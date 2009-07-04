@@ -1,0 +1,74 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Alva ABT (3nn) and Delphi (4nn)
+
+
+####################
+# Default Bindings #
+####################
+
+bind !Left FWINLT
+bind !Right FWINRT
+bind Home+!Left LNBEG
+bind Home+!Right LNEND
+bind Cursor+!Left HWINLT
+bind Cursor+!Right HWINRT
+bind Prog+!Left CHRLT
+bind Prog+!Right CHRRT
+
+bind !Up LNUP
+bind !Down LNDN
+bind Home TOP_LEFT
+bind Home+!Up TOP
+bind Home+!Down BOT
+bind Cursor+!Up ATTRUP
+bind Cursor+!Down ATTRDN
+bind Home+Cursor+!Up PRDIFLN
+bind Home+Cursor+!Down NXDIFLN
+bind Prog+Home+!Up PRPROMPT
+
+bind Home+Cursor CSRTRK
+bind Cursor RETURN
+bind Prog+Cursor+!Left BACK
+
+bind !ROUTING1 ROUTE
+bind Prog+Home+!ROUTING1 DESCCHAR
+bind Home+Cursor+!ROUTING1 SETLEFT
+
+bind Prog+!ROUTING1 CUTBEGIN
+bind Home+!ROUTING1 CUTRECT
+bind Prog+Home+!Down PASTE
+
+bind Prog HELP
+bind Prog+Home DISPMD
+bind Prog+Cursor PREFMENU
+bind Prog+!Up INFO
+bind Prog+!Down FREEZE
+
+bind !Status1_A CAPBLINK
+bind !Status1_B CSRVIS
+bind !Status1_C CSRBLINK
+bind Cursor+!Status1_A SIXDOTS
+bind Cursor+!Status1_B CSRSIZE
+bind Cursor+!Status1_C SLIDEWIN
+
+bind Home+Cursor+!Left MUTE
+bind Home+Cursor+!Right SAY_LINE
+bind Prog+Home+!Left RESTARTSPEECH
+bind Prog+Home+!Right SAY_BELOW

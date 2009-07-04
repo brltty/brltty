@@ -1,0 +1,107 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Alva Satellite (5nn)
+
+
+####################
+# Default Bindings #
+####################
+
+bind !Up LNUP
+bind !Down LNDN
+bind Home+!Up TOP_LEFT
+bind Home+!Down BOT_LEFT
+bind Cursor+!Up TOP
+bind Cursor+!Down BOT
+
+bind RightPadF1+!Up PRDIFLN
+bind RightPadF1+!Down NXDIFLN
+bind RightPadF2+!Up ATTRUP
+bind RightPadF2+!Down ATTRDN
+
+bind !Left FWINLT
+bind !Right FWINRT
+bind Home+!Left LNBEG
+bind Home+!Right LNEND
+bind Cursor+!Left FWINLTSKIP
+bind Cursor+!Right FWINRTSKIP
+
+bind RightPadF1+!Left CHRLT
+bind RightPadF1+!Right CHRRT
+bind RightPadF2+!Left HWINLT
+bind RightPadF2+!Right HWINRT
+
+bind !Routing2 DESCCHAR
+bind !Routing1 ROUTE
+bind Home+!Routing2 SETMARK
+bind Home+!Routing1 GOTOMARK
+bind Cursor+!Routing2 PRINDENT
+bind Cursor+!Routing1 NXINDENT
+
+bind RightPadF1+!Routing1 CUTBEGIN
+bind RightPadF1+!Routing2 CUTAPPEND
+bind RightPadF2+!Routing1 CUTRECT
+bind RightPadF2+!Routing2 CUTLINE
+
+bind !Status1_A CSRVIS
+bind !Status2_A SKPIDLNS
+bind !Status1_B ATTRVIS
+bind !Status2_B DISPMD
+bind !Status1_C CAPBLINK
+bind !Status2_C SKPBLNKWINS
+
+bind !RightPadLeft PREFMENU
+bind !RightPadRight INFO
+bind RightPadF1+!RightPadLeft FREEZE
+bind RightPadF1+!RightPadRight SIXDOTS
+bind RightPadF2+!RightPadLeft PASTE
+bind RightPadF2+!RightPadRight CSRJMP_VERT
+
+bind !RightPadUp PRPROMPT
+bind !RightPadDown NXPROMPT
+bind RightPadF1+!RightPadUp PRPGRPH
+bind RightPadF1+!RightPadDown NXPGRPH
+bind RightPadF2+!RightPadUp PRSEARCH
+bind RightPadF2+!RightPadDown NXSEARCH
+
+bind !LeftPadLeft MUTE
+bind !LeftPadRight SAY_LINE
+bind !LeftPadUp SAY_ABOVE
+bind !LeftPadDown SAY_BELOW
+bind LeftPadF2+!LeftPadLeft SAY_SLOWER
+bind LeftPadF2+!LeftPadRight SAY_FASTER
+bind LeftPadF2+!LeftPadDown SAY_SOFTER
+bind LeftPadF2+!LeftPadUp SAY_LOUDER
+
+bind HOME BACK
+bind CURSOR HOME
+bind HOME+CURSOR CSRTRK
+
+bind RightPadF1 HELP
+bind RightPadF2 LEARN
+bind RightPadF1+RightPadF2 RESTARTBRL
+
+bind LeftPadF1 SPKHOME
+bind LeftPadF2 AUTOSPEAK
+bind LeftPadF1+LeftPadF2 RESTARTSPEECH
+
+bind LeftTumblerLeft CHRLT
+bind LeftTumblerRight CHRRT
+bind RightTumblerLeft LNBEG
+bind RightTumblerRight LNEND

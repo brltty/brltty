@@ -116,11 +116,111 @@
 #define BRL_HAVE_FIRMNESS
 #define BRLCONST
 #include "brl_driver.h"
+#include "brldefs-al.h"
 #include "braille.h"
+
+static KEY_NAME_TABLE(keyNames_routing1) = {
+  KEY_SET_ENTRY(AL_SET_RoutingKeys1, "RoutingKey1"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_routing2) = {
+  KEY_SET_ENTRY(AL_SET_RoutingKeys2, "RoutingKey2"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_status1) = {
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+0, "Status1A"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+1, "Status1B"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+2, "Status1C"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+3, "Status1D"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+4, "Status1E"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS1+5, "Status1F"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_status2) = {
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+0, "Status2A"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+1, "Status2B"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+2, "Status2C"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+3, "Status2D"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+4, "Status2E"),
+  KEY_NAME_ENTRY(AL_KEY_STATUS2+5, "Status2F"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_abt_delphi) = {
+  KEY_NAME_ENTRY(AL_KEY_Prog, "Prog"),
+  KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
+  KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
+
+  KEY_NAME_ENTRY(AL_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(AL_KEY_Left, "Left"),
+  KEY_NAME_ENTRY(AL_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(AL_KEY_Down, "Down"),
+
+  KEY_NAME_ENTRY(AL_KEY_Cursor2, "Cursor2"),
+  KEY_NAME_ENTRY(AL_KEY_Home2, "Home2"),
+  KEY_NAME_ENTRY(AL_KEY_Prog2, "Prog2"),
+
+  KEY_NAME_ENTRY(AL_KEY_LeftTumblerLeft, "LeftTumblerLeft"),
+  KEY_NAME_ENTRY(AL_KEY_LeftTumblerRight, "LeftTumblerRight"),
+  KEY_NAME_ENTRY(AL_KEY_RightTumblerLeft, "RightTumblerLeft"),
+  KEY_NAME_ENTRY(AL_KEY_RightTumblerRight, "RightTumblerRight"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_satellite) = {
+  KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
+  KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
+
+  KEY_NAME_ENTRY(AL_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(AL_KEY_Left, "Left"),
+  KEY_NAME_ENTRY(AL_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(AL_KEY_Down, "Down"),
+
+  KEY_NAME_ENTRY(AL_KEY_LeftPadF1, "LeftPadF1"),
+  KEY_NAME_ENTRY(AL_KEY_LeftPadUp, "LeftPadUp"),
+  KEY_NAME_ENTRY(AL_KEY_LeftPadLeft, "LeftPadLeft"),
+  KEY_NAME_ENTRY(AL_KEY_LeftPadDown, "LeftPadDown"),
+  KEY_NAME_ENTRY(AL_KEY_LeftPadRight, "LeftPadRight"),
+  KEY_NAME_ENTRY(AL_KEY_LeftPadF2, "LeftPadF2"),
+
+  KEY_NAME_ENTRY(AL_KEY_RightPadF1, "RightPadF1"),
+  KEY_NAME_ENTRY(AL_KEY_RightPadUp, "RightPadUp"),
+  KEY_NAME_ENTRY(AL_KEY_RightPadLeft, "RightPadLeft"),
+  KEY_NAME_ENTRY(AL_KEY_RightPadDown, "RightPadDown"),
+  KEY_NAME_ENTRY(AL_KEY_RightPadRight, "RightPadRight"),
+  KEY_NAME_ENTRY(AL_KEY_RightPadF2, "RightPadF2"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_abt_delphi) = {
+  keyNames_abt_delphi,
+  keyNames_status1,
+  keyNames_routing1,
+  NULL
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_satellite) = {
+  keyNames_satellite,
+  keyNames_status1,
+  keyNames_status2,
+  keyNames_routing1,
+  keyNames_routing2,
+  NULL
+};
 
 typedef struct {
   const char *keyBindings;
-} ModuleTypeEntry;
+  const KeyNameEntry *const *keyNameTables;
+} ModelTypeEntry;
 
 typedef enum {
   MOD_TYPE_ABT,
@@ -129,21 +229,25 @@ typedef enum {
   MOD_TYPE_BrailleController
 } ModelType;
 
-static const ModuleTypeEntry moduleTypeTable[] = {
+static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_ABT] = {
-    .keyBindings = "abt+delphi"
+    .keyBindings = "abt+delphi",
+    .keyNameTables = keyNameTables_abt_delphi
   }
   ,
   [MOD_TYPE_Delphi] = {
-    .keyBindings = "abt+delphi"
+    .keyBindings = "abt+delphi",
+    .keyNameTables = keyNameTables_abt_delphi
   }
   ,
   [MOD_TYPE_Satellite] = {
-    .keyBindings = "satellite"
+    .keyBindings = "satellite",
+    .keyNameTables = keyNameTables_satellite
   }
   ,
   [MOD_TYPE_BrailleController] = {
-    .keyBindings = "bc"
+    .keyBindings = "bc",
+    .keyNameTables = NULL
   }
 };
 
@@ -376,7 +480,12 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
-  brl->keyBindings = moduleTypeTable[model->type].keyBindings;
+
+  {
+    const ModelTypeEntry *type = &modelTypeTable[model->type];
+    brl->keyBindings = type->keyBindings;
+    brl->keyNameTables = type->keyNameTables;
+  }
 
   actualColumns = model->columns;
   statusOffset = 0;
@@ -484,57 +593,8 @@ static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define KEY_STATUS2_F	0x60000	/* sixth upper status key */
 #define KEY_ROUTING2	0x80000	/* upper cursor routing key set */
 
-#define KEY_SPK_F1	0x0100000
-#define KEY_SPK_F2	0x0200000
-#define KEY_SPK_UP	0x1000000
-#define KEY_SPK_DOWN	0x2000000
-#define KEY_SPK_LEFT	0x3000000
-#define KEY_SPK_RIGHT	0x4000000
-
-#define KEY_BRL_F1	0x0400000
-#define KEY_BRL_F2	0x0800000
-#define KEY_BRL_UP	0x5000000
-#define KEY_BRL_DOWN	0x6000000
-#define KEY_BRL_LEFT	0x7000000
-#define KEY_BRL_RIGHT	0x8000000
-
-#define KEY_TUMBLER1A	0x10000000	/* left end of left tumbler key */
-#define KEY_TUMBLER1B	0x20000000	/* right end of left tumbler key */
-#define KEY_TUMBLER2A	0x30000000	/* left end of right tumbler key */
-#define KEY_TUMBLER2B	0x40000000	/* right end of right tumbler key */
-
 /* first cursor routing offset on main display (old firmware only) */
 #define KEY_ROUTING_OFFSET 168
-
-#if ! ABT3_OLD_FIRMWARE
-/* Index for new firmware protocol */
-static const int OperatingKeys[14] = {
-  KEY_PROG, KEY_HOME, KEY_CURSOR,
-  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
-  KEY_CURSOR2, KEY_HOME2, KEY_PROG2,
-  KEY_TUMBLER1A, KEY_TUMBLER1B, KEY_TUMBLER2A, KEY_TUMBLER2B
-};
-#endif /* ! ABT3_OLD_FIRMWARE */
-
-static const int StatusKeys1[6] = {
-  KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
-  KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F
-};
-
-static const int StatusKeys2[6] = {
-  KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
-  KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F
-};
-
-static const int SpeechPad[6] = {
-  KEY_SPK_F1, KEY_SPK_UP, KEY_SPK_LEFT,
-  KEY_SPK_DOWN, KEY_SPK_RIGHT, KEY_SPK_F2
-};
-
-static const int BraillePad[6] = {
-  KEY_BRL_F1, KEY_BRL_UP, KEY_BRL_LEFT,
-  KEY_BRL_DOWN, KEY_BRL_RIGHT, KEY_BRL_F2
-};
 
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
@@ -711,557 +771,155 @@ detectModel1 (BrailleDisplay *brl) {
 }
 
 static int
-getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
-  unsigned char packet[MAXIMUM_PACKET_SIZE];
-  int length = protocol->readPacket(packet, sizeof(packet));
-  if (length < 1) return length;
-
-#if ! ABT3_OLD_FIRMWARE
-  switch (packet[0]) {
-    case 0X71: { /* operating keys and status keys */
-      unsigned char key = packet[1];
-      if (key <= 0X0D) {
-        *Keys |= OperatingKeys[key];
-      } else if ((key >= 0X80) && (key <= 0X89)) {
-        *Keys &= ~OperatingKeys[key - 0X80];
-      } else if ((key >= 0X20) && (key <= 0X25)) {
-        *Keys |= StatusKeys1[key - 0X20];
-      } else if ((key >= 0XA0) && (key <= 0XA5)) {
-        *Keys &= ~StatusKeys1[key - 0XA0];
-      } else if ((key >= 0X30) && (key <= 0X35)) {
-        *Keys |= StatusKeys2[key - 0X30];
-      } else if ((key >= 0XB0) && (key <= 0XB5)) {
-        *Keys &= ~StatusKeys2[key - 0XB0];
-      } else {
-        *Keys = 0;
-      }
-      return 1;
-    }
-
-    case 0X72: { /* primary (lower) routing keys */
-      unsigned char key = packet[1];
-      if (key <= 0X5F) {			/* make */
-        *Pos = key;
-        *Keys |= KEY_ROUTING1;
-      } else {
-        *Keys &= ~KEY_ROUTING1;
-      }
-      return 1;
-    }
-
-    case 0X75: { /* secondary (upper) routing keys */
-      unsigned char key = packet[1];
-      if (key <= 0X5F) {			/* make */
-        *Pos = key;
-        *Keys |= KEY_ROUTING2;
-      } else {
-        *Keys &= ~KEY_ROUTING2;
-      }
-      return 1;
-    }
-
-    case 0X77: { /* windows keys and speech keys */
-      unsigned char key = packet[1];
-      if (key <= 0X05) {
-        *Keys |= SpeechPad[key];
-      } else if ((key >= 0X80) && (key <= 0X85)) {
-        *Keys &= ~SpeechPad[key - 0X80];
-      } else if ((key >= 0X20) && (key <= 0X25)) {
-        *Keys |= BraillePad[key - 0X20];
-      } else if ((key >= 0XA0) && (key <= 0XA5)) {
-        *Keys &= ~BraillePad[key - 0XA0];
-      } else {
-        *Keys = 0;
-      }
-      return 1;
-    }
-
-    case 0X7F:
-      switch (packet[1]) {
-        case 0X07: /* text/status cells reconfigured */
-          if (!updateConfiguration1(brl, 0, packet)) return -1;
-          return 0;
-
-        case 0X0B: { /* display parameters reconfigured */
-          int count = PACKET_BYTE(packet, 0);
-
-          if (count >= 8) {
-            unsigned char frontKeys = PACKET_BYTE(packet, 8);
-            const unsigned char progKey = 0X02;
-            if (frontKeys & progKey) {
-              unsigned char newSetting = frontKeys & ~progKey;
-              LogPrint(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
-                       frontKeys, newSetting);
-              writeParameter1(brl, 6, newSetting);
-            }
-          }
-
-          return 0;
-        }
-      }
-      break;
-
-    default:
-      if (length >= BRL_ID_SIZE) {
-        if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
-          /* The terminal has been turned off and back on. */
-          if (!identifyModel1(brl, packet[BRL_ID_LENGTH])) return -1;
-          brl->resizeRequired = 1;
-          return 0;
-        }
-      }
-
-      break;
-  }
-
-#else /* ABT3_OLD_FIRMWARE */
-
-  int key = packet[0];
-  if (key < (KEY_ROUTING_OFFSET + brl->textColumns + brl->statusColumns)) {
-    if (key >= (KEY_ROUTING_OFFSET + brl->textColumns)) {
-      /* status key */
-      *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->textColumns)];
-      return 1;
-    }
-
-    if (key >= KEY_ROUTING_OFFSET) {
-      /* routing key */
-      *Pos = key - KEY_ROUTING_OFFSET;
-      *Keys |= KEY_ROUTING1;
-      return 1;
-    }
-
-    if (!(key & 0X80)) {
-      /* operating key */
-      *Keys = key;		/* check comments where KEY_xxxx are defined */
-      return 1;
-    }
-  }
-
-#endif /* ! ABT3_OLD_FIRMWARE */
-  logUnexpectedPacket(packet, length);
-  return 0;
-}
-
-static int
 readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
-  static unsigned int RoutingPos = 0;
-  int res = EOF;
-  int ProcessKey = getKey1(brl, &CurrentKeys, &RoutingPos);
+  unsigned char packet[MAXIMUM_PACKET_SIZE];
+  int length;
 
-  if (ProcessKey < 0) {
-    /* An input error occurred (perhaps disconnect of USB device) */
-    res = BRL_CMD_RESTARTBRL;
-  } else if (ProcessKey > 0) {
-    res = BRL_CMD_NOOP;
+  while ((length = protocol->readPacket(packet, sizeof(packet))) > 0) {
+#if !ABT3_OLD_FIRMWARE
+    unsigned char group = packet[0];
+    unsigned char key = packet[1];
+    int press = !(key & AL_KEY_RELEASE);
+    key &= ~AL_KEY_RELEASE;
 
-    if (CurrentKeys > LastKeys) {
-      /* These are the keys that should be processed when pressed */
-      LastKeys = CurrentKeys;	/* we keep it until it is released */
-      ReleasedKeys = 0;
-      switch (model->type) {
-        case MOD_TYPE_ABT:
-        case MOD_TYPE_Delphi:
-          switch (CurrentKeys) {
-            case KEY_HOME | KEY_UP:
-              res = BRL_CMD_TOP;
-              break;
-            case KEY_HOME | KEY_DOWN:
-              res = BRL_CMD_BOT;
-              break;
-            case KEY_UP:
-              res = BRL_CMD_LNUP;
-              break;
-            case KEY_CURSOR | KEY_UP:
-              res = BRL_CMD_ATTRUP;
-              break;
-            case KEY_DOWN:
-              res = BRL_CMD_LNDN;
-              break;
-            case KEY_CURSOR | KEY_DOWN:
-              res = BRL_CMD_ATTRDN;
-              break;
-            case KEY_LEFT:
-              res = BRL_CMD_FWINLT;
-              break;
-            case KEY_HOME | KEY_LEFT:
-              res = BRL_CMD_LNBEG;
-              break;
-            case KEY_CURSOR | KEY_LEFT:
-              res = BRL_CMD_HWINLT;
-              break;
-            case KEY_PROG | KEY_LEFT:
-              res = BRL_CMD_CHRLT;
-              break;
-            case KEY_RIGHT:
-              res = BRL_CMD_FWINRT;
-              break;
-            case KEY_HOME | KEY_RIGHT:
-              res = BRL_CMD_LNEND;
-              break;
-            case KEY_PROG | KEY_RIGHT:
-              res = BRL_CMD_CHRRT;
-              break;
-            case KEY_CURSOR | KEY_RIGHT:
-              res = BRL_CMD_HWINRT;
-              break;
-            case KEY_HOME | KEY_CURSOR | KEY_UP:
-              res = BRL_CMD_PRDIFLN;
-              break;
-            case KEY_HOME | KEY_CURSOR | KEY_DOWN:
-              res = BRL_CMD_NXDIFLN;
-              break;
-            case KEY_HOME | KEY_CURSOR | KEY_LEFT:
-              res = BRL_CMD_MUTE;
-              break;
-            case KEY_HOME | KEY_CURSOR | KEY_RIGHT:
-              res = BRL_CMD_SAY_LINE;
-              break;
-            case KEY_PROG | KEY_DOWN:
-              res = BRL_CMD_FREEZE;
-              break;
-            case KEY_PROG | KEY_UP:
-              res = BRL_CMD_INFO;
-              break;
-            case KEY_PROG | KEY_CURSOR | KEY_LEFT:
-              res = BRL_CMD_BACK;
-              break;
-            case KEY_STATUS1_A:
-              res = BRL_CMD_CAPBLINK;
-              break;
-            case KEY_STATUS1_B:
-              res = BRL_CMD_CSRVIS;
-              break;
-            case KEY_STATUS1_C:
-              res = BRL_CMD_CSRBLINK;
-              break;
-            case KEY_CURSOR | KEY_STATUS1_A:
-              res = BRL_CMD_SIXDOTS;
-              break;
-            case KEY_CURSOR | KEY_STATUS1_B:
-              res = BRL_CMD_CSRSIZE;
-              break;
-            case KEY_CURSOR | KEY_STATUS1_C:
-              res = BRL_CMD_SLIDEWIN;
-              break;
-            case KEY_PROG | KEY_HOME | KEY_UP:
-              res = BRL_CMD_PRPROMPT;
-              break;
-            case KEY_PROG | KEY_HOME | KEY_LEFT:
-              res = BRL_CMD_RESTARTSPEECH;
-              break;
-            case KEY_PROG | KEY_HOME | KEY_RIGHT:
-              res = BRL_CMD_SAY_BELOW;
-              break;
-            case KEY_ROUTING1:
-              /* normal Cursor routing keys */
-              res = BRL_BLK_ROUTE + RoutingPos;
-              break;
-            case KEY_PROG | KEY_ROUTING1:
-              /* marking beginning of block */
-              res = BRL_BLK_CUTBEGIN + RoutingPos;
-              break;
-            case KEY_HOME | KEY_ROUTING1:
-              /* marking end of block */
-              res = BRL_BLK_CUTRECT + RoutingPos;
-              break;
-            case KEY_PROG | KEY_HOME | KEY_DOWN:
-              res = BRL_CMD_PASTE;
-              break;
-
-            /* See released keys handling below for these. There appears
-             * to be a bug with at least some models when a routing key
-             * is pressed in conjunction with more than one front key.
-             */
-            case KEY_PROG | KEY_HOME | KEY_ROUTING1:
-            case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
-              break;
-          }
-          break;
-
-        case MOD_TYPE_Satellite:
-          switch (CurrentKeys) {
-            case KEY_UP:
-              res = BRL_CMD_LNUP;
-              break;
-            case KEY_DOWN:
-              res = BRL_CMD_LNDN;
-              break;
-            case KEY_HOME | KEY_UP:
-              res = BRL_CMD_TOP_LEFT;
-              break;
-            case KEY_HOME | KEY_DOWN:
-              res = BRL_CMD_BOT_LEFT;
-              break;
-            case KEY_CURSOR | KEY_UP:
-              res = BRL_CMD_TOP;
-              break;
-            case KEY_CURSOR | KEY_DOWN:
-              res = BRL_CMD_BOT;
-              break;
-            case KEY_BRL_F1 | KEY_UP:
-              res = BRL_CMD_PRDIFLN;
-              break;
-            case KEY_BRL_F1 | KEY_DOWN:
-              res = BRL_CMD_NXDIFLN;
-              break;
-            case KEY_BRL_F2 | KEY_UP:
-              res = BRL_CMD_ATTRUP;
-              break;
-            case KEY_BRL_F2 | KEY_DOWN:
-              res = BRL_CMD_ATTRDN;
-              break;
-
-            case KEY_LEFT:
-              res = BRL_CMD_FWINLT;
-              break;
-            case KEY_RIGHT:
-              res = BRL_CMD_FWINRT;
-              break;
-            case KEY_TUMBLER2A:
-            case KEY_HOME | KEY_LEFT:
-              res = BRL_CMD_LNBEG;
-              break;
-            case KEY_TUMBLER2B:
-            case KEY_HOME | KEY_RIGHT:
-              res = BRL_CMD_LNEND;
-              break;
-            case KEY_CURSOR | KEY_LEFT:
-              res = BRL_CMD_FWINLTSKIP;
-              break;
-            case KEY_CURSOR | KEY_RIGHT:
-              res = BRL_CMD_FWINRTSKIP;
-              break;
-            case KEY_TUMBLER1A:
-            case KEY_BRL_F1 | KEY_LEFT:
-              res = BRL_CMD_CHRLT;
-              break;
-            case KEY_TUMBLER1B:
-            case KEY_BRL_F1 | KEY_RIGHT:
-              res = BRL_CMD_CHRRT;
-              break;
-            case KEY_BRL_F2 | KEY_LEFT:
-              res = BRL_CMD_HWINLT;
-              break;
-            case KEY_BRL_F2 | KEY_RIGHT:
-              res = BRL_CMD_HWINRT;
-              break;
-
-            case KEY_ROUTING2:
-              res = BRL_BLK_DESCCHAR + RoutingPos;
-              break;
-            case KEY_ROUTING1:
-              res = BRL_BLK_ROUTE + RoutingPos;
-              break;
-            case KEY_BRL_F1 | KEY_ROUTING2:
-              res = BRL_BLK_CUTAPPEND + RoutingPos;
-              break;
-            case KEY_BRL_F1 | KEY_ROUTING1:
-              res = BRL_BLK_CUTBEGIN + RoutingPos;
-              break;
-            case KEY_BRL_F2 | KEY_ROUTING2:
-              res = BRL_BLK_CUTLINE + RoutingPos;
-              break;
-            case KEY_BRL_F2 | KEY_ROUTING1:
-              res = BRL_BLK_CUTRECT + RoutingPos;
-              break;
-            case KEY_HOME | KEY_ROUTING2:
-              res = BRL_BLK_SETMARK + RoutingPos;
-              break;
-            case KEY_HOME | KEY_ROUTING1:
-              res = BRL_BLK_GOTOMARK + RoutingPos;
-              break;
-            case KEY_CURSOR | KEY_ROUTING2:
-              res = BRL_BLK_PRINDENT + RoutingPos;
-              break;
-            case KEY_CURSOR | KEY_ROUTING1:
-              res = BRL_BLK_NXINDENT + RoutingPos;
-              break;
-
-            case KEY_STATUS1_A:
-              res = BRL_CMD_CSRVIS;
-              break;
-            case KEY_STATUS2_A:
-              res = BRL_CMD_SKPIDLNS;
-              break;
-            case KEY_STATUS1_B:
-              res = BRL_CMD_ATTRVIS;
-              break;
-            case KEY_STATUS2_B:
-              res = BRL_CMD_DISPMD;
-              break;
-            case KEY_STATUS1_C:
-              res = BRL_CMD_CAPBLINK;
-              break;
-            case KEY_STATUS2_C:
-              res = BRL_CMD_SKPBLNKWINS;
-              break;
-
-            case KEY_BRL_LEFT:
-              res = BRL_CMD_PREFMENU;
-              break;
-            case KEY_BRL_RIGHT:
-              res = BRL_CMD_INFO;
-              break;
-
-            case KEY_BRL_F1 | KEY_BRL_LEFT:
-              res = BRL_CMD_FREEZE;
-              break;
-            case KEY_BRL_F1 | KEY_BRL_RIGHT:
-              res = BRL_CMD_SIXDOTS;
-              break;
-
-            case KEY_BRL_F2 | KEY_BRL_LEFT:
-              res = BRL_CMD_PASTE;
-              break;
-            case KEY_BRL_F2 | KEY_BRL_RIGHT:
-              res = BRL_CMD_CSRJMP_VERT;
-              break;
-
-            case KEY_BRL_UP:
-              res = BRL_CMD_PRPROMPT;
-              break;
-            case KEY_BRL_DOWN:
-              res = BRL_CMD_NXPROMPT;
-              break;
-            case KEY_BRL_F1 | KEY_BRL_UP:
-              res = BRL_CMD_PRPGRPH;
-              break;
-            case KEY_BRL_F1 | KEY_BRL_DOWN:
-              res = BRL_CMD_NXPGRPH;
-              break;
-            case KEY_BRL_F2 | KEY_BRL_UP:
-              res = BRL_CMD_PRSEARCH;
-              break;
-            case KEY_BRL_F2 | KEY_BRL_DOWN:
-              res = BRL_CMD_NXSEARCH;
-              break;
-
-            case KEY_SPK_LEFT:
-              res = BRL_CMD_MUTE;
-              break;
-            case KEY_SPK_RIGHT:
-              res = BRL_CMD_SAY_LINE;
-              break;
-            case KEY_SPK_UP:
-              res = BRL_CMD_SAY_ABOVE;
-              break;
-            case KEY_SPK_DOWN:
-              res = BRL_CMD_SAY_BELOW;
-              break;
-            case KEY_SPK_F2 | KEY_SPK_LEFT:
-              res = BRL_CMD_SAY_SLOWER;
-              break;
-            case KEY_SPK_F2 | KEY_SPK_RIGHT:
-              res = BRL_CMD_SAY_FASTER;
-              break;
-            case KEY_SPK_F2 | KEY_SPK_DOWN:
-              res = BRL_CMD_SAY_SOFTER;
-              break;
-            case KEY_SPK_F2 | KEY_SPK_UP:
-              res = BRL_CMD_SAY_LOUDER;
-              break;
-          }
-          break;
-      }
-      res |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
-    } else {
-      /* These are the keys that should be processed when released */
-      if (!ReleasedKeys) {
-        ReleasedKeys = LastKeys;
-        switch (model->type) {
-          case MOD_TYPE_ABT:
-          case MOD_TYPE_Delphi:
-            switch (ReleasedKeys) {
-              case KEY_HOME:
-                res = BRL_CMD_TOP_LEFT;
-                break;
-              case KEY_CURSOR:
-                res = BRL_CMD_RETURN;
-                break;
-              case KEY_PROG:
-                res = BRL_CMD_HELP;
-                break;
-              case KEY_PROG | KEY_HOME:
-                res = BRL_CMD_DISPMD;
-                break;
-              case KEY_HOME | KEY_CURSOR:
-                res = BRL_CMD_CSRTRK;
-                break;
-              case KEY_PROG | KEY_CURSOR:
-                res = BRL_CMD_PREFMENU;
-                break;
-
-              /* The following bindings really belong in the "pressed keys"
-               * section, but it appears (at least on my ABT340) that a bogus
-               * routing key press event is sometimes generated when at least
-               * two front keys are already pressed. The correct routing key
-               * event follows eventually, so the best workaround is to let
-               * getKey1() overwrite RoutingPos until some key is released.
-               * The exact bug as I observe it is that for routing keys 25-29
-               * an extra press packet for routing key 35-31 is sent before
-               * the correct one. In other words, if 25 <= x <= 29 then a key
-               * press event is prepended with x = 30 + (30-x).
-               */
-              case KEY_PROG | KEY_HOME | KEY_ROUTING1:
-                /* attribute for pointed character */
-                res = BRL_BLK_DESCCHAR + RoutingPos;
-                break;
-              case KEY_HOME | KEY_CURSOR | KEY_ROUTING1:
-                /* align window to pointed character */
-                res = BRL_BLK_SETLEFT + RoutingPos;
-                break;
-            }
-            break;
-
-          case MOD_TYPE_Satellite:
-            switch (ReleasedKeys) {
-              case KEY_HOME:
-                res = BRL_CMD_BACK;
-                break;
-              case KEY_CURSOR:
-                res = BRL_CMD_HOME;
-                break;
-              case KEY_HOME | KEY_CURSOR:
-                res = BRL_CMD_CSRTRK;
-                break;
-
-              case KEY_BRL_F1:
-                res = BRL_CMD_HELP;
-                break;
-              case KEY_BRL_F2:
-                res = BRL_CMD_LEARN;
-                break;
-              case KEY_BRL_F1 | KEY_BRL_F2:
-                res = BRL_CMD_RESTARTBRL;
-                break;
-
-              case KEY_SPK_F1:
-                res = BRL_CMD_SPKHOME;
-                break;
-              case KEY_SPK_F2:
-                res = BRL_CMD_AUTOSPEAK;
-                break;
-              case KEY_SPK_F1 | KEY_SPK_F2:
-                res = BRL_CMD_RESTARTSPEECH;
-                break;
-            }
-            break;
+    switch (group) {
+      case 0X71: /* operating keys and status keys */
+        if (key <= 0X0D) {
+          enqueueKeyEvent(AL_SET_NavigationKeys, key+AL_KEY_OPERATION, press);
+          continue;
         }
-      }
-      LastKeys = CurrentKeys;
-      if (!CurrentKeys)
-        ReleasedKeys = 0;
+
+        if ((key >= 0X20) && (key <= 0X25)) {
+          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X20+AL_KEY_STATUS1, press);
+          continue;
+        }
+
+        if ((key >= 0X30) && (key <= 0X35)) {
+          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X30+AL_KEY_STATUS2, press);
+          continue;
+        }
+
+        break;;
+
+      case 0X72: /* primary (lower) routing keys */
+        if (key <= 0X5F) {			/* make */
+          enqueueKeyEvent(AL_SET_RoutingKeys1, key, press);
+          continue;
+        }
+
+        break;
+
+      case 0X75: /* secondary (upper) routing keys */
+        if (key <= 0X5F) {			/* make */
+          enqueueKeyEvent(AL_SET_RoutingKeys2, key, press);
+          continue;
+        }
+
+        break;
+
+      case 0X77: /* satellite keypads */
+        if (key <= 0X05) {
+          enqueueKeyEvent(AL_SET_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
+          continue;
+        }
+
+        if ((key >= 0X20) && (key <= 0X25)) {
+          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
+          continue;
+        }
+
+        continue;
+
+      case 0X7F:
+        switch (packet[1]) {
+          case 0X07: /* text/status cells reconfigured */
+            if (!updateConfiguration1(brl, 0, packet)) return BRL_CMD_RESTARTBRL;
+            continue;
+
+          case 0X0B: { /* display parameters reconfigured */
+            int count = PACKET_BYTE(packet, 0);
+
+            if (count >= 8) {
+              unsigned char frontKeys = PACKET_BYTE(packet, 8);
+              const unsigned char progKey = 0X02;
+
+              if (frontKeys & progKey) {
+                unsigned char newSetting = frontKeys & ~progKey;
+
+                LogPrint(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
+                         frontKeys, newSetting);
+                writeParameter1(brl, 6, newSetting);
+              }
+            }
+
+            continue;
+          }
+        }
+
+        break;
+
+      default:
+        if (length >= BRL_ID_SIZE) {
+          if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
+            /* The terminal has been turned off and back on. */
+            if (!identifyModel1(brl, packet[BRL_ID_LENGTH])) return BRL_CMD_RESTARTBRL;
+            brl->resizeRequired = 1;
+            continue;
+          }
+        }
+
+        break;
     }
+#else /* ABT3_OLD_FIRMWARE */
+    unsigned char byte = packet[0];
+
+    if (!(byte & 0X80)) {
+      static const unsigned char keys[7] = {
+        AL_KEY_Up, AL_KEY_Cursor, AL_KEY_Home, AL_KEY_Prog, AL_KEY_Left, AL_KEY_Right, AL_KEY_Down
+      };
+
+      unsigned char pressedKeys[ARRAY_COUNT(keys)];
+      unsigned char pressedCount = 0;
+
+      const unsigned char set = AL_SET_NavigationKeys;
+      const unsigned char *key = keys;
+      unsigned char bit = 0X01;
+
+      while (byte) {
+        if (byte & bit) {
+          byte &= ~bit;
+          enqueueKeyEvent(set, *key, 1);
+          pressedKeys[pressedCount++] = *key;
+        }
+
+        key += 1;
+        bit <<= 1;
+      }
+
+      while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
+      continue;
+    }
+
+    if (byte >= KEY_ROUTING_OFFSET) {
+      if ((byte -= KEY_ROUTING_OFFSET) < brl->textColumns) {
+        enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 1);
+        enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 0);
+        continue;
+      }
+
+      if ((byte -= brl->textColumns) < brl->statusColumns) {
+        byte += AL_KEY_STATUS1;
+        enqueueKeyEvent(AL_SET_NavigationKeys, byte, 1);
+        enqueueKeyEvent(AL_SET_NavigationKeys, byte, 0);
+        continue;
+      }
+    }
+#endif /* ! ABT3_OLD_FIRMWARE */
+
+    logUnexpectedPacket(packet, length);
   }
 
-  if (res == BRL_CMD_RESTARTBRL) {
-    CurrentKeys = LastKeys = ReleasedKeys = 0;
-    RoutingPos = 0;
-  }
-
-  return res;
+  return (length < 0)? BRL_CMD_RESTARTBRL: EOF;
 }
 
 static int
