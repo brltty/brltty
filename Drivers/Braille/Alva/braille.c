@@ -167,11 +167,6 @@ static KEY_NAME_TABLE(keyNames_abt_delphi) = {
   KEY_NAME_ENTRY(AL_KEY_Home2, "Home2"),
   KEY_NAME_ENTRY(AL_KEY_Prog2, "Prog2"),
 
-  KEY_NAME_ENTRY(AL_KEY_LeftTumblerLeft, "LeftTumblerLeft"),
-  KEY_NAME_ENTRY(AL_KEY_LeftTumblerRight, "LeftTumblerRight"),
-  KEY_NAME_ENTRY(AL_KEY_RightTumblerLeft, "RightTumblerLeft"),
-  KEY_NAME_ENTRY(AL_KEY_RightTumblerRight, "RightTumblerRight"),
-
   LAST_KEY_NAME_ENTRY
 };
 
@@ -197,6 +192,11 @@ static KEY_NAME_TABLE(keyNames_satellite) = {
   KEY_NAME_ENTRY(AL_KEY_RightPadDown, "RightPadDown"),
   KEY_NAME_ENTRY(AL_KEY_RightPadRight, "RightPadRight"),
   KEY_NAME_ENTRY(AL_KEY_RightPadF2, "RightPadF2"),
+
+  KEY_NAME_ENTRY(AL_KEY_LeftTumblerLeft, "LeftTumblerLeft"),
+  KEY_NAME_ENTRY(AL_KEY_LeftTumblerRight, "LeftTumblerRight"),
+  KEY_NAME_ENTRY(AL_KEY_RightTumblerLeft, "RightTumblerLeft"),
+  KEY_NAME_ENTRY(AL_KEY_RightTumblerRight, "RightTumblerRight"),
 
   LAST_KEY_NAME_ENTRY
 };

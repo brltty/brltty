@@ -47,24 +47,24 @@ bind RightPadF1+!Right CHRRT
 bind RightPadF2+!Left HWINLT
 bind RightPadF2+!Right HWINRT
 
-bind !Routing2 DESCCHAR
-bind !Routing1 ROUTE
-bind Home+!Routing2 SETMARK
-bind Home+!Routing1 GOTOMARK
-bind Cursor+!Routing2 PRINDENT
-bind Cursor+!Routing1 NXINDENT
+bind !RoutingKey2 DESCCHAR
+bind !RoutingKey1 ROUTE
+bind Home+!RoutingKey2 SETMARK
+bind Home+!RoutingKey1 GOTOMARK
+bind Cursor+!RoutingKey2 PRINDENT
+bind Cursor+!RoutingKey1 NXINDENT
 
-bind RightPadF1+!Routing1 CUTBEGIN
-bind RightPadF1+!Routing2 CUTAPPEND
-bind RightPadF2+!Routing1 CUTRECT
-bind RightPadF2+!Routing2 CUTLINE
+bind RightPadF1+!RoutingKey1 CUTBEGIN
+bind RightPadF1+!RoutingKey2 CUTAPPEND
+bind RightPadF2+!RoutingKey1 CUTRECT
+bind RightPadF2+!RoutingKey2 CUTLINE
 
-bind !Status1_A CSRVIS
-bind !Status2_A SKPIDLNS
-bind !Status1_B ATTRVIS
-bind !Status2_B DISPMD
-bind !Status1_C CAPBLINK
-bind !Status2_C SKPBLNKWINS
+bind !Status1A CSRVIS
+bind !Status2A SKPIDLNS
+bind !Status1B ATTRVIS
+bind !Status2B DISPMD
+bind !Status1C CAPBLINK
+bind !Status2C SKPBLNKWINS
 
 bind !RightPadLeft PREFMENU
 bind !RightPadRight INFO
