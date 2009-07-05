@@ -64,15 +64,20 @@ typedef enum {
   AL_KEY_RightPadRight,
   AL_KEY_RightPadF2,
 
-  AL_KEY_SpmartpadF1 = AL_KEY_SMARTPAD,
-  AL_KEY_SpmartpadF2,
-  AL_KEY_SpmartpadLeft,
-  AL_KEY_SpmartpadEnter,
-  AL_KEY_SpmartpadUp,
-  AL_KEY_SpmartpadDown,
-  AL_KEY_SpmartpadRight,
-  AL_KEY_SpmartpadF3,
-  AL_KEY_SpmartpadF4,
+  AL_KEY_ETouchLeftRear = AL_KEY_ETOUCH,
+  AL_KEY_ETouchLeftFront,
+  AL_KEY_ETouchRightRear,
+  AL_KEY_ETouchRightFront,
+
+  AL_KEY_SmartpadF1 = AL_KEY_SMARTPAD,
+  AL_KEY_SmartpadF2,
+  AL_KEY_SmartpadLeft,
+  AL_KEY_SmartpadEnter,
+  AL_KEY_SmartpadUp,
+  AL_KEY_SmartpadDown,
+  AL_KEY_SmartpadRight,
+  AL_KEY_SmartpadF3,
+  AL_KEY_SmartpadF4,
 
   AL_KEY_RELEASE = 0X80
 } AL_NavigationKey;

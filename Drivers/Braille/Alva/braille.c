@@ -201,6 +201,39 @@ static KEY_NAME_TABLE(keyNames_satellite) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static KEY_NAME_TABLE(keyNames_etouch) = {
+  KEY_NAME_ENTRY(AL_KEY_ETouchLeftRear, "ETouchLeftRear"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchLeftFront, "ETouchLeftFront"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchRightRear, "ETouchRightRear"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchRightFront, "ETouchRightFront"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_smartpad) = {
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF1, "SmartpadF1"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF2, "SmartpadF2"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadLeft, "SmartpadLeft"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadEnter, "SmartpadEnter"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadUp, "SmartpadUp"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadDown, "SmartpadDown"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadRight, "SmartpadRight"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF3, "SmartpadF3"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF4, "SmartpadF4"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE(keyNames_thumb) = {
+  KEY_NAME_ENTRY(AL_KEY_THUMB+0, "Thumb1"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+1, "Thumb2"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+2, "Thumb3"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+3, "Thumb4"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+4, "Thumb5"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
 static KEY_NAME_TABLE_LIST(keyNameTables_abt_delphi) = {
   keyNames_abt_delphi,
   keyNames_status1,
@@ -212,6 +245,15 @@ static KEY_NAME_TABLE_LIST(keyNameTables_satellite) = {
   keyNames_satellite,
   keyNames_status1,
   keyNames_status2,
+  keyNames_routing1,
+  keyNames_routing2,
+  NULL
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_bc) = {
+  keyNames_etouch,
+  keyNames_smartpad,
+  keyNames_thumb,
   keyNames_routing1,
   keyNames_routing2,
   NULL
@@ -247,7 +289,7 @@ static const ModelTypeEntry modelTypeTable[] = {
   ,
   [MOD_TYPE_BrailleController] = {
     .keyBindings = "bc",
-    .keyNameTables = NULL
+    .keyNameTables = keyNameTables_bc
   }
 };
 
@@ -415,7 +457,7 @@ typedef struct {
   int (*readPacket) (unsigned char *packet, int size);
   int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
   int (*detectModel) (BrailleDisplay *brl);
-  int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
+  int (*readCommand) (BrailleDisplay *brl);
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
@@ -561,40 +603,6 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
 static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define BRL_ID_LENGTH (sizeof(BRL_ID))
 #define BRL_ID_SIZE (BRL_ID_LENGTH + 1)
-
-/* NB: The first 7 key values are the same as those returned by the
- * old firmware, so they can be used directly from the input stream as
- * make and break sequence already combined... not to be changed.
- */
-#define KEY_PROG 	0x008	/* the PROG key */
-#define KEY_HOME 	0x004	/* the HOME key */
-#define KEY_CURSOR 	0x002	/* the CURSOR key */
-#define KEY_UP 		0x001	/* the UP key */
-#define KEY_LEFT 	0x010	/* the LEFT key */
-#define KEY_RIGHT 	0x020	/* the RIGHT key */
-#define KEY_DOWN 	0x040	/* the DOWN key */
-#define KEY_CURSOR2 	0x080	/* the CURSOR2 key */
-#define KEY_HOME2 	0x100	/* the HOME2 key */
-#define KEY_PROG2 	0x200	/* the PROG2 key */
-
-#define KEY_STATUS1_A	0x01000	/* first lower status key */
-#define KEY_STATUS1_B	0x02000	/* second lower status key */
-#define KEY_STATUS1_C	0x03000	/* third lower status key */
-#define KEY_STATUS1_D	0x04000	/* fourth lower status key */
-#define KEY_STATUS1_E	0x05000	/* fifth lower status key */
-#define KEY_STATUS1_F	0x06000	/* sixth lower status key */
-#define KEY_ROUTING1	0x08000	/* lower cursor routing key set */
-
-#define KEY_STATUS2_A	0x10000	/* first upper status key */
-#define KEY_STATUS2_B	0x20000	/* second upper status key */
-#define KEY_STATUS2_C	0x30000	/* third upper status key */
-#define KEY_STATUS2_D	0x40000	/* fourth upper status key */
-#define KEY_STATUS2_E	0x50000	/* fifth upper status key */
-#define KEY_STATUS2_F	0x60000	/* sixth upper status key */
-#define KEY_ROUTING2	0x80000	/* upper cursor routing key set */
-
-/* first cursor routing offset on main display (old firmware only) */
-#define KEY_ROUTING_OFFSET 168
 
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
@@ -771,7 +779,7 @@ detectModel1 (BrailleDisplay *brl) {
 }
 
 static int
-readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readCommand1 (BrailleDisplay *brl) {
   unsigned char packet[MAXIMUM_PACKET_SIZE];
   int length;
 
@@ -871,6 +879,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 #else /* ABT3_OLD_FIRMWARE */
+    const unsigned char routingBase = 0XA8;
     unsigned char byte = packet[0];
 
     if (!(byte & 0X80)) {
@@ -900,8 +909,8 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       continue;
     }
 
-    if (byte >= KEY_ROUTING_OFFSET) {
-      if ((byte -= KEY_ROUTING_OFFSET) < brl->textColumns) {
+    if (byte >= routingBase) {
+      if ((byte -= routingBase) < brl->textColumns) {
         enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 1);
         enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 0);
         continue;
@@ -951,149 +960,25 @@ static const ProtocolOperations protocol1Operations = {
   readCommand1, writeBraille1
 };
 
-#define KEY2_THUMB_COUNT 5
-#define KEY2_ETOUCH_COUNT 4
-#define KEY2_SMARTPAD_COUNT 9
-
-#define KEY2_THUMB_SHIFT 0
-#define KEY2_ETOUCH_SHIFT (KEY2_THUMB_SHIFT + KEY2_THUMB_COUNT)
-#define KEY2_SMARTPAD_SHIFT (KEY2_ETOUCH_SHIFT + KEY2_ETOUCH_COUNT)
-
-#define KEY2(type,index) (1 << (KEY2_##type##_SHIFT + (index)))
-
-#define KEY2_TH_1 KEY2(THUMB, 0)
-#define KEY2_TH_2 KEY2(THUMB, 1)
-#define KEY2_TH_3 KEY2(THUMB, 2)
-#define KEY2_TH_4 KEY2(THUMB, 3)
-#define KEY2_TH_5 KEY2(THUMB, 4)
-
-#define KEY2_ET_1 KEY2(ETOUCH, 0)
-#define KEY2_ET_2 KEY2(ETOUCH, 1)
-#define KEY2_ET_3 KEY2(ETOUCH, 2)
-#define KEY2_ET_4 KEY2(ETOUCH, 3)
-
-#define KEY2_SP_1 KEY2(SMARTPAD, 0)
-#define KEY2_SP_2 KEY2(SMARTPAD, 1)
-#define KEY2_SP_L KEY2(SMARTPAD, 2)
-#define KEY2_SP_E KEY2(SMARTPAD, 3)
-#define KEY2_SP_U KEY2(SMARTPAD, 4)
-#define KEY2_SP_D KEY2(SMARTPAD, 5)
-#define KEY2_SP_R KEY2(SMARTPAD, 6)
-#define KEY2_SP_3 KEY2(SMARTPAD, 7)
-#define KEY2_SP_4 KEY2(SMARTPAD, 8)
-
 static uint32_t firmwareVersion2;
-static unsigned long primaryKeys2;
-static unsigned long secondaryKeys2;
-static unsigned long activeKeys2;
 static unsigned char splitOffset2;
 
 static void
 initializeVariables2 (void) {
-  primaryKeys2 = 0;
-  secondaryKeys2 = 0;
-  activeKeys2 = 0;
 }
 
 static int
-interpretKeyCombination2 (void) {
-  switch (activeKeys2) {
-    case KEY2_SP_1: return BRL_CMD_HELP;
-    case KEY2_SP_2: return BRL_CMD_LEARN;
-    case KEY2_SP_3: return BRL_CMD_INFO;
-    case KEY2_SP_4: return BRL_CMD_PREFMENU;
-
-    case KEY2_SP_L: return BRL_CMD_SIXDOTS;
-    case KEY2_SP_R: return BRL_CMD_CSRTRK;
-    case KEY2_SP_U: return BRL_CMD_FREEZE;
-    case KEY2_SP_D: return BRL_CMD_DISPMD;
-    case KEY2_SP_E: return BRL_CMD_PASTE;
-
-    case KEY2_TH_3: return BRL_CMD_HOME;
-
-    case KEY2_TH_2: return BRL_CMD_LNUP;
-    case KEY2_TH_4: return BRL_CMD_LNDN;
-    case KEY2_TH_1: return BRL_CMD_FWINLT;
-    case KEY2_TH_5: return BRL_CMD_FWINRT;
-
-    case KEY2_TH_3 | KEY2_TH_2: return BRL_CMD_PRDIFLN;
-    case KEY2_TH_3 | KEY2_TH_4: return BRL_CMD_NXDIFLN;
-    case KEY2_TH_3 | KEY2_TH_1: return BRL_CMD_FWINLTSKIP;
-    case KEY2_TH_3 | KEY2_TH_5: return BRL_CMD_FWINRTSKIP;
-
-    case KEY2_SP_1 | KEY2_TH_3: return BRL_CMD_BACK;
-    case KEY2_SP_1 | KEY2_TH_2: return BRL_CMD_ATTRUP;
-    case KEY2_SP_1 | KEY2_TH_4: return BRL_CMD_ATTRDN;
-    case KEY2_SP_1 | KEY2_TH_1: return BRL_CMD_TOP_LEFT;
-    case KEY2_SP_1 | KEY2_TH_5: return BRL_CMD_BOT_LEFT;
-
-    case KEY2_SP_4 | KEY2_TH_3: return BRL_CMD_CSRJMP_VERT;
-    case KEY2_SP_4 | KEY2_TH_2: return BRL_CMD_PRPGRPH;
-    case KEY2_SP_4 | KEY2_TH_4: return BRL_CMD_NXPGRPH;
-    case KEY2_SP_4 | KEY2_TH_1: return BRL_CMD_PRPROMPT;
-    case KEY2_SP_4 | KEY2_TH_5: return BRL_CMD_NXPROMPT;
-
-    case KEY2_ET_1: return BRL_CMD_LNBEG;
-    case KEY2_ET_2: return BRL_CMD_CHRLT;
-    case KEY2_ET_3: return BRL_CMD_LNEND;
-    case KEY2_ET_4: return BRL_CMD_CHRRT;
-
-    case KEY2_SP_1 | KEY2_SP_L: return BRL_CMD_SAY_SLOWER;
-    case KEY2_SP_1 | KEY2_SP_R: return BRL_CMD_SAY_FASTER;
-    case KEY2_SP_1 | KEY2_SP_D: return BRL_CMD_SAY_SOFTER;
-    case KEY2_SP_1 | KEY2_SP_U: return BRL_CMD_SAY_LOUDER;
-    case KEY2_SP_1 | KEY2_SP_E: return BRL_CMD_AUTOSPEAK;
-    case KEY2_SP_4 | KEY2_SP_L: return BRL_CMD_MUTE;
-    case KEY2_SP_4 | KEY2_SP_R: return BRL_CMD_SAY_LINE;
-    case KEY2_SP_4 | KEY2_SP_U: return BRL_CMD_SAY_ABOVE;
-    case KEY2_SP_4 | KEY2_SP_D: return BRL_CMD_SAY_BELOW;
-    case KEY2_SP_4 | KEY2_SP_E: return BRL_CMD_SPKHOME;
-  }
-
-  return EOF;
-}
-
-static int
-interpretPrimaryRoutingKey2 (void) {
-  switch (activeKeys2) {
-    case 0: return BRL_BLK_ROUTE;
-
-    case KEY2_SP_1: return BRL_BLK_CUTBEGIN;
-    case KEY2_SP_2: return BRL_BLK_CUTAPPEND;
-    case KEY2_SP_3: return BRL_BLK_CUTLINE;
-    case KEY2_SP_4: return BRL_BLK_CUTRECT;
-
-    case KEY2_SP_L: return BRL_BLK_PRINDENT;
-    case KEY2_SP_R: return BRL_BLK_NXINDENT;
-    case KEY2_SP_U: return BRL_BLK_PRDIFCHAR;
-    case KEY2_SP_D: return BRL_BLK_NXDIFCHAR;
-    case KEY2_SP_E: return BRL_BLK_SETLEFT;
-  }
-
-  return EOF;
-}
-
-static int
-interpretSecondaryRoutingKey2 (void) {
-  switch (activeKeys2) {
-    case 0: return BRL_BLK_DESCCHAR;
-  }
-
-  return EOF;
-}
-
-static int
-interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsigned char key) {
+interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key) {
   unsigned char release = group & 0X80;
+  int press = !release;
   group &= ~release;
 
   switch (group) {
     case 0X01:
       switch (key) {
         case 0X01:
-          if (protocol->updateConfiguration(brl, 0, NULL)) return 0;
-          *command = BRL_CMD_RESTARTBRL;
-          return 1;
+          if (!protocol->updateConfiguration(brl, 0, NULL)) return BRL_CMD_RESTARTBRL;
+          return EOF;
 
         default:
           break;
@@ -1101,59 +986,38 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
       break;
 
     {
-      unsigned int shift;
+      unsigned int base;
       unsigned int count;
       int secondary;
-      unsigned long *keys;
 
     case 0X71: /* thumb key */
-      shift = KEY2_THUMB_SHIFT;
-      count = KEY2_THUMB_COUNT;
+      base = AL_KEY_THUMB;
+      count = AL_KEYS_THUMB;
       secondary = 1;
       goto doKey;
 
     case 0X72: /* etouch key */
-      shift = KEY2_ETOUCH_SHIFT;
-      count = KEY2_ETOUCH_COUNT;
+      base = AL_KEY_ETOUCH;
+      count = AL_KEYS_ETOUCH;
       secondary = 0;
       goto doKey;
 
     case 0X73: /* smartpad key */
-      shift = KEY2_SMARTPAD_SHIFT;
-      count = KEY2_SMARTPAD_COUNT;
+      base = AL_KEY_SMARTPAD;
+      count = AL_KEYS_SMARTPAD;
       secondary = 1;
       goto doKey;
 
     doKey:
-      keys = &primaryKeys2;
       if (secondary) {
         if ((key / count) == 1) {
           key -= count;
-          keys = &secondaryKeys2;
         }
       }
 
       if (key < count) {
-        unsigned long bit = 1 << (shift + key);
-
-        if (release) {
-          *command = interpretKeyCombination2();
-          *keys &= ~bit;
-          activeKeys2 = 0;
-          return 1;
-        }
-
-        *keys |= bit;
-        activeKeys2 = primaryKeys2 | secondaryKeys2;
-        *command = interpretKeyCombination2();
-
-        if (*command == EOF) {
-          *command = BRL_CMD_NOOP;
-        } else {
-          *command |= BRL_FLG_REPEAT_DELAY;
-        }
-
-        return 1;
+        enqueueKeyEvent(AL_SET_NavigationKeys, base+key, press);
+        return EOF;
       }
       break;
     }
@@ -1168,20 +1032,9 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
 
       if (key >= textOffset) {
         if ((key -= textOffset) < brl->textColumns) {
-          if (release) {
-            *command = EOF;
-          } else {
-            *command = secondary? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
-
-            if (*command == EOF) {
-              *command = BRL_CMD_NOOP;
-            } else {
-              *command |= key;
-            }
-          }
-
-          activeKeys2 = 0;
-          return 1;
+          unsigned char set = secondary? AL_SET_RoutingKeys2: AL_SET_RoutingKeys1;
+          enqueueKeyEvent(set, key, press);
+          return EOF;
         }
       }
       break;
@@ -1192,7 +1045,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
   }
 
   LogPrint(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
-  return 0;
+  return EOF;
 }
 
 static int
@@ -1347,7 +1200,7 @@ detectModel2s (BrailleDisplay *brl) {
 }
 
 static int
-readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readCommand2s (BrailleDisplay *brl) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
     int length = protocol->readPacket(packet, sizeof(packet));
@@ -1359,8 +1212,8 @@ readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       case 0X1B:
         switch (packet[1]) {
           case 0X4B: /* K */ {
-            int command;
-            if (interpretKeyEvent2(brl, &command, packet[2], packet[3])) return command;
+            int command = interpretKeyEvent2(brl, packet[2], packet[3]);
+            if (command != EOF) return command;
             continue;
           }
 
@@ -1495,7 +1348,7 @@ detectModel2u (BrailleDisplay *brl) {
 }
 
 static int
-readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readCommand2u (BrailleDisplay *brl) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
     int length = protocol->readPacket(packet, sizeof(packet));
@@ -1505,8 +1358,8 @@ readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     switch (packet[0]) {
       case 0X04: {
-        int command;
-        if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
+        int command = interpretKeyEvent2(brl, packet[2], packet[1]);
+        if (command != EOF) return command;
         continue;
       }
 
@@ -1885,7 +1738,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  return protocol->readCommand(brl, context);
+  return protocol->readCommand(brl);
 }
 
 static void

@@ -1,0 +1,107 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Alva Braille Controller (6nn)
+
+
+####################
+# Default Bindings #
+####################
+
+bind SmartpadF1 HELP
+bind SmartpadF2 LEARN
+bind SmartpadF3 INFO
+bind SmartpadF4 PREFMENU
+
+bind SmartpadLeft SIXDOTS
+bind SmartpadRight CSRTRK
+bind SmartpadUp FREEZE
+bind SmartpadDown DISPMD
+bind SmartpadEnter PASTE
+
+bind Thumb3 HOME
+bind Thumb2 LNUP
+bind Thumb4 LNDN
+bind Thumb1 FWINLT
+bind Thumb5 FWINRT
+
+bind Thumb3+Thumb2 PRDIFLN
+bind Thumb3+Thumb4 NXDIFLN
+bind Thumb3+Thumb1 FWINLTSKIP
+bind Thumb3+Thumb5 FWINRTSKIP
+
+bind SmartpadF1+Thumb3 BACK
+bind SmartpadF1+Thumb2 ATTRUP
+bind SmartpadF1+Thumb4 ATTRDN
+bind SmartpadF1+Thumb1 TOP_LEFT
+bind SmartpadF1+Thumb5 BOT_LEFT
+
+bind SmartpadF4+Thumb3 CSRJMP_VERT
+bind SmartpadF4+Thumb2 PRPGRPH
+bind SmartpadF4+Thumb4 NXPGRPH
+bind SmartpadF4+Thumb1 PRPROMPT
+bind SmartpadF4+Thumb5 NXPROMPT
+
+bind ETouchLeftRear LNBEG
+bind ETouchRightRear LNEND
+bind ETouchLeftFront CHRLT
+bind ETouchRightFront CHRRT
+
+bind SmartpadF1+SmartpadLeft SAY_SLOWER
+bind SmartpadF1+SmartpadRight SAY_FASTER
+bind SmartpadF1+SmartpadDown SAY_SOFTER
+bind SmartpadF1+SmartpadUp SAY_LOUDER
+bind SmartpadF1+SmartpadEnter AUTOSPEAK
+
+bind SmartpadF4+SmartpadLeft MUTE
+bind SmartpadF4+SmartpadRight SAY_LINE
+bind SmartpadF4+SmartpadUp SAY_ABOVE
+bind SmartpadF4+SmartpadDown SAY_BELOW
+bind SmartpadF4+SmartpadEnter SPKHOME
+
+bind !RoutingKey1 ROUTE
+bind !RoutingKey2 DESCCHAR
+
+bind SmartpadF1+!RoutingKey1 CUTBEGIN
+bind SmartpadF2+!RoutingKey1 CUTAPPEND
+bind SmartpadF3+!RoutingKey1 CUTLINE
+bind SmartpadF4+!RoutingKey1 CUTRECT
+
+bind SmartpadLeft+!RoutingKey1 PRINDENT
+bind SmartpadRight+!RoutingKey1 NXINDENT
+bind SmartpadUp+!RoutingKey1 PRDIFCHAR
+bind SmartpadDown+!RoutingKey1 NXDIFCHAR
+bind SmartpadEnter+!RoutingKey1 SETLEFT
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+bind !SmartpadEnter PREFMENU
+bind !SmartpadLeft MENU_PREV_SETTING
+bind !SmartpadRight MENU_NEXT_SETTING
+bind !SmartpadUp MENU_PREV_ITEM
+bind !SmartpadDown MENU_NEXT_ITEM
+bind SmartpadF2 MENU_FIRST_ITEM
+bind SmartpadF3 MENU_LAST_ITEM
+bind SmartpadF1+SmartpadF2 PREFLOAD
+bind SmartpadF4+SmartpadF3 PREFSAVE
+bind SmartpadF1 FWINLT
+bind SmartpadF4 FWINRT
