@@ -72,3 +72,24 @@ bind Home+Cursor+!Left MUTE
 bind Home+Cursor+!Right SAY_LINE
 bind Prog+Home+!Left RESTARTSPEECH
 bind Prog+Home+!Right SAY_BELOW
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind !Up MENU_PREV_ITEM
+bind !Down MENU_NEXT_ITEM
+bind Home+!Up MENU_FIRST_ITEM
+bind Home+!Down MENU_LAST_ITEM
+
+bind !Left FWINLT
+bind !Right FWINRT
+bind Home+!Left PREFLOAD
+bind Home+!Right PREFSAVE
+
+bind Prog PREFMENU
+bind Home MENU_PREV_SETTING
+bind Cursor MENU_NEXT_SETTING
