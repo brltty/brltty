@@ -45,7 +45,6 @@ bind Prog+Home+!Up PRPROMPT
 
 bind Home+Cursor CSRTRK
 bind Cursor RETURN
-bind Prog+Cursor+!Left BACK
 
 bind !RoutingKey1 ROUTE
 bind Prog+Home+!RoutingKey1 DESCCHAR
