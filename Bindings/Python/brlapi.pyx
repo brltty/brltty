@@ -83,7 +83,8 @@ class OperationError(Exception):
 		self.brlerrno = c_brlapi.brlapi_error.brlerrno
 		self.libcerrno = c_brlapi.brlapi_error.libcerrno
 		self.gaierrno = c_brlapi.brlapi_error.gaierrno
-		self.errfun = c_brlapi.brlapi_error.errfun
+		if (c_brlapi.brlapi_error.errfun):
+			self.errfun = c_brlapi.brlapi_error.errfun
 
 	def __str__(self):
 		cdef c_brlapi.brlapi_error_t error
