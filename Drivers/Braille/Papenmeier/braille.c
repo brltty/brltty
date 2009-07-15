@@ -1127,6 +1127,7 @@ mapInputModules2 (void) {
     }
   }
 
+  module.bit = 0;
   nextInputModule2(&module, 8);
   addInputMapping2(&module, 0, PM_SET_NavigationKeys, PM_KEY_BarUp2);
   addInputMapping2(&module, 1, PM_SET_NavigationKeys, PM_KEY_BarUp1);
