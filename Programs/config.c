@@ -808,7 +808,7 @@ resetStatusFields (const unsigned char *fields) {
   if (!fields) fields = braille->statusFields;
 
   if (!count && (brl.textColumns > 40)) {
-    count = (brl.textColumns % 20) * brl.textRows;
+    count = MIN((brl.textColumns % 20), (brl.textColumns % 33)) * brl.textRows;
 
     if (count) {
       prefs.statusPosition = spRight;
