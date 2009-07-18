@@ -1147,13 +1147,17 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     else
 #endif /* __CYGWIN32__ */
       len = strlen(str);
-    if (locale && strcmp(locale,"C")) {
+    if (
+#ifdef WINDOWS
+	!wide &&
+#endif /* WINDOWS */
+	locale && strcmp(locale,"C")) {
       mbstate_t ps;
       size_t eaten;
       unsigned i;
       memset(&ps,0,sizeof(ps));
       for (min=0;min<dispSize;min++) {
-	if (!*str)
+	if (!*(char*)str)
 	  goto endcount;
 	eaten = mbrlen(str,len,&ps);
 	switch(eaten) {
