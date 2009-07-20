@@ -22,3 +22,5 @@
 #include "brlapi.h"
 
 extern const brlapi_writeArguments_t brlapi_writeArguments_initialized;
+extern char *brlapi_protocolException(void);
+extern void brlapi_protocolExceptionInit(brlapi_handle_t *handle);

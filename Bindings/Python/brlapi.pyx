@@ -80,14 +80,22 @@ include "constants.auto.pyx"
 class OperationError(Exception):
 	"""Error while performing some operation"""
 	def __init__(self):
-		self.brlerrno = c_brlapi.brlapi_error.brlerrno
-		self.libcerrno = c_brlapi.brlapi_error.libcerrno
-		self.gaierrno = c_brlapi.brlapi_error.gaierrno
-		if (c_brlapi.brlapi_error.errfun):
-			self.errfun = c_brlapi.brlapi_error.errfun
+		cdef char *exception
+		exception = c_brlapi.brlapi_protocolException()
+		if (exception):
+			self.exception = exception
+			c_brlapi.free(exception)
+		else:
+			self.brlerrno = c_brlapi.brlapi_error.brlerrno
+			self.libcerrno = c_brlapi.brlapi_error.libcerrno
+			self.gaierrno = c_brlapi.brlapi_error.gaierrno
+			if (c_brlapi.brlapi_error.errfun):
+				self.errfun = c_brlapi.brlapi_error.errfun
 
 	def __str__(self):
 		cdef c_brlapi.brlapi_error_t error
+		if self.exception:
+			return self.exception
 		error.brlerrno = self.brlerrno
 		error.libcerrno = self.libcerrno
 		error.gaierrno = self.gaierrno
@@ -273,6 +281,7 @@ cdef class Connection:
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		self.fd = c_brlapi.brlapi__openConnection(self.h, &client, &self.settings)
 		c_brlapi.Py_END_ALLOW_THREADS
+		c_brlapi.brlapi_protocolExceptionInit(self.h)
 		if self.fd == -1:
 			c_brlapi.free(self.h)
 			raise ConnectionError(self.settings.host, self.settings.auth)
