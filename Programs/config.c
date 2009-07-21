@@ -2141,6 +2141,74 @@ constructBrailleDriver (void) {
   if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       brailleConstructed = 1;
+
+      /* Initialize the braille driver's help screen. */
+      LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
+               brl.keyBindings? brl.keyBindings: gettext("none"));
+      if (brl.keyNameTables) {
+        char *file;
+
+        {
+          const char *components[] = {
+            "brl-", braille->definition.code, "-", brl.keyBindings, KEY_TABLE_EXTENSION
+          };
+          file = joinStrings(components, ARRAY_COUNT(components));
+        }
+
+        if (file) {
+          char *path;
+
+          if ((path = makePath(opt_tablesDirectory, file))) {
+            if ((brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
+              LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
+
+              if (constructHelpScreen()) {
+                listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
+              }
+            } else {
+              LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
+            }
+
+            free(path);
+          }
+
+          free(file);
+        }
+      }
+
+      if (!brl.keyTable) {
+        char *file;
+
+        {
+          const char *components[] = {
+            PACKAGE_NAME, "-", braille->definition.code, "-", brl.keyBindings, ".hlp"
+          };
+          file = joinStrings(components, ARRAY_COUNT(components));
+        }
+
+        if (file) {
+          char *path;
+
+          if ((path = makePath(opt_dataDirectory, file))) {
+            int loaded = 0;
+
+            if (constructHelpScreen())
+              if (loadHelpFile(path))
+                loaded = 1;
+
+            if (loaded) {
+              LogPrint(LOG_INFO, "%s: %s", gettext("Help Path"), path);
+            } else {
+              LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
+            }
+
+            free(path);
+          }
+
+          free(file);
+        }
+      }
+
       return 1;
     }
 
@@ -2159,6 +2227,12 @@ destructBrailleDriver (void) {
   brailleConstructed = 0;
   drainBrailleOutput(&brl, 0);
   braille->destruct(&brl);
+  destructHelpScreen();
+
+  if (brl.keyTable) {
+    destroyKeyTable(brl.keyTable);
+    brl.keyTable = NULL;
+  }
 }
 
 static int
@@ -2191,74 +2265,6 @@ initializeBrailleDriver (const char *code, int verify) {
         logParameters(braille->parameters, brailleParameters,
                       gettext("Braille Parameter"));
         LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
-
-        /* Initialize the braille driver's help screen. */
-        LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
-                 brl.keyBindings? brl.keyBindings: gettext("none"));
-        if (brl.keyNameTables) {
-          char *file;
-
-          {
-            const char *components[] = {
-              "brl-", braille->definition.code, "-", brl.keyBindings, KEY_TABLE_EXTENSION
-            };
-            file = joinStrings(components, ARRAY_COUNT(components));
-          }
-
-          if (file) {
-            char *path;
-
-            if ((path = makePath(opt_tablesDirectory, file))) {
-              if (verify || (brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
-                LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
-
-                if (constructHelpScreen()) {
-                  listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
-                }
-              } else {
-                LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
-              }
-
-              free(path);
-            }
-
-            free(file);
-          }
-        }
-
-        if (!brl.keyTable) {
-          char *file;
-
-          {
-            const char *components[] = {
-              PACKAGE_NAME, "-", braille->definition.code, "-", brl.keyBindings, ".hlp"
-            };
-            file = joinStrings(components, ARRAY_COUNT(components));
-          }
-
-          if (file) {
-            char *path;
-
-            if ((path = makePath(opt_dataDirectory, file))) {
-              int loaded = verify;
-
-              if (!loaded)
-                if (constructHelpScreen())
-                  if (loadHelpFile(path))
-                    loaded = 1;
-
-              if (loaded) {
-                LogPrint(LOG_INFO, "%s: %s", gettext("Help Path"), path);
-              } else {
-                LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
-              }
-
-              free(path);
-            }
-
-            free(file);
-          }
-        }
 
         {
           const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
@@ -2363,13 +2369,6 @@ activateBrailleDriver (int verify) {
 
 static void
 deactivateBrailleDriver (void) {
-  destructHelpScreen();
-
-  if (brl.keyTable) {
-    destroyKeyTable(brl.keyTable);
-    brl.keyTable = NULL;
-  }
-
   if (brailleDriver) {
 #ifdef ENABLE_API
     if (apiStarted) api_unlink(&brl);
