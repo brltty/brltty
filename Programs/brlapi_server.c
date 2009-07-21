@@ -306,6 +306,7 @@ static const int retainDots = 0;
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
 static int initializeAcceptedKeys(Connection *c);
+static void brlResize(BrailleDisplay *brl);
 
 /****************************************************************************/
 /** DRIVER CAPABILITIES                                                    **/
@@ -342,7 +343,10 @@ static int resumeDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
   pthread_mutex_lock(&suspendMutex);
   driverConstructed = constructBrailleDriver();
-  if (driverConstructed) LogPrint(LOG_DEBUG,"driver resumed");
+  if (driverConstructed) {
+    LogPrint(LOG_DEBUG,"driver resumed");
+    brlResize(brl);
+  }
   pthread_mutex_unlock(&suspendMutex);
   return driverConstructed;
 }
@@ -2460,18 +2464,8 @@ int api_resume(BrailleDisplay *brl) {
    * to normal state */
   pthread_mutex_lock(&rawMutex);
   pthread_mutex_lock(&driverMutex);
-  if (!suspendConnection && !driverConstructed) {
+  if (!suspendConnection && !driverConstructed)
     resumeDriver(brl);
-    if (driverConstructed) {
-      /* TODO: handle clients' resize */
-      displayDimensions[0] = htonl(brl->textColumns);
-      displayDimensions[1] = htonl(brl->textRows);
-      displaySize = brl->textColumns * brl->textRows;
-      coreWindowText = realloc(coreWindowText, displaySize * sizeof(*coreWindowText));
-      coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
-      disp = brl;
-    }
-  }
   pthread_mutex_unlock(&driverMutex);
   pthread_mutex_unlock(&rawMutex);
   return (coreActive = driverConstructed);
@@ -2497,6 +2491,18 @@ void api_suspend(BrailleDisplay *brl) {
   /* we let core's call to api_flush() go to full suspend state */
 }
 
+static void brlResize(BrailleDisplay *brl)
+{
+  /* TODO: handle clients' resize */
+  displayDimensions[0] = htonl(brl->textColumns);
+  displayDimensions[1] = htonl(brl->textRows);
+  displaySize = brl->textColumns * brl->textRows;
+  coreWindowText = realloc(coreWindowText, displaySize * sizeof(*coreWindowText));
+  coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
+  coreWindowCursor = 0;
+  disp = brl;
+}
+
 /* Function : api_link */
 /* Does all the link stuff to let api get events from the driver and */
 /* writes from brltty */
@@ -2513,14 +2519,7 @@ void api_link(BrailleDisplay *brl)
   ApiBraille.readPacket = NULL;
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
-  /* TODO: handle clients' resize */
-  displayDimensions[0] = htonl(brl->textColumns);
-  displayDimensions[1] = htonl(brl->textRows);
-  displaySize = brl->textColumns * brl->textRows;
-  coreWindowText = calloc(displaySize, sizeof(*coreWindowText));
-  coreWindowDots = calloc(displaySize, sizeof(*coreWindowDots));
-  coreWindowCursor = 0;
-  disp = brl;
+  brlResize(brl);
   pthread_mutex_lock(&connectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   pthread_mutex_unlock(&connectionsMutex);
