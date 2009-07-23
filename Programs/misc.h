@@ -178,7 +178,7 @@ extern char *getWorkingDirectory (void);
 extern int setWorkingDirectory (const char *directory);
 
 extern char *getHomeDirectory (void);
-extern char *getUserDirectory (void);
+extern char *getOverrideDirectory (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);
