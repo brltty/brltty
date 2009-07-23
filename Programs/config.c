@@ -3038,16 +3038,6 @@ startup (int argc, char *argv[]) {
   if (*opt_pidFile) createPidFile();
 
   {
-    const char *directories[] = {opt_dataDirectory, "/", NULL};
-    const char **directory = directories;
-
-    while (*directory) {
-      if (setWorkingDirectory(*directory)) break;                /* * change to directory containing data files  */
-      ++directory;
-    }
-  }
-
-  {
     char *directory;
     if ((directory = getWorkingDirectory())) {
       LogPrint(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);

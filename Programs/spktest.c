@@ -191,28 +191,22 @@ main (int argc, char *argv[]) {
       --argc;
     }
 
-    if (chdir(opt_dataDirectory) != -1) {
-      initializeSpeechSynthesizer(&spk);
-      identifySpeechDriver(speech, 0);		/* start-up messages */
-      if (speech->construct(&spk, parameterSettings)) {
-        if (speech->rate) speech->rate(&spk, speechRate);
-        if (speech->volume) speech->volume(&spk, speechVolume);
+    initializeSpeechSynthesizer(&spk);
+    identifySpeechDriver(speech, 0);		/* start-up messages */
+    if (speech->construct(&spk, parameterSettings)) {
+      if (speech->rate) speech->rate(&spk, speechRate);
+      if (speech->volume) speech->volume(&spk, speechVolume);
 
-        if (opt_textString && *opt_textString) {
-          sayString(&spk, opt_textString, 0);
-        } else {
-          processLines(stdin, sayLine, NULL);
-        }
-        speech->destruct(&spk);		/* finish with the display */
-        status = 0;
+      if (opt_textString && *opt_textString) {
+        sayString(&spk, opt_textString, 0);
       } else {
-        LogPrint(LOG_ERR, "can't initialize speech driver.");
-        status = 5;
+        processLines(stdin, sayLine, NULL);
       }
+      speech->destruct(&spk);		/* finish with the display */
+      status = 0;
     } else {
-      LogPrint(LOG_ERR, "can't change directory to '%s': %s",
-               opt_dataDirectory, strerror(errno));
-      status = 4;
+      LogPrint(LOG_ERR, "can't initialize speech driver.");
+      status = 5;
     }
   } else {
     LogPrint(LOG_ERR, "can't load speech driver.");

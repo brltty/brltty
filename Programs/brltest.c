@@ -198,31 +198,25 @@ main (int argc, char *argv[]) {
       --argc;
     }
 
-    if (chdir(opt_dataDirectory) != -1) {
-      initializeBrailleDisplay(&brl);
-      brl.dataDirectory = opt_dataDirectory;
-      identifyBrailleDriver(braille, 0);		/* start-up messages */
-      if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
-        if (ensureBrailleBuffer(&brl, LOG_INFO)) {
+    initializeBrailleDisplay(&brl);
+    brl.dataDirectory = opt_dataDirectory;
+    identifyBrailleDriver(braille, 0);		/* start-up messages */
+    if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
+      if (ensureBrailleBuffer(&brl, LOG_INFO)) {
 #ifdef ENABLE_LEARN_MODE
-          learnMode(&brl, updateInterval, 10000);
+        learnMode(&brl, updateInterval, 10000);
 #else /* ENABLE_LEARN_MODE */
-          message("braille test", 0);
+        message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */
-          braille->destruct(&brl);		/* finish with the display */
-          status = 0;
-        } else {
-          LogPrint(LOG_ERR, "can't allocate braille buffer.");
-          status = 6;
-        }
+        braille->destruct(&brl);		/* finish with the display */
+        status = 0;
       } else {
-        LogPrint(LOG_ERR, "can't initialize braille driver.");
-        status = 5;
+        LogPrint(LOG_ERR, "can't allocate braille buffer.");
+        status = 6;
       }
     } else {
-      LogPrint(LOG_ERR, "can't change directory to '%s': %s",
-               opt_dataDirectory, strerror(errno));
-      status = 4;
+      LogPrint(LOG_ERR, "can't initialize braille driver.");
+      status = 5;
     }
   } else {
     LogPrint(LOG_ERR, "can't load braille driver.");
