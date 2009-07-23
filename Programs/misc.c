@@ -371,7 +371,7 @@ static size_t
 stripPathDelimiter (const char *path, size_t length) {
   while (length) {
     if (!isPathDelimiter(path[length-1])) break;
-    --length;
+    length -= 1;
   }
   return length;
 }
@@ -540,13 +540,27 @@ getHomeDirectory (void) {
 }
 
 char *
-getUserDirectory (void) {
-  char *home = getHomeDirectory();
-  if (home) {
-    char *directory = makePath(home, "." PACKAGE_NAME);
-    free(home);
-    if (directory) return directory;
+getOverrideDirectory (void) {
+  static const char subdirectory[] = "." PACKAGE_NAME;
+
+  {
+    char *homeDirectory = getHomeDirectory();
+    if (homeDirectory) {
+      char *directory = makePath(homeDirectory, subdirectory);
+      free(homeDirectory);
+      if (directory) return directory;
+    }
   }
+
+  {
+    char *workingDirectory = getWorkingDirectory();
+    if (workingDirectory) {
+      char *directory = makePath(workingDirectory, subdirectory);
+      free(workingDirectory);
+      if (directory) return directory;
+    }
+  }
+
   return NULL;
 }
 
@@ -698,37 +712,37 @@ openFile (const char *path, const char *mode, int optional) {
 
 FILE *
 openDataFile (const char *path, const char *mode, int optional) {
-  static const char *userDirectory = NULL;
+  static const char *overrideDirectory = NULL;
   const char *name = locatePathName(path);
-  char *userPath;
+  char *overridePath;
   FILE *file;
 
-  if (!userDirectory) {
-    if ((userDirectory = getUserDirectory())) {
-      LogPrint(LOG_DEBUG, "user directory: %s", userDirectory);
+  if (!overrideDirectory) {
+    if ((overrideDirectory = getOverrideDirectory())) {
+      LogPrint(LOG_DEBUG, "override directory: %s", overrideDirectory);
     } else {
-      LogPrint(LOG_DEBUG, "no user directory");
-      userDirectory = "";
+      LogPrint(LOG_DEBUG, "no override directory");
+      overrideDirectory = "";
     }
   }
 
-  if (!*userDirectory) {
-    userPath = NULL;
-  } else if ((userPath = makePath(userDirectory, name))) {
-    if (testPath(userPath)) {
-      file = openFile(userPath, mode, optional);
+  if (!*overrideDirectory) {
+    overridePath = NULL;
+  } else if ((overridePath = makePath(overrideDirectory, name))) {
+    if (testPath(overridePath)) {
+      file = openFile(overridePath, mode, optional);
       goto done;
     }
   }
 
   if (!(file = openFile(path, mode, optional))) {
-    if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && userPath) {
-      if (makeDirectory(userDirectory)) file = openFile(userPath, mode, optional);
+    if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && overridePath) {
+      if (makeDirectory(overrideDirectory)) file = openFile(overridePath, mode, optional);
     }
   }
 
 done:
-  if (userPath) free(userPath);
+  if (overridePath) free(overridePath);
   return file;
 }
 
