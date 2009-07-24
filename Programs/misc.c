@@ -466,7 +466,7 @@ testPath (const char *path) {
 }
 
 int
-makeDirectory (const char *path) {
+ensureDirectory (const char *path) {
   struct stat status;
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
@@ -491,9 +491,10 @@ const char *writableDirectory = NULL;
 
 const char *
 getWritableDirectory (void) {
-  if (writableDirectory && *writableDirectory) {
-    if (access(writableDirectory, W_OK) != -1) return writableDirectory;
-  }
+  if (writableDirectory && *writableDirectory)
+    if (ensureDirectory(writableDirectory))
+      return writableDirectory;
+
   return NULL;
 }
 
@@ -737,7 +738,7 @@ openDataFile (const char *path, const char *mode, int optional) {
 
   if (!(file = openFile(path, mode, optional))) {
     if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && overridePath) {
-      if (makeDirectory(overrideDirectory)) file = openFile(overridePath, mode, optional);
+      if (ensureDirectory(overrideDirectory)) file = openFile(overridePath, mode, optional);
     }
   }
 

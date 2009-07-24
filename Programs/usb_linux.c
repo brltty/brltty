@@ -912,7 +912,7 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
     char *directory = makeWritablePath(type);
 
     if (directory) {
-      if (makeDirectory(directory)) {
+      if (ensureDirectory(directory)) {
         if (verify(directory)) return directory;
 
         {
