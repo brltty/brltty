@@ -2131,7 +2131,6 @@ void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
   brl.bufferResized = &windowConfigurationChanged;
-  brl.dataDirectory = opt_dataDirectory;
 }
 
 int

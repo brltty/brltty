@@ -64,7 +64,6 @@ typedef struct {
   unsigned resizeRequired:1;
   unsigned int writeDelay;
   void (*bufferResized) (int infoLevel, int rows, int columns);
-  const char *dataDirectory;
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
   BrailleData *data;

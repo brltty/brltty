@@ -199,7 +199,6 @@ main (int argc, char *argv[]) {
     }
 
     initializeBrailleDisplay(&brl);
-    brl.dataDirectory = opt_dataDirectory;
     identifyBrailleDriver(braille, 0);		/* start-up messages */
     if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
       if (ensureBrailleBuffer(&brl, LOG_INFO)) {
