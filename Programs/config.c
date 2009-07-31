@@ -671,9 +671,9 @@ loadKeyTable (const char *name) {
       }
 
       if ((path = makePath(opt_tablesDirectory, file))) {
-        static KEY_NAME_TABLE_LIST(keyboardKeyTables) = {
+        static KEY_NAME_TABLES(keyboardKeyTables) = {
           keyboardKeyNames,
-          NULL
+          LAST_KEY_NAME_TABLE
         };
 
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
