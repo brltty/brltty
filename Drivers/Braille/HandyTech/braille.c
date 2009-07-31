@@ -203,7 +203,7 @@ static CellWriter writeEvolutionCells;
 typedef struct {
   const char *name;
   const char *keyBindings;
-  const KeyNameEntry *const *keyNameTables;
+  KEY_NAME_TABLES_REFERENCE keyNameTables;
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;

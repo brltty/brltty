@@ -108,7 +108,7 @@ typedef struct {
   unsigned char protocolRevision;
   const char *modelName;
   const char *keyBindings;
-  const KeyNameEntry *const *keyNameTables;
+  KEY_NAME_TABLES_REFERENCE keyNameTables;
 
   uint8_t textColumns;
   uint8_t frontKeys;

@@ -40,6 +40,7 @@ typedef struct {
 #define END_KEY_NAME_TABLE LAST_KEY_NAME_ENTRY};
 
 #define KEY_NAME_TABLES(name) keyNameTables_##name
+#define KEY_NAME_TABLES_REFERENCE const KeyNameEntry *const *
 #define KEY_NAME_TABLES_DECLARATION(name) const KeyNameEntry *const KEY_NAME_TABLES(name)[]
 #define LAST_KEY_NAME_TABLE NULL
 #define BEGIN_KEY_NAME_TABLES(name) static KEY_NAME_TABLES_DECLARATION(name) = {

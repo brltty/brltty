@@ -200,7 +200,7 @@ writePacket (
 typedef struct {
   const char *modelName;
   const char *keyBindings;
-  const KeyNameEntry *const *keyNameTables;
+  KEY_NAME_TABLES_REFERENCE keyNameTables;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
