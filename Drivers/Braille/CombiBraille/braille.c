@@ -36,7 +36,7 @@
 #include "braille.h"
 #include "io_serial.h"
 
-static KEY_NAME_TABLE(keyNames_all) = {
+BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(CB_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(CB_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(CB_KEY_Dot3, "Dot3"),
@@ -58,14 +58,11 @@ static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(CB_KEY_Status6, "Status6"),
 
   KEY_SET_ENTRY(CB_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
-  keyNames_all,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(all)
+  keyNameTable_all,
+END_KEY_NAME_TABLES
 
 SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */

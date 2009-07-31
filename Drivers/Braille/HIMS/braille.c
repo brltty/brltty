@@ -205,13 +205,11 @@ typedef struct {
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
-static KEY_NAME_TABLE(keyNames_routing) = {
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(HM_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_dots) = {
+BEGIN_KEY_NAME_TABLE(dots)
   KEY_NAME_ENTRY(HM_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(HM_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(HM_KEY_Dot3, "Dot3"),
@@ -221,11 +219,9 @@ static KEY_NAME_TABLE(keyNames_dots) = {
   KEY_NAME_ENTRY(HM_KEY_Dot7, "Dot7"),
   KEY_NAME_ENTRY(HM_KEY_Dot8, "Dot8"),
   KEY_NAME_ENTRY(HM_KEY_Space, "Space"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_brailleSense) = {
+BEGIN_KEY_NAME_TABLE(brailleSense)
   KEY_NAME_ENTRY(HM_KEY_BS_F1, "F1"),
   KEY_NAME_ENTRY(HM_KEY_BS_F2, "F2"),
   KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
@@ -233,16 +229,13 @@ static KEY_NAME_TABLE(keyNames_brailleSense) = {
 
   KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
   KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_brailleSense) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_brailleSense,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(brailleSense)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_brailleSense,
+END_KEY_NAME_TABLES
 
 static int
 getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -255,20 +248,17 @@ static const ProtocolOperations brailleSenseOperations = {
   getBrailleSenseCellCount
 };
 
-static KEY_NAME_TABLE(keyNames_syncBraille) = {
+BEGIN_KEY_NAME_TABLE(syncBraille)
   KEY_NAME_ENTRY(HM_KEY_SB_LeftUp, "LeftUp"),
   KEY_NAME_ENTRY(HM_KEY_SB_LeftDown, "LeftDown"),
   KEY_NAME_ENTRY(HM_KEY_SB_RightUp, "RightUp"),
   KEY_NAME_ENTRY(HM_KEY_SB_RightDown, "RightDown"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_syncBraille) = {
-  keyNames_routing,
-  keyNames_syncBraille,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(syncBraille)
+  keyNameTable_routing,
+  keyNameTable_syncBraille,
+END_KEY_NAME_TABLES
 
 static int
 getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {

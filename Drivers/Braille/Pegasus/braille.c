@@ -36,7 +36,7 @@ static unsigned char textCells[80];
 static unsigned char statusCells[2];
 static TranslationTable outputTable;
 
-static KEY_NAME_TABLE(keyNames_all) = {
+BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(PG_KEY_LeftShift, "LeftShift"),
   KEY_NAME_ENTRY(PG_KEY_RightShift, "RightShift"),
   KEY_NAME_ENTRY(PG_KEY_LeftControl, "LeftControl"),
@@ -55,14 +55,11 @@ static KEY_NAME_TABLE(keyNames_all) = {
   KEY_SET_ENTRY(PG_SET_RoutingKeys, "RoutingKey"),
   KEY_NAME_ENTRY(PG_KEY_Status+0, "Status1"),
   KEY_NAME_ENTRY(PG_KEY_Status+1, "Status2"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
-  keyNames_all,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(all)
+  keyNameTable_all,
+END_KEY_NAME_TABLES
 
 typedef struct {
   int (*identifyModel) (BrailleDisplay *brl);

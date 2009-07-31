@@ -513,7 +513,7 @@ static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
 
-static KEY_NAME_TABLE(keyNames_all) = {
+BEGIN_KEY_NAME_TABLE(all)
   KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
 
   KEY_NAME_ENTRY(VO_KEY_Dot1, "Dot1"),
@@ -533,14 +533,11 @@ static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(VO_KEY_Right, "Right"),
   KEY_NAME_ENTRY(VO_KEY_Thumb3, "Thumb3"),
   KEY_NAME_ENTRY(VO_KEY_Thumb4, "Thumb4"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
-  keyNames_all,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(all)
+  keyNameTable_all,
+END_KEY_NAME_TABLES
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {

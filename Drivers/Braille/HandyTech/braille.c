@@ -32,13 +32,11 @@
 #include "touch.h"
 #include "brldefs-ht.h"
 
-static KEY_NAME_TABLE(keyNames_routing) = {
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(HT_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_dots) = {
+BEGIN_KEY_NAME_TABLE(dots)
   KEY_NAME_ENTRY(HT_KEY_B1, "B1"),
   KEY_NAME_ENTRY(HT_KEY_B2, "B2"),
   KEY_NAME_ENTRY(HT_KEY_B3, "B3"),
@@ -48,11 +46,9 @@ static KEY_NAME_TABLE(keyNames_dots) = {
   KEY_NAME_ENTRY(HT_KEY_B6, "B6"),
   KEY_NAME_ENTRY(HT_KEY_B7, "B7"),
   KEY_NAME_ENTRY(HT_KEY_B8, "B8"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_keypad) = {
+BEGIN_KEY_NAME_TABLE(keypad)
   KEY_NAME_ENTRY(HT_KEY_B12, "B12"),
   KEY_NAME_ENTRY(HT_KEY_Zero, "Zero"),
   KEY_NAME_ENTRY(HT_KEY_B13, "B13"),
@@ -72,21 +68,17 @@ static KEY_NAME_TABLE(keyNames_keypad) = {
   KEY_NAME_ENTRY(HT_KEY_Seven, "Seven"),
   KEY_NAME_ENTRY(HT_KEY_Eight, "Eight"),
   KEY_NAME_ENTRY(HT_KEY_Nine, "Nine"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_rockers) = {
+BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(HT_KEY_Escape, "LeftRockerTop"),
   KEY_NAME_ENTRY(HT_KEY_Return, "LeftRockerBottom"),
 
   KEY_NAME_ENTRY(HT_KEY_Up, "RightRockerTop"),
   KEY_NAME_ENTRY(HT_KEY_Down, "RightRockerBottom"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_modular) = {
+BEGIN_KEY_NAME_TABLE(modular)
   KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
 
@@ -94,104 +86,87 @@ static KEY_NAME_TABLE(keyNames_modular) = {
   KEY_NAME_ENTRY(HT_KEY_STATUS+1, "Status2"),
   KEY_NAME_ENTRY(HT_KEY_STATUS+2, "Status3"),
   KEY_NAME_ENTRY(HT_KEY_STATUS+3, "Status4"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_modular[] = "mdlr";
-static KEY_NAME_TABLE_LIST(keyNameTables_modular) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_keypad,
-  keyNames_modular,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(modular)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_keypad,
+  keyNameTable_modular,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE(keyNames_modularEvolution) = {
+BEGIN_KEY_NAME_TABLE(modularEvolution)
   KEY_NAME_ENTRY(HT_KEY_Space, "Left"),
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "Right"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_modularEvolution64[] = "me64";
-static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_rockers,
-  keyNames_modularEvolution,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(modularEvolution64)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_rockers,
+  keyNameTable_modularEvolution,
+END_KEY_NAME_TABLES
 
 static const char keyBindings_modularEvolution88[] = "me88";
-static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution88) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_rockers,
-  keyNames_keypad,
-  keyNames_modularEvolution,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(modularEvolution88)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_rockers,
+  keyNameTable_keypad,
+  keyNameTable_modularEvolution,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE(keyNames_brailleStar) = {
+BEGIN_KEY_NAME_TABLE(brailleStar)
   KEY_NAME_ENTRY(HT_KEY_Space, "SpaceLeft"),
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "SpaceRight"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_brailleStar40[] = "bs40";
-static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar40) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_rockers,
-  keyNames_brailleStar,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(brailleStar40)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_rockers,
+  keyNameTable_brailleStar,
+END_KEY_NAME_TABLES
 
 static const char keyBindings_brailleStar80[] = "bs80";
-static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar80) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_rockers,
-  keyNames_keypad,
-  keyNames_brailleStar,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(brailleStar80)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_rockers,
+  keyNameTable_keypad,
+  keyNameTable_brailleStar,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE(keyNames_brailleWave) = {
+BEGIN_KEY_NAME_TABLE(brailleWave)
   KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
 
   KEY_NAME_ENTRY(HT_KEY_Escape, "Escape"),
   KEY_NAME_ENTRY(HT_KEY_Space, "Space"),
   KEY_NAME_ENTRY(HT_KEY_Return, "Return"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_brailleWave[] = "wave";
-static KEY_NAME_TABLE_LIST(keyNameTables_brailleWave) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_brailleWave,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(brailleWave)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_brailleWave,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE(keyNames_easyBraille) = {
+BEGIN_KEY_NAME_TABLE(easyBraille)
   KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_easyBraille[] = "easy";
-static KEY_NAME_TABLE_LIST(keyNameTables_easyBraille) = {
-  keyNames_routing,
-  keyNames_dots,
-  keyNames_easyBraille,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(easyBraille)
+  keyNameTable_routing,
+  keyNameTable_dots,
+  keyNameTable_easyBraille,
+END_KEY_NAME_TABLES
 
 typedef enum {
   HT_BWK_Backward = 0X01,
@@ -201,21 +176,18 @@ typedef enum {
   HT_BWK_Enter = 0X04
 } HT_BookwormKey;
 
-static KEY_NAME_TABLE(keyNames_bookworm) = {
+BEGIN_KEY_NAME_TABLE(bookworm)
   KEY_NAME_ENTRY(HT_BWK_Backward, "Backward"),
   KEY_NAME_ENTRY(HT_BWK_Forward, "Forward"),
 
   KEY_NAME_ENTRY(HT_BWK_Escape, "Escape"),
   KEY_NAME_ENTRY(HT_BWK_Enter, "Enter"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 static const char keyBindings_bookworm[] = "bkwm";
-static KEY_NAME_TABLE_LIST(keyNameTables_bookworm) = {
-  keyNames_bookworm,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(bookworm)
+  keyNameTable_bookworm,
+END_KEY_NAME_TABLES
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 

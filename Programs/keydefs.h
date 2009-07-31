@@ -35,7 +35,13 @@ typedef struct {
 #define KEY_NAME_ENTRY(keyNumber,keyName) {.key=keyNumber, .name=keyName}
 #define KEY_SET_ENTRY(setNumber,keyName) {.set=setNumber, .name=keyName}
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
-#define KEY_NAME_TABLE_LIST(name) const KeyNameEntry *const name[]
+#define BEGIN_KEY_NAME_TABLE(name) static KEY_NAME_TABLE(keyNameTable_##name) = {
+#define END_KEY_NAME_TABLE LAST_KEY_NAME_ENTRY};
+
+#define KEY_NAME_TABLES(name) const KeyNameEntry *const name[]
+#define LAST_KEY_NAME_TABLE NULL
+#define BEGIN_KEY_NAME_TABLES(name) static KEY_NAME_TABLES(keyNameTables_##name) = {
+#define END_KEY_NAME_TABLES LAST_KEY_NAME_TABLE};
 
 typedef struct KeyTableStruct KeyTable;
 

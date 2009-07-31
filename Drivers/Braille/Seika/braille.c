@@ -26,7 +26,7 @@
 #include "brl_driver.h"
 #include "brldefs-sk.h"
 
-static KEY_NAME_TABLE(keyNames_all) = {
+BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(SK_KEY_K1, "K1"),
   KEY_NAME_ENTRY(SK_KEY_K2, "K2"),
   KEY_NAME_ENTRY(SK_KEY_K3, "K3"),
@@ -37,14 +37,11 @@ static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(SK_KEY_K8, "K8"),
 
   KEY_SET_ENTRY(SK_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
-  keyNames_all,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(all)
+  keyNameTable_all,
+END_KEY_NAME_TABLES
 
 typedef enum {
   IPT_identity,

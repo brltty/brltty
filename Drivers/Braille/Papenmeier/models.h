@@ -145,7 +145,7 @@ typedef struct {
   .rightKeys = rk
 
 
-static KEY_NAME_TABLE(keyNames_bar) = {
+BEGIN_KEY_NAME_TABLE(bar)
   KEY_NAME_ENTRY(PM_KEY_BarLeft1, "BarLeft1"),
   KEY_NAME_ENTRY(PM_KEY_BarLeft2, "BarLeft2"),
   KEY_NAME_ENTRY(PM_KEY_BarRight1, "BarRight1"),
@@ -154,29 +154,23 @@ static KEY_NAME_TABLE(keyNames_bar) = {
   KEY_NAME_ENTRY(PM_KEY_BarUp2, "BarUp2"),
   KEY_NAME_ENTRY(PM_KEY_BarDown1, "BarDown1"),
   KEY_NAME_ENTRY(PM_KEY_BarDown2, "BarDown2"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_switches) = {
+BEGIN_KEY_NAME_TABLE(switches)
   KEY_NAME_ENTRY(PM_KEY_LeftSwitchRear, "LeftSwitchRear"),
   KEY_NAME_ENTRY(PM_KEY_LeftSwitchFront, "LeftSwitchFront"),
   KEY_NAME_ENTRY(PM_KEY_RightSwitchRear, "RightSwitchRear"),
   KEY_NAME_ENTRY(PM_KEY_RightSwitchFront, "RightSwitchFront"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_keys) = {
+BEGIN_KEY_NAME_TABLE(keys)
   KEY_NAME_ENTRY(PM_KEY_LeftKeyRear, "LeftKeyRear"),
   KEY_NAME_ENTRY(PM_KEY_LeftKeyFront, "LeftKeyFront"),
   KEY_NAME_ENTRY(PM_KEY_RightKeyRear, "RightKeyRear"),
   KEY_NAME_ENTRY(PM_KEY_RightKeyFront, "RightKeyFront"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_front9) = {
+BEGIN_KEY_NAME_TABLE(front9)
   KEY_NAME_ENTRY(PM_KEY_FRONT+0, "Function"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+1, "Cursor"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+2, "Backward"),
@@ -186,11 +180,9 @@ static KEY_NAME_TABLE(keyNames_front9) = {
   KEY_NAME_ENTRY(PM_KEY_FRONT+6, "Forward"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+7, "Braille"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+8, "Attribute"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_front13) = {
+BEGIN_KEY_NAME_TABLE(front13)
   KEY_NAME_ENTRY(PM_KEY_FRONT+0, "Dot7"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+1, "Dot3"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+2, "Dot2"),
@@ -204,11 +196,9 @@ static KEY_NAME_TABLE(keyNames_front13) = {
   KEY_NAME_ENTRY(PM_KEY_FRONT+10, "Dot5"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+11, "Dot6"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+12, "Dot8"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_status) = {
+BEGIN_KEY_NAME_TABLE(status)
   KEY_NAME_ENTRY(PM_KEY_STATUS+21, "Status22"),
   KEY_NAME_ENTRY(PM_KEY_STATUS+20, "Status21"),
   KEY_NAME_ENTRY(PM_KEY_STATUS+19, "Status20"),
@@ -231,18 +221,16 @@ static KEY_NAME_TABLE(keyNames_status) = {
   KEY_NAME_ENTRY(PM_KEY_STATUS+2, "Status3"),
   KEY_NAME_ENTRY(PM_KEY_STATUS+1, "Status2"),
   KEY_NAME_ENTRY(PM_KEY_STATUS+0, "Status1"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
+#define PM_STATUS_KEYS(count) (keyNameTable_status + (ARRAY_COUNT(keyNameTable_status) - 1 - (count)))
+#define keyNameTable_status2 PM_STATUS_KEYS(2)
+#define keyNameTable_status4 PM_STATUS_KEYS(4)
+#define keyNameTable_status13 PM_STATUS_KEYS(13)
+#define keyNameTable_status20 PM_STATUS_KEYS(20)
+#define keyNameTable_status22 PM_STATUS_KEYS(22)
 
-#define PM_STATUS_KEYS(count) (keyNames_status + (ARRAY_COUNT(keyNames_status) - 1 - (count)))
-#define keyNames_status2 PM_STATUS_KEYS(2)
-#define keyNames_status4 PM_STATUS_KEYS(4)
-#define keyNames_status13 PM_STATUS_KEYS(13)
-#define keyNames_status20 PM_STATUS_KEYS(20)
-#define keyNames_status22 PM_STATUS_KEYS(22)
-
-static KEY_NAME_TABLE(keyNames_keyboard) = {
+BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(PM_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(PM_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(PM_KEY_Dot3, "Dot3"),
@@ -257,192 +245,163 @@ static KEY_NAME_TABLE(keyNames_keyboard) = {
   KEY_NAME_ENTRY(PM_KEY_RightSpace, "RightSpace"),
   KEY_NAME_ENTRY(PM_KEY_LeftThumb, "LeftThumb"),
   KEY_NAME_ENTRY(PM_KEY_RightThumb, "RightThumb"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_routingKeys1) = {
+BEGIN_KEY_NAME_TABLE(routingKeys1)
   KEY_SET_ENTRY(PM_SET_RoutingKeys1, "RoutingKey1"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_routingKeys2) = {
+BEGIN_KEY_NAME_TABLE(routingKeys2)
   KEY_SET_ENTRY(PM_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_statusKeys2) = {
+BEGIN_KEY_NAME_TABLE(statusKeys2)
   KEY_SET_ENTRY(PM_SET_StatusKeys2, "StatusKey2"),
-
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
 
-static KEY_NAME_TABLE_LIST(keyNameTables_c_486) = {
-  keyNames_front9,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(c_486)
+  keyNameTable_front9,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_2d_l) = {
-  keyNames_front9,
-  keyNames_status13,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(2d_l)
+  keyNameTable_front9,
+  keyNameTable_status13,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_c) = {
-  keyNames_front9,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(c)
+  keyNameTable_front9,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_2d_s) = {
-  keyNames_front13,
-  keyNames_status22,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(2d_s)
+  keyNameTable_front13,
+  keyNameTable_status22,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_ib_80) = {
-  keyNames_front9,
-  keyNames_status4,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(ib_80)
+  keyNameTable_front9,
+  keyNameTable_status4,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el_2d_40) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_status13,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el_2d_40)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_status13,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el_2d_66) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_status13,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el_2d_66)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_status13,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el_80) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_status2,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el_80)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_status2,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el_2d_80) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_status20,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el_2d_80)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_status20,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el_40_p) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el_40_p)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_elba_32) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(elba_32)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_elba_20) = {
-  keyNames_bar,
-  keyNames_switches,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(elba_20)
+  keyNameTable_bar,
+  keyNameTable_switches,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el40s) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el40s)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el80_ii) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_status2,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el80_ii)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_status2,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el66s) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  keyNames_routingKeys2,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el66s)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+  keyNameTable_routingKeys2,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el80s) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  keyNames_routingKeys2,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el80s)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+  keyNameTable_routingKeys2,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_trio) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_keyboard,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(trio)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_keyboard,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el70s) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  keyNames_routingKeys2,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el70s)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+  keyNameTable_routingKeys2,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_el2d_80s) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_status20,
-  keyNames_routingKeys1,
-  keyNames_routingKeys2,
-  keyNames_statusKeys2,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(el2d_80s)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_status20,
+  keyNameTable_routingKeys1,
+  keyNameTable_routingKeys2,
+  keyNameTable_statusKeys2,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_elba_trio_20) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(elba_trio_20)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_elba_trio_32) = {
-  keyNames_bar,
-  keyNames_keys,
-  keyNames_routingKeys1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(elba_trio_32)
+  keyNameTable_bar,
+  keyNameTable_keys,
+  keyNameTable_routingKeys1,
+END_KEY_NAME_TABLES
 
 
 static const ModelEntry modelTable[] = {

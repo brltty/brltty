@@ -119,41 +119,33 @@
 #include "brldefs-al.h"
 #include "braille.h"
 
-static KEY_NAME_TABLE(keyNames_routing1) = {
+BEGIN_KEY_NAME_TABLE(routing1)
   KEY_SET_ENTRY(AL_SET_RoutingKeys1, "RoutingKey1"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_routing2) = {
+BEGIN_KEY_NAME_TABLE(routing2)
   KEY_SET_ENTRY(AL_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_status1) = {
+BEGIN_KEY_NAME_TABLE(status1)
   KEY_NAME_ENTRY(AL_KEY_STATUS1+0, "Status1A"),
   KEY_NAME_ENTRY(AL_KEY_STATUS1+1, "Status1B"),
   KEY_NAME_ENTRY(AL_KEY_STATUS1+2, "Status1C"),
   KEY_NAME_ENTRY(AL_KEY_STATUS1+3, "Status1D"),
   KEY_NAME_ENTRY(AL_KEY_STATUS1+4, "Status1E"),
   KEY_NAME_ENTRY(AL_KEY_STATUS1+5, "Status1F"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_status2) = {
+BEGIN_KEY_NAME_TABLE(status2)
   KEY_NAME_ENTRY(AL_KEY_STATUS2+0, "Status2A"),
   KEY_NAME_ENTRY(AL_KEY_STATUS2+1, "Status2B"),
   KEY_NAME_ENTRY(AL_KEY_STATUS2+2, "Status2C"),
   KEY_NAME_ENTRY(AL_KEY_STATUS2+3, "Status2D"),
   KEY_NAME_ENTRY(AL_KEY_STATUS2+4, "Status2E"),
   KEY_NAME_ENTRY(AL_KEY_STATUS2+5, "Status2F"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_abt_delphi) = {
+BEGIN_KEY_NAME_TABLE(abt_delphi)
   KEY_NAME_ENTRY(AL_KEY_Prog, "Prog"),
   KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
   KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
@@ -166,11 +158,9 @@ static KEY_NAME_TABLE(keyNames_abt_delphi) = {
   KEY_NAME_ENTRY(AL_KEY_Cursor2, "Cursor2"),
   KEY_NAME_ENTRY(AL_KEY_Home2, "Home2"),
   KEY_NAME_ENTRY(AL_KEY_Prog2, "Prog2"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_satellite) = {
+BEGIN_KEY_NAME_TABLE(satellite)
   KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
   KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
 
@@ -197,20 +187,16 @@ static KEY_NAME_TABLE(keyNames_satellite) = {
   KEY_NAME_ENTRY(AL_KEY_LeftTumblerRight, "LeftTumblerRight"),
   KEY_NAME_ENTRY(AL_KEY_RightTumblerLeft, "RightTumblerLeft"),
   KEY_NAME_ENTRY(AL_KEY_RightTumblerRight, "RightTumblerRight"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_etouch) = {
+BEGIN_KEY_NAME_TABLE(etouch)
   KEY_NAME_ENTRY(AL_KEY_ETouchLeftRear, "ETouchLeftRear"),
   KEY_NAME_ENTRY(AL_KEY_ETouchLeftFront, "ETouchLeftFront"),
   KEY_NAME_ENTRY(AL_KEY_ETouchRightRear, "ETouchRightRear"),
   KEY_NAME_ENTRY(AL_KEY_ETouchRightFront, "ETouchRightFront"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_smartpad) = {
+BEGIN_KEY_NAME_TABLE(smartpad)
   KEY_NAME_ENTRY(AL_KEY_SmartpadF1, "SmartpadF1"),
   KEY_NAME_ENTRY(AL_KEY_SmartpadF2, "SmartpadF2"),
   KEY_NAME_ENTRY(AL_KEY_SmartpadLeft, "SmartpadLeft"),
@@ -221,43 +207,37 @@ static KEY_NAME_TABLE(keyNames_smartpad) = {
   KEY_NAME_ENTRY(AL_KEY_SmartpadF3, "SmartpadF3"),
   KEY_NAME_ENTRY(AL_KEY_SmartpadF4, "SmartpadF4"),
 
-  LAST_KEY_NAME_ENTRY
-};
+END_KEY_NAME_TABLE
 
-static KEY_NAME_TABLE(keyNames_thumb) = {
+BEGIN_KEY_NAME_TABLE(thumb)
   KEY_NAME_ENTRY(AL_KEY_THUMB+0, "Thumb1"),
   KEY_NAME_ENTRY(AL_KEY_THUMB+1, "Thumb2"),
   KEY_NAME_ENTRY(AL_KEY_THUMB+2, "Thumb3"),
   KEY_NAME_ENTRY(AL_KEY_THUMB+3, "Thumb4"),
   KEY_NAME_ENTRY(AL_KEY_THUMB+4, "Thumb5"),
+END_KEY_NAME_TABLE
 
-  LAST_KEY_NAME_ENTRY
-};
+BEGIN_KEY_NAME_TABLES(abt_delphi)
+  keyNameTable_abt_delphi,
+  keyNameTable_status1,
+  keyNameTable_routing1,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_abt_delphi) = {
-  keyNames_abt_delphi,
-  keyNames_status1,
-  keyNames_routing1,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(satellite)
+  keyNameTable_satellite,
+  keyNameTable_status1,
+  keyNameTable_status2,
+  keyNameTable_routing1,
+  keyNameTable_routing2,
+END_KEY_NAME_TABLES
 
-static KEY_NAME_TABLE_LIST(keyNameTables_satellite) = {
-  keyNames_satellite,
-  keyNames_status1,
-  keyNames_status2,
-  keyNames_routing1,
-  keyNames_routing2,
-  NULL
-};
-
-static KEY_NAME_TABLE_LIST(keyNameTables_bc) = {
-  keyNames_etouch,
-  keyNames_smartpad,
-  keyNames_thumb,
-  keyNames_routing1,
-  keyNames_routing2,
-  NULL
-};
+BEGIN_KEY_NAME_TABLES(bc)
+  keyNameTable_etouch,
+  keyNameTable_smartpad,
+  keyNameTable_thumb,
+  keyNameTable_routing1,
+  keyNameTable_routing2,
+END_KEY_NAME_TABLES
 
 typedef struct {
   const char *keyBindings;
