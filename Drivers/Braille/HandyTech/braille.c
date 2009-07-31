@@ -90,10 +90,10 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_modular[] = "mdlr";
 BEGIN_KEY_NAME_TABLES(modular)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_keypad,
-  keyNameTable_modular,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(keypad),
+  KEY_NAME_TABLE(modular),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(modularEvolution)
@@ -103,19 +103,19 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_modularEvolution64[] = "me64";
 BEGIN_KEY_NAME_TABLES(modularEvolution64)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_rockers,
-  keyNameTable_modularEvolution,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(modularEvolution),
 END_KEY_NAME_TABLES
 
 static const char keyBindings_modularEvolution88[] = "me88";
 BEGIN_KEY_NAME_TABLES(modularEvolution88)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_rockers,
-  keyNameTable_keypad,
-  keyNameTable_modularEvolution,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(keypad),
+  KEY_NAME_TABLE(modularEvolution),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(brailleStar)
@@ -125,19 +125,19 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_brailleStar40[] = "bs40";
 BEGIN_KEY_NAME_TABLES(brailleStar40)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_rockers,
-  keyNameTable_brailleStar,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
 static const char keyBindings_brailleStar80[] = "bs80";
 BEGIN_KEY_NAME_TABLES(brailleStar80)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_rockers,
-  keyNameTable_keypad,
-  keyNameTable_brailleStar,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(keypad),
+  KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(brailleWave)
@@ -151,9 +151,9 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_brailleWave[] = "wave";
 BEGIN_KEY_NAME_TABLES(brailleWave)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_brailleWave,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(brailleWave),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(easyBraille)
@@ -163,9 +163,9 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_easyBraille[] = "easy";
 BEGIN_KEY_NAME_TABLES(easyBraille)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_easyBraille,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(easyBraille),
 END_KEY_NAME_TABLES
 
 typedef enum {
@@ -186,7 +186,7 @@ END_KEY_NAME_TABLE
 
 static const char keyBindings_bookworm[] = "bkwm";
 BEGIN_KEY_NAME_TABLES(bookworm)
-  keyNameTable_bookworm,
+  KEY_NAME_TABLE(bookworm),
 END_KEY_NAME_TABLES
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */

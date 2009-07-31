@@ -29,7 +29,7 @@ const KeyboardProperties anyKeyboard = {
   .product = 0
 };
 
-KEY_NAME_TABLE(keyboardKeyNames) = {
+KEY_NAME_TABLE_DECLARATION(keyboard) = {
 #include "kbdkeys.h"
 LAST_KEY_NAME_ENTRY
 };

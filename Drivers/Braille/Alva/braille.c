@@ -218,25 +218,25 @@ BEGIN_KEY_NAME_TABLE(thumb)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(abt_delphi)
-  keyNameTable_abt_delphi,
-  keyNameTable_status1,
-  keyNameTable_routing1,
+  KEY_NAME_TABLE(abt_delphi),
+  KEY_NAME_TABLE(status1),
+  KEY_NAME_TABLE(routing1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(satellite)
-  keyNameTable_satellite,
-  keyNameTable_status1,
-  keyNameTable_status2,
-  keyNameTable_routing1,
-  keyNameTable_routing2,
+  KEY_NAME_TABLE(satellite),
+  KEY_NAME_TABLE(status1),
+  KEY_NAME_TABLE(status2),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(bc)
-  keyNameTable_etouch,
-  keyNameTable_smartpad,
-  keyNameTable_thumb,
-  keyNameTable_routing1,
-  keyNameTable_routing2,
+  KEY_NAME_TABLE(etouch),
+  KEY_NAME_TABLE(smartpad),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
 typedef struct {

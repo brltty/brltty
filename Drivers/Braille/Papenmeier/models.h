@@ -261,146 +261,146 @@ END_KEY_NAME_TABLE
 
 
 BEGIN_KEY_NAME_TABLES(c_486)
-  keyNameTable_front9,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(front9),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(2d_l)
-  keyNameTable_front9,
-  keyNameTable_status13,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(front9),
+  KEY_NAME_TABLE(status13),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(c)
-  keyNameTable_front9,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(front9),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(2d_s)
-  keyNameTable_front13,
-  keyNameTable_status22,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(front13),
+  KEY_NAME_TABLE(status22),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(ib_80)
-  keyNameTable_front9,
-  keyNameTable_status4,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(front9),
+  KEY_NAME_TABLE(status4),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el_2d_40)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_status13,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status13),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el_2d_66)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_status13,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status13),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el_80)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_status2,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status2),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el_2d_80)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_status20,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status20),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el_40_p)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(elba_32)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(elba_20)
-  keyNameTable_bar,
-  keyNameTable_switches,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(switches),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el40s)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el80_ii)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_status2,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status2),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el66s)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
-  keyNameTable_routingKeys2,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
+  KEY_NAME_TABLE(routingKeys2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el80s)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
-  keyNameTable_routingKeys2,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
+  KEY_NAME_TABLE(routingKeys2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(trio)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_keyboard,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el70s)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
-  keyNameTable_routingKeys2,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
+  KEY_NAME_TABLE(routingKeys2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(el2d_80s)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_status20,
-  keyNameTable_routingKeys1,
-  keyNameTable_routingKeys2,
-  keyNameTable_statusKeys2,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(status20),
+  KEY_NAME_TABLE(routingKeys1),
+  KEY_NAME_TABLE(routingKeys2),
+  KEY_NAME_TABLE(statusKeys2),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(elba_trio_20)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(elba_trio_32)
-  keyNameTable_bar,
-  keyNameTable_keys,
-  keyNameTable_routingKeys1,
+  KEY_NAME_TABLE(bar),
+  KEY_NAME_TABLE(keys),
+  KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 

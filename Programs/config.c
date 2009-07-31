@@ -671,14 +671,13 @@ loadKeyTable (const char *name) {
       }
 
       if ((path = makePath(opt_tablesDirectory, file))) {
-        static KEY_NAME_TABLES(keyboardKeyTables) = {
-          keyboardKeyNames,
-          LAST_KEY_NAME_TABLE
-        };
+        BEGIN_KEY_NAME_TABLES(keyboard)
+          KEY_NAME_TABLE(keyboard),
+        END_KEY_NAME_TABLES
 
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
 
-        if (!(table = compileKeyTable(path, keyboardKeyTables))) {
+        if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
           LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
         }
 

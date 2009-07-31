@@ -61,7 +61,7 @@ BEGIN_KEY_NAME_TABLE(all)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
-  keyNameTable_all,
+  KEY_NAME_TABLE(all),
 END_KEY_NAME_TABLES
 
 SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */

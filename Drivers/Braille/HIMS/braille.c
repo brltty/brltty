@@ -232,9 +232,9 @@ BEGIN_KEY_NAME_TABLE(brailleSense)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(brailleSense)
-  keyNameTable_routing,
-  keyNameTable_dots,
-  keyNameTable_brailleSense,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(brailleSense),
 END_KEY_NAME_TABLES
 
 static int
@@ -256,8 +256,8 @@ BEGIN_KEY_NAME_TABLE(syncBraille)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(syncBraille)
-  keyNameTable_routing,
-  keyNameTable_syncBraille,
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(syncBraille),
 END_KEY_NAME_TABLES
 
 static int

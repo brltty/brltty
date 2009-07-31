@@ -463,7 +463,7 @@ allocateCommandTable (KeyTableData *ktd) {
 }
 
 static int
-parseCommandName (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
+parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   int toggleDone = 0;
   int motionDone = 0;
   int offsetDone = 0;
@@ -560,7 +560,7 @@ getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
   DataString name;
 
   if (getDataString(file, &name, 1, "command name")) {
-    if (parseCommandName(file, value, name.characters, name.length, ktd)) return 1;
+    if (parseCommandOperand(file, value, name.characters, name.length, ktd)) return 1;
   }
 
   return 0;
