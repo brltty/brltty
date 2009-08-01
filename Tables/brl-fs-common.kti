@@ -1,0 +1,71 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+bind LeftWheelPress LNBEG
+bind RightWheelPress LNEND
+
+bind LeftGdf BACK
+bind RightGdf HOME
+bind LeftGdf+RightGdf PASTE
+
+bind LeftAdvance FWINLT
+bind RightAdvance FWINRT
+
+bind LeftGdf+LeftAdvance TOP_LEFT
+bind LeftGdf+RightAdvance BOT_LEFT
+
+bind RightGdf+LeftAdvance TOP
+bind RightGdf+RightAdvance BOT
+
+bind !LeftWheelUp LNUP
+bind !LeftWheelDown LNDN
+
+bind !RightWheelUp FWINLT
+bind !RightWheelDown FWINRT
+
+bind LeftWheelPress+!LeftWheelUp PRDIFLN
+bind LeftWheelPress+!LeftWheelDown NXDIFLN
+
+bind RightWheelPress+!RightWheelUp CHRLT
+bind RightWheelPress+!RightWheelDown CHRRT
+
+bind LeftAdvance+!LeftWheelUp PRPROMPT
+bind LeftAdvance+!LeftWheelDown NXPROMPT
+
+bind RightAdvance+!LeftWheelUp PRPGRPH
+bind RightAdvance+!LeftWheelDown NXPGRPH
+
+bind LeftGdf+!LeftWheelUp ATTRUP
+bind LeftGdf+!LeftWheelDown ATTRDN
+
+bind RightGdf+!LeftWheelUp PRSEARCH
+bind RightGdf+!LeftWheelDown NXSEARCH
+
+bind !RoutingKey1 ROUTE
+bind LeftWheelPress+!RoutingKey1 SETLEFT
+bind RightWheelPress+!RoutingKey1 DESCCHAR
+
+bind LeftAdvance+!RoutingKey1 CUTBEGIN
+bind RightAdvance+!RoutingKey1 CUTRECT
+bind LeftGdf+!RoutingKey1 CUTAPPEND
+bind RightGdf+!RoutingKey1 CUTLINE
+
+bind !RoutingKey2 DESCCHAR
+bind LeftAdvance+!RoutingKey2 PRINDENT
+bind RightAdvance+!RoutingKey2 NXINDENT
+bind LeftGdf+!RoutingKey2 SETLEFT

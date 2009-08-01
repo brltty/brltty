@@ -29,15 +29,70 @@
 
 #include "misc.h"
 
-typedef enum {
-  PARM_DEBUGPACKETS
-} DriverParameter;
-#define BRLPARMS "debugpackets"
-
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
+#include "brldefs-fs.h"
+
+BEGIN_KEY_NAME_TABLE(common)
+  KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
+  KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),
+  KEY_NAME_ENTRY(FS_KEY_LeftGdf, "LeftGdf"),
+  KEY_NAME_ENTRY(FS_KEY_RightGdf, "RightGdf"),
+
+  KEY_NAME_ENTRY(FS_KEY_LeftWheel, "LeftWheelPress"),
+  KEY_NAME_ENTRY(FS_KEY_RightWheel, "RightWheelPress"),
+
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+0, "LeftWheelUp"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+1, "LeftWheelDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
+
+  KEY_SET_ENTRY(FS_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_SET_ENTRY(FS_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(focus)
+  KEY_NAME_ENTRY(FS_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(FS_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(FS_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(FS_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(FS_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(FS_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(FS_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(FS_KEY_Dot8, "Dot8"),
+
+  KEY_NAME_ENTRY(FS_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(FS_KEY_LeftShift, "LeftShift"),
+  KEY_NAME_ENTRY(FS_KEY_RightShift, "RightShift"),
+
+  KEY_NAME_ENTRY(FS_KEY_LeftRockerUp, "LeftRockerUp"),
+  KEY_NAME_ENTRY(FS_KEY_LeftRockerDown, "LeftRockerDown"),
+  KEY_NAME_ENTRY(FS_KEY_RightRockerUp, "RightRockerUp"),
+  KEY_NAME_ENTRY(FS_KEY_RightRockerDown, "RightRockerDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pacmate)
+  KEY_NAME_ENTRY(FS_KEY_HOT+0, "Hot1"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+1, "Hot2"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+2, "Hot3"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+3, "Hot4"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+4, "Hot5"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+5, "Hot6"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+6, "Hot7"),
+  KEY_NAME_ENTRY(FS_KEY_HOT+7, "Hot8"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(focus)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(focus),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pacmate)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(pacmate),
+END_KEY_NAME_TABLES
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -48,7 +103,6 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static unsigned int debugPackets = 0;
 static int outputPayloadLimit;
 
 #include "io_serial.h"
@@ -236,25 +290,90 @@ typedef struct {
 } Packet;
 
 typedef struct {
+  const char *keyBindings;
+  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  signed char hotkeysRow;
+} ModelTypeEntry;
+
+typedef enum {
+  MOD_TYPE_Focus,
+  MOD_TYPE_Pacmate
+} ModelType;
+
+static const ModelTypeEntry modelTypeTable[] = {
+  [MOD_TYPE_Focus] = {
+    .keyBindings = "focus",
+    .keyNameTables = KEY_NAME_TABLES(focus),
+    .hotkeysRow = -1
+  }
+  ,
+  [MOD_TYPE_Pacmate] = {
+    .keyBindings = "pacmate",
+    .keyNameTables = KEY_NAME_TABLES(pacmate),
+    .hotkeysRow = 1
+  }
+};
+
+typedef struct {
   const char *identifier;
   const DotsTable *dotsTable;
   unsigned char cellCount;
-  signed char hotkeysRow;
+  unsigned char type;
 } ModelEntry;
 
 static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
 static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
-  {"Focus 40"     , &dots12345678, 40, -1},
-  {"Focus 44"     , &dots12374568, 44, -1},
-  {"Focus 70"     , &dots12374568, 70, -1},
-  {"Focus 80"     , &dots12345678, 80, -1},
-  {"Focus 84"     , &dots12374568, 84, -1},
-  {"pm display 20", &dots12345678, 20,  1},
-  {"pm display 40", &dots12345678, 40,  1},
-  {"pm display 80", &dots12345678, 80,  1},
-  {NULL           , NULL         ,  0, -1}
+  { .identifier = "Focus 40",
+    .dotsTable = &dots12345678,
+    .cellCount = 40,
+    .type = MOD_TYPE_Focus
+  }
+  ,
+  { .identifier = "Focus 44",
+    .dotsTable = &dots12374568,
+    .cellCount = 44,
+    .type = MOD_TYPE_Focus
+  }
+  ,
+  { .identifier = "Focus 70",
+    .dotsTable = &dots12374568,
+    .cellCount = 70,
+    .type = MOD_TYPE_Focus
+  }
+  ,
+  { .identifier = "Focus 80",
+    .dotsTable = &dots12345678,
+    .cellCount = 80,
+    .type = MOD_TYPE_Focus
+  }
+  ,
+  { .identifier = "Focus 84",
+    .dotsTable = &dots12374568,
+    .cellCount = 84,
+    .type = MOD_TYPE_Focus
+  }
+  ,
+  { .identifier = "pm display 20",
+    .dotsTable = &dots12345678,
+    .cellCount = 20,
+    .type = MOD_TYPE_Pacmate
+  }
+  ,
+  { .identifier = "pm display 40",
+    .dotsTable = &dots12345678,
+    .cellCount = 40,
+    .type = MOD_TYPE_Pacmate
+  }
+  ,
+  { .identifier = "pm display 80",
+    .dotsTable = &dots12345678,
+    .cellCount = 80,
+    .type = MOD_TYPE_Pacmate
+  }
+  ,
+  { .identifier = NULL }
 };
 static const ModelEntry *model;
 
@@ -274,51 +393,7 @@ static union {
 } inputBuffer;
 static int inputCount;
 
-static unsigned int realKeys;
-static unsigned int virtualKeys;
-static unsigned int pressedKeys;
-static unsigned int activeKeys;
-#define KEY_DOT1            0X00000001
-#define KEY_DOT2            0X00000002
-#define KEY_DOT3            0X00000004
-#define KEY_DOT4            0X00000008
-#define KEY_DOT5            0X00000010
-#define KEY_DOT6            0X00000020
-#define KEY_DOT7            0X00000040
-#define KEY_DOT8            0X00000080
-#define KEY_WHEEL_LEFT      0X00000100
-#define KEY_WHEEL_RIGHT     0X00000200
-#define KEY_SHIFT_LEFT      0X00000400
-#define KEY_SHIFT_RIGHT     0X00000800
-#define KEY_ADVANCE_LEFT    0X00001000
-#define KEY_ADVANCE_RIGHT   0X00002000
-#define KEY_SPACE           0X00008000
-#define KEY_GDF_LEFT        0X00010000
-#define KEY_GDF_RIGHT       0X00020000
-#define KEY_BUMP_LEFT_UP    0X00100000
-#define KEY_BUMP_LEFT_DOWN  0X00200000
-#define KEY_BUMP_RIGHT_UP   0X00400000
-#define KEY_BUMP_RIGHT_DOWN 0X00800000
-#define KEY_HOT1            0X01000000
-#define KEY_HOT2            0X02000000
-#define KEY_HOT3            0X04000000
-#define KEY_HOT4            0X08000000
-#define KEY_HOT5            0X10000000
-#define KEY_HOT6            0X20000000
-#define KEY_HOT7            0X40000000
-#define KEY_HOT8            0X80000000
-
-#define DOT_KEYS (KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8)
-#define HOT_KEYS (KEY_HOT1 | KEY_HOT2 | KEY_HOT3 | KEY_HOT4 | KEY_HOT5 | KEY_HOT6 | KEY_HOT7 | KEY_HOT8)
-#define SHIFT_KEYS (KEY_SHIFT_LEFT | KEY_SHIFT_RIGHT)
-
-static int wheelCommand;
-static int wheelCounter;
-#define WHEEL_COUNT 0X07
-#define WHEEL_DOWN  0X08
-#define WHEEL_UNIT  0X30
-#define WHEEL_LEFT  0X00
-#define WHEEL_RIGHT 0X10
+static uint32_t oldKeys;
 
 static int
 writePacket (
@@ -347,8 +422,7 @@ writePacket (
     size += length + 1;
   }
 
-  if (debugPackets)
-    LogBytes(LOG_DEBUG, "Output Packet", (unsigned char *)&packet, size);
+  logOutputPacket(&packet, size);
   return io->writePacket(&packet, size, &brl->writeDelay);
 }
 
@@ -522,7 +596,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
     }
 
     if (size <= inputCount) {
-      if (debugPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer.bytes, size);
+      logInputPacket(inputBuffer.bytes, size);
 
       if (hasPayload) {
         unsigned char checksum = 0;
@@ -571,8 +645,6 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         }
       }
 
-      if (debugPackets)
-        LogBytes(LOG_DEBUG, "Input Bytes", &inputBuffer.bytes[inputCount], count);
       inputCount += count;
     }
   }
@@ -641,9 +713,6 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (!validateYesNo(&debugPackets, parameters[PARM_DEBUGPACKETS]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid debug packets setting", parameters[PARM_DEBUGPACKETS]);
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else
@@ -698,7 +767,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               generic.identifier = "Generic";
               generic.cellCount = 20;
               generic.dotsTable = &dots12345678;
-              generic.hotkeysRow = 1;
+              generic.type = MOD_TYPE_Pacmate;
 
               {
                 typedef struct {
@@ -745,11 +814,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               acknowledgementsMissing = 0;
               firmnessSetting = -1;
 
-              realKeys = 0;
-              virtualKeys = 0;
-              pressedKeys = 0;
-              activeKeys = 0;
-              wheelCounter = 0;
+              oldKeys = 0;
 
               LogPrint(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
                        model->identifier,
@@ -773,6 +838,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (acknowledged && model) {
           brl->textColumns = model->cellCount;
           brl->textRows = 1;
+
+          {
+            const ModelTypeEntry *type = &modelTypeTable[model->type];
+
+            brl->keyBindings = type->keyBindings;
+            brl->keyNameTables = type->keyNameTables;
+          }
+
           return 1;
         }
       }
@@ -805,442 +878,104 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-interpretKeys (BRL_DriverCommandContext context) {
-  unsigned int keys = realKeys | virtualKeys;
-  int press = (keys & pressedKeys) != keys;
-  int command = BRL_CMD_NOOP;
-  int flags = 0;
-
-  pressedKeys = keys;
-  if (press) {
-    activeKeys = pressedKeys;
-    flags |= BRL_FLG_REPEAT_DELAY;
-  } else {
-    keys = activeKeys;
-    activeKeys = 0;
-    if (!keys) return command;
-  }
-
-  {
-    unsigned int dotKeys = DOT_KEYS;
-    if (context == BRL_CTX_CHORDS) dotKeys |= KEY_SPACE;
-
-    if ((keys & dotKeys) && !(keys & ~(dotKeys | SHIFT_KEYS))) {
-      command = BRL_BLK_PASSDOTS | flags;
-      if (keys & KEY_DOT1) command |= BRL_DOT1;
-      if (keys & KEY_DOT2) command |= BRL_DOT2;
-      if (keys & KEY_DOT3) command |= BRL_DOT3;
-      if (keys & KEY_DOT4) command |= BRL_DOT4;
-      if (keys & KEY_DOT5) command |= BRL_DOT5;
-      if (keys & KEY_DOT6) command |= BRL_DOT6;
-      if (keys & KEY_DOT7) command |= BRL_DOT7;
-      if (keys & KEY_DOT8) command |= BRL_DOT8;
-      if (keys & KEY_SPACE) command |= BRL_DOTC;
-      if (keys & KEY_SHIFT_LEFT) command |= BRL_FLG_CHAR_UPPER;
-      if (keys & KEY_SHIFT_RIGHT) command |= BRL_FLG_CHAR_CONTROL;
-      return command;
-    }
-  }
-
-  switch (keys) {
-    default:
-      break;
-
-    case (KEY_WHEEL_LEFT):
-      command = BRL_CMD_LNBEG;
-      break;
-    case (KEY_WHEEL_RIGHT):
-      command = BRL_CMD_LNEND;
-      break;
-
-    case (KEY_GDF_LEFT):
-      command = BRL_CMD_BACK;
-      break;
-    case (KEY_GDF_RIGHT):
-      command = BRL_CMD_HOME;
-      break;
-    case (KEY_GDF_LEFT | KEY_GDF_RIGHT):
-      command = BRL_CMD_PASTE;
-      break;
-
-    case (KEY_ADVANCE_LEFT):
-      command = BRL_CMD_FWINLT;
-      break;
-    case (KEY_ADVANCE_RIGHT):
-      command = BRL_CMD_FWINRT;
-      break;
-    case (KEY_GDF_LEFT | KEY_ADVANCE_LEFT):
-      command = BRL_CMD_TOP_LEFT;
-      break;
-    case (KEY_GDF_LEFT | KEY_ADVANCE_RIGHT):
-      command = BRL_CMD_BOT_LEFT;
-      break;
-    case (KEY_GDF_RIGHT | KEY_ADVANCE_LEFT):
-      command = BRL_CMD_TOP;
-      break;
-    case (KEY_GDF_RIGHT | KEY_ADVANCE_RIGHT):
-      command = BRL_CMD_BOT;
-      break;
-
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT4):
-    case (KEY_HOT1):
-      command = BRL_CMD_SKPIDLNS;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2):
-    case (KEY_GDF_RIGHT | KEY_HOT1):
-      command = BRL_CMD_SKPBLNKWINS;
-      break;
-
-    case (KEY_SPACE | KEY_DOT1):
-    case (KEY_HOT2):
-      command = BRL_CMD_DISPMD;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6):
-    case (KEY_GDF_RIGHT | KEY_HOT2):
-      command = BRL_CMD_ATTRVIS;
-      break;
-
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5):
-    case (KEY_HOT3):
-      command = BRL_CMD_CSRTRK;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT4):
-    case (KEY_GDF_RIGHT | KEY_HOT3):
-      command = BRL_CMD_CSRVIS;
-      break;
-
-    case (KEY_HOT4):
-      command = BRL_CMD_SIXDOTS;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
-      command = BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5):
-    case (KEY_GDF_RIGHT | KEY_HOT4):
-      command = BRL_CMD_AUTOREPEAT;
-      break;
-
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5):
-    case (KEY_HOT5):
-      command = BRL_CMD_HELP;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4):
-    case (KEY_GDF_RIGHT | KEY_HOT5):
-      command = BRL_CMD_FREEZE;
-      break;
-
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3):
-    case (KEY_HOT6):
-      command = BRL_CMD_LEARN;
-      break;
-    case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
-    case (KEY_GDF_RIGHT | KEY_HOT6):
-      command = BRL_CMD_PREFLOAD;
-      break;
-
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
-    case (KEY_HOT7):
-      command = BRL_CMD_PREFMENU;
-      break;
-    case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
-    case (KEY_GDF_RIGHT | KEY_HOT7):
-      command = BRL_CMD_PREFSAVE;
-      break;
-
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4):
-    case (KEY_HOT8):
-      command = BRL_CMD_INFO;
-      break;
-    case (KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-    case (KEY_GDF_RIGHT | KEY_HOT8):
-      command = BRL_CMD_CSRJMP_VERT;
-      break;
-
-    case (KEY_SPACE):
-      command = BRL_BLK_PASSDOTS;
-      break;
-    case (KEY_SPACE | KEY_SHIFT_LEFT):
-      command = BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
-      break;
-    case (KEY_SPACE | KEY_SHIFT_RIGHT):
-      command = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_TAB;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT3):
-      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-      break;
-    case (KEY_SPACE | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-      break;
-    case (KEY_SPACE | KEY_DOT3 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-      break;
-    case (KEY_SPACE | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-      break;
-    case (KEY_SPACE | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
-      break;
-    case (KEY_SPACE | KEY_DOT2):
-      command = BRL_BLK_PASSKEY + BRL_KEY_HOME;
-      break;
-    case (KEY_SPACE | KEY_DOT3):
-      command = BRL_BLK_PASSKEY + BRL_KEY_END;
-      break;
-    case (KEY_SPACE | KEY_DOT3 | KEY_DOT5):
-      command = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT5 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_DELETE;
-      break;
-    case (KEY_SPACE | KEY_DOT2 | KEY_DOT6):
-      command = BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
-      break;
-
-    case (KEY_SPACE | KEY_SHIFT_LEFT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = BRL_CMD_SWITCHVT_PREV;
-      break;
-    case (KEY_SPACE | KEY_SHIFT_RIGHT | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT6):
-      command = BRL_CMD_SWITCHVT_NEXT;
-      break;
-  }
-
-  if (command != BRL_CMD_NOOP) command |= flags;
-  return command;
-}
-
-static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  if (wheelCounter) {
-    --wheelCounter;
-    return wheelCommand;
-  }
+  Packet packet;
+  int count;
 
-  while (1) {
-    Packet packet;
-    int count = getPacket(brl, &packet);
+  while ((count = getPacket(brl, &packet))) {
     if (count == -1) return BRL_CMD_RESTARTBRL;
-    if (count == 0) return EOF;
 
     switch (packet.header.type) {
       default:
-        LogPrint(LOG_WARNING, "Unsupported packet: %02X %02X %02X %02X",
-                 packet.header.type,
-                 packet.header.arg1,
-                 packet.header.arg2,
-                 packet.header.arg3);
-        continue;
+        break;
 
-      case PKT_KEY:
-        realKeys = packet.header.arg1 |
-                   (packet.header.arg2 << 8) |
-                   (packet.header.arg3 << 16);
-        return interpretKeys(context);
+      case PKT_KEY: {
+        uint32_t newKeys = packet.header.arg1 |
+                           (packet.header.arg2 << 8) |
+                           (packet.header.arg3 << 16);
+        uint32_t keyBit = 0X1;
+
+        const FS_KeySet set = FS_SET_NavigationKeys;
+        FS_NavigationKey key = 0;
+
+        FS_NavigationKey pressKeys[24];
+        unsigned int pressCount = 0;
+
+        while (oldKeys != newKeys) {
+          uint32_t oldKey = oldKeys & keyBit;
+          uint32_t newKey = newKeys & keyBit;
+
+          if (oldKey && !newKey) {
+            enqueueKeyEvent(set, key, 0);
+            oldKeys &= ~keyBit;
+          } else if (newKey && !oldKey) {
+            pressKeys[pressCount++] = key;
+            oldKeys |= keyBit;
+          }
+
+          keyBit <<= 1;
+          key += 1;
+        }
+
+        while (pressCount) enqueueKeyEvent(set, pressKeys[--pressCount], 1);
+        continue;
+      }
 
       case PKT_BUTTON: {
-        int button = packet.header.arg1;
-        unsigned char press = packet.header.arg2 & 0X01;
-        unsigned char row = packet.header.arg3;
-        int command = BRL_CMD_NOOP;
+        unsigned char key = packet.header.arg1;
+        unsigned char press = (packet.header.arg2 & 0X01) != 0;
+        unsigned char set = packet.header.arg3;
 
-        if (row == model->hotkeysRow) {
-          static unsigned int keys[] = {
-            KEY_GDF_LEFT,
-            KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
-            KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
-            KEY_GDF_RIGHT
+        if (set == modelTypeTable[model->type].hotkeysRow) {
+          static const unsigned char keys[] = {
+            FS_KEY_LeftGdf,
+            FS_KEY_HOT+0, FS_KEY_HOT+1, FS_KEY_HOT+2, FS_KEY_HOT+3,
+            FS_KEY_HOT+4, FS_KEY_HOT+5, FS_KEY_HOT+6, FS_KEY_HOT+7,
+            FS_KEY_RightGdf
           };
-          static const int keyCount = ARRAY_COUNT(keys);
+          static const unsigned char keyCount = ARRAY_COUNT(keys);
+          const unsigned char base = (model->cellCount - keyCount) / 2;
 
-          unsigned int key;
-          button -= (model->cellCount - keyCount) / 2;
-
-          if (button < 0) {
-            key = KEY_ADVANCE_LEFT;
-          } else if (button >= keyCount) {
-            key = KEY_ADVANCE_RIGHT;
+          if (key < base) {
+            key = FS_KEY_LeftAdvance;
+          } else if ((key -= base) >= keyCount) {
+            key = FS_KEY_RightAdvance;
           } else {
-            key = keys[button];
+            key = keys[key];
           }
 
-          if (press) {
-            virtualKeys |= key;
-          } else {
-            virtualKeys &= ~key;
-          }
-          return interpretKeys(context);
+          set = FS_SET_NavigationKeys;
+        } else {
+          set += 1;
         }
 
-        activeKeys = 0;
-        if (press) {
-          if (button < model->cellCount) {
-            switch (row) {
-              default:
-                break;
-
-              case 0:
-                switch (pressedKeys) {
-                  default:
-                    break;
-                  case 0:
-                    command = BRL_BLK_ROUTE;
-                    break;
-                  case (KEY_WHEEL_LEFT):
-                    command = BRL_BLK_SETLEFT;
-                    break;
-                  case (KEY_WHEEL_RIGHT):
-                    command = BRL_BLK_DESCCHAR;
-                    break;
-
-                  case (KEY_ADVANCE_LEFT):
-                    command = BRL_BLK_CUTBEGIN;
-                    break;
-                  case (KEY_ADVANCE_RIGHT):
-                    command = BRL_BLK_CUTRECT;
-                    break;
-                  case (KEY_GDF_LEFT):
-                    command = BRL_BLK_CUTAPPEND;
-                    break;
-                  case (KEY_GDF_RIGHT):
-                    command = BRL_BLK_CUTLINE;
-                    break;
-
-                  case (KEY_SPACE):
-                    command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION;
-                    break;
-                  case (KEY_SHIFT_RIGHT):
-                    command = BRL_BLK_SWITCHVT;
-                    break;
-                }
-                break;
-
-              case 1:
-                switch (pressedKeys) {
-                  default:
-                    break;
-                  case 0:
-                    command = BRL_BLK_DESCCHAR;
-                    break;
-                  case (KEY_ADVANCE_LEFT):
-                    command = BRL_BLK_PRINDENT;
-                    break;
-                  case (KEY_ADVANCE_RIGHT):
-                    command = BRL_BLK_NXINDENT;
-                    break;
-                  case (KEY_GDF_LEFT):
-                    command = BRL_BLK_SETLEFT;
-                    break;
-                }
-                break;
-            }
-            if (command != BRL_CMD_NOOP) command += button;
-          }
-        }
-
-        return command;
+        enqueueKeyEvent(set, key, press);
+        continue;
       }
 
       case PKT_WHEEL: {
-        int unit = packet.header.arg1 & WHEEL_UNIT;
-        int motion = packet.header.arg1 & (WHEEL_UNIT | WHEEL_DOWN);
-        if (unit == WHEEL_RIGHT) motion ^= WHEEL_DOWN;
+        const FS_KeySet set = FS_SET_NavigationKeys;
+        const FS_NavigationKey key = FS_KEY_WHEEL + ((packet.header.arg1 >> 3) & 0X7);
+        unsigned int count = packet.header.arg1 & 0X7;
 
-        activeKeys = 0;
-        wheelCommand = BRL_CMD_NOOP;
-        switch (motion) {
-          default:
-            break;
-
-          case (WHEEL_LEFT):
-            switch (pressedKeys) {
-              default:
-                break;
-              case 0:
-                wheelCommand = BRL_CMD_LNUP;
-                break;
-              case (KEY_WHEEL_LEFT):
-                wheelCommand = BRL_CMD_PRDIFLN;
-                break;
-              case (KEY_ADVANCE_LEFT):
-                wheelCommand = BRL_CMD_PRPROMPT;
-                break;
-              case (KEY_ADVANCE_RIGHT):
-                wheelCommand = BRL_CMD_PRPGRPH;
-                break;
-              case (KEY_GDF_LEFT):
-                wheelCommand = BRL_CMD_ATTRUP;
-                break;
-              case (KEY_GDF_RIGHT):
-                wheelCommand = BRL_CMD_PRSEARCH;
-                break;
-            }
-            break;
-
-          case (WHEEL_LEFT | WHEEL_DOWN):
-            switch (pressedKeys) {
-              default:
-                break;
-              case 0:
-                wheelCommand = BRL_CMD_LNDN;
-                break;
-              case (KEY_WHEEL_LEFT):
-                wheelCommand = BRL_CMD_NXDIFLN;
-                break;
-              case (KEY_ADVANCE_LEFT):
-                wheelCommand = BRL_CMD_NXPROMPT;
-                break;
-              case (KEY_ADVANCE_RIGHT):
-                wheelCommand = BRL_CMD_NXPGRPH;
-                break;
-              case (KEY_GDF_LEFT):
-                wheelCommand = BRL_CMD_ATTRDN;
-                break;
-              case (KEY_GDF_RIGHT):
-                wheelCommand = BRL_CMD_NXSEARCH;
-                break;
-            }
-            break;
-
-          case (WHEEL_RIGHT):
-            switch (pressedKeys) {
-              default:
-                break;
-              case 0:
-                wheelCommand = BRL_CMD_FWINLT;
-                break;
-              case (KEY_WHEEL_RIGHT):
-                wheelCommand = BRL_CMD_CHRLT;
-                break;
-            }
-            break;
-
-          case (WHEEL_RIGHT | WHEEL_DOWN):
-            switch (pressedKeys) {
-              default:
-                break;
-              case 0:
-                wheelCommand = BRL_CMD_FWINRT;
-                break;
-              case (KEY_WHEEL_RIGHT):
-                wheelCommand = BRL_CMD_CHRRT;
-                break;
-            }
-            break;
+        while (count) {
+          enqueueKeyEvent(set, key, 1);
+          enqueueKeyEvent(set, key, 0);
+          count -= 1;
         }
 
-        if (wheelCommand != BRL_CMD_NOOP) wheelCounter = (packet.header.arg1 & WHEEL_COUNT) - 1;
-        return wheelCommand;
+        continue;
       }
     }
+
+    LogPrint(LOG_WARNING, "unsupported packet: %02X %02X %02X %02X",
+             packet.header.type,
+             packet.header.arg1,
+             packet.header.arg2,
+             packet.header.arg3);
   }
+
+  return EOF;
 }
 
 static ssize_t
