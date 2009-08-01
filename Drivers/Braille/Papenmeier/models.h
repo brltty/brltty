@@ -127,7 +127,7 @@ typedef struct {
   .modelName = name, \
   .protocolRevision = 1, \
   .keyBindings = #model, \
-  .keyNameTables = keyNameTables_##model
+  .keyNameTables = KEY_NAME_TABLES(model)
 
 #define PM_CELL_COUNTS(columns, status) \
   .textColumns = columns, \
@@ -222,13 +222,7 @@ BEGIN_KEY_NAME_TABLE(status)
   KEY_NAME_ENTRY(PM_KEY_STATUS+1, "Status2"),
   KEY_NAME_ENTRY(PM_KEY_STATUS+0, "Status1"),
 END_KEY_NAME_TABLE
-
-#define PM_STATUS_KEYS(count) (keyNameTable_status + (ARRAY_COUNT(keyNameTable_status) - 1 - (count)))
-#define keyNameTable_status2 PM_STATUS_KEYS(2)
-#define keyNameTable_status4 PM_STATUS_KEYS(4)
-#define keyNameTable_status13 PM_STATUS_KEYS(13)
-#define keyNameTable_status20 PM_STATUS_KEYS(20)
-#define keyNameTable_status22 PM_STATUS_KEYS(22)
+#define STATUS_KEY_TABLE(count) (KEY_NAME_TABLE(status) + (ARRAY_COUNT(KEY_NAME_TABLE(status)) - 1 - (count)))
 
 BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(PM_KEY_Dot1, "Dot1"),
@@ -267,7 +261,7 @@ END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(2d_l)
   KEY_NAME_TABLE(front9),
-  KEY_NAME_TABLE(status13),
+  STATUS_KEY_TABLE(13),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -278,13 +272,13 @@ END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(2d_s)
   KEY_NAME_TABLE(front13),
-  KEY_NAME_TABLE(status22),
+  STATUS_KEY_TABLE(22),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(ib_80)
   KEY_NAME_TABLE(front9),
-  KEY_NAME_TABLE(status4),
+  STATUS_KEY_TABLE(4),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -292,7 +286,7 @@ BEGIN_KEY_NAME_TABLES(el_2d_40)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(switches),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status13),
+  STATUS_KEY_TABLE(13),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -300,7 +294,7 @@ BEGIN_KEY_NAME_TABLES(el_2d_66)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(switches),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status13),
+  STATUS_KEY_TABLE(13),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -308,7 +302,7 @@ BEGIN_KEY_NAME_TABLES(el_80)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(switches),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status2),
+  STATUS_KEY_TABLE(2),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -316,7 +310,7 @@ BEGIN_KEY_NAME_TABLES(el_2d_80)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(switches),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status20),
+  STATUS_KEY_TABLE(20),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -350,7 +344,7 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(el80_ii)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status2),
+  STATUS_KEY_TABLE(2),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
@@ -385,7 +379,7 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(el2d_80s)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(keys),
-  KEY_NAME_TABLE(status20),
+  STATUS_KEY_TABLE(20),
   KEY_NAME_TABLE(routingKeys1),
   KEY_NAME_TABLE(routingKeys2),
   KEY_NAME_TABLE(statusKeys2),
