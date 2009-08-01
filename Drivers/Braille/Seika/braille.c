@@ -747,7 +747,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;
-        brl->keyNameTables = keyNameTables_all;
+        brl->keyNameTables = KEY_NAME_TABLES(all);
 
         memset(textCells, 0XFF, brl->textColumns);
         return 1;

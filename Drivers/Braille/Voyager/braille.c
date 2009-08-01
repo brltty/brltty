@@ -591,7 +591,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
        */
       brl->textColumns = cellCount;		/* initialize size of display */
       brl->textRows = 1;		/* always 1 */
-      brl->keyNameTables = keyNameTables_all;
+      brl->keyNameTables = KEY_NAME_TABLES(all);
 
       if ((currentCells = malloc(cellCount))) {
         if ((previousCells = malloc(cellCount))) {

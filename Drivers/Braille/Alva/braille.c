@@ -254,22 +254,22 @@ typedef enum {
 static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_ABT] = {
     .keyBindings = "abt+delphi",
-    .keyNameTables = keyNameTables_abt_delphi
+    .keyNameTables = KEY_NAME_TABLES(abt_delphi)
   }
   ,
   [MOD_TYPE_Delphi] = {
     .keyBindings = "abt+delphi",
-    .keyNameTables = keyNameTables_abt_delphi
+    .keyNameTables = KEY_NAME_TABLES(abt_delphi)
   }
   ,
   [MOD_TYPE_Satellite] = {
     .keyBindings = "satellite",
-    .keyNameTables = keyNameTables_satellite
+    .keyNameTables = KEY_NAME_TABLES(satellite)
   }
   ,
   [MOD_TYPE_BrailleController] = {
     .keyBindings = "bc",
-    .keyNameTables = keyNameTables_bc
+    .keyNameTables = KEY_NAME_TABLES(bc)
   }
 };
 

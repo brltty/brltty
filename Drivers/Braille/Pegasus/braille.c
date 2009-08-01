@@ -107,7 +107,7 @@ setCellCounts (BrailleDisplay *brl, int size) {
   brl->statusRows = 1;
   brl->textColumns = size - brl->statusColumns;
   brl->textRows = 1;
-  brl->keyNameTables = keyNameTables_all;
+  brl->keyNameTables = KEY_NAME_TABLES(all);
 }
 
 static int

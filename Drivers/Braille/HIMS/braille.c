@@ -244,7 +244,7 @@ getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static const ProtocolOperations brailleSenseOperations = {
-  "Braille Sense", "sense", keyNameTables_brailleSense,
+  "Braille Sense", "sense", KEY_NAME_TABLES(brailleSense),
   getBrailleSenseCellCount
 };
 
@@ -284,7 +284,7 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static const ProtocolOperations syncBrailleOperations = {
-  "SyncBraille", "sync", keyNameTables_syncBraille,
+  "SyncBraille", "sync", KEY_NAME_TABLES(syncBraille),
   getSyncBrailleCellCount
 };
 

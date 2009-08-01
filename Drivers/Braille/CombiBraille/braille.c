@@ -143,7 +143,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->textRows = BRLROWS;
               brl->statusColumns = 5;
               brl->statusRows = 1;
-              brl->keyNameTables = keyNameTables_all;
+              brl->keyNameTables = KEY_NAME_TABLES(all);
 
               /* Allocate space for buffers */
               prevdata = mallocWrapper (brl->textColumns * brl->textRows);
