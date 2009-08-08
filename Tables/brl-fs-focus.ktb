@@ -77,4 +77,9 @@ bind Space+Dot2+Dot6 KEY_ESCAPE
 bind Space+!RoutingKey1 KEY_FUNCTION
 bind RightShift+!RoutingKey1 SWITCHVT
 
+bind !RoutingKey2 DESCCHAR
+bind LeftAdvance+!RoutingKey2 PRINDENT
+bind RightAdvance+!RoutingKey2 NXINDENT
+bind LeftGdf+!RoutingKey2 SETLEFT
+
 include brl-fs-common.kti

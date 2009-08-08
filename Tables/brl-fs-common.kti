@@ -64,8 +64,3 @@ bind LeftAdvance+!RoutingKey1 CUTBEGIN
 bind RightAdvance+!RoutingKey1 CUTRECT
 bind LeftGdf+!RoutingKey1 CUTAPPEND
 bind RightGdf+!RoutingKey1 CUTLINE
-
-bind !RoutingKey2 DESCCHAR
-bind LeftAdvance+!RoutingKey2 PRINDENT
-bind RightAdvance+!RoutingKey2 NXINDENT
-bind LeftGdf+!RoutingKey2 SETLEFT
