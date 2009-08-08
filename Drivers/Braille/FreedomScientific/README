@@ -2,6 +2,11 @@ This directory contains the BRLTTY driver for the Focus and PAC Mate braille
 displays from Freedom Scientific [http://www.freedomscientific.com]. It has
 been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
+The most important single command is the one to access the help screen. On the
+PAC Mate display this is the key just to the right of the center marker (also
+referred to as HK5 below). On the Focus, this is chord H (Space+Dot1+Dot2+
+Dot5).
+
 The serial and USB ports are both supported. The following models are 
 recognized:
 *  Focus: 44, 70, 84
@@ -13,7 +18,7 @@ determine its size and to provide generic capabilities.
 
 The upper row of routing buttons on the PAC Mate are a set of hot keys. They
 provide quick access to various braille display functions and options (see the
-help file for what they actually do). There are three markers at the back of
+help screen for what they actually do). There are three markers at the back of
 the display's top surface, i.e. just behind the routing buttons, which help you
 locate and distinguish each hot key. The keys immediately below the left and
 right markers are the left and right GDF keys. Between them are eight keys ...
