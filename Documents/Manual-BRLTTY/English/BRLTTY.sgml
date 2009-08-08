@@ -4919,8 +4919,9 @@ BRLTTY supports the following braille displays:
       |Scriba@
       |Esys 12/40@
     FreedomScientific
-      |Focus 40/44/70/80/84@
-      |PAC Mate 20/40/80@
+      |Focus 44/70/84@
+      |Focus 2 40/80@
+      |PAC Mate 20/40@
     HandyTech
       |Modular 20/40/80@
       |Modular Evolution 64/88@

@@ -367,12 +367,6 @@ static const ModelEntry modelTable[] = {
     .type = MOD_TYPE_Pacmate
   }
   ,
-  { .identifier = "pm display 80",
-    .dotsTable = &dots12345678,
-    .cellCount = 80,
-    .type = MOD_TYPE_Pacmate
-  }
-  ,
   { .identifier = NULL }
 };
 static const ModelEntry *model;
