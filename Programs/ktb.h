@@ -26,7 +26,7 @@ extern "C" {
 #include "misc.h"
 #include "keydefs.h"
 
-extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *const *keys);
+extern KeyTable *compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys);
 extern void destroyKeyTable (KeyTable *table);
 
 typedef int KeyTableListHandler (const wchar_t *line, void *data);

@@ -208,7 +208,7 @@ sortKeyValues (const void *element1, const void *element2) {
 }
 
 static int
-allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
+allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   {
     const KeyNameEntry *const *knt = keys;
 
@@ -811,7 +811,7 @@ makeKeyTable (KeyTableData *ktd) {
 }
 
 KeyTable *
-compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
+compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
   KeyTable *table = NULL;
   KeyTableData ktd;
 

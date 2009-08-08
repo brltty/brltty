@@ -55,7 +55,7 @@ typedef struct {
   unsigned int statusColumns, statusRows;
 
   const char *keyBindings;
-  const KeyNameEntry *const *keyNameTables;
+  KEY_NAME_TABLES_REFERENCE keyNameTables;
   KeyTable *keyTable;
 
   unsigned char *buffer;
