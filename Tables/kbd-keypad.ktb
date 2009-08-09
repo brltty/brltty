@@ -78,6 +78,8 @@ bind KPMinus+!KP3 RestartSpeech
 # Menu Bindings #
 #################
 
+context menu
+
 bind KPInsert+!KPArrowLeft FWINLT
 bind KPInsert+!KPArrowRight FWINRT
 bind KPInsert+!KPArrowUp MENU_PREV_ITEM
