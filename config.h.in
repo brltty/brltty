@@ -352,9 +352,16 @@ extern "C" {
 #undef HAVE_PKG_XM
 
 #define TEXT_TABLE_EXTENSION ".ttb"
+#define TEXT_SUBTABLE_EXTENSION ".tti"
+
 #define ATTRIBUTES_TABLE_EXTENSION ".atb"
+#define ATTRIBUTES_SUBTABLE_EXTENSION ".ati"
+
 #define CONTRACTION_TABLE_EXTENSION ".ctb"
+#define CONTRACTION_SUBTABLE_EXTENSION ".cti"
+
 #define KEY_TABLE_EXTENSION ".ktb"
+#define KEY_SUBTABLE_EXTENSION ".kti"
 
 #ifdef __cplusplus
 }
