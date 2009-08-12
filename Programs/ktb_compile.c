@@ -46,34 +46,28 @@ const KeyboardFunctionEntry keyboardFunctionTable[KBF_None] = {
 };
 
 typedef struct {
-  wchar_t *title;
-
-  const KeyNameEntry **keyNameTable;
-  unsigned int keyNameCount;
+  KeyTable *table;
 
   const CommandEntry **commandTable;
   unsigned int commandCount;
-
-  KeyContext *keyContextTable;
-  unsigned int keyContextCount;
 
   unsigned char context;
 } KeyTableData;
 
 static KeyContext *
 getKeyContext (KeyTableData *ktd, unsigned char context) {
-  if (context >= ktd->keyContextCount) {
+  if (context >= ktd->table->keyContextCount) {
     unsigned int newCount = context + 1;
-    KeyContext *newTable = realloc(ktd->keyContextTable, ARRAY_SIZE(newTable, newCount));
+    KeyContext *newTable = realloc(ktd->table->keyContextTable, ARRAY_SIZE(newTable, newCount));
 
     if (!newTable) {
       LogError("realloc");
       return NULL;
     }
-    ktd->keyContextTable = newTable;
+    ktd->table->keyContextTable = newTable;
 
-    while (ktd->keyContextCount < newCount) {
-      KeyContext *ctx = &ktd->keyContextTable[ktd->keyContextCount++];
+    while (ktd->table->keyContextCount < newCount) {
+      KeyContext *ctx = &ktd->table->keyContextTable[ktd->table->keyContextCount++];
       memset(ctx, 0, sizeof(*ctx));
 
       ctx->name = NULL;
@@ -88,7 +82,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
     }
   }
 
-  return &ktd->keyContextTable[context];
+  return &ktd->table->keyContextTable[context];
 }
 
 static inline KeyContext *
@@ -142,20 +136,6 @@ setDefaultKeyContextProperties (KeyTableData *ktd) {
   }
 
   return 1;
-}
-
-static void
-destroyKeyContextTable (KeyContext *table, unsigned int count) {
-  while (count) {
-    KeyContext *ctx = &table[--count];
-
-    if (ctx->name) free(ctx->name);
-    if (ctx->keyBindingTable) free(ctx->keyBindingTable);
-    if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
-    if (ctx->keyMap) free(ctx->keyMap);
-  }
-
-  if (table) free(table);
 }
 
 static int
@@ -212,27 +192,27 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   {
     const KeyNameEntry *const *knt = keys;
 
-    ktd->keyNameCount = 0;
+    ktd->table->keyNameCount = 0;
     while (*knt) {
       const KeyNameEntry *kne = *knt;
       while (kne->name) kne += 1;
-      ktd->keyNameCount += kne - *knt;
+      ktd->table->keyNameCount += kne - *knt;
       knt += 1;
     }
   }
 
-  if ((ktd->keyNameTable = malloc(ARRAY_SIZE(ktd->keyNameTable, ktd->keyNameCount)))) {
+  if ((ktd->table->keyNameTable = malloc(ARRAY_SIZE(ktd->table->keyNameTable, ktd->table->keyNameCount)))) {
     {
-      const KeyNameEntry **address = ktd->keyNameTable;
+      const KeyNameEntry **address = ktd->table->keyNameTable;
       const KeyNameEntry *const *knt = keys;
 
       while (*knt) {
         const KeyNameEntry *kne = *knt++;
-        while (kne->name)  *address++ = kne++;
+        while (kne->name) *address++ = kne++;
       }
     }
 
-    qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), sortKeyNames);
+    qsort(ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), sortKeyNames);
     return 1;
   }
 
@@ -245,7 +225,7 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
     .characters = characters,
     .length = length
   };
-  const KeyNameEntry **kne = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), searchKeyName);
+  const KeyNameEntry **kne = bsearch(&name, ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), searchKeyName);
 
   if (kne) {
     *set = (*kne)->set;
@@ -693,13 +673,13 @@ processTitleOperands (DataFile *file, void *data) {
   DataOperand title;
 
   if (getDataText(file, &title, "title text")) {
-    if (ktd->title) {
+    if (ktd->table->title) {
       reportDataError(file, "table title specified more than once");
-    } else if (!(ktd->title = malloc(ARRAY_SIZE(ktd->title, title.length+1)))) {
+    } else if (!(ktd->table->title = malloc(ARRAY_SIZE(ktd->table->title, title.length+1)))) {
       LogError("malloc");
     } else {
-      wmemcpy(ktd->title, title.characters, title.length);
-      ktd->title[title.length] = 0;
+      wmemcpy(ktd->table->title, title.characters, title.length);
+      ktd->table->title[title.length] = 0;
       return 1;
     }
   }
@@ -772,42 +752,23 @@ prepareKeyBindings (KeyContext *ctx) {
   return 1;
 }
 
-KeyTable *
-makeKeyTable (KeyTableData *ktd) {
-  KeyTable *table;
-
+int
+finishKeyTable (KeyTableData *ktd) {
   if (!setDefaultKeyContextProperties(ktd)) return 0;
 
   {
     unsigned int context;
 
-    for (context=0; context<ktd->keyContextCount; context+=1) {
-      KeyContext *ctx = &ktd->keyContextTable[context];
+    for (context=0; context<ktd->table->keyContextCount; context+=1) {
+      KeyContext *ctx = &ktd->table->keyContextTable[context];
 
-      if (!prepareKeyBindings(ctx)) return NULL;
+      if (!prepareKeyBindings(ctx)) return 0;
     }
   }
 
-  if ((table = malloc(sizeof(*table)))) {
-    table->title = ktd->title;
-    ktd->title = NULL;
-
-    table->keyNameTable = ktd->keyNameTable;
-    ktd->keyNameTable = NULL;
-    table->keyNameCount = ktd->keyNameCount;
-    ktd->keyNameCount = 0;
-    qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), sortKeyValues);
-
-    table->keyContextTable = ktd->keyContextTable;
-    ktd->keyContextTable = NULL;
-    table->keyContextCount = ktd->keyContextCount;
-    ktd->keyContextCount = 0;
-
-    resetKeyTable(table);
-    return table;
-  }
-
-  return NULL;
+  qsort(ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), sortKeyValues);
+  resetKeyTable(ktd->table);
+  return 1;
 }
 
 KeyTable *
@@ -818,24 +779,29 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
   memset(&ktd, 0, sizeof(ktd));
   ktd.context = BRL_CTX_DEFAULT;
 
-  if (allocateKeyNameTable(&ktd, keys)) {
-    if (allocateCommandTable(&ktd)) {
-      ktd.title = NULL;
+  if ((ktd.table = malloc(sizeof(*ktd.table)))) {
+    ktd.table->title = NULL;
+    ktd.table->keyNameTable = NULL;
+    ktd.table->keyNameCount = 0;
+    ktd.table->keyContextTable = NULL;
+    ktd.table->keyContextCount = 0;
 
-      ktd.keyContextTable = NULL;
-      ktd.keyContextCount = 0;
+    if (allocateKeyNameTable(&ktd, keys)) {
+      if (allocateCommandTable(&ktd)) {
+        if (processDataFile(name, processKeyTableLine, &ktd)) {
+          if (finishKeyTable(&ktd)) {
+            table = ktd.table;
+            ktd.table = NULL;
+          }
+        }
 
-      if (processDataFile(name, processKeyTableLine, &ktd)) {
-        table = makeKeyTable(&ktd);
-
-        destroyKeyContextTable(ktd.keyContextTable, ktd.keyContextCount);
-        if (ktd.title) free(ktd.title);
+        if (ktd.commandTable) free(ktd.commandTable);
       }
-
-      if (ktd.commandTable) free(ktd.commandTable);
     }
 
-    if (ktd.keyNameTable) free(ktd.keyNameTable);
+    if (ktd.table) destroyKeyTable(ktd.table);
+  } else {
+    LogError("malloc");
   }
 
   return table;
@@ -845,7 +811,17 @@ void
 destroyKeyTable (KeyTable *table) {
   if (table->title) free(table->title);
   if (table->keyNameTable) free(table->keyNameTable);
-  destroyKeyContextTable(table->keyContextTable, table->keyContextCount);
+
+  while (table->keyContextCount) {
+    KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
+
+    if (ctx->name) free(ctx->name);
+    if (ctx->keyBindingTable) free(ctx->keyBindingTable);
+    if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
+    if (ctx->keyMap) free(ctx->keyMap);
+  }
+  if (table->keyContextTable) free(table->keyContextTable);
+
   free(table);
 }
 
