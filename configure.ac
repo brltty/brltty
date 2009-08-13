@@ -251,7 +251,6 @@ fi
 
 AC_CHECK_PROGS([LD], [ld], [ld])
 AC_PROG_RANLIB
-AC_PROG_YACC
 AC_PROG_AWK
 AC_PROG_LN_S
 
@@ -786,20 +785,6 @@ in
 esac])
 SYSCFLAGS="${brltty_cv_prog_cc_sysflags}"
 AC_SUBST([SYSCFLAGS])
-
-AC_CACHE_CHECK([for c compiler yacc source flags], [brltty_cv_prog_cc_flags_yacc], [dnl
-if test "${GCC}" = "yes"
-then
-   brltty_cv_prog_cc_flags_yacc="-Wno-parentheses -Wno-unused -Wno-uninitialized -Wno-unknown-pragmas"
-else
-   case "${host_os}"
-   in
-      *)
-         brltty_cv_prog_cc_flags_yacc=""
-         ;;
-   esac
-fi])
-AC_SUBST([YACC_CFLAGS], ["${brltty_cv_prog_cc_flags_yacc}"])
 
 AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
 if test "${GCC}" = "yes"
