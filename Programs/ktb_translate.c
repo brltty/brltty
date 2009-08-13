@@ -46,7 +46,7 @@ compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
   if (binding1->keys.key < binding2->keys.key) return -1;
   if (binding1->keys.key > binding2->keys.key) return 1;
 
-  return compareKeys(binding1->keys.modifiers, binding2->keys.modifiers);
+  return compareKeySetMasks(binding1->keys.modifiers.mask, binding2->keys.modifiers.mask);
 }
 
 static int
@@ -65,7 +65,7 @@ getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsign
 
     target.keys.set = set;
     target.keys.key = key;
-    copyKeySetMask(target.keys.modifiers, table->keys.mask);
+    copyKeySetMask(target.keys.modifiers.mask, table->keys.mask);
 
     {
       const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
@@ -85,7 +85,7 @@ isModifiers (KeyTable *table, unsigned char context) {
     unsigned int count = ctx->keyBindingCount;
 
     while (count) {
-      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+      if (isKeySetSubmask(binding->keys.modifiers.mask, table->keys.mask)) return 1;
       binding += 1, count -= 1;
     }
   }
@@ -394,17 +394,15 @@ putKeyCombination (ListGenerationData *lgd, const KeyCombination *keys) {
   wchar_t delimiter = 0;
 
   {
-    int key;
-    for (key=0; key<BITMASK_SIZE(keys->modifiers); key+=1) {
-      if (BITMASK_TEST(keys->modifiers, key)) {
-        if (!delimiter) {
-          delimiter = WC_C('+');
-        } else if (!putCharacter(lgd, delimiter)) {
-          return 0;
-        }
-
-        if (!putKeyName(lgd, 0, key)) return 0;
+    unsigned char index;
+    for (index=0; index<keys->modifiers.count; index+=1) {
+      if (!delimiter) {
+        delimiter = WC_C('+');
+      } else if (!putCharacter(lgd, delimiter)) {
+        return 0;
       }
+
+      if (!putKeyName(lgd, 0, keys->modifiers.keys[index])) return 0;
     }
   }
 

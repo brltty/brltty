@@ -32,9 +32,9 @@ typedef BITMASK(KeySetMask, KEYS_PER_SET, KEY_SET_MASK_ELEMENT_TYPE);
 #define KEY_SET_MASK_ELEMENT_COUNT (KEY_SET_MASK_SIZE / sizeof(KEY_SET_MASK_ELEMENT_TYPE))
 
 extern void copyKeySetMask (KeySetMask to, const KeySetMask from);
-extern int compareKeys (const KeySetMask mask1, const KeySetMask mask2);
-extern int sameKeys (const KeySetMask mask1, const KeySetMask mask2);
-extern int isKeySubset (const KeySetMask set, const KeySetMask subset);
+extern int compareKeySetMasks (const KeySetMask mask1, const KeySetMask mask2);
+extern int sameKeySetMasks (const KeySetMask mask1, const KeySetMask mask2);
+extern int isKeySetSubmask (const KeySetMask mask, const KeySetMask submask);
 
 typedef struct {
   KeySetMask mask;
@@ -42,6 +42,7 @@ typedef struct {
   unsigned char keys[KEYS_PER_SET];
 } KeySet;
 
+extern int testKey (const KeySet *set, unsigned char key);
 extern int addKey (KeySet *set, unsigned char key);
 extern int removeKey (KeySet *set, unsigned char key);
 extern void removeAllKeys (KeySet *set);

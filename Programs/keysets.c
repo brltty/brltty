@@ -28,25 +28,30 @@ copyKeySetMask (KeySetMask to, const KeySetMask from) {
 }
 
 int
-compareKeys (const KeySetMask mask1, const KeySetMask mask2) {
+compareKeySetMasks (const KeySetMask mask1, const KeySetMask mask2) {
   return memcmp(mask1, mask2, KEY_SET_MASK_SIZE);
 }
 
 int
-sameKeys (const KeySetMask mask1, const KeySetMask mask2) {
-  return compareKeys(mask1, mask2) == 0;
+sameKeySetMasks (const KeySetMask mask1, const KeySetMask mask2) {
+  return compareKeySetMasks(mask1, mask2) == 0;
 }
 
 int
-isKeySubset (const KeySetMask set, const KeySetMask subset) {
+isKeySetSubmask (const KeySetMask mask, const KeySetMask submask) {
   unsigned int count = KEY_SET_MASK_ELEMENT_COUNT;
 
   while (count) {
-    if (~*set++ & *subset++) return 0;
+    if (~*mask++ & *submask++) return 0;
     count -= 1;
   }
 
   return 1;
+}
+
+int
+testKey (const KeySet *set, unsigned char key) {
+  return BITMASK_TEST(set->mask, key);
 }
 
 int

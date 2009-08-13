@@ -52,7 +52,12 @@ typedef struct {
 extern const KeyboardFunctionEntry keyboardFunctionTable[KBF_None];
 
 typedef struct {
-  KeySetMask modifiers;
+  struct {
+    KeySetMask mask;
+    unsigned char count;
+    unsigned char keys[10];
+  } modifiers;
+
   unsigned char set;
   unsigned char key;
 } KeyCombination;

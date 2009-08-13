@@ -238,9 +238,11 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
 }
 
 static int
-parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *characters, int length, KeyTableData *ktd) {
+parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t *characters, int length, KeyTableData *ktd) {
+  KeySet modifiers;
   int immediate;
 
+  removeAllKeys(&modifiers);
   while (1) {
     const wchar_t *end = wmemchr(characters, WC_C('+'), length);
     if (!end) break;
@@ -261,11 +263,10 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
         return 0;
       }
 
-      if (BITMASK_TEST(keys->modifiers, key)) {
+      if (!addKey(&modifiers, key)) {
         reportDataError(file, "duplicate modifier key: %.*" PRIws, count, characters);
         return 0;
       }
-      BITMASK_SET(keys->modifiers, key);
 
       length -= count + 1;
       characters = end + 1;
@@ -284,19 +285,23 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
     reportDataError(file, "missing key");
     return 0;
   }
-  if (!parseKeyName(file, &keys->set, &keys->key, characters, length, ktd)) return 0;
+  if (!parseKeyName(file, &combination->set, &combination->key, characters, length, ktd)) return 0;
 
-  if (!keys->set) {
-    if (BITMASK_TEST(keys->modifiers, keys->key)) {
+  if (!combination->set) {
+    if (testKey(&modifiers, combination->key)) {
       reportDataError(file, "duplicate key: %.*" PRIws, length, characters);
       return 0;
     }
 
     if (!immediate) {
-      BITMASK_SET(keys->modifiers, keys->key);
-      keys->key = 0;
+      addKey(&modifiers, combination->key);
+      combination->key = 0;
     }
   }
+
+  copyKeySetMask(combination->modifiers.mask, modifiers.mask);
+  memcpy(combination->modifiers.keys, modifiers.keys,
+         (combination->modifiers.count = modifiers.count));
 
   return 1;
 }
@@ -754,8 +759,6 @@ prepareKeyBindings (KeyContext *ctx) {
 
 int
 finishKeyTable (KeyTableData *ktd) {
-  if (!setDefaultKeyContextProperties(ktd)) return 0;
-
   {
     unsigned int context;
 
@@ -766,6 +769,7 @@ finishKeyTable (KeyTableData *ktd) {
     }
   }
 
+  if (!setDefaultKeyContextProperties(ktd)) return 0;
   qsort(ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), sortKeyValues);
   resetKeyTable(ktd->table);
   return 1;
@@ -809,9 +813,6 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
-  if (table->title) free(table->title);
-  if (table->keyNameTable) free(table->keyNameTable);
-
   while (table->keyContextCount) {
     KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
 
@@ -820,8 +821,10 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
     if (ctx->keyMap) free(ctx->keyMap);
   }
-  if (table->keyContextTable) free(table->keyContextTable);
 
+  if (table->keyContextTable) free(table->keyContextTable);
+  if (table->keyNameTable) free(table->keyNameTable);
+  if (table->title) free(table->title);
   free(table);
 }
 
