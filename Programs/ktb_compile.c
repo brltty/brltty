@@ -299,6 +299,11 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
     }
   }
 
+  if (modifiers.count > ARRAY_COUNT(combination->modifiers.keys)) {
+    reportDataError(file, "too many modifier keys");
+    return 0;
+  }
+
   copyKeySetMask(combination->modifiers.mask, modifiers.mask);
   memcpy(combination->modifiers.keys, modifiers.keys,
          (combination->modifiers.count = modifiers.count));
