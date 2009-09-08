@@ -238,6 +238,8 @@ updateKeyGroup (
   unsigned char *group, const unsigned char *new,
   unsigned char set, unsigned char base, unsigned char count
 ) {
+  unsigned char pressTable[count];
+  unsigned char pressCount = 0;
   unsigned char offset;
 
   for (offset=0; offset<count; offset+=1) {
@@ -245,9 +247,15 @@ updateKeyGroup (
     int press = (new[offset / 8] & (1 << (offset % 8))) != 0;
 
     if (setGroupedKey(group, key, press)) {
-      enqueueKeyEvent(set, key, press);
+      if (press) {
+        pressTable[pressCount++] = key;
+      } else {
+        enqueueKeyEvent(set, key, 0);
+      }
     }
   }
+
+  while (pressCount) enqueueKeyEvent(set, pressTable[--pressCount], 1);
 }
 
 static void
