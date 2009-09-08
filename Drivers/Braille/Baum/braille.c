@@ -1004,6 +1004,7 @@ setBaumSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize)
       unsigned char offValue;
       unsigned char onValue;
     } SwitchEntry;
+
     static const SwitchEntry switchTable[] = {
       {BAUM_SWT_ShowSensor, 0X01, 0, 2},
       {BAUM_SWT_BrailleKeyboard, 0X03, 0, 3},
@@ -2445,7 +2446,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             clearCells(0, cellCount);
             if (!updateCells(brl)) goto failed;
 
-            brl->keyBindings = useVarioKeys? "variokeys": "all";
+            brl->keyBindings = useVarioKeys? "vario": "all";
             brl->keyNameTables = keyNameTables_all;
             return 1;
           }

@@ -31,7 +31,6 @@ map Command5 DOT4
 map Command6 DOT5
 map Command7 DOT6
 
-#bind Command4+Command3 PASSCHAR+127
 bind Command4+Command5 KEY_ENTER
 bind Command4+Command2 KEY_BACKSPACE
 bind Command4+Command6 KEY_TAB
