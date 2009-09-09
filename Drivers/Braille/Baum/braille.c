@@ -37,14 +37,16 @@ typedef enum {
 #include "brl_driver.h"
 #include "brldefs-bm.h"
 
-BEGIN_KEY_NAME_TABLE(all)
+BEGIN_KEY_NAME_TABLE(display)
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+0, "Display1"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+1, "Display2"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+2, "Display3"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+3, "Display4"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "Display5"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+5, "Display6"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(command)
   KEY_NAME_ENTRY(BM_KEY_COMMAND+0, "Command1"),
   KEY_NAME_ENTRY(BM_KEY_COMMAND+1, "Command2"),
   KEY_NAME_ENTRY(BM_KEY_COMMAND+2, "Command3"),
@@ -52,7 +54,9 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BM_KEY_COMMAND+4, "Command5"),
   KEY_NAME_ENTRY(BM_KEY_COMMAND+5, "Command6"),
   KEY_NAME_ENTRY(BM_KEY_COMMAND+6, "Command7"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+0, "FrontRightDown"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+1, "FrontRightUp"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+2, "FrontMiddleDown"),
@@ -66,7 +70,9 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+3, "BackMiddleUp"),
   KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+4, "BackLeftDown"),
   KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+5, "BackLeftUp"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(buttons)
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+0, "Front10"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+1, "Front9"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+2, "Front8"),
@@ -88,7 +94,9 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+7, "Back3"),
   KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+8, "Back2"),
   KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+9, "Back1"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(entry)
   KEY_NAME_ENTRY(BM_KEY_ENTRY+0, "B9"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+1, "B10"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+2, "B11"),
@@ -96,6 +104,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BM_KEY_ENTRY+5, "F2"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+6, "F3"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+7, "F4"),
+
   KEY_NAME_ENTRY(BM_KEY_ENTRY+8, "Dot1"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+9, "Dot2"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+10, "Dot3"),
@@ -104,22 +113,55 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BM_KEY_ENTRY+13, "Dot6"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+14, "Dot7"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+15, "Dot8"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(joystick)
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+0, "Up"),
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+1, "Left"),
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+2, "Down"),
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+3, "Right"),
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+4, "Press"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(BM_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(horizontal)
   KEY_SET_ENTRY(BM_SET_HorizontalSensors, "HorizontalSensor"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(vertical)
   KEY_SET_ENTRY(BM_SET_LeftSensors, "LeftSensor"),
   KEY_SET_ENTRY(BM_SET_RightSensors, "RightSensor"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
+  KEY_NAME_TABLE(display),
+  KEY_NAME_TABLE(command),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(buttons),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(horizontal),
+  KEY_NAME_TABLE(vertical),
 END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(vario)
+  KEY_NAME_TABLE(display),
+  KEY_NAME_TABLE(command),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(vario)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(vario),
+END_KEY_TABLE_LIST
 
 /* Global Definitions */
 
@@ -386,7 +428,7 @@ typedef enum {
   BAUM_RSP_VerticalSensors      = 0X21,
   BAUM_RSP_RoutingKeys          = 0X22,
   BAUM_RSP_Switches             = 0X23,
-  BAUM_RSP_DisplayKeys              = 0X24,
+  BAUM_RSP_DisplayKeys          = 0X24,
   BAUM_RSP_HorizontalSensor     = 0X25,
   BAUM_RSP_VerticalSensor       = 0X26,
   BAUM_RSP_RoutingKey           = 0X27,
@@ -396,7 +438,7 @@ typedef enum {
   BAUM_RSP_FrontButtons         = 0X2C,
   BAUM_RSP_BackButtons          = 0X2D,
   BAUM_RSP_EntryKeys            = 0X33,
-  BAUM_RSP_JoyStick             = 0X34,
+  BAUM_RSP_Joystick             = 0X34,
   BAUM_RSP_ErrorCode            = 0X40,
   BAUM_RSP_ModuleRegistration   = 0X50,
   BAUM_RSP_DataRegisters        = 0X51,
@@ -550,7 +592,7 @@ typedef union {
       unsigned char frontButtons[2];
       unsigned char backButtons[2];
       unsigned char entryKeys[2];
-      unsigned char joyStick[1];
+      unsigned char joystick[1];
       unsigned char errorCode;
 
       struct {
@@ -875,7 +917,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_FrontRockers:
           case BAUM_RSP_BackRockers:
           case BAUM_RSP_CommandKeys:
-          case BAUM_RSP_JoyStick:
+          case BAUM_RSP_Joystick:
           case BAUM_RSP_ErrorCode:
           case BAUM_RSP_ModuleRegistration:
           case BAUM_RSP_DataRegisters:
@@ -1409,8 +1451,8 @@ updateBaumKeys (BrailleDisplay *brl) {
                              BM_KEY_ENTRY, BM_KEYS_ENTRY);
         continue;
 
-      case BAUM_RSP_JoyStick:
-        updateNavigationKeys(packet.data.values.joyStick,
+      case BAUM_RSP_Joystick:
+        updateNavigationKeys(packet.data.values.joystick,
                              BM_KEY_JOYSTICK, BM_KEYS_JOYSTICK);
         continue;
 
@@ -2454,8 +2496,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             clearCells(0, cellCount);
             if (!updateCells(brl)) goto failed;
 
-            brl->keyBindings = useVarioKeys? "vario": "all";
-            brl->keyNameTables = keyNameTables_all;
+            {
+              const KeyTableDefinition *ktd;
+
+              if (useVarioKeys) {
+                ktd = &KEY_TABLE_DEFINITION(vario);
+              } else {
+                ktd = &KEY_TABLE_DEFINITION(all);
+              }
+
+              brl->keyBindings = ktd->bindings;
+              brl->keyNameTables = ktd->names;
+            }
+
             return 1;
           }
         }
