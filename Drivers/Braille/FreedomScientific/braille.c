@@ -94,6 +94,14 @@ BEGIN_KEY_NAME_TABLES(pacmate)
   KEY_NAME_TABLE(pacmate),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(focus)
+DEFINE_KEY_TABLE(pacmate)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(focus),
+  &KEY_TABLE_DEFINITION(pacmate),
+END_KEY_TABLE_LIST
+
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
@@ -290,8 +298,7 @@ typedef struct {
 } Packet;
 
 typedef struct {
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  const KeyTableDefinition *keyTableDefinition;
   signed char hotkeysRow;
 } ModelTypeEntry;
 
@@ -302,14 +309,12 @@ typedef enum {
 
 static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_Focus] = {
-    .keyBindings = "focus",
-    .keyNameTables = KEY_NAME_TABLES(focus),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(focus),
     .hotkeysRow = -1
   }
   ,
   [MOD_TYPE_Pacmate] = {
-    .keyBindings = "pacmate",
-    .keyNameTables = KEY_NAME_TABLES(pacmate),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(pacmate),
     .hotkeysRow = 1
   }
 };
@@ -836,8 +841,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           {
             const ModelTypeEntry *type = &modelTypeTable[model->type];
 
-            brl->keyBindings = type->keyBindings;
-            brl->keyNameTables = type->keyNameTables;
+            brl->keyBindings = type->keyTableDefinition->bindings;
+            brl->keyNameTables = type->keyTableDefinition->names;
           }
 
           return 1;
