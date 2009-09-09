@@ -539,6 +539,12 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(all),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
+
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
@@ -591,7 +597,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
        */
       brl->textColumns = cellCount;		/* initialize size of display */
       brl->textRows = 1;		/* always 1 */
-      brl->keyNameTables = KEY_NAME_TABLES(all);
+
+      {
+        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+        brl->keyBindings = ktd->bindings;
+        brl->keyNameTables = ktd->names;
+      }
 
       if ((currentCells = malloc(cellCount))) {
         if ((previousCells = malloc(cellCount))) {
