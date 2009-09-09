@@ -536,6 +536,17 @@ doListKeyTable (ListGenerationData *lgd) {
     if (!endLine(lgd)) return 0;
   }
 
+  if (lgd->keyTable->noteCount) {
+    unsigned int noteIndex;
+
+    if (!endLine(lgd)) return 0;
+
+    for (noteIndex=0; noteIndex<lgd->keyTable->noteCount; noteIndex+=1) {
+      if (!putCharacterString(lgd, lgd->keyTable->noteTable[noteIndex])) return 0;
+      if (!endLine(lgd)) return 0;
+    }
+  }
+
   {
     static const unsigned char contexts[] = {
       BRL_CTX_DEFAULT,

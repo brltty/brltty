@@ -82,6 +82,9 @@ typedef struct {
 struct KeyTableStruct {
   wchar_t *title;
 
+  wchar_t **noteTable;
+  unsigned int noteCount;
+
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
 

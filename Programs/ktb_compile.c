@@ -678,6 +678,42 @@ processMapOperands (DataFile *file, void *data) {
 }
 
 static int
+processNoteOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  DataOperand note;
+
+  if (getDataText(file, &note, "note text")) {
+    {
+      unsigned int newCount = ktd->table->noteCount + 1;
+      wchar_t **newTable = realloc(ktd->table->noteTable, newCount);
+
+      if (!newTable) {
+        LogError("realloc");
+        return 0;
+      }
+
+      ktd->table->noteTable = newTable;
+    }
+
+    {
+      wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, note.length+1));
+
+      if (!noteString) {
+        LogError("malloc");
+        return 0;
+      }
+
+      wmemcpy(noteString, note.characters, note.length);
+      noteString[note.length] = 0;
+      ktd->table->noteTable[ktd->table->noteCount++] = noteString;
+      return 1;
+    }
+  }
+
+  return 1;
+}
+
+static int
 processTitleOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   DataOperand title;
@@ -687,6 +723,7 @@ processTitleOperands (DataFile *file, void *data) {
       reportDataError(file, "table title specified more than once");
     } else if (!(ktd->table->title = malloc(ARRAY_SIZE(ktd->table->title, title.length+1)))) {
       LogError("malloc");
+      return 0;
     } else {
       wmemcpy(ktd->table->title, title.characters, title.length);
       ktd->table->title[title.length] = 0;
@@ -705,6 +742,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=WS_C("map"), .processor=processMapOperands},
+    {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
     {.name=NULL, .processor=NULL}
   };
@@ -790,6 +828,8 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
   if ((ktd.table = malloc(sizeof(*ktd.table)))) {
     ktd.table->title = NULL;
+    ktd.table->noteTable = NULL;
+    ktd.table->noteCount = 0;
     ktd.table->keyNameTable = NULL;
     ktd.table->keyNameCount = 0;
     ktd.table->keyContextTable = NULL;
@@ -818,6 +858,8 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
+  while (table->noteCount) free(table->noteTable[--table->noteCount]);
+
   while (table->keyContextCount) {
     KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
 
