@@ -685,7 +685,7 @@ processNoteOperands (DataFile *file, void *data) {
   if (getDataText(file, &note, "note text")) {
     {
       unsigned int newCount = ktd->table->noteCount + 1;
-      wchar_t **newTable = realloc(ktd->table->noteTable, newCount);
+      wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
 
       if (!newTable) {
         LogError("realloc");
