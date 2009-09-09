@@ -25,6 +25,7 @@
 #include <linux/netlink.h>
 #include <linux/input.h>
 
+#include "kbdkeys.h"
 #include "async.h"
 
 typedef struct {
