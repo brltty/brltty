@@ -64,6 +64,12 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(all),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
+
 SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
 
@@ -143,7 +149,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->textRows = BRLROWS;
               brl->statusColumns = 5;
               brl->statusRows = 1;
-              brl->keyNameTables = KEY_NAME_TABLES(all);
+
+              {
+                const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+                brl->keyBindings = ktd->bindings;
+                brl->keyNameTables = ktd->names;
+              }
 
               /* Allocate space for buffers */
               prevdata = mallocWrapper (brl->textColumns * brl->textRows);
