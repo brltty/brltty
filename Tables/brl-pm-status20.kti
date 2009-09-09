@@ -17,6 +17,7 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 20 status keys.
+note The keys to the left of the status cells are named Status1 through Status20.
 
 bind !Status1 HELP
 bind !Status2 LEARN

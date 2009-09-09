@@ -17,6 +17,12 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 13 front keys.
+note On the front surface:
+note * The rectangular key at the center is named Shift.
+note * The square keys to its left and right are named Home and End.
+note * The left and right bars are named Up and Down.
+note * The four square keys at the very left are named: Dot7, Dot3, Dot2, Dot1.
+note * The four square keys at the very right are named: Dot4, Dot5, Dot6, Dot8.
 
 bind !Shift HOME
 bind !Home TOP

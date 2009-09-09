@@ -17,6 +17,7 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 4 status keys.
+note The keys above the status cells are named Status1 through Status4.
 
 bind !Status1 HELP
 bind !Status2 LEARN
