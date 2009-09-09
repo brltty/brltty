@@ -88,8 +88,7 @@ BEGIN_KEY_NAME_TABLE(modular)
   KEY_NAME_ENTRY(HT_KEY_STATUS+3, "Status4"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_modular[] = "mdlr";
-BEGIN_KEY_NAME_TABLES(modular)
+BEGIN_KEY_NAME_TABLES(mdlr)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(keypad),
@@ -101,16 +100,14 @@ BEGIN_KEY_NAME_TABLE(modularEvolution)
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "Right"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_modularEvolution64[] = "me64";
-BEGIN_KEY_NAME_TABLES(modularEvolution64)
+BEGIN_KEY_NAME_TABLES(me64)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
   KEY_NAME_TABLE(modularEvolution),
 END_KEY_NAME_TABLES
 
-static const char keyBindings_modularEvolution88[] = "me88";
-BEGIN_KEY_NAME_TABLES(modularEvolution88)
+BEGIN_KEY_NAME_TABLES(me88)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
@@ -123,16 +120,14 @@ BEGIN_KEY_NAME_TABLE(brailleStar)
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "SpaceRight"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_brailleStar40[] = "bs40";
-BEGIN_KEY_NAME_TABLES(brailleStar40)
+BEGIN_KEY_NAME_TABLES(bs40)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
   KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
-static const char keyBindings_brailleStar80[] = "bs80";
-BEGIN_KEY_NAME_TABLES(brailleStar80)
+BEGIN_KEY_NAME_TABLES(bs80)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
@@ -149,8 +144,7 @@ BEGIN_KEY_NAME_TABLE(brailleWave)
   KEY_NAME_ENTRY(HT_KEY_Return, "Return"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_brailleWave[] = "wave";
-BEGIN_KEY_NAME_TABLES(brailleWave)
+BEGIN_KEY_NAME_TABLES(wave)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(brailleWave),
@@ -161,8 +155,7 @@ BEGIN_KEY_NAME_TABLE(easyBraille)
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_easyBraille[] = "easy";
-BEGIN_KEY_NAME_TABLES(easyBraille)
+BEGIN_KEY_NAME_TABLES(easy)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(easyBraille),
@@ -184,10 +177,29 @@ BEGIN_KEY_NAME_TABLE(bookworm)
   KEY_NAME_ENTRY(HT_BWK_Enter, "Enter"),
 END_KEY_NAME_TABLE
 
-static const char keyBindings_bookworm[] = "bkwm";
-BEGIN_KEY_NAME_TABLES(bookworm)
+BEGIN_KEY_NAME_TABLES(bkwm)
   KEY_NAME_TABLE(bookworm),
 END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(mdlr)
+DEFINE_KEY_TABLE(me64)
+DEFINE_KEY_TABLE(me88)
+DEFINE_KEY_TABLE(bs40)
+DEFINE_KEY_TABLE(bs80)
+DEFINE_KEY_TABLE(wave)
+DEFINE_KEY_TABLE(easy)
+DEFINE_KEY_TABLE(bkwm)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(mdlr),
+  &KEY_TABLE_DEFINITION(me64),
+  &KEY_TABLE_DEFINITION(me88),
+  &KEY_TABLE_DEFINITION(bs40),
+  &KEY_TABLE_DEFINITION(bs80),
+  &KEY_TABLE_DEFINITION(wave),
+  &KEY_TABLE_DEFINITION(easy),
+  &KEY_TABLE_DEFINITION(bkwm),
+END_KEY_TABLE_LIST
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
@@ -202,8 +214,7 @@ static CellWriter writeEvolutionCells;
 
 typedef struct {
   const char *name;
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  const KeyTableDefinition *keyTableDefinition;
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
@@ -225,8 +236,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular 20+4",
     .textCells = 20,
     .statusCells = 4,
-    .keyBindings = keyBindings_modular,
-    .keyNameTables = KEY_NAME_TABLES(modular),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -235,8 +245,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular 40+4",
     .textCells = 40,
     .statusCells = 4,
-    .keyBindings = keyBindings_modular,
-    .keyNameTables = KEY_NAME_TABLES(modular),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -245,8 +254,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular 80+4",
     .textCells = 80,
     .statusCells = 4,
-    .keyBindings = keyBindings_modular,
-    .keyNameTables = KEY_NAME_TABLES(modular),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -255,8 +263,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 64",
     .textCells = 64,
     .statusCells = 0,
-    .keyBindings = keyBindings_modularEvolution64,
-    .keyNameTables = KEY_NAME_TABLES(modularEvolution64),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(me64),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
@@ -266,8 +273,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 88",
     .textCells = 88,
     .statusCells = 0,
-    .keyBindings = keyBindings_modularEvolution88,
-    .keyNameTables = KEY_NAME_TABLES(modularEvolution88),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(me88),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
@@ -277,8 +283,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Wave 40",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_brailleWave,
-    .keyNameTables = KEY_NAME_TABLES(brailleWave),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(wave),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -287,8 +292,7 @@ static const ModelEntry modelTable[] = {
     .name = "Bookworm",
     .textCells = 8,
     .statusCells = 0,
-    .keyBindings = keyBindings_bookworm,
-    .keyNameTables = KEY_NAME_TABLES(bookworm),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bkwm),
     .interpretByte = interpretBookwormByte,
     .writeCells = writeBookwormCells,
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
@@ -298,8 +302,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braillino 20",
     .textCells = 20,
     .statusCells = 0,
-    .keyBindings = keyBindings_brailleStar40,
-    .keyNameTables = KEY_NAME_TABLES(brailleStar40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -308,8 +311,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 40",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_brailleStar40,
-    .keyNameTables = KEY_NAME_TABLES(brailleStar40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -318,8 +320,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 80",
     .textCells = 80,
     .statusCells = 0,
-    .keyBindings = keyBindings_brailleStar80,
-    .keyNameTables = KEY_NAME_TABLES(brailleStar80),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs80),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -328,8 +329,7 @@ static const ModelEntry modelTable[] = {
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_easyBraille,
-    .keyNameTables = KEY_NAME_TABLES(easyBraille),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(easy),
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
@@ -626,8 +626,8 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->textRows = BRLROWS;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
-  brl->keyBindings = model->keyBindings;		/* position in the model list */
-  brl->keyNameTables = model->keyNameTables;		/* position in the model list */
+  brl->keyBindings = model->keyTableDefinition->bindings;
+  brl->keyNameTables = model->keyTableDefinition->names;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
