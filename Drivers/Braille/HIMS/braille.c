@@ -199,8 +199,7 @@ writePacket (
 
 typedef struct {
   const char *modelName;
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  const KeyTableDefinition *keyTableDefinition;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
@@ -231,11 +230,13 @@ BEGIN_KEY_NAME_TABLE(brailleSense)
   KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(brailleSense)
+BEGIN_KEY_NAME_TABLES(sense)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(brailleSense),
 END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(sense)
 
 static int
 getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -244,7 +245,7 @@ getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static const ProtocolOperations brailleSenseOperations = {
-  "Braille Sense", "sense", KEY_NAME_TABLES(brailleSense),
+  "Braille Sense", &KEY_TABLE_DEFINITION(sense),
   getBrailleSenseCellCount
 };
 
@@ -255,10 +256,12 @@ BEGIN_KEY_NAME_TABLE(syncBraille)
   KEY_NAME_ENTRY(HM_KEY_SB_RightDown, "RightDown"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(syncBraille)
+BEGIN_KEY_NAME_TABLES(sync)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(syncBraille),
 END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(sync)
 
 static int
 getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -284,7 +287,7 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static const ProtocolOperations syncBrailleOperations = {
-  "SyncBraille", "sync", KEY_NAME_TABLES(syncBraille),
+  "SyncBraille", &KEY_TABLE_DEFINITION(sync),
   getSyncBrailleCellCount
 };
 
@@ -476,6 +479,11 @@ static const InputOutputOperations bluetoothOperations = {
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(sense),
+  &KEY_TABLE_DEFINITION(sync),
+END_KEY_TABLE_LIST
+
 static TranslationTable outputTable;
 static unsigned char previousCells[40];
 
@@ -534,8 +542,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (protocol->getCellCount(brl, &brl->textColumns) ||
           protocol->getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
-        brl->keyBindings = protocol->keyBindings;
-        brl->keyNameTables = protocol->keyNameTables;
+        brl->keyBindings = protocol->keyTableDefinition->bindings;
+        brl->keyNameTables = protocol->keyTableDefinition->names;
 
         if (clearCells(brl)) return 1;
       }
