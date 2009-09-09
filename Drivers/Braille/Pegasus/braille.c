@@ -61,6 +61,12 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(all),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
+
 typedef struct {
   int (*identifyModel) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned int count);
@@ -107,7 +113,13 @@ setCellCounts (BrailleDisplay *brl, int size) {
   brl->statusRows = 1;
   brl->textColumns = size - brl->statusColumns;
   brl->textRows = 1;
-  brl->keyNameTables = KEY_NAME_TABLES(all);
+
+  {
+    const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+    brl->keyBindings = ktd->bindings;
+    brl->keyNameTables = ktd->names;
+  }
 }
 
 static int
