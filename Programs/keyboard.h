@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "keydefs.h"
+#include "ktbdefs.h"
 
 typedef enum {
   KBD_TYPE_Any = 0,

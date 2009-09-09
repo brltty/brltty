@@ -99,7 +99,7 @@ extern void writePort1 (unsigned short int port, unsigned char value);
 
 
 #include "keyboard.h"
-#include "keydefs.h"
+#include "ktbdefs.h"
 
 typedef KeyTableState KeyEventHandler (unsigned char set, unsigned char key, int press);
 

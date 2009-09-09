@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "misc.h"
-#include "keydefs.h"
+#include "ktbdefs.h"
 
 extern KeyTable *compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys);
 extern void destroyKeyTable (KeyTable *table);

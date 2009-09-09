@@ -27,7 +27,7 @@ extern "C" {
 
 #include "driver.h"
 #include "brldefs.h"
-#include "keydefs.h"
+#include "ktbdefs.h"
 
 typedef enum {
   sfEnd,

@@ -23,8 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "keydefs.h"
 #include "bitmask.h"
+
+#define KEYS_PER_SET 0X100
 
 #define KEY_SET_MASK_ELEMENT_TYPE char
 typedef BITMASK(KeySetMask, KEYS_PER_SET, KEY_SET_MASK_ELEMENT_TYPE);

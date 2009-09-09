@@ -16,14 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYDEFS
-#define BRLTTY_INCLUDED_KEYDEFS
+#ifndef BRLTTY_INCLUDED_KTBDEFS
+#define BRLTTY_INCLUDED_KTBDEFS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#define KEYS_PER_SET 0X100
 
 typedef struct {
   const char *name;
@@ -46,7 +44,10 @@ typedef struct {
 #define BEGIN_KEY_NAME_TABLES(name) static KEY_NAME_TABLES_DECLARATION(name) = {
 #define END_KEY_NAME_TABLES LAST_KEY_NAME_TABLE};
 
-typedef struct KeyTableStruct KeyTable;
+typedef struct {
+  const char *bindings;
+  KEY_NAME_TABLES_REFERENCE names;
+} KeyTableDefinition;
 
 typedef enum {
   KTS_UNBOUND,
@@ -54,8 +55,10 @@ typedef enum {
   KTS_COMMAND
 } KeyTableState;
 
+typedef struct KeyTableStruct KeyTable;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYDEFS */
+#endif /* BRLTTY_INCLUDED_KTBDEFS */
