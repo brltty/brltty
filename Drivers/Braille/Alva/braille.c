@@ -239,9 +239,18 @@ BEGIN_KEY_NAME_TABLES(bc)
   KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(abt_delphi)
+DEFINE_KEY_TABLE(satellite)
+DEFINE_KEY_TABLE(bc)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(abt_delphi),
+  &KEY_TABLE_DEFINITION(satellite),
+  &KEY_TABLE_DEFINITION(bc),
+END_KEY_TABLE_LIST
+
 typedef struct {
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  const KeyTableDefinition *keyTableDefinition;
 } ModelTypeEntry;
 
 typedef enum {
@@ -253,23 +262,19 @@ typedef enum {
 
 static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_ABT] = {
-    .keyBindings = "abt+delphi",
-    .keyNameTables = KEY_NAME_TABLES(abt_delphi)
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_delphi)
   }
   ,
   [MOD_TYPE_Delphi] = {
-    .keyBindings = "abt+delphi",
-    .keyNameTables = KEY_NAME_TABLES(abt_delphi)
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_delphi)
   }
   ,
   [MOD_TYPE_Satellite] = {
-    .keyBindings = "satellite",
-    .keyNameTables = KEY_NAME_TABLES(satellite)
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(satellite)
   }
   ,
   [MOD_TYPE_BrailleController] = {
-    .keyBindings = "bc",
-    .keyNameTables = KEY_NAME_TABLES(bc)
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
   }
 };
 
@@ -505,8 +510,8 @@ setDefaultConfiguration (BrailleDisplay *brl) {
 
   {
     const ModelTypeEntry *type = &modelTypeTable[model->type];
-    brl->keyBindings = type->keyBindings;
-    brl->keyNameTables = type->keyNameTables;
+    brl->keyBindings = type->keyTableDefinition->bindings;
+    brl->keyNameTables = type->keyTableDefinition->names;
   }
 
   actualColumns = model->columns;
