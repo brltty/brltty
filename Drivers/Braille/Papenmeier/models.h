@@ -107,8 +107,7 @@ typedef struct {
   unsigned char modelIdentifier;
   unsigned char protocolRevision;
   const char *modelName;
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  const KeyTableDefinition *keyTableDefinition;
 
   uint8_t textColumns;
   uint8_t frontKeys;
@@ -126,8 +125,7 @@ typedef struct {
   .modelIdentifier = identifier, \
   .modelName = name, \
   .protocolRevision = 1, \
-  .keyBindings = #model, \
-  .keyNameTables = KEY_NAME_TABLES(model)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(model)
 
 #define PM_CELL_COUNTS(columns, status) \
   .textColumns = columns, \
@@ -396,6 +394,52 @@ BEGIN_KEY_NAME_TABLES(elba_trio_32)
   KEY_NAME_TABLE(keys),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(c_486)
+DEFINE_KEY_TABLE(2d_l)
+DEFINE_KEY_TABLE(c)
+DEFINE_KEY_TABLE(2d_s)
+DEFINE_KEY_TABLE(ib_80)
+DEFINE_KEY_TABLE(el_2d_40)
+DEFINE_KEY_TABLE(el_2d_66)
+DEFINE_KEY_TABLE(el_80)
+DEFINE_KEY_TABLE(el_2d_80)
+DEFINE_KEY_TABLE(el_40_p)
+DEFINE_KEY_TABLE(elba_32)
+DEFINE_KEY_TABLE(elba_20)
+DEFINE_KEY_TABLE(el40s)
+DEFINE_KEY_TABLE(el80_ii)
+DEFINE_KEY_TABLE(el66s)
+DEFINE_KEY_TABLE(el80s)
+DEFINE_KEY_TABLE(trio)
+DEFINE_KEY_TABLE(el70s)
+DEFINE_KEY_TABLE(el2d_80s)
+DEFINE_KEY_TABLE(elba_trio_20)
+DEFINE_KEY_TABLE(elba_trio_32)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(c_486),
+  &KEY_TABLE_DEFINITION(2d_l),
+  &KEY_TABLE_DEFINITION(c),
+  &KEY_TABLE_DEFINITION(2d_s),
+  &KEY_TABLE_DEFINITION(ib_80),
+  &KEY_TABLE_DEFINITION(el_2d_40),
+  &KEY_TABLE_DEFINITION(el_2d_66),
+  &KEY_TABLE_DEFINITION(el_80),
+  &KEY_TABLE_DEFINITION(el_2d_80),
+  &KEY_TABLE_DEFINITION(el_40_p),
+  &KEY_TABLE_DEFINITION(elba_32),
+  &KEY_TABLE_DEFINITION(elba_20),
+  &KEY_TABLE_DEFINITION(el40s),
+  &KEY_TABLE_DEFINITION(el80_ii),
+  &KEY_TABLE_DEFINITION(el66s),
+  &KEY_TABLE_DEFINITION(el80s),
+  &KEY_TABLE_DEFINITION(trio),
+  &KEY_TABLE_DEFINITION(el70s),
+  &KEY_TABLE_DEFINITION(el2d_80s),
+  &KEY_TABLE_DEFINITION(elba_trio_20),
+  &KEY_TABLE_DEFINITION(elba_trio_32),
+END_KEY_TABLE_LIST
 
 
 static const ModelEntry modelTable[] = {
