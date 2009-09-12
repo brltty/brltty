@@ -16,9 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Papenmeier BrailleX Compact/Tiny
+# This key subtable is for Papenmeier displays which have primary routing keys.
+note RoutingKey1 refers to any of the keys above the text cells.
 
-include brl-pm-routing1.kti
-
-assign statusKeys 0
-include brl-pm-front9.kti
+bind !RoutingKey1 ROUTE

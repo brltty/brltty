@@ -47,7 +47,6 @@ bind Attribute+!Backward TOP
 bind Function+!Forward BOT_LEFT
 bind Attribute+!Forward BOT
 
-bind !RoutingKey1 ROUTE
 bind Function+!RoutingKey1 CUTBEGIN
 bind Attribute+!RoutingKey1 CUTRECT
 bind Cursor+!RoutingKey1 PRINDENT
