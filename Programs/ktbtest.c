@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "program.h"
@@ -64,8 +65,7 @@ listKeyTableLine (const wchar_t *line, void *data) {
   FILE *stream = stdout;
 
   fprintf(stream, "%" PRIws "\n", line);
-  if (ferror(stream)) return 0;
-  return 1;
+  return !ferror(stream);
 }
 
 static KEY_NAME_TABLES_REFERENCE
@@ -82,6 +82,8 @@ getKeyNameTables (const char *keyTableName) {
 
       if (strcmp(type, "kbd") == 0) {
         if (count) {
+          component++; count--;
+
           keyNameTables = KEY_NAME_TABLES(keyboard);
         } else {
           LogPrint(LOG_ERR, "missing keyboard key table name");
@@ -136,6 +138,13 @@ getKeyNameTables (const char *keyTableName) {
       }
     } else {
       LogPrint(LOG_ERR, "missing key table type");
+    }
+  }
+
+  if (keyNameTables) {
+    if (count) {
+      LogPrint(LOG_ERR, "too many key name table components");
+      keyNameTables = NULL;
     }
   }
 
