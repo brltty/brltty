@@ -672,10 +672,6 @@ loadKeyTable (const char *name) {
       }
 
       if ((path = makePath(opt_tablesDirectory, file))) {
-        BEGIN_KEY_NAME_TABLES(keyboard)
-          KEY_NAME_TABLE(keyboard),
-        END_KEY_NAME_TABLES
-
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
 
         if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {

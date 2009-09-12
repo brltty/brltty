@@ -249,7 +249,6 @@ typedef enum {
   KBD_KEY_FUNCTION_ExSel
 } KeyboardKey;
 
-extern KEY_NAME_TABLE_DECLARATION(keyboard);
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
 #ifdef __cplusplus
