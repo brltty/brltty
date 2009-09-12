@@ -29,12 +29,12 @@ bind Left+Right PASTE
 
 include brl-ht-dots.kti
 
-bind Escape+Space+Enter INFO
+bind Escape+Space+Return INFO
 
 assign brailleContext 1
 assign brailleOn B1+B8+Right
 assign brailleOff B1+B8+Left
 assign space Space
-assign enter Enter
+assign enter Return
 include brl-ht-input.kti
 
