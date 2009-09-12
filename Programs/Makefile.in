@@ -414,6 +414,16 @@ ctbtest.$O:
 
 ###############################################################################
 
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) kbdkeys.$O mount.$O datafile.$O ktb_compile.$O ktb_translate.$O ttb_translate.$O lock.$O charset.$O keysets.$O cmd.$O drivers.$O driver.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+
+ktbtest$X: $(KTBTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+
+ktbtest.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
+
+###############################################################################
+
 TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
