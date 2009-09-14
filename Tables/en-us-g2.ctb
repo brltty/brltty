@@ -131,6 +131,7 @@ begword begg 12-15-2356
 word begs =
 begword beid = Beidermeier
 begword beig = beige
+word bein 23-24-1345
 word bein' 23-24-1345-3
 sufword beijing 12-15-24-245-346
 word beirut =
@@ -323,6 +324,7 @@ always dumb = dumbbell
 # the letter e
 always e 15
 always E 15
+always e'en 15-3-26 Hallowe'en
 midword ea 2
 midword eabil = interchangeability
 always eable 15-1-3456
