@@ -18,7 +18,7 @@
 
 /* EuroBraille/braille.c - Braille display library for the IRIS family.
  * Copyright (C) 2004 by Yannick Plassiard <yan@mistigri.org>
- *                        and Nicolas Pitre <nico@cam.org>
+ *                        and Nicolas Pitre <nico@fluxnic.net>
  * See the GNU General Public License for details in the LICENSE-GPL file
  * See the README file for details about copyrights and version informations
  */

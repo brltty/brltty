@@ -7,8 +7,7 @@ Copyright
 =========
 
 This driver is copyrighted under the GNU Public License. It is free software.
-See the file 'LICENSE-GPL' for more details. Feel free to send your comments and to
-report bugs (if any) to me at <nico@cam.org>.
+See the file 'LICENSE-GPL' for more details.
 
 
 Supported Hardware
@@ -186,6 +185,5 @@ Some models have five status cells rather than three. On these, the last two
 cells are currently not used.
 
 
-Nicolas Pitre
-nico@cam.org
+Nicolas Pitre <nico@fluxnic.net>
 March 4, 2004

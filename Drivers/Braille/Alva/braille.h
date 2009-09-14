@@ -17,7 +17,7 @@
  */
 
 /* Alva/braille.h - Configurable definitions for the Alva driver
- * Copyright (C) 1995-1998 by Nicolas Pitre <nico@cam.org>
+ * Copyright (C) 1995-1998 by Nicolas Pitre <nico@fluxnic.net>
  *
  */
 

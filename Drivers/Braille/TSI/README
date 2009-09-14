@@ -210,7 +210,7 @@ in getting PowerBraille 40 support working: he tested each version of the
 PowerBraile support until it worked. I myself did not have access to a PB40.
 We worked over E-mail.
 
-Thanks to Nicolas Pitre <nico@cam.org> for extensive help writing the very
+Thanks to Nicolas Pitre <nico@fluxnic.net> for extensive help writing the very
 first version of this driver. Initially, this code was derived from that of
 the driver for the Alva ABT40. Surprising how little they have in common now.
 

@@ -9,7 +9,7 @@ process.
 
 History:
 -Initial draft from Stéphane Doyon <s.doyon@videotron.ca>
--Additions from Nicolas Pitre <nico@cam.org>
+-Additions from Nicolas Pitre <nico@fluxnic.net>
 -April 7, 2002: Mostly rewritten by Stéphane Doyon to take into account
    the INIT_PATH hack
 -September 26, 2002: Amended by Dave Mielke <dave@mielke.cc> due to change from
