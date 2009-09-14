@@ -71,61 +71,63 @@ listKeyTableLine (const wchar_t *line, void *data) {
 static KEY_NAME_TABLES_REFERENCE
 getKeyNameTables (const char *keyTableName) {
   KEY_NAME_TABLES_REFERENCE keyNameTables = NULL;
-  int count;
-  char **components = splitString(keyTableName, '-', &count);
+  int componentsLeft;
+  char **nameComponents = splitString(keyTableName, '-', &componentsLeft);
 
-  if (components) {
-    char **component = components;
+  if (nameComponents) {
+    char **currentComponent = nameComponents;
 
-    if (count) {
-      const char *type = *component++; count--;
+    if (componentsLeft) {
+      const char *keyTableType = *currentComponent++; componentsLeft--;
 
-      if (strcmp(type, "kbd") == 0) {
-        if (count) {
-          component++; count--;
-
+      if (strcmp(keyTableType, "kbd") == 0) {
+        if (componentsLeft) {
+          currentComponent++; componentsLeft--;
           keyNameTables = KEY_NAME_TABLES(keyboard);
         } else {
-          LogPrint(LOG_ERR, "missing keyboard key table name");
+          LogPrint(LOG_ERR, "missing keyboard bindings name");
         }
-      } else if (strcmp(type, "brl") == 0) {
-        if (count) {
-          void *object;
-          const char *code = *component++; count--;
+      } else if (strcmp(keyTableType, "brl") == 0) {
+        if (componentsLeft) {
+          void *driverObject;
+          const char *driverCode = *currentComponent++; componentsLeft--;
 
-          if (loadBrailleDriver(code, &object, opt_libraryDirectory)) {
-            char *symbol;
+          if (loadBrailleDriver(driverCode, &driverObject, opt_libraryDirectory)) {
+            char *keyTablesSymbol;
 
             {
-              const char *components[] = {"brl_ktb_", code};
-              symbol = joinStrings(components, ARRAY_COUNT(components));
+              const char *strings[] = {"brl_ktb_", driverCode};
+              keyTablesSymbol = joinStrings(strings, ARRAY_COUNT(strings));
             }
 
-            if (symbol) {
-              const KeyTableDefinition *const *definitions;
+            if (keyTablesSymbol) {
+              const KeyTableDefinition *const *keyTableDefinitions;
 
-              if (findSharedSymbol(object, symbol, &definitions)) {
-                const KeyTableDefinition *const *definition = definitions;
+              if (findSharedSymbol(driverObject, keyTablesSymbol, &keyTableDefinitions)) {
+                const KeyTableDefinition *const *currentDefinition = keyTableDefinitions;
 
-                if (count) {
-                  const char *name = *component++; count--;
+                if (componentsLeft) {
+                  const char *bindingsName = *currentComponent++; componentsLeft--;
 
-                  while (*definition) {
-                    if (strcmp(name, (*definition)->bindings) == 0) {
-                      keyNameTables = (*definition)->names;
+                  while (*currentDefinition) {
+                    if (strcmp(bindingsName, (*currentDefinition)->bindings) == 0) {
+                      keyNameTables = (*currentDefinition)->names;
                       break;
                     }
 
-                    definition += 1;
+                    currentDefinition += 1;
                   }
 
                   if (!keyNameTables) {
-                    LogPrint(LOG_ERR, "unknown %s braille driver key table name: %s", code, name);
+                    LogPrint(LOG_ERR, "unknown %s braille driver bindings name: %s",
+                             driverCode, bindingsName);
                   }
                 } else {
-                  LogPrint(LOG_ERR, "missing braille driver key table name");
+                  LogPrint(LOG_ERR, "missing braille driver bindings name");
                 }
               }
+
+              free(keyTablesSymbol);
             } else {
               LogError("malloc");
             }
@@ -134,7 +136,7 @@ getKeyNameTables (const char *keyTableName) {
           LogPrint(LOG_ERR, "missing braille driver code");
         }
       } else {
-        LogPrint(LOG_ERR, "unknown key table type: %s", type);
+        LogPrint(LOG_ERR, "unknown key table type: %s", keyTableType);
       }
     } else {
       LogPrint(LOG_ERR, "missing key table type");
@@ -142,21 +144,19 @@ getKeyNameTables (const char *keyTableName) {
   }
 
   if (keyNameTables) {
-    if (count) {
-      LogPrint(LOG_ERR, "too many key name table components");
+    if (componentsLeft) {
+      LogPrint(LOG_ERR, "too many key table name components");
       keyNameTables = NULL;
     }
   }
 
-  deallocateStrings(components);
+  deallocateStrings(nameComponents);
   return keyNameTables;
 }
 
 int
 main (int argc, char *argv[]) {
-  int status = 3;
-  const char *keyTableName;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  int status;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -176,34 +176,56 @@ main (int argc, char *argv[]) {
     fixInstallPaths(paths);
   }
 
-  if (!argc) {
-    LogPrint(LOG_ERR, "missing key table name");
-    exit(2);
-  }
-  keyTableName = *argv++; argc--;
-
-  if ((keyNameTables = getKeyNameTables(keyTableName))) {
+  if (argc) {
+    const char *keyTableName = *argv++; argc--;
     char *keyTableFile = ensureKeyTableExtension(keyTableName);
 
     if (keyTableFile) {
-      char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
+      KEY_NAME_TABLES_REFERENCE keyNameTables;
 
-      if (keyTablePath) {
-        KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
+      {
+        size_t length = strrchr(keyTableFile, '.') - keyTableFile;
+        char name[length + 1];
 
-        if (keyTable) {
-          if (opt_listKeyTable) {
-            listKeyTable(keyTable, listKeyTableLine, NULL);
+        memcpy(name, keyTableFile, length);
+        name[length] = 0;
+
+        keyNameTables = getKeyNameTables(name);
+      }
+
+      if (keyNameTables) {
+        char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
+
+        if (keyTablePath) {
+          KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
+
+          if (keyTable) {
+            status = 0;
+
+            if (opt_listKeyTable)
+              if (!listKeyTable(keyTable, listKeyTableLine, NULL))
+                status = 5;
+
+            destroyKeyTable(keyTable);
+          } else {
+            status = 4;
           }
 
-          destroyKeyTable(keyTable);
+          free(keyTablePath);
+        } else {
+          status = 10;
         }
-
-        free(keyTablePath);
+      } else {
+        status = 3;
       }
 
       free(keyTableFile);
+    } else {
+      status = 10;
     }
+  } else {
+    LogPrint(LOG_ERR, "missing key table name");
+    status = 2;
   }
 
   return status;
