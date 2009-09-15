@@ -18,7 +18,5 @@
 
 title Papenmeier BrailleX Compact/Tiny
 
-include brl-pm-routing1.kti
-
 assign statusKeys 0
 include brl-pm-front9.kti

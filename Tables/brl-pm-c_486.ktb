@@ -18,7 +18,5 @@
 
 title Papenmeier BrailleX Compact 486
 
-include brl-pm-routing1.kti
-
 assign statusKeys 0
 include brl-pm-front9.kti

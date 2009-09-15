@@ -18,7 +18,5 @@
 
 title Papenmeier BrailleX 2D Screen Soft
 
-include brl-pm-routing1.kti
-
 assign statusKeys 22
 include brl-pm-front13.kti

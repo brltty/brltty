@@ -17,6 +17,6 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have primary routing keys.
-note RoutingKey1 refers to any of the keys above the text cells.
+note RoutingKey1 refers to any of the keys behind the text cells.
 
 bind !RoutingKey1 ROUTE

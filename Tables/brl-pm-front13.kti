@@ -17,12 +17,14 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 13 front keys.
-note On the front surface:
+note The front surface layout is as follows:
 note * The rectangular key at the center is named Shift.
 note * The square keys immediately to its left and right are named Home and End.
 note * The left and right bars are named Up and Down.
 note * The four square keys at the very left are named: Dot7, Dot3, Dot2, Dot1.
 note * The four square keys at the very right are named: Dot4, Dot5, Dot6, Dot8.
+
+include brl-pm-routing.kti
 
 bind !Shift HOME
 bind !Home TOP
@@ -48,19 +50,37 @@ bind Dot4+Dot5+!RoutingKey1 NXDIFCHAR
 bind Dot3+Dot7+!RoutingKey1 PRINDENT
 bind Dot6+Dot8+!RoutingKey1 NXINDENT
 
-bind Dot1+!Shift LNBEG
-bind Dot1+!Home TOP_LEFT
-bind Dot1+!End BOT_LEFT
 bind Dot1+!Up FWINLT
 bind Dot1+!Down FWINRT
-bind Dot1+!RoutingKey1 SETLEFT
+bind Dot1+!Home TOP_LEFT
+bind Dot1+!End BOT_LEFT
 
-bind Dot4+!Shift LNEND
-bind Dot4+!Home CHRLT
-bind Dot4+!End CHRRT
 bind Dot4+!Up HWINLT
 bind Dot4+!Down HWINRT
+bind Dot4+!Home CHRLT
+bind Dot4+!End CHRRT
+
+bind Dot1+!Shift LNBEG
+bind Dot4+!Shift LNEND
+
+bind Dot1+!RoutingKey1 SETLEFT
 bind Dot4+!RoutingKey1 DESCCHAR
+
+bind Dot2+!Up KEY_CURSOR_UP
+bind Dot2+!Down KEY_CURSOR_DOWN
+bind Dot2+!Home KEY_CURSOR_LEFT
+bind Dot2+!End KEY_CURSOR_RIGHT
+
+bind Dot5+!Up KEY_PAGE_UP
+bind Dot5+!Down KEY_PAGE_DOWN
+bind Dot5+!Home KEY_HOME
+bind Dot5+!End KEY_END
+
+bind Dot2+!Shift KEY_INSERT
+bind Dot5+!Shift KEY_DELETE
+
+bind Dot2+!RoutingKey1 KEY_FUNCTION
+bind Dot5+!RoutingKey1 SWITCHVT
 
 bind Dot7+!Shift SPKHOME
 bind Dot7+!Home SAY_ABOVE
@@ -124,20 +144,6 @@ map Dot5 DOT5
 map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
-
-bind Dot2+!Shift KEY_INSERT
-bind Dot2+!Home KEY_PAGE_UP
-bind Dot2+!End KEY_PAGE_DOWN
-bind Dot2+!Up KEY_CURSOR_UP
-bind Dot2+!Down KEY_CURSOR_DOWN
-bind Dot2+!RoutingKey1 KEY_FUNCTION
-
-bind Dot5+!Shift KEY_DELETE
-bind Dot5+!Home KEY_HOME
-bind Dot5+!End KEY_END
-bind Dot5+!Up KEY_CURSOR_LEFT
-bind Dot5+!Down KEY_CURSOR_RIGHT
-bind Dot5+!RoutingKey1 SWITCHVT
 
 bind Dot3+!Shift PASSDOTS
 bind Dot3+!Home KEY_ESCAPE
