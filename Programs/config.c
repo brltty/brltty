@@ -661,8 +661,8 @@ loadKeyTable (const char *name) {
         const char *prefix = "kbd-";
 
         if (strncmp(file, prefix, strlen(prefix)) != 0) {
-          const char *components[] = {prefix, file};
-          char *newFile = joinStrings(components, ARRAY_COUNT(components));
+          const char *strings[] = {prefix, file};
+          char *newFile = joinStrings(strings, ARRAY_COUNT(strings));
 
           if (newFile) {
             free(file);
@@ -1334,8 +1334,8 @@ globPrepare (GlobData *data, const char *directory, const char *extension, const
   data->none = (none != 0);
 
   {
-    const char *components[] = {"*", extension};
-    data->pattern = joinStrings(components, ARRAY_COUNT(components));
+    const char *strings[] = {"*", extension};
+    data->pattern = joinStrings(strings, ARRAY_COUNT(strings));
   }
 
   data->initial = *initial? ensureExtension(initial, extension): strdup("");
@@ -2144,10 +2144,10 @@ constructBrailleDriver (void) {
         char *file;
 
         {
-          const char *components[] = {
+          const char *strings[] = {
             "brl-", braille->definition.code, "-", brl.keyBindings, KEY_TABLE_EXTENSION
           };
-          file = joinStrings(components, ARRAY_COUNT(components));
+          file = joinStrings(strings, ARRAY_COUNT(strings));
         }
 
         if (file) {
@@ -2175,10 +2175,10 @@ constructBrailleDriver (void) {
         char *file;
 
         {
-          const char *components[] = {
+          const char *strings[] = {
             PACKAGE_NAME, "-", braille->definition.code, "-", brl.keyBindings, ".hlp"
           };
-          file = joinStrings(components, ARRAY_COUNT(components));
+          file = joinStrings(strings, ARRAY_COUNT(strings));
         }
 
         if (file) {
@@ -2764,8 +2764,8 @@ background (void) {
   char *variableName;
 
   {
-    const char *components[] = {programName, "_DAEMON"};
-    variableName = joinStrings(components, ARRAY_COUNT(components));
+    const char *strings[] = {programName, "_DAEMON"};
+    variableName = joinStrings(strings, ARRAY_COUNT(strings));
   }
 
   {

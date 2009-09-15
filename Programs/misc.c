@@ -430,34 +430,34 @@ isExplicitPath (const char *path) {
 char *
 makePath (const char *directory, const char *file) {
   const int count = 3;
-  const char *components[count];
+  const char *strings[count];
   int first = count;
 
-  components[--first] = file;
+  strings[--first] = file;
   if (!isAbsolutePath(file)) {
     if (directory && *directory) {
-      if (!isPathDelimiter(directory[strlen(directory)-1])) components[--first] = "/";
-      components[--first] = directory;
+      if (!isPathDelimiter(directory[strlen(directory)-1])) strings[--first] = "/";
+      strings[--first] = directory;
     }
   }
 
-  return joinStrings(&components[first], count-first);
+  return joinStrings(&strings[first], count-first);
 }
 
 char *
 ensureExtension (const char *path, const char *extension) {
-  const char *components[2];
+  const char *strings[2];
   int count = 0;
   const size_t pathLength = strlen(path);
   const size_t extensionLength = strlen(extension);
 
-  components[count++] = path;
+  strings[count++] = path;
   if (extensionLength)
     if ((pathLength < extensionLength) ||
         (strcmp(&path[pathLength-extensionLength], extension) != 0))
-      components[count++] = extension;
+      strings[count++] = extension;
 
-  return joinStrings(components, count);
+  return joinStrings(strings, count);
 }
 
 int
