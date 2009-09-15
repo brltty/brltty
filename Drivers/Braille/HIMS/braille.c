@@ -26,6 +26,58 @@
 #include "brl_driver.h"
 #include "brldefs-hm.h"
 
+BEGIN_KEY_NAME_TABLE(routing)
+  KEY_SET_ENTRY(HM_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(dots)
+  KEY_NAME_ENTRY(HM_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(HM_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(HM_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(HM_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(HM_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(HM_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(HM_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(HM_KEY_Dot8, "Dot8"),
+  KEY_NAME_ENTRY(HM_KEY_Space, "Space"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(brailleSense)
+  KEY_NAME_ENTRY(HM_KEY_BS_F1, "F1"),
+  KEY_NAME_ENTRY(HM_KEY_BS_F2, "F2"),
+  KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
+  KEY_NAME_ENTRY(HM_KEY_BS_F4, "F4"),
+
+  KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
+  KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(sense)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(brailleSense),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLE(syncBraille)
+  KEY_NAME_ENTRY(HM_KEY_SB_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(HM_KEY_SB_LeftDown, "LeftDown"),
+  KEY_NAME_ENTRY(HM_KEY_SB_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(HM_KEY_SB_RightDown, "RightDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(sync)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(syncBraille),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(sense)
+DEFINE_KEY_TABLE(sync)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(sense),
+  &KEY_TABLE_DEFINITION(sync),
+END_KEY_TABLE_LIST
+
 typedef struct {
   int (*openPort) (const char *device);
   int (*configurePort) (void);
@@ -204,40 +256,6 @@ typedef struct {
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
-BEGIN_KEY_NAME_TABLE(routing)
-  KEY_SET_ENTRY(HM_SET_RoutingKeys, "RoutingKey"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(dots)
-  KEY_NAME_ENTRY(HM_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(HM_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(HM_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(HM_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(HM_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(HM_KEY_Dot6, "Dot6"),
-  KEY_NAME_ENTRY(HM_KEY_Dot7, "Dot7"),
-  KEY_NAME_ENTRY(HM_KEY_Dot8, "Dot8"),
-  KEY_NAME_ENTRY(HM_KEY_Space, "Space"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(brailleSense)
-  KEY_NAME_ENTRY(HM_KEY_BS_F1, "F1"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F2, "F2"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F4, "F4"),
-
-  KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
-  KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLES(sense)
-  KEY_NAME_TABLE(routing),
-  KEY_NAME_TABLE(dots),
-  KEY_NAME_TABLE(brailleSense),
-END_KEY_NAME_TABLES
-
-DEFINE_KEY_TABLE(sense)
-
 static int
 getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
   *count = 32;
@@ -248,20 +266,6 @@ static const ProtocolOperations brailleSenseOperations = {
   "Braille Sense", &KEY_TABLE_DEFINITION(sense),
   getBrailleSenseCellCount
 };
-
-BEGIN_KEY_NAME_TABLE(syncBraille)
-  KEY_NAME_ENTRY(HM_KEY_SB_LeftUp, "LeftUp"),
-  KEY_NAME_ENTRY(HM_KEY_SB_LeftDown, "LeftDown"),
-  KEY_NAME_ENTRY(HM_KEY_SB_RightUp, "RightUp"),
-  KEY_NAME_ENTRY(HM_KEY_SB_RightDown, "RightDown"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLES(sync)
-  KEY_NAME_TABLE(routing),
-  KEY_NAME_TABLE(syncBraille),
-END_KEY_NAME_TABLES
-
-DEFINE_KEY_TABLE(sync)
 
 static int
 getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -478,11 +482,6 @@ static const InputOutputOperations bluetoothOperations = {
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
-
-BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(sense),
-  &KEY_TABLE_DEFINITION(sync),
-END_KEY_TABLE_LIST
 
 static TranslationTable outputTable;
 static unsigned char previousCells[40];
