@@ -78,11 +78,11 @@ getKeyNameTables (const char *keyTableName) {
     char **currentComponent = nameComponents;
 
     if (componentsLeft) {
-      const char *keyTableType = *currentComponent++; componentsLeft--;
+      const char *keyTableType = (componentsLeft--, *currentComponent++);
 
       if (strcmp(keyTableType, "kbd") == 0) {
         if (componentsLeft) {
-          currentComponent++; componentsLeft--;
+          componentsLeft--; currentComponent++;
           keyNameTables = KEY_NAME_TABLES(keyboard);
         } else {
           LogPrint(LOG_ERR, "missing keyboard bindings name");
@@ -90,7 +90,7 @@ getKeyNameTables (const char *keyTableName) {
       } else if (strcmp(keyTableType, "brl") == 0) {
         if (componentsLeft) {
           void *driverObject;
-          const char *driverCode = *currentComponent++; componentsLeft--;
+          const char *driverCode = (componentsLeft--, *currentComponent++);
 
           if (loadBrailleDriver(driverCode, &driverObject, opt_libraryDirectory)) {
             char *keyTablesSymbol;
@@ -107,7 +107,7 @@ getKeyNameTables (const char *keyTableName) {
                 const KeyTableDefinition *const *currentDefinition = keyTableDefinitions;
 
                 if (componentsLeft) {
-                  const char *bindingsName = *currentComponent++; componentsLeft--;
+                  const char *bindingsName = (componentsLeft--, *currentComponent++);
 
                   while (*currentDefinition) {
                     if (strcmp(bindingsName, (*currentDefinition)->bindings) == 0) {
@@ -177,7 +177,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc) {
-    const char *keyTableName = *argv++; argc--;
+    const char *keyTableName = (argc--, *argv++);
     char *keyTableFile = ensureKeyTableExtension(keyTableName);
 
     if (keyTableFile) {
