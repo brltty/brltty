@@ -124,21 +124,21 @@ BEGIN_KEY_NAME_TABLE(joystick)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(wheels)
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+0, "FirstWheelPress"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+1, "FirstWheelUp"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+2, "FirstWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_UP+0, "FirstWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_DOWN+0, "FirstWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_PRESS+0, "FirstWheelPress"),
 
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+3, "SecondWheelPress"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+4, "SecondWheelUp"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+5, "SecondWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_UP+1, "SecondWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_DOWN+1, "SecondWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_PRESS+1, "SecondWheelPress"),
 
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+6, "ThirdWheelPress"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+7, "ThirdWheelUp"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+8, "ThirdWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_UP+2, "ThirdWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_DOWN+2, "ThirdWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_PRESS+2, "ThirdWheelPress"),
 
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+9, "FourthWheelPress"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+10, "FourthWheelUp"),
-  KEY_NAME_ENTRY(BM_KEY_WHEEL+11, "FourthWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_UP+3, "FourthWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_DOWN+3, "FourthWheelDown"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL_PRESS+3, "FourthWheelPress"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status)
@@ -1238,30 +1238,33 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 
       doDisplay:
         if (flags & BAUM_DRF_WheelsChanged) {
-          unsigned char key = BM_KEY_WHEEL;
+          int index;
 
-          while (wheels > 0) {
-            signed char count = *wheel;
+          for (index=0; index<wheels; index+=1) {
+            signed char count = wheel[index];
 
             while (count > 0) {
-              enqueueKeyEvent(BM_SET_NavigationKeys, key+1, 1);
-              enqueueKeyEvent(BM_SET_NavigationKeys, key+1, 0);
+              unsigned char key = BM_KEY_WHEEL_UP + index;
+
+              enqueueKeyEvent(BM_SET_NavigationKeys, key, 1);
+              enqueueKeyEvent(BM_SET_NavigationKeys, key, 0);
+
               count -= 1;
             }
 
             while (count < 0) {
-              enqueueKeyEvent(BM_SET_NavigationKeys, key+2, 1);
-              enqueueKeyEvent(BM_SET_NavigationKeys, key+2, 0);
+              unsigned char key = BM_KEY_WHEEL_DOWN + index;
+
+              enqueueKeyEvent(BM_SET_NavigationKeys, key, 1);
+              enqueueKeyEvent(BM_SET_NavigationKeys, key, 0);
+
               count += 1;
             }
-
-            wheels -= 1;
-            wheel += 1;
-            key += BM_WHEEL_KEYS;
           }
         }
 
         if (flags & BAUM_DRF_ButtonsChanged) {
+          updateNavigationKeys(&buttons, BM_KEY_WHEEL_PRESS, wheels);
         }
 
         if (flags & BAUM_DRF_KeysChanged) {
