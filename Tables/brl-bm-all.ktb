@@ -39,11 +39,6 @@ map B9 SPACE
 map B10 SPACE
 map B11 SPACE
 
-bind Command1 HELP
-bind Command2 LEARN
-bind Command3 INFO
-bind Command4 PREFMENU
-
 bind Display2 FWINLT
 bind Display5 FWINRT
 
