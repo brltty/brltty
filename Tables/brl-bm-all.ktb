@@ -153,3 +153,22 @@ bind Display5+Display6+!RoutingKey NXDIFCHAR
 bind Display1+Display3+!RoutingKey SETMARK
 bind Display4+Display6+!RoutingKey GOTOMARK
 
+bind !FirstWheelUp LNUP
+bind !FirstWheelDown LNDN
+bind !SecondWheelUp LNUP
+bind !SecondWheelDown LNDN
+bind !ThirdWheelUp LNUP
+bind !ThirdWheelDown LNDN
+bind !FourthWheelUp LNUP
+bind !FourthWheelDown LNDN
+
+bind StatusButton1 HELP
+bind StatusButton2 LEARN
+bind StatusButton3 INFO
+bind StatusButton4 PREFMENU
+
+bind StatusKey1 CSRVIS
+bind StatusKey2 ATTRVIS
+bind StatusKey3 FREEZE
+bind StatusKey4 SIXDOTS
+

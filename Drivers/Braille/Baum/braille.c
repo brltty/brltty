@@ -123,6 +123,36 @@ BEGIN_KEY_NAME_TABLE(joystick)
   KEY_NAME_ENTRY(BM_KEY_JOYSTICK+4, "Press"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(wheels)
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+0, "FirstWheelPress"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+1, "FirstWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+2, "FirstWheelDown"),
+
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+3, "SecondWheelPress"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+4, "SecondWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+5, "SecondWheelDown"),
+
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+6, "ThirdWheelPress"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+7, "ThirdWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+8, "ThirdWheelDown"),
+
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+9, "FourthWheelPress"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+10, "FourthWheelUp"),
+  KEY_NAME_ENTRY(BM_KEY_WHEEL+11, "FourthWheelDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(status)
+  KEY_NAME_ENTRY(BM_KEY_STATUS+0, "StatusButton1"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+1, "StatusButton2"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+2, "StatusButton3"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+3, "StatusButton4"),
+
+  KEY_NAME_ENTRY(BM_KEY_STATUS+4, "StatusKey1"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+5, "StatusKey2"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+6, "StatusKey3"),
+  KEY_NAME_ENTRY(BM_KEY_STATUS+7, "StatusKey4"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(BM_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
@@ -143,6 +173,8 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(buttons),
   KEY_NAME_TABLE(entry),
   KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(wheels),
+  KEY_NAME_TABLE(status),
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(horizontal),
   KEY_NAME_TABLE(vertical),
@@ -308,11 +340,6 @@ updateNavigationKeys (const unsigned char *new, unsigned char base, unsigned cha
 static void
 updateDisplayKeys (unsigned char new) {
   updateNavigationKeys(&new, BM_KEY_DISPLAY, BM_KEYS_DISPLAY);
-}
-
-static void
-updateCommandKeys (unsigned char new) {
-  updateNavigationKeys(&new, BM_KEY_COMMAND, BM_KEYS_COMMAND);
 }
 
 static void
@@ -588,7 +615,7 @@ typedef union {
       unsigned char routingKey;
       unsigned char frontRockers[1];
       unsigned char backRockers[1];
-      unsigned char commandKeys;
+      unsigned char commandKeys[1];
       unsigned char frontButtons[2];
       unsigned char backButtons[2];
       unsigned char entryKeys[2];
@@ -1211,6 +1238,27 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 
       doDisplay:
         if (flags & BAUM_DRF_WheelsChanged) {
+          unsigned char key = BM_KEY_WHEEL;
+
+          while (wheels > 0) {
+            signed char count = *wheel;
+
+            while (count > 0) {
+              enqueueKeyEvent(BM_SET_NavigationKeys, key+1, 1);
+              enqueueKeyEvent(BM_SET_NavigationKeys, key+1, 0);
+              count -= 1;
+            }
+
+            while (count < 0) {
+              enqueueKeyEvent(BM_SET_NavigationKeys, key+2, 1);
+              enqueueKeyEvent(BM_SET_NavigationKeys, key+2, 0);
+              count += 1;
+            }
+
+            wheels -= 1;
+            wheel += 1;
+            key += BM_WHEEL_KEYS;
+          }
         }
 
         if (flags & BAUM_DRF_ButtonsChanged) {
@@ -1229,7 +1277,8 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 
       case BAUM_MODULE_Status:
         if (packet->data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged) {
-          updateCommandKeys(packet->data.values.modular.data.registers.status.buttons);
+          updateNavigationKeys(&packet->data.values.modular.data.registers.status.buttons,
+                               BM_KEY_STATUS, BM_KEYS_STATUS);
         }
 
         break;
@@ -1423,7 +1472,8 @@ updateBaumKeys (BrailleDisplay *brl) {
       }
 
       case BAUM_RSP_CommandKeys:
-        updateCommandKeys(packet.data.values.commandKeys);
+        updateNavigationKeys(packet.data.values.commandKeys,
+                             BM_KEY_COMMAND, BM_KEYS_COMMAND);
         continue;
 
       case BAUM_RSP_FrontRockers:
