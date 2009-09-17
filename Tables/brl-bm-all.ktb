@@ -150,12 +150,19 @@ bind Display4+Display6+!RoutingKey GOTOMARK
 
 bind !FirstWheelUp LNUP
 bind !FirstWheelDown LNDN
+bind !FirstWheelPress HOME
+
 bind !SecondWheelUp LNUP
 bind !SecondWheelDown LNDN
+bind !SecondWheelPress HOME
+
 bind !ThirdWheelUp LNUP
 bind !ThirdWheelDown LNDN
+bind !ThirdWheelPress HOME
+
 bind !FourthWheelUp LNUP
 bind !FourthWheelDown LNDN
+bind !FourthWheelPress HOME
 
 bind StatusButton1 HELP
 bind StatusButton2 LEARN
