@@ -104,20 +104,10 @@ typedef struct {
 } LineProcessingData;
 
 static int
-contractLine (char *line, void *data) {
+contractWcharLine (const wchar_t *line, void *data) {
   LineProcessingData *lpd = data;
-  int lineLength = strlen(line);
-  wchar_t inputCharacters[lineLength];
-  const wchar_t *inputBuffer = inputCharacters;
-
-  {
-    int i;
-    for (i=0; i<lineLength; i+=1) {
-      wint_t character = convertCharToWchar(line[i]);
-      if (character == WEOF) character = UNICODE_REPLACEMENT_CHARACTER;
-      inputCharacters[i] = character;
-    }
-  }
+  int lineLength = wcslen(line);
+  const wchar_t *inputBuffer = line;
 
   while (lineLength) {
     int inputCount = lineLength;
@@ -170,6 +160,21 @@ contractLine (char *line, void *data) {
   }
 
   return 1;
+}
+
+static int
+contractUtf8Line (const char *line, void *data) {
+  size_t count = strlen(line) + 1;
+  wchar_t buffer[count];
+  wchar_t *characters = buffer;
+
+  convertStringToWchars(&line, &characters, count);
+  return contractWcharLine(buffer, data);
+}
+
+static int
+contractLine (char *line, void *data) {
+  return contractUtf8Line(line, data);
 }
 
 static int
