@@ -232,6 +232,7 @@ typedef struct {
   int (*probeDisplay) (BrailleDisplay *brl);
   void (*updateKeys) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl);
+  int (*writeCellRange) (BrailleDisplay *brl, int start, int count);
 } ProtocolOperations;
 
 typedef struct {
@@ -356,19 +357,25 @@ updateCells (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
-translateCells (int start, int count) {
-  while (count-- > 0) {
-    externalCells[start] = outputTable[internalCells[start]];
-    ++start;
+static int
+updateCellRange (BrailleDisplay *brl, int start, int count) {
+  if (count) {
+    do {
+      externalCells[start] = outputTable[internalCells[start]];
+      start += 1;
+    } while (--count);
+
     cellsUpdated = 1;
+    if (!protocol->writeCellRange(brl, start, count)) return 0;
   }
+
+  return 1;
 }
 
-static void
-clearCells (int start, int count) {
+static int
+clearCellRange (BrailleDisplay *brl, int start, int count) {
   memset(&internalCells[start], 0, count);
-  translateCells(start, count);
+  return updateCellRange(brl, start, count);
 }
 
 static void
@@ -395,7 +402,7 @@ static void
 changeCellCount (BrailleDisplay *brl, int count) {
   if (count != cellCount) {
     if (count > cellCount) {
-      clearCells(cellCount, count-cellCount);
+      clearCellRange(brl, cellCount, count-cellCount);
 
       {
         int number;
@@ -700,6 +707,7 @@ typedef enum {
   BAUM_DEVICE_Modular,
   BAUM_DEVICE_Generic
 } BaumDeviceType;
+
 static BaumDeviceType baumDeviceType;
 
 typedef enum {
@@ -1064,6 +1072,131 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 }
 
 static int
+writeBaumModuleRegistrationCommand (
+  BrailleDisplay *brl,
+  uint16_t moduleIdentifier, uint16_t serialNumber,
+  BaumModuleRegistrationCommand command
+) {
+  const unsigned char request[] = {
+    BAUM_REQ_ModuleRegistration,
+    5, /* data length */
+    MAKE_BAUM_INTEGER(moduleIdentifier),
+    MAKE_BAUM_INTEGER(serialNumber),
+    command
+  };
+
+  return writeBaumPacket(brl, request, sizeof(request));
+}
+
+static int
+writeBaumDataRegisters (
+  BrailleDisplay *brl,
+  const BaumModuleRegistration *bmr,
+  const unsigned char *registers,
+  unsigned char start, unsigned char count
+) {
+  const BaumModuleDescription *bmd = bmr->description;
+
+  if (bmd) {
+    if (count < bmd->cellCount) count = bmd->cellCount;
+
+    if (count) {
+      unsigned char packet[2 + 7 + count];
+      unsigned char *byte = packet;
+
+      *byte++ = BAUM_REQ_DataRegisters;
+      *byte++ = 7 + count;
+
+      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmd->identifier);
+      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmd->identifier);
+
+      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmr->serialNumber);
+      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmr->serialNumber);
+
+      *byte++ = BAUM_DRC_Write;
+      *byte++ = start;
+      *byte++ = count;
+
+      memcpy(byte, registers, count);
+      byte += count;
+
+      if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+typedef struct {
+  int (*writeAllCells) (BrailleDisplay *brl);
+  int (*writeCellRange) (BrailleDisplay *brl, int start, int count);
+} BaumDeviceOperations;
+
+static int
+writeBaumCells_all (BrailleDisplay *brl) {
+  unsigned char packet[1 + cellCount];
+  unsigned char *byte = packet;
+
+  *byte++ = BAUM_REQ_DisplayData;
+
+  memcpy(byte, externalCells, cellCount);
+  byte += cellCount;
+
+  return writeBaumPacket(brl, packet, byte-packet);
+}
+
+static int
+writeBaumCells_start (BrailleDisplay *brl) {
+  unsigned char packet[1 + 1 + cellCount];
+  unsigned char *byte = packet;
+
+  *byte++ = BAUM_REQ_DisplayData;
+  *byte++ = 0;
+
+  memcpy(byte, externalCells, cellCount);
+  byte += cellCount;
+
+  return writeBaumPacket(brl, packet, byte-packet);
+}
+
+static int
+writeBaumCells_modular (BrailleDisplay *brl, int start, int count) {
+  if (start < brl->textColumns) {
+    int amount = MIN(count, brl->textColumns-start);
+
+    if (amount > 0) {
+      if (!writeBaumDataRegisters(brl, &baumDisplayModule, &externalCells[start], start, amount)) return 0;
+      start += amount;
+      count -= amount;
+    }
+  }
+
+  if (count > 0) {
+    if (!writeBaumDataRegisters(brl, &baumStatusModule, &externalCells[start], start-brl->textColumns, count)) return 0;
+  }
+
+  return 1;
+}
+
+static const BaumDeviceOperations baumDeviceOperations[] = {
+  [BAUM_DEVICE_Inka] = {
+    .writeAllCells = writeBaumCells_start
+  }
+  ,
+  [BAUM_DEVICE_DM80P] = {
+    .writeAllCells = writeBaumCells_start
+  }
+  ,
+  [BAUM_DEVICE_Modular] = {
+    .writeCellRange = writeBaumCells_modular
+  }
+  ,
+  [BAUM_DEVICE_Generic] = {
+    .writeAllCells = writeBaumCells_all
+  }
+};
+
+static int
 setBaumMode (BrailleDisplay *brl, unsigned char mode, unsigned char setting) {
   const unsigned char request[] = {BAUM_REQ_SetMode, mode, setting};
   return writeBaumPacket(brl, request, sizeof(request));
@@ -1103,61 +1236,6 @@ static void
 setInkaSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize) {
   newSettings ^= 0X0F;
   setBaumSwitches(brl, ((newSettings & 0X03) | ((newSettings & 0X0C) << 4)), initialize);
-}
-
-static int
-writeBaumModuleRegistrationCommand (
-  BrailleDisplay *brl,
-  uint16_t moduleIdentifier, uint16_t serialNumber,
-  BaumModuleRegistrationCommand command
-) {
-  const unsigned char request[] = {
-    BAUM_REQ_ModuleRegistration,
-    5, /* data length */
-    MAKE_BAUM_INTEGER(moduleIdentifier),
-    MAKE_BAUM_INTEGER(serialNumber),
-    command
-  };
-
-  return writeBaumPacket(brl, request, sizeof(request));
-}
-
-static int
-writeBaumDataRegisters (
-  BrailleDisplay *brl,
-  const BaumModuleRegistration *bmr,
-  const unsigned char *registers, unsigned char count
-) {
-  const BaumModuleDescription *bmd = bmr->description;
-
-  if (bmd) {
-    if (count < bmd->cellCount) count = bmd->cellCount;
-
-    if (count) {
-      unsigned char packet[2 + 7 + count];
-      unsigned char *byte = packet;
-
-      *byte++ = BAUM_REQ_DataRegisters;
-      *byte++ = 7 + count;
-
-      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmd->identifier);
-      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmd->identifier);
-
-      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmr->serialNumber);
-      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmr->serialNumber);
-
-      *byte++ = BAUM_DRC_Write;
-      *byte++ = 0; /* index of the first register to write */
-      *byte++ = count;
-
-      memcpy(byte, registers, count);
-      byte += count;
-
-      if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
-    }
-  }
-
-  return 1;
 }
 
 static int
@@ -1590,25 +1668,16 @@ updateBaumKeys (BrailleDisplay *brl) {
 
 static int
 writeBaumCells (BrailleDisplay *brl) {
-  if (baumDeviceType == BAUM_DEVICE_Modular) {
-    if (!writeBaumDataRegisters(brl, &baumDisplayModule, &externalCells[0], brl->textColumns)) return 0;
-    if (!writeBaumDataRegisters(brl, &baumStatusModule, &externalCells[brl->textColumns], brl->statusColumns)) return 0;
-    return 1;
-  }
+  const BaumDeviceOperations *bdo = &baumDeviceOperations[baumDeviceType];
+  if (!bdo->writeAllCells) return 1;
+  return bdo->writeAllCells(brl);
+}
 
-  {
-    unsigned char packet[1 + 1 + cellCount];
-    unsigned char *byte = packet;
-
-    *byte++ = BAUM_REQ_DisplayData;
-    if ((baumDeviceType == BAUM_DEVICE_Inka) || (baumDeviceType == BAUM_DEVICE_DM80P))
-      *byte++ = 0;
-
-    memcpy(byte, externalCells, cellCount);
-    byte += cellCount;
-
-    return writeBaumPacket(brl, packet, byte-packet);
-  }
+static int
+writeBaumCellRange (BrailleDisplay *brl, int start, int count) {
+  const BaumDeviceOperations *bdo = &baumDeviceOperations[baumDeviceType];
+  if (!bdo->writeCellRange) return 1;
+  return bdo->writeCellRange(brl, start, count);
 }
 
 static const ProtocolOperations baumOperations = {
@@ -1616,7 +1685,8 @@ static const ProtocolOperations baumOperations = {
   19200, SERIAL_PARITY_NONE,
   {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readBaumPacket, writeBaumPacket,
-  probeBaumDisplay, updateBaumKeys, writeBaumCells
+  probeBaumDisplay, updateBaumKeys,
+  writeBaumCells, writeBaumCellRange
 };
 
 /* HandyTech Protocol */
@@ -1866,12 +1936,18 @@ writeHandyTechCells (BrailleDisplay *brl) {
   return writeHandyTechPacket(brl, packet, byte-packet);
 }
 
+static int
+writeHandyTechCellRange (BrailleDisplay *brl, int start, int count) {
+  return 1;
+}
+
 static const ProtocolOperations handyTechOperations = {
   "HandyTech",
   19200, SERIAL_PARITY_ODD,
   {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readHandyTechPacket, writeHandyTechPacket,
-  probeHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
+  probeHandyTechDisplay, updateHandyTechKeys,
+  writeHandyTechCells, writeHandyTechCellRange
 };
 
 /* PowerBraille Protocol */
@@ -2136,12 +2212,18 @@ writePowerBrailleCells (BrailleDisplay *brl) {
   return writePowerBraillePacket(brl, packet, byte-packet);
 }
 
+static int
+writePowerBrailleCellRange (BrailleDisplay *brl, int start, int count) {
+  return 1;
+}
+
 static const ProtocolOperations powerBrailleOperations = {
   "PowerBraille",
   9600, SERIAL_PARITY_NONE,
   {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readPowerBraillePacket, writePowerBraillePacket,
-  probePowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
+  probePowerBrailleDisplay, updatePowerBrailleKeys,
+  writePowerBrailleCells, writePowerBrailleCellRange
 };
 
 static const ProtocolOperations *const allProtocols[] = {
@@ -2546,7 +2628,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (protocol->probeDisplay(brl)) {
             logCellCount(brl);
 
-            clearCells(0, cellCount);
+            if (!clearCellRange(brl, 0, cellCount)) goto failed;
             if (!updateCells(brl)) goto failed;
 
             {
@@ -2617,8 +2699,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   count -= start;
 
   memcpy(&internalCells[start], &brl->buffer[start], count);
-  translateCells(start, count);
-
+  if (!updateCellRange(brl, start, count)) return 0;
   return updateCells(brl);
 }
 
@@ -2626,8 +2707,9 @@ static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   if (memcmp(&internalCells[brl->textColumns], status, brl->statusColumns) != 0) {
     memcpy(&internalCells[brl->textColumns], status, brl->statusColumns);
-    translateCells(brl->textColumns, brl->statusColumns);
+    if (!updateCellRange(brl, brl->textColumns, brl->statusColumns)) return 0;
   }
+
   return 1;
 }
 
