@@ -360,10 +360,13 @@ updateCells (BrailleDisplay *brl) {
 static int
 updateCellRange (BrailleDisplay *brl, int start, int count) {
   if (count) {
+    const unsigned char *source = &internalCells[start];
+    unsigned char *target = &externalCells[start];
+    const unsigned char *end = source + count;
+
     do {
-      externalCells[start] = outputTable[internalCells[start]];
-      start += 1;
-    } while (--count);
+      *target++ = outputTable[*source++];
+    } while (source != end);
 
     cellsUpdated = 1;
     if (!protocol->writeCellRange(brl, start, count)) return 0;
@@ -398,11 +401,13 @@ logCellCount (BrailleDisplay *brl) {
            cellCount, brl->textColumns, brl->statusColumns);
 }
 
-static void
+static int
 changeCellCount (BrailleDisplay *brl, int count) {
+  int ok = 1;
+
   if (count != cellCount) {
     if (count > cellCount) {
-      clearCellRange(brl, cellCount, count-cellCount);
+      if (!clearCellRange(brl, cellCount, count-cellCount)) ok = 0;
 
       {
         int number;
@@ -417,6 +422,8 @@ changeCellCount (BrailleDisplay *brl, int count) {
     logCellCount(brl);
     brl->resizeRequired = 1;
   }
+
+  return ok;
 }
 
 /* Baum Protocol */
@@ -1504,7 +1511,7 @@ updateBaumKeys (BrailleDisplay *brl) {
   while ((size = getBaumPacket(brl, &packet))) {
     switch (packet.data.code) {
       case BAUM_RSP_CellCount:
-        changeCellCount(brl, packet.data.values.cellCount);
+        if (!changeCellCount(brl, packet.data.values.cellCount)) return;
         continue;
 
       case BAUM_RSP_DeviceIdentity:
@@ -1646,7 +1653,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         if (handleBaumModuleRegistrationEvent(brl, &packet)) {
         }
 
-        changeCellCount(brl, getBaumModuleCellCount());
+        if (!changeCellCount(brl, getBaumModuleCellCount())) return;
         continue;
 
       case BAUM_RSP_DataRegisters:
@@ -1874,7 +1881,7 @@ updateHandyTechKeys (BrailleDisplay *brl) {
         const HandyTechModelEntry *model = findHandyTechModel(packet.data.values.identity);
         if (model && (model != ht)) {
           ht = model;
-          changeCellCount(brl, ht->textCount);
+          if (!changeCellCount(brl, ht->textCount)) return;
         }
         continue;
       }
@@ -2137,7 +2144,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl) {
     if (!packet.data.zero) {
       switch (packet.data.code) {
         case PB_RSP_IDENTITY:
-          changeCellCount(brl, packet.data.values.identity.cells);
+          if (!changeCellCount(brl, packet.data.values.identity.cells)) return;
           continue;
 
         case PB_RSP_SENSORS:
