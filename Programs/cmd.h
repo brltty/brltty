@@ -33,8 +33,9 @@ typedef struct {
   int code;
   unsigned isMotion:1;
   unsigned isToggle:1;
-  unsigned isCharacter:1;
-  unsigned isBase:1;
+  unsigned isColumn:1;
+  unsigned isRow:1;
+  unsigned isOffset:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];

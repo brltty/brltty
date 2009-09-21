@@ -18,3 +18,5 @@
 
 # This key subtable is for Baum displays which have vertical sensors.
 
+bind LeftSensor GOTOLINE+toleft
+bind RightSensor GOTOLINE

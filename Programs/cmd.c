@@ -160,8 +160,27 @@ describeCommand (int command, char *buffer, size_t size, int details) {
     }
     buffer += length, size -= length;
 
+    if (cmd->isMotion) {
+      if (command & BRL_FLG_MOTION_ROUTE) {
+        snprintf(buffer, size, ", drag cursor%n", &length);
+        buffer += length, size -= length;
+      }
+
+      if (cmd->isRow) {
+        if (command & BRL_FLG_LINE_SCALED) {
+          snprintf(buffer, size, " (scaled)%n", &length);
+          buffer += length, size -= length;
+        }
+
+        if (command & BRL_FLG_LINE_TOLEFT) {
+          snprintf(buffer, size, ", beginning of line%n", &length);
+          buffer += length, size -= length;
+        }
+      }
+    }
+
     if (details) {
-      if (cmd->isCharacter || cmd->isBase) {
+      if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         snprintf(buffer, size, " #%u",
                  arg - (cmd->code & BRL_MSK_ARG) + 1);
       } else if (blk) {

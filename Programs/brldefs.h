@@ -203,19 +203,19 @@ typedef enum {
 #define BRL_BLK_CUTRECT   0X0400 /* rectangular cut to character */
 #define BRL_BLK_CUTLINE   0X0500 /* linear cut to character */
 #define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
-#define BRL_BLK_PRINDENT  0X0700 /* go up to line without greater indent than character */
-#define BRL_BLK_NXINDENT  0X0800 /* go down to line without greater indent than character */
+#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line with less indent than character */
+#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line with less indent than character */
 #define BRL_BLK_DESCCHAR  0X0900 /* describe character */
 #define BRL_BLK_SETLEFT   0X0A00 /* place left end of window at character */
 #define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
 #define BRL_BLK_GOTOMARK  0X0C00 /* go to remembered window position */
 
-#define BRL_BLK_GOTOLINE  0X0D00 /* go to line */
+#define BRL_BLK_GOTOLINE  0X0D00 /* go to selected line */
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
-#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to line with different character */
-#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to line with different character */
+#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to nearest line with different character */
+#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to nearest line with different character */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* input keyboard key */

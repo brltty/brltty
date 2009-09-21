@@ -455,7 +455,6 @@ allocateCommandTable (KeyTableData *ktd) {
 static int
 parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   int toggleDone = 0;
-  int motionDone = 0;
   int offsetDone = 0;
 
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
@@ -507,36 +506,40 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     }
   notToggle:
 
-    if ((*command)->isMotion && !motionDone) {
-      if (isKeyword(WS_C("route"), modifier.characters, modifier.length)) {
+    if ((*command)->isMotion) {
+      if (isKeyword(WS_C("route"), modifier.characters, modifier.length) &&
+          !(*value & BRL_FLG_MOTION_ROUTE)) {
         *value |= BRL_FLG_MOTION_ROUTE;
-      } else {
-        goto notMotion;
+        continue;
       }
 
-      motionDone = 1;
-      continue;
-    }
-  notMotion:
+      if ((*command)->isRow) {
+        if (isKeyword(WS_C("scaled"), modifier.characters, modifier.length) &&
+            !(*value & BRL_FLG_LINE_SCALED)) {
+          *value |= BRL_FLG_LINE_SCALED;
+          continue;
+        }
 
-    if ((*command)->isBase && !offsetDone) {
-      unsigned int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
-      unsigned int offset = 0;
-      int index;
-
-      for (index=0; index<modifier.length; index+=1) {
-        wchar_t character = modifier.characters[index];
-
-        if (character < WC_C('0')) goto notOffset;
-        if (character > WC_C('9')) goto notOffset;
-        if ((offset = (offset * 10) + (character - WC_C('0'))) > maximum) goto notOffset;
+        if (isKeyword(WS_C("toleft"), modifier.characters, modifier.length) &&
+            !(*value & BRL_FLG_LINE_TOLEFT)) {
+          *value |= BRL_FLG_LINE_TOLEFT;
+          continue;
+        }
       }
-
-      *value += offset;
-      offsetDone = 1;
-      continue;
     }
-  notOffset:
+
+    if ((*command)->isOffset && !offsetDone) {
+      int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
+      int offset;
+
+      if (isNumber(&offset, modifier.characters, modifier.length)) {
+        if ((offset >= 0) && (offset <= maximum)) {
+          *value += offset;
+          offsetDone = 1;
+          continue;
+        }
+      }
+    }
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
     return 0;
@@ -583,7 +586,7 @@ processBindOperands (DataFile *file, void *data) {
     if (getKeysOperand(file, &binding->keys, ktd)) {
       if (getCommandOperand(file, &binding->command, ktd)) {
         if (!binding->keys.set)
-          if (getCommandEntry(binding->command)->isCharacter)
+          if (getCommandEntry(binding->command)->isColumn)
             binding->command |= BRL_MSK_ARG;
 
         ctx->keyBindingCount += 1;
