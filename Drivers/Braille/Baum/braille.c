@@ -2201,18 +2201,35 @@ updatePowerBrailleKeys (BrailleDisplay *brl) {
        * status for as long as there is at least one key pressed. Baum's PB
        * emulation, however, doesn't do this.
        *
-       * Let's make basic functions act on key presses then.  The limited
-       * set of single key bindings will work just fine.  If one is quick
-       * enough to press, then release, combined keys all at the same time
-       * then combined key functions might even work.  The Brailliant display
-       * on which this was tested appears to delay any key update, possibly to
-       * mitigate the issue, making combined keys somewhat usable.
+       * Let's treat each packet as a discrete set of press/release events.
+       * The limited set of single key bindings will work just fine.
+       * Multi-key combinations won't work very well at all, though,
+       * because it's unlikely that the user will be able to press and/or
+       * release all of the keys quickly enough, and because releasing one
+       * key before the others will generate press events for the rest.
        *
        * This is far from perfect, but that's the best we can do. The PB
        * emulation modes (either PB1 or PB2) should simply be avoided
        * whenever possible, and BAUM or HT should be used instead.
        */
-      updateDisplayKeys(keys);
+
+      {
+        const BM_KeySet set = BM_SET_NavigationKeys;
+        unsigned char pressedKeys[BM_KEYS_DISPLAY];
+        unsigned char pressedCount = 0;
+        unsigned char offset;
+
+        for (offset=0; offset<BM_KEYS_DISPLAY; offset+=1) {
+          if (keys & (1 << offset)) {
+            unsigned char key = BM_KEY_DISPLAY + offset;
+
+            enqueueKeyEvent(set, key, 1);
+            pressedKeys[pressedCount++] = key;
+          }
+        }
+
+        while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
+      }
       continue;
     }
 
