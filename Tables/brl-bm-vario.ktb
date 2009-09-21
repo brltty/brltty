@@ -18,11 +18,6 @@
 
 title Baum Vario
 
-
-####################
-# Default Bindings #
-####################
-
 bind Display2 FWINLT
 bind Display5 FWINRT
 
