@@ -56,7 +56,7 @@ BEGIN_KEY_NAME_TABLE(command)
   KEY_NAME_ENTRY(BM_KEY_COMMAND+6, "Command7"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(rockers)
+BEGIN_KEY_NAME_TABLE(front6)
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+0, "FrontRightDown"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+1, "FrontRightUp"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+2, "FrontMiddleDown"),
@@ -72,7 +72,7 @@ BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+5, "BackLeftUp"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(buttons)
+BEGIN_KEY_NAME_TABLE(front10)
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+0, "Front10"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+1, "Front9"),
   KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+2, "Front8"),
@@ -166,32 +166,51 @@ BEGIN_KEY_NAME_TABLE(vertical)
   KEY_SET_ENTRY(BM_SET_RightSensors, "RightSensor"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
+BEGIN_KEY_NAME_TABLES(inka)
   KEY_NAME_TABLE(display),
-  KEY_NAME_TABLE(command),
-  KEY_NAME_TABLE(rockers),
-  KEY_NAME_TABLE(buttons),
-  KEY_NAME_TABLE(entry),
-  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(horizontal),
+  KEY_NAME_TABLE(vertical),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(dm80p)
+  KEY_NAME_TABLE(display),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pro)
+  KEY_NAME_TABLE(display),
   KEY_NAME_TABLE(wheels),
   KEY_NAME_TABLE(status),
   KEY_NAME_TABLE(routing),
-  KEY_NAME_TABLE(horizontal),
-  KEY_NAME_TABLE(vertical),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(default)
+  KEY_NAME_TABLE(display),
+  KEY_NAME_TABLE(command),
+  KEY_NAME_TABLE(front6),
+  KEY_NAME_TABLE(front10),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(vario)
   KEY_NAME_TABLE(display),
   KEY_NAME_TABLE(command),
-  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(front6),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(inka)
+DEFINE_KEY_TABLE(dm80p)
+DEFINE_KEY_TABLE(pro)
+DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(vario)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(inka),
+  &KEY_TABLE_DEFINITION(dm80p),
+  &KEY_TABLE_DEFINITION(pro),
+  &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(vario),
 END_KEY_TABLE_LIST
 
@@ -712,7 +731,7 @@ typedef enum {
   BAUM_DEVICE_Inka,
   BAUM_DEVICE_DM80P,
   BAUM_DEVICE_Modular,
-  BAUM_DEVICE_Generic
+  BAUM_DEVICE_Default
 } BaumDeviceType;
 
 static BaumDeviceType baumDeviceType;
@@ -1135,6 +1154,7 @@ writeBaumDataRegisters (
 }
 
 typedef struct {
+  const KeyTableDefinition *keyTableDefinition;
   int (*writeAllCells) (BrailleDisplay *brl);
   int (*writeCellRange) (BrailleDisplay *brl, int start, int count);
 } BaumDeviceOperations;
@@ -1187,18 +1207,22 @@ writeBaumCells_modular (BrailleDisplay *brl, int start, int count) {
 
 static const BaumDeviceOperations baumDeviceOperations[] = {
   [BAUM_DEVICE_Inka] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(inka),
     .writeAllCells = writeBaumCells_start
   }
   ,
   [BAUM_DEVICE_DM80P] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(dm80p),
     .writeAllCells = writeBaumCells_start
   }
   ,
   [BAUM_DEVICE_Modular] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(pro),
     .writeCellRange = writeBaumCells_modular
   }
   ,
-  [BAUM_DEVICE_Generic] = {
+  [BAUM_DEVICE_Default] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(default),
     .writeAllCells = writeBaumCells_all
   }
 };
@@ -1385,7 +1409,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
   do {
     int identityCellCount = 0;
 
-    baumDeviceType = BAUM_DEVICE_Generic;
+    baumDeviceType = BAUM_DEVICE_Default;
     cellCount = 0;
 
     {
@@ -2644,7 +2668,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               if (useVarioKeys) {
                 ktd = &KEY_TABLE_DEFINITION(vario);
               } else {
-                ktd = &KEY_TABLE_DEFINITION(all);
+                ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
               }
 
               brl->keyBindings = ktd->bindings;

@@ -16,28 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum
-
-
-####################
-# Default Bindings #
-####################
-
-map Dot1 DOT1
-map Dot2 DOT2
-map Dot3 DOT3
-map Dot4 DOT4
-map Dot5 DOT5
-map Dot6 DOT6
-map Dot7 DOT7
-map Dot8 DOT8
-
-map F2 DOT7
-map F3 DOT8
-
-map B9 SPACE
-map B10 SPACE
-map B11 SPACE
+# This key subtable is for Baum displays which have display keys.
 
 bind Display2 FWINLT
 bind Display5 FWINRT
@@ -106,71 +85,4 @@ bind Display3+Display5 SAY_LINE
 bind Display3+Display5+Display4 SAY_ABOVE
 bind Display3+Display5+Display6 SAY_BELOW
 bind Display3+Display4+Display6 AUTOSPEAK
-
-bind Press KEY_ENTER
-bind Up KEY_CURSOR_UP
-bind Down KEY_CURSOR_DOWN
-bind Left KEY_CURSOR_LEFT
-bind Right KEY_CURSOR_RIGHT
-
-bind Dot4+Up TOP_LEFT
-bind Dot4+Down BOT_LEFT
-bind Dot4+Left LNBEG
-bind Dot4+Right LNEND
-
-bind Dot5+Up LNUP
-bind Dot5+Down LNDN
-bind Dot5+Left FWINLT
-bind Dot5+Right FWINRT
-
-bind Dot6+Up WINUP
-bind Dot6+Down WINDN
-bind Dot6+Left CHRLT
-bind Dot6+Right CHRRT
-
-bind !RoutingKey ROUTE
-bind !HorizontalSensor ROUTE
-
-bind Display1+!RoutingKey CUTBEGIN
-bind Display2+!RoutingKey CUTAPPEND
-bind Display4+!RoutingKey CUTLINE
-bind Display5+!RoutingKey CUTRECT
-
-bind Display3+!RoutingKey DESCCHAR
-bind Display6+!RoutingKey SETLEFT
-
-bind Display2+Display1+!RoutingKey PRINDENT
-bind Display2+Display3+!RoutingKey NXINDENT
-
-bind Display5+Display4+!RoutingKey PRDIFCHAR
-bind Display5+Display6+!RoutingKey NXDIFCHAR
-
-bind Display1+Display3+!RoutingKey SETMARK
-bind Display4+Display6+!RoutingKey GOTOMARK
-
-bind !FirstWheelUp LNUP
-bind !FirstWheelDown LNDN
-bind !FirstWheelPress HOME
-
-bind !SecondWheelUp LNUP
-bind !SecondWheelDown LNDN
-bind !SecondWheelPress HOME
-
-bind !ThirdWheelUp LNUP
-bind !ThirdWheelDown LNDN
-bind !ThirdWheelPress HOME
-
-bind !FourthWheelUp LNUP
-bind !FourthWheelDown LNDN
-bind !FourthWheelPress HOME
-
-bind StatusButton1 HELP
-bind StatusButton2 LEARN
-bind StatusButton3 INFO
-bind StatusButton4 PREFMENU
-
-bind StatusKey1 CSRVIS
-bind StatusKey2 ATTRVIS
-bind StatusKey3 FREEZE
-bind StatusKey4 SIXDOTS
 

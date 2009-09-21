@@ -16,33 +16,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum Vario
+# This key subtable is for Baum displays which have command keys.
 
+map Command4 SPACE
+map Command3 DOT1
+map Command2 DOT2
+map Command1 DOT3
+map Command5 DOT4
+map Command6 DOT5
+map Command7 DOT6
 
-####################
-# Default Bindings #
-####################
+bind Command4+Command5 KEY_ENTER
+bind Command4+Command2 KEY_BACKSPACE
+bind Command4+Command6 KEY_TAB
+bind Command4+Command1 KEY_CURSOR_LEFT
+bind Command4+Command7 KEY_CURSOR_RIGHT
 
-bind Display2 FWINLT
-bind Display5 FWINRT
-
-bind Display1 LNUP
-bind Display3 LNDN
-
-bind Display4 KEY_CURSOR_UP
-bind Display6 KEY_CURSOR_DOWN
-
-bind Display1+Display3 HOME
-bind Display2+Display1 TOP_LEFT
-bind Display2+Display3 BOT_LEFT
-
-bind Display1+Display4 PREFMENU
-bind Display1+Display2+Display4 FREEZE
-bind Display1+Display2+Display5 HELP
-bind Display2+Display4 INFO
-bind Display2+Display3+Display4+Display5 CSRTRK
-bind Display1+Display3+Display6 ATTRVIS
-bind Display1+Display2+Display3+Display6 DISPMD
-
-include brl-bm-command.kti
-include brl-bm-routing.kti

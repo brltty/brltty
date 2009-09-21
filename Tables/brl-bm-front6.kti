@@ -16,33 +16,5 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum Vario
+# This key subtable is for Baum displays which have 6 front keys.
 
-
-####################
-# Default Bindings #
-####################
-
-bind Display2 FWINLT
-bind Display5 FWINRT
-
-bind Display1 LNUP
-bind Display3 LNDN
-
-bind Display4 KEY_CURSOR_UP
-bind Display6 KEY_CURSOR_DOWN
-
-bind Display1+Display3 HOME
-bind Display2+Display1 TOP_LEFT
-bind Display2+Display3 BOT_LEFT
-
-bind Display1+Display4 PREFMENU
-bind Display1+Display2+Display4 FREEZE
-bind Display1+Display2+Display5 HELP
-bind Display2+Display4 INFO
-bind Display2+Display3+Display4+Display5 CSRTRK
-bind Display1+Display3+Display6 ATTRVIS
-bind Display1+Display2+Display3+Display6 DISPMD
-
-include brl-bm-command.kti
-include brl-bm-routing.kti

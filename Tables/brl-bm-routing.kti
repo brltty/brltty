@@ -16,33 +16,24 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum Vario
+# This key subtable is for Baum displays which have routing keys.
 
+bind !RoutingKey ROUTE
 
-####################
-# Default Bindings #
-####################
+bind Display1+!RoutingKey CUTBEGIN
+bind Display2+!RoutingKey CUTAPPEND
+bind Display4+!RoutingKey CUTLINE
+bind Display5+!RoutingKey CUTRECT
 
-bind Display2 FWINLT
-bind Display5 FWINRT
+bind Display3+!RoutingKey DESCCHAR
+bind Display6+!RoutingKey SETLEFT
 
-bind Display1 LNUP
-bind Display3 LNDN
+bind Display2+Display1+!RoutingKey PRINDENT
+bind Display2+Display3+!RoutingKey NXINDENT
 
-bind Display4 KEY_CURSOR_UP
-bind Display6 KEY_CURSOR_DOWN
+bind Display5+Display4+!RoutingKey PRDIFCHAR
+bind Display5+Display6+!RoutingKey NXDIFCHAR
 
-bind Display1+Display3 HOME
-bind Display2+Display1 TOP_LEFT
-bind Display2+Display3 BOT_LEFT
+bind Display1+Display3+!RoutingKey SETMARK
+bind Display4+Display6+!RoutingKey GOTOMARK
 
-bind Display1+Display4 PREFMENU
-bind Display1+Display2+Display4 FREEZE
-bind Display1+Display2+Display5 HELP
-bind Display2+Display4 INFO
-bind Display2+Display3+Display4+Display5 CSRTRK
-bind Display1+Display3+Display6 ATTRVIS
-bind Display1+Display2+Display3+Display6 DISPMD
-
-include brl-bm-command.kti
-include brl-bm-routing.kti

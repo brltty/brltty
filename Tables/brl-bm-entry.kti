@@ -16,33 +16,42 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum Vario
+# This key subtable is for Baum displays which have entry keys.
 
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
 
-####################
-# Default Bindings #
-####################
+map F2 DOT7
+map F3 DOT8
 
-bind Display2 FWINLT
-bind Display5 FWINRT
+map B9 SPACE
+map B10 SPACE
+map B11 SPACE
 
-bind Display1 LNUP
-bind Display3 LNDN
+bind Press KEY_ENTER
+bind Up KEY_CURSOR_UP
+bind Down KEY_CURSOR_DOWN
+bind Left KEY_CURSOR_LEFT
+bind Right KEY_CURSOR_RIGHT
 
-bind Display4 KEY_CURSOR_UP
-bind Display6 KEY_CURSOR_DOWN
+bind Dot4+Up TOP_LEFT
+bind Dot4+Down BOT_LEFT
+bind Dot4+Left LNBEG
+bind Dot4+Right LNEND
 
-bind Display1+Display3 HOME
-bind Display2+Display1 TOP_LEFT
-bind Display2+Display3 BOT_LEFT
+bind Dot5+Up LNUP
+bind Dot5+Down LNDN
+bind Dot5+Left FWINLT
+bind Dot5+Right FWINRT
 
-bind Display1+Display4 PREFMENU
-bind Display1+Display2+Display4 FREEZE
-bind Display1+Display2+Display5 HELP
-bind Display2+Display4 INFO
-bind Display2+Display3+Display4+Display5 CSRTRK
-bind Display1+Display3+Display6 ATTRVIS
-bind Display1+Display2+Display3+Display6 DISPMD
+bind Dot6+Up WINUP
+bind Dot6+Down WINDN
+bind Dot6+Left CHRLT
+bind Dot6+Right CHRRT
 
-include brl-bm-command.kti
-include brl-bm-routing.kti
