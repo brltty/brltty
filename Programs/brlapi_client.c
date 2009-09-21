@@ -1626,7 +1626,7 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
           case 0:
             FLAG(TOGGLE_ON);
             FLAG(TOGGLE_OFF);
-            FLAG(ROUTE);
+            FLAG(MOTION_ROUTE);
             break;
 
           case BRLAPI_KEY_CMD_GOTOLINE:

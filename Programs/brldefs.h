@@ -185,7 +185,7 @@ typedef enum {
 #define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
 /* For automatic cursor routing. */
-#define BRL_FLG_ROUTE 0X040000 /* bring cursor into window after function */
+#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring cursor into window after function */
 
 #define BRL_FLG_REPEAT_INITIAL 0X800000 /* execute command on key press */
 #define BRL_FLG_REPEAT_DELAY   0X400000 /* wait before repeating */

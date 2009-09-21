@@ -509,7 +509,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
     if ((*command)->isMotion && !motionDone) {
       if (isKeyword(WS_C("route"), modifier.characters, modifier.length)) {
-        *value |= BRL_FLG_ROUTE;
+        *value |= BRL_FLG_MOTION_ROUTE;
       } else {
         goto notMotion;
       }

@@ -2323,7 +2323,7 @@ doCommand:
   }
 
   if (!(command & BRL_MSK_BLK)) {
-    if (command & BRL_FLG_ROUTE) {
+    if (command & BRL_FLG_MOTION_ROUTE) {
       int left = p->winx;
       int right = MIN(left+textCount, scr.cols) - 1;
 
