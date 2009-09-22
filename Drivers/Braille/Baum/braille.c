@@ -38,62 +38,48 @@ typedef enum {
 #include "brldefs-bm.h"
 
 BEGIN_KEY_NAME_TABLE(display)
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+0, "Display1"),
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+1, "Display2"),
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+2, "Display3"),
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+3, "Display4"),
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "Display5"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+5, "Display6"),
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "Display5"),
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+3, "Display4"),
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+2, "Display3"),
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+1, "Display2"),
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+0, "Display1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(command)
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+0, "Command1"),
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+1, "Command2"),
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+2, "Command3"),
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+3, "Command4"),
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+4, "Command5"),
-  KEY_NAME_ENTRY(BM_KEY_COMMAND+5, "Command6"),
   KEY_NAME_ENTRY(BM_KEY_COMMAND+6, "Command7"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+5, "Command6"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+4, "Command5"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+3, "Command4"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+2, "Command3"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+1, "Command2"),
+  KEY_NAME_ENTRY(BM_KEY_COMMAND+0, "Command1"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(front6)
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+0, "Front6"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+1, "Front5"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+2, "Front4"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+3, "Front3"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+4, "Front2"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT6+5, "Front1"),
-
-  KEY_NAME_ENTRY(BM_KEY_BACK6+0, "Back6"),
-  KEY_NAME_ENTRY(BM_KEY_BACK6+1, "Back5"),
-  KEY_NAME_ENTRY(BM_KEY_BACK6+2, "Back4"),
-  KEY_NAME_ENTRY(BM_KEY_BACK6+3, "Back3"),
-  KEY_NAME_ENTRY(BM_KEY_BACK6+4, "Back2"),
-  KEY_NAME_ENTRY(BM_KEY_BACK6+5, "Back1"),
+BEGIN_KEY_NAME_TABLE(front)
+  KEY_NAME_ENTRY(BM_KEY_FRONT+0, "Front10"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+1, "Front9"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+2, "Front8"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+3, "Front7"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+4, "Front6"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+5, "Front5"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+6, "Front4"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+7, "Front3"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+8, "Front2"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+9, "Front1"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(front10)
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+0, "Front10"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+1, "Front9"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+2, "Front8"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+3, "Front7"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+4, "Front6"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+5, "Front5"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+6, "Front4"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+7, "Front3"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+8, "Front2"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT10+9, "Front1"),
-
-  KEY_NAME_ENTRY(BM_KEY_BACK10+0, "Back10"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+1, "Back9"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+2, "Back8"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+3, "Back7"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+4, "Back6"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+5, "Back5"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+6, "Back4"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+7, "Back3"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+8, "Back2"),
-  KEY_NAME_ENTRY(BM_KEY_BACK10+9, "Back1"),
+BEGIN_KEY_NAME_TABLE(back)
+  KEY_NAME_ENTRY(BM_KEY_BACK+0, "Back10"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+1, "Back9"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+2, "Back8"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+3, "Back7"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+4, "Back6"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+5, "Back5"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+6, "Back4"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+7, "Back3"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+8, "Back2"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+9, "Back1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(entry)
@@ -186,8 +172,8 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(default)
   KEY_NAME_TABLE(display),
   KEY_NAME_TABLE(command),
-  KEY_NAME_TABLE(front6),
-  KEY_NAME_TABLE(front10),
+  KEY_NAME_TABLE(front),
+  KEY_NAME_TABLE(back),
   KEY_NAME_TABLE(entry),
   KEY_NAME_TABLE(joystick),
   KEY_NAME_TABLE(routing),
@@ -196,7 +182,8 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(vario)
   KEY_NAME_TABLE(display),
   KEY_NAME_TABLE(command),
-  KEY_NAME_TABLE(front6),
+  KEY_NAME_TABLE(front),
+  KEY_NAME_TABLE(back),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
@@ -1590,22 +1577,22 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       case BAUM_RSP_Front6:
         updateNavigationKeys(packet.data.values.front6,
-                             BM_KEY_FRONT6, BM_KEYS_FRONT6);
+                             BM_KEY_FRONT, 6);
         continue;
 
       case BAUM_RSP_Back6:
         updateNavigationKeys(packet.data.values.back6,
-                             BM_KEY_BACK6, BM_KEYS_FRONT6);
+                             BM_KEY_BACK, 6);
         continue;
 
       case BAUM_RSP_Front10:
         updateNavigationKeys(packet.data.values.front10,
-                             BM_KEY_FRONT10, BM_KEYS_FRONT10);
+                             BM_KEY_FRONT, 10);
         continue;
 
       case BAUM_RSP_Back10:
         updateNavigationKeys(packet.data.values.back10,
-                             BM_KEY_BACK10, BM_KEYS_FRONT10);
+                             BM_KEY_BACK, 10);
         continue;
 
       case BAUM_RSP_EntryKeys:
