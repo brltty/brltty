@@ -1983,7 +1983,7 @@ static const ProtocolOperations handyTechOperations = {
 #define PB_BUTTONS1_MARKER    0XE0
 #define PB1_BUTTONS1_Display3 0X08
 #define PB1_BUTTONS1_Display1 0X02
-#define PB2_BUTTONS1_Display6 0X04
+#define PB2_BUTTONS1_Display6 0X08
 #define PB2_BUTTONS1_Display4 0X02
 
 typedef enum {
