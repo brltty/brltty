@@ -1421,14 +1421,18 @@ doCommand:
         break;
 
       case BRL_CMD_WINUP:
-        if (p->winy == 0)
-          playTune (&tune_bounce);
-        p->winy = MAX (p->winy - verticalWindowShift, 0);
+        if (p->winy > 0) {
+          p->winy -= MIN(verticalWindowShift, p->winy);
+        } else {
+          playTune(&tune_bounce);
+        }
         break;
       case BRL_CMD_WINDN:
-        if (p->winy == scr.rows - brl.textRows)
-          playTune (&tune_bounce);
-        p->winy = MIN (p->winy + verticalWindowShift, scr.rows - brl.textRows);
+        if (p->winy < (scr.rows - brl.textRows)) {
+          p->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - p->winy));
+        } else {
+          playTune(&tune_bounce);
+        }
         break;
 
       case BRL_CMD_LNUP:
