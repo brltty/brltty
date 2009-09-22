@@ -36,6 +36,7 @@ typedef struct {
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
 #define BEGIN_KEY_NAME_TABLE(name) static KEY_NAME_TABLE_DECLARATION(name) = {
 #define END_KEY_NAME_TABLE LAST_KEY_NAME_ENTRY};
+#define KEY_NAME_SUBTABLE(name,count) (KEY_NAME_TABLE(name) + (ARRAY_COUNT(KEY_NAME_TABLE(name)) - 1 - (count)))
 
 #define KEY_NAME_TABLES(name) keyNameTables_##name
 #define KEY_NAME_TABLES_REFERENCE const KeyNameEntry *const *
