@@ -19,5 +19,5 @@
 title Baum
 
 include brl-bm-display.kti
-include brl-bm-entry.kti
+include brl-bm-keyboard.kti
 include brl-bm-routing.kti
