@@ -17,6 +17,8 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have wheels.
+note The wheels on the display module are identified by their ordinal position
+note (first through fourth) from the left.
 
 bind !FirstWheelUp LNUP
 bind !FirstWheelDown LNDN

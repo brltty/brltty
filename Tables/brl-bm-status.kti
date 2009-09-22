@@ -17,6 +17,10 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have a status module.
+note The larger controls on the status module, from left to right,
+note are named StatusButton1 through StatusButton4.
+note The smaller controls on the status module, from left to right,
+note are named StatusKey1 through StatusKey4.
 
 bind StatusButton1 HELP
 bind StatusButton2 LEARN

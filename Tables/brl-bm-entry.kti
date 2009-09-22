@@ -17,6 +17,7 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have entry keys.
+note The five joystick positions are named Left, Right, Up, Down, and Press.
 
 map Dot1 DOT1
 map Dot2 DOT2

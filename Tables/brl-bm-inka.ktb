@@ -21,3 +21,9 @@ title Baum Inka
 include brl-bm-display.kti
 include brl-bm-horizontal.kti
 include brl-bm-vertical.kti
+
+note The switches are off when to the left and on when to the right:
+note * Switch1 (upper-left): disable all sensors
+note * Switch2 (lower-left): scaled vertical sensor line selection
+note * Switch3 (upper-right): show selected horizontal sensor (all dots raised)
+note * Switch4 (lower-right): enable braille keyboard

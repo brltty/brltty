@@ -17,4 +17,10 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have 10 front keys.
+note The keys on the front are arranged as follows:
+note * Front1  Front3  Front5  Front7  Front9
+note * Front2  Front4  Front6  Front8  Front10
+note The keys on the back are arranged as follows:
+note * Back1   Back3   Back5   Back7   Back9
+note * Back2   Back4   Back6   Back8   Back10
 

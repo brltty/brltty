@@ -17,6 +17,8 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have command keys.
+note The command keys are in the middle, just behind the cursor routing keys,
+note and, from left to right, are named Command1 through Command7.
 
 map Command4 SPACE
 map Command3 DOT1
