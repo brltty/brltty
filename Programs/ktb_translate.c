@@ -475,8 +475,6 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
-  if (!listKeyboardFunctions(lgd, ctx)) return 0;
-
   {
     const KeyBinding *binding = ctx->keyBindingTable;
     unsigned int count = ctx->keyBindingCount;
@@ -524,6 +522,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
     }
   }
 
+  if (!listKeyboardFunctions(lgd, ctx)) return 0;
   return 1;
 }
 
