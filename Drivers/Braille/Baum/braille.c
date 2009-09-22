@@ -57,43 +57,43 @@ BEGIN_KEY_NAME_TABLE(command)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(front6)
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+0, "FrontRightDown"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+1, "FrontRightUp"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+2, "FrontMiddleDown"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+3, "FrontMiddleUp"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+4, "FrontLeftDown"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_ROCKERS+5, "FrontLeftUp"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+0, "Front6"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+1, "Front5"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+2, "Front4"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+3, "Front3"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+4, "Front2"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT6+5, "Front1"),
 
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+0, "BackRightDown"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+1, "BackRightUp"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+2, "BackMiddleDown"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+3, "BackMiddleUp"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+4, "BackLeftDown"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_ROCKERS+5, "BackLeftUp"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+0, "Back6"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+1, "Back5"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+2, "Back4"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+3, "Back3"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+4, "Back2"),
+  KEY_NAME_ENTRY(BM_KEY_BACK6+5, "Back1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(front10)
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+0, "Front10"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+1, "Front9"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+2, "Front8"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+3, "Front7"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+4, "Front6"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+5, "Front5"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+6, "Front4"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+7, "Front3"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+8, "Front2"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT_BUTTONS+9, "Front1"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+0, "Front10"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+1, "Front9"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+2, "Front8"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+3, "Front7"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+4, "Front6"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+5, "Front5"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+6, "Front4"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+7, "Front3"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+8, "Front2"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT10+9, "Front1"),
 
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+0, "Back10"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+1, "Back9"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+2, "Back8"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+3, "Back7"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+4, "Back6"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+5, "Back5"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+6, "Back4"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+7, "Back3"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+8, "Back2"),
-  KEY_NAME_ENTRY(BM_KEY_BACK_BUTTONS+9, "Back1"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+0, "Back10"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+1, "Back9"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+2, "Back8"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+3, "Back7"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+4, "Back6"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+5, "Back5"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+6, "Back4"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+7, "Back3"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+8, "Back2"),
+  KEY_NAME_ENTRY(BM_KEY_BACK10+9, "Back1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(entry)
@@ -492,11 +492,11 @@ typedef enum {
   BAUM_RSP_HorizontalSensor     = 0X25,
   BAUM_RSP_VerticalSensor       = 0X26,
   BAUM_RSP_RoutingKey           = 0X27,
-  BAUM_RSP_FrontRockers         = 0X28,
-  BAUM_RSP_BackRockers          = 0X29,
+  BAUM_RSP_Front6               = 0X28,
+  BAUM_RSP_Back6                = 0X29,
   BAUM_RSP_CommandKeys          = 0X2B,
-  BAUM_RSP_FrontButtons         = 0X2C,
-  BAUM_RSP_BackButtons          = 0X2D,
+  BAUM_RSP_Front10              = 0X2C,
+  BAUM_RSP_Back10               = 0X2D,
   BAUM_RSP_EntryKeys            = 0X33,
   BAUM_RSP_Joystick             = 0X34,
   BAUM_RSP_ErrorCode            = 0X40,
@@ -646,11 +646,11 @@ typedef union {
       } PACKED verticalSensor;
 
       unsigned char routingKey;
-      unsigned char frontRockers[1];
-      unsigned char backRockers[1];
+      unsigned char front6[1];
+      unsigned char back6[1];
       unsigned char commandKeys[1];
-      unsigned char frontButtons[2];
-      unsigned char backButtons[2];
+      unsigned char front10[2];
+      unsigned char back10[2];
       unsigned char entryKeys[2];
       unsigned char joystick[1];
       unsigned char errorCode;
@@ -975,8 +975,8 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_DisplayKeys:
           case BAUM_RSP_HorizontalSensor:
           case BAUM_RSP_RoutingKey:
-          case BAUM_RSP_FrontRockers:
-          case BAUM_RSP_BackRockers:
+          case BAUM_RSP_Front6:
+          case BAUM_RSP_Back6:
           case BAUM_RSP_CommandKeys:
           case BAUM_RSP_Joystick:
           case BAUM_RSP_ErrorCode:
@@ -987,8 +987,8 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_ModeSetting:
-          case BAUM_RSP_FrontButtons:
-          case BAUM_RSP_BackButtons:
+          case BAUM_RSP_Front10:
+          case BAUM_RSP_Back10:
           case BAUM_RSP_EntryKeys:
             length = 3;
             break;
@@ -1588,24 +1588,24 @@ updateBaumKeys (BrailleDisplay *brl) {
                              BM_KEY_COMMAND, BM_KEYS_COMMAND);
         continue;
 
-      case BAUM_RSP_FrontRockers:
-        updateNavigationKeys(packet.data.values.frontRockers,
-                             BM_KEY_FRONT_ROCKERS, BM_KEYS_ROCKER);
+      case BAUM_RSP_Front6:
+        updateNavigationKeys(packet.data.values.front6,
+                             BM_KEY_FRONT6, BM_KEYS_FRONT6);
         continue;
 
-      case BAUM_RSP_BackRockers:
-        updateNavigationKeys(packet.data.values.backRockers,
-                             BM_KEY_BACK_ROCKERS, BM_KEYS_ROCKER);
+      case BAUM_RSP_Back6:
+        updateNavigationKeys(packet.data.values.back6,
+                             BM_KEY_BACK6, BM_KEYS_FRONT6);
         continue;
 
-      case BAUM_RSP_FrontButtons:
-        updateNavigationKeys(packet.data.values.frontButtons,
-                             BM_KEY_FRONT_BUTTONS, BM_KEYS_BUTTON);
+      case BAUM_RSP_Front10:
+        updateNavigationKeys(packet.data.values.front10,
+                             BM_KEY_FRONT10, BM_KEYS_FRONT10);
         continue;
 
-      case BAUM_RSP_BackButtons:
-        updateNavigationKeys(packet.data.values.backButtons,
-                             BM_KEY_BACK_BUTTONS, BM_KEYS_BUTTON);
+      case BAUM_RSP_Back10:
+        updateNavigationKeys(packet.data.values.back10,
+                             BM_KEY_BACK10, BM_KEYS_FRONT10);
         continue;
 
       case BAUM_RSP_EntryKeys:
