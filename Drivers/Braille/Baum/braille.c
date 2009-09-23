@@ -38,6 +38,7 @@ typedef enum {
 #include "brldefs-bm.h"
 
 BEGIN_KEY_NAME_TABLE(display)
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+6, "Display7"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+5, "Display6"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "Display5"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+3, "Display4"),
@@ -153,24 +154,24 @@ BEGIN_KEY_NAME_TABLE(vertical)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(inka)
-  KEY_NAME_TABLE(display),
+  KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(horizontal),
   KEY_NAME_TABLE(vertical),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(dm80p)
-  KEY_NAME_TABLE(display),
+  KEY_NAME_SUBTABLE(display,7),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pro)
-  KEY_NAME_TABLE(display),
+  KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(wheels),
   KEY_NAME_TABLE(status),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(default)
-  KEY_NAME_TABLE(display),
+  KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(command),
   KEY_NAME_TABLE(front),
   KEY_NAME_TABLE(back),
@@ -180,7 +181,7 @@ BEGIN_KEY_NAME_TABLES(default)
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(vario)
-  KEY_NAME_TABLE(display),
+  KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(command),
   KEY_NAME_TABLE(front),
   KEY_NAME_TABLE(back),
@@ -1543,6 +1544,7 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       case BAUM_RSP_DisplayKeys: {
         unsigned char keys;
+        unsigned char count = 6;
 
         switch (baumDeviceType) {
           case BAUM_DEVICE_Inka:
@@ -1559,6 +1561,7 @@ updateBaumKeys (BrailleDisplay *brl) {
 
           case BAUM_DEVICE_DM80P:
             keys = packet.data.values.displayKeys ^ 0X7F;
+            count = 7;
             break;
 
           default:
