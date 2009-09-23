@@ -18,7 +18,7 @@
 
 title Baum Inka
 
-include brl-bm-display.kti
+include brl-bm-display6.kti
 include brl-bm-horizontal.kti
 include brl-bm-vertical.kti
 

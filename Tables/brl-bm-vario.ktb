@@ -40,4 +40,4 @@ bind Display1+Display3+Display6 ATTRVIS
 bind Display1+Display2+Display3+Display6 DISPMD
 
 include brl-bm-command.kti
-include brl-bm-routing.kti
+include brl-bm-routing6.kti

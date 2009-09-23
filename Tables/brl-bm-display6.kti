@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This key subtable is for Baum displays which have display keys.
+# This key subtable is for Baum displays which have 6 display keys.
 note The display keys are at both ends of the text cell area. From top to bottom:
 note * The three at the left are named Display1 through Display3.
 note * The three at the right are named Display4 through Display6.

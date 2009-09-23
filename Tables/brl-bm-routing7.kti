@@ -16,24 +16,24 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This key subtable is for Baum displays which have routing keys.
+# This key subtable is for Baum displays which have routing keys and 7 display keys.
 
 bind !RoutingKey ROUTE
 
-bind Display1+!RoutingKey CUTBEGIN
-bind Display2+!RoutingKey CUTAPPEND
-bind Display4+!RoutingKey CUTLINE
-bind Display5+!RoutingKey CUTRECT
+bind Display5+!RoutingKey DESCCHAR
 
-bind Display3+!RoutingKey DESCCHAR
-bind Display6+!RoutingKey SETLEFT
+bind Display3+!RoutingKey CUTBEGIN
+bind Display4+!RoutingKey CUTAPPEND
+bind Display6+!RoutingKey CUTLINE
+bind Display7+!RoutingKey CUTRECT
 
-bind Display2+Display1+!RoutingKey PRINDENT
-bind Display2+Display3+!RoutingKey NXINDENT
+bind Display5+Display3+!RoutingKey PRINDENT
+bind Display5+Display4+!RoutingKey NXINDENT
 
-bind Display5+Display4+!RoutingKey PRDIFCHAR
-bind Display5+Display6+!RoutingKey NXDIFCHAR
+bind Display5+Display6+!RoutingKey PRDIFCHAR
+bind Display5+Display7+!RoutingKey NXDIFCHAR
 
-bind Display1+Display3+!RoutingKey SETMARK
-bind Display4+Display6+!RoutingKey GOTOMARK
+bind Display1+!RoutingKey SETMARK
+bind Display2+!RoutingKey GOTOMARK
+bind Display1+Display2+!RoutingKey SETLEFT
 

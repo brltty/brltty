@@ -16,8 +16,28 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum
+# This key subtable is for Baum displays which have 7 display keys.
+note The display keys are at both ends of the text cell area, just above it.
+note * The two at the left are named Display1 and Display2.
+note * The large key at the right is named Display5.
+note * The two immediately to its left are named Display3 and Display4.
+note * The two immediately to its right are named Display6 and Display7.
 
-include brl-bm-display6.kti
-include brl-bm-keyboard.kti
-include brl-bm-routing6.kti
+bind Display1+Display2 PREFMENU
+bind Display3+Display4 LEARN
+bind Display6+Display7 HELP
+
+bind Display5 HOME
+bind Display3 LNUP
+bind Display4 LNDN
+bind Display6 FWINLT
+bind Display7 FWINRT
+
+bind Display1 TOP_LEFT
+bind Display2 BOT_LEFT
+
+bind Display5+Display3 PRDIFLN
+bind Display5+Display4 NXDIFLN
+bind Display5+Display6 ATTRUP
+bind Display5+Display7 ATTRDN
+
