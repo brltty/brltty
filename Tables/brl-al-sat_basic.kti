@@ -17,6 +17,9 @@
 ###############################################################################
 
 # This key subtable is for Alva models which have the basic Satellite keys.
+note The two long, flat keys are named Up and Down.
+note The two long, bent keys are named Left and Right.
+note The two small, round keys are named Home and Cursor.
 
 
 ####################

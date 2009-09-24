@@ -17,6 +17,9 @@
 ###############################################################################
 
 # This key subtable is for Alva models which have the basic ABT/Delphi keys.
+note The two long keys are named Left and Right.
+note The small keys immediately to their left and right are named Up and Down.
+note The three small keys at the left are named Prog, Home, and Cursor.
 
 
 ####################

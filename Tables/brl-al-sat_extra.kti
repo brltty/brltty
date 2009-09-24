@@ -17,6 +17,7 @@
 ###############################################################################
 
 # This key subtable is for Alva models which have the extra Satellite keys.
+note The two three-position, sliding keys are named the left and right tumblers.
 
 bind LeftTumblerLeft LNUP
 bind LeftTumblerRight LNDN
