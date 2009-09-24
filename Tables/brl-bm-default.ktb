@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum
+title Baum (default)
 
 include brl-bm-display6.kti
 include brl-bm-keyboard.kti

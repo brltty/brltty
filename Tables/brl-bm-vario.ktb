@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Baum Vario
+title Baum (variokeys=yes)
 
 bind Display2 FWINLT
 bind Display5 FWINRT
