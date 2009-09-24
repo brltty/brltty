@@ -145,7 +145,7 @@ BEGIN_KEY_NAME_TABLE(status2)
   KEY_NAME_ENTRY(AL_KEY_STATUS2+5, "Status2F"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(abt_delphi)
+BEGIN_KEY_NAME_TABLE(abt_basic)
   KEY_NAME_ENTRY(AL_KEY_Prog, "Prog"),
   KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
   KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
@@ -154,13 +154,15 @@ BEGIN_KEY_NAME_TABLE(abt_delphi)
   KEY_NAME_ENTRY(AL_KEY_Left, "Left"),
   KEY_NAME_ENTRY(AL_KEY_Right, "Right"),
   KEY_NAME_ENTRY(AL_KEY_Down, "Down"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(abt_extra)
   KEY_NAME_ENTRY(AL_KEY_Cursor2, "Cursor2"),
   KEY_NAME_ENTRY(AL_KEY_Home2, "Home2"),
   KEY_NAME_ENTRY(AL_KEY_Prog2, "Prog2"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(satellite)
+BEGIN_KEY_NAME_TABLE(sat_basic)
   KEY_NAME_ENTRY(AL_KEY_Home, "Home"),
   KEY_NAME_ENTRY(AL_KEY_Cursor, "Cursor"),
 
@@ -182,7 +184,9 @@ BEGIN_KEY_NAME_TABLE(satellite)
   KEY_NAME_ENTRY(AL_KEY_RightPadDown, "RightPadDown"),
   KEY_NAME_ENTRY(AL_KEY_RightPadRight, "RightPadRight"),
   KEY_NAME_ENTRY(AL_KEY_RightPadF2, "RightPadF2"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(sat_extra)
   KEY_NAME_ENTRY(AL_KEY_LeftTumblerLeft, "LeftTumblerLeft"),
   KEY_NAME_ENTRY(AL_KEY_LeftTumblerRight, "LeftTumblerRight"),
   KEY_NAME_ENTRY(AL_KEY_RightTumblerLeft, "RightTumblerLeft"),
@@ -206,7 +210,6 @@ BEGIN_KEY_NAME_TABLE(smartpad)
   KEY_NAME_ENTRY(AL_KEY_SmartpadRight, "SmartpadRight"),
   KEY_NAME_ENTRY(AL_KEY_SmartpadF3, "SmartpadF3"),
   KEY_NAME_ENTRY(AL_KEY_SmartpadF4, "SmartpadF4"),
-
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(thumb)
@@ -217,14 +220,30 @@ BEGIN_KEY_NAME_TABLE(thumb)
   KEY_NAME_ENTRY(AL_KEY_THUMB+4, "Thumb5"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(abt_delphi)
-  KEY_NAME_TABLE(abt_delphi),
+BEGIN_KEY_NAME_TABLES(abt_small)
+  KEY_NAME_TABLE(abt_basic),
   KEY_NAME_TABLE(status1),
   KEY_NAME_TABLE(routing1),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(satellite)
-  KEY_NAME_TABLE(satellite),
+BEGIN_KEY_NAME_TABLES(abt_large)
+  KEY_NAME_TABLE(abt_basic),
+  KEY_NAME_TABLE(abt_extra),
+  KEY_NAME_TABLE(status1),
+  KEY_NAME_TABLE(routing1),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(sat_small)
+  KEY_NAME_TABLE(sat_basic),
+  KEY_NAME_TABLE(status1),
+  KEY_NAME_TABLE(status2),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(routing2),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(sat_large)
+  KEY_NAME_TABLE(sat_basic),
+  KEY_NAME_TABLE(sat_extra),
   KEY_NAME_TABLE(status1),
   KEY_NAME_TABLE(status2),
   KEY_NAME_TABLE(routing1),
@@ -239,52 +258,27 @@ BEGIN_KEY_NAME_TABLES(bc)
   KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(abt_delphi)
-DEFINE_KEY_TABLE(satellite)
+DEFINE_KEY_TABLE(abt_small)
+DEFINE_KEY_TABLE(abt_large)
+DEFINE_KEY_TABLE(sat_small)
+DEFINE_KEY_TABLE(sat_large)
 DEFINE_KEY_TABLE(bc)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(abt_delphi),
-  &KEY_TABLE_DEFINITION(satellite),
+  &KEY_TABLE_DEFINITION(abt_small),
+  &KEY_TABLE_DEFINITION(abt_large),
+  &KEY_TABLE_DEFINITION(sat_small),
+  &KEY_TABLE_DEFINITION(sat_large),
   &KEY_TABLE_DEFINITION(bc),
 END_KEY_TABLE_LIST
 
 typedef struct {
-  const KeyTableDefinition *keyTableDefinition;
-} ModelTypeEntry;
-
-typedef enum {
-  MOD_TYPE_ABT,
-  MOD_TYPE_Delphi,
-  MOD_TYPE_Satellite,
-  MOD_TYPE_BrailleController
-} ModelType;
-
-static const ModelTypeEntry modelTypeTable[] = {
-  [MOD_TYPE_ABT] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_delphi)
-  }
-  ,
-  [MOD_TYPE_Delphi] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_delphi)
-  }
-  ,
-  [MOD_TYPE_Satellite] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(satellite)
-  }
-  ,
-  [MOD_TYPE_BrailleController] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
-  }
-};
-
-typedef struct {
   const char *name;
+  const KeyTableDefinition *keyTableDefinition;
   unsigned char identifier;
   unsigned char columns;
   unsigned char statusCells;
   unsigned char flags;
-  unsigned char type;
 } ModelEntry;
 static const ModelEntry *model;		/* points to terminal model config struct */
 
@@ -296,7 +290,7 @@ static const ModelEntry modelTable[] = {
     .columns = 20,
     .statusCells = 3,
     .flags = 0,
-    .type = MOD_TYPE_ABT
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X01,
@@ -304,7 +298,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = 0,
-    .type = MOD_TYPE_ABT
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X02,
@@ -312,7 +306,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 5,
     .flags = 0,
-    .type = MOD_TYPE_ABT
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X03,
@@ -320,7 +314,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .type = MOD_TYPE_ABT
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_large)
   }
   ,
   { .identifier = 0X04,
@@ -328,7 +322,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .type = MOD_TYPE_ABT
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_large)
   }
   ,
   { .identifier = 0X0A,
@@ -336,7 +330,7 @@ static const ModelEntry modelTable[] = {
     .columns = 20,
     .statusCells = 3,
     .flags = 0,
-    .type = MOD_TYPE_Delphi
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X0B,
@@ -344,7 +338,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = 0,
-    .type = MOD_TYPE_Delphi
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X0C,
@@ -352,7 +346,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 5,
     .flags = 0,
-    .type = MOD_TYPE_Delphi
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_small)
   }
   ,
   { .identifier = 0X0D,
@@ -360,7 +354,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .type = MOD_TYPE_Delphi
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(abt_large)
   }
   ,
   { .identifier = 0X0E,
@@ -368,7 +362,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = MOD_FLAG_CONFIGURABLE,
-    .type = MOD_TYPE_Satellite
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
   { .identifier = 0X0F,
@@ -376,7 +370,7 @@ static const ModelEntry modelTable[] = {
     .columns = 66,
     .statusCells = 3,
     .flags = MOD_FLAG_CONFIGURABLE,
-    .type = MOD_TYPE_Satellite
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_large)
   }
   ,
   { .identifier = 0X10,
@@ -384,7 +378,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 3,
     .flags = MOD_FLAG_CONFIGURABLE,
-    .type = MOD_TYPE_Satellite
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_large)
   }
   ,
   { .identifier = 0X11,
@@ -392,7 +386,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = MOD_FLAG_CONFIGURABLE,
-    .type = MOD_TYPE_Satellite
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
   { .identifier = 0X13,
@@ -400,7 +394,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 0,
     .flags = MOD_FLAG_CONFIGURABLE,
-    .type = MOD_TYPE_Satellite
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
   { .name = NULL }
@@ -410,21 +404,21 @@ static const ModelEntry modelBC624 = {
   .identifier = 0X24,
   .name = "BC624",
   .columns = 24,
-  .type = MOD_TYPE_BrailleController
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
 static const ModelEntry modelBC640 = {
   .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
-  .type = MOD_TYPE_BrailleController
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
 static const ModelEntry modelBC680 = {
   .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
-  .type = MOD_TYPE_BrailleController
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
 typedef struct {
@@ -508,11 +502,8 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
 
-  {
-    const ModelTypeEntry *type = &modelTypeTable[model->type];
-    brl->keyBindings = type->keyTableDefinition->bindings;
-    brl->keyNameTables = type->keyTableDefinition->names;
-  }
+  brl->keyBindings = model->keyTableDefinition->bindings;
+  brl->keyNameTables = model->keyTableDefinition->names;
 
   actualColumns = model->columns;
   statusOffset = 0;

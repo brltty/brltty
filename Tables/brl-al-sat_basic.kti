@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Alva Satellite (5nn)
+# This key subtable is for Alva models which have the basic Satellite keys.
 
 
 ####################
@@ -100,11 +100,6 @@ bind RightPadF1+RightPadF2 RESTARTBRL
 bind LeftPadF1 SPKHOME
 bind LeftPadF2 AUTOSPEAK
 bind LeftPadF1+LeftPadF2 RESTARTSPEECH
-
-bind LeftTumblerLeft CHRLT
-bind LeftTumblerRight CHRRT
-bind RightTumblerLeft LNBEG
-bind RightTumblerRight LNEND
 
 
 #################
