@@ -17,9 +17,12 @@
 ###############################################################################
 
 # This key subtable is for Alva models which have the basic Satellite keys.
+note The keypads at either side of the top are named LeftPad and RightPad:
+note * The four inner keys of each are subnamed Left, Right, Up, and Down.
+note * The two outer keys of each are subnamed F1 and F2.
 note The two long, flat keys are named Up and Down.
 note The two long, bent keys are named Left and Right.
-note The two small, round keys are named Home and Cursor.
+note The two round keys are named Home and Cursor.
 
 
 ####################
