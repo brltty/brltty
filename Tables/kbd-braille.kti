@@ -17,16 +17,58 @@
 ###############################################################################
 
 context \{brailleContext} Braille Input Mode
-map f DOT1
-map d DOT2
+
+bind SYMBOL_Grave_Tilde NOOP
+bind 1 NOOP
+bind 2 NOOP
+bind 3 NOOP
+bind 4 NOOP
+bind 5 NOOP
+bind 6 NOOP
+bind 7 NOOP
+bind 8 NOOP
+bind 9 NOOP
+bind 0 NOOP
+bind SYMBOL_Minus_Underscore NOOP
+bind SYMBOL_Equals_Plus NOOP
+bind SYMBOL_Backslash_Bar NOOP
+
+bind q NOOP
+bind w NOOP
+bind e NOOP
+bind r NOOP
+bind t NOOP
+bind y NOOP
+bind u NOOP
+bind i NOOP
+bind o NOOP
+bind p NOOP
+bind SYMBOL_LeftBracket_LeftBrace NOOP
+bind SYMBOL_RightBracket_RightBrace NOOP
+
+map a DOT7
 map s DOT3
+map d DOT2
+map f DOT1
+map g SPACE
+map h SPACE
 map j DOT4
 map k DOT5
 map l DOT6
-map a DOT7
 map SYMBOL_Semicolon_Colon DOT8
-map g SPACE
-map h SPACE
+bind SYMBOL_Apostrophe_Quote NOOP
+
+bind z NOOP
+bind x NOOP
+bind c NOOP
+bind v NOOP
+bind b NOOP
+bind n NOOP
+bind m NOOP
+bind SYMBOL_Comma_Less NOOP
+bind SYMBOL_Period_Greater NOOP
+bind SYMBOL_Slash_Question NOOP
+
 map Space SPACE
 map ShiftLeft UPPERCASE
 map ShiftRight UPPERCASE
