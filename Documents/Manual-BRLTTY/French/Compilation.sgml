@@ -1368,7 +1368,7 @@ voulez arrêter le déplacement du curseur, utiliser Couper/Coller les
 beep et tout cela, vous pouvez exécuter BRLTTY sans les privilèges
 root.
 
-<sect1>Restricitions de construction de d'exécution<p>
+<sect1>Restrictions applicables à la compilation et à l'exécution<p>
 <descrip>
   <tag>les beeps d'Alerte</tag><label id="restriction-tunes">
     Certaines plateformes ne supportent pas tous les périphériques
