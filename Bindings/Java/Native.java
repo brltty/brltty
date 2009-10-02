@@ -20,6 +20,10 @@
 package org.a11y.BrlAPI;
 
 public class Native {
+  static {
+    System.loadLibrary("brlapi_java");
+  }
+
   protected long handle;
 
   protected native int openConnection (
