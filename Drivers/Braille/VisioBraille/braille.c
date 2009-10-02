@@ -544,8 +544,12 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
   type = code & (~ 0xff);
   if (code==0) return 0;
   if (code==EOF) return EOF;
-  if (type==BRL_VSMSK_CHAR) return ch | BRL_BLK_PASSCHAR | altpressed | ctrlpressed | (altpressed = ctrlpressed = 0);
-  else if (type==BRL_VSMSK_ROUTING) {
+  if (type==BRL_VSMSK_CHAR) {
+    int command = ch | BRL_BLK_PASSCHAR | altpressed | ctrlpressed;
+    altpressed = ctrlpressed = 0;
+    return command;
+  }
+  if (type==BRL_VSMSK_ROUTING) {
     ctrlpressed = altpressed = 0;
     switch (cut) {
       case 0:

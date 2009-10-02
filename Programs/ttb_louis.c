@@ -62,7 +62,7 @@ getUnicodeCharacters (DataFile *file, wchar_t *character, int num, const char *d
 	  default:
           invalid:
 	    reportDataError(file, "unknown escape sequence: %.*" PRIws,
-                            c-string.characters+1, string.characters);
+                            (int)(c-string.characters+1), string.characters);
 	}
       } else {
 	character[i] = *c++;
