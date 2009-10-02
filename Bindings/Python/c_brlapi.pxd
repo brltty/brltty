@@ -104,6 +104,8 @@ cdef extern from "Programs/brlapi.h":
 
 cdef extern from "bindings.h":
 	brlapi_writeArguments_t brlapi_writeArguments_initialized
+	char *brlapi_protocolException()
+	void brlapi_protocolExceptionInit(brlapi_handle_t *)
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)
