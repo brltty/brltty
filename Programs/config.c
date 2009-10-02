@@ -806,6 +806,8 @@ resetStatusFields (const unsigned char *fields) {
   prefs.statusSeparator = ssNone;
   memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
 
+  if (!fields) fields = braille->statusFields;
+
   if (!count && (brl.textColumns > 40)) {
     count = (brl.textColumns % 20) * brl.textRows;
 
@@ -816,10 +818,11 @@ resetStatusFields (const unsigned char *fields) {
         count -= 1;
         prefs.statusSeparator = ssStatusSide;
       }
+
+      if (fields && ((*fields == sfEnd) || (*fields == sfGeneric))) fields = NULL;
     }
   }
 
-  if (!fields) fields = braille->statusFields;
   if (!fields && count) {
     static const unsigned char fields1[] = {
       sfWindowRow, sfEnd
