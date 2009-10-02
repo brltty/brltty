@@ -18,7 +18,7 @@
 
 DRIVER_CODE = fs
 DRIVER_NAME = FreedomScientific
-DRIVER_COMMENT = Focus 40/44/70/80/84, PacMate 20/40
+DRIVER_COMMENT = Focus 40/44/70/80/84, PAC Mate 20/40/80
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)
