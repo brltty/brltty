@@ -253,7 +253,6 @@ static const ModelEntry modelTable[] = {
   {"Focus 84"     , &dots12374568, 84, -1},
   {"pm display 20", &dots12345678, 20,  1},
   {"pm display 40", &dots12345678, 40,  1},
-  {"pm display 80", &dots12345678, 80,  1},
   {NULL           , NULL         ,  0, -1}
 };
 static const ModelEntry *model;
