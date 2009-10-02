@@ -123,9 +123,7 @@ Key bindings
 The online help describes the key bindings: for each available function, the
 display key or combination of keys that activates it is listed. For details
 on the functions themselves, see the documentation of the main module of
-BRLTTY. Note that all functions are triggered using keys of the braille
-display: BRLTTY does not trap keyboard keys. Here again is how to bring up the
-help screen:
+BRLTTY. Here again is how to bring up the help screen:
   - For navigator users: press the "cursor left" and "cursor right" keys
     together.
   - For PB40 users: press the first and the last cursor routing keys
@@ -158,9 +156,8 @@ If this is incorrect, then you're in trouble and you should contact me!
 I've tryed to keep key bindings similar to what is used under DOS, but there
 are several differences. Basic movement of the braille display is the
 same, but several bindings have been added for more elaborate
-functionalities since we cannot use any keys of the real keyboard. You
-also have those keys that are mapped to the keyboard arrow keys,
-but I did not think it was really relevant to have a key act as the
+functionalities. You also have those keys that are mapped to the keyboard
+arrow keys, but I did not think it was really relevant to have a key act as the
 RETURN key. Also the link/unlink button does not exactly work the same: the
 rightmost of the front middle buttons simply jumps to the cursor; it is not
 a toggle. The left button toggles the link/unlink (whether or not the braille
@@ -168,8 +165,8 @@ display should follow the cursor if it moves), but unlinking the braille
 display from the cursor can be done without bringing the braille window back
 to the cursor beeforehand.
 
-Also note that there is no function to suppress blank spaces, combine lines
-and wrap words... There is however a function to skip identical lines.
+Also note that there is no function to combine lines and wrap words...
+There is however a function to skip identical lines.
 
 For Navigator 20/40 users:
     You will find one interesting addition to cursor routing: now you do not
