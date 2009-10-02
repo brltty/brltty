@@ -20,7 +20,7 @@ DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
 DRIVER_COMMENT = AzerBraille, Clio, Iris, NoteBraille, Scriba, Esys 12/40
 DRIVER_VERSION = 2.0
-DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@mistigri.org>, Nicolas PITRE <nico@cam.org>
+DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@mistigri.org>, Nicolas PITRE <nico@fluxnic.net>
 HELP_DEPS = $(HELP_TEXT)
 
 include $(SRC_TOP)braille.mk

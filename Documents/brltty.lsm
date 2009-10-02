@@ -10,7 +10,7 @@ Description: Braille Display Driver for Linux/Unix
              speech capability has also been incorporated.
 Keywords: refreshable braille display console access visually impaired blind linux unix
 Author: dave@mielke.cc (Dave Mielke)
-        nico@cam.org (Nicolas Pitre)
+        nico@fluxnic.net (Nicolas Pitre)
         s.doyon@videotron.ca (Stéphane Doyon)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)

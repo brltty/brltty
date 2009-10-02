@@ -19,7 +19,7 @@
 # BRLTTY Contraction Table - French (uncontracted)
 
 # Définitions pour code braille français international unifié
-# Par Nicolas Pitre <nico@cam.org>
+# Par Nicolas Pitre <nico@fluxnic.net>
 # Référence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx
 
 capsign 46		indicateur de majuscule

@@ -17,7 +17,7 @@
  */
 
 /* Alva/brlmain.cc - Braille display library for Alva braille displays
- * Copyright (C) 1995-2002 by Nicolas Pitre <nico@cam.org>
+ * Copyright (C) 1995-2002 by Nicolas Pitre <nico@fluxnic.net>
  * See the GNU Public license for details in the LICENSE-GPL file
  *
  */

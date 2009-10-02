@@ -20,7 +20,7 @@
  * For Blazie Engineering's Braille Lite series
  * Author: Nikhil Nair <nn201@cus.cam.ac.uk>
  * Copyright (C) 1998 by Nikhil Nair.
- * Some additions by: Nicolas Pitre <nico@cam.org>
+ * Some additions by: Nicolas Pitre <nico@fluxnic.net>
  * Some modifications copyright 2001 by Stéphane Doyon <s.doyon@videotron.ca>.
  * Some additions by: Dave Mielke <dave@mielke.cc>
  */
