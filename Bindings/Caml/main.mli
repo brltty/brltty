@@ -68,7 +68,6 @@ val writeArguments_initializer : writeArguments
 type handle
 
 val max_packet_size : int
-val max_keyset_size : int
 
 type errorCode =
   | SUCCESS
