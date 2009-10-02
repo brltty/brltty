@@ -959,15 +959,6 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     and is primarily intended for use on Windows platforms.
   <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
     Don't remove the symbol tables from executables and shared objects when installing them.
-  <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
-    Reduce program size by excluding the preferences menu
-    (see section <ref id="preferences-menu" name="The Preferences Menu">).
-  <tag><tt/--disable-table-selection/<label id="build-table-selection"></tag>
-    Reduce program size by excluding
-    the table selection entries from the preferences menu
-    (see the <ref id="preference-text-table" name="Text Table">,
-    <ref id="preference-attributes-table" name="Attributes Table">,
-    and <ref id="preference-contraction-table" name="Contraction Table"> preferences).
   <tag><tt/--disable-learn-mode/<label id="build-learn-mode"></tag>
     Reduce program size by excluding command learn mode
     (see section <ref id="learn" name="Command Learn Mode">).
@@ -2199,8 +2190,6 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Switch to the preferences menu
     (see <ref id="preferences-menu" name="The Preferences Menu"> for full details).
     Invoke this command again to return to normal operation.
-    This command isn't available if the
-    <ref id="build-preferences-menu" name="--disable-preferences-menu"> build option was specified.
   <tag>PREFSAVE<label id="command-PREFSAVE"></tag>
     Save the current preferences settings
     (see <ref id="preferences" name="Preferences"> for full details).
@@ -3126,8 +3115,6 @@ where <em/driver/ is the two-letter <ref id="drivers" name="driver identificatio
 The preferences settings are saved as binary data
 which, therefore, can't be edited by hand.
 BRLTTY, however, has a simple menu from which you can easily change them.
-This feature isn't available if the
-<ref id="build-preferences-menu" name="--disable-preferences-menu"> build option was specified.
 
 The meny is activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
 The braille display briefly
@@ -3784,29 +3771,21 @@ Notes:
     See section <ref id="table-text" name="Text Tables"> for details.
     See the <ref id="options-text-table" name="-t"> command line option for the initial setting.
     This preference isn't saved.
-    It isn't presented if the
-    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
-  <tag>Attributesw Table<label id="preference-attributes-table"></tag>
+  <tag>Attributes Table<label id="preference-attributes-table"></tag>
     Select the attributes table.
     See section <ref id="table-attributes" name="Attributes Tables"> for details.
     See the <ref id="options-attributes-table" name="-a"> command line option for the initial setting.
     This preference isn't saved.
-    It isn't presented if the
-    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Contraction Table<label id="preference-contraction-table"></tag>
     Select the contraction table.
     See section <ref id="table-contraction" name="Contraction Tables"> for details.
     See the <ref id="options-contraction-table" name="-c"> command line option for the initial setting.
     This preference isn't saved.
-    It isn't presented if the
-    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Key Table<label id="preference-key-table"></tag>
     Select the key table.
     See section <ref id="table-key" name="Key Tables"> for details.
     See the <ref id="options-key-table" name="-k"> command line option for the initial setting.
     This preference isn't saved.
-    It isn't presented if the
-    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
 </descrip>
 
 Notes:

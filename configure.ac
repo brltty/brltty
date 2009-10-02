@@ -992,24 +992,6 @@ system_object="sys_${system_object}."'$O'
 AC_SUBST([system_object])
 
 BRLTTY_ARG_DISABLE(
-   [preferences-menu],
-   [the preferences menu],
-   [],
-[dnl
-   AC_DEFINE([ENABLE_PREFERENCES_MENU], [1],
-             [Define this to include the preferences menu.])
-])
-
-BRLTTY_ARG_DISABLE(
-   [table-selection],
-   [text/attribute/contraction table selection in preferences menu],
-   [],
-[dnl
-   AC_DEFINE([ENABLE_TABLE_SELECTION], [1],
-             [Define this to include table selection within the preferences menu.])
-])
-
-BRLTTY_ARG_DISABLE(
    [learn-mode],
    [interactive command learn mode],
    [],

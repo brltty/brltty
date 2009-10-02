@@ -37,8 +37,6 @@
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
 
-#ifdef ENABLE_PREFERENCES_MENU
-#ifdef ENABLE_TABLE_SELECTION
 #if defined(HAVE_GLOB_H)
 #include <glob.h>
 #elif defined(__MINGW32__)
@@ -46,8 +44,6 @@
 #else /* glob: paradigm-specific global definitions */
 #warning file globbing support not available on this platform
 #endif /* glob: paradigm-specific global definitions */
-#endif /* ENABLE_TABLE_SELECTION */
-#endif /* ENABLE_PREFERENCES_MENU */
 
 #include "cmd.h"
 #include "brl.h"
@@ -1107,7 +1103,6 @@ getPreferences (void) {
   setTuneDevice(prefs.tuneDevice);
 }
 
-#ifdef ENABLE_PREFERENCES_MENU
 int 
 savePreferences (void) {
   int ok = 0;
@@ -1301,7 +1296,6 @@ testTunesFm (void) {
 }
 #endif /* ENABLE_FM_SUPPORT */
 
-#ifdef ENABLE_TABLE_SELECTION
 typedef struct {
   const char *directory;
   const char *extension;
@@ -1501,7 +1495,6 @@ changedContractionTable (unsigned char setting) {
   return loadContractionTable(globChanged(&glob_contractionTable));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-#endif /* ENABLE_TABLE_SELECTION */
 
 static int
 testSkipBlankWindows (void) {
@@ -1582,13 +1575,11 @@ updatePreferences (void) {
   const char *mode = "prf";
   int ok = 1;
 
-#ifdef ENABLE_TABLE_SELECTION
   globBegin(&glob_textTable);
   globBegin(&glob_attributesTable);
 #ifdef ENABLE_CONTRACTED_BRAILLE
   globBegin(&glob_contractionTable);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-#endif /* ENABLE_TABLE_SELECTION */
 
   if (setStatusText(&brl, mode) &&
       message(mode, gettext("Preferences Menu"), 0)) {
@@ -1787,13 +1778,11 @@ updatePreferences (void) {
       STATUS_FIELD_ITEM(7),
       STATUS_FIELD_ITEM(8),
       STATUS_FIELD_ITEM(9),
-#ifdef ENABLE_TABLE_SELECTION
       GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
       GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
 #ifdef ENABLE_CONTRACTED_BRAILLE
       GLOB_ITEM(glob_contractionTable, changedContractionTable, NULL, strtext("Contraction Table"))
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-#endif /* ENABLE_TABLE_SELECTION */
     };
     int menuSize = ARRAY_COUNT(menu);
     static int menuIndex = 0;                        /* current menu item */
@@ -2040,17 +2029,14 @@ exitMenu:
     }
   }
 
-#ifdef ENABLE_TABLE_SELECTION
   globEnd(&glob_textTable);
   globEnd(&glob_attributesTable);
 #ifdef ENABLE_CONTRACTED_BRAILLE
   globEnd(&glob_contractionTable);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-#endif /* ENABLE_TABLE_SELECTION */
 
   return ok;
 }
-#endif /* ENABLE_PREFERENCES_MENU */
 
 typedef struct {
   const char *driverType;
@@ -3028,12 +3014,7 @@ startup (int argc, char *argv[]) {
 
   if (!*opt_textTable) opt_textTable = TEXT_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
-
-#ifdef ENABLE_PREFERENCES_MENU
-#ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
-#endif /* ENABLE_TABLE_SELECTION */
-#endif /* ENABLE_PREFERENCES_MENU */
 
   /* handle attributes table option */
   if (*opt_attributesTable)
@@ -3041,12 +3022,7 @@ startup (int argc, char *argv[]) {
       opt_attributesTable = "";
   if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
-
-#ifdef ENABLE_PREFERENCES_MENU
-#ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
-#endif /* ENABLE_TABLE_SELECTION */
-#endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
@@ -3054,12 +3030,7 @@ startup (int argc, char *argv[]) {
   if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
   LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
            *opt_contractionTable? opt_contractionTable: gettext("none"));
-
-#ifdef ENABLE_PREFERENCES_MENU
-#ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_contractionTable, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
-#endif /* ENABLE_TABLE_SELECTION */
-#endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
