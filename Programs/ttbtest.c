@@ -435,7 +435,10 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
     int digits = (value < (1 << 16))? 4:
                  (value < (1 << 20))? 5:
                                       8;
-    if (fprintf(file, "\\x%0*lx", digits, value) == EOF) return 0;
+    int format = (value < (1 << 16))? 'x':
+                 (value < (1 << 20))? 'y':
+                                      'z';
+    if (fprintf(file, "\\%c%0*lx", format, digits, value) == EOF) return 0;
   }
 
   if (fprintf(file, "\t") == EOF) return 0;
@@ -456,7 +459,7 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
 
     u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
     if (U_SUCCESS(error)) {
-      if (fprintf(file, "\t# %s", name) == EOF) return 0;
+      if (fprintf(file, "\t%s", name) == EOF) return 0;
     }
   }
 #endif /* HAVE_ICU */
