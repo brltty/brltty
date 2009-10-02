@@ -97,6 +97,7 @@ always arubber 1-1235-136-23-12456 indiarubber
 word as 1356
 contraction as
 midendword ation 6-1345
+sufword audio = audiofile
 midendword aunder 1-136-1345-145-12456 saunders
 begword auto = autofocus
 
@@ -580,6 +581,7 @@ begword nosediv = nosedive
 word not 1345
 word noways =
 sufword nowhere 1345-135-5-156
+word nowise =
 begword nuth 1345-136-2345-125 nuthatch nuthouse
 
 # the letter o
@@ -896,6 +898,7 @@ always V 1236
 begword vaing 1236-1-35-1245 vainglory
 word very 1236
 begword vice = viceroy
+sufword video = videofile
 
 # the letter w
 always w 2456
