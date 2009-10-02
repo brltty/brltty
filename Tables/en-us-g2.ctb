@@ -128,9 +128,10 @@ always beer 12-15-12456
 word beg =
 begword begg 12-15-2356
 word begs =
+begword beid = Beidermeier
 begword beig = beige
 word bein' 23-24-1345-3
-word beijing =
+sufword beijing 12-15-24-245-346
 word beirut =
 sufword belch 12-15-123-16
 begword beld = Beldon
@@ -429,7 +430,8 @@ always h 125
 always H 125
 always had 456-125
 begword hadd 125-1-256 haddock
-sufword hade = hadean 
+sufword hade = hadean
+sufword handsome 125-12346-5-234 handsomer
 sufword hadr = hadrian 
 word have 125
 always headd 125-2-145-145 headdress
