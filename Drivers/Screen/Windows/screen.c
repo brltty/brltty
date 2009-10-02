@@ -157,18 +157,18 @@ currentVirtualTerminal_WindowsScreen (void) {
     goto error;
   }
   if (followFocus && AttachConsoleProc && !tryToAttach(win)) {
-    unreadable = "no terminal to read";
+    unreadable = "no console to read";
     goto error;
   }
   if (consoleOutput == INVALID_HANDLE_VALUE) {
-    unreadable = "can't open terminal output";
+    unreadable = "can't open console output";
     goto error;
   }
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
     CloseHandle(consoleOutput);
     consoleOutput = INVALID_HANDLE_VALUE;
-    unreadable = "can't read terminal information";
+    unreadable = "can't read console information";
     goto error;
   }
 error:
