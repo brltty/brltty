@@ -1326,12 +1326,1525 @@ beginProgram (int argc, char *argv[]) {
   return 0;
 }
 
+typedef struct {
+  int oldwinx;
+  int oldwiny;
+
+  unsigned isOffline:1;
+  unsigned isSuspended:1;
+  unsigned isWritable:1;
+} UpdateData;
+
+static int
+doCommand (UpdateData *upd) {
+  int oldmotx = p->winx;
+  int oldmoty = p->winy;
+  int command;
+
+  testProgramTermination();
+
+  command = upd->isWritable? readBrailleCommand(&brl, BRL_CTX_SCREEN): BRL_CMD_RESTARTBRL;
+
+  if (brl.highlightWindow) {
+    brl.highlightWindow = 0;
+    highlightWindow();
+  }
+
+  if (command != EOF) {
+    int real = command;
+
+    if (prefs.skipIdenticalLines) {
+      switch (command & BRL_MSK_CMD) {
+        case BRL_CMD_LNUP:
+          real = BRL_CMD_PRDIFLN;
+          break;
+
+        case BRL_CMD_LNDN:
+          real = BRL_CMD_NXDIFLN;
+          break;
+
+        case BRL_CMD_PRDIFLN:
+          real = BRL_CMD_LNUP;
+          break;
+
+        case BRL_CMD_NXDIFLN:
+          real = BRL_CMD_LNDN;
+          break;
+      }
+    }
+
+    if (real == command) {
+      LogPrint(LOG_DEBUG, "command: %06X", command);
+    } else {
+      real |= (command & ~BRL_MSK_CMD);
+      LogPrint(LOG_DEBUG, "command: %06X -> %06X", command, real);
+      command = real;
+    }
+
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_OFFLINE:
+        if (!upd->isOffline) {
+          LogPrint(LOG_DEBUG, "braille display offline");
+          upd->isOffline = 1;
+        }
+        return 1;
+    }
+  }
+
+  if (upd->isOffline) {
+    LogPrint(LOG_DEBUG, "braille display online");
+    upd->isOffline = 0;
+  }
+
+  handleAutorepeat(&command, NULL);
+  if (command == EOF) return 0;
+
+doCommand:
+  if (!executeScreenCommand(command)) {
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_NOOP:        /* do nothing but loop */
+        if (command & BRL_FLG_TOGGLE_ON)
+          playTune(&tune_toggle_on);
+        else if (command & BRL_FLG_TOGGLE_OFF)
+          playTune(&tune_toggle_off);
+        break;
+
+      case BRL_CMD_TOP_LEFT:
+        p->winx = 0;
+      case BRL_CMD_TOP:
+        p->winy = 0;
+        break;
+      case BRL_CMD_BOT_LEFT:
+        p->winx = 0;
+      case BRL_CMD_BOT:
+        p->winy = scr.rows - brl.textRows;
+        break;
+
+      case BRL_CMD_WINUP:
+        if (p->winy == 0)
+          playTune (&tune_bounce);
+        p->winy = MAX (p->winy - verticalWindowShift, 0);
+        break;
+      case BRL_CMD_WINDN:
+        if (p->winy == scr.rows - brl.textRows)
+          playTune (&tune_bounce);
+        p->winy = MIN (p->winy + verticalWindowShift, scr.rows - brl.textRows);
+        break;
+
+      case BRL_CMD_LNUP:
+        upOneLine();
+        break;
+      case BRL_CMD_LNDN:
+        downOneLine();
+        break;
+
+      case BRL_CMD_PRDIFLN:
+        upDifferentLine(isSameText);
+        break;
+      case BRL_CMD_NXDIFLN:
+        downDifferentLine(isSameText);
+        break;
+
+      case BRL_CMD_ATTRUP:
+        upDifferentLine(isSameAttributes);
+        break;
+      case BRL_CMD_ATTRDN:
+        downDifferentLine(isSameAttributes);
+        break;
+
+      {
+        int increment;
+      case BRL_CMD_PRPGRPH:
+        increment = -1;
+        goto findParagraph;
+      case BRL_CMD_NXPGRPH:
+        increment = 1;
+      findParagraph:
+        {
+          int found = 0;
+          ScreenCharacter characters[scr.cols];
+          int findBlank = 1;
+          int line = p->winy;
+          int i;
+          while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
+            readScreen(0, line, scr.cols, 1, characters);
+            for (i=0; i<scr.cols; i++) {
+              wchar_t text = characters[i].text;
+              if (text != WC_C(' ')) break;
+            }
+            if ((i == scr.cols) == findBlank) {
+              if (!findBlank) {
+                found = 1;
+                p->winy = line;
+                p->winx = 0;
+                break;
+              }
+              findBlank = 0;
+            }
+            line += increment;
+          }
+          if (!found) playTune(&tune_bounce);
+        }
+        break;
+      }
+
+      {
+        int increment;
+      case BRL_CMD_PRPROMPT:
+        increment = -1;
+        goto findPrompt;
+      case BRL_CMD_NXPROMPT:
+        increment = 1;
+      findPrompt:
+        {
+          ScreenCharacter characters[scr.cols];
+          size_t length = 0;
+          readScreen(0, p->winy, scr.cols, 1, characters);
+          while (length < scr.cols) {
+            if (characters[length].text == WC_C(' ')) break;
+            ++length;
+          }
+          if (length < scr.cols) {
+            findRow(length, increment, testPrompt, characters);
+          } else {
+            playTune(&tune_command_rejected);
+          }
+        }
+        break;
+      }
+
+      {
+        int increment;
+      case BRL_CMD_PRSEARCH:
+        increment = -1;
+        goto doSearch;
+      case BRL_CMD_NXSEARCH:
+        increment = 1;
+      doSearch:
+        if (cutBuffer) {
+          int found = 0;
+          size_t count = cutLength;
+          if (count <= scr.cols) {
+            int line = p->winy;
+            wchar_t buffer[scr.cols];
+            wchar_t characters[count];
+
+            {
+              int i;
+              for (i=0; i<count; i++) characters[i] = towlower(cutBuffer[i]);
+            }
+
+            while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
+              const wchar_t *address = buffer;
+              size_t length = scr.cols;
+              readScreenText(0, line, length, 1, buffer);
+
+              {
+                int i;
+                for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
+              }
+
+              if (line == p->winy) {
+                if (increment < 0) {
+                  int end = p->winx + count - 1;
+                  if (end < length) length = end;
+                } else {
+                  int start = p->winx + textCount;
+                  if (start > length) start = length;
+                  address += start;
+                  length -= start;
+                }
+              }
+              if (findCharacters(&address, &length, characters, count)) {
+                if (increment < 0)
+                  while (findCharacters(&address, &length, characters, count))
+                    ++address, --length;
+
+                p->winy = line;
+                p->winx = (address - buffer) / textCount * textCount;
+                found = 1;
+                break;
+              }
+              line += increment;
+            }
+          }
+          if (!found) playTune(&tune_bounce);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+      }
+
+      case BRL_CMD_LNBEG:
+        if (p->winx) {
+          p->winx = 0;
+        } else {
+          playTune(&tune_bounce);
+        }
+        break;
+
+      case BRL_CMD_LNEND: {
+        int end = MAX(scr.cols, textCount) - textCount;
+
+        if (p->winx < end) {
+          p->winx = end;
+        } else {
+          playTune(&tune_bounce);
+        }
+        break;
+      }
+
+      case BRL_CMD_CHRLT:
+        if (p->winx == 0)
+          playTune (&tune_bounce);
+        p->winx = MAX (p->winx - 1, 0);
+        break;
+      case BRL_CMD_CHRRT:
+        if (p->winx < (scr.cols - 1))
+          p->winx++;
+        else
+          playTune(&tune_bounce);
+        break;
+
+      case BRL_CMD_HWINLT:
+        if (p->winx == 0)
+          playTune(&tune_bounce);
+        else
+          p->winx = MAX(p->winx-halfWindowShift, 0);
+        break;
+      case BRL_CMD_HWINRT:
+        if (p->winx < (scr.cols - halfWindowShift))
+          p->winx += halfWindowShift;
+        else
+          playTune(&tune_bounce);
+        break;
+
+      case BRL_CMD_FWINLT:
+        if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
+          int oldX = p->winx;
+          if (shiftWindowLeft()) {
+            if (prefs.skipBlankWindows) {
+              int charCount;
+              if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
+              charCount = MIN(scr.cols, p->winx+textCount);
+              if (!showCursor() ||
+                  (scr.posy != p->winy) ||
+                  (scr.posx < 0) ||
+                  (scr.posx >= charCount)) {
+                int charIndex;
+                ScreenCharacter characters[charCount];
+                readScreen(0, p->winy, charCount, 1, characters);
+                for (charIndex=0; charIndex<charCount; ++charIndex) {
+                  wchar_t text = characters[charIndex].text;
+                  if (text != WC_C(' ')) break;
+                }
+                if (charIndex == charCount) goto wrapUp;
+              }
+            }
+            break;
+          }
+        wrapUp:
+          if (p->winy == 0) {
+            playTune(&tune_bounce);
+            p->winx = oldX;
+            break;
+          }
+          playTune(&tune_wrap_up);
+          upLine(isSameText);
+          placeWindowRight();
+        skipEndOfLine:
+          if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
+            int charIndex;
+            ScreenCharacter characters[scr.cols];
+            readScreen(0, p->winy, scr.cols, 1, characters);
+            for (charIndex=scr.cols-1; charIndex>0; --charIndex) {
+              wchar_t text = characters[charIndex].text;
+              if (text != WC_C(' ')) break;
+            }
+            if (showCursor() && (scr.posy == p->winy) && SCR_COLUMN_OK(scr.posx)) {
+              charIndex = MAX(charIndex, scr.posx);
+            }
+            if (charIndex < p->winx) placeRightEdge(charIndex);
+          }
+          break;
+        }
+      case BRL_CMD_FWINLTSKIP: {
+        int oldX = p->winx;
+        int oldY = p->winy;
+        int tuneLimit = 3;
+        int charCount;
+        int charIndex;
+        ScreenCharacter characters[scr.cols];
+        while (1) {
+          if (!shiftWindowLeft()) {
+            if (p->winy == 0) {
+              playTune(&tune_bounce);
+              p->winx = oldX;
+              p->winy = oldY;
+              break;
+            }
+            if (tuneLimit-- > 0) playTune(&tune_wrap_up);
+            upLine(isSameText);
+            placeWindowRight();
+          }
+          charCount = getWindowLength();
+          charCount = MIN(charCount, scr.cols-p->winx);
+          readScreen(p->winx, p->winy, charCount, 1, characters);
+          for (charIndex=charCount-1; charIndex>=0; charIndex--) {
+            wchar_t text = characters[charIndex].text;
+            if (text != WC_C(' ')) break;
+          }
+          if (showCursor() &&
+              (scr.posy == p->winy) &&
+              (scr.posx >= 0) &&
+              (scr.posx < (p->winx + charCount))) {
+            charIndex = MAX(charIndex, scr.posx-p->winx);
+          }
+          if (charIndex >= 0) break;
+        }
+        break;
+      }
+
+      case BRL_CMD_FWINRT:
+        if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
+          int oldX = p->winx;
+          if (shiftWindowRight()) {
+            if (prefs.skipBlankWindows) {
+              if (!showCursor() ||
+                  (scr.posy != p->winy) ||
+                  (scr.posx < p->winx)) {
+                int charCount = scr.cols - p->winx;
+                int charIndex;
+                ScreenCharacter characters[charCount];
+                readScreen(p->winx, p->winy, charCount, 1, characters);
+                for (charIndex=0; charIndex<charCount; ++charIndex) {
+                  wchar_t text = characters[charIndex].text;
+                  if (text != WC_C(' ')) break;
+                }
+                if (charIndex == charCount) goto wrapDown;
+              }
+            }
+            break;
+          }
+        wrapDown:
+          if (p->winy >= (scr.rows - brl.textRows)) {
+            playTune(&tune_bounce);
+            p->winx = oldX;
+            break;
+          }
+          playTune(&tune_wrap_down);
+          downLine(isSameText);
+          p->winx = 0;
+          break;
+        }
+      case BRL_CMD_FWINRTSKIP: {
+        int oldX = p->winx;
+        int oldY = p->winy;
+        int tuneLimit = 3;
+        int charCount;
+        int charIndex;
+        ScreenCharacter characters[scr.cols];
+        while (1) {
+          if (!shiftWindowRight()) {
+            if (p->winy >= (scr.rows - brl.textRows)) {
+              playTune(&tune_bounce);
+              p->winx = oldX;
+              p->winy = oldY;
+              break;
+            }
+            if (tuneLimit-- > 0) playTune(&tune_wrap_down);
+            downLine(isSameText);
+            p->winx = 0;
+          }
+          charCount = getWindowLength();
+          charCount = MIN(charCount, scr.cols-p->winx);
+          readScreen(p->winx, p->winy, charCount, 1, characters);
+          for (charIndex=0; charIndex<charCount; charIndex++) {
+            wchar_t text = characters[charIndex].text;
+            if (text != WC_C(' ')) break;
+          }
+          if (showCursor() &&
+              (scr.posy == p->winy) &&
+              (scr.posx < scr.cols) &&
+              (scr.posx >= p->winx)) {
+            charIndex = MIN(charIndex, scr.posx-p->winx);
+          }
+          if (charIndex < charCount) break;
+        }
+        break;
+      }
+
+      case BRL_CMD_RETURN:
+        if ((p->winx != p->motx) || (p->winy != p->moty)) {
+      case BRL_CMD_BACK:
+          p->winx = p->motx;
+          p->winy = p->moty;
+          break;
+        }
+      case BRL_CMD_HOME:
+        if (!trackCursor(1)) playTune(&tune_command_rejected);
+        break;
+
+      case BRL_CMD_RESTARTBRL:
+        restartBrailleDriver();
+        resetScanCodes();
+        upd->isWritable = 1;
+        break;
+      case BRL_CMD_PASTE:
+        if (isLiveScreen() && !isRouting()) {
+          if (cutPaste()) break;
+        }
+        playTune(&tune_command_rejected);
+        break;
+      case BRL_CMD_CSRJMP_VERT:
+        playTune(routeCursor(-1, p->winy, scr.number)?
+                 &tune_routing_started:
+                 &tune_command_rejected);
+        break;
+
+      case BRL_CMD_CSRVIS:
+        /* toggles the preferences option that decides whether cursor
+           is shown at all */
+        TOGGLE_PLAY(prefs.showCursor);
+        break;
+      case BRL_CMD_CSRHIDE:
+        /* This is for briefly hiding the cursor */
+        TOGGLE_NOPLAY(p->hideCursor);
+        /* no tune */
+        break;
+      case BRL_CMD_CSRSIZE:
+        TOGGLE_PLAY(prefs.cursorStyle);
+        break;
+      case BRL_CMD_CSRTRK:
+        if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
+#ifdef ENABLE_SPEECH_SUPPORT
+          if (speechTracking && (scr.number == speechScreen)) {
+            speechIndex = -1;
+          } else
+#endif /* ENABLE_SPEECH_SUPPORT */
+            trackCursor(1);
+        }
+        break;
+      case BRL_CMD_CSRBLINK:
+        setBlinkingCursor(1);
+        if (TOGGLE_PLAY(prefs.blinkingCursor)) {
+          setBlinkingAttributes(1);
+          setBlinkingCapitals(0);
+        }
+        break;
+
+      case BRL_CMD_ATTRVIS:
+        TOGGLE_PLAY(prefs.showAttributes);
+        break;
+      case BRL_CMD_ATTRBLINK:
+        setBlinkingAttributes(1);
+        if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
+          setBlinkingCapitals(1);
+          setBlinkingCursor(0);
+        }
+        break;
+
+      case BRL_CMD_CAPBLINK:
+        setBlinkingCapitals(1);
+        if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
+          setBlinkingAttributes(0);
+          setBlinkingCursor(0);
+        }
+        break;
+
+      case BRL_CMD_SKPIDLNS:
+        TOGGLE_PLAY(prefs.skipIdenticalLines);
+        break;
+      case BRL_CMD_SKPBLNKWINS:
+        TOGGLE_PLAY(prefs.skipBlankWindows);
+        break;
+      case BRL_CMD_SLIDEWIN:
+        TOGGLE_PLAY(prefs.slidingWindow);
+        break;
+
+      case BRL_CMD_DISPMD:
+        TOGGLE_NOPLAY(p->showAttributes);
+        break;
+      case BRL_CMD_SIXDOTS:
+        TOGGLE_PLAY(prefs.textStyle);
+        break;
+
+      case BRL_CMD_AUTOREPEAT:
+        if (TOGGLE_PLAY(prefs.autorepeat)) resetAutorepeat();
+        break;
+      case BRL_CMD_TUNES:
+        TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
+        break;
+      case BRL_CMD_FREEZE:
+        if (isLiveScreen()) {
+          playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
+        } else if (isFrozenScreen()) {
+          deactivateFrozenScreen();
+          playTune(&tune_screen_unfrozen);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+
+      case BRL_CMD_PREFMENU:
+        if (!updatePreferences()) upd->isWritable = 0;
+        break;
+      case BRL_CMD_PREFSAVE:
+        if (savePreferences()) {
+          playTune(&tune_command_done);
+        }
+        break;
+      case BRL_CMD_PREFLOAD:
+        if (loadPreferences()) {
+          resetBlinkingStates();
+          playTune(&tune_command_done);
+        }
+        break;
+
+      case BRL_CMD_HELP:
+        infoMode = 0;
+        if (isHelpScreen()) {
+          deactivateHelpScreen();
+        } else if (!activateHelpScreen()) {
+          message(NULL, gettext("help not available"), 0);
+        }
+        break;
+      case BRL_CMD_INFO:
+        if ((prefs.statusPosition == spNone) || haveStatusCells()) {
+          TOGGLE_NOPLAY(infoMode);
+        } else {
+          TOGGLE_NOPLAY(textMaximized);
+          reconfigureWindow();
+        }
+        break;
+
+#ifdef ENABLE_LEARN_MODE
+      case BRL_CMD_LEARN:
+        if (!learnMode(&brl, updateInterval, 10000)) upd->isWritable = 0;
+        break;
+#endif /* ENABLE_LEARN_MODE */
+
+      case BRL_CMD_SWITCHVT_PREV:
+        if (!switchVirtualTerminal(scr.number-1))
+          playTune(&tune_command_rejected);
+        break;
+      case BRL_CMD_SWITCHVT_NEXT:
+        if (!switchVirtualTerminal(scr.number+1))
+          playTune(&tune_command_rejected);
+        break;
+
+#ifdef ENABLE_SPEECH_SUPPORT
+      case BRL_CMD_RESTARTSPEECH:
+        restartSpeechDriver();
+        break;
+      case BRL_CMD_SPKHOME:
+        if (scr.number == speechScreen) {
+          trackSpeech(speech->getTrack(&spk));
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+      case BRL_CMD_AUTOSPEAK:
+        TOGGLE_PLAY(prefs.autospeak);
+        break;
+      case BRL_CMD_MUTE:
+        speech->mute(&spk);
+        break;
+
+      case BRL_CMD_SAY_LINE:
+        sayScreenLines(p->winy, 1, 0, prefs.sayLineMode);
+        break;
+      case BRL_CMD_SAY_ABOVE:
+        sayScreenLines(0, p->winy+1, 1, sayImmediate);
+        break;
+      case BRL_CMD_SAY_BELOW:
+        sayScreenLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
+        break;
+
+      case BRL_CMD_SAY_SLOWER:
+        if (speech->rate && (prefs.speechRate > 0)) {
+          setSpeechRate(&spk, --prefs.speechRate, 1);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+      case BRL_CMD_SAY_FASTER:
+        if (speech->rate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
+          setSpeechRate(&spk, ++prefs.speechRate, 1);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+
+      case BRL_CMD_SAY_SOFTER:
+        if (speech->volume && (prefs.speechVolume > 0)) {
+          setSpeechVolume(&spk, --prefs.speechVolume, 1);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+      case BRL_CMD_SAY_LOUDER:
+        if (speech->volume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
+          setSpeechVolume(&spk, ++prefs.speechVolume, 1);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+        break;
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+      default: {
+        int blk = command & BRL_MSK_BLK;
+        int arg = command & BRL_MSK_ARG;
+        int flags = command & BRL_MSK_FLG;
+
+        switch (blk) {
+          case BRL_BLK_PASSKEY: {
+            ScreenKey key;
+
+            switch (arg) {
+              case BRL_KEY_ENTER:
+                key = SCR_KEY_ENTER;
+                break;
+              case BRL_KEY_TAB:
+                key = SCR_KEY_TAB;
+                break;
+              case BRL_KEY_BACKSPACE:
+                key = SCR_KEY_BACKSPACE;
+                break;
+              case BRL_KEY_ESCAPE:
+                key = SCR_KEY_ESCAPE;
+                break;
+              case BRL_KEY_CURSOR_LEFT:
+                key = SCR_KEY_CURSOR_LEFT;
+                break;
+              case BRL_KEY_CURSOR_RIGHT:
+                key = SCR_KEY_CURSOR_RIGHT;
+                break;
+              case BRL_KEY_CURSOR_UP:
+                key = SCR_KEY_CURSOR_UP;
+                break;
+              case BRL_KEY_CURSOR_DOWN:
+                key = SCR_KEY_CURSOR_DOWN;
+                break;
+              case BRL_KEY_PAGE_UP:
+                key = SCR_KEY_PAGE_UP;
+                break;
+              case BRL_KEY_PAGE_DOWN:
+                key = SCR_KEY_PAGE_DOWN;
+                break;
+              case BRL_KEY_HOME:
+                key = SCR_KEY_HOME;
+                break;
+              case BRL_KEY_END:
+                key = SCR_KEY_END;
+                break;
+              case BRL_KEY_INSERT:
+                key = SCR_KEY_INSERT;
+                break;
+              case BRL_KEY_DELETE:
+                key = SCR_KEY_DELETE;
+                break;
+              default:
+                if (arg < BRL_KEY_FUNCTION) goto badKey;
+                key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
+                break;
+            }
+
+            if (!insertKey(key, flags)) {
+            badKey:
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_PASSCHAR: {
+            wint_t character = convertCharToWchar(arg);
+            if ((character == WEOF) ||
+                !insertKey(character, flags))
+              playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_PASSDOTS:
+            if (!insertKey(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
+            break;
+
+          case BRL_BLK_PASSAT:
+            if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, 0XF0);
+            if (flags & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, 0XE0);
+            if (flags & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, 0XE1);
+            if (atInterpretScanCode(&command, arg)) goto doCommand;
+            break;
+
+          case BRL_BLK_PASSXT:
+            if (flags & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, 0XE0);
+            if (flags & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, 0XE1);
+            if (xtInterpretScanCode(&command, arg)) goto doCommand;
+            break;
+
+          case BRL_BLK_PASSPS2:
+            /* not implemented yet */
+            playTune(&tune_command_rejected);
+            break;
+
+          case BRL_BLK_ROUTE: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
+              if (routeCursor(column, row, scr.number)) {
+                playTune(&tune_routing_started);
+                break;
+              }
+            }
+            playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_CUTBEGIN: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              cutBegin(column, row);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_CUTAPPEND: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              cutAppend(column, row);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_CUTRECT: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+              if (cutRectangle(column, row))
+                break;
+            playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_CUTLINE: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+              if (cutLine(column, row))
+                break;
+            playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_DESCCHAR: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              static char *colours[] = {
+                strtext("black"),
+                strtext("blue"),
+                strtext("green"),
+                strtext("cyan"),
+                strtext("red"),
+                strtext("magenta"),
+                strtext("brown"),
+                strtext("light grey"),
+                strtext("dark grey"),
+                strtext("light blue"),
+                strtext("light green"),
+                strtext("light cyan"),
+                strtext("light red"),
+                strtext("light magenta"),
+                strtext("yellow"),
+                strtext("white")
+              };
+              char buffer[0X50];
+              int size = sizeof(buffer);
+              int length = 0;
+              ScreenCharacter character;
+
+              readScreen(column, row, 1, 1, &character);
+
+              {
+                uint32_t text = character.text;
+                int count;
+                snprintf(&buffer[length], size-length,
+                         "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
+                         text, text,
+                         gettext(colours[character.attributes & 0X0F]),
+                         gettext(colours[(character.attributes & 0X70) >> 4]),
+                         &count);
+                length += count;
+              }
+
+              if (character.attributes & SCR_ATTR_BLINK) {
+                int count;
+                snprintf(&buffer[length], size-length,
+                         " %s%n",
+                         gettext("blink"),
+                         &count);
+                length += count;
+              }
+
+#ifdef HAVE_ICU
+              {
+                char name[0X40];
+                UErrorCode error = U_ZERO_ERROR;
+
+                u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+                if (U_SUCCESS(error)) {
+                  int count;
+                  snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
+                  length += count;
+                }
+              }
+#endif /* HAVE_ICU */
+
+              message(NULL, buffer, 0);
+            } else
+              playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_SETLEFT: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              p->winx = column;
+              p->winy = row;
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_GOTOLINE:
+            if (flags & BRL_FLG_LINE_SCALED)
+              arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
+            if (arg < scr.rows) {
+              slideWindowVertically(arg);
+              if (flags & BRL_FLG_LINE_TOLEFT) p->winx = 0;
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+
+          case BRL_BLK_SETMARK: {
+            ScreenMark *mark = &p->marks[arg];
+            mark->column = p->winx;
+            mark->row = p->winy;
+            playTune(&tune_mark_set);
+            break;
+          }
+          case BRL_BLK_GOTOMARK: {
+            ScreenMark *mark = &p->marks[arg];
+            p->winx = mark->column;
+            p->winy = mark->row;
+            break;
+          }
+
+          case BRL_BLK_SWITCHVT:
+            if (!switchVirtualTerminal(arg+1))
+              playTune(&tune_command_rejected);
+            break;
+
+          {
+            int column, row;
+            int increment;
+
+          case BRL_BLK_PRINDENT:
+            increment = -1;
+            goto findIndent;
+
+          case BRL_BLK_NXINDENT:
+            increment = 1;
+
+          findIndent:
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              p->winy = row;
+              findRow(column, increment, testIndent, NULL);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_PRDIFCHAR: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              p->winy = row;
+              upDifferentCharacter(isSameText, column);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          case BRL_BLK_NXDIFCHAR: {
+            int column, row;
+
+            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+              p->winy = row;
+              downDifferentCharacter(isSameText, column);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+          }
+
+          default:
+            playTune(&tune_command_rejected);
+            LogPrint(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
+        }
+        break;
+      }
+    }
+  }
+
+  if ((p->winx != oldmotx) || (p->winy != oldmoty)) {
+    /* The window has been manually moved. */
+    p->motx = p->winx;
+    p->moty = p->winy;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+    contracted = 0;
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (p->trackCursor && speechTracking && (scr.number == speechScreen)) {
+      p->trackCursor = 0;
+      playTune(&tune_cursor_unlinked);
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+  }
+
+  if (!(command & BRL_MSK_BLK)) {
+    if (command & BRL_FLG_ROUTE) {
+      int left = p->winx;
+      int right = MIN(left+textCount, scr.cols) - 1;
+
+      int top = p->winy;
+      int bottom = MIN(top+brl.textRows, scr.rows) - 1;
+
+      if ((scr.posx < left) || (scr.posx > right) ||
+          (scr.posy < top) || (scr.posy > bottom)) {
+        if (routeCursor(MIN(MAX(scr.posx, left), right),
+                        MIN(MAX(scr.posy, top), bottom),
+                        scr.number)) {
+          playTune(&tune_routing_started);
+          checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
+
+          {
+            ScreenDescription description;
+            describeScreen(&description);
+
+            if (description.number == scr.number) {
+              slideWindowVertically(description.posy);
+              placeWindowHorizontally(description.posx);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
+static void
+doUpdate (UpdateData *upd) {
+  int pointerMoved = 0;
+
+  if (opt_releaseDevice) {
+    if (scr.unreadable) {
+      if (!upd->isSuspended) {
+        setStatusCells();
+        writeBrailleString("wrn", scr.unreadable);
+
+#ifdef ENABLE_API
+        if (apiStarted) {
+          api_suspend(&brl);
+        } else
+#endif /* ENABLE_API */
+
+        {
+          destructBrailleDriver();
+        }
+
+        upd->isSuspended = 1;
+      }
+    } else {
+      if (upd->isSuspended) {
+        upd->isSuspended = !(
+#ifdef ENABLE_API
+          apiStarted? api_resume(&brl):
+#endif /* ENABLE_API */
+          constructBrailleDriver());
+      }
+    }
+  }
+
+  if (!upd->isSuspended
+#ifdef ENABLE_API
+      && (!apiStarted || api_claimDriver(&brl))
+#endif /* ENABLE_API */
+      ) {
+    /*
+     * Process any Braille input 
+     */
+    while (doCommand(upd));
+
+    /* some commands (key insertion, virtual terminal switching, etc)
+     * may have moved the cursor
+     */
+    updateScreenAttributes();
+
+    /*
+     * Update blink counters: 
+     */
+    if (prefs.blinkingCursor)
+      if ((cursorTimer -= updateInterval) <= 0)
+        setBlinkingCursor(!cursorState);
+    if (prefs.blinkingAttributes)
+      if ((attributesTimer -= updateInterval) <= 0)
+        setBlinkingAttributes(!attributesState);
+    if (prefs.blinkingCapitals)
+      if ((capitalsTimer -= updateInterval) <= 0)
+        setBlinkingCapitals(!capitalsState);
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    /* called continually even if we're not tracking so that the pipe doesn't fill up. */
+    speech->doTrack(&spk);
+
+    if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+    if (p->trackCursor) {
+#ifdef ENABLE_SPEECH_SUPPORT
+      if (speechTracking && (scr.number == speechScreen)) {
+        int index = speech->getTrack(&spk);
+        if (index != speechIndex) trackSpeech(speechIndex = index);
+      } else
+#endif /* ENABLE_SPEECH_SUPPORT */
+      {
+        /* If cursor moves while blinking is on */
+        if (prefs.blinkingCursor) {
+          if (scr.posy != p->trky) {
+            /* turn off cursor to see what's under it while changing lines */
+            setBlinkingCursor(0);
+          } else if (scr.posx != p->trkx) {
+            /* turn on cursor to see it moving on the line */
+            setBlinkingCursor(1);
+          }
+        }
+        /* If the cursor moves in cursor tracking mode: */
+        if (!isRouting() && (scr.posx != p->trkx || scr.posy != p->trky)) {
+          trackCursor(0);
+          p->trkx = scr.posx;
+          p->trky = scr.posy;
+        } else if (checkPointer()) {
+          pointerMoved = 1;
+        }
+      }
+    }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (prefs.autospeak) {
+      static int oldScreen = -1;
+      static int oldX = -1;
+      static int oldY = -1;
+      static int oldWidth = 0;
+      static ScreenCharacter *oldCharacters = NULL;
+
+      int newScreen = scr.number;
+      int newX = scr.posx;
+      int newY = scr.posy;
+      int newWidth = scr.cols;
+      ScreenCharacter newCharacters[newWidth];
+
+      readScreen(0, p->winy, newWidth, 1, newCharacters);
+
+      if (!speechTracking) {
+        int column = 0;
+        int count = newWidth;
+        const ScreenCharacter *characters = newCharacters;
+
+        if (oldCharacters) {
+          if ((newScreen == oldScreen) && (p->winy == upd->oldwiny) && (newWidth == oldWidth)) {
+            int onScreen = (newX >= 0) && (newX < newWidth);
+
+            if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
+              if ((newY == p->winy) && (newY == oldY) && onScreen) {
+                if ((newX == oldX) &&
+                    isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
+                  int oldLength = oldWidth;
+                  int newLength = newWidth;
+                  int x = newX + 1;
+
+                  while (oldLength > oldX) {
+                    if (oldCharacters[oldLength-1].text != WC_C(' ')) break;
+                    --oldLength;
+                  }
+
+                  while (newLength > newX) {
+                    if (newCharacters[newLength-1].text != WC_C(' ')) break;
+                    --newLength;
+                  }
+
+                  while (1) {
+                    int done = 1;
+
+                    if (x < newLength) {
+                      if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
+                        column = newX;
+                        count = x - newX;
+                        goto speak;
+                      }
+
+                      done = 0;
+                    }
+
+                    if (x < oldLength) {
+                      if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
+                        column = oldX;
+                        count = x - oldX;
+                        characters = oldCharacters;
+                        goto speak;
+                      }
+
+                      done = 0;
+                    }
+
+                    if (done) break;
+                    x += 1;
+                  }
+                }
+
+                if (oldX < 0) oldX = 0;
+                if ((newX > oldX) &&
+                    isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
+                    isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
+                  column = oldX;
+                  count = newX - oldX;
+                  goto speak;
+                }
+
+                if (oldX >= oldWidth) oldX = oldWidth - 1;
+                if ((newX < oldX) &&
+                    isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
+                    isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
+                  column = newX;
+                  count = oldX - newX;
+                  characters = oldCharacters;
+                  goto speak;
+                }
+
+                while (newCharacters[column].text == oldCharacters[column].text) ++column;
+                while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
+                count -= column;
+              }
+            } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
+              column = newX;
+              count = 1;
+            } else {
+              count = 0;
+            }
+          }
+        }
+
+      speak:
+        if (count) {
+          sayScreenCharacters(characters+column, count, 1);
+        }
+      }
+
+      {
+        size_t size = newWidth * sizeof(*oldCharacters);
+        oldCharacters = reallocWrapper(oldCharacters, size);
+        memcpy(oldCharacters, newCharacters, size);
+      }
+
+      oldScreen = newScreen;
+      oldX = newX;
+      oldY = newY;
+      oldWidth = newWidth;
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+    /* There are a few things to take care of if the display has moved. */
+    if ((p->winx != upd->oldwinx) || (p->winy != upd->oldwiny)) {
+      if (!pointerMoved) highlightWindow();
+
+      if (prefs.showAttributes && prefs.blinkingAttributes) {
+        /* Attributes are blinking.
+           We could check to see if we changed screen, but that doesn't
+           really matter... this is mainly for when you are hunting up/down
+           for the line with attributes. */
+        setBlinkingAttributes(1);
+        /* problem: this still doesn't help when the braille window is
+           stationnary and the attributes themselves are moving
+           (example: tin). */
+      }
+
+      upd->oldwinx = p->winx;
+      upd->oldwiny = p->winy;
+    }
+
+    if (infoMode) {
+      if (!showInfo()) upd->isWritable = 0;
+    } else {
+      const unsigned int windowLength = brl.textColumns * brl.textRows;
+      const unsigned int textLength = textCount * brl.textRows;
+      wchar_t textBuffer[windowLength];
+
+      memset(brl.buffer, 0, windowLength);
+      wmemset(textBuffer, WC_C(' '), windowLength);
+      brl.cursor = -1;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+      contracted = 0;
+      if (isContracting()) {
+        while (1) {
+          int cursorOffset = CTB_NO_CURSOR;
+
+          int inputLength = scr.cols - p->winx;
+          ScreenCharacter inputCharacters[inputLength];
+          wchar_t inputText[inputLength];
+
+          int outputLength = textLength;
+          unsigned char outputBuffer[outputLength];
+
+          if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
+          readScreen(p->winx, p->winy, inputLength, 1, inputCharacters);
+
+          {
+            int i;
+            for (i=0; i<inputLength; ++i) {
+              inputText[i] = inputCharacters[i].text;
+            }
+          }
+
+          if (!contractText(contractionTable,
+                            inputText, &inputLength,
+                            outputBuffer, &outputLength,
+                            contractedOffsets, cursorOffset))
+            break;
+
+          {
+            int inputEnd = inputLength;
+
+            if (contractedTrack) {
+              if (outputLength == textLength) {
+                int inputIndex = inputEnd;
+                while (inputIndex) {
+                  int offset = contractedOffsets[--inputIndex];
+                  if (offset != CTB_NO_OFFSET) {
+                    if (offset != outputLength) break;
+                    inputEnd = inputIndex;
+                  }
+                }
+              }
+
+              if (scr.posx >= (p->winx + inputEnd)) {
+                int offset = 0;
+                int length = scr.cols - p->winx;
+                int onspace = 0;
+
+                while (offset < length) {
+                  if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
+                    if (onspace) break;
+                    onspace = 1;
+                  }
+                  ++offset;
+                }
+
+                if ((offset += p->winx) > scr.posx) {
+                  p->winx = (p->winx + scr.posx) / 2;
+                } else {
+                  p->winx = offset;
+                }
+
+                continue;
+              }
+            }
+
+            if (cursorOffset < inputEnd) {
+              while (cursorOffset >= 0) {
+                int offset = contractedOffsets[cursorOffset];
+                if (offset != CTB_NO_OFFSET) {
+                  brl.cursor = ((offset / textCount) * brl.textColumns) + textStart + (offset % textCount);
+                  break;
+                }
+                --cursorOffset;
+              }
+            }
+          }
+
+          contractedStart = p->winx;
+          contractedLength = inputLength;
+          contractedTrack = 0;
+          contracted = 1;
+
+          if (p->showAttributes || showAttributesUnderline()) {
+            int inputOffset;
+            int outputOffset = 0;
+            unsigned char attributes = 0;
+            unsigned char attributesBuffer[outputLength];
+
+            for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
+              int offset = contractedOffsets[inputOffset];
+              if (offset != CTB_NO_OFFSET) {
+                while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
+                attributes = 0;
+              }
+              attributes |= inputCharacters[inputOffset].attributes;
+            }
+            while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
+
+            if (p->showAttributes) {
+              for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
+                outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
+              }
+            } else {
+              int i;
+              for (i=0; i<outputLength; ++i) {
+                overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
+              }
+            }
+          }
+
+          fillDotsRegion(textBuffer, brl.buffer,
+                         textStart, textCount, brl.textColumns, brl.textRows,
+                         outputBuffer, outputLength);
+          break;
+        }
+      }
+
+      if (!contracted)
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+      {
+        int windowColumns = MIN(textCount, scr.cols-p->winx);
+        ScreenCharacter characters[textLength];
+
+        readScreen(p->winx, p->winy, windowColumns, brl.textRows, characters);
+        if (windowColumns < textCount) {
+          /* We got a rectangular piece of text with readScreen but the display
+           * is in an off-right position with some cells at the end blank
+           * so we'll insert these cells and blank them.
+           */
+          int i;
+
+          for (i=brl.textRows-1; i>0; i--) {
+            memmove(characters + (i * textCount),
+                    characters + (i * windowColumns),
+                    windowColumns * sizeof(*characters));
+          }
+
+          for (i=0; i<brl.textRows; i++) {
+            clearScreenCharacters(characters + (i * textCount) + windowColumns,
+                                  textCount-windowColumns);
+          }
+        }
+
+        /*
+         * If the cursor is visible and in range: 
+         */
+        if ((scr.posx >= p->winx) && (scr.posx < (p->winx + textCount)) &&
+            (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.textRows)) &&
+            (scr.posx < scr.cols) && (scr.posy < scr.rows))
+          brl.cursor = ((scr.posy - p->winy) * brl.textColumns) + textStart + scr.posx - p->winx;
+
+        /* blank out capital letters if they're blinking and should be off */
+        if (prefs.blinkingCapitals && !capitalsState) {
+          int i;
+          for (i=0; i<textCount*brl.textRows; i++) {
+            ScreenCharacter *character = &characters[i];
+            if (iswupper(character->text)) character->text = WC_C(' ');
+          }
+        }
+
+        /* convert to dots using the current translation table */
+        if (p->showAttributes) {
+          int row;
+
+          for (row=0; row<brl.textRows; row+=1) {
+            const ScreenCharacter *source = &characters[row * textCount];
+            unsigned int start = (row * brl.textColumns) + textStart;
+            unsigned char *target = &brl.buffer[start];
+            wchar_t *text = &textBuffer[start];
+            int column;
+
+            for (column=0; column<textCount; column+=1) {
+              text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
+            }
+          }
+        } else {
+          int underline = showAttributesUnderline();
+          int row;
+
+          for (row=0; row<brl.textRows; row+=1) {
+            const ScreenCharacter *source = &characters[row * textCount];
+            unsigned int start = (row * brl.textColumns) + textStart;
+            unsigned char *target = &brl.buffer[start];
+            wchar_t *text = &textBuffer[start];
+            int column;
+
+            for (column=0; column<textCount; column+=1) {
+              const ScreenCharacter *character = &source[column];
+              unsigned char *dots = &target[column];
+
+              *dots = convertCharacterToDots(textTable, character->text);
+              if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
+              if (underline) overlayAttributesUnderline(dots, character->attributes);
+
+              text[column] = character->text;
+            }
+          }
+        }
+      }
+
+      if (brl.cursor >= 0) {
+        if (showCursor()) {
+          brl.buffer[brl.cursor] |= cursorDots();
+        }
+      }
+
+      if (statusCount > 0) {
+        const unsigned char *fields = prefs.statusFields;
+        unsigned int length = getStatusFieldsLength(fields);
+
+        if (length > 0) {
+          unsigned char cells[length];
+          memset(cells, 0, length);
+          renderStatusFields(fields, cells);
+          fillDotsRegion(textBuffer, brl.buffer,
+                         statusStart, statusCount, brl.textColumns, brl.textRows,
+                         cells, length);
+        }
+
+        fillStatusSeparator(textBuffer, brl.buffer);
+      }
+
+      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) upd->isWritable = 0;
+    }
+#ifdef ENABLE_API
+    api_releaseDriver(&brl);
+  } else if (apiStarted) {
+    api_flush(&brl, BRL_CTX_SCREEN);
+#endif /* ENABLE_API */
+  }
+}
+
 static int
 runProgram (void) {
-  int offline = 0;
-  int suspended = 0;
-  int writable = 1;
-  short oldwinx, oldwiny;
+  UpdateData upd;
 
   atexit(exitScreenStates);
   getScreenAttributes();
@@ -1344,1525 +2857,31 @@ runProgram (void) {
   p->trkx = scr.posx; p->trky = scr.posy;
   if (!trackCursor(1)) p->winx = p->winy = 0; /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
-  oldwinx = p->winx; oldwiny = p->winy;
+
+  upd.oldwinx = p->winx;
+  upd.oldwiny = p->winy;
+  upd.isOffline = 0;
+  upd.isSuspended = 0;
+  upd.isWritable = 1;
+
   highlightWindow();
   checkPointer();
-
   resetScanCodes();
   resetBlinkingStates();
   if (prefs.autorepeat) resetAutorepeat();
 
   while (1) {
-    int pointerMoved = 0;
-
     testProgramTermination();
     closeTuneDevice(0);
     checkRoutingStatus(ROUTING_DONE, 0);
-
-    if (opt_releaseDevice) {
-      if (scr.unreadable) {
-        if (!suspended) {
-          setStatusCells();
-          writeBrailleString("wrn", scr.unreadable);
-
-#ifdef ENABLE_API
-          if (apiStarted) {
-            api_suspend(&brl);
-          } else
-#endif /* ENABLE_API */
-
-          {
-            destructBrailleDriver();
-          }
-
-          suspended = 1;
-        }
-      } else {
-        if (suspended) {
-          suspended = !(
-#ifdef ENABLE_API
-            apiStarted? api_resume(&brl):
-#endif /* ENABLE_API */
-            constructBrailleDriver());
-        }
-      }
-    }
-
-    if (!suspended
-#ifdef ENABLE_API
-	&& (!apiStarted || api_claimDriver(&brl))
-#endif /* ENABLE_API */
-	) {
-      /*
-       * Process any Braille input 
-       */
-      while (1) {
-        int oldmotx = p->winx;
-        int oldmoty = p->winy;
-        int command;
-        testProgramTermination();
-
-        command = writable? readBrailleCommand(&brl, BRL_CTX_SCREEN): BRL_CMD_RESTARTBRL;
-
-        if (brl.highlightWindow) {
-          brl.highlightWindow = 0;
-          highlightWindow();
-        }
-
-        if (command != EOF) {
-          int real = command;
-
-          if (prefs.skipIdenticalLines) {
-            switch (command & BRL_MSK_CMD) {
-              case BRL_CMD_LNUP:
-                real = BRL_CMD_PRDIFLN;
-                break;
-
-              case BRL_CMD_LNDN:
-                real = BRL_CMD_NXDIFLN;
-                break;
-
-              case BRL_CMD_PRDIFLN:
-                real = BRL_CMD_LNUP;
-                break;
-
-              case BRL_CMD_NXDIFLN:
-                real = BRL_CMD_LNDN;
-                break;
-            }
-          }
-
-          if (real == command) {
-            LogPrint(LOG_DEBUG, "command: %06X", command);
-          } else {
-            real |= (command & ~BRL_MSK_CMD);
-            LogPrint(LOG_DEBUG, "command: %06X -> %06X", command, real);
-            command = real;
-          }
-
-          switch (command & BRL_MSK_CMD) {
-            case BRL_CMD_OFFLINE:
-              if (!offline) {
-                LogPrint(LOG_DEBUG, "braille display offline");
-                offline = 1;
-              }
-              goto isOffline;
-          }
-        }
-
-        if (offline) {
-          LogPrint(LOG_DEBUG, "braille display online");
-          offline = 0;
-        }
-
-        handleAutorepeat(&command, NULL);
-        if (command == EOF) break;
-
-      doCommand:
-        if (!executeScreenCommand(command)) {
-          switch (command & BRL_MSK_CMD) {
-            case BRL_CMD_NOOP:        /* do nothing but loop */
-              if (command & BRL_FLG_TOGGLE_ON)
-                playTune(&tune_toggle_on);
-              else if (command & BRL_FLG_TOGGLE_OFF)
-                playTune(&tune_toggle_off);
-              break;
-
-            case BRL_CMD_TOP_LEFT:
-              p->winx = 0;
-            case BRL_CMD_TOP:
-              p->winy = 0;
-              break;
-            case BRL_CMD_BOT_LEFT:
-              p->winx = 0;
-            case BRL_CMD_BOT:
-              p->winy = scr.rows - brl.textRows;
-              break;
-
-            case BRL_CMD_WINUP:
-              if (p->winy == 0)
-                playTune (&tune_bounce);
-              p->winy = MAX (p->winy - verticalWindowShift, 0);
-              break;
-            case BRL_CMD_WINDN:
-              if (p->winy == scr.rows - brl.textRows)
-                playTune (&tune_bounce);
-              p->winy = MIN (p->winy + verticalWindowShift, scr.rows - brl.textRows);
-              break;
-
-            case BRL_CMD_LNUP:
-              upOneLine();
-              break;
-            case BRL_CMD_LNDN:
-              downOneLine();
-              break;
-
-            case BRL_CMD_PRDIFLN:
-              upDifferentLine(isSameText);
-              break;
-            case BRL_CMD_NXDIFLN:
-              downDifferentLine(isSameText);
-              break;
-
-            case BRL_CMD_ATTRUP:
-              upDifferentLine(isSameAttributes);
-              break;
-            case BRL_CMD_ATTRDN:
-              downDifferentLine(isSameAttributes);
-              break;
-
-            {
-              int increment;
-            case BRL_CMD_PRPGRPH:
-              increment = -1;
-              goto findParagraph;
-            case BRL_CMD_NXPGRPH:
-              increment = 1;
-            findParagraph:
-              {
-                int found = 0;
-                ScreenCharacter characters[scr.cols];
-                int findBlank = 1;
-                int line = p->winy;
-                int i;
-                while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
-                  readScreen(0, line, scr.cols, 1, characters);
-                  for (i=0; i<scr.cols; i++) {
-                    wchar_t text = characters[i].text;
-                    if (text != WC_C(' ')) break;
-                  }
-                  if ((i == scr.cols) == findBlank) {
-                    if (!findBlank) {
-                      found = 1;
-                      p->winy = line;
-                      p->winx = 0;
-                      break;
-                    }
-                    findBlank = 0;
-                  }
-                  line += increment;
-                }
-                if (!found) playTune(&tune_bounce);
-              }
-              break;
-            }
-
-            {
-              int increment;
-            case BRL_CMD_PRPROMPT:
-              increment = -1;
-              goto findPrompt;
-            case BRL_CMD_NXPROMPT:
-              increment = 1;
-            findPrompt:
-              {
-                ScreenCharacter characters[scr.cols];
-                size_t length = 0;
-                readScreen(0, p->winy, scr.cols, 1, characters);
-                while (length < scr.cols) {
-                  if (characters[length].text == WC_C(' ')) break;
-                  ++length;
-                }
-                if (length < scr.cols) {
-                  findRow(length, increment, testPrompt, characters);
-                } else {
-                  playTune(&tune_command_rejected);
-                }
-              }
-              break;
-            }
-
-            {
-              int increment;
-            case BRL_CMD_PRSEARCH:
-              increment = -1;
-              goto doSearch;
-            case BRL_CMD_NXSEARCH:
-              increment = 1;
-            doSearch:
-              if (cutBuffer) {
-                int found = 0;
-                size_t count = cutLength;
-                if (count <= scr.cols) {
-                  int line = p->winy;
-                  wchar_t buffer[scr.cols];
-                  wchar_t characters[count];
-
-                  {
-                    int i;
-                    for (i=0; i<count; i++) characters[i] = towlower(cutBuffer[i]);
-                  }
-
-                  while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
-                    const wchar_t *address = buffer;
-                    size_t length = scr.cols;
-                    readScreenText(0, line, length, 1, buffer);
-
-                    {
-                      int i;
-                      for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
-                    }
-
-                    if (line == p->winy) {
-                      if (increment < 0) {
-                        int end = p->winx + count - 1;
-                        if (end < length) length = end;
-                      } else {
-                        int start = p->winx + textCount;
-                        if (start > length) start = length;
-                        address += start;
-                        length -= start;
-                      }
-                    }
-                    if (findCharacters(&address, &length, characters, count)) {
-                      if (increment < 0)
-                        while (findCharacters(&address, &length, characters, count))
-                          ++address, --length;
-
-                      p->winy = line;
-                      p->winx = (address - buffer) / textCount * textCount;
-                      found = 1;
-                      break;
-                    }
-                    line += increment;
-                  }
-                }
-                if (!found) playTune(&tune_bounce);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-            }
-
-            case BRL_CMD_LNBEG:
-              if (p->winx) {
-                p->winx = 0;
-              } else {
-                playTune(&tune_bounce);
-              }
-              break;
-
-            case BRL_CMD_LNEND: {
-              int end = MAX(scr.cols, textCount) - textCount;
-
-              if (p->winx < end) {
-                p->winx = end;
-              } else {
-                playTune(&tune_bounce);
-              }
-              break;
-            }
-
-            case BRL_CMD_CHRLT:
-              if (p->winx == 0)
-                playTune (&tune_bounce);
-              p->winx = MAX (p->winx - 1, 0);
-              break;
-            case BRL_CMD_CHRRT:
-              if (p->winx < (scr.cols - 1))
-                p->winx++;
-              else
-                playTune(&tune_bounce);
-              break;
-
-            case BRL_CMD_HWINLT:
-              if (p->winx == 0)
-                playTune(&tune_bounce);
-              else
-                p->winx = MAX(p->winx-halfWindowShift, 0);
-              break;
-            case BRL_CMD_HWINRT:
-              if (p->winx < (scr.cols - halfWindowShift))
-                p->winx += halfWindowShift;
-              else
-                playTune(&tune_bounce);
-              break;
-
-            case BRL_CMD_FWINLT:
-              if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
-                int oldX = p->winx;
-                if (shiftWindowLeft()) {
-                  if (prefs.skipBlankWindows) {
-                    int charCount;
-                    if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
-                    charCount = MIN(scr.cols, p->winx+textCount);
-                    if (!showCursor() ||
-                        (scr.posy != p->winy) ||
-                        (scr.posx < 0) ||
-                        (scr.posx >= charCount)) {
-                      int charIndex;
-                      ScreenCharacter characters[charCount];
-                      readScreen(0, p->winy, charCount, 1, characters);
-                      for (charIndex=0; charIndex<charCount; ++charIndex) {
-                        wchar_t text = characters[charIndex].text;
-                        if (text != WC_C(' ')) break;
-                      }
-                      if (charIndex == charCount) goto wrapUp;
-                    }
-                  }
-                  break;
-                }
-              wrapUp:
-                if (p->winy == 0) {
-                  playTune(&tune_bounce);
-                  p->winx = oldX;
-                  break;
-                }
-                playTune(&tune_wrap_up);
-                upLine(isSameText);
-                placeWindowRight();
-              skipEndOfLine:
-                if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
-                  int charIndex;
-                  ScreenCharacter characters[scr.cols];
-                  readScreen(0, p->winy, scr.cols, 1, characters);
-                  for (charIndex=scr.cols-1; charIndex>0; --charIndex) {
-                    wchar_t text = characters[charIndex].text;
-                    if (text != WC_C(' ')) break;
-                  }
-                  if (showCursor() && (scr.posy == p->winy) && SCR_COLUMN_OK(scr.posx)) {
-                    charIndex = MAX(charIndex, scr.posx);
-                  }
-                  if (charIndex < p->winx) placeRightEdge(charIndex);
-                }
-                break;
-              }
-            case BRL_CMD_FWINLTSKIP: {
-              int oldX = p->winx;
-              int oldY = p->winy;
-              int tuneLimit = 3;
-              int charCount;
-              int charIndex;
-              ScreenCharacter characters[scr.cols];
-              while (1) {
-                if (!shiftWindowLeft()) {
-                  if (p->winy == 0) {
-                    playTune(&tune_bounce);
-                    p->winx = oldX;
-                    p->winy = oldY;
-                    break;
-                  }
-                  if (tuneLimit-- > 0) playTune(&tune_wrap_up);
-                  upLine(isSameText);
-                  placeWindowRight();
-                }
-                charCount = getWindowLength();
-                charCount = MIN(charCount, scr.cols-p->winx);
-                readScreen(p->winx, p->winy, charCount, 1, characters);
-                for (charIndex=charCount-1; charIndex>=0; charIndex--) {
-                  wchar_t text = characters[charIndex].text;
-                  if (text != WC_C(' ')) break;
-                }
-                if (showCursor() &&
-                    (scr.posy == p->winy) &&
-                    (scr.posx >= 0) &&
-                    (scr.posx < (p->winx + charCount))) {
-                  charIndex = MAX(charIndex, scr.posx-p->winx);
-                }
-                if (charIndex >= 0) break;
-              }
-              break;
-            }
-
-            case BRL_CMD_FWINRT:
-              if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
-                int oldX = p->winx;
-                if (shiftWindowRight()) {
-                  if (prefs.skipBlankWindows) {
-                    if (!showCursor() ||
-                        (scr.posy != p->winy) ||
-                        (scr.posx < p->winx)) {
-                      int charCount = scr.cols - p->winx;
-                      int charIndex;
-                      ScreenCharacter characters[charCount];
-                      readScreen(p->winx, p->winy, charCount, 1, characters);
-                      for (charIndex=0; charIndex<charCount; ++charIndex) {
-                        wchar_t text = characters[charIndex].text;
-                        if (text != WC_C(' ')) break;
-                      }
-                      if (charIndex == charCount) goto wrapDown;
-                    }
-                  }
-                  break;
-                }
-              wrapDown:
-                if (p->winy >= (scr.rows - brl.textRows)) {
-                  playTune(&tune_bounce);
-                  p->winx = oldX;
-                  break;
-                }
-                playTune(&tune_wrap_down);
-                downLine(isSameText);
-                p->winx = 0;
-                break;
-              }
-            case BRL_CMD_FWINRTSKIP: {
-              int oldX = p->winx;
-              int oldY = p->winy;
-              int tuneLimit = 3;
-              int charCount;
-              int charIndex;
-              ScreenCharacter characters[scr.cols];
-              while (1) {
-                if (!shiftWindowRight()) {
-                  if (p->winy >= (scr.rows - brl.textRows)) {
-                    playTune(&tune_bounce);
-                    p->winx = oldX;
-                    p->winy = oldY;
-                    break;
-                  }
-                  if (tuneLimit-- > 0) playTune(&tune_wrap_down);
-                  downLine(isSameText);
-                  p->winx = 0;
-                }
-                charCount = getWindowLength();
-                charCount = MIN(charCount, scr.cols-p->winx);
-                readScreen(p->winx, p->winy, charCount, 1, characters);
-                for (charIndex=0; charIndex<charCount; charIndex++) {
-                  wchar_t text = characters[charIndex].text;
-                  if (text != WC_C(' ')) break;
-                }
-                if (showCursor() &&
-                    (scr.posy == p->winy) &&
-                    (scr.posx < scr.cols) &&
-                    (scr.posx >= p->winx)) {
-                  charIndex = MIN(charIndex, scr.posx-p->winx);
-                }
-                if (charIndex < charCount) break;
-              }
-              break;
-            }
-
-            case BRL_CMD_RETURN:
-              if ((p->winx != p->motx) || (p->winy != p->moty)) {
-            case BRL_CMD_BACK:
-                p->winx = p->motx;
-                p->winy = p->moty;
-                break;
-              }
-            case BRL_CMD_HOME:
-              if (!trackCursor(1)) playTune(&tune_command_rejected);
-              break;
-
-            case BRL_CMD_RESTARTBRL:
-              restartBrailleDriver();
-              resetScanCodes();
-              writable = 1;
-              break;
-            case BRL_CMD_PASTE:
-              if (isLiveScreen() && !isRouting()) {
-                if (cutPaste()) break;
-              }
-              playTune(&tune_command_rejected);
-              break;
-            case BRL_CMD_CSRJMP_VERT:
-              playTune(routeCursor(-1, p->winy, scr.number)?
-                       &tune_routing_started:
-                       &tune_command_rejected);
-              break;
-
-            case BRL_CMD_CSRVIS:
-              /* toggles the preferences option that decides whether cursor
-                 is shown at all */
-              TOGGLE_PLAY(prefs.showCursor);
-              break;
-            case BRL_CMD_CSRHIDE:
-              /* This is for briefly hiding the cursor */
-              TOGGLE_NOPLAY(p->hideCursor);
-              /* no tune */
-              break;
-            case BRL_CMD_CSRSIZE:
-              TOGGLE_PLAY(prefs.cursorStyle);
-              break;
-            case BRL_CMD_CSRTRK:
-              if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
-#ifdef ENABLE_SPEECH_SUPPORT
-                if (speechTracking && (scr.number == speechScreen)) {
-                  speechIndex = -1;
-                } else
-#endif /* ENABLE_SPEECH_SUPPORT */
-                  trackCursor(1);
-              }
-              break;
-            case BRL_CMD_CSRBLINK:
-              setBlinkingCursor(1);
-              if (TOGGLE_PLAY(prefs.blinkingCursor)) {
-                setBlinkingAttributes(1);
-                setBlinkingCapitals(0);
-              }
-              break;
-
-            case BRL_CMD_ATTRVIS:
-              TOGGLE_PLAY(prefs.showAttributes);
-              break;
-            case BRL_CMD_ATTRBLINK:
-              setBlinkingAttributes(1);
-              if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
-                setBlinkingCapitals(1);
-                setBlinkingCursor(0);
-              }
-              break;
-
-            case BRL_CMD_CAPBLINK:
-              setBlinkingCapitals(1);
-              if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
-                setBlinkingAttributes(0);
-                setBlinkingCursor(0);
-              }
-              break;
-
-            case BRL_CMD_SKPIDLNS:
-              TOGGLE_PLAY(prefs.skipIdenticalLines);
-              break;
-            case BRL_CMD_SKPBLNKWINS:
-              TOGGLE_PLAY(prefs.skipBlankWindows);
-              break;
-            case BRL_CMD_SLIDEWIN:
-              TOGGLE_PLAY(prefs.slidingWindow);
-              break;
-
-            case BRL_CMD_DISPMD:
-              TOGGLE_NOPLAY(p->showAttributes);
-              break;
-            case BRL_CMD_SIXDOTS:
-              TOGGLE_PLAY(prefs.textStyle);
-              break;
-
-            case BRL_CMD_AUTOREPEAT:
-              if (TOGGLE_PLAY(prefs.autorepeat)) resetAutorepeat();
-              break;
-            case BRL_CMD_TUNES:
-              TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
-              break;
-            case BRL_CMD_FREEZE:
-              if (isLiveScreen()) {
-                playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
-              } else if (isFrozenScreen()) {
-                deactivateFrozenScreen();
-                playTune(&tune_screen_unfrozen);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-
-            case BRL_CMD_PREFMENU:
-              if (!updatePreferences()) writable = 0;
-              break;
-            case BRL_CMD_PREFSAVE:
-              if (savePreferences()) {
-                playTune(&tune_command_done);
-              }
-              break;
-            case BRL_CMD_PREFLOAD:
-              if (loadPreferences()) {
-                resetBlinkingStates();
-                playTune(&tune_command_done);
-              }
-              break;
-
-            case BRL_CMD_HELP:
-              infoMode = 0;
-              if (isHelpScreen()) {
-                deactivateHelpScreen();
-              } else if (!activateHelpScreen()) {
-                message(NULL, gettext("help not available"), 0);
-              }
-              break;
-            case BRL_CMD_INFO:
-              if ((prefs.statusPosition == spNone) || haveStatusCells()) {
-                TOGGLE_NOPLAY(infoMode);
-              } else {
-                TOGGLE_NOPLAY(textMaximized);
-                reconfigureWindow();
-              }
-              break;
-
-#ifdef ENABLE_LEARN_MODE
-            case BRL_CMD_LEARN:
-              if (!learnMode(&brl, updateInterval, 10000)) writable = 0;
-              break;
-#endif /* ENABLE_LEARN_MODE */
-
-            case BRL_CMD_SWITCHVT_PREV:
-              if (!switchVirtualTerminal(scr.number-1))
-                playTune(&tune_command_rejected);
-              break;
-            case BRL_CMD_SWITCHVT_NEXT:
-              if (!switchVirtualTerminal(scr.number+1))
-                playTune(&tune_command_rejected);
-              break;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-            case BRL_CMD_RESTARTSPEECH:
-              restartSpeechDriver();
-              break;
-            case BRL_CMD_SPKHOME:
-              if (scr.number == speechScreen) {
-                trackSpeech(speech->getTrack(&spk));
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-            case BRL_CMD_AUTOSPEAK:
-              TOGGLE_PLAY(prefs.autospeak);
-              break;
-            case BRL_CMD_MUTE:
-              speech->mute(&spk);
-              break;
-
-            case BRL_CMD_SAY_LINE:
-              sayScreenLines(p->winy, 1, 0, prefs.sayLineMode);
-              break;
-            case BRL_CMD_SAY_ABOVE:
-              sayScreenLines(0, p->winy+1, 1, sayImmediate);
-              break;
-            case BRL_CMD_SAY_BELOW:
-              sayScreenLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
-              break;
-
-            case BRL_CMD_SAY_SLOWER:
-              if (speech->rate && (prefs.speechRate > 0)) {
-                setSpeechRate(&spk, --prefs.speechRate, 1);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-            case BRL_CMD_SAY_FASTER:
-              if (speech->rate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
-                setSpeechRate(&spk, ++prefs.speechRate, 1);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-
-            case BRL_CMD_SAY_SOFTER:
-              if (speech->volume && (prefs.speechVolume > 0)) {
-                setSpeechVolume(&spk, --prefs.speechVolume, 1);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-            case BRL_CMD_SAY_LOUDER:
-              if (speech->volume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
-                setSpeechVolume(&spk, ++prefs.speechVolume, 1);
-              } else {
-                playTune(&tune_command_rejected);
-              }
-              break;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-            default: {
-              int blk = command & BRL_MSK_BLK;
-              int arg = command & BRL_MSK_ARG;
-              int flags = command & BRL_MSK_FLG;
-
-              switch (blk) {
-                case BRL_BLK_PASSKEY: {
-                  ScreenKey key;
-
-                  switch (arg) {
-                    case BRL_KEY_ENTER:
-                      key = SCR_KEY_ENTER;
-                      break;
-                    case BRL_KEY_TAB:
-                      key = SCR_KEY_TAB;
-                      break;
-                    case BRL_KEY_BACKSPACE:
-                      key = SCR_KEY_BACKSPACE;
-                      break;
-                    case BRL_KEY_ESCAPE:
-                      key = SCR_KEY_ESCAPE;
-                      break;
-                    case BRL_KEY_CURSOR_LEFT:
-                      key = SCR_KEY_CURSOR_LEFT;
-                      break;
-                    case BRL_KEY_CURSOR_RIGHT:
-                      key = SCR_KEY_CURSOR_RIGHT;
-                      break;
-                    case BRL_KEY_CURSOR_UP:
-                      key = SCR_KEY_CURSOR_UP;
-                      break;
-                    case BRL_KEY_CURSOR_DOWN:
-                      key = SCR_KEY_CURSOR_DOWN;
-                      break;
-                    case BRL_KEY_PAGE_UP:
-                      key = SCR_KEY_PAGE_UP;
-                      break;
-                    case BRL_KEY_PAGE_DOWN:
-                      key = SCR_KEY_PAGE_DOWN;
-                      break;
-                    case BRL_KEY_HOME:
-                      key = SCR_KEY_HOME;
-                      break;
-                    case BRL_KEY_END:
-                      key = SCR_KEY_END;
-                      break;
-                    case BRL_KEY_INSERT:
-                      key = SCR_KEY_INSERT;
-                      break;
-                    case BRL_KEY_DELETE:
-                      key = SCR_KEY_DELETE;
-                      break;
-                    default:
-                      if (arg < BRL_KEY_FUNCTION) goto badKey;
-                      key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
-                      break;
-                  }
-
-                  if (!insertKey(key, flags)) {
-                  badKey:
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_PASSCHAR: {
-                  wint_t character = convertCharToWchar(arg);
-                  if ((character == WEOF) ||
-                      !insertKey(character, flags))
-                    playTune(&tune_command_rejected);
-                  break;
-                }
-
-                case BRL_BLK_PASSDOTS:
-                  if (!insertKey(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
-                  break;
-
-                case BRL_BLK_PASSAT:
-                  if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, 0XF0);
-                  if (flags & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, 0XE1);
-                  if (atInterpretScanCode(&command, arg)) goto doCommand;
-                  break;
-
-                case BRL_BLK_PASSXT:
-                  if (flags & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, 0XE1);
-                  if (xtInterpretScanCode(&command, arg)) goto doCommand;
-                  break;
-
-                case BRL_BLK_PASSPS2:
-                  /* not implemented yet */
-                  playTune(&tune_command_rejected);
-                  break;
-
-                case BRL_BLK_ROUTE: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
-                    if (routeCursor(column, row, scr.number)) {
-                      playTune(&tune_routing_started);
-                      break;
-                    }
-                  }
-                  playTune(&tune_command_rejected);
-                  break;
-                }
-
-                case BRL_BLK_CUTBEGIN: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    cutBegin(column, row);
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_CUTAPPEND: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    cutAppend(column, row);
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_CUTRECT: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-                    if (cutRectangle(column, row))
-                      break;
-                  playTune(&tune_command_rejected);
-                  break;
-                }
-
-                case BRL_BLK_CUTLINE: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-                    if (cutLine(column, row))
-                      break;
-                  playTune(&tune_command_rejected);
-                  break;
-                }
-
-                case BRL_BLK_DESCCHAR: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    static char *colours[] = {
-                      strtext("black"),
-                      strtext("blue"),
-                      strtext("green"),
-                      strtext("cyan"),
-                      strtext("red"),
-                      strtext("magenta"),
-                      strtext("brown"),
-                      strtext("light grey"),
-                      strtext("dark grey"),
-                      strtext("light blue"),
-                      strtext("light green"),
-                      strtext("light cyan"),
-                      strtext("light red"),
-                      strtext("light magenta"),
-                      strtext("yellow"),
-                      strtext("white")
-                    };
-                    char buffer[0X50];
-                    int size = sizeof(buffer);
-                    int length = 0;
-                    ScreenCharacter character;
-
-                    readScreen(column, row, 1, 1, &character);
-
-                    {
-                      uint32_t text = character.text;
-                      int count;
-                      snprintf(&buffer[length], size-length,
-                               "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
-                               text, text,
-                               gettext(colours[character.attributes & 0X0F]),
-                               gettext(colours[(character.attributes & 0X70) >> 4]),
-                               &count);
-                      length += count;
-                    }
-
-                    if (character.attributes & SCR_ATTR_BLINK) {
-                      int count;
-                      snprintf(&buffer[length], size-length,
-                               " %s%n",
-                               gettext("blink"),
-                               &count);
-                      length += count;
-                    }
-
-#ifdef HAVE_ICU
-                    {
-                      char name[0X40];
-                      UErrorCode error = U_ZERO_ERROR;
-
-                      u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-                      if (U_SUCCESS(error)) {
-                        int count;
-                        snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
-                        length += count;
-                      }
-                    }
-#endif /* HAVE_ICU */
-
-                    message(NULL, buffer, 0);
-                  } else
-                    playTune(&tune_command_rejected);
-                  break;
-                }
-
-                case BRL_BLK_SETLEFT: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    p->winx = column;
-                    p->winy = row;
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_GOTOLINE:
-                  if (flags & BRL_FLG_LINE_SCALED)
-                    arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
-                  if (arg < scr.rows) {
-                    slideWindowVertically(arg);
-                    if (flags & BRL_FLG_LINE_TOLEFT) p->winx = 0;
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-
-                case BRL_BLK_SETMARK: {
-                  ScreenMark *mark = &p->marks[arg];
-                  mark->column = p->winx;
-                  mark->row = p->winy;
-                  playTune(&tune_mark_set);
-                  break;
-                }
-                case BRL_BLK_GOTOMARK: {
-                  ScreenMark *mark = &p->marks[arg];
-                  p->winx = mark->column;
-                  p->winy = mark->row;
-                  break;
-                }
-
-                case BRL_BLK_SWITCHVT:
-                  if (!switchVirtualTerminal(arg+1))
-                    playTune(&tune_command_rejected);
-                  break;
-
-                {
-                  int column, row;
-                  int increment;
-
-                case BRL_BLK_PRINDENT:
-                  increment = -1;
-                  goto findIndent;
-
-                case BRL_BLK_NXINDENT:
-                  increment = 1;
-
-                findIndent:
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    p->winy = row;
-                    findRow(column, increment, testIndent, NULL);
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_PRDIFCHAR: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    p->winy = row;
-                    upDifferentCharacter(isSameText, column);
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                case BRL_BLK_NXDIFCHAR: {
-                  int column, row;
-
-                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-                    p->winy = row;
-                    downDifferentCharacter(isSameText, column);
-                  } else {
-                    playTune(&tune_command_rejected);
-                  }
-                  break;
-                }
-
-                default:
-                  playTune(&tune_command_rejected);
-                  LogPrint(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
-              }
-              break;
-            }
-          }
-        }
-
-        if ((p->winx != oldmotx) || (p->winy != oldmoty)) {
-          /* The window has been manually moved. */
-          p->motx = p->winx;
-          p->moty = p->winy;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-          contracted = 0;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#ifdef ENABLE_SPEECH_SUPPORT
-          if (p->trackCursor && speechTracking && (scr.number == speechScreen)) {
-            p->trackCursor = 0;
-            playTune(&tune_cursor_unlinked);
-          }
-#endif /* ENABLE_SPEECH_SUPPORT */
-        }
-
-        if (!(command & BRL_MSK_BLK)) {
-          if (command & BRL_FLG_ROUTE) {
-            int left = p->winx;
-            int right = MIN(left+textCount, scr.cols) - 1;
-
-            int top = p->winy;
-            int bottom = MIN(top+brl.textRows, scr.rows) - 1;
-
-            if ((scr.posx < left) || (scr.posx > right) ||
-                (scr.posy < top) || (scr.posy > bottom)) {
-              if (routeCursor(MIN(MAX(scr.posx, left), right),
-                              MIN(MAX(scr.posy, top), bottom),
-                              scr.number)) {
-                playTune(&tune_routing_started);
-                checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
-
-                {
-                  ScreenDescription description;
-                  describeScreen(&description);
-
-                  if (description.number == scr.number) {
-                    slideWindowVertically(description.posy);
-                    placeWindowHorizontally(description.posx);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      /* some command (key insertion, virtual terminal switching, etc)
-       * may have moved the cursor
-       */
-      updateScreenAttributes();
-
-      /*
-       * Update blink counters: 
-       */
-      if (prefs.blinkingCursor)
-        if ((cursorTimer -= updateInterval) <= 0)
-          setBlinkingCursor(!cursorState);
-      if (prefs.blinkingAttributes)
-        if ((attributesTimer -= updateInterval) <= 0)
-          setBlinkingAttributes(!attributesState);
-      if (prefs.blinkingCapitals)
-        if ((capitalsTimer -= updateInterval) <= 0)
-          setBlinkingCapitals(!capitalsState);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-      /* called continually even if we're not tracking so that the pipe doesn't fill up. */
-      speech->doTrack(&spk);
-
-      if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-      if (p->trackCursor) {
-#ifdef ENABLE_SPEECH_SUPPORT
-        if (speechTracking && (scr.number == speechScreen)) {
-          int index = speech->getTrack(&spk);
-          if (index != speechIndex) trackSpeech(speechIndex = index);
-        } else
-#endif /* ENABLE_SPEECH_SUPPORT */
-        {
-          /* If cursor moves while blinking is on */
-          if (prefs.blinkingCursor) {
-            if (scr.posy != p->trky) {
-              /* turn off cursor to see what's under it while changing lines */
-              setBlinkingCursor(0);
-            } else if (scr.posx != p->trkx) {
-              /* turn on cursor to see it moving on the line */
-              setBlinkingCursor(1);
-            }
-          }
-          /* If the cursor moves in cursor tracking mode: */
-          if (!isRouting() && (scr.posx != p->trkx || scr.posy != p->trky)) {
-            trackCursor(0);
-            p->trkx = scr.posx;
-            p->trky = scr.posy;
-          } else if (checkPointer()) {
-            pointerMoved = 1;
-          }
-        }
-      }
-
-#ifdef ENABLE_SPEECH_SUPPORT
-      if (prefs.autospeak) {
-        static int oldScreen = -1;
-        static int oldX = -1;
-        static int oldY = -1;
-        static int oldWidth = 0;
-        static ScreenCharacter *oldCharacters = NULL;
-
-        int newScreen = scr.number;
-        int newX = scr.posx;
-        int newY = scr.posy;
-        int newWidth = scr.cols;
-        ScreenCharacter newCharacters[newWidth];
-
-        readScreen(0, p->winy, newWidth, 1, newCharacters);
-
-        if (!speechTracking) {
-          int column = 0;
-          int count = newWidth;
-          const ScreenCharacter *characters = newCharacters;
-
-          if (oldCharacters) {
-            if ((newScreen == oldScreen) && (p->winy == oldwiny) && (newWidth == oldWidth)) {
-              int onScreen = (newX >= 0) && (newX < newWidth);
-
-              if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
-                if ((newY == p->winy) && (newY == oldY) && onScreen) {
-                  if ((newX == oldX) &&
-                      isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
-                    int oldLength = oldWidth;
-                    int newLength = newWidth;
-                    int x = newX + 1;
-
-                    while (oldLength > oldX) {
-                      if (oldCharacters[oldLength-1].text != WC_C(' ')) break;
-                      --oldLength;
-                    }
-
-                    while (newLength > newX) {
-                      if (newCharacters[newLength-1].text != WC_C(' ')) break;
-                      --newLength;
-                    }
-
-                    while (1) {
-                      int done = 1;
-
-                      if (x < newLength) {
-                        if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
-                          column = newX;
-                          count = x - newX;
-                          goto speak;
-                        }
-
-                        done = 0;
-                      }
-
-                      if (x < oldLength) {
-                        if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
-                          column = oldX;
-                          count = x - oldX;
-                          characters = oldCharacters;
-                          goto speak;
-                        }
-
-                        done = 0;
-                      }
-
-                      if (done) break;
-                      x += 1;
-                    }
-                  }
-
-                  if (oldX < 0) oldX = 0;
-                  if ((newX > oldX) &&
-                      isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
-                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
-                    column = oldX;
-                    count = newX - oldX;
-                    goto speak;
-                  }
-
-                  if (oldX >= oldWidth) oldX = oldWidth - 1;
-                  if ((newX < oldX) &&
-                      isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
-                      isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
-                    column = newX;
-                    count = oldX - newX;
-                    characters = oldCharacters;
-                    goto speak;
-                  }
-
-                  while (newCharacters[column].text == oldCharacters[column].text) ++column;
-                  while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
-                  count -= column;
-                }
-              } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
-                column = newX;
-                count = 1;
-              } else {
-                count = 0;
-              }
-            }
-          }
-
-        speak:
-          if (count) {
-            sayScreenCharacters(characters+column, count, 1);
-          }
-        }
-
-        {
-          size_t size = newWidth * sizeof(*oldCharacters);
-          oldCharacters = reallocWrapper(oldCharacters, size);
-          memcpy(oldCharacters, newCharacters, size);
-        }
-
-        oldScreen = newScreen;
-        oldX = newX;
-        oldY = newY;
-        oldWidth = newWidth;
-      }
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-      /* There are a few things to take care of if the display has moved. */
-      if ((p->winx != oldwinx) || (p->winy != oldwiny)) {
-        if (!pointerMoved) highlightWindow();
-
-        if (prefs.showAttributes && prefs.blinkingAttributes) {
-          /* Attributes are blinking.
-             We could check to see if we changed screen, but that doesn't
-             really matter... this is mainly for when you are hunting up/down
-             for the line with attributes. */
-          setBlinkingAttributes(1);
-          /* problem: this still doesn't help when the braille window is
-             stationnary and the attributes themselves are moving
-             (example: tin). */
-        }
-
-        oldwinx = p->winx;
-        oldwiny = p->winy;
-      }
-
-      if (infoMode) {
-        if (!showInfo()) writable = 0;
-      } else {
-        const unsigned int windowLength = brl.textColumns * brl.textRows;
-        const unsigned int textLength = textCount * brl.textRows;
-        wchar_t textBuffer[windowLength];
-
-        memset(brl.buffer, 0, windowLength);
-        wmemset(textBuffer, WC_C(' '), windowLength);
-        brl.cursor = -1;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-        contracted = 0;
-        if (isContracting()) {
-          while (1) {
-            int cursorOffset = CTB_NO_CURSOR;
-
-            int inputLength = scr.cols - p->winx;
-            ScreenCharacter inputCharacters[inputLength];
-            wchar_t inputText[inputLength];
-
-            int outputLength = textLength;
-            unsigned char outputBuffer[outputLength];
-
-            if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
-            readScreen(p->winx, p->winy, inputLength, 1, inputCharacters);
-
-            {
-              int i;
-              for (i=0; i<inputLength; ++i) {
-                inputText[i] = inputCharacters[i].text;
-              }
-            }
-
-            if (!contractText(contractionTable,
-                              inputText, &inputLength,
-                              outputBuffer, &outputLength,
-                              contractedOffsets, cursorOffset))
-              break;
-
-            {
-              int inputEnd = inputLength;
-
-              if (contractedTrack) {
-                if (outputLength == textLength) {
-                  int inputIndex = inputEnd;
-                  while (inputIndex) {
-                    int offset = contractedOffsets[--inputIndex];
-                    if (offset != CTB_NO_OFFSET) {
-                      if (offset != outputLength) break;
-                      inputEnd = inputIndex;
-                    }
-                  }
-                }
-
-                if (scr.posx >= (p->winx + inputEnd)) {
-                  int offset = 0;
-                  int length = scr.cols - p->winx;
-                  int onspace = 0;
-
-                  while (offset < length) {
-                    if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
-                      if (onspace) break;
-                      onspace = 1;
-                    }
-                    ++offset;
-                  }
-
-                  if ((offset += p->winx) > scr.posx) {
-                    p->winx = (p->winx + scr.posx) / 2;
-                  } else {
-                    p->winx = offset;
-                  }
-
-                  continue;
-                }
-              }
-
-              if (cursorOffset < inputEnd) {
-                while (cursorOffset >= 0) {
-                  int offset = contractedOffsets[cursorOffset];
-                  if (offset != CTB_NO_OFFSET) {
-                    brl.cursor = ((offset / textCount) * brl.textColumns) + textStart + (offset % textCount);
-                    break;
-                  }
-                  --cursorOffset;
-                }
-              }
-            }
-
-            contractedStart = p->winx;
-            contractedLength = inputLength;
-            contractedTrack = 0;
-            contracted = 1;
-
-            if (p->showAttributes || showAttributesUnderline()) {
-              int inputOffset;
-              int outputOffset = 0;
-              unsigned char attributes = 0;
-              unsigned char attributesBuffer[outputLength];
-
-              for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
-                int offset = contractedOffsets[inputOffset];
-                if (offset != CTB_NO_OFFSET) {
-                  while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
-                  attributes = 0;
-                }
-                attributes |= inputCharacters[inputOffset].attributes;
-              }
-              while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
-
-              if (p->showAttributes) {
-                for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                  outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
-                }
-              } else {
-                int i;
-                for (i=0; i<outputLength; ++i) {
-                  overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
-                }
-              }
-            }
-
-            fillDotsRegion(textBuffer, brl.buffer,
-                           textStart, textCount, brl.textColumns, brl.textRows,
-                           outputBuffer, outputLength);
-            break;
-          }
-        }
-
-        if (!contracted)
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-        {
-          int windowColumns = MIN(textCount, scr.cols-p->winx);
-          ScreenCharacter characters[textLength];
-
-          readScreen(p->winx, p->winy, windowColumns, brl.textRows, characters);
-          if (windowColumns < textCount) {
-            /* We got a rectangular piece of text with readScreen but the display
-             * is in an off-right position with some cells at the end blank
-             * so we'll insert these cells and blank them.
-             */
-            int i;
-
-            for (i=brl.textRows-1; i>0; i--) {
-              memmove(characters + (i * textCount),
-                      characters + (i * windowColumns),
-                      windowColumns * sizeof(*characters));
-            }
-
-            for (i=0; i<brl.textRows; i++) {
-              clearScreenCharacters(characters + (i * textCount) + windowColumns,
-                                    textCount-windowColumns);
-            }
-          }
-
-          /*
-           * If the cursor is visible and in range: 
-           */
-          if ((scr.posx >= p->winx) && (scr.posx < (p->winx + textCount)) &&
-              (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.textRows)) &&
-              (scr.posx < scr.cols) && (scr.posy < scr.rows))
-            brl.cursor = ((scr.posy - p->winy) * brl.textColumns) + textStart + scr.posx - p->winx;
-
-          /* blank out capital letters if they're blinking and should be off */
-          if (prefs.blinkingCapitals && !capitalsState) {
-            int i;
-            for (i=0; i<textCount*brl.textRows; i++) {
-              ScreenCharacter *character = &characters[i];
-              if (iswupper(character->text)) character->text = WC_C(' ');
-            }
-          }
-
-          /* convert to dots using the current translation table */
-          if (p->showAttributes) {
-            int row;
-
-            for (row=0; row<brl.textRows; row+=1) {
-              const ScreenCharacter *source = &characters[row * textCount];
-              unsigned int start = (row * brl.textColumns) + textStart;
-              unsigned char *target = &brl.buffer[start];
-              wchar_t *text = &textBuffer[start];
-              int column;
-
-              for (column=0; column<textCount; column+=1) {
-                text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
-              }
-            }
-          } else {
-            int underline = showAttributesUnderline();
-            int row;
-
-            for (row=0; row<brl.textRows; row+=1) {
-              const ScreenCharacter *source = &characters[row * textCount];
-              unsigned int start = (row * brl.textColumns) + textStart;
-              unsigned char *target = &brl.buffer[start];
-              wchar_t *text = &textBuffer[start];
-              int column;
-
-              for (column=0; column<textCount; column+=1) {
-                const ScreenCharacter *character = &source[column];
-                unsigned char *dots = &target[column];
-
-                *dots = convertCharacterToDots(textTable, character->text);
-                if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
-                if (underline) overlayAttributesUnderline(dots, character->attributes);
-
-                text[column] = character->text;
-              }
-            }
-          }
-        }
-
-        if (brl.cursor >= 0) {
-          if (showCursor()) {
-            brl.buffer[brl.cursor] |= cursorDots();
-          }
-        }
-
-        if (statusCount > 0) {
-          const unsigned char *fields = prefs.statusFields;
-          unsigned int length = getStatusFieldsLength(fields);
-
-          if (length > 0) {
-            unsigned char cells[length];
-            memset(cells, 0, length);
-            renderStatusFields(fields, cells);
-            fillDotsRegion(textBuffer, brl.buffer,
-                           statusStart, statusCount, brl.textColumns, brl.textRows,
-                           cells, length);
-          }
-
-          fillStatusSeparator(textBuffer, brl.buffer);
-        }
-
-        if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) writable = 0;
-      }
-#ifdef ENABLE_API
-      api_releaseDriver(&brl);
-    } else if (apiStarted) {
-      api_flush(&brl, BRL_CTX_SCREEN);
-#endif /* ENABLE_API */
-    }
-
-  isOffline:
+    doUpdate(&upd);
 
 #ifdef ENABLE_SPEECH_SUPPORT
     processSpeechFifo(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     drainBrailleOutput(&brl, updateInterval);
-    updateIntervals++;
+    updateIntervals += 1;
 
     /*
      * Update Braille display and screen information.  Switch screen 
