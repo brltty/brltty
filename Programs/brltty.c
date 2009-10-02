@@ -1443,7 +1443,7 @@ runProgram (void) {
           switch (command & BRL_MSK_CMD) {
             case BRL_CMD_OFFLINE:
               if (!offline) {
-                LogPrint(LOG_NOTICE, "braille display offline");
+                LogPrint(LOG_DEBUG, "braille display offline");
                 offline = 1;
               }
               goto isOffline;
@@ -1451,7 +1451,7 @@ runProgram (void) {
         }
 
         if (offline) {
-          LogPrint(LOG_NOTICE, "braille display online");
+          LogPrint(LOG_DEBUG, "braille display online");
           offline = 0;
         }
 
