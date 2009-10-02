@@ -280,10 +280,6 @@ extern void usbCloseInterface (
   UsbDevice *device
 );
 
-extern int usbResetEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-);
 extern int usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress

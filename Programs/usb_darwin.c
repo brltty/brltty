@@ -488,26 +488,6 @@ usbSetAlternative (
 }
 
 int
-usbResetEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-) {
-  UsbDeviceExtension *devx = device->extension;
-  UsbEndpoint *endpoint;
-
-  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
-    UsbEndpointExtension *eptx = endpoint->extension;
-    IOReturn result;
-
-    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
-    if (result == kIOReturnSuccess) return 1;
-    setUnixError(result, "USB endpoint reset");
-  }
-
-  return 0;
-}
-
-int
 usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
@@ -519,7 +499,7 @@ usbClearEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     IOReturn result;
 
-    result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipeNumber);
+    result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
     if (result == kIOReturnSuccess) return 1;
     setUnixError(result, "USB endpoint clear");
   }
@@ -734,7 +714,7 @@ usbReadEndpoint (
 
       case kIOUSBPipeStalled:
         if (!stalled) {
-          result = (*devx->interface)->ClearPipeStall(devx->interface, eptx->pipeNumber);
+          result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
           if (result == kIOReturnSuccess) {
             stalled = 1;
             goto read;

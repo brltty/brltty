@@ -116,16 +116,6 @@ usbSetAlternative (
 }
 
 int
-usbResetEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-) {
-  errno = ENOSYS;
-  LogError("USB endpoint reset");
-  return 0;
-}
-
-int
 usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
