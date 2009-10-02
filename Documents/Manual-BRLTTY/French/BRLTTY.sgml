@@ -5,7 +5,6 @@
 <!ENTITY utilisation 	SYSTEM "Utilisation.sgml">
 <!ENTITY features 	SYSTEM "Features.sgml">
 <!ENTITY translation 	SYSTEM "Translation.sgml">
-<!ENTITY contraction 	SYSTEM "Contraction.sgml">
 <!ENTITY advanced 	SYSTEM "Advanced.sgml">
 <!ENTITY displays 	SYSTEM "Displays.sgml">
 <!ENTITY synthesizers 	SYSTEM "Synthesizers.sgml">
@@ -34,7 +33,7 @@
     <name>Traduction française
   <and>
     <name>Jean-Philippe Mengual <tt><htmlurl url="mailto:mengualjeanphi@free.fr" name="&lt;mengualjeanphi@free.fr&gt;"></tt>
-  <date>Version 3.10, juillet 2008
+  <date>Version 4.0, mai 2009
   <abstract>
     Copyright &copy; 1995-2009 by Les Développeurs de BRLTTY.
     BRLTTY est un logiciel libre, et n'est fourni avec AUCUNE
@@ -56,7 +55,7 @@ le modifier sous les termes de la <htmlurl url="http://www.gnu.org/licenses/lice
 stipulée par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2 (ou supérieure) de la licence.
 
 Vous devriez avoir reçu une copie de la licence avec le
-programme. Elle devrait être dans le fichier <tt>COPYING</tt> du
+programme. Elle devrait être dans le fichier <tt/LICENSE-GPL/ du
 répertoire principal. Si ce n'est pas le cas, écrivez à la Free Software
 Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
@@ -103,7 +102,6 @@ détails).
 &utilisation
 &features
 &translation
-&contraction
 &advanced
 
 &displays

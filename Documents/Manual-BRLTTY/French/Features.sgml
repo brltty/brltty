@@ -274,8 +274,7 @@ où <em>pilote</em> correspond aux deux lettres du
 Les paramètres de préférence sont sauvegardés sous forme de données binaires,
 que vous ne pouvez donc pas éditer à la main.
 Cependant, BRLTTY a un menu simple à partir duquel vous pouvez facilement les
-changer. Cette caractéristique n'est pas disponible si vous avez spécifié
-l'option de compilation  <ref id="build-preferences-menu" name="--disable-preferences-menu">.
+changer.
 
 le menu est activé par la commande <ref id="command-PREFMENU" name="PREFMENU">.
 L'afficheur braille affiche brièvement (voir l'option
@@ -916,29 +915,29 @@ Remarques:
     </descrip>
     La valeur initiale dépend du pilote de l'afficheur braille.
   <tag>Text Table<label id="preference-text-table"></tag>
-    Sélectionnez la table de traduction de texte. Voir la section
-    <ref id="translation-text" name="Traduction de texte"> pour des détails.
+    Sélectionnez la table de texte. Voir la section
+    <ref id="table-text" name="Table de texte"> pour des détails.
     Voir l'option <ref id="options-text-table" name="-t"> en ligne de
     commande pour la valeur initiale.
-    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
-    avez spécifié l'option de compilation
-    <ref id="build-table-selection" name="--disable-table-selection">
-  <tag>Attributesw Table<label id="preference-attributes-table"></tag>
-    Sélectionnez la table de traduction des attributs. Voir la section
-    <ref id="translation-attributes" name="Traduction des attributs"> pour
+    Cette préférence n'est pas sauvegardée.
+  <tag>Attributes Table<label id="preference-attributes-table"></tag>
+    Sélectionnez la table d'attributs. Voir la section
+    <ref id="table-attributes" name="Tables d'attributs"> pour
     des détails. Voir l'option <ref id="options-attributes-table" name="-a">
     en ligne de commande pour la valeur initiale.
-    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
-    avez spécifié l'option de compilation 
-    <ref id="build-table-selection" name="--disable-table-selection">.
+    Cette préférence n'est pas sauvegardée.
   <tag>Contraction Table<label id="preference-contraction-table"></tag>
     Sélectionnez la table d'abrégé. Voir la section
-    <ref id="contraction" name="Braille abrégé"> pour des détails. Voir l'option
+    <ref id="table-contraction" name="Tables d'abrégé"> pour des détails. Voir l'option
     <ref id="options-contraction-table" name="-c"> en ligne de commande
     pour la valeur initiale.
-    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
-    avez spécifié l'option de compilation
-    <ref id="build-table-selection" name="--disable-table-selection">.
+    Cette préférence n'est pas sauvegardée.
+  <tag>Key Table<label id="preference-key-table"></tag>
+    Sélection de la table de touches.
+    Voir la section <ref id="table-key" name="Tables de touches"> pour plus de détails.
+    Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande 
+    pour le réglage initial.
+    Cette préférence n'est pas sauvegardée.
 </descrip>
 
 Remarques:

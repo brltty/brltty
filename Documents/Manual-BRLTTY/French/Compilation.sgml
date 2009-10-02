@@ -48,26 +48,37 @@ fichiers suivants:
         plus ou moins à <tt>brltty-</tt><em>pilote</em><tt>.conf</tt>, où
         <em>pilote</em> correspond aux deux lettres du <ref id="drivers"
         name="code d'identification du pilote">.
+      <tag/*.atb/
+        Tables d'attributs
+        (voir la section <ref id="table-attributes" name="Tables d'attributs"> pour plus de détails).
+        Leur nom ressemble à <em/name/<tt/.atb/.
+      <tag/*.ati/
+        Include files for attributes tables.
+
       <tag>*.ctb</tag>
-        Tables de braille abrégé (voir <ref id="contraction" name="Braille
-        abrégé"> pour plus de détails).  Leur nom ressemble plus ou
+        Tables de braille abrégé (voir <ref id=table-contraction name="Tables
+        d'abrégé"> pour plus de détails).  Leur nom ressemble plus ou
         moins à
         <em>langue</em><tt>-</tt><em>pays</em><tt>-</tt><em>niveau</em><tt>.ctb</tt>.
       <tag>*.cti</tag>
         Incluent les fichiers pour les tables de traduction.
+      <tag/*.ktb/
+        Tables de touches
+        (voir la section <ref id="table-key" name="Tables de touches"> pour plus de détails).
+        Leurs noms ressemble à <em/name/<tt/.ktb/.
+      <tag/*.kti/
+        Fichiers Include pour les tables de touches.
+      <tag/*.ttb/
+        Tables de texte
+        (voir la section <ref id="table-text" name="Tables de texte"> pour plus de détails).
+        Leurs noms ressemble à <em/language/<tt/.ttb/.
+      <tag/*.tti/
+        Fichiers Include pour les tables de texte.
       <tag>*.hlp</tag>
         Pages d'aide spécifiques à chaque pilote. Leur nom ressemble
         plus ou moins à <tt>brltty-</tt><em>pilote</em><tt>.hlp</tt>, où
         <em>pilote</em> correspond aux deux lettres du <ref id="drivers"
         name="code d'identification du pilote">.
-      <tag>*.tbl</tag>
-        Tables de traduction (voir la section <ref id="translation"
-        name="Tables de traduction"> pour plus de détails). Leur nom
-        ressemble plus ou moins à <tt>text.</tt><em>langue</em><tt>.tbl</tt>. Il y
-        a aussi deux tables spéciales qui assignent les attributs des
-        caractères de mise en relief à des points braille :
-        <tt>attrib.tbl</tt> le rend comme le chemin original, et
-        <tt>attributes.tbl</tt> le rend comme le chemin courant.
     </descrip>
   <tag>/var/lib/</tag>
     Sockets locaux pour la connexion à l'interface de programmation de
@@ -291,12 +302,12 @@ instructions supplémentaires spécifiques.
         <tt>/opt/libbraille</tt>. Cela revient à à spécifier <tt>--with-libbraille</tt>.
     </descrip>
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
-    Spécifie la table de traduction de texte (voir la section <ref
-    id="translation-text" name="Traduction de texte"> pour plus de
+    Spécifie la table de traduction de texte par défaut (voir la section <ref
+    id="table-text" name="Tables de texte"> pour plus de
     détails). Vous pouvez fournir le chemin absolu d'une table hors de
-    l'arborescence source. L'extension .tbl est facultative. Pour un
+    l'arborescence source. L'extension <tt/.ttb/ est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
-    vous ne spécifiez pas cette option, nabcc, une table commune (en
+    vous ne spécifiez pas cette option, <tt/en-nabcc/, une table commune (en
     Amérique du Nord) utilisant la variante 8 points du 
     <ref id="nabcc" name="North American Braille Computer Code">, est
     utilisée. Voir la ligne <ref id="configure-text-table"
@@ -305,10 +316,10 @@ instructions supplémentaires spécifiques.
     sélection à l'exécution. Ce paramètre peut être modifié par la
     préférence <ref id="preference-text-table" name="Text Table">.
   <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
-    Spécifie la table de trwdfhwdfhaduction des attributs (voir la section
-    <ref id="translation-attributes" name="Traduction des attributs">
+    Spécifie la table des attributs par défaut (voir la section
+    <ref id="table-attributes" name="Tables d'attributs">
     pour plus de détails). Vous pouvez fournir le chemin absolu d'une
-    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    table hors de l'arborescence source.  L'extension <tt>.atb</tt> est
     facultative. Si vous ne spécifiez pas cette option,
     <tt>attributes</tt> est alors utilisé. Changez cette option en
     <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
@@ -368,9 +379,9 @@ instructions supplémentaires spécifiques.
     (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
     Spécifie la table de traduction de texte (voir la section <ref
-    id="translation-text" name="Traduction de texte"> pour plus de
+    id="table-text" name="Tables de texte"> pour plus de
     détails). Vous pouvez fournir le chemin absolu d'une table hors de
-    l'arborescence source.  L'extension .tbl est facultative. Pour un
+    l'arborescence source.  L'extension .ttb est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
     vous ne spécifiez pas cette option, nabcc, une table commune (en
     Amérique du Nord) utilisant la variante 8 points du 
@@ -382,9 +393,9 @@ instructions supplémentaires spécifiques.
     préférence <ref id="preference-text-table" name="Text Table">.
   <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
     Spécifie la table de traduction des attributs (voir la section
-    <ref id="translation-attributes" name="Traduction des attributs">
+    <ref id="table-attributes" name="Tables d'attributs">
     pour plus de détails). Vous pouvez fournir le chemin absolu d'une
-    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    table hors de l'arborescence source.  L'extension <tt>.atb</tt> est
     facultative. Si vous ne spécifiez pas cette option,
     <tt>attributes</tt> est alors utilisé. Changez cette option en
     <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
@@ -446,9 +457,9 @@ instructions supplémentaires spécifiques.
     (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
     Spécifie la table de traduction de texte (voir la section <ref
-    id="translation-text" name="Traduction de texte"> pour plus de
+    id="table-text" name="Tables de texte"> pour plus de
     détails). Vous pouvez fournir le chemin absolu d'une table hors de
-    l'arborescence source.  L'extension .tbl est facultative. Pour un
+    l'arborescence source.  L'extension .ttb est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
     vous ne spécifiez pas cette option, nabcc, une table commune (en
     Amérique du Nord) utilisant la variante 8 points du 
@@ -460,9 +471,9 @@ instructions supplémentaires spécifiques.
     préférence <ref id="preference-text-table" name="Text Table">.
   <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
     Spécifie la table de traduction des attributs (voir la section
-    <ref id="translation-attributes" name="Traduction des attributs">
+    <ref id="table-attributes" name="Tables d'attributs">
     pour plus de détails). Vous pouvez fournir le chemin absolu d'une
-    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    table hors de l'arborescence source.  L'extension <tt>.atb</tt> est
     facultative. Si vous ne spécifiez pas cette option,
     <tt>attributes</tt> est alors utilisé. Changez cette option en
     <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
@@ -524,9 +535,9 @@ instructions supplémentaires spécifiques.
     (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
     Spécifie la table de traduction de texte (voir la section <ref
-    id="translation-text" name="Traduction de texte"> pour plus de
+    id="table-text" name="Tables de texte"> pour plus de
     détails). Vous pouvez fournir le chemin absolu d'une table hors de
-    l'arborescence source.  L'extension .tbl est facultative. Pour un
+    l'arborescence source.  L'extension .ttb est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
     vous ne spécifiez pas cette option, nabcc, une table commune (en
     Amérique du Nord) utilisant la variante 8 points du 
@@ -538,9 +549,9 @@ instructions supplémentaires spécifiques.
     préférence <ref id="preference-text-table" name="Text Table">.
   <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
     Spécifie la table de traduction des attributs (voir la section
-    <ref id="translation-attributes" name="Traduction des attributs">
+    <ref id="table-attributes" name="Tables d'attributs">
     pour plus de détails). Vous pouvez fournir le chemin absolu d'une
-    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    table hors de l'arborescence source.  L'extension <tt>.atb</tt> est
     facultative. Si vous ne spécifiez pas cette option,
     <tt>attributes</tt> est alors utilisé. Changez cette option en
     <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
@@ -913,9 +924,9 @@ les fonctions inutiles.
     les options de compilation <ref id="build-braille-driver" name="--with-braille-driver">,
     <ref id="build-speech-driver" name="--with-speech-driver"> et
     <ref id="build-screen-driver" name="--with-screen-driver">) sont compilés.
-  <tag><tt>--disable-preferences-menu</tt><label id="build-preferences-menu"></tag>
-    Réduit la taille du programme en excluant le menu Préférences
-    (voir la section <ref id="preferences-menu" name="Le Menu Préférences">).
+  <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
+    Ne supprime pas les symboles des tables des exécutables et des objets
+    partagés lors de leur installation.
     
   <tag><tt>--enable-relocatable-install</tt><label id="build-table-selection"></tag>
     Si cette fonctionnalité est activée, tous les chemins internes sont
@@ -945,7 +956,7 @@ les fonctions inutiles.
     des commandes (voir la section <ref id="learn" name="Command Learn Mode">).
   <tag><tt>--disable-contracted-braille</tt><label id="build-contracted-braille"></tag>
     Réduit la taille du programme en excluant le support pour le
-    braille abrégé (voir la section <ref id="contraction"
+    braille abrégé (voir la section <ref id=table-contraction
     name="Braille abrégé">).
   <tag><tt>--disable-usb-support</tt><label id="build-usb-support"></tag>
     Réduit la taille du programme en excluant le support pour les
@@ -1188,7 +1199,7 @@ commande <tt>brltty</tt>. Vous pouvez créer un fichier de configuration
 afin de d'établir des paramètres système par défaut pour des choses
 telles que l'emplacement du fichier de préférences, le pilote
 d'afficheur braille à utiliser, le périphérique auquel l'afficheur
-braille est connecté, et la table de traduction de texte à utiliser.
+braille est connecté, et la table de texte à utiliser.
 Beaucoup d'options (voir la section <ref id="options" name="Options en ligne de commande">
 pour plus de détails) permettent de spécifier lors de l'exécution des
 choses telles que le fichier de configuration, les paramètres par
@@ -1675,25 +1686,20 @@ Les éléments suivants sont écrits sur la sortie standard (stdout):
     non-imprimables sont représentés par des espaces.
 </enum>
 
-<sect2>tbltest<label id="utility-tbltest"><p>
-Cet utilitaire teste une table de traduction (section <ref id="translation" name="Tables de
-traduction">).
-<tscreen>tbltest -<em>option</em> ... <em>table-en-entrée</em> ... <em>table-en-sortie</em></tscreen>
+<sect2>ttbtest<label id="utility-ttbtest"><p>
+Cet utilitaire teste une table de texte (section <ref id="table-text" name="Tables de
+texte">).
+<tscreen>ttbtest -<em/option/ ... <em/input-table/ <em/output-table/</tscreen>
 <descrip>
   <tag><em>table-en-entrée</em></tag>
-    Le chemin du fichier vers la table de traduction en entrée du test. S'il
+    Le chemin du fichier vers la table de texte en entrée du test. S'il
     est relatif, il est ancré au répertoire configuré avec l'option de
     compilation --with-data-directory.
     
   <tag><em>table-en-sortie</em></tag>  
-    Le chemin du fichier vers la table de traduction en sortie du test. S'il
+    Le chemin du fichier vers la table de texte en sortie du test. S'il
     est relatif, il est ancré au répertoire de travail  courant. Si vous ne
     fournissez pas ce paramètre, aucune table en sortie ne  sera écrite.
-    
-  <tag><tt>-c</tt> <tt>--charset=</tt><em>charset</em></tag>
-    Spécifie le  nom du codage 8-bit  à utiliser lors de l'interprétation
-    des tables. Si vous ne fournissez pas ce paramètre, le codage du système
-    est utilisé.
   <tag><tt>-i</tt> <tt>--input-format=</tt><em>format</em></tag>
     Spécifie le format  de la table d'entrée. S'il vous ne fournissez pas cette
     option, le  format de la table en entrée est déduit du l'extension de son
@@ -1702,42 +1708,32 @@ traduction">).
     Spécifie le format  de la table en sortie. S'il vous ne fournissez pas cette
     option, le  format de la table en entrée est déduit du l'extension de son
     fichier.
-  <tag><tt>-t</tt> <tt>--translate</tt></tag>
-    <enum>
-       <item>
-          si vous fournissez cette  option, vous devez spécifier  deux
-           tables. L'entrée standard est lue, traduite en  braille  avec
-           la table en entrée, retraduite en texte avec la table en  sortie,
-           et écrite sur la sortie standard.
-       <item>
-           Si vous ne fournissez pas cette option, la table en sortie
-           est facultative. Si vous la spécifiez, la table en entrée est
-           convertie. Sinon elle est
-           simplement vérifiée.
-           
-           
-           
-           
-           
-    </enum>
+  <tag><tt/-c/<em/charset/ <tt/--charset=/<em/charset/</tag>
+    Spécifie le nom de l'encodage 8-bit à utiliser lors de l'interprétation des 
+    tables. Si vous ne fournissez pas cette option, le codage de l'hôte est
+    utilisé.
+  <tag><tt/-e/ <tt/--edit/</tag>
+    Appelle l'éditeur de tables de texte. Si vous spécifiez table de sortie,
+    les changements seront écrits dessus. Sinon, la table d'entrée et réécrite.
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options en ligne de commande, et quitte.
 </descrip>
 
+Si vous ne demandez aucune action en particulier, la table de sortie est 
+facultative. Si vous ne la spécifiez pas, la table d'entrée est vérifiée.
+Si vous la spécifiez, la table d'entrée est convertie.
 Les  formats de table suivants sont supportés:
 <descrip>
-  <tag><tt>tbl</tt></tag>
-    BRLTTY
-  <tag><tt>sbl</tt></tag>
-    SuSE Blinux
-  <tag><tt>a2b</tt></tag>
-    Gnopernicus
+  <tag/ttb/BRLTTY
+  <tag/sbl/SuSE Blinux
+  <tag/a2b/Gnopernicus
+  <tag/gnb/Braille Gnome
 </descrip>
 
 
 <sect2>ctbtest<label id="utility-ctbtest"><p>
-Cet utilitaire teste une table de braille abrégé (section <ref id="contraction" name="Braille
-abrégé">). Le texte lu à partir de l'entrée standard (stdin) est réécrit sur
+Cet utilitaire teste une table de braille abrégé (section <ref id="table-contraction" name="Tables
+d'abrégé">). Le texte lu à partir de l'entrée standard (stdin) est réécrit sur
 la sortie standard (stdout) en braille abrégé.
 <tscreen>ctbtest -<em>fichier-en-entrée</em></tscreen>
 <descrip>
@@ -1752,13 +1748,13 @@ la sortie standard (stdout) en braille abrégé.
     <ref id="build-data-directory" name="--with-data-directory">.
     L'extension .ctb est facultative. Si vous ne fournissez pas cette option,
     en-us-g2 est assumé.
-  <tag><tt>-t</tt><em>fichier</em> <tt>--text-table=</tt><em>fichier</em></tag>
-    Le chemin du fichier de la table de braille abrégé
+  <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
+    Le chemin du système de fichiers de la table d'abrégé
     à utiliser. S'il est relatif, il est lié au répertoire configuré
     par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">. Si cette
     option n'est pas spécifiée, c'est la table définie par l'option de
     compilation <ref id="build-text-table" name="--with-text-table"> qui est utilisé.
-    L'extension .tbl et le préfixe text. sont facultatifs. Si vous ne
+    L'extension .ttb et le préfixe text. sont facultatifs. Si vous ne
     fournissez pas cette option,  la table configurée avec l'option de compilation
     <ref id="build-data-directory" name="--with-text-table"> est assumée.
   <tag><tt>-w</tt><em>colonnes</em> <tt>--output-width==</tt><em>colonnes</em></tag>
@@ -1771,10 +1767,10 @@ la sortie standard (stdout) en braille abrégé.
     Affiche un résumé des options en ligne de commande, et quitte.
 </descrip>
 
-La table de traduction de texte est utilisée:
+La table de texte est utilisée:
 <itemize>
   <item>
-    Pour définir le paramètre du caractère de sortie de manière à ce que le
+    Pour définir l'encodage de sortie de manière à ce que le
     braille abrégé soit correctement affiché. Vous devriez spécifier
     la même table devant être utilisée par BRLTTY lorsque la sortie sera lue.
   <item>
@@ -1783,7 +1779,7 @@ La table de traduction de texte est utilisée:
     <ref id="contraction-opcodes-translation" name="Traduction de caractère">).
 </itemize>
 
-C'est la table de traduction de texte <tt>text.brf.tbl</tt> qui est
+C'est la table de traduction de texte <tt>text.brf.ttb</tt> qui est
 fournie pour l'utilisation de cet utilitaire. Il définit le format
 utilisé dans les fichiers .brf. C'est aussi le format que préfèrent
 utiliser les imprimantes braille et les documents braille
