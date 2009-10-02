@@ -1413,6 +1413,7 @@ mapInputModules2 (void) {
     }
   }
 
+  module.bit = 0;
   nextInputModule2(&module, 8);
   addInputMapping2(&module, 0, KEYS_BAR+BAR_U2, 0);
   addInputMapping2(&module, 1, KEYS_BAR+BAR_U1, 0);
