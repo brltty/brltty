@@ -1830,7 +1830,7 @@ const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error)
     return errmsg;
   }
   else if (error->brlerrno==BRLAPI_ERROR_LIBCERR) {
-    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->libcerrno));
+    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun?error->errfun:"(null)", strerror(error->libcerrno));
     return errmsg;
   } else
     return brlapi_errlist[error->brlerrno];
