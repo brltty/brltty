@@ -1,0 +1,10 @@
+One way to pair a Bluetooth device on Linux is as follows:
+
+Find out your host's Bluetooth Device Address via the command "hciconfig hci0". 
+Then go into the directory "/var/lib/bluetooth/<host-address>. In there (create 
+if necessary) is the file "pincodes". This file contains one device per record. 
+Each record has two fields separated by space. The first field is the device's 
+Bluetooth Device Address and the second field is its PIN. So:
+
+   cat /var/lib/bluetooth/01:23:45:67:89:AB/pincodes
+   12:34:56:78:9A:BC 1234
