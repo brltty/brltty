@@ -479,8 +479,8 @@ setVgaCharacterCount (int force) {
 
     memset(&cfo, 0, sizeof(cfo));
     cfo.op = KD_FONT_OP_GET;
-    cfo.height = 32;
-    cfo.width = 16;
+    cfo.height = UINT_MAX;
+    cfo.width = UINT_MAX;
 
     if (controlConsole(KDFONTOP, &cfo) != -1) {
       vgaCharacterCount = cfo.charcount;
