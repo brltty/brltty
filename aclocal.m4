@@ -49,7 +49,7 @@ AC_DEFUN([BRLTTY_ARG_TABLE], [dnl
 brltty_default_table="$2"
 BRLTTY_ARG_WITH(
    [$1-table], [FILE],
-   [default $1 table]brltty_tables_$1,
+   [$4 $1 table]brltty_tables_$1,
    [$1_table], ["${brltty_default_table}"]
 )
 install_$1_tables=install-$1-tables

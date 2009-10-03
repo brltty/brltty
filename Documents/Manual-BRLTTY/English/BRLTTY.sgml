@@ -514,8 +514,10 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--with-libbraille/.
     </descrip>
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
-    Specify the default text table
+    Specify the fallback text table
     (see section <ref id="table-text" name="Text Tables"> for details).
+    The specified table is linked into the BRLTTY binary,
+    and is used if the table requested at run-time can't be loaded.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.ttb/ extension is optional.
     If this option isn't specified,
@@ -531,6 +533,7 @@ for any additional display-specific instructions.
   <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
     Specify the default attributes table
     (see section <ref id="table-attributes" name="Attributes Translation"> for details).
+    The specified table is linked into the BRLTTY binary.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.atb/ extension is optional.
     If this option isn't specified,
@@ -1745,13 +1748,17 @@ is rewritten to standard output as contracted braille.
     The <tt/.ctb/ extension is optional.
     If this option isn't supplied then <tt/en-us-g2/ is assumed.
   <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
-    The file system path to the text table to use.
-    If it's relative then it's anchored at the directory configured via the
-    <ref id="build-data-directory" name="--with-data-directory"> build option.
+    Specify the text table
+    (see section <ref id="table-text" name="Text Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--with-data-directory">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
     The <tt/.ttb/ extension is optional.
-    If this option isn't supplied then the table defined via the
-    <ref id="build-text-table" name="--with-text-table">
-    build option is assumed.
+    See the <ref id="configure-text-table" name="text-table">
+    configuration file directive for the default run-time setting.
+    This setting can be changed with the
+    <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/-w/<em/columns/ <tt/--output-width=/<em/columns/</tag>
     The maximum length of an output line.
     Each contracted input line is wrapped into as many output lines as necessary.
@@ -2516,9 +2523,9 @@ The following directives are recognized:
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ttb/ extension is optional.
-    See the <ref id="build-text-table" name="--with-text-table">
-    build option for the default established during the build procedure.
-    The default is to perform locale-based autoselection with fallback to the built-in table.
+    The default is to perform locale-based autoselection,
+    with fallback to the built-in table
+    (see the <ref id="build-text-table" name="--with-text-table"> build option).
     This directive can be overridden with the
     <ref id="options-text-table" name="-t"> command line option.
 </descrip>
