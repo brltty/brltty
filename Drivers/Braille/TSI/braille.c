@@ -605,7 +605,7 @@ display (BrailleDisplay *brl,
   {
     int count = DIM_BRL_SEND + 2 * length;
     serialWriteData (serialDevice, rawdata, count);
-    brl->writeDelay += (count * 1000 / charactersPerSecond) + (slow_update * 20);
+    brl->writeDelay += (count * 1000 / charactersPerSecond) + (slow_update * 24);
   }
 }
 
