@@ -1501,5 +1501,6 @@ AC_OUTPUT([
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy
+   Bindings/Lisp/brlapi.lisp
    Bindings/Python/setup.py
    ${brltty_make_files}])
