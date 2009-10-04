@@ -77,8 +77,6 @@ typedef struct {
 
   unsigned char *keyMap;
   int superimposedBits;
-
-  KeySetMask ignoredKeys;
 } KeyContext;
 
 struct KeyTableStruct {

@@ -323,17 +323,6 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 }
 
 static int
-getKeyOperand (DataFile *file, unsigned char *set, unsigned char *key, KeyTableData *ktd) {
-  DataString name;
-
-  if (getDataString(file, &name, 1, "key name"))
-    if (parseKeyName(file, set, key, name.characters, name.length, ktd))
-      return 1;
-
-  return 0;
-}
-
-static int
 getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
   DataString name;
 
@@ -574,6 +563,7 @@ static int
 processBindOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
+
   if (!ctx) return 0;
 
   if (ctx->keyBindingCount == ctx->keyBindingsSize) {
@@ -647,28 +637,6 @@ processContextOperands (DataFile *file, void *data) {
             return 0;
           }
         }
-      }
-    }
-  }
-
-  return 1;
-}
-
-static int
-processIgnoreOperands (DataFile *file, void *data) {
-  KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
-  if (!ctx) return 0;
-
-  {
-    unsigned char set;
-    unsigned char key;
-
-    if (getKeyOperand(file, &set, &key, ktd)) {
-      if (set) {
-        reportDataError(file, "unignorable key");
-      } else {
-        BITMASK_SET(ctx->ignoredKeys, key);
       }
     }
   }
@@ -775,7 +743,6 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
-    {.name=WS_C("ignore"), .processor=processIgnoreOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},

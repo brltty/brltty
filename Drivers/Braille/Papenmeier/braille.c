@@ -480,7 +480,7 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     key = (code - rcvStatusFirst) / 3;
-  //return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
+    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
   }
 
   if (rcvBarFirst <= code && 
@@ -498,7 +498,7 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     key = (code - rcvCursorFirst) / 3;
-  //return enqueueKeyEvent(PM_SET_RoutingKeys1, key, press);
+    return enqueueKeyEvent(PM_SET_RoutingKeys1, key, press);
   }
 
   LogPrint(LOG_WARNING, "unexpected key: %04X", code);

@@ -18,33 +18,33 @@
 
 context \{brailleContext} Braille Input Mode
 
-ignore SYMBOL_Grave_Tilde
-ignore 1
-ignore 2
-ignore 3
-ignore 4
-ignore 5
-ignore 6
-ignore 7
-ignore 8
-ignore 9
-ignore 0
-ignore SYMBOL_Minus_Underscore
-ignore SYMBOL_Equals_Plus
-ignore SYMBOL_Backslash_Bar
+bind SYMBOL_Grave_Tilde NOOP
+bind 1 NOOP
+bind 2 NOOP
+bind 3 NOOP
+bind 4 NOOP
+bind 5 NOOP
+bind 6 NOOP
+bind 7 NOOP
+bind 8 NOOP
+bind 9 NOOP
+bind 0 NOOP
+bind SYMBOL_Minus_Underscore NOOP
+bind SYMBOL_Equals_Plus NOOP
+bind SYMBOL_Backslash_Bar NOOP
 
-ignore q
-ignore w
-ignore e
-ignore r
-ignore t
-ignore y
-ignore u
-ignore i
-ignore o
-ignore p
-ignore SYMBOL_LeftBracket_LeftBrace
-ignore SYMBOL_RightBracket_RightBrace
+bind q NOOP
+bind w NOOP
+bind e NOOP
+bind r NOOP
+bind t NOOP
+bind y NOOP
+bind u NOOP
+bind i NOOP
+bind o NOOP
+bind p NOOP
+bind SYMBOL_LeftBracket_LeftBrace NOOP
+bind SYMBOL_RightBracket_RightBrace NOOP
 
 map a DOT7
 map s DOT3
@@ -56,18 +56,18 @@ map j DOT4
 map k DOT5
 map l DOT6
 map SYMBOL_Semicolon_Colon DOT8
-ignore SYMBOL_Apostrophe_Quote
+bind SYMBOL_Apostrophe_Quote NOOP
 
-ignore z
-ignore x
-ignore c
-ignore v
-ignore b
-ignore n
-ignore m
-ignore SYMBOL_Comma_Less
-ignore SYMBOL_Period_Greater
-ignore SYMBOL_Slash_Question
+bind z NOOP
+bind x NOOP
+bind c NOOP
+bind v NOOP
+bind b NOOP
+bind n NOOP
+bind m NOOP
+bind SYMBOL_Comma_Less NOOP
+bind SYMBOL_Period_Greater NOOP
+bind SYMBOL_Slash_Question NOOP
 
 map Space SPACE
 map ShiftLeft UPPERCASE
