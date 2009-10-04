@@ -1,7 +1,7 @@
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
-# Copyright (C) 2006-2009 by Mario Lang <mlang@delysid.org>
+# Copyright (C) 2006-2009 by Dave Mielke <dave@mielke.cc>
 #
 # libbrlapi comes with ABSOLUTELY NO WARRANTY.
 #
@@ -15,14 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(SRC_TOP)bindings.mk
-
-all:
-
-install: all
-
-uninstall:
-
-distclean::
-	-rm -f brlapi.lisp
-
+AC_DEFUN([BRLTTY_LISP_BINDINGS], [dnl
+LISP_OK=true
+AC_SUBST([LISP_OK])
+])

@@ -540,6 +540,7 @@ BRLTTY_ARG_DISABLE(
 
       BRLTTY_BINDINGS([Caml])
       BRLTTY_BINDINGS([Java])
+      BRLTTY_BINDINGS([Lisp])
       BRLTTY_BINDINGS([Python])
       BRLTTY_BINDINGS([Tcl])
 
