@@ -224,109 +224,63 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Fri May 15 2009 Dave Mielke <dave@mielke.cc> 4.0
+* Thu Oct  8 2009 Dave Mielke <dave@mielke.cc> 4.1
 +  General Changes:
-      All screen reading, character handling, and tables are now Unicode-based.
-      The "<n> startup problems" message has been removed.
-      Boot operands may contain multiple items separated by plus signs.
-      USB enhancements and fixes.
-      Windows serial I/O fixes.
-      A UDEV rules file for brltty is provided.
-      An upstart job for brltty is provided.
-+  Status Cells:
-      Hard-coded styles have been replaced by user-configurable fields.
-      If there are no status cells then a text region may be reserved for them.
-      The INFO command toggles text maximization if a text region is being used.
-+  Braille Drivers:
-      The Pegasus and Seika braille drivers have been added.
-      The BrailleSense braille driver has been renamed to HIMS.
-+  Alva Braille Driver:
-      The BC6nn series are supported.
-+  Baum Braille Driver:
-      The VarioConnect, EcoVario, VarioPro, and Refreshabraille are supported.
-+  BrailleNote Braille Driver:
-      The statuscells= parameter has been removed.
-+  EuroBraille Braille Driver:
-      USB support has been added.
-      Robustness has been improved.
-      Bindings for the Esys have been added.
-+  FreedomScientific Braille Driver:
-      The statuscells= parameter has been removed.
-+  HandyTech Braille Driver:
-      The Evolution models have been redefined to only have text cells.
-+  HIMS Braille Driver:
-      The Braille Sense key bindings have been reworked.
-      SyncBraille support has been added.
-      Bluetooth support has been fixed.
-+  TSI Braille Driver:
-      The way Seika devices implement PowerBraille emulation is supported.
-      The PowerBraille 81 has been redefined to only have text cells.
-      The core's flow control mechanism is used (rather than hard-coded delays).
-+  Voyager Braille Driver:
-      The statuscells= parameter has been removed.
-      Key binding changes:
-         CUTAPPEND/CUTLINE moved to CRt# + B/C
-         PRINDENT/NXINDENT moved to CRt# + A+B/C+D
-+  XWindow Braille Driver:
-      The font= parameter has been added.
-+  SpeechDispatcher Speech Driver:
-      Single characters are now spoken correctly.
-+  BrlAPI Server:
-      The version has been changed from 0.5.2 to 0.5.3.
-      enterTtyMode() now works correctly on Windows.
-      Problems when no braille display is connected at startup have been resolved.
-      The core's output is automatically restored when the last client disconnects.
-      Writes to the driver are no longer buffered.
-      Braille keyboard input is now converted to characters.
-      Output to the braille display is now drained the same way the core does.
-+  Lisp Bindings:
-      Now compatible with CFFI 0.10.0.
-+  Text Tables:
-      The license has been changed from GPL to LGPL.
-      File names have been changed from "text.*.tbl" to "*.ttb".
-      The file extension ".tti" is used for text subtables.
-      Tables must be encoded in UTF-8 (rather than in a local character set).
-      The "byte" keyword is no longer optional.
-      The "dot" directive is no longer supported.
-      The "char" and "include" directives have been added.
-      Language-based tables include common representations for box characters.
-      Tables for several languages have been added.
-      The default is now to select the table based on the locale's name.
-      The tbltest utility has been renamed to ttbtest.
-      The compress, fi2, identity, and simple tables have been removed.
-      The following tables have been renamed (mostly for ISO 639 compliance):
-         cz     -> cs
-         fi1    -> fi
-         nabcc  -> en-nabcc
-         se     -> sv
-         se-old -> sv-1989
-         visiob -> fr-vs
-         vni    -> vi
-+  Attributes Tables:
-      The license has been changed from GPL to LGPL.
-      File names have been changed from "attr*.tbl" to "*.atb".
-      The file extension ".ati" is used for attributes subtables.
-      Tables must be encoded in UTF-8 (rather than in Latin1).
-      The "byte" directive is no longer supported.
-      The "include" directive has been added.
-+  Contraction Tables:
-      The license has been changed from GPL to LGPL.
-      Tables for several languages have been added.
-      The following tables have been renamed:
-         en-uebc-g2 -> en-ueb-g2
-      The en-ueb-g2, en-us-g2, and zh-tw tables have been updated.
-+  Key tables (for binding keyboard keys to brltty commands) have been added:
-      The file extension ".ktb" is used for key tables.
-      The file extension ".kti" is used for key subtables.
-      The desktop, keypad, and laptop key tables are provided.
-      The -k [--key-table=] option has been added.
-      The -K [--keyboard-properties=] option has been added.
-+  Source Tree Changes:
-      The text tables have been moved from BrailleTables/ to Tables/.
-      The attributes tables have been moved from BrailleTables/ to Tables/.
-      The contraction tables have been moved from ContractionTables/ to Tables/.
-      The braille drivers have been moved from BrailleDrivers/ to Drivers/Braille/.
-      The speech drivers have been moved from SpeechDrivers/ to Drivers/Speech/.
-      The screen drivers have been moved from ScreenDrivers/ to Drivers/Screen/.
-      Source for the Windows installer is provided.
+      BRL_CMD_WINUP can go above the top row of the screen.
+      Protect against NULL being given to snprintf() for a string.
+      Change the "braille display offline/online" logs to DEBUG (from NOTICE).
+      Fixes to status field initialization during a preferences file upgrade.
+      Default status field selection should take into account 66-cell displays.
+      Remove usbResetEndpoint().
+      Resolve gcc-4.4 warnings.
+      Resolve 64-bit warnings.
+      C compilers needn't deallocate variable-size arrays until function return.
+      Updates to the English Grade 2 contraction table.
+      Updates to the German contraction table.
+      Change ctbtest to expect input encoded in UTF-8.
+      liblouis tables use y for 5-digit and z for 8-digit characters.
++  Baum Braille Driver Changes:
+      Fix the support for display key #6 in PB2 mode.
++  EuroBraille Braille Driver Changes:
+      Re-add some bindings forgotten during the driver rewrite for 3.10.
+      Rework the bindings a bit for greater consistency and easier learning.
+      Add new bindings to support as many commands as possible.
++  Papenmeier Braille Driver Changes:
+      Interpret the EL66S Easy Access Bar correctly.
++  TSI Braille Driver Changes:
+      Increase the write delay a bit.
++  Linux Screen Driver Changes:
+      Give KD_FONT_OP_GET maximum (rather than reasonably high) font dimensions.
++  Java Bindings Changes:
+      Define the DOTn constants as bytes (rather than as chars).
+      JNI fixes for Sun-based JVMs.
+      Load the JNI part automatically at startup.
++  Lisp Bindings Changes:
+      Reference version 0.5.3 of BrlAPI.
++  Python Bindings Changes:
+      Pyrex doesn't automatically convert C's NULL to Python's None.
+      Translate BrlAPI exceptions into Python exceptions.
++  BrlAPI Changes:
+      Remove all mention of key sets.
+      Handle unbound key ranges.
+      Fix an issue with TCP/IP socket connection on Windows.
+      Handle the possibility of a different braille device after resuming.
++  Windows Changes:
+      Fix a compile problem.
+      The screen driver should refer to "consoles" rather than to "terminals".
++  Documentation Updates:
+      Update the French manual from 3.10 to 4.0.
+      Document that the EuroBraille Esys is supported.
+      Update the supported FreedomScientific model lists.
+      Clarify that --with-*-table sets the fallback (not the default) table.
+      Change log fixes.
+      Update the TSI braille driver's README.
+      Add README.Bluetooth.
+      The README for how to use a Seika with the TSI driver is no longer needed.
+      E-mail address change for Nicolas Pitre.
++  Build Changes:
+      The API socket directory should be created under the install root.
+      Add the --disable-stripping configure option.
+      Remove the --disable-preferences-menu configure option.
+      Remove the --disable-table-selection configure option.
 

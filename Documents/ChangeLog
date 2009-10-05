@@ -1,6 +1,67 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+October 8, 2009:
+ - BRLTTY 4.1 released:
+   General Changes:
+      BRL_CMD_WINUP can go above the top row of the screen.
+      Protect against NULL being given to snprintf() for a string.
+      Change the "braille display offline/online" logs to DEBUG (from NOTICE).
+      Fixes to status field initialization during a preferences file upgrade.
+      Default status field selection should take into account 66-cell displays.
+      Remove usbResetEndpoint().
+      Resolve gcc-4.4 warnings.
+      Resolve 64-bit warnings.
+      C compilers needn't deallocate variable-size arrays until function return.
+      Updates to the English Grade 2 contraction table.
+      Updates to the German contraction table.
+      Change ctbtest to expect input encoded in UTF-8.
+      liblouis tables use y for 5-digit and z for 8-digit characters.
+   Baum Braille Driver Changes:
+      Fix the support for display key #6 in PB2 mode.
+   EuroBraille Braille Driver Changes:
+      Re-add some bindings forgotten during the driver rewrite for 3.10.
+      Rework the bindings a bit for greater consistency and easier learning.
+      Add new bindings to support as many commands as possible.
+   Papenmeier Braille Driver Changes:
+      Interpret the EL66S Easy Access Bar correctly.
+   TSI Braille Driver Changes:
+      Increase the write delay a bit.
+   Linux Screen Driver Changes:
+      Give KD_FONT_OP_GET maximum (rather than reasonably high) font dimensions.
+   Java Bindings Changes:
+      Define the DOTn constants as bytes (rather than as chars).
+      JNI fixes for Sun-based JVMs.
+      Load the JNI part automatically at startup.
+   Lisp Bindings Changes:
+      Reference version 0.5.3 of BrlAPI.
+   Python Bindings Changes:
+      Pyrex doesn't automatically convert C's NULL to Python's None.
+      Translate BrlAPI exceptions into Python exceptions.
+   BrlAPI Changes:
+      Remove all mention of key sets.
+      Handle unbound key ranges.
+      Fix an issue with TCP/IP socket connection on Windows.
+      Handle the possibility of a different braille device after resuming.
+   Windows Changes:
+      Fix a compile problem.
+      The screen driver should refer to "consoles" rather than to "terminals".
+   Documentation Updates:
+      Update the French manual from 3.10 to 4.0.
+      Document that the EuroBraille Esys is supported.
+      Update the supported FreedomScientific model lists.
+      Clarify that --with-*-table sets the fallback (not the default) table.
+      Change log fixes.
+      Update the TSI braille driver's README.
+      Add README.Bluetooth.
+      The README for how to use a Seika with the TSI driver is no longer needed.
+      E-mail address change for Nicolas Pitre.
+   Build Changes:
+      The API socket directory should be created under the install root.
+      Add the --disable-stripping configure option.
+      Remove the --disable-preferences-menu configure option.
+      Remove the --disable-table-selection configure option.
+
 May 15, 2009:
  - BRLTTY 4.0 released:
    General Changes:
