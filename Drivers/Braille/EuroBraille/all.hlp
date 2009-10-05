@@ -1,10 +1,11 @@
 Help for All Models
       Driver developped by Yannick PLASSIARD and Olivier BERT
 
-To enter in the Learn-Mode press Layer1 key (alpha or # or FG+FB) depending
-on the model of display you have followed by "J" (for notebraille/clio), 
-L6 (for scriba) L5 (for iris). For Esys put LeftJoystick in the "Right"
-position and RightJoystick in the "Up" position.
+To enter in the Learn-Mode, press #+L (on notebraille/clio), Alpha+L8 (for 
+Scriba) or Level1+L7 (on Iris - Level1 may be performed by pressing 
+FG+FB simultaneously).
+For Esys put LeftJoystick in the "Right" position and RightJoystick in the 
+"Up" position.
 
 Using Cut And Paste
 -------------------
