@@ -61,10 +61,6 @@ enum	clioModelType {
   CP4,
   CP8,
   CZ4,
-  IR2,
-  IR4,
-  IS2,
-  IS3,
   JN2,
   NB2,
   NB4, 
@@ -73,6 +69,10 @@ enum	clioModelType {
   SB4,
   SC2,
   SC4,
+  IR2,
+  IR4,
+  IS2,
+  IS3,
   TYPE_LAST
 }clioModelType;
 
@@ -104,10 +104,6 @@ static struct s_clioModelType		clioModels[] =
     {CP4, "Cp4", "Clio-PupiBraille 40"},
     {CP8, "Cp8", "Clio-PupiBraille 80"},
     {CZ4, "CZ4", "Clio-AzerBraille 40"},
-    {IR2, "IR2", "Iris 20"},
-    {IR4, "IR4", "Iris 40"},
-    {IS2, "IS2", "Iris S20"},
-    {IS3, "IS3", "Iris S32"},
     {JN2, "JN2", ""},
     {NB2, "NB2", "NoteBraille 20"}, 
     {NB4, "NB4", "NoteBraille 40"}, 
@@ -116,6 +112,10 @@ static struct s_clioModelType		clioModels[] =
     {SB4, "SB4", "Scriba 40"},
     {SC2, "SC2", "Scriba 20"},
     {SC4, "SC4", "Scriba 40"},
+    {IR2, "IR2", "Iris 20"},
+    {IR4, "IR4", "Iris 40"},
+    {IS2, "IS2", "Iris S20"},
+    {IS3, "IS3", "Iris S32"},
     {TYPE_LAST, "", ""},
   };
 
@@ -203,12 +203,24 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   if (key == CL_STAR && !flagLevel1)
     {
       flagLevel2 = !flagLevel2;
-      if (flagLevel2) message(NULL, "Level 2 ...", MSG_NODELAY);
+      if (flagLevel2)
+	{
+	  if (brlModel >= IR2)
+	    message(NULL, "Layer 2 ...", MSG_NODELAY);
+	  else
+	    message(NULL, "Programming on ...", MSG_NODELAY);
+	}
     }
   else if (key == CL_SHARP && !flagLevel2)
     {
       flagLevel1 = !flagLevel1;
-      if (flagLevel1) message(NULL, "Level 1 ...", MSG_NODELAY);
+      if (flagLevel1)
+	{
+	  if (brlModel >= IR2) 
+	    message(NULL, "Layer 1 ...", MSG_NODELAY);
+	  else
+	    message(NULL, "View on ...", MSG_NODELAY);
+	}
     }
   if (flagLevel1)
     {
@@ -216,14 +228,20 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       flagLevel1 = 0;
       switch (subkey & 0x000000ff)
 	{
+	case CL_1 : res = BRL_CMD_LEARN; break;
+	case CL_3 : res = BRL_CMD_TOP_LEFT; break;
+	case CL_9 : res = BRL_CMD_BOT_LEFT; break;
+	case CL_A : res = BRL_CMD_DISPMD; break;
 	case CL_E : res = BRL_CMD_TOP_LEFT; break;
+	case CL_G : res = BRL_CMD_PRSEARCH; break;
 	case CL_H : res = BRL_CMD_HELP; break;
-	case CL_J : res = BRL_CMD_LEARN; break;
+	case CL_K : res = BRL_CMD_NXSEARCH; break;
+	case CL_L : res = BRL_CMD_LEARN; break;
 	case CL_M : res = BRL_CMD_BOT_LEFT; break;
 	case CL_FG: res = BRL_CMD_LNBEG; break;
 	case CL_FD: res = BRL_CMD_LNEND; break;
-	case CL_FH : res = BRL_CMD_TOP_LEFT; break;
-	case CL_FB : res = BRL_CMD_BOT_LEFT; break;
+	case CL_FH : res = BRL_CMD_HOME; break;
+	case CL_FB : res = BRL_CMD_RETURN; break;
 	default : res = BRL_CMD_NOOP; break;
 	}
     }
@@ -234,12 +252,14 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       switch (subkey & 0x000000ff)
 	{
 	case CL_E : routingMode = BRL_BLK_CUTBEGIN; break;
+	case CL_F : routingMode = BRL_BLK_CUTAPPEND; break;
 	case CL_G : res = BRL_CMD_CSRVIS; break;
-	case CL_K : res = BRL_CMD_SIXDOTS; break;
+	case CL_K : routingMode = BRL_BLK_CUTRECT; break;
 	case CL_L : res = BRL_CMD_PASTE; break;
 	case CL_M : routingMode = BRL_BLK_CUTLINE; break;
+	case CL_FH : res = BRL_CMD_PREFMENU; break;
 	case CL_FB : res = BRL_CMD_CSRTRK; break;
-	case CL_FH : res = BRL_CMD_TUNES; break;
+	case CL_FD : res = BRL_CMD_TUNES; break;
 	default : res = BRL_CMD_NOOP; break;
 	}
     }
@@ -248,10 +268,18 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       switch (key)
 	{
 	case CL_NONE:	res = BRL_CMD_NOOP; break;
+	case CL_0:	res = BRL_CMD_CSRTRK; break;
+	case CL_1 :	res = BRL_CMD_TOP_LEFT; break;
+	case CL_3 :	res = BRL_CMD_PRDIFLN; break;
+	case CL_5:	res = BRL_CMD_HOME; break;
+	case CL_9 :	res = BRL_CMD_NXDIFLN; break;
+	case CL_7 :	res = BRL_CMD_BOT_LEFT; break;
+	case CL_A:	res = BRL_CMD_FREEZE; break;
 	case CL_E:	res = BRL_CMD_FWINLT; break;
 	case CL_F:	res = BRL_CMD_LNUP; break;
 	case CL_G:	res = BRL_CMD_PRPROMPT; break;
 	case CL_H:	res = BRL_CMD_PREFMENU; break;
+	case CL_I:	res = BRL_CMD_INFO; break;
 	case CL_J:	res = BRL_CMD_INFO; break;
 	case CL_K:	res = BRL_CMD_NXPROMPT; break;
 	case CL_L:	res = BRL_CMD_LNDN; break;

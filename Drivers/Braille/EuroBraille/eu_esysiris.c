@@ -105,11 +105,13 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	  switch (subkey & 0x00000fff)
 	    {
 	    case VK_L1 : res = BRL_CMD_TOP_LEFT; break;
-	    case VK_L4: res = BRL_CMD_HELP; break;
-	    case VK_L5: res = BRL_CMD_LEARN; break;
+	    case VK_L3 : res = BRL_CMD_PRSEARCH; break;
+	    case VK_L4 : res = BRL_CMD_HELP; break;
+	    case VK_L5 : res = BRL_CMD_LEARN; break;
+	    case VK_L6 : res = BRL_CMD_NXSEARCH; break;
 	    case VK_L8 : res = BRL_CMD_BOT_LEFT; break;
-	    case VK_FG: res = BRL_CMD_LNBEG; break;
-	    case VK_FD: res = BRL_CMD_LNEND; break;
+	    case VK_FG : res = BRL_CMD_LNBEG; break;
+	    case VK_FD : res = BRL_CMD_LNEND; break;
 	    case VK_FH : res = BRL_CMD_HOME; break;
 	    case VK_FB : res = BRL_CMD_RETURN; break;
 	    default: res = BRL_CMD_NOOP; break;
@@ -122,12 +124,14 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	  switch (subkey & 0x00000fff)
 	    {
 	    case VK_L1: routingMode = BRL_BLK_CUTBEGIN; break;
+	    case VK_L2: routingMode = BRL_BLK_CUTAPPEND; break;
 	    case VK_L3 : res = BRL_CMD_CSRVIS; break;
-	    case VK_L6: res = BRL_CMD_SIXDOTS; break;
+	    case VK_L6: routingMode = BRL_BLK_CUTRECT; break;
 	    case VK_L7: res = BRL_CMD_PASTE; break;
 	    case VK_L8: routingMode = BRL_BLK_CUTLINE; break;
+	    case VK_FH: res = BRL_CMD_PREFMENU; break;
 	    case VK_FB: res = BRL_CMD_CSRTRK; break;
-	    case VK_FH : res = BRL_CMD_TUNES; break;
+	    case VK_FD : res = BRL_CMD_TUNES; break;
 	    default: res = BRL_CMD_NOOP; break;
 	    }
 	}
