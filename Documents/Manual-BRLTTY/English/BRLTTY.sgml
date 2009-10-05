@@ -514,10 +514,11 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--with-libbraille/.
     </descrip>
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
-    Specify the fallback text table
+    Specify the built-in (fallback) text table
     (see section <ref id="table-text" name="Text Tables"> for details).
-    The specified table is linked into the BRLTTY binary,
-    and is used if the table requested at run-time can't be loaded.
+    The specified table is linked into the BRLTTY binary, and is used
+    either if locale-based autoselection fails
+    or if the requested table can't be loaded.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.ttb/ extension is optional.
     If this option isn't specified,
@@ -531,9 +532,10 @@ for any additional display-specific instructions.
     This setting can be changed with the
     <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
-    Specify the default attributes table
+    Specify the built-in (fallback) attributes table
     (see section <ref id="table-attributes" name="Attributes Translation"> for details).
-    The specified table is linked into the BRLTTY binary.
+    The specified table is linked into the BRLTTY binary, and is used
+    if the requested table can't be loaded.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.atb/ extension is optional.
     If this option isn't specified,
@@ -2372,8 +2374,8 @@ The following directives are recognized:
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.atb/ extension is optional.
-    See the <ref id="build-attributes-table" name="--with-attributes-table">
-    build option for the default established during the build procedure.
+    The default is to use the built-in table
+    (see the <ref id="build-attributes-table" name="--with-attributes-table"> build option).
     This directive can be overridden with the
     <ref id="options-attributes-table" name="-a"> command line option.
   <tag><tt/braille-device/ <em/device/<tt/,/...<label id="configure-braille-device"></tag>
