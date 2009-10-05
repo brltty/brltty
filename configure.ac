@@ -1349,11 +1349,11 @@ BRLTTY_TEXT_TABLE([ta], [Tamil])
 BRLTTY_TEXT_TABLE([te], [Telugu])
 BRLTTY_TEXT_TABLE([tr], [Turkish])
 BRLTTY_TEXT_TABLE([vi], [Vietnamese])
-BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb], [fallback])
+BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb])
 
 BRLTTY_ATTRIBUTES_TABLE([attributes], [])
 BRLTTY_ATTRIBUTES_TABLE([attrib], [])
-BRLTTY_ARG_TABLE([attributes], [attributes], [atb], [default])
+BRLTTY_ARG_TABLE([attributes], [attributes], [atb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],
