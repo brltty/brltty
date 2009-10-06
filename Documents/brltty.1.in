@@ -1,4 +1,4 @@
-.TH "BRLTTY" "1" "May 2009" "brltty 4.0" "The BRLTTY Project"
+.TH "BRLTTY" "1" "October 2009" "brltty 4.1" "The BRLTTY Project"
 .SH NAME
 brltty \- refreshable braille display driver for Linux/Unix
 .SH SYNOPSIS
