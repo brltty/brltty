@@ -1,3 +1,13 @@
+
+    Le chemin du système de fichiers de la table d'abrégé
+    à utiliser. S'il est relatif, il est lié au répertoire configuré
+    par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">. Si cette
+    option n'est pas spécifiée, c'est la table définie par l'option de
+    compilation <ref id="build-text-table" name="--with-text-table"> qui est utilisé.
+    L'extension .ttb et le préfixe text. sont facultatifs. Si vous ne
+    fournissez pas cette option,  la table configurée avec l'option de compilation
+    <ref id="build-data-directory" name="--with-text-table"> est assumée.
+    
 <sect>La procédure de compilation<p>
 On peut télécharger BRLTTY depuis son site Web (voir la section <ref
 id="contact" name="Contacts"> pour son adresse).  Toutes les versions
@@ -302,9 +312,12 @@ instructions supplémentaires spécifiques.
         <tt>/opt/libbraille</tt>. Cela revient à à spécifier <tt>--with-libbraille</tt>.
     </descrip>
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
-    Spécifie la table de traduction de texte par défaut (voir la section <ref
+    Spécifie la table de traduction de texte compilée en dur (celle par défaut) (voir la section <ref
     id="table-text" name="Tables de texte"> pour plus de
-    détails). Vous pouvez fournir le chemin absolu d'une table hors de
+    détails). La table spécifiée est liée au binaire BRLTTY et elle est utilisée
+    au cas où la sélection automatique à partir de la locale échoue ou si la table
+    demandée ne peut pas être chargée.
+    Vous pouvez fournir le chemin absolu d'une table hors de
     l'arborescence source. L'extension <tt/.ttb/ est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
     vous ne spécifiez pas cette option, <tt/en-nabcc/, une table commune (en
@@ -316,9 +329,12 @@ instructions supplémentaires spécifiques.
     sélection à l'exécution. Ce paramètre peut être modifié par la
     préférence <ref id="preference-text-table" name="Text Table">.
   <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
-    Spécifie la table des attributs par défaut (voir la section
+    Spécifie la table des attributs compilée en dur (celle par défaut) (voir la section
     <ref id="table-attributes" name="Tables d'attributs">
-    pour plus de détails). Vous pouvez fournir le chemin absolu d'une
+    pour plus de détails). La table spécifiée est liée au binaire BRLTTY et elle est utilisée
+    au cas où la sélection automatique à partir de la locale échoue ou si la table
+    demandée ne peut pas être chargée.
+    Vous pouvez fournir le chemin absolu d'une
     table hors de l'arborescence source.  L'extension <tt>.atb</tt> est
     facultative. Si vous ne spécifiez pas cette option,
     <tt>attributes</tt> est alors utilisé. Changez cette option en
@@ -936,21 +952,9 @@ les fonctions inutiles.
     <ref id="hierarchy" name="hiérarchie des fichiers installés"> soit
     copiée ou déplacée proprement d'un endroit à l'autre, tout particulièrement
     pour un usage sur des plateformes Windows.
-  <tag><tt>--disable-iconv</tt><label id="build-table-selection"></tag>
-    Réduit la taille du programme en excluant le support pour la conversion
-    des codages.
-
-  <tag><tt/--disable-icu/<label id="build-icu"></tag>
-    Réduit la taille du programme en excluant le support pour 
-    l'internationalisation basée sur l'Unicode.
-    
-  <tag><tt/--disable-x/<label id="build-x"></tag>
-    Réduit la taille du programme en excluant le support pour X11.
-  <tag><tt>--disable-table-selection</tt><label id="build-table-selection"></tag>
-    Réduit la taille du programme en excluant les entrées de sélection
-    des tables du menu Préférences (voir les préférences <ref id="preference-text-table" name="Text Table">,
-    <ref id="preference-attributes-table" name="Attributes Table">,
-    et <ref id="preference-contraction-table" name="Contraction Table">).
+  <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
+    Ne supprime pas les tables de symboles des exécutables et des objets
+    partagés lors de leur installation.
   <tag><tt>--disable-learn-mode</tt><label id="build-learn-mode"></tag>
     Réduit la taille du programme en excluant le mode apprentissage
     des commandes (voir la section <ref id="learn" name="Command Learn Mode">).
@@ -967,6 +971,15 @@ les fonctions inutiles.
   <tag><tt>--disable-speech-support</tt><label id="build-speech-support"></tag>
     Réduit la taille du programme en excluant le support pour le
     générateur des "none" en console.
+
+  <tag><tt>--disable-iconv</tt><label id="build-table-selection"></tag>
+    Réduit la taille du programme en excluant le support pour la conversion
+    des codages.
+  <tag><tt/--disable-icu/<label id="build-icu"></tag>
+    Réduit la taille du programme en excluant le support pour 
+    l'internationalisation basée sur l'Unicode.
+  <tag><tt/--disable-x/<label id="build-x"></tag>
+    Réduit la taille du programme en excluant le support pour X11.
   <tag><tt>--disable-beeper-support</tt><label id="build-beeper-support"></tag>
     Réduit la taille du programme en excluant le support pour le
     générateur des "none" en console.
@@ -1749,14 +1762,16 @@ la sortie standard (stdout) en braille abrégé.
     L'extension .ctb est facultative. Si vous ne fournissez pas cette option,
     en-us-g2 est assumé.
   <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
-    Le chemin du système de fichiers de la table d'abrégé
-    à utiliser. S'il est relatif, il est lié au répertoire configuré
-    par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">. Si cette
-    option n'est pas spécifiée, c'est la table définie par l'option de
-    compilation <ref id="build-text-table" name="--with-text-table"> qui est utilisé.
-    L'extension .ttb et le préfixe text. sont facultatifs. Si vous ne
-    fournissez pas cette option,  la table configurée avec l'option de compilation
-    <ref id="build-data-directory" name="--with-text-table"> est assumée.
+    Spécifie la table de texte (voir
+    la section <ref id="table-text" name="Tables de texte"> pour les détails).
+    Si vous fournissez un chemin relatif, il est ancré à
+    <tt>/etc/brltty</> (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory"> et
+    <ref id="build-execute-root" name="--with-execute-root"> pour plus de détails).
+    L'extension <tt/.ttb/ est facultative.
+    Voir la ligne <ref id="configure-text-table" name="text-table">
+    du fichier de configuration pour le paramétrage par défaut au moment de l'exécution. Vous pouvez modifier
+    ce paramètreavec la préférence 
+    <ref id="preference-text-table" name="Text Table">.
   <tag><tt>-w</tt><em>colonnes</em> <tt>--output-width==</tt><em>colonnes</em></tag>
     La longueur  maximale d'une ligne en sortie. Chaque ligne d'entrée en
     braille abrégé est développée sur  autant de lignes que nécessaire. Si

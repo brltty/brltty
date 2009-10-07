@@ -493,8 +493,8 @@ Les lignes de commande suivantes sont reconnues:
     et <ref id="build-execute-root" name="--with-execute-root">
     pour plus de détails).
     L'extension <tt>.atb</tt> est facultative.
-    Voir l'option de compilation <ref id="build-attributes-table" name="--with-attributes-table">
-    pour les paramètres par défaut établis pendant la procédure de compilation.
+    Le comportement par défaut est d'utiliser la table compilée en dur (voir l'option de
+    compilation <ref id="build-attributes-table" name="--with-attributes-table">).
     Vous pouvez vous passer de cette ligne de commande avec l'option
     en ligne de commande <ref id="options-attributes-table" name="-a">.
   <tag><tt>braille-device</tt> <em>device</em><tt>,</tt>...<label id="configure-braille-device"></tag>
@@ -657,10 +657,9 @@ Les lignes de commande suivantes sont reconnues:
     pour plus de détails).
     L'extension <tt>.ttb</tt> est facultative.
     Pour un nom de fichier simple, le préfixe <tt>text.</tt> est facultatif.
-    Voir l'option de compilation <ref id="build-text-table" name="--with-text-table">
-    pour les paramètres par défaut établis lors de la procédure de
-    compilation. Par défaut, on réalise une auto-sélection à partir de la locale
-    avec répercutions sur la table compilée en dur.
+    Par défaut, on réalise une auto-sélection à partir de la locale
+    avec utilisation de la table compilée en dur en cas de problème
+    (voir l'option de compilation <ref id="build-text-table" name="--with-text-table">).
     L'effet de cette instruction peut être annulé avec l'option en ligne de commande
     <ref id="options-text-table" name="-t">.
 </descrip>
