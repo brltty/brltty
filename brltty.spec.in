@@ -278,6 +278,7 @@ rm -fr "${RPM_BUILD_ROOT}"
       Add README.Bluetooth.
       The README for how to use a Seika with the TSI driver is no longer needed.
       E-mail address change for Nicolas Pitre.
+      E-mail address change for Jean-Philippe Mengual.
 +  Build Changes:
       The API socket directory should be created under the install root.
       Add the --disable-stripping configure option.
