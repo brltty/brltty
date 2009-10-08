@@ -62,6 +62,7 @@ October 8, 2009:
       Add the --disable-stripping configure option.
       Remove the --disable-preferences-menu configure option.
       Remove the --disable-table-selection configure option.
+      Fedora no longer creates "/usr/lib/ocaml/stublibs/dllbrlapi_stubs.*".
 
 May 15, 2009:
  - BRLTTY 4.0 released:

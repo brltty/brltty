@@ -200,7 +200,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brlapi-caml
 @OCAMLLIB@/brlapi
-@OCAMLLIB@/stublibs/dllbrlapi_stubs.*
 
 %files -n brlapi-java
 @JAVA_JAR_DIR@/*
@@ -284,4 +283,5 @@ rm -fr "${RPM_BUILD_ROOT}"
       Add the --disable-stripping configure option.
       Remove the --disable-preferences-menu configure option.
       Remove the --disable-table-selection configure option.
+      Fedora no longer creates "/usr/lib/ocaml/stublibs/dllbrlapi_stubs.*".
 
