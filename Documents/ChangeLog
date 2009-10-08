@@ -47,7 +47,7 @@ October 8, 2009:
       Fix a compile problem.
       The screen driver should refer to "consoles" rather than to "terminals".
    Documentation Updates:
-      Update the French manual from 3.10 to 4.0.
+      Update the French manual from 3.10 to 4.1.
       Document that the EuroBraille Esys is supported.
       Update the supported FreedomScientific model lists.
       Clarify that --with-*-table sets the fallback (not the default) table.
