@@ -210,14 +210,17 @@ word blinding 12-123-35-145-346
 always braille 12-1235-123
 contraction brl
 sufword brigham =
+sufword burlingame 12-136-1235-123-346-1-134-15
 word but 12
 
 # the letter c
 always c 14
 always C 14
+begword calcedon 14-1-123-14-1246-135-1345 calcedony calcedonies
 begword cart 14-345-2345 carthorse
 word carthage 14-345-1456-1-1245-15
 midword cch 14-16
+sufword chalcedon 16-1-123-14-1246-135-1345 chalcedony chalcedonies
 sufword cheat 16-2-2345 Cheatham
 always chloro 16-123-135-1235-135
 sufword citron = citronella
@@ -269,6 +272,7 @@ sufword clever 14-123-5-15 cleverest
 # the letter d
 always d 145
 always D 145
+word d'you 145-3-13456-1256
 begword dachs 145-1-16-234 dachshund
 begword dared 145-345-15-145 daredevil
 always day 5-145
