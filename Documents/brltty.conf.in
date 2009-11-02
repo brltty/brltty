@@ -78,6 +78,11 @@
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
 #braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
+#
+# NOTE: If the device is connected through a serial-to-USB adapter,
+# braille-device usb: will not work, braille-device has to be set to something
+# like serial:ttyUSB0, see the kernel messages on device plug to get the exact
+# device name.
 
 # The release-device directive specifies whether or not the device to which the
 # braille display is connected is to be released when the current screen or
@@ -427,8 +432,11 @@
 # (can be overridden with the -A [--api-parameters=] option)
 #api-parameters parameter=setting,...
 
-#api-parameters Auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
-#api-parameters Host=:0
+#api-parameters Auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
+#api-parameters Auth=user:joe		# Allow some local user
+#api-parameters Auth=group:brl		# Allow some local group
+#api-parameters Host=:0			# Accept only local Unix connections
+#api-parameters Host=0.0.0.0:0		# Accept any internet connection.
 #api-parameters StackSize=65536
 
 
