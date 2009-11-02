@@ -612,11 +612,12 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
 
   if (tryHost(handle, settings.host)<0) {
     brlapi_error_t error = brlapi_error;
-    if (tryHost(handle, settings.host="127.0.0.1:0")<0
+    if (strrchr(settings.host, ':') != settings.host ||
+	(tryHost(handle, settings.host="127.0.0.1:0")<0
 #ifdef AF_INET6
       && tryHost(handle, settings.host="::1:0")<0
 #endif /* AF_INET6 */
-      ) {
+      )) {
       brlapi_error = error;
       goto out;
     }
