@@ -157,6 +157,8 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
 "LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
+"LibUsb-Win32 Metec"=LIBUSB_DEV, USB\VID_0452&PID_0100
+
 "LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 "LibUsb-Win32 Pegasus"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -204,6 +206,8 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
 "LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
+"LibUsb-Win32 Metec"=LIBUSB_DEV, USB\VID_0452&PID_0100
+
 "LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 "LibUsb-Win32 Pegasus"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -250,6 +254,8 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
 "LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
+
+"LibUsb-Win32 Metec"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 "LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
 

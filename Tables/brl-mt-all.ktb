@@ -1,0 +1,120 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Metec
+
+
+####################
+# Default Bindings #
+####################
+
+bind LeftMiddle FWINLT
+bind RightMiddle FWINRT
+
+bind LeftRear+LeftFront CHRLT
+bind RightRear+RightFront CHRRT
+
+bind LeftRear+LeftMiddle+LeftFront LNBEG
+bind RightRear+RightMiddle+RightFront LNEND
+
+bind RightRear LNUP
+bind RightFront LNDN
+
+bind LeftRear+RightRear TOP
+bind LeftFront+RightFront BOT
+
+bind LeftMiddle+RightRear TOP_LEFT
+bind LeftMiddle+RightFront BOT_LEFT
+
+bind RightMiddle+RightRear PRDIFLN
+bind RightMiddle+RightFront NXDIFLN
+
+bind LeftMiddle+LeftRear ATTRUP
+bind LeftMiddle+LeftFront ATTRDN
+
+bind LeftMiddle+RightMiddle+LeftRear+RightRear PRPROMPT
+bind LeftMiddle+RightMiddle+LeftFront+RightFront NXPROMPT
+
+bind LeftMiddle+RightMiddle+RightRear PRPGRPH
+bind LeftMiddle+RightMiddle+RightFront NXPGRPH
+
+bind LeftMiddle+RightRear+RightFront+LeftRear PRSEARCH
+bind LeftMiddle+RightRear+RightFront+LeftFront NXSEARCH
+
+bind LeftRear CSRTRK+on
+bind LeftFront CSRTRK+off
+
+bind LeftRear+RightFront BACK
+
+bind LeftMiddle+RightRear+RightFront HOME
+bind LeftRear+LeftFront+RightMiddle SPKHOME
+
+bind LeftRear+LeftFront+RightRear+RightFront CSRJMP_VERT
+bind LeftMiddle+RightMiddle INFO
+
+bind LeftRear+RightRear+RightMiddle DISPMD
+bind LeftRear+LeftMiddle+RightRear FREEZE
+bind LeftRear+LeftMiddle+RightMiddle HELP
+bind LeftRear+LeftFront+RightRear PREFMENU
+bind LeftRear+LeftMiddle+LeftFront+RightRear PASTE
+bind LeftRear+LeftMiddle+LeftFront+RightMiddle PREFLOAD
+bind LeftMiddle+LeftFront+RightRear RESTARTSPEECH
+bind LeftMiddle+LeftFront+RightRear+RightMiddle ATTRVIS
+bind LeftRear+LeftFront+RightFront BACK
+bind LeftMiddle+RightRear+RightMiddle+RightFront PREFSAVE
+
+bind LeftMiddle+LeftFront+RightMiddle SIXDOTS+on
+bind LeftMiddle+LeftFront+RightFront SIXDOTS+off
+
+bind LeftRear+RightRear+RightMiddle+RightFront LEARN
+bind LeftRear+LeftMiddle+LeftFront+RightFront SWITCHVT_NEXT
+bind LeftFront+RightRear+RightMiddle+RightFront SWITCHVT_PREV
+
+bind LeftFront+RightRear MUTE
+bind LeftFront+RightMiddle SAY_LINE
+bind LeftFront+RightMiddle+RightRear SAY_ABOVE
+bind LeftFront+RightMiddle+RightFront SAY_BELOW
+bind LeftFront+RightRear+RightFront AUTOSPEAK
+
+bind !RoutingKey1 ROUTE
+
+bind LeftRear+!RoutingKey1 CUTBEGIN
+bind LeftMiddle+!RoutingKey1 CUTAPPEND
+bind RightRear+!RoutingKey1 CUTLINE
+bind RightMiddle+!RoutingKey1 CUTRECT
+
+bind LeftFront+!RoutingKey1 DESCCHAR
+bind RightFront+!RoutingKey1 SETLEFT
+
+bind LeftMiddle+LeftRear+!RoutingKey1 PRINDENT
+bind LeftMiddle+LeftFront+!RoutingKey1 NXINDENT
+
+bind RightMiddle+RightRear+!RoutingKey1 PRDIFCHAR
+bind RightMiddle+RightFront+!RoutingKey1 NXDIFCHAR
+
+bind LeftRear+LeftFront+!RoutingKey1 SETMARK
+bind RightRear+RightFront+!RoutingKey1 GOTOMARK
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+

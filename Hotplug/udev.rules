@@ -67,6 +67,9 @@ ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 # HIMS
 ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="hm", GOTO="brltty_usb_run"
 
+# Metec
+ENV{PRODUCT}=="452/100/*", ENV{BRLTTY_DRIVER}="mt", GOTO="brltty_usb_run"
+
 # Papenmeier
 ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_DRIVER}="pm", GOTO="brltty_usb_run"
 
