@@ -19,7 +19,6 @@
 #include "prologue.h"
 
 #include <string.h>
-#include <errno.h>
 
 #include "misc.h"
 
@@ -54,9 +53,11 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 #define MT_INPUT_PACKET_LENGTH 8
-#define MT_PRIMARY_ROUTING_KEYS 0
-#define MT_SECONDARY_ROUTING_KEYS 100
-#define MT_NO_ROUTING_KEY 0XFF
+
+#define MT_ROUTING_KEYS_PRIMARY 0
+#define MT_ROUTING_KEYS_SECONDARY 100
+#define MT_ROUTING_KEYS_NONE 0XFF
+
 #define MT_MODULE_SIZE 8
 #define MT_MODULES_MAXIMUM 10
 
@@ -64,7 +65,6 @@ static unsigned char textCells[MT_MODULES_MAXIMUM * MT_MODULE_SIZE];
 static int forceWrite;
 static uint16_t lastNavigationKeys;
 static unsigned char lastRoutingKey;
-
 static TranslationTable outputTable;
 
 #ifdef ENABLE_USB_SUPPORT
@@ -119,6 +119,10 @@ getInputPacket (unsigned char *packet) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  forceWrite = 1;
+  lastNavigationKeys = 0;
+  lastRoutingKey = MT_ROUTING_KEYS_NONE;
+
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
     makeOutputTable(dots, outputTable);
@@ -157,9 +161,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->keyNameTables = ktd->names;
             }
 
-            forceWrite = 1;
-            lastNavigationKeys = 0;
-            lastRoutingKey = MT_NO_ROUTING_KEY;
             return 1;
           }
         }
@@ -188,7 +189,6 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-#ifdef ENABLE_USB_SUPPORT
   const unsigned char *source = brl->buffer;
   unsigned char *target = textCells;
   const int moduleCount = brl->textColumns / MT_MODULE_SIZE;
@@ -203,7 +203,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
         for (i=0; i<MT_MODULE_SIZE; i+=1) buffer[i] = outputTable[source[i]];
       }
 
+#ifdef ENABLE_USB_SUPPORT
       if (writeDevice(0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
+#endif /* ENABLE_USB_SUPPORT */
+
       memcpy(target, source, MT_MODULE_SIZE);
     }
 
@@ -212,23 +215,21 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   forceWrite = 0;
-#endif /* ENABLE_USB_SUPPORT */
-
   return 1;
 }
 
 static void
 routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
-  if (key != MT_NO_ROUTING_KEY) {
+  if (key != MT_ROUTING_KEYS_NONE) {
     MT_KeySet set;
 
-    if ((key >= MT_PRIMARY_ROUTING_KEYS) &&
-        (key < (MT_PRIMARY_ROUTING_KEYS + brl->textColumns))) {
-      key -= MT_PRIMARY_ROUTING_KEYS;
+    if ((key >= MT_ROUTING_KEYS_PRIMARY) &&
+        (key < (MT_ROUTING_KEYS_PRIMARY + brl->textColumns))) {
+      key -= MT_ROUTING_KEYS_PRIMARY;
       set = MT_SET_RoutingKeys1;
-    } else if ((key >= MT_SECONDARY_ROUTING_KEYS) &&
-        (key < (MT_SECONDARY_ROUTING_KEYS + brl->textColumns))) {
-      key -= MT_SECONDARY_ROUTING_KEYS;
+    } else if ((key >= MT_ROUTING_KEYS_SECONDARY) &&
+        (key < (MT_ROUTING_KEYS_SECONDARY + brl->textColumns))) {
+      key -= MT_ROUTING_KEYS_SECONDARY;
       set = MT_SET_RoutingKeys2;
     } else {
       LogPrint(LOG_WARNING, "unexpected routing key: %u", key);
@@ -265,18 +266,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     uint16_t bit = 0X1;
     unsigned char key = 0;
     const unsigned char set = MT_SET_NavigationKeys;
-    unsigned char keyPressTable[0X10];
-    unsigned char keyPressCount = 0;
+    unsigned char pressTable[0X10];
+    unsigned char pressCount = 0;
 
     while (bit) {
       if ((lastNavigationKeys & bit) && !(keys & bit)) {
         enqueueKeyEvent(set, key, 0);
         lastNavigationKeys &= ~bit;
       } else if (!(lastNavigationKeys & bit) && (keys & bit)) {
-        keyPressTable[keyPressCount++] = key;
+        pressTable[pressCount++] = key;
         lastNavigationKeys |= bit;
       }
-      while (keyPressCount) enqueueKeyEvent(set, keyPressTable[--keyPressCount], 1);
+      while (pressCount) enqueueKeyEvent(set, pressTable[--pressCount], 1);
 
       key += 1;
       bit <<= 1;
