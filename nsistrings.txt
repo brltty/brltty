@@ -271,7 +271,7 @@ LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 篩
 LangString msg_inslibusb32 ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 驅動程式？\r$\n（沒有安裝原廠 USB 驅動程式才有用）"
 
 LangString shortcut_brlttycnf $(LANG_TRADCHINESE) "設定 BRLTTY"
-LangString shortcut_brlttydebug $(LANG_TRADCHINESE) "Run BRLTTY in debugging mode"
+LangString shortcut_brlttydebug $(LANG_TRADCHINESE) "以偵錯模式執行 BRLTTY"
 LangString shortcut_inssrv $(LANG_TRADCHINESE) "安裝 BRLTTY 服務"
 LangString shortcut_rmvsrv $(LANG_TRADCHINESE) "移除 BRLTTY 服務"
 LangString shortcut_uninstall $(LANG_TRADCHINESE) "移除"
