@@ -50,6 +50,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Libbraille
            - LogText [32]
            - MDV [MB208/MB408L/MB408S (protocol 5)]
+           - Metec [BD-40]
            - MiniBraille [20]
            - MultiBraille [MB125CR/MB145CR/MB185CR]
            - Papenmeier [Compact 486, Compact/Tiny, IB 80 CR Soft,

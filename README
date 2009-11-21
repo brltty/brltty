@@ -195,6 +195,7 @@ The following braille displays are supported:
 -  Libbraille
 -  LogText [32]
 -  MDV [MB208/MB408L/MB408S (protocol 5)]
+-  Metec [BD-40]
 -  MiniBraille [20]
 -  MultiBraille [MB125CR/MB145CR/MB185CR]
 -  Papenmeier [Compact 486, Compact/Tiny, IB 80 CR Soft, 2D Lite (plus),

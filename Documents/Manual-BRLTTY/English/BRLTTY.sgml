@@ -4947,6 +4947,8 @@ BRLTTY supports the following braille displays:
       |32@
     MDV
       |MB208/MB408L/MB408S (protocol 5)@
+    Metec
+      |BD-40@
     MiniBraille
       |20@
     MultiBraille
@@ -5045,6 +5047,7 @@ BRLTTY supports the following speech synthesizers:
     md|MDV@
     mn|MiniBraille@
     mp|Mikropuhe@
+    mt|Metec@
     no|no driver@
     pg|Pegasus@
     pm|Papenmeier@

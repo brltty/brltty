@@ -673,6 +673,9 @@ MiniBraille
 .B mp
 Mikropuhe
 .TP 4
+.B mt
+Metec
+.TP 4
 .B no
 no driver
 .TP 4
