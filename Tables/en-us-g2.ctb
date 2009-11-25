@@ -59,7 +59,7 @@ contraction acr
 always ae =
 endword aed 1-1246
 word aforesaid 1-123456-15-234-145
-always after 1-124
+word after 1-124
 contraction af
 sufword aftereffect 1-124-2345-12456-15-235-15-14-2345
 sufword afternoon 1-124-1345 afternoons
@@ -455,6 +455,8 @@ sufword hadr = hadrian
 word have 125
 always headd 125-2-145-145 headdress
 always here 5-125
+word hereafter 5-125-1-124
+word hereinafter 5-125-35-1-124
 always hered 125-12456-1246
 always heren 125-12456-26
 midendword herence 125-12456-56-15 adherence
@@ -510,7 +512,6 @@ midendword ity 56-13456
 # the letter j
 always j 245
 always J 245
-sufword jewsharp 245-15-2456-234-125-345-1234
 sufword jihad = jihadis
 word just 245
 
@@ -876,6 +877,8 @@ word themvs 1456-15-134-1236-234
 always their 456-2346
 always thence 1456-56-15
 always there 5-2346
+word thereafter 5-2346-1-124
+word thereinafter 5-2346-35-1-124
 midendword thereal 2346-1235-2-123 ethereal
 word thereupon 5-2346-45-136
 always thered 2346-1235-1246
@@ -935,6 +938,7 @@ word will 2456
 lowword were 2356
 sufword were\s-\s 2456-12456-15-36-36
 always where 5-156
+word whereafter 5-156-1-124
 word whereupon 5-156-45-136
 word wherever 156-12456-5-15
 sufword wiseacre =
