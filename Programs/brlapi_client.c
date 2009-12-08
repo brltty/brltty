@@ -212,16 +212,14 @@ static brlapi_handle_t defaultHandle;
 /* Initialize a BrlAPI handle */
 static void brlapi_initializeHandle(brlapi_handle_t *handle)
 {
-  pthread_mutexattr_t mattr;
-  pthread_mutexattr_init(&mattr);
   handle->brlx = 0;
   handle->brly = 0;
   handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
   handle->addrfamily = 0;
-  pthread_mutex_init(&handle->fileDescriptor_mutex, &mattr);
-  pthread_mutex_init(&handle->req_mutex, &mattr);
-  pthread_mutex_init(&handle->key_mutex, &mattr);
-  pthread_mutex_init(&handle->read_mutex, &mattr);
+  pthread_mutex_init(&handle->fileDescriptor_mutex, NULL);
+  pthread_mutex_init(&handle->req_mutex, NULL);
+  pthread_mutex_init(&handle->key_mutex, NULL);
+  pthread_mutex_init(&handle->read_mutex, NULL);
   handle->reading = 0;
   handle->altExpectedPacketType = 0;
   handle->altPacket = NULL;
@@ -229,7 +227,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   handle->altRes = NULL;
   handle->altSem = NULL;
   handle->state = 0;
-  pthread_mutex_init(&handle->state_mutex, &mattr);
+  pthread_mutex_init(&handle->state_mutex, NULL);
   memset(handle->keybuf, 0, sizeof(handle->keybuf));
   handle->keybuf_next = 0;
   handle->keybuf_nb = 0;
@@ -237,7 +235,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
     handle->exceptionHandler.withoutHandle = brlapi_defaultExceptionHandler;
   else
     handle->exceptionHandler.withHandle = brlapi__defaultExceptionHandler;
-  pthread_mutex_init(&handle->exceptionHandler_mutex, &mattr);
+  pthread_mutex_init(&handle->exceptionHandler_mutex, NULL);
 }
 
 /* brlapi_doWaitForPacket */
