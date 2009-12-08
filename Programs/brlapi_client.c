@@ -133,6 +133,23 @@ static WIN_PROC_STUB(freeaddrinfo);
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
+/* We need to declare these as weak external references to determine at runtime 
+ * whether libpthread is used or not. We also can't rely on the functions prototypes.
+ */
+#if defined(WINDOWS)
+
+#elif defined(__GNUC__) || defined(__sun__)
+#pragma weak pthread_key_create
+#pragma weak pthread_once
+#pragma weak pthread_getspecific
+#pragma weak pthread_setspecific
+#pragma weak sem_init
+#pragma weak sem_post
+#pragma weak sem_wait
+#pragma weak sem_destroy
+
+#endif /* weak external references */
+
 /** key presses buffer size
  *
  * key presses won't be lost provided no more than BRL_KEYBUF_SIZE key presses
@@ -249,7 +266,8 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   if (handle->altSem && type==handle->altExpectedPacketType) {
     /* Yes, put packet content there */
     *handle->altRes = res = brlapi_readPacketContent(handle->fileDescriptor, res, handle->altPacket, handle->altSize);
-    sem_post(handle->altSem);
+    if (sem_post)
+      sem_post(handle->altSem);
     handle->altSem = NULL;
     pthread_mutex_unlock(&handle->read_mutex);
     if (res < 0) return res;
@@ -317,7 +335,8 @@ again:
   pthread_mutex_lock(&handle->read_mutex);
   if (!handle->reading) doread = handle->reading = 1;
   else {
-    if (handle->altSem) {
+    if (!sem_init || !sem_post || !sem_wait || !sem_destroy || handle->altSem) {
+      /* This can't happen without threads */
       syslog(LOG_ERR,"third call to brlapi_waitForPacket !");
       brlapi_errno = BRLAPI_ERROR_ILLEGAL_INSTRUCTION;
       return -1;
@@ -342,7 +361,8 @@ again:
     pthread_mutex_lock(&handle->read_mutex);
     if (handle->altSem) {
       *handle->altRes = -3; /* no packet for him */
-      sem_post(handle->altSem);
+      if (sem_post)
+        sem_post(handle->altSem);
       handle->altSem = NULL;
     }
     handle->reading = 0;
@@ -1861,19 +1881,6 @@ static pthread_key_t error_key;
 
 /* the key must be created at most once */
 static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
-
-/* We need to declare these as weak external references to determine at runtime 
- * whether libpthread is used or not. We also can't rely on the functions prototypes.
- */
-#if defined(WINDOWS)
-
-#elif defined(__GNUC__) || defined(__sun__)
-#pragma weak pthread_key_create
-#pragma weak pthread_once
-#pragma weak pthread_getspecific
-#pragma weak pthread_setspecific
-
-#endif /* weak external references */
 
 static void error_key_free(void *key)
 {
