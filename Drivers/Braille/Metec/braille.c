@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 
 #include "misc.h"
 
@@ -54,7 +55,6 @@ END_KEY_TABLE_LIST
 
 #define MT_INPUT_PACKET_LENGTH 8
 
-#define MT_ROUTING_KEYS_PRIMARY 0
 #define MT_ROUTING_KEYS_SECONDARY 100
 #define MT_ROUTING_KEYS_NONE 0XFF
 
@@ -89,7 +89,7 @@ writeDevice (unsigned char request, const void *buffer, int length) {
 }
 
 static int
-getDeviceIdentity (void *buffer, int *length) {
+getDeviceIdentity (char *buffer, int *length) {
   int result;
 
   {
@@ -99,8 +99,9 @@ getDeviceIdentity (void *buffer, int *length) {
   }
 
   result = usbReadEndpoint(usbChannel->device, usbChannel->definition.inputEndpoint,
-                           buffer, *length, MT_REQUEST_TIMEOUT);
   if (result == -1) return 0;
+
+  LogPrint(LOG_INFO, "Device Identity: %.*s", result, buffer);
   *length = result;
   return 1;
 }
@@ -141,12 +142,22 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     };
 
     if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-      unsigned char identity[100];
-      int identityLength = sizeof(identity);
+      char identity[100];
+      int identityLength;
+      int retries = -1;
 
-      if (getDeviceIdentity(identity, &identityLength)) {
-        LogBytes(LOG_DEBUG, "Device Identity", identity, identityLength);
+      do {
+        identityLength = sizeof(identity);
+        if (getDeviceIdentity(identity, &identityLength)) break;
+        identityLength = 0;
 
+        if (errno != EAGAIN) {
+          if (errno != EILSEQ) break;
+          retries = MIN(retries, 1);
+        }
+      } while (retries-- > 0);
+
+      if (identityLength || (retries < -1)) {
         if (setHighVoltage(1)) {
           unsigned char inputPacket[MT_INPUT_PACKET_LENGTH];
 
@@ -163,15 +174,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             return 1;
           }
+
+          setHighVoltage(0);
         }
       }
+
+      usbCloseChannel(usbChannel);
+      usbChannel = NULL;
     }
   } else
 #endif /* ENABLE_USB_SUPPORT */
 
   {
     unsupportedDevice(device);
-    return 0;
   }
   
   return 0;
@@ -181,6 +196,7 @@ static void
 brl_destruct (BrailleDisplay *brl) {
 #ifdef ENABLE_USB_SUPPORT
   if (usbChannel) {
+    setHighVoltage(0);
     usbCloseChannel(usbChannel);
     usbChannel = NULL;
   }
@@ -223,9 +239,7 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   if (key != MT_ROUTING_KEYS_NONE) {
     MT_KeySet set;
 
-    if ((key >= MT_ROUTING_KEYS_PRIMARY) &&
-        (key < (MT_ROUTING_KEYS_PRIMARY + brl->textColumns))) {
-      key -= MT_ROUTING_KEYS_PRIMARY;
+    if (key < brl->textColumns) {
       set = MT_SET_RoutingKeys1;
     } else if ((key >= MT_ROUTING_KEYS_SECONDARY) &&
         (key < (MT_ROUTING_KEYS_SECONDARY + brl->textColumns))) {
