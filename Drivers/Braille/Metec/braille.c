@@ -99,6 +99,7 @@ getDeviceIdentity (char *buffer, int *length) {
   }
 
   result = usbReadEndpoint(usbChannel->device, usbChannel->definition.inputEndpoint,
+                           buffer, *length, MT_REQUEST_TIMEOUT);
   if (result == -1) return 0;
 
   LogPrint(LOG_INFO, "Device Identity: %.*s", result, buffer);
