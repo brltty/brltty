@@ -1,7 +1,7 @@
 ; Some translations for the brltty.nsi installer
 ;Czech
 LangString msg_WelcomePageTitle ${LANG_CZECH} "Instalace ${PRODUCT}, verze ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_CZECH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_CZECH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_CZECH} "Chcete nainstalovat ovlada? LibUSB-win32?$\r$\n(užite?né jen pokud nemáte nainstalován USB ovlada? dodávaný výrobcem pro vaše za?ízení)"
 
 LangString shortcut_brlttycnf $(LANG_CZECH) "Nastavení BRLTTY"
@@ -15,7 +15,7 @@ LangString shortcut_inslibusb $(LANG_CZECH) "Instalace ovlada?e LibUSB-win32"
 
 ;German
 LangString msg_WelcomePageTitle ${LANG_GERMAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_GERMAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_GERMAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_GERMAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_GERMAN) "Configure BRLTTY"
@@ -29,7 +29,7 @@ LangString shortcut_inslibusb $(LANG_GERMAN) "Install LibUSB-win32 driver"
 
 ;English
 LangString msg_WelcomePageTitle ${LANG_ENGLISH} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_ENGLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_ENGLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_ENGLISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_ENGLISH) "Configure BRLTTY"
@@ -43,7 +43,7 @@ LangString shortcut_inslibusb $(LANG_ENGLISH) "Install LibUSB-win32 driver"
 
 ;Spanish
 LangString msg_WelcomePageTitle ${LANG_SPANISH} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_SPANISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_SPANISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_SPANISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_SPANISH) "Configure BRLTTY"
@@ -57,7 +57,7 @@ LangString shortcut_inslibusb $(LANG_SPANISH) "Install LibUSB-win32 driver"
 
 ;Finnish
 LangString msg_WelcomePageTitle ${LANG_FINNISH} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_FINNISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_FINNISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_FINNISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_FINNISH) "Configure BRLTTY"
@@ -71,7 +71,7 @@ LangString shortcut_inslibusb $(LANG_FINNISH) "Install LibUSB-win32 driver"
 
 ;French
 LangString msg_WelcomePageTitle ${LANG_FRENCH} "Installation de ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_FRENCH} "Voulez-vous installer le filtre LibUSB-win32 ?$\r$\n(utile seulement pour les plages USB et si vous avez déjà installé le pilote fourni par le constructeur de votre unité USB. Ne l'installez pas si votre windows est 64bit)"
+LangString msg_inslibusb32filter ${LANG_FRENCH} "Voulez-vous installer le filtre LibUSB-win32 ?$\r$\n(utile seulement pour les plages USB et si vous avez déjà installé le pilote fourni par le constructeur de votre unité USB. Ne l'installez pas si votre windows est 64bit, ou Vista, ou 7)"
 LangString msg_inslibusb32 ${LANG_FRENCH} "Voulez-vous installer le pilote LibUSB-win32?$\r$\n(utile seulement si vous n'avez pas installé le pilote fourni par le constructeur de votre unité USB)"
 
 LangString shortcut_brlttycnf $(LANG_FRENCH) "Configurer BRLTTY"
@@ -85,7 +85,7 @@ LangString shortcut_inslibusb $(LANG_FRENCH) "Installer le pilote LibUSB-win32"
 
 ;Galician
 LangString msg_WelcomePageTitle ${LANG_GALICIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_GALICIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_GALICIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_GALICIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_GALICIAN) "Configure BRLTTY"
@@ -99,7 +99,7 @@ LangString shortcut_inslibusb $(LANG_GALICIAN) "Install LibUSB-win32 driver"
 
 ;Croatian
 LangString msg_WelcomePageTitle ${LANG_CROATIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_CROATIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_CROATIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_CROATIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_CROATIAN) "Configure BRLTTY"
@@ -113,7 +113,7 @@ LangString shortcut_inslibusb $(LANG_CROATIAN) "Install LibUSB-win32 driver"
 
 ;Hungarian
 LangString msg_WelcomePageTitle ${LANG_HUNGARIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_HUGARIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_HUGARIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_HUNGARIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_HUNGARIAN) "Configure BRLTTY"
@@ -127,7 +127,7 @@ LangString shortcut_inslibusb $(LANG_HUNGARIAN) "Install LibUSB-win32 driver"
 
 ;Italian
 LangString msg_WelcomePageTitle ${LANG_ITALIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_ITALIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_ITALIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_ITALIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_ITALIAN) "Configure BRLTTY"
@@ -141,7 +141,7 @@ LangString shortcut_inslibusb $(LANG_ITALIAN) "Install LibUSB-win32 driver"
 
 ;Japanese
 LangString msg_WelcomePageTitle ${LANG_JAPANESE} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_JAPANESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_JAPANESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_JAPANESE} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_JAPANESE) "Configure BRLTTY"
@@ -155,7 +155,7 @@ LangString shortcut_inslibusb $(LANG_JAPANESE) "Install LibUSB-win32 driver"
 
 ;Polish
 LangString msg_WelcomePageTitle ${LANG_POLISH} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_POLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_POLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_POLISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_POLISH) "Configure BRLTTY"
@@ -169,7 +169,7 @@ LangString shortcut_inslibusb $(LANG_POLISH) "Install LibUSB-win32 driver"
 
 ;PortugueseBr
 LangString msg_WelcomePageTitle ${LANG_PORTUGUESEBR} "Setup para o ${PRODUCT}, Versão ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_PORTUGUESEBR} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_PORTUGUESEBR} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_PORTUGUESEBR} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente útil se não tiver instalado drivers do fabricante para o seu dispositivo USB)"
 
 LangString shortcut_brlttycnf $(LANG_PORTUGUESEBR) "Configurar o BRLTTY"
@@ -183,7 +183,7 @@ LangString shortcut_inslibusb $(LANG_PORTUGUESEBR) "Instalar o driver LibUSB-win
 
 ;Portuguese
 LangString msg_WelcomePageTitle ${LANG_PORTUGUESE} "Setup para o ${PRODUCT}, Versão ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_PORTUGUESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_PORTUGUESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_PORTUGUESE} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente útil se não tiver instalado drivers do fabricante para o seu dispositivo USB)"
 
 LangString shortcut_brlttycnf $(LANG_PORTUGUESE) "Configurar o BRLTTY"
@@ -197,7 +197,7 @@ LangString shortcut_inslibusb $(LANG_PORTUGUESE) "Instalar o driver LibUSB-win32
 
 ;Russian
 LangString msg_WelcomePageTitle ${LANG_RUSSIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_RUSSIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_RUSSIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_RUSSIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_RUSSIAN) "Configure BRLTTY"
@@ -211,7 +211,7 @@ LangString shortcut_inslibusb $(LANG_RUSSIAN) "Install LibUSB-win32 driver"
 
 ;Swedish
 LangString msg_WelcomePageTitle ${LANG_SWEDISH} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_SWEDISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_SWEDISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_SWEDISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_SWEDISH) "Configure BRLTTY"
@@ -225,7 +225,7 @@ LangString shortcut_inslibusb $(LANG_SWEDISH) "Install LibUSB-win32 driver"
 
 ;Slovak
 LangString msg_WelcomePageTitle ${LANG_SLOVAK} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_SLOVAK} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_SLOVAK} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_SLOVAK} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_SLOVAK) "Configure BRLTTY"
@@ -239,7 +239,7 @@ LangString shortcut_inslibusb $(LANG_SLOVAK) "Install LibUSB-win32 driver"
 
 ;Thai
 LangString msg_WelcomePageTitle ${LANG_THAI} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_THAI} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_THAI} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_THAI} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_THAI) "Configure BRLTTY"
@@ -253,7 +253,7 @@ LangString shortcut_inslibusb $(LANG_THAI) "Install LibUSB-win32 driver"
 
 ;Chinese Simplified
 LangString msg_WelcomePageTitle ${LANG_SIMPCHINESE} "Setup for ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_SIMPCHINESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32filter ${LANG_SIMPCHINESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit, or Vista, or 7)"
 LangString msg_inslibusb32 ${LANG_SIMPCHINESE} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
 
 LangString shortcut_brlttycnf $(LANG_SIMPCHINESE) "Configure BRLTTY"
@@ -267,7 +267,7 @@ LangString shortcut_inslibusb $(LANG_SIMPCHINESE) "Install LibUSB-win32 driver"
 
 ;Chinese Traditional
 LangString msg_WelcomePageTitle ${LANG_TRADCHINESE} "¦w¸Ë ${PRODUCT}, ª©¥» ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "¬O§_­n¦w¸Ë LibUSB-win32 ¿z¿ï¾¹¡H$\r$\n¡]¦³¦w¸Ë­ì¼t USB ÅX°Êµ{¦¡¤~¦³¥Î¡C¦pªG¬O 64 ¦ì¤¸ windows ½Ð§O¦w¸Ë¡^"
+LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "¬O§_­n¦w¸Ë LibUSB-win32 ¿z¿ï¾¹¡H$\r$\n¡]¦³¦w¸Ë­ì¼t USB ÅX°Êµ{¦¡¤~¦³¥Î¡C¦pªG¬O 64, Vista, 7 ¦ì¤¸ windows ½Ð§O¦w¸Ë¡^"
 LangString msg_inslibusb32 ${LANG_TRADCHINESE} "¬O§_­n¦w¸Ë LibUSB-win32 ÅX°Êµ{¦¡¡H\r$\n¡]¨S¦³¦w¸Ë­ì¼t USB ÅX°Êµ{¦¡¤~¦³¥Î¡^"
 
 LangString shortcut_brlttycnf $(LANG_TRADCHINESE) "³]©w BRLTTY"
