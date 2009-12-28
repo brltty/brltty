@@ -24,7 +24,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+
+#ifdef HAVE_LEGACY_DEV_USB_USB_H
+#include <legacy/dev/usb/usb.h>
+#else /* HAVE_LEGACY_DEV_USB_USB_H */
 #include <dev/usb/usb.h>
+#endif /* HAVE_LEGACY_DEV_USB_USB_H */
 
 #include "misc.h"
 #include "io_usb.h"

@@ -321,6 +321,9 @@ extern "C" {
 /* Define this if Universal Serial Bus support is to be included. */
 #undef ENABLE_USB_SUPPORT
 
+/* Define this if the header file legacy/dev/usb/usb.h exists. */
+#undef HAVE_LEGACY_DEV_USB_USB_H
+
 /* Define this if bluetooth support is to be included. */
 #undef ENABLE_BLUETOOTH_SUPPORT
 

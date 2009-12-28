@@ -1081,6 +1081,7 @@ in
       ;;
    kfreebsd*)
       usb_object="kfreebsd"
+      AC_CHECK_HEADERS([legacy/dev/usb/usb.h])
       ;;
    netbsd*)
       usb_object="netbsd"
