@@ -56,6 +56,8 @@ BRLTTY supporte les afficheurs braille suivants:
       |32@
     MDV
       |MB208/MB408L/MB408S (protocol 5)@
+    Metec
+      |BD-40@
     MiniBraille
       |20@
     MultiBraille
