@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; libbrlapi - A library providing access to braille terminals for applications.
 ;
-; Copyright (C) 2006-2009 by Mario Lang <mlang@delysid.org>
+; Copyright (C) 2006-2010 by Mario Lang <mlang@delysid.org>
 ;
 ; libbrlapi comes with ABSOLUTELY NO WARRANTY.
 ;

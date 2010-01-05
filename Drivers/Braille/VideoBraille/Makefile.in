@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2009 by The BRLTTY Developers.
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -20,7 +20,7 @@ DRIVER_CODE = vd
 DRIVER_NAME = VideoBraille
 DRIVER_COMMENT = 40
 DRIVER_VERSION = 
-DRIVER_COPYRIGHt = 
+DRIVER_DEVELOPERS = 
 include $(SRC_TOP)braille.mk
 
 vblow.$O:

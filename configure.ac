@@ -3,7 +3,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2009 by The BRLTTY Developers.
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #

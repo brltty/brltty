@@ -3,7 +3,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2009 by The BRLTTY Developers.
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -45,7 +45,7 @@ fi
 [ "${#}" -eq 0 ] || syntaxError "too many parameters."
 
 xgettext -o - \
-   --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Team" \
+   --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Developers" \
    --keyword=strtext:1 --flag=LogPrint:2:c-format \
    `find . -name '*.c' -print` |
 sed >"${potFile}" -e "
