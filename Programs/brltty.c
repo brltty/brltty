@@ -1076,7 +1076,7 @@ isTextOffset (int *arg, int end, int relaxed) {
 
   if ((p->winx + value) >= scr.cols) {
     if (!relaxed) return 0;
-    value = scr.cols - 1;
+    value = scr.cols - 1 - p->winx;
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
