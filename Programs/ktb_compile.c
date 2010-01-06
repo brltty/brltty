@@ -329,11 +329,6 @@ getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
   if (getDataString(file, &name, 1, "mapped key name")) {
     unsigned char set;
 
-    if (isKeyword(WS_C("superimpose"), name.characters, name.length)) {
-      *key = 0;
-      return 1;
-    }
-
     if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
       if (!set) return 1;
       reportDataError(file, "invalid mapped key: %.*" PRIws, name.length, name.characters);
@@ -657,11 +652,6 @@ processMapOperands (DataFile *file, void *data) {
       unsigned char function;
 
       if (getKeyboardFunctionOperand(file, &function, ktd)) {
-        if (!key) {
-          ctx->superimposedBits |= keyboardFunctionTable[function].bit;
-          return 1;
-        }
-
         if (!ctx->keyMap) {
           if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, KEYS_PER_SET)))) {
             LogError("malloc");
@@ -717,6 +707,24 @@ processNoteOperands (DataFile *file, void *data) {
 }
 
 static int
+processSuperimposeOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+  if (!ctx) return 0;
+
+  {
+    unsigned char function;
+
+    if (getKeyboardFunctionOperand(file, &function, ktd)) {
+      ctx->superimposedBits |= keyboardFunctionTable[function].bit;
+      return 1;
+    }
+  }
+
+  return 1;
+}
+
+static int
 processTitleOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   DataOperand title;
@@ -746,6 +754,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
+    {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
     {.name=NULL, .processor=NULL}
   };
