@@ -83,7 +83,7 @@ eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length)
   if(length>=USB_PACKET_SIZE) count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, USB_PACKET_SIZE, 0,2);
   if(count>0 && count<USB_PACKET_SIZE)
     {
-      LogPrint(LOG_DEBUG,"eu: We recieved a too small packet");
+      LogPrint(LOG_DEBUG,"eu: We received a too small packet");
       return (-1);
     }
   return count;
