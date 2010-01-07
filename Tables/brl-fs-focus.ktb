@@ -59,7 +59,7 @@ map Space SPACE
 map LeftShift UPPERCASE
 map RightShift CONTROL
 
-bind Space+LeftShift KEY_BACKSpace
+bind Space+LeftShift KEY_BACKSPACE
 bind Space+RightShift KEY_ENTER
 bind Space+Dot2+Dot3+Dot5+Dot6 KEY_TAB
 bind Space+Dot2+Dot3 KEY_CURSOR_LEFT
