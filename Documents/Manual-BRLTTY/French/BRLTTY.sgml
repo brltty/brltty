@@ -32,7 +32,11 @@
   <and>
     <name>Traduction française
   <and>
-    <name>Jean-Philippe Mengual <tt><htmlurl url="mailto:jmengual@linuxfromscratch.org" name="&lt;jmengual@linuxfromscratch.org&gt;"></tt>
+    <name>
+      Jean-Philippe Mengual
+        <tt><htmlurl url="mailto:jmengual@linuxfromscratch.org" name="&lt;jmengual@linuxfromscratch.org&gt;"></tt>
+      pour
+        <tt><htmlurl url="http://www.traduc.org/" name="Traduc.org"></tt>
   <date>Version 4.1, octobre 2009
   <abstract>
     Copyright &copy; 1995-2010 by Les Développeurs de BRLTTY.
