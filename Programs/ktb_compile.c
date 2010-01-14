@@ -52,6 +52,7 @@ typedef struct {
   unsigned int commandCount;
 
   unsigned char context;
+  unsigned hide:1;
 } KeyTableData;
 
 static KeyContext *
@@ -576,7 +577,9 @@ processBindOperands (DataFile *file, void *data) {
 
   {
     KeyBinding *binding = &ctx->keyBindingTable[ctx->keyBindingCount];
+
     memset(binding, 0, sizeof(*binding));
+    binding->hide = ktd->hide;
 
     if (getKeysOperand(file, &binding->keys, ktd)) {
       if (getCommandOperand(file, &binding->command, ktd)) {
@@ -637,6 +640,34 @@ processContextOperands (DataFile *file, void *data) {
   }
 
   return 1;
+}
+
+static int
+processHideOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  DataString state;
+
+  if (getDataString(file, &state, 1, "hide state")) {
+    if (isKeyword(WS_C("on"), state.characters, state.length)) {
+      ktd->hide = 1;
+    } else if (isKeyword(WS_C("off"), state.characters, state.length)) {
+      ktd->hide = 0;
+    } else {
+      reportDataError(file, "unknown hide state: %.*" PRIws, state.length, state.characters);
+    }
+  }
+
+  return 1;
+}
+
+static int
+processIncludeWrapper (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  unsigned int hide = ktd->hide;
+  int result = processIncludeOperands(file, data);
+
+  ktd->hide = hide;
+  return result;
 }
 
 static int
@@ -751,7 +782,8 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
-    {.name=WS_C("include"), .processor=processIncludeOperands},
+    {.name=WS_C("hide"), .processor=processHideOperands},
+    {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
