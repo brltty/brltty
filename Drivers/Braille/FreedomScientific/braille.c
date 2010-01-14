@@ -448,7 +448,9 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = NULL }
 };
+
 static const ModelEntry *model;
+static const KeyTableDefinition *keyTableDefinition;
 
 static TranslationTable outputTable;
 static unsigned char outputBuffer[84];
@@ -458,6 +460,10 @@ static int writeTo;
 static int writingFrom;
 static int writingTo;
 
+typedef void (*AcknowledgementHandler) (int ok);
+static AcknowledgementHandler acknowledgementHandler;
+static struct timeval acknowledgementTime;
+static int acknowledgementsMissing;
 static unsigned char configFlags;
 static int firmnessSetting;
 
@@ -603,10 +609,6 @@ handleWriteAcknowledgement (int ok) {
   }
 }
 
-typedef void (*AcknowledgementHandler) (int ok);
-static AcknowledgementHandler acknowledgementHandler;
-static struct timeval acknowledgementTime;
-static int acknowledgementsMissing;
 static void
 setAcknowledgementHandler (AcknowledgementHandler handler) {
   acknowledgementHandler = handler;
@@ -918,8 +920,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             }
 
             if (model) {
+              keyTableDefinition = modelTypeTable[model->type].keyTableDefinition;
               makeOutputTable(model->dotsTable[0], outputTable);
-
               memset(outputBuffer, 0, model->cellCount);
               writeFrom = 0;
               writeTo = model->cellCount - 1;
@@ -929,9 +931,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               configFlags = 0;
               firmnessSetting = -1;
 
-              if (model->type == MOD_TYPE_Focus)
-                if (response.payload.info.firmware[0] >= '3')
-                  configFlags |= 0X02;
+              if (model->type == MOD_TYPE_Focus) {
+                unsigned char firmwareVersion = response.payload.info.firmware[0] - '0';
+
+                if (firmwareVersion >= 3) configFlags |= 0X02;
+
+                if (firmwareVersion >= 4) {
+                  keyTableDefinition = &KEY_TABLE_DEFINITION(focus_rockers);
+                } else if ((firmwareVersion == 3) && (model->cellCount == 80)) {
+                  keyTableDefinition = &KEY_TABLE_DEFINITION(focus_bumpers);
+                }
+              }
 
               oldKeys = 0;
 
@@ -958,12 +968,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->textColumns = model->cellCount;
           brl->textRows = 1;
 
-          {
-            const ModelTypeEntry *type = &modelTypeTable[model->type];
-
-            brl->keyBindings = type->keyTableDefinition->bindings;
-            brl->keyNameTables = type->keyTableDefinition->names;
-          }
+          brl->keyBindings = keyTableDefinition->bindings;
+          brl->keyNameTables = keyTableDefinition->names;
 
           if (!writeRequest(brl)) break;
           return 1;
