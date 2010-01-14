@@ -41,10 +41,15 @@ typedef enum {
 
   FS_KEY_LeftGdf = 16,
   FS_KEY_RightGdf = 17,
-  FS_KEY_LeftRockerUp = 20,
-  FS_KEY_LeftRockerDown = 21,
-  FS_KEY_RightRockerUp = 22,
-  FS_KEY_RightRockerDown = 23,
+  FS_KEY_LeftBumperUp = 20,
+  FS_KEY_LeftBumperDown = 21,
+  FS_KEY_RightBumperUp = 22,
+  FS_KEY_RightBumperDown = 23,
+
+  FS_KEY_LeftRockerUp = 28,
+  FS_KEY_LeftRockerDown = 29,
+  FS_KEY_RightRockerUp = 30,
+  FS_KEY_RightRockerDown = 31,
 
   FS_KEY_WHEEL,
   FS_KEY_HOT = FS_KEY_WHEEL + FS_KEYS_WHEEL

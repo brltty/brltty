@@ -67,6 +67,11 @@ BEGIN_KEY_NAME_TABLE(focus)
   KEY_NAME_ENTRY(FS_KEY_LeftShift, "LeftShift"),
   KEY_NAME_ENTRY(FS_KEY_RightShift, "RightShift"),
 
+  KEY_NAME_ENTRY(FS_KEY_LeftBumperUp, "LeftBumperUp"),
+  KEY_NAME_ENTRY(FS_KEY_LeftBumperDown, "LeftBumperDown"),
+  KEY_NAME_ENTRY(FS_KEY_RightBumperUp, "RightBumperUp"),
+  KEY_NAME_ENTRY(FS_KEY_RightBumperDown, "RightBumperDown"),
+
   KEY_NAME_ENTRY(FS_KEY_LeftRockerUp, "LeftRockerUp"),
   KEY_NAME_ENTRY(FS_KEY_LeftRockerDown, "LeftRockerDown"),
   KEY_NAME_ENTRY(FS_KEY_RightRockerUp, "RightRockerUp"),
@@ -113,17 +118,17 @@ typedef struct {
 static const InputOutputOperations *io;
 static int outputPayloadLimit;
 
+static const int serialBaud = 57600;
+static int serialCharactersPerSecond;
+
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
-static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    int baud = 57600;
-
-    if (serialRestartDevice(serialDevice, baud)) {
-      serialCharactersPerSecond = baud / 10;
+    if (serialRestartDevice(serialDevice, serialBaud)) {
+      serialCharactersPerSecond = serialBaud / 10;
       return 1;
     }
 
@@ -166,7 +171,7 @@ static const InputOutputOperations serialOperations = {
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
-static UsbChannel *usb = NULL;
+static UsbChannel *usbChannel = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
@@ -189,10 +194,16 @@ openUsbPort (char **parameters, const char *device) {
       .inputEndpoint=2, .outputEndpoint=1
     }
     ,
+    { /* Focus Blue */
+      .vendor=0X0F4E, .product=0X0114,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
     { .vendor=0 }
   };
 
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
     return 1;
   }
   return 0;
@@ -200,20 +211,20 @@ openUsbPort (char **parameters, const char *device) {
 
 static void
 closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbChannel = NULL;
   }
 }
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (void *buffer, int length) {
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 0);
+  int count = usbReapInput(usbChannel->device, usbChannel->definition.inputEndpoint, buffer, length, 0, 0);
   if (count == -1)
     if (errno == EAGAIN)
       count = 0;
@@ -222,7 +233,7 @@ readUsbBytes (void *buffer, int length) {
 
 static int
 writeUsbPacket (const void *buffer, int length, unsigned int *delay) {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {
@@ -230,6 +241,53 @@ static const InputOutputOperations usbOperations = {
   awaitUsbInput, readUsbBytes, writeUsbPacket
 };
 #endif /* ENABLE_USB_SUPPORT */
+
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+#include "io_bluetooth.h"
+#include "io_misc.h"
+
+static int bluetoothConnection = -1;
+
+static int
+openBluetoothPort (char **parameters, const char *device) {
+  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1) {
+    serialCharactersPerSecond = serialBaud / 10;
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection != -1) {
+    close(bluetoothConnection);
+    bluetoothConnection = -1;
+  }
+}
+
+static int
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
+}
+
+static int
+readBluetoothBytes (void *buffer, int length) {
+  return readData(bluetoothConnection, buffer, length, 0, 0);
+}
+
+static int
+writeBluetoothPacket (const void *buffer, int length, unsigned int *delay) {
+  int written = writeData(bluetoothConnection, buffer, length);
+  if (delay && (written != -1)) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
+  return written;
+}
+
+static const InputOutputOperations bluetoothOperations = {
+  openBluetoothPort, closeBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothPacket
+};
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 typedef enum {
   PKT_QUERY  = 0X00, /* host->unit: request device information */
@@ -384,6 +442,7 @@ static int writeTo;
 static int writingFrom;
 static int writingTo;
 
+static unsigned char configFlags;
 static int firmnessSetting;
 
 static union {
@@ -392,7 +451,7 @@ static union {
 } inputBuffer;
 static int inputCount;
 
-static uint32_t oldKeys;
+static uint64_t oldKeys;
 
 static int
 writePacket (
@@ -505,6 +564,11 @@ logNegativeAcknowledgement (const Packet *packet) {
 }
 
 static void
+handleConfigAcknowledgement (int ok) {
+  configFlags = 0;
+}
+
+static void
 handleFirmnessAcknowledgement (int ok) {
   firmnessSetting = -1;
 }
@@ -530,11 +594,15 @@ setAcknowledgementHandler (AcknowledgementHandler handler) {
 static int
 writeRequest (BrailleDisplay *brl) {
   if (!acknowledgementHandler) {
+    if (configFlags) {
+      int size = writePacket(brl, PKT_CONFIG, configFlags, 0, 0, NULL);
+      if (size != -1) setAcknowledgementHandler(handleConfigAcknowledgement);
+      return size;
+    }
+
     if (firmnessSetting >= 0) {
       int size = writePacket(brl, PKT_HVADJ, firmnessSetting, 0, 0, NULL);
-      if (size != -1) {
-        setAcknowledgementHandler(handleFirmnessAcknowledgement);
-      }
+      if (size != -1) setAcknowledgementHandler(handleFirmnessAcknowledgement);
       return size;
     }
 
@@ -600,10 +668,9 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
       if (hasPayload) {
         unsigned char checksum = 0;
         int index;
-        for (index=0; index<size; ++index)
-          checksum -= inputBuffer.bytes[index];
-        if (checksum)
-          LogPrint(LOG_WARNING, "Input packet checksum error.");
+
+        for (index=0; index<size; index+=1) checksum -= inputBuffer.bytes[index];
+        if (checksum) LogPrint(LOG_WARNING, "Input packet checksum error.");
       }
 
       memcpy(packet, &inputBuffer, size);
@@ -615,6 +682,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
   retry:
     {
       int count = io->readBytes(&inputBuffer.bytes[inputCount], size-inputCount);
+
       if (count < 1) {
         if (count == -1) {
           LogError("read");
@@ -624,6 +692,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           logPartialPacket(inputBuffer.bytes, inputCount);
           inputCount = 0;
         }
+
         return count;
       }
       acknowledgementsMissing = 0;
@@ -631,13 +700,15 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
       if (!inputCount) {
         static const unsigned char packets[] = {
           PKT_ACK, PKT_NAK,
-          PKT_KEY, PKT_BUTTON, PKT_WHEEL,
+          PKT_KEY, PKT_EXTKEY, PKT_BUTTON, PKT_WHEEL,
           PKT_INFO
         };
         int first;
-        for (first=0; first<count; ++first)
+
+        for (first=0; first<count; first+=1)
           if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
             break;
+
         if (first) {
           logDiscardedBytes(inputBuffer.bytes, first);
           memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
@@ -722,6 +793,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* ENABLE_USB_SUPPORT */
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+  if (isBluetoothDevice(&device)) {
+    io = &bluetoothOperations;
+  } else
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
   {
     unsupportedDevice(device);
     return 0;
@@ -751,10 +828,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         switch (response.header.type) {
           case PKT_INFO:
+            LogPrint(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
+            LogPrint(LOG_DEBUG, "Model: %s", response.payload.info.model);
+            LogPrint(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
+
             model = modelTable;
             while (model->identifier) {
               if (strcmp(response.payload.info.model, model->identifier) == 0) break;
-              ++model;
+              model += 1;
             }
 
             if (!model->identifier) {
@@ -811,7 +892,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               acknowledgementHandler = NULL;
               acknowledgementsMissing = 0;
+              configFlags = 0;
               firmnessSetting = -1;
+
+              if (model->type == MOD_TYPE_Focus)
+                if (response.payload.info.firmware[0] >= '3')
+                  configFlags |= 0X02;
 
               oldKeys = 0;
 
@@ -845,6 +931,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->keyNameTables = type->keyTableDefinition->names;
           }
 
+          writeRequest(brl);
           return 1;
         }
       }
@@ -876,6 +963,37 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static void
+updateKeys (uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
+  const FS_KeySet set = FS_SET_NavigationKeys;
+  FS_NavigationKey key = keyBase;
+
+  FS_NavigationKey pressKeys[keyCount];
+  unsigned int pressCount = 0;
+
+  uint64_t keyBit = 0X1 << keyBase;
+  newKeys <<= keyBase;
+  newKeys |= oldKeys & ~(((0X1 << keyCount) - 1) << keyBase);
+
+  while (oldKeys != newKeys) {
+    uint64_t oldKey = oldKeys & keyBit;
+    uint64_t newKey = newKeys & keyBit;
+
+    if (oldKey && !newKey) {
+      enqueueKeyEvent(set, key, 0);
+      oldKeys &= ~keyBit;
+    } else if (newKey && !oldKey) {
+      pressKeys[pressCount++] = key;
+      oldKeys |= keyBit;
+    }
+
+    keyBit <<= 1;
+    key += 1;
+  }
+
+  while (pressCount) enqueueKeyEvent(set, pressKeys[--pressCount], 1);
+}
+
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   Packet packet;
@@ -889,34 +1007,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
 
       case PKT_KEY: {
-        uint32_t newKeys = packet.header.arg1 |
+        uint64_t newKeys = packet.header.arg1 |
                            (packet.header.arg2 << 8) |
                            (packet.header.arg3 << 16);
-        uint32_t keyBit = 0X1;
 
-        const FS_KeySet set = FS_SET_NavigationKeys;
-        FS_NavigationKey key = 0;
+        updateKeys(newKeys, 0, 24);
+        continue;
+      }
 
-        FS_NavigationKey pressKeys[24];
-        unsigned int pressCount = 0;
+      case PKT_EXTKEY: {
+        uint64_t newKeys = packet.payload.extkey.bytes[0];
 
-        while (oldKeys != newKeys) {
-          uint32_t oldKey = oldKeys & keyBit;
-          uint32_t newKey = newKeys & keyBit;
-
-          if (oldKey && !newKey) {
-            enqueueKeyEvent(set, key, 0);
-            oldKeys &= ~keyBit;
-          } else if (newKey && !oldKey) {
-            pressKeys[pressCount++] = key;
-            oldKeys |= keyBit;
-          }
-
-          keyBit <<= 1;
-          key += 1;
-        }
-
-        while (pressCount) enqueueKeyEvent(set, pressKeys[--pressCount], 1);
+        updateKeys(newKeys, 24, 8);
         continue;
       }
 
