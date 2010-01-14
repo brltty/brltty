@@ -67,6 +67,13 @@ bind \{switches}BarRight1+!RoutingKey1 CUTLINE
 bind \{switches}BarLeft2+!RoutingKey1 CUTBEGIN
 bind \{switches}BarRight2+!RoutingKey1 CUTRECT
 
+hide on
+bind \{switches}BarUp1+BarUp2+!RoutingKey1 SETLEFT
+bind \{switches}BarDown1+BarDown2+!RoutingKey1 DESCCHAR
+bind \{switches}BarLeft1+BarLeft2+!RoutingKey1 CUTBEGIN
+bind \{switches}BarRight1+BarRight2+!RoutingKey1 CUTRECT
+hide off
+
 bind \{switches}!RoutingKey2 DESCCHAR
 
 assign toggleOff BarLeft1
