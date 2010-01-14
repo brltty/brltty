@@ -66,12 +66,16 @@ BEGIN_KEY_NAME_TABLE(focus)
   KEY_NAME_ENTRY(FS_KEY_Space, "Space"),
   KEY_NAME_ENTRY(FS_KEY_LeftShift, "LeftShift"),
   KEY_NAME_ENTRY(FS_KEY_RightShift, "RightShift"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(bumpers)
   KEY_NAME_ENTRY(FS_KEY_LeftBumperUp, "LeftBumperUp"),
   KEY_NAME_ENTRY(FS_KEY_LeftBumperDown, "LeftBumperDown"),
   KEY_NAME_ENTRY(FS_KEY_RightBumperUp, "RightBumperUp"),
   KEY_NAME_ENTRY(FS_KEY_RightBumperDown, "RightBumperDown"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(FS_KEY_LeftRockerUp, "LeftRockerUp"),
   KEY_NAME_ENTRY(FS_KEY_LeftRockerDown, "LeftRockerDown"),
   KEY_NAME_ENTRY(FS_KEY_RightRockerUp, "RightRockerUp"),
@@ -89,9 +93,21 @@ BEGIN_KEY_NAME_TABLE(pacmate)
   KEY_NAME_ENTRY(FS_KEY_HOT+7, "Hot8"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(focus)
+BEGIN_KEY_NAME_TABLES(focus_basic)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(focus),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(focus_bumpers)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(focus),
+  KEY_NAME_TABLE(bumpers),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(focus_rockers)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(focus),
+  KEY_NAME_TABLE(rockers),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pacmate)
@@ -99,11 +115,15 @@ BEGIN_KEY_NAME_TABLES(pacmate)
   KEY_NAME_TABLE(pacmate),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(focus)
+DEFINE_KEY_TABLE(focus_basic)
+DEFINE_KEY_TABLE(focus_bumpers)
+DEFINE_KEY_TABLE(focus_rockers)
 DEFINE_KEY_TABLE(pacmate)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(focus),
+  &KEY_TABLE_DEFINITION(focus_basic),
+  &KEY_TABLE_DEFINITION(focus_bumpers),
+  &KEY_TABLE_DEFINITION(focus_rockers),
   &KEY_TABLE_DEFINITION(pacmate),
 END_KEY_TABLE_LIST
 
@@ -174,7 +194,7 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* Focus */
+    { /* Focus 1 */
       .vendor=0X0F4E, .product=0X0100,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=1
@@ -363,7 +383,7 @@ typedef enum {
 
 static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_Focus] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(focus),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(focus_basic),
     .hotkeysRow = -1
   }
   ,

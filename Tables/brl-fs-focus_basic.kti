@@ -1,0 +1,85 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for all FreedomScientific Focus displays.
+
+bind Space+Dot2+Dot4 SKPIDLNS
+bind Space+Dot1+Dot2 SKPBLNKWINS
+
+bind Space+Dot1 DISPMD
+bind Space+Dot1+Dot3+Dot6 ATTRVIS
+
+bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
+bind Space+Dot1+Dot4 CSRVIS
+
+bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
+bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
+bind Space+Dot1+Dot2+Dot3+Dot5 AUTOREPEAT
+
+bind Space+Dot1+Dot2+Dot5 HELP
+bind Space+Dot1+Dot2+Dot4 FREEZE
+
+bind Space+Dot1+Dot2+Dot3 LEARN
+bind Space+LeftShift+Dot1+Dot2+Dot3+Dot4 PREFLOAD
+
+bind Space+Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind Space+RightShift+Dot1+Dot2+Dot3+Dot4 PREFSAVE
+
+bind Space+Dot2+Dot3+Dot4 INFO
+bind Space+Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
+
+bind Space+LeftShift+Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
+bind Space+RightShift+Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
+
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+
+map Space SPACE
+map LeftShift UPPERCASE
+map RightShift CONTROL
+
+bind Space+LeftShift KEY_BACKSPACE
+bind Space+RightShift KEY_ENTER
+bind Space+Dot2+Dot3+Dot5+Dot6 KEY_TAB
+bind Space+Dot2+Dot3 KEY_CURSOR_LEFT
+bind Space+Dot5+Dot6 KEY_CURSOR_RIGHT
+bind Space+Dot2+Dot5 KEY_CURSOR_UP
+bind Space+Dot3+Dot6 KEY_CURSOR_DOWN
+bind Space+Dot5 KEY_PAGE_UP
+bind Space+Dot6 KEY_PAGE_DOWN
+bind Space+Dot2 KEY_HOME
+bind Space+Dot3 KEY_END
+bind Space+Dot3+Dot5 KEY_INSERT
+bind Space+Dot2+Dot5+Dot6 KEY_DELETE
+bind Space+Dot2+Dot6 KEY_ESCAPE
+
+bind Space+!RoutingKey1 KEY_FUNCTION
+bind RightShift+!RoutingKey1 SWITCHVT
+
+bind !RoutingKey2 DESCCHAR
+bind LeftAdvance+!RoutingKey2 PRINDENT
+bind RightAdvance+!RoutingKey2 NXINDENT
+bind LeftGdf+!RoutingKey2 SETLEFT
+
+include brl-fs-common.kti
