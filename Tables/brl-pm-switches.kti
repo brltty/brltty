@@ -63,6 +63,8 @@ bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
 bind RightSwitchFront+BarLeft2 PREFLOAD
 bind RightSwitchFront+BarRight2 PREFSAVE
 
+hide on
+
 assign switches LeftSwitchRear+
 include brl-pm-keys.kti
 
