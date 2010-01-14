@@ -49,8 +49,8 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
   KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
 
-  KEY_SET_ENTRY(FS_SET_RoutingKeys1, "RoutingKey1"),
-  KEY_SET_ENTRY(FS_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_SET_ENTRY(FS_SET_RoutingKeys, "RoutingKey"),
+  KEY_SET_ENTRY(FS_SET_NavrowKeys, "NavrowKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(focus)

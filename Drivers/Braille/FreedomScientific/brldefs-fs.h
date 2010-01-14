@@ -57,8 +57,8 @@ typedef enum {
 
 typedef enum {
   FS_SET_NavigationKeys = 0,
-  FS_SET_RoutingKeys1,
-  FS_SET_RoutingKeys2
+  FS_SET_RoutingKeys,
+  FS_SET_NavrowKeys
 } FS_KeySet;
 
 #endif /* BRLTTY_INCLUDED_FS_BRLDEFS */ 
