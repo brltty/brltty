@@ -112,7 +112,7 @@ typedef struct {
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (void *buffer, int length);
-  int (*writePacket) (const void *buffer, int length, unsigned int *delay);
+  int (*writePacket) (const void *buffer, int length);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -157,10 +157,8 @@ readSerialBytes (void *buffer, int length) {
 }
 
 static int
-writeSerialPacket (const void *buffer, int length, unsigned int *delay) {
-  int written = serialWriteData(serialDevice, buffer, length);
-  if (delay && (written != -1)) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
-  return written;
+writeSerialPacket (const void *buffer, int length) {
+  return serialWriteData(serialDevice, buffer, length);
 }
 
 static const InputOutputOperations serialOperations = {
@@ -232,7 +230,7 @@ readUsbBytes (void *buffer, int length) {
 }
 
 static int
-writeUsbPacket (const void *buffer, int length, unsigned int *delay) {
+writeUsbPacket (const void *buffer, int length) {
   return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);
 }
 
@@ -277,10 +275,8 @@ readBluetoothBytes (void *buffer, int length) {
 }
 
 static int
-writeBluetoothPacket (const void *buffer, int length, unsigned int *delay) {
-  int written = writeData(bluetoothConnection, buffer, length);
-  if (delay && (written != -1)) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
-  return written;
+writeBluetoothPacket (const void *buffer, int length) {
+  return writeData(bluetoothConnection, buffer, length);
 }
 
 static const InputOutputOperations bluetoothOperations = {
@@ -474,14 +470,20 @@ writePacket (
   if (data) {
     unsigned char length = packet.header.arg1;
     int index;
-    for (index=0; index<length; ++index)
+
+    for (index=0; index<length; index+=1)
       checksum -= (packet.payload.bytes[index] = data[index]);
+
     packet.payload.bytes[length] = checksum;
     size += length + 1;
   }
 
   logOutputPacket(&packet, size);
-  return io->writePacket(&packet, size, &brl->writeDelay);
+  {
+    int result = io->writePacket(&packet, size);
+    if (result != -1) brl->writeDelay += (size * 1000 / serialCharactersPerSecond) + 1;
+    return result;
+  }
 }
 
 static void
