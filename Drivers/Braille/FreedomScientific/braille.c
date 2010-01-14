@@ -593,40 +593,43 @@ setAcknowledgementHandler (AcknowledgementHandler handler) {
 
 static int
 writeRequest (BrailleDisplay *brl) {
-  if (!acknowledgementHandler) {
-    if (configFlags) {
-      int size = writePacket(brl, PKT_CONFIG, configFlags, 0, 0, NULL);
-      if (size != -1) setAcknowledgementHandler(handleConfigAcknowledgement);
-      return size;
-    }
+  if (acknowledgementHandler) return 1;
 
-    if (firmnessSetting >= 0) {
-      int size = writePacket(brl, PKT_HVADJ, firmnessSetting, 0, 0, NULL);
-      if (size != -1) setAcknowledgementHandler(handleFirmnessAcknowledgement);
-      return size;
-    }
-
-    if (writeTo != -1) {
-      int size;
-      int count = writeTo + 1 - writeFrom;
-      int truncate = count > outputPayloadLimit;
-      if (truncate) count = outputPayloadLimit;
-      if ((size = writePacket(brl, PKT_WRITE, count, writeFrom, 0,
-                              &outputBuffer[writeFrom])) != -1) {
-        setAcknowledgementHandler(handleWriteAcknowledgement);
-        writingFrom = writeFrom;
-        if (truncate) {
-          writingTo = (writeFrom += count) - 1;
-        } else {
-          writingTo = writeTo;
-          writeFrom = -1;
-          writeTo = -1;
-        }
-      }
-      return size;
-    }
+  if (configFlags) {
+    if (writePacket(brl, PKT_CONFIG, configFlags, 0, 0, NULL) == -1) return 0;
+    setAcknowledgementHandler(handleConfigAcknowledgement);
+    return 1;
   }
-  return 0;
+
+  if (firmnessSetting >= 0) {
+    if (writePacket(brl, PKT_HVADJ, firmnessSetting, 0, 0, NULL) == -1) return 0;
+    setAcknowledgementHandler(handleFirmnessAcknowledgement);
+    return 1;
+  }
+
+  if (writeTo != -1) {
+    int count = writeTo + 1 - writeFrom;
+    int truncate = count > outputPayloadLimit;
+
+    if (truncate) count = outputPayloadLimit;
+    if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
+                    &outputBuffer[writeFrom]) == -1) return 0;
+
+    setAcknowledgementHandler(handleWriteAcknowledgement);
+    writingFrom = writeFrom;
+
+    if (truncate) {
+      writingTo = (writeFrom += count) - 1;
+    } else {
+      writingTo = writeTo;
+      writeFrom = -1;
+      writeTo = -1;
+    }
+
+    return 1;
+  }
+
+  return 1;
 }
 
 static void
@@ -724,6 +727,7 @@ static int
 getPacket (BrailleDisplay *brl, Packet *packet) {
   while (1) {
     int count = readPacket(brl, packet);
+
     if (count > 0) {
       switch (packet->header.type) {
         {
@@ -731,6 +735,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 
         case PKT_NAK:
           logNegativeAcknowledgement(packet);
+
           if (!acknowledgementHandler) {
             LogPrint(LOG_WARNING, "Unexpected NAK.");
             continue;
@@ -739,10 +744,13 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           switch (packet->header.arg1) {
             case PKT_ERR_TIMEOUT: {
               int originalLimit = outputPayloadLimit;
+
               if (outputPayloadLimit > model->cellCount)
                 outputPayloadLimit = model->cellCount;
+
               if (outputPayloadLimit > 1)
                 outputPayloadLimit--;
+
               if (outputPayloadLimit != originalLimit)
                 LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
                          originalLimit, outputPayloadLimit);
@@ -764,8 +772,10 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
         handleAcknowledgement:
           acknowledgementHandler(ok);
           acknowledgementHandler = NULL;
-          writeRequest(brl);
-          continue;
+          if (writeRequest(brl)) continue;
+
+          count = -1;
+          break;
         }
       }
     } else if ((count == 0) && acknowledgementHandler &&
@@ -774,9 +784,11 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
         LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
         goto handleNegativeAcknowledgement;
       }
+
       LogPrint(LOG_WARNING, "Too many missing ACKs.");
       count = -1;
     }
+
     return count;
   }
 }
@@ -931,7 +943,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->keyNameTables = type->keyTableDefinition->names;
           }
 
-          writeRequest(brl);
+          if (!writeRequest(brl)) break;
           return 1;
         }
       }
@@ -948,19 +960,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  while (io->awaitInput(100)) {
-    Packet packet;
-    int count = getPacket(brl, &packet);
-    if (count == -1) break;
-  }
   io->closePort();
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   updateCells(brl, brl->buffer, model->cellCount, 0);
-  writeRequest(brl);
-  return 1;
+  return writeRequest(brl);
 }
 
 static void
