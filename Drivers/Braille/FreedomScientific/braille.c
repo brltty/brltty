@@ -147,10 +147,7 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, serialBaud)) {
-      serialCharactersPerSecond = serialBaud / 10;
-      return 1;
-    }
+    if (serialRestartDevice(serialDevice, serialBaud)) return 1;
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
@@ -268,12 +265,7 @@ static int bluetoothConnection = -1;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1) {
-    serialCharactersPerSecond = serialBaud / 10;
-    return 1;
-  }
-
-  return 0;
+  return ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1);
 }
 
 static void
@@ -842,6 +834,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   inputCount = 0;
   outputPayloadLimit = 0XFF;
+  serialCharactersPerSecond = serialBaud / 10;
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
