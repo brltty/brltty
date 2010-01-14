@@ -31,26 +31,97 @@
 
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
-#include "braille.h"
-#include "io_serial.h"
+#include "brldefs-at.h"
 
-#define LOWER_ROUTING_DEFAULT BRL_BLK_ROUTE
-#define UPPER_ROUTING_DEFAULT BRL_BLK_DESCCHAR
+BEGIN_KEY_NAME_TABLE(all)
+  /* front left keys */
+  KEY_NAME_ENTRY(AT_KEY_Home1, "Home1"),
+  KEY_NAME_ENTRY(AT_KEY_End1, "End1"),
+  KEY_NAME_ENTRY(AT_KEY_ExtraCursor1, "ExtraCursor1"),
+  KEY_NAME_ENTRY(AT_KEY_Cursor1, "Cursor1"),
+  KEY_NAME_ENTRY(AT_KEY_Up1, "Up1"),
+  KEY_NAME_ENTRY(AT_KEY_Down1, "Down1"),
+  KEY_NAME_ENTRY(AT_KEY_Left, "Left"),
+
+  /* front right keys */
+  KEY_NAME_ENTRY(AT_KEY_Home2, "Home2"),
+  KEY_NAME_ENTRY(AT_KEY_End2, "End2"),
+  KEY_NAME_ENTRY(AT_KEY_ExtraCursor2, "ExtraCursor2"),
+  KEY_NAME_ENTRY(AT_KEY_Cursor2, "Cursor2"),
+  KEY_NAME_ENTRY(AT_KEY_Up2, "Up2"),
+  KEY_NAME_ENTRY(AT_KEY_Down2, "Down2"),
+  KEY_NAME_ENTRY(AT_KEY_Right, "Right"),
+
+  /* front middle keys */
+  KEY_NAME_ENTRY(AT_KEY_Up3, "Up3"),
+  KEY_NAME_ENTRY(AT_KEY_Down3, "Down3"),
+
+  /* top left keys */
+  KEY_NAME_ENTRY(AT_KEY_F1, "F1"),
+  KEY_NAME_ENTRY(AT_KEY_F2, "F2"),
+  KEY_NAME_ENTRY(AT_KEY_F3, "F3"),
+  KEY_NAME_ENTRY(AT_KEY_F4, "F4"),
+  KEY_NAME_ENTRY(AT_KEY_F5, "F5"),
+  KEY_NAME_ENTRY(AT_KEY_F6, "F6"),
+  KEY_NAME_ENTRY(AT_KEY_F7, "F7"),
+  KEY_NAME_ENTRY(AT_KEY_F8, "F8"),
+
+  /* top right keys */
+  KEY_NAME_ENTRY(AT_KEY_F9, "F9"),
+  KEY_NAME_ENTRY(AT_KEY_F10, "F10"),
+  KEY_NAME_ENTRY(AT_KEY_F11, "F11"),
+  KEY_NAME_ENTRY(AT_KEY_F12, "F12"),
+  KEY_NAME_ENTRY(AT_KEY_F13, "F13"),
+  KEY_NAME_ENTRY(AT_KEY_F14, "F14"),
+  KEY_NAME_ENTRY(AT_KEY_F15, "F15"),
+  KEY_NAME_ENTRY(AT_KEY_F16, "F16"),
+
+  /* attribute keys */
+  KEY_NAME_ENTRY(AT_KEY_Attribute1, "Attribute1"),
+  KEY_NAME_ENTRY(AT_KEY_Attribute2, "Attribute2"),
+  KEY_NAME_ENTRY(AT_KEY_Attribute3, "Attribute3"),
+  KEY_NAME_ENTRY(AT_KEY_Attribute4, "Attribute4"),
+
+  /* wheels */
+  KEY_NAME_ENTRY(AT_KEY_LeftWheelRight, "LeftWheelRight"),
+  KEY_NAME_ENTRY(AT_KEY_LeftWheelLeft, "LeftWheelLeft"),
+  KEY_NAME_ENTRY(AT_KEY_LeftWheelUp, "LeftWheelUp"),
+  KEY_NAME_ENTRY(AT_KEY_LeftWheelDown, "LeftWheelDown"),
+  KEY_NAME_ENTRY(AT_KEY_RightWheelRight, "RightWheelRight"),
+  KEY_NAME_ENTRY(AT_KEY_RightWheelLeft, "RightWheelLeft"),
+  KEY_NAME_ENTRY(AT_KEY_RightWheelUp, "RightWheelUp"),
+  KEY_NAME_ENTRY(AT_KEY_RightWheelDown, "RightWheelDown"),
+
+  /* routing keys */
+  KEY_SET_ENTRY(AT_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_SET_ENTRY(AT_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(all)
+  KEY_NAME_TABLE(all),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
+
+#include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;
 
 static TranslationTable inputMap;
-static const unsigned char topLeftKeys[]  = { 84,  83,  87,  85,  86,  88,  89,  90};
-static const unsigned char topRightKeys[] = {194, 193, 198, 195, 196, 197, 199, 200};
-static int lowerRoutingFunction;
-static int upperRoutingFunction;
-
-static const unsigned char controlKeys[] = {
-    1,  42, 151, 192,
-   83,  84,  89,  90,  91,  92,  93,  94,
-  193, 194, 199, 200, 201, 202, 203, 204
+static const unsigned char topLeftKeys[]  = {
+  AT_KEY_F1, AT_KEY_F2, AT_KEY_F3, AT_KEY_F4,
+  AT_KEY_F5, AT_KEY_F6, AT_KEY_F7, AT_KEY_F8
 };
+static const unsigned char topRightKeys[] = {
+  AT_KEY_F9, AT_KEY_F10, AT_KEY_F11, AT_KEY_F12,
+  AT_KEY_F13, AT_KEY_F14, AT_KEY_F15, AT_KEY_F16
+};
+
 static unsigned char controlKey;
 #define NO_CONTROL_KEY 0XFF
 
@@ -157,14 +228,12 @@ acknowledgeDisplay (BrailleDisplay *brl) {
       if (left)
         for (i=0; i<8; ++i)
           inputMap[topLeftKeys[i]] = left[i];
+
       if (right)
         for (i=0; i<8; ++i)
           inputMap[topRightKeys[i]] = right[i];
     }
   }
-
-  lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
-  upperRoutingFunction = UPPER_ROUTING_DEFAULT;
 
   LogPrint(LOG_INFO, "Albatross: %d cells (%d text, %d%s status), top keypads [%s,%s].",
            displaySize, windowWidth, statusCount,
@@ -253,9 +322,18 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
+
           clearDisplay(brl);
           brl->textColumns = windowWidth;
           brl->textRows = 1;
+
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
           return 1;
         }
 
@@ -307,44 +385,34 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     byte = inputMap[byte];
     {
-      int base;
-      int offset;
-
-      int lower = lowerRoutingFunction;
-      int upper = upperRoutingFunction;
-      lowerRoutingFunction = LOWER_ROUTING_DEFAULT;
-      upperRoutingFunction = UPPER_ROUTING_DEFAULT;
+      unsigned char set;
+      unsigned char key;
 
       if ((byte >= 2) && (byte <= 41)) {
-        base = lower;
-        offset = byte - 2;
+        set = AT_SET_RoutingKeys1;
+        key = byte - 2;
       } else if ((byte >= 111) && (byte <= 150)) {
-        base = lower;
-        offset = byte - 71;
+        set = AT_SET_RoutingKeys1;
+        key = byte - 71;
       } else if ((byte >= 43) && (byte <= 82)) {
-        base = upper;
-        offset = byte - 43;
+        set = AT_SET_RoutingKeys2;
+        key = byte - 43;
       } else if ((byte >= 152) && (byte <= 191)) {
-        base = upper;
-        offset = byte - 112;
+        set = AT_SET_RoutingKeys2;
+        key = byte - 112;
       } else {
         goto notRouting;
       }
 
-      if ((offset >= windowStart) &&
-          (offset < (windowStart + windowWidth)))
-        return base + offset - windowStart;
+      if ((key >= windowStart) &&
+          (key < (windowStart + windowWidth))) {
+        key -= windowStart;
+        enqueueKeyEvent(set, key, 1);
+        enqueueKeyEvent(set, key, 0);
+        continue;
+      }
     }
   notRouting:
-
-    if (memchr(controlKeys, byte, sizeof(controlKeys))) {
-      if (byte == controlKey) {
-        controlKey = NO_CONTROL_KEY;
-        return EOF;
-      }
-
-      if (controlKey == NO_CONTROL_KEY) controlKey = byte;
-    }
 
     switch (byte) {
       default:
@@ -354,124 +422,68 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         refreshDisplay(brl);
         continue;
 
-      case  83: /* key: top left first lower */
-        return BRL_CMD_LEARN;
+      case AT_KEY_Attribute1:
+      case AT_KEY_Attribute2:
+      case AT_KEY_Attribute3:
+      case AT_KEY_Attribute4:
+      case AT_KEY_F1:
+      case AT_KEY_F2:
+      case AT_KEY_F7:
+      case AT_KEY_F8:
+      case AT_KEY_F9:
+      case AT_KEY_F10:
+      case AT_KEY_F15:
+      case AT_KEY_F16:
+      case AT_KEY_Home1:
+      case AT_KEY_Home2:
+      case AT_KEY_End1:
+      case AT_KEY_End2:
+      case AT_KEY_ExtraCursor1:
+      case AT_KEY_ExtraCursor2:
+      case AT_KEY_Cursor1:
+      case AT_KEY_Cursor2:
+        if (byte == controlKey) {
+          controlKey = NO_CONTROL_KEY;
+          enqueueKeyEvent(AT_SET_NavigationKeys, byte, 0);
+          continue;
+        }
 
-      case  84: /* key: top left first upper */
-        return BRL_CMD_HELP;
+        if (controlKey == NO_CONTROL_KEY) {
+          controlKey = byte;
+          enqueueKeyEvent(AT_SET_NavigationKeys, byte, 1);
+          continue;
+        }
 
-      case  85: /* key: top left third upper */
-        return BRL_CMD_PASTE;
-
-      case  86: /* key: top left third lower */
-        return BRL_CMD_CSRTRK;
-
-      case  87: /* key: top left second */
-        lowerRoutingFunction = BRL_BLK_CUTBEGIN;
-        upperRoutingFunction = BRL_BLK_SETMARK;
-        return BRL_CMD_NOOP;
-
-      case  88: /* key: top left fourth */
-        lowerRoutingFunction = BRL_BLK_CUTAPPEND;
-        upperRoutingFunction = BRL_BLK_GOTOMARK;
-        return BRL_CMD_NOOP;
-
-      case  89: /* key: top left fifth upper */
-        return BRL_CMD_PREFMENU;
-
-      case  90: /* key: top left fifth lower */
-        return BRL_CMD_INFO;
-
-      case 193: /* key: top right first lower */
-        return BRL_CMD_NXPROMPT;
-
-      case 194: /* key: top right first upper */
-        return BRL_CMD_PRPROMPT;
-
-      case 195: /* key: top right third upper */
-        return BRL_CMD_PRDIFLN;
-
-      case 196: /* key: top right third lower */
-        return BRL_CMD_NXDIFLN;
-
-      case 198: /* key: top right second */
-        lowerRoutingFunction = BRL_BLK_CUTRECT;
-        upperRoutingFunction = BRL_BLK_NXINDENT;
-        return BRL_CMD_NOOP;
-
-      case 197: /* key: top right fourth */
-        lowerRoutingFunction = BRL_BLK_CUTLINE;
-        upperRoutingFunction = BRL_BLK_PRINDENT;
-        return BRL_CMD_NOOP;
-
-      case 199: /* key: top right fifth upper */
-        return BRL_CMD_PRPGRPH;
-
-      case 200: /* key: top right fifth lower */
-        return BRL_CMD_NXPGRPH;
-
-      case  91: /* key: front left first upper */
-      case 201: /* key: front right first upper */
-        return BRL_CMD_TOP_LEFT;
-
-      case  92: /* key: front left first lower */
-      case 202: /* key: front right first lower */
-        return BRL_CMD_BOT_LEFT;
-
-      case  93: /* key: front left second upper */
-      case 203: /* key: front right second upper */
-        return BRL_CMD_BACK;
-
-      case  94: /* key: front left second lower */
-      case 204: /* key: front right second lower */
-        return BRL_CMD_HOME;
-
-      case  95: /* key: front left third upper */
-      case 205: /* key: front right third upper */
-      case  98:
-        return BRL_CMD_LNUP;
-
-      case  96: /* key: front left third lower */
-      case 206: /* key: front right third lower */
-      case 208:
-        return BRL_CMD_LNDN;
-
-      case  97: /* key: front left fourth */
-        return BRL_CMD_FWINLT;
-
-      case 207: /* key: front right fourth */
-        return BRL_CMD_FWINRT;
-
-      case 103: /* wheel: front left right */
-      case 213: /* wheel: front right right */
-        return BRL_CMD_CHRRT;
-
-      case 104: /* wheel: front left left */
-      case 214: /* wheel: front right left */
-        return BRL_CMD_CHRLT;
-
-      case 105: /* wheel: side left backward */
-      case 215: /* wheel: side right backward */
-        return BRL_CMD_LNUP;
-
-      case 106: /* wheel: side left forward */
-      case 216: /* wheel: side right forward */
-        return BRL_CMD_LNDN;
-
-      case  42: /* key: attribute left upper */
-        return BRL_CMD_FREEZE;
-
-      case   1: /* key: attribute left lower */
-        return BRL_CMD_DISPMD;
-
-      case 192: /* key: attribute right upper */
-        return BRL_CMD_ATTRUP;
-
-      case 151: /* key: attribute right lower */
-        return BRL_CMD_ATTRDN;
+      case AT_KEY_Up1:
+      case AT_KEY_Down1:
+      case AT_KEY_Left:
+      case AT_KEY_Up2:
+      case AT_KEY_Down2:
+      case AT_KEY_Right:
+      case AT_KEY_Up3:
+      case AT_KEY_Down3:
+      case AT_KEY_F3:
+      case AT_KEY_F4:
+      case AT_KEY_F5:
+      case AT_KEY_F6:
+      case AT_KEY_F11:
+      case AT_KEY_F12:
+      case AT_KEY_F13:
+      case AT_KEY_F14:
+      case AT_KEY_LeftWheelRight:
+      case AT_KEY_LeftWheelLeft:
+      case AT_KEY_LeftWheelUp:
+      case AT_KEY_LeftWheelDown:
+      case AT_KEY_RightWheelRight:
+      case AT_KEY_RightWheelLeft:
+      case AT_KEY_RightWheelUp:
+      case AT_KEY_RightWheelDown:
+        enqueueKeyEvent(AT_SET_NavigationKeys, byte, 1);
+        enqueueKeyEvent(AT_SET_NavigationKeys, byte, 0);
+        continue;
     }
 
-    LogPrint(LOG_WARNING, "Unexpected byte: %02X", byte);
+    logUnexpectedPacket(&byte, 1);
   }
 
   return EOF;

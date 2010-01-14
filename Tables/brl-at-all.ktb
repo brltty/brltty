@@ -1,0 +1,95 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Albatross
+
+
+####################
+# Default Bindings #
+####################
+
+bind Home1 TOP_LEFT
+bind Home2 TOP_LEFT
+
+bind End1 BOT_LEFT
+bind End2 BOT_LEFT
+
+bind ExtraCursor1 BACK
+bind ExtraCursor2 BACK
+
+bind Cursor1 HOME
+bind Cursor2 HOME
+
+bind !Up1 LNUP
+bind !Up2 LNUP
+bind !Up3 LNUP
+
+bind !Down1 LNDN
+bind !Down2 LNDN
+bind !Down3 LNDN
+
+bind !Left FWINLT
+bind !Right FWINRT
+
+bind F1 ATTRDN
+bind F2 ATTRUP
+bind !F3 PASTE
+bind !F4 CSRTRK
+bind !F5 HELP
+bind !F6 LEARN
+bind F7 PRPROMPT
+bind F8 NXPROMPT
+
+bind F9 NXDIFLN
+bind F10 PRDIFLN
+bind !F11 CSRJMP_VERT
+bind !F12 SIXDOTS
+bind !F13 PREFMENU
+bind !F14 INFO
+bind F15 PRPGRPH
+bind F16 NXPGRPH
+
+bind Attribute1 FREEZE
+bind Attribute2 DISPMD
+bind Attribute3 CSRVIS
+bind Attribute4 ATTRVIS
+
+bind !LeftWheelLeft CHRLT
+bind !RightWheelLeft CHRLT
+
+bind !LeftWheelRight CHRRT
+bind !RightWheelRight CHRRT
+
+bind !LeftWheelUp LNUP
+bind !RightWheelUp LNUP
+
+bind !LeftWheelDown LNDN
+bind !RightWheelDown LNDN
+
+bind !RoutingKey1 ROUTE
+bind Attribute2+!RoutingKey1 CUTBEGIN
+bind Attribute1+!RoutingKey1 CUTAPPEND
+bind Attribute4+!RoutingKey1 CUTLINE
+bind Attribute3+!RoutingKey1 CUTRECT
+
+bind !RoutingKey2 DESCCHAR
+bind Attribute2+!RoutingKey2 PRINDENT
+bind Attribute1+!RoutingKey2 NXINDENT
+bind Attribute4+!RoutingKey2 PRDIFCHAR
+bind Attribute3+!RoutingKey2 NXDIFCHAR
+
