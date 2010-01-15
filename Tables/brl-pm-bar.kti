@@ -27,5 +27,12 @@ bind BarRight1 FWINRT
 bind BarLeft2 LNBEG
 bind BarRight2 LNEND
 
+hide on
+bind BarUp1+BarUp2 TOP
+bind BarDown1+BarDown2 BOT
+bind BarLeft1+BarLeft2 LNBEG
+bind BarRight1+BarRight2 LNEND
+hide off
+
 assign switches
 include brl-pm-keys.kti
