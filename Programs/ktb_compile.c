@@ -53,9 +53,14 @@ typedef struct {
 
   unsigned char context;
 
-  unsigned explicitHide:1;
-  unsigned implicitHide:1;
+  unsigned hideRequested:1;
+  unsigned hideImposed:1;
 } KeyTableData;
+
+static inline int
+hideBindings (const KeyTableData *ktd) {
+  return ktd->hideRequested || ktd->hideImposed;
+}
 
 static KeyContext *
 getKeyContext (KeyTableData *ktd, unsigned char context) {
@@ -581,7 +586,7 @@ processBindOperands (DataFile *file, void *data) {
     KeyBinding *binding = &ctx->keyBindingTable[ctx->keyBindingCount];
 
     memset(binding, 0, sizeof(*binding));
-    binding->hidden = ktd->explicitHide || ktd->implicitHide;
+    binding->hidden = hideBindings(ktd);
 
     if (getKeysOperand(file, &binding->keys, ktd)) {
       if (getCommandOperand(file, &binding->command, ktd)) {
@@ -651,9 +656,9 @@ processHideOperands (DataFile *file, void *data) {
 
   if (getDataString(file, &state, 1, "hide state")) {
     if (isKeyword(WS_C("on"), state.characters, state.length)) {
-      ktd->explicitHide = 1;
+      ktd->hideRequested = 1;
     } else if (isKeyword(WS_C("off"), state.characters, state.length)) {
-      ktd->explicitHide = 0;
+      ktd->hideRequested = 0;
     } else {
       reportDataError(file, "unknown hide state: %.*" PRIws, state.length, state.characters);
     }
@@ -667,14 +672,14 @@ processIncludeWrapper (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   int result;
 
-  unsigned int explicitHide = ktd->explicitHide;
-  unsigned int implicitHide = ktd->implicitHide;
+  unsigned int hideRequested = ktd->hideRequested;
+  unsigned int hideImposed = ktd->hideImposed;
 
-  if (ktd->explicitHide) ktd->implicitHide = 1;
+  if (ktd->hideRequested) ktd->hideImposed = 1;
   result = processIncludeOperands(file, data);
 
-  ktd->explicitHide = explicitHide;
-  ktd->implicitHide = implicitHide;
+  ktd->hideRequested = hideRequested;
+  ktd->hideImposed = hideImposed;
   return result;
 }
 
@@ -715,7 +720,7 @@ processNoteOperands (DataFile *file, void *data) {
   DataOperand note;
 
   if (getDataText(file, &note, "note text")) {
-    {
+    if (!hideBindings(ktd)) {
       unsigned int newCount = ktd->table->noteCount + 1;
       wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
 
@@ -725,20 +730,20 @@ processNoteOperands (DataFile *file, void *data) {
       }
 
       ktd->table->noteTable = newTable;
-    }
 
-    {
-      wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, note.length+1));
+      {
+        wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, note.length+1));
 
-      if (!noteString) {
-        LogError("malloc");
-        return 0;
+        if (!noteString) {
+          LogError("malloc");
+          return 0;
+        }
+
+        wmemcpy(noteString, note.characters, note.length);
+        noteString[note.length] = 0;
+        ktd->table->noteTable[ktd->table->noteCount++] = noteString;
+        return 1;
       }
-
-      wmemcpy(noteString, note.characters, note.length);
-      noteString[note.length] = 0;
-      ktd->table->noteTable[ktd->table->noteCount++] = noteString;
-      return 1;
     }
   }
 
