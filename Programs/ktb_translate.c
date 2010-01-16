@@ -480,7 +480,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
     unsigned int count = ctx->keyBindingCount;
 
     while (count) {
-      if (!binding->hide) {
+      if (!binding->hidden) {
         size_t keysOffset;
 
         if (!putCommandDescription(lgd, binding->command)) return 0;

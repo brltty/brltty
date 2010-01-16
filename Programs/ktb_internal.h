@@ -65,7 +65,7 @@ typedef struct {
 typedef struct {
   KeyCombination keys;
   int command;
-  unsigned hide:1;
+  unsigned hidden:1;
 } KeyBinding;
 
 typedef struct {

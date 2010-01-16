@@ -52,7 +52,9 @@ typedef struct {
   unsigned int commandCount;
 
   unsigned char context;
-  unsigned hide:1;
+
+  unsigned explicitHide:1;
+  unsigned implicitHide:1;
 } KeyTableData;
 
 static KeyContext *
@@ -579,7 +581,7 @@ processBindOperands (DataFile *file, void *data) {
     KeyBinding *binding = &ctx->keyBindingTable[ctx->keyBindingCount];
 
     memset(binding, 0, sizeof(*binding));
-    binding->hide = ktd->hide;
+    binding->hidden = ktd->explicitHide || ktd->implicitHide;
 
     if (getKeysOperand(file, &binding->keys, ktd)) {
       if (getCommandOperand(file, &binding->command, ktd)) {
@@ -649,9 +651,9 @@ processHideOperands (DataFile *file, void *data) {
 
   if (getDataString(file, &state, 1, "hide state")) {
     if (isKeyword(WS_C("on"), state.characters, state.length)) {
-      ktd->hide = 1;
+      ktd->explicitHide = 1;
     } else if (isKeyword(WS_C("off"), state.characters, state.length)) {
-      ktd->hide = 0;
+      ktd->explicitHide = 0;
     } else {
       reportDataError(file, "unknown hide state: %.*" PRIws, state.length, state.characters);
     }
@@ -663,10 +665,16 @@ processHideOperands (DataFile *file, void *data) {
 static int
 processIncludeWrapper (DataFile *file, void *data) {
   KeyTableData *ktd = data;
-  unsigned int hide = ktd->hide;
-  int result = processIncludeOperands(file, data);
+  int result;
 
-  ktd->hide = hide;
+  unsigned int explicitHide = ktd->explicitHide;
+  unsigned int implicitHide = ktd->implicitHide;
+
+  if (ktd->explicitHide) ktd->implicitHide = 1;
+  result = processIncludeOperands(file, data);
+
+  ktd->explicitHide = explicitHide;
+  ktd->implicitHide = implicitHide;
   return result;
 }
 
