@@ -24,8 +24,6 @@ note * The left and right bars are named Up and Down.
 note * The four square keys at the very left are named: Dot7, Dot3, Dot2, Dot1.
 note * The four square keys at the very right are named: Dot4, Dot5, Dot6, Dot8.
 
-include brl-pm-routing.kti
-
 bind !Shift HOME
 bind !Home TOP
 bind !End BOT
@@ -123,6 +121,9 @@ bind Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
 bind Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
 bind Dot2+Dot3+Dot5 SIXDOTS+on
 bind Dot2+Dot3+Dot6 SIXDOTS+off
+
+assign switches
+include brl-pm-routing.kti
 
 assign toggleOff Dot7
 assign toggleOn Dot8

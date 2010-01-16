@@ -27,6 +27,13 @@ bind LeftSwitchRear+BarRight1 NXPROMPT
 bind LeftSwitchRear+BarLeft2 PRPGRPH
 bind LeftSwitchRear+BarRight2 NXPGRPH
 
+hide on
+bind LeftSwitchRear+BarUp1+BarUp2 ATTRUP
+bind LeftSwitchRear+BarDown1+BarDown2 ATTRDN
+bind LeftSwitchRear+BarLeft1+BarLeft2 PRPGRPH
+bind LeftSwitchRear+BarRight1+BarRight2 NXPGRPH
+hide off
+
 bind RightSwitchRear+BarUp1 KEY_CURSOR_UP
 bind RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
 bind RightSwitchRear+BarUp2 KEY_PAGE_UP
@@ -35,6 +42,13 @@ bind RightSwitchRear+BarLeft1 FWINLT+route
 bind RightSwitchRear+BarRight1 FWINRT+route
 bind RightSwitchRear+BarLeft2 LNBEG+route
 bind RightSwitchRear+BarRight2 LNEND+route
+
+hide on
+bind RightSwitchRear+BarUp1+BarUp2 KEY_PAGE_UP
+bind RightSwitchRear+BarDown1+BarDown2 KEY_PAGE_DOWN
+bind RightSwitchRear+BarLeft1+BarLeft2 LNBEG+route
+bind RightSwitchRear+BarRight1+BarRight2 LNEND+route
+hide off
 
 bind LeftSwitchRear+RightSwitchRear+BarUp1 KEY_CURSOR_UP
 bind LeftSwitchRear+RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
@@ -45,6 +59,13 @@ bind LeftSwitchRear+RightSwitchRear+BarRight1 KEY_CURSOR_RIGHT
 bind LeftSwitchRear+RightSwitchRear+BarLeft2 KEY_HOME
 bind LeftSwitchRear+RightSwitchRear+BarRight2 KEY_END
 
+hide on
+bind LeftSwitchRear+RightSwitchRear+BarUp1+BarUp2 KEY_PAGE_UP
+bind LeftSwitchRear+RightSwitchRear+BarDown1+BarDown2 KEY_PAGE_DOWN
+bind LeftSwitchRear+RightSwitchRear+BarLeft1+BarLeft2 KEY_HOME
+bind LeftSwitchRear+RightSwitchRear+BarRight1+BarRight2 KEY_END
+hide off
+
 bind LeftSwitchFront+BarUp1 PRSEARCH
 bind LeftSwitchFront+BarDown1 NXSEARCH
 bind LeftSwitchFront+BarUp2 HELP
@@ -54,6 +75,13 @@ bind LeftSwitchFront+BarRight1 CHRRT
 bind LeftSwitchFront+BarLeft2 HWINLT
 bind LeftSwitchFront+BarRight2 HWINRT
 
+hide on
+bind LeftSwitchFront+BarUp1+BarUp2 HELP
+bind LeftSwitchFront+BarDown1+BarDown2 LEARN
+bind LeftSwitchFront+BarLeft1+BarLeft2 HWINLT
+bind LeftSwitchFront+BarRight1+BarRight2 HWINRT
+hide off
+
 bind RightSwitchFront+BarUp1 MENU_PREV_ITEM
 bind RightSwitchFront+BarDown1 MENU_NEXT_ITEM
 bind RightSwitchFront+BarUp2 MENU_FIRST_ITEM
@@ -62,6 +90,13 @@ bind RightSwitchFront+BarLeft1 MENU_PREV_SETTING
 bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
 bind RightSwitchFront+BarLeft2 PREFLOAD
 bind RightSwitchFront+BarRight2 PREFSAVE
+
+hide on
+bind RightSwitchFront+BarUp1+BarUp2 MENU_FIRST_ITEM
+bind RightSwitchFront+BarDown1+BarDown2 MENU_LAST_ITEM
+bind RightSwitchFront+BarLeft1+BarLeft2 PREFLOAD
+bind RightSwitchFront+BarRight1+BarRight2 PREFSAVE
+hide off
 
 hide on
 
@@ -88,3 +123,4 @@ include brl-pm-keys.kti
 
 assign switches LeftSwitchFront+RightSwitchFront+
 include brl-pm-keys.kti
+

@@ -19,9 +19,9 @@
 # This key subtable is for Papenmeier displays which have 4 status keys.
 note The keys behind the status cells are named Status1 through Status4.
 
-bind !Status1 HELP
-bind !Status2 LEARN
-bind !Status3 CSRJMP_VERT
-bind !Status4 DISPMD
-bind \{toggleOff}+!Status4 DISPMD+off
-bind \{toggleOn}+!Status4 DISPMD+on
+bind \{switches}!Status1 HELP
+bind \{switches}!Status2 LEARN
+bind \{switches}!Status3 CSRJMP_VERT
+bind \{switches}!Status4 DISPMD
+bind \{switches}\{toggleOff}+!Status4 DISPMD+off
+bind \{switches}\{toggleOn}+!Status4 DISPMD+on

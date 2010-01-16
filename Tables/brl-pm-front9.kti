@@ -18,8 +18,6 @@
 
 # This key subtable is for Papenmeier displays which have 9 front keys.
 
-include brl-pm-routing.kti
-
 bind !Home HOME
 bind !Up WINUP
 bind !Down WINDN
@@ -55,6 +53,9 @@ bind Cursor+!RoutingKey1 PRINDENT
 bind Braille+!RoutingKey1 NXINDENT
 
 bind Function+Attribute PASTE
+
+assign switches
+include brl-pm-routing.kti
 
 assign toggleOff Function
 assign toggleOn Attribute

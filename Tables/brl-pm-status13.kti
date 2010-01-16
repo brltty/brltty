@@ -19,24 +19,24 @@
 # This key subtable is for Papenmeier displays which have 13 status keys.
 note The keys to the left of the status cells are named Status1 through Status13.
 
-bind !Status1 HELP
-bind !Status2 LEARN
-bind !Status3 CSRJMP_VERT
-bind !Status4 BACK
-bind !Status5 INFO
-bind !Status6 CSRTRK
-bind \{toggleOff}+!Status6 CSRTRK+off
-bind \{toggleOn}+!Status6 CSRTRK+on
-bind !Status7 DISPMD
-bind \{toggleOff}+!Status7 DISPMD+off
-bind \{toggleOn}+!Status7 DISPMD+on
-bind !Status8 FREEZE
-bind !Status9 PREFMENU
-bind !Status10 PREFLOAD
-bind !Status11 CSRVIS
-bind \{toggleOff}+!Status11 CSRVIS+off
-bind \{toggleOn}+!Status11 CSRVIS+on
-bind !Status12 ATTRVIS
-bind \{toggleOff}+!Status12 ATTRVIS+off
-bind \{toggleOn}+!Status12 ATTRVIS+on
-bind !Status13 PASTE
+bind \{switches}!Status1 HELP
+bind \{switches}!Status2 LEARN
+bind \{switches}!Status3 CSRJMP_VERT
+bind \{switches}!Status4 BACK
+bind \{switches}!Status5 INFO
+bind \{switches}!Status6 CSRTRK
+bind \{switches}\{toggleOff}+!Status6 CSRTRK+off
+bind \{switches}\{toggleOn}+!Status6 CSRTRK+on
+bind \{switches}!Status7 DISPMD
+bind \{switches}\{toggleOff}+!Status7 DISPMD+off
+bind \{switches}\{toggleOn}+!Status7 DISPMD+on
+bind \{switches}!Status8 FREEZE
+bind \{switches}!Status9 PREFMENU
+bind \{switches}!Status10 PREFLOAD
+bind \{switches}!Status11 CSRVIS
+bind \{switches}\{toggleOff}+!Status11 CSRVIS+off
+bind \{switches}\{toggleOn}+!Status11 CSRVIS+on
+bind \{switches}!Status12 ATTRVIS
+bind \{switches}\{toggleOff}+!Status12 ATTRVIS+off
+bind \{switches}\{toggleOn}+!Status12 ATTRVIS+on
+bind \{switches}!Status13 PASTE

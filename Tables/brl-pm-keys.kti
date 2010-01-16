@@ -32,6 +32,13 @@ bind \{switches}LeftKeyRear+BarRight1 CSRTRK
 bind \{switches}LeftKeyRear+BarLeft2 ATTRVIS
 bind \{switches}LeftKeyRear+BarRight2 CSRVIS
 
+hide on
+bind \{switches}LeftKeyRear+BarUp1+BarUp2 CAPBLINK
+bind \{switches}LeftKeyRear+BarDown1+BarDown2 CSRJMP_VERT
+bind \{switches}LeftKeyRear+BarLeft1+BarLeft2 ATTRVIS
+bind \{switches}LeftKeyRear+BarRight1+BarRight2 CSRVIS
+hide off
+
 bind \{switches}LeftKeyFront+BarUp1 AUTOSPEAK
 bind \{switches}LeftKeyFront+BarDown1 AUTOREPEAT
 bind \{switches}LeftKeyFront+BarUp2 RESTARTBRL
@@ -40,6 +47,13 @@ bind \{switches}LeftKeyFront+BarLeft1 INFO
 bind \{switches}LeftKeyFront+BarRight1 PREFMENU
 bind \{switches}LeftKeyFront+BarLeft2 PREFLOAD
 bind \{switches}LeftKeyFront+BarRight2 PREFSAVE
+
+hide on
+bind \{switches}LeftKeyFront+BarUp1+BarUp2 RESTARTBRL
+bind \{switches}LeftKeyFront+BarDown1+BarDown2 FREEZE
+bind \{switches}LeftKeyFront+BarLeft1+BarLeft2 PREFLOAD
+bind \{switches}LeftKeyFront+BarRight1+BarRight2 PREFSAVE
+hide off
 
 bind \{switches}RightKeyRear+BarUp1 SAY_ABOVE
 bind \{switches}RightKeyRear+BarDown1 SAY_BELOW
@@ -50,6 +64,13 @@ bind \{switches}RightKeyRear+BarRight1 SAY_LINE
 bind \{switches}RightKeyRear+BarLeft2 SAY_SLOWER
 bind \{switches}RightKeyRear+BarRight2 SAY_FASTER
 
+hide on
+bind \{switches}RightKeyRear+BarUp1+BarUp2 SAY_LOUDER
+bind \{switches}RightKeyRear+BarDown1+BarDown2 SAY_SOFTER
+bind \{switches}RightKeyRear+BarLeft1+BarLeft2 SAY_SLOWER
+bind \{switches}RightKeyRear+BarRight1+BarRight2 SAY_FASTER
+hide off
+
 bind \{switches}RightKeyFront+BarUp1 SPKHOME
 bind \{switches}RightKeyFront+BarDown1 TUNES
 bind \{switches}RightKeyFront+BarUp2 RESTARTSPEECH
@@ -57,7 +78,12 @@ bind \{switches}RightKeyFront+BarLeft1 SKPIDLNS
 bind \{switches}RightKeyFront+BarRight1 SKPBLNKWINS
 bind \{switches}RightKeyFront+BarRight2 SLIDEWIN
 
-bind \{switches}!RoutingKey1 ROUTE
+hide on
+bind \{switches}RightKeyFront+BarUp1+BarUp2 RESTARTSPEECH
+bind \{switches}RightKeyFront+BarRight1+BarRight2 SLIDEWIN
+hide off
+
+include brl-pm-routing.kti
 bind \{switches}BarUp1+!RoutingKey1 PRINDENT
 bind \{switches}BarDown1+!RoutingKey1 NXINDENT
 bind \{switches}BarUp2+!RoutingKey1 SETLEFT
@@ -74,10 +100,10 @@ bind \{switches}BarLeft1+BarLeft2+!RoutingKey1 CUTBEGIN
 bind \{switches}BarRight1+BarRight2+!RoutingKey1 CUTRECT
 hide off
 
-bind \{switches}!RoutingKey2 DESCCHAR
+ifkey RoutingKey2 bind \{switches}!RoutingKey2 DESCCHAR
 
 assign toggleOff BarLeft1
 assign toggleOn BarRight1
 include brl-pm-status\{statusKeys}.kti
 
-bind \{switches}!StatusKey2 GOTOLINE
+ifkey StatusKey2 bind \{switches}!StatusKey2 GOTOLINE
