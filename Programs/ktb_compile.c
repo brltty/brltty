@@ -227,13 +227,19 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   return 0;
 }
 
-static int
-parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wchar_t *characters, int length, KeyTableData *ktd) {
+static const KeyNameEntry **
+findKeyName (const wchar_t *characters, int length, KeyTableData *ktd) {
   const DataOperand name = {
     .characters = characters,
     .length = length
   };
-  const KeyNameEntry **kne = bsearch(&name, ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), searchKeyName);
+
+  return bsearch(&name, ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), searchKeyName);
+}
+
+static int
+parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wchar_t *characters, int length, KeyTableData *ktd) {
+  const KeyNameEntry **kne = findKeyName(characters, length, ktd);
 
   if (kne) {
     *set = (*kne)->set;
@@ -562,6 +568,8 @@ getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
   return 0;
 }
 
+static int processKeyTableLine (DataFile *file, void *data);
+
 static int
 processBindOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
@@ -661,6 +669,20 @@ processHideOperands (DataFile *file, void *data) {
       ktd->hideRequested = 0;
     } else {
       reportDataError(file, "unknown hide state: %.*" PRIws, state.length, state.characters);
+    }
+  }
+
+  return 1;
+}
+
+static int
+processIfKeyOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  DataString name;
+
+  if (getDataString(file, &name, 1, "key name")) {
+    if (findKeyName(name.characters, name.length, ktd)) {
+      return processKeyTableLine(file, ktd);
     }
   }
 
@@ -796,6 +818,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("hide"), .processor=processHideOperands},
+    {.name=WS_C("ifkey"), .processor=processIfKeyOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
