@@ -18,3 +18,5 @@
 
 # This key subtable is for FreedomScientific Focus displays which have rockers.
 
+bind RightRockerUp KEY_CURSOR_UP
+bind RightRockerDown KEY_CURSOR_DOWN

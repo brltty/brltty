@@ -18,3 +18,5 @@
 
 # This key subtable is for FreedomScientific Focus displays which have bumper bars.
 
+bind RightBumperUp KEY_CURSOR_UP
+bind RightBumperDown KEY_CURSOR_DOWN
