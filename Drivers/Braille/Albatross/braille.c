@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <time.h>
 
 #include "misc.h"
@@ -107,10 +108,135 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  int (*openPort) (const char *device);
+  int (*configurePort) (int baud);
+  void (*closePort) (void);
+  int (*awaitInput) (int milliseconds);
+  int (*readBytes) (unsigned char *buffer, size_t size, int wait);
+  int (*writeBytes) (const unsigned char *buffer, size_t size);
+} InputOutputOperations;
+
+static const InputOutputOperations *io;
+static int charactersPerSecond;
+
 #include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
-static int charactersPerSecond;
+
+static int
+openSerialPort (const char *device) {
+  if ((serialDevice = serialOpenDevice(device))) return 1;
+  return 0;
+}
+
+static int
+configureSerialPort (int baud) {
+  return serialRestartDevice(serialDevice, baud);
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
+static int
+awaitSerialInput (int milliseconds) {
+  return serialAwaitInput(serialDevice, milliseconds);
+}
+
+static int
+readSerialBytes (unsigned char *buffer, size_t size, int wait) {
+  const int timeout = 100;
+  return serialReadData(serialDevice, buffer, size,
+                        (wait? timeout: 0), timeout);
+}
+
+static int
+writeSerialBytes (const unsigned char *buffer, size_t size) {
+  return serialWriteData(serialDevice, buffer, size);
+}
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, configureSerialPort, closeSerialPort,
+  awaitSerialInput, readSerialBytes, writeSerialBytes
+};
+
+#ifdef ENABLE_USB_SUPPORT
+#include "io_usb.h"
+
+static UsbChannel *usbChannel = NULL;
+
+static int
+openUsbPort (const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    { /* Albatross */
+      .vendor=0X0403, .product=0X6001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+configureUsbPort (int baud) {
+  const SerialParameters parameters = {
+    .baud = baud,
+    .flow = SERIAL_FLOW_NONE,
+    .data = 8,
+    .stop = 1,
+    .parity = SERIAL_PARITY_NONE
+  };
+
+  return usbSetSerialParameters(usbChannel->device, &parameters);
+}
+
+static void
+closeUsbPort (void) {
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbChannel = NULL;
+  }
+}
+
+static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
+}
+
+static int
+readUsbBytes (unsigned char *buffer, size_t size, int wait) {
+  const int timeout = 100;
+  int count = usbReapInput(usbChannel->device,
+                           usbChannel->definition.inputEndpoint,
+                           buffer, size,
+                           (wait? timeout: 0), timeout);
+  if (count != -1) return count;
+  if (errno == EAGAIN) return 0;
+  return -1;
+}
+
+static int
+writeUsbBytes (const unsigned char *buffer, size_t size) {
+  return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, size, 1000);
+}
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, configureUsbPort, closeUsbPort,
+  awaitUsbInput, readUsbBytes, writeUsbBytes
+};
+#endif /* ENABLE_USB_SUPPORT */
 
 static TranslationTable inputMap;
 static const unsigned char topLeftKeys[]  = {
@@ -135,24 +261,32 @@ static int statusStart;
 
 static int
 readByte (unsigned char *byte) {
-  int received = serialReadData(serialDevice, byte, 1, 0, 0);
+  int received = io->readBytes(byte, 1, 0);
   if (received == -1) LogError("Albatross read");
   return received == 1;
+}
+
+static void
+discardInput (void) {
+  unsigned char byte;
+  while (readByte(&byte));
 }
 
 static int
 awaitByte (unsigned char *byte) {
   if (readByte(byte)) return 1;
-  if (serialAwaitInput(serialDevice, 1000))
+
+  if (io->awaitInput(1000))
     if (readByte(byte))
       return 1;
+
   return 0;
 }
 
 static int
-writeBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
+writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
-  if (serialWriteData(serialDevice, bytes, count) != -1) return 1;
+  if (io->writeBytes(bytes, count) != -1) return 1;
   LogError("Albatross write");
   return 0;
 }
@@ -174,12 +308,12 @@ acknowledgeDisplay (BrailleDisplay *brl) {
   }
 
   {
-    unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
+    static const unsigned char acknowledgement[] = {0XFE, 0XFF, 0XFE, 0XFF};
     if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
-    serialDiscardInput(serialDevice);
+    discardInput();
     approximateDelay(100);
-    serialDiscardInput(serialDevice);
+    discardInput();
   }
   LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);
 
@@ -301,16 +435,26 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     makeOutputTable(dots, outputTable);
   }
 
-  if (!isSerialDevice(&device)) {
+  if (isSerialDevice(&device)) {
+    io = &serialOperations;
+  } else
+
+#ifdef ENABLE_USB_SUPPORT
+  if (isUsbDevice(&device)) {
+    io = &usbOperations;
+  } else
+#endif /* ENABLE_USB_SUPPORT */
+
+  {
     unsupportedDevice(device);
     return 0;
   }
 
-  if ((serialDevice = serialOpenDevice(device))) {
+  if (io->openPort(device)) {
     int baudTable[] = {19200, 9600, 0};
     const int *baud = baudTable;
 
-    while (serialRestartDevice(serialDevice, *baud)) {
+    while (io->configurePort(*baud)) {
       time_t start = time(NULL);
       int count = 0;
       unsigned char byte;
@@ -344,16 +488,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (!*++baud) baud = baudTable;
     }
 
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
+    io->closePort();
   }
   return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  serialCloseDevice(serialDevice);
-  serialDevice = NULL;
+  io->closePort();
 }
 
 static int
