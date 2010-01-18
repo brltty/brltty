@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus 2 80
+title FreedomScientific Focus Blue
 
 include brl-fs-focus_basic.kti
-include brl-fs-focus_bumpers.kti
+include brl-fs-rockers.kti

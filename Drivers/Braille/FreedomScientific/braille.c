@@ -98,13 +98,13 @@ BEGIN_KEY_NAME_TABLES(focus_basic)
   KEY_NAME_TABLE(focus),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(focus_bumpers)
+BEGIN_KEY_NAME_TABLES(focus_large)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(focus),
   KEY_NAME_TABLE(bumpers),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(focus_rockers)
+BEGIN_KEY_NAME_TABLES(focus_small)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(focus),
   KEY_NAME_TABLE(rockers),
@@ -116,14 +116,14 @@ BEGIN_KEY_NAME_TABLES(pacmate)
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(focus_basic)
-DEFINE_KEY_TABLE(focus_bumpers)
-DEFINE_KEY_TABLE(focus_rockers)
+DEFINE_KEY_TABLE(focus_large)
+DEFINE_KEY_TABLE(focus_small)
 DEFINE_KEY_TABLE(pacmate)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(focus_basic),
-  &KEY_TABLE_DEFINITION(focus_bumpers),
-  &KEY_TABLE_DEFINITION(focus_rockers),
+  &KEY_TABLE_DEFINITION(focus_large),
+  &KEY_TABLE_DEFINITION(focus_small),
   &KEY_TABLE_DEFINITION(pacmate),
 END_KEY_TABLE_LIST
 
@@ -927,12 +927,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               if (model->type == MOD_TYPE_Focus) {
                 unsigned char firmwareVersion = response.payload.info.firmware[0] - '0';
 
-                if (firmwareVersion >= 3) configFlags |= 0X02;
+                if (firmwareVersion >= 3) {
+                  configFlags |= 0X02;
 
-                if (firmwareVersion >= 4) {
-                  keyTableDefinition = &KEY_TABLE_DEFINITION(focus_rockers);
-                } else if ((firmwareVersion == 3) && (model->cellCount == 80)) {
-                  keyTableDefinition = &KEY_TABLE_DEFINITION(focus_bumpers);
+                  if (model->cellCount < 80) {
+                    keyTableDefinition = &KEY_TABLE_DEFINITION(focus_small);
+                  } else {
+                    keyTableDefinition = &KEY_TABLE_DEFINITION(focus_large);
+                  }
                 }
               }
 

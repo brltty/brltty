@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This key subtable is for FreedomScientific Focus displays which have bumper bars.
+title FreedomScientific Focus 2 80
 
-bind RightBumperUp KEY_CURSOR_UP
-bind RightBumperDown KEY_CURSOR_DOWN
+include brl-fs-focus_basic.kti
+include brl-fs-bumpers.kti

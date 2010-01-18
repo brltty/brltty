@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus Blue
+# This key subtable is for FreedomScientific displays which have rockers.
 
-include brl-fs-focus_basic.kti
-include brl-fs-focus_rockers.kti
+bind RightRockerUp KEY_CURSOR_UP
+bind RightRockerDown KEY_CURSOR_DOWN
