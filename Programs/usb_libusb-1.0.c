@@ -91,8 +91,9 @@ usbSetErrno (int error, const char *action) {
       break;
 
     default:
+      LogPrint(LOG_DEBUG, "unsupported libusb1 error code: %d", error);
     case LIBUSB_ERROR_OTHER:
-      errno = EPERM;
+      errno = EIO;
       break;
   }
 

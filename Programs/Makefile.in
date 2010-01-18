@@ -278,7 +278,7 @@ uninstall-api-bindings:
 BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O keysets.$O kbdkeys.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(LDLIBS)
 
 brltty.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty.c
@@ -349,7 +349,10 @@ usb_darwin.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
 
 usb_libusb.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_libusb.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb.c
+
+usb_libusb-1.0.$O:
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb-1.0.c
 
 ###############################################################################
 
@@ -367,7 +370,7 @@ bluetooth_linux.$O:
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) mount.$O ttb_translate.$O cmd.$O charset.$O lock.$O drivers.$O driver.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(LDLIBS)
 
 brltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c

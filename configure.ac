@@ -1063,6 +1063,9 @@ in
       ;;
 esac
 
+usb_object=""
+usb_cflags=""
+usb_libs=""
 case "${host_os}"
 in
    linux*)
@@ -1090,10 +1093,23 @@ in
       usb_object="darwin"
       ;;
    *)
-      AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [dnl
-         usb_object="libusb"
-         LIBS="-lusb ${LIBS}"
-])])
+      for usb_package in libusb libusb-1.0
+      do
+         pkg-config --exists "${usb_package}" && {
+            usb_object="${usb_package}"
+            usb_cflags="`pkg-config --cflags-only-I "${usb_package}"`"
+            usb_libs="`pkg-config ${pkgconfig_flags_libs} "${usb_package}"`"
+            break
+         }
+      done
+
+      test -z "${usb_object}" && {
+         AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [dnl
+            usb_object="libusb"
+            usb_libs="-lusb"
+         ])])
+      }
+
       ;;
 esac
 if test -n "${usb_object}"
@@ -1110,7 +1126,10 @@ then
 else
    AC_MSG_WARN([no USB support on ${host_os}])
 fi
+test -z "${usb_objects}" && usb_libs=""
 AC_SUBST([usb_objects])
+AC_SUBST([usb_cflags])
+AC_SUBST([usb_libs])
 
 case "${host_os}"
 in
