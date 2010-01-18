@@ -2390,6 +2390,10 @@ deactivateBrailleDriver (void) {
 
 static int
 startBrailleDriver (void) {
+#ifdef ENABLE_USB_SUPPORT
+  usbForgetDevices();
+#endif /* ENABLE_USB_SUPPORT */
+
 #ifdef ENABLE_BLUETOOTH_SUPPORT
   btForgetConnectErrors();
 #endif /* ENABLE_BLUETOOTH_SUPPORT */

@@ -963,3 +963,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
   return device;
 }
+
+void
+usbForgetDevices (void) {
+}

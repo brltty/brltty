@@ -194,3 +194,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
   return device;
 }
+
+void
+usbForgetDevices (void) {
+}
