@@ -628,5 +628,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     logUnexpectedPacket(&byte, 1);
   }
 
+  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
   return EOF;
 }
