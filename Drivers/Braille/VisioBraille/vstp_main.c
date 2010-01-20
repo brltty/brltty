@@ -112,6 +112,7 @@ static void Parse(char *filename) {
    }
   }
  }
+ fclose(fd);
 }
 
 static void CheckOptions(int argc, char **argv) {
