@@ -754,6 +754,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     } else {
       LogError("USB endpoint completed request queue allocate");
     }
+
+    free(eptx);
   } else {
     LogError("USB endpoint extension allocate");
   }
