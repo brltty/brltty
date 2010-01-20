@@ -236,10 +236,12 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       LogPrint(LOG_INFO,"   prog=%c",terminfo.prog);
       LogPrint(LOG_INFO,"   lcd=%c",terminfo.lcd);
       LogPrint(LOG_INFO,"   f2=%s",terminfo.f2);  
-      if (brl->textColumns<=0) brl->textColumns = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
+      if (brl->textColumns<=0)
+        brl->textColumns = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
     }
+  }
 #else /* SendIdReq */
-    brl->textColumns = ds;
+  brl->textColumns = ds;
 #endif /* SendIdReq */
   brl->textRows=1; 
   return 1;
