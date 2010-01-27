@@ -73,6 +73,7 @@ word against 1-1245-34
 contraction agst
 endword ageries = messageries
 endword agery = savagery
+sufword airedale =
 word alittle =
 midendword ally 6-13456
 word almost 1-123-134
@@ -113,6 +114,7 @@ midendword bble 12-3456
 lowword be 23
 begword be 23
 sufword be\s-\s 12-15-36-36
+word bea = Beatrice's nickname
 begword bea 12-2
 always bear 12-15-345
 begword beatif 23-1-2345-24-124
@@ -908,6 +910,7 @@ contraction tgr
 word those 45-1456
 begword trans = transtype
 sufword tranship 2345-1235-1-1345-146-24-1234
+before vowel begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
 
 # the letter u
 always u 136
