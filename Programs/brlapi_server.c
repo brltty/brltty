@@ -323,7 +323,7 @@ static int isRawCapable(const BrailleDriver *brl)
 /* Returns !0 if driver can return specific keycodes, 0 if not. */
 static int isKeyCapable(const BrailleDriver *brl)
 {
-  return ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL));
+  return (((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp->keyNameTables!=NULL));
 }
 
 /* Function : suspendDriver */
@@ -2293,6 +2293,36 @@ static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
     broadcastKey(t, code, how);
 }
 
+/* The core produced a key event, try to send it to a brlapi client.
+ * On success, return EOF, else return the command.  */
+static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
+  Connection *c;
+
+  if (offline) {
+    broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
+    offline = 0;
+  }
+  /* somebody gets the raw code */
+  if ((c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
+    LogPrint(LOG_DEBUG,"Transmitting accepted key %016"BRLAPI_PRIxKEYCODE, clientCode);
+    writeKey(c->fd,clientCode);
+    return EOF;
+  }
+  return 0;
+}
+
+int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
+  int ret;
+  brlapi_keyCode_t clientCode;
+  clientCode = ((brlapi_keyCode_t)set << 8) | key | ((brlapi_keyCode_t)press << 63);
+  LogPrint(LOG_DEBUG, "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, set, key, press, clientCode);
+
+  pthread_mutex_lock(&connectionsMutex);
+  ret = api__handleKeyEvent(clientCode);
+  pthread_mutex_unlock(&connectionsMutex);
+  return ret;
+}
+
 /* The core produced a command, try to send it to a brlapi client.
  * On success, return EOF, else return the command.  */
 static int api__handleCommand(int command) {
@@ -2419,7 +2449,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   if (drain)
     drainBrailleOutput(brl, 0);
   if ((context == BRL_CTX_DEFAULT) && retainDots) context = BRL_CTX_CHORDS;
-  if (trueBraille->readKey) {
+  if (trueBraille->readKey && trueBraille->keyToCommand) {
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);
     pthread_mutex_unlock(&driverMutex);
@@ -2442,12 +2472,9 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   /* some client may get raw mode only from now */
   pthread_mutex_unlock(&rawMutex);
   clientCode = keycode;
-  if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
-    /* somebody gets the raw code */
-    LogPrint(LOG_DEBUG,"Transmitting accepted key %lu",(unsigned long)keycode);
-    writeKey(c->fd,clientCode);
+  if (trueBraille->readKey && keycode != EOF && api__handleKeyEvent(clientCode) == EOF)
     command = EOF;
-  } else
+  else
     command = api__handleCommand(command);
 out:
   pthread_mutex_unlock(&connectionsMutex);

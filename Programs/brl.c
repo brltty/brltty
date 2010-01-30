@@ -380,9 +380,18 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   Queue *queue = getKeyEventQueue(0);
 
   if (queue) {
-    KeyEventQueueItem *item = dequeueItem(queue);
+    KeyEventQueueItem *item;
 
-    if (item) {
+    while ((item = dequeueItem(queue))) {
+#ifdef ENABLE_API
+      if (apiStarted) {
+        if ((api_handleKeyEvent(item->set, item->key, item->press)) == EOF) {
+          free(item);
+	  continue;
+	}
+      }
+#endif /* ENABLE_API */
+
       *set = item->set;
       *key = item->key;
       *press = item->press;
