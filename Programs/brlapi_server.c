@@ -305,7 +305,7 @@ static const int retainDots = 0;
 /****************************************************************************/
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
-static int initializeAcceptedKeys(Connection *c);
+static int initializeAcceptedKeys(Connection *c, int how);
 static void brlResize(BrailleDisplay *brl);
 
 /****************************************************************************/
@@ -791,7 +791,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     how = BRL_KEYCODES;
   }
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
-  if ((initializeAcceptedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
+  if ((initializeAcceptedKeys(c, how)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
     freeKeyrangeList(&c->acceptedKeys);
     WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for accepted keys");
@@ -2172,10 +2172,10 @@ static void *server(void *arg)
 /* and screen-related commands */
 /* If the client is interested in braille codes, one passes it nothing */
 /* to let the user read the screen in case theree is an error */
-static int initializeAcceptedKeys(Connection *c)
+static int initializeAcceptedKeys(Connection *c, int how)
 {
   if (c==NULL) return 0;
-  if (c->how==BRL_KEYCODES) return 0;
+  if (how==BRL_KEYCODES) return 0;
   if (addKeyrange(0,BRLAPI_KEY_MAX,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
