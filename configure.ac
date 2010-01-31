@@ -1458,6 +1458,23 @@ AC_SUBST([cspi_includes])
 AC_SUBST([cspi_libdirs])
 AC_SUBST([cspi_libraries])
 
+dbus_includes=""
+dbus_libdirs=""
+dbus_libraries=""
+for package in dbus-1
+do
+   pkg-config --exists "${package}" && {
+      dbus_includes="`pkg-config --cflags-only-I "${package}"`"
+      dbus_libdirs="`pkg-config --libs-only-L "${package}"`"
+      dbus_libraries="`pkg-config --libs-only-l "${package}"`"
+      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBDIRS) $(DBUS_LIBRARIES)])
+      break
+   }
+done
+AC_SUBST([dbus_includes])
+AC_SUBST([dbus_libdirs])
+AC_SUBST([dbus_libraries])
+
 BRLTTY_ARG_DRIVER([screen], [Screen])
 AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
                    [Define this to be a string containing the default screen driver code.])

@@ -176,6 +176,10 @@ CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBDIRS = @cspi_libdirs@
 CSPI_LIBRARIES = @cspi_libraries@
 
+DBUS_INCLUDES = @dbus_includes@
+DBUS_LIBDIRS = @dbus_libdirs@
+DBUS_LIBRARIES = @dbus_libraries@
+
 ICU_INCLUDES = @icu_includes@
 ICU_LIBRARIES = @icu_libraries@
 
