@@ -770,7 +770,7 @@ outConn:
   dbus_connection_unref(bus);
 
 out:
-  return res;
+  return NULL;
 }
 
 static int
@@ -856,7 +856,6 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
       }
     }
   }
-out:
   pthread_mutex_unlock(&updateMutex);
   return 1;
 }
