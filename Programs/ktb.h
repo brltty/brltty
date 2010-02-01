@@ -36,6 +36,7 @@ extern char *ensureKeyTableExtension (const char *path);
 
 extern void resetKeyTable (KeyTable *table);
 extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);
+extern void traceKeyEvents (KeyTable *table);
 
 #ifdef __cplusplus
 }

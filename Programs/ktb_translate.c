@@ -277,7 +277,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (0) {
+  if (table->traceKeyEvents) {
     char buffer[0X40];
     size_t size = sizeof(buffer);
     int offset = 0;
@@ -289,7 +289,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     offset += length, size -= length;
 
     if (command != EOF) {
-      snprintf(&buffer[offset], size, " Cmd:%06X", command);
+      snprintf(&buffer[offset], size, " Cmd:%06X%n", command, &length);
       offset += length, size -= length;
     }
 
@@ -297,6 +297,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   }
 
   return state;
+}
+
+void
+traceKeyEvents (KeyTable *table) {
+  table->traceKeyEvents = 1;
 }
 
 typedef struct {

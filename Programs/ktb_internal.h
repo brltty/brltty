@@ -98,6 +98,8 @@ struct KeyTableStruct {
   KeySet keys;
   int command;
   unsigned immediate:1;
+
+  unsigned traceKeyEvents:1;
 };
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
