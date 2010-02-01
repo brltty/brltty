@@ -348,13 +348,18 @@ getUinputDevice (void) {
         strcpy(description.name, "brltty");
 
         if (write(device, &description, sizeof(description)) != -1) {
-          ioctl(device, UI_SET_EVBIT, EV_KEY);
-          ioctl(device, UI_SET_EVBIT, EV_REP);
+          if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1)
+            LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
+
+          if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1)
+            LogError("ioctl[UI_SET_EVBIT,EV_REP]");
 
           {
             int key;
-            for (key=KEY_RESERVED; key<=KEY_MAX; key++) {
-              ioctl(device, UI_SET_KEYBIT, key);
+
+            for (key=KEY_RESERVED; key<=KEY_MAX; key+=1) {
+              if (ioctl(device, UI_SET_KEYBIT, key) == -1)
+                LogError("ioctl[UI_SET_KEYBIT]");
             }
           }
 
@@ -390,6 +395,8 @@ writeKeyEvent (int key, int press) {
 #ifdef HAVE_LINUX_INPUT_H
   struct input_event event;
 
+  memset(&event, 0, sizeof(event));
+  gettimeofday(&event.time, NULL);
   event.type = EV_KEY;
   event.code = key;
   event.value = press;
