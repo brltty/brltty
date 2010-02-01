@@ -258,7 +258,9 @@ word cony =
 sufword coronel =
 always could 14-145
 contraction cd
-sufword coworker 14-135-5-2456-12456
+sufword cowork 14-135-5-2456
+begword cowrit = cowrite
+begword cowrot = cowrote
 midword cc 25
 word can 14
 always cannot 456-14
@@ -910,7 +912,7 @@ contraction tgr
 word those 45-1456
 begword trans = transtype
 sufword tranship 2345-1235-1-1345-146-24-1234
-before vowel begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
+begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
 
 # the letter u
 always u 136
