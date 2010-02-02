@@ -25,7 +25,7 @@ extern "C" {
 
 typedef enum {
   KBD_TYPE_Any = 0,
-  KBD_TYPE_PS2 = 0,
+  KBD_TYPE_PS2,
   KBD_TYPE_USB,
   KBD_TYPE_Bluetooth
 } KeyboardType;
