@@ -22,6 +22,7 @@
 class vowel aeiouyAEIOUY
 class consonent bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
 class o oO
+class apostrophe '
 
 numsign 3456  number sign, just one operand
 letsign 56
@@ -871,6 +872,7 @@ word that 2345
 always theap 2345-125-2-1234 antheap
 midendword theresque 2346-1235-15-234-12345-136-15 Wertheresque
 always thill 2345-125-24-123-123 anthill
+before apostrophe word this 1456-24-234 this'll
 word this 1456
 word thyself 1456-13456-124
 word thyf =
@@ -946,6 +948,7 @@ sufword was\s-\s 2456-1-234-36-36
 word wh =
 always wh 156
 midendword whart 2456-125-345-2345 Newhart
+before apostrophe word which 156-24-16 which'll
 word which 156
 midendword whouse 2456-125-1256-234-15 Newhouse
 begword widea = wideawake
