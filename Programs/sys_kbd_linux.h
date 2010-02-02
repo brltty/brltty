@@ -647,15 +647,17 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
           }
         }
       
-        if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
-          if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
+        if (kpd->actualProperties.type) {
+          if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
+            if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+              if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
 #ifdef EVIOCGRAB
-              ioctl(device, EVIOCGRAB, 1);
+                ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-              LogPrint(LOG_DEBUG, "keyboard found: fd=%d", device);
-              return 1;
+                LogPrint(LOG_DEBUG, "keyboard found: fd=%d", device);
+                return 1;
+              }
             }
           }
         }
