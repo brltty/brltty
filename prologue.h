@@ -52,6 +52,15 @@ extern "C" {
 #include <_mingw.h>
 #endif /* __MINGW32__ */
 
+/*
+ * The (poorly named) macro "interface" is unfortunately defined within
+ * Windows headers. Fortunately, though, it's also only ever used within
+ * them so it's safe to undefine it here.
+ */
+#ifdef interface
+#undef interface
+#endif /* interface */
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>

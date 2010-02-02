@@ -25,10 +25,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef interface
-#undef interface
-#endif /* interface */
-
 #include "io_defs.h"
 
 /* Descriptor types. */
