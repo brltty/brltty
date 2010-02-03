@@ -351,9 +351,6 @@ getUinputDevice (void) {
           if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1)
             LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
 
-          if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1)
-            LogError("ioctl[UI_SET_EVBIT,EV_REP]");
-
           {
             int key;
 
