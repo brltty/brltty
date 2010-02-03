@@ -348,22 +348,30 @@ getUinputDevice (void) {
         strcpy(description.name, "brltty");
 
         if (write(device, &description, sizeof(description)) != -1) {
-          if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1)
-            LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
+          if (ioctl(device, UI_SET_EVBIT, EV_KEY) != -1) {
+            int keysInitialized = 1;
 
-          {
-            int key;
+            {
+              int key;
 
-            for (key=KEY_RESERVED; key<=KEY_MAX; key+=1) {
-              if (ioctl(device, UI_SET_KEYBIT, key) == -1)
-                LogError("ioctl[UI_SET_KEYBIT]");
+              for (key=0; key<=KEY_MAX; key+=1) {
+                if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
+                  LogError("ioctl[UI_SET_KEYBIT]");
+                  keysInitialized = 0;
+                  break;
+                }
+              }
             }
-          }
 
-          if (ioctl(device, UI_DEV_CREATE) != -1) {
-            uinputDevice = device;
+            if (keysInitialized) {
+              if (ioctl(device, UI_DEV_CREATE) != -1) {
+                uinputDevice = device;
+              } else {
+                LogError("ioctl[UI_DEV_CREATE]");
+              }
+            }
           } else {
-            LogError("ioctl[UI_DEV_CREATE]");
+            LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
           }
         } else {
           LogError("write(struct uinput_user_dev)");
