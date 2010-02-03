@@ -850,6 +850,22 @@ usbReapInput (
 }
 
 int
+usbHidGetReport (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  void *buffer,
+  int length,
+  int timeout
+) {
+  return usbControlRead(device,
+                        UsbControlRecipient_Interface, UsbControlType_Class,
+                        UsbHidRequest_GetReport,
+                        (UsbHidReportType_Input << 8) | report, interface,
+                        buffer, length, timeout);
+}
+
+int
 usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,

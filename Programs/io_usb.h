@@ -429,6 +429,15 @@ typedef enum {
   UsbHidReportType_Feature = 0X03
 } UsbHidReportType;
 
+extern int usbHidGetReport (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  void *buffer,
+  int length,
+  int timeout
+);
+
 extern int usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
