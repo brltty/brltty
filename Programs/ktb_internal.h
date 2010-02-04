@@ -69,12 +69,24 @@ typedef struct {
 } KeyBinding;
 
 typedef struct {
+  unsigned char set;
+  unsigned char key;
+
+  int press;
+  int release;
+} HotkeyEntry;
+
+typedef struct {
   wchar_t *name;
 
   KeyBinding *keyBindingTable;
   unsigned int keyBindingsSize;
   unsigned int keyBindingCount;
   const KeyBinding **sortedKeyBindings;
+
+  HotkeyEntry *hotkeyTable;
+  unsigned int hotkeyCount;
+  const HotkeyEntry **sortedHotkeyEntries;
 
   unsigned char *keyMap;
   int superimposedBits;
@@ -99,9 +111,10 @@ struct KeyTableStruct {
   int command;
   unsigned immediate:1;
 
-  unsigned traceKeyEvents:1;
+  unsigned logKeyEvents:1;
 };
 
+extern int compareKeys (unsigned char set1, unsigned char key1, unsigned char set2, unsigned char key2);
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
 #ifdef __cplusplus

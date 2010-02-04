@@ -85,6 +85,10 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->keyBindingCount = 0;
       ctx->sortedKeyBindings = NULL;
 
+      ctx->hotkeyTable = NULL;
+      ctx->hotkeyCount = 0;
+      ctx->sortedHotkeyEntries = NULL;
+
       ctx->keyMap = NULL;
       ctx->superimposedBits = 0;
     }
@@ -252,6 +256,19 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
 }
 
 static int
+getKeyOperand (DataFile *file, unsigned char *set, unsigned char *key, KeyTableData *ktd) {
+  DataString name;
+
+  if (getDataString(file, &name, 1, "key name")) {
+    if (parseKeyName(file, set, key, name.characters, name.length, ktd)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
 parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t *characters, int length, KeyTableData *ktd) {
   KeySet modifiers;
   int immediate;
@@ -331,22 +348,6 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 
   if (getDataString(file, &names, 1, "key combination")) {
     if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
-  }
-
-  return 0;
-}
-
-static int
-getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
-  DataString name;
-
-  if (getDataString(file, &name, 1, "mapped key name")) {
-    unsigned char set;
-
-    if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
-      if (!set) return 1;
-      reportDataError(file, "invalid mapped key: %.*" PRIws, name.length, name.characters);
-    }
   }
 
   return 0;
@@ -676,6 +677,36 @@ processHideOperands (DataFile *file, void *data) {
 }
 
 static int
+processHotkeyOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+  HotkeyEntry hotkey;
+
+  if (!ctx) return 0;
+  memset(&hotkey, 0, sizeof(hotkey));
+
+  if (getKeyOperand(file, &hotkey.set, &hotkey.key, ktd)) {
+    if (getCommandOperand(file, &hotkey.press, ktd)) {
+      if (getCommandOperand(file, &hotkey.release, ktd)) {
+        unsigned int newCount = ctx->hotkeyCount + 1;
+        HotkeyEntry *newTable = realloc(ctx->hotkeyTable, ARRAY_SIZE(newTable, newCount));
+
+        if (!newTable) {
+          LogError("realloc");
+          return 0;
+        }
+
+        ctx->hotkeyTable = newTable;
+        ctx->hotkeyTable[ctx->hotkeyCount++] = hotkey;
+        return 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
 processIfKeyOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   DataString name;
@@ -712,23 +743,28 @@ processMapOperands (DataFile *file, void *data) {
   if (!ctx) return 0;
 
   {
+    unsigned char set;
     unsigned char key;
 
-    if (getMappedKeyOperand(file, &key, ktd)) {
-      unsigned char function;
+    if (getKeyOperand(file, &set, &key, ktd)) {
+      if (!set) {
+        unsigned char function;
 
-      if (getKeyboardFunctionOperand(file, &function, ktd)) {
-        if (!ctx->keyMap) {
-          if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, KEYS_PER_SET)))) {
-            LogError("malloc");
-            return 0;
+        if (getKeyboardFunctionOperand(file, &function, ktd)) {
+          if (!ctx->keyMap) {
+            if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, KEYS_PER_SET)))) {
+              LogError("malloc");
+              return 0;
+            }
+
+            memset(ctx->keyMap, KBF_None, KEYS_PER_SET);
           }
 
-          memset(ctx->keyMap, KBF_None, KEYS_PER_SET);
+          ctx->keyMap[key] = function;
+          return 1;
         }
-
-        ctx->keyMap[key] = function;
-        return 1;
+      } else {
+        reportDataError(file, "unmappable key");
       }
     }
   }
@@ -818,6 +854,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("hide"), .processor=processHideOperands},
+    {.name=WS_C("hotkey"), .processor=processHotkeyOperands},
     {.name=WS_C("ifkey"), .processor=processIfKeyOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
@@ -880,6 +917,39 @@ prepareKeyBindings (KeyContext *ctx) {
   return 1;
 }
 
+static int
+sortHotkeyEntries (const void *element1, const void *element2) {
+  const HotkeyEntry *const *hotkey1 = element1;
+  const HotkeyEntry *const *hotkey2 = element2;
+
+  return compareKeys((*hotkey1)->set, (*hotkey1)->key, (*hotkey2)->set, (*hotkey2)->key);
+}
+
+static int
+prepareHotkeyEntries (KeyContext *ctx) {
+  if (ctx->hotkeyCount) {
+    if (!(ctx->sortedHotkeyEntries = malloc(ARRAY_SIZE(ctx->sortedHotkeyEntries, ctx->hotkeyCount)))) {
+      LogError("malloc");
+      return 0;
+    }
+
+    {
+      HotkeyEntry *source = ctx->hotkeyTable;
+      const HotkeyEntry **target = ctx->sortedHotkeyEntries;
+      unsigned int count = ctx->hotkeyCount;
+
+      while (count) {
+        *target++ = source++;
+        count -= 1;
+      }
+    }
+
+    qsort(ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), sortHotkeyEntries);
+  }
+
+  return 1;
+}
+
 int
 finishKeyTable (KeyTableData *ktd) {
   {
@@ -889,6 +959,7 @@ finishKeyTable (KeyTableData *ktd) {
       KeyContext *ctx = &ktd->table->keyContextTable[context];
 
       if (!prepareKeyBindings(ctx)) return 0;
+      if (!prepareHotkeyEntries(ctx)) return 0;
     }
   }
 
@@ -944,8 +1015,13 @@ destroyKeyTable (KeyTable *table) {
     KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
 
     if (ctx->name) free(ctx->name);
+
     if (ctx->keyBindingTable) free(ctx->keyBindingTable);
     if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
+
+    if (ctx->hotkeyTable) free(ctx->hotkeyTable);
+    if (ctx->sortedHotkeyEntries) free(ctx->sortedHotkeyEntries);
+
     if (ctx->keyMap) free(ctx->keyMap);
   }
 

@@ -53,7 +53,8 @@ typedef struct {
 typedef enum {
   KTS_UNBOUND,
   KTS_MODIFIERS,
-  KTS_COMMAND
+  KTS_COMMAND,
+  KTS_HOTKEY
 } KeyTableState;
 
 typedef struct KeyTableStruct KeyTable;

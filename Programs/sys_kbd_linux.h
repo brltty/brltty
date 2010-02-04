@@ -515,7 +515,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           }
         }
 
-        {
+        if (state != KTS_HOTKEY) {
           typedef enum {
             WKA_NONE,
             WKA_CURRENT,

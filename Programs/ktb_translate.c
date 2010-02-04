@@ -39,14 +39,21 @@ isTemporaryKeyContext (const KeyTable *table, const KeyContext *ctx) {
 }
 
 int
+compareKeys (unsigned char set1, unsigned char key1, unsigned char set2, unsigned char key2) {
+  if (set1 < set2) return -1;
+  if (set1 > set2) return 1;
+
+  if (key1 < key2) return -1;
+  if (key1 > key2) return 1;
+
+  return 0;
+}
+
+int
 compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
-  if (binding1->keys.set < binding2->keys.set) return -1;
-  if (binding1->keys.set > binding2->keys.set) return 1;
-
-  if (binding1->keys.key < binding2->keys.key) return -1;
-  if (binding1->keys.key > binding2->keys.key) return 1;
-
-  return compareKeySetMasks(binding1->keys.modifiers.mask, binding2->keys.modifiers.mask);
+  int result = compareKeys(binding1->keys.set, binding1->keys.key, binding2->keys.set, binding2->keys.key);
+  if (!result) result = compareKeySetMasks(binding1->keys.modifiers.mask, binding2->keys.modifiers.mask);
+  return result;
 }
 
 static int
@@ -91,6 +98,32 @@ isModifiers (KeyTable *table, unsigned char context) {
   }
 
   return 0;
+}
+
+static int
+searchHotkeyEntry (const void *target, const void *element) {
+  const HotkeyEntry *reference = target;
+  const HotkeyEntry *const *hotkey = element;
+  return compareKeys(reference->set, reference->key, (*hotkey)->set, (*hotkey)->key);
+}
+
+static const HotkeyEntry *
+getHotkeyEntry (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
+  const KeyContext *ctx = getKeyContext(table, context);
+
+  if (ctx && ctx->sortedHotkeyEntries) {
+    HotkeyEntry target;
+
+    target.set = set;
+    target.key = key;
+
+    {
+      const HotkeyEntry **hotkey = bsearch(&target, ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), searchHotkeyEntry);
+      if (hotkey) return *hotkey;
+    }
+  }
+
+  return NULL;
 }
 
 static int
@@ -182,11 +215,16 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   KeyTableState state = KTS_UNBOUND;
   int command = EOF;
   int immediate = 1;
+  const HotkeyEntry *hotkey;
 
   if (context == BRL_CTX_DEFAULT) context = table->currentContext;
   if (press) table->currentContext = table->persistentContext;
 
-  if (set) {
+  if ((hotkey = getHotkeyEntry(table, context, set, key))) {
+    int cmd = press? hotkey->press: hotkey->release;
+    if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
+    state = KTS_HOTKEY;
+  } else if (set) {
     if (press) {
       const KeyBinding *binding = getKeyBinding(table, context, set, 0);
 
@@ -277,7 +315,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (table->traceKeyEvents) {
+  if (table->logKeyEvents) {
     char buffer[0X40];
     size_t size = sizeof(buffer);
     int offset = 0;
@@ -300,8 +338,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 }
 
 void
-traceKeyEvents (KeyTable *table) {
-  table->traceKeyEvents = 1;
+logKeyEvents (KeyTable *table) {
+  table->logKeyEvents = 1;
 }
 
 typedef struct {
@@ -480,6 +518,29 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
+  {
+    const HotkeyEntry *hotkey = ctx->hotkeyTable;
+    unsigned int count = ctx->hotkeyCount;
+
+    while (count) {
+      if (hotkey->press != BRL_CMD_NOOP) {
+        if (!putCommandDescription(lgd, hotkey->press)) return 0;
+        if (!putCharacterString(lgd, WS_C(": press "))) return 0;
+        if (!putKeyName(lgd, hotkey->set, hotkey->key)) return 0;
+        if (!endLine(lgd)) return 0;
+      }
+
+      if (hotkey->release != BRL_CMD_NOOP) {
+        if (!putCommandDescription(lgd, hotkey->release)) return 0;
+        if (!putCharacterString(lgd, WS_C(": release "))) return 0;
+        if (!putKeyName(lgd, hotkey->set, hotkey->key)) return 0;
+        if (!endLine(lgd)) return 0;
+      }
+
+      hotkey += 1, count -= 1;
+    }
+  }
+
   {
     const KeyBinding *binding = ctx->keyBindingTable;
     unsigned int count = ctx->keyBindingCount;
