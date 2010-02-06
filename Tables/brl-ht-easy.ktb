@@ -27,4 +27,15 @@ bind Right+RoutingKey NXINDENT
 
 bind Left+Right PASTE
 
+bind B1+Left LNBEG
+bind B1+Right LNEND
+bind B2+Left TOP
+bind B2+Right BOT
+bind B3+Left HWINLT
+bind B3+Right HWINRT
+bind B6+Left CHRLT
+bind B6+Right CHRRT
+bind B2+B3+Left MUTE
+bind B2+B3+Right SAY_LINE
+
 include brl-ht-dots.kti
