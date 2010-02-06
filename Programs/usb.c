@@ -424,6 +424,19 @@ usbEndpointDescriptor (
   return NULL;
 }
 
+const UsbHidDescriptor *
+usbHidDescriptor (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor))
+    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID)
+      return &descriptor->hid;
+
+  LogPrint(LOG_WARNING, "USB: HID descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
 static void
 usbDeallocateEndpoint (void *item, void *data) {
   UsbEndpoint *endpoint = item;

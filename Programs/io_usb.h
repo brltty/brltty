@@ -33,7 +33,9 @@ typedef enum {
   UsbDescriptorType_Configuration = 0X02,
   UsbDescriptorType_String        = 0X03,
   UsbDescriptorType_Interface     = 0X04,
-  UsbDescriptorType_Endpoint      = 0X05
+  UsbDescriptorType_Endpoint      = 0X05,
+  UsbDescriptorType_HID           = 0X21,
+  UsbDescriptorType_Report        = 0X22
 } UsbDescriptorType;
 
 /* Descriptor sizes. */
@@ -42,7 +44,9 @@ typedef enum {
   UsbDescriptorSize_Configuration =  9,
   UsbDescriptorSize_String        =  2,
   UsbDescriptorSize_Interface     =  9,
-  UsbDescriptorSize_Endpoint      =  7
+  UsbDescriptorSize_Endpoint      =  7,
+  UsbDescriptorSize_HID           =  6,
+  UsbDescriptorSize_Report        =  3
 } UsbDescriptorSize;
 
 /* Configuration attributes (bmAttributes). */
@@ -209,6 +213,20 @@ typedef struct {
   uint8_t bSynchAddress;
 } PACKED UsbEndpointDescriptor;
 
+typedef struct {
+  uint8_t bDescriptorType;  /* Descriptor type (34 == report). */
+  uint16_t wLength;         /* Descriptor size in bytes (6). */
+} PACKED UsbReportDescriptor;
+
+typedef struct {
+  uint8_t bLength;          /* Descriptor size in bytes (6). */
+  uint8_t bDescriptorType;  /* Descriptor type (33 == HID). */
+  uint16_t bcdHID;
+  uint8_t bCountryCode;
+  uint8_t bNumDescriptors;
+  UsbReportDescriptor descriptors[(0XFF - UsbDescriptorSize_HID) / UsbDescriptorSize_Report];
+} PACKED UsbHidDescriptor;
+
 typedef union {
   UsbDescriptorHeader header;
   UsbDeviceDescriptor device;
@@ -216,6 +234,7 @@ typedef union {
   UsbStringDescriptor string;
   UsbInterfaceDescriptor interface;
   UsbEndpointDescriptor endpoint;
+  UsbHidDescriptor hid;
   unsigned char bytes[0XFF];
 } UsbDescriptor;
 
@@ -259,6 +278,7 @@ extern const UsbEndpointDescriptor *usbEndpointDescriptor (
   UsbDevice *device,
   unsigned char endpointAddress
 );
+extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
 extern int usbConfigureDevice (
   UsbDevice *device,
