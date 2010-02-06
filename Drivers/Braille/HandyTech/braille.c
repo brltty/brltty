@@ -232,7 +232,7 @@ typedef struct {
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
-  { .identifier = HT_Model_Modular20,
+  { .identifier = HT_MODEL_Modular20,
     .name = "Modular 20+4",
     .textCells = 20,
     .statusCells = 4,
@@ -241,7 +241,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_Modular40,
+  { .identifier = HT_MODEL_Modular40,
     .name = "Modular 40+4",
     .textCells = 40,
     .statusCells = 4,
@@ -250,7 +250,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_Modular80,
+  { .identifier = HT_MODEL_Modular80,
     .name = "Modular 80+4",
     .textCells = 80,
     .statusCells = 4,
@@ -259,7 +259,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_ModularEvolution64,
+  { .identifier = HT_MODEL_ModularEvolution64,
     .name = "Modular Evolution 64",
     .textCells = 64,
     .statusCells = 0,
@@ -269,7 +269,7 @@ static const ModelEntry modelTable[] = {
     .hasATC = 1
   }
   ,
-  { .identifier = HT_Model_ModularEvolution88,
+  { .identifier = HT_MODEL_ModularEvolution88,
     .name = "Modular Evolution 88",
     .textCells = 88,
     .statusCells = 0,
@@ -279,7 +279,7 @@ static const ModelEntry modelTable[] = {
     .hasATC = 1
   }
   ,
-  { .identifier = HT_Model_BrailleWave,
+  { .identifier = HT_MODEL_BrailleWave,
     .name = "Braille Wave 40",
     .textCells = 40,
     .statusCells = 0,
@@ -288,7 +288,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_Bookworm,
+  { .identifier = HT_MODEL_Bookworm,
     .name = "Bookworm",
     .textCells = 8,
     .statusCells = 0,
@@ -298,7 +298,7 @@ static const ModelEntry modelTable[] = {
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
   }
   ,
-  { .identifier = HT_Model_Braillino,
+  { .identifier = HT_MODEL_Braillino,
     .name = "Braillino 20",
     .textCells = 20,
     .statusCells = 0,
@@ -307,7 +307,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_BrailleStar40,
+  { .identifier = HT_MODEL_BrailleStar40,
     .name = "Braille Star 40",
     .textCells = 40,
     .statusCells = 0,
@@ -316,7 +316,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_BrailleStar80,
+  { .identifier = HT_MODEL_BrailleStar80,
     .name = "Braille Star 80",
     .textCells = 80,
     .statusCells = 0,
@@ -325,7 +325,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = HT_Model_EasyBraille,
+  { .identifier = HT_MODEL_EasyBraille,
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,
@@ -428,6 +428,39 @@ static const InputOutputOperations serialOperations = {
 
 static UsbChannel *usb = NULL;
 
+#define HT_HID_REPORT_SIZE 61
+
+typedef enum {
+  HT_HID_RPT_OutData     = 0X01, /* receive data from device */
+  HT_HID_RPT_InData      = 0X02, /* send data to device */
+  HT_HID_RPT_InCommand   = 0XFB, /* run USB-HID firmware command */
+  HT_HID_RPT_OutGetVer   = 0XFC, /* get version of USB-HID firmware */
+  HT_HID_RPT_OutBaudRate = 0XFD, /* get baud rate of serial connection */
+  HT_HID_RPT_InBaudRate  = 0XFE, /* set baud rate of serial connection */
+} HT_HidReportNumber;
+
+typedef enum {
+  HT_HID_CMD_FlushBuffers = 0X01, /* flush input and output buffers */
+} HtHidCommand;
+
+static uint16_t hidFirmwareVersion;
+static unsigned char hidInputReport[HT_HID_REPORT_SIZE];
+#define hidInputLength (hidInputReport[1])
+#define hidInputBuffer (&hidInputReport[2])
+static unsigned char hidInputOffset;
+
+static int
+getHidReport (unsigned char number, unsigned char *buffer, int size) {
+  return usbHidGetReport(usb->device, usb->definition.interface,
+                         number, buffer, size, 1000);
+}
+
+static int
+setHidReport (const unsigned char *report, int size) {
+  return usbHidSetReport(usb->device, usb->definition.interface,
+                         report[0], report, size, 1000);
+}
+
 static int
 openUsbPort (char **parameters, const char *device) {
   const SerialParameters serial = {
@@ -453,10 +486,56 @@ openUsbPort (char **parameters, const char *device) {
       .serial = &serial
     }
     ,
+    { /* Easy Braille (HID) */
+      .vendor=HT_USB_VENDOR, .product=HT_MODEL_EasyBraille,
+      .configuration=1, .interface=0, .alternative=0
+    }
+    ,
+    { /* Braille Star 40 (HID) */
+      .vendor=HT_USB_VENDOR, .product=HT_MODEL_BrailleStar40,
+      .configuration=1, .interface=0, .alternative=0
+    }
+    ,
+    { /* ATC Braille Navigator (HID) */
+      .vendor=HT_USB_VENDOR, .product=HT_MODEL_AtcBrailleNavigator,
+      .configuration=1, .interface=0, .alternative=0
+    }
+    ,
+    { /* USB-HID adapter */
+      .vendor=HT_USB_VENDOR, .product=HT_MODEL_UsbHidAdapter,
+      .configuration=1, .interface=0, .alternative=0
+    }
+    ,
     { .vendor=0 }
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
+    if (!usb->definition.outputEndpoint) {
+      hidInputLength = 0;
+      hidInputOffset = 0;
+
+      hidFirmwareVersion = 0;
+      {
+        unsigned char report[HT_HID_REPORT_SIZE];
+        int result = getHidReport(HT_HID_RPT_OutGetVer, report, sizeof(report));
+
+        if (result > 0) {
+          hidFirmwareVersion = (report[1] << 8) | report[2];
+          LogPrint(LOG_INFO, "HandyTech USB HID Firmware Version: %u.%u",
+                   report[1], report[2]);
+        }
+      }
+
+      {
+        const unsigned char report[HT_HID_REPORT_SIZE] = {
+          HT_HID_RPT_InCommand,
+          HT_HID_CMD_FlushBuffers
+        };
+
+        setHidReport(report, sizeof(report));
+      }
+    }
+
     return 1;
   }
   return 0;
@@ -464,14 +543,56 @@ openUsbPort (char **parameters, const char *device) {
 
 static int
 awaitUsbInput (int milliseconds) {
+  if (!usb->definition.inputEndpoint) {
+    struct timeval startTime;
+
+    if (hidInputOffset < hidInputLength) return 1;
+    gettimeofday(&startTime, NULL);
+
+    while (1) {
+      int result = getHidReport(HT_HID_RPT_OutData, hidInputReport, sizeof(hidInputReport));
+
+      if (result == -1) return 0;
+      hidInputOffset = 0;
+      if (hidInputLength > 0) return 1;
+
+      if (millisecondsSince(&startTime) >= milliseconds) break;
+      approximateDelay(10);
+    }
+
+    errno = EAGAIN;
+    return 0;
+  }
+
   return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
-                           (wait? timeout: 0), timeout);
+  int count;
+
+  if (usb->definition.inputEndpoint) {
+    count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
+                         (wait? timeout: 0), timeout);
+  } else {
+    count = 0;
+
+    while (count < length) {
+      if (!io->awaitInput(wait? timeout: 0)) {
+        count = -1;
+        break;
+      }
+
+      {
+        int amount = MIN(length-count, hidInputLength-hidInputOffset);
+        memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
+        hidInputOffset += amount;
+        count += amount;
+      }
+    }
+  }
+
   if (count != -1) return count;
   if (errno == EAGAIN) return 0;
   return -1;
@@ -480,7 +601,32 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 static int
 writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+
+  if (!usb->definition.outputEndpoint) {
+    int index = 0;
+
+    while (length) {
+      unsigned char report[HT_HID_REPORT_SIZE];
+      unsigned char count = MIN(length, (sizeof(report) - 2));
+      int result;
+
+      report[0] = HT_HID_RPT_InData;
+      report[1] = count;
+      memcpy(report+2, &buffer[index], count);
+      memset(&report[count+2], 0, sizeof(report)-count-2);
+
+      result = setHidReport(report, sizeof(report));
+      if (result == -1) return -1;
+
+      index += count;
+      length -= count;
+    }
+
+    return index;
+  }
+
+  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
+                          buffer, length, 1000);
 }
 
 static void
@@ -560,6 +706,88 @@ static struct timeval stateTime;
 static unsigned int retryCount = 0;
 static unsigned char updateRequired = 0;
 
+static ssize_t
+brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
+  unsigned char *packet = buffer;
+  size_t offset = 0;
+  size_t length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+      int count = io->readBytes(&byte, 1, started);
+
+      if (count != 1) {
+        if (!count && started) logPartialPacket(packet, offset);
+        return count;
+      }
+    }
+
+    if (offset == 0) {
+      switch (byte) {
+        default:
+          length = 1;
+          break;
+
+        case HT_PKT_OK:
+          length = 2;
+          break;
+
+        case HT_PKT_Extended:
+          length = 4;
+          break;
+      }
+    } else {
+      switch (packet[0]) {
+        case HT_PKT_Extended:
+          if (offset == 2) length += byte;
+          break;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
+    }
+
+    if (++offset == length) {
+      if (offset <= size) {
+        int ok = 0;
+
+        switch (packet[0]) {
+          case HT_PKT_Extended:
+            if (packet[length-1] == SYN) ok = 1;
+            break;
+
+          default:
+            ok = 1;
+            break;
+        }
+
+        if (ok) {
+          logInputPacket(packet, offset);
+          return length;
+        }
+
+        logCorruptPacket(packet, offset);
+      }
+
+      offset = 0;
+      length = 0;
+    }
+  }
+}
+
+static ssize_t
+brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
+  logOutputPacket(packet, length);
+  return io->writeBytes(packet, length, &brl->writeDelay);
+}
+
 static void
 setState (BrailleDisplayState state) {
   if (state == currentState) {
@@ -575,7 +803,7 @@ setState (BrailleDisplayState state) {
 static int
 brl_reset (BrailleDisplay *brl) {
   static const unsigned char packet[] = {HT_PKT_Reset};
-  return io->writeBytes(packet, sizeof(packet), &brl->writeDelay) != -1;
+  return brl_writePacket(brl, packet, sizeof(packet)) != -1;
 }
 
 static void
@@ -656,7 +884,7 @@ writeExtendedPacket (
   memcpy(packet.fields.data.extended.data.bytes, data, size);
   packet.fields.data.extended.data.bytes[size] = SYN;
   size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
-  return io->writeBytes((unsigned char *)&packet, size, &brl->writeDelay) == size;
+  return brl_writePacket(brl, (unsigned char *)&packet, size) == size;
 }
 
 static int
@@ -708,10 +936,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
+
     while (brl_reset(brl)) {
       while (io->awaitInput(100)) {
         HT_Packet response;
-        if (brl_readPacket(brl, &response, sizeof(response)) > 0) {
+        int length = brl_readPacket(brl, &response, sizeof(response));
+
+        if (length > 0) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
               if (model->hasATC) {
@@ -724,6 +955,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               return 1;
             }
+
             deallocateBuffers();
           }
         }
@@ -735,13 +967,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     io->closePort();
   }
+
   return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (model->sessionEndLength) {
-    io->writeBytes(model->sessionEndAddress, model->sessionEndLength, NULL);
+    brl_writePacket(brl, model->sessionEndAddress, model->sessionEndLength);
   }
   io->closePort();
 
@@ -768,7 +1001,7 @@ writeStatusAndTextCells (BrailleDisplay *brl) {
   memcpy(buffer+1, rawStatus, model->statusCells);
   memcpy(buffer+model->statusCells+1, rawData, model->textCells);
 
-  return io->writeBytes(buffer, sizeof(buffer), &brl->writeDelay) != -1;
+  return brl_writePacket(brl, buffer, sizeof(buffer)) != -1;
 }
 
 static int
@@ -778,7 +1011,7 @@ writeBookwormCells (BrailleDisplay *brl) {
   buffer[0] = 0X01;
   memcpy(buffer+1, rawData, model->textCells);
   buffer[sizeof(buffer)-1] = SYN;
-  return io->writeBytes(buffer, sizeof(buffer), &brl->writeDelay) != -1;
+  return brl_writePacket(brl, buffer, sizeof(buffer)) != -1;
 }
 
 static int
@@ -901,7 +1134,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
-    if (model->identifier == HT_Model_Bookworm) {
+    if (model->identifier == HT_MODEL_Bookworm) {
       if (packet.fields.type == 0X06) {
         if (currentState != BDS_OFF) {
           /* if we get another byte right away then the device
@@ -1079,87 +1312,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   updateCells(brl);
 
   return EOF;
-}
-
-static ssize_t
-brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  unsigned char *packet = buffer;
-  int offset = 0;
-  int length = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-      int count = io->readBytes(&byte, 1, started);
-
-      if (count != 1) {
-        if (!count && started) logPartialPacket(packet, offset);
-        return count;
-      }
-    }
-
-    if (offset == 0) {
-      switch (byte) {
-        default:
-          length = 1;
-          break;
-
-        case HT_PKT_OK:
-          length = 2;
-          break;
-
-        case HT_PKT_Extended:
-          length = 4;
-          break;
-      }
-    } else {
-      switch (packet[0]) {
-        case HT_PKT_Extended:
-          if (offset == 2) length += byte;
-          break;
-      }
-    }
-
-    if (offset < size) {
-      packet[offset] = byte;
-    } else {
-      if (offset == size) logTruncatedPacket(packet, offset);
-      logDiscardedByte(byte);
-    }
-
-    if (++offset == length) {
-      if (offset <= size) {
-        int ok = 0;
-
-        switch (packet[0]) {
-          case HT_PKT_Extended:
-            if (packet[length-1] == SYN) ok = 1;
-            break;
-
-          default:
-            ok = 1;
-            break;
-        }
-
-        if (ok) {
-          logInputPacket(packet, offset);
-          return length;
-        }
-
-        logCorruptPacket(packet, offset);
-      }
-
-      offset = 0;
-      length = 0;
-    }
-  }
-}
-
-static ssize_t
-brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  return io->writeBytes(packet, length, &brl->writeDelay);
 }
 
 static void
