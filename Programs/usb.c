@@ -94,6 +94,47 @@ usbGetDeviceDescriptor (
 }
 
 int
+usbGetReport (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char number,
+  unsigned char **report,
+  int timeout
+) {
+  const UsbHidDescriptor *hid = usbHidDescriptor(device);
+
+  if (hid) {
+    if (number < hid->bNumDescriptors) {
+      const UsbClassDescriptor *descriptor = &hid->descriptors[number];
+      uint16_t length = getLittleEndian(descriptor->wDescriptorLength);
+      void *buffer = malloc(length);
+
+      if (buffer) {
+        int result = usbControlRead(device,
+                                    UsbControlRecipient_Interface, UsbControlType_Standard,
+                                    UsbStandardRequest_GetDescriptor,
+                                    (descriptor->bDescriptorType << 8) | interface,
+                                    number, buffer, length, timeout);
+
+        if (result != -1) {
+          *report = buffer;
+          return result;
+        }
+
+        free(buffer);
+      } else {
+        LogError("malloc");
+      }
+    } else {
+      LogPrint(LOG_WARNING, "USB report descriptor not found: %u[%u]",
+               interface, number);
+    }
+  }
+
+  return -1;
+}
+
+int
 usbGetLanguage (
   UsbDevice *device,
   uint16_t *language,
