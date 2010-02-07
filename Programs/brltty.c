@@ -94,6 +94,8 @@ typedef struct {
   short row;
 } ScreenMark;
 typedef struct {
+  int number;
+
   unsigned char trackCursor;		/* cursor tracking mode */
   unsigned char hideCursor;		/* for temporarily hiding the cursor */
   unsigned char showAttributes;		/* text or attributes display */
@@ -102,9 +104,11 @@ typedef struct {
   int trkx, trky;	/* tracked cursor position */
   int ptrx, ptry;	/* last known mouse/pointer position */
   ScreenMark marks[0X100];
-} ScreenState;
+} ScreenEntry;
 
-static const ScreenState initialScreenState = {
+static const ScreenEntry initialScreenEntry = {
+  .number = 0,
+
   .trackCursor = DEFAULT_TRACK_CURSOR,
   .hideCursor = DEFAULT_HIDE_CURSOR,
 
@@ -113,13 +117,14 @@ static const ScreenState initialScreenState = {
 };
 
 /* 
- * Array definition containing pointers to ScreenState structures for 
+ * Array definition containing pointers to ScreenEntry structures for 
  * each screen.  Each structure is dynamically allocated when its 
  * screen is used for the first time.
  */
-static ScreenState **screenStates = NULL;
-static int screenCount = 0;
-static ScreenState *p;
+static ScreenEntry **screenArray = NULL;
+static unsigned int screenLimit = 0;
+static unsigned int screenCount = 0;
+static ScreenEntry *p;
 
 static ScreenDescription scr;          /* For screen state infos */
 #define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
@@ -129,33 +134,56 @@ static ScreenDescription scr;          /* For screen state infos */
 #define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
 
 static void
-getScreenAttributes (void) {
-  int previousScreen = scr.number;
+setScreenEntry (void) {
+  int previousNumber = scr.number;
 
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
 
-  if (scr.number >= screenCount) {
-    int newCount = (scr.number + 1) | 0XF;
-    screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
-    while (screenCount < newCount) screenStates[screenCount++] = NULL;
-  } else if (scr.number == previousScreen) {
-    return;
-  }
+  if (scr.number != previousNumber) {
+    int first = 0;
+    int last = screenCount - 1;
 
-  {
-    ScreenState **state = &screenStates[scr.number];
-    if (!*state) {
-      *state = mallocWrapper(sizeof(**state));
-      **state = initialScreenState;
+    while (first <= last) {
+      int current = (first + last) / 2;
+      ScreenEntry *entry = screenArray[current];
+
+      if (scr.number == entry->number) {
+        p = entry;
+        return;
+      }
+
+      if (scr.number < entry->number) {
+        last = current - 1;
+      } else {
+        first = current + 1;
+      }
     }
-    p = *state;
+
+    if (screenCount == screenLimit) {
+      screenLimit = screenLimit? screenLimit<<1: 0X10;
+      screenArray = reallocWrapper(screenArray, ARRAY_SIZE(screenArray, screenLimit));
+    }
+
+    {
+      ScreenEntry *entry = mallocWrapper(sizeof(*entry));
+
+      *entry = initialScreenEntry;
+      entry->number = scr.number;
+
+      memmove(&screenArray[first+1], &screenArray[first],
+              ARRAY_SIZE(screenArray, screenCount-first));
+      screenCount += 1;
+      screenArray[first] = entry;
+
+      p = entry;
+    }
   }
 }
 
 static void
 updateScreenAttributes (void) {
-  getScreenAttributes();
+  setScreenEntry();
 
   {
     int maximum = MAX(scr.rows-(int)brl.textRows, 0);
@@ -179,14 +207,15 @@ updateScreenAttributes (void) {
 }
 
 static void
-exitScreenStates (void) {
-  if (screenStates) {
-    while (screenCount > 0) free(screenStates[--screenCount]);
-    free(screenStates);
-    screenStates = NULL;
+exitScreenArray (void) {
+  if (screenArray) {
+    while (screenCount > 0) free(screenArray[--screenCount]);
+    free(screenArray);
+    screenArray = NULL;
   } else {
     screenCount = 0;
   }
+  screenLimit = 0;
 }
 
 static void
@@ -2846,8 +2875,8 @@ static int
 runProgram (void) {
   UpdateData upd;
 
-  atexit(exitScreenStates);
-  getScreenAttributes();
+  atexit(exitScreenArray);
+  setScreenEntry();
   /* NB: screen size can sometimes change, e.g. the video mode may be changed
    * when installing a new font. This will be detected by another call to
    * describeScreen() within the main loop. Don't assume that scr.rows
