@@ -124,7 +124,7 @@ static const ScreenEntry initialScreenEntry = {
 static ScreenEntry **screenArray = NULL;
 static unsigned int screenLimit = 0;
 static unsigned int screenCount = 0;
-static ScreenEntry *p;
+static ScreenEntry *p = NULL;
 
 static ScreenDescription scr;          /* For screen state infos */
 #define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
@@ -135,12 +135,10 @@ static ScreenDescription scr;          /* For screen state infos */
 
 static void
 setScreenEntry (void) {
-  int previousNumber = scr.number;
-
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
 
-  if (scr.number != previousNumber) {
+  if (!p || (scr.number != p->number)) {
     int first = 0;
     int last = screenCount - 1;
 
