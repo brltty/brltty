@@ -147,7 +147,7 @@ currentVirtualTerminal_WindowsScreen (void) {
 	      &altTabInfo, altTabName, sizeof(altTabName))))
 	altTab = NULL;
       else
-	return (int)altTab;
+	return 0;
     }
   }
   win = GetForegroundWindow();
