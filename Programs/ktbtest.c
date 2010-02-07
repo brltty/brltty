@@ -241,6 +241,11 @@ api_handleCommand (int command) {
 }
 
 int
+api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
+  return EOF;
+}
+
+int
 message (const char *mode, const char *string, short flags) {
   return 1;
 }
