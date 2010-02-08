@@ -94,47 +94,6 @@ usbGetDeviceDescriptor (
 }
 
 int
-usbGetReport (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char number,
-  unsigned char **report,
-  int timeout
-) {
-  const UsbHidDescriptor *hid = usbHidDescriptor(device);
-
-  if (hid) {
-    if (number < hid->bNumDescriptors) {
-      const UsbClassDescriptor *descriptor = &hid->descriptors[number];
-      uint16_t length = getLittleEndian(descriptor->wDescriptorLength);
-      void *buffer = malloc(length);
-
-      if (buffer) {
-        int result = usbControlRead(device,
-                                    UsbControlRecipient_Interface, UsbControlType_Standard,
-                                    UsbStandardRequest_GetDescriptor,
-                                    (descriptor->bDescriptorType << 8) | interface,
-                                    number, buffer, length, timeout);
-
-        if (result != -1) {
-          *report = buffer;
-          return result;
-        }
-
-        free(buffer);
-      } else {
-        LogError("malloc");
-      }
-    } else {
-      LogPrint(LOG_WARNING, "USB report descriptor not found: %u[%u]",
-               interface, number);
-    }
-  }
-
-  return -1;
-}
-
-int
 usbGetLanguage (
   UsbDevice *device,
   uint16_t *language,
@@ -461,19 +420,6 @@ usbEndpointDescriptor (
   }
 
   LogPrint(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
-  errno = ENOENT;
-  return NULL;
-}
-
-const UsbHidDescriptor *
-usbHidDescriptor (UsbDevice *device) {
-  const UsbDescriptor *descriptor = NULL;
-
-  while (usbNextDescriptor(device, &descriptor))
-    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID)
-      return &descriptor->hid;
-
-  LogPrint(LOG_WARNING, "USB: HID descriptor not found");
   errno = ENOENT;
   return NULL;
 }
@@ -901,6 +847,125 @@ usbReapInput (
     return target - bytes;
   }
   return -1;
+}
+
+const UsbHidDescriptor *
+usbHidDescriptor (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor))
+    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID)
+      return &descriptor->hid;
+
+  LogPrint(LOG_WARNING, "USB: HID descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+int
+usbHidGetItems (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char number,
+  unsigned char **items,
+  int timeout
+) {
+  const UsbHidDescriptor *hid = usbHidDescriptor(device);
+
+  if (hid) {
+    if (number < hid->bNumDescriptors) {
+      const UsbClassDescriptor *descriptor = &hid->descriptors[number];
+      uint16_t length = getLittleEndian(descriptor->wDescriptorLength);
+      void *buffer = malloc(length);
+
+      if (buffer) {
+        int result = usbControlRead(device,
+                                    UsbControlRecipient_Interface, UsbControlType_Standard,
+                                    UsbStandardRequest_GetDescriptor,
+                                    (descriptor->bDescriptorType << 8) | interface,
+                                    number, buffer, length, timeout);
+
+        if (result != -1) {
+          *items = buffer;
+          return result;
+        }
+
+        free(buffer);
+      } else {
+        LogError("malloc");
+      }
+    } else {
+      LogPrint(LOG_WARNING, "USB report descriptor not found: %u[%u]",
+               interface, number);
+    }
+  }
+
+  return -1;
+}
+
+int
+usbHidFillReportDescription (
+  const unsigned char *items,
+  int size,
+  unsigned char identifier,
+  UsbHidReportDescription *description
+) {
+  int found = 0;
+  int index = 0;
+
+  while (index < size) {
+    unsigned char item = items[index++];
+    UsbHidItemType type = USB_HID_ITEM_TYPE(item);
+    unsigned char length = USB_HID_ITEM_LENGTH(item);
+    uint32_t value = 0;
+
+    if (length) {
+      unsigned char shift = 0;
+
+      do {
+        if (index == size) return 0;
+        value |= items[index++] << shift;
+        shift += 8;
+      } while (--length);
+    }
+
+    switch (type) {
+      case UsbHidItemType_ReportID:
+        if (!found && (value == identifier)) {
+          memset(description, 0, sizeof(*description));
+          description->identifier = identifier;
+
+          found = 1;
+          continue;
+        }
+        break;
+
+      case UsbHidItemType_ReportSize:
+        if (found) {
+          description->size = value;
+          goto defined;
+        }
+        break;
+
+      case UsbHidItemType_ReportCount:
+        if (found) {
+          description->count = value;
+          goto defined;
+        }
+        break;
+
+      defined:
+        description->defined |= USB_HID_ITEM_BIT(type);
+        continue;
+
+      default:
+        break;
+    }
+
+    if (found) break;
+  }
+
+  return found;
 }
 
 int
