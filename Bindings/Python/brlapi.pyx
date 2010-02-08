@@ -86,6 +86,7 @@ class OperationError(Exception):
 			self.exception = exception
 			c_brlapi.free(exception)
 		else:
+			self.exception = None
 			self.brlerrno = c_brlapi.brlapi_error.brlerrno
 			self.libcerrno = c_brlapi.brlapi_error.libcerrno
 			self.gaierrno = c_brlapi.brlapi_error.gaierrno
