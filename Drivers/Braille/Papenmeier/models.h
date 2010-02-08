@@ -121,10 +121,10 @@ typedef struct {
   const uint16_t *statusCells;
 } ModelEntry; 
 
-#define PM_MODEL_IDENTITY(identifier, model, name) \
+#define PM_MODEL_IDENTITY(identifier, model, name, protocol)	\
   .modelIdentifier = identifier, \
   .modelName = name, \
-  .protocolRevision = 1, \
+  .protocolRevision = protocol, \
   .keyTableDefinition = &KEY_TABLE_DEFINITION(model)
 
 #define PM_CELL_COUNTS(columns, status) \
@@ -442,110 +442,107 @@ END_KEY_TABLE_LIST
 
 
 static const ModelEntry modelTable[] = {
-  { PM_MODEL_IDENTITY(0, c_486, "BrailleX Compact 486"),
+  { PM_MODEL_IDENTITY(0, c_486, "BrailleX Compact 486", 1),
     PM_CELL_COUNTS(40, 0),
     PM_FRONT_KEYS(9)
   }
   ,
-  { PM_MODEL_IDENTITY(1, 2d_l, "BrailleX 2D Lite (plus)"),
+  { PM_MODEL_IDENTITY(1, 2d_l, "BrailleX 2D Lite (plus)", 1),
     PM_CELL_COUNTS(40, 13),
     PM_FRONT_KEYS(9)
   }
   ,
-  { PM_MODEL_IDENTITY(2, c, "BrailleX Compact/Tiny"),
+  { PM_MODEL_IDENTITY(2, c, "BrailleX Compact/Tiny", 1),
     PM_CELL_COUNTS(40, 0),
     PM_FRONT_KEYS(9)
   }
   ,
-  { PM_MODEL_IDENTITY(3, 2d_s, "BrailleX 2D Screen Soft"),
+  { PM_MODEL_IDENTITY(3, 2d_s, "BrailleX 2D Screen Soft", 1),
     PM_CELL_COUNTS(80, 22),
     PM_FRONT_KEYS(13)
   }
   ,
-  { PM_MODEL_IDENTITY(6, ib_80, "BrailleX IB 80 CR Soft"),
+  { PM_MODEL_IDENTITY(6, ib_80, "BrailleX IB 80 CR Soft", 1),
     PM_CELL_COUNTS(80, 4),
     PM_FRONT_KEYS(9)
   }
   ,
-  { PM_MODEL_IDENTITY(64, el_2d_40, "BrailleX EL 2D-40"),
+  { PM_MODEL_IDENTITY(64, el_2d_40, "BrailleX EL 2D-40", 1),
     PM_CELL_COUNTS(40, 13),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(65, el_2d_66, "BrailleX EL 2D-66"),
+  { PM_MODEL_IDENTITY(65, el_2d_66, "BrailleX EL 2D-66", 1),
     PM_CELL_COUNTS(66, 13),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(66, el_80, "BrailleX EL 80"),
+  { PM_MODEL_IDENTITY(66, el_80, "BrailleX EL 80", 1),
     PM_CELL_COUNTS(80, 2),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(67, el_2d_80, "BrailleX EL 2D-80"),
+  { PM_MODEL_IDENTITY(67, el_2d_80, "BrailleX EL 2D-80", 1),
     PM_CELL_COUNTS(80, 20),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(68, el_40_p, "BrailleX EL 40 P"),
+  { PM_MODEL_IDENTITY(68, el_40_p, "BrailleX EL 40 P", 1),
     PM_CELL_COUNTS(40, 0),
     PM_BAR(1, 1, 1, 0)
   }
   ,
-  { PM_MODEL_IDENTITY(69, elba_32, "BrailleX Elba 32"),
+  { PM_MODEL_IDENTITY(69, elba_32, "BrailleX Elba 32", 1),
     PM_CELL_COUNTS(32, 0),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(70, elba_20, "BrailleX Elba 20"),
+  { PM_MODEL_IDENTITY(70, elba_20, "BrailleX Elba 20", 1),
     PM_CELL_COUNTS(20, 0),
     PM_BAR(1, 1, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(85, el40s, "BrailleX EL40s"),
+  { PM_MODEL_IDENTITY(85, el40s, "BrailleX EL40s", 1),
     PM_CELL_COUNTS(40, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(86, el80_ii, "BrailleX EL80-II"),
+  { PM_MODEL_IDENTITY(86, el80_ii, "BrailleX EL80-II", 1),
     PM_CELL_COUNTS(80, 2),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(87, el66s, "BrailleX EL66s"),
+  { PM_MODEL_IDENTITY(87, el66s, "BrailleX EL66s", 1),
     PM_CELL_COUNTS(66, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(88, el80s, "BrailleX EL80s"),
+  { PM_MODEL_IDENTITY(88, el80s, "BrailleX EL80s", 1),
     PM_CELL_COUNTS(80, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(89, trio, "BrailleX Trio"),
-    .protocolRevision = 2,
+  { PM_MODEL_IDENTITY(89, trio, "BrailleX Trio", 2),
     PM_CELL_COUNTS(40, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(90, el70s, "BrailleX EL70s"),
+  { PM_MODEL_IDENTITY(90, el70s, "BrailleX EL70s", 1),
     PM_CELL_COUNTS(70, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(91, el2d_80s, "BrailleX EL2D-80s"),
+  { PM_MODEL_IDENTITY(91, el2d_80s, "BrailleX EL2D-80s", 1),
     PM_CELL_COUNTS(80, 20),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)"),
-    .protocolRevision = 2,
+  { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)", 2),
     PM_CELL_COUNTS(20, 0),
     PM_BAR(0, 0, 1, 1)
   }
   ,
-  { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)"),
-    .protocolRevision = 2,
+  { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)", 2),
     PM_CELL_COUNTS(32, 0),
     PM_BAR(0, 0, 1, 1)
   }
