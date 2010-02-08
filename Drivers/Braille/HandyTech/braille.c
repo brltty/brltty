@@ -429,6 +429,7 @@ static const InputOutputOperations serialOperations = {
 static UsbChannel *usb = NULL;
 
 #define HT_HID_REPORT_SIZE 61
+#define HT_HID_REPORT_TIMEOUT 100
 
 typedef enum {
   HT_HID_RPT_OutData     = 0X01, /* receive data from device */
@@ -451,14 +452,22 @@ static unsigned char hidInputOffset;
 
 static int
 getHidReport (unsigned char number, unsigned char *buffer, int size) {
-  return usbHidGetReport(usb->device, usb->definition.interface,
-                         number, buffer, size, 1000);
+  int result = usbHidGetReport(usb->device, usb->definition.interface,
+                               number, buffer, size, HT_HID_REPORT_TIMEOUT);
+  if (result > 0 && buffer[0] != number) {
+    LogPrint(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
+             number, buffer[0]);
+    errno = EIO;
+    result = -1;
+  }
+
+  return result;
 }
 
 static int
 setHidReport (const unsigned char *report, int size) {
   return usbHidSetReport(usb->device, usb->definition.interface,
-                         report[0], report, size, 1000);
+                         report[0], report, size, HT_HID_REPORT_TIMEOUT);
 }
 
 static int
