@@ -133,50 +133,48 @@ static ScreenDescription scr;          /* For screen state infos */
 #define SCR_COORDINATES_OK(column,row) (SCR_COLUMN_OK((column)) && SCR_ROW_OK((row)))
 #define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
 
+static ScreenEntry *
+getScreenEntry (int number) {
+  int first = 0;
+  int last = screenCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    ScreenEntry *entry = screenArray[current];
+    if (number == entry->number) return entry;
+
+    if (number < entry->number) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+
+  if (screenCount == screenLimit) {
+    screenLimit = screenLimit? screenLimit<<1: 0X10;
+    screenArray = reallocWrapper(screenArray, ARRAY_SIZE(screenArray, screenLimit));
+  }
+
+  {
+    ScreenEntry *entry = mallocWrapper(sizeof(*entry));
+
+    *entry = initialScreenEntry;
+    entry->number = number;
+
+    memmove(&screenArray[first+1], &screenArray[first],
+            ARRAY_SIZE(screenArray, screenCount-first));
+    screenArray[first] = entry;
+    screenCount += 1;
+
+    return entry;
+  }
+}
+
 static void
 setScreenEntry (void) {
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
-
-  if (!p || (scr.number != p->number)) {
-    int first = 0;
-    int last = screenCount - 1;
-
-    while (first <= last) {
-      int current = (first + last) / 2;
-      ScreenEntry *entry = screenArray[current];
-
-      if (scr.number == entry->number) {
-        p = entry;
-        return;
-      }
-
-      if (scr.number < entry->number) {
-        last = current - 1;
-      } else {
-        first = current + 1;
-      }
-    }
-
-    if (screenCount == screenLimit) {
-      screenLimit = screenLimit? screenLimit<<1: 0X10;
-      screenArray = reallocWrapper(screenArray, ARRAY_SIZE(screenArray, screenLimit));
-    }
-
-    {
-      ScreenEntry *entry = mallocWrapper(sizeof(*entry));
-
-      *entry = initialScreenEntry;
-      entry->number = scr.number;
-
-      memmove(&screenArray[first+1], &screenArray[first],
-              ARRAY_SIZE(screenArray, screenCount-first));
-      screenCount += 1;
-      screenArray[first] = entry;
-
-      p = entry;
-    }
-  }
+  if (!p || (scr.number != p->number)) p = getScreenEntry(scr.number);
 }
 
 static void
