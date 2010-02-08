@@ -428,24 +428,30 @@ static const InputOutputOperations serialOperations = {
 
 static UsbChannel *usb = NULL;
 
-#define HT_HID_REPORT_SIZE 61
 #define HT_HID_REPORT_TIMEOUT 100
 
 typedef enum {
-  HT_HID_RPT_OutData     = 0X01, /* receive data from device */
-  HT_HID_RPT_InData      = 0X02, /* send data to device */
-  HT_HID_RPT_InCommand   = 0XFB, /* run USB-HID firmware command */
-  HT_HID_RPT_OutGetVer   = 0XFC, /* get version of USB-HID firmware */
-  HT_HID_RPT_OutBaudRate = 0XFD, /* get baud rate of serial connection */
-  HT_HID_RPT_InBaudRate  = 0XFE, /* set baud rate of serial connection */
+  HT_HID_RPT_OutData    = 0X01, /* receive data from device */
+  HT_HID_RPT_InData     = 0X02, /* send data to device */
+  HT_HID_RPT_InCommand  = 0XFB, /* run USB-HID firmware command */
+  HT_HID_RPT_OutVersion = 0XFC, /* get version of USB-HID firmware */
+  HT_HID_RPT_OutBaud    = 0XFD, /* get baud rate of serial connection */
+  HT_HID_RPT_InBaud     = 0XFE, /* set baud rate of serial connection */
 } HT_HidReportNumber;
 
 typedef enum {
   HT_HID_CMD_FlushBuffers = 0X01, /* flush input and output buffers */
 } HtHidCommand;
 
+static uint32_t hidReportSize_OutData;
+static uint32_t hidReportSize_InData;
+static uint32_t hidReportSize_InCommand;
+static uint32_t hidReportSize_OutVersion;
+static uint32_t hidReportSize_OutBaud;
+static uint32_t hidReportSize_InBaud;
+
 static uint16_t hidFirmwareVersion;
-static unsigned char hidInputReport[HT_HID_REPORT_SIZE];
+static unsigned char hidInputReport[1 + 60];
 #define hidInputLength (hidInputReport[1])
 #define hidInputBuffer (&hidInputReport[2])
 static unsigned char hidInputOffset;
@@ -468,6 +474,67 @@ static int
 setHidReport (const unsigned char *report, int size) {
   return usbHidSetReport(usb->device, usb->definition.interface,
                          report[0], report, size, HT_HID_REPORT_TIMEOUT);
+}
+
+static void
+getHidReportSize (const unsigned char *items, uint16_t size, unsigned char identifier, uint32_t *value) {
+  UsbHidReportDescription description;
+
+  *value = 0;
+
+  if (usbHidFillReportDescription(items, size, identifier, &description)) {
+    if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
+      if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
+        *value = ((description.reportCount * description.reportSize) + 7) / 8;
+      }
+    }
+  }
+}
+
+static void
+getHidReportSizes (void) {
+  unsigned char *items;
+  uint16_t size = usbHidGetItems(usb->device, usb->definition.interface, 0,
+                                 &items, HT_HID_REPORT_TIMEOUT);
+
+  if (items) {
+    getHidReportSize(items, size, HT_HID_RPT_OutData, &hidReportSize_OutData);
+    getHidReportSize(items, size, HT_HID_RPT_InData, &hidReportSize_InData);
+    getHidReportSize(items, size, HT_HID_RPT_InCommand, &hidReportSize_InCommand);
+    getHidReportSize(items, size, HT_HID_RPT_OutVersion, &hidReportSize_OutVersion);
+    getHidReportSize(items, size, HT_HID_RPT_OutBaud, &hidReportSize_OutBaud);
+    getHidReportSize(items, size, HT_HID_RPT_InBaud, &hidReportSize_InBaud);
+
+    free(items);
+  }
+}
+
+static void
+getHidFirmwareVersion (void) {
+  hidFirmwareVersion = 0;
+
+  if (hidReportSize_OutVersion) {
+    unsigned char report[1 + hidReportSize_OutVersion];
+    int result = getHidReport(HT_HID_RPT_OutVersion, report, sizeof(report));
+
+    if (result > 0) {
+      hidFirmwareVersion = (report[1] << 8) | report[2];
+      LogPrint(LOG_INFO, "Firmware Version: %u.%u",
+               report[1], report[2]);
+    }
+  }
+}
+
+static void
+flushHidBuffers (void) {
+  if (hidReportSize_InCommand) {
+    unsigned char report[1 + hidReportSize_InCommand];
+
+    report[0] = HT_HID_RPT_InCommand;
+    report[1] = HT_HID_CMD_FlushBuffers;
+
+    setHidReport(report, sizeof(report));
+  }
 }
 
 static int
@@ -523,26 +590,9 @@ openUsbPort (char **parameters, const char *device) {
       hidInputLength = 0;
       hidInputOffset = 0;
 
-      hidFirmwareVersion = 0;
-      {
-        unsigned char report[HT_HID_REPORT_SIZE];
-        int result = getHidReport(HT_HID_RPT_OutGetVer, report, sizeof(report));
-
-        if (result > 0) {
-          hidFirmwareVersion = (report[1] << 8) | report[2];
-          LogPrint(LOG_INFO, "HandyTech USB HID Firmware Version: %u.%u",
-                   report[1], report[2]);
-        }
-      }
-
-      {
-        const unsigned char report[HT_HID_REPORT_SIZE] = {
-          HT_HID_RPT_InCommand,
-          HT_HID_CMD_FlushBuffers
-        };
-
-        setHidReport(report, sizeof(report));
-      }
+      getHidReportSizes();
+      getHidFirmwareVersion();
+      flushHidBuffers();
     }
 
     return 1;
@@ -614,21 +664,23 @@ writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (!usb->definition.outputEndpoint) {
     int index = 0;
 
-    while (length) {
-      unsigned char report[HT_HID_REPORT_SIZE];
-      unsigned char count = MIN(length, (sizeof(report) - 2));
-      int result;
+    if (hidReportSize_InData) {
+      while (length) {
+        unsigned char report[1 + hidReportSize_InData];
+        unsigned char count = MIN(length, (sizeof(report) - 2));
+        int result;
 
-      report[0] = HT_HID_RPT_InData;
-      report[1] = count;
-      memcpy(report+2, &buffer[index], count);
-      memset(&report[count+2], 0, sizeof(report)-count-2);
+        report[0] = HT_HID_RPT_InData;
+        report[1] = count;
+        memcpy(report+2, &buffer[index], count);
+        memset(&report[count+2], 0, sizeof(report)-count-2);
 
-      result = setHidReport(report, sizeof(report));
-      if (result == -1) return -1;
+        result = setHidReport(report, sizeof(report));
+        if (result == -1) return -1;
 
-      index += count;
-      length -= count;
+        index += count;
+        length -= count;
+      }
     }
 
     return index;
