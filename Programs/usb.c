@@ -849,6 +849,8 @@ usbReapInput (
   return -1;
 }
 
+const unsigned char usbHidItemLengths[] = {0, 1, 2, 4};
+
 const UsbHidDescriptor *
 usbHidDescriptor (UsbDevice *device) {
   const UsbDescriptor *descriptor = NULL;
@@ -916,7 +918,7 @@ usbHidFillReportDescription (
   while (index < size) {
     unsigned char item = items[index++];
     UsbHidItemType type = USB_HID_ITEM_TYPE(item);
-    unsigned char length = USB_HID_ITEM_LENGTH(item);
+    unsigned char length = usbHidItemLengths[USB_HID_ITEM_LENGTH(item)];
     uint32_t value = 0;
 
     if (length) {

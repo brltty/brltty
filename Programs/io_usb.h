@@ -483,6 +483,8 @@ typedef struct {
   unsigned char reportIdentifier;
 } UsbHidReportDescription;
 
+extern const unsigned char usbHidItemLengths[];
+
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
 extern int usbHidGetItems (
