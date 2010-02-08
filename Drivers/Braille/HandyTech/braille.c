@@ -520,7 +520,10 @@ getHidReportSizes (void) {
 static void
 getHidInputBuffer (void) {
   if (hidReportSize_OutData) {
-    if (!(hidInputReport = malloc(1 + hidReportSize_OutData))) {
+    if ((hidInputReport = malloc(1 + hidReportSize_OutData))) {
+      hidInputLength = 0;
+      hidInputOffset = 0;
+    } else {
       LogPrint(LOG_WARNING, "HID input buffer not allocated: %s", strerror(errno));
     }
   }
@@ -604,9 +607,6 @@ openUsbPort (char **parameters, const char *device) {
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
     if (!usb->definition.outputEndpoint) {
-      hidInputLength = 0;
-      hidInputOffset = 0;
-
       getHidReportSizes();
       getHidInputBuffer();
       getHidFirmwareVersion();
@@ -621,10 +621,10 @@ openUsbPort (char **parameters, const char *device) {
 static int
 awaitUsbInput (int milliseconds) {
   if (!usb->definition.inputEndpoint) {
-    if (hidInputOffset < hidInputLength) return 1;
-
     if (hidReportSize_OutData) {
       struct timeval startTime;
+
+      if (hidInputOffset < hidInputLength) return 1;
       gettimeofday(&startTime, NULL);
 
       while (1) {
