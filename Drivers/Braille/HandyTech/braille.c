@@ -451,7 +451,7 @@ static uint32_t hidReportSize_OutBaud;
 static uint32_t hidReportSize_InBaud;
 
 static uint16_t hidFirmwareVersion;
-static unsigned char hidInputReport[1 + 60];
+static unsigned char *hidInputReport = NULL;
 #define hidInputLength (hidInputReport[1])
 #define hidInputBuffer (&hidInputReport[2])
 static unsigned char hidInputOffset;
@@ -485,9 +485,17 @@ getHidReportSize (const unsigned char *items, uint16_t size, unsigned char ident
   if (usbHidFillReportDescription(items, size, identifier, &description)) {
     if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
       if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
-        *value = ((description.reportCount * description.reportSize) + 7) / 8;
+        uint32_t size = ((description.reportCount * description.reportSize) + 7) / 8;
+        LogPrint(LOG_DEBUG, "HID Report Size: %02X = %u", identifier, size);
+        *value = size + 1;
+      } else {
+        LogPrint(LOG_WARNING, "HID report size not defined: %02X", identifier);
       }
+    } else {
+      LogPrint(LOG_WARNING, "HID report count not defined: %02X", identifier);
     }
+  } else {
+    LogPrint(LOG_WARNING, "HID report not found: %02X", identifier);
   }
 }
 
@@ -510,11 +518,20 @@ getHidReportSizes (void) {
 }
 
 static void
+getHidInputBuffer (void) {
+  if (hidReportSize_OutData) {
+    if (!(hidInputReport = malloc(1 + hidReportSize_OutData))) {
+      LogPrint(LOG_WARNING, "HID input buffer not allocated: %s", strerror(errno));
+    }
+  }
+}
+
+static void
 getHidFirmwareVersion (void) {
   hidFirmwareVersion = 0;
 
   if (hidReportSize_OutVersion) {
-    unsigned char report[1 + hidReportSize_OutVersion];
+    unsigned char report[hidReportSize_OutVersion];
     int result = getHidReport(HT_HID_RPT_OutVersion, report, sizeof(report));
 
     if (result > 0) {
@@ -526,9 +543,9 @@ getHidFirmwareVersion (void) {
 }
 
 static void
-flushHidBuffers (void) {
+flushHidDeviceBuffers (void) {
   if (hidReportSize_InCommand) {
-    unsigned char report[1 + hidReportSize_InCommand];
+    unsigned char report[hidReportSize_InCommand];
 
     report[0] = HT_HID_RPT_InCommand;
     report[1] = HT_HID_CMD_FlushBuffers;
@@ -591,8 +608,9 @@ openUsbPort (char **parameters, const char *device) {
       hidInputOffset = 0;
 
       getHidReportSizes();
+      getHidInputBuffer();
       getHidFirmwareVersion();
-      flushHidBuffers();
+      flushHidDeviceBuffers();
     }
 
     return 1;
@@ -603,20 +621,22 @@ openUsbPort (char **parameters, const char *device) {
 static int
 awaitUsbInput (int milliseconds) {
   if (!usb->definition.inputEndpoint) {
-    struct timeval startTime;
-
     if (hidInputOffset < hidInputLength) return 1;
-    gettimeofday(&startTime, NULL);
 
-    while (1) {
-      int result = getHidReport(HT_HID_RPT_OutData, hidInputReport, sizeof(hidInputReport));
+    if (hidReportSize_OutData) {
+      struct timeval startTime;
+      gettimeofday(&startTime, NULL);
 
-      if (result == -1) return 0;
-      hidInputOffset = 0;
-      if (hidInputLength > 0) return 1;
+      while (1) {
+        int result = getHidReport(HT_HID_RPT_OutData, hidInputReport, hidReportSize_OutData);
 
-      if (millisecondsSince(&startTime) >= milliseconds) break;
-      approximateDelay(10);
+        if (result == -1) return 0;
+        hidInputOffset = 0;
+        if (hidInputLength > 0) return 1;
+
+        if (millisecondsSince(&startTime) >= milliseconds) break;
+        approximateDelay(10);
+      }
     }
 
     errno = EAGAIN;
@@ -666,7 +686,7 @@ writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
 
     if (hidReportSize_InData) {
       while (length) {
-        unsigned char report[1 + hidReportSize_InData];
+        unsigned char report[hidReportSize_InData];
         unsigned char count = MIN(length, (sizeof(report) - 2));
         int result;
 
@@ -692,6 +712,11 @@ writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
 
 static void
 closeUsbPort (void) {
+  if (hidInputReport) {
+    free(hidInputReport);
+    hidInputReport = NULL;
+  }
+
   if (usb) {
     usbCloseChannel(usb);
     usb = NULL;
