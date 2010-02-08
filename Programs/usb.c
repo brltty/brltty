@@ -933,23 +933,37 @@ usbHidFillReportDescription (
       case UsbHidItemType_ReportID:
         if (!found && (value == identifier)) {
           memset(description, 0, sizeof(*description));
-          description->identifier = identifier;
+          description->reportIdentifier = identifier;
 
           found = 1;
           continue;
         }
         break;
 
-      case UsbHidItemType_ReportSize:
+      case UsbHidItemType_ReportCount:
         if (found) {
-          description->size = value;
+          description->reportCount = value;
           goto defined;
         }
         break;
 
-      case UsbHidItemType_ReportCount:
+      case UsbHidItemType_ReportSize:
         if (found) {
-          description->count = value;
+          description->reportSize = value;
+          goto defined;
+        }
+        break;
+
+      case UsbHidItemType_LogicalMinimum:
+        if (found) {
+          description->logicalMinimum = value;
+          goto defined;
+        }
+        break;
+
+      case UsbHidItemType_LogicalMaximum:
+        if (found) {
+          description->logicalMaximum = value;
           goto defined;
         }
         break;

@@ -472,13 +472,15 @@ typedef enum {
 } UsbHidItemType;
 #define USB_HID_ITEM_TYPE(item) ((item) & UsbHidItemType_Mask)
 #define USB_HID_ITEM_LENGTH(item) ((item) & ~UsbHidItemType_Mask)
-#define USB_HID_ITEM_BIT(type) (1 << ((type) >> 2))
+#define USB_HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
 
 typedef struct {
   uint64_t defined;
-  uint32_t size;
-  uint32_t count;
-  unsigned char identifier;
+  uint32_t reportCount;
+  uint32_t reportSize;
+  uint32_t logicalMinimum;
+  uint32_t logicalMaximum;
+  unsigned char reportIdentifier;
 } UsbHidReportDescription;
 
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
