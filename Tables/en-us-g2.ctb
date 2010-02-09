@@ -95,6 +95,7 @@ sufword anemone =
 midword angh = Shanghai
 begword antenn 1-1345-2345-26-1345 antenna
 begword anterio 1-1345-2345-12456-24-135 anterior
+word antigone =
 begword aqued = aqueduct
 always ar 345
 word aright 1-5-1235
@@ -331,10 +332,12 @@ begword dishone 256-125-5-135 dishonest
 sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 midword dist = contradistinction
+endword dists 145-24-34-234 Methodists
 begword disul = disulfide
 word do 145
 before o begword dogg =
 word doggo 145-135-2356-135
+sufword donegal = Donegalers
 sufword doolittle =
 always dumb = dumbbell
 
