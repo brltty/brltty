@@ -487,7 +487,7 @@ getHidReportSize (const unsigned char *items, uint16_t size, unsigned char ident
       if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
         uint32_t size = ((description.reportCount * description.reportSize) + 7) / 8;
         LogPrint(LOG_DEBUG, "HID Report Size: %02X = %u", identifier, size);
-        *value = size + 1;
+        *value = 1 + size;
       } else {
         LogPrint(LOG_WARNING, "HID report size not defined: %02X", identifier);
       }
@@ -520,7 +520,7 @@ getHidReportSizes (void) {
 static void
 getHidInputBuffer (void) {
   if (hidReportSize_OutData) {
-    if ((hidInputReport = malloc(1 + hidReportSize_OutData))) {
+    if ((hidInputReport = malloc(hidReportSize_OutData))) {
       hidInputLength = 0;
       hidInputOffset = 0;
     } else {
