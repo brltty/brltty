@@ -23,7 +23,6 @@
 typedef enum {
   HT_MODEL_UsbHidAdapter       = 0X03,
   HT_MODEL_BrailleWave         = 0X05,
-  HT_MODEL_AtcBrailleNavigator = 0X32,
   HT_MODEL_ModularEvolution64  = 0X36,
   HT_MODEL_ModularEvolution88  = 0X38,
   HT_MODEL_EasyBraille         = 0X44,

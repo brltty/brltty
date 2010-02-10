@@ -343,8 +343,6 @@ static const ModelEntry modelTable[] = {
 #define BRLROWS		1
 #define MAX_STCELLS	4	/* highest number of status cells */
 
-/* This is the brltty braille mapping standard to Handy's mapping table.
- */
 static TranslationTable outputTable;
 
 /* Global variables */
@@ -539,19 +537,18 @@ getHidFirmwareVersion (void) {
 
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
-      LogPrint(LOG_INFO, "Firmware Version: %u.%u",
-               report[1], report[2]);
+      LogPrint(LOG_INFO, "Firmware Version: %u.%u", report[1], report[2]);
     }
   }
 }
 
 static void
-flushHidDeviceBuffers (void) {
+executeHidFirmwareCommand (HtHidCommand command) {
   if (hidReportSize_InCommand) {
     unsigned char report[hidReportSize_InCommand];
 
     report[0] = HT_HID_RPT_InCommand;
-    report[1] = HT_HID_CMD_FlushBuffers;
+    report[1] = command;
 
     setHidReport(report, sizeof(report));
   }
@@ -592,11 +589,6 @@ openUsbPort (char **parameters, const char *device) {
       .configuration=1, .interface=0, .alternative=0
     }
     ,
-    { /* ATC Braille Navigator (HID) */
-      .vendor=HT_USB_VENDOR, .product=HT_MODEL_AtcBrailleNavigator,
-      .configuration=1, .interface=0, .alternative=0
-    }
-    ,
     { /* USB-HID adapter */
       .vendor=HT_USB_VENDOR, .product=HT_MODEL_UsbHidAdapter,
       .configuration=1, .interface=0, .alternative=0
@@ -610,7 +602,7 @@ openUsbPort (char **parameters, const char *device) {
       getHidReportSizes();
       getHidInputBuffer();
       getHidFirmwareVersion();
-      flushHidDeviceBuffers();
+      executeHidFirmwareCommand(HT_HID_CMD_FlushBuffers);
     }
 
     return 1;
