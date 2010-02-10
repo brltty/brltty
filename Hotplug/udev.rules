@@ -64,6 +64,9 @@ ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
 # HandyTech
 ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/44/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # HIMS
 ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="hm", GOTO="brltty_usb_run"
