@@ -504,12 +504,26 @@ getHidReportSizes (void) {
                                  &items, HT_HID_REPORT_TIMEOUT);
 
   if (items) {
-    getHidReportSize(items, size, HT_HID_RPT_OutData, &hidReportSize_OutData);
-    getHidReportSize(items, size, HT_HID_RPT_InData, &hidReportSize_InData);
-    getHidReportSize(items, size, HT_HID_RPT_InCommand, &hidReportSize_InCommand);
-    getHidReportSize(items, size, HT_HID_RPT_OutVersion, &hidReportSize_OutVersion);
-    getHidReportSize(items, size, HT_HID_RPT_OutBaud, &hidReportSize_OutBaud);
-    getHidReportSize(items, size, HT_HID_RPT_InBaud, &hidReportSize_InBaud);
+    typedef struct {
+      HT_HidReportNumber number;
+      uint32_t *size;
+    } ReportEntry;
+
+    static const ReportEntry reportTable[] = {
+      {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
+      {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+      {.number=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
+      {.number=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
+      {.number=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
+      {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
+      {.number=0}
+    };
+    const ReportEntry *report = reportTable;
+
+    while (report->number) {
+      getHidReportSize(items, size, report->number, report->size);
+      report += 1;
+    }
 
     free(items);
   }
