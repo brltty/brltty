@@ -89,6 +89,12 @@
 #include "braille.h"
 #include "io_serial.h"
 
+#ifdef __MSDOS__
+#ifdef HIGHBAUD
+#undef HIGHBAUD
+#endif /* HIGHBAUD */
+#endif /* __MSDOS__ */
+
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
