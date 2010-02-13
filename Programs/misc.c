@@ -197,6 +197,7 @@ LogPrint (int level, const char *format, ...) {
       syslog(level, "%s", buffer);
 #endif /* HAVE_VSYSLOG */
       goto done;
+#define NEED_DONE
     }
 #elif defined(WINDOWS)
     if (windowsEventLog != INVALID_HANDLE_VALUE) {
@@ -208,6 +209,7 @@ LogPrint (int level, const char *format, ...) {
       ReportEvent(windowsEventLog, toEventType(level), 0, 0, NULL,
                   ARRAY_COUNT(strings), 0, strings, NULL);
       goto done;
+#define NEED_DONE
     }
 #elif defined(__MSDOS__)
     if (dosLogFile != -1) {
@@ -217,17 +219,18 @@ LogPrint (int level, const char *format, ...) {
       size = vsnprintf(buffer, sizeof(buffer), format, argp);
       va_end(argp);
       write(dosLogFile, buffer, size);
-      write(dosLogFile, "\r\n", 2);
+      write(dosLogFile, "\n", 1);
       goto done;
+#define NEED_DONE
     }
 #endif /* write system log */
 
     level = printLevel;
   }
 
-#if defined(HAVE_SYSLOG_H) || defined(WINDOWS) || defined(__MSDOS__)
+#ifdef NEED_DONE
 done:
-#endif /* label needed */
+#endif /* NEED_DONE */
 
   if (level <= printLevel) {
     FILE *stream = stderr;
