@@ -127,6 +127,9 @@ toEventType (int level) {
   return EVENTLOG_INFORMATION_TYPE;
 }
 
+#elif defined(__MSDOS__)
+static int dosLogFile = -1;
+
 #endif /* system log internal definitions */
 
 static int logLevel = LOG_NOTICE;
@@ -146,6 +149,11 @@ LogOpen (int toConsole) {
   if (windowsEventLog == INVALID_HANDLE_VALUE) {
     windowsEventLog = RegisterEventSource(NULL, "brltty");
   }
+#elif defined(__MSDOS__)
+  if (dosLogFile == -1) {
+    dosLogFile = open("brltty.log", O_WRONLY|O_CREAT|O_TRUNC,
+                      (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
+  }
 #endif /* open system log */
 }
 
@@ -153,13 +161,18 @@ void
 LogClose (void) {
 #if defined(HAVE_SYSLOG_H)
   if (syslogOpened) {
-    syslogOpened = 0;
     closelog();
+    syslogOpened = 0;
   }
 #elif defined(WINDOWS)
   if (windowsEventLog != INVALID_HANDLE_VALUE) {
     DeregisterEventSource(windowsEventLog);
     windowsEventLog = INVALID_HANDLE_VALUE;
+  }
+#elif defined(__MSDOS__)
+  if (dosLogFile != -1) {
+    close(dosLogFile);
+    dosLogFile = -1;
   }
 #endif /* close system log */
 }
@@ -196,12 +209,23 @@ LogPrint (int level, const char *format, ...) {
                   ARRAY_COUNT(strings), 0, strings, NULL);
       goto done;
     }
+#elif defined(__MSDOS__)
+    if (dosLogFile != -1) {
+      char buffer[0X100];
+      int size;
+      va_start(argp, format);
+      size = vsnprintf(buffer, sizeof(buffer), format, argp);
+      va_end(argp);
+      write(dosLogFile, buffer, size);
+      write(dosLogFile, "\r\n", 2);
+      goto done;
+    }
 #endif /* write system log */
 
     level = printLevel;
   }
 
-#if defined(HAVE_SYSLOG_H) || defined(WINDOWS)
+#if defined(HAVE_SYSLOG_H) || defined(WINDOWS) || defined(__MSDOS__)
 done:
 #endif /* label needed */
 
