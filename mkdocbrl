@@ -1,0 +1,149 @@
+#!/bin/bash -p
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/prologue.sh"
+
+set -e
+umask 022
+shopt -s nullglob
+
+setOutputFile() {
+   outputFile="${outputDirectory}/${driverCode}-${model}.txt"
+}
+
+listModel() {
+   exec 4<"${outputFile}"
+   local description
+   read -r -u 4 description
+   exec 4<&-
+
+   description="${description} "
+   description="${description#* for ${driverName} }"
+   description="${description% }"
+
+   local prefix="All Models"
+   [ -z "${description}" ] || {
+      if [ "${description}" = "${description#(}" ]
+      then
+         prefix=""
+      else
+         prefix="${prefix} "
+      fi
+   }
+   description="${prefix}${description}"
+
+   "${modelListed}" || {
+      modelListed=true
+      echo >&3 "<UL>"
+   }
+
+   echo >&3 "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
+}
+
+inputDirectory="$(dirname "${0}")"
+outputDirectory="doc-brl"
+
+while getopts ":i:o:" option
+do
+   case "${option}"
+   in
+      i) inputDirectory="${OPTARG}";;
+      o) outputDirectory="${OPTARG}";;
+      :) syntaxError "missing value: -${OPTARG}";;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+
+shift $((OPTIND - 1))
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+
+verifyInputDirectory "${inputDirectory}"
+verifyOutputDirectory "${outputDirectory}"
+
+driversSubdirectory="Drivers/Braille"
+driversDirectory="${inputDirectory}/${driversSubdirectory}"
+
+tablesSubdirectory="Tables"
+tablesDirectory="${inputDirectory}/${tablesSubdirectory}"
+
+exec 3>"${outputDirectory}/index.html"
+documentTitle="Braille Driver Help"
+echo >&3 "<HTML>"
+echo >&3 "<HEAD>"
+echo >&3 "<TITLE>${documentTitle}</TITLE>"
+echo >&3 "</HEAD>"
+echo >&3 "<BODY>"
+echo >&3 "<H1>${documentTitle}</H1>"
+echo >&3 "<DL>"
+
+for driverDirectory in "${driversDirectory}/"*
+do
+   [ -d "${driverDirectory}" ] || continue
+   driverName="${driverDirectory##*/}"
+   driverCode="$(sed -n '/^DRIVER_CODE *=/s/^.*= *\([^ ]*\).*$/\1/p' "${driverDirectory}/Makefile.in")"
+
+   header="${driverName}"
+   inputFile="${driverDirectory}/README"
+   [ ! -f "${inputFile}" ] || {
+      outputFile="${outputDirectory}/${driverCode}.txt"
+      cp -a -- "${inputFile}" "${outputFile}"
+      header="<A HREF=\"${outputFile##*/}\">${header}</A>"
+   }
+   echo >&3 "<DT>${header}<DD>"
+
+   modelListed=false
+   set -- "${tablesDirectory}/brl-${driverCode}-"*".ktb"
+   if [ "${#}" -gt 0 ]
+   then
+      for inputFile
+      do
+         model="${inputFile##*/}"
+         model="${model%.*}"
+         model="${model##*-}"
+
+         setOutputFile
+         "${inputDirectory}/Programs/ktbtest" -L"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
+         listModel
+      done
+   else
+      set -- "${driverDirectory}/"*".hlp"
+      for inputFile
+      do
+         model="${inputFile##*/}"
+         model="${model%.*}"
+
+         setOutputFile
+         cp -a -- "${inputFile}" "${outputFile}"
+         listModel
+      done
+   fi
+
+   "${modelListed}" && {
+      echo >&3 "</UL>"
+   }
+done
+
+echo >&3 "</DL>"
+echo >&3 "<HR>"
+echo >&3 "</BODY>"
+echo >&3 "</HTML>"
+exec 3>&-
+
+exit 0

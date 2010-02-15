@@ -16,25 +16,54 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-initialDirectory="`pwd`"
-programName="`basename "${0}"`"
+initialDirectory=`pwd`
+programName=`basename "${0}"`
 
 programMessage() {
    echo >&2 "${programName}: ${1}"
 }
-programError() {
-   [ -n "${2}" ] && programMessage "${2}"
-   exit "${1:-3}"
-}
+
 syntaxError() {
-   programError 2 "${1}"
+   programMessage "${1}"
+   exit 2
+}
+
+semanticError() {
+   programMessage "${1}"
+   exit 3
+}
+
+verifyProgram() {
+   [ -e "${1}" ] || semanticError "program not found: ${1}"
+   [ -f "${1}" ] || semanticError "not a file: ${1}"
+   [ -x "${1}" ] || semanticError "not executable: ${1}"
+}
+
+verifyDirectory() {
+   [ -e "${1}" ] || return 1
+   [ -d "${1}" ] || semanticError "not a directory: ${1}"
+   return 0
+}
+
+verifyInputDirectory() {
+   verifyDirectory "${1}" || semanticError "directory not found: ${1}"
+}
+
+verifyOutputDirectory() {
+   if verifyDirectory "${1}"
+   then
+      [ -w "${1}" ] || semanticError "directory not writable: ${1}"
+      rm -f -r -- "${1}/"*
+   else
+      mkdir -p "${1}"
+   fi
 }
 
 needTemporaryDirectory() {
    cleanup() {
       set +e
       cd /
-      [ -n "${temporaryDirectory}" ] && rm -f -r -- "${temporaryDirectory}"
+      [ -z "${temporaryDirectory}" ] || rm -f -r -- "${temporaryDirectory}"
    }
    trap "cleanup" 0
 
@@ -43,5 +72,5 @@ needTemporaryDirectory() {
       TMPDIR="/tmp"
       export TMPDIR
    }
-   temporaryDirectory="`mktemp -d "${TMPDIR}/${programName}.XXXXXX"`" && cd "${temporaryDirectory}" || exit "${?}"
+   temporaryDirectory=`mktemp -d "${TMPDIR}/${programName}.XXXXXX"` && cd "${temporaryDirectory}" || exit "${?}"
 }
