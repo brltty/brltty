@@ -317,6 +317,35 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
   return descriptor;
 }
 
+static int
+setUinputKeyEvents (int device) {
+  int key;
+
+  if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
+    LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
+    return 0;
+  }
+
+  for (key=0; key<=KEY_MAX; key+=1) {
+    if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
+      LogError("ioctl[UI_SET_KEYBIT]");
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+setUinputRepeatEvents (int device) {
+  if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
+    LogError("ioctl[UI_SET_EVBIT,EV_REP]");
+    return 0;
+  }
+
+  return 1;
+}
+
 int
 getUinputDevice (void) {
   static int uinputDevice = -1;
@@ -348,30 +377,14 @@ getUinputDevice (void) {
         strcpy(description.name, "brltty");
 
         if (write(device, &description, sizeof(description)) != -1) {
-          if (ioctl(device, UI_SET_EVBIT, EV_KEY) != -1) {
-            int keysInitialized = 1;
-
-            {
-              int key;
-
-              for (key=0; key<=KEY_MAX; key+=1) {
-                if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
-                  LogError("ioctl[UI_SET_KEYBIT]");
-                  keysInitialized = 0;
-                  break;
-                }
-              }
-            }
-
-            if (keysInitialized) {
+          if (setUinputKeyEvents(device)) {
+            if (setUinputRepeatEvents(device)) {
               if (ioctl(device, UI_DEV_CREATE) != -1) {
                 uinputDevice = device;
               } else {
                 LogError("ioctl[UI_DEV_CREATE]");
               }
             }
-          } else {
-            LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
           }
         } else {
           LogError("write(struct uinput_user_dev)");
