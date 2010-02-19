@@ -1643,18 +1643,34 @@ insertKey_LinuxScreen (ScreenKey key) {
     int mode;
     if (controlConsole(KDGKBMODE, &mode) != -1) {
       switch (mode) {
+        {
+          int raw;
+
         case K_RAW:
-          if (insertCode(key, 1)) ok = 1;
-          break;
+          raw = 1;
+          goto doCode;
+
         case K_MEDIUMRAW:
-          if (insertCode(key, 0)) ok = 1;
+          raw = 0;
+          goto doCode;
+
+        doCode:
+          if (insertUinput(key)) {
+            ok = 1;
+          } else if (insertCode(key, raw)) {
+            ok = 1;
+          }
           break;
+        }
+
         case K_XLATE:
           if (insertTranslated(key, insertXlate)) ok = 1;
           break;
+
         case K_UNICODE:
           if (insertTranslated(key, insertUnicode)) ok = 1;
           break;
+
         default:
           LogPrint(LOG_WARNING, "unsupported keyboard mode: %d", mode);
           break;
