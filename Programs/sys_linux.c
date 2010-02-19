@@ -318,7 +318,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 }
 
 static int
-setUinputKeyEvents (int device) {
+enableUinputKeyEvents (int device) {
   int key;
 
   if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
@@ -337,7 +337,7 @@ setUinputKeyEvents (int device) {
 }
 
 static int
-setUinputRepeatEvents (int device) {
+enableUinputAutorepeat (int device) {
   if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
     LogError("ioctl[UI_SET_EVBIT,EV_REP]");
     return 0;
@@ -377,8 +377,8 @@ getUinputDevice (void) {
         strcpy(description.name, "brltty");
 
         if (write(device, &description, sizeof(description)) != -1) {
-          if (setUinputKeyEvents(device)) {
-            if (setUinputRepeatEvents(device)) {
+          if (enableUinputKeyEvents(device)) {
+            if (enableUinputAutorepeat(device)) {
               if (ioctl(device, UI_DEV_CREATE) != -1) {
                 uinputDevice = device;
               } else {
@@ -425,6 +425,11 @@ writeKeyEvent (int key, int press) {
     } else {
       BITMASK_CLEAR(pressedKeys, key);
     }
+
+    event.type = EV_SYN;
+    event.code = SYN_REPORT;
+    event.value = 0;
+    writeInputEvent(&event);
 
     return 1;
   }
