@@ -920,6 +920,10 @@ getProcessIdentifier (void) {
 int
 testProcessIdentifier (ProcessIdentifier pid) {
 #if defined(__MINGW32__)
+  HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+  if (!handle) return 0;
+  CloseHandle(handle);
+  return 1;
 #elif defined(__MSDOS__)
   return pid == DOS_PROCESS_ID;
 #else /* Unix */
