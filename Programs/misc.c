@@ -24,6 +24,7 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -893,7 +894,7 @@ gettimeofday (struct timeval *tvp, void *tzp) {
   tvp->tv_usec = (time % 1000) * 1000;
   return 0;
 }
-#endif /* gettimeofday */
+#endif /* gettimeofday() */
 
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
 void
@@ -902,8 +903,29 @@ usleep (int usec) {
     approximateDelay((usec+999)/1000);
   }
 }
-#endif /* usleep */
+#endif /* usleep() */
 #endif /* __MINGW32__ */
+
+ProcessIdentifier
+getProcessIdentifier (void) {
+#if defined(__MINGW32__)
+  return GetCurrentProcessId();
+#elif defined(__MSDOS__)
+  return DOS_PROCESS_ID;
+#else /* Unix */
+  return getpid();
+#endif /* getProcessIdentifier() */
+}
+
+int
+testProcessIdentifier (ProcessIdentifier pid) {
+#if defined(__MINGW32__)
+#elif defined(__MSDOS__)
+  return pid == DOS_PROCESS_ID;
+#else /* Unix */
+  return kill(pid, 0) != -1;
+#endif /* testProcessIdentifier() */
+}
 
 long int
 millisecondsBetween (const struct timeval *from, const struct timeval *to) {

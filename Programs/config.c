@@ -2739,27 +2739,42 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-static void createPidFile (void);
+static int
+createPidFile (ProcessIdentifier pid) {
+  FILE *stream;
 
-static void
-retryPidFile (void *data) {
-  createPidFile();
-}
+  if (!opt_pidFile) return 1;
+  if (!*opt_pidFile) return 1;
 
-static void
-createPidFile (void) {
-  FILE *stream = fopen(opt_pidFile, "w");
-  if (stream) {
-    long int pid = getpid();
-    fprintf(stream, "%ld\n", pid);
+  if ((stream = fopen(opt_pidFile, "a"))) {
+    fprintf(stream, "%" PRIpid "\n", pid);
     fclose(stream);
     atexit(exitPidFile);
+    return 1;
   } else {
     LogPrint(LOG_WARNING, "%s: %s: %s",
              gettext("cannot open process identifier file"),
              opt_pidFile, strerror(errno));
-    asyncRelativeAlarm(5000, retryPidFile, NULL);
   }
+
+  return 0;
+}
+
+static void schedulePidFile (void);
+
+static void
+tryPidFile (void) {
+  if (!createPidFile(getProcessIdentifier())) schedulePidFile();
+}
+
+static void
+retryPidFile (void *data) {
+  tryPidFile();
+}
+
+static void
+schedulePidFile (void) {
+  asyncRelativeAlarm(5000, retryPidFile, NULL);
 }
 
 #if defined(__MINGW32__)
@@ -2831,7 +2846,10 @@ background (void) {
       exit(10);
     }
 
-    if (child) _exit(0);
+    if (child) {
+      createPidFile(child);
+      _exit(0);
+    }
   }
 
   if (setsid() == -1) {                        
@@ -2979,7 +2997,12 @@ startup (int argc, char *argv[]) {
 #ifdef __MINGW32__
       && !isWindowsService
 #endif
-  ) background();
+     ) {
+    background();
+    schedulePidFile();
+  } else {
+    tryPidFile();
+  }
 
   if (!opt_standardError) {
     LogClose();
@@ -3032,9 +3055,6 @@ startup (int argc, char *argv[]) {
 
   atexit(exitTunes);
   suppressTuneDeviceOpenErrors();
-
-  /* Create the process identifier file. */
-  if (*opt_pidFile) createPidFile();
 
   {
     char *directory;

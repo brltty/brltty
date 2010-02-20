@@ -101,7 +101,10 @@ extern void formatInputError (
   va_list argp
 );
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
+typedef DWORD ProcessIdentifier;
+#define PRIpid "lu"
+
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
 extern int gettimeofday (struct timeval *tvp, void *tzp);
 #endif /* gettimeofday */
@@ -109,7 +112,19 @@ extern int gettimeofday (struct timeval *tvp, void *tzp);
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
 extern void usleep (int usec);
 #endif /* usleep */
-#endif /* __MINGW32__ */
+
+#elif defined(__MSDOS__)
+typedef int ProcessIdentifier;
+#define PRIpid "d"
+#define DOS_PROCESS_ID 1
+
+#else /* Unix */
+typedef pid_t ProcessIdentifier;
+#define PRIpid "d"
+#endif /* platform-dependent definitions */
+
+extern ProcessIdentifier getProcessIdentifier (void);
+extern int testProcessIdentifier (ProcessIdentifier pid);
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void accurateDelay (int milliseconds);
