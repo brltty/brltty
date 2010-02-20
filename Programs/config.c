@@ -2824,6 +2824,7 @@ background (void) {
       exit(10);
     }
 
+    createPidFile(processInfo.dwProcessId);
     ExitProcess(0);
   }
 
