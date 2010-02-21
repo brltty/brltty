@@ -33,15 +33,15 @@
 #endif /* __MINGW32__ */
 
 #include <dbus/dbus.h>
-#define SPI2_DBUS_INTERFACE		"org.freedesktop.atspi"
+#define SPI2_DBUS_INTERFACE		"org.a11y.atspi"
 #define SPI2_DBUS_INTERFACE_REG		SPI2_DBUS_INTERFACE".Registry"
-#define SPI2_DBUS_PATH_DEC		"/org/freedesktop/atspi/registry/deviceeventcontroller"
+#define SPI2_DBUS_PATH_DEC		"/org/a11y/atspi/registry/deviceeventcontroller"
 #define SPI2_DBUS_INTERFACE_DEC		SPI2_DBUS_INTERFACE".DeviceEventController"
 #define SPI2_DBUS_INTERFACE_EVENT	SPI2_DBUS_INTERFACE".Event"
 #define SPI2_DBUS_INTERFACE_TREE	SPI2_DBUS_INTERFACE".Tree"
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
-#define SPI2_DBUS_INTERFACE_PROP	"org.freedesktop.DBus.Properties"
+#define SPI2_DBUS_INTERFACE_PROP	"org.a11y.DBus.Properties"
 
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
@@ -750,11 +750,11 @@ static void *doAtSpi2ScreenOpen(void *arg) {
     goto out; \
   }
   WATCH("type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'");
-  WATCH("type='signal',interface='org.freedesktop.atspi.Event.Focus'");
-  WATCH("type='signal',interface='org.freedesktop.atspi.Event.Object'");
-  WATCH("type='signal',interface='org.freedesktop.atspi.Event.Object',member='TextChanged'");
-  WATCH("type='signal',interface='org.freedesktop.atspi.Event.Object',member='TextCaretMoved'");
-  WATCH("type='signal',interface='org.freedesktop.atspi.Event.Object',member='StateChanged'");
+  WATCH("type='signal',interface='org.a11y.atspi.Event.Focus'");
+  WATCH("type='signal',interface='org.a11y.atspi.Event.Object'");
+  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='TextChanged'");
+  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='TextCaretMoved'");
+  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='StateChanged'");
 
   res = 1;
 
