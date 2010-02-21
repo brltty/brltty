@@ -29,7 +29,7 @@
 #include <sys/wait.h>
 
 #include "log.h"
-#include "misc.h"
+#include "parse.h"
 
 typedef enum {
   PARM_pitch

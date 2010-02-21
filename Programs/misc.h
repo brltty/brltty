@@ -79,10 +79,6 @@ extern "C" {
 #define setSystemErrno() setErrno(getSystemError())
 #define setSocketErrno() setErrno(getSocketError())
 
-extern char **splitString (const char *string, char delimiter, int *count);
-extern void deallocateStrings (char **array);
-extern char *joinStrings (const char *const *strings, int count);
-
 #if defined(__MINGW32__)
 typedef DWORD ProcessIdentifier;
 #define PRIpid "lu"
@@ -109,21 +105,6 @@ extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
-
-extern int rescaleInteger (int value, int from, int to);
-
-extern int isInteger (int *value, const char *string);
-extern int isFloat (float *value, const char *string);
-
-extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);
-extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
-extern int validateChoice (unsigned int *value, const char *string, const char *const *choices);
-extern int validateFlag (unsigned int *value, const char *string, const char *on, const char *off);
-extern int validateOnOff (unsigned int *value, const char *string);
-extern int validateYesNo (unsigned int *value, const char *string);
-
-extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
-extern void logParameters (const char *const *names, char **values, char *description);
 
 #ifdef __cplusplus
 }

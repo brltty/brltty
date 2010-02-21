@@ -34,6 +34,7 @@
 #endif /* HAVE_ICU */
 
 #include "log.h"
+#include "parse.h"
 #include "message.h"
 #include "tunes.h"
 #include "ttb.h"

@@ -39,6 +39,7 @@
 
 #include "log.h"
 #include "file.h"
+#include "parse.h"
 #include "misc.h"
 #include "mount.h"
 #include "io_usb.h"

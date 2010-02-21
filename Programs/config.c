@@ -59,6 +59,7 @@
 #include "message.h"
 #include "log.h"
 #include "file.h"
+#include "parse.h"
 #include "system.h"
 #include "async.h"
 #include "program.h"

@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parse.h"
 #include "misc.h"
 #include "io_defs.h"
 

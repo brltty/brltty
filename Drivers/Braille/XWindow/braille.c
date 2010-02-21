@@ -24,6 +24,7 @@
 #include <signal.h>
 
 #include "log.h"
+#include "parse.h"
 #include "misc.h"
 #include "charset.h"
 #include "unicode.h"

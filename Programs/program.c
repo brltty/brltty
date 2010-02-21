@@ -28,6 +28,7 @@
 #include "program.h"
 #include "log.h"
 #include "file.h"
+#include "parse.h"
 #include "misc.h"
 #include "system.h"
 

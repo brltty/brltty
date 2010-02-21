@@ -51,7 +51,7 @@ static iconv_t conversionDescriptor = NULL;
 #endif /* HAVE_PKG_CURSES */
 
 #include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "charset.h"
 
 #ifdef USE_CURSES

@@ -47,7 +47,7 @@
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
 
 #include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "auth.h"
 
 /* peer credentials */

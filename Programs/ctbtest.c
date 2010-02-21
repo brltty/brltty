@@ -30,7 +30,7 @@
 #include "options.h"
 #include "log.h"
 #include "file.h"
-#include "misc.h"
+#include "parse.h"
 #include "charset.h"
 #include "unicode.h"
 //#include "brl.h"

@@ -47,7 +47,7 @@
 #include <X11/Xlib.h>
 
 #include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "brldefs.h"
 #include "charset.h"
 

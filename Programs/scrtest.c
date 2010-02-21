@@ -30,7 +30,7 @@
 #include "program.h"
 #include "options.h"
 #include "log.h"
-#include "misc.h"
+#include "parse.h"
 #include "scr.h"
 
 static char *opt_boxLeft;

@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "parse.h"
 #include "misc.h"
 #include "message.h"
 

@@ -25,6 +25,7 @@
 #include "options.h"
 #include "log.h"
 #include "file.h"
+#include "parse.h"
 #include "system.h"
 #include "ktb.h"
 #include "kbdkeys.h"
