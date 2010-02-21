@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#include "misc.h"
+#include "log.h"
 
 //#define BRL_STATUS_FIELDS sf...
 //#define BRL_HAVE_STATUS_CELLS

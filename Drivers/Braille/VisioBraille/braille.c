@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "log.h"
 #include "misc.h"
 #include "scr.h"
 #include "message.h"

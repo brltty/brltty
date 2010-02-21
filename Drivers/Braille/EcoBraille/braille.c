@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"

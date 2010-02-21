@@ -22,6 +22,7 @@
 /* For a description of what each function does, see rangelist.h */
 
 #include "brlapi_keyranges.h"
+#include "log.h"
 #include "misc.h"
 
 static int inKeyrange(KeyrangeList *l, KeyrangeElem e)

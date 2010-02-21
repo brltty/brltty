@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 #include "dataarea.h"
 
 struct DataAreaStruct {

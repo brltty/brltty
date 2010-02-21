@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "sys_windows.h"
 

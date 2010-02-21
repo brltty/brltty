@@ -21,6 +21,7 @@
 #include <strings.h>
 #include <errno.h>
 
+#include "log.h"
 #include "misc.h"
 #include "queue.h"
 #include "io_misc.h"

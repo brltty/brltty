@@ -25,7 +25,7 @@
 #include <dpmi.h>
 #include <sys/farptr.h>
 
-#include "misc.h"
+#include "log.h"
 #include "brldefs.h"
 #include "charset.h"
 #include "scancodes.h"

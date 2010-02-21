@@ -41,6 +41,7 @@
 #include <io.h>
 #endif /* __MINGW32__ */
 
+#include "log.h"
 #include "misc.h"
 
 typedef enum {

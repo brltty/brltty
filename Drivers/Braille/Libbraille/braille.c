@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 #include "brltty.h"
 
 #include <braille.h>

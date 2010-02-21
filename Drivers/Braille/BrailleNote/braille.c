@@ -27,6 +27,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "log.h"
 #include "misc.h"
 
 #define BRL_HAVE_PACKET_IO

@@ -26,7 +26,7 @@
 #include <sys/param.h>
 #include <dev/usb/usb.h>
 
-#include "misc.h"
+#include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 

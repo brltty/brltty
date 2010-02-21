@@ -27,6 +27,7 @@
 #include <sys/wait.h>
 #endif /* SIGUSR1 */
 
+#include "log.h"
 #include "misc.h"
 #include "scr.h"
 #include "routing.h"

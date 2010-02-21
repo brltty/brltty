@@ -37,6 +37,7 @@
 #define USBDEVFS_CONNECT _IO('U', 23)
 #endif /* USBDEVFS_CONNECT */
 
+#include "log.h"
 #include "misc.h"
 #include "mount.h"
 #include "io_usb.h"

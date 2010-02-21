@@ -57,7 +57,7 @@
 #include "keyboard.h"
 #include "tunes.h"
 #include "message.h"
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "async.h"
 #include "program.h"

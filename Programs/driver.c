@@ -18,11 +18,16 @@
 
 #include "prologue.h"
 
-#include "misc.h"
+#include "log.h"
 #include "driver.h"
 
-static int logOutputPackets = 0;
 static int logInputPackets = 0;
+static int logOutputPackets = 0;
+
+void
+unsupportedDevice (const char *path) {
+  LogPrint(LOG_WARNING, "Unsupported device: %s", path);
+}
 
 static void
 logPacket (const char *description, const void *packet, size_t size) {

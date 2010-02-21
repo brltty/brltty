@@ -35,7 +35,7 @@
 #include	<sys/ioctl.h>
 
 #include	"message.h"
-#include	"misc.h"
+#include	"log.h"
 
 
 #define		BRL_HAVE_PACKET_IO	1

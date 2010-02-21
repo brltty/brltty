@@ -50,6 +50,7 @@ static iconv_t conversionDescriptor = NULL;
 #define getch() my_getch()
 #endif /* HAVE_PKG_CURSES */
 
+#include "log.h"
 #include "misc.h"
 #include "charset.h"
 

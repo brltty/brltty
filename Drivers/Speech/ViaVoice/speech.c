@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <eci.h>
 
-#include "misc.h"
+#include "log.h"
 
 typedef enum {
    PARM_IniFile,

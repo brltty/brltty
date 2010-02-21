@@ -21,7 +21,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "misc.h"
+#include "log.h"
 #include "scr.h"
 #include "scr_help.h"
 

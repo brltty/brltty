@@ -31,7 +31,7 @@
 #  include <netinet/in.h>
 #endif /* HAVE_HPUX_AUDIO */
 
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 
 #include "sys_prog_none.h"

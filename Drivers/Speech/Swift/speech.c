@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 
-#include "misc.h"
+#include "log.h"
 
 typedef enum {
   PARM_NAME

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "misc.h"
+#include "log.h"
 #include "datafile.h"
 #include "cmd.h"
 #include "brldefs.h"

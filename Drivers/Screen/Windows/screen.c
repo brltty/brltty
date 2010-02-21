@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "misc.h"
+#include "log.h"
 #include "brldefs.h"
 #include "sys_windows.h"
 #include "scancodes.h"

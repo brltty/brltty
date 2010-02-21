@@ -32,7 +32,7 @@
 #include <unicode/uchar.h>
 #endif /* HAVE_ICU */
 
-#include "misc.h"
+#include "log.h"
 #include "message.h"
 #include "tunes.h"
 #include "ttb.h"

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "misc.h"
+#include "log.h"
 
 #include "brl_driver.h"
 #include "brldefs-sk.h"

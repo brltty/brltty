@@ -22,7 +22,7 @@
 
 #include "prologue.h"
 
-#include "misc.h"
+#include "log.h"
 #include "io_misc.h"
 #include "io_bluetooth.h"
 #include "eu_io.h"

@@ -34,7 +34,7 @@ typedef enum {
 #include <string.h>
 
 #include "message.h"
-#include "misc.h"
+#include "log.h"
 
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"

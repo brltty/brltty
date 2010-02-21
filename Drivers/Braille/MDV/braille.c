@@ -60,7 +60,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 
 #define BRL_STATUS_FIELDS sfWindowCoordinates
 #define BRL_HAVE_STATUS_CELLS

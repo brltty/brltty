@@ -27,7 +27,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "misc.h"
+#include "log.h"
 
 typedef enum {
   PARM_COMMAND,

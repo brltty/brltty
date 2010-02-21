@@ -56,6 +56,7 @@ typedef struct {
 
 #endif /* monitor definitions */
 
+#include "log.h"
 #include "misc.h"
 #include "queue.h"
 #include "async.h"

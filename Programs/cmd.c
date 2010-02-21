@@ -22,6 +22,7 @@
 #include <string.h>
 #include <search.h>
 
+#include "log.h"
 #include "misc.h"
 #include "brldefs.h"
 #include "cmd.h"

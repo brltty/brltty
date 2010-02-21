@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
@@ -45,6 +46,7 @@
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
 
+#include "log.h"
 #include "misc.h"
 #include "auth.h"
 

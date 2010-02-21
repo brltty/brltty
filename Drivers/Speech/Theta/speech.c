@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+#include "log.h"
 #include "misc.h"
 
 typedef enum {

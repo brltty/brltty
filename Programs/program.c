@@ -26,6 +26,7 @@
 
 #include "program.h"
 #include "misc.h"
+#include "log.h"
 #include "system.h"
 
 #ifdef WINDOWS

@@ -26,7 +26,7 @@
 #include <sys/asynch.h>
 #include <sys/usb/clients/ugen/usb_ugen.h>
 
-#include "misc.h"
+#include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 

@@ -132,39 +132,6 @@ extern long int millisecondsBetween (const struct timeval *from, const struct ti
 extern long int millisecondsSince (const struct timeval *from);
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
-#if defined(HAVE_SYSLOG_H)
-#include <syslog.h>
-#else /* no system log */
-typedef enum {
-  LOG_EMERG,
-  LOG_ALERT,
-  LOG_CRIT,
-  LOG_ERR,
-  LOG_WARNING,
-  LOG_NOTICE,
-  LOG_INFO,
-  LOG_DEBUG
-} SyslogLevel;
-#endif /* system log external definitions */
-
-extern void LogOpen(int toConsole);
-extern void LogClose(void);
-extern void LogPrint
-       (int level, const char *format, ...) PRINTF(2, 3);
-extern void LogError (const char *action);
-#ifdef WINDOWS
-extern void LogWindowsCodeError (DWORD code, const char *action);
-extern void LogWindowsError (const char *action);
-#ifdef __MINGW32__
-extern void LogWindowsSocketError (const char *action);
-#endif /* __MINGW32__ */
-#endif /* WINDOWS */
-extern void LogBytes (int level, const char *description, const unsigned char *data, unsigned int length);
-extern int setLogLevel (int level);
-extern const char *setPrintPrefix (const char *prefix);
-extern int setPrintLevel (int level);
-extern int setPrintOff (void);
-
 extern int getConsole (void);
 extern int writeConsole (const unsigned char *address, size_t count);
 extern int ringBell (void);
@@ -200,7 +167,6 @@ extern char *getDevicePath (const char *device);
 extern const char *resolveDeviceName (const char *const *names, const char *description, int mode);
 
 extern int isQualifiedDevice (const char **path, const char *qualifier);
-extern void unsupportedDevice (const char *path);
 
 #undef ALLOW_DOS_DEVICE_NAMES
 #if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN32__))

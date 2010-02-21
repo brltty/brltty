@@ -33,6 +33,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "log.h"
 #include "misc.h"
 #include "message.h"
 

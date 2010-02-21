@@ -23,6 +23,7 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "misc.h"
 #include "message.h"
 #include "eu_protocol.h"

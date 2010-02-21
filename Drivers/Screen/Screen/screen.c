@@ -38,7 +38,7 @@ static const char *shmPath = "/screen";
 static int shmFileDescriptor = -1;
 #endif /* HAVE_SHM_OPEN */
 
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "charset.h"
 

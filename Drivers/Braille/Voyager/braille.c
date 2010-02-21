@@ -47,7 +47,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "misc.h"
+#include "log.h"
 
 #define BRLSTAT ST_VoyagerStyle
 #define BRL_HAVE_FIRMNESS

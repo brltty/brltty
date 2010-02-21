@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "log.h"
 #include "misc.h"
 
 #include "spk_driver.h"

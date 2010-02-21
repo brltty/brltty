@@ -28,6 +28,7 @@
 #include <regex.h>
 #endif /* HAVE_REGEX_H */
 
+#include "log.h"
 #include "misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"

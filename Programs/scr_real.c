@@ -28,6 +28,7 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
+#include "log.h"
 #include "misc.h"
 #include "async.h"
 #include "scr.h"

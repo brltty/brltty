@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "log.h"
 #include "misc.h"
 #include "keyboard.h"
 

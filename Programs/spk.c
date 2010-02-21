@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "log.h"
 #include "misc.h"
 #include "charset.h"
 #include "drivers.h"

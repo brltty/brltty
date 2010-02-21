@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "misc.h"
 #include "system.h"
 #include "notes.h"

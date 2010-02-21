@@ -23,7 +23,7 @@
 
 #include "program.h"
 #include "options.h"
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "ktb.h"
 #include "kbdkeys.h"

@@ -27,7 +27,7 @@
 #include <sys/mman.h>
 #include <hurd/console.h>
 
-#include "misc.h"
+#include "log.h"
 #include "brldefs.h"
 #include "charset.h"
 

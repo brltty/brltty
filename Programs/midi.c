@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "brltty.h"
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "notes.h"
 

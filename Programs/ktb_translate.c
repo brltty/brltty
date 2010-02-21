@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 #include "charset.h"
 #include "ktb.h"
 #include "ktb_internal.h"

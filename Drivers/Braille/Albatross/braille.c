@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <time.h>
 
+#include "log.h"
 #include "misc.h"
 
 #define BRL_HAVE_STATUS_CELLS

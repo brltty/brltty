@@ -30,6 +30,7 @@
 #include "program.h"
 #include "options.h"
 #include "brl.h"
+#include "log.h"
 #include "misc.h"
 #include "charset.h"
 #include "message.h"

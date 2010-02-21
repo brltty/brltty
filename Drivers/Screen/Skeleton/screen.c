@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#include "misc.h"
+#include "log.h"
 
 #include "scr_driver.h"
 

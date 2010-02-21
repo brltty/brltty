@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "options.h"
+#include "log.h"
 #include "misc.h"
 
 #include "ttb.h"

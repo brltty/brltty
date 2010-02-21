@@ -26,7 +26,7 @@
 
 #include <errno.h>
 
-#include "misc.h"
+#include "log.h"
 
 #include "eu_io.h"
 

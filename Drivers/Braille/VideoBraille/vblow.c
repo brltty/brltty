@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "brl.h"
 #include "braille.h"

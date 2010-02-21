@@ -34,6 +34,7 @@
 #include <langinfo.h>
 #endif /* platform-specific includes */
 
+#include "log.h"
 #include "misc.h"
 #include "lock.h"
 #include "charset.h"

@@ -27,7 +27,7 @@
 
 #include "options.h"
 #include "tunes.h"
-#include "misc.h"
+#include "log.h"
 #include "defaults.h"
 #include "brltty.h"
 #include "message.h"

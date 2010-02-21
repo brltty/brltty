@@ -71,6 +71,7 @@
 #define LogSocketError(msg) LogError(msg)
 #endif /* __MINGW32__ */
 
+#include "log.h"
 #include "misc.h"
 #include "io_misc.h"
 #include "cmd.h"

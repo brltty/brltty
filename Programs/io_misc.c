@@ -32,7 +32,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "io_misc.h"
-#include "misc.h"
+#include "log.h"
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"

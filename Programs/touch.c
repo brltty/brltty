@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-#include "misc.h"
+#include "log.h"
 #include "touch.h"
 #include "brltty.h"
 

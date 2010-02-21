@@ -63,7 +63,7 @@
 #include "brl.h"
 #include "ttb.h"
 #include "brltty.h"
-#include "misc.h"
+#include "log.h"
 #include "auth.h"
 #include "io_misc.h"
 #include "scr.h"

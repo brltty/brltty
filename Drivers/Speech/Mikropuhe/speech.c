@@ -33,7 +33,7 @@
 #include <pthread.h>
 #endif /* __MINGW32__ */
 
-#include "misc.h"
+#include "log.h"
 #include "system.h"
 #include "queue.h"
 #include "brltty.h"

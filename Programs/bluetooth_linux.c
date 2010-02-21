@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 
-#include "misc.h"
+#include "log.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 

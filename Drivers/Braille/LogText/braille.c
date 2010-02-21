@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "log.h"
 #include "misc.h"
 
 #define BRL_STATUS_FIELDS sfGeneric

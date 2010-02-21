@@ -29,6 +29,7 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 
+#include "log.h"
 #include "misc.h"
 #include "system.h"
 #include "sys_linux.h"

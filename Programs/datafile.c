@@ -26,6 +26,7 @@
 #include <unicode/uchar.h>
 #endif /* HAVE_ICU */
 
+#include "log.h"
 #include "misc.h"
 #include "queue.h"
 #include "datafile.h"
