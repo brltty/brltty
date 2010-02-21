@@ -24,6 +24,7 @@
 #include "program.h"
 #include "options.h"
 #include "log.h"
+#include "file.h"
 #include "system.h"
 #include "ktb.h"
 #include "kbdkeys.h"

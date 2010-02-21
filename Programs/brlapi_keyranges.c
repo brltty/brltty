@@ -21,6 +21,8 @@
 /* Source file for range list management module */
 /* For a description of what each function does, see rangelist.h */
 
+#include <stdio.h>
+
 #include "brlapi_keyranges.h"
 #include "log.h"
 #include "misc.h"

@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdio.h>
+
 /* this header file is used to create the driver structure
  * for a dynamically loadable braille display driver.
  */

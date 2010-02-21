@@ -24,7 +24,7 @@
 
 #include "options.h"
 #include "log.h"
-#include "misc.h"
+#include "file.h"
 
 #include "ttb.h"
 #include "ttb_internal.h"

@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "misc.h"
+#include "file.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"

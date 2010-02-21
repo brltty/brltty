@@ -25,7 +25,6 @@ extern "C" {
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <stdarg.h>
 #include <sys/time.h>
 
@@ -85,13 +84,6 @@ extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 extern char *joinStrings (const char *const *strings, int count);
 
-extern FILE *openFile (const char *path, const char *mode, int optional);
-extern FILE *openDataFile (const char *path, const char *mode, int optional);
-
-typedef int LineHandler (char *line, void *data);
-extern int processLines (FILE *file, LineHandler handleLine, void *data);
-extern int readLine (FILE *file, char **buffer, size_t *size);
-
 extern void formatInputError (
   char *buffer,
   int size,
@@ -135,28 +127,6 @@ extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
-
-extern int isPathDelimiter (const char character);
-extern int isAbsolutePath (const char *path);
-extern char *getPathDirectory (const char *path);
-extern const char *locatePathName (const char *path);
-extern const char *locatePathExtension (const char *path);
-extern int isExplicitPath (const char *path);
-
-extern char *makePath (const char *directory, const char *file);
-extern char *ensureExtension (const char *path, const char *extension);
-extern int testPath (const char *path);
-extern int ensureDirectory (const char *path);
-
-extern const char *writableDirectory;
-extern const char *getWritableDirectory (void);
-extern char *makeWritablePath (const char *file);
-
-extern char *getWorkingDirectory (void);
-extern int setWorkingDirectory (const char *directory);
-
-extern char *getHomeDirectory (void);
-extern char *getOverrideDirectory (void);
 
 extern int rescaleInteger (int value, int from, int to);
 

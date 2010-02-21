@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <strings.h>
 #include <errno.h>
@@ -25,6 +26,7 @@
 
 #include "device.h"
 #include "log.h"
+#include "file.h"
 #include "misc.h"
 
 int

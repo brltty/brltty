@@ -43,13 +43,16 @@ dataarea.$O:
 
 ###############################################################################
 
-BASE_OBJECTS = misc.$O log.$O device.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = misc.$O log.$O file.$O device.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
 
 misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
 
 log.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/log.c
+
+file.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/file.c
 
 device.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/device.c
@@ -124,7 +127,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_log.$O host_device.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_log.$O host_file.$O host_device.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c

@@ -30,6 +30,7 @@
 #include "options.h"
 #include "spk.h"
 #include "log.h"
+#include "file.h"
 #include "misc.h"
 
 static SpeechSynthesizer spk;

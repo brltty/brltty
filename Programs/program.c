@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <limits.h>
 
 #ifdef ENABLE_I18N_SUPPORT
@@ -25,8 +26,9 @@
 #endif /* ENABLE_I18N_SUPPORT */
 
 #include "program.h"
-#include "misc.h"
 #include "log.h"
+#include "file.h"
+#include "misc.h"
 #include "system.h"
 
 #ifdef WINDOWS

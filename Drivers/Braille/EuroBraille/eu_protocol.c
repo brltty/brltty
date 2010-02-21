@@ -23,7 +23,8 @@
 
 #include "prologue.h"
 
-#include "misc.h"
+#include <stdio.h>
+
 #include "eu_protocol.h"
 
 t_eubrl_protocol	esysirisProtocol = {

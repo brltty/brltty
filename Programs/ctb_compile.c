@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
  
-#include "misc.h"
+#include "file.h"
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "datafile.h"

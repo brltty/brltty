@@ -34,6 +34,7 @@
 #endif /* __MINGW32__ */
 
 #include "log.h"
+#include "file.h"
 #include "system.h"
 #include "queue.h"
 #include "brltty.h"

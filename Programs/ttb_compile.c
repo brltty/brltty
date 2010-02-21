@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include "misc.h"
+#include "file.h"
 #include "datafile.h"
 #include "dataarea.h"
 #include "charset.h"

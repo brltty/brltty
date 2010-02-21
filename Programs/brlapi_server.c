@@ -64,6 +64,7 @@
 #include "ttb.h"
 #include "brltty.h"
 #include "log.h"
+#include "file.h"
 #include "auth.h"
 #include "io_misc.h"
 #include "scr.h"

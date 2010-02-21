@@ -22,6 +22,7 @@
 #include <ctype.h>
 
 #include "log.h"
+#include "file.h"
 #include "datafile.h"
 #include "cmd.h"
 #include "brldefs.h"

@@ -23,6 +23,8 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+
 #include "log.h"
 #include "misc.h"
 #include "message.h"

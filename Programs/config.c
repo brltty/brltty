@@ -58,6 +58,7 @@
 #include "tunes.h"
 #include "message.h"
 #include "log.h"
+#include "file.h"
 #include "system.h"
 #include "async.h"
 #include "program.h"

@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
@@ -27,6 +28,7 @@
 #endif /* HAVE_ICU */
 
 #include "log.h"
+#include "file.h"
 #include "misc.h"
 #include "queue.h"
 #include "datafile.h"

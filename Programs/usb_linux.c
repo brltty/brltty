@@ -38,6 +38,7 @@
 #endif /* USBDEVFS_CONNECT */
 
 #include "log.h"
+#include "file.h"
 #include "misc.h"
 #include "mount.h"
 #include "io_usb.h"

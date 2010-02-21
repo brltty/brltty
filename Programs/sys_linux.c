@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -25,6 +26,7 @@
 #include <linux/kd.h>
 
 #include "log.h"
+#include "file.h"
 #include "misc.h"
 #include "system.h"
 #include "sys_linux.h"
