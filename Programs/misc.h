@@ -87,14 +87,6 @@ extern char *joinStrings (const char *const *strings, int count);
 typedef DWORD ProcessIdentifier;
 #define PRIpid "lu"
 
-#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
-extern int gettimeofday (struct timeval *tvp, void *tzp);
-#endif /* gettimeofday */
-
-#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
-extern void usleep (int usec);
-#endif /* usleep */
-
 #elif defined(__MSDOS__)
 typedef int ProcessIdentifier;
 #define PRIpid "d"

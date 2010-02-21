@@ -44,8 +44,8 @@ extern "C" {
 #ifdef __MINGW32__
 #define __USE_W32_SOCKETS
 #endif /* __MINGW32__ */
-#include <windows.h>
 
+#include <windows.h>
 #endif /* WINDOWS */
 
 #ifdef __MINGW32__
@@ -64,6 +64,16 @@ extern "C" {
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#ifdef __MINGW32__
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
+extern int gettimeofday (struct timeval *tvp, void *tzp);
+#endif /* gettimeofday */
+
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
+extern void usleep (int usec);
+#endif /* usleep */
+#endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
 #include <stdarg.h>
