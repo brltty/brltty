@@ -51,6 +51,10 @@ extern char *getOverrideDirectory (void);
 extern FILE *openFile (const char *path, const char *mode, int optional);
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 
+extern int acquireFileLock (int file, int exclusive);
+extern int attemptFileLock (int file, int exclusive);
+extern int releaseFileLock (int file);
+
 typedef int LineHandler (char *line, void *data);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
 extern int readLine (FILE *file, char **buffer, size_t *size);

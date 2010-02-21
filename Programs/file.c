@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 
 #include "file.h"
@@ -288,6 +289,44 @@ openDataFile (const char *path, const char *mode, int optional) {
 done:
   if (overridePath) free(overridePath);
   return file;
+}
+
+static int
+fileLockOperation (int file, int action, short type) {
+  struct flock lock;
+
+  memset(&lock, 0, sizeof(lock));
+  lock.l_type = type;
+  lock.l_whence = SEEK_SET;
+  lock.l_start = 0;
+  lock.l_len = 0;
+
+  do {
+    if (fcntl(file, action, &lock) != -1) return 1;
+  } while (errno == EINTR);
+
+  if (errno != EAGAIN) LogError("lock");
+  return 0;
+}
+
+static int
+lockFile (int file, int exclusive, int wait) {
+  return fileLockOperation(file, (wait? F_SETLKW: F_SETLK), (exclusive? F_WRLCK: F_RDLCK));
+}
+
+int
+acquireFileLock (int file, int exclusive) {
+  return lockFile(file, exclusive, 1);
+}
+
+int
+attemptFileLock (int file, int exclusive) {
+  return lockFile(file, exclusive, 0);
+}
+
+int
+releaseFileLock (int file) {
+  return fileLockOperation(file, F_SETLK, F_UNLCK);
 }
 
 int
