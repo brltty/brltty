@@ -62,6 +62,7 @@
 #endif /* __MINGW32__ */
 
 #include "log.h"
+#include "device.h"
 #include "misc.h"
 #include "charset.h"
 #include "cmd.h"

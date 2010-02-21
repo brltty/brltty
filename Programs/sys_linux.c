@@ -128,58 +128,7 @@ getBootParameters (const char *name) {
 #include "sys_shlib_dlfcn.h"
 #endif /* ENABLE_SHARED_OBJECTS */
 
-#define BEEP_DIVIDEND 1193180
-
-static void
-enableBeeps (void) {
-  static int status = 0;
-  installKernelModule("pcspkr", &status);
-}
-
-int
-canBeep (void) {
-  enableBeeps();
-  return getConsole() != -1;
-}
-
-int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
-
-int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
-    LogError("ioctl KDMKTONE");
-  }
-  return 0;
-}
-
-int
-startBeep (unsigned short frequency) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
-    LogError("ioctl KIOCSOUND");
-  }
-  return 0;
-}
-
-int
-stopBeep (void) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, 0) != -1) return 1;
-    LogError("ioctl KIOCSOUND");
-  }
-  return 0;
-}
-
-void
-endBeep (void) {
-}
+#include "sys_beep_linux.h"
 
 #ifdef ENABLE_PCM_SUPPORT
 #if defined(USE_PCM_SUPPORT_OSS)

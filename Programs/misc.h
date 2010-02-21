@@ -132,10 +132,6 @@ extern long int millisecondsBetween (const struct timeval *from, const struct ti
 extern long int millisecondsSince (const struct timeval *from);
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
-extern int getConsole (void);
-extern int writeConsole (const unsigned char *address, size_t count);
-extern int ringBell (void);
-
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
@@ -161,18 +157,6 @@ extern int setWorkingDirectory (const char *directory);
 
 extern char *getHomeDirectory (void);
 extern char *getOverrideDirectory (void);
-
-extern const char *getDeviceDirectory (void);
-extern char *getDevicePath (const char *device);
-extern const char *resolveDeviceName (const char *const *names, const char *description, int mode);
-
-extern int isQualifiedDevice (const char **path, const char *qualifier);
-
-#undef ALLOW_DOS_DEVICE_NAMES
-#if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN32__))
-#define ALLOW_DOS_DEVICE_NAMES 1
-extern int isDosDevice (const char *path, const char *prefix);
-#endif /* DOS or Windows (but not Cygwin) */
 
 extern int rescaleInteger (int value, int from, int to);
 

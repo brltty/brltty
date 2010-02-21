@@ -29,7 +29,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "log.h"
-#include "misc.h"
+#include "device.h"
 #include "async.h"
 #include "scr.h"
 #include "scr_real.h"

@@ -28,7 +28,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "misc.h"
+#include "device.h"
 
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"

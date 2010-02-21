@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "misc.h"
+#include "device.h"
 #include "queue.h"
 #include "io_misc.h"
 #include "io_bluetooth.h"

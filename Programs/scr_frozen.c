@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
+#include "log.h"
 #include "scr.h"
 #include "scr_frozen.h"
 
