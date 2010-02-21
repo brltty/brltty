@@ -25,7 +25,6 @@ extern "C" {
 
 #include "prologue.h"
 
-#include <stdarg.h>
 #include <sys/time.h>
 
 #ifndef MIN
@@ -83,15 +82,6 @@ extern "C" {
 extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 extern char *joinStrings (const char *const *strings, int count);
-
-extern void formatInputError (
-  char *buffer,
-  int size,
-  const char *file,
-  const int *line,
-  const char *format,
-  va_list argp
-);
 
 #if defined(__MINGW32__)
 typedef DWORD ProcessIdentifier;

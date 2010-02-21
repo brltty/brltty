@@ -24,6 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <stdio.h>
+#include <stdarg.h>
 
 extern int isPathDelimiter (const char character);
 extern int isAbsolutePath (const char *path);
@@ -53,6 +54,8 @@ extern FILE *openDataFile (const char *path, const char *mode, int optional);
 typedef int LineHandler (char *line, void *data);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
 extern int readLine (FILE *file, char **buffer, size_t *size);
+
+void formatInputError (char *buffer, int size, const char *file, const int *line, const char *format, va_list argp);
 
 #ifdef __cplusplus
 }

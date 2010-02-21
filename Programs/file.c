@@ -356,3 +356,28 @@ processLines (FILE *file, LineHandler handleLine, void *data) {
   if (buffer) free(buffer);
   return !ferror(file);
 }
+
+void
+formatInputError (char *buffer, int size, const char *file, const int *line, const char *format, va_list argp) {
+  int length = 0;
+
+  if (file) {
+    int count;
+    snprintf(&buffer[length], size-length, "%s%n", file, &count);
+    length += count;
+  }
+
+  if (line) {
+    int count;
+    snprintf(&buffer[length], size-length, "[%d]%n", *line, &count);
+    length += count;
+  }
+
+  if (length) {
+    int count;
+    snprintf(&buffer[length], size-length, ": %n", &count);
+    length += count;
+  }
+
+  vsnprintf(&buffer[length], size-length, format, argp);
+}
