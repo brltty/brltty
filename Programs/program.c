@@ -181,7 +181,14 @@ createPidFile (const char *path, ProcessIdentifier pid) {
     PidFileState state = PFS_error;
     int file = open(path,
                     O_RDWR | O_CREAT,
-                    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                    S_IRUSR | S_IWUSR
+#ifdef S_IRGRP
+                    | S_IRGRP
+#endif /* S_IRGRP */
+#ifdef S_IROTH
+                    | S_IROTH
+#endif /* S_IROTH */
+                    );
 
     if (file != -1) {
       int locked = acquireFileLock(file, 1);
