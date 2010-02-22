@@ -23,7 +23,7 @@ $(TXT2HLP)$X:
 braille-help::
 	$(INSTALL_DIRECTORY) $(BLD_TOP)$(DAT_DIR)
 	set -- *.hlp && [ -f $$1 ] || exit 0 && \
-	for file; do $(INSTALL) $$file $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)-$$file; done
+	for file in "${@}"; do $(INSTALL) $$file $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)-$$file; done
 
 braille-all:: braille-help
 
