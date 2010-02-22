@@ -29,10 +29,10 @@
 #endif /* ENABLE_I18N_SUPPORT */
 
 #include "program.h"
+#include "pid.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "misc.h"
 #include "system.h"
 
 #ifdef WINDOWS

@@ -16,28 +16,35 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_PROGRAM
-#define BRLTTY_INCLUDED_PROGRAM
+#ifndef BRLTTY_INCLUDED_PID
+#define BRLTTY_INCLUDED_PID
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include "pid.h"
+#if defined(__MINGW32__)
+typedef DWORD ProcessIdentifier;
+#define PRIpid "lu"
+#define SCNpid "lu"
 
-extern const char *programPath;
-extern const char *programName;
+#elif defined(__MSDOS__)
+typedef int ProcessIdentifier;
+#define PRIpid "d"
+#define SCNpid "d"
+#define DOS_PROCESS_ID 1
 
-extern void prepareProgram (int argumentCount, char **argumentVector);
-extern void makeProgramBanner (char *buffer, size_t size);
+#else /* Unix */
+typedef pid_t ProcessIdentifier;
+#define PRIpid "d"
+#define SCNpid "d"
+#endif /* platform-dependent definitions */
 
-extern void fixInstallPaths (char **const *paths);
-extern void fixInstallPath (char **path);
-
-extern int createPidFile (const char *path, ProcessIdentifier pid);
+extern ProcessIdentifier getProcessIdentifier (void);
+extern int testProcessIdentifier (ProcessIdentifier pid);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_PROGRAM */
+#endif /* BRLTTY_INCLUDED_PID */

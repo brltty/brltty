@@ -27,10 +27,13 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
-PROGRAM_OBJECTS = program.$O options.$O
+PROGRAM_OBJECTS = program.$O pid.$O options.$O
 
 program.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/program.c
+
+pid.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/pid.c
 
 options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
@@ -130,7 +133,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
