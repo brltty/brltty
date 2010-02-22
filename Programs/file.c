@@ -308,7 +308,7 @@ modifyFileLock (int file, int action, short type) {
     if (fcntl(file, action, &lock) != -1) return 1;
   } while (errno == EINTR);
 
-  if (errno != EAGAIN) LogError("lock");
+  if (errno != EAGAIN) LogError("fcntl[struct flock *]");
   return 0;
 }
 
@@ -334,6 +334,28 @@ releaseFileLock (int file) {
 
 #else /* file locking */
 #warning file lock support not available on this platform
+
+static int
+fileLockingNotSupported (void) {
+  errno = ENOSYS;
+  LogError("lock");
+  return 0;
+}
+
+int
+acquireFileLock (int file, int exclusive) {
+  return fileLockingNotSupported();
+}
+
+int
+attemptFileLock (int file, int exclusive) {
+  return fileLockingNotSupported();
+}
+
+int
+releaseFileLock (int file) {
+  return fileLockingNotSupported();
+}
 #endif /* file locking */
 
 int
