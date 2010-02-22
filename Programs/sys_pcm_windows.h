@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "parse.h"
+
 struct PcmDeviceStruct {
   HWAVEOUT handle;
   UINT deviceID;

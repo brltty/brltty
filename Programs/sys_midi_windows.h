@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "misc.h"
+
 struct MidiDeviceStruct {
   HMIDIOUT handle;
   unsigned char note;

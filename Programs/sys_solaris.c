@@ -23,6 +23,7 @@
 #include <fcntl.h>
 
 #include "log.h"
+#include "misc.h"
 #include "system.h"
 
 char *
