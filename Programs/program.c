@@ -182,10 +182,12 @@ createPidFile (const char *path, ProcessIdentifier pid) {
     if (!pid) pid = getProcessIdentifier();
 
     if ((file = open(path, O_RDWR|O_CREAT)) != -1) {
-      char buffer[0X20];
-      int length;
+      int locked = acquireFileLock(file, 1);
 
-      if (acquireFileLock(file, 1)) {
+      if (locked || (errno == ENOSYS)) {
+        char buffer[0X20];
+        int length;
+
         if ((length = read(file, buffer, sizeof(buffer))) != -1) {
           ProcessIdentifier oldPid;
           char terminator;
@@ -225,7 +227,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
           }
         }
 
-        releaseFileLock(file);
+        if (locked) releaseFileLock(file);
       }
 
       close(file);
