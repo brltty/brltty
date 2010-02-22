@@ -333,7 +333,9 @@ releaseFileLock (int file) {
   return modifyFileLock(file, F_SETLK, F_UNLCK);
 }
 
-#elif defined(LOCK_EX)
+#elif defined(HAVE_SYS_FILE_H)
+#include <sys/file.h>
+
 static int
 modifyFileLock (int file, int operation) {
   do {

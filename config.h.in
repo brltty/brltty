@@ -83,16 +83,15 @@ extern "C" {
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H
 
-#ifdef __MINGW32__
+/* Define this if the header file sys/file.h exists. */
+#undef HAVE_SYS_FILE_H
 
-#else /* __MINGW32__ */
-
+#ifndef __MINGW32__
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H
 
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
-
 #endif /* __MINGW32__ */
 
 /* Define this if the header file sys/wait.h exists,
