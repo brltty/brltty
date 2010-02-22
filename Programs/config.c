@@ -30,7 +30,6 @@
 #include <locale.h>
 #include <signal.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <limits.h>
 
 #ifdef HAVE_SYS_WAIT_H
@@ -60,6 +59,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
+#include "misc.h"
 #include "system.h"
 #include "async.h"
 #include "program.h"
@@ -2741,92 +2741,24 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-static void createPidFile (ProcessIdentifier pid);
+static void tryPidFile (ProcessIdentifier pid);
 
 static void
 retryPidFile (void *data) {
-  createPidFile(0);
+  tryPidFile(0);
 }
 
 static void
-createPidFile (ProcessIdentifier pid) {
-  if (opt_pidFile && *opt_pidFile) {
-    typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
-    PidFileState state = PFS_error;
-    int file;
+tryPidFile (ProcessIdentifier pid) {
+  int created = createPidFile(opt_pidFile, pid);
 
-    LogPrint(LOG_DEBUG, "checking PID file: %s", opt_pidFile);
-    if (!pid) pid = getProcessIdentifier();
-
-    if ((file = open(opt_pidFile, O_RDWR|O_CREAT)) != -1) {
-      char buffer[0X20];
-      int length;
-
-      if (acquireFileLock(file, 1)) {
-        if ((length = read(file, buffer, sizeof(buffer))) != -1) {
-          ProcessIdentifier oldPid;
-          char terminator;
-          int count;
-
-          if (length == sizeof(buffer)) length -= 1;
-          buffer[length] = 0;
-          count = sscanf(buffer, "%" SCNpid "%c", &oldPid, &terminator);
-          state = PFS_stale;
-
-          if ((count == 1) ||
-              ((count == 2) && ((terminator == '\n') || (terminator == '\r')))) {
-            if (oldPid == pid) {
-              state = PFS_ready;
-            } else if (testProcessIdentifier(oldPid)) {
-              LogPrint(LOG_ERR, "instance already running: PID=%" PRIpid, oldPid);
-              state = PFS_clash;
-            }
-          }
-        } else {
-          LogError("read");
-        }
-
-        if (state == PFS_stale) {
-          state = PFS_error;
-
-          if (ftruncate(file, 0) != -1) {
-            snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
-
-            if (write(file, buffer, length) != -1) {
-              state = PFS_ready;
-            } else {
-              LogError("write");
-            }
-          } else {
-            LogError("ftruncate");
-          }
-        }
-
-        releaseFileLock(file);
-      }
-
-      close(file);
+  if (!pid) {
+    if (created) {
+      atexit(exitPidFile);
+    } else if (errno == EEXIST) {
+      exit(12);
     } else {
-      LogPrint(LOG_WARNING, "%s: %s: %s",
-               gettext("cannot open process identifier file"),
-               opt_pidFile, strerror(errno));
-    }
-
-    switch (state) {
-      case PFS_ready:
-        atexit(exitPidFile);
-        break;
-
-      case PFS_clash:
-        exit(12);
-
-      case PFS_error:
-        asyncRelativeAlarm(5000, retryPidFile, NULL);
-        break;
-
-      default:
-        LogPrint(LOG_WARNING, "unexpected PID file state: %u", state);
-        break;
+      asyncRelativeAlarm(5000, retryPidFile, NULL);
     }
   }
 }
@@ -2878,7 +2810,7 @@ background (void) {
       exit(10);
     }
 
-    createPidFile(processInfo.dwProcessId);
+    tryPidFile(processInfo.dwProcessId);
     ExitProcess(0);
   }
 
@@ -2902,7 +2834,7 @@ background (void) {
     }
 
     if (child) {
-      createPidFile(child);
+      tryPidFile(child);
       _exit(0);
     }
   }
@@ -2945,6 +2877,7 @@ startup (int argc, char *argv[]) {
       &opt_writableDirectory,
       &opt_dataDirectory,
       &opt_tablesDirectory,
+      &opt_pidFile,
       NULL
     };
     fixInstallPaths(paths);
@@ -3055,7 +2988,7 @@ startup (int argc, char *argv[]) {
      ) {
     background();
   }
-  createPidFile(0);
+  tryPidFile(0);
 
   if (!opt_standardError) {
     LogClose();

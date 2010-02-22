@@ -19,6 +19,10 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <limits.h>
 
 #ifdef ENABLE_I18N_SUPPORT
@@ -157,7 +161,7 @@ fixInstallPaths (char **const *paths) {
       }
     }
 
-    ++paths;
+    paths += 1;
   }
 }
 
@@ -165,4 +169,88 @@ void
 fixInstallPath (char **path) {
   char **const paths[] = {path, NULL};
   fixInstallPaths(paths);
+}
+
+int
+createPidFile (const char *path, ProcessIdentifier pid) {
+  if (path && *path) {
+    typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
+    PidFileState state = PFS_error;
+    int file;
+
+    LogPrint(LOG_DEBUG, "checking PID file: %s", path);
+    if (!pid) pid = getProcessIdentifier();
+
+    if ((file = open(path, O_RDWR|O_CREAT)) != -1) {
+      char buffer[0X20];
+      int length;
+
+      if (acquireFileLock(file, 1)) {
+        if ((length = read(file, buffer, sizeof(buffer))) != -1) {
+          ProcessIdentifier oldPid;
+          char terminator;
+          int count;
+
+          if (length == sizeof(buffer)) length -= 1;
+          buffer[length] = 0;
+          count = sscanf(buffer, "%" SCNpid "%c", &oldPid, &terminator);
+          state = PFS_stale;
+
+          if ((count == 1) ||
+              ((count == 2) && ((terminator == '\n') || (terminator == '\r')))) {
+            if (oldPid == pid) {
+              state = PFS_ready;
+            } else if (testProcessIdentifier(oldPid)) {
+              LogPrint(LOG_ERR, "instance already running: PID=%" PRIpid, oldPid);
+              state = PFS_clash;
+            }
+          }
+        } else {
+          LogError("read");
+        }
+
+        if (state == PFS_stale) {
+          state = PFS_error;
+
+          if (ftruncate(file, 0) != -1) {
+            snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
+
+            if (write(file, buffer, length) != -1) {
+              state = PFS_ready;
+            } else {
+              LogError("write");
+            }
+          } else {
+            LogError("ftruncate");
+          }
+        }
+
+        releaseFileLock(file);
+      }
+
+      close(file);
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s: %s",
+               gettext("cannot open process identifier file"),
+               path, strerror(errno));
+    }
+
+    switch (state) {
+      case PFS_ready:
+        return 1;
+
+      case PFS_clash:
+        errno = EEXIST;
+        break;
+
+      case PFS_error:
+        break;
+
+      default:
+        LogPrint(LOG_WARNING, "unexpected PID file state: %u", state);
+        break;
+    }
+  }
+
+  return 0;
 }

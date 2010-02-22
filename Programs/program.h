@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "misc.h"
+
 extern const char *programPath;
 extern const char *programName;
 
@@ -31,6 +33,8 @@ extern void makeProgramBanner (char *buffer, size_t size);
 
 extern void fixInstallPaths (char **const *paths);
 extern void fixInstallPath (char **path);
+
+extern int createPidFile (const char *path, ProcessIdentifier pid);
 
 #ifdef __cplusplus
 }
