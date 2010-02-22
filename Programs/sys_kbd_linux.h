@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include <limits.h>
+
 #ifdef HAVE_LINUX_INPUT_H
 #include <dirent.h>
 #include <fcntl.h>

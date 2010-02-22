@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 #ifdef ENABLE_I18N_SUPPORT
 #include <locale.h>
@@ -33,6 +34,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
+#include "misc.h"
 #include "system.h"
 
 #ifdef WINDOWS

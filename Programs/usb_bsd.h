@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include <limits.h>
+
 struct UsbDeviceExtensionStruct {
   char *path;
   int file;
