@@ -173,15 +173,16 @@ fixInstallPath (char **path) {
 
 int
 createPidFile (const char *path, ProcessIdentifier pid) {
+  if (!pid) pid = getProcessIdentifier();
+
   if (path && *path) {
     typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
     PidFileState state = PFS_error;
-    int file;
+    int file = open(path,
+                    O_RDWR | O_CREAT,
+                    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-    LogPrint(LOG_DEBUG, "checking PID file: %s", path);
-    if (!pid) pid = getProcessIdentifier();
-
-    if ((file = open(path, O_RDWR|O_CREAT)) != -1) {
+    if (file != -1) {
       int locked = acquireFileLock(file, 1);
 
       if (locked || (errno == ENOSYS)) {
