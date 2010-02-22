@@ -308,6 +308,7 @@ modifyFileLock (int file, int action, short type) {
     if (fcntl(file, action, &lock) != -1) return 1;
   } while (errno == EINTR);
 
+  if (errno == EACCES) errno = EAGAIN;
   if (errno != EAGAIN) LogError("fcntl[struct flock *]");
   return 0;
 }
@@ -330,6 +331,47 @@ attemptFileLock (int file, int exclusive) {
 int
 releaseFileLock (int file) {
   return modifyFileLock(file, F_SETLK, F_UNLCK);
+}
+
+#elif defined(F_LOCK)
+static int
+modifyRegionLock (int file, int command, off_t length) {
+  do {
+    if (lockf(file, command, length) != -1) return 1;
+  } while (errno == EINTR);
+
+  if (errno == EACCES) errno = EAGAIN;
+  if (errno != EAGAIN) LogError("lockf");
+  return 0;
+}
+
+static int
+modifyFileLock (int file, int command) {
+  off_t offset;
+
+  if ((offset = lseek(file, 0, SEEK_CUR)) == -1) {
+    LogError("lseek");
+  } else if (modifyRegionLock(file, command, 0)) {
+    if (!offset) return 1;
+    if (modifyRegionLock(file, command, -offset)) return 1;
+  }
+
+  return 0;
+}
+
+int
+acquireFileLock (int file, int exclusive) {
+  return modifyFileLock(file, F_LOCK);
+}
+
+int
+attemptFileLock (int file, int exclusive) {
+  return modifyFileLock(file, F_TLOCK);
+}
+
+int
+releaseFileLock (int file) {
+  return modifyFileLock(file, F_ULOCK);
 }
 
 #else /* file locking */
