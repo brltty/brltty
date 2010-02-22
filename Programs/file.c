@@ -19,7 +19,9 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -291,8 +293,9 @@ done:
   return file;
 }
 
+#if defined(F_SETLK)
 static int
-fileLockOperation (int file, int action, short type) {
+modifyFileLock (int file, int action, short type) {
   struct flock lock;
 
   memset(&lock, 0, sizeof(lock));
@@ -311,7 +314,7 @@ fileLockOperation (int file, int action, short type) {
 
 static int
 lockFile (int file, int exclusive, int wait) {
-  return fileLockOperation(file, (wait? F_SETLKW: F_SETLK), (exclusive? F_WRLCK: F_RDLCK));
+  return modifyFileLock(file, (wait? F_SETLKW: F_SETLK), (exclusive? F_WRLCK: F_RDLCK));
 }
 
 int
@@ -326,8 +329,12 @@ attemptFileLock (int file, int exclusive) {
 
 int
 releaseFileLock (int file) {
-  return fileLockOperation(file, F_SETLK, F_UNLCK);
+  return modifyFileLock(file, F_SETLK, F_UNLCK);
 }
+
+#else /* file locking */
+#warning file lock support not available on this platform
+#endif /* file locking */
 
 int
 readLine (FILE *file, char **buffer, size_t *size) {
