@@ -264,7 +264,9 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   if (handle->altSem && type==handle->altExpectedPacketType) {
     /* Yes, put packet content there */
     *handle->altRes = res = brlapi_readPacketContent(handle->fileDescriptor, res, handle->altPacket, handle->altSize);
+#ifndef WINDOWS
     if (sem_post)
+#endif /* WINDOWS */
       sem_post(handle->altSem);
     handle->altSem = NULL;
     pthread_mutex_unlock(&handle->read_mutex);
@@ -333,7 +335,11 @@ again:
   pthread_mutex_lock(&handle->read_mutex);
   if (!handle->reading) doread = handle->reading = 1;
   else {
-    if (!sem_init || !sem_post || !sem_wait || !sem_destroy || handle->altSem) {
+    if (
+#ifndef WINDOWS
+    	!sem_init || !sem_post || !sem_wait || !sem_destroy ||
+#endif /* WINDOWS */
+	handle->altSem) {
       /* This can't happen without threads */
       syslog(LOG_ERR,"third call to brlapi_waitForPacket !");
       brlapi_errno = BRLAPI_ERROR_ILLEGAL_INSTRUCTION;
@@ -359,7 +365,9 @@ again:
     pthread_mutex_lock(&handle->read_mutex);
     if (handle->altSem) {
       *handle->altRes = -3; /* no packet for him */
+#ifndef WINDOWS
       if (sem_post)
+#endif /* WINDOWS */
         sem_post(handle->altSem);
       handle->altSem = NULL;
     }
