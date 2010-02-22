@@ -333,7 +333,7 @@ releaseFileLock (int file) {
   return modifyFileLock(file, F_SETLK, F_UNLCK);
 }
 
-#elif defined(HAVE_SYS_FILE_H)
+#elif defined(HAVE_SYS_FILE_H) && defined(LOCK_EX)
 #include <sys/file.h>
 
 static int
@@ -405,6 +405,73 @@ attemptFileLock (int file, int exclusive) {
 int
 releaseFileLock (int file) {
   return modifyFileLock(file, F_ULOCK);
+}
+
+#elif defined(__MINGW32__)
+#include <io.h>
+#include <sys/locking.h>
+
+static int
+modifyFileLock (int file, int command) {
+  int ok = 0;
+  off_t offset;
+
+  if ((offset = lseek(file, 0, SEEK_CUR)) != -1) {
+    if (lseek(file, 0, SEEK_SET) != -1) {
+      int wait;
+
+      if (command == _LK_LOCK) {
+        command = _LK_NBLCK;
+        wait = 1;
+      } else if (command == _LK_RLCK) {
+        command = _LK_NBRLCK;
+        wait = 1;
+      } else {
+        wait = 0;
+      }
+
+      while (1) {
+        if (_locking(file, command, 1) != -1) {
+          ok = 1;
+          break;
+        }
+
+        if (errno != EACCES) {
+          LogError("_locking");
+          break;
+        }
+
+        if (!wait) break;
+        approximateDelay(1000);
+      }
+
+      if (lseek(file, offset, SEEK_SET) == -1) {
+        LogError("lseek");
+        ok = 0;
+      }
+    } else {
+      LogError("lseek");
+    }
+  } else {
+    LogError("lseek");
+  }
+
+  return ok;
+}
+
+int
+acquireFileLock (int file, int exclusive) {
+  return modifyFileLock(file, (exclusive? _LK_LOCK: _LK_RLCK));
+}
+
+int
+attemptFileLock (int file, int exclusive) {
+  return modifyFileLock(file, (exclusive? _LK_NBLCK: _LK_NBRLCK));
+}
+
+int
+releaseFileLock (int file) {
+  return modifyFileLock(file, _LK_UNLCK);
 }
 
 #else /* file locking */
