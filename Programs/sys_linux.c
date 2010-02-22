@@ -64,6 +64,35 @@ writeInputEvent (const struct input_event *event) {
 
 #ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>
+
+static int
+enableUinputKeyEvents (int device) {
+  int key;
+
+  if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
+    LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
+    return 0;
+  }
+
+  for (key=0; key<=KEY_MAX; key+=1) {
+    if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
+      LogError("ioctl[UI_SET_KEYBIT]");
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+enableUinputAutorepeat (int device) {
+  if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
+    LogError("ioctl[UI_SET_EVBIT,EV_REP]");
+    return 0;
+  }
+
+  return 1;
+}
 #endif /* HAVE_LINUX_UINPUT_H */
 
 char *
@@ -267,35 +296,6 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 
   if (path) free(path);
   return descriptor;
-}
-
-static int
-enableUinputKeyEvents (int device) {
-  int key;
-
-  if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
-    LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
-    return 0;
-  }
-
-  for (key=0; key<=KEY_MAX; key+=1) {
-    if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
-      LogError("ioctl[UI_SET_KEYBIT]");
-      return 0;
-    }
-  }
-
-  return 1;
-}
-
-static int
-enableUinputAutorepeat (int device) {
-  if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
-    LogError("ioctl[UI_SET_EVBIT,EV_REP]");
-    return 0;
-  }
-
-  return 1;
 }
 
 int
