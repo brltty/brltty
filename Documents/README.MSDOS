@@ -37,7 +37,8 @@ one line, of course):
 
    CC_FOR_BUILD=gcc LD=i586-pc-msdosdjgpp-ld ./configure
       --prefix=/brltty-msdos --host=i586-pc-msdosdjgpp
-      --disable-api
+      --disable-api --disable-icu --without-speechd
+      --disable-x --disable-usb-support
       --with-braille-driver=-vr,all --without-libbraille
       --with-speech-driver=all --without-flite
       --with-screen-driver=pb,-all 
