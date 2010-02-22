@@ -23,6 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "bitfield.h"
 #include "queue.h"
 
 typedef struct {

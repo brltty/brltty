@@ -37,25 +37,6 @@ extern "C" {
 
 #define DEFINE_POINTER_TO(name,prefix) typeof(name) *prefix##name
 
-#define HIGH_NIBBLE(byte) ((byte) & 0XF0)
-#define LOW_NIBBLE(byte) ((byte) & 0XF)
-
-#define getSameEndian(from) (from)
-#define getOtherEndian(from) ((((from) & 0XFF) << 8) | (((from) >> 8) & 0XFF))
-#define putSameEndian(to, from) (*(to) = getSameEndian((from)))
-#define putOtherEndian(to, from) putSameEndian((to), getOtherEndian((from)))
-#ifdef WORDS_BIGENDIAN
-#  define getLittleEndian getOtherEndian
-#  define putLittleEndian putOtherEndian
-#  define getBigEndian getSameEndian
-#  define putBigEndian putSameEndian
-#else /* WORDS_BIGENDIAN */
-#  define getLittleEndian getSameEndian
-#  define putLittleEndian putSameEndian
-#  define getBigEndian getOtherEndian
-#  define putBigEndian putOtherEndian
-#endif /* WORDS_BIGENDIAN */
-
 #ifdef WINDOWS
 #define getSystemError() GetLastError()
 

@@ -41,6 +41,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "bitfield.h"
 #include "misc.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
