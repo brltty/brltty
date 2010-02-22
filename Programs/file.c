@@ -410,9 +410,10 @@ releaseFileLock (int file) {
 #elif defined(__MINGW32__)
 #include <io.h>
 #include <sys/locking.h>
+#include <limits.h>
 
 static int
-modifyFileLock (int file, int command) {
+modifyFileLock (int file, int mode) {
   int ok = 0;
   off_t offset;
 
@@ -420,18 +421,18 @@ modifyFileLock (int file, int command) {
     if (lseek(file, 0, SEEK_SET) != -1) {
       int wait;
 
-      if (command == _LK_LOCK) {
-        command = _LK_NBLCK;
+      if (mode == _LK_LOCK) {
+        mode = _LK_NBLCK;
         wait = 1;
-      } else if (command == _LK_RLCK) {
-        command = _LK_NBRLCK;
+      } else if (mode == _LK_RLCK) {
+        mode = _LK_NBRLCK;
         wait = 1;
       } else {
         wait = 0;
       }
 
       while (1) {
-        if (_locking(file, command, 1) != -1) {
+        if (_locking(file, mode, LONG_MAX) != -1) {
           ok = 1;
           break;
         }
