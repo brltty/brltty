@@ -2741,42 +2741,94 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-static int
-createPidFile (ProcessIdentifier pid) {
-  FILE *stream;
-
-  if (!opt_pidFile) return 1;
-  if (!*opt_pidFile) return 1;
-
-  if ((stream = fopen(opt_pidFile, "a"))) {
-    fprintf(stream, "%" PRIpid "\n", pid);
-    fclose(stream);
-    atexit(exitPidFile);
-    return 1;
-  } else {
-    LogPrint(LOG_WARNING, "%s: %s: %s",
-             gettext("cannot open process identifier file"),
-             opt_pidFile, strerror(errno));
-  }
-
-  return 0;
-}
-
-static void schedulePidFile (void);
-
-static void
-tryPidFile (void) {
-  if (!createPidFile(getProcessIdentifier())) schedulePidFile();
-}
+static void createPidFile (ProcessIdentifier pid);
 
 static void
 retryPidFile (void *data) {
-  tryPidFile();
+  createPidFile(0);
 }
 
 static void
-schedulePidFile (void) {
-  asyncRelativeAlarm(5000, retryPidFile, NULL);
+createPidFile (ProcessIdentifier pid) {
+  if (opt_pidFile && *opt_pidFile) {
+    typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
+    PidFileState state = PFS_error;
+    int file;
+
+    LogPrint(LOG_DEBUG, "checking PID file: %s", opt_pidFile);
+    if (!pid) pid = getProcessIdentifier();
+
+    if ((file = open(opt_pidFile, O_RDWR|O_CREAT)) != -1) {
+      char buffer[0X20];
+      int length;
+
+      if (acquireFileLock(file, 1)) {
+        if ((length = read(file, buffer, sizeof(buffer))) != -1) {
+          ProcessIdentifier oldPid;
+          char terminator;
+          int count;
+
+          if (length == sizeof(buffer)) length -= 1;
+          buffer[length] = 0;
+          count = sscanf(buffer, "%" SCNpid "%c", &oldPid, &terminator);
+          state = PFS_stale;
+
+          if ((count == 1) ||
+              ((count == 2) && ((terminator == '\n') || (terminator == '\r')))) {
+            if (oldPid == pid) {
+              state = PFS_ready;
+            } else if (testProcessIdentifier(oldPid)) {
+              LogPrint(LOG_ERR, "instance already running: PID=%" PRIpid, oldPid);
+              state = PFS_clash;
+            }
+          }
+        } else {
+          LogError("read");
+        }
+
+        if (state == PFS_stale) {
+          state = PFS_error;
+
+          if (ftruncate(file, 0) != -1) {
+            snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
+
+            if (write(file, buffer, length) != -1) {
+              state = PFS_ready;
+            } else {
+              LogError("write");
+            }
+          } else {
+            LogError("ftruncate");
+          }
+        }
+
+        releaseFileLock(file);
+      }
+
+      close(file);
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s: %s",
+               gettext("cannot open process identifier file"),
+               opt_pidFile, strerror(errno));
+    }
+
+    switch (state) {
+      case PFS_ready:
+        atexit(exitPidFile);
+        break;
+
+      case PFS_clash:
+        exit(12);
+
+      case PFS_error:
+        asyncRelativeAlarm(5000, retryPidFile, NULL);
+        break;
+
+      default:
+        LogPrint(LOG_WARNING, "unexpected PID file state: %u", state);
+        break;
+    }
+  }
 }
 
 #if defined(__MINGW32__)
@@ -3002,10 +3054,8 @@ startup (int argc, char *argv[]) {
 #endif
      ) {
     background();
-    schedulePidFile();
-  } else {
-    tryPidFile();
   }
+  createPidFile(0);
 
   if (!opt_standardError) {
     LogClose();
