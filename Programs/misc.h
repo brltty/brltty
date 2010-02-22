@@ -63,15 +63,18 @@ extern "C" {
 #if defined(__MINGW32__)
 typedef DWORD ProcessIdentifier;
 #define PRIpid "lu"
+#define SCNpid "lu"
 
 #elif defined(__MSDOS__)
 typedef int ProcessIdentifier;
 #define PRIpid "d"
+#define SCNpid "d"
 #define DOS_PROCESS_ID 1
 
 #else /* Unix */
 typedef pid_t ProcessIdentifier;
 #define PRIpid "d"
+#define SCNpid "d"
 #endif /* platform-dependent definitions */
 
 extern ProcessIdentifier getProcessIdentifier (void);
