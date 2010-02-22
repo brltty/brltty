@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <limits.h>
 
 #ifdef ENABLE_I18N_SUPPORT
 #include <locale.h>

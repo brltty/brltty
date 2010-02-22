@@ -30,7 +30,6 @@
 #include <locale.h>
 #include <signal.h>
 #include <fcntl.h>
-#include <limits.h>
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
