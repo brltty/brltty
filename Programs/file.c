@@ -333,6 +333,37 @@ releaseFileLock (int file) {
   return modifyFileLock(file, F_SETLK, F_UNLCK);
 }
 
+#elif defined(LOCK_EX)
+static int
+modifyFileLock (int file, int operation) {
+  do {
+    if (flock(file, operation) != -1) return 1;
+  } while (errno == EINTR);
+
+#ifdef EWOULDBLOCK
+  if (errno == EWOULDBLOCK) errno = EAGAIN;
+#endif /* EWOULDBLOCK */
+
+  if (errno == EACCES) errno = EAGAIN;
+  if (errno != EAGAIN) LogError("flock");
+  return 0;
+}
+
+int
+acquireFileLock (int file, int exclusive) {
+  return modifyFileLock(file, (exclusive? LOCK_EX: LOCK_SH));
+}
+
+int
+attemptFileLock (int file, int exclusive) {
+  return modifyFileLock(file, ((exclusive? LOCK_EX: LOCK_SH) | LOCK_NB));
+}
+
+int
+releaseFileLock (int file) {
+  return modifyFileLock(file, LOCK_UN);
+}
+
 #elif defined(F_LOCK)
 static int
 modifyRegionLock (int file, int command, off_t length) {
