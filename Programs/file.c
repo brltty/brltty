@@ -26,6 +26,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif /* HAVE_SYS_FILE_H */
+
 #include "file.h"
 #include "log.h"
 #include "parse.h"
@@ -333,9 +337,7 @@ releaseFileLock (int file) {
   return modifyFileLock(file, F_SETLK, F_UNLCK);
 }
 
-#elif defined(HAVE_SYS_FILE_H) && defined(LOCK_EX)
-#include <sys/file.h>
-
+#elif defined(LOCK_EX)
 static int
 modifyFileLock (int file, int operation) {
   do {
