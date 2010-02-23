@@ -725,12 +725,13 @@ static int
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
   unsigned char buffer[0X203];
   size_t offset = 0;
-  size_t size;
-  int identity;
+
+  volatile size_t size;
+  volatile int identity;
 
   while (1) {
     if (!io->readBytes(buffer, &offset, 1, 1000)) {
-      logPartialPacket(buffer, offset);
+      if (offset > 0) logPartialPacket(buffer, offset);
       return 0;
     }
 
