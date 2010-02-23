@@ -1113,7 +1113,7 @@ static size_t getCharset(unsigned char *buffer)
   if (CHECKPROC("ntdll.dll", wcslen) && wide) {
 #endif /* __CYGWIN32__ */
     *p++ = strlen(WIN_WCHAR_T);
-    strcpy(p, WIN_WCHAR_T);
+    strcpy((char*) p, WIN_WCHAR_T);
     p += strlen(WIN_WCHAR_T);
   } else
 #endif /* WINDOWS */
@@ -1122,7 +1122,7 @@ static size_t getCharset(unsigned char *buffer)
 #ifdef WINDOWS
     UINT CP;
     if ((CP = GetACP() || (CP = GetOEMCP()))) {
-      len = sprintf(p+3, "%d", CP);
+      len = sprintf(p+3, "%u", CP);
       *p++ = 2 + len;
       *p++ = 'C';
       *p++ = 'P';

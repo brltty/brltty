@@ -648,7 +648,7 @@ int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD 
 	if (!(lpntme->ntmFontSig.fsUsb[BRAILLE_USB / shift] &
 		(1 << (BRAILLE_USB % shift))))
 		return 1;
-	font = CreateFont(CHRY-6, CHRX-4, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, lpelfe->elfFullName);
+	font = CreateFont(CHRY-6, CHRX-4, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, (LPCTSTR) lpelfe->elfFullName);
 	if (!font) {
 		LogWindowsError("Couldn't load font");
 		LogPrint(LOG_ERR,"font %s", lpelfe->elfFullName);
