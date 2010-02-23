@@ -105,12 +105,12 @@ static size_t stackSize;
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \
-  LogPrint(LOG_ERR, "writing error %d to %"PRIFD, y, x); \
+  LogPrint(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
   LogPrint(LOG_ERR, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
 #define WEXC(x, y, type, packet, size, ...) do { \
-  LogPrint(LOG_ERR, "writing exception %d to %"PRIFD, y, x); \
+  LogPrint(LOG_ERR, "writing exception %d to %"PRIfd, y, x); \
   LogPrint(LOG_ERR, __VA_ARGS__); \
   writeException(x, y, type, packet, size); \
 } while(0)
@@ -369,7 +369,7 @@ static inline void writeAck(FileDescriptor fd)
 static void writeError(FileDescriptor fd, unsigned int err)
 {
   uint32_t code = htonl(err);
-  LogPrint(LOG_DEBUG,"error %u on fd %"PRIFD, err, fd);
+  LogPrint(LOG_DEBUG,"error %u on fd %"PRIfd, err, fd);
   brlapiserver_writePacket(fd,BRLAPI_PACKET_ERROR,&code,sizeof(code));
 }
 
@@ -380,7 +380,7 @@ static void writeException(FileDescriptor fd, unsigned int err, brlapi_packetTyp
   int hdrsize, esize;
   brlapi_packet_t epacket;
   brlapi_errorPacket_t * errorPacket = &epacket.error;
-  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIFD, err, (unsigned long)type, fd);
+  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIfd, err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
   errorPacket->type = htonl(type);
@@ -737,7 +737,7 @@ static inline void freeTty(Tty *tty)
 /* Logs the given request */
 static inline void LogPrintRequest(int type, FileDescriptor fd)
 {
-  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIFD, brlapiserver_getPacketTypeName(type), fd);  
+  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIfd, brlapiserver_getPacketTypeName(type), fd);  
 }
 
 static int handleGetDriver(Connection *c, brlapi_packetType_t type, size_t size, const char *str)
@@ -1255,7 +1255,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 
     if (!authCorrect) {
       writeError(c->fd, BRLAPI_ERROR_AUTHENTICATION);
-      LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
+      LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIfd" failed authorization", c->fd);
       return 0;
     }
 
@@ -1280,15 +1280,15 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
-    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %"PRIFD")",strerror(errno),c->fd);
+    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);
     else {
-      LogPrint(LOG_DEBUG,"Closing connection on fd %"PRIFD,c->fd);
+      LogPrint(LOG_DEBUG,"Closing connection on fd %"PRIfd,c->fd);
     }
     if (c->raw) {
       pthread_mutex_lock(&rawMutex);
       c->raw = 0;
       rawConnection = NULL;
-      LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up raw mode properly",c->fd);
+      LogPrint(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
       LogPrint(LOG_WARNING,"Trying to reset braille terminal");
       if (!trueBraille->reset || !trueBraille->reset(disp)) {
@@ -1302,7 +1302,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       pthread_mutex_lock(&rawMutex);
       c->suspend = 0;
       suspendConnection = NULL;
-      LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up suspended mode properly",c->fd);
+      LogPrint(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
       if (!driverConstructed && !resumeDriver(disp))
 	LogPrint(LOG_WARNING,"Couldn't resume braille driver");
@@ -1315,7 +1315,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       pthread_mutex_unlock(&rawMutex);
     }
     if (c->tty) {
-      LogPrint(LOG_DEBUG,"Client on fd %"PRIFD" did not give up control of tty %#010x properly",c->fd,c->tty->number);
+      LogPrint(LOG_DEBUG,"Client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
     return 1;
@@ -1326,7 +1326,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   if (c->auth!=1) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
-    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIFD,brlapiserver_getPacketTypeName(type), c->fd);
+    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIfd,brlapiserver_getPacketTypeName(type), c->fd);
     return 0;    
   }
   switch (type) {
@@ -1647,7 +1647,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
       LogWindowsError("CreateNamedPipe");
     goto out;
   }
-  LogPrint(LOG_DEBUG,"CreateFile -> %"PRIFD,fd);
+  LogPrint(LOG_DEBUG,"CreateFile -> %"PRIfd,fd);
   if (!info->overl.hEvent) {
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       LogWindowsError("CreateEvent");
@@ -1834,7 +1834,7 @@ static void *establishSocket(void *arg)
 	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR))
     LogPrint(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
   else
-    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIFD")",num,cinfo->fd);
+    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
   return NULL;
 }
 
@@ -2106,7 +2106,7 @@ static void *server(void *arg)
             LogWindowsError("GetOverlappedResult");
           resfd = socketInfo[i].fd;
           if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR)
-            LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIFD", was %"PRIFD")",i,socketInfo[i].fd,resfd);
+            LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIfd", was %"PRIfd")",i,socketInfo[i].fd,resfd);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
           if (!ResetEvent(socketInfo[i].overl.hEvent))
@@ -2118,7 +2118,7 @@ static void *server(void *arg)
           resfd = (FileDescriptor)accept((SocketDescriptor)socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
           if (resfd == INVALID_FILE_DESCRIPTOR) {
             setSocketErrno();
-            LogPrint(LOG_WARNING,"accept(%"PRIFD"): %s",socketInfo[i].fd,strerror(errno));
+            LogPrint(LOG_WARNING,"accept(%"PRIfd"): %s",socketInfo[i].fd,strerror(errno));
             continue;
           }
           formatAddress(source, sizeof(source), &addr, addrlen);
@@ -2127,7 +2127,7 @@ static void *server(void *arg)
         }
 #endif /* __MINGW32__ */
 
-        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
+        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
           writeError(resfd, BRLAPI_ERROR_CONNREFUSED);

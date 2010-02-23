@@ -117,22 +117,22 @@ typedef signed long long	int64_t;
 #ifdef __MINGW32__
 typedef HANDLE FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
-#define PRIFD "p"
+#define PRIfd "p"
 #define closeFileDescriptor(fd) CloseHandle(fd)
 
 typedef SOCKET SocketDescriptor;
 #define INVALID_SOCKET_DESCRIPTOR -1
-#define PRISD "d"
+#define PRIsd "d"
 #define closeSocketDescriptor(sd) closesocket(sd)
 #else /* __MINGW32__ */
 typedef int FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR -1
-#define PRIFD "d"
+#define PRIfd "d"
 #define closeFileDescriptor(fd) close(fd)
 
 typedef int SocketDescriptor;
 #define INVALID_SOCKET_DESCRIPTOR -1
-#define PRISD "d"
+#define PRIsd "d"
 #define closeSocketDescriptor(sd) close(sd)
 #endif /* __MINGW32__ */
 

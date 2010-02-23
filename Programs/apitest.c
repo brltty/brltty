@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_openConnection(&settings, &settings)) != (brlapi_fileDescriptor)(-1)) {
-    fprintf(stderr, "done (fd=%"PRIFD")\n", fd);
+    fprintf(stderr, "done (fd=%"PRIfd")\n", fd);
     fprintf(stderr,"Connected to %s using auth %s\n", settings.host, settings.auth);
 
     if (opt_showName) {
