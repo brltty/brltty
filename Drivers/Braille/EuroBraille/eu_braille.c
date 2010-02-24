@@ -39,7 +39,8 @@ typedef enum {
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 #include "parse.h"
-#include "misc.h"
+#include "timing.h"
+
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 #endif /* ENABLE_USB_SUPPORT */

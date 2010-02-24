@@ -35,6 +35,8 @@
 #include <arpa/inet.h>
 #endif /* __MINGW32__ */
 
+#include "misc.h"
+
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
 #endif /* !defined(AF_LOCAL) && defined(AF_UNIX) */

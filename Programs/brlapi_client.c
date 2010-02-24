@@ -27,15 +27,15 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <locale.h>
+
 #ifndef __MINGW32__
 #include <langinfo.h>
 #endif /* __MINGW32__ */
-#include <locale.h>
 
 #ifdef __MINGW32__
 #include <ws2tcpip.h>
 #include "win_pthread.h"
-#include "misc.h"
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, ## __VA_ARGS__)
 
@@ -57,7 +57,6 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
-#define setSocketErrno()
 #endif /* __MINGW32__ */
 
 #ifdef HAVE_ALLOCA_H
@@ -78,6 +77,8 @@
 #ifndef MAXIMUM_VIRTUAL_CONSOLE
 #define MAXIMUM_VIRTUAL_CONSOLE 1
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
+
+#include "misc.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"

@@ -32,6 +32,7 @@
 #endif /* HAVE_HPUX_AUDIO */
 
 #include "log.h"
+#include "misc.h"
 #include "system.h"
 
 #include "sys_prog_none.h"

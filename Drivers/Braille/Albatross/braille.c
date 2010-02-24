@@ -29,7 +29,7 @@
 #include <time.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"

@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "misc.h"
-
 #include "spk_driver.h"
 #include "speech.h"		/* for BLite speech definitions */
 #include "Drivers/Braille/BrailleLite/braille.h"		/* for BLite speech definitions */

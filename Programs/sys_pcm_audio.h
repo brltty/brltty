@@ -19,6 +19,7 @@
 #include <sys/audio.h>
 #include <stropts.h>
 
+#include "log.h"
 #include "io_misc.h"
 
 struct PcmDeviceStruct {

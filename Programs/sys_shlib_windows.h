@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "log.h"
+
 void *
 loadSharedObject (const char *path) {
   HMODULE library;

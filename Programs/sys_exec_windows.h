@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "log.h"
+
 int
 executeHostCommand (const char *const *arguments) {
   int result = 0XFF;

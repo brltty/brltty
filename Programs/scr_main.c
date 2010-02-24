@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 
-#include "misc.h"
 #include "scr.h"
 #include "scr_main.h"
 

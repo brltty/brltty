@@ -18,6 +18,8 @@
 
 #include <mach-o/dyld.h>
 
+#include "log.h"
+
 static void
 logDyldError (const char *action) {
   NSLinkEditErrors errors;

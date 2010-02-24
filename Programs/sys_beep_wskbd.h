@@ -18,6 +18,9 @@
 
 #include <dev/wscons/wsconsio.h>
 
+#include "log.h"
+#include "device.h"
+
 int
 canBeep (void) {
   return getConsole() != -1;

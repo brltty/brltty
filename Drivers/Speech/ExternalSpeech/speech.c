@@ -43,7 +43,7 @@
 #endif /* __MINGW32__ */
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 
 typedef enum {
   PARM_PROGRAM=0,

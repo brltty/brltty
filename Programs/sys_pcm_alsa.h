@@ -19,6 +19,10 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #include <alsa/asoundlib.h>
 
+#include "log.h"
+#include "timing.h"
+#include "misc.h"
+
 struct PcmDeviceStruct {
   snd_pcm_t *handle;
   snd_pcm_hw_params_t *hardwareParameters;

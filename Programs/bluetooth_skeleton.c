@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include "misc.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 

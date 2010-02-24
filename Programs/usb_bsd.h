@@ -18,6 +18,8 @@
 
 #include <limits.h>
 
+#include "log.h"
+
 struct UsbDeviceExtensionStruct {
   char *path;
   int file;

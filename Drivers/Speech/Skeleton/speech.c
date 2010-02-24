@@ -20,8 +20,6 @@
 
 #include <stdio.h>
 
-#include "log.h"
-
 //#define SPK_HAVE_TRACK
 //#define SPK_HAVE_RATE
 //#define SPK_HAVE_VOLUME

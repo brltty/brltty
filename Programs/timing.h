@@ -16,33 +16,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_TIMING
+#define BRLTTY_INCLUDED_TIMING
 
-#include "system.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#include "sys_prog_none.h"
+#include <sys/time.h>
 
-#include "sys_boot_none.h"
+extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
+extern void accurateDelay (int milliseconds);
 
-#include "sys_exec_unix.h"
+extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
+extern long int millisecondsSince (const struct timeval *from);
 
-#include "sys_mount_none.h"
+extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
-
-#include "sys_kbd_none.h"
+#endif /* BRLTTY_INCLUDED_TIMING */

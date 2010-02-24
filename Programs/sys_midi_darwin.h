@@ -20,6 +20,10 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioToolbox.h>
 
+#include "log.h"
+#include "timing.h"
+#include "misc.h"
+
 struct MidiDeviceStruct {
   AUGraph graph;
   AudioUnit synth;

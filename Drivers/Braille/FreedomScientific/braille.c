@@ -29,7 +29,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "misc.h"
+#include "timing.h"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO

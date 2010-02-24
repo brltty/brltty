@@ -28,7 +28,7 @@
 #endif /* SIGUSR1 */
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "scr.h"
 #include "routing.h"
 

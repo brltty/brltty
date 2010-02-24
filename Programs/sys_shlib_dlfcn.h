@@ -22,6 +22,8 @@
 #warning shared object support not available on this installation: no <dlfcn.h>
 #endif /* HAVE_DLOPEN */
 
+#include "log.h"
+
 void *
 loadSharedObject (const char *path) {
 #ifdef HAVE_DLOPEN 

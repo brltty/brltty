@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */

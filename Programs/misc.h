@@ -25,8 +25,6 @@ extern "C" {
 
 #include "prologue.h"
 
-#include <sys/time.h>
-
 #ifndef MIN
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #endif /* MIN */
@@ -59,12 +57,6 @@ extern "C" {
 
 #define setSystemErrno() setErrno(getSystemError())
 #define setSocketErrno() setErrno(getSocketError())
-
-extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
-extern void accurateDelay (int milliseconds);
-extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
-extern long int millisecondsSince (const struct timeval *from);
-extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);

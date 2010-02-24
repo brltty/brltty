@@ -83,7 +83,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "message.h"
 
 #include "brl_driver.h"

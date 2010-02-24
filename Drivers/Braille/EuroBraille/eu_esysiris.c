@@ -26,7 +26,7 @@
 #include <stdio.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "message.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"

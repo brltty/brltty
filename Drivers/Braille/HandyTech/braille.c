@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
 #include "misc.h"
 
 #define BRLSTAT ST_AlvaStyle

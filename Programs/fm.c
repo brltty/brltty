@@ -20,6 +20,7 @@
 
 #include "brltty.h"
 #include "log.h"
+#include "timing.h"
 #include "notes.h"
 #include "adlib.h"
 

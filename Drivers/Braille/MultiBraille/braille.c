@@ -58,6 +58,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "timing.h"
 #include "misc.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots

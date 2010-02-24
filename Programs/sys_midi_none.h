@@ -18,6 +18,8 @@
 
 #warning MIDI support not available on this platform
 
+#include "log.h"
+
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   LogPrint(errorLevel, "MIDI device not supported.");

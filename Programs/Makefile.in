@@ -46,7 +46,7 @@ dataarea.$O:
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O misc.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
 
 log.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/log.c
@@ -59,6 +59,9 @@ device.$O:
 
 parse.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/parse.c
+
+timing.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/timing.c
 
 misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
@@ -133,7 +136,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c

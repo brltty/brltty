@@ -72,7 +72,7 @@
 #endif /* __MINGW32__ */
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "io_misc.h"
 #include "cmd.h"
 

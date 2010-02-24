@@ -109,6 +109,8 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
+#include "misc.h"
 #include "brltty.h"
 
 #define BRL_STATUS_FIELDS sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter

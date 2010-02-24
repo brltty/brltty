@@ -27,6 +27,8 @@
 
 #include "log.h"
 #include "file.h"
+#include "device.h"
+#include "timing.h"
 #include "misc.h"
 #include "system.h"
 #include "sys_linux.h"

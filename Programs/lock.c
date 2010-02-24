@@ -29,7 +29,6 @@
 #include <pthread.h>
 #endif /* posix threads */
 
-#include "misc.h"
 #include "lock.h"
 
 #ifdef __MSDOS__

@@ -18,6 +18,8 @@
 
 #warning I/O port access not available on this platform
 
+#include "log.h"
+
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
   LogPrint(errorLevel, "I/O ports not supported.");

@@ -19,6 +19,7 @@
 #include <sys/soundcard.h>
 #include <sys/ioctl.h>
 
+#include "log.h"
 #include "io_misc.h"
 
 #ifndef SNDCTL_DSP_SPEED

@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
+#include "timing.h"
 
 #include "brl_driver.h"
 #include "braille.h"

@@ -26,8 +26,6 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "misc.h"
-
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 #include "Drivers/Braille/Alva/braille.h"

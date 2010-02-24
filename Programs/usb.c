@@ -30,6 +30,7 @@
 
 #include "log.h"
 #include "device.h"
+#include "timing.h"
 #include "misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"

@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
 #include "scr.h"
 #include "scr_base.h"
 

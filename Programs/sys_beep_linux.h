@@ -16,6 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "log.h"
 #include "device.h"
 
 #define BEEP_DIVIDEND 1193180

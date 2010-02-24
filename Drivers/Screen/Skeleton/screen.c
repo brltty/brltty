@@ -20,8 +20,6 @@
 
 #include <stdio.h>
 
-#include "log.h"
-
 #include "scr_driver.h"
 
 static void

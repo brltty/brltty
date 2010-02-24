@@ -29,6 +29,7 @@
 #include "tunes.h"
 #include "log.h"
 #include "parse.h"
+#include "misc.h"
 #include "defaults.h"
 #include "brltty.h"
 #include "message.h"

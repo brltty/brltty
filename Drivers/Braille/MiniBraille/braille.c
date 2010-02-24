@@ -34,7 +34,7 @@
 #include <time.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "message.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots

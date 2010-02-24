@@ -25,7 +25,6 @@
 #include <sys/audioio.h>
 #include <sys/time.h>
 
-#include "log.h"
 #include "system.h"
 
 #include "sys_prog_none.h"

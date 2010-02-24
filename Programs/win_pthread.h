@@ -31,7 +31,10 @@ extern "C" {
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
+
+#include "timing.h"
 #include "misc.h"
+
 #define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return -1; } } while (0)
 #define winPthreadAssert(expr) do { if (!(expr)) return -1; } while (0)
 

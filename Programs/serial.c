@@ -143,6 +143,7 @@ typedef int SerialLines;
 #include "log.h"
 #include "device.h"
 #include "parse.h"
+#include "timing.h"
 #include "misc.h"
 
 typedef void * (*FlowControlProc) (void *arg);

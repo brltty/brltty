@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include "misc.h"
 #include "queue.h"
 
 struct QueueStruct {

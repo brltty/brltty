@@ -23,6 +23,8 @@
 #include <sys/io.h>
 #endif /* HAVE_SYS_IO_H */
 
+#include "log.h"
+
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
 #ifdef HAVE_SYS_IO_H

@@ -31,7 +31,6 @@
 #include <dev/usb/usb.h>
 #endif /* HAVE_LEGACY_DEV_USB_USB_H */
 
-#include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 

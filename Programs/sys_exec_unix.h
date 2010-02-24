@@ -19,6 +19,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+#include "log.h"
+
 int
 executeHostCommand (const char *const *arguments) {
   int result = 0XFF;

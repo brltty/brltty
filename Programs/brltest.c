@@ -32,7 +32,7 @@
 #include "brl.h"
 #include "log.h"
 #include "file.h"
-#include "misc.h"
+#include "timing.h"
 #include "charset.h"
 #include "message.h"
 #include "defaults.h"

@@ -24,6 +24,7 @@
 #include <fcntl.h>
 
 #include "log.h"
+#include "timing.h"
 #include "async.h"
 #include "message.h"
 #include "charset.h"

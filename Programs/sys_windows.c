@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
 #include "system.h"
 #include "sys_windows.h"
 

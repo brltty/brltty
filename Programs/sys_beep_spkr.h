@@ -19,6 +19,8 @@
 #ifdef HAVE_MACHINE_SPEAKER_H
 #include <machine/speaker.h>
 
+#include "log.h"
+
 static int speaker = -1;
 
 static int

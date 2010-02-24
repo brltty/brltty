@@ -29,7 +29,6 @@
 
 #include "log.h"
 #include "file.h"
-#include "misc.h"
 #include "queue.h"
 #include "datafile.h"
 #include "charset.h"

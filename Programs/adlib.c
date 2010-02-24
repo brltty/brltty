@@ -29,7 +29,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "system.h"
 #include "adlib.h"
 

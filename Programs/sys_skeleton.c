@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include "log.h"
 #include "system.h"
 
 #include "sys_prog_none.h"

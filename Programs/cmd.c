@@ -23,7 +23,7 @@
 #include <search.h>
 
 #include "log.h"
-#include "misc.h"
+#include "timing.h"
 #include "brldefs.h"
 #include "cmd.h"
 #include "ttb.h"

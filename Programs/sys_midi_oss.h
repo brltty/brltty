@@ -18,6 +18,7 @@
 
 #include <sys/soundcard.h>
 
+#include "log.h"
 #include "io_misc.h"
 
 struct MidiDeviceStruct {

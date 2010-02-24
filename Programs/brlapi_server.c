@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <time.h>
+
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
@@ -57,8 +58,8 @@
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 #include "brlapi_protocol.h"
-
 #include "brlapi_keyranges.h"
+
 #include "cmd.h"
 #include "brl.h"
 #include "ttb.h"
@@ -66,6 +67,8 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
+#include "timing.h"
+#include "misc.h"
 #include "auth.h"
 #include "io_misc.h"
 #include "scr.h"

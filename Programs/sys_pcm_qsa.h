@@ -18,6 +18,8 @@
 
 #include <sys/asoundlib.h>
 
+#include "log.h"
+#include "misc.h"
 #include "io_misc.h"
 
 struct PcmDeviceStruct {

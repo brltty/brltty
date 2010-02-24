@@ -18,6 +18,8 @@
 
 #warning sound card support not available on this platform
 
+#include "log.h"
+
 PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {
   LogPrint(errorLevel, "PCM device not supported.");
