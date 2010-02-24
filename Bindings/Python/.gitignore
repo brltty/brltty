@@ -2,6 +2,7 @@ Makefile
 reldeps.mk
 setup.py
 *.auto.c
+*.auto.dep
 *.auto.pyx
 brlapi.so
 build

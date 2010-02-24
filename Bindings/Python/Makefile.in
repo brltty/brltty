@@ -63,7 +63,7 @@ uninstall:
 	[ ! -f "$(INSTALLED_FILES)" ] || rm -f -- `$(AWK) '{printf "%s%s ", "$(PYTHON_DESTDIR)", $$0}' "$(INSTALLED_FILES)"`
 
 clean::
-	-rm -f -- $(PYTHON_API) *.auto.pyx *.html "$(INSTALLED_FILES)"
+	-rm -f -- $(PYTHON_API) *.auto.* *.html "$(INSTALLED_FILES)"
 	-rm -f -r -- build
 
 distclean::
