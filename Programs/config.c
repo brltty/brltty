@@ -2740,14 +2740,14 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-static void tryPidFile (ProcessIdentifier pid);
+static int tryPidFile (ProcessIdentifier pid);
 
 static void
 retryPidFile (void *data) {
   tryPidFile(0);
 }
 
-static void
+static int
 tryPidFile (ProcessIdentifier pid) {
   int created = createPidFile(opt_pidFile, pid);
 
@@ -2760,6 +2760,8 @@ tryPidFile (ProcessIdentifier pid) {
       asyncRelativeAlarm(5000, retryPidFile, NULL);
     }
   }
+
+  return created;
 }
 
 #if defined(__MINGW32__)
@@ -2821,6 +2823,13 @@ background (void) {
 #else /* Unix */
 static void
 background (void) {
+  int fds[2];
+
+  if (pipe(fds) == -1) {
+    LogError("pipe");
+    exit(11);
+  }
+
   fflush(stdout);
   fflush(stderr);
 
@@ -2833,9 +2842,28 @@ background (void) {
     }
 
     if (child) {
-      tryPidFile(child);
-      _exit(0);
+      int returnCode = 0;
+
+      if (close(fds[0]) == -1) LogError("close");
+
+      if (!tryPidFile(child)) {
+        if (errno == EEXIST) {
+          returnCode = 12;
+        }
+      }
+
+      if (close(fds[1]) == -1) LogError("close");
+      _exit(returnCode);
     }
+  }
+
+  if (close(fds[1]) == -1) LogError("close");
+
+  {
+    unsigned char buffer[1];
+
+    if (read(fds[0], buffer, sizeof(buffer)) == -1) LogError("read");
+    if (close(fds[0]) == -1) LogError("close");
   }
 
   if (setsid() == -1) {                        
