@@ -2805,13 +2805,28 @@ background (void) {
     }
 
     if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE,
-                       CREATE_NEW_PROCESS_GROUP,
+                       CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED,
                        NULL, NULL, &startupInfo, &processInfo)) {
       LogWindowsError("CreateProcess");
       exit(10);
     }
 
-    tryPidFile(processInfo.dwProcessId);
+    {
+      int created = tryPidFile(processInfo.dwProcessId);
+      int resumed = ResumeThread(processInfo.hThread) != -1;
+
+      if (!created) {
+        if (errno == EEXIST) {
+          ExitProcess(12);
+        }
+      }
+
+      if (!resumed) {
+        LogWindowsError("ResumeThread");
+        ExitProcess(13);
+      }
+    }
+
     ExitProcess(0);
   }
 
