@@ -480,6 +480,26 @@ then
    $4
 fi])
 
+AC_DEFUN([BRLTTY_HAVE_PACKAGE], [dnl
+$1_includes=""
+$1_libdirs=""
+$1_libraries=""
+for package_specification in $2
+do
+   pkg-config --exists "${package_specification}" && {
+      package_name="${package_specification%% *}"
+      $1_includes=`pkg-config --cflags-only-I "${package_name}"`
+      $1_libdirs=`pkg-config --libs-only-L "${package_name}"`
+      $1_libraries=`pkg-config --libs-only-l "${package_name}"`
+      $3
+      break
+   }
+done
+AC_SUBST([$1_includes])
+AC_SUBST([$1_libdirs])
+AC_SUBST([$1_libraries])
+])
+
 AC_DEFUN([BRLTTY_HAVE_PTHREADS], [dnl
    AC_CACHE_CHECK([if pthreads are available], [brltty_cv_have_pthreads], [dnl
       SYSCFLAGS="${SYSCFLAGS} -D_REENTRANT"
