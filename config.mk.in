@@ -173,12 +173,10 @@ INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
 
 CSPI_INCLUDES = @cspi_includes@
-CSPI_LIBDIRS = @cspi_libdirs@
-CSPI_LIBRARIES = @cspi_libraries@
+CSPI_LIBS = @cspi_libs@
 
 DBUS_INCLUDES = @dbus_includes@
-DBUS_LIBDIRS = @dbus_libdirs@
-DBUS_LIBRARIES = @dbus_libraries@
+DBUS_LIBS = @dbus_libs@
 
 ICU_INCLUDES = @icu_includes@
 ICU_LIBRARIES = @icu_libraries@

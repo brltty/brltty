@@ -1442,25 +1442,12 @@ in
 esac
 BRLTTY_SCREEN_DRIVER([sc], [Screen])
 
-cspi_includes=""
-cspi_libdirs=""
-cspi_libraries=""
-for package in cspi-1.0
-do
-   pkg-config --exists "${package}" && {
-      cspi_includes="`pkg-config --cflags-only-I "${package}"`"
-      cspi_libdirs="`pkg-config --libs-only-L "${package}"`"
-      cspi_libraries="`pkg-config --libs-only-l "${package}"`"
-      BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(CSPI_LIBDIRS) $(CSPI_LIBRARIES)])
-      break
-   }
-done
-AC_SUBST([cspi_includes])
-AC_SUBST([cspi_libdirs])
-AC_SUBST([cspi_libraries])
+BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
+   BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(CSPI_LIBS)])
+])
 
 BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
-   BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBDIRS) $(DBUS_LIBRARIES)])
+   BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS)])
 ])
 
 BRLTTY_ARG_DRIVER([screen], [Screen])
