@@ -576,7 +576,7 @@ typedef struct {
   UsbDevice *device;
 } UsbChannel;
 
-extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *device);
+extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumber);
 extern void usbCloseChannel (UsbChannel *channel);
 
 extern int isUsbDevice (const char **path);

@@ -1712,27 +1712,31 @@ usbChooseChannel (UsbDevice *device, void *data) {
 }
 
 UsbChannel *
-usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
-  UsbChooseChannelData choose;
-  UsbChannel *channel;
+usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumber) {
+  UsbChooseChannelData choose = {
+    .definition = definitions,
+    .serialNumber = serialNumber
+  };
+  UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
 
-  choose.definition = definitions;
-  choose.serialNumber = device;
+  if (device) {
+    UsbChannel *channel = malloc(sizeof(*channel));
 
-  if ((channel = malloc(sizeof(*channel)))) {
-    memset(channel, 0, sizeof(*channel));
-
-    if ((channel->device = usbFindDevice(usbChooseChannel, &choose))) {
+    if (channel) {
+      memset(channel, 0, sizeof(*channel));
+      channel->device = device;
       channel->definition = *choose.definition;
       return channel;
     } else {
-      LogPrint(LOG_DEBUG, "USB device not found%s%s",
-               (*device? ": ": ""),
-               device);
+      LogError("malloc");
     }
 
-    free(channel);
+    usbCloseDevice(device);
+  } else {
+    LogPrint(LOG_DEBUG, "USB device not found%s%s",
+             (*serialNumber? ": ": ""), serialNumber);
   }
+
   return NULL;
 }
 
