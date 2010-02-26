@@ -58,7 +58,6 @@ typedef struct {
 
 #include "log.h"
 #include "timing.h"
-#include "misc.h"
 #include "queue.h"
 #include "async.h"
 

@@ -43,7 +43,6 @@
 #include "log.h"
 #include "bitfield.h"
 #include "timing.h"
-#include "misc.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS

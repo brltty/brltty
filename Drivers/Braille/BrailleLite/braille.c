@@ -33,7 +33,6 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 #include "message.h"
 
 typedef enum {

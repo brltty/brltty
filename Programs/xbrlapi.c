@@ -54,7 +54,6 @@
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 
-#include "misc.h"
 #include "options.h"
 
 //#define DEBUG

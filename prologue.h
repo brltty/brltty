@@ -32,6 +32,9 @@ extern "C" {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
+#define MIN(a, b)  (((a) < (b))? (a): (b)) 
+#define MAX(a, b)  (((a) > (b))? (a): (b)) 
+
 #define ARRAY_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
 #define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
 
