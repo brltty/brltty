@@ -311,31 +311,35 @@ AC_SUBST([$1_driver_libraries])
 
 AC_DEFUN([BRLTTY_ITEM_RESOLVE], [dnl
 brltty_item_unknown=true
-if test -n "${brltty_item}"
+brltty_item_length=`expr length "${brltty_item}"`
+
+if test "${brltty_item_length}" -eq 2
 then
-   [brltty_item_entry="`expr "${brltty_items_left_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`"]
+   [brltty_item_entry=`expr "${brltty_items_left_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`]
    if test -n "${brltty_item_entry}"
    then
       brltty_item_code="${brltty_item}"
-      [brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"]
+      [brltty_item_name=`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`]
       brltty_item_unknown=false
-   else
-      [brltty_item_entry="`expr "${brltty_items_left_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"]
-      if test -z "${brltty_item_entry}"
+   fi
+elif test "${brltty_item_length}" -gt 2
+then
+   [brltty_item_entry=`expr "${brltty_items_left_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`]
+   if test -z "${brltty_item_entry}"
+   then
+      brltty_lowercase=`echo "${brltty_items_left_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`
+      [brltty_item_code=`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`]
+      if test -n "${brltty_item_code}"
       then
-         brltty_lowercase="`echo "${brltty_items_left_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`"
-         [brltty_item_code="`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`"]
-         if test -n "${brltty_item_code}"
-         then
-            [brltty_item_entry="`expr "${brltty_items_left_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`"]
-         fi
+         [brltty_item_entry=`expr "${brltty_items_left_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`]
       fi
-      if test -n "${brltty_item_entry}"
-      then
-         [brltty_item_code="`expr "${brltty_item_entry}" : '\([^[.-.]]*\)'`"]
-         [brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"]
-         brltty_item_unknown=false
-      fi
+   fi
+
+   if test -n "${brltty_item_entry}"
+   then
+      [brltty_item_code=`expr "${brltty_item_entry}" : '\([^[.-.]]*\)'`]
+      [brltty_item_name=`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`]
+      brltty_item_unknown=false
    fi
 fi
 ])
