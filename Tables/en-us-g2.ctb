@@ -675,6 +675,7 @@ always part 5-1234
 begword parta 1234-345-2345-1 partake
 begword parto 1234-345-2345-135
 begword peacen 1234-2-14-15-1345 peacenik
+begword pedic 1234-1246-24-14 pedicure, pedicab, pedicle
 word people 1234
 always perceive 1234-12456-14-1236
 word percv =
@@ -699,8 +700,10 @@ word phonemes =
 begword phonemi = phonemic
 begword pinea 1234-35-15-1 pineapple
 word pineal 1234-35-2-123
+sufword pipedream 1234-24-1234-15-145-1235-2-134
 sufword poleax =
 begword portho = porthole
+sufword porthos 1234-135-1235-1456-135-234 (Dumas) Porthosesque
 begword potho = pothole pothook
 begword pre =
 always preach 1234-1235-2-16
