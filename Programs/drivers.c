@@ -29,15 +29,15 @@
 int
 isDriverAvailable (const char *code, const char *codes) {
   int length = strlen(code);
-  const char *string;
+  const char *string = codes;
 
-  while ((string = strstr(codes, code))) {
+  while ((string = strstr(string, code))) {
     if (((string == codes) || (string[-1] == ' ')) &&
         (!string[length] || (string[length] == ' '))) {
       return 1;
     }
 
-    codes = string + strcspn(string, " ");
+    string += length;
   }
 
   return 0;
