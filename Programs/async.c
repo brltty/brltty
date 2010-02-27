@@ -574,9 +574,8 @@ createOperation (
     if ((functionElement = getFunctionElement(fileDescriptor, methods, 1))) {
       FunctionEntry *function = getElementItem(functionElement);
       int new = !getQueueSize(function->operations);
-      Element *operationElement;
 
-      if ((operationElement = enqueueItem(function->operations, operation))) {
+      if (enqueueItem(function->operations, operation)) {
         operation->function = function;
         operation->extension = extension;
         operation->data = data;

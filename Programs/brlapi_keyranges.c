@@ -217,7 +217,6 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
     }
     if (i<32) {
       /* don't intersect any more, keep it */
-      c = c->next;
       break;
     } else {
       /* remaining intersection, drop it */
