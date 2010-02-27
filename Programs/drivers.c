@@ -37,7 +37,7 @@ isDriverAvailable (const char *code, const char *codes) {
       return 1;
     }
 
-    string += length;
+    codes = string + strcspn(string, " ");
   }
 
   return 0;
