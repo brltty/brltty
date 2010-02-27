@@ -46,9 +46,16 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
-struct UsbDeviceExtensionStruct {
-  char *usbfsPath;
+typedef struct {
   char *sysfsPath;
+  char *usbfsPath;
+  UsbDeviceDescriptor usbDescriptor;
+} UsbHostDevice;
+
+static Queue *usbHostDevices = NULL;
+
+struct UsbDeviceExtensionStruct {
+  const UsbHostDevice *host;
   int usbfsFile;
 };
 
@@ -59,9 +66,9 @@ struct UsbEndpointExtensionStruct {
 static int
 usbOpenUsbfsFile (UsbDeviceExtension *devx) {
   if (devx->usbfsFile == -1) {
-    if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) == -1) {
+    if ((devx->usbfsFile = open(devx->host->usbfsPath, O_RDWR)) == -1) {
       LogPrint(LOG_ERR, "USBFS open error: %s: %s",
-               devx->usbfsPath, strerror(errno));
+               devx->host->usbfsPath, strerror(errno));
       return 0;
     }
   }
@@ -94,8 +101,8 @@ usbDisableAutosuspend (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int ok = 0;
 
-  if (devx->sysfsPath) {
-    char *path = makePath(devx->sysfsPath, "power/autosuspend");
+  if (devx->host->sysfsPath) {
+    char *path = makePath(devx->host->sysfsPath, "power/autosuspend");
 
     if (path) {
       int file = open(path, O_WRONLY);
@@ -698,53 +705,8 @@ usbWriteEndpoint (
 
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-  int file = -1;
-  int sysfs = 0;
-
-  if (devx->sysfsPath) {
-    if (file == -1) {
-      char *path;
-
-      if ((path = makePath(devx->sysfsPath, "descriptors"))) {
-        if ((file = open(path, O_RDONLY)) != -1) {
-          sysfs = 1;
-        }
-
-        free(path);
-      }
-    }
-  }
-
-  if (file == -1) {
-    if (usbOpenUsbfsFile(devx)) {
-      file = devx->usbfsFile;
-    }
-  }
-
-  if (file != -1) {
-    int count = read(file, &device->descriptor, UsbDescriptorSize_Device);
-
-    if (count == -1) {
-      LogError("USB device descriptor read");
-    } else if (count != UsbDescriptorSize_Device) {
-      LogPrint(LOG_ERR, "USB short device descriptor: %d", count);
-    } else {
-      if (sysfs) {
-        device->descriptor.bcdUSB = getLittleEndian(device->descriptor.bcdUSB);
-        device->descriptor.idVendor = getLittleEndian(device->descriptor.idVendor);
-        device->descriptor.idProduct = getLittleEndian(device->descriptor.idProduct);
-        device->descriptor.bcdDevice = getLittleEndian(device->descriptor.bcdDevice);
-
-        close(file);
-        file = -1;
-      }
-
-      return 1;
-    }
-  }
-
-  return 0;
+  device->descriptor = device->extension->host->usbDescriptor;
+  return 1;
 }
 
 int
@@ -780,28 +742,53 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   usbCloseUsbfsFile(devx);
-
-  if (devx->usbfsPath) {
-    free(devx->usbfsPath);
-    devx->usbfsPath = NULL;
-  }
-
-  if (devx->sysfsPath) {
-    free(devx->sysfsPath);
-    devx->sysfsPath = NULL;
-  }
-
   free(devx);
 }
 
+static void
+usbDeallocateHostDevice (void *item, void *data) {
+  UsbHostDevice *host = item;
+
+  if (host->sysfsPath) free(host->sysfsPath);
+  if (host->usbfsPath) free(host->usbfsPath);
+  free(host);
+}
+
+typedef struct {
+  UsbDeviceChooser chooser;
+  void *data;
+  UsbDevice *device;
+} UsbTestHostDeviceData;
+
 static int
-usbMakeSysfsPath (UsbDeviceExtension *devx) {
-  const char *tail = devx->usbfsPath + strlen(devx->usbfsPath);
+usbTestHostDevice (void *item, void *data) {
+  const UsbHostDevice *host = item;
+  UsbTestHostDeviceData *test = data;
+  UsbDeviceExtension *devx;
+
+  if ((devx = malloc(sizeof(*devx)))) {
+    memset(devx, 0, sizeof(*devx));
+    devx->host = host;
+    devx->usbfsFile = -1;
+
+    if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
+
+    free(devx);
+  } else {
+    LogError("malloc");
+  }
+
+  return 0;
+}
+
+static char *
+usbMakeSysfsPath (const char *usbfsPath) {
+  const char *tail = usbfsPath + strlen(usbfsPath);
 
   {
     int count = 0;
     while (1) {
-      if (tail == devx->usbfsPath) return 0;
+      if (tail == usbfsPath) return 0;
       if (!isPathDelimiter(*--tail)) continue;
       if (++count == 2) break;
     }
@@ -824,8 +811,11 @@ usbMakeSysfsPath (UsbDeviceExtension *devx) {
       while (*format) {
         char path[strlen(*format) + (2 * 0X10) + 1];
         snprintf(path, sizeof(path), *format, bus, device);
+
         if (access(path, F_OK) != -1) {
-          return (devx->sysfsPath = strdup(path)) != NULL;
+          char *sysfsPath = strdup(path);
+          if (!sysfsPath) LogError("strdup");
+          return sysfsPath;
         }
 
         format += 1;
@@ -833,18 +823,96 @@ usbMakeSysfsPath (UsbDeviceExtension *devx) {
     }
   }
 
-  return 0;
+  return NULL;
 }
 
-static UsbDevice *
-usbSearchUsbfs (const char *root, UsbDeviceChooser chooser, void *data) {
+static int
+usbReadHostDeviceDescriptor (UsbHostDevice *host) {
+  int ok = 0;
+  int file = -1;
+  int sysfs = 0;
+
+  if (file == -1) {
+    if (host->sysfsPath) {
+      char *path;
+
+      if ((path = makePath(host->sysfsPath, "descriptors"))) {
+        if ((file = open(path, O_RDONLY)) != -1) {
+          sysfs = 1;
+        }
+
+        free(path);
+      }
+    }
+  }
+
+  if (file == -1) {
+    file = open(host->usbfsPath, O_RDONLY);
+  }
+
+  if (file != -1) {
+    int count = read(file, &host->usbDescriptor, UsbDescriptorSize_Device);
+
+    if (count == -1) {
+      LogError("USB device descriptor read");
+    } else if (count != UsbDescriptorSize_Device) {
+      LogPrint(LOG_ERR, "USB short device descriptor: %d", count);
+    } else {
+      ok = 1;
+
+      if (sysfs) {
+        host->usbDescriptor.bcdUSB = getLittleEndian(host->usbDescriptor.bcdUSB);
+        host->usbDescriptor.idVendor = getLittleEndian(host->usbDescriptor.idVendor);
+        host->usbDescriptor.idProduct = getLittleEndian(host->usbDescriptor.idProduct);
+        host->usbDescriptor.bcdDevice = getLittleEndian(host->usbDescriptor.bcdDevice);
+      }
+    }
+
+    close(file);
+  }
+
+  return ok;
+}
+
+static int
+usbAddHostDevice (const char *path) {
+  int ok = 0;
+  UsbHostDevice *host;
+
+  if ((host = malloc(sizeof(*host)))) {
+    if ((host->usbfsPath = strdup(path))) {
+      host->sysfsPath = usbMakeSysfsPath(host->usbfsPath);
+
+      if (!usbReadHostDeviceDescriptor(host)) {
+        ok = 1;
+      } else if (enqueueItem(usbHostDevices, host)) {
+        return 1;
+      }
+
+      if (host->sysfsPath) free(host->sysfsPath);
+      free(host->usbfsPath);
+    } else {
+      LogError("strdup");
+    }
+
+    free(host);
+  } else {
+    LogError("malloc");
+  }
+
+  return ok;
+}
+
+static int
+usbAddHostDevices (const char *root) {
+  int ok = 0;
   size_t rootLength = strlen(root);
-  UsbDevice *device = NULL;
   DIR *directory;
 
   if ((directory = opendir(root))) {
     struct dirent *entry;
 
+    ok = 1;
     while ((entry = readdir(directory))) {
       size_t nameLength = strlen(entry->d_name);
       struct stat status;
@@ -855,30 +923,18 @@ usbSearchUsbfs (const char *root, UsbDeviceChooser chooser, void *data) {
       if (stat(path, &status) == -1) continue;
 
       if (S_ISDIR(status.st_mode)) {
-        if ((device = usbSearchUsbfs(path, chooser, data))) break;
+        if (!usbAddHostDevices(path)) ok = 0;
       } else if (S_ISREG(status.st_mode) || S_ISCHR(status.st_mode)) {
-        UsbDeviceExtension *devx;
-
-        if ((devx = malloc(sizeof(*devx)))) {
-          devx->usbfsPath = NULL;
-          devx->usbfsFile = -1;
-          devx->sysfsPath = NULL;
-
-          if ((devx->usbfsPath = strdup(path))) {
-            usbMakeSysfsPath(devx);
-
-            if ((device = usbTestDevice(devx, chooser, data))) break;
-          }
-
-          usbDeallocateDeviceExtension(devx);
-        }
+        if (!usbAddHostDevice(path)) ok = 0;
       }
+
+      if (!ok) break;
     }
 
     closedir(directory);
   }
 
-  return device;
+  return ok;
 }
 
 typedef int (*FileSystemVerifier) (const char *path);
@@ -970,20 +1026,45 @@ usbGetUsbfs (void) {
 
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
-  UsbDevice *device = NULL;
-  char *root;
+  if (!usbHostDevices) {
+    int ok = 0;
 
-  if ((root = usbGetUsbfs())) {
-    LogPrint(LOG_DEBUG, "USBFS Root: %s", root);
-    device = usbSearchUsbfs(root, chooser, data);
-    free(root);
-  } else {
-    LogPrint(LOG_DEBUG, "USBFS not mounted");
+    if ((usbHostDevices = newQueue(usbDeallocateHostDevice, NULL))) {
+      char *root;
+
+      if ((root = usbGetUsbfs())) {
+        LogPrint(LOG_DEBUG, "USBFS Root: %s", root);
+        if (usbAddHostDevices(root)) ok = 1;
+
+        free(root);
+      } else {
+        LogPrint(LOG_DEBUG, "USBFS not mounted");
+      }
+
+      if (!ok) {
+        deallocateQueue(usbHostDevices);
+        usbHostDevices = NULL;
+      }
+    }
   }
 
-  return device;
+  if (usbHostDevices) {
+    UsbTestHostDeviceData test = {
+      .chooser = chooser,
+      .data = data,
+      .device = NULL
+    };
+
+    if (processQueue(usbHostDevices, usbTestHostDevice, &test)) return test.device;
+  }
+
+  return NULL;
 }
 
 void
 usbForgetDevices (void) {
+  if (usbHostDevices) {
+    deallocateQueue(usbHostDevices);
+    usbHostDevices = NULL;
+  }
 }
