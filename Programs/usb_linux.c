@@ -802,9 +802,9 @@ usbMakeSysfsPath (const char *usbfsPath) {
 
     if (count == 2) {
       static const char *const formats[] = {
+        "/sys/dev/char/189:%3$u",
         "/sys/class/usb_device/usbdev%1$u.%2$u/device",
         "/sys/class/usb_endpoint/usbdev%1$u.%2$u_ep00/device",
-        "/sys/dev/char/189:%3$u",
         NULL
       };
       const char *const *format = formats;
