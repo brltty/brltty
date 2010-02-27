@@ -773,7 +773,7 @@ usbTestHostDevice (void *item, void *data) {
 
     if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
 
-    free(devx);
+    usbDeallocateDeviceExtension(devx);
   } else {
     LogError("malloc");
   }
@@ -802,15 +802,17 @@ usbMakeSysfsPath (const char *usbfsPath) {
 
     if (count == 2) {
       static const char *const formats[] = {
-        "/sys/class/usb_device/usbdev%u.%u/device",
-        "/sys/class/usb_endpoint/usbdev%u.%u_ep00/device",
+        "/sys/class/usb_device/usbdev%1$u.%2$u/device",
+        "/sys/class/usb_endpoint/usbdev%1$u.%2$u_ep00/device",
+        "/sys/dev/char/189:%3$u",
         NULL
       };
       const char *const *format = formats;
 
       while (*format) {
         char path[strlen(*format) + (2 * 0X10) + 1];
-        snprintf(path, sizeof(path), *format, bus, device);
+        snprintf(path, sizeof(path), *format,
+                 bus, device, (((bus - 1) << 7) | (device - 1)));
 
         if (access(path, F_OK) != -1) {
           char *sysfsPath = strdup(path);
