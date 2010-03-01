@@ -223,16 +223,20 @@ createPidFile (const char *path, ProcessIdentifier pid) {
         if (state == PFS_stale) {
           state = PFS_error;
 
-          if (ftruncate(file, 0) != -1) {
-            snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
+          if (lseek(file, 0, SEEK_SET) != -1) {
+            if (ftruncate(file, 0) != -1) {
+              snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
 
-            if (write(file, buffer, length) != -1) {
-              state = PFS_ready;
+              if (write(file, buffer, length) != -1) {
+                state = PFS_ready;
+              } else {
+                LogError("write");
+              }
             } else {
-              LogError("write");
+              LogError("ftruncate");
             }
           } else {
-            LogError("ftruncate");
+            LogError("lseek");
           }
         }
 
