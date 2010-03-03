@@ -18,33 +18,23 @@
 
 context \{brailleContext} Braille Input Mode
 
-bind SYMBOL_Grave_Tilde NOOP
-bind 1 NOOP
-bind 2 NOOP
-bind 3 NOOP
-bind 4 NOOP
-bind 5 NOOP
-bind 6 NOOP
-bind 7 NOOP
-bind 8 NOOP
-bind 9 NOOP
-bind 0 NOOP
-bind SYMBOL_Minus_Underscore NOOP
-bind SYMBOL_Equals_Plus NOOP
-bind SYMBOL_Backslash_Bar NOOP
+hotkey SYMBOL_Grave_Tilde NOOP NOOP
+hotkey SYMBOL_Minus_Underscore NOOP NOOP
+hotkey SYMBOL_Equals_Plus NOOP NOOP
+hotkey SYMBOL_Backslash_Bar NOOP NOOP
 
-bind q NOOP
-bind w NOOP
-bind e NOOP
-bind r NOOP
-bind t NOOP
-bind y NOOP
-bind u NOOP
-bind i NOOP
-bind o NOOP
-bind p NOOP
-bind SYMBOL_LeftBracket_LeftBrace NOOP
-bind SYMBOL_RightBracket_RightBrace NOOP
+hotkey q NOOP NOOP
+hotkey w NOOP NOOP
+hotkey e NOOP NOOP
+hotkey r NOOP NOOP
+hotkey t NOOP NOOP
+hotkey y NOOP NOOP
+hotkey u NOOP NOOP
+hotkey i NOOP NOOP
+hotkey o NOOP NOOP
+hotkey p NOOP NOOP
+hotkey SYMBOL_LeftBracket_LeftBrace NOOP NOOP
+hotkey SYMBOL_RightBracket_RightBrace NOOP NOOP
 
 map a DOT7
 map s DOT3
@@ -56,18 +46,18 @@ map j DOT4
 map k DOT5
 map l DOT6
 map SYMBOL_Semicolon_Colon DOT8
-bind SYMBOL_Apostrophe_Quote NOOP
+hotkey SYMBOL_Apostrophe_Quote NOOP NOOP
 
-bind z NOOP
-bind x NOOP
-bind c NOOP
-bind v NOOP
-bind b NOOP
-bind n NOOP
-bind m NOOP
-bind SYMBOL_Comma_Less NOOP
-bind SYMBOL_Period_Greater NOOP
-bind SYMBOL_Slash_Question NOOP
+hotkey z NOOP NOOP
+hotkey x NOOP NOOP
+hotkey c NOOP NOOP
+hotkey v NOOP NOOP
+hotkey b NOOP NOOP
+hotkey n NOOP NOOP
+hotkey m NOOP NOOP
+hotkey SYMBOL_Comma_Less NOOP NOOP
+hotkey SYMBOL_Period_Greater NOOP NOOP
+hotkey SYMBOL_Slash_Question NOOP NOOP
 
 map Space SPACE
 map ShiftLeft UPPERCASE
