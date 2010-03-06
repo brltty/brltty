@@ -24,17 +24,47 @@ umask 022
 shopt -s nullglob
 
 setOutputFile() {
-   outputFile="${outputDirectory}/${driverCode}-${model}.txt"
+   local prefix="${1}"
+
+   local layout="${inputFile##*/}"
+   layout="${layout%.*}"
+   layout="${layout##*-}"
+
+   outputFile="${outputDirectory}/${prefix}-${layout}.${plainTextExtension}"
 }
 
-listModel() {
+beginSection() {
+   local title="${1}"
+
+   headerLevel=$((headerLevel + 1))
+   echo >&3 "<H${headerLevel}>${title}</H${headerLevel}>"
+}
+
+endSection() {
+   headerLevel=$((headerLevel - 1))
+}
+
+beginLayoutList() {
+   layoutListed=false
+}
+
+endLayoutList() {
+   ! "${layoutListed}" || {
+      echo >&3 "</UL>"
+   }
+}
+
+listLayout() {
+   local category="${1}"
+
    exec 4<"${outputFile}"
    local description
    read -r -u 4 description
    exec 4<&-
 
    description="${description} "
-   description="${description#* for ${driverName} }"
+   description="${description#* for }"
+   [ -z "${category}" ] || description="${description#${category} }"
    description="${description% }"
 
    local prefix="All Models"
@@ -48,16 +78,22 @@ listModel() {
    }
    description="${prefix}${description}"
 
-   "${modelListed}" || {
-      modelListed=true
+   "${layoutListed}" || {
+      layoutListed=true
       echo >&3 "<UL>"
    }
 
    echo >&3 "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
 }
 
+translateKeyTable() {
+   local program="${inputDirectory}/Programs/ktbtest"
+   [ -x "${program}" ] || make -C "${program%/*}" -s "${program##*/}"
+   "${program}" -L"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
+}
+
 inputDirectory="$(dirname "${0}")"
-outputDirectory="doc-brl"
+outputDirectory="doc-ktb"
 
 while getopts ":i:o:" option
 do
@@ -83,16 +119,39 @@ driversDirectory="${inputDirectory}/${driversSubdirectory}"
 tablesSubdirectory="Tables"
 tablesDirectory="${inputDirectory}/${tablesSubdirectory}"
 
-exec 3>"${outputDirectory}/index.html"
-documentTitle="Braille Driver Help"
+braillePrefix="brl"
+keyboardPrefix="kbd"
+
+plainTextExtension="txt"
+hypertextExtension="html"
+keyTableExtension="ktb"
+
+headerLevel=0
+
+exec 3>"${outputDirectory}/index.${hypertextExtension}"
+documentTitle="Key Table Help"
 echo >&3 "<HTML>"
 echo >&3 "<HEAD>"
 echo >&3 "<TITLE>${documentTitle}</TITLE>"
 echo >&3 "</HEAD>"
 echo >&3 "<BODY>"
-echo >&3 "<H1>${documentTitle}</H1>"
-echo >&3 "<DL>"
+beginSection "${documentTitle}"
 
+beginSection "Keyboard Key Tables"
+beginLayoutList
+set -- "${tablesDirectory}/${keyboardPrefix}-"*".${keyTableExtension}"
+for inputFile
+do
+   setOutputFile "${keyboardPrefix}"
+   translateKeyTable
+   listLayout
+done
+endLayoutList
+echo >&3 "<HR>"
+endSection
+
+beginSection "Braille Drivers"
+echo >&3 "<DL>"
 for driverDirectory in "${driversDirectory}/"*
 do
    [ -d "${driverDirectory}" ] || continue
@@ -102,46 +161,39 @@ do
    header="${driverName}"
    inputFile="${driverDirectory}/README"
    [ ! -f "${inputFile}" ] || {
-      outputFile="${outputDirectory}/${driverCode}.txt"
+      outputFile="${outputDirectory}/${braillePrefix}-${driverCode}.${plainTextExtension}"
       cp -a -- "${inputFile}" "${outputFile}"
       header="<A HREF=\"${outputFile##*/}\">${header}</A>"
    }
    echo >&3 "<DT>${header}<DD>"
 
-   modelListed=false
-   set -- "${tablesDirectory}/brl-${driverCode}-"*".ktb"
+   beginLayoutList
+   set -- "${tablesDirectory}/${braillePrefix}-${driverCode}-"*".${keyTableExtension}"
    if [ "${#}" -gt 0 ]
    then
       for inputFile
       do
-         model="${inputFile##*/}"
-         model="${model%.*}"
-         model="${model##*-}"
-
-         setOutputFile
-         "${inputDirectory}/Programs/ktbtest" -L"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
-         listModel
+         setOutputFile "${braillePrefix}-${driverCode}"
+         translateKeyTable
+         listLayout "${driverName}"
       done
    else
       set -- "${driverDirectory}/"*".hlp"
       for inputFile
       do
-         model="${inputFile##*/}"
-         model="${model%.*}"
-
-         setOutputFile
+         setOutputFile "${braillePrefix}-${driverCode}"
          cp -a -- "${inputFile}" "${outputFile}"
-         listModel
+         listLayout "${driverName}"
       done
    fi
 
-   "${modelListed}" && {
-      echo >&3 "</UL>"
-   }
+   endLayoutList
 done
-
 echo >&3 "</DL>"
 echo >&3 "<HR>"
+endSection
+
+endSection
 echo >&3 "</BODY>"
 echo >&3 "</HTML>"
 exec 3>&-
