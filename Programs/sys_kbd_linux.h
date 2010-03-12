@@ -751,7 +751,7 @@ handleKobjectUeventString (const AsyncInputResult *result) {
     const char *end = memchr(buffer, 0, result->length);
 
     if (end) {
-      char *path = strchr(buffer, '@');
+      const char *path = strchr(buffer, '@');
 
       if (path) {
         const char *action = buffer;
@@ -759,41 +759,45 @@ handleKobjectUeventString (const AsyncInputResult *result) {
 
         LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
         if (strncmp(action, "add", actionLength) == 0) {
-          int inputNumber, eventNumber;
+          const char *suffix = strstr(path, "/input");
 
-          if (sscanf(path, "/class/input/input%d/event%d", &inputNumber, &eventNumber) == 2) {
-            static const char sysfsRoot[] = "/sys";
-            static const char devName[] = "/dev";
-            char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
-            int descriptor;
+          if (suffix) {
+            int inputNumber, eventNumber;
 
-            snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
-            if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
-              char stringBuffer[0X10];
-              int stringLength;
+            if (sscanf(suffix, "/input%d/event%d", &inputNumber, &eventNumber) == 2) {
+              static const char sysfsRoot[] = "/sys";
+              static const char devName[] = "/dev";
+              char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
+              int descriptor;
 
-              if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
-                InputDeviceData *idd;
-                int ok = 0;
+              snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
+              if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
+                char stringBuffer[0X10];
+                int stringLength;
 
-                if ((idd = malloc(sizeof(*idd)))) {
-                  if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
-                    char eventDevice[0X40];
-                    snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
+                if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
+                  InputDeviceData *idd;
+                  int ok = 0;
 
-                    if ((idd->name = strdup(eventDevice))) {
-                      idd->kcd = result->data;
-                      if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
+                  if ((idd = malloc(sizeof(*idd)))) {
+                    if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
+                      char eventDevice[0X40];
+                      snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
 
-                      if (!ok) free(idd->name);
+                      if ((idd->name = strdup(eventDevice))) {
+                        idd->kcd = result->data;
+                        if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
+
+                        if (!ok) free(idd->name);
+                      }
                     }
+
+                    if (!ok) free(idd);
                   }
-
-                  if (!ok) free(idd);
                 }
-              }
 
-              close(descriptor);
+                close(descriptor);
+              }
             }
           }
         }
