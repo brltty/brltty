@@ -46,8 +46,6 @@
 #include "sys_ports_always.h"
 #include "sys_ports_x86.h"
 
-#include "sys_kbd_none.h"
-
 #include <stdarg.h>
 #include <string.h>
 #include <setjmp.h>

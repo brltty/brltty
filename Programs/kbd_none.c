@@ -18,6 +18,10 @@
 
 #warning keyboard monitor support not available on this platform
 
+#include "prologue.h"
+
+#include "kbd.h"
+
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
   return 0;

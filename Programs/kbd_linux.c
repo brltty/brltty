@@ -16,9 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <limits.h>
+#include "prologue.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#include "kbd.h"
+#include "log.h"
+#include "sys_linux.h"
 
 #ifdef HAVE_LINUX_INPUT_H
+#include <limits.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -27,9 +36,9 @@
 #include <linux/netlink.h>
 #include <linux/input.h>
 
-#include "log.h"
-#include "kbdkeys.h"
+#include "bitmask.h"
 #include "async.h"
+#include "kbdkeys.h"
 
 typedef struct {
   KeyEventHandler *handleKeyEvent;
@@ -593,7 +602,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           }
         }
       } else {
-        writeInputEvent(event);
+        writeInputEvent(event->type, event->code, event->value);
       }
 
       return sizeof(*event);

@@ -98,14 +98,6 @@ extern unsigned char readPort1 (unsigned short int port);
 extern void writePort1 (unsigned short int port, unsigned char value);
 
 
-#include "keyboard.h"
-#include "ktbdefs.h"
-
-typedef KeyTableState KeyEventHandler (unsigned char set, unsigned char key, int press);
-
-extern int startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
-
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

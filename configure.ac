@@ -978,6 +978,20 @@ esac
 system_object="sys_${system_object}."'$O'
 AC_SUBST([system_object])
 
+keyboard_object=""
+case "${host_os}"
+in
+   linux*) keyboard_object="linux";;
+   *) keyboard_object="none";;
+esac
+if test -n "${keyboard_object}"
+then
+   keyboard_objects="kbd."'$O'" kbd_${keyboard_object}."'$O'
+else
+   keyboard_objects=""
+fi
+AC_SUBST([keyboard_objects])
+
 BRLTTY_ARG_DISABLE(
    [learn-mode],
    [interactive command learn mode],

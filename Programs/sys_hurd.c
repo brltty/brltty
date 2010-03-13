@@ -44,5 +44,3 @@
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_glibc.h"
-
-#include "sys_kbd_none.h"

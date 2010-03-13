@@ -24,8 +24,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int installKernelModule (const char *name, int *status);
+
 extern int openCharacterDevice (const char *name, int flags, int major, int minor);
+
 extern int getUinputDevice (void);
+extern int hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max);
+extern int writeInputEvent (uint16_t type, uint16_t code, int32_t value);
+
 extern int writeKeyEvent (int key, int press);
 extern void releaseAllKeys (void);
 

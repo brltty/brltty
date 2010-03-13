@@ -22,7 +22,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "keyboard.h"
+#include "kbd.h"
 
 const KeyboardProperties anyKeyboard = {
   .type = KBD_TYPE_Any,

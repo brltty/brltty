@@ -36,8 +36,6 @@
 
 #include "sys_ports_windows.h"
 
-#include "sys_kbd_none.h"
-
 #ifdef __CYGWIN32__
 
 #include "sys_exec_unix.h"

@@ -16,12 +16,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYBOARD
-#define BRLTTY_INCLUDED_KEYBOARD
+#ifndef BRLTTY_INCLUDED_KBD
+#define BRLTTY_INCLUDED_KBD
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#include "ktbdefs.h"
 
 typedef enum {
   KBD_TYPE_Any = 0,
@@ -41,8 +43,11 @@ extern const KeyboardProperties anyKeyboard;
 extern int parseKeyboardProperties (KeyboardProperties *properties, const char *string);
 extern int checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required);
 
+typedef KeyTableState KeyEventHandler (unsigned char set, unsigned char key, int press);
+extern int startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYBOARD */
+#endif /* BRLTTY_INCLUDED_KBD */

@@ -25,6 +25,10 @@
 #include <sys/ioctl.h>
 #include <linux/kd.h>
 
+#ifdef HAVE_LINUX_INPUT_H
+#include <linux/input.h>
+#endif /* HAVE_LINUX_INPUT_H */
+
 #include "log.h"
 #include "file.h"
 #include "device.h"
@@ -33,36 +37,6 @@
 #include "system.h"
 #include "sys_linux.h"
 #include "bitmask.h"
-
-#ifdef HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-
-static int
-hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
-  BITMASK(mask, max+1, long);
-
-  if (ioctl(device, EVIOCGBIT(type, sizeof(mask)), mask) != -1)
-    if (BITMASK_TEST(mask, code))
-      return 1;
-
-  return 0;
-}
-
-static int
-writeInputEvent (const struct input_event *event) {
-  int device = getUinputDevice();
-
-  if (device != -1) {
-    if (write(device, event, sizeof(*event)) != -1) {
-      return 1;
-    } else {
-      LogError("write(struct input_event)");
-    }
-  }
-
-  return 0;
-}
-#endif /* HAVE_LINUX_INPUT_H */
 
 #ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>
@@ -188,8 +162,6 @@ getBootParameters (const char *name) {
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_glibc.h"
-
-#include "sys_kbd_linux.h"
 
 int
 installKernelModule (const char *name, int *status) {
@@ -358,6 +330,44 @@ getUinputDevice (void) {
   return uinputDevice;
 }
 
+int
+hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
+#ifdef HAVE_LINUX_INPUT_H
+  BITMASK(mask, max+1, long);
+
+  if (ioctl(device, EVIOCGBIT(type, sizeof(mask)), mask) != -1)
+    if (BITMASK_TEST(mask, code))
+      return 1;
+#endif /* HAVE_LINUX_INPUT_H */
+
+  return 0;
+}
+
+int
+writeInputEvent (uint16_t type, uint16_t code, int32_t value) {
+#ifdef HAVE_LINUX_INPUT_H
+  int device = getUinputDevice();
+
+  if (device != -1) {
+    struct input_event event;
+
+    memset(&event, 0, sizeof(event));
+    gettimeofday(&event.time, NULL);
+    event.type = type;
+    event.code = code;
+    event.value = value;
+
+    if (write(device, &event, sizeof(event)) != -1) {
+      return 1;
+    } else {
+      LogError("write(struct input_event)");
+    }
+  }
+#endif /* HAVE_LINUX_INPUT_H */
+
+  return 0;
+}
+
 #ifdef HAVE_LINUX_INPUT_H
 static BITMASK(pressedKeys, KEY_MAX+1, char);
 #endif /* HAVE_LINUX_INPUT_H */
@@ -365,25 +375,14 @@ static BITMASK(pressedKeys, KEY_MAX+1, char);
 int
 writeKeyEvent (int key, int press) {
 #ifdef HAVE_LINUX_INPUT_H
-  struct input_event event;
-
-  memset(&event, 0, sizeof(event));
-  gettimeofday(&event.time, NULL);
-  event.type = EV_KEY;
-  event.code = key;
-  event.value = press;
-
-  if (writeInputEvent(&event)) {
+  if (writeInputEvent(EV_KEY, key, press)) {
     if (press) {
       BITMASK_SET(pressedKeys, key);
     } else {
       BITMASK_CLEAR(pressedKeys, key);
     }
 
-    event.type = EV_SYN;
-    event.code = SYN_REPORT;
-    event.value = 0;
-    writeInputEvent(&event);
+    writeInputEvent(EV_SYN, SYN_REPORT, 0);
 
     return 1;
   }

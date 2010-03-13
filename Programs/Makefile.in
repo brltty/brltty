@@ -46,7 +46,7 @@ dataarea.$O:
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O queue.$O async.$O $(SYSTEM_OBJECT)
 
 log.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/log.c
@@ -78,8 +78,14 @@ async.$O:
 keysets.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keysets.c
 
-keyboard.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyboard.c
+kbd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd.c
+
+kbd_none.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd_none.c
+
+kbd_linux.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd_linux.c
 
 kbdkeys.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbdkeys.c
@@ -136,7 +142,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
@@ -293,7 +299,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O keysets.$O kbdkeys.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(KEYBOARD_OBJECTS) config.$O datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O keysets.$O kbdkeys.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(LDLIBS)

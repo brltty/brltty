@@ -51,5 +51,3 @@
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_kfreebsd.h"
-
-#include "sys_kbd_none.h"
