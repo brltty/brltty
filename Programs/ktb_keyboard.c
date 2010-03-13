@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "kbdkeys.h"
+#include "ktb_keyboard.h"
 
 BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(KBD_KEY_LETTER_A, "LETTER_A"),

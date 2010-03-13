@@ -22,8 +22,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "kbd.h"
 #include "log.h"
+#include "kbd.h"
+#include "ktb_keyboard.h"
 #include "sys_linux.h"
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -38,7 +39,6 @@
 
 #include "bitmask.h"
 #include "async.h"
-#include "kbdkeys.h"
 
 typedef struct {
   KeyEventHandler *handleKeyEvent;

@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KBDKEYS
-#define BRLTTY_INCLUDED_KBDKEYS
+#ifndef BRLTTY_INCLUDED_KTB_KEYBOARD
+#define BRLTTY_INCLUDED_KTB_KEYBOARD
 
 #ifdef __cplusplus
 extern "C" {
@@ -255,4 +255,4 @@ extern KEY_NAME_TABLES_DECLARATION(keyboard);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KBDKEYS */
+#endif /* BRLTTY_INCLUDED_KTB_KEYBOARD */

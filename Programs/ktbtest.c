@@ -28,7 +28,7 @@
 #include "parse.h"
 #include "system.h"
 #include "ktb.h"
-#include "kbdkeys.h"
+#include "ktb_keyboard.h"
 #include "brl.h"
 
 static char *opt_libraryDirectory;

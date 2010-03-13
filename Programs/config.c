@@ -51,7 +51,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "ktb.h"
-#include "kbdkeys.h"
+#include "ktb_keyboard.h"
 #include "kbd.h"
 #include "tunes.h"
 #include "message.h"
