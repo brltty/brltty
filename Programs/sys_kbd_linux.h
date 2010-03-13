@@ -759,12 +759,12 @@ handleKobjectUeventString (const AsyncInputResult *result) {
 
         LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
         if (strncmp(action, "add", actionLength) == 0) {
-          const char *suffix = strstr(path, "/input");
+          const char *suffix = path;
 
-          if (suffix) {
+          while ((suffix = strstr(suffix, "/input"))) {
             int inputNumber, eventNumber;
 
-            if (sscanf(suffix, "/input%d/event%d", &inputNumber, &eventNumber) == 2) {
+            if (sscanf(++suffix, "input%d/event%d", &inputNumber, &eventNumber) == 2) {
               static const char sysfsRoot[] = "/sys";
               static const char devName[] = "/dev";
               char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
@@ -777,7 +777,6 @@ handleKobjectUeventString (const AsyncInputResult *result) {
 
                 if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
                   InputDeviceData *idd;
-                  int ok = 0;
 
                   if ((idd = malloc(sizeof(*idd)))) {
                     if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
@@ -786,13 +785,17 @@ handleKobjectUeventString (const AsyncInputResult *result) {
 
                       if ((idd->name = strdup(eventDevice))) {
                         idd->kcd = result->data;
-                        if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
 
-                        if (!ok) free(idd->name);
+                        if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) {
+                          close(descriptor);
+                          break;
+                        }
+
+                        free(idd->name);
                       }
                     }
 
-                    if (!ok) free(idd);
+                    free(idd);
                   }
                 }
 
