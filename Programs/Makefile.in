@@ -38,15 +38,9 @@ pid.$O:
 options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
 
-datafile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/datafile.c
-
-dataarea.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/dataarea.c
-
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O queue.$O async.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O $(SYSTEM_OBJECT)
 
 log.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/log.c
@@ -69,14 +63,51 @@ misc.$O:
 io_misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_misc.c
 
-queue.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/queue.c
+###############################################################################
 
-async.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
+sys_skeleton.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_skeleton.c
 
-keysets.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keysets.c
+sys_darwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
+
+sys_freebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
+
+sys_hpux.$O:
+	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
+
+sys_hurd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
+
+sys_kfreebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
+
+sys_linux.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
+
+sys_msdos.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_msdos.c
+
+sys_netbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_netbsd.c
+
+sys_openbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
+
+sys_osf.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_osf.c
+
+sys_qnx.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
+
+sys_solaris.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
+
+sys_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_windows.c
+
+###############################################################################
 
 kbd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd.c
@@ -87,108 +118,45 @@ kbd_none.$O:
 kbd_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd_linux.c
 
-ktb_keyboard.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
-
-ktb_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_compile.c
-
-ktb_translate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_translate.c
-
 ###############################################################################
 
-sys_skeleton.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_skeleton.c
-
-sys_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
-
-sys_solaris.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
-
-sys_hpux.$O:
-	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
-
-sys_openbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
-
-sys_freebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
-
-sys_kfreebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
-
-sys_netbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_netbsd.c
-
-sys_osf.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_osf.c
-
-sys_qnx.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
-
-sys_hurd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
-
-sys_darwin.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
-
-sys_windows.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_windows.c
-
-sys_msdos.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_msdos.c
-
-###############################################################################
-
-HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
 
 ###############################################################################
 
-lock.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
+async.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
+
+auth.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/auth.c
 
 charset.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/charset.c
 
-###############################################################################
+dataarea.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/dataarea.c
 
-ttb_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
+datafile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/datafile.c
 
-ttb_native.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
+keysets.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/keysets.c
 
-ttb_gnome.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
+lock.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
 
-ttb_louis.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_louis.c
+mount.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/mount.c
 
-ttb_translate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
-
-atb_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_compile.c
-
-atb_translate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_translate.c
+queue.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/queue.c
 
 ###############################################################################
 
-ctb_compile.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
-
-ctb_translate.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
-
-###############################################################################
-
-SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O scr_real.$O
+SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O scr_real.$O routing.$O
 
 scr.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr.c
@@ -299,7 +267,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(KEYBOARD_OBJECTS) config.$O datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_keyboard.$O keysets.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O cut.$O touch.$O async.$O charset.$O dataarea.$O datafile.$O keysets.$O lock.$O mount.$O queue.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(LDLIBS)
@@ -309,18 +277,6 @@ brltty.$O:
 
 config.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/config.c
-
-auth.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/auth.c
-
-mount.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/mount.c
-
-drivers.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/drivers.c
-
-driver.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/driver.c
 
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
@@ -334,14 +290,20 @@ cmd.$O:
 scancodes.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scancodes.c
 
-serial.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
+drivers.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/drivers.c
+
+driver.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/driver.c
 
 brl.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
 
 spk.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
+
+serial.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
 ###############################################################################
 
@@ -351,14 +313,8 @@ usb.$O:
 usb_skeleton.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_skeleton.c
 
-usb_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_linux.c
-
-usb_solaris.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_solaris.c
-
-usb_openbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
+usb_darwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
 
 usb_freebsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
@@ -366,17 +322,23 @@ usb_freebsd.$O:
 usb_kfreebsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_kfreebsd.c
 
-usb_netbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
-
-usb_darwin.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
-
 usb_libusb.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb.c
 
 usb_libusb-1.0.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb-1.0.c
+
+usb_linux.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_linux.c
+
+usb_netbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
+
+usb_openbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
+
+usb_solaris.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_solaris.c
 
 ###############################################################################
 
@@ -411,7 +373,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O charset.$O lock.$O scancodes.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) async.$O queue.$O charset.$O lock.$O scancodes.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -421,7 +383,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
+TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
 
 ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
 	$(CC) $(LDFLAGS) -o $@ $(TTBTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -429,9 +391,32 @@ ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
 ttbtest.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ttbtest.c
 
+ttb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
+
+ttb_native.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
+
+ttb_gnome.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
+
+ttb_louis.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_louis.c
+
+ttb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
+
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O
+atb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_compile.c
+
+atb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_translate.c
+
+###############################################################################
+
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -439,15 +424,30 @@ ctbtest$X: $(CTBTEST_OBJECTS)
 ctbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctbtest.c
 
+ctb_compile.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
+
+ctb_translate.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
+
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_keyboard.$O mount.$O datafile.$O ktb_compile.$O ktb_translate.$O ttb_translate.$O lock.$O charset.$O keysets.$O cmd.$O drivers.$O driver.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_keyboard.$O mount.$O async.$O datafile.$O queue.$O ktb_compile.$O ktb_translate.$O ttb_translate.$O lock.$O charset.$O keysets.$O cmd.$O drivers.$O driver.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
 
 ktbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
+
+ktb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_compile.c
+
+ktb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_translate.c
+
+ktb_keyboard.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
 ###############################################################################
 
@@ -517,7 +517,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_dataarea.$O host_ttb_compile.$O host_ttb_native.$O host_atb_compile.$O host_ctb_compile.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_queue.$O host_dataarea.$O host_ttb_compile.$O host_ttb_native.$O host_atb_compile.$O host_ctb_compile.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
