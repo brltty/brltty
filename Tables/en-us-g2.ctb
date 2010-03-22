@@ -309,6 +309,7 @@ begword deref = dereferencing
 begword dereg = deregulation
 word deshabille =
 midword dd 256
+midendword ddamn =
 midendword dday 145-5-145 midday
 begword dedic 145-1246-24-14 dedicated
 always dedu = nondeductible
