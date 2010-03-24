@@ -27,8 +27,6 @@
 #include "io_bluetooth.h"
 #include "eu_io.h"
 
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-
 #define	DEFAULT_ESYS_CHANNEL	1
 
 static int bluetoothConnection = -1;
@@ -77,34 +75,3 @@ eubrl_bluetoothClose (BrailleDisplay *brl)
   bluetoothConnection = -1;
   return 0;
 }
-
-#else /* No bluetooth support enabled */
-
-
-int
-eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device) 
-{
-  unsupportedDevice(device);
-  return -1;
-}
-
-ssize_t
-eubrl_bluetoothRead(BrailleDisplay *brl, void *buffer, size_t length)
-{
-  return -1;
-}
-
-ssize_t
-eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
-{
-  return 0;
-}
-
-int
-eubrl_bluetoothClose (BrailleDisplay *brl) 
-{
-  return 0;
-}
-
-
-#endif /* ENABLE_BLUETOOTH_SUPPORT */

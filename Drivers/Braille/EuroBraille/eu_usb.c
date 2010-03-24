@@ -33,7 +33,6 @@
 #define USB_PACKET_SIZE 64
 
 
-#ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
 static UsbChannel *usb = NULL;
@@ -98,34 +97,3 @@ eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
   memcpy(packetToSend,buffer,length);
   return usbHidSetReport(usb->device, usb->definition.interface, 0, packetToSend, USB_PACKET_SIZE, 10);
 }
-
-
-#else /* No usb support - empty functions */
-
-
-int
-eubrl_usbInit (BrailleDisplay *brl, char **parameters, const char *device)
-{
-  return 0;
-}
-
-int
-eubrl_usbClose (BrailleDisplay *brl) 
-{
-  return (0);
-}
-
-
-ssize_t
-eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length) 
-{
-  return -1;
-}
-
-ssize_t
-eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
-{
-  return -1;
-}
-
-#endif /* ENABLE_USB_SUPPORT */

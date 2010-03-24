@@ -166,7 +166,6 @@ static const InputOutputOperations serialOperations = {
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
-#ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
 static UsbChannel *usbChannel = NULL;
@@ -237,7 +236,6 @@ static const InputOutputOperations usbOperations = {
   openUsbPort, configureUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
-#endif /* ENABLE_USB_SUPPORT */
 
 static TranslationTable inputMap;
 static const unsigned char topLeftKeys[]  = {
@@ -438,15 +436,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (isSerialDevice(&device)) {
     io = &serialOperations;
-  } else
-
-#ifdef ENABLE_USB_SUPPORT
-  if (isUsbDevice(&device)) {
+  } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-  {
+  } else {
     unsupportedDevice(device);
     return 0;
   }

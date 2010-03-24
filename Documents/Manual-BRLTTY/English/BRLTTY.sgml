@@ -767,6 +767,49 @@ for any additional display-specific instructions.
     See the <ref id="configure-screen-parameters" name="screen-parameters"> configuration file directive
     and the <ref id="options-screen-parameters" name="-X"> command line option
     for run-time selection.
+  <tag><tt/--with-usb-package=/<em/package/<tt/,/...<label id="build-usb-package"></tag>
+    Specify the package which is to be used for USB I/O.
+    The package names must be separated from one another by a single comma,
+    and are processed from left to right.
+    The first one which is installed on the system is selected.
+    The following packages are supported:
+    <enum>
+      <item>libusb
+      <item>libusb-1.0
+    </enum>
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't support USB I/O.
+        This is equivalent to specifying <tt/--without-usb-package/.
+      <tag/yes/
+        Use native support for USB I/O.
+        If native support isn't available for the current platform
+        then use the first available supported package
+        (as per the order specified above).
+        This is equivalent to specifying <tt/--with-usb-package/.
+    </descrip>
+  <tag><tt/--with-bluetooth-package=/<em/package/<tt/,/...<label id="build-bluetooth-package"></tag>
+    Specify the package which is to be used for Bluetooth I/O.
+    The package names must be separated from one another by a single comma,
+    and are processed from left to right.
+    The first one which is installed on the system is selected.
+    The following packages are supported:
+    <enum>
+      <item>(no packages are currently supported)
+    </enum>
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't support Bluetooth I/O.
+        This is equivalent to specifying <tt/--without-bluetooth-package/.
+      <tag/yes/
+        Use native support for Bluetooth I/O.
+        If native support isn't available for the current platform
+        then use the first available supported package
+        (as per the order specified above).
+        This is equivalent to specifying <tt/--with-bluetooth-package/.
+    </descrip>
 </descrip>
 
 <sect3>Directory Specification<label id="build-directoreis"><p>
@@ -970,10 +1013,6 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-contracted-braille/<label id="build-contracted-braille"></tag>
     Reduce program size by excluding support for contracted braille
     (see section <ref id="table-contraction" name="Contraction Tables">).
-  <tag><tt/--disable-usb-support/<label id="build-usb-support"></tag>
-    Reduce program size by excluding support for USB devices.
-  <tag><tt/--disable-bluetooth-support/<label id="build-bluetooth-support"></tag>
-    Reduce program size by excluding support for bluetooth devices.
   <tag><tt/--disable-speech-support/<label id="build-speech-support"></tag>
     Reduce program size by excluding support for speech synthesizers.
   <tag><tt/--disable-iconv/<label id="build-iconv"></tag>

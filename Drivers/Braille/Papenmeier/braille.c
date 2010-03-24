@@ -134,7 +134,6 @@ static const InputOutputOperations serialOperations = {
 
 /*--- USB Operations ---*/
 
-#ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 static UsbChannel *usb = NULL;
 static const int usbBauds[] = {115200, 57600, 0};
@@ -206,10 +205,9 @@ static const InputOutputOperations usbOperations = {
   openUsbPort, prepareUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
-#endif /* ENABLE_USB_SUPPORT */
 
 /*--- Bluetooth Operations ---*/
-#ifdef ENABLE_BLUETOOTH_SUPPORT
+
 #include "io_bluetooth.h"
 #include "io_misc.h"
 
@@ -264,7 +262,6 @@ static const InputOutputOperations bluetoothOperations = {
   openBluetoothPort, prepareBluetoothPort, closeBluetoothPort, flushBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 /*--- Protocol Operation Utilities ---*/
 
@@ -1203,21 +1200,11 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
     io = &serialOperations;
-  } else
-
-#ifdef ENABLE_USB_SUPPORT
-  if (isUsbDevice(&device)) {
+  } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-  if (isBluetoothDevice(&device)) {
+  } else if (isBluetoothDevice(&device)) {
     io = &bluetoothOperations;
-  } else
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
-
-  {
+  } else {
     unsupportedDevice(device);
     goto failed;
   }

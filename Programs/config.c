@@ -65,16 +65,11 @@
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
-#include "io_serial.h"
 #include "charset.h"
 
-#ifdef ENABLE_USB_SUPPORT
+#include "io_serial.h"
 #include "io_usb.h"
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
 #include "io_bluetooth.h"
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 #ifdef __MINGW32__
 #include "sys_windows.h"
@@ -2314,31 +2309,21 @@ activateBrailleDriver (int verify) {
         };
         autodetectableDrivers = serialDrivers;
         type = "serial";
-      } else
-
-#ifdef ENABLE_USB_SUPPORT
-      if (isUsbDevice(&dev)) {
+      } else if (isUsbDevice(&dev)) {
         static const char *const usbDrivers[] = {
           "al", "bm", "eu", "fs", "ht", "hm", "mt", "pg", "pm", "sk", "vo",
           NULL
         };
         autodetectableDrivers = usbDrivers;
         type = "USB";
-      } else
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-      if (isBluetoothDevice(&dev)) {
+      } else if (isBluetoothDevice(&dev)) {
         static const char *bluetoothDrivers[] = {
           "ht", "al", "bm",
           NULL
         };
         autodetectableDrivers = bluetoothDrivers;
         type = "bluetooth";
-      } else
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
-
-      {
+      } else {
         static const char *noDrivers[] = {NULL};
         autodetectableDrivers = noDrivers;
       }
@@ -2391,13 +2376,8 @@ deactivateBrailleDriver (void) {
 
 static int
 startBrailleDriver (void) {
-#ifdef ENABLE_USB_SUPPORT
   usbForgetDevices();
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
   btForgetConnectErrors();
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   if (activateBrailleDriver(0)) {
     getPreferences();

@@ -23,9 +23,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <bluetooth/bluetooth.h>
+struct BluetoothDeviceAddressStruct {
+  unsigned char bytes[6];
+};
 
-extern int btConnect (bdaddr_t address, unsigned char channel);
+extern int btConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
 
 #ifdef __cplusplus
 }

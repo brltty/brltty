@@ -310,8 +310,8 @@ serial.$O:
 usb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb.c
 
-usb_skeleton.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_skeleton.c
+usb_none.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_none.c
 
 usb_darwin.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
@@ -345,8 +345,8 @@ usb_solaris.$O:
 bluetooth.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth.c
 
-bluetooth_skeleton.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_skeleton.c
+bluetooth_none.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
 
 bluetooth_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c

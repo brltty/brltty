@@ -397,7 +397,6 @@ static const InputOutputOperations serialOperations = {
   &serialMethods
 };
 
-#ifdef ENABLE_USB_SUPPORT
 /* USB IO */
 #include "io_usb.h"
 
@@ -498,7 +497,6 @@ static const InputOutputOperations usbOperations = {
   awaitUsbInput, readUsbBytes, writeUsbBytes,
   &usbMethods
 };
-#endif /* ENABLE_USB_SUPPORT */
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -509,15 +507,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   
   if (isSerialDevice(&device)) {
     io = &serialOperations;
-  } else
-
-#ifdef ENABLE_USB_SUPPORT
-  if (isUsbDevice(&device)) {
+  } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-  {
+  } else {
     unsupportedDevice(device);
     return 0;
   }

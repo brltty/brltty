@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning USB support not available on this platform
+
 #include "prologue.h"
 
 #include <stdio.h>
@@ -191,8 +193,7 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
-  UsbDevice *device = NULL;
-  return device;
+  return NULL;
 }
 
 void

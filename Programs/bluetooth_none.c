@@ -16,12 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#warning Bluetooth support not available on this platform
+
 #include "prologue.h"
+
+#include <errno.h>
 
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
+#include "log.h"
 
 int
-openRfcommConnection (const char *address, unsigned char channel) {
+btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
+  errno = ENOSYS;
+  LogError("Bluetooth connect");
   return -1;
 }

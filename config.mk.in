@@ -187,11 +187,13 @@ ATTRIBUTES_TABLE = @attributes_table@
 SYSTEM_OBJECT = @system_object@
 KEYBOARD_OBJECTS = @keyboard_objects@
 
-USB_OBJECTS = @usb_objects@
+USB_OBJECTS = usb.$O usb_@usb_package@.$O
 USB_CFLAGS = @usb_cflags@
 USB_LIBS = @usb_libs@
 
-BLUETOOTH_OBJECTS = @bluetooth_objects@
+BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_@bluetooth_package@.$O
+BLUETOOTH_CFLAGS = @bluetooth_cflags@
+BLUETOOTH_LIBS = @bluetooth_libs@
 
 CTB_OBJECTS = @contracted_braille_objects@
 

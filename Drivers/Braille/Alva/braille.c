@@ -1434,7 +1434,6 @@ static const InputOutputOperations serialOperations = {
   getSerialFeatureReport
 };
 
-#ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
 static UsbChannel *usbChannel = NULL;
@@ -1532,10 +1531,7 @@ static const InputOutputOperations usbOperations = {
   awaitUsbInput, readUsbBytes, writeUsbBytes,
   getUsbFeatureReport
 };
-#endif /* ENABLE_USB_SUPPORT */
 
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-/* Bluetooth IO */
 #include "io_bluetooth.h"
 #include "io_misc.h"
 
@@ -1596,7 +1592,6 @@ static const InputOutputOperations bluetoothOperations = {
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes,
   getBluetoothFeatureReport
 };
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 int
 AL_writeData( unsigned char *data, int len ) {
@@ -1612,21 +1607,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (isSerialDevice(&device)) {
     io = &serialOperations;
-  } else
-
-#ifdef ENABLE_USB_SUPPORT
-  if (isUsbDevice(&device)) {
+  } else if (isUsbDevice(&device)) {
     io = &usbOperations;
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-  if (isBluetoothDevice(&device)) {
+  } else if (isBluetoothDevice(&device)) {
     io = &bluetoothOperations;
-  } else
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
-
-  {
+  } else {
     unsupportedDevice(device);
     return 0;
   }

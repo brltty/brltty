@@ -1078,99 +1078,40 @@ in
       ;;
 esac
 
-usb_object=""
-usb_cflags=""
-usb_libs=""
-case "${host_os}"
-in
+BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
    linux*)
-      usb_object="linux"
+      usb_package="linux"
       ;;
    solaris*)
-      usb_object="solaris"
+      usb_package="solaris"
       AC_HAVE_LIBRARY([aio])
       AC_HAVE_LIBRARY([rt])
       ;;
    openbsd*)
-      usb_object="openbsd"
+      usb_package="openbsd"
       ;;
    freebsd*)
-      usb_object="freebsd"
+      usb_package="freebsd"
       ;;
    kfreebsd*)
-      usb_object="kfreebsd"
+      usb_package="kfreebsd"
       AC_CHECK_HEADERS([legacy/dev/usb/usb.h])
       ;;
    netbsd*)
-      usb_object="netbsd"
+      usb_package="netbsd"
       ;;
    darwin*)
-      usb_object="darwin"
+      usb_package="darwin"
       ;;
-   *)
-      for usb_package in libusb libusb-1.0
-      do
-         pkg-config --exists "${usb_package}" && {
-            usb_object="${usb_package}"
-            usb_cflags="`pkg-config --cflags-only-I "${usb_package}"`"
-            usb_libs="`pkg-config ${pkgconfig_flags_libs} "${usb_package}"`"
-            break
-         }
-      done
-
-      test -z "${usb_object}" && {
-         AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [dnl
-            usb_object="libusb"
-            usb_libs="-lusb"
-         ])])
-      }
-
-      ;;
-esac
-if test -n "${usb_object}"
-then
-   BRLTTY_ARG_DISABLE(
-      [usb-support],
-      [support for the Universal Serial Bus],
-      [],
-[dnl
-      AC_DEFINE([ENABLE_USB_SUPPORT], [1],
-                [Define this if Universal Serial Bus support is to be included.])
-      usb_objects="usb."'$O'" usb_${usb_object}."'$O'
 ])
-else
-   AC_MSG_WARN([no USB support on ${host_os}])
-fi
-test -z "${usb_objects}" && usb_libs=""
-AC_SUBST([usb_objects])
-AC_SUBST([usb_cflags])
-AC_SUBST([usb_libs])
 
-case "${host_os}"
-in
+BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
    linux*)
-      bluetooth_object="linux"
+      AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
+         bluetooth_package="linux"
+      ])
       ;;
-   *)
-      bluetooth_object=""
-      AC_MSG_WARN([no bluetooth support on ${host_os}])
-      ;;
-esac
-if test -n "${bluetooth_object}"
-then
-   AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
-      BRLTTY_ARG_DISABLE(
-         [bluetooth-support],
-         [support for bluetooth capable devices],
-         [],
-[dnl
-         AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT], [1],
-                   [Define this if bluetooth support is to be included.])
-         bluetooth_objects="bluetooth."'$O'" bluetooth_${bluetooth_object}."'$O'
 ])
-])
-fi
-AC_SUBST([bluetooth_objects])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])

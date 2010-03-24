@@ -41,15 +41,9 @@ typedef enum {
 #include "parse.h"
 #include "timing.h"
 
-#ifdef ENABLE_USB_SUPPORT
-#include "io_usb.h"
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-#include "io_bluetooth.h"
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
-
 #include "io_serial.h"
+#include "io_usb.h"
+#include "io_bluetooth.h"
 
 #include	"eu_protocol.h"
 
@@ -112,21 +106,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       iop = &eubrl_serialIos;
     }
 
-#ifdef ENABLE_USB_SUPPORT
   else if (isUsbDevice(&device))
     {
       iop = &eubrl_usbIos;
       protocolp = &esysirisProtocol;
     }
-#endif /* ENABLE_USB_SUPPORT */
 
-#ifdef ENABLE_BLUETOOTH_SUPPORT
   else if (isBluetoothDevice(&device))
     {
       iop = &eubrl_bluetoothIos;
       protocolp = &esysirisProtocol;
     }
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 #ifndef __MSDOS__
   else if (!strncasecmp(device, "net:", 4))

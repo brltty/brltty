@@ -85,6 +85,62 @@ AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_parameters]), ["${$1_parameters}"],
                    [Define this to be a string containing the default $2 parameters.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
+AC_DEFUN([BRLTTY_ARG_PACKAGE], [dnl
+$1_package=""
+$1_cflags=""
+$1_libs=""
+
+BRLTTY_ARG_WITH(
+   [$1-package], [PACKAGE],
+   [which $2 package to use],
+   [packages], ["yes"]
+)
+
+if test "${packages}" = "no"
+then
+   packages=""
+elif test "${packages}" = "yes"
+then
+   packages="$3"
+
+   case "${host_os}"
+   in
+      $4
+      *);;
+   esac
+else
+   packages=`echo "${packages}" | sed -e 'y/,/ /'`
+fi
+
+test -z "${$1_package}" && {
+   test -n "${packages}" && {
+      for package in ${packages}
+      do
+         pkg-config --exists "${package}" && {
+            $1_package="${package}"
+            $1_cflags=`pkg-config --cflags-only-I "${package}"`
+            $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package}"`
+            break
+         }
+
+         AC_MSG_NOTICE([$2 package not available: ${package}])
+      done
+
+      test -z "${$1_package}" && {
+         AC_MSG_WARN([no $2 support])
+      }
+   }
+}
+
+test -z "${$1_package}" && {
+   $1_package="none"
+}
+
+AC_SUBST([$1_package])
+AC_SUBST([$1_cflags])
+AC_SUBST([$1_libs])
+BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])])
+
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
 BRLTTY_ARG_FEATURE([$1], [$2], [enable], [no], [$3], [$4], [$5])])
 

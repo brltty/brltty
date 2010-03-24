@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct BluetoothDeviceAddressStruct BluetoothDeviceAddress;
+
 extern int isBluetoothDevice (const char **path);
 
 extern void btForgetConnectErrors (void);

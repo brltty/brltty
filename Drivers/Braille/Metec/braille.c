@@ -67,7 +67,6 @@ static uint16_t lastNavigationKeys;
 static unsigned char lastRoutingKey;
 static TranslationTable outputTable;
 
-#ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
 #define MT_REQUEST_RECIPIENT UsbControlRecipient_Device
@@ -117,7 +116,6 @@ static int
 getInputPacket (unsigned char *packet) {
   return readDevice(0X80, packet, MT_INPUT_PACKET_LENGTH);
 }
-#endif /* ENABLE_USB_SUPPORT */
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -130,7 +128,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     makeOutputTable(dots, outputTable);
   }
 
-#ifdef ENABLE_USB_SUPPORT
   if (isUsbDevice(&device)) {
     static const UsbChannelDefinition definitions[] = {
       {
@@ -183,10 +180,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       usbCloseChannel(usbChannel);
       usbChannel = NULL;
     }
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-  {
+  } else {
     unsupportedDevice(device);
   }
   
@@ -195,13 +189,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-#ifdef ENABLE_USB_SUPPORT
   if (usbChannel) {
     setHighVoltage(0);
     usbCloseChannel(usbChannel);
     usbChannel = NULL;
   }
-#endif /* ENABLE_USB_SUPPORT */
 }
 
 static int
@@ -220,10 +212,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
         for (i=0; i<MT_MODULE_SIZE; i+=1) buffer[i] = outputTable[source[i]];
       }
 
-#ifdef ENABLE_USB_SUPPORT
       if (writeDevice(0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
-#endif /* ENABLE_USB_SUPPORT */
-
       memcpy(target, source, MT_MODULE_SIZE);
     }
 
@@ -258,12 +247,9 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   unsigned char packet[MT_INPUT_PACKET_LENGTH];
+
   memset(packet, 0, sizeof(packet));
-
-#ifdef ENABLE_USB_SUPPORT
   if (!getInputPacket(packet)) return BRL_CMD_RESTARTBRL;
-#endif /* ENABLE_USB_SUPPORT */
-
   logInputPacket(packet, sizeof(packet));
 
   {
