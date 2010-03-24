@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "prologue.h"
+
 extern int getConsole (void);
 extern int writeConsole (const unsigned char *address, size_t count);
 extern int ringBell (void);
