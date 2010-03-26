@@ -162,7 +162,7 @@ deallocateDataVariable (void *item, void *data) {
 }
 
 static int
-testDataVariableName (void *item, void *data) {
+testDataVariableName (const void *item, const void *data) {
   const DataVariable *variable = item;
   const DataOperand *name = data;
   if (variable->name.length == name->length)
@@ -173,7 +173,7 @@ testDataVariableName (void *item, void *data) {
 }
 
 static const DataVariable *
-getReadableDataVariable (DataFile *file, DataOperand *name) {
+getReadableDataVariable (DataFile *file, const DataOperand *name) {
   while (file) {
     if (file->variables) {
       DataVariable *variable = findItem(file->variables, testDataVariableName, name);
@@ -187,7 +187,7 @@ getReadableDataVariable (DataFile *file, DataOperand *name) {
 }
 
 static DataVariable *
-getWritableDataVariable (DataFile *file, DataOperand *name) {
+getWritableDataVariable (DataFile *file, const DataOperand *name) {
   if (!file->variables)
     if (!(file->variables = newQueue(deallocateDataVariable, NULL)))
       return NULL;

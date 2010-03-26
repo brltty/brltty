@@ -52,14 +52,14 @@ bthInitializeConnectErrors (void) {
 }
 
 static int
-bthTestConnectError (void *item, void *data) {
+bthTestConnectError (const void *item, const void *data) {
   const BluetoothConnectError *error = item;
   const BluetoothDeviceAddress *bda = data;
   return memcmp(error->bda.bytes, bda->bytes, sizeof(bda->bytes)) == 0;
 }
 
 static BluetoothConnectError *
-bthGetConnectError (BluetoothDeviceAddress *bda, int add) {
+bthGetConnectError (const BluetoothDeviceAddress *bda, int add) {
   BluetoothConnectError *error = findItem(bluetoothConnectErrors, bthTestConnectError, bda);
   if (error) return error;
 
@@ -82,7 +82,7 @@ bthForgetConnectErrors (void) {
 }
 
 static int
-bthRememberConnectError (BluetoothDeviceAddress *bda, int value) {
+bthRememberConnectError (const BluetoothDeviceAddress *bda, int value) {
   if (bthInitializeConnectErrors()) {
     BluetoothConnectError *error = bthGetConnectError(bda, 1);
 
@@ -96,7 +96,7 @@ bthRememberConnectError (BluetoothDeviceAddress *bda, int value) {
 }
 
 static int
-bthRecallConnectError (BluetoothDeviceAddress *bda, int *value) {
+bthRecallConnectError (const BluetoothDeviceAddress *bda, int *value) {
   if (bthInitializeConnectErrors()) {
     BluetoothConnectError *error = bthGetConnectError(bda, 0);
 
@@ -110,9 +110,9 @@ bthRecallConnectError (BluetoothDeviceAddress *bda, int *value) {
 }
 
 static void
-bthForgetConnectError (BluetoothDeviceAddress *bda) {
+bthForgetConnectError (const BluetoothDeviceAddress *bda) {
   if (bthInitializeConnectErrors()) {
-    Element *element = processQueue(bluetoothConnectErrors, bthTestConnectError, bda);
+    Element *element = findElement(bluetoothConnectErrors, bthTestConnectError, bda);
     if (element) deleteElement(element);
   }
 }

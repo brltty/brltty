@@ -454,9 +454,9 @@ usbDeallocateEndpoint (void *item, void *data) {
 }
 
 static int
-usbTestEndpoint (void *item, void *data) {
-  UsbEndpoint *endpoint = item;
-  unsigned char *endpointAddress = data;
+usbTestEndpoint (const void *item, const void *data) {
+  const UsbEndpoint *endpoint = item;
+  const unsigned char *endpointAddress = data;
   return endpoint->descriptor->bEndpointAddress == *endpointAddress;
 }
 
