@@ -27,25 +27,25 @@
 #include "log.h"
 
 BluetoothConnectionExtension *
-btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
+bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
   errno = ENOSYS;
   LogError("Bluetooth connect");
   return NULL;
 }
 
 void
-btDisconnect (BluetoothConnectionExtension *bcx) {
+bthDisconnect (BluetoothConnectionExtension *bcx) {
 }
 
 int
-btAwaitInput (BluetoothConnection *connection, int milliseconds) {
+bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   errno = ENOSYS;
   LogError("Bluetooth wait");
   return 0;
 }
 
 ssize_t
-btReadData (
+bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
@@ -55,7 +55,7 @@ btReadData (
 }
 
 ssize_t
-btWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   errno = ENOSYS;
   LogError("Bluetooth write");
   return -1;

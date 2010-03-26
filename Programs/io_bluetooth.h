@@ -29,16 +29,16 @@ typedef struct BluetoothDeviceAddressStruct BluetoothDeviceAddress;
 
 extern int isBluetoothDevice (const char **path);
 
-extern void btForgetConnectErrors (void);
+extern void bthForgetConnectErrors (void);
 
-extern BluetoothConnection *btOpenConnection (const char *address, unsigned char channel, int force);
-extern void btCloseConnection (BluetoothConnection *connection);
-extern int btAwaitInput (BluetoothConnection *connection, int milliseconds);
-extern ssize_t btReadData (
+extern BluetoothConnection *bthOpenConnection (const char *address, unsigned char channel, int force);
+extern void bthCloseConnection (BluetoothConnection *connection);
+extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
+extern ssize_t bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
-extern ssize_t btWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
+extern ssize_t bthWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
 
 #ifdef __cplusplus
 }

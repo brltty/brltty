@@ -35,7 +35,7 @@ struct BluetoothConnectionExtensionStruct {
 };
 
 BluetoothConnectionExtension *
-btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
+bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
@@ -78,20 +78,20 @@ btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
 }
 
 void
-btDisconnect (BluetoothConnectionExtension *bcx) {
+bthDisconnect (BluetoothConnectionExtension *bcx) {
   close(bcx->socket);
   free(bcx);
 }
 
 int
-btAwaitInput (BluetoothConnection *connection, int milliseconds) {
+bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
   return awaitInput(bcx->socket, milliseconds);
 }
 
 ssize_t
-btReadData (
+bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
@@ -101,7 +101,7 @@ btReadData (
 }
 
 ssize_t
-btWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
   return writeData(bcx->socket, buffer, size);

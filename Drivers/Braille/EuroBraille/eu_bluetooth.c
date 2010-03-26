@@ -33,7 +33,7 @@ static BluetoothConnection *bluetoothConnection = NULL;
 int
 eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device) 
 {
-  bluetoothConnection = btOpenConnection(device, DEFAULT_ESYS_CHANNEL, 0);
+  bluetoothConnection = bthOpenConnection(device, DEFAULT_ESYS_CHANNEL, 0);
   if (!bluetoothConnection)
     {
       LogPrint(LOG_ERR, "eu: Failed to initialize bluetooth connection.");
@@ -45,13 +45,13 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
 ssize_t
 eubrl_bluetoothRead (BrailleDisplay *brl, void *buffer, size_t length)
 {
-  return btReadData(bluetoothConnection, buffer, length, 0, 10);
+  return bthReadData(bluetoothConnection, buffer, length, 0, 10);
 }
 
 ssize_t
 eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 {
-  ssize_t count = btWriteData(bluetoothConnection, buf, length);
+  ssize_t count = bthWriteData(bluetoothConnection, buf, length);
   if (count != length) 
     {
       if (count == -1) 
@@ -70,7 +70,7 @@ eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 int
 eubrl_bluetoothClose (BrailleDisplay *brl) 
 {
-  btCloseConnection(bluetoothConnection);
+  bthCloseConnection(bluetoothConnection);
   bluetoothConnection = NULL;
   return 0;
 }

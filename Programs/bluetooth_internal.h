@@ -33,8 +33,8 @@ struct BluetoothDeviceAddressStruct {
   unsigned char bytes[6];
 };
 
-extern BluetoothConnectionExtension *btConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
-extern void btDisconnect (BluetoothConnectionExtension *bcx);
+extern BluetoothConnectionExtension *bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
+extern void bthDisconnect (BluetoothConnectionExtension *bcx);
 
 #ifdef __cplusplus
 }

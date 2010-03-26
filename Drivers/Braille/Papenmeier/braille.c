@@ -215,7 +215,7 @@ static const int bluetoothBauds[] = {115200, 0};
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != NULL;
+  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
 }
 
 static int
@@ -226,7 +226,7 @@ prepareBluetoothPort (void) {
 static void
 closeBluetoothPort (void) {
   if (bluetoothConnection) {
-    btCloseConnection(bluetoothConnection);
+    bthCloseConnection(bluetoothConnection);
     bluetoothConnection = NULL;
   }
 }
@@ -237,18 +237,18 @@ flushBluetoothPort (BrailleDisplay *brl) {
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return btAwaitInput(bluetoothConnection, milliseconds);
+  return bthAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
-  return btReadData(bluetoothConnection, buffer+*offset, length-*offset,
-                    (*offset? timeout: 0), timeout);
+  return bthReadData(bluetoothConnection, buffer+*offset, length-*offset,
+                     (*offset? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = btWriteData(bluetoothConnection, buffer, length);
+  int count = bthWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
       LogError("Papenmeier Bluetooth write");

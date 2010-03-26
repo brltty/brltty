@@ -2377,7 +2377,7 @@ deactivateBrailleDriver (void) {
 static int
 startBrailleDriver (void) {
   usbForgetDevices();
-  btForgetConnectErrors();
+  bthForgetConnectErrors();
 
   if (activateBrailleDriver(0)) {
     getPreferences();

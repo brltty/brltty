@@ -742,32 +742,32 @@ static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != NULL;
+  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
 }
 
 static void
 closeBluetoothPort (void) {
   if (bluetoothConnection) {
-    btCloseConnection(bluetoothConnection);
+    bthCloseConnection(bluetoothConnection);
     bluetoothConnection = NULL;
   }
 }
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return btAwaitInput(bluetoothConnection, milliseconds);
+  return bthAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  return btReadData(bluetoothConnection, buffer, length,
-                    (wait? timeout: 0), timeout);
+  return bthReadData(bluetoothConnection, buffer, length,
+                     (wait? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = btWriteData(bluetoothConnection, buffer, length);
+  int count = bthWriteData(bluetoothConnection, buffer, length);
   if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
   if (count != length) {
     if (count == -1) {
