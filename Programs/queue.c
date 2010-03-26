@@ -119,8 +119,8 @@ typedef struct {
 } FindReferenceElementData;
 
 static int
-findReferenceElement (void *item, void *data) {
-  FindReferenceElementData *fre = data;
+findReferenceElement (const void *item, const void *data) {
+  const FindReferenceElementData *fre = data;
   return fre->queue->compare(fre->item, item, fre->queue->data);
 }
 
@@ -137,7 +137,7 @@ enqueueElement (Element *element) {
       fre.queue = queue;
       fre.item = element->item;
 
-      if (!(reference = processQueue(queue, findReferenceElement, &fre))) {
+      if (!(reference = findElement(queue, findReferenceElement, &fre))) {
         reference = queue->head;
       } else if (reference == queue->head) {
         newHead = 1;
@@ -238,10 +238,11 @@ setQueueData (Queue *queue, void *data) {
 
 Element *
 findElement (Queue *queue, ItemTester testItem, const void *data) {
-  Element *element = queue->head;
-  while (element) {
-    if (testItem(element->item, data)) return element;
-    if ((element = element->next) == queue->head) element = NULL;
+  if (queue->head) {
+    Element *element = queue->head;
+    do {
+      if (testItem(element->item, data)) return element;
+    } while ((element = element->next) != queue->head);
   }
   return NULL;
 }
@@ -266,13 +267,13 @@ processQueue (Queue *queue, ItemProcessor processItem, void *data) {
 }
 
 static int
-testItemAddress (void *item, void *data) {
+testItemAddress (const void *item, const void *data) {
   return item == data;
 }
 
 int
 deleteItem (Queue *queue, void *item) {
-  Element *element = processQueue(queue, testItemAddress, item);
+  Element *element = findElement(queue, testItemAddress, item);
   if (!element) return 0;
 
   element->item = NULL;
