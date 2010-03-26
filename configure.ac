@@ -1234,7 +1234,7 @@ then
    braille_device=""
 elif test "${braille_device}" = "yes"
 then
-   if test -n "${usb_objects}"
+   if test "${usb_package}" != "none"
    then
       braille_device="usb:"
    else
