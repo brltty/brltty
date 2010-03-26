@@ -480,7 +480,7 @@ deallocateFunctionEntry (void *item, void *data) {
 }
 
 static int
-testFunctionEntry (void *item, void *data) {
+testFunctionEntry (const void *item, const void *data) {
   const FunctionEntry *function = item;
   const FunctionKey *key = data;
   return (function->fileDescriptor == key->fileDescriptor) &&
@@ -518,7 +518,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
       key.methods = methods;
 
       {
-        Element *element = processQueue(functions, testFunctionEntry, &key);
+        Element *element = findElement(functions, testFunctionEntry, &key);
         if (element) return element;
       }
     }
