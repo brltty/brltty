@@ -241,8 +241,9 @@ processQueue (Queue *queue, ItemProcessor processItem, void *data) {
   Element *element = queue->head;
   while (element) {
     Element *next = element->next;
+    if (next == queue->head) next = NULL;
     if (processItem(element->item, data)) return element;
-    element = (next != queue->head)? next: NULL;
+    element = next;
   }
   return NULL;
 }
