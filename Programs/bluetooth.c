@@ -24,7 +24,6 @@
 #include "log.h"
 #include "device.h"
 #include "queue.h"
-#include "io_misc.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
