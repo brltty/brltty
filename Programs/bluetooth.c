@@ -144,38 +144,38 @@ bthParseAddress (BluetoothDeviceAddress *bda, const char *address) {
 
 BluetoothConnection *
 bthOpenConnection (const char *address, unsigned char channel, int force) {
-  BluetoothDeviceAddress bda;
+  BluetoothConnection *connection;
 
-  if (bthParseAddress(&bda, address)) {
-    if (force) {
-      bthForgetConnectError(&bda);
-    } else {
-      int value;
+  if ((connection = malloc(sizeof(*connection)))) {
+    memset(connection, 0, sizeof(*connection));
+    connection->channel = channel;
 
-      if (bthRecallConnectError(&bda, &value)) {
-        errno = value;
-        return NULL;
-      }
-    }
+    if (bthParseAddress(&connection->address, address)) {
+      int alreadyTried = 0;
 
-    {
-      BluetoothConnection *connection;
-
-      if ((connection = malloc(sizeof(*connection)))) {
-        memset(connection, 0, sizeof(*connection));
-
-        if ((connection->extension = bthConnect(&bda, channel))) return connection;
-
-        free(connection);
+      if (force) {
+        bthForgetConnectError(&connection->address);
       } else {
-        LogError("malloc");
+        int value;
+
+        if (bthRecallConnectError(&connection->address, &value)) {
+          errno = value;
+          alreadyTried = 1;
+        }
       }
 
-      bthRememberConnectError(&bda, errno);
+      if (!alreadyTried) {
+        if ((connection->extension = bthConnect(&connection->address, connection->channel))) return connection;
+        bthRememberConnectError(&connection->address, errno);
+      }
+    } else {
+      LogPrint(LOG_ERR, "invalid Bluetooth device address: %s", address);
+      errno = EINVAL;
     }
+
+    free(connection);
   } else {
-    LogPrint(LOG_ERR, "invalid Bluetooth address: %s", address);
-    errno = EINVAL;
+    LogError("malloc");
   }
 
   return NULL;
