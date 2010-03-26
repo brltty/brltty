@@ -23,19 +23,18 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "io_misc.h"
 #include "io_bluetooth.h"
 #include "eu_io.h"
 
 #define	DEFAULT_ESYS_CHANNEL	1
 
-static int bluetoothConnection = -1;
+static BluetoothConnection *bluetoothConnection = NULL;
 
 int
 eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device) 
 {
   bluetoothConnection = btOpenConnection(device, DEFAULT_ESYS_CHANNEL, 0);
-  if (bluetoothConnection < 0)
+  if (!bluetoothConnection)
     {
       LogPrint(LOG_ERR, "eu: Failed to initialize bluetooth connection.");
       return (0);
@@ -46,13 +45,13 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
 ssize_t
 eubrl_bluetoothRead (BrailleDisplay *brl, void *buffer, size_t length)
 {
-  return readData(bluetoothConnection, buffer, length, 0, 10);
+  return btReadData(bluetoothConnection, buffer, length, 0, 10);
 }
 
 ssize_t
 eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 {
-  ssize_t count = writeData(bluetoothConnection, buf, length);
+  ssize_t count = btWriteData(bluetoothConnection, buf, length);
   if (count != length) 
     {
       if (count == -1) 
@@ -71,7 +70,7 @@ eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 int
 eubrl_bluetoothClose (BrailleDisplay *brl) 
 {
-  close(bluetoothConnection);
-  bluetoothConnection = -1;
+  btCloseConnection(bluetoothConnection);
+  bluetoothConnection = NULL;
   return 0;
 }

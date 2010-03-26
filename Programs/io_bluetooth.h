@@ -23,13 +23,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct BluetoothConnectionStruct BluetoothConnection;
+
 typedef struct BluetoothDeviceAddressStruct BluetoothDeviceAddress;
 
 extern int isBluetoothDevice (const char **path);
 
 extern void btForgetConnectErrors (void);
 
-extern int btOpenConnection (const char *address, unsigned char channel, int force);
+extern BluetoothConnection *btOpenConnection (const char *address, unsigned char channel, int force);
+extern void btCloseConnection (BluetoothConnection *connection);
+extern int btAwaitInput (BluetoothConnection *connection, int milliseconds);
+extern ssize_t btReadData (
+  BluetoothConnection *connection, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
+extern ssize_t btWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
 
 #ifdef __cplusplus
 }

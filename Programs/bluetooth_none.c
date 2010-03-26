@@ -26,9 +26,37 @@
 #include "bluetooth_internal.h"
 #include "log.h"
 
-int
+BluetoothConnectionExtension *
 btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
   errno = ENOSYS;
   LogError("Bluetooth connect");
+  return NULL;
+}
+
+void
+btDisconnect (BluetoothConnectionExtension *bcx) {
+}
+
+int
+btAwaitInput (BluetoothConnection *connection, int milliseconds) {
+  errno = ENOSYS;
+  LogError("Bluetooth wait");
+  return 0;
+}
+
+ssize_t
+btReadData (
+  BluetoothConnection *connection, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  errno = ENOSYS;
+  LogError("Bluetooth read");
+  return -1;
+}
+
+ssize_t
+btWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+  errno = ENOSYS;
+  LogError("Bluetooth write");
   return -1;
 }

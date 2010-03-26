@@ -23,11 +23,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
+
+struct BluetoothConnectionStruct {
+  BluetoothConnectionExtension *extension;
+};
+
 struct BluetoothDeviceAddressStruct {
   unsigned char bytes[6];
 };
 
-extern int btConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
+extern BluetoothConnectionExtension *btConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
+extern void btDisconnect (BluetoothConnectionExtension *bcx);
 
 #ifdef __cplusplus
 }

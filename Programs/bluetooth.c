@@ -142,26 +142,35 @@ btParseAddress (BluetoothDeviceAddress *bda, const char *address) {
   return 1;
 }
 
-int
+BluetoothConnection *
 btOpenConnection (const char *address, unsigned char channel, int force) {
   BluetoothDeviceAddress bda;
+
   if (btParseAddress(&bda, address)) {
     if (force) {
       btForgetConnectError(&bda);
     } else {
       int value;
+
       if (btRecallConnectError(&bda, &value)) {
         errno = value;
-        return -1;
+        return NULL;
       }
     }
 
     {
-      int connection = btConnect(&bda, channel);
-      if (connection != -1) {
-        if (setBlockingIo(connection, 0)) return connection;
-        close(connection);
+      BluetoothConnection *connection;
+
+      if ((connection = malloc(sizeof(*connection)))) {
+        memset(connection, 0, sizeof(*connection));
+
+        if ((connection->extension = btConnect(&bda, channel))) return connection;
+
+        free(connection);
+      } else {
+        LogError("malloc");
       }
+
       btRememberConnectError(&bda, errno);
     }
   } else {
@@ -169,7 +178,13 @@ btOpenConnection (const char *address, unsigned char channel, int force) {
     errno = EINVAL;
   }
 
-  return -1;
+  return NULL;
+}
+
+void
+btCloseConnection (BluetoothConnection *connection) {
+  btDisconnect(connection->extension);
+  free(connection);
 }
 
 int

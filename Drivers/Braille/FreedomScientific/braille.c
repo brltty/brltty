@@ -258,36 +258,35 @@ static const InputOutputOperations usbOperations = {
 };
 
 #include "io_bluetooth.h"
-#include "io_misc.h"
 
-static int bluetoothConnection = -1;
+static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1);
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != NULL;
 }
 
 static void
 closeBluetoothPort (void) {
-  if (bluetoothConnection != -1) {
-    close(bluetoothConnection);
-    bluetoothConnection = -1;
+  if (bluetoothConnection) {
+    btCloseConnection(bluetoothConnection);
+    bluetoothConnection = NULL;
   }
 }
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return awaitInput(bluetoothConnection, milliseconds);
+  return btAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (void *buffer, int length) {
-  return readData(bluetoothConnection, buffer, length, 0, 0);
+  return btReadData(bluetoothConnection, buffer, length, 0, 0);
 }
 
 static int
 writeBluetoothPacket (const void *buffer, int length) {
-  return writeData(bluetoothConnection, buffer, length);
+  return btWriteData(bluetoothConnection, buffer, length);
 }
 
 static const InputOutputOperations bluetoothOperations = {

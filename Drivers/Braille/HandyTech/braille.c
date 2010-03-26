@@ -390,6 +390,14 @@ openSerialPort (char **parameters, const char *device) {
   return 0;
 }
 
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
 static int
 awaitSerialInput (int milliseconds) {
   return serialAwaitInput(serialDevice, milliseconds);
@@ -407,14 +415,6 @@ writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) 
   int count = serialWriteData(serialDevice, buffer, length);
   if (delay && (count != -1)) *delay += (length * 1000 / charactersPerSecond) + 1;
   return count;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
 }
 
 static const InputOutputOperations serialOperations = {
@@ -625,6 +625,19 @@ openUsbPort (char **parameters, const char *device) {
   return 0;
 }
 
+static void
+closeUsbPort (void) {
+  if (hidInputReport) {
+    free(hidInputReport);
+    hidInputReport = NULL;
+  }
+
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
+  }
+}
+
 static int
 awaitUsbInput (int milliseconds) {
   if (!usb->definition.inputEndpoint) {
@@ -717,19 +730,6 @@ writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
                           buffer, length, 1000);
 }
 
-static void
-closeUsbPort (void) {
-  if (hidInputReport) {
-    free(hidInputReport);
-    hidInputReport = NULL;
-  }
-
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
-}
-
 static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
@@ -737,31 +737,37 @@ static const InputOutputOperations usbOperations = {
 
 /* Bluetooth IO */
 #include "io_bluetooth.h"
-#include "io_misc.h"
 
-static int bluetoothConnection = -1;
+static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != NULL;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection) {
+    btCloseConnection(bluetoothConnection);
+    bluetoothConnection = NULL;
+  }
 }
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return awaitInput(bluetoothConnection, milliseconds);
+  return btAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  if (!awaitInput(bluetoothConnection, (wait? timeout: 0)))
-    return (errno == EAGAIN)? 0: -1;
-  return readData(bluetoothConnection, buffer, length, 0, timeout);
+  return btReadData(bluetoothConnection, buffer, length,
+                    (wait? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = writeData(bluetoothConnection, buffer, length);
+  int count = btWriteData(bluetoothConnection, buffer, length);
   if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
   if (count != length) {
     if (count == -1) {
@@ -771,12 +777,6 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
     }
   }
   return count;
-}
-
-static void
-closeBluetoothPort (void) {
-  close(bluetoothConnection);
-  bluetoothConnection = -1;
 }
 
 static const InputOutputOperations bluetoothOperations = {

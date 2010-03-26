@@ -21,46 +21,88 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 
 #include "log.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
+#include "io_misc.h"
 
-#include <bluetooth/rfcomm.h>
+struct BluetoothConnectionExtensionStruct {
+  int socket;
+  struct sockaddr_rc local;
+  struct sockaddr_rc remote;
+};
 
-int
+BluetoothConnectionExtension *
 btConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
-  int connection;
+  BluetoothConnectionExtension *bcx;
 
-  if ((connection = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
-    struct sockaddr_rc local;
+  if ((bcx = malloc(sizeof(*bcx)))) {
+    memset(bcx, 0, sizeof(*bcx));
 
-    local.rc_family = AF_BLUETOOTH;
-    local.rc_channel = 0;
-    bacpy(&local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
-                                          * interface specification yet.
-                                          */
+    if ((bcx->socket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+      bcx->local.rc_family = AF_BLUETOOTH;
+      bcx->local.rc_channel = 0;
+      bacpy(&bcx->local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
+                                                 * interface specification yet.
+                                                 */
 
-    if (bind(connection, (struct sockaddr *)&local, sizeof(local)) != -1) {
-      struct sockaddr_rc remote;
+      if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
+        bcx->remote.rc_family = AF_BLUETOOTH;
+        bcx->remote.rc_channel = channel;
+        memcpy(bcx->remote.rc_bdaddr.b, bda->bytes, sizeof(bda->bytes));
 
-      remote.rc_family = AF_BLUETOOTH;
-      remote.rc_channel = channel;
-      memcpy(remote.rc_bdaddr.b, bda->bytes, sizeof(bda->bytes));
-
-      if (connect(connection, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
-        return connection;
-      } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-        LogError("RFCOMM socket connect");
+        if (connect(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
+          if (setBlockingIo(bcx->socket, 0)) {
+            return bcx;
+          }
+        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
+          LogError("RFCOMM connect");
+        }
+      } else {
+        LogError("RFCOMM bind");
       }
+
+      close(bcx->socket);
     } else {
-      LogError("RFCOMM socket bind");
+      LogError("RFCOMM socket");
     }
 
-    close(connection);
+    free(bcx);
   } else {
-    LogError("RFCOMM socket allocate");
+    LogError("malloc");
   }
 
-  return -1;
+  return NULL;
+}
+
+void
+btDisconnect (BluetoothConnectionExtension *bcx) {
+  close(bcx->socket);
+  free(bcx);
+}
+
+int
+btAwaitInput (BluetoothConnection *connection, int milliseconds) {
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  return awaitInput(bcx->socket, milliseconds);
+}
+
+ssize_t
+btReadData (
+  BluetoothConnection *connection, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  return readData(bcx->socket, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+btWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  return writeData(bcx->socket, buffer, size);
 }

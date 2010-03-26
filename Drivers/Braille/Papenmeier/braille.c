@@ -209,14 +209,13 @@ static const InputOutputOperations usbOperations = {
 /*--- Bluetooth Operations ---*/
 
 #include "io_bluetooth.h"
-#include "io_misc.h"
 
-static int bluetoothConnection = -1;
+static BluetoothConnection *bluetoothConnection = NULL;
 static const int bluetoothBauds[] = {115200, 0};
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != NULL;
 }
 
 static int
@@ -226,8 +225,10 @@ prepareBluetoothPort (void) {
 
 static void
 closeBluetoothPort (void) {
-  close(bluetoothConnection);
-  bluetoothConnection = -1;
+  if (bluetoothConnection) {
+    btCloseConnection(bluetoothConnection);
+    bluetoothConnection = NULL;
+  }
 }
 
 static void
@@ -236,17 +237,18 @@ flushBluetoothPort (BrailleDisplay *brl) {
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return awaitInput(bluetoothConnection, milliseconds);
+  return btAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
-  return readChunk(bluetoothConnection, buffer, offset, length, 0, timeout);
+  return btReadData(bluetoothConnection, buffer+*offset, length-*offset,
+                    (*offset? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = writeData(bluetoothConnection, buffer, length);
+  int count = btWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
       LogError("Papenmeier Bluetooth write");

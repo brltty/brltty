@@ -1533,13 +1533,12 @@ static const InputOutputOperations usbOperations = {
 };
 
 #include "io_bluetooth.h"
-#include "io_misc.h"
 
-static int bluetoothConnection = -1;
+static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (const char *device) {
-  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1) {
+  if ((bluetoothConnection = btOpenConnection(device, 1, 0))) {
     textRewriteInterval = REWRITE_INTERVAL;
     protocol = &protocol2sOperations;
     return 1;
@@ -1550,27 +1549,27 @@ openBluetoothPort (const char *device) {
 
 static void
 closeBluetoothPort (void) {
-  close(bluetoothConnection);
-  bluetoothConnection = -1;
+  if (bluetoothConnection) {
+    btCloseConnection(bluetoothConnection);
+    bluetoothConnection = NULL;
+  }
 }
 
 static int
 awaitBluetoothInput (int milliseconds) {
-  return awaitInput(bluetoothConnection, milliseconds);
+  return btAwaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
 readBluetoothBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  size_t offset = 0;
-  return readChunk(bluetoothConnection,
-                   buffer, &offset, length,
-                   (wait? timeout: 0), timeout);
+  return btReadData(bluetoothConnection, buffer, length,
+                    (wait? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = writeData(bluetoothConnection, buffer, length);
+  int count = btWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
       LogError("Alva Bluetooth write");
