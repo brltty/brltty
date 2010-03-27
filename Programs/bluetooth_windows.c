@@ -35,10 +35,15 @@ struct BluetoothConnectionExtensionStruct {
 };
 
 static void
-bthSocketError (const char *action) {
+bthSocketError (const char *action, const DWORD *exceptions) {
   DWORD error = WSAGetLastError();
-  LogWindowsCodeError(error, action);
   setErrno(error);
+
+  if (exceptions)
+    while (*exceptions != NO_ERROR)
+      if (error == *exceptions++)
+        return;
+  LogWindowsCodeError(error, action);
 }
 
 BluetoothConnectionExtension *
@@ -48,10 +53,10 @@ bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
 
-    if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != -1) {
+    if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
       bcx->local.addressFamily = AF_BTH;
       bcx->local.btAddr = BTH_ADDR_NULL;
-      bcx->local.port = 0;
+      bcx->local.port = BT_PORT_ANY;
 
       if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != -1) {
         bcx->remote.addressFamily = AF_BTH;
@@ -61,21 +66,20 @@ bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
         if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != -1) {
           return bcx;
         } else {
-          DWORD error = WSAGetLastError();
-
-          if ((error != ERROR_HOST_DOWN) && (error != ERROR_HOST_UNREACHABLE)) {
-            LogWindowsCodeError(error, "RFCOMM connect");
-          }
-
-          setErrno(error);
+          static const DWORD exceptions[] = {
+            ERROR_HOST_DOWN,
+            ERROR_HOST_UNREACHABLE,
+            NO_ERROR
+          };
+          bthSocketError("RFCOMM connect", exceptions);
         }
       } else {
-        bthSocketError("RFCOMM bind");
+        bthSocketError("RFCOMM bind", NULL);
       }
 
       closesocket(bcx->socket);
     } else {
-      bthSocketError("RFCOMM socket");
+      bthSocketError("RFCOMM socket", NULL);
     }
 
     free(bcx);
@@ -107,7 +111,7 @@ bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
 
   switch (select(1, &input, NULL, NULL, &timeout)) {
     case -1:
-      bthSocketError("RFCOMM wait");
+      bthSocketError("RFCOMM wait", NULL);
       break;
 
     case 0:
@@ -126,17 +130,22 @@ bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  errno = ENOSYS;
-  LogError("Bluetooth read");
+  errno = EAGAIN;
+  {
+    static const DWORD exceptions[] = {
+      EAGAIN,
+      NO_ERROR
+    };
+    bthSocketError("Bluetooth read", exceptions);
+  }
   return -1;
 }
 
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
-  DWORD result;
+  int result = send(bcx->socket, buffer, size, 0);
 
-  if (WriteFile(bcx->socket, buffer, size, &result, NULL)) return result;
-  bthSocketError("RFCOMM write");
-  return -1;
+  if (result == -1) bthSocketError("RFCOMM write", NULL);
+  return result;
 }
