@@ -130,17 +130,27 @@ isOctalDigit (wchar_t character, int *value, int *shift) {
 int
 isNumber (int *number, const wchar_t *characters, int length) {
   if (length > 0) {
-    wchar_t string[length + 1];
-    wchar_t *end;
-    long value;
-
-    wmemcpy(string, characters, length);
+    char string[length + 1];
     string[length] = 0;
-    value = wcstol(string, &end, 0);
 
-    if (!*end) {
-      *number = value;
-      return 1;
+    {
+      int index;
+
+      for (index=0; index<length; index+=1) {
+        wchar_t wc = characters[index];
+        if (!iswLatin1(wc)) return 0;
+        string[index] = wc;
+      }
+    }
+
+    {
+      char *end;
+      long value = strtol(string, &end, 0);
+
+      if (!*end) {
+        *number = value;
+        return 1;
+      }
     }
   }
 
