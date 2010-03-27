@@ -237,7 +237,7 @@ setQueueData (Queue *queue, void *data) {
 }
 
 Element *
-findElement (Queue *queue, ItemTester testItem, const void *data) {
+findElement (const Queue *queue, ItemTester testItem, const void *data) {
   if (queue->head) {
     Element *element = queue->head;
     do {
@@ -248,7 +248,7 @@ findElement (Queue *queue, ItemTester testItem, const void *data) {
 }
 
 void *
-findItem (Queue *queue, ItemTester testItem, const void *data) {
+findItem (const Queue *queue, ItemTester testItem, const void *data) {
   Element *element = findElement(queue, testItem, data);
   if (element) return element->item;
   return NULL;
