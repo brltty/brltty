@@ -37,7 +37,8 @@ extern "C" {
 #define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
 #else /* __CYGWIN32__ */
 #define getSocketError() WSAGetLastError()
-#define setErrno(error) errno = EIO
+#define setErrno(error) errno = toErrno((error))
+extern int toErrno (DWORD error);
 #endif /* __CYGWIN32__ */
 
 #else /* WINDOWS */

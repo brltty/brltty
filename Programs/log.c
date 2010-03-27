@@ -188,7 +188,7 @@ LogWindowsError (const char *action) {
 
 #ifdef __MINGW32__
 void
-LogWindowsSocketError(const char *action) {
+LogWindowsSocketError (const char *action) {
   DWORD error = WSAGetLastError();
   LogWindowsCodeError(error, action);
 }
