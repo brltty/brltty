@@ -351,6 +351,9 @@ bluetooth_none.$O:
 bluetooth_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
 
+bluetooth_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_windows.c
+
 ###############################################################################
 
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) mount.$O ttb_translate.$O cmd.$O charset.$O lock.$O drivers.$O driver.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)

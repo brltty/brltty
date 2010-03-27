@@ -1111,6 +1111,11 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
          bluetooth_package="linux"
       ])
       ;;
+   cygwin*|mingw*)
+      AC_CHECK_HEADER([ws2bth.h], [dnl
+         bluetooth_package="windows"
+      ])
+      ;;
 ])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
