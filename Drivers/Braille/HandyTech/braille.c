@@ -485,7 +485,7 @@ getHidReportSize (const unsigned char *items, uint16_t size, unsigned char ident
     if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
       if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
         uint32_t size = ((description.reportCount * description.reportSize) + 7) / 8;
-        LogPrint(LOG_DEBUG, "HID Report Size: %02X = %u", identifier, size);
+        LogPrint(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, size);
         *value = 1 + size;
       } else {
         LogPrint(LOG_WARNING, "HID report size not defined: %02X", identifier);
