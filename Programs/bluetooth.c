@@ -29,7 +29,7 @@
 
 static Queue *bluetoothConnectErrors = NULL;
 typedef struct {
-  BluetoothDeviceAddress bda;
+  uint64_t bda;
   int value;
 } BluetoothConnectError;
 
@@ -53,18 +53,18 @@ bthInitializeConnectErrors (void) {
 static int
 bthTestConnectError (const void *item, const void *data) {
   const BluetoothConnectError *error = item;
-  const BluetoothDeviceAddress *bda = data;
-  return memcmp(error->bda.bytes, bda->bytes, sizeof(bda->bytes)) == 0;
+  const uint64_t *bda = data;
+  return error->bda == *bda;
 }
 
 static BluetoothConnectError *
-bthGetConnectError (const BluetoothDeviceAddress *bda, int add) {
-  BluetoothConnectError *error = findItem(bluetoothConnectErrors, bthTestConnectError, bda);
+bthGetConnectError (uint64_t bda, int add) {
+  BluetoothConnectError *error = findItem(bluetoothConnectErrors, bthTestConnectError, &bda);
   if (error) return error;
 
   if (add) {
     if ((error = malloc(sizeof(*error)))) {
-      error->bda = *bda;
+      error->bda = bda;
       error->value = 0;
       if (enqueueItem(bluetoothConnectErrors, error)) return error;
 
@@ -81,7 +81,7 @@ bthForgetConnectErrors (void) {
 }
 
 static int
-bthRememberConnectError (const BluetoothDeviceAddress *bda, int value) {
+bthRememberConnectError (uint64_t bda, int value) {
   if (bthInitializeConnectErrors()) {
     BluetoothConnectError *error = bthGetConnectError(bda, 1);
 
@@ -95,7 +95,7 @@ bthRememberConnectError (const BluetoothDeviceAddress *bda, int value) {
 }
 
 static int
-bthRecallConnectError (const BluetoothDeviceAddress *bda, int *value) {
+bthRecallConnectError (uint64_t bda, int *value) {
   if (bthInitializeConnectErrors()) {
     BluetoothConnectError *error = bthGetConnectError(bda, 0);
 
@@ -109,40 +109,43 @@ bthRecallConnectError (const BluetoothDeviceAddress *bda, int *value) {
 }
 
 static void
-bthForgetConnectError (const BluetoothDeviceAddress *bda) {
+bthForgetConnectError (uint64_t bda) {
   if (bthInitializeConnectErrors()) {
-    Element *element = findElement(bluetoothConnectErrors, bthTestConnectError, bda);
+    Element *element = findElement(bluetoothConnectErrors, bthTestConnectError, &bda);
     if (element) deleteElement(element);
   }
 }
 
 static int
-bthParseAddress (BluetoothDeviceAddress *bda, const char *address) {
-  const char *start = address;
-  int index = sizeof(bda->bytes);
+bthParseAddress (uint64_t *bda, const char *address) {
+  const unsigned int width = 8;
+  const unsigned long mask = (1L << width) - 1L;
+  int counter = BDA_SIZE;
+  *bda = 0;
 
-  while (--index >= 0) {
-    char *end;
-    long int value = strtol(start, &end, 0X10);
+  do {
+    *bda <<= width;
 
-    if (end == start) return 0;
-    if (value < 0) return 0;
-    if (value > 0XFF) return 0;
+    if (*address) {
+      char *end;
+      long int value = strtol(address, &end, 0X10);
 
-    bda->bytes[index] = value;
-    if (!*end) break;
-    if (*end != ':') return 0;
-    start = end + 1;
-  }
+      if (end == address) return 0;
+      if (value < 0) return 0;
+      if (value > mask) return 0;
+      *bda |= value;
 
-  if (index < 0) return 0;
-  while (--index >= 0) bda->bytes[index] = 0;
+      if (!*(address = end)) continue;
+      if (*address != ':') return 0;
+      if (!*++address) return 0;
+    }
+  } while (--counter);
 
-  return 1;
+  return !*address;
 }
 
 BluetoothConnection *
-bthOpenConnection (const char *address, unsigned char channel, int force) {
+bthOpenConnection (const char *address, uint8_t channel, int force) {
   BluetoothConnection *connection;
 
   if ((connection = malloc(sizeof(*connection)))) {
@@ -153,19 +156,19 @@ bthOpenConnection (const char *address, unsigned char channel, int force) {
       int alreadyTried = 0;
 
       if (force) {
-        bthForgetConnectError(&connection->address);
+        bthForgetConnectError(connection->address);
       } else {
         int value;
 
-        if (bthRecallConnectError(&connection->address, &value)) {
+        if (bthRecallConnectError(connection->address, &value)) {
           errno = value;
           alreadyTried = 1;
         }
       }
 
       if (!alreadyTried) {
-        if ((connection->extension = bthConnect(&connection->address, connection->channel))) return connection;
-        bthRememberConnectError(&connection->address, errno);
+        if ((connection->extension = bthConnect(connection->address, connection->channel))) return connection;
+        bthRememberConnectError(connection->address, errno);
       }
     } else {
       LogPrint(LOG_ERR, "invalid Bluetooth device address: %s", address);

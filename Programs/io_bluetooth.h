@@ -25,13 +25,9 @@ extern "C" {
 
 typedef struct BluetoothConnectionStruct BluetoothConnection;
 
-typedef struct BluetoothDeviceAddressStruct BluetoothDeviceAddress;
-
-extern int isBluetoothDevice (const char **path);
-
 extern void bthForgetConnectErrors (void);
 
-extern BluetoothConnection *bthOpenConnection (const char *address, unsigned char channel, int force);
+extern BluetoothConnection *bthOpenConnection (const char *address, uint8_t channel, int force);
 extern void bthCloseConnection (BluetoothConnection *connection);
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
 extern ssize_t bthReadData (
@@ -39,6 +35,8 @@ extern ssize_t bthReadData (
   int initialTimeout, int subsequentTimeout
 );
 extern ssize_t bthWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
+
+extern int isBluetoothDevice (const char **path);
 
 #ifdef __cplusplus
 }

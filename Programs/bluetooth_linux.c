@@ -35,7 +35,7 @@ struct BluetoothConnectionExtensionStruct {
 };
 
 BluetoothConnectionExtension *
-bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
+bthConnect (uint64_t bda, uint8_t channel) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
@@ -51,7 +51,14 @@ bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
       if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
         bcx->remote.rc_family = AF_BLUETOOTH;
         bcx->remote.rc_channel = channel;
-        memcpy(bcx->remote.rc_bdaddr.b, bda->bytes, sizeof(bda->bytes));
+
+        {
+          int index;
+          for (index=0; index<BDA_SIZE; index+=1) {
+            bcx->remote.rc_bdaddr.b[index] = bda & 0XFF;
+            bda >>= 8;
+          }
+        }
 
         if (connect(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
           if (setBlockingIo(bcx->socket, 0)) {

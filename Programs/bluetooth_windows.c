@@ -50,7 +50,7 @@ isException:
 }
 
 BluetoothConnectionExtension *
-bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
+bthConnect (uint64_t bda, uint8_t channel) {
   int result;
   WSADATA wsa;
 
@@ -67,7 +67,7 @@ bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel) {
 
         if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
           bcx->remote.addressFamily = AF_BTH;
-          memcpy(&bcx->remote.btAddr, bda->bytes, sizeof(bda->bytes));
+          bcx->remote.btAddr = bda;
           bcx->remote.port = channel;
 
           if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {

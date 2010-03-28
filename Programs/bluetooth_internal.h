@@ -23,19 +23,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-struct BluetoothDeviceAddressStruct {
-  unsigned char bytes[6];
-};
+#define BDA_SIZE 6
 
 typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
 
 struct BluetoothConnectionStruct {
-  BluetoothDeviceAddress address;
-  unsigned char channel;
+  uint64_t address;
+  uint8_t channel;
   BluetoothConnectionExtension *extension;
 };
 
-extern BluetoothConnectionExtension *bthConnect (const BluetoothDeviceAddress *bda, unsigned char channel);
+extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel);
 extern void bthDisconnect (BluetoothConnectionExtension *bcx);
 
 #ifdef __cplusplus
