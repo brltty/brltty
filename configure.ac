@@ -1122,7 +1122,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
       AC_CHECK_HEADER([ws2bth.h], [dnl
          bluetooth_package="windows"
          bluetooth_libs="-lbthprops -lws2_32"
-      ])
+      ], , [[#include <windows.h>]])
       ;;
 ])
 
