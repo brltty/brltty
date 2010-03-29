@@ -34,18 +34,26 @@ struct BluetoothConnectionExtensionStruct {
   SOCKADDR_BTH remote;
 };
 
+static void
+bthSetErrno (DWORD error, const char *action, const DWORD *exceptions) {
+  if (exceptions) {
+    const DWORD *exception = exceptions;
+
+    while (*exception != NO_ERROR)
+      if (error == *exception++)
+        goto isException;
+  }
+
+  LogWindowsCodeError(error, action);
+isException:
+  setErrno(error);
+}
+
 static DWORD
 bthSocketError (const char *action, const DWORD *exceptions) {
   DWORD error = WSAGetLastError();
-  setErrno(error);
 
-  if (exceptions)
-    while (*exceptions != NO_ERROR)
-      if (error == *exceptions++)
-        goto isException;
-  LogWindowsCodeError(error, action);
-
-isException:
+  bthSetErrno(error, action, exceptions);
   return error;
 }
 
@@ -102,8 +110,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
 
     WSACleanup();
   } else {
-    setErrno(result);
-    LogWindowsCodeError(result, "WSA startup");
+    bthSetErrno(result, "WSA startup", NULL);
   }
 
   return NULL;
@@ -159,11 +166,8 @@ bthReadData (
 
     if (result != SOCKET_ERROR) {
       to += result;
-      count -= result;
-      break;
-    }
-
-    {
+      if (!(count -= result)) break;
+    } else {
       static const DWORD exceptions[] = {
         WSAEWOULDBLOCK,
         NO_ERROR
