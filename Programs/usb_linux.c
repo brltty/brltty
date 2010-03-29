@@ -801,6 +801,8 @@ usbMakeSysfsPath (const char *usbfsPath) {
     int count = sscanf(tail, "/%u/%u%c", &bus, &device, &extra);
 
     if (count == 2) {
+      unsigned int minor = ((bus - 1) << 7) | (device - 1);
+
       static const char *const formats[] = {
         "/sys/dev/char/189:%3$u",
         "/sys/class/usb_device/usbdev%1$u.%2$u/device",
@@ -810,7 +812,6 @@ usbMakeSysfsPath (const char *usbfsPath) {
       const char *const *format = formats;
 
       while (*format) {
-        unsigned int minor = ((bus - 1) << 7) | (device - 1);
         char path[strlen(*format) + (2 * 0X10) + 1];
         snprintf(path, sizeof(path), *format,
                  bus, device, minor);
