@@ -138,41 +138,43 @@ static int rows;
 static int
 currentVirtualTerminal_WindowsScreen (void) {
   HWND win;
+
   unreadable = NULL;
   altTab = NULL;
+
   if (followFocus && (AttachConsoleProc || root) && GetAltTabInfoAProc) {
     altTabInfo.cbSize = sizeof(altTabInfo);
     EnumWindows(findAltTab, 0);
+
     if (altTab) {
       if (!(GetAltTabInfoAProc(altTab,
 	      altTabInfo.iColFocus + altTabInfo.iRowFocus * altTabInfo.cColumns,
-	      &altTabInfo, altTabName, sizeof(altTabName))))
+	      &altTabInfo, altTabName, sizeof(altTabName)))) {
 	altTab = NULL;
-      else
+      } else {
 	return 0;
+      }
     }
   }
-  win = GetForegroundWindow();
+
+  if (!(win = GetForegroundWindow())) win = INVALID_HANDLE_VALUE;
+
   if (!AttachConsoleProc && root) {
     unreadable = "root BRLTTY";
-    goto error;
-  }
-  if (followFocus && AttachConsoleProc && !tryToAttach(win)) {
-    unreadable = "no console to read";
-    goto error;
-  }
-  if (consoleOutput == INVALID_HANDLE_VALUE) {
+  } else if (win == INVALID_HANDLE_VALUE) {
+    unreadable = "no foreground window";
+  } else if (followFocus && AttachConsoleProc && !tryToAttach(win)) {
+    unreadable = "no attachable console";
+  } else if (consoleOutput == INVALID_HANDLE_VALUE) {
     unreadable = "can't open console output";
-    goto error;
-  }
-  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
+  } else if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
+    unreadable = "can't read console information";
+
     CloseHandle(consoleOutput);
     consoleOutput = INVALID_HANDLE_VALUE;
-    unreadable = "can't read console information";
-    goto error;
   }
-error:
+
   return (int)win;
 }
 
