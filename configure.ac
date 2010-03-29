@@ -1103,6 +1103,13 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
    darwin*)
       usb_package="darwin"
       ;;
+], [dnl
+   libusb)
+      AC_CHECK_HEADER([usb.h], [dnl
+         usb_package="libusb"
+         usb_libs="-lusb"
+      ])
+      ;;
 ])
 
 BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl

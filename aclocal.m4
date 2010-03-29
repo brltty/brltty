@@ -102,12 +102,13 @@ then
 elif test "${packages}" = "yes"
 then
    packages="$3"
-
-   case "${host_os}"
-   in
-      $4
-      *);;
-   esac
+   ifelse(len([$4]), 0, [], [dnl
+      case "${host_os}"
+      in
+         $4
+         *);;
+      esac
+   ])
 else
    packages=`echo "${packages}" | sed -e 'y/,/ /'`
 fi
@@ -122,6 +123,16 @@ test -z "${$1_package}" && {
             $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package}"`
             break
          }
+
+         ifelse(len([$5]), 0, [], [dnl
+            case "${package}"
+            in
+               $5
+               *);;
+            esac
+
+            test -n "${$1_package}" && break
+         ])
 
          AC_MSG_NOTICE([$2 package not available: ${package}])
       done
