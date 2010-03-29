@@ -158,34 +158,37 @@ bthReadData (
   int initialTimeout, int subsequentTimeout
 ) {
   BluetoothConnectionExtension *bcx = connection->extension;
-  unsigned char *to = buffer;
   size_t count = size;
 
-  while (count) {
-    int result = recv(bcx->socket, to, count, 0);
+  if (count) {
+    unsigned char *to = buffer;
 
-    if (result != SOCKET_ERROR) {
-      to += result;
-      if (!(count -= result)) break;
-    } else {
-      static const DWORD exceptions[] = {
-        WSAEWOULDBLOCK,
-        NO_ERROR
-      };
-      DWORD error = bthSocketError("RFCOMM read", exceptions);
+    while (1) {
+      int result = recv(bcx->socket, to, count, 0);
 
-      if (error != WSAEWOULDBLOCK) return -1;
-    }
+      if (result != SOCKET_ERROR) {
+        to += result;
+        if (!(count -= result)) break;
+      } else {
+        static const DWORD exceptions[] = {
+          WSAEWOULDBLOCK,
+          NO_ERROR
+        };
+        DWORD error = bthSocketError("RFCOMM read", exceptions);
 
-    {
-      int timeout = (to == buffer)? initialTimeout: subsequentTimeout;
-
-      if (!timeout) {
-        errno = EAGAIN;
-        return -1;
+        if (error != WSAEWOULDBLOCK) return -1;
       }
 
-      if (!bthAwaitInput(connection, timeout)) return -1;
+      {
+        int timeout = (to == buffer)? initialTimeout: subsequentTimeout;
+
+        if (!timeout) {
+          errno = EAGAIN;
+          return -1;
+        }
+
+        if (!bthAwaitInput(connection, timeout)) return -1;
+      }
     }
   }
 
