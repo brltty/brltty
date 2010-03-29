@@ -138,6 +138,7 @@ static int rows;
 static int
 currentVirtualTerminal_WindowsScreen (void) {
   HWND win;
+  unreadable = NULL;
   altTab = NULL;
   if (followFocus && (AttachConsoleProc || root) && GetAltTabInfoAProc) {
     altTabInfo.cbSize = sizeof(altTabInfo);
@@ -152,7 +153,6 @@ currentVirtualTerminal_WindowsScreen (void) {
     }
   }
   win = GetForegroundWindow();
-  unreadable = NULL;
   if (!AttachConsoleProc && root) {
     unreadable = "root BRLTTY";
     goto error;
@@ -180,25 +180,27 @@ static void
 describe_WindowsScreen (ScreenDescription *description) {
   description->number = (int) currentVirtualTerminal_WindowsScreen();
   description->unreadable = unreadable;
-  if (altTab) {
-    description->rows = 1;
-    description->cols = strlen(altTabName);
-    description->posx = 0;
-    description->posy = 0;
-    description->cursor = 0;
-  } else if (unreadable) {
+  if (unreadable) {
     description->rows = 1;
     description->cols = strlen(unreadable);
     description->posx = 0;
     description->posy = 0;
     description->cursor = 0;
+  } else if (altTab) {
+    description->rows = 1;
+    description->cols = strlen(altTabName);
+    description->posx = 0;
+    description->posy = 0;
+    description->cursor = 0;
   } else {
-    description->cols = cols = info.srWindow.Right + 1 - info.srWindow.Left;
-    description->rows = rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
+    description->cols = info.srWindow.Right + 1 - info.srWindow.Left;
+    description->rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
     description->posx = info.dwCursorPosition.X - info.srWindow.Left;
     description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
     description->cursor = 1;
   }
+  cols = description->cols;
+  rows = description->rows;
 }
 
 static int
@@ -213,16 +215,17 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   void *buf;
   WORD *bufAttr;
 
-  if (altTab) {
-    setScreenMessage(box, buffer, altTabName);
-    return 1;
-  }
-  if (consoleOutput == INVALID_HANDLE_VALUE) return 0;
+  if (!validateScreenBox(box, cols, rows)) return 0;
+
   if (unreadable) {
     setScreenMessage(box, buffer, unreadable);
     return 1;
   }
-  if (!validateScreenBox(box, cols, rows)) return 0;
+
+  if (altTab) {
+    setScreenMessage(box, buffer, altTabName);
+    return 1;
+  }
 
   coord.X = box->left + info.srWindow.Left;
   coord.Y = box->top + info.srWindow.Top;
