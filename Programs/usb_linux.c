@@ -810,9 +810,10 @@ usbMakeSysfsPath (const char *usbfsPath) {
       const char *const *format = formats;
 
       while (*format) {
+        unsigned int minor = ((bus - 1) << 7) | (device - 1);
         char path[strlen(*format) + (2 * 0X10) + 1];
         snprintf(path, sizeof(path), *format,
-                 bus, device, (((bus - 1) << 7) | (device - 1)));
+                 bus, device, minor);
 
         if (access(path, F_OK) != -1) {
           char *sysfsPath = strdup(path);
