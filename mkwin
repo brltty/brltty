@@ -17,12 +17,48 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-version=3.10
+version=4.2
 subversion=x
-apiversion=0.5.3
+apiversion=0.5.4
 whole_version=$version-$subversion
 autohotkey="/c/Program Files/AutoHotkey"
 nsis="/c/Program Files/NSIS"
+configure_line="--quiet --prefix=/ --enable-relocatable-install --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice --disable-i18n"
+README_head="\
+This is an unofficial build of brltty $version + a few fixes for windows.
+
+You should probably read README.txt and doc/README.Windows.txt for information
+on brltty.
+
+For a very quick startguide:
+
+- use the BRLTTY configurator (brlttycnf.exe) or uncomment by hand the proper
+  lines from etc/brltty.conf.
+- For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
+- for sighted users, use the xw braille driver to get a virtual braille box."
+README_foot="
+If you are getting troubles, please run run-debug.bat and send us the debug.log
+file.
+
+=============================
+Technical notes on this build
+
+- brltty was compiled from version $version plus some path fixes using mingw32
+  and ./configure $configure_line
+- to make life easier to windows users, Programs/brlapi_server.c was modified
+  to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
+  and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
+- *usb0* come from libusb-win32 0.1.12.1 available on
+  http://libusb-win32.sourceforge.net/
+- libiconv-2.dll comes from libiconv portage from
+  http://gnuwin32.sourceforge.net/
+- braille.dll comes from http://libbraille.sourceforge.net/
+- python bindings are provided in Brlapi-$apiversion.win32.exe
+- C bindings are provided in include/ and lib/ (a .def file is provided for
+  linking, run
+  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
+  to produce a brlapi.lib file suitable to your compiler)
+"
 
 . "`dirname "${0}"`/prologue.sh"
 
@@ -64,7 +100,7 @@ cp -p -r -- "${sourceRoot}" "${buildRoot}"
 cd "${buildRoot}"
 
 installRoot="${temporaryDirectory}/${archiveName}"
-"./configure" --quiet --prefix=/ --enable-relocatable-install --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice
+"./configure" $configure_line
 make -s
 "${autohotkey}/Compiler/Ahk2Exe.exe" /in brlttycnf.ahk /out brlttycnf.exe
 make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
@@ -112,45 +148,26 @@ do
 done
 
 sed -e 's/$/'$'\015''/' > "${installRoot}/README.first.txt" << EOF
-This is an unofficial build of brltty $version + a few fixes for windows.
-
-You should probably read README.txt and doc/README.Windows.txt for information
-on brltty.
-
-For the impatient people who don't want to read docs:
-
-- use the BRLTTY configurator or uncomment by hand the proper lines from
-  etc/brltty.conf.
-- if you need to install libusb-win32 drivers, right-click on bin/brltty.inf
-  and select install or install and activate the libusb-win32 filter from
+$README_head
+- to register BRLTTY as a service so that it gets started automatically at boot,
+  run install.bat. To unregister it, run uninstall.bat
+- If your braille device is USB,
+  * if you have installed your manufacturer's driver, you should rather
+    select its virtual COM port if it provides one, else select "USB:" to use
+    libusb-win32's filter,
+  * if you do not want or can not install your manufacturer's driver, you can
+    select "USB:" here and install libusb-win32's driver.
+- to install the libusb-win32 filter, fetch it from
   http://libusb-win32.sourceforge.net/
-- to register BRLTTY as a service, run install.bat
-- For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
-- for sighted users, use the xw braille driver to get a virtual braille box.
-
-If you are getting troubles, please run run-debug.bat and send us the debug.log
-file.
-
-=============================
-Technical notes on this build
-
-- brltty was compiled from version $version plus some fixes using mingw32 and
-  ./configure --enable-relocatable-install --prefix=/
-- to make life easier to windows users, Programs/brlapi_server.c was modified
-  to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
-  and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
-- *usb0* come from libusb-win32 0.1.12.1 from
-  http://libusb-win32.sourceforge.net/
-- libiconv-2.dll comes from libiconv portage from
-  http://gnuwin32.sourceforge.net/
-- libintl3.dll comes from libintl from
-  http://gnuwin32.sourceforge.net/
-- braille.dll comes from http://libbraille.sourceforge.net/
-- python bindings are provided in Brlapi-$apiversion.win32.exe
-- C bindings are provided in include/ and lib/ (a .def file is provided for
-  linking, run
-  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
-  to produce a brlapi.lib file suitable to your compiler)
+- to install libusb-win32 drivers, right-click on bin/brltty.inf
+  and select install
+- If your braille device is serial, is connect through a serial to USB
+  converter, just select the proper COM port.  Make sure to select the proper
+  braille display as incorrect probing seems to possibly brick some devices.
+- If your braille device is bluetooth, you can either use the windows bluetooth
+  facilities to create a virtual COM port which you can then direct brltty to,
+  or you can configure by hand the braille-device line in the brltty.conf file.
+$README_foot
 EOF
 
 sed -e 's/$/'$'\015''/' > "${installRoot}/install.bat" << EOF
@@ -182,7 +199,6 @@ cp "$SYSTEMROOT/system32/libusb0_x64.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/braille.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/msvcr90.dll" "${installRoot}/bin"
 cp /mingw/bin/libiconv2.dll "${installRoot}/bin"
-cp /mingw/bin/libintl3.dll "${installRoot}/bin"
 cp /mingw/bin/curses2.dll "${installRoot}/bin"
 rm -f "${installRoot}/bin/brltty-config"
 rm -f "${installRoot}/bin/brltty-install"
@@ -194,41 +210,8 @@ rm -f "${archiveFile}"
 zip -q -A -r "${archiveFile}" "${archiveName}"
 
 sed -e 's/$/'$'\015''/' > "${installRoot}/README.first.txt" << EOF
-This is an unofficial build of brltty $version + a few fixes for windows.
-
-You should probably read README.txt and doc/README.Windows.txt for information
-on brltty.
-
-For the impatient people who don't want to read docs:
-
-- use the BRLTTY configurator or uncomment by hand the proper lines from
-  etc/brltty.conf.
-- For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
-- for sighted users, use the xw braille driver to get a virtual braille box.
-
-If you are getting troubles, please run run-debug.bat and send us the debug.log
-file.
-
-=============================
-Technical notes on this build
-
-- brltty was compiled from version $version plus some fixes using mingw32 and
-  ./configure --enable-relocatable-install --prefix=/
-- to make life easier to windows users, Programs/brlapi_server.c was modified
-  to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
-  and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
-- *usb0* come from libusb-win32 0.1.12.1 from
-  http://libusb-win32.sourceforge.net/
-- libiconv-2.dll comes from libiconv portage from
-  http://gnuwin32.sourceforge.net/
-- libintl3.dll comes from libintl from
-  http://gnuwin32.sourceforge.net/
-- braille.dll comes from http://libbraille.sourceforge.net/
-- python bindings are provided in Brlapi-$apiversion.win32.exe
-- C bindings are provided in include/ and lib/ (a .def file is provided for
-  linking, run
-  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
-  to produce a brlapi.lib file suitable to your compiler)
+$README_head
+$README_foot
 EOF
 
 cp "${buildRoot}/brltty.nsi" .
