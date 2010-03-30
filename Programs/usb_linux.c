@@ -804,17 +804,19 @@ usbMakeSysfsPath (const char *usbfsPath) {
       unsigned int minor = ((bus - 1) << 7) | (device - 1);
 
       static const char *const formats[] = {
-        "/sys/dev/char/189:%3$u",
-        "/sys/class/usb_device/usbdev%1$u.%2$u/device",
-        "/sys/class/usb_endpoint/usbdev%1$u.%2$u_ep00/device",
+        "/sys/dev/char/189:%4$u%1$n%2$u%3$u",
+        "/sys/class/usb_device/usbdev%2$u.%3$u/device%1$n",
+        "/sys/class/usb_endpoint/usbdev%2$u.%3$u_ep00/device%1$n",
         NULL
       };
       const char *const *format = formats;
 
       while (*format) {
+        int length;
         char path[strlen(*format) + (2 * 0X10) + 1];
-        snprintf(path, sizeof(path), *format,
-                 bus, device, minor);
+
+        snprintf(path, sizeof(path), *format, &length, bus, device, minor);
+        path[length] = 0;
 
         if (access(path, F_OK) != -1) {
           char *sysfsPath = strdup(path);
