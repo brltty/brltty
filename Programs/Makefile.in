@@ -311,16 +311,16 @@ usb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb.c
 
 usb_none.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_none.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_none.c
 
 usb_darwin.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_darwin.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_darwin.c
 
 usb_freebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
 
 usb_kfreebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_kfreebsd.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_kfreebsd.c
 
 usb_libusb.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb.c
@@ -329,16 +329,16 @@ usb_libusb-1.0.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb-1.0.c
 
 usb_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_linux.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_linux.c
 
 usb_netbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
 
 usb_openbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
 
 usb_solaris.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_solaris.c
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_solaris.c
 
 ###############################################################################
 
@@ -346,13 +346,13 @@ bluetooth.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth.c
 
 bluetooth_none.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
+	$(CC) $(CFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
 
 bluetooth_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
+	$(CC) $(CFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
 
 bluetooth_windows.$O:
-	$(CC) $(CFLAGS) -D__USE_W32_SOCKETS -c $(SRC_DIR)/bluetooth_windows.c
+	$(CC) $(CFLAGS) $(BLUETOOTH_CFLAGS) -D__USE_W32_SOCKETS -c $(SRC_DIR)/bluetooth_windows.c
 
 ###############################################################################
 
