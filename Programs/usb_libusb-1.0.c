@@ -39,64 +39,57 @@ static int usbDeviceCount = 0;
 #define ETIMEDOUT 116
 #endif /* __MINGW32__ && !ETIMEDOUT */
 
-static void
-usbSetErrno (int error, const char *action) {
+static int
+usbToErrno (enum libusb_error error) {
   switch (error) {
     case LIBUSB_ERROR_IO:
-      errno = EIO;
-      break;
+      return EIO;
 
     case LIBUSB_ERROR_INVALID_PARAM:
-      errno = EINVAL;
-      break;
+      return EINVAL;
 
     case LIBUSB_ERROR_ACCESS:
-      errno = EACCES;
-      break;
+      return EACCES;
 
     case LIBUSB_ERROR_NO_DEVICE:
-      errno = ENODEV;
-      break;
+      return ENODEV;
 
     case LIBUSB_ERROR_NOT_FOUND:
-      errno = ENOENT;
-      break;
+      return ENOENT;
 
     case LIBUSB_ERROR_BUSY:
-      errno = EBUSY;
-      break;
+      return EBUSY;
 
     case LIBUSB_ERROR_TIMEOUT:
-      errno = ETIMEDOUT;
-      break;
+      return ETIMEDOUT;
 
+#ifdef EMSGSIZE
     case LIBUSB_ERROR_OVERFLOW:
-      errno = EOVERFLOW;
-      break;
+      return EMSGSIZE;
+#endif /* EMSGSIZE */
 
     case LIBUSB_ERROR_PIPE:
-      errno = EPIPE;
-      break;
+      return EPIPE;
 
     case LIBUSB_ERROR_INTERRUPTED:
-      errno = EINTR;
-      break;
+      return EINTR;
 
     case LIBUSB_ERROR_NO_MEM:
-      errno = ENOMEM;
-      break;
+      return ENOMEM;
 
     case LIBUSB_ERROR_NOT_SUPPORTED:
-      errno = ENOSYS;
-      break;
+      return ENOSYS;
 
     default:
       LogPrint(LOG_DEBUG, "unsupported libusb1 error code: %d", error);
     case LIBUSB_ERROR_OTHER:
-      errno = EIO;
-      break;
+      return EIO;
   }
+}
 
+static void
+usbSetErrno (enum libusb_error error, const char *action) {
+  errno = usbToErrno(error);
   if (action) LogError(action);
 }
 
