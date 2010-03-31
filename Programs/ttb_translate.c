@@ -36,19 +36,19 @@ static TextTable internalTextTable = {
 
 TextTable *textTable = &internalTextTable;
 
-static const void *
+static inline const void *
 getTextTableItem (TextTable *table, TextTableOffset offset) {
   return &table->header.bytes[offset];
 }
 
-static const UnicodeGroupEntry *
+static inline const UnicodeGroupEntry *
 getUnicodeGroupEntry (TextTable *table, wchar_t character) {
   TextTableOffset offset = table->header.fields->unicodeGroups[UNICODE_GROUP_NUMBER(character)];
   if (offset) return getTextTableItem(table, offset);
   return NULL;
 }
 
-static const UnicodePlaneEntry *
+static inline const UnicodePlaneEntry *
 getUnicodePlaneEntry (TextTable *table, wchar_t character) {
   const UnicodeGroupEntry *group = getUnicodeGroupEntry(table, character);
 
@@ -60,7 +60,7 @@ getUnicodePlaneEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
-static const UnicodeRowEntry *
+static inline const UnicodeRowEntry *
 getUnicodeRowEntry (TextTable *table, wchar_t character) {
   const UnicodePlaneEntry *plane = getUnicodePlaneEntry(table, character);
 
@@ -72,7 +72,7 @@ getUnicodeRowEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
-static const unsigned char *
+static inline const unsigned char *
 getUnicodeCellEntry (TextTable *table, wchar_t character) {
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
