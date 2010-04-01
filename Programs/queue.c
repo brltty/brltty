@@ -180,12 +180,12 @@ dequeueItem (Queue *queue) {
 }
 
 Queue *
-getElementQueue (Element *element) {
+getElementQueue (const Element *element) {
   return element->queue;
 }
 
 void *
-getElementItem (Element *element) {
+getElementItem (const Element *element) {
   return element->item;
 }
 
@@ -215,17 +215,17 @@ deallocateQueue (Queue *queue) {
 }
 
 Element *
-getQueueHead (Queue *queue) {
+getQueueHead (const Queue *queue) {
   return queue->head;
 }
 
 int
-getQueueSize (Queue *queue) {
+getQueueSize (const Queue *queue) {
   return queue->size;
 }
 
 void *
-getQueueData (Queue *queue) {
+getQueueData (const Queue *queue) {
   return queue->data;
 }
 
@@ -272,7 +272,7 @@ testItemAddress (const void *item, const void *data) {
 }
 
 int
-deleteItem (Queue *queue, void *item) {
+deleteItem (Queue *queue, const void *item) {
   Element *element = findElement(queue, testItemAddress, item);
   if (!element) return 0;
 
