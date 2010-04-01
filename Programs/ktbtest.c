@@ -233,14 +233,16 @@ main (int argc, char *argv[]) {
   return status;
 }
 
-#include "brltty.h"
-#include "ttb.h"
-#include "unicode.h"
-#include "message.h"
-#include "async.h"
+KeyTableState
+processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
+  return KTS_UNBOUND;
+}
 
+#include "brltty.h"
+
+unsigned int textStart;
+unsigned int textCount;
 int apiStarted = 0;
-TextTable *textTable;
 
 int
 api_handleCommand (int command) {
@@ -252,15 +254,10 @@ api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
   return EOF;
 }
 
-int
-message (const char *mode, const char *string, short flags) {
-  return 1;
-}
+#include "ttb.h"
+#include "unicode.h"
 
-KeyTableState
-processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
-  return KTS_UNBOUND;
-}
+TextTable *textTable;
 
 unsigned char
 convertCharacterToDots (TextTable *table, wchar_t character) {
@@ -272,6 +269,16 @@ convertDotsToCharacter (TextTable *table, unsigned char dots) {
   return UNICODE_REPLACEMENT_CHARACTER;
 }
 
-void
-asyncWait (int duration) {
+#include "message.h"
+
+int
+message (const char *mode, const char *string, short flags) {
+  return 1;
+}
+
+#include "scr.h"
+
+int
+currentVirtualTerminal (void) {
+  return 0;
 }
