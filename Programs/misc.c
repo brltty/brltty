@@ -49,15 +49,3 @@ strdupWrapper (const char *string) {
   if (!address) noMemory();
   return address;
 }
-
-#ifdef WINDOWS
-#ifndef __CYGWIN32__
-int
-win_toErrno (DWORD error) {
-  switch (error) {
-    case NO_ERROR: return 0;
-    default: return EIO;
-  }
-}
-#endif /* __CYGWIN32__ */
-#endif /* WINDOWS */

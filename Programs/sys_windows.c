@@ -295,6 +295,8 @@ sysInit (void) {
 }
 
 #ifdef __MINGW32__
+#include "win_errno.h"
+
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
 int
 gettimeofday (struct timeval *tvp, void *tzp) {

@@ -19,6 +19,7 @@
 
 /* api_client.c handles connection with BrlApi */
 
+#define WIN_ERRNO_STORAGE_CLASS static
 #include "prologue.h"
 
 #include <stdio.h>
@@ -36,6 +37,8 @@
 #ifdef __MINGW32__
 #include <ws2tcpip.h>
 #include "win_pthread.h"
+
+#include "win_errno.h"
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, ## __VA_ARGS__)
 

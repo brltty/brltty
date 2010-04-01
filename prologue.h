@@ -45,7 +45,9 @@ extern "C" {
 #define WINVER WindowsXP
 
 #ifdef __MINGW32__
+#ifndef __USE_W32_SOCKETS
 #define __USE_W32_SOCKETS
+#endif /* __USE_W32_SOCKETS */
 #endif /* __MINGW32__ */
 
 #include <windows.h>
@@ -150,7 +152,12 @@ typedef int SocketDescriptor;
 #else /* __CYGWIN32__ */
 #define getSocketError() WSAGetLastError()
 #define setErrno(error) errno = win_toErrno((error))
-extern int win_toErrno (DWORD error);
+
+#ifndef WIN_ERRNO_STORAGE_CLASS
+#define WIN_ERRNO_STORAGE_CLASS
+extern
+#endif /* WIN_ERRNO_STORAGE_CLASS */
+WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #endif /* __CYGWIN32__ */
 
 #else /* WINDOWS */
