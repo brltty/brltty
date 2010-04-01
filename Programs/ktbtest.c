@@ -244,6 +244,11 @@ unsigned int textStart;
 unsigned int textCount;
 int apiStarted = 0;
 
+unsigned char
+cursorDots (void) {
+  return 0;
+}
+
 int
 api_handleCommand (int command) {
   return command;
@@ -252,21 +257,6 @@ api_handleCommand (int command) {
 int
 api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
   return EOF;
-}
-
-#include "ttb.h"
-#include "unicode.h"
-
-TextTable *textTable;
-
-unsigned char
-convertCharacterToDots (TextTable *table, wchar_t character) {
-  return 0;
-}
-
-wchar_t
-convertDotsToCharacter (TextTable *table, unsigned char dots) {
-  return UNICODE_REPLACEMENT_CHARACTER;
 }
 
 #include "message.h"

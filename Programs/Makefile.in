@@ -435,10 +435,10 @@ ctb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O keysets.$O datafile.$O queue.$O charset.$O lock.$O cmd.$O brl.$O async.$O drivers.$O driver.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) touch.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O keysets.$O datafile.$O queue.$O charset.$O lock.$O cmd.$O brl.$O async.$O drivers.$O driver.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) mount.$O touch.$O ttb_translate.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(ICU_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(API_LIBS) $(CLIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
 ktbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
