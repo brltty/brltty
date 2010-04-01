@@ -233,9 +233,14 @@ main (int argc, char *argv[]) {
   return status;
 }
 
-unsigned int textStart;
-unsigned int textCount;
+#include "brltty.h"
+#include "ttb.h"
+#include "unicode.h"
+#include "message.h"
+#include "async.h"
+
 int apiStarted = 0;
+TextTable *textTable;
 
 int
 api_handleCommand (int command) {
@@ -250,4 +255,23 @@ api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
 int
 message (const char *mode, const char *string, short flags) {
   return 1;
+}
+
+KeyTableState
+processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
+  return KTS_UNBOUND;
+}
+
+unsigned char
+convertCharacterToDots (TextTable *table, wchar_t character) {
+  return 0;
+}
+
+wchar_t
+convertDotsToCharacter (TextTable *table, unsigned char dots) {
+  return UNICODE_REPLACEMENT_CHARACTER;
+}
+
+void
+asyncWait (int duration) {
 }

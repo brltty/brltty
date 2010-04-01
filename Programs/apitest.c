@@ -92,7 +92,7 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-void showDisplaySize(void)
+static void showDisplaySize(void)
 {
   unsigned int x, y;
   fprintf(stderr,"Getting display size: ");
@@ -103,7 +103,7 @@ void showDisplaySize(void)
   fprintf(stderr, "%dX%d\n", x, y);
 }
 
-void showDriverName(void)
+static void showDriverName(void)
 {
   char name[30];
   fprintf(stderr, "Getting driver name: ");
@@ -118,7 +118,7 @@ void showDriverName(void)
 #define DOTS_TEXTLEN (strlen(DOTS_TEXT))
 #define DOTS_LEN 8
 #define DOTS_TOTALLEN (DOTS_TEXTLEN+DOTS_LEN)
-void showDots(void)
+static void showDots(void)
 {
   unsigned int x, y;
   brlapi_keyCode_t k;
@@ -162,7 +162,7 @@ void showDots(void)
   brlapi_readKey(1, &k);
 }
 
-void enterLearnMode(void)
+static void enterLearnMode(void)
 {
   int res;
   brlapi_keyCode_t code;
@@ -191,7 +191,7 @@ void enterLearnMode(void)
   brlapi_perror("brlapi_readKey");
 }
 
-void showKeyCodes(void)
+static void showKeyCodes(void)
 {
   int res;
   brlapi_keyCode_t cmd;
@@ -226,10 +226,10 @@ void showKeyCodes(void)
 }
 
 #ifdef SIGUSR1
-void emptySignalHandler(int sig) { }
+static void emptySignalHandler(int sig) { }
 #endif /* SIGUSR1 */
 
-void suspendDriver(void)
+static void suspendDriver(void)
 {
   char name[30];
   fprintf(stderr, "Getting driver name: ");

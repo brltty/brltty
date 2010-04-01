@@ -868,6 +868,32 @@ processKeyTableLine (DataFile *file, void *data) {
   return processPropertyOperand(file, properties, "key table directive", data);
 }
 
+void
+resetKeyTable (KeyTable *table) {
+  table->currentContext = table->persistentContext = BRL_CTX_DEFAULT;
+  removeAllKeys(&table->keys);
+  table->command = EOF;
+  table->immediate = 0;
+}
+
+int
+compareKeys (unsigned char set1, unsigned char key1, unsigned char set2, unsigned char key2) {
+  if (set1 < set2) return -1;
+  if (set1 > set2) return 1;
+
+  if (key1 < key2) return -1;
+  if (key1 > key2) return 1;
+
+  return 0;
+}
+
+int
+compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
+  int result = compareKeys(binding1->keys.set, binding1->keys.key, binding2->keys.set, binding2->keys.key);
+  if (!result) result = compareKeySetMasks(binding1->keys.modifiers.mask, binding2->keys.modifiers.mask);
+  return result;
+}
+
 static int
 sortKeyBindings (const void *element1, const void *element2) {
   const KeyBinding *const *binding1 = element1;
