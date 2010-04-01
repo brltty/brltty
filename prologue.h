@@ -139,6 +139,30 @@ typedef int SocketDescriptor;
 #define closeSocketDescriptor(sd) close(sd)
 #endif /* __MINGW32__ */
 
+#ifdef WINDOWS
+#define getSystemError() GetLastError()
+
+#ifdef __CYGWIN32__
+#include <sys/cygwin.h>
+
+#define getSocketError() errno
+#define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
+#else /* __CYGWIN32__ */
+#define getSocketError() WSAGetLastError()
+#define setErrno(error) errno = win_toErrno((error))
+extern int win_toErrno (DWORD error);
+#endif /* __CYGWIN32__ */
+
+#else /* WINDOWS */
+#define getSystemError() errno
+#define getSocketError() errno
+
+#define setErrno(error)
+#endif /* WINDOWS */
+
+#define setSystemErrno() setErrno(getSystemError())
+#define setSocketErrno() setErrno(getSocketError())
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */

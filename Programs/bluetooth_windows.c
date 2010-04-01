@@ -26,7 +26,6 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 #include "log.h"
-#include "misc.h"
 
 struct BluetoothConnectionExtensionStruct {
   SOCKET socket;

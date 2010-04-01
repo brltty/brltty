@@ -53,7 +53,7 @@ strdupWrapper (const char *string) {
 #ifdef WINDOWS
 #ifndef __CYGWIN32__
 int
-toErrno (DWORD error) {
+win_toErrno (DWORD error) {
   switch (error) {
     case NO_ERROR: return 0;
     default: return EIO;

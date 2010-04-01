@@ -78,8 +78,6 @@
 #define MAXIMUM_VIRTUAL_CONSOLE 1
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
-#include "misc.h"
-
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 #include "brlapi_protocol.h"

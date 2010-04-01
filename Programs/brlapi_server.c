@@ -68,7 +68,6 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 #include "auth.h"
 #include "io_misc.h"
 #include "scr.h"

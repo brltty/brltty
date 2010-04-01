@@ -27,30 +27,6 @@ extern "C" {
 
 #define DEFINE_POINTER_TO(name,prefix) typeof(name) *prefix##name
 
-#ifdef WINDOWS
-#define getSystemError() GetLastError()
-
-#ifdef __CYGWIN32__
-#include <sys/cygwin.h>
-
-#define getSocketError() errno
-#define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
-#else /* __CYGWIN32__ */
-#define getSocketError() WSAGetLastError()
-#define setErrno(error) errno = toErrno((error))
-extern int toErrno (DWORD error);
-#endif /* __CYGWIN32__ */
-
-#else /* WINDOWS */
-#define getSystemError() errno
-#define getSocketError() errno
-
-#define setErrno(error)
-#endif /* WINDOWS */
-
-#define setSystemErrno() setErrno(getSystemError())
-#define setSocketErrno() setErrno(getSocketError())
-
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
