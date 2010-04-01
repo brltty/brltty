@@ -225,11 +225,11 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, const 
   if (fprintf(file, "char ") == EOF) goto error;
 
   if (value < 0X100) {
-    if (fprintf(file, "\\x%02X", value) == EOF) goto error;
+    if (fprintf(file, "\\x%02" PRIX32, value) == EOF) goto error;
   } else if (value < 0X10000) {
-    if (fprintf(file, "\\u%04X", value) == EOF) goto error;
+    if (fprintf(file, "\\u%04" PRIX32, value) == EOF) goto error;
   } else {
-    if (fprintf(file, "\\U%08X", value) == EOF) goto error;
+    if (fprintf(file, "\\U%08" PRIX32, value) == EOF) goto error;
   }
 
   if (fprintf(file, "\t") == EOF) goto error;
