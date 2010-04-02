@@ -906,7 +906,7 @@ setPreviousActualCharacter (EditTableData *etd) {
   if (etd->charset) {
     etd->character.byte = (etd->character.byte - 1) & CHARSET_BYTE_MAXIMUM;
   } else {
-    etd->character.unicode = (etd->character.unicode - 1) & UNICODE_CHARACTER_MASK;
+    etd->character.unicode = (etd->character.unicode - 1) & WCHAR_MAX;
   }
 }
 
@@ -915,7 +915,7 @@ setNextActualCharacter (EditTableData *etd) {
   if (etd->charset) {
     etd->character.byte = (etd->character.byte + 1) & CHARSET_BYTE_MAXIMUM;
   } else {
-    etd->character.unicode = (etd->character.unicode + 1) & UNICODE_CHARACTER_MASK;
+    etd->character.unicode = (etd->character.unicode + 1) & WCHAR_MAX;
   }
 }
 
@@ -933,7 +933,7 @@ setLastActualCharacter (EditTableData *etd) {
   if (etd->charset) {
     etd->character.byte = CHARSET_BYTE_MAXIMUM;
   } else {
-    etd->character.unicode = UNICODE_CHARACTER_MASK;
+    etd->character.unicode = WCHAR_MAX;
   }
 }
 
