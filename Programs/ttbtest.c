@@ -622,6 +622,9 @@ convertTable (void) {
 #define erase() printf("\r\n\v")
 #define refresh() fflush(stdout)
 #define beep() printf("\a")
+#include <termios.h>
+static int inputFileDescriptor;
+static struct termios inputTerminalAttributes;
 #endif /* curses package */
 
 typedef struct {
@@ -688,7 +691,7 @@ static int
 getCharacter (EditTableData *etd, wchar_t *character) {
   if (etd->charset) {
     wint_t wc = convertCharToWchar(etd->character.byte);
-    if (wc == WEOF) return 0;;
+    if (wc == WEOF) return 0;
     *character = wc;
   } else {
     *character = etd->character.unicode;
@@ -808,9 +811,9 @@ updateCharacterDescription (EditTableData *etd) {
     printw("Up/Down: previous/next defined character\n");
     printw("Home/End: first/last defined character\n");
 
-#define DOT(n) printw("F%u: %s dot %u  ", n, ((dots & BRLAPI_DOT##n)? "lower": "raise"), n)
-    DOT(1);
-    DOT(5);
+#define DOT(dot,key) printw("F%u: %s dot %u  ", key, ((dots & BRLAPI_DOT##dot)? "lower": "raise"), dot)
+    DOT(1, 4);
+    DOT(4, 5);
     printw("F9: %s",
            !gotCharacter? "":
            !gotDots? "define (as empty cell)":
@@ -818,8 +821,8 @@ updateCharacterDescription (EditTableData *etd) {
            "undefine character");
     printw("\n");
 
-    DOT(2);
-    DOT(6);
+    DOT(2, 3);
+    DOT(5, 6);
     printw("F10:");
     {
       static const char *label_SwitchCase = "switch case";
@@ -833,13 +836,13 @@ updateCharacterDescription (EditTableData *etd) {
     }
     printw("\n");
 
-    DOT(3);
-    DOT(7);
+    DOT(3, 2);
+    DOT(6, 7);
     printw("F11: %s", etd->updated? "save table": "");
     printw("\n");
 
-    DOT(4);
-    DOT(8);
+    DOT(7, 1);
+    DOT(8, 8);
     printw("F12: exit table editor");
     if (etd->updated) printw(" (unsaved changes)");
     printw("\n");
@@ -1198,7 +1201,7 @@ doKeyboardCommand (EditTableData *etd) {
         break;
 
       case KEY_DOWN:
-        if (!setNextDefinedCharacter(etd)) beep();;
+        if (!setNextDefinedCharacter(etd)) beep();
         break;
 
       case KEY_HOME:
@@ -1210,31 +1213,31 @@ doKeyboardCommand (EditTableData *etd) {
         break;
 
       case KEY_F(1):
-        if (!toggleDot(etd, BRLAPI_DOT1)) beep();
+        if (!toggleDot(etd, BRLAPI_DOT7)) beep();
         break;
 
       case KEY_F(2):
-        if (!toggleDot(etd, BRLAPI_DOT2)) beep();
-        break;
-
-      case KEY_F(3):
         if (!toggleDot(etd, BRLAPI_DOT3)) beep();
         break;
 
+      case KEY_F(3):
+        if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+        break;
+
       case KEY_F(4):
-        if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+        if (!toggleDot(etd, BRLAPI_DOT1)) beep();
         break;
 
       case KEY_F(5):
-        if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+        if (!toggleDot(etd, BRLAPI_DOT4)) beep();
         break;
 
       case KEY_F(6):
-        if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+        if (!toggleDot(etd, BRLAPI_DOT5)) beep();
         break;
 
       case KEY_F(7):
-        if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+        if (!toggleDot(etd, BRLAPI_DOT6)) beep();
         break;
 
       case KEY_F(8):
@@ -1284,24 +1287,135 @@ doKeyboardCommand (EditTableData *etd) {
         (character <= (UNICODE_BRAILLE_ROW | UNICODE_CELL_MASK))) {
       if (!setDots(etd, character & UNICODE_CELL_MASK)) beep();
     } else {
-      if (etd->charset) {
-        int c;
+      switch (character) {
+        case 0X1B: /* escape */
+          return 0;
+
+        case 0X11: /* CTRL-Q */
+          if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+          break;
+
+        case 0X17: /* CTRL-W */
+          if (!toggleDot(etd, BRLAPI_DOT3)) beep();
+          break;
+
+        case 0X05: /* CTRL-E */
+          if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+          break;
+
+        case 0X12: /* CTRL-R */
+          if (!toggleDot(etd, BRLAPI_DOT1)) beep();
+          break;
+
+        case 0X14: /* CTRL-T */
+          if (!toggleCharacter(etd)) beep();
+          break;
+
+        case 0X19: /* CTRL-Y */
+          if (!setAlternateCharacter(etd)) beep();
+          break;
+
+        case 0X15: /* CTRL-U */
+          if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+          break;
+
+        case 0X09: /* CTRL-I */
+          if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+          break;
+
+        case 0X0F: /* CTRL-O */
+          if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+          break;
+
+        case 0X10: /* CTRL-P */
+          if (!toggleDot(etd, BRLAPI_DOT8)) beep();
+          break;
+
+        case 0X01: /* CTRL-A */
+          if (!(etd->updated && saveTable(etd))) beep();
+          break;
+
+        case 0X13: /* CTRL-S */
+          setFirstActualCharacter(etd);
+          break;
+
+        case 0X04: /* CTRL-D */
+          setPreviousActualCharacter(etd);
+          break;
+
+        case 0X06: /* CTRL-F */
+          setNextActualCharacter(etd);
+          break;
+
+        case 0X07: /* CTRL-G */
+          setLastActualCharacter(etd);
+          break;
+
+        case 0X08: /* CTRL-H */
+          if (!setFirstDefinedCharacter(etd)) beep();
+          break;
+
+        case 0X0A: /* CTRL-J */
+          if (!setPreviousDefinedCharacter(etd)) beep();
+          break;
+
+        case 0X0B: /* CTRL-K */
+          if (!setNextDefinedCharacter(etd)) beep();
+          break;
+
+        case 0X0C: /* CTRL-L */
+          if (!setLastDefinedCharacter(etd)) beep();
+          break;
+
+        case 0X1A: /* CTRL-Z */
+          beep();
+          break;
+
+        case 0X18: /* CTRL-X */
+          beep();
+          break;
+
+        case 0X03: /* CTRL-C */
+          beep();
+          break;
+
+        case 0X16: /* CTRL-V */
+          beep();
+          break;
+
+        case 0X02: /* CTRL-B */
+          beep();
+          break;
+
+        case 0X0E: /* CTRL-N */
+          beep();
+          break;
+
+        case 0X0D: /* CTRL-M */
+          beep();
+          break;
+
+        default:
+          if (etd->charset) {
+            int c;
 
 #ifdef IS_UNICODE_CHARACTER
-        c = convertWcharToChar(ch);
+            c = convertWcharToChar(ch);
 #else /* IS_UNICODE_CHARACTER */
-        c = ch;
+            c = ch;
 #endif /* IS_UNICODE_CHARACTER */
 
-        if (c != EOF) {
-          etd->character.byte = c;
-        } else {
-          beep();
-        }
-      } else if (character != WEOF) {
-        etd->character.unicode = character;
-      } else {
-        beep();
+            if (c != EOF) {
+              etd->character.byte = c;
+            } else {
+              beep();
+            }
+          } else if (character != WEOF) {
+            etd->character.unicode = character;
+          } else {
+            beep();
+          }
+          break;
       }
     }
   }
@@ -1471,6 +1585,30 @@ editTable (void) {
     nonl();
     intrflush(stdscr, FALSE);
 #else /* standard input/output */
+    inputFileDescriptor = fileno(stdin);
+    setvbuf(stdin, NULL, _IONBF, 0);
+
+    if (isatty(inputFileDescriptor)) {
+      struct termios newAttributes;
+
+      tcgetattr(inputFileDescriptor, &inputTerminalAttributes);
+      newAttributes = inputTerminalAttributes;
+
+      newAttributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+      newAttributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+      newAttributes.c_cflag &= ~(CSIZE | PARENB);
+      newAttributes.c_cflag |= CS8;
+
+      {
+        int i;
+        for (i=0; i<NCCS; i+=1) newAttributes.c_cc[i] = _POSIX_VDISABLE;
+      }
+
+      newAttributes.c_cc[VTIME] = 0;
+      newAttributes.c_cc[VMIN] = 1;
+
+      tcsetattr(inputFileDescriptor, TCSAFLUSH, &newAttributes);
+    }
 #endif /* initialize keyboard and screen */
 
     etd.charset = *opt_charset? opt_charset: NULL;
@@ -1508,6 +1646,9 @@ editTable (void) {
 #if defined(USE_CURSES)
     endwin();
 #else /* standard input/output */
+    if (isatty(inputFileDescriptor)) {
+      tcsetattr(inputFileDescriptor, TCSAFLUSH, &inputTerminalAttributes);
+    }
 #endif /* restore keyboard and screen */
 
     if (haveBrailleDisplay(&etd)) releaseBrailleDisplay(&etd);
