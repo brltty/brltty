@@ -1607,11 +1607,8 @@ editTable (void) {
       }
     }
 #else /* termios */
-    if (isatty(STDIN_FILENO)) {
-      struct termios newAttributes;
-
-      tcgetattr(STDIN_FILENO, &inputTerminalAttributes);
-      newAttributes = inputTerminalAttributes;
+    if (tcgetattr(STDIN_FILENO, &inputTerminalAttributes) != -1) {
+      struct termios newAttributes = inputTerminalAttributes;
 
       newAttributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
       newAttributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
@@ -1626,7 +1623,9 @@ editTable (void) {
       newAttributes.c_cc[VTIME] = 0;
       newAttributes.c_cc[VMIN] = 1;
 
-      tcsetattr(STDIN_FILENO, TCSAFLUSH, &newAttributes);
+      if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &newAttributes) != -1) {
+        inputAttributesChanged = 1;
+      };
     }
 #endif /* input terminal initialization */
 #endif /* initialize keyboard and screen */
