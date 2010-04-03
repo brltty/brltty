@@ -619,21 +619,24 @@ convertTable (void) {
 #else /* standard input/output */
 #warning curses package either unspecified or unsupported
 
+#define refresh() fflush(stdout)
+#define printw printf
+#define erase() printf("\r\n\v")
+#define beep() printf("\a")
+
 static int inputAttributesChanged;
 
 #if defined(__MINGW32__)
 #define STDIN_HANDLE ((HANDLE)_get_osfhandle(STDIN_FILENO))
 static long inputConsoleMode;
 
+#undef beep
+#define beep() MessageBeep(MB_ICONWARNING)
+
 #else /* termios */
 #include <termios.h>
 static struct termios inputTerminalAttributes;
 #endif /* input terminal definitions */
-
-#define refresh() fflush(stdout)
-#define printw printf
-#define erase() printf("\r\n\v")
-#define beep() printf("\a")
 #endif /* curses package */
 
 typedef struct {
@@ -1377,8 +1380,7 @@ doKeyboardCommand (EditTableData *etd) {
           break;
 
         case 0X1A: /* CTRL-Z */
-          beep();
-          break;
+          return 0;
 
         case 0X18: /* CTRL-X */
           beep();
@@ -1600,7 +1602,7 @@ editTable (void) {
 #if defined(__MINGW32__)
     if (GetConsoleMode(STDIN_HANDLE, &inputConsoleMode)) {
       long newConsoleMode = inputConsoleMode;
-      newConsoleMode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+      newConsoleMode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
 
       if (SetConsoleMode(STDIN_HANDLE, newConsoleMode)) {
         inputAttributesChanged = 1;
