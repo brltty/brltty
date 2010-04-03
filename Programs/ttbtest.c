@@ -618,13 +618,22 @@ convertTable (void) {
 
 #else /* standard input/output */
 #warning curses package either unspecified or unsupported
+
+static int inputAttributesChanged;
+
+#if defined(__MINGW32__)
+#define STDIN_HANDLE ((HANDLE)_get_osfhandle(STDIN_FILENO))
+static long inputConsoleMode;
+
+#else /* termios */
+#include <termios.h>
+static struct termios inputTerminalAttributes;
+#endif /* input terminal definitions */
+
+#define refresh() fflush(stdout)
 #define printw printf
 #define erase() printf("\r\n\v")
-#define refresh() fflush(stdout)
 #define beep() printf("\a")
-#include <termios.h>
-static int inputFileDescriptor;
-static struct termios inputTerminalAttributes;
 #endif /* curses package */
 
 typedef struct {
@@ -1585,13 +1594,23 @@ editTable (void) {
     nonl();
     intrflush(stdscr, FALSE);
 #else /* standard input/output */
-    inputFileDescriptor = fileno(stdin);
     setvbuf(stdin, NULL, _IONBF, 0);
+    inputAttributesChanged = 0;
 
-    if (isatty(inputFileDescriptor)) {
+#if defined(__MINGW32__)
+    if (GetConsoleMode(STDIN_HANDLE, &inputConsoleMode)) {
+      long newConsoleMode = inputConsoleMode;
+      newConsoleMode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT);
+
+      if (SetConsoleMode(STDIN_HANDLE, newConsoleMode)) {
+        inputAttributesChanged = 1;
+      }
+    }
+#else /* termios */
+    if (isatty(STDIN_FILENO)) {
       struct termios newAttributes;
 
-      tcgetattr(inputFileDescriptor, &inputTerminalAttributes);
+      tcgetattr(STDIN_FILENO, &inputTerminalAttributes);
       newAttributes = inputTerminalAttributes;
 
       newAttributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
@@ -1607,8 +1626,9 @@ editTable (void) {
       newAttributes.c_cc[VTIME] = 0;
       newAttributes.c_cc[VMIN] = 1;
 
-      tcsetattr(inputFileDescriptor, TCSAFLUSH, &newAttributes);
+      tcsetattr(STDIN_FILENO, TCSAFLUSH, &newAttributes);
     }
+#endif /* input terminal initialization */
 #endif /* initialize keyboard and screen */
 
     etd.charset = *opt_charset? opt_charset: NULL;
@@ -1618,6 +1638,7 @@ editTable (void) {
       fd_set set;
       FD_ZERO(&set);
 
+#ifndef __MINGW32__
       {
         int maximumFileDescriptor = STDIN_FILENO;
         FD_SET(STDIN_FILENO, &set);
@@ -1631,13 +1652,15 @@ editTable (void) {
         select(maximumFileDescriptor+1, &set, NULL, NULL, NULL);
       }
 
-      if (FD_ISSET(STDIN_FILENO, &set))
-        if (!doKeyboardCommand(&etd))
-          break;
+      if (haveBrailleDisplay(&etd) && FD_ISSET(etd.brlapiFileDescriptor, &set)) {
+        if (!doBrailleCommand(&etd)) break;
+      }
 
-      if (haveBrailleDisplay(&etd) && FD_ISSET(etd.brlapiFileDescriptor, &set))
-        if (!doBrailleCommand(&etd))
-          break;
+      if (FD_ISSET(STDIN_FILENO, &set))
+#endif /* __MINGW32__ */
+      {
+        if (!doKeyboardCommand(&etd)) break;
+      }
     }
 
     erase();
@@ -1646,8 +1669,12 @@ editTable (void) {
 #if defined(USE_CURSES)
     endwin();
 #else /* standard input/output */
-    if (isatty(inputFileDescriptor)) {
-      tcsetattr(inputFileDescriptor, TCSAFLUSH, &inputTerminalAttributes);
+    if (inputAttributesChanged) {
+#if defined(__MINGW32__)
+      SetConsoleMode(STDIN_HANDLE, inputConsoleMode);
+#else /* termios */
+      tcsetattr(STDIN_FILENO, TCSAFLUSH, &inputTerminalAttributes);
+#endif /* input terminal restoration */
     }
 #endif /* restore keyboard and screen */
 
