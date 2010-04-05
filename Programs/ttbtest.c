@@ -801,6 +801,27 @@ printCharacterString (const wchar_t *wcs) {
   }
 }
 
+static void
+printNavigationPair (
+  const char *key1, const char *preposition1,
+  const char *key2, const char *preposition2,
+  const char *adjective, const char *noun,
+  int width
+) {
+  int length = 0;
+
+  if (*key1 || *key2) {
+    const char *separator = (*key1 && *key2)? "/": "";
+
+    printw("%s%s%s: %s%s%s %s %s%n",
+           key1, separator, key2,
+           preposition1, separator, preposition2,
+           adjective, noun, &length);
+  }
+
+  if (width > length) printw("%*s", width-length, "");
+}
+
 static int
 updateCharacterDescription (EditTableData *etd) {
   int ok = 0;
@@ -818,24 +839,92 @@ updateCharacterDescription (EditTableData *etd) {
     erase();
 
 #if defined(USE_CURSES)
-    printw("Left/Right: previous/next %s character\n",
-           etd->charset? etd->charset: "unicode");
-    printw("Up/Down: previous/next defined character\n");
-    printw("Home/End: first/last defined character\n");
+#define KEY_FIRST_ACTUAL_CHARACTER ""
+#define KEY_LAST_ACTUAL_CHARACTER ""
+#define KEY_PREVIOUS_ACTUAL_CHARACTER "Left"
+#define KEY_NEXT_ACTUAL_CHARACTER "Right"
+#define KEY_FIRST_DEFINED_CHARACTER "Home"
+#define KEY_LAST_DEFINED_CHARACTER "End"
+#define KEY_PREVIOUS_DEFINED_CHARACTER "Up"
+#define KEY_NEXT_DEFINED_CHARACTER "Down"
+#define KEY_TOGGLE_DOT1 "F4"
+#define KEY_TOGGLE_DOT2 "F3"
+#define KEY_TOGGLE_DOT3 "F2"
+#define KEY_TOGGLE_DOT4 "F5"
+#define KEY_TOGGLE_DOT5 "F6"
+#define KEY_TOGGLE_DOT6 "F7"
+#define KEY_TOGGLE_DOT7 "F1"
+#define KEY_TOGGLE_DOT8 "F8"
+#define KEY_TOGGLE_CHARACTER "F9"
+#define KEY_ALTERNATE_CHARACTER "F10"
+#define KEY_SAVE_TABLE "F11"
+#define KEY_EXIT_EDITOR "F12"
+#else /* standard input/output */
+#define KEY_FIRST_ACTUAL_CHARACTER "^S"
+#define KEY_LAST_ACTUAL_CHARACTER "^G"
+#define KEY_PREVIOUS_ACTUAL_CHARACTER "^D"
+#define KEY_NEXT_ACTUAL_CHARACTER "^F"
+#define KEY_FIRST_DEFINED_CHARACTER "^H"
+#define KEY_LAST_DEFINED_CHARACTER "^L"
+#define KEY_PREVIOUS_DEFINED_CHARACTER "^J"
+#define KEY_NEXT_DEFINED_CHARACTER "^K"
+#define KEY_TOGGLE_DOT1 "^R"
+#define KEY_TOGGLE_DOT2 "^E"
+#define KEY_TOGGLE_DOT3 "^W"
+#define KEY_TOGGLE_DOT4 "^U"
+#define KEY_TOGGLE_DOT5 "^I"
+#define KEY_TOGGLE_DOT6 "^O"
+#define KEY_TOGGLE_DOT7 "^Q"
+#define KEY_TOGGLE_DOT8 "^P"
+#define KEY_TOGGLE_CHARACTER "^T"
+#define KEY_ALTERNATE_CHARACTER "^Y"
+#define KEY_SAVE_TABLE "^A"
+#define KEY_EXIT_EDITOR "^Z"
+#endif /* key definitions */
 
-#define DOT(dot,key) printw("F%u: %s dot %u  ", key, ((dots & BRLAPI_DOT##dot)? "lower": "raise"), dot)
-    DOT(1, 4);
-    DOT(4, 5);
-    printw("F9: %s",
+    {
+      const char *first = "first";
+      const char *last = "last";
+      const char *previous = "prev";
+      const char *next = "next";
+
+      const char *actual = etd->charset? etd->charset: "unicode";
+      const char *defined = "defined";
+
+      const char *character = "char";
+      const int width = 38;
+
+      printNavigationPair(KEY_PREVIOUS_ACTUAL_CHARACTER, previous,
+                          KEY_NEXT_ACTUAL_CHARACTER, next,
+                          actual, character, width);
+      printNavigationPair(KEY_PREVIOUS_DEFINED_CHARACTER, previous,
+                          KEY_NEXT_DEFINED_CHARACTER, next,
+                          defined, character, 0);
+      printw("\n");
+
+      printNavigationPair(KEY_FIRST_ACTUAL_CHARACTER, first,
+                          KEY_LAST_ACTUAL_CHARACTER, last,
+                          actual, character, width);
+      printNavigationPair(KEY_FIRST_DEFINED_CHARACTER, first,
+                          KEY_LAST_DEFINED_CHARACTER, last,
+                          defined, character, 0);
+      printw("\n");
+    }
+    printw("\n");
+
+#define DOT(n) printw("%s: %s dot %u    ", KEY_TOGGLE_DOT##n, ((dots & BRLAPI_DOT##n)? "lower": "raise"), n)
+    DOT(1);
+    DOT(4);
+    printw("%s: %s", KEY_TOGGLE_CHARACTER,
            !gotCharacter? "":
-           !gotDots? "define (as empty cell)":
+           !gotDots? "define character (empty cell)":
            dots? "clear all dots":
            "undefine character");
     printw("\n");
 
-    DOT(2, 3);
-    DOT(5, 6);
-    printw("F10:");
+    DOT(2);
+    DOT(5);
+    printw("%s:", KEY_ALTERNATE_CHARACTER);
     {
       static const char *label_SwitchCase = "switch case";
       const char *label = NULL;
@@ -848,21 +937,20 @@ updateCharacterDescription (EditTableData *etd) {
     }
     printw("\n");
 
-    DOT(3, 2);
-    DOT(6, 7);
-    printw("F11: %s", etd->updated? "save table": "");
+    DOT(3);
+    DOT(6);
+    printw("%s: %s", KEY_SAVE_TABLE,
+           etd->updated? "save table": "");
     printw("\n");
 
-    DOT(7, 1);
-    DOT(8, 8);
-    printw("F12: exit table editor");
+    DOT(7);
+    DOT(8);
+    printw("%s: exit table editor", KEY_EXIT_EDITOR);
     if (etd->updated) printw(" (unsaved changes)");
     printw("\n");
 #undef DOT
 
     printw("\n");
-#else /* standard input/output */
-#endif /* write header */
 
     if (etd->charset) {
       printw("%02X: %s\n", etd->character.byte, etd->charset);
@@ -1282,8 +1370,123 @@ doKeyboardCommand (EditTableData *etd) {
 #endif /* USE_FUNC_GET_WCH */
 #else /* standard input/output */
 #define IS_UNICODE_CHARACTER
+  int handled = 1;
   wint_t ch = fgetwc(stdin);
   if (ch == WEOF) return 0;
+
+  switch (ch) {
+    case 0X1B: /* escape */
+      return 0;
+
+    case 0X11: /* CTRL-Q */
+      if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+      break;
+
+    case 0X17: /* CTRL-W */
+      if (!toggleDot(etd, BRLAPI_DOT3)) beep();
+      break;
+
+    case 0X05: /* CTRL-E */
+      if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+      break;
+
+    case 0X12: /* CTRL-R */
+      if (!toggleDot(etd, BRLAPI_DOT1)) beep();
+      break;
+
+    case 0X14: /* CTRL-T */
+      if (!toggleCharacter(etd)) beep();
+      break;
+
+    case 0X19: /* CTRL-Y */
+      if (!setAlternateCharacter(etd)) beep();
+      break;
+
+    case 0X15: /* CTRL-U */
+      if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+      break;
+
+    case 0X09: /* CTRL-I */
+      if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+      break;
+
+    case 0X0F: /* CTRL-O */
+      if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+      break;
+
+    case 0X10: /* CTRL-P */
+      if (!toggleDot(etd, BRLAPI_DOT8)) beep();
+      break;
+
+    case 0X01: /* CTRL-A */
+      if (!(etd->updated && saveTable(etd))) beep();
+      break;
+
+    case 0X13: /* CTRL-S */
+      setFirstActualCharacter(etd);
+      break;
+
+    case 0X04: /* CTRL-D */
+      setPreviousActualCharacter(etd);
+      break;
+
+    case 0X06: /* CTRL-F */
+      setNextActualCharacter(etd);
+      break;
+
+    case 0X07: /* CTRL-G */
+      setLastActualCharacter(etd);
+      break;
+
+    case 0X08: /* CTRL-H */
+      if (!setFirstDefinedCharacter(etd)) beep();
+      break;
+
+    case 0X0A: /* CTRL-J */
+      if (!setPreviousDefinedCharacter(etd)) beep();
+      break;
+
+    case 0X0B: /* CTRL-K */
+      if (!setNextDefinedCharacter(etd)) beep();
+      break;
+
+    case 0X0C: /* CTRL-L */
+      if (!setLastDefinedCharacter(etd)) beep();
+      break;
+
+    case 0X1A: /* CTRL-Z */
+      return 0;
+
+    case 0X18: /* CTRL-X */
+      beep();
+      break;
+
+    case 0X03: /* CTRL-C */
+      beep();
+      break;
+
+    case 0X16: /* CTRL-V */
+      beep();
+      break;
+
+    case 0X02: /* CTRL-B */
+      beep();
+      break;
+
+    case 0X0E: /* CTRL-N */
+      beep();
+      break;
+
+    case 0X0D: /* CTRL-M */
+      beep();
+      break;
+
+    default:
+      handled = 0;
+      break;
+  }
+
+  if (!handled)
 #endif /* read character */
 
   {
@@ -1299,134 +1502,24 @@ doKeyboardCommand (EditTableData *etd) {
         (character <= (UNICODE_BRAILLE_ROW | UNICODE_CELL_MASK))) {
       if (!setDots(etd, character & UNICODE_CELL_MASK)) beep();
     } else {
-      switch (character) {
-        case 0X1B: /* escape */
-          return 0;
-
-        case 0X11: /* CTRL-Q */
-          if (!toggleDot(etd, BRLAPI_DOT7)) beep();
-          break;
-
-        case 0X17: /* CTRL-W */
-          if (!toggleDot(etd, BRLAPI_DOT3)) beep();
-          break;
-
-        case 0X05: /* CTRL-E */
-          if (!toggleDot(etd, BRLAPI_DOT2)) beep();
-          break;
-
-        case 0X12: /* CTRL-R */
-          if (!toggleDot(etd, BRLAPI_DOT1)) beep();
-          break;
-
-        case 0X14: /* CTRL-T */
-          if (!toggleCharacter(etd)) beep();
-          break;
-
-        case 0X19: /* CTRL-Y */
-          if (!setAlternateCharacter(etd)) beep();
-          break;
-
-        case 0X15: /* CTRL-U */
-          if (!toggleDot(etd, BRLAPI_DOT4)) beep();
-          break;
-
-        case 0X09: /* CTRL-I */
-          if (!toggleDot(etd, BRLAPI_DOT5)) beep();
-          break;
-
-        case 0X0F: /* CTRL-O */
-          if (!toggleDot(etd, BRLAPI_DOT6)) beep();
-          break;
-
-        case 0X10: /* CTRL-P */
-          if (!toggleDot(etd, BRLAPI_DOT8)) beep();
-          break;
-
-        case 0X01: /* CTRL-A */
-          if (!(etd->updated && saveTable(etd))) beep();
-          break;
-
-        case 0X13: /* CTRL-S */
-          setFirstActualCharacter(etd);
-          break;
-
-        case 0X04: /* CTRL-D */
-          setPreviousActualCharacter(etd);
-          break;
-
-        case 0X06: /* CTRL-F */
-          setNextActualCharacter(etd);
-          break;
-
-        case 0X07: /* CTRL-G */
-          setLastActualCharacter(etd);
-          break;
-
-        case 0X08: /* CTRL-H */
-          if (!setFirstDefinedCharacter(etd)) beep();
-          break;
-
-        case 0X0A: /* CTRL-J */
-          if (!setPreviousDefinedCharacter(etd)) beep();
-          break;
-
-        case 0X0B: /* CTRL-K */
-          if (!setNextDefinedCharacter(etd)) beep();
-          break;
-
-        case 0X0C: /* CTRL-L */
-          if (!setLastDefinedCharacter(etd)) beep();
-          break;
-
-        case 0X1A: /* CTRL-Z */
-          return 0;
-
-        case 0X18: /* CTRL-X */
-          beep();
-          break;
-
-        case 0X03: /* CTRL-C */
-          beep();
-          break;
-
-        case 0X16: /* CTRL-V */
-          beep();
-          break;
-
-        case 0X02: /* CTRL-B */
-          beep();
-          break;
-
-        case 0X0E: /* CTRL-N */
-          beep();
-          break;
-
-        case 0X0D: /* CTRL-M */
-          beep();
-          break;
-
-        default:
-          if (etd->charset) {
-            int c;
+      if (etd->charset) {
+        int c;
 
 #ifdef IS_UNICODE_CHARACTER
-            c = convertWcharToChar(ch);
+        c = convertWcharToChar(ch);
 #else /* IS_UNICODE_CHARACTER */
-            c = ch;
+        c = ch;
 #endif /* IS_UNICODE_CHARACTER */
 
-            if (c != EOF) {
-              etd->character.byte = c;
-            } else {
-              beep();
-            }
-          } else if (character != WEOF) {
-            etd->character.unicode = character;
-          } else {
-            beep();
-          }
-          break;
+        if (c != EOF) {
+          etd->character.byte = c;
+        } else {
+          beep();
+        }
+      } else if (character != WEOF) {
+        etd->character.unicode = character;
+      } else {
+        beep();
       }
     }
   }
