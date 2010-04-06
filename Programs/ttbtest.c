@@ -815,7 +815,7 @@ printNavigationPair (
 
     printw("%s%s%s: %s%s%s %s %s%n",
            key1, separator, key2,
-           preposition1, separator, preposition2,
+           (*key1? preposition1: ""), separator, (*key2? preposition2: ""),
            adjective, noun, &length);
   }
 
@@ -926,14 +926,25 @@ updateCharacterDescription (EditTableData *etd) {
     DOT(5);
     printw("%s:", KEY_ALTERNATE_CHARACTER);
     {
-      static const char *label_SwitchCase = "switch case";
-      const char *label = NULL;
+      const char *lower = "lowercase";
+      const char *upper = "uppercase";
+      const char *alternate = NULL;
+
       if (etd->charset) {
-        if (isalpha(etd->character.byte)) label = label_SwitchCase;
+        if (isupper(etd->character.byte)) {
+          alternate = lower;
+        } else if (islower(etd->character.byte)) {
+          alternate = upper;
+        }
       } else {
-        if (iswalpha(etd->character.unicode)) label = label_SwitchCase;
+        if (iswupper(etd->character.unicode)) {
+          alternate = lower;
+        } else if (iswlower(etd->character.unicode)) {
+          alternate = upper;
+        }
       }
-      if (label) printw(" %s", label);
+
+      if (alternate) printw(" switch to %s equivalent", alternate);
     }
     printw("\n");
 
