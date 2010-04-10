@@ -258,15 +258,17 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         if (command != table->command) {
           table->command = command;
 
-          if (binding->flags & KBF_ADJUST) {
-            int index;
+          if (binding) {
+            if (binding->flags & KBF_ADJUST) {
+              int index;
 
-            for (index=0; index<table->pressedCount; index+=1) {
-              const KeyValue *pressed = &table->pressedKeys[index];
+              for (index=0; index<table->pressedCount; index+=1) {
+                const KeyValue *pressed = &table->pressedKeys[index];
 
-              if (pressed->set) {
-                command += pressed->key;
-                break;
+                if (pressed->set) {
+                  command += pressed->key;
+                  break;
+                }
               }
             }
           }
