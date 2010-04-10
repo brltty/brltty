@@ -93,53 +93,46 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
 }
 
 static int
-putKeyName (ListGenerationData *lgd, unsigned char set, unsigned char key) {
-  int first = 0;
-  int last = lgd->keyTable->keyNameCount - 1;
+searchKeyValue (const void *target, const void *element) {
+  const KeyValue *value = target;
+  const KeyNameEntry *const *kne = element;
+  return compareKeyValues(value, &(*kne)->value);
+}
 
-  while (first <= last) {
-    int current = (first + last) / 2;
-    const KeyNameEntry *kne = lgd->keyTable->keyNameTable[current];
-
-    if (set < kne->set) goto searchBelow;
-    if (set > kne->set) goto searchAbove;
-    if (key == kne->key) return putUtf8String(lgd, kne->name);
-
-    if (key < kne->key) {
-    searchBelow:
-      last = current - 1;
-    } else {
-    searchAbove:
-      first = current + 1;
-    }
-  }
-
-  return putCharacter(lgd, WC_C('?'));
+static const KeyNameEntry *const *
+findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
+  return bsearch(value, lgd->keyTable->keyNameTable, lgd->keyTable->keyNameCount, sizeof(*lgd->keyTable->keyNameTable), searchKeyValue);
 }
 
 static int
-putKeyCombination (ListGenerationData *lgd, const KeyCombination *keys) {
+putKeyName (ListGenerationData *lgd, const KeyValue *value) {
+  const KeyNameEntry *const *kne = findKeyNameEntry(lgd, value);
+  return putUtf8String(lgd, (kne? (*kne)->name: "?"));
+}
+
+static int
+putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
   wchar_t delimiter = 0;
 
   {
     unsigned char index;
-    for (index=0; index<keys->modifiers.count; index+=1) {
+    for (index=0; index<combination->modifierCount; index+=1) {
       if (!delimiter) {
         delimiter = WC_C('+');
       } else if (!putCharacter(lgd, delimiter)) {
         return 0;
       }
 
-      if (!putKeyName(lgd, 0, keys->modifiers.keys[index])) return 0;
+      if (!putKeyName(lgd, &combination->modifierKeys[combination->modifierPositions[index]])) return 0;
     }
   }
 
-  if (keys->set || keys->key) {
+  if (combination->flags & KCF_IMMEDIATE_KEY) {
     if (delimiter)
       if (!putCharacter(lgd, delimiter))
         return 0;
 
-    if (!putKeyName(lgd, keys->set, keys->key)) return 0;
+    if (!putKeyName(lgd, &combination->immediateKey)) return 0;
   }
 
   return 1;
@@ -168,16 +161,19 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
     {
       unsigned int key;
 
-      for (key=0; key<KEYS_PER_SET; key+=1) {
+      for (key=0; key<MAX_KEYS_PER_SET; key+=1) {
         KeyboardFunction function = ctx->keyMap[key];
 
         if (function != KBF_None) {
           const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+          const KeyValue value = {
+            .set = 0,
+            .key = key
+          };
 
           if (!putUtf8String(lgd, kbf->name)) return 0;
-          if (!putCharacterString(lgd, WS_C(" key"))) return 0;
-          if (!putCharacterString(lgd, WS_C(": "))) return 0;
-          if (!putKeyName(lgd, 0, key)) return 0;
+          if (!putCharacterString(lgd, WS_C(" key: "))) return 0;
+          if (!putKeyName(lgd, &value)) return 0;
           if (!endLine(lgd)) return 0;
         }
       }
@@ -208,17 +204,17 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
     unsigned int count = ctx->hotkeyCount;
 
     while (count) {
-      if (hotkey->press != BRL_CMD_NOOP) {
-        if (!putCommandDescription(lgd, hotkey->press)) return 0;
+      if (hotkey->pressCommand != BRL_CMD_NOOP) {
+        if (!putCommandDescription(lgd, hotkey->pressCommand)) return 0;
         if (!putCharacterString(lgd, WS_C(": press "))) return 0;
-        if (!putKeyName(lgd, hotkey->set, hotkey->key)) return 0;
+        if (!putKeyName(lgd, &hotkey->keyValue)) return 0;
         if (!endLine(lgd)) return 0;
       }
 
-      if (hotkey->release != BRL_CMD_NOOP) {
-        if (!putCommandDescription(lgd, hotkey->release)) return 0;
+      if (hotkey->releaseCommand != BRL_CMD_NOOP) {
+        if (!putCommandDescription(lgd, hotkey->releaseCommand)) return 0;
         if (!putCharacterString(lgd, WS_C(": release "))) return 0;
-        if (!putKeyName(lgd, hotkey->set, hotkey->key)) return 0;
+        if (!putKeyName(lgd, &hotkey->keyValue)) return 0;
         if (!endLine(lgd)) return 0;
       }
 
@@ -231,7 +227,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
     unsigned int count = ctx->keyBindingCount;
 
     while (count) {
-      if (!binding->hidden) {
+      if (!(binding->flags & KBF_HIDDEN)) {
         size_t keysOffset;
 
         if (!putCommandDescription(lgd, binding->command)) return 0;
@@ -243,7 +239,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
           if (!putCharacterString(lgd, WS_C(", "))) return 0;
         }
 
-        if (!putKeyCombination(lgd, &binding->keys)) return 0;
+        if (!putKeyCombination(lgd, &binding->combination)) return 0;
 
         if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
           const KeyContext *c = getKeyContext(lgd->keyTable, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));

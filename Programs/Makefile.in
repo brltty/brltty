@@ -142,9 +142,6 @@ dataarea.$O:
 datafile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/datafile.c
 
-keysets.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keysets.c
-
 lock.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
 
@@ -267,7 +264,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O cut.$O touch.$O async.$O charset.$O dataarea.$O datafile.$O keysets.$O lock.$O mount.$O queue.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O cut.$O touch.$O async.$O charset.$O dataarea.$O datafile.$O lock.$O mount.$O queue.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -435,7 +432,7 @@ ctb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O keysets.$O datafile.$O queue.$O charset.$O lock.$O cmd.$O brl.$O async.$O drivers.$O driver.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) mount.$O touch.$O ttb_translate.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O queue.$O charset.$O lock.$O cmd.$O brl.$O async.$O drivers.$O driver.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) mount.$O touch.$O ttb_translate.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)

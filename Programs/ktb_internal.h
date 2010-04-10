@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "keysets.h"
+#define MAX_MODIFIERS_PER_COMBINATION 10
 
 typedef enum {
   KBF_Dot1,
@@ -51,29 +51,33 @@ typedef struct {
 
 extern const KeyboardFunctionEntry keyboardFunctionTable[KBF_None];
 
-typedef struct {
-  struct {
-    KeySetMask mask;
-    unsigned char count;
-    unsigned char keys[10];
-  } modifiers;
+typedef enum {
+  KCF_IMMEDIATE_KEY = 0X01
+} KeyCombinationFlag;
 
-  unsigned char set;
-  unsigned char key;
+typedef struct {
+  unsigned char flags;
+  unsigned char modifierCount;
+  unsigned char modifierPositions[MAX_MODIFIERS_PER_COMBINATION];
+  KeyValue modifierKeys[MAX_MODIFIERS_PER_COMBINATION];
+  KeyValue immediateKey;
 } KeyCombination;
 
+typedef enum {
+  KBF_HIDDEN = 0X01,
+  KBF_ADJUST = 0X02
+} KeyBindingFlag;
+
 typedef struct {
-  KeyCombination keys;
   int command;
-  unsigned hidden:1;
+  KeyCombination combination;
+  unsigned char flags;
 } KeyBinding;
 
 typedef struct {
-  unsigned char set;
-  unsigned char key;
-
-  int press;
-  int release;
+  KeyValue keyValue;
+  int pressCommand;
+  int releaseCommand;
 } HotkeyEntry;
 
 typedef struct {
@@ -107,14 +111,26 @@ struct KeyTableStruct {
   unsigned char persistentContext;
   unsigned char currentContext;
 
-  KeySet keys;
+  KeyValue *pressedKeys;
+  unsigned int pressedSize;
+  unsigned int pressedCount;
+
   int command;
   unsigned immediate:1;
-
   unsigned logKeyEvents:1;
 };
 
-extern int compareKeys (unsigned char set1, unsigned char key1, unsigned char set2, unsigned char key2);
+extern int compareKeyValues (const KeyValue *value1, const KeyValue *value2);
+extern int findKeyValue (
+  const KeyValue *values, unsigned int count,
+  const KeyValue *target, unsigned int *position
+);
+extern int insertKeyValue (
+  KeyValue **values, unsigned int *count, unsigned int *size,
+  const KeyValue *value, unsigned int position
+);
+extern void removeKeyValue (KeyValue *values, unsigned int *count, unsigned int position);
+
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
 #ifdef __cplusplus

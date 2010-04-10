@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_KTB_KEYBOARD
 #define BRLTTY_INCLUDED_KTB_KEYBOARD
 
+#include "ktbdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "ktbdefs.h"
 
 typedef enum {
   KBD_KEY_SPECIAL_None = 0,

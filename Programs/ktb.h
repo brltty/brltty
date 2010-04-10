@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_KTB
 #define BRLTTY_INCLUDED_KTB
 
+#include "ktbdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "ktbdefs.h"
 
 extern KeyTable *compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys);
 extern void destroyKeyTable (KeyTable *table);

@@ -35,19 +35,42 @@ searchKeyBinding (const void *target, const void *element) {
 }
 
 static const KeyBinding *
-getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
+findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediate, int *isIncomplete) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->sortedKeyBindings) {
+  if (ctx && ctx->sortedKeyBindings &&
+      (table->pressedCount <= MAX_MODIFIERS_PER_COMBINATION)) {
     KeyBinding target;
+    memset(&target, 0, sizeof(target));
 
-    target.keys.set = set;
-    target.keys.key = key;
-    copyKeySetMask(target.keys.modifiers.mask, table->keys.mask);
+    if (immediate) {
+      target.combination.immediateKey = *immediate;
+      target.combination.flags |= KCF_IMMEDIATE_KEY;
+    }
+
+    target.combination.modifierCount = table->pressedCount;
+    memcpy(target.combination.modifierKeys, table->pressedKeys,
+           target.combination.modifierCount * sizeof(target.combination.modifierKeys[0]));
+
+    {
+      int index;
+
+      for (index=0; index<target.combination.modifierCount; index+=1) {
+        KeyValue *modifier = &target.combination.modifierKeys[index];
+        if (modifier->set) modifier->key = KTB_KEY_MAX;
+      }
+    }
+
+    if (target.combination.flags & KCF_IMMEDIATE_KEY)
+      if (target.combination.immediateKey.set)
+        target.combination.immediateKey.key = KTB_KEY_MAX;
 
     {
       const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
-      if (binding) return *binding;
+      if (binding) {
+        if ((*binding)->command != EOF) return *binding;
+        *isIncomplete = 1;
+      }
     }
   }
 
@@ -55,38 +78,20 @@ getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsign
 }
 
 static int
-isModifiers (KeyTable *table, unsigned char context) {
-  const KeyContext *ctx = getKeyContext(table, context);
-
-  if (ctx) {
-    const KeyBinding *binding = ctx->keyBindingTable;
-    unsigned int count = ctx->keyBindingCount;
-
-    while (count) {
-      if (isKeySetSubmask(binding->keys.modifiers.mask, table->keys.mask)) return 1;
-      binding += 1, count -= 1;
-    }
-  }
-
-  return 0;
-}
-
-static int
 searchHotkeyEntry (const void *target, const void *element) {
   const HotkeyEntry *reference = target;
   const HotkeyEntry *const *hotkey = element;
-  return compareKeys(reference->set, reference->key, (*hotkey)->set, (*hotkey)->key);
+  return compareKeyValues(&reference->keyValue, &(*hotkey)->keyValue);
 }
 
 static const HotkeyEntry *
-getHotkeyEntry (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
+findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValue) {
   const KeyContext *ctx = getKeyContext(table, context);
 
   if (ctx && ctx->sortedHotkeyEntries) {
-    HotkeyEntry target;
-
-    target.set = set;
-    target.key = key;
+    HotkeyEntry target = {
+      .keyValue = *keyValue
+    };
 
     {
       const HotkeyEntry **hotkey = bsearch(&target, ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), searchHotkeyEntry);
@@ -98,7 +103,7 @@ getHotkeyEntry (KeyTable *table, unsigned char context, unsigned char set, unsig
 }
 
 static int
-getKeyboardCommand (KeyTable *table, unsigned char context) {
+makeKeyboardCommand (KeyTable *table, unsigned char context) {
   int chordsRequested = context == BRL_CTX_CHORDS;
   const KeyContext *ctx;
 
@@ -111,11 +116,13 @@ getKeyboardCommand (KeyTable *table, unsigned char context) {
     int spacePressed = 0;
 
     {
-      unsigned int keyIndex;
+      unsigned int pressedIndex;
 
-      for (keyIndex=0; keyIndex<table->keys.count; keyIndex+=1) {
-        KeyboardFunction function = ctx->keyMap[table->keys.keys[keyIndex]];
+      for (pressedIndex=0; pressedIndex<table->pressedCount; pressedIndex+=1) {
+        const KeyValue *keyValue = &table->pressedKeys[pressedIndex];
+        KeyboardFunction function = ctx->keyMap[keyValue->key];
 
+        if (keyValue->set) return EOF;
         if (function == KBF_None) return EOF;
 
         {
@@ -173,8 +180,29 @@ processCommand (KeyTable *table, int command) {
   return enqueueCommand(command);
 }
 
+static int
+findPressedKey (KeyTable *table, const KeyValue *value, unsigned int *position) {
+  return findKeyValue(table->pressedKeys, table->pressedCount, value, position);
+}
+
+static int
+insertPressedKey (KeyTable *table, const KeyValue *value, unsigned int position) {
+  return insertKeyValue(&table->pressedKeys, &table->pressedCount, &table->pressedSize, value, position);
+}
+
+static void
+removePressedKey (KeyTable *table, unsigned int position) {
+  removeKeyValue(table->pressedKeys, &table->pressedCount, position);
+}
+
 KeyTableState
 processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
+  KeyValue keyValue = {
+    .set = set,
+    .key = key
+  };
+  unsigned int keyPosition;
+
   KeyTableState state = KTS_UNBOUND;
   int command = EOF;
   int immediate = 1;
@@ -183,52 +211,35 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   if (context == BRL_CTX_DEFAULT) context = table->currentContext;
   if (press) table->currentContext = table->persistentContext;
 
-  if ((hotkey = getHotkeyEntry(table, context, set, key))) {
-    int cmd = press? hotkey->press: hotkey->release;
+  if ((hotkey = findHotkeyEntry(table, context, &keyValue))) {
+    int cmd = press? hotkey->pressCommand: hotkey->releaseCommand;
     if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
     state = KTS_HOTKEY;
-  } else if (set) {
-    if (press) {
-      const KeyBinding *binding = getKeyBinding(table, context, set, 0);
-
-      if (!binding)
-        if (context != BRL_CTX_DEFAULT)
-          binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, 0);
-
-      if (binding) {
-        command = binding->command + key;
-      } else {
-        command = BRL_CMD_NOOP;
-      }
-
-      table->command = EOF;
-      processCommand(table, command);
-      state = KTS_COMMAND;
-    }
   } else {
-    removeKey(&table->keys, key);
+    if (findPressedKey(table, &keyValue, &keyPosition)) removePressedKey(table, keyPosition);
 
     if (press) {
-      const KeyBinding *binding = getKeyBinding(table, context, 0, key);
-      addKey(&table->keys, key);
+      int isIncomplete = 0;
+      const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
+      insertPressedKey(table, &keyValue, keyPosition);
 
       if (binding) {
         command = binding->command;
-      } else if ((binding = getKeyBinding(table, context, 0, 0))) {
+      } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
         command = binding->command;
         immediate = 0;
-      } else if ((command = getKeyboardCommand(table, context)) != EOF) {
+      } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
         immediate = 0;
       } else if (context == BRL_CTX_DEFAULT) {
         command = EOF;
       } else {
-        removeKey(&table->keys, key);
-        binding = getKeyBinding(table, BRL_CTX_DEFAULT, 0, key);
-        addKey(&table->keys, key);
+        removePressedKey(table, keyPosition);
+        binding = findKeyBinding(table, BRL_CTX_DEFAULT, &keyValue, &isIncomplete);
+        insertPressedKey(table, &keyValue, keyPosition);
 
         if (binding) {
           command = binding->command;
-        } else if ((binding = getKeyBinding(table, BRL_CTX_DEFAULT, 0, 0))) {
+        } else if ((binding = findKeyBinding(table, BRL_CTX_DEFAULT, NULL, &isIncomplete))) {
           command = binding->command;
           immediate = 0;
         } else {
@@ -237,11 +248,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (command == EOF) {
-        if (isModifiers(table, context)) {
-          state = KTS_MODIFIERS;
-        } else if (context != BRL_CTX_DEFAULT) {
-          if (isModifiers(table, BRL_CTX_DEFAULT)) state = KTS_MODIFIERS;
-        }
+        if (isIncomplete) state = KTS_MODIFIERS;
 
         if (table->command != EOF) {
           table->command = EOF;
@@ -250,6 +257,19 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       } else {
         if (command != table->command) {
           table->command = command;
+
+          if (binding->flags & KBF_ADJUST) {
+            int index;
+
+            for (index=0; index<table->pressedCount; index+=1) {
+              const KeyValue *pressed = &table->pressedKeys[index];
+
+              if (pressed->set) {
+                command += pressed->key;
+                break;
+              }
+            }
+          }
 
           if ((table->immediate = immediate)) {
             command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;

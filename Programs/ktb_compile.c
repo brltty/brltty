@@ -58,6 +58,86 @@ typedef struct {
   unsigned hideImposed:1;
 } KeyTableData;
 
+int
+compareKeyValues (const KeyValue *value1, const KeyValue *value2) {
+  if (value1->set < value2->set) return -1;
+  if (value1->set > value2->set) return 1;
+
+  if (value1->key < value2->key) return -1;
+  if (value1->key > value2->key) return 1;
+
+  return 0;
+}
+
+static int
+compareKeyArrays (
+  unsigned int count1, const KeyValue *array1,
+  unsigned int count2, const KeyValue *array2
+) {
+  if (count1 < count2) return -1;
+  if (count1 > count2) return 1;
+  return memcmp(array1, array2, count1*sizeof(*array1));
+}
+
+int
+findKeyValue (
+  const KeyValue *values, unsigned int count,
+  const KeyValue *target, unsigned int *position
+) {
+  int first = 0;
+  int last = count - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const KeyValue *value = &values[current];
+    int relation = compareKeyValues(target, value);
+
+    if (!relation) {
+      *position = current;
+      return 1;
+    }
+
+    if (relation < 0) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+
+  *position = first;
+  return 0;
+}
+
+int
+insertKeyValue (
+  KeyValue **values, unsigned int *count, unsigned int *size,
+  const KeyValue *value, unsigned int position
+) {
+  if (*count == *size) {
+    unsigned int newSize = (*size)? (*size)<<1: 0X10;
+    KeyValue *newValues = realloc(*values, ARRAY_SIZE(newValues, newSize));
+
+    if (!newValues) {
+      LogError("realloc");
+      return 0;
+    }
+
+    *values = newValues;
+    *size = newSize;
+  }
+
+  memmove(&(*values)[position+1], &(*values)[position],
+          ((*count)++ - position) * sizeof(**values));
+  (*values)[position] = *value;
+  return 1;
+}
+
+void
+removeKeyValue (KeyValue *values, unsigned int *count, unsigned int position) {
+  memmove(&values[position], &values[position+1],
+          (--*count - position) * sizeof(*values));
+}
+
 static inline int
 hideBindings (const KeyTableData *ktd) {
   return ktd->hideRequested || ktd->hideImposed;
@@ -190,14 +270,7 @@ static int
 sortKeyValues (const void *element1, const void *element2) {
   const KeyNameEntry *const *kne1 = element1;
   const KeyNameEntry *const *kne2 = element2;
-
-  if ((*kne1)->set < (*kne2)->set) return -1;
-  if ((*kne1)->set > (*kne2)->set) return 1;
-
-  if ((*kne1)->key < (*kne2)->key) return -1;
-  if ((*kne1)->key > (*kne2)->key) return 1;
-
-  return 0;
+  return compareKeyValues(&(*kne1)->value, &(*kne2)->value);
 }
 
 static int
@@ -243,12 +316,11 @@ findKeyName (const wchar_t *characters, int length, KeyTableData *ktd) {
 }
 
 static int
-parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wchar_t *characters, int length, KeyTableData *ktd) {
+parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   const KeyNameEntry **kne = findKeyName(characters, length, ktd);
 
   if (kne) {
-    *set = (*kne)->set;
-    *key = (*kne)->key;
+    *value = (*kne)->value;
     return 1;
   }
 
@@ -257,11 +329,11 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
 }
 
 static int
-getKeyOperand (DataFile *file, unsigned char *set, unsigned char *key, KeyTableData *ktd) {
+getKeyOperand (DataFile *file, KeyValue *value, KeyTableData *ktd) {
   DataString name;
 
   if (getDataString(file, &name, 1, "key name")) {
-    if (parseKeyName(file, set, key, name.characters, name.length, ktd)) {
+    if (parseKeyName(file, value, name.characters, name.length, ktd)) {
       return 1;
     }
   }
@@ -270,34 +342,65 @@ getKeyOperand (DataFile *file, unsigned char *set, unsigned char *key, KeyTableD
 }
 
 static int
-parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t *characters, int length, KeyTableData *ktd) {
-  KeySet modifiers;
-  int immediate;
+newModifierPosition (const KeyCombination *combination, const KeyValue *modifier, unsigned int *position) {
+  return findKeyValue(combination->modifierKeys, combination->modifierCount, modifier, position);
+}
 
-  removeAllKeys(&modifiers);
+static int
+insertModifier (DataFile *file, KeyCombination *combination, unsigned int position, const KeyValue *value) {
+  if (combination->modifierCount == MAX_MODIFIERS_PER_COMBINATION) {
+    reportDataError(file, "too many modifier keys");
+    return 0;
+  }
+
+  {
+    int index = combination->modifierCount;
+
+    while (index--) {
+      if (index >= position) {
+        combination->modifierKeys[index+1] = combination->modifierKeys[index];
+      }
+
+      if (combination->modifierPositions[index] >= position) {
+        combination->modifierPositions[index] += 1;
+      }
+    }
+  }
+
+  combination->modifierKeys[position] = *value;
+  combination->modifierPositions[combination->modifierCount++] = position;
+  return 1;
+}
+
+static int
+parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t *characters, int length, KeyTableData *ktd) {
+  KeyValue value;
+
+  memset(combination, 0, sizeof(*combination));
+  combination->modifierCount = 0;
+
   while (1) {
     const wchar_t *end = wmemchr(characters, WC_C('+'), length);
     if (!end) break;
 
     {
       int count = end - characters;
-      unsigned char set;
-      unsigned char key;
 
       if (!count) {
         reportDataError(file, "missing modifier key");
         return 0;
       }
-      if (!parseKeyName(file, &set, &key, characters, count, ktd)) return 0;
+      if (!parseKeyName(file, &value, characters, count, ktd)) return 0;
 
-      if (set) {
-        reportDataError(file, "unexpected modifier key: %.*" PRIws, count, characters);
-        return 0;
-      }
+      {
+        unsigned int position;
 
-      if (!addKey(&modifiers, key)) {
-        reportDataError(file, "duplicate modifier key: %.*" PRIws, count, characters);
-        return 0;
+        if (newModifierPosition(combination, &value, &position)) {
+          reportDataError(file, "duplicate modifier key: %.*" PRIws, count, characters);
+          return 0;
+        }
+
+        if (!insertModifier(file, combination, position, &value)) return 0;
       }
 
       length -= count + 1;
@@ -305,11 +408,10 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
     }
   }
 
-  immediate = 0;
   if (length) {
     if (*characters == WC_C('!')) {
       characters += 1, length -= 1;
-      immediate = 1;
+      combination->flags |= KCF_IMMEDIATE_KEY;
     }
   }
 
@@ -317,38 +419,32 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
     reportDataError(file, "missing key");
     return 0;
   }
-  if (!parseKeyName(file, &combination->set, &combination->key, characters, length, ktd)) return 0;
+  if (!parseKeyName(file, &value, characters, length, ktd)) return 0;
 
-  if (!combination->set) {
-    if (testKey(&modifiers, combination->key)) {
+  {
+    unsigned int position;
+
+    if (newModifierPosition(combination, &value, &position)) {
       reportDataError(file, "duplicate key: %.*" PRIws, length, characters);
       return 0;
     }
 
-    if (!immediate) {
-      addKey(&modifiers, combination->key);
-      combination->key = 0;
+    if (combination->flags & KCF_IMMEDIATE_KEY) {
+      combination->immediateKey = value;
+    } else if (!insertModifier(file, combination, position, &value)) {
+      return 0;
     }
   }
-
-  if (modifiers.count > ARRAY_COUNT(combination->modifiers.keys)) {
-    reportDataError(file, "too many modifier keys");
-    return 0;
-  }
-
-  copyKeySetMask(combination->modifiers.mask, modifiers.mask);
-  memcpy(combination->modifiers.keys, modifiers.keys,
-         (combination->modifiers.count = modifiers.count));
 
   return 1;
 }
 
 static int
-getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
+getKeysOperand (DataFile *file, KeyCombination *combination, KeyTableData *ktd) {
   DataString names;
 
   if (getDataString(file, &names, 1, "key combination")) {
-    if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
+    if (parseKeyCombination(file, combination, names.characters, names.length, ktd)) return 1;
   }
 
   return 0;
@@ -463,7 +559,7 @@ allocateCommandTable (KeyTableData *ktd) {
   return 0;
 }
 
-static int
+static const CommandEntry *
 parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   int toggleDone = 0;
   int offsetDone = 0;
@@ -479,12 +575,12 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
     if (!name.length) {
       reportDataError(file, "missing command name");
-      return 0;
+      return NULL;
     }
 
     if (!(command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName))) {
       reportDataError(file, "unknown command name: %.*" PRIws, name.length, name.characters);
-      return 0;
+      return NULL;
     }
   }
   *value = (*command)->code;
@@ -494,7 +590,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
     if (!(length -= end - characters + 1)) {
       reportDataError(file, "missing command modifier");
-      return 0;
+      return NULL;
     }
 
     characters = end + 1;
@@ -553,32 +649,27 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     }
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
-    return 0;
+    return NULL;
   }
 
-  return 1;
+  return *command;
 }
 
-static int
+static const CommandEntry *
 getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
   DataString name;
 
   if (getDataString(file, &name, 1, "command name")) {
-    if (parseCommandOperand(file, value, name.characters, name.length, ktd)) return 1;
+    const CommandEntry *cmd;
+
+    if ((cmd = parseCommandOperand(file, value, name.characters, name.length, ktd))) return cmd;
   }
 
-  return 0;
+  return NULL;
 }
 
-static int processKeyTableLine (DataFile *file, void *data);
-
 static int
-processBindOperands (DataFile *file, void *data) {
-  KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
-
-  if (!ctx) return 0;
-
+addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
   if (ctx->keyBindingCount == ctx->keyBindingsSize) {
     unsigned int newSize = ctx->keyBindingsSize? ctx->keyBindingsSize<<1: 0X10;
     KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, newSize));
@@ -592,20 +683,29 @@ processBindOperands (DataFile *file, void *data) {
     ctx->keyBindingsSize = newSize;
   }
 
-  {
-    KeyBinding *binding = &ctx->keyBindingTable[ctx->keyBindingCount];
+  ctx->keyBindingTable[ctx->keyBindingCount++] = *binding;
+  return 1;
+}
 
-    memset(binding, 0, sizeof(*binding));
-    binding->hidden = hideBindings(ktd);
+static int processKeyTableLine (DataFile *file, void *data);
 
-    if (getKeysOperand(file, &binding->keys, ktd)) {
-      if (getCommandOperand(file, &binding->command, ktd)) {
-        if (!binding->keys.set)
-          if (getCommandEntry(binding->command)->isColumn)
-            binding->command |= BRL_MSK_ARG;
+static int
+processBindOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+  KeyBinding binding;
 
-        ctx->keyBindingCount += 1;
-      }
+  if (!ctx) return 0;
+
+  memset(&binding, 0, sizeof(binding));
+  if (hideBindings(ktd)) binding.flags |= KBF_HIDDEN;
+
+  if (getKeysOperand(file, &binding.combination, ktd)) {
+    const CommandEntry *cmd;
+
+    if ((cmd = getCommandOperand(file, &binding.command, ktd))) {
+      if (cmd->isColumn || cmd->isOffset) binding.flags |= KBF_ADJUST;
+      if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }
 
@@ -686,9 +786,9 @@ processHotkeyOperands (DataFile *file, void *data) {
   if (!ctx) return 0;
   memset(&hotkey, 0, sizeof(hotkey));
 
-  if (getKeyOperand(file, &hotkey.set, &hotkey.key, ktd)) {
-    if (getCommandOperand(file, &hotkey.press, ktd)) {
-      if (getCommandOperand(file, &hotkey.release, ktd)) {
+  if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
+    if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
+      if (getCommandOperand(file, &hotkey.releaseCommand, ktd)) {
         unsigned int newCount = ctx->hotkeyCount + 1;
         HotkeyEntry *newTable = realloc(ctx->hotkeyTable, ARRAY_SIZE(newTable, newCount));
 
@@ -744,24 +844,23 @@ processMapOperands (DataFile *file, void *data) {
   if (!ctx) return 0;
 
   {
-    unsigned char set;
-    unsigned char key;
+    KeyValue value;
 
-    if (getKeyOperand(file, &set, &key, ktd)) {
-      if (!set) {
+    if (getKeyOperand(file, &value, ktd)) {
+      if (!value.set) {
         unsigned char function;
 
         if (getKeyboardFunctionOperand(file, &function, ktd)) {
           if (!ctx->keyMap) {
-            if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, KEYS_PER_SET)))) {
+            if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, MAX_KEYS_PER_SET)))) {
               LogError("malloc");
               return 0;
             }
 
-            memset(ctx->keyMap, KBF_None, KEYS_PER_SET);
+            memset(ctx->keyMap, KBF_None, MAX_KEYS_PER_SET);
           }
 
-          ctx->keyMap[key] = function;
+          ctx->keyMap[value.key] = function;
           return 1;
         }
       } else {
@@ -871,27 +970,31 @@ processKeyTableLine (DataFile *file, void *data) {
 void
 resetKeyTable (KeyTable *table) {
   table->currentContext = table->persistentContext = BRL_CTX_DEFAULT;
-  removeAllKeys(&table->keys);
+  table->pressedCount = 0;
   table->command = EOF;
   table->immediate = 0;
 }
 
-int
-compareKeys (unsigned char set1, unsigned char key1, unsigned char set2, unsigned char key2) {
-  if (set1 < set2) return -1;
-  if (set1 > set2) return 1;
+static int
+compareKeyCombinations (const KeyCombination *combination1, const KeyCombination *combination2) {
+  if (combination1->flags & KCF_IMMEDIATE_KEY) {
+    if (combination2->flags & KCF_IMMEDIATE_KEY) {
+      int relation = compareKeyValues(&combination1->immediateKey, &combination2->immediateKey);
+      if (relation) return relation;
+    } else {
+      return -1;
+    }
+  } else if (combination2->flags & KCF_IMMEDIATE_KEY) {
+    return 1;
+  }
 
-  if (key1 < key2) return -1;
-  if (key1 > key2) return 1;
-
-  return 0;
+  return compareKeyArrays(combination1->modifierCount, combination1->modifierKeys,
+                          combination2->modifierCount, combination2->modifierKeys);
 }
 
 int
 compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
-  int result = compareKeys(binding1->keys.set, binding1->keys.key, binding2->keys.set, binding2->keys.key);
-  if (!result) result = compareKeySetMasks(binding1->keys.modifiers.mask, binding2->keys.modifiers.mask);
-  return result;
+  return compareKeyCombinations(&binding1->combination, &binding2->combination);
 }
 
 static int
@@ -901,8 +1004,139 @@ sortKeyBindings (const void *element1, const void *element2) {
   return compareKeyBindings(*binding1, *binding2);
 }
 
+typedef struct {
+  unsigned int *indexTable;
+  unsigned int indexSize;
+  unsigned int indexCount;
+} IncompleteBindingData;
+
+static int
+addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, unsigned int index, IncompleteBindingData *ibd) {
+  int first = 0;
+  int last = ibd->indexCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const KeyCombination *combination = &ctx->keyBindingTable[ibd->indexTable[current]].combination;
+    int relation = compareKeyArrays(count, keys, combination->modifierCount, combination->modifierKeys);
+    if (!relation) return 1;
+
+    if (relation < 0) {
+      last = current - 1;
+    } else {
+      first = current + 1;
+    }
+  }
+
+  if (ibd->indexCount == ibd->indexSize) {
+    unsigned int newSize = ibd->indexSize? ibd->indexSize<<1: 0X40;
+    unsigned int *newTable = realloc(ibd->indexTable, ARRAY_SIZE(newTable, newSize));
+
+    if (!newTable) {
+      LogError("realloc");
+      return 0;
+    }
+
+    ibd->indexTable = newTable;
+    ibd->indexSize = newSize;
+  }
+
+  if (index == ctx->keyBindingCount) {
+    KeyBinding binding = {
+      .flags = KBF_HIDDEN,
+      .command = EOF,
+
+      .combination = {
+        .modifierCount = count
+      }
+    };
+
+    memcpy(binding.combination.modifierKeys, keys,
+           count * sizeof(binding.combination.modifierKeys[0]));
+
+    if (!addKeyBinding(ctx, &binding)) return 0;
+  }
+
+  memmove(&ibd->indexTable[first+1], &ibd->indexTable[first],
+          (ibd->indexCount++ - first) * sizeof(*ibd->indexTable));
+  ibd->indexTable[first] = index;
+  return 1;
+}
+
+static int
+addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count, IncompleteBindingData *ibd) {
+  if (count > 1) {
+    KeyValue values[--count];
+    int index = 0;
+
+    memcpy(values, &keys[1], count*sizeof(values[8]));
+
+    while (1) {
+      if (!addBindingIndex(ctx, values, count, ctx->keyBindingCount, ibd)) return 0;
+      if (!addSubbindingIndexes(ctx, values, count, ibd)) return 0;
+      if (index == count) break;
+      values[index] = keys[index];
+      index += 1;
+    }
+  }
+
+  return 1;
+}
+
+static int
+addIncompleteBindings (KeyContext *ctx) {
+  int ok = 1;
+  IncompleteBindingData ibd = {
+    .indexTable = NULL,
+    .indexSize = 0,
+    .indexCount = 0
+  };
+
+  {
+    int index;
+
+    for (index=0; index<ctx->keyBindingCount; index+=1) {
+      const KeyCombination *combination = &ctx->keyBindingTable[index].combination;
+
+      if (!(combination->flags & KCF_IMMEDIATE_KEY)) {
+        if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, index, &ibd)) {
+          ok = 0;
+          goto done;
+        }
+      }
+    }
+  }
+
+  {
+    int count = ctx->keyBindingCount;
+    int index;
+
+    for (index=0; index<count; index+=1) {
+      const KeyCombination *combination = &ctx->keyBindingTable[index].combination;
+
+      if ((combination->flags & KCF_IMMEDIATE_KEY)) {
+        if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, ctx->keyBindingCount, &ibd)) {
+          ok = 0;
+          goto done;
+        }
+      }
+
+      if (!addSubbindingIndexes(ctx, combination->modifierKeys, combination->modifierCount, &ibd)) {
+        ok = 0;
+        goto done;
+      }
+    }
+  }
+
+done:
+  if (ibd.indexTable) free(ibd.indexTable);
+  return ok;
+}
+
 static int
 prepareKeyBindings (KeyContext *ctx) {
+  if (!addIncompleteBindings(ctx)) return 0;
+
   if (ctx->keyBindingCount < ctx->keyBindingsSize) {
     if (ctx->keyBindingCount) {
       KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
@@ -949,7 +1183,7 @@ sortHotkeyEntries (const void *element1, const void *element2) {
   const HotkeyEntry *const *hotkey1 = element1;
   const HotkeyEntry *const *hotkey2 = element2;
 
-  return compareKeys((*hotkey1)->set, (*hotkey1)->key, (*hotkey2)->set, (*hotkey2)->key);
+  return compareKeyValues(&(*hotkey1)->keyValue, &(*hotkey2)->keyValue);
 }
 
 static int
@@ -1006,12 +1240,19 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
   if ((ktd.table = malloc(sizeof(*ktd.table)))) {
     ktd.table->title = NULL;
+
     ktd.table->noteTable = NULL;
     ktd.table->noteCount = 0;
+
     ktd.table->keyNameTable = NULL;
     ktd.table->keyNameCount = 0;
+
     ktd.table->keyContextTable = NULL;
     ktd.table->keyContextCount = 0;
+
+    ktd.table->pressedKeys = NULL;
+    ktd.table->pressedSize = 0;
+    ktd.table->pressedCount = 0;
 
     if (allocateKeyNameTable(&ktd, keys)) {
       if (allocateCommandTable(&ktd)) {
@@ -1055,6 +1296,7 @@ destroyKeyTable (KeyTable *table) {
   if (table->keyContextTable) free(table->keyContextTable);
   if (table->keyNameTable) free(table->keyNameTable);
   if (table->title) free(table->title);
+  if (table->pressedKeys) free(table->pressedKeys);
   free(table);
 }
 
