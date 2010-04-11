@@ -221,7 +221,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     if (press) {
       int isIncomplete = 0;
       const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
-      insertPressedKey(table, &keyValue, keyPosition);
+      int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
       if (binding) {
         command = binding->command;
@@ -232,10 +232,12 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         immediate = 0;
       } else if (context == BRL_CTX_DEFAULT) {
         command = EOF;
+      } else if (!inserted) {
+        command = EOF;
       } else {
         removePressedKey(table, keyPosition);
         binding = findKeyBinding(table, BRL_CTX_DEFAULT, &keyValue, &isIncomplete);
-        insertPressedKey(table, &keyValue, keyPosition);
+        inserted = insertPressedKey(table, &keyValue, keyPosition);
 
         if (binding) {
           command = binding->command;
@@ -259,7 +261,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
           table->command = command;
 
           if (binding) {
-            if (binding->flags & KBF_ADJUST) {
+            if (binding->flags & (KBF_COLUMN | KBF_OFFSET)) {
               int index;
 
               for (index=0; index<table->pressedCount; index+=1) {
@@ -270,6 +272,10 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
                   break;
                 }
               }
+
+              if (index == table->pressedCount)
+                if (binding->flags & KBF_COLUMN)
+                  command |= BRL_MSK_ARG;
             }
           }
 

@@ -65,7 +65,8 @@ typedef struct {
 
 typedef enum {
   KBF_HIDDEN = 0X01,
-  KBF_ADJUST = 0X02
+  KBF_COLUMN = 0X02,
+  KBF_OFFSET = 0X04
 } KeyBindingFlag;
 
 typedef struct {
