@@ -258,8 +258,6 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         }
       } else {
         if (command != table->command) {
-          table->command = command;
-
           if (binding) {
             if (binding->flags & (KBF_COLUMN | KBF_OFFSET)) {
               int index;
@@ -278,6 +276,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
                   command |= BRL_MSK_ARG;
             }
           }
+
+          table->command = command;
 
           if ((table->immediate = immediate)) {
             command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
