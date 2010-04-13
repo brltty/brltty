@@ -93,7 +93,7 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
 }
 
 static int
-searchKeyValue (const void *target, const void *element) {
+searchKeyNameEntry (const void *target, const void *element) {
   const KeyValue *value = target;
   const KeyNameEntry *const *kne = element;
   return compareKeyValues(value, &(*kne)->value);
@@ -101,7 +101,7 @@ searchKeyValue (const void *target, const void *element) {
 
 static const KeyNameEntry *const *
 findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
-  return bsearch(value, lgd->keyTable->keyNameTable, lgd->keyTable->keyNameCount, sizeof(*lgd->keyTable->keyNameTable), searchKeyValue);
+  return bsearch(value, lgd->keyTable->keyNameTable, lgd->keyTable->keyNameCount, sizeof(*lgd->keyTable->keyNameTable), searchKeyNameEntry);
 }
 
 static int

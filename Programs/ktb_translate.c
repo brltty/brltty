@@ -49,21 +49,20 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
     }
 
     target.combination.modifierCount = table->pressedCount;
-    memcpy(target.combination.modifierKeys, table->pressedKeys,
-           target.combination.modifierCount * sizeof(target.combination.modifierKeys[0]));
+    copyKeyValues(target.combination.modifierKeys, table->pressedKeys, target.combination.modifierCount);
 
     {
       int index;
 
       for (index=0; index<target.combination.modifierCount; index+=1) {
         KeyValue *modifier = &target.combination.modifierKeys[index];
-        if (modifier->set) modifier->key = KTB_KEY_MAX;
+        if (modifier->set) modifier->key = KTB_KEY_ANY;
       }
     }
 
     if (target.combination.flags & KCF_IMMEDIATE_KEY)
       if (target.combination.immediateKey.set)
-        target.combination.immediateKey.key = KTB_KEY_MAX;
+        target.combination.immediateKey.key = KTB_KEY_ANY;
 
     {
       const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
@@ -195,6 +194,21 @@ removePressedKey (KeyTable *table, unsigned int position) {
   removeKeyValue(table->pressedKeys, &table->pressedCount, position);
 }
 
+static inline void
+deleteExplicitKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
+  if (value->key != KTB_KEY_ANY) deleteKeyValue(values, count, value);
+}
+
+static int
+sortKeyOffsets (const void *element1, const void *element2) {
+  const KeyValue *value1 = element1;
+  const KeyValue *value2 = element2;
+
+  if (value1->key < value2->key) return -1;
+  if (value1->key > value2->key) return 1;
+  return 0;
+}
+
 KeyTableState
 processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
   KeyValue keyValue = {
@@ -260,20 +274,32 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         if (command != table->command) {
           if (binding) {
             if (binding->flags & (KBF_COLUMN | KBF_OFFSET)) {
-              int index;
+              unsigned int keyCount = table->pressedCount;
+              KeyValue keyValues[keyCount];
+              copyKeyValues(keyValues, table->pressedKeys, keyCount);
 
-              for (index=0; index<table->pressedCount; index+=1) {
-                const KeyValue *pressed = &table->pressedKeys[index];
+              {
+                int index;
 
-                if (pressed->set) {
-                  command += pressed->key;
-                  break;
+                for (index=0; index<binding->combination.modifierCount; index+=1) {
+                  deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
                 }
               }
 
-              if (index == table->pressedCount)
-                if (binding->flags & KBF_COLUMN)
-                  command |= BRL_MSK_ARG;
+              if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
+                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
+              }
+
+              if (keyCount > 0) {
+                if (keyCount > 1) {
+                  qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
+                  command |= BRL_EXT(keyValues[1].key);
+                }
+
+                command += keyValues[0].key;
+              } else if (binding->flags & KBF_COLUMN) {
+                command |= BRL_MSK_ARG;
+              }
             }
           }
 

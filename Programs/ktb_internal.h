@@ -121,7 +121,9 @@ struct KeyTableStruct {
   unsigned logKeyEvents:1;
 };
 
+extern void copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count);
 extern int compareKeyValues (const KeyValue *value1, const KeyValue *value2);
+
 extern int findKeyValue (
   const KeyValue *values, unsigned int count,
   const KeyValue *target, unsigned int *position
@@ -131,6 +133,7 @@ extern int insertKeyValue (
   const KeyValue *value, unsigned int position
 );
 extern void removeKeyValue (KeyValue *values, unsigned int *count, unsigned int position);
+extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value);
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 

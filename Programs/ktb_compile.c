@@ -58,6 +58,11 @@ typedef struct {
   unsigned hideImposed:1;
 } KeyTableData;
 
+void
+copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count) {
+  memcpy(target, source, count*sizeof(*target));
+}
+
 int
 compareKeyValues (const KeyValue *value1, const KeyValue *value2) {
   if (value1->set < value2->set) return -1;
@@ -136,6 +141,15 @@ void
 removeKeyValue (KeyValue *values, unsigned int *count, unsigned int position) {
   memmove(&values[position], &values[position+1],
           (--*count - position) * sizeof(*values));
+}
+
+int
+deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
+  unsigned int position;
+  int found = findKeyValue(values, *count, value, &position);
+
+  if (found) removeKeyValue(values, count, position);
+  return found;
 }
 
 static inline int
@@ -343,7 +357,8 @@ getKeyOperand (DataFile *file, KeyValue *value, KeyTableData *ktd) {
 
 static int
 newModifierPosition (const KeyCombination *combination, const KeyValue *modifier, unsigned int *position) {
-  return findKeyValue(combination->modifierKeys, combination->modifierCount, modifier, position);
+  int found = findKeyValue(combination->modifierKeys, combination->modifierCount, modifier, position);
+  return found && (modifier->key != KTB_KEY_ANY);
 }
 
 static int
@@ -1052,8 +1067,7 @@ addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, uns
       }
     };
 
-    memcpy(binding.combination.modifierKeys, keys,
-           count * sizeof(binding.combination.modifierKeys[0]));
+    copyKeyValues(binding.combination.modifierKeys, keys, count);
 
     if (!addKeyBinding(ctx, &binding)) return 0;
   }
@@ -1070,7 +1084,7 @@ addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count
     KeyValue values[--count];
     int index = 0;
 
-    memcpy(values, &keys[1], count*sizeof(values[8]));
+    copyKeyValues(values, &keys[1], count);
 
     while (1) {
       if (!addBindingIndex(ctx, values, count, ctx->keyBindingCount, ibd)) return 0;

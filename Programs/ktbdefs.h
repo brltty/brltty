@@ -23,8 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define KTB_KEY_MAX 0XFF
-#define MAX_KEYS_PER_SET (KTB_KEY_MAX + 1)
+#define MAX_KEYS_PER_SET 0X100
+#define KTB_KEY_ANY 0XFF
 
 typedef struct {
   unsigned char set;
@@ -39,7 +39,7 @@ typedef struct {
 #define KEY_NAME_TABLE(name) keyNameTable_##name
 #define KEY_NAME_TABLE_DECLARATION(name) const KeyNameEntry KEY_NAME_TABLE(name)[]
 #define KEY_NAME_ENTRY(keyNumber,keyName) {.value.key=keyNumber, .name=keyName}
-#define KEY_SET_ENTRY(setNumber,keyName) {.value={.set=setNumber, .key=KTB_KEY_MAX}, .name=keyName}
+#define KEY_SET_ENTRY(setNumber,keyName) {.value={.set=setNumber, .key=KTB_KEY_ANY}, .name=keyName}
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
 #define BEGIN_KEY_NAME_TABLE(name) static KEY_NAME_TABLE_DECLARATION(name) = {
 #define END_KEY_NAME_TABLE LAST_KEY_NAME_ENTRY};
