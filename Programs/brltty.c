@@ -2026,6 +2026,7 @@ doCommand:
       default: {
         int blk = command & BRL_MSK_BLK;
         int arg = command & BRL_MSK_ARG;
+        int ext = BRL_CODE_GET(EXT, command);
         int flags = command & BRL_MSK_FLG;
 
         switch (blk) {
@@ -2156,6 +2157,7 @@ doCommand:
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
               if (cutRectangle(column, row))
                 break;
+
             playTune(&tune_command_rejected);
             break;
           }
@@ -2166,6 +2168,25 @@ doCommand:
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
               if (cutLine(column, row))
                 break;
+
+            playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_CUTCHARS: {
+            if (ext > arg) {
+              int column1, row1;
+
+              if (getCharacterCoordinates(arg, &column1, &row1, 0, 0)) {
+                int column2, row2;
+
+                if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
+                  cutBegin(column1, row1);
+                  if (cutLine(column2, row2)) break;
+                }
+              }
+            }
+
             playTune(&tune_command_rejected);
             break;
           }

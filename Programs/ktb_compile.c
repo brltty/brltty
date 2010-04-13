@@ -719,8 +719,10 @@ processBindOperands (DataFile *file, void *data) {
     const CommandEntry *cmd;
 
     if ((cmd = getCommandOperand(file, &binding.command, ktd))) {
-      if (cmd->isColumn) binding.flags |= KBF_COLUMN;
       if (cmd->isOffset) binding.flags |= KBF_OFFSET;
+      if (cmd->isColumn) binding.flags |= KBF_COLUMN;
+      if (cmd->isRow) binding.flags |= KBF_ROW;
+      if (cmd->isRange) binding.flags |= KBF_RANGE;
       if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }

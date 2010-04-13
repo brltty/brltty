@@ -118,7 +118,9 @@ getCommandEntry (int code) {
 void
 describeCommand (int command, char *buffer, size_t size, int details) {
   int blk = command & BRL_MSK_BLK;
-  uint16_t arg = BRL_ARG_GET(command);
+  unsigned int arg = BRL_ARG_GET(command);
+  unsigned int arg1 = BRL_CODE_GET(ARG, command);
+  unsigned int arg2 = BRL_CODE_GET(EXT, command);
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
@@ -184,6 +186,8 @@ describeCommand (int command, char *buffer, size_t size, int details) {
       if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         snprintf(buffer, size, " #%u",
                  arg - (cmd->code & BRL_MSK_ARG) + 1);
+      } else if (cmd->isRange) {
+        snprintf(buffer, size, " #%u-%u", arg1, arg2);
       } else if (blk) {
         switch (blk) {
           case BRL_BLK_PASSKEY:

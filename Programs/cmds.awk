@@ -31,6 +31,8 @@ function writeCommandEntry(name, symbol, help) {
       }
     } else if (help ~ / character$/) {
       print "  .isColumn = 1,"
+    } else if (help ~ / characters$/) {
+      print "  .isRange = 1,"
     } else if (help ~ / line$/) {
       print "  .isRow = 1,"
     } else {

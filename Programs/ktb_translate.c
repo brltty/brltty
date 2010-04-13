@@ -273,7 +273,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       } else {
         if (command != table->command) {
           if (binding) {
-            if (binding->flags & (KBF_COLUMN | KBF_OFFSET)) {
+            if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE)) {
               unsigned int keyCount = table->pressedCount;
               KeyValue keyValues[keyCount];
               copyKeyValues(keyValues, table->pressedKeys, keyCount);

@@ -216,6 +216,7 @@ typedef enum {
 
 #define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to nearest line with different character */
 #define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to nearest line with different character */
+#define BRL_BLK_CUTCHARS  0X1000 /* start new cut buffer with characters */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* input keyboard key */

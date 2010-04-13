@@ -36,6 +36,7 @@ typedef struct {
   unsigned isColumn:1;
   unsigned isRow:1;
   unsigned isOffset:1;
+  unsigned isRange:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
