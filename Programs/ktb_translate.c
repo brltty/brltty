@@ -293,7 +293,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
               if (keyCount > 0) {
                 if (keyCount > 1) {
                   qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-                  command |= BRL_EXT(keyValues[1].key);
+                  if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
                 }
 
                 command += keyValues[0].key;
