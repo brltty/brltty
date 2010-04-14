@@ -23,7 +23,7 @@ bind Right FWINRT
 include brl-ht-rockers.kti
 
 bind RoutingKey ROUTE
-bind RoutingKey+!RoutingKey CUTCHARS
+bind RoutingKey+!RoutingKey COPYCHARS
 
 bind Left+RoutingKey PRINDENT
 bind Right+RoutingKey NXINDENT

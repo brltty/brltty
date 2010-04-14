@@ -24,7 +24,7 @@ bind Display1+RoutingKey CUTBEGIN
 bind Display2+RoutingKey CUTAPPEND
 bind Display4+RoutingKey CUTLINE
 bind Display5+RoutingKey CUTRECT
-bind RoutingKey+!RoutingKey CUTCHARS
+bind RoutingKey+!RoutingKey COPYCHARS
 
 bind Display3+RoutingKey DESCCHAR
 bind Display6+RoutingKey SETLEFT

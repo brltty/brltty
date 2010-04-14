@@ -2337,6 +2337,16 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     associated with the routing key,
     and append the linear region to the cut buffer
     (see <ref id="cut" name="Cut and Paste"> for full details).
+  <tag>COPYCHARS<label id="command-COPYCHARS"></tag>
+    Copy the character block
+    anchored by the two routing keys
+    to the cut buffer
+    (see <ref id="cut" name="Cut and Paste"> for full details).
+  <tag>APNDCHARS<label id="command-APNDCHARS"></tag>
+    Append the character block
+    anchored by the two routing keys
+    to the cut buffer
+    (see <ref id="cut" name="Cut and Paste"> for full details).
   <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
     Go up/down to the nearest line which isn't indented
     more than the column associated with the routing key.

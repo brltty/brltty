@@ -2173,7 +2173,18 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CUTCHARS: {
+          {
+            void (*start) (int column, int row);
+
+          case BRL_BLK_COPYCHARS:
+            start = cutBegin;
+            goto doCopy;
+
+          case BRL_BLK_APNDCHARS:
+            start = cutAppend;
+            goto doCopy;
+
+          doCopy:
             if (ext > arg) {
               int column1, row1;
 
@@ -2181,7 +2192,7 @@ doCommand:
                 int column2, row2;
 
                 if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
-                  cutBegin(column1, row1);
+                  start(column1, row1);
                   if (cutLine(column2, row2)) break;
                 }
               }
