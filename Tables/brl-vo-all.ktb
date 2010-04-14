@@ -73,10 +73,7 @@ bind Thumb2+RoutingKey CUTAPPEND
 bind Thumb3+RoutingKey CUTLINE
 bind Thumb4+RoutingKey CUTRECT
 bind RoutingKey+!RoutingKey CUTCHARS
-
-bind Dot1+Dot2+Dot3+Dot4 PASTE
 bind Thumb2+Dot1+Dot2+Dot3+Dot4 PASTE
-bind Thumb3+Dot1+Dot2+Dot3+Dot4 PASTE
 
 bind Left+Thumb1 LNBEG
 bind Left+Thumb4 LNEND
