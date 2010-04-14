@@ -22,6 +22,8 @@ bind Left FWINLT
 bind Right FWINRT
 
 bind RoutingKey ROUTE
+bind RoutingKey+!RoutingKey CUTCHARS
+
 bind Left+RoutingKey PRINDENT
 bind Right+RoutingKey NXINDENT
 
