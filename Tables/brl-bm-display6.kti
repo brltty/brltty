@@ -73,7 +73,6 @@ bind Display1+Display2+Display3+Display4 PASTE
 bind Display1+Display2+Display3+Display5 PREFLOAD
 bind Display2+Display3+Display4 RESTARTSPEECH
 bind Display2+Display3+Display4+Display5 ATTRVIS
-bind Display1+Display3+Display6 BACK
 bind Display2+Display4+Display5+Display6 PREFSAVE
 
 bind Display2+Display3+Display5 SIXDOTS+on
