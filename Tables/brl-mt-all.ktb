@@ -75,7 +75,6 @@ bind LeftRear+LeftMiddle+LeftFront+RightRear PASTE
 bind LeftRear+LeftMiddle+LeftFront+RightMiddle PREFLOAD
 bind LeftMiddle+LeftFront+RightRear RESTARTSPEECH
 bind LeftMiddle+LeftFront+RightRear+RightMiddle ATTRVIS
-bind LeftRear+LeftFront+RightFront BACK
 bind LeftMiddle+RightRear+RightMiddle+RightFront PREFSAVE
 
 bind LeftMiddle+LeftFront+RightMiddle SIXDOTS+on
