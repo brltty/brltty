@@ -358,6 +358,10 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, vo
   while (*knt) {
     const KeyNameEntry *kne = *knt;
 
+    if (knt != keys)
+      if (!handleLine(WS_C(""), data))
+        return 0;
+
     while (kne->name) {
       const char *string = kne->name;
       size_t size = strlen(string) + 1;
@@ -372,7 +376,6 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, vo
       kne += 1;
     }
 
-    if (!handleLine(WS_C(""), data)) return 0;
     knt += 1;
   }
 
