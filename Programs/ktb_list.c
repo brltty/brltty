@@ -350,3 +350,31 @@ listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *data) {
   if (lgd.lineCharacters) free(lgd.lineCharacters);
   return result;
 }
+
+int
+listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, void *data) {
+  const KeyNameEntry *const *knt = keys;
+
+  while (*knt) {
+    const KeyNameEntry *kne = *knt;
+
+    while (kne->name) {
+      const char *string = kne->name;
+      size_t size = strlen(string) + 1;
+      wchar_t characters[size];
+
+      {
+        wchar_t *character = characters;
+        convertStringToWchars(&string, &character, size);
+      }
+
+      if (!handleLine(characters, data)) return 0;
+      kne += 1;
+    }
+
+    if (!handleLine(WS_C(""), data)) return 0;
+    knt += 1;
+  }
+
+  return 1;
+}

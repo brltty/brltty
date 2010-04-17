@@ -30,6 +30,7 @@ extern void destroyKeyTable (KeyTable *table);
 
 typedef int KeyTableListHandler (const wchar_t *line, void *data);
 extern int listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *data);
+extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, void *data);
 
 extern char *ensureKeyTableExtension (const char *path);
 

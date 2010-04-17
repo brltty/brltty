@@ -33,9 +33,17 @@
 
 static char *opt_libraryDirectory;
 static char *opt_tablesDirectory;
+static int opt_listKeyNames;
 static int opt_listKeyTable;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'k',
+    .word = "keys",
+    .flags = OPT_Config | OPT_Environ,
+    .setting.flag = &opt_listKeyNames,
+    .description = strtext("List key names on standard output.")
+  },
+
   { .letter = 'l',
     .word = "list",
     .flags = OPT_Config | OPT_Environ,
@@ -63,7 +71,7 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-listKeyTableLine (const wchar_t *line, void *data) {
+listLine (const wchar_t *line, void *data) {
   FILE *stream = stdout;
 
   fprintf(stream, "%" PRIws "\n", line);
@@ -158,7 +166,7 @@ getKeyNameTables (const char *keyTableName) {
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  int status = 0;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -196,26 +204,30 @@ main (int argc, char *argv[]) {
       }
 
       if (keyNameTables) {
-        char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
+        if (opt_listKeyNames)
+          if (!listKeyNames(keyNameTables, listLine, NULL))
+            status = 5;
 
-        if (keyTablePath) {
-          KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
+        if (!status) {
+          char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
 
-          if (keyTable) {
-            status = 0;
+          if (keyTablePath) {
+            KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
 
-            if (opt_listKeyTable)
-              if (!listKeyTable(keyTable, listKeyTableLine, NULL))
-                status = 5;
+            if (keyTable) {
+              if (opt_listKeyTable)
+                if (!listKeyTable(keyTable, listLine, NULL))
+                  status = 5;
 
-            destroyKeyTable(keyTable);
+              destroyKeyTable(keyTable);
+            } else {
+              status = 4;
+            }
+
+            free(keyTablePath);
           } else {
-            status = 4;
+            status = 10;
           }
-
-          free(keyTablePath);
-        } else {
-          status = 10;
         }
       } else {
         status = 3;
