@@ -10,14 +10,14 @@ BRLTTY supporte les pilotes d'écran suivants:
     Ce pilote fournit un accès direct à l'écran d'une console Linux
     Il n'est  sélectionnable et par défaut oque sur les systèmes Linux.
   <tag/sc/
-    Ce pilote fournit un accès direct au programme <tt/screen/
+    Ce pilote fournit un accès direct au programme <tt/screen/.
     Vous pouvez le sélectionner sur tous les systèmes, et il l'est par défaut
     si aucun pilote d'écran d'origine n'est disponible. Vous devez appliquer le
-    patch pour <tt/screen/ que nous fournissons (voir le sous-répertoire
+    correctif de <tt/screen/ que nous fournissons (voir le sous-répertoire
     <tt/Patches/ ). Du fait que screen doit être exécuté simultanément,
-    l'utilisation de ce pilote rend BRLTJó opérationnel uniquement après que
+    l'utilisation de ce pilote rend BRLTTY opérationnel uniquement après que
     l'utilisateur s'est identifié.
   <tag/wn/
     Ce pilote fournit un accès direct à l'écran d'une console Windows.
-    Il n'est  sélectionnable et par défaut oque sur les systèmes Windows/Cygwin.
+    Il n'est  sélectionnable et par défaut que sur les systèmes Windows/Cygwin.
 </descrip>

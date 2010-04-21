@@ -308,7 +308,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
     cette commande pour revenir à l'écran.
   <tag>LEARN<label id="command-LEARN"></tag>
     Entre dans le mode d'apprentissage de commande (voir la section <ref id="learn"
-    name="Mode Appresntissage Commande"> pour des détails complets). C'est ainsi
+    name="Mode Apprentissage Commandes"> pour des détails complets). C'est ainsi
     que vous pouvez apprendre de façon interactive ce que font les
     touches de votre afficheur braille. Rappelez cette commande pour
     revenir à l'écran. Cette commande n'est pas disponible si l'option
@@ -356,7 +356,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
   <tag>SPKHOME<label id="command-SPKHOME"></tag>
     Va où se trouve le curseur parlant.
   <tag>SAY_SLOWER/SAY_FASTER<label id="command-SAY_SLOWER-SAY_FASTER"></tag>
-    Diminue/accélère le débit de parole (voir aussi la péférence <ref id="preference-speech-rate" name="Débit de parole">).
+    Diminue/accélère le débit de parole (voir aussi la préférence <ref id="preference-speech-rate" name="Débit de parole">).
     Cette commande n'est disponible que si un pilote qui la supporte est utilisé.
   <tag>SAY_SOFTER/SAY_LOUDER<label id="command-SAY_SOFTER-SAY_LOUDER"></tag>
     Diminue/augmente le volume de la parole (voir aussi la préférence <ref id="preference-speech-volume" name="Volume de la parole">).
@@ -417,6 +417,14 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Fixe la fin du bloc coupé au caractère associé à la touche de
     direction, et place la partie linéaire sur le bloc coupé (voir
     <ref id="cut" name="Cut and Paste"> pour des détails complets).
+  <tag>COPYCHARS<label id="command-COPYCHARS"></tag>
+    Copie le bloc de caractères ancré par les deux touches de routine
+    dans le presse-papier 
+    (voir <ref id="cut" name="Copier et coller"> pour tous les détails).
+  <tag>APNDCHARS<label id="command-APNDCHARS"></tag>
+    Insère le bloc de caractères ancrés par les deux touches de routine
+    dans le presse-papier
+    (voir <ref id="cut" name="Copier et coller"> pour tous les détails).
   <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
     Monte/descend à la ligne la plus proche qui n'est pas indentée plus
     que la colonne associée à la routine.
@@ -582,7 +590,7 @@ Les lignes de commande suivantes sont reconnues:
     compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
   <tag><tt>screen-parameters</tt> <em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="configure-screen-parameters"></tag>
     Spécifie les paramètres pour le pilote d'écran.
-    Si le même paramètre est spéciié plus d'une fois, sa valeur la
+    Si le même paramètre est spécifié plus d'une fois, sa valeur la
     plus à droite est utilisée. Pour une description des paramètres
     acceptés par un pilote en particulier, voyez la documentation de
     ce pilote. Voir l'option de compilation <ref id="build-screen-parameters" name="--with-screen-parameters">
@@ -620,7 +628,7 @@ Les lignes de commande suivantes sont reconnues:
 
   <tag><tt>speech-driver</tt> <em>driver</em><tt>,</tt>...|<tt>auto</tt><label id="configure-speech-driver"></tag>
     Spécifie le pilote de synthèse vocales (voir la section 
-    <ref id="operand-driver" name="Spécification du pilote de synthèse">). Pah
+    <ref id="operand-driver" name="Spécification du pilote de synthèse">). Par
     défaut, uneautodétection est effectuée.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-speech-driver" name="-s">.
@@ -757,7 +765,7 @@ suivantes:
     compilation <ref id="build-midi-support" name="--disable-midi-support">.
   <tag><tt>-n</tt> <tt>--no-daemon</tt><label id="options-no-daemon"></tag>
     Indique à BRLTTY qu'il doit rester au premier plan.
-    Si cette option n'est pas spéciiée, BRLTTY devient un processus en
+    Si cette option n'est pas spécifiée, BRLTTY devient un processus en
     arrière-plan (démon) après s'être initialisé mais avant de démarrer tous
     les pilotes sélectionnés.
   <tag><tt>-p</tt><em>périphérique</em> <tt>--pcm-device=</tt><em>device</em><label id="options-pcm-device"></tag>

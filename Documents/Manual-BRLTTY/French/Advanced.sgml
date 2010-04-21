@@ -86,7 +86,7 @@ compilation <ref id="build-standalone-programs" name="--enable-standalone-progra
 Cela supprime toutes les dépendances des bibliothèques partagées, mais
 malheureusement, crée aussi un exécutable plus gros.
 Il y a un certain nombre d'options de compilation que vous pouvez utiliser
-pour supprimer de façon sélective les possibilitéés de BRLTTY dont vous n'avez pas
+pour supprimer de façon sélective les possibilités de BRLTTY dont vous n'avez pas
 besoin de façon à atténuer ce problème (voir la section
 <ref id="build-features" name="possibilitéés de la compilation">).
 

@@ -15,14 +15,14 @@ Si vous ne spécifiez que le mot <tt>auto</tt>, l'autodétection s'effectue
 en n'utilisant que les pilotes connus pour leur fiabilité dans le but
 recherché.
 
-<sect1>Spécificationn du périphérique braille<label id="operand-braille-device"><p>
+<sect1>Spécification du périphérique braille<label id="operand-braille-device"><p>
 La forme générale de la spécification d'un périphérique braille (voir l'option
 <ref id="options-braille-device" name="-d"> en ligne de commande, la ligne
 <ref id="configure-braille-device" name="braille-device"> du fichier de
 configuration, et l'option de compilation
 <ref id="build-braille-device" name="--with-braille-device">) est
-<tt>qualifiée:</tt><em>data</em>.
-Par compatibilité entre d'anciennes versions et les plus récentes, si vous ommetez
+<tt>qualifiée:</tt><em>donnée</em>.
+Par compatibilité entre d'anciennes versions et les plus récentes, si vous ommettez
 le qualificateur c'est <tt>série:</tt> qui est utilisé.
 
 Les types de périphérique suivants sont supportés:
@@ -66,7 +66,7 @@ Dans ce cas, il est en général préférable de lister d'abord le port USB, comme
 par exemple <tt>usb:,série:/dev/ttyS0</tt>, étant donné que l'ancien à
 tendance à être mieux détecté que le plus récent.
 
-<sect1>Spécificationn d'un périphérique PCM<label id="operand-pcm-device"><p>
+<sect1>Spécification d'un périphérique PCM<label id="operand-pcm-device"><p>
 Dans la plupart des cas, le périphériqve PCM est le chemin complet vers un
 périphérique du système approprié. Les exceptions sont:
 <descrip>

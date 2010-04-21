@@ -454,7 +454,7 @@ Ils n'ont pas d'effet direct sur la traduction de caractère.
   <tag><tt>include</tt> <em>path</em><label id="contraction-opcode-include"></tag>
     Inclut le contenu d'un autre fichier.
     L'inclusion peut se faire à n'importe quel niveau.
-    Les chemins relatifs sont déterminés par rapport au répertoire du fichier incluS.
+    Les chemins relatifs sont déterminés par rapport au répertoire du fichier inclu.
   <tag><tt>locale</tt> <em>locale</em><label id="contraction-opcode-locale"></tag>
     Définit la locale pour l'interprétation d'un caractère (minuscule,
     majuscule, numérique, etc). La locale peut être définie comme:
@@ -490,7 +490,7 @@ le texte braille afin de le rendre plus clair.
   <tag><tt>letsign</tt> <em>points</em><label id="contraction-opcode-letsign"></tag>
     Le symbole qui désigne une lettre ne faisant pas partie du mot.
   
-  
+  <tag><tt/numsign/ <em/points/<label id="contraction-opcode-numsign"></tag>  
     Le symbole marquant le début d'un nombre.
   <tag><tt>lastlargesign</tt> <em>points</em><label id="contraction-opcode-numsign"></tag>
     Traduit les caractères quelque soit l'endroit où ils apparaissent.

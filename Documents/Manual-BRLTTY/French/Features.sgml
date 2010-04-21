@@ -295,7 +295,7 @@ peuvent être aussi utilisées.
   <tag><tt>FH</tt>/<tt>FB</tt>, <tt>LIGNPRECEDENTE</tt>/<tt>LNSUIV</tt>, <tt>CURSEUR_HAUT</tt>/<tt>CURSEUR_BAS</tt></tag>
     Va à l'item précédent/suivant du menu (comme
     <ref id="command-MENU_PREV_ITEM-MENU_NEXT_ITEM" name="MENU_PREV_ITEM/MENU_NEXT_ITEM">).
-  <tag><tt>FENETREPRECEDENTE</tt>/<tt>FENSUIV</tt>, <tt>CARGAUCH</tt>/<tt>CADROITE</tt>, <tt>CURSEUR_GAUCHE</tt>/<tt>CURSEUR_DROITE</tt>, <tt>DEBUT</tt>/<tt>HOME</tt></tag>
+  <tag><tt>FENETRE_PRECEDENTE</tt>/<tt>FENSUIV</tt>, <tt>CARGAUCH</tt>/<tt>CADROITE</tt>, <tt>CURSEUR_GAUCHE</tt>/<tt>CURSEUR_DROITE</tt>, <tt>DEBUT</tt>/<tt>HOME</tt></tag>
     Déroule ou "enroule" la valeur de l'item courant dans le menu (comme
     <ref id="command-MENU_PREV_SETTING-MENU_NEXT_SETTING" name="MENU_PREV_SETTING/MENU_NEXT_SETTING">).
 </descrip>
@@ -488,7 +488,7 @@ Remarques:
     <ref id="command-CSRVIS" name="CSRVIS">.
     La valeur initiale est <tt>Yes</tt>.
   <tag>Cursor Style<label id="preference-cursor-style"></tag>
-    Lorsque le curseur est affiché, le représente:
+    Lorsque le curseur est affiché, il faut le représenter:
     <descrip>
       <tag>Underline</tag>
         (souligné) Avec les points 7 et 8.
@@ -775,9 +775,9 @@ Remarques:
     le plus élevé). Cette préférence n'est disponible que si vous utilisez
     un pilote qui la supporte. Le réglage initial est <tt/10/.
   <tag>Speech Punctuation<label id="preference-speech-punctuation"></tag>
-    Ajuste la quantité de ponctuation parlée. Elle peut être inijialisée à:
+    Ajuste la quantité de ponctuation parlée. Elle peut être initialisée à:
     <itemize>
-      <item>All (toutes)
+$$      <item>All (toutes)
       <item>Some (certaines)
       <item>All (toutes)
     </itemize>
@@ -1066,7 +1066,7 @@ crypté, de façon à montrer la présentation en colonne précise.
       <tag>Point 7</tag>
         Poursuite du curseur (voir la commande
 	<ref id="command-CSRTRK" name="CSRTRK">).
-      <tag>Dot 8</tag>
+      <tag>Point 8</tag>
         Glissement de la fenêtre (voir la commande
 	<ref id="command-SLIDEWIN" name="SLIDEWIN">).
     </descrip>
