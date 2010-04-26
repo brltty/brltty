@@ -35,10 +35,6 @@ static libusb_context *usbContext = NULL;
 static libusb_device **usbDeviceList = NULL;
 static int usbDeviceCount = 0;
 
-#if defined(__MINGW32__) && !defined(ETIMEDOUT)
-#define ETIMEDOUT 116
-#endif /* __MINGW32__ && !ETIMEDOUT */
-
 static int
 usbToErrno (enum libusb_error error) {
   switch (error) {

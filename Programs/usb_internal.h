@@ -19,12 +19,18 @@
 #ifndef BRLTTY_INCLUDED_USB_INTERNAL
 #define BRLTTY_INCLUDED_USB_INTERNAL
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include <errno.h>
+
+#if defined(__MINGW32__) && !defined(ETIMEDOUT)
+#define ETIMEDOUT 116
+#endif /* __MINGW32__ && !ETIMEDOUT */
 
 #include "bitfield.h"
 #include "queue.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef struct {
   UsbInputFilter filter;
