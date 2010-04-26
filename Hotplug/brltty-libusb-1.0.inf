@@ -1,0 +1,230 @@
+; ======== libusb 1.0 (WinUSB) device driver ==========
+
+; ===================== Strings =======================
+
+[Strings]
+
+DeviceGUID = "{ffe1ce84-18a1-4cf9-ac16-df74b7958daa}"
+DeviceClassGUID = "{78a1c341-4539-11d3-b88d-00c04fad5171}"
+Date = "04/26/2010"
+
+ProviderName = "libusb 1.0"
+WinUSB_SvcDesc = "WinUSB Driver Service"
+DiskName = "libusb (WinUSB) Device Install Disk"
+ClassName = "libusb (WinUSB) devices"
+
+; ====================== Version ======================
+
+[Version]
+DriverVer = %Date%
+Signature = "$Windows NT$"
+Class = %ClassName%
+ClassGuid = %DeviceClassGUID%
+Provider = %ProviderName%
+CatalogFile = libusb_device.cat
+
+; =================== Class section ===================
+
+; Since the device is not a standard USB device, we define a new class for it.
+[ClassInstall32]
+Addreg = WinUSBDeviceClassReg
+
+[WinUSBDeviceClassReg]
+HKR,,,0,%ClassName%
+; -20 is for the USB icon
+HKR,,Icon,,-20
+
+; =========== Manufacturer/Models sections ============
+
+[Manufacturer]
+%ProviderName% = libusbDevice_WinUSB,NTx86,NTamd64
+
+[libusbDevice_WinUSB.NTx86]
+"LibUsb-Win32 ALVA Satellite" = LIBUSB_DEV, USB\VID_06B0&PID_0001
+"LibUsb-Win32 ALVA BC640" = LIBUSB_DEV, USB\VID_0798&PID_0640
+"LibUsb-Win32 ALVA BC680" = LIBUSB_DEV, USB\VID_0798&PID_0680
+
+"LibUsb-Win32 Baum Vario40" = LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUsb-Win32 Baum PocketVario 24" = LIBUSB_DEV, USB\VID_0403&PID_FE71
+"LibUsb-Win32 Baum SuperVario 40" = LIBUSB_DEV, USB\VID_0403&PID_FE72
+"LibUsb-Win32 Baum SuperVario 32" = LIBUSB_DEV, USB\VID_0403&PID_FE73
+"LibUsb-Win32 Baum SuperVario 64" = LIBUSB_DEV, USB\VID_0403&PID_FE74
+"LibUsb-Win32 Baum SuperVario 80" = LIBUSB_DEV, USB\VID_0403&PID_FE75
+"LibUsb-Win32 Baum VarioPro 80" = LIBUSB_DEV, USB\VID_0403&PID_FE76
+"LibUsb-Win32 Baum VarioPro 64" = LIBUSB_DEV, USB\VID_0403&PID_FE77
+"LibUsb-Win32 Baum VarioPro 40" = LIBUSB_DEV, USB\VID_0904&PID_2000
+"LibUsb-Win32 Baum EcoVario 24" = LIBUSB_DEV, USB\VID_0904&PID_2001
+"LibUsb-Win32 Baum EcoVario 40" = LIBUSB_DEV, USB\VID_0904&PID_2002
+"LibUsb-Win32 Baum VarioConnect 40" = LIBUSB_DEV, USB\VID_0904&PID_2007
+"LibUsb-Win32 Baum VarioConnect 32" = LIBUSB_DEV, USB\VID_0904&PID_2008
+"LibUsb-Win32 Baum VarioConnect 24" = LIBUSB_DEV, USB\VID_0904&PID_2009
+"LibUsb-Win32 Baum VarioConnect 64" = LIBUSB_DEV, USB\VID_0904&PID_2010
+"LibUsb-Win32 Baum VarioConnect 80" = LIBUSB_DEV, USB\VID_0904&PID_2011
+"LibUsb-Win32 Baum EcoVario 32" = LIBUSB_DEV, USB\VID_0904&PID_2014
+"LibUsb-Win32 Baum EcoVario 64" = LIBUSB_DEV, USB\VID_0904&PID_2015
+"LibUsb-Win32 Baum EcoVario 80" = LIBUSB_DEV, USB\VID_0904&PID_2016
+"LibUsb-Win32 Baum Refreshabraille 18" = LIBUSB_DEV, USB\VID_0904&PID_3000
+
+"LibUsb-Win32 Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb-Win32 EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1122
+"LibUsb-Win32 EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1124
+
+"LibUsb-Win32 FreedomScientific Focus 1" = LIBUSB_DEV, USB\VID_0F4E&PID_0100
+"LibUsb-Win32 FreedomScientific PAC Mate" = LIBUSB_DEV, USB\VID_0F4E&PID_0111
+"LibUsb-Win32 FreedomScientific Focus 2" = LIBUSB_DEV, USB\VID_0F4E&PID_0112
+"LibUsb-Win32 FreedomScientific Focus Blue" = LIBUSB_DEV, USB\VID_0F4E&PID_0114
+
+"LibUsb-Win32 HandyTech (GoHubs)" = LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUsb-Win32 HandyTech (FTDI)" = LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUsb-Win32 HandyTech (USB-HID converter)" = LIBUSB_DEV, USB\VID_1FE4&PID_0003
+"LibUsb-Win32 HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUsb-Win32 HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+"LibUsb-Win32 Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
+
+"LibUsb-Win32 Papenmeier" = LIBUSB_DEV, USB\VID_0403&PID_F208
+
+"LibUsb-Win32 Pegasus" = LIBUSB_DEV, USB\VID_4242&PID_0001
+
+"LibUsb-Win32 Seika" = LIBUSB_DEV, USB\VID_10C4&PID_EA60
+
+"LibUsb-Win32 Voyager" = LIBUSB_DEV, USB\VID_0798&PID_0001
+
+[libusbDevice_WinUSB.NTamd64]
+"LibUsb-Win32 ALVA Satellite" = LIBUSB_DEV, USB\VID_06B0&PID_0001
+"LibUsb-Win32 ALVA BC640" = LIBUSB_DEV, USB\VID_0798&PID_0640
+"LibUsb-Win32 ALVA BC680" = LIBUSB_DEV, USB\VID_0798&PID_0680
+
+"LibUsb-Win32 Baum Vario40" = LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUsb-Win32 Baum PocketVario 24" = LIBUSB_DEV, USB\VID_0403&PID_FE71
+"LibUsb-Win32 Baum SuperVario 40" = LIBUSB_DEV, USB\VID_0403&PID_FE72
+"LibUsb-Win32 Baum SuperVario 32" = LIBUSB_DEV, USB\VID_0403&PID_FE73
+"LibUsb-Win32 Baum SuperVario 64" = LIBUSB_DEV, USB\VID_0403&PID_FE74
+"LibUsb-Win32 Baum SuperVario 80" = LIBUSB_DEV, USB\VID_0403&PID_FE75
+"LibUsb-Win32 Baum VarioPro 80" = LIBUSB_DEV, USB\VID_0403&PID_FE76
+"LibUsb-Win32 Baum VarioPro 64" = LIBUSB_DEV, USB\VID_0403&PID_FE77
+"LibUsb-Win32 Baum VarioPro 40" = LIBUSB_DEV, USB\VID_0904&PID_2000
+"LibUsb-Win32 Baum EcoVario 24" = LIBUSB_DEV, USB\VID_0904&PID_2001
+"LibUsb-Win32 Baum EcoVario 40" = LIBUSB_DEV, USB\VID_0904&PID_2002
+"LibUsb-Win32 Baum VarioConnect 40" = LIBUSB_DEV, USB\VID_0904&PID_2007
+"LibUsb-Win32 Baum VarioConnect 32" = LIBUSB_DEV, USB\VID_0904&PID_2008
+"LibUsb-Win32 Baum VarioConnect 24" = LIBUSB_DEV, USB\VID_0904&PID_2009
+"LibUsb-Win32 Baum VarioConnect 64" = LIBUSB_DEV, USB\VID_0904&PID_2010
+"LibUsb-Win32 Baum VarioConnect 80" = LIBUSB_DEV, USB\VID_0904&PID_2011
+"LibUsb-Win32 Baum EcoVario 32" = LIBUSB_DEV, USB\VID_0904&PID_2014
+"LibUsb-Win32 Baum EcoVario 64" = LIBUSB_DEV, USB\VID_0904&PID_2015
+"LibUsb-Win32 Baum EcoVario 80" = LIBUSB_DEV, USB\VID_0904&PID_2016
+"LibUsb-Win32 Baum Refreshabraille 18" = LIBUSB_DEV, USB\VID_0904&PID_3000
+
+"LibUsb-Win32 Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb-Win32 EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1122
+"LibUsb-Win32 EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1124
+
+"LibUsb-Win32 FreedomScientific Focus 1" = LIBUSB_DEV, USB\VID_0F4E&PID_0100
+"LibUsb-Win32 FreedomScientific PAC Mate" = LIBUSB_DEV, USB\VID_0F4E&PID_0111
+"LibUsb-Win32 FreedomScientific Focus 2" = LIBUSB_DEV, USB\VID_0F4E&PID_0112
+"LibUsb-Win32 FreedomScientific Focus Blue" = LIBUSB_DEV, USB\VID_0F4E&PID_0114
+
+"LibUsb-Win32 HandyTech (GoHubs)" = LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUsb-Win32 HandyTech (FTDI)" = LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUsb-Win32 HandyTech (USB-HID converter)" = LIBUSB_DEV, USB\VID_1FE4&PID_0003
+"LibUsb-Win32 HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUsb-Win32 HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+"LibUsb-Win32 Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
+
+"LibUsb-Win32 Papenmeier" = LIBUSB_DEV, USB\VID_0403&PID_F208
+
+"LibUsb-Win32 Pegasus" = LIBUSB_DEV, USB\VID_4242&PID_0001
+
+"LibUsb-Win32 Seika" = LIBUSB_DEV, USB\VID_10C4&PID_EA60
+
+"LibUsb-Win32 Voyager" = LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; ==================== Installation ===================
+
+; The Include and Needs directives in the LIBUSB_DEV section are required for 
+; installing WinUSB on Windows Vista systems. Windows XP systems ignore these 
+; directives. These directives should not be modified.
+[LIBUSB_DEV]
+Include=winusb.inf
+Needs=WINUSB.NT
+
+; The Include directive in the LIBUSB_DEV.Services section includes the system-
+; supplied INF for WinUSB. This INF is installed by the WinUSB co-installer if 
+; it is not already on the target system. The AddService directive specifies 
+; WinUsb.sys as the device�s function driver. These directives should not be 
+; modified.
+[LIBUSB_DEV.Services]
+Include=winusb.inf
+AddService=WinUSB,0x00000002,WinUSB_ServiceInstall
+
+; The WinUSB_ServiceInstall section contains the data for installing WinUsb.sys 
+; as a service. This section should not be modified.
+[WinUSB_ServiceInstall]
+DisplayName     = %WinUSB_SvcDesc%
+ServiceType     = 1
+StartType       = 3
+ErrorControl    = 1
+ServiceBinary   = %12%\WinUSB.sys
+
+; The KmdfService directive installs WinUsb.sys as a kernel-mode service. The 
+; referenced WinLIBUSB_DEV section specifies the KMDF library version. 
+; Usually, the version can be derived from the WdfCoInstallerxxyyy.dll with 
+; xx = major, yyy = minor
+[LIBUSB_DEV.Wdf]
+KmdfService=WINUSB, WinLIBUSB_DEV
+
+[WinLIBUSB_DEV]
+KmdfLibraryVersion=1.9
+
+; LIBUSB_DEV.HW is the key section in the INF. It specifies the device 
+; interface globally unique identifier (GUID) for your device. The AddReg 
+; directive puts the interface GUID in a standard registry value. When 
+; WinUsb.sys is loaded as the device�s function driver, it reads the registry
+; value and uses the specified GUID to represent the device interface. You 
+; should replace the GUID in this example with one that you create specifically
+; for your device. If the protocols for the device change, you should create a
+; new device interface GUID.
+[LIBUSB_DEV.HW]
+AddReg=Dev_AddReg
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,%DeviceGUID%
+
+; The LIBUSB_DEV.CoInstallers section, including the referenced AddReg and 
+; CopyFiles sections, contains data and instructions to install the WinUSB and 
+; KMDF co installers and associate them with the device. Most USB devices can 
+; use these sections and directives without modification.
+[LIBUSB_DEV.CoInstallers]
+AddReg=CoInstallers_AddReg
+CopyFiles=CoInstallers_CopyFiles
+
+[CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+
+[CoInstallers_CopyFiles]
+WinUSBCoInstaller2.dll
+WdfCoInstaller01009.dll
+
+[DestinationDirs]
+CoInstallers_CopyFiles=11
+
+; =============== Source Media Section ================
+ 
+; The x86 and x64 versions of Windows have separate co installers. This example 
+; stores them on the installation disk in folders that are named x86 and amd64
+[SourceDisksNames]
+1 = %DiskName%,,,\x86
+2 = %DiskName%,,,\amd64
+
+[SourceDisksFiles.x86]
+WinUSBCoInstaller2.dll=1
+WdfCoInstaller01009.dll=1
+
+[SourceDisksFiles.amd64]
+WinUSBCoInstaller2.dll=2
+WdfCoInstaller01009.dll=2
+
