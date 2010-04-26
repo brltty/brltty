@@ -220,6 +220,10 @@ usbReadEndpoint (
     errno = -result;
   }
 
+#if defined(__MINGW32__) && !defined(ETIMEDOUT)
+#  define ETIMEDOUT 116
+#endif /* __MINGW32__ && !ETIMEDOUT */
+
 #ifdef ETIMEDOUT
   if (errno == ETIMEDOUT) errno = EAGAIN;
 #endif /* ETIMEDOUT */

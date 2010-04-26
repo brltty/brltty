@@ -57,7 +57,7 @@ usbToErrno (enum libusb_error error) {
       return EBUSY;
 
     case LIBUSB_ERROR_TIMEOUT:
-      return ETIMEDOUT;
+      return EAGAIN;
 
 #ifdef EMSGSIZE
     case LIBUSB_ERROR_OVERFLOW:
@@ -312,10 +312,6 @@ usbReadEndpoint (
       usbSetErrno(result, NULL);
     }
   }
-
-#ifdef ETIMEDOUT
-  if (errno == ETIMEDOUT) errno = EAGAIN;
-#endif /* ETIMEDOUT */
 
   if (errno != EAGAIN) LogError("USB endpoint read");
   return -1;

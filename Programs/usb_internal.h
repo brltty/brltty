@@ -19,12 +19,6 @@
 #ifndef BRLTTY_INCLUDED_USB_INTERNAL
 #define BRLTTY_INCLUDED_USB_INTERNAL
 
-#include <errno.h>
-
-#if defined(__MINGW32__) && !defined(ETIMEDOUT)
-#define ETIMEDOUT 116
-#endif /* __MINGW32__ && !ETIMEDOUT */
-
 #include "bitfield.h"
 #include "queue.h"
 
