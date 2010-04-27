@@ -215,7 +215,46 @@ BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
 
 AC_PROG_MAKE_SET
 
+brltty_gcc_options="-Wall"
+case "${build_os} ${host_os}"
+in
+   linux*\ eabi*)
+      if test -z "${ANDROID_HOME}"
+      then
+         AC_MSG_ERROR([ANDROID_HOME not set])
+      fi
+
+      if test -z "${ANDROID_TOOLCHAIN_VERSION}"
+      then
+         AC_MSG_ERROR([ANDROID_TOOLCHAIN_VERSION not set])
+      fi
+
+      ANDROID_LIBS_PATH="${ANDROID_HOME}/out/target/product/generic/obj/lib"
+      ANDROID_TOOLCHAIN_PATH="${ANDROID_HOME}/prebuilt/linux-x86/toolchain/${host_cpu}-eabi-${ANDROID_TOOLCHAIN_VERSION}"
+
+      CPPFLAGS="${CPPFLAGS} -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__"
+      CPPFLAGS="${CPPFLAGS} -DANDROID -DSK_RELEASE"
+      CPPFLAGS="${CPPFLAGS} -DNDEBUG -include ${ANDROID_HOME}/system/core/include/arch/linux-${host_cpu}/AndroidConfig.h -UDEBUG"
+
+      CPPFLAGS="${CPPFLAGS} -I${ANDROID_HOME}/bionic/libc/include -I${ANDROID_HOME}/bionic/libc/arch-${host_cpu}/include"
+      CPPFLAGS="${CPPFLAGS} -I${ANDROID_HOME}/bionic/libc/kernel/common -I${ANDROID_HOME}/bionic/libc/kernel/arch-${host_cpu}"
+
+      LIBS="${LIBS} -Wl,-rpath-link=${ANDROID_LIBS_PATH}"
+      LIBS="${LIBS} ${ANDROID_LIBS_PATH}/crtend_android.o"
+      LIBS="${LIBS} ${ANDROID_LIBS_PATH}/crtbegin_dynamic.o"
+      LIBS="${LIBS} -nostdlib -L${ANDROID_LIBS_PATH} -lm -lc"
+      LIBS="${LIBS} ${ANDROID_TOOLCHAIN_PATH}/lib/gcc/${host_cpu}-eabi/${ANDROID_TOOLCHAIN_VERSION}/interwork/libgcc.a"
+
+      brltty_gcc_options="${brltty_gcc_options} -march=armv5te -mtune=xscale -msoft-float -mthumb-interwork -fpic -fno-exceptions -ffunction-sections -funwind-tables -fstack-protector -fmessage-length=0"
+      ;;
+   cygwin*\ mingw*)
+      brltty_gcc_options="${brltty_gcc_options} -mno-cygwin"
+      ;;
+esac
+
 AC_PROG_CC
+test "${GCC}" = "yes" && CC="${CC} ${brltty_gcc_options}"
+
 if test -z "${CXX}"
 then
    if test "${GCC}" = "yes"
@@ -232,22 +271,7 @@ then
    fi
 fi
 AC_PROG_CXX
-
-brltty_gcc_options="-Wall"
-case "${build_os} ${host_os}"
-in
-   cygwin*\ mingw*)
-      brltty_gcc_options="${brltty_gcc_options} -mno-cygwin"
-      ;;
-esac
-if test "${GCC}" = "yes"
-then
-   CC="${CC} ${brltty_gcc_options}"
-fi
-if test "$GXX" = "yes"
-then
-   CXX="${CXX} ${brltty_gcc_options}"
-fi
+test "${GXX}" = "yes" && CXX="${CXX} ${brltty_gcc_options}"
 
 AC_CHECK_PROGS([LD], [ld], [ld])
 AC_PROG_RANLIB
@@ -278,6 +302,9 @@ in
    darwin*)
       brltty_cv_prog_ld_flags=""
       ;;
+   eabi*)
+      brltty_cv_prog_ld_flags="-Bdynamic -Wl,-T,${ANDROID_HOME}/build/core/armelf.x -Wl,-dynamic-linker,/system/bin/linker -Wl,--gc-sections -Wl,-z,nocopyreloc"
+      ;;
    *)
       AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
       ;;
@@ -291,7 +318,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|eabi*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -349,7 +376,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|eabi*)
       brltty_mkmod_ld_make="-shared"
       ;;
    solaris*)
@@ -386,7 +413,7 @@ AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|eabi*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
@@ -431,7 +458,7 @@ AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|kfreebsd*)
+   linux*|gnu*|kfreebsd*|eabi*)
       brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
       ;;
    *)
@@ -915,7 +942,7 @@ brltty_pcm_interfaces=""
 brltty_midi_interfaces=""
 case "${host_os}"
 in
-   linux*)
+   linux*|eabi*)
       system_object="linux"
       brltty_pcm_interfaces="oss"
       brltty_midi_interfaces="oss"
@@ -1068,7 +1095,7 @@ BRLTTY_ARG_DISABLE(
 
 case "${host_os}"
 in
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*|eabi*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -1079,7 +1106,7 @@ in
 esac
 
 BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
-   linux*)
+   linux*|eabi*)
       usb_package="linux"
       ;;
    solaris*)
@@ -1113,7 +1140,7 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
-   linux*)
+   linux*|eabi*)
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"
       ])
@@ -1186,7 +1213,7 @@ AC_DEFINE_UNQUOTED([DEVICE_DIRECTORY], ["${brltty_cv_device_directory}"],
 AC_CACHE_CHECK([for first serial device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
 in
-   linux*)
+   linux*|eabi*)
       for brltty_device in "ttyS0" "tts/0"
       do
          test -c "${brltty_cv_device_directory}/${brltty_device}" && {
@@ -1392,7 +1419,7 @@ BRLTTY_ARG_DRIVER([speech], [Speech])
 
 case "${host_os}"
 in
-   linux*)
+   linux*|eabi*)
       BRLTTY_SCREEN_DRIVER([lx], [Linux])
       ;;
    gnu*)
