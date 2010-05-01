@@ -4696,91 +4696,476 @@ The opcodes which define and use character classes are:
 <sect1>Key Tables<label id="table-key"><p>
 Files with names of the form <tt/*.ktb/ are key tables,
 and with names of the form <tt/*.kti/ are key subtables.
-They are used by BRLTTY to bind keyboard key combinations
+They are used by BRLTTY to bind
+braille display and keyboard key combinations
 to BRLTTY commands.
 
-The following key tables are provided:
+The names of braille display key table files begin with <tt/brl-/<em/xx/<tt/-/",
+where <em/xx/ is the two-letter
+<ref id="drivers" name="driver identification code">.
+The rest of the name identifies the model(s)
+for which the key table is used.
+
+The names of keyboard key table files begin with <tt/kbd-/.
+The rest of the name describes the kind of keyboard
+for which the key table has been designed.
+
+The following keyboard key tables are provided:
 <descrip>
-  <tag/desktop/bindings for full keyboards
-  <tag/keypad/bindings for keypad-based navigation
-  <tag/laptop/bindings for keyboards without a keypad
+  <tag/kbd-desktop/bindings for full keyboards
+  <tag/kbd-keypad/bindings for keypad-based navigation
+  <tag/kbd-laptop/bindings for keyboards without a keypad
 </descrip>
 See the <ref id="options-key-table" name="-k"> command line option,
 and the <ref id="configure-key-table" name="key-table"> configuration file directive
-for details regarding how to use a key table.
-
-<sect2>Key Table Format<p>
-A key table consists of a sequence of directives, one per line,
-which define what each key combination is to be bound to.
-<tt/UTF-8/ character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line,
-as well as before and/or after any operand of any directive,
-is ignored.
-Lines containing only white-space are ignored.
-If the first non-white-space character of a line is "&num;"
-then that line is a comment and is ignored.
+for details regarding how to select a keyboard key table.
 
 <sect2>Key Table Directives<p>
+A key table consists of a sequence of directives, one per line,
+which define how keys and key combinations are to be interpreted.
+<tt/UTF-8/ character encoding must be used.
+White-space (blanks, tabs) at the beginning of a line,
+as well as before and/or after any operand,
+is ignored.
+Lines containing only white-space are ignored.
+If the first non-white-space character of a line is a number (<tt/&num;/) sign
+then that line is a comment and is ignored.
+
+The precedence for resolving each key press/release event is as follows:
+<enum>
+  <item>
+    A hotkey press or release defined within the current context.
+    See the
+    <ref id="key-table-hotkey" name="hotkey">
+    directive for details.
+  <item>
+    A key combination defined within the current context.
+    See the
+    <ref id="key-table-bind" name="bind">
+    directive for details.
+  <item>
+    A braille keyboard command defined within the current context.
+    See the
+    <ref id="key-table-map" name="map">
+    and
+    <ref id="key-table-superimpose" name="superimpose">
+    directives for details.
+  <item>
+    A key combination defined within the default context.
+    See the
+    <ref id="key-table-bind" name="bind">
+    directive for details.
+</enum>
+
 The following directives are provided:
+
+<sect3>The Assign Directive<label id="key-table-assign"><p>
+Create or update a variable associated with the current include level.
+The variable is visible to the current and to lower include levels,
+but not to higher include levels.
+
+<tt/assign/ <em/variable/ [<em/value/]
 <descrip>
-  <tag><tt/bind/ <em/keys/ <em/command/ &num; <em/comment/</tag>
-    Use the <tt/bind/ directive to bind a key combination to a command.
+  <tag><em/variable/</tag>
+    The name of the variable.
+    If the variable doesn't already exist at the current include level
+    then it is created.
+  <tag><em/value/</tag>
+    The value which is to be assigned to the variable.
+    If it's not supplied then a zero-length (null) value is assigned.
+</descrip>
 
-    <descrip>
-      <tag><em/keys/</tag>
-        The key combination to be bound.
-        It is a sequence of one or more key names
-        (see the file <tt/ktb_keynames.h/ within the <tt/Programs/ subdirectory of BRLTTY's source tree)
-        separated by plus (<tt/+/) signs.
-        The initial keys are known as modifiers and may be pressed in any order.
-        The last key must be pressed while all the modifiers are being held.
-      <tag><em/command/</tag>
-        The name of a BRLTTY command
-        (see section <ref id="commands" name="Commands"> for details).
+The escape sequence \{variable} is substituted
+with the value of the variable named within the braces.
+The variable must have been defined
+at the current or at a higher include level.
 
-        For the commands listed in section <ref id="commands-features" name="Feature Activation">:
+Examples:
+<itemize>
+  <item><tt/assign nullValue/
+  <item><tt/assign ReturnKey Key1/
+  <item><tt/bind \{ReturnKey} RETURN/
+</itemize>
+
+<sect3>The Bind Directive<label id="key-table-bind"><p>
+Define which BRLTTY command is executed
+when a particular combination of one or more keys is pressed.
+The binding is defined within the current context.
+
+<tt/bind/ <em/keys/ <em/command/
+<descrip>
+  <tag><em/keys/</tag>
+    The key combination which is to be bound.
+    It's a sequence of one or more key names
+    separated by plus (<tt/+/) signs.
+    The final (or only) key name may be optionally prefixed
+    with an exclamation (<tt/!/) point.
+    The keys may be pressed in any order, with the exception that
+    if the final key name is prefixed with an exclamation point
+    then it must be pressed last.
+    The exclamation point prefix means that
+    the command is executed as soon as that key is pressed.
+    If not used,
+    the command is executed as soon as any of the keys is released.
+  <tag><em/command/</tag>
+    The name of a BRLTTY command.
+    One or more modifiers may be optionally appended to the command name
+    by using a plus (<tt/+/) sign as the separator.
+    <itemize>
+      <item>
+        For commands which enable/disable a feature:
         <itemize>
           <item>
-            If no modifier is appended
-            then the state of the feature is toggled.
+            If the modifier <tt/+on/ is specified
+            then the feature is enabled.
           <item>
-            If the modifier <tt/+on/ is appended
-            then the feature is turned on.
+            If the modifier <tt/+off/ is specified
+            then the feature is disabled.
           <item>
-            If the modifier <tt/+off/ is appended
-            then the feature is turned off.
+            If neither <tt/+on/ nor <tt/+off/ is specified
+            then the state of the feature is toggled on/off.
         </itemize>
-
-        For the commands listed in section <ref id="commands-characters" name="Character Commands">:
-        The command acts on the character where the cursor is.
-
-        For the commands listed in section <ref id="commands-base" name="Base Commands">:
-        The modifier <tt/+/<em/n/,
-        wehre <em/n/ is a non-negative integer,
-        may be appended.
-        If this modifier isn't specified then <tt/0/ is assumed.
-    </descrip>
-
-    Examples:
-    <itemize>
-      <item><tt/bind CapsLock+Enter CsrTrk/
-      <item><tt/bind CapsLock+O CsrTrk+off/
-      <item><tt/bind CapsLock+P CsrTrk+on/
-      <item><tt/bind KPInsert+1 GoToMark+1/
+      <item>
+        For commands which move the braille window:
+        <itemize>
+          <item>
+            If the modifier <tt/+route/ is specified
+            then, if necessary, the cursor is automatically routed
+            so that it's always visible on the braille display.
+        </itemize>
+      <item>
+        For commands which move the braille window to a specific line on the screen:
+        <itemize>
+          <item>
+            If the modifier <tt/+toleft/ is specified
+            then the braille window is also moved
+            to the beginning of that line.
+          <item>
+            If the modifier <tt/+scaled/ is specified
+            then the set of keys bound to the command
+            is interpreted as though it were a scroll bar.
+            If it isn't,
+            then there's a one-to-one correspondence
+            between keys and lines.
+        </itemize>
+      <item>
+        For commands which require an offset:
+        <itemize>
+          <item>
+            The modifier +<em/offset/,
+            where <em/offset/ is a non-negative integer,
+            may be specified.
+            If it isn't supplied then <tt/+0/ is assumed.
+        </itemize>
     </itemize>
-  <tag><tt/include/ <em/file/ &num; <em/comment/</tag>
-    Use the <tt/include/ directive to include the content of a key subtable.
-    It is recursive, which means that
-    any key subtable can itself include yet another key subtable.
-    Care must be taken to ensure that an "include loop" is not created.
+</descrip>
 
+Examples:
+<itemize>
+  <item><tt/bind Key1 CSRTRK/
+  <item><tt/bind Key1+Key2 CSRTRK+off/
+  <item><tt/bind Key1+Key3 CSRTRK+on/
+  <item><tt/bind Key4 TOP/
+  <item><tt/bind Key5 TOP+route/
+  <item><tt/bind VerticalSensor GOTOLINE+toleft+scaled/
+  <item><tt/bind Key6 CONTEXT+1/
+</itemize>
+
+<sect3>The Context Directive<label id="key-table-context"><p>
+Define alternate ways to interpret certain key events and/or combinations.
+A context contains definitions created by the
+<ref id="key-table-bind" name="bind">, 
+<ref id="key-table-hotkey" name="hotkey">,
+<ref id="key-table-map" name="map">,
+and
+<ref id="key-table-superimpose" name="superimpose">
+directives.
+
+<tt/context/ <em/identifier/ [<em/title/]
+<descrip>
+  <tag><em/identifier/</tag>
+    Which context subsequent definitions are to be created within.
+    It may be:
+    <itemize>
+      <item>
+        One of these special names:
+        <descrip>
+          <tag/default/
+            The default context.
+            If a key combination hasn't been defined within the current context
+            then its definition within the default context is used.
+            This only applies to definitions created by
+            the <ref id="key-table-bind" name="bind"> directive.
+          <tag/menu/
+            This context is used when within BRLTTY's preferences menu.
+        </descrip>
+      <item>
+        An integer within the range <tt/0/ through <tt/252/.
+        Context <tt/0/ is an alternate way to refer to the default context.
+        Higher context numbers should be avoided because
+        the highest allowable number is subject to change without notice
+        if, for example, more named contexts are added.
+    </itemize>
+  <tag><em/title/</tag>
+    A person-readable description of the context.
+    It may contain spaces,
+    and standard capitalization conventions should be used. 
+    This operand is optional.
+    If supplied when selecting a context which already has a title
+    then the two must match.
+    Named contexts already have internally-assigned titles.
+    Numeric contexts are initially created without titles.
+</descrip>
+
+A context is created the first time it's selected.
+It may be reselected any number of times thereafter.
+
+All subsequent definitions until
+either the next <ref id="key-table-context" name="context"> directive
+or the end of the current include level
+are created within the selected context.
+The initial context of the top-level key table is <tt/default/.
+The initial context of an included key subtable
+is the context which was selected when it was included.
+Context changes within included key subtables
+don't affect the context of the including key table or subtable.
+
+If a context has a title
+(all named contexts
+and those numeric contexts for which the <em/title/ operand has been supplied)
+then it is persisten.
+When a key event causes a persistent context to be activated,
+that context remains current until a subsequent key event
+causes a different persistent context to be activated.
+
+If a context doesn't have a title
+(those numeric contexts for which the <em/title/ operand hasn't been supplied)
+then it is temporary.
+When a key event causes a temporary context to be activated,
+that context is only used to interpret the very next key event.
+
+Examples:
+<itemize>
+  <item><tt/context menu/
+  <item><tt/context 1 Braille Input/
+  <item><tt/context 2/
+</itemize>
+
+<sect3>The Hide Directive<label id="key-table-hide"><p>
+Specify whether or not certain definitions (see the 
+<ref id="key-table-bind" name="bind">,
+<ref id="key-table-hotkey" name="hotkey">,
+<ref id="key-table-map" name="map">,
+and
+<ref id="key-table-superimpose" name="superimpose">
+directives) and notes (see the 
+<ref id="key-table-note" name="note">
+directive) are included within the key table's help text.
+
+<tt/hide/ <em/state/
+<descrip>
+  <tag><em/state/</tag>
+    One of these keywords:
     <descrip>
-      <tag><em/file/</tag>
-        The file to be included.
-        It may be either a relative or an absolute path.
-        If relative, it is anchored at the directory containing the including file.
+      <tag/on/They're excluded.
+      <tag/off/They're included.
     </descrip>
 </descrip>
+
+The specified state applies to all subsequent definitions and notes
+until either the next <tt/hide/ directive
+or the end of the current include level.
+The initial state of the top-level key table is <tt/off/.
+The initial state of an included key subtable
+is the state which was selected when it was included. 
+State changes within included key subtables
+don't affect the state of the including key table or subtable.
+
+Examples:
+<itemize>
+  <item><tt/hide on/
+</itemize>
+
+<sect3>The Hotkey Directive<label id="key-table-hotkey"><p>
+Bind the press and release events of a specific key
+to two separate BRLTTY commands.
+The bindings are defined within the current context.
+
+<tt/hotkey/ <em/key/ <em/press/ <em/release/
+<descrip>
+  <tag><em/key/</tag>
+    The name of the key which is to be bound.
+  <tag><em/press/</tag>
+    The name of the BRLTTY command
+    which is to be executed whenever the key is pressed.
+  <tag><em/release/</tag>
+    The name of the BRLTTY command
+    which is to be executed whenever the key is released.
+</descrip>
+
+Modifiers may be appended to the command names.
+See the <em/command/ operand
+of the <ref id="key-table-bind" name="bind"> directive
+for details.
+
+Specify <tt/NOOP/ if no command is to be executed.
+Specifying <tt/NOOP/ for both commands
+effectively disables the key.
+
+Examples:
+<itemize>
+  <item><tt/hotkey Key1 CSRVIS+off CSRVIS+on/
+  <item><tt/hotkey Key2 NOOP NOOP/
+</itemize>
+
+<sect3>The IfKey Directive<label id="key-table-ifkey"><p>
+Conditionally process a key table directive
+only if the device has a particular key.
+
+<tt/ifkey/ <em/key/ <em/directive/
+<descrip>
+  <tag><em/key/</tag>
+    The name of the key whose availability is to be tested.
+  <tag><em/directive/</tag>
+    The key table directive which is to be conditionally processed.
+</descrip>
+
+Examples:
+<itemize>
+  <item><tt/ifkey Key1 ifkey Key2 bind Key1+Key2 HOME/
+</itemize>
+
+<sect3>The Include Directive<label id="key-table-include"><p>
+Process the directives within a key subtable.
+It's recursive, which means that
+any key subtable can itself include yet another key subtable.
+Care must be taken to ensure that an "include loop" is not created.
+
+<tt/include/ <em/file/
+<descrip>
+  <tag><em/file/</tag>
+    The key subtable which is to be included.
+    It may be either a relative or an absolute path.
+    If relative, it's anchored at
+    the directory containing the including key table or subtable.
+</descrip>
+
+Examples:
+<itemize>
+  <item><tt/include common.kti/
+  <item><tt>include /path/to/my/keys.kti</tt>
+</itemize>
+
+<sect3>The Map Directive<label id="key-table-map"><p>
+Map a key to a braille keyboard function.
+The mapping is defined within the current context.
+
+<tt/map/ <em/key/ <em/function/
+<descrip>
+  <tag><em/key/</tag>
+    The name of the key which is to be mapped.
+    More than one key may be mapped to the same braille keyboard function.
+  <tag><em/function/</tag>
+    The name of the braille keyboard function.
+    It may be one of the following keywords:
+    <descrip>
+      <tag/DOT1/The upper-left standard braille dot.
+      <tag/DOT2/The middle-left standard braille dot.
+      <tag/DOT3/The lower-left standard braille dot.
+      <tag/DOT4/The upper-right standard braille dot.
+      <tag/DOT5/The middle-right standard braille dot.
+      <tag/DOT6/The lower-right standard braille dot.
+      <tag/DOT7/The lower-left computer braille dot.
+      <tag/DOT8/The lower-right computer braille dot.
+      <tag/SPACE/The space bar.
+      <tag/SHIFT/The shift key.
+      <tag/UPPERCASE/
+        If a lowercase letter is being entered
+        then translate it to its uppercase equivalent.
+      <tag/CONTROL/The control key.
+      <tag/META/The left alt key.
+    </descrip>
+</descrip>
+
+If a key combination consists only of keys
+which have been mapped to braille keyboard functions,
+and if those functions when combined form a valid braille keyboard command,
+then that command is executed as soon as any of the keys is released.
+A valid braille keyboard command must include
+either any combination of dot keys or the space bar (but not both).
+If at least one dot key is included
+then the braille keyboard functions specified by the
+<ref id="key-table-superimpose" name="superimpose">
+directives within the same context are also implicitly included.
+
+Examples:
+<itemize>
+  <item><tt/map Key1 DOT1/
+</itemize>
+
+<sect3>The Note Directive<label id="key-table-note"><p>
+Add a person-readable explanation to the key table's help text.
+Notes are commonly used, for example,
+to describe the placement, sizes, and shapes of the keys on the device.
+
+<tt/note/ <em/text/
+<descrip>
+  <tag><em/text/</tag>
+    The explanation which is to be added.
+    It may contain spaces,
+    and should be grammatically correct.
+</descrip>
+
+Each note specifies exactly one line of explanatory text.
+Leading space is ignored so indentation cannot be specified.
+
+There's no limit to the number of notes which may be specified.
+All of them are gathered together
+and presented in a single block
+at the start of the key table's help text.
+
+Examples:
+<itemize>
+  <item><tt/note Key1 is the round key at the far left on the front surface./
+</itemize>
+
+<sect3>The Superimpose Directive<label id="key-table-superimpose"><p>
+Implicitly include a braille keyboard function whenever
+a braille keyboard command consisting of at least one dot is executed.
+The implicit inclusion is defined within the current context.
+Any number of them may be specified.
+
+<tt/superimpose/ <em/function/
+<descrip>
+  <tag><em/function/</tag>
+    The name of the braille keyboard function.
+    See the <em/function/ operand
+    of the <ref id="key-table-map" name="map"> directive
+    for details.
+</descrip>
+
+Examples:
+<itemize>
+  <item><tt/superimpose DOT7/
+</itemize>
+
+<sect3>The Title Directive<label id="key-table-title"><p>
+Provide a person-readable summary of the key table's purpose.
+
+<tt/title/ <em/text/
+<descrip>
+  <tag><em/text/</tag>
+    A one-line summary of what the key table is used for.
+    It may contain spaces,
+    and standard capitalization conventions should be used.
+</descrip>
+
+The title of the key table may be specified only once.
+
+Examples:
+<itemize>
+  <item><tt/title Bindings for Keypad-based Navigation/
+</itemize>
 
 <sect2>Keyboard Properties<label id="keyboard-properties"><p>
 The default is that all keyboards are monitored.
