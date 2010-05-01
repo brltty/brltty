@@ -256,7 +256,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
               if (!listKeyContext(lgd, c, keys)) return 0;
             } else {
               if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
-              if (!putCharacterString(lgd, c->name)) return 0;
+              if (!putCharacterString(lgd, c->title)) return 0;
               if (!putCharacterString(lgd, WS_C(": "))) return 0;
               if (!putCharacterString(lgd, keys)) return 0;
               if (!endLine(lgd)) return 0;
@@ -308,7 +308,7 @@ doListKeyTable (ListGenerationData *lgd) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, *context);
 
       if (ctx) {
-        lgd->sectionTitle = ctx->name;
+        lgd->sectionTitle = ctx->title;
         if (!listKeyContext(lgd, ctx, NULL)) return 0;
       }
 
@@ -323,7 +323,7 @@ doListKeyTable (ListGenerationData *lgd) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
 
       if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {
-        lgd->sectionTitle = ctx->name;
+        lgd->sectionTitle = ctx->title;
         if (!listKeyContext(lgd, ctx, NULL)) return 0;
       }
     }

@@ -173,7 +173,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       KeyContext *ctx = &ktd->table->keyContextTable[ktd->table->keyContextCount++];
       memset(ctx, 0, sizeof(*ctx));
 
-      ctx->name = NULL;
+      ctx->title = NULL;
 
       ctx->keyBindingTable = NULL;
       ctx->keyBindingsSize = 0;
@@ -198,16 +198,16 @@ getCurrentKeyContext (KeyTableData *ktd) {
 }
 
 static int
-setKeyContextName (KeyContext *ctx, const wchar_t *name, size_t length) {
-  if (ctx->name) free(ctx->name);
+setKeyContextTitle (KeyContext *ctx, const wchar_t *title, size_t length) {
+  if (ctx->title) free(ctx->title);
 
-  if (!(ctx->name = malloc(ARRAY_SIZE(ctx->name, length+1)))) {
+  if (!(ctx->title = malloc(ARRAY_SIZE(ctx->title, length+1)))) {
     LogError("malloc");
     return 0;
   }
 
-  wmemcpy(ctx->name, name, length);
-  ctx->name[length] = 0;
+  wmemcpy(ctx->title, title, length);
+  ctx->title[length] = 0;
   return 1;
 }
 
@@ -215,28 +215,28 @@ static int
 setDefaultKeyContextProperties (KeyTableData *ktd) {
   typedef struct {
     unsigned char context;
-    const wchar_t *name;
+    const wchar_t *title;
   } PropertiesEntry;
 
   static const PropertiesEntry propertiesTable[] = {
-    { .context=BRL_CTX_DEFAULT,
-      .name = WS_C("Default Bindings")
+    { .context = BRL_CTX_DEFAULT,
+      .title = WS_C("Default Bindings")
     }
     ,
-    { .context=BRL_CTX_MENU,
-      .name = WS_C("Menu Bindings")
+    { .context = BRL_CTX_MENU,
+      .title = WS_C("Menu Bindings")
     }
     ,
-    { .name = NULL }
+    { .title = NULL }
   };
   const PropertiesEntry *properties = propertiesTable;
 
-  while (properties->name) {
+  while (properties->title) {
     KeyContext *ctx = getKeyContext(ktd, properties->context);
     if (!ctx) return 0;
 
-    if (!ctx->name)
-      if (!setKeyContextName(ctx, properties->name, wcslen(properties->name)))
+    if (!ctx->title)
+      if (!setKeyContextTitle(ctx, properties->title, wcslen(properties->title)))
         return 0;
 
     properties += 1;
@@ -761,12 +761,16 @@ processContextOperands (DataFile *file, void *data) {
       KeyContext *ctx = getCurrentKeyContext(ktd);
 
       if (ctx) {
-        DataOperand name;
+        DataOperand title;
 
-        if (getDataText(file, &name, NULL)) {
-          if (ctx->name) {
-            reportDataError(file, "context name specified more than once");
-          } else if (!setKeyContextName(ctx, name.characters, name.length)) {
+        if (getDataText(file, &title, NULL)) {
+          if (ctx->title) {
+            if ((title.length != wcslen(ctx->title)) ||
+                (wmemcmp(title.characters, ctx->title, title.length) != 0)) {
+              reportDataError(file, "context title redefined");
+              return 0;
+            }
+          } else if (!setKeyContextTitle(ctx, title.characters, title.length)) {
             return 0;
           }
         }
@@ -1299,7 +1303,7 @@ destroyKeyTable (KeyTable *table) {
   while (table->keyContextCount) {
     KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
 
-    if (ctx->name) free(ctx->name);
+    if (ctx->title) free(ctx->title);
 
     if (ctx->keyBindingTable) free(ctx->keyBindingTable);
     if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);

@@ -84,7 +84,7 @@ typedef struct {
 } HotkeyEntry;
 
 typedef struct {
-  wchar_t *name;
+  wchar_t *title;
 
   KeyBinding *keyBindingTable;
   unsigned int keyBindingsSize;
