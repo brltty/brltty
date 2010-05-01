@@ -940,7 +940,14 @@ processSuperimposeOperands (DataFile *file, void *data) {
     unsigned char function;
 
     if (getKeyboardFunctionOperand(file, &function, ktd)) {
-      ctx->superimposedBits |= keyboardFunctionTable[function].bit;
+      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+
+      if (!kbf->bit) {
+        reportDataError(file, "unsuperimposable keyboard function");
+        return 0;
+      }
+
+      ctx->superimposedBits |= kbf->bit;
       return 1;
     }
   }
