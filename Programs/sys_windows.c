@@ -315,17 +315,17 @@ sysInit (void) {
 
 const char *
 win_getLocaleName (void) {
-  DWORD language;
+  DWORD langid;
   int result = GetLocaleInfo(GetThreadLocale(),
                              LOCALE_ILANGUAGE | LOCALE_RETURN_NUMBER,
-                             (char *)&language, sizeof(language)/sizeof(TCHAR));
+                             (char *)&langid, sizeof(langid)/sizeof(TCHAR));
 
   if (result > 0) {
-#define TERRITORY(l,t,s) case MAKELANGID(LANG_##l, SUBLANG_##l##_##t): return (s);
-    switch (language) {
+#define TERRITORY(language,territory,locale) case MAKELANGID(LANG_##language, SUBLANG_##language##_##territory): return (locale);
+    switch (langid) {
       TERRITORY(AFRIKAANS, SOUTH_AFRICA, "af_ZA");
       TERRITORY(ALBANIAN, ALBANIA, "sq_AL");
-      TERRITORY(ALSATIAN, FRANCE, "xx_FR");
+      TERRITORY(ALSATIAN, FRANCE, "gsw_FR");
       TERRITORY(AMHARIC, ETHIOPIA, "am_ET");
       TERRITORY(ARABIC, ALGERIA, "ar_DZ");
       TERRITORY(ARABIC, BAHRAIN, "ar_BH");
@@ -387,7 +387,7 @@ win_getLocaleName (void) {
       TERRITORY(ENGLISH, ZIMBABWE, "en_ZW");
       TERRITORY(ESTONIAN, ESTONIA, "et_EE");
       TERRITORY(FAEROESE, FAROE_ISLANDS, "fo_FO");
-      TERRITORY(FILIPINO, PHILIPPINES, "xx_PH");
+      TERRITORY(FILIPINO, PHILIPPINES, "fil_PH");
       TERRITORY(FINNISH, FINLAND, "fi_FI");
       TERRITORY(FRENCH, BELGIAN, "fr_BE");
       TERRITORY(FRENCH, CANADIAN, "fr_CA");
@@ -395,7 +395,7 @@ win_getLocaleName (void) {
       TERRITORY(FRENCH, MONACO, "fr_MC");
       TERRITORY(FRENCH, SWISS, "fr_CH");
       TERRITORY(FRISIAN, NETHERLANDS, "fy_NL");
-      TERRITORY(GALICIAN, GALICIAN, "gl_XX");
+      TERRITORY(GALICIAN, GALICIAN, "gl_ES");
       TERRITORY(GEORGIAN, GEORGIA, "ka_GE");
       TERRITORY(GERMAN, AUSTRIAN, "de_AT");
       TERRITORY(GERMAN, LIECHTENSTEIN, "de_LI");
@@ -420,12 +420,12 @@ win_getLocaleName (void) {
       TERRITORY(KHMER, CAMBODIA, "km_KH");
       TERRITORY(KICHE, GUATEMALA, "xx_GT");
       TERRITORY(KINYARWANDA, RWANDA, "rw_RW");
-      TERRITORY(KONKANI, INDIA, "xx_IN");
+      TERRITORY(KONKANI, INDIA, "kok_IN");
       TERRITORY(KYRGYZ, KYRGYZSTAN, "ky_KG");
       TERRITORY(LAO, LAO_PDR, "lo_LA");
       TERRITORY(LATVIAN, LATVIA, "lv_LV");
       TERRITORY(LITHUANIAN, LITHUANIA, "lt_LT");
-      TERRITORY(LOWER_SORBIAN, GERMANY, "xx_DE");
+      TERRITORY(LOWER_SORBIAN, GERMANY, "dsb_DE");
       TERRITORY(LUXEMBOURGISH, LUXEMBOURG, "lb_LU");
       TERRITORY(MACEDONIAN, MACEDONIA, "mk_MK");
       TERRITORY(MALAY, BRUNEI_DARUSSALAM, "ms_BN");
@@ -433,15 +433,15 @@ win_getLocaleName (void) {
       TERRITORY(MALAYALAM, INDIA, "ml_IN");
       TERRITORY(MALTESE, MALTA, "mt_MT");
       TERRITORY(MAORI, NEW_ZEALAND, "mi_NZ");
-      TERRITORY(MAPUDUNGUN, CHILE, "xx_CL");
+      TERRITORY(MAPUDUNGUN, CHILE, "arn_CL");
       TERRITORY(MARATHI, INDIA, "mr_IN");
-      TERRITORY(MOHAWK, MOHAWK, "xx_XX");
+      TERRITORY(MOHAWK, MOHAWK, "moh");
       TERRITORY(MONGOLIAN, CYRILLIC_MONGOLIA, "mn_MN");
-      TERRITORY(MONGOLIAN, PRC, "mn_XX");
+      TERRITORY(MONGOLIAN, PRC, "mn_CN");
       TERRITORY(NEPALI, INDIA, "ne_IN");
       TERRITORY(NEPALI, NEPAL, "ne_NP");
       TERRITORY(NORWEGIAN, BOKMAL, "no_XX");
-      TERRITORY(NORWEGIAN, NYNORSK, "no_XX");
+      TERRITORY(NORWEGIAN, NYNORSK, "nn_NO");
       TERRITORY(OCCITAN, FRANCE, "oc_FR");
       TERRITORY(ORIYA, INDIA, "or_IN");
       TERRITORY(PASHTO, AFGHANISTAN, "ps_AF");
@@ -457,13 +457,13 @@ win_getLocaleName (void) {
       TERRITORY(ROMANIAN, MOLDOVA, "ro_MD");
       TERRITORY(ROMANIAN, ROMANIA, "ro_RO");
       TERRITORY(RUSSIAN, RUSSIA, "ru_RU");
-      TERRITORY(SAMI, LULE_NORWAY, "se_XX");
-      TERRITORY(SAMI, LULE_SWEDEN, "se_XX");
-      TERRITORY(SAMI, NORTHERN_FINLAND, "se_XX");
-      TERRITORY(SAMI, NORTHERN_NORWAY, "se_XX");
-      TERRITORY(SAMI, NORTHERN_SWEDEN, "se_XX");
-      TERRITORY(SAMI, SOUTHERN_NORWAY, "se_XX");
-      TERRITORY(SAMI, SOUTHERN_SWEDEN, "se_XX");
+      TERRITORY(SAMI, LULE_NORWAY, "smj_NO");
+      TERRITORY(SAMI, LULE_SWEDEN, "smj_SE");
+      TERRITORY(SAMI, NORTHERN_FINLAND, "sme_FI");
+      TERRITORY(SAMI, NORTHERN_NORWAY, "sme_NO");
+      TERRITORY(SAMI, NORTHERN_SWEDEN, "sme_SE");
+      TERRITORY(SAMI, SOUTHERN_NORWAY, "sma_NO");
+      TERRITORY(SAMI, SOUTHERN_SWEDEN, "sma_SE");
       TERRITORY(SANSKRIT, INDIA, "sa_IN");
       TERRITORY(SERBIAN, BOSNIA_HERZEGOVINA_CYRILLIC, "sr_BA");
       TERRITORY(SERBIAN, BOSNIA_HERZEGOVINA_LATIN, "sr_BA");
@@ -502,11 +502,11 @@ win_getLocaleName (void) {
       TERRITORY(TELUGU, INDIA, "te_IN");
       TERRITORY(THAI, THAILAND, "th_TH");
       TERRITORY(TIBETAN, BHUTAN, "bo_BT");
-      TERRITORY(TIBETAN, PRC, "bo_XX");
+      TERRITORY(TIBETAN, PRC, "bo_CN");
       TERRITORY(TIGRIGNA, ERITREA, "ti_ER");
       TERRITORY(TSWANA, SOUTH_AFRICA, "tn_ZA");
       TERRITORY(TURKISH, TURKEY, "tr_TR");
-      TERRITORY(UIGHUR, PRC, "ug_XX");
+      TERRITORY(UIGHUR, PRC, "ug_CN");
       TERRITORY(UKRAINIAN, UKRAINE, "uk_UA");
     //TERRITORY(UPPER_SORBIAN, GERMANY, "xx_DE");
       TERRITORY(URDU, INDIA, "ur_IN");
@@ -517,18 +517,18 @@ win_getLocaleName (void) {
       TERRITORY(WELSH, UNITED_KINGDOM, "cy_GB");
       TERRITORY(WOLOF, SENEGAL, "fy_SN");
       TERRITORY(XHOSA, SOUTH_AFRICA, "xh_ZA");
-      TERRITORY(YAKUT, RUSSIA, "xx_RU");
-      TERRITORY(YI, PRC, "yi_XX");
+      TERRITORY(YAKUT, RUSSIA, "sah_RU");
+      TERRITORY(YI, PRC, "ii_CN");
       TERRITORY(YORUBA, NIGERIA, "yo_NG");
       TERRITORY(ZULU, SOUTH_AFRICA, "zu_ZA");
     }
 #undef TERRITORY
 
-#define LANGUAGE(l,s) case LANG_##l: return (s);
-    switch (PRIMARYLANGID(language)) {
+#define LANGUAGE(language,locale) case LANG_##language: return (locale);
+    switch (PRIMARYLANGID(langid)) {
       LANGUAGE(AFRIKAANS, "af");
       LANGUAGE(ALBANIAN, "sq");
-      LANGUAGE(ALSATIAN, "xx");
+      LANGUAGE(ALSATIAN, "gsw");
       LANGUAGE(AMHARIC, "am");
       LANGUAGE(ARABIC, "ar");
       LANGUAGE(ARMENIAN, "hy");
@@ -548,13 +548,13 @@ win_getLocaleName (void) {
     //LANGUAGE(CROATIAN, "hr");
       LANGUAGE(CZECH, "cs");
       LANGUAGE(DANISH, "da");
-      LANGUAGE(DARI, "xx");
+      LANGUAGE(DARI, "gbz");
       LANGUAGE(DIVEHI, "dv");
       LANGUAGE(DUTCH, "nl");
       LANGUAGE(ENGLISH, "en");
       LANGUAGE(ESTONIAN, "et");
       LANGUAGE(FAEROESE, "fo");
-      LANGUAGE(FILIPINO, "xx");
+      LANGUAGE(FILIPINO, "fil");
       LANGUAGE(FINNISH, "fi");
       LANGUAGE(FRENCH, "fr");
       LANGUAGE(FRISIAN, "fy");
@@ -581,24 +581,24 @@ win_getLocaleName (void) {
       LANGUAGE(KHMER, "km");
       LANGUAGE(KICHE, "xx");
       LANGUAGE(KINYARWANDA, "rw");
-      LANGUAGE(KONKANI, "xx");
+      LANGUAGE(KONKANI, "kok");
       LANGUAGE(KOREAN, "ko");
       LANGUAGE(KYRGYZ, "ky");
       LANGUAGE(LAO, "lo");
       LANGUAGE(LATVIAN, "lv");
       LANGUAGE(LITHUANIAN, "lt");
-      LANGUAGE(LOWER_SORBIAN, "xx");
+      LANGUAGE(LOWER_SORBIAN, "dsb");
       LANGUAGE(LUXEMBOURGISH, "lb");
       LANGUAGE(MACEDONIAN, "mk");
       LANGUAGE(MALAGASY, "mg");
       LANGUAGE(MALAY, "ms");
       LANGUAGE(MALAYALAM, "ml");
       LANGUAGE(MALTESE, "mt");
-      LANGUAGE(MANIPURI, "xx");
+      LANGUAGE(MANIPURI, "mni");
       LANGUAGE(MAORI, "mi");
-      LANGUAGE(MAPUDUNGUN, "xx");
+      LANGUAGE(MAPUDUNGUN, "arn");
       LANGUAGE(MARATHI, "mr");
-      LANGUAGE(MOHAWK, "xx");
+      LANGUAGE(MOHAWK, "moh");
       LANGUAGE(MONGOLIAN, "mn");
       LANGUAGE(NEPALI, "ne");
       LANGUAGE(NORWEGIAN, "no");
@@ -624,7 +624,7 @@ win_getLocaleName (void) {
       LANGUAGE(SPANISH, "es");
       LANGUAGE(SWAHILI, "sw");
       LANGUAGE(SWEDISH, "sv");
-      LANGUAGE(SYRIAC, "xx");
+      LANGUAGE(SYRIAC, "syr");
       LANGUAGE(TAMAZIGHT, "xx");
       LANGUAGE(TAMIL, "ta");
       LANGUAGE(TATAR, "tt");
@@ -643,8 +643,8 @@ win_getLocaleName (void) {
       LANGUAGE(WELSH, "cy");
       LANGUAGE(WOLOF, "fy");
       LANGUAGE(XHOSA, "xh");
-      LANGUAGE(YAKUT, "xx");
-      LANGUAGE(YI, "yi");
+      LANGUAGE(YAKUT, "sah");
+      LANGUAGE(YI, "ii");
       LANGUAGE(YORUBA, "yo");
       LANGUAGE(ZULU, "zu");
     }
