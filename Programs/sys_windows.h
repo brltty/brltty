@@ -57,6 +57,8 @@ extern WIN_PROC_STUB(freeaddrinfo);
 
 #define getaddrinfo(host,port,hints,res) getaddrinfoProc(host,port,hints,res)
 #define freeaddrinfo(res) freeaddrinfoProc(res)
+
+extern const char *win_getLocaleName (void);
 #endif /* __MINGW32__ */
 
 
