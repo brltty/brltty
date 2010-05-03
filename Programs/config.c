@@ -505,6 +505,15 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+static const char *
+getTextTableLocale (void) {
+#if defined(__MINGW32__)
+  return win_getLocale();
+#else /* unix */
+  return setlocale(LC_CTYPE, NULL);
+#endif /* text table locale */
+}
+
 static int
 testTextTable (char *table) {
   int exists = 0;
@@ -3085,7 +3094,7 @@ startup (int argc, char *argv[]) {
   /* handle text table option */
   if (*opt_textTable) {
     if (strcmp(opt_textTable, "auto") == 0) {
-      const char *locale = setlocale(LC_CTYPE, NULL);
+      const char *locale = getTextTableLocale();
       opt_textTable = "";
 
       if (locale) {
