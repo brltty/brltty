@@ -10,8 +10,8 @@ l'analyse de problèmes de démarrage. Il facilite aussi beaucoup des
 opérations de bases telles que l'identification.
 
 BRLTTY reproduit une portion rectangulaire de l'écran (appelée
-dans ce document `la fenêtre') en un texte braille sur l'afficheur.
-Vous pouvez utiliser des contrôles de l'affichage pour déplacer la fenêtre sur
+dans ce document `la plage') en un texte braille sur l'afficheur.
+Vous pouvez utiliser des contrôles de l'affichage pour déplacer la plage sur
 l'écran, pour activer et désactiver des options de revue
 variées, et pour exécuter des fonctions spéciales.
 

@@ -108,7 +108,7 @@ brailles, nous espérons, si le temps nous le permet, travailler sur:
       <item>Mode mixte texte et attribut.
     </itemize>
   <tag>Suivi du défilement</tag>
-     Allignement de la fenêtre braille sur une ligne alors qu'elle défile à
+     Allignement de la plage braille sur une ligne alors qu'elle défile à
      l'écran.
   <tag>Meilleur support de voix</tag>
     <itemize>

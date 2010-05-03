@@ -32,7 +32,7 @@ provoquera une erreur, et de taper <tt>entrée</tt>. L'erreur
 apparaît sur l'écran mais, sauf si vous avez un afficheur à plusieurs
 lignes, il y a des chances qu'elle ne soit pas visible sur l'afficheur
 braille. Vous n'y voyez que l'invite du shell. Vous avez donc besoin,
-à présent, d'un moyen de déplacer la <tt>fenêtre</tt> braille à
+à présent, d'un moyen de déplacer la <tt>plage</tt> braille à
 travers l'écran. Les touches de l'afficheur braille lui-même peuvent
 être utilisées pour envoyer les commandes à BRLTTY qui, entre autres
 choses, peut s'en charger.
@@ -92,9 +92,9 @@ Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="P
   <tag>PRSEARCH/NXSEARCH<label id="command-PRSEARCH-NXSEARCH"></tag>
     Recherche avant/arrière de l'occurrence la plus proche de la
     chaîne de caractères du tampon coupé (voir <ref id="cut" name="Couper-coller">) qui
-    n'est pas dans la fenêtre braille. La recherche se fait à
+    n'est pas dans la plage braille. La recherche se fait à
     gauche/droite, et commence au caractère immédiatement à
-    gauche/droite de la fenêtre, et en englobant le bord de
+    gauche/droite de la plage, et en englobant le bord de
     l'écran. La recherche ne tient pas compte de la casse.
 </descrip>
 
@@ -104,9 +104,9 @@ Voir aussi la commande de la routine <ref id="command-SETLEFT" name="SETLEFT">.
   <tag>CHRLT/CHRRT<label id="command-CHRLT-CHRRT"></tag>
     Va à gauche/droite d'un caractère.
   <tag>HWINLT/HWINRT<label id="command-HWINLT-HWINRT"></tag>
-    Va à gauche/droite de la moitié de la fenêtre.
+    Va à gauche/droite de la moitié de la plage.
   <tag>FWINLT/FWINRT<label id="command-FWINLT-FWINRT"></tag>
-    Va à gauche/droite d'une fenêtre. Ces commandes sont
+    Va à gauche/droite d'une plage. Ces commandes sont
     particulièrement utiles parce qu'elles débordent automatiquement
     quand elles atteignent le bord de l'écran. Les autres
     caractéristiques, comme celles de sauter les fenêtres vides (voir
@@ -125,18 +125,18 @@ Voir aussi la commande de routine <ref id="command-GOTOMARK" name="GOTOMARK">.
     Va à l'endroit où se trouve le curseur d'écran.
   <tag>BACK<label id="command-BACK"></tag>
     Revient là où la commande de déplacement la plus récente a mis la
-    fenêtre braille. C'est une façon facile de retourner à droite de là
+    plage braille. C'est une façon facile de retourner à droite de là
     où vous lisiez, après un événement imprévu (comme une poursuite du
-    curseur) qui déplace la fenêtre braille à un moment inapproprié.
+    curseur) qui déplace la plage braille à un moment inapproprié.
   <tag>RETURN<label id="command-RETURN"></tag>
     <itemize>
       <item>
-        Si le déplacement le plus récent de la fenêtre braille
+        Si le déplacement le plus récent de la plage braille
         était automatique, comme le résultat d'une poursuite du
         curseur, revient là où la commande de déplacement la plus
         récente l'a mise (voir la commande <ref id="command-BACK" name="BACK">).
       <item>
-        Si le curseur n'est pas dans la fenêtre braille, va où se
+        Si le curseur n'est pas dans la plage braille, va où se
         trouve le curseur (voir la commande <ref id="command-HOME" name="HOME">).
     </itemize>
 </descrip>
@@ -160,7 +160,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
     qui écrit beaucoup trop rapidement.
   <tag>DISPMD<label id="command-DISPMD"></tag>
     Montre les mises en relief (attributs) de chaque caractère dans la
-    fenêtre braille, plutôt que les caractères eux-mêmes (le
+    plage braille, plutôt que les caractères eux-mêmes (le
     contenu). Par exemple, cette fonctionnalité est utile si vous
     devez mettre en valeur un item. Quand elle montre le contenu de
     l'écran, la table de texte est utilisée (voir
@@ -185,10 +185,10 @@ par le <ref id="preferences-menu" name="menu préférences">.
     Si le suivit (tracking) du curseur (voir la commande <ref
     id="command-CSRTRK" name="CSRTRK">) est  <bf>on</bf>, chaque fois que
     le curseur se déplace de façon trop limitée (ou pas assez) au-delà
-    de la fin de la fenêtre braille, elle repositionne
-    horizontalement la fenêtre braille, de sorte que le curseur,
+    de la fin de la plage braille, elle repositionne
+    horizontalement la plage braille, de sorte que le curseur,
     tant qu'il reste de ce côté, soit plus proche du centre. Si cette
-    caractéristique est <bf>off</bf>, la fenêtre braille est toujours
+    caractéristique est <bf>off</bf>, la plage braille est toujours
     positionnée de façon à ce que sont côté gauche soit un multiple de
     de sa largeur depuis le bord gauche de l'écran.
 
@@ -217,14 +217,14 @@ par le <ref id="preferences-menu" name="menu préférences">.
   virtuelle courante.
   <tag>CSRTRK<label id="command-CSRTRK"></tag>
     Poursuite du curseur. Si le curseur se déplace à un
-    endroit qui n'est pas à l'intérieur de la fenêtre braille, il
-    déplace automatiquement la fenêtre braille vers la nouvelle
+    endroit qui n'est pas à l'intérieur de la plage braille, il
+    déplace automatiquement la plage braille vers la nouvelle
     position du curseur. Vous voudrez en principe que cette
     caractéristique soit active, puisque cela minimise les effets du défilement
     de l'écran, et puisque, lorsque vous entrez quelque chose, la
     région à l'intérieur de laquelle vous écrivez actuellement est
     toujours visible. 
-    Si cette option fait sauter la fenêtre braille à un moment
+    Si cette option fait sauter la plage braille à un moment
     inadéquat, utilisez la commande <ref id="command-BACK" name="BACK">
     pour revenir là où vous étiez en train de lire.
     Il se peut que vous deviez
@@ -280,7 +280,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
   <tag>AUTOSPEAK<label id="command-AUTOSPEAK"></tag>
     Dit automatiquement:
     <itemize>
-      <item>la nouvelle ligne quand la fenêtre braille est déplacée verticalement
+      <item>la nouvelle ligne quand la plage braille est déplacée verticalement
       <item>les caractères que vous entrez ou que vous effacez.
       <item>le caractère vers lequel vous déplacez le curseur.
     </itemize>
@@ -303,7 +303,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
     Va à l'affichage des états (voir la section <ref id="status"
     name="Affichage des Statuts"> pour des détails complets). Cela
     présente un résumé comprenant la position du curseur, la position
-    de la fenêtre braille, et l'état d'un certain nombre de
+    de la plage braille, et l'état d'un certain nombre de
     caractéristiques de BRLTTY. Appelez de nouveau
     cette commande pour revenir à l'écran.
   <tag>LEARN<label id="command-LEARN"></tag>
@@ -373,7 +373,7 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
 <sect2>Autres Commandes<p>
 <descrip>
   <tag>CSRJMP_VERT<label id="command-CSRJMP_VERT"></tag>
-    Amène le curseur n'importe où sur la première ligne de la fenêtre
+    Amène le curseur n'importe où sur la première ligne de la plage
     braille (voir <ref id="routing" name="Déplacement du Curseur"> pour des détails complets).
     Le curseur se déplace grâce à la simulation de l'appui sur les touches de direction verticales.
     Cette commande ne fonctionne pas toujours car certaines applications,
@@ -438,12 +438,12 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     (<tt>bright</tt> et <tt>blink</tt>). Le message ressemble à cela:
     <tscreen>char 65 (0x41): white on black bright blink</tscreen>
   <tag>SETLEFT<label id="command-SETLEFT"></tag>
-    Replace horrizontalement la fenêtre braille de façon à ce que son
+    Replace horrizontalement la plage braille de façon à ce que son
     côté gauche soit à la colonne associée à la touche de
     déplacement. Cette caractéristique rend très facile l'action de
-    mettre la fenêtre précisément là où il faut et, donc, pour les
+    mettre la plage précisément là où il faut et, donc, pour les
     afficheurs qui ont des touches routines, élimine presque la
-    nécessité pour beaucoup de déplacements élémentaires de la fenêtre
+    nécessité pour beaucoup de déplacements élémentaires de la plage
     (comme les commandes <ref id="command-CHRLT-CHRRT"
     name="CHRLT/CHRRT"> et <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">).
   <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
@@ -459,11 +459,11 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Voir aussi les commandes de basculement entre terminaux virtuels
     <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT" name="SWITCHVT_PREV/SWITCHVT_NEXT">.
   <tag>SETMARK<label id="command-SETMARK"></tag>
-    Marque la position courante de la fenêtre braille dans
+    Marque la position courante de la plage braille dans
     une mémoire associée à la routine. Voir la commande <ref id="command-GOTOMARK" name="GOTOMARK">.
     Cette caractéristique n'affecte que le terminal virtuel courant.
   <tag>GOTOMARK<label id="command-GOTOMARK"></tag>
-    Déplace la fenêtre braille à la position précédemment marquée
+    Déplace la plage braille à la position précédemment marquée
     (voir la commande <ref id="command-SETMARK" name="SETMARK">) avec
     la même routine.
     Cette caractéristique n'affecte que le terminal virtuel courant.
@@ -972,7 +972,7 @@ suivantes:
     Voir la ligne <ref id="configure-speech-parameters" name="speech-parameters">
     du fichier de configuration pour les paramètres par défaut à l'exécution.
   <tag><tt>-U</tt><em>csecs</em> <tt>--update-interval=</tt><em>csecs</em><label id="options-update-interval"></tag>
-    Spécifie l'intervalle (en centièmes de secondes) auquel la fenêtre
+    Spécifie l'intervalle (en centièmes de secondes) auquel la plage
     braille est synchronisée avec le nouveau contenu de l'écran. Si ce
     n'est pas spécifié, c'est <tt>4</tt> (40 millisecondes) qui est utilisé.
   <tag><tt>-V</tt> <tt>--version</tt><label id="options-version"></tag>

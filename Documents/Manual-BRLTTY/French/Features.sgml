@@ -1,9 +1,9 @@
 <sect>Description des possibilités<p>
 
 <sect1>Routine curseur<label id="routing"><p>
-Lorsque vous déplacez la fenêtre braille sur l'écran alors que vous
+Lorsque vous déplacez la plage braille sur l'écran alors que vous
 examinez le texte, dans un éditeur, vous avez souvent besoin d'amener
-le curseur à un caractère en particulier à l'intérieur de la fenêtre braille.
+le curseur à un caractère en particulier à l'intérieur de la plage braille.
 Vous trouverez que c'est une tâche plutôt difficile pour un certain nombre de
 raisons. L'une d'entre elles est qu'il se peut que vous ne sachiez pas où se
 trouve le curseur, et vous avez peut-être perdu votre position en essayant de le
@@ -63,7 +63,7 @@ s'effectuer, la première est annulée et la deuxième est démarrée.
 Une commande de routine curseur plus sûre mais moins puissante, 
 <ref id="command-CSRJMP_VERT" name="CSRJMP_VERT">, utilise le déplacement
 vertical pour amener le curseur n'importe où sur la première ligne de la
-fenêtre braille. Elle est surtout utile, jointe à certaines applications
+plage braille. Elle est surtout utile, jointe à certaines applications
 (comme <tt>lynx</tt>), dans lesquelles le déplacement du curseur à l'horizontal
 ne doit jamais être tenté.
 
@@ -80,7 +80,7 @@ les adresses mail, et les URLS. Couper et coller du texte passe par trois
   <item>
     Marquer le coin en haut à gauche de la zone rectangulaire ou le début de la
     zone linéaire sur l'écran, qui sera extraite (coupée). Si votre afficheur a
-    des routines-curseur, déplacez la fenêtre braille de façon à ce que le
+    des routines-curseur, déplacez la plage braille de façon à ce que le
     premier caractère à couper apparaisse quelque part à l'intérieur, puis:
     <itemize>
       <item>
@@ -95,7 +95,7 @@ les adresses mail, et les URLS. Couper et coller du texte passe par trois
   <item>
     Marquer le coin en bas à droite de la zone rectangulaire ou la fin de
     la zone linéaire sur l'écran qui doit être extraite (coupée).
-    Si votre afficheur a des routine-curseur, déplacez la fenêtre braille
+    Si votre afficheur a des routine-curseur, déplacez la plage braille
     de telle sorte que le dernier caractère à couper apparaisse quelque part
     à l'intérieur, puis
     <itemize>
@@ -134,27 +134,27 @@ Si BRLTTY est configuré avec l'option de compilation,
 <ref id="gpm" name="--enable-gpm"> sur un système où l'application
 <tt>gpm</tt> a été installée, il réagira au pointeur (souris).
 
-Le fait de bouger la fenêtre braille déplace le pointeur (voir la préférence
+Le fait de bouger la plage braille déplace le pointeur (voir la préférence
 <ref id="preference-pointer-follows-window" name="Pointer Follows Window">).
-Le déplacement de la fenêtre braille (manuel, par recherche du curseur etc.),
+Le déplacement de la plage braille (manuel, par recherche du curseur etc.),
 est appliqué non seulement quand il se déplace en réponse à un mouvement du pointeur, mais il
 déplace aussi le pointeur au caractère à l'écran qui correspond au coin en haut à
-gauche de la fenêtre braille. Cela permet à une personne voyante de voir où se
-trouve la fenêtre braille et donc, de savoir ce que l'utilisateur brailliste
-est en train de lire. Cela récupère aussi le pointeur dans la fenêtre
+gauche de la plage braille. Cela permet à une personne voyante de voir où se
+trouve la plage braille et donc, de savoir ce que l'utilisateur brailliste
+est en train de lire. Cela récupère aussi le pointeur dans la plage
 braille de sorte que vous pouvez le
 trouver facilement et que le périphérique du pointeur peut toujours être
-utilisé comme un autre moyen de déplacer la fenêtre braille. 
+utilisé comme un autre moyen de déplacer la plage braille. 
 
-Le déplacement du pointeur emmène la fenêtre braille (voir la préférence
+Le déplacement du pointeur emmène la plage braille (voir la préférence
 <ref id="preference-window-follows-pointer" name="Window Follows Pointer">).
-Chaque fois que vous déplacez le pointeur au-delà du bord de la fenêtre
-braille, la fenêtre braille est emmenée tout au long du déplacement (un
+Chaque fois que vous déplacez le pointeur au-delà du bord de la plage
+braille, la plage braille est emmenée tout au long du déplacement (un
 caractère à la fois).
 Cela donne à l'utilisateur braille une autre manière à deux dimensions
-d'inspecter le contenu de l'écran ou de déplacer rapidement la fenêtre braille
+d'inspecter le contenu de l'écran ou de déplacer rapidement la plage braille
 sur un emplacement désiré. Cela donne aussi à l'utilisateur voyant une façon
-simple de déplacer la fenêtre braille sur quelque chose qu'il aimerait que
+simple de déplacer la plage braille sur quelque chose qu'il aimerait que
 l'utilisateur brailliste lise.
 
 <tt>gpm</tt> utilise la vidéo inversée pour montrer où se trouve le pointeur.
@@ -248,7 +248,7 @@ Ces événements incluent:
   <item>
     Le moment où l'image de l'écran est gelée ou rafraîchie.
   <item>
-    Le moment où la fenêtre braille entraîne la fenêtre braille en bas au début de la
+    Le moment où la plage braille entraîne la plage braille en bas au début de la
     ligne suivante, ou en haut à la fin de la ligne précédente.
   <item>
     Le moment où des lignes identiques sont sautées.
@@ -385,19 +385,19 @@ Remarques:
   <tag>Sliding Window<label id="preference-sliding-window"></tag>
     Si le curseur est suivi (voir la commande
     <ref id="command-CSRTRK" name="CSRTRK">),
-    et que le curseur est trop enfermé (ou trop à l'extérieur) à la fin d'une fenêtre braille:
+    et que le curseur est trop enfermé (ou trop à l'extérieur) à la fin d'une plage braille:
     <descrip>
       <tag>No</tag>
-        Repositionne la fenêtre horizontalement de sorte que son bord gauche
+        Repositionne la plage horizontalement de sorte que son bord gauche
 	soit un multiple de sa largeur à partir du bord gauche de l'écran.
       <tag>Yes</tag>
-        Repositionne la fenêtre horizontalement de façon à ce que le curseur,
-	tout en restant sur ce côté de la fenêtre, soit plus proche du centre.	
+        Repositionne la plage horizontalement de façon à ce que le curseur,
+	tout en restant sur ce côté de la plage, soit plus proche du centre.	
     </descrip>
     Vous pouvez aussi changer ce paramètre avec la commande
     <ref id="command-SLIDEWIN" name="SLIDEWIN">.
   <tag>Eager Sliding Window<label id="preference-eager-sliding-window"></tag>
-    Si la fenêtre braille doit glisser:
+    Si la plage braille doit glisser:
     <descrip>
       <tag>No</tag>
         La repositionne chaque fois que le curseur va au-delà de la fin.
@@ -409,8 +409,8 @@ Remarques:
   <tag>Window Overlap<label id="preference-window-overlap"></tag>
     Lors d'un déplacement à gauche ou à droite avec les commandes
     <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">, ce paramètre
-    spécifie de combien de caractères adjacents horizontalement dans
-    la fenêtre braille doivent-ils se recouvrir.
+    spécifie de combien de caractères adjacents horizontalement doit
+    se couvrir la plage braille.
     Le paramètre initial est <tt>0</tt>.
   <tag>Autorepeat<label id="preference-autorepeat"></tag>
     Tandis que la touche (la combinaison) d'une commande reste appuyée:
@@ -430,7 +430,7 @@ Remarques:
       <item>
         Les commandes <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT">.
       <item>
-        Opérations de défilement automatique de la fenêtre braille (voir
+        Opérations de défilement automatique de la plage braille (voir
         la préférence "Autorepeat Panning).
       <item>
         Les opérations Page Précédente Page suivante.
@@ -456,9 +456,9 @@ Remarques:
     <descrip>
       <tag>No</tag>
         Ne répète pas automatiquement les opérations de défilement  de la
-        fenêtre braille.
+        plage braille.
       <tag>Yes</tag>
-        Répète automatiquement les opérations de défilement  de la fenêtre 
+        Répète automatiquement les opérations de défilement de la plage 
         braille.
     </descrip>
     
@@ -605,27 +605,27 @@ Remarques:
     Lors du déplacement du pointeur (souris):
     <descrip>
       <tag>No</tag>
-        N'emmène pas la fenêtre braille.
+        N'emmène pas la plage braille.
       <tag>Yes</tag>
-        Emmène la fenêtre braille.
+        Emmène la plage braille.
     </descrip>
     Cette préférence n'est présentée que si l'option de compilation
     <ref id="gpm" name="--enable-gpm"> a été spécifiée.
   <tag>Highlight Window<label id="preference-pointer-follows-window"></tag>
-    Lors du déplacement de la fenêtre braille:
+    Lors du déplacement de la plage braille:
     <descrip>
       <tag>No</tag>
         Ne met pas en surbrillance la nouvelle zone de l'ùcran.
       <tag>Yes</tag>
         Cette option active un marqueur visible montrant où se situe la
-        fenêtre braille, et, par conséquent, permettant de savoir ce que
+        plage braille, et, par conséquent, permettant de savoir ce que
         l'utilisateur en braille est en train de lire. Tout mouvement de la
-        fenêtre braille (manuel, poursuite du curseur, etc.) autre que ceux
+        plage braille (manuel, poursuite du curseur, etc.) autre que ceux
         répondant au mouvement du pointeur (voir la préférence ref id="preference-window-follows-pointer" name="Window Follows Pointer">)
         a pour conséquence que la zone de l'écran correspondant à
-        au nouvel endroit où se trouve la  fenêtre braille est mis en
+        au nouvel endroit où se trouve la  plage braille est mis en
         surbrillance. Si la préférence "Show Attributes" est activée, seul le
-        caractère correspondant au coin en haut à gauche de la fenêtre braille
+        caractère correspondant au coin en haut à gauche de la plage braille
         est mis en surbrillance.
     </descrip>
     Cette préférence n'est présentée que si l'option de compilation 
@@ -747,7 +747,7 @@ Remarques:
       <tag>on</tag>
         Parle automatiquement:
         <itemize>
-          <item>la nouvelle ligne lorsque vous déplacez la fenêtre braille
+          <item>la nouvelle ligne lorsque vous déplacez la plage braille
 	  verticalement.
           <item>les caractères qui sont entrés ou effacés.
           <item>le caractère sur lequel vous déplacez le curseur.
@@ -799,7 +799,7 @@ $$      <item>All (toutes)
           <tag>1</tag>
             La place du curseur (voir ci-dessous).
           <tag>2</tag>
-            La place du coin en haut à gauche de la fenêtre braille (voir
+            La place du coin en haut à gauche de la plage braille (voir
 	    ci-dessous).
           <tag>3</tag>
             Une lettre indiquant l'état de BRLTTY.
@@ -818,11 +818,11 @@ $$      <item>All (toutes)
                 Rien de spécial.
             </descrip>
         </descrip>
-	Les emplacements du curseur et de la fenêtre braille sont présentés de
+	Les emplacements du curseur et de la plage braille sont présentés de
 	façon intéressante. Les points 1 à 6 représentent le numéro de la ligne
 	avec une lettre de <tt>a</tt> (pour 1) à <tt>y</tt> (pour 25).
 	Les points 7 et 8 (les deux points supplémentaires sur l'arrière)
-	représentent le numéro de la fenêtre braille horrizontal comme suit:
+	représentent le numéro de la plage braille horrizontal comme suit:
 	<descrip>
           <tag>Aucun points</tag>La première fenêtre (la plus à gauche).
           <tag>Point 7</tag>La seconde fenêtre.
@@ -831,18 +831,18 @@ $$      <item>All (toutes)
         </descrip>
 	Dans les deux cas, les indicateurs incluent:
 	la ligne 26 est représentée par la lettre <tt>a</tt>, et la cinquième
-	fenêtre braille horizontale est représentée avec aucun point derrière.
+	plage braille horizontale est représentée avec aucun point derrière.
       <tag>Tieman</tag>
         Les cellules de statut contiennent:
         <descrip>
           <tag>1-2</tag>
 	    Les colonnes (en partant de un) du curseur (montrées dans la
 	    moitié supérieure des cellules et du coin haut à gauche de la
-	    fenêtre braille (montré dans la partie arrière des cellules).
+	    plage braille (montré dans la partie arrière des cellules).
           <tag>3-4</tag>
 	    Les rangées (en partant de un) du curseur montrées dans la
 	    moitié supérieure des cellules et du coin haut à gauche de la
-	    fenêtre braille (montré dans la partie arrière des cellules).
+	    plage braille (montré dans la partie arrière des cellules).
           <tag>5</tag>
 	    Chaque point indique si une caractéristique est active comme suit:
             <descrip>
@@ -868,7 +868,7 @@ $$      <item>All (toutes)
                 Le curseur est poursuivi (voir la commande
                 <ref id="command-CSRTRK" name="CSRTRK">).
               <tag>Point 8</tag>
-                La fenêtre braille glissera (voir la commande
+                La plage braille glissera (voir la commande
                 <ref id="command-SLIDEWIN" name="SLIDEWIN">).
             </descrip>
         </descrip>
@@ -876,7 +876,7 @@ $$      <item>All (toutes)
         Les cellules de statut contiennent:
         <descrip>
           <tag>1</tag>
-	    La rangée (en partant de 1) correspondant au haut de la fenêtre
+	    La rangée (en partant de 1) correspondant au haut de la plage
 	    braille. La partie des dizaines est montrée dans la moitié supérieure
 	    de la cellule, et celle des unités est montrée dans la moitié
 	    arrière de la cellule.
@@ -888,7 +888,7 @@ $$      <item>All (toutes)
         Les cellules de statut contiennent:
         <descrip>
           <tag>1-2</tag>
-	    L'emplacement du coin en haut à gauche de la fenêtre braille.
+	    L'emplacement du coin en haut à gauche de la plage braille.
 	    La rangée (en partant de 1) est montrée dans la moitié supérieure
 	    des cellules, et la colonne (en partant de 1) est montrée dans la
 	    moitié arrière des cellules.
@@ -897,7 +897,7 @@ $$      <item>All (toutes)
         Les cellules de statut contiennent:
         <descrip>
           <tag>1</tag>
-	    La rangée (en partant de 0) correspondant au haut de la fenêtre
+	    La rangée (en partant de 0) correspondant au haut de la plage
 	    braille (voir ci-dessous).
           <tag>2</tag>
             La rangée (en partant de 1) sur laquelle se trouve le curseur (voir
@@ -944,14 +944,14 @@ Remarques:
 <itemize>
   <item><label id="time-settings">
     Tous les paramètres de temps sont en centièmes de seconde. Ce sont des
-    multiples de la fréquence de mise à jour de la fenêtre braille (voir l'option
+    multiples de la fréquence de mise à jour de la plage braille (voir l'option
     <ref id="options-update-interval" name="-U"> en ligne de commande)
     dans un intervalle de 1 à 100.
 </itemize>
 
 <sect1>L'affichage des états<label id="status"><p>
 L'affichage des états est un résumé de l'état courant de BRLTTY qui s'adapte
-totalement à l'intérieur de la fenêtre braille. Certains afficheurs braille ont
+totalement à l'intérieur de la plage braille. Certains afficheurs braille ont
 un type de cellules d'état qui sont utilisées pour afficher en permanence
 certaines de ces informations de la même façon (voir la documentation du
 pilote de votre afficheur).
@@ -962,7 +962,7 @@ commandes BRLTTY.
 Utilisez la commande <ref id="command-INFO" name="INFO"> pour aller à
 l'affichage des états, et utilisez-la de nouveau pour revenir à l'écran.
 La présentation des informations contenu à l'intérieur dépend de la taille de
-la fenêtre braille.
+la plage braille.
 
 <sect2>Afficheurs à 21 cellules ou plus<p>
 De courtes symboliques ont été utilisées, bien qu'elles s'apparentent à un code
@@ -971,7 +971,7 @@ crypté, de façon à montrer la présentation en colonne précise.
 <descrip>
   <tag><em>wx</em><tt>:</tt><em>wy</em></tag>
     La colonne et la rangée (en partant de 1) sur l'écran correspondant au
-    coin en haut à gauche de la fenêtre braille.
+    coin en haut à gauche de la plage braille.
   <tag><em>cx</em><tt>:</tt><em>cy</em></tag>
     La colonne et la rangée (en partant de 1) sur l'écran correspondant à la
     position du curseur.
@@ -1067,7 +1067,7 @@ crypté, de façon à montrer la présentation en colonne précise.
         Poursuite du curseur (voir la commande
 	<ref id="command-CSRTRK" name="CSRTRK">).
       <tag>Point 8</tag>
-        Glissement de la fenêtre (voir la commande
+        Glissement de la plage (voir la commande
 	<ref id="command-SLIDEWIN" name="SLIDEWIN">).
     </descrip>
   <tag><em>vt</em></tag>

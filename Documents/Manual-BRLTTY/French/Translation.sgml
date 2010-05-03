@@ -443,7 +443,7 @@ différentes.
     point; il ne peut être utilisé parallèlement à un autre numéro de point.
 </descrip>
 
-+<sect2>Opcodes<label id="contraction-opcodes"><p>
+<sect2>Opcodes<label id="contraction-opcodes"><p>
 Un opcode est un mot-clé qui dit au traducteur comment interpréter les
 opérateurs. Les opcodes sont groupés ici par leur fonction.
 
@@ -644,95 +644,487 @@ Les opcodes qui définissent et utilisent des classes de caractères sont:
 </descrip>
 
 <sect1>Tables de touches<label id="table-key"><p>
-Les fichiers aux noms de la forme <tt/*.ktb/ sont des tables de touches, et ceux
-aux noms de la forme <tt/*.kti/ sont des sous-tables de touches.
-Ils sont utilisés par BRLTTY pour associer des combinaisons de touches de clavier
-à des commandes BRLTTY.
+Les fichiers aux noms ayant la forme <tt/*.ktb/ sont des tables de touches, et ceux
+aux noms ayant la forme <tt/*.kti/ sont des sous-tables de touches.
+Ils sont utilisés par BRLTTY pour associer des combinaisons de touches
+de l'afficheur braille et du clavier à des commandes BRLTTY.
+
+Les noms de fichier de table de touches de l'afficheur braille commencent par
+<tt/brl-/<em/xx/<tt/-/", où <em/xx/ représente le
+<ref id="drivers" name="code d'identification de pilote"> à deux lettres. Le reste
+du nom identifie le(s) modèle(s) pour le(s)quel(s) la table de touches est
+utilisée.
+
+Les noms de fichier de table de touches du clavier commencent par <tt/kbd-/.
+Le reste du nom décrit le type de clavier pour lequel a été conçue la table
+de touches.
 
 Les tables de touches suivantes sont fournies:
 <descrip>
-  <tag/desktop/associations pour les claviers complets
-    <tag/keypad/associations pour la navigation à partir du pavé numérique
-    <tag/laptop/associations pour les claviers sans pavé numérique
-  </descrip>
+  <tag/kbd-desktop/associations pour les claviers complets
+  <tag/kbd-keypad/associations pour la navigation à partir du pavé numérique
+  <tag/kbd-laptop/associations pour les claviers sans pavé numérique
+</descrip>
       Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande
       et la ligne 
       <ref id="configure-key-table" name="key-table"> du fichier de
-      configuration pour plus de détails concernant la manière d'utiliser une table
-      de touche.
+      configuration pour plus de détails concernant la manière de sélectionner
+      une table de touches de clavier.
       
       <sect2>Format des tables de touches<p>
 Une table de touche consiste en une séquence d'instructions, une par ligne,
-qui définit comment chaque caractère doit être représenté en braille 
+qui définit comment les touches et les combinaisons de touches seront interprétées.
 Vous devez utiliser l'encodage <tt/UTF-8/.
-Un blanc (espaces, tabs) tant au début de la ligne qu'aavant et/ou après l'opérateur d'une instruction,
+Un blanc (espaces, tabs) tant au début de la ligne qu'aavant et/ou après n'importe quel opérateur,
 est ignoré.
 
 Les lignes ne contenant que des blancs sont ignorées.
-Si le premier caractère non blanc d'une ligne est "&num;", cette ligne est
+Si le premier caractère non blanc d'une ligne est un nombre ("&num;"), cette ligne est
 un commentaire et est ignorée.
-      
-      <sect2>Lignes de la table de touche<p>
+
+L'ordre de résolution de chaque appui de touche/événement qui se produit
+est le suivant:
+<enum>
+  <item>
+    Un appui sur une touche de raccourci ou une action définie dans le contexte actuel.
+    Voir la ligne 
+    <ref id="key-table-hotkey" name="hotkey">
+    pour des détails.
+  <item>
+    Une combinaison de touche définie dans le contexte actuel.
+    Voir la ligne
+    <ref id="key-table-bind" name="bind">
+    pour des détails.
+  <item>
+    Une commande du clavier braille définie dans le contexte actuel.
+    Voir les lignes
+    <ref id="key-table-map" name="map">
+    et
+    <ref id="key-table-superimpose" name="superimpose">d
+    pour des détails.
+  <item>
+    Une combinaison de touches définie dans le contexte par défaut.
+    Voir la ligne
+    <ref id="key-table-bind" name="bind">
+    pour des détails.
+</enum>
+
       Les lignes suivantes sont fournies:
+
+<sect3>La ligne Assign<label id="key-table-assign"><p>
+Crée ou met à jour une variable associée au niveau include actuel.
+La variable est visible aux niveaux include actuel et inférieur, mais pas aux
+niveaux include supérieurs.
+
+<tt/assign/ <em/variable/ [<em/valeur/]
       <descrip>
-        <tag><tt/bind/ <em/touches/ <em/commande/ &num; <em/commentaire/</tag>
-            Utilisez la ligne <tt/bind/ pour associer une combinaison de touches 
-            à une commande.            
+ <tag><em/variable/</tag>
+    Le nom de la variable.
+    Si la variable n'existe pas déjà au niveau include actuel, elle sera créée.
+  <tag><em/valeur/</tag>
+    La valeur qui sera associée à la variable.
+    Si on ne la fournit pas, une valeur zéro (null) est assignée.
+</descrip>
+
+La séquence d'échappement \{variable} est remplacée par la valeur de la
+variable nommée dans les accolades. La variable doit être définie au niveau 
+include actuel ou supérieur.
+
+Exemples:
+<itemize>
+  <item><tt/assign nullValue/
+  <item><tt/assign ReturnKey Key1/
+  <item><tt/bind \{ReturnKey} RETURN/
+</itemize>
+
+<sect3>La ligne Bind<label id="key-table-bind"><p>
+Définit quelle commande BRLTTY est exécutée quand on appuie sur une ou plusieurs
+combinaisons particulière de touches.
+L'association est définie dans le contexte courant.
+
+        <tt/bind/ <em/touches/ <em/commande/
             <descrip>
               <tag><em/touches/</tag>
                 La combinaison de touches à associer.
-               C'est une séquence d'un ou plusieurs noms de touches (voir le
-               fichier <tt/ktb_keynames.h/ dans le sous-répertoire <tt/Programs/
-               de l'arborescence des sources de BRLTTY) séparés par des
-               signes plus (<tt/+/). Les touches initiales sont connues comme
-               des modificateurs et peuvent être pressées dans n'importe quel
-               ordre. La dernière touche doit être appuyée avec tous les modifieurs maintenus.
+               C'est une séquence d'un ou plusieurs noms de touches séparés par 
+               des signes plus (<tt/+/). Le nom de touch à la fin (ou seulement)
+               peut être éventuellement précédé d'un point d'exclamation
+               (<tt/!/). Vous pouvez appuyer sur les touches dans
+               n'importe quel ordre sauf si le nom de la touche à la fin est
+               est précédé d'un point d'exclamation, alors on doit appuyer dessus
+               en dernier.
+               Le préfixe du point d'exclamation signifie que la commande est
+               exécutée dès qu'on appuie sur cette touche. S'il n'est pas
+               utilisé, la commande est exécutée dès qu'on effectue
+               une des touches.
               <tag><em/commande/</tag>
-                Le nom d'une commande BRLTTY (voir la section
-                <ref id="commands" name="Commandes"> pour plus de détails). Pour
-                les commandes listées dans la section 
-                <ref id="commands-features" name="Activation de fonctionnalités">:
+                Le nom d'une commande BRLTTY. Un ou plusieurs modificateurs
+                peuvent éventuellement être associé au nom de la commande en 
+                utilisant un signe plus (<tt/+/) comme séparateur.
                 <itemize>
-                  <item>
-                    Si aucun modificateur n'est appliqué, l'état de la fonctionnalité
-                    inversée.
-                  <item>
-                    Si le modificateur <tt/+on/ est appliqué, la fonctionnalité
-                    est activée.
-                  <item>
-                    Si le modificateur <tt/+off/ est appliqué, la
-                    fonctionnalité est désactivée.
-                </itemize>
-
-Pour les commandes listées dans la section <ref id="commands-characters" name="Commandes de caractère">:
-La commande agit sur le caractère où est le curseur.
-
-Pour les commandes listées dans la section <ref id="commands-base" name="Commandes de base">:
-Le modificateur <tt/+/<em/n/, où <em/n/ est un entier non négatif, peut être
-appliqué.
-Si ce modificateur n'est pas spécifié, <tt/0/ est supposé.
+      <item>
+        Pour les commandes qui activent/désactivent une fonctionnalité:
+         <itemize>
+           <item>
+            Si vous spécifiez le modificateur <tt/+on/, la fonctionnalité est
+            alors activée.
+          <item>
+            Si vous spécifiez le modificateur <tt/+off/, la fonctionnalité est
+            alors désactivée.
+          <item>
+            Si vous ne spécifiez ni <tt/+on/ ni <tt/+off/, l'état de la fonctionnalité
+            est activable/désactivable en bascule.
+</itemize>
+      <item>
+        Pour les commandes qui déplacent la plage braille:
+        <itemize>+          <item>
+            Si vous spécifiez le modificateur <tt/+route/, si nécessaire,
+            le curseur est automatiquement routé afin d'être toujours visible
+            sur l'afficheur braille.
+        </itemize>
+      <item>
+        Pour les commandes qui déplacent la plage braille vers une ligne
+        spécifique de l'écran:
+        <itemize>
+          <item>
+            Si vous spécifiez le modificateur <tt/+toleft/,
+            la plage braille est alors également déplacée au début de cette
+            ligne.
+          <item>
+            Si vous spécifiez le modificateur <tt/+scaled/, l'ensemble de
+            touches associé à la commande est interprété comme si c'était une
+            barre de défilement. Si vous ne le spécifiez pas, il y a une
+            correspondance une à une entre les touches et les lignes.
+        </itemize>
+      <item>
+        Pour les commandes qui demandent un complément (offset):
+        <itemize>
+          <item>
+            Vous pouvez spécifier le modificateur +<em/offset/, où
+            <em/offset/ est un entier non négatif.
+            Si vous ne le fournissez pas, <tt/+0/ est supposé.
+        </itemize>
+    </itemize>
 </descrip>
 
 Exemples:
 <itemize>
-<item><tt/bind CapsLock+Enter CsrTrk/
-<item><tt/bind CapsLock+O CsrTrk+off/
-<item><tt/bind CapsLock+P CsrTrk+on/
-<item><tt/bind KPInsert+1 GoToMark+1/
+  <item><tt/bind Key1 CSRTRK/
+  <item><tt/bind Key1+Key2 CSRTRK+off/
+  <item><tt/bind Key1+Key3 CSRTRK+on/
+  <item><tt/bind Key4 TOP/
+  <item><tt/bind Key5 TOP+route/
+  <item><tt/bind VerticalSensor GOTOLINE+toleft+scaled/
+  <item><tt/bind Key6 CONTEXT+1/
 </itemize>
 
-<tag><tt/include/ <em/file/ &num; <em/comment/</tag>
-    Utilisez la ligne <tt/include/ pour inclure le contenu d'une sous-table de
-    touche. Elle est récursive, ce qui signifie que toute sous-table de texte peut
-    inclure elle-même une autre sous-table de touche. Prenez soin de vous
-    assurer de ne pas créer une "inclusion en boucle".
+<sect3>La ligne Context<label id="key-table-context"><p>
+Définit des façons alternatives d'interpréter certains événements et/ou
+combinaisons de touches. Un contexte contient des définitions créées avec les
+lignes 
+<ref id="key-table-bind" name="bind">, 
+<ref id="key-table-hotkey" name="hotkey">,
+<ref id="key-table-map" name="map">,
+et
+<ref id="key-table-superimpose" name="superimpose">.
 
+<tt/context/ <em/identificateur/ [<em/titre/]
+<descrip>
+  <tag><em/identificateur/</tag>
+    À l'intérieur de quel contexte sous-jacent doivent être créées les définitions.
+    Cela peut être:
+
+<itemize>
+      <item>
+        On de ces noms spéciaux:
+        <descrip>
+          <tag/default/
+            Le contexte par défaut. Si une combinaison de touche n'a pas été définie
+            dans le contexte actuel, c'est alors sa définition dans le contexte
+            par défaut qui sera utilisée. Cela ne s'applique qu'aux définitions
+            créées par la ligne
+            <ref id="key-table-bind" name="bind">.
+          <tag/menu/
+            Ce contexte est utilisé quand on est à l'intérieur du menu des
+            préférences de BRLTTY.
+        </descrip>
+      <item>
+        Un entier compris entre <tt/0/ et <tt/252/.
+        Le contexte <tt/0/ est une façon alternative de se référer au contexte
+        par défaut. Vous devriez éviter les numéros de contexte supérieurs car 
+        le numéro le plus élevé autorisé est susceptible de changer sans signalement,
+        si, par exemple, on ajoute davantage de contextes nommés.
+
+    </itemize>
+
+  <tag><em/titre/</tag>
+    Une description lisible par un humain du  contexte.
+    Il peut contenir des espaces et vous devriez utiliser les conventions de
+    mise en majuscules standards. 
+    Cet opérande est facultatif. Si on le fournit lors de la sélection d'un
+    contexte ayant déjà un titre, les deux doivent correspondre.
+    Les contextes nommés ont déjà des titres internes attribués.
+    
+    Les contextes numériques sont créés au départ sans titres.
+</descrip>
+
+Un contexte est créé la première fois qu'il est sélrctionné.
+
+Il peut être sélectionné autant de fois que nécessaire après.
+
+Toutes les définitions sous-jacentes jusqu'à la prochaine ligne
+<ref id="key-table-context" name="context"> ou à la fin du niveau include
+actuel sont créées à l'intérieur du contexte sélectionné.
+
+Le contexte initial du premier niveau de la table de touches est <tt/default/.
+Le contexte initial d'une sous-table de touches incluse est le contexte qui
+a été sélectionné lorsqu'il a été inclu.
+
+Les changements de contexte dans les sous-tables de touches incluses n'affectent
+pas le contexte de la table de touches qui inclut ou de la sous-table.
+
+Si un contexte a un titre (tous les contextes nommés et les contextes numériques 
+pour lesquels on a fourni l'opérande <em/title/), il demeure en place.
+
+Quand un événement de touches entraîne l'activation d'un contexte permanent,
+ce contexte reste actuel jusqu'à ce qu'un événement de touches subséquent
+entraîne l'activation d'un contexte permanent différent. 
+
+Si un contexte n'a pas de titre (les contextes numériques pour lesquels on n'a
+pas fourni l'opérande <em/title/), il est temporaire.
+
+Quand un événement de touche provoque l'activation d'un contexte temporaire,
+ce contexte n'est utilisé que pour interpréter le tout prochain événement de
+touche.
+
+Exemples:
+<itemize>
+  <item><tt/context menu/
+  <item><tt/context 1 Braille Input/
+  <item><tt/context 2/
+</itemize>
+
+<sect3>La ligne Hide<label id="key-table-hide"><p>
+Spécifie si des définitions (voir les lignes
+<ref id="key-table-bind" name="bind">,
+<ref id="key-table-hotkey" name="hotkey">,
+<ref id="key-table-map" name="map">,
+et
+<ref id="key-table-superimpose" name="superimpose">) et les remarques (voir
+la ligne <ref id="key-table-note" name="note">) sont incluses ou pas 
+dans le texte d'aide de la table de touches.
+ 
+<tt/hide/ <em/state/
+<descrip>
+  <tag><em/state/</tag>
+    Un de ces mots-clés:
+     <descrip>
+      <tag/on/Elles sont exclues.
+      <tag/off/Elles sont incluses.
+     </descrip>
+</descrip>
+
+L'état spécifié s'applique à toutes les définitions et les notes qui en découlent
+jusqu'à la prochaine ligne <tt/hide/ ou jusqu'à la fin du niveau include actuel.
+L'état initial du premier niveau de la table de touches est <tt/off/.
+L'état initial d'une sous-table de touches incluse est l'état qui a été
+sélectionné quand elle a été incluse. 
+
+Les changements d'état à l'intérieur des sous-tables de touches incluses
+n'affectent pas l'état de la table de touche ou de la sous-table qui inclut.
+
+Exemples:
+<itemize>
+  <item><tt/hide on/
+</itemize>
+
+<sect3>La ligne Hotkey<label id="key-table-hotkey"><p>
+Associe l'appui ou la survenance d'un événement d'une touche spécifique
+à deux commandes BRLTTY distinctes.
+
+Les associations sont définies dans le contexte actuel.
+
+<tt/hotkey/ <em/touche/ <em/appui/ <em/effectuer/
+<descrip>
+  <tag><em/touche/</tag>
+    Le nom de la touche qui sera associée.
+  <tag><em/appui/</tag>
+    Le nom de la commande BRLTTY qui sera exécutée à chaque fois qu'on appuiera
+    sur la touche. 
+
+  <tag><em/Effectuer/</tag>
+    Le nom de la commande BRLTTY qui sera exécutée à chaque fois qu'on effectuera
+    la touche. 
+</descrip>
+
+On peut coller des modificateurs aux noms de commande.
+
+Voir l'opérande <em/command/ de la ligne 
+<ref id="key-table-bind" name="bind"> pour des
+détails.
+
+Spécifiez <tt/NOOP/ si aucune commande ne sera exécutée.
+Spécifier <tt/NOOP/ pour deux commandes désactive la touche dans les faits.
+
+Exemples:
+<itemize>
+  <item><tt/hotkey Key1 CSRVIS+off CSRVIS+on/
+  <item><tt/hotkey Key2 NOOP NOOP/
+</itemize>
+
+<sect3>La ligne IfKey<label id="key-table-ifkey"><p>
+Applique une ligne de la table de touches à la condition que
+le périphérique ait une touche particulière.
+
+<tt/ifkey/ <em/touche/ <em/ligne/
+<descrip>
+  <tag><em/touche/</tag>
+    Le nom de la touche dont la disponibilité doit être testée.
+  <tag><em/ligne/</tag>
+    La ligne de la table de touches qui doit être appliquée sous condition.
+</descrip>
+
+Exemples:
+<itemize>
+  <item><tt/ifkey Key1 ifkey Key2 bind Key1+Key2 HOME/
+</itemize>
+
+<sect3>La ligne Include<label id="key-table-include"><p>
+Exécute les lignes à l'intérieur d'une sous-table de touches.
+
+Cela est récursif, ce qui signifie que n'importe quelle table de touches
+peut s'inclure elle-même dans une autre sous-table.
+
+Il faut faire attention à bien s'assurer qu'une "boucle d'inclusion" ne soit
+pas créée.
+
+<tt/include/ <em/fichier/
+<descrip>
+  <tag><em/file/</tag>
+    La sous-table de touche qui doit être incluse.
+    Il peut s'agir d'un chemin soit relatif soit absolu.
+    S'il est relatif, il est ancré au répertoire contenant la table de touches
+    qui inclut ou la sous-table.
+</descrip>
+
+Exemples:
+<itemize>
+  <item><tt/include common.kti/
+  <item><tt>include /chemin/vers/my/keys.kti</tt>
+</itemize>
+
+<sect3>La ligne Map<label id="key-table-map"><p>
+Fait correspondre une touche à une fonction de clavier braille.
+La correspondance est définie à l'intérieur du contexte actuel.
+
+<tt/map/ <em/touche/ <em/fonction/
+<descrip>
+  <tag><em/touche/</tag>
+    Le nom de la touche qui doit être associée. Vous pouvez associer plus d'une
+    touche à la même fonction de clavier braille.
+  <tag><em/fonction/</tag>
+    Le nom de la fonction de clavier braille. Cela peut être un des
+    mots-clés suivants:
     <descrip>
-      <tag><em/fichier/</tag>
-        Le fichier à inclure. Cela peut être un chemin relatif ou absolu. Si c'est
-        relatif, il est ancré au répertoire contenant le fichier qui inclut.
+      <tag/DOT1/Le point braille standard en haut à gauche.
+      <tag/DOT2/Le point braille standard au milieu à gauche
+      <tag/DOT3/Le point braille standard en bas à gauche.
+      <tag/DOT4/Le point braille standard en haut à droite.
+      <tag/DOT5/Le point braille standard au milieu à droite.
+      <tag/DOT6/Le point braille standard en bas à droite.
+      <tag/DOT7/Le point braille informatique en bas à gauche.
+      <tag/DOT8/Le point braille informatique en bas à droite.
+      <tag/SPACE/La barre d'espace.
+      <tag/SHIFT/La touche shift.
+      <tag/UPPERCASE/
+        Si on doit entrer une lettre minuscule, la traduit alors dans son
+        équivalent en majuscule.
+      <tag/CONTROL/La touche contrôle.
+      <tag/META/La touche alt gauche.
     </descrip>
 </descrip>
+
+Si une combinaison de touches ne consiste qu'en des touches qui ont été
+associées à des fonctions du clavier braille, et si ces fonctions, lorsqu'elles
+sont combinées, constituent une commande de clavier braille valide, la commande
+est alors exécutée dès que les touches sont utilisées.
+Une commande de clavier braille valide doit inclure soit n'importe quelle
+combinaison de points, soit la barre d'espace (mais pas les deux).
+Si on inclut au moins un point braille, les fonctions du clavier braille
+spécifiée par les lignes
+<ref id="key-table-superimpose" name="superimpose">
+dans le même contexte sont aussi incluses implicitement.
+
+Exemples:
+<itemize>
+  <item><tt/map Key1 DOT1/
+</itemize>
+
+<sect3>La ligne Note<label id="key-table-note"><p>
+
+Ajoute une explication lisible par un humain au texte d'aide de la table de
+touches. 
+
+Les remarques sont utilisées en général, par exemple, pour décrire la place,
+les tailles et les formes des touches d'un périphérique.
+
+<tt/note/ <em/texte/
+<descrip>
+  <tag><em/texte/</tag>
+    L'explication qui doit être ajoutée.
+    Elle peut contenir des espaces et devrait être grammaticalement correcte.
+</descrip>
+
+Chaque remarque comporte exactement une ligne de texte d'explication.
+Le grand espace est ignoré donc on ne peut spécifier l'indentation.
+
+Il n'y a pas de limite au nombre de remarques que vous pouvez spécifier.
+Toutes sont regroupées et présentées dans un seul bloc au début du texte d'aide
+de la table de touches.
+
+Exemples:
+<itemize>
+  <item><tt/note Key1 is the round key at the far left on the front surface./
+</itemize>
+
+<sect3>La ligne Superimpose<label id="key-table-superimpose"><p>
+Inclut implicitement une fonction de clavier braille à chaque fois qu'une
+commande de clavier braille d'au moins un point esst exécutée.
+
+L'inclusion implicite est définie dans le contexte actuel.
+
+Vous pouvez spécifier n'importe quel numéro parmi elles.
+
+<tt/superimpose/ <em/fonction/
+<descrip>
+  <tag><em/fonction/</tag>
+    Le nom de la fonction de clavier braille. Voir l'opérande <em/function/
+    de la ligne <ref id="key-table-map" name="map"> pour des détails.
+</descrip>
+
+Exemples:
+<itemize>
+  <item><tt/superimpose DOT7/
+</itemize>
+
+<sect3>La ligne Title<label id="key-table-title"><p>
+Fournit un résumé lisible par un humain de l'objectif de la table de touches.
+
+<tt/title/ <em/texte/
+<descrip>
+  <tag><em/texte/</tag>
+   Un résumé d'une ligne de la raison pour laquelle est utilisée la table de 
+   touches. Il peut contenir des espaces et vous devriez utiliser les
+   conventions de mise en majuscule standards.
+
+</descrip>
+
+Le titre d'une table de touches ne peut être spécifié qu'une fois.
+
+Exemples:
+<itemize>
+  <item><tt/title Bindings for Keypad-based Navigation/
+</itemize>
 
 <sect2>Propriétés du clavier<label id="keyboard-properties"><p>
 Par défaut, tous les claviers sont pris en charge. 
