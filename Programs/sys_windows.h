@@ -42,7 +42,7 @@ extern WIN_PROC_STUB(NtSetInformationProcess);
 /* kernel32.dll: console */
 extern WIN_PROC_STUB(AttachConsole);
 
-extern int WINAPI GetLocaleInfoEx (LPCWSTR, LCTYPE, LPWSTR, int);
+extern WINBASEAPI int WINAPI GetLocaleInfoEx (LPCWSTR, LCTYPE, LPWSTR, int);
 extern WIN_PROC_STUB(GetLocaleInfoEx);
 
 #ifndef LOCALE_NAME_USER_DEFAULT
