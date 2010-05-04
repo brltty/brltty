@@ -362,12 +362,14 @@ win_getLocale (void) {
       } while (*source++);
 
       return locale;
+    } else {
+      LogWindowsError("GetLocaleInfoEx");
     }
   }
 
   {
     DWORD langid;
-    int result = GetLocaleInfo(GetThreadLocale(),
+    int result = GetLocaleInfo(LOCALE_USER_DEFAULT,
                                LOCALE_ILANGUAGE | LOCALE_RETURN_NUMBER,
                                (char *)&langid, sizeof(langid)/sizeof(TCHAR));
 
@@ -707,6 +709,8 @@ win_getLocale (void) {
         LANGUAGE(ZULU, "zu");
 #undef LANGUAGE
       }
+    } else {
+      LogWindowsError("GetLocaleInfo");
     }
   }
 
