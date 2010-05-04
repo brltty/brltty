@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_SYS_WINDOWS
 #define BRLTTY_INCLUDED_SYS_WINDOWS
 
+#include "prologue.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "prologue.h"
 
 #define WIN_PROC_STUB(name) typeof(name) (*name##Proc)
 
@@ -41,6 +41,17 @@ extern WIN_PROC_STUB(NtSetInformationProcess);
 
 /* kernel32.dll: console */
 extern WIN_PROC_STUB(AttachConsole);
+
+extern int WINAPI GetLocaleInfoEx (LPCWSTR, LCTYPE, LPWSTR, int);
+extern WIN_PROC_STUB(GetLocaleInfoEx);
+
+#ifndef LOCALE_NAME_USER_DEFAULT
+#define LOCALE_NAME_USER_DEFAULT NULL
+#endif /* LOCALE_NAME_USER_DEFAULT */
+
+#ifndef LOCALE_SNAME
+#define LOCALE_SNAME 0X5CL
+#endif /* LOCALE_SNAME */
 
 
 /* user32.dll */
