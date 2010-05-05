@@ -452,6 +452,11 @@ ktb_list.$O:
 ktb_keyboard.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
+check-key-tables: $(SRC_TOP)$(TBL_DIR)/*.ktb
+
+%.ktb: ktbtest$X
+	./ktbtest$X -L$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) $@
+
 ###############################################################################
 
 TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(TUNE_OBJECTS)
