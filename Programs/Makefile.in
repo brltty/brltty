@@ -407,6 +407,11 @@ ttb_louis.$O:
 ttb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
+check-text-tables: $(SRC_TOP)$(TBL_DIR)/*.ttb
+
+%.ttb: ttbtest$X api
+	LD_LIBRARY_PATH=$(BLD_DIR) ./ttbtest$X -T$(SRC_TOP)$(TBL_DIR) $@
+
 ###############################################################################
 
 atb_compile.$O:
@@ -430,6 +435,11 @@ ctb_compile.$O:
 
 ctb_translate.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
+
+check-contraction-tables: $(SRC_TOP)$(TBL_DIR)/*.ctb
+
+%.ctb: ctbtest$X
+	./ctbtest$X -T$(SRC_TOP)$(TBL_DIR) -c$@ </dev/null
 
 ###############################################################################
 
