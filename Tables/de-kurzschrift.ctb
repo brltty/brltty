@@ -132,6 +132,7 @@ endword tener 2345-14-12456
 endword tenes 2345-14-123456
 endword tens 2345-14-234
 endword ter 2345-12456
+always liter 123-24-2345-12456
 endword tern 2345-12456-1345
 endword tes 2345-123456
 
@@ -202,6 +203,7 @@ always trigraph = shouldn't use the ig-contraction
 # Vorsilbenkürzungen
 begword aus 34
 begword ent 2346
+begmidword entwickl 2346-2456-24-46-123
 begword ex 1346
 begword pro 12345
 begword ver 36
@@ -1010,6 +1012,7 @@ prfword hallen 125-1-12345-14 shouldn't use the allen-contraction
 always hauf 125-16-124 shouldn't use the auf-contraction
 always hotel 125-135-2345-13456 shouldn't use the te-contraction
 always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
+always internet 35-2345-12456-1345-15-2345 shouldn't use the te-contraction
 always interview 35-2345-12456-1236-24-15-2456 shouldn't use the ie-contraction
 after st always ionstrieb 245-234-2345-1235-346-12
 after st always ionstrupp 245-234-2345-1235-136-1234-1234
