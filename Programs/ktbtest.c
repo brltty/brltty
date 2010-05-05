@@ -194,10 +194,11 @@ main (int argc, char *argv[]) {
       KEY_NAME_TABLES_REFERENCE keyNameTables;
 
       {
-        size_t length = strrchr(keyTableFile, '.') - keyTableFile;
+        const char *file = locatePathName(keyTableFile);
+        size_t length = strrchr(file, '.') - file;
         char name[length + 1];
 
-        memcpy(name, keyTableFile, length);
+        memcpy(name, file, length);
         name[length] = 0;
 
         keyNameTables = getKeyNameTables(name);
