@@ -218,7 +218,7 @@ The following speech synthesizers are supported:
 -  Alva [Delphi(4nn)]
 -  BrailleLite
 -  CombiBraille
--  eSpeak [text to speech library]
+-  eSpeak [text to speech engine]
 -  ExternalSpeech [runs /usr/local/bin/externalspeech]
 -  Festival [text to speech engine]
 -  FestivalLite [text to speech engine]

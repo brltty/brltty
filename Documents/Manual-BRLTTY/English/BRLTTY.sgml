@@ -5437,7 +5437,7 @@ BRLTTY supports the following speech synthesizers:
     CombiBraille
       |@
     eSpeak
-      |text to speech library@
+      |text to speech engine@
     ExternalSpeech
       |runs /usr/local/bin/externalspeech@
     Festival
