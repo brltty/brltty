@@ -750,7 +750,7 @@ trackSpeech (int index) {
 
 static void
 sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
-  unsigned char text[count * UTF8_LEN_MAX];
+  unsigned char text[(count * UTF8_LEN_MAX) + 1];
   unsigned char *t = text;
 
   unsigned char attributes[count];
@@ -758,7 +758,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immedi
 
   {
     int i;
-    for (i=0; i<count; ++i) {
+    for (i=0; i<count; i+=1) {
       const ScreenCharacter *character = &characters[i];
       Utf8Buffer utf8;
       int length = convertWcharToUtf8(character->text, utf8);
@@ -772,6 +772,8 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immedi
 
       *a++ = character->attributes;
     }
+
+    *t = 0;
   }
 
   if (immediate) speech->mute(&spk);

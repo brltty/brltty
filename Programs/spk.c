@@ -99,12 +99,12 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
 void
 sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute) {
   if (count) {
-    unsigned char bytes[count * UTF8_LEN_MAX];
+    unsigned char bytes[(count * UTF8_LEN_MAX) + 1];
     unsigned char *b = bytes;
 
     {
       int i;
-      for (i=0; i<count; ++i) {
+      for (i=0; i<count; i+=1) {
         Utf8Buffer utf8;
         size_t utfs = convertCharToUtf8(characters[i], utf8);
 
@@ -115,6 +115,8 @@ sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int
           *b++ = ' ';
         }
       }
+
+      *b = 0;
     }
 
     if (mute) speech->mute(spk);
