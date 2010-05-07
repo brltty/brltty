@@ -1,0 +1,28 @@
+This directory contains the BRLTTY speech driver for the eSpeak text to
+speech engine.  The eSpeak web site is http://espeak.sourceforge.net/.
+
+eSpeak comes with a simple command-line tool called espeak which can be
+used to test it, and to recompile modified dictionaries, etc. Please see
+the espeak man page for more information.
+
+BRLTTY's configure script automatically includes this driver if the
+eSpeak development library is installed.
+
+This driver recognizes the following parameters:
+
+data
+
+	Specifies the directory containing the espeak-data directory.
+	If not specified, the default location is used.
+	
+punctlist
+
+	Specified a list of punctuation characters whose names are to be
+	spoken when the speech punctuation parameter is set to "Some".
+	If not specified, a default list is used.
+
+voice
+
+	Specifies a voice/language to use.  The complete list of available
+	voices may be obtained with the command 'espeak --voices'.
+

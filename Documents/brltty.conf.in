@@ -306,10 +306,15 @@
 # (can be overridden with the -S [--speech-parameters=] option)
 #speech-parameters driver:parameter=setting,...
 
+# eSpeak Speech Driver Parameters
+#speech-parameters es:Data=
+#speech-parameters es:PunctList=
+#speech-parameters es:Voice=
+
 # ExternalSpeech Speech Driver Parameters
-#speech-parameters es:Program=/usr/local/bin/externalspeech
-#speech-parameters es:Uid=65534
-#speech-parameters es:Gid=65534
+#speech-parameters xs:Program=/usr/local/bin/externalspeech
+#speech-parameters xs:Uid=65534
+#speech-parameters xs:Gid=65534
 
 # Festival Speech Driver Parameters
 #speech-parameters fv:Command=festival # [/path/to/command]
