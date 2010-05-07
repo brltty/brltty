@@ -5436,6 +5436,8 @@ BRLTTY supports the following speech synthesizers:
       |@
     CombiBraille
       |@
+    eSpeak
+      |text to speech library@
     ExternalSpeech
       |runs /usr/local/bin/externalspeech@
     Festival
@@ -5467,7 +5469,7 @@ BRLTTY supports the following speech synthesizers:
     bn|BrailleNote@
     cb|CombiBraille@
     ec|EcoBraille@
-    es|ExternalSpeech@
+    es|eSpeak@
     eu|EuroBraille@
     fl|FestivalLite@
     fs|FreedomScientific@
@@ -5497,6 +5499,7 @@ BRLTTY supports the following speech synthesizers:
     vr|Virtual@
     vs|VisioBraille@
     vv|ViaVoice@
+    xs|ExternalSpeech@
     xw|XWindow@
   </tabular>
 </table>

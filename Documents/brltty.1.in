@@ -629,7 +629,7 @@ CombiBraille
 EcoBraille
 .TP 4
 .B es
-ExternalSpeech
+eSpeak
 .TP 4
 .B eu
 EuroBraille
@@ -720,6 +720,9 @@ VisioBraille
 .TP 4
 .B vv
 ViaVoice
+.TP 4
+.B xs
+ExternalSpeech
 .TP 4
 .B xw
 XWindow

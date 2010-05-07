@@ -72,6 +72,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Alva [Delphi(4nn)]
            - BrailleLite
            - CombiBraille
+           - eSpeak [text to speech library]
            - ExternalSpeech [runs /usr/local/bin/externalspeech]
            - Festival [text to speech engine]
            - FestivalLite [text to speech engine]

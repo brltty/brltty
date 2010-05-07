@@ -157,6 +157,7 @@ SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
 SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
 SCREEN_DRIVERS = @screen_drivers@
 
+ESPEAK_ROOT = @espeak_root@
 FLITE_ROOT = @flite_root@
 FLITE_LANGUAGE = @flite_language@
 FLITE_LEXICON = @flite_lexicon@

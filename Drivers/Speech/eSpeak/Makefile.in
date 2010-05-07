@@ -16,13 +16,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = xs
-DRIVER_NAME = ExternalSpeech
-DRIVER_COMMENT = runs /usr/local/bin/externalspeech
-DRIVER_VERSION = 0.8 (September 2004)
-DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
+DRIVER_CODE = es
+DRIVER_NAME = eSpeak
+DRIVER_COMMENT = text to speech library 
+DRIVER_VERSION = 0.1 
+DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>
+SPK_OBJS = @speech_libraries_es@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -I$(ESPEAK_ROOT)/include -c $(SRC_DIR)/speech.c
 

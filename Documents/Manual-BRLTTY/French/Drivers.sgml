@@ -10,7 +10,7 @@
     bn|BrailleNote@
     cb|CombiBraille@
     ec|EcoBraille@
-    es|ExternalSpeech@
+    es|eSpeak@
     eu|EuroBraille@
     fl|FestivalLite@
     fs|FreedomScientific@
@@ -40,6 +40,7 @@
     vr|Virtual@
     vs|VisioBraille@
     vv|ViaVoice@
+    xs|ExternalSpeech@
     xw|XWindow@
   </tabular>
 </table>

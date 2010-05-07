@@ -9,6 +9,8 @@ BRLTTY supporte les synthèses vocales suivantes:
       |@
     CombiBraille
       |@
+    eSpeak
+      |text to speech library@
     ExternalSpeech
       |exécute /usr/local/bin/externalspeech@
     Festival

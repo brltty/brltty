@@ -1384,7 +1384,8 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_SPEECH_DRIVER([al], [Alva])
    BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
    BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
-   BRLTTY_SPEECH_DRIVER([es], [ExternalSpeech])
+   BRLTTY_IF_PACKAGE([eSpeak], [espeak], [include/espeak/speak_lib.h], [BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])])
+   BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])
    BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
       BRLTTY_ARG_REQUIRED(
          [flite-language], [LANGUAGE],
