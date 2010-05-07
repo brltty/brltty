@@ -307,7 +307,7 @@
 #speech-parameters driver:parameter=setting,...
 
 # eSpeak Speech Driver Parameters
-#speech-parameters es:Data=
+#speech-parameters es:Path=
 #speech-parameters es:PunctList=
 #speech-parameters es:Voice=
 

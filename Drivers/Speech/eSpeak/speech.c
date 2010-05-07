@@ -26,11 +26,11 @@
 #include "parse.h"
 
 typedef enum {
-	PARM_DATA,
+	PARM_PATH,
 	PARM_PUNCTLIST,
 	PARM_VOICE
 } DriverParameter;
-#define SPKPARMS "data", "punctlist", "voice"
+#define SPKPARMS "path", "punctlist", "voice"
 
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
@@ -60,7 +60,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 
 	LogPrint(LOG_NOTICE, "eSpeak version %s", espeak_Info(NULL));
 
-	data_path = parameters[PARM_DATA];
+	data_path = parameters[PARM_PATH];
 	if (data_path && !*data_path)
 		data_path = NULL;
 	result = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, data_path, 0);

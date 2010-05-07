@@ -10,7 +10,7 @@ eSpeak development library is installed.
 
 This driver recognizes the following parameters:
 
-data
+path
 
 	Specifies the directory containing the espeak-data directory.
 	If not specified, the default location is used.
