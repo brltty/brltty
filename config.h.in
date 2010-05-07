@@ -274,8 +274,8 @@ extern "C" {
 #undef ENABLE_PCM_SUPPORT
 
 /* If necessary, define only one of the following PCM interfaces. */
-#undef USE_PCM_SUPPORT_OSS
 #undef USE_PCM_SUPPORT_ALSA
+#undef USE_PCM_SUPPORT_OSS
 
 /* Define this to include MIDI (Musical Instrument Digital Interface) support. */
 #undef ENABLE_MIDI_SUPPORT

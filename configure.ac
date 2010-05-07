@@ -944,12 +944,18 @@ case "${host_os}"
 in
    linux*|eabi*)
       system_object="linux"
-      brltty_pcm_interfaces="oss"
-      brltty_midi_interfaces="oss"
+      brltty_pcm_interfaces=""
+      brltty_midi_interfaces=""
+
       AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
          brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
          brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
-])
+      ])
+
+      AC_CHECK_HEADER([linux/soundcard.h], [dnl
+         brltty_pcm_interfaces="${brltty_pcm_interfaces} oss"
+         brltty_midi_interfaces="${brltty_midi_interfaces} oss"
+      ])
       ;;
    gnu*)
       system_object="hurd"

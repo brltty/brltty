@@ -256,8 +256,8 @@ openMidiDevice (int errorLevel, const char *device) {
                                                       SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
         if ((midi->queue = my_snd_seq_alloc_queue(midi->sequencer)) >= 0) {
           if ((result = my_snd_seq_queue_status_malloc(&midi->status)) >= 0) {
-            int client;
-            int port;
+            int client = 0;
+            int port = 0;
             int deviceOk;
 
             if (*device) {
