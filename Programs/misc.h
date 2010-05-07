@@ -23,10 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "prologue.h"
-
-#define DEFINE_POINTER_TO(name,prefix) typeof(name) *prefix##name
-
 extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
