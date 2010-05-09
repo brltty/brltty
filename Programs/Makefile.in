@@ -407,10 +407,8 @@ ttb_louis.$O:
 ttb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
-check-text-tables: $(SRC_TOP)$(TBL_DIR)/*.ttb
-
-%.ttb: ttbtest$X api
-	LD_LIBRARY_PATH=$(BLD_DIR) ./ttbtest$X -T$(SRC_TOP)$(TBL_DIR) $@
+check-text-tables: ttbtest$X
+	for file in $(SRC_TOP)$(TBL_DIR)/*.ttb; do LD_LIBRARY_PATH=$(BLD_DIR) ./ttbtest$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
 
 ###############################################################################
 
@@ -436,10 +434,8 @@ ctb_compile.$O:
 ctb_translate.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
 
-check-contraction-tables: $(SRC_TOP)$(TBL_DIR)/*.ctb
-
-%.ctb: ctbtest$X
-	./ctbtest$X -T$(SRC_TOP)$(TBL_DIR) -c$@ </dev/null
+check-contraction-tables: ctbtest$X
+	for file in $(SRC_TOP)$(TBL_DIR)/*.ctb; do ./ctbtest$X -T$(SRC_TOP)$(TBL_DIR) -c$$file </dev/null; done
 
 ###############################################################################
 
@@ -463,10 +459,8 @@ ktb_list.$O:
 ktb_keyboard.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
-check-key-tables: $(SRC_TOP)$(TBL_DIR)/*.ktb
-
-%.ktb: all-ktbtest
-	./ktbtest$X -L$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) $@
+check-key-tables: all-ktbtest
+	for file in $(SRC_TOP)$(TBL_DIR)/*.ktb; do ./ktbtest$X -L$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) $$file; done
 
 ###############################################################################
 
