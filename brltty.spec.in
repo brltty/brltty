@@ -223,65 +223,96 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Thu Oct  8 2009 Dave Mielke <dave@mielke.cc> 4.1
-+  General Changes:
-      BRL_CMD_WINUP can go above the top row of the screen.
-      Protect against NULL being given to snprintf() for a string.
-      Change the "braille display offline/online" logs to DEBUG (from NOTICE).
-      Fixes to status field initialization during a preferences file upgrade.
-      Default status field selection should take into account 66-cell displays.
-      Remove usbResetEndpoint().
-      Resolve gcc-4.4 warnings.
-      Resolve 64-bit warnings.
-      C compilers needn't deallocate variable-size arrays until function return.
-      Updates to the English Grade 2 contraction table.
-      Updates to the German contraction table.
-      Change ctbtest to expect input encoded in UTF-8.
-      liblouis tables use y for 5-digit and z for 8-digit characters.
-+  Baum Braille Driver Changes:
-      Fix the support for display key #6 in PB2 mode.
-+  EuroBraille Braille Driver Changes:
-      Re-add some bindings forgotten during the driver rewrite for 3.10.
-      Rework the bindings a bit for greater consistency and easier learning.
-      Add new bindings to support as many commands as possible.
-+  Papenmeier Braille Driver Changes:
-      Interpret the EL66S Easy Access Bar correctly.
-+  TSI Braille Driver Changes:
-      Increase the write delay a bit.
-+  Linux Screen Driver Changes:
-      Give KD_FONT_OP_GET maximum (rather than reasonably high) font dimensions.
-+  Java Bindings Changes:
-      Define the DOTn constants as bytes (rather than as chars).
-      JNI fixes for Sun-based JVMs.
-      Load the JNI part automatically at startup.
-+  Lisp Bindings Changes:
-      Reference version 0.5.3 of BrlAPI.
-+  Python Bindings Changes:
-      Pyrex doesn't automatically convert C's NULL to Python's None.
-      Translate BrlAPI exceptions into Python exceptions.
-+  BrlAPI Changes:
-      Remove all mention of key sets.
-      Handle unbound key ranges.
-      Fix an issue with TCP/IP socket connection on Windows.
-      Handle the possibility of a different braille device after resuming.
-+  Windows Changes:
-      Fix a compile problem.
-      The screen driver should refer to "consoles" rather than to "terminals".
-+  Documentation Updates:
-      Update the French manual from 3.10 to 4.0.
-      Document that the EuroBraille Esys is supported.
-      Update the supported FreedomScientific model lists.
-      Clarify that --with-*-table sets the fallback (not the default) table.
-      Change log fixes.
-      Update the TSI braille driver's README.
-      Add README.Bluetooth.
-      The README for how to use a Seika with the TSI driver is no longer needed.
-      E-mail address change for Nicolas Pitre.
-      E-mail address change for Jean-Philippe Mengual.
-+  Build Changes:
-      The API socket directory should be created under the install root.
-      Add the --disable-stripping configure option.
-      Remove the --disable-preferences-menu configure option.
-      Remove the --disable-table-selection configure option.
-      Fedora no longer creates "/usr/lib/ocaml/stublibs/dllbrlapi_stubs.*".
+* Mon May  0 2010 Dave Mielke <dave@mielke.cc> 4.2
++  Ending a cut operation beyond the right edge of the screen has been fixed.
++  Key/character insertion works with newer versions of Xorg.
++  The braille driver help files have been converted to plain text.
++  Multiple instances of brltty may not use the same PID file.
++  The keypad keyboard key table provides a braille input mode.
++  The working directory is no longer set to the data directory.
++  The writable directory is created if it doesn't already exist.
++  USB I/O via libusb1 is supported.
++  The Metec braille driver has been added.
++  The eSpeak speech driver has been added.
++  The AtSpi2 screen driver has been added.
++  A BrlAPI client for Window-Eyes has been developed.
++  Albatross braille driver changes:
+      Converted to use key tables.
+      USB support has been added.
++  Alva braille driver changes:
+      Converted to use key tables.
++  Baum braille driver changes:
+      Converted to use key tables.
+      Vario Pro wheels are supported.
+      For Vario Pro models, only update the text cells which have changed.
++  CombiBraille braille driver changes:
+      Converted to use key tables.
++  FreedomScientific braille driver changes:
+      Converted to use key tables.
+      Bluetooth support has been added.
+      The Focus Blue is supported.
+      Rockers and bumper bars are recognized as distinct keys.
++  HandyTech braille driver changes:
+      Converted to use key tables.
+      Pressing two routing keys simultaneously immediately cuts the selected text.
+      Newer models which use the USB HID interface are supported.
+      The InputMode= parameter has been removed.
++  HIMS braille driver changes:
+      Converted to use key tables.
++  Papenmeier braille driver changes:
+      Converted to use key tables.
+      The DebugReads= and DebugWrites= parameters have been removed.
+      Support for the configuration file has been removed (now uses key tables).
++  Pegasus braille driver changes:
+      Converted to use key tables.
++  Seika braille driver changes:
+      Converted to use key tables.
++  Voyager braille driver changes:
+      Converted to use key tables.
++  BrlAPI changes:
+      Key event support has been added.
+      Various client fixes for the Windows environment.
+      Various fixes for when threads aren't available.
+      No more extraneous connection to localhost when using a TCP/IP host name.
+      A fix to exception handling within the Python bindings.
++  ExternalSpeech speech driver changes:
+      Two-letter driver identification code changed to "xs" (from "es").
++  AtSpi screen driver changes:
+      Static linking is supported.
+      A problem causing crashes on 64-bit platforms has been resolved.
++  Windows screen driver changes:
+      Significant reductions in memory usage.
+      Better handling of unreadable screens.
+      Better handling of the Alt+Tab window.
++  DOS changes:
+      Log records are written to the file "brltty.log".
+      The TSI braille driver stays at 9600 baud.
++  Key table changes:
+      Add the following directives:
+         assign, context, hide, hotkey, ifkey, map, note, superimpose, title.
+      Add the \{name} variable name expansion syntax.
+      Add the ! immediate key syntax.
+      A command may have more than one modifier.
+      The line command modifiers are supported.
+      Keyboard key table names are now prefixed with "kbd-".
+      The ktbtest tool has been added.
++  Linux changes:
+      USB device inspection is more efficient.
+      Fixes to keyboard connect/disconnect monitoring.
+      Fixes to key event handling.
+      PCM and MIDI support defaults to ALSA (instead of to OSS).
++  Windows changes:
+      Improved conversion of Windows errors to system errors (errno values).
+      Bluetooth support has been added.
+      Text table autoselection has been fixed.
+      Text table editing (ttbtest -e) is supported.
++  Build changes:
+      --enable-usb-support changed to --with-usb-package[=package,...].
+      --disable-usb-support changed to --without-usb-package.
+      --enable-bluetooth-support changed to --with-bluetooth-package[=package,...].
+      --disable-bluetooth-support changed to --without-bluetooth-package.
++  Text tables updated:
+      hu, sk.
++  Contraction tables updated:
+      de-kurzschrift, en-us-g2, zh-tw.
 
