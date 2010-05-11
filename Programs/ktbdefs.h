@@ -25,6 +25,7 @@ extern "C" {
 
 #define MAX_KEYS_PER_SET 0X100
 #define KTB_KEY_ANY 0XFF
+#define KTB_KEY_MAX 0XFE
 
 typedef struct {
   unsigned char set;

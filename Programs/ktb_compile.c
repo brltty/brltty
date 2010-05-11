@@ -331,15 +331,59 @@ findKeyName (const wchar_t *characters, int length, KeyTableData *ktd) {
 
 static int
 parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int length, KeyTableData *ktd) {
-  const KeyNameEntry **kne = findKeyName(characters, length, ktd);
+  const wchar_t *suffix = wmemchr(characters, WC_C('.'), length);
+  int prefixLength;
+  int suffixLength;
 
-  if (kne) {
-    *value = (*kne)->value;
-    return 1;
+  if (suffix) {
+    if (!(prefixLength = suffix - characters)) {
+      reportDataError(file, "missing key set name: %.*" PRIws, length, characters);
+      return 0;
+    }
+
+    if (!(suffixLength = (characters + length) - ++suffix)) {
+      reportDataError(file, "missing key number: %.*" PRIws, length, characters);
+      return 0;
+    }
+  } else {
+    prefixLength = length;
+    suffixLength = 0;
   }
 
-  reportDataError(file, "unknown key: %.*" PRIws, length, characters);
-  return 0;
+  {
+    const KeyNameEntry **kne = findKeyName(characters, prefixLength, ktd);
+
+    if (!kne) {
+      reportDataError(file, "unknown key name: %.*" PRIws, prefixLength, characters);
+      return 0;
+    }
+
+    *value = (*kne)->value;
+  }
+
+  if (suffix) {
+    int ok = 0;
+    int number;
+
+    if (isNumber(&number, suffix, suffixLength))
+      if (number > 0)
+        if (--number <= KTB_KEY_MAX)
+          ok = 1;
+
+    if (!ok) {
+      reportDataError(file, "invalid key number: %.*" PRIws, suffixLength, suffix);
+      return 0;
+    }
+
+    if (value->key != KTB_KEY_ANY) {
+      reportDataError(file, "not a key set: %.*" PRIws, prefixLength, characters);
+      return 0;
+    }
+
+    value->key = number;
+  }
+
+  return 1;
 }
 
 static int
