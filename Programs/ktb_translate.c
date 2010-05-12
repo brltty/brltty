@@ -28,6 +28,13 @@
 #include "brl.h"
 
 static int
+sortModifierKeys (const void *element1, const void *element2) {
+  const KeyValue *modifier1 = element1;
+  const KeyValue *modifier2 = element2;
+  return compareKeyValues(modifier1, modifier2);
+}
+
+static int
 searchKeyBinding (const void *target, const void *element) {
   const KeyBinding *reference = target;
   const KeyBinding *const *binding = element;
@@ -47,29 +54,37 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
       target.combination.immediateKey = *immediate;
       target.combination.flags |= KCF_IMMEDIATE_KEY;
     }
-
     target.combination.modifierCount = table->pressedCount;
-    copyKeyValues(target.combination.modifierKeys, table->pressedKeys, target.combination.modifierCount);
 
-    {
-      int index;
+    while (1) {
+      unsigned int all = (1 << table->pressedCount) - 1;
+      unsigned int bits;
 
-      for (index=0; index<target.combination.modifierCount; index+=1) {
-        KeyValue *modifier = &target.combination.modifierKeys[index];
-        if (modifier->set) modifier->key = KTB_KEY_ANY;
+      for (bits=0; bits<=all; bits+=1) {
+        copyKeyValues(target.combination.modifierKeys, table->pressedKeys, table->pressedCount);
+        {
+          unsigned int index;
+          unsigned int bit;
+
+          for (index=0, bit=1; index<table->pressedCount; index+=1, bit<<=1)
+            if (bits & bit)
+              target.combination.modifierKeys[index].key = KTB_KEY_ANY;
+        }
+        qsort(target.combination.modifierKeys, table->pressedCount, sizeof(*target.combination.modifierKeys), sortModifierKeys);
+
+        {
+          const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
+
+          if (binding) {
+            if ((*binding)->command != EOF) return *binding;
+            *isIncomplete = 1;
+          }
+        }
       }
-    }
 
-    if (target.combination.flags & KCF_IMMEDIATE_KEY)
-      if (target.combination.immediateKey.set)
-        target.combination.immediateKey.key = KTB_KEY_ANY;
-
-    {
-      const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
-      if (binding) {
-        if ((*binding)->command != EOF) return *binding;
-        *isIncomplete = 1;
-      }
+      if (!(target.combination.flags & KCF_IMMEDIATE_KEY)) break;
+      if (target.combination.immediateKey.key == KTB_KEY_ANY) break;
+      target.combination.immediateKey.key = KTB_KEY_ANY;
     }
   }
 
