@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "log.h"
@@ -93,6 +94,14 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
 }
 
 static int
+putNumber (ListGenerationData *lgd, int number) {
+  char buffer[0X10];
+
+  snprintf(buffer, sizeof(buffer), "%d", number);
+  return putUtf8String(lgd, buffer);
+}
+
+static int
 searchKeyNameEntry (const void *target, const void *element) {
   const KeyValue *value = target;
   const KeyNameEntry *const *kne = element;
@@ -107,7 +116,23 @@ findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
 static int
 putKeyName (ListGenerationData *lgd, const KeyValue *value) {
   const KeyNameEntry *const *kne = findKeyNameEntry(lgd, value);
-  return putUtf8String(lgd, (kne? (*kne)->name: "?"));
+  if (kne) return putUtf8String(lgd, (*kne)->name);
+
+  if (value->key != KTB_KEY_ANY) {
+    const KeyValue anyKey = {
+      .set = value->set,
+      .key = KTB_KEY_ANY
+    };
+
+    if ((kne = findKeyNameEntry(lgd, &anyKey))) {
+      if (!putUtf8String(lgd, (*kne)->name)) return 0;
+      if (!putCharacter(lgd, WC_C('.'))) return 0;
+      if (!putNumber(lgd, value->key+1)) return 0;
+      return 1;
+    }
+  }
+
+  return putUtf8String(lgd, "?");
 }
 
 static int
