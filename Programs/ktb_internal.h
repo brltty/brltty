@@ -84,6 +84,11 @@ typedef struct {
 } HotkeyEntry;
 
 typedef struct {
+  KeyValue keyValue;
+  unsigned char keyboardFunction;
+} MappedKeyEntry;
+
+typedef struct {
   wchar_t *title;
 
   KeyBinding *keyBindingTable;
@@ -95,7 +100,9 @@ typedef struct {
   unsigned int hotkeyCount;
   const HotkeyEntry **sortedHotkeyEntries;
 
-  unsigned char *keyMap;
+  MappedKeyEntry *mappedKeyTable;
+  unsigned int mappedKeyCount;
+  const MappedKeyEntry **sortedMappedKeyEntries;
   int superimposedBits;
 } KeyContext;
 

@@ -61,14 +61,16 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
       unsigned int bits;
 
       for (bits=0; bits<=all; bits+=1) {
-        copyKeyValues(target.combination.modifierKeys, table->pressedKeys, table->pressedCount);
         {
           unsigned int index;
           unsigned int bit;
 
-          for (index=0, bit=1; index<table->pressedCount; index+=1, bit<<=1)
-            if (bits & bit)
-              target.combination.modifierKeys[index].key = KTB_KEY_ANY;
+          for (index=0, bit=1; index<table->pressedCount; index+=1, bit<<=1) {
+            KeyValue *modifier = &target.combination.modifierKeys[index];
+
+            *modifier = table->pressedKeys[index];
+            if (bits & bit) modifier->key = KTB_KEY_ANY;
+          }
         }
         qsort(target.combination.modifierKeys, table->pressedCount, sizeof(*target.combination.modifierKeys), sortModifierKeys);
 
@@ -117,14 +119,36 @@ findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValu
 }
 
 static int
+searchMappedKeyEntry (const void *target, const void *element) {
+  const MappedKeyEntry *reference = target;
+  const MappedKeyEntry *const *map = element;
+  return compareKeyValues(&reference->keyValue, &(*map)->keyValue);
+}
+
+static const MappedKeyEntry *
+findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
+  if (ctx->sortedMappedKeyEntries) {
+    MappedKeyEntry target = {
+      .keyValue = *keyValue
+    };
+
+    {
+      const MappedKeyEntry **map = bsearch(&target, ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), searchMappedKeyEntry);
+      if (map) return *map;
+    }
+  }
+
+  return NULL;
+}
+
+static int
 makeKeyboardCommand (KeyTable *table, unsigned char context) {
   int chordsRequested = context == BRL_CTX_CHORDS;
   const KeyContext *ctx;
 
   if (chordsRequested) context = table->persistentContext;
-  if (!(ctx = getKeyContext(table, context))) return EOF;
 
-  if (ctx->keyMap) {
+  if ((ctx = getKeyContext(table, context))) {
     int keyboardCommand = BRL_BLK_PASSDOTS;
     int dotPressed = 0;
     int spacePressed = 0;
@@ -134,13 +158,12 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
 
       for (pressedIndex=0; pressedIndex<table->pressedCount; pressedIndex+=1) {
         const KeyValue *keyValue = &table->pressedKeys[pressedIndex];
-        KeyboardFunction function = ctx->keyMap[keyValue->key];
+        const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
 
-        if (keyValue->set) return EOF;
-        if (function == KBF_None) return EOF;
+        if (!map) return EOF;
 
         {
-          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[map->keyboardFunction];
 
           keyboardCommand |= kbf->bit;
 

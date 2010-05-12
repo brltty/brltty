@@ -182,39 +182,34 @@ endLine (ListGenerationData *lgd) {
 
 static int
 listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
-  if (ctx->keyMap) {
-    {
-      unsigned int key;
+  const char *prefix = "braille keyboard ";
 
-      for (key=0; key<MAX_KEYS_PER_SET; key+=1) {
-        KeyboardFunction function = ctx->keyMap[key];
+  {
+    unsigned int index;
 
-        if (function != KBF_None) {
-          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
-          const KeyValue value = {
-            .set = 0,
-            .key = key
-          };
+    for (index=0; index<ctx->mappedKeyCount; index+=1) {
+      const MappedKeyEntry *map = &ctx->mappedKeyTable[index];
+      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[map->keyboardFunction];
 
-          if (!putUtf8String(lgd, kbf->name)) return 0;
-          if (!putCharacterString(lgd, WS_C(" key: "))) return 0;
-          if (!putKeyName(lgd, &value)) return 0;
-          if (!endLine(lgd)) return 0;
-        }
-      }
+      if (!putUtf8String(lgd, prefix)) return 0;
+      if (!putUtf8String(lgd, kbf->name)) return 0;
+      if (!putCharacterString(lgd, WS_C(": "))) return 0;
+      if (!putKeyName(lgd, &map->keyValue)) return 0;
+      if (!endLine(lgd)) return 0;
     }
+  }
 
-    {
-      KeyboardFunction function;
+  {
+    KeyboardFunction function;
 
-      for (function=0; function<KBF_None; function+=1) {
-        const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+    for (function=0; function<KBF_None; function+=1) {
+      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
 
-        if (ctx->superimposedBits & kbf->bit) {
-          if (!putUtf8String(lgd, kbf->name)) return 0;
-          if (!putCharacterString(lgd, WS_C(" key: superimposed"))) return 0;
-          if (!endLine(lgd)) return 0;
-        }
+      if (ctx->superimposedBits & kbf->bit) {
+        if (!putUtf8String(lgd, prefix)) return 0;
+        if (!putUtf8String(lgd, kbf->name)) return 0;
+        if (!putCharacterString(lgd, WS_C(": superimposed"))) return 0;
+        if (!endLine(lgd)) return 0;
       }
     }
   }

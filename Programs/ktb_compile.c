@@ -184,7 +184,9 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->hotkeyCount = 0;
       ctx->sortedHotkeyEntries = NULL;
 
-      ctx->keyMap = NULL;
+      ctx->mappedKeyTable = NULL;
+      ctx->mappedKeyCount = 0;
+      ctx->sortedMappedKeyEntries = NULL;
       ctx->superimposedBits = 0;
     }
   }
@@ -907,31 +909,28 @@ static int
 processMapOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
+  MappedKeyEntry map;
+
   if (!ctx) return 0;
+  memset(&map, 0, sizeof(map));
 
-  {
-    KeyValue value;
+  if (getKeyOperand(file, &map.keyValue, ktd)) {
+    if (map.keyValue.key != KTB_KEY_ANY) {
+      if (getKeyboardFunctionOperand(file, &map.keyboardFunction, ktd)) {
+        unsigned int newCount = ctx->mappedKeyCount + 1;
+        MappedKeyEntry *newTable = realloc(ctx->mappedKeyTable, ARRAY_SIZE(newTable, newCount));
 
-    if (getKeyOperand(file, &value, ktd)) {
-      if (!value.set) {
-        unsigned char function;
-
-        if (getKeyboardFunctionOperand(file, &function, ktd)) {
-          if (!ctx->keyMap) {
-            if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, MAX_KEYS_PER_SET)))) {
-              LogError("malloc");
-              return 0;
-            }
-
-            memset(ctx->keyMap, KBF_None, MAX_KEYS_PER_SET);
-          }
-
-          ctx->keyMap[value.key] = function;
-          return 1;
+        if (!newTable) {
+          LogError("realloc");
+          return 0;
         }
-      } else {
-        reportDataError(file, "unmappable key");
+
+        ctx->mappedKeyTable = newTable;
+        ctx->mappedKeyTable[ctx->mappedKeyCount++] = map;
+        return 1;
       }
+    } else {
+      reportDataError(file, "cannot map key set");
     }
   }
 
@@ -1267,7 +1266,7 @@ prepareHotkeyEntries (KeyContext *ctx) {
     }
 
     {
-      HotkeyEntry *source = ctx->hotkeyTable;
+      const HotkeyEntry *source = ctx->hotkeyTable;
       const HotkeyEntry **target = ctx->sortedHotkeyEntries;
       unsigned int count = ctx->hotkeyCount;
 
@@ -1283,6 +1282,39 @@ prepareHotkeyEntries (KeyContext *ctx) {
   return 1;
 }
 
+static int
+sortMappedKeyEntries (const void *element1, const void *element2) {
+  const MappedKeyEntry *const *map1 = element1;
+  const MappedKeyEntry *const *map2 = element2;
+
+  return compareKeyValues(&(*map1)->keyValue, &(*map2)->keyValue);
+}
+
+static int
+prepareMappedKeyEntries (KeyContext *ctx) {
+  if (ctx->mappedKeyCount) {
+    if (!(ctx->sortedMappedKeyEntries = malloc(ARRAY_SIZE(ctx->sortedMappedKeyEntries, ctx->mappedKeyCount)))) {
+      LogError("malloc");
+      return 0;
+    }
+
+    {
+      const MappedKeyEntry *source = ctx->mappedKeyTable;
+      const MappedKeyEntry **target = ctx->sortedMappedKeyEntries;
+      unsigned int count = ctx->mappedKeyCount;
+
+      while (count) {
+        *target++ = source++;
+        count -= 1;
+      }
+    }
+
+    qsort(ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), sortMappedKeyEntries);
+  }
+
+  return 1;
+}
+
 int
 finishKeyTable (KeyTableData *ktd) {
   {
@@ -1293,6 +1325,7 @@ finishKeyTable (KeyTableData *ktd) {
 
       if (!prepareKeyBindings(ctx)) return 0;
       if (!prepareHotkeyEntries(ctx)) return 0;
+      if (!prepareMappedKeyEntries(ctx)) return 0;
     }
   }
 
@@ -1362,7 +1395,8 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->hotkeyTable) free(ctx->hotkeyTable);
     if (ctx->sortedHotkeyEntries) free(ctx->sortedHotkeyEntries);
 
-    if (ctx->keyMap) free(ctx->keyMap);
+    if (ctx->mappedKeyTable) free(ctx->mappedKeyTable);
+    if (ctx->sortedMappedKeyEntries) free(ctx->sortedMappedKeyEntries);
   }
 
   if (table->keyContextTable) free(table->keyContextTable);
