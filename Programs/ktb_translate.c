@@ -263,7 +263,16 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   if (context == BRL_CTX_DEFAULT) context = table->currentContext;
   if (press) table->currentContext = table->persistentContext;
 
-  if ((hotkey = findHotkeyEntry(table, context, &keyValue))) {
+  if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
+    const KeyValue anyKey = {
+      .set = keyValue.set,
+      .key = KTB_KEY_ANY
+    };
+
+    hotkey = findHotkeyEntry(table, context, &anyKey);
+  }
+
+  if (hotkey) {
     int cmd = press? hotkey->pressCommand: hotkey->releaseCommand;
     if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
     state = KTS_HOTKEY;
