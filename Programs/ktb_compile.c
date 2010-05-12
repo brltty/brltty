@@ -29,7 +29,7 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
-const KeyboardFunctionEntry keyboardFunctionTable[KBF_None] = {
+const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
   [KBF_Dot1] = {.name="dot1", .bit=BRL_DOT1},
   [KBF_Dot2] = {.name="dot2", .bit=BRL_DOT2},
   [KBF_Dot3] = {.name="dot3", .bit=BRL_DOT3},
@@ -530,7 +530,7 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
   static const KeyboardFunctionEntry **sortedKeyboardFunctions = NULL;
 
   if (!sortedKeyboardFunctions) {
-    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KBF_None));
+    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KeyboardFunctionCount));
 
     if (!newTable) {
       LogError("malloc");
@@ -540,13 +540,13 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
     {
       const KeyboardFunctionEntry *source = keyboardFunctionTable;
       const KeyboardFunctionEntry **target = newTable;
-      unsigned int count = KBF_None;
+      unsigned int count = KeyboardFunctionCount;
 
       do {
         *target++ = source++;
       } while (--count);
 
-      qsort(newTable, KBF_None, sizeof(*newTable), sortKeyboardFunctionNames);
+      qsort(newTable, KeyboardFunctionCount, sizeof(*newTable), sortKeyboardFunctionNames);
     }
 
     sortedKeyboardFunctions = newTable;
@@ -557,7 +557,7 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
       .characters = characters,
       .length = length
     };
-    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KBF_None, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
+    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KeyboardFunctionCount, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
 
     if (kbf) {
       *function = *kbf - keyboardFunctionTable;

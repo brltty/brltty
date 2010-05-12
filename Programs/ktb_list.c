@@ -202,7 +202,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   {
     KeyboardFunction function;
 
-    for (function=0; function<KBF_None; function+=1) {
+    for (function=0; function<KeyboardFunctionCount; function+=1) {
       const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
 
       if (ctx->superimposedBits & kbf->bit) {

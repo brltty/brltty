@@ -41,7 +41,7 @@ typedef enum {
   KBF_Control,
   KBF_Meta,
 
-  KBF_None /* must be last */
+  KeyboardFunctionCount /* must be last */
 } KeyboardFunction;
 
 typedef struct {
@@ -49,7 +49,7 @@ typedef struct {
   int bit;
 } KeyboardFunctionEntry;
 
-extern const KeyboardFunctionEntry keyboardFunctionTable[KBF_None];
+extern const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount];
 
 typedef enum {
   KCF_IMMEDIATE_KEY = 0X01
