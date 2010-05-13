@@ -60,7 +60,7 @@ openPcmDevice (int errorLevel, const char *device) {
   }
 
   if (!(pcm = malloc(sizeof(*pcm)))) {
-    LogError("PCM device allocation");
+    logSystemError("PCM device allocation");
     return NULL;
   }
   pcm->deviceID = id;
@@ -127,7 +127,7 @@ openPcmDevice (int errorLevel, const char *device) {
   }
 
   if (!(pcm->done = CreateEvent(NULL, FALSE, TRUE, NULL))) {
-    LogWindowsError("creating PCM completion event");
+    logWindowsSystemError("creating PCM completion event");
     goto out;
   }
 
@@ -194,7 +194,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
   if (count > pcm->bufSize) {
     if (!(unprepareHeader(pcm))) return 0;
     if (!(newBuf = realloc(pcm->waveHdr.lpData, 2 * count))) {
-      LogError("allocating PCM data buffer");
+      logSystemError("allocating PCM data buffer");
       return 0;
     }
     pcm->waveHdr.lpData = newBuf;

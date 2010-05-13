@@ -701,7 +701,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
 
       if (count < 1) {
         if (count == -1) {
-          LogError("read");
+          logSystemError("read");
         } else if ((count == 0) && (inputCount > 0)) {
           if (io->awaitInput(1000)) goto retry;
           if (errno != EAGAIN) count = -1;

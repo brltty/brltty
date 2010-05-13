@@ -251,7 +251,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
   int count = bthWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
-      LogError("Papenmeier Bluetooth write");
+      logSystemError("Papenmeier Bluetooth write");
     } else {
       LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
@@ -289,7 +289,7 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
     brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     return 1;
   } else {
-    LogError("Write");
+    logSystemError("Write");
     return 0;
   }
 }
@@ -926,7 +926,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 0; /* easy access bar mixed into braille data stream */
     data[size++] = 1; /* routing keys mixed into braille data stream */
 
-    LogBytes(LOG_DEBUG, "Init Packet", data, size);
+    logBytes(LOG_DEBUG, "Init Packet", data, size);
     writePacket2(brl, 1, size, data);
   }
 }

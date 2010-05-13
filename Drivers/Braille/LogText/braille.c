@@ -336,7 +336,7 @@ makeFifo (const char *path, mode_t mode) {
       umask(mask);
       if (result != -1) return 1;
       errno = error;
-      LogError("Download FIFO creation");
+      logSystemError("Download FIFO creation");
    }
    return 0;
 }
@@ -408,7 +408,7 @@ checkData (const unsigned char *data, unsigned int length) {
 static int
 sendBytes (const unsigned char *bytes, size_t count) {
    if (serialWriteData(serialDevice, bytes, count) == -1) {
-      LogError("LogText write");
+      logSystemError("LogText write");
       return 0;
    }
    return 1;
@@ -424,10 +424,10 @@ sendData (unsigned char line, unsigned char column, unsigned char count) {
    *target++ = (line == cursorRow)? cursorColumn+1: 0;
    *target++ = column + 1;
    *target++ = count;
-   LogBytes(LOG_DEBUG, "Output dots", source, count);
+   logBytes(LOG_DEBUG, "Output dots", source, count);
    while (count--) *target++ = outputTable[*source++];
    count = target - data;
-   LogBytes(LOG_DEBUG, "LogText write", data, count);
+   logBytes(LOG_DEBUG, "LogText write", data, count);
    if (checkData(data, count)) {
       if (sendBytes(data, count)) {
          return 1;
@@ -630,7 +630,7 @@ askUser (const unsigned char *prompt) {
                      LogPrint(LOG_DEBUG, "Response: %s", response);
                      return response;
                   } else {
-                     LogError("Download file path allocation");
+                     logSystemError("Download file path allocation");
                   }
                }
                return NULL;
@@ -709,7 +709,7 @@ downloadFile (void) {
                      break;
                   }
                   if (count == -1) {
-                     LogError("Download file read");
+                     logSystemError("Download file read");
                      break;
                   }
                   address = buffer;
@@ -727,13 +727,13 @@ downloadFile (void) {
                }
             }
          } else {
-            LogError("Download file status");
+            logSystemError("Download file status");
          }
          if (close(file) == -1) {
-            LogError("Download file close");
+            logSystemError("Download file close");
          }
       } else {
-         LogError("Download file open");
+         logSystemError("Download file open");
       }
    } else {
       LogPrint(LOG_WARNING, "Download path not specified.");

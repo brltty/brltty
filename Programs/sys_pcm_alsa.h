@@ -249,7 +249,7 @@ openPcmDevice (int errorLevel, const char *device) {
 
     free(pcm);
   } else {
-    LogError("PCM device allocation");
+    logSystemError("PCM device allocation");
   }
 
   return NULL;

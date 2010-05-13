@@ -261,7 +261,7 @@ static int statusStart;
 static int
 readByte (unsigned char *byte) {
   int received = io->readBytes(byte, 1, 0);
-  if (received == -1) LogError("Albatross read");
+  if (received == -1) logSystemError("Albatross read");
   return received == 1;
 }
 
@@ -286,7 +286,7 @@ static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
   if (io->writeBytes(bytes, count) != -1) return 1;
-  LogError("Albatross write");
+  logSystemError("Albatross write");
   return 0;
 }
 

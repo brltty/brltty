@@ -2578,7 +2578,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
   int count = bthWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
-      LogError("Baum Bluetooth write");
+      logSystemError("Baum Bluetooth write");
     } else {
       LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }

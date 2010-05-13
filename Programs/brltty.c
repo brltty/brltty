@@ -222,10 +222,10 @@ exitLog (void) {
   /* Reopen syslog (in case -e closed it) so that there will
    * be a "stopped" message to match the "starting" message.
    */
-  LogOpen(0);
+  openLog(0);
   setPrintOff();
   LogPrint(LOG_INFO, gettext("terminated"));
-  LogClose();
+  closeLog();
 }
 
 static void
@@ -236,11 +236,11 @@ handleSignal (int number, void (*handler) (int)) {
   sigemptyset(&action.sa_mask);
   action.sa_handler = handler;
   if (sigaction(number, &action, NULL) == -1) {
-    LogError("sigaction");
+    logSystemError("sigaction");
   }
 #else /* HAVE_SIGACTION */
   if (signal(number, handler) == SIG_ERR) {
-    LogError("signal");
+    logSystemError("signal");
   }
 #endif /* HAVE_SIGACTION */
 }
@@ -1333,7 +1333,7 @@ highlightWindow (void) {
 static int
 beginProgram (int argc, char *argv[]) {
   /* Open the system log. */
-  LogOpen(0);
+  openLog(0);
   LogPrint(LOG_INFO, gettext("starting"));
   atexit(exitLog);
 
@@ -3072,7 +3072,7 @@ setServiceState (DWORD state, int exitCode, const char *name) {
 
   serviceState = state;
   if (SetServiceStatus(serviceStatusHandle, &status)) return 1;
-  LogWindowsError(name);
+  logWindowsSystemError(name);
   return 0;
 }
 
@@ -3120,7 +3120,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
       setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
     }
   } else {
-    LogWindowsError("RegisterServiceCtrlHandler");
+    logWindowsSystemError("RegisterServiceCtrlHandler");
   }
 }
 #endif /* __MINGW32__ */
@@ -3138,7 +3138,7 @@ main (int argc, char *argv[]) {
     isWindowsService = 0;
 
     if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-      LogWindowsError("StartServiceCtrlDispatcher");
+      logWindowsSystemError("StartServiceCtrlDispatcher");
       return 20;
     }
   }

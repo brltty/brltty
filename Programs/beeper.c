@@ -39,7 +39,7 @@ beeperConstruct (int errorLevel) {
 
     free(device);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   LogPrint(LOG_DEBUG, "beeper not available");

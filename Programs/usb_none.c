@@ -30,14 +30,14 @@
 int
 usbResetDevice (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device reset");
+  logSystemError("USB device reset");
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device autosuspend disable");
+  logSystemError("USB device autosuspend disable");
   return 0;
 }
 
@@ -47,7 +47,7 @@ usbSetConfiguration (
   unsigned char configuration
 ) {
   errno = ENOSYS;
-  LogError("USB configuration set");
+  logSystemError("USB configuration set");
   return 0;
 }
 
@@ -57,7 +57,7 @@ usbClaimInterface (
   unsigned char interface
 ) {
   errno = ENOSYS;
-  LogError("USB interface claim");
+  logSystemError("USB interface claim");
   return 0;
 }
 
@@ -67,7 +67,7 @@ usbReleaseInterface (
   unsigned char interface
 ) {
   errno = ENOSYS;
-  LogError("USB interface release");
+  logSystemError("USB interface release");
   return 0;
 }
 
@@ -78,7 +78,7 @@ usbSetAlternative (
   unsigned char alternative
 ) {
   errno = ENOSYS;
-  LogError("USB alternative set");
+  logSystemError("USB alternative set");
   return 0;
 }
 
@@ -88,7 +88,7 @@ usbClearEndpoint (
   unsigned char endpointAddress
 ) {
   errno = ENOSYS;
-  LogError("USB endpoint clear");
+  logSystemError("USB endpoint clear");
   return 0;
 }
 
@@ -106,7 +106,7 @@ usbControlTransfer (
   int timeout
 ) {
   errno = ENOSYS;
-  LogError("USB control transfer");
+  logSystemError("USB control transfer");
   return -1;
 }
 
@@ -119,7 +119,7 @@ usbSubmitRequest (
   void *context
 ) {
   errno = ENOSYS;
-  LogError("USB request submit");
+  logSystemError("USB request submit");
   return NULL;
 }
 
@@ -129,7 +129,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancel");
+  logSystemError("USB request cancel");
   return 0;
 }
 
@@ -141,7 +141,7 @@ usbReapResponse (
   int wait
 ) {
   errno = ENOSYS;
-  LogError("USB request reap");
+  logSystemError("USB request reap");
   return NULL;
 }
 
@@ -154,7 +154,7 @@ usbReadEndpoint (
   int timeout
 ) {
   errno = ENOSYS;
-  LogError("USB endpoint read");
+  logSystemError("USB endpoint read");
   return -1;
 }
 
@@ -167,14 +167,14 @@ usbWriteEndpoint (
   int timeout
 ) {
   errno = ENOSYS;
-  LogError("USB endpoint write");
+  logSystemError("USB endpoint write");
   return -1;
 }
 
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device descriptor read");
+  logSystemError("USB device descriptor read");
   return 0;
 }
 

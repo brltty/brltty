@@ -110,7 +110,7 @@ prepareProgram (int argumentCount, char **argumentVector) {
       if (path) {
         programPath = strdupWrapper(path);
       } else {
-        LogError("realpath");
+        logSystemError("realpath");
       }
     }
 #endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
@@ -217,7 +217,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
             }
           }
         } else {
-          LogError("read");
+          logSystemError("read");
         }
 
         if (state == PFS_stale) {
@@ -230,13 +230,13 @@ createPidFile (const char *path, ProcessIdentifier pid) {
               if (write(file, buffer, length) != -1) {
                 state = PFS_ready;
               } else {
-                LogError("write");
+                logSystemError("write");
               }
             } else {
-              LogError("ftruncate");
+              logSystemError("ftruncate");
             }
           } else {
-            LogError("lseek");
+            logSystemError("lseek");
           }
         }
 

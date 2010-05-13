@@ -36,7 +36,7 @@ usbSetTimeout (int file, int new, int *old) {
   if (!old || (new != *old)) {
     int arg = new;
     if (ioctl(file, USB_SET_TIMEOUT, &arg) == -1) {
-      LogError("USB timeout set");
+      logSystemError("USB timeout set");
       return 0;
     }
     if (old) *old = new;
@@ -47,21 +47,21 @@ usbSetTimeout (int file, int new, int *old) {
 static int
 usbSetShortTransfers (int file, int arg) {
   if (ioctl(file, USB_SET_SHORT_XFER, &arg) != -1) return 1;
-  LogError("USB set short transfers");
+  logSystemError("USB set short transfers");
   return 0;
 }
 
 int
 usbResetDevice (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device reset");
+  logSystemError("USB device reset");
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device autosuspend disable");
+  logSystemError("USB device autosuspend disable");
   return 0;
 }
 
@@ -73,7 +73,7 @@ usbSetConfiguration (
   UsbDeviceExtension *devx = device->extension;
   int arg = configuration;
   if (ioctl(devx->file, USB_SET_CONFIG, &arg) != -1) return 1;
-  LogError("USB configuration set");
+  logSystemError("USB configuration set");
   return 0;
 }
 
@@ -85,7 +85,7 @@ usbClaimInterface (
   return 1;
 /*
   errno = ENOSYS;
-  LogError("USB interface claim");
+  logSystemError("USB interface claim");
   return 0;
 */
 }
@@ -98,7 +98,7 @@ usbReleaseInterface (
   return 1;
 /*
   errno = ENOSYS;
-  LogError("USB interface release");
+  logSystemError("USB interface release");
   return 0;
 */
 }
@@ -115,7 +115,7 @@ usbSetAlternative (
   arg.uai_interface_index = interface;
   arg.uai_alt_no = alternative;
   if (ioctl(devx->file, USB_SET_ALTINTERFACE, &arg) != -1) return 1;
-  LogError("USB alternative set");
+  logSystemError("USB alternative set");
   return 0;
 }
 
@@ -125,7 +125,7 @@ usbClearEndpoint (
   unsigned char endpointAddress
 ) {
   errno = ENOSYS;
-  LogError("USB endpoint clear");
+  logSystemError("USB endpoint clear");
   return 0;
 }
 
@@ -154,7 +154,7 @@ usbControlTransfer (
   arg.ucr_flags = USBD_SHORT_XFER_OK;
   if (usbSetTimeout(devx->file, timeout, &devx->timeout)) {
     if (ioctl(devx->file, USB_DO_REQUEST, &arg) != -1) return arg.ucr_actlen;
-    LogError("USB control transfer");
+    logSystemError("USB control transfer");
   }
   return -1;
 }
@@ -168,7 +168,7 @@ usbSubmitRequest (
   void *context
 ) {
   errno = ENOSYS;
-  LogError("USB request submit");
+  logSystemError("USB request submit");
   return NULL;
 }
 
@@ -178,7 +178,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancel");
+  logSystemError("USB request cancel");
   return 0;
 }
 
@@ -190,7 +190,7 @@ usbReapResponse (
   int wait
 ) {
   errno = ENOSYS;
-  LogError("USB request reap");
+  logSystemError("USB request reap");
   return NULL;
 }
 
@@ -213,7 +213,7 @@ usbReadEndpoint (
           count = -1;
         }
       } else if (errno != ETIMEDOUT) {
-        LogError("USB endpoint read");
+        logSystemError("USB endpoint read");
       }
     }
   }
@@ -234,7 +234,7 @@ usbWriteEndpoint (
     if (usbSetTimeout(eptx->file, timeout, &eptx->timeout)) {
       int count = write(eptx->file, buffer, length);
       if (count != -1) return count;
-      LogError("USB endpoint write");
+      logSystemError("USB endpoint write");
     }
   }
   return -1;
@@ -250,7 +250,7 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     device->descriptor.bcdDevice = getLittleEndian(device->descriptor.bcdDevice);
     return 1;
   }
-  LogError("USB device descriptor read");
+  logSystemError("USB device descriptor read");
   return 0;
 }
 
@@ -365,14 +365,14 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
             }
           }
         } else if (errno != ENXIO) {
-          LogError("USB device query");
+          logSystemError("USB device query");
         }
       }
       close(bus);
     } else if (errno == ENOENT) {
       break;
     } else if (errno != ENXIO) {
-      LogError("USB bus open");
+      logSystemError("USB bus open");
     }
     busNumber++;
   }

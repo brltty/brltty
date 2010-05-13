@@ -33,19 +33,19 @@ executeHostCommand (const char *const *arguments) {
 
   switch ((pid = fork())) {
     case -1: /* error */
-      LogError("fork");
+      logSystemError("fork");
       break;
 
     case 0: /* child */
       sigprocmask(SIG_SETMASK, &oldMask, NULL);
       execvp(arguments[0], (char *const*)arguments);
-      LogError("execvp");
+      logSystemError("execvp");
       _exit(1);
 
     default: { /* parent */
       int status;
       if (waitpid(pid, &status, 0) == -1) {
-        LogError("waitpid");
+        logSystemError("waitpid");
       } else if (WIFEXITED(status)) {
         result = WEXITSTATUS(status);
         LogPrint(LOG_DEBUG, "exit status: %d", result);

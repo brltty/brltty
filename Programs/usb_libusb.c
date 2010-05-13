@@ -38,14 +38,14 @@ usbResetDevice (UsbDevice *device) {
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB device reset");
+  logSystemError("USB device reset");
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device autosuspend disable");
+  logSystemError("USB device autosuspend disable");
   return 0;
 }
 
@@ -59,7 +59,7 @@ usbSetConfiguration (
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB configuration set");
+  logSystemError("USB configuration set");
   return 0;
 }
 
@@ -73,7 +73,7 @@ usbClaimInterface (
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB interface claim");
+  logSystemError("USB interface claim");
   return 0;
 }
 
@@ -87,7 +87,7 @@ usbReleaseInterface (
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB interface release");
+  logSystemError("USB interface release");
   return 0;
 }
 
@@ -102,7 +102,7 @@ usbSetAlternative (
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB alternative set");
+  logSystemError("USB alternative set");
   return 0;
 }
 
@@ -116,7 +116,7 @@ usbClearEndpoint (
   if (result >= 0) return 1;
 
   errno = -result;
-  LogError("USB endpoint clear");
+  logSystemError("USB endpoint clear");
   return 0;
 }
 
@@ -139,7 +139,7 @@ usbControlTransfer (
   if (result >= 0) return result;
 
   errno = -result;
-  LogError("USB control transfer");
+  logSystemError("USB control transfer");
   return -1;
 }
 
@@ -161,7 +161,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancel");
+  logSystemError("USB request cancel");
   return 0;
 }
 
@@ -173,7 +173,7 @@ usbReapResponse (
   int wait
 ) {
   errno = ENOSYS;
-  LogError("USB request reap");
+  logSystemError("USB request reap");
   return NULL;
 }
 
@@ -228,7 +228,7 @@ usbReadEndpoint (
   if (errno == ETIMEDOUT) errno = EAGAIN;
 #endif /* ETIMEDOUT */
 
-  if (errno != EAGAIN) LogError("USB endpoint read");
+  if (errno != EAGAIN) logSystemError("USB endpoint read");
   return -1;
 }
 
@@ -269,7 +269,7 @@ usbWriteEndpoint (
     errno = -result;
   }
 
-  LogError("USB endpoint write");
+  logSystemError("USB endpoint write");
   return -1;
 }
 
@@ -340,7 +340,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
                 free(devx);
               } else {
-                LogError("USB device extension allocate");
+                logSystemError("USB device extension allocate");
               }
 
               if ((dev = dev->next) == dev0) dev = NULL;
@@ -352,11 +352,11 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
       }
     } else {
       errno = -result;
-      LogError("USB devices find");
+      logSystemError("USB devices find");
     }
   } else {
     errno = -result;
-    LogError("USB busses find");
+    logSystemError("USB busses find");
   }
 
   return device;

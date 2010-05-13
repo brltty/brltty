@@ -123,7 +123,7 @@ insertKeyValue (
     KeyValue *newValues = realloc(*values, ARRAY_SIZE(newValues, newSize));
 
     if (!newValues) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
 
@@ -164,7 +164,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
     KeyContext *newTable = realloc(ktd->table->keyContextTable, ARRAY_SIZE(newTable, newCount));
 
     if (!newTable) {
-      LogError("realloc");
+      logSystemError("realloc");
       return NULL;
     }
     ktd->table->keyContextTable = newTable;
@@ -204,7 +204,7 @@ setKeyContextTitle (KeyContext *ctx, const wchar_t *title, size_t length) {
   if (ctx->title) free(ctx->title);
 
   if (!(ctx->title = malloc(ARRAY_SIZE(ctx->title, length+1)))) {
-    LogError("malloc");
+    logMallocError();
     return 0;
   }
 
@@ -533,7 +533,7 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
     const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KeyboardFunctionCount));
 
     if (!newTable) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     }
 
@@ -736,7 +736,7 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
     KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
 
@@ -861,7 +861,7 @@ processHotkeyOperands (DataFile *file, void *data) {
         HotkeyEntry *newTable = realloc(ctx->hotkeyTable, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
-          LogError("realloc");
+          logSystemError("realloc");
           return 0;
         }
 
@@ -921,7 +921,7 @@ processMapOperands (DataFile *file, void *data) {
         MappedKeyEntry *newTable = realloc(ctx->mappedKeyTable, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
-          LogError("realloc");
+          logSystemError("realloc");
           return 0;
         }
 
@@ -948,7 +948,7 @@ processNoteOperands (DataFile *file, void *data) {
       wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
 
       if (!newTable) {
-        LogError("realloc");
+        logSystemError("realloc");
         return 0;
       }
 
@@ -958,7 +958,7 @@ processNoteOperands (DataFile *file, void *data) {
         wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, note.length+1));
 
         if (!noteString) {
-          LogError("malloc");
+          logMallocError();
           return 0;
         }
 
@@ -1007,7 +1007,7 @@ processTitleOperands (DataFile *file, void *data) {
     if (ktd->table->title) {
       reportDataError(file, "table title specified more than once");
     } else if (!(ktd->table->title = malloc(ARRAY_SIZE(ktd->table->title, title.length+1)))) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     } else {
       wmemcpy(ktd->table->title, title.characters, title.length);
@@ -1105,7 +1105,7 @@ addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, uns
     unsigned int *newTable = realloc(ibd->indexTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
 
@@ -1213,7 +1213,7 @@ prepareKeyBindings (KeyContext *ctx) {
       KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
 
       if (!newTable) {
-        LogError("realloc");
+        logSystemError("realloc");
         return 0;
       }
 
@@ -1228,7 +1228,7 @@ prepareKeyBindings (KeyContext *ctx) {
 
   if (ctx->keyBindingCount) {
     if (!(ctx->sortedKeyBindings = malloc(ARRAY_SIZE(ctx->sortedKeyBindings, ctx->keyBindingCount)))) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     }
 
@@ -1261,7 +1261,7 @@ static int
 prepareHotkeyEntries (KeyContext *ctx) {
   if (ctx->hotkeyCount) {
     if (!(ctx->sortedHotkeyEntries = malloc(ARRAY_SIZE(ctx->sortedHotkeyEntries, ctx->hotkeyCount)))) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     }
 
@@ -1294,7 +1294,7 @@ static int
 prepareMappedKeyEntries (KeyContext *ctx) {
   if (ctx->mappedKeyCount) {
     if (!(ctx->sortedMappedKeyEntries = malloc(ARRAY_SIZE(ctx->sortedMappedKeyEntries, ctx->mappedKeyCount)))) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     }
 
@@ -1374,7 +1374,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
     if (ktd.table) destroyKeyTable(ktd.table);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return table;

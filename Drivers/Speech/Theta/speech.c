@@ -189,7 +189,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 
     if (pipe(pipeDescriptors) != -1) {
       if ((child = fork()) == -1) {
-        LogError("fork");
+        logSystemError("fork");
       } else if (child == 0) {
         _exit(doChild());
       } else
@@ -204,7 +204,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
       close(*pipeInput);
       close(*pipeOutput);
     } else {
-      LogError("pipe");
+      logSystemError("pipe");
     }
   }
 }

@@ -114,7 +114,7 @@ addWindowsCommandLineCharacter (char **buffer, int *size, int *length, char char
   if (*length == *size) {
     char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X80));
     if (!newBuffer) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
     *buffer = newBuffer;
@@ -183,7 +183,7 @@ makeWindowsCommandLine (const char *const *arguments) {
   {
     char *line = realloc(buffer, length);
     if (line) return line;
-    LogError("realloc");
+    logSystemError("realloc");
   }
 
 error:
@@ -218,12 +218,12 @@ installService (const char *name, const char *description) {
         LogPrint(LOG_WARNING, "service already installed: %s", name);
         installed = 1;
       } else {
-        LogWindowsError("CreateService");
+        logWindowsSystemError("CreateService");
       }
 
       CloseServiceHandle(scm);
     } else {
-      LogWindowsError("OpenSCManager");
+      logWindowsSystemError("OpenSCManager");
     }
 
     free(command);
@@ -248,7 +248,7 @@ removeService (const char *name) {
         LogPrint(LOG_WARNING, "service already being removed: %s", name);
         removed = 1;
       } else {
-        LogWindowsError("DeleteService");
+        logWindowsSystemError("DeleteService");
       }
 
       CloseServiceHandle(service);
@@ -256,12 +256,12 @@ removeService (const char *name) {
       LogPrint(LOG_WARNING, "service not installed: %s", name);
       removed = 1;
     } else {
-      LogWindowsError("OpenService");
+      logWindowsSystemError("OpenService");
     }
 
     CloseServiceHandle(scm);
   } else {
-    LogWindowsError("OpenSCManager");
+    logWindowsSystemError("OpenSCManager");
   }
 
   return removed;
@@ -363,7 +363,7 @@ win_getLocale (void) {
 
       return locale;
     } else {
-      LogWindowsError("GetLocaleInfoEx");
+      logWindowsSystemError("GetLocaleInfoEx");
     }
   }
 
@@ -710,7 +710,7 @@ win_getLocale (void) {
 #undef LANGUAGE
       }
     } else {
-      LogWindowsError("GetLocaleInfo");
+      logWindowsSystemError("GetLocaleInfo");
     }
   }
 

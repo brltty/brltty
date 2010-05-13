@@ -56,9 +56,9 @@
 
 #ifdef __MINGW32__
 #define close(fd) CloseHandle((HANDLE)(fd))
-#define LogSocketError(msg) LogWindowsSocketError(msg)
+#define LogSocketError(msg) logWindowsSocketError(msg)
 #else /* __MINGW32__ */
-#define LogSocketError(msg) LogError(msg)
+#define LogSocketError(msg) logSystemError(msg)
 #endif /* __MINGW32__ */
 
 #include "log.h"
@@ -335,7 +335,7 @@ static void
 unbindLocalAddress (const struct sockaddr *address) {
   const struct sockaddr_un *localAddress = (const struct sockaddr_un *)address;
   if (unlink(localAddress->sun_path) == -1) {
-    LogError("unlink");
+    logSystemError("unlink");
   }
 }
 
@@ -363,7 +363,7 @@ readNamedPipe (int descriptor, void *buffer, int size) {
     DWORD available;
 
     if (!PeekNamedPipe((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
-      LogWindowsError("PeekNamedPipe");
+      logWindowsSystemError("PeekNamedPipe");
       return 0;
     }
 
@@ -382,10 +382,10 @@ readNamedPipe (int descriptor, void *buffer, int size) {
 
     if (!ReadFile((HANDLE)descriptor, buffer, size, &received, &overl)) {
       if (GetLastError() != ERROR_IO_PENDING) {
-        LogWindowsError("ReadPipe");
+        logWindowsSystemError("ReadPipe");
         received = 0;
       } else if (!GetOverlappedResult((HANDLE)descriptor, &overl, &received, TRUE)) {
-        LogWindowsError("GetOverlappedResult");
+        logWindowsSystemError("GetOverlappedResult");
         received = 0;
       }
     }
@@ -410,7 +410,7 @@ acceptNamedPipeConnection (const char *path) {
                                 PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                 PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
                                 1, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
-    LogWindowsError("CreateNamedPipe");
+    logWindowsSystemError("CreateNamedPipe");
     return -1;
   }
 
@@ -423,7 +423,7 @@ acceptNamedPipeConnection (const char *path) {
             ++attempts;
             LogPrint(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
           } else {
-            LogWindowsError("ConnectNamedPipe");
+            logWindowsSystemError("ConnectNamedPipe");
             CloseHandle(h);
             h = (HANDLE) -1;
             break;
@@ -434,7 +434,7 @@ acceptNamedPipeConnection (const char *path) {
         break;
 
       default:
-        LogWindowsError("ConnectNamedPipe");
+        logWindowsSystemError("ConnectNamedPipe");
         CloseHandle(h);
         h = (HANDLE) -1;
         break;
@@ -454,7 +454,7 @@ requestNamedPipeConnection (const char *path) {
                       GENERIC_READ|GENERIC_WRITE,
                       FILE_SHARE_READ|FILE_SHARE_WRITE,
                       NULL, OPEN_EXISTING, 0, NULL)) == INVALID_HANDLE_VALUE) {
-    LogWindowsError("Connect to named pipe");
+    logWindowsSystemError("Connect to named pipe");
     return -1;
   }
 
@@ -987,7 +987,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else {
     static WSADATA wsadata;
     if (WSAStartup(MAKEWORD(1, 1), &wsadata)) {
-      LogWindowsError("socket library start");
+      logWindowsSystemError("socket library start");
       goto failed;
     }
   }

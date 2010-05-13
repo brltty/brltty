@@ -60,7 +60,7 @@ putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count)
     wchar_t *newCharacters = realloc(lgd->lineCharacters, ARRAY_SIZE(newCharacters, newSize));
 
     if (!newCharacters) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
 

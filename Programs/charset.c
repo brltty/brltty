@@ -82,7 +82,7 @@ convertCharToWchar (char c) {
   int result = MultiByteToWideChar(CHARSET_WINDOWS_CODEPAGE, MB_ERR_INVALID_CHARS,
                                    &c, 1,  &wc, 1);
   if (result) return wc;
-  LogWindowsError("MultiByteToWideChar[" STRINGIFY(CHARSET_WINDOWS_CODEPAGE) "]");
+  logWindowsSystemError("MultiByteToWideChar[" STRINGIFY(CHARSET_WINDOWS_CODEPAGE) "]");
   return WEOF;
 }
 
@@ -93,7 +93,7 @@ convertWcharToChar (wchar_t wc) {
                                    &wc, 1, &c, 1,
                                    NULL, NULL);
   if (result) return c;
-  LogWindowsError("WideCharToMultiByte[" STRINGIFY(CHARSET_WINDOWS_CODEPAGE) "]");
+  logWindowsSystemError("WideCharToMultiByte[" STRINGIFY(CHARSET_WINDOWS_CODEPAGE) "]");
   return EOF;
 }
 
@@ -515,7 +515,7 @@ setCharset (const char *name) {
       if (conv->permanent && (*conv->handle != CHARSET_ICONV_NULL)) {
         conv->newHandle = CHARSET_ICONV_NULL;
       } else if ((conv->newHandle = iconv_open(conv->toCharset, conv->fromCharset)) == CHARSET_ICONV_NULL) {
-        LogError("iconv_open");
+        logSystemError("iconv_open");
         while (conv != convTable)
           if ((--conv)->newHandle != CHARSET_ICONV_NULL)
             iconv_close(conv->newHandle);

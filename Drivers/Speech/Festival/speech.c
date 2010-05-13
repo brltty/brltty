@@ -363,7 +363,7 @@ writeString (const char *string, int reopen) {
   fputs(string, festivalStream);
   if (!ferror(festivalStream)) return 1;
 
-  LogError("fputs");
+  logSystemError("fputs");
   closeStream();
   return 0;
 }

@@ -139,7 +139,7 @@ getKeyNameTables (const char *keyTableName) {
 
               free(keyTablesSymbol);
             } else {
-              LogError("malloc");
+              logMallocError();
             }
           }
         } else {

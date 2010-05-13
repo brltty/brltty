@@ -41,7 +41,7 @@ asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
     bell.volume = 100;
     bell.which = WSKBD_BELL_DOALL;
     if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    LogError("ioctl WSKBDIO_COMPLEXBELL");
+    logSystemError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;
 }
@@ -60,7 +60,7 @@ stopBeep (void) {
     bell.volume = 0;
     bell.period = 0;
     if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    LogError("ioctl WSKBDIO_COMPLEXBELL");
+    logSystemError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;
 }

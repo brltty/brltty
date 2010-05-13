@@ -75,7 +75,7 @@ static int
 allocateCharsetConverter (CharsetConverter *converter, const char *sourceCharset, const char *targetCharset) {
   if (converter->iconvHandle == ICONV_NULL) {
     if ((converter->iconvHandle = iconv_open(targetCharset, sourceCharset)) == ICONV_NULL) {
-      LogError("iconv_open");
+      logSystemError("iconv_open");
       return 0;
     }
   }
@@ -101,7 +101,7 @@ convertCharacters (
   if (errno == EILSEQ) return CONV_ILLEGAL;
   if (errno == EINVAL) return CONV_SHORT;
   if (errno == E2BIG) return CONV_OVERFLOW;
-  LogError("iconv");
+  logSystemError("iconv");
   return CONV_ERROR;
 }
 #else /* charset conversion definitions */
@@ -332,7 +332,7 @@ static void
 closeConsole (void) {
   if (consoleDescriptor != -1) {
     if (close(consoleDescriptor) == -1) {
-      LogError("console close");
+      logSystemError("console close");
     }
     LogPrint(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
@@ -370,7 +370,7 @@ static void
 closeScreen (void) {
   if (screenDescriptor != -1) {
     if (close(screenDescriptor) == -1) {
-      LogError("screen close");
+      logSystemError("screen close");
     }
     LogPrint(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
@@ -426,13 +426,13 @@ setScreenFontMap (int force) {
   while (1) {
     sfm.entry_ct = size;
     if (!(sfm.entries = malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
-      LogError("screen font map allocation");
+      logSystemError("screen font map allocation");
       return 0;
     }
     if (controlConsole(GIO_UNIMAP, &sfm) != -1) break;
     free(sfm.entries);
     if (errno != ENOMEM) {
-      LogError("ioctl GIO_UNIMAP");
+      logSystemError("ioctl GIO_UNIMAP");
       return 0;
     }
     if (!(size <<= 1)) {
@@ -548,7 +548,7 @@ determineAttributesMasks (void) {
     {
       unsigned short mask;
       if (controlConsole(VT_GETHIFONTMASK, &mask) == -1) {
-        if (errno != EINVAL) LogError("ioctl[VT_GETHIFONTMASK]");
+        if (errno != EINVAL) logSystemError("ioctl[VT_GETHIFONTMASK]");
       } else if (mask & 0XFF) {
         LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
       } else {
@@ -574,13 +574,13 @@ determineAttributesMasks (void) {
           setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
           return 1;
         } else {
-          LogError("read");
+          logSystemError("read");
         }
       } else {
-        LogError("read");
+        logSystemError("read");
       }
     } else {
-      LogError("lseek");
+      logSystemError("lseek");
     }
   }
 
@@ -876,13 +876,13 @@ userVirtualTerminal_LinuxScreen (int number) {
 static int
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
-    LogError("screen seek");
+    logSystemError("screen seek");
   } else {
     ssize_t count = read(screenDescriptor, buffer, size);
     if (count == size) return 1;
 
     if (count == -1) {
-      LogError("screen read");
+      logSystemError("screen read");
     } else {
       LogPrint(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
                (unsigned int)size, (int)count);
@@ -1027,7 +1027,7 @@ getConsoleDescription (ScreenDescription *description) {
   } else {
     struct vt_stat state;
     if (controlConsole(VT_GETSTATE, &state) == -1) {
-      LogError("ioctl VT_GETSTATE");
+      logSystemError("ioctl VT_GETSTATE");
       description->number = 0;
       problemText = "can't get virtual terminal number";
       return 0;
@@ -1048,7 +1048,7 @@ getConsoleDescription (ScreenDescription *description) {
   {
     int mode;
     if (controlConsole(KDGETMODE, &mode) == -1) {
-      LogError("ioctl KDGETMODE");
+      logSystemError("ioctl KDGETMODE");
     } else if (mode == KD_TEXT) {
       problemText = NULL;
       return 1;
@@ -1262,7 +1262,7 @@ insertUinput (ScreenKey key) {
 static int
 insertByte (char byte) {
   if (controlConsole(TIOCSTI, &byte) != -1) return 1;
-  LogError("ioctl TIOCSTI");
+  logSystemError("ioctl TIOCSTI");
   return 0;
 }
 
@@ -1679,7 +1679,7 @@ insertKey_LinuxScreen (ScreenKey key) {
           break;
       }
     } else {
-      LogError("ioctl KDGKBMODE");
+      logSystemError("ioctl KDGKBMODE");
     }
   }
   return ok;
@@ -1697,7 +1697,7 @@ typedef struct {
 static int
 selectCharacters (CharacterSelectionArguments *arguments) {
   if (controlConsole(TIOCLINUX, arguments) != -1) return 1;
-  if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
+  if (errno != EINVAL) logSystemError("ioctl[TIOCLINUX]");
   return 0;
 }
 
@@ -1749,7 +1749,7 @@ switchVirtualTerminal_LinuxScreen (int vt) {
         LogPrint(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
         return 1;
       } else {
-        LogError("ioctl VT_ACTIVATE");
+        logSystemError("ioctl VT_ACTIVATE");
       }
     }
   }

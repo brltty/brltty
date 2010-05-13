@@ -139,11 +139,11 @@ openPcmDevice (int errorLevel, const char *device) {
         if (connect(pcm->socket, (struct sockaddr *)&pcm->stream.tcp_sockaddr, sizeof(pcm->stream.tcp_sockaddr)) != -1) {
           return pcm;
         } else {
-          LogError("PCM socket connection");
+          logSystemError("PCM socket connection");
         }
         close(pcm->socket);
       } else {
-        LogError("PCM socket creation");
+        logSystemError("PCM socket creation");
       }
     } else {
       logAudioError(errorLevel, status, "APlaySStream");
@@ -152,7 +152,7 @@ openPcmDevice (int errorLevel, const char *device) {
   noServer:
     free(pcm);
   } else {
-    LogError("PCM device allocation");
+    logSystemError("PCM device allocation");
   }
 #endif /* HAVE_HPUX_AUDIO */
   return NULL;

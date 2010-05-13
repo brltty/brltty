@@ -99,13 +99,13 @@ construct_ScreenScreen (void) {
       if ((shmAddress = mmap(0, shmSize, PROT_READ, MAP_SHARED, shmFileDescriptor, 0)) != MAP_FAILED) {
         return 1;
       } else {
-        LogError("mmap");
+        logSystemError("mmap");
       }
 
       close(shmFileDescriptor);
       shmFileDescriptor = -1;
     } else {
-      LogError("shm_open");
+      logSystemError("shm_open");
     }
   }
 #endif /* HAVE_SHM_OPEN */

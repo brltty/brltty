@@ -51,7 +51,7 @@ currentVt(void) {
   if ((size = readlink(HURD_CURVCSPATH,link,sizeof(link))) == -1) {
     /* console may not be started yet or in X mode, don't flood */
     if (errno != ENOENT && errno != ENOTDIR && errno != ENODEV)
-      LogError("reading " HURD_CURVCSPATH " link");
+      logSystemError("reading " HURD_CURVCSPATH " link");
     return 1;
   }
   link[size]='\0';
@@ -87,7 +87,7 @@ static void
 closeConsole (void) {
   if (consoleDescriptor != -1) {
     if (close(consoleDescriptor) == -1) {
-      LogError("Console close");
+      logSystemError("Console close");
     }
     LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
@@ -106,7 +106,7 @@ openConsole (unsigned char vt) {
       free(path);
       return 1;
     }
-    LogError("Console open");
+    logSystemError("Console open");
     free(path);
   }
   return 0;
@@ -124,10 +124,10 @@ static void
 closeScreen (void) {
   if (screenDescriptor != -1) {
     if (munmap((void *) screenMap, screenMapSize) == -1) {
-      LogError("Screen unmap");
+      logSystemError("Screen unmap");
     }
     if (close(screenDescriptor) == -1) {
-      LogError("Screen close");
+      logSystemError("Screen close");
     }
     LogPrint(LOG_DEBUG, "Screen closed: fd=%d mmap=%p", screenDescriptor, screenMap);
     screenDescriptor = -1;
@@ -155,8 +155,8 @@ openScreen (unsigned char vt) {
             return 1;
           }
           munmap((void *) map, st.st_size);
-        } else LogError("Screen map");
-      } else LogError("Getting size of Screen");
+        } else logSystemError("Screen map");
+      } else logSystemError("Getting size of Screen");
       close(screen);
     }
     free(path);
@@ -234,7 +234,7 @@ static int
 insertByte (unsigned char byte) {
   if (write(consoleDescriptor, &byte, 1) != -1)
     return 1;
-  LogError("Console write");
+  logSystemError("Console write");
   return 0;
 }
 
@@ -409,7 +409,7 @@ switchVirtualTerminal_HurdScreen (int vt) {
       LogPrint(LOG_DEBUG, "Switched to virtual terminal %d.", vt);
       return 1;
     } else {
-      LogError("symlinking to switch vt");
+      logSystemError("symlinking to switch vt");
     }
   }
   return 0;

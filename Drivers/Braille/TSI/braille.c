@@ -325,19 +325,19 @@ QueryDisplay(unsigned char *reply)
     if (serialAwaitInput(serialDevice, 100)) {
       if ((count = myread(reply, Q_REPLY_LENGTH)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
-          LogBytes(LOG_DEBUG, "TSI Reply", reply, count);
+          logBytes(LOG_DEBUG, "TSI Reply", reply, count);
           return 1;
         } else {
           logUnexpectedPacket(reply, count);
         }
       } else {
-        LogError("Read");
+        logSystemError("Read");
       }
     }
   } else if (count != -1) {
     LogPrint(LOG_ERR, "Short write: %d < %d", count, DIM_BRL_QUERY);
   } else {
-    LogError("Write");
+    logSystemError("Write");
   }
   return 0;
 }

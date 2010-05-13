@@ -62,7 +62,7 @@ addLine_HelpScreen (const wchar_t *line) {
     HelpLineEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      LogError("realloc");
+      logSystemError("realloc");
       return 0;
     }
 
@@ -76,7 +76,7 @@ addLine_HelpScreen (const wchar_t *line) {
     if ((hle->length = length) > lineLength) lineLength = length;
 
     if (!(hle->characters = malloc(ARRAY_SIZE(hle->characters, length)))) {
-      LogError("malloc");
+      logMallocError();
       return 0;
     }
 

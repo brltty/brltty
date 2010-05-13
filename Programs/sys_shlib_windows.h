@@ -22,14 +22,14 @@ void *
 loadSharedObject (const char *path) {
   HMODULE library;
   if (!(library = LoadLibrary(path)))
-    LogWindowsError("loading library");
+    logWindowsSystemError("loading library");
   return library;
 }
 
 void 
 unloadSharedObject (void *object) {
   if (!(FreeLibrary((HMODULE) object)))
-    LogWindowsError("unloading library");
+    logWindowsSystemError("unloading library");
 }
 
 int 
@@ -37,6 +37,6 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   void **address = pointerAddress;
   if ((*address = GetProcAddress((HMODULE) object, symbol)))
     return 1;
-  LogWindowsError("looking up symbol in library");
+  logWindowsSystemError("looking up symbol in library");
   return 0;
 }

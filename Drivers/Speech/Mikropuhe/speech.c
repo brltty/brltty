@@ -200,7 +200,7 @@ static int
 writeSound (const void *bytes, unsigned int count, void *data, void *reserved) {
   if (synthesisThreadStarted) {
     if (writePcmData(pcm, bytes, count)) return 0;
-    LogError("Mikropuhe write");
+    logSystemError("Mikropuhe write");
     return MPINT_ERR_GENERAL;
   }
   return 1;
@@ -265,7 +265,7 @@ awaitSpeechSegment (void) {
         continue;
 
       default:
-        LogError("pthread_cond_timedwait");
+        logSystemError("pthread_cond_timedwait");
         return 0;
     }
   }

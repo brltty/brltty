@@ -193,7 +193,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             return 1;
 #ifdef USE_CURSES
           } else {
-            LogError("newterm");
+            logSystemError("newterm");
           }
 
           ttyStream = NULL;
@@ -208,7 +208,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #ifdef HAVE_ICONV_H
     iconv_close(conversionDescriptor);
   } else {
-    LogError("iconv_open");
+    logSystemError("iconv_open");
   }
   conversionDescriptor = NULL;
 #endif /* HAVE_ICONV_H */

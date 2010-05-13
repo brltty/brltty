@@ -103,7 +103,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
     if (serialWriteData(serialDevice, buffer, size) != -1) return 1;
   }
 
-  LogError("serial write");
+  logSystemError("serial write");
   return 0;
 }
 

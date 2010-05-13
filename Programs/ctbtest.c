@@ -117,7 +117,7 @@ contractWcharLine (const wchar_t *line, void *data) {
 
     if (!outputBuffer) {
       if (!(outputBuffer = malloc(outputWidth))) {
-        LogError("output buffer allocation");
+        logSystemError("output buffer allocation");
         lpd->status = 10;
         return 0;
       }
@@ -150,7 +150,7 @@ contractWcharLine (const wchar_t *line, void *data) {
         if (opt_forceOutput && !ferror(output)) fflush(output);
 
         if (ferror(output)) {
-          LogError("output");
+          logSystemError("output");
           lpd->status = 12;
           return 0;
         }

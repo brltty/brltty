@@ -35,7 +35,7 @@ getProgramPath (void) {
         DWORD length = GetModuleFileName(handle, buffer, size);
 
         if (!length) {
-          LogWindowsError("GetModuleFileName");
+          logWindowsSystemError("GetModuleFileName");
           break;
         }
 
@@ -54,7 +54,7 @@ getProgramPath (void) {
 
     free(buffer);
   } else {
-    LogWindowsError("GetModuleHandle");
+    logWindowsSystemError("GetModuleHandle");
   }
 
   return path;

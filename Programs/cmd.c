@@ -61,7 +61,7 @@ getCommandEntry (int code) {
       const CommandEntry **entries = malloc(ARRAY_SIZE(entries, commandCount));
 
       if (!entries) {
-        LogError("malloc");
+        logMallocError();
         return NULL;
       }
 

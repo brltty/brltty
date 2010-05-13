@@ -128,7 +128,7 @@ awaitOperation (MonitorEntry *monitors, int count, int timeout) {
     if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
 
     if (result == WAIT_FAILED) {
-      LogWindowsError("WaitForMultipleObjects");
+      logWindowsSystemError("WaitForMultipleObjects");
     }
   } else {
     approximateDelay(timeout);
@@ -148,7 +148,7 @@ testMonitor (const MonitorEntry *monitor) {
   if (result == WAIT_OBJECT_0) return 1;
 
   if (result == WAIT_FAILED) {
-    LogWindowsError("WaitForSingleObject");
+    logWindowsSystemError("WaitForSingleObject");
   }
 
   return 0;
@@ -266,7 +266,7 @@ awaitOperation (MonitorEntry *monitors, int count, int timeout) {
   if (result > 0) return 1;
 
   if (result == -1) {
-    if (errno != EINTR) LogError("poll");
+    if (errno != EINTR) logSystemError("poll");
   }
 
   return 0;
@@ -323,7 +323,7 @@ doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
     if (result > 0) return 1;
 
     if (result == -1) {
-      if (errno != EINTR) LogError("select");
+      if (errno != EINTR) logSystemError("select");
     }
 
     return 0;
@@ -543,7 +543,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
 
         free(function);
       } else {
-        LogError("malloc");
+        logMallocError();
       }
     }
   }
@@ -593,7 +593,7 @@ createOperation (
 
     free(operation);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return 0;
@@ -619,7 +619,7 @@ createTransferOperation (
 
     free(extension);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return 0;
@@ -773,7 +773,7 @@ asyncAbsoluteAlarm (
 
       free(alarm);
     } else {
-      LogError("malloc");
+      logMallocError();
     }
   }
 
@@ -870,7 +870,7 @@ asyncWait (int duration) {
           monitorArray = NULL;
         }
       } else {
-        LogError("malloc");
+        logMallocError();
         monitorCount = 0;
       }
     }

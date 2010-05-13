@@ -67,7 +67,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
   if ((spk_buffer = malloc(spk_size))) {
     return 1;
   } else {
-    LogError("malloc");
+    logMallocError();
   }
   return 0;
 }

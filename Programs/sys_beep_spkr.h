@@ -29,7 +29,7 @@ getSpeaker (void) {
     if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
       LogPrint(LOG_DEBUG, "Speaker opened: fd=%d", speaker);
     } else {
-      LogError("speaker open");
+      logSystemError("speaker open");
     }
   }
   return speaker;
@@ -57,7 +57,7 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
     tone.frequency = frequency;
     tone.duration = (milliseconds + 9) / 10;
     if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
-    LogError("speaker tone");
+    logSystemError("speaker tone");
   }
 #endif /* HAVE_MACHINE_SPEAKER_H */
   return 0;

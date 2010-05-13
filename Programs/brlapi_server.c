@@ -75,9 +75,9 @@
 #include "charset.h"
 
 #ifdef __MINGW32__
-#define LogSocketError(msg) LogWindowsSocketError(msg)
+#define LogSocketError(msg) logWindowsSocketError(msg)
 #else /* __MINGW32__ */
-#define LogSocketError(msg) LogError(msg)
+#define LogSocketError(msg) logSystemError(msg)
 #endif /* __MINGW32__ */
 
 #ifdef __CYGWIN32__
@@ -424,7 +424,7 @@ int initializePacket(Packet *packet)
 #ifdef __MINGW32__
   memset(&packet->overl,0,sizeof(packet->overl));
   if (!(packet->overl.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL))) {
-    LogWindowsError("CreateEvent for readPacket");
+    logWindowsSystemError("CreateEvent for readPacket");
     return -1;
   }
 #endif /* __MINGW32__ */
@@ -448,7 +448,7 @@ int readPacket(Connection *c)
         case ERROR_IO_PENDING: return 0;
         case ERROR_HANDLE_EOF:
         case ERROR_BROKEN_PIPE: return -2;
-        default: LogWindowsError("GetOverlappedResult"); setSystemErrno(); return -1;
+        default: logWindowsSystemError("GetOverlappedResult"); setSystemErrno(); return -1;
       }
     }
 read:
@@ -490,13 +490,13 @@ read:
 #ifdef __MINGW32__
   } else packet->state = READING_HEADER;
   if (!ResetEvent(packet->overl.hEvent))
-    LogWindowsError("ResetEvent in readPacket");
+    logWindowsSystemError("ResetEvent in readPacket");
   if (!ReadFile(c->fd, packet->p, packet->n, &res, &packet->overl)) {
     switch (GetLastError()) {
       case ERROR_IO_PENDING: return 0;
       case ERROR_HANDLE_EOF:
       case ERROR_BROKEN_PIPE: return -2;
-      default: LogWindowsError("ReadFile"); setSystemErrno(); return -1;
+      default: logWindowsSystemError("ReadFile"); setSystemErrno(); return -1;
     }
   }
 #endif /* __MINGW32__ */
@@ -1469,7 +1469,7 @@ cont:
 
 #ifdef __MINGW32__
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-      LogWindowsError("CreateEvent");
+      logWindowsSystemError("CreateEvent");
       closeSocketDescriptor(fd);
       return INVALID_FILE_DESCRIPTOR;
     }
@@ -1583,7 +1583,7 @@ cont:
 
 #ifdef __MINGW32__
   if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-    LogWindowsError("CreateEvent");
+    logWindowsSystemError("CreateEvent");
     closeSocketDescriptor(fd);
     return INVALID_FILE_DESCRIPTOR;
   }
@@ -1646,19 +1646,19 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
 	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
 	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
     if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
-      LogWindowsError("CreateNamedPipe");
+      logWindowsSystemError("CreateNamedPipe");
     goto out;
   }
   LogPrint(LOG_DEBUG,"CreateFile -> %"PRIfd,fd);
   if (!info->overl.hEvent) {
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-      LogWindowsError("CreateEvent");
+      logWindowsSystemError("CreateEvent");
       goto outfd;
     }
     LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   }
   if (!(ResetEvent(info->overl.hEvent))) {
-    LogWindowsError("ResetEvent");
+    logWindowsSystemError("ResetEvent");
     goto outfd;
   }
   if (ConnectNamedPipe(fd, &info->overl)) {
@@ -1669,7 +1669,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   switch(GetLastError()) {
     case ERROR_IO_PENDING: return fd;
     case ERROR_PIPE_CONNECTED: SetEvent(info->overl.hEvent); return fd;
-    default: LogWindowsError("ConnectNamedPipe");
+    default: logWindowsSystemError("ConnectNamedPipe");
   }
   CloseHandle(info->overl.hEvent);
 #else /* __MINGW32__ */
@@ -1683,7 +1683,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
 
   mode_t oldmode;
   if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
-    LogError("socket");
+    logSystemError("socket");
     goto out;
   }
   sa.sun_family = AF_LOCAL;
@@ -1697,7 +1697,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     if (errno == EEXIST)
       break;
     if (errno != EROFS && errno != ENOENT) {
-      LogError("making socket directory");
+      logSystemError("making socket directory");
       goto outmode;
     }
     /* read-only, or not mounted yet, wait */
@@ -1719,7 +1719,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
       continue;
     }
     if (errno != EEXIST) {
-      LogError("opening local socket lock");
+      logSystemError("opening local socket lock");
       goto outmode;
     }
     if ((pid = readPid(tmppath)) && pid != getpid()
@@ -1730,7 +1730,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     /* bogus file, myself or non-existent process, remove */
     while (unlink(tmppath)) {
       if (errno != EROFS) {
-	LogError("removing stale local socket lock");
+	logSystemError("removing stale local socket lock");
 	goto outmode;
       }
       approximateDelay(1000);
@@ -1742,7 +1742,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   while ((res = write(lock,pids+done,n)) < n) {
     if (res == -1) {
       if (errno != ENOSPC) {
-	LogError("writing pid in local socket lock");
+	logSystemError("writing pid in local socket lock");
 	goto outtmp;
       }
       approximateDelay(1000);
@@ -1757,7 +1757,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
       LogPrint(LOG_DEBUG,"linking local socket lock: %s", strerror(errno));
       /* but no action: link() might erroneously return errors, see manpage */
     if (fstat(lock, &st)) {
-      LogError("checking local socket lock");
+      logSystemError("checking local socket lock");
       goto outtmp;
     }
     if (st.st_nlink == 2)
@@ -1771,15 +1771,15 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     }
     /* bogus file, myself or non-existent process, remove */
     if (unlink(lockpath)) {
-      LogError("removing stale local socket lock");
+      logSystemError("removing stale local socket lock");
       goto outtmp;
     }
   }
   closeFileDescriptor(lock);
   if (unlink(tmppath))
-    LogError("removing temp local socket lock");
+    logSystemError("removing temp local socket lock");
   if (unlink(sa.sun_path) && errno != ENOENT) {
-    LogError("removing old socket");
+    logSystemError("removing old socket");
     goto outtmp;
   }
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
@@ -1788,7 +1788,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   }
   umask(oldmode);
   if (listen(fd,1)<0) {
-    LogError("listen");
+    logSystemError("listen");
     goto outlock;
   }
   return fd;
@@ -1850,7 +1850,7 @@ static void closeSockets(void *arg)
     info=&socketInfo[i];
     if (info->fd>=0) {
       if (closeFileDescriptor(info->fd))
-        LogError("closing socket");
+        logSystemError("closing socket");
       info->fd=INVALID_FILE_DESCRIPTOR;
 #ifdef __MINGW32__
       if ((info->overl.hEvent)) {
@@ -1866,11 +1866,11 @@ static void closeSockets(void *arg)
 	  memcpy(path,BRLAPI_SOCKETPATH "/",lpath+1);
 	  memcpy(path+lpath+1,info->port,lport+1);
 	  if (unlink(path))
-	    LogError("unlinking local socket");
+	    logSystemError("unlinking local socket");
 	  path[lpath+1]='.';
 	  memcpy(path+lpath+2,info->port,lport+1);
 	  if (unlink(path))
-	    LogError("unlinking local socket lock");
+	    logSystemError("unlinking local socket lock");
 	  free(path);
 	}
       }
@@ -2023,7 +2023,7 @@ static void *server(void *arg)
 #ifdef __MINGW32__
   if ((getaddrinfoProc && WSAStartup(MAKEWORD(2,0), &wsadata))
 	|| (!getaddrinfoProc && WSAStartup(MAKEWORD(1,1), &wsadata))) {
-    LogWindowsSocketError("Starting socket library");
+    logWindowsSocketError("Starting socket library");
     pthread_exit(NULL);
   }
 #endif /* __MINGW32__ */
@@ -2070,7 +2070,7 @@ static void *server(void *arg)
     }
     switch (WaitForMultipleObjects(nbHandles, lpHandles, FALSE, 1000)) {
       case WAIT_TIMEOUT: continue;
-      case WAIT_FAILED:  LogWindowsError("WaitForMultipleObjects");
+      case WAIT_FAILED:  logWindowsSystemError("WaitForMultipleObjects");
     }
     free(lpHandles);
 #else /* __MINGW32__ */
@@ -2105,14 +2105,14 @@ static void *server(void *arg)
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
           if (!(GetOverlappedResult(socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
-            LogWindowsError("GetOverlappedResult");
+            logWindowsSystemError("GetOverlappedResult");
           resfd = socketInfo[i].fd;
           if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR)
             LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIfd", was %"PRIfd")",i,socketInfo[i].fd,resfd);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
           if (!ResetEvent(socketInfo[i].overl.hEvent))
-            LogWindowsError("ResetEvent in server loop");
+            logWindowsSystemError("ResetEvent in server loop");
 #else /* __MINGW32__ */
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* __MINGW32__ */

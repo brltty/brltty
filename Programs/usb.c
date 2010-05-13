@@ -127,7 +127,7 @@ usbDecodeString (const UsbStringDescriptor *descriptor) {
       string[count] = character;
     }
   } else {
-    LogError("USB string allocate");
+    logSystemError("USB string allocate");
   }
   return string;
 }
@@ -317,7 +317,7 @@ usbConfigurationDescriptor (
             free(descriptors);
           }
         } else {
-          LogError("USB configuration descriptor allocate");
+          logSystemError("USB configuration descriptor allocate");
         }
       } else {
         LogPrint(LOG_ERR, "USB configuration descriptor not found: %d", current);
@@ -661,7 +661,7 @@ usbOpenDevice (UsbDeviceExtension *extension) {
     free(device);
   }
 
-  LogError("USB device open");
+  logSystemError("USB device open");
   return NULL;
 }
 
@@ -896,7 +896,7 @@ usbHidGetItems (
 
         free(buffer);
       } else {
-        LogError("malloc");
+        logMallocError();
       }
     } else {
       LogPrint(LOG_WARNING, "USB report descriptor not found: %u[%u]",
@@ -1335,12 +1335,12 @@ usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, i
     memset(&bytes[result], 0, length-result);
   }
 
-  LogBytes(LOG_DEBUG, "CP2101 Attributes", data, result);
+  logBytes(LOG_DEBUG, "CP2101 Attributes", data, result);
   return result;
 }
 static int
 usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *data, int length) {
-  LogBytes(LOG_DEBUG, "CP2101 Attributes", data, length);
+  logBytes(LOG_DEBUG, "CP2101 Attributes", data, length);
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, 0, 0, data, length, 1000) != -1;
 }
@@ -1728,7 +1728,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumbe
       channel->definition = *choose.definition;
       return channel;
     } else {
-      LogError("malloc");
+      logMallocError();
     }
 
     usbCloseDevice(device);

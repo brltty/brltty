@@ -835,12 +835,12 @@ getKobjectUeventSocket (void) {
 
     if ((netlinkSocket = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) != -1) {
       if (bind(netlinkSocket, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) == -1) {
-        LogError("bind");
+        logSystemError("bind");
         close(netlinkSocket);
         netlinkSocket = -1;
       }
     } else {
-      LogError("socket");
+      logSystemError("socket");
     }
   }
 

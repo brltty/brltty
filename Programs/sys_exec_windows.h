@@ -43,16 +43,16 @@ executeHostCommand (const char *const *arguments) {
         if (GetExitCodeProcess(process.hProcess, &code)) {
           result = code;
         } else {
-          LogWindowsError("GetExitCodeProcess");
+          logWindowsSystemError("GetExitCodeProcess");
         }
       } else {
-        LogWindowsError("WaitForSingleObject");
+        logWindowsSystemError("WaitForSingleObject");
       }
 
       CloseHandle(process.hProcess);
       CloseHandle(process.hThread);
     } else {
-      LogWindowsError("CreateProcess");
+      logWindowsSystemError("CreateProcess");
     }
 
     free(line);

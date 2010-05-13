@@ -46,13 +46,13 @@ enableUinputKeyEvents (int device) {
   int key;
 
   if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
-    LogError("ioctl[UI_SET_EVBIT,EV_KEY]");
+    logSystemError("ioctl[UI_SET_EVBIT,EV_KEY]");
     return 0;
   }
 
   for (key=0; key<=KEY_MAX; key+=1) {
     if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
-      LogError("ioctl[UI_SET_KEYBIT]");
+      logSystemError("ioctl[UI_SET_KEYBIT]");
       return 0;
     }
   }
@@ -63,7 +63,7 @@ enableUinputKeyEvents (int device) {
 static int
 enableUinputAutorepeat (int device) {
   if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
-    LogError("ioctl[UI_SET_EVBIT,EV_REP]");
+    logSystemError("ioctl[UI_SET_EVBIT,EV_REP]");
     return 0;
   }
 
@@ -84,7 +84,7 @@ getProgramPath (void) {
       int length = readlink("/proc/self/exe", buffer, size);
 
       if (length == -1) {
-        if (errno != ENOENT) LogError("readlink");
+        if (errno != ENOENT) logSystemError("readlink");
         break;
       }
 
@@ -308,12 +308,12 @@ getUinputDevice (void) {
               if (ioctl(device, UI_DEV_CREATE) != -1) {
                 uinputDevice = device;
               } else {
-                LogError("ioctl[UI_DEV_CREATE]");
+                logSystemError("ioctl[UI_DEV_CREATE]");
               }
             }
           }
         } else {
-          LogError("write(struct uinput_user_dev)");
+          logSystemError("write(struct uinput_user_dev)");
         }
 
         if (device != uinputDevice) {
@@ -360,7 +360,7 @@ writeInputEvent (uint16_t type, uint16_t code, int32_t value) {
     if (write(device, &event, sizeof(event)) != -1) {
       return 1;
     } else {
-      LogError("write(struct input_event)");
+      logSystemError("write(struct input_event)");
     }
   }
 #endif /* HAVE_LINUX_INPUT_H */

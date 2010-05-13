@@ -518,7 +518,7 @@ setIni (const char *path) {
       value = INI_DEFAULT;
    }
    if (setenv(variable, path, 1) == -1) {
-      LogError("environment variable assignment");
+      logSystemError("environment variable assignment");
       return 0;
    }
 isSet:
@@ -586,7 +586,7 @@ ensureSayBuffer (int size) {
    if (size > saySize) {
       char *newBuffer = malloc(size |= 0XFF);
       if (!newBuffer) {
-         LogError("speech buffer allocation");
+         logSystemError("speech buffer allocation");
 	 return 0;
       }
       free(sayBuffer);

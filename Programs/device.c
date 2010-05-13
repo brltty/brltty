@@ -36,7 +36,7 @@ getConsole (void) {
     if ((console = open("/dev/console", O_WRONLY)) != -1) {
       LogPrint(LOG_DEBUG, "Console opened: fd=%d", console);
     } else {
-      LogError("Console open");
+      logSystemError("Console open");
     }
   }
   return console;
@@ -49,7 +49,7 @@ writeConsole (const unsigned char *address, size_t count) {
     if (write(console, address, count) != -1) {
       return 1;
     } else {
-      LogError("Console write");
+      logSystemError("Console write");
     }
   }
   return 0;

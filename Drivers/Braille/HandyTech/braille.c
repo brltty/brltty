@@ -771,7 +771,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
   if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
   if (count != length) {
     if (count == -1) {
-      LogError("HandyTech Bluetooth write");
+      logSystemError("HandyTech Bluetooth write");
     } else {
       LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
@@ -916,7 +916,7 @@ reallocateBuffer (unsigned char **buffer, size_t size) {
   if (allocated) {
     *buffer = address;
   } else {
-    LogError("buffer allocation");
+    logSystemError("buffer allocation");
   }
   return allocated;
 }

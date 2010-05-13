@@ -292,10 +292,10 @@ setVirtualTerminal (int vt) {
       if (ioctl(consoleDescriptor, VT_WAITACTIVE, vt) != -1) {
         LogPrint(LOG_INFO, "switched to virtual terminal %d", vt);
       } else {
-        LogError("virtual console wait");
+        logSystemError("virtual console wait");
       }
     } else {
-      LogError("virtual console activate");
+      logSystemError("virtual console activate");
     }
   }
 #endif /* HAVE_LINUX_VT_H */
@@ -416,7 +416,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 temporaryRoutingOperation = persistentRoutingOperation;
                 return 1;
               } else {
-                LogError("cell buffer allocation");
+                logSystemError("cell buffer allocation");
               }
             } else {
               logUnexpectedPacket(response.bytes, size);

@@ -31,7 +31,7 @@ unsupportedDevice (const char *path) {
 
 static void
 logPacket (const char *description, const void *packet, size_t size) {
-  LogBytes(LOG_WARNING, description, packet, size);
+  logBytes(LOG_WARNING, description, packet, size);
 }
 
 void
@@ -46,7 +46,7 @@ logInputPacket (const void *packet, size_t size) {
 
 void
 logInputProblem (const char *problem, const unsigned char *bytes, size_t count) {
-  LogBytes(LOG_WARNING, problem, bytes, count);
+  logBytes(LOG_WARNING, problem, bytes, count);
 }
 
 void

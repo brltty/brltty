@@ -46,7 +46,7 @@ fmConstruct (int errorLevel) {
 
     free(device);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   LogPrint(LOG_DEBUG, "FM not available");

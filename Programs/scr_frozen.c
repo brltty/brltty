@@ -42,7 +42,7 @@ construct_FrozenScreen (BaseScreen *source) {
     free(screenCharacters);
     screenCharacters = NULL;
   } else {
-    LogError("malloc");
+    logMallocError();
   }
   return 0;
 }

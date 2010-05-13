@@ -100,7 +100,7 @@ openMidiDevice (int errorLevel, const char *device) {
 
     free(midi);
   } else {
-    LogError("MIDI device allocation");
+    logSystemError("MIDI device allocation");
   }
   return NULL;
 }

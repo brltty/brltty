@@ -83,7 +83,7 @@ static int
 setEnvironmentVariable (const char *name, const char *value) {
   LogPrint(LOG_DEBUG, "setting swift environment variable: %s=%s", name, value);
   if (setenv(name, value, 1) != -1) return 1;
-  LogError("environment variable set");
+  logSystemError("environment variable set");
   return 0;
 }
 

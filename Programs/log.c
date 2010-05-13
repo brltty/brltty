@@ -28,7 +28,7 @@
 #include "log.h"
 
 #if defined(HAVE_SYSLOG_H)
-static int syslogOpened = 0;
+static int sysopenLoged = 0;
 
 #elif defined(WINDOWS)
 static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
@@ -50,13 +50,13 @@ static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
 
 void
-LogOpen (int toConsole) {
+openLog (int toConsole) {
 #if defined(HAVE_SYSLOG_H)
-  if (!syslogOpened) {
+  if (!sysopenLoged) {
     int flags = LOG_PID;
     if (toConsole) flags |= LOG_CONS;
     openlog("brltty", flags, LOG_DAEMON);
-    syslogOpened = 1;
+    sysopenLoged = 1;
   }
 #elif defined(WINDOWS)
   if (windowsEventLog == INVALID_HANDLE_VALUE) {
@@ -71,11 +71,11 @@ LogOpen (int toConsole) {
 }
 
 void
-LogClose (void) {
+closeLog (void) {
 #if defined(HAVE_SYSLOG_H)
-  if (syslogOpened) {
+  if (sysopenLoged) {
     closelog();
-    syslogOpened = 0;
+    sysopenLoged = 0;
   }
 #elif defined(WINDOWS)
   if (windowsEventLog != INVALID_HANDLE_VALUE) {
@@ -90,6 +90,32 @@ LogClose (void) {
 #endif /* close system log */
 }
 
+int
+setLogLevel (int level) {
+  int previous = logLevel;
+  logLevel = level;
+  return previous;
+}
+
+const char *
+setPrintPrefix (const char *prefix) {
+  const char *previous = printPrefix;
+  printPrefix = prefix;
+  return previous;
+}
+
+int
+setPrintLevel (int level) {
+  int previous = printLevel;
+  printLevel = level;
+  return previous;
+}
+
+int
+setPrintOff (void) {
+  return setPrintLevel(-1);
+}
+
 void
 LogPrint (int level, const char *format, ...) {
   int reason = errno;
@@ -97,7 +123,7 @@ LogPrint (int level, const char *format, ...) {
 
   if (level <= logLevel) {
 #if defined(HAVE_SYSLOG_H)
-    if (syslogOpened) {
+    if (sysopenLoged) {
 #ifdef HAVE_VSYSLOG
       va_start(argp, format);
       vsyslog(level, format, argp);
@@ -159,13 +185,29 @@ done:
 }
 
 void
-LogError (const char *action) {
+logBytes (int level, const char *description, const void *data, size_t length) {
+  if (length) {
+    char buffer[(length * 3) + 1];
+    char *out = buffer;
+    const unsigned char *in = data;
+
+    while (length--) out += sprintf(out, " %2.2X", *in++);
+    LogPrint(level, "%s:%s", description, buffer);
+  }
+}
+
+void
+logSystemError (const char *action) {
   LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+}
+void
+logMallocError (void) {
+  logSystemError("malloc");
 }
 
 #ifdef WINDOWS
 void
-LogWindowsCodeError (DWORD error, const char *action) {
+logWindowsError (DWORD error, const char *action) {
   char *message;
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -181,54 +223,16 @@ LogWindowsCodeError (DWORD error, const char *action) {
 }
 
 void
-LogWindowsError (const char *action) {
+logWindowsSystemError (const char *action) {
   DWORD error = GetLastError();
-  LogWindowsCodeError(error, action);
+  logWindowsError(error, action);
 }
 
 #ifdef __MINGW32__
 void
-LogWindowsSocketError (const char *action) {
+logWindowsSocketError (const char *action) {
   DWORD error = WSAGetLastError();
-  LogWindowsCodeError(error, action);
+  logWindowsError(error, action);
 }
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
-
-void
-LogBytes (int level, const char *description, const unsigned char *data, unsigned int length) {
-  if (length) {
-    char buffer[(length * 3) + 1];
-    char *out = buffer;
-    const unsigned char *in = data;
-
-    while (length--) out += sprintf(out, " %2.2X", *in++);
-    LogPrint(level, "%s:%s", description, buffer);
-  }
-}
-
-int
-setLogLevel (int level) {
-  int previous = logLevel;
-  logLevel = level;
-  return previous;
-}
-
-const char *
-setPrintPrefix (const char *prefix) {
-  const char *previous = printPrefix;
-  printPrefix = prefix;
-  return previous;
-}
-
-int
-setPrintLevel (int level) {
-  int previous = printLevel;
-  printLevel = level;
-  return previous;
-}
-
-int
-setPrintOff (void) {
-  return setPrintLevel(-1);
-}

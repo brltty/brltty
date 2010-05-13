@@ -50,7 +50,7 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
     }
 
     if (byte == '\r') {
-      LogBytes(LOG_DEBUG, "Read", buffer, *length);
+      logBytes(LOG_DEBUG, "Read", buffer, *length);
       return 1;
     }
   }
@@ -60,7 +60,7 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  LogBytes(LOG_DEBUG, "Write", bytes, count);
+  logBytes(LOG_DEBUG, "Write", bytes, count);
   if (serialWriteData(serialDevice, bytes, count) == -1) return 0;
   brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
   return 1;
@@ -204,7 +204,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           free(outputBuffer);
           outputBuffer = NULL;
         } else {
-          LogError("Output buffer allocation");
+          logSystemError("Output buffer allocation");
         }
       }
     }

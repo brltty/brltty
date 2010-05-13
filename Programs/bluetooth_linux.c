@@ -65,20 +65,20 @@ bthConnect (uint64_t bda, uint8_t channel) {
             return bcx;
           }
         } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-          LogError("RFCOMM connect");
+          logSystemError("RFCOMM connect");
         }
       } else {
-        LogError("RFCOMM bind");
+        logSystemError("RFCOMM bind");
       }
 
       close(bcx->socket);
     } else {
-      LogError("RFCOMM socket");
+      logSystemError("RFCOMM socket");
     }
 
     free(bcx);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;

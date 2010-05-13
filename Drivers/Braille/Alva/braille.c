@@ -1572,7 +1572,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
   int count = bthWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
-      LogError("Alva Bluetooth write");
+      logSystemError("Alva Bluetooth write");
     } else {
       LogPrint(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
     }

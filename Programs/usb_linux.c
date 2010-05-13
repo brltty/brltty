@@ -90,7 +90,7 @@ usbResetDevice (UsbDevice *device) {
 
   if (usbOpenUsbfsFile(devx)) {
     if (ioctl(devx->usbfsFile, USBDEVFS_RESET, NULL) != -1) return 1;
-    LogError("USB device reset");
+    logSystemError("USB device reset");
   }
 
   return 0;
@@ -178,7 +178,7 @@ usbControlDriver (
     arg.data = data;
 
     if (ioctl(devx->usbfsFile, USBDEVFS_IOCTL, &arg) != -1) return 1;
-    LogError("USB driver control");
+    logSystemError("USB driver control");
   }
 
   return 0;
@@ -219,7 +219,7 @@ usbSetConfiguration (
     unsigned int arg = configuration;
 
     if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
-    LogError("USB configuration set");
+    logSystemError("USB configuration set");
   }
 
   return 0;
@@ -249,7 +249,7 @@ usbClaimInterface (
       disconnected = 1;
     }
 
-    LogError("USB interface claim");
+    logSystemError("USB interface claim");
   }
 
   return 0;
@@ -266,7 +266,7 @@ usbReleaseInterface (
     unsigned int arg = interface;
     if (ioctl(devx->usbfsFile, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
     if (errno == ENODEV) return 1;
-    LogError("USB interface release");
+    logSystemError("USB interface release");
   }
 
   return 0;
@@ -288,7 +288,7 @@ usbSetAlternative (
     arg.altsetting = alternative;
 
     if (ioctl(devx->usbfsFile, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
-    LogError("USB alternative set");
+    logSystemError("USB alternative set");
   }
 
   return 0;
@@ -305,7 +305,7 @@ usbClearEndpoint (
     unsigned int arg = endpointAddress;
 
     if (ioctl(devx->usbfsFile, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
-    LogError("USB endpoint clear");
+    logSystemError("USB endpoint clear");
   }
 
   return 0;
@@ -344,7 +344,7 @@ usbControlTransfer (
     {
       int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
       if (count != -1) return count;
-      LogError("USB control transfer");
+      logSystemError("USB control transfer");
     }
   }
 
@@ -371,14 +371,14 @@ usbReapUrb (
           UsbEndpointExtension *eptx = endpoint->extension;
 
           if (enqueueItem(eptx->completedRequests, urb)) return 1;
-          LogError("USB completed request enqueue");
+          logSystemError("USB completed request enqueue");
           free(urb);
         }
       } else {
         errno = EAGAIN;
       }
     } else {
-      if (wait || (errno != EAGAIN)) LogError("USB URB reap");
+      if (wait || (errno != EAGAIN)) logSystemError("USB URB reap");
     }
   }
 
@@ -443,11 +443,11 @@ usbSubmitRequest (
         }
 
         /* UHCI support returns ENXIO if a URB is already submitted. */
-        if (errno != ENXIO) LogError("USB URB submit");
+        if (errno != ENXIO) logSystemError("USB URB submit");
 
         free(urb);
       } else {
-        LogError("USB URB allocate");
+        logSystemError("USB URB allocate");
       }
     }
   }
@@ -469,7 +469,7 @@ usbCancelRequest (
       if (errno == ENODEV)  {
         reap = 0;
       } else if (errno != EINVAL) {
-        LogError("USB URB discard");
+        logSystemError("USB URB discard");
       }
     }
     
@@ -528,7 +528,7 @@ usbReapResponse (
     if ((response->error = urb->status)) {
       if (response->error < 0) response->error = -response->error;
       errno = response->error;
-      LogError("USB URB status");
+      logSystemError("USB URB status");
       response->count = -1;
     } else {
       response->count = urb->actual_length;
@@ -573,7 +573,7 @@ usbBulkTransfer (
       if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Input)
         if (errno == ETIMEDOUT)
           errno = EAGAIN;
-      if (errno != EAGAIN) LogError("USB bulk transfer");
+      if (errno != EAGAIN) logSystemError("USB bulk transfer");
     }
   }
 
@@ -718,12 +718,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       endpoint->extension = eptx;
       return 1;
     } else {
-      LogError("USB endpoint completed request queue allocate");
+      logSystemError("USB endpoint completed request queue allocate");
     }
 
     free(eptx);
   } else {
-    LogError("USB endpoint extension allocate");
+    logSystemError("USB endpoint extension allocate");
   }
 
   return 0;
@@ -775,7 +775,7 @@ usbTestHostDevice (void *item, void *data) {
 
     usbDeallocateDeviceExtension(devx);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return 0;
@@ -820,7 +820,7 @@ usbMakeSysfsPath (const char *usbfsPath) {
 
         if (access(path, F_OK) != -1) {
           char *sysfsPath = strdup(path);
-          if (!sysfsPath) LogError("strdup");
+          if (!sysfsPath) logSystemError("strdup");
           return sysfsPath;
         }
 
@@ -860,7 +860,7 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
     int count = read(file, &host->usbDescriptor, UsbDescriptorSize_Device);
 
     if (count == -1) {
-      LogError("USB device descriptor read");
+      logSystemError("USB device descriptor read");
     } else if (count != UsbDescriptorSize_Device) {
       LogPrint(LOG_ERR, "USB short device descriptor: %d", count);
     } else {
@@ -898,12 +898,12 @@ usbAddHostDevice (const char *path) {
       if (host->sysfsPath) free(host->sysfsPath);
       free(host->usbfsPath);
     } else {
-      LogError("strdup");
+      logSystemError("strdup");
     }
 
     free(host);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return ok;

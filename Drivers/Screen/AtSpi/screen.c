@@ -325,7 +325,7 @@ static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
       if (len==-2)
 	LogPrint(LOG_ERR,"unterminated sequence %s",c);
       else if (len==-1)
-	LogError("mbrlen");
+	logSystemError("mbrlen");
       curRowLengths[i] = (len = -1) + (d != NULL);
     }
     curRows[i] = malloc((len + (d!=NULL)) * sizeof(*curRows[i]));
@@ -550,7 +550,7 @@ construct_AtSpiScreen (void) {
     errno = 0;
   } while (sem_wait(&SPI_init_sem) == -1 && errno == EINTR);
   if (errno) {
-    LogError("SPI initialization wait failed");
+    logSystemError("SPI initialization wait failed");
     return 0;
   }
   LogPrint(LOG_DEBUG,"SPI initialized");

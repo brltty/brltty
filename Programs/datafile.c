@@ -213,12 +213,12 @@ getDataVariable (Queue *variables, const DataOperand *name, int create) {
 
         free(nameCharacters);
       } else {
-        LogError("malloc");
+        logMallocError();
       }
 
       free(variable);
     } else {
-      LogError("malloc");
+      logMallocError();
     }
   }
 
@@ -249,7 +249,7 @@ setDataVariable (DataVariable *variable, const wchar_t *characters, int length) 
   if (!length) {
     value = NULL;
   } else if (!(value = malloc(ARRAY_SIZE(value, length)))) {
-    LogError("malloc");
+    logMallocError();
     return 0;
   } else {
     wmemcpy(value, characters, length);

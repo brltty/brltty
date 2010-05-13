@@ -43,7 +43,7 @@ bthSetErrno (DWORD error, const char *action, const DWORD *exceptions) {
         goto isException;
   }
 
-  LogWindowsCodeError(error, action);
+  logWindowsError(error, action);
 isException:
   setErrno(error);
 }
@@ -104,7 +104,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
 
       free(bcx);
     } else {
-      LogError("malloc");
+      logMallocError();
     }
 
     WSACleanup();

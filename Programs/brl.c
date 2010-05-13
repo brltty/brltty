@@ -252,7 +252,7 @@ resizeBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
         void *newAddress = malloc(newSize);
 
         if (!newAddress) {
-          LogError("malloc");
+          logMallocError();
           return 0;
         }
 

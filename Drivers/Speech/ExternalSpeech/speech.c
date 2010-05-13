@@ -112,7 +112,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 
   if (!CreatePipe(&fd1R,&fd1W,&attributes,0)
       ||!CreatePipe(&fd2R,&fd2W,&attributes,0)) {
-    LogWindowsError("CreatePipe");
+    logWindowsSystemError("CreatePipe");
     return 0;
   }
 
@@ -122,15 +122,15 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   startupinfo.hStdInput = fd2R;
   startupinfo.hStdOutput = fd1W;
   if (!CreateProcess(NULL, extProgPath, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
-    LogWindowsError("CreateProcess");
+    logWindowsSystemError("CreateProcess");
     return 0;
   }
   if ((helper_fd_in = _open_osfhandle((long)fd1R, O_RDONLY)) < 0) {
-    LogError("open_osfhandle");
+    logSystemError("open_osfhandle");
     return 0;
   }
   if ((helper_fd_out = _open_osfhandle((long)fd2W, O_WRONLY)) < 0) {
-    LogError("open_osfhandle");
+    logSystemError("open_osfhandle");
     return 0;
   }
 #else /* __MINGW32__ */

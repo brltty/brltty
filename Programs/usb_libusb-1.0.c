@@ -86,7 +86,7 @@ usbToErrno (enum libusb_error error) {
 static void
 usbSetErrno (enum libusb_error error, const char *action) {
   errno = usbToErrno(error);
-  if (action) LogError(action);
+  if (action) logSystemError(action);
 }
 
 static int
@@ -119,7 +119,7 @@ usbResetDevice (UsbDevice *device) {
 int
 usbDisableAutosuspend (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device autosuspend disable");
+  logSystemError("USB device autosuspend disable");
   return 0;
 }
 
@@ -240,7 +240,7 @@ usbSubmitRequest (
   void *context
 ) {
   errno = ENOSYS;
-  LogError("USB request submit");
+  logSystemError("USB request submit");
   return NULL;
 }
 
@@ -250,7 +250,7 @@ usbCancelRequest (
   void *request
 ) {
   errno = ENOSYS;
-  LogError("USB request cancel");
+  logSystemError("USB request cancel");
   return 0;
 }
 
@@ -262,7 +262,7 @@ usbReapResponse (
   int wait
 ) {
   errno = ENOSYS;
-  LogError("USB request reap");
+  logSystemError("USB request reap");
   return NULL;
 }
 
@@ -313,7 +313,7 @@ usbReadEndpoint (
     }
   }
 
-  if (errno != EAGAIN) LogError("USB endpoint read");
+  if (errno != EAGAIN) logSystemError("USB endpoint read");
   return -1;
 }
 
@@ -358,7 +358,7 @@ usbWriteEndpoint (
     }
   }
 
-  LogError("USB endpoint write");
+  logSystemError("USB endpoint write");
   return -1;
 }
 
@@ -438,7 +438,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
     free(devx);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;

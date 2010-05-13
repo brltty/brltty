@@ -64,7 +64,7 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 
         if (result == -1) {
           if (errno == EINTR) continue;
-          LogError("poll");
+          logSystemError("poll");
           return 0;
         }
 
@@ -91,7 +91,7 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 
         if (result == -1) {
           if (errno == EINTR) continue;
-          LogError("select");
+          logSystemError("select");
           return 0;
         }
 
@@ -153,7 +153,7 @@ readChunk (
       if (errno == EWOULDBLOCK) goto noInput;
 #endif /* EWOULDBLOCK */
 
-      LogError("read");
+      logSystemError("read");
       return 0;
     }
 
@@ -209,7 +209,7 @@ canWrite:
 #ifdef EWOULDBLOCK
       if (errno == EWOULDBLOCK) goto noOutput;
 #endif /* EWOULDBLOCK */
-      LogError("Write");
+      logSystemError("Write");
       return count;
     }
 
@@ -245,10 +245,10 @@ changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
     if (fcntl(fileDescriptor, F_SETFL, flags) != -1) {
       return 1;
     } else {
-      LogError("F_SETFL");
+      logSystemError("F_SETFL");
     }
   } else {
-    LogError("F_GETFL");
+    logSystemError("F_GETFL");
   }
 #else /* defined(F_GETFL) && defined(F_SETFL) */
   errno = ENOSYS;

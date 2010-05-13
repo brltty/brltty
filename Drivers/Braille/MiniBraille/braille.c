@@ -69,7 +69,7 @@ writeData (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   ssize_t result = serialWriteData(serialDevice, bytes, count);
 
   if (result == -1) {
-    LogError("write");
+    logSystemError("write");
     return 0;
   }
 
@@ -435,7 +435,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
 
     if (result == -1) {
-      LogError("read");
+      logSystemError("read");
       return BRL_CMD_RESTARTBRL;
     }
   }

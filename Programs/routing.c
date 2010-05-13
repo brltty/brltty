@@ -319,7 +319,7 @@ getRoutingStatus (int wait) {
           return ROUTING_ERROR;
         }
 
-        LogError("waitpid");
+        logSystemError("waitpid");
       }
     }
   }
@@ -373,7 +373,7 @@ startRouting (int column, int row, int screen) {
     }
 
     case -1: /* error: fork() failed */
-      LogError("fork");
+      logSystemError("fork");
       routingProcess = NOT_ROUTING;
       break;
 

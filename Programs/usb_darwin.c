@@ -208,7 +208,7 @@ setUnixError (long int result, const char *action) {
 
   if (action) {
     LogPrint(LOG_WARNING, "Darwin error 0X%lX.", result);
-    LogError(action);
+    logSystemError(action);
   }
 }
 
@@ -381,7 +381,7 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   request->count = (UInt32)arg;
 
   if (!enqueueItem(eptx->completedRequests, request)) {
-    LogError("USB completed request enqueue");
+    logSystemError("USB completed request enqueue");
     free(request);
   }
 }
@@ -399,7 +399,7 @@ usbResetDevice (UsbDevice *device) {
 int
 usbDisableAutosuspend (UsbDevice *device) {
   errno = ENOSYS;
-  LogError("USB device autosuspend disable");
+  logSystemError("USB device autosuspend disable");
   return 0;
 }
 
@@ -608,7 +608,7 @@ usbSubmitRequest (
 
       free(request);
     } else {
-      LogError("USB asynchronous request allocate");
+      logSystemError("USB asynchronous request allocate");
     }
   }
 
@@ -837,12 +837,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
       deallocateQueue(eptx->completedRequests);
     } else {
-      LogError("USB completed request queue allocate");
+      logSystemError("USB completed request queue allocate");
     }
 
     free(eptx);
   } else {
-    LogError("USB endpoint extension allocate");
+    logSystemError("USB endpoint extension allocate");
   }
 
   return 0;
@@ -934,7 +934,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                 free(devx);
                 devx = NULL;
               } else {
-                LogError("USB device extension allocate");
+                logSystemError("USB device extension allocate");
               }
 
               (*interface)->Release(interface);

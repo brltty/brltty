@@ -458,10 +458,10 @@ serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
     if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
       return 1;
     } else {
-      LogError("cfsetispeed");
+      logSystemError("cfsetispeed");
     }
   } else {
-    LogError("cfsetospeed");
+    logSystemError("cfsetospeed");
   }
   return 0;
 #endif /* set speed */
@@ -672,7 +672,7 @@ serialStartFlowControlThread (SerialDevice *serial) {
     pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 
     if (pthread_create(&thread, &attributes, serial->currentFlowControlProc, serial)) {
-      LogError("pthread_create");
+      logSystemError("pthread_create");
       return 0;
     }
 
@@ -858,14 +858,14 @@ int
 serialDiscardInput (SerialDevice *serial) {
 #if defined(__MINGW32__)
   if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
-  LogWindowsError("PurgeComm");
+  logWindowsSystemError("PurgeComm");
 #elif defined(__MSDOS__)
   LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
   if (errno == EINVAL) return 1;
-  LogError("TCIFLUSH");
+  logSystemError("TCIFLUSH");
 #endif /* discard input */
   return 0;
 }
@@ -874,14 +874,14 @@ int
 serialDiscardOutput (SerialDevice *serial) {
 #if defined(__MINGW32__)
   if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
-  LogWindowsError("PurgeComm");
+  logWindowsSystemError("PurgeComm");
 #elif defined(__MSDOS__)
   LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
   if (errno == EINVAL) return 1;
-  LogError("TCOFLUSH");
+  logSystemError("TCOFLUSH");
 #endif /* discard output */
   return 0;
 }
@@ -890,7 +890,7 @@ int
 serialFlushOutput (SerialDevice *serial) {
   if (serial->stream) {
     if (fflush(serial->stream) == EOF) {
-      LogError("fflush");
+      logSystemError("fflush");
       return 0;
     }
   }
@@ -903,7 +903,7 @@ serialDrainOutput (SerialDevice *serial) {
 
 #if defined(__MINGW32__)
   if (FlushFileBuffers(serial->fileHandle)) return 1;
-  LogWindowsError("FlushFileBuffers");
+  logWindowsSystemError("FlushFileBuffers");
 #elif defined(__MSDOS__)
   LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
@@ -911,7 +911,7 @@ serialDrainOutput (SerialDevice *serial) {
   do {
     if (tcdrain(serial->fileDescriptor) != -1) return 1;
   } while (errno == EINTR);
-  LogError("tcdrain");
+  logSystemError("tcdrain");
 #endif /* drain output */
   return 0;
 }
@@ -931,7 +931,7 @@ serialReadAttributes (SerialDevice *serial) {
 #if defined(__MINGW32__)
   serial->currentAttributes.DCBlength = sizeof(serial->currentAttributes);
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
-  LogWindowsError("GetCommState");
+  logWindowsSystemError("GetCommState");
 #elif defined(__MSDOS__)
   int interruptsWereEnabled = disable();
   unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
@@ -959,7 +959,7 @@ serialReadAttributes (SerialDevice *serial) {
   return 1;
 #else /* UNIX */
   if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
-  LogError("tcgetattr");
+  logSystemError("tcgetattr");
 #endif /* read attributes */
   return 0;
 }
@@ -971,7 +971,7 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
 
 #if defined(__MINGW32__)
     if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {
-      LogWindowsError("SetCommState");
+      logWindowsSystemError("SetCommState");
       return 0;
     }
 #elif defined(__MSDOS__)
@@ -998,7 +998,7 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
     }
 #else /* UNIX */
     if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) == -1) {
-      LogError("tcsetattr");
+      logSystemError("tcsetattr");
       return 0;
     }
 #endif /* write attributes */
@@ -1040,13 +1040,13 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
     char c;
 
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      LogWindowsError("SetCommTimeouts serialAwaitInput");
+      logWindowsSystemError("SetCommTimeouts serialAwaitInput");
       setSystemErrno();
       return 0;
     }
 
     if (!ReadFile(serial->fileHandle, &c, 1, &bytesRead, NULL)) {
-      LogWindowsError("ReadFile");
+      logWindowsSystemError("ReadFile");
       setSystemErrno();
       return 0;
     }
@@ -1082,13 +1082,13 @@ serialReadChunk (
     bytesRead = 1;
   } else {
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      LogWindowsError("SetCommTimeouts serialReadChunk1");
+      logWindowsSystemError("SetCommTimeouts serialReadChunk1");
       setSystemErrno();
       return 0;
     }
 
     if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-      LogWindowsError("ReadFile");
+      logWindowsSystemError("ReadFile");
       setSystemErrno();
       return 0;
     }
@@ -1103,7 +1103,7 @@ serialReadChunk (
   *offset += bytesRead;
   timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
   if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-    LogWindowsError("SetCommTimeouts serialReadChunk2");
+    logWindowsSystemError("SetCommTimeouts serialReadChunk2");
     setSystemErrno();
     return 0;
   }
@@ -1119,7 +1119,7 @@ serialReadChunk (
   }
 
   if (!count) return 1;
-  LogWindowsError("ReadFile");
+  logWindowsSystemError("ReadFile");
   setSystemErrno();
   return 0;
 #else /* __MINGW32__ */
@@ -1156,7 +1156,7 @@ serialWriteData (
     DWORD bytesWritten;
 
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      LogWindowsError("SetCommTimeouts serialWriteData");
+      logWindowsSystemError("SetCommTimeouts serialWriteData");
       setSystemErrno();
       return -1;
     }
@@ -1168,10 +1168,10 @@ serialWriteData (
     }
 
     if (!left) return size;
-    LogWindowsError("WriteFile");
+    logWindowsSystemError("WriteFile");
 #else /* __MINGW32__ */
     if (writeData(serial->fileDescriptor, data, size) != -1) return size;
-    LogError("serial write");
+    logSystemError("serial write");
 #endif /* __MINGW32__ */
   }
   return -1;
@@ -1182,12 +1182,12 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
 #if defined(__MINGW32__)
   DCB dcb;
   if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
-    LogWindowsError("GetCommModemStatus");
+    logWindowsSystemError("GetCommModemStatus");
     return 0;
   }
   dcb.DCBlength = sizeof(dcb);
   if (!GetCommState(serial->fileHandle, &dcb)) {
-    LogWindowsError("GetCommState");
+    logWindowsSystemError("GetCommState");
     return 0;
   }
   if (dcb.fRtsControl == RTS_CONTROL_ENABLE)
@@ -1198,7 +1198,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
   serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
 #elif defined(TIOCMGET)
   if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
-    LogError("TIOCMGET");
+    logSystemError("TIOCMGET");
     return 0;
   }
 #else /* get lines */
@@ -1227,9 +1227,9 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
       dcb.fDtrControl = DTR_CONTROL_ENABLE;
 
     if (SetCommState(serial->fileHandle, &dcb)) return 1;
-    LogWindowsError("SetCommState");
+    logWindowsSystemError("SetCommState");
   } else {
-    LogWindowsError("GetCommState");
+    logWindowsSystemError("GetCommState");
   }
 #elif defined(__MSDOS__)
   int interruptsWereEnabled = disable();
@@ -1245,7 +1245,7 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
     status |= high;
     status &= ~low;
     if (ioctl(serial->fileDescriptor, TIOCMSET, &status) != -1) return 1;
-    LogError("TIOCMSET");
+    logSystemError("TIOCMSET");
   }
 #else /* set lines */
 #warning setting modem lines not supported on this platform
@@ -1299,7 +1299,7 @@ serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
     if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
 
     if (!SetCommMask(serial->fileHandle, eventMask)) {
-      LogWindowsError("SetCommMask");
+      logWindowsSystemError("SetCommMask");
       return 0;
     }
 #endif /* __MINGW32__ */
@@ -1315,10 +1315,10 @@ serialMonitorWaitLines (SerialDevice *serial) {
 #if defined(__MINGW32__)
   DWORD event;
   if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
-  LogWindowsError("WaitCommEvent");
+  logWindowsSystemError("WaitCommEvent");
 #elif defined(TIOCMIWAIT)
   if (ioctl(serial->fileDescriptor, TIOCMIWAIT, serial->waitLines) != -1) return 1;
-  LogError("TIOCMIWAIT");
+  logSystemError("TIOCMIWAIT");
 #else
   SerialLines old = serial->linesState & serial->waitLines;
   SerialLines new;
@@ -1451,7 +1451,7 @@ serialOpenDevice (const char *path) {
 #endif /* __MINGW32__ */
       } else {
 #ifdef __MINGW32__
-        LogWindowsError("CreateFile");
+        logWindowsSystemError("CreateFile");
         LogPrint(LOG_ERR, "cannot open serial device: %s", device);
 #else /* __MINGW32__ */
         LogPrint(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
@@ -1463,7 +1463,7 @@ serialOpenDevice (const char *path) {
 
     free(serial);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;
@@ -1570,10 +1570,10 @@ serialGetStream (SerialDevice *serial) {
     if (serial->fileDescriptor < 0) {
 #ifdef __CYGWIN32__
       if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
-        LogError("cygwin_attach_handle_to_fd");
+        logSystemError("cygwin_attach_handle_to_fd");
 #else /* __CYGWIN32__ */
       if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
-        LogError("open_osfhandle");
+        logSystemError("open_osfhandle");
 #endif /* __CYGWIN32__ */
         return NULL;
       }
@@ -1581,7 +1581,7 @@ serialGetStream (SerialDevice *serial) {
 #endif /* __MINGW32__ */
 
     if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
-      LogError("fdopen");
+      logSystemError("fdopen");
       return NULL;
     }
   }

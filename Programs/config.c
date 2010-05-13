@@ -1411,9 +1411,9 @@ globBegin (GlobData *data) {
 #endif /* glob: paradigm-specific field initialization */
 
 #ifdef HAVE_FCHDIR
-        if (fchdir(originalDirectory) == -1) LogError("fchdir");
+        if (fchdir(originalDirectory) == -1) logSystemError("fchdir");
 #else /* HAVE_FCHDIR */
-        if (chdir(originalDirectory) == -1) LogError("chdir");
+        if (chdir(originalDirectory) == -1) logSystemError("chdir");
 #endif /* HAVE_FCHDIR */
       } else {
         LogPrint(LOG_ERR, "%s: %s: %s",
@@ -1482,7 +1482,7 @@ globChanged (GlobData *data) {
     free(data->current);
     return data->current = path;
   } else {
-    LogError("strdup");
+    logSystemError("strdup");
   }
   return NULL;
 }
@@ -2796,14 +2796,14 @@ background (void) {
     startupInfo.cb = sizeof(startupInfo);
 
     if (!SetEnvironmentVariable(variableName, "")) {
-      LogWindowsError("SetEnvironmentVariable");
+      logWindowsSystemError("SetEnvironmentVariable");
       exit(11);
     }
 
     if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE,
                        CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED,
                        NULL, NULL, &startupInfo, &processInfo)) {
-      LogWindowsError("CreateProcess");
+      logWindowsSystemError("CreateProcess");
       exit(10);
     }
 
@@ -2818,7 +2818,7 @@ background (void) {
       }
 
       if (!resumed) {
-        LogWindowsError("ResumeThread");
+        logWindowsSystemError("ResumeThread");
         ExitProcess(13);
       }
     }
@@ -2837,7 +2837,7 @@ background (void) {
   int fds[2];
 
   if (pipe(fds) == -1) {
-    LogError("pipe");
+    logSystemError("pipe");
     exit(11);
   }
 
@@ -2848,14 +2848,14 @@ background (void) {
     pid_t child = fork();
 
     if (child == -1) {
-      LogError("fork");
+      logSystemError("fork");
       exit(10);
     }
 
     if (child) {
       int returnCode = 0;
 
-      if (close(fds[0]) == -1) LogError("close");
+      if (close(fds[0]) == -1) logSystemError("close");
 
       if (!tryPidFile(child)) {
         if (errno == EEXIST) {
@@ -2863,22 +2863,22 @@ background (void) {
         }
       }
 
-      if (close(fds[1]) == -1) LogError("close");
+      if (close(fds[1]) == -1) logSystemError("close");
       _exit(returnCode);
     }
   }
 
-  if (close(fds[1]) == -1) LogError("close");
+  if (close(fds[1]) == -1) logSystemError("close");
 
   {
     unsigned char buffer[1];
 
-    if (read(fds[0], buffer, sizeof(buffer)) == -1) LogError("read");
-    if (close(fds[0]) == -1) LogError("close");
+    if (read(fds[0], buffer, sizeof(buffer)) == -1) logSystemError("read");
+    if (close(fds[0]) == -1) logSystemError("close");
   }
 
   if (setsid() == -1) {                        
-    LogError("setsid");
+    logSystemError("setsid");
     exit(13);
   }
 }
@@ -2972,7 +2972,7 @@ startup (int argc, char *argv[]) {
     setPrintLevel((opt_version || opt_verify)?
                     (opt_quiet? LOG_NOTICE: LOG_INFO):
                     (opt_quiet? LOG_WARNING: LOG_NOTICE));
-    if (opt_standardError) LogClose();
+    if (opt_standardError) closeLog();
   }
 
   {
@@ -3029,8 +3029,8 @@ startup (int argc, char *argv[]) {
   tryPidFile(0);
 
   if (!opt_standardError) {
-    LogClose();
-    LogOpen(1);
+    closeLog();
+    openLog(1);
   }
 
   if (!opt_noDaemon) {
@@ -3056,7 +3056,7 @@ startup (int argc, char *argv[]) {
                             NULL, OPEN_EXISTING, 0, NULL);
 
       if (!h) {
-        LogWindowsError("CreateFile[NUL]");
+        logWindowsSystemError("CreateFile[NUL]");
       } else {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);

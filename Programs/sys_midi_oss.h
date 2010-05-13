@@ -43,7 +43,7 @@ void
 seqbuf_dump (void) {
   if (_seqbufptr)
     if (writeData(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
-      LogError("MIDI write");
+      logSystemError("MIDI write");
   _seqbufptr = 0;
 }
 
@@ -125,7 +125,7 @@ openMidiDevice (int errorLevel, const char *device) {
 
     free(midi);
   } else {
-    LogError("MIDI device allocation");
+    logSystemError("MIDI device allocation");
   }
   return NULL;
 }

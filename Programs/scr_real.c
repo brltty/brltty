@@ -146,7 +146,7 @@ getPointer_RealScreen (int *column, int *row) {
 
         if (result == -1) {
           if (errno == EINTR) continue;
-          LogError("select");
+          logSystemError("select");
           break;
         }
 
@@ -157,7 +157,7 @@ getPointer_RealScreen (int *column, int *row) {
 
         if ((result = Gpm_GetEvent(&event)) == -1) {
           if (errno == EINTR) continue;
-          LogError("Gpm_GetEvent");
+          logSystemError("Gpm_GetEvent");
           break;
         }
 

@@ -274,7 +274,7 @@ openSpeechFifo (const char *directory, const char *path) {
                speechFifoPath, (unsigned)speechFifoHandle);
       return 1;
     } else {
-      LogWindowsError("CreateNamedPipe");
+      logWindowsSystemError("CreateNamedPipe");
     }
 #else /* __MINGW32__ */
     int ret = mkfifo(speechFifoPath, 0);
@@ -329,7 +329,7 @@ processSpeechFifo (SpeechSynthesizer *spk) {
           DisconnectNamedPipe(speechFifoHandle);
 
           if (error != ERROR_BROKEN_PIPE)
-            LogWindowsError("Speech FIFO read");
+            logWindowsSystemError("Speech FIFO read");
         }
       }
     }

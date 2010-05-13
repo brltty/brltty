@@ -177,7 +177,7 @@ bthOpenConnection (const char *address, uint8_t channel, int force) {
 
     free(connection);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;

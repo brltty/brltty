@@ -40,25 +40,28 @@ typedef enum {
 } SyslogLevel;
 #endif /* system log external definitions */
 
-extern void LogOpen(int toConsole);
-extern void LogClose(void);
-extern void LogPrint (int level, const char *format, ...) PRINTF(2, 3);
-extern void LogError (const char *action);
+extern void openLog (int toConsole);
+extern void closeLog (void);
 
-#ifdef WINDOWS
-extern void LogWindowsCodeError (DWORD code, const char *action);
-extern void LogWindowsError (const char *action);
-
-#ifdef __MINGW32__
-extern void LogWindowsSocketError (const char *action);
-#endif /* __MINGW32__ */
-#endif /* WINDOWS */
-
-extern void LogBytes (int level, const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);
 extern const char *setPrintPrefix (const char *prefix);
 extern int setPrintLevel (int level);
 extern int setPrintOff (void);
+
+extern void LogPrint (int level, const char *format, ...) PRINTF(2, 3);
+extern void logBytes (int level, const char *description, const void *data, size_t length);
+
+extern void logSystemError (const char *action);
+extern void logMallocError (void);
+
+#ifdef WINDOWS
+extern void logWindowsError (DWORD code, const char *action);
+extern void logWindowsSystemError (const char *action);
+
+#ifdef __MINGW32__
+extern void logWindowsSocketError (const char *action);
+#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 #ifdef __cplusplus
 }

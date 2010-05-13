@@ -53,7 +53,7 @@ pcmConstruct (int errorLevel) {
                  device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
         return device;
       } else {
-        LogError("malloc");
+        logMallocError();
       }
 
       closePcmDevice(device->pcm);
@@ -61,7 +61,7 @@ pcmConstruct (int errorLevel) {
 
     free(device);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   LogPrint(LOG_DEBUG, "PCM not available");

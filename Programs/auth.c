@@ -89,7 +89,7 @@ retrievePeerCredentials (PeerCredentials *credentials, FileDescriptor fd) {
   } else {
     switch (GetLastError()) {
       default:
-        LogWindowsError("GetNamedPipeHandleState");
+        logWindowsSystemError("GetNamedPipeHandleState");
 
       case ERROR_INSUFFICIENT_BUFFER: /* buffer too small */
       case ERROR_INVALID_HANDLE: /* not a named pipe */
@@ -131,7 +131,7 @@ static int
 retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   *credentials = NULL;
   if (getpeerucred(fd, credentials) == -1) {
-    LogError("getpeerucred");
+    logSystemError("getpeerucred");
     return 0;
   }
 
@@ -180,7 +180,7 @@ static int
 retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   socklen_t length = sizeof(*credentials);
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
-  LogError("getsockopt[SO_PEERCRED]");
+  logSystemError("getsockopt[SO_PEERCRED]");
   return 0;
 }
 
@@ -209,7 +209,7 @@ typedef struct {
 static int
 retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   if (getpeereid(fd, &credentials->euid, &credentials->egid) != -1) return 1;
-  LogError("getpeereid");
+  logSystemError("getpeereid");
   return 0;
 }
 
@@ -290,7 +290,7 @@ authKeyfile_initialize (const char *parameter) {
 
     free(keyfile);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;
@@ -359,7 +359,7 @@ authUser_initialize (const char *parameter) {
     free(user);
 #endif /* __MINGW32__ */
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;
@@ -414,7 +414,7 @@ authGroup_initialize (const char *parameter) {
     free(group);
 #endif /* __MINGW32__ */
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;
@@ -540,7 +540,7 @@ authBegin (const char *parameter, const char *defaultParameter, AuthPerform perf
 
         free(auth->methods);
       } else {
-        LogError("malloc");
+        logMallocError();
       }
 
       deallocateStrings(auth->parameters);
@@ -548,7 +548,7 @@ authBegin (const char *parameter, const char *defaultParameter, AuthPerform perf
 
     free(auth);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;

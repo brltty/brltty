@@ -194,7 +194,7 @@ midiConstruct (int errorLevel) {
 
     free(device);
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   LogPrint(LOG_DEBUG, "MIDI not available");

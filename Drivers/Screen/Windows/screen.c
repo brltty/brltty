@@ -60,7 +60,7 @@ openStdHandles (void) {
     (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
     ||(consoleInput == INVALID_HANDLE_VALUE &&
     (consoleInput = CreateFile("CONIN$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)) {
-    LogWindowsError("GetStdHandle");
+    logWindowsSystemError("GetStdHandle");
     return 0;
   }
   return 1;
@@ -97,7 +97,7 @@ construct_WindowsScreen (void) {
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
     if (!FreeConsole() && GetLastError() != ERROR_INVALID_PARAMETER)
-      LogWindowsError("FreeConsole");
+      logWindowsSystemError("FreeConsole");
     return 1;
   }
   return openStdHandles();
@@ -168,7 +168,7 @@ currentVirtualTerminal_WindowsScreen (void) {
   } else if (consoleOutput == INVALID_HANDLE_VALUE) {
     unreadable = "can't open console output";
   } else if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
-    LogWindowsError("GetConsoleScreenBufferInfo");
+    logWindowsSystemError("GetConsoleScreenBufferInfo");
     unreadable = "can't read console information";
 
     CloseHandle(consoleOutput);
@@ -241,7 +241,7 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
 	wide = -1;
       else {
-	LogWindowsError("ReadConsoleOutputCharacterW");
+	logWindowsSystemError("ReadConsoleOutputCharacterW");
 	return 0;
       }
     }
@@ -254,12 +254,12 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 #undef USE
 
   if (!(buf = malloc(box->width*size))) {
-    LogError("malloc for Windows console reading");
+    logSystemError("malloc for Windows console reading");
     return 0;
   }
 
   if (!(bufAttr = malloc(box->width*sizeof(WORD)))) {
-    LogError("malloc for Windows console reading");
+    logSystemError("malloc for Windows console reading");
     free(buf);
     return 0;
   }
@@ -268,7 +268,7 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     DWORD read;
 
     if (!fun(consoleOutput, buf, box->width, coord, &read)) {
-      LogWindowsError(name);
+      logWindowsSystemError(name);
       break;
     }
 
@@ -290,7 +290,7 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     }
 
     if (!ReadConsoleOutputAttribute(consoleOutput, bufAttr, box->width, coord, &read)) {
-      LogWindowsError(name);
+      logWindowsSystemError(name);
       break;
     }
 
@@ -342,7 +342,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
 	}
       }
     }
-    LogWindowsError("WriteConsoleInput");
+    logWindowsSystemError("WriteConsoleInput");
     CloseHandle(consoleInput);
     consoleInput = INVALID_HANDLE_VALUE;
   }
@@ -374,7 +374,7 @@ doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD flags) 
     num = SendInput(1, &input, sizeof(INPUT));
     switch (num) {
       case 1:  return 1;
-      case 0:  LogWindowsError("SendInput"); break;
+      case 0:  logWindowsSystemError("SendInput"); break;
       default: LogPrint(LOG_ERR, "inserted %d keys, expected 1", num); break;
     }
     return 0;

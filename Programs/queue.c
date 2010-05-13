@@ -72,7 +72,7 @@ newElement (Queue *queue, void *item) {
 
   if (!(element = retrieveElement())) {
     if (!(element = malloc(sizeof(*element)))) {
-      LogError("malloc");
+      logMallocError();
       return NULL;
     }
 
@@ -206,7 +206,7 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
     queue->compare = compare;
     return queue;
   } else {
-    LogError("malloc");
+    logMallocError();
   }
 
   return NULL;

@@ -55,7 +55,7 @@ openPcmDevice (int errorLevel, const char *device) {
     }
     free(pcm);
   } else {
-    LogError("PCM device allocation");
+    logSystemError("PCM device allocation");
   }
   return NULL;
 }
@@ -74,7 +74,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
 static int
 getPcmAudioInfo (PcmDevice *pcm, audio_info_t *info) {
   if (ioctl(pcm->fileDescriptor, AUDIO_GETINFO, info) != -1) return 1;
-  LogError("AUDIO_GETINFO");
+  logSystemError("AUDIO_GETINFO");
   return 0;
 }
 

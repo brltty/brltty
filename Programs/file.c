@@ -314,7 +314,7 @@ modifyFileLock (int file, int action, short type) {
   } while (errno == EINTR);
 
   if (errno == EACCES) errno = EAGAIN;
-  if (errno != EAGAIN) LogError("fcntl[struct flock *]");
+  if (errno != EAGAIN) logSystemError("fcntl[struct flock *]");
   return 0;
 }
 
@@ -350,7 +350,7 @@ modifyFileLock (int file, int operation) {
 #endif /* EWOULDBLOCK */
 
   if (errno == EACCES) errno = EAGAIN;
-  if (errno != EAGAIN) LogError("flock");
+  if (errno != EAGAIN) logSystemError("flock");
   return 0;
 }
 
@@ -377,7 +377,7 @@ modifyRegionLock (int file, int command, off_t length) {
   } while (errno == EINTR);
 
   if (errno == EACCES) errno = EAGAIN;
-  if (errno != EAGAIN) LogError("lockf");
+  if (errno != EAGAIN) logSystemError("lockf");
   return 0;
 }
 
@@ -386,7 +386,7 @@ modifyFileLock (int file, int command) {
   off_t offset;
 
   if ((offset = lseek(file, 0, SEEK_CUR)) == -1) {
-    LogError("lseek");
+    logSystemError("lseek");
   } else if (modifyRegionLock(file, command, 0)) {
     if (!offset) return 1;
     if (modifyRegionLock(file, command, -offset)) return 1;
@@ -441,7 +441,7 @@ modifyFileLock (int file, int mode) {
         }
 
         if (errno != EACCES) {
-          LogError("_locking");
+          logSystemError("_locking");
           break;
         }
 
@@ -450,14 +450,14 @@ modifyFileLock (int file, int mode) {
       }
 
       if (lseek(file, offset, SEEK_SET) == -1) {
-        LogError("lseek");
+        logSystemError("lseek");
         ok = 0;
       }
     } else {
-      LogError("lseek");
+      logSystemError("lseek");
     }
   } else {
-    LogError("lseek");
+    logSystemError("lseek");
   }
 
   return ok;
@@ -484,7 +484,7 @@ releaseFileLock (int file) {
 static int
 fileLockingNotSupported (void) {
   errno = ENOSYS;
-  LogError("lock");
+  logSystemError("lock");
   return 0;
 }
 
@@ -524,7 +524,7 @@ readLine (FILE *file, char **buffer, size_t *size) {
       /* Read the rest of the line into the end of the buffer. */
       if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
         if (!ferror(file)) return 1;
-        LogError("read");
+        logSystemError("read");
         return 0;
       }
 
@@ -538,7 +538,7 @@ readLine (FILE *file, char **buffer, size_t *size) {
     line[length] = 0; /* Remove trailing new-line. */
     return 1;
   } else if (ferror(file)) {
-    LogError("read");
+    logSystemError("read");
   }
 
   return 0;

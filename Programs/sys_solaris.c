@@ -39,7 +39,7 @@ getProgramPath (void) {
       int length = readlink("/proc/self/path/a.out", buffer, size);
 
       if (length == -1) {
-        if (errno != ENOENT) LogError("readlink");
+        if (errno != ENOENT) logSystemError("readlink");
         break;
       }
 
@@ -77,7 +77,7 @@ getKeyboard (void) {
     if ((keyboard = open("/dev/kbd", O_WRONLY)) != -1) {
       LogPrint(LOG_DEBUG, "keyboard opened: fd=%d", keyboard);
     } else {
-      LogError("keyboard open");
+      logSystemError("keyboard open");
     }
   }
   return keyboard;
@@ -104,7 +104,7 @@ startBeep (unsigned short frequency) {
   if (keyboard != -1) {
     int command = KBD_CMD_BELL;
     if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
-    LogError("ioctl KIOCCMD KBD_CMD_BELL");
+    logSystemError("ioctl KIOCCMD KBD_CMD_BELL");
   }
   return 0;
 }
@@ -115,7 +115,7 @@ stopBeep (void) {
   if (keyboard != -1) {
     int command = KBD_CMD_NOBELL;
     if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
-    LogError("ioctl KIOCCMD KBD_CMD_NOBELL");
+    logSystemError("ioctl KIOCCMD KBD_CMD_NOBELL");
   }
   return 0;
 }

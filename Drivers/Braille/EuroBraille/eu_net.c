@@ -66,9 +66,9 @@
 #ifdef __MINGW32__
 #undef AF_LOCAL
 #define close(fd) CloseHandle((HANDLE)(fd))
-#define LogSocketError(msg) LogWindowsSocketError(msg)
+#define LogSocketError(msg) logWindowsSocketError(msg)
 #else /* __MINGW32__ */
-#define LogSocketError(msg) LogError(msg)
+#define LogSocketError(msg) logSystemError(msg)
 #endif /* __MINGW32__ */
 
 #include "log.h"
@@ -117,13 +117,13 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   broadcastAddress.sin_port = htons(BROADCAST_PORT); 
   if ((broadcastFd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     {
-      LogError("eu: netinit: Error while creating socket");
+      logSystemError("eu: netinit: Error while creating socket");
       return (0);
     }
   broadcastAddress.sin_addr.s_addr = INADDR_BROADCAST;
   if (setsockopt(broadcastFd, SOL_SOCKET, SO_BROADCAST, &optBroadcast, sizeof(optBroadcast)) == -1)
     {
-      LogError("Cannot set broadcast flag to true");
+      logSystemError("Cannot set broadcast flag to true");
       close(broadcastFd);
       broadcastFd = -1;
       return (0);
@@ -133,7 +133,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 	     (struct sockaddr *)&broadcastAddress,
 	     len) == -1)
     {
-      LogError("eu: netinit: Cannot send data.");
+      logSystemError("eu: netinit: Cannot send data.");
       return (0);
     }
   struct sockaddr_in sourceAddress;
@@ -143,7 +143,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 			&sourceLen);
   if (nBytes <= 0)
     {
-      LogError("eu: netinit: Failed to receive data.");
+      logSystemError("eu: netinit: Failed to receive data.");
       close(broadcastFd);
       broadcastFd = -1;
       return (0);
@@ -161,7 +161,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 	     (struct sockaddr *)&broadcastAddress,
 	     len) == -1)
     {
-      LogError("eu: netinit: Cannot send data.");
+      logSystemError("eu: netinit: Cannot send data.");
       return (0);
     }
   nBytes = recvfrom(broadcastFd, (void *)inbuf, IRIS_RECV_INIT_LEN, 0, 
@@ -169,7 +169,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 			&sourceLen);
   if (nBytes <= 0)
     {
-      LogError("eu: netinit: Failed to receive data.");
+      logSystemError("eu: netinit: Failed to receive data.");
       close(broadcastFd);
       broadcastFd = -1;
       return (0);
@@ -180,7 +180,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   socklen_t localLen;
   if (getsockname(broadcastFd, (struct sockaddr*)&localAddress, &localLen)== -1)
     {
-      LogError("Cannot get local address description");
+      logSystemError("Cannot get local address description");
       close(broadcastFd);
       broadcastFd = -1;
       return (0);
@@ -194,13 +194,13 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   realConnectionFd = socket(AF_INET, SOCK_STREAM, 0);
   if (realConnectionFd == -1)
     {
-      LogError("eu: netinit: Failed to establish TCP socket server");
+      logSystemError("eu: netinit: Failed to establish TCP socket server");
       close(broadcastFd);
       broadcastFd = -1;
     }
   if (bind(realConnectionFd, (struct sockaddr *)&listenAddress, listenLen) == -1)
     {
-      LogError("eu: netinit: Cannot bind socket");
+      logSystemError("eu: netinit: Cannot bind socket");
       close(realConnectionFd);
       close(broadcastFd);
       broadcastFd = realConnectionFd = -1;
@@ -208,7 +208,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
     }
   if (listen(realConnectionFd, 5) == -1)
     {
-      LogError("eu: netinit: Failed to listen for TCP connection");
+      logSystemError("eu: netinit: Failed to listen for TCP connection");
       close(realConnectionFd);
       close(broadcastFd);
       realConnectionFd = broadcastFd = -1;
@@ -231,7 +231,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 	     (struct sockaddr *)&broadcastAddress,
 	     sourceLen) == -1)
     {
-      LogError("eu: netinit: Cannot send data.");
+      logSystemError("eu: netinit: Cannot send data.");
       return (0);
     }
   close(broadcastFd);
@@ -241,7 +241,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   if ((fd = accept(realConnectionFd, (struct sockaddr *)&sourceAddress, 
 	     &sourceLen)) == -1)
     {
-      LogError("eu: netinit: Cannot accept connection");
+      logSystemError("eu: netinit: Cannot accept connection");
       close(realConnectionFd);
       realConnectionFd = -1;
       return (0);
