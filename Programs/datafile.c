@@ -36,11 +36,11 @@
 
 struct DataFileStruct {
   const char *name;
-  int line;		/*line number in table */
+  int line;
+
   DataProcessor *processor;
   void *data;
 
-  DataFile *includer;
   Queue *variables;
 
   const wchar_t *start;
@@ -171,6 +171,13 @@ deallocateDataVariable (void *item, void *data) {
   free(variable);
 }
 
+static Queue *
+newDataVariableQueue (Queue *previous) {
+  Queue *queue = newQueue(deallocateDataVariable, NULL);
+  if (queue) setQueueData(queue, previous);
+  return queue;
+}
+
 static int
 testDataVariableName (const void *item, const void *data) {
   const DataVariable *variable = item;
@@ -182,68 +189,116 @@ testDataVariableName (const void *item, const void *data) {
   return 0;
 }
 
+static DataVariable *
+getDataVariable (Queue *variables, const DataOperand *name, int create) {
+  DataVariable *variable = findItem(variables, testDataVariableName, name);
+  if (variable) return variable;
+
+  if (create) {
+    if ((variable = malloc(sizeof(*variable)))) {
+      wchar_t *nameCharacters;
+
+      memset(variable, 0, sizeof(*variable));
+
+      if ((nameCharacters = malloc(ARRAY_SIZE(nameCharacters, name->length)))) {
+        wmemcpy(nameCharacters, name->characters, name->length);
+
+        variable->name.characters = nameCharacters;
+        variable->name.length = name->length;
+
+        variable->value.characters = NULL;
+        variable->value.length = 0;
+
+        if (enqueueItem(variables, variable)) return variable;
+
+        free(nameCharacters);
+      } else {
+        LogError("malloc");
+      }
+
+      free(variable);
+    } else {
+      LogError("malloc");
+    }
+  }
+
+  return NULL;
+}
+
 static const DataVariable *
 getReadableDataVariable (DataFile *file, const DataOperand *name) {
-  while (file) {
-    if (file->variables) {
-      DataVariable *variable = findItem(file->variables, testDataVariableName, name);
-      if (variable) return variable;
-    }
+  Queue *variables = file->variables;
 
-    file = file->includer;
-  }
+  do {
+    DataVariable *variable = getDataVariable(variables, name, 0);
+    if (variable) return variable;
+  } while ((variables = getQueueData(variables)));
 
   return NULL;
 }
 
 static DataVariable *
 getWritableDataVariable (DataFile *file, const DataOperand *name) {
-  if (!file->variables)
-    if (!(file->variables = newQueue(deallocateDataVariable, NULL)))
-      return NULL;
-
-  if (file->variables) {
-    DataVariable *variable = findItem(file->variables, testDataVariableName, name);
-    if (variable) return variable;
-
-    if ((variable = malloc(sizeof(*variable)))) {
-      wchar_t *nameCharacters;
-
-      if ((nameCharacters = malloc(ARRAY_SIZE(nameCharacters, name->length)))) {
-        wmemcpy(nameCharacters, name->characters, name->length);
-        variable->name.characters = nameCharacters;
-        variable->name.length = name->length;
-        variable->value.characters = NULL;
-        variable->value.length = 0;
-
-        if (enqueueItem(file->variables, variable)) return variable;
-
-        free(nameCharacters);
-      }
-
-      free(variable);
-    }
-  }
-
-  return NULL;
+  return getDataVariable(file->variables, name, 1);
 }
 
 static int
-setDataVariable (DataVariable *variable, const DataOperand *value) {
-  wchar_t *valueCharacters;
+setDataVariable (DataVariable *variable, const wchar_t *characters, int length) {
+  wchar_t *value;
 
-  if (!value->length) {
-    valueCharacters = NULL;
-  } else if (!(valueCharacters = malloc(ARRAY_SIZE(valueCharacters, value->length)))) {
+  if (!length) {
+    value = NULL;
+  } else if (!(value = malloc(ARRAY_SIZE(value, length)))) {
+    LogError("malloc");
     return 0;
   } else {
-    wmemcpy(valueCharacters, value->characters, value->length);
+    wmemcpy(value, characters, length);
   }
 
   if (variable->value.characters) free((void *)variable->value.characters);
-  variable->value.characters = valueCharacters;
-  variable->value.length = value->length;
+  variable->value.characters = value;
+  variable->value.length = length;
   return 1;
+}
+
+static Queue *
+getGlobalDataVariables () {
+  static Queue *variables = NULL;
+
+  if (!variables) variables = newDataVariableQueue(NULL);
+  return variables;
+}
+
+int
+setGlobalDataVariable (const char *name, const char *value) {
+  size_t nameLength = strlen(name);
+  wchar_t nameBuffer[nameLength];
+
+  size_t valueLength = strlen(value);
+  wchar_t valueBuffer[valueLength];
+
+  convertCharsToWchars(name, nameBuffer, nameLength);
+  convertCharsToWchars(value, valueBuffer, valueLength);
+
+  {
+    Queue *variables = getGlobalDataVariables();
+
+    if (variables) {
+      const DataOperand nameArgument = {
+        .characters = nameBuffer,
+        .length = nameLength
+      };
+      DataVariable *variable = getDataVariable(variables, &nameArgument, 1);
+
+      if (variable) {
+        if (setDataVariable(variable, valueBuffer, valueLength)) {
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
 }
 
 int
@@ -557,7 +612,7 @@ processAssignOperands (DataFile *file, void *data) {
       DataVariable *variable = getWritableDataVariable(file, &name);
 
       if (variable) {
-        if (setDataVariable(variable, &value)) return 1;
+        if (setDataVariable(variable, value.characters, value.length)) return 1;
       }
     }
   }
@@ -583,7 +638,7 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
     snprintf(path, sizeof(path), "%.*s%.*" PRIws,
              prefixLength, prefixAddress, length, name);
     if ((stream = openDataFile(path, "r", 0))) {
-      if (processDataStream(file, stream, path, file->processor, file->data)) ok = 1;
+      if (processDataStream(file->variables, stream, path, file->processor, file->data)) ok = 1;
       fclose(stream);
     }
 
@@ -660,28 +715,30 @@ processUtf8Line (char *line, void *dataAddress) {
 
 int
 processDataStream (
-  DataFile *includer,
+  Queue *variables,
   FILE *stream, const char *name,
   DataProcessor processor, void *data
 ) {
+  int ok = 0;
   DataFile file;
 
   file.name = name;
   file.line = 0;
+
   file.processor = processor;
   file.data = data;
 
-  file.includer = includer;
-  file.variables = NULL;
+  if (!variables)
+    if (!(variables = getGlobalDataVariables()))
+      return 0;
 
   LogPrint(LOG_DEBUG, "including data file: %s", file.name);
-  {
-    int ok = processLines(stream, processUtf8Line, &file);
-
-    if (file.variables) deallocateQueue(file.variables);
-
-    return ok;
+  if ((file.variables = newDataVariableQueue(variables))) {
+    if (processLines(stream, processUtf8Line, &file)) ok = 1;
+    deallocateQueue(file.variables);
   }
+
+  return ok;
 }
 
 int

@@ -47,6 +47,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "datafile.h"
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
@@ -547,11 +548,14 @@ replaceTextTable (const char *name) {
     if ((path = makePath(opt_tablesDirectory, file))) {
       TextTable *newTable;
 
+      LogPrint(LOG_DEBUG, "compiling text table: %s", path);
       if ((newTable = compileTextTable(path))) {
         TextTable *oldTable = textTable;
         textTable = newTable;
         destroyTextTable(oldTable);
         ok = 1;
+      } else {
+        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
       }
 
       free(path);
@@ -575,11 +579,14 @@ replaceAttributesTable (const char *name) {
     if ((path = makePath(opt_tablesDirectory, file))) {
       AttributesTable *newTable;
 
+      LogPrint(LOG_DEBUG, "compiling attributes table: %s", path);
       if ((newTable = compileAttributesTable(path))) {
         AttributesTable *oldTable = attributesTable;
         attributesTable = newTable;
         destroyAttributesTable(oldTable);
         ok = 1;
+      } else {
+        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
       }
 
       free(path);
@@ -3089,7 +3096,9 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
   LogPrint(LOG_INFO, "%s: %s", gettext("Data Directory"), opt_dataDirectory);
   LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
+
   LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
+  setGlobalDataVariable("tablesDirectory", opt_tablesDirectory);
 
   /* handle text table option */
   if (*opt_textTable) {

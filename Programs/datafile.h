@@ -19,9 +19,13 @@
 #ifndef BRLTTY_INCLUDED_DATAFILE
 #define BRLTTY_INCLUDED_DATAFILE
 
+#include "queue.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+extern int setGlobalDataVariable (const char *name, const char *value);
 
 typedef struct DataFileStruct DataFile;
 
@@ -31,7 +35,7 @@ extern int processDataFile (const char *name, DataProcessor processor, void *dat
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
-  DataFile *includer,
+  Queue *variables,
   FILE *stream, const char *name,
   DataProcessor processor, void *data
 );
