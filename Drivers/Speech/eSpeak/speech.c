@@ -58,7 +58,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	char *data_path, *voicename, *punctlist;
 	int result;
 
-	LogPrint(LOG_NOTICE, "eSpeak version %s", espeak_Info(NULL));
+	LogPrint(LOG_INFO, "eSpeak version %s", espeak_Info(NULL));
 
 	data_path = parameters[PARM_PATH];
 	if (data_path && !*data_path)
