@@ -23,21 +23,47 @@ set -e
 umask 022
 shopt -s nullglob
 
-setOutputFile() {
-   local prefix="${1}"
+declare -a documentLines
+addLine() {
+   local line="${1}"
 
-   local layout="${inputFile##*/}"
-   layout="${layout%.*}"
-   layout="${layout##*-}"
+   documentLines[${#documentLines[*]}]="${line}"
+}
 
-   outputFile="${outputDirectory}/${prefix}-${layout}.${plainTextExtension}"
+beginDocument() {
+   local title="${1}"
+
+   headerLevel=0
+
+   addLine "<HTML>"
+   addLine "<HEAD>"
+   addLine "<TITLE>${title}</TITLE>"
+   addLine "</HEAD>"
+   addLine "<BODY>"
+}
+
+endDocument() {
+   local file="${1}"
+
+   addLine "</BODY>"
+   addLine "</HTML>"
+
+   local count="${#documentLines[*]}"
+   local index=0
+
+   exec 3>"${file}"
+   while ((index < count))
+   do
+      echo >&3 "${documentLines[index++]}"
+   done
+   exec 3>&-
 }
 
 beginSection() {
    local title="${1}"
 
    headerLevel=$((headerLevel + 1))
-   echo >&3 "<H${headerLevel}>${title}</H${headerLevel}>"
+   addLine "<H${headerLevel}>${title}</H${headerLevel}>"
 }
 
 endSection() {
@@ -50,11 +76,21 @@ beginLayoutList() {
 
 endLayoutList() {
    ! "${layoutListed}" || {
-      echo >&3 "</UL>"
+      addLine "</UL>"
    }
 }
 
-listLayout() {
+beginLayoutEntry() {
+   local prefix="${1}"
+
+   local layout="${inputFile##*/}"
+   layout="${layout%.*}"
+   layout="${layout##*-}"
+
+   outputFile="${outputDirectory}/${prefix}-${layout}.${plainTextExtension}"
+}
+
+endLayoutEntry() {
    local category="${1}"
 
    exec 4<"${outputFile}"
@@ -80,10 +116,10 @@ listLayout() {
 
    "${layoutListed}" || {
       layoutListed=true
-      echo >&3 "<UL>"
+      addLine "<UL>"
    }
 
-   echo >&3 "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
+   addLine "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
 }
 
 translateKeyTable() {
@@ -126,32 +162,25 @@ plainTextExtension="txt"
 hypertextExtension="html"
 keyTableExtension="ktb"
 
-headerLevel=0
-
-exec 3>"${outputDirectory}/index.${hypertextExtension}"
-documentTitle="Key Table Help"
-echo >&3 "<HTML>"
-echo >&3 "<HEAD>"
-echo >&3 "<TITLE>${documentTitle}</TITLE>"
-echo >&3 "</HEAD>"
-echo >&3 "<BODY>"
+documentTitle="Key Tables"
+beginDocument "${documentTitle}"
 beginSection "${documentTitle}"
 
-beginSection "Keyboard Key Tables"
+beginSection "Keyboards"
 beginLayoutList
 set -- "${tablesDirectory}/${keyboardPrefix}-"*".${keyTableExtension}"
 for inputFile
 do
-   setOutputFile "${keyboardPrefix}"
+   beginLayoutEntry "${keyboardPrefix}"
    translateKeyTable
-   listLayout
+   endLayoutEntry
 done
 endLayoutList
-echo >&3 "<HR>"
+addLine "<HR>"
 endSection
 
 beginSection "Braille Drivers"
-echo >&3 "<DL>"
+addLine "<DL>"
 for driverDirectory in "${driversDirectory}/"*
 do
    [ -d "${driverDirectory}" ] || continue
@@ -165,7 +194,7 @@ do
       cp -a -- "${inputFile}" "${outputFile}"
       header="<A HREF=\"${outputFile##*/}\">${header}</A>"
    }
-   echo >&3 "<DT>${header}<DD>"
+   addLine "<DT>${header}<DD>"
 
    beginLayoutList
    set -- "${tablesDirectory}/${braillePrefix}-${driverCode}-"*".${keyTableExtension}"
@@ -173,29 +202,26 @@ do
    then
       for inputFile
       do
-         setOutputFile "${braillePrefix}-${driverCode}"
+         beginLayoutEntry "${braillePrefix}-${driverCode}"
          translateKeyTable
-         listLayout "${driverName}"
+         endLayoutEntry "${driverName}"
       done
    else
       set -- "${driverDirectory}/"*".hlp"
       for inputFile
       do
-         setOutputFile "${braillePrefix}-${driverCode}"
+         beginLayoutEntry "${braillePrefix}-${driverCode}"
          cp -a -- "${inputFile}" "${outputFile}"
-         listLayout "${driverName}"
+         endLayoutEntry "${driverName}"
       done
    fi
 
    endLayoutList
 done
-echo >&3 "</DL>"
-echo >&3 "<HR>"
+addLine "</DL>"
+addLine "<HR>"
 endSection
 
 endSection
-echo >&3 "</BODY>"
-echo >&3 "</HTML>"
-exec 3>&-
-
+endDocument "${outputDirectory}/index.${hypertextExtension}"
 exit 0
