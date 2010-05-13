@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "queue.h"
 
 struct QueueStruct {
@@ -70,7 +71,11 @@ newElement (Queue *queue, void *item) {
   Element *element;
 
   if (!(element = retrieveElement())) {
-    if (!(element = malloc(sizeof(*element)))) return NULL;
+    if (!(element = malloc(sizeof(*element)))) {
+      LogError("malloc");
+      return NULL;
+    }
+
     element->previous = element->next = NULL;
   }
 
@@ -192,6 +197,7 @@ getElementItem (const Element *element) {
 Queue *
 newQueue (ItemDeallocator deallocate, ItemComparator compare) {
   Queue *queue;
+
   if ((queue = malloc(sizeof(*queue)))) {
     queue->head = NULL;
     queue->size = 0;
@@ -199,7 +205,10 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
     queue->deallocate = deallocate;
     queue->compare = compare;
     return queue;
+  } else {
+    LogError("malloc");
   }
+
   return NULL;
 }
 

@@ -542,6 +542,8 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
         }
 
         free(function);
+      } else {
+        LogError("malloc");
       }
     }
   }
@@ -590,6 +592,8 @@ createOperation (
     }
 
     free(operation);
+  } else {
+    LogError("malloc");
   }
 
   return 0;
@@ -614,6 +618,8 @@ createTransferOperation (
     if (createOperation(fileDescriptor, methods, extension, data)) return 1;
 
     free(extension);
+  } else {
+    LogError("malloc");
   }
 
   return 0;
@@ -766,6 +772,8 @@ asyncAbsoluteAlarm (
       if (enqueueItem(alarms, alarm)) return 1;
 
       free(alarm);
+    } else {
+      LogError("malloc");
     }
   }
 
@@ -862,6 +870,7 @@ asyncWait (int duration) {
           monitorArray = NULL;
         }
       } else {
+        LogError("malloc");
         monitorCount = 0;
       }
     }
