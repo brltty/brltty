@@ -116,16 +116,24 @@ static inline void pthread_exit (void *res) {
 }
 
 static inline int pthread_join (pthread_t thread, void **res) {
-  DWORD _res;
-
-  while (1) {
-    if (GetExitCodeThread(thread, &_res)) {
-      if (res) *res = (void *)_res;
-      return 0;
+again:
+  switch (WaitForSingleObject(thread, INFINITE)) {
+    default:
+    case WAIT_FAILED:
+      setSystemErrno();
+      return errno;
+    case WAIT_ABANDONED:
+    case WAIT_OBJECT_0:
+      break;
+    case WAIT_TIMEOUT:
+      goto again;
     }
-    winPthreadAssertWindows(GetLastError() == STILL_ACTIVE);
-    approximateDelay(1);
+  if (res) {
+    DWORD _res;
+    if (GetExitCodeThread(thread, &_res))
+      *res = (void *)_res;
   }
+  return 0;
 }
 
 /***********
