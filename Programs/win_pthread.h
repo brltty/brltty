@@ -35,8 +35,9 @@ extern "C" {
 #include "prologue.h"
 #include "timing.h"
 
-#define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return -1; } } while (0)
-#define winPthreadAssert(expr) do { if (!(expr)) return -1; } while (0)
+#define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return errno; } } while (0)
+#define winPthreadAssertPthread(expr) do { int ret = (expr); if (ret) return ret; } while (0)
+#define winPthreadAssert(expr) do { if (!(expr)) return EIO; } while (0)
 
 /***********
  * threads *
@@ -92,10 +93,8 @@ static inline int pthread_create (
   pthread_t *thread, const pthread_attr_t *attr,
   void * (*fun) (void *), void *arg
 ) {
-  if (attr && *attr) {
-    errno = EINVAL;
-    return -1;
-  }
+  if (attr && *attr)
+    return EINVAL;
   winPthreadAssertWindows(*thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) fun, arg, 0, NULL));
   return 0;
 }
@@ -158,10 +157,8 @@ static inline int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
 }
 
 static inline int pthread_mutex_init (pthread_mutex_t *mutex, pthread_mutexattr_t *attr) {
-  if (attr && *attr!=PTHREAD_MUTEX_RECURSIVE) {
-    errno = EINVAL;
-    return -1;
-  }
+  if (attr && *attr!=PTHREAD_MUTEX_RECURSIVE)
+    return EINVAL;
   winPthreadAssertWindows(*mutex = CreateMutex(NULL, FALSE, NULL));
   return 0;
 }
@@ -176,11 +173,11 @@ static inline int __pthread_mutex_alloc_concurrently (pthread_mutex_t *mutex) {
     HANDLE mutex_init_mutex;
   /* Get access to one global named mutex to serialize mutex initialization */
   winPthreadAssertWindows((mutex_init_mutex = CreateMutex(NULL, FALSE, "StarPU mutex init")));
-    winPthreadAssert(!pthread_mutex_lock(&mutex_init_mutex));
+  winPthreadAssertPthread(pthread_mutex_lock(&mutex_init_mutex));
   /* Now we are the one that can initialize it */
   if (!*mutex)
-    winPthreadAssert(!pthread_mutex_init(mutex,NULL));
-    winPthreadAssert(!pthread_mutex_unlock(&mutex_init_mutex));
+    winPthreadAssertPthread(pthread_mutex_init(mutex,NULL));
+  winPthreadAssertPthread(pthread_mutex_unlock(&mutex_init_mutex));
     winPthreadAssertWindows(CloseHandle(mutex_init_mutex));
   return 0;
 }
@@ -193,7 +190,7 @@ again:
     default:
     case WAIT_FAILED:
       setSystemErrno();
-      return -1;
+      return errno;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
       return 0;
@@ -281,10 +278,8 @@ struct timespec {
 typedef unsigned pthread_condattr_t;
 
 static inline int pthread_cond_init (pthread_cond_t *cond, const pthread_condattr_t *attr) {
-  if (attr) {
-    errno = EINVAL;
-    return -1;
-  }
+  if (attr)
+    return EINVAL;
   winPthreadAssertWindows(cond->sem = CreateSemaphore(NULL, 0, MAXLONG, NULL));
   cond->nbwait = 0;
   return 0;
@@ -292,52 +287,52 @@ static inline int pthread_cond_init (pthread_cond_t *cond, const pthread_condatt
 
 static inline int pthread_cond_timedwait (pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *time) {
   if (!cond->sem)
-    winPthreadAssert(!pthread_cond_init(cond,NULL));
+    winPthreadAssertPthread(pthread_cond_init(cond,NULL));
   cond->nbwait++;
-  winPthreadAssert(!pthread_mutex_unlock(mutex));
+  winPthreadAssertPthread(pthread_mutex_unlock(mutex));
 again:
   switch (WaitForSingleObject(cond->sem, time->tv_sec*1000+time->tv_nsec/1000)) {
     default:
     case WAIT_FAILED:
       setSystemErrno();
-      winPthreadAssert(!pthread_mutex_lock(mutex));
-      return -1;
+      winPthreadAssertPthread(pthread_mutex_lock(mutex));
+      return errno;
     case WAIT_TIMEOUT:
       goto again;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
       break;
   }
-  winPthreadAssert(!pthread_mutex_lock(mutex));
+  winPthreadAssertPthread(pthread_mutex_lock(mutex));
   cond->nbwait--;
   return 0;
 }
 
 static inline int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mutex) {
   if (!cond->sem)
-    winPthreadAssert(!pthread_cond_init(cond,NULL));
+    winPthreadAssertPthread(pthread_cond_init(cond,NULL));
   cond->nbwait++;
-  winPthreadAssert(!pthread_mutex_unlock(mutex));
+  winPthreadAssertPthread(pthread_mutex_unlock(mutex));
 again:
   switch (WaitForSingleObject(cond->sem, INFINITE)) {
     case WAIT_FAILED:
       setSystemErrno();
       winPthreadAssert(!pthread_mutex_lock(mutex));
-      return -1;
+      return errno;
     case WAIT_TIMEOUT:
       goto again;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
       break;
   }
-  winPthreadAssert(!pthread_mutex_lock(mutex));
+  winPthreadAssertPthread(pthread_mutex_lock(mutex));
   cond->nbwait--;
   return 0;
 }
 
 static inline int pthread_cond_signal (pthread_cond_t *cond) {
   if (!cond->sem)
-    winPthreadAssert(!pthread_cond_init(cond,NULL));
+    winPthreadAssertPthread(pthread_cond_init(cond,NULL));
   if (cond->nbwait)
     ReleaseSemaphore(cond->sem, 1, NULL);
   return 0;
@@ -345,7 +340,7 @@ static inline int pthread_cond_signal (pthread_cond_t *cond) {
 
 static inline int pthread_cond_broadcast (pthread_cond_t *cond) {
   if (!cond->sem)
-    winPthreadAssert(!pthread_cond_init(cond,NULL));
+    winPthreadAssertPthread(pthread_cond_init(cond,NULL));
   ReleaseSemaphore(cond->sem, cond->nbwait, NULL);
   return 0;
 }
@@ -370,12 +365,12 @@ typedef struct {
 } pthread_once_t;
 
 static inline int pthread_once (pthread_once_t *once, void (*oncefun)(void)) {
-  winPthreadAssert(pthread_mutex_lock(&once->mutex));
+  winPthreadAssertPthread(pthread_mutex_lock(&once->mutex));
   if (!once->done) {
     oncefun();
     once->done = 1;
   }
-  winPthreadAssert(!pthread_mutex_unlock(&once->mutex));
+  winPthreadAssertPthread(pthread_mutex_unlock(&once->mutex));
   return 0;
 }
 
@@ -392,10 +387,7 @@ static inline int pthread_key_delete (pthread_key_t key) {
 }
 
 static inline void *pthread_getspecific (pthread_key_t key) {
-  void * res = TlsGetValue(key);
-  if (!res)
-    errno = EIO;
-  return res;
+  return TlsGetValue(key);
 }
 
 static inline int pthread_setspecific (pthread_key_t key, const void *data) {
