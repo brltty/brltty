@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <linux/kd.h>
 
 #ifdef HAVE_LINUX_INPUT_H
