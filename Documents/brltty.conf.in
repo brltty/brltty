@@ -393,7 +393,7 @@
 #pcm-device	/path/to/device	# most methods
 #pcm-device	pcm-handle-id	# ALSA (see second parameter of snd_pcm_open)
 
-# The pcm-device directive specifies the device to use for the Musical
+# The midi-device directive specifies the device to use for the Musical
 # Instrument Digital Interface. If not specified, a method- and
 # system-dependent default will be used.
 # (can be overridden with the -m [--midi-device=] option)
