@@ -43,8 +43,9 @@
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
 #define SPI2_DBUS_INTERFACE_PROP	"org.a11y.DBus.Properties"
 
+#ifdef HAVE_X11_KEYSYM_H
 #include <X11/keysym.h>
-#include <X11/Xlib.h>
+#endif /* HAVE_X11_KEYSYM_H */
 
 #include "log.h"
 #include "parse.h"
@@ -910,6 +911,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
 
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
+#ifdef HAVE_X11_KEYSYM_H
       case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
       case SCR_KEY_TAB:           keysym = XK_Tab;       break;
       case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
@@ -959,6 +961,9 @@ insertKey_AtSpi2Screen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 32: keysym = XK_F33;       break;
       case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
       case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
+#else /* HAVE_X11_KEYSYM_H */
+#warning "AtSpi2 driver will not be able to insert non-character keypresses"
+#endif /* HAVE_X11_KEYSYM_H */
       default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
   } else {
@@ -989,14 +994,18 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   {
     int ok = 0;
 
+#ifdef HAVE_X11_KEYSYM_H
     if (!modMeta || AtSpi2GenerateKeyboardEvent(XK_Meta_L,PRESS)) {
       if (!modControl || AtSpi2GenerateKeyboardEvent(XK_Control_L,PRESS)) {
+#endif /* HAVE_X11_KEYSYM_H */
+
         if (AtSpi2GenerateKeyboardEvent(keysym,SYM)) {
           ok = 1;
         } else {
           LogPrint(LOG_WARNING, "key insertion failed.");
         }
 
+#ifdef HAVE_X11_KEYSYM_H
         if (modControl && !AtSpi2GenerateKeyboardEvent(XK_Control_L,RELEASE)) {
           LogPrint(LOG_WARNING, "control release failed.");
           ok = 0;
@@ -1012,6 +1021,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
     } else {
       LogPrint(LOG_WARNING, "meta press failed.");
     }
+#endif /* HAVE_X11_KEYSYM_H */
 
     return ok;
   }

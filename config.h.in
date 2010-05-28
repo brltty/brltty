@@ -329,6 +329,9 @@ extern "C" {
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
+/* Define this if the header file X11/keysym.h exists. */
+#undef HAVE_X11_KEYSYM_H
+
 /* Define this if the header file X11/extensions/XTest.h exists. */
 #undef HAVE_X11_EXTENSIONS_XTEST_H
 

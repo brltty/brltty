@@ -626,6 +626,8 @@ BRLTTY_ARG_DISABLE(
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
 
+      AC_CHECK_HEADERS([X11/keysym.h])
+
       pkg-config --exists xext && {
          brltty_libs_xkb="`pkg-config ${pkgconfig_flags_libs} xext` ${brltty_libs_xkb}"
 
