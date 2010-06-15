@@ -20,7 +20,7 @@
 # Created by John Boyer <director@chpi.org>.
 
 class vowel aeiouyAEIOUY
-class consonent bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
+class consonant bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
 class o oO
 class apostrophe '
 
@@ -513,9 +513,10 @@ word ing 346 such as after a hyphen
 midendword ing 346
 midword ingal 35-1245-1-123 farthingale martingale nightingale
 always ingar 35-1245-345 Weingarten
-midword ingi 35-1245-24 meningitis
-endword ingin 346-35 swingin' 
-midendword inging 346-346 bringing
+midendword ingism 35-1245-24-234-134 meningism
+midword ingit 35-1245-24-2345 meningitis
+midendword ingite 346-24-2345-15 wyomingite
+midword ingiv 35-1245-24-1236 gingivitis
 joinword into 35-235
 always isomer 24-234-135-134-12456
 word it 1346
@@ -865,7 +866,7 @@ always shouse 234-125-1256-234-15
 always ssh =
 always shood =
 word such 234-16
-before consonent sufword such 234-16
+before consonant sufword such 234-16
 word sch =
 sufword schofield 234-16-135-124-24-15-123-145
 always sword =
