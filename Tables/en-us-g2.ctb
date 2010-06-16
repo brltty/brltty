@@ -516,7 +516,6 @@ always ingar 35-1245-345 Weingarten
 midendword ingism 35-1245-24-234-134 meningism
 midword ingit 35-1245-24-2345 meningitis
 midendword ingite 346-24-2345-15 wyomingite
-midword ingiv 35-1245-24-1236 gingivitis
 joinword into 35-235
 always isomer 24-234-135-134-12456
 word it 1346
@@ -570,6 +569,7 @@ begword mishand 134-24-234-125-12346 mishandled
 always mishap =
 sufword mishear 134-24-234-125-15-345 misheard
 begword missh 134-24-234-146 misshapen
+always mistak = mistake
 word mistook =
 begword mistran = mistranslation
 sufword mistreat 134-24-234-2345-1235-2-2345
@@ -673,6 +673,7 @@ always p 1234
 always P 1234
 always paid 1234-145
 contraction pd
+begword painst = painstake
 begword palingen 1234-1-123-35-1245-26 palingenesis (new birth)
 sufword panther 1234-1-1345-2346-1235 pantheresque
 always part 5-1234
@@ -835,7 +836,6 @@ begword side = sidenote
 sufword sided 234-24-145-1246
 sufword sider 234-24-145-12456 sidereal siderite
 midendword sion 46-1345
-midword stak 234-2345-1-13
 midendword stion 234-56-1345
 word so 234
 begword solo = soloensis (anthropology)
