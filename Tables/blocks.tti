@@ -16,15 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable is included by all general purpose text tables. Its
-# sole purpose is to be a common place wherein to include text subtables which
-# define braille representations that are generally useful in all contexts.
+# This BRLTTY text subtable implements a portable representation of the block
+# element characters.
 
-# space characters
-include spaces.tti
-
-# box drawing characters
-include boxes.tti
-
-# block characters
-include blocks.tti
+char \u2580	(12 45   )  # ⠛ ▀ [UPPER HALF BLOCK]
+char \u2582	(      78)  # ⣀ ▂ [LOWER ONE QUARTER BLOCK]
+char \u2584	(  3  678)  # ⣤ ▄ [LOWER HALF BLOCK]
+char \u2586	( 23 5678)  # ⣶ ▆ [LOWER THREE QUARTERS BLOCK]
+char \u2588	(12345678)  # ⣿ █ [FULL BLOCK]
