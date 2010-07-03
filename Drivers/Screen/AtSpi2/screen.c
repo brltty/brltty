@@ -41,7 +41,7 @@
 #define SPI2_DBUS_INTERFACE_TREE	SPI2_DBUS_INTERFACE".Tree"
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
-#define SPI2_DBUS_INTERFACE_PROP	"org.a11y.DBus.Properties"
+#define SPI2_DBUS_INTERFACE_PROP	"org.freedesktop.DBus.Properties"
 
 #ifdef HAVE_X11_KEYSYM_H
 #include <X11/keysym.h>
@@ -541,8 +541,10 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
 
   dbus_message_iter_init(message, &iter);
 
-  /* skip struct */
-  dbus_message_iter_next(&iter);
+  if (dbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_STRUCT) {
+    /* skip struct */
+    dbus_message_iter_next(&iter);
+  }
 
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
     LogPrint(LOG_DEBUG, "message detail not a string but '%c'", dbus_message_iter_get_arg_type(&iter));
@@ -638,6 +640,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       /* imaginary extra lines don't need to be deleted */
       downTo=curNumRows-1;
     delRows(y+1,downTo-y);
+    caretPosition(curCaret);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextChanged") && !strcmp(detail, "insert")) {
     long len=detail2,semilen,x,y;
     const char *added;
@@ -700,6 +703,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       if (curRowLengths[y]-(curRows[y][curRowLengths[y]-1]=='\n')>curNumCols)
 	curNumCols=curRowLengths[y]-(curRows[y][curRowLengths[y]-1]=='\n');
     }
+    caretPosition(curCaret);
   } else {
       //LogPrint(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
   }
@@ -729,6 +733,7 @@ static void *doAtSpi2ScreenOpen(void *arg) {
   sem_t *SPI2_init_sem = (sem_t *)arg;
 
   dbus_error_init(&error);
+  /* TODO: try to use the accessibility bus */
   bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
   if (dbus_error_is_set(&error)) {
     LogPrint(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
@@ -751,11 +756,11 @@ static void *doAtSpi2ScreenOpen(void *arg) {
     goto out; \
   }
   WATCH("type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'");
-  WATCH("type='signal',interface='org.a11y.atspi.Event.Focus'");
-  WATCH("type='signal',interface='org.a11y.atspi.Event.Object'");
-  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='TextChanged'");
-  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='TextCaretMoved'");
-  WATCH("type='signal',interface='org.a11y.atspi.Event.Object',member='StateChanged'");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Focus'");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object'");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'");
 
   res = 1;
 
