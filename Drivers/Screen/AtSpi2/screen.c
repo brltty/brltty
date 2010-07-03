@@ -967,7 +967,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
       case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
 #else /* HAVE_X11_KEYSYM_H */
-#warning "AtSpi2 driver will not be able to insert non-character keypresses"
+#warning insertion of non-character key presses not supported by this build - check that X11 protocol headers have been installed
 #endif /* HAVE_X11_KEYSYM_H */
       default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
