@@ -48,7 +48,7 @@
 #include <X11/extensions/XTest.h>
 #define CAN_SIMULATE_KEY_PRESSES
 #else /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
-#warning key press simulation not supported on this installation
+#warning key press simulation not supported by this build - check that libxtst has been installed
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
 
 #define BRLAPI_NO_DEPRECATED
