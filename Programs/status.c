@@ -192,23 +192,87 @@ typedef struct {
 } StatusFieldEntry;
 
 static const StatusFieldEntry statusFieldTable[] = {
-  {NULL, 0},
-  {renderStatusField_windowCoordinates, 2},
-  {renderStatusField_windowColumn, 1},
-  {renderStatusField_windowRow, 1},
-  {renderStatusField_cursorCoordinates, 2},
-  {renderStatusField_cursorColumn, 1},
-  {renderStatusField_cursorRow, 1},
-  {renderStatusField_cursorAndWindowColumn, 2},
-  {renderStatusField_cursorAndWindowRow, 2},
-  {renderStatusField_screenNumber, 1},
-  {renderStatusField_stateDots, 1},
-  {renderStatusField_stateLetter, 1},
-  {renderStatusField_time, 2},
-  {renderStatusField_alphabeticWindowCoordinates, 1},
-  {renderStatusField_alphabeticCursorCoordinates, 1},
-  {renderStatusField_generic, BRL_genericStatusCellCount}
+  [sfEnd] = {
+    .render = NULL,
+    .length = 0
+  }
+  ,
+  [sfWindowCoordinates] = {
+    .render = renderStatusField_windowCoordinates,
+    .length = 2
+  }
+  ,
+  [sfWindowColumn] = {
+    .render = renderStatusField_windowColumn,
+    .length = 1
+  }
+  ,
+  [sfWindowRow] = {
+    .render = renderStatusField_windowRow,
+    .length = 1
+  }
+  ,
+  [sfCursorCoordinates] = {
+    .render = renderStatusField_cursorCoordinates,
+    .length = 2
+  }
+  ,
+  [sfCursorColumn] = {
+    .render = renderStatusField_cursorColumn,
+    .length = 1
+  }
+  ,
+  [sfCursorRow] = {
+    .render = renderStatusField_cursorRow,
+    .length = 1
+  }
+  ,
+  [sfCursorAndWindowColumn] = {
+    .render = renderStatusField_cursorAndWindowColumn,
+    .length = 2
+  }
+  ,
+  [sfCursorAndWindowRow] = {
+    .render = renderStatusField_cursorAndWindowRow,
+    .length = 2
+  }
+  ,
+  [sfScreenNumber] = {
+    .render = renderStatusField_screenNumber,
+    .length = 1
+  }
+  ,
+  [sfStateDots] = {
+    .render = renderStatusField_stateDots,
+    .length = 1
+  }
+  ,
+  [sfStateLetter] = {
+    .render = renderStatusField_stateLetter,
+    .length = 1
+  }
+  ,
+  [sfTime] = {
+    .render = renderStatusField_time,
+    .length = 2
+  }
+  ,
+  [sfAlphabeticWindowCoordinates] = {
+    .render = renderStatusField_alphabeticWindowCoordinates,
+    .length = 1
+  }
+  ,
+  [sfAlphabeticCursorCoordinates] = {
+    .render = renderStatusField_alphabeticCursorCoordinates,
+    .length = 1
+  }
+  ,
+  [sfGeneric] = {
+    .render = renderStatusField_generic,
+    .length = BRL_genericStatusCellCount
+  }
 };
+
 static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);
 
 unsigned int
