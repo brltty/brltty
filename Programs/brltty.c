@@ -49,6 +49,7 @@
 #include "unicode.h"
 #include "scancodes.h"
 #include "scr.h"
+#include "ses.h"
 #include "brl.h"
 #include "brltty.h"
 #include "defaults.h"
@@ -88,46 +89,7 @@ static int contractedTrack = 0;
 
 static unsigned int updateIntervals = 0;        /* incremented each main loop cycle */
 
-
-/* 
- * Structure definition for volatile screen state variables.
- */
-typedef struct {
-  short column;
-  short row;
-} ScreenMark;
-typedef struct {
-  int number;
-
-  unsigned char trackCursor;		/* cursor tracking mode */
-  unsigned char hideCursor;		/* for temporarily hiding the cursor */
-  unsigned char showAttributes;		/* text or attributes display */
-  int winx, winy;	/* upper-left corner of braille window */
-  int motx, moty;	/* last user motion of braille window */
-  int trkx, trky;	/* tracked cursor position */
-  int ptrx, ptry;	/* last known mouse/pointer position */
-  ScreenMark marks[0X100];
-} ScreenEntry;
-
-static const ScreenEntry initialScreenEntry = {
-  .number = 0,
-
-  .trackCursor = DEFAULT_TRACK_CURSOR,
-  .hideCursor = DEFAULT_HIDE_CURSOR,
-
-  .ptrx = -1,
-  .ptry = -1
-};
-
-/* 
- * Array definition containing pointers to ScreenEntry structures for 
- * each screen.  Each structure is dynamically allocated when its 
- * screen is used for the first time.
- */
-static ScreenEntry **screenArray = NULL;
-static unsigned int screenLimit = 0;
-static unsigned int screenCount = 0;
-static ScreenEntry *p = NULL;
+static SessionEntry *ses = NULL;
 
 static ScreenDescription scr;          /* For screen state infos */
 #define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
@@ -136,85 +98,42 @@ static ScreenDescription scr;          /* For screen state infos */
 #define SCR_COORDINATES_OK(column,row) (SCR_COLUMN_OK((column)) && SCR_ROW_OK((row)))
 #define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
 
-static ScreenEntry *
-getScreenEntry (int number) {
-  int first = 0;
-  int last = screenCount - 1;
-
-  while (first <= last) {
-    int current = (first + last) / 2;
-    ScreenEntry *entry = screenArray[current];
-    if (number == entry->number) return entry;
-
-    if (number < entry->number) {
-      last = current - 1;
-    } else {
-      first = current + 1;
-    }
-  }
-
-  if (screenCount == screenLimit) {
-    screenLimit = screenLimit? screenLimit<<1: 0X10;
-    screenArray = reallocWrapper(screenArray, ARRAY_SIZE(screenArray, screenLimit));
-  }
-
-  {
-    ScreenEntry *entry = mallocWrapper(sizeof(*entry));
-
-    *entry = initialScreenEntry;
-    entry->number = number;
-
-    memmove(&screenArray[first+1], &screenArray[first],
-            ARRAY_SIZE(screenArray, screenCount-first));
-    screenArray[first] = entry;
-    screenCount += 1;
-
-    return entry;
-  }
-}
-
 static void
-setScreenEntry (void) {
+setSessionEntry (void) {
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
-  if (!p || (scr.number != p->number)) p = getScreenEntry(scr.number);
+  if (!ses || (scr.number != ses->number)) ses = getSessionEntry(scr.number);
 }
 
 static void
-updateScreenAttributes (void) {
-  setScreenEntry();
+updateSessionAttributes (void) {
+  setSessionEntry();
 
   {
     int maximum = MAX(scr.rows-(int)brl.textRows, 0);
-    int *table[] = {&p->winy, &p->moty, NULL};
+    int *table[] = {&ses->winy, &ses->moty, NULL};
     int **value = table;
     while (*value) {
       if (**value > maximum) **value = maximum;
-      ++value;
+      value += 1;
     }
   }
 
   {
     int maximum = MAX(scr.cols-1, 0);
-    int *table[] = {&p->winx, &p->motx, NULL};
+    int *table[] = {&ses->winx, &ses->motx, NULL};
     int **value = table;
     while (*value) {
       if (**value > maximum) **value = maximum;
-      ++value;
+      value += 1;
     }
   }
 }
 
 static void
-exitScreenArray (void) {
-  if (screenArray) {
-    while (screenCount > 0) free(screenArray[--screenCount]);
-    free(screenArray);
-    screenArray = NULL;
-  } else {
-    screenCount = 0;
-  }
-  screenLimit = 0;
+exitSessions (void) {
+  ses = NULL;
+  deallocateSessionEntries();
 }
 
 static void
@@ -311,17 +230,17 @@ typedef void (*RenderStatusField) (unsigned char *cells);
 
 static void
 renderStatusField_windowCoordinates (unsigned char *cells) {
-  renderCoordinatesVertical(cells, SF_COLUMN_NUMBER(p->winx), SF_ROW_NUMBER(p->winy));
+  renderCoordinatesVertical(cells, SF_COLUMN_NUMBER(ses->winx), SF_ROW_NUMBER(ses->winy));
 }
 
 static void
 renderStatusField_windowColumn (unsigned char *cells) {
-  renderNumberVertical(cells, SF_COLUMN_NUMBER(p->winx));
+  renderNumberVertical(cells, SF_COLUMN_NUMBER(ses->winx));
 }
 
 static void
 renderStatusField_windowRow (unsigned char *cells) {
-  renderNumberVertical(cells, SF_ROW_NUMBER(p->winy));
+  renderNumberVertical(cells, SF_ROW_NUMBER(ses->winy));
 }
 
 static void
@@ -342,13 +261,13 @@ renderStatusField_cursorRow (unsigned char *cells) {
 static void
 renderStatusField_cursorAndWindowColumn (unsigned char *cells) {
   renderNumberUpper(cells, SF_COLUMN_NUMBER(scr.posx));
-  renderNumberLower(cells, SF_COLUMN_NUMBER(p->winx));
+  renderNumberLower(cells, SF_COLUMN_NUMBER(ses->winx));
 }
 
 static void
 renderStatusField_cursorAndWindowRow (unsigned char *cells) {
   renderNumberUpper(cells, SF_ROW_NUMBER(scr.posy));
-  renderNumberLower(cells, SF_ROW_NUMBER(p->winy));
+  renderNumberLower(cells, SF_ROW_NUMBER(ses->winy));
 }
 
 static void
@@ -360,20 +279,20 @@ static void
 renderStatusField_stateDots (unsigned char *cells) {
   *cells = (isFrozenScreen()    ? BRL_DOT1: 0) |
            (prefs.showCursor    ? BRL_DOT4: 0) |
-           (p->showAttributes   ? BRL_DOT2: 0) |
+           (ses->showAttributes   ? BRL_DOT2: 0) |
            (prefs.cursorStyle   ? BRL_DOT5: 0) |
            (prefs.alertTunes    ? BRL_DOT3: 0) |
            (prefs.blinkingCursor? BRL_DOT6: 0) |
-           (p->trackCursor      ? BRL_DOT7: 0) |
+           (ses->trackCursor      ? BRL_DOT7: 0) |
            (prefs.slidingWindow ? BRL_DOT8: 0);
 }
 
 static void
 renderStatusField_stateLetter (unsigned char *cells) {
   *cells = convertCharacterToDots(textTable,
-                                  p->showAttributes? WC_C('a'):
+                                  ses->showAttributes? WC_C('a'):
                                   isFrozenScreen()? WC_C('f'):
-                                  p->trackCursor? WC_C('t'):
+                                  ses->trackCursor? WC_C('t'):
                                   WC_C(' '));
 }
 
@@ -387,7 +306,7 @@ renderStatusField_time (unsigned char *cells) {
 
 static void
 renderStatusField_alphabeticWindowCoordinates (unsigned char *cells) {
-  renderCoordinatesAlphabetic(cells, p->winx, p->winy);
+  renderCoordinatesAlphabetic(cells, ses->winx, ses->winy);
 }
 
 static void
@@ -398,20 +317,20 @@ renderStatusField_alphabeticCursorCoordinates (unsigned char *cells) {
 static void
 renderStatusField_generic (unsigned char *cells) {
   cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
-  cells[BRL_GSC_BRLCOL] = SF_COLUMN_NUMBER(p->winx);
-  cells[BRL_GSC_BRLROW] = SF_ROW_NUMBER(p->winy);
+  cells[BRL_GSC_BRLCOL] = SF_COLUMN_NUMBER(ses->winx);
+  cells[BRL_GSC_BRLROW] = SF_ROW_NUMBER(ses->winy);
   cells[BRL_GSC_CSRCOL] = SF_COLUMN_NUMBER(scr.posx);
   cells[BRL_GSC_CSRROW] = SF_ROW_NUMBER(scr.posy);
   cells[BRL_GSC_SCRNUM] = scr.number;
   cells[BRL_GSC_FREEZE] = isFrozenScreen();
-  cells[BRL_GSC_DISPMD] = p->showAttributes;
+  cells[BRL_GSC_DISPMD] = ses->showAttributes;
   cells[BRL_GSC_SIXDOTS] = prefs.textStyle;
   cells[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
   cells[BRL_GSC_SKPIDLNS] = prefs.skipIdenticalLines;
   cells[BRL_GSC_SKPBLNKWINS] = prefs.skipBlankWindows;
   cells[BRL_GSC_CSRVIS] = prefs.showCursor;
-  cells[BRL_GSC_CSRHIDE] = p->hideCursor;
-  cells[BRL_GSC_CSRTRK] = p->trackCursor;
+  cells[BRL_GSC_CSRHIDE] = ses->hideCursor;
+  cells[BRL_GSC_CSRTRK] = ses->trackCursor;
   cells[BRL_GSC_CSRSIZE] = prefs.cursorStyle;
   cells[BRL_GSC_CSRBLINK] = prefs.blinkingCursor;
   cells[BRL_GSC_ATTRVIS] = prefs.showAttributes;
@@ -629,10 +548,10 @@ showInfo (void) {
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
              cellCount, prefix,
              scr.number,
-             p->trackCursor? 't': ' ',
+             ses->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
-             p->showAttributes? 'a': 't',
+             ses->showAttributes? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ',
@@ -657,13 +576,13 @@ showInfo (void) {
 
   {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             SF_COLUMN_NUMBER(p->winx), SF_ROW_NUMBER(p->winy),
+             SF_COLUMN_NUMBER(ses->winx), SF_ROW_NUMBER(ses->winy),
              SF_COLUMN_NUMBER(scr.posx), SF_ROW_NUMBER(scr.posy),
              scr.number, 
-             p->trackCursor? 't': ' ',
+             ses->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
-             p->showAttributes? 'a': 't',
+             ses->showAttributes? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
@@ -673,15 +592,15 @@ showInfo (void) {
 
 static void 
 slideWindowVertically (int y) {
-  if (y < p->winy)
-    p->winy = y;
-  else if  (y >= (p->winy + brl.textRows))
-    p->winy = y - (brl.textRows - 1);
+  if (y < ses->winy)
+    ses->winy = y;
+  else if  (y >= (ses->winy + brl.textRows))
+    ses->winy = y - (brl.textRows - 1);
 }
 
 static void 
 placeWindowHorizontally (int x) {
-  p->winx = x / textCount * textCount;
+  ses->winx = x / textCount * textCount;
 }
 
 static int
@@ -690,12 +609,12 @@ trackCursor (int place) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (contracted) {
-    p->winy = scr.posy;
-    if (scr.posx < p->winx) {
+    ses->winy = scr.posy;
+    if (scr.posx < ses->winx) {
       int length = scr.posx + 1;
       ScreenCharacter characters[length];
       int onspace = 1;
-      readScreen(0, p->winy, length, 1, characters);
+      readScreen(0, ses->winy, length, 1, characters);
       while (length) {
         if ((iswspace(characters[--length].text) != 0) != onspace) {
           if (onspace) {
@@ -706,7 +625,7 @@ trackCursor (int place) {
           }
         }
       }
-      p->winx = length;
+      ses->winx = length;
     }
     contractedTrack = 1;
     return 1;
@@ -714,22 +633,22 @@ trackCursor (int place) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (place)
-    if ((scr.posx < p->winx) || (scr.posx >= (p->winx + textCount)) ||
-        (scr.posy < p->winy) || (scr.posy >= (p->winy + brl.textRows)))
+    if ((scr.posx < ses->winx) || (scr.posx >= (ses->winx + textCount)) ||
+        (scr.posy < ses->winy) || (scr.posy >= (ses->winy + brl.textRows)))
       placeWindowHorizontally(scr.posx);
 
   if (prefs.slidingWindow) {
     int reset = textCount * 3 / 10;
     int trigger = prefs.eagerSlidingWindow? textCount*3/20: 0;
-    if (scr.posx < (p->winx + trigger))
-      p->winx = MAX(scr.posx-reset, 0);
-    else if (scr.posx >= (p->winx + textCount - trigger))
-      p->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)textCount, 0);
-  } else if (scr.posx < p->winx) {
-    p->winx -= ((p->winx - scr.posx - 1) / textCount + 1) * textCount;
-    if (p->winx < 0) p->winx = 0;
+    if (scr.posx < (ses->winx + trigger))
+      ses->winx = MAX(scr.posx-reset, 0);
+    else if (scr.posx >= (ses->winx + textCount - trigger))
+      ses->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)textCount, 0);
+  } else if (scr.posx < ses->winx) {
+    ses->winx -= ((ses->winx - scr.posx - 1) / textCount + 1) * textCount;
+    if (ses->winx < 0) ses->winx = 0;
   } else
-    p->winx += (scr.posx - p->winx) / textCount * textCount;
+    ses->winx += (scr.posx - ses->winx) / textCount * textCount;
 
   slideWindowVertically(scr.posy);
   return 1;
@@ -839,17 +758,17 @@ typedef int (*CanMoveWindow) (void);
 
 static int
 canMoveUp (void) {
-  return p->winy > 0;
+  return ses->winy > 0;
 }
 
 static int
 canMoveDown (void) {
-  return p->winy < (scr.rows - brl.textRows);
+  return ses->winy < (scr.rows - brl.textRows);
 }
 
 static inline int
 showCursor (void) {
-  return scr.cursor && prefs.showCursor && !p->hideCursor;
+  return scr.cursor && prefs.showCursor && !ses->hideCursor;
 }
 
 static int
@@ -862,15 +781,15 @@ toDifferentLine (
     ScreenCharacter characters1[width];
     int skipped = 0;
 
-    if ((isSameCharacter == isSameText) && p->showAttributes) isSameCharacter = isSameAttributes;
-    readScreen(from, p->winy, width, 1, characters1);
+    if ((isSameCharacter == isSameText) && ses->showAttributes) isSameCharacter = isSameAttributes;
+    readScreen(from, ses->winy, width, 1, characters1);
 
     do {
       ScreenCharacter characters2[width];
-      readScreen(from, p->winy+=amount, width, 1, characters2);
+      readScreen(from, ses->winy+=amount, width, 1, characters2);
 
       if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
-          (showCursor() && (scr.posy == p->winy) &&
+          (showCursor() && (scr.posy == ses->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -912,8 +831,8 @@ downDifferentCharacter (IsSameCharacter isSameCharacter, int column) {
 
 static void
 upOneLine (void) {
-  if (p->winy > 0) {
-    p->winy--;
+  if (ses->winy > 0) {
+    ses->winy--;
   } else {
     playTune(&tune_bounce);
   }
@@ -921,8 +840,8 @@ upOneLine (void) {
 
 static void
 downOneLine (void) {
-  if (p->winy < (scr.rows - brl.textRows)) {
-    p->winy++;
+  if (ses->winy < (scr.rows - brl.textRows)) {
+    ses->winy++;
   } else {
     playTune(&tune_bounce);
   }
@@ -949,10 +868,10 @@ downLine (IsSameCharacter isSameCharacter) {
 typedef int (*RowTester) (int column, int row, void *data);
 static void
 findRow (int column, int increment, RowTester test, void *data) {
-  int row = p->winy + increment;
+  int row = ses->winy + increment;
   while ((row >= 0) && (row <= scr.rows-(int)brl.textRows)) {
     if (test(column, row, data)) {
-      p->winy = row;
+      ses->winy = row;
       return;
     }
     row += increment;
@@ -1035,17 +954,17 @@ static void
 placeRightEdge (int column) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
-    p->winx = 0;
+    ses->winx = 0;
     while (1) {
-      int length = getContractedLength(p->winx, p->winy);
-      int end = p->winx + length;
+      int length = getContractedLength(ses->winx, ses->winy);
+      int end = ses->winx + length;
       if (end > column) break;
-      p->winx = end;
+      ses->winx = end;
     }
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
-    p->winx = column / textCount * textCount;
+    ses->winx = column / textCount * textCount;
   }
 }
 
@@ -1056,15 +975,15 @@ placeWindowRight (void) {
 
 static int
 shiftWindowLeft (void) {
-  if (p->winx == 0) return 0;
+  if (ses->winx == 0) return 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
-    placeRightEdge(p->winx-1);
+    placeRightEdge(ses->winx-1);
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
-    p->winx -= MIN(fullWindowShift, p->winx);
+    ses->winx -= MIN(fullWindowShift, ses->winx);
   }
 
   return 1;
@@ -1076,22 +995,22 @@ shiftWindowRight (void) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
-    shift = getContractedLength(p->winx, p->winy);
+    shift = getContractedLength(ses->winx, ses->winy);
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
     shift = fullWindowShift;
   }
 
-  if (p->winx >= (scr.cols - shift)) return 0;
-  p->winx += shift;
+  if (ses->winx >= (scr.cols - shift)) return 0;
+  ses->winx += shift;
   return 1;
 }
 
 static int
 getWindowLength (void) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) return getContractedLength(p->winx, p->winy);
+  if (isContracting()) return getContractedLength(ses->winx, ses->winy);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   return textCount;
@@ -1104,9 +1023,9 @@ isTextOffset (int *arg, int end, int relaxed) {
   if (value < textStart) return 0;
   if ((value -= textStart) >= textCount) return 0;
 
-  if ((p->winx + value) >= scr.cols) {
+  if ((ses->winx + value) >= scr.cols) {
     if (!relaxed) return 0;
-    value = scr.cols - 1 - p->winx;
+    value = scr.cols - 1 - ses->winx;
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1144,8 +1063,8 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
     *row = scr.posy;
   } else {
     if (!isTextOffset(&arg, end, relaxed)) return 0;
-    *column = p->winx + arg;
-    *row = p->winy;
+    *column = ses->winx + arg;
+    *row = ses->winy;
   }
   return 1;
 }
@@ -1267,31 +1186,31 @@ checkPointer (void) {
   int column, row;
 
   if (prefs.windowFollowsPointer && getScreenPointer(&column, &row)) {
-    if (column != p->ptrx) {
-      if (p->ptrx >= 0) moved = 1;
-      p->ptrx = column;
+    if (column != ses->ptrx) {
+      if (ses->ptrx >= 0) moved = 1;
+      ses->ptrx = column;
     }
 
-    if (row != p->ptry) {
-      if (p->ptry >= 0) moved = 1;
-      p->ptry = row;
+    if (row != ses->ptry) {
+      if (ses->ptry >= 0) moved = 1;
+      ses->ptry = row;
     }
 
     if (moved) {
-      if (column < p->winx) {
-        p->winx = column;
-      } else if (column >= (p->winx + textCount)) {
-        p->winx = column + 1 - textCount;
+      if (column < ses->winx) {
+        ses->winx = column;
+      } else if (column >= (ses->winx + textCount)) {
+        ses->winx = column + 1 - textCount;
       }
 
-      if (row < p->winy) {
-        p->winy = row;
-      } else if (row >= (p->winy + brl.textRows)) {
-        p->winy = row + 1 - brl.textRows;
+      if (row < ses->winy) {
+        ses->winy = row;
+      } else if (row >= (ses->winy + brl.textRows)) {
+        ses->winy = row + 1 - brl.textRows;
       }
     }
   } else {
-    p->ptrx = p->ptry = -1;
+    ses->ptrx = ses->ptry = -1;
   }
 
   return moved;
@@ -1326,7 +1245,7 @@ highlightWindow (void) {
       }
     }
 
-    highlightScreenRegion(p->winx+left, p->winx+right, p->winy+top, p->winy+bottom);
+    highlightScreenRegion(ses->winx+left, ses->winx+right, ses->winy+top, ses->winy+bottom);
   }
 }
 
@@ -1366,8 +1285,8 @@ typedef struct {
 
 static int
 doCommand (UpdateData *upd) {
-  int oldmotx = p->winx;
-  int oldmoty = p->winy;
+  int oldmotx = ses->winx;
+  int oldmoty = ses->winy;
   int command;
 
   testProgramTermination();
@@ -1439,26 +1358,26 @@ doCommand:
         break;
 
       case BRL_CMD_TOP_LEFT:
-        p->winx = 0;
+        ses->winx = 0;
       case BRL_CMD_TOP:
-        p->winy = 0;
+        ses->winy = 0;
         break;
       case BRL_CMD_BOT_LEFT:
-        p->winx = 0;
+        ses->winx = 0;
       case BRL_CMD_BOT:
-        p->winy = scr.rows - brl.textRows;
+        ses->winy = scr.rows - brl.textRows;
         break;
 
       case BRL_CMD_WINUP:
-        if (p->winy > 0) {
-          p->winy -= MIN(verticalWindowShift, p->winy);
+        if (ses->winy > 0) {
+          ses->winy -= MIN(verticalWindowShift, ses->winy);
         } else {
           playTune(&tune_bounce);
         }
         break;
       case BRL_CMD_WINDN:
-        if (p->winy < (scr.rows - brl.textRows)) {
-          p->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - p->winy));
+        if (ses->winy < (scr.rows - brl.textRows)) {
+          ses->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - ses->winy));
         } else {
           playTune(&tune_bounce);
         }
@@ -1497,7 +1416,7 @@ doCommand:
           int found = 0;
           ScreenCharacter characters[scr.cols];
           int findBlank = 1;
-          int line = p->winy;
+          int line = ses->winy;
           int i;
           while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
             readScreen(0, line, scr.cols, 1, characters);
@@ -1508,8 +1427,8 @@ doCommand:
             if ((i == scr.cols) == findBlank) {
               if (!findBlank) {
                 found = 1;
-                p->winy = line;
-                p->winx = 0;
+                ses->winy = line;
+                ses->winx = 0;
                 break;
               }
               findBlank = 0;
@@ -1532,7 +1451,7 @@ doCommand:
         {
           ScreenCharacter characters[scr.cols];
           size_t length = 0;
-          readScreen(0, p->winy, scr.cols, 1, characters);
+          readScreen(0, ses->winy, scr.cols, 1, characters);
           while (length < scr.cols) {
             if (characters[length].text == WC_C(' ')) break;
             ++length;
@@ -1558,7 +1477,7 @@ doCommand:
           int found = 0;
           size_t count = cutLength;
           if (count <= scr.cols) {
-            int line = p->winy;
+            int line = ses->winy;
             wchar_t buffer[scr.cols];
             wchar_t characters[count];
 
@@ -1577,12 +1496,12 @@ doCommand:
                 for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
               }
 
-              if (line == p->winy) {
+              if (line == ses->winy) {
                 if (increment < 0) {
-                  int end = p->winx + count - 1;
+                  int end = ses->winx + count - 1;
                   if (end < length) length = end;
                 } else {
-                  int start = p->winx + textCount;
+                  int start = ses->winx + textCount;
                   if (start > length) start = length;
                   address += start;
                   length -= start;
@@ -1593,8 +1512,8 @@ doCommand:
                   while (findCharacters(&address, &length, characters, count))
                     ++address, --length;
 
-                p->winy = line;
-                p->winx = (address - buffer) / textCount * textCount;
+                ses->winy = line;
+                ses->winx = (address - buffer) / textCount * textCount;
                 found = 1;
                 break;
               }
@@ -1609,8 +1528,8 @@ doCommand:
       }
 
       case BRL_CMD_LNBEG:
-        if (p->winx) {
-          p->winx = 0;
+        if (ses->winx) {
+          ses->winx = 0;
         } else {
           playTune(&tune_bounce);
         }
@@ -1619,8 +1538,8 @@ doCommand:
       case BRL_CMD_LNEND: {
         int end = MAX(scr.cols, textCount) - textCount;
 
-        if (p->winx < end) {
-          p->winx = end;
+        if (ses->winx < end) {
+          ses->winx = end;
         } else {
           playTune(&tune_bounce);
         }
@@ -1628,45 +1547,45 @@ doCommand:
       }
 
       case BRL_CMD_CHRLT:
-        if (p->winx == 0)
+        if (ses->winx == 0)
           playTune (&tune_bounce);
-        p->winx = MAX (p->winx - 1, 0);
+        ses->winx = MAX (ses->winx - 1, 0);
         break;
       case BRL_CMD_CHRRT:
-        if (p->winx < (scr.cols - 1))
-          p->winx++;
+        if (ses->winx < (scr.cols - 1))
+          ses->winx++;
         else
           playTune(&tune_bounce);
         break;
 
       case BRL_CMD_HWINLT:
-        if (p->winx == 0)
+        if (ses->winx == 0)
           playTune(&tune_bounce);
         else
-          p->winx = MAX(p->winx-halfWindowShift, 0);
+          ses->winx = MAX(ses->winx-halfWindowShift, 0);
         break;
       case BRL_CMD_HWINRT:
-        if (p->winx < (scr.cols - halfWindowShift))
-          p->winx += halfWindowShift;
+        if (ses->winx < (scr.cols - halfWindowShift))
+          ses->winx += halfWindowShift;
         else
           playTune(&tune_bounce);
         break;
 
       case BRL_CMD_FWINLT:
         if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
-          int oldX = p->winx;
+          int oldX = ses->winx;
           if (shiftWindowLeft()) {
             if (prefs.skipBlankWindows) {
               int charCount;
               if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
-              charCount = MIN(scr.cols, p->winx+textCount);
+              charCount = MIN(scr.cols, ses->winx+textCount);
               if (!showCursor() ||
-                  (scr.posy != p->winy) ||
+                  (scr.posy != ses->winy) ||
                   (scr.posx < 0) ||
                   (scr.posx >= charCount)) {
                 int charIndex;
                 ScreenCharacter characters[charCount];
-                readScreen(0, p->winy, charCount, 1, characters);
+                readScreen(0, ses->winy, charCount, 1, characters);
                 for (charIndex=0; charIndex<charCount; ++charIndex) {
                   wchar_t text = characters[charIndex].text;
                   if (text != WC_C(' ')) break;
@@ -1677,9 +1596,9 @@ doCommand:
             break;
           }
         wrapUp:
-          if (p->winy == 0) {
+          if (ses->winy == 0) {
             playTune(&tune_bounce);
-            p->winx = oldX;
+            ses->winx = oldX;
             break;
           }
           playTune(&tune_wrap_up);
@@ -1689,31 +1608,31 @@ doCommand:
           if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
             int charIndex;
             ScreenCharacter characters[scr.cols];
-            readScreen(0, p->winy, scr.cols, 1, characters);
+            readScreen(0, ses->winy, scr.cols, 1, characters);
             for (charIndex=scr.cols-1; charIndex>0; --charIndex) {
               wchar_t text = characters[charIndex].text;
               if (text != WC_C(' ')) break;
             }
-            if (showCursor() && (scr.posy == p->winy) && SCR_COLUMN_OK(scr.posx)) {
+            if (showCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
               charIndex = MAX(charIndex, scr.posx);
             }
-            if (charIndex < p->winx) placeRightEdge(charIndex);
+            if (charIndex < ses->winx) placeRightEdge(charIndex);
           }
           break;
         }
       case BRL_CMD_FWINLTSKIP: {
-        int oldX = p->winx;
-        int oldY = p->winy;
+        int oldX = ses->winx;
+        int oldY = ses->winy;
         int tuneLimit = 3;
         int charCount;
         int charIndex;
         ScreenCharacter characters[scr.cols];
         while (1) {
           if (!shiftWindowLeft()) {
-            if (p->winy == 0) {
+            if (ses->winy == 0) {
               playTune(&tune_bounce);
-              p->winx = oldX;
-              p->winy = oldY;
+              ses->winx = oldX;
+              ses->winy = oldY;
               break;
             }
             if (tuneLimit-- > 0) playTune(&tune_wrap_up);
@@ -1721,17 +1640,17 @@ doCommand:
             placeWindowRight();
           }
           charCount = getWindowLength();
-          charCount = MIN(charCount, scr.cols-p->winx);
-          readScreen(p->winx, p->winy, charCount, 1, characters);
+          charCount = MIN(charCount, scr.cols-ses->winx);
+          readScreen(ses->winx, ses->winy, charCount, 1, characters);
           for (charIndex=charCount-1; charIndex>=0; charIndex--) {
             wchar_t text = characters[charIndex].text;
             if (text != WC_C(' ')) break;
           }
           if (showCursor() &&
-              (scr.posy == p->winy) &&
+              (scr.posy == ses->winy) &&
               (scr.posx >= 0) &&
-              (scr.posx < (p->winx + charCount))) {
-            charIndex = MAX(charIndex, scr.posx-p->winx);
+              (scr.posx < (ses->winx + charCount))) {
+            charIndex = MAX(charIndex, scr.posx-ses->winx);
           }
           if (charIndex >= 0) break;
         }
@@ -1740,16 +1659,16 @@ doCommand:
 
       case BRL_CMD_FWINRT:
         if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
-          int oldX = p->winx;
+          int oldX = ses->winx;
           if (shiftWindowRight()) {
             if (prefs.skipBlankWindows) {
               if (!showCursor() ||
-                  (scr.posy != p->winy) ||
-                  (scr.posx < p->winx)) {
-                int charCount = scr.cols - p->winx;
+                  (scr.posy != ses->winy) ||
+                  (scr.posx < ses->winx)) {
+                int charCount = scr.cols - ses->winx;
                 int charIndex;
                 ScreenCharacter characters[charCount];
-                readScreen(p->winx, p->winy, charCount, 1, characters);
+                readScreen(ses->winx, ses->winy, charCount, 1, characters);
                 for (charIndex=0; charIndex<charCount; ++charIndex) {
                   wchar_t text = characters[charIndex].text;
                   if (text != WC_C(' ')) break;
@@ -1760,47 +1679,47 @@ doCommand:
             break;
           }
         wrapDown:
-          if (p->winy >= (scr.rows - brl.textRows)) {
+          if (ses->winy >= (scr.rows - brl.textRows)) {
             playTune(&tune_bounce);
-            p->winx = oldX;
+            ses->winx = oldX;
             break;
           }
           playTune(&tune_wrap_down);
           downLine(isSameText);
-          p->winx = 0;
+          ses->winx = 0;
           break;
         }
       case BRL_CMD_FWINRTSKIP: {
-        int oldX = p->winx;
-        int oldY = p->winy;
+        int oldX = ses->winx;
+        int oldY = ses->winy;
         int tuneLimit = 3;
         int charCount;
         int charIndex;
         ScreenCharacter characters[scr.cols];
         while (1) {
           if (!shiftWindowRight()) {
-            if (p->winy >= (scr.rows - brl.textRows)) {
+            if (ses->winy >= (scr.rows - brl.textRows)) {
               playTune(&tune_bounce);
-              p->winx = oldX;
-              p->winy = oldY;
+              ses->winx = oldX;
+              ses->winy = oldY;
               break;
             }
             if (tuneLimit-- > 0) playTune(&tune_wrap_down);
             downLine(isSameText);
-            p->winx = 0;
+            ses->winx = 0;
           }
           charCount = getWindowLength();
-          charCount = MIN(charCount, scr.cols-p->winx);
-          readScreen(p->winx, p->winy, charCount, 1, characters);
+          charCount = MIN(charCount, scr.cols-ses->winx);
+          readScreen(ses->winx, ses->winy, charCount, 1, characters);
           for (charIndex=0; charIndex<charCount; charIndex++) {
             wchar_t text = characters[charIndex].text;
             if (text != WC_C(' ')) break;
           }
           if (showCursor() &&
-              (scr.posy == p->winy) &&
+              (scr.posy == ses->winy) &&
               (scr.posx < scr.cols) &&
-              (scr.posx >= p->winx)) {
-            charIndex = MIN(charIndex, scr.posx-p->winx);
+              (scr.posx >= ses->winx)) {
+            charIndex = MIN(charIndex, scr.posx-ses->winx);
           }
           if (charIndex < charCount) break;
         }
@@ -1808,10 +1727,10 @@ doCommand:
       }
 
       case BRL_CMD_RETURN:
-        if ((p->winx != p->motx) || (p->winy != p->moty)) {
+        if ((ses->winx != ses->motx) || (ses->winy != ses->moty)) {
       case BRL_CMD_BACK:
-          p->winx = p->motx;
-          p->winy = p->moty;
+          ses->winx = ses->motx;
+          ses->winy = ses->moty;
           break;
         }
       case BRL_CMD_HOME:
@@ -1830,7 +1749,7 @@ doCommand:
         playTune(&tune_command_rejected);
         break;
       case BRL_CMD_CSRJMP_VERT:
-        playTune(routeCursor(-1, p->winy, scr.number)?
+        playTune(routeCursor(-1, ses->winy, scr.number)?
                  &tune_routing_started:
                  &tune_command_rejected);
         break;
@@ -1842,14 +1761,14 @@ doCommand:
         break;
       case BRL_CMD_CSRHIDE:
         /* This is for briefly hiding the cursor */
-        TOGGLE_NOPLAY(p->hideCursor);
+        TOGGLE_NOPLAY(ses->hideCursor);
         /* no tune */
         break;
       case BRL_CMD_CSRSIZE:
         TOGGLE_PLAY(prefs.cursorStyle);
         break;
       case BRL_CMD_CSRTRK:
-        if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
+        if (TOGGLE(ses->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
 #ifdef ENABLE_SPEECH_SUPPORT
           if (speechTracking && (scr.number == speechScreen)) {
             speechIndex = -1;
@@ -1896,7 +1815,7 @@ doCommand:
         break;
 
       case BRL_CMD_DISPMD:
-        TOGGLE_NOPLAY(p->showAttributes);
+        TOGGLE_NOPLAY(ses->showAttributes);
         break;
       case BRL_CMD_SIXDOTS:
         TOGGLE_PLAY(prefs.textStyle);
@@ -1985,13 +1904,13 @@ doCommand:
         break;
 
       case BRL_CMD_SAY_LINE:
-        sayScreenLines(p->winy, 1, 0, prefs.sayLineMode);
+        sayScreenLines(ses->winy, 1, 0, prefs.sayLineMode);
         break;
       case BRL_CMD_SAY_ABOVE:
-        sayScreenLines(0, p->winy+1, 1, sayImmediate);
+        sayScreenLines(0, ses->winy+1, 1, sayImmediate);
         break;
       case BRL_CMD_SAY_BELOW:
-        sayScreenLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
+        sayScreenLines(ses->winy, scr.rows-ses->winy, 1, sayImmediate);
         break;
 
       case BRL_CMD_SAY_SLOWER:
@@ -2278,8 +2197,8 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              p->winx = column;
-              p->winy = row;
+              ses->winx = column;
+              ses->winy = row;
             } else {
               playTune(&tune_command_rejected);
             }
@@ -2291,23 +2210,23 @@ doCommand:
               arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
             if (arg < scr.rows) {
               slideWindowVertically(arg);
-              if (flags & BRL_FLG_LINE_TOLEFT) p->winx = 0;
+              if (flags & BRL_FLG_LINE_TOLEFT) ses->winx = 0;
             } else {
               playTune(&tune_command_rejected);
             }
             break;
 
           case BRL_BLK_SETMARK: {
-            ScreenMark *mark = &p->marks[arg];
-            mark->column = p->winx;
-            mark->row = p->winy;
+            ScreenLocation *mark = &ses->marks[arg];
+            mark->column = ses->winx;
+            mark->row = ses->winy;
             playTune(&tune_mark_set);
             break;
           }
           case BRL_BLK_GOTOMARK: {
-            ScreenMark *mark = &p->marks[arg];
-            p->winx = mark->column;
-            p->winy = mark->row;
+            ScreenLocation *mark = &ses->marks[arg];
+            ses->winx = mark->column;
+            ses->winy = mark->row;
             break;
           }
 
@@ -2329,7 +2248,7 @@ doCommand:
 
           findIndent:
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              p->winy = row;
+              ses->winy = row;
               findRow(column, increment, testIndent, NULL);
             } else {
               playTune(&tune_command_rejected);
@@ -2341,7 +2260,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              p->winy = row;
+              ses->winy = row;
               upDifferentCharacter(isSameText, column);
             } else {
               playTune(&tune_command_rejected);
@@ -2353,7 +2272,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              p->winy = row;
+              ses->winy = row;
               downDifferentCharacter(isSameText, column);
             } else {
               playTune(&tune_command_rejected);
@@ -2370,18 +2289,18 @@ doCommand:
     }
   }
 
-  if ((p->winx != oldmotx) || (p->winy != oldmoty)) {
+  if ((ses->winx != oldmotx) || (ses->winy != oldmoty)) {
     /* The window has been manually moved. */
-    p->motx = p->winx;
-    p->moty = p->winy;
+    ses->motx = ses->winx;
+    ses->moty = ses->winy;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
     contracted = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (p->trackCursor && speechTracking && (scr.number == speechScreen)) {
-      p->trackCursor = 0;
+    if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
+      ses->trackCursor = 0;
       playTune(&tune_cursor_unlinked);
     }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -2389,10 +2308,10 @@ doCommand:
 
   if (!(command & BRL_MSK_BLK)) {
     if (command & BRL_FLG_MOTION_ROUTE) {
-      int left = p->winx;
+      int left = ses->winx;
       int right = MIN(left+textCount, scr.cols) - 1;
 
-      int top = p->winy;
+      int top = ses->winy;
       int bottom = MIN(top+brl.textRows, scr.rows) - 1;
 
       if ((scr.posx < left) || (scr.posx > right) ||
@@ -2466,7 +2385,7 @@ doUpdate (UpdateData *upd) {
     /* some commands (key insertion, virtual terminal switching, etc)
      * may have moved the cursor
      */
-    updateScreenAttributes();
+    updateSessionAttributes();
 
     /*
      * Update blink counters: 
@@ -2488,7 +2407,7 @@ doUpdate (UpdateData *upd) {
     if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-    if (p->trackCursor) {
+    if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
       if (speechTracking && (scr.number == speechScreen)) {
         int index = speech->getTrack(&spk);
@@ -2498,19 +2417,19 @@ doUpdate (UpdateData *upd) {
       {
         /* If cursor moves while blinking is on */
         if (prefs.blinkingCursor) {
-          if (scr.posy != p->trky) {
+          if (scr.posy != ses->trky) {
             /* turn off cursor to see what's under it while changing lines */
             setBlinkingCursor(0);
-          } else if (scr.posx != p->trkx) {
+          } else if (scr.posx != ses->trkx) {
             /* turn on cursor to see it moving on the line */
             setBlinkingCursor(1);
           }
         }
         /* If the cursor moves in cursor tracking mode: */
-        if (!isRouting() && (scr.posx != p->trkx || scr.posy != p->trky)) {
+        if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
           trackCursor(0);
-          p->trkx = scr.posx;
-          p->trky = scr.posy;
+          ses->trkx = scr.posx;
+          ses->trky = scr.posy;
         } else if (checkPointer()) {
           pointerMoved = 1;
         }
@@ -2531,7 +2450,7 @@ doUpdate (UpdateData *upd) {
       int newWidth = scr.cols;
       ScreenCharacter newCharacters[newWidth];
 
-      readScreen(0, p->winy, newWidth, 1, newCharacters);
+      readScreen(0, ses->winy, newWidth, 1, newCharacters);
 
       if (!speechTracking) {
         int column = 0;
@@ -2539,11 +2458,11 @@ doUpdate (UpdateData *upd) {
         const ScreenCharacter *characters = newCharacters;
 
         if (oldCharacters) {
-          if ((newScreen == oldScreen) && (p->winy == upd->oldwiny) && (newWidth == oldWidth)) {
+          if ((newScreen == oldScreen) && (ses->winy == upd->oldwiny) && (newWidth == oldWidth)) {
             int onScreen = (newX >= 0) && (newX < newWidth);
 
             if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
-              if ((newY == p->winy) && (newY == oldY) && onScreen) {
+              if ((newY == ses->winy) && (newY == oldY) && onScreen) {
                 if ((newX == oldX) &&
                     isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
                   int oldLength = oldWidth;
@@ -2612,7 +2531,7 @@ doUpdate (UpdateData *upd) {
                 while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
                 count -= column;
               }
-            } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
+            } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
               column = newX;
               count = 1;
             } else {
@@ -2641,7 +2560,7 @@ doUpdate (UpdateData *upd) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     /* There are a few things to take care of if the display has moved. */
-    if ((p->winx != upd->oldwinx) || (p->winy != upd->oldwiny)) {
+    if ((ses->winx != upd->oldwinx) || (ses->winy != upd->oldwiny)) {
       if (!pointerMoved) highlightWindow();
 
       if (prefs.showAttributes && prefs.blinkingAttributes) {
@@ -2655,8 +2574,8 @@ doUpdate (UpdateData *upd) {
            (example: tin). */
       }
 
-      upd->oldwinx = p->winx;
-      upd->oldwiny = p->winy;
+      upd->oldwinx = ses->winx;
+      upd->oldwiny = ses->winy;
     }
 
     if (infoMode) {
@@ -2676,15 +2595,15 @@ doUpdate (UpdateData *upd) {
         while (1) {
           int cursorOffset = CTB_NO_CURSOR;
 
-          int inputLength = scr.cols - p->winx;
+          int inputLength = scr.cols - ses->winx;
           ScreenCharacter inputCharacters[inputLength];
           wchar_t inputText[inputLength];
 
           int outputLength = textLength;
           unsigned char outputBuffer[outputLength];
 
-          if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
-          readScreen(p->winx, p->winy, inputLength, 1, inputCharacters);
+          if ((scr.posy == ses->winy) && (scr.posx >= ses->winx)) cursorOffset = scr.posx - ses->winx;
+          readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
 
           {
             int i;
@@ -2714,9 +2633,9 @@ doUpdate (UpdateData *upd) {
                 }
               }
 
-              if (scr.posx >= (p->winx + inputEnd)) {
+              if (scr.posx >= (ses->winx + inputEnd)) {
                 int offset = 0;
-                int length = scr.cols - p->winx;
+                int length = scr.cols - ses->winx;
                 int onspace = 0;
 
                 while (offset < length) {
@@ -2727,10 +2646,10 @@ doUpdate (UpdateData *upd) {
                   ++offset;
                 }
 
-                if ((offset += p->winx) > scr.posx) {
-                  p->winx = (p->winx + scr.posx) / 2;
+                if ((offset += ses->winx) > scr.posx) {
+                  ses->winx = (ses->winx + scr.posx) / 2;
                 } else {
-                  p->winx = offset;
+                  ses->winx = offset;
                 }
 
                 continue;
@@ -2749,12 +2668,12 @@ doUpdate (UpdateData *upd) {
             }
           }
 
-          contractedStart = p->winx;
+          contractedStart = ses->winx;
           contractedLength = inputLength;
           contractedTrack = 0;
           contracted = 1;
 
-          if (p->showAttributes || showAttributesUnderline()) {
+          if (ses->showAttributes || showAttributesUnderline()) {
             int inputOffset;
             int outputOffset = 0;
             unsigned char attributes = 0;
@@ -2770,7 +2689,7 @@ doUpdate (UpdateData *upd) {
             }
             while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
 
-            if (p->showAttributes) {
+            if (ses->showAttributes) {
               for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
                 outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
               }
@@ -2792,10 +2711,10 @@ doUpdate (UpdateData *upd) {
       if (!contracted)
 #endif /* ENABLE_CONTRACTED_BRAILLE */
       {
-        int windowColumns = MIN(textCount, scr.cols-p->winx);
+        int windowColumns = MIN(textCount, scr.cols-ses->winx);
         ScreenCharacter characters[textLength];
 
-        readScreen(p->winx, p->winy, windowColumns, brl.textRows, characters);
+        readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
         if (windowColumns < textCount) {
           /* We got a rectangular piece of text with readScreen but the display
            * is in an off-right position with some cells at the end blank
@@ -2818,10 +2737,10 @@ doUpdate (UpdateData *upd) {
         /*
          * If the cursor is visible and in range: 
          */
-        if ((scr.posx >= p->winx) && (scr.posx < (p->winx + textCount)) &&
-            (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.textRows)) &&
+        if ((scr.posx >= ses->winx) && (scr.posx < (ses->winx + textCount)) &&
+            (scr.posy >= ses->winy) && (scr.posy < (ses->winy + brl.textRows)) &&
             (scr.posx < scr.cols) && (scr.posy < scr.rows))
-          brl.cursor = ((scr.posy - p->winy) * brl.textColumns) + textStart + scr.posx - p->winx;
+          brl.cursor = ((scr.posy - ses->winy) * brl.textColumns) + textStart + scr.posx - ses->winx;
 
         /* blank out capital letters if they're blinking and should be off */
         if (prefs.blinkingCapitals && !capitalsState) {
@@ -2833,7 +2752,7 @@ doUpdate (UpdateData *upd) {
         }
 
         /* convert to dots using the current translation table */
-        if (p->showAttributes) {
+        if (ses->showAttributes) {
           int row;
 
           for (row=0; row<brl.textRows; row+=1) {
@@ -2908,20 +2827,20 @@ static int
 runProgram (void) {
   UpdateData upd;
 
-  atexit(exitScreenArray);
-  setScreenEntry();
+  atexit(exitSessions);
+  setSessionEntry();
   /* NB: screen size can sometimes change, e.g. the video mode may be changed
    * when installing a new font. This will be detected by another call to
    * describeScreen() within the main loop. Don't assume that scr.rows
    * and scr.cols are constants across loop iterations.
    */
 
-  p->trkx = scr.posx; p->trky = scr.posy;
-  if (!trackCursor(1)) p->winx = p->winy = 0; /* set initial window position */
-  p->motx = p->winx; p->moty = p->winy;
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0; /* set initial window position */
+  ses->motx = ses->winx; ses->moty = ses->winy;
 
-  upd.oldwinx = p->winx;
-  upd.oldwiny = p->winy;
+  upd.oldwinx = ses->winx;
+  upd.oldwiny = ses->winy;
   upd.isOffline = 0;
   upd.isSuspended = 0;
   upd.isWritable = 1;
@@ -2949,7 +2868,7 @@ runProgram (void) {
      * Update Braille display and screen information.  Switch screen 
      * state if screen number has changed.
      */
-    updateScreenAttributes();
+    updateSessionAttributes();
   }
 
   return 0;
