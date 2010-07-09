@@ -38,8 +38,6 @@ static SessionEntry **sessionArray = NULL;
 static unsigned int sessionLimit = 0;
 static unsigned int sessionCount = 0;
 
-SessionEntry *ses = NULL;
-
 SessionEntry *
 getSessionEntry (int number) {
   int first = 0;

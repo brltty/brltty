@@ -285,45 +285,6 @@ typedef enum {
 
 #define BRL_BLK_CONTEXT 0X2600 /* switch to command context */
 
-/*
- * Please comment all BRL_GSC_* definitions. They are
- * used during automatic help file generation.
- */
-#define BRL_STATUS_CELLS_GENERIC 0XFF /* must be in BRL_firstStatusCell */
-typedef enum {
-  BRL_firstStatusCell = 0,
-
-  /* numbers */
-  BRL_GSC_BRLCOL /* screen column where left of braille window is */,
-  BRL_GSC_BRLROW /* screen row where top of braille window is */,
-  BRL_GSC_CSRCOL /* screen column where cursor is */,
-  BRL_GSC_CSRROW /* screen row where cursor is */,
-  BRL_GSC_SCRNUM /* virtual screen number */,
-
-  /* flags */
-  BRL_GSC_FREEZE /* frozen screen */,
-  BRL_GSC_DISPMD /* attributes display */,
-  BRL_GSC_SIXDOTS /* six-dot braille */,
-  BRL_GSC_SLIDEWIN /* sliding window */,
-  BRL_GSC_SKPIDLNS /* skip identical lines */,
-  BRL_GSC_SKPBLNKWINS /* skip blank windows */,
-  BRL_GSC_CSRVIS /* visible cursor */,
-  BRL_GSC_CSRHIDE /* hidden cursor */,
-  BRL_GSC_CSRTRK /* cursor tracking */,
-  BRL_GSC_CSRSIZE /* block cursor */,
-  BRL_GSC_CSRBLINK /* blinking cursor */,
-  BRL_GSC_ATTRVIS /* visible attributes underline */,
-  BRL_GSC_ATTRBLINK /* blinking attributes underline */,
-  BRL_GSC_CAPBLINK /* blinking capital letters */,
-  BRL_GSC_TUNES /* alert tunes */,
-  BRL_GSC_HELP /* help mode */,
-  BRL_GSC_INFO /* info mode */,
-  BRL_GSC_AUTOREPEAT /* autorepeat */,
-  BRL_GSC_AUTOSPEAK /* autospeak */,
-
-  BRL_genericStatusCellCount
-} BRL_GenericStatusCell;
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

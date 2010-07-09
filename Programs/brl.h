@@ -19,34 +19,15 @@
 #ifndef BRLTTY_INCLUDED_BRL
 #define BRLTTY_INCLUDED_BRL
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #include "prologue.h"
 
 #include "driver.h"
 #include "brldefs.h"
 #include "ktbdefs.h"
 
-typedef enum {
-  sfEnd,
-  sfWindowCoordinates,
-  sfWindowColumn,
-  sfWindowRow,
-  sfCursorCoordinates,
-  sfCursorColumn,
-  sfCursorRow,
-  sfCursorAndWindowColumn,
-  sfCursorAndWindowRow,
-  sfScreenNumber,
-  sfStateDots,
-  sfStateLetter,
-  sfTime,
-  sfAlphabeticWindowCoordinates,
-  sfAlphabeticCursorCoordinates,
-  sfGeneric
-} StatusField;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef struct BrailleDataStruct BrailleData;
 

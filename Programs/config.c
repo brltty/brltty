@@ -47,6 +47,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "status.h"
 #include "datafile.h"
 #include "ttb.h"
 #include "atb.h"

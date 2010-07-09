@@ -19,17 +19,14 @@
 #ifndef BRLTTY_INCLUDED_BRL_DRIVER
 #define BRLTTY_INCLUDED_BRL_DRIVER
 
+#include <stdio.h>
+
+#include "brl.h"
+#include "statdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include <stdio.h>
-
-/* this header file is used to create the driver structure
- * for a dynamically loadable braille display driver.
- */
-
-#include "brl.h"
 
 /* Routines provided by this braille display driver. */
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);

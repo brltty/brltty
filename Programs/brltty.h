@@ -21,15 +21,17 @@
 
 #include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
 #include "ctb.h"
 #include "ktb.h"
+#include "scr.h"
+#include "ses.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef enum {
   sbwAll,
@@ -118,7 +120,18 @@ typedef struct {
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
-extern unsigned int getStatusFieldsLength (const unsigned char *fields);
+extern ScreenDescription scr;
+#define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
+#define SCR_COLUMN_OK(column) SCR_COORDINATE_OK((column), scr.cols)
+#define SCR_ROW_OK(row) SCR_COORDINATE_OK((row), scr.rows)
+#define SCR_COORDINATES_OK(column,row) (SCR_COLUMN_OK((column)) && SCR_ROW_OK((row)))
+#define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
+#define SCR_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)
+#define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
+
+extern SessionEntry *ses;
+extern unsigned int updateIntervals;
+extern unsigned char infoMode;
 
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
 extern int writeBrailleBytes (const char *mode, const char *bytes, size_t length);
