@@ -42,39 +42,39 @@ typedef enum {
   sfGeneric
 } StatusField;
 
-#define BRL_STATUS_CELLS_GENERIC 0XFF /* must be in BRL_firstStatusCell */
+#define GSC_MARKER 0XFF /* must be in GSC_FIRST */
 typedef enum {
-  BRL_firstStatusCell = 0,
+  GSC_FIRST = 0 /* must be first */,
 
   /* numbers */
-  BRL_GSC_BRLCOL /* screen column where left of braille window is */,
-  BRL_GSC_BRLROW /* screen row where top of braille window is */,
-  BRL_GSC_CSRCOL /* screen column where cursor is */,
-  BRL_GSC_CSRROW /* screen row where cursor is */,
-  BRL_GSC_SCRNUM /* virtual screen number */,
+  gscWindowColumn /* screen column where left of braille window is */,
+  gscWindowRow /* screen row where top of braille window is */,
+  gscCursorColumn /* screen column where cursor is */,
+  gscCursorRow /* screen row where cursor is */,
+  gscScreenNumber /* virtual screen number */,
 
   /* flags */
-  BRL_GSC_FREEZE /* frozen screen */,
-  BRL_GSC_DISPMD /* attributes display */,
-  BRL_GSC_SIXDOTS /* six-dot braille */,
-  BRL_GSC_SLIDEWIN /* sliding window */,
-  BRL_GSC_SKPIDLNS /* skip identical lines */,
-  BRL_GSC_SKPBLNKWINS /* skip blank windows */,
-  BRL_GSC_CSRVIS /* visible cursor */,
-  BRL_GSC_CSRHIDE /* hidden cursor */,
-  BRL_GSC_CSRTRK /* cursor tracking */,
-  BRL_GSC_CSRSIZE /* block cursor */,
-  BRL_GSC_CSRBLINK /* blinking cursor */,
-  BRL_GSC_ATTRVIS /* visible attributes underline */,
-  BRL_GSC_ATTRBLINK /* blinking attributes underline */,
-  BRL_GSC_CAPBLINK /* blinking capital letters */,
-  BRL_GSC_TUNES /* alert tunes */,
-  BRL_GSC_HELP /* help mode */,
-  BRL_GSC_INFO /* info mode */,
-  BRL_GSC_AUTOREPEAT /* autorepeat */,
-  BRL_GSC_AUTOSPEAK /* autospeak */,
+  gscFrozenScreen /* frozen screen */,
+  gscDisplayMode /* attributes display */,
+  gscTextStyle /* six-dot braille */,
+  gscSlidingWindow /* sliding window */,
+  gscSkipIdenticalLines /* skip identical lines */,
+  gscSkipBlankWindows /* skip blank windows */,
+  gscShowCursor /* visible cursor */,
+  gscHideCursor /* hidden cursor */,
+  gscTrackCursor /* cursor tracking */,
+  gscCursorStyle /* block cursor */,
+  gscBlinkingCursor /* blinking cursor */,
+  gscShowAttributes /* visible attributes underline */,
+  gscBlinkingAttributes /* blinking attributes underline */,
+  gscBlinkingCapitals /* blinking capital letters */,
+  gscAlertTunes /* alert tunes */,
+  gscHelpScreen /* help mode */,
+  gscInfoMode /* info mode */,
+  gscAutorepeat /* autorepeat */,
+  gscAutospeak /* autospeak */,
 
-  BRL_genericStatusCellCount
+  GSC_COUNT /* must be last */
 } BRL_GenericStatusCell;
 
 #ifdef __cplusplus

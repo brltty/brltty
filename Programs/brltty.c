@@ -339,7 +339,7 @@ showInfo (void) {
              ses->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
-             ses->showAttributes? 'a': 't',
+             ses->displayMode? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ',
@@ -370,7 +370,7 @@ showInfo (void) {
              ses->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
-             ses->showAttributes? 'a': 't',
+             ses->displayMode? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
@@ -569,7 +569,7 @@ toDifferentLine (
     ScreenCharacter characters1[width];
     int skipped = 0;
 
-    if ((isSameCharacter == isSameText) && ses->showAttributes) isSameCharacter = isSameAttributes;
+    if ((isSameCharacter == isSameText) && ses->displayMode) isSameCharacter = isSameAttributes;
     readScreen(from, ses->winy, width, 1, characters1);
 
     do {
@@ -1603,7 +1603,7 @@ doCommand:
         break;
 
       case BRL_CMD_DISPMD:
-        TOGGLE_NOPLAY(ses->showAttributes);
+        TOGGLE_NOPLAY(ses->displayMode);
         break;
       case BRL_CMD_SIXDOTS:
         TOGGLE_PLAY(prefs.textStyle);
@@ -2461,7 +2461,7 @@ doUpdate (UpdateData *upd) {
           contractedTrack = 0;
           contracted = 1;
 
-          if (ses->showAttributes || showAttributesUnderline()) {
+          if (ses->displayMode || showAttributesUnderline()) {
             int inputOffset;
             int outputOffset = 0;
             unsigned char attributes = 0;
@@ -2477,7 +2477,7 @@ doUpdate (UpdateData *upd) {
             }
             while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
 
-            if (ses->showAttributes) {
+            if (ses->displayMode) {
               for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
                 outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
               }
@@ -2540,7 +2540,7 @@ doUpdate (UpdateData *upd) {
         }
 
         /* convert to dots using the current translation table */
-        if (ses->showAttributes) {
+        if (ses->displayMode) {
           int row;
 
           for (row=0; row<brl.textRows; row+=1) {

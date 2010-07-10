@@ -1275,11 +1275,11 @@ static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
   if (model->statusCount) {
     unsigned char cells[model->statusCount];
-    if (s[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC) {
+    if (s[GSC_FIRST] == GSC_MARKER) {
       int i;
 
-      unsigned char values[BRL_genericStatusCellCount];
-      memcpy(values, s, BRL_genericStatusCellCount);
+      unsigned char values[GSC_COUNT];
+      memcpy(values, s, GSC_COUNT);
 
       for (i=0; i<model->statusCount; i++) {
         int code = model->statusCells[i];

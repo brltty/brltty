@@ -106,7 +106,7 @@ static int statusColumns;
 static int statusRows;
 static int statusCount;
 static unsigned char *statusCells = NULL;
-static unsigned char genericCells[BRL_genericStatusCellCount];
+static unsigned char genericCells[GSC_COUNT];
 
 typedef struct {
 #ifdef AF_LOCAL
@@ -912,7 +912,7 @@ dimensionsChanged (BrailleDisplay *brl) {
           if (statusCells) free(statusCells);
           statusCells = status;
           memset(statusCells, 0, count2);
-          memset(genericCells, 0, BRL_genericStatusCellCount);
+          memset(genericCells, 0, GSC_COUNT);
 
           brl->textColumns = brailleColumns;
           brl->textRows = brailleRows;
@@ -1104,13 +1104,13 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  int generic = status[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC;
+  int generic = status[GSC_FIRST] == GSC_MARKER;
   unsigned char *cells;
   int count;
 
   if (generic) {
     cells = genericCells;
-    count = BRL_genericStatusCellCount;
+    count = GSC_COUNT;
   } else {
     cells = statusCells;
     count = statusCount;
@@ -1118,38 +1118,38 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
   if (memcmp(status, cells, count) != 0) {
     if (generic) {
-      int all = cells[BRL_firstStatusCell] != BRL_STATUS_CELLS_GENERIC;
+      int all = cells[GSC_FIRST] != GSC_MARKER;
       int i;
 
       for (i=1; i<count; ++i) {
         unsigned char value = status[i];
         if (all || (value != cells[i])) {
           static const char *const names[] = {
-            [BRL_firstStatusCell] = NULL,
-            [BRL_GSC_BRLCOL] = "BRLCOL",
-            [BRL_GSC_BRLROW] = "BRLROW",
-            [BRL_GSC_CSRCOL] = "CSRCOL",
-            [BRL_GSC_CSRROW] = "CSRROW",
-            [BRL_GSC_SCRNUM] = "SCRNUM",
-            [BRL_GSC_FREEZE] = "FREEZE",
-            [BRL_GSC_DISPMD] = "DISPMD",
-            [BRL_GSC_SIXDOTS] = "SIXDOTS",
-            [BRL_GSC_SLIDEWIN] = "SLIDEWIN",
-            [BRL_GSC_SKPIDLNS] = "SKPIDLNS",
-            [BRL_GSC_SKPBLNKWINS] = "SKPBLNKWINS",
-            [BRL_GSC_CSRVIS] = "CSRVIS",
-            [BRL_GSC_CSRHIDE] = "CSRHIDE",
-            [BRL_GSC_CSRTRK] = "CSRTRK",
-            [BRL_GSC_CSRSIZE] = "CSRSIZE",
-            [BRL_GSC_CSRBLINK] = "CSRBLINK",
-            [BRL_GSC_ATTRVIS] = "ATTRVIS",
-            [BRL_GSC_ATTRBLINK] = "ATTRBLINK",
-            [BRL_GSC_CAPBLINK] = "CAPBLINK",
-            [BRL_GSC_TUNES] = "TUNES",
-            [BRL_GSC_HELP] = "HELP",
-            [BRL_GSC_INFO] = "INFO",
-            [BRL_GSC_AUTOREPEAT] = "AUTOREPEAT",
-            [BRL_GSC_AUTOSPEAK] = "AUTOSPEAK"
+            [GSC_FIRST] = NULL,
+            [gscWindowColumn] = "BRLCOL",
+            [gscWindowRow] = "BRLROW",
+            [gscCursorColumn] = "CSRCOL",
+            [gscCursorRow] = "CSRROW",
+            [gscScreenNumber] = "SCRNUM",
+            [gscFrozenScreen] = "FREEZE",
+            [gscDisplayMode] = "DISPMD",
+            [gscTextStyle] = "SIXDOTS",
+            [gscSlidingWindow] = "SLIDEWIN",
+            [gscSkipIdenticalLines] = "SKPIDLNS",
+            [gscSkipBlankWindows] = "SKPBLNKWINS",
+            [gscShowCursor] = "CSRVIS",
+            [gscHideCursor] = "CSRHIDE",
+            [gscTrackCursor] = "CSRTRK",
+            [gscCursorStyle] = "CSRSIZE",
+            [gscBlinkingCursor] = "CSRBLINK",
+            [gscShowAttributes] = "ATTRVIS",
+            [gscBlinkingAttributes] = "ATTRBLINK",
+            [gscBlinkingCapitals] = "CAPBLINK",
+            [gscAlertTunes] = "TUNES",
+            [gscHelpScreen] = "HELP",
+            [gscInfoMode] = "INFO",
+            [gscAutorepeat] = "AUTOREPEAT",
+            [gscAutospeak] = "AUTOSPEAK"
           };
           const int nameCount = ARRAY_COUNT(names);
 

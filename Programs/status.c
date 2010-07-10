@@ -122,7 +122,7 @@ static void
 renderStatusField_stateDots (unsigned char *cells) {
   *cells = (isFrozenScreen()    ? BRL_DOT1: 0) |
            (prefs.showCursor    ? BRL_DOT4: 0) |
-           (ses->showAttributes   ? BRL_DOT2: 0) |
+           (ses->displayMode    ? BRL_DOT2: 0) |
            (prefs.cursorStyle   ? BRL_DOT5: 0) |
            (prefs.alertTunes    ? BRL_DOT3: 0) |
            (prefs.blinkingCursor? BRL_DOT6: 0) |
@@ -133,7 +133,7 @@ renderStatusField_stateDots (unsigned char *cells) {
 static void
 renderStatusField_stateLetter (unsigned char *cells) {
   *cells = convertCharacterToDots(textTable,
-                                  ses->showAttributes? WC_C('a'):
+                                  ses->displayMode? WC_C('a'):
                                   isFrozenScreen()? WC_C('f'):
                                   ses->trackCursor? WC_C('t'):
                                   WC_C(' '));
@@ -159,31 +159,31 @@ renderStatusField_alphabeticCursorCoordinates (unsigned char *cells) {
 
 static void
 renderStatusField_generic (unsigned char *cells) {
-  cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
-  cells[BRL_GSC_BRLCOL] = SCR_COLUMN_NUMBER(ses->winx);
-  cells[BRL_GSC_BRLROW] = SCR_ROW_NUMBER(ses->winy);
-  cells[BRL_GSC_CSRCOL] = SCR_COLUMN_NUMBER(scr.posx);
-  cells[BRL_GSC_CSRROW] = SCR_ROW_NUMBER(scr.posy);
-  cells[BRL_GSC_SCRNUM] = scr.number;
-  cells[BRL_GSC_FREEZE] = isFrozenScreen();
-  cells[BRL_GSC_DISPMD] = ses->showAttributes;
-  cells[BRL_GSC_SIXDOTS] = prefs.textStyle;
-  cells[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
-  cells[BRL_GSC_SKPIDLNS] = prefs.skipIdenticalLines;
-  cells[BRL_GSC_SKPBLNKWINS] = prefs.skipBlankWindows;
-  cells[BRL_GSC_CSRVIS] = prefs.showCursor;
-  cells[BRL_GSC_CSRHIDE] = ses->hideCursor;
-  cells[BRL_GSC_CSRTRK] = ses->trackCursor;
-  cells[BRL_GSC_CSRSIZE] = prefs.cursorStyle;
-  cells[BRL_GSC_CSRBLINK] = prefs.blinkingCursor;
-  cells[BRL_GSC_ATTRVIS] = prefs.showAttributes;
-  cells[BRL_GSC_ATTRBLINK] = prefs.blinkingAttributes;
-  cells[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
-  cells[BRL_GSC_TUNES] = prefs.alertTunes;
-  cells[BRL_GSC_HELP] = isHelpScreen();
-  cells[BRL_GSC_INFO] = infoMode;
-  cells[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
-  cells[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
+  cells[GSC_FIRST] = GSC_MARKER;
+  cells[gscWindowColumn] = SCR_COLUMN_NUMBER(ses->winx);
+  cells[gscWindowRow] = SCR_ROW_NUMBER(ses->winy);
+  cells[gscCursorColumn] = SCR_COLUMN_NUMBER(scr.posx);
+  cells[gscCursorRow] = SCR_ROW_NUMBER(scr.posy);
+  cells[gscScreenNumber] = scr.number;
+  cells[gscFrozenScreen] = isFrozenScreen();
+  cells[gscDisplayMode] = ses->displayMode;
+  cells[gscTextStyle] = prefs.textStyle;
+  cells[gscSlidingWindow] = prefs.slidingWindow;
+  cells[gscSkipIdenticalLines] = prefs.skipIdenticalLines;
+  cells[gscSkipBlankWindows] = prefs.skipBlankWindows;
+  cells[gscShowCursor] = prefs.showCursor;
+  cells[gscHideCursor] = ses->hideCursor;
+  cells[gscTrackCursor] = ses->trackCursor;
+  cells[gscCursorStyle] = prefs.cursorStyle;
+  cells[gscBlinkingCursor] = prefs.blinkingCursor;
+  cells[gscShowAttributes] = prefs.showAttributes;
+  cells[gscBlinkingAttributes] = prefs.blinkingAttributes;
+  cells[gscBlinkingCapitals] = prefs.blinkingCapitals;
+  cells[gscAlertTunes] = prefs.alertTunes;
+  cells[gscHelpScreen] = isHelpScreen();
+  cells[gscInfoMode] = infoMode;
+  cells[gscAutorepeat] = prefs.autorepeat;
+  cells[gscAutospeak] = prefs.autospeak;
 }
 
 typedef struct {
@@ -269,7 +269,7 @@ static const StatusFieldEntry statusFieldTable[] = {
   ,
   [sfGeneric] = {
     .render = renderStatusField_generic,
-    .length = BRL_genericStatusCellCount
+    .length = GSC_COUNT
   }
 };
 
