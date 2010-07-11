@@ -5345,6 +5345,8 @@ BRLTTY supports the following braille displays:
       |EcoVario@
       |VarioConnect/BrailleConnect@
       |Refreshabraille@
+    BrailComm
+      |III@
     BrailleLite
       |18/40/M20/M40@
     BrailleNote
@@ -5464,6 +5466,7 @@ BRLTTY supports the following speech synthesizers:
     al|Alva@
     at|Albatross@
     ba|BrlAPI@
+    bc|BrailComm@
     bl|BrailleLite@
     bm|Baum (Native, HT, PB1, PB2)@
     bn|BrailleNote@

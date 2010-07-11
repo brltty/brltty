@@ -610,6 +610,9 @@ Albatross
 .B ba
 BrlAPI
 .TP 4
+.B bc
+BrailComm
+.TP 4
 .B bd
 Braudi
 .TP 4

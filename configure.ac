@@ -1166,6 +1166,7 @@ BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 test -n "${api_objects}" && {
    BRLTTY_BRAILLE_DRIVER([ba], [BrlAPI], [$(API_LIBS)])
 }
+BRLTTY_BRAILLE_DRIVER([bc], [BrailComm])
 BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
 BRLTTY_BRAILLE_DRIVER([bm], [Baum])

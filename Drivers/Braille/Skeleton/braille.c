@@ -20,6 +20,12 @@
 
 #include <stdio.h>
 
+//typedef enum {
+//  PARM_XXX,
+//  ...
+//} DriverParameter;
+//#define BRLPARMS "xxx", ...
+
 //#define BRL_STATUS_FIELDS sf...
 //#define BRL_HAVE_STATUS_CELLS
 //#define BRL_HAVE_PACKET_IO

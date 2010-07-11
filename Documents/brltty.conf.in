@@ -37,6 +37,7 @@
 #braille-driver	al	# Alva
 #braille-driver	at	# Albatross
 #braille-driver	ba	# BrlAPI
+#braille-driver	bc	# BrailComm
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# BrailleLite
 #braille-driver	bm	# Baum
