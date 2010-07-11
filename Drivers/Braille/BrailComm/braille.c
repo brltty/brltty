@@ -365,8 +365,8 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
-  ssize_t result = serialWriteData(serialDevice, packet, size);
-  return result != -1;
+  logOutputPacket(packet, size);
+  return serialWriteData(serialDevice, packet, size) != -1;
 }
 
 static int
@@ -374,8 +374,8 @@ writeLine (BrailleDisplay *brl) {
   unsigned char packet[2 + (brl->textColumns * 2)];
   unsigned char *byte = packet;
 
-  *byte++ = statusCells[gscCursorRow] + 1;
-  *byte++ = statusCells[gscCursorColumn] + 1;
+  *byte++ = statusCells[gscCursorRow];
+  *byte++ = statusCells[gscCursorColumn];
 
   {
     int i;
@@ -394,8 +394,8 @@ writeLocation (BrailleDisplay *brl) {
   unsigned char packet[2];
   unsigned char *byte = packet;
 
-  *byte++ = statusCells[gscCursorRow] + 1;
-  *byte++ = statusCells[gscCursorColumn] + 1;
+  *byte++ = statusCells[gscCursorRow];
+  *byte++ = statusCells[gscCursorColumn];
 
   return writePacket(brl, packet, byte-packet);
 }
