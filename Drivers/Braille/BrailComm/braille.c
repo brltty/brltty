@@ -34,6 +34,7 @@ typedef enum {
 
 static SerialDevice *serialDevice = NULL;
 static int serialBaud;
+static int charactersPerSecond;
 
 typedef enum {
   IPT_MINIMUM_LINE     =   1,
@@ -341,10 +342,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(serialDevice, serialBaud)) {
-      brl->textColumns = 80;
+      charactersPerSecond = serialBaud / 10;
 
       writeFunction = NULL;
       enqueueCommand(BRL_CMD_CSRTRK | BRL_FLG_TOGGLE_OFF);
+
+      brl->textColumns = 80;
       return 1;
     }
 
@@ -366,6 +369,7 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   logOutputPacket(packet, size);
+  brl->writeDelay += (size * 1000 / charactersPerSecond) + 1;
   return serialWriteData(serialDevice, packet, size) != -1;
 }
 
@@ -481,6 +485,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int length;
 
   if (context == BRL_CTX_WAITING) return BRL_CMD_NOOP;
+  if (writeFunction) return EOF;
 
   while ((length = readPacket(brl, &packet))) {
     if ((packet.data.type >= IPT_MINIMUM_LINE) &&
