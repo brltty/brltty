@@ -1510,7 +1510,15 @@ probeBaumDisplay (BrailleDisplay *brl) {
     if (errno != EAGAIN) break;
 
     if (identityCellCount) {
-      cellCount = identityCellCount;
+      /* Older models don't provide the actual cell count
+       * so it must be derived from the identity string.
+       */
+      switch ((cellCount = identityCellCount)) {
+        case 80: /* probably a Vario 80 */
+          cellCount += 4;
+          break;
+      }
+
       return 1;
     }
   } while (++probes < probeLimit);
