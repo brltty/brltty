@@ -166,6 +166,13 @@ BEGIN_KEY_NAME_TABLES(dm80p)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(vario80)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(front),
+  KEY_NAME_TABLE(back),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(pro)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(wheels),
@@ -193,6 +200,7 @@ END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(inka)
 DEFINE_KEY_TABLE(dm80p)
+DEFINE_KEY_TABLE(vario80)
 DEFINE_KEY_TABLE(pro)
 DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(vario)
@@ -200,6 +208,7 @@ DEFINE_KEY_TABLE(vario)
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(inka),
   &KEY_TABLE_DEFINITION(dm80p),
+  &KEY_TABLE_DEFINITION(vario80),
   &KEY_TABLE_DEFINITION(pro),
   &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(vario),
@@ -721,6 +730,7 @@ typedef union {
 typedef enum {
   BAUM_DEVICE_Inka,
   BAUM_DEVICE_DM80P,
+  BAUM_DEVICE_Vario80,
   BAUM_DEVICE_Modular,
   BAUM_DEVICE_Default
 } BaumDeviceType;
@@ -1207,6 +1217,11 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
     .writeAllCells = writeBaumCells_start
   }
   ,
+  [BAUM_DEVICE_Vario80] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(vario80),
+    .writeAllCells = writeBaumCells_all
+  }
+  ,
   [BAUM_DEVICE_Modular] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pro),
     .writeCellRange = writeBaumCells_modular
@@ -1515,7 +1530,8 @@ probeBaumDisplay (BrailleDisplay *brl) {
        */
       switch ((cellCount = identityCellCount)) {
         case 80: /* probably a Vario 80 */
-          cellCount += 4;
+           baumDeviceType = BAUM_DEVICE_Vario80;
+           cellCount += 4;
           break;
       }
 
