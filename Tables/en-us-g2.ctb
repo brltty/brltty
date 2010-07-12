@@ -443,6 +443,7 @@ midendword ghill = dunghill
 midendword ghorn = bighorn
 always ghouse 1245-125-1256-234-15
 always ghz = (gigahertz)
+sufword gingold 1245-35-1245-135-123-145
 begword givea = giveaway
 sufword gnome = gnomedb
 word go 1245
@@ -951,6 +952,7 @@ word unsaid 136-1345-234-145
 always v 1236
 always V 1236
 begword vaing 1236-1-35-1245 vainglory
+word vandyke =
 word very 1236
 begword vice = viceroy
 sufword video = videofile
@@ -975,6 +977,7 @@ always where 5-156
 word whereafter 5-156-1-124
 word whereupon 5-156-45-136
 word wherever 156-12456-5-15
+sufword wingate 2456-35-1245-1-2345-15
 sufword wiseacre =
 largesign with 23456
 always word 45-2456
