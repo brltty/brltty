@@ -60,29 +60,29 @@ BEGIN_KEY_NAME_TABLE(command)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(front)
-  KEY_NAME_ENTRY(BM_KEY_FRONT+0, "Front10"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+1, "Front9"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+2, "Front8"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+3, "Front7"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+4, "Front6"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+5, "Front5"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+6, "Front4"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+7, "Front3"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+8, "Front2"),
-  KEY_NAME_ENTRY(BM_KEY_FRONT+9, "Front1"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+0, "Front1"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+1, "Front2"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+2, "Front3"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+3, "Front4"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+4, "Front5"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+5, "Front6"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+6, "Front7"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+7, "Front8"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+8, "Front9"),
+  KEY_NAME_ENTRY(BM_KEY_FRONT+9, "Front10"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(back)
-  KEY_NAME_ENTRY(BM_KEY_BACK+0, "Back10"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+1, "Back9"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+2, "Back8"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+3, "Back7"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+4, "Back6"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+5, "Back5"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+6, "Back4"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+7, "Back3"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+8, "Back2"),
-  KEY_NAME_ENTRY(BM_KEY_BACK+9, "Back1"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+0, "Back1"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+1, "Back2"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+2, "Back3"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+3, "Back4"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+4, "Back5"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+5, "Back6"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+6, "Back7"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+7, "Back8"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+8, "Back9"),
+  KEY_NAME_ENTRY(BM_KEY_BACK+9, "Back10"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(entry)
@@ -1531,8 +1531,8 @@ probeBaumDisplay (BrailleDisplay *brl) {
        */
       switch ((cellCount = identityCellCount)) {
         case 80: /* probably a Vario 80 */
-           baumDeviceType = BAUM_DEVICE_Vario80;
-           cellCount += 4;
+          baumDeviceType = BAUM_DEVICE_Vario80;
+          cellCount += 4;
           break;
       }
 
@@ -1616,15 +1616,21 @@ updateBaumKeys (BrailleDisplay *brl) {
                              BM_KEY_BACK, 6);
         continue;
 
-      case BAUM_RSP_Front10:
-        updateNavigationKeys(packet.data.values.front10,
-                             BM_KEY_FRONT, 10);
+      case BAUM_RSP_Front10: {
+        unsigned char keys[2];
+        keys[0] = packet.data.values.front10[1];
+        keys[1] = packet.data.values.front10[0];
+        updateNavigationKeys(keys, BM_KEY_FRONT, 10);
         continue;
+      }
 
-      case BAUM_RSP_Back10:
-        updateNavigationKeys(packet.data.values.back10,
-                             BM_KEY_BACK, 10);
+      case BAUM_RSP_Back10: {
+        unsigned char keys[2];
+        keys[0] = packet.data.values.back10[1];
+        keys[1] = packet.data.values.back10[0];
+        updateNavigationKeys(keys, BM_KEY_BACK, 10);
         continue;
+      }
 
       case BAUM_RSP_EntryKeys:
         updateNavigationKeys(packet.data.values.entryKeys,
