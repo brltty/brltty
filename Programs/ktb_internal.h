@@ -77,10 +77,15 @@ typedef struct {
   unsigned char flags;
 } KeyBinding;
 
+typedef enum {
+  HKF_HIDDEN = 0X01
+} HotkeyFlag;
+
 typedef struct {
   KeyValue keyValue;
   int pressCommand;
   int releaseCommand;
+  unsigned char flags;
 } HotkeyEntry;
 
 typedef struct {

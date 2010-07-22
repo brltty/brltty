@@ -246,8 +246,11 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
     unsigned int count = ctx->hotkeyCount;
 
     while (count) {
-      if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", hotkey->pressCommand)) return 0;
-      if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", hotkey->releaseCommand)) return 0;
+      if (!(hotkey->flags & HKF_HIDDEN)) {
+        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", hotkey->pressCommand)) return 0;
+        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", hotkey->releaseCommand)) return 0;
+      }
+
       hotkey += 1, count -= 1;
     }
   }

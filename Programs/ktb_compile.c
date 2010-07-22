@@ -853,6 +853,7 @@ processHotkeyOperands (DataFile *file, void *data) {
 
   if (!ctx) return 0;
   memset(&hotkey, 0, sizeof(hotkey));
+  if (hideBindings(ktd)) hotkey.flags |= HKF_HIDDEN;
 
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
     if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
