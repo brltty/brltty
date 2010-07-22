@@ -218,26 +218,36 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 }
 
 static int
+listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, int command) {
+  if (command != BRL_CMD_NOOP) {
+    if ((command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+      const KeyContext *c = getKeyContext(lgd->keyTable, (BRL_CTX_DEFAULT + (command & BRL_MSK_ARG)));
+      if (!c) return 0;
+      if (!putUtf8String(lgd, "switch to ")) return 0;
+      if (!putCharacterString(lgd, c->title)) return 0;
+    } else {
+      if (!putCommandDescription(lgd, command)) return 0;
+    }
+
+    if (!putCharacterString(lgd, WS_C(": "))) return 0;
+    if (!putUtf8String(lgd, event)) return 0;
+    if (!putCharacter(lgd, WC_C(' '))) return 0;
+    if (!putKeyName(lgd, keyValue)) return 0;
+    if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
+static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
   {
     const HotkeyEntry *hotkey = ctx->hotkeyTable;
     unsigned int count = ctx->hotkeyCount;
 
     while (count) {
-      if (hotkey->pressCommand != BRL_CMD_NOOP) {
-        if (!putCommandDescription(lgd, hotkey->pressCommand)) return 0;
-        if (!putCharacterString(lgd, WS_C(": press "))) return 0;
-        if (!putKeyName(lgd, &hotkey->keyValue)) return 0;
-        if (!endLine(lgd)) return 0;
-      }
-
-      if (hotkey->releaseCommand != BRL_CMD_NOOP) {
-        if (!putCommandDescription(lgd, hotkey->releaseCommand)) return 0;
-        if (!putCharacterString(lgd, WS_C(": release "))) return 0;
-        if (!putKeyName(lgd, &hotkey->keyValue)) return 0;
-        if (!endLine(lgd)) return 0;
-      }
-
+      if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", hotkey->pressCommand)) return 0;
+      if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", hotkey->releaseCommand)) return 0;
       hotkey += 1, count -= 1;
     }
   }
@@ -263,8 +273,9 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 
         if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
           const KeyContext *c = getKeyContext(lgd->keyTable, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+          if (!c) return 0;
 
-          if (c) {
+          {
             size_t length = lgd->lineLength - keysOffset;
             wchar_t keys[length + 1];
 
