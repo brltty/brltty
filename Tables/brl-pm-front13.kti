@@ -122,7 +122,6 @@ bind Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
 bind Dot2+Dot3+Dot5 SIXDOTS+on
 bind Dot2+Dot3+Dot6 SIXDOTS+off
 
-assign switches
 include brl-pm-routing.kti
 
 assign toggleOff Dot7

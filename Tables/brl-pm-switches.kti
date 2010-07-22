@@ -18,109 +18,163 @@
 
 # This key subtable is for Papenmeier displays which have switches.
 
-bind LeftSwitchRear+BarUp1 PRDIFLN
-bind LeftSwitchRear+BarDown1 NXDIFLN
-bind LeftSwitchRear+BarUp2 ATTRUP
-bind LeftSwitchRear+BarDown2 ATTRDN
-bind LeftSwitchRear+BarLeft1 PRPROMPT
-bind LeftSwitchRear+BarRight1 NXPROMPT
-bind LeftSwitchRear+BarLeft2 PRPGRPH
-bind LeftSwitchRear+BarRight2 NXPGRPH
-
 hide on
-bind LeftSwitchRear+BarUp1+BarUp2 ATTRUP
-bind LeftSwitchRear+BarDown1+BarDown2 ATTRDN
-bind LeftSwitchRear+BarLeft1+BarLeft2 PRPGRPH
-bind LeftSwitchRear+BarRight1+BarRight2 NXPGRPH
+hotkey LeftSwitchRear CONTEXT+1 NOOP
+hotkey LeftSwitchFront CONTEXT+2 NOOP
+hotkey RightSwitchRear CONTEXT+3 NOOP
+hotkey RightSwitchFront CONTEXT+4 NOOP
 hide off
 
-bind RightSwitchRear+BarUp1 KEY_CURSOR_UP
-bind RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
-bind RightSwitchRear+BarUp2 KEY_PAGE_UP
-bind RightSwitchRear+BarDown2 KEY_PAGE_DOWN
-bind RightSwitchRear+BarLeft1 FWINLT+route
-bind RightSwitchRear+BarRight1 FWINRT+route
-bind RightSwitchRear+BarLeft2 LNBEG+route
-bind RightSwitchRear+BarRight2 LNEND+route
+
+context 1 LeftSwitchRear - Advanced Vertical Navigation
 
 hide on
-bind RightSwitchRear+BarUp1+BarUp2 KEY_PAGE_UP
-bind RightSwitchRear+BarDown1+BarDown2 KEY_PAGE_DOWN
-bind RightSwitchRear+BarLeft1+BarLeft2 LNBEG+route
-bind RightSwitchRear+BarRight1+BarRight2 LNEND+route
+hotkey LeftSwitchRear NOOP CONTEXT+0
+hotkey RightSwitchRear CONTEXT+5 NOOP
+hotkey RightSwitchFront CONTEXT+6 NOOP
 hide off
 
-bind LeftSwitchRear+RightSwitchRear+BarUp1 KEY_CURSOR_UP
-bind LeftSwitchRear+RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
-bind LeftSwitchRear+RightSwitchRear+BarUp2 KEY_PAGE_UP
-bind LeftSwitchRear+RightSwitchRear+BarDown2 KEY_PAGE_DOWN
-bind LeftSwitchRear+RightSwitchRear+BarLeft1 KEY_CURSOR_LEFT
-bind LeftSwitchRear+RightSwitchRear+BarRight1 KEY_CURSOR_RIGHT
-bind LeftSwitchRear+RightSwitchRear+BarLeft2 KEY_HOME
-bind LeftSwitchRear+RightSwitchRear+BarRight2 KEY_END
+bind BarUp1 PRDIFLN
+bind BarDown1 NXDIFLN
+bind BarUp2 ATTRUP
+bind BarDown2 ATTRDN
+bind BarLeft1 PRPROMPT
+bind BarRight1 NXPROMPT
+bind BarLeft2 PRPGRPH
+bind BarRight2 NXPGRPH
 
 hide on
-bind LeftSwitchRear+RightSwitchRear+BarUp1+BarUp2 KEY_PAGE_UP
-bind LeftSwitchRear+RightSwitchRear+BarDown1+BarDown2 KEY_PAGE_DOWN
-bind LeftSwitchRear+RightSwitchRear+BarLeft1+BarLeft2 KEY_HOME
-bind LeftSwitchRear+RightSwitchRear+BarRight1+BarRight2 KEY_END
+bind BarUp1+BarUp2 ATTRUP
+bind BarDown1+BarDown2 ATTRDN
+bind BarLeft1+BarLeft2 PRPGRPH
+bind BarRight1+BarRight2 NXPGRPH
 hide off
 
-bind LeftSwitchFront+BarUp1 PRSEARCH
-bind LeftSwitchFront+BarDown1 NXSEARCH
-bind LeftSwitchFront+BarUp2 HELP
-bind LeftSwitchFront+BarDown2 LEARN
-bind LeftSwitchFront+BarLeft1 CHRLT
-bind LeftSwitchFront+BarRight1 CHRRT
-bind LeftSwitchFront+BarLeft2 HWINLT
-bind LeftSwitchFront+BarRight2 HWINRT
+
+context 2 LeftSwitchFront - Specialized Navigation
 
 hide on
-bind LeftSwitchFront+BarUp1+BarUp2 HELP
-bind LeftSwitchFront+BarDown1+BarDown2 LEARN
-bind LeftSwitchFront+BarLeft1+BarLeft2 HWINLT
-bind LeftSwitchFront+BarRight1+BarRight2 HWINRT
+hotkey LeftSwitchFront NOOP CONTEXT+0
+hotkey RightSwitchRear CONTEXT+7 NOOP
+hotkey RightSwitchFront CONTEXT+8 NOOP
 hide off
 
-bind RightSwitchFront+BarUp1 MENU_PREV_ITEM
-bind RightSwitchFront+BarDown1 MENU_NEXT_ITEM
-bind RightSwitchFront+BarUp2 MENU_FIRST_ITEM
-bind RightSwitchFront+BarDown2 MENU_LAST_ITEM
-bind RightSwitchFront+BarLeft1 MENU_PREV_SETTING
-bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
-bind RightSwitchFront+BarLeft2 PREFLOAD
-bind RightSwitchFront+BarRight2 PREFSAVE
+bind BarUp1 PRSEARCH
+bind BarDown1 NXSEARCH
+bind BarUp2 HELP
+bind BarDown2 LEARN
+bind BarLeft1 CHRLT
+bind BarRight1 CHRRT
+bind BarLeft2 HWINLT
+bind BarRight2 HWINRT
 
 hide on
-bind RightSwitchFront+BarUp1+BarUp2 MENU_FIRST_ITEM
-bind RightSwitchFront+BarDown1+BarDown2 MENU_LAST_ITEM
-bind RightSwitchFront+BarLeft1+BarLeft2 PREFLOAD
-bind RightSwitchFront+BarRight1+BarRight2 PREFSAVE
+bind BarUp1+BarUp2 HELP
+bind BarDown1+BarDown2 LEARN
+bind BarLeft1+BarLeft2 HWINLT
+bind BarRight1+BarRight2 HWINRT
 hide off
 
+
+context 3 RightSwitchRear - Content-based Navigation
+
 hide on
+hotkey RightSwitchRear NOOP CONTEXT+0
+hotkey LeftSwitchRear CONTEXT+5 NOOP
+hotkey LeftSwitchFront CONTEXT+7 NOOP
+hide off
 
-assign switches LeftSwitchRear+
-include brl-pm-keys.kti
+bind BarUp1 KEY_CURSOR_UP
+bind BarDown1 KEY_CURSOR_DOWN
+bind BarUp2 KEY_PAGE_UP
+bind BarDown2 KEY_PAGE_DOWN
+bind BarLeft1 FWINLT+route
+bind BarRight1 FWINRT+route
+bind BarLeft2 LNBEG+route
+bind BarRight2 LNEND+route
 
-assign switches LeftSwitchFront+
-include brl-pm-keys.kti
+hide on
+bind BarUp1+BarUp2 KEY_PAGE_UP
+bind BarDown1+BarDown2 KEY_PAGE_DOWN
+bind BarLeft1+BarLeft2 LNBEG+route
+bind BarRight1+BarRight2 LNEND+route
+hide off
 
-assign switches RightSwitchRear+
-include brl-pm-keys.kti
 
-assign switches RightSwitchFront+
-include brl-pm-keys.kti
+context 4 RightSwitchFront - Function Key Emulation
 
-assign switches LeftSwitchRear+RightSwitchRear+
-include brl-pm-keys.kti
+hide on
+hotkey RightSwitchFront NOOP CONTEXT+0
+hotkey LeftSwitchRear CONTEXT+6 NOOP
+hotkey LeftSwitchFront CONTEXT+8 NOOP
+hide off
 
-assign switches LeftSwitchRear+RightSwitchFront+
-include brl-pm-keys.kti
+bind BarUp1 KEY_CURSOR_UP
+bind BarDown1 KEY_CURSOR_DOWN
+bind BarUp2 KEY_PAGE_UP
+bind BarDown2 KEY_PAGE_DOWN
+bind BarLeft1 KEY_CURSOR_LEFT
+bind BarRight1 KEY_CURSOR_RIGHT
+bind BarLeft2 KEY_HOME
+bind BarRight2 KEY_END
 
-assign switches LeftSwitchFront+RightSwitchRear+
-include brl-pm-keys.kti
+hide on
+bind BarUp1+BarUp2 KEY_PAGE_UP
+bind BarDown1+BarDown2 KEY_PAGE_DOWN
+bind BarLeft1+BarLeft2 KEY_HOME
+bind BarRight1+BarRight2 KEY_END
+hide off
 
-assign switches LeftSwitchFront+RightSwitchFront+
-include brl-pm-keys.kti
 
+context 5 LeftSwitchRear+RightSwitchRear - Unused
+
+hide on
+hotkey LeftSwitchRear NOOP CONTEXT+3
+hotkey RightSwitchRear NOOP CONTEXT+1
+hide off
+
+
+context 6 LeftSwitchRear+RightSwitchFront - Unused
+
+hide on
+hotkey LeftSwitchRear NOOP CONTEXT+4
+hotkey RightSwitchFront NOOP CONTEXT+1
+hide off
+
+
+context 7 LeftSwitchFront+RightSwitchRear - Unused
+
+hide on
+hotkey LeftSwitchFront NOOP CONTEXT+3
+hotkey RightSwitchRear NOOP CONTEXT+2
+hide off
+
+
+context 8 LeftSwitchFront+RightSwitchFront - Unused
+
+hide on
+hotkey LeftSwitchFront NOOP CONTEXT+4
+hotkey RightSwitchRear NOOP CONTEXT+2
+hide off
+
+
+context menu
+
+bind BarUp1 MENU_PREV_ITEM
+bind BarDown1 MENU_NEXT_ITEM
+bind BarUp2 MENU_FIRST_ITEM
+bind BarDown2 MENU_LAST_ITEM
+bind BarLeft1 MENU_PREV_SETTING
+bind BarRight1 MENU_NEXT_SETTING
+bind BarLeft2 PREFLOAD
+bind BarRight2 PREFSAVE
+
+hide on
+bind BarUp1+BarUp2 MENU_FIRST_ITEM
+bind BarDown1+BarDown2 MENU_LAST_ITEM
+bind BarLeft1+BarLeft2 PREFLOAD
+bind BarRight1+BarRight2 PREFSAVE
+hide off
+
+
+context default

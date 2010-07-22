@@ -54,7 +54,6 @@ bind Braille+!RoutingKey1 NXINDENT
 
 bind Function+Attribute PASTE
 
-assign switches
 include brl-pm-routing.kti
 
 assign toggleOff Function
