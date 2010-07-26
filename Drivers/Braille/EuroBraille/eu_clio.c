@@ -554,13 +554,14 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
     addByte:
       if (offset < sizeof(buffer))
         {
-          buffer[offset++] = byte;
+          buffer[offset] = byte;
         }
       else
         {
           if (offset == sizeof(buffer)) logTruncatedPacket(buffer, offset);
           logDiscardedByte(byte);
         }
+      offset += 1;
 
       if (!escaped && (byte == EOT))
         {

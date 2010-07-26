@@ -24,6 +24,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <errno.h>
 
 #include "log.h"
 #include "timing.h"
@@ -456,63 +457,76 @@ void	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 
 ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
-  static char buffer[READ_BUFFER_LENGTH];
-  static int pos = 0;
+  unsigned char *buffer = packet;
+  int offset = 0;
+  int length = 3;
 
-  int	i; 
-  int end=-1; int start=-1; 
-  int framelen = 0;
-  int ret = 0;
-  int bytesRead = 0;
-
-  if (!iop || !packet || size < 4)
-    return (-1);
-
-  while( ((READ_BUFFER_LENGTH - pos)>0) ? ((ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos, 0))>0) : 0)
-//  if ((READ_BUFFER_LENGTH - pos)>0) ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
-  {
-    bytesRead+=ret;
-    pos+=ret;
-  }
-
-
-  if (ret < 0 && pos==0)
-    return (-1);
-
-  if(pos==0) {
-    return (0);
-  }
-
-  for (i = 0; i < pos && start==-1; i++)
+  if (size < length)
     {
-      if (buffer[i] == STX) start = i;
-    }
-  if (start!=-1 && start+2<pos)
-    {
-      framelen = buffer[start + 1] * 256 + buffer[start + 2];
-      if (start+framelen+1<pos) 
-        if (buffer[start+framelen+1] == ETX) end = start+framelen+1;
+      LogPrint(LOG_WARNING, "input buffer too small");
+      return 0;
     }
 
-  if (start != -1 && end != -1 && size > framelen + 2)
+  while (1)
     {
-      memcpy(packet, buffer + start, framelen + 2);
-      memmove(buffer, buffer + end + 1, pos - framelen - 2);
-      pos -= (framelen + 2);
-      return (1);
+      int started = offset > 0;
+      unsigned char byte;
+      ssize_t result = iop->read(brl, &byte, 1, started);
+
+      if (!result)
+        {
+          errno = EAGAIN;
+          result = -1;
+        }
+
+      if (result == -1)
+        {
+          if (started) logPartialPacket(buffer, offset);
+          return (errno == EAGAIN)? 0: -1;
+        }
+
+      switch (offset)
+        {
+          case 0:
+            if (byte != STX)
+              {
+                logIgnoredByte(byte);
+                continue;
+              }
+            break;
+
+          case 2:
+            length = ((buffer[1] << 8) | byte) + 2;
+            break;
+
+          default:
+            break;
+        }
+
+      if (offset < length)
+        {
+          buffer[offset] = byte;
+        }
+      else
+        {
+          if (offset == length) logTruncatedPacket(buffer, offset);
+          logDiscardedByte(byte);
+        }
+
+      if (++offset == length)
+        {
+          if (byte != ETX)
+            {
+              logCorruptPacket(buffer, offset);
+              offset = 0;
+              length = 3;
+              continue;
+            }
+
+          logInputPacket(buffer, offset);
+          return 1;
+        }
     }
-      else if(pos==bytesRead)
-    {
-      pos=0;
-      return (0);
-    }
-      else if(pos>bytesRead)
-    {
-      memmove(buffer,buffer+(pos-bytesRead),bytesRead);
-      pos = bytesRead;
-      return (0);
-    }
-  return (0);
 }
 
 
@@ -528,5 +542,6 @@ ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t siz
   memcpy(buf + 3, packet, size);
   buf[sizeof(buf)-1] = ETX;
   updateWriteDelay(brl, sizeof(buf) );
+  logOutputPacket(buf, sizeof(buf));
   return iop->write(brl, buf, sizeof(buf));
 }
