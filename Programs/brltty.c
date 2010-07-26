@@ -2725,9 +2725,11 @@ message (const char *mode, const char *string, short flags) {
         int i;
         for (i=0; i<messageDelay; i+=updateInterval) {
           int command;
+
           testProgramTermination();
           drainBrailleOutput(&brl, updateInterval);
-          while ((command = readCommand(BRL_CTX_WAITING)) == BRL_CMD_NOOP);
+
+          command = readCommand(BRL_CTX_WAITING);
           if (command != EOF) break;
         }
       }
