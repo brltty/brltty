@@ -348,6 +348,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       {
         static const int initialCommands[] = {
+          BRL_CMD_TUNES | BRL_FLG_TOGGLE_OFF,
           BRL_CMD_CSRTRK | BRL_FLG_TOGGLE_OFF,
           BRL_CMD_CSRVIS | BRL_FLG_TOGGLE_OFF,
           BRL_CMD_ATTRVIS | BRL_FLG_TOGGLE_OFF,
