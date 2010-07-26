@@ -44,7 +44,7 @@ typedef struct	s_eubrl_io
 {
   int			(*init)(BrailleDisplay *brl, char **params, const char* device);
   int			(*close)(BrailleDisplay *brl);
-  ssize_t		(*read)(BrailleDisplay *brl, void *buffer, size_t bufsize);
+  ssize_t		(*read)(BrailleDisplay *brl, void *buffer, size_t bufsize, int wait);
   ssize_t		(*write)(BrailleDisplay *brl, const void *buf, size_t size);
   
   t_eubrl_iotype	ioType;
@@ -58,7 +58,7 @@ typedef struct	s_eubrl_io
 /* USB IO */
 int		eubrl_usbInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_usbClose(BrailleDisplay *brl);
-ssize_t		eubrl_usbRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_usbRead(BrailleDisplay *brl, void *buf, size_t size, int wait);
 ssize_t		eubrl_usbWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 
@@ -66,20 +66,20 @@ ssize_t		eubrl_usbWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 int		eubrl_serialInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_serialClose(BrailleDisplay *brl);
-ssize_t		eubrl_serialRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_serialRead(BrailleDisplay *brl, void *buf, size_t size, int wait);
 ssize_t		eubrl_serialWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 /* Bluetooth IO */
 int		eubrl_bluetoothInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_bluetoothClose(BrailleDisplay *brl);
-ssize_t		eubrl_bluetoothRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_bluetoothRead(BrailleDisplay *brl, void *buf, size_t size, int wait);
 ssize_t		eubrl_bluetoothWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 /* Ethernet IO */
 
 int		eubrl_netInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_netClose(BrailleDisplay *brl);
-ssize_t		eubrl_netRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_netRead(BrailleDisplay *brl, void *buf, size_t size, int wait);
 ssize_t		eubrl_netWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 #endif /* __EU_IO_H__ */

@@ -56,9 +56,10 @@ eubrl_serialClose (BrailleDisplay *brl) {
 }
 
 ssize_t
-eubrl_serialRead (BrailleDisplay *brl, void *buf, size_t length) 
+eubrl_serialRead (BrailleDisplay *brl, void *buf, size_t length, int wait) 
 {
-  return serialReadData(serialDevice, buf, length, 0, 20);
+  int timeout = 20;
+  return serialReadData(serialDevice, buf, length, (wait? timeout: 0), timeout);
 }
 
 ssize_t

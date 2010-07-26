@@ -75,16 +75,11 @@ eubrl_usbClose (BrailleDisplay *brl)
 
 
 ssize_t
-eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length) 
+eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length, int wait) 
 {
-  ssize_t count=0;
+  int timeout = 20;
+  ssize_t count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, (wait? timeout: 0), timeout);
 
-  if(length>=USB_PACKET_SIZE) count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, USB_PACKET_SIZE, 0,2);
-  if(count>0 && count<USB_PACKET_SIZE)
-    {
-      LogPrint(LOG_DEBUG,"eu: We received a too small packet");
-      return (-1);
-    }
   return count;
 }
 

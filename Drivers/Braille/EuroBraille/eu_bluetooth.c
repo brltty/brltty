@@ -43,9 +43,10 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
 }
 
 ssize_t
-eubrl_bluetoothRead (BrailleDisplay *brl, void *buffer, size_t length)
+eubrl_bluetoothRead (BrailleDisplay *brl, void *buffer, size_t length, int wait)
 {
-  return bthReadData(bluetoothConnection, buffer, length, 0, 10);
+  int timeout = 10;
+  return bthReadData(bluetoothConnection, buffer, length, (wait? timeout: 0), timeout);
 }
 
 ssize_t

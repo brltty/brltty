@@ -256,15 +256,19 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
 }
 
 ssize_t
-eubrl_netRead(BrailleDisplay *brl, void *buf, size_t bufsize)
+eubrl_netRead(BrailleDisplay *brl, void *buf, size_t bufsize, int wait)
 {
   if (connectionStatus != NET_CONNECTED)
     {
+      errno = ENOTCONN;
       LogPrint(LOG_ERR, "EuroBraille: NET read while not connected.");
       return (-1);
     }
-  ssize_t nBytes = readData(realConnectionFd, buf, bufsize, 0, 0);
-  return nBytes;
+  else
+    {
+      int timeout = 10;
+      return readData(realConnectionFd, buf, bufsize, (wait? timeout: 0), timeout);
+    }
 }
 
 ssize_t

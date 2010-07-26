@@ -468,7 +468,7 @@ ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
   if (!iop || !packet || size < 4)
     return (-1);
 
-  while( ((READ_BUFFER_LENGTH - pos)>0) ? ((ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos))>0) : 0)
+  while( ((READ_BUFFER_LENGTH - pos)>0) ? ((ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos, 0))>0) : 0)
 //  if ((READ_BUFFER_LENGTH - pos)>0) ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
   {
     bytesRead+=ret;

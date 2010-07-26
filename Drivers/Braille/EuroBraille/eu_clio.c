@@ -24,6 +24,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <errno.h>
 
 #include "log.h"
 #include "timing.h"
@@ -94,6 +95,7 @@ static t_eubrl_io*	iop = NULL; /* I/O methods */
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
+static int previousPacketNumber;
 static const struct s_clioModelType		clioModels[] =
   {
     {UNKNOWN, "", ""},
@@ -355,6 +357,9 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
     { /* Succesfully identified hardware. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
+
+      previousPacketNumber = -1;
+
       LogPrint(LOG_INFO, "eu: %s connected.",
 	       clioModels[brlModel].modelDesc);
       return (1);
@@ -479,105 +484,127 @@ int	clio_hasLcdSupport(BrailleDisplay *brl)
 
 ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
-  static char 		buffer[READ_BUFFER_LENGTH];
-  static int		pos = 0;
-  static char		prevPktNbr = 0;
-  int		parity = 0;
-  int		ret, i, j, start, end, framelen = 0, otherchars;
-  char		*tmpres = NULL;
-  
-  if (!iop || !packet || size < 3)
-    return (-1);
-  ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
-  if (ret < 0)
-    return (-1);
-  for (i = 0, start = -1, end = -1, framelen = 0, otherchars = 0;
-       i < pos + ret && (start == -1 || end == -1); 
-       i++)
-    {
-      if (buffer[i] == SOH && start == -1) /* packet start detection */
-	start = i;
-      /* Packet end detection */
-      if (start != -1 && end == -1 && buffer[i] == EOT &&
-	  (buffer[i - 1] != DLE || 
-	   (buffer[i - 1] == DLE && buffer[i - 2] == DLE)))
-	end = i;
-      /* Frame length count */
-      if (start != -1 || end != -1)
-	framelen++;
-      if ((start == -1 && end == -1) || (start != -1 && end != -1))
-	otherchars++;
-    }
-  if (end != -1)
-    otherchars--;
-  pos += ret;
-  /* Skipping trailing chars if no packet has been read */
-  if (start == -1 && end == -1)
-    {
-      pos -= otherchars;
-      return 0;
-    }
-  /* If we found beginning of the packet but not the end */
-  if (end == -1)
-    return 0;
+  unsigned char buffer[size + 4];
+  int offset = 0;
+  int escape = 0;
 
-  /* ignoring packets received twice **/
-  if ((needsEscape[((unsigned char)buffer[end - 1])] != 1
-       && buffer[end - 2] == prevPktNbr)
-      || (needsEscape[((unsigned char)buffer[end - 1])] == 1 
-	  && buffer[end - 3] == prevPktNbr))
+  while (1)
     {
-      memmove(buffer, buffer + end + 1, pos - framelen);
-      pos -= framelen + otherchars;
-      return 0;
-    }
-  /* Updating pprevPktNbr */
-  if (needsEscape[((unsigned char)buffer[end - 1])] != 1)
-    prevPktNbr = buffer[end - 2];
-  else
-    prevPktNbr = buffer[end - 3];
+      int started = offset > 0;
+      int escaped = 0;
+      unsigned char byte;
+      ssize_t result = iop->read(brl, &byte, 1, started);
 
-  if ((tmpres = malloc(size + 1)) == NULL)
-    {
-      LogPrint(LOG_ERR, "clio: Failed to allocate memory.");
-      return (-1);
-    }
-  if (start != -1 && end != -1
-      && size >= framelen - 2)
-    {
-      /* parity calculation and preparing resultin buffer */
-      for (parity = 0, i = start + 1, j = 0; 
-	   i < end - 1 && j < size; 
-	   i++)
-	{
-	  if (buffer[i] != DLE || buffer[i - 1] == DLE)
-	    {
-	      tmpres[j] = buffer[i];
-	      j++;
-	      parity ^= buffer[i];
-	    }
-	}
-      /* Parity check */
-      if (parity != buffer[end - 1])
-	{
-	  sendbyte(brl, NAK);
-	  sendbyte(brl, PRT_E_PAR);
-	  prevPktNbr = 0;
-	  pos = 0;
-	  free(tmpres);
-	  return (0);
-	}
+      if (!result)
+        {
+          errno = EAGAIN;
+          result = -1;
+        }
+
+      if (result == -1)
+        {
+          if (started) logPartialPacket(buffer, offset);
+          return (errno == EAGAIN)? 0: -1;
+        }
+
+      if (escape)
+        {
+          escape = 0;
+          escaped = 1;
+        }
+      else if (byte == DLE)
+        {
+          escape = 1;
+          continue;
+        }
+
+      if (!escaped)
+        {
+          switch (byte)
+            {
+              case SOH:
+                if (started)
+                  {
+                    logShortPacket(buffer, offset);
+                    offset = 1;
+                    continue;
+                  }
+                goto addByte;
+
+              case EOT:
+                break;
+
+              default:
+                if (needsEscape[byte])
+                  {
+                    if (started) logShortPacket(buffer, offset);
+                    offset = 0;
+                    continue;
+                  }
+                break;
+            }
+        }
+
+      if (!started)
+        {
+          logIgnoredByte(byte);
+          continue;
+        }
+
+    addByte:
+      if (offset < sizeof(buffer))
+        {
+          buffer[offset++] = byte;
+        }
       else
-	{
-	  memcpy(packet, tmpres, j - 1);
-	  memmove(buffer, buffer + end + 1, pos - framelen);
-	  pos -= framelen + otherchars;
-	  sendbyte(brl, ACK);
-	  free(tmpres);
-	  return (1); /* success */
-	}
+        {
+          if (offset == sizeof(buffer)) logTruncatedPacket(buffer, offset);
+          logDiscardedByte(byte);
+        }
+
+      if (!escaped && (byte == EOT))
+        {
+          if (offset > sizeof(buffer))
+            {
+              offset = 0;
+              continue;
+            }
+
+          logInputPacket(buffer, offset);
+          offset -= 1; /* remove EOT */
+
+          {
+            unsigned char parity = 0;
+
+            {
+              int i;
+              for (i=1; i<offset; i+=1) parity ^= buffer[i];
+            }
+
+            if (parity)
+              {
+                sendbyte(brl, NAK);
+                sendbyte(brl, PRT_E_PAR);
+
+                offset = 0;
+                continue;
+              }
+          }
+
+          offset -= 1; /* remove parity */
+          sendbyte(brl, ACK);
+
+          if (buffer[--offset] == previousPacketNumber)
+            {
+              offset = 0;
+              continue;
+            }
+          previousPacketNumber = buffer[offset];
+
+          memcpy(packet, &buffer[1], offset-1);
+          return 1;
+        }
     }
-  return (0);
 }
 
 ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
@@ -606,5 +633,6 @@ ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
    *q++ = EOT;
    packetSize = q - buf;
    updateWriteDelay(brl, packetSize);
+   logOutputPacket(buf, packetSize);
    return iop->write(brl, buf, packetSize);
 }
