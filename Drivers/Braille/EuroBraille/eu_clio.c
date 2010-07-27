@@ -493,7 +493,7 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
       int started = offset > 0;
       int escaped = 0;
       unsigned char byte;
-      ssize_t result = iop->read(brl, &byte, 1, started);
+      ssize_t result = iop->read(brl, &byte, 1, (started || escape));
 
       if (!result)
         {
@@ -522,26 +522,26 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
         {
           switch (byte)
             {
-              case SOH:
-                if (started)
-                  {
-                    logShortPacket(buffer, offset);
-                    offset = 1;
-                    continue;
-                  }
-                goto addByte;
+            case SOH:
+              if (started)
+                {
+                  logShortPacket(buffer, offset);
+                  offset = 1;
+                  continue;
+                }
+              goto addByte;
 
-              case EOT:
-                break;
+            case EOT:
+              break;
 
-              default:
-                if (needsEscape[byte])
-                  {
-                    if (started) logShortPacket(buffer, offset);
-                    offset = 0;
-                    continue;
-                  }
-                break;
+            default:
+              if (needsEscape[byte])
+                {
+                  if (started) logShortPacket(buffer, offset);
+                  offset = 0;
+                  continue;
+                }
+              break;
             }
         }
 
@@ -579,7 +579,11 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 
             {
               int i;
-              for (i=1; i<offset; i+=1) parity ^= buffer[i];
+
+              for (i=1; i<offset; i+=1)
+                {
+                  parity ^= buffer[i];
+                }
             }
 
             if (parity)
