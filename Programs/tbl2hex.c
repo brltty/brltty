@@ -222,22 +222,29 @@ main (int argc, char *argv[]) {
   path = *argv++, argc--;
 
   {
-    const TableEntry *entry = findTableEntry(locatePathExtension(path));
+    const char *extension = locatePathExtension(path);
 
-    if (entry) {
-      TableData data;
-      if (entry->load(path, &data)) {
-        if (dumpBytes(stdout, data.bytes, data.size)) {
-          status = 0;
+    if (extension) {
+      const TableEntry *entry = findTableEntry(extension);
+
+      if (entry) {
+        TableData data;
+        if (entry->load(path, &data)) {
+          if (dumpBytes(stdout, data.bytes, data.size)) {
+            status = 0;
+          } else {
+            status = 4;
+          }
+
+          entry->unload(&data);
         } else {
-          status = 4;
+          status = 3;
         }
-
-        entry->unload(&data);
       } else {
-        status = 3;
+        status = 6;
       }
     } else {
+      LogPrint(LOG_ERR, "no file extension");
       status = 5;
     }
   }
