@@ -19,8 +19,8 @@
 # This BRLTTY text subtable implements a portable representation of the block
 # element characters.
 
-char \u2580	(12 45   )  # ⠛ ▀ [UPPER HALF BLOCK]
-char \u2582	(      78)  # ⣀ ▂ [LOWER ONE QUARTER BLOCK]
-char \u2584	(  3  678)  # ⣤ ▄ [LOWER HALF BLOCK]
-char \u2586	( 23 5678)  # ⣶ ▆ [LOWER THREE QUARTERS BLOCK]
-char \u2588	(12345678)  # ⣿ █ [FULL BLOCK]
+glyph \u2580	(12 45   )  # ⠛ ▀ [UPPER HALF BLOCK]
+glyph \u2582	(      78)  # ⣀ ▂ [LOWER ONE QUARTER BLOCK]
+glyph \u2584	(  3  678)  # ⣤ ▄ [LOWER HALF BLOCK]
+glyph \u2586	( 23 5678)  # ⣶ ▆ [LOWER THREE QUARTERS BLOCK]
+glyph \u2588	(12345678)  # ⣿ █ [FULL BLOCK]
