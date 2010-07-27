@@ -114,7 +114,7 @@ mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
 
 typedef TextTableData *TableReader (const char *path, FILE *file, void *data);
 typedef int TableWriter (const char *path, FILE *file, TextTableData *ttd, void *data);
-typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data);
+typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, void *data);
 
 static int
 getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
@@ -122,6 +122,17 @@ getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
   if (!cell) return 0;
   *dots = *cell;
   return 1;
+}
+
+static int
+isPrimaryCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
+  const TextTableHeader *header = getTextTableHeader(ttd);
+
+  if (BITMASK_TEST(header->dotsCharacterDefined, dots))
+    if (header->dotsToCharacter[dots] == character)
+      return 1;
+
+  return 0;
 }
 
 static int
@@ -136,7 +147,8 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
         const unsigned char *cell = getUnicodeCellEntry(ttd, character);
 
         if (cell) {
-          if (!writer(file, character, *cell, &byte, data)) return 0;
+          int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+          if (!writer(file, character, *cell, &byte, isPrimary, data)) return 0;
         }
       }
     } while ((byte += 1));
@@ -177,7 +189,8 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
 
                     {
                       const unsigned char *cell = &row->cells[cellNumber];
-                      if (!writer(file, character, *cell, NULL, data)) return 0;
+                      int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+                      if (!writer(file, character, *cell, NULL, isPrimary, data)) return 0;
                     }
                   }
                 }
@@ -219,10 +232,10 @@ writeDots_native (FILE *file, unsigned char dots) {
 }
 
 static int
-writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
+writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, void *data) {
   uint32_t value = character;
 
-  if (fprintf(file, "char ") == EOF) goto error;
+  if (fprintf(file, "%s ", (isPrimary? "char": "glyph")) == EOF) goto error;
 
   if (value < 0X100) {
     if (fprintf(file, "\\x%02" PRIX32, value) == EOF) goto error;
@@ -353,7 +366,7 @@ readTable_gnome (const char *path, FILE *file, void *data) {
 }
 
 static int
-writeCharacter_gnome (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
+writeCharacter_gnome (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, void *data) {
   wchar_t pattern = UNICODE_BRAILLE_ROW | dots;
 
   if (iswprint(character) && !iswspace(character)) {
@@ -391,7 +404,7 @@ readTable_libLouis (const char *path, FILE *file, void *data) {
 }
 
 static int
-writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
+writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, void *data) {
   int i;
 
   {

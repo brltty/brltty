@@ -127,22 +127,6 @@ getDotsOperand (DataFile *file, unsigned char *dots) {
 }
 
 static int
-processCharOperands (DataFile *file, void *data) {
-  TextTableData *ttd = data;
-  wchar_t character;
-
-  if (getCharacterOperand(file, &character)) {
-    unsigned char dots;
-
-    if (getDotsOperand(file, &dots)) {
-      if (!setTextTableCharacter(ttd, character, dots)) return 0;
-    }
-  }
-
-  return 1;
-}
-
-static int
 processByteOperands (DataFile *file, void *data) {
   TextTableData *ttd = data;
   unsigned char byte;
@@ -159,9 +143,42 @@ processByteOperands (DataFile *file, void *data) {
 }
 
 static int
+processCharOperands (DataFile *file, void *data) {
+  TextTableData *ttd = data;
+  wchar_t character;
+
+  if (getCharacterOperand(file, &character)) {
+    unsigned char dots;
+
+    if (getDotsOperand(file, &dots)) {
+      if (!setTextTableCharacter(ttd, character, dots)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+processGlyphOperands (DataFile *file, void *data) {
+  TextTableData *ttd = data;
+  wchar_t character;
+
+  if (getCharacterOperand(file, &character)) {
+    unsigned char dots;
+
+    if (getDotsOperand(file, &dots)) {
+      if (!setTextTableGlyph(ttd, character, dots)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
 processTextTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("char"), .processor=processCharOperands},
+    {.name=WS_C("glyph"), .processor=processGlyphOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=NULL, .processor=NULL}

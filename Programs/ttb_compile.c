@@ -127,7 +127,7 @@ getUnicodeCellEntry (TextTableData *ttd, wchar_t character) {
 }
 
 static void
-resetDotsCharacter (TextTableData *ttd, unsigned char dots, wchar_t character) {
+resetTextTableDots (TextTableData *ttd, unsigned char dots, wchar_t character) {
   TextTableHeader *header = getTextTableHeader(ttd);
 
   if (BITMASK_TEST(header->dotsCharacterDefined, dots)) {
@@ -138,33 +138,41 @@ resetDotsCharacter (TextTableData *ttd, unsigned char dots, wchar_t character) {
   }
 }
 
-int
-setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
-  UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 1);
-  if (!row) return 0;
+static void
+setTextTableDots (TextTableData *ttd, wchar_t character, unsigned char dots) {
+  TextTableHeader *header = getTextTableHeader(ttd);
 
-  {
+  if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
+    header->dotsToCharacter[dots] = character;
+    BITMASK_SET(header->dotsCharacterDefined, dots);
+  }
+}
+
+int
+setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
+  UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 1);
+
+  if (row) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
     unsigned char *cell = &row->cells[cellNumber];
 
     if (!BITMASK_TEST(row->defined, cellNumber)) {
       BITMASK_SET(row->defined, cellNumber);
     } else if (*cell != dots) {
-      resetDotsCharacter(ttd, *cell, character);
+      resetTextTableDots(ttd, *cell, character);
     }
 
     *cell = dots;
+    return 1;
   }
 
-  {
-    TextTableHeader *header = getTextTableHeader(ttd);
+  return 0;
+}
 
-    if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
-      header->dotsToCharacter[dots] = character;
-      BITMASK_SET(header->dotsCharacterDefined, dots);
-    }
-  }
-
+int
+setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
+  if (!setTextTableGlyph(ttd, character, dots)) return 0;
+  setTextTableDots(ttd, character, dots);
   return 1;
 }
 
@@ -178,7 +186,7 @@ unsetTextTableCharacter (TextTableData *ttd, wchar_t character) {
     if (BITMASK_TEST(row->defined, cellNumber)) {
       unsigned char *cell = &row->cells[cellNumber];
 
-      resetDotsCharacter(ttd, *cell, character);
+      resetTextTableDots(ttd, *cell, character);
       *cell = 0;
       BITMASK_CLEAR(row->defined, cellNumber);
     }
