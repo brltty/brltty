@@ -545,6 +545,7 @@ word knowledge 13
 always l 123
 always L 123
 midendword less 46-234
+always lesson = unlessoned
 always letter 123-1235
 contraction lr
 word like 123
