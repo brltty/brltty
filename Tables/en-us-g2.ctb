@@ -331,6 +331,7 @@ begword disha 256-125-1 dishabile
 begword dishear 256-125-15-345 disheartened
 begword disho 256-125-135 dishonor
 begword dishone 256-125-5-135 dishonest
+begword disin 256-35 disingenuous
 sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 midword dist = contradistinction
@@ -840,6 +841,7 @@ always shoulder 146-1256-123-145-12456
 begword side = sidenote
 sufword sided 234-24-145-1246
 sufword sider 234-24-145-12456 sidereal siderite
+sufword sing 234-346 singalong
 midendword sion 46-1345
 midendword stion 234-56-1345
 word so 234
