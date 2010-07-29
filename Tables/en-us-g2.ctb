@@ -1040,6 +1040,10 @@ begword atto 1-2345-2345-135 10^-18
 begword zepto 1356-15-1234-2345-135 10^-21
 begword yocto 13456-135-14-2345-135 10^-24
 
+word thz = teraherz
+word ghz = gigaherz
+word chz = centiherz
+
 begword ante =
 begword anti =
 begword endo 26-145-135
