@@ -33,6 +33,7 @@
 #include <unicode/uchar.h>
 #endif /* HAVE_ICU */
 
+#include "embed.h"
 #include "log.h"
 #include "parse.h"
 #include "misc.h"
@@ -1037,8 +1038,8 @@ highlightWindow (void) {
   }
 }
 
-static int
-beginProgram (int argc, char *argv[]) {
+int
+brlttyInitialize (int argc, char *argv[]) {
   /* Open the system log. */
   openLog(0);
   LogPrint(LOG_INFO, gettext("starting"));
@@ -1059,27 +1060,45 @@ beginProgram (int argc, char *argv[]) {
   /* Setup everything required on startup */
   startup(argc, argv);
 
+  atexit(exitSessions);
   return 0;
 }
 
-typedef struct {
-  int oldwinx;
-  int oldwiny;
+static int oldwinx;
+static int oldwiny;
+static int isOffline;
+static int isSuspended;
+static int isWritable;
 
-  unsigned isOffline:1;
-  unsigned isSuspended:1;
-  unsigned isWritable:1;
-} UpdateData;
+void
+brlttyPrepare (void) {
+  setSessionEntry();
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  ses->motx = ses->winx; ses->moty = ses->winy;
+
+  oldwinx = ses->winx;
+  oldwiny = ses->winy;
+  isOffline = 0;
+  isSuspended = 0;
+  isWritable = 1;
+
+  highlightWindow();
+  checkPointer();
+  resetScanCodes();
+  resetBlinkingStates();
+  if (prefs.autorepeat) resetAutorepeat();
+}
 
 static int
-doCommand (UpdateData *upd) {
+brlttyCommand (void) {
   int oldmotx = ses->winx;
   int oldmoty = ses->winy;
   int command;
 
   testProgramTermination();
 
-  command = upd->isWritable? readBrailleCommand(&brl, BRL_CTX_DEFAULT): BRL_CMD_RESTARTBRL;
+  command = isWritable? readBrailleCommand(&brl, BRL_CTX_DEFAULT): BRL_CMD_RESTARTBRL;
 
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;
@@ -1119,17 +1138,17 @@ doCommand (UpdateData *upd) {
 
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_OFFLINE:
-        if (!upd->isOffline) {
+        if (!isOffline) {
           LogPrint(LOG_DEBUG, "braille display offline");
-          upd->isOffline = 1;
+          isOffline = 1;
         }
         return 1;
     }
   }
 
-  if (upd->isOffline) {
+  if (isOffline) {
     LogPrint(LOG_DEBUG, "braille display online");
-    upd->isOffline = 0;
+    isOffline = 0;
   }
 
   handleAutorepeat(&command, NULL);
@@ -1528,7 +1547,7 @@ doCommand:
       case BRL_CMD_RESTARTBRL:
         restartBrailleDriver();
         resetScanCodes();
-        upd->isWritable = 1;
+        isWritable = 1;
         break;
       case BRL_CMD_PASTE:
         if (isLiveScreen() && !isRouting()) {
@@ -1627,7 +1646,7 @@ doCommand:
         break;
 
       case BRL_CMD_PREFMENU:
-        if (!updatePreferences()) upd->isWritable = 0;
+        if (!updatePreferences()) isWritable = 0;
         break;
       case BRL_CMD_PREFSAVE:
         if (savePreferences()) {
@@ -1660,7 +1679,7 @@ doCommand:
 
 #ifdef ENABLE_LEARN_MODE
       case BRL_CMD_LEARN:
-        if (!learnMode(&brl, updateInterval, 10000)) upd->isWritable = 0;
+        if (!learnMode(&brl, updateInterval, 10000)) isWritable = 0;
         break;
 #endif /* ENABLE_LEARN_MODE */
 
@@ -2128,12 +2147,12 @@ doCommand:
 }
 
 static void
-doUpdate (UpdateData *upd) {
+brlttyUpdate (void) {
   int pointerMoved = 0;
 
   if (opt_releaseDevice) {
     if (scr.unreadable) {
-      if (!upd->isSuspended) {
+      if (!isSuspended) {
         setStatusCells();
         writeBrailleString("wrn", scr.unreadable);
 
@@ -2147,11 +2166,11 @@ doUpdate (UpdateData *upd) {
           destructBrailleDriver();
         }
 
-        upd->isSuspended = 1;
+        isSuspended = 1;
       }
     } else {
-      if (upd->isSuspended) {
-        upd->isSuspended = !(
+      if (isSuspended) {
+        isSuspended = !(
 #ifdef ENABLE_API
           apiStarted? api_resume(&brl):
 #endif /* ENABLE_API */
@@ -2160,7 +2179,7 @@ doUpdate (UpdateData *upd) {
     }
   }
 
-  if (!upd->isSuspended
+  if (!isSuspended
 #ifdef ENABLE_API
       && (!apiStarted || api_claimDriver(&brl))
 #endif /* ENABLE_API */
@@ -2168,7 +2187,7 @@ doUpdate (UpdateData *upd) {
     /*
      * Process any Braille input 
      */
-    while (doCommand(upd));
+    while (brlttyCommand());
 
     /* some commands (key insertion, virtual terminal switching, etc)
      * may have moved the cursor
@@ -2246,7 +2265,7 @@ doUpdate (UpdateData *upd) {
         const ScreenCharacter *characters = newCharacters;
 
         if (oldCharacters) {
-          if ((newScreen == oldScreen) && (ses->winy == upd->oldwiny) && (newWidth == oldWidth)) {
+          if ((newScreen == oldScreen) && (ses->winy == oldwiny) && (newWidth == oldWidth)) {
             int onScreen = (newX >= 0) && (newX < newWidth);
 
             if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
@@ -2348,7 +2367,7 @@ doUpdate (UpdateData *upd) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     /* There are a few things to take care of if the display has moved. */
-    if ((ses->winx != upd->oldwinx) || (ses->winy != upd->oldwiny)) {
+    if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
       if (!pointerMoved) highlightWindow();
 
       if (prefs.showAttributes && prefs.blinkingAttributes) {
@@ -2362,12 +2381,12 @@ doUpdate (UpdateData *upd) {
            (example: tin). */
       }
 
-      upd->oldwinx = ses->winx;
-      upd->oldwiny = ses->winy;
+      oldwinx = ses->winx;
+      oldwiny = ses->winy;
     }
 
     if (infoMode) {
-      if (!showInfo()) upd->isWritable = 0;
+      if (!showInfo()) isWritable = 0;
     } else {
       const unsigned int windowLength = brl.textColumns * brl.textRows;
       const unsigned int textLength = textCount * brl.textRows;
@@ -2601,7 +2620,7 @@ doUpdate (UpdateData *upd) {
         fillStatusSeparator(textBuffer, brl.buffer);
       }
 
-      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) upd->isWritable = 0;
+      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) isWritable = 0;
     }
 #ifdef ENABLE_API
     api_releaseDriver(&brl);
@@ -2611,54 +2630,26 @@ doUpdate (UpdateData *upd) {
   }
 }
 
-static int
-runProgram (void) {
-  UpdateData upd;
-
-  atexit(exitSessions);
-  setSessionEntry();
-  /* NB: screen size can sometimes change, e.g. the video mode may be changed
-   * when installing a new font. This will be detected by another call to
-   * describeScreen() within the main loop. Don't assume that scr.rows
-   * and scr.cols are constants across loop iterations.
-   */
-
-  ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0; /* set initial window position */
-  ses->motx = ses->winx; ses->moty = ses->winy;
-
-  upd.oldwinx = ses->winx;
-  upd.oldwiny = ses->winy;
-  upd.isOffline = 0;
-  upd.isSuspended = 0;
-  upd.isWritable = 1;
-
-  highlightWindow();
-  checkPointer();
-  resetScanCodes();
-  resetBlinkingStates();
-  if (prefs.autorepeat) resetAutorepeat();
-
-  while (1) {
-    testProgramTermination();
-    closeTuneDevice(0);
-    checkRoutingStatus(ROUTING_DONE, 0);
-    doUpdate(&upd);
+void
+brlttyMain (void) {
+  testProgramTermination();
+  closeTuneDevice(0);
+  checkRoutingStatus(ROUTING_DONE, 0);
+  brlttyUpdate();
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    processSpeechFifo(&spk);
+  processSpeechFifo(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-    drainBrailleOutput(&brl, updateInterval);
-    updateIntervals += 1;
+  drainBrailleOutput(&brl, updateInterval);
+  updateIntervals += 1;
+  updateSessionAttributes();
+}
 
-    /*
-     * Update Braille display and screen information.  Switch screen 
-     * state if screen number has changed.
-     */
-    updateSessionAttributes();
-  }
-
+static int
+brlttyRun (void) {
+  brlttyPrepare();
+  while (1) brlttyMain();
   return 0;
 }
 
@@ -2821,9 +2812,9 @@ serviceMain (DWORD argc, LPSTR *argv) {
 
   if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
-      if (!(serviceReturnCode = beginProgram(argc, argv))) {
+      if (!(serviceReturnCode = brlttyInitialize(argc, argv))) {
         if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
-          runProgram();
+          brlttyRun();
         }
       }
       setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
@@ -2857,20 +2848,25 @@ main (int argc, char *argv[]) {
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
     fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
     fflush(stderr);
+
     switch (fork()) {
       case -1: /* failed */
-        fprintf(stderr, gettext("Fork of %s failed: %s\n"),
+        fprintf(stderr, gettext("fork of %s failed: %s\n"),
                 PACKAGE_TITLE, strerror(errno));
         fflush(stderr);
+
       default: /* parent */
-        fprintf(stderr, gettext("Executing %s (from %s)\n"), "INIT", INIT_PATH);
+        fprintf(stderr, gettext("executing %s (from %s)\n"), "INIT", INIT_PATH);
         fflush(stderr);
-      exec_init:
+
+      executeInit:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
-        fprintf(stderr, gettext("Execution of %s failed: %s\n"), "INIT", strerror(errno));
+
+        fprintf(stderr, gettext("execution of %s failed: %s\n"), "INIT", strerror(errno));
         fflush(stderr);
         exit(1);
+
       case 0: { /* child */
         static char *arguments[] = {"brltty", "-E", "-n", "-e", "-linfo", NULL};
         argv = arguments;
@@ -2884,7 +2880,7 @@ main (int argc, char *argv[]) {
      * when someone might want to call that binary even when pid != 1.
      * One example is /sbin/telinit which is a symlink to /sbin/init.
      */
-    goto exec_init;
+    goto executeInit;
   }
 #endif /* INIT_PATH */
 
@@ -2893,8 +2889,8 @@ main (int argc, char *argv[]) {
 #endif /* STDERR_PATH */
 
   {
-    int returnCode = beginProgram(argc, argv);
-    if (!returnCode) returnCode = runProgram();
+    int returnCode = brlttyInitialize(argc, argv);
+    if (!returnCode) returnCode = brlttyRun();
     return returnCode;
   }
 }
