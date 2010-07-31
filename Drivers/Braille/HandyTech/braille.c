@@ -22,6 +22,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "bitfield.h"
 #include "log.h"
 #include "timing.h"
 #include "misc.h"
@@ -1331,10 +1332,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                         unsigned char byte = bytes[dataIndex];
                         unsigned char nibble;
 
-                        nibble = byte & 0XF0;
+                        nibble = HIGH_NIBBLE(byte);
                         pressureValues[cellIndex++] = nibble | (nibble >> 4);
 
-                        nibble = byte & 0X0F;
+                        nibble = LOW_NIBBLE(byte);
                         pressureValues[cellIndex++] = nibble | (nibble << 4);
                       }
 
