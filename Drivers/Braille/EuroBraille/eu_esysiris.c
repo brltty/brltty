@@ -488,6 +488,8 @@ ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
       switch (offset)
         {
           case 0:
+            if (byte == 0X55) continue;
+
             if (byte != STX)
               {
                 logIgnoredByte(byte);
