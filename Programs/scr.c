@@ -230,13 +230,12 @@ clearScreenCharacters (ScreenCharacter *characters, size_t count) {
 void
 setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message) {
   int count = box->width * box->height;
+  size_t length = strlen(message);
 
-  {
-    size_t length = strlen(message) - box->left;
-    if (length < 0) length = 0;
-    if (length > box->width) length = box->width;
+  clearScreenCharacters(buffer, count);
 
-    clearScreenCharacters(buffer, count);
+  if (length > box->left) {
+    if ((length -= box->left) > box->width) length = box->width;
     if (length) copyScreenCharacterText(buffer, &message[box->left], length);
   }
 }
