@@ -1366,16 +1366,18 @@ doCommand:
         break;
 
       case BRL_CMD_HWINLT:
-        if (ses->winx == 0)
+        if (ses->winx == 0) {
           playTune(&tune_bounce);
-        else
-          ses->winx = MAX(ses->winx-halfWindowShift, 0);
+        } else {
+          ses->winx -= MIN(ses->winx, halfWindowShift);
+        }
         break;
       case BRL_CMD_HWINRT:
-        if (ses->winx < (scr.cols - halfWindowShift))
+        if (ses->winx < (scr.cols - halfWindowShift)) {
           ses->winx += halfWindowShift;
-        else
+        } else {
           playTune(&tune_bounce);
+        }
         break;
 
       case BRL_CMD_FWINLT:
