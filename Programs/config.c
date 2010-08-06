@@ -1858,7 +1858,7 @@ updatePreferences (void) {
         indexChanged = 0;
 
         /* Then draw the braille window */
-        if (!writeBrailleBytes(mode, &line[lineIndent], MAX(0, lineLength-lineIndent))) ok = 0;
+        if (!writeBrailleBytes(mode, &line[lineIndent], lineLength-lineIndent)) ok = 0;
         drainBrailleOutput(&brl, updateInterval);
         if (!ok) break;
 
@@ -1931,10 +1931,11 @@ updatePreferences (void) {
               break;
 
             case BRL_CMD_FWINLT:
-              if (lineIndent > 0)
+              if (lineIndent > 0) {
                 lineIndent -= MIN(textLength, lineIndent);
-              else
+              } else {
                 playTune(&tune_bounce);
+              }
               break;
             case BRL_CMD_FWINRT:
               if ((lineLength - lineIndent) > textLength) {
