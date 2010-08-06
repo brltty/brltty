@@ -2317,7 +2317,6 @@ activateBrailleDriver (int verify) {
     LogPrint(LOG_DEBUG, "checking braille device: %s", brailleDevice);
 
     {
-      const char *type;
       const char *dev = brailleDevice;
 
       if (isSerialDevice(&dev)) {
@@ -2326,21 +2325,18 @@ activateBrailleDriver (int verify) {
           NULL
         };
         autodetectableDrivers = serialDrivers;
-        type = "serial";
       } else if (isUsbDevice(&dev)) {
         static const char *const usbDrivers[] = {
           "al", "bm", "eu", "fs", "ht", "hm", "mt", "pg", "pm", "sk", "vo",
           NULL
         };
         autodetectableDrivers = usbDrivers;
-        type = "USB";
       } else if (isBluetoothDevice(&dev)) {
         static const char *bluetoothDrivers[] = {
           "ht", "al", "bm",
           NULL
         };
         autodetectableDrivers = bluetoothDrivers;
-        type = "bluetooth";
       } else {
         static const char *noDrivers[] = {NULL};
         autodetectableDrivers = noDrivers;
