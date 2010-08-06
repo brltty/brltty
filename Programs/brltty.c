@@ -507,6 +507,31 @@ sayScreenLines (int line, int count, int track, SayMode mode) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static inline int
+showCursor (void) {
+  return scr.cursor && prefs.showCursor && !ses->hideCursor;
+}
+
+static int
+moveLeft (unsigned int amount) {
+  if (ses->winx > 0) {
+    ses->winx -= MIN(ses->winx, amount);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+moveRight (unsigned int amount) {
+  if (ses->winx < (scr.cols - amount)) {
+    ses->winx += amount;
+    return 1;
+  }
+
+  return 0;
+}
+
 typedef int (*IsSameCharacter) (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
@@ -553,11 +578,6 @@ canMoveUp (void) {
 static int
 canMoveDown (void) {
   return ses->winy < (scr.rows - brl.textRows);
-}
-
-static inline int
-showCursor (void) {
-  return scr.cursor && prefs.showCursor && !ses->hideCursor;
 }
 
 static int
@@ -1354,30 +1374,17 @@ doCommand:
       }
 
       case BRL_CMD_CHRLT:
-        if (ses->winx == 0)
-          playTune (&tune_bounce);
-        ses->winx = MAX (ses->winx - 1, 0);
+        if (!moveLeft(1)) playTune(&tune_bounce);
         break;
       case BRL_CMD_CHRRT:
-        if (ses->winx < (scr.cols - 1))
-          ses->winx++;
-        else
-          playTune(&tune_bounce);
+        if (!moveRight(1)) playTune(&tune_bounce);
         break;
 
       case BRL_CMD_HWINLT:
-        if (ses->winx == 0) {
-          playTune(&tune_bounce);
-        } else {
-          ses->winx -= MIN(ses->winx, halfWindowShift);
-        }
+        if (!moveLeft(halfWindowShift)) playTune(&tune_bounce);
         break;
       case BRL_CMD_HWINRT:
-        if (ses->winx < (scr.cols - halfWindowShift)) {
-          ses->winx += halfWindowShift;
-        } else {
-          playTune(&tune_bounce);
-        }
+        if (!moveRight(halfWindowShift)) playTune(&tune_bounce);
         break;
 
       case BRL_CMD_FWINLT:
