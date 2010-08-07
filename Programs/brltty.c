@@ -770,18 +770,19 @@ placeWindowRight (void) {
 
 static int
 moveWindowLeft (unsigned int amount) {
-  if (ses->winx > 0) {
-    ses->winx -= MIN(ses->winx, amount);
-    return 1;
-  }
+  if (ses->winx < 1) return 0;
+  if (amount < 1) return 0;
 
-  return 0;
+  ses->winx -= MIN(ses->winx, amount);
+  return 1;
 }
 
 static int
 moveWindowRight (unsigned int amount) {
-  if (ses->winx < (scr.cols - amount)) {
-    ses->winx += amount;
+  int newx = ses->winx + amount;
+
+  if ((newx > ses->winx) && (newx < scr.cols)) {
+    ses->winx = newx;
     return 1;
   }
 
@@ -792,26 +793,26 @@ static int
 shiftWindowLeft (unsigned int amount) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
-    if (ses->winx == 0) return 0;
+    int reference = ses->winx;
+    int first = 0;
+    int last = ses->winx - 1;
 
-    {
-      int reference = ses->winx;
-      int first = 0;
-      int last = ses->winx - 1;
+    while (first <= last) {
+      int end = (ses->winx = (first + last) / 2) + getContractedLength(amount);
 
-      while (first <= last) {
-        int end = (ses->winx = (first + last) / 2) + getContractedLength(amount);
-
-        if (end < reference) {
-          first = ses->winx + 1;
-        } else {
-          last = ses->winx - 1;
-        }
+      if (end < reference) {
+        first = ses->winx + 1;
+      } else {
+        last = ses->winx - 1;
       }
-
-      ses->winx = first;
     }
 
+    if (first == reference) {
+      if (!first) return 0;
+      first -= 1;
+    }
+
+    ses->winx = first;
     return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
