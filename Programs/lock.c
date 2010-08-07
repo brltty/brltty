@@ -64,12 +64,12 @@ struct LockDescriptorStruct {
 LockDescriptor *
 newLockDescriptor (void) {
   LockDescriptor *lock;
-  int result;
 
   if ((lock = malloc(sizeof(*lock)))) {
-    if (!(result = pthread_rwlock_init(&lock->lock, NULL))) {
+    if (pthread_rwlock_init(&lock->lock, NULL) == 0) {
       return lock;
     }
+
     free(lock);
   }
 
