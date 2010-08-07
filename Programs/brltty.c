@@ -512,26 +512,6 @@ showCursor (void) {
   return scr.cursor && prefs.showCursor && !ses->hideCursor;
 }
 
-static int
-moveLeft (unsigned int amount) {
-  if (ses->winx > 0) {
-    ses->winx -= MIN(ses->winx, amount);
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-moveRight (unsigned int amount) {
-  if (ses->winx < (scr.cols - amount)) {
-    ses->winx += amount;
-    return 1;
-  }
-
-  return 0;
-}
-
 typedef int (*IsSameCharacter) (
   const ScreenCharacter *character1,
   const ScreenCharacter *character2
@@ -745,16 +725,19 @@ getCursorOffset (int x, int y) {
 }
 
 static int
-getContractedLength (int x, int y) {
-  int inputLength = scr.cols - x;
-  int outputLength = textCount * brl.textRows;
+getContractedLength (unsigned int outputLimit) {
+  int inputLength = scr.cols - ses->winx;
   wchar_t inputBuffer[inputLength];
+
+  int outputLength = outputLimit;
   unsigned char outputBuffer[outputLength];
-  readScreenText(x, y, inputLength, 1, inputBuffer);
+
+  readScreenText(ses->winx, ses->winy, inputLength, 1, inputBuffer);
   if (!contractText(contractionTable,
                     inputBuffer, &inputLength,
                     outputBuffer, &outputLength,
-                    NULL, getCursorOffset(x, y))) return 0;
+                    NULL, getCursorOffset(ses->winx, ses->winy)))
+    return 0;
   return inputLength;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -764,10 +747,13 @@ placeRightEdge (int column) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     ses->winx = 0;
+
     while (1) {
-      int length = getContractedLength(ses->winx, ses->winy);
+      int length = getContractedLength(textCount);
       int end = ses->winx + length;
+
       if (end > column) break;
+      if (end == ses->winx) break;
       ses->winx = end;
     }
   } else
@@ -783,43 +769,69 @@ placeWindowRight (void) {
 }
 
 static int
-shiftWindowLeft (void) {
-  if (ses->winx == 0) return 0;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) {
-    placeRightEdge(ses->winx-1);
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  {
-    ses->winx -= MIN(fullWindowShift, ses->winx);
+moveWindowLeft (unsigned int amount) {
+  if (ses->winx > 0) {
+    ses->winx -= MIN(ses->winx, amount);
+    return 1;
   }
 
-  return 1;
+  return 0;
 }
 
 static int
-shiftWindowRight (void) {
-  int shift;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) {
-    shift = getContractedLength(ses->winx, ses->winy);
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  {
-    shift = fullWindowShift;
+moveWindowRight (unsigned int amount) {
+  if (ses->winx < (scr.cols - amount)) {
+    ses->winx += amount;
+    return 1;
   }
 
-  if (ses->winx >= (scr.cols - shift)) return 0;
-  ses->winx += shift;
-  return 1;
+  return 0;
+}
+
+static int
+shiftWindowLeft (unsigned int amount) {
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) {
+    if (ses->winx == 0) return 0;
+
+    {
+      int reference = ses->winx;
+      int first = 0;
+      int last = ses->winx - 1;
+
+      while (first <= last) {
+        int end = (ses->winx = (first + last) / 2) + getContractedLength(amount);
+
+        if (end < reference) {
+          first = ses->winx + 1;
+        } else {
+          last = ses->winx - 1;
+        }
+      }
+
+      ses->winx = first;
+    }
+
+    return 1;
+  }
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  return moveWindowLeft(amount);
+}
+
+static int
+shiftWindowRight (unsigned int amount) {
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) amount = getContractedLength(amount);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  return moveWindowRight(amount);
 }
 
 static int
 getWindowLength (void) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) return getContractedLength(ses->winx, ses->winy);
+  if (isContracting()) return getContractedLength(textCount);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   return textCount;
@@ -1374,23 +1386,23 @@ doCommand:
       }
 
       case BRL_CMD_CHRLT:
-        if (!moveLeft(1)) playTune(&tune_bounce);
+        if (!moveWindowLeft(1)) playTune(&tune_bounce);
         break;
       case BRL_CMD_CHRRT:
-        if (!moveRight(1)) playTune(&tune_bounce);
+        if (!moveWindowRight(1)) playTune(&tune_bounce);
         break;
 
       case BRL_CMD_HWINLT:
-        if (!moveLeft(halfWindowShift)) playTune(&tune_bounce);
+        if (!shiftWindowLeft(halfWindowShift)) playTune(&tune_bounce);
         break;
       case BRL_CMD_HWINRT:
-        if (!moveRight(halfWindowShift)) playTune(&tune_bounce);
+        if (!shiftWindowRight(halfWindowShift)) playTune(&tune_bounce);
         break;
 
       case BRL_CMD_FWINLT:
         if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
           int oldX = ses->winx;
-          if (shiftWindowLeft()) {
+          if (shiftWindowLeft(fullWindowShift)) {
             if (prefs.skipBlankWindows) {
               int charCount;
               if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
@@ -1444,7 +1456,7 @@ doCommand:
         int charIndex;
         ScreenCharacter characters[scr.cols];
         while (1) {
-          if (!shiftWindowLeft()) {
+          if (!shiftWindowLeft(fullWindowShift)) {
             if (ses->winy == 0) {
               playTune(&tune_bounce);
               ses->winx = oldX;
@@ -1476,7 +1488,7 @@ doCommand:
       case BRL_CMD_FWINRT:
         if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
           int oldX = ses->winx;
-          if (shiftWindowRight()) {
+          if (shiftWindowRight(fullWindowShift)) {
             if (prefs.skipBlankWindows) {
               if (!showCursor() ||
                   (scr.posy != ses->winy) ||
@@ -1513,7 +1525,7 @@ doCommand:
         int charIndex;
         ScreenCharacter characters[scr.cols];
         while (1) {
-          if (!shiftWindowRight()) {
+          if (!shiftWindowRight(fullWindowShift)) {
             if (ses->winy >= (scr.rows - brl.textRows)) {
               playTune(&tune_bounce);
               ses->winx = oldX;
