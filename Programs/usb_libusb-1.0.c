@@ -271,7 +271,7 @@ usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
@@ -322,7 +322,7 @@ usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;

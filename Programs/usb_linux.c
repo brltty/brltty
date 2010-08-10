@@ -553,7 +553,7 @@ static int
 usbBulkTransfer (
   UsbEndpoint *endpoint,
   void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbDeviceExtension *devx = endpoint->device->extension;
@@ -624,7 +624,7 @@ usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   int count = -1;
@@ -671,7 +671,7 @@ usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbEndpoint *endpoint;

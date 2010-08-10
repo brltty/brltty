@@ -379,7 +379,7 @@ usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbEndpoint *endpoint;
@@ -409,7 +409,7 @@ usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  int length,
+  unsigned int length,
   int timeout
 ) {
   UsbEndpoint *endpoint;
