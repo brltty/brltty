@@ -123,14 +123,14 @@ usbClearEndpoint (
 int
 usbControlTransfer (
   UsbDevice *device,
-  unsigned char direction,
-  unsigned char recipient,
-  unsigned char type,
-  unsigned char request,
-  unsigned short value,
-  unsigned short index,
+  uint8_t direction,
+  uint8_t recipient,
+  uint8_t type,
+  uint8_t request,
+  uint16_t value,
+  uint16_t index,
   void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
