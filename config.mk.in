@@ -16,6 +16,21 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+BUILD = @build@
+BUILD_CPU = @build_cpu@
+BUILD_OS = @build_os@
+BUILD_VENDOR = @build_vendor@
+
+HOST = @host@
+hOST_CPU = @host_cpu@
+hOST_OS = @host_os@
+hOST_VENDOR = @host_vendor@
+
+TARGET = @target@
+TARGET_CPU = @target_cpu@
+TARGET_OS = @target_os@
+TARGET_VENDOR = @target_vendor@
+
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 
