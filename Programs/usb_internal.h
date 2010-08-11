@@ -42,7 +42,7 @@ typedef struct {
       Queue *pending;
       void *completed;
       unsigned char *buffer;
-      int length;
+      size_t length;
     } input;
 
     struct {
@@ -72,7 +72,7 @@ extern UsbDevice *usbTestDevice (
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
-extern int usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length);
+extern int usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *length);
 
 extern int usbSetConfiguration (
   UsbDevice *device,

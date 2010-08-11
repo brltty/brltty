@@ -553,8 +553,13 @@ usbApplyInputFilter (void *item, void *data) {
 }
 
 int
-usbApplyInputFilters (UsbDevice *device, void *buffer, int size, int *length) {
-  UsbInputFilterData data = {buffer, size, *length};
+usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *length) {
+  UsbInputFilterData data = {
+    .buffer = buffer,
+    .size = size,
+    .length = *length
+  };
+
   if (processQueue(device->inputFilters, usbApplyInputFilter, &data)) {
     errno = EIO;
     return 0;
@@ -817,7 +822,7 @@ usbReapInput (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  int length,
+  size_t length,
   int initialTimeout,
   int subsequentTimeout
 ) {
@@ -830,7 +835,7 @@ usbReapInput (
                          (target == bytes)? initialTimeout: subsequentTimeout)) return -1;
 
       {
-        int count = endpoint->direction.input.length;
+        size_t count = endpoint->direction.input.length;
         if (length < count) count = length;
         memcpy(target, endpoint->direction.input.buffer, count);
 

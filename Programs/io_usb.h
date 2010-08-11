@@ -375,29 +375,29 @@ extern int usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 );
 extern int usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 );
 
 typedef struct {
   void *context;
   void *buffer;
-  int size;
-  int count;
+  size_t size;
+  ssize_t count;
   int error;
 } UsbResponse;
 extern void *usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpointAddress,
   void *buffer,
-  int length,
+  size_t length,
   void *context
 );
 extern int usbCancelRequest (
@@ -420,7 +420,7 @@ extern int usbReapInput (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  int length,
+  size_t length,
   int initialTimeout,
   int subsequentTimeout
 );
@@ -540,8 +540,8 @@ extern int usbHidSetFeature (
 
 typedef struct {
   void *const buffer;
-  int const size;
-  int length;
+  const size_t size;
+  ssize_t length;
 } UsbInputFilterData;
 typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);

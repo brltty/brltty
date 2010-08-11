@@ -33,10 +33,10 @@ typedef struct {
   UsbEndpoint *endpoint;
   void *context;
   void *buffer;
-  int length;
+  size_t length;
 
   IOReturn result;
-  int count;
+  ssize_t count;
 } UsbAsynchronousRequest;
 
 struct UsbDeviceExtensionStruct {
@@ -545,7 +545,7 @@ usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpointAddress,
   void *buffer,
-  int length,
+  size_t length,
   void *context
 ) {
   UsbDeviceExtension *devx = device->extension;
@@ -683,7 +683,7 @@ usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
@@ -738,7 +738,7 @@ usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;

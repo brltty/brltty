@@ -55,7 +55,7 @@ typedef struct {
 
   void *context;
   void *buffer;
-  int length;
+  size_t length;
 } UsbAsynchronousRequest;
 
 static int
@@ -235,7 +235,7 @@ usbSubmitRequest (
   UsbDevice *device,
   unsigned char endpointAddress,
   void *buffer,
-  int length,
+  size_t length,
   void *context
 ) {
   UsbEndpoint *endpoint;
@@ -379,7 +379,7 @@ usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 ) {
   UsbEndpoint *endpoint;
@@ -409,7 +409,7 @@ usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
-  unsigned int length,
+  size_t length,
   int timeout
 ) {
   UsbEndpoint *endpoint;
