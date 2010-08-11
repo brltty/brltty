@@ -49,6 +49,26 @@ $(ZIP_FILE):
 	$(SRC_TOP)mkzip $(SRC_TOP) $(ARCHIVE_NAME) $@
 zip: $(ZIP_FILE)
 
+BIN_DIR = `pwd`/BinTree
+bin-tree:
+	$(INSTALL_DIRECTORY) $(BIN_DIR)
+	$(MAKE) install INSTALL_ROOT=$(BIN_DIR)
+
+BIN_TAR = $(ARCHIVE_NAME).$(HOST_OS).$(HOST_CPU).tar
+bin-tar: $(BIN_TAR)
+$(BIN_TAR): bin-tree
+	tar -C $(BIN_DIR) -c -f $@ .
+
+BIN_TAR_GZIP = $(BIN_TAR).gz
+bin-tar-gzip: $(BIN_TAR_GZIP)
+$(BIN_TAR_GZIP): $(BIN_TAR)
+	gzip -9 -c $(BIN_TAR) >$@
+
+BIN_TAR_BZIP2 = $(BIN_TAR).bz2
+bin-tar-bzip2: $(BIN_TAR_BZIP2)
+$(BIN_TAR_BZIP2): $(BIN_TAR)
+	bzip2 -c $(BIN_TAR) >$@
+
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
@@ -56,7 +76,7 @@ clean::
 distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)
-	-rm -f brltty.spec brltty.lsm
+	-rm -f brltty.spec
 	-rm -f config.log config.cache config.status
 	-rm -fr autom4te*.cache
 	-rm -f config.mk config.h
