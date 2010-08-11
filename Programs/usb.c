@@ -564,6 +564,7 @@ usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *len
     errno = EIO;
     return 0;
   }
+
   *length = data.length;
   return 1;
 }
@@ -997,7 +998,7 @@ usbHidGetReport (
   unsigned char interface,
   unsigned char report,
   void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 ) {
   return usbControlRead(device,
@@ -1013,7 +1014,7 @@ usbHidSetReport (
   unsigned char interface,
   unsigned char report,
   const void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 ) {
   return usbControlWrite(device,
@@ -1029,7 +1030,7 @@ usbHidGetFeature (
   unsigned char interface,
   unsigned char report,
   void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 ) {
   return usbControlRead(device,
@@ -1045,7 +1046,7 @@ usbHidSetFeature (
   unsigned char interface,
   unsigned char report,
   const void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 ) {
   return usbControlWrite(device,

@@ -507,7 +507,7 @@ extern int usbHidGetReport (
   unsigned char interface,
   unsigned char report,
   void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 );
 
@@ -516,7 +516,7 @@ extern int usbHidSetReport (
   unsigned char interface,
   unsigned char report,
   const void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 );
 
@@ -525,7 +525,7 @@ extern int usbHidGetFeature (
   unsigned char interface,
   unsigned char report,
   void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 );
 
@@ -534,7 +534,7 @@ extern int usbHidSetFeature (
   unsigned char interface,
   unsigned char report,
   const void *buffer,
-  int length,
+  uint16_t length,
   int timeout
 );
 
