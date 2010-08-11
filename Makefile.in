@@ -25,54 +25,58 @@ $(POT_FILE):
 pot: $(POT_FILE)
 
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+TAR_EXTENSION = tar
+GZIP_EXTENSION = gz
+BZIP2_EXTENSION = bz2
+ZIP_EXTENSION = zip
 
-TAR_FILE = $(ARCHIVE_NAME).tar
-$(TAR_FILE):
+SRC_TAR = $(ARCHIVE_NAME).$(TAR_EXTENSION)
+$(SRC_TAR):
 	$(SRC_TOP)mktar $(SRC_TOP) $(ARCHIVE_NAME) $@
-tar: $(TAR_FILE)
+src-tar: $(SRC_TAR)
 
-GZIP_FILE = $(TAR_FILE).gz
-$(GZIP_FILE): $(TAR_FILE)
-	gzip -c -9 $(TAR_FILE) >$@
-gzip: $(GZIP_FILE)
+SRC_TAR_GZIP = $(SRC_TAR).$(GZIP_EXTENSION)
+$(SRC_TAR_GZIP): $(SRC_TAR)
+	gzip -9 -c $(SRC_TAR) >$@
+src-tar-gzip: $(SRC_TAR_GZIP)
 
-BZIP2_FILE = $(TAR_FILE).bz2
-$(BZIP2_FILE): $(TAR_FILE)
-	bzip2 -c -9 $(TAR_FILE) >$@
-bzip2: $(BZIP2_FILE)
+SRC_TAR_BZIP2 = $(SRC_TAR).$(BZIP2_EXTENSION)
+$(SRC_TAR_BZIP2): $(SRC_TAR)
+	bzip2 -9 -c $(SRC_TAR) >$@
+src-tar-bzip2: $(SRC_TAR_BZIP2)
 
-rpm: $(GZIP_FILE)
-	$(SRC_TOP)mkrpm $(GZIP_FILE)
+rpm: $(SRC_TAR_GZIP)
+	$(SRC_TOP)mkrpm $(SRC_TAR_GZIP)
 
-ZIP_FILE = $(ARCHIVE_NAME).zip
-$(ZIP_FILE):
+SRC_ZIP = $(ARCHIVE_NAME).$(ZIP_EXTENSION)
+$(SRC_ZIP):
 	$(SRC_TOP)mkzip $(SRC_TOP) $(ARCHIVE_NAME) $@
-zip: $(ZIP_FILE)
+src-zip: $(SRC_ZIP)
 
 BIN_DIR = `pwd`/BinTree
 bin-tree:
 	$(INSTALL_DIRECTORY) $(BIN_DIR)
 	$(MAKE) install INSTALL_ROOT=$(BIN_DIR)
 
-BIN_TAR = $(ARCHIVE_NAME).$(HOST_OS).$(HOST_CPU).tar
-bin-tar: $(BIN_TAR)
+BIN_TAR = $(ARCHIVE_NAME).$(HOST_OS).$(HOST_CPU).$(TAR_EXTENSION)
 $(BIN_TAR): bin-tree
 	tar -C $(BIN_DIR) -c -f $@ .
+bin-tar: $(BIN_TAR)
 
-BIN_TAR_GZIP = $(BIN_TAR).gz
-bin-tar-gzip: $(BIN_TAR_GZIP)
+BIN_TAR_GZIP = $(BIN_TAR).$(GZIP_EXTENSION)
 $(BIN_TAR_GZIP): $(BIN_TAR)
 	gzip -9 -c $(BIN_TAR) >$@
+bin-tar-gzip: $(BIN_TAR_GZIP)
 
-BIN_TAR_BZIP2 = $(BIN_TAR).bz2
-bin-tar-bzip2: $(BIN_TAR_BZIP2)
+BIN_TAR_BZIP2 = $(BIN_TAR).$(BZIP2_EXTENSION)
 $(BIN_TAR_BZIP2): $(BIN_TAR)
-	bzip2 -c $(BIN_TAR) >$@
+	bzip2 -9 -c $(BIN_TAR) >$@
+bin-tar-bzip2: $(BIN_TAR_BZIP2)
 
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
-	-rm -f -- *.pot *.tar *.gz *.bz2 *.rpm
+	-rm -f -- *.pot *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(ZIP_EXTENSION) *.rpm
 distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)
