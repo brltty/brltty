@@ -29,6 +29,7 @@ TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
 BZIP2_EXTENSION = bz2
 ZIP_EXTENSION = zip
+XZ_EXTENSION = xz
 
 SRC_TAR = $(ARCHIVE_NAME).$(TAR_EXTENSION)
 $(SRC_TAR):
@@ -44,6 +45,11 @@ SRC_TAR_BZIP2 = $(SRC_TAR).$(BZIP2_EXTENSION)
 $(SRC_TAR_BZIP2): $(SRC_TAR)
 	bzip2 -9 -c $(SRC_TAR) >$@
 src-tar-bzip2: $(SRC_TAR_BZIP2)
+
+SRC_TAR_XZ = $(SRC_TAR).$(XZ_EXTENSION)
+$(SRC_TAR_XZ): $(SRC_TAR)
+	xz -9 -c $(SRC_TAR) >$@
+src-tar-xz: $(SRC_TAR_XZ)
 
 rpm: $(SRC_TAR_GZIP)
 	$(SRC_TOP)mkrpm $(SRC_TAR_GZIP)
@@ -72,6 +78,11 @@ BIN_TAR_BZIP2 = $(BIN_TAR).$(BZIP2_EXTENSION)
 $(BIN_TAR_BZIP2): $(BIN_TAR)
 	bzip2 -9 -c $(BIN_TAR) >$@
 bin-tar-bzip2: $(BIN_TAR_BZIP2)
+
+BIN_TAR_XZ = $(BIN_TAR).$(XZ_EXTENSION)
+$(BIN_TAR_XZ): $(BIN_TAR)
+	xz -9 -c $(BIN_TAR) >$@
+bin-tar-xz: $(BIN_TAR_XZ)
 
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
