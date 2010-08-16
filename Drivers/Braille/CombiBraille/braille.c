@@ -97,31 +97,37 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((CB_serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(CB_serialDevice, BAUDRATE)) {
-      if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
-        static const unsigned char init_seq[] = { 27, '?' };
-        static const unsigned char init_ack[] = { 27, '?' };
+      CB_charactersPerSecond = BAUDRATE / 10;
 
-        CB_charactersPerSecond = BAUDRATE / 10;
+      if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
+        static const unsigned char init_seq[] = {0X1B, '?'};
 
         if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
-          short n;
+          static const unsigned char init_ack[] = {0X1B, '?'};
+          unsigned int n = 0;
           unsigned char c;
           signed char id = -1;
 
           hasTimedOut(0);		/* initialise timeout testing */
-          n = 0;
           do {
-            approximateDelay (20);
-            if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1)
-              continue;
-            if (n < sizeof(init_ack) && c != init_ack[n])
-              continue;
+            approximateDelay(20);
+            if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1) continue;
+
             if (n == sizeof(init_ack)) {
               id = c;
               break;
             }
-            n++;
-          } while (!hasTimedOut(ACK_TIMEOUT) && n <= sizeof(init_ack));
+
+          testCharacter:
+            if (c != init_ack[n]) {
+              if (n == 0) continue;
+
+              n = 0;
+              goto testCharacter;
+            }
+
+            n += 1;
+          } while (!hasTimedOut(ACK_TIMEOUT));
 
           if (id != -1) {
             typedef struct {
@@ -143,12 +149,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             while (model->textColumns) {
               if (id == model->identifier) break;
-              model++;
+              model += 1;
             }
               
             if (model->textColumns) {
               brl->textColumns = model->textColumns;
-              brl->textRows = BRLROWS;
+              brl->textRows = 1;
+
               brl->statusColumns = 5;
               brl->statusRows = 1;
 
@@ -160,14 +167,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               }
 
               /* Allocate space for buffers */
-              prevdata = mallocWrapper (brl->textColumns * brl->textRows);
+              prevdata = mallocWrapper(brl->textColumns * brl->textRows);
+
               /* rawdata has to have room for the pre- and post-data sequences,
-               * the status cells, and escaped 0x1b's: */
-              rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
+               * the status cells, and escaped escapes
+               */
+              rawdata = mallocWrapper(20 + (brl->textColumns * brl->textRows * 2));
 
               return 1;
             } else {
-              LogPrint(LOG_ERR, "Detected unknown CombiBraille model with ID %02X.", id);
+              LogPrint(LOG_ERR, "detected unknown CombiBraille model with ID %02X", id);
             }
           }
         }
@@ -175,6 +184,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     }
 
     serialCloseDevice(CB_serialDevice);
+    CB_serialDevice = NULL;
   }
 
   return 0;
@@ -182,37 +192,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
-  unsigned char *post_data = (unsigned char *)POST_DATA;
-  unsigned char *close_seq = (unsigned char *)CLOSE_SEQ;
+  if (prevdata) {
+    free(prevdata);
+    prevdata = NULL;
+  }
 
-  rawlen = 0;
-  if (pre_data[0])
-    {
-      memcpy (rawdata + rawlen, pre_data + 1, pre_data[0]);
-      rawlen += pre_data[0];
-    }
-  /* Clear the five status cells and the main display: */
-  memset (rawdata + rawlen, 0, 5 + brl->textColumns * brl->textRows);
-  rawlen += 5 + brl->textColumns * brl->textRows;
-  if (post_data[0])
-    {
-      memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
-      rawlen += post_data[0];
-    }
+  if (rawdata) {
+    free(rawdata);
+    rawdata = NULL;
+  }
 
-  /* Send closing sequence: */
-  if (close_seq[0])
-    {
-      memcpy (rawdata + rawlen, close_seq + 1, close_seq[0]);
-      rawlen += close_seq[0];
-    }
-  serialWriteData (CB_serialDevice, rawdata, rawlen);
-
-  free (prevdata);
-  free (rawdata);
-
-  serialCloseDevice (CB_serialDevice);
+  if (CB_serialDevice) {
+    serialCloseDevice(CB_serialDevice);
+    CB_serialDevice = NULL;
+  }
 }
 
 static int
@@ -226,47 +219,39 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  short i;			/* loop counter */
+  int i;			/* loop counter */
   unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
-  unsigned char *post_data = (unsigned char *)POST_DATA;
 
   /* Only refresh display if the data has changed: */
-  if (memcmp (brl->buffer, prevdata, brl->textColumns * brl->textRows) || \
-      memcmp (status, oldstatus, 5))
-    {
-      /* Save new Braille data: */
-      memcpy (prevdata, brl->buffer, brl->textColumns * brl->textRows);
+  if ((memcmp(brl->buffer, prevdata, brl->textColumns) != 0) ||
+      (memcmp(status, oldstatus, 5) != 0)) {
+    /* save new braille data */
+    memcpy(prevdata, brl->buffer, brl->textColumns);
 
-      /* Dot mapping from standard to CombiBraille: */
-      for (i = 0; i < brl->textColumns * brl->textRows; brl->buffer[i] = outputTable[brl->buffer[i]], \
-	   i++);
+    /* dot mapping from core to device */
+    for (i=0; i<brl->textColumns; i+=1)
+      brl->buffer[i] = outputTable[brl->buffer[i]];
 
-      rawlen = 0;
-      if (pre_data[0])
-	{
-	  memcpy (rawdata + rawlen, pre_data + 1, pre_data[0]);
-	  rawlen += pre_data[0];
-	}
-      for (i = 0; i < 5; i++)
-	{
-	  rawdata[rawlen++] = status[i];
-	  if (status[i] == 0x1b)	/* CombiBraille hack */
-	    rawdata[rawlen++] = 0x1b;
-	}
-      for (i = 0; i < brl->textColumns * brl->textRows; i++)
-	{
-	  rawdata[rawlen++] = brl->buffer[i];
-	  if (brl->buffer[i] == 0x1b)	/* CombiBraille hack */
-	    rawdata[rawlen++] = brl->buffer[i];
-	}
-      if (post_data[0])
-	{
-	  memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
-	  rawlen += post_data[0];
-	}
-      serialWriteData (CB_serialDevice, rawdata, rawlen);
-      brl->writeDelay += (rawlen * 1000 / CB_charactersPerSecond) + 1;
+    rawlen = 0;
+    if (pre_data[0]) {
+      memcpy(rawdata+rawlen, pre_data+1, pre_data[0]);
+      rawlen += pre_data[0];
     }
+
+    for (i=0; i<5; i+=1) {
+      rawdata[rawlen++] = status[i];
+      if (status[i] == 0X1B) rawdata[rawlen++] = status[i];
+    }
+
+    for (i=0; i<brl->textColumns; i+=1) {
+      rawdata[rawlen++] = brl->buffer[i];
+      if (brl->buffer[i] == 0X1B) rawdata[rawlen++] = brl->buffer[i];
+    }
+
+    serialWriteData(CB_serialDevice, rawdata, rawlen);
+    brl->writeDelay += (rawlen * 1000 / CB_charactersPerSecond) + 1;
+  }
+
   return 1;
 }
 

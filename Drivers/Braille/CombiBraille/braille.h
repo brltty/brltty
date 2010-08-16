@@ -29,7 +29,6 @@
 extern SerialDevice *CB_serialDevice;
 extern int CB_charactersPerSecond;			/* file descriptor for Braille display */
 
-#define BRLROWS 1		/* number of rows on Braille display */
 #define BAUDRATE 38400		/* baud rate for Braille display */
 
 /* The following sequences are sent at termination and before and after Braille
@@ -41,6 +40,4 @@ extern int CB_charactersPerSecond;			/* file descriptor for Braille display */
 #define ACK_TIMEOUT 5000	/* acknowledgement timeout in milliseconds */
 #define MAX_ATTEMPTS 0		/* total tiimeout = timeout * attempts */
 				/* try forever if MAX_ATTEMPTS = 0 */
-#define CLOSE_SEQ ""		/* string to send to Braille to close */
 #define PRE_DATA "\002\033B"	/* string to send to Braille before data */
-#define POST_DATA ""		/* string to send to Braille after data */
