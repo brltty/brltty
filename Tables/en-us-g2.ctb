@@ -460,7 +460,8 @@ begword gravedi = gravedigger
 begword gravero = graverobbing
 always great 1245-1235-2345
 contraction grt
-sufword guenever 1245-136-26-15-1236-12456
+sufword guenever 1245-136-26-15-1236-12456 Guenevere
+sufword guinever 1245-136-35-15-1236-12456 Guinevere
 
 # the letter h
 always h 125
@@ -579,8 +580,10 @@ sufword mishear 134-24-234-125-15-345 misheard
 begword missh 134-24-234-146 misshapen
 always mistak = mistake
 word mistook =
+sufword mistrain 134-24-234-2345-1235-1-35 mistrained
 begword mistran = mistranslation
 sufword mistreat 134-24-234-2345-1235-2-2345
+sufword mistrial = mistrials
 begword mistru = mistrust
 begword misty = mistyped
 word monetary 134-5-135-2345-345-13456
