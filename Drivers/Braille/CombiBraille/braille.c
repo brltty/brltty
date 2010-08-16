@@ -219,23 +219,23 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int i;			/* loop counter */
-  unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
-
   /* Only refresh display if the data has changed: */
   if ((memcmp(brl->buffer, prevdata, brl->textColumns) != 0) ||
       (memcmp(status, oldstatus, 5) != 0)) {
+    int i;			/* loop counter */
+
     /* save new braille data */
     memcpy(prevdata, brl->buffer, brl->textColumns);
 
     /* dot mapping from core to device */
-    for (i=0; i<brl->textColumns; i+=1)
-      brl->buffer[i] = outputTable[brl->buffer[i]];
+    for (i=0; i<brl->textColumns; i+=1) brl->buffer[i] = outputTable[brl->buffer[i]];
 
     rawlen = 0;
-    if (pre_data[0]) {
-      memcpy(rawdata+rawlen, pre_data+1, pre_data[0]);
-      rawlen += pre_data[0];
+
+    {
+      static const unsigned char header[] = {0X1B, 'B'};
+      memcpy(rawdata+rawlen, header, sizeof(header));
+      rawlen += sizeof(header);
     }
 
     for (i=0; i<5; i+=1) {

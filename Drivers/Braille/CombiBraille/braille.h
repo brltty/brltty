@@ -39,5 +39,3 @@ extern int CB_charactersPerSecond;			/* file descriptor for Braille display */
  */
 #define ACK_TIMEOUT 5000	/* acknowledgement timeout in milliseconds */
 #define MAX_ATTEMPTS 0		/* total tiimeout = timeout * attempts */
-				/* try forever if MAX_ATTEMPTS = 0 */
-#define PRE_DATA "\002\033B"	/* string to send to Braille before data */
