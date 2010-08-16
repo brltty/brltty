@@ -97,33 +97,33 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((CB_serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(CB_serialDevice, BAUDRATE)) {
-      static const unsigned char init_seq[] = { 27, '?' };
-      static const unsigned char init_ack[] = { 27, '?' };
+      if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
+        static const unsigned char init_seq[] = { 27, '?' };
+        static const unsigned char init_ack[] = { 27, '?' };
 
-      CB_charactersPerSecond = BAUDRATE / 10;
+        CB_charactersPerSecond = BAUDRATE / 10;
 
-      if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
-        short n;
-        unsigned char c;
-        signed char id = -1;
+        if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
+          short n;
+          unsigned char c;
+          signed char id = -1;
 
-        hasTimedOut(0);		/* initialise timeout testing */
-        n = 0;
-        do {
-          approximateDelay (20);
-          if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1)
-            continue;
-          if (n < sizeof(init_ack) && c != init_ack[n])
-            continue;
-          if (n == sizeof(init_ack)) {
-            id = c;
-            break;
-          }
-          n++;
-        } while (!hasTimedOut(ACK_TIMEOUT) && n <= sizeof(init_ack));
+          hasTimedOut(0);		/* initialise timeout testing */
+          n = 0;
+          do {
+            approximateDelay (20);
+            if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1)
+              continue;
+            if (n < sizeof(init_ack) && c != init_ack[n])
+              continue;
+            if (n == sizeof(init_ack)) {
+              id = c;
+              break;
+            }
+            n++;
+          } while (!hasTimedOut(ACK_TIMEOUT) && n <= sizeof(init_ack));
 
-        if (id != -1) {
-          if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
+          if (id != -1) {
             typedef struct {
               char identifier;
               char textColumns;
