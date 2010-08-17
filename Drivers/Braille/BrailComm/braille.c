@@ -32,6 +32,8 @@ typedef enum {
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 
+static const int showOutputMapping = 0;
+
 static SerialDevice *serialDevice = NULL;
 static int serialBaud;
 static int charactersPerSecond;
@@ -398,6 +400,29 @@ writeLine (BrailleDisplay *brl) {
     for (i=0; i<brl->textColumns; i+=1) {
       *byte++ = outputTable[brl->buffer[i]];
       *byte++ = 0X07;
+    }
+  }
+
+  if (showOutputMapping) {
+    int row = statusCells[gscWindowRow];
+
+    if (--row < 0X10) {
+      int column;
+
+      for (column=0; column<80; column+=1) packet[2+(column*2)] = ' ';
+
+      for (column=0; column<0X10; column+=1) {
+        unsigned char *byte = &packet[2 + (column * 8)];
+        static const unsigned char hex[] = "0123456789ABCDEF";
+
+        *byte = hex[row];
+        byte += 2;
+
+        *byte = hex[column];
+        byte += 2;
+
+        *byte = (row << 4) | column;
+      }
     }
   }
 
