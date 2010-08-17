@@ -76,10 +76,11 @@ SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
-static unsigned char *prevdata;	/* previously received data */
-static unsigned char status[5], oldstatus[5];	/* status cells - always five */
-static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
-static short rawlen;			/* length of rawdata buffer */
+static unsigned char *prevdata;
+
+#define MAX_STATUS_CELLS 5
+static unsigned char status[MAX_STATUS_CELLS];
+static unsigned char oldstatus[MAX_STATUS_CELLS];
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -88,7 +89,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
 
-  prevdata = rawdata = NULL;		/* clear pointers */
+  prevdata = NULL;		/* clear pointers */
 
   if ((CB_serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(CB_serialDevice, BAUDRATE)) {
@@ -139,7 +140,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               { .identifier = 9, .textColumns = 80 },
               { .textColumns = 0 }
             };
-
             const ModelEntry *model = modelTable;
 
             while (model->textColumns) {
@@ -156,7 +156,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               {
                 const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
                 brl->keyBindings = ktd->bindings;
                 brl->keyNameTables = ktd->names;
               }
@@ -167,12 +166,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               }
 
               /* Allocate space for buffers */
-              prevdata = mallocWrapper(brl->textColumns * brl->textRows);
-
-              /* rawdata has to have room for the pre- and post-data sequences,
-               * the status cells, and escaped escapes
-               */
-              rawdata = mallocWrapper(20 + (brl->textColumns * brl->textRows * 2));
+              prevdata = mallocWrapper(brl->textColumns);
 
               return 1;
             } else {
@@ -197,11 +191,6 @@ brl_destruct (BrailleDisplay *brl) {
     prevdata = NULL;
   }
 
-  if (rawdata) {
-    free(rawdata);
-    rawdata = NULL;
-  }
-
   if (CB_serialDevice) {
     serialCloseDevice(CB_serialDevice);
     CB_serialDevice = NULL;
@@ -210,10 +199,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
-  short i;
-
-  /* Dot mapping: */
-  for (i = 0; i < 5; status[i] = outputTable[s[i]], i++);
+  memcpy(status, s, brl->statusColumns);
   return 1;
 }
 
@@ -221,35 +207,36 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   /* Only refresh display if the data has changed: */
   if ((memcmp(brl->buffer, prevdata, brl->textColumns) != 0) ||
-      (memcmp(status, oldstatus, 5) != 0)) {
+      (memcmp(status, oldstatus, brl->statusColumns) != 0)) {
+    static const unsigned char header[] = {0X1B, 'B'};
+    unsigned char buffer[sizeof(header) + ((brl->statusColumns + brl->textColumns) * 2)];
+    unsigned char *byte = buffer;
     int i;			/* loop counter */
 
     /* save new braille data */
     memcpy(prevdata, brl->buffer, brl->textColumns);
+    memcpy(oldstatus, status, brl->statusColumns);
 
-    /* dot mapping from core to device */
-    for (i=0; i<brl->textColumns; i+=1) brl->buffer[i] = outputTable[brl->buffer[i]];
+    memcpy(byte, header, sizeof(header));
+    byte += sizeof(header);
 
-    rawlen = 0;
-
-    {
-      static const unsigned char header[] = {0X1B, 'B'};
-      memcpy(rawdata+rawlen, header, sizeof(header));
-      rawlen += sizeof(header);
-    }
-
-    for (i=0; i<5; i+=1) {
-      rawdata[rawlen++] = status[i];
-      if (status[i] == 0X1B) rawdata[rawlen++] = status[i];
+    for (i=0; i<brl->statusColumns; i+=1) {
+      const unsigned char c = outputTable[status[i]];
+      if (c == 0X1B) *byte++ = c;
+      *byte++ = c;
     }
 
     for (i=0; i<brl->textColumns; i+=1) {
-      rawdata[rawlen++] = brl->buffer[i];
-      if (brl->buffer[i] == 0X1B) rawdata[rawlen++] = brl->buffer[i];
+      const unsigned char c = outputTable[brl->buffer[i]];
+      if (c == 0X1B) *byte++ = c;
+      *byte++ = c;
     }
 
-    serialWriteData(CB_serialDevice, rawdata, rawlen);
-    brl->writeDelay += (rawlen * 1000 / CB_charactersPerSecond) + 1;
+    {
+      const size_t size = byte - buffer;
+      serialWriteData(CB_serialDevice, buffer, size);
+      brl->writeDelay += (size * 1000 / CB_charactersPerSecond) + 1;
+    }
   }
 
   return 1;
