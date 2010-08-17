@@ -253,11 +253,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     .set = set,
     .key = key
   };
-  unsigned int keyPosition;
 
   KeyTableState state = KTS_UNBOUND;
   int command = EOF;
-  int immediate = 1;
   const HotkeyEntry *hotkey;
 
   if (context == BRL_CTX_DEFAULT) context = table->currentContext;
@@ -277,6 +275,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
     state = KTS_HOTKEY;
   } else {
+    int immediate = 1;
+    unsigned int keyPosition;
+
     if (findPressedKey(table, &keyValue, &keyPosition)) removePressedKey(table, keyPosition);
 
     if (press) {
