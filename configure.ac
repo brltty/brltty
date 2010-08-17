@@ -697,6 +697,7 @@ AC_CHECK_FUNCS([pause sigaction])
 AC_CHECK_FUNCS([fchdir fchmod])
 AC_CHECK_FUNCS([shmget shm_open])
 AC_CHECK_FUNCS([getpeereid getpeerucred getzoneid])
+AC_CHECK_FUNCS([mempcpy wmempcpy])
 
 case "${host_os}"
 in

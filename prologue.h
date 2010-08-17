@@ -249,6 +249,14 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
 
+#ifndef HAVE_MEMPCPY
+#define mempcpy(dest,src,size) (void *)((char *)memcpy((dest), (src), (size)) + (size))
+#endif /* HAVE_MEMPCPY */
+
+#ifndef HAVE_WMEMPCPY
+#define wmempcpy(dest,src,count) (wmemcpy((dest), (src), (count)) + (count))
+#endif /* HAVE_WMEMPCPY */
+
 #ifndef WRITABLE_DIRECTORY
 #define WRITABLE_DIRECTORY ""
 #endif /* WRITABLE_DIRECTORY */

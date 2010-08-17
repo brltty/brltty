@@ -125,6 +125,12 @@ extern "C" {
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
 
+/* Define this if the function mempcpy exists. */
+#undef HAVE_MEMPCPY
+
+/* Define this if the function wmempcpy exists. */
+#undef HAVE_WMEMPCPY
+
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
 
