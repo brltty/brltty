@@ -28,7 +28,7 @@
 static int
 brlttyRun (void) {
   while (brlttyUpdate());
-  return 0;
+  return 1;
 }
 
 #ifdef __MINGW32__
@@ -86,7 +86,6 @@ exitService (void) {
 static void WINAPI
 serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
-  isWindowsService = 1;
 
   if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
@@ -95,6 +94,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
           brlttyRun();
         }
       }
+
       setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
     }
   } else {
@@ -112,6 +112,7 @@ main (int argc, char *argv[]) {
       {}
     };
 
+    isWindowsService = 1;
     if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
     isWindowsService = 0;
 
@@ -123,25 +124,27 @@ main (int argc, char *argv[]) {
 #endif /* __MINGW32__ */
 
 #ifdef INIT_PATH
-  if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
-    fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
+#define INIT_NAME "init"
+
+  if ((getpid() == 1) || strstr(argv[0], "linuxrc")) {
+    fprintf(stderr, gettext("\"%s\" started as \"%s\"\n"), PACKAGE_TITLE, argv[0]);
     fflush(stderr);
 
     switch (fork()) {
       case -1: /* failed */
-        fprintf(stderr, gettext("fork of %s failed: %s\n"),
+        fprintf(stderr, gettext("fork of \"%s\" failed: %s\n"),
                 PACKAGE_TITLE, strerror(errno));
         fflush(stderr);
 
       default: /* parent */
-        fprintf(stderr, gettext("executing %s (from %s)\n"), "INIT", INIT_PATH);
+        fprintf(stderr, gettext("executing \"%s\" (from \"%s\")\n"), INIT_NAME, INIT_PATH);
         fflush(stderr);
 
       executeInit:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
 
-        fprintf(stderr, gettext("execution of %s failed: %s\n"), "INIT", strerror(errno));
+        fprintf(stderr, gettext("execution of \"%s\" failed: %s\n"), INIT_NAME, strerror(errno));
         fflush(stderr);
         exit(1);
 
@@ -152,7 +155,7 @@ main (int argc, char *argv[]) {
         break;
       }
     }
-  } else if (strstr(argv[0], "brltty") == NULL) {
+  } else if (!strstr(argv[0], "brltty")) {
     /* 
      * If we are substituting the real init binary, then we may consider
      * when someone might want to call that binary even when pid != 1.
