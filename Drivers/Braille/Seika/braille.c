@@ -307,9 +307,7 @@ writeCells_330 (BrailleDisplay *brl) {
   unsigned char packet[sizeof(header) + 2 + (brl->textColumns * 2)];
   unsigned char *byte = packet;
 
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
-
+  byte = mempcpy(byte, header, sizeof(header));
   *byte++ = brl->textColumns * 2;
   *byte++ = 0;
 
@@ -368,8 +366,7 @@ writeCells_331 (BrailleDisplay *brl) {
   unsigned char packet[sizeof(header) + (brl->textColumns * 2)];
   unsigned char *byte = packet;
 
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
+  byte = mempcpy(byte, header, sizeof(header));
 
   {
     int i;
@@ -501,9 +498,7 @@ writeCells_332 (BrailleDisplay *brl) {
   unsigned char packet[sizeof(header) + 1 + brl->textColumns];
   unsigned char *byte = packet;
 
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
-
+  byte = mempcpy(byte, header, sizeof(header));
   *byte++ = brl->textColumns;
 
   {

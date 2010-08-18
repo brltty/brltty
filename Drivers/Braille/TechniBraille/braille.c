@@ -85,9 +85,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
   *byte++ = 0;
   *byte++ = function;
   *byte++ = count;
-
-  memcpy(byte, data, count);
-  byte += count;
+  byte = mempcpy(byte, data, count);
 
   {
     unsigned char checksum = 0;
