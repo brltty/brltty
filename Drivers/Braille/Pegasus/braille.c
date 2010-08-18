@@ -476,9 +476,7 @@ writeUsbCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int cou
   unsigned char *byte = buffer;
 
   *byte++ = 0X43;
-
-  memcpy(byte, cells, count);
-  byte += count;
+  byte = mempcpy(byte, cells, count);
 
   return writeBytes(brl, buffer, byte-buffer);
 }
