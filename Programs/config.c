@@ -76,17 +76,18 @@
 #ifdef __MINGW32__
 #include "sys_windows.h"
 
-static int opt_installService;
-static int opt_removeService;
+int isWindowsService = 0;
 
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
+static int opt_installService;
 static const char *const optionStrings_InstallService[] = {
   SERVICE_NAME,
   NULL
 };
 
+static int opt_removeService;
 static const char *const optionStrings_RemoveService[] = {
   SERVICE_NAME,
   NULL

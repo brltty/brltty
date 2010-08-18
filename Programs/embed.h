@@ -23,9 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int brlttyInitialize (int argc, char *argv[]);
-extern void brlttyPrepare (void);
-extern void brlttyMain (void);
+extern int brlttyConstruct (int argc, char *argv[]);
+extern void brlttyUpdate (void);
 
 #ifdef __cplusplus
 }

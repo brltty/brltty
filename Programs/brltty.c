@@ -1070,8 +1070,44 @@ highlightWindow (void) {
   }
 }
 
+static void (*brlttyPrepare) (void);
+static int oldwinx;
+static int oldwiny;
+static int isOffline;
+static int isSuspended;
+static int isWritable;
+
+static void
+brlttyPrepare_next (void) {
+  drainBrailleOutput(&brl, updateInterval);
+  updateIntervals += 1;
+  updateSessionAttributes();
+}
+
+static void
+brlttyPrepare_first (void) {
+  setSessionEntry();
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  ses->motx = ses->winx; ses->moty = ses->winy;
+
+  oldwinx = ses->winx;
+  oldwiny = ses->winy;
+  isOffline = 0;
+  isSuspended = 0;
+  isWritable = 1;
+
+  highlightWindow();
+  checkPointer();
+  resetScanCodes();
+  resetBlinkingStates();
+  if (prefs.autorepeat) resetAutorepeat();
+
+  brlttyPrepare = brlttyPrepare_next;
+}
+
 int
-brlttyInitialize (int argc, char *argv[]) {
+brlttyConstruct (int argc, char *argv[]) {
   /* Open the system log. */
   openLog(0);
   LogPrint(LOG_INFO, gettext("starting"));
@@ -1093,33 +1129,8 @@ brlttyInitialize (int argc, char *argv[]) {
   startup(argc, argv);
 
   atexit(exitSessions);
+  brlttyPrepare = brlttyPrepare_first;
   return 0;
-}
-
-static int oldwinx;
-static int oldwiny;
-static int isOffline;
-static int isSuspended;
-static int isWritable;
-
-void
-brlttyPrepare (void) {
-  setSessionEntry();
-  ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0;
-  ses->motx = ses->winx; ses->moty = ses->winy;
-
-  oldwinx = ses->winx;
-  oldwiny = ses->winy;
-  isOffline = 0;
-  isSuspended = 0;
-  isWritable = 1;
-
-  highlightWindow();
-  checkPointer();
-  resetScanCodes();
-  resetBlinkingStates();
-  if (prefs.autorepeat) resetAutorepeat();
 }
 
 static int
@@ -2167,9 +2178,12 @@ doCommand:
   return 1;
 }
 
-static void
+void
 brlttyUpdate (void) {
-  int pointerMoved = 0;
+  brlttyPrepare();
+  testProgramTermination();
+  closeTuneDevice(0);
+  checkRoutingStatus(ROUTING_DONE, 0);
 
   if (opt_releaseDevice) {
     if (scr.unreadable) {
@@ -2205,6 +2219,8 @@ brlttyUpdate (void) {
       && (!apiStarted || api_claimDriver(&brl))
 #endif /* ENABLE_API */
       ) {
+    int pointerMoved = 0;
+
     /*
      * Process any Braille input 
      */
@@ -2643,35 +2659,17 @@ brlttyUpdate (void) {
 
       if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) isWritable = 0;
     }
+
 #ifdef ENABLE_API
     api_releaseDriver(&brl);
   } else if (apiStarted) {
     api_flush(&brl, BRL_CTX_DEFAULT);
 #endif /* ENABLE_API */
   }
-}
-
-void
-brlttyMain (void) {
-  testProgramTermination();
-  closeTuneDevice(0);
-  checkRoutingStatus(ROUTING_DONE, 0);
-  brlttyUpdate();
 
 #ifdef ENABLE_SPEECH_SUPPORT
   processSpeechFifo(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
-
-  drainBrailleOutput(&brl, updateInterval);
-  updateIntervals += 1;
-  updateSessionAttributes();
-}
-
-static int
-brlttyRun (void) {
-  brlttyPrepare();
-  while (1) brlttyMain();
-  return 0;
 }
 
 int 
@@ -2772,9 +2770,13 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   return 1;
 }
 
-#ifdef __MINGW32__
-int isWindowsService;
+static int
+brlttyRun (void) {
+  while (1) brlttyUpdate();
+  return 0;
+}
 
+#ifdef __MINGW32__
 static SERVICE_STATUS_HANDLE serviceStatusHandle;
 static DWORD serviceState;
 static int serviceReturnCode;
@@ -2833,7 +2835,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
 
   if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
-      if (!(serviceReturnCode = brlttyInitialize(argc, argv))) {
+      if (!(serviceReturnCode = brlttyConstruct(argc, argv))) {
         if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
           brlttyRun();
         }
@@ -2910,7 +2912,7 @@ main (int argc, char *argv[]) {
 #endif /* STDERR_PATH */
 
   {
-    int returnCode = brlttyInitialize(argc, argv);
+    int returnCode = brlttyConstruct(argc, argv);
     if (!returnCode) returnCode = brlttyRun();
     return returnCode;
   }
