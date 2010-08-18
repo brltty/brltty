@@ -27,7 +27,7 @@
 
 static int
 brlttyRun (void) {
-  while (1) brlttyUpdate();
+  while (brlttyUpdate());
   return 0;
 }
 

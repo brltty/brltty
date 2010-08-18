@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int brlttyConstruct (int argc, char *argv[]);
-extern void brlttyUpdate (void);
+extern int brlttyUpdate (void);
 
 #ifdef __cplusplus
 }

@@ -1070,21 +1070,28 @@ highlightWindow (void) {
   }
 }
 
-static void (*brlttyPrepare) (void);
+static int
+brlttyPrepare_unconstructed (void) {
+  LogPrint(LOG_ERR, "not constructed yet");
+  return 0;
+}
+
+static int (*brlttyPrepare) (void) = brlttyPrepare_unconstructed;
 static int oldwinx;
 static int oldwiny;
 static int isOffline;
 static int isSuspended;
 static int isWritable;
 
-static void
+static int
 brlttyPrepare_next (void) {
   drainBrailleOutput(&brl, updateInterval);
   updateIntervals += 1;
   updateSessionAttributes();
+  return 1;
 }
 
-static void
+static int
 brlttyPrepare_first (void) {
   setSessionEntry();
   ses->trkx = scr.posx; ses->trky = scr.posy;
@@ -1104,6 +1111,7 @@ brlttyPrepare_first (void) {
   if (prefs.autorepeat) resetAutorepeat();
 
   brlttyPrepare = brlttyPrepare_next;
+  return 1;
 }
 
 int
@@ -2178,9 +2186,10 @@ doCommand:
   return 1;
 }
 
-void
+int
 brlttyUpdate (void) {
-  brlttyPrepare();
+  if (!brlttyPrepare()) return 0;
+
   testProgramTermination();
   closeTuneDevice(0);
   checkRoutingStatus(ROUTING_DONE, 0);
@@ -2670,6 +2679,8 @@ brlttyUpdate (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
   processSpeechFifo(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  return 1;
 }
 
 int 
