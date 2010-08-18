@@ -60,6 +60,7 @@
 #include "log.h"
 #include "timing.h"
 #include "misc.h"
+#include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
 #define BRL_HAVE_STATUS_CELLS
@@ -67,9 +68,6 @@
 #include "braille.h"
 #include "tables.h"		/* for keybindings */
 #include "io_serial.h"
-
-#define ESC '\033'
-#define CR '\015'
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
 SerialDevice *MB_serialDevice;			/* file descriptor for Braille display */
@@ -165,7 +163,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	/* Allocate space for buffers */
 	prevdata = mallocWrapper (brl->textColumns * brl->textRows);
 	/* rawdata has to have room for the pre- and post-data sequences,
-	 * the status cells, and escaped 0x1b's: */
+	 * the status cells, and escaped escapes: */
 	rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
 
 	return 1;

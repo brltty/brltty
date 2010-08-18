@@ -43,6 +43,7 @@
 #include "log.h"
 #include "bitfield.h"
 #include "timing.h"
+#include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
@@ -376,7 +377,7 @@ static unsigned char xmtTextOffset;
 
 static void
 resetTerminal1 (BrailleDisplay *brl) {
-  static const unsigned char sequence[] = {cSTX, 0X01, cETX};
+  static const unsigned char sequence[] = {STX, 0X01, ETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
   io->flushPort(brl);
   writeBytes(brl, sequence, sizeof(sequence));
@@ -388,7 +389,7 @@ static int
 readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t count, int flags) {
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
-    if (*(buffer+offset-1) == cETX) return 1;
+    if (*(buffer+offset-1) == ETX) return 1;
     logCorruptPacket(buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
@@ -399,12 +400,12 @@ static int
 writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *data) {
   if (count) {
     unsigned char header[] = {
-      cSTX,
+      STX,
       cIdSend,
       0, 0, /* big endian data offset */
       0, 0  /* big endian packet length */
     };
-    static const unsigned char trailer[] = {cETX};
+    static const unsigned char trailer[] = {ETX};
 
     unsigned int size = sizeof(header) + count + sizeof(trailer);
     unsigned char buffer[size];
@@ -554,7 +555,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     while (1) {
       READ(0, 1, 0);
-      if (buf[0] == cSTX) break;
+      if (buf[0] == STX) break;
       logIgnoredByte(buf[0]);
     }
 
@@ -652,11 +653,11 @@ static const ProtocolOperations protocolOperations1 = {
 static int
 identifyTerminal1 (BrailleDisplay *brl) {
   static const unsigned char badPacket[] = { 
-    cSTX,
+    STX,
     cIdSend,
     0, 0,			/* position */
     0, 0,			/* wrong number of bytes */
-    cETX
+    ETX
   };
 
   io->flushPort(brl);
@@ -664,7 +665,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
     if (io->awaitInput(1000)) {
       unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
       if (readBytes1(brl, identity, 0, 1, 0)) {
-        if (identity[0] == cSTX) {
+        if (identity[0] == STX) {
           if (readBytes1(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
             if (identity[1] == cIdIdentify) {
               if (interpretIdentity1(brl, identity)) {
@@ -735,14 +736,14 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       unsigned char value = LOW_NIBBLE(byte);
 
       switch (byte) {
-        case cSTX:
+        case STX:
           if (offset > 1) {
             logDiscardedBytes(buffer, offset-1);
             offset = 1;
           }
           continue;
 
-        case cETX:
+        case ETX:
           if ((offset >= 5) && (offset == size)) {
             logInputPacket(buffer, offset);
             return 1;
@@ -818,7 +819,7 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   unsigned char buffer[(count * 2) + 5];
   unsigned char *byte = buffer;
 
-  *byte++ = cSTX;
+  *byte++ = STX;
   *byte++ = 0X40 | command;
   *byte++ = 0X50 | (count >> 4);
   *byte++ = 0X50 | (count & 0XF);
@@ -829,7 +830,7 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
     data++;
   }
 
-  *byte++ = cETX;
+  *byte++ = ETX;
   return writeBytes(brl, buffer, byte-buffer);
 }
 

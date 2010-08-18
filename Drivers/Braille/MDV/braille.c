@@ -61,6 +61,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfWindowCoordinates
 #define BRL_HAVE_STATUS_CELLS
@@ -76,9 +77,6 @@
 #define EXPECTEDNRSTATCELLS 2
 
 /* protocol packets */
-#define SOH 0x01
-#define STX 0x02
-#define ETX 0x03
 #define CKSUM_MASK 0xAA55
 
 /* Packet is SOH STX <code> <len> ETX <data...> <CKSUM_LOW-CKSUM_HIGH> */

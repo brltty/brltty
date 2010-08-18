@@ -48,6 +48,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "ascii.h"
 
 #define BRLSTAT ST_VoyagerStyle
 #define BRL_HAVE_FIRMNESS
@@ -84,7 +85,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
   unsigned char size = 0;
   unsigned char index;
 
-  buffer[size++] = 0X1B;
+  buffer[size++] = ESC;
   buffer[size++] = code;
 
   for (index=0; index<count; ++index)
@@ -115,7 +116,7 @@ readSerialPacket (unsigned char *buffer, int size) {
     {
       unsigned char byte = buffer[offset - 1];
 
-      if (byte == 0X1B) {
+      if (byte == ESC) {
         if ((escape = !escape)) {
           offset--;
           continue;

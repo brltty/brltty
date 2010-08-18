@@ -36,6 +36,7 @@
 
 #include	"message.h"
 #include	"log.h"
+#include	"ascii.h"
 
 
 #define		BRL_HAVE_PACKET_IO	1
@@ -190,14 +191,6 @@ static int	control = 0;
 static int	alt = 0;
 
 
-/* Communication codes */
-
-#define SOH     0x01
-#define EOT     0x04
-#define ACK     0x06
-#define DLE     0x10
-#define NACK    0x15
-
 #define DIM_INBUFSZ 256
 
 static int readbrlkey(BrailleDisplay *brl, char key_context);
@@ -235,7 +228,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const char *data)
 	   case EOT:
 	   case ACK:
 	   case DLE:
-	   case NACK:
+	   case NAK:
 	     *p++ = DLE;
 	  /* no break */
 	   default:
@@ -819,7 +812,7 @@ static int readbrlkey(BrailleDisplay *brl, char key_context)
       else
 	switch (c)
 	  {
-	  case NACK:
+	  case NAK:
 	    ErrFlag = 1;
 	    /* no break */
 	  case ACK:

@@ -29,11 +29,9 @@
 #include "log.h"
 #include "timing.h"
 #include "message.h"
+#include "ascii.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"
-
-# define	STX	0x02
-# define	ETX	0x03
 
 # define	READ_BUFFER_LENGTH 2048
 

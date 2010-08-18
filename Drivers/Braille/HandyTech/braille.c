@@ -26,6 +26,7 @@
 #include "log.h"
 #include "timing.h"
 #include "misc.h"
+#include "ascii.h"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
@@ -784,8 +785,6 @@ static const InputOutputOperations bluetoothOperations = {
   openBluetoothPort, closeBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
-
-#define SYN 0X16
 
 typedef enum {
   BDS_OFF,

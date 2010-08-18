@@ -344,7 +344,7 @@ writeVisualDisplay (unsigned char c) {
 static int
 visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext context) {
   int vt = getVirtualTerminal();
-  const unsigned char end[] = {0X1B, 0};
+  const unsigned char end[] = {ESC, 0};
   unsigned int state = 0;
   openVisualDisplay();
   writeVisualDisplay(BNI_DISPLAY);

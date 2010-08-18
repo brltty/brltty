@@ -33,9 +33,6 @@
  * Edit as necessary for your system.
  */
 
-#define cSTX 0X02
-#define cETX 0X03
-
 #define BRLCOLSMAX   80 
 
 /* maximum number of status cells */

@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "ascii.h"
 
 #include "brl_driver.h"
 #include "io_serial.h"
@@ -44,12 +45,12 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
     }
     byte = buffer[*length - 1];
 
-    if ((*length == 1) && (byte == 0X06)) {
+    if ((*length == 1) && (byte == ACK)) {
       *length = 0;
       continue;
     }
 
-    if (byte == '\r') {
+    if (byte == CR) {
       logBytes(LOG_DEBUG, "Read", buffer, *length);
       return 1;
     }
@@ -68,14 +69,14 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
 
 static int
 writeAcknowledgement (BrailleDisplay *brl) {
-  static const unsigned char acknowledgement[] = {0X06};
+  static const unsigned char acknowledgement[] = {ACK};
   return writeBytes(brl, acknowledgement, sizeof(acknowledgement));
 }
 
 static int
 writeCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {'D'};
-  static const unsigned char trailer[] = {'\r'};
+  static const unsigned char trailer[] = {CR};
   unsigned char buffer[sizeof(header) + brl->textColumns + sizeof(trailer)];
   unsigned char *byte = buffer;
 
@@ -129,7 +130,7 @@ interpretNumber (int *number, const unsigned char **bytes, int *count) {
 
 static int
 identifyDisplay (BrailleDisplay *brl) {
-  static const unsigned char identify[] = {'I', '\r'};
+  static const unsigned char identify[] = {'I', CR};
 
   if (writeBytes(brl, identify, sizeof(identify))) {
     if (serialAwaitInput(serialDevice, 1000)) {

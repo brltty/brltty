@@ -35,6 +35,7 @@
 
 #include "log.h"
 #include "timing.h"
+#include "ascii.h"
 #include "message.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
@@ -45,9 +46,6 @@
 static SerialDevice *serialDevice = NULL;
 static const int serialBaud = 9600;
 static int serialCharactersPerSecond;
-
-#define CR  0X0D
-#define ESC 0X1B
 
 #define KEY_F1     0x01
 #define KEY_F2     0x02

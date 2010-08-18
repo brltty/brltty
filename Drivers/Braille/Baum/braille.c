@@ -26,6 +26,7 @@
 #include "parse.h"
 #include "timing.h"
 #include "io_defs.h"
+#include "ascii.h"
 
 typedef enum {
   PARM_PROTOCOLS,
@@ -447,8 +448,6 @@ changeCellCount (BrailleDisplay *brl, int count) {
 }
 
 /* Baum Protocol */
-
-#define ESCAPE 0X1B
 
 typedef unsigned char BaumInteger[2];
 #define MAKE_BAUM_INTEGER_FIRST(i) ((i) & 0XFF)
@@ -941,7 +940,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
       return 0;
     }
 
-    if (byte == ESCAPE) {
+    if (byte == ESC) {
       if ((escape = !escape)) continue;
     } else if (escape) {
       escape = 0;
@@ -1078,13 +1077,13 @@ static int
 writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
   unsigned char buffer[1 + (length * 2)];
   unsigned char *byte = buffer;
-  *byte++ = ESCAPE;
+  *byte++ = ESC;
 
   {
     int index = 0;
     while (index < length)
-      if ((*byte++ = packet[index++]) == ESCAPE)
-        *byte++ = ESCAPE;
+      if ((*byte++ = packet[index++]) == ESC)
+        *byte++ = ESC;
   }
 
   {

@@ -30,6 +30,7 @@
 #include "log.h"
 #include "timing.h"
 #include "misc.h"
+#include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
 #define BRL_HAVE_STATUS_CELLS
@@ -96,10 +97,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       CB_charactersPerSecond = BAUDRATE / 10;
 
       if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
-        static const unsigned char init_seq[] = {0X1B, '?'};
+        static const unsigned char init_seq[] = {ESC, '?'};
 
         if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
-          static const unsigned char init_ack[] = {0X1B, '?'};
+          static const unsigned char init_ack[] = {ESC, '?'};
           unsigned int n = 0;
           unsigned char c;
           signed char id = -1;
@@ -208,7 +209,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   /* Only refresh display if the data has changed: */
   if ((memcmp(brl->buffer, prevdata, brl->textColumns) != 0) ||
       (memcmp(status, oldstatus, brl->statusColumns) != 0)) {
-    static const unsigned char header[] = {0X1B, 'B'};
+    static const unsigned char header[] = {ESC, 'B'};
     unsigned char buffer[sizeof(header) + ((brl->statusColumns + brl->textColumns) * 2)];
     unsigned char *byte = buffer;
     int i;			/* loop counter */
@@ -221,13 +222,13 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
     for (i=0; i<brl->statusColumns; i+=1) {
       const unsigned char c = outputTable[status[i]];
-      if (c == 0X1B) *byte++ = c;
+      if (c == ESC) *byte++ = c;
       *byte++ = c;
     }
 
     for (i=0; i<brl->textColumns; i+=1) {
       const unsigned char c = outputTable[brl->buffer[i]];
-      if (c == 0X1B) *byte++ = c;
+      if (c == ESC) *byte++ = c;
       *byte++ = c;
     }
 

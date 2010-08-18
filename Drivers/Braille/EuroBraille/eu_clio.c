@@ -29,16 +29,11 @@
 #include "log.h"
 #include "timing.h"
 #include "message.h"
+#include "ascii.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"
 
 /* Communication codes */
-# define SOH	0x01
-# define EOT	0x04
-# define ACK	0x06
-# define DLE	0x10
-# define NAK	0x15
-
 # define PRT_E_PAR 0x01		/* parity error */
 # define PRT_E_NUM 0x02		/* frame numver error */
 # define PRT_E_ING 0x03		/* length error */

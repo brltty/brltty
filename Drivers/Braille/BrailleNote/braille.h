@@ -22,6 +22,8 @@
  * Edit as necessary for your system.
  */
 
+#include "ascii.h"
+
 /* The braille dots. */
 #define BND_0 0000
 #define BND_1 0001
@@ -111,9 +113,9 @@
 #define BNI_THUMB 0X84
 #define BNI_ROUTE 0X85
 #define BNI_DESCRIBE 0X86
-#define BNI_DISPLAY 0X1B
+#define BNI_DISPLAY ESC
 
 /* Output commands. */
-#define BNO_BEGIN 0X1B
+#define BNO_BEGIN ESC
 #define BNO_DESCRIBE '?'
 #define BNO_WRITE 'B'
