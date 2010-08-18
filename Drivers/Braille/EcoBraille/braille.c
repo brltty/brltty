@@ -139,24 +139,16 @@ static char BRL_KEY[] = "\x10\x02\x88";
 
 static int WriteToBrlDisplay(unsigned char *Data)
 {
-  int size = DIM_BRL_WRITE_PREFIX + DIM_BRL_WRITE_SUFIX + BrailleSize;
-  unsigned char *buffTmp;
+  unsigned int size = DIM_BRL_WRITE_PREFIX + BrailleSize + DIM_BRL_WRITE_SUFIX;
+  unsigned char buffer[size];
+  unsigned char *byte = buffer;
   
-  /* Make temporal buffer */
-  buffTmp = malloc(size);
-
-  /* Copy the prefix, Data and sufix */
-  memcpy(buffTmp, BRL_WRITE_PREFIX, DIM_BRL_WRITE_PREFIX);
-  memcpy(buffTmp + DIM_BRL_WRITE_PREFIX, Data, BrailleSize);
-  memcpy(buffTmp + DIM_BRL_WRITE_PREFIX + BrailleSize, BRL_WRITE_SUFIX, DIM_BRL_WRITE_SUFIX); 
-  
-  /* write directly to Braille Line  */
-  serialWriteData(serialDevice, buffTmp, size);
-  
-  /* Destroy temporal buffer */
-  free(buffTmp);
-  
-return(0);
+  byte = mempcpy(byte, BRL_WRITE_PREFIX, DIM_BRL_WRITE_PREFIX);
+  byte = mempcpy(byte, Data, BrailleSize);
+  byte = mempcpy(byte, BRL_WRITE_SUFIX, DIM_BRL_WRITE_SUFIX);
+ 
+  serialWriteData(serialDevice, buffer, byte-buffer);
+  return 0;
 }
 
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)

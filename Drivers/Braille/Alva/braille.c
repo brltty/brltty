@@ -916,17 +916,11 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   unsigned char packet[sizeof(header) + 2 + count + sizeof(trailer)];
   unsigned char *byte = packet;
 
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
-
+  byte = mempcpy(byte, header, sizeof(header));
   *byte++ = start;
   *byte++ = count;
-
-  memcpy(byte, cells, count);
-  byte += count;
-
-  memcpy(byte, trailer, sizeof(trailer));
-  byte += sizeof(trailer);
+  byte = mempcpy(byte, cells, count);
+  byte = mempcpy(byte, trailer, sizeof(trailer));
 
   return writeBytes(packet, byte-packet, &brl->writeDelay);
 }
@@ -1216,9 +1210,7 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
   *byte++ = 0X42;
   *byte++ = start;
   *byte++ = count;
-
-  memcpy(byte, cells, count);
-  byte += count;
+  byte = mempcpy(byte, cells, count);
 
   return writeBytes(packet, byte-packet, &brl->writeDelay);
 }
@@ -1358,9 +1350,7 @@ writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int 
     *byte++ = 0X02;
     *byte++ = start;
     *byte++ = length;
-
-    memcpy(byte, cells, length);
-    byte += length;
+    byte = mempcpy(byte, cells, length);
 
     if (!writeBytes(packet, byte-packet, &brl->writeDelay)) return 0;
     cells += length;

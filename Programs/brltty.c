@@ -472,8 +472,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immedi
       int length = convertWcharToUtf8(character->text, utf8);
 
       if (length) {
-        memcpy(t, utf8, length);
-        t += length;
+        t = mempcpy(t, utf8, length);
       } else {
         *t++ = ' ';
       }

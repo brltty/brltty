@@ -404,27 +404,22 @@ writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned cha
       0, 0, /* big endian data offset */
       0, 0  /* big endian packet length */
     };
-    unsigned char trailer[] = {cETX};
-    int size = sizeof(header) + count + sizeof(trailer);
+    static const unsigned char trailer[] = {cETX};
+
+    unsigned int size = sizeof(header) + count + sizeof(trailer);
     unsigned char buffer[size];
-    int index = 0;
+    unsigned char *byte = buffer;
 
     header[2] = xmtAddress >> 8;
     header[3] = xmtAddress & 0XFF;
     header[4] = size >> 8;
     header[5] = size & 0XFF;
-    memcpy(&buffer[index], header, sizeof(header));
-    index += sizeof(header);
 
-    if (count) {
-      memcpy(&buffer[index], data, count);
-      index += count;
-    }
-    
-    memcpy(&buffer[index], trailer, sizeof(trailer));
-    index += sizeof(trailer);
-    
-    if (!writeBytes(brl, buffer, index)) return 0;
+    byte = mempcpy(byte, header, sizeof(header));
+    byte = mempcpy(byte, data, count);
+    byte = mempcpy(byte, trailer, sizeof(trailer));
+
+    if (!writeBytes(brl, buffer, byte-buffer)) return 0;
   }
   return 1;
 }
@@ -859,35 +854,33 @@ static void
 flushCells2 (BrailleDisplay *brl) {
   if (refreshRequired2) {
     unsigned char buffer[0XFF];
-    unsigned int size = 0;
+    unsigned char *byte = buffer;
 
     /* The status cells. */
-    memcpy(&buffer[size], currentStatus, model->statusCount);
-    size += model->statusCount;
+    byte = mempcpy(byte, currentStatus, model->statusCount);
 
     /* Two dummy cells for each key on the left side. */
     if (model->protocolRevision < 2) {
       int count = model->leftKeys;
       while (count-- > 0) {
-        buffer[size++] = 0;
-        buffer[size++] = 0;
+        *byte++ = 0;
+        *byte++ = 0;
       }
     }
 
     /* The text cells. */
-    memcpy(&buffer[size], currentText, model->textColumns);
-    size += model->textColumns;
+    byte = mempcpy(byte, currentText, model->textColumns);
 
     /* Two dummy cells for each key on the right side. */
     if (model->protocolRevision < 2) {
       int count = model->rightKeys;
       while (count-- > 0) {
-        buffer[size++] = 0;
-        buffer[size++] = 0;
+        *byte++ = 0;
+        *byte++ = 0;
       }
     }
 
-    writePacket2(brl, 3, size, buffer);
+    writePacket2(brl, 3, byte-buffer, buffer);
     refreshRequired2 = 0;
   }
 }

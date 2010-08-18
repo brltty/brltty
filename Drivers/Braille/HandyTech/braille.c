@@ -1077,12 +1077,13 @@ writeCells (BrailleDisplay *brl) {
 static int
 writeStatusAndTextCells (BrailleDisplay *brl) {
   unsigned char buffer[1 + model->statusCells + model->textCells];
+  unsigned char *byte = buffer;
 
-  buffer[0] = 0X01;
-  memcpy(buffer+1, rawStatus, model->statusCells);
-  memcpy(buffer+model->statusCells+1, rawData, model->textCells);
+  *byte++ = 0X01;
+  byte = mempcpy(byte, rawStatus, model->statusCells);
+  byte = mempcpy(byte, rawData, model->textCells);
 
-  return brl_writePacket(brl, buffer, sizeof(buffer)) != -1;
+  return brl_writePacket(brl, buffer, byte-buffer) != -1;
 }
 
 static int

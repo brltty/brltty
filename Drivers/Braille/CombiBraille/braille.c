@@ -217,8 +217,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     memcpy(prevdata, brl->buffer, brl->textColumns);
     memcpy(oldstatus, status, brl->statusColumns);
 
-    memcpy(byte, header, sizeof(header));
-    byte += sizeof(header);
+    byte = mempcpy(byte, header, sizeof(header));
 
     for (i=0; i<brl->statusColumns; i+=1) {
       const unsigned char c = outputTable[status[i]];

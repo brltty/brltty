@@ -199,8 +199,7 @@ writePacket (
   *byte++ = (length1 >> 8) & 0XFF;
 
   /* D1 */
-  memcpy(byte, data1, length1);
-  byte += length1;
+  byte = mempcpy(byte, data1, length1);
 
   /* DE1 */
   *byte++ = 0XF1;
@@ -213,8 +212,7 @@ writePacket (
   *byte++ = (length2 >> 8) & 0XFF;
 
   /* D2 */
-  memcpy(byte, data2, length2);
-  byte += length2;
+  byte = mempcpy(byte, data2, length2);
 
   /* DE2 */
   *byte++ = 0XF3;

@@ -375,14 +375,9 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int 
   unsigned char buffer[sizeof(header) + count + sizeof(trailer)];
   unsigned char *byte = buffer;
 
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
-
-  memcpy(byte, cells, count);
-  byte += count;
-
-  memcpy(byte, trailer, sizeof(trailer));
-  byte += sizeof(trailer);
+  byte = mempcpy(byte, header, sizeof(header));
+  byte = mempcpy(byte, cells, count);
+  byte = mempcpy(byte, trailer, sizeof(trailer));
 
   return writeBytes(brl, buffer, byte-buffer);
 }

@@ -85,16 +85,13 @@ writeCells  (BrailleDisplay *brl) {
 
   unsigned char buffer[sizeof(beginSequence) + sizeof(statusCells) + sizeof(textCells) + sizeof(endSequence)];
   unsigned char *byte = buffer;
+
   int i;
 
-  memcpy(byte, beginSequence, sizeof(beginSequence));
-  byte += sizeof(beginSequence);
-
+  byte = mempcpy(byte, beginSequence, sizeof(beginSequence));
   for (i=0; i<sizeof(statusCells); ++i) *byte++ = outputTable[statusCells[i]];
   for (i=0; i<sizeof(textCells); ++i) *byte++ = outputTable[textCells[i]];
-
-  memcpy(byte, endSequence, sizeof(endSequence));
-  byte += sizeof(endSequence);
+  byte = mempcpy(byte, endSequence, sizeof(endSequence));
 
   return writeData(brl, buffer, byte-buffer);
 }

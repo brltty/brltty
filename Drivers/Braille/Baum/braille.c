@@ -1134,19 +1134,14 @@ writeBaumDataRegisters (
 
       *byte++ = BAUM_REQ_DataRegisters;
       *byte++ = 7 + count;
-
       *byte++ = MAKE_BAUM_INTEGER_FIRST(bmd->identifier);
       *byte++ = MAKE_BAUM_INTEGER_SECOND(bmd->identifier);
-
       *byte++ = MAKE_BAUM_INTEGER_FIRST(bmr->serialNumber);
       *byte++ = MAKE_BAUM_INTEGER_SECOND(bmr->serialNumber);
-
       *byte++ = BAUM_DRC_Write;
       *byte++ = start;
       *byte++ = count;
-
-      memcpy(byte, registers, count);
-      byte += count;
+      byte = mempcpy(byte, registers, count);
 
       if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
     }
@@ -1167,9 +1162,7 @@ writeBaumCells_all (BrailleDisplay *brl) {
   unsigned char *byte = packet;
 
   *byte++ = BAUM_REQ_DisplayData;
-
-  memcpy(byte, externalCells, cellCount);
-  byte += cellCount;
+  byte = mempcpy(byte, externalCells, cellCount);
 
   return writeBaumPacket(brl, packet, byte-packet);
 }
@@ -1181,9 +1174,7 @@ writeBaumCells_start (BrailleDisplay *brl) {
 
   *byte++ = BAUM_REQ_DisplayData;
   *byte++ = 0;
-
-  memcpy(byte, externalCells, cellCount);
-  byte += cellCount;
+  byte = mempcpy(byte, externalCells, cellCount);
 
   return writeBaumPacket(brl, packet, byte-packet);
 }
@@ -1985,8 +1976,7 @@ writeHandyTechCells (BrailleDisplay *brl) {
     while (count-- > 0) *byte++ = 0;
   }
 
-  memcpy(byte, externalCells, ht->textCount);
-  byte += ht->textCount;
+  byte = mempcpy(byte, externalCells, ht->textCount);
 
   return writeHandyTechPacket(brl, packet, byte-packet);
 }
@@ -2143,9 +2133,7 @@ writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int l
 
   *byte++ = 0XFF;
   *byte++ = 0XFF;
-
-  memcpy(byte, packet, length);
-  byte += length;
+  byte = mempcpy(byte, packet, length);
 
   {
     int count = byte - buffer;

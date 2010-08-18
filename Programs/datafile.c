@@ -201,9 +201,7 @@ getDataVariable (Queue *variables, const DataOperand *name, int create) {
       memset(variable, 0, sizeof(*variable));
 
       if ((nameCharacters = malloc(ARRAY_SIZE(nameCharacters, name->length)))) {
-        wmemcpy(nameCharacters, name->characters, name->length);
-
-        variable->name.characters = nameCharacters;
+        variable->name.characters = wmemcpy(nameCharacters, name->characters, name->length);
         variable->name.length = name->length;
 
         variable->value.characters = NULL;

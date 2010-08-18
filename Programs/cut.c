@@ -93,8 +93,7 @@ append (wchar_t *buffer, size_t length) {
     wchar_t *newBuffer = mallocWchars(newLength);
     if (!newBuffer) return 0;
 
-    wmemcpy(newBuffer, cutBuffer, beginOffset);
-    wmemcpy(newBuffer+beginOffset, buffer, length);
+    wmemcpy(wmempcpy(newBuffer, cutBuffer, beginOffset), buffer, length);
 
     free(buffer);
     free(cutBuffer);
