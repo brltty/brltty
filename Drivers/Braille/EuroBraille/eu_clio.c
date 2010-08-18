@@ -41,10 +41,19 @@
 # define PRT_E_DON 0x05		/* data error */
 # define PRT_E_SYN 0x06		/* syntax error */
 
-/* Codes which need to be escaped */
-static const unsigned char needsEscape[0x100] = {
-  [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NAK] = 1
-};
+static int
+needsEscape(unsigned char code) {
+  switch (code) {
+    case SOH:
+    case EOT:
+    case DLE:
+    case ACK:
+    case NAK:
+      return 1;
+  }
+
+  return 0;
+}
 
 # define	READ_BUFFER_LENGTH 1024
 
@@ -530,7 +539,7 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
               break;
 
             default:
-              if (needsEscape[byte])
+              if (needsEscape(byte))
                 {
                   if (started) logShortPacket(buffer, offset);
                   offset = 0;
@@ -620,7 +629,7 @@ ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
   *q++ = SOH;
   while (size--)
     {
-	if (needsEscape[*p]) *q++ = DLE;
+	if (needsEscape(*p)) *q++ = DLE;
         *q++ = *p;
 	parity ^= *p++;
      }
@@ -628,7 +637,7 @@ ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
    parity ^= pktNbr;
    if (++pktNbr >= 256)
      pktNbr = 128;
-   if (needsEscape[parity]) *q++ = DLE;
+   if (needsEscape(parity)) *q++ = DLE;
    *q++ = parity;
    *q++ = EOT;
    packetSize = q - buf;
