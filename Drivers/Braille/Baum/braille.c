@@ -1134,10 +1134,13 @@ writeBaumDataRegisters (
 
       *byte++ = BAUM_REQ_DataRegisters;
       *byte++ = 7 + count;
+
       *byte++ = MAKE_BAUM_INTEGER_FIRST(bmd->identifier);
       *byte++ = MAKE_BAUM_INTEGER_SECOND(bmd->identifier);
+
       *byte++ = MAKE_BAUM_INTEGER_FIRST(bmr->serialNumber);
       *byte++ = MAKE_BAUM_INTEGER_SECOND(bmr->serialNumber);
+
       *byte++ = BAUM_DRC_Write;
       *byte++ = start;
       *byte++ = count;
