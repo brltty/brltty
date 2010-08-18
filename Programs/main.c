@@ -50,6 +50,7 @@ setServiceState (DWORD state, int exitCode, const char *name) {
 
   serviceState = state;
   if (SetServiceStatus(serviceStatusHandle, &status)) return 1;
+
   logWindowsSystemError(name);
   return 0;
 }
@@ -91,11 +92,13 @@ serviceMain (DWORD argc, LPSTR *argv) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
       if (!(serviceReturnCode = brlttyConstruct(argc, argv))) {
         if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
-          brlttyRun();
+          serviceReturnCode = brlttyRun();
+        } else {
+          serviceReturnCode = 1;
         }
       }
 
-      setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
+      setServiceState(SERVICE_STOPPED, serviceReturnCode, "SERVICE_STOPPED");
     }
   } else {
     logWindowsSystemError("RegisterServiceCtrlHandler");
