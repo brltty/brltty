@@ -98,11 +98,6 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	unsigned char *init_ack = (unsigned char *)"\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
 
-	{
-		static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
-		makeOutputTable(dots, outputTable);
-	}
-
 	if (!isSerialDevice(&device)) {
 		unsupportedDevice(device);
 		return 0;
@@ -159,6 +154,13 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	brl->textRows = BRLROWS;
 	brl->statusColumns = 5;
 	brl->statusRows = 1;
+
+	{
+		static const DotsTable dots = {
+			0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
+		};
+		makeOutputTable(dots, outputTable);
+	}
 
 	/* Allocate space for buffers */
 	prevdata = mallocWrapper (brl->textColumns * brl->textRows);

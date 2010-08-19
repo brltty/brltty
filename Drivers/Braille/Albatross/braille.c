@@ -429,11 +429,6 @@ refreshDisplay (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-    static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
-    makeOutputTable(dots, outputTable);
-  }
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else if (isUsbDevice(&device)) {
@@ -460,13 +455,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
 
+          {
+            static const DotsTable dots = {
+              0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
+            };
+            makeOutputTable(dots, outputTable);
+          }
+
           clearDisplay(brl);
           brl->textColumns = windowWidth;
           brl->textRows = 1;
 
           {
             const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
             brl->keyBindings = ktd->bindings;
             brl->keyNameTables = ktd->names;
           }

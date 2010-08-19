@@ -140,12 +140,6 @@ clearVisualText (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-    reverseTranslationTable(outputTable, inputTable);
-  }
-
   if (!isSerialDevice(&device)) {
     unsupportedDevice(device);
     return 0;
@@ -166,6 +160,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if (response[1] == 4) {
               brl->textColumns = response[2];
               brl->textRows = 1;
+
+              {
+                static const DotsTable dots = {
+                  0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+                };
+                makeOutputTable(dots, outputTable);
+                reverseTranslationTable(outputTable, inputTable);
+              }
 
               if (!clearBrailleCells(brl)) break;
               if (!clearVisualText(brl)) break;

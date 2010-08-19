@@ -291,11 +291,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int hasrouting, dotspercell, version1, version2;
 
-  {
-    static const DotsTable dots = {0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10};
-    makeOutputTable(dots, outputTable);
-  }
-
   if (!isSerialDevice(&device)) {
     unsupportedDevice(device);
     return 0;
@@ -372,6 +367,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   brl->textRows = BRLROWS;		/* always 1 */
   brl->statusColumns = nrstatcells;
   brl->statusRows = 1;
+
+  {
+    static const DotsTable dots = {
+      0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10
+    };
+    makeOutputTable(dots, outputTable);
+  }
 
   /* Allocate space for buffers */
   /* For portability we want to avoid declarations such as char array[v]

@@ -47,21 +47,6 @@ static TranslationTable inputTable;
 static int
 brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  {
-    static const DotsTable dots = {
-      BRAILLE(1, 0, 0, 0, 0, 0, 0, 0),
-      BRAILLE(0, 1, 0, 0, 0, 0, 0, 0),
-      BRAILLE(0, 0, 1, 0, 0, 0, 0, 0),
-      BRAILLE(0, 0, 0, 1, 0, 0, 0, 0),
-      BRAILLE(0, 0, 0, 0, 1, 0, 0, 0),
-      BRAILLE(0, 0, 0, 0, 0, 1, 0, 0),
-      BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
-      BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
-    };
-    makeOutputTable(dots, outputTable);
-    reverseTranslationTable(outputTable, inputTable);
-  }
-  
   if(*parameters[PARM_DEVICE])
     braille_config(BRL_DEVICE, parameters[PARM_DEVICE]);
 
@@ -101,6 +86,21 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
       brl->textColumns = braille_size();  /* initialise size of display */
       brl->textRows = 1;
 
+      {
+        static const DotsTable dots = {
+          BRAILLE(1, 0, 0, 0, 0, 0, 0, 0),
+          BRAILLE(0, 1, 0, 0, 0, 0, 0, 0),
+          BRAILLE(0, 0, 1, 0, 0, 0, 0, 0),
+          BRAILLE(0, 0, 0, 1, 0, 0, 0, 0),
+          BRAILLE(0, 0, 0, 0, 1, 0, 0, 0),
+          BRAILLE(0, 0, 0, 0, 0, 1, 0, 0),
+          BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
+          BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
+        };
+        makeOutputTable(dots, outputTable);
+        reverseTranslationTable(outputTable, inputTable);
+      }
+  
       braille_timeout(100);
 
       return 1;

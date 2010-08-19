@@ -361,11 +361,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   unsigned char reply[Q_REPLY_LENGTH];
   int speed;
 
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-
   if (!isSerialDevice(&device)) {
     unsupportedDevice(device);
     return 0;
@@ -511,6 +506,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   brl->textColumns = brl_cols;		/* initialise size of display */
   brl->textRows = BRLROWS;		/* always 1 */
+
+  {
+    static const DotsTable dots = {
+      0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+    };
+    makeOutputTable(dots, outputTable);
+  }
 
   /* Allocate space for buffers */
   dispbuf = malloc(ncells);

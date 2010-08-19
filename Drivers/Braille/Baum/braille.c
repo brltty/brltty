@@ -2658,7 +2658,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       while ((protocol = *(protocolAddress++))) {
         LogPrint(LOG_DEBUG, "probing with %s protocol", protocol->name);
-        makeOutputTable(protocol->dotsTable, outputTable);
 
         {
           int bits = 10;
@@ -2675,6 +2674,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (protocol->probeDisplay(brl)) {
             logCellCount(brl);
 
+            makeOutputTable(protocol->dotsTable, outputTable);
             if (!clearCellRange(brl, 0, cellCount)) goto failed;
             if (!updateCells(brl)) goto failed;
 

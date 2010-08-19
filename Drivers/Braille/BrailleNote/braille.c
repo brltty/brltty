@@ -373,12 +373,6 @@ visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-     makeOutputTable(dots, outputTable);
-     reverseTranslationTable(outputTable, inputTable);
-  }
-
   if (!isSerialDevice(&device)) {
      unsupportedDevice(device);
      return 0;
@@ -386,7 +380,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(serialDevice, serialBaud)) {
-      unsigned char request[] = {BNO_DESCRIBE};
+      static const unsigned char request[] = {BNO_DESCRIBE};
       charactersPerSecond = serialBaud / 10;
       if (writePacket(brl, request, sizeof(request)) != -1) {
         while (serialAwaitInput(serialDevice, 100)) {
@@ -405,6 +399,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               }
               dataCells = brl->textColumns * brl->textRows;
               cellCount = statusCells + dataCells;
+
+              {
+                 static const DotsTable dots = {
+                    0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+                 };
+                 makeOutputTable(dots, outputTable);
+                 reverseTranslationTable(outputTable, inputTable);
+              }
+
               if ((cellBuffer = malloc(cellCount))) {
                 memset(cellBuffer, 0, cellCount);
                 statusArea = cellBuffer;

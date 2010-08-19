@@ -493,11 +493,6 @@ static const InputOutputOperations usbOperations = {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-  
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else if (isUsbDevice(&device)) {
@@ -509,6 +504,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(device)) {
     if (io->methods->identifyModel(brl)) {
+      {
+        static const DotsTable dots = {
+          0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+        };
+        makeOutputTable(dots, outputTable);
+      }
+  
       rewriteRequired = 1;
       memset(textCells, 0, sizeof(textCells));
       memset(statusCells, 0, sizeof(statusCells));

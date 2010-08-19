@@ -123,11 +123,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   lastNavigationKeys = 0;
   lastRoutingKey = MT_ROUTING_KEYS_NONE;
 
-  {
-    static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
-    makeOutputTable(dots, outputTable);
-  }
-
   if (isUsbDevice(&device)) {
     static const UsbChannelDefinition definitions[] = {
       {
@@ -164,8 +159,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->textRows = 1;
 
             {
-              const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+              static const DotsTable dots = {
+                0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
+              };
+              makeOutputTable(dots, outputTable);
+            }
 
+            {
+              const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
               brl->keyBindings = ktd->bindings;
               brl->keyNameTables = ktd->names;
             }

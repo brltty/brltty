@@ -701,11 +701,6 @@ static const InputOutputOperations bluetoothOperations = {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-  
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else if (isUsbDevice(&device)) {
@@ -733,8 +728,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textRows = 1;
 
         {
+          static const DotsTable dots = {
+            0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+          };
+          makeOutputTable(dots, outputTable);
+        }
+  
+        {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
           brl->keyBindings = ktd->bindings;
           brl->keyNameTables = ktd->names;
         }

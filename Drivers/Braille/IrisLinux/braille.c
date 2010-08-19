@@ -269,9 +269,6 @@ static int brl_reset(BrailleDisplay *brl)
 
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
-  static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-  makeOutputTable(dots, outputTable);
-
   if ((gio_fd = open("/dev/iris", O_RDWR)) == -1)
     {
       LogPrint(LOG_INFO, "Cannot open Iris-GIO device.");
@@ -332,6 +329,14 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	       break;
 	  }
      }
+
+   {
+     static const DotsTable dots = {
+       0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+     };
+     makeOutputTable(dots, outputTable);
+   }
+
    ReWrite = 1;  /* To write whole display at first time */
    ReWrite_LCD = 1;
    return 1;

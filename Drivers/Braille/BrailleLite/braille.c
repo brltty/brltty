@@ -294,12 +294,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_WARNING, "%s: %s", "invalid keyboard emulation setting", parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
 
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-    reverseTranslationTable(outputTable, inputTable);
-  }
-
   if (!isSerialDevice(&device)) {
     unsupportedDevice(device);
     return 0;
@@ -367,6 +361,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
           LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
           brl->textColumns = blitesz;	/* initialise size of display - */
           brl->textRows = 1;		/* Braille Lites are single line displays */
+
+          {
+            static const DotsTable dots = {
+              0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+            };
+            makeOutputTable(dots, outputTable);
+            reverseTranslationTable(outputTable, inputTable);
+          }
 
           /* Allocate space for buffers */
           if ((prevdata = malloc(brl->textColumns))) {

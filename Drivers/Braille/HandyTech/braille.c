@@ -995,11 +995,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   at2Size = 0;
   at2Count = 0;
 
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else if (isUsbDevice(&device)) {
@@ -1025,6 +1020,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (length > 0) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
+              {
+                static const DotsTable dots = {
+                  0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+                };
+                makeOutputTable(dots, outputTable);
+              }
+
               if (model->hasATC) {
                 setAtcMode(brl, 1);
                 setAtcSensitivity(brl, 50);
