@@ -63,28 +63,22 @@ extern void setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation sett
 
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
+
   const char *const *parameters;
 
   int (*construct) (SpeechSynthesizer *spk, char **parameters);
   void (*destruct) (SpeechSynthesizer *spk);
+
   void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
   void (*mute) (SpeechSynthesizer *spk);
 
-  /* These require SPK_HAVE_TRACK. */
   void (*doTrack) (SpeechSynthesizer *spk);
   int (*getTrack) (SpeechSynthesizer *spk);
   int (*isSpeaking) (SpeechSynthesizer *spk);
 
-  /* These require SPK_HAVE_RATE. */
   void (*rate) (SpeechSynthesizer *spk, unsigned char setting);
-
-  /* These require SPK_HAVE_VOLUME. */
   void (*volume) (SpeechSynthesizer *spk, unsigned char setting);
-
-  /* These require SPK_HAVE_PITCH. */
   void (*pitch) (SpeechSynthesizer *spk, unsigned char setting);
-
-  /* These require SPK_HAVE_PUNCTUATION. */
   void (*punctuation) (SpeechSynthesizer *spk, SpeechPunctuation setting);
 } SpeechDriver;
 

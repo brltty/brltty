@@ -99,31 +99,25 @@ extern void setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setti
  */
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
+
   const char *const *parameters;
   const unsigned char *statusFields;
 
-  /* Routines provided by the braille driver library: */
   int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
   void (*destruct) (BrailleDisplay *brl);
+
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
   int (*writeWindow) (BrailleDisplay *brl, const wchar_t *characters);
-
-  /* These require BRL_HAVE_STATUS_CELLS. */
   int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
 
-  /* These require BRL_HAVE_PACKET_IO. */
   ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);
   ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
   int (*reset) (BrailleDisplay *brl);
   
-  /* These require BRL_HAVE_KEY_CODES. */
   int (*readKey) (BrailleDisplay *brl);
   int (*keyToCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
 
-  /* These require BRL_HAVE_FIRMNESS. */
   void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);
-
-  /* These require BRL_HAVE_SENSITIVITY. */
   void (*sensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
 } BrailleDriver;
 

@@ -28,37 +28,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Routines provided by this braille display driver. */
-static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);
-static void brl_destruct (BrailleDisplay *brl);
-static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context);
-static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters);
-
-#ifdef BRL_HAVE_STATUS_CELLS
-  static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);
-#endif /* BRL_HAVE_STATUS_CELLS */
-
-#ifdef BRL_HAVE_PACKET_IO
-  static ssize_t brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size);
-  static ssize_t brl_writePacket (BrailleDisplay *brl, const void *buffer, size_t size);
-  static int brl_reset (BrailleDisplay *brl);
-#endif /* BRL_HAVE_PACKET_IO */
-
-#ifdef BRL_HAVE_KEY_CODES
-  static int brl_readKey (BrailleDisplay *brl);
-  static int brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
-#endif /* BRL_HAVE_KEY_CODES */
-
-#ifdef BRL_HAVE_FIRMNESS
-  static void brl_firmness (BrailleDisplay *brl, BrailleFirmness setting);
-#endif /* BRL_HAVE_FIRMNESS */
-
-#ifdef BRL_HAVE_SENSITIVITY
-  static void brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
-#endif /* BRL_HAVE_SENSITIVITY */
-
 #ifdef BRLPARMS
-  static const char *const brl_parameters[] = {BRLPARMS, NULL};
+static const char *const brl_parameters[] = {BRLPARMS, NULL};
+#else /* BRLPARMS */
+#define brl_parameters NULL
 #endif /* BRLPARMS */
 
 #ifdef BRL_STATUS_FIELDS
@@ -67,66 +40,79 @@ static const unsigned char brl_statusFields[] = {BRL_STATUS_FIELDS, sfEnd};
 #define brl_statusFields NULL
 #endif /* BRL_STATUS_FIELDS */
 
+static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);
+static void brl_destruct (BrailleDisplay *brl);
+
+static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context);
+static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters);
+
+#ifdef BRL_HAVE_STATUS_CELLS
+static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);
+#else /* BRL_HAVE_STATUS_CELLS */
+#define brl_writeStatus NULL
+#endif /* BRL_HAVE_STATUS_CELLS */
+
+#ifdef BRL_HAVE_PACKET_IO
+static ssize_t brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size);
+static ssize_t brl_writePacket (BrailleDisplay *brl, const void *buffer, size_t size);
+static int brl_reset (BrailleDisplay *brl);
+#else /* BRL_HAVE_PACKET_IO */
+#define brl_readPacket NULL
+#define brl_writePacket NULL
+#define brl_reset NULL
+#endif /* BRL_HAVE_PACKET_IO */
+
+#ifdef BRL_HAVE_KEY_CODES
+static int brl_readKey (BrailleDisplay *brl);
+static int brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
+#else /* BRL_HAVE_KEY_CODES */
+#define brl_readKey NULL
+#define brl_keyToCommand NULL
+#endif /* BRL_HAVE_KEY_CODES */
+
+#ifdef BRL_HAVE_FIRMNESS
+static void brl_firmness (BrailleDisplay *brl, BrailleFirmness setting);
+#else /* BRL_HAVE_FIRMNESS */
+#define brl_firmness NULL
+#endif /* BRL_HAVE_FIRMNESS */
+
+#ifdef BRL_HAVE_SENSITIVITY
+static void brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
+#else /* BRL_HAVE_SENSITIVITY */
+#define brl_sensitivity NULL
+#endif /* BRL_HAVE_SENSITIVITY */
+
 #ifndef BRLSYMBOL
-#  define BRLSYMBOL CONCATENATE(brl_driver_,DRIVER_CODE)
+#define BRLSYMBOL CONCATENATE(brl_driver_,DRIVER_CODE)
 #endif /* BRLSYMBOL */
 
 #ifndef BRLCONST
-#  define BRLCONST const
+#define BRLCONST const
 #endif /* BRLCONST */
 
 extern BRLCONST BrailleDriver BRLSYMBOL;
 BRLCONST BrailleDriver BRLSYMBOL = {
   DRIVER_DEFINITION_INITIALIZER,
 
-#ifdef BRLPARMS
   brl_parameters,
-#else /* BRLPARMS */
-  NULL,
-#endif /* BRLPARMS */
-
   brl_statusFields,
 
   brl_construct,
   brl_destruct,
+
   brl_readCommand,
   brl_writeWindow,
-
-#ifdef BRL_HAVE_STATUS_CELLS
   brl_writeStatus,
-#else /* BRL_HAVE_STATUS_CELLS */
-  NULL, /* brl_writeStatus */
-#endif /* BRL_HAVE_STATUS_CELLS */
 
-#ifdef BRL_HAVE_PACKET_IO
   brl_readPacket,
   brl_writePacket,
   brl_reset,
-#else /* BRL_HAVE_PACKET_IO */
-  NULL, /* brl_readPacket */
-  NULL, /* brl_writePacket */
-  NULL, /* brl_reset */
-#endif /* BRL_HAVE_PACKET_IO */
 
-#ifdef BRL_HAVE_KEY_CODES
   brl_readKey,
   brl_keyToCommand,
-#else /* BRL_HAVE_KEY_CODES */
-  NULL, /* brl_readKey */
-  NULL, /* brl_keyToCommand */
-#endif /* BRL_HAVE_KEY_CODES */
 
-#ifdef BRL_HAVE_FIRMNESS
   brl_firmness,
-#else /* BRL_HAVE_FIRMNESS */
-  NULL, /* brl_firmness */
-#endif /* BRL_HAVE_FIRMNESS */
-
-#ifdef BRL_HAVE_SENSITIVITY
   brl_sensitivity
-#else /* BRL_HAVE_SENSITIVITY */
-  NULL  /* brl_sensitivity */
-#endif /* BRL_HAVE_SENSITIVITY */
 };
 
 DRIVER_VERSION_DECLARATION(brl);

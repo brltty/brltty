@@ -19,72 +19,75 @@
 #ifndef BRLTTY_INCLUDED_SPK_DRIVER
 #define BRLTTY_INCLUDED_SPK_DRIVER
 
+#include "spk.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-/* this header file is used to create the driver structure
- * for a dynamically loadable speech driver.
- */
+#ifdef SPKPARMS
+static const char *const spk_parameters[] = {SPKPARMS, NULL};
+#else /* SPKPARMS */
+#define spk_parameters NULL
+#endif /* SPKPARMS */
 
-#include "spk.h"
-
-/* Routines provided by this speech driver. */
 static int spk_construct (SpeechSynthesizer *spk, char **parameters);
 static void spk_destruct (SpeechSynthesizer *spk);
+
 static void spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
 static void spk_mute (SpeechSynthesizer *spk);
 
 #ifdef SPK_HAVE_TRACK
-  static void spk_doTrack (SpeechSynthesizer *spk);
-  static int spk_getTrack (SpeechSynthesizer *spk);
-  static int spk_isSpeaking (SpeechSynthesizer *spk);
+static void spk_doTrack (SpeechSynthesizer *spk);
+static int spk_getTrack (SpeechSynthesizer *spk);
+static int spk_isSpeaking (SpeechSynthesizer *spk);
 #else
-  static void spk_doTrack (SpeechSynthesizer *spk) { }
-  static int spk_getTrack (SpeechSynthesizer *spk) { return 0; }
-  static int spk_isSpeaking (SpeechSynthesizer *spk) { return 0; }
+static void spk_doTrack (SpeechSynthesizer *spk) { }
+static int spk_getTrack (SpeechSynthesizer *spk) { return 0; }
+static int spk_isSpeaking (SpeechSynthesizer *spk) { return 0; }
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
-  static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);
+static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);
+#else /* SPK_HAVE_RATE */
+#define spk_rate NULL
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);
+static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);
+#else /* SPK_HAVE_VOLUME */
+#define spk_volume NULL
 #endif /* SPK_HAVE_VOLUME */
 
 #ifdef SPK_HAVE_PITCH
-  static void spk_pitch (SpeechSynthesizer *spk, unsigned char setting);
+static void spk_pitch (SpeechSynthesizer *spk, unsigned char setting);
+#else /* SPK_HAVE_PITCH */
+#define spk_pitch NULL
 #endif /* SPK_HAVE_PITCH */
 
 #ifdef SPK_HAVE_PUNCTUATION
-  static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
+static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
+#else /* SPK_HAVE_PUNCTUATION */
+#define spk_punctuation NULL
 #endif /* SPK_HAVE_PUNCTUATION */
 
-#ifdef SPKPARMS
-  static const char *const spk_parameters[] = {SPKPARMS, NULL};
-#endif /* SPKPARMS */
-
 #ifndef SPKSYMBOL
-#  define SPKSYMBOL CONCATENATE(spk_driver_,DRIVER_CODE)
+#define SPKSYMBOL CONCATENATE(spk_driver_,DRIVER_CODE)
 #endif /* SPKSYMBOL */
 
 #ifndef SPKCONST
-#  define SPKCONST const
+#define SPKCONST const
 #endif /* SPKCONST */
 
 extern SPKCONST SpeechDriver SPKSYMBOL;
 SPKCONST SpeechDriver SPKSYMBOL = {
   DRIVER_DEFINITION_INITIALIZER,
 
-#ifdef SPKPARMS
   spk_parameters,
-#else /* SPKPARMS */
-  NULL,
-#endif /* SPKPARMS */
 
   spk_construct,
   spk_destruct,
+
   spk_say,
   spk_mute,
 
@@ -92,29 +95,10 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   spk_getTrack,
   spk_isSpeaking,
 
-#ifdef SPK_HAVE_RATE
   spk_rate,
-#else /* SPK_HAVE_RATE */
-  NULL,
-#endif /* SPK_HAVE_RATE */
-
-#ifdef SPK_HAVE_VOLUME
   spk_volume,
-#else /* SPK_HAVE_VOLUME */
-  NULL,
-#endif /* SPK_HAVE_VOLUME */
-
-#ifdef SPK_HAVE_PITCH
   spk_pitch,
-#else /* SPK_HAVE_PITCH */
-  NULL,
-#endif /* SPK_HAVE_PITCH */
-
-#ifdef SPK_HAVE_PUNCTUATION
   spk_punctuation
-#else /* SPK_HAVE_PUNCTUATION */
-  NULL
-#endif /* SPK_HAVE_PUNCTUATION */
 };
 
 DRIVER_VERSION_DECLARATION(spk);
