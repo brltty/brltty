@@ -353,7 +353,10 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
           table->command = command;
 
-          if ((table->immediate = immediate)) {
+          if (context == BRL_CTX_WAITING) {
+            table->command = EOF;
+            table->immediate = 0;
+          } else if ((table->immediate = immediate)) {
             command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
           } else {
             command |= BRL_FLG_REPEAT_DELAY;
