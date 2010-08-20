@@ -216,7 +216,7 @@ static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
 static char **xtArgv = xtDefArgv;
 static int regenerate;
-static void generateToplevel(void);
+static int generateToplevel(void);
 static void destroyToplevel(void);
 #if defined(USE_XAW) || defined(USE_WINDOWS)
 static unsigned char displayedWindow[WHOLESIZE];
@@ -717,7 +717,7 @@ static void popup(Widget w, XEvent *event, String *params, Cardinal *num_params)
 }
 #endif /* USE_XM */
 
-static void generateToplevel(void)
+static int generateToplevel(void)
 {
 #ifdef USE_XT
   int argc;
@@ -810,7 +810,11 @@ static void generateToplevel(void)
     if (!(RegisterClass(&wndclass)) &&
 	GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
       logWindowsSystemError("RegisterClass");
-      exit(1);
+      if (font) {
+	DeleteObject(font);
+	font = NULL;
+      }
+      return 0;
     }
     modelWidth = cols*CHRX;
     if (keyModel) {
@@ -825,7 +829,11 @@ static void generateToplevel(void)
 	    WS_POPUP, GetSystemMetrics(SM_CXSCREEN)-modelWidth-RIGHTMARGIN, 0,
 	    modelWidth, totlines*CHRY+modelHeight, NULL, NULL, NULL, NULL))) {
       logWindowsSystemError("CreateWindow");
-      exit(1);
+      if (font) {
+	DeleteObject(font);
+	font = NULL;
+      }
+      return 0;
     }
   }
 #else /* USE_ */
@@ -1056,6 +1064,7 @@ static void generateToplevel(void)
 #endif /* USE_XAW || USE_WINDOWS */
   memset(displayedVisual,0,sizeof(displayedVisual));
   lastcursor = -1;
+  return 1;
 }
 
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
@@ -1121,9 +1130,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   brl->textColumns=cols;
   brl->textRows=lines;
 
-  generateToplevel();
-
-  return 1;
+  return generateToplevel();
 }
 static void destroyToplevel(void)
 {
