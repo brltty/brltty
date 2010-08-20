@@ -21,9 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "embed.h"
 #include "brltty.h"
+#include "log.h"
 
 static int
 brlttyRun (void) {
