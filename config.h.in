@@ -207,8 +207,8 @@ extern "C" {
 /* Define this to be a string containing the path to a writable directory. */
 #undef WRITABLE_DIRECTORY
 
-/* Define this to be a string containing the path to the data files directory. */
-#undef DATA_DIRECTORY
+/* Define this to be a string containing the path to the tables directory. */
+#undef TABLES_DIRECTORY
 
 /* Define this to be a string containing the path to the configuration directory. */
 #undef CONFIGURATION_DIRECTORY

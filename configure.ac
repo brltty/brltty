@@ -140,9 +140,9 @@ AC_SUBST([writable_directory])
 BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
 
 BRLTTY_ARG_REQUIRED(
-   [data-directory], [DIRECTORY],
+   [tables-directory], [DIRECTORY],
    [path to directory containing data files],
-   [data_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
+   [tables_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(
@@ -1494,7 +1494,7 @@ then
    BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
                            [Define this to be a string containing the path to a writable directory.])
 fi
-BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
+BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
 BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
                         [Define this to be a string containing the path to the library directory.])

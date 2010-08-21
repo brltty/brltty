@@ -112,7 +112,6 @@ static char *opt_messageDelay;
 static char *opt_configurationFile;
 static char *opt_pidFile;
 static char *opt_writableDirectory;
-static char *opt_dataDirectory;
 static char *opt_libraryDirectory;
 
 static char *opt_brailleDevice;
@@ -226,15 +225,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to process identifier file.")
   },
 
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for driver help and configuration files.")
-  },
-
   { .letter = 'L',
     .word = "library-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
@@ -334,7 +324,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = DATA_DIRECTORY,
+    .defaultSetting = TABLES_DIRECTORY,
     .description = strtext("Path to directory for text and attributes tables.")
   },
 
@@ -2191,7 +2181,7 @@ constructBrailleDriver (void) {
 
         {
           const char *strings[] = {
-            PACKAGE_NAME, "-", braille->definition.code, "-", brl.keyBindings, ".hlp"
+            "brl-", braille->definition.code, "-", brl.keyBindings, ".hlp"
           };
           file = joinStrings(strings, ARRAY_COUNT(strings));
         }
@@ -2199,7 +2189,7 @@ constructBrailleDriver (void) {
         if (file) {
           char *path;
 
-          if ((path = makePath(opt_dataDirectory, file))) {
+          if ((path = makePath(opt_tablesDirectory, file))) {
             int loaded = 0;
 
             if (constructHelpScreen())
@@ -2912,7 +2902,6 @@ startup (int argc, char *argv[]) {
     char **const paths[] = {
       &opt_libraryDirectory,
       &opt_writableDirectory,
-      &opt_dataDirectory,
       &opt_tablesDirectory,
       &opt_pidFile,
       NULL
@@ -3093,7 +3082,6 @@ startup (int argc, char *argv[]) {
   writableDirectory = opt_writableDirectory;
 
   LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Data Directory"), opt_dataDirectory);
   LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
 
   LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
@@ -3225,7 +3213,13 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
            *opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
-    if (*opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
+    {
+      const char *directory = getWritableDirectory();
+
+      if (directory) {
+        if (*opt_speechFifo) openSpeechFifo(directory, opt_speechFifo);
+      }
+    }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

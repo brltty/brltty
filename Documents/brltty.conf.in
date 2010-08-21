@@ -96,7 +96,7 @@
 #release-device	off	# Don't release the device.
 
 # The text-table directive specifies which text table to use. Relative paths
-# are anchored at "@DATA_DIRECTORY@". If not specified, locale-based
+# are anchored at "@TABLES_DIRECTORY@". If not specified, locale-based
 # autoselection with fallback to "@text_table@" will be performed.
 # (can be overridden with the -t [--text-table=] option)
 #text-table	auto	# locale-based autoselection (fallback to "@text_table@")
@@ -181,14 +181,14 @@
 #text-table	vi	# Vietnamese
 
 # The attributes-table directive specifies which attributes table to use.
-# Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
+# Relative paths are anchored at "@TABLES_DIRECTORY@". If not specified,
 # "@attributes_table@" will be used.
 # (can be overridden with the -a [--attributes-table=] option)
 #attributes-table	attributes	#
 #attributes-table	attrib	#
 
 # The contraction-table directive specifies which contraction table to use.
-# Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
+# Relative paths are anchored at "@TABLES_DIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
 #contraction-table	af	# Afrikaans (contracted)
@@ -293,7 +293,7 @@
 #speech-driver	xs	# ExternalSpeech (executes /usr/local/bin/externalspeech)
 
 # The speech-fifo directive specifies the path to the FIFO used by the speech
-# pass-through facility. Relative paths are anchored at "@DATA_DIRECTORY@".
+# pass-through facility. Relative paths are anchored at "@WRITABLE_DIRECTORY@".
 # If not specified, the speech pass-through facility isn't enabled.
 # (can be overridden with the -F [--speech-fifo=] option)
 #speech-fifo	spk
@@ -370,7 +370,7 @@
 #####################
 
 # The key-table directive specifies which key table to use. Relative paths are
-# anchored at "@DATA_DIRECTORY@". If not specified, no key table is used.
+# anchored at "@TABLES_DIRECTORY@". If not specified, no key table is used.
 # (can be overridden with the -k [--key-table=] option)
 #key-table	desktop	# bindings for full keyboards
 #key-table	keypad	# bindings for keypad-based navigation
@@ -432,17 +432,11 @@
 # (can be overridden with the -W [--writable-directory=] option)
 #writable-directory @WRITABLE_DIRECTORY@
 
-# The data-directory directive specifies the absolute path to the directory
-# which contains driver data files (help files, configuration files, etc.). If
-# not specified, "@DATA_DIRECTORY@" will be used.
-# (can be overridden with the -D [--data-directory=] option)
-#data-directory @DATA_DIRECTORY@
-
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text, attributes, contraction, and key tables. If not
-# specified, "@DATA_DIRECTORY@" will be used.
+# specified, "@TABLES_DIRECTORY@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
-#tables-directory @DATA_DIRECTORY@
+#tables-directory @TABLES_DIRECTORY@
 
 
 ################################################

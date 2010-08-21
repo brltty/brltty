@@ -18,7 +18,7 @@
 
 all: all-brltty $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 everything: all-brltty all-brltest all-scrtest all-spktest$X ttbtest$X ctbtest$X all-ktbtest tunetest$X $(ALL_API)
-all-brltty: brltty$X all-braille $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
+all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
@@ -495,12 +495,7 @@ apitest.$O:
 
 braille-drivers:
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-all) || exit 1; \
-	done
-
-all-braille: $(BRAILLE_DRIVERS)
-	for driver in $(BRAILLE_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-all) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver) || exit 1; \
 	done
 
 ###############################################################################
@@ -573,7 +568,7 @@ check-speech: brltty speech-drivers
 
 ###############################################################################
 
-install:: install-programs install-data-files install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
+install:: install-programs install-data $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -583,22 +578,22 @@ install-programs: brltty$X install-program-directory install-writable-directory
 install-xbrlapi: xbrlapi$X install-program-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-data-files: all-braille install-data-directory
-	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_DATA_DIRECTORY) 
+install-data: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
 
-install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables
+install-text-tables: install-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tt[bi] $(INSTALL_TABLES_DIRECTORY)
 
-install-text-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tt[bi] $(INSTALL_DATA_DIRECTORY)
+install-attributes-tables: install-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.at[bi] $(INSTALL_TABLES_DIRECTORY)
 
-install-attributes-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.at[bi] $(INSTALL_DATA_DIRECTORY)
+install-contraction-tables: install-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ct[bi] $(INSTALL_TABLES_DIRECTORY)
 
-install-contraction-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ct[bi] $(INSTALL_DATA_DIRECTORY)
+install-key-tables: install-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.kt[bi] $(INSTALL_TABLES_DIRECTORY)
 
-install-key-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.kt[bi] $(INSTALL_DATA_DIRECTORY)
+install-help-files: install-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.hlp $(INSTALL_TABLES_DIRECTORY)
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-library-directory
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_LIBRARY_DIRECTORY)
@@ -651,10 +646,10 @@ uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 
 uninstall-data:
-	-rm -f $(INSTALL_DATA_DIRECTORY)/*.[tack]t[bi]
-	-rm -f $(INSTALL_DATA_DIRECTORY)/brltty*
+	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[tack]t[bi]
+	-rm -f $(INSTALL_TABLES_DIRECTORY)/brl-*.hlp
 	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
-	-[ ! -d $(INSTALL_DATA_DIRECTORY) ] || rmdir $(INSTALL_DATA_DIRECTORY)
+	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
 
 uninstall-libraries: $(UNINSTALL_API_LIBRARIES)
 	-rm -f $(INSTALL_LIBRARY_DIRECTORY)/$(LIB_NAME)*

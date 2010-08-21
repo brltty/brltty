@@ -43,15 +43,6 @@ static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden,
-    .argument = "directory",
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = "Path to directory for configuration files."
-  },
-
   { .letter = 'L',
     .word = "library-directory",
     .flags = OPT_Hidden,
