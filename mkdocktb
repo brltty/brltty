@@ -125,7 +125,7 @@ endLayoutEntry() {
 translateKeyTable() {
    local program="${inputDirectory}/Programs/ktbtest"
    [ -x "${program}" ] || make -C "${program%/*}" -s "${program##*/}"
-   "${program}" -L"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
+   "${program}" -D"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
 }
 
 inputDirectory="$(dirname "${0}")"
@@ -184,6 +184,7 @@ addLine "<DL>"
 for driverDirectory in "${driversDirectory}/"*
 do
    [ -d "${driverDirectory}" ] || continue
+
    driverName="${driverDirectory##*/}"
    driverCode="$(sed -n '/^DRIVER_CODE *=/s/^.*= *\([^ ]*\).*$/\1/p' "${driverDirectory}/Makefile.in")"
 
@@ -207,7 +208,7 @@ do
          endLayoutEntry "${driverName}"
       done
    else
-      set -- "${driverDirectory}/"*".hlp"
+      set -- "${tablesDirectory}/${braillePrefix}-${driverCode}-"*".${plainTextExtension}"
       for inputFile
       do
          beginLayoutEntry "${braillePrefix}-${driverCode}"
