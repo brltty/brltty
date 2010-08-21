@@ -65,7 +65,6 @@ AC_SUBST([install_$1_tables])
 BRLTTY_SUMMARY_ITEM([$1-table], [$1_table])
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"],
                    [Define this to be a string containing the path to the default $1 table.])
-BRLTTY_FILE_PATH([$1_table], [$3], [], [$(SRC_TOP)$(TBL_DIR)])
 AC_SUBST([$1_table])])
 
 AC_DEFUN([BRLTTY_ARG_PARAMETERS], [dnl
@@ -444,28 +443,6 @@ AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_drivers])
 AC_SUBST([$1_help])
 ])
-
-AC_DEFUN([BRLTTY_FILE_PATH], [dnl
-ifelse(len([$3]), 0, [], [dnl
-if test `expr "${$1}" : '.*/'` -eq 0
-then
-   if test `expr "${$1}" : '$3\.'` -eq 0
-   then
-      $1="$3.${$1}"
-   fi
-fi
-])dnl
-ifelse(len([$4]), 0, [], [dnl
-if test "${$1}" = "${$1#/}"
-then
-   $1='$4/'"${$1}"
-fi
-])dnl
-ifelse(len([$2]), 0, [], [dnl
-if test `expr "${$1}" : '.*\.$2$'` -eq 0
-then
-   $1="${$1}.$2"
-fi])])
 
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
 define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[

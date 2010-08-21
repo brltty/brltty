@@ -514,11 +514,13 @@ screen-drivers:
 
 ###############################################################################
 
-text.auto.h: $(TEXT_TABLE) tbl2hex$X
-	./tbl2hex$X -- $(TEXT_TABLE) >$@
+TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE).ttb
+text.auto.h: $(TEXT_TABLE_FILE) tbl2hex$X
+	./tbl2hex$X -- $(TEXT_TABLE_FILE) >$@
 
-attr.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
-	./tbl2hex$X -- $(ATTRIBUTES_TABLE) >$@
+ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE).atb
+attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$X
+	./tbl2hex$X -- $(ATTRIBUTES_TABLE_FILE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
