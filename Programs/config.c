@@ -2181,7 +2181,7 @@ constructBrailleDriver (void) {
 
         {
           const char *strings[] = {
-            "brl-", braille->definition.code, "-", brl.keyBindings, ".hlp"
+            "brl-", braille->definition.code, "-", brl.keyBindings, ".txt"
           };
           file = joinStrings(strings, ARRAY_COUNT(strings));
         }

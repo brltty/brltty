@@ -570,7 +570,7 @@ check-speech: brltty speech-drivers
 
 ###############################################################################
 
-install:: install-programs install-data $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -580,7 +580,7 @@ install-programs: brltty$X install-program-directory install-writable-directory
 install-xbrlapi: xbrlapi$X install-program-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-data: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
+install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
 
 install-text-tables: install-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tt[bi] $(INSTALL_TABLES_DIRECTORY)
@@ -595,7 +595,7 @@ install-key-tables: install-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.kt[bi] $(INSTALL_TABLES_DIRECTORY)
 
 install-help-files: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.hlp $(INSTALL_TABLES_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.txt $(INSTALL_TABLES_DIRECTORY)
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-drivers-directory
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_DRIVERS_DIRECTORY)
@@ -639,7 +639,7 @@ install-api-key:
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers uninstall-api-bindings
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-manpages uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
@@ -647,13 +647,13 @@ uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-install
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 
-uninstall-data:
+uninstall-tables:
 	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[tack]t[bi]
-	-rm -f $(INSTALL_TABLES_DIRECTORY)/brl-*.hlp
+	-rm -f $(INSTALL_TABLES_DIRECTORY)/brl-*.txt
 	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
 
-uninstall-libraries: $(UNINSTALL_API_LIBRARIES)
+uninstall-drivers: $(UNINSTALL_API_LIBRARIES)
 	-rm -f $(INSTALL_DRIVERS_DIRECTORY)/$(LIB_NAME)*
 	-[ ! -d $(INSTALL_DRIVERS_DIRECTORY) ] || rmdir $(INSTALL_DRIVERS_DIRECTORY)
 
