@@ -420,11 +420,11 @@
 #log-level	information
 #log-level	debug
 
-# The library-directory directive specifies the absolute path to the
+# The drivers-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
-# specified, @LIBRARY_DIRECTORY@ will be used.
-# (can be overridden with the -L [--library-directory=] option)
-#library-directory @LIBRARY_DIRECTORY@
+# specified, @DRIVERS_DIRECTORY@ will be used.
+# (can be overridden with the -D [--drivers-directory=] option)
+#drivers-directory @DRIVERS_DIRECTORY@
 
 # The writable-directory directive specifies the absolute path to a directory
 # which can be written to (creation of missing but needed resources, etc). If

@@ -119,9 +119,9 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_ARG_REQUIRED(
-   [library-directory], [DIRECTORY],
+   [drivers-directory], [DIRECTORY],
    [path to directory containing drivers],
-   [library_directory], ["${libdir}/${PACKAGE_NAME}"]
+   [drivers_directory], ["${libdir}/${PACKAGE_NAME}"]
 )
 
 BRLTTY_ARG_WITH(
@@ -134,7 +134,7 @@ then
    writable_directory=""
 elif test "${writable_directory}" = "yes"
 then
-   writable_directory="${library_directory}/rw"
+   writable_directory="${drivers_directory}/rw"
 fi
 AC_SUBST([writable_directory])
 BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
@@ -1496,8 +1496,8 @@ then
 fi
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
-BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
-                        [Define this to be a string containing the path to the library directory.])
+BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
+                        [Define this to be a string containing the path to the drivers directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],

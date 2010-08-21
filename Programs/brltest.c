@@ -41,17 +41,17 @@ int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
 
 static char *opt_brailleDevice;
-static char *opt_libraryDirectory;
+static char *opt_driversDirectory;
 static char *opt_writableDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'L',
-    .word = "library-directory",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden,
     .argument = "directory",
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
+    .setting.string = &opt_driversDirectory,
+    .defaultSetting = DRIVERS_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },
 
@@ -129,7 +129,7 @@ main (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_libraryDirectory,
+      &opt_driversDirectory,
       &opt_writableDirectory,
       &opt_dataDirectory,
       NULL
@@ -145,7 +145,7 @@ main (int argc, char *argv[]) {
   }
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
 
-  if ((braille = loadBrailleDriver(driver, &object, opt_libraryDirectory))) {
+  if ((braille = loadBrailleDriver(driver, &object, opt_driversDirectory))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
     if (!parameterNames) {

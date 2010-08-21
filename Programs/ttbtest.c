@@ -53,7 +53,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = DATA_DIRECTORY,
+    .defaultSetting = TABLES_DIRECTORY,
     .description = "Path to directory containing text tables."
   },
 

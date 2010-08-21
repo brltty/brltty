@@ -31,7 +31,7 @@
 #include "ktb_keyboard.h"
 #include "brl.h"
 
-static char *opt_libraryDirectory;
+static char *opt_driversDirectory;
 static char *opt_tablesDirectory;
 static int opt_listKeyNames;
 static int opt_listKeyTable;
@@ -51,12 +51,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("List key table on standard output.")
   },
 
-  { .letter = 'L',
-    .word = "library-directory",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
+    .setting.string = &opt_driversDirectory,
+    .defaultSetting = DRIVERS_DIRECTORY,
     .description = strtext("Path to directory for loading drivers.")
   },
 
@@ -65,7 +65,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = DATA_DIRECTORY,
+    .defaultSetting = TABLES_DIRECTORY,
     .description = strtext("Path to directory containing tables.")
   },
 END_OPTION_TABLE
@@ -102,7 +102,7 @@ getKeyNameTables (const char *keyTableName) {
           void *driverObject;
           const char *driverCode = (componentsLeft--, *currentComponent++);
 
-          if (loadBrailleDriver(driverCode, &driverObject, opt_libraryDirectory)) {
+          if (loadBrailleDriver(driverCode, &driverObject, opt_driversDirectory)) {
             char *keyTablesSymbol;
 
             {
@@ -179,7 +179,7 @@ main (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_libraryDirectory,
+      &opt_driversDirectory,
       &opt_tablesDirectory,
       NULL
     };

@@ -39,16 +39,16 @@ char *opt_pcmDevice;
 static char *opt_speechRate;
 static char *opt_textString;
 static char *opt_speechVolume;
-static char *opt_libraryDirectory;
+static char *opt_driversDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'L',
-    .word = "library-directory",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden,
     .argument = "directory",
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
+    .setting.string = &opt_driversDirectory,
+    .defaultSetting = DRIVERS_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },
 
@@ -106,7 +106,7 @@ main (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_libraryDirectory,
+      &opt_driversDirectory,
       &opt_dataDirectory,
       NULL
     };
@@ -138,7 +138,7 @@ main (int argc, char *argv[]) {
     --argc;
   }
 
-  if ((speech = loadSpeechDriver(driver, &object, opt_libraryDirectory))) {
+  if ((speech = loadSpeechDriver(driver, &object, opt_driversDirectory))) {
     const char *const *parameterNames = speech->parameters;
     char **parameterSettings;
     if (!parameterNames) {

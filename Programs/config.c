@@ -112,7 +112,7 @@ static char *opt_messageDelay;
 static char *opt_configurationFile;
 static char *opt_pidFile;
 static char *opt_writableDirectory;
-static char *opt_libraryDirectory;
+static char *opt_driversDirectory;
 
 static char *opt_brailleDevice;
 int opt_releaseDevice;
@@ -225,12 +225,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to process identifier file.")
   },
 
-  { .letter = 'L',
-    .word = "library-directory",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
+    .setting.string = &opt_driversDirectory,
+    .defaultSetting = DRIVERS_DIRECTORY,
     .description = strtext("Path to directory for loading drivers.")
   },
 
@@ -2237,7 +2237,7 @@ destructBrailleDriver (void) {
 
 static int
 initializeBrailleDriver (const char *code, int verify) {
-  if ((braille = loadBrailleDriver(code, &brailleObject, opt_libraryDirectory))) {
+  if ((braille = loadBrailleDriver(code, &brailleObject, opt_driversDirectory))) {
     brailleParameters = getParameters(braille->parameters,
                                       braille->definition.code,
                                       opt_brailleParameters);
@@ -2481,7 +2481,7 @@ destructSpeechDriver (void) {
 
 static int
 initializeSpeechDriver (const char *code, int verify) {
-  if ((speech = loadSpeechDriver(code, &speechObject, opt_libraryDirectory))) {
+  if ((speech = loadSpeechDriver(code, &speechObject, opt_driversDirectory))) {
     speechParameters = getParameters(speech->parameters,
                                      speech->definition.code,
                                      opt_speechParameters);
@@ -2605,7 +2605,7 @@ exitSpeechDriver (void) {
 
 static int
 initializeScreenDriver (const char *code, int verify) {
-  if ((screen = loadScreenDriver(code, &screenObject, opt_libraryDirectory))) {
+  if ((screen = loadScreenDriver(code, &screenObject, opt_driversDirectory))) {
     screenParameters = getParameters(getScreenParameters(screen),
                                      getScreenDriverDefinition(screen)->code,
                                      opt_screenParameters);
@@ -2900,7 +2900,7 @@ startup (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_libraryDirectory,
+      &opt_driversDirectory,
       &opt_writableDirectory,
       &opt_tablesDirectory,
       &opt_pidFile,
@@ -3082,7 +3082,7 @@ startup (int argc, char *argv[]) {
   writableDirectory = opt_writableDirectory;
 
   LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Drivers Directory"), opt_driversDirectory);
 
   LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
   setGlobalDataVariable("tablesDirectory", opt_tablesDirectory);

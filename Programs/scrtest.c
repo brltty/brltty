@@ -38,15 +38,15 @@ static char *opt_boxWidth;
 static char *opt_boxTop;
 static char *opt_boxHeight;
 static char *opt_screenDriver;
-static char *opt_libraryDirectory;
+static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'L',
-    .word = "library-directory",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden,
     .argument = "directory",
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
+    .setting.string = &opt_driversDirectory,
+    .defaultSetting = DRIVERS_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },
 
@@ -142,13 +142,13 @@ main (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_libraryDirectory,
+      &opt_driversDirectory,
       NULL
     };
     fixInstallPaths(paths);
   }
 
-  if ((screen = loadScreenDriver(opt_screenDriver, &driverObject, opt_libraryDirectory))) {
+  if ((screen = loadScreenDriver(opt_screenDriver, &driverObject, opt_driversDirectory))) {
     const char *const *parameterNames = getScreenParameters(screen);
     char **parameterSettings;
 

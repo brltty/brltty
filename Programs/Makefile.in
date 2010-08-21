@@ -595,8 +595,8 @@ install-key-tables: install-tables-directory
 install-help-files: install-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.hlp $(INSTALL_TABLES_DIRECTORY)
 
-install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-library-directory
-	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_LIBRARY_DIRECTORY)
+install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-drivers-directory
+	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_DRIVERS_DIRECTORY)
 
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
@@ -652,8 +652,8 @@ uninstall-data:
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
 
 uninstall-libraries: $(UNINSTALL_API_LIBRARIES)
-	-rm -f $(INSTALL_LIBRARY_DIRECTORY)/$(LIB_NAME)*
-	-[ ! -d $(INSTALL_LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_LIBRARY_DIRECTORY)
+	-rm -f $(INSTALL_DRIVERS_DIRECTORY)/$(LIB_NAME)*
+	-[ ! -d $(INSTALL_DRIVERS_DIRECTORY) ] || rmdir $(INSTALL_DRIVERS_DIRECTORY)
 
 uninstall-api-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
