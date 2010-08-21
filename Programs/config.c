@@ -474,7 +474,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'l',
     .word = "log-level",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("level"),
     .setting.string = &opt_logLevel,
     .description = strtext("Diagnostic logging level: %s, or one of {%s}"),

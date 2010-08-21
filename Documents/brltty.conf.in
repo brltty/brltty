@@ -81,10 +81,11 @@
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
 #braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
 #
-# NOTE: If the device is connected through a serial-to-USB adapter,
-# braille-device usb: will not work, braille-device has to be set to something
-# like serial:ttyUSB0, see the kernel messages on device plug to get the exact
-# device name.
+# NOTE: If the device is connected via a serial-to-USB adapter then setting
+# braille-device to usb: will not work. In this case it needs to identify the
+# virtual serial device which the kernel has created for the adapter, i.e. to
+# something like serial:ttyUSB0 (see the kernel messages on device plug to get
+# the actual device name).
 
 # The release-device directive specifies whether or not the device to which the
 # braille display is connected is to be released when the current screen or
@@ -405,6 +406,19 @@
 ##########################
 # Miscellaneous Settings #
 ##########################
+
+# The log-level directive specifies the severity threshold for diagnostics
+# written to the system log. Less severe diagnostics will not be logged. If not
+# specified, "notice" will be used.
+# (can be overridden with the -l [--log-level=] option)
+#log-level	emergency
+#log-level	alert
+#log-level	critical
+#log-level	error
+#log-level	warning
+#log-level	notice
+#log-level	information
+#log-level	debug
 
 # The library-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
