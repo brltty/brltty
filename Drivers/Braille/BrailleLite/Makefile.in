@@ -26,13 +26,3 @@ include $(SRC_TOP)braille.mk
 braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
-help-files: default.hlp 18.hlp
-
-default.hlp: $(SRC_DIR)/help.src
-	sed -e '1s/<x00>/Braille Lite/' -e 's/^<x40>//' <$(SRC_DIR)/help.src \
-	| grep -v '^<x20>' >$@
-
-18.hlp: $(SRC_DIR)/help.src
-	sed -e '1s/<x00>/Braille Lite 18/' -e 's/^<x20>//' <$(SRC_DIR)/help.src \
-	| grep -v '^<x40>' >$@
-
