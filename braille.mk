@@ -20,13 +20,6 @@ TXT2HLP = $(BLD_TOP)$(PGM_DIR)/txt2hlp$X
 $(TXT2HLP)$X:
 	cd $(@D) && $(MAKE) $(@F)
 
-braille-help::
-	$(INSTALL_DIRECTORY) $(BLD_TOP)$(DAT_DIR)
-	set -- $(SRC_DIR)/*.hlp && [ -f $$1 ] || exit 0 && \
-	for file in "$${@}"; do $(INSTALL) $$file $(BLD_TOP)$(DAT_DIR)/brltty-$(DRIVER_CODE)-`basename $$file`; done
-
-braille-all:: braille-help
-
 BRL_DEFS = '-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"'
 BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
 BRL_CXXFLAGS = $(LIBCXXFLAGS) $(BRL_DEFS)
