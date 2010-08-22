@@ -28,7 +28,7 @@
 #include "log.h"
 
 #if defined(HAVE_SYSLOG_H)
-static int sysopenLoged = 0;
+static int syslogOpened = 0;
 
 #elif defined(WINDOWS)
 static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
@@ -41,41 +41,65 @@ toEventType (int level) {
 }
 
 #elif defined(__MSDOS__)
-static int dosLogFile = -1;
 
 #endif /* system log internal definitions */
 
-static int logLevel = LOG_NOTICE;
-static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
+static int logLevel = LOG_NOTICE;
+static const char *logPrefix = NULL;
+
+#define LOG_FILE_CLOSED -1
+static int logFile = LOG_FILE_CLOSED;
 
 void
-openLog (int toConsole) {
+closeLogFile (void) {
+  if (logFile != LOG_FILE_CLOSED) {
+    close(logFile);
+    logFile = LOG_FILE_CLOSED;
+  }
+}
+
+void
+openLogFile (const char *path) {
+  closeLogFile();
+
+  logFile = open(path, O_WRONLY|O_CREAT|O_TRUNC,
+                 (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
+}
+
+static void
+writeLogRecord (const char *record) {
+  if (logFile != LOG_FILE_CLOSED) {
+    static const char trailer[] = {'\n'};
+
+    write(logFile, record, strlen(record));
+    write(logFile, trailer, sizeof(trailer));
+  }
+}
+
+void
+openSystemLog (void) {
 #if defined(HAVE_SYSLOG_H)
-  if (!sysopenLoged) {
+  if (!syslogOpened) {
     int flags = LOG_PID;
-    if (toConsole) flags |= LOG_CONS;
-    openlog("brltty", flags, LOG_DAEMON);
-    sysopenLoged = 1;
+    openlog(PACKAGE_NAME, flags, LOG_DAEMON);
+    syslogOpened = 1;
   }
 #elif defined(WINDOWS)
   if (windowsEventLog == INVALID_HANDLE_VALUE) {
-    windowsEventLog = RegisterEventSource(NULL, "brltty");
+    windowsEventLog = RegisterEventSource(NULL, PACKAGE_NAME);
   }
 #elif defined(__MSDOS__)
-  if (dosLogFile == -1) {
-    dosLogFile = open("brltty.log", O_WRONLY|O_CREAT|O_TRUNC,
-                      (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
-  }
+  openLogFile(PACKAGE_NAME ".log");
 #endif /* open system log */
 }
 
 void
-closeLog (void) {
+closeSystemLog (void) {
 #if defined(HAVE_SYSLOG_H)
-  if (sysopenLoged) {
+  if (syslogOpened) {
     closelog();
-    sysopenLoged = 0;
+    syslogOpened = 0;
   }
 #elif defined(WINDOWS)
   if (windowsEventLog != INVALID_HANDLE_VALUE) {
@@ -83,32 +107,29 @@ closeLog (void) {
     windowsEventLog = INVALID_HANDLE_VALUE;
   }
 #elif defined(__MSDOS__)
-  if (dosLogFile != -1) {
-    close(dosLogFile);
-    dosLogFile = -1;
-  }
+  closeLogFile();
 #endif /* close system log */
 }
 
 int
-setLogLevel (int level) {
-  int previous = logLevel;
-  logLevel = level;
-  return previous;
+setLogLevel (int newLevel) {
+  int oldLevel = logLevel;
+  logLevel = newLevel;
+  return oldLevel;
 }
 
 const char *
-setPrintPrefix (const char *prefix) {
-  const char *previous = printPrefix;
-  printPrefix = prefix;
-  return previous;
+setLogPrefix (const char *newPrefix) {
+  const char *oldPrefix = logPrefix;
+  logPrefix = newPrefix;
+  return oldPrefix;
 }
 
 int
-setPrintLevel (int level) {
-  int previous = printLevel;
-  printLevel = level;
-  return previous;
+setPrintLevel (int newLevel) {
+  int oldLevel = printLevel;
+  printLevel = newLevel;
+  return oldLevel;
 }
 
 int
@@ -118,70 +139,54 @@ setPrintOff (void) {
 
 void
 LogPrint (int level, const char *format, ...) {
-  int reason = errno;
-  va_list argp;
+  int write = level <= logLevel;
+  int print = level <= printLevel;
 
-  if (level <= logLevel) {
+  if (write || print) {
+    int reason = errno;
+    char record[0X100];
+
+    {
+      va_list argp;
+
+      va_start(argp, format);
+      vsnprintf(record, sizeof(record), format, argp);
+      va_end(argp);
+    }
+
+    if (*record) {
+      if (write) {
+        writeLogRecord(record);
+
 #if defined(HAVE_SYSLOG_H)
-    if (sysopenLoged) {
-#ifdef HAVE_VSYSLOG
-      va_start(argp, format);
-      vsyslog(level, format, argp);
-      va_end(argp);
-#else /* HAVE_VSYSLOG */
-      char buffer[0X100];
-      va_start(argp, format);
-      vsnprintf(buffer, sizeof(buffer), format, argp);
-      va_end(argp);
-      syslog(level, "%s", buffer);
-#endif /* HAVE_VSYSLOG */
-      goto done;
-#define NEED_DONE
-    }
+        if (syslogOpened) syslog(level, "%s", record);
 #elif defined(WINDOWS)
-    if (windowsEventLog != INVALID_HANDLE_VALUE) {
-      char buffer[0X100];
-      const char *strings[] = {buffer};
-      va_start(argp, format);
-      vsnprintf(buffer, sizeof(buffer), format, argp);
-      va_end(argp);
-      ReportEvent(windowsEventLog, toEventType(level), 0, 0, NULL,
-                  ARRAY_COUNT(strings), 0, strings, NULL);
-      goto done;
-#define NEED_DONE
-    }
+        if (windowsEventLog != INVALID_HANDLE_VALUE) {
+          const char *strings[] = {record};
+          ReportEvent(windowsEventLog, toEventType(level), 0, 0, NULL,
+                      ARRAY_COUNT(strings), 0, strings, NULL);
+        }
 #elif defined(__MSDOS__)
-    if (dosLogFile != -1) {
-      char buffer[0X100];
-      int size;
-      va_start(argp, format);
-      size = vsnprintf(buffer, sizeof(buffer), format, argp);
-      va_end(argp);
-      write(dosLogFile, buffer, size);
-      write(dosLogFile, "\n", 1);
-      goto done;
-#define NEED_DONE
-    }
+
 #endif /* write system log */
+      }
 
-    level = printLevel;
+      if (print) {
+        FILE *stream = stderr;
+
+        if (logPrefix) {
+          fputs(logPrefix, stream);
+          fputs(": ", stream);
+        }
+
+        fputs(record, stream);
+        fputc('\n', stream);
+        fflush(stream);
+      }
+    }
+
+    errno = reason;
   }
-
-#ifdef NEED_DONE
-done:
-#endif /* NEED_DONE */
-
-  if (level <= printLevel) {
-    FILE *stream = stderr;
-    if (printPrefix) fprintf(stream, "%s: ", printPrefix);
-    va_start(argp, format);
-    vfprintf(stream, format, argp);
-    va_end(argp);
-    fprintf(stream, "\n");
-    fflush(stream);
-  }
-
-  errno = reason;
 }
 
 void

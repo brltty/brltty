@@ -133,13 +133,8 @@ exitSessions (void) {
 
 static void
 exitLog (void) {
-  /* Reopen syslog (in case -e closed it) so that there will
-   * be a "stopped" message to match the "starting" message.
-   */
-  openLog(0);
-  setPrintOff();
-  LogPrint(LOG_INFO, gettext("terminated"));
-  closeLog();
+  closeSystemLog();
+  closeLogFile();
 }
 
 static void
@@ -1116,10 +1111,8 @@ brlttyPrepare_first (void) {
 
 int
 brlttyConstruct (int argc, char *argv[]) {
-  /* Open the system log. */
-  openLog(0);
-  LogPrint(LOG_INFO, gettext("starting"));
   atexit(exitLog);
+  openSystemLog();
 
 #ifdef SIGPIPE
   /* We install SIGPIPE handler before startup() so that drivers which

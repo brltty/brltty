@@ -104,6 +104,7 @@ static int opt_quiet;
 static int opt_noDaemon;
 static int opt_standardError;
 static char *opt_logLevel;
+static char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
 static char *opt_updateInterval;
@@ -469,6 +470,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_logLevel,
     .description = strtext("Diagnostic logging level: %s, or one of {%s}"),
     .strings = optionStrings_LogLevel
+  },
+
+  { .letter = 'L',
+    .word = "log-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_logFile,
+    .description = strtext("Path to log file.")
   },
 
   { .letter = 'e',
@@ -2954,21 +2963,33 @@ startup (int argc, char *argv[]) {
 
       LogPrint(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
     }
-  setLevel:
 
+  setLevel:
     setLogLevel(level);
-    setPrintLevel((opt_version || opt_verify)?
-                    (opt_quiet? LOG_NOTICE: LOG_INFO):
-                    (opt_quiet? LOG_WARNING: LOG_NOTICE));
-    if (opt_standardError) closeLog();
+
+    if (opt_standardError) {
+      closeSystemLog();
+    } else {
+      level = LOG_NOTICE;
+      if (opt_version || opt_verify) level += 1;
+      if (opt_quiet) level -= 1;
+    }
+
+    setPrintLevel(level);
+  }
+
+  if (*opt_logFile) {
+    openLogFile(opt_logFile);
+    closeSystemLog();
   }
 
   {
-    const char *prefix = setPrintPrefix(NULL);
+    const char *oldPrefix = setLogPrefix(NULL);
     char banner[0X100];
+
     makeProgramBanner(banner, sizeof(banner));
     LogPrint(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
-    setPrintPrefix(prefix);
+    setLogPrefix(oldPrefix);
   }
 
   if (opt_version) {
@@ -3015,11 +3036,6 @@ startup (int argc, char *argv[]) {
     background();
   }
   tryPidFile(0);
-
-  if (!opt_standardError) {
-    closeLog();
-    openLog(1);
-  }
 
   if (!opt_noDaemon) {
     setPrintOff();

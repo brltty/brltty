@@ -127,7 +127,7 @@ prepareProgram (int argumentCount, char **argumentVector) {
   }
 
   programName = locatePathName(programPath);
-  setPrintPrefix(programName);
+  setLogPrefix(programName);
 }
 
 void

@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_LOG
 #define BRLTTY_INCLUDED_LOG
 
+#include "prologue.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "prologue.h"
 
 #if defined(HAVE_SYSLOG_H)
 #include <syslog.h>
@@ -40,12 +40,16 @@ typedef enum {
 } SyslogLevel;
 #endif /* system log external definitions */
 
-extern void openLog (int toConsole);
-extern void closeLog (void);
+extern void openLogFile (const char *path);
+extern void closeLogFile (void);
 
-extern int setLogLevel (int level);
-extern const char *setPrintPrefix (const char *prefix);
-extern int setPrintLevel (int level);
+extern void openSystemLog (void);
+extern void closeSystemLog (void);
+
+extern int setLogLevel (int newLevel);
+extern const char *setLogPrefix (const char *newPrefix);
+
+extern int setPrintLevel (int newLevel);
 extern int setPrintOff (void);
 
 extern void LogPrint (int level, const char *format, ...) PRINTF(2, 3);
