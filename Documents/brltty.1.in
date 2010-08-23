@@ -39,9 +39,9 @@ the rightmost specification takes precedence.
 The following options are supported:
 .TP
 \fB-a \fItable\fR (\fB--attributes-table=\fR)
-The path to the attributes translation table.
+The path to the attributes table.
 Relative paths are anchored at
-.BR "/etc/brltty/" "."
+.BR "@TABLES_DIRECTORY@" "."
 The
 .B ".atb"
 extension is optional.
@@ -56,7 +56,7 @@ The built-in default is \fBauto\fR.
 \fB-c \fItable\fR (\fB--contraction-table=\fR)
 The path to the contraction table.
 Relative paths are anchored at
-.BR "/etc/brltty/" "."
+.BR "@TABLES_DIRECTORY@" "."
 The
 .B ".ctb"
 extension is optional.
@@ -124,7 +124,7 @@ Write logs to standard error rather than to the system log (useful for debugging
 The path to the configuration file.
 Relative paths are anchored at the current working directory.
 The built-in default is
-.BR "/etc/brltty.conf" "."
+.BR "@CONFIGURATION_DIRECTORY@/@configuration_file@" "."
 .TP
 \fB-h\fR (\fB--help\fR)
 Print a command line usage summary and then exit.
@@ -230,9 +230,9 @@ The driver for the speech synthesizer
 The built-in default is \fBauto\fR.
 .TP
 \fB-t \fItable\fR (\fB--text-table=\fR)
-The path to the text translation table.
+The path to the text table.
 Relative paths are anchored at
-.BR "/etc/brltty/" "."
+.BR "@TABLES_DIRECTORY@" "."
 The
 .B ".ttb"
 extension is optional.
@@ -284,7 +284,7 @@ The FIFO which gives other applications access to
 speech driver.
 It's created at start-up and removed at termination.
 Relative paths are anchored at
-.BR "/etc/brltty/" "."
+.BR "@WRITABLE_DIRECTORY@" "."
 The built-in default is
 that no FIFO is created.
 .TP
@@ -298,6 +298,11 @@ service so that it will be automatically started when the system is booted
 and so that applications can know that a
 .B BrlAPI
 server is running.
+.TP
+\fB-L \fIfile\fR (\fB--log-file=\fR)
+The file to which log messages are written.
+Relative paths are anchored at the current working directory.
+The default is to send log messages to the system log.
 .TP
 \fB-M \fIcsecs\fR (\fB--message-delay=\fR)
 The message hold time in hundredths of a second.
@@ -374,7 +379,7 @@ See the
 option for details.
 .TP
 \fBBRLTTY_ATTRIBUTES_TABLE=\fItable\fR
-The attributes translation table.
+The attributes table.
 See the
 .B -a
 .RB "(" "--attributes-table=" ")"
@@ -475,7 +480,7 @@ See the
 option for details.
 .TP
 \fBBRLTTY_TEXT_TABLE=\fItable\fR
-The text translation table.
+The text table.
 See the
 .B -t
 .RB "(" "--text-table=" ")"
@@ -497,7 +502,7 @@ See the
 option for details.
 .TP
 \fBattributes-table \fItable\fR
-The attributes translation table.
+The attributes table.
 See the
 .B -a
 .RB "(" "--attributes-table=" ")"
@@ -591,7 +596,7 @@ See the
 option for details.
 .TP
 \fBtext-table \fItable\fR
-The text translation table.
+The text table.
 See the
 .B -t
 .RB "(" "--text-table=" ")"

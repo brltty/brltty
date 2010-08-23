@@ -420,6 +420,12 @@
 #log-level	information
 #log-level	debug
 
+# The log-file directive specifies the file to which diagnostics are written.
+# Relative paths are anchored at the current working directory. If not
+# specified, diagnostics are written to the system log.
+# (can be overridden with the -L [--log-file=] option)
+#log-file	/tmp/brltty.log
+
 # The drivers-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
 # specified, @DRIVERS_DIRECTORY@ will be used.
