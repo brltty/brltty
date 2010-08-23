@@ -20,8 +20,9 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -71,6 +72,18 @@ static void
 writeLogRecord (const char *record) {
   if (logFile != LOG_FILE_CLOSED) {
     static const char trailer[] = {'\n'};
+
+    {
+      time_t now;
+      struct tm description;
+      char buffer[0X20];
+      int length;
+
+      time(&now);
+      localtime_r(&now, &description);
+      length = strftime(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S ", &description);
+      write(logFile, buffer, length);
+    }
 
     write(logFile, record, strlen(record));
     write(logFile, trailer, sizeof(trailer));
