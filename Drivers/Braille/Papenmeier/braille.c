@@ -375,6 +375,8 @@ static int rcvSwitchLast;
 static unsigned char xmtStatusOffset;
 static unsigned char xmtTextOffset;
 
+static unsigned char switchState1;
+
 static void
 resetTerminal1 (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {STX, 0X01, ETX};
@@ -465,7 +467,36 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static int
-handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
+handleSwitches1 (uint16_t time) {
+  unsigned char state = time & 0XFF;
+  unsigned char pressStack[8];
+  unsigned char pressCount = 0;
+  const unsigned char set = PM_SET_NavigationKeys;
+  unsigned char key = PM_KEY_SWITCH;
+  unsigned char bit = 0X1;
+
+  while (switchState1 != state) {
+    if ((state & bit) && !(switchState1 & bit)) {
+      pressStack[pressCount++] = key;
+      switchState1 |= bit;
+    } else if (!(state & bit) && (switchState1 & bit)) {
+      if (!enqueueKeyEvent(set, key, 0)) return 0;
+      switchState1 &= ~bit;
+    }
+
+    key += 1;
+    bit <<= 1;
+  }
+
+  while (pressCount)
+    if (!enqueueKeyEvent(set, pressStack[--pressCount], 1))
+      return 0;
+
+  return 1;
+}
+
+static int
+handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   int key;
 
   if (rcvFrontFirst <= code && 
@@ -482,14 +513,17 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
 
   if (rcvBarFirst <= code && 
       code <= rcvBarLast) { /* easy access bar */
+    if (!handleSwitches1(time)) return 0;
+
     key = (code - rcvBarFirst) / 3;
     return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy access bar */
-    key = (code - rcvSwitchFirst) / 3;
-    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
+    return handleSwitches1(time);
+  //key = (code - rcvSwitchFirst) / 3;
+  //return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
   if (rcvCursorFirst <= code && 
@@ -670,6 +704,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
             if (identity[1] == cIdIdentify) {
               if (interpretIdentity1(brl, identity)) {
                 protocol = &protocolOperations1;
+                switchState1 = 0;
 
                 {
                   static const DotsTable dots = {
