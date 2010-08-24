@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -49,44 +50,40 @@ static int printLevel = LOG_NOTICE;
 static int logLevel = LOG_NOTICE;
 static const char *logPrefix = NULL;
 
-#define LOG_FILE_CLOSED -1
-static int logFile = LOG_FILE_CLOSED;
+static FILE *logFile = NULL;
 
 void
 closeLogFile (void) {
-  if (logFile != LOG_FILE_CLOSED) {
-    close(logFile);
-    logFile = LOG_FILE_CLOSED;
+  if (logFile) {
+    fclose(logFile);
+    logFile = NULL;
   }
 }
 
 void
 openLogFile (const char *path) {
   closeLogFile();
-
-  logFile = open(path, O_WRONLY|O_CREAT|O_TRUNC,
-                 (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH));
+  logFile = fopen(path, "w");
 }
 
 static void
 writeLogRecord (const char *record) {
-  if (logFile != LOG_FILE_CLOSED) {
-    static const char trailer[] = {'\n'};
-
+  if (logFile) {
     {
-      time_t now;
+      struct timeval now;
       struct tm description;
       char buffer[0X20];
       int length;
 
-      time(&now);
-      localtime_r(&now, &description);
-      length = strftime(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S ", &description);
-      write(logFile, buffer, length);
+      gettimeofday(&now, NULL);
+      localtime_r(&now.tv_sec, &description);
+      length = strftime(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", &description);
+      fprintf(logFile, "%.*s.%03ld ", length, buffer, now.tv_usec/1000);
     }
 
-    write(logFile, record, strlen(record));
-    write(logFile, trailer, sizeof(trailer));
+    fputs(record, logFile);
+    fputc('\n', logFile);
+    fflush(logFile);
   }
 }
 
