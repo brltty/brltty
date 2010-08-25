@@ -467,7 +467,8 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static int
-handleSwitches1 (uint16_t state) {
+handleSwitches1 (uint16_t time) {
+  unsigned char state = time & 0XFF;
   unsigned char pressStack[8];
   unsigned char pressCount = 0;
   const unsigned char set = PM_SET_NavigationKeys;
