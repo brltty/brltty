@@ -3229,13 +3229,7 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
            *opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
-    {
-      const char *directory = getWritableDirectory();
-
-      if (directory) {
-        if (*opt_speechFifo) openSpeechFifo(directory, opt_speechFifo);
-      }
-    }
+    if (*opt_speechFifo) openSpeechFifo(opt_speechFifo);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

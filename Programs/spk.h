@@ -90,7 +90,7 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern int openSpeechFifo (const char *directory, const char *path);
+extern int openSpeechFifo (const char *path);
 extern void processSpeechFifo (SpeechSynthesizer *spk);
 
 #ifdef __cplusplus

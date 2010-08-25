@@ -258,11 +258,14 @@ exitSpeechFifo (void) {
 }
 
 int
-openSpeechFifo (const char *directory, const char *path) {
+openSpeechFifo (const char *path) {
+  const char *directory;
   atexit(exitSpeechFifo);
 
 #ifdef __MINGW32__
   directory = "//./pipe";
+#else /* __MINGW32__ */
+  directory = ".";
 #endif /* __MINGW32__ */
 
   if ((speechFifoPath = makePath(directory, path))) {

@@ -293,8 +293,8 @@
 #speech-driver	xs	# ExternalSpeech (executes /usr/local/bin/externalspeech)
 
 # The speech-fifo directive specifies the path to the FIFO used by the speech
-# pass-through facility. Relative paths are anchored at "@WRITABLE_DIRECTORY@".
-# If not specified, the speech pass-through facility isn't enabled.
+# pass-through facility. Relative paths are anchored at the current working
+# directory. If not specified, the speech pass-through facility isn't enabled.
 # (can be overridden with the -F [--speech-fifo=] option)
 #speech-fifo	spk
 
