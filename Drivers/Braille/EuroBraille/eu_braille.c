@@ -67,12 +67,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   protocolp = NULL;
   brl->textColumns = 0;
   iop = NULL;
-  {
-    static const DotsTable dots = {
-      0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
-    };
-    makeOutputTable(dots, outputTable);
-  }
+  makeOutputTable(dotsTable_12345678, outputTable);
   if (parameters[PARAM_PROTOCOLTYPE])
     {
       unsigned int choice = 0;

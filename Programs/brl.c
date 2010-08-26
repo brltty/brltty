@@ -475,6 +475,8 @@ reverseTranslationTable (TranslationTable from, TranslationTable to) {
   for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }
 
+const DotsTable dotsTable_12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+
 void
 makeOutputTable (const DotsTable dots, TranslationTable table) {
   int byte;

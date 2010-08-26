@@ -706,13 +706,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
                 protocol = &protocolOperations1;
                 switchState1 = 0;
 
-                {
-                  static const DotsTable dots = {
-                    0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
-                  };
-                  makeOutputTable(dots, outputTable);
-                }
-
+                makeOutputTable(dotsTable_12345678, outputTable);
                 return 1;
               }
             } else {
