@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "ascii.h"
 #include "log.h"
 #include "device.h"
 #include "timing.h"
@@ -618,7 +619,7 @@ askUser (const unsigned char *prompt) {
          }
       } else {
          switch (key) {
-            case 0X0D:
+            case CR:
                if (to > from) {
                   size_t length = to - from;
                   unsigned char *response = malloc(length+1);
@@ -634,7 +635,7 @@ askUser (const unsigned char *prompt) {
                   }
                }
                return NULL;
-            case 0X08:
+            case BS:
                if (cursorColumn > from) {
                   --cursorColumn;
                   deleteCharacters(1);
@@ -643,7 +644,7 @@ askUser (const unsigned char *prompt) {
                   ringBell();
                }
                break;
-            case 0X7F:
+            case DEL:
                if (cursorColumn < to) {
                   deleteCharacters(1);
                   --to;
@@ -715,7 +716,7 @@ downloadFile (void) {
                   address = buffer;
                }
                if ((newline = memchr(address, '\n', count))) {
-                  static const unsigned char lineTrailer[] = {0X0D, 0X0A};
+                  static const unsigned char lineTrailer[] = {CR, LF};
                   size_t length = newline - address;
                   if (!sendBytes(address, length++)) break;
                   if (!sendBytes(lineTrailer, sizeof(lineTrailer))) break;
