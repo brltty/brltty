@@ -48,8 +48,8 @@ loadSharedObject (const char *path) {
 #ifdef HAVE_SHL_LOAD
   shl_t object = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|DYNAMIC_PATH, 0L);
   if (object) return object;
-  LogPrint(LOG_ERR, "Shared library '%s' not loaded: %s",
-           path, strerror(errno));
+  logMessage(LOG_ERR, "Shared library '%s' not loaded: %s",
+             path, strerror(errno));
 #endif /* HAVE_SHL_LOAD */
   return NULL;
 }
@@ -58,8 +58,8 @@ void
 unloadSharedObject (void *object) {
 #ifdef HAVE_SHL_LOAD
   if (shl_unload(object) == -1)
-    LogPrint(LOG_ERR, "Shared library unload error: %s",
-             strerror(errno));
+    logMessage(LOG_ERR, "Shared library unload error: %s",
+               strerror(errno));
 #endif /* HAVE_SHL_LOAD */
 }
 
@@ -68,8 +68,8 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 #ifdef HAVE_SHL_LOAD
   shl_t handle = object;
   if (shl_findsym(&handle, symbol, TYPE_UNDEFINED, address) != -1) return 1;
-  LogPrint(LOG_ERR, "Shared symbol '%s' not found: %s",
-           symbol, strerror(errno));
+  logMessage(LOG_ERR, "Shared symbol '%s' not found: %s",
+             symbol, strerror(errno));
 #endif /* HAVE_SHL_LOAD */
   return 0;
 }
@@ -91,7 +91,7 @@ static void
 logAudioError (int level, long status, const char *action) {
   char message[132];
   AGetErrorText(audioServer, status, message, sizeof(message)-1);
-  LogPrint(level, "%s error %ld: %s", action, status, message);
+  logMessage(level, "%s error %ld: %s", action, status, message);
 }
 
 static const AudioAttributes *
@@ -118,7 +118,7 @@ openPcmDevice (int errorLevel, const char *device) {
         audioServer = NULL;
         goto noServer;
       }
-      LogPrint(LOG_DEBUG, "connected to audio server: %s", AAudioString(audioServer));
+      logMessage(LOG_DEBUG, "connected to audio server: %s", AAudioString(audioServer));
   
       ASetCloseDownMode(audioServer, AKeepTransactions, &status);
       if (status != AENoError) {

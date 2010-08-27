@@ -203,7 +203,7 @@ acceptSocketConnection (
 
           {
             char *address = formatSocketAddress(localAddress);
-            LogPrint(LOG_NOTICE, "listening on: %s", address);
+            logMessage(LOG_NOTICE, "listening on: %s", address);
             free(address);
           }
 
@@ -225,7 +225,7 @@ acceptSocketConnection (
                 break;
 
               case 0:
-                LogPrint(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
+                logMessage(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
                 continue;
 
               default: {
@@ -233,7 +233,7 @@ acceptSocketConnection (
 
                 if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
                   char *address = formatSocketAddress(remoteAddress);
-                  LogPrint(LOG_NOTICE, "client is: %s", address);
+                  logMessage(LOG_NOTICE, "client is: %s", address);
                   free(address);
                 } else {
                   LogSocketError("accept");
@@ -270,7 +270,7 @@ requestConnection (
 
   {
     char *address = formatSocketAddress(remoteAddress);
-    LogPrint(LOG_DEBUG, "connecting to: %s", address);
+    logMessage(LOG_DEBUG, "connecting to: %s", address);
     free(address);
   }
 
@@ -278,14 +278,14 @@ requestConnection (
     if (connect(clientSocket, remoteAddress, remoteSize) != -1) {
       {
         char *address = formatSocketAddress(remoteAddress);
-        LogPrint(LOG_NOTICE, "connected to: %s", address);
+        logMessage(LOG_NOTICE, "connected to: %s", address);
         free(address);
       }
 
       operations = &socketOperationsEntry;
       return clientSocket;
     } else {
-      LogPrint(LOG_WARNING, "connect error: %s", strerror(errno));
+      logMessage(LOG_WARNING, "connect error: %s", strerror(errno));
     }
 
     close(clientSocket);
@@ -320,7 +320,7 @@ setLocalAddress (const char *string, struct sockaddr_un *address) {
     strncpy(address->sun_path, string, sizeof(address->sun_path)-1);
   } else {
     ok = 0;
-    LogPrint(LOG_WARNING, "Local socket path too long: %s", string);
+    logMessage(LOG_WARNING, "Local socket path too long: %s", string);
   }
 
   return ok;
@@ -421,7 +421,7 @@ acceptNamedPipeConnection (const char *path) {
         while ((res = WaitForSingleObject(overl.hEvent, 10000)) != WAIT_OBJECT_0) {
           if (res == WAIT_TIMEOUT) {
             ++attempts;
-            LogPrint(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
+            logMessage(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
           } else {
             logWindowsSystemError("ConnectNamedPipe");
             CloseHandle(h);
@@ -484,7 +484,7 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
       memcpy(&address->sin_addr, host->h_addr, sizeof(address->sin_addr));
     } else {
       ok = 0;
-      LogPrint(LOG_WARNING, "Unknown host name: %s", hostName);
+      logMessage(LOG_WARNING, "Unknown host name: %s", hostName);
     }
   } else {
     address->sin_addr.s_addr = INADDR_ANY;
@@ -497,7 +497,7 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
         address->sin_port = htons(port);
       } else {
         ok = 0;
-        LogPrint(LOG_WARNING, "Invalid port number: %s", portNumber);
+        logMessage(LOG_WARNING, "Invalid port number: %s", portNumber);
       }
     } else {
       const struct servent *service = getservbyname(portNumber, "tcp");
@@ -505,7 +505,7 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
         address->sin_port = service->s_port;
       } else {
         ok = 0;
-        LogPrint(LOG_WARNING, "Unknown service: %s", portNumber);
+        logMessage(LOG_WARNING, "Unknown service: %s", portNumber);
       }
     }
   } else {
@@ -861,26 +861,26 @@ dimensionsChanged (BrailleDisplay *brl) {
               if ((word = nextWord())) {
                 if (isInteger(&rows2, word) && (rows2 > 0)) {
                 } else {
-                  LogPrint(LOG_WARNING, "invalid status row count: %s", word);
+                  logMessage(LOG_WARNING, "invalid status row count: %s", word);
                   ok = 0;
                 }
               }
             } else {
-              LogPrint(LOG_WARNING, "invalid status column count: %s", word);
+              logMessage(LOG_WARNING, "invalid status column count: %s", word);
               ok = 0;
             }
           }
         } else {
-          LogPrint(LOG_WARNING, "invalid text row count: %s", word);
+          logMessage(LOG_WARNING, "invalid text row count: %s", word);
           ok = 0;
         }
       }
     } else {
-      LogPrint(LOG_WARNING, "invalid text column count: %s", word);
+      logMessage(LOG_WARNING, "invalid text column count: %s", word);
       ok = 0;
     }
   } else {
-    LogPrint(LOG_WARNING, "missing text column count");
+    logMessage(LOG_WARNING, "missing text column count");
   }
 
   if (ok) {
@@ -1007,7 +1007,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (line) free(line);
       if ((line = readCommandLine())) {
         const char *word;
-        LogPrint(LOG_DEBUG, "command received: %s", line);
+        logMessage(LOG_DEBUG, "command received: %s", line);
 
         if ((word = strtok(line, inputDelimiters))) {
           if (testWord(word, "cells")) {
@@ -1018,7 +1018,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           } else if (testWord(word, "quit")) {
             break;
           } else {
-            LogPrint(LOG_WARNING, "unexpected command: %s", word);
+            logMessage(LOG_WARNING, "unexpected command: %s", word);
           }
         }
       } else {
@@ -1184,7 +1184,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   if (line) {
     const char *word;
-    LogPrint(LOG_DEBUG, "Command received: %s", line);
+    logMessage(LOG_DEBUG, "Command received: %s", line);
 
     if ((word = strtok(line, inputDelimiters))) {
       if (testWord(word, "cells")) {
@@ -1227,20 +1227,20 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   command += number;
                   continue;
                 } else {
-                  LogPrint(LOG_WARNING, "Number out of range.");
+                  logMessage(LOG_WARNING, "Number out of range.");
                 }
               }
             }
 
-            LogPrint(LOG_WARNING, "unknown option: %s", word);
+            logMessage(LOG_WARNING, "unknown option: %s", word);
           }
 
           if (needsNumber && !numberSpecified) {
-            LogPrint(LOG_WARNING, "Number not specified.");
+            logMessage(LOG_WARNING, "Number not specified.");
             command = EOF;
           }
         } else {
-          LogPrint(LOG_WARNING, "unknown command: %s", word);
+          logMessage(LOG_WARNING, "unknown command: %s", word);
         }
       }
     }

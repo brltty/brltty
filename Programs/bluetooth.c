@@ -171,7 +171,7 @@ bthOpenConnection (const char *address, uint8_t channel, int force) {
         bthRememberConnectError(connection->address, errno);
       }
     } else {
-      LogPrint(LOG_ERR, "invalid Bluetooth device address: %s", address);
+      logMessage(LOG_ERR, "invalid Bluetooth device address: %s", address);
       errno = EINVAL;
     }
 

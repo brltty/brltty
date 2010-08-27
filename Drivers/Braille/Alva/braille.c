@@ -490,14 +490,14 @@ reallocateBuffers (BrailleDisplay *brl) {
     if (reallocateBuffer(&previousStatus, brl->statusColumns*brl->statusRows))
       return 1;
 
-  LogPrint(LOG_ERR, "cannot allocate braille buffers");
+  logMessage(LOG_ERR, "cannot allocate braille buffers");
   return 0;
 }
 
 static int
 setDefaultConfiguration (BrailleDisplay *brl) {
-  LogPrint(LOG_INFO, "detected Alva %s: %d columns, %d status cells",
-           model->name, model->columns, model->statusCells);
+  logMessage(LOG_INFO, "detected Alva %s: %d columns, %d status cells",
+             model->name, model->columns, model->statusCells);
 
   brl->textColumns = model->columns;
   brl->textRows = 1;
@@ -548,13 +548,13 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
   }
 
   if (statusColumns != brl->statusColumns) {
-    LogPrint(LOG_INFO, "status cell count changed to %d", statusColumns);
+    logMessage(LOG_INFO, "status cell count changed to %d", statusColumns);
     brl->statusColumns = statusColumns;
     changed = 1;
   }
 
   if (textColumns != brl->textColumns) {
-    LogPrint(LOG_INFO, "text column count changed to %d", textColumns);
+    logMessage(LOG_INFO, "text column count changed to %d", textColumns);
     brl->textColumns = textColumns;
     if (!autodetecting) brl->resizeRequired = 1;
     changed = 1;
@@ -641,7 +641,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
       return 1;
     }
   } else {
-    LogPrint(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
+    logMessage(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
   }
 
   return 0;
@@ -832,8 +832,8 @@ readCommand1 (BrailleDisplay *brl) {
               if (frontKeys & progKey) {
                 unsigned char newSetting = frontKeys & ~progKey;
 
-                LogPrint(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
-                         frontKeys, newSetting);
+                logMessage(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
+                           frontKeys, newSetting);
                 writeParameter1(brl, 6, newSetting);
               }
             }
@@ -1016,7 +1016,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       break;
   }
 
-  LogPrint(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
+  logMessage(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
   return EOF;
 }
 
@@ -1148,7 +1148,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
     }
   }
 
-  LogPrint(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
+  logMessage(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
   return 0;
 }
 
@@ -1565,7 +1565,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
     if (count == -1) {
       logSystemError("Alva Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;

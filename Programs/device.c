@@ -34,7 +34,7 @@ getConsole (void) {
   static int console = -1;
   if (console == -1) {
     if ((console = open("/dev/console", O_WRONLY)) != -1) {
-      LogPrint(LOG_DEBUG, "Console opened: fd=%d", console);
+      logMessage(LOG_DEBUG, "Console opened: fd=%d", console);
     } else {
       logSystemError("Console open");
     }
@@ -85,8 +85,8 @@ getDeviceDirectory (void) {
         }
 
         if (errno != ENOENT)
-          LogPrint(LOG_ERR, "device directory error: %s (%s): %s",
-                   path, *variable, strerror(errno));
+          logMessage(LOG_ERR, "device directory error: %s (%s): %s",
+                     path, *variable, strerror(errno));
       }
 
       ++variable;
@@ -94,7 +94,7 @@ getDeviceDirectory (void) {
 
     deviceDirectory = directory;
   found:
-    LogPrint(LOG_DEBUG, "device directory: %s", deviceDirectory);
+    logMessage(LOG_DEBUG, "device directory: %s", deviceDirectory);
   }
 
   return deviceDirectory;
@@ -136,7 +136,7 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
     char *path = getDevicePath(name);
 
     if (!path) break;
-    LogPrint(LOG_DEBUG, "checking %s device: %s", description, path);
+    logMessage(LOG_DEBUG, "checking %s device: %s", description, path);
 
     if (access(path, mode) != -1) {
       device = name;
@@ -144,8 +144,8 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
       break;
     }
 
-    LogPrint(LOG_DEBUG, "%s device access error: %s: %s",
-             description, path, strerror(errno));
+    logMessage(LOG_DEBUG, "%s device access error: %s: %s",
+               description, path, strerror(errno));
     if (errno != ENOENT)
       if (!device)
         device = name;
@@ -156,11 +156,11 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
     if (first) {
       device = first;
     } else {
-      LogPrint(LOG_ERR, "%s device names not defined", description);
+      logMessage(LOG_ERR, "%s device names not defined", description);
     }
   }
 
-  if (device) LogPrint(LOG_INFO, "%s device: %s", description, device);
+  if (device) logMessage(LOG_INFO, "%s device: %s", description, device);
   return device;
 }
 

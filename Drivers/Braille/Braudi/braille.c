@@ -150,7 +150,7 @@ identifyDisplay (BrailleDisplay *brl) {
             skipCharacter(' ', &bytes, &count);
             if (interpretNumber(&cells, &bytes, &count)) {
               if (!count) {
-                LogPrint(LOG_INFO, "Detected: %.*s", (int)length, identity);
+                logMessage(LOG_INFO, "Detected: %.*s", (int)length, identity);
 
                 brl->textColumns = cells;
                 brl->textRows = 1;

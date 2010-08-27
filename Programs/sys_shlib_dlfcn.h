@@ -29,7 +29,7 @@ loadSharedObject (const char *path) {
 #ifdef HAVE_DLOPEN 
   void *object = dlopen(path, SHARED_OBJECT_LOAD_FLAGS);
   if (object) return object;
-  LogPrint(LOG_ERR, "%s", dlerror());
+  logMessage(LOG_ERR, "%s", dlerror());
 #endif /* HAVE_DLOPEN */
   return NULL;
 }
@@ -52,7 +52,7 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   {
     const char *error = dlerror();
     if (!error) return 1;
-    LogPrint(LOG_ERR, "%s", error);
+    logMessage(LOG_ERR, "%s", error);
   }
 #endif /* HAVE_DLOPEN */
   return 0;

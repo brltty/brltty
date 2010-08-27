@@ -52,7 +52,7 @@ extern const char *setLogPrefix (const char *newPrefix);
 extern int setPrintLevel (int newLevel);
 extern int setPrintOff (void);
 
-extern void LogPrint (int level, const char *format, ...) PRINTF(2, 3);
+extern void logMessage (int level, const char *format, ...) PRINTF(2, 3);
 extern void logBytes (int level, const char *description, const void *data, size_t length);
 
 extern void logSystemError (const char *action);

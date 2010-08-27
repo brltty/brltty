@@ -47,7 +47,7 @@ int vbinit() {
     disablePorts(LPTPORT, 3);
   }
 
-  LogPrint(LOG_ERR, "Error: must be superuser");
+  logMessage(LOG_ERR, "Error: must be superuser");
   return -1;
 }
 

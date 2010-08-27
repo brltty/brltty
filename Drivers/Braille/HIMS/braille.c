@@ -463,7 +463,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
     if (count == -1) {
       logSystemError("Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;
@@ -512,7 +512,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(device)) {
     if (io->configurePort()) {
       charactersPerSecond = SERIAL_BAUD / 10;
-      LogPrint(LOG_INFO, "detected: %s", protocol->modelName);
+      logMessage(LOG_INFO, "detected: %s", protocol->modelName);
 
       if (protocol->getCellCount(brl, &brl->textColumns) ||
           protocol->getCellCount(brl, &brl->textColumns)) {

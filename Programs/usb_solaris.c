@@ -189,7 +189,7 @@ usbControlTransfer (
       if ((count = write(devx->data, &setup, size)) == -1) {
         logSystemError("USB control request");
       } else if (count != size) {
-        LogPrint(LOG_ERR, "USB truncated control request: %d < %d", count, size);
+        logMessage(LOG_ERR, "USB truncated control request: %d < %d", count, size);
         errno = EIO;
       } else if ((count = read(devx->data, buffer, length)) == -1) {
         logSystemError("USB control read");
@@ -213,7 +213,7 @@ usbControlTransfer (
       if ((count = write(devx->data, packet, size)) == -1) {
         logSystemError("USB control write");
       } else if (count != size) {
-        LogPrint(LOG_ERR, "USB truncated control write: %d < %d", count, size);
+        logMessage(LOG_ERR, "USB truncated control write: %d < %d", count, size);
         errno = EIO;
       } else {
         return size;
@@ -222,7 +222,7 @@ usbControlTransfer (
     }
 
     default:
-      LogPrint(LOG_ERR, "USB unsupported control direction: %02X", direction);
+      logMessage(LOG_ERR, "USB unsupported control direction: %02X", direction);
       errno = ENOSYS;
       break;
   }
@@ -265,7 +265,7 @@ usbSubmitRequest (
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB unsupported asynchronous direction: %02X", direction);
+          logMessage(LOG_ERR, "USB unsupported asynchronous direction: %02X", direction);
           errno = ENOSYS;
           break;
       }
@@ -423,7 +423,7 @@ usbWriteEndpoint (
       if (errno == EINTR) goto doWrite;
       logSystemError("USB endpoint write");
     } else if (count != length) {
-      LogPrint(LOG_ERR, "USB truncated endpoint write: %d < %d", count, length);
+      logMessage(LOG_ERR, "USB truncated endpoint write: %d < %d", count, length);
       errno = EIO;
     } else {
       return count;
@@ -446,7 +446,7 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   }
 
   if (count != -1) {
-    LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
+    logMessage(LOG_ERR, "USB short device descriptor (%d).", count);
     errno = EIO;
   }
 
@@ -502,7 +502,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
               break;
   
             default:
-              LogPrint(LOG_ERR, "USB unsupported endpoint direction: %02X", direction);
+              logMessage(LOG_ERR, "USB unsupported endpoint direction: %02X", direction);
               goto nameError;
           }
   

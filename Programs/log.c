@@ -148,7 +148,7 @@ setPrintOff (void) {
 }
 
 void
-LogPrint (int level, const char *format, ...) {
+logMessage (int level, const char *format, ...) {
   int write = level <= logLevel;
   int print = level <= printLevel;
 
@@ -207,13 +207,13 @@ logBytes (int level, const char *description, const void *data, size_t length) {
     const unsigned char *in = data;
 
     while (length--) out += sprintf(out, " %2.2X", *in++);
-    LogPrint(level, "%s:%s", description, buffer);
+    logMessage(level, "%s:%s", description, buffer);
   }
 }
 
 void
 logSystemError (const char *action) {
-  LogPrint(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+  logMessage(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
 void
 logMallocError (void) {
@@ -233,7 +233,7 @@ logWindowsError (DWORD error, const char *action) {
     if (end) *end = 0;
   }
 
-  LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
+  logMessage(LOG_ERR, "%s error %ld: %s", action, error, message);
   LocalFree(message);
 }
 

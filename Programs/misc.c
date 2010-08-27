@@ -26,7 +26,7 @@
 
 static void
 noMemory (void) {
-  LogPrint(LOG_CRIT, "insufficient memory: %s", strerror(errno));
+  logMessage(LOG_CRIT, "insufficient memory: %s", strerror(errno));
   exit(3);
 }
 

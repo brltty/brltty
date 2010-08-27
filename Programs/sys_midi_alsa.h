@@ -88,9 +88,9 @@ findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
           !(actualCapabilities & SND_SEQ_PORT_CAP_NO_EXPORT)) {
         *client = clientIdentifier;
         *port = portIdentifier;
-        LogPrint(LOG_DEBUG, "Using ALSA MIDI device: %d[%s] %d[%s]",
-                 clientIdentifier, midiAlsa_seq_client_info_get_name(clientInformation),
-                 portIdentifier, midiAlsa_seq_port_info_get_name(portInformation));
+        logMessage(LOG_DEBUG, "Using ALSA MIDI device: %d[%s] %d[%s]",
+                   clientIdentifier, midiAlsa_seq_client_info_get_name(clientInformation),
+                   portIdentifier, midiAlsa_seq_port_info_get_name(portInformation));
 
         free(portInformation);
         free(clientInformation);
@@ -102,7 +102,7 @@ findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
   }
 
   free(clientInformation);
-  LogPrint(errorLevel, "No MDII devices.");
+  logMessage(errorLevel, "No MDII devices.");
   return 0;
 }
 
@@ -131,8 +131,8 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
             if (strstr(name, clientSpecifier)) {
               clientIdentifier = midiAlsa_seq_client_info_get_client(info);
               clientOk = 1;
-              LogPrint(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
-                       clientIdentifier, name);
+              logMessage(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
+                         clientIdentifier, name);
               break;
             }
           }
@@ -155,8 +155,8 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
               if (strstr(name, portSpecifier)) {
                 portIdentifier = midiAlsa_seq_port_info_get_port(info);
                 portOk = 1;
-                LogPrint(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
-                         portIdentifier, name);
+                logMessage(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
+                           portIdentifier, name);
                 break;
               }
             }
@@ -168,19 +168,19 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
             *port = portIdentifier;
             return 1;
           } else {
-            LogPrint(errorLevel, "Invalid ALSA MIDI port: %s", device);
+            logMessage(errorLevel, "Invalid ALSA MIDI port: %s", device);
           }
         } else {
-          LogPrint(errorLevel, "Invalid ALSA MIDI client: %s", device);
+          logMessage(errorLevel, "Invalid ALSA MIDI client: %s", device);
         }
       } else {
-        LogPrint(errorLevel, "Too many ALSA MIDI device components: %s", device);
+        logMessage(errorLevel, "Too many ALSA MIDI device components: %s", device);
       }
     } else {
-      LogPrint(errorLevel, "Missing ALSA MIDI port specifier: %s", device);
+      logMessage(errorLevel, "Missing ALSA MIDI port specifier: %s", device);
     }
   } else {
-    LogPrint(errorLevel, "Missing ALSA MIDI client specifier: %s", device);
+    logMessage(errorLevel, "Missing ALSA MIDI client specifier: %s", device);
   }
 
   deallocateStrings(components);
@@ -212,7 +212,7 @@ openMidiDevice (int errorLevel, const char *device) {
 
   if (!midiAlsaLibrary) {
     if (!(midiAlsaLibrary = loadSharedObject("libasound.so.2"))) {
-      LogPrint(LOG_ERR, "Unable to load ALSA MIDI library.");
+      logMessage(LOG_ERR, "Unable to load ALSA MIDI library.");
       return NULL;
     }
 
@@ -267,40 +267,40 @@ openMidiDevice (int errorLevel, const char *device) {
             }
 
             if (deviceOk) {
-              LogPrint(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
+              logMessage(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
 
               if ((result = midiAlsa_seq_connect_to(midi->sequencer, midi->port, client, port)) >= 0) {
                 if ((result = snd_seq_start_queue(midi->sequencer, midi->queue, NULL)) >= 0) {
                   stopMidiTimer(midi);
                   return midi;
                 } else {
-                  LogPrint(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
-                           client, port, midiAlsa_strerror(result));
+                  logMessage(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
+                             client, port, midiAlsa_strerror(result));
                 }
               } else {
-                LogPrint(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
-                         client, port, midiAlsa_strerror(result));
+                logMessage(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
+                           client, port, midiAlsa_strerror(result));
               }
             }
 
             midiAlsa_seq_queue_status_free(midi->status);
           } else {
-            LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue status container: %s",
-                     midiAlsa_strerror(result));
+            logMessage(errorLevel, "Cannot allocate ALSA MIDI queue status container: %s",
+                       midiAlsa_strerror(result));
           }
         } else {
-          LogPrint(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
-                   midiAlsa_strerror(result));
+          logMessage(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
+                     midiAlsa_strerror(result));
         }
       } else {
-        LogPrint(errorLevel, "Cannot create ALSA MIDI output port: %s",
-                 midiAlsa_strerror(midi->port));
+        logMessage(errorLevel, "Cannot create ALSA MIDI output port: %s",
+                   midiAlsa_strerror(midi->port));
       }
 
       midiAlsa_seq_close(midi->sequencer);
     } else {
-      LogPrint(errorLevel, "Cannot open ALSA sequencer: %s: %s",
-               sequencerName, midiAlsa_strerror(result));
+      logMessage(errorLevel, "Cannot open ALSA sequencer: %s: %s",
+                 sequencerName, midiAlsa_strerror(result));
     }
 
     free(midi);
@@ -358,7 +358,7 @@ sendMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
     midiAlsa_seq_drain_output(midi->sequencer);
     return 1;
   } else {
-    LogPrint(LOG_ERR, "ALSA MIDI write error: %s", midiAlsa_strerror(result));
+    logMessage(LOG_ERR, "ALSA MIDI write error: %s", midiAlsa_strerror(result));
   }
   return 0;
 }

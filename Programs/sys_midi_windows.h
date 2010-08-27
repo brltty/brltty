@@ -42,7 +42,7 @@ static void
 logMidiOutError (MMRESULT error, int errorLevel, const char *action) {
   char text[MAXERRORLENGTH];
   midiOutGetErrorText(error, text, sizeof(text));
-  LogPrint(errorLevel, "%s error %d: %s", action, error, text);
+  logMessage(errorLevel, "%s error %d: %s", action, error, text);
 }
 
 static int
@@ -84,7 +84,7 @@ openMidiDevice (int errorLevel, const char *device) {
     }
 
     if (id == count) {
-      LogPrint(errorLevel, "invalid MIDI device number: %s", device);
+      logMessage(errorLevel, "invalid MIDI device number: %s", device);
       return NULL;
     }
   }

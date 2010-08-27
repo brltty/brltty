@@ -188,7 +188,7 @@ midiConstruct (int errorLevel) {
       device->channelNumber = 0;
       setMidiInstrument(device->midi, device->channelNumber, prefs.midiInstrument);
 
-      LogPrint(LOG_DEBUG, "MIDI enabled");
+      logMessage(LOG_DEBUG, "MIDI enabled");
       return device;
     }
 
@@ -197,7 +197,7 @@ midiConstruct (int errorLevel) {
     logMallocError();
   }
 
-  LogPrint(LOG_DEBUG, "MIDI not available");
+  logMessage(LOG_DEBUG, "MIDI not available");
   return NULL;
 }
 
@@ -206,12 +206,12 @@ midiPlay (NoteDevice *device, int note, int duration) {
   beginMidiBlock(device->midi);
 
   if (note) {
-    LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
+    logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
     startMidiNote(device->midi, device->channelNumber, note, prefs.midiVolume);
     insertMidiWait(device->midi, duration);
     stopMidiNote(device->midi, device->channelNumber);
   } else {
-    LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
+    logMessage(LOG_DEBUG, "tone: msec=%d", duration);
     insertMidiWait(device->midi, duration);
   }
 
@@ -228,7 +228,7 @@ static void
 midiDestruct (NoteDevice *device) {
   closeMidiDevice(device->midi);
   free(device);
-  LogPrint(LOG_DEBUG, "MIDI disabled");
+  logMessage(LOG_DEBUG, "MIDI disabled");
 }
 
 const NoteMethods midiMethods = {

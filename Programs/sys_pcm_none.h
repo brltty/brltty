@@ -22,7 +22,7 @@
 
 PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {
-  LogPrint(errorLevel, "PCM device not supported.");
+  logMessage(errorLevel, "PCM device not supported.");
   return NULL;
 }
 

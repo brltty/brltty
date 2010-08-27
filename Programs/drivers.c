@@ -128,21 +128,21 @@ loadDriver (
               static const char *expectedVersion = DRIVER_VERSION_STRING;
 
               if (strcmp(actualVersion, expectedVersion) != 0) {
-                LogPrint(LOG_WARNING, "%s %s driver version %s does not match expected version %s",
-                         driverCode, typeName, actualVersion, expectedVersion);
+                logMessage(LOG_WARNING, "%s %s driver version %s does not match expected version %s",
+                           driverCode, typeName, actualVersion, expectedVersion);
               }
             } else {
-              LogPrint(LOG_WARNING, "cannot find %s %s driver version symbol: %s",
-                       driverCode, typeName, versionSymbol);
+              logMessage(LOG_WARNING, "cannot find %s %s driver version symbol: %s",
+                         driverCode, typeName, versionSymbol);
             }
           }
         } else {
-          LogPrint(LOG_ERR, "cannot find %s driver symbol: %s", typeName, driverSymbol);
+          logMessage(LOG_ERR, "cannot find %s driver symbol: %s", typeName, driverSymbol);
           unloadSharedObject(libraryHandle);
           driverAddress = NULL;
         }
       } else {
-        LogPrint(LOG_ERR, "cannot load %s driver: %s", typeName, libraryPath);
+        logMessage(LOG_ERR, "cannot load %s driver: %s", typeName, libraryPath);
       }
 
       free(libraryPath);
@@ -179,11 +179,11 @@ identifyDriver (
       length += count;
     }
 
-    LogPrint(LOG_NOTICE, "%s", buffer);
+    logMessage(LOG_NOTICE, "%s", buffer);
   }
 
   if (full) {
     if (definition->developers && *definition->developers)
-      LogPrint(LOG_INFO, "   Developed by %s", definition->developers);
+      logMessage(LOG_INFO, "   Developed by %s", definition->developers);
   }
 }

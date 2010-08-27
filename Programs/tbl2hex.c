@@ -131,7 +131,7 @@ findTableEntry (const char *extension) {
     entry += 1;
   }
 
-  LogPrint(LOG_ERR, "unrecognized file extension: %s", extension);
+  logMessage(LOG_ERR, "unrecognized file extension: %s", extension);
   return NULL;
 }
 
@@ -197,7 +197,7 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
   return 1;
 
 outputError:
-  LogPrint(LOG_ERR, "table write error: %s", strerror(errno));
+  logMessage(LOG_ERR, "table write error: %s", strerror(errno));
   return 0;
 }
 
@@ -216,7 +216,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc == 0) {
-    LogPrint(LOG_ERR, "missing table file.");
+    logMessage(LOG_ERR, "missing table file.");
     exit(2);
   }
   path = *argv++, argc--;
@@ -244,7 +244,7 @@ main (int argc, char *argv[]) {
         status = 6;
       }
     } else {
-      LogPrint(LOG_ERR, "no file extension");
+      logMessage(LOG_ERR, "no file extension");
       status = 5;
     }
   }

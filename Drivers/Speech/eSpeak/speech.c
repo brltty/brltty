@@ -58,14 +58,14 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	char *data_path, *voicename, *punctlist;
 	int result;
 
-	LogPrint(LOG_INFO, "eSpeak version %s", espeak_Info(NULL));
+	logMessage(LOG_INFO, "eSpeak version %s", espeak_Info(NULL));
 
 	data_path = parameters[PARM_PATH];
 	if (data_path && !*data_path)
 		data_path = NULL;
 	result = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, data_path, 0);
 	if (result < 0) {
-		LogPrint(LOG_ERR, "eSpeak: initialization failed");
+		logMessage(LOG_ERR, "eSpeak: initialization failed");
 		return 0;
 	}
 
@@ -80,7 +80,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 		result = espeak_SetVoiceByProperties(&voice_select);
 	}
 	if (result != EE_OK) {
-		LogPrint(LOG_ERR, "eSpeak: unable to load voice '%s'", voicename);
+		logMessage(LOG_ERR, "eSpeak: unable to load voice '%s'", voicename);
 		return 0;
 	}
 
@@ -115,7 +115,7 @@ spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size
 	result = espeak_Synth(buffer, length+1, 0, POS_CHARACTER, 0,
 			espeakCHARS_UTF8, NULL, NULL);
 	if (result != EE_OK)
-		LogPrint(LOG_ERR, "eSpeak: Synth() returned error %d", result);
+		logMessage(LOG_ERR, "eSpeak: Synth() returned error %d", result);
 }
 
 static void

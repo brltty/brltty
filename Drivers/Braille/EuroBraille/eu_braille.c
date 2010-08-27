@@ -72,14 +72,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     {
       unsigned int choice = 0;
       char* choices[3];
-      LogPrint(LOG_DEBUG, "Detecting param %s", parameters[PARAM_PROTOCOLTYPE]);
+      logMessage(LOG_DEBUG, "Detecting param %s", parameters[PARAM_PROTOCOLTYPE]);
       choices[0] = "clio";
       choices[1] = "esysiris";
       choices[2] = NULL;
       if (!validateChoice(&choice, parameters[PARAM_PROTOCOLTYPE], (const char **)choices))
 	{
-	  LogPrint(LOG_ERR, "%s: unknown protocol type.", 
-		   parameters[PARAM_PROTOCOLTYPE]);
+	  logMessage(LOG_ERR, "%s: unknown protocol type.", 
+		     parameters[PARAM_PROTOCOLTYPE]);
 	  return 0;
 	}
       else if (choice == 0)
@@ -88,7 +88,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 	protocolp = &esysirisProtocol;
       if (protocolp == NULL)
 	{
-	  LogPrint(LOG_ERR, "eu: Undefined NULL protocol subsystem.");
+	  logMessage(LOG_ERR, "eu: Undefined NULL protocol subsystem.");
 	  return (0);
 	}
     }
@@ -136,28 +136,28 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     }
   if (iop->init(brl, parameters, device) == 0)
     {
-      LogPrint(LOG_DEBUG, "eu: Failed to initialize IO subsystem.");
+      logMessage(LOG_DEBUG, "eu: Failed to initialize IO subsystem.");
       return (0);
     }
 
   if (!protocolp) /* Autodetecting */
     { 
       protocolp = &esysirisProtocol;
-      LogPrint(LOG_INFO, "eu: Starting auto-detection process...");
+      logMessage(LOG_INFO, "eu: Starting auto-detection process...");
       if (protocolp->init(brl, iop) == 0)
 	{
-	  LogPrint(LOG_INFO, "eu: Esysiris detection failed.");
+	  logMessage(LOG_INFO, "eu: Esysiris detection failed.");
 	  iop->close(brl);
 	  approximateDelay(700);
 	  if (iop->init(brl, parameters, device) == 0)
 	    {
-	      LogPrint(LOG_ERR, "Failed to initialize IO for second autodetection.");
+	      logMessage(LOG_ERR, "Failed to initialize IO for second autodetection.");
 	      return (0);
 	    }
 	  protocolp = &clioProtocol;
 	  if (protocolp->init(brl, iop) == 0)
 	    {
-	      LogPrint(LOG_ERR, "eu: Autodetection failed.");
+	      logMessage(LOG_ERR, "eu: Autodetection failed.");
 	      iop->close(brl);
 	      return (0);
 	    }
@@ -166,17 +166,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   else
     {
       if (protocolp->protocolType == CLIO_PROTOCOL)
-	LogPrint(LOG_INFO, "Initializing clio protocol.");
+	logMessage(LOG_INFO, "Initializing clio protocol.");
       else
-	LogPrint(LOG_INFO, "Initializing EsysIris protocol.");
+	logMessage(LOG_INFO, "Initializing EsysIris protocol.");
       if (protocolp->init(brl, iop) == 0)
 	{
-	  LogPrint(LOG_ERR, "eu: Unable to connect to Braille display.");
+	  logMessage(LOG_ERR, "eu: Unable to connect to Braille display.");
 	  iop->close(brl);
 	  return (0);
 	}      
     }
-  LogPrint(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->textColumns);
+  logMessage(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->textColumns);
   return (1);
 }
 

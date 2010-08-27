@@ -22,7 +22,7 @@
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
-  LogPrint(errorLevel, "I/O ports not supported.");
+  logMessage(errorLevel, "I/O ports not supported.");
   return 0;
 }
 

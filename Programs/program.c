@@ -144,11 +144,11 @@ fixInstallPaths (char **const *paths) {
 
   if (!programDirectory) {
     if (!(programDirectory = getPathDirectory(programPath))) {
-      LogPrint(LOG_WARNING, gettext("cannot determine program directory"));
+      logMessage(LOG_WARNING, gettext("cannot determine program directory"));
       programDirectory = ".";
     }
 
-    LogPrint(LOG_DEBUG, "program directory: %s", programDirectory);
+    logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
   }
 
   while (*paths) {
@@ -156,9 +156,9 @@ fixInstallPaths (char **const *paths) {
       char *newPath = makePath(programDirectory, **paths);
 
       if (!newPath) {
-        LogPrint(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
+        logMessage(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
       } else if (!isAbsolutePath(**paths=newPath)) {
-        LogPrint(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
+        logMessage(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
       }
     }
 
@@ -212,7 +212,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
             if (oldPid == pid) {
               state = PFS_ready;
             } else if (testProcessIdentifier(oldPid)) {
-              LogPrint(LOG_ERR, "instance already running: PID=%" PRIpid, oldPid);
+              logMessage(LOG_ERR, "instance already running: PID=%" PRIpid, oldPid);
               state = PFS_clash;
             }
           }
@@ -245,9 +245,9 @@ createPidFile (const char *path, ProcessIdentifier pid) {
 
       close(file);
     } else {
-      LogPrint(LOG_WARNING, "%s: %s: %s",
-               gettext("cannot open process identifier file"),
-               path, strerror(errno));
+      logMessage(LOG_WARNING, "%s: %s: %s",
+                 gettext("cannot open process identifier file"),
+                 path, strerror(errno));
     }
 
     switch (state) {
@@ -262,7 +262,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
         break;
 
       default:
-        LogPrint(LOG_WARNING, "unexpected PID file state: %u", state);
+        logMessage(LOG_WARNING, "unexpected PID file state: %u", state);
         break;
     }
   }

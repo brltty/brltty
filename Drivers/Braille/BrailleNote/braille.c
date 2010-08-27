@@ -287,10 +287,10 @@ setVirtualTerminal (int vt) {
 #ifdef HAVE_LINUX_VT_H
   int consoleDescriptor = getConsole();
   if (consoleDescriptor != -1) {
-    LogPrint(LOG_DEBUG, "switching to virtual terminal %d", vt);
+    logMessage(LOG_DEBUG, "switching to virtual terminal %d", vt);
     if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
       if (ioctl(consoleDescriptor, VT_WAITACTIVE, vt) != -1) {
-        LogPrint(LOG_INFO, "switched to virtual terminal %d", vt);
+        logMessage(LOG_INFO, "switched to virtual terminal %d", vt);
       } else {
         logSystemError("virtual console wait");
       }
@@ -311,7 +311,7 @@ openVisualDisplay (void) {
         char path[0X20];
         snprintf(path, sizeof(path), "/dev/tty%d", displayTerminal);
         if ((displayDescriptor = open(path, O_WRONLY)) != -1) {
-          LogPrint(LOG_INFO, "visual display is %s", path);
+          logMessage(LOG_INFO, "visual display is %s", path);
         }
       }
     }

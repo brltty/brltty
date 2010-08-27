@@ -315,9 +315,9 @@ readTable_binary (const char *path, FILE *file, void *data) {
 
       if (dots == EOF) {
         if (ferror(file)) {
-          LogPrint(LOG_ERR, "input error: %s: %s", path, strerror(errno));
+          logMessage(LOG_ERR, "input error: %s: %s", path, strerror(errno));
         } else {
-          LogPrint(LOG_ERR, "table too short: %s", path);
+          logMessage(LOG_ERR, "table too short: %s", path);
         }
 
         break;
@@ -351,7 +351,7 @@ writeTable_binary (const char *path, FILE *file, TextTableData *ttd, void *data)
 
     if (data) dots = mapDots(dots, dotsInternal, data);
     if (fputc(dots, file) == EOF) {
-      LogPrint(LOG_ERR, "output error: %s: %s", path, strerror(errno));
+      logMessage(LOG_ERR, "output error: %s: %s", path, strerror(errno));
       return 0;
     }
   }
@@ -529,7 +529,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
     name = locatePathExtension(path);
 
     if (!(name && *++name)) {
-      LogPrint(LOG_ERR, "unspecified %s format.", description);
+      logMessage(LOG_ERR, "unspecified %s format.", description);
       exit(2);
     }
   }
@@ -539,7 +539,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
     if (format) return format;
   }
 
-  LogPrint(LOG_ERR, "unknown %s format: %s", description, name);
+  logMessage(LOG_ERR, "unknown %s format: %s", description, name);
   exit(2);
 }
 
@@ -565,7 +565,7 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
 
   {
     FILE *stream = fopen(*file, mode);
-    if (!stream) LogPrint(LOG_ERR, "table open error: %s: %s", *file, strerror(errno));
+    if (!stream) logMessage(LOG_ERR, "table open error: %s: %s", *file, strerror(errno));
     return stream;
   }
 }
@@ -1826,7 +1826,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc == 0) {
-    LogPrint(LOG_ERR, "missing input table.");
+    logMessage(LOG_ERR, "missing input table.");
     exit(2);
   }
   inputPath = *argv++, argc--;
@@ -1844,7 +1844,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc > 0) {
-    LogPrint(LOG_ERR, "too many parameters.");
+    logMessage(LOG_ERR, "too many parameters.");
     exit(2);
   }
 
@@ -1856,7 +1856,7 @@ main (int argc, char *argv[]) {
   }
 
   if (*opt_charset && !setCharset(opt_charset)) {
-    LogPrint(LOG_ERR, "can't establish character set: %s", opt_charset);
+    logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
     exit(9);
   }
 

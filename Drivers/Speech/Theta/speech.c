@@ -74,13 +74,13 @@ initializeTheta (void) {
 static void
 loadVoice (theta_voice_desc *descriptor) {
   if ((voice = theta_load_voice(descriptor))) {
-    LogPrint(LOG_INFO, "Voice: %s(%s,%d)",
-             theta_voice_human(voice),
-             theta_voice_gender(voice),
-             theta_voice_age(voice));
+    logMessage(LOG_INFO, "Voice: %s(%s,%d)",
+               theta_voice_human(voice),
+               theta_voice_gender(voice),
+               theta_voice_age(voice));
   } else {
-    LogPrint(LOG_WARNING, "Voice load error: %s [%s]",
-             descriptor->human, descriptor->voxname);
+    logMessage(LOG_WARNING, "Voice load error: %s [%s]",
+               descriptor->human, descriptor->voxname);
   }
 }
 
@@ -96,7 +96,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
     if (validateChoice(&choice, parameters[PARM_GENDER], choices)) {
       criteria.gender = (char *)choices[choice];
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid gender specification", parameters[PARM_GENDER]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid gender specification", parameters[PARM_GENDER]);
     }
   }
 
@@ -113,7 +113,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
       if (younger) value = -value;
       criteria.age = value;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid age specification", word);
+      logMessage(LOG_WARNING, "%s: %s", "invalid age specification", word);
     }
   }
 
@@ -149,15 +149,15 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
       if (validateFloat(&pitch, parameters[PARM_PITCH], &minimumPitch, &maximumPitch)) {
         theta_set_pitch_shift(voice, pitch, NULL);
       } else {
-        LogPrint(LOG_WARNING, "%s: %s", "invalid pitch shift specification", parameters[PARM_PITCH]);
+        logMessage(LOG_WARNING, "%s: %s", "invalid pitch shift specification", parameters[PARM_PITCH]);
       }
     }
 
-    LogPrint(LOG_INFO, "Theta Engine: version %s", theta_version);
+    logMessage(LOG_INFO, "Theta Engine: version %s", theta_version);
     return 1;
   }
 
-  LogPrint(LOG_WARNING, "No voices found.");
+  logMessage(LOG_WARNING, "No voices found.");
   return 0;
 }
 

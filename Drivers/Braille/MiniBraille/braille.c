@@ -450,14 +450,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     case KEY_CENTER: binding = &mode->keyCenter; break;
 
     default:
-      LogPrint(LOG_WARNING, "unhandled key: %s -> %02X", mode->name, byte);
+      logMessage(LOG_WARNING, "unhandled key: %s -> %02X", mode->name, byte);
       beep(brl);
       return EOF;
   }
 
   switch (binding->type) {
     case IBT_unbound:
-      LogPrint(LOG_WARNING, "unbound key: %s -> %02X", mode->name, byte);
+      logMessage(LOG_WARNING, "unbound key: %s -> %02X", mode->name, byte);
       beep(brl);
       break;
 
@@ -476,7 +476,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
 
     default:
-      LogPrint(LOG_WARNING, "unhandled input binding type: %02X", binding->type);
+      logMessage(LOG_WARNING, "unhandled input binding type: %02X", binding->type);
       break;
   }
 

@@ -108,8 +108,8 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 #endif /* __MSDOS__ */
 
     if (milliseconds > 0)
-      LogPrint(LOG_DEBUG, "timeout after %d %s",
-               milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+      logMessage(LOG_DEBUG, "timeout after %d %s",
+                 milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
 
     errno = EAGAIN;
     return 0;
@@ -162,7 +162,7 @@ readChunk (
     noInput:
       if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
         if (awaitInput(fileDescriptor, timeout)) continue;
-        LogPrint(LOG_WARNING, "input byte missing at offset %d", (int)*offset);
+        logMessage(LOG_WARNING, "input byte missing at offset %d", (int)*offset);
 #ifdef __MSDOS__
       } else if (!tried) {
         if (awaitInput(fileDescriptor, 0)) continue;

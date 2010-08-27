@@ -291,7 +291,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   if (*parameters[PARM_KBEMU])
     if (!validateYesNo(&kbemu, parameters[PARM_KBEMU]))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid keyboard emulation setting", parameters[PARM_KBEMU]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid keyboard emulation setting", parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
 
   if (!isSerialDevice(&device)) {
@@ -301,14 +301,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   if ((qbase = malloc(QSZ))) {
     /* Open the Braille display device for random access */
-    LogPrint(LOG_DEBUG, "Opening serial port: %s", device);
+    logMessage(LOG_DEBUG, "Opening serial port: %s", device);
     if ((BL_serialDevice = serialOpenDevice(device))) {
       /* activate new settings */
       if (serialRestartDevice(BL_serialDevice, baudrate)) {
         qflush();
         write_prebrl();
         if (await_ack()) {
-          LogPrint(LOG_DEBUG, "Got response.");
+          logMessage(LOG_DEBUG, "Got response.");
 
           /* Next, let's detect the BLT-Model (18, 40, M20, M40). */
           barcmds = &bar2cmds;
@@ -347,7 +347,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
                 response[length++] = byte;
               } while (qlen);
               response[length] = 0;
-              LogPrint(LOG_INFO, "Braille Lite identity: %s", response);
+              logMessage(LOG_INFO, "Braille Lite identity: %s", response);
 
               if ((response[0] == 'X') &&
                   (response[1] == ' ') &&
@@ -358,7 +358,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
             }
           }
 
-          LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
+          logMessage(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
           brl->textColumns = blitesz;	/* initialise size of display - */
           brl->textRows = 1;		/* Braille Lites are single line displays */
 
@@ -375,15 +375,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
               free(rawdata);
               rawdata = NULL;
             } else {
-              LogPrint(LOG_ERR, "Cannot allocate rawdata.");
+              logMessage(LOG_ERR, "Cannot allocate rawdata.");
             }
             free(prevdata);
             prevdata = NULL;
           } else {
-            LogPrint(LOG_ERR, "Cannot allocate prevdata.");
+            logMessage(LOG_ERR, "Cannot allocate prevdata.");
           }
         } else {
-          LogPrint(LOG_DEBUG, "BrailleLite not responding.");
+          logMessage(LOG_DEBUG, "BrailleLite not responding.");
         }
       }
       serialCloseDevice(BL_serialDevice);
@@ -392,7 +392,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     free(qbase);
     qbase = NULL;
   } else {
-    LogPrint(LOG_ERR, "Cannot allocate qbase.");
+    logMessage(LOG_ERR, "Cannot allocate qbase.");
   }
   return 0;
 }

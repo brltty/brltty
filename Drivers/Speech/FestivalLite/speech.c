@@ -64,13 +64,13 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
     int pitch = 100, minpitch = 50, maxpitch = 200;
     if (*parameters[PARM_pitch])
       if (!validateInteger(&pitch, parameters[PARM_pitch], &minpitch, &maxpitch))
-        LogPrint(LOG_WARNING, "%s: %s", "invalid pitch specification", parameters[PARM_pitch]);
+        logMessage(LOG_WARNING, "%s: %s", "invalid pitch specification", parameters[PARM_pitch]);
     feat_set_int(voice->features, "int_f0_target_mean", pitch);
   }
 
-  LogPrint(LOG_INFO, "Festival Lite Engine: version %s-%s, %s",
-	   FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
-	   FLITE_PROJECT_DATE);
+  logMessage(LOG_INFO, "Festival Lite Engine: version %s-%s, %s",
+	     FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
+	     FLITE_PROJECT_DATE);
   return 1;
 }
 

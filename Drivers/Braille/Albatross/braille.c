@@ -314,7 +314,7 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     approximateDelay(100);
     discardInput();
   }
-  LogPrint(LOG_DEBUG, "Albatross description byte: %02X", description);
+  logMessage(LOG_DEBUG, "Albatross description byte: %02X", description);
 
   windowStart = statusStart = 0;
   displaySize = (description & 0X80)? 80: 46;
@@ -368,11 +368,11 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     }
   }
 
-  LogPrint(LOG_INFO, "Albatross: %d cells (%d text, %d%s status), top keypads [%s,%s].",
-           displaySize, windowWidth, statusCount,
-           !statusCount? "": statusStart? " right": " left",
-           (inputMap[topLeftKeys[0]] == topLeftKeys[0])? "left": "right",
-           (inputMap[topRightKeys[0]] == topRightKeys[0])? "right": "left");
+  logMessage(LOG_INFO, "Albatross: %d cells (%d text, %d%s status), top keypads [%s,%s].",
+             displaySize, windowWidth, statusCount,
+             !statusCount? "": statusStart? " right": " left",
+             (inputMap[topLeftKeys[0]] == topLeftKeys[0])? "left": "right",
+             (inputMap[topRightKeys[0]] == topRightKeys[0])? "right": "left");
   return 1;
 }
 
@@ -450,7 +450,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       charactersPerSecond = *baud / 10;
       controlKey = NO_CONTROL_KEY;
 
-      LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", *baud);
+      logMessage(LOG_DEBUG, "Trying Albatross at %d baud.", *baud);
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;

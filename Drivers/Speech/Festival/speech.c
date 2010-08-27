@@ -313,7 +313,7 @@ setRate (float setting, int reopen) {
 
 static void
 closeStream (void) {
-  LogPrint(LOG_DEBUG, "stopping festival");
+  logMessage(LOG_DEBUG, "stopping festival");
   pclose(festivalStream);
   festivalStream = NULL;
 }
@@ -323,7 +323,7 @@ openStream (void) {
   const char *command = festivalParameters[PARM_COMMAND];
   if (!command || !*command) command = "festival";
 
-  LogPrint(LOG_DEBUG, "starting festival: command=%s", command);
+  logMessage(LOG_DEBUG, "starting festival: command=%s", command);
   if ((festivalStream = popen(command, "w"))) {
     setvbuf(festivalStream, NULL, _IOLBF, 0X1000);
 
@@ -338,7 +338,7 @@ openStream (void) {
         } else if (strcasecmp(name, "Kal") == 0) {
           if (!writeCommand("(voice_kal_diphone)", 0)) return 0;
         } else {
-          LogPrint(LOG_WARNING, "Unknown Festival voice name: %s", name);
+          logMessage(LOG_WARNING, "Unknown Festival voice name: %s", name);
         }
       }
     }

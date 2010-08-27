@@ -70,11 +70,11 @@ handleKeyboardEvent (const AsyncInputResult *result) {
   KeyboardPrivateData *kpd = result->data;
 
   if (result->error) {
-    LogPrint(LOG_DEBUG, "keyboard read error: fd=%d: %s",
-             kpd->fileDescriptor, strerror(result->error));
+    logMessage(LOG_DEBUG, "keyboard read error: fd=%d: %s",
+               kpd->fileDescriptor, strerror(result->error));
     closeKeyboard(kpd);
   } else if (result->end) {
-    LogPrint(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
+    logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
     closeKeyboard(kpd);
   } else {
     const struct input_event *event = result->buffer;
@@ -526,7 +526,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
             if (key) {
               state = kpd->kcd->handleKeyEvent(0, key, press);
             } else {
-              LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
+              logMessage(LOG_INFO, "unmapped Linux keycode: %d", event->code);
               state = KTS_UNBOUND;
             }
           }
@@ -634,8 +634,8 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
         {
           struct input_id identity;
           if (ioctl(device, EVIOCGID, &identity) != -1) {
-            LogPrint(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
-                     device, identity.bustype, identity.vendor, identity.product, identity.version);
+            logMessage(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
+                       device, identity.bustype, identity.vendor, identity.product, identity.version);
 
             {
               static const KeyboardType typeTable[] = {
@@ -659,8 +659,8 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
             kpd->actualProperties.vendor = identity.vendor;
             kpd->actualProperties.product = identity.product;
           } else {
-            LogPrint(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
-                     device, strerror(errno));
+            logMessage(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
+                       device, strerror(errno));
           }
         }
       
@@ -672,7 +672,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
                 ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-                LogPrint(LOG_DEBUG, "keyboard found: fd=%d", device);
+                logMessage(LOG_DEBUG, "keyboard found: fd=%d", device);
                 return 1;
               }
             }
@@ -683,7 +683,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
       }
     }
   } else {
-    LogPrint(LOG_DEBUG, "cannot stat input device: fd=%d: %s", device, strerror(errno));
+    logMessage(LOG_DEBUG, "cannot stat input device: fd=%d: %s", device, strerror(errno));
   }
 
   return 0;
@@ -695,7 +695,7 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
   const size_t rootLength = strlen(root);
   DIR *directory;
 
-  LogPrint(LOG_DEBUG, "searching for keyboards");
+  logMessage(LOG_DEBUG, "searching for keyboards");
   if ((directory = opendir(root))) {
     struct dirent *entry;
 
@@ -706,21 +706,21 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
       if ((device = open(path, O_RDONLY)) != -1) {
-        LogPrint(LOG_DEBUG, "input device opened: %s: fd=%d", path, device);
+        logMessage(LOG_DEBUG, "input device opened: %s: fd=%d", path, device);
         if (monitorKeyboard(device, kcd)) continue;
 
         close(device);
-        LogPrint(LOG_DEBUG, "input device closed: %s: fd=%d", path, device);
+        logMessage(LOG_DEBUG, "input device closed: %s: fd=%d", path, device);
       } else {
-        LogPrint(LOG_DEBUG, "cannot open input device: %s: %s", path, strerror(errno));
+        logMessage(LOG_DEBUG, "cannot open input device: %s: %s", path, strerror(errno));
       }
     }
 
     closedir(directory);
   } else {
-    LogPrint(LOG_DEBUG, "cannot open directory: %s: %s", root, strerror(errno));
+    logMessage(LOG_DEBUG, "cannot open directory: %s: %s", root, strerror(errno));
   }
-  LogPrint(LOG_DEBUG, "keyboard search complete");
+  logMessage(LOG_DEBUG, "keyboard search complete");
 }
 
 #ifdef NETLINK_KOBJECT_UEVENT
@@ -737,13 +737,13 @@ doOpenInputDevice (void *data) {
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
   if (device != -1) {
-    LogPrint(LOG_DEBUG, "input device opened: %s: fd=%d", idd->name, device);
+    logMessage(LOG_DEBUG, "input device opened: %s: fd=%d", idd->name, device);
     if (!monitorKeyboard(device, idd->kcd)) {
       close(device);
-      LogPrint(LOG_DEBUG, "input device closed: %s: fd=%d", idd->name, device);
+      logMessage(LOG_DEBUG, "input device closed: %s: fd=%d", idd->name, device);
     }
   } else {
-    LogPrint(LOG_DEBUG, "cannot open input device: %s: %s", idd->name, strerror(errno));
+    logMessage(LOG_DEBUG, "cannot open input device: %s: %s", idd->name, strerror(errno));
   }
 
   free(idd->name);
@@ -753,9 +753,9 @@ doOpenInputDevice (void *data) {
 static size_t
 handleKobjectUeventString (const AsyncInputResult *result) {
   if (result->error) {
-    LogPrint(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
+    logMessage(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
   } else if (result->end) {
-    LogPrint(LOG_DEBUG, "netlink end-of-file");
+    logMessage(LOG_DEBUG, "netlink end-of-file");
   } else {
     const char *buffer = result->buffer;
     const char *end = memchr(buffer, 0, result->length);
@@ -767,7 +767,7 @@ handleKobjectUeventString (const AsyncInputResult *result) {
         const char *action = buffer;
         int actionLength = path++ - action;
 
-        LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
+        logMessage(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
         if (strncmp(action, "add", actionLength) == 0) {
           const char *suffix = path;
 

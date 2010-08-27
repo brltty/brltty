@@ -32,7 +32,7 @@ executeHostCommand (const char *const *arguments) {
 
     memset(&process, 0, sizeof(process));
 
-    LogPrint(LOG_DEBUG, "host command: %s", line);
+    logMessage(LOG_DEBUG, "host command: %s", line);
     if (CreateProcess(NULL, line, NULL, NULL, TRUE,
                       CREATE_NEW_PROCESS_GROUP,
                       NULL, NULL, &startup, &process)) {

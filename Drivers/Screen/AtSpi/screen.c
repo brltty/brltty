@@ -226,14 +226,14 @@ processParameters_AtSpiScreen (char **parameters) {
         if (validateChoice(&choice, type, choices)) {
           int *flag = flags[choice];
           if ((flag == &typeAll) && (index > 0)) {
-            LogPrint(LOG_WARNING, "widget type is mutually exclusive: %s", type);
+            logMessage(LOG_WARNING, "widget type is mutually exclusive: %s", type);
           } else if (*flag || typeAll) {
-            LogPrint(LOG_WARNING, "widget type specified more than once: %s", type);
+            logMessage(LOG_WARNING, "widget type specified more than once: %s", type);
           } else {
             *flag = 1;
           }
         } else {
-          LogPrint(LOG_WARNING, "%s: %s", "invalid widget type", type);
+          logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
         }
       }
     }
@@ -274,7 +274,7 @@ static void caretPosition(long caret) {
 }
 
 static void finiTerm(void) {
-  LogPrint(LOG_DEBUG,"end of term %p",curTerm);
+  logMessage(LOG_DEBUG,"end of term %p",curTerm);
   Accessible_unref(curTerm);
   curTerm = NULL;
   Accessible_unref(curFocus);
@@ -292,7 +292,7 @@ static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
     finiTerm();
   Accessible_ref(curFocus = newTerm);
   curTerm = newTextTerm;
-  LogPrint(LOG_DEBUG,"new term %p",curTerm);
+  logMessage(LOG_DEBUG,"new term %p",curTerm);
   text = AccessibleText_getText(curTerm,0,LONG_MAX);
   curNumRows = 0;
   if (curRows) {
@@ -308,7 +308,7 @@ static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
       break;
     c++;
   }
-  LogPrint(LOG_DEBUG,"%ld rows",curNumRows);
+  logMessage(LOG_DEBUG,"%ld rows",curNumRows);
   curRows = malloc(curNumRows * sizeof(*curRows));
   curRowLengths = malloc(curNumRows * sizeof(*curRowLengths));
   i = 0;
@@ -323,7 +323,7 @@ static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
       curNumCols = len;
     else if (len < 0) {
       if (len==-2)
-	LogPrint(LOG_ERR,"unterminated sequence %s",c);
+	logMessage(LOG_ERR,"unterminated sequence %s",c);
       else if (len==-1)
 	logSystemError("mbrlen");
       curRowLengths[i] = (len = -1) + (d != NULL);
@@ -337,7 +337,7 @@ static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
       break;
     i++;
   }
-  LogPrint(LOG_DEBUG,"%ld cols",curNumCols);
+  logMessage(LOG_DEBUG,"%ld cols",curNumCols);
   SPI_freeString(text);
   caretPosition(AccessibleText_getCaretOffset(curTerm));
 }
@@ -385,19 +385,19 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	      (typeTerminal && (role == SPI_ROLE_TERMINAL))) {
 	    restartTerm(event->source, newText);
 	  } else {
-	    LogPrint(LOG_DEBUG,"AT SPI widget not for us");
+	    logMessage(LOG_DEBUG,"AT SPI widget not for us");
 	    if (curFocus) finiTerm();
 	  }
 	}
       } else if (!strcmp(event->type,"object:text-caret-moved")) {
 	if (event->source != curFocus) continue;
-	LogPrint(LOG_DEBUG,"caret move to %lu",event->detail1);
+	logMessage(LOG_DEBUG,"caret move to %lu",event->detail1);
 	caretPosition(event->detail1);
       } else if (!strcmp(event->type,"object:text-changed:delete")) {
 	long x,y,toDelete = event->detail2;
 	long length = 0, toCopy;
 	long downTo; /* line that will provide what will follow x */
-	LogPrint(LOG_DEBUG,"delete %lu from %lu",event->detail2,event->detail1);
+	logMessage(LOG_DEBUG,"delete %lu from %lu",event->detail2,event->detail1);
 	if (event->source != curFocus) continue;
 	findPosition(event->detail1,&x,&y);
 	downTo = y;
@@ -410,7 +410,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	  else {
 	    /* imaginary extra line doesn't provide more length, and shouldn't need to ! */
 	    if (x+toDelete > length) {
-	      LogPrint(LOG_ERR,"deleting past end of text !");
+	      logMessage(LOG_ERR,"deleting past end of text !");
 	      /* discarding */
 	      toDelete = length - x;
 	    }
@@ -442,7 +442,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	long len=event->detail2,semilen,x,y;
 	char *added;
 	const char *adding,*c;
-	LogPrint(LOG_DEBUG,"insert %lu from %lu",event->detail2,event->detail1);
+	logMessage(LOG_DEBUG,"insert %lu from %lu",event->detail2,event->detail1);
 	if (event->source != curFocus) continue;
 	findPosition(event->detail1,&x,&y);
 	adding = c = added = AccessibleTextChangedEvent_getChangeString(event);
@@ -498,7 +498,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	SPI_freeString(added);
 	caretPosition(AccessibleText_getCaretOffset(curTerm));
       } else
-	LogPrint(LOG_INFO,"event %s, source %p, detail1 %lu detail2 %lu",event->type,event->source,event->detail1,event->detail2);
+	logMessage(LOG_INFO,"event %s, source %p, detail1 %lu detail2 %lu",event->type,event->source,event->detail1,event->detail2);
     }
     pthread_mutex_unlock(&updateMutex);
   }
@@ -517,23 +517,23 @@ static void *doAtSpiScreenOpen(void *arg) {
   };
   const char **event;
   if ((res=SPI_init())) {
-    LogPrint(LOG_ERR,"SPI_init returned %d",res);
+    logMessage(LOG_ERR,"SPI_init returned %d",res);
     return 0;
   }
   if (!(evListener = SPI_createAccessibleEventListener(evListenerCB,NULL)))
-    LogPrint(LOG_ERR,"SPI_createAccessibleEventListener failed");
+    logMessage(LOG_ERR,"SPI_createAccessibleEventListener failed");
   else for (event=events; event<&events[sizeof(events)/sizeof(*events)]; event++)
     if (!(SPI_registerGlobalEventListener(evListener,*event)))
-      LogPrint(LOG_ERR,"SPI_registerGlobalEventListener(%s) failed",*event);
+      logMessage(LOG_ERR,"SPI_registerGlobalEventListener(%s) failed",*event);
   sem_post(SPI_init_sem);
   SPI_event_main();
   if (!(SPI_deregisterGlobalEventListenerAll(evListener)))
-    LogPrint(LOG_ERR,"SPI_deregisterGlobalEventListenerAll failed");
+    logMessage(LOG_ERR,"SPI_deregisterGlobalEventListenerAll failed");
   AccessibleEventListener_unref(evListener);
   if (curFocus)
     finiTerm();
   if ((res=SPI_exit()))
-    LogPrint(LOG_ERR,"SPI_exit returned %d",res);
+    logMessage(LOG_ERR,"SPI_exit returned %d",res);
   return NULL;
 }
 
@@ -543,7 +543,7 @@ construct_AtSpiScreen (void) {
   sem_init(&SPI_init_sem,0,0);
   XInitThreads();
   if (pthread_create(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
-    LogPrint(LOG_ERR,"main SPI thread failed to be launched");
+    logMessage(LOG_ERR,"main SPI thread failed to be launched");
     return 0;
   }
   do {
@@ -553,7 +553,7 @@ construct_AtSpiScreen (void) {
     logSystemError("SPI initialization wait failed");
     return 0;
   }
-  LogPrint(LOG_DEBUG,"SPI initialized");
+  logMessage(LOG_DEBUG,"SPI initialized");
   return 1;
 }
 
@@ -561,7 +561,7 @@ static void
 destruct_AtSpiScreen (void) {
   SPI_event_quit();
   pthread_join(SPI_main_thread,NULL);
-  LogPrint(LOG_DEBUG,"SPI stopped");
+  logMessage(LOG_DEBUG,"SPI stopped");
 }
 
 static int
@@ -682,7 +682,7 @@ insertKey_AtSpiScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 32: keysym = XK_F33;       break;
       case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
       case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
-      default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
+      default: logMessage(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
   } else {
     wchar_t wc;
@@ -703,11 +703,11 @@ insertKey_AtSpiScreen (ScreenKey key) {
     else
       keysym = 0x1000000 | wc;
   }
-  LogPrint(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
-           key,
-           (modMeta? "meta ": ""),
-           (modControl? "control ": ""),
-           keysym);
+  logMessage(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
+             key,
+             (modMeta? "meta ": ""),
+             (modControl? "control ": ""),
+             keysym);
 
   {
     int ok = 0;
@@ -717,23 +717,23 @@ insertKey_AtSpiScreen (ScreenKey key) {
         if (SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM)) {
           ok = 1;
         } else {
-          LogPrint(LOG_WARNING, "key insertion failed.");
+          logMessage(LOG_WARNING, "key insertion failed.");
         }
 
         if (modControl && !SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_RELEASE)) {
-          LogPrint(LOG_WARNING, "control release failed.");
+          logMessage(LOG_WARNING, "control release failed.");
           ok = 0;
         }
       } else {
-        LogPrint(LOG_WARNING, "control press failed.");
+        logMessage(LOG_WARNING, "control press failed.");
       }
 
       if (modMeta && !SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_RELEASE)) {
-        LogPrint(LOG_WARNING, "meta release failed.");
+        logMessage(LOG_WARNING, "meta release failed.");
         ok = 0;
       }
     } else {
-      LogPrint(LOG_WARNING, "meta press failed.");
+      logMessage(LOG_WARNING, "meta press failed.");
     }
 
     return ok;

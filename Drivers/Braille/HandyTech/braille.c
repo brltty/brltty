@@ -462,8 +462,8 @@ getHidReport (unsigned char number, unsigned char *buffer, int size) {
   int result = usbHidGetReport(usb->device, usb->definition.interface,
                                number, buffer, size, HT_HID_REPORT_TIMEOUT);
   if (result > 0 && buffer[0] != number) {
-    LogPrint(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
-             number, buffer[0]);
+    logMessage(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
+               number, buffer[0]);
     errno = EIO;
     result = -1;
   }
@@ -487,16 +487,16 @@ getHidReportSize (const unsigned char *items, uint16_t size, unsigned char ident
     if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
       if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
         uint32_t size = ((description.reportCount * description.reportSize) + 7) / 8;
-        LogPrint(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, size);
+        logMessage(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, size);
         *value = 1 + size;
       } else {
-        LogPrint(LOG_WARNING, "HID report size not defined: %02X", identifier);
+        logMessage(LOG_WARNING, "HID report size not defined: %02X", identifier);
       }
     } else {
-      LogPrint(LOG_WARNING, "HID report count not defined: %02X", identifier);
+      logMessage(LOG_WARNING, "HID report count not defined: %02X", identifier);
     }
   } else {
-    LogPrint(LOG_WARNING, "HID report not found: %02X", identifier);
+    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }
 }
 
@@ -539,7 +539,7 @@ getHidInputBuffer (void) {
       hidInputLength = 0;
       hidInputOffset = 0;
     } else {
-      LogPrint(LOG_WARNING, "HID input buffer not allocated: %s", strerror(errno));
+      logMessage(LOG_WARNING, "HID input buffer not allocated: %s", strerror(errno));
     }
   }
 }
@@ -554,7 +554,7 @@ getHidFirmwareVersion (void) {
 
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
-      LogPrint(LOG_INFO, "Firmware Version: %u.%u", report[1], report[2]);
+      logMessage(LOG_INFO, "Firmware Version: %u.%u", report[1], report[2]);
     }
   }
 }
@@ -775,7 +775,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
     if (count == -1) {
       logSystemError("HandyTech Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;
@@ -887,7 +887,7 @@ setState (BrailleDisplayState state) {
     currentState = state;
   }
   gettimeofday(&stateTime, NULL);
-  // LogPrint(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
+  // logMessage(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 
 static int
@@ -930,15 +930,15 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   );
 
   if (!model->name) {
-    LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
-             identifier);
+    logMessage(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
+               identifier);
     return 0;
   }
 
-  LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
-           model->name,
-           model->textCells, (model->textCells == 1)? "cell": "cells",
-           model->statusCells, (model->statusCells == 1)? "cell": "cells");
+  logMessage(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
+             model->name,
+             model->textCells, (model->textCells == 1)? "cell": "cells",
+             model->statusCells, (model->statusCells == 1)? "cell": "cells");
 
   brl->textColumns = model->textCells;			/* initialise size of display */
   brl->textRows = BRLROWS;
@@ -1368,7 +1368,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
 
     logUnexpectedPacket(packet.bytes, size);
-    LogPrint(LOG_WARNING, "state %d", currentState);
+    logMessage(LOG_WARNING, "state %d", currentState);
   }
 
   if (noInput) {

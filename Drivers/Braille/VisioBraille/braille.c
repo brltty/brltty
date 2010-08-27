@@ -143,7 +143,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
         }
       } else {
         if ((q-&buf[0])>=size) {
-          LogPrint(LOG_WARNING,"Packet too long: discarded");
+          logMessage(LOG_WARNING,"Packet too long: discarded");
           apacket = 0;
           return 0;
         }
@@ -187,12 +187,12 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   if (*parameters[PARM_DISPSIZE]) {
     int dsmin=20, dsmax=40;
     if (!validateInteger(&ds, parameters[PARM_DISPSIZE], &dsmin, &dsmax))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid braille display size", parameters[PARM_DISPSIZE]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid braille display size", parameters[PARM_DISPSIZE]);
   }
   if (*parameters[PARM_PROMVER]) {
     int pvmin=3, pvmax=6;
     if (!validateInteger(&promVersion, parameters[PARM_PROMVER], &pvmin, &pvmax))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid PROM version", parameters[PARM_PROMVER]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid PROM version", parameters[PARM_PROMVER]);
   }
   if (*parameters[PARM_BAUD]) {
     int baud;
@@ -223,20 +223,20 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       i--;
     }
     if (i==0) {
-      LogPrint(LOG_WARNING,"Unable to identify terminal properly");  
+      logMessage(LOG_WARNING,"Unable to identify terminal properly");  
       if (!brl->textColumns) brl->textColumns = BRAILLEDISPLAYSIZE;  
     } else {
-      LogPrint(LOG_INFO,"Braille terminal description:");
-      LogPrint(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
-      LogPrint(LOG_INFO,"   f1=%c",terminfo.f1);
-      LogPrint(LOG_INFO,"   size=%c%c",terminfo.size[0],terminfo.size[1]);
-      LogPrint(LOG_INFO,"   dongle=%c",terminfo.dongle);
-      LogPrint(LOG_INFO,"   clock=%c",terminfo.clock);
-      LogPrint(LOG_INFO,"   routing=%c",terminfo.routing);
-      LogPrint(LOG_INFO,"   flash=%c",terminfo.flash);
-      LogPrint(LOG_INFO,"   prog=%c",terminfo.prog);
-      LogPrint(LOG_INFO,"   lcd=%c",terminfo.lcd);
-      LogPrint(LOG_INFO,"   f2=%s",terminfo.f2);  
+      logMessage(LOG_INFO,"Braille terminal description:");
+      logMessage(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
+      logMessage(LOG_INFO,"   f1=%c",terminfo.f1);
+      logMessage(LOG_INFO,"   size=%c%c",terminfo.size[0],terminfo.size[1]);
+      logMessage(LOG_INFO,"   dongle=%c",terminfo.dongle);
+      logMessage(LOG_INFO,"   clock=%c",terminfo.clock);
+      logMessage(LOG_INFO,"   routing=%c",terminfo.routing);
+      logMessage(LOG_INFO,"   flash=%c",terminfo.flash);
+      logMessage(LOG_INFO,"   prog=%c",terminfo.prog);
+      logMessage(LOG_INFO,"   lcd=%c",terminfo.lcd);
+      logMessage(LOG_INFO,"   f2=%s",terminfo.f2);  
       if (brl->textColumns<=0)
         brl->textColumns = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
     }

@@ -205,7 +205,7 @@ usbReadEndpoint (
         break;
 
       default:
-        LogPrint(LOG_ERR, "USB endpoint input transfer not supported: 0X%02X", transfer);
+        logMessage(LOG_ERR, "USB endpoint input transfer not supported: 0X%02X", transfer);
         result = -ENOSYS;
         break;
     }
@@ -260,7 +260,7 @@ usbWriteEndpoint (
         break;
 
       default:
-        LogPrint(LOG_ERR, "USB endpoint output transfer not supported: 0X%02X", transfer);
+        logMessage(LOG_ERR, "USB endpoint output transfer not supported: 0X%02X", transfer);
         result = -ENOSYS;
         break;
     }
@@ -334,8 +334,8 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
                   usb_close(devx->handle);
                 } else {
-                  LogPrint(LOG_ERR, "USB open error: vendor=%X product=%X",
-                           dev->descriptor.idVendor, dev->descriptor.idProduct);
+                  logMessage(LOG_ERR, "USB open error: vendor=%X product=%X",
+                             dev->descriptor.idVendor, dev->descriptor.idProduct);
                 }
 
                 free(devx);

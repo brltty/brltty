@@ -346,7 +346,7 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
   brlCols = 0;
   if (!io)
     {
-      LogPrint(LOG_ERR, "eu: Clio : Invalid IO Subsystem driver.");
+      logMessage(LOG_ERR, "eu: Clio : Invalid IO Subsystem driver.");
       return (-1);
     }
   memset(brlFirmwareVersion, 0, 21);
@@ -364,8 +364,8 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
 
       previousPacketNumber = -1;
 
-      LogPrint(LOG_INFO, "eu: %s connected.",
-	       clioModels[brlModel].modelDesc);
+      logMessage(LOG_INFO, "eu: %s connected.",
+	         clioModels[brlModel].modelDesc);
       return (1);
     }
   return (0);
@@ -375,10 +375,10 @@ int     clio_reset(BrailleDisplay *brl)
 {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
 
-  LogPrint(LOG_INFO, "eu Clio hardware reset requested");
+  logMessage(LOG_INFO, "eu Clio hardware reset requested");
   if (clio_writePacket(brl, packet, sizeof(packet)) == -1)
     {
-      LogPrint(LOG_WARNING, "Clio: Failed to send ident request.");
+      logMessage(LOG_WARNING, "Clio: Failed to send ident request.");
       return -1;
     }
   return 1;
@@ -441,7 +441,7 @@ void     clio_writeWindow(BrailleDisplay *brl)
   unsigned char buf[displaySize + 3];
 
   if ( displaySize > sizeof(previousBrailleWindow) ) {
-    LogPrint(LOG_WARNING, "[eu] Discarding too large braille window" );
+    logMessage(LOG_WARNING, "[eu] Discarding too large braille window" );
     return;
   }
   if (!memcmp(previousBrailleWindow, brl->buffer, displaySize) && !refreshDisplay)
@@ -463,7 +463,7 @@ void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
   int i;
 
   if ( displaySize > sizeof(previousVisualDisplay) ) {
-    LogPrint(LOG_WARNING, "[eu] Discarding too large visual display" );
+    logMessage(LOG_WARNING, "[eu] Discarding too large visual display" );
     return;
   }
 

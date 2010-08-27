@@ -88,7 +88,7 @@ reportDataError (DataFile *file, char *format, ...) {
     va_end(args);
   }
 
-  LogPrint(LOG_WARNING, "%s", message);
+  logMessage(LOG_WARNING, "%s", message);
 }
 
 int
@@ -730,7 +730,7 @@ processDataStream (
     if (!(variables = getGlobalDataVariables()))
       return 0;
 
-  LogPrint(LOG_DEBUG, "including data file: %s", file.name);
+  logMessage(LOG_DEBUG, "including data file: %s", file.name);
   if ((file.variables = newDataVariableQueue(variables))) {
     if (processLines(stream, processUtf8Line, &file)) ok = 1;
     deallocateQueue(file.variables);

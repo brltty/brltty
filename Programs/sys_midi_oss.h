@@ -84,28 +84,28 @@ openMidiDevice (int errorLevel, const char *device) {
                   continue;
               }
 
-              LogPrint(LOG_DEBUG, "Unknown synthesizer: %d[%d]: %s",
-                       info.synth_type, info.synth_subtype, info.name);
+              logMessage(LOG_DEBUG, "Unknown synthesizer: %d[%d]: %s",
+                         info.synth_type, info.synth_subtype, info.name);
             } else {
-              LogPrint(errorLevel, "Cannot get description for synthesizer %d: %s",
-                       index, strerror(errno));
+              logMessage(errorLevel, "Cannot get description for synthesizer %d: %s",
+                         index, strerror(errno));
             }
           }
 
           if (gus >= 0)
             if (ioctl(midi->fileDescriptor, SNDCTL_SEQ_RESETSAMPLES, &gus) == -1)
-              LogPrint(errorLevel, "Cannot reset samples for gus synthesizer %d: %s",
-                       gus, strerror(errno));
+              logMessage(errorLevel, "Cannot reset samples for gus synthesizer %d: %s",
+                         gus, strerror(errno));
         } else {
-          LogPrint(errorLevel, "Cannot get MIDI synthesizer count: %s",
-                   strerror(errno));
+          logMessage(errorLevel, "Cannot get MIDI synthesizer count: %s",
+                     strerror(errno));
         }
 
         if (ioctl(midi->fileDescriptor, SNDCTL_SEQ_NRMIDIS, &count) != -1) {
           if (count > 0) ext = count - 1;
         } else {
-          LogPrint(errorLevel, "Cannot get MIDI device count: %s",
-                   strerror(errno));
+          logMessage(errorLevel, "Cannot get MIDI device count: %s",
+                     strerror(errno));
         }
 
         midi->deviceNumber = (awe >= 0)? awe:
@@ -120,7 +120,7 @@ openMidiDevice (int errorLevel, const char *device) {
 
       return midi;
     } else {
-      LogPrint(errorLevel, "Cannot open MIDI device: %s: %s", device, strerror(errno));
+      logMessage(errorLevel, "Cannot open MIDI device: %s: %s", device, strerror(errno));
     }
 
     free(midi);

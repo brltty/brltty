@@ -30,7 +30,7 @@ struct PcmDeviceStruct {
 
 static void
 logPcmError (int level, const char *action, int code) {
-  LogPrint(level, "QSA PCM %s error: %s", action, snd_strerror(code));
+  logMessage(level, "QSA PCM %s error: %s", action, snd_strerror(code));
 }
 
 static int
@@ -70,9 +70,9 @@ openPcmDevice (int errorLevel, const char *device) {
 
 	number = strtol(component, &end, 0);
 	if ((*end && (*end != ':')) || (number < 0) || (number > 0XFF)) {
-	  LogPrint(errorLevel, "Invalid QSA card number: %s", device);
+	  logMessage(errorLevel, "Invalid QSA card number: %s", device);
 	} else if (end == component) {
-	  LogPrint(errorLevel, "Missing QSA card number: %s", device);
+	  logMessage(errorLevel, "Missing QSA card number: %s", device);
 	} else {
 	  pcm->card = number;
 
@@ -80,9 +80,9 @@ openPcmDevice (int errorLevel, const char *device) {
 	    component = end + 1;
 	    number = strtol(component, &end, 0);
 	    if (*end || (number < 0) || (number > 0XFF)) {
-	      LogPrint(errorLevel, "Invalid QSA device number: %s", device);
+	      logMessage(errorLevel, "Invalid QSA device number: %s", device);
 	    } else if (end == component) {
-	      LogPrint(errorLevel, "Missing QSA device number: %s", device);
+	      logMessage(errorLevel, "Missing QSA device number: %s", device);
 	    } else {
 	      pcm->device = number;
 	      ok = 1;
@@ -104,16 +104,16 @@ openPcmDevice (int errorLevel, const char *device) {
       logPcmError(errorLevel, "preferred open", code);
       goto openError;
     }
-    LogPrint(LOG_DEBUG, "QSA PCM device opened: %d:%d", pcm->card, pcm->device);
+    logMessage(LOG_DEBUG, "QSA PCM device opened: %d:%d", pcm->card, pcm->device);
 
     {
       snd_pcm_channel_info_t info;
       info.channel = SND_PCM_CHANNEL_PLAYBACK;
       if ((code = snd_pcm_channel_info(pcm->handle, &info)) >= 0) {
-	LogPrint(LOG_DEBUG, "QSA PCM Info: Frag=%d-%d Rate=%d-%d Chan=%d-%d",
-	         info.min_fragment_size, info.max_fragment_size,
-	         info.min_rate, info.max_rate,
-	         info.min_voices, info.max_voices);
+	logMessage(LOG_DEBUG, "QSA PCM Info: Frag=%d-%d Rate=%d-%d Chan=%d-%d",
+	           info.min_fragment_size, info.max_fragment_size,
+	           info.min_rate, info.max_rate,
+	           info.min_voices, info.max_voices);
 	memset(&pcm->parameters, 0, sizeof(pcm->parameters));
 
 	pcm->parameters.channel = info.channel;
@@ -128,7 +128,7 @@ openPcmDevice (int errorLevel, const char *device) {
 	    break;
 
 	  default:
-	    LogPrint(LOG_WARNING, "Unsupported QSA PCM mode: %d", pcm->parameters.mode);
+	    logMessage(LOG_WARNING, "Unsupported QSA PCM mode: %d", pcm->parameters.mode);
 	    goto openError;
 	}
 

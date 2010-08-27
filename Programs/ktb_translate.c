@@ -399,7 +399,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       offset += length, size -= length;
     }
 
-    LogPrint(LOG_DEBUG, "%s", buffer);
+    logMessage(LOG_DEBUG, "%s", buffer);
   }
 
   return state;

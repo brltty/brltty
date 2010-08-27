@@ -53,7 +53,7 @@ parseKeyboardProperties (KeyboardProperties *properties, const char *string) {
     if (validateChoice(&choice, parameters[KBD_PARM_TYPE], choices)) {
       properties->type = types[choice];
     } else {
-      LogPrint(LOG_WARNING, "invalid keyboard type: %s", parameters[KBD_PARM_TYPE]);
+      logMessage(LOG_WARNING, "invalid keyboard type: %s", parameters[KBD_PARM_TYPE]);
       ok = 0;
     }
   }
@@ -66,7 +66,7 @@ parseKeyboardProperties (KeyboardProperties *properties, const char *string) {
     if (validateInteger(&value, parameters[KBD_PARM_VENDOR], &minimum, &maximum)) {
       properties->vendor = value;
     } else {
-      LogPrint(LOG_WARNING, "invalid keyboard vendor code: %s", parameters[KBD_PARM_VENDOR]);
+      logMessage(LOG_WARNING, "invalid keyboard vendor code: %s", parameters[KBD_PARM_VENDOR]);
       ok = 0;
     }
   }
@@ -79,7 +79,7 @@ parseKeyboardProperties (KeyboardProperties *properties, const char *string) {
     if (validateInteger(&value, parameters[KBD_PARM_PRODUCT], &minimum, &maximum)) {
       properties->product = value;
     } else {
-      LogPrint(LOG_WARNING, "invalid keyboard product code: %s", parameters[KBD_PARM_PRODUCT]);
+      logMessage(LOG_WARNING, "invalid keyboard product code: %s", parameters[KBD_PARM_PRODUCT]);
       ok = 0;
     }
   }

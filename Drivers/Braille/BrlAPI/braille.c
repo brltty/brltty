@@ -40,7 +40,7 @@ typedef enum {
 #define CHECK(cond, label) \
   do { \
     if (!(cond)) { \
-      LogPrint(LOG_ERR, "%s", brlapi_strerror(&brlapi_error)); \
+      logMessage(LOG_ERR, "%s", brlapi_strerror(&brlapi_error)); \
       goto label; \
     } \
   } while (0);
@@ -61,11 +61,11 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
   CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
-  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.auth);
+  logMessage(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.auth);
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
-  LogPrint(LOG_DEBUG, "Got tty successfully");
+  logMessage(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->textColumns, &brl->textRows)==0), out1);
-  LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->textColumns, brl->textRows);
+  logMessage(LOG_DEBUG,"Found out display size: %dx%d", brl->textColumns, brl->textRows);
   displaySize = brl->textColumns*brl->textRows;
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);
@@ -73,7 +73,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   CHECK((prevText!=NULL), out2);
   prevShown = 0;
   restart = 0;
-  LogPrint(LOG_DEBUG, "Memory allocated, returning 1");
+  logMessage(LOG_DEBUG, "Memory allocated, returning 1");
   return 1;
   
 out2:
@@ -83,7 +83,7 @@ out1:
 out0:
   brlapi_closeConnection();
 out:
-  LogPrint(LOG_DEBUG, "Something went wrong, returning 0");
+  logMessage(LOG_DEBUG, "Something went wrong, returning 0");
   return 0;
 }
 
@@ -134,7 +134,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
       prevCursor = brl->cursor;
       prevShown = 1;
     } else {
-      LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+      logMessage(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
       restart = 1;
     }
   }

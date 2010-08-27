@@ -155,19 +155,19 @@ ensureDirectory (const char *path) {
   struct stat status;
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
-    LogPrint(LOG_ERR, "not a directory: %s", path);
+    logMessage(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
-    LogPrint(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
+    logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
   } else if (mkdir(path
 #ifndef __MINGW32__
                   ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
 #endif /* __MINGW32__ */
                   ) != -1) {
-    LogPrint(LOG_NOTICE, "directory created: %s", path);
+    logMessage(LOG_NOTICE, "directory created: %s", path);
     return 1;
   } else {
-    LogPrint(((errno == ENOENT)? LOG_DEBUG: LOG_WARNING),
-             "cannot create directory: %s: %s", path, strerror(errno));
+    logMessage(((errno == ENOENT)? LOG_DEBUG: LOG_WARNING),
+               "cannot create directory: %s: %s", path, strerror(errno));
   }
   return 0;
 }
@@ -212,8 +212,8 @@ getWorkingDirectory (void) {
 int
 setWorkingDirectory (const char *directory) {
   if (chdir(directory) != -1) return 1;                /* * change to directory containing data files  */
-  LogPrint(LOG_WARNING, "%s: %s: %s",
-           gettext("cannot set working directory"),
+  logMessage(LOG_WARNING, "%s: %s: %s",
+             gettext("cannot set working directory"),
            directory, strerror(errno));
   return 0;
 }
@@ -254,10 +254,10 @@ FILE *
 openFile (const char *path, const char *mode, int optional) {
   FILE *file = fopen(path, mode);
   if (file) {
-    LogPrint(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
+    logMessage(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
   } else {
-    LogPrint((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
-             "cannot open file: %s: %s", path, strerror(errno));
+    logMessage((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
+               "cannot open file: %s: %s", path, strerror(errno));
   }
   return file;
 }
@@ -271,9 +271,9 @@ openDataFile (const char *path, const char *mode, int optional) {
 
   if (!overrideDirectory) {
     if ((overrideDirectory = getOverrideDirectory())) {
-      LogPrint(LOG_DEBUG, "override directory: %s", overrideDirectory);
+      logMessage(LOG_DEBUG, "override directory: %s", overrideDirectory);
     } else {
-      LogPrint(LOG_DEBUG, "no override directory");
+      logMessage(LOG_DEBUG, "no override directory");
       overrideDirectory = "";
     }
   }

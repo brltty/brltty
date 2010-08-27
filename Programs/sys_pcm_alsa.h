@@ -68,7 +68,7 @@ PCM_ALSA_SYMBOL(pcm_resume);
 
 static void
 logPcmError (int level, const char *action, int code) {
-  LogPrint(level, "ALSA PCM %s error: %s", action, pcmAlsa_strerror(code));
+  logMessage(level, "ALSA PCM %s error: %s", action, pcmAlsa_strerror(code));
 }
 
 static int
@@ -93,7 +93,7 @@ configurePcmSampleFormat (PcmDevice *pcm, int errorLevel) {
     ++format;
   }
 
-  LogPrint(errorLevel, "Unsupported PCM sample format.");
+  logMessage(errorLevel, "Unsupported PCM sample format.");
   return 0;
 }
 
@@ -114,7 +114,7 @@ configurePcmSampleRate (PcmDevice *pcm, int errorLevel) {
   }
 
   if ((minimum > maximum) || (minimum < 1)) {
-    LogPrint(errorLevel, "Invalid PCM rate range: %u-%u", minimum, maximum);
+    logMessage(errorLevel, "Invalid PCM rate range: %u-%u", minimum, maximum);
     return 0;
   }
 
@@ -144,7 +144,7 @@ configurePcmChannelCount (PcmDevice *pcm, int errorLevel) {
   }
 
   if ((minimum > maximum) || (minimum < 1)) {
-    LogPrint(errorLevel, "Invalid PCM channel range: %u-%u", minimum, maximum);
+    logMessage(errorLevel, "Invalid PCM channel range: %u-%u", minimum, maximum);
     return 0;
   }
 
@@ -163,7 +163,7 @@ openPcmDevice (int errorLevel, const char *device) {
 
   if (!pcmAlsaLibrary) {
     if (!(pcmAlsaLibrary = loadSharedObject("libasound.so.2"))) {
-      LogPrint(LOG_ERR, "Unable to load ALSA PCM library.");
+      logMessage(LOG_ERR, "Unable to load ALSA PCM library.");
       return NULL;
     }
 
@@ -216,7 +216,7 @@ openPcmDevice (int errorLevel, const char *device) {
                     pcm->periodTime = pcm->bufferTime / 8;
                     if ((result = pcmAlsa_pcm_hw_params_set_period_time_near(pcm->handle, pcm->hardwareParameters, &pcm->periodTime, NULL)) >= 0) {
                       if ((result = pcmAlsa_pcm_hw_params(pcm->handle, pcm->hardwareParameters)) >= 0) {
-                        LogPrint(LOG_DEBUG, "ALSA PCM: Chan=%u Rate=%u BufTim=%u PerTim=%u", pcm->channelCount, pcm->sampleRate, pcm->bufferTime, pcm->periodTime);
+                        logMessage(LOG_DEBUG, "ALSA PCM: Chan=%u Rate=%u BufTim=%u PerTim=%u", pcm->channelCount, pcm->sampleRate, pcm->bufferTime, pcm->periodTime);
                         return pcm;
                       } else {
                         logPcmError(errorLevel, "set hardware parameters", result);

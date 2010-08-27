@@ -207,7 +207,7 @@ setUnixError (long int result, const char *action) {
 #undef SET
 
   if (action) {
-    LogPrint(LOG_WARNING, "Darwin error 0X%lX.", result);
+    logMessage(LOG_WARNING, "Darwin error 0X%lX.", result);
     logSystemError(action);
   }
 }
@@ -236,8 +236,8 @@ openDevice (UsbDevice *device, int seize) {
       level = LOG_NOTICE;
     }
 
-    LogPrint(level, "USB device %s: vendor=%04X product=%04X",
-             action, device->descriptor.idVendor, device->descriptor.idProduct);
+    logMessage(level, "USB device %s: vendor=%04X product=%04X",
+               action, device->descriptor.idVendor, device->descriptor.idProduct);
     devx->deviceOpened = 1;
   }
 
@@ -360,7 +360,7 @@ setInterface (UsbDeviceExtension *devx, UInt8 number) {
         setUnixError(result, "USB interface service plugin create");
       }
     }
-    if (!found) LogPrint(LOG_ERR, "USB interface not found: %d", number);
+    if (!found) logMessage(LOG_ERR, "USB interface not found: %d", number);
 
     IOObjectRelease(iterator);
     iterator = 0;
@@ -600,8 +600,8 @@ usbSubmitRequest (
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB endpoint direction not suppported: %d",
-                   eptx->transferDirection);
+          logMessage(LOG_ERR, "USB endpoint direction not suppported: %d",
+                     eptx->transferDirection);
           errno = ENOSYS;
           break;
       }
@@ -817,10 +817,10 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
           if ((eptx->endpointNumber == number) &&
               (((eptx->transferDirection == kUSBIn) && (direction == UsbEndpointDirection_Input)) ||
                ((eptx->transferDirection == kUSBOut) && (direction == UsbEndpointDirection_Output)))) {
-            LogPrint(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
-                     endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
-                     eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
-                     eptx->pollInterval, eptx->packetSize);
+            logMessage(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
+                       endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
+                       eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
+                       eptx->pollInterval, eptx->packetSize);
 
             eptx->endpoint = endpoint;
             endpoint->extension = eptx;
@@ -832,8 +832,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
       }
 
       errno = EIO;
-      LogPrint(LOG_ERR, "USB pipe not found: ept=%02X",
-               endpoint->descriptor->bEndpointAddress);
+      logMessage(LOG_ERR, "USB pipe not found: ept=%02X",
+                 endpoint->descriptor->bEndpointAddress);
 
       deallocateQueue(eptx->completedRequests);
     } else {
@@ -953,7 +953,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
         setUnixError(kernelResult, "USB device iterator create");
       }
     } else {
-      LogPrint(LOG_ERR, "USB device matching dictionary create error.");
+      logMessage(LOG_ERR, "USB device matching dictionary create error.");
     }
 
     mach_port_deallocate(mach_task_self(), port);

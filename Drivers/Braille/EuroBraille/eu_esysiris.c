@@ -77,7 +77,7 @@ static int		routingMode = BRL_BLK_ROUTE;
 
 static inline void
 LogUnknownProtocolKey(const char *function, unsigned char key) {
-  LogPrint(LOG_NOTICE,"[eu] %s: unknown protocol key %c (%x)",function,key,key);
+  logMessage(LOG_NOTICE,"[eu] %s: unknown protocol key %c (%x)",function,key,key);
 }
 
 static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
@@ -253,7 +253,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
         unsigned char c = packet[3];
         unsigned char d = packet[4];
         key = 0;
-        LogPrint(LOG_DEBUG, "PC key %x %x %x %x", a, b, c, d);
+        logMessage(LOG_DEBUG, "PC key %x %x %x %x", a, b, c, d);
         if (!a) {
           if (d)
             key = EUBRL_PC_KEY | BRL_BLK_PASSCHAR | d;
@@ -323,7 +323,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
 {
   if (!io)
     {
-      LogPrint(LOG_ERR, "eu: EsysIris: Invalid IO Subsystem driver.");
+      logMessage(LOG_ERR, "eu: EsysIris: Invalid IO Subsystem driver.");
       return (-1);
     }
   memset(brlFirmwareVersion, 0, 21);
@@ -335,7 +335,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
     {
       if (esysiris_writePacket(brl, (unsigned char *)outPacket, 2) == -1)
 	{
-	  LogPrint(LOG_WARNING, "eu: EsysIris: Failed to send ident request.");
+	  logMessage(LOG_WARNING, "eu: EsysIris: Failed to send ident request.");
 	  leftTries = 0;
 	  continue;
 	}
@@ -351,8 +351,8 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
     { /* Succesfully identified hardware. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
-      LogPrint(LOG_INFO, "eu: %s connected.",
-	       modelTable[brlType]);
+      logMessage(LOG_INFO, "eu: %s connected.",
+	         modelTable[brlType]);
       return (1);
     }
   return (0);
@@ -430,7 +430,7 @@ void	esysiris_writeWindow(BrailleDisplay *brl)
   unsigned char buf[displaySize + 2];
   
   if (displaySize > sizeof(previousBrailleWindow)) {
-    LogPrint(LOG_WARNING, "[eu] Discarding too large braille window");
+    logMessage(LOG_WARNING, "[eu] Discarding too large braille window");
     return;
   }
 
@@ -461,7 +461,7 @@ ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 
   if (size < length)
     {
-      LogPrint(LOG_WARNING, "input buffer too small");
+      logMessage(LOG_WARNING, "input buffer too small");
       return 0;
     }
 

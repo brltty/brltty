@@ -48,17 +48,17 @@ executeHostCommand (const char *const *arguments) {
         logSystemError("waitpid");
       } else if (WIFEXITED(status)) {
         result = WEXITSTATUS(status);
-        LogPrint(LOG_DEBUG, "exit status: %d", result);
+        logMessage(LOG_DEBUG, "exit status: %d", result);
       } else if (WIFSIGNALED(status)) {
         result = WTERMSIG(status);
-        LogPrint(LOG_DEBUG, "termination signal: %d", result);
+        logMessage(LOG_DEBUG, "termination signal: %d", result);
         result += 0X80;
       } else if (WIFSTOPPED(status)) {
         result = WSTOPSIG(status);
-        LogPrint(LOG_DEBUG, "stop signal: %d", result);
+        logMessage(LOG_DEBUG, "stop signal: %d", result);
         result += 0X80;
       } else {
-        LogPrint(LOG_DEBUG, "unknown status: 0X%X", status);
+        logMessage(LOG_DEBUG, "unknown status: 0X%X", status);
       }
     }
   }

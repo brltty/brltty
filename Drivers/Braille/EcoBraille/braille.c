@@ -212,7 +212,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       serialReadData(serialDevice, &buffer, DIM_BRL_READY + 6, 100, 100);
       /*}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));*/
       
-      LogPrint(LOG_DEBUG, "buffer is: %s",buffer);
+      logMessage(LOG_DEBUG, "buffer is: %s",buffer);
   
   /* Set model params */
   model = &Models[ModelID];

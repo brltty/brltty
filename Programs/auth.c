@@ -285,7 +285,7 @@ authKeyfile_initialize (const char *parameter) {
       keyfile->path = parameter;
       return keyfile;
     } else {
-      LogPrint(LOG_ERR, "path to key file not specified");
+      logMessage(LOG_ERR, "path to key file not specified");
     }
 
     free(keyfile);
@@ -310,7 +310,7 @@ authKeyfile_client (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 static int
 authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_keyfile *keyfile = data;
-  LogPrint(LOG_DEBUG, "checking key file: %s", keyfile->path);
+  logMessage(LOG_DEBUG, "checking key file: %s", keyfile->path);
   return 1;
 }
 
@@ -355,7 +355,7 @@ authUser_initialize (const char *parameter) {
       }
     }
 
-    LogPrint(LOG_ERR, "unknown user: %s", parameter);
+    logMessage(LOG_ERR, "unknown user: %s", parameter);
     free(user);
 #endif /* __MINGW32__ */
   } else {
@@ -410,7 +410,7 @@ authGroup_initialize (const char *parameter) {
       }
     }
 
-    LogPrint(LOG_ERR, "unknown group: %s", parameter);
+    logMessage(LOG_ERR, "unknown group: %s", parameter);
     free(group);
 #endif /* __MINGW32__ */
   } else {
@@ -498,7 +498,7 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter) {
     }
   }
 
-  LogPrint(LOG_WARNING, "unknown authentication/authorization method: %.*s", nameLength, name);
+  logMessage(LOG_WARNING, "unknown authentication/authorization method: %.*s", nameLength, name);
   return 0;
 }
 
@@ -592,7 +592,7 @@ authPerformServer (AuthDescriptor *auth, FileDescriptor fd) {
 #ifdef CAN_CHECK_CREDENTIALS
   if (auth->peerCredentialsState != PCS_NEED) {
     if (auth->peerCredentialsState == PCS_HAVE) releasePeerCredentials(&auth->peerCredentials);
-    if (!ok) LogPrint(LOG_ERR, "no matching user or group");
+    if (!ok) logMessage(LOG_ERR, "no matching user or group");
   }
 #endif /* CAN_CHECK_CREDENTIALS */
 

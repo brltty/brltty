@@ -334,7 +334,7 @@ closeConsole (void) {
     if (close(consoleDescriptor) == -1) {
       logSystemError("console close");
     }
-    LogPrint(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
+    logMessage(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
 }
@@ -346,7 +346,7 @@ openConsole (unsigned char vt) {
   if (name) {
     int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
-      LogPrint(LOG_DEBUG, "console opened: %s: fd=%d", name, console);
+      logMessage(LOG_DEBUG, "console opened: %s: fd=%d", name, console);
       closeConsole();
       consoleDescriptor = console;
       opened = 1;
@@ -372,7 +372,7 @@ closeScreen (void) {
     if (close(screenDescriptor) == -1) {
       logSystemError("screen close");
     }
-    LogPrint(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
+    logMessage(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
   }
 }
@@ -384,7 +384,7 @@ openScreen (unsigned char vt) {
   if (name) {
     int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
-      LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", name, screen);
+      logMessage(LOG_DEBUG, "screen opened: %s: fd=%d", name, screen);
       if (openConsole(vt)) {
         closeScreen();
         screenDescriptor = screen;
@@ -392,7 +392,7 @@ openScreen (unsigned char vt) {
         opened = 1;
       } else {
         close(screen);
-        LogPrint(LOG_DEBUG, "screen closed: fd=%d", screen);
+        logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
       }
     }
     free(name);
@@ -436,7 +436,7 @@ setScreenFontMap (int force) {
       return 0;
     }
     if (!(size <<= 1)) {
-      LogPrint(LOG_ERR, "screen font map too big.");
+      logMessage(LOG_ERR, "screen font map too big.");
       return 0;
     }
   }
@@ -458,13 +458,13 @@ setScreenFontMap (int force) {
   screenFontMapTable = sfm.entries;
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
-  LogPrint(LOG_INFO, "Screen Font Map Size: %d", screenFontMapCount);
+  logMessage(LOG_INFO, "Screen Font Map Size: %d", screenFontMapCount);
   if (debugScreenFontMap) {
     int i;
     for (i=0; i<screenFontMapCount; ++i) {
       const struct unipair *map = &screenFontMapTable[i];
-      LogPrint(LOG_DEBUG, "sfm[%03u]: unum=%4.4X fpos=%4.4X",
-               i, map->unicode, map->fontpos);
+      logMessage(LOG_DEBUG, "sfm[%03u]: unum=%4.4X fpos=%4.4X",
+                 i, map->unicode, map->fontpos);
     }
   }
   return 1;
@@ -491,7 +491,7 @@ setVgaCharacterCount (int force) {
       vgaCharacterCount = 0;
 
       if (errno != EINVAL) {
-        LogPrint(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
+        logMessage(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
       }
     }
   }
@@ -511,9 +511,9 @@ setVgaCharacterCount (int force) {
     if (vgaCharacterCount == oldCount)
       return 0;
 
-  LogPrint(LOG_INFO, "VGA Character Count: %d(%s)",
-           vgaCharacterCount,
-           vgaLargeTable? "large": "small");
+  logMessage(LOG_INFO, "VGA Character Count: %d(%s)",
+             vgaCharacterCount,
+             vgaLargeTable? "large": "small");
 
   return 1;
 }
@@ -530,8 +530,8 @@ setAttributesMasks (unsigned short bit) {
                             (((bit & 0X0F00) - 0X0100) & 0X0F00);
   shiftedAttributesMask = ((~((bit & 0XF000) - 0X1000) << 1) & 0XE000) |
                           ((~((bit & 0X0F00) - 0X0100) << 1) & 0X0E00);
-  LogPrint(LOG_DEBUG, "attributes masks: font=%04X unshifted=%04X shifted=%04X",
-           fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
+  logMessage(LOG_DEBUG, "attributes masks: font=%04X unshifted=%04X shifted=%04X",
+             fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
 }
 
 #ifndef VT_GETHIFONTMASK
@@ -550,7 +550,7 @@ determineAttributesMasks (void) {
       if (controlConsole(VT_GETHIFONTMASK, &mask) == -1) {
         if (errno != EINVAL) logSystemError("ioctl[VT_GETHIFONTMASK]");
       } else if (mask & 0XFF) {
-        LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
+        logMessage(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
       } else {
         setAttributesMasks(mask);
         return 1;
@@ -596,7 +596,7 @@ processParameters_LinuxScreen (char **parameters) {
   }
 
   if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
+    logMessage(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
 
   highFontBit = 0;
   if (parameters[PARM_HFB] && *parameters[PARM_HFB]) {
@@ -608,7 +608,7 @@ processParameters_LinuxScreen (char **parameters) {
     if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
       highFontBit = 1 << (bit + 8);
     } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
     } else if (choice) {
       static const unsigned short bits[] = {0X0800, 0X0100};
       highFontBit = bits[choice-1];
@@ -884,8 +884,8 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
     if (count == -1) {
       logSystemError("screen read");
     } else {
-      LogPrint(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
-               (unsigned int)size, (int)count);
+      logMessage(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
+                 (unsigned int)size, (int)count);
     }
   }
   return 0;
@@ -1283,7 +1283,7 @@ insertXlate (wchar_t character) {
 
   if (result != CONV_OK) {
     uint32_t value = character;
-    LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
+    logMessage(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
     return 0;
   }
 
@@ -1300,7 +1300,7 @@ insertUnicode (wchar_t character) {
 
   {
     uint32_t value = character;
-    LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in unicode mode." , value);
+    logMessage(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in unicode mode." , value);
   }
 
   return 0;
@@ -1418,14 +1418,14 @@ insertCode (ScreenKey key, int raw) {
         case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
         default:
           if (insertUinput(key)) return 1;
-          LogPrint(LOG_WARNING, "key %04X not suported in raw keycode mode.", key);
+          logMessage(LOG_WARNING, "key %04X not suported in raw keycode mode.", key);
           return 0;
       }
 
       if (raw) {
         prefix = 0XE0;
       } else if (!(code = emul0XtScanCodeToLinuxKeyCode[code])) {
-        LogPrint(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
+        logMessage(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
         return 0;
       }
       break;
@@ -1602,7 +1602,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         break;
       default:
 	if (insertUinput(key)) return 1;
-        LogPrint(LOG_WARNING, "key %04X not supported in xlate mode.", key);
+        logMessage(LOG_WARNING, "key %04X not supported in xlate mode.", key);
         return 0;
     }
     end = sequence + wcslen(sequence);
@@ -1626,7 +1626,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
           }
 
         default:
-          LogPrint(LOG_WARNING, "unsupported keyboard meta mode: %d", meta);
+          logMessage(LOG_WARNING, "unsupported keyboard meta mode: %d", meta);
           return 0;
       }
     }
@@ -1641,7 +1641,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
-  LogPrint(LOG_DEBUG, "insert key: %4.4X", key);
+  logMessage(LOG_DEBUG, "insert key: %4.4X", key);
   if (rebindConsole()) {
     int mode;
     if (controlConsole(KDGKBMODE, &mode) != -1) {
@@ -1675,7 +1675,7 @@ insertKey_LinuxScreen (ScreenKey key) {
           break;
 
         default:
-          LogPrint(LOG_WARNING, "unsupported keyboard mode: %d", mode);
+          logMessage(LOG_WARNING, "unsupported keyboard mode: %d", mode);
           break;
       }
     } else {
@@ -1730,7 +1730,7 @@ unhighlightRegion_LinuxScreen (void) {
 static int
 validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
-  LogPrint(LOG_DEBUG, "virtual terminal out of range: %d", vt);
+  logMessage(LOG_DEBUG, "virtual terminal out of range: %d", vt);
   return 0;
 }
 
@@ -1746,7 +1746,7 @@ switchVirtualTerminal_LinuxScreen (int vt) {
   if (validateVt(vt)) {
     if (selectVirtualTerminal_LinuxScreen(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
-        LogPrint(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
+        logMessage(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
         return 1;
       } else {
         logSystemError("ioctl VT_ACTIVATE");
@@ -1787,14 +1787,14 @@ executeCommand_LinuxScreen (int command) {
             if (command & BRL_FLG_KBD_EMUL0) {
               unsigned char code = emul0XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
-		LogPrint(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
+		logMessage(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
               unsigned int code = emul1XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
-		LogPrint(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
+		logMessage(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;

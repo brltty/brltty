@@ -37,7 +37,7 @@ fmConstruct (int errorLevel) {
       if (AL_testCard(errorLevel)) {
         device->channelNumber = 0;
 
-        LogPrint(LOG_DEBUG, "FM enabled");
+        logMessage(LOG_DEBUG, "FM enabled");
         return device;
       }
 
@@ -49,14 +49,14 @@ fmConstruct (int errorLevel) {
     logMallocError();
   }
 
-  LogPrint(LOG_DEBUG, "FM not available");
+  logMessage(LOG_DEBUG, "FM not available");
   return NULL;
 }
 
 static int
 fmPlay (NoteDevice *device, int note, int duration) {
-  LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
-           duration, note);
+  logMessage(LOG_DEBUG, "tone: msec=%d note=%d",
+             duration, note);
 
   if (note) {
     AL_playTone(device->channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
@@ -76,7 +76,7 @@ static void
 fmDestruct (NoteDevice *device) {
   free(device);
   AL_disablePorts();
-  LogPrint(LOG_DEBUG, "FM disabled");
+  logMessage(LOG_DEBUG, "FM disabled");
 }
 
 const NoteMethods fmMethods = {

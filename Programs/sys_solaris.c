@@ -75,7 +75,7 @@ getKeyboard (void) {
   static int keyboard = -1;
   if (keyboard == -1) {
     if ((keyboard = open("/dev/kbd", O_WRONLY)) != -1) {
-      LogPrint(LOG_DEBUG, "keyboard opened: fd=%d", keyboard);
+      logMessage(LOG_DEBUG, "keyboard opened: fd=%d", keyboard);
     } else {
       logSystemError("keyboard open");
     }

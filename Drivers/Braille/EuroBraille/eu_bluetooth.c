@@ -36,7 +36,7 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
   bluetoothConnection = bthOpenConnection(device, DEFAULT_ESYS_CHANNEL, 0);
   if (!bluetoothConnection)
     {
-      LogPrint(LOG_ERR, "eu: Failed to initialize bluetooth connection.");
+      logMessage(LOG_ERR, "eu: Failed to initialize bluetooth connection.");
       return (0);
     }
   return (1);
@@ -61,8 +61,8 @@ eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 	} 
       else 
 	{
-	  LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %u", 
-		   (int)count, (unsigned int)length);
+	  logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %u", 
+		     (int)count, (unsigned int)length);
 	}
     }
   return count;

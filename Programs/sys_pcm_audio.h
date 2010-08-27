@@ -48,10 +48,10 @@ openPcmDevice (int errorLevel, const char *device) {
       info.play.precision = 16;
       info.play.gain = AUDIO_MAX_GAIN;
       if (ioctl(pcm->fileDescriptor, AUDIO_SETINFO, &info) == -1)
-        LogPrint(errorLevel, "Cannot set audio info: %s", strerror(errno));
+        logMessage(errorLevel, "Cannot set audio info: %s", strerror(errno));
       return pcm;
     } else {
-      LogPrint(errorLevel, "Cannot open PCM device: %s: %s", device, strerror(errno));
+      logMessage(errorLevel, "Cannot open PCM device: %s: %s", device, strerror(errno));
     }
     free(pcm);
   } else {

@@ -142,7 +142,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (validateInteger(&lines, parameters[PARM_LINES], &minimum, &maximum)) {
       windowLines = lines;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
     }
   }
 
@@ -153,7 +153,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (validateInteger(&columns, parameters[PARM_COLUMNS], &minimum, &maximum)) {
       windowColumns = columns;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
     }
   }
 
@@ -188,8 +188,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->textColumns = windowColumns;
             brl->textRows = windowLines; 
 
-            LogPrint(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
-                     ttyType, ttyBaud, windowColumns, windowLines);
+            logMessage(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
+                       ttyType, ttyBaud, windowColumns, windowLines);
             return 1;
 #ifdef USE_CURSES
           } else {
@@ -322,7 +322,7 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
     KEY(EOF, EOF);
     default:
       if (key <= 0XFF) return BRL_BLK_PASSCHAR|key;
-      LogPrint(LOG_WARNING, "Unknown key: %d", key);
+      logMessage(LOG_WARNING, "Unknown key: %d", key);
       return BRL_CMD_NOOP;
 
 #ifdef USE_CURSES
@@ -372,13 +372,13 @@ brl_readKey (BrailleDisplay *brl) {
   if (key == ERR) return EOF;
 #endif /* USE_CURSES */
 
-  LogPrint(LOG_DEBUG, "key %d", key);
+  logMessage(LOG_DEBUG, "key %d", key);
   return key;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command = brl_keyToCommand(brl, context, brl_readKey(brl));
-  if (command != EOF) LogPrint(LOG_DEBUG, "cmd %04X", command);
+  if (command != EOF) logMessage(LOG_DEBUG, "cmd %04X", command);
   return command;
 }

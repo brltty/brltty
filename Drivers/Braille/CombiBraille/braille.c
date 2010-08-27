@@ -173,7 +173,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               return 1;
             } else {
-              LogPrint(LOG_ERR, "detected unknown CombiBraille model with ID %02X", id);
+              logMessage(LOG_ERR, "detected unknown CombiBraille model with ID %02X", id);
             }
           }
         }

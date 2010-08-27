@@ -64,29 +64,29 @@ construct_ScreenScreen (void) {
       int project = 'b';
       const char *path = getenv("HOME");
       if (!path || !*path) path = "/";
-      LogPrint(LOG_DEBUG, "Shared memory file system object: %s", path);
+      logMessage(LOG_DEBUG, "Shared memory file system object: %s", path);
       if ((keys[keyCount] = ftok(path, project)) != -1) {
         keyCount++;
       } else {
-        LogPrint(LOG_WARNING, "Per user shared memory key not generated: %s",
-                 strerror(errno));
+        logMessage(LOG_WARNING, "Per user shared memory key not generated: %s",
+                   strerror(errno));
       }
     }
 
     while (keyCount > 0) {
       shmKey = keys[--keyCount];
-      LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
+      logMessage(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
       if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
         if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (unsigned char *)-1) {
-          LogPrint(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
+          logMessage(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
           return 1;
         } else {
-          LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
-                   shmKey, strerror(errno));
+          logMessage(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
+                     shmKey, strerror(errno));
         }
       } else {
-        LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
-                 shmKey, strerror(errno));
+        logMessage(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
+                   shmKey, strerror(errno));
       }
     }
     shmIdentifier = -1;
@@ -153,7 +153,7 @@ doScreenCommand (const char *command, ...) {
     {
       int result = executeHostCommand(argv);
       if (result == 0) return 1;
-      LogPrint(LOG_ERR, "screen error: %d", result);
+      logMessage(LOG_ERR, "screen error: %d", result);
     }
   }
 
@@ -208,7 +208,7 @@ insertKey_ScreenScreen (ScreenKey key) {
   char buffer[3];
   char *sequence;
 
-  LogPrint(LOG_DEBUG, "insert key: %04X", key);
+  logMessage(LOG_DEBUG, "insert key: %04X", key);
   setKeyModifiers(&key, 0);
 
   if (isSpecialKey(key)) {
@@ -253,7 +253,7 @@ insertKey_ScreenScreen (ScreenKey key) {
       KEY(SCR_KEY_FUNCTION+19, "\x1b[34~");
 
       default:
-        LogPrint(LOG_WARNING, "unsuported key: %04X", key);
+        logMessage(LOG_WARNING, "unsuported key: %04X", key);
         return 0;
     }
 #undef CURSOR_KEY
@@ -262,7 +262,7 @@ insertKey_ScreenScreen (ScreenKey key) {
     int byte = convertWcharToChar(character);
 
     if (byte == EOF) {
-      LogPrint(LOG_WARNING, "character not supported in local character set: 0X%04X", key);
+      logMessage(LOG_WARNING, "character not supported in local character set: 0X%04X", key);
     }
 
     sequence = buffer + sizeof(buffer);

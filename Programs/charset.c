@@ -60,7 +60,7 @@ ret convert##name (from f) { \
     to *tp = &t; \
     size_t ts = sizeof(t); \
     if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) != -1) return t; \
-    LogPrint(LOG_DEBUG, "iconv (" #from " -> " #to ") error: %s", strerror(errno)); \
+    logMessage(LOG_DEBUG, "iconv (" #from " -> " #to ") error: %s", strerror(errno)); \
   } \
   return eof; \
 }

@@ -27,7 +27,7 @@ static int
 getSpeaker (void) {
   if (speaker == -1) {
     if ((speaker = open("/dev/speaker", O_WRONLY)) != -1) {
-      LogPrint(LOG_DEBUG, "Speaker opened: fd=%d", speaker);
+      logMessage(LOG_DEBUG, "Speaker opened: fd=%d", speaker);
     } else {
       logSystemError("speaker open");
     }

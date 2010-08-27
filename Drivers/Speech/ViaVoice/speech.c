@@ -380,7 +380,7 @@ reportError (ECIHand eci, const char *routine) {
    int status = eciProgStatus(eci);
    char message[100];
    eciErrorMessage(eci, message);
-   LogPrint(LOG_ERR, "%s error %4.4X: %s", routine, status, message);
+   logMessage(LOG_ERR, "%s error %4.4X: %s", routine, status, message);
 }
 
 static void
@@ -400,7 +400,7 @@ reportParameter (const char *description, int setting, const char *const *choice
       }
    }
    if (value == buffer) snprintf(buffer, sizeof(buffer), "%d", setting);
-   LogPrint(LOG_DEBUG, "ViaVoice Parameter: %s = %s", description, value);
+   logMessage(LOG_DEBUG, "ViaVoice Parameter: %s = %s", description, value);
 }
 
 static void
@@ -432,7 +432,7 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
 	    assume = setting;
 	 }
       } else {
-        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
+        logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportEnvironmentParameter(eci, description, parameter, assume, choices, map);
@@ -452,7 +452,7 @@ rangeEnvironmentParameter (ECIHand eci, const char *description, const char *val
 	    assume = setting;
 	 }
       } else {
-        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
+        logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportEnvironmentParameter(eci, description, parameter, assume, NULL, NULL);
@@ -480,7 +480,7 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, E
 	    ok = 1;
 	 }
       } else {
-        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
+        logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportVoiceParameter(eci, description, parameter, choices, map);
@@ -497,7 +497,7 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, EC
 	    ok = 1;
 	 }
       } else {
-        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
+        logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportVoiceParameter(eci, description, parameter, NULL, NULL);
@@ -507,7 +507,7 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, EC
 static int
 setIni (const char *path) {
    const char *variable = INI_VARIABLE;
-   LogPrint(LOG_DEBUG, "ViaVoice Ini Variable: %s", variable);
+   logMessage(LOG_DEBUG, "ViaVoice Ini Variable: %s", variable);
 
    if (!*path) {
       const char *value = getenv(variable);
@@ -523,7 +523,7 @@ setIni (const char *path) {
    }
 isSet:
 
-   LogPrint(LOG_INFO, "ViaVoice Ini File: %s", path);
+   logMessage(LOG_INFO, "ViaVoice Ini File: %s", path);
    return 1;
 }
 
@@ -557,7 +557,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
                {
                   char version[0X80];
                   eciVersion(version);
-                  LogPrint(LOG_INFO, "ViaVoice Engine: version %s", version);
+                  logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
                }
                return 1;
 	    } else {
@@ -566,7 +566,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
             eciDelete(eci);
             eci = NULL_ECI_HAND;
 	 } else {
-	    LogPrint(LOG_ERR, "ViaVoice initialization error.");
+	    logMessage(LOG_ERR, "ViaVoice initialization error.");
 	 }
       }
    }
@@ -668,7 +668,7 @@ static int
 spk_getTrack (SpeechSynthesizer *spk) {
    if (eci) {
       int index = eciGetIndex(eci);
-      LogPrint(LOG_DEBUG, "speech tracked at %d", index);
+      logMessage(LOG_DEBUG, "speech tracked at %d", index);
       return index;
    }
    return 0;

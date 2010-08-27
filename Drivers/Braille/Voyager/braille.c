@@ -231,8 +231,8 @@ logSerialSerialNumber (void) {
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
     if (buffer[1] != device) continue;
-    LogPrint(LOG_INFO, "Voyager %s Serial Number: %.*s", 
-             serialDeviceNames[device], 16, buffer+2);
+    logMessage(LOG_INFO, "Voyager %s Serial Number: %.*s", 
+               serialDeviceNames[device], 16, buffer+2);
   }
   return 1;
 }
@@ -246,8 +246,8 @@ logSerialHardwareVersion (void) {
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
     if (buffer[1] != device) continue;
-    LogPrint(LOG_INFO, "Voyager %s Hardware Version: %u.%u.%u", 
-             serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+    logMessage(LOG_INFO, "Voyager %s Hardware Version: %u.%u.%u", 
+               serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
   }
   return 1;
 }
@@ -261,8 +261,8 @@ logSerialFirmwareVersion (void) {
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
     if (buffer[1] != device) continue;
-    LogPrint(LOG_INFO, "Voyager %s Firmware Version: %u.%u.%u", 
-             serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+    logMessage(LOG_INFO, "Voyager %s Firmware Version: %u.%u.%u", 
+               serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
   }
   return 1;
 }
@@ -355,7 +355,7 @@ writeUsbData (uint8_t request, uint16_t value, uint16_t index,
     int ret = usbControlWrite(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                               request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
-    LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
+    logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
 }
 
@@ -367,7 +367,7 @@ readUsbData (uint8_t request, uint16_t value, uint16_t index,
     int ret = usbControlRead(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                              request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
-    LogPrint(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
+    logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
 }
 
@@ -418,7 +418,7 @@ logUsbString (uint8_t request, const char *description) {
   if (readUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
     char *string = usbDecodeString(&descriptor.string);
     if (string) {
-      LogPrint(LOG_INFO, "Voyager %s: %s", description, string);
+      logMessage(LOG_INFO, "Voyager %s: %s", description, string);
       free(string);
       return 1;
     }
@@ -437,8 +437,8 @@ logUsbHardwareVersion (void) {
   int size = readUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
-  LogPrint(LOG_INFO, "Voyager Hardware: %u.%u",
-           buffer[0], buffer[1]);
+  logMessage(LOG_INFO, "Voyager Hardware: %u.%u",
+             buffer[0], buffer[1]);
   return 1;
 }
 
@@ -571,14 +571,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             break;
 
           default:
-            LogPrint(LOG_ERR, "Unsupported Voyager cell count: %u", count);
+            logMessage(LOG_ERR, "Unsupported Voyager cell count: %u", count);
             break;
         }
       }
     }
 
     if (cellCount) {
-      LogPrint(LOG_INFO, "Voyager Cell Count: %u", cellCount);
+      logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
 
       /* log information about the display */
       io->logSerialNumber();
@@ -734,13 +734,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           /* Display was disconnected */
           return BRL_CMD_RESTARTBRL;
         } else {
-          LogPrint(LOG_ERR, "Voyager read error: %s", strerror(errno));
+          logMessage(LOG_ERR, "Voyager read error: %s", strerror(errno));
           firstRead = 1;
           return EOF;
         }
       } else if ((size > 0) && (size < sizeof(packet))) {
         /* The display handles read requests of only and exactly 8bytes */
-        LogPrint(LOG_NOTICE, "Short read: %d", size);
+        logMessage(LOG_NOTICE, "Short read: %d", size);
         firstRead = 1;
         return EOF;
       }
@@ -779,7 +779,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         if (!key) break;
 
         if ((key < 1) || (key > cellCount)) {
-          LogPrint(LOG_NOTICE, "Invalid routing key number: %u", key);
+          logMessage(LOG_NOTICE, "Invalid routing key number: %u", key);
           continue;
         }
         key -= 1;
@@ -817,6 +817,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
-  LogPrint(LOG_DEBUG, "Setting voltage: %02X", voltage);
+  logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
   io->setDisplayVoltage(voltage);
 }

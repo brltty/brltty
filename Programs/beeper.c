@@ -33,7 +33,7 @@ beeperConstruct (int errorLevel) {
 
   if ((device = malloc(sizeof(*device)))) {
     if (canBeep()) {
-      LogPrint(LOG_DEBUG, "beeper enabled");
+      logMessage(LOG_DEBUG, "beeper enabled");
       return device;
     }
 
@@ -42,14 +42,13 @@ beeperConstruct (int errorLevel) {
     logMallocError();
   }
 
-  LogPrint(LOG_DEBUG, "beeper not available");
+  logMessage(LOG_DEBUG, "beeper not available");
   return NULL;
 }
 
 static int
 beeperPlay (NoteDevice *device, int note, int duration) {
-  LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
-           duration, note);
+  logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
 
   if (!note) {
     accurateDelay(duration);
@@ -80,7 +79,7 @@ static void
 beeperDestruct (NoteDevice *device) {
   endBeep();
   free(device);
-  LogPrint(LOG_DEBUG, "beeper disabled");
+  logMessage(LOG_DEBUG, "beeper disabled");
 }
 
 const NoteMethods beeperMethods = {

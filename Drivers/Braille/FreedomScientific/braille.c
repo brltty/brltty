@@ -574,9 +574,9 @@ logNegativeAcknowledgement (const Packet *packet) {
       break;
   }
 
-  LogPrint(LOG_WARNING, "Negative Acknowledgement: [%02X] %s in [%02X] %s",
-           packet->header.arg1, problem,
-           packet->header.arg2, component);
+  logMessage(LOG_WARNING, "Negative Acknowledgement: [%02X] %s in [%02X] %s",
+             packet->header.arg1, problem,
+             packet->header.arg2, component);
 }
 
 static void
@@ -685,7 +685,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         int index;
 
         for (index=0; index<size; index+=1) checksum -= inputBuffer.bytes[index];
-        if (checksum) LogPrint(LOG_WARNING, "Input packet checksum error.");
+        if (checksum) logMessage(LOG_WARNING, "Input packet checksum error.");
       }
 
       memcpy(packet, &inputBuffer, size);
@@ -749,7 +749,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           logNegativeAcknowledgement(packet);
 
           if (!acknowledgementHandler) {
-            LogPrint(LOG_WARNING, "Unexpected NAK.");
+            logMessage(LOG_WARNING, "Unexpected NAK.");
             continue;
           }
 
@@ -764,8 +764,8 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
                 outputPayloadLimit--;
 
               if (outputPayloadLimit != originalLimit)
-                LogPrint(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
-                         originalLimit, outputPayloadLimit);
+                logMessage(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
+                           originalLimit, outputPayloadLimit);
               break;
             }
           }
@@ -776,7 +776,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 
         case PKT_ACK:
           if (!acknowledgementHandler) {
-            LogPrint(LOG_WARNING, "Unexpected ACK.");
+            logMessage(LOG_WARNING, "Unexpected ACK.");
             continue;
           }
 
@@ -793,11 +793,11 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
     } else if ((count == 0) && acknowledgementHandler &&
                (millisecondsSince(&acknowledgementTime) > 500)) {
       if (++acknowledgementsMissing < 5) {
-        LogPrint(LOG_WARNING, "Missing ACK; assuming NAK.");
+        logMessage(LOG_WARNING, "Missing ACK; assuming NAK.");
         goto handleNegativeAcknowledgement;
       }
 
-      LogPrint(LOG_WARNING, "Too many missing ACKs.");
+      logMessage(LOG_WARNING, "Too many missing ACKs.");
       count = -1;
     }
 
@@ -843,9 +843,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         switch (response.header.type) {
           case PKT_INFO:
-            LogPrint(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
-            LogPrint(LOG_DEBUG, "Model: %s", response.payload.info.model);
-            LogPrint(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
+            logMessage(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
+            logMessage(LOG_DEBUG, "Model: %s", response.payload.info.model);
+            logMessage(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
 
             model = modelTable;
             while (model->identifier) {
@@ -856,7 +856,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if (!model->identifier) {
               static ModelEntry generic;
               model = &generic;
-              LogPrint(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+              logMessage(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
 
               memset(&generic, 0, sizeof(generic));
               generic.identifier = "Generic";
@@ -926,10 +926,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               oldKeys = 0;
 
-              LogPrint(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
-                       model->identifier,
-                       model->cellCount,
-                       response.payload.info.firmware);
+              logMessage(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
+                         model->identifier,
+                         model->cellCount,
+                         response.payload.info.firmware);
             }
             break;
 
@@ -1084,11 +1084,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    LogPrint(LOG_WARNING, "unsupported packet: %02X %02X %02X %02X",
-             packet.header.type,
-             packet.header.arg1,
-             packet.header.arg2,
-             packet.header.arg3);
+    logMessage(LOG_WARNING, "unsupported packet: %02X %02X %02X %02X",
+               packet.header.type,
+               packet.header.arg1,
+               packet.header.arg2,
+               packet.header.arg3);
   }
 
   return EOF;
@@ -1101,7 +1101,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
   if (count > 0) {
     if (count > sizeof(packet.header)) count--;
     if (length < count) {
-      LogPrint(LOG_WARNING, "Input packet buffer too small: %d < %d", (int)length, count);
+      logMessage(LOG_WARNING, "Input packet buffer too small: %d < %d", (int)length, count);
       count = length;
     }
     memcpy(buffer, &packet, count);
@@ -1121,13 +1121,13 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
     }
     if (length >= size) {
       if (length > size)
-        LogPrint(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
-                 (int)length, size);
+        logMessage(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
+                   (int)length, size);
       return writePacket(brl, bytes[0], bytes[1], bytes[2], bytes[3],
                          (hasPayload? &bytes[4]: NULL));
     }
   }
-  LogPrint(LOG_WARNING, "Output packet buffer too small: %d < %d", (int)length, size);
+  logMessage(LOG_WARNING, "Output packet buffer too small: %d < %d", (int)length, size);
   return 0;
 }
 

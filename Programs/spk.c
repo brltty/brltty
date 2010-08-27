@@ -143,7 +143,7 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
 
 void
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
-  LogPrint(LOG_DEBUG, "setting speech rate: %d", setting);
+  logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
   speech->rate(spk, setting);
   if (say) saySpeechSetting(spk, setting, "rate");
 }
@@ -184,7 +184,7 @@ getFloatSpeechRate (unsigned char setting) {
 
 void
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
-  LogPrint(LOG_DEBUG, "setting speech volume: %d", setting);
+  logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
   speech->volume(spk, setting);
   if (say) saySpeechSetting(spk, setting, "volume");
 }
@@ -201,7 +201,7 @@ getFloatSpeechVolume (unsigned char setting) {
 
 void
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
-  LogPrint(LOG_DEBUG, "setting speech pitch: %d", setting);
+  logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
   speech->pitch(spk, setting);
   if (say) saySpeechSetting(spk, setting, "pitch");
 }
@@ -218,7 +218,7 @@ getFloatSpeechPitch (unsigned char setting) {
 
 void
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
-  LogPrint(LOG_DEBUG, "setting speech punctuation: %d", setting);
+  logMessage(LOG_DEBUG, "setting speech punctuation: %d", setting);
   speech->punctuation(spk, setting);
 }
 
@@ -273,8 +273,8 @@ openSpeechFifo (const char *path) {
     if ((speechFifoHandle = CreateNamedPipe(speechFifoPath, PIPE_ACCESS_INBOUND,
                                             PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_NOWAIT,
                                             1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
-      LogPrint(LOG_DEBUG, "Speech FIFO created: %s: handle=%u",
-               speechFifoPath, (unsigned)speechFifoHandle);
+      logMessage(LOG_DEBUG, "Speech FIFO created: %s: handle=%u",
+                 speechFifoPath, (unsigned)speechFifoHandle);
       return 1;
     } else {
       logWindowsSystemError("CreateNamedPipe");
@@ -290,18 +290,18 @@ openSpeechFifo (const char *path) {
     if (ret != -1) {
       chmod(speechFifoPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
       if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NONBLOCK)) != -1) {
-        LogPrint(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
-                 speechFifoPath, speechFifoDescriptor);
+        logMessage(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
+                   speechFifoPath, speechFifoDescriptor);
         return 1;
       } else {
-        LogPrint(LOG_ERR, "cannot open speech FIFO: %s: %s",
-                 speechFifoPath, strerror(errno));
+        logMessage(LOG_ERR, "cannot open speech FIFO: %s: %s",
+                   speechFifoPath, strerror(errno));
       }
 
       unlink(speechFifoPath);
     } else {
-      LogPrint(LOG_ERR, "cannot create speech FIFO: %s: %s",
-               speechFifoPath, strerror(errno));
+      logMessage(LOG_ERR, "cannot create speech FIFO: %s: %s",
+                 speechFifoPath, strerror(errno));
     }
 #endif /* __MINGW32__ */
 

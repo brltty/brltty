@@ -258,7 +258,7 @@ static int modelWidth,modelHeight;
 #ifdef USE_XT
 static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData)
 {
-  LogPrint(LOG_DEBUG,"keypresscb(%p)", closure);
+  logMessage(LOG_DEBUG,"keypresscb(%p)", closure);
   enqueueCommand((long) closure);
 }
 
@@ -269,12 +269,12 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   KeySym keysym;
 
   if (event->type != KeyPress && event->type != KeyRelease) {
-    LogPrint(LOG_ERR,"keypress is not a KeyPress");
+    logMessage(LOG_ERR,"keypress is not a KeyPress");
     return;
   }
   keysym = XtGetActionKeysym(event, &modifiers);
   modifiers |= my_modifiers;
-  LogPrint(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
+  logMessage(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
 
   /* latin1 */
   if (keysym < 0x100) keysym |= 0x1000000;
@@ -286,7 +286,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     else {
       int c = convertWcharToChar(keysym & 0xffffff);
       if (c == EOF) {
-	LogPrint(LOG_DEBUG, "non translatable unicode U+%lx", keysym & 0xffffff);
+	logMessage(LOG_DEBUG, "non translatable unicode U+%lx", keysym & 0xffffff);
 	return;
       }
       keypressed = BRL_BLK_PASSCHAR | c;
@@ -384,7 +384,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     case XK_KP_7:         keypressed = BRL_BLK_PASSCHAR | '7'; break;
     case XK_KP_8:         keypressed = BRL_BLK_PASSCHAR | '8'; break;
     case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
-    default: LogPrint(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
+    default: logMessage(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
   }
   if (modifiers & ControlMask)
     keypressed |= BRL_FLG_CHAR_CONTROL;
@@ -398,12 +398,12 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     keypressed |= BRL_FLG_REPEAT_DELAY | BRL_FLG_REPEAT_INITIAL;
   else
     keypressed = BRL_CMD_NOOP;
-  LogPrint(LOG_DEBUG,"keypressed %#lx", keypressed);
+  logMessage(LOG_DEBUG,"keypressed %#lx", keypressed);
   enqueueCommand(keypressed);
   return;
 
 modif:
-  LogPrint(LOG_DEBUG,"modifier %#x", modifier);
+  logMessage(LOG_DEBUG,"modifier %#x", modifier);
   if (event->type == KeyPress)
     my_modifiers |= modifier;
   else
@@ -413,7 +413,7 @@ modif:
 static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int index = atoi(params[0]);
-  LogPrint(LOG_DEBUG,"route(%u)", index);
+  logMessage(LOG_DEBUG,"route(%u)", index);
   enqueueCommand(BRL_BLK_ROUTE | (index&BRL_MSK_ARG));
 }
 
@@ -651,10 +651,10 @@ int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD 
 	font = CreateFont(CHRY-6, CHRX-4, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, (LPCTSTR) lpelfe->elfFullName);
 	if (!font) {
 		logWindowsSystemError("Couldn't load font");
-		LogPrint(LOG_ERR,"font %s", lpelfe->elfFullName);
+		logMessage(LOG_ERR,"font %s", lpelfe->elfFullName);
 		return 1;
 	}
-	LogPrint(LOG_INFO, "Using braille font `%s\'",lpelfe->elfFullName);
+	logMessage(LOG_INFO, "Using braille font `%s\'",lpelfe->elfFullName);
 	return 0;
 }
 #endif /* USE_WINDOWS */
@@ -787,7 +787,7 @@ static int generateToplevel(void)
     EnumFontFamiliesEx(hdc, NULL, (void*) fontEnumProc, 0, 0);
     ReleaseDC(root, hdc);
     if (!font) {
-      LogPrint(LOG_ERR,"Error while loading braille font");
+      logMessage(LOG_ERR,"Error while loading braille font");
       totlines = lines;
     } else {
       totlines = 2*lines;
@@ -857,11 +857,11 @@ static int generateToplevel(void)
 
 #ifdef USE_XAW
   if (!(fontset = XCreateFontSet(XtDisplay(toplevel), fontname, &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
-    LogPrint(LOG_ERR,"Error while loading unicode font");
+    logMessage(LOG_ERR,"Error while loading unicode font");
   if (missing_charset_count_return) {
     int i;
     for (i=0; i<missing_charset_count_return; i++)
-      LogPrint(LOG_INFO,"Could not load a unicode font for charset %s",missing_charset_list_return[i]);
+      logMessage(LOG_INFO,"Could not load a unicode font for charset %s",missing_charset_list_return[i]);
     XFreeStringList(missing_charset_list_return);
   }
 #endif /* USE_XAW */
@@ -1077,7 +1077,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     if (validateInteger(&value, parameters[PARM_LINES], &minimum, &maximum)) {
       lines=value;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
     }
   }
 
@@ -1089,7 +1089,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     if (validateInteger(&value, parameters[PARM_COLUMNS], &minimum, &maximum)) {
       cols=value;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
     }
   }
 
@@ -1098,7 +1098,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     if (validateFlag(&value, parameters[PARM_INPUT], "on", "off")) {
       input = value;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUT]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUT]);
     }
   }
 

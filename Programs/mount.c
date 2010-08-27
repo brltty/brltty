@@ -47,9 +47,9 @@ static FILE *
 openMountsTable (int update) {
   FILE *table = setmntent(MOUNTS_TABLE_PATH, (update? "a": "r"));
   if (!table)
-    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-             "mounted file systems table open erorr: %s: %s",
-             MOUNTS_TABLE_PATH, strerror(errno));
+    logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+               "mounted file systems table open erorr: %s: %s",
+               MOUNTS_TABLE_PATH, strerror(errno));
   return table;
 }
 
@@ -67,8 +67,8 @@ static int
 addMountEntry (FILE *table, MountEntry *entry) {
 #ifdef HAVE_ADDMNTENT
   if (addmntent(table, entry)) {
-    LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-             entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
+    logMessage(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
+               entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
     return 0;
   }
 #endif /* HAVE_ADDMNTENT */
@@ -88,9 +88,9 @@ static FILE *
 openMountsTable (int update) {
   FILE *table = fopen(MNTTAB, (update? "a": "r"));
   if (!table)
-    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-             "mounted file systems table open erorr: %s: %s",
-             MNTTAB, strerror(errno));
+    logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+               "mounted file systems table open erorr: %s: %s",
+               MNTTAB, strerror(errno));
   return table;
 }
 
@@ -110,8 +110,8 @@ static int
 addMountEntry (FILE *table, MountEntry *entry) {
   errno = ENOSYS;
   if (!putmntent(table, entry)) return 1;
-  LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-           entry->mnt_fstype, entry->mnt_special, entry->mnt_mountp, strerror(errno));
+  logMessage(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
+             entry->mnt_fstype, entry->mnt_special, entry->mnt_mountp, strerror(errno));
   return 0;
 }
 
@@ -209,8 +209,8 @@ updateMountsTable (MountEntry *entry) {
 int
 makeMountPoint (const char *path, const char *reference, const char *type) {
   if (mountFileSystem(path, reference, type)) {
-    LogPrint(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
-             type, reference, path);
+    logMessage(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
+               type, reference, path);
 
     {
       MountEntry *entry = mallocWrapper(sizeof(*entry));
@@ -224,8 +224,8 @@ makeMountPoint (const char *path, const char *reference, const char *type) {
 
     return 1;
   } else {
-    LogPrint(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
-             type, reference, path, strerror(errno));
+    logMessage(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
+               type, reference, path, strerror(errno));
   }
 
   return 0;

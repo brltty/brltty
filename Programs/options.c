@@ -97,14 +97,14 @@ ensureSetting (
         } else if (wordMeansFalse(value)) {
           *option->setting.flag = 0;
         } else if (!(option->flags & OPT_Extend)) {
-          LogPrint(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
+          logMessage(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
           info->errorCount++;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
             *option->setting.flag = count;
           } else {
-            LogPrint(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
+            logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
             info->errorCount++;
           }
         }
@@ -467,12 +467,12 @@ processCommandLine (
       }
 
       case '?':
-        LogPrint(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
+        logMessage(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
         info->errorCount++;
         break;
 
       case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
+        logMessage(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
         info->errorCount++;
         break;
 
@@ -625,17 +625,17 @@ processConfigurationLine (
           const char *operand = strtok(NULL, delimiters);
 
           if (!operand) {
-            LogPrint(LOG_ERR, "%s: %s", gettext("operand not supplied for configuration directive"), line);
+            logMessage(LOG_ERR, "%s: %s", gettext("operand not supplied for configuration directive"), line);
             conf->info->errorCount++;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
-            LogPrint(LOG_ERR, "%s: %s", gettext("too many operands for configuration directive"), line);
+            logMessage(LOG_ERR, "%s: %s", gettext("too many operands for configuration directive"), line);
             conf->info->errorCount++;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-              LogPrint(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
+              logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
               conf->info->errorCount++;
               free(*setting);
               *setting = NULL;
@@ -652,7 +652,7 @@ processConfigurationLine (
         }
       }
     }
-    LogPrint(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), line);
+    logMessage(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), line);
     conf->info->errorCount++;
   }
   return 1;
@@ -690,7 +690,7 @@ processConfigurationFile (
 
     fclose(file);
     if (processed) return 1;
-    LogPrint(LOG_ERR, gettext("file '%s' processing error."), path);
+    logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
     info->errorCount++;
   } else {
     if (optional && (errno == ENOENT)) return 1;

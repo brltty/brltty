@@ -22,7 +22,7 @@
 
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
-  LogPrint(errorLevel, "MIDI device not supported.");
+  logMessage(errorLevel, "MIDI device not supported.");
   return NULL;
 }
 

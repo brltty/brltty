@@ -137,7 +137,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 			/* reading version-info */
 			/* firmware version == [Software Version] / 10.0 */
 			serialReadData (MB_serialDevice, &c, 1, 0, 0);
-			LogPrint (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
+			logMessage (LOG_INFO, "MultiBraille: Version: %2.1f", c/10.0);
 
 			/* read trailing [CR] */
 			serialReadData (MB_serialDevice, &c, 1, 0, 0);
@@ -340,14 +340,14 @@ static struct KeyStroke getbrlkey (void) {
 				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read keynumber */
 				keystroke.key = c;
 				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read trailing [CR] */
-  				/* LogPrint(LOG_NOTICE, "MultiBraille.o: Receiving: Key=%d, Block=%c", keystroke.key, keystroke.block); */
+  				/* logMessage(LOG_NOTICE, "MultiBraille.o: Receiving: Key=%d, Block=%c", keystroke.key, keystroke.block); */
 				return keystroke;
 			default:			/* not supported command --> ignore */
 				c_temp = c;
 				keystroke.block = EOF;	/* invalid / not supported keystroke */
 				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read keynumber */
   				keystroke.key = 0;
-  				/* LogPrint(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c", keystroke.key, c_temp); */
+  				/* logMessage(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c", keystroke.key, c_temp); */
 				return keystroke;
 		}
 	}

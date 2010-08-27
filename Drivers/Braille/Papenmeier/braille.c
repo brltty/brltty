@@ -254,7 +254,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
     if (count == -1) {
       logSystemError("Papenmeier Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;
@@ -298,12 +298,12 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
 static int
 interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
   int modelIndex;
-  LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", id, major, minor);
+  logMessage(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", id, major, minor);
 
   for (modelIndex=0; modelIndex<modelCount; modelIndex++) {
     if (modelTable[modelIndex].modelIdentifier == id) {
       model = &modelTable[modelIndex];
-      LogPrint(LOG_INFO, "%s  Size: %d", model->modelName, model->textColumns);
+      logMessage(LOG_INFO, "%s  Size: %d", model->modelName, model->textColumns);
 
       brl->textColumns = model->textColumns;
       brl->textRows = 1;
@@ -315,7 +315,7 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
     }
   }
 
-  LogPrint(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
+  logMessage(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
   return 0;
 }
 
@@ -380,7 +380,7 @@ static unsigned char switchState1;
 static void
 resetTerminal1 (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {STX, 0X01, ETX};
-  LogPrint(LOG_WARNING, "Resetting terminal.");
+  logMessage(LOG_WARNING, "Resetting terminal.");
   io->flushPort(brl);
   writeBytes(brl, sequence, sizeof(sequence));
 }
@@ -441,9 +441,9 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   rcvStatusLast  = rcvStatusFirst + 3 * (model->statusCount - 1);
   rcvCursorFirst = rcvStatusLast + 3;
   rcvCursorLast  = rcvCursorFirst + 3 * (model->textColumns - 1);
-  LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-           rcvStatusFirst, rcvStatusLast,
-           rcvCursorFirst, rcvCursorLast);
+  logMessage(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
+             rcvStatusFirst, rcvStatusLast,
+             rcvCursorFirst, rcvCursorLast);
 
   /* function key codes: 0X000 -> front -> bar -> switches */
   rcvFrontFirst = RCV_KEYFUNC + 3;
@@ -452,16 +452,16 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   rcvBarLast  = rcvBarFirst + 3 * ((model->hasBar? 8: 0) - 1);
   rcvSwitchFirst = rcvBarLast + 3;
   rcvSwitchLast  = rcvSwitchFirst + 3 * ((model->hasBar? 8: 0) - 1);
-  LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-           rcvFrontFirst, rcvFrontLast,
-           rcvBarFirst, rcvBarLast,
-           rcvSwitchFirst, rcvSwitchLast);
+  logMessage(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
+             rcvFrontFirst, rcvFrontLast,
+             rcvBarFirst, rcvBarLast,
+             rcvSwitchFirst, rcvSwitchLast);
 
   /* cell offsets: 0X00 -> status -> text */
   xmtStatusOffset = 0;
   xmtTextOffset = xmtStatusOffset + model->statusCount;
-  LogPrint(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
-           xmtStatusOffset, xmtTextOffset);
+  logMessage(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
+             xmtStatusOffset, xmtTextOffset);
 
   return 1;
 }
@@ -532,7 +532,7 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
     return enqueueKeyEvent(PM_SET_RoutingKeys1, key, press);
   }
 
-  LogPrint(LOG_WARNING, "unexpected key: %04X", code);
+  logMessage(LOG_WARNING, "unexpected key: %04X", code);
   return 1;
 }
 
@@ -624,7 +624,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         length = (buf[4] << 8) | buf[5];	/* packet size */
 
         if (length != 10) {
-          LogPrint(LOG_WARNING, "Unexpected input packet length: %d", length);
+          logMessage(LOG_WARNING, "Unexpected input packet length: %d", length);
           resetTerminal1(brl);
           return EOF;
         }
@@ -664,7 +664,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       logError:
         READ(2, 1, RBF_ETX);
         logInputPacket(buf, 3);
-        LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
+        logMessage(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
         restartTerminal1(brl);
         break;
       }
@@ -710,10 +710,10 @@ identifyTerminal1 (BrailleDisplay *brl) {
                 return 1;
               }
             } else {
-              LogPrint(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
+              logMessage(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
             }
           } else {
-            LogPrint(LOG_WARNING, "Malformed identification packet.");
+            logMessage(LOG_WARNING, "Malformed identification packet.");
           }
         }
       }
@@ -963,7 +963,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   while (readPacket2(brl, &packet)) {
     switch (packet.type) {
       default:
-        LogPrint(LOG_DEBUG, "Packet ignored: %02X", packet.type);
+        logMessage(LOG_DEBUG, "Packet ignored: %02X", packet.type);
         break;
 
       case 0X0B: {
@@ -1240,7 +1240,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   baud = io->bauds;
   while (*baud) {
-    LogPrint(LOG_DEBUG, "Probing Papenmeier display at %d baud.", *baud);
+    logMessage(LOG_DEBUG, "Probing Papenmeier display at %d baud.", *baud);
     charactersPerSecond = *baud / 10;
 
     if (io->openPort(parameters, device)) {

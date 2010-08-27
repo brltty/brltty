@@ -27,7 +27,7 @@ logDyldError (const char *action) {
   const char *file;
   const char *message;
   NSLinkEditError(&errors, &number, &file, &message);
-  LogPrint(LOG_ERR, "%.*s", (int)(strlen(message)-1), message);
+  logMessage(LOG_ERR, "%.*s", (int)(strlen(message)-1), message);
 }
 
 void *
@@ -38,29 +38,29 @@ loadSharedObject (const char *path) {
       NSModule module = NSLinkModule(image, path, NSLINKMODULE_OPTION_RETURN_ON_ERROR);
       if (module) return module;
       logDyldError("link module");
-      LogPrint(LOG_ERR, "shared object not linked: %s", path);
+      logMessage(LOG_ERR, "shared object not linked: %s", path);
       break;
     }
 
     case NSObjectFileImageInappropriateFile:
-      LogPrint(LOG_ERR, "inappropriate object type: %s", path);
+      logMessage(LOG_ERR, "inappropriate object type: %s", path);
       break;
 
     case NSObjectFileImageArch:
-      LogPrint(LOG_ERR, "incorrect object architecture: %s", path);
+      logMessage(LOG_ERR, "incorrect object architecture: %s", path);
       break;
 
     case NSObjectFileImageFormat:
-      LogPrint(LOG_ERR, "invalid object format: %s", path);
+      logMessage(LOG_ERR, "invalid object format: %s", path);
       break;
 
     case NSObjectFileImageAccess:
-      LogPrint(LOG_ERR, "inaccessible object: %s", path);
+      logMessage(LOG_ERR, "inaccessible object: %s", path);
       break;
 
     case NSObjectFileImageFailure:
     default:
-      LogPrint(LOG_ERR, "shared object not loaded: %s", path);
+      logMessage(LOG_ERR, "shared object not loaded: %s", path);
       break;
   }
   return NULL;

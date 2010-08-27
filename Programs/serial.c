@@ -475,7 +475,7 @@ serialSetBaud (SerialDevice *serial, int baud) {
       return 1;
     }
   } else {
-    LogPrint(LOG_WARNING, "unsupported serial baud: %d", baud);
+    logMessage(LOG_WARNING, "unsupported serial baud: %d", baud);
   }
   return 0;
 }
@@ -492,12 +492,12 @@ serialValidateBaud (int *baud, const char *description, const char *word, const 
         ++choices;
       }
 
-      LogPrint(LOG_ERR, "Unsupported %s: %d", description, *baud);
+      logMessage(LOG_ERR, "Unsupported %s: %d", description, *baud);
       return 0;
     }
   }
 
-  LogPrint(LOG_ERR, "Invalid %s: %d", description, *baud);
+  logMessage(LOG_ERR, "Invalid %s: %d", description, *baud);
   return 0;
 }
 
@@ -526,7 +526,7 @@ serialSetDataBits (SerialDevice *serial, int bits) {
 
     default:
 #endif /* test data bits */
-      LogPrint(LOG_WARNING, "unsupported serial data bit count: %d", bits);
+      logMessage(LOG_WARNING, "unsupported serial data bit count: %d", bits);
       return 0;
   }
 
@@ -562,7 +562,7 @@ serialSetStopBits (SerialDevice *serial, int bits) {
     serial->pendingAttributes.c_cflag |= CSTOPB;
 #endif /* set stop bits */
   } else {
-    LogPrint(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
+    logMessage(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
     return 0;
   }
   return 1;
@@ -644,7 +644,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
   return 1;
 
 unsupportedParity:
-  LogPrint(LOG_WARNING, "unsupported serial parity: %d", parity);
+  logMessage(LOG_WARNING, "unsupported serial parity: %d", parity);
   return 0;
 }
 
@@ -801,7 +801,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
-  LogPrint(LOG_WARNING, "unsupported serial flow control: 0X%02X", flow);
+  logMessage(LOG_WARNING, "unsupported serial flow control: 0X%02X", flow);
   return 0;
 }
 
@@ -815,7 +815,7 @@ serialGetCharacterBits (SerialDevice *serial) {
   if (serial->pendingAttributes.StopBits == TWOSTOPBITS) {
     ++bits;
   } else if (serial->pendingAttributes.StopBits != ONESTOPBIT) {
-    LogPrint(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
+    logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
   }
 #elif defined(__MSDOS__)
   bits += serial->pendingAttributes.bios.fields.bits + 5;
@@ -842,7 +842,7 @@ serialGetCharacterBits (SerialDevice *serial) {
   #endif /* CS8 */
 
       default:
-        LogPrint(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
+        logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
         break;
     }
   }
@@ -860,7 +860,7 @@ serialDiscardInput (SerialDevice *serial) {
   if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
   logWindowsSystemError("PurgeComm");
 #elif defined(__MSDOS__)
-  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
+  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
@@ -876,7 +876,7 @@ serialDiscardOutput (SerialDevice *serial) {
   if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
   logWindowsSystemError("PurgeComm");
 #elif defined(__MSDOS__)
-  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
+  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
@@ -905,7 +905,7 @@ serialDrainOutput (SerialDevice *serial) {
   if (FlushFileBuffers(serial->fileHandle)) return 1;
   logWindowsSystemError("FlushFileBuffers");
 #elif defined(__MSDOS__)
-  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
+  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
   return 1;
 #else /* UNIX */
   do {
@@ -978,7 +978,7 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
     {
       if (attributes->speed.biosBPS <= 7) {
         if (bioscom(0, attributes->bios.byte, serial->port) & 0X0700) {
-          LogPrint(LOG_ERR, "serialWriteAttributes failed");
+          logMessage(LOG_ERR, "serialWriteAttributes failed");
           return 0;
         }
       } else {
@@ -1420,14 +1420,14 @@ serialOpenDevice (const char *path) {
             serial->pending = -1;
 #endif /* __MINGW32__ */
 
-            LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
-                     device,
+            logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
+                       device,
 #ifdef __MINGW32__
-                     (int)serial->fileHandle
+                       (int)serial->fileHandle
 #else /* __MINGW32__ */
-                     serial->fileDescriptor
+                       serial->fileDescriptor
 #endif /* __MINGW32__ */
-                     );
+                       );
             free(device);
             return serial;
           }
@@ -1437,13 +1437,13 @@ serialOpenDevice (const char *path) {
 #else /* __MINGW32__ */
 #ifdef __MSDOS__
         } else {
-          LogPrint(LOG_ERR, "could not determine serial device port number: %s", device);
+          logMessage(LOG_ERR, "could not determine serial device port number: %s", device);
         }
 
         if (truePath) free(truePath);
 #else /* __MSDOS__ */
         } else {
-          LogPrint(LOG_ERR, "not a serial device: %s", device);
+          logMessage(LOG_ERR, "not a serial device: %s", device);
         }
 #endif /* __MSDOS__ */
 
@@ -1452,9 +1452,9 @@ serialOpenDevice (const char *path) {
       } else {
 #ifdef __MINGW32__
         logWindowsSystemError("CreateFile");
-        LogPrint(LOG_ERR, "cannot open serial device: %s", device);
+        logMessage(LOG_ERR, "cannot open serial device: %s", device);
 #else /* __MINGW32__ */
-        LogPrint(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
+        logMessage(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
 #endif /* __MINGW32__ */
       }
 

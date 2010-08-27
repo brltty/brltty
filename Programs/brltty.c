@@ -1067,7 +1067,7 @@ highlightWindow (void) {
 
 static int
 brlttyPrepare_unconstructed (void) {
-  LogPrint(LOG_ERR, "not constructed yet");
+  logMessage(LOG_ERR, "not constructed yet");
   return 0;
 }
 
@@ -1173,17 +1173,17 @@ brlttyCommand (void) {
     }
 
     if (real == command) {
-      LogPrint(LOG_DEBUG, "command: %06X", command);
+      logMessage(LOG_DEBUG, "command: %06X", command);
     } else {
       real |= (command & ~BRL_MSK_CMD);
-      LogPrint(LOG_DEBUG, "command: %06X -> %06X", command, real);
+      logMessage(LOG_DEBUG, "command: %06X -> %06X", command, real);
       command = real;
     }
 
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_OFFLINE:
         if (!isOffline) {
-          LogPrint(LOG_DEBUG, "braille display offline");
+          logMessage(LOG_DEBUG, "braille display offline");
           isOffline = 1;
         }
         return 1;
@@ -1191,7 +1191,7 @@ brlttyCommand (void) {
   }
 
   if (isOffline) {
-    LogPrint(LOG_DEBUG, "braille display online");
+    logMessage(LOG_DEBUG, "braille display online");
     isOffline = 0;
   }
 
@@ -2122,7 +2122,7 @@ doCommand:
 
           default:
             playTune(&tune_command_rejected);
-            LogPrint(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
+            logMessage(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
         }
         break;
       }

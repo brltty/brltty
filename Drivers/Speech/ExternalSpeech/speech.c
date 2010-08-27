@@ -73,7 +73,7 @@ static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
   }
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
-  LogPrint(LOG_ERR, "%s", buf);
+  logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
 }
 static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
@@ -90,7 +90,7 @@ static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
   }
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
-  LogPrint(LOG_ERR, "%s", buf);
+  logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
 }
 
@@ -179,8 +179,8 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
     myperror(spk, "pipe");
     return 0;
   }
-  LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
-	   fd1[0],fd1[1], fd2[0],fd2[1]);
+  logMessage(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
+	     fd1[0],fd1[1], fd2[0],fd2[1]);
   switch(fork()) {
   case -1:
     myperror(spk, "fork");
@@ -199,7 +199,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
     {
       unsigned long uid = getuid();
       unsigned long gid = getgid();
-      LogPrint(LOG_INFO, "ExternalSpeech program uid is %lu, gid is %lu", uid, gid);
+      logMessage(LOG_INFO, "ExternalSpeech program uid is %lu, gid is %lu", uid, gid);
     }
 
     if(dup2(fd2[0], 0) < 0 /* stdin */
@@ -228,8 +228,8 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   };
 #endif /* __MINGW32__ */
 
-  LogPrint(LOG_INFO,"Opened pipe to external speech program '%s'",
-	   extProgPath);
+  logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
+	     extProgPath);
 
   return 1;
 }
@@ -311,10 +311,10 @@ static void spk_doTrack(SpeechSynthesizer *spk)
   while(myread(spk, helper_fd_in, b, 2)) {
     unsigned inx;
     inx = (b[0]<<8 | b[1]);
-    LogPrint(LOG_DEBUG, "spktrk: Received index %u", inx);
+    logMessage(LOG_DEBUG, "spktrk: Received index %u", inx);
     if(inx >= finalIndex) {
       speaking = 0;
-      LogPrint(LOG_DEBUG, "spktrk: Done speaking %d", lastIndex);
+      logMessage(LOG_DEBUG, "spktrk: Done speaking %d", lastIndex);
 	/* do not change last_inx: remain on position of last spoken words,
 	   not after them. */
     }else lastIndex = inx;
@@ -335,7 +335,7 @@ static void spk_mute (SpeechSynthesizer *spk)
 {
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"mute");
+  logMessage(LOG_DEBUG,"mute");
   speaking = 0;
   mywrite(spk, helper_fd_out, &c,1);
 }
@@ -346,7 +346,7 @@ static void spk_rate (SpeechSynthesizer *spk, unsigned char setting)
   unsigned char *p = (unsigned char *)&expand;
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
+  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
   l[0] = 3; /* time scale code */
 #ifdef WORDS_BIGENDIAN
   l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];

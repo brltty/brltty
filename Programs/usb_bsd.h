@@ -331,14 +331,14 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
           static const char *driver = "ugen";
           const char *deviceName = info.udi_devnames[0];
 
-          LogPrint(LOG_DEBUG, "USB device [%d,%d]: vendor=%s product=%s",
-                   busNumber, deviceNumber, info.udi_vendor, info.udi_product);
+          logMessage(LOG_DEBUG, "USB device [%d,%d]: vendor=%s product=%s",
+                     busNumber, deviceNumber, info.udi_vendor, info.udi_product);
           {
             int nameNumber;
             for (nameNumber=0; nameNumber<USB_MAX_DEVNAMES; nameNumber++) {
               const char *name = info.udi_devnames[nameNumber];
               if (*name)
-                LogPrint(LOG_DEBUG, "USB name %d: %s", nameNumber, name);
+                logMessage(LOG_DEBUG, "USB name %d: %s", nameNumber, name);
             }
           }
 

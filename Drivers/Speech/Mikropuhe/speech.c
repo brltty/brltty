@@ -110,15 +110,15 @@ openSoundDevice (void) {
         ++format;
       }
       if (format->internal == PCM_FMT_UNKNOWN) {
-        LogPrint(LOG_WARNING, "No supported sound format.");
+        logMessage(LOG_WARNING, "No supported sound format.");
         closePcmDevice(pcm);
         pcm = NULL;
         return 0;
       }
       speechParameters.nBits = format->external;
     }
-    LogPrint(LOG_DEBUG, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
-             speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
+    logMessage(LOG_DEBUG, "Mikropuhe audio configuration: channels=%d rate=%d bits=%d",
+               speechParameters.nChannels, speechParameters.nSampleFreq, speechParameters.nBits);
   }
   return 1;
 }
@@ -193,7 +193,7 @@ logSynthesisError (int code, const char *action) {
       explanation = "sound device";
       break;
   }
-  LogPrint(LOG_ERR, "Mikropuhe %s error: %s", action, explanation);
+  logMessage(LOG_ERR, "Mikropuhe %s error: %s", action, explanation);
 }
 
 static int
@@ -302,20 +302,20 @@ startSynthesisThread (void) {
         if (!error) {
           return 1;
         } else {
-          LogPrint(LOG_ERR, "Cannot create speech thread: %s", strerror(error));
+          logMessage(LOG_ERR, "Cannot create speech thread: %s", strerror(error));
         }
       } else {
-        LogPrint(LOG_ERR, "Cannot initialize speech thread attributes: %s", strerror(error));
+        logMessage(LOG_ERR, "Cannot initialize speech thread attributes: %s", strerror(error));
       }
 
       pthread_cond_destroy(&speechConditional);
     } else {
-      LogPrint(LOG_ERR, "Cannot initialize speech conditional: %s", strerror(error));
+      logMessage(LOG_ERR, "Cannot initialize speech conditional: %s", strerror(error));
     }
 
     pthread_mutex_destroy(&speechMutex);
   } else {
-    LogPrint(LOG_ERR, "Cannot initialize speech mutex: %s", strerror(error));
+    logMessage(LOG_ERR, "Cannot initialize speech mutex: %s", strerror(error));
   }
   synthesisThreadStarted = 0;
   return 0;
@@ -376,15 +376,15 @@ loadSynthesisLibrary (void) {
         while (symbol->name) {
           void **address = symbol->address;
           if (findSharedSymbol(speechLibrary, symbol->name, address)) {
-            LogPrint(LOG_DEBUG, "Mikropuhe symbol: %s -> %p",
-                     symbol->name, *address);
+            logMessage(LOG_DEBUG, "Mikropuhe symbol: %s -> %p",
+                       symbol->name, *address);
           } else {
-            LogPrint(LOG_ERR, "Mikropuhe symbol not found: %s", symbol->name);
+            logMessage(LOG_ERR, "Mikropuhe symbol not found: %s", symbol->name);
           }
           ++symbol;
         }
       } else {
-        LogPrint(LOG_ERR, "Mikropuhe library not loaded: %s", path);
+        logMessage(LOG_ERR, "Mikropuhe library not loaded: %s", path);
       }
       free(path);
     }
@@ -425,7 +425,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
               snprintf(tag, sizeof(tag), "<pitch absmiddle=\"%d\"/>", setting);
               enqueueTag(tag);
             } else {
-              LogPrint(LOG_WARNING, "%s: %s", "invalid pitch specification", pitch);
+              logMessage(LOG_WARNING, "%s: %s", "invalid pitch specification", pitch);
             }
           }
         }
@@ -436,7 +436,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
       }
     }
   } else {
-    LogPrint(LOG_ERR, "Cannot allocate speech queue.");
+    logMessage(LOG_ERR, "Cannot allocate speech queue.");
   }
 
   spk_destruct(spk);

@@ -271,7 +271,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 {
   if ((gio_fd = open("/dev/iris", O_RDWR)) == -1)
     {
-      LogPrint(LOG_INFO, "Cannot open Iris-GIO device.");
+      logMessage(LOG_INFO, "Cannot open Iris-GIO device.");
       return 0;
     }
   
@@ -280,7 +280,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
   */
   if (ioctl(gio_fd, IOCTL_SETBIT_FIRSTBYTE, IO_D0) == -1)
     {
-      LogPrint(LOG_INFO, "Cannot send ioctl to device.");
+      logMessage(LOG_INFO, "Cannot send ioctl to device.");
       return 0;
     }
 
@@ -290,7 +290,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
   usleep(8500);
   if (ioctl(gio_fd, IOCTL_SETBIT_FIRSTBYTE, 0x00) == -1)
     {
-      LogPrint(LOG_INFO, "Cannot clear device bits.");
+      logMessage(LOG_INFO, "Cannot clear device bits.");
       return 0;
     }
   /*
@@ -366,10 +366,10 @@ static void brl_destruct (BrailleDisplay *brl)
    if (gio_fd == -1)
      return;
    if (ioctl(gio_fd, IOCTL_SETBIT_FIRSTBYTE, IO_D1) == -1)
-     LogPrint(LOG_INFO, "Cannot turn off braille power.");
+     logMessage(LOG_INFO, "Cannot turn off braille power.");
    usleep(8500);
    if (ioctl(gio_fd, IOCTL_SETBIT_FIRSTBYTE, 0x00) == -1)
-     LogPrint(LOG_INFO, "Cannot send ioctl().");
+     logMessage(LOG_INFO, "Cannot send ioctl().");
    close(gio_fd);
    gio_fd = -1;
 }
@@ -854,7 +854,7 @@ static int readbrlkey(BrailleDisplay *brl, char key_context)
 	case 'V':
 	  /* it's an identification string */
 	  memcpy(IdentString, buf + p + 1, 40);
-	  LogPrint(LOG_INFO, "BIOS detected: %s", IdentString);
+	  logMessage(LOG_INFO, "BIOS detected: %s", IdentString);
 	  if (buf[p + 1] == 's' || buf[p + 1] == 'S')
 	    NbCols = 32;
 	  else

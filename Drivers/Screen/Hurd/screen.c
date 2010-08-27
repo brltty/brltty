@@ -72,10 +72,10 @@ currentVt(void) {
 static int
 openDevice (const char *path, const char *description, int flags) {
   int file;
-  LogPrint(LOG_DEBUG, "Opening %s device: %s", description, path);
+  logMessage(LOG_DEBUG, "Opening %s device: %s", description, path);
   if ((file = open(path, flags)) == -1) {
-    LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
-             description, path, strerror(errno));
+    logMessage(LOG_ERR, "Cannot open %s device: %s: %s",
+               description, path, strerror(errno));
   }
   return file;
 }
@@ -89,7 +89,7 @@ closeConsole (void) {
     if (close(consoleDescriptor) == -1) {
       logSystemError("Console close");
     }
-    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
+    logMessage(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
 }
@@ -102,7 +102,7 @@ openConsole (unsigned char vt) {
     if (console != -1) {
       closeConsole();
       consoleDescriptor = console;
-      LogPrint(LOG_DEBUG, "Console opened: %s: fd=%d", path, consoleDescriptor);
+      logMessage(LOG_DEBUG, "Console opened: %s: fd=%d", path, consoleDescriptor);
       free(path);
       return 1;
     }
@@ -129,7 +129,7 @@ closeScreen (void) {
     if (close(screenDescriptor) == -1) {
       logSystemError("Screen close");
     }
-    LogPrint(LOG_DEBUG, "Screen closed: fd=%d mmap=%p", screenDescriptor, screenMap);
+    logMessage(LOG_DEBUG, "Screen closed: fd=%d mmap=%p", screenDescriptor, screenMap);
     screenDescriptor = -1;
     screenMap = NULL;
   }
@@ -150,7 +150,7 @@ openScreen (unsigned char vt) {
             screenDescriptor = screen;
             screenMap = map;
             screenMapSize = st.st_size;
-            LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d map=%p", path, screenDescriptor, screenMap);
+            logMessage(LOG_DEBUG, "Screen opened: %s: fd=%d map=%p", path, screenDescriptor, screenMap);
             free(path);
             return 1;
           }
@@ -351,7 +351,7 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         sequence = WS_C("\x1b[34~");
         break;
       default:
-        LogPrint(LOG_WARNING, "Key %04X not suported in ANSI mode.", key);
+        logMessage(LOG_WARNING, "Key %04X not suported in ANSI mode.", key);
         return 0;
     }
     end = sequence + wcslen(sequence);
@@ -382,14 +382,14 @@ insertUtf8 (wchar_t character) {
 
 static int
 insertKey_HurdScreen (ScreenKey key) {
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
+  logMessage(LOG_DEBUG, "Insert key: %4.4X", key);
   return insertMapped(key, insertUtf8); 
 }
 
 static int
 validateVt (int vt) {
   if ((vt >= 1) && (vt <= 99)) return 1;
-  LogPrint(LOG_DEBUG, "Virtual terminal %d is out of range.", vt);
+  logMessage(LOG_DEBUG, "Virtual terminal %d is out of range.", vt);
   return 0;
 }
 
@@ -406,7 +406,7 @@ switchVirtualTerminal_HurdScreen (int vt) {
     char link[]=HURD_VCSDIR "/00";
     snprintf(link, sizeof(link), HURD_VCSDIR "/%u", vt);
     if (symlink(link, HURD_CURVCSPATH) != -1) {
-      LogPrint(LOG_DEBUG, "Switched to virtual terminal %d.", vt);
+      logMessage(LOG_DEBUG, "Switched to virtual terminal %d.", vt);
       return 1;
     } else {
       logSystemError("symlinking to switch vt");

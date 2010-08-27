@@ -239,14 +239,14 @@ processParameters_AtSpi2Screen (char **parameters) {
         if (validateChoice(&choice, type, choices)) {
           int *flag = flags[choice];
           if ((flag == &typeAll) && (index > 0)) {
-            LogPrint(LOG_WARNING, "widget type is mutually exclusive: %s", type);
+            logMessage(LOG_WARNING, "widget type is mutually exclusive: %s", type);
           } else if (*flag || typeAll) {
-            LogPrint(LOG_WARNING, "widget type specified more than once: %s", type);
+            logMessage(LOG_WARNING, "widget type specified more than once: %s", type);
           } else {
             *flag = 1;
           }
         } else {
-          LogPrint(LOG_WARNING, "%s: %s", "invalid widget type", type);
+          logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
         }
       }
     }
@@ -288,7 +288,7 @@ static void caretPosition(long caret) {
 }
 
 static void finiTerm(void) {
-  LogPrint(LOG_DEBUG,"end of term %s:%s",curSender,curPath);
+  logMessage(LOG_DEBUG,"end of term %s:%s",curSender,curPath);
   free(curSender);
   curSender = NULL;
   free(curPath);
@@ -310,12 +310,12 @@ static char *getRole(const char *sender, const char *path) {
   dbus_error_init(&error);
   msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetRoleName");
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while making getrole message: %s %s", error.name, error.message);
+    logMessage(LOG_DEBUG, "error while making getrole message: %s %s", error.name, error.message);
     dbus_error_free(&error);
     return NULL;
   }
   if (!msg) {
-    LogPrint(LOG_DEBUG, "no memory while getting role");
+    logMessage(LOG_DEBUG, "no memory while getting role");
     return NULL;
   }
 
@@ -323,21 +323,21 @@ static char *getRole(const char *sender, const char *path) {
   /* 1s max delay */
   reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while getting role for %s:%s: %s %s", sender, path, error.name, error.message);
+    logMessage(LOG_DEBUG, "error while getting role for %s:%s: %s %s", sender, path, error.name, error.message);
     dbus_error_free(&error);
     goto outMsg;
   }
   if (!reply) {
-    LogPrint(LOG_DEBUG, "timeout while getting role");
+    logMessage(LOG_DEBUG, "timeout while getting role");
     goto outMsg;
   }
   if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    LogPrint(LOG_DEBUG, "error while getting role");
+    logMessage(LOG_DEBUG, "error while getting role");
     goto out;
   }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    LogPrint(LOG_DEBUG, "GetRoleName didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "GetRoleName didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_get_basic(&iter, &text);
@@ -363,12 +363,12 @@ static char *getText(const char *sender, const char *path) {
   dbus_error_init(&error);
   msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_TEXT, "GetText");
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while making gettext message: %s %s", error.name, error.message);
+    logMessage(LOG_DEBUG, "error while making gettext message: %s %s", error.name, error.message);
     dbus_error_free(&error);
     return NULL;
   }
   if (!msg) {
-    LogPrint(LOG_DEBUG, "no memory while getting text");
+    logMessage(LOG_DEBUG, "no memory while getting text");
     return NULL;
   }
   dbus_message_append_args(msg, DBUS_TYPE_INT32, &begin, DBUS_TYPE_INT32, &end, DBUS_TYPE_INVALID);
@@ -377,21 +377,21 @@ static char *getText(const char *sender, const char *path) {
   /* 1s max delay */
   reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while getting text for %s:%s: %s %s", sender, path, error.name, error.message);
+    logMessage(LOG_DEBUG, "error while getting text for %s:%s: %s %s", sender, path, error.name, error.message);
     dbus_error_free(&error);
     goto outMsg;
   }
   if (!reply) {
-    LogPrint(LOG_DEBUG, "timeout while getting text");
+    logMessage(LOG_DEBUG, "timeout while getting text");
     goto outMsg;
   }
   if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    LogPrint(LOG_DEBUG, "error while getting text");
+    logMessage(LOG_DEBUG, "error while getting text");
     goto out;
   }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    LogPrint(LOG_DEBUG, "GetText didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "GetText didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_get_basic(&iter, &text);
@@ -416,12 +416,12 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
   dbus_error_init(&error);
   msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_PROP, "Get");
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while making caret message: %s %s", error.name, error.message);
+    logMessage(LOG_DEBUG, "error while making caret message: %s %s", error.name, error.message);
     dbus_error_free(&error);
     return -1;
   }
   if (!msg) {
-    LogPrint(LOG_DEBUG, "no memory while making caret message");
+    logMessage(LOG_DEBUG, "no memory while making caret message");
     return -1;
   }
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
@@ -430,30 +430,30 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
   /* 1s max delay */
   reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while getting caret: %s %s", error.name, error.message);
+    logMessage(LOG_DEBUG, "error while getting caret: %s %s", error.name, error.message);
     dbus_error_free(&error);
     goto outMsg;
   }
   if (!reply) {
-    LogPrint(LOG_DEBUG, "timeout while getting caret");
+    logMessage(LOG_DEBUG, "timeout while getting caret");
     goto outMsg;
   }
   if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    LogPrint(LOG_DEBUG, "error while getting caret");
+    logMessage(LOG_DEBUG, "error while getting caret");
     goto out;
   }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
-    LogPrint(LOG_DEBUG, "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_recurse(&iter, &iter_variant);
   if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_INT32) {
-    LogPrint(LOG_DEBUG, "getText didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+    logMessage(LOG_DEBUG, "getText didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
     goto out;
   }
   dbus_message_iter_get_basic(&iter_variant, &res);
-  LogPrint(LOG_DEBUG,"Got caret %d", res);
+  logMessage(LOG_DEBUG,"Got caret %d", res);
 
 out:
   dbus_message_unref(reply);
@@ -478,7 +478,7 @@ static void restartTerm(const char *sender, const char *path) {
 
   curSender = strdup(sender);
   curPath = strdup(path);
-  LogPrint(LOG_DEBUG,"new term %s:%s with text %s",curSender,curPath, text);
+  logMessage(LOG_DEBUG,"new term %s:%s with text %s",curSender,curPath, text);
 
   if (curRows) {
     for (i=0;i<curNumRows;i++)
@@ -494,7 +494,7 @@ static void restartTerm(const char *sender, const char *path) {
       break;
     c++;
   }
-  LogPrint(LOG_DEBUG,"%ld rows",curNumRows);
+  logMessage(LOG_DEBUG,"%ld rows",curNumRows);
   curRows = malloc(curNumRows * sizeof(*curRows));
   curRowLengths = malloc(curNumRows * sizeof(*curRowLengths));
   i = 0;
@@ -509,7 +509,7 @@ static void restartTerm(const char *sender, const char *path) {
       curNumCols = len;
     else if (len < 0) {
       if (len==-2)
-	LogPrint(LOG_ERR,"unterminated sequence %s",c);
+	logMessage(LOG_ERR,"unterminated sequence %s",c);
       else if (len==-1)
 	logSystemError("mbrlen");
       curRowLengths[i] = (len = -1) + (d != NULL);
@@ -523,7 +523,7 @@ static void restartTerm(const char *sender, const char *path) {
       break;
     i++;
   }
-  LogPrint(LOG_DEBUG,"%ld cols",curNumCols);
+  logMessage(LOG_DEBUG,"%ld cols",curNumCols);
   caretPosition(getCaret(sender, path));
   free(text);
 }
@@ -547,32 +547,32 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
   }
 
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    LogPrint(LOG_DEBUG, "message detail not a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "message detail not a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INT32) {
-    LogPrint(LOG_DEBUG, "message detail1 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "message detail1 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail1);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INT32) {
-    LogPrint(LOG_DEBUG, "message detail2 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "message detail2 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail2);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
-    LogPrint(LOG_DEBUG, "message detail2 not a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_DEBUG, "message detail2 not a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_recurse(&iter, &iter_variant);
-  //LogPrint(LOG_DEBUG, "event %s %s %s %s %s %d %d", interface, member, sender, path, detail, detail1, detail2);
+  //logMessage(LOG_DEBUG, "event %s %s %s %s %s %d %d", interface, member, sender, path, detail, detail1, detail2);
 
   StateChanged_focused =
        !strcmp(interface, "Object")
@@ -584,7 +584,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       finiTerm();
   } else if (!strcmp(interface,"Focus") || (StateChanged_focused && detail1)) {
     char *role = getRole(sender, path);
-    LogPrint(LOG_DEBUG, "state changed focused to role %s", role);
+    logMessage(LOG_DEBUG, "state changed focused to role %s", role);
     if (typeAll || (typeText && !strcmp(role, "text")) || (typeTerminal && !strcmp(role, "terminal"))) {
       restartTerm(sender, path);
     } else {
@@ -594,13 +594,13 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     free(role);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextCaretMoved")) {
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
-    LogPrint(LOG_DEBUG, "caret move to %d", detail1);
+    logMessage(LOG_DEBUG, "caret move to %d", detail1);
     caretPosition(detail1);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextChanged") && !strcmp(detail, "delete")) {
     long x,y,toDelete = detail2;
     long length = 0, toCopy;
     long downTo; /* line that will provide what will follow x */
-    LogPrint(LOG_DEBUG,"delete %d from %d",detail2,detail1);
+    logMessage(LOG_DEBUG,"delete %d from %d",detail2,detail1);
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
     findPosition(detail1,&x,&y);
     downTo = y;
@@ -613,7 +613,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       else {
 	/* imaginary extra line doesn't provide more length, and shouldn't need to ! */
 	if (x+toDelete > length) {
-	  LogPrint(LOG_ERR,"deleting past end of text !");
+	  logMessage(LOG_ERR,"deleting past end of text !");
 	  /* discarding */
 	  toDelete = length - x;
 	}
@@ -645,11 +645,11 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     long len=detail2,semilen,x,y;
     const char *added;
     const char *adding,*c;
-    LogPrint(LOG_DEBUG,"insert %d from %d",detail2,detail1);
+    logMessage(LOG_DEBUG,"insert %d from %d",detail2,detail1);
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
     findPosition(detail1,&x,&y);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
-      LogPrint(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+      logMessage(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
       return;
     }
     dbus_message_iter_get_basic(&iter_variant, &added);
@@ -705,7 +705,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     }
     caretPosition(curCaret);
   } else {
-      //LogPrint(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
+      //logMessage(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
   }
 }
 
@@ -718,9 +718,9 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
     if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT".")))
       AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
     else
-      LogPrint(LOG_DEBUG, "unknown signal %s %s", interface, member);
+      logMessage(LOG_DEBUG, "unknown signal %s %s", interface, member);
   } else
-    LogPrint(LOG_DEBUG, "unknown message %d %s %s", type, interface, member);
+    logMessage(LOG_DEBUG, "unknown message %d %s %s", type, interface, member);
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
@@ -736,12 +736,12 @@ static void *doAtSpi2ScreenOpen(void *arg) {
   /* TODO: try to use the accessibility bus */
   bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
+    logMessage(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
     dbus_error_free(&error);
     goto out;
   }
   if (!bus) {
-    LogPrint(LOG_ERR, "Can't get dbus session bus.");
+    logMessage(LOG_ERR, "Can't get dbus session bus.");
     goto out;
   }
   if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) {
@@ -751,7 +751,7 @@ static void *doAtSpi2ScreenOpen(void *arg) {
   dbus_error_init(&error); \
   dbus_bus_add_match(bus, str, &error); \
   if (dbus_error_is_set(&error)) { \
-    LogPrint(LOG_ERR, "error while adding watch %s: %s %s", str, error.name, error.message); \
+    logMessage(LOG_ERR, "error while adding watch %s: %s %s", str, error.name, error.message); \
     dbus_error_free(&error); \
     goto out; \
   }
@@ -786,7 +786,7 @@ construct_AtSpi2Screen (void) {
   sem_init(&SPI2_init_sem,0,0);
   finished = 0;
   if (pthread_create(&SPI2_main_thread,NULL,doAtSpi2ScreenOpen,(void *)&SPI2_init_sem)) {
-    LogPrint(LOG_ERR,"main SPI2 thread failed to be launched");
+    logMessage(LOG_ERR,"main SPI2 thread failed to be launched");
     return 0;
   }
   do {
@@ -796,7 +796,7 @@ construct_AtSpi2Screen (void) {
     logSystemError("SPI2 initialization wait failed");
     return 0;
   }
-  LogPrint(LOG_DEBUG,"SPI2 initialized");
+  logMessage(LOG_DEBUG,"SPI2 initialized");
   return 1;
 }
 
@@ -804,7 +804,7 @@ static void
 destruct_AtSpi2Screen (void) {
   finished = 1;
   pthread_join(SPI2_main_thread,NULL);
-  LogPrint(LOG_DEBUG,"SPI2 stopped");
+  logMessage(LOG_DEBUG,"SPI2 stopped");
 }
 
 static int
@@ -884,7 +884,7 @@ AtSpi2GenerateKeyboardEvent (dbus_uint32_t keysym, enum key_type_e key_type)
 
   msg = dbus_message_new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_DEC, SPI2_DBUS_INTERFACE_DEC, "GenerateKeyboardEvent");
   if (!msg) {
-    LogPrint(LOG_DEBUG, "no memory while getting text");
+    logMessage(LOG_DEBUG, "no memory while getting text");
     return 0;
   }
   dbus_message_append_args(msg, DBUS_TYPE_INT32, &keysym, DBUS_TYPE_STRING, &s, DBUS_TYPE_INT32, &key_type, DBUS_TYPE_INVALID);
@@ -893,11 +893,11 @@ AtSpi2GenerateKeyboardEvent (dbus_uint32_t keysym, enum key_type_e key_type)
   /* 1s max delay */
   reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
   if (dbus_error_is_set(&error)) {
-    LogPrint(LOG_DEBUG, "error while generating keyboard event: %s %s", error.name, error.message);
+    logMessage(LOG_DEBUG, "error while generating keyboard event: %s %s", error.name, error.message);
     goto outMsg;
   }
   if (!reply) {
-    LogPrint(LOG_DEBUG, "timeout while generating keyboard event");
+    logMessage(LOG_DEBUG, "timeout while generating keyboard event");
     goto outMsg;
   }
   res = 1;
@@ -969,7 +969,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
 #else /* HAVE_X11_KEYSYM_H */
 #warning insertion of non-character key presses not supported by this build - check that X11 protocol headers have been installed
 #endif /* HAVE_X11_KEYSYM_H */
-      default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
+      default: logMessage(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
   } else {
     wchar_t wc;
@@ -990,11 +990,11 @@ insertKey_AtSpi2Screen (ScreenKey key) {
     else
       keysym = 0x1000000 | wc;
   }
-  LogPrint(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
-           key,
-           (modMeta? "meta ": ""),
-           (modControl? "control ": ""),
-           keysym);
+  logMessage(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
+             key,
+             (modMeta? "meta ": ""),
+             (modControl? "control ": ""),
+             keysym);
 
   {
     int ok = 0;
@@ -1007,24 +1007,24 @@ insertKey_AtSpi2Screen (ScreenKey key) {
         if (AtSpi2GenerateKeyboardEvent(keysym,SYM)) {
           ok = 1;
         } else {
-          LogPrint(LOG_WARNING, "key insertion failed.");
+          logMessage(LOG_WARNING, "key insertion failed.");
         }
 
 #ifdef HAVE_X11_KEYSYM_H
         if (modControl && !AtSpi2GenerateKeyboardEvent(XK_Control_L,RELEASE)) {
-          LogPrint(LOG_WARNING, "control release failed.");
+          logMessage(LOG_WARNING, "control release failed.");
           ok = 0;
         }
       } else {
-        LogPrint(LOG_WARNING, "control press failed.");
+        logMessage(LOG_WARNING, "control press failed.");
       }
 
       if (modMeta && !AtSpi2GenerateKeyboardEvent(XK_Meta_L,RELEASE)) {
-        LogPrint(LOG_WARNING, "meta release failed.");
+        logMessage(LOG_WARNING, "meta release failed.");
         ok = 0;
       }
     } else {
-      LogPrint(LOG_WARNING, "meta press failed.");
+      logMessage(LOG_WARNING, "meta press failed.");
     }
 #endif /* HAVE_X11_KEYSYM_H */
 

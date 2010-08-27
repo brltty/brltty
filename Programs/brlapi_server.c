@@ -107,13 +107,13 @@ static size_t stackSize;
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \
-  LogPrint(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
-  LogPrint(LOG_ERR, __VA_ARGS__); \
+  logMessage(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
+  logMessage(LOG_ERR, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
 #define WEXC(x, y, type, packet, size, ...) do { \
-  LogPrint(LOG_ERR, "writing exception %d to %"PRIfd, y, x); \
-  LogPrint(LOG_ERR, __VA_ARGS__); \
+  logMessage(LOG_ERR, "writing exception %d to %"PRIfd, y, x); \
+  logMessage(LOG_ERR, __VA_ARGS__); \
   writeException(x, y, type, packet, size); \
 } while(0)
 
@@ -334,7 +334,7 @@ static int isKeyCapable(const BrailleDriver *brl)
 /* Close driver */
 static void suspendDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return; /* core unlinked api */
-  LogPrint(LOG_DEBUG,"driver suspended");
+  logMessage(LOG_DEBUG,"driver suspended");
   pthread_mutex_lock(&suspendMutex);
   driverConstructed = 0;
   destructBrailleDriver();
@@ -348,7 +348,7 @@ static int resumeDriver(BrailleDisplay *brl) {
   pthread_mutex_lock(&suspendMutex);
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
-    LogPrint(LOG_DEBUG,"driver resumed");
+    logMessage(LOG_DEBUG,"driver resumed");
     brlResize(brl);
   }
   pthread_mutex_unlock(&suspendMutex);
@@ -371,7 +371,7 @@ static inline void writeAck(FileDescriptor fd)
 static void writeError(FileDescriptor fd, unsigned int err)
 {
   uint32_t code = htonl(err);
-  LogPrint(LOG_DEBUG,"error %u on fd %"PRIfd, err, fd);
+  logMessage(LOG_DEBUG,"error %u on fd %"PRIfd, err, fd);
   brlapiserver_writePacket(fd,BRLAPI_PACKET_ERROR,&code,sizeof(code));
 }
 
@@ -382,7 +382,7 @@ static void writeException(FileDescriptor fd, unsigned int err, brlapi_packetTyp
   int hdrsize, esize;
   brlapi_packet_t epacket;
   brlapi_errorPacket_t * errorPacket = &epacket.error;
-  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIfd, err, (unsigned long)type, fd);
+  logMessage(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIfd, err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
   errorPacket->type = htonl(type);
@@ -395,7 +395,7 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
   uint32_t buf[2];
   buf[0] = htonl(key >> 32);
   buf[1] = htonl(key & 0xffffffff);
-  LogPrint(LOG_DEBUG,"writing key %08"PRIx32" %08"PRIx32,buf[0],buf[1]);
+  logMessage(LOG_DEBUG,"writing key %08"PRIx32" %08"PRIx32,buf[0],buf[1]);
   brlapiserver_writePacket(fd,BRLAPI_PACKET_KEY,&buf,sizeof(buf));
 }
 
@@ -592,7 +592,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 static void handleResize(BrailleDisplay *brl)
 {
   /* TODO: handle resize */
-  LogPrint(LOG_INFO,"BrlAPI resize");
+  logMessage(LOG_INFO,"BrlAPI resize");
 }
 
 /****************************************************************************/
@@ -735,17 +735,17 @@ static inline void freeTty(Tty *tty)
 /** COMMUNICATION PROTOCOL HANDLING                                        **/
 /****************************************************************************/
 
-/* Function LogPrintRequest */
+/* Function logMessageRequest */
 /* Logs the given request */
-static inline void LogPrintRequest(int type, FileDescriptor fd)
+static inline void logMessageRequest(int type, FileDescriptor fd)
 {
-  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIfd, brlapiserver_getPacketTypeName(type), fd);  
+  logMessage(LOG_DEBUG, "Received %s request on fd %"PRIfd, brlapiserver_getPacketTypeName(type), fd);  
 }
 
 static int handleGetDriver(Connection *c, brlapi_packetType_t type, size_t size, const char *str)
 {
   int len = strlen(str);
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd, type, str, len+1);
@@ -759,7 +759,7 @@ static int handleGetDriverName(Connection *c, brlapi_packetType_t type, brlapi_p
 
 static int handleGetDisplaySize(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd,BRLAPI_PACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
@@ -777,7 +777,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   Tty *tty,*tty2,*tty3;
   uint32_t *ptty;
   size_t remaining = size;
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR((!c->raw),BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small");
   p += sizeof(uint32_t); remaining -= sizeof(uint32_t);
@@ -796,7 +796,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   }
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
   if ((initializeAcceptedKeys(c, how)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
-    LogPrint(LOG_WARNING,"Failed to allocate some ressources");
+    logMessage(LOG_WARNING,"Failed to allocate some ressources");
     freeKeyrangeList(&c->acceptedKeys);
     WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for accepted keys");
     return 0;
@@ -807,7 +807,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next);
       if (!tty2) break;
   	tty = tty2;
-  	LogPrint(LOG_DEBUG,"tty %#010lx ok",(unsigned long)ntohl(*ptty));
+  	logMessage(LOG_DEBUG,"tty %#010lx ok",(unsigned long)ntohl(*ptty));
   }
   if (!tty2) {
     /* we were stopped at some point because the path doesn't exist yet */
@@ -828,7 +828,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
       return 0;
     }
     ptty++;
-    LogPrint(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*(ptty-1)));
+    logMessage(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*(ptty-1)));
     for (; ptty<=ints+nbTtys; ptty++) {
       if (!(tty2 = newTty(tty2,ntohl(*ptty)))) {
         /* gasp, couldn't allocate :/, clean tree */
@@ -841,7 +841,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
         freeBrailleWindow(&c->brailleWindow);
   	return 0;
       }
-      LogPrint(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*ptty));
+      logMessage(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*ptty));
     }
     tty = tty2;
   }
@@ -871,7 +871,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   __addConnection(c,tty->connections);
   pthread_mutex_unlock(&connectionsMutex);
   writeAck(c->fd);
-  LogPrint(LOG_DEBUG,"Taking control of tty %#010x (how=%d)",tty->number,how);
+  logMessage(LOG_DEBUG,"Taking control of tty %#010x (how=%d)",tty->number,how);
   return 0;
 }
 
@@ -881,7 +881,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
   CHECKEXC(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   c->tty->focus = ntohl(ints[0]);
-  LogPrint(LOG_DEBUG,"Focus on window %#010x",c->tty->focus);
+  logMessage(LOG_DEBUG,"Focus on window %#010x",c->tty->focus);
   return 0;
 }
 
@@ -890,7 +890,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
 static void doLeaveTty(Connection *c)
 {
   Tty *tty = c->tty;
-  LogPrint(LOG_DEBUG,"Releasing tty %#010x",tty->number);
+  logMessage(LOG_DEBUG,"Releasing tty %#010x",tty->number);
   c->tty = NULL;
   pthread_mutex_lock(&connectionsMutex);
   __removeConnection(c);
@@ -902,7 +902,7 @@ static void doLeaveTty(Connection *c)
 
 static int handleLeaveTtyMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   doLeaveTty(c);
@@ -916,7 +916,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   brlapi_keyCode_t x,y;
   uint32_t (*ints)[4] = (uint32_t (*)[4]) packet;
   unsigned int i;
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
@@ -924,7 +924,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
     x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
     y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
-    LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
+    logMessage(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
     if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->acceptedKeys);
     else res = addKeyrange(x,y,&c->acceptedKeys);
     if (res==-1) {
@@ -950,7 +950,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   char *charset = NULL, *coreCharset = NULL;
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
@@ -971,7 +971,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
       BRLAPI_ERROR_INVALID_PARAMETER, "wrong region");
   } else {
-    LogPrint(LOG_DEBUG,"Warning: Client uses deprecated regionBegin=0 and regionSize = 0");
+    logMessage(LOG_DEBUG,"Warning: Client uses deprecated regionBegin=0 and regionSize = 0");
     rbeg = 1;
     rsiz = displaySize;
   }
@@ -1030,7 +1030,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
-      LogPrint(LOG_DEBUG,"charset %s", charset);
+      logMessage(LOG_DEBUG,"charset %s", charset);
       CHECKEXC((conv = iconv_open(getWcharCharset(),charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
@@ -1076,7 +1076,7 @@ static int checkDriverSpecificModePacket(Connection *c, brlapi_packet_t *packet,
 
 static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw, BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(isRawCapable(trueBraille), BRLAPI_ERROR_OPNOTSUPP, "driver doesn't support Raw mode");
@@ -1103,9 +1103,9 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
-  LogPrint(LOG_DEBUG,"Going out of raw mode");
+  logMessage(LOG_DEBUG,"Going out of raw mode");
   pthread_mutex_lock(&rawMutex);
   c->raw = 0;
   rawConnection = NULL;
@@ -1116,7 +1116,7 @@ static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 static int handlePacket(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKEXC(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   pthread_mutex_lock(&driverMutex);
   trueBraille->writePacket(disp,&packet->data,size);
@@ -1126,7 +1126,7 @@ static int handlePacket(Connection *c, brlapi_packetType_t type, brlapi_packet_t
 
 static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(!c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed in suspend mode");
   pthread_mutex_lock(&rawMutex);
@@ -1147,7 +1147,7 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
 
 static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  LogPrintRequest(type, c->fd);
+  logMessageRequest(type, c->fd);
   CHECKERR(c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
   pthread_mutex_lock(&rawMutex);
   c->suspend = 0;
@@ -1240,24 +1240,24 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 	case BRLAPI_AUTH_KEY:
 	  if (isAbsolutePath(auth)) {
 	    if (brlapiserver_loadAuthKey(auth,&authKeyLength,&authKey)==-1) {
-	      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
+	      logMessage(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
 	      break;
 	    }
-	    LogPrint(LOG_DEBUG, "Authorization key loaded");
+	    logMessage(LOG_DEBUG, "Authorization key loaded");
 	    authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, &authKey, authKeyLength));
 	    memset(&authKey, 0, authKeyLength);
 	    memset(&authPacket->key, 0, authKeyLength);
 	  }
 	  break;
 	default:
-	  LogPrint(LOG_DEBUG, "Unsupported authorization method %"PRId32, authType);
+	  logMessage(LOG_DEBUG, "Unsupported authorization method %"PRId32, authType);
 	  break;
       }
     }
 
     if (!authCorrect) {
       writeError(c->fd, BRLAPI_ERROR_AUTHENTICATION);
-      LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIfd" failed authorization", c->fd);
+      logMessage(LOG_WARNING, "BrlAPI connection fd=%"PRIfd" failed authorization", c->fd);
       return 0;
     }
 
@@ -1282,20 +1282,20 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
-    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);
+    if (res==-1) logMessage(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);
     else {
-      LogPrint(LOG_DEBUG,"Closing connection on fd %"PRIfd,c->fd);
+      logMessage(LOG_DEBUG,"Closing connection on fd %"PRIfd,c->fd);
     }
     if (c->raw) {
       pthread_mutex_lock(&rawMutex);
       c->raw = 0;
       rawConnection = NULL;
-      LogPrint(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
+      logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
-      LogPrint(LOG_WARNING,"Trying to reset braille terminal");
+      logMessage(LOG_WARNING,"Trying to reset braille terminal");
       if (!trueBraille->reset || !trueBraille->reset(disp)) {
 	if (trueBraille->reset)
-          LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
+          logMessage(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
       }
       pthread_mutex_unlock(&driverMutex);
@@ -1304,20 +1304,20 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       pthread_mutex_lock(&rawMutex);
       c->suspend = 0;
       suspendConnection = NULL;
-      LogPrint(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
+      logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
       if (!driverConstructed && !resumeDriver(disp))
-	LogPrint(LOG_WARNING,"Couldn't resume braille driver");
+	logMessage(LOG_WARNING,"Couldn't resume braille driver");
       if (driverConstructed && trueBraille->reset) {
-        LogPrint(LOG_DEBUG,"Trying to reset braille terminal");
+        logMessage(LOG_DEBUG,"Trying to reset braille terminal");
 	if (!trueBraille->reset(disp))
-	  LogPrint(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
+	  logMessage(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
       }
       pthread_mutex_unlock(&driverMutex);
       pthread_mutex_unlock(&rawMutex);
     }
     if (c->tty) {
-      LogPrint(LOG_DEBUG,"Client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
+      logMessage(LOG_DEBUG,"Client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
     return 1;
@@ -1328,7 +1328,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   if (c->auth!=1) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
-    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIfd,brlapiserver_getPacketTypeName(type), c->fd);
+    logMessage(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIfd,brlapiserver_getPacketTypeName(type), c->fd);
     return 0;    
   }
   switch (type) {
@@ -1413,7 +1413,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 
   err = getaddrinfo(info->host, info->port, &hints, &res);
   if (err) {
-    LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
+    logMessage(LOG_WARNING,"getaddrinfo(%s,%s): "
 #ifdef HAVE_GAI_STRERROR
 	"%s"
 #else /* HAVE_GAI_STRERROR */
@@ -1439,7 +1439,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 #ifdef EAFNOSUPPORT
       if (errno != EAFNOSUPPORT)
 #endif /* EAFNOSUPPORT */
-        LogPrint(LOG_WARNING,"socket: %s",strerror(errno));
+        logMessage(LOG_WARNING,"socket: %s",strerror(errno));
       continue;
     }
     /* Specifies that address can be reused */
@@ -1473,13 +1473,13 @@ cont:
       closeSocketDescriptor(fd);
       return INVALID_FILE_DESCRIPTOR;
     }
-    LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+    logMessage(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
     WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* __MINGW32__ */
 
     return (FileDescriptor)fd;
   }
-  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
+  logMessage(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
 #endif /* HAVE_GETADDRINFO */
 #ifdef __MINGW32__
   } else {
@@ -1500,7 +1500,7 @@ cont:
       struct servent *se;
 
       if (!(se = getservbyname(info->port,"tcp"))) {
-        LogPrint(LOG_ERR,"port %s: "
+        logMessage(LOG_ERR,"port %s: "
 #ifdef __MINGW32__
 	  "%d"
 #else /* __MINGW32__ */
@@ -1523,7 +1523,7 @@ cont:
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   } else if ((addr.sin_addr.s_addr = inet_addr(info->host)) == htonl(INADDR_NONE)) {
     if (!(he = gethostbyname(info->host))) {
-      LogPrint(LOG_ERR,"gethostbyname(%s): "
+      logMessage(LOG_ERR,"gethostbyname(%s): "
 #ifdef __MINGW32__
 	"%d"
 #else /* __MINGW32__ */
@@ -1544,12 +1544,12 @@ cont:
 #else /* EAFNOSUPPORT */
       errno = EINVAL;
 #endif /* EAFNOSUPPORT */
-      LogPrint(LOG_ERR,"unknown address type %d",he->h_addrtype);
+      logMessage(LOG_ERR,"unknown address type %d",he->h_addrtype);
       return INVALID_FILE_DESCRIPTOR;
     }
     if (he->h_length > sizeof(addr.sin_addr)) {
       errno = EINVAL;
-      LogPrint(LOG_ERR,"too big address: %d",he->h_length);
+      logMessage(LOG_ERR,"too big address: %d",he->h_length);
       return INVALID_FILE_DESCRIPTOR;
     }
     memcpy(&addr.sin_addr,he->h_addr,he->h_length);
@@ -1566,7 +1566,7 @@ cont:
   }
 #if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
   if (setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes))!=0)
-    LogPrint(LOG_WARNING, "setsockopt(NODELAY): %s", strerror(errno));
+    logMessage(LOG_WARNING, "setsockopt(NODELAY): %s", strerror(errno));
 #endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
   if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
     fun = "bind";
@@ -1587,7 +1587,7 @@ cont:
     closeSocketDescriptor(fd);
     return INVALID_FILE_DESCRIPTOR;
   }
-  LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+  logMessage(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* __MINGW32__ */
 
@@ -1649,20 +1649,20 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
       logWindowsSystemError("CreateNamedPipe");
     goto out;
   }
-  LogPrint(LOG_DEBUG,"CreateFile -> %"PRIfd,fd);
+  logMessage(LOG_DEBUG,"CreateFile -> %"PRIfd,fd);
   if (!info->overl.hEvent) {
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       logWindowsSystemError("CreateEvent");
       goto outfd;
     }
-    LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+    logMessage(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   }
   if (!(ResetEvent(info->overl.hEvent))) {
     logWindowsSystemError("ResetEvent");
     goto outfd;
   }
   if (ConnectNamedPipe(fd, &info->overl)) {
-    LogPrint(LOG_DEBUG,"already connected !");
+    logMessage(LOG_DEBUG,"already connected !");
     return fd;
   }
 
@@ -1688,7 +1688,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   }
   sa.sun_family = AF_LOCAL;
   if (lpath+lport+1>sizeof(sa.sun_path)) {
-    LogPrint(LOG_ERR, "Unix path too long");
+    logMessage(LOG_ERR, "Unix path too long");
     goto outfd;
   }
 
@@ -1724,7 +1724,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     }
     if ((pid = readPid(tmppath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
+      logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
       goto outmode;
     }
     /* bogus file, myself or non-existent process, remove */
@@ -1754,7 +1754,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
 
   while(1) {
     if (link(tmppath, lockpath))
-      LogPrint(LOG_DEBUG,"linking local socket lock: %s", strerror(errno));
+      logMessage(LOG_DEBUG,"linking local socket lock: %s", strerror(errno));
       /* but no action: link() might erroneously return errors, see manpage */
     if (fstat(lock, &st)) {
       logSystemError("checking local socket lock");
@@ -1766,7 +1766,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     /* failed to link */
     if ((pid = readPid(lockpath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
+      logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
       goto outtmp;
     }
     /* bogus file, myself or non-existent process, remove */
@@ -1783,7 +1783,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     goto outtmp;
   }
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-    LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
+    logMessage(LOG_WARNING,"bind: %s",strerror(errno));
     goto outlock;
   }
   umask(oldmode);
@@ -1822,7 +1822,7 @@ static void *establishSocket(void *arg)
   sigaddset(&blockedSignals,SIGCHLD);
   sigaddset(&blockedSignals,SIGUSR1);
   if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-    LogPrint(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
+    logMessage(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
     return NULL;
   }
 #endif /* __MINGW32__ */
@@ -1834,9 +1834,9 @@ static void *establishSocket(void *arg)
   if ((
 #endif /* PF_LOCAL */
 	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR))
-    LogPrint(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
+    logMessage(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
   else
-    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
+    logMessage(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
   return NULL;
 }
 
@@ -1949,7 +1949,7 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   }
   if (tty!=&ttys && tty!=&notty
       && tty->connections->next == tty->connections && !tty->subttys) {
-    LogPrint(LOG_DEBUG,"freeing tty %#010x",tty->number);
+    logMessage(LOG_DEBUG,"freeing tty %#010x",tty->number);
     pthread_mutex_lock(&connectionsMutex);
     removeTty(tty);
     freeTty(tty);
@@ -1992,18 +1992,18 @@ static void *server(void *arg)
   sigaddset(&blockedSignals,SIGCHLD);
   sigaddset(&blockedSignals,SIGUSR1);
   if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-    LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
+    logMessage(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
 #endif /* __MINGW32__ */
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
-    LogPrint(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
+    logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
     pthread_exit(NULL);
   }
   if (numSockets == 0) {
-    LogPrint(LOG_INFO,"no hosts specified");
+    logMessage(LOG_INFO,"no hosts specified");
     pthread_exit(NULL);
   }
 #ifdef __MINGW32__
@@ -2036,7 +2036,7 @@ static void *server(void *arg)
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
       if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)(intptr_t)i)) != 0) {
-	LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
+	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 	for (i--;i>=0;i--)
 	  pthread_cancel(socketThreads[i]);
 	pthread_exit(NULL);
@@ -2091,7 +2091,7 @@ static void *server(void *arg)
     if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0)
     {
       if (fdmax==0) continue; /* still no server socket */
-      LogPrint(LOG_WARNING,"select: %s",strerror(errno));
+      logMessage(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
 #endif /* __MINGW32__ */
@@ -2108,7 +2108,7 @@ static void *server(void *arg)
             logWindowsSystemError("GetOverlappedResult");
           resfd = socketInfo[i].fd;
           if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR)
-            LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIfd", was %"PRIfd")",i,socketInfo[i].fd,resfd);
+            logMessage(LOG_DEBUG,"socket %d re-established (fd %"PRIfd", was %"PRIfd")",i,socketInfo[i].fd,resfd);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
           if (!ResetEvent(socketInfo[i].overl.hEvent))
@@ -2120,7 +2120,7 @@ static void *server(void *arg)
           resfd = (FileDescriptor)accept((SocketDescriptor)socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
           if (resfd == INVALID_FILE_DESCRIPTOR) {
             setSocketErrno();
-            LogPrint(LOG_WARNING,"accept(%"PRIfd"): %s",socketInfo[i].fd,strerror(errno));
+            logMessage(LOG_WARNING,"accept(%"PRIfd"): %s",socketInfo[i].fd,strerror(errno));
             continue;
           }
           formatAddress(source, sizeof(source), &addr, addrlen);
@@ -2129,24 +2129,24 @@ static void *server(void *arg)
         }
 #endif /* __MINGW32__ */
 
-        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
+        logMessage(LOG_NOTICE, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
           writeError(resfd, BRLAPI_ERROR_CONNREFUSED);
           closeFileDescriptor(resfd);
-          if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
+          if (unauthConnLog==0) logMessage(LOG_WARNING, "Too many simultaneous unauthorized connections");
           unauthConnLog++;
         } else {
 #ifndef __MINGW32__
           if (!setBlockingIo(resfd, 0)) {
-            LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
+            logMessage(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
             break;
           }
 #endif /* __MINGW32__ */
 
           c = createConnection(resfd, currentTime);
           if (c==NULL) {
-            LogPrint(LOG_WARNING,"Failed to create connection structure");
+            logMessage(LOG_WARNING,"Failed to create connection structure");
             closeFileDescriptor(resfd);
           } else {
 	    unauthConnections++;
@@ -2206,7 +2206,7 @@ static void terminationHandler(void)
 {
   int res;
   if ((res = pthread_cancel(serverThread)) != 0 )
-    LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
+    logMessage(LOG_WARNING,"pthread_cancel: %s",strerror(res));
   ttyTerminationHandler(&notty);
   ttyTerminationHandler(&ttys);
   if (authDescriptor)
@@ -2308,7 +2308,7 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
   }
   /* somebody gets the raw code */
   if ((c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
-    LogPrint(LOG_DEBUG,"Transmitting accepted key %016"BRLAPI_PRIxKEYCODE, clientCode);
+    logMessage(LOG_DEBUG,"Transmitting accepted key %016"BRLAPI_PRIxKEYCODE, clientCode);
     writeKey(c->fd,clientCode);
     return EOF;
   }
@@ -2319,7 +2319,7 @@ int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
   int ret;
   brlapi_keyCode_t clientCode;
   clientCode = ((brlapi_keyCode_t)set << 8) | key | ((brlapi_keyCode_t)press << 63);
-  LogPrint(LOG_DEBUG, "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, set, key, press, clientCode);
+  logMessage(LOG_DEBUG, "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, set, key, press, clientCode);
 
   pthread_mutex_lock(&connectionsMutex);
   ret = api__handleKeyEvent(clientCode);
@@ -2349,7 +2349,7 @@ static int api__handleCommand(int command) {
     clientCode = cmdBrlttyToBrlapi(command, retainDots);
     /* nobody needs the raw code */
     if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-      LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
+      logMessage(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
       writeKey(c->fd,clientCode);
       return EOF;
     }
@@ -2539,7 +2539,7 @@ static void brlResize(BrailleDisplay *brl)
 /* writes from brltty */
 void api_link(BrailleDisplay *brl)
 {
-  LogPrint(LOG_DEBUG, "api link");
+  logMessage(LOG_DEBUG, "api link");
   resetRepeatState(&repeatState);
   trueBraille=braille;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
@@ -2560,7 +2560,7 @@ void api_link(BrailleDisplay *brl)
 /* Does all the unlink stuff to remove api from the picture */
 void api_unlink(BrailleDisplay *brl)
 {
-  LogPrint(LOG_DEBUG, "api unlink");
+  logMessage(LOG_DEBUG, "api unlink");
   pthread_mutex_lock(&connectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
   pthread_mutex_unlock(&connectionsMutex);
@@ -2581,9 +2581,9 @@ void api_unlink(BrailleDisplay *brl)
 /* Identifies BrlApi */
 void api_identify(int full)
 {
-  LogPrint(LOG_NOTICE, RELEASE);
+  logMessage(LOG_NOTICE, RELEASE);
   if (full) {
-    LogPrint(LOG_INFO, COPYRIGHT);
+    logMessage(LOG_INFO, COPYRIGHT);
   }
 }
 
@@ -2617,12 +2617,12 @@ int api_start(BrailleDisplay *brl, char **parameters)
   coreActive=driverConstructed=1;
 
   if ((notty.connections = createConnection(INVALID_FILE_DESCRIPTOR,0)) == NULL) {
-    LogPrint(LOG_WARNING, "Unable to create connections list");
+    logMessage(LOG_WARNING, "Unable to create connections list");
     goto out;
   }
   notty.connections->prev = notty.connections->next = notty.connections;
   if ((ttys.connections = createConnection(INVALID_FILE_DESCRIPTOR, 0)) == NULL) {
-    LogPrint(LOG_WARNING, "Unable to create ttys' connections list");
+    logMessage(LOG_WARNING, "Unable to create ttys' connections list");
     goto outalloc;
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
@@ -2646,7 +2646,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
       if (validateInteger(&size, operand, &minSize, NULL)) {
         stackSize = size;
       } else {
-        LogPrint(LOG_WARNING, "%s: %s", "invalid thread stack size", operand);
+        logMessage(LOG_WARNING, "%s: %s", "invalid thread stack size", operand);
       }
     }
   }
@@ -2660,7 +2660,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
   trueBraille=&noBraille;
   if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
-    LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
+    logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     for (i=0;i<numSockets;i++)
       pthread_cancel(socketThreads[i]);
     goto outallocs;

@@ -98,8 +98,8 @@ constructScreenDriver (char **parameters) {
     if (mainScreen.construct()) {
       return 1;
     } else {
-      LogPrint(LOG_DEBUG, "screen driver initialization failed: %s",
-               screen->definition.code);
+      logMessage(LOG_DEBUG, "screen driver initialization failed: %s",
+                 screen->definition.code);
     }
   }
 
@@ -193,9 +193,9 @@ validateScreenBox (const ScreenBox *box, int columns, int rows) {
             if (((box->top + box->height) <= rows))
               return 1;
 
-  LogPrint(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
-           columns, box->left, box->width,
-           rows, box->top, box->height);
+  logMessage(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
+             columns, box->left, box->width,
+             rows, box->top, box->height);
   return 0;
 }
 

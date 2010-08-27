@@ -58,7 +58,7 @@ allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int 
     unsigned char *newAddress = realloc(area->address, newSize);
 
     if (!newAddress) {
-      LogPrint(LOG_ERR, "insufficient memory for data area");
+      logMessage(LOG_ERR, "insufficient memory for data area");
       return 0;
     }
 

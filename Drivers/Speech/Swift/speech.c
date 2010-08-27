@@ -42,7 +42,7 @@ static swift_port *swiftPort = NULL;
 
 static void
 speechError (swift_result_t result, const char *action) {
-  LogPrint(LOG_ERR, "Swift %s error: %s", action, swift_strerror(result));
+  logMessage(LOG_ERR, "Swift %s error: %s", action, swift_strerror(result));
 }
 
 static int
@@ -55,17 +55,17 @@ setPortParameter (const char *name, swift_val *value) {
 
 static int
 setStringParameter (const char *name, const char *value) {
-  LogPrint(LOG_DEBUG, "setting swift string parameter: %s=%s", name, value);
+  logMessage(LOG_DEBUG, "setting swift string parameter: %s=%s", name, value);
   if (setPortParameter(name, swift_val_string(value))) return 1;
-  LogPrint(LOG_WARNING, "Couldn't set %s=%s", name, value);
+  logMessage(LOG_WARNING, "Couldn't set %s=%s", name, value);
   return 0;
 }
 
 static int
 setIntegerParameter (const char *name, int value) {
-  LogPrint(LOG_DEBUG, "setting swift integer parameter: %s=%d", name, value);
+  logMessage(LOG_DEBUG, "setting swift integer parameter: %s=%d", name, value);
   if (setPortParameter(name, swift_val_int(value))) return 1;
-  LogPrint(LOG_WARNING, "Couldn't set %s=%d", name, value);
+  logMessage(LOG_WARNING, "Couldn't set %s=%d", name, value);
   return 0;
 }
 
@@ -81,7 +81,7 @@ setVolume (int percentage) {
 
 static int
 setEnvironmentVariable (const char *name, const char *value) {
-  LogPrint(LOG_DEBUG, "setting swift environment variable: %s=%s", name, value);
+  logMessage(LOG_DEBUG, "setting swift environment variable: %s=%s", name, value);
   if (setenv(name, value, 1) != -1) return 1;
   logSystemError("environment variable set");
   return 0;
@@ -102,26 +102,26 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
             if (name && *name) {
               swift_voice *voice;
               if (*name == '/') {
-                LogPrint(LOG_DEBUG, "setting swift voice directory: %s", name);
+                logMessage(LOG_DEBUG, "setting swift voice directory: %s", name);
                 voice = swift_port_set_voice_from_dir(swiftPort, name);
               } else {
-                LogPrint(LOG_DEBUG, "setting swift voice name: %s", name);
+                logMessage(LOG_DEBUG, "setting swift voice name: %s", name);
                 voice = swift_port_set_voice_by_name(swiftPort, name);
               }
 
               if (!voice) {
-                 LogPrint(LOG_WARNING, "Swift voice set error: %s", name);
+                 logMessage(LOG_WARNING, "Swift voice set error: %s", name);
               }
             }
           }
 
           setStringParameter("tts/content-type", "text/plain");
 
-          LogPrint(LOG_INFO, "Swift Engine: %s for %s, version %s, %s",
-                   swift_engine_name, swift_platform, swift_version, swift_date);
+          logMessage(LOG_INFO, "Swift Engine: %s for %s, version %s, %s",
+                     swift_engine_name, swift_platform, swift_version, swift_date);
           return 1;
         } else {
-          LogPrint(LOG_ERR, "Swift port open error.");
+          logMessage(LOG_ERR, "Swift port open error.");
         }
 
         if ((result = swift_engine_close(swiftEngine)) != SWIFT_SUCCESS) {
@@ -129,10 +129,10 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
         }
         swiftEngine = NULL;
       } else {
-        LogPrint(LOG_ERR, "Swift engine open error.");
+        logMessage(LOG_ERR, "Swift engine open error.");
       }
     } else {
-      LogPrint(LOG_ERR, "Swift engine parameters allocation error.");
+      logMessage(LOG_ERR, "Swift engine parameters allocation error.");
     }
   }
 

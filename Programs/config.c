@@ -524,7 +524,7 @@ testTextTable (char *table) {
   if ((file = ensureTextTableExtension(table))) {
     char *path;
 
-    LogPrint(LOG_DEBUG, "checking for text table: %s", file);
+    logMessage(LOG_DEBUG, "checking for text table: %s", file);
 
     if ((path = makePath(opt_tablesDirectory, file))) {
       if (testPath(path)) exists = 1;
@@ -549,14 +549,14 @@ replaceTextTable (const char *name) {
     if ((path = makePath(opt_tablesDirectory, file))) {
       TextTable *newTable;
 
-      LogPrint(LOG_DEBUG, "compiling text table: %s", path);
+      logMessage(LOG_DEBUG, "compiling text table: %s", path);
       if ((newTable = compileTextTable(path))) {
         TextTable *oldTable = textTable;
         textTable = newTable;
         destroyTextTable(oldTable);
         ok = 1;
       } else {
-        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
       }
 
       free(path);
@@ -565,7 +565,7 @@ replaceTextTable (const char *name) {
     free(file);
   }
 
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
+  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
   return ok;
 }
 
@@ -580,14 +580,14 @@ replaceAttributesTable (const char *name) {
     if ((path = makePath(opt_tablesDirectory, file))) {
       AttributesTable *newTable;
 
-      LogPrint(LOG_DEBUG, "compiling attributes table: %s", path);
+      logMessage(LOG_DEBUG, "compiling attributes table: %s", path);
       if ((newTable = compileAttributesTable(path))) {
         AttributesTable *oldTable = attributesTable;
         attributesTable = newTable;
         destroyAttributesTable(oldTable);
         ok = 1;
       } else {
-        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
       }
 
       free(path);
@@ -596,7 +596,7 @@ replaceAttributesTable (const char *name) {
     free(file);
   }
 
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
+  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
   return ok;
 }
 
@@ -604,7 +604,7 @@ int
 readCommand (BRL_DriverCommandContext context) {
   int command = readBrailleCommand(&brl, context);
   if (command != EOF) {
-    LogPrint(LOG_DEBUG, "command: %06X", command);
+    logMessage(LOG_DEBUG, "command: %06X", command);
     if (BRL_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
     command &= BRL_MSK_CMD;
   }
@@ -631,10 +631,10 @@ loadContractionTable (const char *name) {
       char *path;
 
       if ((path = makePath(opt_tablesDirectory, file))) {
-        LogPrint(LOG_DEBUG, "compiling contraction table: %s", path);
+        logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
 
         if (!(table = compileContractionTable(path))) {
-          LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
+          logMessage(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
         }
 
         free(path);
@@ -685,10 +685,10 @@ loadKeyTable (const char *name) {
       }
 
       if ((path = makePath(opt_tablesDirectory, file))) {
-        LogPrint(LOG_DEBUG, "compiling key table: %s", path);
+        logMessage(LOG_DEBUG, "compiling key table: %s", path);
 
         if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
-          LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
+          logMessage(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
         }
 
         free(path);
@@ -714,9 +714,9 @@ static void scheduleKeyboardMonitor (int interval);
 
 static void
 tryKeyboardMonitor (void *data) {
-  LogPrint(LOG_DEBUG, "starting keyboard monitor");
+  logMessage(LOG_DEBUG, "starting keyboard monitor");
   if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
-    LogPrint(LOG_DEBUG, "keyboard monitor failed");
+    logMessage(LOG_DEBUG, "keyboard monitor failed");
     scheduleKeyboardMonitor(5000);
   }
 }
@@ -763,14 +763,14 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
       }
     }
   }
-  LogPrint(LOG_DEBUG, "regions: text=%u.%u status=%u.%u",
-           textStart, textCount, statusStart, statusCount);
+  logMessage(LOG_DEBUG, "regions: text=%u.%u status=%u.%u",
+             textStart, textCount, statusStart, statusCount);
 
   fullWindowShift = MAX(textCount-prefs.windowOverlap, 1);
   halfWindowShift = textCount / 2;
   verticalWindowShift = (rows > 1)? rows: 5;
-  LogPrint(LOG_DEBUG, "shifts: full=%u half=%u vertical=%u",
-           fullWindowShift, halfWindowShift, verticalWindowShift);
+  logMessage(LOG_DEBUG, "shifts: full=%u half=%u vertical=%u",
+             fullWindowShift, halfWindowShift, verticalWindowShift);
 }
 
 void
@@ -958,12 +958,12 @@ loadPreferences (void) {
     size_t length = fread(&newPreferences, 1, sizeof(newPreferences), file);
 
     if (ferror(file)) {
-      LogPrint(LOG_ERR, "%s: %s: %s",
-               gettext("cannot read preferences file"), preferencesFile, strerror(errno));
+      logMessage(LOG_ERR, "%s: %s: %s",
+                 gettext("cannot read preferences file"), preferencesFile, strerror(errno));
     } else if ((length < 40) ||
                (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
                (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
-      LogPrint(LOG_ERR, "%s: %s", gettext("invalid preferences file"), preferencesFile);
+      logMessage(LOG_ERR, "%s: %s", gettext("invalid preferences file"), preferencesFile);
     } else {
       prefs = newPreferences;
       ok = 1;
@@ -1124,8 +1124,8 @@ savePreferences (void) {
       ok = 1;
     } else {
       if (!ferror(file)) errno = EIO;
-      LogPrint(LOG_ERR, "%s: %s: %s",
-               gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
+      logMessage(LOG_ERR, "%s: %s: %s",
+                 gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
     }
     fclose(file);
   }
@@ -1417,8 +1417,8 @@ globBegin (GlobData *data) {
         if (chdir(originalDirectory) == -1) logSystemError("chdir");
 #endif /* HAVE_FCHDIR */
       } else {
-        LogPrint(LOG_ERR, "%s: %s: %s",
-                 gettext("cannot set working directory"), data->directory, strerror(errno));
+        logMessage(LOG_ERR, "%s: %s: %s",
+                   gettext("cannot set working directory"), data->directory, strerror(errno));
       }
 
 #ifdef HAVE_FCHDIR
@@ -1428,10 +1428,10 @@ globBegin (GlobData *data) {
 #endif /* HAVE_FCHDIR */
     } else {
 #ifdef HAVE_FCHDIR
-      LogPrint(LOG_ERR, "%s: %s",
-               gettext("cannot open working directory"), strerror(errno));
+      logMessage(LOG_ERR, "%s: %s",
+                 gettext("cannot open working directory"), strerror(errno));
 #else /* HAVE_FCHDIR */
-      LogPrint(LOG_ERR, "%s", gettext("cannot determine working directory"));
+      logMessage(LOG_ERR, "%s", gettext("cannot determine working directory"));
 #endif /* HAVE_FCHDIR */
     }
   }
@@ -2103,9 +2103,9 @@ activateDriver (const DriverActivationData *data, int verify) {
   } else if (defaultDrivers[0]) {
     driver = defaultDrivers;
   } else if (*(driver = data->autodetectableDrivers)) {
-    LogPrint(LOG_DEBUG, "performing %s driver autodetection", data->driverType);
+    logMessage(LOG_DEBUG, "performing %s driver autodetection", data->driverType);
   } else {
-    LogPrint(LOG_DEBUG, "no autodetectable %s drivers", data->driverType);
+    logMessage(LOG_DEBUG, "no autodetectable %s drivers", data->driverType);
   }
 
   if (!*driver) {
@@ -2116,14 +2116,14 @@ activateDriver (const DriverActivationData *data, int verify) {
 
   while (*driver) {
     if (!autodetect || data->haveDriver(*driver)) {
-      LogPrint(LOG_DEBUG, "checking for %s driver: %s", data->driverType, *driver);
+      logMessage(LOG_DEBUG, "checking for %s driver: %s", data->driverType, *driver);
       if (data->initializeDriver(*driver, verify)) return 1;
     }
 
     ++driver;
   }
 
-  LogPrint(LOG_DEBUG, "%s driver not found", data->driverType);
+  logMessage(LOG_DEBUG, "%s driver not found", data->driverType);
   return 0;
 }
 
@@ -2152,8 +2152,8 @@ constructBrailleDriver (void) {
       brailleConstructed = 1;
 
       /* Initialize the braille driver's help screen. */
-      LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
-               brl.keyBindings? brl.keyBindings: gettext("none"));
+      logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"),
+                 brl.keyBindings? brl.keyBindings: gettext("none"));
       if (brl.keyNameTables) {
         char *file;
 
@@ -2169,13 +2169,13 @@ constructBrailleDriver (void) {
 
           if ((path = makePath(opt_tablesDirectory, file))) {
             if ((brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
-              LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
+              logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), path);
 
               if (constructHelpScreen()) {
                 listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
               }
             } else {
-              LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
+              logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
             }
 
             free(path);
@@ -2206,9 +2206,9 @@ constructBrailleDriver (void) {
                 loaded = 1;
 
             if (loaded) {
-              LogPrint(LOG_INFO, "%s: %s", gettext("Help Path"), path);
+              logMessage(LOG_INFO, "%s: %s", gettext("Help Path"), path);
             } else {
-              LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
+              logMessage(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
             }
 
             free(path);
@@ -2223,9 +2223,9 @@ constructBrailleDriver (void) {
 
     braille->destruct(&brl);
   } else {
-    LogPrint(LOG_DEBUG, "%s: %s -> %s",
-             gettext("braille driver initialization failed"),
-             braille->definition.code, brailleDevice);
+    logMessage(LOG_DEBUG, "%s: %s -> %s",
+               gettext("braille driver initialization failed"),
+               braille->definition.code, brailleDevice);
   }
 
   return 0;
@@ -2254,8 +2254,8 @@ initializeBrailleDriver (const char *code, int verify) {
       int constructed = verify;
 
       if (!constructed) {
-        LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
-                 braille->definition.code, brailleDevice);
+        logMessage(LOG_DEBUG, "initializing braille driver: %s -> %s",
+                   braille->definition.code, brailleDevice);
 
         if (constructBrailleDriver()) {
 #ifdef ENABLE_API
@@ -2268,12 +2268,12 @@ initializeBrailleDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        LogPrint(LOG_INFO, "%s: %s [%s]",
-                 gettext("Braille Driver"), braille->definition.code, braille->definition.name);
+        logMessage(LOG_INFO, "%s: %s [%s]",
+                   gettext("Braille Driver"), braille->definition.code, braille->definition.name);
         identifyBrailleDriver(braille, 0);
         logParameters(braille->parameters, brailleParameters,
                       gettext("Braille Parameter"));
-        LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
+        logMessage(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
         {
           const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
@@ -2285,7 +2285,7 @@ initializeBrailleDriver (const char *code, int verify) {
           fixInstallPath(&preferencesFile);
           if (path != preferencesFile) free(path);
         }
-        LogPrint(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
+        logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
 
         return 1;
       }
@@ -2296,7 +2296,7 @@ initializeBrailleDriver (const char *code, int verify) {
 
     unloadDriverObject(&brailleObject);
   } else {
-    LogPrint(LOG_ERR, "%s: %s", gettext("braille driver not loadable"), code);
+    logMessage(LOG_ERR, "%s: %s", gettext("braille driver not loadable"), code);
   }
 
   braille = &noBraille;
@@ -2314,7 +2314,7 @@ activateBrailleDriver (int verify) {
     const char *const *autodetectableDrivers;
 
     brailleDevice = *device;
-    LogPrint(LOG_DEBUG, "checking braille device: %s", brailleDevice);
+    logMessage(LOG_DEBUG, "checking braille device: %s", brailleDevice);
 
     {
       const char *dev = brailleDevice;
@@ -2441,7 +2441,7 @@ stopBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
   stopBrailleDriver();
-  LogPrint(LOG_INFO, gettext("reinitializing braille driver"));
+  logMessage(LOG_INFO, gettext("reinitializing braille driver"));
   tryBrailleDriver();
 }
 
@@ -2476,8 +2476,8 @@ constructSpeechDriver (void) {
   if (speech->construct(&spk, speechParameters)) {
     return 1;
   } else {
-    LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
-             speech->definition.code);
+    logMessage(LOG_DEBUG, "speech driver initialization failed: %s",
+               speech->definition.code);
   }
 
   return 0;
@@ -2498,8 +2498,8 @@ initializeSpeechDriver (const char *code, int verify) {
       int constructed = verify;
 
       if (!constructed) {
-        LogPrint(LOG_DEBUG, "initializing speech driver: %s",
-                 speech->definition.code);
+        logMessage(LOG_DEBUG, "initializing speech driver: %s",
+                   speech->definition.code);
 
         if (constructSpeechDriver()) {
           constructed = 1;
@@ -2508,8 +2508,8 @@ initializeSpeechDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        LogPrint(LOG_INFO, "%s: %s [%s]",
-                 gettext("Speech Driver"), speech->definition.code, speech->definition.name);
+        logMessage(LOG_INFO, "%s: %s [%s]",
+                   gettext("Speech Driver"), speech->definition.code, speech->definition.name);
         identifySpeechDriver(speech, 0);
         logParameters(speech->parameters, speechParameters,
                       gettext("Speech Parameter"));
@@ -2523,7 +2523,7 @@ initializeSpeechDriver (const char *code, int verify) {
 
     unloadDriverObject(&speechObject);
   } else {
-    LogPrint(LOG_ERR, "%s: %s", gettext("speech driver not loadable"), code);
+    logMessage(LOG_ERR, "%s: %s", gettext("speech driver not loadable"), code);
   }
 
   speech = &noSpeech;
@@ -2602,7 +2602,7 @@ stopSpeechDriver (void) {
 void
 restartSpeechDriver (void) {
   stopSpeechDriver();
-  LogPrint(LOG_INFO, gettext("reinitializing speech driver"));
+  logMessage(LOG_INFO, gettext("reinitializing speech driver"));
   trySpeechDriver();
 }
 
@@ -2622,8 +2622,8 @@ initializeScreenDriver (const char *code, int verify) {
       int constructed = verify;
 
       if (!constructed) {
-        LogPrint(LOG_DEBUG, "initializing screen driver: %s",
-                 getScreenDriverDefinition(screen)->code);
+        logMessage(LOG_DEBUG, "initializing screen driver: %s",
+                   getScreenDriverDefinition(screen)->code);
 
         if (constructScreenDriver(screenParameters)) {
           constructed = 1;
@@ -2632,10 +2632,10 @@ initializeScreenDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        LogPrint(LOG_INFO, "%s: %s [%s]",
-                 gettext("Screen Driver"),
-                 getScreenDriverDefinition(screen)->code,
-                 getScreenDriverDefinition(screen)->name);
+        logMessage(LOG_INFO, "%s: %s [%s]",
+                   gettext("Screen Driver"),
+                   getScreenDriverDefinition(screen)->code,
+                   getScreenDriverDefinition(screen)->name);
         identifyScreenDriver(screen, 0);
         logParameters(getScreenParameters(screen),
                       screenParameters,
@@ -2650,7 +2650,7 @@ initializeScreenDriver (const char *code, int verify) {
 
     unloadDriverObject(&screenObject);
   } else {
-    LogPrint(LOG_ERR, "%s: %s", gettext("screen driver not loadable"), code);
+    logMessage(LOG_ERR, "%s: %s", gettext("screen driver not loadable"), code);
   }
 
   screen = &noScreen;
@@ -2919,15 +2919,15 @@ startup (int argc, char *argv[]) {
   }
 
   if (argc) {
-    LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
+    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
   if (!validateInterval(&updateInterval, opt_updateInterval)) {
-    LogPrint(LOG_ERR, "%s: %s", gettext("invalid update interval"), opt_updateInterval);
+    logMessage(LOG_ERR, "%s: %s", gettext("invalid update interval"), opt_updateInterval);
   }
 
   if (!validateInterval(&messageDelay, opt_messageDelay)) {
-    LogPrint(LOG_ERR, "%s: %s", gettext("invalid message delay"), opt_messageDelay);
+    logMessage(LOG_ERR, "%s: %s", gettext("invalid message delay"), opt_messageDelay);
   }
 
   /* Set logging levels. */
@@ -2961,7 +2961,7 @@ startup (int argc, char *argv[]) {
         }
       }
 
-      LogPrint(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
+      logMessage(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
     }
 
   setLevel:
@@ -2988,12 +2988,12 @@ startup (int argc, char *argv[]) {
     char banner[0X100];
 
     makeProgramBanner(banner, sizeof(banner));
-    LogPrint(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
+    logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
     setLogPrefix(oldPrefix);
   }
 
   if (opt_version) {
-    LogPrint(LOG_INFO, "%s", PACKAGE_COPYRIGHT);
+    logMessage(LOG_INFO, "%s", PACKAGE_COPYRIGHT);
     identifyScreenDrivers(1);
 
 #ifdef ENABLE_API
@@ -3077,7 +3077,7 @@ startup (int argc, char *argv[]) {
 
   /*
    * From this point, all IO functions as printf, puts, perror, etc. can't be
-   * used anymore since we are a daemon.  The LogPrint facility should 
+   * used anymore since we are a daemon.  The logMessage() facility should 
    * be used instead.
    */
 
@@ -3087,20 +3087,20 @@ startup (int argc, char *argv[]) {
   {
     char *directory;
     if ((directory = getWorkingDirectory())) {
-      LogPrint(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);
+      logMessage(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);
       free(directory);
     } else {
-      LogPrint(LOG_ERR, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
+      logMessage(LOG_ERR, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
     }
   }
 
-  LogPrint(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
+  logMessage(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
   writableDirectory = opt_writableDirectory;
 
-  LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Drivers Directory"), opt_driversDirectory);
+  logMessage(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
+  logMessage(LOG_INFO, "%s: %s", gettext("Drivers Directory"), opt_driversDirectory);
 
-  LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
+  logMessage(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
   setGlobalDataVariable("tablesDirectory", opt_tablesDirectory);
 
   /* handle text table option */
@@ -3139,7 +3139,7 @@ startup (int argc, char *argv[]) {
   }
 
   if (!*opt_textTable) opt_textTable = TEXT_TABLE;
-  LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
+  logMessage(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
   globPrepare(&glob_textTable, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
 
   /* handle attributes table option */
@@ -3147,23 +3147,23 @@ startup (int argc, char *argv[]) {
     if (!replaceAttributesTable(opt_attributesTable))
       opt_attributesTable = "";
   if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
-  LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
+  logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
   globPrepare(&glob_attributesTable, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
   atexit(exitContractionTable);
   if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
-           *opt_contractionTable? opt_contractionTable: gettext("none"));
+  logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
+             *opt_contractionTable? opt_contractionTable: gettext("none"));
   globPrepare(&glob_contractionTable, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
   atexit(exitKeyTable);
   if (*opt_keyTable) loadKeyTable(opt_keyTable);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"),
-           *opt_keyTable? opt_keyTable: gettext("none"));
+  logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
+             *opt_keyTable? opt_keyTable: gettext("none"));
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))
     if (keyboardKeyTable)
@@ -3199,7 +3199,7 @@ startup (int argc, char *argv[]) {
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
-    LogPrint(LOG_ERR, gettext("braille device not specified"));
+    logMessage(LOG_ERR, gettext("braille device not specified"));
     exit(4);
   }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
@@ -3226,8 +3226,8 @@ startup (int argc, char *argv[]) {
   }
 
   /* Create the speech pass-through FIFO. */
-  LogPrint(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
-           *opt_speechFifo? opt_speechFifo: gettext("none"));
+  logMessage(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
+             *opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
     if (*opt_speechFifo) openSpeechFifo(opt_speechFifo);
   }

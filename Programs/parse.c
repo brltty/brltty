@@ -209,10 +209,10 @@ parseParameters (
       if (*name) {
         char *value = strchr(name, '=');
         if (!value) {
-          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
+          logMessage(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
         } else if (value == name) {
         noName:
-          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
+          logMessage(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
         } else {
           int nameLength = value++ - name;
           int eligible = 1;
@@ -224,7 +224,7 @@ parseParameters (
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {
-                LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
+                logMessage(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
               } else if (!(nameLength -= nameAdjustment)) {
                 goto noName;
               } else if ((qualifierLength == strlen(qualifier)) &&
@@ -247,7 +247,7 @@ parseParameters (
             }
 
             if (!names[index]) {
-              LogPrint(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
+              logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
             }
           }
         }
@@ -286,7 +286,7 @@ void
 logParameters (const char *const *names, char **values, char *description) {
   if (names && values) {
     while (*names) {
-      LogPrint(LOG_INFO, "%s: %s=%s", description, *names, *values);
+      logMessage(LOG_INFO, "%s: %s=%s", description, *names, *values);
       ++names;
       ++values;
     }

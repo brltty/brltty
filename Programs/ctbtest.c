@@ -212,7 +212,7 @@ main (int argc, char *argv[]) {
   } else {
     static const int minimum = 1;
     if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
+      logMessage(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
       exit(2);
     }
   }
@@ -261,8 +261,8 @@ main (int argc, char *argv[]) {
                     status = contractFile(file);
                     fclose(file);
                   } else {
-                    LogPrint(LOG_ERR, "cannot open input file: %s: %s",
-                             path, strerror(errno));
+                    logMessage(LOG_ERR, "cannot open input file: %s: %s",
+                               path, strerror(errno));
                     status = 6;
                   }
                 }

@@ -77,7 +77,7 @@ usbToErrno (enum libusb_error error) {
       return ENOSYS;
 
     default:
-      LogPrint(LOG_DEBUG, "unsupported libusb1 error code: %d", error);
+      logMessage(LOG_DEBUG, "unsupported libusb1 error code: %d", error);
     case LIBUSB_ERROR_OTHER:
       return EIO;
   }
@@ -297,7 +297,7 @@ usbReadEndpoint (
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB endpoint input transfer not supported: 0X%02X", transfer);
+          logMessage(LOG_ERR, "USB endpoint input transfer not supported: 0X%02X", transfer);
           result = LIBUSB_ERROR_NOT_SUPPORTED;
           break;
       }
@@ -348,7 +348,7 @@ usbWriteEndpoint (
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB endpoint output transfer not supported: 0X%02X", transfer);
+          logMessage(LOG_ERR, "USB endpoint output transfer not supported: 0X%02X", transfer);
           result = LIBUSB_ERROR_NOT_SUPPORTED;
           break;
       }

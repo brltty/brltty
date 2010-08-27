@@ -67,8 +67,8 @@ static int
 usbOpenUsbfsFile (UsbDeviceExtension *devx) {
   if (devx->usbfsFile == -1) {
     if ((devx->usbfsFile = open(devx->host->usbfsPath, O_RDWR)) == -1) {
-      LogPrint(LOG_ERR, "USBFS open error: %s: %s",
-               devx->host->usbfsPath, strerror(errno));
+      logMessage(LOG_ERR, "USBFS open error: %s: %s",
+                 devx->host->usbfsPath, strerror(errno));
       return 0;
     }
   }
@@ -121,7 +121,7 @@ usbDisableAutosuspend (UsbDevice *device) {
           }
 
           if (errno != EINVAL) {
-            LogPrint(LOG_ERR, "write error: %s: %s", path, strerror(errno));
+            logMessage(LOG_ERR, "write error: %s: %s", path, strerror(errno));
             break;
           }
 
@@ -130,8 +130,8 @@ usbDisableAutosuspend (UsbDevice *device) {
 
         close(file);
       } else {
-        LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
-                 "open error: %s: %s", path, strerror(errno));
+        logMessage((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+                   "open error: %s: %s", path, strerror(errno));
       }
 
       free(path);
@@ -189,7 +189,7 @@ usbDisconnectDriver (UsbDevice *device, unsigned char interface) {
 #ifdef USBDEVFS_DISCONNECT
   if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
 #else /* USBDEVFS_DISCONNECT */
-  LogPrint(LOG_WARNING, "USB driver disconnection not available.");
+  logMessage(LOG_WARNING, "USB driver disconnection not available.");
 #endif /* USBDEVFS_DISCONNECT */
   return 0;
 }
@@ -199,7 +199,7 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
   char *driver = usbGetDriver(device, interface);
 
   if (driver) {
-    LogPrint(LOG_WARNING, "USB interface in use: %u (%s)", interface, driver);
+    logMessage(LOG_WARNING, "USB interface in use: %u (%s)", interface, driver);
     free(driver);
 
     if (usbDisconnectDriver(device, interface)) return 1;
@@ -429,9 +429,9 @@ usbSubmitRequest (
         }
 
       /*
-        LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
-                 urb, urb->type, urb->endpoint, urb->flags, urb->signr,
-                 urb->buffer, urb->buffer_length, urb->usercontext);
+        logMessage(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
+                   urb, urb->type, urb->endpoint, urb->flags, urb->signr,
+                   urb->buffer, urb->buffer_length, urb->usercontext);
       */
       submit:
         if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return urb;
@@ -495,8 +495,8 @@ usbCancelRequest (
           return 1;
         }
 
-        LogPrint(LOG_ERR, "USB request not found: urb=%p ept=%02X",
-                 urb, urb->endpoint);
+        logMessage(LOG_ERR, "USB request not found: urb=%p ept=%02X",
+                   urb, urb->endpoint);
       }
     }
   }
@@ -650,7 +650,7 @@ usbReadEndpoint (
       }
 
       default:
-        LogPrint(LOG_ERR, "USB input transfer not supported: %d", transfer);
+        logMessage(LOG_ERR, "USB input transfer not supported: %d", transfer);
         errno = ENOSYS;
         break;
     }
@@ -695,7 +695,7 @@ usbWriteEndpoint (
       }
 */
       default:
-        LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
+        logMessage(LOG_ERR, "USB output transfer not supported: %d", transfer);
         errno = ENOSYS;
         break;
     }
@@ -862,7 +862,7 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
     if (count == -1) {
       logSystemError("USB device descriptor read");
     } else if (count != UsbDescriptorSize_Device) {
-      LogPrint(LOG_ERR, "USB short device descriptor: %d", count);
+      logMessage(LOG_ERR, "USB short device descriptor: %d", count);
     } else {
       ok = 1;
 
@@ -965,7 +965,7 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
     const FileSystemCandidate *candidate = candidates;
 
     while (candidate->path) {
-      LogPrint(LOG_DEBUG, "verifying file system path: %s: %s", type, candidate->path);
+      logMessage(LOG_DEBUG, "verifying file system path: %s: %s", type, candidate->path);
       if (candidate->verify(candidate->path)) return strdupWrapper(candidate->path);
       candidate += 1;
     }
@@ -1039,12 +1039,12 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
       char *root;
 
       if ((root = usbGetUsbfs())) {
-        LogPrint(LOG_DEBUG, "USBFS Root: %s", root);
+        logMessage(LOG_DEBUG, "USBFS Root: %s", root);
         if (usbAddHostDevices(root)) ok = 1;
 
         free(root);
       } else {
-        LogPrint(LOG_DEBUG, "USBFS not mounted");
+        logMessage(LOG_DEBUG, "USBFS not mounted");
       }
 
       if (!ok) {

@@ -687,7 +687,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
     if (count == -1) {
       logSystemError("Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;
@@ -718,11 +718,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     while ((protocol = *protocolAddress++)) {
       InputPacket response;
 
-      LogPrint(LOG_DEBUG, "trying protocol %s", protocol->name);
+      logMessage(LOG_DEBUG, "trying protocol %s", protocol->name);
       if (protocol->probeDisplay(brl, &response)) {
-        LogPrint(LOG_DEBUG, "Seika Protocol: %s", protocol->name);
-        LogPrint(LOG_DEBUG, "Seika Model: %u", response.fields.identity.model);
-        LogPrint(LOG_DEBUG, "Seika Size: %u", response.fields.identity.size);
+        logMessage(LOG_DEBUG, "Seika Protocol: %s", protocol->name);
+        logMessage(LOG_DEBUG, "Seika Model: %u", response.fields.identity.model);
+        logMessage(LOG_DEBUG, "Seika Size: %u", response.fields.identity.size);
 
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;

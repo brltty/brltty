@@ -98,14 +98,14 @@ WIN_PROC_STUB(freeaddrinfo);
 static void *
 loadLibrary (const char *name) {
   HMODULE module = LoadLibrary(name);
-  if (!module) LogPrint(LOG_DEBUG, "%s: %s", gettext("cannot load library"), name);
+  if (!module) logMessage(LOG_DEBUG, "%s: %s", gettext("cannot load library"), name);
   return module;
 }
 
 static void *
 getProcedure (HMODULE module, const char *name) {
   void *address = module? GetProcAddress(module, name): NULL;
-  if (!address) LogPrint(LOG_DEBUG, "%s: %s", gettext("cannot find procedure"), name);
+  if (!address) logMessage(LOG_DEBUG, "%s: %s", gettext("cannot find procedure"), name);
   return address;
 }
 
@@ -210,12 +210,12 @@ installService (const char *name, const char *description) {
                                         command, NULL, NULL, NULL, NULL, NULL);
 
       if (service) {
-        LogPrint(LOG_NOTICE, "service installed: %s", name);
+        logMessage(LOG_NOTICE, "service installed: %s", name);
         installed = 1;
 
         CloseServiceHandle(service);
       } else if (GetLastError() == ERROR_SERVICE_EXISTS) {
-        LogPrint(LOG_WARNING, "service already installed: %s", name);
+        logMessage(LOG_WARNING, "service already installed: %s", name);
         installed = 1;
       } else {
         logWindowsSystemError("CreateService");
@@ -242,10 +242,10 @@ removeService (const char *name) {
 
     if (service) {
       if (DeleteService(service)) {
-        LogPrint(LOG_NOTICE, "service removed: %s", name);
+        logMessage(LOG_NOTICE, "service removed: %s", name);
         removed = 1;
       } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        LogPrint(LOG_WARNING, "service already being removed: %s", name);
+        logMessage(LOG_WARNING, "service already being removed: %s", name);
         removed = 1;
       } else {
         logWindowsSystemError("DeleteService");
@@ -253,7 +253,7 @@ removeService (const char *name) {
 
       CloseServiceHandle(service);
     } else if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST) {
-      LogPrint(LOG_WARNING, "service not installed: %s", name);
+      logMessage(LOG_WARNING, "service not installed: %s", name);
       removed = 1;
     } else {
       logWindowsSystemError("OpenService");

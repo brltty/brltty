@@ -329,7 +329,7 @@ makeFifo (const char *path, mode_t mode) {
    struct stat status;
    if (lstat(path, &status) != -1) {
       if (S_ISFIFO(status.st_mode)) return 1;
-      LogPrint(LOG_ERR, "Download object not a FIFO: %s", path);
+      logMessage(LOG_ERR, "Download object not a FIFO: %s", path);
    } else if (errno == ENOENT) {
       mode_t mask = umask(0);
       int result = mkfifo(path, mode);
@@ -389,17 +389,17 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 checkData (const unsigned char *data, unsigned int length) {
    if ((length < 5) || (length != (data[4] + 5))) {
-      LogPrint(LOG_ERR, "Bad length: %d", length);
+      logMessage(LOG_ERR, "Bad length: %d", length);
    } else if (data[0] != 255) {
-      LogPrint(LOG_ERR, "Bad header: %d", data[0]);
+      logMessage(LOG_ERR, "Bad header: %d", data[0]);
    } else if ((data[1] < 1) || (data[1] > screenHeight)) {
-      LogPrint(LOG_ERR, "Bad line: %d", data[1]);
+      logMessage(LOG_ERR, "Bad line: %d", data[1]);
    } else if (data[2] > screenWidth) {
-      LogPrint(LOG_ERR, "Bad cursor: %d", data[2]);
+      logMessage(LOG_ERR, "Bad cursor: %d", data[2]);
    } else if ((data[3] < 1) || (data[3] > screenWidth)) {
-      LogPrint(LOG_ERR, "Bad column: %d", data[3]);
+      logMessage(LOG_ERR, "Bad column: %d", data[3]);
    } else if (data[4] > (screenWidth - (data[3] - 1))) {
-      LogPrint(LOG_ERR, "Bad count: %d", data[4]);
+      logMessage(LOG_ERR, "Bad count: %d", data[4]);
    } else {
       return 1;
    }
@@ -452,7 +452,7 @@ sendLine (unsigned char line, int force) {
       ++start;
    }
    if ((count -= start) || force) {
-      LogPrint(LOG_DEBUG, "LogText line: line=%d, column=%d, count=%d", line, start, count);
+      logMessage(LOG_DEBUG, "LogText line: line=%d, column=%d, count=%d", line, start, count);
       memcpy(&target[start], &source[start], count);
       if (!sendData(line, start, count)) {
          return 0;
@@ -473,13 +473,13 @@ sendCursorRow (void) {
 
 static int
 handleUpdate (unsigned char line) {
-   LogPrint(LOG_DEBUG, "Request line: (0X%2.2X) 0X%2.2X dec=%d", KEY_UPDATE, line, line);
+   logMessage(LOG_DEBUG, "Request line: (0X%2.2X) 0X%2.2X dec=%d", KEY_UPDATE, line, line);
    if (!line) return sendCursorRow();
    if (line <= screenHeight) {
       currentLine = line - 1;
       return sendCurrentLine();
    }
-   LogPrint(LOG_WARNING, "Invalid line request: %d", line);
+   logMessage(LOG_WARNING, "Invalid line request: %d", line);
    return 1;
 }
 
@@ -497,12 +497,12 @@ isOnline (void) {
    if (online) {
       if (deviceStatus < DEV_ONLINE) {
          deviceStatus = DEV_ONLINE;
-         LogPrint(LOG_WARNING, "LogText online.");
+         logMessage(LOG_WARNING, "LogText online.");
       }
    } else {
       if (deviceStatus > DEV_OFFLINE) {
          deviceStatus = DEV_OFFLINE;
-         LogPrint(LOG_WARNING, "LogText offline.");
+         logMessage(LOG_WARNING, "LogText offline.");
       }
    }
    return online;
@@ -525,7 +525,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
             deviceStatus = DEV_READY;
          }
          if ((row != cursorRow) || (column != cursorColumn)) {
-            LogPrint(LOG_DEBUG, "cursor moved: [%d,%d] -> [%d,%d]", cursorColumn, cursorRow, column, row);
+            logMessage(LOG_DEBUG, "cursor moved: [%d,%d] -> [%d,%d]", cursorColumn, cursorRow, column, row);
             cursorRow = row;
             cursorColumn = column;
             sendCursorRow();
@@ -552,7 +552,7 @@ readKey (void) {
    }
    {
       int result = COMPOUND_KEY(key, arg);
-      LogPrint(LOG_DEBUG, "Key read: %4.4X", result);
+      logMessage(LOG_DEBUG, "Key read: %4.4X", result);
       return result;
    }
 }
@@ -595,7 +595,7 @@ askUser (const unsigned char *prompt) {
    unsigned char from;
    unsigned char to;
    selectLine(screenHeight-1);
-   LogPrint(LOG_DEBUG, "Prompt: %s", prompt);
+   logMessage(LOG_DEBUG, "Prompt: %s", prompt);
    replaceCharacters(prompt, strlen(prompt));
    from = to = ++cursorColumn;
    sendCursorRow();
@@ -628,7 +628,7 @@ askUser (const unsigned char *prompt) {
                      do {
                         response[--length] = outputTable[selectedLine[--to]];
                      } while (to > from);
-                     LogPrint(LOG_DEBUG, "Response: %s", response);
+                     logMessage(LOG_DEBUG, "Response: %s", response);
                      return response;
                   } else {
                      logSystemError("Download file path allocation");
@@ -737,7 +737,7 @@ downloadFile (void) {
          logSystemError("Download file open");
       }
    } else {
-      LogPrint(LOG_WARNING, "Download path not specified.");
+      logMessage(LOG_WARNING, "Download path not specified.");
    }
 }
 
@@ -745,7 +745,7 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    int key = readKey();
    if (context != currentContext) {
-      LogPrint(LOG_DEBUG, "Context switch: %d -> %d", currentContext, context);
+      logMessage(LOG_DEBUG, "Context switch: %d -> %d", currentContext, context);
       switch (currentContext = context) {
          case BRL_CTX_DEFAULT:
             deviceStatus = DEV_ONLINE;
@@ -797,7 +797,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
          case KEY_COMMAND: {
             int command;
             while ((command = readKey()) == EOF) approximateDelay(1);
-            LogPrint(LOG_DEBUG, "Received command: (0x%2.2X) 0x%4.4X", KEY_COMMAND, command);
+            logMessage(LOG_DEBUG, "Received command: (0x%2.2X) 0x%4.4X", KEY_COMMAND, command);
             switch (command) {
                case KEY_COMMAND:
                   /* pressing the escape command twice will pass it through */
@@ -850,7 +850,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   downloadFile();
                   break;
                default:
-                  LogPrint(LOG_WARNING, "Unknown command: (0X%2.2X) 0X%4.4X", KEY_COMMAND, command);
+                  logMessage(LOG_WARNING, "Unknown command: (0X%2.2X) 0X%4.4X", KEY_COMMAND, command);
                   break;
             }
             break;
@@ -861,11 +861,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   handleUpdate(key >> KEY_SHIFT);
                   break;
                case KEY_FUNCTION:
-                  LogPrint(LOG_WARNING, "Unknown function: (0X%2.2X) 0X%4.4X", KEY_COMMAND, key>>KEY_SHIFT);
+                  logMessage(LOG_WARNING, "Unknown function: (0X%2.2X) 0X%4.4X", KEY_COMMAND, key>>KEY_SHIFT);
                   break;
                default: {
                   unsigned char dots = inputTable[key];
-                  LogPrint(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", key, key, dots);
+                  logMessage(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", key, key, dots);
                   return BRL_BLK_PASSDOTS + dots;
                }
             }

@@ -118,7 +118,7 @@ main (int argc, char *argv[]) {
     static const float minimum = 0.1;
     static const float maximum = 10.0;
     if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
+      logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
       exit(2);
     }
   }
@@ -128,7 +128,7 @@ main (int argc, char *argv[]) {
     static const float minimum = 0.0;
     static const float maximum = 2.0;
     if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
+      logMessage(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
       exit(2);
     }
   }
@@ -152,7 +152,7 @@ main (int argc, char *argv[]) {
       while (*name) ++name;
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-        LogPrint(LOG_ERR, "insufficient memory.");
+        logMessage(LOG_ERR, "insufficient memory.");
         exit(9);
       }
       setting = parameterSettings;
@@ -164,9 +164,9 @@ main (int argc, char *argv[]) {
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
       if (!delimiter) {
-        LogPrint(LOG_ERR, "missing speech driver parameter value: %s", assignment);
+        logMessage(LOG_ERR, "missing speech driver parameter value: %s", assignment);
       } else if (delimiter == assignment) {
-        LogPrint(LOG_ERR, "missing speech driver parameter name: %s", assignment);
+        logMessage(LOG_ERR, "missing speech driver parameter name: %s", assignment);
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
@@ -178,7 +178,7 @@ main (int argc, char *argv[]) {
           }
           ++name;
         }
-        if (!ok) LogPrint(LOG_ERR, "invalid speech driver parameter: %s", assignment);
+        if (!ok) logMessage(LOG_ERR, "invalid speech driver parameter: %s", assignment);
       }
       if (!ok) exit(2);
       --argc;
@@ -198,11 +198,11 @@ main (int argc, char *argv[]) {
       speech->destruct(&spk);		/* finish with the display */
       status = 0;
     } else {
-      LogPrint(LOG_ERR, "can't initialize speech driver.");
+      logMessage(LOG_ERR, "can't initialize speech driver.");
       status = 5;
     }
   } else {
-    LogPrint(LOG_ERR, "can't load speech driver.");
+    logMessage(LOG_ERR, "can't load speech driver.");
     status = 3;
   }
   return status;

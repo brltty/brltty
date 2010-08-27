@@ -232,9 +232,9 @@ clearStatusCells (BrailleDisplay *brl) {
 static void
 brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
   memset(brl->buffer, 0, brl->textColumns*brl->textRows);
-  LogPrint(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
-           brl->textRows, (brl->textRows == 1)? "row": "rows",
-           brl->textColumns, (brl->textColumns == 1)? "column": "columns");
+  logMessage(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
+             brl->textRows, (brl->textRows == 1)? "row": "rows",
+             brl->textColumns, (brl->textColumns == 1)? "column": "columns");
   if (brl->bufferResized) brl->bufferResized(infoLevel, brl->textRows, brl->textColumns);
 }
 
@@ -442,7 +442,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
   do {
     int command = readBrailleCommand(brl, BRL_CTX_DEFAULT);
     if (command != EOF) {
-      LogPrint(LOG_DEBUG, "Learn: command=%06X", command);
+      logMessage(LOG_DEBUG, "Learn: command=%06X", command);
       if (BRL_DELAYED_COMMAND(command)) continue;
 
       {
@@ -454,7 +454,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       {
         char buffer[0X100];
         describeCommand(command, buffer, sizeof(buffer), 1);
-        LogPrint(LOG_DEBUG, "Learn: %s", buffer);
+        logMessage(LOG_DEBUG, "Learn: %s", buffer);
         if (!message(mode, buffer, MSG_NODELAY|MSG_SILENT)) return 0;
       }
 
@@ -584,12 +584,12 @@ portraitFlag (int number, int on) {
 
 void
 setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  LogPrint(LOG_DEBUG, "setting braille firmness: %d", setting);
+  logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
   braille->firmness(brl, setting);
 }
 
 void
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  LogPrint(LOG_DEBUG, "setting braille sensitivity: %d", setting);
+  logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   braille->sensitivity(brl, setting);
 }

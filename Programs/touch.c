@@ -128,7 +128,7 @@ touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure) {
   if (pressure) {
     logBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->textColumns*brl->textRows);
   } else {
-    LogPrint(LOG_DEBUG, "Touch Pressure off");
+    logMessage(LOG_DEBUG, "Touch Pressure off");
   }
 
   touchRecropWindow(brl, pressure);

@@ -279,7 +279,7 @@ logTextField (const char *name, const char *address, int length) {
     if (byte && (byte != ' ')) break;
     --length;
   }
-  LogPrint(LOG_INFO, "%s: %.*s", name, length, address);
+  logMessage(LOG_INFO, "%s: %.*s", name, length, address);
 }
 
 static int
@@ -418,8 +418,8 @@ logCellCount (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusRows = (brl->statusColumns = cellCount - brl->textColumns)? 1: 0;
 
-  LogPrint(LOG_INFO, "Cell Count: %d (%d text, %d status)",
-           cellCount, brl->textColumns, brl->statusColumns);
+  logMessage(LOG_INFO, "Cell Count: %d (%d text, %d status)",
+             cellCount, brl->textColumns, brl->statusColumns);
 }
 
 static int
@@ -815,7 +815,7 @@ getBaumModuleDescription (uint16_t identifier) {
     bmd += 1;
   }
 
-  LogPrint(LOG_DEBUG, "unknown module identifier: %04X", identifier);
+  logMessage(LOG_DEBUG, "unknown module identifier: %04X", identifier);
   return NULL;
 }
 
@@ -875,7 +875,7 @@ getBaumModuleCellCount (void) {
 
 static void
 assumeBaumDeviceIdentity (const char *identity) {
-  LogPrint(LOG_INFO, "Baum Device Identity: %s", identity);
+  logMessage(LOG_INFO, "Baum Device Identity: %s", identity);
 }
 
 static void
@@ -921,7 +921,7 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
     }
   }
 
-  LogPrint(LOG_WARNING, "%.*s", length, buffer);
+  logMessage(LOG_WARNING, "%.*s", length, buffer);
   return 1;
 }
 
@@ -1396,7 +1396,7 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
         break;
 
       default:
-        LogPrint(LOG_WARNING, "unsupported data register configuration: %u", bmd->type);
+        logMessage(LOG_WARNING, "unsupported data register configuration: %u", bmd->type);
         break;
     }
   }
@@ -1466,7 +1466,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
               return 1;
             }
 
-            LogPrint(LOG_DEBUG, "unexpected cell count: %u", count);
+            logMessage(LOG_DEBUG, "unexpected cell count: %u", count);
             continue;
           }
 
@@ -1504,7 +1504,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
 
           case BAUM_RSP_ErrorCode:
             if (response.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
-            LogPrint(LOG_DEBUG, "unsupported request");
+            logMessage(LOG_DEBUG, "unsupported request");
             continue;
 
           default:
@@ -1703,7 +1703,7 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       case BAUM_RSP_ErrorCode:
         if (packet.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
-        LogPrint(LOG_DEBUG, "unsupported request");
+        logMessage(LOG_DEBUG, "unsupported request");
         continue;
 
       default:
@@ -1878,12 +1878,12 @@ findHandyTechModel (unsigned char identity) {
 
   for (model=handyTechModelTable; model->name; ++model) {
     if (identity == model->identity) {
-      LogPrint(LOG_INFO, "Baum emulation: HandyTech Model: %02X -> %s", identity, model->name);
+      logMessage(LOG_INFO, "Baum emulation: HandyTech Model: %02X -> %s", identity, model->name);
       return model;
     }
   }
 
-  LogPrint(LOG_WARNING, "Baum emulation: unknown HandyTech identity code: %02X", identity);
+  logMessage(LOG_WARNING, "Baum emulation: unknown HandyTech identity code: %02X", identity);
   return NULL;
 }
 
@@ -2159,8 +2159,8 @@ probePowerBrailleDisplay (BrailleDisplay *brl) {
       if (getPowerBraillePacket(brl, &response)) {
         if (response.data.code == PB_RSP_IDENTITY) {
           const unsigned char *version = response.data.values.identity.version;
-          LogPrint(LOG_INFO, "Baum emulation: PowerBraille Version: %c%c%c%c",
-                   version[0], version[1], version[2], version[3]);
+          logMessage(LOG_INFO, "Baum emulation: PowerBraille Version: %c%c%c%c",
+                     version[0], version[1], version[2], version[3]);
           cellCount = response.data.values.identity.cells;
           return 1;
         }
@@ -2601,7 +2601,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
     if (count == -1) {
       logSystemError("Baum Bluetooth write");
     } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
   }
   return count;
@@ -2629,13 +2629,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     unsigned int index;
 
     if (!validateChoice(&index, parameters[PARM_PROTOCOLS], choices))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid protocols setting", parameters[PARM_PROTOCOLS]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid protocols setting", parameters[PARM_PROTOCOLS]);
     requestedProtocols = values[index];
   }
 
   useVarioKeys = 0;
   if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
+    logMessage(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
 
   if (isSerialDevice(&device)) {
     io = &serialOperations;
@@ -2657,7 +2657,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (!protocolAddress) protocolAddress = io->protocols;
 
       while ((protocol = *(protocolAddress++))) {
-        LogPrint(LOG_DEBUG, "probing with %s protocol", protocol->name);
+        logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
 
         {
           int bits = 10;

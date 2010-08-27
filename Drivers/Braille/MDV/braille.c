@@ -214,15 +214,15 @@ receive_rest(unsigned char *packet)
   if(myread(packet+1, PACKET_HDR_LEN-1) != PACKET_HDR_LEN-1) return 0;
   /* Check for STX and ETX */
   if(packet[1] != packet_hdr[1] || packet[4] != packet_hdr[4]){
-    LogPrint(LOG_DEBUG,"Invalid packet: STX %02x, ETX %02x",
-	     packet[1],packet[4]);
+    logMessage(LOG_DEBUG,"Invalid packet: STX %02x, ETX %02x",
+	       packet[1],packet[4]);
     return 0;
   }
   len = packet[OFF_LEN];
   if(len > MAXPACKETLEN) return 0;
   if(myread(packet+PACKET_HDR_LEN, len+NRCKSUMBYTES)
      != len+NRCKSUMBYTES){
-    LogPrint(LOG_DEBUG,"receive_rest(): short read count");
+    logMessage(LOG_DEBUG,"receive_rest(): short read count");
     return 0;
   }
 #if 0
@@ -234,15 +234,15 @@ receive_rest(unsigned char *packet)
     sprintf(hexbuf, "%02x ", packet[i+PACKET_HDR_LEN]);
     strcat(msgbuf, hexbuf);
   }
-  LogPrint(LOG_DEBUG,"Received packet: code %u, body %s",
-	   packet[OFF_CODE],msgbuf);
+  logMessage(LOG_DEBUG,"Received packet: code %u, body %s",
+	     packet[OFF_CODE],msgbuf);
 }
 #endif /* 0 */
   /* Verify checksum */
   cksum = calc_cksum(packet);
   if(packet[PACKET_HDR_LEN+len] != (unsigned char)(cksum & 0xFF)
      || packet[PACKET_HDR_LEN+len+1] != (unsigned char)(cksum >> 8)){
-    LogPrint(LOG_DEBUG,"Checksum invalid");
+    logMessage(LOG_DEBUG,"Checksum invalid");
     return 0;
   }
   return 1;
@@ -330,9 +330,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     if(memcmp(recvpacket, query_reply_packet_hdr, PACKET_HDR_LEN) == 0)
       break;
     if(recvpacket[OFF_CODE] == ACK)
-      LogPrint(LOG_DEBUG,"Skipping probable ACK packet");
+      logMessage(LOG_DEBUG,"Skipping probable ACK packet");
     else
-      LogPrint(LOG_DEBUG,"Skipping invalid response to query");
+      logMessage(LOG_DEBUG,"Skipping invalid response to query");
   }
 
   brl_cols = recvpacket[OFF_NRCONTENTCELLS];
@@ -342,24 +342,24 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   version1 = recvpacket[OFF_PRIMARYVERSION];
   version2 = recvpacket[OFF_SECONDARYVERSION];
 
-  LogPrint(LOG_INFO,"Display replyed: %d cells, %d status cells, "
-	   "%d dots per cell, has routing keys flag %d, version %d.%d",
-	   brl_cols, nrstatcells, dotspercell, hasrouting, version1,version2);
+  logMessage(LOG_INFO,"Display replied: %d cells, %d status cells, "
+	     "%d dots per cell, has routing keys flag %d, version %d.%d",
+	     brl_cols, nrstatcells, dotspercell, hasrouting, version1,version2);
 
   if(brl_cols > MAXNRCONTENTCELLS || brl_cols < 1){
-    LogPrint(LOG_ERR, "Invalid number of cells: %d", brl_cols);
+    logMessage(LOG_ERR, "Invalid number of cells: %d", brl_cols);
     goto failure;
   }
   if(nrstatcells != EXPECTEDNRSTATCELLS)
-    LogPrint(LOG_NOTICE, "Unexpected number of status cells: %d", nrstatcells);
+    logMessage(LOG_NOTICE, "Unexpected number of status cells: %d", nrstatcells);
   if(nrstatcells < 0){
-    LogPrint(LOG_ERR, "Invalid number of status cells: %d", nrstatcells);
+    logMessage(LOG_ERR, "Invalid number of status cells: %d", nrstatcells);
     goto failure;
   }
   if(brl_cols + nrstatcells > MAXPACKETLEN){
     /* This is to make sure we don't overflow the sendpacket when sending
        braille to be displayed. */
-    LogPrint(LOG_ERR, "Invalid total number of cells");
+    logMessage(LOG_ERR, "Invalid total number of cells");
     goto failure;
   }
 
@@ -464,10 +464,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
       return 1;
     else{
       packet_to_process = 1;
-      LogPrint(LOG_DEBUG, "After sending update, received code %d packet",
-	       recvpacket[OFF_CODE]);
+      logMessage(LOG_DEBUG, "After sending update, received code %d packet",
+	         recvpacket[OFF_CODE]);
     }
-  }else LogPrint(LOG_DEBUG, "No ACK after update");
+  }else logMessage(LOG_DEBUG, "No ACK after update");
   /* We'll do resends like this for now */
   memset(prevdata, 0xFF, brl_cols);
   memset(prevstatbuf, 0, nrstatcells);
@@ -509,7 +509,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   /* Note that we discard ACK packets */
   /* All these packets should have a length of 1 */
   if(recvpacket[OFF_LEN] != 1){
-    LogPrint(LOG_NOTICE,"Received key code 0x%x with length %d",
+    logMessage(LOG_NOTICE,"Received key code 0x%x with length %d",
 	       code, recvpacket[OFF_LEN]);
     return EOF;
   }
@@ -521,8 +521,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       /* SHIFT_PRESS and SHIFT_RELEASE are exceptions to the following */
       int key = keycode & KEY_MASK;
       int modifier = keycode & MODIFIER_MASK;
-      LogPrint(LOG_DEBUG,"Received key code 0x%x with modifier 0x%x",
-	       key, modifier);
+      logMessage(LOG_DEBUG,"Received key code 0x%x with modifier 0x%x",
+	         key, modifier);
       if(nr_routing_cur_pressed > 0){
 	ignore_next_release = 1;
 	if(howmanykeys == 1 && modifier == 0){
@@ -593,9 +593,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     case REPORTROUTINGKEYPRESS:
     case REPORTROUTINGKEYRELEASE: {
       int whichkey = recvpacket[PACKET_HDR_LEN];
-      LogPrint(LOG_DEBUG,"Received routing key %s for key %d",
-	       ((code == REPORTROUTINGKEYPRESS) ? "press" : "release"),
-	       whichkey);
+      logMessage(LOG_DEBUG,"Received routing key %s for key %d",
+	         ((code == REPORTROUTINGKEYPRESS) ? "press" : "release"),
+	         whichkey);
       if(whichkey < 1 || whichkey > brl_cols+nrstatcells) return EOF;
       if(whichkey <= nrstatcells){
 	/* special handling for routing keys over status cells: currently

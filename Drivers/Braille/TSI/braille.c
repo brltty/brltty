@@ -335,7 +335,7 @@ QueryDisplay(unsigned char *reply)
       }
     }
   } else if (count != -1) {
-    LogPrint(LOG_ERR, "Short write: %d < %d", count, DIM_BRL_QUERY);
+    logMessage(LOG_ERR, "Short write: %d < %d", count, DIM_BRL_QUERY);
   } else {
     logSystemError("Write");
   }
@@ -371,13 +371,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   /* Open the Braille display device for random access */
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
   /* Try to detect display by sending query */
-  LogPrint(LOG_DEBUG,"Sending query at 9600bps");
+  logMessage(LOG_DEBUG,"Sending query at 9600bps");
   if(!serialRestartDevice(serialDevice, serialBaud=9600)) goto failure;
   if(!QueryDisplay(reply)){
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
-    LogPrint(LOG_DEBUG,"Sending query at 19200bps");
+    logMessage(LOG_DEBUG,"Sending query at 19200bps");
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     if(!QueryDisplay(reply)) goto failure;
 #endif /* HIGHBAUD */
@@ -385,8 +385,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   memcpy (disp_ver, &reply[Q_OFFSET_VER], Q_VER_LENGTH);
   ncells = reply[Q_OFFSET_COLS];
-  LogPrint(LOG_INFO,"Display replied: %d cells, version %c%c%c%c", ncells,
-	   disp_ver[0], disp_ver[1], disp_ver[2], disp_ver[3]);
+  logMessage(LOG_INFO,"Display replied: %d cells, version %c%c%c%c", ncells,
+	     disp_ver[0], disp_ver[1], disp_ver[2], disp_ver[3]);
 
   brl_cols = ncells;
   sw_lastkey = brl_cols-1;
@@ -398,7 +398,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     /* nav 20 */
     displayType = NAV20_40;
     has_sw = 0;
-    LogPrint(LOG_INFO, "Detected Navigator 20");
+    logMessage(LOG_INFO, "Detected Navigator 20");
     break;
   case 40:
     if(disp_ver[1] > '3'){
@@ -408,13 +408,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       sw_bcnt = SW_CNT40;
       sw_lastkey = 39;
       speed = 2;
-      LogPrint(LOG_INFO, "Detected PowerBraille 40");
+      logMessage(LOG_INFO, "Detected PowerBraille 40");
     }else{
       /* nav 40 */
       has_sw = 0;
       displayType = NAV20_40;
       slow_update = 1;
-      LogPrint(LOG_INFO, "Detected Navigator 40");
+      logMessage(LOG_INFO, "Detected Navigator 40");
     }
     break;
   case 80:
@@ -424,7 +424,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     sw_bcnt = SW_CNT80;
     sw_lastkey = 79;
     slow_update = 2;
-    LogPrint(LOG_INFO, "Detected Navigator 80");
+    logMessage(LOG_INFO, "Detected Navigator 80");
     break;
   case 65:
     /* pb65 */
@@ -434,7 +434,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     sw_lastkey = 64;
     speed = 2;
     slow_update = 2;
-    LogPrint(LOG_INFO, "Detected PowerBraille 65");
+    logMessage(LOG_INFO, "Detected PowerBraille 65");
     break;
   case 81:
     /* pb80 */
@@ -444,10 +444,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     sw_lastkey = 80;
     speed = 2;
     slow_update = 2;
-    LogPrint(LOG_INFO, "Detected PowerBraille 80");
+    logMessage(LOG_INFO, "Detected PowerBraille 80");
     break;
   default:
-    LogPrint(LOG_ERR,"Unrecognized braille display");
+    logMessage(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
   brl->keyBindings = keyBindings[displayType];
@@ -471,21 +471,21 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     serialDrainOutput(serialDevice);
     approximateDelay(BAUD_DELAY);
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
-    LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
+    logMessage(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(reply))
-      LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
+      logMessage(LOG_DEBUG,"Display responded at 19200bps.");
     else{
-      LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
-	       "falling back to 9600bps.");
+      logMessage(LOG_INFO,"Display did not respond at 19200bps, "
+	         "falling back to 9600bps.");
       if(!serialSetBaud(serialDevice, serialBaud=9600)) goto failure;
       serialDrainOutput(serialDevice);
       approximateDelay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(reply)) {
-	LogPrint(LOG_INFO,"Found display again at 9600bps.");
-	LogPrint(LOG_INFO, "Must be a TSI emulator.");
+	logMessage(LOG_INFO,"Found display again at 9600bps.");
+	logMessage(LOG_INFO, "Must be a TSI emulator.");
         fullFreshenEvery = 1;
       }else{
-	LogPrint(LOG_ERR,"Display lost after baud switching");
+	logMessage(LOG_ERR,"Display lost after baud switching");
 	goto failure;
       }
     }
@@ -921,7 +921,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       if((pings>=PING_MAXNQUERY && ping_due))
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
-	LogPrint(LOG_DEBUG,"Display idle: sending query");
+	logMessage(LOG_DEBUG,"Display idle: sending query");
 	serialDrainOutput(serialDevice);
 	approximateDelay(2*SEND_DELAY);
 	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
@@ -993,7 +993,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
     return (EOF);
   }else if(packtype == K_QUERYREP){
     /* flush the last 10bytes of the reply. */
-    LogPrint(LOG_DEBUG,"Got reply to idle ping");
+    logMessage(LOG_DEBUG,"Got reply to idle ping");
     myread(buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH);
     return(EOF);
   }else if(packtype == K_NAVKEY || packtype == K_PBKEY){

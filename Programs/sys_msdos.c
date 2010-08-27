@@ -281,7 +281,7 @@ background(void) {
     __dpmi_int(DOS_INT, &regs);
 
     /* shouldn't be reached */
-    LogPrint(LOG_ERR,"Installation failed");
+    logMessage(LOG_ERR,"Installation failed");
     backgrounded = 0;
   }
   saveState(&intState);

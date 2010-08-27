@@ -148,15 +148,15 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
       broadcastFd = -1;
       return (0);
     }
-  LogPrint(LOG_DEBUG, "Received %s response from %s:%d.", 
-	   inbuf, inet_ntoa(sourceAddress.sin_addr), 
-	   ntohs(sourceAddress.sin_port));
+  logMessage(LOG_DEBUG, "Received %s response from %s:%d.", 
+	     inbuf, inet_ntoa(sourceAddress.sin_addr), 
+	     ntohs(sourceAddress.sin_port));
   memset(outbuf, 0, sizeof(outbuf));
   strcpy(outbuf, "IRIS_NET_");
   strncat(outbuf + 9, inbuf + 5, 4);
   strcat(outbuf + 13, "_?");
   memset(inbuf, 0, sizeof(inbuf));
-  LogPrint(LOG_DEBUG, "Sending %s ...", outbuf);
+  logMessage(LOG_DEBUG, "Sending %s ...", outbuf);
   if (sendto(broadcastFd, (void *)outbuf, strlen(outbuf), 0,
 	     (struct sockaddr *)&broadcastAddress,
 	     len) == -1)
@@ -174,7 +174,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
       broadcastFd = -1;
       return (0);
     }
-  LogPrint(LOG_DEBUG, "Received %s response.", inbuf);
+  logMessage(LOG_DEBUG, "Received %s response.", inbuf);
   int ourPort;
   struct sockaddr_in localAddress;
   socklen_t localLen;
@@ -186,8 +186,8 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
       return (0);
     }
   ourPort = ntohs(localAddress.sin_port);
-  LogPrint(LOG_DEBUG, "Sourde Address: %s:%d",
-	   inet_ntoa(localAddress.sin_addr), ourPort);
+  logMessage(LOG_DEBUG, "Sourde Address: %s:%d",
+	     inet_ntoa(localAddress.sin_addr), ourPort);
   listenAddress.sin_family = AF_INET;
   listenAddress.sin_port = htons(ourPort);
   listenAddress.sin_addr.s_addr = INADDR_ANY;
@@ -217,16 +217,16 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   approximateDelay(200);
   if (ourPort == 0)
     {
-      LogPrint(LOG_INFO, "eu: netinit: Failed to negotiate port.");
+      logMessage(LOG_INFO, "eu: netinit: Failed to negotiate port.");
       close(broadcastFd);
       close(realConnectionFd);
       realConnectionFd = broadcastFd = -1;
       return (0);
     }
-  LogPrint(LOG_DEBUG, "eu: netinit: Listening on port %d", ourPort);
+  logMessage(LOG_DEBUG, "eu: netinit: Listening on port %d", ourPort);
   memset(outbuf, 0, sizeof(outbuf));
   strcpy(outbuf, "IRIS_NET_DO_CONNECT");
-  LogPrint(LOG_DEBUG, "Sending %s", outbuf);
+  logMessage(LOG_DEBUG, "Sending %s", outbuf);
   if (sendto(broadcastFd, (void *)outbuf, strlen(outbuf), 0,
 	     (struct sockaddr *)&broadcastAddress,
 	     sourceLen) == -1)
@@ -237,7 +237,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   close(broadcastFd);
   broadcastFd = -1;
   int fd = -1;
-  LogPrint(LOG_DEBUG, "Waiting for incoming connection from remote device.");
+  logMessage(LOG_DEBUG, "Waiting for incoming connection from remote device.");
   if ((fd = accept(realConnectionFd, (struct sockaddr *)&sourceAddress, 
 	     &sourceLen)) == -1)
     {
@@ -249,8 +249,8 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   close(realConnectionFd);
   realConnectionFd = fd;
   setBlockingIo(realConnectionFd, 0);
-  LogPrint(LOG_INFO, "eu: Ethernet transport initialized, fd=%d.",
-	   realConnectionFd);
+  logMessage(LOG_INFO, "eu: Ethernet transport initialized, fd=%d.",
+	     realConnectionFd);
   connectionStatus = NET_CONNECTED;
   return (1);
 }
@@ -261,7 +261,7 @@ eubrl_netRead(BrailleDisplay *brl, void *buf, size_t bufsize, int wait)
   if (connectionStatus != NET_CONNECTED)
     {
       errno = ENOTCONN;
-      LogPrint(LOG_ERR, "EuroBraille: NET read while not connected.");
+      logMessage(LOG_ERR, "EuroBraille: NET read while not connected.");
       return (-1);
     }
   else

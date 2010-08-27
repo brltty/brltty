@@ -49,8 +49,8 @@ pcmConstruct (int errorLevel) {
       device->blockUsed = 0;
 
       if ((device->blockAddress = malloc(device->blockSize))) {
-        LogPrint(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
-                 device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
+        logMessage(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
+                   device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
         return device;
       } else {
         logMallocError();
@@ -64,7 +64,7 @@ pcmConstruct (int errorLevel) {
     logMallocError();
   }
 
-  LogPrint(LOG_DEBUG, "PCM not available");
+  logMessage(LOG_DEBUG, "PCM not available");
   return NULL;
 }
 
@@ -195,8 +195,8 @@ pcmPlay (NoteDevice *device, int note, int duration) {
     float currSample = 0;
 
     if (waveLength <= 2) stepSample = 0;
-    LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
-             duration, sampleCount, note);
+    logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+               duration, sampleCount, note);
 
     while (sampleCount > 0) {
       do {
@@ -214,8 +214,8 @@ pcmPlay (NoteDevice *device, int note, int duration) {
       } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
     }
   } else {
-    LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
-             duration, sampleCount, note);
+    logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+               duration, sampleCount, note);
 
     while (sampleCount > 0) {
       if (!writeSample(device, 0)) return 0;
@@ -246,7 +246,7 @@ pcmDestruct (NoteDevice *device) {
   free(device->blockAddress);
   closePcmDevice(device->pcm);
   free(device);
-  LogPrint(LOG_DEBUG, "PCM disabled");
+  logMessage(LOG_DEBUG, "PCM disabled");
 }
 
 const NoteMethods pcmMethods = {

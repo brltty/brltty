@@ -188,7 +188,7 @@ installKernelModule (const char *name, int *status) {
 
         fclose(stream);
       } else {
-        LogPrint(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
+        logMessage(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
       }
     }
 
@@ -197,7 +197,7 @@ installKernelModule (const char *name, int *status) {
       int ok = executeHostCommand(arguments) == 0;
 
       if (!ok) {
-        LogPrint(LOG_WARNING, "kernel module not installed: %s", name);
+        logMessage(LOG_WARNING, "kernel module not installed: %s", name);
         return 0;
       }
 
@@ -216,31 +216,31 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
   if (!path) {
     descriptor = -1;
   } else if ((descriptor = open(path, flags)) != -1) {
-    LogPrint(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
+    logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
   } else {
-    LogPrint(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
+    logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
 
     if (errno == ENOENT) {
       free(path);
       if ((path = makeWritablePath(locatePathName(name)))) {
         if ((descriptor = open(path, flags)) != -1) {
-          LogPrint(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
+          logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
         } else {
-          LogPrint(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
+          logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
 
           if (errno == ENOENT) {
             mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
 
             if (mknod(path, mode, makedev(major, minor)) == -1) {
-              LogPrint(LOG_DEBUG, "cannot create device: %s: %s", path, strerror(errno));
+              logMessage(LOG_DEBUG, "cannot create device: %s: %s", path, strerror(errno));
             } else {
-              LogPrint(LOG_DEBUG, "device created: %s mode=%06o major=%d minor=%d",
-                       path, mode, major, minor);
+              logMessage(LOG_DEBUG, "device created: %s mode=%06o major=%d minor=%d",
+                         path, mode, major, minor);
 
               if ((descriptor = open(path, flags)) != -1) {
-                LogPrint(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
+                logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
               } else {
-                LogPrint(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
+                logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
               }
             }
           }
@@ -254,17 +254,17 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
     struct stat status;
 
     if (fstat(descriptor, &status) == -1) {
-      LogPrint(LOG_DEBUG, "cannot fstat device: %d [%s]: %s",
-               descriptor, path, strerror(errno));
+      logMessage(LOG_DEBUG, "cannot fstat device: %d [%s]: %s",
+                 descriptor, path, strerror(errno));
     } else if (!S_ISCHR(status.st_mode)) {
-      LogPrint(LOG_DEBUG, "not a character device: %s: fd=%d", path, descriptor);
+      logMessage(LOG_DEBUG, "not a character device: %s: fd=%d", path, descriptor);
     } else {
       ok = 1;
     }
 
     if (!ok) {
       close(descriptor);
-      LogPrint(LOG_DEBUG, "device closed: %s: fd=%d", path, descriptor);
+      logMessage(LOG_DEBUG, "device closed: %s: fd=%d", path, descriptor);
       descriptor = -1;
     }
   }
@@ -298,7 +298,7 @@ getUinputDevice (void) {
 
       if (device != -1) {
         struct uinput_user_dev description;
-        LogPrint(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
+        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
         
         memset(&description, 0, sizeof(description));
         strcpy(description.name, "brltty");
@@ -319,10 +319,10 @@ getUinputDevice (void) {
 
         if (device != uinputDevice) {
           close(device);
-          LogPrint(LOG_DEBUG, "uinput closed");
+          logMessage(LOG_DEBUG, "uinput closed");
         }
       } else {
-        LogPrint(LOG_DEBUG, "cannot open uinput");
+        logMessage(LOG_DEBUG, "cannot open uinput");
       }
     }
   }

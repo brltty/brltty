@@ -154,7 +154,7 @@ main (int argc, char *argv[]) {
   if (opt_tuneDevice && *opt_tuneDevice) {
     unsigned int device;
     if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
+      logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
       exit(2);
     }
     tuneDevice = device;
@@ -165,7 +165,7 @@ main (int argc, char *argv[]) {
 #ifdef ENABLE_MIDI_SUPPORT
   if (opt_midiInstrument && *opt_midiInstrument) {
     if (!validateInstrument(&midiInstrument, opt_midiInstrument)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
+      logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
       exit(2);
     }
   } else {
@@ -178,7 +178,7 @@ main (int argc, char *argv[]) {
     static const int maximum = 100;
     int volume;
     if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
-      LogPrint(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
+      logMessage(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
       exit(2);
     }
     outputVolume = volume;
@@ -187,12 +187,12 @@ main (int argc, char *argv[]) {
   }
 
   if (!argc) {
-    LogPrint(LOG_ERR, "missing tune.");
+    logMessage(LOG_ERR, "missing tune.");
     exit(2);
   }
 
   if (argc % 2) {
-    LogPrint(LOG_ERR, "missing note duration.");
+    logMessage(LOG_ERR, "missing note duration.");
     exit(2);
   }
 
@@ -210,7 +210,7 @@ main (int argc, char *argv[]) {
         static const int maximum = 0X7F;
         const char *argument = *argv++;
         if (!validateInteger(&note, argument, &minimum, &maximum)) {
-          LogPrint(LOG_ERR, "%s: %s", "invalid note number", argument);
+          logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
           exit(2);
         }
         --argc;
@@ -221,7 +221,7 @@ main (int argc, char *argv[]) {
         static const int maximum = 255;
         const char *argument = *argv++;
         if (!validateInteger(&duration, argument, &minimum, &maximum)) {
-          LogPrint(LOG_ERR, "%s: %s", "invalid note duration", argument);
+          logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
           exit(2);
         }
         --argc;
@@ -239,7 +239,7 @@ main (int argc, char *argv[]) {
     }
 
     if (!setTuneDevice(tuneDevice)) {
-      LogPrint(LOG_ERR, "unsupported tune device: %s", deviceNames[tuneDevice]);
+      logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[tuneDevice]);
       exit(3);
     }
 

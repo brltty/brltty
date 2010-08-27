@@ -41,16 +41,16 @@ processParameters_WindowsScreen (char **parameters) {
   root = 0;
   if (*parameters[PARM_ROOT])
     if (!validateYesNo(&root, parameters[PARM_ROOT]))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
   if (root && AttachConsoleProc)
-    LogPrint(LOG_WARNING, "No need for root BRLTTY on newer (XP or later) systems");
+    logMessage(LOG_WARNING, "No need for root BRLTTY on newer (XP or later) systems");
 
   followFocus = 1;
   if (*parameters[PARM_FOLLOWFOCUS])
     if (!validateYesNo(&followFocus, parameters[PARM_FOLLOWFOCUS]))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid follow focus setting", parameters[PARM_FOLLOWFOCUS]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid follow focus setting", parameters[PARM_FOLLOWFOCUS]);
   if (followFocus && !AttachConsoleProc)
-    LogPrint(LOG_WARNING, "Cannot follow focus on older (pre-XP) systems");
+    logMessage(LOG_WARNING, "Cannot follow focus on older (pre-XP) systems");
   return 1;
 }
 
@@ -273,8 +273,8 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     }
 
     if (read != box->width) {
-      LogPrint(LOG_ERR, "wrong number of items read: %s: %ld != %d",
-               name, read, box->width);
+      logMessage(LOG_ERR, "wrong number of items read: %s: %ld != %d",
+                 name, read, box->width);
       break;
     }
 
@@ -295,8 +295,8 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     }
 
     if (read != box->width) {
-      LogPrint(LOG_ERR, "wrong number of items read: %s: %ld != %d",
-               name, read, box->width);
+      logMessage(LOG_ERR, "wrong number of items read: %s: %ld != %d",
+                 name, read, box->width);
       break;
     }
 
@@ -329,7 +329,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
     if (num == 1) {
       return 1;
     } else {
-      LogPrint(LOG_ERR, "inserted %ld keys, expected 1", num);
+      logMessage(LOG_ERR, "inserted %ld keys, expected 1", num);
     }
   } else {
     if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) {
@@ -338,7 +338,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
 	if (num == 1) {
 	  return 1;
 	} else {
-	  LogPrint(LOG_ERR, "inserted %ld keys, expected 1", num);
+	  logMessage(LOG_ERR, "inserted %ld keys, expected 1", num);
 	}
       }
     }
@@ -375,7 +375,7 @@ doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD flags) 
     switch (num) {
       case 1:  return 1;
       case 0:  logWindowsSystemError("SendInput"); break;
-      default: LogPrint(LOG_ERR, "inserted %d keys, expected 1", num); break;
+      default: logMessage(LOG_ERR, "inserted %d keys, expected 1", num); break;
     }
     return 0;
   } else {
@@ -391,7 +391,7 @@ insertKey_WindowsScreen (ScreenKey key) {
   DWORD controlKeyState = 0;
   WCHAR wchar = 0;
 
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X",key);
+  logMessage(LOG_DEBUG, "Insert key: %4.4X",key);
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:         vk = VK_RETURN; wchar='\r'; break;
@@ -432,7 +432,7 @@ insertKey_WindowsScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 21: vk = VK_F22;    break;
       case SCR_KEY_FUNCTION + 22: vk = VK_F23;    break;
       case SCR_KEY_FUNCTION + 23: vk = VK_F24;    break;
-      default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key);
+      default: logMessage(LOG_WARNING, "Key %4.4X not suported.", key);
                return 0;
     }
   } else {
@@ -457,7 +457,7 @@ insertKey_WindowsScreen (ScreenKey key) {
     if (vk == -1 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
       vk = VkKeyScan(wchar);
     if (vk != -1) {
-      LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
+      logMessage(LOG_DEBUG, "vk is %4.4X", vk);
       if (vk & 0x100) controlKeyState |= SHIFT_PRESSED;
       if ((vk & 0x600) == 0x600) {
 	controlKeyState |= RIGHT_ALT_PRESSED;
@@ -471,16 +471,16 @@ insertKey_WindowsScreen (ScreenKey key) {
 
   scancode = MapVirtualKey(vk, 0);
 
-  LogPrint(LOG_DEBUG,"wchar %x vk %x scancode %d ks %ld", wchar, vk, scancode, controlKeyState);
+  logMessage(LOG_DEBUG,"wchar %x vk %x scancode %d ks %ld", wchar, vk, scancode, controlKeyState);
   if (consoleInput != INVALID_HANDLE_VALUE && !unreadable) {
-    LogPrint(LOG_DEBUG, "using WriteConsoleInput");
+    logMessage(LOG_DEBUG, "using WriteConsoleInput");
     if (!doInsertWriteConsoleInput(TRUE, wchar, vk, scancode, controlKeyState))
       return 0;
     if (!doInsertWriteConsoleInput(FALSE, wchar, vk, scancode, controlKeyState))
       return 0;
     return 1;
   } else {
-    LogPrint(LOG_DEBUG, "using SendInput");
+    logMessage(LOG_DEBUG, "using SendInput");
     if (controlKeyState & LEFT_CTRL_PRESSED)
       if (!doInsertSendInput(TRUE, 0, VK_CONTROL, 0, 0))
         return 0;

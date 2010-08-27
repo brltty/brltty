@@ -42,7 +42,7 @@ static void
 LogWaveOutError(MMRESULT error, int errorLevel, const char *action) {
   char msg[MAXERRORLENGTH];
   waveOutGetErrorText(error, msg, sizeof(msg));
-  LogPrint(errorLevel, "%s error %d: %s.", action, error, msg);
+  logMessage(errorLevel, "%s error %d: %s.", action, error, msg);
 }
 
 PcmDevice *
@@ -54,7 +54,7 @@ openPcmDevice (int errorLevel, const char *device) {
 
   if (*device) {
     if (!isInteger(&id, device) || (id < 0) || (id >= waveOutGetNumDevs())) {
-      LogPrint(errorLevel, "invalid PCM device number: %s", device);
+      logMessage(errorLevel, "invalid PCM device number: %s", device);
       return NULL;
     }
   }
@@ -68,7 +68,7 @@ openPcmDevice (int errorLevel, const char *device) {
   if ((waveOutGetDevCaps(pcm->deviceID, &caps, sizeof(caps))) != MMSYSERR_NOERROR)
     pcm->format = defaultFormat;
   else {
-    LogPrint(errorLevel, "PCM device %d is %s", pcm->deviceID, caps.szPname);
+    logMessage(errorLevel, "PCM device %d is %s", pcm->deviceID, caps.szPname);
     pcm->format.wFormatTag = WAVE_FORMAT_PCM;
     if (caps.dwFormats & 
 	(WAVE_FORMAT_1S08
@@ -99,7 +99,7 @@ openPcmDevice (int errorLevel, const char *device) {
 	|WAVE_FORMAT_1S16))
       pcm->format.nSamplesPerSec = 11025;
     else {
-      LogPrint(errorLevel, "unknown PCM capability %#lx",caps.dwFormats);
+      logMessage(errorLevel, "unknown PCM capability %#lx",caps.dwFormats);
       goto out;
     }
     if (caps.dwFormats &
@@ -119,7 +119,7 @@ openPcmDevice (int errorLevel, const char *device) {
 	|WAVE_FORMAT_4S08))
       pcm->format.wBitsPerSample = 8;
     else {
-      LogPrint(LOG_ERR, "unknown PCM capability %#lx",caps.dwFormats);
+      logMessage(LOG_ERR, "unknown PCM capability %#lx",caps.dwFormats);
       goto out;
     }
     recomputeWaveOutFormat(&pcm->format);

@@ -107,7 +107,7 @@ usbGetLanguage (
   if (size != -1) {
     if (size >= 4) {
       *language = getLittleEndian(descriptor.string.wData[0]);
-      LogPrint(LOG_DEBUG, "USB Language: %02X", *language);
+      logMessage(LOG_DEBUG, "USB Language: %02X", *language);
       return 1;
     }
     errno = EIO;
@@ -176,7 +176,7 @@ usbLogString (
   if (number) {
     char *string = usbGetString(device, number, 1000);
     if (string) {
-      LogPrint(LOG_INFO, "USB: %s: %s", description, string);
+      logMessage(LOG_INFO, "USB: %s: %s", description, string);
       free(string);
     }
   }
@@ -256,7 +256,7 @@ usbGetConfiguration (
                             UsbStandardRequest_GetConfiguration, 0, 0,
                             configuration, sizeof(*configuration), 1000);
   if (size != -1) return 1;
-  LogPrint(LOG_WARNING, "USB standard request not supported: get configuration");
+  logMessage(LOG_WARNING, "USB standard request not supported: get configuration");
   return 0;
 }
 
@@ -289,7 +289,7 @@ usbConfigurationDescriptor (
         int size = usbGetDescriptor(device, UsbDescriptorType_Configuration,
                                     number, 0, &descriptor, 1000);
         if (size == -1) {
-          LogPrint(LOG_WARNING, "USB configuration descriptor not readable: %d", number);
+          logMessage(LOG_WARNING, "USB configuration descriptor not readable: %d", number);
         } else if (descriptor.configuration.bConfigurationValue == current) {
           break;
         }
@@ -320,7 +320,7 @@ usbConfigurationDescriptor (
           logSystemError("USB configuration descriptor allocate");
         }
       } else {
-        LogPrint(LOG_ERR, "USB configuration descriptor not found: %d", current);
+        logMessage(LOG_ERR, "USB configuration descriptor not found: %d", current);
       }
     }
   }
@@ -386,7 +386,7 @@ usbInterfaceDescriptor (
           return &descriptor->interface;
   }
 
-  LogPrint(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
+  logMessage(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
   errno = ENOENT;
   return NULL;
 }
@@ -421,7 +421,7 @@ usbEndpointDescriptor (
         return &descriptor->endpoint;
   }
 
-  LogPrint(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
+  logMessage(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
   errno = ENOENT;
   return NULL;
 }
@@ -486,10 +486,10 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         case UsbEndpointTransfer_Interrupt:   transfer = "int"; break;
       }
 
-      LogPrint(LOG_DEBUG, "USB: ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
-               descriptor->bEndpointAddress, direction, transfer,
-               getLittleEndian(descriptor->wMaxPacketSize),
-               descriptor->bInterval);
+      logMessage(LOG_DEBUG, "USB: ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
+                 descriptor->bEndpointAddress, direction, transfer,
+                 getLittleEndian(descriptor->wMaxPacketSize),
+                 descriptor->bInterval);
     }
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
@@ -610,7 +610,7 @@ usbOpenInterface (
     if (size != -1) {
       if (response[0] == alternative) goto done;
     } else {
-      LogPrint(LOG_WARNING, "USB standard request not supported: get interface");
+      logMessage(LOG_WARNING, "USB standard request not supported: get interface");
     }
   }
 
@@ -675,9 +675,9 @@ UsbDevice *
 usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *data) {
   UsbDevice *device;
   if ((device = usbOpenDevice(extension))) {
-    LogPrint(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
-             device->descriptor.idVendor,
-             device->descriptor.idProduct);
+    logMessage(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
+               device->descriptor.idVendor,
+               device->descriptor.idProduct);
     if (chooser(device, data)) {
       usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
       usbLogString(device, device->descriptor.iProduct, "Product Description");
@@ -867,7 +867,7 @@ usbHidDescriptor (UsbDevice *device) {
     if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID)
       return &descriptor->hid;
 
-  LogPrint(LOG_WARNING, "USB: HID descriptor not found");
+  logMessage(LOG_WARNING, "USB: HID descriptor not found");
   errno = ENOENT;
   return NULL;
 }
@@ -905,8 +905,8 @@ usbHidGetItems (
         logMallocError();
       }
     } else {
-      LogPrint(LOG_WARNING, "USB report descriptor not found: %u[%u]",
-               interface, number);
+      logMessage(LOG_WARNING, "USB report descriptor not found: %u[%u]",
+                 interface, number);
     }
   }
 
@@ -1058,7 +1058,7 @@ usbHidSetFeature (
 
 static int
 usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, int value, int index) {
-  LogPrint(LOG_DEBUG, "Belkin Request: %02X %04X %04X", request, value, index);
+  logMessage(LOG_DEBUG, "Belkin Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
@@ -1066,7 +1066,7 @@ static int
 usbSetBaud_Belkin (UsbDevice *device, int rate) {
   const int base = 230400;
   if (base % rate) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin baud: %d", rate);
+    logMessage(LOG_WARNING, "Unsupported Belkin baud: %d", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1086,14 +1086,14 @@ usbSetFlowControl_Belkin (UsbDevice *device, SerialFlowControl flow) {
   BELKIN_FLOW(SERIAL_FLOW_INPUT_XON , 0X0100);
 #undef BELKIN_FLOW
   if (flow) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
+    logMessage(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
   }
   return usbSetAttribute_Belkin(device, 16, value, 0);
 }
 static int
 usbSetDataBits_Belkin (UsbDevice *device, int bits) {
   if ((bits < 5) || (bits > 8)) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin data bits: %d", bits);
+    logMessage(LOG_WARNING, "Unsupported Belkin data bits: %d", bits);
     errno = EINVAL;
     return 0;
   }
@@ -1102,7 +1102,7 @@ usbSetDataBits_Belkin (UsbDevice *device, int bits) {
 static int
 usbSetStopBits_Belkin (UsbDevice *device, int bits) {
   if ((bits < 1) || (bits > 2)) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
+    logMessage(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
     errno = EINVAL;
     return 0;
   }
@@ -1118,7 +1118,7 @@ usbSetParity_Belkin (UsbDevice *device, SerialParity parity) {
     case SERIAL_PARITY_MARK:  value = 3; break;
     case SERIAL_PARITY_NONE:  value = 0; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported Belkin parity: %d", parity);
+      logMessage(LOG_WARNING, "Unsupported Belkin parity: %d", parity);
       errno = EINVAL;
       return 0;
   }
@@ -1135,7 +1135,7 @@ usbSetDataFormat_Belkin (UsbDevice *device, int dataBits, int stopBits, SerialPa
 static int
 usbSetDtrState_Belkin (UsbDevice *device, int state) {
   if ((state < 0) || (state > 1)) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin DTR state: %d", state);
+    logMessage(LOG_WARNING, "Unsupported Belkin DTR state: %d", state);
     errno = EINVAL;
     return 0;
   }
@@ -1144,7 +1144,7 @@ usbSetDtrState_Belkin (UsbDevice *device, int state) {
 static int
 usbSetRtsState_Belkin (UsbDevice *device, int state) {
   if ((state < 0) || (state > 1)) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin RTS state: %d", state);
+    logMessage(LOG_WARNING, "Unsupported Belkin RTS state: %d", state);
     errno = EINVAL;
     return 0;
   }
@@ -1172,7 +1172,7 @@ usbInputFilter_FTDI (UsbInputFilterData *data) {
 }
 static int
 usbSetAttribute_FTDI (UsbDevice *device, unsigned char request, int value, int index) {
-  LogPrint(LOG_DEBUG, "FTDI Request: %02X %04X %04X", request, value, index);
+  logMessage(LOG_DEBUG, "FTDI Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
@@ -1195,7 +1195,7 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, int rate) {
     case  57600: divisor = 8; break;
     case 115200: divisor = 9; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported FTDI SIO baud: %d", rate);
+      logMessage(LOG_WARNING, "Unsupported FTDI SIO baud: %d", rate);
       errno = EINVAL;
       return 0;
   }
@@ -1204,7 +1204,7 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, int rate) {
 static int
 usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, int rate) {
   if (rate > 3000000) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI FT8U232AM baud: %d", rate);
+    logMessage(LOG_WARNING, "Unsupported FTDI FT8U232AM baud: %d", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1225,7 +1225,7 @@ usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, int rate) {
 static int
 usbSetBaud_FTDI_FT232BM (UsbDevice *device, int rate) {
   if (rate > 3000000) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI FT232BM baud: %d", rate);
+    logMessage(LOG_WARNING, "Unsupported FTDI FT232BM baud: %d", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1251,7 +1251,7 @@ usbSetFlowControl_FTDI (UsbDevice *device, SerialFlowControl flow) {
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_XON|SERIAL_FLOW_INPUT_XON, 0X0400);
 #undef FTDI_FLOW
   if (flow) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
+    logMessage(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
   }
   return usbSetAttribute_FTDI(device, 2, ((index & 0X0400)? 0X1311: 0), index);
 }
@@ -1260,7 +1260,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
   int ok = 1;
   int value = dataBits & 0XFF;
   if (dataBits != value) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI data bits: %d", dataBits);
+    logMessage(LOG_WARNING, "Unsupported FTDI data bits: %d", dataBits);
     ok = 0;
   }
   switch (parity) {
@@ -1270,7 +1270,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
     case SERIAL_PARITY_MARK:  value |= 0X300; break;
     case SERIAL_PARITY_SPACE: value |= 0X400; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported FTDI parity: %d", parity);
+      logMessage(LOG_WARNING, "Unsupported FTDI parity: %d", parity);
       ok = 0;
       break;
   }
@@ -1278,7 +1278,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
     case 1: value |= 0X0000; break;
     case 2: value |= 0X1000; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported FTDI stop bits: %d", stopBits);
+      logMessage(LOG_WARNING, "Unsupported FTDI stop bits: %d", stopBits);
       ok = 0;
       break;
   }
@@ -1291,7 +1291,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
 static int
 usbSetModemState_FTDI (UsbDevice *device, int state, int shift, const char *name) {
   if ((state < 0) || (state > 1)) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
+    logMessage(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
     errno = EINVAL;
     return 0;
   }
@@ -1352,7 +1352,7 @@ usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *d
 }
 static int
 usbSetAttribute_CP2101 (UsbDevice *device, unsigned char request, int value, int index) {
-  LogPrint(LOG_DEBUG, "CP2101 Request: %02X %04X %04X", request, value, index);
+  logMessage(LOG_DEBUG, "CP2101 Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
@@ -1361,7 +1361,7 @@ usbSetBaud_CP2101 (UsbDevice *device, int rate) {
   const int base = 0X384000;
   int divisor = base / rate;
   if ((rate * divisor) != base) {
-    LogPrint(LOG_WARNING, "Unsupported CP2101 baud: %d", rate);
+    logMessage(LOG_WARNING, "Unsupported CP2101 baud: %d", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1374,7 +1374,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   if (!count) return 0;
 
   if (flow) {
-    LogPrint(LOG_WARNING, "Unsupported CP2101 flow control: %02X", flow);
+    logMessage(LOG_WARNING, "Unsupported CP2101 flow control: %02X", flow);
   }
 
   return usbSetAttributes_CP2101(device, 19, bytes, count);
@@ -1384,7 +1384,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
   int ok = 1;
   int value = dataBits & 0XF;
   if (dataBits != value) {
-    LogPrint(LOG_WARNING, "Unsupported CP2101 data bits: %d", dataBits);
+    logMessage(LOG_WARNING, "Unsupported CP2101 data bits: %d", dataBits);
     ok = 0;
   }
   value <<= 8;
@@ -1395,7 +1395,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
     case SERIAL_PARITY_MARK:  value |= 0X30; break;
     case SERIAL_PARITY_SPACE: value |= 0X40; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported CP2101 parity: %d", parity);
+      logMessage(LOG_WARNING, "Unsupported CP2101 parity: %d", parity);
       ok = 0;
       break;
   }
@@ -1403,7 +1403,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
     case 1: value |= 0X0; break;
     case 2: value |= 0X2; break;
     default:
-      LogPrint(LOG_WARNING, "Unsupported CP2101 stop bits: %d", stopBits);
+      logMessage(LOG_WARNING, "Unsupported CP2101 stop bits: %d", stopBits);
       ok = 0;
       break;
   }
@@ -1416,7 +1416,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
 static int
 usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *name) {
   if ((state < 0) || (state > 1)) {
-    LogPrint(LOG_WARNING, "Unsupported CP2101 %s state: %d", name, state);
+    logMessage(LOG_WARNING, "Unsupported CP2101 %s state: %d", name, state);
     errno = EINVAL;
     return 0;
   }
@@ -1628,8 +1628,8 @@ usbSetSerialOperations (UsbDevice *device) {
     }
 
     if (!device->serial)
-      LogPrint(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
-               device->descriptor.idVendor, device->descriptor.idProduct);
+      logMessage(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
+                 device->descriptor.idVendor, device->descriptor.idProduct);
   }
 
   return 1;
@@ -1739,8 +1739,8 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumbe
 
     usbCloseDevice(device);
   } else {
-    LogPrint(LOG_DEBUG, "USB device not found%s%s",
-             (*serialNumber? ": ": ""), serialNumber);
+    logMessage(LOG_DEBUG, "USB device not found%s%s",
+               (*serialNumber? ": ": ""), serialNumber);
   }
 
   return NULL;

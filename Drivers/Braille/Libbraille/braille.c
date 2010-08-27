@@ -58,30 +58,30 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 
   if(braille_init())
     {
-      LogPrint(LOG_INFO, "Libbraille Version: %s", braille_info(BRL_VERSION));
+      logMessage(LOG_INFO, "Libbraille Version: %s", braille_info(BRL_VERSION));
 
 #ifdef BRL_PATH
-      LogPrint(LOG_DEBUG, "Libbraille Installation Directory: %s", braille_info(BRL_PATH));
+      logMessage(LOG_DEBUG, "Libbraille Installation Directory: %s", braille_info(BRL_PATH));
 #endif /* BRL_PATH */
 
 #ifdef BRL_PATHCONF
-      LogPrint(LOG_DEBUG, "Libbraille Configuration Directory: %s", braille_info(BRL_PATHCONF));
+      logMessage(LOG_DEBUG, "Libbraille Configuration Directory: %s", braille_info(BRL_PATHCONF));
 #endif /* BRL_PATHCONF */
 
 #ifdef BRL_PATHTBL
-      LogPrint(LOG_DEBUG, "Libbraille Tables Directory: %s", braille_info(BRL_PATHTBL));
+      logMessage(LOG_DEBUG, "Libbraille Tables Directory: %s", braille_info(BRL_PATHTBL));
 #endif /* BRL_PATHTBL */
 
 #ifdef BRL_PATHDRV
-      LogPrint(LOG_DEBUG, "Libbraille Drivers Directory: %s", braille_info(BRL_PATHDRV));
+      logMessage(LOG_DEBUG, "Libbraille Drivers Directory: %s", braille_info(BRL_PATHDRV));
 #endif /* BRL_PATHDRV */
 
-      LogPrint(LOG_INFO, "Libbraille Table: %s", braille_info(BRL_TABLE));
-      LogPrint(LOG_INFO, "Libbraille Driver: %s", braille_info(BRL_DRIVER));
-      LogPrint(LOG_INFO, "Libbraille Device: %s", braille_info(BRL_DEVICE));
+      logMessage(LOG_INFO, "Libbraille Table: %s", braille_info(BRL_TABLE));
+      logMessage(LOG_INFO, "Libbraille Driver: %s", braille_info(BRL_DRIVER));
+      logMessage(LOG_INFO, "Libbraille Device: %s", braille_info(BRL_DEVICE));
 
-      LogPrint(LOG_INFO, "Display Type: %s", braille_info(BRL_TERMINAL));
-      LogPrint(LOG_INFO, "Display Size: %d", braille_size());
+      logMessage(LOG_INFO, "Display Type: %s", braille_info(BRL_TERMINAL));
+      logMessage(LOG_INFO, "Display Size: %d", braille_size());
 
       brl->textColumns = braille_size();  /* initialise size of display */
       brl->textRows = 1;
@@ -107,7 +107,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
     }
   else
     {
-      LogPrint(LOG_DEBUG, "Libbraille initialization erorr: %s", braille_geterror());
+      logMessage(LOG_DEBUG, "Libbraille initialization erorr: %s", braille_geterror());
     }
   
   return 0;
@@ -155,7 +155,7 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
   status = braille_read(&key);
   if(status == -1)
     {
-      LogPrint(LOG_ERR, "error in braille_read: %s", braille_geterror());
+      logMessage(LOG_ERR, "error in braille_read: %s", braille_geterror());
       res = BRL_CMD_RESTARTBRL;
     }
   else if(status)

@@ -122,7 +122,7 @@ static int
 openConnection (void) {
   if (!connectionHandle) {
     if (!(connectionHandle = spd_open("brltty", "main", NULL, SPD_MODE_THREADED))) {
-      LogPrint(LOG_ERR, "speech dispatcher open failure");
+      logMessage(LOG_ERR, "speech dispatcher open failure");
       return 0;
     }
 
@@ -159,7 +159,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
       snprintf(number, sizeof(number), "%d", port);
       setenv("SPEECHD_PORT", number, 1);
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid port number", parameters[PARM_PORT]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid port number", parameters[PARM_PORT]);
     }
   }
 
@@ -192,7 +192,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
     if (validateChoice(&choice, parameters[PARM_VOICE], choices)) {
       voiceType = voices[choice];
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid voice type", parameters[PARM_VOICE]);
+      logMessage(LOG_WARNING, "%s: %s", "invalid voice type", parameters[PARM_VOICE]);
     }
   }
 
@@ -252,21 +252,21 @@ static void
 spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
   relativeRate = getIntegerSpeechRate(setting, 100) - 100;
   speechdAction(setRate, NULL);
-  LogPrint(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
+  logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
 }
 
 static void
 spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
   relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
   speechdAction(setVolume, NULL);
-  LogPrint(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
+  logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
 }
 
 static void
 spk_pitch (SpeechSynthesizer *spk, unsigned char setting) {
   relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
   speechdAction(setPitch, NULL);
-  LogPrint(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
+  logMessage(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
 }
 
 static void
@@ -275,5 +275,5 @@ spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
                          (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
                          SPD_PUNCT_SOME;
   speechdAction(setPunctuation, NULL);
-  LogPrint(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationVerbosity);
+  logMessage(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationVerbosity);
 }

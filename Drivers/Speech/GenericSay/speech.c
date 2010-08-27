@@ -43,7 +43,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
-  LogPrint(LOG_INFO, "Speech Command: %s", commandPath);
+  logMessage(LOG_INFO, "Speech Command: %s", commandPath);
   return 1;
 }
 

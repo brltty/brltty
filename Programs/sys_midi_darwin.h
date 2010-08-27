@@ -48,7 +48,7 @@ openMidiDevice (int errorLevel, const char *device) {
   cd.componentFlagsMask = 0;
 
   if ((result = NewAUGraph(&midi->graph)) != noErr) {
-    LogPrint(errorLevel, "Can't create audio graph component: %d", result);
+    logMessage(errorLevel, "Can't create audio graph component: %d", result);
     goto err;
   }
 
@@ -56,8 +56,8 @@ openMidiDevice (int errorLevel, const char *device) {
   cd.componentSubType = kAudioUnitSubType_DLSSynth;
   if ((result = AUGraphNewNode(midi->graph, &cd, 0, NULL, &synthNode))
       != noErr) {
-    LogPrint(errorLevel, "Can't create software synthersizer component: %d",
-	     result);
+    logMessage(errorLevel, "Can't create software synthersizer component: %d",
+	       result);
     goto err;
   }
 
@@ -65,32 +65,32 @@ openMidiDevice (int errorLevel, const char *device) {
   cd.componentSubType = kAudioUnitSubType_DefaultOutput;
   if ((result = AUGraphNewNode(midi->graph, &cd, 0, NULL, &outNode))
       != noErr) {
-    LogPrint(errorLevel, "Can't create default output audio component: %d",
-	     result);
+    logMessage(errorLevel, "Can't create default output audio component: %d",
+	       result);
     goto err;
   }
 
   if ((result = AUGraphOpen(midi->graph)) != noErr) {
-    LogPrint(errorLevel, "Can't open audio graph component: %d", result);
+    logMessage(errorLevel, "Can't open audio graph component: %d", result);
     goto err;
   }
 
   if ((result = AUGraphConnectNodeInput(midi->graph, synthNode, 0, outNode, 0))
       != noErr) {
-    LogPrint(errorLevel, "Can't connect synth audio component to output: %d",
-	     result);
+    logMessage(errorLevel, "Can't connect synth audio component to output: %d",
+	       result);
     goto err;
   }
 
   if ((result = AUGraphGetNodeInfo(midi->graph, synthNode, 0, 0, 0,
 				   &midi->synth)) != noErr) {
-    LogPrint(errorLevel, "Can't get audio component for software synth: %d",
-	     result);
+    logMessage(errorLevel, "Can't get audio component for software synth: %d",
+	       result);
     goto err;
   }
 
   if ((result = AUGraphInitialize(midi->graph)) != noErr) {
-    LogPrint(errorLevel, "Can't initialize audio graph: %d", result);
+    logMessage(errorLevel, "Can't initialize audio graph: %d", result);
     goto err;
   }
 
@@ -102,13 +102,13 @@ openMidiDevice (int errorLevel, const char *device) {
 				     &propVal, sizeof(propVal)))
       != noErr) {
     /* So, having reverb isn't that critical, is it? */
-    LogPrint(LOG_DEBUG, "Can't turn of software synth reverb: %d",
-	     result);
+    logMessage(LOG_DEBUG, "Can't turn of software synth reverb: %d",
+	       result);
   }
 
   /* TODO: Maybe just start the graph when we are going to use it? */
   if ((result = AUGraphStart(midi->graph)) != noErr) {
-    LogPrint(errorLevel, "Can't start audio graph component: %d", result);
+    logMessage(errorLevel, "Can't start audio graph component: %d", result);
     goto err;
   }
 
@@ -126,7 +126,7 @@ closeMidiDevice (MidiDevice *midi) {
   int result;
   if (midi) {
     if ((result = DisposeAUGraph(midi->graph)) != noErr)
-      LogPrint(LOG_ERR, "Can't dispose audio graph component: %d", result);
+      logMessage(LOG_ERR, "Can't dispose audio graph component: %d", result);
     free(midi);
   }
 }
@@ -141,7 +141,7 @@ setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instru
   int result;
   if ((result = MusicDeviceMIDIEvent(midi->synth, 0xC0 | channel, instrument,
 				     0, 0)) != noErr)
-    LogPrint(LOG_ERR, "Can't set MIDI instrument: %d", result);
+    logMessage(LOG_ERR, "Can't set MIDI instrument: %d", result);
 
   return result == noErr;
 }
@@ -162,7 +162,7 @@ startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsi
 
   if ((result = MusicDeviceMIDIEvent(midi->synth, 0x90 | channel, note,
 				     volume, 0)) != noErr) {
-    LogPrint(LOG_ERR, "Can't start MIDI note: %d", result);
+    logMessage(LOG_ERR, "Can't start MIDI note: %d", result);
     return 0;
   }
   midi->note = note;
@@ -176,7 +176,7 @@ stopMidiNote (MidiDevice *midi, unsigned char channel) {
 
   if ((result = MusicDeviceMIDIEvent(midi->synth, 0x90 | channel, midi->note,
 				     0, 0)) != noErr) {
-    LogPrint(LOG_ERR, "Can't stop MIDI note: %d", result);
+    logMessage(LOG_ERR, "Can't stop MIDI note: %d", result);
     return 0;
   }
   midi->note = 0;

@@ -101,7 +101,7 @@ getDeviceIdentity (char *buffer, int *length) {
                            buffer, *length, MT_REQUEST_TIMEOUT);
   if (result == -1) return 0;
 
-  LogPrint(LOG_INFO, "Device Identity: %.*s", result, buffer);
+  logMessage(LOG_INFO, "Device Identity: %.*s", result, buffer);
   *length = result;
   return 1;
 }
@@ -237,7 +237,7 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
       key -= MT_ROUTING_KEYS_SECONDARY;
       set = MT_SET_RoutingKeys2;
     } else {
-      LogPrint(LOG_WARNING, "unexpected routing key: %u", key);
+      logMessage(LOG_WARNING, "unexpected routing key: %u", key);
       return;
     }
 

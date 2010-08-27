@@ -29,9 +29,9 @@ int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
 #ifdef HAVE_SYS_IO_H
   if (iopl(3) != -1) return 1;
-  LogPrint(errorLevel, "Port enable error: %u.%u: %s", base, count, strerror(errno));
+  logMessage(errorLevel, "Port enable error: %u.%u: %s", base, count, strerror(errno));
 #else /* HAVE_SYS_IO_H */
-  LogPrint(errorLevel, "I/O ports not supported.");
+  logMessage(errorLevel, "I/O ports not supported.");
 #endif /* HAVE_SYS_IO_H */
   return 0;
 }
@@ -40,7 +40,7 @@ int
 disablePorts (unsigned short int base, unsigned short int count) {
 #ifdef HAVE_SYS_IO_H
   if (iopl(0) != -1) return 1;
-  LogPrint(LOG_ERR, "Port disable error: %u.%u: %s", base, count, strerror(errno));
+  logMessage(LOG_ERR, "Port disable error: %u.%u: %s", base, count, strerror(errno));
 #endif /* HAVE_SYS_IO_H */
   return 0;
 }

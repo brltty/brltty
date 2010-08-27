@@ -142,7 +142,7 @@ insertMapped (ScreenKey key) {
       case SCR_KEY_FUNCTION + 12:
         return(simulateKey(88, 0));
       default:
-        LogPrint(LOG_WARNING, "Key %4.4X not suported.", key);
+        logMessage(LOG_WARNING, "Key %4.4X not suported.", key);
         return 0;
     }
     end = sequence + strlen(sequence);
@@ -151,7 +151,7 @@ insertMapped (ScreenKey key) {
     int c = convertWcharToChar(character);
 
     if (c== EOF) {
-      LogPrint(LOG_WARNING, "Character %d not supported", character);
+      logMessage(LOG_WARNING, "Character %d not supported", character);
       return 0;
     }
 
@@ -170,7 +170,7 @@ insertMapped (ScreenKey key) {
 
 static int
 insertKey_PcBiosScreen (ScreenKey key) {
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
+  logMessage(LOG_DEBUG, "Insert key: %4.4X", key);
   return insertMapped(key); 
 }
 

@@ -53,15 +53,15 @@ openPcmDevice (int errorLevel, const char *device) {
       pcm->driverVersion = 0X030000;
 #ifdef OSS_GETVERSION
       if (ioctl(pcm->fileDescriptor, OSS_GETVERSION, &pcm->driverVersion) == -1)
-        LogPrint(errorLevel, "cannot get OSS driver version");
+        logMessage(errorLevel, "cannot get OSS driver version");
 #endif /* OSS_GETVERSION */
-      LogPrint(LOG_DEBUG, "OPSS driver version: %06X", pcm->driverVersion);
+      logMessage(LOG_DEBUG, "OPSS driver version: %06X", pcm->driverVersion);
 
       setPcmSampleRate(pcm, 8000);
       setPcmChannelCount(pcm, 1);
       return pcm;
     } else {
-      LogPrint(errorLevel, "cannot open PCM device: %s: %s", device, strerror(errno));
+      logMessage(errorLevel, "cannot open PCM device: %s: %s", device, strerror(errno));
     }
     free(pcm);
   } else {

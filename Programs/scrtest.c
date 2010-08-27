@@ -97,7 +97,7 @@ setRegion (
       const int minimum = 0;
       const int maximum = sizeLimit - 1;
       if (!validateInteger(offsetValue, offsetOption, &minimum, &maximum)) {
-        LogPrint(LOG_ERR, "invalid %s: %s", offsetName, offsetOption);
+        logMessage(LOG_ERR, "invalid %s: %s", offsetName, offsetOption);
         exit(2);
       }
     }
@@ -106,7 +106,7 @@ setRegion (
       const int minimum = 1;
       const int maximum = sizeLimit - *offsetValue;
       if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
-        LogPrint(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
+        logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
         exit(2);
       }
       return;
@@ -115,7 +115,7 @@ setRegion (
     const int minimum = 1;
     const int maximum = sizeLimit;
     if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
-      LogPrint(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
+      logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
       exit(2);
     }
     *offsetValue = (sizeLimit - *sizeValue) / 2;
@@ -164,7 +164,7 @@ main (int argc, char *argv[]) {
       while (*name) ++name;
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-        LogPrint(LOG_ERR, "insufficient memory.");
+        logMessage(LOG_ERR, "insufficient memory.");
         exit(9);
       }
       setting = parameterSettings;
@@ -177,9 +177,9 @@ main (int argc, char *argv[]) {
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
       if (!delimiter) {
-        LogPrint(LOG_ERR, "missing screen parameter value: %s", assignment);
+        logMessage(LOG_ERR, "missing screen parameter value: %s", assignment);
       } else if (delimiter == assignment) {
-        LogPrint(LOG_ERR, "missing screen parameter name: %s", assignment);
+        logMessage(LOG_ERR, "missing screen parameter name: %s", assignment);
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
@@ -191,7 +191,7 @@ main (int argc, char *argv[]) {
           }
           ++name;
         }
-        if (!ok) LogPrint(LOG_ERR, "invalid screen parameter: %s", assignment);
+        if (!ok) logMessage(LOG_ERR, "invalid screen parameter: %s", assignment);
       }
       if (!ok) exit(2);
       --argc;
@@ -232,18 +232,18 @@ main (int argc, char *argv[]) {
           }
           status = 0;
         } else {
-          LogPrint(LOG_ERR, "Can't read screen.");
+          logMessage(LOG_ERR, "Can't read screen.");
           status = 4;
         }
       }
     } else {
-      LogPrint(LOG_ERR, "can't open screen.");
+      logMessage(LOG_ERR, "can't open screen.");
       status = 3;
     }
 
     destructScreenDriver();
   } else {
-    LogPrint(LOG_ERR, "can't load screen driver.");
+    logMessage(LOG_ERR, "can't load screen driver.");
     status = 3;
   }
   return status;

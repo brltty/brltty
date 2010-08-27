@@ -95,7 +95,7 @@ getKeyNameTables (const char *keyTableName) {
           componentsLeft--; currentComponent++;
           keyNameTables = KEY_NAME_TABLES(keyboard);
         } else {
-          LogPrint(LOG_ERR, "missing keyboard bindings name");
+          logMessage(LOG_ERR, "missing keyboard bindings name");
         }
       } else if (strcmp(keyTableType, "brl") == 0) {
         if (componentsLeft) {
@@ -129,11 +129,11 @@ getKeyNameTables (const char *keyTableName) {
                   }
 
                   if (!keyNameTables) {
-                    LogPrint(LOG_ERR, "unknown %s braille driver bindings name: %s",
-                             driverCode, bindingsName);
+                    logMessage(LOG_ERR, "unknown %s braille driver bindings name: %s",
+                               driverCode, bindingsName);
                   }
                 } else {
-                  LogPrint(LOG_ERR, "missing braille driver bindings name");
+                  logMessage(LOG_ERR, "missing braille driver bindings name");
                 }
               }
 
@@ -143,19 +143,19 @@ getKeyNameTables (const char *keyTableName) {
             }
           }
         } else {
-          LogPrint(LOG_ERR, "missing braille driver code");
+          logMessage(LOG_ERR, "missing braille driver code");
         }
       } else {
-        LogPrint(LOG_ERR, "unknown key table type: %s", keyTableType);
+        logMessage(LOG_ERR, "unknown key table type: %s", keyTableType);
       }
     } else {
-      LogPrint(LOG_ERR, "missing key table type");
+      logMessage(LOG_ERR, "missing key table type");
     }
   }
 
   if (keyNameTables) {
     if (componentsLeft) {
-      LogPrint(LOG_ERR, "too many key table name components");
+      logMessage(LOG_ERR, "too many key table name components");
       keyNameTables = NULL;
     }
   }
@@ -239,7 +239,7 @@ main (int argc, char *argv[]) {
       status = 10;
     }
   } else {
-    LogPrint(LOG_ERR, "missing key table name");
+    logMessage(LOG_ERR, "missing key table name");
     status = 2;
   }
 
