@@ -247,7 +247,7 @@ typedef struct {
   const char *name;
   int serialBaud;
   SerialParity serialParity;
-  DotsTable dotsTable;
+  const DotsTable *dotsTable;
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*probeDisplay) (BrailleDisplay *brl);
@@ -1731,7 +1731,7 @@ writeBaumCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations baumOperations = {
   "Baum",
   19200, SERIAL_PARITY_NONE,
-  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
+  &dotsTable_12345678,
   readBaumPacket, writeBaumPacket,
   probeBaumDisplay, updateBaumKeys,
   writeBaumCells, writeBaumCellRange
@@ -1991,7 +1991,7 @@ writeHandyTechCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations handyTechOperations = {
   "HandyTech",
   19200, SERIAL_PARITY_ODD,
-  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
+  &dotsTable_12345678,
   readHandyTechPacket, writeHandyTechPacket,
   probeHandyTechDisplay, updateHandyTechKeys,
   writeHandyTechCells, writeHandyTechCellRange
@@ -2282,7 +2282,7 @@ writePowerBrailleCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations powerBrailleOperations = {
   "PowerBraille",
   9600, SERIAL_PARITY_NONE,
-  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
+  &dotsTable_12345678,
   readPowerBraillePacket, writePowerBraillePacket,
   probePowerBrailleDisplay, updatePowerBrailleKeys,
   writePowerBrailleCells, writePowerBrailleCellRange
@@ -2674,7 +2674,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (protocol->probeDisplay(brl)) {
             logCellCount(brl);
 
-            makeOutputTable(protocol->dotsTable, outputTable);
+            makeOutputTable(protocol->dotsTable[0], outputTable);
             if (!clearCellRange(brl, 0, cellCount)) goto failed;
             if (!updateCells(brl)) goto failed;
 
