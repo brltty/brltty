@@ -1176,7 +1176,13 @@ identifyTerminal2 (BrailleDisplay *brl) {
         if (packet.type == 0X0A) {
           if (interpretIdentity2(brl, packet.data.bytes)) {
             protocol = &protocolOperations2;
-            makeOutputTable(dotsTable_ISO11548_1);
+
+            {
+              static const DotsTable dots = {
+                0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
+              };
+              makeOutputTable(dots);
+            }
 
             inputKeySize2 = (model->protocolRevision < 2)? 4: 8;
             {
