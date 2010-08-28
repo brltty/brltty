@@ -469,8 +469,6 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 #endif /* ENABLE_LEARN_MODE */
 
 const DotsTable dotsTable_ISO11548_1 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-static TranslationTable outputTable;
-static TranslationTable inputTable;
 
 void
 makeTranslationTable (const DotsTable dots, TranslationTable table) {
@@ -494,47 +492,68 @@ makeTranslationTable (const DotsTable dots, TranslationTable table) {
 }
 
 void
-reverseTranslationTable (TranslationTable from, TranslationTable to) {
+reverseTranslationTable (const TranslationTable from, TranslationTable to) {
   int byte;
   memset(to, 0, sizeof(TranslationTable));
   for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }
 
+static TranslationTable internalOutputTable;
+static const unsigned char *outputTable;
+
 void
 setOutputTable (const TranslationTable table) {
-  memcpy(outputTable, table, TRANSLATION_TABLE_SIZE);
+  memcpy(internalOutputTable, table, TRANSLATION_TABLE_SIZE);
+  outputTable = internalOutputTable;
 }
 
 void
 makeOutputTable (const DotsTable dots) {
-  makeTranslationTable(dots, outputTable);
+  if (memcmp(dots, dotsTable_ISO11548_1, DOTS_TABLE_SIZE) == 0) {
+    outputTable = NULL;
+  } else {
+    makeTranslationTable(dots, internalOutputTable);
+    outputTable = internalOutputTable;
+  }
 }
 
 void *
 translateOutputCells (unsigned char *target, const unsigned char *source, size_t count) {
+  if (!outputTable) return mempcpy(target, source, count);
+
   while (count--) *target++ = outputTable[*source++];
   return target;
 }
 
 unsigned char
 translateOutputCell (unsigned char cell) {
-  return outputTable[cell];
+  return outputTable? outputTable[cell]: cell;
 }
+
+static TranslationTable internalInputTable;
+static const unsigned char *inputTable;
 
 void
 makeInputTable (void) {
-  reverseTranslationTable(outputTable, inputTable);
+  if (outputTable) {
+    reverseTranslationTable(outputTable, internalInputTable);
+    inputTable = internalInputTable;
+  } else {
+    inputTable = NULL;
+  }
 }
 
 void *
 translateInputCells (unsigned char *target, const unsigned char *source, size_t count) {
+  if (!inputTable) return mempcpy(target, source, count);
+
   while (count--) *target++ = inputTable[*source++];
   return target;
 }
 
 unsigned char
 translateInputCell (unsigned char cell) {
-  return inputTable[cell];
+  return inputTable? inputTable[cell]: cell;
 }
 
 /* Functions which support vertical and horizontal status cells. */

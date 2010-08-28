@@ -137,7 +137,7 @@ typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
 extern const DotsTable dotsTable_ISO11548_1;
 
 extern void makeTranslationTable (const DotsTable dots, TranslationTable table);
-extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
+extern void reverseTranslationTable (const TranslationTable from, TranslationTable to);
 
 extern void setOutputTable (const TranslationTable table);
 extern void makeOutputTable (const DotsTable dots);
