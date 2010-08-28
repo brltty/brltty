@@ -131,12 +131,20 @@ extern const BrailleDriver noBraille;
 
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
-extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
 extern const DotsTable dotsTable_ISO11548_1;
-extern void makeOutputTable (const DotsTable dots, TranslationTable table);
+
+extern void makeTranslationTable (const DotsTable dots, TranslationTable table);
+extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
+
+extern void setOutputTable (const TranslationTable table);
+extern void makeOutputTable (const DotsTable dots);
+extern void translateOutputDots (unsigned char *target, const unsigned char *source, size_t count);
+
+extern void makeInputTable (void);
+extern void translateInputDots (unsigned char *target, const unsigned char *source, size_t count);
 
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);

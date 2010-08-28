@@ -2674,7 +2674,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (protocol->probeDisplay(brl)) {
             logCellCount(brl);
 
-            makeOutputTable(protocol->dotsTable[0], outputTable);
+            makeTranslationTable(protocol->dotsTable[0], outputTable);
             if (!clearCellRange(brl, 0, cellCount)) goto failed;
             if (!updateCells(brl)) goto failed;
 

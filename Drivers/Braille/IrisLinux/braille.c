@@ -330,7 +330,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	  }
      }
 
-   makeOutputTable(dotsTable_ISO11548_1, outputTable);
+   makeTranslationTable(dotsTable_ISO11548_1, outputTable);
 
    ReWrite = 1;  /* To write whole display at first time */
    ReWrite_LCD = 1;

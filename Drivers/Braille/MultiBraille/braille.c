@@ -159,7 +159,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 		static const DotsTable dots = {
 			0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
 		};
-		makeOutputTable(dots, outputTable);
+		makeTranslationTable(dots, outputTable);
 	}
 
 	/* Allocate space for buffers */

@@ -34,7 +34,7 @@ static TranslationTable outputTable;
 int vbinit() {
   if (enablePorts(LOG_ERR, LPTPORT, 3)) {
     if (enablePorts(LOG_ERR, 0X80, 1)) {
-      makeOutputTable(dotsTable_ISO11548_1, outputTable);
+      makeTranslationTable(dotsTable_ISO11548_1, outputTable);
 
       {
         unsigned char alldots[40];

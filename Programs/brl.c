@@ -468,17 +468,12 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 }
 #endif /* ENABLE_LEARN_MODE */
 
-void
-reverseTranslationTable (TranslationTable from, TranslationTable to) {
-  int byte;
-  memset(to, 0, sizeof(TranslationTable));
-  for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
-}
-
 const DotsTable dotsTable_ISO11548_1 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+static TranslationTable outputTable;
+static TranslationTable inputTable;
 
 void
-makeOutputTable (const DotsTable dots, TranslationTable table) {
+makeTranslationTable (const DotsTable dots, TranslationTable table) {
   int byte;
 
   for (byte=0; byte<TRANSLATION_TABLE_SIZE; byte+=1) {
@@ -496,6 +491,38 @@ makeOutputTable (const DotsTable dots, TranslationTable table) {
 
     table[byte] = cell;
   }
+}
+
+void
+reverseTranslationTable (TranslationTable from, TranslationTable to) {
+  int byte;
+  memset(to, 0, sizeof(TranslationTable));
+  for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
+}
+
+void
+setOutputTable (const TranslationTable table) {
+  memcpy(outputTable, table, TRANSLATION_TABLE_SIZE);
+}
+
+void
+makeOutputTable (const DotsTable dots) {
+  makeTranslationTable(dots, outputTable);
+}
+
+void
+translateOutputDots (unsigned char *target, const unsigned char *source, size_t count) {
+  while (count--) *target++ = outputTable[*source++];
+}
+
+void
+makeInputTable (void) {
+  reverseTranslationTable(outputTable, inputTable);
+}
+
+void
+translateInputDots (unsigned char *target, const unsigned char *source, size_t count) {
+  while (count--) *target++ = inputTable[*source++];
 }
 
 /* Functions which support vertical and horizontal status cells. */

@@ -362,7 +362,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
           brl->textColumns = blitesz;	/* initialise size of display - */
           brl->textRows = 1;		/* Braille Lites are single line displays */
 
-          makeOutputTable(dotsTable_ISO11548_1, outputTable);
+          makeTranslationTable(dotsTable_ISO11548_1, outputTable);
           reverseTranslationTable(outputTable, inputTable);
 
           /* Allocate space for buffers */

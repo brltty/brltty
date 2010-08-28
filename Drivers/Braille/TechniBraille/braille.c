@@ -161,7 +161,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->textColumns = response[2];
               brl->textRows = 1;
 
-              makeOutputTable(dotsTable_ISO11548_1, outputTable);
+              makeTranslationTable(dotsTable_ISO11548_1, outputTable);
               reverseTranslationTable(outputTable, inputTable);
 
               if (!clearBrailleCells(brl)) break;

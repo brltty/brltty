@@ -520,7 +520,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->keyBindings = protocol->keyTableDefinition->bindings;
         brl->keyNameTables = protocol->keyTableDefinition->names;
 
-        makeOutputTable(dotsTable_ISO11548_1, outputTable);
+        makeTranslationTable(dotsTable_ISO11548_1, outputTable);
   
         if (clearCells(brl)) return 1;
       }

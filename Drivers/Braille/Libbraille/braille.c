@@ -97,7 +97,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
           BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
           BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
         };
-        makeOutputTable(dots, outputTable);
+        makeTranslationTable(dots, outputTable);
         reverseTranslationTable(outputTable, inputTable);
       }
   

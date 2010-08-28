@@ -40,7 +40,7 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
+    makeTranslationTable(dots, outputTable);
   }
   
   return 0;

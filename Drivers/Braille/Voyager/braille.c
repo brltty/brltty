@@ -607,7 +607,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (io->setDisplayState(1)) {
             io->soundBeep(200);
 
-            makeOutputTable(dotsTable_ISO11548_1, outputTable);
+            makeTranslationTable(dotsTable_ISO11548_1, outputTable);
 
             firstRead = 1;
             if (io->preparePort()) return 1;

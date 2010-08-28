@@ -706,7 +706,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
                 protocol = &protocolOperations1;
                 switchState1 = 0;
 
-                makeOutputTable(dotsTable_ISO11548_1, outputTable);
+                makeTranslationTable(dotsTable_ISO11548_1, outputTable);
                 return 1;
               }
             } else {
@@ -1182,7 +1182,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
               static const DotsTable dots = {
                 0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
               };
-              makeOutputTable(dots, outputTable);
+              makeTranslationTable(dots, outputTable);
             }
 
             inputKeySize2 = (model->protocolRevision < 2)? 4: 8;

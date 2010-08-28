@@ -900,7 +900,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             if (model) {
               keyTableDefinition = modelTypeTable[model->type].keyTableDefinition;
-              makeOutputTable(model->dotsTable[0], outputTable);
+              makeTranslationTable(model->dotsTable[0], outputTable);
               memset(outputBuffer, 0, model->cellCount);
               writeFrom = 0;
               writeTo = model->cellCount - 1;
