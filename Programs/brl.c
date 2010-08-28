@@ -503,8 +503,7 @@ static const unsigned char *outputTable;
 
 void
 setOutputTable (const TranslationTable table) {
-  memcpy(internalOutputTable, table, TRANSLATION_TABLE_SIZE);
-  outputTable = internalOutputTable;
+  outputTable = table;
 }
 
 void
@@ -519,10 +518,13 @@ makeOutputTable (const DotsTable dots) {
 
 void *
 translateOutputCells (unsigned char *target, const unsigned char *source, size_t count) {
-  if (!outputTable) return mempcpy(target, source, count);
+  if (outputTable) {
+    while (count--) *target++ = outputTable[*source++];
+    return target;
+  }
 
-  while (count--) *target++ = outputTable[*source++];
-  return target;
+  if (target == source) return target + count;
+  return mempcpy(target, source, count);
 }
 
 unsigned char
@@ -545,10 +547,13 @@ makeInputTable (void) {
 
 void *
 translateInputCells (unsigned char *target, const unsigned char *source, size_t count) {
-  if (!inputTable) return mempcpy(target, source, count);
+  if (inputTable) {
+    while (count--) *target++ = inputTable[*source++];
+    return target;
+  }
 
-  while (count--) *target++ = inputTable[*source++];
-  return target;
+  if (target == source) return target + count;
+  return mempcpy(target, source, count);
 }
 
 unsigned char
