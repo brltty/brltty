@@ -54,7 +54,6 @@
 #include "braille.h"
 
 static const ModelEntry *model = NULL;
-static TranslationTable outputTable;
  
 /*--- Input/Output Operations ---*/
 
@@ -706,7 +705,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
                 protocol = &protocolOperations1;
                 switchState1 = 0;
 
-                makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+                makeOutputTable(dotsTable_ISO11548_1);
                 return 1;
               }
             } else {
@@ -1177,13 +1176,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
         if (packet.type == 0X0A) {
           if (interpretIdentity2(brl, packet.data.bytes)) {
             protocol = &protocolOperations2;
-
-            {
-              static const DotsTable dots = {
-                0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
-              };
-              makeTranslationTable(dots, outputTable);
-            }
+            makeOutputTable(dotsTable_ISO11548_1);
 
             inputKeySize2 = (model->protocolRevision < 2)? 4: 8;
             {
@@ -1245,8 +1238,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (io->openPort(parameters, device)) {
       if (identifyTerminal(brl)) {
-        memset(currentText, outputTable[0], model->textColumns);
-        memset(currentStatus, outputTable[0], model->statusCount);
+        memset(currentText, 0, model->textColumns);
+        memset(currentStatus, 0, model->statusCount);
         protocol->initializeTerminal(brl);
         if (io->preparePort()) return 1;
       }
@@ -1291,8 +1284,7 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int i;
-  for (i=0; i<model->textColumns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
+  translateOutputCells(brl->buffer, brl->buffer, model->textColumns);
   updateCells(brl, model->textColumns, brl->buffer, currentText, protocol->writeText);
   protocol->flushCells(brl);
   return 1;
@@ -1310,25 +1302,30 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
 
       for (i=0; i<model->statusCount; i++) {
         int code = model->statusCells[i];
-        if (code == OFFS_EMPTY)
+
+        if (code == OFFS_EMPTY) {
           cells[i] = 0;
-        else if (code >= OFFS_NUMBER)
-          cells[i] = outputTable[portraitNumber(values[code-OFFS_NUMBER])];
-        else if (code >= OFFS_FLAG)
-          cells[i] = outputTable[seascapeFlag(i+1, values[code-OFFS_FLAG])];
-        else if (code >= OFFS_HORIZ)
-          cells[i] = outputTable[seascapeNumber(values[code-OFFS_HORIZ])];
-        else
-          cells[i] = outputTable[values[code]];
+        } else if (code >= OFFS_NUMBER) {
+          cells[i] = translateOutputCell(portraitNumber(values[code-OFFS_NUMBER]));
+        } else if (code >= OFFS_FLAG) {
+          cells[i] = translateOutputCell(seascapeFlag(i+1, values[code-OFFS_FLAG]));
+        } else if (code >= OFFS_HORIZ) {
+          cells[i] = translateOutputCell(seascapeNumber(values[code-OFFS_HORIZ]));
+        } else {
+          cells[i] = translateOutputCell(values[code]);
+        }
       }
     } else {
       int i = 0;
+
       while (i < model->statusCount) {
         unsigned char dots = s[i];
+
         if (!dots) break;
-        cells[i++] = outputTable[dots];
+        cells[i++] = translateOutputCell(dots);
       }
-      while (i < model->statusCount) cells[i++] = outputTable[0];
+
+      while (i < model->statusCount) cells[i++] = 0;
     }
     updateCells(brl, model->statusCount, cells, currentStatus, protocol->writeStatus);
   }

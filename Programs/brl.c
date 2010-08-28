@@ -511,8 +511,13 @@ makeOutputTable (const DotsTable dots) {
 }
 
 void
-translateOutputDots (unsigned char *target, const unsigned char *source, size_t count) {
+translateOutputCells (unsigned char *target, const unsigned char *source, size_t count) {
   while (count--) *target++ = outputTable[*source++];
+}
+
+unsigned char
+translateOutputCell (unsigned char cell) {
+  return outputTable[cell];
 }
 
 void
@@ -521,7 +526,7 @@ makeInputTable (void) {
 }
 
 void
-translateInputDots (unsigned char *target, const unsigned char *source, size_t count) {
+translateInputCells (unsigned char *target, const unsigned char *source, size_t count) {
   while (count--) *target++ = inputTable[*source++];
 }
 
