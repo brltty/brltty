@@ -32,10 +32,6 @@ $(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu
 $(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_esysiris.$O
 	cd $(@D) && $(MAKE) $(@F)
 
-$(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vb.$O
-$(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vblow.$O
-	cd $(@D) && $(MAKE) $(@F)
-
 INSTALL_PROGRAM_DIRECTORY = $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
 install-program-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_PROGRAM_DIRECTORY)
