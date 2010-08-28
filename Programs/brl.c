@@ -501,6 +501,25 @@ reverseTranslationTable (const TranslationTable from, TranslationTable to) {
   for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }
 
+static inline void *
+translateCells (
+  const TranslationTable table,
+  unsigned char *target, const unsigned char *source, size_t count
+) {
+  if (table) {
+    while (count--) *target++ = table[*source++];
+    return target;
+  }
+
+  if (target == source) return target + count;
+  return mempcpy(target, source, count);
+}
+
+static inline unsigned char
+translateCell (const TranslationTable table, unsigned char cell) {
+  return table? table[cell]: cell;
+}
+
 static TranslationTable internalOutputTable;
 static const unsigned char *outputTable;
 
@@ -521,18 +540,12 @@ makeOutputTable (const DotsTable dots) {
 
 void *
 translateOutputCells (unsigned char *target, const unsigned char *source, size_t count) {
-  if (outputTable) {
-    while (count--) *target++ = outputTable[*source++];
-    return target;
-  }
-
-  if (target == source) return target + count;
-  return mempcpy(target, source, count);
+  return translateCells(outputTable, target, source, count);
 }
 
 unsigned char
 translateOutputCell (unsigned char cell) {
-  return outputTable? outputTable[cell]: cell;
+  return translateCell(outputTable, cell);
 }
 
 static TranslationTable internalInputTable;
@@ -550,18 +563,12 @@ makeInputTable (void) {
 
 void *
 translateInputCells (unsigned char *target, const unsigned char *source, size_t count) {
-  if (inputTable) {
-    while (count--) *target++ = inputTable[*source++];
-    return target;
-  }
-
-  if (target == source) return target + count;
-  return mempcpy(target, source, count);
+  return translateCells(inputTable, target, source, count);
 }
 
 unsigned char
 translateInputCell (unsigned char cell) {
-  return inputTable? inputTable[cell]: cell;
+  return translateCell(inputTable, cell);
 }
 
 /* Functions which support vertical and horizontal status cells. */
