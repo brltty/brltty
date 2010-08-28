@@ -727,7 +727,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;
 
-        makeOutputTable(dotsTable_12345678, outputTable);
+        makeOutputTable(dotsTable_ISO11548_1, outputTable);
   
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);

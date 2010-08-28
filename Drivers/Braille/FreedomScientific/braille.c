@@ -389,47 +389,47 @@ typedef struct {
   unsigned char type;
 } ModelEntry;
 
-static const DotsTable dotsTable_12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
+static const DotsTable dotsTable_Focus1 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
   { .identifier = "Focus 40",
-    .dotsTable = &dotsTable_12345678,
+    .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
     .type = MOD_TYPE_Focus
   }
   ,
   { .identifier = "Focus 44",
-    .dotsTable = &dotsTable_12374568,
+    .dotsTable = &dotsTable_Focus1,
     .cellCount = 44,
     .type = MOD_TYPE_Focus
   }
   ,
   { .identifier = "Focus 70",
-    .dotsTable = &dotsTable_12374568,
+    .dotsTable = &dotsTable_Focus1,
     .cellCount = 70,
     .type = MOD_TYPE_Focus
   }
   ,
   { .identifier = "Focus 80",
-    .dotsTable = &dotsTable_12345678,
+    .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 80,
     .type = MOD_TYPE_Focus
   }
   ,
   { .identifier = "Focus 84",
-    .dotsTable = &dotsTable_12374568,
+    .dotsTable = &dotsTable_Focus1,
     .cellCount = 84,
     .type = MOD_TYPE_Focus
   }
   ,
   { .identifier = "pm display 20",
-    .dotsTable = &dotsTable_12345678,
+    .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 20,
     .type = MOD_TYPE_Pacmate
   }
   ,
   { .identifier = "pm display 40",
-    .dotsTable = &dotsTable_12345678,
+    .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
     .type = MOD_TYPE_Pacmate
   }
@@ -861,7 +861,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               memset(&generic, 0, sizeof(generic));
               generic.identifier = "Generic";
               generic.cellCount = 20;
-              generic.dotsTable = &dotsTable_12345678;
+              generic.dotsTable = &dotsTable_ISO11548_1;
               generic.type = MOD_TYPE_Pacmate;
 
               {
@@ -870,7 +870,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                   const DotsTable *dotsTable;
                 } ExceptionEntry;
                 static const ExceptionEntry exceptionTable[] = {
-                  {"Focus", &dotsTable_12374568},
+                  {"Focus", &dotsTable_Focus1},
                   {NULL   , NULL         }
                 };
                 const ExceptionEntry *exception = exceptionTable;

@@ -135,7 +135,7 @@ extern void reverseTranslationTable (TranslationTable from, TranslationTable to)
 
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
-extern const DotsTable dotsTable_12345678;
+extern const DotsTable dotsTable_ISO11548_1;
 extern void makeOutputTable (const DotsTable dots, TranslationTable table);
 
 /* Formatting of status cells. */

@@ -1606,7 +1606,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     protocol->initializeVariables();
 
     if (protocol->detectModel(brl)) {
-      makeOutputTable(dotsTable_12345678, outputTable);
+      makeOutputTable(dotsTable_ISO11548_1, outputTable);
 
       memset(&textRewriteTime, 0, sizeof(textRewriteTime));
       return 1;

@@ -1731,7 +1731,7 @@ writeBaumCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations baumOperations = {
   "Baum",
   19200, SERIAL_PARITY_NONE,
-  &dotsTable_12345678,
+  &dotsTable_ISO11548_1,
   readBaumPacket, writeBaumPacket,
   probeBaumDisplay, updateBaumKeys,
   writeBaumCells, writeBaumCellRange
@@ -1991,7 +1991,7 @@ writeHandyTechCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations handyTechOperations = {
   "HandyTech",
   19200, SERIAL_PARITY_ODD,
-  &dotsTable_12345678,
+  &dotsTable_ISO11548_1,
   readHandyTechPacket, writeHandyTechPacket,
   probeHandyTechDisplay, updateHandyTechKeys,
   writeHandyTechCells, writeHandyTechCellRange
@@ -2282,7 +2282,7 @@ writePowerBrailleCellRange (BrailleDisplay *brl, int start, int count) {
 static const ProtocolOperations powerBrailleOperations = {
   "PowerBraille",
   9600, SERIAL_PARITY_NONE,
-  &dotsTable_12345678,
+  &dotsTable_ISO11548_1,
   readPowerBraillePacket, writePowerBraillePacket,
   probePowerBrailleDisplay, updatePowerBrailleKeys,
   writePowerBrailleCells, writePowerBrailleCellRange

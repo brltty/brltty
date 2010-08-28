@@ -1020,7 +1020,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (length > 0) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
-              makeOutputTable(dotsTable_12345678, outputTable);
+              makeOutputTable(dotsTable_ISO11548_1, outputTable);
 
               if (model->hasATC) {
                 setAtcMode(brl, 1);

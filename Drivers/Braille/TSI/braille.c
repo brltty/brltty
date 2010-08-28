@@ -507,7 +507,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   brl->textColumns = brl_cols;		/* initialise size of display */
   brl->textRows = BRLROWS;		/* always 1 */
 
-  makeOutputTable(dotsTable_12345678, outputTable);
+  makeOutputTable(dotsTable_ISO11548_1, outputTable);
 
   /* Allocate space for buffers */
   dispbuf = malloc(ncells);

@@ -400,7 +400,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               dataCells = brl->textColumns * brl->textRows;
               cellCount = statusCells + dataCells;
 
-              makeOutputTable(dotsTable_12345678, outputTable);
+              makeOutputTable(dotsTable_ISO11548_1, outputTable);
               reverseTranslationTable(outputTable, inputTable);
 
               if ((cellBuffer = malloc(cellCount))) {

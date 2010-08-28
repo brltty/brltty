@@ -706,7 +706,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
                 protocol = &protocolOperations1;
                 switchState1 = 0;
 
-                makeOutputTable(dotsTable_12345678, outputTable);
+                makeOutputTable(dotsTable_ISO11548_1, outputTable);
                 return 1;
               }
             } else {
