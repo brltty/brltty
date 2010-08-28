@@ -481,14 +481,9 @@ makeTranslationTable (const DotsTable dots, TranslationTable table) {
     unsigned char cell = 0;
     int dot;
 
-    for (dot=0; dot<DOTS_TABLE_SIZE; dot+=1) {
-      static const DotsTable internalDots = {
-        BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-        BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
-      };
-
-      if (byte & internalDots[dot]) cell |= dots[dot];
-    }
+    for (dot=0; dot<DOTS_TABLE_SIZE; dot+=1)
+      if (byte & dotsTable_ISO11548_1[dot])
+        cell |= dots[dot];
 
     table[byte] = cell;
   }
