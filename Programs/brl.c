@@ -510,9 +510,10 @@ makeOutputTable (const DotsTable dots) {
   makeTranslationTable(dots, outputTable);
 }
 
-void
+void *
 translateOutputCells (unsigned char *target, const unsigned char *source, size_t count) {
   while (count--) *target++ = outputTable[*source++];
+  return target;
 }
 
 unsigned char
@@ -525,9 +526,15 @@ makeInputTable (void) {
   reverseTranslationTable(outputTable, inputTable);
 }
 
-void
+void *
 translateInputCells (unsigned char *target, const unsigned char *source, size_t count) {
   while (count--) *target++ = inputTable[*source++];
+  return target;
+}
+
+unsigned char
+translateInputCell (unsigned char cell) {
+  return inputTable[cell];
 }
 
 /* Functions which support vertical and horizontal status cells. */

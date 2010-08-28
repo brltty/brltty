@@ -141,11 +141,12 @@ extern void reverseTranslationTable (TranslationTable from, TranslationTable to)
 
 extern void setOutputTable (const TranslationTable table);
 extern void makeOutputTable (const DotsTable dots);
-extern void translateOutputCells (unsigned char *target, const unsigned char *source, size_t count);
+extern void *translateOutputCells (unsigned char *target, const unsigned char *source, size_t count);
 extern unsigned char translateOutputCell (unsigned char cell);
 
 extern void makeInputTable (void);
-extern void translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
+extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
+extern unsigned char translateInputCell (unsigned char cell);
 
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);
