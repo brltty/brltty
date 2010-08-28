@@ -23,12 +23,6 @@ DRIVER_VERSION =
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)braille.mk
 
-vblow.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/vblow.c
-
-vb.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/vb.c
+braille.$O:
+	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 	
-braille.$O: vb.$O vblow.$O
-	$(MKOBJ) braille.$O vblow.$O vb.$O 
-
