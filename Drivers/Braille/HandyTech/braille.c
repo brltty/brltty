@@ -347,8 +347,6 @@ static const ModelEntry modelTable[] = {
 #define BRLROWS		1
 #define MAX_STCELLS	4	/* highest number of status cells */
 
-static TranslationTable outputTable;
-
 /* Global variables */
 static unsigned char *rawData = NULL;		/* translated data to send to Braille */
 static unsigned char *prevData = NULL;	/* previously sent raw data */
@@ -1020,7 +1018,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (length > 0) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
-              makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+              makeOutputTable(dotsTable_ISO11548_1);
 
               if (model->hasATC) {
                 setAtcMode(brl, 1);
@@ -1113,11 +1111,10 @@ updateCells (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (memcmp(brl->buffer, prevData, model->textCells) != 0) {
-    int i;
-    for (i=0; i<model->textCells; ++i) {
-      rawData[i] = outputTable[(prevData[i] = brl->buffer[i])];
-    }
+  const unsigned char cellCount = model->textCells;
+  if (memcmp(brl->buffer, prevData, cellCount) != 0) {
+    memcpy(prevData, brl->buffer, cellCount);
+    translateOutputCells(rawData, prevData, cellCount);
     updateRequired = 1;
   }
   updateCells(brl);
@@ -1126,12 +1123,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  if (model->statusCells &&
-      (memcmp(st, prevStatus, model->statusCells) != 0)) {
-    int i;
-    for (i=0; i<model->statusCells; ++i) {
-      rawStatus[i] = outputTable[(prevStatus[i] = st[i])];
-    }
+  const unsigned char cellCount = model->statusCells;
+  if (cellCount && (memcmp(st, prevStatus, cellCount) != 0)) {
+    memcpy(prevStatus, st, cellCount);
+    translateOutputCells(rawStatus, prevStatus, cellCount);
     updateRequired = 1;
   }
   return 1;

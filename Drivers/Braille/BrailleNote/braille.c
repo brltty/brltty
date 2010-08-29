@@ -86,9 +86,6 @@ static unsigned int persistentRoutingOperation;
 static unsigned int temporaryRoutingOperation;
 static unsigned int currentRoutingOperation;
 
-static TranslationTable outputTable;
-static TranslationTable inputTable;
-
 static int
 readBytes (unsigned char *buffer, int count, int wait) {
   const int timeout = 100;
@@ -200,11 +197,7 @@ refreshCells (BrailleDisplay *brl) {
   unsigned char *byte = buffer;
 
   *byte++ = BNO_WRITE;
-
-  {
-    int i;
-    for (i=0; i<cellCount; ++i) *byte++ = outputTable[cellBuffer[i]];
-  }
+  byte = translateOutputCells(byte, cellBuffer, cellCount);
 
   return writePacket(brl, buffer, byte-buffer);
 }
@@ -237,7 +230,7 @@ getCharacter (BrailleDisplay *brl) {
       default:
         break;
       case BNI_CHARACTER:
-        return convertDotsToCharacter(textTable, inputTable[getByte()]);
+        return convertDotsToCharacter(textTable, translateInputCell(getByte()));
       case BNI_SPACE:
         switch (getByte()) {
           default:
@@ -400,8 +393,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               dataCells = brl->textColumns * brl->textRows;
               cellCount = statusCells + dataCells;
 
-              makeTranslationTable(dotsTable_ISO11548_1, outputTable);
-              reverseTranslationTable(outputTable, inputTable);
+              makeOutputTable(dotsTable_ISO11548_1);
+              makeInputTable();
 
               if ((cellBuffer = malloc(cellCount))) {
                 memset(cellBuffer, 0, cellCount);
@@ -662,12 +655,13 @@ interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandCo
       mask |= 0X80;
       break;
   }
-  return BRL_BLK_PASSDOTS + (inputTable[dots] | mask);
+  return BRL_BLK_PASSDOTS + (translateInputCell(dots) | mask);
 }
 
 static int
 interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
-  if (context == BRL_CTX_CHORDS) return BRL_BLK_PASSDOTS | inputTable[dots] | BRL_DOTC;
+  if (context == BRL_CTX_CHORDS)
+    return BRL_BLK_PASSDOTS | translateInputCell(dots) | BRL_DOTC;
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */

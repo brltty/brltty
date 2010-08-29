@@ -31,7 +31,6 @@
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;
 static unsigned char *outputBuffer = NULL;
-static TranslationTable outputTable;
 
 static int
 readBytes (unsigned char *buffer, int size, size_t *length) {
@@ -81,12 +80,7 @@ writeCells (BrailleDisplay *brl) {
   unsigned char *byte = buffer;
 
   byte = mempcpy(byte, header, sizeof(header));
-
-  {
-    int i;
-    for (i=0; i<brl->textColumns; *byte++=outputTable[outputBuffer[i++]]);
-  }
-
+  byte = translateOutputCells(byte, outputBuffer, brl->textColumns);
   byte = mempcpy(byte, trailer, sizeof(trailer));
 
   return writeBytes(brl, buffer, byte-buffer);
@@ -191,7 +185,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           static const DotsTable dots = {
             0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80
           };
-          makeTranslationTable(dots, outputTable);
+          makeOutputTable(dots);
         }
   
         if ((outputBuffer = malloc(brl->textColumns))) {
