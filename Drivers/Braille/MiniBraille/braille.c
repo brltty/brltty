@@ -57,7 +57,6 @@ static int serialCharactersPerSecond;
 
 #define POST_COMMAND_DELAY 30
 
-static TranslationTable outputTable;
 static unsigned char textCells[20];
 static unsigned char statusCells[2];
 static int refreshNeeded;
@@ -84,11 +83,9 @@ writeCells  (BrailleDisplay *brl) {
   unsigned char buffer[sizeof(beginSequence) + sizeof(statusCells) + sizeof(textCells) + sizeof(endSequence)];
   unsigned char *byte = buffer;
 
-  int i;
-
   byte = mempcpy(byte, beginSequence, sizeof(beginSequence));
-  for (i=0; i<sizeof(statusCells); ++i) *byte++ = outputTable[statusCells[i]];
-  for (i=0; i<sizeof(textCells); ++i) *byte++ = outputTable[textCells[i]];
+  byte = translateOutputCells(byte, statusCells, sizeof(statusCells));
+  byte = translateOutputCells(byte, textCells, sizeof(textCells));
   byte = mempcpy(byte, endSequence, sizeof(endSequence));
 
   return writeData(brl, buffer, byte-buffer);
@@ -363,7 +360,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         static const DotsTable dots = {
           0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
         };
-        makeTranslationTable(dots, outputTable);
+        makeOutputTable(dots);
       }
 
       clearCells(textCells,  sizeof(textCells));

@@ -1111,7 +1111,7 @@ updateCells (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  const unsigned char cellCount = model->textCells;
+  const size_t cellCount = model->textCells;
   if (memcmp(brl->buffer, prevData, cellCount) != 0) {
     memcpy(prevData, brl->buffer, cellCount);
     translateOutputCells(rawData, prevData, cellCount);
@@ -1123,7 +1123,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  const unsigned char cellCount = model->statusCells;
+  const size_t cellCount = model->statusCells;
   if (cellCount && (memcmp(st, prevStatus, cellCount) != 0)) {
     memcpy(prevStatus, st, cellCount);
     translateOutputCells(rawStatus, prevStatus, cellCount);

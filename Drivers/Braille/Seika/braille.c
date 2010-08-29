@@ -92,7 +92,6 @@ static const InputOutputOperations *io;
 #define SERIAL_BAUD 9600
 static const int charactersPerSecond = SERIAL_BAUD / 10;
 
-static TranslationTable outputTable;
 static unsigned char textCells[40];
 
 static int
@@ -315,7 +314,7 @@ writeCells_330 (BrailleDisplay *brl) {
     int i;
     for (i=0; i<brl->textColumns; i+=1) {
       *byte++ = 0;
-      *byte++ = outputTable[textCells[i]];
+      *byte++ = translateOutputCell(textCells[i]);
     }
   }
 
@@ -372,7 +371,7 @@ writeCells_331 (BrailleDisplay *brl) {
     int i;
     for (i=0; i<brl->textColumns; i+=1) {
       *byte++ = 0;
-      *byte++ = outputTable[textCells[i]];
+      *byte++ = translateOutputCell(textCells[i]);
     }
   }
 
@@ -500,11 +499,7 @@ writeCells_332 (BrailleDisplay *brl) {
 
   byte = mempcpy(byte, header, sizeof(header));
   *byte++ = brl->textColumns;
-
-  {
-    int i;
-    for (i=0; i<brl->textColumns; i+=1) *byte++ = outputTable[textCells[i]];
-  }
+  byte = translateOutputCells(byte, textCells, brl->textColumns);
 
   return writeBytes(brl, packet, byte-packet);
 }
@@ -727,7 +722,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;
 
-        makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+        makeOutputTable(dotsTable_ISO11548_1);
   
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);

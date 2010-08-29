@@ -140,9 +140,6 @@ put_cksum(unsigned char *buf)
 #define QUERYREPLY 37
 /* len 6, see bellow */
 
-/* This defines the mapping between brltty and MDV's dots pattern coding. */
-static TranslationTable outputTable;
-
 /* Key codes */
 #define NRFKEYS 10 /* values 1-10 */
 /* Shift and Long modifiers for all F-keys, (except LONG-F10 and
@@ -372,7 +369,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     static const DotsTable dots = {
       0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10
     };
-    makeTranslationTable(dots, outputTable);
+    makeOutputTable(dots);
   }
 
   /* Allocate space for buffers */
@@ -438,7 +435,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 static int 
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
-  int i;
   unsigned char *p;
 
   if(memcmp(prevdata, brl->buffer, brl_cols) == 0
@@ -450,10 +446,8 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   sendpacket[OFF_CODE] = FULLREFRESH;
   sendpacket[OFF_LEN] = nrstatcells+brl_cols;
   p = sendpacket+PACKET_HDR_LEN;
-  for(i=0; i<nrstatcells; i++)
-    *(p++) = outputTable[statbuf[i]];
-  for(i=0; i < brl_cols; i++)
-     *(p++) = outputTable[brl->buffer[i]];
+  p = translateOutputCells(p, statbuf, nrstatcells);
+  p = translateOutputCells(p, brl->buffer, brl_cols);
   put_cksum(sendpacket);
 
   serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);

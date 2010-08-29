@@ -474,18 +474,14 @@ static const InputOutputOperations bluetoothOperations = {
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
 
-static TranslationTable outputTable;
 static unsigned char previousCells[40];
 
 static int
 writeCells (BrailleDisplay *brl) {
-  size_t count = brl->textColumns * brl->textRows;
+  const size_t count = brl->textColumns * brl->textRows;
   unsigned char cells[count];
 
-  {
-    int i;
-    for (i=0; i<count; i+=1) cells[i] = outputTable[previousCells[i]];
-  }
+  translateOutputCells(cells, previousCells, count);
 
   return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
 }
@@ -520,7 +516,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->keyBindings = protocol->keyTableDefinition->bindings;
         brl->keyNameTables = protocol->keyTableDefinition->names;
 
-        makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+        makeOutputTable(dotsTable_ISO11548_1);
   
         if (clearCells(brl)) return 1;
       }
