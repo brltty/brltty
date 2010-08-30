@@ -37,8 +37,6 @@ static unsigned char lastbuff[40];
 #define LPTSTATUSPORT LPTPORT+1
 #define LPTCONTROLPORT LPTPORT+2
   
-static TranslationTable outputTable;
-
 static void vbclockpause() {
   int i;
   for (i = 0; i<=VBCLOCK*100; i++) ;
@@ -69,7 +67,7 @@ static void vbdisplay(unsigned char *vbBuf) {
 static int vbinit() {
   if (enablePorts(LOG_ERR, LPTPORT, 3)) {
     if (enablePorts(LOG_ERR, 0X80, 1)) {
-      makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+      makeOutputTable(dotsTable_ISO11548_1);
 
       {
         unsigned char alldots[40];
@@ -89,11 +87,6 @@ static int vbinit() {
 void vbsleep(long x) {
   int i;
   for (i = 0; i<x; i++) writePort1(0x80, 1);
-}
-
-static void vbtranslate(const unsigned char *vbBuf,unsigned char *vbDest,int size) {
-  int i;
-  for (i=0; i<size; i++) vbDest[i] = outputTable[vbBuf[i]];
 }
 
 static void BrButtons(vbButtons *dest) {
@@ -135,23 +128,19 @@ static void brl_destruct(BrailleDisplay *brl) {
 }
 
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
-  unsigned char outbuff[40];
-  int i;
+  const size_t cells = 40;
+  unsigned char outbuff[cells];
 
   /* Only display something if the data actually differs, this 
   *  could most likely cause some problems in redraw situations etc
   *  but since the darn thing wants to redraw quite frequently otherwise 
   *  this still makes a better lookin result */ 
-  for (i = 0; i<40; i++) {
-    if (lastbuff[i]!=brl->buffer[i]) {
-      memcpy(lastbuff,brl->buffer,40*sizeof(char));
-      /*  Redefine the given dot-pattern to match ours */
-      vbtranslate(brl->buffer, outbuff, 40);
-      vbdisplay(outbuff);
-      vbdisplay(outbuff);
-      accurateDelay(VBREFRESHDELAY);
-      break;
-    }
+  if (memcmp(brl->buffer, lastbuff, cells) != 0) {
+    memcpy(lastbuff, brl->buffer, cells);
+    translateOutputCells(outbuff, brl->buffer, cells);
+    vbdisplay(outbuff);
+    vbdisplay(outbuff);
+    accurateDelay(VBREFRESHDELAY);
   }
   return 1;
 }
