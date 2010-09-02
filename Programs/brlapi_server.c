@@ -946,9 +946,10 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   int cursor = -1;
   unsigned char *p = &wa->data;
   int remaining = size;
-#ifdef HAVE_ICONV_H
-  char *charset = NULL, *coreCharset = NULL;
+  char *charset = NULL;
   unsigned int charsetLen = 0;
+#ifdef HAVE_ICONV_H
+  char *coreCharset = NULL;
 #endif /* HAVE_ICONV_H */
   logMessageRequest(type, c->fd);
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
@@ -1001,7 +1002,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* cursor */
     CHECKEXC(cursor<=displaySize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
   }
-#ifdef HAVE_ICONV_H
   if (wa->flags & BRLAPI_WF_CHARSET) {
     CHECKEXC(wa->flags & BRLAPI_WF_TEXT, BRLAPI_ERROR_INVALID_PACKET, "charset requires text");
     CHECKEXC(remaining>=1, BRLAPI_ERROR_INVALID_PACKET, "packet too small for charset length");
@@ -1010,16 +1010,17 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     charset = (char *) p;
     p += charsetLen; remaining -= charsetLen; /* charset name */
   }
-#else /* HAVE_ICONV_H */
-  CHECKEXC(!(wa->flags & BRLAPI_WF_CHARSET), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
-#endif /* HAVE_ICONV_H */
   CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */
   if (text) {
-#ifdef HAVE_ICONV_H
     if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
-    } else {
+#ifndef HAVE_ICONV_H
+      CHECKEXC(!strcasecmp(charset, "iso-8859-1"), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
+#endif /* !HAVE_ICONV_H */
+    }
+#ifdef HAVE_ICONV_H
+    else {
       lockCharset(0);
       charset = coreCharset = (char *) getCharset();
       if (!coreCharset)
