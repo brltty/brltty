@@ -1211,7 +1211,7 @@ AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
 case "${host_os}"
 in
    mingw*)
-      brltty_cv_device_directory=""
+      brltty_cv_device_directory="//."
       ;;
    *)
       brltty_cv_device_directory="/dev"
