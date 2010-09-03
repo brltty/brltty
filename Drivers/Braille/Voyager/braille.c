@@ -493,7 +493,6 @@ static const InputOutputOperations usbOperations = {
 
 /* Global variables */
 static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
-static TranslationTable outputTable;
 static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
 
@@ -597,8 +596,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (io->setDisplayState(1)) {
             io->soundBeep(200);
 
-            makeTranslationTable(dotsTable_ISO11548_1, outputTable);
-
+            makeOutputTable(dotsTable_ISO11548_1);
             firstRead = 1;
             return 1;
           }
@@ -645,11 +643,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   memcpy(previousCells, currentCells, cellCount);
 
   /* translate to voyager dot pattern coding */
-  {
-    int i;
-    for (i=0; i<cellCount; i++)
-      buffer[i] = outputTable[currentCells[i]];
-  }
+  translateOutputCells(buffer, currentCells, cellCount);
 
   /* The firmware supports multiples of 8 cells, so there are extra cells
    * in the firmware's imagination that don't actually exist physically.

@@ -54,8 +54,6 @@ typedef enum {
 
 SerialDevice *BL_serialDevice = NULL;		/* file descriptor for Braille display */
 
-static TranslationTable outputTable;	/* dot mapping table (output) */
-static TranslationTable inputTable;	/* mapping for reversed display */
 static unsigned char *prevdata = NULL;	/* previously received data */
 static unsigned char *rawdata = NULL;	/* writebrl() buffer for raw Braille data */
 static int blitesz;	/* set to 18 or 40 */
@@ -369,8 +367,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
             brl->textColumns = blitesz;	/* initialise size of display - */
             brl->textRows = 1;		/* Braille Lites are single line displays */
 
-            makeTranslationTable(dotsTable_ISO11548_1, outputTable);
-            reverseTranslationTable(outputTable, inputTable);
+            makeOutputTable(dotsTable_ISO11548_1);
+            makeInputTable();
 
             /* Allocate space for buffers */
             if ((prevdata = malloc(brl->textColumns))) {
@@ -458,11 +456,13 @@ brl_writeWindow (BrailleDisplay * brl, const wchar_t *text)
     }
 
   /* Next we must handle display reversal: */
-  if (reverse_kbd)
-    for (i = 0; i < blitesz; i++)
-      rawdata[i] = inputTable[brl->buffer[blitesz - 1 - i]];
-  else
-    memcpy (rawdata, brl->buffer, blitesz);
+  if (reverse_kbd) {
+    for (i=0; i<blitesz; i+=1) {
+      rawdata[i] = translateInputCell(brl->buffer[blitesz - 1 - i]);
+    }
+  } else {
+    memcpy(rawdata, brl->buffer, blitesz);
+  }
 
   /* Only refresh display if the data has changed: */
   if (memcmp (rawdata, prevdata, blitesz))
@@ -471,8 +471,7 @@ brl_writeWindow (BrailleDisplay * brl, const wchar_t *text)
       memcpy (prevdata, rawdata, blitesz);
 
       /* Dot mapping from standard to BrailleLite: */
-      for (i = 0; i < blitesz; i++)
-	rawdata[i] = outputTable[rawdata[i]];
+      translateOutputCells(rawdata, rawdata, blitesz);
 
       /* First we process any pending keystrokes, just in case any of them
        * are ^e ...
