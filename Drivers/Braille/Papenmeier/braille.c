@@ -62,7 +62,6 @@ typedef struct {
   unsigned char protocol1;
   unsigned char protocol2;
   int (*openPort) (char **parameters, const char *device);
-  int (*preparePort) (void);
   void (*closePort) (void);
   void (*flushPort) (BrailleDisplay *brl);
   int (*awaitInput) (int milliseconds);
@@ -83,17 +82,15 @@ static const int serialBauds[] = {19200, 38400, 0};
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, *baud)) return 1;
+    if (serialRestartDevice(serialDevice, *baud))
+      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE))
+        return 1;
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
   }
-  return 0;
-}
 
-static int
-prepareSerialPort (void) {
-  return serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
+  return 0;
 }
 
 static void
@@ -128,7 +125,7 @@ writeSerialBytes (const unsigned char *buffer, int length) {
 
 static const InputOutputOperations serialOperations = {
   serialBauds, 1, 1,
-  openSerialPort, prepareSerialPort, closeSerialPort, flushSerialPort,
+  openSerialPort, closeSerialPort, flushSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
@@ -164,11 +161,6 @@ openUsbPort (char **parameters, const char *device) {
   return 0;
 }
 
-static int
-prepareUsbPort (void) {
-  return 1;
-}
-
 static void
 closeUsbPort (void) {
   if (usb) {
@@ -202,7 +194,7 @@ writeUsbBytes (const unsigned char *buffer, int length) {
 
 static const InputOutputOperations usbOperations = {
   usbBauds, 0, 3,
-  openUsbPort, prepareUsbPort, closeUsbPort, flushUsbPort,
+  openUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 
@@ -216,11 +208,6 @@ static const int bluetoothBauds[] = {115200, 0};
 static int
 openBluetoothPort (char **parameters, const char *device) {
   return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
-}
-
-static int
-prepareBluetoothPort (void) {
-  return 1;
 }
 
 static void
@@ -261,7 +248,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
 
 static const InputOutputOperations bluetoothOperations = {
   bluetoothBauds, 0, 3,
-  openBluetoothPort, prepareBluetoothPort, closeBluetoothPort, flushBluetoothPort,
+  openBluetoothPort, closeBluetoothPort, flushBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
 
@@ -1247,12 +1234,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         memset(currentText, 0, model->textColumns);
         memset(currentStatus, 0, model->statusCount);
         protocol->initializeTerminal(brl);
-        if (io->preparePort()) return 1;
+        return 1;
       }
+
       io->closePort();
     }
 
-    ++baud;
+    baud += 1;
   }
 
 failed:

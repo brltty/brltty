@@ -57,7 +57,6 @@
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
-  int (*preparePort) (void);
   void (*closePort) (void);
   int (*getCellCount) (unsigned char *length);
   int (*logSerialNumber) (void);
@@ -186,19 +185,15 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 38400)) {
-      return 1;
-    }
+    if (serialRestartDevice(serialDevice, 38400))
+      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE))
+        return 1;
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
   }
-  return 0;
-}
 
-static int
-prepareSerialPort (void) {
-  return serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE);
+  return 0;
 }
 
 static void
@@ -332,7 +327,7 @@ soundSerialBeep (unsigned char duration) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, prepareSerialPort, closeSerialPort, getSerialCellCount,
+  openSerialPort, closeSerialPort, getSerialCellCount,
   logSerialSerialNumber, logSerialHardwareVersion, logSerialFirmwareVersion,
   setSerialDisplayVoltage, getSerialDisplayVoltage, getSerialDisplayCurrent,
   setSerialDisplayState, writeSerialBraille,
@@ -387,11 +382,6 @@ openUsbPort (char **parameters, const char *device) {
   }
 
   return 0;
-}
-
-static int
-prepareUsbPort (void) {
-  return 1;
 }
 
 static void
@@ -493,7 +483,7 @@ soundUsbBeep (unsigned char duration) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, prepareUsbPort, closeUsbPort, getUsbCellCount,
+  openUsbPort, closeUsbPort, getUsbCellCount,
   logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
   setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
   setUsbDisplayState, writeUsbBraille,
@@ -610,7 +600,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             makeTranslationTable(dotsTable_ISO11548_1, outputTable);
 
             firstRead = 1;
-            if (io->preparePort()) return 1;
+            return 1;
           }
 
           free(previousCells);

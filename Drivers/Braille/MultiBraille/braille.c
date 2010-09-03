@@ -113,6 +113,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	/* Now open the Braille display device for random access */
 	if (!(MB_serialDevice = serialOpenDevice(device))) goto failure;
 	if (!serialRestartDevice(MB_serialDevice, BAUDRATE)) goto failure;
+	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
 	/* MultiBraille initialisation procedure:
 	 * [ESC][V][Braillelength][Software Version][CR]
@@ -147,7 +148,6 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	while (!hasTimedOut (ACK_TIMEOUT) && n <= init_ack[0]);
 
 	if (!success) goto failure;
-	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
 	if (brlcols == 25) goto failure;						/* MultiBraille Vertical uses a different protocol --> not supported */
 	brl->textColumns = brlcols;

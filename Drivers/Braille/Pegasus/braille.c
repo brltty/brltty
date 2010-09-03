@@ -74,7 +74,6 @@ typedef struct {
 
 typedef struct {
   int (*openPort) (const char *device);
-  int (*configurePort) (void);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
@@ -304,21 +303,15 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, SERIAL_BAUD)) {
-      return 1;
-    }
+    if (serialRestartDevice(serialDevice, SERIAL_BAUD))
+      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE))
+        return 1;
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
   }
 
   return 0;
-}
-
-static int
-configureSerialPort (void) {
-  if (!serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) return 0;
-  return 1;
 }
 
 static void
@@ -387,7 +380,7 @@ static const InputOutputMethods serialMethods = {
 };
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, configureSerialPort, closeSerialPort,
+  openSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes,
   &serialMethods
 };
@@ -413,11 +406,6 @@ openUsbPort (const char *device) {
     return 1;
   }
   return 0;
-}
-
-static int
-configureUsbPort (void) {
-  return 1;
 }
 
 static void
@@ -486,7 +474,7 @@ static const InputOutputMethods usbMethods = {
 };
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, configureUsbPort, closeUsbPort,
+  openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes,
   &usbMethods
 };
@@ -510,7 +498,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       memset(textCells, 0, sizeof(textCells));
       memset(statusCells, 0, sizeof(statusCells));
 
-      if (io->configurePort()) return 1;
+      return 1;
     }
 
     io->closePort();

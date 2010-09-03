@@ -299,101 +299,113 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     return 0;
   }
 
-  if ((qbase = malloc(QSZ))) {
-    /* Open the Braille display device for random access */
-    logMessage(LOG_DEBUG, "Opening serial port: %s", device);
-    if ((BL_serialDevice = serialOpenDevice(device))) {
-      /* activate new settings */
-      if (serialRestartDevice(BL_serialDevice, baudrate)) {
-        qflush();
-        write_prebrl();
-        if (await_ack()) {
-          logMessage(LOG_DEBUG, "Got response.");
+  logMessage(LOG_DEBUG, "Opening serial port: %s", device);
+  if ((BL_serialDevice = serialOpenDevice(device))) {
+    if (serialRestartDevice(BL_serialDevice, baudrate)) {
+      if (serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE)) {
+        if ((qbase = malloc(QSZ))) {
+          qflush();
+          write_prebrl();
 
-          /* Next, let's detect the BLT-Model (18, 40, M20, M40). */
-          barcmds = &bar2cmds;
-          {
-            unsigned char cells[18];
-            memset(cells, 0, sizeof(cells));
-            serialWriteData(BL_serialDevice, cells, sizeof(cells));
-            waiting_ack = 1;
-            approximateDelay(400);
-            qfill();
-            if (waiting_ack) {
-              /* no response, so it must be BLT40 */
-              blitesz = 40;
-              brl->keyBindings = "40+m20+m40";
-            } else {
-              blitesz = sizeof(cells);
-              brl->keyBindings = "18";
-            }
-          }
+          if (await_ack()) {
+            logMessage(LOG_DEBUG, "Got response.");
 
-          {
-            static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
-            approximateDelay(200);
-            qflush();
-            serialWriteData(BL_serialDevice, request, sizeof(request));
-            waiting_ack = 0;
-            approximateDelay(200);
-            qfill();
-            if (qlen) {
-              char response[qlen + 1];
-              int length = 0;
-              do {
-                unsigned char byte = qbase[qoff % QSZ];
-                qoff = (qoff + 1) % QSZ, --qlen;
-                if (!byte) break;
-                response[length++] = byte;
-              } while (qlen);
-              response[length] = 0;
-              logMessage(LOG_INFO, "Braille Lite identity: %s", response);
+            /* Next, let's detect the BLT-Model (18, 40, M20, M40). */
+            barcmds = &bar2cmds;
+            {
+              unsigned char cells[18];
 
-              if ((response[0] == 'X') &&
-                  (response[1] == ' ') &&
-                  (response[2] == 'B')) {
-                blitesz = atoi(&response[3]);
-                if (blitesz <= 20) barcmds = &bar1cmds;
+              memset(cells, 0, sizeof(cells));
+              serialWriteData(BL_serialDevice, cells, sizeof(cells));
+              waiting_ack = 1;
+              approximateDelay(400);
+              qfill();
+
+              if (waiting_ack) {
+                /* no response, so it must be BLT40 */
+                blitesz = 40;
+                brl->keyBindings = "40+m20+m40";
+              } else {
+                blitesz = sizeof(cells);
+                brl->keyBindings = "18";
               }
             }
-          }
 
-          logMessage(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
-          brl->textColumns = blitesz;	/* initialise size of display - */
-          brl->textRows = 1;		/* Braille Lites are single line displays */
+            {
+              static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
 
-          makeTranslationTable(dotsTable_ISO11548_1, outputTable);
-          reverseTranslationTable(outputTable, inputTable);
+              approximateDelay(200);
+              qflush();
+              serialWriteData(BL_serialDevice, request, sizeof(request));
+              waiting_ack = 0;
+              approximateDelay(200);
+              qfill();
 
-          /* Allocate space for buffers */
-          if ((prevdata = malloc(brl->textColumns))) {
-            memset(prevdata, 0, brl->textColumns);
+              if (qlen) {
+                char response[qlen + 1];
+                int length = 0;
 
-            if ((rawdata = malloc(brl->textColumns))) {
-              if (serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE)) return 1;
+                do {
+                  unsigned char byte = qbase[qoff % QSZ];
 
-              free(rawdata);
-              rawdata = NULL;
-            } else {
-              logMessage(LOG_ERR, "Cannot allocate rawdata.");
+                  qoff = (qoff + 1) % QSZ, --qlen;
+                  if (!byte) break;
+                  response[length++] = byte;
+                } while (qlen);
+
+                response[length] = 0;
+                logMessage(LOG_INFO, "Braille Lite identity: %s", response);
+
+                if ((response[0] == 'X') &&
+                    (response[1] == ' ') &&
+                    (response[2] == 'B')) {
+                  blitesz = atoi(&response[3]);
+                  if (blitesz <= 20) barcmds = &bar1cmds;
+                }
+              }
             }
-            free(prevdata);
-            prevdata = NULL;
+
+            logMessage(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
+            brl->textColumns = blitesz;	/* initialise size of display - */
+            brl->textRows = 1;		/* Braille Lites are single line displays */
+
+            makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+            reverseTranslationTable(outputTable, inputTable);
+
+            /* Allocate space for buffers */
+            if ((prevdata = malloc(brl->textColumns))) {
+              memset(prevdata, 0, brl->textColumns);
+
+              if ((rawdata = malloc(brl->textColumns))) {
+                return 1;
+
+              //free(rawdata);
+              //rawdata = NULL;
+              } else {
+                logMallocError();
+              }
+
+              free(prevdata);
+              prevdata = NULL;
+            } else {
+              logMallocError();
+            }
           } else {
-            logMessage(LOG_ERR, "Cannot allocate prevdata.");
+            logMessage(LOG_DEBUG, "BrailleLite not responding.");
           }
+
+          free(qbase);
+          qbase = NULL;
         } else {
-          logMessage(LOG_DEBUG, "BrailleLite not responding.");
+          logMallocError();
         }
       }
-      serialCloseDevice(BL_serialDevice);
-      BL_serialDevice = NULL;
     }
-    free(qbase);
-    qbase = NULL;
-  } else {
-    logMessage(LOG_ERR, "Cannot allocate qbase.");
+
+    serialCloseDevice(BL_serialDevice);
+    BL_serialDevice = NULL;
   }
+
   return 0;
 }
 
