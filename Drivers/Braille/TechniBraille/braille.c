@@ -26,8 +26,6 @@
 
 #include "brl_driver.h"
 
-static TranslationTable outputTable;
-static TranslationTable inputTable;
 static unsigned char brailleCells[0XFF];
 static wchar_t visualText[0XFF];
 
@@ -107,10 +105,11 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
 static int
 writeBrailleCells (BrailleDisplay *brl) {
-  unsigned char cells[brl->textColumns];
-  int i;
-  for (i=0; i<brl->textColumns; ++i) cells[i] = outputTable[brailleCells[i]];
-  return writePacket(brl, 1, cells, brl->textColumns);
+  size_t count = brl->textColumns;
+  unsigned char cells[count];
+
+  translateOutputCells(cells, brailleCells, count);
+  return writePacket(brl, 1, cells, count);
 }
 
 static int
@@ -161,8 +160,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->textColumns = response[2];
               brl->textRows = 1;
 
-              makeTranslationTable(dotsTable_ISO11548_1, outputTable);
-              reverseTranslationTable(outputTable, inputTable);
+              makeOutputTable(dotsTable_ISO11548_1);
+              makeInputTable();
 
               if (!clearBrailleCells(brl)) break;
               if (!clearVisualText(brl)) break;
@@ -219,7 +218,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
 
       case 1:
-        return BRL_BLK_PASSDOTS | inputTable[packet[2]];
+        return BRL_BLK_PASSDOTS | translateInputCell(packet[2]);
 
       case 2: {
         unsigned char column = packet[2];

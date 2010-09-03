@@ -57,7 +57,6 @@ extern t_eubrl_io eubrl_usbIos, eubrl_serialIos;
 extern t_eubrl_io eubrl_bluetoothIos, eubrl_ethernetIos;
 
 
-static TranslationTable outputTable;
 static t_eubrl_io *iop = NULL;
 static t_eubrl_protocol *protocolp = NULL;
 
@@ -67,7 +66,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   protocolp = NULL;
   brl->textColumns = 0;
   iop = NULL;
-  makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+  makeOutputTable(dotsTable_ISO11548_1);
   if (parameters[PARAM_PROTOCOLTYPE])
     {
       unsigned int choice = 0;

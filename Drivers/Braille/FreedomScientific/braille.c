@@ -440,7 +440,6 @@ static const ModelEntry modelTable[] = {
 static const ModelEntry *model;
 static const KeyTableDefinition *keyTableDefinition;
 
-static TranslationTable outputTable;
 static unsigned char outputBuffer[84];
 
 static int writeFrom;
@@ -653,7 +652,7 @@ updateCells (
 ) {
   int index;
   for (index=0; index<count; ++index) {
-    unsigned char cell = outputTable[cells[index]];
+    unsigned char cell = translateOutputCell(cells[index]);
     unsigned char position = offset + index;
     unsigned char *byte = &outputBuffer[position];
     if (cell != *byte) {
@@ -900,7 +899,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             if (model) {
               keyTableDefinition = modelTypeTable[model->type].keyTableDefinition;
-              makeTranslationTable(model->dotsTable[0], outputTable);
+              makeOutputTable(model->dotsTable[0]);
               memset(outputBuffer, 0, model->cellCount);
               writeFrom = 0;
               writeTo = model->cellCount - 1;

@@ -41,9 +41,6 @@ typedef enum {
 
 #include "brl_driver.h"
 
-static TranslationTable outputTable;
-static TranslationTable inputTable;
-
 static int
 brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
@@ -97,8 +94,8 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
           BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
           BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
         };
-        makeTranslationTable(dots, outputTable);
-        reverseTranslationTable(outputTable, inputTable);
+        makeOutputTable(dots);
+        makeInputTable();
       }
   
       braille_timeout(100);
@@ -136,7 +133,7 @@ brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
       if(brl->cursor >= 0)
         {
-          braille_filter(outputTable[cursorDots()], brl->cursor);
+          braille_filter(translateOutputCell(cursorDots()), brl->cursor);
         }
 
       braille_render();
@@ -214,7 +211,7 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    }
 	  break;
 	case BRL_KEY:
-	  res = BRL_BLK_PASSDOTS | inputTable[key.braille];
+	  res = BRL_BLK_PASSDOTS | translateInputCell(key.braille);
 	  break;
 	default:
           break;

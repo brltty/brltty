@@ -73,11 +73,6 @@ static BRLPARAMS Models[NB_MODEL] ={
 #define BRLROWS		1
 #define MAX_STCELLS	4	/* hiest number of status cells */
 
-/* Eco dot translate table. This Braille Line use Spanish Braille file 
- * text.es.tbl for default
- */
-static TranslationTable outputTable;
-
 /* Global variables */
 static SerialDevice *serialDevice;			/* file descriptor for Braille display */
 static unsigned char *rawdata;		/* translated data to send to Braille */
@@ -223,7 +218,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     static const DotsTable dots = {
       0X10, 0X20, 0X40, 0X01, 0X02, 0X04, 0X80, 0X08
     };
-    makeTranslationTable(dots, outputTable);
+    makeOutputTable(dots);
   }
 
   /* Need to calculate the size; Cols + Status + 1 (space between) */
@@ -263,19 +258,17 @@ static void brl_destruct(BrailleDisplay *brl)
 
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
-  int i, j;
-
+  unsigned char *byte = rawdata;
   /* This Braille Line need to display all information, include status */
   
   /* Make status info to rawdata */
-  for(i=0; i < model->NbStCells; i++)
-      rawdata[i] = outputTable[Status[i]];
+  byte = translateOutputCells(byte, Status, model->NbStCells);
 
-  i++;  /* step a phisical space with main cells */
+  /* step a physical space with main cells */
+  *byte++ = 0;
   
   /* Make main info to rawdata */
-  for(j=0; j < brl->textColumns; j++)
-      rawdata[i++] = outputTable[brl->buffer[j]];
+  byte = translateOutputCells(byte, brl->buffer, brl->textColumns);
      
   /* Write to Braille Display */
   WriteToBrlDisplay(rawdata);

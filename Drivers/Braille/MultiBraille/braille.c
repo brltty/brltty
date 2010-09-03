@@ -69,7 +69,6 @@
 #include "tables.h"		/* for keybindings */
 #include "io_serial.h"
 
-static TranslationTable outputTable;	/* dot mapping table (output) */
 SerialDevice *MB_serialDevice;			/* file descriptor for Braille display */
 static int brlcols;		/* length of braille display (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
@@ -159,7 +158,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 		static const DotsTable dots = {
 			0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
 		};
-		makeTranslationTable(dots, outputTable);
+		makeOutputTable(dots);
 	}
 
 	/* Allocate space for buffers */
@@ -215,10 +214,8 @@ static void brl_destruct (BrailleDisplay *brl) {
 
 
 static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
-	short i;
-
 	/* Dot mapping: */
-	for (i = 0; i < 5; status[i] = outputTable[s[i]], i++);
+	translateOutputCells(status, s, 5);
 	return 1;
 }
 
@@ -234,7 +231,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 		memcpy (prevdata, brl->buffer, brl->textColumns * brl->textRows);
 
 		/* Dot mapping from standard to MultiBraille: */
-		for (i = 0; i < brl->textColumns * brl->textRows; brl->buffer[i] = outputTable[brl->buffer[i]], i++);
+		translateOutputCells(brl->buffer, brl->buffer, brl->textColumns*brl->textRows);
 
     rawlen = 0;
 		if (pre_data[0]) {

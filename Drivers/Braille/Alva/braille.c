@@ -449,7 +449,6 @@ typedef enum {
   STATUS_RIGHT
 } StatusType;
 
-static TranslationTable outputTable;
 static unsigned char *previousText = NULL;
 static unsigned char *previousStatus = NULL;
 
@@ -1606,7 +1605,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     protocol->initializeVariables();
 
     if (protocol->detectModel(brl)) {
-      makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+      makeOutputTable(dotsTable_ISO11548_1);
 
       memset(&textRewriteTime, 0, sizeof(textRewriteTime));
       return 1;
@@ -1654,31 +1653,29 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   if (from < to) {
-    unsigned char cells[to - from - 1];
+    const unsigned char *source = &brl->buffer[from];
+    size_t count = to - from;
+    unsigned char cells[count];
 
-    {
-      int index;
-      for (index=from; index<to; index++)
-        cells[index - from] = outputTable[(previousText[index] = brl->buffer[index])];
-    }
+    memcpy(&previousText[from], source, count);
+    translateOutputCells(cells, source, count);
 
-    if (!protocol->writeBraille(brl, cells, textOffset+from, to-from)) return 0;
+    if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
   }
   return 1;
 }
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (statusRewriteRequired || (memcmp(status, previousStatus, brl->statusColumns) != 0)) {
-    unsigned char cells[brl->statusColumns];
+  size_t cellCount = brl->statusColumns;
 
-    {
-      int i;
-      for (i=0; i<brl->statusColumns; ++i)
-        cells[i] = outputTable[(previousStatus[i] = status[i])];
-    }
+  if (statusRewriteRequired || (memcmp(status, previousStatus, cellCount) != 0)) {
+    unsigned char cells[cellCount];
 
-    if (!protocol->writeBraille(brl, cells, statusOffset, brl->statusColumns)) return 0;
+    memcpy(previousStatus, status, cellCount);
+    translateOutputCells(cells, status, cellCount);
+
+    if (!protocol->writeBraille(brl, cells, statusOffset, cellCount)) return 0;
     statusRewriteRequired = 0;
   }
 

@@ -65,7 +65,6 @@ static unsigned char textCells[MT_MODULES_MAXIMUM * MT_MODULE_SIZE];
 static int forceWrite;
 static uint16_t lastNavigationKeys;
 static unsigned char lastRoutingKey;
-static TranslationTable outputTable;
 
 #include "io_usb.h"
 
@@ -162,7 +161,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               static const DotsTable dots = {
                 0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
               };
-              makeTranslationTable(dots, outputTable);
+              makeOutputTable(dots);
             }
 
             {
@@ -208,11 +207,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     if (forceWrite || (memcmp(target, source, MT_MODULE_SIZE) != 0)) {
       unsigned char buffer[MT_MODULE_SIZE];
 
-      {
-        int i;
-        for (i=0; i<MT_MODULE_SIZE; i+=1) buffer[i] = outputTable[source[i]];
-      }
-
+      translateOutputCells(buffer, source, MT_MODULE_SIZE);
       if (writeDevice(0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
       memcpy(target, source, MT_MODULE_SIZE);
     }

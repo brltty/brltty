@@ -34,7 +34,6 @@ static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 static int rewriteRequired;
 static unsigned char textCells[80];
 static unsigned char statusCells[2];
-static TranslationTable outputTable;
 
 BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(PG_KEY_LeftShift, "LeftShift"),
@@ -280,8 +279,8 @@ writeCells (BrailleDisplay *brl) {
   unsigned char cells[textCount + statusCount];
   unsigned char *cell = cells;
 
-  while (textCount) *cell++ = outputTable[textCells[--textCount]];
-  while (statusCount) *cell++ = outputTable[statusCells[--statusCount]];
+  while (textCount) *cell++ = translateOutputCell(textCells[--textCount]);
+  while (statusCount) *cell++ = translateOutputCell(statusCells[--statusCount]);
 
   return io->methods->writeCells(brl, cells, cell-cells);
 }
@@ -492,7 +491,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(device)) {
     if (io->methods->identifyModel(brl)) {
-      makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+      makeOutputTable(dotsTable_ISO11548_1);
   
       rewriteRequired = 1;
       memset(textCells, 0, sizeof(textCells));

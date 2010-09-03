@@ -230,7 +230,6 @@ static int cellCount;
 static int cellsUpdated;
 static unsigned char internalCells[MAXIMUM_CELL_COUNT];
 static unsigned char externalCells[MAXIMUM_CELL_COUNT];
-static TranslationTable outputTable;
 
 typedef struct {
   unsigned char navigationKeys[KEY_GROUP_SIZE(BM_KEY_COUNT)];
@@ -381,14 +380,7 @@ updateCells (BrailleDisplay *brl) {
 static int
 updateCellRange (BrailleDisplay *brl, int start, int count) {
   if (count) {
-    const unsigned char *source = &internalCells[start];
-    unsigned char *target = &externalCells[start];
-    const unsigned char *end = source + count;
-
-    do {
-      *target++ = outputTable[*source++];
-    } while (source != end);
-
+    translateOutputCells(&externalCells[start], &internalCells[start], count);
     cellsUpdated = 1;
     if (!protocol->writeCellRange(brl, start, count)) return 0;
   }
@@ -2674,7 +2666,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (protocol->probeDisplay(brl)) {
             logCellCount(brl);
 
-            makeTranslationTable(protocol->dotsTable[0], outputTable);
+            makeOutputTable(protocol->dotsTable[0]);
             if (!clearCellRange(brl, 0, cellCount)) goto failed;
             if (!updateCells(brl)) goto failed;
 

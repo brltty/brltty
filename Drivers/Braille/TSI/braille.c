@@ -140,9 +140,6 @@ static int repeat_list[] =
  BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN,
  BRL_CMD_CSRTRK, 0};
 
-/* This defines the mapping between brltty and Navigator's dots coding. */
-static TranslationTable outputTable;
-
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
 
@@ -507,7 +504,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   brl->textColumns = brl_cols;		/* initialise size of display */
   brl->textRows = BRLROWS;		/* always 1 */
 
-  makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+  makeOutputTable(dotsTable_ISO11548_1);
 
   /* Allocate space for buffers */
   dispbuf = malloc(ncells);
@@ -575,7 +572,7 @@ display (BrailleDisplay *brl,
   rawdata[BRL_SEND_OFFSET] = start;
 
   for (i = 0; i < length; i++)
-    rawdata[DIM_BRL_SEND + 2 * i + 1] = outputTable[pattern[start + i]];
+    rawdata[DIM_BRL_SEND + 2 * i + 1] = translateOutputCell(pattern[start + i]);
 
   /* Some displays apparently don't like rapid updating. Most or all apprently
      don't do flow control. If we update the display too often and too fast,

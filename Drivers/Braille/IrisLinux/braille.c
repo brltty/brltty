@@ -169,10 +169,6 @@ static t_alias	brl_key[] = {
 #define BRLROWS		1
 #define MAX_STCELLS	5	/* hiest number of status cells */
 
-/* This is the brltty braille mapping standard to Eurobraille's mapping table.
- */
-static TranslationTable outputTable;
-
 /* Global variables */
 
 static int		chars_per_sec;
@@ -330,7 +326,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	  }
      }
 
-   makeTranslationTable(dotsTable_ISO11548_1, outputTable);
+   makeOutputTable(dotsTable_ISO11548_1);
 
    ReWrite = 1;  /* To write whole display at first time */
    ReWrite_LCD = 1;
@@ -431,7 +427,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	 for (j = 0; j < 8; j++)
 	   *p++ = 0;
        for (j = NbCols - 1; j >= 0; j--)
-	 *p++ = outputTable[brl->buffer[j]];
+	 *p++ = translateOutputCell(brl->buffer[j]);
        WriteToBrlDisplay (brl, p - OutBuf, OutBuf);
        ReWrite = 0;
      }

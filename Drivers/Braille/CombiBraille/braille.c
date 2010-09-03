@@ -76,7 +76,6 @@ END_KEY_TABLE_LIST
 SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
 
-static TranslationTable outputTable;	/* dot mapping table (output) */
 static unsigned char *prevdata;
 
 #define MAX_STATUS_CELLS 5
@@ -165,7 +164,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 static const DotsTable dots = {
                   0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
                 };
-                makeTranslationTable(dots, outputTable);
+                makeOutputTable(dots);
               }
 
               /* Allocate space for buffers */
@@ -223,13 +222,13 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     byte = mempcpy(byte, header, sizeof(header));
 
     for (i=0; i<brl->statusColumns; i+=1) {
-      const unsigned char c = outputTable[status[i]];
+      const unsigned char c = translateOutputCell(status[i]);
       if (c == ESC) *byte++ = c;
       *byte++ = c;
     }
 
     for (i=0; i<brl->textColumns; i+=1) {
-      const unsigned char c = outputTable[brl->buffer[i]];
+      const unsigned char c = translateOutputCell(brl->buffer[i]);
       if (c == ESC) *byte++ = c;
       *byte++ = c;
     }

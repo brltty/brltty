@@ -250,7 +250,6 @@ static const unsigned char topRightKeys[] = {
 static unsigned char controlKey;
 #define NO_CONTROL_KEY 0XFF
 
-static TranslationTable outputTable;
 static unsigned char displayContent[80];
 static int displaySize;
 static int windowWidth;
@@ -395,7 +394,7 @@ updateDisplay (BrailleDisplay *brl, const unsigned char *cells, int count, int s
     unsigned char cell;
     if (!cells) {
       cell = displayContent[start+index];
-    } else if ((cell = outputTable[cells[index]]) != displayContent[start+index]) {
+    } else if ((cell = translateOutputCell(cells[index])) != displayContent[start+index]) {
       displayContent[start+index] = cell;
     } else {
       continue;
@@ -459,7 +458,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             static const DotsTable dots = {
               0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
             };
-            makeTranslationTable(dots, outputTable);
+            makeOutputTable(dots);
           }
 
           clearDisplay(brl);
