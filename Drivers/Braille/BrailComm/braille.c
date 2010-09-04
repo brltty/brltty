@@ -91,7 +91,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       {
         static const TranslationTable outputTable = {
+#define MAP(byte,cell) [cell] = byte
 #include "brl-out.h"
+#undef MAP
         };
         setOutputTable(outputTable);
       }
