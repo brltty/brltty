@@ -129,6 +129,11 @@ extern void identifyBrailleDrivers (int full);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
 
+extern int cellsHaveChanged (
+  unsigned char *cells, const unsigned char *new, unsigned int count,
+  unsigned int *from, unsigned int *to
+);
+
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 

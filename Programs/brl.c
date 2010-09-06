@@ -468,6 +468,41 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 }
 #endif /* ENABLE_LEARN_MODE */
 
+int
+cellsHaveChanged (
+  unsigned char *cells, const unsigned char *new, unsigned int count,
+  unsigned int *from, unsigned int *to
+) {
+  if (memcmp(cells, new, count) == 0) return 0;
+
+  {
+    unsigned int first = 0;
+
+    if (to) {
+      while (count) {
+        unsigned int last = count - 1;
+        if (cells[last] != new[last]) break;
+        count = last;
+      }
+
+      *to = count;
+    }
+
+    if (from) {
+      while (first < count) {
+        if (cells[first] != new[first]) break;
+        first += 1;
+      }
+
+      *from = first;
+    }
+
+    memcpy(cells+first, new+first, count-first);
+  }
+
+  return 1;
+}
+
 const DotsTable dotsTable_ISO11548_1 = {
   BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
   BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
