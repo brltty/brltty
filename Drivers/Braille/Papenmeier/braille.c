@@ -538,12 +538,16 @@ initializeTable1 (BrailleDisplay *brl) {
 
 static void
 writeText1 (BrailleDisplay *brl, int start, int count) {
-  writePacket1(brl, XMT_BRLDATA+xmtTextOffset+start, count, currentText+start);
+  unsigned char buffer[count];
+  translateOutputCells(buffer, currentText+start, count);
+  writePacket1(brl, XMT_BRLDATA+xmtTextOffset+start, count, buffer);
 }
 
 static void
 writeStatus1 (BrailleDisplay *brl, int start, int count) {
-  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset+start, count, currentStatus+start);
+  unsigned char buffer[count];
+  translateOutputCells(buffer, currentStatus+start, count);
+  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset+start, count, buffer);
 }
 
 static void
@@ -875,7 +879,7 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char *byte = buffer;
 
     /* The status cells. */
-    byte = mempcpy(byte, currentStatus, model->statusCount);
+    byte = translateOutputCells(byte, currentStatus, model->statusCount);
 
     /* Two dummy cells for each key on the left side. */
     if (model->protocolRevision < 2) {
@@ -887,7 +891,7 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     /* The text cells. */
-    byte = mempcpy(byte, currentText, model->textColumns);
+    byte = translateOutputCells(byte, currentText, model->textColumns);
 
     /* Two dummy cells for each key on the right side. */
     if (model->protocolRevision < 2) {
@@ -1278,7 +1282,6 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  translateOutputCells(brl->buffer, brl->buffer, model->textColumns);
   updateCells(brl, model->textColumns, brl->buffer, currentText, protocol->writeText);
   protocol->flushCells(brl);
   return 1;
@@ -1300,13 +1303,13 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
         if (code == OFFS_EMPTY) {
           cells[i] = 0;
         } else if (code >= OFFS_NUMBER) {
-          cells[i] = translateOutputCell(portraitNumber(values[code-OFFS_NUMBER]));
+          cells[i] = portraitNumber(values[code-OFFS_NUMBER]);
         } else if (code >= OFFS_FLAG) {
-          cells[i] = translateOutputCell(seascapeFlag(i+1, values[code-OFFS_FLAG]));
+          cells[i] = seascapeFlag(i+1, values[code-OFFS_FLAG]);
         } else if (code >= OFFS_HORIZ) {
-          cells[i] = translateOutputCell(seascapeNumber(values[code-OFFS_HORIZ]));
+          cells[i] = seascapeNumber(values[code-OFFS_HORIZ]);
         } else {
-          cells[i] = translateOutputCell(values[code]);
+          cells[i] = values[code];
         }
       }
     } else {
@@ -1316,7 +1319,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
         unsigned char dots = s[i];
 
         if (!dots) break;
-        cells[i++] = translateOutputCell(dots);
+        cells[i++] = dots;
       }
 
       while (i < model->statusCount) cells[i++] = 0;
