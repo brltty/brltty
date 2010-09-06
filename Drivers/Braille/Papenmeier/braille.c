@@ -258,8 +258,8 @@ typedef struct {
   void (*initializeTerminal) (BrailleDisplay *brl);
   void (*releaseResources) (void);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
-  void (*writeText) (BrailleDisplay *brl, int start, int count);
-  void (*writeStatus) (BrailleDisplay *brl, int start, int count);
+  void (*writeText) (BrailleDisplay *brl, unsigned int start, unsigned int count);
+  void (*writeStatus) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*flushCells) (BrailleDisplay *brl);
   void (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
@@ -385,7 +385,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t co
 }
 
 static int
-writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned char *data) {
+writePacket1 (BrailleDisplay *brl, unsigned int xmtAddress, unsigned int count, const unsigned char *data) {
   if (count) {
     unsigned char header[] = {
       STX,
@@ -401,6 +401,7 @@ writePacket1 (BrailleDisplay *brl, int xmtAddress, int count, const unsigned cha
 
     header[2] = xmtAddress >> 8;
     header[3] = xmtAddress & 0XFF;
+
     header[4] = size >> 8;
     header[5] = size & 0XFF;
 
@@ -537,14 +538,14 @@ initializeTable1 (BrailleDisplay *brl) {
 }
 
 static void
-writeText1 (BrailleDisplay *brl, int start, int count) {
+writeText1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, currentText+start, count);
   writePacket1(brl, XMT_BRLDATA+xmtTextOffset+start, count, buffer);
 }
 
 static void
-writeStatus1 (BrailleDisplay *brl, int start, int count) {
+writeStatus1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, currentStatus+start, count);
   writePacket1(brl, XMT_BRLDATA+xmtStatusOffset+start, count, buffer);
@@ -868,7 +869,7 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static void
-writeCells2 (BrailleDisplay *brl, int start, int count) {
+writeCells2 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   refreshRequired2 = 1;
 }
 
@@ -1258,25 +1259,15 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static void
-updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned char *cells,
-             void (*writeCells) (BrailleDisplay *brl, int start, int count)) {
-  if (memcmp(cells, data, size) != 0) {
-    int index;
+updateCells (
+  BrailleDisplay *brl,
+  unsigned int count, const unsigned char *data, unsigned char *cells,
+  void (*writeCells) (BrailleDisplay *brl, unsigned int start, unsigned int count)
+) {
+  unsigned int from, to;
 
-    while (size) {
-      index = size - 1;
-      if (cells[index] != data[index]) break;
-      size = index;
-    }
-
-    for (index=0; index<size; ++index) {
-      if (cells[index] != data[index]) break;
-    }
-
-    if ((size -= index)) {
-      memcpy(cells+index, data+index, size);
-      writeCells(brl, index, size);
-    }
+  if (cellsHaveChanged(cells, data, count, &from, &to)) {
+    writeCells(brl, from, to-from);
   }
 }
 
