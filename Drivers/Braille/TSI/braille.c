@@ -558,7 +558,7 @@ brl_destruct (BrailleDisplay *brl)
 static void 
 display (BrailleDisplay *brl, 
          const unsigned char *pattern, 
-	 unsigned start, unsigned stop)
+	 unsigned int from, unsigned int to)
 /* display a given dot pattern. We process only part of the pattern, from
    byte (cell) start to byte stop. That pattern should be shown at position 
    start on the display. */
@@ -566,13 +566,13 @@ display (BrailleDisplay *brl,
   int i, length;
 
   /* Assumes BRLROWS == 1 */
-  length = stop - start + 1;
+  length = to - from;
 
   rawdata[BRL_SEND_LENGTH] = 2 * length;
-  rawdata[BRL_SEND_OFFSET] = start;
+  rawdata[BRL_SEND_OFFSET] = from;
 
   for (i = 0; i < length; i++)
-    rawdata[DIM_BRL_SEND + 2 * i + 1] = translateOutputCell(pattern[start + i]);
+    rawdata[DIM_BRL_SEND + 2 * i + 1] = translateOutputCell(pattern[from + i]);
 
   /* Some displays apparently don't like rapid updating. Most or all apprently
      don't do flow control. If we update the display too often and too fast,
@@ -616,7 +616,7 @@ static void
 display_all (BrailleDisplay *brl,
              unsigned char *pattern)
 {
-  display (brl, pattern, 0, ncells - 1);
+  display (brl, pattern, 0, ncells);
 }
 
 
@@ -639,7 +639,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
     unsigned int from, to;
     
     if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to)) {
-      display (brl, dispbuf, from, to-1);
+      display (brl, dispbuf, from, to);
     }
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
@@ -650,7 +650,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	  simil++;
 	  if (collecting && 2 * simil > DIM_BRL_SEND)
 	    {
-	      display (brl, dispbuf, base, i - simil);
+	      display (brl, dispbuf, base, i - simil + 1);
 	      base = i;
 	      collecting = 0;
 	      simil = 0;
@@ -668,7 +668,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	}
     
     if (collecting)
-      display (brl, dispbuf, base, i - simil - 1);
+      display (brl, dispbuf, base, i - simil );
   }
 return 1;
 }
