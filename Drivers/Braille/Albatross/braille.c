@@ -384,11 +384,11 @@ clearDisplay (BrailleDisplay *brl) {
 }
 
 static int
-updateDisplay (BrailleDisplay *brl, const unsigned char *cells, int count, int start) {
+updateDisplay (BrailleDisplay *brl, const unsigned char *cells, unsigned int count, unsigned int start) {
   static time_t lastUpdate = 0;
   unsigned char bytes[count * 2 + 2];
   unsigned char *byte = bytes;
-  int index;
+  unsigned int index;
   *byte++ = 0XFB;
   for (index=0; index<count; ++index) {
     unsigned char cell;

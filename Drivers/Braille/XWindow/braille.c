@@ -1164,6 +1164,7 @@ static void brl_destruct(BrailleDisplay *brl)
 
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
+  unsigned int from, to;
   wchar_t wc;
   int i;
 #ifdef USE_XM
@@ -1251,9 +1252,9 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   }
 
 #if defined(USE_XAW) || defined(USE_WINDOWS)
-  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->textRows*brl->textColumns) == 0)) return 1;
+  if (!cellsHaveChanged(displayedWindow,brl->buffer,brl->textRows*brl->textColumns,&from,&to) || !displayb[0]) return 1;
 
-  for (i=0;i<brl->textRows*brl->textColumns;i++)
+  for (i=from;i<to;i++)
     if (displayedWindow[i] != brl->buffer[i]) {
       unsigned char c = brl->buffer[i];
       c =
@@ -1274,7 +1275,6 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
       data[1] = 0;
       SetWindowTextW(displayb[i],data);
 #endif /* USE_WINDOWS */
-      displayedWindow[i] = brl->buffer[i];
   }
 #endif /* USE_XAW || USE_WINDOWS */
   return 1;

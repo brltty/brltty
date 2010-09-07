@@ -748,8 +748,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (memcmp(textCells, brl->buffer, brl->textColumns) != 0) {
-    memcpy(textCells, brl->buffer, brl->textColumns);
+  if (cellsHaveChanged(textCells, brl->buffer, brl->textColumns, NULL, NULL)) {
     if (!protocol->writeCells(brl)) return 0;
   }
 

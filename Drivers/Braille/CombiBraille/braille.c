@@ -207,17 +207,15 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl->textColumns, NULL, NULL);
+  int statusChanged = cellsHaveChanged(oldstatus, status, brl->statusColumns, NULL, NULL);
+
   /* Only refresh display if the data has changed: */
-  if ((memcmp(brl->buffer, prevdata, brl->textColumns) != 0) ||
-      (memcmp(status, oldstatus, brl->statusColumns) != 0)) {
+  if (textChanged || statusChanged) {
     static const unsigned char header[] = {ESC, 'B'};
     unsigned char buffer[sizeof(header) + ((brl->statusColumns + brl->textColumns) * 2)];
     unsigned char *byte = buffer;
     int i;			/* loop counter */
-
-    /* save new braille data */
-    memcpy(prevdata, brl->buffer, brl->textColumns);
-    memcpy(oldstatus, status, brl->statusColumns);
 
     byte = mempcpy(byte, header, sizeof(header));
 

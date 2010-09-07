@@ -286,9 +286,8 @@ writeCells (BrailleDisplay *brl) {
 }
 
 static void
-updateCells (unsigned char *target, const unsigned char *source, int count) {
-  if (memcmp(target, source, count) != 0) {
-    memcpy(target, source, count);
+updateCells (unsigned char *target, const unsigned char *source, unsigned int count) {
+  if (cellsHaveChanged(target, source, count, NULL, NULL)) {
     rewriteRequired = 1;
   }
 }

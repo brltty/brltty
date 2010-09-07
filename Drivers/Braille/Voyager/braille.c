@@ -637,10 +637,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   memcpy(currentCells, brl->buffer, cellCount);
 
   /* If content hasn't changed, do nothing. */
-  if (memcmp(previousCells, currentCells, cellCount) == 0) return 1;
-
-  /* remember current content */
-  memcpy(previousCells, currentCells, cellCount);
+  if (!cellsHaveChanged(previousCells, currentCells, cellCount, NULL, NULL)) return 1;
 
   /* translate to voyager dot pattern coding */
   translateOutputCells(buffer, currentCells, cellCount);

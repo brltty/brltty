@@ -204,12 +204,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   int moduleNumber;
 
   for (moduleNumber=0; moduleNumber<moduleCount; moduleNumber+=1) {
-    if (forceWrite || (memcmp(target, source, MT_MODULE_SIZE) != 0)) {
+    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL) || forceWrite) {
       unsigned char buffer[MT_MODULE_SIZE];
 
       translateOutputCells(buffer, source, MT_MODULE_SIZE);
       if (writeDevice(0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
-      memcpy(target, source, MT_MODULE_SIZE);
     }
 
     source += MT_MODULE_SIZE;

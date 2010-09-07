@@ -436,7 +436,7 @@ int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandCo
  
 void     clio_writeWindow(BrailleDisplay *brl)
 {
-  static char previousBrailleWindow[80];
+  static unsigned char previousBrailleWindow[80];
   int displaySize = brl->textColumns * brl->textRows;
   unsigned char buf[displaySize + 3];
 
@@ -444,10 +444,9 @@ void     clio_writeWindow(BrailleDisplay *brl)
     logMessage(LOG_WARNING, "[eu] Discarding too large braille window" );
     return;
   }
-  if (!memcmp(previousBrailleWindow, brl->buffer, displaySize) && !refreshDisplay)
+  if (!cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL) && !refreshDisplay)
     return;
   refreshDisplay = 0;
-  memcpy(previousBrailleWindow, brl->buffer, displaySize);
   buf[0] = (unsigned char)(displaySize + 2);
   buf[1] = 'D';
   buf[2] = 'P';

@@ -276,12 +276,9 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   static unsigned char brailleDisplay[81]= { 0x3e }; /* should be large enough for everyone */
   static unsigned char prevData[80];
-  if (memcmp(&prevData,brl->buffer,brl->textColumns)==0) return 1;
+  if (!cellsHaveChanged(prevData,brl->buffer,brl->textColumns,NULL,NULL)) return 1;
   translateOutputCells(brailleDisplay+1, brl->buffer, brl->textColumns);
-  if (brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->textColumns+1)==0) {
-    memcpy(&prevData,brl->buffer,brl->textColumns);
-  }
-  return 1;
+  return brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->textColumns+1)==0;
 }
 
 /* Function : brl_keyToCommand */

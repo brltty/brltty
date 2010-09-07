@@ -198,8 +198,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     }
   }
 
-  if (memcmp(brl->buffer, brailleCells, brl->textColumns) != 0) {
-    memcpy(brailleCells, brl->buffer, brl->textColumns);
+  if (cellsHaveChanged(brailleCells, brl->buffer, brl->textColumns, NULL, NULL)) {
     if (!writeBrailleCells(brl)) return 0;
   }
   return 1;

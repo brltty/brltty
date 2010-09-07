@@ -435,13 +435,12 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 static int 
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
+  unsigned int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl_cols, NULL, NULL);
+  unsigned int statusChanged = cellsHaveChanged(prevstatbuf, statbuf, nrstatcells, NULL, NULL);
   unsigned char *p;
 
-  if(memcmp(prevdata, brl->buffer, brl_cols) == 0
-     && memcmp(prevstatbuf, statbuf, nrstatcells) == 0)
+  if(!(textChanged || statusChanged))
     return 1;
-  memcpy(prevdata, brl->buffer, brl_cols);
-  memcpy(prevstatbuf, statbuf, nrstatcells);
 
   sendpacket[OFF_CODE] = FULLREFRESH;
   sendpacket[OFF_LEN] = nrstatcells+brl_cols;

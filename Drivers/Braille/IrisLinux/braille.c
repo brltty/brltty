@@ -411,10 +411,9 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
      }
    if (!ReWrite)
      /* We update the display only if it has changed */
-     if (memcmp(brl->buffer, prevdata, NbCols) != 0)
+     if (cellsHaveChanged(prevdata, brl->buffer, NbCols, NULL, NULL))
        {
 	 ReWrite = 1;
-	 memcpy(prevdata, brl->buffer, NbCols);
        }
    if (ReWrite)
      {

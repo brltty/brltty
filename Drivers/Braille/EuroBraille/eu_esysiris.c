@@ -434,9 +434,8 @@ void	esysiris_writeWindow(BrailleDisplay *brl)
     return;
   }
 
-  if (!memcmp(previousBrailleWindow, brl->buffer, displaySize))
+  if (!cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL))
     return;
-  memcpy(previousBrailleWindow, brl->buffer, displaySize);
   buf[0] = 'B';
   buf[1] = 'S';
   memcpy(buf + 2, brl->buffer, displaySize);

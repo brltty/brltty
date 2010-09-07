@@ -537,8 +537,7 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   size_t count = brl->textColumns * brl->textRows;
 
-  if (memcmp(brl->buffer, previousCells, count) != 0) {
-    memcpy(previousCells, brl->buffer, count);
+  if (cellsHaveChanged(previousCells, brl->buffer, count, NULL, NULL)) {
     if (!writeCells(brl)) return 0;
   }
 

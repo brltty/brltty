@@ -619,12 +619,13 @@ writeRequest (BrailleDisplay *brl) {
   }
 
   if (writeTo != -1) {
-    int count = writeTo + 1 - writeFrom;
+    unsigned int count = writeTo + 1 - writeFrom;
+    unsigned char buffer[count];
     int truncate = count > outputPayloadLimit;
 
     if (truncate) count = outputPayloadLimit;
-    if (writePacket(brl, PKT_WRITE, count, writeFrom, 0,
-                    &outputBuffer[writeFrom]) == -1) return 0;
+    translateOutputCells(buffer, &outputBuffer[writeFrom], count);
+    if (writePacket(brl, PKT_WRITE, count, writeFrom, 0, buffer) == -1) return 0;
 
     setAcknowledgementHandler(handleWriteAcknowledgement);
     writingFrom = writeFrom;
@@ -650,16 +651,16 @@ updateCells (
   unsigned char count,
   unsigned char offset
 ) {
-  int index;
-  for (index=0; index<count; ++index) {
-    unsigned char cell = translateOutputCell(cells[index]);
-    unsigned char position = offset + index;
-    unsigned char *byte = &outputBuffer[position];
-    if (cell != *byte) {
-      if ((writeFrom == -1) || (position < writeFrom)) writeFrom = position;
-      if (position > writeTo) writeTo = position;
-      *byte = cell;
-    }
+  unsigned int from;
+  unsigned int to;
+
+  if (cellsHaveChanged(&outputBuffer[offset], cells, count, &from, &to)) {
+    from += offset;
+    to += offset;
+    to -= 1;
+
+    if ((writeFrom == -1) || (from < writeFrom)) writeFrom = from;
+    if (to > writeTo) writeTo = to;
   }
 }
 

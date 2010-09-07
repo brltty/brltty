@@ -450,8 +450,7 @@ brl_reset (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (memcmp(dataArea, brl->buffer, dataCells) != 0) {
-    memcpy(dataArea, brl->buffer, dataCells);
+  if (cellsHaveChanged(dataArea, brl->buffer, dataCells, NULL, NULL)) {
     refreshCells(brl);
   }
   return 1;

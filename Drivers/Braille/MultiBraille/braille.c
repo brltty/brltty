@@ -221,15 +221,14 @@ static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+	int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl->textColumns*brl->textRows, NULL, NULL);
+	int statusChanged = cellsHaveChanged(oldstatus, status, 5, NULL, NULL);
 	short i;			/* loop counter */
 	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* bytewise accessible copies */
 	unsigned char *post_data = (unsigned char *)"\001\015";
 
 	/* Only refresh display if the data has changed: */
-	if (memcmp (brl->buffer, prevdata, brl->textColumns * brl->textRows) || memcmp (status, oldstatus, 5)) {
-		/* Save new Braille data: */
-		memcpy (prevdata, brl->buffer, brl->textColumns * brl->textRows);
-
+	if (textChanged || statusChanged) {
 		/* Dot mapping from standard to MultiBraille: */
 		translateOutputCells(brl->buffer, brl->buffer, brl->textColumns*brl->textRows);
 
