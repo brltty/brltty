@@ -252,7 +252,7 @@ typedef struct {
   int (*probeDisplay) (BrailleDisplay *brl);
   void (*updateKeys) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl);
-  int (*writeCellRange) (BrailleDisplay *brl, int start, int count);
+  int (*writeCellRange) (BrailleDisplay *brl, unsigned int start, unsigned int count);
 } ProtocolOperations;
 
 typedef struct {
@@ -378,7 +378,7 @@ updateCells (BrailleDisplay *brl) {
 }
 
 static int
-updateCellRange (BrailleDisplay *brl, int start, int count) {
+updateCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   if (count) {
     translateOutputCells(&externalCells[start], &internalCells[start], count);
     cellsUpdated = 1;
@@ -389,9 +389,21 @@ updateCellRange (BrailleDisplay *brl, int start, int count) {
 }
 
 static int
-clearCellRange (BrailleDisplay *brl, int start, int count) {
+clearCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   memset(&internalCells[start], 0, count);
   return updateCellRange(brl, start, count);
+}
+
+static int
+putCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int start, unsigned int count) {
+  unsigned int from;
+  unsigned int to;
+
+  if (cellsHaveChanged(&internalCells[start], cells, count, &from, &to)) {
+    if (!updateCellRange(brl, start+from, to-from)) return 0;
+  }
+
+  return 1;
 }
 
 static void
@@ -1147,7 +1159,7 @@ writeBaumDataRegisters (
 typedef struct {
   const KeyTableDefinition *keyTableDefinition;
   int (*writeAllCells) (BrailleDisplay *brl);
-  int (*writeCellRange) (BrailleDisplay *brl, int start, int count);
+  int (*writeCellRange) (BrailleDisplay *brl, unsigned int start, unsigned int count);
 } BaumDeviceOperations;
 
 static int
@@ -1174,9 +1186,9 @@ writeBaumCells_start (BrailleDisplay *brl) {
 }
 
 static int
-writeBaumCells_modular (BrailleDisplay *brl, int start, int count) {
+writeBaumCells_modular (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   if (start < brl->textColumns) {
-    int amount = MIN(count, brl->textColumns-start);
+    unsigned int amount = MIN(count, brl->textColumns-start);
 
     if (amount > 0) {
       if (!writeBaumDataRegisters(brl, &baumDisplayModule, &externalCells[start], start, amount)) return 0;
@@ -1714,7 +1726,7 @@ writeBaumCells (BrailleDisplay *brl) {
 }
 
 static int
-writeBaumCellRange (BrailleDisplay *brl, int start, int count) {
+writeBaumCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   const BaumDeviceOperations *bdo = &baumDeviceOperations[baumDeviceType];
   if (!bdo->writeCellRange) return 1;
   return bdo->writeCellRange(brl, start, count);
@@ -1976,7 +1988,7 @@ writeHandyTechCells (BrailleDisplay *brl) {
 }
 
 static int
-writeHandyTechCellRange (BrailleDisplay *brl, int start, int count) {
+writeHandyTechCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   return 1;
 }
 
@@ -2267,7 +2279,7 @@ writePowerBrailleCells (BrailleDisplay *brl) {
 }
 
 static int
-writePowerBrailleCellRange (BrailleDisplay *brl, int start, int count) {
+writePowerBrailleCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   return 1;
 }
 
@@ -2723,33 +2735,13 @@ brl_reset (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int start = 0;
-  int count = brl->textColumns;
-
-  while (count > 0) {
-    if (brl->buffer[count-1] != internalCells[count-1]) break;
-    count -= 1;
-  }
-
-  while (start < count) {
-    if (brl->buffer[start] != internalCells[start]) break;
-    start += 1;
-  }
-  count -= start;
-
-  memcpy(&internalCells[start], &brl->buffer[start], count);
-  if (!updateCellRange(brl, start, count)) return 0;
+  if (!putCells(brl, brl->buffer, 0, brl->textColumns)) return 0;
   return updateCells(brl);
 }
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (memcmp(&internalCells[brl->textColumns], status, brl->statusColumns) != 0) {
-    memcpy(&internalCells[brl->textColumns], status, brl->statusColumns);
-    if (!updateCellRange(brl, brl->textColumns, brl->statusColumns)) return 0;
-  }
-
-  return 1;
+  return putCells(brl, status, brl->textColumns, brl->statusColumns);
 }
 
 static int
