@@ -1644,15 +1644,19 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     if (textRewriteRequired) textRewriteTime = now;
   }
 
-  if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to))
-    textRewriteRequired = 1;
-
   if (textRewriteRequired) {
+    from = 0;
+    to = brl->textColumns;
+    memcpy(previousText, brl->buffer, brl->textColumns);
+  } else if (!cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to)) {
+    return 1;
+  }
+
+  {
     size_t count = to - from;
     unsigned char cells[count];
 
     translateOutputCells(cells, &brl->buffer[from], count);
-
     if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
     textRewriteRequired = 0;
   }
