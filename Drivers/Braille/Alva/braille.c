@@ -1634,8 +1634,8 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int from = 0;
-  int to = brl->textColumns * brl->textRows;
+  unsigned int from;
+  unsigned int to;
 
   if (textRewriteInterval) {
     struct timeval now;
@@ -1644,24 +1644,19 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     if (textRewriteRequired) textRewriteTime = now;
   }
 
-  if (textRewriteRequired) {
-    textRewriteRequired = 0;
-  } else {
-    while ((from < to) && (brl->buffer[from] == previousText[from])) from++;
-    while ((--to > from) && (brl->buffer[to] == previousText[to]));
-    to++;
-  }
+  if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to))
+    textRewriteRequired = 1;
 
-  if (from < to) {
-    const unsigned char *source = &brl->buffer[from];
+  if (textRewriteRequired) {
     size_t count = to - from;
     unsigned char cells[count];
 
-    memcpy(&previousText[from], source, count);
-    translateOutputCells(cells, source, count);
+    translateOutputCells(cells, &brl->buffer[from], count);
 
     if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
+    textRewriteRequired = 0;
   }
+
   return 1;
 }
 
@@ -1669,10 +1664,9 @@ static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   size_t cellCount = brl->statusColumns;
 
-  if (statusRewriteRequired || (memcmp(status, previousStatus, cellCount) != 0)) {
+  if (cellsHaveChanged(previousStatus, status, cellCount, NULL, NULL) || statusRewriteRequired) {
     unsigned char cells[cellCount];
 
-    memcpy(previousStatus, status, cellCount);
     translateOutputCells(cells, status, cellCount);
 
     if (!protocol->writeBraille(brl, cells, statusOffset, cellCount)) return 0;
