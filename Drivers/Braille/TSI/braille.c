@@ -636,16 +636,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
     memcpy(prevdata, dispbuf, ncells);
     display_all (brl, dispbuf);
   }else if(no_multiple_updates){
-    int start, stop;
+    unsigned int from, to;
     
-    for(start=0; start<ncells; start++)
-      if(dispbuf[start] != prevdata[start]) break;
-    if(start == ncells) return 1;
-    for(stop = ncells-1; stop > start; stop--)
-      if(dispbuf[stop] != prevdata[stop]) break;
-    
-    memcpy(prevdata+start, dispbuf+start, stop-start+1);
-    display (brl, dispbuf, start, stop);
+    if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to)) {
+      display (brl, dispbuf, from, to-1);
+    }
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
     
