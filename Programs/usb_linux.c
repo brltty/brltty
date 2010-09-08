@@ -627,7 +627,7 @@ usbReadEndpoint (
   size_t length,
   int timeout
 ) {
-  int count = -1;
+  ssize_t count = -1;
   UsbEndpoint *endpoint;
 
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
