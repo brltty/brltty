@@ -120,7 +120,7 @@ usbClearEndpoint (
   return 0;
 }
 
-int
+ssize_t
 usbControlTransfer (
   UsbDevice *device,
   uint8_t direction,
@@ -177,7 +177,7 @@ usbReapResponse (
   return NULL;
 }
 
-int
+ssize_t
 usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -232,7 +232,7 @@ usbReadEndpoint (
   return -1;
 }
 
-int
+ssize_t
 usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,

@@ -302,7 +302,7 @@ extern int usbClearEndpoint (
   unsigned char endpointAddress
 );
 
-extern int usbControlRead (
+extern ssize_t usbControlRead (
   UsbDevice *device,
   uint8_t recipient,
   uint8_t type,
@@ -313,7 +313,7 @@ extern int usbControlRead (
   uint16_t length,
   int timeout
 );
-extern int usbControlWrite (
+extern ssize_t usbControlWrite (
   UsbDevice *device,
   uint8_t recipient,
   uint8_t type,
@@ -325,7 +325,7 @@ extern int usbControlWrite (
   int timeout
 );
 
-extern int usbGetDescriptor (
+extern ssize_t usbGetDescriptor (
   UsbDevice *device,
   unsigned char type,
   unsigned char number,
@@ -371,14 +371,14 @@ extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
 extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
-extern int usbReadEndpoint (
+extern ssize_t usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
   size_t length,
   int timeout
 );
-extern int usbWriteEndpoint (
+extern ssize_t usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
   const void *buffer,
@@ -416,7 +416,7 @@ extern int usbAwaitInput (
   unsigned char endpointNumber,
   int timeout
 );
-extern int usbReapInput (
+extern ssize_t usbReapInput (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
@@ -487,7 +487,7 @@ extern const unsigned char usbHidItemLengths[];
 
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
-extern int usbHidGetItems (
+extern ssize_t usbHidGetItems (
   UsbDevice *device,
   unsigned char interface,
   unsigned char number,
@@ -502,7 +502,7 @@ extern int usbHidFillReportDescription (
   UsbHidReportDescription *description
 );
 
-extern int usbHidGetReport (
+extern ssize_t usbHidGetReport (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,
@@ -511,7 +511,7 @@ extern int usbHidGetReport (
   int timeout
 );
 
-extern int usbHidSetReport (
+extern ssize_t usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,
@@ -520,7 +520,7 @@ extern int usbHidSetReport (
   int timeout
 );
 
-extern int usbHidGetFeature (
+extern ssize_t usbHidGetFeature (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,
@@ -529,7 +529,7 @@ extern int usbHidGetFeature (
   int timeout
 );
 
-extern int usbHidSetFeature (
+extern ssize_t usbHidSetFeature (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,

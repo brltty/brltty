@@ -34,7 +34,7 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
-int
+ssize_t
 usbControlRead (
   UsbDevice *device,
   uint8_t recipient,
@@ -50,7 +50,7 @@ usbControlRead (
                             request, value, index, buffer, length, timeout);
 }
 
-int
+ssize_t
 usbControlWrite (
   UsbDevice *device,
   uint8_t recipient,
@@ -66,7 +66,7 @@ usbControlWrite (
                             request, value, index, (void *)buffer, length, timeout);
 }
 
-int
+ssize_t
 usbGetDescriptor (
   UsbDevice *device,
   unsigned char type,
@@ -252,9 +252,9 @@ usbGetConfiguration (
   UsbDevice *device,
   unsigned char *configuration
 ) {
-  int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
-                            UsbStandardRequest_GetConfiguration, 0, 0,
-                            configuration, sizeof(*configuration), 1000);
+  ssize_t size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
+                                UsbStandardRequest_GetConfiguration, 0, 0,
+                                configuration, sizeof(*configuration), 1000);
   if (size != -1) return 1;
   logMessage(LOG_WARNING, "USB standard request not supported: get configuration");
   return 0;
@@ -300,7 +300,7 @@ usbConfigurationDescriptor (
         UsbDescriptor *descriptors;
 
         if ((descriptors = malloc(length))) {
-          int size;
+          ssize_t size;
 
           if (length > sizeof(descriptor)) {
             size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
@@ -603,9 +603,9 @@ usbOpenInterface (
 
   {
     unsigned char response[1];
-    int size = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Standard,
-                              UsbStandardRequest_GetInterface, 0, interface,
-                              response, sizeof(response), 1000);
+    ssize_t size = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Standard,
+                                  UsbStandardRequest_GetInterface, 0, interface,
+                                  response, sizeof(response), 1000);
 
     if (size != -1) {
       if (response[0] == alternative) goto done;
@@ -759,7 +759,7 @@ usbAwaitInput (
     int size = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
     unsigned char *buffer = malloc(size);
     if (buffer) {
-      int count;
+      ssize_t count;
 
       if (timeout) hasTimedOut(0);
       while (1) {
@@ -818,7 +818,7 @@ usbAwaitInput (
   }
 }
 
-int
+ssize_t
 usbReapInput (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -872,7 +872,7 @@ usbHidDescriptor (UsbDevice *device) {
   return NULL;
 }
 
-int
+ssize_t
 usbHidGetItems (
   UsbDevice *device,
   unsigned char interface,
@@ -889,11 +889,11 @@ usbHidGetItems (
       void *buffer = malloc(length);
 
       if (buffer) {
-        int result = usbControlRead(device,
-                                    UsbControlRecipient_Interface, UsbControlType_Standard,
-                                    UsbStandardRequest_GetDescriptor,
-                                    (descriptor->bDescriptorType << 8) | interface,
-                                    number, buffer, length, timeout);
+        ssize_t result = usbControlRead(device,
+                                        UsbControlRecipient_Interface, UsbControlType_Standard,
+                                        UsbStandardRequest_GetDescriptor,
+                                        (descriptor->bDescriptorType << 8) | interface,
+                                        number, buffer, length, timeout);
 
         if (result != -1) {
           *items = buffer;
@@ -992,7 +992,7 @@ usbHidFillReportDescription (
   return found;
 }
 
-int
+ssize_t
 usbHidGetReport (
   UsbDevice *device,
   unsigned char interface,
@@ -1008,7 +1008,7 @@ usbHidGetReport (
                         buffer, length, timeout);
 }
 
-int
+ssize_t
 usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
@@ -1024,7 +1024,7 @@ usbHidSetReport (
                          buffer, length, timeout);
 }
 
-int
+ssize_t
 usbHidGetFeature (
   UsbDevice *device,
   unsigned char interface,
@@ -1040,7 +1040,7 @@ usbHidGetFeature (
                         buffer, length, timeout);
 }
 
-int
+ssize_t
 usbHidSetFeature (
   UsbDevice *device,
   unsigned char interface,
@@ -1330,10 +1330,10 @@ static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
   NULL
 };
 
-static int
-usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, int length) {
-  int result = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
-                              request, 0, 0, data, length, 1000);
+static ssize_t
+usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, size_t length) {
+  ssize_t result = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
+                                  request, 0, 0, data, length, 1000);
   if (result == -1) return 0;
 
   if (result < length) {
@@ -1344,8 +1344,8 @@ usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, i
   logBytes(LOG_DEBUG, "CP2101 Attributes", data, result);
   return result;
 }
-static int
-usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *data, int length) {
+static ssize_t
+usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *data, size_t length) {
   logBytes(LOG_DEBUG, "CP2101 Attributes", data, length);
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, 0, 0, data, length, 1000) != -1;
@@ -1370,14 +1370,14 @@ usbSetBaud_CP2101 (UsbDevice *device, int rate) {
 static int
 usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   unsigned char bytes[16];
-  int count = usbGetAttributes_CP2101(device, 20, bytes, sizeof(bytes));
+  ssize_t count = usbGetAttributes_CP2101(device, 20, bytes, sizeof(bytes));
   if (!count) return 0;
 
   if (flow) {
     logMessage(LOG_WARNING, "Unsupported CP2101 flow control: %02X", flow);
   }
 
-  return usbSetAttributes_CP2101(device, 19, bytes, count);
+  return usbSetAttributes_CP2101(device, 19, bytes, count) != -1;
 }
 static int
 usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {

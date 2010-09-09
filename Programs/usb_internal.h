@@ -91,7 +91,7 @@ extern int usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 );
-extern int usbControlTransfer (
+extern ssize_t usbControlTransfer (
   UsbDevice *device,
   uint8_t direction,
   uint8_t recipient,

@@ -129,7 +129,7 @@ usbClearEndpoint (
   return 0;
 }
 
-int
+ssize_t
 usbControlTransfer (
   UsbDevice *device,
   uint8_t direction,
@@ -194,7 +194,7 @@ usbReapResponse (
   return NULL;
 }
 
-int
+ssize_t
 usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -202,7 +202,7 @@ usbReadEndpoint (
   size_t length,
   int timeout
 ) {
-  int count = -1;
+  ssize_t count = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
   if (endpoint) {
     UsbEndpointExtension *eptx = endpoint->extension;
@@ -220,7 +220,7 @@ usbReadEndpoint (
   return count;
 }
 
-int
+ssize_t
 usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -232,7 +232,7 @@ usbWriteEndpoint (
   if (endpoint) {
     UsbEndpointExtension *eptx = endpoint->extension;
     if (usbSetTimeout(eptx->file, timeout, &eptx->timeout)) {
-      int count = write(eptx->file, buffer, length);
+      ssize_t count = write(eptx->file, buffer, length);
       if (count != -1) return count;
       logSystemError("USB endpoint write");
     }

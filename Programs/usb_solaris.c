@@ -159,7 +159,7 @@ usbClearEndpoint (
   return 0;
 }
 
-int
+ssize_t
 usbControlTransfer (
   UsbDevice *device,
   uint8_t direction,
@@ -183,8 +183,8 @@ usbControlTransfer (
 
   switch (direction) {
     case UsbControlDirection_Input: {
-      int size = sizeof(setup);
-      int count;
+      size_t size = sizeof(setup);
+      ssize_t count;
 
       if ((count = write(devx->data, &setup, size)) == -1) {
         logSystemError("USB control request");
@@ -201,8 +201,8 @@ usbControlTransfer (
 
     case UsbControlDirection_Output: {
       unsigned char packet[sizeof(setup) + length];
-      int size = 0;
-      int count;
+      size_t size = 0;
+      ssize_t count;
 
       memcpy(&packet[size], &setup, sizeof(setup));
       size += sizeof(setup);
@@ -374,7 +374,7 @@ usbReapResponse (
   return NULL;
 }
 
-int
+ssize_t
 usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -386,7 +386,7 @@ usbReadEndpoint (
 
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    int count;
+    ssize_t count;
 
   doRead:
     if ((count = read(eptx->data, buffer, length)) == -1) {
@@ -404,7 +404,7 @@ usbReadEndpoint (
   return -1;
 }
 
-int
+ssize_t
 usbWriteEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,
@@ -416,7 +416,7 @@ usbWriteEndpoint (
 
   if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    int count;
+    ssize_t count;
 
   doWrite:
     if ((count = write(eptx->data, buffer, length)) == -1) {
