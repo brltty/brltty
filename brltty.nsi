@@ -170,7 +170,7 @@ Section "install"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.dll" "$SYSDIR\libusb0.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.sys" "$SYSDIR\drivers\libusb0.sys" "$SYSDIR\drivers"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\msvcr90.dll" "$SYSDIR\msvcr90.dll" "$SYSDIR"
-	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libiconv2.dll" "$SYSDIR\libiconv2.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libiconv-2.dll" "$SYSDIR\libiconv-2.dll" "$SYSDIR"
 
 	;Store installation folder
 	WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR

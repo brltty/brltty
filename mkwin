@@ -19,7 +19,7 @@
 
 version=4.2
 subversion=x
-apiversion=0.5.4
+apiversion=0.5.5
 whole_version=$version-$subversion
 autohotkey="/c/Program Files/AutoHotkey"
 nsis="/c/Program Files/NSIS"
@@ -40,6 +40,8 @@ README_foot="
 If you are getting troubles, please run run-debug.bat and send us the debug.log
 file.
 
+More documentation can be found in README.txt and doc/
+
 =============================
 Technical notes on this build
 
@@ -48,16 +50,15 @@ Technical notes on this build
 - to make life easier to windows users, Programs/brlapi_server.c was modified
   to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
   and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
-- *usb0* come from libusb-win32 0.1.12.1 available on
+- *usb0* come from libusb-win32 1.2.1.0 available on
   http://libusb-win32.sourceforge.net/
-- libiconv-2.dll comes from libiconv portage from
-  http://gnuwin32.sourceforge.net/
 - braille.dll comes from http://libbraille.sourceforge.net/
 - python bindings are provided in Brlapi-$apiversion.win32.exe
-- C bindings are provided in include/ and lib/ (a .def file is provided for
+- C bindings are provided in include/ and lib/: a .def file is provided for
   linking, run
   lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
-  to produce a brlapi.lib file suitable to your compiler)
+  to produce a brlapi.lib file suitable to your compiler. Then you can just
+  ship bin/brlapi${apiversion%.*} along your .exe application.
 "
 
 . "`dirname "${0}"`/prologue.sh"
@@ -104,8 +105,10 @@ installRoot="${temporaryDirectory}/${archiveName}"
 make -s
 "${autohotkey}/Compiler/Ahk2Exe.exe" /in brlttycnf.ahk /out brlttycnf.exe
 make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
+make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
 cp Bindings/Python/dist/Brlapi-$apiversion.win32.exe "${installRoot}"
 cp brlttycnf.exe "${installRoot}"
+cp Drivers/BrlAPI/WindowEyes/webrloem109.dll "${installRoot}"
 
 todos() {
   sed -e 's/'$'\033''\[[0-9]*m//g' -e 's/$/'$'\015'/ < "$1" > "$2"
@@ -115,12 +118,7 @@ todos "${sourceRoot}/LICENSE-GPL" "${installRoot}/LICENSE-GPL.txt"
 todos "${sourceRoot}/LICENSE-LGPL" "${installRoot}/LICENSE-LGPL.txt"
 todos "${sourceRoot}/README" "${installRoot}/README.txt"
 
-mkdir -p "${installRoot}/BrailleDrivers"
-for i in `cd Drivers/Braille ; ls` ; do
-  [ -r "Drivers/Braille/$i/README" ] && todos "${sourceRoot}/Drivers/Braille/$i/README" "${installRoot}/BrailleDrivers/$i.txt"
-done
-
-mkdir -p "${installRoot}/doc"
+mkdir "${installRoot}/doc"
 for i in BrlAPIref Manual-BRLTTY Manual-BrlAPI
 do
   for file in `(cd ${sourceRoot}/Documents ; find "$i" -type f ! -name \*.3)`
@@ -132,6 +130,13 @@ done
 for i in ChangeLog HISTORY TODO README.windows
 do
   todos "${sourceRoot}/Documents/$i" "${installRoot}/doc/$i.txt"
+done
+todos "${sourceRoot}/Drivers/BrlAPI/WindowEyes/README" "${installRoot}/doc/WindowEyes.txt"
+todos "${sourceRoot}/Drivers/BrlAPI/WindowEyes/braille.ini" "${installRoot}/doc/braille.ini"
+
+mkdir "${installRoot}/doc/BrailleDrivers"
+for i in `cd Drivers/Braille ; ls` ; do
+  [ -r "Drivers/Braille/$i/README" ] && todos "${sourceRoot}/Drivers/Braille/$i/README" "${installRoot}/doc/BrailleDrivers/$i.txt"
 done
 
 todos "${buildRoot}/Documents/brltty.conf" "${installRoot}/etc/brltty.conf"
@@ -198,7 +203,7 @@ cp "$SYSTEMROOT/system32/libusb0.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/libusb0_x64.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/braille.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/msvcr90.dll" "${installRoot}/bin"
-cp /mingw/bin/libiconv2.dll "${installRoot}/bin"
+cp /mingw/bin/libiconv-2.dll "${installRoot}/bin"
 cp /mingw/bin/curses2.dll "${installRoot}/bin"
 rm -f "${installRoot}/bin/brltty-config"
 rm -f "${installRoot}/bin/brltty-install"
