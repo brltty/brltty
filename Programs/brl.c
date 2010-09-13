@@ -424,7 +424,8 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    if (command == EOF) command = dequeueCommand();
+    if (command != EOF) enqueueCommand(command);
+    command = dequeueCommand();
   }
 
   return command;

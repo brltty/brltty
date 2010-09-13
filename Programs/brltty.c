@@ -2663,11 +2663,17 @@ brlttyUpdate (void) {
     }
 
 #ifdef ENABLE_API
-    api_releaseDriver(&brl);
+    if (apiStarted) api_releaseDriver(&brl);
   } else if (apiStarted) {
-    api_flush(&brl, BRL_CTX_DEFAULT);
+    if (readBrailleCommand(&brl, BRL_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) {
+      restartBrailleDriver();
+    }
 #endif /* ENABLE_API */
   }
+
+#ifdef ENABLE_API
+  if (apiStarted) isWritable = api_flush(&brl);
+#endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
   processSpeechFifo(&spk);

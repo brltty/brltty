@@ -2365,22 +2365,18 @@ int api_handleCommand(int command) {
   return command;
 }
 
-/* Function : api_readCommand */
-static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
-{
-  int res;
+/* Function : api_readCommand
+ * Call driver->readCommand unless the driver is suspended.
+ */
+static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {
   ssize_t size;
-  Connection *c;
   brlapi_packet_t packet;
-  int keycode, command = EOF;
-  brlapi_keyCode_t clientCode;
-  int ok = 1;
-  int drain = 0;
-  unsigned char newCursorShape;
+  int res;
+  int command = EOF;
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
-  if (suspendConnection) {
+  if (suspendConnection || !driverConstructed) {
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }
@@ -2392,6 +2388,35 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       writeException(rawConnection->fd, BRLAPI_ERROR_DRIVERERROR, BRLAPI_PACKET_PACKET, NULL, 0);
     else if (size)
       brlapiserver_writePacket(rawConnection->fd,BRLAPI_PACKET_PACKET,&packet.data,size);
+    pthread_mutex_unlock(&rawMutex);
+    goto out;
+  }
+  if ((context == BRL_CTX_DEFAULT) && retainDots) context = BRL_CTX_CHORDS;
+  pthread_mutex_lock(&driverMutex);
+  res = trueBraille->readCommand(brl,context);
+  pthread_mutex_unlock(&driverMutex);
+  if (brl->resizeRequired)
+    handleResize(brl);
+  command = res;
+  /* some client may get raw mode only from now */
+  pthread_mutex_unlock(&rawMutex);
+out:
+  pthread_mutex_unlock(&connectionsMutex);
+  return command;
+}
+
+/* Function : api_flush
+ * Flush writes to the braille device.
+ */
+int api_flush(BrailleDisplay *brl) {
+  Connection *c;
+  int ok = 1;
+  int drain = 0;
+  unsigned char newCursorShape;
+
+  pthread_mutex_lock(&connectionsMutex);
+  pthread_mutex_lock(&rawMutex);
+  if (suspendConnection) {
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }
@@ -2448,47 +2473,13 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   }
   if (!ok) {
     pthread_mutex_unlock(&rawMutex);
-    command = BRL_CMD_RESTARTBRL;
     goto out;
   }
   if (drain)
     drainBrailleOutput(brl, 0);
-  if ((context == BRL_CTX_DEFAULT) && retainDots) context = BRL_CTX_CHORDS;
-  if (trueBraille->readKey && trueBraille->keyToCommand) {
-    pthread_mutex_lock(&driverMutex);
-    res = trueBraille->readKey(brl);
-    pthread_mutex_unlock(&driverMutex);
-    if (brl->resizeRequired)
-      handleResize(brl);
-    keycode = res;
-    pthread_mutex_lock(&driverMutex);
-    command = trueBraille->keyToCommand(brl,context,keycode);
-    pthread_mutex_unlock(&driverMutex);
-  } else {
-    /* we already ensured in ENTERTTYMODE that no connection has how == KEYCODES */
-    pthread_mutex_lock(&driverMutex);
-    res = trueBraille->readCommand(brl,context);
-    pthread_mutex_unlock(&driverMutex);
-    if (brl->resizeRequired)
-      handleResize(brl);
-    keycode = EOF;
-    command = res;
-  }
-  /* some client may get raw mode only from now */
-  pthread_mutex_unlock(&rawMutex);
-  clientCode = keycode;
-  if (trueBraille->readKey && keycode != EOF && api__handleKeyEvent(clientCode) == EOF)
-    command = EOF;
-  else
-    command = api__handleCommand(command);
 out:
   pthread_mutex_unlock(&connectionsMutex);
-  return command;
-}
-
-void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  if (disp && api_readCommand(brl, context) == BRL_CMD_RESTARTBRL)
-    restartBrailleDriver();
+  return ok;
 }
 
 int api_resume(BrailleDisplay *brl) {
