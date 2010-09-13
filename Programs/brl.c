@@ -406,10 +406,13 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
 
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  int command = dequeueCommand();
+  {
+    int command = dequeueCommand();
+    if (command != EOF) return command;
+  }
 
-  if (command == EOF) {
-    command = braille->readCommand(brl, context);
+  {
+    int command = braille->readCommand(brl, context);
     resizeBrailleBuffer(brl, LOG_INFO);
 
     {
@@ -425,10 +428,9 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
 
     if (command != EOF) enqueueCommand(command);
-    command = dequeueCommand();
   }
 
-  return command;
+  return dequeueCommand();
 }
 
 #ifdef ENABLE_LEARN_MODE
