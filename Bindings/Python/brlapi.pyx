@@ -75,6 +75,7 @@ except brlapi.ConnectionError, e:
 ###############################################################################
 
 cimport c_brlapi
+import errno
 include "constants.auto.pyx"
 
 class OperationError(Exception):
@@ -113,7 +114,15 @@ class ConnectionError(OperationError):
 		self.auth = auth
 
 	def __str__(self):
-		return "couldn't connect to %s with key %s: %s" % (self.host,self.auth,OperationError.__str__(self))
+		msg = "couldn't connect to %s with key %s: %s" % (self.host,self.auth,OperationError.__str__(self))
+		msg += "\n(brlerrno %d, libcerrno %d, gaierrno %d)" % (self.brlerrno, self.libcerrno, self.gaierrno)
+		if self.brlerrno == ERROR_CONNREFUSED:
+			msg += "\nBRLTTY is too busy..."
+		elif self.brlerrno == ERROR_AUTHENTICATION:
+			msg += "\nAuthentication failed. Please check you can read %s and it is not empty." % self.auth
+		elif self.brlerrno == ERROR_LIBCERR and (self.libcerrno == errno.ECONNREFUSED or self.libcerrno == errno.ENOENT):
+			msg += "\nIs BRLTTY really running?"
+		return msg
 
 	def host(self):
 		"""Host of BRLTTY server"""
