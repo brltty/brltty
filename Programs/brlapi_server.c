@@ -191,6 +191,7 @@ typedef struct Connection {
   unsigned int how; /* how keys must be delivered to clients */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
+  RepeatState repeatState;
   pthread_mutex_t brlMutex;
   KeyrangeList *acceptedKeys;
   pthread_mutex_t acceptedKeysMutex;
@@ -284,7 +285,6 @@ static uint32_t displayDimensions[2] = { 0, 0 };
 static unsigned int displaySize = 0;
 
 static BrailleDisplay *disp; /* Parameter to pass to braille drivers */
-static RepeatState repeatState;
 
 static int coreActive; /* Whether core is active */
 static int offline; /* Whether device is offline */
@@ -612,6 +612,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
+  resetRepeatState(&c->repeatState);
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&c->brlMutex,&mattr);
@@ -2345,13 +2346,23 @@ static int api__handleCommand(int command) {
     broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
     offline = 0;
   }
-  handleAutorepeat(&command, &repeatState);
   if (command != EOF) {
     clientCode = cmdBrlttyToBrlapi(command, retainDots);
     /* nobody needs the raw code */
     if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-      logMessage(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
-      writeKey(c->fd,clientCode);
+      int passKey;
+      /* Handle repetition */
+      handleAutorepeat(&command, &c->repeatState);
+      /* Update brlapi equivalent */
+      clientCode = cmdBrlttyToBrlapi(command, retainDots);
+      /* Check whether the client really wants the result of repetition */
+      pthread_mutex_lock(&c->acceptedKeysMutex);
+      passKey = inKeyrangeList(c->acceptedKeys,clientCode) != NULL;
+      pthread_mutex_unlock(&c->acceptedKeysMutex);
+      if (passKey) {
+        logMessage(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
+        writeKey(c->fd,clientCode);
+      }
       return EOF;
     }
   }
@@ -2532,7 +2543,6 @@ static void brlResize(BrailleDisplay *brl)
 void api_link(BrailleDisplay *brl)
 {
   logMessage(LOG_DEBUG, "api link");
-  resetRepeatState(&repeatState);
   trueBraille=braille;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
