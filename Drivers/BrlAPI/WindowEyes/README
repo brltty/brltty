@@ -2,7 +2,8 @@ Starting from version 7.0, WindowEyes can use OEM-provided drivers, this is
 such driver for making it use the BrlAPI interface.
 
 It can be added by
-* copying webrloem109.dll to the window eyes directory, along wineyes.exe,
+* copying bin/webrloem109.dll and bin/brlapi-0.5.dll to the window eyes
+directory, along wineyes.exe,
 * copy/pasting the content of braille.ini into your braille.ini (found in the
 Application Data\GW Micro\Window-Eyes/users/default/ ), and in the same file,
 appending the following two lines to the [BrailleDisplays] section:

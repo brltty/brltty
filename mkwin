@@ -108,7 +108,7 @@ make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/li
 make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
 cp Bindings/Python/dist/Brlapi-$apiversion.win32.exe "${installRoot}"
 cp brlttycnf.exe "${installRoot}"
-cp Drivers/BrlAPI/WindowEyes/webrloem109.dll "${installRoot}"
+cp Drivers/BrlAPI/WindowEyes/webrloem109.dll "${installRoot}/bin"
 
 todos() {
   sed -e 's/'$'\033''\[[0-9]*m//g' -e 's/$/'$'\015'/ < "$1" > "$2"
