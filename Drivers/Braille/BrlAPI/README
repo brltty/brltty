@@ -1,5 +1,24 @@
-This driver allows BRLTTY to access braille displays through BrlAPI.
-Multiple instance of brltty can hence b run, one using thereal braille
-driver, the others accessing it through the API. Each instance of BRLTTY can
-use Adifferent screen driver thanks to the -x command-line option.
+This driver allows BRLTTY to access braille displays through BrlAPI.  Multiple
+instances of brltty can hence be run, one using the real braille driver, the
+others accessing it through the API. Each instance of BRLTTY can use a different
+screen driver thanks to the -x command-line option.
 
+
+For example, in a gnome desktop you can run a second BRLTTY that reads
+gnome-terminal by running
+
+brltty -b ba -x as
+
+from your X session.
+
+
+Another example is accessing the Linux console of a remote host:
+
+ssh -R 4102:localhost:4101 root@theremotehost brltty -b ba -B host=localhost:1
+
+This will forward your local BrlAPI port (4101) to the remote machine (as 4102,
+i.e. :1), where you can then run brltty and tell it to connect to localhost:1.
+This will however take complete control of your braille device. To restrict the
+control to some local console (e.g. console 4), you can use e.g.
+
+ssh -R 4102:localhost:4101 root@theremotehost WINDOWPATH=4 brltty -b ba -B host=localhost:1
