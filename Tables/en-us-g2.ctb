@@ -502,6 +502,7 @@ always hydro =
 word i 24
 always i 24
 always I 24
+word ibuprofen 24-12-136-1234-1235-12356-26
 midendword iever 24-15-1236-12456
 always immediate 24-134-134
 contraction imm
@@ -728,10 +729,14 @@ begword pre =
 always preach 1234-1235-2-16
 word pred 1234-1235-1246 liquid pred: prednisone trade name
 sufword predator 1234-1235-1246-1-2345-135-1235
-sufword prednisone 1234-1235-1246-1345-24-234-5-135
+begword predn 1234-1235-1246-1345 prednisone prednisolone
 sufword predsolan 1234-1235-1246-234-135-123-1-1345
 always prof =
-begword proff 1234-1235-12356-124 proffer
+word prof 1234-1235-12356
+sufword profanation 1234-1235-12356-1-1345-6-1345
+sufword proff 1234-1235-12356-124 proffer
+begword profliga 1234-1235-12356-123-24-1245-1 profligate profligacy
+word profs 1234-1235-12356-234
 always profit 1234-1235-12356-24-2345
 begword proto = protoenchanter (Cervantes)
 begword psyched 1234-234-13456-16-15-145 psychedelic
