@@ -49,3 +49,6 @@ get the text.
 See help.txt (or press F1) to get help on key bindings
 Default configuration should be fine, but if not, get sure to use 8-dot text
 style and not to show attributes in the configuration menu (F4).
+
+Note that when the displayed window is not supposed to contain the cursor, the
+cursor is actually put below the displayed window.
