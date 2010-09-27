@@ -1254,26 +1254,25 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 #if defined(USE_XAW) || defined(USE_WINDOWS)
   if (!cellsHaveChanged(displayedWindow,brl->buffer,brl->textRows*brl->textColumns,&from,&to) || !displayb[0]) return 1;
 
-  for (i=from;i<to;i++)
-    if (displayedWindow[i] != brl->buffer[i]) {
-      unsigned char c = brl->buffer[i];
-      c =
-	 (!!(c&BRL_DOT1))<<0
-	|(!!(c&BRL_DOT2))<<1
-	|(!!(c&BRL_DOT3))<<2
-	|(!!(c&BRL_DOT4))<<3
-	|(!!(c&BRL_DOT5))<<4
-	|(!!(c&BRL_DOT6))<<5
-	|(!!(c&BRL_DOT7))<<6
-	|(!!(c&BRL_DOT8))<<7;
+  for (i=from;i<to;i++) {
+    unsigned char c = brl->buffer[i];
+    c =
+       (!!(c&BRL_DOT1))<<0
+      |(!!(c&BRL_DOT2))<<1
+      |(!!(c&BRL_DOT3))<<2
+      |(!!(c&BRL_DOT4))<<3
+      |(!!(c&BRL_DOT5))<<4
+      |(!!(c&BRL_DOT6))<<5
+      |(!!(c&BRL_DOT7))<<6
+      |(!!(c&BRL_DOT8))<<7;
 #ifdef USE_XAW
-      convertWcharToUtf8(UNICODE_BRAILLE_ROW | c, utf8);
+    convertWcharToUtf8(UNICODE_BRAILLE_ROW | c, utf8);
 
-      XtVaSetValues(displayb[i], XtNlabel, utf8, NULL);
+    XtVaSetValues(displayb[i], XtNlabel, utf8, NULL);
 #elif defined(USE_WINDOWS)
-      data[0] = UNICODE_BRAILLE_ROW | c;
-      data[1] = 0;
-      SetWindowTextW(displayb[i],data);
+    data[0] = UNICODE_BRAILLE_ROW | c;
+    data[1] = 0;
+    SetWindowTextW(displayb[i],data);
 #endif /* USE_WINDOWS */
   }
 #endif /* USE_XAW || USE_WINDOWS */
