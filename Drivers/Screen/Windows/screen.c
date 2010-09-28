@@ -23,6 +23,7 @@
 #include "brldefs.h"
 #include "sys_windows.h"
 #include "scancodes.h"
+#include "unicode.h"
 
 typedef enum {
   PARM_ROOT,
@@ -207,7 +208,7 @@ describe_WindowsScreen (ScreenDescription *description) {
 
 static int
 readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  int x, y;
+  int x, xx, y;
   static int wide;
   COORD coord;
 
@@ -272,20 +273,25 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       break;
     }
 
-    if (read != box->width) {
-      logMessage(LOG_ERR, "wrong number of items read: %s: %ld != %d",
-                 name, read, box->width);
-      break;
-    }
-
     if (wide > 0) {
-      for (x=0; x<box->width; x++) {
-	buffer[y*box->width+x].text = ((wchar_t*)buf)[x];
+      for (x=0, xx = 0; x<box->width && xx < read; x++, xx++) {
+	wchar_t wc = ((wchar_t*)buf)[xx];
+	buffer[y*box->width+x].text = wc;
+	if (wcwidth(wc) == 2) {
+	  x++;
+	  buffer[y*box->width+x].text = UNICODE_ZERO_WIDTH_SPACE;
+	}
+      }
+      for ( ; x<box->width; x++) {
+	buffer[y*box->width+x].text = L' ';
       }
     } else {
-      for (x=0; x<box->width; x++) {
+      for (x=0; x<read; x++) {
 	/* TODO: GetConsoleCP and convert */
 	buffer[y*box->width+x].text = ((char*)buf)[x];
+      }
+      for ( ; x<box->width; x++) {
+	buffer[y*box->width+x].text = ' ';
       }
     }
 
@@ -294,15 +300,15 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       break;
     }
 
-    if (read != box->width) {
-      logMessage(LOG_ERR, "wrong number of items read: %s: %ld != %d",
-                 name, read, box->width);
-      break;
+    for (x=0, xx=0; x<box->width, xx < read; x++, xx++) {
+      buffer[y*box->width+x].attributes = bufAttr[xx];
+      if (wcwidth(buffer[y*box->width+x].text) == 2) {
+	x++;
+        buffer[y*box->width+x].attributes = bufAttr[xx];
+      }
     }
-
-    for (x=0; x<box->width; x++) {
-      buffer[y*box->width+x].attributes = bufAttr[x];
-    }
+    for ( ; x < box->width; x++)
+      buffer[y*box->width+x].attributes = 0;
   }
 
   free(buf);
