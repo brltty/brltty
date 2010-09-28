@@ -27,6 +27,7 @@
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "unicode.h"
+#include "ascii.h"
 #include "brldots.h"
 
 static ContractionTable *table;
@@ -428,13 +429,14 @@ putCharacter (wchar_t character) {
 
   {
 #ifdef HAVE_WCHAR_H 
-    const wchar_t substitute = UNICODE_REPLACEMENT_CHARACTER;
+    const wchar_t replacementCharacter = UNICODE_REPLACEMENT_CHARACTER;
+    if (wcwidth(character) == 0) return 1;
 #else /* HAVE_WCHAR_H */
-    const wchar_t substitute = 0X1A; /* ASCII SUB (CTRL-Z) */
+    const wchar_t replacementCharacter = SUB;
 #endif /* HAVE_WCHAR_H */
 
-    if (character != substitute) {
-      const ContractionTableRule *rule = getAlwaysRule(substitute);
+    if (replacementCharacter != character) {
+      const ContractionTableRule *rule = getAlwaysRule(replacementCharacter);
       if (rule) return putReplace(rule);
     }
   }
