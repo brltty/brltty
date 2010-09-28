@@ -850,7 +850,8 @@ for any additional display-specific instructions.
     are to be rooted.
     These directories include:
     <itemize>
-      <item>the <ref id="build-tables-directory" name="tables directory">
+      <item>the <ref id="build-writable-directory" name="writable directory">
+      <item>the <ref id="build-data-directory" name="data directory">
       <item>the <ref id="build-configuration-directory" name="configuration directory">
       <item>the <ref id="build-manpage-directory" name="manpage directory">
       <item>the <ref id="build-include-directory" name="include directory">
@@ -868,8 +869,7 @@ for any additional display-specific instructions.
     These directories include:
     <itemize>
       <item>the <ref id="build-program-directory" name="program directory">
-      <item>the <ref id="build-drivers-directory" name="drivers directory">
-      <item>the <ref id="build-writable-directory" name="writable directory">
+      <item>the <ref id="build-library-directory" name="library directory">
       <item>the <ref id="build-api-directory" name="API directory">
     </itemize>
     The absolute path should be supplied.
@@ -916,7 +916,7 @@ for any additional display-specific instructions.
     <ref id="build-architecture-root" name="--exec-prefix"> build option)
     is assumed.
     The directory is created if it doesn't exist.
-  <tag><tt/--with-drivers-directory=/<em/directory/<label id="build-drivers-directory"></tag>
+  <tag><tt/--with-library-directory=/<em/directory/<label id="build-library-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
     where the drivers and other architecture-dependent files are to be installed.
@@ -944,18 +944,14 @@ for any additional display-specific instructions.
     </descrip>
     If this option isn't specified,
     then the <tt>rw</> subdirectory of the directory specified via the
-    <ref id="build-drivers-directory" name="--with-drivers-directory"> build option
+    <ref id="build-library-directory" name="--with-library-directory"> build option
     is assumed.
     The directory is created if it doesn't exist.
-  <tag><tt/--with-tables-directory=/<em/directory/<label id="build-tables-directory"></tag>
+  <tag><tt/--with-data-directory=/<em/directory/<label id="build-data-directory"></tag>
     Specify the directory within the
     <ref id="hierarchy" name="installed file hierarchy">
-    where the
-    <ref id="table-text" name="Text Tables">,
-    <ref id="table-attributes" name="Attributes Tables">,
-    <ref id="table-contraction" name="Contraction Tables">,
-    and <ref id="table-key" name="Key Tables">
-    are to be installed.
+    where the tables, help pages,
+    and other architecture-independent files are to be installed.
     The absolute path should be supplied.
     If this option isn't specified,
     then the <tt/brltty/ subdirectory of the directory
@@ -1384,10 +1380,10 @@ Here's what we know so far about how to do this:
 If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
 See the <ref id="build-execute-root" name="--with-execute-root">,
-<ref id="build-program-directory" name="--with-program-directory">,
-<ref id="build-drivers-directory" name="--with-drivers-directory">,
+<ref id="build-program-directory" name="--bindir">,
+<ref id="build-library-directory" name="--libdir">,
 <ref id="build-writable-directory" name="--with-writable-directory">,
-and <ref id="build-tables-directory" name="--with-tables-directory">
+and <ref id="build-data-directory" name="--with-data-directory">
 build options.
 
 <sect1>Security Considerations<p>
@@ -1508,15 +1504,15 @@ The following environment variables are set:
   <tag/BRLTTY_PROGRAM_DIRECTORY/
     Directory for runnable programs (binaries, executables).
     Configured via the <ref id="build-program-directory" name="--with-program-directory"> build option.
-  <tag/BRLTTY_DRIVERS_DIRECTORY/
+  <tag/BRLTTY_LIBRARY_DIRECTORY/
     Directory for drivers.
-    Configured via the <ref id="build-drivers-directory" name="--with-drivers-directory"> build option.
+    Configured via the <ref id="build-library-directory" name="--with-library-directory"> build option.
   <tag/BRLTTY_WRITABLE_DIRECTORY/
     Directory which can be written to.
     Configured via the <ref id="build-writable-directory" name="--with-writable-directory"> build option.
-  <tag/BRLTTY_TABLES_DIRECTORY/
-    Directory for tables.
-    Configured via the <ref id="build-tables-directory" name="--with-tables-directory"> build option.
+  <tag/BRLTTY_DATA_DIRECTORY/
+    Directory for tables and help pages.
+    Configured via the <ref id="build-data-directory" name="--with-data-directory"> build option.
   <tag/BRLTTY_MANPAGE_DIRECTORY/
     Directory for manual pages.
     Configured via the <ref id="build-manpage-directory" name="--with-manpage-directory"> build option.
@@ -1544,11 +1540,11 @@ In addition, the following standard <bf/autoconf/ environment variables are also
     Configured via the <tt/--bindir/ build option.
   <tag/libdir/
     Directory for BrlAPI's static archive and dynamically loadable object.
-    Default anchor for <ref id="build-drivers-directory" name="drivers directory">.
+    Default anchor for <ref id="build-library-directory" name="library directory">.
     Configured via the <ref id="build-api-directory" name="--libdir"> build option.
   <tag/sysconfdir/
     Directory for configuration files.
-    Default anchor for <ref id="build-tables-directory" name="tables directory">.
+    Default anchor for <ref id="build-data-directory" name="data directory">.
     Configured via the <ref id="build-configuration-directory" name="--sysconfdir"> build option.
   <tag/mandir/
     Default location for <ref id="build-manpage-directory" name="manual pages directory">.
@@ -1610,10 +1606,15 @@ It should be run as root.
     If it's not specified, then the device configured via the
     <ref id="build-braille-device" name="--with-braille-device"> build option
     is assumed.
-  <tag><tt/-D/<em/directory/ <tt/--drivers-directory=/<em/directory/</tag>
+  <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the driver data files reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-data-directory" name="--with-data-directory"> build option
+    is assumed.
+  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the drivers reside.
     If it's not specified, then the directory configured via the
-    <ref id="build-drivers-directory" name="--with-drivers-directory"> build option
+    <ref id="build-library-directory" name="--libdir"> build option
     is assumed.
   <tag><tt/-W/<em/directory/ <tt/--writable-directory=/<em/directory/</tag>
     The absolute path for a directory which can be written to.
@@ -1650,10 +1651,15 @@ It may need to be run as root.
   <tag><tt/-t/<em/string/ <tt/--text-string=/<em/string/</tag>
     The text to be spoken.
     If it's not specified, then standard input is read.
-  <tag><tt/-D/<em/directory/ <tt/--drivers-directory=/<em/directory/</tag>
+  <tag><tt/-D/<em/directory/ <tt/--data-directory=/<em/directory/</tag>
+    The absolute path for the directory wherein the driver data files reside.
+    If it's not specified, then the directory configured via the
+    <ref id="build-data-directory" name="--with-data-directory"> build option
+    is assumed.
+  <tag><tt/-L/<em/directory/ <tt/--library-directory=/<em/directory/</tag>
     The absolute path for the directory wherein the drivers reside.
     If it's not specified, then the directory configured via the
-    <ref id="build-drivers-directory" name="--with-drivers-directory"> build option
+    <ref id="build-library-directory" name="--libdir"> build option
     is assumed.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
@@ -1727,7 +1733,7 @@ This utility tests a text table
   <tag><em/input-table/</tag>
     The file system path to the input text table.
     If it's relative then it's anchored at the directory configured via the
-    <ref id="build-tables-directory" name="--with-tables-directory"> build option.
+    <ref id="build-data-directory" name="--with-data-directory"> build option.
   <tag><em/output-table/</tag>
     The file system path to the output text table.
     If it's relative then it's anchored at the current working directory.
@@ -1779,14 +1785,14 @@ is rewritten to standard output as contracted braille.
   <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/</tag>
     The file system path to the contraction table.
     If it's relative then it's anchored at the directory configured via the
-    <ref id="build-tables-directory" name="--with-tables-directory"> build option.
+    <ref id="build-data-directory" name="--with-data-directory"> build option.
     The <tt/.ctb/ extension is optional.
     If this option isn't supplied then <tt/en-us-g2/ is assumed.
   <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
     Specify the text table
     (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ttb/ extension is optional.
@@ -2413,7 +2419,7 @@ The following directives are recognized:
     Specify the attributes table
     (see section <ref id="table-attributes" name="Attributes Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.atb/ extension is optional.
@@ -2452,7 +2458,7 @@ The following directives are recognized:
     Specify the contraction table
     (see section <ref id="table-contraction" name="Contraction Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ctb/ extension is optional.
@@ -2468,7 +2474,7 @@ The following directives are recognized:
     Specify the key table
     (see section <ref id="table-key" name="Key Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ktb/ extension is optional.
@@ -2564,7 +2570,7 @@ The following directives are recognized:
     Specify the text table
     (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ttb/ extension is optional.
@@ -2583,7 +2589,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the attributes table
     (see section <ref id="table-attributes" name="Attributes Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.atb/ extension is optional.
@@ -2600,7 +2606,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the contraction table
     (see section <ref id="table-contraction" name="Contraction Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ctb/ extension is optional.
@@ -2631,7 +2637,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the key table
     (see section <ref id="table-key" name="Key Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ktb/ extension is optional.
@@ -2655,7 +2661,7 @@ The <tt/brltty/ command accepts the following options:
     Either the number or the name may be supplied,
     and the name may be abbreviated.
     If not specified,
-    then <tt/notice/ is assumed
+    then <tt/information/ is assumed
     (see the <ref id="options-quiet" name="-q"> option for more details).
   <tag><tt/-m/<em/device/ <tt/--midi-device=/<em/device/<label id="options-midi-device"></tag>
     Specify the device to use for the Musical Instrument Digital Interface
@@ -2699,7 +2705,7 @@ The <tt/brltty/ command accepts the following options:
     Specify the text table
     (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
-    (see the <ref id="build-tables-directory" name="--with-tables-directory">
+    (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ttb/ extension is optional.
@@ -2793,9 +2799,6 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_KEYBOARD_PROPERTIES/</tag>
         The keyboard properties
         (see the <ref id="options-keyboard-properties" name="-K"> command line option).
-      <tag><tt/BRLTTY_LOG_LEVEL/</tag>
-        The log level
-        (see the <ref id="options-log-level" name="-l"> command line option).
       <tag><tt/BRLTTY_MIDI_DEVICE/</tag>
         The Musical Instrument Digital Interface device
         (see the <ref id="options-midi-device" name="-m"> command line option).
@@ -5242,7 +5245,7 @@ BRLTTY can run as a stand-alone executable.
 Everything it needs to know can be explicitly configured at build-time
 (see <ref id="build" name="Build Options">).
 If the data directory
-(see the <ref id="build-tables-directory" name="--with-tables-directory">
+(see the <ref id="build-data-directory" name="--with-data-directory">
 and <ref id="build-execute-root" name="--with-execute-root"> build options)
 doesn't exist, then BRLTTY looks in <tt>/etc</> for the files it needs.
 Even if any of these files don't exist at all, BRLTTY still works!
