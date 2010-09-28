@@ -21,7 +21,7 @@
 
 set -e
 umask 022
-shopt -s nullglob
+shopt -s nullglob extglob
 
 declare -a documentLines
 addLine() {
@@ -31,27 +31,20 @@ addLine() {
 }
 
 beginDocument() {
-   local title="${1}"
-
-   headerLevel=0
-
-   addLine "<HTML>"
-   addLine "<HEAD>"
-   addLine "<TITLE>${title}</TITLE>"
-   addLine "</HEAD>"
-   addLine "<BODY>"
+   currentHeaderLevel=0
+   addDocumentHeader "${1}"
 }
 
 endDocument() {
-   local file="${1}"
+   addDocumentTrailer
+   writeDocument
+}
 
-   addLine "</BODY>"
-   addLine "</HTML>"
-
+writeDocument() {
    local count="${#documentLines[*]}"
    local index=0
 
-   exec 3>"${file}"
+   exec 3>"${outputDocument}"
    while ((index < count))
    do
       echo >&3 "${documentLines[index++]}"
@@ -60,14 +53,14 @@ endDocument() {
 }
 
 beginSection() {
-   local title="${1}"
-
-   headerLevel=$((headerLevel + 1))
-   addLine "<H${headerLevel}>${title}</H${headerLevel}>"
+   highestHeaderLevel="${currentHeaderLevel}"
+   currentHeaderLevel=$((currentHeaderLevel + 1))
+   addSectionHeader "${1}"
 }
 
 endSection() {
-   headerLevel=$((headerLevel - 1))
+   currentHeaderLevel=$((currentHeaderLevel - 1))
+   addSectionTrailer
 }
 
 beginLayoutList() {
@@ -76,7 +69,7 @@ beginLayoutList() {
 
 endLayoutList() {
    ! "${layoutListed}" || {
-      addLine "</UL>"
+      addLayoutListTrailer
    }
 }
 
@@ -116,7 +109,7 @@ endLayoutEntry() {
 
    "${layoutListed}" || {
       layoutListed=true
-      addLine "<UL>"
+      addLayoutListHeader
    }
 
    addLine "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
@@ -129,14 +122,14 @@ translateKeyTable() {
 }
 
 inputDirectory="$(dirname "${0}")"
-outputDirectory="doc-ktb"
+outputDocument="doc-ktb/"
 
 while getopts ":i:o:" option
 do
    case "${option}"
    in
       i) inputDirectory="${OPTARG}";;
-      o) outputDirectory="${OPTARG}";;
+      o) outputDocument="${OPTARG}";;
       :) syntaxError "missing value: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -147,7 +140,85 @@ shift $((OPTIND - 1))
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 verifyInputDirectory "${inputDirectory}"
+
+outputFile="${outputDocument##*/}"
+if [ "${outputFile}" = "${outputDocument}" ]
+then
+   outputDirectory="."
+else
+   outputDirectory="${outputDocument%/*}"
+fi
+[ "${outputDirectory%/}" != "${outputDirectory}" ] || outputDirectory="${outputDirectory}/"
+[ -n "${outputFile}" ] || outputFile="index.html"
+outputDocument="${outputDirectory}${outputFile}"
 verifyOutputDirectory "${outputDirectory}"
+
+outputFormat="${outputFile##*.}"
+[ "${outputFormat}" != "${outputFile}" ] || syntaxError "unknown output format"
+case "${outputFormat}"
+in
+   html)
+      addDocumentHeader() {
+         addLine "<HTML>"
+         addLine "<HEAD>"
+         addLine "<TITLE>${1}</TITLE>"
+         addLine "</HEAD>"
+
+         addLine "<BODY>"
+         beginSection "${1}"
+      }
+
+      addDocumentTrailer() {
+         endSection
+         addLine "</BODY>"
+         addLine "</HTML>"
+      }
+
+      addSectionHeader() {
+         addLine "<H${currentHeaderLevel}>${1}</H${currentHeaderLevel}>"
+      }
+
+      addSectionTrailer() {
+         [ "${currentHeaderLevel}" -ne "${highestHeaderLevel}" ] || addLine "<HR>"
+      }
+
+      addLayoutListHeader() {
+         addLine "<UL>"
+      }
+
+      addLayoutListTrailer() {
+         addLine "</UL>"
+      }
+      ;;
+
+   sgml)
+      addDocumentHeader() {
+         addLine "<sect>${1}<p>"
+      }
+
+      addDocumentTrailer() {
+         :
+      }
+
+      addSectionHeader() {
+         addLine "<sect${currentHeaderLevel}>${1}<p>"
+      }
+
+      addSectionTrailer() {
+         [ "${currentHeaderLevel}" -ne "${highestHeaderLevel}" ] || addLine ""
+      }
+
+      addLayoutListHeader() {
+         addLine "<itemize>"
+      }
+
+      addLayoutListTrailer() {
+         addLine "</itemize>"
+      }
+      ;;
+
+   *) syntaxError "unsupported output format: ${outputFormat}";;
+esac
 
 driversSubdirectory="Drivers/Braille"
 driversDirectory="${inputDirectory}/${driversSubdirectory}"
@@ -162,9 +233,7 @@ plainTextExtension="txt"
 hypertextExtension="html"
 keyTableExtension="ktb"
 
-documentTitle="Key Tables"
-beginDocument "${documentTitle}"
-beginSection "${documentTitle}"
+beginDocument "Key Tables"
 
 beginSection "Keyboards"
 beginLayoutList
@@ -176,7 +245,6 @@ do
    endLayoutEntry
 done
 endLayoutList
-addLine "<HR>"
 endSection
 
 beginSection "Braille Drivers"
@@ -220,9 +288,7 @@ do
    endLayoutList
 done
 addLine "</DL>"
-addLine "<HR>"
 endSection
 
-endSection
-endDocument "${outputDirectory}/index.${hypertextExtension}"
+endDocument
 exit 0
