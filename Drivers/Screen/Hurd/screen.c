@@ -219,8 +219,17 @@ readCharacters_HurdScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   start = screenMap->screen.cur_line;
   for (row=start+box->top; row<start+box->top+box->height; ++row)
     for (col=box->left; col<box->left+box->width; ++col) {
+      wchar_t text;
       conchar_attr_t attr;
-      buffer->text = screenDisplay[(row%lines)*description.cols+col].chr;
+      text = screenDisplay[(row%lines)*description.cols+col].chr;
+#ifdef CONS_WCHAR_MASK
+      text &= CONS_WCHAR_MASK;
+#endif
+#ifdef CONS_WCHAR_CONTINUED
+      if (text & CONS_WCHAR_CONTINUED)
+	text = UNICODE_ZERO_WIDTH_SPACE;
+#endif
+      buffer->text = text;
       attr = screenDisplay[(row%lines)*description.cols+col].attr;
       buffer->attributes = attr.fgcol | (attr.bgcol << 4)
 	| (attr.intensity == CONS_ATTR_INTENSITY_BOLD?SCR_ATTR_FG_BRIGHT:0)
