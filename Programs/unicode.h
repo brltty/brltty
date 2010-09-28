@@ -24,6 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define UNICODE_REPLACEMENT_CHARACTER 0XFFFD
+#define UNICODE_ZERO_WIDTH_SPACE 0X200B
 #define UNICODE_BRAILLE_ROW 0X2800
 
 #define UNICODE_CELL_BITS 8
