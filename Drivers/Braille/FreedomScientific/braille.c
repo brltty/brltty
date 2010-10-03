@@ -442,10 +442,10 @@ static const KeyTableDefinition *keyTableDefinition;
 
 static unsigned char outputBuffer[84];
 
-static int writeFrom;
-static int writeTo;
-static int writingFrom;
-static int writingTo;
+static int writeFirst;
+static int writeLast;
+static int writingFirst;
+static int writingLast;
 
 typedef void (*AcknowledgementHandler) (int ok);
 static AcknowledgementHandler acknowledgementHandler;
@@ -591,8 +591,8 @@ handleFirmnessAcknowledgement (int ok) {
 static void
 handleWriteAcknowledgement (int ok) {
   if (!ok) {
-    if ((writeFrom == -1) || (writingFrom < writeFrom)) writeFrom = writingFrom;
-    if ((writeTo == -1) || (writingTo > writeTo)) writeTo = writingTo;
+    if ((writeFirst == -1) || (writingFirst < writeFirst)) writeFirst = writingFirst;
+    if ((writeLast == -1) || (writingLast > writeLast)) writeLast = writingLast;
   }
 }
 
@@ -618,24 +618,24 @@ writeRequest (BrailleDisplay *brl) {
     return 1;
   }
 
-  if (writeTo != -1) {
-    unsigned int count = writeTo + 1 - writeFrom;
+  if (writeLast != -1) {
+    unsigned int count = writeLast + 1 - writeFirst;
     unsigned char buffer[count];
     int truncate = count > outputPayloadLimit;
 
     if (truncate) count = outputPayloadLimit;
-    translateOutputCells(buffer, &outputBuffer[writeFrom], count);
-    if (writePacket(brl, PKT_WRITE, count, writeFrom, 0, buffer) == -1) return 0;
+    translateOutputCells(buffer, &outputBuffer[writeFirst], count);
+    if (writePacket(brl, PKT_WRITE, count, writeFirst, 0, buffer) == -1) return 0;
 
     setAcknowledgementHandler(handleWriteAcknowledgement);
-    writingFrom = writeFrom;
+    writingFirst = writeFirst;
 
     if (truncate) {
-      writingTo = (writeFrom += count) - 1;
+      writingLast = (writeFirst += count) - 1;
     } else {
-      writingTo = writeTo;
-      writeFrom = -1;
-      writeTo = -1;
+      writingLast = writeLast;
+      writeFirst = -1;
+      writeLast = -1;
     }
 
     return 1;
@@ -655,12 +655,11 @@ updateCells (
   unsigned int to;
 
   if (cellsHaveChanged(&outputBuffer[offset], cells, count, &from, &to)) {
-    from += offset;
-    to += offset;
-    to -= 1;
+    int first = from + offset;
+    int last = to + offset - 1;
 
-    if ((writeFrom == -1) || (from < writeFrom)) writeFrom = from;
-    if (to > writeTo) writeTo = to;
+    if ((writeFirst == -1) || (first < writeFirst)) writeFirst = first;
+    if (last > writeLast) writeLast = last;
   }
 }
 
@@ -902,8 +901,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               keyTableDefinition = modelTypeTable[model->type].keyTableDefinition;
               makeOutputTable(model->dotsTable[0]);
               memset(outputBuffer, 0, model->cellCount);
-              writeFrom = 0;
-              writeTo = model->cellCount - 1;
+              writeFirst = 0;
+              writeLast = model->cellCount - 1;
 
               acknowledgementHandler = NULL;
               acknowledgementsMissing = 0;
