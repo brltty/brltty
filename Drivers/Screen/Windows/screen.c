@@ -78,7 +78,7 @@ closeStdHandles (void) {
 static int
 tryToAttach (HWND win) {
 #define CONSOLEWINDOW "ConsoleWindowClass"
-  static char class[strlen(CONSOLEWINDOW)+1];
+  static char class[] = CONSOLEWINDOW;
   DWORD process;
   if (GetClassName(win, class, sizeof(class)) != strlen(CONSOLEWINDOW)
       || memcmp(class,CONSOLEWINDOW,strlen(CONSOLEWINDOW)))
