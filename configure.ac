@@ -495,7 +495,9 @@ BRLTTY_ARG_DISABLE(
    ])
 ])
 
-AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h])])
+AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h], [dnl
+   AC_CHECK_FUNCS([wcwidth])
+])])
 
 icu_includes=""
 icu_libraries=""
