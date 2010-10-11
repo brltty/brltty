@@ -30,7 +30,7 @@ typedef enum {
   ETX = 0X03, /* ^C: End of Text */
   EOT = 0X04, /* ^D: End of Transmission */
   ENQ = 0X05, /* ^E: Enquiry */
-  ACK = 0X06, /* ^F: Acknowledgment */
+  ACK = 0X06, /* ^F: Acknowledgement */
   BEL = 0X07, /* ^G: Bell */
   BS  = 0X08, /* ^H: BackSpace */
   HT  = 0X09, /* ^I: Horizontal Tab (Character Tabulation) */
@@ -45,7 +45,7 @@ typedef enum {
   DC2 = 0X12, /* ^R: Device Control Two */
   DC3 = 0X13, /* ^S: Device Control Three (XOFF) */
   DC4 = 0X14, /* ^T: Device Control Four */
-  NAK = 0X15, /* ^U: Negative Acknowledgment */
+  NAK = 0X15, /* ^U: Negative Acknowledgement */
   SYN = 0X16, /* ^V: Synchronous Idle */
   ETB = 0X17, /* ^W: End of Transmission Block */
   CAN = 0X18, /* ^X: Cancel */

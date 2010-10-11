@@ -59,6 +59,8 @@ extern "C" {
 #define UNICODE_GROUP_NUMBER(c) (((c) & UNICODE_GROUP_MASK) >> UNICODE_GROUP_SHIFT)
 #define UNICODE_CHARACTER(group,plane,row,cell) (((group) << UNICODE_GROUP_SHIFT) | ((plane) << UNICODE_PLANE_SHIFT) | ((row) << UNICODE_ROW_SHIFT) | ((cell) << UNICODE_CELL_SHIFT))
 
+extern int getCharacterWidth (wchar_t character);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
