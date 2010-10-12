@@ -62,10 +62,10 @@ getCharacterWidth (wchar_t character) {
     if ((character >= 0XF900) && (character <= 0XFAFF)) return 2;
 
     /* Supplementary Ideographic Plane */
-    if ((character >= 0X20000) && (character <= 0X2FFFF)) return 2;
+  //if ((character >= 0X20000) && (character <= 0X2FFFF)) return 2;
 
     /* Tertiary Ideographic Plane */
-    if ((character >= 0X30000) && (character <= 0X3FFFF)) return 2;
+  //if ((character >= 0X30000) && (character <= 0X3FFFF)) return 2;
   }
 
   if (category == U_UNASSIGNED) return -1;
