@@ -27,7 +27,7 @@
 
 int
 getCharacterWidth (wchar_t character) {
-#if defined(HAVE_WCHAR_H)
+#if defined(HAVE_WCWIDTH)
   return wcwidth(character);
 #elif defined(HAVE_ICU)
   UCharCategory category = u_getIntPropertyValue(character, UCHAR_GENERAL_CATEGORY);
