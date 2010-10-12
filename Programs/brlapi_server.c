@@ -2348,6 +2348,7 @@ static int api__handleCommand(int command) {
   }
   if (command != EOF) {
     clientCode = cmdBrlttyToBrlapi(command, retainDots);
+    logMessage(LOG_DEBUG, "API got command %08x, thus client code %016"BRLAPI_PRIxKEYCODE, command, clientCode);
     /* nobody needs the raw code */
     if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
       int passKey;
@@ -2355,6 +2356,7 @@ static int api__handleCommand(int command) {
       handleAutorepeat(&command, &c->repeatState);
       /* Update brlapi equivalent */
       clientCode = cmdBrlttyToBrlapi(command, retainDots);
+      logMessage(LOG_DEBUG, "API got command %08x from repeat engine, thus client code %016"BRLAPI_PRIxKEYCODE, command, clientCode);
       /* Check whether the client really wants the result of repetition */
       pthread_mutex_lock(&c->acceptedKeysMutex);
       passKey = inKeyrangeList(c->acceptedKeys,clientCode) != NULL;
