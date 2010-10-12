@@ -279,7 +279,7 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 	int i;
 
 	buffer[y*box->width+x].text = wc;
-	for (i = 1; i < wcwidth(wc); i++) {
+	for (i = 1; i < getCharacterWidth(wc); i++) {
 	  x++;
 	  buffer[y*box->width+x].text = UNICODE_ZERO_WIDTH_SPACE;
 	}
@@ -305,7 +305,7 @@ readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     for (x=0, xx=0; x<box->width && xx < read; x++, xx++) {
       int i;
       buffer[y*box->width+x].attributes = bufAttr[xx];
-      for (i = 1; i < wcwidth(buffer[y*box->width+x].text); i++) {
+      for (i = 1; i < getCharacterWidth(buffer[y*box->width+x].text); i++) {
 	x++;
         buffer[y*box->width+x].attributes = bufAttr[xx];
       }
