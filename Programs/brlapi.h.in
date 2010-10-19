@@ -616,7 +616,7 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * This function returns one key press's code.
  *
  * If NULL or "" was given to brlapi_enterTtyMode(), a \e brltty command is returned,
- * as described in \c <brltty/brldefs.h> . It is hence pretty
+ * as described in the documentation for ::brlapi_keyCode_t . It is hence pretty
  * driver-independent, and should be used by default when no other option is
  * possible.
  *
