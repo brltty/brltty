@@ -230,4 +230,6 @@ char \xFD	(        )  # FD ⠀ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \xFE	(        )  # FE ⠀ þ [LATIN SMALL LETTER THORN]
 char \xFF	(        )  # FF ⠀ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
 
+glyph \u2019	(  3     )  # ⠄ ’ [RIGHT SINGLE QUOTATION MARK]
+
 include common.tti
