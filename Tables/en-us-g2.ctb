@@ -726,7 +726,8 @@ sufword poleax =
 begword portho = porthole
 sufword porthos 1234-135-1235-1456-135-234 (Dumas) Porthosesque
 begword poth = pothole pothook pothouse
-word pother 1234-135-2346-1235
+sufword pother 1234-135-2346-1235
+sufword potherb 1234-135-2345-125-12456-12
 begword pre =
 always preach 1234-1235-2-16
 word pred 1234-1235-1246 liquid pred: prednisone trade name
