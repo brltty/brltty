@@ -231,5 +231,6 @@ char \xFE	(        )  # FE ⠀ þ [LATIN SMALL LETTER THORN]
 char \xFF	(        )  # FF ⠀ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
 
 glyph \u2019	(  3     )  # ⠄ ’ [RIGHT SINGLE QUOTATION MARK]
+char \u20AC	(1   5  8)  # ⢑ € [EURO SIGN]
 
 include common.tti
