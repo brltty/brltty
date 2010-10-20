@@ -427,6 +427,17 @@ putCharacter (wchar_t character) {
     if (rule) return putReplace(rule);
   }
 
+#ifdef HAVE_ICU
+  {
+    wchar_t base = getBaseCharacter(character);
+
+    if (base) {
+      const ContractionTableRule *rule = getAlwaysRule(base);
+      if (rule) return putReplace(rule);
+    }
+  }
+#endif /* HAVE_ICU */
+
   {
 #ifdef HAVE_WCHAR_H 
     const wchar_t replacementCharacter = UNICODE_REPLACEMENT_CHARACTER;

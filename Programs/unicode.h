@@ -60,6 +60,7 @@ extern "C" {
 #define UNICODE_CHARACTER(group,plane,row,cell) (((group) << UNICODE_GROUP_SHIFT) | ((plane) << UNICODE_PLANE_SHIFT) | ((row) << UNICODE_ROW_SHIFT) | ((cell) << UNICODE_CELL_SHIFT))
 
 extern int getCharacterWidth (wchar_t character);
+extern wchar_t getBaseCharacter (wchar_t character);
 
 #ifdef __cplusplus
 }

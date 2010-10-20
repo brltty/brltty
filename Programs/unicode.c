@@ -20,6 +20,7 @@
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
+#include <unicode/unorm.h>
 #endif /* HAVE_ICU */
 
 #include "unicode.h"
@@ -76,4 +77,25 @@ getCharacterWidth (wchar_t character) {
   if (!(character & 0X60)) return -1;
   return 1;
 #endif /* character width */
+}
+
+wchar_t
+getBaseCharacter (wchar_t character) {
+#ifdef HAVE_ICU
+  {
+    UChar source[] = {character};
+    const unsigned int resultLength = 0X10;
+    UChar resultBuffer[resultLength];
+    UErrorCode error = U_ZERO_ERROR;
+
+    unorm_normalize(source, ARRAY_COUNT(source),
+                    UNORM_NFD, 0,
+                    resultBuffer, resultLength,
+                    &error);
+
+    if (U_SUCCESS(error)) return resultBuffer[0];
+  }
+#endif /* HAVE_ICU */
+
+  return 0;
 }

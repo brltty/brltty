@@ -100,6 +100,14 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
       const unsigned char *cell;
       if ((cell = getUnicodeCellEntry(table, character))) return *cell;
 
+      {
+        wchar_t base = getBaseCharacter(character);
+
+        if (base)
+          if ((cell = getUnicodeCellEntry(table, base)))
+            return *cell;
+      }
+
     unknownCharacter:
       if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
       if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
