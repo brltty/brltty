@@ -23,6 +23,10 @@
 #include <unicode/unorm.h>
 #endif /* HAVE_ICU */
 
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
+
 #include "unicode.h"
 #include "ascii.h"
 
@@ -96,6 +100,25 @@ getBaseCharacter (wchar_t character) {
     if (U_SUCCESS(error)) return resultBuffer[0];
   }
 #endif /* HAVE_ICU */
+
+#ifdef HAVE_ICONV_H
+  {
+    static iconv_t handle = NULL;
+    if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
+
+    if (handle != (iconv_t)-1) {
+      char *inputAddress = (char *)&character;
+      size_t inputSize = sizeof(character);
+      size_t outputSize = 0X10;
+      char outputBuffer[outputSize];
+      char *outputAddress = outputBuffer;
+
+      if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != -1)
+        if ((outputAddress - outputBuffer) == 1)
+          return outputBuffer[0] & 0XFF;
+    }
+  }
+#endif /* HAVE_ICONV_H */
 
   return 0;
 }
