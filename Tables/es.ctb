@@ -26,6 +26,8 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 include letters-latin.cti
+always \s 0
+
 class voy aeiouäáéíóú
 class con bcdfghjklmnñpqrstvwxz
 
