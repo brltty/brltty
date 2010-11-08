@@ -193,6 +193,7 @@ sufword ungerecht 256-12346-1235-2345
 sufword zuge 2-1356-12346
 endword ges 1245-123456 shouldn't use the ge-contraction
 midendword ien 24-14 shouldn't use the ie-contraction
+midendword iene 346-1345-15 should use the ie-contraction
 midendword ienen 346-1345-14 should use the ie-contraction
 endword tel 2345-13456 should use the el-contraction
 endword ten 2345-14 should use the en-contraction
