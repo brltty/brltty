@@ -105,9 +105,21 @@ typedef struct {
   unsigned char status;
 } LineProcessingData;
 
+static void
+writeNewLine (FILE *stream) {
+  if (!ferror(stream)) {
+    fputc('\n', stream);
+    if (opt_forceOutput && !ferror(stream)) fflush(stream);
+  }
+}
+
 static int
 contractWcharLine (const wchar_t *line, void *data) {
   LineProcessingData *lpd = data;
+
+  FILE *output = stdout;
+  void (*writeCell) (FILE *stream, unsigned char cell) = textTable? writeLocalCharacter: writeUtf8Braille;
+
   int lineLength = wcslen(line);
   const wchar_t *inputBuffer = line;
 
@@ -117,7 +129,7 @@ contractWcharLine (const wchar_t *line, void *data) {
 
     if (!outputBuffer) {
       if (!(outputBuffer = malloc(outputWidth))) {
-        logSystemError("output buffer allocation");
+        logMallocError();
         lpd->status = 10;
         return 0;
       }
@@ -137,28 +149,28 @@ contractWcharLine (const wchar_t *line, void *data) {
       outputWidth <<= 1;
     } else {
       {
-        FILE *output = stdout;
-        void (*writeCell) (FILE *stream, unsigned char cell) = textTable? writeLocalCharacter: writeUtf8Braille;
         int index;
 
         for (index=0; index<outputCount; index+=1) {
           writeCell(output, outputBuffer[index]);
           if (ferror(output)) break;
         }
-
-        if (!ferror(output)) fputc('\n', output);
-        if (opt_forceOutput && !ferror(output)) fflush(output);
-
-        if (ferror(output)) {
-          logSystemError("output");
-          lpd->status = 12;
-          return 0;
-        }
       }
 
       inputBuffer += inputCount;
       lineLength -= inputCount;
+
+      if (lineLength) writeNewLine(output);
+      if (ferror(output)) break;
     }
+  }
+
+  writeNewLine(output);
+
+  if (ferror(output)) {
+    logSystemError("output");
+    lpd->status = 12;
+    return 0;
   }
 
   return 1;
