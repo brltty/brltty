@@ -37,21 +37,14 @@
 #include "ttb.h"
 #include "ctb.h"
 
-static char *opt_contractionTable;
 static char *opt_tablesDirectory;
+static char *opt_contractionTable;
 static char *opt_textTable;
+static int opt_reformatInput;
 static char *opt_outputWidth;
 static int opt_forceOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'c',
-    .word = "contraction-table",
-    .argument = "file",
-    .setting.string = &opt_contractionTable,
-    .defaultSetting = "en-us-g2",
-    .description = "Contraction table."
-  },
-
   { .letter = 'T',
     .word = "tables-directory",
     .flags = OPT_Hidden,
@@ -61,11 +54,25 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing tables.")
   },
 
+  { .letter = 'c',
+    .word = "contraction-table",
+    .argument = "file",
+    .setting.string = &opt_contractionTable,
+    .defaultSetting = "en-us-g2",
+    .description = "Contraction table."
+  },
+
   { .letter = 't',
     .word = "text-table",
     .argument = "file",
     .setting.string = &opt_textTable,
     .description = "Text table."
+  },
+
+  { .letter = 'r',
+    .word = "reformat-input",
+    .setting.flag = &opt_reformatInput,
+    .description = "Reformat input."
   },
 
   { .letter = 'w',
@@ -88,49 +95,54 @@ static ContractionTable *contractionTable;
 static int outputWidth;
 static int outputExtend;
 static unsigned char *outputBuffer;
+static FILE *outputStream;
+static void (*writeCell) (unsigned char cell);
 
 static void
-writeLocalCharacter (FILE *stream, unsigned char cell) {
-  fputc(convertDotsToCharacter(textTable, cell), stream);
+writeLocalCharacter (unsigned char cell) {
+  fputc(convertDotsToCharacter(textTable, cell), outputStream);
 }
 
 static void
-writeUtf8Braille (FILE *stream, unsigned char cell) {
+writeUtf8Braille (unsigned char cell) {
   Utf8Buffer utf8;
   size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
-  fprintf(stream, "%.*s", (int)utfs, utf8);
+  fprintf(outputStream, "%.*s", (int)utfs, utf8);
 }
 
 typedef struct {
-  unsigned char status;
+  wchar_t *lineBuffer;
+  size_t lineSize;
+  size_t lineLength;
+
+  unsigned char exitStatus;
 } LineProcessingData;
 
 static void
-writeNewLine (FILE *stream) {
-  if (!ferror(stream)) {
-    fputc('\n', stream);
-    if (opt_forceOutput && !ferror(stream)) fflush(stream);
-  }
+noMemory (void *data) {
+  LineProcessingData *lpd = data;
+
+  logMallocError();
+  lpd->exitStatus = 10;
+}
+
+static inline void
+writeNewLine (void) {
+  if (!ferror(outputStream)) fputc('\n', outputStream);
 }
 
 static int
-contractWcharLine (const wchar_t *line, void *data) {
+writeInputLine (const wchar_t *inputLine, size_t inputLength, void *data) {
   LineProcessingData *lpd = data;
+  const wchar_t *inputBuffer = inputLine;
 
-  FILE *output = stdout;
-  void (*writeCell) (FILE *stream, unsigned char cell) = textTable? writeLocalCharacter: writeUtf8Braille;
-
-  int lineLength = wcslen(line);
-  const wchar_t *inputBuffer = line;
-
-  while (lineLength) {
-    int inputCount = lineLength;
+  while (inputLength) {
+    int inputCount = inputLength;
     int outputCount = outputWidth;
 
     if (!outputBuffer) {
       if (!(outputBuffer = malloc(outputWidth))) {
-        logMallocError();
-        lpd->status = 10;
+        noMemory(data);
         return 0;
       }
     }
@@ -139,11 +151,11 @@ contractWcharLine (const wchar_t *line, void *data) {
                       inputBuffer, &inputCount,
                       outputBuffer, &outputCount,
                       NULL, CTB_NO_CURSOR)) {
-      lpd->status = 11;
+      lpd->exitStatus = 11;
       return 0;
     }
 
-    if ((inputCount < lineLength) && outputExtend) {
+    if ((inputCount < inputLength) && outputExtend) {
       free(outputBuffer);
       outputBuffer = NULL;
       outputWidth <<= 1;
@@ -152,24 +164,25 @@ contractWcharLine (const wchar_t *line, void *data) {
         int index;
 
         for (index=0; index<outputCount; index+=1) {
-          writeCell(output, outputBuffer[index]);
-          if (ferror(output)) break;
+          writeCell(outputBuffer[index]);
+          if (ferror(outputStream)) break;
         }
       }
 
       inputBuffer += inputCount;
-      lineLength -= inputCount;
+      inputLength -= inputCount;
 
-      if (lineLength) writeNewLine(output);
-      if (ferror(output)) break;
+      if (inputLength) writeNewLine();
+      if (ferror(outputStream)) break;
     }
   }
 
-  writeNewLine(output);
+  writeNewLine();
+  if (opt_forceOutput && !ferror(outputStream)) fflush(outputStream);
 
-  if (ferror(output)) {
+  if (ferror(outputStream)) {
     logSystemError("output");
-    lpd->status = 12;
+    lpd->exitStatus = 12;
     return 0;
   }
 
@@ -177,25 +190,91 @@ contractWcharLine (const wchar_t *line, void *data) {
 }
 
 static int
-contractUtf8Line (const char *line, void *data) {
+flushInputLine (void *data) {
+  LineProcessingData *lpd = data;
+
+  if (lpd->lineLength) {
+    if (!writeInputLine(lpd->lineBuffer, lpd->lineLength, data)) return 0;
+    lpd->lineLength = 0;
+  }
+
+  return 1;
+}
+
+static int
+processWcharLine (const wchar_t *line, void *data) {
+  LineProcessingData *lpd = data;
+  size_t length = wcslen(line);
+
+  if (opt_reformatInput) {
+    if (length && !iswspace(line[0])) {
+      unsigned int spaces = !lpd->lineLength? 0: 1;
+      size_t newLength = lpd->lineLength + spaces + length;
+
+      if (newLength > lpd->lineSize) {
+        size_t newSize = newLength | 0XFF;
+        wchar_t *newBuffer = calloc(newSize, sizeof(*newBuffer));
+
+        if (!newBuffer) {
+          noMemory(data);
+          return 0;
+        }
+
+        wmemcpy(newBuffer, lpd->lineBuffer, lpd->lineLength);
+        free(lpd->lineBuffer);
+
+        lpd->lineBuffer = newBuffer;
+        lpd->lineSize = newSize;
+      }
+
+      while (spaces) {
+        lpd->lineBuffer[lpd->lineLength++] = WC_C(' ');
+        spaces -= 1;
+      }
+
+      wmemcpy(&lpd->lineBuffer[lpd->lineLength], line, length);
+      lpd->lineLength += length;
+
+      return 1;
+    }
+  }
+
+  return flushInputLine(data) && writeInputLine(line, length, data);
+}
+
+static int
+processUtf8Line (const char *line, void *data) {
   size_t count = strlen(line) + 1;
   wchar_t buffer[count];
   wchar_t *characters = buffer;
 
   convertStringToWchars(&line, &characters, count);
-  return contractWcharLine(buffer, data);
+  return processWcharLine(buffer, data);
 }
 
 static int
-contractLine (char *line, void *data) {
-  return contractUtf8Line(line, data);
+processStreamLine (char *line, void *data) {
+  return processUtf8Line(line, data);
 }
 
 static int
-contractFile (FILE *file) {
-  LineProcessingData lpd;
-  lpd.status = 0;
-  return processLines(file, contractLine, &lpd)? lpd.status: 5;
+processStream (FILE *stream) {
+  LineProcessingData lpd = {
+    .lineBuffer = NULL,
+    .lineSize = 1,
+    .lineLength = 0,
+
+    .exitStatus = 0
+  };;
+  unsigned char exitStatus = processLines(stream, processStreamLine, &lpd)? lpd.exitStatus: 5;
+
+  if (!exitStatus) {
+    flushInputLine(&lpd);
+    exitStatus = lpd.exitStatus;
+  }
+
+  if (lpd.lineBuffer) free(lpd.lineBuffer);
+  return exitStatus;
 }
 
 int
@@ -223,12 +302,15 @@ main (int argc, char *argv[]) {
     outputWidth = 0X80;
   } else {
     static const int minimum = 1;
+
     if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
       logMessage(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
       exit(2);
     }
   }
+
   outputBuffer = NULL;
+  outputStream = stdout;
 
   {
     char *contractionTableFile;
@@ -262,16 +344,18 @@ main (int argc, char *argv[]) {
           }
 
           if (!status) {
+            writeCell = textTable? writeLocalCharacter: writeUtf8Braille;
+
             if (argc) {
               do {
                 char *path = *argv;
                 if (strcmp(path, "-") == 0) {
-                  status = contractFile(stdin);
+                  status = processStream(stdin);
                 } else {
-                  FILE *file = fopen(path, "r");
-                  if (file) {
-                    status = contractFile(file);
-                    fclose(file);
+                  FILE *stream = fopen(path, "r");
+                  if (stream) {
+                    status = processStream(stream);
+                    fclose(stream);
                   } else {
                     logMessage(LOG_ERR, "cannot open input file: %s: %s",
                                path, strerror(errno));
@@ -280,7 +364,7 @@ main (int argc, char *argv[]) {
                 }
               } while ((status == 0) && (++argv, --argc));
             } else {
-              status = contractFile(stdin);
+              status = processStream(stdin);
             }
 
             if (textTable) destroyTextTable(textTable);
