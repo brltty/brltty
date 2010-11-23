@@ -895,6 +895,7 @@ always shouse 234-125-1256-234-15
 always ssh =
 always shood =
 word such 234-16
+endword such 234-16 nonesuch somesuch
 before consonant sufword such 234-16
 word sch =
 sufword schofield 234-16-135-124-24-15-123-145
