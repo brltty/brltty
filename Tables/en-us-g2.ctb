@@ -75,7 +75,6 @@ contraction agst
 endword ageries = messageries
 endword agery = savagery
 sufword airedale =
-word alittle =
 midendword ally 6-13456
 word almost 1-123-134
 contraction alm
@@ -146,6 +145,7 @@ sufword belch 12-15-123-16
 begword beld = Beldon
 begword belf = belfry, belfast
 begword belg = Belgium
+sufword belittle 23-123-123
 begword belk = Belkin
 always bell =
 begword belm = Belmont
@@ -340,9 +340,7 @@ begword disul = disulfide
 word do 145
 before o begword dogg =
 word doggo 145-135-2356-135
-sufword dolittle = the Dolittles
 sufword donegal = Donegalers
-sufword doolittle =
 always dumb = dumbbell
 
 # the letter e
@@ -558,7 +556,7 @@ word like 123
 begword limea = limeade
 word lingerie 123-35-1245-12456-24-15
 word lionel =
-always little 123-123
+sufword little 123-123
 contraction ll
 always lord 5-123
 sufword lucknow 123-136-14-13-1345-246
