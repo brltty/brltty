@@ -10,6 +10,7 @@ $ brltty -b xw -x as
 Then you can launch a BrlAPI application:
 $ ~/brltty/Programs/apitest
 or you can launch text applications in AT-SPI terminals like gnome-terminal.
+More details can be found on http://brl.thefreecat.org/text-apps-a11y-test.html
 
 You may give several parameters to the driver:
 $ brltty -b xw -t identity -B tkparms="-geometry -0+0 -display :1",lines=2,cols=20,model=bare
