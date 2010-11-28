@@ -603,11 +603,13 @@ describe_AtSpiScreen (ScreenDescription *description) {
 static int
 readCharacters_AtSpiScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   long x,y;
-  if (!validateScreenBox(box, curNumCols, curNumRows)) return 0;
   clearScreenCharacters(buffer,box->height*box->width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) {
     setScreenMessage(box, buffer, nonatspi);
+    goto out;
+  }
+  if (!validateScreenBox(box, curNumCols, curNumRows)) {
     goto out;
   }
   for (y=0; y<box->height; y++) {
