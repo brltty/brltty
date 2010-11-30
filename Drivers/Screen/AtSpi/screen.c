@@ -609,6 +609,9 @@ readCharacters_AtSpiScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     setScreenMessage(box, buffer, nonatspi);
     goto out;
   }
+  if (!curNumRows) {
+    goto out;
+  }
   if (!validateScreenBox(box, curNumCols, curNumRows)) {
     goto out;
   }
