@@ -564,6 +564,7 @@ sufword lucknow 123-136-14-13-1345-246
 # the letter m
 always m 134
 always M 134
+sufword mahoney = 
 always many 456-134
 begword mc =
 always medic 134-1246-24-14 medicare
@@ -818,6 +819,7 @@ begword reveren 1235-5-15-26 reverent
 sufword reverence 1235-5-15-56-15 reverence
 sufword reverie 1235-5-15-24-15
 begword rh = Rhadamanthus
+always rhein =
 word riflery =
 always right 5-1235
 
