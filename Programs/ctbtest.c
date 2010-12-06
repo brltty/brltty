@@ -33,14 +33,14 @@
 #include "parse.h"
 #include "charset.h"
 #include "unicode.h"
-//#include "brl.h"
+#include "ascii.h"
 #include "ttb.h"
 #include "ctb.h"
 
 static char *opt_tablesDirectory;
 static char *opt_contractionTable;
 static char *opt_textTable;
-static int opt_reformatInput;
+static int opt_reformatText;
 static char *opt_outputWidth;
 static int opt_forceOutput;
 
@@ -70,8 +70,8 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .letter = 'r',
-    .word = "reformat-input",
-    .setting.flag = &opt_reformatInput,
+    .word = "reformat-text",
+    .setting.flag = &opt_reformatText,
     .description = "Reformat input."
   },
 
@@ -90,31 +90,19 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static ContractionTable *contractionTable;
+static wchar_t *inputBuffer;
+static size_t inputSize;
+static size_t inputLength;
 
+static FILE *outputStream;
+static unsigned char *outputBuffer;
 static int outputWidth;
 static int outputExtend;
-static unsigned char *outputBuffer;
-static FILE *outputStream;
-static void (*writeCell) (unsigned char cell);
 
-static void
-writeLocalCharacter (unsigned char cell) {
-  fputc(convertDotsToCharacter(textTable, cell), outputStream);
-}
-
-static void
-writeUtf8Braille (unsigned char cell) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
-  fprintf(outputStream, "%.*s", (int)utfs, utf8);
-}
+static ContractionTable *contractionTable;
+static int (*writeCell) (unsigned char cell, void *data);
 
 typedef struct {
-  wchar_t *lineBuffer;
-  size_t lineSize;
-  size_t lineLength;
-
   unsigned char exitStatus;
 } LineProcessingData;
 
@@ -126,13 +114,42 @@ noMemory (void *data) {
   lpd->exitStatus = 10;
 }
 
-static inline void
-writeNewLine (void) {
-  if (!ferror(outputStream)) fputc('\n', outputStream);
+static int
+outputError (void *data) {
+  LineProcessingData *lpd = data;
+
+  if (ferror(outputStream)) {
+    logSystemError("output");
+    lpd->exitStatus = 12;
+    return 0;
+  }
+
+  return 1;
 }
 
 static int
-writeInputLine (const wchar_t *inputLine, size_t inputLength, void *data) {
+writeLocalCharacter (unsigned char cell, void *data) {
+  fputc(convertDotsToCharacter(textTable, cell), outputStream);
+  return outputError(data);
+}
+
+static int
+writeUtf8Braille (unsigned char cell, void *data) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
+
+  fprintf(outputStream, "%.*s", (int)utfs, utf8);
+  return outputError(data);
+}
+
+static int
+putCharacter (unsigned char character, void *data) {
+  fputc(character, outputStream);
+  return outputError(data);
+}
+
+static int
+writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
   LineProcessingData *lpd = data;
   const wchar_t *inputBuffer = inputLine;
 
@@ -163,55 +180,46 @@ writeInputLine (const wchar_t *inputLine, size_t inputLength, void *data) {
       {
         int index;
 
-        for (index=0; index<outputCount; index+=1) {
-          writeCell(outputBuffer[index]);
-          if (ferror(outputStream)) break;
-        }
+        for (index=0; index<outputCount; index+=1)
+          if (!writeCell(outputBuffer[index], data))
+            return 0;
       }
 
       inputBuffer += inputCount;
       inputLength -= inputCount;
 
-      if (inputLength) writeNewLine();
-      if (ferror(outputStream)) break;
+      if (inputLength)
+        if (!putCharacter('\n', data))
+          return 0;
     }
   }
 
-  writeNewLine();
   if (opt_forceOutput && !ferror(outputStream)) fflush(outputStream);
+  return 1;
+}
 
-  if (ferror(outputStream)) {
-    logSystemError("output");
-    lpd->exitStatus = 12;
-    return 0;
+static int
+flushCharacters (wchar_t end, void *data) {
+  if (inputLength) {
+    if (!writeCharacters(inputBuffer, inputLength, data)) return 0;
+    inputLength = 0;
+
+    if (end)
+      if (!putCharacter(end, data))
+        return 0;
   }
 
   return 1;
 }
 
 static int
-flushInputLine (void *data) {
-  LineProcessingData *lpd = data;
+processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *data) {
+  if (opt_reformatText) {
+    if (count && !iswspace(characters[0])) {
+      unsigned int spaces = !inputLength? 0: 1;
+      size_t newLength = inputLength + spaces + count;
 
-  if (lpd->lineLength) {
-    if (!writeInputLine(lpd->lineBuffer, lpd->lineLength, data)) return 0;
-    lpd->lineLength = 0;
-  }
-
-  return 1;
-}
-
-static int
-processWcharLine (const wchar_t *line, void *data) {
-  LineProcessingData *lpd = data;
-  size_t length = wcslen(line);
-
-  if (opt_reformatInput) {
-    if (length && !iswspace(line[0])) {
-      unsigned int spaces = !lpd->lineLength? 0: 1;
-      size_t newLength = lpd->lineLength + spaces + length;
-
-      if (newLength > lpd->lineSize) {
+      if (newLength > inputSize) {
         size_t newSize = newLength | 0XFF;
         wchar_t *newBuffer = calloc(newSize, sizeof(*newBuffer));
 
@@ -220,60 +228,76 @@ processWcharLine (const wchar_t *line, void *data) {
           return 0;
         }
 
-        wmemcpy(newBuffer, lpd->lineBuffer, lpd->lineLength);
-        free(lpd->lineBuffer);
+        wmemcpy(newBuffer, inputBuffer, inputLength);
+        free(inputBuffer);
 
-        lpd->lineBuffer = newBuffer;
-        lpd->lineSize = newSize;
+        inputBuffer = newBuffer;
+        inputSize = newSize;
       }
 
       while (spaces) {
-        lpd->lineBuffer[lpd->lineLength++] = WC_C(' ');
+        inputBuffer[inputLength++] = WC_C(' ');
         spaces -= 1;
       }
 
-      wmemcpy(&lpd->lineBuffer[lpd->lineLength], line, length);
-      lpd->lineLength += length;
+      wmemcpy(&inputBuffer[inputLength], characters, count);
+      inputLength += count;
+
+      if (end != '\n') {
+        if (!flushCharacters(0, data)) return 0;
+        if (!putCharacter(end, data)) return 0;
+      }
 
       return 1;
     }
   }
 
-  return flushInputLine(data) && writeInputLine(line, length, data);
+  if (!flushCharacters('\n', data)) return 0;
+  if (!writeCharacters(characters, count, data)) return 0;
+  if (!putCharacter(end, data)) return 0;
+  return 1;
 }
 
 static int
-processUtf8Line (const char *line, void *data) {
-  size_t count = strlen(line) + 1;
-  wchar_t buffer[count];
-  wchar_t *characters = buffer;
+processLine (char *line, void *data) {
+  const char *string = line;
+  size_t length = strlen(string);
+  const char *byte = string;
 
-  convertStringToWchars(&line, &characters, count);
-  return processWcharLine(buffer, data);
-}
+  size_t count = length + 1;
+  wchar_t characters[count];
+  wchar_t *character = characters;
 
-static int
-processStreamLine (char *line, void *data) {
-  return processUtf8Line(line, data);
+  convertStringToWchars(&byte, &character, count);
+  length = character - characters;
+  character = characters;
+
+  while (1) {
+    const wchar_t *end = wmemchr(character, FF, length);
+    if (!end) break;
+
+    count = end - character;
+    if (!processCharacters(character, count, *end, data)) return 0;
+
+    count += 1;
+    character += count;
+    length -= count;
+  }
+
+  return processCharacters(character, length, '\n', data);
 }
 
 static int
 processStream (FILE *stream) {
   LineProcessingData lpd = {
-    .lineBuffer = NULL,
-    .lineSize = 1,
-    .lineLength = 0,
-
     .exitStatus = 0
-  };;
-  unsigned char exitStatus = processLines(stream, processStreamLine, &lpd)? lpd.exitStatus: 5;
+  };
+  unsigned char exitStatus = processLines(stream, processLine, &lpd)? lpd.exitStatus: 5;
 
-  if (!exitStatus) {
-    flushInputLine(&lpd);
-    exitStatus = lpd.exitStatus;
-  }
+  if (!exitStatus)
+    if (!flushCharacters('\n', &lpd))
+      exitStatus = lpd.exitStatus;
 
-  if (lpd.lineBuffer) free(lpd.lineBuffer);
   return exitStatus;
 }
 
@@ -298,6 +322,13 @@ main (int argc, char *argv[]) {
     fixInstallPaths(paths);
   }
 
+  inputBuffer = NULL;
+  inputSize = 0;
+  inputLength = 0;
+
+  outputStream = stdout;
+  outputBuffer = NULL;
+
   if ((outputExtend = !*opt_outputWidth)) {
     outputWidth = 0X80;
   } else {
@@ -308,9 +339,6 @@ main (int argc, char *argv[]) {
       exit(2);
     }
   }
-
-  outputBuffer = NULL;
-  outputStream = stdout;
 
   {
     char *contractionTableFile;
@@ -385,5 +413,6 @@ main (int argc, char *argv[]) {
   }
 
   if (outputBuffer) free(outputBuffer);
+  if (inputBuffer) free(inputBuffer);
   return status;
 }
