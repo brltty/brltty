@@ -370,6 +370,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         state = KTS_COMMAND;
       }
     } else {
+      if (context == BRL_CTX_WAITING) table->command = EOF;
+
       if (table->command != EOF) {
         if (table->immediate) {
           command = BRL_CMD_NOOP;
