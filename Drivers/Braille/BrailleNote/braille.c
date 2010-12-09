@@ -484,7 +484,7 @@ getDecimalInteger (BrailleDisplay *brl, unsigned int *integer, unsigned int widt
       case WC_C('7'):
       case WC_C('8'):
       case WC_C('9'):
-        memcpy(buffer, buffer+1, width-1);
+        memmove(buffer, buffer+1, width-1);
         buffer[width-1] = character;
         break;
     }

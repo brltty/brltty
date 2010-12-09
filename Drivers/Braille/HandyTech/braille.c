@@ -1192,7 +1192,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   if (at2Count) {
     unsigned char code = at2Buffer[0];
-    memcpy(at2Buffer, at2Buffer+1, --at2Count);
+    memmove(at2Buffer, at2Buffer+1, --at2Count);
     return BRL_BLK_PASSAT + code;
   }
 

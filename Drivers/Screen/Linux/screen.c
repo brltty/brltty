@@ -293,7 +293,7 @@ convertCharacter (const wchar_t *character) {
       if (result != CONV_ILLEGAL) break;
 
       if (!--length) break;
-      memcpy(buffer, buffer+1, length);
+      memmove(buffer, buffer+1, length);
     }
   }
 
