@@ -442,7 +442,7 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
     if (fprintf(file, "\\t") == EOF) return 0;
   } else if (character == WC_C('\v')) {
     if (fprintf(file, "\\v") == EOF) return 0;
-  } else if ((character > 0X20) && (character < 0X7F)) {
+  } else if ((character > 0X20) && (character < 0X7F) && (character != '#')) {
     wint_t value = character;
     if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
   } else {
