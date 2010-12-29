@@ -564,6 +564,7 @@ sufword lucknow 123-136-14-13-1345-246
 # the letter m
 always m 134
 always M 134
+begword maha = maharaja, maharani
 sufword mahoney = 
 always many 456-134
 begword mc =
