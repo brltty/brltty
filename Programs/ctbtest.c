@@ -100,7 +100,7 @@ static int outputWidth;
 static int outputExtend;
 
 static ContractionTable *contractionTable;
-static int (*writeCell) (unsigned char cell, void *data);
+static int (*putCell) (unsigned char cell, void *data);
 
 typedef struct {
   unsigned char exitStatus;
@@ -115,7 +115,7 @@ noMemory (void *data) {
 }
 
 static int
-outputError (void *data) {
+checkOutputStream (void *data) {
   LineProcessingData *lpd = data;
 
   if (ferror(outputStream)) {
@@ -128,24 +128,30 @@ outputError (void *data) {
 }
 
 static int
-writeLocalCharacter (unsigned char cell, void *data) {
-  fputc(convertDotsToCharacter(textTable, cell), outputStream);
-  return outputError(data);
-}
-
-static int
-writeUtf8Braille (unsigned char cell, void *data) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
-
-  fprintf(outputStream, "%.*s", (int)utfs, utf8);
-  return outputError(data);
+flushOutputStream (void *data) {
+  fflush(outputStream);
+  return checkOutputStream(data);
 }
 
 static int
 putCharacter (unsigned char character, void *data) {
   fputc(character, outputStream);
-  return outputError(data);
+  return checkOutputStream(data);
+}
+
+static int
+putMappedCharacter (unsigned char cell, void *data) {
+  fputc(convertDotsToCharacter(textTable, cell), outputStream);
+  return checkOutputStream(data);
+}
+
+static int
+putUnicodeBraille (unsigned char cell, void *data) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
+
+  fprintf(outputStream, "%.*s", (int)utfs, utf8);
+  return checkOutputStream(data);
 }
 
 static int
@@ -181,7 +187,7 @@ writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
         int index;
 
         for (index=0; index<outputCount; index+=1)
-          if (!writeCell(outputBuffer[index], data))
+          if (!putCell(outputBuffer[index], data))
             return 0;
       }
 
@@ -194,7 +200,6 @@ writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
     }
   }
 
-  if (opt_forceOutput && !ferror(outputStream)) fflush(outputStream);
   return 1;
 }
 
@@ -283,8 +288,13 @@ processLine (char *line, void *data) {
     character += count;
     length -= count;
   }
+  if (!processCharacters(character, length, '\n', data)) return 0;
 
-  return processCharacters(character, length, '\n', data);
+  if (opt_forceOutput)
+    if (!flushOutputStream(data))
+      return 0;
+
+  return 1;
 }
 
 static int
@@ -295,7 +305,7 @@ processStream (FILE *stream) {
   unsigned char exitStatus = processLines(stream, processLine, &lpd)? lpd.exitStatus: 5;
 
   if (!exitStatus)
-    if (!flushCharacters('\n', &lpd))
+    if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd)))
       exitStatus = lpd.exitStatus;
 
   return exitStatus;
@@ -372,7 +382,7 @@ main (int argc, char *argv[]) {
           }
 
           if (!status) {
-            writeCell = textTable? writeLocalCharacter: writeUtf8Braille;
+            putCell = textTable? putMappedCharacter: putUnicodeBraille;
 
             if (argc) {
               do {

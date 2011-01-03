@@ -53,8 +53,8 @@ enableUinputKeyEvents (int device) {
 
   for (key=0; key<=KEY_MAX; key+=1) {
     if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
-      logSystemError("ioctl[UI_SET_KEYBIT]");
-      return 0;
+      logMessage(LOG_WARNING, "ioctl[UI_SET_KEYBIT] failed for key 0X%X: %s",
+                 key, strerror(errno));
     }
   }
 

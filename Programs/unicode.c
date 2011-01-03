@@ -86,39 +86,46 @@ getCharacterWidth (wchar_t character) {
 wchar_t
 getBaseCharacter (wchar_t character) {
 #ifdef HAVE_ICU
-  {
-    UChar source[] = {character};
-    const unsigned int resultLength = 0X10;
-    UChar resultBuffer[resultLength];
-    UErrorCode error = U_ZERO_ERROR;
+  UChar source[] = {character};
+  const unsigned int resultLength = 0X10;
+  UChar resultBuffer[resultLength];
+  UErrorCode error = U_ZERO_ERROR;
 
-    unorm_normalize(source, ARRAY_COUNT(source),
-                    UNORM_NFD, 0,
-                    resultBuffer, resultLength,
-                    &error);
+  unorm_normalize(source, ARRAY_COUNT(source),
+                  UNORM_NFD, 0,
+                  resultBuffer, resultLength,
+                  &error);
 
-    if (U_SUCCESS(error)) return resultBuffer[0];
-  }
+  if (U_SUCCESS(error)) return resultBuffer[0];
 #endif /* HAVE_ICU */
 
+  return 0;
+}
+
+wchar_t
+getTransliteratedCharacter (wchar_t character, const char *encoding) {
 #ifdef HAVE_ICONV_H
-  {
-    static iconv_t handle = NULL;
-    if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
+  static iconv_t handle = NULL;
+  if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
 
-    if (handle != (iconv_t)-1) {
-      char *inputAddress = (char *)&character;
-      size_t inputSize = sizeof(character);
-      size_t outputSize = 0X10;
-      char outputBuffer[outputSize];
-      char *outputAddress = outputBuffer;
+  if (handle != (iconv_t)-1) {
+    char *inputAddress = (char *)&character;
+    size_t inputSize = sizeof(character);
+    size_t outputSize = 0X10;
+    char outputBuffer[outputSize];
+    char *outputAddress = outputBuffer;
 
-      if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != -1)
-        if ((outputAddress - outputBuffer) == 1)
-          return outputBuffer[0] & 0XFF;
-    }
+    if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != -1)
+      if ((outputAddress - outputBuffer) == 1)
+        return outputBuffer[0] & 0XFF;
   }
 #endif /* HAVE_ICONV_H */
 
   return 0;
+}
+
+wchar_t
+getEquivalentCharacter (wchar_t character, TestCharacter test, void *data) {
+  wchar_t base = getBaseCharacter(character);
+  return base;
 }

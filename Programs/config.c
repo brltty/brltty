@@ -1883,9 +1883,13 @@ updatePreferences (void) {
 
             case BRL_BLK_PASSKEY+BRL_KEY_HOME:
             case BRL_CMD_PREFLOAD:
+logMessage(LOG_NOTICE, "before assignment: %02x", prefs.autorepeat);
               prefs = oldPreferences;
+logMessage(LOG_NOTICE, "after assignment: %02x", prefs.autorepeat);
               applyPreferences();
+logMessage(LOG_NOTICE, "after apply: %02x", prefs.autorepeat);
               message(mode, gettext("changes discarded"), 0);
+logMessage(LOG_NOTICE, "after message: %02x", prefs.autorepeat);
               break;
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
