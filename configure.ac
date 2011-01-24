@@ -253,7 +253,7 @@ in
 esac
 
 AC_PROG_CC
-test "${GCC}" = "yes" && CC="${CC} ${brltty_gcc_options}"
+test "${GCC}" = "yes" && CFLAGS="${CFLAGS} ${brltty_gcc_options}"
 
 if test -z "${CXX}"
 then
@@ -271,7 +271,7 @@ then
    fi
 fi
 AC_PROG_CXX
-test "${GXX}" = "yes" && CXX="${CXX} ${brltty_gcc_options}"
+test "${GXX}" = "yes" && CXXFLAGS="${CXXFLAGS} ${brltty_gcc_options}"
 
 AC_CHECK_PROGS([LD], [ld], [ld])
 AC_PROG_RANLIB
