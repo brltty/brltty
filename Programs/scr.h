@@ -84,7 +84,32 @@ typedef enum {
   SCR_KEY_END,
   SCR_KEY_INSERT,
   SCR_KEY_DELETE,
-  SCR_KEY_FUNCTION
+  SCR_KEY_FUNCTION,
+
+  SCR_KEY_F1 = SCR_KEY_FUNCTION,
+  SCR_KEY_F2,
+  SCR_KEY_F3,
+  SCR_KEY_F4,
+  SCR_KEY_F5,
+  SCR_KEY_F6,
+  SCR_KEY_F7,
+  SCR_KEY_F8,
+  SCR_KEY_F9,
+  SCR_KEY_F10,
+  SCR_KEY_F11,
+  SCR_KEY_F12,
+  SCR_KEY_F13,
+  SCR_KEY_F14,
+  SCR_KEY_F15,
+  SCR_KEY_F16,
+  SCR_KEY_F17,
+  SCR_KEY_F18,
+  SCR_KEY_F19,
+  SCR_KEY_F20,
+  SCR_KEY_F21,
+  SCR_KEY_F22,
+  SCR_KEY_F23,
+  SCR_KEY_F24,
 } ScreenKey;
 
 /* Routines which apply to all screens. */
