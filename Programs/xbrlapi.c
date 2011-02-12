@@ -70,6 +70,7 @@
 static char *auth;
 static char *host;
 static char *xDisplay;
+static int quiet;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
@@ -91,6 +92,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("display"),
     .setting.string = &xDisplay,
     .description = strtext("X display to connect to")
+  },
+
+  { .letter = 'q',
+    .word = "quiet",
+    .setting.flag = &quiet,
+    .description = strtext("Do not write any text to the braille device")
   },
 END_OPTION_TABLE
 
@@ -451,10 +458,12 @@ static void setFocus(Window win) {
   curWindow=win;
   api_setFocus((uint32_t)win);
 
-  if (!(window=window_of_Window(win))) {
-    fprintf(stderr,gettext("didn't grab window %#010lx but got focus\n"),win);
-    api_setName("unknown");
-  } else setName(window);
+  if (!quiet) {
+    if (!(window=window_of_Window(win))) {
+      fprintf(stderr,gettext("didn't grab window %#010lx but got focus\n"),win);
+      api_setName("unknown");
+    } else setName(window);
+  }
 }
 
 #ifdef CAN_SIMULATE_KEY_PRESSES
