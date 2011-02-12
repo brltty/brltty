@@ -18,6 +18,10 @@
 
 title Seika
 
+note The round keys to the left/right of the braille cells are named K1 and K8.
+note The left/right ends of the left rocker are named K2 and K3.
+note The long keys to the left/right of the center are named K4 and K5.
+note The left/right ends of the right rocker are named K6 and K7.
 
 ####################
 # Default Bindings #
