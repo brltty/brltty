@@ -436,7 +436,7 @@ cdef class Connection:
 	# by position. New code should not use it since the plan is to remove
 	# it once it's no longer being used. New code should supply attributes
 	# by specifying the remaining parameters, as needed, by name.
-	def write(self, WriteStruct writeArguments = None,
+	def write(self, WriteStruct writeArguments or None = None,
 			displayNumber = None,
 			regionBegin = None,
 			regionSize = None,
