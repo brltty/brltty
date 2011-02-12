@@ -267,8 +267,8 @@ LangString shortcut_inslibusb $(LANG_SIMPCHINESE) "Install LibUSB-win32 driver"
 
 ;Chinese Traditional
 LangString msg_WelcomePageTitle ${LANG_TRADCHINESE} "安裝 ${PRODUCT}, 版本 ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 篩選器？$\r$\n（有安裝原廠 USB 驅動程式才有用。如果是 64, Vista, 7 位元 windows 請別安裝）"
-LangString msg_inslibusb32 ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 驅動程式？\r$\n（沒有安裝原廠 USB 驅動程式才有用）"
+LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 篩選器？$\r$\n（有安裝原廠 USB 驅動程式才需要。如果是 64 位元 Windows, 或 Vista, 或 win7, 請別安裝）"
+LangString msg_inslibusb32 ${LANG_TRADCHINESE} "是否要安裝 LibUSB-win32 驅動程式？\r$\n（沒有安裝原廠 USB 驅動程式才需要）"
 
 LangString shortcut_brlttycnf $(LANG_TRADCHINESE) "設定 BRLTTY"
 LangString shortcut_brlttydebug $(LANG_TRADCHINESE) "以偵錯模式執行 BRLTTY"
