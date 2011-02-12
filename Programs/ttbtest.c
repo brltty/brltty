@@ -839,7 +839,7 @@ static int
 updateCharacterDescription (EditTableData *etd) {
   int ok = 0;
 
-  wchar_t character;
+  wchar_t character = UNICODE_REPLACEMENT_CHARACTER;
   int gotCharacter = getCharacter(etd, &character);
 
   size_t length;
