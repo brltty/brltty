@@ -618,10 +618,11 @@ install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
 
-install-documents: install-document-directory
+install-documents: install-document-directory ktbtest$X $(BRAILLE_DRIVERS)
 	$(INSTALL_DATA) $(SRC_TOP)README $(INSTALL_DOCUMENT_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/README.* $(INSTALL_DOCUMENT_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/brltty.conf $(INSTALL_DOCUMENT_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty.conf $(INSTALL_DOCUMENT_DIRECTORY)
+	$(SRC_TOP)mkdocktb -i $(SRC_TOP) -o $(INSTALL_DOCUMENT_DIRECTORY)/KeyTables
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
