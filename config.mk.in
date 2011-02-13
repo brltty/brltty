@@ -130,6 +130,11 @@ includedir = @includedir@
 oldincludedir = @oldincludedir@
 infodir = @infodir@
 mandir = @mandir@
+docdir = @docdir@
+htmldir = @htmldir@
+dvidir = @dvidir@
+pdfdir = @pdfdir@
+psdir = @psdir@
 
 PROGRAM_DIRECTORY = @program_directory@
 DRIVERS_DIRECTORY = @drivers_directory@

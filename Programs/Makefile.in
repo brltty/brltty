@@ -585,7 +585,7 @@ check-speech: brltty speech-drivers
 
 ###############################################################################
 
-install:: install-programs install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-manpages install-documents $(INSTALL_API)
 
 install-programs: brltty$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -617,6 +617,11 @@ install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-
 
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
+
+install-documents: install-document-directory
+	$(INSTALL_DATA) $(SRC_TOP)README $(INSTALL_DOCUMENT_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/README.* $(INSTALL_DOCUMENT_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/brltty.conf $(INSTALL_DOCUMENT_DIRECTORY)
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
@@ -654,7 +659,7 @@ install-api-key:
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-manpages uninstall-headers uninstall-api-bindings
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
@@ -690,6 +695,9 @@ uninstall-api-libraries-windows:
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
+
+uninstall-documents:
+	-rm -r -f $(INSTALL_DOCUMENT_DIRECTORY)
 
 uninstall-headers:
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
