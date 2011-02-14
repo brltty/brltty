@@ -202,6 +202,7 @@ always between 23-2345
 word bet =
 always beyond 23-13456
 word bey =
+sufword blake = Blakeney
 word ble 3456 amia- ble, but not amia- bleness
 midendword ble 3456
 midendword bleau 12-123-2-136 tableau
@@ -241,6 +242,7 @@ sufword comin' 36-24-1345-3 comin's and goin's; I'm--comin' home
 begword comingl 14-135-134-346-123 comingle
 sufword common 36-134-135-1345 commonest
 begword con 25
+sufword conan =
 sufword conceive 25-14-1236
 word concv =
 word concvd =
@@ -250,11 +252,14 @@ word concvst =
 word concvth =
 sufword conceiving 25-14-1236-1245
 word concvg =
+word conch 14-135-1345-16
+word conches 14-135-1345-16-15-234
 sufword cone 14-5-135
 word coned 14-135-1345-1246
 sufword conelrad =
 sufword coney =
 word conies =
+sufword conk =
 word cons 14-135-1345-234
 sufword conundrum = 
 word cony =
@@ -321,6 +326,7 @@ begword denu = denunciation
 begword dera = derail
 begword deri 145-15-1235-24
 begword dero = derogatory
+sufword dew = Dewhurst
 begword dingh 145-35-126 dinghy
 begword dinu 145-24-1345-136
 begword dis 256
@@ -328,6 +334,7 @@ word disc =
 word discs =
 sufword dish 145-24-146
 begword disha 256-125-1 dishabile
+begword disharmon 256-125-345-134-135-1345 disharmony
 begword dishear 256-125-15-345 disheartened
 begword disho 256-125-135 dishonor
 begword dishone 256-125-5-135 dishonest
@@ -392,8 +399,12 @@ begword era =
 word eras 12456-1-234
 begword erec = erect 
 begword ero 15-1235-135
+begword erog 12456-135-1245 erogenous
+word eros 12456-135-234 Down Eros, up Mars!
+sufword erotic 12456-135-2345-24-14
 midendword eroom = storeroom
 begword eru = erupt
+begword erudi 12456-136-145-24 erudite
 midendword onesque = Runyonesques
 always ethole 15-2345-125-135-123-15 bullethole
 always ever 5-15
@@ -575,6 +586,7 @@ midword menth 134-26-1456 Blumenthal
 always mention 134-26-56-1345
 sufword messagerie =
 always mideast 134-24-145-15-1-34
+sufword milliner 134-24-123-123-35-12456
 word milling 134-24-123-123-346
 begword mishand 134-24-234-125-12346 mishandled
 always mishap =
@@ -719,6 +731,7 @@ word phoneme =
 word phonemes =
 word phoney =
 begword phonemi = phonemic
+sufword picoult 1234-24-14-1256-123-2345 Jodi Picoult, an author
 begword pinea 1234-35-15-1 pineapple
 word pineal 1234-35-2-123
 sufword pipedream 1234-24-1234-15-145-1235-2-134
@@ -778,7 +791,9 @@ begword reass 1235-15-1-234-234
 begword reatt = reattach
 begword reau = reauthorization
 begword reaw = reawaken
+begword redat = redated
 begword rede =
+begword redey 1235-1246-15-13456 redeyed
 begword redi =
 word redo =
 begword redol 1235-1246-135-123 redolent
@@ -786,6 +801,7 @@ word redone 1235-15-145-5-135
 begword redou 1235-15-145-1256 redouble redoubt 
 always redu = reduce redundant reduplicate
 always redul 1235-1246-136-123 incredulous
+begword redy = redyed
 always receive 1235-14-1236
 contraction rcv
 contraction rcvd
@@ -797,6 +813,9 @@ always receiving 1235-14-1236-1245
 contraction rcvg
 begword redis = redistribute
 begword redr = redress
+begword redro 1235-1246-1235-135 redroot redrock
+sufword redrove =
+begword redru 1235-1246-1235-136 redruthite
 always rejoice 1235-245-14
 contraction rjc
 contraction rjcd
@@ -983,6 +1002,7 @@ begword vaing 1236-1-35-1245 vainglory
 word vandyke =
 word very 1236
 begword vice = viceroy
+sufword vicenza 1236-24-14-26-1356-1
 sufword video = videofile
 
 # the letter w
