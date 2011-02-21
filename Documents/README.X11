@@ -1,0 +1,63 @@
+Brltty provides some support for the X11 graphical environment.
+
+Braille Input from braille device support
+-----------------------------------------
+
+Some braille devices have an integrated braille keyboard.  The brltty daemon
+alone can not properly simulate keypresses for the X11 server, because it
+does not know which keyboard layout the latter uses.  To get proper keyboard
+simulation, xbrlapi should be started in the background during X session
+startup. By default, xbrlapi also prints the current window's title on the
+braille device. To avoid this (since it could interfere with the output from
+screen readers like Orca), give the -q option to xbrlapi.
+
+Braille Input from PC keyboard support
+--------------------------------------
+
+The PC keyboard itself can be used in X11 as a braille keyboard. This can be
+enabled by using the "brai" layout, for instance, the following
+
+setxkbmap -layout "us,brai" -option "grp:shift_caps_toggle,grp_led:scroll"
+
+enables both US and braille keyboard layouts to be enabled in X11 (in two
+different XKB groups), and Shift+CapsLock can be used to switch between both
+(i.e. switch between the two XKB groups). The scroll LED will be lit while being
+in braille mode, for sighted people to notice why they get strange output if
+they switch groups by accident. Other shortcuts and LEDs can be used, see the
+XKB documentation. The default keyboard mapping for braille dots is "asdfjkl,",
+but other layouts are available, see the variants in XKB.
+
+The setxkbmap command above enables it just for the current session.  For
+permanent configuration, the two groups have to be configured properly in the
+system.  On Debian for instance, this can be achieved by setting the following
+in /etc/default/keyboard:
+
+XKBLAYOUT="us,brai"
+XKBOPTIONS="grp:shift_caps_toggle,grp_led:scroll"
+
+By default, the result will be unicode braille patterns, because X11 does not
+know which braille table it should use. To tell X11 the conversion that should
+be performed, use the ttbtest tool to convert your brltty table into an XCompose
+table, for instance:
+
+ttbtest -i ttb -o XCompose en_US.ttb /tmp/my.XCompose
+
+The XCompose table can then be enabled by:
+
+cat /tmp/my.XCompose >> ~/.XCompose
+
+Screen reading
+--------------
+
+Brltty is not meant to be able to read a whole graphical environment, as it
+does not have the notion of menus, buttons, etc.  The orca screen reader should
+be used instead. Brltty however has a driver to at least review the textual
+elements: edit boxes and terminals.  This is particularly interesting for
+reading terminals, since that is what brltty is good at. This can be achieved by
+running a second brltty daemon during X11 session startup:
+
+brltty -b ba -x as
+
+This second daemon will connect to the first one throught BrlAPI (thanks to the
+"ba" braille driver), and read the screen via AtSpi (thanks to the "as" screen
+driver). An "a2" driver is also provided for AtSpi2 support.
