@@ -29,7 +29,7 @@ extern "C" {
 #define BITMASK_SHIFT(bit,size) ((bit) % (size))
 #define BITMASK_ELEMENT_COUNT(bits,size) (BITMASK_INDEX((bits)-1, (size)) + 1)
 #define BITMASK_ELEMENT(name,bit) ((name)[BITMASK_INDEX((bit), BITMASK_ELEMENT_SIZE((name)[0]))])
-#define BITMASK_BIT(name,bit) (1 << BITMASK_SHIFT((bit), BITMASK_ELEMENT_SIZE((name)[0])))
+#define BITMASK_BIT(name,bit) (UINTMAX_C(1) << BITMASK_SHIFT((bit), BITMASK_ELEMENT_SIZE((name)[0])))
 
 /* These macros are for public use. */
 #define BITMASK(name,bits,type) unsigned type name[BITMASK_ELEMENT_COUNT((bits), BITMASK_ELEMENT_SIZE(type))]
