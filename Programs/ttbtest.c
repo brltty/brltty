@@ -533,7 +533,7 @@ writeCharacter_XCompose (FILE *file, wchar_t character, unsigned char dots, cons
         break;
 
       default:
-        if (fprintf(file, "%lc", character) == EOF) return 0;
+        if (fprintf(file, "%lc", (wint_t)character) == EOF) return 0;
         break;
     }
 
