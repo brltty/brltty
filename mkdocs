@@ -1,0 +1,84 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "${0%/*}/prologue.sh"
+
+executeCommand() {
+   "${@}"
+}
+
+updateFile() {
+   executeCommand cp -a -- "${1}/${2}" "${targetRoot}/${3}"
+}
+
+updateDirectory() {
+   fromRoot="${1}"
+   fromDirectory="${2}"
+   toDirectory="${3}"
+   shift 3
+
+   executeCommand mkdir -p -- "${targetRoot}/${toDirectory}"
+   set -- `cd "${fromRoot}/${fromDirectory}" && echo ${*}`
+
+   for file
+   do
+      updateFile "${fromRoot}" "${fromDirectory}/${file}" "${toDirectory}/"
+   done
+}
+
+[ "${#}" -gt 0 ] || syntaxError "missing target root"
+targetRoot="${1}"
+shift
+
+[ "${#}" -gt 0 ] || syntaxError "missing source root"
+sourceRoot="${1}"
+shift
+
+[ "${#}" -gt 0 ] || syntaxError "missing build root"
+buildRoot="${1}"
+shift
+
+[ "${#}" -gt 0 ] || syntaxError "missing documents subdirectory"
+documentsSubdirectory="${1}"
+shift
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+
+verifyOutputDirectory "${targetRoot}"
+verifyInputDirectory "${sourceRoot}"
+verifyInputDirectory "${buildRoot}"
+
+executeCommand "${sourceRoot}/mkdocktb" -b "${buildRoot}" -i "${sourceRoot}" -o "${targetRoot}/KeyTables"
+
+for manual in `cd "${sourceRoot}/${documentsSubdirectory}" && echo Manual-*/*`
+do
+   updateDirectory "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.sgml"
+   updateDirectory "${buildRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.txt" "*.html"
+done
+
+for manual in BrlAPIref
+do
+   updateDirectory "${buildRoot}" "${documentsSubdirectory}/${manual}/html" "${manual}" "*.html"
+done
+
+updateDirectory "${sourceRoot}" "." "." "README"
+updateDirectory "${sourceRoot}" "${documentsSubdirectory}" "." "ChangeLog" "CONTRIBUTORS" "README.*" "TODO"
+updateDirectory "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf"
+
+exit 0

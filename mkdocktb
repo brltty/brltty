@@ -87,7 +87,7 @@ beginLayoutEntry() {
    layout="${layout%.*}"
    layout="${layout##*-}"
 
-   outputFile="${outputDirectory}/${prefix}-${layout}.${plainTextExtension}"
+   outputFile="${outputRoot}/${prefix}-${layout}.${plainTextExtension}"
 }
 
 endLayoutEntry() {
@@ -123,20 +123,22 @@ endLayoutEntry() {
 }
 
 translateKeyTable() {
-   local program="${inputDirectory}/Programs/ktbtest"
+   local program="${buildRoot}/Programs/ktbtest"
    [ -x "${program}" ] || make -C "${program%/*}" -s "${program##*/}"
-   "${program}" -D"../lib" -T"../${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
+   "${program}" -D"${buildRoot}/lib" -T"${inputRoot}/${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
 }
 
-inputDirectory="$(dirname "${0}")"
-outputDirectory="doc-ktb"
+inputRoot="$(dirname "${0}")"
+outputRoot="doc-ktb"
+buildRoot="${inputRoot}"
 
-while getopts ":i:o:" option
+while getopts ":b:i:o:" option
 do
    case "${option}"
    in
-      i) inputDirectory="${OPTARG}";;
-      o) outputDirectory="${OPTARG}";;
+      b) buildRoot="${OPTARG}";;
+      i) inputRoot="${OPTARG}";;
+      o) outputRoot="${OPTARG}";;
       :) syntaxError "missing value: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -146,14 +148,14 @@ done
 shift $((OPTIND - 1))
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-verifyInputDirectory "${inputDirectory}"
-verifyOutputDirectory "${outputDirectory}"
+verifyInputDirectory "${inputRoot}"
+verifyOutputDirectory "${outputRoot}"
 
 driversSubdirectory="Drivers/Braille"
-driversDirectory="${inputDirectory}/${driversSubdirectory}"
+driversDirectory="${inputRoot}/${driversSubdirectory}"
 
 tablesSubdirectory="Tables"
-tablesDirectory="${inputDirectory}/${tablesSubdirectory}"
+tablesDirectory="${inputRoot}/${tablesSubdirectory}"
 
 braillePrefix="brl"
 keyboardPrefix="kbd"
@@ -191,7 +193,7 @@ do
    header="${driverName}"
    inputFile="${driverDirectory}/README"
    [ ! -f "${inputFile}" ] || {
-      outputFile="${outputDirectory}/${braillePrefix}-${driverCode}.${plainTextExtension}"
+      outputFile="${outputRoot}/${braillePrefix}-${driverCode}.${plainTextExtension}"
       cp -a -- "${inputFile}" "${outputFile}"
       header="<A HREF=\"${outputFile##*/}\">${header}</A>"
    }
@@ -224,5 +226,5 @@ addLine "<HR>"
 endSection
 
 endSection
-endDocument "${outputDirectory}/index.${hypertextExtension}"
+endDocument "${outputRoot}/index.${hypertextExtension}"
 exit 0
