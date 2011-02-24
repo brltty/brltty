@@ -23,62 +23,81 @@ executeCommand() {
    "${@}"
 }
 
-updateFile() {
-   executeCommand cp -a -- "${1}/${2}" "${targetRoot}/${3}"
-}
-
-updateDirectory() {
+updateFiles() {
    fromRoot="${1}"
    fromDirectory="${2}"
    toDirectory="${3}"
    shift 3
 
-   executeCommand mkdir -p -- "${targetRoot}/${toDirectory}"
+   executeCommand mkdir -p -- "${outputRoot}/${toDirectory}"
    set -- `cd "${fromRoot}/${fromDirectory}" && echo ${*}`
 
    for file
    do
-      updateFile "${fromRoot}" "${fromDirectory}/${file}" "${toDirectory}/"
+      executeCommand cp -a -- "${fromRoot}/${fromDirectory}/${file}" "${outputRoot}/${toDirectory}/"
    done
 }
 
-[ "${#}" -gt 0 ] || syntaxError "missing target root"
-targetRoot="${1}"
-shift
+outputRoot=""
+sourceRoot=""
+buildRoot=""
+documentsSubdirectory=""
+tablesSubdirectory=""
 
-[ "${#}" -gt 0 ] || syntaxError "missing source root"
-sourceRoot="${1}"
-shift
-
-[ "${#}" -gt 0 ] || syntaxError "missing build root"
-buildRoot="${1}"
-shift
-
-[ "${#}" -gt 0 ] || syntaxError "missing documents subdirectory"
-documentsSubdirectory="${1}"
-shift
+while getopts ":o:s:b:d:t:" option
+do
+   case "${option}"
+   in
+      o) outputRoot="${OPTARG}";;
+      s) sourceRoot="${OPTARG}";;
+      b) buildRoot="${OPTARG}";;
+      d) documentsSubdirectory="${OPTARG}";;
+      t) tablesSubdirectory="${OPTARG}";;
+      :) syntaxError "missing value: -${OPTARG}";;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+shift `expr "${OPTIND}" - 1`
 
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-verifyOutputDirectory "${targetRoot}"
+[ -n "${outputRoot}" ] || outputRoot="doc"
+verifyOutputDirectory "${outputRoot}"
+
+[ -n "${sourceRoot}" ] || sourceRoot=`dirname "${0}"`
 verifyInputDirectory "${sourceRoot}"
-verifyInputDirectory "${buildRoot}"
+sourceRoot=`resolveDirectory "${sourceRoot}"`
 
-executeCommand "${sourceRoot}/mkdocktb" -b "${buildRoot}" -i "${sourceRoot}" -o "${targetRoot}/KeyTables"
+if [ -n "${buildRoot}" ]
+then
+   verifyInputDirectory "${buildRoot}"
+   buildRoot=`resolveDirectory "${buildRoot}"`
+else
+   buildRoot="${sourceRoot}"
+fi
 
-for manual in `cd "${sourceRoot}/${documentsSubdirectory}" && echo Manual-*/*`
-do
-   updateDirectory "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.sgml"
-   updateDirectory "${buildRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.txt" "*.html"
-done
+updateFiles "${sourceRoot}" "." "." "README"
 
-for manual in BrlAPIref
-do
-   updateDirectory "${buildRoot}" "${documentsSubdirectory}/${manual}/html" "${manual}" "*.html"
-done
+[ -z "${documentsSubdirectory}" ] || {
+   updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "ChangeLog" "CONTRIBUTORS" "README.*" "TODO"
+   updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf"
 
-updateDirectory "${sourceRoot}" "." "." "README"
-updateDirectory "${sourceRoot}" "${documentsSubdirectory}" "." "ChangeLog" "CONTRIBUTORS" "README.*" "TODO"
-updateDirectory "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf"
+   for manual in `cd "${sourceRoot}/${documentsSubdirectory}" && echo Manual-*/*`
+   do
+      updateFiles "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.sgml"
+      updateFiles "${buildRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.txt" "*.html"
+   done
+
+   for manual in BrlAPIref
+   do
+      updateFiles "${buildRoot}" "${documentsSubdirectory}/${manual}/html" "${manual}" "*.html"
+   done
+}
+
+[ -z "${tablesSubdirectory}" ] || {
+   updateFiles "${sourceRoot}" "${tablesSubdirectory}" "." "README-*"
+   executeCommand "${sourceRoot}/mkdocktb" -o "${outputRoot}/KeyTables" -s "${sourceRoot}" -b "${buildRoot}"
+}
 
 exit 0

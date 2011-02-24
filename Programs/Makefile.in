@@ -620,7 +620,7 @@ install-manpages: install-man1-directory
 
 install-documents: install-document-directory ktbtest$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
-	$(SRC_TOP)mkdocs $(INSTALL_DOCUMENT_DIRECTORY) $(SRC_TOP) $(BLD_TOP) $(DOC_DIR)
+	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 

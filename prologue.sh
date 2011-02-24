@@ -18,6 +18,7 @@
 
 initialDirectory=`pwd`
 programName=`basename "${0}"`
+programDirectory=`dirname "${0}"`
 
 programMessage() {
    echo >&2 "${programName}: ${1}"
@@ -39,24 +40,28 @@ verifyProgram() {
    [ -x "${1}" ] || semanticError "not executable: ${1}"
 }
 
-verifyDirectory() {
+testDirectory() {
    [ -e "${1}" ] || return 1
    [ -d "${1}" ] || semanticError "not a directory: ${1}"
    return 0
 }
 
 verifyInputDirectory() {
-   verifyDirectory "${1}" || semanticError "directory not found: ${1}"
+   testDirectory "${1}" || semanticError "directory not found: ${1}"
 }
 
 verifyOutputDirectory() {
-   if verifyDirectory "${1}"
+   if testDirectory "${1}"
    then
       [ -w "${1}" ] || semanticError "directory not writable: ${1}"
       rm -f -r -- "${1}/"*
    else
       mkdir -p "${1}"
    fi
+}
+
+resolveDirectory() {
+   (cd "${1}" && pwd)
 }
 
 needTemporaryDirectory() {

@@ -1,4 +1,5 @@
 #!/bin/bash -p
+echo $*
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -125,20 +126,20 @@ endLayoutEntry() {
 translateKeyTable() {
    local program="${buildRoot}/Programs/ktbtest"
    [ -x "${program}" ] || make -C "${program%/*}" -s "${program##*/}"
-   "${program}" -D"${buildRoot}/lib" -T"${inputRoot}/${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
+   "${program}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" -l "${inputFile##*/}" >"${outputFile}"
 }
 
-inputRoot="$(dirname "${0}")"
+sourceRoot="$(dirname "${0}")"
 outputRoot="doc-ktb"
-buildRoot="${inputRoot}"
+buildRoot="${sourceRoot}"
 
-while getopts ":b:i:o:" option
+while getopts ":o:s:b:" option
 do
    case "${option}"
    in
-      b) buildRoot="${OPTARG}";;
-      i) inputRoot="${OPTARG}";;
       o) outputRoot="${OPTARG}";;
+      s) sourceRoot="${OPTARG}";;
+      b) buildRoot="${OPTARG}";;
       :) syntaxError "missing value: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -148,14 +149,14 @@ done
 shift $((OPTIND - 1))
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-verifyInputDirectory "${inputRoot}"
+verifyInputDirectory "${sourceRoot}"
 verifyOutputDirectory "${outputRoot}"
 
 driversSubdirectory="Drivers/Braille"
-driversDirectory="${inputRoot}/${driversSubdirectory}"
+driversDirectory="${sourceRoot}/${driversSubdirectory}"
 
 tablesSubdirectory="Tables"
-tablesDirectory="${inputRoot}/${tablesSubdirectory}"
+tablesDirectory="${sourceRoot}/${tablesSubdirectory}"
 
 braillePrefix="brl"
 keyboardPrefix="kbd"
