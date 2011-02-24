@@ -211,7 +211,7 @@ typedef enum {
 static int cols,lines;
 static int input;
 static char *model = "simple";
-static const char *fontname = "-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-unifont-*-r-*-*-17-*-*-*-*-*-iso10646-1";
+static const char *fontname = "-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-unifont-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-*-*-*-*-*-*-*-*-*-iso10646-1,-*-fixed-*-*-*-*-*-*-*-*-*-*-iso8859-1";
 static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
 static char **xtArgv = xtDefArgv;
