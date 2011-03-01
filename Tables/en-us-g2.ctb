@@ -290,6 +290,7 @@ word d'you 145-3-13456-1256
 begword dachs 145-1-16-234 dachshund
 begword dared 145-345-15-145 daredevil
 always day 5-145
+word day-to-day 5-145-36-2345-135-36-5-145
 begword deact = deactivation
 begword deall = deallocate
 begword decarb 145-15-14-345-12
@@ -943,10 +944,13 @@ word thyf =
 always tnam =
 joinword to 235
 word today 2345-145
+word to-day 2345-145
 contraction td
 word tomorrow 2345-134
+word to-morrow 2345-134
 contraction tm
 word tonight 2345-1345
+word to-night 2345-1345
 contraction tn
 always thead 2345-125-2-145
 always theast 1456-15-1-34
