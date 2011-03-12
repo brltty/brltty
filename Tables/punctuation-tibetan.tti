@@ -16,13 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Tibetan
+# This BRLTTY text subtable defines the standard braille representations
+# for Tibetan punctuation marks.
+#
+# Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
 
-include letters-tibetan.tti
-include punctuation-tibetan.tti
+char \u0F0B	(  3     )  # ⠄ ་ [TIBETAN MARK INTERSYLLABIC TSHEG]
 
-include letters-latin-dot8.tti
-include numbers-nemeth.tti
-include punctuation-alternate.tti
-
-include common.tti
