@@ -321,6 +321,7 @@ midendword ddamn =
 midendword dday 145-5-145 midday
 begword dedic 145-1246-24-14 dedicated
 always dedu = nondeductible
+sufword denational 145-15-1345-6-1345-1-123 denationalization
 begword deno = denote
 always denom =
 begword denou 145-15-1345-1256 denounce
@@ -829,6 +830,7 @@ word rjcth =
 always rejoicing 1235-245-14-1245
 contraction rjcg
 sufword renaming 1235-15-1345-1-134-346 renamings
+begword renational 1235-15-1345-6-1345-1-123 renationalise renationalization
 begword rene = renegotiate
 begword renegad 1235-26-15-1245-1-145 renegade
 begword reni = renig
@@ -896,6 +898,7 @@ always somer 234-135-134-12456 somersault
 always someter 234-135-134-15-2345-12456 gasometer 
 always somever 234-135-134-5-15
 sufword sparerib 234-1234-345-15-1235-24-12
+sufword speed 234-1234-15-1246 speedometer
 always spirit 456-234
 begword spreadeagl 234-1234-1235-2-145-15-1-1245-123 spreadeagled
 sufword squall = squally
