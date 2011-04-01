@@ -18,15 +18,17 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
+set -e
 
-[ "${#}" -eq 0 ] && syntaxError "missing source root."
+[ "${#}" -gt 0 ] || syntaxError "missing source root"
 sourceRoot="${1}"
 shift
 
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-set -e
-revision="`svnversion -n "${sourceRoot}"`"
+revision="`svnversion -n "${sourceRoot}" 2>/dev/null`" || semanticError "build revision cannot be determined - subversion not installed"
 [ "${revision}" != "exported" ] || revision=""
-[ -z "${revision}" ] || echo "${revision}"
+[ -n "${revision}" ] || semanticError "build revision not known"
+
+echo "${revision}"
 exit 0
