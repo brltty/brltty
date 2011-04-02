@@ -26,9 +26,10 @@ shift
 
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-revision="`svnversion -n "${sourceRoot}" 2>/dev/null`" || semanticError "build revision cannot be determined - subversion not installed"
+revision="`svnversion -n "${sourceRoot}" 2>/dev/null`" || revision=""
 [ "${revision}" != "exported" ] || revision=""
-[ -n "${revision}" ] || semanticError "build revision not known"
+[ -n "${revision}" ] || read <"${sourceRoot}/REVISION" x revision x
 
+[ -n "${revision}" ] || semanticError "build revision not known"
 echo "${revision}"
 exit 0
