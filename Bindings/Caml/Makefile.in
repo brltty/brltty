@@ -54,7 +54,7 @@ OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
 all : $(OCAML_FILES)
 
-$(OCAML_CLIBS) : brlapi_stubs.$O
+$(OCAML_CLIBS) : brlapi_stubs.$O brlapi
 	$(OCAMLMKLIB) $(API_LDFLAGS) -oc $(OCAML_LIB)_stubs brlapi_stubs.$O
 
 $(OCAML_BCLIB) : $(OCAML_CLIBS) brlapi.cmo
@@ -99,10 +99,14 @@ install-without-findlib:
 	[ ! -f "$(OCAML_PKGDIR)/$(OCAML_STUB)" ] || mv $(OCAML_PKGDIR)/$(OCAML_STUB) $(OCAML_STUBDIR)
 	echo >$(OCAML_STUBDIR)/$(OCAML_OWNER) $(OCAML_LIB)
 
+OCAML_LDCONF = $(OCAML_DESTDIR)/ld.conf
 install-with-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
+	[ ! -d "$(OCAML_DESTDIR)/$(OCAML_LIB)" ] || \
 	$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
-	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" -ldconf "$(OCAML_DESTDIR)/ld.conf" $(OCAML_LIB) $(OCAML_FILES) 
+	set -- -destdir "$(OCAML_DESTDIR)"; \
+	[ -f "$(OCAML_LDCONF)" ] && set -- "$${@}" -ldconf "$(OCAML_LDCONF)" || set -- "$${@}" -ldconf ignore; \
+	$(OCAMLFIND) install "$${@}" $(OCAML_LIB) $(OCAML_FILES) 
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
 
