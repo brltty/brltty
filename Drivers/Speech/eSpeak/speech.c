@@ -41,6 +41,11 @@ typedef enum {
 
 #include <espeak/speak_lib.h>
 
+#if ESPEAK_API_REVISION < 6
+#define espeakRATE_MINIMUM	80
+#define espeakRATE_MAXIMUM	450
+#endif
+
 static int IndexPos;
 
 static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
@@ -144,7 +149,8 @@ spk_isSpeaking(SpeechSynthesizer *spk)
 static void
 spk_rate(SpeechSynthesizer *spk, unsigned char setting)
 {
-	int rate = getIntegerSpeechRate(setting, (390-80)/2) + 80;
+	int h_range = (espeakRATE_MAXIMUM - espeakRATE_MINIMUM)/2;
+	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
 	espeak_SetParameter(espeakRATE, rate, 0);
 }
 
