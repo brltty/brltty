@@ -1455,7 +1455,9 @@ BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
 ])
 
 BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
-   BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS)])
+   AC_CHECK_HEADERS([X11/keysym.h], [dnl
+      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS)])
+   ])
 ])
 
 BRLTTY_ARG_DRIVER([screen], [Screen])
