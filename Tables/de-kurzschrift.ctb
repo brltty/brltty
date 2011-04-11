@@ -55,6 +55,7 @@ begmidword be 23
 midendword ck 46
 midword eh 2356
 always ein 1246
+always lateinisch 123-1-2345-1246-1345-24-156
 always el 13456
 always em 12356
 always en 14
@@ -66,6 +67,9 @@ midendword ig 45
 always in 35
 midendword lich 456
 midendword ll 12345
+always holland 125-135-123-123-235-145 shouldn't use the ll-contraction
+always holländer 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contraction
+always hollaender 125-135-123-123-345-1345-145-12456 shouldn't use the ll-contraction
 midendword mm 1346
 begmidword or 26
 
@@ -263,6 +267,8 @@ begword gesam 12346-234-1-134 shouldn't use the sam-contraction
 always herrschaft 1235-1235-156-1-124-2345 can not use the shaft-contraction
 always hoheit 125-135-125-146-2345 shouldn't use the heit-contraction
 always kuhdung 13-136-125-145-256-1245 shouldn't use the ung-contraction
+always hunger 125-256-1245-12456 shouldn't use the ung-contraction
+always lunge 123-256-12346 shouldn't use the ung-contraction
 prfword maximal = shouldn't use the mal-contraction
 begmidword maximal 134-1-6-1346-24-134-25 shouldn't use the mal-contraction
 always tennis 2345-14-1345-24-234 shouldn't use the nis-contraction
