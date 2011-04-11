@@ -26,6 +26,7 @@ typedef enum {
   HT_MODEL_ModularEvolution64  = 0X36,
   HT_MODEL_ModularEvolution88  = 0X38,
   HT_MODEL_EasyBraille         = 0X44,
+  HT_MODEL_ActiveBraille       = 0X54,
   HT_MODEL_Braillino           = 0X72,
   HT_MODEL_BrailleStar40       = 0X74,
   HT_MODEL_BrailleStar80       = 0X78,

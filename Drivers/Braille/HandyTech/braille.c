@@ -338,6 +338,16 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
+  { .identifier = HT_MODEL_ActiveBraille,
+    .name = "Active Braille",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
+    .interpretByte = interpretKeyByte,
+    .writeCells = writeEvolutionCells,
+    .hasATC = 1
+  }
+  ,
   { /* end of table */
     .name = NULL
   }
