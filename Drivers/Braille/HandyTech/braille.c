@@ -139,6 +139,13 @@ BEGIN_KEY_NAME_TABLES(bs80)
   KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(ab40)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLE(brailleWave)
   KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
@@ -190,6 +197,7 @@ DEFINE_KEY_TABLE(me64)
 DEFINE_KEY_TABLE(me88)
 DEFINE_KEY_TABLE(bs40)
 DEFINE_KEY_TABLE(bs80)
+DEFINE_KEY_TABLE(ab40)
 DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
 DEFINE_KEY_TABLE(bkwm)
@@ -200,6 +208,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(me88),
   &KEY_TABLE_DEFINITION(bs40),
   &KEY_TABLE_DEFINITION(bs80),
+  &KEY_TABLE_DEFINITION(ab40),
   &KEY_TABLE_DEFINITION(wave),
   &KEY_TABLE_DEFINITION(easy),
   &KEY_TABLE_DEFINITION(bkwm),
@@ -342,7 +351,7 @@ static const ModelEntry modelTable[] = {
     .name = "Active Braille",
     .textCells = 40,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ab40),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
@@ -845,7 +854,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           } else if (offset == 4) {
             if ((packet[1] == HT_MODEL_ActiveBraille) && 
                 (packet[3] == HT_EXTPKT_Confirmation) &&
-                (byte == HT_PKT_NAK))
+                (byte == 0X15))
               length += 1;
           }
           break;
@@ -1000,8 +1009,17 @@ setAtcMode (BrailleDisplay *brl, unsigned char value) {
 
 static int
 setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
-  const unsigned char data[] = {value};
-  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
+  HT_ExtendedPacketType type = HT_EXTPKT_SetAtcSensitivity;
+
+  if (model->identifier == HT_MODEL_ActiveBraille) {
+    type = HT_EXTPKT_SetAtcSensitivity2;
+    value = MIN(value, 6);
+  }
+
+  {
+    const unsigned char data[] = {value};
+    return writeExtendedPacket(brl, type, data, sizeof(data));
+  }
 }
 
 static int
@@ -1354,6 +1372,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     {
                       int command = touchAnalyzePressure(brl, pressure);
                       if (command != EOF) return command;
+                    }
+
+                    continue;
+                  }
+
+                  case HT_EXTPKT_ReadingPosition: {
+                    uint8_t cell = bytes[0];
+
+                    if (cell == 0XFF) {
+                      logMessage(LOG_DEBUG, "No reading position");
+                    } else {
+                      logMessage(LOG_DEBUG, "Reading position: %d", cell);
                     }
 
                     continue;
