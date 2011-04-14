@@ -840,7 +840,14 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
     } else {
       switch (packet[0]) {
         case HT_PKT_Extended:
-          if (offset == 2) length += byte;
+          if (offset == 2) {
+            length += byte;
+          } else if (offset == 4) {
+            if ((packet[1] == HT_MODEL_ActiveBraille) && 
+                (packet[3] == HT_EXTPKT_Confirmation) &&
+                (byte == HT_PKT_NAK))
+              length += 1;
+          }
           break;
       }
     }
