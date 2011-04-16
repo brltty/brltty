@@ -31,6 +31,7 @@
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_FIRMNESS
 #define BRL_HAVE_SENSITIVITY
 #include "brl_driver.h"
 #include "touch.h"
@@ -225,12 +226,21 @@ static CellWriter writeStatusAndTextCells;
 static CellWriter writeBookwormCells;
 static CellWriter writeEvolutionCells;
 
+typedef void (FirmnessSetter) (BrailleDisplay *brl, BrailleFirmness setting);
+static FirmnessSetter setFirmness;
+
+typedef void (SensitivitySetter) (BrailleDisplay *brl, BrailleSensitivity setting);
+static SensitivitySetter setSensitivityEvolution;
+static SensitivitySetter setSensitivityActiveBraille;
+
 typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
+  FirmnessSetter *setFirmness;
+  SensitivitySetter *setSensitivity;
 
   const unsigned char *sessionEndAddress;
 
@@ -279,6 +289,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me64),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
+    .setSensitivity = setSensitivityEvolution,
     .hasATC = 1
   }
   ,
@@ -289,6 +300,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me88),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
+    .setSensitivity = setSensitivityEvolution,
     .hasATC = 1
   }
   ,
@@ -354,6 +366,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(ab40),
     .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
+    .setFirmness = setFirmness,
+    .setSensitivity = setSensitivityActiveBraille,
     .hasATC = 1
   }
   ,
@@ -1007,19 +1021,22 @@ setAtcMode (BrailleDisplay *brl, unsigned char value) {
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcMode, data, sizeof(data));
 }
 
-static int
-setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
-  HT_ExtendedPacketType type = HT_EXTPKT_SetAtcSensitivity;
+static void
+setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  const unsigned char data[] = {setting * 2 / BRL_FIRMNESS_MAXIMUM};
+  writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
+}
 
-  if (model->identifier == HT_MODEL_ActiveBraille) {
-    type = HT_EXTPKT_SetAtcSensitivity2;
-    value = MIN(value, 6);
-  }
+static void
+setSensitivityEvolution (BrailleDisplay *brl, BrailleSensitivity setting) {
+  const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
+}
 
-  {
-    const unsigned char data[] = {value};
-    return writeExtendedPacket(brl, type, data, sizeof(data));
-  }
+static void
+setSensitivityActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
+  const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }
 
 static int
@@ -1062,7 +1079,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               if (model->hasATC) {
                 setAtcMode(brl, 1);
-                setAtcSensitivity(brl, 50);
 
                 touchAnalyzeCells(brl, NULL);
                 brl->touchEnabled = 1;
@@ -1454,9 +1470,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 static void
+brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  if (model->setFirmness) model->setFirmness(brl, setting);
+}
+
+static void
 brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  if (model->hasATC) {
-    unsigned char value = 0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM);
-    setAtcSensitivity(brl, value);
-  }
+  if (model->setSensitivity) model->setSensitivity(brl, setting);
 }

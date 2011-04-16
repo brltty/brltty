@@ -56,7 +56,8 @@ typedef enum {
   HT_EXTPKT_SetAtcSensitivity = 0X51,
   HT_EXTPKT_AtcInfo           = 0X52,
   HT_EXTPKT_SetAtcSensitivity2= 0X53,
-  HT_EXTPKT_ReadingPosition   = 0X55
+  HT_EXTPKT_ReadingPosition   = 0X55,
+  HT_EXTPKT_SetFirmness       = 0X60
 } HT_ExtendedPacketType;
 
 typedef union {
