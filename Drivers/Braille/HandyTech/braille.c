@@ -218,20 +218,20 @@ END_KEY_TABLE_LIST
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef int (ByteInterpreter) (unsigned char byte);
-static ByteInterpreter interpretKeyByte;
-static ByteInterpreter interpretBookwormByte;
+static ByteInterpreter interpretByte_key;
+static ByteInterpreter interpretByte_Bookworm;
 
 typedef int (CellWriter) (BrailleDisplay *brl);
-static CellWriter writeStatusAndTextCells;
-static CellWriter writeBookwormCells;
-static CellWriter writeEvolutionCells;
+static CellWriter writeCells_statusAndText;
+static CellWriter writeCells_Bookworm;
+static CellWriter writeCells_Evolution;
 
-typedef void (FirmnessSetter) (BrailleDisplay *brl, BrailleFirmness setting);
+typedef int (FirmnessSetter) (BrailleDisplay *brl, BrailleFirmness setting);
 static FirmnessSetter setFirmness;
 
-typedef void (SensitivitySetter) (BrailleDisplay *brl, BrailleSensitivity setting);
-static SensitivitySetter setSensitivityEvolution;
-static SensitivitySetter setSensitivityActiveBraille;
+typedef int (SensitivitySetter) (BrailleDisplay *brl, BrailleSensitivity setting);
+static SensitivitySetter setSensitivity_Evolution;
+static SensitivitySetter setSensitivity_ActiveBraille;
 
 typedef struct {
   const char *name;
@@ -260,8 +260,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 4,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_Modular40,
@@ -269,8 +269,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 4,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_Modular80,
@@ -278,8 +278,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 80,
     .statusCells = 4,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_ModularEvolution64,
@@ -287,9 +287,9 @@ static const ModelEntry modelTable[] = {
     .textCells = 64,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me64),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeEvolutionCells,
-    .setSensitivity = setSensitivityEvolution,
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setSensitivity = setSensitivity_Evolution,
     .hasATC = 1
   }
   ,
@@ -298,9 +298,9 @@ static const ModelEntry modelTable[] = {
     .textCells = 88,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me88),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeEvolutionCells,
-    .setSensitivity = setSensitivityEvolution,
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setSensitivity = setSensitivity_Evolution,
     .hasATC = 1
   }
   ,
@@ -309,8 +309,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(wave),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_Bookworm,
@@ -318,8 +318,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 8,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bkwm),
-    .interpretByte = interpretBookwormByte,
-    .writeCells = writeBookwormCells,
+    .interpretByte = interpretByte_Bookworm,
+    .writeCells = writeCells_Bookworm,
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
   }
   ,
@@ -328,8 +328,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_BrailleStar40,
@@ -337,8 +337,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_BrailleStar80,
@@ -346,8 +346,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 80,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs80),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_EasyBraille,
@@ -355,8 +355,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(easy),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeStatusAndTextCells
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_statusAndText
   }
   ,
   { .identifier = HT_MODEL_ActiveBraille,
@@ -364,10 +364,10 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(ab40),
-    .interpretByte = interpretKeyByte,
-    .writeCells = writeEvolutionCells,
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
     .setFirmness = setFirmness,
-    .setSensitivity = setSensitivityActiveBraille,
+    .setSensitivity = setSensitivity_ActiveBraille,
     .hasATC = 1
   }
   ,
@@ -1021,20 +1021,20 @@ setAtcMode (BrailleDisplay *brl, unsigned char value) {
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcMode, data, sizeof(data));
 }
 
-static void
+static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   const unsigned char data[] = {setting * 2 / BRL_FIRMNESS_MAXIMUM};
-  writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
+  return writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
 }
 
-static void
-setSensitivityEvolution (BrailleDisplay *brl, BrailleSensitivity setting) {
+static int
+setSensitivity_Evolution (BrailleDisplay *brl, BrailleSensitivity setting) {
   const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
 }
 
-static void
-setSensitivityActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
+static int
+setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
   const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }
@@ -1125,7 +1125,7 @@ writeCells (BrailleDisplay *brl) {
 }
 
 static int
-writeStatusAndTextCells (BrailleDisplay *brl) {
+writeCells_statusAndText (BrailleDisplay *brl) {
   unsigned char buffer[1 + model->statusCells + model->textCells];
   unsigned char *byte = buffer;
 
@@ -1137,7 +1137,7 @@ writeStatusAndTextCells (BrailleDisplay *brl) {
 }
 
 static int
-writeBookwormCells (BrailleDisplay *brl) {
+writeCells_Bookworm (BrailleDisplay *brl) {
   unsigned char buffer[1 + model->statusCells + model->textCells + 1];
 
   buffer[0] = 0X01;
@@ -1147,7 +1147,7 @@ writeBookwormCells (BrailleDisplay *brl) {
 }
 
 static int
-writeEvolutionCells (BrailleDisplay *brl) {
+writeCells_Evolution (BrailleDisplay *brl) {
   return writeExtendedPacket(brl, HT_EXTPKT_Braille, rawData, model->textCells);
 }
 
@@ -1187,7 +1187,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 }
 
 static int
-interpretKeyByte (unsigned char byte) {
+interpretByte_key (unsigned char byte) {
   int release = (byte & HT_KEY_RELEASE) != 0;
   if (release) byte &= ~HT_KEY_RELEASE;
 
@@ -1209,7 +1209,7 @@ interpretKeyByte (unsigned char byte) {
 }
 
 static int
-interpretBookwormByte (unsigned char byte) {
+interpretByte_Bookworm (unsigned char byte) {
   static const unsigned char keys[] = {
     HT_BWK_Backward,
     HT_BWK_Forward,
