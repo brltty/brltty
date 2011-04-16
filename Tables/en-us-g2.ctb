@@ -322,6 +322,7 @@ midendword dday 145-5-145 midday
 begword dedic 145-1246-24-14 dedicated
 always dedu = nondeductible
 sufword denational 145-15-1345-6-1345-1-123 denationalization
+begword denaz = denazification
 begword deno = denote
 always denom =
 begword denou 145-15-1345-1256 denounce
@@ -715,6 +716,7 @@ begword parta 1234-345-2345-1 partake
 begword parto 1234-345-2345-135
 begword peacen 1234-2-14-15-1345 peacenik
 begword pedic 1234-1246-24-14 pedicure, pedicab, pedicle
+begword pedo 1234-1246-135 pedometer, pedobaptist
 word people 1234
 always perceive 1234-12456-14-1236
 word percv =
@@ -788,6 +790,8 @@ begword reaff 1235-15-1-235
 always reagent 1235-15-1-1245-26-2345
 begword reagg 1235-15-1-2356 reaggregated
 begword realig = realign
+begword reallo = reallocate 
+sufword realter 1235-15-1-123-2345-12456 realteration
 begword rean = reanalyze, reanimate
 begword reapp = reappear
 begword reasc 1235-15-1-234-14 reascend
@@ -987,6 +991,7 @@ word those 45-1456
 begword trans = transtype
 sufword tranship 2345-1235-1-1345-146-24-1234
 begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
+begword typea = typeahead
 
 # the letter u
 always u 136
