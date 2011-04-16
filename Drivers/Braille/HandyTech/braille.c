@@ -1023,6 +1023,11 @@ setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
 }
 
 static int
+requestRealTimeClock (BrailleDisplay *brl) {
+  return writeExtendedPacket(brl, HT_EXTPKT_GetRTC, NULL, 0);
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   at2Buffer = NULL;
   at2Size = 0;
@@ -1340,6 +1345,22 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                       }
                       return BRL_BLK_PASSAT + code;
                     }
+                    break;
+                  }
+
+                  case HT_EXTPKT_GetRTC: {
+                    uint16_t year = (bytes[0] << 8) | bytes[1];
+                    uint8_t month = bytes[2];
+                    uint8_t day = bytes[3];
+                    uint8_t hour = bytes[4];
+                    uint8_t minute = bytes[5];
+                    uint8_t second = bytes[6];
+
+                    logMessage(LOG_INFO,
+                               "date and time of %s:"
+                               " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
+                               " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
+                               model->name, year, month, day, hour, minute, second);
                     break;
                   }
 

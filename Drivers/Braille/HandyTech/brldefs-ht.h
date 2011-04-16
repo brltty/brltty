@@ -50,6 +50,8 @@ typedef enum {
   HT_EXTPKT_Key               = 0X04,
   HT_EXTPKT_Confirmation      = 0X07,
   HT_EXTPKT_Scancode          = 0X09,
+  HT_EXTPKT_SetRTC            = 0X44,
+  HT_EXTPKT_GetRTC            = 0X45,
   HT_EXTPKT_SetAtcMode        = 0X50,
   HT_EXTPKT_SetAtcSensitivity = 0X51,
   HT_EXTPKT_AtcInfo           = 0X52,
