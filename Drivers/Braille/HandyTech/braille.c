@@ -20,13 +20,20 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 
 #include "bitfield.h"
 #include "log.h"
+#include "parse.h"
 #include "timing.h"
 #include "misc.h"
 #include "ascii.h"
+
+typedef enum {
+  PARM_SETTIME
+} DriverParameter;
+#define BRLPARMS "settime"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
@@ -1046,6 +1053,8 @@ requestRealTimeClock (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  unsigned int setTime = 0;
+
   at2Buffer = NULL;
   at2Size = 0;
   at2Count = 0;
@@ -1063,6 +1072,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   rawData = prevData = NULL;		/* clear pointers */
   charactersPerSecond = baud / 11;
+
+  if (*parameters[PARM_SETTIME])
+    if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
+      logMessage(LOG_WARNING, "%s: %s", "invalid set time setting", parameters[PARM_SETTIME]);
+  setTime = !!setTime;
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
@@ -1082,6 +1096,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
                 touchAnalyzeCells(brl, NULL);
                 brl->touchEnabled = 1;
+              }
+
+              if (setTime) {
+                if (model->identifier == HT_MODEL_ActiveBraille) {
+                  time_t now = time(NULL);
+                  const struct tm *t = localtime(&now);
+                  const uint16_t year = t->tm_year + 1900;
+                  const unsigned char data[] = {
+                    (year >> 8) & 0XFF, year & 0XFF,
+                    t->tm_mon+1, t->tm_mday,
+                    t->tm_hour, t->tm_min, t->tm_sec 
+                  };
+
+                  writeExtendedPacket(brl, HT_EXTPKT_SetRTC, data, sizeof(data));
+                } else {
+                  logMessage(LOG_INFO, "%s does not support setting the clock", model->name);
+                }
               }
 
               return 1;

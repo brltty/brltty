@@ -242,6 +242,9 @@
 #braille-parameters bm:Protocols=default # [default,all,native]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
+# HandyTech Braille Driver Parameters
+#braille-parameters ht:SetTime=no # [no,yes]
+
 # Libbraille Braille Driver Parameters
 #braille-parameters lb:Device=/dev/ttyS0 # 
 #braille-parameters lb:Driver=auto # 
