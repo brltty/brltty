@@ -28,11 +28,25 @@ extern "C" {
 #define HIGH_NIBBLE(byte) ((byte) & 0XF0)
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
 
-#define getSameEndian(from) (from)
-#define getOtherEndian(from) ((((from) & 0XFF) << 8) | (((from) >> 8) & 0XFF))
+static inline uint16_t
+getSameEndian (uint16_t from) {
+  return from;
+}
 
-#define putSameEndian(to, from) (*(to) = getSameEndian((from)))
-#define putOtherEndian(to, from) putSameEndian((to), getOtherEndian((from)))
+static inline uint16_t
+getOtherEndian (uint16_t from) {
+  return ((from & 0XFF) << 8) | ((from >> 8) & 0XFF);
+}
+
+static inline void
+putSameEndian (uint16_t *to, uint16_t from) {
+  *to = getSameEndian(from);
+}
+
+static inline void
+putOtherEndian (uint16_t *to, uint16_t from) {
+  *to = getOtherEndian(from);
+}
 
 #ifdef WORDS_BIGENDIAN
 #  define getLittleEndian getOtherEndian
