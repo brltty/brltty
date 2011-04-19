@@ -1451,7 +1451,7 @@ esac
 BRLTTY_SCREEN_DRIVER([sc], [Screen])
 
 BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
-   BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(CSPI_LIBS)])
+   BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X_LIBS) $(CSPI_LIBS)])
 ])
 
 BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
