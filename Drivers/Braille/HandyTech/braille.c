@@ -1102,14 +1102,18 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 if (model->identifier == HT_MODEL_ActiveBraille) {
                   time_t now = time(NULL);
                   const struct tm *t = localtime(&now);
-                  const uint16_t year = t->tm_year + 1900;
-                  const unsigned char data[] = {
-                    (year >> 8) & 0XFF, year & 0XFF,
-                    t->tm_mon+1, t->tm_mday,
-                    t->tm_hour, t->tm_min, t->tm_sec 
-                  };
 
-                  writeExtendedPacket(brl, HT_EXTPKT_SetRTC, data, sizeof(data));
+                  HT_DateTime payload = {
+                    .month = t->tm_mon + 1,
+                    .day = t->tm_mday,
+                    .hour = t->tm_hour,
+                    .minute = t->tm_min,
+                    .second = t->tm_sec
+                  };
+                  putBigEndian(&payload.year, t->tm_year+1900);
+
+                  writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
+                                      (unsigned char *)&payload, sizeof(payload));
                 } else {
                   logMessage(LOG_INFO, "%s does not support setting the clock", model->name);
                 }
@@ -1396,19 +1400,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   }
 
                   case HT_EXTPKT_GetRTC: {
-                    uint16_t year = (bytes[0] << 8) | bytes[1];
-                    uint8_t month = bytes[2];
-                    uint8_t day = bytes[3];
-                    uint8_t hour = bytes[4];
-                    uint8_t minute = bytes[5];
-                    uint8_t second = bytes[6];
+                    const HT_DateTime *const payload = (HT_DateTime *)bytes;
 
                     logMessage(LOG_INFO,
                                "date and time of %s:"
                                " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
                                " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
-                               model->name, year, month, day, hour, minute, second);
-                    break;
+                               model->name,
+                               getBigEndian(payload->year), payload->month, payload->day,
+                               payload->hour, payload->minute, payload->second);
+                    continue;
                   }
 
                   case HT_EXTPKT_AtcInfo: {

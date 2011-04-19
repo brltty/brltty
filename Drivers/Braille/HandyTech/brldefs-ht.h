@@ -60,6 +60,15 @@ typedef enum {
   HT_EXTPKT_SetFirmness       = 0X60
 } HT_ExtendedPacketType;
 
+typedef struct {
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+} PACKED HT_DateTime;
+
 typedef union {
   unsigned char bytes[4 + 0XFF];
 
@@ -77,6 +86,7 @@ typedef union {
         HT_ExtendedPacketType type:8;
 
         union {
+          HT_DateTime date;
           unsigned char bytes[0XFF];
         } data;
       } PACKED extended;
