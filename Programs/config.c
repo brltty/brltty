@@ -604,7 +604,7 @@ int
 readCommand (BRL_DriverCommandContext context) {
   int command = readBrailleCommand(&brl, context);
   if (command != EOF) {
-    logMessage(LOG_DEBUG, "command: %06X", command);
+    logCommand(command);
     if (BRL_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
     command &= BRL_MSK_CMD;
   }

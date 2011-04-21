@@ -226,6 +226,27 @@ describeCommand (int command, char *buffer, size_t size, int details) {
 }
 
 void
+logCommand (int command) {
+  char description[0X100];
+  int verbose = 1;
+
+  describeCommand(command, description, sizeof(description), verbose);  
+  logMessage(LOG_DEBUG, "command: %06X (%s)", command, description);
+}
+
+void
+logTransformedCommand (int oldCommand, int newCommand) {
+  char oldDescription[0X100];
+  char newDescription[0X100];
+  int verbose = 1;
+
+  describeCommand(oldCommand, oldDescription, sizeof(oldDescription), verbose);  
+  describeCommand(newCommand, newDescription, sizeof(newDescription), verbose);
+  logMessage(LOG_DEBUG, "command: %06X (%s) -> %06X (%s)",
+             oldCommand, oldDescription, newCommand, newDescription);
+}
+
+void
 resetRepeatState (RepeatState *state) {
   state->command = EOF;
   state->timeout = 0;

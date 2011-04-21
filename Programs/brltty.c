@@ -1173,10 +1173,10 @@ brlttyCommand (void) {
     }
 
     if (real == command) {
-      logMessage(LOG_DEBUG, "command: %06X", command);
+      logCommand(command);
     } else {
       real |= (command & ~BRL_MSK_CMD);
-      logMessage(LOG_DEBUG, "command: %06X -> %06X", command, real);
+      logTransformedCommand(command, real);
       command = real;
     }
 

@@ -43,6 +43,8 @@ extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
 extern void describeCommand (int command, char *buffer, size_t size, int details);
+extern void logCommand (int command);
+extern void logTransformedCommand (int oldCommand, int newCommand);
 
 typedef struct {
   int command;
