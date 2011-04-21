@@ -148,21 +148,14 @@ setPrintOff (void) {
 }
 
 void
-logMessage (int level, const char *format, ...) {
+logData (int level, LogDataFormatter *formatLogData, const void *data) {
   int write = level <= logLevel;
   int print = level <= printLevel;
 
   if (write || print) {
     int reason = errno;
-    char record[0X100];
-
-    {
-      va_list argp;
-
-      va_start(argp, format);
-      vsnprintf(record, sizeof(record), format, argp);
-      va_end(argp);
-    }
+    char buffer[0X100];
+    const char *record = formatLogData(buffer, sizeof(buffer), data);
 
     if (*record) {
       if (write) {
@@ -199,16 +192,66 @@ logMessage (int level, const char *format, ...) {
   }
 }
 
+typedef struct {
+  const char *format;
+  va_list arguments;
+} LogMessageData;
+
+static const char *
+formatLogMessageData (char *buffer, size_t size, const void *data) {
+  const LogMessageData *msg = data;
+  vsnprintf(buffer, size, msg->format, msg->arguments);
+  return buffer;
+}
+
+void
+logMessage (int level, const char *format, ...) {
+  LogMessageData msg = {
+    .format = format
+  };;
+
+  va_start(msg.arguments, format);
+  logData(level, formatLogMessageData, &msg);
+  va_end(msg.arguments);
+}
+
+typedef struct {
+  const char *description;
+  const void *data;
+  size_t length;
+} LogBytesData;
+
+static const char *
+formatLogBytesData (char *buffer, size_t size, const void *data) {
+  const LogBytesData *bytes = data;
+  size_t length = bytes->length;
+  const unsigned char *in = bytes->data;
+  char *out = buffer;
+
+  {
+    size_t count = snprintf(out, size, "%s:", bytes->description);
+    out += count;
+    size -= count;
+  }
+
+  while (length-- && (size > 3)) {
+    size_t count = snprintf(out, size, " %2.2X", *in++);
+    out += count;
+    size -= count;
+  }
+
+  return buffer;
+}
+
 void
 logBytes (int level, const char *description, const void *data, size_t length) {
-  if (length) {
-    char buffer[(length * 3) + 1];
-    char *out = buffer;
-    const unsigned char *in = data;
+  const LogBytesData bytes = {
+    .description = description,
+    .data = data,
+    .length = length
+  };
 
-    while (length--) out += sprintf(out, " %2.2X", *in++);
-    logMessage(level, "%s:%s", description, buffer);
-  }
+  logData(level, formatLogBytesData, &bytes);
 }
 
 void
