@@ -872,6 +872,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
             length += byte;
           } else if (offset == 4) {
             if ((packet[1] == HT_MODEL_ActiveBraille) && 
+                (packet[2] == 2) &&
                 (packet[3] == HT_EXTPKT_Confirmation) &&
                 (byte == 0X15))
               length += 1;
