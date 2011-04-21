@@ -70,28 +70,12 @@ static int brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext conte
 #define brl_keyToCommand NULL
 #endif /* BRL_HAVE_KEY_CODES */
 
-#ifdef BRL_HAVE_FIRMNESS
-static void brl_firmness (BrailleDisplay *brl, BrailleFirmness setting);
-#else /* BRL_HAVE_FIRMNESS */
-#define brl_firmness NULL
-#endif /* BRL_HAVE_FIRMNESS */
-
-#ifdef BRL_HAVE_SENSITIVITY
-static void brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
-#else /* BRL_HAVE_SENSITIVITY */
-#define brl_sensitivity NULL
-#endif /* BRL_HAVE_SENSITIVITY */
-
 #ifndef BRLSYMBOL
 #define BRLSYMBOL CONCATENATE(brl_driver_,DRIVER_CODE)
 #endif /* BRLSYMBOL */
 
-#ifndef BRLCONST
-#define BRLCONST const
-#endif /* BRLCONST */
-
-extern BRLCONST BrailleDriver BRLSYMBOL;
-BRLCONST BrailleDriver BRLSYMBOL = {
+extern const BrailleDriver BRLSYMBOL;
+const BrailleDriver BRLSYMBOL = {
   DRIVER_DEFINITION_INITIALIZER,
 
   brl_parameters,
@@ -109,10 +93,7 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   brl_reset,
 
   brl_readKey,
-  brl_keyToCommand,
-
-  brl_firmness,
-  brl_sensitivity
+  brl_keyToCommand
 };
 
 DRIVER_VERSION_DECLARATION(brl);

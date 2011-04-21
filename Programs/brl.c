@@ -120,6 +120,8 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->touchEnabled = 0;
   brl->highlightWindow = 0;
   brl->data = NULL;
+  brl->setFirmness = NULL;
+  brl->setSensitivity = NULL;
 }
 
 unsigned int
@@ -688,14 +690,22 @@ portraitFlag (int number, int on) {
   return dots;
 }
 
-void
+int
 setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
-  braille->firmness(brl, setting);
+  if (brl->setFirmness) {
+    logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
+    if (brl->setFirmness(brl, setting)) return 1;
+  }
+
+  return 0;
 }
 
-void
+int
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
-  braille->sensitivity(brl, setting);
+  if (brl->setSensitivity) {
+    logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
+    if (brl->setSensitivity(brl, setting)) return 1;
+  }
+
+  return 0;
 }

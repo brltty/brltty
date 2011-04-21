@@ -780,8 +780,8 @@ reconfigureWindow (void) {
 
 static void
 applyBraillePreferences (void) {
-  if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
-  if (braille->sensitivity) braille->sensitivity(&brl, prefs.brailleSensitivity);
+  setBrailleFirmness(&brl, prefs.brailleFirmness);
+  setBrailleSensitivity(&brl, prefs.brailleSensitivity);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1135,24 +1135,22 @@ savePreferences (void) {
 
 static int
 testBrailleFirmness (void) {
-  return braille->firmness != NULL;
+  return brl.setFirmness != NULL;
 }
 
 static int
 changedBrailleFirmness (unsigned char setting) {
-  setBrailleFirmness(&brl, setting);
-  return 1;
+  return setBrailleFirmness(&brl, setting);
 }
 
 static int
 testBrailleSensitivity (void) {
-  return braille->sensitivity != NULL;
+  return brl.setSensitivity != NULL;
 }
 
 static int
 changedBrailleSensitivity (unsigned char setting) {
-  setBrailleSensitivity(&brl, setting);
-  return 1;
+  return setBrailleSensitivity(&brl, setting);
 }
 
 static int

@@ -30,8 +30,6 @@
 //#define BRL_HAVE_STATUS_CELLS
 //#define BRL_HAVE_PACKET_IO
 //#define BRL_HAVE_KEY_CODES
-//#define BRL_HAVE_FIRMNESS
-//#define BRL_HAVE_SENSITIVITY
 #include "brl_driver.h"
 
 static int
@@ -88,15 +86,3 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return EOF;
 }
-
-#ifdef BRL_HAVE_FIRMNESS
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-}
-#endif /* BRL_HAVE_FIRMNESS */
-
-#ifdef BRL_HAVE_SENSITIVITY
-static void
-brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-}
-#endif /* BRL_HAVE_SENSITIVITY */

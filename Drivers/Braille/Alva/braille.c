@@ -115,8 +115,6 @@
 
 #define BRL_STATUS_FIELDS sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter
 #define BRL_HAVE_STATUS_CELLS
-#define BRL_HAVE_FIRMNESS
-#define BRLCONST
 #include "brl_driver.h"
 #include "brldefs-al.h"
 #include "braille.h"
@@ -605,6 +603,12 @@ updateConfiguration1 (BrailleDisplay *brl, int autodetecting, const unsigned cha
 }
 
 static int
+setFirmness1 (BrailleDisplay *brl, BrailleFirmness setting) {
+  return writeParameter1(brl, 3,
+                         setting * 4 / BRL_FIRMNESS_MAXIMUM);
+}
+
+static int
 identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
   /* Find out which model we are connected to... */
   for (
@@ -616,7 +620,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
   if (model->name) {
     if (setDefaultConfiguration(brl)) {
       if (model->flags & MOD_FLAG_CONFIGURABLE) {
-        BRLSYMBOL.firmness = brl_firmness;
+        brl->setFirmness = setFirmness1;
 
         if (!writeFunction1(brl, 0X07)) return 0;
         while (io->awaitInput(200)) {
@@ -633,8 +637,6 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
         }
 
         if (!writeFunction1(brl, 0X0B)) return 0;
-      } else {
-        BRLSYMBOL.firmness = NULL; 
       }
 
       return 1;
@@ -1128,8 +1130,6 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
-      BRLSYMBOL.firmness = NULL;
-
       firmwareVersion2 = 0;
       if (getAttributes2s(0X56, packet, sizeof(packet))) {
         firmwareVersion2 |= (packet[4] << 16);
@@ -1297,8 +1297,6 @@ updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned ch
 
 static int
 detectModel2u (BrailleDisplay *brl) {
-  BRLSYMBOL.firmness = NULL;
-
   {
     unsigned char buffer[0X20];
     int length = io->getFeatureReport(0X09, buffer, sizeof(buffer));
@@ -1683,10 +1681,4 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return protocol->readCommand(brl);
-}
-
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  writeParameter1(brl, 3,
-                 setting * 4 / BRL_FIRMNESS_MAXIMUM);
 }

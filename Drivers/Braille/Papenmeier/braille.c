@@ -47,7 +47,6 @@
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
-#define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "brldefs-pm.h"
 #include "models.h"
@@ -261,7 +260,7 @@ typedef struct {
   void (*writeText) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*writeStatus) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*flushCells) (BrailleDisplay *brl);
-  void (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
+  int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
 
 static const ProtocolOperations *protocol;
@@ -294,8 +293,11 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       brl->textColumns = model->textColumns;
       brl->textRows = 1;
       brl->statusRows = (brl->statusColumns = model->statusCount)? 1: 0;
+
       brl->keyBindings = model->keyTableDefinition->bindings;
       brl->keyNameTables = model->keyTableDefinition->names;
+
+      brl->setFirmness = protocol->setFirmness;
 
       return 1;
     }
@@ -1050,10 +1052,10 @@ releaseResources2 (void) {
   }
 }
 
-static void
+static int
 setFirmness2 (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char data[] = {(setting * 98 / BRL_FIRMNESS_MAXIMUM) + 2, 0X99};
-  writePacket2(brl, 6, sizeof(data), data);
+  return writePacket2(brl, 6, sizeof(data), data);
 }
 
 static const ProtocolOperations protocolOperations2 = {
@@ -1323,9 +1325,4 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
 static int 
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return protocol->readCommand(brl, context);
-}
-
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  if (protocol->setFirmness) protocol->setFirmness(brl, setting);
 }

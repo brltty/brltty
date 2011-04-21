@@ -51,7 +51,6 @@
 #include "ascii.h"
 
 #define BRLSTAT ST_VoyagerStyle
-#define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "brldefs-vo.h"
 
@@ -349,7 +348,8 @@ writeUsbData (uint8_t request, uint16_t value, uint16_t index,
   while (1) {
     int ret = usbControlWrite(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                               request, value, index, buffer, size, 100);
-    if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
+    if (ret != -1) return 1;
+    if ((errno != EPIPE) || (retry == USB_RETRIES)) return 0;
     logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
   }
 }
@@ -439,7 +439,7 @@ logUsbFirmwareVersion (void) {
 
 static int
 setUsbDisplayVoltage (unsigned char voltage) {
-  return writeUsbData(0X01, voltage, 0, NULL, 0) != -1;
+  return writeUsbData(0X01, voltage, 0, NULL, 0);
 }
 
 static int
@@ -464,12 +464,12 @@ getUsbDisplayCurrent (unsigned char *current) {
 
 static int
 setUsbDisplayState (unsigned char state) {
-  return writeUsbData(0X00, state, 0, NULL, 0) != -1;
+  return writeUsbData(0X00, state, 0, NULL, 0);
 }
 
 static int
 writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start) {
-  return writeUsbData(0X07, 0, start, cells, count) != -1;
+  return writeUsbData(0X07, 0, start, cells, count);
 }
 
 static int
@@ -479,7 +479,7 @@ getUsbKeys (unsigned char *packet, int size) {
 
 static int
 soundUsbBeep (unsigned char duration) {
-  return writeUsbData(0X09, duration, 0, NULL, 0) != -1;
+  return writeUsbData(0X09, duration, 0, NULL, 0);
 }
 
 static const InputOutputOperations usbOperations = {
@@ -532,6 +532,18 @@ DEFINE_KEY_TABLE(all)
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
+
+/* Voltage: from 0->300V to 255->200V.
+ * Presumably this is voltage for dot firmness.
+ * Presumably 0 makes dots hardest, 255 makes them softest.
+ * We are told 265V is normal operating voltage but we don't know the scale.
+ */
+static int
+setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
+  logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
+  return io->setDisplayVoltage(voltage);
+}
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -586,6 +598,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->keyBindings = ktd->bindings;
         brl->keyNameTables = ktd->names;
       }
+
+      brl->setFirmness = setFirmness;
 
       if ((currentCells = malloc(cellCount))) {
         if ((previousCells = malloc(cellCount))) {
@@ -788,16 +802,4 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
   return EOF;
-}
-
-/* Voltage: from 0->300V to 255->200V.
- * Presumably this is voltage for dot firmness.
- * Presumably 0 makes dots hardest, 255 makes them softest.
- * We are told 265V is normal operating voltage but we don't know the scale.
- */
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
-  logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
-  io->setDisplayVoltage(voltage);
 }

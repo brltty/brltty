@@ -38,8 +38,6 @@ typedef enum {
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
-#define BRL_HAVE_FIRMNESS
-#define BRL_HAVE_SENSITIVITY
 #include "brl_driver.h"
 #include "touch.h"
 #include "brldefs-ht.h"
@@ -989,8 +987,12 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->textRows = BRLROWS;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
+
   brl->keyBindings = model->keyTableDefinition->bindings;
   brl->keyNameTables = model->keyTableDefinition->names;
+
+  brl->setFirmness = model->setFirmness;
+  brl->setSensitivity = model->setSensitivity;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
@@ -1499,14 +1501,4 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   updateCells(brl);
 
   return EOF;
-}
-
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  if (model->setFirmness) model->setFirmness(brl, setting);
-}
-
-static void
-brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  if (model->setSensitivity) model->setSensitivity(brl, setting);
 }

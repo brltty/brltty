@@ -29,9 +29,27 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum {
+  BRL_FIRMNESS_MINIMUM,
+  BRL_FIRMNESS_LOW,
+  BRL_FIRMNESS_MEDIUM,
+  BRL_FIRMNESS_HIGH,
+  BRL_FIRMNESS_MAXIMUM
+} BrailleFirmness;
+
+typedef enum {
+  BRL_SENSITIVITY_MINIMUM,
+  BRL_SENSITIVITY_LOW,
+  BRL_SENSITIVITY_MEDIUM,
+  BRL_SENSITIVITY_HIGH,
+  BRL_SENSITIVITY_MAXIMUM
+} BrailleSensitivity;
+
 typedef struct BrailleDataStruct BrailleData;
 
-typedef struct {
+typedef struct BrailleDisplayStruct BrailleDisplay;
+
+struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
 
@@ -48,7 +66,10 @@ typedef struct {
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
   BrailleData *data;
-} BrailleDisplay;
+
+  int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
+  int (*setSensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
+};
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
@@ -75,23 +96,8 @@ extern int enqueueCommand (int command);
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
 extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
 
-typedef enum {
-  BRL_FIRMNESS_MINIMUM,
-  BRL_FIRMNESS_LOW,
-  BRL_FIRMNESS_MEDIUM,
-  BRL_FIRMNESS_HIGH,
-  BRL_FIRMNESS_MAXIMUM
-} BrailleFirmness;
-extern void setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
-
-typedef enum {
-  BRL_SENSITIVITY_MINIMUM,
-  BRL_SENSITIVITY_LOW,
-  BRL_SENSITIVITY_MEDIUM,
-  BRL_SENSITIVITY_HIGH,
-  BRL_SENSITIVITY_MAXIMUM
-} BrailleSensitivity;
-extern void setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
+extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
+extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
@@ -116,9 +122,6 @@ typedef struct {
   
   int (*readKey) (BrailleDisplay *brl);
   int (*keyToCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
-
-  void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);
-  void (*sensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
 } BrailleDriver;
 
 extern int haveBrailleDriver (const char *code);

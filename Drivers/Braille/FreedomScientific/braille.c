@@ -33,7 +33,6 @@
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
-#define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "brldefs-fs.h"
 
@@ -805,6 +804,12 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 }
 
 static int
+setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  firmnessSetting = setting * 0XFF / BRL_FIRMNESS_MAXIMUM;
+  return writeRequest(brl);
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
     io = &serialOperations;
@@ -950,6 +955,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           brl->keyBindings = keyTableDefinition->bindings;
           brl->keyNameTables = keyTableDefinition->names;
+
+          brl->setFirmness = setFirmness;
 
           if (!writeRequest(brl)) break;
           return 1;
@@ -1133,10 +1140,4 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
 static int
 brl_reset (BrailleDisplay *brl) {
   return 0;
-}
-
-static void
-brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  firmnessSetting = setting * 0XFF / BRL_FIRMNESS_MAXIMUM;
-  writeRequest(brl);
 }
