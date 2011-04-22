@@ -115,8 +115,10 @@ getCommandEntry (int code) {
   return NULL;
 }
 
-void
+size_t
 describeCommand (int command, char *buffer, size_t size, int details) {
+  const char *start = buffer;
+
   int blk = command & BRL_MSK_BLK;
   unsigned int arg = BRL_ARG_GET(command);
   unsigned int arg1 = BRL_CODE_GET(ARG, command);
@@ -124,7 +126,9 @@ describeCommand (int command, char *buffer, size_t size, int details) {
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
-    snprintf(buffer, size, "unknown: %06X", command);
+    int length;
+    snprintf(buffer, size, "unknown: %06X%n", command, &length);
+    buffer += length, size -= length;
   } else {
     int length;
 
@@ -184,17 +188,21 @@ describeCommand (int command, char *buffer, size_t size, int details) {
 
     if (details) {
       if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
-        snprintf(buffer, size, " #%u",
-                 arg - (cmd->code & BRL_MSK_ARG) + 1);
+        snprintf(buffer, size, " #%u%n",
+                 arg - (cmd->code & BRL_MSK_ARG) + 1,
+                 &length);
+        buffer += length, size -= length;
       } else if (cmd->isRange) {
-        snprintf(buffer, size, " #%u-%u", arg1, arg2);
+        snprintf(buffer, size, " #%u-%u%n", arg1, arg2, &length);
+        buffer += length, size -= length;
       } else if (blk) {
         switch (blk) {
           case BRL_BLK_PASSKEY:
             break;
 
           case BRL_BLK_PASSCHAR:
-            snprintf(buffer, size, " [U+%04" PRIX16 "]", arg);
+            snprintf(buffer, size, " [U+%04" PRIX16 "]%n", arg, &length);
+            buffer += length, size -= length;
             break;
 
           case BRL_BLK_PASSDOTS:
@@ -209,41 +217,110 @@ describeCommand (int command, char *buffer, size_t size, int details) {
                 }
               }
 
-              snprintf(buffer, size, " [%s %u]",
-                       ((number < 10)? "dot": "dots"), number);
+              snprintf(buffer, size, " [%s %u]%n",
+                       ((number < 10)? "dot": "dots"), number,
+                       &length);
+              buffer += length, size -= length;
             } else {
-              snprintf(buffer, size, " [space]");
+              snprintf(buffer, size, " [space]%n", &length);
+              buffer += length, size -= length;
             }
             break;
 
           default:
-            snprintf(buffer, size, " 0X%02X", arg);
+            snprintf(buffer, size, " 0X%02X%n", arg, &length);
+            buffer += length, size -= length;
             break;
         }
       }
     }
   }
+
+  return buffer - start;
+}
+
+static size_t
+formatCommand (char *buffer, size_t size, int command) {
+  const char *start = buffer;
+
+  {
+    int length;
+    snprintf(buffer, size, "command: %06X (%n", command, &length);
+    buffer += length, size -= length;
+  }
+
+  {
+    size_t length = describeCommand(command, buffer, size, 1);  
+    buffer += length, size -= length;
+  }
+
+  {
+    int length;
+    snprintf(buffer, size, ")%n", &length);
+    buffer += length, size -= length;
+  }
+
+  return buffer - start;
+}
+
+typedef struct {
+  int command;
+} LogCommandData;
+
+static const char *
+formatLogCommandData (char *buffer, size_t size, const void *data) {
+  const LogCommandData *cmd = data;
+
+  formatCommand(buffer, size, cmd->command);
+  return buffer;
 }
 
 void
 logCommand (int command) {
-  char description[0X100];
-  int verbose = 1;
+  const LogCommandData cmd = {
+    .command = command
+  };
 
-  describeCommand(command, description, sizeof(description), verbose);  
-  logMessage(LOG_DEBUG, "command: %06X (%s)", command, description);
+  logData(LOG_DEBUG, formatLogCommandData, &cmd);
+}
+
+typedef struct {
+  int oldCommand;
+  int newCommand;
+} LogTransformedCommandData;
+
+static const char *
+formatLogTransformedCommandData (char *buffer, size_t size, const void *data) {
+  const LogTransformedCommandData *cmd = data;
+  const char *start = buffer;
+
+  {
+    size_t length = formatCommand(buffer, size, cmd->oldCommand);
+    buffer += length, size -= length;
+  }
+
+  {
+    int length;
+    snprintf(buffer, size, " -> %n", &length);
+    buffer += length, size -= length;
+  }
+
+  {
+    size_t length = formatCommand(buffer, size, cmd->newCommand);
+    buffer += length, size -= length;
+  }
+
+  return start;
 }
 
 void
 logTransformedCommand (int oldCommand, int newCommand) {
-  char oldDescription[0X100];
-  char newDescription[0X100];
-  int verbose = 1;
+  const LogTransformedCommandData cmd = {
+    .oldCommand = oldCommand,
+    .newCommand = newCommand
+  };
 
-  describeCommand(oldCommand, oldDescription, sizeof(oldDescription), verbose);  
-  describeCommand(newCommand, newDescription, sizeof(newDescription), verbose);
-  logMessage(LOG_DEBUG, "command: %06X (%s) -> %06X (%s)",
-             oldCommand, oldDescription, newCommand, newDescription);
+  logData(LOG_DEBUG, formatLogTransformedCommandData, &cmd);
 }
 
 void
