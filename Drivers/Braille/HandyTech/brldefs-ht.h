@@ -69,6 +69,41 @@ typedef struct {
   uint8_t second;
 } PACKED HT_DateTime;
 
+typedef enum {
+  HT_MCAP_reqBatteryManagementInformation  = 0X001,
+  HT_MCAP_BatteryCalibrationAndTestMode    = 0X002,
+  HT_MCAP_getRealTimeClock                 = 0X004,
+  HT_MCAP_setRealTimeClock                 = 0X008,
+  HT_MCAP_getSerialNumber                  = 0X010,
+  HT_MCAP_setSerialNumber                  = 0X020,
+  HT_MCAP_getBluetoothPIN                  = 0X040,
+  HT_MCAP_setBluetoothPIN                  = 0X080,
+  HT_MCAP_setServiceInformation            = 0X100,
+  HT_MCAP_getServiceInformation            = 0X200
+} HT_MaintainanceCapabilities;
+
+typedef enum {
+  HT_ICAP_hasInternalMode               = 0X001,
+  HT_ICAP_updNormalModeFirmware         = 0X002,
+  HT_ICAP_updBrailleProcessorFirmware   = 0X004,
+  HT_ICAP_updUsbProcessorFirmware       = 0X008,
+  HT_ICAP_updBluetoothModuleFirmware    = 0X010,
+  HT_ICAP_getBrailleSystemConfiguration = 0X020,
+  HT_ICAP_setBrailleSystemConfiguration = 0X040
+} HT_InternalModeCapabilities;
+
+typedef struct {
+  unsigned char majorVersion;
+  unsigned char minorVersion;
+  unsigned char cellCount;
+  unsigned char hasSensitivity;
+  unsigned char maximumSensitivity;
+  unsigned char hasFirmness;
+  unsigned char maximumFirmness;
+  HT_MaintainanceCapabilities maintainanceCapabilities:16;
+  HT_InternalModeCapabilities internalModeCapabilities:16;
+} PACKED HT_ProtocolProperties;
+
 typedef union {
   unsigned char bytes[4 + 0XFF];
 
@@ -86,7 +121,8 @@ typedef union {
         HT_ExtendedPacketType type:8;
 
         union {
-          HT_DateTime date;
+          HT_DateTime dateTime;
+          HT_ProtocolProperties protocolProperties;
           unsigned char bytes[0XFF];
         } data;
       } PACKED extended;
