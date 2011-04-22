@@ -297,8 +297,6 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       brl->keyBindings = model->keyTableDefinition->bindings;
       brl->keyNameTables = model->keyTableDefinition->names;
 
-      brl->setFirmness = protocol->setFirmness;
-
       return 1;
     }
   }
@@ -1238,8 +1236,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (io->openPort(parameters, device)) {
       if (identifyTerminal(brl)) {
+        brl->setFirmness = protocol->setFirmness;
+
         memset(currentText, 0, model->textColumns);
         memset(currentStatus, 0, model->statusCount);
+
         protocol->initializeTerminal(brl);
         return 1;
       }
