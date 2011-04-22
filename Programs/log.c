@@ -154,7 +154,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
   if (write || print) {
     int reason = errno;
-    char buffer[0X100];
+    char buffer[0X1000];
     const char *record = formatLogData(buffer, sizeof(buffer), data);
 
     if (*record) {
@@ -194,25 +194,27 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
 typedef struct {
   const char *format;
-  va_list arguments;
+  va_list *arguments;
 } LogMessageData;
 
 static const char *
 formatLogMessageData (char *buffer, size_t size, const void *data) {
   const LogMessageData *msg = data;
-  vsnprintf(buffer, size, msg->format, msg->arguments);
+  vsnprintf(buffer, size, msg->format, *msg->arguments);
   return buffer;
 }
 
 void
 logMessage (int level, const char *format, ...) {
-  LogMessageData msg = {
-    .format = format
+  va_list arguments;
+  const LogMessageData msg = {
+    .format = format,
+    .arguments = &arguments
   };;
 
-  va_start(msg.arguments, format);
+  va_start(arguments, format);
   logData(level, formatLogMessageData, &msg);
-  va_end(msg.arguments);
+  va_end(arguments);
 }
 
 typedef struct {
