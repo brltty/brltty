@@ -210,7 +210,7 @@ logMessage (int level, const char *format, ...) {
   const LogMessageData msg = {
     .format = format,
     .arguments = &arguments
-  };;
+  };
 
   va_start(arguments, format);
   logData(level, formatLogMessageData, &msg);

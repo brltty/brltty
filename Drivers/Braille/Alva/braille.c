@@ -786,7 +786,7 @@ readCommand1 (BrailleDisplay *brl) {
           continue;
         }
 
-        break;;
+        break;
 
       case 0X72: /* primary (lower) routing keys */
         if (key <= 0X5F) {			/* make */

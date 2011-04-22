@@ -1471,9 +1471,9 @@ insertCode (ScreenKey key, int raw) {
     if (modAltRight) {
       if (raw) {
         codes[count++] = codeEmul0;
-        codes[count++] = codeAlt | bitRelease;;
+        codes[count++] = codeAlt | bitRelease;
       } else {
-        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF] | bitRelease;;
+        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF] | bitRelease;
       }
     }
     if (modAltLeft) codes[count++] = codeAlt | bitRelease;

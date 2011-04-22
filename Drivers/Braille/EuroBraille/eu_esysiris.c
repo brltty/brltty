@@ -534,7 +534,7 @@ ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t siz
   int packetSize = size + 2;
   unsigned char buf[packetSize + 2];
   if (!iop || !packet || !size)
-    return (-1);;
+    return (-1);
   buf[0] = STX;
   buf[1] = (packetSize >> 8) & 0x00FF;
   buf[2] = packetSize & 0x00FF;

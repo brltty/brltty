@@ -222,7 +222,7 @@ newTextTableData (void) {
     free(ttd);
   }
 
-  return NULL;;
+  return NULL;
 }
 
 void

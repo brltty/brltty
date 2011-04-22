@@ -534,8 +534,8 @@ enqueueNavigationKey (PG_NavigationKey modifier, PG_NavigationKey key) {
   int modifierSpecified = modifier != PG_KEY_None;
 
   if (modifierSpecified && !enqueueKeyEvent(set, modifier, 1)) return 0;
-  if (!enqueueKeyEvent(set, key, 1)) return 0;;
-  if (!enqueueKeyEvent(set, key, 0)) return 0;;
+  if (!enqueueKeyEvent(set, key, 1)) return 0;
+  if (!enqueueKeyEvent(set, key, 0)) return 0;
   if (modifierSpecified && !enqueueKeyEvent(set, modifier, 0)) return 0;
   return 1;
 }
