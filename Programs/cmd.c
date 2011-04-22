@@ -245,7 +245,7 @@ formatCommand (char *buffer, size_t size, int command) {
 
   {
     int length;
-    snprintf(buffer, size, "command: %06X (%n", command, &length);
+    snprintf(buffer, size, "%06X (%n", command, &length);
     buffer += length, size -= length;
   }
 
@@ -270,9 +270,20 @@ typedef struct {
 static const char *
 formatLogCommandData (char *buffer, size_t size, const void *data) {
   const LogCommandData *cmd = data;
+  const char *start = buffer;
 
-  formatCommand(buffer, size, cmd->command);
-  return buffer;
+  {
+    int length;
+    snprintf(buffer, size, "command: %n", &length);
+    buffer += length, size -= length;
+  }
+
+  {
+    size_t length = formatCommand(buffer, size, cmd->command);
+    buffer += length, size -= length;
+  }
+
+  return start;
 }
 
 void
@@ -293,6 +304,12 @@ static const char *
 formatLogTransformedCommandData (char *buffer, size_t size, const void *data) {
   const LogTransformedCommandData *cmd = data;
   const char *start = buffer;
+
+  {
+    int length;
+    snprintf(buffer, size, "command: %n", &length);
+    buffer += length, size -= length;
+  }
 
   {
     size_t length = formatCommand(buffer, size, cmd->oldCommand);
