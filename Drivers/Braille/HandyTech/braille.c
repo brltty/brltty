@@ -1450,12 +1450,24 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   }
 
                   case HT_EXTPKT_ReadingPosition: {
-                    uint8_t cell = bytes[0];
+                    const size_t cellCount = model->textCells + model->statusCells;
+                    unsigned char pressureValues[cellCount];
+                    const unsigned char *pressure;
 
-                    if (cell == 0XFF) {
-                      logMessage(LOG_DEBUG, "No reading position");
+                    if (bytes[0] != 0XFF) {
+                      const int cellIndex = bytes[0];
+
+                      memset(pressureValues, 0, cellCount);
+                      pressureValues[cellIndex] = 0XFF;
+
+                      pressure = &pressureValues[0];
                     } else {
-                      logMessage(LOG_DEBUG, "Reading position: %d", cell);
+                      pressure = NULL;
+                    }
+
+                    {
+                      int command = touchAnalyzePressure(brl, pressure);
+                      if (command != EOF) return command;
                     }
 
                     continue;
