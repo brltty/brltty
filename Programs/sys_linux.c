@@ -136,7 +136,11 @@ getBootParameters (const char *name) {
 #include "sys_shlib_dlfcn.h"
 #endif /* ENABLE_SHARED_OBJECTS */
 
+#ifdef ENABLE_BEEPER_SUPPORT 1
 #include "sys_beep_linux.h"
+#else /* ENABLE_BEEPER_SUPPORT */
+#include "sys_beep_none.h"
+#endif /* ENABLE_BEEPER_SUPPORT */
 
 #ifdef ENABLE_PCM_SUPPORT
 #if defined(USE_PCM_SUPPORT_ALSA)
