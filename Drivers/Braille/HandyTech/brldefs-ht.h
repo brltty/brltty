@@ -46,18 +46,25 @@ typedef enum {
 } HT_PacketType;
 
 typedef enum {
-  HT_EXTPKT_Braille           = 0X01,
-  HT_EXTPKT_Key               = 0X04,
-  HT_EXTPKT_Confirmation      = 0X07,
-  HT_EXTPKT_Scancode          = 0X09,
-  HT_EXTPKT_SetRTC            = 0X44,
-  HT_EXTPKT_GetRTC            = 0X45,
-  HT_EXTPKT_SetAtcMode        = 0X50,
-  HT_EXTPKT_SetAtcSensitivity = 0X51,
-  HT_EXTPKT_AtcInfo           = 0X52,
-  HT_EXTPKT_SetAtcSensitivity2= 0X53,
-  HT_EXTPKT_ReadingPosition   = 0X55,
-  HT_EXTPKT_SetFirmness       = 0X60
+  HT_EXTPKT_Braille               = 0X01,
+  HT_EXTPKT_Key                   = 0X04,
+  HT_EXTPKT_Confirmation          = 0X07,
+  HT_EXTPKT_Scancode              = 0X09,
+  HT_EXTPKT_Ping                  = 0X19,
+  HT_EXTPKT_GetSerialNumber       = 0X41,
+  HT_EXTPKT_SetRTC                = 0X44,
+  HT_EXTPKT_GetRTC                = 0X45,
+  HT_EXTPKT_GetBluetoothPIN       = 0X47,
+  HT_EXTPKT_SetAtcMode            = 0X50,
+  HT_EXTPKT_SetAtcSensitivity     = 0X51,
+  HT_EXTPKT_AtcInfo               = 0X52,
+  HT_EXTPKT_SetAtcSensitivity2    = 0X53,
+  HT_EXTPKT_GetAtcSensitivity2    = 0X54,
+  HT_EXTPKT_ReadingPosition       = 0X55,
+  HT_EXTPKT_SetFirmness           = 0X60,
+  HT_EXTPKT_GetFirmness           = 0X61,
+  HT_EXTPKT_GetProtocolProperties = 0XC1,
+  HT_EXTPKT_GetFirmwareVersion    = 0XC2
 } HT_ExtendedPacketType;
 
 typedef struct {
