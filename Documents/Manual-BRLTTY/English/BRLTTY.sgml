@@ -5371,11 +5371,12 @@ BRLTTY supports the following braille displays:
     HandyTech
       |Modular 20/40/80@
       |Modular Evolution 64/88@
-      |Braille Wave 40@
+      |Active Braille (bluetooth only)@
+      |Braille Wave@
       |Easy Braille@
       |Braille Star 40/80@
       |Bookworm@
-      |Braillino 20@
+      |Braillino@
     HIMS
       |Braille Sense@
       |SyncBraille@

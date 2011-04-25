@@ -310,7 +310,7 @@ static const ModelEntry modelTable[] = {
   }
   ,
   { .identifier = HT_MODEL_BrailleWave,
-    .name = "Braille Wave 40",
+    .name = "Braille Wave",
     .textCells = 40,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(wave),
@@ -329,7 +329,7 @@ static const ModelEntry modelTable[] = {
   }
   ,
   { .identifier = HT_MODEL_Braillino,
-    .name = "Braillino 20",
+    .name = "Braillino",
     .textCells = 20,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
