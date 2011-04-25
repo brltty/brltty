@@ -322,7 +322,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
               if (waiting_ack) {
                 /* no response, so it must be BLT40 */
                 blitesz = 40;
-                brl->keyBindings = "40+m20+m40";
+                brl->keyBindings = "40_m20_m40";
               } else {
                 blitesz = sizeof(cells);
                 brl->keyBindings = "18";
