@@ -30,6 +30,7 @@ typedef struct {
   int (*construct) (void);
   void (*destruct) (void);
   int (*addLine) (const wchar_t *line);
+  unsigned int (*getLineCount) (void);
 } HelpScreen;
 
 extern void initializeHelpScreen (HelpScreen *);

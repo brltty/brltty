@@ -378,6 +378,11 @@ addHelpLine (const wchar_t *line) {
   return helpScreen.addLine(line);
 }
 
+unsigned int
+getHelpLineCount (void) {
+  return helpScreen.getLineCount();
+}
+
 
 int
 isFrozenScreen (void) {

@@ -50,7 +50,7 @@ clearHelpScreen (void) {
   }
 
   lineTableSize = 0;
-  lineLength = 0;
+  lineLength = 1;
   cursorRow = 0;
   cursorColumn = 0;
 }
@@ -85,6 +85,11 @@ addLine_HelpScreen (const wchar_t *line) {
   lineCount += 1;
 
   return 1;
+}
+
+static unsigned int 
+getLineCount_HelpScreen (void) {
+  return lineCount;
 }
 
 static int
@@ -205,4 +210,5 @@ initializeHelpScreen (HelpScreen *help) {
   help->construct = construct_HelpScreen;
   help->destruct = destruct_HelpScreen;
   help->addLine = addLine_HelpScreen;
+  help->getLineCount = getLineCount_HelpScreen;
 }

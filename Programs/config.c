@@ -2216,6 +2216,10 @@ constructBrailleDriver (void) {
         }
       }
 
+      if (!getHelpLineCount()) {
+        addHelpLine(WS_C("help not available"));
+      }
+
       return 1;
     }
 

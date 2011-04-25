@@ -155,6 +155,7 @@ extern void destructRoutingScreen (void);
 extern int constructHelpScreen (void);
 extern void destructHelpScreen (void);
 extern int addHelpLine (const wchar_t *line);
+extern unsigned int getHelpLineCount (void);
 
 typedef struct ScreenDriverStruct ScreenDriver;
 extern const char *const *getScreenParameters (const ScreenDriver *driver);
