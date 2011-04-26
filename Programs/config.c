@@ -945,7 +945,6 @@ resetPreferences (void) {
   prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
   resetStatusFields(NULL);
-  applyPreferences();
 }
 
 int
@@ -1098,8 +1097,6 @@ loadPreferences (void) {
         length = 58;
         resetStatusFields(fields);
       }
-
-      applyPreferences();
     }
 
     fclose(file);
@@ -1111,6 +1108,7 @@ loadPreferences (void) {
 static void
 getPreferences (void) {
   if (!loadPreferences()) resetPreferences();
+  applyPreferences();
   setTuneDevice(prefs.tuneDevice);
 }
 
@@ -2397,7 +2395,6 @@ startBrailleDriver (void) {
 
   if (activateBrailleDriver(0)) {
     getPreferences();
-    applyBraillePreferences();
     playTune(&tune_braille_on);
 
     if (clearStatusCells(&brl)) {
