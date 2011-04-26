@@ -62,6 +62,7 @@ typedef struct {
   wchar_t characters[0XFF];
 } DataString;
 extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
+extern int parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode);
 
 typedef struct {
   const wchar_t *name;

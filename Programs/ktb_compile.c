@@ -941,32 +941,36 @@ processMapOperands (DataFile *file, void *data) {
 static int
 processNoteOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
-  DataOperand note;
+  DataOperand operand;
 
-  if (getDataText(file, &note, "note text")) {
+  if (getDataText(file, &operand, "note text")) {
     if (!hideBindings(ktd)) {
-      unsigned int newCount = ktd->table->noteCount + 1;
-      wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
+      DataString string;
 
-      if (!newTable) {
-        logSystemError("realloc");
-        return 0;
-      }
+      if (parseDataString(file, &string, operand.characters, operand.length, 0)) {
+        unsigned int newCount = ktd->table->noteCount + 1;
+        wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
 
-      ktd->table->noteTable = newTable;
-
-      {
-        wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, note.length+1));
-
-        if (!noteString) {
-          logMallocError();
+        if (!newTable) {
+          logSystemError("realloc");
           return 0;
         }
 
-        wmemcpy(noteString, note.characters, note.length);
-        noteString[note.length] = 0;
-        ktd->table->noteTable[ktd->table->noteCount++] = noteString;
-        return 1;
+        ktd->table->noteTable = newTable;
+
+        {
+          wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, string.length+1));
+
+          if (!noteString) {
+            logMallocError();
+            return 0;
+          }
+
+          wmemcpy(noteString, string.characters, string.length);
+          noteString[string.length] = 0;
+          ktd->table->noteTable[ktd->table->noteCount++] = noteString;
+          return 1;
+        }
       }
     }
   }

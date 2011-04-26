@@ -360,7 +360,7 @@ getDataText (DataFile *file, DataOperand *text, const char *description) {
   return 1;
 }
 
-static int
+int
 parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode) {
   int index = 0;
 
