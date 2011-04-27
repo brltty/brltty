@@ -17,6 +17,11 @@
 ###############################################################################
 
 # Key subtable for HandyTech keypad keys
+note The 16 keys of a Handy Tech Keypad are named like this:
+note * B9    One   Two   Three
+note * B10   Four  Five  Six
+note * B11   Seven Eight Nine
+note * B12   B13   Zero  B14
 
 bind B9 SAY_ABOVE
 bind B10 SAY_LINE
