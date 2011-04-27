@@ -20,6 +20,30 @@ you're using a serial connection then specify "serial:/path/to/device", e.g.
 trailing colon is important). If you're using a bluetooth connection then
 specify "bluez:address", e.g. "bluez:01:23:45:67:89:AB".
 
+Active Braille:
+---------------
+
+An external keyboard can be connected to your Active Braille via USB. The 
+keyboard is presented to the host as though it were a true HID (Human Interface 
+Device) in its own right. If you are using USB (not yet supported) to connect 
+your Active Braille to the host, most modern operating systems will 
+automatically recognize and correctly handle the keyboard. If you are using 
+Bluetooth to connect your Active Braille to the host, you will need to do some 
+additional setup to get the keyboard working.
+
+For Bluetooth on Linux: Add the Bluetooth device address and the PIN of your 
+Active Braille to the file /var/lib/bluetooth/<host-address>/pincodes so that 
+it will successfully pair with the host. Then, to enable keyboard input from 
+the Active Braille, execuzte the following command as root:
+
+   bluez-test-input connect 00:01:02:03:04:05
+
+Note that you will need to replace the sample Bluetooth device address in the 
+example above with that of your Active Braille.
+
+Braille Star:
+-------------
+
 Braille Star models allow the use of an external keyboard for input. It can be
 used not only while the Braille Star is in "Notetaker" mode, i.e. while not
 connected to any external PC hardware, but also as a keyboard for the PC
