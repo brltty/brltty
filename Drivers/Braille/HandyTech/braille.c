@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -1049,9 +1050,70 @@ setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }
 
+typedef int (DateTimeProcessor) (BrailleDisplay *brl, const HT_DateTime *dateTime);
+static DateTimeProcessor *dateTimeProcessor = NULL;
+
 static int
-requestRealTimeClock (BrailleDisplay *brl) {
-  return writeExtendedPacket(brl, HT_EXTPKT_GetRTC, NULL, 0);
+requestDateTime (BrailleDisplay *brl, DateTimeProcessor *processor) {
+  int result = writeExtendedPacket(brl, HT_EXTPKT_GetRTC, NULL, 0);
+
+  if (result) {
+    dateTimeProcessor = processor;
+  }
+
+  return result;
+}
+
+static int
+logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
+  logMessage(LOG_INFO,
+             "date and time of %s:"
+             " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
+             " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
+             model->name,
+             getBigEndian(dateTime->year), dateTime->month, dateTime->day,
+             dateTime->hour, dateTime->minute, dateTime->second);
+
+  return 1;
+}
+
+static int
+compareAndMaybeSetDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
+  struct tm t0 = {
+    .tm_year = getBigEndian(dateTime->year) - 1900,
+    .tm_mon = dateTime->month - 1,
+    .tm_mday = dateTime->day,
+    .tm_hour = dateTime->hour,
+    .tm_min = dateTime->minute,
+    .tm_sec = dateTime->second,
+    .tm_isdst = -1
+  };
+
+  time_t deviceTime = mktime(&t0);
+  time_t hostTime = time(NULL);
+  double delta = difftime(deviceTime, hostTime);
+
+  if (fabs(delta) > 1) {
+    const struct tm *t = localtime(&hostTime);
+
+    HT_DateTime payload = {
+      .month = t->tm_mon + 1,
+      .day = t->tm_mday,
+      .hour = t->tm_hour,
+      .minute = t->tm_min,
+      .second = t->tm_sec
+    };
+    putLittleEndian(&payload.year, t->tm_year + 1900);
+
+    logMessage(LOG_DEBUG, "Time difference between host and device: %.0f", delta);
+
+    if (writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
+                            (unsigned char *)&payload, sizeof(payload))) {
+      return requestDateTime(brl, logDateTime);
+    }
+  }
+
+  return 1;
 }
 
 static int
@@ -1103,20 +1165,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               if (setTime) {
                 if (model->identifier == HT_MODEL_ActiveBraille) {
-                  time_t now = time(NULL);
-                  const struct tm *t = localtime(&now);
-
-                  HT_DateTime payload = {
-                    .month = t->tm_mon + 1,
-                    .day = t->tm_mday,
-                    .hour = t->tm_hour,
-                    .minute = t->tm_min,
-                    .second = t->tm_sec
-                  };
-                  putBigEndian(&payload.year, t->tm_year+1900);
-
-                  writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
-                                      (unsigned char *)&payload, sizeof(payload));
+                  requestDateTime(brl, compareAndMaybeSetDateTime);
                 } else {
                   logMessage(LOG_INFO, "%s does not support setting the clock", model->name);
                 }
@@ -1404,15 +1453,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                   case HT_EXTPKT_GetRTC: {
                     const HT_DateTime *const payload = (HT_DateTime *)bytes;
+                    int ok = 0;
 
-                    logMessage(LOG_INFO,
-                               "date and time of %s:"
-                               " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
-                               " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
-                               model->name,
-                               getBigEndian(payload->year), payload->month, payload->day,
-                               payload->hour, payload->minute, payload->second);
-                    continue;
+                    if (dateTimeProcessor) {
+                      ok = dateTimeProcessor(brl, payload);
+                      dateTimeProcessor = NULL;
+                    }
+
+                    if (ok) continue;
+
+                    break;
                   }
 
                   case HT_EXTPKT_AtcInfo: {
