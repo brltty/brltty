@@ -1078,7 +1078,7 @@ logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
 }
 
 static int
-compareAndMaybeSetDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
+synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
   struct tm t0 = {
     .tm_year = getBigEndian(dateTime->year) - 1900,
     .tm_mon = dateTime->month - 1,
@@ -1165,7 +1165,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               if (setTime) {
                 if (model->identifier == HT_MODEL_ActiveBraille) {
-                  requestDateTime(brl, compareAndMaybeSetDateTime);
+                  requestDateTime(brl, synchronizeDateTime);
                 } else {
                   logMessage(LOG_INFO, "%s does not support setting the clock", model->name);
                 }
@@ -1453,16 +1453,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                   case HT_EXTPKT_GetRTC: {
                     const HT_DateTime *const payload = (HT_DateTime *)bytes;
-                    int ok = 0;
+                    DateTimeProcessor *processor = dateTimeProcessor;
+                    dateTimeProcessor = NULL;
 
-                    if (dateTimeProcessor) {
-                      ok = dateTimeProcessor(brl, payload);
-                      dateTimeProcessor = NULL;
+                    if (processor) {
+                      if (!processor(brl, payload)) {
+                        break;
+                      }
                     }
 
-                    if (ok) continue;
-
-                    break;
+                    continue;
                   }
 
                   case HT_EXTPKT_AtcInfo: {
