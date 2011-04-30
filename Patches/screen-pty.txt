@@ -1,0 +1,17 @@
+If you compile screen on Mac OS X and encounter the following error:
+
+   pty.c:38:26: error: sys/stropts.h: No such file or directory
+
+then try applying the included screen pty.c patch for this problem as follows:
+
+   cd /path/to/screen-build-tree
+   patch -p0 </path/to/brltty/Patches/screen-pty.patch
+
+This patch was downloaded from the following location:
+
+   https://trac.macports.org/raw-attachment/ticket/13009/patch-pty.c
+
+It is documented as MacPorts ticket 13009, which can be read at the following 
+location:
+
+   https://trac.macports.org/ticket/13009
