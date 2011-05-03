@@ -109,7 +109,7 @@ bool WEBrailleOpen(int portType, int portNumber, DWORD *handle)
   int i,j;
   brlapi_range_t *cmd_ranges;
 
-  if (brlapi__openConnection(brl_handle, NULL, NULL) == -1)
+  if (brlapi__openConnection(brl_handle, NULL, NULL) == INVALID_HANDLE_VALUE)
     goto error;
 
   raw = portNumber == 2;
