@@ -33,6 +33,7 @@
 
 #include "scr_driver.h"
 #include "screen.h"
+#include "unicode.h"
 
 static char *
 vtPath (const char *base, unsigned char vt) {
