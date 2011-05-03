@@ -114,6 +114,8 @@ typedef signed long long	int64_t;
 #define PRIX32 "lX"
 #define PRIu16 "u"
 #define PRIX16 "X"
+#define PRIu8 "u"
+#define PRIX8 "X"
 
 #else /* __MSDOS__ */
 #include <inttypes.h>
