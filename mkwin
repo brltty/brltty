@@ -38,7 +38,7 @@ For a very quick startguide:
 - for sighted users, use the xw braille driver to get a virtual braille box."
 README_foot="
 If you are getting troubles, please run run-debug.bat and send us the debug.log
-file.
+and brltty.conf files.
 
 More documentation can be found in README.txt and doc/
 
@@ -54,13 +54,10 @@ Technical notes on this build
   http://libusb-win32.sourceforge.net/
 - braille.dll comes from http://libbraille.sourceforge.net/
 - python bindings are provided in Brlapi-$apiversion.win32.exe
-- C bindings are provided in include/ and lib/: a .def file is provided for
-  linking, run
-  lib /def:brlapi.def /name:brlapi-${apiversion%.*}.dll /out:brlapi.lib
-  to produce a brlapi.lib file suitable to your compiler. Then you can just
-  ship bin/brlapi-${apiversion%.*}.dll along your .exe application.
+- C bindings are provided in include/ and lib/: a .lib file is provided for
+  linking in e.g. Visual C.  Then you can just ship
+  bin/brlapi${apiversion%.*}.dll along your .exe application.
 "
-
 . "`dirname "${0}"`/prologue.sh"
 
 [ "$MSYSTEM" = "MINGW32" ] || programError 1 "This script is for MinGW32 only"
@@ -108,7 +105,7 @@ make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/li
 make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
 cp Bindings/Python/dist/Brlapi-$apiversion.win32.exe "${installRoot}"
 cp brlttycnf.exe "${installRoot}"
-cp Drivers/BrlAPI/WindowEyes/webrloem109.dll "${installRoot}/bin"
+cp Drivers/BrlAPI/WindowEyes/webrloem109.dll "${installRoot}"
 
 todos() {
   sed -e 's/'$'\033''\[[0-9]*m//g' -e 's/$/'$'\015'/ < "$1" > "$2"
@@ -203,6 +200,7 @@ cp "$SYSTEMROOT/system32/libusb0.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/libusb0_x64.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/braille.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/msvcr90.dll" "${installRoot}/bin"
+(cd "${installRoot}/lib" ; lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib )
 cp /mingw/bin/libiconv-2.dll "${installRoot}/bin"
 cp /mingw/bin/curses2.dll "${installRoot}/bin"
 rm -f "${installRoot}/bin/brltty-config"
