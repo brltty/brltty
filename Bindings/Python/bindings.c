@@ -24,10 +24,11 @@
 #include "brlapi.h"
 
 #ifdef __MINGW32__
-#include "win_pthread.h"
 
 #define WIN_ERRNO_STORAGE_CLASS static
 #include "win_errno.h"
+
+#include "win_pthread.h"
 
 #else /* __MINGW32__ */
 #include <pthread.h>
