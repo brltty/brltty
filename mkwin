@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-version=4.2
+version=4.3
 subversion=x
 apiversion=0.5.5
 whole_version=$version-$subversion
@@ -56,9 +56,9 @@ Technical notes on this build
 - python bindings are provided in Brlapi-$apiversion.win32.exe
 - C bindings are provided in include/ and lib/: a .def file is provided for
   linking, run
-  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
+  lib /def:brlapi.def /name:brlapi-${apiversion%.*}.dll /out:brlapi.lib
   to produce a brlapi.lib file suitable to your compiler. Then you can just
-  ship bin/brlapi${apiversion%.*} along your .exe application.
+  ship bin/brlapi-${apiversion%.*}.dll along your .exe application.
 "
 
 . "`dirname "${0}"`/prologue.sh"
