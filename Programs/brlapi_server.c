@@ -2555,6 +2555,7 @@ void api_link(BrailleDisplay *brl)
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
   brlResize(brl);
+  driverConstructed=1;
   pthread_mutex_lock(&connectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   pthread_mutex_unlock(&connectionsMutex);
@@ -2618,7 +2619,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
-  coreActive=driverConstructed=1;
+  coreActive=1;
 
   if ((notty.connections = createConnection(INVALID_FILE_DESCRIPTOR,0)) == NULL) {
     logMessage(LOG_WARNING, "Unable to create connections list");
