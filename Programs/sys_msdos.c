@@ -47,6 +47,7 @@
 #include "sys_ports_x86.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include <setjmp.h>
 #include <dpmi.h>
