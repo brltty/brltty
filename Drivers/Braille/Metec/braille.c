@@ -143,10 +143,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (getDeviceIdentity(identity, &identityLength)) break;
         identityLength = 0;
 
-        if (errno != EAGAIN) {
-          if (errno != EILSEQ) break;
+#ifdef EILSEQ
+        if (errno == EILSEQ) {
           retries = MIN(retries, 1);
+          continue;
         }
+#endif /* EILSEQ */
+
+        if (errno != EAGAIN) break;
       } while (retries-- > 0);
 
       if (identityLength || (retries < -1)) {
