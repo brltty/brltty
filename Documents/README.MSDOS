@@ -32,13 +32,14 @@ applying the same instructions to the gcc410s2.zip archive (listed above)
 instead of to the gcc32s2.zip archive (mentioned in the howto). You can also
 use a more recent binutils package too (2.16.91 works fine).
 
-You can use the cross-compiler with the following ./configure command (all on
-one line, of course):
+You can use the cross-compiler with the following ./configure command:
 
-   CC_FOR_BUILD=gcc LD=i586-pc-msdosdjgpp-ld ./configure
-      --prefix=/brltty-msdos --host=i586-pc-msdosdjgpp
-      --disable-api --disable-icu --without-speechd
-      --disable-x --without-usb-package --without-bluetooth-package
-      --with-braille-driver=-vr,all --without-libbraille
-      --with-speech-driver=all --without-flite
-      --with-screen-driver=pb,-all 
+   CC_FOR_BUILD=gcc LD=i586-pc-msdosdjgpp-ld ./configure              \
+      --prefix=/brltty-msdos                                          \
+      --host=i586-pc-msdosdjgpp --target=i586-pc-msdosdjgpp           \
+      --build=x86_64-unknown-linux-gnu                                \
+      --disable-api --disable-icu --without-speechd                   \
+      --disable-x --without-usb-package --without-bluetooth-package   \
+      --with-braille-driver=-vr,all --without-libbraille              \
+      --with-speech-driver=all --without-flite                        \
+      --with-screen-driver=pb,-all
