@@ -327,7 +327,7 @@ static int isRawCapable(const BrailleDriver *brl)
 /* Returns !0 if driver can return specific keycodes, 0 if not. */
 static int isKeyCapable(const BrailleDriver *brl)
 {
-  return (((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp->keyNameTables!=NULL));
+  return (((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNameTables!=NULL));
 }
 
 /* Function : suspendDriver */
@@ -1089,7 +1089,7 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     return 0;
   }
   pthread_mutex_lock(&driverMutex);
-  if (!driverConstructed && !resumeDriver(disp)) {
+  if (!driverConstructed && (!disp || !resumeDriver(disp))) {
     WERR(c->fd, BRLAPI_ERROR_DRIVERERROR,"driver resume error");
     pthread_mutex_unlock(&driverMutex);
     pthread_mutex_unlock(&rawMutex);
@@ -1295,7 +1295,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
       logMessage(LOG_WARNING,"Trying to reset braille terminal");
-      if (!trueBraille->reset || !trueBraille->reset(disp)) {
+      if (!trueBraille->reset || !disp || !trueBraille->reset(disp)) {
 	if (trueBraille->reset)
           logMessage(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
@@ -1308,7 +1308,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       suspendConnection = NULL;
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
-      if (!driverConstructed && !resumeDriver(disp))
+      if (!driverConstructed && (!disp || !resumeDriver(disp)))
 	logMessage(LOG_WARNING,"Couldn't resume braille driver");
       if (driverConstructed && trueBraille->reset) {
         logMessage(LOG_DEBUG,"Trying to reset braille terminal");
