@@ -24,7 +24,7 @@ struct MidiDeviceStruct {
   HMIDIOUT handle;
   unsigned char note;
   int count;
-  unsigned char buffer[0X80];
+  char buffer[0X80];
 };
 
 typedef enum {
@@ -46,7 +46,7 @@ logMidiOutError (MMRESULT error, int errorLevel, const char *action) {
 }
 
 static int
-addMidiMessage (MidiDevice *midi, const char *message, int length) {
+addMidiMessage (MidiDevice *midi, const unsigned char *message, int length) {
   if ((midi->count + length) > sizeof(midi->buffer))
     if (!flushMidiDevice(midi))
       return 0;
@@ -57,7 +57,7 @@ addMidiMessage (MidiDevice *midi, const char *message, int length) {
 }
 
 static int
-writeMidiMessage (MidiDevice *midi, const char *message, int length) {
+writeMidiMessage (MidiDevice *midi, const unsigned char *message, int length) {
   if (!addMidiMessage(midi, message, length)) return 0;
   if (!flushMidiDevice(midi)) return 0;
   return 1;
