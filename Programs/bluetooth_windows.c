@@ -160,7 +160,7 @@ bthReadData (
   size_t count = size;
 
   if (count) {
-    unsigned char *to = buffer;
+    char *to = buffer;
 
     while (1) {
       int result = recv(bcx->socket, to, count, 0);
@@ -197,7 +197,7 @@ bthReadData (
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
-  const unsigned char *from = buffer;
+  const char *from = buffer;
   size_t count = size;
 
   while (count) {
