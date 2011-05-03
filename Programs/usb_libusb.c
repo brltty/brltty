@@ -191,7 +191,7 @@ usbReadEndpoint (
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(descriptor);
-    int result = -1;
+    ssize_t result = -1;
 
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
