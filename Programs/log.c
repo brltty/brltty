@@ -27,6 +27,16 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef __MINGW32__
+/* MinGW defines localtime_r() in <pthread.h> */
+#include <pthread.h>
+#endif /* __MINGW32__ */
+
+#ifdef __MSDOS__
+/* DJGCC doesn't define localtime_r() but localtime() is safe */
+#define localtime_r(timep, result) (localtime(timep))
+#endif /* __MSDOS__ */
+
 #include "log.h"
 
 #if defined(HAVE_SYSLOG_H)
