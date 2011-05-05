@@ -34,7 +34,11 @@
 
 #ifdef __MSDOS__
 /* DJGCC doesn't define localtime_r() but localtime() is safe */
-#define localtime_r(timep, result) (localtime(timep))
+static inline struct tm *
+localtime_r (const time_t *timep, struct tm *result) {
+  *result = *localtime(timep);
+  return result;
+}
 #endif /* __MSDOS__ */
 
 #include "log.h"
