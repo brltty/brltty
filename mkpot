@@ -46,7 +46,7 @@ fi
 
 xgettext -o - \
    --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Developers" \
-   --keyword=strtext:1 --flag=LogPrint:2:c-format \
+   --keyword=strtext:1 --flag=logMessage:2:c-format \
    `find . -name '*.c' -print` |
 sed >"${potFile}" -e "
 s/PACKAGE/${packageName}/
