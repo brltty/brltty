@@ -34,7 +34,7 @@ additional setup to get the keyboard working.
 For Bluetooth on Linux: Add the Bluetooth device address and the PIN of your 
 Active Braille to the file /var/lib/bluetooth/<host-address>/pincodes so that 
 it will successfully pair with the host. Then, to enable keyboard input from 
-the Active Braille, execuzte the following command as root:
+the Active Braille, execute the following command as root:
 
    bluez-test-input connect 00:01:02:03:04:05
 
