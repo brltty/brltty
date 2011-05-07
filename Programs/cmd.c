@@ -137,7 +137,7 @@ describeCommand (int command, char *buffer, size_t size, int details) {
       buffer += length, size -= length;
     }
 
-    snprintf(buffer, size, "%s%n", cmd->description, &length);
+    snprintf(buffer, size, "%s%n", gettext(cmd->description), &length);
     if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
       const char *oldVerb = "toggle";
       size_t oldLength = strlen(oldVerb);

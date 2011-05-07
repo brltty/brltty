@@ -40,7 +40,7 @@ function writeCommandEntry(name, symbol, help) {
     }
   }
 
-  print "  .description = \"" help "\""
+  print "  .description = strtext(\"" help "\")"
   print "}"
   print ","
 }

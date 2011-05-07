@@ -20,7 +20,7 @@ all install uninstall install-programs install-help install-tables install-drive
 	cd $(PGM_DIR) && $(MAKE) $@
 
 POT_FILE = $(PACKAGE_NAME).pot
-$(POT_FILE):
+$(POT_FILE): Programs/cmds.auto.h
 	$(SRC_TOP)mkpot $(SRC_TOP) $(PACKAGE_NAME) $@
 pot: $(POT_FILE)
 
