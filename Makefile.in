@@ -21,7 +21,7 @@ all install uninstall install-programs install-help install-tables install-drive
 
 POT_FILE = $(PACKAGE_NAME).pot
 $(POT_FILE): Programs/cmds.auto.h
-	$(SRC_TOP)mkpot $(SRC_TOP) $(PACKAGE_NAME) $@
+	$(SRC_TOP)mkpot -o $@ -p $(PACKAGE_NAME) $(SRC_TOP)
 pot: $(POT_FILE)
 
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)

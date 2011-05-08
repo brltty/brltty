@@ -25,12 +25,12 @@ programMessage() {
 }
 
 syntaxError() {
-   programMessage "${1}"
+   [ "${#}" -eq 0 ] || programMessage "${1}"
    exit 2
 }
 
 semanticError() {
-   programMessage "${1}"
+   [ "${#}" -eq 0 ] || programMessage "${1}"
    exit 3
 }
 
