@@ -52,7 +52,7 @@ buildRoot=`pwd`
 xgettext -o - \
    --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Developers" \
    --keyword=strtext:1 --flag=logMessage:2:c-format \
-   `find "${sourceRoot}" "${buildRoot}" -name '*.c' -o -name '*.h'` |
+   `find ${sourceRoot} ${buildRoot} -name '*.c' -o -name '*.h'` |
 sed >"${outputFile}" -e "
 s/PACKAGE/${packageName}/
 "
