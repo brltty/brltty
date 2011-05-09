@@ -1,0 +1,1628 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR The BRLTTY Developers
+# This file is distributed under the same license as the brltty package.
+# Mario Lang <mlang@delysid.org>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: brltty 4.3\n"
+"Report-Msgid-Bugs-To: dave@mielke.cc\n"
+"POT-Creation-Date: 2011-05-09 17:08-0400\n"
+"PO-Revision-Date: 2011-05-07 17:32+0200\n"
+"Last-Translator: Mario Lang <mlang@delysid.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+
+#: /home/dave/brltty/firmness/Programs/main.c:135
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1817
+msgid "<off>"
+msgstr "<aus>"
+
+#: /home/dave/brltty/firmness/Programs/config.c:3192
+msgid "API Parameter"
+msgstr "API Parameter"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1768
+msgid "Alert Dots"
+msgstr "Warnpunkte"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1769
+msgid "Alert Messages"
+msgstr "Warnnachrichten"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1756
+msgid "Alert Tunes"
+msgstr "Warnsignale"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1622
+#: /home/dave/brltty/firmness/Programs/config.c:1712
+msgid "All"
+msgstr "Alle"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1656
+msgid "Alphabetic Cursor Coordinates (1 cell)"
+msgstr "Alphabetische Cursorkoordinaten (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1655
+msgid "Alphabetic Window Coordinates (1 cell)"
+msgstr "Alphabetische Braillezeilenkoordinaten (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1746
+msgid "Attributes Invisible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1791
+#: /home/dave/brltty/firmness/Programs/config.c:3152
+msgid "Attributes Table"
+msgstr "Attribute Tabelle"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1745
+msgid "Attributes Visible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1734
+msgid "Autorepeat"
+msgstr "Automatische Wiederholung"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1736
+msgid "Autorepeat Delay"
+msgstr "Wiederholungsverzögerung"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1737
+msgid "Autorepeat Interval"
+msgstr "Wiederholungsintervall"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1735
+msgid "Autorepeat Panning"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1772
+msgid "Autospeak"
+msgstr "Automatisches sprechen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2454
+msgid "BRLTTY terminated"
+msgstr "BRLTTY beendet"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1744
+msgid "Blinking Attributes"
+msgstr "Blinkende Attribute"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1747
+msgid "Blinking Capitals"
+msgstr "Blinkende Großbuchstaben"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1740
+msgid "Blinking Cursor"
+msgstr "Blinkender Cursor"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1602
+#: /home/dave/brltty/firmness/Programs/config.c:1636
+msgid "Block"
+msgstr "Block"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2278
+msgid "Braille Device"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:2274
+msgid "Braille Driver"
+msgstr "Braillezeilentreiber"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1750
+msgid "Braille Firmness"
+msgstr "Braille Stärke"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2277
+msgid "Braille Parameter"
+msgstr "Braillezeilenparameter"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1751
+msgid "Braille Sensitivity"
+msgstr "Braille Empfindlichkeit"
+
+#: /home/dave/brltty/firmness/Programs/config.c:288
+#, c-format
+msgid "Braille driver: one of {%s}"
+msgstr "Brailletreiber: einer von [%s]"
+
+#: /home/dave/brltty/firmness/Programs/config.c:449
+msgid "Braille window update interval [4]."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:87
+msgid "BrlAPI authorization/authentication string"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:80
+msgid "BrlAPI host and/or port to connect to"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1749
+msgid "Capitals Invisible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1748
+msgid "Capitals Visible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:3102
+msgid "Configuration File"
+msgstr "Konfigurationsdatei"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1793
+#: /home/dave/brltty/firmness/Programs/config.c:3159
+msgid "Contraction Table"
+msgstr "Kurzschrifttabelle"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:691
+#, c-format
+msgid "Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:667
+#, c-format
+msgid "Couldn't translate keysym %08X to keycode.\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1647
+msgid "Cursor Column (1 cell)"
+msgstr "Cursorspalte (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1646
+msgid "Cursor Coordinates (2 cells)"
+msgstr "Cursor Koordinaten (2 Zellen)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1742
+msgid "Cursor Invisible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1648
+msgid "Cursor Row (1 cell)"
+msgstr "Cursorzeile (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1739
+msgid "Cursor Style"
+msgstr "Cursorstil"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1741
+msgid "Cursor Visible Time"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1649
+msgid "Cursor and Window Column (2 cells)"
+msgstr "Cursor- und Braillezeilenspalte (2 Zellen)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1650
+msgid "Cursor and Window Row (2 cells)"
+msgstr "Cursor- und Braillezielnereihe (2 Zellen)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:430
+msgid "Device specifier for soundcard digital audio."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:440
+msgid "Device specifier for the Musical Instrument Digital Interface."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:471
+#, c-format
+msgid "Diagnostic logging level: %s, or one of {%s}"
+msgstr "Diagnistikprotokoll Level: %s, oder einer von {%s}"
+
+#: /home/dave/brltty/firmness/Programs/config.c:277
+msgid "Disable the application programming interface."
+msgstr "Deaktiviere die Programmierschnittstelle."
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:100
+msgid "Do not write any text to the braille device"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:3103
+msgid "Drivers Directory"
+msgstr "Treiber-Verzeichnis"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1732
+msgid "Eager Sliding Window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1642
+msgid "End"
+msgstr "Ende"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1623
+msgid "End of Line"
+msgstr "Am ende der Zeile"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1706
+msgid "Enqueue"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1766
+msgid "FM Volume"
+msgstr "FM Lautstärke"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1657
+msgid "Generic"
+msgstr "generisch"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2207
+msgid "Help Path"
+msgstr "Hilfe Pfad"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1609
+#: /home/dave/brltty/firmness/Programs/config.c:1617
+msgid "High"
+msgstr "Hoch"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1755
+msgid "Highlight Window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1705
+msgid "Immediate"
+msgstr "Sofort"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:520
+msgid "Incompatible XKB library\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:522
+msgid "Incompatible XKB server support\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:208
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:2153
+msgid "Key Bindings"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:2170
+#: /home/dave/brltty/firmness/Programs/config.c:3167
+msgid "Key Table"
+msgstr "Tastentabelle"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1629
+msgid "Left"
+msgstr "Links"
+
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:44
+msgid "List key names on standard output."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:51
+msgid "List key table on standard output."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:506
+msgid "Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:487
+msgid "Log to standard error rather than to the system log."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1607
+#: /home/dave/brltty/firmness/Programs/config.c:1615
+msgid "Low"
+msgstr "Niedrig"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1763
+msgid "MIDI Instrument"
+msgstr "MIDI Instrument"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1762
+msgid "MIDI Volume"
+msgstr "MIDI Lautstärke"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1610
+#: /home/dave/brltty/firmness/Programs/config.c:1618
+msgid "Maximum"
+msgstr "Maximum"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1608
+#: /home/dave/brltty/firmness/Programs/config.c:1616
+msgid "Medium"
+msgstr "Mittel"
+
+#: /home/dave/brltty/firmness/Programs/config.c:457
+msgid "Message hold time [400]."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1606
+#: /home/dave/brltty/firmness/Programs/config.c:1614
+msgid "Minimum"
+msgstr "Minimum"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1687
+msgid "Musical Instrument Digital Interface"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1596
+msgid "No"
+msgstr "Nein"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1628
+#: /home/dave/brltty/firmness/Programs/config.c:1634
+#: /home/dave/brltty/firmness/Programs/config.c:1710
+msgid "None"
+msgstr "Keine"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1759
+msgid "PCM Volume"
+msgstr "PCM Lautstärke"
+
+#: /home/dave/brltty/firmness/Programs/config.c:270
+msgid "Parameters for the application programming interface."
+msgstr "Parameter für die Programmierschnittstelle."
+
+#: /home/dave/brltty/firmness/Programs/config.c:298
+msgid "Parameters for the braille driver."
+msgstr "Paramter für den Brailletreiber."
+
+#: /home/dave/brltty/firmness/Programs/config.c:421
+msgid "Parameters for the screen driver."
+msgstr "Parameter für den Bildschirmtreiber."
+
+#: /home/dave/brltty/firmness/Programs/config.c:393
+msgid "Parameters for the speech driver."
+msgstr "Parameter für den Sprachausgabentreiber."
+
+#: /home/dave/brltty/firmness/Programs/config.c:347
+msgid "Path to attributes translation table file."
+msgstr "Pfad zur Attributsübersetzungstabelle."
+
+#: /home/dave/brltty/firmness/Programs/config.c:356
+msgid "Path to contraction table file."
+msgstr "Pfad zur Kurzschriftstabelle."
+
+#: /home/dave/brltty/firmness/Programs/config.c:253
+msgid "Path to default settings file."
+msgstr "Pfad für die Default Einstellungsdatei."
+
+#: /home/dave/brltty/firmness/Programs/config.c:308
+msgid "Path to device for accessing braille display."
+msgstr "Pfad zur Gerätedatei um auf Braillezeile zuzugreifen."
+
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:69
+#: /home/dave/brltty/firmness/Programs/ctbtest.c:54
+msgid "Path to directory containing tables."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:60
+#: /home/dave/brltty/firmness/Programs/config.c:235
+msgid "Path to directory for loading drivers."
+msgstr "Pfad für das Verzeichnis aus dem Treiber geladen werden."
+
+#: /home/dave/brltty/firmness/Programs/config.c:329
+msgid "Path to directory for text and attributes tables."
+msgstr "Pfad für das Verzeichnis für Text- und Attributstabellen."
+
+#: /home/dave/brltty/firmness/Programs/config.c:244
+#: /home/dave/brltty/firmness/Programs/brltest.c:64
+msgid "Path to directory which can be written to."
+msgstr "Pfad für das Verzeichnis in das geschrieben werden kann."
+
+#: /home/dave/brltty/firmness/Programs/config.c:365
+msgid "Path to key table file."
+msgstr "Pfad zur Tastentabelle."
+
+#: /home/dave/brltty/firmness/Programs/config.c:480
+msgid "Path to log file."
+msgstr "Pfad zur Protokolldatei."
+
+#: /home/dave/brltty/firmness/Programs/config.c:226
+msgid "Path to process identifier file."
+msgstr "Pfad zur Prozessidentifikationsdatei."
+
+#: /home/dave/brltty/firmness/Programs/config.c:401
+msgid "Path to speech pass-through FIFO."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:339
+msgid "Path to text translation table file."
+msgstr "Pfad zur Textübersetzungstabelle."
+
+#: /home/dave/brltty/firmness/Programs/config.c:2290
+msgid "Preferences File"
+msgstr "Einstellungsdatei"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1594
+msgid "Preferences Menu"
+msgstr "Einstellungsmenü"
+
+#: /home/dave/brltty/firmness/Programs/options.h:60
+msgid "Print a usage summary (all options), and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/options.h:55
+msgid "Print a usage summary (commonly used options only), and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:373
+msgid "Properties of the keyboard."
+msgstr "Eigenschaften der Tastatur."
+
+#: /home/dave/brltty/firmness/Programs/config.c:260
+msgid "Recognize environment variables."
+msgstr "Erkenne Umgebungsvariablen."
+
+#: /home/dave/brltty/firmness/Programs/config.c:320
+msgid "Release braille device when screen or window is unreadable."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:494
+msgid "Remain a foreground process."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:216
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1624
+msgid "Rest of Line"
+msgstr "Rest der Zeile"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1630
+msgid "Right"
+msgstr "Rechts"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1726
+msgid "Save on Exit"
+msgstr "Beim verlassen speichern"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1771
+msgid "Say-Line Mode"
+msgstr "Sprich-Zeile Modus"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2638
+msgid "Screen Driver"
+msgstr "Bildschirmtreiber"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1651
+msgid "Screen Number (1 cell)"
+msgstr "Bildschirmnummer (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2644
+msgid "Screen Parameter"
+msgstr "Bildschirmparameter"
+
+#: /home/dave/brltty/firmness/Programs/config.c:411
+#, c-format
+msgid "Screen driver: one of {%s}"
+msgstr "Bildschirmtreiber: einer von [%s]"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1743
+msgid "Show Attributes"
+msgstr "Zeige Attribute"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1738
+msgid "Show Cursor"
+msgstr "Cursor anzeigen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1729
+msgid "Skip Blank Windows"
+msgstr "Identische Braillezeileninhalte überspringen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1728
+msgid "Skip Identical Lines"
+msgstr "Identische Zeilen überspringen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1731
+msgid "Sliding Window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1711
+msgid "Some"
+msgstr "Manche"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1635
+msgid "Space"
+msgstr "Leerschlag"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2514
+msgid "Speech Driver"
+msgstr "Sprachausgabentreiber"
+
+#: /home/dave/brltty/firmness/Programs/config.c:3231
+msgid "Speech FIFO"
+msgstr "Sprachausgaben-FIFO"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2517
+msgid "Speech Parameter"
+msgstr "Sprachausgabenparameter"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1775
+msgid "Speech Pitch"
+msgstr "Tonhöhe der Sprachausgabe"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1776
+msgid "Speech Punctuation"
+msgstr "Satzzeichenansage"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1773
+msgid "Speech Rate"
+msgstr "Sprachgeschwindigkeit"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1774
+msgid "Speech Volume"
+msgstr "Sprachlautstärke"
+
+#: /home/dave/brltty/firmness/Programs/config.c:383
+#, c-format
+msgid "Speech driver: one of {%s}"
+msgstr "Sprachausgabentreiber: einer von [%s]"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1652
+msgid "State Dots (1 cell)"
+msgstr "Statuspunkte (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1653
+msgid "State Letter (1 cell)"
+msgstr "Statusbuchstable (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1779
+msgid "Status Count"
+msgstr "Status Anzahl"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1724
+msgid "Status Field "
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1778
+msgid "Status Position"
+msgstr "Status Position"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1780
+msgid "Status Separator"
+msgstr "Status Separator"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1637
+msgid "Status Side"
+msgstr "Statusseitig"
+
+#: /home/dave/brltty/firmness/Programs/config.c:463
+msgid "Suppress start-up messages."
+msgstr "Unterdrücke Nachrichten betreffen den Start."
+
+#: /home/dave/brltty/firmness/Programs/config.c:3105
+msgid "Tables Directory"
+msgstr "Tabellen-Verzeichnis"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1638
+msgid "Text Side"
+msgstr "Textseitig"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1727
+msgid "Text Style"
+msgstr "Textstil"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1790
+#: /home/dave/brltty/firmness/Programs/config.c:3144
+msgid "Text Table"
+msgstr "Text Tabelle"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1654
+msgid "Time (2 cells)"
+msgstr "Uhrzeit (2 Zellen)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1757
+msgid "Tune Device"
+msgstr "Signalgerät"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1601
+msgid "Underline"
+msgstr "Unterstrich"
+
+#: /home/dave/brltty/firmness/Programs/options.c:135
+msgid "Usage"
+msgstr "Benutzung"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1730
+msgid "Which Blank Windows"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1644
+msgid "Window Column (1 cell)"
+msgstr "Braillezeilenspalte (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1643
+msgid "Window Coordinates (2 cells)"
+msgstr "Braillezielne Koordinatesn (2 Zellen)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1753
+msgid "Window Follows Pointer"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1733
+msgid "Window Overlap"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1645
+msgid "Window Row (1 cell)"
+msgstr "Braillezeilenzeile (1 Zelle)"
+
+#: /home/dave/brltty/firmness/Programs/config.c:3092
+msgid "Working Directory"
+msgstr "Arbeitsverzeichnis"
+
+#: /home/dave/brltty/firmness/Programs/config.c:3099
+msgid "Writable Directory"
+msgstr "Scheibbares Verzeichnis"
+
+#: /home/dave/brltty/firmness/Programs/config.c:500
+msgid "Write the start-up logs, and then exit."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:296
+#, c-format
+msgid "X Error %d, %s on display %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:94
+msgid "X display to connect to"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:628
+msgid "XFree(wm_name) for change"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1597
+msgid "Yes"
+msgstr "Ja"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:78
+msgid "[host][:port]"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:635
+msgid "append characters to cut buffer"
+msgstr "hänge Zeichenkette an die Zwischenablage an"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:531
+msgid "append to existing cut buffer from character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:267
+#: /home/dave/brltty/firmness/Programs/config.c:295
+#: /home/dave/brltty/firmness/Programs/config.c:371
+#: /home/dave/brltty/firmness/Programs/config.c:390
+#: /home/dave/brltty/firmness/Programs/config.c:418
+msgid "arg,..."
+msgstr "arg,..."
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:659
+msgid "backspace key"
+msgstr "Backspace Taste"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:338
+#, c-format
+msgid "bad format for VT number\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:341
+#, c-format
+msgid "bad type for VT number\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1971
+msgid "black"
+msgstr "schwarz"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:2011
+msgid "blink"
+msgstr "blink"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1972
+msgid "blue"
+msgstr "blau"
+
+#: /home/dave/brltty/firmness/Programs/config.c:3204
+#, c-format
+msgid "braille device not specified"
+msgstr "Braille-Gerät nicht spezifiziert"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:510
+msgid "braille display temporarily unavailable"
+msgstr "Braillezeile temporär nicht verfügbar"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2229
+msgid "braille driver initialization failed"
+msgstr "Braillezeilentreiber Initialisierung fehlgeschlagen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2301
+msgid "braille driver not loadable"
+msgstr "Brailletreiber nicht ladbar"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:517
+msgid "bring cursor to character"
+msgstr "bringe Cursor zu Zeichen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:486
+msgid "bring cursor to line"
+msgstr "bringe Cursor zur aktuellen Braillezeilenposititon"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1977
+msgid "brown"
+msgstr "braun"
+
+#: /home/dave/brltty/firmness/Programs/config.c:590
+msgid "cannot compile attributes table"
+msgstr "kann Attributstabelle nicht übersetzen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:637
+msgid "cannot compile contraction table"
+msgstr "kann Kurzschriftstabelle nicht übersetzen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:691
+msgid "cannot compile key table"
+msgstr "kann Tastentabelle nicht übersetzen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:559
+msgid "cannot compile text table"
+msgstr "kann Texttabelle nicht übersetzen"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:175
+#, c-format
+msgid "cannot connect to brltty at %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:508
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/program.c:147
+#, c-format
+msgid "cannot determine program directory"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1432
+#: /home/dave/brltty/firmness/Programs/config.c:3095
+msgid "cannot determine working directory"
+msgstr "kann Arbeitsverzeichnis nicht ermitteln"
+
+#: /home/dave/brltty/firmness/Programs/sys_windows.c:108
+msgid "cannot find procedure"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/program.c:159
+msgid "cannot fix install path"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:320
+#, c-format
+msgid "cannot get root window XFree86_VT property\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:192
+msgid "cannot get tty\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:195
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:552
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:199
+msgid "cannot ignore keys\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:599
+msgid "cannot load attributes table"
+msgstr "kann Attributstabelle nicht laden"
+
+#: /home/dave/brltty/firmness/Programs/sys_windows.c:101
+msgid "cannot load library"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:568
+msgid "cannot load text table"
+msgstr "kann Texttabelle nicht laden"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2209
+msgid "cannot open help file"
+msgstr "kann Hilfsdatei nicht öffnen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2176
+msgid "cannot open key table"
+msgstr "kann Tastentabelle nicht öffnen"
+
+#: /home/dave/brltty/firmness/Programs/program.c:249
+msgid "cannot open process identifier file"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1430
+msgid "cannot open working directory"
+msgstr "kann Arbeitsverzeichnis nicht öffnen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:962
+msgid "cannot read preferences file"
+msgstr "kann Einstellungsdatei nicht lesen"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:227
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1419
+#: /home/dave/brltty/firmness/Programs/file.c:216
+msgid "cannot set working directory"
+msgstr "kann Arbeitsverzeichnis nicht setzen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1128
+msgid "cannot write to preferences file"
+msgstr "kann Einstellungsdatei nicht schreiben"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:220
+#, c-format
+msgid "cannot write window name %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1886
+msgid "changes discarded"
+msgstr "Änderungen verworfen"
+
+#: /home/dave/brltty/firmness/Programs/options.c:638
+msgid "configuration directive specified more than once"
+msgstr "Konfigurationsdirektive mehrfach angegeben"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1669
+msgid "console tone generator"
+msgstr "Konsole Tongenerator"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:628
+msgid "copy characters to cut buffer"
+msgstr "kopiere Zeichenkette in die Zwischenablage"
+
+#: /home/dave/brltty/firmness/Programs/config.c:447
+#: /home/dave/brltty/firmness/Programs/config.c:455
+msgid "csecs"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:689
+msgid "cursor-down key"
+msgstr "Cursor-Runter Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:671
+msgid "cursor-left key"
+msgstr "Cursor-Links Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:677
+msgid "cursor-right key"
+msgstr "Cursor-Rechts Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:683
+msgid "cursor-up key"
+msgstr "Cursor-Rauf Taste"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1974
+msgid "cyan"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1979
+msgid "dark grey"
+msgstr "dunkelgrau"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:450
+msgid "decrease speech rate"
+msgstr "langsamer sprechen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:462
+msgid "decrease speech volume"
+msgstr "leiser sprechen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:725
+msgid "delete key"
+msgstr "Lösch Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:575
+msgid "describe character"
+msgstr "beschreibe Zeichen"
+
+#: /home/dave/brltty/firmness/Programs/config.c:305
+#: /home/dave/brltty/firmness/Programs/config.c:428
+#: /home/dave/brltty/firmness/Programs/config.c:438
+msgid "device"
+msgstr "Gerät"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:606
+#, c-format
+msgid "didn't grab parent of %#010lx\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:624
+#, c-format
+msgid "didn't grab window %#010lx\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:463
+#, c-format
+msgid "didn't grab window %#010lx but got focus\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:57
+#: /home/dave/brltty/firmness/Programs/ktbtest.c:66
+#: /home/dave/brltty/firmness/Programs/config.c:232
+#: /home/dave/brltty/firmness/Programs/config.c:241
+#: /home/dave/brltty/firmness/Programs/config.c:326
+#: /home/dave/brltty/firmness/Programs/brltest.c:61
+#: /home/dave/brltty/firmness/Programs/ctbtest.c:51
+msgid "directory"
+msgstr "Verzeichnis"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:92
+msgid "display"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:4
+msgid "do nothing"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:285
+#: /home/dave/brltty/firmness/Programs/config.c:380
+#: /home/dave/brltty/firmness/Programs/config.c:408
+msgid "driver"
+msgstr "Treiber"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:713
+msgid "end key"
+msgstr "End Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:647
+msgid "enter key"
+msgstr "Enter Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:355
+msgid "enter/leave command learn mode"
+msgstr "aufruf/verlassen des Lernmodus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:343
+msgid "enter/leave help display"
+msgstr "aufruf/verlassen der Hilfe"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:361
+msgid "enter/leave preferences menu"
+msgstr "aufruf/verlassen des Einstellungsmenüs"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:349
+msgid "enter/leave status display"
+msgstr "aufruf/verlassen der Statusanzeige"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:665
+msgid "escape key"
+msgstr "Escape Taste"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2924
+msgid "excess argument"
+msgstr "überschüssiges Argument"
+
+#: /home/dave/brltty/firmness/Programs/main.c:145
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/main.c:152
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:559
+msgid "failed to get first focus\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:224
+#: /home/dave/brltty/firmness/Programs/config.c:250
+#: /home/dave/brltty/firmness/Programs/config.c:336
+#: /home/dave/brltty/firmness/Programs/config.c:345
+#: /home/dave/brltty/firmness/Programs/config.c:354
+#: /home/dave/brltty/firmness/Programs/config.c:363
+#: /home/dave/brltty/firmness/Programs/config.c:399
+#: /home/dave/brltty/firmness/Programs/config.c:478
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:85
+msgid "file"
+msgstr "Datei"
+
+#: /home/dave/brltty/firmness/Programs/options.c:693
+#, c-format
+msgid "file '%s' processing error."
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/main.c:140
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:225
+msgid "freeze/unfreeze screen image"
+msgstr "Bildschirm einfrieren/auftauen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:732
+msgid "function key"
+msgstr "Funktionstaste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:212
+msgid "go back after cursor tracking"
+msgstr "Gehe zurÃ¼ck nach Cursor tracking"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:18
+msgid "go down one line"
+msgstr "Gehe eine Zeile nach unten"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:32
+msgid "go down several lines"
+msgstr "Gehe mehrere Zeilen nach unten"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:102
+msgid "go down to first line of next paragraph"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:621
+msgid "go down to nearest line with different character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:46
+msgid "go down to nearest line with different content"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:60
+msgid "go down to nearest line with different highlighting"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:568
+msgid "go down to nearest line with less indent than character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:116
+msgid "go down to next command prompt"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:149
+msgid "go left half a window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:135
+msgid "go left one character"
+msgstr "Gehe ein Zeichen nach links"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:163
+msgid "go left one window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:177
+msgid "go left to nearest non-blank window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:156
+msgid "go right half a window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:142
+msgid "go right one character"
+msgstr "Gehe ein Zeichen nach rechts"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:170
+msgid "go right one window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:184
+msgid "go right to nearest non-blank window"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:88
+msgid "go to beginning of bottom line"
+msgstr "Gehe zum Anfang des letzten Zeile des Bildschirms"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:191
+msgid "go to beginning of line"
+msgstr "Gehe zum Beginn der Zeile"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:81
+msgid "go to beginning of top line"
+msgstr "Gehe zum Anfang der ersten Zeile des Bildschirms"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:74
+msgid "go to bottom line"
+msgstr "Gehe zur letzten Zeile des Bildschirms"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:426
+msgid "go to current speech position"
+msgstr "gehe zur derzeiigen Sprachposition"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:205
+msgid "go to cursor"
+msgstr "Gehe zum Cursor"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:219
+msgid "go to cursor or go back after cursor tracking"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:198
+msgid "go to end of line"
+msgstr "Gehe zum Ende der Zeile"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:380
+msgid "go to first item"
+msgstr "gehe zum ersten Menüpunkt"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:387
+msgid "go to last item"
+msgstr "gehe zum letzen Menüpunkt"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:401
+msgid "go to next item"
+msgstr "gehe zum nächsten Menüpunkt"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:394
+msgid "go to previous item"
+msgstr "gehe zum vorherigen Menüpunkt"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:597
+msgid "go to remembered window position"
+msgstr "gehe zu gemerkter Braillezeilenposition"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:605
+msgid "go to selected line"
+msgstr "gehe zu ausgewählter Zeile"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:67
+msgid "go to top line"
+msgstr "Gehe zur ersten Zeile des Bildschirms"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:11
+msgid "go up one line"
+msgstr "Gehe eine Zeile nach oben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:25
+msgid "go up several lines"
+msgstr "Gehe mehrere Zeilen nach oben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:95
+msgid "go up to last line of previous paragraph"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:613
+msgid "go up to nearest line with different character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:39
+msgid "go up to nearest line with different content"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:53
+msgid "go up to nearest line with different highlighting"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:560
+msgid "go up to nearest line with less indent than character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:109
+msgid "go up to previous command prompt"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1973
+msgid "green"
+msgstr "grün"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1701
+msgid "help not available"
+msgstr "Hilfe nicht verfügbar"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:707
+msgid "home key"
+msgstr "Home Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:456
+msgid "increase speech rate"
+msgstr "schneller sprechen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:468
+msgid "increase speech volume"
+msgstr "lauter sprechen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:750
+msgid "input AT (set 2) keyboard scan code"
+msgstr "AT (set 2) Tastatur-Scancode eingeben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:762
+msgid "input PS/2 (set 3) keyboard scan code"
+msgstr "PS/2 (set 3) Tastatur-Scancode eingeben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:756
+msgid "input XT (set 1) keyboard scan code"
+msgstr "XT (set 1) Tastatur-Scancode eingeben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:744
+msgid "input braille character"
+msgstr "Braillezeichen eingeben"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:641
+msgid "input keyboard key"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:738
+msgid "input unicode character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:492
+msgid "insert cut text at cursor"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:719
+msgid "insert key"
+msgstr "Einfüge Taste"
+
+#: /home/dave/brltty/firmness/Programs/program.c:161
+msgid "install path not absolute"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/options.c:107
+msgid "invalid counter setting"
+msgstr "ungütlige Zäöhler-Einstellung"
+
+#: /home/dave/brltty/firmness/Programs/options.c:100
+msgid "invalid flag setting"
+msgstr "ungütlige Schalter-Einstellung"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2966
+msgid "invalid log level"
+msgstr "ungültiges Log-Level"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2932
+msgid "invalid message delay"
+msgstr "ungültige Wartezeit für Nachrichten"
+
+#: /home/dave/brltty/firmness/Programs/config.c:966
+msgid "invalid preferences file"
+msgstr "ungültige Einstellungsdatei"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2928
+msgid "invalid update interval"
+msgstr "Ungütliges Update-Interval"
+
+#: /home/dave/brltty/firmness/Programs/config.c:469
+msgid "level"
+msgstr "Level"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1980
+msgid "light blue"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1982
+msgid "light cyan"
+msgstr "Helltürkis"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1981
+msgid "light green"
+msgstr "hellgrün"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1978
+msgid "light grey"
+msgstr "hellgrau"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1984
+msgid "light magenta"
+msgstr "Hellmagenta"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1983
+msgid "light red"
+msgstr "Hellrot"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:545
+msgid "linear cut to character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1976
+msgid "magenta"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/options.c:475
+msgid "missing operand"
+msgstr "fehlender Operant"
+
+#: /home/dave/brltty/firmness/Programs/parse.c:215
+msgid "missing parameter name"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/parse.c:227
+msgid "missing parameter qualifier"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/parse.c:212
+msgid "missing parameter value"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:329
+#, c-format
+msgid "more than one item for VT number\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:314
+#, c-format
+msgid "no XFree86_VT atom\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:325
+#, c-format
+msgid "no items for VT number\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:2154
+#: /home/dave/brltty/firmness/Programs/config.c:3160
+#: /home/dave/brltty/firmness/Programs/config.c:3168
+#: /home/dave/brltty/firmness/Programs/config.c:3232
+msgid "none"
+msgstr "keine"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1132
+msgid "not saved"
+msgstr "nicht gespeichert"
+
+#: /home/dave/brltty/firmness/Programs/options.c:628
+msgid "operand not supplied for configuration directive"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/options.c:139
+msgid "option"
+msgstr "Option"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:701
+msgid "page-down key"
+msgstr "Seite-Runter Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:695
+msgid "page-up key"
+msgstr "Seite-Rauf Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:582
+msgid "place left end of window at character"
+msgstr "positioniere linken Rand der Braillezeile bei Zeichen"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:538
+msgid "rectangular cut to character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1975
+msgid "red"
+msgstr "rot"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2446
+#, c-format
+msgid "reinitializing braille driver"
+msgstr "Neuinitialisierung des Brailletreibers"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2607
+#, c-format
+msgid "reinitializing speech driver"
+msgstr "Neuinitialisierung des Sprachausgabentreibers"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:589
+msgid "remember current window position"
+msgstr "merke derzeitige Braillezeilenposition"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:297
+#, c-format
+msgid "resource %#010lx, req %u:%u\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:498
+msgid "restart braille driver"
+msgstr "Brailletreiber neu starten"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:504
+msgid "restart speech driver"
+msgstr "Sprachausgabentreiber neu starten"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:373
+msgid "restore preferences from disk"
+msgstr "Einstellungen laden"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:367
+msgid "save preferences to disk"
+msgstr "Einstellungen speichern"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2655
+msgid "screen driver not loadable"
+msgstr "Bildschirmtreiber nicht ladbar"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:122
+msgid "search backward for cut text"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:128
+msgid "search forward for cut text"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:413
+msgid "select next choice"
+msgstr "wählne nächste Möglichkeit"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:407
+msgid "select previous choice"
+msgstr "wähle vorherige Möglichkeit"
+
+#: /home/dave/brltty/firmness/Programs/config.c:1678
+msgid "soundcard digital audio"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1696
+msgid "soundcard synthesizer"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:432
+msgid "speak current line"
+msgstr "sprich aktuelle Zeile"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:444
+msgid "speak from current line through bottom of screen"
+msgstr "sprich von der aktueller Zeile bis zum Ende des Bildschirms"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:438
+msgid "speak from top of screen through current line"
+msgstr "sprich vom Beginn des Bildschirms bis zur aktuellen Zeile"
+
+#: /home/dave/brltty/firmness/Programs/config.c:2528
+msgid "speech driver not loadable"
+msgstr "Sprachausgabentreiber nicht ladbar"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:524
+msgid "start new cut buffer at character"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:419
+msgid "stop speaking"
+msgstr "sprechen stoppen"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:510
+msgid "strange old error handler\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:769
+msgid "switch to command context"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:480
+msgid "switch to next virtual terminal"
+msgstr "wechsle zum nächsten virtuellen Terminal"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:474
+msgid "switch to previous virtual terminal"
+msgstr "wechsle zum vorherigen virtuellen Terminal"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:552
+msgid "switch to virtual terminal"
+msgstr "wechsle zu virtuellem Terminal"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:653
+msgid "tab key"
+msgstr "Tab Taste"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:323
+msgid "toggle alert tunes on/off"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:309
+msgid "toggle attribute blinking on/off"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:302
+msgid "toggle attribute underlining on/off"
+msgstr "schalte Unterstreichung von Atrributen ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:330
+msgid "toggle autorepeat on/off"
+msgstr "schalte automatische Wiederholung ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:337
+msgid "toggle autospeak on/off"
+msgstr "schalte automatisches sprechen ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:316
+msgid "toggle capital letter blinking on/off"
+msgstr "schalte blinkende Großbuchstaben ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:295
+msgid "toggle cursor blinking on/off"
+msgstr "schalte blinkenden Cursor ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:288
+msgid "toggle cursor style block/underline"
+msgstr "wechsle zwischen Cursorart Block/Unterstreichung"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:281
+msgid "toggle cursor tracking on/off"
+msgstr "schalte Cursor-Tracking ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:267
+msgid "toggle cursor visibility on/off"
+msgstr "schalte die Sichtbarkeit des Cursors ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:232
+msgid "toggle display mode attributes/text"
+msgstr "Umschalten des Anzeigemodus zwischen Attributen und Text"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:274
+msgid "toggle hidden cursor on/off"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:260
+msgid "toggle skipping of blank windows on/off"
+msgstr "schalte überspringen von leeren Fenstern ein/aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:253
+msgid "toggle skipping of lines with identical content on/off"
+msgstr "Überspringen von identischen Zeileninhalten Ein/Aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:246
+msgid "toggle sliding window on/off"
+msgstr "Überlappende Braillezeileninhalte Ein/Aus"
+
+#: /home/dave/brltty/firmness/Programs/cmds.auto.h:239
+msgid "toggle text style 6-dot/8-dot"
+msgstr "Umschalten zwischen 6-Punkt und 8-Punkt Braille"
+
+#: /home/dave/brltty/firmness/Programs/options.c:632
+msgid "too many operands for configuration directive"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:659
+msgid "unexpected block type %"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:652
+#, c-format
+msgid "unhandled event type: %d\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/options.c:655
+msgid "unknown configuration directive"
+msgstr "unbekannte Konfigurationsdirektive"
+
+#: /home/dave/brltty/firmness/Programs/options.c:470
+msgid "unknown option"
+msgstr "unbekannte Option"
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:2125
+msgid "unrecognized command"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/config.c:1671
+#: /home/dave/brltty/firmness/Programs/config.c:1680
+#: /home/dave/brltty/firmness/Programs/config.c:1689
+#: /home/dave/brltty/firmness/Programs/config.c:1698
+msgid "unsupported"
+msgstr "nicht unterstützt"
+
+#: /home/dave/brltty/firmness/Programs/parse.c:250
+msgid "unsupported parameter"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1986
+msgid "white"
+msgstr "Weiß"
+
+#: /home/dave/brltty/firmness/Programs/xbrlapi.c:632
+#, c-format
+msgid "window %#010lx changed to NULL name\n"
+msgstr ""
+
+#: /home/dave/brltty/firmness/Programs/brltty.c:1985
+msgid "yellow"
+msgstr "Gelb"

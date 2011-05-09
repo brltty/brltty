@@ -1,0 +1,29 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2011 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+POT_FILE = $(PACKAGE_NAME).pot
+$(POT_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
+	$(SRC_TOP)mkpot -n "$(PACKAGE_NAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "dave@mielke.cc" -c "The BRLTTY Developers" $(SRC_TOP) $(BLD_TOP)
+pot: $(POT_FILE)
+
+%.po: $(POT_FILE)
+	msgmerge --no-wrap --sort-output --update -- $@ $(POT_FILE)
+
+clean::
+	-rm -f -- *.pot
+

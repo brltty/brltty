@@ -19,11 +19,6 @@
 all install uninstall install-programs install-help install-tables install-drivers:
 	cd $(PGM_DIR) && $(MAKE) $@
 
-POT_FILE = $(PACKAGE_NAME).pot
-$(POT_FILE): $(PGM_DIR)/cmds.auto.h
-	$(SRC_TOP)mkpot -o $@ -p $(PACKAGE_NAME) $(SRC_TOP)
-pot: $(POT_FILE)
-
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
@@ -84,10 +79,10 @@ $(BIN_TAR_XZ): $(BIN_TAR)
 	xz -9 -c $(BIN_TAR) >$@
 bin-tar-xz: $(BIN_TAR_XZ)
 
-ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
+ITERATE = -for directory in $(PGM_DIR) $(INT_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
-	-rm -f -- *.pot *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(ZIP_EXTENSION) *.rpm
+	-rm -f -- *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(ZIP_EXTENSION) *.rpm
 distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)

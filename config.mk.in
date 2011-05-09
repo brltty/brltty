@@ -36,6 +36,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 
 PGM_DIR = Programs
 DOC_DIR = Documents
+INT_DIR = Internationalization
 TBL_DIR = Tables
 BRL_DIR = Drivers/Braille
 SPK_DIR = Drivers/Speech

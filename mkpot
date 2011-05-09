@@ -19,15 +19,21 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
-outputFile=""
 packageName=""
+packageVersion=""
+outputFile=""
+bugsAddress=""
+copyrightHolder=""
 
-while getopts ":o:p:" option
+while getopts ":n:v:o:b:c:" option
 do
    case "${option}"
    in
+      n) packageName="${OPTARG}";;
+      v) packageVersion="${OPTARG}";;
       o) outputFile="${OPTARG}";;
-      p) packageName="${OPTARG}";;
+      b) bugsAddress="${OPTARG}";;
+      c) copyrightHolder="${OPTARG}";;
       :) syntaxError "missing operand: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -39,20 +45,31 @@ shift `expr "${OPTIND}" - 1`
 sourceRoot="${1}"
 shift 1
 
+if [ "${#}" -eq 0 ]
+then
+   buildRoot=""
+else
+   buildRoot="${1}"
+   shift 1
+fi
+
 [ "${#}" -eq 0 ] || syntaxError "too many parameters."
 
 sourceRoot=`cd "${sourceRoot}" && pwd` || semanticError
-buildRoot=`pwd`
+buildRoot=`cd "${buildRoot}" && pwd` || semanticError
 [ "${buildRoot}" != "${sourceRoot}" ] || buildRoot=""
 
 [ -n "${packageName}" ] || packageName=`basename "${sourceRoot}"`
 [ -n "${outputFile}" ] || outputFile="${packageName}.pot"
 [ "${outputFile#/}" != "${outputFile}" ] || outputFile="${initialDirectory}/${outputFile}"
 
-xgettext -o - \
-   --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Developers" \
+xgettext --no-wrap --sort-output --output - \
+   ${packageName:+--package-name "${packageName}"} \
+   ${packageVersion:+--package-version "${packageVersion}"} \
+   ${bugsAddress:+--msgid-bugs-address "${bugsAddress}"} \
+   ${copyrightHolder:+--copyright-holder "${copyrightHolder}"} \
    --keyword=strtext:1 --flag=logMessage:2:c-format \
-   `find ${sourceRoot} ${buildRoot} -name '*.c' -o -name '*.h'` |
+   -- `find ${sourceRoot} ${buildRoot} -name '*.c' -o -name '*.h'` |
 sed >"${outputFile}" -e "
 s/PACKAGE/${packageName}/
 "
