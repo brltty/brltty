@@ -8,7 +8,6 @@ config.mk
 config.h
 brltty.spec
 configure
-*.pot
 *.tar
 *.gz
 *.bz2
