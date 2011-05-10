@@ -71,6 +71,11 @@ xgettext --no-wrap --sort-output --output - \
    --keyword=strtext:1 --flag=logMessage:2:c-format \
    -- `find ${sourceRoot} ${buildRoot} -name '*.c' -o -name '*.h'` |
 sed >"${outputFile}" -e "
-s/PACKAGE/${packageName}/
+  s/PACKAGE/${packageName}/
+
+  /^#: /{
+    s% ${sourceRoot}/*% %
+    s% ${buildRoot}/*% %
+  }
 "
 exit "${?}"
