@@ -1656,8 +1656,8 @@ updatePreferences (void) {
     };
 
     static const char *textStyles[] = {
-      "8-dot",
-      "6-dot"
+      strtext("8-dot"),
+      strtext("6-dot")
     };
 
     static const char *tuneDevices[] = {
