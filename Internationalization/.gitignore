@@ -1,0 +1,4 @@
+Makefile
+reldeps.mk
+*.pot
+LINGUAS

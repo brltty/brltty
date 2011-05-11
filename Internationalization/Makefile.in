@@ -16,14 +16,24 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-POT_FILE = $(PACKAGE_NAME).pot
+all:: pot linguas
+
+POT_EXT = pot
+PO_EXT = po
+
+POT_FILE = $(PACKAGE_NAME).$(POT_EXT)
 $(POT_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
 	$(SRC_TOP)mkpot -n "$(PACKAGE_NAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "dave@mielke.cc" -c "The BRLTTY Developers" $(SRC_TOP) $(BLD_TOP)
 pot: $(POT_FILE)
 
-%.po: $(POT_FILE)
-	msgmerge --no-wrap --sort-output --update -- $@ $(POT_FILE)
+%.$(PO_EXT): $(POT_FILE)
+	msgmerge --force-po --no-wrap --sort-output --update -- $@ $(POT_FILE)
+
+PO_LIST = LINGUAS
+$(PO_LIST):
+	ls -1 *.$(PO_EXT) | sed -e 's/\..*//' | sort >$@
+linguas: $(PO_LIST)
 
 clean::
-	-rm -f -- *.pot
+	-rm -f -- *.$(POT_EXT) $(PO_LIST)
 
