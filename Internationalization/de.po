@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
-"POT-Creation-Date: 2011-05-09 23:34+0200\n"
-"PO-Revision-Date: 2011-05-09 19:44+0200\n"
+"POT-Creation-Date: 2011-05-10 19:38+0200\n"
+"PO-Revision-Date: 2011-05-10 19:39+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -16,1613 +16,1581 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /home/mlang/src/a11y/brltty/Programs/main.c:135
+#: Programs/main.c:137
 #, c-format
 msgid "\"%s\" started as \"%s\"\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1815
+#: Programs/config.c:1660
+msgid "6-dot"
+msgstr "6-Punkt"
+
+#: Programs/config.c:1659
+msgid "8-dot"
+msgstr "8-Punkt"
+
+#: Programs/config.c:1815
 msgid "<off>"
 msgstr "<aus>"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3189
+#: Programs/config.c:3189
 msgid "API Parameter"
 msgstr "API Parameter"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1766
+#: Programs/config.c:1766
 msgid "Alert Dots"
 msgstr "Warnpunkte"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1767
+#: Programs/config.c:1767
 msgid "Alert Messages"
 msgstr "Warnnachrichten"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1754
+#: Programs/config.c:1754
 msgid "Alert Tunes"
 msgstr "Warnsignale"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1620
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1710
+#: Programs/config.c:1620 Programs/config.c:1710
 msgid "All"
 msgstr "Alle"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1654
+#: Programs/config.c:1654
 msgid "Alphabetic Cursor Coordinates (1 cell)"
 msgstr "Alphabetische Cursorkoordinaten (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1653
+#: Programs/config.c:1653
 msgid "Alphabetic Window Coordinates (1 cell)"
 msgstr "Alphabetische Braillezeilenkoordinaten (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1744
+#: Programs/config.c:1744
 msgid "Attributes Invisible Time"
 msgstr "Zeit der Unsichtbarkeit von Attributen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1789
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3149
+#: Programs/config.c:1789 Programs/config.c:3149
 msgid "Attributes Table"
 msgstr "Attribute Tabelle"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1743
+#: Programs/config.c:1743
 msgid "Attributes Visible Time"
 msgstr "Zeit der Sichbarkeit von Attributen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1732
+#: Programs/config.c:1732
 msgid "Autorepeat"
 msgstr "Automatische Wiederholung"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1734
+#: Programs/config.c:1734
 msgid "Autorepeat Delay"
 msgstr "Wiederholungsverzögerung"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1735
+#: Programs/config.c:1735
 msgid "Autorepeat Interval"
 msgstr "Wiederholungsintervall"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1733
+#: Programs/config.c:1733
 msgid "Autorepeat Panning"
 msgstr "Automatische Wiederholung für Seitwertsbewegungen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1770
+#: Programs/config.c:1770
 msgid "Autospeak"
 msgstr "Automatisches sprechen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2451
+#: Programs/config.c:2451
 msgid "BRLTTY terminated"
 msgstr "BRLTTY beendet"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1742
+#: Programs/config.c:1742
 msgid "Blinking Attributes"
 msgstr "Blinkende Attribute"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1745
+#: Programs/config.c:1745
 msgid "Blinking Capitals"
 msgstr "Blinkende Großbuchstaben"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1738
+#: Programs/config.c:1738
 msgid "Blinking Cursor"
 msgstr "Blinkender Cursor"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1600
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1634
+#: Programs/config.c:1600 Programs/config.c:1634
 msgid "Block"
 msgstr "Block"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2276
+#: Programs/config.c:2276
 msgid "Braille Device"
 msgstr "Braillegerät"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2272
+#: Programs/config.c:2272
 msgid "Braille Driver"
 msgstr "Braillezeilentreiber"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1748
+#: Programs/config.c:1748
 msgid "Braille Firmness"
 msgstr "Braille Stärke"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2275
+#: Programs/config.c:2275
 msgid "Braille Parameter"
 msgstr "Braillezeilenparameter"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1749
+#: Programs/config.c:1749
 msgid "Braille Sensitivity"
 msgstr "Braille Empfindlichkeit"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:288
+#: Programs/config.c:288
 #, c-format
 msgid "Braille driver: one of {%s}"
 msgstr "Brailletreiber: einer von [%s]"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:449
+#: Programs/config.c:449
 msgid "Braille window update interval [4]."
 msgstr "Braillezilen Update-Intervall [4]."
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:87
+#: Programs/xbrlapi.c:87
 msgid "BrlAPI authorization/authentication string"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:80
+#: Programs/xbrlapi.c:80
 msgid "BrlAPI host and/or port to connect to"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1747
+#: Programs/config.c:1747
 msgid "Capitals Invisible Time"
 msgstr "Zeit der Unsichtbarkeit von Großbuchstaben"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1746
+#: Programs/config.c:1746
 msgid "Capitals Visible Time"
 msgstr "Zeit der Sichtbarkeit von Großbuchstaben"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3099
+#: Programs/config.c:3099
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1791
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3156
+#: Programs/config.c:1791 Programs/config.c:3156
 msgid "Contraction Table"
 msgstr "Kurzschrifttabelle"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:691
+#: Programs/xbrlapi.c:691
 #, c-format
 msgid "Couldn't find modifiers to apply to %d for getting keysym %08X\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:667
+#: Programs/xbrlapi.c:667
 #, c-format
 msgid "Couldn't translate keysym %08X to keycode.\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1645
+#: Programs/config.c:1645
 msgid "Cursor Column (1 cell)"
 msgstr "Cursorspalte (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1644
+#: Programs/config.c:1644
 msgid "Cursor Coordinates (2 cells)"
 msgstr "Cursor Koordinaten (2 Zellen)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1740
+#: Programs/config.c:1740
 msgid "Cursor Invisible Time"
 msgstr "Zeit der Unsichbarkeit des Cursors"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1646
+#: Programs/config.c:1646
 msgid "Cursor Row (1 cell)"
 msgstr "Cursorzeile (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1737
+#: Programs/config.c:1737
 msgid "Cursor Style"
 msgstr "Cursorstil"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1739
+#: Programs/config.c:1739
 msgid "Cursor Visible Time"
 msgstr "Zeit der Sichtbarkeit des Cursors"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1647
+#: Programs/config.c:1647
 msgid "Cursor and Window Column (2 cells)"
 msgstr "Cursor- und Braillezeilenspalte (2 Zellen)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1648
+#: Programs/config.c:1648
 msgid "Cursor and Window Row (2 cells)"
 msgstr "Cursor- und Braillezielnereihe (2 Zellen)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:430
+#: Programs/config.c:430
 msgid "Device specifier for soundcard digital audio."
 msgstr "Gerätespezifizierer für digital audio Soundkarte."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:440
+#: Programs/config.c:440
 msgid "Device specifier for the Musical Instrument Digital Interface."
 msgstr "Gerätespezifizierer für Musical Instrument Digital Interface."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:471
+#: Programs/config.c:471
 #, c-format
 msgid "Diagnostic logging level: %s, or one of {%s}"
 msgstr "Diagnistikprotokoll Level: %s, oder einer von {%s}"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:277
+#: Programs/config.c:277
 msgid "Disable the application programming interface."
 msgstr "Deaktiviere die Programmierschnittstelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:100
+#: Programs/xbrlapi.c:100
 msgid "Do not write any text to the braille device"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3100
+#: Programs/config.c:3100
 msgid "Drivers Directory"
 msgstr "Treiber-Verzeichnis"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1730
+#: Programs/config.c:1730
 msgid "Eager Sliding Window"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1640
+#: Programs/config.c:1640
 msgid "End"
 msgstr "Ende"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1621
+#: Programs/config.c:1621
 msgid "End of Line"
 msgstr "Am ende der Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1704
+#: Programs/config.c:1704
 msgid "Enqueue"
 msgstr "Anhängen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1764
+#: Programs/config.c:1764
 msgid "FM Volume"
 msgstr "FM Lautstärke"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1655
+#: Programs/config.c:1655
 msgid "Generic"
 msgstr "generisch"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2205
+#: Programs/config.c:2205
 msgid "Help Path"
 msgstr "Hilfe Pfad"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1607
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1615
+#: Programs/config.c:1607 Programs/config.c:1615
 msgid "High"
 msgstr "Hoch"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1753
+#: Programs/config.c:1753
 msgid "Highlight Window"
 msgstr "Highlight Braillezeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1703
+#: Programs/config.c:1703
 msgid "Immediate"
 msgstr "Sofort"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:520
+#: Programs/xbrlapi.c:520
 msgid "Incompatible XKB library\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:522
+#: Programs/xbrlapi.c:522
 msgid "Incompatible XKB server support\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:208
+#: Programs/config.c:208
 #, c-format
 msgid "Install the %s service, and then exit."
 msgstr "Installiere das %s Service und beende dann."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2151
+#: Programs/config.c:2151
 msgid "Key Bindings"
 msgstr "Tastenzuordnungen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2168
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3164
+#: Programs/config.c:2168 Programs/config.c:3164
 msgid "Key Table"
 msgstr "Tastentabelle"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1627
+#: Programs/config.c:1627
 msgid "Left"
 msgstr "Links"
 
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:44
+#: Programs/ktbtest.c:44
 msgid "List key names on standard output."
 msgstr "Liste Tastennamen via Standardausgabe."
 
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:51
+#: Programs/ktbtest.c:51
 msgid "List key table on standard output."
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:506
+#: Programs/config.c:506
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:487
+#: Programs/config.c:487
 msgid "Log to standard error rather than to the system log."
 msgstr "Protokolliere via Standardfehlerausgabe anstatt System Log."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1605
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1613
+#: Programs/config.c:1605 Programs/config.c:1613
 msgid "Low"
 msgstr "Niedrig"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1761
+#: Programs/config.c:1761
 msgid "MIDI Instrument"
 msgstr "MIDI Instrument"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1760
+#: Programs/config.c:1760
 msgid "MIDI Volume"
 msgstr "MIDI Lautstärke"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1608
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1616
+#: Programs/config.c:1608 Programs/config.c:1616
 msgid "Maximum"
 msgstr "Maximum"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1606
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1614
+#: Programs/config.c:1606 Programs/config.c:1614
 msgid "Medium"
 msgstr "Mittel"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:457
+#: Programs/config.c:457
 msgid "Message hold time [400]."
 msgstr "Nachrichten Wartezeit [400]."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1604
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1612
+#: Programs/config.c:1604 Programs/config.c:1612
 msgid "Minimum"
 msgstr "Minimum"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1685
+#: Programs/config.c:1685
 msgid "Musical Instrument Digital Interface"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1594
+#: Programs/config.c:1594
 msgid "No"
 msgstr "Nein"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1626
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1632
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1708
+#: Programs/config.c:1626 Programs/config.c:1632 Programs/config.c:1708
 msgid "None"
 msgstr "Keine"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1757
+#: Programs/config.c:1757
 msgid "PCM Volume"
 msgstr "PCM Lautstärke"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:270
+#: Programs/config.c:270
 msgid "Parameters for the application programming interface."
 msgstr "Parameter für die Programmierschnittstelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:298
+#: Programs/config.c:298
 msgid "Parameters for the braille driver."
 msgstr "Paramter für den Brailletreiber."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:421
+#: Programs/config.c:421
 msgid "Parameters for the screen driver."
 msgstr "Parameter für den Bildschirmtreiber."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:393
+#: Programs/config.c:393
 msgid "Parameters for the speech driver."
 msgstr "Parameter für den Sprachausgabentreiber."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:347
+#: Programs/config.c:347
 msgid "Path to attributes translation table file."
 msgstr "Pfad zur Attributsübersetzungstabelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:356
+#: Programs/config.c:356
 msgid "Path to contraction table file."
 msgstr "Pfad zur Kurzschriftstabelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:253
+#: Programs/config.c:253
 msgid "Path to default settings file."
 msgstr "Pfad für die Default Einstellungsdatei."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:308
+#: Programs/config.c:308
 msgid "Path to device for accessing braille display."
 msgstr "Pfad zur Gerätedatei um auf Braillezeile zuzugreifen."
 
-#: /home/mlang/src/a11y/brltty/Programs/ctbtest.c:54
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:69
+#: Programs/ctbtest.c:54 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
 msgstr "Pfad zum Verzeichnis das Tabellen beinhaltet."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:235
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:60
+#: Programs/config.c:235 Programs/ktbtest.c:60
 msgid "Path to directory for loading drivers."
 msgstr "Pfad für das Verzeichnis aus dem Treiber geladen werden."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:329
+#: Programs/config.c:329
 msgid "Path to directory for text and attributes tables."
 msgstr "Pfad für das Verzeichnis für Text- und Attributstabellen."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:244
-#: /home/mlang/src/a11y/brltty/Programs/brltest.c:64
+#: Programs/config.c:244 Programs/brltest.c:64
 msgid "Path to directory which can be written to."
 msgstr "Pfad für das Verzeichnis in das geschrieben werden kann."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:365
+#: Programs/config.c:365
 msgid "Path to key table file."
 msgstr "Pfad zur Tastentabelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:480
+#: Programs/config.c:480
 msgid "Path to log file."
 msgstr "Pfad zur Protokolldatei."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:226
+#: Programs/config.c:226
 msgid "Path to process identifier file."
 msgstr "Pfad zur Prozessidentifikationsdatei."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:401
+#: Programs/config.c:401
 msgid "Path to speech pass-through FIFO."
 msgstr "Pfad zum pass-through FIFO für die Sprachausgabe."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:339
+#: Programs/config.c:339
 msgid "Path to text translation table file."
 msgstr "Pfad zur Textübersetzungstabelle."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2288
+#: Programs/config.c:2288
 msgid "Preferences File"
 msgstr "Einstellungsdatei"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1592
+#: Programs/config.c:1592
 msgid "Preferences Menu"
 msgstr "Einstellungsmenü"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.h:60
+#: Programs/options.h:60
 msgid "Print a usage summary (all options), and then exit."
 msgstr "Zeige eine Benutzungszusammenfassung (alle Optionen) und beende dann."
 
-#: /home/mlang/src/a11y/brltty/Programs/options.h:55
+#: Programs/options.h:55
 msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "Zeige eine Benutzungszusammenfassung (nur häufig verwendete Optionen) und beende dann."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:373
+#: Programs/config.c:373
 msgid "Properties of the keyboard."
 msgstr "Eigenschaften der Tastatur."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:260
+#: Programs/config.c:260
 msgid "Recognize environment variables."
 msgstr "Erkenne Umgebungsvariablen."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:320
+#: Programs/config.c:320
 msgid "Release braille device when screen or window is unreadable."
 msgstr "Gib die Braillezeile frei wenn der Bildschirm oder das Fenster unlesbar sind."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:494
+#: Programs/config.c:494
 msgid "Remain a foreground process."
 msgstr "Verbleibe als Fordergrundprozess."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:216
+#: Programs/config.c:216
 #, c-format
 msgid "Remove the %s service, and then exit."
 msgstr "Entferne das %s Service und beende dann."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1622
+#: Programs/config.c:1622
 msgid "Rest of Line"
 msgstr "Rest der Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1628
+#: Programs/config.c:1628
 msgid "Right"
 msgstr "Rechts"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1724
+#: Programs/config.c:1724
 msgid "Save on Exit"
 msgstr "Beim verlassen speichern"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1769
+#: Programs/config.c:1769
 msgid "Say-Line Mode"
 msgstr "Sprich-Zeile Modus"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2635
+#: Programs/config.c:2635
 msgid "Screen Driver"
 msgstr "Bildschirmtreiber"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1649
+#: Programs/config.c:1649
 msgid "Screen Number (1 cell)"
 msgstr "Bildschirmnummer (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2641
+#: Programs/config.c:2641
 msgid "Screen Parameter"
 msgstr "Bildschirmparameter"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:411
+#: Programs/config.c:411
 #, c-format
 msgid "Screen driver: one of {%s}"
 msgstr "Bildschirmtreiber: einer von [%s]"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1741
+#: Programs/config.c:1741
 msgid "Show Attributes"
 msgstr "Zeige Attribute"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1736
+#: Programs/config.c:1736
 msgid "Show Cursor"
 msgstr "Zeige Cursor"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1727
+#: Programs/config.c:1727
 msgid "Skip Blank Windows"
 msgstr "Identische Braillezeileninhalte überspringen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1726
+#: Programs/config.c:1726
 msgid "Skip Identical Lines"
 msgstr "Identische Zeilen überspringen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1729
+#: Programs/config.c:1729
 msgid "Sliding Window"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1709
+#: Programs/config.c:1709
 msgid "Some"
 msgstr "Manche"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1633
+#: Programs/config.c:1633
 msgid "Space"
 msgstr "Leerschlag"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2511
+#: Programs/config.c:2511
 msgid "Speech Driver"
 msgstr "Sprachausgabentreiber"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3228
+#: Programs/config.c:3228
 msgid "Speech FIFO"
 msgstr "Sprachausgaben-FIFO"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2514
+#: Programs/config.c:2514
 msgid "Speech Parameter"
 msgstr "Sprachausgabenparameter"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1773
+#: Programs/config.c:1773
 msgid "Speech Pitch"
 msgstr "Tonhöhe der Sprachausgabe"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1774
+#: Programs/config.c:1774
 msgid "Speech Punctuation"
 msgstr "Satzzeichenansage"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1771
+#: Programs/config.c:1771
 msgid "Speech Rate"
 msgstr "Sprachgeschwindigkeit"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1772
+#: Programs/config.c:1772
 msgid "Speech Volume"
 msgstr "Sprachlautstärke"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:383
+#: Programs/config.c:383
 #, c-format
 msgid "Speech driver: one of {%s}"
 msgstr "Sprachausgabentreiber: einer von [%s]"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1650
+#: Programs/config.c:1650
 msgid "State Dots (1 cell)"
 msgstr "Statuspunkte (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1651
+#: Programs/config.c:1651
 msgid "State Letter (1 cell)"
 msgstr "Statusbuchstable (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1777
+#: Programs/config.c:1777
 msgid "Status Count"
 msgstr "Status Anzahl"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1722
+#: Programs/config.c:1722
 msgid "Status Field "
 msgstr "Statusfeld "
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1776
+#: Programs/config.c:1776
 msgid "Status Position"
 msgstr "Status Position"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1778
+#: Programs/config.c:1778
 msgid "Status Separator"
 msgstr "Status Separator"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1635
+#: Programs/config.c:1635
 msgid "Status Side"
 msgstr "Statusseitig"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:463
+#: Programs/config.c:463
 msgid "Suppress start-up messages."
 msgstr "Unterdrücke Nachrichten betreffen den Start."
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3102
+#: Programs/config.c:3102
 msgid "Tables Directory"
 msgstr "Tabellen-Verzeichnis"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1636
+#: Programs/config.c:1636
 msgid "Text Side"
 msgstr "Textseitig"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1725
+#: Programs/config.c:1725
 msgid "Text Style"
 msgstr "Textstil"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1788
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3141
+#: Programs/config.c:1788 Programs/config.c:3141
 msgid "Text Table"
 msgstr "Text Tabelle"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1652
+#: Programs/config.c:1652
 msgid "Time (2 cells)"
 msgstr "Uhrzeit (2 Zellen)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1755
+#: Programs/config.c:1755
 msgid "Tune Device"
 msgstr "Signalgerät"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1599
+#: Programs/config.c:1599
 msgid "Underline"
 msgstr "Unterstrich"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:135
+#: Programs/options.c:135
 msgid "Usage"
 msgstr "Benutzung"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1728
+#: Programs/config.c:1728
 msgid "Which Blank Windows"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1642
+#: Programs/config.c:1642
 msgid "Window Column (1 cell)"
 msgstr "Braillezeilenspalte (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1641
+#: Programs/config.c:1641
 msgid "Window Coordinates (2 cells)"
 msgstr "Braillezielne Koordinatesn (2 Zellen)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1751
+#: Programs/config.c:1751
 msgid "Window Follows Pointer"
 msgstr "Braillezeile folgt Mauszeiger"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1731
+#: Programs/config.c:1731
 msgid "Window Overlap"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1643
+#: Programs/config.c:1643
 msgid "Window Row (1 cell)"
 msgstr "Braillezeilenzeile (1 Zelle)"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3089
+#: Programs/config.c:3089
 msgid "Working Directory"
 msgstr "Arbeitsverzeichnis"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3096
+#: Programs/config.c:3096
 msgid "Writable Directory"
 msgstr "Scheibbares Verzeichnis"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:500
+#: Programs/config.c:500
 msgid "Write the start-up logs, and then exit."
 msgstr "Schreibe das Startprotokoll und beende dann."
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:296
+#: Programs/xbrlapi.c:296
 #, c-format
 msgid "X Error %d, %s on display %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:94
+#: Programs/xbrlapi.c:94
 msgid "X display to connect to"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:628
+#: Programs/xbrlapi.c:628
 msgid "XFree(wm_name) for change"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1595
+#: Programs/config.c:1595
 msgid "Yes"
 msgstr "Ja"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:78
+#: Programs/xbrlapi.c:78
 msgid "[host][:port]"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:635
+#: Programs/cmds.auto.h:635
 msgid "append characters to cut buffer"
 msgstr "hänge Zeichenkette an die Zwischenablage an"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:531
+#: Programs/cmds.auto.h:531
 msgid "append to existing cut buffer from character"
 msgstr "hänge an bestehender Auswahl von Zeichen an"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:267
-#: /home/mlang/src/a11y/brltty/Programs/config.c:295
-#: /home/mlang/src/a11y/brltty/Programs/config.c:371
-#: /home/mlang/src/a11y/brltty/Programs/config.c:390
-#: /home/mlang/src/a11y/brltty/Programs/config.c:418
+#: Programs/config.c:267 Programs/config.c:295 Programs/config.c:371
+#: Programs/config.c:390 Programs/config.c:418
 msgid "arg,..."
 msgstr "arg,..."
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:659
+#: Programs/cmds.auto.h:659
 msgid "backspace key"
 msgstr "Backspace Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:338
+#: Programs/xbrlapi.c:338
 #, c-format
 msgid "bad format for VT number\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:341
+#: Programs/xbrlapi.c:341
 #, c-format
 msgid "bad type for VT number\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1971
+#: Programs/brltty.c:1971
 msgid "black"
 msgstr "schwarz"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:2011
+#: Programs/brltty.c:2011
 msgid "blink"
 msgstr "blink"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1972
+#: Programs/brltty.c:1972
 msgid "blue"
 msgstr "blau"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3201
+#: Programs/config.c:3201
 #, c-format
 msgid "braille device not specified"
 msgstr "Braille-Gerät nicht spezifiziert"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:510
+#: Programs/cmds.auto.h:510
 msgid "braille display temporarily unavailable"
 msgstr "Braillezeile temporär nicht verfügbar"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2227
+#: Programs/config.c:2227
 msgid "braille driver initialization failed"
 msgstr "Braillezeilentreiber Initialisierung fehlgeschlagen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2299
+#: Programs/config.c:2299
 msgid "braille driver not loadable"
 msgstr "Brailletreiber nicht ladbar"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:517
+#: Programs/cmds.auto.h:517
 msgid "bring cursor to character"
 msgstr "bringe Cursor zu Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:486
+#: Programs/cmds.auto.h:486
 msgid "bring cursor to line"
 msgstr "bringe Cursor zur aktuellen Braillezeilenposititon"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1977
+#: Programs/brltty.c:1977
 msgid "brown"
 msgstr "braun"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:590
+#: Programs/config.c:590
 msgid "cannot compile attributes table"
 msgstr "kann Attributstabelle nicht übersetzen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:637
+#: Programs/config.c:637
 msgid "cannot compile contraction table"
 msgstr "kann Kurzschriftstabelle nicht übersetzen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:691
+#: Programs/config.c:691
 msgid "cannot compile key table"
 msgstr "kann Tastentabelle nicht übersetzen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:559
+#: Programs/config.c:559
 msgid "cannot compile text table"
 msgstr "kann Texttabelle nicht übersetzen"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:175
+#: Programs/xbrlapi.c:175
 #, c-format
 msgid "cannot connect to brltty at %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:508
+#: Programs/xbrlapi.c:508
 #, c-format
 msgid "cannot connect to display %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/program.c:147
+#: Programs/program.c:147
 #, c-format
 msgid "cannot determine program directory"
 msgstr "kann Programmverzeichnis nicht bestimmen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1430
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3092
+#: Programs/config.c:1430 Programs/config.c:3092
 msgid "cannot determine working directory"
 msgstr "kann Arbeitsverzeichnis nicht bestimmen"
 
-#: /home/mlang/src/a11y/brltty/Programs/sys_windows.c:108
+#: Programs/sys_windows.c:108
 msgid "cannot find procedure"
 msgstr "kann Prozedur nicht finden"
 
-#: /home/mlang/src/a11y/brltty/Programs/program.c:159
+#: Programs/program.c:159
 msgid "cannot fix install path"
 msgstr "kann Installationspfad nicht beheben"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:320
+#: Programs/xbrlapi.c:320
 #, c-format
 msgid "cannot get root window XFree86_VT property\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:192
+#: Programs/xbrlapi.c:192
 msgid "cannot get tty\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:195
+#: Programs/xbrlapi.c:195
 #, c-format
 msgid "cannot get tty %d\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:552
+#: Programs/xbrlapi.c:552
 #, c-format
 msgid "cannot grab windows on screen %d\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:199
+#: Programs/xbrlapi.c:199
 msgid "cannot ignore keys\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:599
+#: Programs/config.c:599
 msgid "cannot load attributes table"
 msgstr "kann Attributstabelle nicht laden"
 
-#: /home/mlang/src/a11y/brltty/Programs/sys_windows.c:101
+#: Programs/sys_windows.c:101
 msgid "cannot load library"
 msgstr "kann Programmbibliothek nicht laden"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:568
+#: Programs/config.c:568
 msgid "cannot load text table"
 msgstr "kann Texttabelle nicht laden"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2207
+#: Programs/config.c:2207
 msgid "cannot open help file"
 msgstr "kann Hilfsdatei nicht öffnen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2174
+#: Programs/config.c:2174
 msgid "cannot open key table"
 msgstr "kann Tastentabelle nicht öffnen"
 
-#: /home/mlang/src/a11y/brltty/Programs/program.c:249
+#: Programs/program.c:249
 msgid "cannot open process identifier file"
 msgstr "kann Prozessidentifikationsdatei nicht öffnen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1428
+#: Programs/config.c:1428
 msgid "cannot open working directory"
 msgstr "kann Arbeitsverzeichnis nicht öffnen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:961
+#: Programs/config.c:961
 msgid "cannot read preferences file"
 msgstr "kann Einstellungsdatei nicht lesen"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:227
+#: Programs/xbrlapi.c:227
 #, c-format
 msgid "cannot set focus to %#010x\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1417
-#: /home/mlang/src/a11y/brltty/Programs/file.c:216
+#: Programs/config.c:1417 Programs/file.c:216
 msgid "cannot set working directory"
 msgstr "kann Arbeitsverzeichnis nicht setzen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1126
+#: Programs/config.c:1126
 msgid "cannot write to preferences file"
 msgstr "kann Einstellungsdatei nicht schreiben"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:220
+#: Programs/xbrlapi.c:220
 #, c-format
 msgid "cannot write window name %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1884
+#: Programs/config.c:1884
 msgid "changes discarded"
 msgstr "Änderungen verworfen"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:638
+#: Programs/options.c:638
 msgid "configuration directive specified more than once"
 msgstr "Konfigurationsdirektive mehrfach angegeben"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1667
+#: Programs/config.c:1667
 msgid "console tone generator"
 msgstr "Konsole Tongenerator"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:628
+#: Programs/cmds.auto.h:628
 msgid "copy characters to cut buffer"
 msgstr "kopiere Zeichenkette in die Zwischenablage"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:447
-#: /home/mlang/src/a11y/brltty/Programs/config.c:455
+#: Programs/config.c:447 Programs/config.c:455
 msgid "csecs"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:689
+#: Programs/cmds.auto.h:689
 msgid "cursor-down key"
 msgstr "Cursor-Runter Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:671
+#: Programs/cmds.auto.h:671
 msgid "cursor-left key"
 msgstr "Cursor-Links Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:677
+#: Programs/cmds.auto.h:677
 msgid "cursor-right key"
 msgstr "Cursor-Rechts Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:683
+#: Programs/cmds.auto.h:683
 msgid "cursor-up key"
 msgstr "Cursor-Rauf Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1974
+#: Programs/brltty.c:1974
 msgid "cyan"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1979
+#: Programs/brltty.c:1979
 msgid "dark grey"
 msgstr "dunkelgrau"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:450
+#: Programs/cmds.auto.h:450
 msgid "decrease speech rate"
 msgstr "langsamer sprechen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:462
+#: Programs/cmds.auto.h:462
 msgid "decrease speech volume"
 msgstr "leiser sprechen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:725
+#: Programs/cmds.auto.h:725
 msgid "delete key"
 msgstr "Lösch Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:575
+#: Programs/cmds.auto.h:575
 msgid "describe character"
 msgstr "beschreibe Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:305
-#: /home/mlang/src/a11y/brltty/Programs/config.c:428
-#: /home/mlang/src/a11y/brltty/Programs/config.c:438
+#: Programs/config.c:305 Programs/config.c:428 Programs/config.c:438
 msgid "device"
 msgstr "Gerät"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:606
+#: Programs/xbrlapi.c:606
 #, c-format
 msgid "didn't grab parent of %#010lx\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:624
+#: Programs/xbrlapi.c:624
 #, c-format
 msgid "didn't grab window %#010lx\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:463
+#: Programs/xbrlapi.c:463
 #, c-format
 msgid "didn't grab window %#010lx but got focus\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:232
-#: /home/mlang/src/a11y/brltty/Programs/config.c:241
-#: /home/mlang/src/a11y/brltty/Programs/config.c:326
-#: /home/mlang/src/a11y/brltty/Programs/ctbtest.c:51
-#: /home/mlang/src/a11y/brltty/Programs/brltest.c:61
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:57
-#: /home/mlang/src/a11y/brltty/Programs/ktbtest.c:66
+#: Programs/config.c:232 Programs/config.c:241 Programs/config.c:326
+#: Programs/ctbtest.c:51 Programs/brltest.c:61 Programs/ktbtest.c:57
+#: Programs/ktbtest.c:66
 msgid "directory"
 msgstr "Verzeichnis"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:92
+#: Programs/xbrlapi.c:92
 msgid "display"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:4
+#: Programs/cmds.auto.h:4
 msgid "do nothing"
 msgstr "mach nichts"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:285
-#: /home/mlang/src/a11y/brltty/Programs/config.c:380
-#: /home/mlang/src/a11y/brltty/Programs/config.c:408
+#: Programs/config.c:285 Programs/config.c:380 Programs/config.c:408
 msgid "driver"
 msgstr "Treiber"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:713
+#: Programs/cmds.auto.h:713
 msgid "end key"
 msgstr "End Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:647
+#: Programs/cmds.auto.h:647
 msgid "enter key"
 msgstr "Enter Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:355
+#: Programs/cmds.auto.h:355
 msgid "enter/leave command learn mode"
 msgstr "aufruf/verlassen des Lernmodus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:343
+#: Programs/cmds.auto.h:343
 msgid "enter/leave help display"
 msgstr "aufruf/verlassen der Hilfe"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:361
+#: Programs/cmds.auto.h:361
 msgid "enter/leave preferences menu"
 msgstr "aufruf/verlassen des Einstellungsmenüs"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:349
+#: Programs/cmds.auto.h:349
 msgid "enter/leave status display"
 msgstr "aufruf/verlassen der Statusanzeige"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:665
+#: Programs/cmds.auto.h:665
 msgid "escape key"
 msgstr "Escape Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2921
+#: Programs/config.c:2921
 msgid "excess argument"
 msgstr "überschüssiges Argument"
 
-#: /home/mlang/src/a11y/brltty/Programs/main.c:145
+#: Programs/main.c:147
 #, c-format
 msgid "executing \"%s\" (from \"%s\")\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/main.c:152
+#: Programs/main.c:154
 #, c-format
 msgid "execution of \"%s\" failed: %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:559
+#: Programs/xbrlapi.c:559
 msgid "failed to get first focus\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:224
-#: /home/mlang/src/a11y/brltty/Programs/config.c:250
-#: /home/mlang/src/a11y/brltty/Programs/config.c:336
-#: /home/mlang/src/a11y/brltty/Programs/config.c:345
-#: /home/mlang/src/a11y/brltty/Programs/config.c:354
-#: /home/mlang/src/a11y/brltty/Programs/config.c:363
-#: /home/mlang/src/a11y/brltty/Programs/config.c:399
-#: /home/mlang/src/a11y/brltty/Programs/config.c:478
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:85
+#: Programs/config.c:224 Programs/config.c:250 Programs/config.c:336
+#: Programs/config.c:345 Programs/config.c:354 Programs/config.c:363
+#: Programs/config.c:399 Programs/config.c:478 Programs/xbrlapi.c:85
 msgid "file"
 msgstr "Datei"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:693
+#: Programs/options.c:693
 #, c-format
 msgid "file '%s' processing error."
 msgstr "Datei ‘%s’ Verarbeitungsfehler."
 
-#: /home/mlang/src/a11y/brltty/Programs/main.c:140
+#: Programs/main.c:142
 #, c-format
 msgid "fork of \"%s\" failed: %s\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:225
+#: Programs/cmds.auto.h:225
 msgid "freeze/unfreeze screen image"
 msgstr "Bildschirm einfrieren/auftauen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:732
+#: Programs/cmds.auto.h:732
 msgid "function key"
 msgstr "Funktionstaste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:212
+#: Programs/cmds.auto.h:212
 msgid "go back after cursor tracking"
 msgstr "gehe zurÃ¼ck nach Cursor tracking"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:18
+#: Programs/cmds.auto.h:18
 msgid "go down one line"
 msgstr "gehe eine Zeile nach unten"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:32
+#: Programs/cmds.auto.h:32
 msgid "go down several lines"
 msgstr "gehe mehrere Zeilen nach unten"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:102
+#: Programs/cmds.auto.h:102
 msgid "go down to first line of next paragraph"
 msgstr "gehe nach unten zur ersten Zeile des nächsten Absatzes"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:621
+#: Programs/cmds.auto.h:621
 msgid "go down to nearest line with different character"
 msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlichem Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:46
+#: Programs/cmds.auto.h:46
 msgid "go down to nearest line with different content"
 msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlichem Inhalt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:60
+#: Programs/cmds.auto.h:60
 msgid "go down to nearest line with different highlighting"
 msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlichm Hinterlegung"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:568
+#: Programs/cmds.auto.h:568
 msgid "go down to nearest line with less indent than character"
 msgstr "gehe nach unten zur nächsten Zeile mit weniger Einrückung als Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:116
+#: Programs/cmds.auto.h:116
 msgid "go down to next command prompt"
 msgstr "gehe nach unten zum nächsten Kommandoprompt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:149
+#: Programs/cmds.auto.h:149
 msgid "go left half a window"
 msgstr "gehe eine halbe Braillezeile nach links"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:135
+#: Programs/cmds.auto.h:135
 msgid "go left one character"
 msgstr "gehe ein Zeichen nach links"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:163
+#: Programs/cmds.auto.h:163
 msgid "go left one window"
 msgstr "gehe eine Braillezeile nach links"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:177
+#: Programs/cmds.auto.h:177
 msgid "go left to nearest non-blank window"
 msgstr "gehe zur nächsten beschriebenen Braillezeile nach links"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:156
+#: Programs/cmds.auto.h:156
 msgid "go right half a window"
 msgstr "gehe eine halbe Braillezeile nach rechts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:142
+#: Programs/cmds.auto.h:142
 msgid "go right one character"
 msgstr "gehe ein Zeichen nach rechts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:170
+#: Programs/cmds.auto.h:170
 msgid "go right one window"
 msgstr "gehe eine Braillezeile nach rechts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:184
+#: Programs/cmds.auto.h:184
 msgid "go right to nearest non-blank window"
 msgstr "gehe zur nächsten beschriebenen Braillezeile nach rechts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:88
+#: Programs/cmds.auto.h:88
 msgid "go to beginning of bottom line"
 msgstr "gehe zum Anfang der untersten Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:191
+#: Programs/cmds.auto.h:191
 msgid "go to beginning of line"
 msgstr "gehe zum Beginn der Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:81
+#: Programs/cmds.auto.h:81
 msgid "go to beginning of top line"
 msgstr "gehe zum Anfang der obersten Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:74
+#: Programs/cmds.auto.h:74
 msgid "go to bottom line"
 msgstr "gehe zur untersten Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:426
+#: Programs/cmds.auto.h:426
 msgid "go to current speech position"
 msgstr "gehe zur derzeiigen Sprachposition"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:205
+#: Programs/cmds.auto.h:205
 msgid "go to cursor"
 msgstr "gehe zum Cursor"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:219
+#: Programs/cmds.auto.h:219
 msgid "go to cursor or go back after cursor tracking"
 msgstr "gehe zum Cursor oder zurück nach Cursor tracking"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:198
+#: Programs/cmds.auto.h:198
 msgid "go to end of line"
 msgstr "gehe zum Ende der Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:380
+#: Programs/cmds.auto.h:380
 msgid "go to first item"
 msgstr "gehe zum ersten Menüpunkt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:387
+#: Programs/cmds.auto.h:387
 msgid "go to last item"
 msgstr "gehe zum letzen Menüpunkt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:401
+#: Programs/cmds.auto.h:401
 msgid "go to next item"
 msgstr "gehe zum nächsten Menüpunkt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:394
+#: Programs/cmds.auto.h:394
 msgid "go to previous item"
 msgstr "gehe zum vorherigen Menüpunkt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:597
+#: Programs/cmds.auto.h:597
 msgid "go to remembered window position"
 msgstr "gehe zu gemerkter Braillezeilenposition"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:605
+#: Programs/cmds.auto.h:605
 msgid "go to selected line"
 msgstr "gehe zu ausgewählter Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:67
+#: Programs/cmds.auto.h:67
 msgid "go to top line"
 msgstr "gehe zur obersten Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:11
+#: Programs/cmds.auto.h:11
 msgid "go up one line"
 msgstr "gehe eine Zeile nach oben"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:25
+#: Programs/cmds.auto.h:25
 msgid "go up several lines"
 msgstr "gehe mehrere Zeilen nach oben"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:95
+#: Programs/cmds.auto.h:95
 msgid "go up to last line of previous paragraph"
 msgstr "gehe nach oben zur letzten Zeile des vorhergehenden Absatzes"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:613
+#: Programs/cmds.auto.h:613
 msgid "go up to nearest line with different character"
 msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlichem Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:39
+#: Programs/cmds.auto.h:39
 msgid "go up to nearest line with different content"
 msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlichem Inhalt"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:53
+#: Programs/cmds.auto.h:53
 msgid "go up to nearest line with different highlighting"
 msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlichm Hinterlegung"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:560
+#: Programs/cmds.auto.h:560
 msgid "go up to nearest line with less indent than character"
 msgstr "gehe nach oben zur nächsten Zeile mit weniger Einrückung als Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:109
+#: Programs/cmds.auto.h:109
 msgid "go up to previous command prompt"
 msgstr "gehe nach oben zum vorhergehenden Kommandoprompt"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1973
+#: Programs/brltty.c:1973
 msgid "green"
 msgstr "grün"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1701
+#: Programs/brltty.c:1701
 msgid "help not available"
 msgstr "Hilfe nicht verfügbar"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:707
+#: Programs/cmds.auto.h:707
 msgid "home key"
 msgstr "Home Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:456
+#: Programs/cmds.auto.h:456
 msgid "increase speech rate"
 msgstr "schneller sprechen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:468
+#: Programs/cmds.auto.h:468
 msgid "increase speech volume"
 msgstr "lauter sprechen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:750
+#: Programs/cmds.auto.h:750
 msgid "input AT (set 2) keyboard scan code"
 msgstr "AT (set 2) Tastatur-Scancode eingeben"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:762
+#: Programs/cmds.auto.h:762
 msgid "input PS/2 (set 3) keyboard scan code"
 msgstr "PS/2 (set 3) Tastatur-Scancode eingeben"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:756
+#: Programs/cmds.auto.h:756
 msgid "input XT (set 1) keyboard scan code"
 msgstr "XT (set 1) Tastatur-Scancode eingeben"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:744
+#: Programs/cmds.auto.h:744
 msgid "input braille character"
 msgstr "gib ein Braillezeichen ein"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:641
+#: Programs/cmds.auto.h:641
 msgid "input keyboard key"
 msgstr "gib eine Taste der Tastatur ein"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:738
+#: Programs/cmds.auto.h:738
 msgid "input unicode character"
 msgstr "gib ein Uncidoe-Zeichen ein"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:492
+#: Programs/cmds.auto.h:492
 msgid "insert cut text at cursor"
 msgstr "füge ausgewählten Text an Cursorposition ein"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:719
+#: Programs/cmds.auto.h:719
 msgid "insert key"
 msgstr "Einfüge Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/program.c:161
+#: Programs/program.c:161
 msgid "install path not absolute"
 msgstr "Installationspfad ist nicht absolut"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:107
+#: Programs/options.c:107
 msgid "invalid counter setting"
 msgstr "ungütlige Zäöhler-Einstellung"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:100
+#: Programs/options.c:100
 msgid "invalid flag setting"
 msgstr "ungütlige Schalter-Einstellung"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2963
+#: Programs/config.c:2963
 msgid "invalid log level"
 msgstr "ungültiges Log-Level"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2929
+#: Programs/config.c:2929
 msgid "invalid message delay"
 msgstr "ungültige Wartezeit für Nachrichten"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:965
+#: Programs/config.c:965
 msgid "invalid preferences file"
 msgstr "ungültige Einstellungsdatei"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2925
+#: Programs/config.c:2925
 msgid "invalid update interval"
 msgstr "Ungütliges Update-Interval"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:469
+#: Programs/config.c:469
 msgid "level"
 msgstr "Level"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1980
+#: Programs/brltty.c:1980
 msgid "light blue"
 msgstr "hellblau"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1982
+#: Programs/brltty.c:1982
 msgid "light cyan"
 msgstr "Helltürkis"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1981
+#: Programs/brltty.c:1981
 msgid "light green"
 msgstr "hellgrün"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1978
+#: Programs/brltty.c:1978
 msgid "light grey"
 msgstr "hellgrau"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1984
+#: Programs/brltty.c:1984
 msgid "light magenta"
 msgstr "Hellmagenta"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1983
+#: Programs/brltty.c:1983
 msgid "light red"
 msgstr "Hellrot"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:545
+#: Programs/cmds.auto.h:545
 msgid "linear cut to character"
 msgstr "lineare Auswahl zu Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1976
+#: Programs/brltty.c:1976
 msgid "magenta"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:475
+#: Programs/options.c:475
 msgid "missing operand"
 msgstr "fehlender Operant"
 
-#: /home/mlang/src/a11y/brltty/Programs/parse.c:215
+#: Programs/parse.c:215
 msgid "missing parameter name"
 msgstr "fehlender Parametername"
 
-#: /home/mlang/src/a11y/brltty/Programs/parse.c:227
+#: Programs/parse.c:227
 msgid "missing parameter qualifier"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/parse.c:212
+#: Programs/parse.c:212
 msgid "missing parameter value"
 msgstr "fehlender Parameterwert"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:329
+#: Programs/xbrlapi.c:329
 #, c-format
 msgid "more than one item for VT number\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:314
+#: Programs/xbrlapi.c:314
 #, c-format
 msgid "no XFree86_VT atom\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:325
+#: Programs/xbrlapi.c:325
 #, c-format
 msgid "no items for VT number\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2152
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3157
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3165
-#: /home/mlang/src/a11y/brltty/Programs/config.c:3229
+#: Programs/config.c:2152 Programs/config.c:3157 Programs/config.c:3165
+#: Programs/config.c:3229
 msgid "none"
 msgstr "keine"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1130
+#: Programs/config.c:1130
 msgid "not saved"
 msgstr "nicht gespeichert"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:628
+#: Programs/options.c:628
 msgid "operand not supplied for configuration directive"
 msgstr "Operand nicht angegeben für Konfigurationsdirektive"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:139
+#: Programs/options.c:139
 msgid "option"
 msgstr "Option"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:701
+#: Programs/cmds.auto.h:701
 msgid "page-down key"
 msgstr "Seite-Runter Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:695
+#: Programs/cmds.auto.h:695
 msgid "page-up key"
 msgstr "Seite-Rauf Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:582
+#: Programs/cmds.auto.h:582
 msgid "place left end of window at character"
 msgstr "positioniere linken Rand der Braillezeile bei Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:538
+#: Programs/cmds.auto.h:538
 msgid "rectangular cut to character"
 msgstr "rechtwinkelige Auswahl zu Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1975
+#: Programs/brltty.c:1975
 msgid "red"
 msgstr "rot"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2443
+#: Programs/config.c:2443
 #, c-format
 msgid "reinitializing braille driver"
 msgstr "Neuinitialisierung des Brailletreibers"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2604
+#: Programs/config.c:2604
 #, c-format
 msgid "reinitializing speech driver"
 msgstr "Neuinitialisierung des Sprachausgabentreibers"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:589
+#: Programs/cmds.auto.h:589
 msgid "remember current window position"
 msgstr "merke derzeitige Braillezeilenposition"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:297
+#: Programs/xbrlapi.c:297
 #, c-format
 msgid "resource %#010lx, req %u:%u\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:498
+#: Programs/cmds.auto.h:498
 msgid "restart braille driver"
 msgstr "Brailletreiber neu starten"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:504
+#: Programs/cmds.auto.h:504
 msgid "restart speech driver"
 msgstr "Sprachausgabentreiber neu starten"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:373
+#: Programs/cmds.auto.h:373
 msgid "restore preferences from disk"
 msgstr "Einstellungen laden"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:367
+#: Programs/cmds.auto.h:367
 msgid "save preferences to disk"
 msgstr "Einstellungen speichern"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2652
+#: Programs/config.c:2652
 msgid "screen driver not loadable"
 msgstr "Bildschirmtreiber nicht ladbar"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:122
+#: Programs/cmds.auto.h:122
 msgid "search backward for cut text"
 msgstr "suche nach Auswahl rückwerts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:128
+#: Programs/cmds.auto.h:128
 msgid "search forward for cut text"
 msgstr "such nach Auswahl vorwärts"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:413
+#: Programs/cmds.auto.h:413
 msgid "select next choice"
 msgstr "wählne nächste Möglichkeit"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:407
+#: Programs/cmds.auto.h:407
 msgid "select previous choice"
 msgstr "wähle vorherige Möglichkeit"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1676
+#: Programs/config.c:1676
 msgid "soundcard digital audio"
 msgstr "digital audio Soundkarte"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1694
+#: Programs/config.c:1694
 msgid "soundcard synthesizer"
 msgstr "Synthesizer der Soundkarte"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:432
+#: Programs/cmds.auto.h:432
 msgid "speak current line"
 msgstr "sprich aktuelle Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:444
+#: Programs/cmds.auto.h:444
 msgid "speak from current line through bottom of screen"
 msgstr "sprich von der aktueller Zeile bis zum Ende des Bildschirms"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:438
+#: Programs/cmds.auto.h:438
 msgid "speak from top of screen through current line"
 msgstr "sprich vom Beginn des Bildschirms bis zur aktuellen Zeile"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:2525
+#: Programs/config.c:2525
 msgid "speech driver not loadable"
 msgstr "Sprachausgabentreiber nicht ladbar"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:524
+#: Programs/cmds.auto.h:524
 msgid "start new cut buffer at character"
 msgstr "beginne neue Auswahl bei Zeichen"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:419
+#: Programs/cmds.auto.h:419
 msgid "stop speaking"
 msgstr "sprechen stoppen"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:510
+#: Programs/xbrlapi.c:510
 msgid "strange old error handler\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:769
+#: Programs/cmds.auto.h:769
 msgid "switch to command context"
 msgstr "wächsle in den Kommandokontext"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:480
+#: Programs/cmds.auto.h:480
 msgid "switch to next virtual terminal"
 msgstr "wechsle zum nächsten virtuellen Terminal"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:474
+#: Programs/cmds.auto.h:474
 msgid "switch to previous virtual terminal"
 msgstr "wechsle zum vorherigen virtuellen Terminal"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:552
+#: Programs/cmds.auto.h:552
 msgid "switch to virtual terminal"
 msgstr "wechsle zu virtuellem Terminal"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:653
+#: Programs/cmds.auto.h:653
 msgid "tab key"
 msgstr "Tab Taste"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:323
+#: Programs/cmds.auto.h:323
 msgid "toggle alert tunes on/off"
 msgstr "schlate Signaltöne ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:309
+#: Programs/cmds.auto.h:309
 msgid "toggle attribute blinking on/off"
 msgstr "schlate blinkende Attribute ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:302
+#: Programs/cmds.auto.h:302
 msgid "toggle attribute underlining on/off"
 msgstr "schalte Unterstreichung von Atrributen ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:330
+#: Programs/cmds.auto.h:330
 msgid "toggle autorepeat on/off"
 msgstr "schalte automatische Wiederholung ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:337
+#: Programs/cmds.auto.h:337
 msgid "toggle autospeak on/off"
 msgstr "schalte automatisches sprechen ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:316
+#: Programs/cmds.auto.h:316
 msgid "toggle capital letter blinking on/off"
 msgstr "schalte blinkende Großbuchstaben ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:295
+#: Programs/cmds.auto.h:295
 msgid "toggle cursor blinking on/off"
 msgstr "schalte blinkenden Cursor ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:288
+#: Programs/cmds.auto.h:288
 msgid "toggle cursor style block/underline"
 msgstr "wechsle zwischen Cursorart Block/Unterstreichung"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:281
+#: Programs/cmds.auto.h:281
 msgid "toggle cursor tracking on/off"
 msgstr "schalte Cursorverfolgung ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:267
+#: Programs/cmds.auto.h:267
 msgid "toggle cursor visibility on/off"
 msgstr "schalte die Sichtbarkeit des Cursors ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:232
+#: Programs/cmds.auto.h:232
 msgid "toggle display mode attributes/text"
 msgstr "umschalten des Anzeigemodus Attribute/Text"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:274
+#: Programs/cmds.auto.h:274
 msgid "toggle hidden cursor on/off"
 msgstr "schalte versteckten Cursor ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:260
+#: Programs/cmds.auto.h:260
 msgid "toggle skipping of blank windows on/off"
 msgstr "schalte überspringen von leeren Fenstern ein/aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:253
+#: Programs/cmds.auto.h:253
 msgid "toggle skipping of lines with identical content on/off"
 msgstr "überspringen von identischen Zeileninhalten Ein/Aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:246
+#: Programs/cmds.auto.h:246
 msgid "toggle sliding window on/off"
 msgstr "überlappende Braillezeileninhalte Ein/Aus"
 
-#: /home/mlang/src/a11y/brltty/Programs/cmds.auto.h:239
+#: Programs/cmds.auto.h:239
 msgid "toggle text style 6-dot/8-dot"
 msgstr "umschalten zwischen 6-Punkt und 8-Punkt Braille"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:632
+#: Programs/options.c:632
 msgid "too many operands for configuration directive"
 msgstr "zu viele Operanden für Konfigurationsdirektive"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:659
+#: Programs/xbrlapi.c:659
 msgid "unexpected block type %"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:652
+#: Programs/xbrlapi.c:652
 #, c-format
 msgid "unhandled event type: %d\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:655
+#: Programs/options.c:655
 msgid "unknown configuration directive"
 msgstr "unbekannte Konfigurationsdirektive"
 
-#: /home/mlang/src/a11y/brltty/Programs/options.c:470
+#: Programs/options.c:470
 msgid "unknown option"
 msgstr "unbekannte Option"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:2125
+#: Programs/brltty.c:2125
 msgid "unrecognized command"
 msgstr "nicht erkanntes Kommando"
 
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1669
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1678
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1687
-#: /home/mlang/src/a11y/brltty/Programs/config.c:1696
+#: Programs/config.c:1669 Programs/config.c:1678 Programs/config.c:1687
+#: Programs/config.c:1696
 msgid "unsupported"
 msgstr "nicht unterstützt"
 
-#: /home/mlang/src/a11y/brltty/Programs/parse.c:250
+#: Programs/parse.c:250
 msgid "unsupported parameter"
 msgstr "nicht unterstützter Parameter"
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1986
+#: Programs/brltty.c:1986
 msgid "white"
 msgstr "Weiß"
 
-#: /home/mlang/src/a11y/brltty/Programs/xbrlapi.c:632
+#: Programs/xbrlapi.c:632
 #, c-format
 msgid "window %#010lx changed to NULL name\n"
 msgstr ""
 
-#: /home/mlang/src/a11y/brltty/Programs/brltty.c:1985
+#: Programs/brltty.c:1985
 msgid "yellow"
 msgstr "Gelb"
