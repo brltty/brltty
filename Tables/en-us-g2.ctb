@@ -852,6 +852,7 @@ begword rh = Rhadamanthus
 always rhein 1235-125-15-35
 word riflery =
 always right 5-1235
+sufword roseann =
 
 # the letter s
 endnum s = 40s (no letter sign)
@@ -991,6 +992,7 @@ contraction tgr
 word those 45-1456
 begword trans = transtype
 sufword tranship 2345-1235-1-1345-146-24-1234
+sufword tuberose =
 begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
 begword typea = typeahead
 
