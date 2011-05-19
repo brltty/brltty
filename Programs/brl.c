@@ -441,7 +441,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
   const char *mode = "lrn";
 
   if (!setStatusText(brl, mode)) return 0;
-  if (!message(mode, "command learn mode", MSG_NODELAY)) return 0;
+  if (!message(mode, gettext("command learn mode"), MSG_NODELAY)) return 0;
 
   hasTimedOut(0);
   do {
