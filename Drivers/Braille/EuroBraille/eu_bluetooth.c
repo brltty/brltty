@@ -57,7 +57,7 @@ eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
     {
       if (count == -1) 
 	{
-	  logSystemError("EuroBraille Bluetooth write error");
+	  logSystemError("EuroBraille Bluetooth write");
 	} 
       else 
 	{
