@@ -1,4 +1,3 @@
-###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
@@ -14,8 +13,6 @@
 # Web Page: http://mielke.cc/brltty/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
-###############################################################################
-
 msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
