@@ -1053,7 +1053,7 @@ getConsoleDescription (ScreenDescription *description) {
       problemText = NULL;
       return 1;
     }
-    problemText = "screen not in text mode";
+    problemText = gettext("screen not in text mode");
     return 0;
   }
 }
