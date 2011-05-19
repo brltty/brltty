@@ -15,13 +15,12 @@
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
-
 msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
-"POT-Creation-Date: 2011-05-10 19:38+0200\n"
-"PO-Revision-Date: 2011-05-10 19:39+0200\n"
+"POT-Creation-Date: 2011-05-19 10:27+0200\n"
+"PO-Revision-Date: 2011-05-19 10:31+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -29,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Programs/main.c:137
+#: Programs/main.c:135
 #, c-format
 msgid "\"%s\" started as \"%s\"\n"
 msgstr ""
@@ -879,6 +878,10 @@ msgstr ""
 msgid "changes discarded"
 msgstr "Änderungen verworfen"
 
+#: Programs/brl.c:444
+msgid "command learn mode"
+msgstr "Kommando Lernmodus"
+
 #: Programs/options.c:638
 msgid "configuration directive specified more than once"
 msgstr "Konfigurationsdirektive mehrfach angegeben"
@@ -1004,12 +1007,12 @@ msgstr "Escape Taste"
 msgid "excess argument"
 msgstr "überschüssiges Argument"
 
-#: Programs/main.c:147
+#: Programs/main.c:145
 #, c-format
 msgid "executing \"%s\" (from \"%s\")\n"
 msgstr ""
 
-#: Programs/main.c:154
+#: Programs/main.c:152
 #, c-format
 msgid "execution of \"%s\" failed: %s\n"
 msgstr ""
@@ -1029,7 +1032,7 @@ msgstr "Datei"
 msgid "file '%s' processing error."
 msgstr "Datei ‘%s’ Verarbeitungsfehler."
 
-#: Programs/main.c:142
+#: Programs/main.c:140
 #, c-format
 msgid "fork of \"%s\" failed: %s\n"
 msgstr ""
@@ -1425,6 +1428,10 @@ msgstr "Einstellungen speichern"
 msgid "screen driver not loadable"
 msgstr "Bildschirmtreiber nicht ladbar"
 
+#: Drivers/Screen/Linux/screen.c:1056
+msgid "screen not in text mode"
+msgstr "Bildschirm nicht im Textmodus"
+
 #: Programs/cmds.auto.h:122
 msgid "search backward for cut text"
 msgstr "suche nach Auswahl rückwerts"
@@ -1572,7 +1579,7 @@ msgstr ""
 #: Programs/xbrlapi.c:652
 #, c-format
 msgid "unhandled event type: %d\n"
-msgstr ""
+msgstr "unbehandelter Eventtyp: %d\n"
 
 #: Programs/options.c:655
 msgid "unknown configuration directive"
