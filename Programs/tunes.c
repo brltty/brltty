@@ -57,7 +57,7 @@ static TuneElement elements_command_done[] = {
   TUNE_STOP()
 };
 TuneDefinition tune_command_done = {
-  "Done", 0, elements_command_done
+  strtext("Done"), 0, elements_command_done
 };
 
 static TuneElement elements_command_rejected[] = {
@@ -169,7 +169,7 @@ static TuneElement elements_screen_frozen[] = {
   TUNE_STOP()
 };
 TuneDefinition tune_screen_frozen = {
-  "Frozen", 0, elements_screen_frozen
+  strtext("Frozen"), 0, elements_screen_frozen
 };
 
 static TuneElement elements_screen_unfrozen[] = {
@@ -200,7 +200,7 @@ static TuneElement elements_screen_unfrozen[] = {
   TUNE_STOP()
 };
 TuneDefinition tune_screen_unfrozen = {
-  "Unfrozen", 0, elements_screen_unfrozen
+  strtext("Unfrozen"), 0, elements_screen_unfrozen
 };
 
 static TuneElement elements_wrap_down[] = {
@@ -544,7 +544,7 @@ playTune (const TuneDefinition *tune) {
       unsigned char duration = tune->tactile >> 8;
       showDotPattern(dots, duration);
     } else if (prefs.alertMessages && tune->message) {
-      message(NULL, tune->message, 0);
+      message(NULL, gettext(tune->message), 0);
     }
   }
 }
