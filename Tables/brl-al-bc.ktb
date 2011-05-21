@@ -33,18 +33,12 @@ note The five keys on the front are named Thumb1 through Thumb5.
 # Default Bindings #
 ####################
 
-bind SmartpadF1 HELP
-bind SmartpadF2 LEARN
-bind SmartpadF3 INFO
-bind SmartpadF4 PREFMENU
+bind ETouchLeftRear+ETouchRightRear HELP
+bind ETouchLeftRear+ETouchRightFront LEARN
+bind ETouchLeftFront+ETouchRightRear INFO
+bind ETouchLeftFront+ETouchRightFront PREFMENU
 
-bind SmartpadLeft SIXDOTS
-bind SmartpadRight CSRTRK
-bind SmartpadUp FREEZE
-bind SmartpadDown DISPMD
-bind SmartpadEnter PASTE
-
-bind Thumb3 HOME
+bind Thumb3 RETURN
 bind Thumb2 LNUP
 bind Thumb4 LNDN
 bind Thumb1 FWINLT
@@ -55,22 +49,51 @@ bind Thumb3+Thumb4 NXDIFLN
 bind Thumb3+Thumb1 FWINLTSKIP
 bind Thumb3+Thumb5 FWINRTSKIP
 
-bind SmartpadF1+Thumb3 BACK
-bind SmartpadF1+Thumb2 ATTRUP
-bind SmartpadF1+Thumb4 ATTRDN
-bind SmartpadF1+Thumb1 TOP_LEFT
-bind SmartpadF1+Thumb5 BOT_LEFT
+bind Thumb3+ETouchLeftRear TOP_LEFT
+bind Thumb3+ETouchLeftFront BOT_LEFT
+bind Thumb3+ETouchRightRear ATTRUP
+bind Thumb3+ETouchRightFront ATTRDN
 
-bind SmartpadF4+Thumb3 CSRJMP_VERT
-bind SmartpadF4+Thumb2 PRPGRPH
-bind SmartpadF4+Thumb4 NXPGRPH
-bind SmartpadF4+Thumb1 PRPROMPT
-bind SmartpadF4+Thumb5 NXPROMPT
+bind Thumb1+Thumb4 PRPROMPT
+bind Thumb1+Thumb5 NXPROMPT
+bind Thumb2+Thumb4 PRPGRPH
+bind Thumb2+Thumb5 NXPGRPH
 
 bind ETouchLeftRear LNBEG
 bind ETouchRightRear LNEND
 bind ETouchLeftFront CHRLT
 bind ETouchRightFront CHRRT
+
+bind !RoutingKey1 ROUTE
+bind ETouchLeftRear+ETouchLeftFront CSRJMP_VERT
+
+bind RoutingKey1+!RoutingKey1 COPYCHARS
+bind Thumb1+!RoutingKey1 CUTBEGIN
+bind Thumb2+!RoutingKey1 CUTAPPEND
+bind Thumb4+!RoutingKey1 CUTLINE
+bind Thumb5+!RoutingKey1 CUTRECT
+bind ETouchRightRear+ETouchRightFront PASTE
+
+bind !RoutingKey2 DESCCHAR
+bind Thumb2+!RoutingKey2 PRINDENT
+bind Thumb4+!RoutingKey2 NXINDENT
+bind Thumb1+!RoutingKey2 PRDIFCHAR
+bind Thumb5+!RoutingKey2 NXDIFCHAR
+
+bind Thumb3+!RoutingKey1 SETLEFT
+
+bind Thumb1+Thumb2 SIXDOTS
+bind Thumb4+Thumb5 CSRTRK
+
+bind Thumb1+ETouchLeftRear CSRVIS
+bind Thumb1+ETouchLeftFront ATTRVIS
+bind Thumb2+ETouchLeftRear FREEZE
+bind Thumb2+ETouchLeftFront DISPMD
+
+bind SmartpadLeft KEY_CURSOR_LEFT
+bind SmartpadRight KEY_CURSOR_RIGHT
+bind SmartpadUp KEY_CURSOR_UP
+bind SmartpadDown KEY_CURSOR_DOWN
 
 bind SmartpadF1+SmartpadLeft SAY_SLOWER
 bind SmartpadF1+SmartpadRight SAY_FASTER
@@ -84,34 +107,24 @@ bind SmartpadF4+SmartpadUp SAY_ABOVE
 bind SmartpadF4+SmartpadDown SAY_BELOW
 bind SmartpadF4+SmartpadEnter SPKHOME
 
-bind !RoutingKey1 ROUTE
-bind !RoutingKey2 DESCCHAR
-
-bind SmartpadF1+!RoutingKey1 CUTBEGIN
-bind SmartpadF2+!RoutingKey1 CUTAPPEND
-bind SmartpadF3+!RoutingKey1 CUTLINE
-bind SmartpadF4+!RoutingKey1 CUTRECT
-
-bind SmartpadLeft+!RoutingKey1 PRINDENT
-bind SmartpadRight+!RoutingKey1 NXINDENT
-bind SmartpadUp+!RoutingKey1 PRDIFCHAR
-bind SmartpadDown+!RoutingKey1 NXDIFCHAR
-bind SmartpadEnter+!RoutingKey1 SETLEFT
-
 
 #################
 # Menu Bindings #
 #################
 
 context menu
-bind !SmartpadEnter PREFMENU
-bind !SmartpadLeft MENU_PREV_SETTING
-bind !SmartpadRight MENU_NEXT_SETTING
-bind !SmartpadUp MENU_PREV_ITEM
-bind !SmartpadDown MENU_NEXT_ITEM
-bind SmartpadF2 MENU_FIRST_ITEM
-bind SmartpadF3 MENU_LAST_ITEM
-bind SmartpadF1+SmartpadF2 PREFLOAD
-bind SmartpadF4+SmartpadF3 PREFSAVE
-bind SmartpadF1 FWINLT
-bind SmartpadF4 FWINRT
+
+bind Thumb1 FWINLT
+bind Thumb5 FWINRT
+bind Thumb2 MENU_PREV_ITEM
+bind Thumb4 MENU_NEXT_ITEM
+bind ETouchLeftRear MENU_FIRST_ITEM
+bind ETouchLeftFront MENU_LAST_ITEM
+bind ETouchRightRear MENU_PREV_SETTING
+bind ETouchRightFront MENU_NEXT_SETTING
+
+bind Thumb3 PREFMENU
+bind ETouchLeftRear+ETouchLeftFront PREFLOAD
+bind ETouchRightRear+ETouchRightFront PREFSAVE
+
+
