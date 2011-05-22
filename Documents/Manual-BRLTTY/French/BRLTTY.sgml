@@ -13,6 +13,7 @@
 <!ENTITY syntaxe 	SYSTEM "Syntax.sgml">
 <!ENTITY dots 		SYSTEM "Dots.sgml">
 <!ENTITY nabcc          SYSTEM "nabcc.sgml">
+<!ENTITY fr2007          SYSTEM "fr-2007.sgml">
 <!ENTITY midi 		SYSTEM "Midi.sgml">
 
 ]>
@@ -65,8 +66,8 @@ Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 <sect1>Mise en garde<p>
 Ce programme est distribué avec l'espoir d'être utile, mais SANS
-AUCUNE GARANTIE, même pas celle impliquée par une VALEUR MARCHANDE ou
-de SOLIDITÉ pour un BUT PARTICULIER. Voir la <bf>GNU General
+AUCUNE GARANTIE, même pas celle d'être COMMERCIALISABLE ou
+de CONVENIR À UNE FINALITÉ EN PARTICULIER. Voir la <bf>GNU General
 Public License</bf> pour plus de détails.
 
 <sect1>Contacts<label id="contact"><p>
@@ -115,6 +116,7 @@ détails).
 &syntaxe
 &dots
 &nabcc
+&fr2007
 &midi
 
 </article>

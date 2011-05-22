@@ -1,0 +1,257 @@
+<sect>Table française unifiée<label id="nabcc"><p>
+<tscreen><verb>
+  Num Hex  Points     Description
++-------------------------------------------------------------------------+
+|  0  00   [ 32145 8] code nul                                            |
+|  1  01   [73214 68] début de lecture                                    |
+|  2  02   [  21 5 8] début de texte                                      |
+|  3  03   [ 3214 68] fin de texte                                        |
+|  4  04   [7  145 8] fin de transmission                                 |
+|  5  05   [   1 5 8] ENQUIRY                                             |
+|  6  06   [7 214  8] Connaissance                                        |
+|  7  07   [  2145 8] son (bell)                                          |
+|  8  08   [7 21 5 8] effacement                                          |
+|  9  09   [7 214 68] tabulation                                          |
+|  10 0A   [  2 4568] LINE FEED (LF)                                      |
+|  11 0B   [ 3 1   8] tabulation                                          |
+|  12 0C   [7321   8] pied FORM FEED (FF)                                 |
+|  13 0D   [73 14  8] retour chariot                                      |
+|  14 0E   [ 3 145 8] SHIFT OUT                                           |
+|  15 0F   [ 32   68] SHIFT IN                                            |
+|  16 10   [73214  8] échapper lien noir                                  |
+|  17 11   [732145 8] contrôle de périphérique 1                          |
+|  18 12   [7321 5 8] contrôle de périphérique 2                          |
+|  19 13   [732 4  8] contrôle de périphérique 3                          |
+|  20 14   [732 45 8] contrôle de périphérique 4                          |
+|  21 15   [73 1 6 8] Connaissance négative                               |
+|  22 16   [7321  68] [SYNCHRONOUS IDLE]                                  |
+|  23 17   [7 2 4568] fin du bloc de transmission                         |
+|  24 18   [73 14 68] annule                                              |                                             |
+|  25 19   [ 321  68] fin du milieu                                       |
+|  26 1A   [7  1 568] remplacer                                           |
+|  27 1B   [7 21 568] échappement                                         |
+|  28 1C   [7  14 68] séparateur 4                                        |   
+|  29 1D   [7 21  68] séparateur 3                                        |
+|  30 1E   [732  5  ] séparateur 2                                        |
+|  31 1F   [732   6 ] flèche droite                                       |
+|  32 20   [        ] espace                                              |
+|  33 21   [ 32  5  ] point d'exclamation                                 |
+|  34 22   [ 32  56 ] guillemet                                           |
+|  35 23   [ 3  4568] dièse                                               |
+|  36 24   [73   5  ] dollar                                              |
+|  37 25   [ 3  4 68] pour cent                                           |
+|  38 26   [ 3214568] e commercial                                        |
+|  39 27   [ 3      ] apostrophe                                          |
+|  40 28   [ 32   6 ] parenthèse ouvrant                                  |
+|  41 29   [ 3   56 ] parenthèse fermant                                  |
+|  42 2A   [ 3   5  ] astérisque (étoile)                                 |
+|  43 2B   [732  5 8] plus                                                |
+|  44 2C   [  2     ] virgule                                             |                                       |
+|  45 2D   [ 3    6 ] tiret                                               |
+|  46 2E   [  2  56 ] point                                               |
+|  47 2F   [ 3  4   ] barre oblique                                       |
+|  48 30   [ 3  456 ] zéro                                                |
+|  49 31   [   1  6 ] un                                                  |
+|  50 32   [  21  6 ] deux                                                |
+|  51 33   [   14 6 ] trois                                               |
+|  52 34   [   1456 ] quatre                                              |
+|  53 35   [   1 56 ] cinq                                                |
+|  54 36   [  214 6 ] six                                                 |
+|  55 37   [  21456 ] sept                                                |
+|  56 38   [  21 56 ] huit                                                |
+|  57 39   [  2 4 6 ] neuf                                                |
+|  58 3A   [  2  5  ] deux-points                                         |
+|  59 3B   [ 32     ] inférieur                                           |
+|  60 3C   [ 32    8] inférieur                                           |
+|  61 3D   [732  568] égal                                                |
+|  62 3E   [7    56 ] supérieur                                           |
+|  63 3F   [  2   6 ] point d'interrogation                               |
+|  64 40   [ 3  45  ] arrobas                                             |
+|  65 41   [7  1    ] a majuscule                                         |
+|  66 42   [7 21    ] b majuscule                                         |
+|  67 43   [7  14   ] c majuscule                                         |
+|  68 44   [7  145  ] d majuscule                                         |
+|  69 45   [7  1 5  ] e majuscule                                         |
+|  70 46   [7 214   ] f majuscule                                         |
+|  71 47   [7 2145  ] g majuscule                                         |
+|  72 48   [7 21 5  ] h majuscule                                         |
+|  73 49   [7 2 4   ] i majuscule                                         |
+|  74 4A   [7 2 45  ] j majuscule                                         |
+|  75 4B   [73 1    ] k majuscule                                         |
+|  76 4C   [7321    ] l majuscule                                         |
+|  77 4D   [73 14   ] m majuscule                                         |
+|  78 4E   [73 145  ] n majuscule                                         |
+|  79 4F   [73 1 5  ] o majuscule                                         |
+|  80 50   [73214   ] p majuscule                                         |
+|  81 51   [732145  ] q majuscule                                         |
+|  82 52   [7321 5  ] r majuscule                                         |
+|  83 53   [732 4   ] s majuscule                                         |
+|  84 54   [732 45  ] t majuscule                                         |
+|  85 55   [73 1  6 ] u majuscule                                         |
+|  86 56   [7321  6 ] v majuscule                                         |
+|  87 57   [7 2 456 ] w majuscule                                         |
+|  88 58   [73 14 6 ] x majuscule                                         |
+|  89 59   [73 1456 ] y majuscule                                         |
+|  90 5A   [73 1 56 ] z majuscule                                         |
+|  91 5B   [732   68] crochet ouvrant                                     |
+|  92 5C   [ 3  4  8] barre oblique inversée                              |
+|  93 5D   [73   568] crochet fermant                                     |
+|  94 5E   [    4   ] accent circonflexe                                  |
+|  95 5F   [7    5 8] souligné                                            |
+|  96 60   [      6 ] accent grave                                        |
+|  97 61   [   1    ] a minuscule                                         |
+|  98 62   [  21    ] b minuscule                                         |
+|  99 63   [   14   ] c minuscule                                         |
+| 100 64   [   145  ] d minuscule                                         |
+| 101 65   [   1 5  ] e minuscule                                         |
+| 102 66   [  214   ] f minuscule                                         |
+| 103 67   [  2145  ] g minuscule                                         |
+| 104 68   [  21 5  ] h minuscule                                         |
+| 105 69   [  2 4   ] i minuscule                                         |
+| 106 6A   [  2 45  ] j minuscule                                         |
+| 107 6B   [ 3 1    ] k minuscule                                         |
+| 108 6C   [ 321    ] l minuscule                                         |
+| 109 6D   [ 3 14   ] m minuscule                                         |
+| 110 6E   [ 3 145  ] n minuscule                                         |
+| 111 6F   [ 3 1 5  ] o minuscule                                         |
+| 112 70   [ 3214   ] p minuscule                                         |
+| 113 71   [ 32145  ] q minuscule                                         |
+| 114 72   [ 321 5  ] r minuscule                                         |
+| 115 73   [ 32 4   ] s minuscule                                         |
+| 116 74   [ 32 45  ] t minuscule                                         |
+| 117 75   [ 3 1  6 ] u minuscule                                         |
+| 118 76   [ 321  6 ] v minuscule                                         |  
+| 119 77   [  2 456 ] w minuscule                                         |
+| 120 78   [ 3 14 6 ] x minuscule                                         |
+| 121 79   [ 3 1456 ] y minuscule                                         |
+| 122 7A   [ 3 1 56 ] z minuscule                                         |
+| 123 7B   [732    8] ouvre accolade                                      |
+| 124 7C   [    4568] barre verticale                                     |
+| 125 7D   [7    568] ferme accolade                                      |
+| 126 7E   [ 3     8] tilde minuscule                                     |
+| 127 7F   [ 321   8] effacement                                          |
+| 128 20AC [7  1 5 8] euro                                                |
+| 129 201A [7     6 ] guillemet bas simple                                |
+| 130 0192 [  214  8] florin                                              |
+| 131 201E [     56 ] guillemet bas double                                |
+| 132 2026 [ 3    68] points de suspension                                |
+| 133 2020 [ 3   568] obel                                                |
+| 134 2021 [73   56 ] double obel                                         | 
+| 135 2C6  [    4  8] circonflexe minuscule                               |
+| 136 2030 [73  4 68] pour mille                                          |
+| 137 0160 [732 4 68] s carron majuscule                                  |
+| 138 2039 [7    5  ] guillemet fermant                                   |
+| 139 0152 [7 2 4 6 ] e dans o majuscule                                  |
+| 140 017D [73 1 568] z carron majuscule                                  |
+| 141 2018 [      68] guillemet simple ouvrant                            |
+| 142 2019 [73      ] guillemet simple fermant                            |
+| 143 201C [73     8] guillemet double ouvrant                            |
+| 144 201D [7     68] guillemett double fermant                           |
+| 145 2022 [7 2145 8] puce                                                |
+| 146 2013 [7   4  8] tiret cadre atteint                                 |
+| 147 2014 [7   45 8] tiret EM                                            |
+| 148 02DC [7   4 6 ] tilde minuscule                                     |
+| 149 2122 [ 32 45 8] marque déposée                                      |
+| 150 0161 [ 32 4 68] s avec carron minuscule                             |
+| 151 203A [     5 8] guillemet ouvrant                                   |
+| 152 0153 [  2 4 68] e dans o minuscule                                  |
+| 153 017E [73 1 568] z carron minuscule                                  |
+| 154 0178 [7  14568] y tréma majuscule                                   |
+| 160 A0   [7       ] espace insécable (forcé)                            |
+| 161 A1   [ 32  5 8] point d'exclamation inversé                         |
+| 162 A2   [7  14  8] cent                                                |
+| 163 A3   [732     ] livre                                               |
+| 164 A4   [    45  ] devise                                              |
+| 165 A5   [7 2  568] yen                                                 |
+| 166 A6   [    45 8] trait coupé vertical                                |
+| 167 A7   [ 3214  8] paragraphe                                          |
+| 168 A8   [    4 6 ] tréma                                               |
+| 169 A9   [   14  8] copyright                                           |
+| 170 AA   [7  1  68] ordinal féminin                                     |
+| 171 AB   [ 32  568] guillemet français ouvrant                          |
+| 172 AC   [7 2  56 ] négation logique                                    |
+| 173 AD   [7      8] trait d'union conditionne                           |
+| 174 AE   [ 321 5 8] marque déposée                                      |
+| 175 AF   [ 3 14  8] macron                                              |
+| 176 B0   [7 2   6 ] degré                                               |
+| 177 B1   [73    68] plus ou moins                                       |
+| 178 B2   [7   45  ] carré (puissance 2)                                 |
+| 179 B3   [7   456 ] cube (puissance 3)                                  |
+| 180 B4   [     5  ] accent aigu                                         |
+| 181 B5   [7 2  5  ] micro                                               |
+| 182 B6   [7   4568] pied de mouche                                      |
+| 183 B7   [       8] point médiant                                       |
+| 184 B8   [    456 ] cédille                                             |
+| 185 B9   [7   4   ] exposant                                            |
+| 186 BA   [7 2   68] ordinal masculin                                    |
+| 187 BB   [732  56 ] guillemetts français fermant                        |
+| 188 BC   [ 3 1  68] un quart                                            |
+| 189 BD   [    4 68] un demi                                             |
+| 190 BE   [ 3 14 68] trois quart                                         |
+| 191 BF   [  2   68] point d'interrogation inversé                       |
+| 192 C0   [7321 56 ] a grave majuscule                                   |
+| 193 C1   [7321 568] a aigu majuscule                                    |
+| 194 C2   [7  1  6 ] a circonflexe majuscule                             |
+| 195 C3   [7  1   8] a tilde majuscule                                   |
+| 196 C4   [73  456 ] a tréma majuscule                                   |
+| 197 C5   [7 2     ] a avec rond au-dessus majuscule                     |
+| 198 C6   [73  45  ] a e majuscule                                       |
+| 199 C7   [73214 6 ] c cédille majuscule                                 |
+| 200 C8   [732 4 6 ] e grave majuscule                                   |
+| 201 C9   [7321456 ] e aigu majuscule                                    |
+| 202 CA   [7 21  6 ] e circonflexe majuscule                             |
+| 203 CB   [7 214 6 ] e tréma majuscule                                   |
+| 204 CC   [7 2 4  8] i grave majuscule                                   |
+| 205 CD   [73  4   ] i aigu majuscule                                    |
+| 206 CE   [7  14 6 ] i circonflexe majuscule                             |
+| 207 CF   [7 21456 ] i tréma majuscule                                   |
+| 208 D0   [7 21   8] Eth majuscule                                       |
+| 209 D1   [73 145 8] n tilde majuscule                                   |
+| 210 D2   [73 1 5 8] o grave majuscule                                   |
+| 211 D3   [73  4 6 ] o aigu majuscule                                    |
+| 212 D4   [73 1456 ] o circonflexe majuscule                             |
+| 213 D5   [73 1   8] o tilde majuscule                                   |
+| 214 D6   [7 2 4 68] o tréma majuscule                                   |
+| 215 D7   [73   5 8] multipilé par                                       |
+| 216 D8   [73  4568] o barré majuscule                                   |
+| 217 D9   [732 456 ] u grave majuscule                                   |
+| 218 DA   [732 4568] u aigu majuscule                                    |
+| 219 DB   [7  1 56 ] u circonflexe majuscule                             |
+| 220 DC   [7 21 56 ] u tréma majuscule                                   |
+| 221 DD   [73 14568] y aigu majuscule                                    |
+| 222 DE   [  2 45 8] Thorn majuscule                                     |
+| 223 DF   [ 32 4  8] szeth                                               |
+| 224 E0   [ 321 56 ] a grave minuscule                                   |
+| 225 E1   [ 321 568] a aigu minuscule                                    |
+| 226 E2   [   1  68] a circonflexe minuscule                             |
+| 227 E3   [   1   8] a qilde minuscule                                   |
+| 228 E4   [73  45 8] a tréma minuscule                                   |
+| 229 E5   [  2    8] a avec rond en tête minuscule                       |
+| 230 E6   [ 3  45 8] a e minuscule                                       |
+| 231 E7   [ 3214 6 ] c cédille minuscule                                 |
+| 232 E8   [ 32 4 6 ] e grave minuscule                                   |
+| 233 E9   [ 321456 ] e aigu minuscule                                    |
+| 234 EA   [  21  68] e circonflexe minuscule                             |
+| 235 EB   [  214 68] e tréma minuscule                                   | 
+| 236 EC   [  2 4  8] i grave minuscule                                   |
+| 237 ED   [73  4  8] i aigu minuscule                                    |
+| 238 EE   [   14 68] i circonflexe minuscule                             |
+| 239 EF   [  214568] i tréma minuscule                                   |
+| 240 F0   [  21   8] Eth minuscule                                       |
+| 241 F1   [7 214568] n tilde minuscule                                   |
+| 242 F2   [ 3 1 5 8] o grave minuscule                                   |
+| 243 F3   [ 3  4 6 ] o aigu minuscule                                    |
+| 244 F4   [   14568] o circonflexe minuscule                             |
+| 245 F5   [7   4 68] o tilde minuscule                                   |
+| 246 F6   [ 3   5 8] o tréma minuscule                                   |
+| 247 F7   [7 2  5 8] divisé par                                          |
+| 248 F8   [     568] o barré minuscule                                   |
+| 249 F9   [ 32 456 ] u grave minuscule                                   |
+| 250 FA   [ 32 4568] u aigu minuscule                                    |
+| 251 FB   [   1 568] u circonflexe minuscule                             |
+| 252 FC   [  21 568] u tréma minuscule                                   |
+| 253 FD   [ 3 14568] y aigu minuscule                                    |
+| 254 FE   [  2 45 8] thorn minuscule                                     |
+| 255 FF   [  2  568] y tréma minuscule                                   |
++-------------------------------------------------------------------------+
+</verb></tscreen>

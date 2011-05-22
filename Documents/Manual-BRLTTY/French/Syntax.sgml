@@ -5,13 +5,13 @@ Vous devez spécifier un pilote pour un afficheur braille ou une synthèse vocale
 via les deux lettres de son
 <ref id="drivers" name="Code d'identification de pilote">.
 
-Vous pouvez spécifier une liste de pilotes délimitée par des virgules. Dans
-ce cas, une autodétection s'effectue en utilisant chaque pilote listé dans la
+Vous pouvez spécifier une liste de pilotes délimités par des virgules. Dans
+ce cas, une détection automatique s'effectue en utilisant chaque pilote listé dans la
 séquence.
 Il se peut que vous soyez obligé de faire des essais afin de déterminer l'ordre le plus
-fiable, étant donné que certains pilotes s'autodétectent mieux que d'autres.
+fiable, étant donné que certains pilotes se détectent mieux automatiquement que d'autres.
 
-Si vous ne spécifiez que le mot <tt>auto</tt>, l'autodétection s'effectue
+Si vous ne spécifiez que le mot <tt>auto</tt>, la détection automatique s'effectue
 en n'utilisant que les pilotes connus pour leur fiabilité dans le but
 recherché.
 
@@ -21,9 +21,9 @@ La forme générale de la spécification d'un périphérique braille (voir l'option
 <ref id="configure-braille-device" name="braille-device"> du fichier de
 configuration, et l'option de compilation
 <ref id="build-braille-device" name="--with-braille-device">) est
-<tt>qualifiée:</tt><em>donnée</em>.
+<tt>qualificateur:</tt><em>donnée</em>.
 Par compatibilité entre d'anciennes versions et les plus récentes, si vous ommettez
-le qualificateur c'est <tt>série:</tt> qui est utilisé.
+le qualificateur c'est <tt>serial:</tt> qui est utilisé.
 
 Les types de périphérique suivants sont supportés:
 <descrip>
@@ -34,15 +34,15 @@ Les types de périphérique suivants sont supportés:
     séparés par des "deux-points", par exemple <tt>01:23:45:67:89:AB</tt>.
   <tag>Série</tag>
     Pour un périphérique en port série, spécifiez
-    <tt>série:</tt><em>/chemin/vers/peripherique</em>. Le qualificateur <tt>serial:</tt>
+    <tt>serial:</tt><em>/chemin/vers/peripherique</em>. Le qualificateur <tt>serial:</tt>
     est facultatif (pour compatibilité). Si vous donnez un chemin
     relatif, il est déterminé par rapport à <tt>/dev</tt> (l'emplacement habituel
     où les périphériques sont définis sur un système de type Unix).
     Les spécifications de périphérique suivantes se réfèrent toutes au port
     série 1 sur Linux:
     <itemize>
-      <item><tt>série:/dev/ttyS0</tt>
-      <item><tt>série:ttyS0</tt>
+      <item><tt>serial:/dev/ttyS0</tt>
+      <item><tt>serial:ttyS0</tt>
       <item><tt>/dev/ttyS0</tt>
       <item><tt>ttyS0</tt>
     </itemize>
@@ -50,20 +50,20 @@ Les types de périphérique suivants sont supportés:
     Pour un périphérique USB, spécifiez <tt>usb:</tt>. BRLTTY cherchera le premier
     périphérique USB qui entraîne l'utilisation du pilote d'afficheur braille.
     Par exemple, si vous avez plus d'un afficheur braille USB nécessitant le
-    même pilote, vous pouvez affiner la spécification de pilote en y assignant
+    même pilote, vous pouvez affiner la spécification de pilote en y affectant
     le numéro de série de l'afficheur, comme par exemple <tt>usb:12345</tt>.
     N.B.: La possibilité "identification par le numéro de série" ne
-    fonctionne pas avec certains modèles car certains fabriquants, soit
+    fonctionne pas avec certains modèles car certains fabricants, soit
     n'indiquent pas la description du numéro de série, soit l'indiquent
     mais pas en une valeur unique.
 </descrip>
 
-Vous pouvez spécifier une liste de pilotes délimitée par des virgules. Dans
-ce cas, une autodétection s'effectue en utilisant chaque pilote listés dans la
+Vous pouvez spécifier une liste de pilotes délimités par des virgules. Dans
+ce cas, une détection automatique s'effectue en utilisant chaque pilote listé dans la
 séquence. Cette possibilité est particulièrement utile si vous avez un
 afficheur braille à plusieurs interfaces, par exemple un port série et un USB.
 Dans ce cas, il est en général préférable de lister d'abord le port USB, comme
-par exemple <tt>usb:,série:/dev/ttyS0</tt>, étant donné que l'ancien à
+par exemple <tt>usb:,serial:/dev/ttyS0</tt>, étant donné que l'ancien a
 tendance à être mieux détecté que le plus récent.
 
 <sect1>Spécification d'un périphérique PCM<label id="operand-pcm-device"><p>

@@ -10,8 +10,8 @@ l'analyse de problèmes de démarrage. Il facilite aussi beaucoup des
 opérations de bases telles que l'identification.
 
 BRLTTY reproduit une portion rectangulaire de l'écran (appelée
-dans ce document `la plage') en un texte braille sur l'afficheur.
-Vous pouvez utiliser des contrôles de l'affichage pour déplacer la plage sur
+dans ce document `la fenêtre') sous forme de texte braille sur l'afficheur.
+Vous pouvez utiliser des contrôles de l'affichage pour déplacer la fenêtre sur
 l'écran, pour activer et désactiver des options de revue
 variées, et pour exécuter des fonctions spéciales.
 
@@ -37,12 +37,12 @@ BRLTTY donne les possibilités suivantes:
     rapatriment du curseur dans les éditeurs de texte, les navigateurs
     web, etc., sans bouger les mains de l'afficheur braille.
   <item>
-    Une fonction couper-et-coller, (linéaire ou rectangulaire) qui est
+    Une fonction copier-coller (linéaire ou rectangulaire) qui est
     particulièrement utile pour la copie de longs noms de fichier, de
     texte entre des terminaux virtuels, la saisie de commandes
     compliquées, etc.
   <item>
-    Gestion des tables abrégée (fournie en anglais et en français).
+    Gestion des tables de braille abrégé (fournie en anglais et en français).
   <item>
     Support pour de multiples codes braille.
   <item>
@@ -61,12 +61,12 @@ BRLTTY donne les possibilités suivantes:
     facilement d'autres afficheurs braille et d'autres synthèses
     vocales.
   <item>
-    Une Interface Programmatique de l'Application.
+    Une Interface de programmation de l'Application.
 </itemize>
 
 <sect1>Système requis<p>
 Actuellement, BRLTTY fonctionne sur Linux, Solaris, OpenBSD, FreeBSD,
-NetBSD et Windows. Les transpositions pour d'autres systèmes d'exploitation
+NetBSD et Windows. Les portages sur d'autres systèmes d'exploitation
 dérivés de Unix ne sont pas encore prévues, nous apprécierions vraiment
 tout intérêt pour de tels projets.
 
@@ -127,7 +127,7 @@ Linux 1.1.92 ou supérieur est nécessaire si BRLTTY est utilisé de
 cette façon. Cette possibilité:
 <itemize>
   <item>
-    Permet à BRLTTY d'être démarré très tôt dans le séquence de
+    Permet à BRLTTY d'être démarré très tôt dans la séquence de
     démarrage du système.
   <item>
     Active l'afficheur braille pour qu'il soit totalement opérationnel
@@ -137,7 +137,7 @@ cette façon. Cette possibilité:
     des tâches d'administration lors du démarrage.
 </itemize>
 
-Un patch pour le programme <tt>d'écran</tt> est fourni (voir le sous-répertoire
+Un correctif pour le programme <tt>d'écran</tt> est fourni (voir le sous-répertoire
 <tt>Patches</tt>). Il permet à BRLTTY d'accéder à l'image d'un écran
 via une mémoire partagée, et, ainsi, permet à BRLTTY d'être utilisé
 beaucoup plus efficacement sur des plateformes qui n'ont pas leurs

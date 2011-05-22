@@ -50,7 +50,7 @@ Ensuite, tout ce que vous devez faire est de pointer <tt>/brltty</tt> vers la
 version désirée.
 <tscreen>ln -s /brltty-3.1 /brltty</tscreen>
 
-<sect1>Disques racine d'Installation/Secours pour Linux<p>
+<sect1>Disques racines d'Installation/Secours pour Linux<p>
 BRLTTY peut s'exécuter comme un seul exécutable. Tout ce qu'il a besoin de
 savoir peut être configuré explicitement lors de la compilation (voir
 <ref id="build" name="Options de compilation">).
@@ -92,7 +92,7 @@ besoin de façon à atténuer ce problème (voir la section
 
 L'exécutable est nettoyé pendant le
 <ref id="make-install" name="make install">. Cela réduit de façon
-significative sa taille en supprimant sa table symbole.
+significative sa taille en supprimant sa table de symboles.
 Vous obtiendrez un exécutable beaucoup plus petit, puis copiez-le de son emplacement
 d'installation.
 Cependant, si vous le copiez depuis le répertoire de compilation, n'oubliez pas de le nettoyer.
@@ -102,18 +102,18 @@ Cependant, si vous le copiez depuis le répertoire de compilation, n'oubliez pas 
 Outre la réparation de bugs et le support de plus de types d'afficheurs
 brailles, nous espérons, si le temps nous le permet, travailler sur:
 <descrip>
-  <tag>Meilleure prise en main des attributs</tag>
+  <tag>Meilleure prise en charge des attributs</tag>
     <itemize>
-      <item>Suivi des attributs.
-      <item>Mode mixte texte et attribut.
+      <item>Poursuite des attributs.
+      <item>Mode mixte texte et attributs.
     </itemize>
-  <tag>Suivi du défilement</tag>
-     Allignement de la plage braille sur une ligne alors qu'elle défile à
+  <tag>Poursuite du défilement</tag>
+     Alignement de la plage braille sur une ligne alors qu'elle défile à
      l'écran.
   <tag>Meilleur support de voix</tag>
     <itemize>
       <item>Braille et voix mélangés pour une lecture plus rapide du texte.
-      <item>Meilleur navigation parlée.
+      <item>Meilleur navigation vocale.
       <item>Plus de synthèses vocales.
     </itemize>
   <tag>Sous-régions sur l'écran</tag>
@@ -122,12 +122,12 @@ brailles, nous espérons, si le temps nous le permet, travailler sur:
 </descrip>
 Voir le fichier <tt>TODO</tt> pour une liste plus complète.
 
-<sect1>Bugs connus<p>
+<sect1>Bogues connus<p>
 A l'heure où nous écrivons (décembre 2001), les problèmes suivants sont
 connus.
 
 La routine-curseur est considérée comme un sous-processus en boucle qui s'exécute
-avec une priorité réduite pour éviter de trop utiliser le temps cpu.
+avec une priorité réduite pour éviter de trop utiliser le temps du processeur.
 Les chargements de systèmes différents nécessitent des réglages différents de
 ses paramètres. Ceux par défaut fonctionnent très bien dans un éditeur Unix
 classique sur un système chargé normalement, mais très mal dans d'autres

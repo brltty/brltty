@@ -2,121 +2,121 @@
 <table loc="h">
   <tabular ca="lrl">
     <hline>Piano
-      |0|Acoustic Grand Piano@
-      |1|Bright Acoustic Piano@
-      |2|Electric Grand Piano@
-      |3|Honkytonk Piano@
-      |4|Electric Piano 1@
-      |5|Electric Piano 2@
-      |6|Harpsichord@
-      |7|Clavi@
-    <hline>Chromatic Percussion
-      |8|Celesta@
+      |0|Grand Piano acoustique@
+      |1|Piano acoustique brillant@
+      |2|Grand piano électrique@
+      |3|Piano bastringue@
+      |4|Piano 1@
+      |5|Piano électrique 2@
+      |6|clavecin@
+      |7|Claviers@
+    <hline>Percussions chromatiques
+      |8|Célesta@
       |9|Glockenspiel@
-      |10|Music Box@
+      |10|Boîte à rythme@
       |11|Vibraphone@
       |12|Marimba@
       |13|Xylophone@
       |14|Tubular Bells@
       |15|Dulcimer@
-    <hline>Organ
-      |16|Drawbar Organ@
-      |17|Percussive Organ@
-      |18|Rock Organ@
-      |19|Church Organ@
-      |20|Reed Organ@
-      |21|Accordion@
+    <hline>Orgue
+      |16|Orgue de barbarie@
+      |17|Orgue percussive@
+      |18|Orgue rock@
+      |19|Orgue d'église@
+      |20|Orgue de hanche@
+      |21|Accordéon@
       |22|Harmonica@
-      |23|Tango Accordion@
-    <hline>Guitar
-      |24|Nylon Acoustic Guitar@
-      |25|Steel Acoustic Guitar@
-      |26|Jazz Electric Guitar@
-      |27|Clean Electric Guitar@
-      |28|Muted Electric Guitar@
-      |29|Overdriven Guitar@
+      |23|Accordéon de tango@
+    <hline>Guitare
+      |24|Guitare acoustique Nylon Acoustic Guitar@
+      |25|Guitare acoustique métal@
+      |26|Guitare électrique Jazz@
+      |27|Guitare électrique propre@
+      |28|Guitare électrique bouchée@
+      |29|Guitare overdriven@
       |30|Distortion Guitar@
-      |31|Guitar Harmonics@
-    <hline>Bass
-      |32|Acoustic Bass@
-      |33|Finger Electric Bass@
+      |31|Harmoniques de guitare@
+    <hline>Basse
+      |32|Basse acoustique@
+      |33|Basse électrique au doigt@
       |34|Pick Electric Bass@
       |35|Fretless Bass@
       |36|Slap Bass 1@
       |37|Slap Bass 2@
       |38|Synth Bass 1@
       |39|Synth Bass 2@
-    <hline>Strings
-      |40|Violin@
-      |41|Viola@
-      |42|Cello@
-      |43|Contrabass@
-      |44|Tremolo Strings@
-      |45|Pizzicato Strings@
-      |46|Orchestral Harp@
-      |47|Timpani@
+    <hline>Pistons
+      |40|Violon@
+      |41|Alto@
+      |42|Violoncelle@
+      |43|Contrebasse@
+      |44|Pistons Tremolo@
+      |45|Pisstons pizzicato@
+      |46|Harpe Orchestrale@
+      |47|timbales@
     <hline>Ensemble
       |48|String Ensemble 1@
       |49|String Ensemble 2@
       |50|Synth Strings 1@
       |51|Synth Strings 2@
-      |52|Choir Aahs@
-      |53|Voice Oohs@
-      |54|Synth Voice@
+      |52|Aahs choeur@
+      |53|Oohs voix@
+      |54|Voice synthétique@
       |55|Orchestra Hit@
-    <hline>Brass
-      |56|Trumpet@
-      |57|Trombone@
+    <hline>Cuivre
+      |56|Trompette@
+      |57|Trombonne@
       |58|Tuba@
-      |59|Muted Trumpet@
-      |60|French Horn@
-      |61|Brass Section@
-      |62|Synth Brass 1@
-      |63|Synth Brass 2@
-    <hline>Reed
-      |64|Soprano Saxophone@
-      |65|Alto Saxophone@
-      |66|Tenor Saxophone@
-      |67|Baritone Saxophone@
-      |68|Oboe@
-      |69|English Horn@
-      |70|Bassoon@
-      |71|Clarinet@
-    <hline>Pipe
+      |59|Trompette bouchée@
+      |60|Cor français@
+      |61|Section cuivre@
+      |62|Cuivre synthétique 1@
+      |63|Cuivre synthétique 2@
+    <hline>Anche
+      |64|Saxophone soprano@
+      |65|Saxophone Alto@
+      |66|Saxophone Tenor@
+      |67|Saxophone Bariton@
+      |68|Hautbois@
+      |69|Cor anglais@
+      |70|Basson@
+      |71|Clarinette@
+    <hline>Tuyau
       |72|Piccolo@
-      |73|Flute@
-      |74|Recorder@
-      |75|Pan Flute@
+      |73|Flûte@
+      |74|Flûte à bec@
+      |75|Flûte de pan@
       |76|Blown Bottle@
       |77|Shakuhachi@
-      |78|Whistle@
+      |78|Sifflet@
       |79|Ocarina@
     <hline>Synth Lead
       |80|Lead 1 (square)@
-      |81|Lead 2 (sawtooth)@
+      |81|Lead 2 (dent de scie)@
       |82|Lead 3 (calliope)@
       |83|Lead 4 (chiff)@
       |84|Lead 5 (charang)@
-      |85|Lead 6 (voice)@
-      |86|Lead 7 (fifths)@
-      |87|Lead 8 (bass + lead)@
+      |85|Lead 6 (voix)@
+      |86|Lead 7 (cinquièmes)@
+      |87|Lead 8 (basse + lead)@
     <hline>Synth Pad
-      |88|Pad 1 (new age)@
-      |89|Pad 2 (warm)@
+      |88|Pad 1 (nOuvel âge)@
+      |89|Pad 2 (chaud)@
       |90|Pad 3 (polysynth)@
-      |91|Pad 4 (choir)@
+      |91|Pad 4 (choeur)@
       |92|Pad 5 (bowed)@
-      |93|Pad 6 (metallic)@
+      |93|Pad 6 (métalique)@
       |94|Pad 7 (halo)@
       |95|Pad 8 (sweep)@
     <hline>Synth FM
-      |96|FX 1 (rain)@
+      |96|FX 1 (pluie)@
       |97|FX 2 (soundtrack)@
-      |98|FX 3 (crystal)@
-      |99|FX 4 (atmosphere)@
+      |98|FX 3 (cristal)@
+      |99|FX 4 (atmosphère)@
       |100|FX 5 (brightness)@
       |101|FX 6 (goblins)@
-      |102|FX 7 (echoes)@
+      |102|FX 7 (échos)@
       |103|FX 8 (science-fiction)@
     <hline>Ethnic
       |104|Sitar@
@@ -136,14 +136,14 @@
       |117|Melodic Tom@
       |118|Synth Drum@
       |119|Reverse Cymbal@
-    <hline>Sound Effects
-      |120|Guitar Fret Noise@
-      |121|Breath Noise@
-      |122|Seashore@
-      |123|Bird Tweet@
-      |124|Telephone Ring@
-      |125|Helicopter@
-      |126|Applause@
+    <hline>Effets sonores
+      |120|Bruit de touche de guitare@
+      |121|Bruit de souffle@
+      |122|Bord de mer@
+      |123|Bruit d'oiseau@
+      |124|Sonnerie de télphone@
+      |125|Helicoptère@
+      |126|Applaudissements@
       |127|Gunshot@
   </tabular>
 </table>

@@ -11,9 +11,9 @@
 <sect>La procédure de compilation<p>
 On peut télécharger BRLTTY depuis son site Web (voir la section <ref
 id="contact" name="Contacts"> pour son adresse).  Toutes les versions
-sont fournies en <ref id="tar" name="tar balls"> compressés. Les
+sont fournies en <ref id="tar" name="archives tar"> compressés. Les
 versions récentes sont aussi fournies en fichiers <ref id="rpm"
-name="RPM"> (RedHat Package Manager).
+name="RPM"> (RedHat paquet Manager).
 
 Ces information éparses ont probablement piqué votre
 curiosité et vous êtes impatient de démarrer.
@@ -29,11 +29,11 @@ fichiers suivants:
       <tag>brltty</tag>
         Le programme BRLTTY.
       <tag><ref id="utility-brltty-install" name="brltty-install"></tag>
-        Un utilitaire pour la copie de la <ref id="hierarchy"
+        Un outil pour la copie de la <ref id="hierarchy"
         name="hiérarchie des fichiers installés"> de BRLTTY d'un emplacement à
         un autre...
       <tag><ref id="utility-brltty-config" name="brltty-config"></tag>
-        Un utilitaire qui assigne un certain nombre de variables
+        Un outil qui assigne un certain nombre de variables
         d'environnement à des valeurs reflétant l'installation
         courante de BRLTTY.
     </descrip>
@@ -45,7 +45,7 @@ fichiers suivants:
       <tag>brltty.conf</tag>
         Paramètres système par défaut pour BRLTTY.
       <tag>brlapi.key</tag>
-        Touches d'accès pour BrlAPI.
+        Clés d'accès pour BrlAPI.
     </descrip>
   <tag>/etc/brltty/</tag>
     Il se peut que votre installation de BRLTTY n'ait pas tous les
@@ -63,15 +63,15 @@ fichiers suivants:
         (voir la section <ref id="table-attributes" name="Tables d'attributs"> pour plus de détails).
         Leur nom ressemble à <em/name/<tt/.atb/.
       <tag/*.ati/
-        Include files for attributes tables.
+        Fichiers include pour les tables d'attributs.
 
       <tag>*.ctb</tag>
         Tables de braille abrégé (voir <ref id=table-contraction name="Tables
-        d'abrégé"> pour plus de détails).  Leur nom ressemble plus ou
+        de braille abrégé"> pour plus de détails).  Leur nom ressemble plus ou
         moins à
         <em>langue</em><tt>-</tt><em>pays</em><tt>-</tt><em>niveau</em><tt>.ctb</tt>.
       <tag>*.cti</tag>
-        Incluent les fichiers pour les tables de traduction.
+        Fichiers include pour les tables de traduction.
       <tag/*.ktb/
         Tables de touches
         (voir la section <ref id="table-key" name="Tables de touches"> pour plus de détails).
@@ -179,15 +179,15 @@ BRLTTY à toute vitesse, en espérant que tous
 nos paramètres par défaut soient corrects.
 <enum>
   <item>
-    Téléchargez le source. Il s'agira d'un fichier nommé
+    Téléchargez les sources. Il s'agira d'un fichier nommé
     <tt>brltty-</tt><em>version</em><tt>.tar.gz</tt>, par exemple
     <tt>brltty-3.0.tar.gz</tt>.
   <item>
-    Décompressez la source dans une structure hiérarchique native.
+    Décompressez les sources dans une structure hiérarchique native.
     <tscreen>tar xzf brltty-<em>version</em>.tar.gz</tscreen>
     Cela devrait créer le répertoire <tt>brltty-</tt><em>version</em>.
   <item>
-    Allez dans le répertoire source, configurez, compilez et installez BRLTTY.
+    Allez dans le répertoire des sources, configurez, compilez et installez BRLTTY.
     <tscreen>
       cd brltty-<em>version</em>
       <newline>
@@ -235,7 +235,7 @@ instructions supplémentaires spécifiques.
     Spécifie les pilotes des terminaux braille que vous voulez lier à
     l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
     liste de cette option seront compilés en tant qu'objets dynamiques
-    et pourront toujours être sélectionnés à l'exécution. Chaque
+    et pourront toujours être sélectionnés au moment de l'exécution. Chaque
     pilote doit être identifié soit par les 2 lettres de son <ref id="drivers" name="code
     d'identification de pilote"> ou par son vrai nom (complet ou
     abrégé). Ces noms et/ou identifiants de pilotes doivent être séparés les uns des
@@ -400,7 +400,7 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-flite</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>,
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>,
         <tt>/usr/local</tt>, <tt>/usr/local/FestivalLite</tt>,
         <tt>/usr/local/flite</tt>, <tt>/opt/FestivalLite</tt> ou
         <tt>/opt/flite</tt>. Cela revient à
@@ -409,15 +409,15 @@ instructions supplémentaires spécifiques.
 
   <tag><tt>--with-flite-language=</tt><em>language</em><label id="build-flite-language"></tag>
     Spécifie la langue qu'utilisera le moteur de FestivalLite.
-    La langue utilisée par défaut est <tt>l'anglais</tt>..
+    La langue utilisée par défaut est <tt>l'anglais</tt>.
   <tag><tt>--with-flite-lexicon=</tt><em>lexicon</em><label id="build-flite-lexicon"></tag>
     Spécifie le dictionnaire que le moteur de FestivalLite
     utilisera. Le dictionnaire par défaut est <tt>cmulex</tt>.
   <tag><tt>--with-flite-voice=</tt><em>voice</em><label id="build-flite-voice"></tag>
-    Spécifie la personne que le moteur de FestivalLite.
-    La voix par défaut est<tt>cmu_us_kal16</tt>.
+    Spécifie la personne que le moteur de FestivalLite doit utiliser.
+    La voix par défaut est <tt>cmu_us_kal16</tt>.
   <tag><tt>--with-mikropuhe=</tt><em>directory</em><label id="build-mikropuhe"></tag>
-    Spécifie l'emplacement d'installation du package
+    Spécifie l'emplacement d'installation du paquet
     Mickropuhe et compile le pilote pour la synthèse
     vocale Mikropuhe (voir <ref id="restrictions-mikropuhe" name="Restrictions dans la compilation">). L'un
     des mots suivants peut aussi être utilisé comme opérateur de cette
@@ -427,14 +427,14 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-mikropuhe</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>, 
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>, 
         <tt>/usr/local</tt>, <tt>/usr/local</tt>, <tt>/usr/local/Mikropuhe</tt>,
         <tt>/usr/local/mikropuhe</tt>, <tt>/opt/Mikropuhe</tt> 
         ou <tt>/opt/mikropuhe</tt>. Cela revient à spécifier 
         <tt>--with-mikropuhe</tt>.
     </descrip>
   <tag><tt>--with-speechd=</tt><em>repertoire</em><label id="build-theta"></tag>
-    Spécifie l'endroit où est installé le package de la synthèse vocale speech-dispatcher
+    Spécifie l'endroit où est installé le paquet de la synthèse vocale speech-dispatcher
     (multiplexeur de synthèse vocale) et compile le pilote pour speech-dispatcher.
     L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
     option:
@@ -443,13 +443,13 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-speechd</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
         <tt>/usr/local/speech-dispatcher</tt>, <tt>/usr/local/speechd</tt>,
         <tt>/opt/speech-dispatcher</tt>, ou <tt>/opt/speechd</tt>. Cela revient
         à spécifier <tt>--with-speechd</tt>.
     </descrip>    
   <tag><tt>--with-swift=</tt><em>repertoire</em><label id="build-theta"></tag>
-    Spécifie l'endroit où est installé le package de la synthèse vocale, et
+    Spécifie l'endroit où est installé le paquet de la synthèse vocale, et
     compile le pilote pour la synthèse vocale Swift.
     L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
     option:
@@ -458,13 +458,13 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-swift</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
         <tt>/usr/local/Swift</tt>, <tt>/usr/local/swift</tt>,
         <tt>/opt/Swift</tt>, ou <tt>/opt/swift</tt>. Cela revient
         à spécifier <tt>--with-swift</tt>.
     </descrip>    
   <tag><tt>--with-theta=</tt><em>repertoire</em><label id="build-theta"></tag>
-    Spécifie l'emplacement d'installation du package Theta
+    Spécifie l'emplacement d'installation du paquet Theta
     et compile le pilote pour la synthèse vocale Theta
     (voir <ref id="restrictions-theta" name="Restrictions dans la compilation">). L'un des mots
     suivants peut aussi être utilisé comme opérateur de cette option:
@@ -473,13 +473,13 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-theta</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
         <tt>/usr/local/Theta</tt>, <tt>/usr/local/theta</tt>,
         <tt>/opt/Theta</tt>, ou <tt>/opt/theta</tt>.
         Cela revient à spécifier <tt>--with-theta</tt>.
     </descrip>
   <tag><tt>--with-viavoice=</tt><em>repertoire</em><label id="build-viavoice"></tag>
-    Spécifie l'emplacement d'installation du package Viavoice
+    Spécifie l'emplacement d'installation du paquet Viavoice
     et compile le pilote pour la synthèse vocale
     Viavoice (voir <ref id="restrictions-viavoice" name="Restrictions dans la compilation">). L'un des
     mots suivants peut aussi être utilisé comme opérateur de cette
@@ -489,7 +489,7 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-viavoice</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>,
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>,
         <tt>/usr/local</tt>, <tt>/usr/local/ViaVoice</tt>, <tt>/usr/local/viavoice</tt>,
         <tt>/opt/ViaVoice</tt>, ou <tt>/opt/viavoice</tt>.
         Cela revient à spécifier <tt>--with-viavoice</tt>.
@@ -527,7 +527,7 @@ instructions supplémentaires spécifiques.
     </descrip>
 
     Le premier pilote non exclu devient celui par défaut. 
-    Si cette option n'est pas spécifiée, une sélection appropriée au
+    Si cette option n'est pas spécifiée, une sélection adaptée au
     système d'exploitation est faite. Si un pilote spécifique au
     système d'exploitation en cours est fiable, il est utilisé. Sinon,
     <tt>sc</tt> est utilisé.
@@ -537,7 +537,7 @@ instructions supplémentaires spécifiques.
   <tag><tt>--with-screen-parameters=</tt><em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-screen-parameters"></tag>
     Spécifie les paramètres par défaut pour le pilote d'écran. Si le
     même paramètre est spécifié plus d'une fois, c'est sa valeur la
-    plus à droite qui est retenue. Si le nom d'un paramètre est assigné par un
+    plus à droite qui est retenue. Si le nom d'un paramètre est affecté à un
     pilote (voir section Pilotes d'écran supportés) alors ce paramètre ne
     s'applique qu'au pilote; sinon il s'applique à tous les pilotes.
     Pour une description des paramètres
@@ -546,7 +546,7 @@ instructions supplémentaires spécifiques.
     fichier de configuration et l'option <ref id="options-screen-parameters" name="-X"> en ligne de commande
     pour la sélection à l'exécution.
 
-  <tag><tt/--with-usb-package=/<em/paquet/<tt/,/...<label id="build-usb-package"></tag>
+  <tag><tt/--with-usb-paquet=/<em/paquet/<tt/,/...<label id="build-usb-paquet"></tag>
     Spécifie le paquet qui sera utilisé pour l'E/S USB.
     Vous devez spéarer les noms de paquets les uns des
     autres par une virgule, ils sont traités de la gauche vers la droite.
@@ -561,15 +561,15 @@ instructions supplémentaires spécifiques.
     <descrip>
       <tag/no/
         Ne supporte pas l'E/S USB.
-        Cela revient à spécifier <tt/--without-usb-package/.
+        Cela revient à spécifier <tt/--without-usb-paquet/.
       <tag/yes/
         Utiliser le support natif pour l'E/S USB.
         Si un support natif n'est pas disponible pour la
         plateforme actuelle, utiliser alors le premier paquet supporté
         disponible (comme pour l'ordre spécifié ci-dessus).
-        Cela revient à spécifier <tt/--with-usb-package/.
+        Cela revient à spécifier <tt/--with-usb-paquet/.
     </descrip>
-  <tag><tt/--with-bluetooth-package=/<em/paquet/<tt/,/...<label id="build-bluetooth-package"></tag>
+  <tag><tt/--with-bluetooth-paquet=/<em/paquet/<tt/,/...<label id="build-bluetooth-paquet"></tag>
     Spécifie le paquet qui sera utilisé pour l'E/S Bluetooth.
     Vous devez spéarer les noms de paquets les uns des
     autres par une virgule, ils sont traités de la gauche vers la droite.
@@ -583,13 +583,13 @@ instructions supplémentaires spécifiques.
     <descrip>
       <tag/no/
         Ne supporte pas l'E/S Bluetooth.
-        Cela revient à spécifier <tt/--without-bluetooth-package/.
+        Cela revient à spécifier <tt/--without-bluetooth-paquet/.
       <tag/yes/
         Utiliser le support natif pour l'E/S Bluetooth.
         Si un support natif n'est pas disponible pour la
         plateforme actuelle, utiliser alors le premier paquet supporté
         disponible (comme pour l'ordre spécifié ci-dessus).
-        Cela revient à spécifier <tt/--with-bluetooth-package/.
+        Cela revient à spécifier <tt/--with-bluetooth-paquet/.
     </descrip>
 
 </descrip>
@@ -610,10 +610,10 @@ instructions supplémentaires spécifiques.
   <tag><tt>--with-install-root=</tt><em>repertoire</em><label id="build-install-root"></tag>
     Spécifie le répertoire où la <ref id="hierarchy" name="hiérarchie
     des fichiers installés"> sera installée. Vous devriez
-    fournir un chemin absolu. Si cette option n'est pas spécifiée, le
-    package racine d'exécution (voir l'option de compilation <ref
+    fournir un chemin absolu. Si cette option n'est pas spécifiée, la racine
+    d'exécution du paquet (voir l'option de compilation <ref
     id="build-execute-root" name="--with-execute-root">) est
-    utilisé. Ce répertoire n'est utilisé que par <ref id="make-install"
+    utilisée. Ce répertoire n'est utilisé que par <ref id="make-install"
     name="make-install"> et <ref id="make-uninstall" name="make-uninstall">.
     Utilisez cette option si vous avez besoin d'installer
     BRLTTY dans un répertoire différent de celui où il sera exécuté en
@@ -624,7 +624,7 @@ instructions supplémentaires spécifiques.
     Indique le répertoire dans lequel la <ref id="hierarchy" name="hiérarchie des fichiers
     installés"> constitue le répertoire par défaut, indépendant de
     l'architecture, et qui sera utilisé comme répertoire
-    maître. Ces sous-répertoires comprennent les dossiers:
+    racine. Ces sous-répertoires comprennent les dossiers:
     <itemize>
       <item>le <ref id="build-data-directory" name="répertoire writable">
       <item>le <ref id="build-data-directory" name="répertoire data">
@@ -653,7 +653,7 @@ instructions supplémentaires spécifiques.
     </descrip>
     Si vous ne spécifiez pas cette option, le sous-répertoire autorisé en rw
     (lecture/écriture) dans le dossier spécifié par l'option --with-library-directory
-    est assumé. Le répertoire est créé s'il n'existe pas.
+    est supposé. Le répertoire est créé s'il n'existe pas.
     
   <tag><tt>--exec-prefix=</tt><em>répertoire</em><label id="build-architecture-root"></tag>
     Spécifie le répertoire de la <ref id="hierarchy" name="hiérarchie des fichiers installés">
@@ -729,7 +729,7 @@ instructions supplémentaires spécifiques.
     par l'option de configuration standard <tt>--mandir</tt> (qui par
     défaut est le répertoire racine <tt>/man</tt> spécifié par l'option
     de compilation <ref id="build-portable-root" name="--prefix">) qui
-    est assumé. Le répertoire est créé s'il n'existe pas.
+    est utilisé. Le répertoire est créé s'il n'existe pas.
   <tag><tt>--with-include-directory=</tt><em>directory</em><label id="build-include-directory"></tag>
     Spécifie le répertoire situé dans la <ref id="hierarchy"
     name="hiérarchie des fichiers installés"> où les fichiers d'en-tête
@@ -760,7 +760,7 @@ les fonctions inutiles.
     
   <tag><tt>--enable-relocatable-install</tt><label id="build-table-selection"></tag>
     Si cette fonctionnalité est activée, tous les chemins internes sont
-    recalculés afin d'englober le répertoire du programme.. Si elle n'est pas
+    recalculés afin d'englober le répertoire du programme. Si elle n'est pas
     utilisée, tous les chemins internes sont absolus. Cette fonctionnalité
     vise à ce que toute la
     <ref id="hierarchy" name="hiérarchie des fichiers installés"> soit
@@ -771,7 +771,8 @@ les fonctions inutiles.
     partagés lors de leur installation.
   <tag><tt>--disable-learn-mode</tt><label id="build-learn-mode"></tag>
     Réduit la taille du programme en excluant le mode apprentissage
-    des commandes (voir la section <ref id="learn" name="Command Learn Mode">).
+    des commandes (voir la section <ref id="learn" name="Mode apprentissage
+    des commandes">).
   <tag><tt>--disable-contracted-braille</tt><label id="build-contracted-braille"></tag>
     Réduit la taille du programme en excluant le support pour le
     braille abrégé (voir la section <ref id=table-contraction
@@ -805,10 +806,10 @@ les fonctions inutiles.
     </table>
   <tag><tt>--disable-midi-support</tt><label id="build-midi-support"></tag>
     Réduit la taille du programme en excluant le support pour
-    l'interface Musical Instrument Digital sur la carte son.
+    l'interface numérique d'instruments de musique sur la carte son.
   <tag><tt>--enable-midi-support=</tt><em>interface</em></tag>
-    Si une plateforme propose plus d'une interface Musical
-    Instrument Digital, vous pouvez spécifier celle qui sera utilisée.
+    Si une plateforme propose plus d'une interface numérique d'instrument de 
+    musique, vous pouvez spécifier celle qui sera utilisée.
     <table loc="h">
       <tabular ca="lll">
         Platte-forme|Interface|Description@<hline>
@@ -822,14 +823,14 @@ les fonctions inutiles.
     synthétiseur FM sur une carte son AdLib, OPL3, Sound Blaster, ou
     équivalent.
   <tag><tt>--disable-pm-configfile</tt><label id="build-pm-configfile"></tag>
-    Inclut une interface à l'application <tt>gpm</tt> de telle sorte que,
+    Inclut une interface avec l'application <tt>gpm</tt> de telle sorte que,
         sur les systèmes qui le supportent, BRLTTY interagisse avec le
         pilote du pointeur (souris) (voir la section <ref id="gpm"
     name="Support du pointeur (souris) via GPM">).
   <tag><tt>--disable-gpm</tt><label id="build-api"></tag>
     Réduit la taille du programme en excluant l'interface avec l'application gpm
     qui permet à BRLTTY d'interagir avec le périphérique du pointeur (la souris)
-    (voir Support du pointeur (sourii)  par GPM).
+    (voir Support du pointeur (souris)  par GPM).
   <tag><tt>--disable-api</tt><label id="build-api"></tag>
     Réduit la taille du programme en excluant l'interface de programmation de l'application.
   <tag><tt>--with-api-parameters=</tt><em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
@@ -843,15 +844,15 @@ les fonctions inutiles.
     id="options-api-parameters" name="-A">
     en ligne de commande pour la sélection à l'exécution.
   <tag><tt>--disable-caml-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Ne compile pas les bindings (interfaces de programmation) Caml pour l'interface de programmation de l'application.
+    Ne compile pas les bindings Caml (interfaces de programmation) pour l'interface de programmation de l'application.
   <tag><tt>--disable-java-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Ne compile pas les bindings (interface de programmation) Java pour l'interface de programmation de l'application.
+    Ne compile pas les bindings Java (interfaces de programmation)  pour l'interface de programmation de l'application.
   <tag><tt>--disable-lisp-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Ne compile pas les bindings (interface de programmation) Lisp pour l'interface de programmation de l'application.
+    Ne compile pas les bindings Lisp (interfaces de programmation) pour l'interface de programmation de l'application.
   <tag><tt>--disable-python-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Ne compile pas les bindings (interface de programmation) Python pour l'interface de programmation de l'application.
+    Ne compile pas les bindings Python (interfaces de programmation) pour l'interface de programmation de l'application.
   <tag><tt>--disable-tcl-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Ne compile pas les bindings (interface de programmation) Tcl pour l'interface de programmation de l'application.
+    Ne compile pas les bindings Tcl (interfaces de programmation) pour l'interface de programmation de l'application.
   <tag><tt>--with-tcl-config=</tt><em>chemin</em>
     Spécifie l'endroit où se trouve le script de configuration Tcl 
     (tclConfig.sh). Vous pouvez fournir le chemin, soit vers le script lui-même,
@@ -924,7 +925,7 @@ d'application courants. Ils incluent:
   <tag>make all<label id="make-all"></tag>
     Compile et fait l'édition de liens pour l'exécutable BRLTTY, ses pilotes et leurs pages
     de manuel, ses programmes de texte, et quelques autres petits
-    utilitaires.
+    outils.
   <tag>make install<label id="make-install"></tag>
     Complète la compilation et la phase d'édition de liens (voir <ref id="make-all" name="make all">), et
     installe alors l'exécutable BRLTTY, ses fichiers de données
@@ -934,9 +935,9 @@ d'application courants. Ils incluent:
     Enlève du système l'exécutable BRLTTY, ses fichiers de données,
     pilotes et pages de manuel.
   <tag>make clean<label id="make-clean"></tag>
-    S'assure que la compilation à venir et l'édition de liens (voir see <ref
+    Garantit que la compilation à venir et l'édition de liens (voir see <ref
     id="make-all" name="make all">)
-    sera fait à vide en enlevant les résultats de la
+    se feront à vide en enlevant les résultats de la
     compilation précédente, en liant et en testant depuis la structure du
     répertoire source. Cela comprend la suppression des fichiers
     objets, des exécutables, des objets dynamiques, des listes de
@@ -989,7 +990,7 @@ commande précédente, chaque caractère devrait apparaître sur
 l'afficheur dès qu'il est tapé sur le clavier.
 
 Si les choses se passent ainsi, arrêtez l'exécution de BRLTTY, et
-réjouisez-vous. Sinon, il peut être nécessaire de tester chaque pilote
+réjouissez-vous. Sinon, il peut être nécessaire de tester chaque pilote
 séparément de façon à isoler la source du problème. Vous pouvez tester
 le pilote de l'écran par <ref id="utility-scrtest" name="scrtest">, et celui de l'afficheur braille
 par <ref id="utility-brltest" name="brltest">.
@@ -1031,7 +1032,7 @@ de l'API et des pilotes sélectionnés. L'option ``-v'' affiche les valeurs
 des options après que toutes les sources aient été examinées.
 
 C'est probablement mieux d'avoir BRLTTY démarré automatiquement par le
-système, dès la séquence de boot, de façon à ce
+système, dès la séquence d'amorçage, de façon à ce
 que l'afficheur braille soit déjà prêt à fonctionner quand l'invite du
 logging apparaît. La plupart (probablement toutes) des distributions
 fournissent un script dans lequel les applications fournies par
@@ -1071,14 +1072,16 @@ dépend de la distribution. Voici les emplacements que nous connaissons:
   <tag>Debian</tag>
     <tt>/etc/init.d/boot</tt> (pour les vieilles versions)
     <newline>
-    <tt>/etc/init.d/rcS</tt> (pour les versions récentes)
+    <tt>/etc/init.d</tt> (pour les versions récentes)
     <newline>
-    Un package <tt>brltty</tt> est fourni
-    (voir [<htmlurl url="http://packages.debian.org/brltty" name="http://packages.debian.org/brltty">])
+    Un paquet <tt>brltty</tt> est fourni
+    (voir [<htmlurl url="http://paquets.debian.org/brltty" name="http://paquets.debian.org/brltty">])
     en tant que version <tt>3.0</tt> (<tt>Woody</tt>).
-    Comme ce package prend soin du démarrage de BRLTTY, il n'y a pas
+    Comme ce paquet prend soin du démarrage de BRLTTY, il n'y a pas
     besoin pour l'utilisateur de fournir quoique ce soit, s'il est
-    installé.
+    installé. Si vous avez besoin que le démon se lance avec des options en ligne
+    de commande, vous pouvez modifier le contenu entre guillemets du fichier
+    <tt>/etc/default/brltty</>.
   <tag>RedHat</tag>
     <tt>/etc/rc.d/rc.sysinit</tt>
     <newline>
@@ -1176,14 +1179,14 @@ des flèches de direction pendant le déplacement du curseur) pour
 l'insertion de caractères lors du Coller, pour la simulation de
 touches spéciales en utilisant celles de l'afficheur braille, pour la
 recherche de traduction des caractères en sortie et les tables faisant
-la correspondance des fontes de l'écran, et pour l'activation
+la correspondance des polices de l'écran, et pour l'activation
 du beeper interne). Vous pouvez, bien entendu, autoriser les
 utilisateurs ordinaires à accéder aux périphériques nécessaires, en
 changeant les permissions du fichier associé au
 périphérique. Toutefois, le simple accès à la console ne suffit pas
 car l'activation du beeper interne et des fonctions de
 simulation du clavier requiert les privilèges root. Ainsi, si vous
-voulez arrêter le déplacement du curseur, utiliser Couper/Coller les
+voulez arrêter le déplacement du curseur, utiliser Copier/Coller les
 beep et tout cela, vous pouvez exécuter BRLTTY sans les privilèges
 root.
 
@@ -1191,7 +1194,7 @@ root.
 <descrip>
   <tag>les beeps d'Alerte</tag><label id="restriction-tunes">
     Certaines plateformes ne supportent pas tous les périphériques
-    sonores. Voir <ref id="preference-tune-device" name="Tune Device"> pour plus de détails.
+    sonores. Voir <ref id="preference-tune-device" name="Périphérique pour le son"> pour plus de détails.
   <tag>Pilote pour la synthèse FestivalLite</tag><label id="restrictions-flite">
     Le pilote pour le moteur FestivalLite n'est compilé
     que si ce paquet a été installé.
@@ -1202,7 +1205,7 @@ root.
     <ref id="build-theta" name="--with-speech-driver">) car les bibliothèques nécessaires à leur
     exécution contiennent des éléments conflictuels.
   <tag>Pilote pour l'afficheur braille Libbraille</tag><label id="restrictions-mikropuhe">
-    Le pilote pour le package libbraille n'est compilé que si le package a
+    Le pilote pour le paquet libbraille n'est compilé que si le paquet a
     été installé.   
   
   <tag>Pilote pour la synthèse Mikropuhe</tag><label id="restrictions-mikropuhe">
@@ -1242,7 +1245,7 @@ root.
 </descrip>
 
 <sect1>Installation à partir d'un fichier RPM<label id="rpm"><p>
-Pour installer BRLTTY à partir d'un fichier RPM (RedHat Package
+Pour installer BRLTTY à partir d'un fichier RPM (RedHat paquet
 Manager), procéder comme suit:
 <enum>
   <item>
@@ -1266,12 +1269,12 @@ Pour les gens courageux, nous fournissons le fichier RPM source
 Pour désinstaller BRLTTY, faites:
 <tscreen>rpm -e brltty</tscreen>
 
-<sect1>Autres utilitaires<p>
+<sect1>Autres outils<p>
 La compilation de BRLTTY donne aussi celle de quelques petits
-utilitaires d'aide et de diagnostic.
+outils d'aide et de diagnostic.
 
 <sect2>brltty-config<label id="utility-brltty-config"><p>
-Cet utilitaire assigne un certain nombre de variables d'environnement
+Cet outil affecte un certain nombre de variables d'environnement
 à des valeurs reflétant l'installation courante de BRLTTY (voir les
 <ref id="build" name="options de compilation">). Vous devriez l'exécuter dans un
 environnement shell existant, donc ce n'est pas une véritable commande,
@@ -1279,7 +1282,7 @@ et seuls les scripts supportant la syntaxe <tt>Bourne Shell</tt>
 peuvent l'utiliser.
 <tscreen>. brltty-config</tscreen>
 
-Les variables d'environnement suivantes sont assignées:
+Les variables d'environnement suivantes sont affectées:
 <descrip>
   <tag>BRLTTY_VERSION</tag>
     Le numéro de version du paquet BRLTTY.
@@ -1292,7 +1295,7 @@ Les variables d'environnement suivantes sont assignées:
   <tag>BRLTTY_LIBRARY_DIRECTORY</tag>
     Répertoire des pilotes. Configuré par l'option de compilation <ref id="build-library-directory" name="--with-library-directory">.
   <tag>BRLTTY_WRITABLE_DIRECTORY</tag>    
-    Répertoire vers lequel il est possible d'écrire. Configuré par l'option
+    Répertoire dans lequel il est possible d'écrire. Configuré par l'option
     de compilation <ref id="build-program-directory" name="--with-writable-directory">.
   <tag>BRLTTY_DATA_DIRECTORY</tag>
     Répertoire des tables et des pages de manuel. Configuré par
@@ -1309,7 +1312,7 @@ Les variables d'environnement suivantes sont assignées:
   <tag>BRLAPI_RELEASE</tag>
     Le numéro de version complet de BrlAPI.
   <tag>BRLAPI_AUTH</tag>
-    Le nom du fichier du clavier de BrlAPI.
+    Le nom du fichier de clés de BrlAPI.
 </descrip>
 
 En plus, les variables d'environnement standard <tt>autoconf</tt>
@@ -1331,8 +1334,8 @@ suivantes sont aussi assignées:
     bibliothèques">. Configuré par l'option de compilation <ref
     id="build-api-directory" name="--libdir">.
   <tag>sysconfdir</tag>
-    Répertoire des fichiers de configuration, localisation par défaut du <ref
-    id="build-data-directory" name="répertoire data">. Configuré par
+    Répertoire des fichiers de configuration, emplacement par défaut du <ref
+    id="build-data-directory" name="répertoire de données">. Configuré par
     l'option de compilation <ref id="build-configuration-directory"
     name="--sysconfdir">.
   <tag>mandir</tag>
@@ -1344,23 +1347,23 @@ suivantes sont aussi assignées:
 </descrip>
 
 <sect2>brltty-install<label id="utility-brltty-install"><p>
-Cet utilitaire copie la <ref id="hierarchy" name="hiérarchie des fichiers installés"> de
+Cet outil copie la <ref id="hierarchy" name="hiérarchie des fichiers installés"> de
 BRLTTY d'un emplacement à un autre.
 <tscreen>brltty-install <em>destination</em> &lsqb;<em>origine</em>&rsqb;</tscreen>
 <descrip>
   <tag><em>destination</em></tag>
     L'emplacement où la <ref id="hierarchy" name="hiérarchie des fichiers installés">
-    sera copié. Cela doit être un répertoire existant.
+    sera copiée. Cela doit être un répertoire existant.
   <tag><em>from</em></tag>
     L'emplacement à partir duquel la <ref id="hierarchy" name="hiérarchie des fichiers installés">
     sera copiée. S'il est spécifié, le répertoire doit
     exister. S'il n'est pas spécifié, l'emplacement utilisé pour la
     compilation est utilisé.
 </descrip>
-Par exemple, vous pouvez utiliser cette utilitaire pour copier BRLTTY
+Par exemple, vous pouvez utiliser cette outil pour copier BRLTTY
 à partir d'un disque racine. Si une disquette racine est montée dans
 <tt>/mnt</tt>, et que BRLTTY est installé sur le système principal, taper <tscreen>brltty-install /mnt</tscreen>
-copie BRLTTY, en entier avec ses fichiers data et ses bibliothèques, sur
+copie BRLTTY, en entier avec ses fichiers de données et ses bibliothèques, sur
 la disquette racine.
 
 Quelques problèmes ont été rencontrés en copiant BRLTTY entre des
@@ -1368,7 +1371,7 @@ systèmes avec différentes versions de la bibliothèque C. Si vous avez
 des difficultés, cela vaut la peine d'enquêter.
 
 <sect2>brltest<label id="utility-brltest"><p>
-Cet utilitaire teste un pilote d'afficheur braille, et fournit presque
+Cet outil teste un pilote d'afficheur braille, et fournit presque
 une façon interactive d'apprendre ce que font les touches de
 l'afficheur braille. Vous devriez l'exécuter en tant que root.
 <tscreen>brltest -<em>option</em> ... [<em>pilote</em> [<em>nom</em>=<em>valeur</em> ...]]</tscreen>
@@ -1379,7 +1382,7 @@ l'afficheur braille. Vous devriez l'exécuter en tant que root.
     premier pilote configuré par l'option de compilation
     <ref id="build-braille-driver" name="--with-braille-driver"> est utilisé.
   <tag><em>nom</em><tt>=</tt><em>valeur</em></tag>
-    Assigne un paramètre d'afficheur braille. Pour une description des
+    Affecte un paramètre d'afficheur braille. Pour une description des
     paramètres acceptés par un pilote spécifique, voir la
     documentation de ce pilote.
   <tag><tt>-d</tt><em>device</em> <tt>--device=</tt><em>périphérique</em></tag>
@@ -1390,7 +1393,7 @@ l'afficheur braille. Vous devriez l'exécuter en tant que root.
     utilisé.
   <tag><tt>-D</tt><em>directory</em> <tt>--data-directory=</tt><em>répertoire</em></tag>
     Vous devriez fournir un chemin absolu pour le répertoire où les
-    fichiers de data des pilotes sont placés. S'il n'est pas spécifié,
+    fichiers de données des pilotes sont placés. S'il n'est pas spécifié,
     c'est le répertoire configuré par l'option de compilation
     <ref id="build-data-directory" name="--with-data-directory"> qui est utilisé.
   <tag><tt>-L</tt><em>directory</em> <tt>--library-directory=</tt><em>repertoire</em></tag>
@@ -1400,18 +1403,18 @@ l'afficheur braille. Vous devriez l'exécuter en tant que root.
   <tag><tt>-W</tt><em>répertoire</em> <tt>--writable-directory=</tt><em>repertoire</em></tag>
     Le chemin absolu vers un répertoire où il est possible d'écrire. S'il
     n'est pas spécifié, le répertoire configuré avec l'option >e compilation --with-writable-directory
-    est assumé.
+    est utilisé.
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options de la ligne de commande, puis quitte.
 </descrip>
 
-Cet utilitaire utilise le ``mode apprentissage des commandes'' de
-BRLTTY. Le délai d'appui sur une touche (après lequel cet utilitaire
+Cet outil utilise le ``mode apprentissage des commandes'' de
+BRLTTY. Le délai d'appui sur une touche (après lequel cet outil
 quitte) est de 10 secondes. Le temps d'affichage du message (utilisé
 pour les segments non-finaux de longs messages) est de <tt>4</tt> secondes.
 
 <sect2>spktest<label id="utility-spktest"><p>
-Cet utilitaire teste un pilote de synthèse vocale. Il se peut qu'il
+Cet outil teste un pilote de synthèse vocale. Il se peut qu'il
 doive être exécuté en tant que root.
 <tscreen>spktest -<em>option</em> ... [<em>pilote</em> [<em>nom</em>=<em>value</em> ...]]</tscreen>
 <descrip>
@@ -1430,7 +1433,7 @@ doive être exécuté en tant que root.
     standard (stdin) qui est lue.
   <tag><tt>-D</tt><em>repertoire</em> <tt>--data-directory=</tt><em>repertoire</em></tag>
     Le chemin absolu pour le répertoire dans lequel se situent les
-    fichiers data du pilote. S'il n'est pas spécifié, c'est le
+    fichiers de données du pilote. S'il n'est pas spécifié, c'est le
     répertoire configuré par l'option de compilation
     <ref id="build-data-directory" name="--with-data-directory"> qui est utilisé.
   <tag><tt>-L</tt><em>repertoire</em> <tt>--library-directory=</tt><em>repertoire</em></tag>
@@ -1442,34 +1445,34 @@ doive être exécuté en tant que root.
 </descrip>
 
 <sect2>scrtest<label id="utility-scrtest"><p>
-Cet utilitaire teste le pilote d'écran. Il doit être exécuté en tant
+Cet outil teste le pilote d'écran. Il doit être exécuté en tant
 que root.
 <tscreen>scrtest -<em>option</em> ... [<em>nom</em>=<em>valeur</em> ...]</tscreen>
 <descrip>
   <tag><em>nom</em><tt>=</tt><em>valeur</em></tag>
-    Règle le paramètre du pilote de la synthèse vocale. Pour une
+    Règle le paramètre du pilote de l'écran. Pour une
     description des paramètres acceptés par un pilote spécifique
     voir la documentation de ce pilote.
   <tag><tt>-l</tt><em>colonne</em> <tt>--left=</tt><em>colonne</em></tag>
     Spécifie la colonne du début (à gauche) de l'écran (origine à
     zéro). Si vous ne fournissez pas cette valeur, une valeur par
     défaut, basée sur la largeur spécifiée, est sélectionnée, de telle
-    sorte que la région soit centrée à l'horizontal, est utilisée.
+    sorte que la fenêtre soit centrée à l'horizontal, est utilisée.
   <tag><tt>-c</tt><em>coompte</em> <tt>--columns=</tt><em>compte</em></tag>
-    Spécifie la largeur de la région (en colonnes). Si vous ne
+    Spécifie la largeur de la fenêtre (en colonnes). Si vous ne
     fournissez pas cette valeur, une valeur par défaut, basée sur la
-    colonne de début, est sélectionnée, de telle sorte que la région
+    colonne de début, est sélectionnée, de telle sorte que la fenêtre
     soit centrée à l'horrizontal.
   <tag><tt>-t</tt><em>ligne</em> <tt>--top=</tt><em>ligne</em></tag>
     Spécifie la ligne de début (en haut) de l'écran (origine à
     zéro). Si vous ne fournissez pas cette valeur, une valeur par
     défaut, basée sur la hauteur spécifiée, est sélectionnée, de telle
-    sorte que la région soit centrée à la verticale.
+    sorte que la fenêtre soit centrée à la verticale.
   <tag><tt>-r</tt><em>compte</em> <tt>--rows=</tt><em>compte</em></tag>
-    Spécifie la hauteur de la région (en lignes). Si vous ne
+    Spécifie la hauteur de la fenêtre (en lignes). Si vous ne
     fournissez pas cette valeur, une valeur par défaut, basée sur la
     rangée de début spécifiée, est sélectionnée, de telle sorte que la
-    région soit centrée à la verticale.
+    fenêtre soit centrée à la verticale.
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options de la ligne de commande, puis
         quitte.
@@ -1479,11 +1482,11 @@ Remarques:
 <itemize>
   <item>
     Si vous ne spécifiez ni la colonne de début, ni la largeur de la
-    région, la région est centrée horizontalement et commence à la
+    fenêtre, la région est centrée horizontalement et commence à la
     colonne 5.
   <item>
     Si vous ne spécifiez ni la rangée de début, ni la hauteur de la
-    région, la région est centrée verticalement et commence à la ligne
+    fenêtre, la région est centrée verticalement et commence à la ligne
     5.
 </itemize>
 
@@ -1506,7 +1509,7 @@ Les éléments suivants sont écrits sur la sortie standard (stdout):
 </enum>
 
 <sect2>ttbtest<label id="utility-ttbtest"><p>
-Cet utilitaire teste une table de texte (section <ref id="table-text" name="Tables de
+Cet outil teste une table de texte (section <ref id="table-text" name="Tables de
 texte">).
 <tscreen>ttbtest -<em/option/ ... <em/input-table/ <em/output-table/</tscreen>
 <descrip>
@@ -1521,11 +1524,11 @@ texte">).
     fournissez pas ce paramètre, aucune table en sortie ne  sera écrite.
   <tag><tt>-i</tt> <tt>--input-format=</tt><em>format</em></tag>
     Spécifie le format  de la table d'entrée. S'il vous ne fournissez pas cette
-    option, le  format de la table en entrée est déduit du l'extension de son
+    option, le  format de la table en entrée est déduit de l'extension de son
     fichier.
   <tag><tt>-o</tt> <tt>--output-format=</tt><em>format</em></tag>
     Spécifie le format  de la table en sortie. S'il vous ne fournissez pas cette
-    option, le  format de la table en entrée est déduit du l'extension de son
+    option, le  format de la table en entrée est déduit de l'extension de son
     fichier.
   <tag><tt/-c/<em/charset/ <tt/--charset=/<em/charset/</tag>
     Spécifie le nom de l'encodage 8-bit à utiliser lors de l'interprétation des 
@@ -1541,7 +1544,7 @@ texte">).
 Si vous ne demandez aucune action en particulier, la table de sortie est 
 facultative. Si vous ne la spécifiez pas, la table d'entrée est vérifiée.
 Si vous la spécifiez, la table d'entrée est convertie.
-Les  formats de table suivants sont supportés:
+Les formats de table suivants sont supportés:
 <descrip>
   <tag/ttb/BRLTTY
   <tag/sbl/SuSE Blinux
@@ -1551,8 +1554,8 @@ Les  formats de table suivants sont supportés:
 
 
 <sect2>ctbtest<label id="utility-ctbtest"><p>
-Cet utilitaire teste une table de braille abrégé (section <ref id="table-contraction" name="Tables
-d'abrégé">). Le texte lu à partir de l'entrée standard (stdin) est réécrit sur
+Cet outil teste une table de braille abrégé (section <ref id="table-contraction" name="Tables
+de braille abrégé">). Le texte lu à partir de l'entrée standard (stdin) est réécrit sur
 la sortie standard (stdout) en braille abrégé.
 <tscreen>ctbtest -<em>fichier-en-entrée</em></tscreen>
 <descrip>
@@ -1562,7 +1565,7 @@ la sortie standard (stdout) en braille abrégé.
     de fichier spécial - est interprété comme l'entrée standard (stdin). Si
     vous ne spécifiez aucun fichier, l'entrée standard est traitée.
   <tag><tt>-c</tt><em>fichier</em> <tt>--contraction-table=</tt><em>fichier</em></tag>
-    Le chemin vers le  fichier de la table de braille abrégé. S'il est relatif, il
+    Le chemin vers le fichier de la table de braille abrégé. S'il est relatif, il
     est ancré au répertoire configuré par l'option de compilation
     <ref id="build-data-directory" name="--with-data-directory">.
     L'extension .ctb est facultative. Si vous ne fournissez pas cette option,
@@ -1576,7 +1579,7 @@ la sortie standard (stdout) en braille abrégé.
     L'extension <tt/.ttb/ est facultative.
     Voir la ligne <ref id="configure-text-table" name="text-table">
     du fichier de configuration pour le paramétrage par défaut au moment de l'exécution. Vous pouvez modifier
-    ce paramètreavec la préférence 
+    ce paramètre avec la préférence 
     <ref id="preference-text-table" name="Text Table">.
   <tag><tt>-w</tt><em>colonnes</em> <tt>--output-width==</tt><em>colonnes</em></tag>
     La longueur  maximale d'une ligne en sortie. Chaque ligne d'entrée en
@@ -1601,21 +1604,21 @@ La table de texte est utilisée:
 </itemize>
 
 C'est la table de traduction de texte <tt>text.brf.ttb</tt> qui est
-fournie pour l'utilisation de cet utilitaire. Il définit le format
+fournie pour l'utilisation de cet outil. Il définit le format
 utilisé dans les fichiers .brf. C'est aussi le format que préfèrent
 utiliser les imprimantes braille et les documents braille
-électroniques. Cette table permet à cet utilitaire d'être réellement
+électroniques. Cette table permet à cet outil d'être réellement
 utilisé en tant que traducteur de braille en texte.
 
 <sect2>tunetest<label id="utility-tunetest"><p>
-Cet utilitaire teste la facilité des beeps d'alerte, et fournit aussi
-un moyen facile composé de nouveaux beeps. Il se peut que vous
+Cet outil teste la facilité des sons d'avertissement, et fournit aussi
+un moyen facile de créer de nouveaux sons. Il se peut que vous
 soyez obligés de l'exécuter en tant que root.
 <tscreen>tunetest -<em>option</em> ... {<em>note</em> <em>durée</em>} ...</tscreen>
 <descrip>
   <tag><em>note</em></tag>
     Un numéro de note MIDI standard. Il doit être un entier de <tt>1</tt> à <tt>127</tt>,
-    avec 60 réprésentant la valeur moyenne. Chaque valeur représente un
+    avec 60 représentant la valeur moyenne. Chaque valeur représente un
     demi-ton chromatique standard, donc des notes les
     plus basses aux notes les plus hautes. La valeur la plus faible (<tt>1</tt>)
     représente le cinquième sous Middle C, et la valeur la plus haute
@@ -1631,7 +1634,7 @@ soyez obligés de l'exécuter en tant que root.
       <tag>pcm</tag>
         L'interface digital audio sur la carte son.
       <tag>midi</tag>
-        L'interface Musical Instrument Digital Interface sur la carte
+        L'interface numérique d'instrument de musique sur la carte
         son.
       <tag>fm</tag>
         Le synthétiseur FM sur une carte son AdLib, OPL3, Sound
@@ -1644,12 +1647,12 @@ soyez obligés de l'exécuter en tant que root.
     Spécifie le volume à la sortie (intensité) sous la forme d'un
     pourcentage du maximum. Le volume de sortie par défaut est de <tt>50</tt>.
   <tag><tt>-p</tt><em>device</em> <tt>--pcm-device=</tt><em>device</em></tag>
-    Spécifie le périphérique à utiliser pour l'audio (voir la
+    Spécifie le périphérique à utiliser pour le son (voir la
     section <ref id="operand-pcm-device" name="spécification du périphérique PCM">). Cette option ne
     fonctionne pas si vous avez spécifié l'option de compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
   <tag><tt>-m</tt><em>peripherique</em> <tt>--midi-device=</tt><em>peripherique</em></tag>
-    Spécifie le périphérique à utiliser pour l'interface Musical
-    Instrument Digital (voir la section <ref id="operand-midi-device" name="spécification du
+    Spécifie le périphérique à utiliser pour l'interface numérique d'instrument
+    de musique (voir la section <ref id="operand-midi-device" name="spécification du
     périphérique MIDI">). Cette option ne fonctionne pas si vous avez
     spécifié l'option de compilation <ref id="build-midi-support" name="--disable-midi-support">.
   <tag><tt>-i</tt><em>instrument</em> <tt>--instrument=</tt><em>instrument</em></tag>
