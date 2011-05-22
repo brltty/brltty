@@ -1299,13 +1299,17 @@ Here are the places we know about so far:
   <tag>Debian</tag>
     <tt>/etc/init.d/boot</> (for older releases)
     <newline>
-    <tt>/etc/init.d/rcS</> (for newer releases)
+    <tt>/etc/init.d/</> (for newer releases)
     <newline>
     A <tt/brltty/ package is provided
     (see [<htmlurl url="http://packages.debian.org/brltty" name="http://packages.debian.org/brltty">])
     as of release <tt/3.0/ (<tt/Woody/).
     Since this package takes care of starting BRLTTY,
     there's no need for user-supplied code to do so if it's installed.
+    If you need the daemon to run with some command-line options,
+    you can change the contents between quotes
+    on the directive <tt/ARGUMENTS/
+    in the <tt>/etc/default/brltty</> file.
   <tag>RedHat</tag>
     <tt>/etc/rc.d/rc.sysinit</>
     <newline>
@@ -3688,7 +3692,7 @@ Notes:
     Adjust the amount of punctuation which is spoken.
     It can be set to:
     <itemize>
-      <item>All
+      <item>None
       <item>Some
       <item>All
     </itemize>
