@@ -1322,7 +1322,7 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
     switch (bmd->type) {
       {
         unsigned char flags;
-        unsigned char errors;
+        unsigned char UNUSED errors;
         const signed char *wheel;
         unsigned char wheels;
         unsigned char buttons;
@@ -1569,7 +1569,7 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       case BAUM_RSP_DisplayKeys: {
         unsigned char keys;
-        unsigned char count = 6;
+        unsigned char UNUSED count = 6;
 
         switch (baumDeviceType) {
           case BAUM_DEVICE_Inka:
