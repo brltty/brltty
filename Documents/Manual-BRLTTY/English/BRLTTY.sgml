@@ -4173,6 +4173,16 @@ The following directives are provided:
   <tag><tt/char/ <em/character/ <em/dots/ &num; <em/comment/</tag>
     Use the <tt/char/ directive to specify
     how a Unicode character is to be represented in braille.
+    Characters defined with this directive
+    can also be entered from a braille keyboard.
+    If several characters have the same braille representation
+    then only one of them should be defined with the <tt/char/ directive -
+    the others should be defined with teh <tt/glyph/ directive
+    (which has the same syntax).
+    If more than one character with the same braille representation
+    is defined with the <tt/char/ directive
+    (which is currently allowed for backward compatibility)
+    then the first one is selected.
 
     <descrip>
       <tag><em/character/</tag>
@@ -4225,6 +4235,13 @@ The following directives are provided:
       <item><tt/char \x20 ()/
       <item><tt/char \&lt;LATIN_SMALL_LETTER_D&gt; 145/
     </itemize>
+  <tag><tt/glyph/ <em/character/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/glyph/ directive to specify
+    how a Unicode character is to be represented in braille.
+    Characters defined with this directive are output-only. 
+    They cannot be entered from a braille keyboard.
+
+    See the <tt/char/ directive for syntax details and for examples.
   <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
     Use the <tt/byte/ directive to specify how
     a character in the local character set 

@@ -20,7 +20,13 @@ The Char Directive
    char <character> <dots> # <comment>
 
 Use the "char" directive to specify how a Unicode character is to be 
-represented in braille.
+represented in braille. Characters defined with this directive can also be
+entered from a braille keyboard. If several characters have the same braille
+representation then only one of them should be defined with the "char"
+directive - the others should be defined with teh "glyph" directive (which has
+the same syntax). If more than one character with the same braille
+representation is defined with the "char" directive (which is currently allowed
+for backward compatibility) then the first one is selected.
 
 The <character> operand specifies the Unicode character being defined. It may
 be:
@@ -59,6 +65,19 @@ Examples:
    char \s 0
    char \x20 ()
    char \<LATIN_SMALL_LETTER_D> 145
+
+===============================================================================
+
+The Glyph Directive
+-------------------
+
+   glyph <character> <dots> # <comment>
+
+Use the "glyph" directive to specify how a Unicode character is to be 
+represented in braille. Characters defined with this directive are output-only. 
+They cannot be entered from a braille keyboard.
+
+See the "char" directive for syntax details and for examples.
 
 ===============================================================================
 
