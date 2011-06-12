@@ -59,7 +59,7 @@ ret convert##name (from f) { \
     to t; \
     to *tp = &t; \
     size_t ts = sizeof(t); \
-    if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) != -1) return t; \
+    if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) != (size_t)-1) return t; \
     logMessage(LOG_DEBUG, "iconv (" #from " -> " #to ") error: %s", strerror(errno)); \
   } \
   return eof; \
