@@ -92,7 +92,7 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
-isKeyword (const wchar_t *keyword, const wchar_t *characters, int length) {
+isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t length) {
   if (length != wcslen(keyword)) return 0;
 
   while (length > 0) {

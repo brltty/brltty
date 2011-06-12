@@ -36,7 +36,7 @@ splitString (const char *string, char delimiter, int *count) {
       if (*start) {
         while (1) {
           const char *end = strchr(start, delimiter);
-          int length = end? end-start: strlen(start);
+          size_t length = end? (size_t)(end-start): strlen(start);
 
           if (array) {
             char *element = mallocWrapper(length+1);
@@ -220,7 +220,7 @@ parseParameters (
           if (qualifier) {
             char *colon = memchr(name, ':', nameLength);
             if (colon) {
-              int qualifierLength = colon - name;
+              size_t qualifierLength = (size_t)(colon - name);
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {

@@ -40,7 +40,7 @@ extern int processDataStream (
   DataProcessor processor, void *data
 );
 
-extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, int length);
+extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t length);
 extern int isNumber (int *number, const wchar_t *characters, int length);
 extern int isHexadecimalDigit (wchar_t character, int *value, int *shift);
 extern int isOctalDigit (wchar_t character, int *value, int *shift);
