@@ -113,7 +113,7 @@ getBaseCharacter (wchar_t character) {
       char outputBuffer[outputSize];
       char *outputAddress = outputBuffer;
 
-      if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != -1)
+      if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1)
         if ((outputAddress - outputBuffer) == 1)
           return outputBuffer[0] & 0XFF;
     }
