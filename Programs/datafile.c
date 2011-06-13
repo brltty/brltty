@@ -163,7 +163,7 @@ typedef struct {
 } DataVariable;
 
 static void
-deallocateDataVariable (void *item, void *data) {
+deallocateDataVariable (void *item, void *data UNUSED) {
   DataVariable *variable = item;
 
   if (variable->name.characters) free((void *)variable->name.characters);
@@ -595,7 +595,7 @@ getDotOperand (DataFile *file, int *index) {
 }
 
 int
-processAssignOperands (DataFile *file, void *data) {
+processAssignOperands (DataFile *file, void *data UNUSED) {
   DataOperand name;
 
   if (getDataOperand(file, &name, "variable name")) {
@@ -645,7 +645,7 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
 }
 
 int
-processIncludeOperands (DataFile *file, void *data) {
+processIncludeOperands (DataFile *file, void *data UNUSED) {
   DataString path;
 
   if (getDataString(file, &path, 0, "include file path"))
