@@ -505,9 +505,9 @@ setCharset (const char *name) {
     } ConvEntry;
 
     ConvEntry convTable[] = {
-      {&iconvCharToWchar, charset, wcharCharset, 0},
-      {&iconvWcharToChar, wcharCharset, charset, 0},
-      {NULL, NULL, NULL, 1}
+      {&iconvCharToWchar, charset, wcharCharset, 0, CHARSET_ICONV_NULL},
+      {&iconvWcharToChar, wcharCharset, charset, 0, CHARSET_ICONV_NULL},
+      {NULL, NULL, NULL, 1, CHARSET_ICONV_NULL}
     };
     ConvEntry *conv = convTable;
 
