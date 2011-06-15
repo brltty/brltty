@@ -422,15 +422,15 @@ getAlwaysRule (wchar_t character) {
 
 typedef struct {
   const ContractionTableRule *rule;
-} SetAlwaysRuleData;
+} SetCharacterRuleData;
 
 static int
-setAlwaysRule (wchar_t character, void *data) {
+setCharacterRule (wchar_t character, void *data) {
   const ContractionTableRule *rule = getAlwaysRule(character);
 
   if (rule) {
-    SetAlwaysRuleData *sar = data;
-    sar->rule = rule;
+    SetCharacterRuleData *scr = data;
+    scr->rule = rule;
     return 1;
   }
 
@@ -440,12 +440,12 @@ setAlwaysRule (wchar_t character, void *data) {
 static int
 putCharacter (wchar_t character) {
   {
-    SetAlwaysRuleData sar = {
+    SetCharacterRuleData scr = {
       .rule = NULL
     };
 
-    if (handleBestCharacter(character, setAlwaysRule, &sar)) {
-      return putReplace(sar.rule);
+    if (handleBestCharacter(character, setCharacterRule, &scr)) {
+      return putReplace(scr.rule);
     }
   }
 

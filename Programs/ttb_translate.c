@@ -87,15 +87,15 @@ getUnicodeCellEntry (TextTable *table, wchar_t character) {
 typedef struct {
   TextTable *const table;
   unsigned char dots;
-} SetBrailleDotsData;
+} SetBrailleRepresentationData;
 
 static int
-setBrailleDots (wchar_t character, void *data) {
-  SetBrailleDotsData *sbd = data;
-  const unsigned char *cell = getUnicodeCellEntry(sbd->table, character);
+setBrailleRepresentation (wchar_t character, void *data) {
+  SetBrailleRepresentationData *sbr = data;
+  const unsigned char *cell = getUnicodeCellEntry(sbr->table, character);
 
   if (cell) {
-    sbd->dots = *cell;
+    sbr->dots = *cell;
     return 1;
   }
 
@@ -116,12 +116,14 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
     default: {
       {
-        SetBrailleDotsData sbd = {
+        SetBrailleRepresentationData sbr = {
           .table = table,
           .dots = 0
         };
 
-        if (handleBestCharacter(character, setBrailleDots, &sbd)) return sbd.dots;
+        if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
+          return sbr.dots;
+        }
       }
 
     unknownCharacter:
@@ -130,8 +132,9 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
         if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
         if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
-        return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
       }
+
+      return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
     }
   }
 }
