@@ -47,7 +47,8 @@ getCharacterWidth (wchar_t character) {
   /* Hangul Jamo medial vowels and final consonants */
   if ((character >= 0X1160) && (character <= 0X11FF) && (category == U_OTHER_LETTER)) return 0;
 
-  if (character == 0XAD) return 1;
+  /*  */
+  if (character == 0XAD) return 1; /* soft hyphen */
   if (category == U_FORMAT_CHAR) return 0;
 
   if (width == U_EA_FULLWIDTH) return 2;
@@ -86,39 +87,62 @@ getCharacterWidth (wchar_t character) {
 wchar_t
 getBaseCharacter (wchar_t character) {
 #ifdef HAVE_ICU
-  {
-    UChar source[] = {character};
-    const unsigned int resultLength = 0X10;
-    UChar resultBuffer[resultLength];
-    UErrorCode error = U_ZERO_ERROR;
+  UChar source[] = {character};
+  const unsigned int resultLength = 0X10;
+  UChar resultBuffer[resultLength];
+  UErrorCode error = U_ZERO_ERROR;
 
-    unorm_normalize(source, ARRAY_COUNT(source),
-                    UNORM_NFD, 0,
-                    resultBuffer, resultLength,
-                    &error);
+  unorm_normalize(source, ARRAY_COUNT(source),
+                  UNORM_NFD, 0,
+                  resultBuffer, resultLength,
+                  &error);
 
-    if (U_SUCCESS(error)) return resultBuffer[0];
-  }
+  if (U_SUCCESS(error)) return resultBuffer[0];
 #endif /* HAVE_ICU */
 
+  return 0;
+}
+
+wchar_t
+getTransliteratedCharacter (wchar_t character) {
 #ifdef HAVE_ICONV_H
-  {
-    static iconv_t handle = NULL;
-    if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
+  static iconv_t handle = NULL;
+  if (!handle) handle = iconv_open("ASCII//TRANSLIT", "WCHAR_T");
 
-    if (handle != (iconv_t)-1) {
-      char *inputAddress = (char *)&character;
-      size_t inputSize = sizeof(character);
-      size_t outputSize = 0X10;
-      char outputBuffer[outputSize];
-      char *outputAddress = outputBuffer;
+  if (handle != (iconv_t)-1) {
+    char *inputAddress = (char *)&character;
+    size_t inputSize = sizeof(character);
+    size_t outputSize = 0X10;
+    char outputBuffer[outputSize];
+    char *outputAddress = outputBuffer;
 
-      if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1)
-        if ((outputAddress - outputBuffer) == 1)
-          return outputBuffer[0] & 0XFF;
-    }
+    if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1)
+      if ((outputAddress - outputBuffer) == 1)
+        return outputBuffer[0] & 0XFF;
   }
 #endif /* HAVE_ICONV_H */
 
   return 0;
+}
+
+int
+handleBestCharacter (wchar_t character, CharacterHandler handleCharacter, void *data) {
+  typedef wchar_t CharacterTranslator (wchar_t character);
+  static CharacterTranslator *const characterTranslators[] = {
+    getBaseCharacter,
+    getTransliteratedCharacter,
+    NULL
+  };
+  CharacterTranslator *const *translateCharacter = characterTranslators;
+
+  while (!handleCharacter(character, data)) {
+    if (!*translateCharacter) return 0;
+
+    {
+      wchar_t alternate = (*translateCharacter++)(character);
+      if (alternate) character = alternate;
+    }
+  }
+
+  return 1;
 }

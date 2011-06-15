@@ -420,23 +420,34 @@ getAlwaysRule (wchar_t character) {
   return NULL;
 }
 
+typedef struct {
+  const ContractionTableRule *rule;
+} SetAlwaysRuleData;
+
+static int
+setAlwaysRule (wchar_t character, void *data) {
+  const ContractionTableRule *rule = getAlwaysRule(character);
+
+  if (rule) {
+    SetAlwaysRuleData *sar = data;
+    sar->rule = rule;
+    return 1;
+  }
+
+  return 0;
+}
+
 static int
 putCharacter (wchar_t character) {
   {
-    const ContractionTableRule *rule = getAlwaysRule(character);
-    if (rule) return putReplace(rule);
-  }
+    SetAlwaysRuleData sar = {
+      .rule = NULL
+    };
 
-#ifdef HAVE_ICU
-  {
-    wchar_t base = getBaseCharacter(character);
-
-    if (base) {
-      const ContractionTableRule *rule = getAlwaysRule(base);
-      if (rule) return putReplace(rule);
+    if (handleBestCharacter(character, setAlwaysRule, &sar)) {
+      return putReplace(sar.rule);
     }
   }
-#endif /* HAVE_ICU */
 
   {
 #ifdef HAVE_WCHAR_H 
