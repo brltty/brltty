@@ -1636,9 +1636,12 @@ makePreferencesMenu (void) {
   Menu *menu = newMenu();
   if (!menu) goto noMenu;
 
+#define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
+#define TEST(property) setMenuItemTester(item, test##property)
+#define CHANGED(setting) setMenuItemChanged(item, changed##setting)
+
   {
-    MenuItem *item = newBooleanMenuItem(menu, &saveOnExit, strtext("Save on Exit"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &saveOnExit, strtext("Save on Exit")));
   }
 
   {
@@ -1648,26 +1651,22 @@ makePreferencesMenu (void) {
       strtext("6-Dot Computer Braille")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.textStyle, strtext("Text Style"), strings);
-    if (!item) goto noItem;
+    ITEM(newEnumeratedMenuItem(menu, &prefs.textStyle, strtext("Text Style"), strings));
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.expandCurrentWord, strtext("Expand Current Word"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testContractedBraille);
+    ITEM(newBooleanMenuItem(menu, &prefs.expandCurrentWord, strtext("Expand Current Word")));
+    TEST(ContractedBraille);
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.skipIdenticalLines, strtext("Skip Identical Lines"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.skipIdenticalLines, strtext("Skip Identical Lines")));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.skipBlankWindows, strtext("Skip Blank Windows"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.skipBlankWindows, strtext("Skip Blank Windows")));
   }
 
   {
@@ -1677,55 +1676,46 @@ makePreferencesMenu (void) {
       strtext("Rest of Line")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.blankWindowsSkipMode, strtext("Which Blank Windows"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSkipBlankWindows);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.blankWindowsSkipMode, strtext("Which Blank Windows"), strings));
+    TEST(SkipBlankWindows);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.slidingWindow, strtext("Sliding Window"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.slidingWindow, strtext("Sliding Window")));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.eagerSlidingWindow, strtext("Eager Sliding Window"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSlidingWindow);
+    ITEM(newBooleanMenuItem(menu, &prefs.eagerSlidingWindow, strtext("Eager Sliding Window")));
+    TEST(SlidingWindow);
   }
 
   {
-    MenuItem *item = newNumericMenuItem(menu, &prefs.windowOverlap, strtext("Window Overlap"), 0, 20, 1);
-    if (!item) goto noItem;
-    setMenuItemChanged(item, changedWindowOverlap);
+    ITEM(newNumericMenuItem(menu, &prefs.windowOverlap, strtext("Window Overlap"), 0, 20, 1));
+    CHANGED(WindowOverlap);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.autorepeat, strtext("Autorepeat"));
-    if (!item) goto noItem;
-    setMenuItemChanged(item, changedAutorepeat);
+    ITEM(newBooleanMenuItem(menu, &prefs.autorepeat, strtext("Autorepeat")));
+    CHANGED(Autorepeat);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.autorepeatPanning, strtext("Autorepeat Panning"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testAutorepeat);
+    ITEM(newBooleanMenuItem(menu, &prefs.autorepeatPanning, strtext("Autorepeat Panning")));
+    TEST(Autorepeat);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.autorepeatDelay, strtext("Autorepeat Delay"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testAutorepeat);
+    ITEM(newTimeMenuItem(menu, &prefs.autorepeatDelay, strtext("Autorepeat Delay")));
+    TEST(Autorepeat);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.autorepeatInterval, strtext("Autorepeat Interval"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testAutorepeat);
+    ITEM(newTimeMenuItem(menu, &prefs.autorepeatInterval, strtext("Autorepeat Interval")));
+    TEST(Autorepeat);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.showCursor, strtext("Show Cursor"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.showCursor, strtext("Show Cursor")));
   }
 
   {
@@ -1734,67 +1724,56 @@ makePreferencesMenu (void) {
       strtext("Block")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.cursorStyle, strtext("Cursor Style"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testShowCursor);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.cursorStyle, strtext("Cursor Style"), strings));
+    TEST(ShowCursor);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.blinkingCursor, strtext("Blinking Cursor"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testShowCursor);
+    ITEM(newBooleanMenuItem(menu, &prefs.blinkingCursor, strtext("Blinking Cursor")));
+    TEST(ShowCursor);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.cursorVisibleTime, strtext("Cursor Visible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingCursor);
+    ITEM(newTimeMenuItem(menu, &prefs.cursorVisibleTime, strtext("Cursor Visible Time")));
+    TEST(BlinkingCursor);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.cursorInvisibleTime, strtext("Cursor Invisible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingCursor);
+    ITEM(newTimeMenuItem(menu, &prefs.cursorInvisibleTime, strtext("Cursor Invisible Time")));
+    TEST(BlinkingCursor);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.showAttributes, strtext("Show Attributes"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.showAttributes, strtext("Show Attributes")));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.blinkingAttributes, strtext("Blinking Attributes"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testShowAttributes);
+    ITEM(newBooleanMenuItem(menu, &prefs.blinkingAttributes, strtext("Blinking Attributes")));
+    TEST(ShowAttributes);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.attributesVisibleTime, strtext("Attributes Visible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingAttributes);
+    ITEM(newTimeMenuItem(menu, &prefs.attributesVisibleTime, strtext("Attributes Visible Time")));
+    TEST(BlinkingAttributes);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.attributesInvisibleTime, strtext("Attributes Invisible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingAttributes);
+    ITEM(newTimeMenuItem(menu, &prefs.attributesInvisibleTime, strtext("Attributes Invisible Time")));
+    TEST(BlinkingAttributes);
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.blinkingCapitals, strtext("Blinking Capitals"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.blinkingCapitals, strtext("Blinking Capitals")));
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.capitalsVisibleTime, strtext("Capitals Visible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingCapitals);
+    ITEM(newTimeMenuItem(menu, &prefs.capitalsVisibleTime, strtext("Capitals Visible Time")));
+    TEST(BlinkingCapitals);
   }
 
   {
-    MenuItem *item = newTimeMenuItem(menu, &prefs.capitalsInvisibleTime, strtext("Capitals Invisible Time"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBlinkingCapitals);
+    ITEM(newTimeMenuItem(menu, &prefs.capitalsInvisibleTime, strtext("Capitals Invisible Time")));
+    TEST(BlinkingCapitals);
   }
 
   {
@@ -1806,10 +1785,9 @@ makePreferencesMenu (void) {
       strtext("Maximum")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.brailleFirmness, strtext("Braille Firmness"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBrailleFirmness);
-    setMenuItemChanged(item, changedBrailleFirmness);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.brailleFirmness, strtext("Braille Firmness"), strings));
+    TEST(BrailleFirmness);
+    CHANGED(BrailleFirmness);
   }
 
   {
@@ -1821,27 +1799,23 @@ makePreferencesMenu (void) {
       strtext("Maximum")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.brailleSensitivity, strtext("Braille Sensitivity"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testBrailleSensitivity);
-    setMenuItemChanged(item, changedBrailleSensitivity);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.brailleSensitivity, strtext("Braille Sensitivity"), strings));
+    TEST(BrailleSensitivity);
+    CHANGED(BrailleSensitivity);
   }
 
 #ifdef HAVE_LIBGPM
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.windowFollowsPointer, strtext("Window Follows Pointer"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.windowFollowsPointer, strtext("Window Follows Pointer")));
   }
 #endif /* HAVE_LIBGPM */
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.highlightWindow, strtext("Highlight Window"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.highlightWindow, strtext("Highlight Window")));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.alertTunes, strtext("Alert Tunes"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.alertTunes, strtext("Alert Tunes")));
   }
 
   {
@@ -1883,50 +1857,43 @@ makePreferencesMenu (void) {
         ")"
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.tuneDevice, strtext("Tune Device"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testTunes);
-    setMenuItemChanged(item, changedTuneDevice);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.tuneDevice, strtext("Tune Device"), strings));
+    TEST(Tunes);
+    CHANGED(TuneDevice);
   }
 
 #ifdef ENABLE_PCM_SUPPORT
   {
-    MenuItem *item = newVolumeMenuItem(menu, &prefs.pcmVolume, strtext("PCM Volume"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testTunesPcm);
+    ITEM(newVolumeMenuItem(menu, &prefs.pcmVolume, strtext("PCM Volume")));
+    TEST(TunesPcm);
   }
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
   {
-    MenuItem *item = newVolumeMenuItem(menu, &prefs.midiVolume, strtext("MIDI Volume"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testTunesMidi);
+    ITEM(newVolumeMenuItem(menu, &prefs.midiVolume, strtext("MIDI Volume")));
+    TEST(TunesMidi);
   }
 
   {
-    MenuItem *item = newStringsMenuItem(menu, &prefs.midiInstrument, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testTunesMidi);
+    ITEM(newStringsMenuItem(menu, &prefs.midiInstrument, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount));
+    TEST(TunesMidi);
   }
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #ifdef ENABLE_FM_SUPPORT
   {
-    MenuItem *item = newVolumeMenuItem(menu, &prefs.fmVolume, strtext("FM Volume"));
-    if (!item) goto noItem;
-    setMenuItemTester(item, testTunesFm);
+    ITEM(newVolumeMenuItem(menu, &prefs.fmVolume, strtext("FM Volume")));
+    TEST(TunesFm);
   }
 #endif /* ENABLE_FM_SUPPORT */
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.alertDots, strtext("Alert Dots"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.alertDots, strtext("Alert Dots")));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.alertMessages, strtext("Alert Messages"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.alertMessages, strtext("Alert Messages")));
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1936,34 +1903,29 @@ makePreferencesMenu (void) {
       strtext("Enqueue")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.sayLineMode, strtext("Say-Line Mode"), strings);
-    if (!item) goto noItem;
+    ITEM(newEnumeratedMenuItem(menu, &prefs.sayLineMode, strtext("Say-Line Mode"), strings));
   }
 
   {
-    MenuItem *item = newBooleanMenuItem(menu, &prefs.autospeak, strtext("Autospeak"));
-    if (!item) goto noItem;
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeak, strtext("Autospeak")));
   }
 
   {
-    MenuItem *item = newNumericMenuItem(menu, &prefs.speechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSpeechRate);
-    setMenuItemChanged(item, changedSpeechRate);
+    ITEM(newNumericMenuItem(menu, &prefs.speechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1));
+    TEST(SpeechRate);
+    CHANGED(SpeechRate);
   }
 
   {
-    MenuItem *item = newNumericMenuItem(menu, &prefs.speechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSpeechVolume);
-    setMenuItemChanged(item, changedSpeechVolume);
+    ITEM(newNumericMenuItem(menu, &prefs.speechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1));
+    TEST(SpeechVolume);
+    CHANGED(SpeechVolume);
   }
 
   {
-    MenuItem *item = newNumericMenuItem(menu, &prefs.speechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSpeechPitch);
-    setMenuItemChanged(item, changedSpeechPitch);
+    ITEM(newNumericMenuItem(menu, &prefs.speechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1));
+    TEST(SpeechPitch);
+    CHANGED(SpeechPitch);
   }
 
   {
@@ -1973,10 +1935,9 @@ makePreferencesMenu (void) {
       strtext("All")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.speechPunctuation, strtext("Speech Punctuation"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testSpeechPunctuation);
-    setMenuItemChanged(item, changedSpeechPunctuation);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.speechPunctuation, strtext("Speech Punctuation"), strings));
+    TEST(SpeechPunctuation);
+    CHANGED(SpeechPunctuation);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1987,17 +1948,15 @@ makePreferencesMenu (void) {
       strtext("Right")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.statusPosition, strtext("Status Position"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testStatusPosition);
-    setMenuItemChanged(item, changedStatusPosition);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.statusPosition, strtext("Status Position"), strings));
+    TEST(StatusPosition);
+    CHANGED(StatusPosition);
   }
 
   {
-    MenuItem *item = newNumericMenuItem(menu, &prefs.statusCount, strtext("Status Count"), 0, MAX((int)brl.textColumns/2-1, 0), 1);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testStatusCount);
-    setMenuItemChanged(item, changedStatusCount);
+    ITEM(newNumericMenuItem(menu, &prefs.statusCount, strtext("Status Count"), 0, MAX((int)brl.textColumns/2-1, 0), 1));
+    TEST(StatusCount);
+    CHANGED(StatusCount);
   }
 
   {
@@ -2009,14 +1968,13 @@ makePreferencesMenu (void) {
       strtext("Text Side")
     };
 
-    MenuItem *item = newEnumeratedMenuItem(menu, &prefs.statusSeparator, strtext("Status Separator"), strings);
-    if (!item) goto noItem;
-    setMenuItemTester(item, testStatusSeparator);
-    setMenuItemChanged(item, changedStatusSeparator);
+    ITEM(newEnumeratedMenuItem(menu, &prefs.statusSeparator, strtext("Status Separator"), strings));
+    TEST(StatusSeparator);
+    CHANGED(StatusSeparator);
   }
 
   {
-#define STATUS_FIELD_ITEM(number) if (!newStatusFieldMenuItem(menu, number, strtext("Status Field ") #number, testStatusField##number, changedStatusField##number)) goto noItem
+#define STATUS_FIELD_ITEM(number) { ITEM(newStatusFieldMenuItem(menu, number, strtext("Status Field ") #number, testStatusField##number, changedStatusField##number)); }
     STATUS_FIELD_ITEM(1);
     STATUS_FIELD_ITEM(2);
     STATUS_FIELD_ITEM(3);
@@ -2030,27 +1988,28 @@ makePreferencesMenu (void) {
   }
 
   {
-    MenuItem *item = newGlobMenuItem(menu, &glob_textTable, strtext("Text Table"));
-    if (!item) goto noItem;
-    setMenuItemChanged(item, changedTextTable);
+    ITEM(newGlobMenuItem(menu, &glob_textTable, strtext("Text Table")));
+    CHANGED(TextTable);
     globPrepare(&glob_textTable, item, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
   }
 
   {
-    MenuItem *item = newGlobMenuItem(menu, &glob_attributesTable, strtext("Attributes Table"));
-    if (!item) goto noItem;
-    setMenuItemChanged(item, changedAttributesTable);
+    ITEM(newGlobMenuItem(menu, &glob_attributesTable, strtext("Attributes Table")));
+    CHANGED(AttributesTable);
     globPrepare(&glob_attributesTable, item, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {
-    MenuItem *item = newGlobMenuItem(menu, &glob_contractionTable, strtext("Contraction Table"));
-    if (!item) goto noItem;
-    setMenuItemChanged(item, changedContractionTable);
+    ITEM(newGlobMenuItem(menu, &glob_contractionTable, strtext("Contraction Table")));
+    CHANGED(ContractionTable);
     globPrepare(&glob_contractionTable, item, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+#undef ITEM
+#undef TEST
+#undef CHANGED
 
   return menu;
 
