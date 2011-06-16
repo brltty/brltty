@@ -2016,7 +2016,7 @@ makePreferencesMenu (void) {
   }
 
   {
-#define STATUS_FIELD_ITEM(number) newStatusFieldItem(menu, number, strtext("Status Field ") #number, testStatusField##number, changedStatusField##number)
+#define STATUS_FIELD_ITEM(number) if (!newStatusFieldItem(menu, number, strtext("Status Field ") #number, testStatusField##number, changedStatusField##number)) goto noItem
     STATUS_FIELD_ITEM(1);
     STATUS_FIELD_ITEM(2);
     STATUS_FIELD_ITEM(3);
