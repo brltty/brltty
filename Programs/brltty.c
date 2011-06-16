@@ -709,13 +709,17 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 isContracting (void) {
-  return prefs.textStyle && contractionTable;
+  return prefs.textStyle && (prefs.sixDotsMode != sdmComputerBraille) && contractionTable;
 }
 
 static int
-getCursorOffset (int x, int y) {
-  if ((scr.posy == y) && (scr.posx >= x) && (scr.posx < scr.cols)) return scr.posx - x;
-  return -1;
+getCursorOffset (void) {
+  return ((scr.posy == ses->winy) && (scr.posx >= ses->winx) && (scr.posx < scr.cols))? (scr.posx - ses->winx): -1;
+}
+
+static int
+getContractedCursor (int offset) {
+  return ((prefs.sixDotsMode == sdmExpandCurrentWord) && (offset >= 0))? offset: CTB_NO_CURSOR;
 }
 
 static int
@@ -730,7 +734,7 @@ getContractedLength (unsigned int outputLimit) {
   if (!contractText(contractionTable,
                     inputBuffer, &inputLength,
                     outputBuffer, &outputLength,
-                    NULL, getCursorOffset(ses->winx, ses->winy)))
+                    NULL, getContractedCursor(getCursorOffset())))
     return 0;
   return inputLength;
 }
@@ -890,7 +894,7 @@ static int cursorTimer;
 unsigned char
 cursorDots (void) {
   if (prefs.blinkingCursor && !cursorState) return 0;
-  return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
+  return prefs.cursorStyle? (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
 }
 
 static void
@@ -2439,7 +2443,7 @@ brlttyUpdate (void) {
       contracted = 0;
       if (isContracting()) {
         while (1) {
-          int cursorOffset = CTB_NO_CURSOR;
+          int cursorOffset = getCursorOffset();
 
           int inputLength = scr.cols - ses->winx;
           ScreenCharacter inputCharacters[inputLength];
@@ -2448,7 +2452,6 @@ brlttyUpdate (void) {
           int outputLength = textLength;
           unsigned char outputBuffer[outputLength];
 
-          if ((scr.posy == ses->winy) && (scr.posx >= ses->winx)) cursorOffset = scr.posx - ses->winx;
           readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
 
           {
@@ -2461,7 +2464,7 @@ brlttyUpdate (void) {
           if (!contractText(contractionTable,
                             inputText, &inputLength,
                             outputBuffer, &outputLength,
-                            contractedOffsets, cursorOffset))
+                            contractedOffsets, getContractedCursor(cursorOffset)))
             break;
 
           {

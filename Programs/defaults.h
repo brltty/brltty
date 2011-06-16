@@ -65,6 +65,7 @@ extern "C" {
 #define DEFAULT_HIGHLIGHT_WINDOW 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_TEXT_STYLE 0		/* 1 for six dots, 0 for eight dots */
+#define DEFAULT_SIX_DOTS_MODE sdmExpandCurrentWord
 #define DEFAULT_BRAILLE_FIRMNESS BRL_FIRMNESS_MEDIUM
 #define DEFAULT_BRAILLE_SENSITIVITY BRL_SENSITIVITY_MEDIUM
 

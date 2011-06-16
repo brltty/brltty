@@ -888,7 +888,7 @@ resetPreferences (void) {
 
   prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
   prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-  prefs.version = 4;
+  prefs.version = 6;
 
   prefs.autorepeat = DEFAULT_AUTOREPEAT;
   prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
@@ -914,6 +914,7 @@ resetPreferences (void) {
   prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
 
   prefs.textStyle = DEFAULT_TEXT_STYLE;
+  prefs.sixDotsMode = DEFAULT_SIX_DOTS_MODE;
   prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
   prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
 
@@ -1096,6 +1097,11 @@ loadPreferences (void) {
 
         length = 58;
         resetStatusFields(fields);
+      }
+
+      if (prefs.version == 5) {
+        prefs.version++;
+        prefs.sixDotsMode = DEFAULT_SIX_DOTS_MODE;
       }
     }
 
@@ -1660,6 +1666,12 @@ updatePreferences (void) {
       strtext("6-dot")
     };
 
+    static const char *sixDotsModes[] = {
+      strtext("Computer Braille"),
+      strtext("Contract Whole Line"),
+      strtext("Expand Current Word")
+    };
+
     static const char *tuneDevices[] = {
       "Beeper"
         " ("
@@ -1723,6 +1735,7 @@ updatePreferences (void) {
     MenuItem menu[] = {
       BOOLEAN_ITEM(saveOnExit, NULL, NULL, strtext("Save on Exit")),
       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
+      SYMBOLIC_ITEM(prefs.sixDotsMode, NULL, NULL, strtext("Six Dots Mode"), sixDotsModes),
       BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, strtext("Skip Identical Lines")),
       BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, strtext("Skip Blank Windows")),
       SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, strtext("Which Blank Windows"), skipBlankWindowsModes),
