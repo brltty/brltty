@@ -25,44 +25,45 @@ extern "C" {
 
 typedef struct MenuStruct Menu;
 typedef struct MenuItemStruct MenuItem;
+typedef const char *const MenuItemString;
 
 extern Menu *newMenu (void);
 extern void deallocateMenu (Menu *menu);
 extern MenuItem *newMenuItem (Menu *menu, unsigned char *setting, const char *label);
 
-extern MenuItem *newNumericItem (
+extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 );
 
-extern MenuItem *newTextItem (
+extern MenuItem *newStringsMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
-  const char *const *names, unsigned char count
+  MenuItemString *strings, unsigned char count
 );
 
-#define newSymbolicItem(menu, setting, label, names) newTextItem(menu, setting, label, names, ARRAY_COUNT(names))
-extern MenuItem *newBooleanItem (Menu *menu, unsigned char *setting, const char *label);
+#define newEnumeratedMenuItem(menu, setting, label, strings) newStringsMenuItem(menu, setting, label, strings, ARRAY_COUNT(strings))
+extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const char *label);
 
-typedef int TestItem (void);
-extern void setTestItem (MenuItem *item, TestItem *test);
+typedef int MenuItemTester (void);
+extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 
-typedef int SettingChanged (unsigned char setting);
-extern void setSettingChanged (MenuItem *item, SettingChanged *changed);
+typedef int MenuItemChanged (unsigned char setting);
+extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
-extern void setItemNames (MenuItem *item, const char *const *names, unsigned char count);
+extern void setMenuItemStrings (MenuItem *item, MenuItemString *strings, unsigned char count);
 
-extern MenuItem *getCurrentItem (Menu *menu);
-extern const char *getItemLabel (MenuItem *item);
-extern const char *getItemValue (MenuItem *item);
+extern MenuItem *getCurrentMenuItem (Menu *menu);
+extern const char *getMenuItemLabel (MenuItem *item);
+extern const char *getMenuItemValue (MenuItem *item);
 
-extern int setFirstItem (Menu *menu);
-extern int setLastItem (Menu *menu);
-extern int setPreviousItem (Menu *menu);
-extern int setNextItem (Menu *menu);
+extern int changeMenuItemPrevious (MenuItem *item);
+extern int changeMenuItemNext (MenuItem *item);
+extern int changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count);
 
-extern int previousItemSetting (MenuItem *item);
-extern int nextItemSetting (MenuItem *item);
-extern int selectItemSetting (MenuItem *item, unsigned int index, unsigned int count);
+extern int setMenuPreviousItem (Menu *menu);
+extern int setMenuNextItem (Menu *menu);
+extern int setMenuFirstItem (Menu *menu);
+extern int setMenuLastItem (Menu *menu);
 
 #ifdef __cplusplus
 }

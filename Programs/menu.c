@@ -38,10 +38,10 @@ struct MenuItemStruct {
   unsigned char *setting;                 /* pointer to current value */
   const char *label;                      /* item name for presentation */
 
-  TestItem *test;                     /* returns true if item should be presented */
-  SettingChanged *changed;
+  MenuItemTester *test;                     /* returns true if item should be presented */
+  MenuItemChanged *changed;
 
-  const char *const *names;               /* symbolic names of values */
+  MenuItemString *strings;               /* symbolic names of values */
 
   unsigned char minimum;                  /* lowest valid value */
   unsigned char maximum;                  /* highest valid value */
@@ -76,7 +76,7 @@ getMenuItem (Menu *menu, unsigned int index) {
 }
 
 MenuItem *
-getCurrentItem (Menu *menu) {
+getCurrentMenuItem (Menu *menu) {
   return getMenuItem(menu, menu->index);
 }
 
@@ -87,16 +87,16 @@ testMenuItem (Menu *menu, unsigned int index) {
 }
 
 const char *
-getItemLabel (MenuItem *item) {
+getMenuItemLabel (MenuItem *item) {
   return gettext(item->label);
 }
 
 const char *
-getItemValue (MenuItem *item) {
-  if (item->names) {
-    const char *name = item->names[*item->setting - item->minimum];
-    if (!*name) name = strtext("<off>");
-    return gettext(name);
+getMenuItemValue (MenuItem *item) {
+  if (item->strings) {
+    const char *string = item->strings[*item->setting - item->minimum];
+    if (!*string) string = strtext("<off>");
+    return gettext(string);
   }
 
   {
@@ -131,7 +131,7 @@ newMenuItem (Menu *menu, unsigned char *setting, const char *label) {
     item->test = NULL;
     item->changed = NULL;
 
-    item->names = NULL;
+    item->strings = NULL;
 
     item->minimum = 0;
     item->maximum = 0;
@@ -142,25 +142,25 @@ newMenuItem (Menu *menu, unsigned char *setting, const char *label) {
 }
 
 void
-setTestItem (MenuItem *item, TestItem *test) {
-  item->test = test;
+setMenuItemTester (MenuItem *item, MenuItemTester *handler) {
+  item->test = handler;
 }
 
 void
-setSettingChanged (MenuItem *item, SettingChanged *changed) {
-  item->changed = changed;
+setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
+  item->changed = handler;
 }
 
 void
-setItemNames (MenuItem *item, const char *const *names, unsigned char count) {
-  item->names = names;
+setMenuItemStrings (MenuItem *item, MenuItemString *strings, unsigned char count) {
+  item->strings = strings;
   item->minimum = 0;
   item->maximum = count - 1;
   item->divisor = 1;
 }
 
 MenuItem *
-newNumericItem (
+newNumericMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 ) {
@@ -176,66 +176,31 @@ newNumericItem (
 }
 
 MenuItem *
-newTextItem (
+newStringsMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
-  const char *const *names, unsigned char count
+  MenuItemString *strings, unsigned char count
 ) {
   MenuItem *item = newMenuItem(menu, setting, label);
 
   if (item) {
-    setItemNames(item, names, count);
+    setMenuItemStrings(item, strings, count);
   }
 
   return item;
 }
 
 MenuItem *
-newBooleanItem (Menu *menu, unsigned char *setting, const char *label) {
-  static const char *names[] = {
+newBooleanMenuItem (Menu *menu, unsigned char *setting, const char *label) {
+  static MenuItemString strings[] = {
     strtext("No"),
     strtext("Yes")
   };
 
-  return newSymbolicItem(menu, setting, label, names);
-}
-
-int
-setPreviousItem (Menu *menu) {
-  do {
-    if (!menu->index) menu->index = menu->count;
-    if (!menu->index) return 0;
-  } while (!testMenuItem(menu, --menu->index));
-
-  return 1;
-}
-
-int
-setNextItem (Menu *menu) {
-  if (menu->index >= menu->count) return 0;
-
-  do {
-    if (++menu->index == menu->count) menu->index = 0;
-  } while (!testMenuItem(menu, menu->index));
-
-  return 1;
-}
-
-int
-setFirstItem (Menu *menu) {
-  if (!menu->count) return 0;
-  menu->index = 0;
-  return testMenuItem(menu, menu->index) || setNextItem(menu);
-}
-
-int
-setLastItem (Menu *menu) {
-  if (!menu->count) return 0;
-  menu->index = menu->count - 1;
-  return testMenuItem(menu, menu->index) || setPreviousItem(menu);
+  return newEnumeratedMenuItem(menu, setting, label, strings);
 }
 
 static int
-adjustItemSetting (MenuItem *item, void (*adjust) (MenuItem *ktem)) {
+adjustMenuItem (MenuItem *item, void (*adjust) (MenuItem *item)) {
   int count = item->maximum - item->minimum + 1;
 
   do {
@@ -247,30 +212,30 @@ adjustItemSetting (MenuItem *item, void (*adjust) (MenuItem *ktem)) {
 }
 
 static void
-decrementItemSetting (MenuItem *item) {
+decrementMenuItem (MenuItem *item) {
   if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
 }
 
 int
-previousItemSetting (MenuItem *item) {
-  return adjustItemSetting(item, decrementItemSetting);
+changeMenuItemPrevious (MenuItem *item) {
+  return adjustMenuItem(item, decrementMenuItem);
 }
 
 static void
-incrementItemSetting (MenuItem *item) {
+incrementMenuItem (MenuItem *item) {
   if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
 }
 
 int
-nextItemSetting (MenuItem *item) {
-  return adjustItemSetting(item, incrementItemSetting);
+changeMenuItemNext (MenuItem *item) {
+  return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
-selectItemSetting (MenuItem *item, unsigned int index, unsigned int count) {
+changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char newSetting;
 
-  if (item->names) {
+  if (item->strings) {
     newSetting = index % (item->maximum + 1);
   } else {
     newSetting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
@@ -279,4 +244,39 @@ selectItemSetting (MenuItem *item, unsigned int index, unsigned int count) {
   if (item->changed && !item->changed(newSetting)) return 0;
   *item->setting = newSetting;
   return 1;
+}
+
+int
+setMenuPreviousItem (Menu *menu) {
+  do {
+    if (!menu->index) menu->index = menu->count;
+    if (!menu->index) return 0;
+  } while (!testMenuItem(menu, --menu->index));
+
+  return 1;
+}
+
+int
+setMenuNextItem (Menu *menu) {
+  if (menu->index >= menu->count) return 0;
+
+  do {
+    if (++menu->index == menu->count) menu->index = 0;
+  } while (!testMenuItem(menu, menu->index));
+
+  return 1;
+}
+
+int
+setMenuFirstItem (Menu *menu) {
+  if (!menu->count) return 0;
+  menu->index = 0;
+  return testMenuItem(menu, menu->index) || setMenuNextItem(menu);
+}
+
+int
+setMenuLastItem (Menu *menu) {
+  if (!menu->count) return 0;
+  menu->index = menu->count - 1;
+  return testMenuItem(menu, menu->index) || setMenuPreviousItem(menu);
 }
