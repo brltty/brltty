@@ -709,7 +709,7 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 isContracting (void) {
-  return prefs.textStyle && (prefs.sixDotsMode != sdmComputerBraille) && contractionTable;
+  return (prefs.textStyle == tsContractedBraille) && contractionTable;
 }
 
 static int
@@ -719,7 +719,7 @@ getCursorOffset (void) {
 
 static int
 getContractedCursor (int offset) {
-  return ((prefs.sixDotsMode == sdmExpandCurrentWord) && (offset >= 0))? offset: CTB_NO_CURSOR;
+  return (prefs.expandCurrentWord && (offset >= 0))? offset: CTB_NO_CURSOR;
 }
 
 static int

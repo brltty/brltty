@@ -34,10 +34,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  sdmComputerBraille,
-  sdmContractWholeLine,
-  sdmExpandCurrentWord
-} SixDotsMode;
+  tsComputerBraille8,
+  tsContractedBraille,
+  tsComputerBraille6
+} TextStyles;
 
 typedef enum {
   sbwAll,
@@ -110,7 +110,7 @@ typedef struct {
   unsigned char alertDots;
   unsigned char skipBlankWindows;
   unsigned char midiInstrument;
-  unsigned char sixDotsMode;
+  unsigned char expandCurrentWord;
   unsigned char windowOverlap;
   unsigned char speechRate;
   unsigned char speechVolume;

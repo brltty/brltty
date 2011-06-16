@@ -914,7 +914,7 @@ resetPreferences (void) {
   prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
 
   prefs.textStyle = DEFAULT_TEXT_STYLE;
-  prefs.sixDotsMode = DEFAULT_SIX_DOTS_MODE;
+  prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
   prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
   prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
 
@@ -1101,7 +1101,7 @@ loadPreferences (void) {
 
       if (prefs.version == 5) {
         prefs.version++;
-        prefs.sixDotsMode = DEFAULT_SIX_DOTS_MODE;
+        prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
       }
     }
 
@@ -1504,6 +1504,11 @@ changedAttributesTable (unsigned char setting) {
 static GlobData glob_contractionTable;
 
 static int
+testContractedBraille (void) {
+  return prefs.textStyle == tsContractedBraille;
+}
+
+static int
 changedContractionTable (unsigned char setting) {
   return loadContractionTable(globChanged(&glob_contractionTable));
 }
@@ -1662,14 +1667,9 @@ updatePreferences (void) {
     };
 
     static const char *textStyles[] = {
-      strtext("8-dot"),
-      strtext("6-dot")
-    };
-
-    static const char *sixDotsModes[] = {
-      strtext("Computer Braille"),
-      strtext("Contract Whole Line"),
-      strtext("Expand Current Word")
+      strtext("8-Dot Computer Braille"),
+      strtext("Contracted Braille"),
+      strtext("6-Dot Computer Braille")
     };
 
     static const char *tuneDevices[] = {
@@ -1735,7 +1735,9 @@ updatePreferences (void) {
     MenuItem menu[] = {
       BOOLEAN_ITEM(saveOnExit, NULL, NULL, strtext("Save on Exit")),
       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
-      SYMBOLIC_ITEM(prefs.sixDotsMode, NULL, NULL, strtext("Six Dots Mode"), sixDotsModes),
+#ifdef ENABLE_CONTRACTED_BRAILLE
+      BOOLEAN_ITEM(prefs.expandCurrentWord, NULL, testContractedBraille, strtext("Expand Current Word")),
+#endif /* ENABLE_CONTRACTED_BRAILLE */
       BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, strtext("Skip Identical Lines")),
       BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, strtext("Skip Blank Windows")),
       SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, strtext("Which Blank Windows"), skipBlankWindowsModes),
