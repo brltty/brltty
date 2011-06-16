@@ -67,6 +67,7 @@
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
+#include "menu.h"
 #include "charset.h"
 
 #include "io_serial.h"
@@ -1328,6 +1329,8 @@ typedef struct {
   int count;
   unsigned char setting;
   const char *pathsArea[3];
+
+  MenuItem *menuItem;
 } GlobData;
 
 static GlobData glob_textTable;
@@ -1341,12 +1344,17 @@ qsortCompare_fileNames (const void *element1, const void *element2) {
 }
 
 static void
-globPrepare (GlobData *data, const char *directory, const char *extension, const char *initial, int none) {
+globPrepare (
+  GlobData *data, MenuItem *menuItem,
+  const char *directory, const char *extension,
+  const char *initial, int none
+) {
   memset(data, 0, sizeof(*data));
 
   data->directory = directory;
   data->extension = extension;
-  data->none = (none != 0);
+  data->none = !!none;
+  data->menuItem = menuItem;
 
   {
     const char *strings[] = {"*", extension};
@@ -1459,6 +1467,8 @@ globBegin (GlobData *data) {
       break;
     }
   }
+
+  setItemNames(data->menuItem, data->paths, data->count);
 }
 
 static void
@@ -1566,113 +1576,276 @@ testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
 }
 
-typedef struct {
-  unsigned char *setting;                 /* pointer to current value */
-  int (*changed) (unsigned char setting); /* called when value changes */
-  int (*test) (void);                     /* returns true if item should be presented */
-  const char *label;                      /* item name for presentation */
-  const char *const *names;               /* symbolic names of values */
-  unsigned char minimum;                  /* lowest valid value */
-  unsigned char maximum;                  /* highest valid value */
-  unsigned char divisor;                  /* present only multiples of this value */
-} MenuItem;
+static MenuItem *
+newGlobItem (Menu *menu, GlobData *data, const char *label) {
+  static const char *names[] = {
+    NULL
+  };
 
-static void
-previousSetting (MenuItem *item) {
-  if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
+  return newSymbolicItem(menu, &data->setting, label, names);
 }
 
-static void
-nextSetting (MenuItem *item) {
-  if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+static MenuItem *
+newStatusFieldItem (
+  Menu *menu, unsigned char number, const char *label,
+  TestItem *test, SettingChanged *changed
+) {
+  static const char *names[] = {
+    strtext("End"),
+    strtext("Window Coordinates (2 cells)"),
+    strtext("Window Column (1 cell)"),
+    strtext("Window Row (1 cell)"),
+    strtext("Cursor Coordinates (2 cells)"),
+    strtext("Cursor Column (1 cell)"),
+    strtext("Cursor Row (1 cell)"),
+    strtext("Cursor and Window Column (2 cells)"),
+    strtext("Cursor and Window Row (2 cells)"),
+    strtext("Screen Number (1 cell)"),
+    strtext("State Dots (1 cell)"),
+    strtext("State Letter (1 cell)"),
+    strtext("Time (2 cells)"),
+    strtext("Alphabetic Window Coordinates (1 cell)"),
+    strtext("Alphabetic Cursor Coordinates (1 cell)"),
+    strtext("Generic")
+  };
+
+  MenuItem *item = newSymbolicItem(menu, &prefs.statusFields[number-1], label, names);
+
+  if (item) {
+    setTestItem(item, test);
+    setSettingChanged(item, changed);
+  }
+
+  return item;
 }
 
-int
-updatePreferences (void) {
-  static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
-  const char *mode = "prf";
-  int ok = 1;
+static MenuItem *
+newTimeItem (Menu *menu, unsigned char *setting, const char *label) {
+  return newNumericItem(menu, setting, label, 1, 100, updateInterval/10);
+}
 
-  globBegin(&glob_textTable);
-  globBegin(&glob_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  globBegin(&glob_contractionTable);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
+static MenuItem *
+newVolumeItem (Menu *menu, unsigned char *setting, const char *label) {
+  return newNumericItem(menu, setting, label, 0, 100, 5);
+}
 
-  if (setStatusText(&brl, mode) &&
-      message(mode, gettext("Preferences Menu"), 0)) {
-    static const char *booleanValues[] = {
-      strtext("No"),
-      strtext("Yes")
-    };
+static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
 
-    static const char *cursorStyles[] = {
-      strtext("Underline"),
-      strtext("Block")
-    };
+static Menu *
+makePreferencesMenu (void) {
+  Menu *menu = newMenu();
+  if (!menu) goto noMenu;
 
-    static const char *firmnessLevels[] = {
-      strtext("Minimum"),
-      strtext("Low"),
-      strtext("Medium"),
-      strtext("High"),
-      strtext("Maximum")
-    };
+  {
+    MenuItem *item = newBooleanItem(menu, &saveOnExit, strtext("Save on Exit"));
+    if (!item) goto noItem;
+  }
 
-    static const char *sensitivityLevels[] = {
-      strtext("Minimum"),
-      strtext("Low"),
-      strtext("Medium"),
-      strtext("High"),
-      strtext("Maximum")
-    };
-
-    static const char *skipBlankWindowsModes[] = {
-      strtext("All"),
-      strtext("End of Line"),
-      strtext("Rest of Line")
-    };
-
-    static const char *statusPositions[] = {
-      strtext("None"),
-      strtext("Left"),
-      strtext("Right")
-    };
-
-    static const char *statusSeparators[] = {
-      strtext("None"),
-      strtext("Space"),
-      strtext("Block"),
-      strtext("Status Side"),
-      strtext("Text Side")
-    };
-
-    static const char *statusFields[] = {
-      strtext("End"),
-      strtext("Window Coordinates (2 cells)"),
-      strtext("Window Column (1 cell)"),
-      strtext("Window Row (1 cell)"),
-      strtext("Cursor Coordinates (2 cells)"),
-      strtext("Cursor Column (1 cell)"),
-      strtext("Cursor Row (1 cell)"),
-      strtext("Cursor and Window Column (2 cells)"),
-      strtext("Cursor and Window Row (2 cells)"),
-      strtext("Screen Number (1 cell)"),
-      strtext("State Dots (1 cell)"),
-      strtext("State Letter (1 cell)"),
-      strtext("Time (2 cells)"),
-      strtext("Alphabetic Window Coordinates (1 cell)"),
-      strtext("Alphabetic Cursor Coordinates (1 cell)"),
-      strtext("Generic")
-    };
-
-    static const char *textStyles[] = {
+  {
+    static const char *names[] = {
       strtext("8-Dot Computer Braille"),
       strtext("Contracted Braille"),
       strtext("6-Dot Computer Braille")
     };
 
-    static const char *tuneDevices[] = {
+    MenuItem *item = newSymbolicItem(menu, &prefs.textStyle, strtext("Text Style"), names);
+    if (!item) goto noItem;
+  }
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.expandCurrentWord, strtext("Expand Current Word"));
+    if (!item) goto noItem;
+    setTestItem(item, testContractedBraille);
+  }
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.skipIdenticalLines, strtext("Skip Identical Lines"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.skipBlankWindows, strtext("Skip Blank Windows"));
+    if (!item) goto noItem;
+  }
+
+  {
+    static const char *names[] = {
+      strtext("All"),
+      strtext("End of Line"),
+      strtext("Rest of Line")
+    };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.blankWindowsSkipMode, strtext("Which Blank Windows"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testSkipBlankWindows);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.slidingWindow, strtext("Sliding Window"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.eagerSlidingWindow, strtext("Eager Sliding Window"));
+    if (!item) goto noItem;
+    setTestItem(item, testSlidingWindow);
+  }
+
+  {
+    MenuItem *item = newNumericItem(menu, &prefs.windowOverlap, strtext("Window Overlap"), 0, 20, 1);
+    if (!item) goto noItem;
+    setSettingChanged(item, changedWindowOverlap);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.autorepeat, strtext("Autorepeat"));
+    if (!item) goto noItem;
+    setSettingChanged(item, changedAutorepeat);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.autorepeatPanning, strtext("Autorepeat Panning"));
+    if (!item) goto noItem;
+    setTestItem(item, testAutorepeat);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.autorepeatDelay, strtext("Autorepeat Delay"));
+    if (!item) goto noItem;
+    setTestItem(item, testAutorepeat);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.autorepeatInterval, strtext("Autorepeat Interval"));
+    if (!item) goto noItem;
+    setTestItem(item, testAutorepeat);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.showCursor, strtext("Show Cursor"));
+    if (!item) goto noItem;
+  }
+
+  {
+    static const char *names[] = {
+      strtext("Underline"),
+      strtext("Block")
+    };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.cursorStyle, strtext("Cursor Style"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testShowCursor);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.blinkingCursor, strtext("Blinking Cursor"));
+    if (!item) goto noItem;
+    setTestItem(item, testShowCursor);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.cursorVisibleTime, strtext("Cursor Visible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingCursor);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.cursorInvisibleTime, strtext("Cursor Invisible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingCursor);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.showAttributes, strtext("Show Attributes"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.blinkingAttributes, strtext("Blinking Attributes"));
+    if (!item) goto noItem;
+    setTestItem(item, testShowAttributes);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.attributesVisibleTime, strtext("Attributes Visible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingAttributes);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.attributesInvisibleTime, strtext("Attributes Invisible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingAttributes);
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.blinkingCapitals, strtext("Blinking Capitals"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.capitalsVisibleTime, strtext("Capitals Visible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingCapitals);
+  }
+
+  {
+    MenuItem *item = newTimeItem(menu, &prefs.capitalsInvisibleTime, strtext("Capitals Invisible Time"));
+    if (!item) goto noItem;
+    setTestItem(item, testBlinkingCapitals);
+  }
+
+  {
+    static const char *names[] = {
+      strtext("Minimum"),
+      strtext("Low"),
+      strtext("Medium"),
+      strtext("High"),
+      strtext("Maximum")
+    };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.brailleFirmness, strtext("Braille Firmness"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testBrailleFirmness);
+    setSettingChanged(item, changedBrailleFirmness);
+  }
+
+  {
+    static const char *names[] = {
+      strtext("Minimum"),
+      strtext("Low"),
+      strtext("Medium"),
+      strtext("High"),
+      strtext("Maximum")
+    };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.brailleSensitivity, strtext("Braille Sensitivity"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testBrailleSensitivity);
+    setSettingChanged(item, changedBrailleSensitivity);
+  }
+
+#ifdef HAVE_LIBGPM
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.windowFollowsPointer, strtext("Window Follows Pointer"));
+    if (!item) goto noItem;
+  }
+#endif /* HAVE_LIBGPM */
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.highlightWindow, strtext("Highlight Window"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.alertTunes, strtext("Alert Tunes"));
+    if (!item) goto noItem;
+  }
+
+  {
+    static const char *names[] = {
       "Beeper"
         " ("
 #ifdef ENABLE_BEEPER_SUPPORT
@@ -1710,105 +1883,199 @@ updatePreferences (void) {
         ")"
     };
 
+    MenuItem *item = newSymbolicItem(menu, &prefs.tuneDevice, strtext("Tune Device"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testTunes);
+    setSettingChanged(item, changedTuneDevice);
+  }
+
+#ifdef ENABLE_PCM_SUPPORT
+  {
+    MenuItem *item = newVolumeItem(menu, &prefs.pcmVolume, strtext("PCM Volume"));
+    if (!item) goto noItem;
+    setTestItem(item, testTunesPcm);
+  }
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+  {
+    MenuItem *item = newVolumeItem(menu, &prefs.midiVolume, strtext("MIDI Volume"));
+    if (!item) goto noItem;
+    setTestItem(item, testTunesMidi);
+  }
+
+  {
+    MenuItem *item = newTextItem(menu, &prefs.midiInstrument, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount);
+    if (!item) goto noItem;
+    setTestItem(item, testTunesMidi);
+  }
+#endif /* ENABLE_MIDI_SUPPORT */
+
+#ifdef ENABLE_FM_SUPPORT
+  {
+    MenuItem *item = newVolumeItem(menu, &prefs.fmVolume, strtext("FM Volume"));
+    if (!item) goto noItem;
+    setTestItem(item, testTunesFm);
+  }
+#endif /* ENABLE_FM_SUPPORT */
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.alertDots, strtext("Alert Dots"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.alertMessages, strtext("Alert Messages"));
+    if (!item) goto noItem;
+  }
+
 #ifdef ENABLE_SPEECH_SUPPORT
-    static const char *sayModes[] = {
+  {
+    static const char *names[] = {
       strtext("Immediate"),
       strtext("Enqueue")
     };
 
-    static const char *punctuationLevels[] = {
+    MenuItem *item = newSymbolicItem(menu, &prefs.sayLineMode, strtext("Say-Line Mode"), names);
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newBooleanItem(menu, &prefs.autospeak, strtext("Autospeak"));
+    if (!item) goto noItem;
+  }
+
+  {
+    MenuItem *item = newNumericItem(menu, &prefs.speechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1);
+    if (!item) goto noItem;
+    setTestItem(item, testSpeechRate);
+    setSettingChanged(item, changedSpeechRate);
+  }
+
+  {
+    MenuItem *item = newNumericItem(menu, &prefs.speechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1);
+    if (!item) goto noItem;
+    setTestItem(item, testSpeechVolume);
+    setSettingChanged(item, changedSpeechVolume);
+  }
+
+  {
+    MenuItem *item = newNumericItem(menu, &prefs.speechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1);
+    if (!item) goto noItem;
+    setTestItem(item, testSpeechPitch);
+    setSettingChanged(item, changedSpeechPitch);
+  }
+
+  {
+    static const char *names[] = {
       strtext("None"),
       strtext("Some"),
       strtext("All")
     };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.speechPunctuation, strtext("Speech Punctuation"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testSpeechPunctuation);
+    setSettingChanged(item, changedSpeechPunctuation);
+  }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-    #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
-    #define NUMERIC_ITEM(setting, changed, test, label, minimum, maximum, divisor) MENU_ITEM(setting, changed, test, label, NULL, minimum, maximum, divisor)
-    #define TIME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 1, 100, updateInterval/10)
-    #define VOLUME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 0, 100, 5)
-    #define TEXT_ITEM(setting, changed, test, label, names, count) MENU_ITEM(setting, changed, test, label, names, 0, count-1, 1)
-    #define SYMBOLIC_ITEM(setting, changed, test, label, names) TEXT_ITEM(setting, changed, test, label, names, ARRAY_COUNT(names))
-    #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
-    #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
-    #define STATUS_FIELD_ITEM(number) SYMBOLIC_ITEM(prefs.statusFields[number-1], changedStatusField##number, testStatusField##number, strtext("Status Field ") #number, statusFields)
-    MenuItem menu[] = {
-      BOOLEAN_ITEM(saveOnExit, NULL, NULL, strtext("Save on Exit")),
-      SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
-#ifdef ENABLE_CONTRACTED_BRAILLE
-      BOOLEAN_ITEM(prefs.expandCurrentWord, NULL, testContractedBraille, strtext("Expand Current Word")),
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-      BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, strtext("Skip Identical Lines")),
-      BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, strtext("Skip Blank Windows")),
-      SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, strtext("Which Blank Windows"), skipBlankWindowsModes),
-      BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, strtext("Sliding Window")),
-      BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, strtext("Eager Sliding Window")),
-      NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, strtext("Window Overlap"), 0, 20, 1),
-      BOOLEAN_ITEM(prefs.autorepeat, changedAutorepeat, NULL, strtext("Autorepeat")),
-      BOOLEAN_ITEM(prefs.autorepeatPanning, NULL, testAutorepeat, strtext("Autorepeat Panning")),
-      TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, strtext("Autorepeat Delay")),
-      TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, strtext("Autorepeat Interval")),
-      BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, strtext("Show Cursor")),
-      SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, strtext("Cursor Style"), cursorStyles),
-      BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, strtext("Blinking Cursor")),
-      TIME_ITEM(prefs.cursorVisibleTime, NULL, testBlinkingCursor, strtext("Cursor Visible Time")),
-      TIME_ITEM(prefs.cursorInvisibleTime, NULL, testBlinkingCursor, strtext("Cursor Invisible Time")),
-      BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, strtext("Show Attributes")),
-      BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, strtext("Blinking Attributes")),
-      TIME_ITEM(prefs.attributesVisibleTime, NULL, testBlinkingAttributes, strtext("Attributes Visible Time")),
-      TIME_ITEM(prefs.attributesInvisibleTime, NULL, testBlinkingAttributes, strtext("Attributes Invisible Time")),
-      BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, strtext("Blinking Capitals")),
-      TIME_ITEM(prefs.capitalsVisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Visible Time")),
-      TIME_ITEM(prefs.capitalsInvisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Invisible Time")),
-      SYMBOLIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, strtext("Braille Firmness"), firmnessLevels),
-      SYMBOLIC_ITEM(prefs.brailleSensitivity, changedBrailleSensitivity, testBrailleSensitivity, strtext("Braille Sensitivity"), sensitivityLevels),
-#ifdef HAVE_LIBGPM
-      BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, strtext("Window Follows Pointer")),
-#endif /* HAVE_LIBGPM */
-      BOOLEAN_ITEM(prefs.highlightWindow, NULL, NULL, strtext("Highlight Window")),
-      BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, strtext("Alert Tunes")),
-      SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, strtext("Tune Device"), tuneDevices),
-#ifdef ENABLE_PCM_SUPPORT
-      VOLUME_ITEM(prefs.pcmVolume, NULL, testTunesPcm, strtext("PCM Volume")),
-#endif /* ENABLE_PCM_SUPPORT */
-#ifdef ENABLE_MIDI_SUPPORT
-      VOLUME_ITEM(prefs.midiVolume, NULL, testTunesMidi, strtext("MIDI Volume")),
-      TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount),
-#endif /* ENABLE_MIDI_SUPPORT */
-#ifdef ENABLE_FM_SUPPORT
-      VOLUME_ITEM(prefs.fmVolume, NULL, testTunesFm, strtext("FM Volume")),
-#endif /* ENABLE_FM_SUPPORT */
-      BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, strtext("Alert Dots")),
-      BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, strtext("Alert Messages")),
-#ifdef ENABLE_SPEECH_SUPPORT
-      SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, strtext("Say-Line Mode"), sayModes),
-      BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, strtext("Autospeak")),
-      NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1),
-      NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1),
-      NUMERIC_ITEM(prefs.speechPitch, changedSpeechPitch, testSpeechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1),
-      SYMBOLIC_ITEM(prefs.speechPunctuation, changedSpeechPunctuation, testSpeechPunctuation, strtext("Speech Punctuation"), punctuationLevels),
-#endif /* ENABLE_SPEECH_SUPPORT */
-      SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
-      NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.textColumns/2-1, 0), 1),
-      SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
-      STATUS_FIELD_ITEM(1),
-      STATUS_FIELD_ITEM(2),
-      STATUS_FIELD_ITEM(3),
-      STATUS_FIELD_ITEM(4),
-      STATUS_FIELD_ITEM(5),
-      STATUS_FIELD_ITEM(6),
-      STATUS_FIELD_ITEM(7),
-      STATUS_FIELD_ITEM(8),
-      STATUS_FIELD_ITEM(9),
-      GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
-      GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
-#ifdef ENABLE_CONTRACTED_BRAILLE
-      GLOB_ITEM(glob_contractionTable, changedContractionTable, NULL, strtext("Contraction Table"))
-#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {
+    static const char *names[] = {
+      strtext("None"),
+      strtext("Left"),
+      strtext("Right")
     };
-    int menuSize = ARRAY_COUNT(menu);
-    static int menuIndex = 0;                        /* current menu item */
 
+    MenuItem *item = newSymbolicItem(menu, &prefs.statusPosition, strtext("Status Position"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testStatusPosition);
+    setSettingChanged(item, changedStatusPosition);
+  }
+
+  {
+    MenuItem *item = newNumericItem(menu, &prefs.statusCount, strtext("Status Count"), 0, MAX((int)brl.textColumns/2-1, 0), 1);
+    if (!item) goto noItem;
+    setTestItem(item, testStatusCount);
+    setSettingChanged(item, changedStatusCount);
+  }
+
+  {
+    static const char *names[] = {
+      strtext("None"),
+      strtext("Space"),
+      strtext("Block"),
+      strtext("Status Side"),
+      strtext("Text Side")
+    };
+
+    MenuItem *item = newSymbolicItem(menu, &prefs.statusSeparator, strtext("Status Separator"), names);
+    if (!item) goto noItem;
+    setTestItem(item, testStatusSeparator);
+    setSettingChanged(item, changedStatusSeparator);
+  }
+
+  {
+#define STATUS_FIELD_ITEM(number) newStatusFieldItem(menu, number, strtext("Status Field ") #number, testStatusField##number, changedStatusField##number)
+    STATUS_FIELD_ITEM(1);
+    STATUS_FIELD_ITEM(2);
+    STATUS_FIELD_ITEM(3);
+    STATUS_FIELD_ITEM(4);
+    STATUS_FIELD_ITEM(5);
+    STATUS_FIELD_ITEM(6);
+    STATUS_FIELD_ITEM(7);
+    STATUS_FIELD_ITEM(8);
+    STATUS_FIELD_ITEM(9);
+#undef STATUS_FIELD_ITEM
+  }
+
+  {
+    MenuItem *item = newGlobItem(menu, &glob_textTable, strtext("Text Table"));
+    if (!item) goto noItem;
+    setSettingChanged(item, changedTextTable);
+    globPrepare(&glob_textTable, item, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
+  }
+
+  {
+    MenuItem *item = newGlobItem(menu, &glob_attributesTable, strtext("Attributes Table"));
+    if (!item) goto noItem;
+    setSettingChanged(item, changedAttributesTable);
+    globPrepare(&glob_attributesTable, item, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
+  }
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  {
+    MenuItem *item = newGlobItem(menu, &glob_contractionTable, strtext("Contraction Table"));
+    if (!item) goto noItem;
+    setSettingChanged(item, changedContractionTable);
+    globPrepare(&glob_contractionTable, item, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
+  }
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  return menu;
+
+noItem:
+  deallocateMenu(menu);
+noMenu:
+  return NULL;
+}
+
+int
+updatePreferences (void) {
+  const char *mode = "prf";
+  static Menu *menu = NULL;
+  int ok = 1;
+
+  if (!menu) menu = makePreferencesMenu();
+
+  globBegin(&glob_textTable);
+  globBegin(&glob_attributesTable);
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  globBegin(&glob_contractionTable);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  if (setStatusText(&brl, mode) &&
+      message(mode, gettext("Preferences Menu"), 0)) {
     unsigned int lineIndent = 0;                                /* braille window pos in buffer */
     int indexChanged = 1;
     int settingChanged = 0;                        /* 1 when item's value has changed */
@@ -1819,23 +2086,14 @@ updatePreferences (void) {
     if (prefs.autorepeat) resetAutorepeat();
 
     while (ok) {
-      MenuItem *item = &menu[menuIndex];
-      char valueBuffer[0X10];
-      const char *value;
+      MenuItem *item = getCurrentItem(menu);
+      const char *value = getItemValue(item);
 
       testProgramTermination();
       closeTuneDevice(0);
 
-      if (item->names) {
-        if (!*(value = item->names[*item->setting - item->minimum])) value = strtext("<off>");
-        value = gettext(value);
-      } else {
-        snprintf(valueBuffer, sizeof(valueBuffer), "%d", *item->setting);
-        value = valueBuffer;
-      }
-
       {
-        const char *label = gettext(item->label);
+        const char *label = getItemLabel(item);
         const char *delimiter = ": ";
         unsigned int settingIndent = strlen(label) + strlen(delimiter);
         unsigned int valueLength = strlen(value);
@@ -1907,38 +2165,46 @@ updatePreferences (void) {
             case BRL_CMD_TOP_LEFT:
             case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
             case BRL_CMD_MENU_FIRST_ITEM:
-              menuIndex = lineIndent = 0;
-              indexChanged = 1;
+              if (setFirstItem(menu)) {
+                lineIndent = 0;
+                indexChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
             case BRL_CMD_BOT:
             case BRL_CMD_BOT_LEFT:
             case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
             case BRL_CMD_MENU_LAST_ITEM:
-              menuIndex = menuSize - 1;
-              lineIndent = 0;
-              indexChanged = 1;
+              if (setLastItem(menu)) {
+                lineIndent = 0;
+                indexChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
 
             case BRL_CMD_LNUP:
             case BRL_CMD_PRDIFLN:
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
             case BRL_CMD_MENU_PREV_ITEM:
-              do {
-                if (menuIndex == 0) menuIndex = menuSize;
-                --menuIndex;
-              } while (menu[menuIndex].test && !menu[menuIndex].test());
-              lineIndent = 0;
-              indexChanged = 1;
+              if (setPreviousItem(menu)) {
+                lineIndent = 0;
+                indexChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
             case BRL_CMD_LNDN:
             case BRL_CMD_NXDIFLN:
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
             case BRL_CMD_MENU_NEXT_ITEM:
-              do {
-                if (++menuIndex == menuSize) menuIndex = 0;
-              } while (menu[menuIndex].test && !menu[menuIndex].test());
-              lineIndent = 0;
-              indexChanged = 1;
+              if (setNextItem(menu)) {
+                lineIndent = 0;
+                indexChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
 
             case BRL_CMD_FWINLT:
@@ -1956,44 +2222,31 @@ updatePreferences (void) {
               }
               break;
 
-            {
-              void (*adjust) (MenuItem *item);
-              int count;
             case BRL_CMD_WINUP:
             case BRL_CMD_CHRLT:
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
             case BRL_CMD_BACK:
             case BRL_CMD_MENU_PREV_SETTING:
-              adjust = previousSetting;
-              goto adjustSetting;
+              if (!previousItemSetting(item)) playTune(&tune_command_rejected);
+              break;
+
             case BRL_CMD_WINDN:
             case BRL_CMD_CHRRT:
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
             case BRL_CMD_HOME:
             case BRL_CMD_RETURN:
             case BRL_CMD_MENU_NEXT_SETTING:
-              adjust = nextSetting;
-            adjustSetting:
-              count = item->maximum - item->minimum + 1;
-              do {
-                adjust(item);
-                if (!--count) break;
-              } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
-              if (count)
-                settingChanged = 1;
-              else
-                playTune(&tune_command_rejected);
+              if (!nextItemSetting(item)) playTune(&tune_command_rejected);
               break;
-            }
 
-    #ifdef ENABLE_SPEECH_SUPPORT
+#ifdef ENABLE_SPEECH_SUPPORT
             case BRL_CMD_SAY_LINE:
               sayCharacters(&spk, line, lineLength, 1);
               break;
             case BRL_CMD_MUTE:
               speech->mute(&spk);
               break;
-    #endif /* ENABLE_SPEECH_SUPPORT */
+#endif /* ENABLE_SPEECH_SUPPORT */
 
             default:
               if ((command >= BRL_BLK_ROUTE) &&
@@ -2001,21 +2254,7 @@ updatePreferences (void) {
                 int key = command - BRL_BLK_ROUTE;
 
                 if ((key >= textStart) && (key < (textStart + textCount))) {
-                  unsigned char oldSetting = *item->setting;
-                  key -= textStart;
-
-                  if (item->names) {
-                    *item->setting = key % (item->maximum + 1);
-                  } else {
-                    *item->setting = rescaleInteger(key, textCount-1, item->maximum-item->minimum) + item->minimum;
-                  }
-
-                  if (item->changed && !item->changed(*item->setting)) {
-                    *item->setting = oldSetting;
-                    playTune(&tune_command_rejected);
-                  } else if (*item->setting != oldSetting) {
-                    settingChanged = 1;
-                  }
+                  if (!selectItemSetting(item, key-textStart, textCount)) playTune(&tune_command_rejected);
                 } else if ((key >= statusStart) && (key < (statusStart + statusCount))) {
                   switch (key - statusStart) {
                     default:
@@ -3154,7 +3393,6 @@ startup (int argc, char *argv[]) {
 
   if (!*opt_textTable) opt_textTable = TEXT_TABLE;
   logMessage(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
-  globPrepare(&glob_textTable, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
 
   /* handle attributes table option */
   if (*opt_attributesTable)
@@ -3162,7 +3400,6 @@ startup (int argc, char *argv[]) {
       opt_attributesTable = "";
   if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
   logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
-  globPrepare(&glob_attributesTable, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
@@ -3170,7 +3407,6 @@ startup (int argc, char *argv[]) {
   if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
              *opt_contractionTable? opt_contractionTable: gettext("none"));
-  globPrepare(&glob_contractionTable, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
