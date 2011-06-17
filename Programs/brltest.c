@@ -74,29 +74,31 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 int
-message (const char *mode, const char *string, short flags) {
-  size_t length = strlen(string);
+message (const char *mode, const char *text, short flags) {
   size_t size = brl.textColumns * brl.textRows;
-  char buffer[size];
+  wchar_t buffer[size];
+
+  size_t length = getTextLength(text);
+  wchar_t characters[length + 1];
+  const wchar_t *character = characters;
 
   clearStatusCells(&brl);
+  mbstowcs(characters, text, ARRAY_COUNT(characters));
 
-  memset(buffer, ' ', size);
   while (length) {
     int count = (length <= size)? length: (size - 1);
-    int index;
 
-    for (index=0; index<count; buffer[index++]=*string++);
-    if (length -= count) {
+    wmemcpy(buffer, character, count);
+    character += count;
+    length -= count;
+
+    if (length) {
       buffer[(count = size) - 1] = WC_C('-');
     }
 
     {
-      wchar_t characters[count];
-      wchar_t text[brl.textColumns * brl.textRows];
-      convertCharsToWchars(buffer, characters, count);
-      fillTextRegion(text, brl.buffer, 0, brl.textColumns, brl.textColumns, brl.textRows, characters, count);
-      if (!braille->writeWindow(&brl, text)) return 0;
+      wmemset(&buffer[count], WC_C(' '), (size - count));
+      if (!braille->writeWindow(&brl, buffer)) return 0;
     }
 
     if (length) {

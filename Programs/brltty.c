@@ -269,9 +269,9 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
                  characters, length);
 
   {
-    size_t modeLength = mode? strlen(mode): 0;
-    wchar_t modeCharacters[modeLength];
-    convertCharsToWchars(mode, modeCharacters, modeLength);
+    size_t modeLength = mode? getUtf8Length(mode): 0;
+    wchar_t modeCharacters[modeLength + 1];
+    mbstowcs(modeCharacters, mode, ARRAY_COUNT(modeCharacters));
     fillTextRegion(textBuffer, brl.buffer,
                    statusStart, statusCount, brl.textColumns, brl.textRows,
                    modeCharacters, modeLength);
@@ -283,20 +283,16 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
 }
 
 int
-writeBrailleBytes (const char *mode, const char *bytes, size_t length) {
-  wchar_t characters[length];
-  convertCharsToWchars(bytes, characters, length);
+writeBrailleText (const char *mode, const char *text) {
+  size_t count = getTextLength(text) + 1;
+  wchar_t characters[count];
+  size_t length = mbstowcs(characters, text, count);
   return writeBrailleCharacters(mode, characters, length);
 }
 
 int
-writeBrailleString (const char *mode, const char *string) {
-  return writeBrailleBytes(mode, string, strlen(string));
-}
-
-int
-showBrailleString (const char *mode, const char *string, unsigned int duration) {
-  int ok = writeBrailleString(mode, string);
+showBrailleText (const char *mode, const char *text, unsigned int duration) {
+  int ok = writeBrailleText(mode, text);
   drainBrailleOutput(&brl, duration);
   return ok;
 }
@@ -370,7 +366,7 @@ showInfo (void) {
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
-    return writeBrailleString(mode, text);
+    return writeBrailleText(mode, text);
   }
 }
 
@@ -2195,7 +2191,7 @@ brlttyUpdate (void) {
     if (scr.unreadable) {
       if (!isSuspended) {
         setStatusCells();
-        writeBrailleString("wrn", scr.unreadable);
+        writeBrailleText("wrn", scr.unreadable);
 
 #ifdef ENABLE_API
         if (apiStarted) {
@@ -2693,19 +2689,22 @@ brlttyUpdate (void) {
 }
 
 int 
-message (const char *mode, const char *string, short flags) {
+message (const char *mode, const char *text, short flags) {
   int ok = 1;
 
   if (!mode) mode = "";
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.autospeak && !(flags & MSG_SILENT)) sayString(&spk, string, 1);
+  if (prefs.autospeak && !(flags & MSG_SILENT)) sayString(&spk, text, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {
-    size_t length = strlen(string);
     size_t size = textCount * brl.textRows;
-    char text[size];
+    wchar_t buffer[size];
+
+    size_t length = getTextLength(text);
+    wchar_t characters[length + 1];
+    const wchar_t *character = characters;
 
 #ifdef ENABLE_API
     int api = apiStarted;
@@ -2713,29 +2712,30 @@ message (const char *mode, const char *string, short flags) {
     if (api) api_unlink(&brl);
 #endif /* ENABLE_API */
 
+    mbstowcs(characters, text, ARRAY_COUNT(characters));
     while (length) {
       int count;
-      int index;
 
       /* strip leading spaces */
-      while (*string == ' ') string++, length--;
+      while (iswspace(*character)) character++, length--;
 
       if (length <= size) {
         count = length; /* the whole message fits in the braille window */
       } else {
         /* split the message across multiple windows on space characters */
-        for (count=size-2; count>0 && string[count]==' '; count--);
+        for (count=size-2; count>0 && iswspace(characters[count]); count--);
         count = count? count+1: size-1;
       }
 
-      memset(text, ' ', size);
-      for (index=0; index<count; text[index++]=*string++);
+      wmemcpy(buffer, character, count);
+      character += count;
+
       if (length -= count) {
-        while (index < size) text[index++] = '-';
-        text[index - 1] = '>';
+        while (count < size) buffer[count++] = WC_C('-');
+        buffer[count - 1] = WC_C('>');
       }
 
-      if (!writeBrailleBytes(mode, text, index)) {
+      if (!writeBrailleCharacters(mode, buffer, count)) {
         ok = 0;
         break;
       }

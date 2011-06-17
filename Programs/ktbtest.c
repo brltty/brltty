@@ -275,7 +275,7 @@ api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
 #include "message.h"
 
 int
-message (const char *mode, const char *string, short flags) {
+message (const char *mode, const char *text, short flags) {
   return 1;
 }
 

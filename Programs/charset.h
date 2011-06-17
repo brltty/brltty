@@ -40,11 +40,15 @@ extern int convertUtf8ToChar (const char **utf8, size_t *utfs);
 
 extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
 extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
-extern void convertStringToWchars (const char **utf8, wchar_t **characters, size_t count);
+
+extern size_t getUtf8Length (const char *utf8);
+extern void convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
-extern void convertCharsToWchars (const char *c, wchar_t *wc, size_t count);
+
+extern size_t getTextLength (const char *text);
+extern wchar_t *convertTextToWchars (const char *text);
 
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);

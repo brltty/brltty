@@ -306,14 +306,23 @@ convertWcharToChar (wchar_t wc) {
 }
 #endif /* conversions */
 
-void
-convertCharsToWchars (const char *c, wchar_t *wc, size_t count) {
-  while (count > 0) {
-    wint_t wi = convertCharToWchar(*c++);
-    if (wi == WEOF) wi = UNICODE_REPLACEMENT_CHARACTER;
-    *wc++ = wi;
-    count -= 1;
+size_t
+getTextLength (const char *text) {
+  return mbstowcs(NULL, text, 0);
+}
+
+wchar_t *
+convertTextToWchars (const char *text) {
+  size_t count = getTextLength(text) + 1;
+  wchar_t *characters = malloc(count * sizeof(*characters));
+
+  if (characters) {
+    mbstowcs(characters, text, count);
+  } else {
+    logMallocError();
   }
+
+  return characters;
 }
 
 size_t
@@ -405,8 +414,23 @@ truncated:
   return WEOF;
 }
 
+size_t
+getUtf8Length (const char *utf8) {
+  size_t length = 0;
+
+  while (*utf8) {
+    size_t utfs = UTF8_LEN_MAX;
+    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
+
+    if (character == WEOF) break;
+    length += 1;
+  }
+
+  return length;
+}
+
 void
-convertStringToWchars (const char **utf8, wchar_t **characters, size_t count) {
+convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count) {
   while (**utf8 && (count > 1)) {
     size_t utfs = UTF8_LEN_MAX;
     wint_t character = convertUtf8ToWchar(utf8, &utfs);

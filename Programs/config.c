@@ -2086,7 +2086,7 @@ updatePreferences (void) {
         indexChanged = 0;
 
         /* Then draw the braille window */
-        if (!writeBrailleBytes(mode, &line[lineIndent], lineLength-lineIndent)) ok = 0;
+        if (!writeBrailleText(mode, &line[lineIndent])) ok = 0;
         drainBrailleOutput(&brl, updateInterval);
         if (!ok) break;
 
@@ -2271,7 +2271,7 @@ handleUtf8HelpLine (char *line, void *data) {
   wchar_t buffer[count];
   wchar_t *characters = buffer;
 
-  convertStringToWchars(&utf8, &characters, count);
+  convertUtf8ToWchars(&utf8, &characters, count);
   return handleWcharHelpLine(buffer, data);
 }
 

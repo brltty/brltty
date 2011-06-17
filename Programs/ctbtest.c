@@ -273,7 +273,7 @@ processLine (char *line, void *data) {
   wchar_t characters[count];
   wchar_t *character = characters;
 
-  convertStringToWchars(&byte, &character, count);
+  convertUtf8ToWchars(&byte, &character, count);
   length = character - characters;
   character = characters;
 

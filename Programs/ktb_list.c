@@ -89,7 +89,7 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
   wchar_t characters[size];
   wchar_t *character = characters;
 
-  convertStringToWchars(&string, &character, size);
+  convertUtf8ToWchars(&string, &character, size);
   return putCharacters(lgd, characters, character-characters);
 }
 
@@ -403,7 +403,7 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, vo
 
       {
         wchar_t *character = characters;
-        convertStringToWchars(&string, &character, size);
+        convertUtf8ToWchars(&string, &character, size);
       }
 
       if (!handleLine(characters, data)) return 0;

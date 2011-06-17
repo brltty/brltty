@@ -269,14 +269,23 @@ getGlobalDataVariables () {
 
 int
 setGlobalDataVariable (const char *name, const char *value) {
-  size_t nameLength = strlen(name);
-  wchar_t nameBuffer[nameLength];
+  size_t nameLength = getUtf8Length(name);
+  wchar_t nameBuffer[nameLength + 1];
 
-  size_t valueLength = strlen(value);
-  wchar_t valueBuffer[valueLength];
+  size_t valueLength = getUtf8Length(value);
+  wchar_t valueBuffer[valueLength + 1];
 
-  convertCharsToWchars(name, nameBuffer, nameLength);
-  convertCharsToWchars(value, valueBuffer, valueLength);
+  {
+    const char *utf8 = name;
+    wchar_t *wc = nameBuffer;
+    convertUtf8ToWchars(&utf8, &wc, ARRAY_COUNT(nameBuffer));
+  }
+
+  {
+    const char *utf8 = value;
+    wchar_t *wc = valueBuffer;
+    convertUtf8ToWchars(&utf8, &wc, ARRAY_COUNT(valueBuffer));
+  }
 
   {
     Queue *variables = getGlobalDataVariables();
@@ -700,7 +709,7 @@ processUtf8Line (char *line, void *dataAddress) {
   wchar_t *character = characters;
 
   file->line += 1;
-  convertStringToWchars(&byte, &character, size);
+  convertUtf8ToWchars(&byte, &character, size);
 
   if (*byte) {
     unsigned int offset = byte - line;
