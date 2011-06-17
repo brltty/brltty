@@ -233,17 +233,17 @@ changeMenuItemNext (MenuItem *item) {
 
 int
 changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
-  unsigned char newSetting;
+  unsigned char oldSetting = *item->setting;
 
   if (item->strings) {
-    newSetting = index % (item->maximum + 1);
+    *item->setting = index % (item->maximum + 1);
   } else {
-    newSetting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
+    *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
   }
 
-  if (item->changed && !item->changed(newSetting)) return 0;
-  *item->setting = newSetting;
-  return 1;
+  if (!item->changed || item->changed(*item->setting)) return 1;
+  *item->setting = oldSetting;
+  return 0;
 }
 
 int
