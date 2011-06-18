@@ -141,7 +141,7 @@ extern unsigned char infoMode;
 
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
 extern int writeBrailleText (const char *mode, const char *text);
-extern int showBrailleText (const char *mode, const char *text, unsigned int duration);
+extern int showBrailleText (const char *mode, const char *text, int minimumDelay);
 
 extern int opt_releaseDevice;
 extern char *opt_pcmDevice;

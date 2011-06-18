@@ -291,9 +291,9 @@ writeBrailleText (const char *mode, const char *text) {
 }
 
 int
-showBrailleText (const char *mode, const char *text, unsigned int duration) {
+showBrailleText (const char *mode, const char *text, int minimumDelay) {
   int ok = writeBrailleText(mode, text);
-  drainBrailleOutput(&brl, duration);
+  drainBrailleOutput(&brl, minimumDelay);
   return ok;
 }
 
