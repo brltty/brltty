@@ -2086,8 +2086,7 @@ updatePreferences (void) {
         indexChanged = 0;
 
         /* Then draw the braille window */
-        if (!writeBrailleText(mode, &line[lineIndent])) ok = 0;
-        drainBrailleOutput(&brl, updateInterval);
+        if (!showBrailleText(mode, &line[lineIndent], updateInterval)) ok = 0;
         if (!ok) break;
 
         /* Now process any user interaction */
