@@ -32,6 +32,7 @@
 #include "queue.h"
 #include "datafile.h"
 #include "charset.h"
+#include "unicode.h"
 #include "brldots.h"
 
 struct DataFileStruct {
@@ -429,6 +430,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             break;
 
           {
+            uint32_t result;
             int count;
             int (*isDigit) (wchar_t character, int *value, int *shift);
 
@@ -457,7 +459,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             goto doNumber;
 
           doNumber:
-            character = 0;
+            result = 0;
 
             while (++index < length) {
               {
@@ -465,10 +467,12 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
                 int shift;
 
                 if (!isDigit(characters[index], &value, &shift)) break;
-                character = (character << shift) | value;
+                result = (result << shift) | value;
               }
 
               if (!--count) {
+                if (result > WCHAR_MAX) break;
+                character = result;
                 ok = 1;
                 break;
               }
