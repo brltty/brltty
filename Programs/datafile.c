@@ -385,6 +385,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
     if (character == WC_C('\\')) {
       int start = index;
+      const char *problem = strtext("invalid escape sequence");
       int ok = 0;
 
       if (++index < length) {
@@ -471,9 +472,13 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
               }
 
               if (!--count) {
-                if (result > WCHAR_MAX) break;
-                character = result;
-                ok = 1;
+                if (result > WCHAR_MAX) {
+                  problem = strtext("character out of range");
+                } else {
+                  character = result;
+                  ok = 1;
+                }
+
                 break;
               }
             }
@@ -550,7 +555,8 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
       if (!ok) {
         if (index < length) index += 1;
-        reportDataError(file, "invalid escape sequence: %.*" PRIws,
+        reportDataError(file, "%s: %.*" PRIws,
+                        gettext(problem),
                         index-start, &characters[start]);
         return 0;
       }
