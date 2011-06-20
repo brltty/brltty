@@ -358,7 +358,7 @@ convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
 
 wint_t
 convertUtf8ToWchar (const char **utf8, size_t *utfs) {
-  wint_t wc = WEOF;
+  uint32_t character = UINT32_MAX;
   int state = 0;
 
   while (*utfs) {
@@ -366,14 +366,14 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
     (*utfs)--;
 
     if (!(byte & 0X80)) {
-      if (wc != WEOF) goto truncated;
-      wc = byte;
+      if (character != UINT32_MAX) goto truncated;
+      character = byte;
       break;
     }
 
     if (!(byte & 0X40)) {
-      if (wc == WEOF) break;
-      wc = (wc << 6) | (byte & 0X3F);
+      if (character == UINT32_MAX) break;
+      character = (character << 6) | (byte & 0X3F);
       if (!--state) break;
     } else {
       if (!(byte & 0X20)) {
@@ -390,27 +390,30 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
         state = 0;
       }
 
-      if (wc != WEOF) goto truncated;
+      if (character != UINT32_MAX) goto truncated;
 
       if (!state) {
-        wc = WEOF;
+        character = UINT32_MAX;
         break;
       }
 
-      wc = byte & ((1 << (6 - state)) - 1);
+      character = byte & ((1 << (6 - state)) - 1);
     }
   }
 
   while (*utfs) {
     if ((**utf8 & 0XC0) != 0X80) break;
     (*utf8)++, (*utfs)--;
-    wc = WEOF;
+    character = UINT32_MAX;
   }
 
-  return wc;
+  if (character == UINT32_MAX) goto error;
+  if (character > WCHAR_MAX) character = UNICODE_REPLACEMENT_CHARACTER;
+  return character;
 
 truncated:
   (*utf8)--, (*utfs)++;
+error:
   return WEOF;
 }
 
