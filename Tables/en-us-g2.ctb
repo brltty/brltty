@@ -195,6 +195,7 @@ word bel =
 begword beln = Belnick
 always below 23-123
 always beneath 23-1345
+sufword bertheau 12-12456-1456-2-136
 always beside 23-234
 word bes =
 sufword bess = Bessie
@@ -230,6 +231,7 @@ sufword chalcedon 16-1-123-14-1246-135-1345 chalcedony chalcedonies
 sufword cheat 16-2-2345 Cheatham
 always chloro 16-123-135-1235-135
 sufword citron = citronella
+sufword clemenceau 14-123-15-134-26-14-2-136
 sufword coed 14-135-1246
 begword coen 14-135-26 coenzyme (Bana)
 begword cofac = cofactor
@@ -784,7 +786,10 @@ begword ratho = rathole
 sufword raw = rawhide
 endnum rd = (third)
 begword reab = reabsorbed
+begword reacc 1235-15-1-25 reaccelerate
 always reach 1235-2-16
+begword reachiev 1235-15-1-16-24-15-1236 reachieving
+begword reacq 1235-15-1-14-12345 reacquire reacquaint
 always react =
 always reaction 1235-15-1-14-56-1345
 begword readj = readjust
