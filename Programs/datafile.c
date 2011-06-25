@@ -473,7 +473,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
               if (!--count) {
                 if (result > WCHAR_MAX) {
-                  problem = strtext("character out of range");
+                  problem = NULL;
                 } else {
                   character = result;
                   ok = 1;
@@ -555,9 +555,13 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
       if (!ok) {
         if (index < length) index += 1;
-        reportDataError(file, "%s: %.*" PRIws,
-                        gettext(problem),
-                        index-start, &characters[start]);
+
+        if (problem) {
+          reportDataError(file, "%s: %.*" PRIws,
+                          gettext(problem),
+                          index-start, &characters[start]);
+        }
+
         return 0;
       }
     }
