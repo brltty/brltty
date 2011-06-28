@@ -507,7 +507,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    AC_PATH_PROG([ICU_CONFIG], [icu-config])
-   test -n "${ICU_CONFIG}" && ${ICU_CONFIG} --exists && {
+   test -n "${ICU_CONFIG}" && ${ICU_CONFIG} --exists >/dev/null && {
       icu_includes="`${ICU_CONFIG} --cppflags-searchpath`"
       icu_libraries="`${ICU_CONFIG} --ldflags`"
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
