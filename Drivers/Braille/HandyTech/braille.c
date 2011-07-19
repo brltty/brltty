@@ -608,6 +608,221 @@ executeHidFirmwareCommand (HtHidCommand command) {
   }
 }
 
+typedef struct {
+  void (*initialize) (void);
+  int (*readBytes) (unsigned char *buffer, int length, int wait);
+  int (*writeBytes) (const unsigned char *buffer, int length);
+  int (*awaitInput) (int milliseconds);
+} UsbOperations;
+
+static const UsbOperations *usbOps;
+
+static void
+initializeUsb1 (void) {
+}
+
+static int
+readUsbBytes1 (unsigned char *buffer, int length, int wait) {
+  int timeout = 100;
+
+  return usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
+                      (wait? timeout: 0), timeout);
+}
+
+static int
+writeUsbBytes1 (const unsigned char *buffer, int length) {
+  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
+                          buffer, length, 1000);
+}
+
+static int
+awaitUsbInput1 (int milliseconds) {
+  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+}
+
+static const UsbOperations usbOperations1 = {
+  .initialize = initializeUsb1,
+  .readBytes = readUsbBytes1,
+  .writeBytes = writeUsbBytes1,
+  .awaitInput = awaitUsbInput1
+};
+
+static void
+initializeUsb2 (void) {
+  getHidReportSizes();
+  getHidInputBuffer();
+  getHidFirmwareVersion();
+  executeHidFirmwareCommand(HT_HID_CMD_FlushBuffers);
+}
+
+static int
+readUsbBytes2 (unsigned char *buffer, int length, int wait) {
+  int count = 0;
+
+  while (count < length) {
+    if (!io->awaitInput(wait? 100: 0)) {
+      count = -1;
+      break;
+    }
+
+    {
+      int amount = MIN(length-count, hidInputLength-hidInputOffset);
+
+      memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
+      hidInputOffset += amount;
+      count += amount;
+    }
+  }
+
+  return count;
+}
+
+static int
+writeUsbBytes2 (const unsigned char *buffer, int length) {
+  int index = 0;
+
+  if (hidReportSize_InData) {
+    while (length) {
+      unsigned char report[hidReportSize_InData];
+      unsigned char count = MIN(length, (sizeof(report) - 2));
+      int result;
+
+      report[0] = HT_HID_RPT_InData;
+      report[1] = count;
+      memcpy(report+2, &buffer[index], count);
+      memset(&report[count+2], 0, sizeof(report)-count-2);
+
+      result = setHidReport(report, sizeof(report));
+      if (result == -1) return -1;
+
+      index += count;
+      length -= count;
+    }
+  }
+
+  return index;
+}
+
+static int
+awaitUsbInput2 (int milliseconds) {
+  if (hidReportSize_OutData) {
+    struct timeval startTime;
+
+    if (hidInputOffset < hidInputLength) return 1;
+    gettimeofday(&startTime, NULL);
+
+    while (1) {
+      int result = getHidReport(HT_HID_RPT_OutData, hidInputReport,
+                                hidReportSize_OutData);
+
+      if (result == -1) return 0;
+      hidInputOffset = 0;
+      if (hidInputLength > 0) return 1;
+
+      if (millisecondsSince(&startTime) >= milliseconds) break;
+      approximateDelay(10);
+    }
+  }
+
+  errno = EAGAIN;
+  return 0;
+}
+
+static const UsbOperations usbOperations2 = {
+  .initialize = initializeUsb2,
+  .readBytes = readUsbBytes2,
+  .writeBytes = writeUsbBytes2,
+  .awaitInput = awaitUsbInput2
+};
+
+static void
+initializeUsb3 (void) {
+  getHidReportSizes();
+  getHidInputBuffer();
+}
+
+static int
+readUsbBytes3 (unsigned char *buffer, int length, int wait) {
+  int count = 0;
+
+  while (count < length) {
+    if (!io->awaitInput(wait? 100: 0)) {
+      count = -1;
+      break;
+    }
+
+    {
+      int amount = MIN(length-count, hidInputLength-hidInputOffset);
+
+      memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
+      hidInputOffset += amount;
+      count += amount;
+    }
+  }
+
+  return count;
+}
+
+static int
+writeUsbBytes3 (const unsigned char *buffer, int length) {
+  int index = 0;
+
+  if (hidReportSize_InData) {
+    while (length) {
+      unsigned char report[hidReportSize_InData];
+      unsigned char count = MIN(length, (sizeof(report) - 2));
+      int result;
+
+      report[0] = HT_HID_RPT_InData;
+      report[1] = count;
+      memcpy(report+2, &buffer[index], count);
+      memset(&report[count+2], 0, sizeof(report)-count-2);
+
+      result = usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
+                                report, sizeof(report), 1000);
+      if (result == -1) return -1;
+
+      index += count;
+      length -= count;
+    }
+  }
+
+  return index;
+}
+
+static int
+awaitUsbInput3 (int milliseconds) {
+  if (hidReportSize_OutData) {
+    struct timeval startTime;
+
+    if (hidInputOffset < hidInputLength) return 1;
+    gettimeofday(&startTime, NULL);
+
+    while (1) {
+      int result = usbReapInput(usb->device, usb->definition.inputEndpoint,
+                                hidInputReport, hidReportSize_OutData,
+                                0, 100);
+
+      if (result == -1) return 0;
+      hidInputOffset = 0;
+      if (hidInputLength > 0) return 1;
+
+      if (millisecondsSince(&startTime) >= milliseconds) break;
+      approximateDelay(10);
+    }
+  }
+
+  errno = EAGAIN;
+  return 0;
+}
+
+static const UsbOperations usbOperations3 = {
+  .initialize = initializeUsb3,
+  .readBytes = readUsbBytes3,
+  .writeBytes = writeUsbBytes3,
+  .awaitInput = awaitUsbInput3
+};
+
 static int
 openUsbPort (char **parameters, const char *device) {
   const SerialParameters serial = {
@@ -623,41 +838,49 @@ openUsbPort (char **parameters, const char *device) {
       .vendor=0X0921, .product=0X1200,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
-      .serial = &serial
+      .serial = &serial,
+      .data=&usbOperations1
     }
     ,
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .serial = &serial
+      .serial = &serial,
+      .data=&usbOperations1
     }
     ,
     { /* Easy Braille (HID) */
       .vendor=HT_USB_VENDOR, .product=HT_MODEL_EasyBraille,
-      .configuration=1, .interface=0, .alternative=0
+      .configuration=1, .interface=0, .alternative=0,
+      .data=&usbOperations2
     }
     ,
     { /* Braille Star 40 (HID) */
       .vendor=HT_USB_VENDOR, .product=HT_MODEL_BrailleStar40,
-      .configuration=1, .interface=0, .alternative=0
+      .configuration=1, .interface=0, .alternative=0,
+      .data=&usbOperations2
     }
     ,
     { /* USB-HID adapter */
       .vendor=HT_USB_VENDOR, .product=HT_MODEL_UsbHidAdapter,
-      .configuration=1, .interface=0, .alternative=0
+      .configuration=1, .interface=0, .alternative=0,
+      .data=&usbOperations2
+    }
+    ,
+    { /* Active Braille */
+      .vendor=HT_USB_VENDOR, .product=HT_MODEL_ActiveBraille,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
     }
     ,
     { .vendor=0 }
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
-    if (!usb->definition.outputEndpoint) {
-      getHidReportSizes();
-      getHidInputBuffer();
-      getHidFirmwareVersion();
-      executeHidFirmwareCommand(HT_HID_CMD_FlushBuffers);
-    }
+    usbOps = usb->definition.data;
+    usbOps->initialize();
 
     return 1;
   }
@@ -679,57 +902,12 @@ closeUsbPort (void) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  if (!usb->definition.inputEndpoint) {
-    if (hidReportSize_OutData) {
-      struct timeval startTime;
-
-      if (hidInputOffset < hidInputLength) return 1;
-      gettimeofday(&startTime, NULL);
-
-      while (1) {
-        int result = getHidReport(HT_HID_RPT_OutData, hidInputReport, hidReportSize_OutData);
-
-        if (result == -1) return 0;
-        hidInputOffset = 0;
-        if (hidInputLength > 0) return 1;
-
-        if (millisecondsSince(&startTime) >= milliseconds) break;
-        approximateDelay(10);
-      }
-    }
-
-    errno = EAGAIN;
-    return 0;
-  }
-
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+  return usbOps->awaitInput(milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  int count;
-
-  if (usb->definition.inputEndpoint) {
-    count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
-                         (wait? timeout: 0), timeout);
-  } else {
-    count = 0;
-
-    while (count < length) {
-      if (!io->awaitInput(wait? timeout: 0)) {
-        count = -1;
-        break;
-      }
-
-      {
-        int amount = MIN(length-count, hidInputLength-hidInputOffset);
-        memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
-        hidInputOffset += amount;
-        count += amount;
-      }
-    }
-  }
+  int count = usbOps->readBytes(buffer, length, wait);
 
   if (count != -1) return count;
   if (errno == EAGAIN) return 0;
@@ -740,33 +918,7 @@ static int
 writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
 
-  if (!usb->definition.outputEndpoint) {
-    int index = 0;
-
-    if (hidReportSize_InData) {
-      while (length) {
-        unsigned char report[hidReportSize_InData];
-        unsigned char count = MIN(length, (sizeof(report) - 2));
-        int result;
-
-        report[0] = HT_HID_RPT_InData;
-        report[1] = count;
-        memcpy(report+2, &buffer[index], count);
-        memset(&report[count+2], 0, sizeof(report)-count-2);
-
-        result = setHidReport(report, sizeof(report));
-        if (result == -1) return -1;
-
-        index += count;
-        length -= count;
-      }
-    }
-
-    return index;
-  }
-
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
-                          buffer, length, 1000);
+  return usbOps->writeBytes(buffer, length);
 }
 
 static const InputOutputOperations usbOperations = {
