@@ -537,28 +537,19 @@ getHidReportSize (const unsigned char *items, uint16_t size, unsigned char ident
   }
 }
 
+typedef struct {
+  HT_HidReportNumber number;
+  uint32_t *size;
+} ReportEntry;
+
 static void
-getHidReportSizes (void) {
+getHidReportSizes (const ReportEntry *table) {
   unsigned char *items;
   uint16_t size = usbHidGetItems(usb->device, usb->definition.interface, 0,
                                  &items, HT_HID_REPORT_TIMEOUT);
 
   if (items) {
-    typedef struct {
-      HT_HidReportNumber number;
-      uint32_t *size;
-    } ReportEntry;
-
-    static const ReportEntry reportTable[] = {
-      {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
-      {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
-      {.number=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
-      {.number=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
-      {.number=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
-      {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
-      {.number=0}
-    };
-    const ReportEntry *report = reportTable;
+    const ReportEntry *report = table;
 
     while (report->number) {
       getHidReportSize(items, size, report->number, report->size);
@@ -649,7 +640,16 @@ static const UsbOperations usbOperations1 = {
 
 static void
 initializeUsb2 (void) {
-  getHidReportSizes();
+  static const ReportEntry reportTable[] = {
+    {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
+    {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+    {.number=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
+    {.number=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
+    {.number=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
+    {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
+    {.number=0}
+  };
+  getHidReportSizes(reportTable);
   allocateHidInputBuffer();
   getHidFirmwareVersion();
   executeHidFirmwareCommand(HT_HID_CMD_FlushBuffers);
@@ -737,7 +737,12 @@ static const UsbOperations usbOperations2 = {
 
 static void
 initializeUsb3 (void) {
-  getHidReportSizes();
+  static const ReportEntry reportTable[] = {
+    {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
+    {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+    {.number=0}
+  };
+  getHidReportSizes(reportTable);
   allocateHidInputBuffer();
 }
 
