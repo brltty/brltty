@@ -916,7 +916,7 @@ usbHidGetItems (
 int
 usbHidFillReportDescription (
   const unsigned char *items,
-  int size,
+  size_t size,
   unsigned char identifier,
   UsbHidReportDescription *description
 ) {
@@ -990,6 +990,38 @@ usbHidFillReportDescription (
   }
 
   return found;
+}
+
+int
+usbHidGetReportSize (
+  const unsigned char *items,
+  size_t length,
+  unsigned char identifier,
+  uint32_t *size
+) {
+  UsbHidReportDescription description;
+
+  *size = 0;
+
+  if (usbHidFillReportDescription(items, length, identifier, &description)) {
+    if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
+      if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
+        uint32_t bytes = ((description.reportCount * description.reportSize) + 7) / 8;
+
+        logMessage(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, bytes);
+        *size = 1 + bytes;
+        return 1;
+      } else {
+        logMessage(LOG_WARNING, "HID report size not defined: %02X", identifier);
+      }
+    } else {
+      logMessage(LOG_WARNING, "HID report count not defined: %02X", identifier);
+    }
+  } else {
+    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
+  }
+
+  return 0;
 }
 
 ssize_t

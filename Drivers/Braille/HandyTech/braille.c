@@ -514,29 +514,6 @@ setHidReport (const unsigned char *report, int size) {
                          report[0], report, size, HT_HID_REPORT_TIMEOUT);
 }
 
-static void
-getHidReportSize (const unsigned char *items, uint16_t size, unsigned char identifier, uint32_t *value) {
-  UsbHidReportDescription description;
-
-  *value = 0;
-
-  if (usbHidFillReportDescription(items, size, identifier, &description)) {
-    if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
-      if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
-        uint32_t size = ((description.reportCount * description.reportSize) + 7) / 8;
-        logMessage(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, size);
-        *value = 1 + size;
-      } else {
-        logMessage(LOG_WARNING, "HID report size not defined: %02X", identifier);
-      }
-    } else {
-      logMessage(LOG_WARNING, "HID report count not defined: %02X", identifier);
-    }
-  } else {
-    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
-  }
-}
-
 typedef struct {
   HT_HidReportNumber number;
   uint32_t *size;
@@ -545,14 +522,14 @@ typedef struct {
 static void
 getHidReportSizes (const ReportEntry *table) {
   unsigned char *items;
-  uint16_t size = usbHidGetItems(usb->device, usb->definition.interface, 0,
-                                 &items, HT_HID_REPORT_TIMEOUT);
+  ssize_t length = usbHidGetItems(usb->device, usb->definition.interface, 0,
+                                  &items, HT_HID_REPORT_TIMEOUT);
 
   if (items) {
     const ReportEntry *report = table;
 
     while (report->number) {
-      getHidReportSize(items, size, report->number, report->size);
+      usbHidGetReportSize(items, length, report->number, report->size);
       report += 1;
     }
 

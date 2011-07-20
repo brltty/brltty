@@ -497,9 +497,16 @@ extern ssize_t usbHidGetItems (
 
 extern int usbHidFillReportDescription (
   const unsigned char *items,
-  int size,
+  size_t size,
   unsigned char identifier,
   UsbHidReportDescription *description
+);
+
+extern int usbHidGetReportSize (
+  const unsigned char *items,
+  size_t length,
+  unsigned char identifier,
+  uint32_t *size
 );
 
 extern ssize_t usbHidGetReport (
