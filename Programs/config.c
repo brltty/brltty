@@ -66,6 +66,7 @@
 #include "program.h"
 #include "options.h"
 #include "brltty.h"
+#include "prefs.h"
 #include "defaults.h"
 #include "menu.h"
 #include "charset.h"

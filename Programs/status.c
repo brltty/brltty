@@ -24,6 +24,7 @@
 #include "brldefs.h"
 #include "scr.h"
 #include "brltty.h"
+#include "prefs.h"
 #include "ttb.h"
 
 static void

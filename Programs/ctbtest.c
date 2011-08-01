@@ -28,6 +28,7 @@
 
 #include "program.h"
 #include "options.h"
+#include "prefs.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"
@@ -36,6 +37,8 @@
 #include "ascii.h"
 #include "ttb.h"
 #include "ctb.h"
+
+Preferences prefs;
 
 static char *opt_tablesDirectory;
 static char *opt_contractionTable;
@@ -314,6 +317,9 @@ processStream (FILE *stream) {
 int
 main (int argc, char *argv[]) {
   int status = 3;
+
+  memset(&prefs, 0, sizeof(prefs));
+  prefs.expandCurrentWord = 0;
 
   {
     static const OptionsDescriptor descriptor = {

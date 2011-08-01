@@ -54,6 +54,7 @@
 #include "ses.h"
 #include "brl.h"
 #include "brltty.h"
+#include "prefs.h"
 #include "defaults.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -715,7 +716,7 @@ getCursorOffset (void) {
 
 static int
 getContractedCursor (int offset) {
-  return (prefs.expandCurrentWord && (offset >= 0))? offset: CTB_NO_CURSOR;
+  return (offset >= 0)? offset: CTB_NO_CURSOR;
 }
 
 static int

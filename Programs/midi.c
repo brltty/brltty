@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "brltty.h"
+#include "prefs.h"
 #include "log.h"
 #include "system.h"
 #include "notes.h"

@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "brltty.h"
+#include "prefs.h"
 #include "log.h"
 #include "timing.h"
 #include "notes.h"

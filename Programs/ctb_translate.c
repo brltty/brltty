@@ -26,6 +26,7 @@
 
 #include "ctb.h"
 #include "ctb_internal.h"
+#include "prefs.h"
 #include "unicode.h"
 #include "ascii.h"
 #include "brldots.h"
@@ -924,7 +925,7 @@ contractText (
     if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
       if (!literal &&
           ((currentOpcode == CTO_Literal) ||
-           ((cursor >= src) && (cursor < (src + currentFindLength))))) {
+           (prefs.expandCurrentWord && (cursor >= src) && (cursor < (src + currentFindLength))))) {
         literal = src + currentFindLength;
 
         if (!testCharacter(*src, CTC_Space)) {

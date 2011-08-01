@@ -25,6 +25,7 @@
 #include "message.h"
 #include "brl.h"
 #include "brltty.h"
+#include "prefs.h"
 #include "tunes.h"
 #include "notes.h"
 

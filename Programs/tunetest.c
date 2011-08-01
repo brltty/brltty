@@ -31,7 +31,7 @@
 #include "parse.h"
 #include "misc.h"
 #include "defaults.h"
-#include "brltty.h"
+#include "prefs.h"
 #include "message.h"
 #include "brl.h"
 
@@ -247,22 +247,28 @@ main (int argc, char *argv[]) {
     prefs.alertMessages = 0;
     prefs.alertDots = 0;
     prefs.alertTunes = 1;
+
     switch (tuneDevice) {
-      default:
-        break;
       case tdPcm:
         prefs.pcmVolume = outputVolume;
         break;
+
       case tdMidi:
         prefs.midiVolume = outputVolume;
         break;
+
       case tdFm:
         prefs.fmVolume = outputVolume;
         break;
+
+      default:
+        break;
     }
+
 #ifdef ENABLE_MIDI_SUPPORT
     prefs.midiInstrument = midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
+
     {
       TuneDefinition tune = {NULL, 0, elements};
       playTune(&tune);
