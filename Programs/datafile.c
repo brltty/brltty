@@ -310,6 +310,13 @@ setGlobalDataVariable (const char *name, const char *value) {
 }
 
 int
+setGlobalTableVariables (const char *tableExtension, const char *subtableExtension) {
+  if (!setGlobalDataVariable("tableExtension", tableExtension)) return 0;
+  if (!setGlobalDataVariable("subtableExtension", subtableExtension)) return 0;
+  return 1;
+}
+
+int
 findDataOperand (DataFile *file, const char *description) {
   file->start = file->end;
 

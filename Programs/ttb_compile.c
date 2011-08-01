@@ -233,11 +233,13 @@ destroyTextTableData (TextTableData *ttd) {
 
 TextTableData *
 processTextTableLines (FILE *stream, const char *name, DataProcessor processor) {
-  TextTableData *ttd;
+  if (setGlobalTableVariables(TEXT_TABLE_EXTENSION, TEXT_SUBTABLE_EXTENSION)) {
+    TextTableData *ttd;
 
-  if ((ttd = newTextTableData())) {
-    if (processDataStream(NULL, stream, name, processor, ttd)) return ttd;
-    destroyTextTableData(ttd);
+    if ((ttd = newTextTableData())) {
+      if (processDataStream(NULL, stream, name, processor, ttd)) return ttd;
+      destroyTextTableData(ttd);
+    }
   }
 
   return NULL;

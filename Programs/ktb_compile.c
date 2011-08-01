@@ -1343,43 +1343,46 @@ finishKeyTable (KeyTableData *ktd) {
 KeyTable *
 compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
   KeyTable *table = NULL;
-  KeyTableData ktd;
 
-  memset(&ktd, 0, sizeof(ktd));
-  ktd.context = BRL_CTX_DEFAULT;
+  if (setGlobalTableVariables(KEY_TABLE_EXTENSION, KEY_SUBTABLE_EXTENSION)) {
+    KeyTableData ktd;
+    memset(&ktd, 0, sizeof(ktd));
 
-  if ((ktd.table = malloc(sizeof(*ktd.table)))) {
-    ktd.table->title = NULL;
+    ktd.context = BRL_CTX_DEFAULT;
 
-    ktd.table->noteTable = NULL;
-    ktd.table->noteCount = 0;
+    if ((ktd.table = malloc(sizeof(*ktd.table)))) {
+      ktd.table->title = NULL;
 
-    ktd.table->keyNameTable = NULL;
-    ktd.table->keyNameCount = 0;
+      ktd.table->noteTable = NULL;
+      ktd.table->noteCount = 0;
 
-    ktd.table->keyContextTable = NULL;
-    ktd.table->keyContextCount = 0;
+      ktd.table->keyNameTable = NULL;
+      ktd.table->keyNameCount = 0;
 
-    ktd.table->pressedKeys = NULL;
-    ktd.table->pressedSize = 0;
-    ktd.table->pressedCount = 0;
+      ktd.table->keyContextTable = NULL;
+      ktd.table->keyContextCount = 0;
 
-    if (allocateKeyNameTable(&ktd, keys)) {
-      if (allocateCommandTable(&ktd)) {
-        if (processDataFile(name, processKeyTableLine, &ktd)) {
-          if (finishKeyTable(&ktd)) {
-            table = ktd.table;
-            ktd.table = NULL;
+      ktd.table->pressedKeys = NULL;
+      ktd.table->pressedSize = 0;
+      ktd.table->pressedCount = 0;
+
+      if (allocateKeyNameTable(&ktd, keys)) {
+        if (allocateCommandTable(&ktd)) {
+          if (processDataFile(name, processKeyTableLine, &ktd)) {
+            if (finishKeyTable(&ktd)) {
+              table = ktd.table;
+              ktd.table = NULL;
+            }
           }
+
+          if (ktd.commandTable) free(ktd.commandTable);
         }
-
-        if (ktd.commandTable) free(ktd.commandTable);
       }
-    }
 
-    if (ktd.table) destroyKeyTable(ktd.table);
-  } else {
-    logMallocError();
+      if (ktd.table) destroyKeyTable(ktd.table);
+    } else {
+      logMallocError();
+    }
   }
 
   return table;

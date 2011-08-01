@@ -26,6 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int setGlobalDataVariable (const char *name, const char *value);
+extern int setGlobalTableVariables (const char *tableExtension, const char *subtableExtension);
 
 typedef struct DataFileStruct DataFile;
 

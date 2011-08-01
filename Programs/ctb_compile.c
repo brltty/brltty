@@ -640,49 +640,52 @@ processContractionTableLine (DataFile *file, void *data) {
 ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
-  ContractionTableData ctd;
 
-  memset(&ctd, 0, sizeof(ctd));
+  if (setGlobalTableVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
+    ContractionTableData ctd;
+    memset(&ctd, 0, sizeof(ctd));
 
-  ctd.characterTable = NULL;
-  ctd.characterTableSize = 0;
-  ctd.characterEntryCount = 0;
+    ctd.characterTable = NULL;
+    ctd.characterTableSize = 0;
+    ctd.characterEntryCount = 0;
 
-  ctd.characterClasses = NULL;
-  ctd.characterClassAttribute = 1;
+    ctd.characterClasses = NULL;
+    ctd.characterClassAttribute = 1;
 
-  {
-    ContractionTableOpcode opcode;
+    {
+      ContractionTableOpcode opcode;
 
-    for (opcode=0; opcode<CTO_None; opcode+=1)
-      ctd.opcodeNameLengths[opcode] = wcslen(opcodeNames[opcode]);
-  }
-
-  if ((ctd.area = newDataArea())) {
-    if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
-      if (allocateCharacterClasses(&ctd)) {
-        if (processDataFile(fileName, processContractionTableLine, &ctd)) {
-          if (saveCharacterTable(&ctd)) {
-            if ((table = malloc(sizeof(*table)))) {
-              table->header.fields = getContractionTableHeader(&ctd);
-              table->size = getDataSize(ctd.area);
-              resetDataArea(ctd.area);
-
-              table->characters = NULL;
-              table->charactersSize = 0;
-              table->characterCount = 0;
-            }
-          }
-        }
-
-        deallocateCharacterClasses(&ctd);
-      }
+      for (opcode=0; opcode<CTO_None; opcode+=1)
+        ctd.opcodeNameLengths[opcode] = wcslen(opcodeNames[opcode]);
     }
 
-    destroyDataArea(ctd.area);
+    if ((ctd.area = newDataArea())) {
+      if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
+        if (allocateCharacterClasses(&ctd)) {
+          if (processDataFile(fileName, processContractionTableLine, &ctd)) {
+            if (saveCharacterTable(&ctd)) {
+              if ((table = malloc(sizeof(*table)))) {
+                table->header.fields = getContractionTableHeader(&ctd);
+                table->size = getDataSize(ctd.area);
+                resetDataArea(ctd.area);
+
+                table->characters = NULL;
+                table->charactersSize = 0;
+                table->characterCount = 0;
+              }
+            }
+          }
+
+          deallocateCharacterClasses(&ctd);
+        }
+      }
+
+      destroyDataArea(ctd.area);
+    }
+
+    if (ctd.characterTable) free(ctd.characterTable);
   }
 
-  if (ctd.characterTable) free(ctd.characterTable);
   return table;
 }
 

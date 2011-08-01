@@ -167,24 +167,26 @@ processAttributesTableLine (DataFile *file, void *data) {
 AttributesTable *
 compileAttributesTable (const char *name) {
   AttributesTable *table = NULL;
-  AttributesTableData atd;
 
-  memset(&atd, 0, sizeof(atd));
+  if (setGlobalTableVariables(ATTRIBUTES_TABLE_EXTENSION, ATTRIBUTES_SUBTABLE_EXTENSION)) {
+    AttributesTableData atd;
+    memset(&atd, 0, sizeof(atd));
 
-  if ((atd.area = newDataArea())) {
-    if (allocateDataItem(atd.area, NULL, sizeof(AttributesTableHeader), __alignof__(AttributesTableHeader))) {
-      if (processDataFile(name, processAttributesTableLine, &atd)) {
-        if (makeAttributesToDots(&atd)) {
-          if ((table = malloc(sizeof(*table)))) {
-            table->header.fields = getAttributesTableHeader(&atd);
-            table->size = getDataSize(atd.area);
-            resetDataArea(atd.area);
+    if ((atd.area = newDataArea())) {
+      if (allocateDataItem(atd.area, NULL, sizeof(AttributesTableHeader), __alignof__(AttributesTableHeader))) {
+        if (processDataFile(name, processAttributesTableLine, &atd)) {
+          if (makeAttributesToDots(&atd)) {
+            if ((table = malloc(sizeof(*table)))) {
+              table->header.fields = getAttributesTableHeader(&atd);
+              table->size = getDataSize(atd.area);
+              resetDataArea(atd.area);
+            }
           }
         }
       }
-    }
 
-    destroyDataArea(atd.area);
+      destroyDataArea(atd.area);
+    }
   }
 
   return table;
