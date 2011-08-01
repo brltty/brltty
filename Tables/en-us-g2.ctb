@@ -347,6 +347,7 @@ begword disin 256-35 disingenuous
 sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 midword dist = contradistinction
+midendword distic 145-24-34-24-14 Methodistic Methodistical
 endword dists 145-24-34-234 Methodists
 begword disul = disulfide
 word do 145
@@ -513,6 +514,7 @@ sufword his\s-\s 125-24-234-36-36
 word holloware 125-135-123-123-135-2456-345-15
 sufword horse = horseradish
 sufword houghton 125-1256-126-2345-135-1345
+sufword humidistat 125-136-134-24-145-24-34-1-2345
 always hydro =
 begword hypsomet = hypsometrical
 
@@ -565,10 +567,12 @@ always K 13
 sufword kettledrum =
 always know 5-13
 word knowledge 13
+sufword kurdistan 13-136-1235-145-24-34-1-1345 Kurdistani
 
 # the letter l
 always l 123
 always L 123
+begword leatherett 123-2-2346-1235-15-2345-2345 leatherette
 midendword less 46-234
 always lesson = unlessoned
 always letter 123-1235
@@ -766,6 +770,7 @@ begword profliga 1234-1235-12356-123-24-1245-1 profligate profligacy
 word profs 1234-1235-12356-234
 always profit 1234-1235-12356-24-2345
 begword proto = protoenchanter (Cervantes)
+sufword prounion = prounionist
 begword psyched 1234-234-13456-16-15-145 psychedelic
 word pulseaudio =
 
