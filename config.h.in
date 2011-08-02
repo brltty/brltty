@@ -204,6 +204,9 @@ extern "C" {
 /* Define this if standard error is to be redirected to a file. */
 #undef STDERR_PATH
 
+/* Define this to be a string containing the path to the locale directory. */
+#undef LOCALE_DIRECTORY
+
 /* Define this to be a string containing the path to a writable directory. */
 #undef WRITABLE_DIRECTORY
 

@@ -24,9 +24,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <locale.h>
 
 #ifdef ENABLE_I18N_SUPPORT
-#include <locale.h>
+#include <libintl.h>
 #endif /* ENABLE_I18N_SUPPORT */
 
 #include "program.h"
@@ -43,6 +44,16 @@
 
 const char *programPath;
 const char *programName;
+
+static void
+prepareLocale (void) {
+  setlocale(LC_ALL, "");
+
+#ifdef ENABLE_I18N_SUPPORT
+  bindtextdomain(PACKAGE_NAME, LOCALE_DIRECTORY);
+  textdomain(PACKAGE_NAME);
+#endif /* ENABLE_I18N_SUPPORT */
+}
 
 static char *
 testProgram (const char *directory, const char *name) {
@@ -88,10 +99,7 @@ prepareProgram (int argumentCount, char **argumentVector) {
   sysInit();
 #endif /* WINDOWS */
 
-#ifdef ENABLE_I18N_SUPPORT
-  setlocale(LC_ALL, "");
-  textdomain(PACKAGE_NAME);
-#endif /* ENABLE_I18N_SUPPORT */
+  prepareLocale();
 
   if (!(programPath = getProgramPath())) programPath = argumentVector[0];
 

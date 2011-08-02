@@ -106,7 +106,6 @@ BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"],
 
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([datarootdir], [/usr])
-BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
 BRLTTY_PORTABLE_DIRECTORY([localstatedir], [])
 
 BRLTTY_SUMMARY_ITEM([libdir], [libdir])
@@ -1497,6 +1496,8 @@ test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
+BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], ["${execute_root}${localedir}"],
+                        [Define this to be a string containing the path to the locale directory.])
 if test -n "${writable_directory}"
 then
    BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
