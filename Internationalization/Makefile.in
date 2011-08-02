@@ -20,6 +20,7 @@ all:: pot linguas
 
 POT_EXT = pot
 PO_EXT = po
+MO_EXT = mo
 
 POT_FILE = $(PACKAGE_NAME).$(POT_EXT)
 $(POT_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
@@ -36,4 +37,17 @@ linguas: $(PO_LIST)
 
 clean::
 	-rm -f -- *.$(POT_EXT) $(PO_LIST)
+
+install:: install-locale-directory
+	for inputFile in "$(SRC_DIR)/"*.$(PO_EXT); \
+	do \
+	   localeName=`basename "$${inputFile}" .$(PO_EXT)`; \
+	   outputDirectory="$(INSTALL_LOCALE_DIRECTORY)/$${localeName}/LC_MESSAGES"; \
+	   outputFile="$${outputDirectory}/$(PACKAGE_NAME).$(MO_EXT)"; \
+           $(INSTALL_DIRECTORY) "$${outputDirectory}"; \
+	   msgfmt -o "$${outputFile}" "$${inputFile}"; \
+	done
+
+uninstall::
+	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_NAME).$(MO_EXT)
 

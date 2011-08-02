@@ -129,6 +129,7 @@ localstatedir = @localstatedir@
 libdir = @libdir@
 includedir = @includedir@
 oldincludedir = @oldincludedir@
+localedir = @localedir@
 infodir = @infodir@
 mandir = @mandir@
 docdir = @docdir@
