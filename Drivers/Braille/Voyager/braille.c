@@ -450,9 +450,11 @@ getSerialCellCount (unsigned char *count) {
 static int
 logSerialSerialNumber (void) {
   unsigned char device;
-  for (device=0; device<=1; ++device) {
+
+  for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X53;
     unsigned char buffer[10];
+
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
@@ -460,36 +462,43 @@ logSerialSerialNumber (void) {
                buffer[2], buffer[3], buffer[4], buffer[5],
                buffer[6], buffer[7], buffer[8], buffer[9]);
   }
+
   return 1;
 }
 
 static int
 logSerialHardwareVersion (void) {
   unsigned char device;
-  for (device=0; device<=1; ++device) {
+
+  for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X48;
     unsigned char buffer[5];
+
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Hardware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
+
   return 1;
 }
 
 static int
 logSerialFirmwareVersion (void) {
   unsigned char device;
-  for (device=0; device<=1; ++device) {
+
+  for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X46;
     unsigned char buffer[5];
+
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Firmware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
+
   return 1;
 }
 
@@ -542,7 +551,7 @@ writeSerialBraille (unsigned char *cells, unsigned char count, unsigned char sta
 
 static int
 updateSerialKeys (void) {
-  unsigned char code = 0X4B;
+  const unsigned char code = 0X4B;
   unsigned char packet[9];
 
   while (nextSerialPacket(code, packet, sizeof(packet), 0)) {
@@ -574,8 +583,10 @@ static const InputOutputOperations serialOperations = {
 static UsbChannel *usb = NULL;
 
 static int
-writeUsbData (uint8_t request, uint16_t value, uint16_t index,
-	      const unsigned char *buffer, uint16_t size) {
+writeUsbData (
+  uint8_t request, uint16_t value, uint16_t index,
+  const unsigned char *buffer, uint16_t size
+) {
   int retry = 0;
   while (1) {
     int ret = usbControlWrite(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
@@ -659,14 +670,14 @@ logUsbHardwareVersion (void) {
   int size = readUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
-  logMessage(LOG_INFO, "Voyager Hardware: %u.%u",
+  logMessage(LOG_INFO, "Voyager Hardware Version: %u.%u",
              buffer[0], buffer[1]);
   return 1;
 }
 
 static int
 logUsbFirmwareVersion (void) {
-  return logUsbString(0X05, "Firmware");
+  return logUsbString(0X05, "Firmware Version");
 }
 
 static int
@@ -878,37 +889,37 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  unsigned char buffer[cellCount];
+  if (cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL)) {
+    translateOutputCells(currentCells, brl->buffer, cellCount);
 
-  memcpy(currentCells, brl->buffer, cellCount);
+    /* The firmware supports multiples of 8 cells, so there are extra cells
+     * in the firmware's imagination that don't actually exist physically.
+     */
+    switch (cellCount) {
+      case 44: {
+        /* Two ghost cells at the beginning of the display,
+         * plus two more after the sixth physical cell.
+         */
+        unsigned char buffer[46];
+        memcpy(buffer, currentCells, 6);
+        buffer[6] = buffer[7] = 0;
+        memcpy(buffer+8, currentCells+6, 38);
+        if (!io->writeBraille(buffer, 46, 2)) return 0;
+        break;
+      }
 
-  /* If content hasn't changed, do nothing. */
-  if (!cellsHaveChanged(previousCells, currentCells, cellCount, NULL, NULL)) return 1;
+      case 70:
+        /* Two ghost cells at the beginning of the display. */
+        if (!io->writeBraille(currentCells, cellCount, 2)) return 0;
+        break;
 
-  /* translate to voyager dot pattern coding */
-  translateOutputCells(buffer, currentCells, cellCount);
-
-  /* The firmware supports multiples of 8 cells, so there are extra cells
-   * in the firmware's imagination that don't actually exist physically.
-   */
-  switch (cellCount) {
-    case 44: {
-      /* Two ghost cells at the beginning of the display,
-       * plus two more after the sixth physical cell.
-       */
-      unsigned char hbuf[46];
-      memcpy(hbuf, buffer, 6);
-      hbuf[6] = hbuf[7] = 0;
-      memcpy(hbuf+8, buffer+6, 38);
-      io->writeBraille(hbuf, 46, 2);
-      break;
+      default:
+        /* No ghost cells. */
+        if (!io->writeBraille(currentCells, cellCount, 0)) return 0;
+        break;
     }
-
-    case 70:
-      /* Two ghost cells at the beginning of the display. */
-      io->writeBraille(buffer, 70, 2);
-      break;
   }
+
   return 1;
 }
 
