@@ -85,7 +85,7 @@ initializeKeys (void) {
 }
 
 static void
-processKeyData (const unsigned char *data) {
+updateKeys (const unsigned char *packet) {
   Keys currentKeys;
 
   unsigned char navigationPresses[0X10];
@@ -96,7 +96,7 @@ processKeyData (const unsigned char *data) {
 
   initializeKeys();
   memset(&currentKeys, 0, sizeof(currentKeys));
-  currentKeys.navigation = (data[1] << 8) | data[0];
+  currentKeys.navigation = (packet[1] << 8) | packet[0];
 
   {
     unsigned char key = 0;
@@ -117,7 +117,7 @@ processKeyData (const unsigned char *data) {
     int i;
 
     for (i=2; i<8; i+=1) {
-      unsigned char key = data[i];
+      unsigned char key = packet[i];
       if (!key) break;
 
       if ((key < 1) || (key > cellCount)) {
@@ -161,7 +161,7 @@ typedef struct {
   int (*getDisplayCurrent) (unsigned char *current);
   int (*setDisplayState) (unsigned char state);
   int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
-  int (*getKeys) (unsigned char *packet, int size);
+  int (*updateKeys) (void);
   int (*soundBeep) (unsigned char duration);
 } InputOutputOperations;
 static const InputOutputOperations *io;
@@ -292,9 +292,11 @@ readSerialPacket (unsigned char *packet, int size) {
 static int
 nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait) {
   int length;
+
   if (wait)
     if (!serialAwaitInput(serialDevice, SERIAL_INITIAL_TIMEOUT))
       return 0;
+
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
     logUnexpectedPacket(buffer, length);
@@ -434,15 +436,15 @@ writeSerialBraille (unsigned char *cells, unsigned char count, unsigned char sta
 }
 
 static int
-getSerialKeys (unsigned char *packet, int size) {
-  const int offset = 1;
-  unsigned char buffer[offset + size];
-  int length = nextSerialPacket(0X4B, buffer, sizeof(buffer), 0);
-  if (length) {
-    memcpy(packet, buffer+offset, length-=offset);
-    return length;
+updateSerialKeys (void) {
+  unsigned char code = 0X4B;
+  unsigned char packet[9];
+
+  while (nextSerialPacket(code, packet, sizeof(packet), 0)) {
+    updateKeys(&packet[1]);
   }
-  return -1;
+
+  return 1;
 }
 
 static int
@@ -455,7 +457,7 @@ static const InputOutputOperations serialOperations = {
   logSerialSerialNumber, logSerialHardwareVersion, logSerialFirmwareVersion,
   setSerialDisplayVoltage, getSerialDisplayVoltage, getSerialDisplayCurrent,
   setSerialDisplayState, writeSerialBraille,
-  getSerialKeys, soundSerialBeep
+  updateSerialKeys, soundSerialBeep
 };
 
 
@@ -598,8 +600,46 @@ writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start)
 }
 
 static int
-getUsbKeys (unsigned char *packet, int size) {
-  return usbReapInput(usb->device, usb->definition.inputEndpoint, packet, size, 0, 0);
+updateUsbKeys (void) {
+  while (1) {
+    unsigned char packet[8];
+
+    {
+      int size = usbReapInput(usb->device, usb->definition.inputEndpoint,
+                              packet, sizeof(packet),
+                              0, 0);
+
+      if (size < 0) {
+        if (errno == EAGAIN) {
+          /* no input */
+          return 1;
+        }
+
+        if (errno == ENODEV) {
+          /* Display was disconnected */
+          return 0;
+        }
+
+        logMessage(LOG_ERR, "Voyager read error: %s", strerror(errno));
+        keysInitialized = 0;
+        return 1;
+      }
+
+      if ((size > 0) && (size < sizeof(packet))) {
+        /* The display handles read requests of only and exactly 8 bytes */
+        logMessage(LOG_NOTICE, "Short read: %d", size);
+        keysInitialized = 0;
+        return 1;
+      }
+
+      if (size == 0) {
+        /* no new key */
+        return 1;
+      }
+    }
+
+    updateKeys(packet);
+  }
 }
 
 static int
@@ -612,7 +652,7 @@ static const InputOutputOperations usbOperations = {
   logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
   setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
   setUsbDisplayState, writeUsbBraille,
-  getUsbKeys, soundUsbBeep
+  updateUsbKeys, soundUsbBeep
 };
 
 
@@ -801,39 +841,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  while (1) {
-    unsigned char packet[8];
-
-    {
-      int size = io->getKeys(packet, sizeof(packet));
-
-      if (size < 0) {
-        if (errno == EAGAIN) {
-          /* no input */
-          size = 0;
-        } else if (errno == ENODEV) {
-          /* Display was disconnected */
-          return BRL_CMD_RESTARTBRL;
-        } else {
-          logMessage(LOG_ERR, "Voyager read error: %s", strerror(errno));
-          keysInitialized = 0;
-          return EOF;
-        }
-      } else if ((size > 0) && (size < sizeof(packet))) {
-        /* The display handles read requests of only and exactly 8bytes */
-        logMessage(LOG_NOTICE, "Short read: %d", size);
-        keysInitialized = 0;
-        return EOF;
-      }
-
-      if (size == 0) {
-        /* no new key */
-        break;
-      }
-    }
-
-    processKeyData(packet);
-  }
-
-  return EOF;
+  return io->updateKeys()? EOF: BRL_CMD_RESTARTBRL;
 }
