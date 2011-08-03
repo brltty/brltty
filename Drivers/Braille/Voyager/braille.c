@@ -102,7 +102,7 @@ updateKeys (const unsigned char *packet) {
     unsigned char key = 0;
     uint16_t bit = 0X1;
 
-    while (++key <= 0X10) {
+    while (key < 0X10) {
       if ((pressedKeys.navigation & bit) && !(currentKeys.navigation & bit)) {
         enqueueKeyEvent(VO_SET_NavigationKeys, key, 0);
       } else if (!(pressedKeys.navigation & bit) && (currentKeys.navigation & bit)) {
@@ -110,6 +110,7 @@ updateKeys (const unsigned char *packet) {
       }
 
       bit <<= 1;
+      key += 1;
     }
   }
   
@@ -682,14 +683,42 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(VO_KEY_Thumb4, "Thumb4"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(bp)
+  KEY_NAME_ENTRY(BP_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(BP_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(BP_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(BP_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(BP_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(BP_KEY_Dot6, "Dot6"),
+
+  KEY_NAME_ENTRY(BP_KEY_Shift, "Shift"),
+  KEY_NAME_ENTRY(BP_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(BP_KEY_Control, "Control"),
+
+  KEY_NAME_ENTRY(BP_KEY_JoystickEnter, "JoystickEnter"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickLeft, "JoystickLeft"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickRight, "JoystickRight"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickUp, "JoystickUp"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickDown, "JoystickDown"),
+
+  KEY_NAME_ENTRY(BP_KEY_ScrollLeft, "ScrollLeft"),
+  KEY_NAME_ENTRY(BP_KEY_ScrollRight, "ScrollRight"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(all),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(bp)
+  KEY_NAME_TABLE(bp),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(bp)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(bp),
 END_KEY_TABLE_LIST
 
 /* Voltage: from 0->300V to 255->200V.
