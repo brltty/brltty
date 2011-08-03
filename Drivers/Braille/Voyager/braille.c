@@ -55,6 +55,100 @@
 #include "brl_driver.h"
 #include "brldefs-vo.h"
 
+
+#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
+static unsigned char cellCount;
+#define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
+#define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
+
+/* Structure to remember which keys are pressed */
+typedef struct {
+  uint16_t navigation;
+  unsigned char routing[MAXIMUM_CELLS];
+} Keys;
+
+/* Remember which keys are pressed.
+ * Updated immediately whenever a key is pressed.
+ * Cleared after analysis whenever a key is released.
+ */
+static Keys pressedKeys;
+
+/* Flag to reinitialize brl_readCommand() function state. */
+static char keysInitialized;
+
+static void
+initializeKeys (void) {
+  if (!keysInitialized) {
+    memset(&pressedKeys, 0, sizeof(pressedKeys));
+    keysInitialized = 1;
+  }
+}
+
+static void
+processKeyData (const unsigned char *data) {
+  Keys currentKeys;
+
+  unsigned char navigationPresses[0X10];
+  int navigationPressCount = 0;
+
+  unsigned char routingPresses[6];
+  int routingPressCount = 0;
+
+  initializeKeys();
+  memset(&currentKeys, 0, sizeof(currentKeys));
+  currentKeys.navigation = (data[1] << 8) | data[0];
+
+  {
+    unsigned char key = 0;
+    uint16_t bit = 0X1;
+
+    while (++key <= 0X10) {
+      if ((pressedKeys.navigation & bit) && !(currentKeys.navigation & bit)) {
+        enqueueKeyEvent(VO_SET_NavigationKeys, key, 0);
+      } else if (!(pressedKeys.navigation & bit) && (currentKeys.navigation & bit)) {
+        navigationPresses[navigationPressCount++] = key;
+      }
+
+      bit <<= 1;
+    }
+  }
+  
+  {
+    int i;
+
+    for (i=2; i<8; i+=1) {
+      unsigned char key = data[i];
+      if (!key) break;
+
+      if ((key < 1) || (key > cellCount)) {
+        logMessage(LOG_NOTICE, "Invalid routing key number: %u", key);
+        continue;
+      }
+      key -= 1;
+
+      currentKeys.routing[key] = 1;
+      if (!pressedKeys.routing[key]) routingPresses[routingPressCount++] = key;
+    }
+  }
+
+  {
+    unsigned char key;
+
+    for (key=0; key<cellCount; key+=1)
+      if (pressedKeys.routing[key] && !currentKeys.routing[key])
+        enqueueKeyEvent(VO_SET_RoutingKeys, key, 0);
+  }
+
+  while (navigationPressCount)
+    enqueueKeyEvent(VO_SET_NavigationKeys, navigationPresses[--navigationPressCount], 1);
+
+  while (routingPressCount)
+    enqueueKeyEvent(VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
+
+  pressedKeys = currentKeys;
+}
+
+
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
@@ -523,14 +617,8 @@ static const InputOutputOperations usbOperations = {
 
 
 /* Global variables */
-static char firstRead; /* Flag to reinitialize brl_readCommand() function state. */
 static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
-
-#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
-static unsigned char cellCount;
-#define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
-#define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
 
 BEGIN_KEY_NAME_TABLE(all)
   KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
@@ -642,7 +730,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             io->soundBeep(200);
 
             makeOutputTable(dotsTable_ISO11548_1);
-            firstRead = 1;
+            keysInitialized = 0;
             return 1;
           }
 
@@ -713,41 +801,8 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  /* Structure to remember which keys are pressed */
-  typedef struct {
-    uint16_t control; /* Front and dot keys */
-    unsigned char routing[MAXIMUM_CELLS];
-  } Keys;
-
-  /* Static variables to remember the state between calls. */
-  /* Remember which keys are pressed.
-   * Updated immediately whenever a key is pressed.
-   * Cleared after analysis whenever a key is released.
-   */
-  static Keys pressedKeys;
-
   while (1) {
-    /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
-     * RL RR, packet[2]-packet[7] list pressed routing keys by number, maximum
-     * 6 keys, list ends with 0.
-     * All 0s is sent when all keys released.
-     */
     unsigned char packet[8];
-
-    /* one or more keys were pressed or released */
-    Keys currentKeys;
-
-    unsigned char controlPresses[0X10];
-    int controlPressCount = 0;
-
-    unsigned char routingPresses[6];
-    int routingPressCount = 0;
-
-    if (firstRead) {
-      /* initialize state */
-      firstRead = 0;
-      memset(&pressedKeys, 0, sizeof(pressedKeys));
-    }
 
     {
       int size = io->getKeys(packet, sizeof(packet));
@@ -761,13 +816,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           return BRL_CMD_RESTARTBRL;
         } else {
           logMessage(LOG_ERR, "Voyager read error: %s", strerror(errno));
-          firstRead = 1;
+          keysInitialized = 0;
           return EOF;
         }
       } else if ((size > 0) && (size < sizeof(packet))) {
         /* The display handles read requests of only and exactly 8bytes */
         logMessage(LOG_NOTICE, "Short read: %d", size);
-        firstRead = 1;
+        keysInitialized = 0;
         return EOF;
       }
 
@@ -777,59 +832,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    memset(&currentKeys, 0, sizeof(currentKeys));
-
-    /* We combine dot and front key info in keystate */
-    currentKeys.control = (packet[1] << 8) | packet[0];
-
-    {
-      unsigned char key = 0;
-      uint16_t bit = 0X1;
-
-      while (++key <= 0X10) {
-        if ((pressedKeys.control & bit) && !(currentKeys.control & bit)) {
-          enqueueKeyEvent(VO_SET_NavigationKeys, key, 0);
-        } else if (!(pressedKeys.control & bit) && (currentKeys.control & bit)) {
-          controlPresses[controlPressCount++] = key;
-        }
-
-        bit <<= 1;
-      }
-    }
-    
-    {
-      int i;
-
-      for (i=2; i<8; i+=1) {
-        unsigned char key = packet[i];
-        if (!key) break;
-
-        if ((key < 1) || (key > cellCount)) {
-          logMessage(LOG_NOTICE, "Invalid routing key number: %u", key);
-          continue;
-        }
-        key -= 1;
-
-        currentKeys.routing[key] = 1;
-        if (!pressedKeys.routing[key]) routingPresses[routingPressCount++] = key;
-      }
-    }
-
-    {
-      unsigned char key;
-
-      for (key=0; key<cellCount; key+=1)
-        if (pressedKeys.routing[key] && !currentKeys.routing[key])
-          enqueueKeyEvent(VO_SET_RoutingKeys, key, 0);
-    }
-
-    while (controlPressCount)
-      enqueueKeyEvent(VO_SET_NavigationKeys, controlPresses[--controlPressCount], 1);
-
-    while (routingPressCount)
-      enqueueKeyEvent(VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
-
-    pressedKeys = currentKeys;
+    processKeyData(packet);
   }
 
   return EOF;
