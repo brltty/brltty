@@ -48,6 +48,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
 #include "ascii.h"
 
 #define BRLSTAT ST_VoyagerStyle
@@ -73,6 +74,9 @@ static const InputOutputOperations *io;
 
 
 #include "io_serial.h"
+#define SERIAL_OPEN_DELAY 400
+#define SERIAL_INITIAL_TIMEOUT 200
+#define SERIAL_SUBSEQUENT_TIMEOUT 100
 
 static SerialDevice *serialDevice = NULL;
 static const char *serialDeviceNames[] = {"Adapter", "Base"};
@@ -95,85 +99,108 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
 }
 
 static int
-readSerialPacket (unsigned char *buffer, int size) {
-  size_t offset = 0;
+readSerialPacket (unsigned char *packet, int size) {
+  int started = 0;
   int escape = 0;
-  int length = -1;
+  int offset = 0;
+  int length = 0;
 
-  while ((offset < 1) || (offset < length)) {
-    if (offset == size) {
-      logTruncatedPacket(buffer, offset);
-      offset = 0;
-    }
-
-    if (!serialReadChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
-      logPartialPacket(buffer, offset);
-      return 0;
-    }
+  while (1) {
+    unsigned char byte;
 
     {
-      unsigned char byte = buffer[offset - 1];
+      int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
+      ssize_t result = serialReadData(serialDevice, &byte, 1,
+                                      ((started || escape)? timeout: 0), timeout);
 
-      if (byte == ESC) {
-        if ((escape = !escape)) {
-          offset--;
-          continue;
-        }
+      if (result == 0) {
+        errno = EAGAIN;
+        result = -1;
       }
 
-      if (!escape) {
-        if (offset == 1) {
-          logIgnoredByte(byte);
-          offset = 0;
-        }
-        continue;
-      }
-      escape = 0;
-
-      if (offset > 1) {
-        logTruncatedPacket(buffer, offset-1);
-        buffer[0] = byte;
-        offset = 1;
-      }
-
-      switch (byte) {
-        case 0X43:
-        case 0X47:
-          length = 2;
-          continue;
-
-        case 0X4C:
-          length = 3;
-          continue;
-
-        case 0X46:
-        case 0X48:
-          length = 5;
-          continue;
-
-        case 0X4B:
-          length = 9;
-          continue;
-
-        case 0X53:
-          length = 18;
-          continue;
-
-        default:
-          logUnknownPacket(byte);
-          offset = 0;
-          continue;
+      if (result == -1) {
+        if (started) logPartialPacket(packet, offset);
+        return 0;
       }
     }
-  }
 
-  logInputPacket(buffer, offset);
-  return offset;
+    if (byte == ESC) {
+      if ((escape = !escape)) continue;
+    } else if (escape) {
+      escape = 0;
+
+      if (offset > 0) {
+        logShortPacket(packet, offset);
+        offset = 0;
+        length = 0;
+      } else {
+        started = 1;
+      }
+    }
+
+    if (!started) {
+      logIgnoredByte(byte);
+      continue;
+    }
+
+    if (offset < size) {
+      if (offset == 0) {
+        switch (byte) {
+          case 0X43:
+          case 0X47:
+            length = 2;
+            break;
+
+          case 0X4C:
+            length = 3;
+            break;
+
+          case 0X46:
+          case 0X48:
+            length = 5;
+            break;
+
+          case 0X4B:
+            length = 9;
+            break;
+
+          case 0X53:
+            length = 10;
+            break;
+
+          default:
+            logUnknownPacket(byte);
+            started = 0;
+            continue;
+        }
+      }
+
+      packet[offset] = byte;
+    } else {
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
+    }
+
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        started = 0;
+        continue;
+      }
+
+      logInputPacket(packet, offset);
+      return length;
+    }
+  }
 }
 
 static int
-nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
+nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait) {
   int length;
+  if (wait)
+    if (!serialAwaitInput(serialDevice, SERIAL_INITIAL_TIMEOUT))
+      return 0;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
     logUnexpectedPacket(buffer, length);
@@ -184,9 +211,12 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 38400))
-      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE))
+    if (serialRestartDevice(serialDevice, 38400)) {
+      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) {
+        approximateDelay(SERIAL_OPEN_DELAY);
         return 1;
+      }
+    }
 
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
@@ -208,7 +238,7 @@ getSerialCellCount (unsigned char *count) {
   const unsigned int code = 0X4C;
   if (writeSerialPacket(code, NULL, 0)) {
     unsigned char buffer[3];
-    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *count = buffer[2];
       return 1;
     }
@@ -221,12 +251,13 @@ logSerialSerialNumber (void) {
   unsigned char device;
   for (device=0; device<=1; ++device) {
     const unsigned char code = 0X53;
-    unsigned char buffer[18];
+    unsigned char buffer[10];
     if (!writeSerialPacket(code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
-    if (buffer[1] != device) continue;
-    logMessage(LOG_INFO, "Voyager %s Serial Number: %.*s", 
-               serialDeviceNames[device], 16, buffer+2);
+    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
+    logMessage(LOG_INFO, "Voyager %s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
+               serialDeviceNames[buffer[1]],
+               buffer[2], buffer[3], buffer[4], buffer[5],
+               buffer[6], buffer[7], buffer[8], buffer[9]);
   }
   return 1;
 }
@@ -238,10 +269,10 @@ logSerialHardwareVersion (void) {
     const unsigned char code = 0X48;
     unsigned char buffer[5];
     if (!writeSerialPacket(code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
-    if (buffer[1] != device) continue;
+    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Hardware Version: %u.%u.%u", 
-               serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+               serialDeviceNames[buffer[1]],
+               buffer[2], buffer[3], buffer[4]);
   }
   return 1;
 }
@@ -253,10 +284,10 @@ logSerialFirmwareVersion (void) {
     const unsigned char code = 0X46;
     unsigned char buffer[5];
     if (!writeSerialPacket(code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer))) return 0;
-    if (buffer[1] != device) continue;
+    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Firmware Version: %u.%u.%u", 
-               serialDeviceNames[device], buffer[2], buffer[3], buffer[4]);
+               serialDeviceNames[buffer[1]],
+               buffer[2], buffer[3], buffer[4]);
   }
   return 1;
 }
@@ -271,7 +302,7 @@ getSerialDisplayVoltage (unsigned char *voltage) {
   const unsigned char code = 0X47;
   if (writeSerialPacket(code, NULL, 0)) {
     unsigned char buffer[2];
-    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *voltage = buffer[1];
       return 1;
     }
@@ -284,7 +315,7 @@ getSerialDisplayCurrent (unsigned char *current) {
   const unsigned int code = 0X43;
   if (writeSerialPacket(code, NULL, 0)) {
     unsigned char buffer[2];
-    if (nextSerialPacket(code, buffer, sizeof(buffer))) {
+    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *current = buffer[1];
       return 1;
     }
@@ -312,7 +343,7 @@ static int
 getSerialKeys (unsigned char *packet, int size) {
   const int offset = 1;
   unsigned char buffer[offset + size];
-  int length = nextSerialPacket(0X4B, buffer, sizeof(buffer));
+  int length = nextSerialPacket(0X4B, buffer, sizeof(buffer), 0);
   if (length) {
     memcpy(packet, buffer+offset, length-=offset);
     return length;
