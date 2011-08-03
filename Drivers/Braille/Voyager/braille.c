@@ -56,6 +56,110 @@
 #include "brldefs-vo.h"
 
 
+BEGIN_KEY_NAME_TABLE(all)
+  KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
+
+  KEY_NAME_ENTRY(VO_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(VO_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(VO_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(VO_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(VO_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(VO_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(VO_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(VO_KEY_Dot8, "Dot8"),
+
+  KEY_NAME_ENTRY(VO_KEY_Thumb1, "Thumb1"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb2, "Thumb2"),
+  KEY_NAME_ENTRY(VO_KEY_Left, "Left"),
+  KEY_NAME_ENTRY(VO_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(VO_KEY_Down, "Down"),
+  KEY_NAME_ENTRY(VO_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb3, "Thumb3"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb4, "Thumb4"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(bp)
+  KEY_NAME_ENTRY(BP_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(BP_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(BP_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(BP_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(BP_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(BP_KEY_Dot6, "Dot6"),
+
+  KEY_NAME_ENTRY(BP_KEY_Shift, "Shift"),
+  KEY_NAME_ENTRY(BP_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(BP_KEY_Control, "Control"),
+
+  KEY_NAME_ENTRY(BP_KEY_JoystickEnter, "JoystickEnter"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickLeft, "JoystickLeft"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickRight, "JoystickRight"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickUp, "JoystickUp"),
+  KEY_NAME_ENTRY(BP_KEY_JoystickDown, "JoystickDown"),
+
+  KEY_NAME_ENTRY(BP_KEY_ScrollLeft, "ScrollLeft"),
+  KEY_NAME_ENTRY(BP_KEY_ScrollRight, "ScrollRight"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(all)
+  KEY_NAME_TABLE(all),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bp)
+  KEY_NAME_TABLE(bp),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(bp)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(bp),
+END_KEY_TABLE_LIST
+
+
+typedef struct {
+  const char *name;
+  const KeyTableDefinition *keyTableDefinition;
+} DeviceType;
+
+static const DeviceType deviceType_Voyager = {
+  .name = "Voyager",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
+};
+
+static const DeviceType deviceType_BraillePen = {
+  .name = "Braille Pen",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
+};
+
+typedef struct {
+  const DeviceType *deviceType;
+  unsigned char reportedCellCount;
+  unsigned char actualCellCount;
+} DeviceModel;
+
+static const DeviceModel deviceModels[] = {
+  { .reportedCellCount = 48,
+    .actualCellCount = 44,
+    .deviceType = &deviceType_Voyager
+  }
+  ,
+  { .reportedCellCount = 72,
+    .actualCellCount = 70,
+    .deviceType = &deviceType_Voyager
+  }
+  ,
+  { .reportedCellCount = 12,
+    .actualCellCount = 12,
+    .deviceType = &deviceType_BraillePen
+  }
+  ,
+  { .reportedCellCount = 0 }
+};
+
+static const DeviceModel *deviceModel;
+
+
 #define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
 static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
@@ -367,7 +471,7 @@ logSerialHardwareVersion (void) {
     unsigned char buffer[5];
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "Voyager %s Hardware Version: %u.%u.%u", 
+    logMessage(LOG_INFO, "Voyager %s Hardware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -382,7 +486,7 @@ logSerialFirmwareVersion (void) {
     unsigned char buffer[5];
     if (!writeSerialPacket(code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "Voyager %s Firmware Version: %u.%u.%u", 
+    logMessage(LOG_INFO, "Voyager %s Firmware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -661,66 +765,6 @@ static const InputOutputOperations usbOperations = {
 static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
 
-BEGIN_KEY_NAME_TABLE(all)
-  KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
-
-  KEY_NAME_ENTRY(VO_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(VO_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(VO_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(VO_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(VO_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(VO_KEY_Dot6, "Dot6"),
-  KEY_NAME_ENTRY(VO_KEY_Dot7, "Dot7"),
-  KEY_NAME_ENTRY(VO_KEY_Dot8, "Dot8"),
-
-  KEY_NAME_ENTRY(VO_KEY_Thumb1, "Thumb1"),
-  KEY_NAME_ENTRY(VO_KEY_Thumb2, "Thumb2"),
-  KEY_NAME_ENTRY(VO_KEY_Left, "Left"),
-  KEY_NAME_ENTRY(VO_KEY_Up, "Up"),
-  KEY_NAME_ENTRY(VO_KEY_Down, "Down"),
-  KEY_NAME_ENTRY(VO_KEY_Right, "Right"),
-  KEY_NAME_ENTRY(VO_KEY_Thumb3, "Thumb3"),
-  KEY_NAME_ENTRY(VO_KEY_Thumb4, "Thumb4"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(bp)
-  KEY_NAME_ENTRY(BP_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(BP_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(BP_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(BP_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(BP_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(BP_KEY_Dot6, "Dot6"),
-
-  KEY_NAME_ENTRY(BP_KEY_Shift, "Shift"),
-  KEY_NAME_ENTRY(BP_KEY_Space, "Space"),
-  KEY_NAME_ENTRY(BP_KEY_Control, "Control"),
-
-  KEY_NAME_ENTRY(BP_KEY_JoystickEnter, "JoystickEnter"),
-  KEY_NAME_ENTRY(BP_KEY_JoystickLeft, "JoystickLeft"),
-  KEY_NAME_ENTRY(BP_KEY_JoystickRight, "JoystickRight"),
-  KEY_NAME_ENTRY(BP_KEY_JoystickUp, "JoystickUp"),
-  KEY_NAME_ENTRY(BP_KEY_JoystickDown, "JoystickDown"),
-
-  KEY_NAME_ENTRY(BP_KEY_ScrollLeft, "ScrollLeft"),
-  KEY_NAME_ENTRY(BP_KEY_ScrollRight, "ScrollRight"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(bp)
-  KEY_NAME_TABLE(bp),
-END_KEY_NAME_TABLES
-
-DEFINE_KEY_TABLE(all)
-DEFINE_KEY_TABLE(bp)
-
-BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
-  &KEY_TABLE_DEFINITION(bp),
-END_KEY_TABLE_LIST
-
 /* Voltage: from 0->300V to 255->200V.
  * Presumably this is voltage for dot firmness.
  * Presumably 0 makes dots hardest, 255 makes them softest.
@@ -745,75 +789,75 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(parameters, device)) {
-    /* find out how big the display is */
-    cellCount = 0;
-    {
-      unsigned char count;
-      if (io->getCellCount(&count)) {
-        switch (count) {
-          case 48:
-            cellCount = 44;
-            break;
+    if (io->getCellCount(&cellCount)) {
+      deviceModel = deviceModels;
 
-          case 72:
-            cellCount = 70;
-            break;
+      while (deviceModel->reportedCellCount) {
+        if (deviceModel->reportedCellCount == cellCount) {
+          const DeviceType *deviceType = deviceModel->deviceType;
 
-          default:
-            logMessage(LOG_ERR, "Unsupported Voyager cell count: %u", count);
-            break;
-        }
-      }
-    }
+          cellCount = deviceModel->actualCellCount;
+          logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
 
-    if (cellCount) {
-      logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
+          io->logSerialNumber();
+          io->logHardwareVersion();
+          io->logFirmwareVersion();
 
-      /* log information about the display */
-      io->logSerialNumber();
-      io->logHardwareVersion();
-      io->logFirmwareVersion();
+          /* currentCells holds the status cells and the text cells.
+           * We export directly to BRLTTY only the text cells.
+           */
+          brl->textColumns = cellCount;		/* initialize size of display */
+          brl->textRows = 1;		/* always 1 */
 
-      /* currentCells holds the status cells and the text cells.
-       * We export directly to BRLTTY only the text cells.
-       */
-      brl->textColumns = cellCount;		/* initialize size of display */
-      brl->textRows = 1;		/* always 1 */
-
-      {
-        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-        brl->keyBindings = ktd->bindings;
-        brl->keyNameTables = ktd->names;
-      }
-
-      brl->setFirmness = setFirmness;
-
-      if ((currentCells = malloc(cellCount))) {
-        if ((previousCells = malloc(cellCount))) {
-          /* Force rewrite of display */
-          memset(currentCells, 0, cellCount); /* no dots */
-          memset(previousCells, 0XFF, cellCount); /* all dots */
-
-          if (io->setDisplayState(1)) {
-            io->soundBeep(200);
-
-            makeOutputTable(dotsTable_ISO11548_1);
-            keysInitialized = 0;
-            return 1;
+          {
+            const KeyTableDefinition *ktd = deviceType->keyTableDefinition;
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
           }
 
-          free(previousCells);
-          previousCells = NULL;
+          brl->setFirmness = setFirmness;
+
+          if ((currentCells = malloc(cellCount))) {
+            if ((previousCells = malloc(cellCount))) {
+              /* Force rewrite of display */
+              memset(currentCells, 0, cellCount); /* no dots */
+              memset(previousCells, 0XFF, cellCount); /* all dots */
+
+              if (io->setDisplayState(1)) {
+                makeOutputTable(dotsTable_ISO11548_1);
+                keysInitialized = 0;
+
+                io->soundBeep(200);
+                return 1;
+              }
+
+              free(previousCells);
+              previousCells = NULL;
+            } else {
+              logMallocError();
+            }
+
+            free(currentCells);
+            currentCells = NULL;
+          } else {
+            logMallocError();
+          }
+
+          break;
         }
 
-        free(currentCells);
-        currentCells = NULL;
+        deviceModel += 1;
+      }
+
+      if (!deviceModel->reportedCellCount) {
+        logMessage(LOG_ERR, "Unsupported Voyager cell count: %u", cellCount);
+        deviceModel = NULL;
       }
     }
 
     io->closePort();
   }
+
   return 0;
 }
 
