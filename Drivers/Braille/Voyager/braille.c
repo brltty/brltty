@@ -51,7 +51,6 @@
 #include "timing.h"
 #include "ascii.h"
 
-#define BRLSTAT ST_VoyagerStyle
 #include "brl_driver.h"
 #include "brldefs-vo.h"
 
@@ -159,6 +158,8 @@ static const DeviceModel deviceModels[] = {
 
 static const DeviceModel *deviceModel;
 
+
+#define READY_BEEP_DURATION 200
 
 #define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
 static unsigned char cellCount;
@@ -406,6 +407,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait)
     if (buffer[0] == code) return length;
     logUnexpectedPacket(buffer, length);
   }
+
   return 0;
 }
 
@@ -558,7 +560,7 @@ updateSerialKeys (void) {
     updateKeys(&packet[1]);
   }
 
-  return 1;
+  return errno == EAGAIN;
 }
 
 static int
@@ -773,7 +775,7 @@ static const InputOutputOperations usbOperations = {
 
 
 /* Global variables */
-static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
+static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
 
 /* Voltage: from 0->300V to 255->200V.
@@ -814,7 +816,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           io->logHardwareVersion();
           io->logFirmwareVersion();
 
-          /* currentCells holds the status cells and the text cells.
+          /* translatedCells holds the status cells and the text cells.
            * We export directly to BRLTTY only the text cells.
            */
           brl->textColumns = cellCount;		/* initialize size of display */
@@ -828,17 +830,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           brl->setFirmness = setFirmness;
 
-          if ((currentCells = malloc(cellCount))) {
+          if ((translatedCells = malloc(cellCount))) {
             if ((previousCells = malloc(cellCount))) {
               /* Force rewrite of display */
-              memset(currentCells, 0, cellCount); /* no dots */
               memset(previousCells, 0XFF, cellCount); /* all dots */
 
               if (io->setDisplayState(1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
 
-                io->soundBeep(200);
+                io->soundBeep(READY_BEEP_DURATION);
+                approximateDelay(READY_BEEP_DURATION);
                 return 1;
               }
 
@@ -848,8 +850,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               logMallocError();
             }
 
-            free(currentCells);
-            currentCells = NULL;
+            free(translatedCells);
+            translatedCells = NULL;
           } else {
             logMallocError();
           }
@@ -876,9 +878,9 @@ static void
 brl_destruct (BrailleDisplay *brl) {
   io->closePort();
 
-  if (currentCells) {
-    free(currentCells);
-    currentCells = NULL;
+  if (translatedCells) {
+    free(translatedCells);
+    translatedCells = NULL;
   }
 
   if (previousCells) {
@@ -889,8 +891,11 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL)) {
-    translateOutputCells(currentCells, brl->buffer, cellCount);
+  unsigned int from;
+  unsigned int to;
+
+  if (cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to)) {
+    translateOutputCells(&translatedCells[from], &brl->buffer[from], to-from);
 
     /* The firmware supports multiples of 8 cells, so there are extra cells
      * in the firmware's imagination that don't actually exist physically.
@@ -901,21 +906,21 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
          * plus two more after the sixth physical cell.
          */
         unsigned char buffer[46];
-        memcpy(buffer, currentCells, 6);
+        memcpy(buffer, translatedCells, 6);
         buffer[6] = buffer[7] = 0;
-        memcpy(buffer+8, currentCells+6, 38);
+        memcpy(buffer+8, translatedCells+6, 38);
         if (!io->writeBraille(buffer, 46, 2)) return 0;
         break;
       }
 
       case 70:
         /* Two ghost cells at the beginning of the display. */
-        if (!io->writeBraille(currentCells, cellCount, 2)) return 0;
+        if (!io->writeBraille(translatedCells, cellCount, 2)) return 0;
         break;
 
       default:
         /* No ghost cells. */
-        if (!io->writeBraille(currentCells, cellCount, 0)) return 0;
+        if (!io->writeBraille(translatedCells, cellCount, 0)) return 0;
         break;
     }
   }
