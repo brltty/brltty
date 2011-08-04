@@ -2489,18 +2489,28 @@ initializeBrailleDriver (const char *code, int verify) {
         logMessage(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
         {
-          const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
-          const char *part2 = braille->definition.code;
-          const char *part3 = ".prefs";
-          char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-          sprintf(path, "%s%s%s", part1, part2, part3);
-          preferencesFile = path;
-          fixInstallPath(&preferencesFile);
-          if (path != preferencesFile) free(path);
-        }
-        logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
+          char *path;
 
-        return 1;
+          {
+            const char *strings[] = {
+              CONFIGURATION_DIRECTORY, "/",
+              PACKAGE_NAME, "-",
+              braille->definition.code, ".prefs"
+            };
+
+            path = joinStrings(strings, ARRAY_COUNT(strings));
+          }
+
+          if ((preferencesFile = path)) {
+            fixInstallPath(&preferencesFile);
+            if (path != preferencesFile) free(path);
+
+            logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
+            return 1;
+          } else {
+            logMallocError();
+          }
+        }
       }
 
       deallocateStrings(brailleParameters);
