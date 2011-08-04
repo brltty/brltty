@@ -462,6 +462,7 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
         }
 
         if (!insertModifier(file, combination, position, &value)) return 0;
+        if (value.key == KTB_KEY_ANY) combination->anyKeyCount += 1;
       }
 
       length -= count + 1;
@@ -495,6 +496,7 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
     } else if (!insertModifier(file, combination, position, &value)) {
       return 0;
     }
+    if (value.key == KTB_KEY_ANY) combination->anyKeyCount += 1;
   }
 
   return 1;

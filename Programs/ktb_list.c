@@ -164,10 +164,11 @@ putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
 }
 
 static int
-putCommandDescription (ListGenerationData *lgd, int command) {
+putCommandDescription (ListGenerationData *lgd, int command, int details) {
   char description[0X60];
 
-  describeCommand(command, description, sizeof(description), 0);
+  describeCommand(command, description, sizeof(description),
+                  details? (CDO_IncludeOperand | CDO_DefaultOperand): 0);
   return putUtf8String(lgd, description);
 }
 
@@ -226,7 +227,7 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
       if (!putUtf8String(lgd, "switch to ")) return 0;
       if (!putCharacterString(lgd, c->title)) return 0;
     } else {
-      if (!putCommandDescription(lgd, command)) return 0;
+      if (!putCommandDescription(lgd, command, (keyValue->key != KTB_KEY_ANY))) return 0;
     }
 
     if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -263,7 +264,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
       if (!(binding->flags & KBF_HIDDEN)) {
         size_t keysOffset;
 
-        if (!putCommandDescription(lgd, binding->command)) return 0;
+        if (!putCommandDescription(lgd, binding->command, !binding->combination.anyKeyCount)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         keysOffset = lgd->lineLength;
 

@@ -183,7 +183,8 @@ static void enterLearnMode(void)
   while ((res = brlapi_readKey(1, &code)) != -1) {
     fprintf(stderr, "got key %016"BRLAPI_PRIxKEYCODE"\n",code);
     cmd = cmdBrlapiToBrltty(code);
-    describeCommand(cmd, buf, sizeof(buf), 1);
+    describeCommand(cmd, buf, sizeof(buf),
+                    CDO_IncludeName | CDO_IncludeOperand);
     brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
     if (cmd==BRL_CMD_LEARN) return;

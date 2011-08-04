@@ -458,7 +458,8 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
       {
         char buffer[0X100];
-        describeCommand(command, buffer, sizeof(buffer), 1);
+        describeCommand(command, buffer, sizeof(buffer),
+                        CDO_IncludeName | CDO_IncludeOperand);
         logMessage(LOG_DEBUG, "Learn: %s", buffer);
         if (!message(mode, buffer, MSG_NODELAY|MSG_SILENT)) return 0;
       }

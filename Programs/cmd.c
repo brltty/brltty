@@ -116,7 +116,7 @@ getCommandEntry (int code) {
 }
 
 size_t
-describeCommand (int command, char *buffer, size_t size, int details) {
+describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options) {
   const char *start = buffer;
 
   int blk = command & BRL_MSK_BLK;
@@ -132,7 +132,7 @@ describeCommand (int command, char *buffer, size_t size, int details) {
   } else {
     int length;
 
-    if (details) {
+    if (options & CDO_IncludeName) {
       snprintf(buffer, size, "%s: %n", cmd->name, &length);
       buffer += length, size -= length;
     }
@@ -186,8 +186,11 @@ describeCommand (int command, char *buffer, size_t size, int details) {
       }
     }
 
-    if (details) {
-      if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
+    if (options & CDO_IncludeOperand) {
+      if ((options & CDO_DefaultOperand) && cmd->isColumn && !cmd->isRouting && !arg) {
+        snprintf(buffer, size, " at cursor%n", &length);
+        buffer += length, size -= length;
+      } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         snprintf(buffer, size, " #%u%n",
                  arg - (cmd->code & BRL_MSK_ARG) + 1,
                  &length);
@@ -250,7 +253,8 @@ formatCommand (char *buffer, size_t size, int command) {
   }
 
   {
-    size_t length = describeCommand(command, buffer, size, 1);  
+    size_t length = describeCommand(command, buffer, size, 
+                                    CDO_IncludeName | CDO_IncludeOperand);
     buffer += length, size -= length;
   }
 

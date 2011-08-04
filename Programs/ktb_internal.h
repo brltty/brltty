@@ -57,6 +57,7 @@ typedef enum {
 
 typedef struct {
   unsigned char flags;
+  unsigned char anyKeyCount;
   unsigned char modifierCount;
   unsigned char modifierPositions[MAX_MODIFIERS_PER_COMBINATION];
   KeyValue modifierKeys[MAX_MODIFIERS_PER_COMBINATION];

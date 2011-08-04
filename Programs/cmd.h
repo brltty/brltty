@@ -43,7 +43,13 @@ typedef struct {
 extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
-extern size_t describeCommand (int command, char *buffer, size_t size, int details);
+typedef enum {
+  CDO_IncludeName,
+  CDO_IncludeOperand,
+  CDO_DefaultOperand
+} CommandDescriptionOption;
+
+extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
 extern void logCommand (int command);
 extern void logTransformedCommand (int oldCommand, int newCommand);
 
