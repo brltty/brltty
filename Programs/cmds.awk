@@ -21,8 +21,9 @@ function writeCommandEntry(name, symbol, help) {
   print "  .name = \"" name "\","
   print "  .code = " symbol ","
 
-  if (help ~ /^go /) print "  .isMotion = 1,"
   if (help ~ /^toggle /) print "  .isToggle = 1,"
+  if (help ~ /^go /) print "  .isMotion = 1,"
+  if (help ~ /^bring /) print "  .isRouting = 1,"
 
   if (symbol ~ /^BRL_BLK_/) {
     if (symbol ~ /^BRL_BLK_PASS/) {

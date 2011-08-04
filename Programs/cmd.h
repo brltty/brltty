@@ -31,8 +31,9 @@ typedef struct {
   const char *name;
   const char *description;
   int code;
-  unsigned isMotion:1;
   unsigned isToggle:1;
+  unsigned isMotion:1;
+  unsigned isRouting:1;
   unsigned isColumn:1;
   unsigned isRow:1;
   unsigned isOffset:1;

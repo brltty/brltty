@@ -769,6 +769,7 @@ processBindOperands (DataFile *file, void *data) {
       if (cmd->isColumn) binding.flags |= KBF_COLUMN;
       if (cmd->isRow) binding.flags |= KBF_ROW;
       if (cmd->isRange) binding.flags |= KBF_RANGE;
+      if (cmd->isRouting) binding.flags |= KBF_ROUTE;
       if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }
