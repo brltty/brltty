@@ -31,7 +31,140 @@ map Control CONTROL
 
 bind Space+Shift KEY_BACKSPACE
 bind Space+Control KEY_ENTER
+bind Shift+Control KEY_TAB
 
+bind Shift LNUP
+bind Control LNDN
 bind ScrollLeft FWINLT
 bind ScrollRight FWINRT
+bind ScrollLeft+Shift FWINLTSKIP
+bind ScrollRight+Control FWINRTSKIP
+bind ScrollLeft+ScrollRight HOME
+
+bind JoystickEnter ROUTE
+bind JoystickLeft KEY_CURSOR_LEFT
+bind JoystickRight KEY_CURSOR_RIGHT
+bind JoystickUp KEY_CURSOR_UP
+bind JoystickDown KEY_CURSOR_DOWN
+
+bind ScrollLeft+JoystickEnter SETLEFT
+bind ScrollLeft+JoystickLeft CHRLT
+bind ScrollLeft+JoystickRight CHRRT
+bind ScrollLeft+JoystickUp PRDIFLN
+bind ScrollLeft+JoystickDown NXDIFLN
+
+bind ScrollRight+JoystickEnter DESCCHAR
+bind ScrollRight+JoystickLeft HWINLT
+bind ScrollRight+JoystickRight HWINRT
+bind ScrollRight+JoystickUp ATTRUP
+bind ScrollRight+JoystickDown ATTRDN
+
+bind ScrollLeft+ScrollRight+JoystickEnter BACK
+bind ScrollLeft+ScrollRight+JoystickLeft PRPGRPH
+bind ScrollLeft+ScrollRight+JoystickRight NXPGRPH
+bind ScrollLeft+ScrollRight+JoystickUp PRPROMPT
+bind ScrollLeft+ScrollRight+JoystickDown NXPROMPT
+
+bind Shift+JoystickEnter CSRJMP_VERT
+bind Shift+JoystickLeft LNBEG
+bind Shift+JoystickRight LNEND
+bind Shift+JoystickUp TOP
+bind Shift+JoystickDown BOT
+
+bind Space+JoystickEnter PASTE
+bind Space+JoystickLeft CUTBEGIN
+bind Space+JoystickUp CUTAPPEND
+bind Space+JoystickRight CUTLINE
+bind Space+JoystickDown CUTRECT
+
+bind Control+JoystickEnter KEY_DELETE
+bind Control+JoystickLeft KEY_HOME
+bind Control+JoystickRight KEY_END
+bind Control+JoystickUp KEY_PAGE_UP
+bind Control+JoystickDown KEY_PAGE_DOWN
+
+bind Space+Dot1 DISPMD
+bind JoystickLeft+Dot1 DISPMD+off
+bind JoystickRight+Dot1 DISPMD+on
+bind Space+Dot1+Dot2 SKPBLNKWINS
+bind JoystickLeft+Dot1+Dot2 SKPBLNKWINS+off
+bind JoystickRight+Dot1+Dot2 SKPBLNKWINS+on
+bind Space+Dot1+Dot4 CSRVIS
+bind JoystickLeft+Dot1+Dot4 CSRVIS+off
+bind JoystickRight+Dot1+Dot4 CSRVIS+on
+bind Space+Dot1+Dot2+Dot4 FREEZE
+bind Space+Dot1+Dot2+Dot5 HELP
+bind Space+Dot2+Dot4 SKPIDLNS
+bind JoystickLeft+Dot2+Dot4 SKPIDLNS+off
+bind JoystickRight+Dot2+Dot4 SKPIDLNS+on
+bind Space+Dot1+Dot2+Dot3 LEARN
+bind Space+Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind JoystickLeft+Dot1+Dot2+Dot3+Dot4 PREFLOAD
+bind JoystickRight+Dot1+Dot2+Dot3+Dot4 PREFSAVE
+bind Space+Dot2+Dot3+Dot4 INFO
+bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
+bind JoystickLeft+Dot2+Dot3+Dot4+Dot5 CSRTRK+off
+bind JoystickRight+Dot2+Dot3+Dot4+Dot5 CSRTRK+on
+bind Space+Dot1+Dot3+Dot6 ATTRVIS
+bind JoystickLeft+Dot1+Dot3+Dot6 ATTRVIS+off
+bind JoystickRight+Dot1+Dot3+Dot6 ATTRVIS+on
+bind Space+Dot2+Dot4+Dot5+Dot6 SLIDEWIN
+bind JoystickLeft+Dot2+Dot4+Dot5+Dot6 SLIDEWIN+off
+bind JoystickRight+Dot2+Dot4+Dot5+Dot6 SLIDEWIN+on
+bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
+bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
+
+bind JoystickUp+Dot1 KEY_FUNCTION+0
+bind JoystickUp+Dot1+Dot2 KEY_FUNCTION+1
+bind JoystickUp+Dot1+Dot4 KEY_FUNCTION+2
+bind JoystickUp+Dot1+Dot4+Dot5 KEY_FUNCTION+3
+bind JoystickUp+Dot1+Dot5 KEY_FUNCTION+4
+bind JoystickUp+Dot1+Dot2+Dot4 KEY_FUNCTION+5
+bind JoystickUp+Dot1+Dot2+Dot4+Dot5 KEY_FUNCTION+6
+bind JoystickUp+Dot1+Dot2+Dot5 KEY_FUNCTION+7
+bind JoystickUp+Dot2+Dot4 KEY_FUNCTION+8
+bind JoystickUp+Dot2+Dot4+Dot5 KEY_FUNCTION+9
+bind JoystickUp+Dot1+Dot3 KEY_FUNCTION+10
+bind JoystickUp+Dot1+Dot2+Dot3 KEY_FUNCTION+11
+bind JoystickUp+Dot1+Dot3+Dot4 KEY_FUNCTION+12
+bind JoystickUp+Dot1+Dot3+Dot4+Dot5 KEY_FUNCTION+13
+bind JoystickUp+Dot1+Dot3+Dot5 KEY_FUNCTION+14
+bind JoystickUp+Dot1+Dot2+Dot3+Dot4 KEY_FUNCTION+15
+bind JoystickUp+Dot1+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+16
+bind JoystickUp+Dot1+Dot2+Dot3+Dot5 KEY_FUNCTION+17
+bind JoystickUp+Dot2+Dot3+Dot4 KEY_FUNCTION+18
+bind JoystickUp+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+19
+bind JoystickUp+Dot1+Dot3+Dot6 KEY_FUNCTION+20
+bind JoystickUp+Dot1+Dot2+Dot3+Dot6 KEY_FUNCTION+21
+bind JoystickUp+Dot2+Dot4+Dot5+Dot6 KEY_FUNCTION+22
+bind JoystickUp+Dot1+Dot3+Dot4+Dot6 KEY_FUNCTION+23
+bind JoystickUp+Dot1+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+24
+bind JoystickUp+Dot1+Dot3+Dot5+Dot6 KEY_FUNCTION+25
+
+bind JoystickDown+Dot1 SWITCHVT+0
+bind JoystickDown+Dot1+Dot2 SWITCHVT+1
+bind JoystickDown+Dot1+Dot4 SWITCHVT+2
+bind JoystickDown+Dot1+Dot4+Dot5 SWITCHVT+3
+bind JoystickDown+Dot1+Dot5 SWITCHVT+4
+bind JoystickDown+Dot1+Dot2+Dot4 SWITCHVT+5
+bind JoystickDown+Dot1+Dot2+Dot4+Dot5 SWITCHVT+6
+bind JoystickDown+Dot1+Dot2+Dot5 SWITCHVT+7
+bind JoystickDown+Dot2+Dot4 SWITCHVT+8
+bind JoystickDown+Dot2+Dot4+Dot5 SWITCHVT+9
+bind JoystickDown+Dot1+Dot3 SWITCHVT+10
+bind JoystickDown+Dot1+Dot2+Dot3 SWITCHVT+11
+bind JoystickDown+Dot1+Dot3+Dot4 SWITCHVT+12
+bind JoystickDown+Dot1+Dot3+Dot4+Dot5 SWITCHVT+13
+bind JoystickDown+Dot1+Dot3+Dot5 SWITCHVT+14
+bind JoystickDown+Dot1+Dot2+Dot3+Dot4 SWITCHVT+15
+bind JoystickDown+Dot1+Dot2+Dot3+Dot4+Dot5 SWITCHVT+16
+bind JoystickDown+Dot1+Dot2+Dot3+Dot5 SWITCHVT+17
+bind JoystickDown+Dot2+Dot3+Dot4 SWITCHVT+18
+bind JoystickDown+Dot2+Dot3+Dot4+Dot5 SWITCHVT+19
+bind JoystickDown+Dot1+Dot3+Dot6 SWITCHVT+20
+bind JoystickDown+Dot1+Dot2+Dot3+Dot6 SWITCHVT+21
+bind JoystickDown+Dot2+Dot4+Dot5+Dot6 SWITCHVT+22
+bind JoystickDown+Dot1+Dot3+Dot4+Dot6 SWITCHVT+23
+bind JoystickDown+Dot1+Dot3+Dot4+Dot5+Dot6 SWITCHVT+24
+bind JoystickDown+Dot1+Dot3+Dot5+Dot6 SWITCHVT+25
 
