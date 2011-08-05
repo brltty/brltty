@@ -222,7 +222,7 @@ updateKeys (const unsigned char *packet) {
       if (!key) break;
 
       if ((key < 1) || (key > cellCount)) {
-        logMessage(LOG_NOTICE, "Invalid routing key number: %u", key);
+        logMessage(LOG_NOTICE, "invalid routing key number: %u", key);
         continue;
       }
       key -= 1;
@@ -280,7 +280,7 @@ static const InputOutputOperations *io;
 #define SERIAL_INITIAL_TIMEOUT 200
 #define SERIAL_SUBSEQUENT_TIMEOUT 100
 
-static const char *serialDeviceNames[] = {"Adapter", "Base"};
+static const char *serialDeviceNames[] = {"Serial Adapter", "Base Unit"};
 static unsigned int serialCharactersPerSecond;
 
 static inline void
@@ -440,7 +440,7 @@ logSerialSerialNumber (BrailleDisplay *brl) {
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "Voyager %s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
+    logMessage(LOG_INFO, "%s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4], buffer[5],
                buffer[6], buffer[7], buffer[8], buffer[9]);
@@ -459,7 +459,7 @@ logSerialHardwareVersion (BrailleDisplay *brl) {
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "Voyager %s Hardware Version: %c.%c.%c", 
+    logMessage(LOG_INFO, "%s Hardware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -477,7 +477,7 @@ logSerialFirmwareVersion (BrailleDisplay *brl) {
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "Voyager %s Firmware Version: %c.%c.%c", 
+    logMessage(LOG_INFO, "%s Firmware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -692,7 +692,7 @@ putUsbData (
                               request, value, index, buffer, size, 100);
     if (ret != -1) return 1;
     if ((errno != EPIPE) || (retry == USB_RETRIES)) return 0;
-    logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
+    logMessage(LOG_WARNING, "USB request 0X%X retry #%d", request, ++retry);
   }
 }
 
@@ -707,7 +707,7 @@ getUsbData (
     int ret = usbControlRead(usbChannel->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                              request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
-    logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
+    logMessage(LOG_WARNING, "USB request 0X%X retry #%d", request, ++retry);
   }
 }
 
@@ -727,7 +727,7 @@ logUsbString (uint8_t request, const char *description) {
   if (getUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
     char *string = usbDecodeString(&descriptor.string);
     if (string) {
-      logMessage(LOG_INFO, "Voyager %s: %s", description, string);
+      logMessage(LOG_INFO, "%s: %s", description, string);
       free(string);
       return 1;
     }
@@ -746,7 +746,7 @@ logUsbHardwareVersion (BrailleDisplay *brl) {
   int size = getUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
-  logMessage(LOG_INFO, "Voyager Hardware Version: %u.%u",
+  logMessage(LOG_INFO, "Hardware Version: %u.%u",
              buffer[0], buffer[1]);
   return 1;
 }
@@ -810,14 +810,14 @@ updateUsbKeys (BrailleDisplay *brl) {
           return 0;
         }
 
-        logMessage(LOG_ERR, "Voyager read error: %s", strerror(errno));
+        logMessage(LOG_ERR, "USB read error: %s", strerror(errno));
         keysInitialized = 0;
         return 1;
       }
 
       if ((result > 0) && (result < sizeof(packet))) {
         /* The display handles read requests of only and exactly 8 bytes */
-        logMessage(LOG_NOTICE, "Short read: %d", result);
+        logMessage(LOG_NOTICE, "short USB read: %d", result);
         keysInitialized = 0;
         return 1;
       }
@@ -878,6 +878,13 @@ closeUsbPort (void) {
   }
 }
 
+static int
+awaitUsbInput (int timeout) {
+  return usbAwaitInput(usbChannel->device,
+                       usbChannel->definition.inputEndpoint,
+                       timeout);
+}
+
 static ssize_t
 readUsbData (void *buffer, size_t size, int wait) {
   const int timeout = 100;
@@ -895,6 +902,7 @@ static const InputOutputOperations usbInputOutputOperations = {
   .protocol = &usbProtocolOperations,
   .openPort = openUsbPort,
   .closePort = closeUsbPort,
+  .awaitInput = awaitUsbInput,
   .readData = readUsbData
 };
 
@@ -911,7 +919,7 @@ static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern *
 static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
-  logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
+  logMessage(LOG_DEBUG, "setting display voltage: %02X", voltage);
   return io->protocol->setDisplayVoltage(brl, voltage);
 }
 
@@ -944,7 +952,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           const DeviceType *deviceType = deviceModel->deviceType;
 
           cellCount = deviceModel->actualCellCount;
-          logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
+          logMessage(LOG_INFO, "Device Type: %s", deviceType->productName);
+          logMessage(LOG_INFO, "Cell Count: %u", cellCount);
 
           io->protocol->logSerialNumber(brl);
           io->protocol->logHardwareVersion(brl);
@@ -994,7 +1003,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
 
       if (!deviceModel->reportedCellCount) {
-        logMessage(LOG_ERR, "Unsupported Voyager cell count: %u", cellCount);
+        logMessage(LOG_ERR, "unsupported cell count: %u", cellCount);
         deviceModel = NULL;
       }
     }
