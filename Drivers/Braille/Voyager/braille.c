@@ -160,8 +160,9 @@ static const DeviceModel *deviceModel;
 
 
 #define READY_BEEP_DURATION 200
+#define MAXIMUM_CELL_COUNT 70 /* arbitrary max for allocations */
 
-#define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
+static unsigned char cellsInitialized;
 static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
@@ -169,16 +170,10 @@ static unsigned char cellCount;
 /* Structure to remember which keys are pressed */
 typedef struct {
   uint16_t navigation;
-  unsigned char routing[MAXIMUM_CELLS];
+  unsigned char routing[MAXIMUM_CELL_COUNT];
 } Keys;
 
-/* Remember which keys are pressed.
- * Updated immediately whenever a key is pressed.
- * Cleared after analysis whenever a key is released.
- */
 static Keys pressedKeys;
-
-/* Flag to reinitialize brl_readCommand() function state. */
 static char keysInitialized;
 
 static void
@@ -894,8 +889,8 @@ static const InputOutputOperations usbInputOutputOperations = {
 
 
 /* Global variables */
-static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
+static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern */
 
 /* Voltage: from 0->300V to 255->200V.
  * Presumably this is voltage for dot firmness.
@@ -958,27 +953,25 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           brl->setFirmness = setFirmness;
 
-          if ((translatedCells = malloc(cellCount))) {
-            if ((previousCells = malloc(cellCount))) {
-              /* Force rewrite of display */
-              memset(previousCells, 0XFF, cellCount); /* all dots */
-
+          if ((previousCells = malloc(cellCount))) {
+            if ((translatedCells = malloc(cellCount))) {
               if (io->protocol->setDisplayState(1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
+                cellsInitialized = 0;
 
                 soundBeep(READY_BEEP_DURATION);
                 return 1;
               }
 
-              free(previousCells);
-              previousCells = NULL;
+              free(translatedCells);
+              translatedCells = NULL;
             } else {
               logMallocError();
             }
 
-            free(translatedCells);
-            translatedCells = NULL;
+            free(previousCells);
+            previousCells = NULL;
           } else {
             logMallocError();
           }
@@ -1020,8 +1013,20 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int from;
   unsigned int to;
+  int changed;
 
-  if (cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to)) {
+  if (cellsInitialized) {
+    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to);
+  } else {
+    memcpy(previousCells, brl->buffer, cellCount);
+    from = 0;
+    to = cellCount;
+
+    changed = 1;
+    cellsInitialized = 1;
+  }
+
+  if (changed) {
     translateOutputCells(&translatedCells[from], &brl->buffer[from], to-from);
 
     /* The firmware supports multiples of 8 cells, so there are extra cells
