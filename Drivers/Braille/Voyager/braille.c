@@ -281,7 +281,6 @@ typedef struct {
 static const InputOutputOperations *io;
 
 
-#define SERIAL_OPEN_DELAY 400
 #define SERIAL_INITIAL_TIMEOUT 200
 #define SERIAL_SUBSEQUENT_TIMEOUT 100
 
@@ -403,11 +402,9 @@ static int
 nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait) {
   int length;
 
-logMessage(LOG_NOTICE, "waiting");
   if (wait)
     if (!io->awaitInput(SERIAL_INITIAL_TIMEOUT))
       return 0;
-logMessage(LOG_NOTICE, "waited");
 
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
@@ -566,6 +563,8 @@ static const ProtocolOperations serialProtocolOperations = {
 
 #include "io_serial.h"
 
+#define SERIAL_OPEN_DELAY 4000
+
 static SerialDevice *serialDevice = NULL;
 
 static int
@@ -622,13 +621,15 @@ static const InputOutputOperations serialInputOutputOperations = {
 
 #include "io_bluetooth.h"
 
+#define BLUETOOTH_CHANNEL 1
+#define BLUETOOTH_OPEN_DELAY 800
+
 static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  if (!(bluetoothConnection = bthOpenConnection(device, 1, 0))) return 0;
-  approximateDelay(SERIAL_OPEN_DELAY);
-logMessage(LOG_NOTICE, "opened");
+  if (!(bluetoothConnection = bthOpenConnection(device, BLUETOOTH_CHANNEL, 0))) return 0;
+  approximateDelay(BLUETOOTH_OPEN_DELAY);
   return 1;
 }
 
