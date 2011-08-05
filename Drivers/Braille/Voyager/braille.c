@@ -251,17 +251,17 @@ updateKeys (const unsigned char *packet) {
 
 
 typedef struct {
-  int (*getCellCount) (unsigned char *length);
-  int (*logSerialNumber) (void);
-  int (*logHardwareVersion) (void);
-  int (*logFirmwareVersion) (void);
-  int (*setDisplayVoltage) (unsigned char voltage);
-  int (*getDisplayVoltage) (unsigned char *voltage);
-  int (*getDisplayCurrent) (unsigned char *current);
-  int (*setDisplayState) (unsigned char state);
-  int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
-  int (*updateKeys) (void);
-  int (*soundBeep) (unsigned char duration);
+  int (*getCellCount) (BrailleDisplay *brl, unsigned char *length);
+  int (*logSerialNumber) (BrailleDisplay *brl);
+  int (*logHardwareVersion) (BrailleDisplay *brl);
+  int (*logFirmwareVersion) (BrailleDisplay *brl);
+  int (*setDisplayVoltage) (BrailleDisplay *brl, unsigned char voltage);
+  int (*getDisplayVoltage) (BrailleDisplay *brl, unsigned char *voltage);
+  int (*getDisplayCurrent) (BrailleDisplay *brl, unsigned char *current);
+  int (*setDisplayState) (BrailleDisplay *brl, unsigned char state);
+  int (*writeBraille) (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start);
+  int (*updateKeys) (BrailleDisplay *brl);
+  int (*soundBeep) (BrailleDisplay *brl, unsigned char duration);
 } ProtocolOperations;
 
 typedef struct {
@@ -276,13 +276,20 @@ typedef struct {
 static const InputOutputOperations *io;
 
 
+#define SERIAL_BAUD 38400
 #define SERIAL_INITIAL_TIMEOUT 200
 #define SERIAL_SUBSEQUENT_TIMEOUT 100
 
 static const char *serialDeviceNames[] = {"Adapter", "Base"};
+static unsigned int serialCharactersPerSecond;
+
+static inline void
+setSerialCharactersPerSecond (int bits) {
+  serialCharactersPerSecond = SERIAL_BAUD / bits;
+}
 
 static int
-writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count) {
+writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data, unsigned char count) {
   unsigned char buffer[2 + (count * 2)];
   unsigned char size = 0;
   unsigned char index;
@@ -295,6 +302,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
       buffer[size++] = buffer[0];
 
   logOutputPacket(buffer, size);
+  brl->writeDelay += (size * 1000 / serialCharactersPerSecond) + 1;
   return io->writeData(buffer, size) != -1;
 }
 
@@ -410,9 +418,9 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait)
 }
 
 static int
-getSerialCellCount (unsigned char *count) {
+getSerialCellCount (BrailleDisplay *brl, unsigned char *count) {
   const unsigned int code = 0X4C;
-  if (writeSerialPacket(code, NULL, 0)) {
+  if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[3];
     if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *count = buffer[2];
@@ -423,14 +431,14 @@ getSerialCellCount (unsigned char *count) {
 }
 
 static int
-logSerialSerialNumber (void) {
+logSerialSerialNumber (BrailleDisplay *brl) {
   unsigned char device;
 
   for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X53;
     unsigned char buffer[10];
 
-    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
                serialDeviceNames[buffer[1]],
@@ -442,14 +450,14 @@ logSerialSerialNumber (void) {
 }
 
 static int
-logSerialHardwareVersion (void) {
+logSerialHardwareVersion (BrailleDisplay *brl) {
   unsigned char device;
 
   for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X48;
     unsigned char buffer[5];
 
-    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Hardware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
@@ -460,14 +468,14 @@ logSerialHardwareVersion (void) {
 }
 
 static int
-logSerialFirmwareVersion (void) {
+logSerialFirmwareVersion (BrailleDisplay *brl) {
   unsigned char device;
 
   for (device=0; device<ARRAY_COUNT(serialDeviceNames); ++device) {
     const unsigned char code = 0X46;
     unsigned char buffer[5];
 
-    if (!writeSerialPacket(code, &device, 1)) return 0;
+    if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "Voyager %s Firmware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
@@ -478,14 +486,14 @@ logSerialFirmwareVersion (void) {
 }
 
 static int
-setSerialDisplayVoltage (unsigned char voltage) {
-  return writeSerialPacket(0X56, &voltage, 1);
+setSerialDisplayVoltage (BrailleDisplay *brl, unsigned char voltage) {
+  return writeSerialPacket(brl, 0X56, &voltage, 1);
 }
 
 static int
-getSerialDisplayVoltage (unsigned char *voltage) {
+getSerialDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
   const unsigned char code = 0X47;
-  if (writeSerialPacket(code, NULL, 0)) {
+  if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[2];
     if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *voltage = buffer[1];
@@ -496,9 +504,9 @@ getSerialDisplayVoltage (unsigned char *voltage) {
 }
 
 static int
-getSerialDisplayCurrent (unsigned char *current) {
+getSerialDisplayCurrent (BrailleDisplay *brl, unsigned char *current) {
   const unsigned int code = 0X43;
-  if (writeSerialPacket(code, NULL, 0)) {
+  if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[2];
     if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
       *current = buffer[1];
@@ -509,23 +517,23 @@ getSerialDisplayCurrent (unsigned char *current) {
 }
 
 static int
-setSerialDisplayState (unsigned char state) {
-  return writeSerialPacket(0X44, &state, 1);
+setSerialDisplayState (BrailleDisplay *brl, unsigned char state) {
+  return writeSerialPacket(brl, 0X44, &state, 1);
 }
 
 static int
-writeSerialBraille (unsigned char *cells, unsigned char count, unsigned char start) {
+writeSerialBraille (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start) {
   unsigned char buffer[2 + count];
   unsigned char size = 0;
   buffer[size++] = start;
   buffer[size++] = count;
   memcpy(&buffer[size], cells, count);
   size += count;
-  return writeSerialPacket(0X42, buffer, size);
+  return writeSerialPacket(brl, 0X42, buffer, size);
 }
 
 static int
-updateSerialKeys (void) {
+updateSerialKeys (BrailleDisplay *brl) {
   const unsigned char code = 0X4B;
   unsigned char packet[9];
 
@@ -537,8 +545,8 @@ updateSerialKeys (void) {
 }
 
 static int
-soundSerialBeep (unsigned char duration) {
-  return writeSerialPacket(0X41, &duration, 1);
+soundSerialBeep (BrailleDisplay *brl, unsigned char duration) {
+  return writeSerialPacket(brl, 0X41, &duration, 1);
 }
 
 static const ProtocolOperations serialProtocolOperations = {
@@ -565,8 +573,9 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 38400)) {
+    if (serialRestartDevice(serialDevice, SERIAL_BAUD)) {
       if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) {
+        setSerialCharactersPerSecond(serialGetCharacterBits(serialDevice));
         approximateDelay(SERIAL_OPEN_DELAY);
         return 1;
       }
@@ -616,14 +625,16 @@ static const InputOutputOperations serialInputOutputOperations = {
 
 #include "io_bluetooth.h"
 
-#define BLUETOOTH_CHANNEL 1
+#define BLUETOOTH_CHANNEL_NUMBER 1
+#define BLUETOOTH_CHARACTER_BITS 8
 #define BLUETOOTH_OPEN_DELAY 800
 
 static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  if (!(bluetoothConnection = bthOpenConnection(device, BLUETOOTH_CHANNEL, 0))) return 0;
+  if (!(bluetoothConnection = bthOpenConnection(device, BLUETOOTH_CHANNEL_NUMBER, 0))) return 0;
+  setSerialCharactersPerSecond(BLUETOOTH_CHARACTER_BITS);
   approximateDelay(BLUETOOTH_OPEN_DELAY);
   return 1;
 }
@@ -701,7 +712,7 @@ getUsbData (
 }
 
 static int
-getUsbCellCount (unsigned char *count) {
+getUsbCellCount (BrailleDisplay *brl, unsigned char *count) {
   unsigned char buffer[2];
   int size = getUsbData(0X06, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
@@ -725,12 +736,12 @@ logUsbString (uint8_t request, const char *description) {
 }
 
 static int
-logUsbSerialNumber (void) {
+logUsbSerialNumber (BrailleDisplay *brl) {
   return logUsbString(0X03, "Serial Number");
 }
 
 static int
-logUsbHardwareVersion (void) {
+logUsbHardwareVersion (BrailleDisplay *brl) {
   unsigned char buffer[2];
   int size = getUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
@@ -741,17 +752,17 @@ logUsbHardwareVersion (void) {
 }
 
 static int
-logUsbFirmwareVersion (void) {
+logUsbFirmwareVersion (BrailleDisplay *brl) {
   return logUsbString(0X05, "Firmware Version");
 }
 
 static int
-setUsbDisplayVoltage (unsigned char voltage) {
+setUsbDisplayVoltage (BrailleDisplay *brl, unsigned char voltage) {
   return putUsbData(0X01, voltage, 0, NULL, 0);
 }
 
 static int
-getUsbDisplayVoltage (unsigned char *voltage) {
+getUsbDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
   unsigned char buffer[1];
   int size = getUsbData(0X02, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
@@ -761,7 +772,7 @@ getUsbDisplayVoltage (unsigned char *voltage) {
 }
 
 static int
-getUsbDisplayCurrent (unsigned char *current) {
+getUsbDisplayCurrent (BrailleDisplay *brl, unsigned char *current) {
   unsigned char buffer[1];
   int size = getUsbData(0X08, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
@@ -771,17 +782,17 @@ getUsbDisplayCurrent (unsigned char *current) {
 }
 
 static int
-setUsbDisplayState (unsigned char state) {
+setUsbDisplayState (BrailleDisplay *brl, unsigned char state) {
   return putUsbData(0X00, state, 0, NULL, 0);
 }
 
 static int
-writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start) {
+writeUsbBraille (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start) {
   return putUsbData(0X07, 0, start, cells, count);
 }
 
 static int
-updateUsbKeys (void) {
+updateUsbKeys (BrailleDisplay *brl) {
   while (1) {
     unsigned char packet[8];
 
@@ -822,7 +833,7 @@ updateUsbKeys (void) {
 }
 
 static int
-soundUsbBeep (unsigned char duration) {
+soundUsbBeep (BrailleDisplay *brl, unsigned char duration) {
   return putUsbData(0X09, duration, 0, NULL, 0);
 }
 
@@ -901,12 +912,12 @@ static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
   logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
-  return io->protocol->setDisplayVoltage(voltage);
+  return io->protocol->setDisplayVoltage(brl, voltage);
 }
 
 static int
-soundBeep (unsigned char duration) {
-  if (!io->protocol->soundBeep(duration)) return 0;
+soundBeep (BrailleDisplay *brl, unsigned char duration) {
+  if (!io->protocol->soundBeep(brl, duration)) return 0;
   approximateDelay(duration);
   return 1;
 }
@@ -925,7 +936,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(parameters, device)) {
-    if (io->protocol->getCellCount(&cellCount)) {
+    if (io->protocol->getCellCount(brl, &cellCount)) {
       deviceModel = deviceModels;
 
       while (deviceModel->reportedCellCount) {
@@ -935,9 +946,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           cellCount = deviceModel->actualCellCount;
           logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
 
-          io->protocol->logSerialNumber();
-          io->protocol->logHardwareVersion();
-          io->protocol->logFirmwareVersion();
+          io->protocol->logSerialNumber(brl);
+          io->protocol->logHardwareVersion(brl);
+          io->protocol->logFirmwareVersion(brl);
 
           /* translatedCells holds the status cells and the text cells.
            * We export directly to BRLTTY only the text cells.
@@ -955,12 +966,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           if ((previousCells = malloc(cellCount))) {
             if ((translatedCells = malloc(cellCount))) {
-              if (io->protocol->setDisplayState(1)) {
+              if (io->protocol->setDisplayState(brl, 1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
                 cellsInitialized = 0;
 
-                soundBeep(READY_BEEP_DURATION);
+                soundBeep(brl, READY_BEEP_DURATION);
                 return 1;
               }
 
@@ -1041,18 +1052,18 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
         memcpy(buffer, translatedCells, 6);
         buffer[6] = buffer[7] = 0;
         memcpy(buffer+8, translatedCells+6, 38);
-        if (!io->protocol->writeBraille(buffer, 46, 2)) return 0;
+        if (!io->protocol->writeBraille(brl, buffer, 46, 2)) return 0;
         break;
       }
 
       case 70:
         /* Two ghost cells at the beginning of the display. */
-        if (!io->protocol->writeBraille(translatedCells, cellCount, 2)) return 0;
+        if (!io->protocol->writeBraille(brl, translatedCells, cellCount, 2)) return 0;
         break;
 
       default:
         /* No ghost cells. */
-        if (!io->protocol->writeBraille(translatedCells, cellCount, 0)) return 0;
+        if (!io->protocol->writeBraille(brl, translatedCells, cellCount, 0)) return 0;
         break;
     }
   }
@@ -1062,5 +1073,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  return io->protocol->updateKeys()? EOF: BRL_CMD_RESTARTBRL;
+  return io->protocol->updateKeys(brl)? EOF: BRL_CMD_RESTARTBRL;
 }
