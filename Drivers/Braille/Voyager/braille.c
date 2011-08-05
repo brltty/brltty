@@ -117,17 +117,17 @@ END_KEY_TABLE_LIST
 
 
 typedef struct {
-  const char *name;
+  const char *productName;
   const KeyTableDefinition *keyTableDefinition;
 } DeviceType;
 
 static const DeviceType deviceType_Voyager = {
-  .name = "Voyager",
+  .productName = "Voyager",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
 };
 
 static const DeviceType deviceType_BraillePen = {
-  .name = "Braille Pen",
+  .productName = "Braille Pen",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
 };
 
@@ -256,8 +256,6 @@ updateKeys (const unsigned char *packet) {
 
 
 typedef struct {
-  int (*openPort) (char **parameters, const char *device);
-  void (*closePort) (void);
   int (*getCellCount) (unsigned char *length);
   int (*logSerialNumber) (void);
   int (*logHardwareVersion) (void);
@@ -269,16 +267,24 @@ typedef struct {
   int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
   int (*updateKeys) (void);
   int (*soundBeep) (unsigned char duration);
+} ProtocolOperations;
+
+typedef struct {
+  const ProtocolOperations *protocol;
+  int (*openPort) (char **parameters, const char *device);
+  void (*closePort) (void);
+  int (*awaitInput) (int timeout);
+  ssize_t (*readData) (void *buffer, size_t size, int wait);
+  ssize_t (*writeData) (const void *data, size_t size);
 } InputOutputOperations;
+
 static const InputOutputOperations *io;
 
 
-#include "io_serial.h"
 #define SERIAL_OPEN_DELAY 400
 #define SERIAL_INITIAL_TIMEOUT 200
 #define SERIAL_SUBSEQUENT_TIMEOUT 100
 
-static SerialDevice *serialDevice = NULL;
 static const char *serialDeviceNames[] = {"Adapter", "Base"};
 
 static int
@@ -295,7 +301,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
       buffer[size++] = buffer[0];
 
   logOutputPacket(buffer, size);
-  return serialWriteData(serialDevice, buffer, size) != -1;
+  return io->writeData(buffer, size) != -1;
 }
 
 static int
@@ -309,9 +315,7 @@ readSerialPacket (unsigned char *packet, int size) {
     unsigned char byte;
 
     {
-      int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
-      ssize_t result = serialReadData(serialDevice, &byte, 1,
-                                      ((started || escape)? timeout: 0), timeout);
+      ssize_t result = io->readData(&byte, 1, (started || escape));
 
       if (result == 0) {
         errno = EAGAIN;
@@ -399,9 +403,11 @@ static int
 nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait) {
   int length;
 
+logMessage(LOG_NOTICE, "waiting");
   if (wait)
-    if (!serialAwaitInput(serialDevice, SERIAL_INITIAL_TIMEOUT))
+    if (!io->awaitInput(SERIAL_INITIAL_TIMEOUT))
       return 0;
+logMessage(LOG_NOTICE, "waited");
 
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
@@ -409,31 +415,6 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait)
   }
 
   return 0;
-}
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 38400)) {
-      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) {
-        approximateDelay(SERIAL_OPEN_DELAY);
-        return 1;
-      }
-    }
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
 }
 
 static int
@@ -568,12 +549,121 @@ soundSerialBeep (unsigned char duration) {
   return writeSerialPacket(0X41, &duration, 1);
 }
 
-static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort, getSerialCellCount,
-  logSerialSerialNumber, logSerialHardwareVersion, logSerialFirmwareVersion,
-  setSerialDisplayVoltage, getSerialDisplayVoltage, getSerialDisplayCurrent,
-  setSerialDisplayState, writeSerialBraille,
-  updateSerialKeys, soundSerialBeep
+static const ProtocolOperations serialProtocolOperations = {
+  .getCellCount = getSerialCellCount,
+  .logSerialNumber = logSerialSerialNumber,
+  .logHardwareVersion = logSerialHardwareVersion,
+  .logFirmwareVersion = logSerialFirmwareVersion,
+  .setDisplayVoltage = setSerialDisplayVoltage,
+  .getDisplayVoltage = getSerialDisplayVoltage,
+  .getDisplayCurrent = getSerialDisplayCurrent,
+  .setDisplayState = setSerialDisplayState,
+  .writeBraille = writeSerialBraille,
+  .updateKeys = updateSerialKeys,
+  .soundBeep = soundSerialBeep
+};
+
+
+#include "io_serial.h"
+
+static SerialDevice *serialDevice = NULL;
+
+static int
+openSerialPort (char **parameters, const char *device) {
+  if ((serialDevice = serialOpenDevice(device))) {
+    if (serialRestartDevice(serialDevice, 38400)) {
+      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) {
+        approximateDelay(SERIAL_OPEN_DELAY);
+        return 1;
+      }
+    }
+
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+
+  return 0;
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
+static int
+awaitSerialInput (int timeout) {
+  return serialAwaitInput(serialDevice, timeout);
+}
+
+static ssize_t
+readSerialData (void *buffer, size_t size, int wait) {
+  const int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
+  return serialReadData(serialDevice, buffer, size,
+                        (wait? timeout: 0), timeout);
+}
+
+static ssize_t
+writeSerialData (const void *data, size_t size) {
+  return serialWriteData(serialDevice, data, size);
+}
+
+static const InputOutputOperations serialInputOutputOperations = {
+  .protocol = &serialProtocolOperations,
+  .openPort = openSerialPort,
+  .closePort = closeSerialPort,
+  .awaitInput = awaitSerialInput,
+  .readData = readSerialData,
+  .writeData = writeSerialData
+};
+
+
+#include "io_bluetooth.h"
+
+static BluetoothConnection *bluetoothConnection = NULL;
+
+static int
+openBluetoothPort (char **parameters, const char *device) {
+  if (!(bluetoothConnection = bthOpenConnection(device, 1, 0))) return 0;
+  approximateDelay(SERIAL_OPEN_DELAY);
+logMessage(LOG_NOTICE, "opened");
+  return 1;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection) {
+    bthCloseConnection(bluetoothConnection);
+    bluetoothConnection = NULL;
+  }
+}
+
+static int
+awaitBluetoothInput (int timeout) {
+  return bthAwaitInput(bluetoothConnection, timeout);
+}
+
+static ssize_t
+readBluetoothData (void *buffer, size_t size, int wait) {
+  const int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
+  return bthReadData(bluetoothConnection, buffer, size,
+                     (wait? timeout: 0), timeout);
+}
+
+static ssize_t
+writeBluetoothData (const void *data, size_t size) {
+  return bthWriteData(bluetoothConnection, data, size);
+}
+
+static const InputOutputOperations bluetoothInputOutputOperations = {
+  .protocol = &serialProtocolOperations,
+  .openPort = openBluetoothPort,
+  .closePort = closeBluetoothPort,
+  .awaitInput = awaitBluetoothInput,
+  .readData = readBluetoothData,
+  .writeData = writeBluetoothData
 };
 
 
@@ -582,16 +672,16 @@ static const InputOutputOperations serialOperations = {
 /* Workarounds for control transfer flakiness (at least in this demo model) */
 #define USB_RETRIES 6
 
-static UsbChannel *usb = NULL;
+static UsbChannel *usbChannel = NULL;
 
 static int
-writeUsbData (
+putUsbData (
   uint8_t request, uint16_t value, uint16_t index,
   const unsigned char *buffer, uint16_t size
 ) {
   int retry = 0;
   while (1) {
-    int ret = usbControlWrite(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+    int ret = usbControlWrite(usbChannel->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                               request, value, index, buffer, size, 100);
     if (ret != -1) return 1;
     if ((errno != EPIPE) || (retry == USB_RETRIES)) return 0;
@@ -600,11 +690,14 @@ writeUsbData (
 }
 
 static int
-readUsbData (uint8_t request, uint16_t value, uint16_t index,
-	     unsigned char *buffer, uint16_t size) {
+getUsbData (
+  uint8_t request, uint16_t value, uint16_t index,
+  unsigned char *buffer, uint16_t size
+) {
   int retry = 0;
+
   while (1) {
-    int ret = usbControlRead(usb->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+    int ret = usbControlRead(usbChannel->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                              request, value, index, buffer, size, 100);
     if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
     logMessage(LOG_WARNING, "Voyager request 0X%X retry #%d.", request, ++retry);
@@ -612,35 +705,9 @@ readUsbData (uint8_t request, uint16_t value, uint16_t index,
 }
 
 static int
-openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    { .vendor=0X0798, .product=0X0001, 
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1
-    }
-    ,
-    { .vendor=0 }
-  };
-
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
-    return 1;
-  }
-
-  return 0;
-}
-
-static void
-closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
-}
-
-static int
 getUsbCellCount (unsigned char *count) {
   unsigned char buffer[2];
-  int size = readUsbData(0X06, 0, 0, buffer, sizeof(buffer));
+  int size = getUsbData(0X06, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   *count = buffer[1];
@@ -650,7 +717,7 @@ getUsbCellCount (unsigned char *count) {
 static int
 logUsbString (uint8_t request, const char *description) {
   UsbDescriptor descriptor;
-  if (readUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
+  if (getUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
     char *string = usbDecodeString(&descriptor.string);
     if (string) {
       logMessage(LOG_INFO, "Voyager %s: %s", description, string);
@@ -669,7 +736,7 @@ logUsbSerialNumber (void) {
 static int
 logUsbHardwareVersion (void) {
   unsigned char buffer[2];
-  int size = readUsbData(0X04, 0, 0, buffer, sizeof(buffer));
+  int size = getUsbData(0X04, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   logMessage(LOG_INFO, "Voyager Hardware Version: %u.%u",
@@ -684,13 +751,13 @@ logUsbFirmwareVersion (void) {
 
 static int
 setUsbDisplayVoltage (unsigned char voltage) {
-  return writeUsbData(0X01, voltage, 0, NULL, 0);
+  return putUsbData(0X01, voltage, 0, NULL, 0);
 }
 
 static int
 getUsbDisplayVoltage (unsigned char *voltage) {
   unsigned char buffer[1];
-  int size = readUsbData(0X02, 0, 0, buffer, sizeof(buffer));
+  int size = getUsbData(0X02, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   *voltage = buffer[0];
@@ -700,7 +767,7 @@ getUsbDisplayVoltage (unsigned char *voltage) {
 static int
 getUsbDisplayCurrent (unsigned char *current) {
   unsigned char buffer[1];
-  int size = readUsbData(0X08, 0, 0, buffer, sizeof(buffer));
+  int size = getUsbData(0X08, 0, 0, buffer, sizeof(buffer));
   if (size == -1) return 0;
 
   *current = buffer[0];
@@ -709,12 +776,12 @@ getUsbDisplayCurrent (unsigned char *current) {
 
 static int
 setUsbDisplayState (unsigned char state) {
-  return writeUsbData(0X00, state, 0, NULL, 0);
+  return putUsbData(0X00, state, 0, NULL, 0);
 }
 
 static int
 writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start) {
-  return writeUsbData(0X07, 0, start, cells, count);
+  return putUsbData(0X07, 0, start, cells, count);
 }
 
 static int
@@ -723,11 +790,9 @@ updateUsbKeys (void) {
     unsigned char packet[8];
 
     {
-      int size = usbReapInput(usb->device, usb->definition.inputEndpoint,
-                              packet, sizeof(packet),
-                              0, 0);
+      ssize_t result = io->readData(packet, sizeof(packet), 0);
 
-      if (size < 0) {
+      if (result < 0) {
         if (errno == EAGAIN) {
           /* no input */
           return 1;
@@ -743,14 +808,14 @@ updateUsbKeys (void) {
         return 1;
       }
 
-      if ((size > 0) && (size < sizeof(packet))) {
+      if ((result > 0) && (result < sizeof(packet))) {
         /* The display handles read requests of only and exactly 8 bytes */
-        logMessage(LOG_NOTICE, "Short read: %d", size);
+        logMessage(LOG_NOTICE, "Short read: %d", result);
         keysInitialized = 0;
         return 1;
       }
 
-      if (size == 0) {
+      if (result == 0) {
         /* no new key */
         return 1;
       }
@@ -762,15 +827,68 @@ updateUsbKeys (void) {
 
 static int
 soundUsbBeep (unsigned char duration) {
-  return writeUsbData(0X09, duration, 0, NULL, 0);
+  return putUsbData(0X09, duration, 0, NULL, 0);
 }
 
-static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort, getUsbCellCount,
-  logUsbSerialNumber, logUsbHardwareVersion, logUsbFirmwareVersion,
-  setUsbDisplayVoltage, getUsbDisplayVoltage, getUsbDisplayCurrent,
-  setUsbDisplayState, writeUsbBraille,
-  updateUsbKeys, soundUsbBeep
+static const ProtocolOperations usbProtocolOperations = {
+  .getCellCount = getUsbCellCount,
+  .logSerialNumber = logUsbSerialNumber,
+  .logHardwareVersion = logUsbHardwareVersion,
+  .logFirmwareVersion = logUsbFirmwareVersion,
+  .setDisplayVoltage = setUsbDisplayVoltage,
+  .getDisplayVoltage = getUsbDisplayVoltage,
+  .getDisplayCurrent = getUsbDisplayCurrent,
+  .setDisplayState = setUsbDisplayState,
+  .writeBraille = writeUsbBraille,
+  .updateKeys = updateUsbKeys,
+  .soundBeep = soundUsbBeep
+};
+
+
+static int
+openUsbPort (char **parameters, const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    { .vendor=0X0798, .product=0X0001, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+closeUsbPort (void) {
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbChannel = NULL;
+  }
+}
+
+static ssize_t
+readUsbData (void *buffer, size_t size, int wait) {
+  const int timeout = 100;
+  ssize_t result = usbReapInput(usbChannel->device,
+                                usbChannel->definition.inputEndpoint,
+                                buffer, size,
+                                (wait? timeout: 0), timeout);
+
+  if (result != -1) return result;
+  if (errno == EAGAIN) return 0;
+  return -1;
+}
+
+static const InputOutputOperations usbInputOutputOperations = {
+  .protocol = &usbProtocolOperations,
+  .openPort = openUsbPort,
+  .closePort = closeUsbPort,
+  .readData = readUsbData
 };
 
 
@@ -787,22 +905,31 @@ static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
   logMessage(LOG_DEBUG, "Setting voltage: %02X", voltage);
-  return io->setDisplayVoltage(voltage);
+  return io->protocol->setDisplayVoltage(voltage);
+}
+
+static int
+soundBeep (unsigned char duration) {
+  if (!io->protocol->soundBeep(duration)) return 0;
+  approximateDelay(duration);
+  return 1;
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
-    io = &serialOperations;
+    io = &serialInputOutputOperations;
   } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
+    io = &usbInputOutputOperations;
+  } else if (isBluetoothDevice(&device)) {
+    io = &bluetoothInputOutputOperations;
   } else {
     unsupportedDevice(device);
     return 0;
   }
 
   if (io->openPort(parameters, device)) {
-    if (io->getCellCount(&cellCount)) {
+    if (io->protocol->getCellCount(&cellCount)) {
       deviceModel = deviceModels;
 
       while (deviceModel->reportedCellCount) {
@@ -812,9 +939,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           cellCount = deviceModel->actualCellCount;
           logMessage(LOG_INFO, "Voyager Cell Count: %u", cellCount);
 
-          io->logSerialNumber();
-          io->logHardwareVersion();
-          io->logFirmwareVersion();
+          io->protocol->logSerialNumber();
+          io->protocol->logHardwareVersion();
+          io->protocol->logFirmwareVersion();
 
           /* translatedCells holds the status cells and the text cells.
            * We export directly to BRLTTY only the text cells.
@@ -835,12 +962,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               /* Force rewrite of display */
               memset(previousCells, 0XFF, cellCount); /* all dots */
 
-              if (io->setDisplayState(1)) {
+              if (io->protocol->setDisplayState(1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
 
-                io->soundBeep(READY_BEEP_DURATION);
-                approximateDelay(READY_BEEP_DURATION);
+                soundBeep(READY_BEEP_DURATION);
                 return 1;
               }
 
@@ -909,18 +1035,18 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
         memcpy(buffer, translatedCells, 6);
         buffer[6] = buffer[7] = 0;
         memcpy(buffer+8, translatedCells+6, 38);
-        if (!io->writeBraille(buffer, 46, 2)) return 0;
+        if (!io->protocol->writeBraille(buffer, 46, 2)) return 0;
         break;
       }
 
       case 70:
         /* Two ghost cells at the beginning of the display. */
-        if (!io->writeBraille(translatedCells, cellCount, 2)) return 0;
+        if (!io->protocol->writeBraille(translatedCells, cellCount, 2)) return 0;
         break;
 
       default:
         /* No ghost cells. */
-        if (!io->writeBraille(translatedCells, cellCount, 0)) return 0;
+        if (!io->protocol->writeBraille(translatedCells, cellCount, 0)) return 0;
         break;
     }
   }
@@ -930,5 +1056,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  return io->updateKeys()? EOF: BRL_CMD_RESTARTBRL;
+  return io->protocol->updateKeys()? EOF: BRL_CMD_RESTARTBRL;
 }
