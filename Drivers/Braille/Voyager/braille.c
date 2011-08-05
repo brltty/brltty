@@ -116,49 +116,6 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 
-typedef struct {
-  const char *productName;
-  const KeyTableDefinition *keyTableDefinition;
-} DeviceType;
-
-static const DeviceType deviceType_Voyager = {
-  .productName = "Voyager",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
-};
-
-static const DeviceType deviceType_BraillePen = {
-  .productName = "Braille Pen",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
-};
-
-typedef struct {
-  const DeviceType *deviceType;
-  unsigned char reportedCellCount;
-  unsigned char actualCellCount;
-} DeviceModel;
-
-static const DeviceModel deviceModels[] = {
-  { .reportedCellCount = 48,
-    .actualCellCount = 44,
-    .deviceType = &deviceType_Voyager
-  }
-  ,
-  { .reportedCellCount = 72,
-    .actualCellCount = 70,
-    .deviceType = &deviceType_Voyager
-  }
-  ,
-  { .reportedCellCount = 12,
-    .actualCellCount = 12,
-    .deviceType = &deviceType_BraillePen
-  }
-  ,
-  { .reportedCellCount = 0 }
-};
-
-static const DeviceModel *deviceModel;
-
-
 #define READY_BEEP_DURATION 200
 #define MAXIMUM_CELL_COUNT 70 /* arbitrary max for allocations */
 
@@ -259,7 +216,7 @@ typedef struct {
   int (*getDisplayVoltage) (BrailleDisplay *brl, unsigned char *voltage);
   int (*getDisplayCurrent) (BrailleDisplay *brl, unsigned char *current);
   int (*setDisplayState) (BrailleDisplay *brl, unsigned char state);
-  int (*writeBraille) (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start);
+  int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start);
   int (*updateKeys) (BrailleDisplay *brl);
   int (*soundBeep) (BrailleDisplay *brl, unsigned char duration);
 } ProtocolOperations;
@@ -522,7 +479,7 @@ setSerialDisplayState (BrailleDisplay *brl, unsigned char state) {
 }
 
 static int
-writeSerialBraille (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start) {
+writeSerialBraille (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
   unsigned char buffer[2 + count];
   unsigned char size = 0;
   buffer[size++] = start;
@@ -787,7 +744,7 @@ setUsbDisplayState (BrailleDisplay *brl, unsigned char state) {
 }
 
 static int
-writeUsbBraille (BrailleDisplay *brl, unsigned char *cells, unsigned char count, unsigned char start) {
+writeUsbBraille (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
   return putUsbData(0X07, 0, start, cells, count);
 }
 
@@ -907,6 +864,139 @@ static const InputOutputOperations usbInputOutputOperations = {
 };
 
 
+typedef struct {
+  const char *productName;
+  const KeyTableDefinition *keyTableDefinition;
+} DeviceType;
+
+static const DeviceType deviceType_Voyager = {
+  .productName = "Voyager",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
+};
+
+static const DeviceType deviceType_BraillePen = {
+  .productName = "Braille Pen",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
+};
+
+
+typedef struct {
+  const DeviceType *deviceType;
+  int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start);
+  unsigned char reportedCellCount;
+  unsigned char actualCellCount;
+  unsigned partialUpdates:1;
+} DeviceModel;
+
+static const DeviceModel *deviceModel;
+
+static void
+addCells (
+  unsigned char *toCells, unsigned char toCount, unsigned char *toOffset
+) {
+  while (toCount) {
+    toCells[(*toOffset)++] = 0;
+    toCount -= 1;
+  }
+}
+
+static void
+copyCells (
+  unsigned char *toCells, unsigned char toCount, unsigned char *toOffset,
+  const unsigned char *fromCells, unsigned char *fromCount, unsigned char *fromOffset
+) {
+  unsigned char count;
+
+  if (!toCount) toCount = *fromCount;
+  if ((count = toCount) > *fromCount) count = *fromCount;
+
+  if (count) {
+    memcpy(&toCells[*toOffset], &fromCells[*fromOffset], count);
+    *fromCount -= count;
+    *fromOffset += count;
+    *toOffset += count;
+  }
+
+  addCells(toCells, toCount-count, toOffset);
+}
+
+static int
+writeBraille0 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
+  return io->protocol->writeBraille(brl, cells, count, start);
+}
+
+static int
+writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
+  if (!deviceModel->partialUpdates) {
+    unsigned char buffer[count + 2];
+    unsigned char offset = 0;
+
+    addCells(buffer, 2, &offset);
+    copyCells(buffer, 0, &offset, cells, &count, &start);
+    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
+  }
+
+  return io->protocol->writeBraille(brl, cells, count, start+2);
+}
+
+static int
+writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
+  if (!deviceModel->partialUpdates) {
+    unsigned char buffer[count + 4];
+    unsigned char offset = 0;
+
+    addCells(buffer, 2, &offset);
+    copyCells(buffer, 6, &offset, cells, &count, &start);
+    addCells(buffer, 2, &offset);
+    copyCells(buffer, 0, &offset, cells, &count, &start);
+    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
+  }
+
+  if (start >= 6) {
+    return io->protocol->writeBraille(brl, &cells[start], count, start+4);
+  }
+
+  if ((start + count) <= 6) {
+    return io->protocol->writeBraille(brl, &cells[start], count, start+2);
+  }
+
+  {
+    unsigned char buffer[count + 2];
+    unsigned char fromOffset = start;
+    unsigned char toOffset = 0;
+
+    copyCells(buffer, 6-start, &toOffset, cells, &count, &fromOffset);
+    addCells(buffer, 2, &toOffset);
+    copyCells(buffer, 0, &toOffset, cells, &count, &fromOffset);
+    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), start+2);
+  }
+}
+
+static const DeviceModel deviceModels[] = {
+  { .reportedCellCount = 48,
+    .actualCellCount = 44,
+    .writeBraille = writeBraille4,
+    .partialUpdates = 1,
+    .deviceType = &deviceType_Voyager
+  }
+  ,
+  { .reportedCellCount = 72,
+    .actualCellCount = 70,
+    .writeBraille = writeBraille2,
+    .partialUpdates = 1,
+    .deviceType = &deviceType_Voyager
+  }
+  ,
+  { .reportedCellCount = 12,
+    .actualCellCount = 12,
+    .writeBraille = writeBraille0,
+    .deviceType = &deviceType_BraillePen
+  }
+  ,
+  { .deviceType = NULL }
+};
+
+
 /* Global variables */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
 static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern */
@@ -947,7 +1037,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (io->protocol->getCellCount(brl, &cellCount)) {
       deviceModel = deviceModels;
 
-      while (deviceModel->reportedCellCount) {
+      while (deviceModel->deviceType) {
         if (deviceModel->reportedCellCount == cellCount) {
           const DeviceType *deviceType = deviceModel->deviceType;
 
@@ -1031,50 +1121,23 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  unsigned int from;
-  unsigned int to;
+  unsigned int from = 0;
+  unsigned int to = cellCount;
   int changed;
 
-  if (cellsInitialized) {
-    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to);
-  } else {
+  if (!cellsInitialized) {
     memcpy(previousCells, brl->buffer, cellCount);
-    from = 0;
-    to = cellCount;
-
     changed = 1;
     cellsInitialized = 1;
+  } else if (deviceModel->partialUpdates) {
+    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to);
+  } else {
+    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL);
   }
 
   if (changed) {
     translateOutputCells(&translatedCells[from], &brl->buffer[from], to-from);
-
-    /* The firmware supports multiples of 8 cells, so there are extra cells
-     * in the firmware's imagination that don't actually exist physically.
-     */
-    switch (cellCount) {
-      case 44: {
-        /* Two ghost cells at the beginning of the display,
-         * plus two more after the sixth physical cell.
-         */
-        unsigned char buffer[46];
-        memcpy(buffer, translatedCells, 6);
-        buffer[6] = buffer[7] = 0;
-        memcpy(buffer+8, translatedCells+6, 38);
-        if (!io->protocol->writeBraille(brl, buffer, 46, 2)) return 0;
-        break;
-      }
-
-      case 70:
-        /* Two ghost cells at the beginning of the display. */
-        if (!io->protocol->writeBraille(brl, translatedCells, cellCount, 2)) return 0;
-        break;
-
-      default:
-        /* No ghost cells. */
-        if (!io->protocol->writeBraille(brl, translatedCells, cellCount, 0)) return 0;
-        break;
-    }
+    if (!deviceModel->writeBraille(brl, translatedCells, to-from, from)) return 0;
   }
 
   return 1;
