@@ -890,34 +890,42 @@ typedef struct {
 
 static const DeviceModel *deviceModel;
 
+typedef struct {
+  struct {
+    const unsigned char *cells;
+    unsigned char offset;
+    unsigned char count;
+  } from;
+
+  struct {
+    unsigned char *cells;
+    unsigned char offset;
+  } to;
+} WriteBrailleData;
+
 static void
-addCells (
-  unsigned char *toCells, unsigned char toCount, unsigned char *toOffset
-) {
-  while (toCount) {
-    toCells[(*toOffset)++] = 0;
-    toCount -= 1;
+addHiddenCells (WriteBrailleData *wbd, unsigned char count) {
+  while (count) {
+    wbd->to.cells[wbd->to.offset++] = 0;
+    count -= 1;
   }
 }
 
 static void
-copyCells (
-  unsigned char *toCells, unsigned char toCount, unsigned char *toOffset,
-  const unsigned char *fromCells, unsigned char *fromCount, unsigned char *fromOffset
-) {
+addActualCells (WriteBrailleData *wbd, unsigned char toCount) {
   unsigned char count;
 
-  if (!toCount) toCount = *fromCount;
-  if ((count = toCount) > *fromCount) count = *fromCount;
+  if (!toCount) toCount = wbd->from.count;
+  if ((count = toCount) > wbd->from.count) count = wbd->from.count;
 
   if (count) {
-    memcpy(&toCells[*toOffset], &fromCells[*fromOffset], count);
-    *fromCount -= count;
-    *fromOffset += count;
-    *toOffset += count;
+    memcpy(&wbd->to.cells[wbd->to.offset], &wbd->from.cells[wbd->from.offset], count);
+    wbd->from.count -= count;
+    wbd->from.offset += count;
+    wbd->to.offset += count;
   }
 
-  addCells(toCells, toCount-count, toOffset);
+  addHiddenCells(wbd, toCount-count);
 }
 
 static int
@@ -929,10 +937,21 @@ static int
 writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
   if (!deviceModel->partialUpdates) {
     unsigned char buffer[count + 2];
-    unsigned char offset = 0;
+    WriteBrailleData wbd = {
+      .from = {
+        .cells = cells,
+        .offset = 0,
+        .count = cellCount
+      },
 
-    addCells(buffer, 2, &offset);
-    copyCells(buffer, 0, &offset, cells, &count, &start);
+      .to = {
+        .cells = buffer,
+        .offset = 0
+      }
+    };
+
+    addHiddenCells(&wbd, 2);
+    addActualCells(&wbd, 0);
     return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
   }
 
@@ -943,12 +962,23 @@ static int
 writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
   if (!deviceModel->partialUpdates) {
     unsigned char buffer[count + 4];
-    unsigned char offset = 0;
+    WriteBrailleData wbd = {
+      .from = {
+        .cells = cells,
+        .offset = 0,
+        .count = cellCount
+      },
 
-    addCells(buffer, 2, &offset);
-    copyCells(buffer, 6, &offset, cells, &count, &start);
-    addCells(buffer, 2, &offset);
-    copyCells(buffer, 0, &offset, cells, &count, &start);
+      .to = {
+        .cells = buffer,
+        .offset = 0
+      }
+    };
+
+    addHiddenCells(&wbd, 2);
+    addActualCells(&wbd, 6);
+    addHiddenCells(&wbd, 2);
+    addActualCells(&wbd, 0);
     return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
   }
 
@@ -962,12 +992,22 @@ writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
   {
     unsigned char buffer[count + 2];
-    unsigned char fromOffset = start;
-    unsigned char toOffset = 0;
+    WriteBrailleData wbd = {
+      .from = {
+        .cells = cells,
+        .offset = start,
+        .count = count
+      },
 
-    copyCells(buffer, 6-start, &toOffset, cells, &count, &fromOffset);
-    addCells(buffer, 2, &toOffset);
-    copyCells(buffer, 0, &toOffset, cells, &count, &fromOffset);
+      .to = {
+        .cells = buffer,
+        .offset = 0
+      }
+    };
+
+    addActualCells(&wbd, 6-start);
+    addHiddenCells(&wbd, 2);
+    addActualCells(&wbd, 0);
     return io->protocol->writeBraille(brl, buffer, sizeof(buffer), start+2);
   }
 }
