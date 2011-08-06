@@ -1075,9 +1075,9 @@ brlttyPrepare_unconstructed (void) {
 static int (*brlttyPrepare) (void) = brlttyPrepare_unconstructed;
 static int oldwinx;
 static int oldwiny;
+static int restartRequired;
 static int isOffline;
 static int isSuspended;
-static int isWritable;
 
 static int
 brlttyPrepare_next (void) {
@@ -1096,9 +1096,9 @@ brlttyPrepare_first (void) {
 
   oldwinx = ses->winx;
   oldwiny = ses->winy;
+  restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
-  isWritable = 1;
 
   highlightWindow();
   checkPointer();
@@ -1143,7 +1143,7 @@ brlttyCommand (void) {
 
   testProgramTermination();
 
-  command = isWritable? readBrailleCommand(&brl, BRL_CTX_DEFAULT): BRL_CMD_RESTARTBRL;
+  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, BRL_CTX_DEFAULT);
 
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;
@@ -1581,7 +1581,7 @@ doCommand:
       case BRL_CMD_RESTARTBRL:
         restartBrailleDriver();
         resetScanCodes();
-        isWritable = 1;
+        restartRequired = 0;
         break;
       case BRL_CMD_PASTE:
         if (isLiveScreen() && !isRouting()) {
@@ -1680,7 +1680,7 @@ doCommand:
         break;
 
       case BRL_CMD_PREFMENU:
-        if (!updatePreferences()) isWritable = 0;
+        if (!updatePreferences()) restartRequired = 1;
         break;
       case BRL_CMD_PREFSAVE:
         if (savePreferences()) {
@@ -1713,7 +1713,7 @@ doCommand:
 
 #ifdef ENABLE_LEARN_MODE
       case BRL_CMD_LEARN:
-        if (!learnMode(&brl, updateInterval, 10000)) isWritable = 0;
+        if (!learnMode(&brl, updateInterval, 10000)) restartRequired = 1;
         break;
 #endif /* ENABLE_LEARN_MODE */
 
@@ -2426,7 +2426,7 @@ brlttyUpdate (void) {
     }
 
     if (infoMode) {
-      if (!showInfo()) isWritable = 0;
+      if (!showInfo()) restartRequired = 1;
     } else {
       const unsigned int windowLength = brl.textColumns * brl.textRows;
       const unsigned int textLength = textCount * brl.textRows;
@@ -2659,7 +2659,7 @@ brlttyUpdate (void) {
         fillStatusSeparator(textBuffer, brl.buffer);
       }
 
-      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) isWritable = 0;
+      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
     }
 
 #ifdef ENABLE_API
@@ -2678,7 +2678,7 @@ brlttyUpdate (void) {
 
 #ifdef ENABLE_API
   if (apiStarted) {
-    isWritable = api_flush(&brl);
+    if (!api_flush(&brl)) restartRequired = 1;
   }
 #endif /* ENABLE_API */
 
