@@ -1685,12 +1685,16 @@ doCommand:
       case BRL_CMD_PREFSAVE:
         if (savePreferences()) {
           playTune(&tune_command_done);
+        } else {
+          playTune(&tune_command_rejected);
         }
         break;
       case BRL_CMD_PREFLOAD:
         if (loadPreferences()) {
           resetBlinkingStates();
           playTune(&tune_command_done);
+        } else {
+          playTune(&tune_command_rejected);
         }
         break;
 
