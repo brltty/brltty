@@ -46,7 +46,7 @@ extern char *getWorkingDirectory (void);
 extern int setWorkingDirectory (const char *directory);
 
 extern char *getHomeDirectory (void);
-extern char *getOverrideDirectory (void);
+extern const char *getOverrideDirectory (void);
 
 extern FILE *openFile (const char *path, const char *mode, int optional);
 extern FILE *openDataFile (const char *path, const char *mode, int optional);

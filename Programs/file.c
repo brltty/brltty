@@ -78,11 +78,15 @@ getPathDirectory (const char *path) {
 
   if (!length) length = strlen(path = ".");
   {
-    char *directory = mallocWrapper(length + 1);
+    char *directory = malloc(length + 1);
+
     if (directory) {
       memcpy(directory, path, length);
       directory[length] = 0;
+    } else {
+      logMallocError();
     }
+
     return directory;
   }
 }
@@ -153,22 +157,37 @@ testPath (const char *path) {
 int
 ensureDirectory (const char *path) {
   struct stat status;
+
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
     logMessage(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
     logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
-  } else if (mkdir(path
-#ifndef __MINGW32__
-                  ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-#endif /* __MINGW32__ */
-                  ) != -1) {
-    logMessage(LOG_NOTICE, "directory created: %s", path);
-    return 1;
   } else {
-    logMessage(((errno == ENOENT)? LOG_DEBUG: LOG_WARNING),
-               "cannot create directory: %s: %s", path, strerror(errno));
+    {
+      char *directory = getPathDirectory(path);
+      if (!directory) return 0;
+
+      {
+         int exists = ensureDirectory(directory);
+         free(directory);
+         if (!exists) return 0;
+      }
+    }
+
+    if (mkdir(path
+#ifndef __MINGW32__
+             ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+#endif /* __MINGW32__ */
+             ) != -1) {
+      logMessage(LOG_NOTICE, "directory created: %s", path);
+      return 1;
+    } else {
+      logMessage(LOG_WARNING, "cannot create directory: %s: %s",
+                 path, strerror(errno));
+    }
   }
+
   return 0;
 }
 
@@ -195,15 +214,25 @@ getWorkingDirectory (void) {
   size_t size = 0X80;
   char *buffer = NULL;
 
-  do {
+  while (1) {
     {
       char *newBuffer = realloc(buffer, size<<=1);
-      if (!newBuffer) break;
+
+      if (!newBuffer) {
+        logMallocError();
+        break;
+      }
+
       buffer = newBuffer;
     }
 
     if (getcwd(buffer, size)) return buffer;
-  } while (errno == ERANGE);
+
+    if (errno != ERANGE) {
+      logSystemError("getcwd");
+      break;
+    }
+  }
 
   if (buffer) free(buffer);
   return NULL;
@@ -225,60 +254,67 @@ getHomeDirectory (void) {
   return strdup(path);
 }
 
-char *
+const char *
 getOverrideDirectory (void) {
-  static const char subdirectory[] = "." PACKAGE_NAME;
+  static const char *directory = NULL;
 
-  {
-    char *homeDirectory = getHomeDirectory();
-    if (homeDirectory) {
-      char *directory = makePath(homeDirectory, subdirectory);
-      free(homeDirectory);
-      if (directory) return directory;
+  if (!directory) {
+    static const char subdirectory[] = "." PACKAGE_NAME;
+
+    {
+      char *homeDirectory = getHomeDirectory();
+
+      if (homeDirectory) {
+        directory = makePath(homeDirectory, subdirectory);
+        free(homeDirectory);
+        if (directory) goto gotDirectory;
+      }
     }
+
+    {
+      char *workingDirectory = getWorkingDirectory();
+
+      if (workingDirectory) {
+        directory = makePath(workingDirectory, subdirectory);
+        free(workingDirectory);
+        if (directory) goto gotDirectory;
+      }
+    }
+
+    directory = "";
+    logMessage(LOG_WARNING, "no override directory");
+    goto ready;
+
+  gotDirectory:
+    logMessage(LOG_INFO, "Override Directory: %s", directory);
   }
 
-  {
-    char *workingDirectory = getWorkingDirectory();
-    if (workingDirectory) {
-      char *directory = makePath(workingDirectory, subdirectory);
-      free(workingDirectory);
-      if (directory) return directory;
-    }
-  }
-
-  return NULL;
+ready:
+  return *directory? directory: NULL;
 }
 
 FILE *
 openFile (const char *path, const char *mode, int optional) {
   FILE *file = fopen(path, mode);
+
   if (file) {
     logMessage(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
   } else {
     logMessage((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
                "cannot open file: %s: %s", path, strerror(errno));
   }
+
   return file;
 }
 
 FILE *
 openDataFile (const char *path, const char *mode, int optional) {
-  static const char *overrideDirectory = NULL;
   const char *name = locatePathName(path);
+  const char *overrideDirectory = getOverrideDirectory();
   char *overridePath;
   FILE *file;
 
   if (!overrideDirectory) {
-    if ((overrideDirectory = getOverrideDirectory())) {
-      logMessage(LOG_DEBUG, "override directory: %s", overrideDirectory);
-    } else {
-      logMessage(LOG_DEBUG, "no override directory");
-      overrideDirectory = "";
-    }
-  }
-
-  if (!*overrideDirectory) {
     overridePath = NULL;
   } else if ((overridePath = makePath(overrideDirectory, name))) {
     if (testPath(overridePath)) {
@@ -288,8 +324,27 @@ openDataFile (const char *path, const char *mode, int optional) {
   }
 
   if (!(file = openFile(path, mode, optional))) {
-    if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && overridePath) {
-      if (ensureDirectory(overrideDirectory)) file = openFile(overridePath, mode, optional);
+    if ((*mode == 'w') || (*mode == 'a')) {
+      if (errno == ENOENT) {
+        char *directory = getPathDirectory(path);
+
+        if (directory) {
+          int exists = ensureDirectory(directory);
+          free(directory);
+
+          if (exists) {
+            file = openFile(path, mode, optional);
+            goto done;
+          }
+        }
+      }
+
+      if (((errno == EACCES) || (errno == EROFS)) && overridePath) {
+        if (ensureDirectory(overrideDirectory)) {
+          file = openFile(overridePath, mode, optional);
+          goto done;
+        }
+      }
     }
   }
 
