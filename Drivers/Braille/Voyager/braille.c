@@ -774,7 +774,7 @@ updateUsbKeys (BrailleDisplay *brl) {
 
       if ((result > 0) && (result < sizeof(packet))) {
         /* The display handles read requests of only and exactly 8 bytes */
-        logMessage(LOG_NOTICE, "short USB read: %d", result);
+        logMessage(LOG_WARNING, "short USB read: %ld", (long int)result);
         keysInitialized = 0;
         return 1;
       }
@@ -904,19 +904,19 @@ typedef struct {
 } WriteBrailleData;
 
 static void
-addHiddenCells (WriteBrailleData *wbd, unsigned char count) {
-  while (count) {
+addHiddenCells (WriteBrailleData *wbd, unsigned char size) {
+  while (size) {
     wbd->to.cells[wbd->to.offset++] = 0;
-    count -= 1;
+    size -= 1;
   }
 }
 
 static void
-addActualCells (WriteBrailleData *wbd, unsigned char toCount) {
+addActualCells (WriteBrailleData *wbd, unsigned char size) {
   unsigned char count;
 
-  if (!toCount) toCount = wbd->from.count;
-  if ((count = toCount) > wbd->from.count) count = wbd->from.count;
+  if (!size) size = wbd->from.count;
+  if ((count = size) > wbd->from.count) count = wbd->from.count;
 
   if (count) {
     memcpy(&wbd->to.cells[wbd->to.offset], &wbd->from.cells[wbd->from.offset], count);
@@ -925,7 +925,7 @@ addActualCells (WriteBrailleData *wbd, unsigned char toCount) {
     wbd->to.offset += count;
   }
 
-  addHiddenCells(wbd, toCount-count);
+  addHiddenCells(wbd, size-count);
 }
 
 static int
