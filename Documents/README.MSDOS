@@ -41,5 +41,5 @@ You can use the cross-compiler with the following ./configure command:
       --disable-api --disable-icu --without-speechd                   \
       --disable-x --without-usb-package --without-bluetooth-package   \
       --with-braille-driver=-vr,all --without-libbraille              \
-      --with-speech-driver=-es,all --without-flite                    \
+      --with-speech-driver=all --without-espeak --without-flite                    \
       --with-screen-driver=pb,-all
