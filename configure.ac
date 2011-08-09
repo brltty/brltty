@@ -1439,6 +1439,7 @@ in
       ;;
    cygwin*|mingw*)
       BRLTTY_SCREEN_DRIVER([wn], [Windows])
+      brltty_build_directories="${brltty_build_directories} Drivers/BrlAPI/WindowEyes"
       ;;
    msdos*)
       BRLTTY_SCREEN_DRIVER([pb], [PcBios])
