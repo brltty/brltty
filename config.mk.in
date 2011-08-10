@@ -138,6 +138,7 @@ dvidir = @dvidir@
 pdfdir = @pdfdir@
 psdir = @psdir@
 
+STATE_DIRECTORY = @STATE_DIRECTORY@
 PROGRAM_DIRECTORY = @program_directory@
 DRIVERS_DIRECTORY = @drivers_directory@
 WRITABLE_DIRECTORY = @writable_directory@

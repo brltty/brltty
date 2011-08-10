@@ -219,6 +219,12 @@ extern "C" {
 /* Define this to be a string containing the name of the default configuration file. */
 #undef CONFIGURATION_FILE
 
+/* Define this to be a string containing the path to the state directory. */
+#undef STATE_DIRECTORY
+
+/* Define this to be a string containing the name of the default preferences file. */
+#undef PREFERENCES_FILE
+
 /* Define this to be a string containing the path to the drivers directory. */
 #undef DRIVERS_DIRECTORY
 

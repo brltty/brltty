@@ -100,9 +100,13 @@ fi
 AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
-AC_SUBST([configuration_file], ["${PACKAGE_NAME}.conf"])
-BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"],
+AC_SUBST([CONFIGURATION_FILE], ["${PACKAGE_NAME}.conf"])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${CONFIGURATION_FILE}"],
                        [Define this to be a string containing the name of the default configuration file.])
+
+AC_SUBST([PREFERENCES_FILE], ["${PACKAGE_NAME}.prefs"])
+BRLTTY_DEFINE_EXPANDED([PREFERENCES_FILE], ["${PREFERENCES_FILE}"],
+                       [Define this to be a string containing the name of the default preferences file.])
 
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([datarootdir], [/usr])
@@ -133,7 +137,7 @@ then
    writable_directory=""
 elif test "${writable_directory}" = "yes"
 then
-   writable_directory="${drivers_directory}/rw"
+   writable_directory="${localstatedir}/lib/${PACKAGE_NAME}/rw"
 fi
 AC_SUBST([writable_directory])
 BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
@@ -1501,7 +1505,7 @@ BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], ["${execute_root}${localedir}"],
                         [Define this to be a string containing the path to the locale directory.])
 if test -n "${writable_directory}"
 then
-   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
+   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${writable_directory}],
                            [Define this to be a string containing the path to a writable directory.])
 fi
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
@@ -1510,6 +1514,8 @@ BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory
                         [Define this to be a string containing the path to the drivers directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
+BRLTTY_DEFINE_DIRECTORY([STATE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_NAME}],
+                        [Define this to be a string containing the path to the state directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
