@@ -113,6 +113,7 @@ static char *opt_updateInterval;
 static char *opt_messageDelay;
 
 static char *opt_configurationFile;
+static char *opt_preferencesFile;
 static char *opt_pidFile;
 static char *opt_writableDirectory;
 static char *opt_driversDirectory;
@@ -129,7 +130,8 @@ static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject;
 static char *opt_brailleParameters;
 static char **brailleParameters = NULL;
-static char *preferencesFile = NULL;
+static char *oldPreferencesFile = NULL;
+static int oldPreferencesEnabled = 1;
 
 static char *opt_tablesDirectory;
 static char *opt_textTable;
@@ -253,6 +255,15 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_configurationFile,
     .defaultSetting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
     .description = strtext("Path to default settings file.")
+  },
+
+  { .letter = 'z',
+    .word = "preferences-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_preferencesFile,
+    .defaultSetting = PREFERENCES_FILE,
+    .description = strtext("Path to default preferences file.")
   },
 
   { .letter = 'E',
@@ -782,6 +793,7 @@ reconfigureWindow (void) {
 
 static void
 applyBraillePreferences (void) {
+  reconfigureWindow();
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setBrailleSensitivity(&brl, prefs.brailleSensitivity);
 }
@@ -797,8 +809,7 @@ applySpeechPreferences (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-applyPreferences (void) {
-  reconfigureWindow();
+applyAllPreferences (void) {
   setTuneDevice(prefs.tuneDevice);
   applyBraillePreferences();
 
@@ -950,8 +961,13 @@ resetPreferences (void) {
   resetStatusFields(NULL);
 }
 
-int
-loadPreferences (void) {
+static char *
+makePreferencesFilePath (void) {
+  return makePath(STATE_DIRECTORY, opt_preferencesFile);
+}
+
+static int
+loadPreferencesFile (const char *preferencesFile) {
   int ok = 0;
   FILE *file = openDataFile(preferencesFile, "rb", 1);
 
@@ -1113,28 +1129,58 @@ loadPreferences (void) {
   return ok;
 }
 
-static void
-getPreferences (void) {
-  if (!loadPreferences()) resetPreferences();
-  applyPreferences();
-  setTuneDevice(prefs.tuneDevice);
+int
+loadPreferences (void) {
+  int ok = 0;
+
+  {
+    char *path = makePreferencesFilePath();
+
+    if (path) {
+      if (testPath(path)) {
+        oldPreferencesEnabled = 0;
+        if (loadPreferencesFile(path)) ok = 1;
+      }
+
+      free(path);
+    }
+  }
+
+  if (oldPreferencesEnabled && oldPreferencesFile) {
+    if (loadPreferencesFile(oldPreferencesFile)) ok = 1;
+  }
+
+  if (!ok) resetPreferences();
+  applyAllPreferences();
+  return ok;
 }
 
 int 
 savePreferences (void) {
   int ok = 0;
-  FILE *file = openDataFile(preferencesFile, "w+b", 0);
-  if (file) {
-    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
-    if (length == sizeof(prefs)) {
-      ok = 1;
-    } else {
-      if (!ferror(file)) errno = EIO;
-      logMessage(LOG_ERR, "%s: %s: %s",
-                 gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
+  char *path = makePreferencesFilePath();
+
+  if (path) {
+    FILE *file = openDataFile(path, "w+b", 0);
+
+    if (file) {
+      size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
+
+      if (length == sizeof(prefs)) {
+        ok = 1;
+        oldPreferencesEnabled = 0;
+      } else {
+        if (!ferror(file)) errno = EIO;
+        logMessage(LOG_ERR, "%s: %s: %s",
+                   gettext("cannot write to preferences file"), path, strerror(errno));
+      }
+
+      fclose(file);
     }
-    fclose(file);
+
+    free(path);
   }
+
   if (!ok) message(NULL, gettext("not saved"), 0);
   return ok;
 }
@@ -2112,7 +2158,7 @@ updatePreferences (void) {
             case BRL_BLK_PASSKEY+BRL_KEY_HOME:
             case BRL_CMD_PREFLOAD:
               prefs = oldPreferences;
-              applyPreferences();
+              applyAllPreferences();
               message(mode, gettext("changes discarded"), 0);
               break;
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
@@ -2489,27 +2535,20 @@ initializeBrailleDriver (const char *code, int verify) {
         logMessage(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
         {
-          char *path;
+          const char *strings[] = {
+            CONFIGURATION_DIRECTORY, "/",
+            PACKAGE_NAME, "-",
+            braille->definition.code, ".prefs"
+          };
 
-          {
-            const char *strings[] = {
-              CONFIGURATION_DIRECTORY, "/",
-              PACKAGE_NAME, "-",
-              braille->definition.code, ".prefs"
-            };
+          oldPreferencesFile = joinStrings(strings, ARRAY_COUNT(strings));
+        }
 
-            path = joinStrings(strings, ARRAY_COUNT(strings));
-          }
-
-          if ((preferencesFile = path)) {
-            fixInstallPath(&preferencesFile);
-            if (path != preferencesFile) free(path);
-
-            logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
-            return 1;
-          } else {
-            logMallocError();
-          }
+        if (oldPreferencesFile) {
+          logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
+          return 1;
+        } else {
+          logMallocError();
         }
       }
 
@@ -2605,9 +2644,9 @@ deactivateBrailleDriver (void) {
     brailleParameters = NULL;
   }
 
-  if (preferencesFile) {
-    free(preferencesFile);
-    preferencesFile = NULL;
+  if (oldPreferencesFile) {
+    free(oldPreferencesFile);
+    oldPreferencesFile = NULL;
   }
 }
 
@@ -2617,7 +2656,12 @@ startBrailleDriver (void) {
   bthForgetConnectErrors();
 
   if (activateBrailleDriver(0)) {
-    getPreferences();
+    if (oldPreferencesEnabled) {
+      if (!loadPreferencesFile(oldPreferencesFile)) resetPreferences();
+      applyAllPreferences();
+    } else {
+      applyBraillePreferences();
+    }
     playTune(&tune_braille_on);
 
     if (clearStatusCells(&brl)) {
@@ -3320,6 +3364,9 @@ startup (int argc, char *argv[]) {
   writableDirectory = opt_writableDirectory;
 
   logMessage(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
+  logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), opt_preferencesFile);
+  loadPreferences();
+
   logMessage(LOG_INFO, "%s: %s", gettext("Drivers Directory"), opt_driversDirectory);
 
   logMessage(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
@@ -3429,7 +3476,6 @@ startup (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
-    resetPreferences();
     atexit(exitBrailleDriver);
     tryBrailleDriver();
   }
