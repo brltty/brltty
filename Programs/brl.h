@@ -95,6 +95,7 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 extern int enqueueCommand (int command);
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
 extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
+extern BRL_DriverCommandContext getCurrentCommandContext (void);
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);

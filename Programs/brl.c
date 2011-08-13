@@ -406,8 +406,12 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   return 0;
 }
 
+static BRL_DriverCommandContext currentCommandContext = BRL_CTX_DEFAULT;
+
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  currentCommandContext = context;
+
   {
     int command = dequeueCommand();
     if (command != EOF) return command;
@@ -433,6 +437,11 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
   return dequeueCommand();
+}
+
+BRL_DriverCommandContext
+getCurrentCommandContext (void) {
+  return currentCommandContext;
 }
 
 #ifdef ENABLE_LEARN_MODE

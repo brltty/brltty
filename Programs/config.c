@@ -720,7 +720,7 @@ loadKeyTable (const char *name) {
 
 static KeyTableState
 handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
-  return processKeyEvent(keyboardKeyTable, BRL_CTX_DEFAULT, set, key, press);
+  return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), set, key, press);
 }
 
 static void scheduleKeyboardMonitor (int interval);
