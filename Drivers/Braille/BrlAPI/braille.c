@@ -143,7 +143,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
 /* Function : brl_readCommand */
 /* Reads a command from the braille keyboard */
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 {
   brlapi_keyCode_t keycode;
   if (restart) return BRL_CMD_RESTARTBRL;

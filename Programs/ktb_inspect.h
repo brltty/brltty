@@ -33,7 +33,7 @@ getKeyContext (KeyTable *table, unsigned char context) {
 
 static inline int
 isTemporaryKeyContext (const KeyTable *table, const KeyContext *ctx) {
-  return ((ctx - table->keyContextTable) > BRL_CTX_DEFAULT) && !ctx->title;
+  return ((ctx - table->keyContextTable) > KTB_CTX_DEFAULT) && !ctx->title;
 }
 
 #ifdef __cplusplus

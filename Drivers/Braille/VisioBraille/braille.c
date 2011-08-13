@@ -283,7 +283,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
 /* Function : brl_keyToCommand */
 /* Converts a key code to a brltty command according to the context */
-int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int code)
+int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
 {
   static int ctrlpressed = 0; 
   static int altpressed = 0;
@@ -444,7 +444,7 @@ static int brl_readKey(BrailleDisplay *brl)
 
 /* Function : brl_readCommand */
 /* Reads a command from the braille keyboard */
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 {
   return brl_keyToCommand(brl,context,brl_readKey(brl));
 }

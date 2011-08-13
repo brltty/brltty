@@ -600,7 +600,7 @@ interpretSimulationKey (unsigned char key) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   InputPacket packet;
   int length;
 

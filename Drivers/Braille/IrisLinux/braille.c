@@ -320,7 +320,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
-	     brl_readCommand (brl, BRL_CTX_DEFAULT);       /* to get the answer */
+	     brl_readCommand (brl, KTB_CTX_DEFAULT);       /* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }
@@ -481,7 +481,7 @@ static int brl_readKey(BrailleDisplay *brl)
   return (int)readbrlkey(brl, CTX_KEYCODES);
 }
 
-static int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext key_context, int code)
+static int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext key_context, int code)
 {
   if (code & 0x00010000)
     {
@@ -506,7 +506,7 @@ static int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext key_co
   return (EOF);
 }
 
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext key_context)
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext key_context)
 {
   unsigned int	key;
 

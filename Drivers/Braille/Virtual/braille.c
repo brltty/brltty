@@ -1174,7 +1174,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int command = EOF;
   char *line = readCommandLine();
 

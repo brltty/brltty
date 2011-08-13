@@ -233,7 +233,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char buffer[0X100];
   size_t length;
 

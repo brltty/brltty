@@ -290,7 +290,7 @@ putKeys (unsigned char bits, unsigned char keys, unsigned char count) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int key;
 
   while ((key = getKey()) != EOF) {

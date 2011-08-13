@@ -58,7 +58,7 @@ typedef enum {
 } DeviceStatus;
 static DeviceStatus deviceStatus;
 
-static BRL_DriverCommandContext currentContext;
+static KeyTableCommandContext currentContext;
 static unsigned char currentLine;
 static unsigned char cursorRow;
 static unsigned char cursorColumn;
@@ -270,7 +270,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
          column = MAX(1, MIN(column, screenWidth)) - 1;
          if (deviceStatus < DEV_READY) {
             memset(targetImage, 0, sizeof(targetImage));
-            currentContext = BRL_CTX_DEFAULT;
+            currentContext = KTB_CTX_DEFAULT;
             currentLine = row;
             cursorRow = screenHeight;
             cursorColumn = screenWidth;
@@ -493,12 +493,12 @@ downloadFile (void) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
    int key = readKey();
    if (context != currentContext) {
       logMessage(LOG_DEBUG, "Context switch: %d -> %d", currentContext, context);
       switch (currentContext = context) {
-         case BRL_CTX_DEFAULT:
+         case KTB_CTX_DEFAULT:
             deviceStatus = DEV_ONLINE;
             break;
          default:

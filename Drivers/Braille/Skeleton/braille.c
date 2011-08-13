@@ -65,7 +65,7 @@ brl_readKey (BrailleDisplay *brl) {
 }
 
 static int
-brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key) {
+brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
   return EOF;
 }
 #endif /* BRL_HAVE_KEY_CODES */
@@ -83,6 +83,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 #endif /* BRL_HAVE_STATUS_CELLS */
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   return EOF;
 }

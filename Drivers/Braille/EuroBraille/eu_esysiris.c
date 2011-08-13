@@ -342,7 +342,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
       int i=60;
       while(i-- && brlCols==0)
         {
-          esysiris_readCommand(brl, BRL_CTX_DEFAULT);
+          esysiris_readCommand(brl, KTB_CTX_DEFAULT);
           approximateDelay(10);
         }
       approximateDelay(100);
@@ -388,12 +388,12 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
   return res;
 }
 
-int	esysiris_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext ctx)
+int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
 {
   return esysiris_keyToCommand(brl, esysiris_readKey(brl), ctx);
 }
 
-int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx)
+int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx)
 {
   unsigned int res = EOF;
 

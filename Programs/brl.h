@@ -94,8 +94,8 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 
 extern int enqueueCommand (int command);
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
-extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
-extern BRL_DriverCommandContext getCurrentCommandContext (void);
+extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
+extern KeyTableCommandContext getCurrentCommandContext (void);
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
@@ -113,7 +113,7 @@ typedef struct {
   int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
   void (*destruct) (BrailleDisplay *brl);
 
-  int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
+  int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext context);
   int (*writeWindow) (BrailleDisplay *brl, const wchar_t *characters);
   int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
 
@@ -122,7 +122,7 @@ typedef struct {
   int (*reset) (BrailleDisplay *brl);
   
   int (*readKey) (BrailleDisplay *brl);
-  int (*keyToCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
+  int (*keyToCommand) (BrailleDisplay *brl, KeyTableCommandContext context, int key);
 } BrailleDriver;
 
 extern int haveBrailleDriver (const char *code);

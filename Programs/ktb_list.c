@@ -222,7 +222,7 @@ static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, int command) {
   if (command != BRL_CMD_NOOP) {
     if ((command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-      const KeyContext *c = getKeyContext(lgd->keyTable, (BRL_CTX_DEFAULT + (command & BRL_MSK_ARG)));
+      const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (command & BRL_MSK_ARG)));
       if (!c) return 0;
       if (!putUtf8String(lgd, "switch to ")) return 0;
       if (!putCharacterString(lgd, c->title)) return 0;
@@ -276,7 +276,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
         if (!putKeyCombination(lgd, &binding->combination)) return 0;
 
         if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-          const KeyContext *c = getKeyContext(lgd->keyTable, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+          const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
           if (!c) return 0;
 
           {
@@ -332,8 +332,8 @@ doListKeyTable (ListGenerationData *lgd) {
 
   {
     static const unsigned char contexts[] = {
-      BRL_CTX_DEFAULT,
-      BRL_CTX_MENU
+      KTB_CTX_DEFAULT,
+      KTB_CTX_MENU
     };
 
     const unsigned char *context = contexts;
@@ -354,7 +354,7 @@ doListKeyTable (ListGenerationData *lgd) {
   {
     unsigned int context;
 
-    for (context=BRL_CTX_DEFAULT+1; context<lgd->keyTable->keyContextCount; context+=1) {
+    for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContextCount; context+=1) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
 
       if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {

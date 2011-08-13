@@ -284,7 +284,7 @@ static int brl_writeStatus(BrailleDisplay *brl, const unsigned char *st)
 }
 
 
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 {
   int res = EOF;
   long bytes = 0;

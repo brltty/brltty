@@ -2381,7 +2381,7 @@ int api_handleCommand(int command) {
 /* Function : api_readCommand
  * Call driver->readCommand unless the driver is suspended.
  */
-static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {
+static int api_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) {
   ssize_t size;
   brlapi_packet_t packet;
   int res;
@@ -2404,7 +2404,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }
-  if ((context == BRL_CTX_DEFAULT) && retainDots) context = BRL_CTX_CHORDS;
+  if ((context == KTB_CTX_DEFAULT) && retainDots) context = KTB_CTX_CHORDS;
   pthread_mutex_lock(&driverMutex);
   res = trueBraille->readCommand(brl,context);
   pthread_mutex_unlock(&driverMutex);

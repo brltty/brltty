@@ -266,11 +266,11 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   InputPacket packet;
   int length;
 
-  if (context == BRL_CTX_WAITING) return BRL_CMD_NOOP;
+  if (context == KTB_CTX_WAITING) return BRL_CMD_NOOP;
   if (writeFunction) return EOF;
   while (*initialCommand != EOF) enqueueCommand(*initialCommand++);
 

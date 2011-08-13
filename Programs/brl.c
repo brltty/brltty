@@ -56,7 +56,7 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   return EOF;
 }
 
@@ -406,10 +406,10 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   return 0;
 }
 
-static BRL_DriverCommandContext currentCommandContext = BRL_CTX_DEFAULT;
+static KeyTableCommandContext currentCommandContext = KTB_CTX_DEFAULT;
 
 int
-readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   currentCommandContext = context;
 
   {
@@ -439,7 +439,7 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return dequeueCommand();
 }
 
-BRL_DriverCommandContext
+KeyTableCommandContext
 getCurrentCommandContext (void) {
   return currentCommandContext;
 }
@@ -454,7 +454,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
   hasTimedOut(0);
   do {
-    int command = readBrailleCommand(brl, BRL_CTX_DEFAULT);
+    int command = readBrailleCommand(brl, KTB_CTX_DEFAULT);
     if (command != EOF) {
       logMessage(LOG_DEBUG, "Learn: command=%06X", command);
       if (BRL_DELAYED_COMMAND(command)) continue;

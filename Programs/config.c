@@ -614,7 +614,7 @@ replaceAttributesTable (const char *name) {
 }
 
 int
-readCommand (BRL_DriverCommandContext context) {
+readCommand (KeyTableCommandContext context) {
   int command = readBrailleCommand(&brl, context);
   if (command != EOF) {
     logCommand(command);
@@ -2137,7 +2137,7 @@ updatePreferences (void) {
         if (!ok) break;
 
         /* Now process any user interaction */
-        command = readBrailleCommand(&brl, BRL_CTX_MENU);
+        command = readBrailleCommand(&brl, KTB_CTX_MENU);
         handleAutorepeat(&command, NULL);
         if (command != EOF) {
           switch (command) {

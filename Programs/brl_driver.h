@@ -43,7 +43,7 @@ static const unsigned char brl_statusFields[] = {BRL_STATUS_FIELDS, sfEnd};
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);
 static void brl_destruct (BrailleDisplay *brl);
 
-static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context);
+static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context);
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters);
 
 #ifdef BRL_HAVE_STATUS_CELLS
@@ -64,7 +64,7 @@ static int brl_reset (BrailleDisplay *brl);
 
 #ifdef BRL_HAVE_KEY_CODES
 static int brl_readKey (BrailleDisplay *brl);
-static int brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
+static int brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key);
 #else /* BRL_HAVE_KEY_CODES */
 #define brl_readKey NULL
 #define brl_keyToCommand NULL

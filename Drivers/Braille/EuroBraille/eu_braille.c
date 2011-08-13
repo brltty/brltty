@@ -229,7 +229,7 @@ brl_readKey (BrailleDisplay *brl)
 }
 
 static int
-brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key) 
+brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 {
   if (protocolp)
     return protocolp->keyToCommand(brl, key, context);
@@ -249,7 +249,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) 
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) 
 {
   if (protocolp)
     return protocolp->readCommand(brl, context);

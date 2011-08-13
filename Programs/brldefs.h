@@ -53,14 +53,6 @@ extern "C" {
 #define BRL_ARG_GET(code) (BRL_CODE_GET(ARG, (code)) | (BRL_CODE_GET(EXT, (code)) << BRL_BITS_ARG))
 #define BRL_ARG_SET(value) (BRL_CODE_SET(ARG, (value)) | BRL_CODE_SET(EXT, ((value) >> BRL_BITS_ARG)))
 
-/* Argument for brl_readCommand() */
-typedef enum {
-  BRL_CTX_MENU,
-  BRL_CTX_CHORDS,
-  BRL_CTX_WAITING,
-  BRL_CTX_DEFAULT /* this one must be defined last */
-} BRL_DriverCommandContext;
-
 /* The following command codes are return values for brl_readCommand().
  * The BRL_CMD_* codes are guaranteed to be between 1 and 255
  * inclusive, with the exception of BRL_CMD_NOOP = 0.

@@ -411,7 +411,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char byte;
   const InputMode *mode;
   const InputBinding *binding;

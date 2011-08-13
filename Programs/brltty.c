@@ -1143,7 +1143,7 @@ brlttyCommand (void) {
 
   testProgramTermination();
 
-  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, BRL_CTX_DEFAULT);
+  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, KTB_CTX_DEFAULT);
 
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;
@@ -2669,7 +2669,7 @@ brlttyUpdate (void) {
 #ifdef ENABLE_API
     if (apiStarted) api_releaseDriver(&brl);
   } else if (apiStarted) {
-    switch (readBrailleCommand(&brl, BRL_CTX_DEFAULT)) {
+    switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
       case BRL_CMD_RESTARTBRL:
         restartBrailleDriver();
         break;
@@ -2747,7 +2747,7 @@ message (const char *mode, const char *text, short flags) {
 
       if (flags & MSG_WAITKEY) {
         while (1) {
-          int command = readCommand(BRL_CTX_WAITING);
+          int command = readCommand(KTB_CTX_WAITING);
           testProgramTermination();
           if (command == EOF) {
             drainBrailleOutput(&brl, updateInterval);
@@ -2764,7 +2764,7 @@ message (const char *mode, const char *text, short flags) {
           testProgramTermination();
           drainBrailleOutput(&brl, updateInterval);
 
-          command = readCommand(BRL_CTX_WAITING);
+          command = readCommand(KTB_CTX_WAITING);
           if (command != EOF) break;
         }
       }

@@ -659,7 +659,7 @@ int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD 
 }
 #endif /* USE_WINDOWS */
 
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 {
 #if defined(USE_XT)
   while (XtAppPending(app_con)) {

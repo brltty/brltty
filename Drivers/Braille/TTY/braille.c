@@ -315,7 +315,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 int
-brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key) {
+brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
 #define KEY(key,cmd) case (key): return (cmd)
   switch (key) {
     KEY(EOF, EOF);
@@ -381,7 +381,7 @@ brl_readKey (BrailleDisplay *brl) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int command = brl_keyToCommand(brl, context, brl_readKey(brl));
   if (command != EOF) logMessage(LOG_DEBUG, "cmd %04X", command);
   return command;

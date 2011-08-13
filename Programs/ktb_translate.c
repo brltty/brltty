@@ -143,7 +143,7 @@ findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
 
 static int
 makeKeyboardCommand (KeyTable *table, unsigned char context) {
-  int chordsRequested = context == BRL_CTX_CHORDS;
+  int chordsRequested = context == KTB_CTX_CHORDS;
   const KeyContext *ctx;
 
   if (chordsRequested) context = table->persistentContext;
@@ -198,7 +198,7 @@ processCommand (KeyTable *table, int command) {
   switch (blk) {
     case BRL_BLK_CONTEXT:
       if (!BRL_DELAYED_COMMAND(command)) {
-        unsigned char context = BRL_CTX_DEFAULT + arg;
+        unsigned char context = KTB_CTX_DEFAULT + arg;
         const KeyContext *ctx = getKeyContext(table, context);
 
         if (ctx) {
@@ -258,7 +258,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   int command = EOF;
   const HotkeyEntry *hotkey;
 
-  if (context == BRL_CTX_DEFAULT) context = table->currentContext;
+  if (context == KTB_CTX_DEFAULT) context = table->currentContext;
   if (press) table->currentContext = table->persistentContext;
 
   if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
@@ -292,18 +292,18 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         immediate = 0;
       } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
         immediate = 0;
-      } else if (context == BRL_CTX_DEFAULT) {
+      } else if (context == KTB_CTX_DEFAULT) {
         command = EOF;
       } else if (!inserted) {
         command = EOF;
       } else {
         removePressedKey(table, keyPosition);
-        binding = findKeyBinding(table, BRL_CTX_DEFAULT, &keyValue, &isIncomplete);
+        binding = findKeyBinding(table, KTB_CTX_DEFAULT, &keyValue, &isIncomplete);
         inserted = insertPressedKey(table, &keyValue, keyPosition);
 
         if (binding) {
           command = binding->command;
-        } else if ((binding = findKeyBinding(table, BRL_CTX_DEFAULT, NULL, &isIncomplete))) {
+        } else if ((binding = findKeyBinding(table, KTB_CTX_DEFAULT, NULL, &isIncomplete))) {
           command = binding->command;
           immediate = 0;
         } else {
@@ -353,7 +353,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
           table->command = command;
 
-          if (context == BRL_CTX_WAITING) {
+          if (context == KTB_CTX_WAITING) {
             table->command = EOF;
             table->immediate = 0;
           } else if ((table->immediate = immediate)) {
@@ -370,7 +370,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         state = KTS_COMMAND;
       }
     } else {
-      if (context == BRL_CTX_WAITING) table->command = EOF;
+      if (context == KTB_CTX_WAITING) table->command = EOF;
 
       if (table->command != EOF) {
         if (table->immediate) {

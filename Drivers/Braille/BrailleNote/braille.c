@@ -335,7 +335,7 @@ writeVisualDisplay (unsigned char c) {
 }
 
 static int
-visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext context) {
+visualDisplay (BrailleDisplay *brl, unsigned char byte, KeyTableCommandContext context) {
   int vt = getVirtualTerminal();
   const unsigned char end[] = {ESC, 0};
   unsigned int state = 0;
@@ -570,7 +570,7 @@ getFunctionKey (BrailleDisplay *brl) {
 }
 
 static int
-interpretNavigation (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
+interpretNavigation (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
   switch (dots) {
     default:
       break;
@@ -637,7 +637,7 @@ interpretNavigation (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandC
 }
 
 static int
-interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
+interpretCharacter (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
   int mask = 0X00;
   switch (currentKeyboardMode) {
     case KBM_NAVIGATE:
@@ -658,8 +658,8 @@ interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandCo
 }
 
 static int
-interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
-  if (context == BRL_CTX_CHORDS)
+interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
+  if (context == KTB_CTX_CHORDS)
     return BRL_BLK_PASSDOTS | translateInputCell(dots) | BRL_DOTC;
   switch (dots) {
     default:
@@ -773,7 +773,7 @@ interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandC
 }
 
 static int
-interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
+interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
   switch (dots & 0X3F) {
     default:
       break;
@@ -814,7 +814,7 @@ interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverComm
 }
 
 static int
-interpretEnterChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
+interpretEnterChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */
@@ -851,7 +851,7 @@ interpretEnterChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandC
 }
 
 static int
-interpretThumbKeys (BrailleDisplay *brl, unsigned char keys, BRL_DriverCommandContext context) {
+interpretThumbKeys (BrailleDisplay *brl, unsigned char keys, KeyTableCommandContext context) {
   switch (keys) {
     default:
       break;
@@ -880,17 +880,17 @@ interpretThumbKeys (BrailleDisplay *brl, unsigned char keys, BRL_DriverCommandCo
 }
 
 static int
-interpretRoutingKey (BrailleDisplay *brl, unsigned char key, BRL_DriverCommandContext context) {
+interpretRoutingKey (BrailleDisplay *brl, unsigned char key, KeyTableCommandContext context) {
   return currentRoutingOperation + key;
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   ResponsePacket packet;
   int size;
 
   while ((size = getPacket(&packet))) {
-    int (*handler)(BrailleDisplay *, unsigned char, BRL_DriverCommandContext);
+    int (*handler)(BrailleDisplay *, unsigned char, KeyTableCommandContext);
     unsigned char data;
 
     switch (packet.data.code) {

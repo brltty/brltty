@@ -67,6 +67,13 @@ typedef enum {
 
 typedef struct KeyTableStruct KeyTable;
 
+typedef enum {
+  KTB_CTX_MENU,
+  KTB_CTX_CHORDS,
+  KTB_CTX_WAITING,
+  KTB_CTX_DEFAULT /* this one must be defined last */
+} KeyTableCommandContext;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

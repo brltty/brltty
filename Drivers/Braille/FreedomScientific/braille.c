@@ -1016,7 +1016,7 @@ updateKeys (uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   Packet packet;
   int count;
 

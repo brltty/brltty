@@ -221,11 +221,11 @@ setDefaultKeyContextProperties (KeyTableData *ktd) {
   } PropertiesEntry;
 
   static const PropertiesEntry propertiesTable[] = {
-    { .context = BRL_CTX_DEFAULT,
+    { .context = KTB_CTX_DEFAULT,
       .title = WS_C("Default Bindings")
     }
     ,
-    { .context = BRL_CTX_MENU,
+    { .context = KTB_CTX_MENU,
       .title = WS_C("Menu Bindings")
     }
     ,
@@ -788,20 +788,20 @@ processContextOperands (DataFile *file, void *data) {
     int ok = 0;
 
     if (isKeyword(WS_C("default"), context.characters, context.length)) {
-      ktd->context = BRL_CTX_DEFAULT;
+      ktd->context = KTB_CTX_DEFAULT;
       ok = 1;
     } else if (isKeyword(WS_C("menu"), context.characters, context.length)) {
-      ktd->context = BRL_CTX_MENU;
+      ktd->context = KTB_CTX_MENU;
       ok = 1;
     } else {
       int number;
 
       if (!isNumber(&number, context.characters, context.length)) {
         reportDataError(file, "unknown context name: %.*" PRIws, context.length, context.characters);
-      } else if ((number < 0) || (number > (BRL_MSK_ARG - BRL_CTX_DEFAULT))) {
+      } else if ((number < 0) || (number > (BRL_MSK_ARG - KTB_CTX_DEFAULT))) {
         reportDataError(file, "invalid context number: %.*" PRIws, context.length, context.characters);
       } else {
-        ktd->context = BRL_CTX_DEFAULT + number;
+        ktd->context = KTB_CTX_DEFAULT + number;
         ok = 1;
       }
     }
@@ -1049,7 +1049,7 @@ processKeyTableLine (DataFile *file, void *data) {
 
 void
 resetKeyTable (KeyTable *table) {
-  table->currentContext = table->persistentContext = BRL_CTX_DEFAULT;
+  table->currentContext = table->persistentContext = KTB_CTX_DEFAULT;
   table->pressedCount = 0;
   table->command = EOF;
   table->immediate = 0;
@@ -1351,7 +1351,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
     KeyTableData ktd;
     memset(&ktd, 0, sizeof(ktd));
 
-    ktd.context = BRL_CTX_DEFAULT;
+    ktd.context = KTB_CTX_DEFAULT;
 
     if ((ktd.table = malloc(sizeof(*ktd.table)))) {
       ktd.table->title = NULL;

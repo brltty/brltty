@@ -355,7 +355,7 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
     {
       clio_reset(brl);      
       approximateDelay(500);
-      clio_readCommand(brl, BRL_CTX_DEFAULT);
+      clio_readCommand(brl, KTB_CTX_DEFAULT);
     }
   if (brlCols > 0)
     { /* Succesfully identified hardware. */
@@ -409,12 +409,12 @@ unsigned int	clio_readKey(BrailleDisplay *brl)
   return res;
 }
 
-int	clio_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext ctx)
+int	clio_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
 {
   return clio_keyToCommand(brl, clio_readKey(brl), ctx);
 }
 
-int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx)
+int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx)
 {
   unsigned int res = EOF;
 

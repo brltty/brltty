@@ -244,7 +244,7 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char packet[MT_INPUT_PACKET_LENGTH];
 
   memset(packet, 0, sizeof(packet));

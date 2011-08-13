@@ -144,7 +144,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
-static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {
+static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) {
   vbButtons buttons;
   BrButtons(&buttons);
   if (!buttons.keypressed) {

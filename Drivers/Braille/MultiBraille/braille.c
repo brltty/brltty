@@ -266,7 +266,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 
-static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 	static short status = 0;	/* cursor routing keys mode */
 	
 	KeyStroke keystroke;

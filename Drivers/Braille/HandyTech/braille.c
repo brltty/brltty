@@ -1442,7 +1442,7 @@ interpretByte_Bookworm (unsigned char byte) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int noInput = 1;
 
   if (at2Count) {
