@@ -260,8 +260,8 @@ eubrl_netRead(BrailleDisplay *brl, void *buf, size_t bufsize, int wait)
 {
   if (connectionStatus != NET_CONNECTED)
     {
-      errno = ENOTCONN;
       logMessage(LOG_ERR, "EuroBraille: NET read while not connected.");
+      errno = ENODEV;
       return (-1);
     }
   else
