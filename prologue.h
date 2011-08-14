@@ -272,8 +272,13 @@ mbstowcs (wchar_t *dest, const char *src, size_t n) {
   size_t length = strlen(src);
 
   if (dest) {
-    strncpy(dest, src, n);
-    if (length > n) return n;
+    if (length > n) {
+      length = n;
+    } else if (length < n) {
+      length += 1;
+    }
+
+    memcpy(dest, src, length);
   }
 
   return length;
