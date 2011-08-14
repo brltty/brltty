@@ -88,27 +88,47 @@ extern int vsnprintf (char *str, size_t size, const char *format, va_list ap);
 
 #define lstat(file_name, buf) stat(file_name, buf)
 
-typedef unsigned char		uint8_t;
-typedef unsigned short		uint16_t;
-typedef unsigned long		uint32_t;
-typedef unsigned long long	uint64_t;
 typedef signed char		int8_t;
 typedef signed short		int16_t;
 typedef signed long		int32_t;
 typedef signed long long	int64_t;
 
+typedef unsigned char		uint8_t;
+typedef unsigned short		uint16_t;
+typedef unsigned long		uint32_t;
+typedef unsigned long long	uint64_t;
+
 #define INT8_C(c)	c
 #define INT16_C(c)	c
 #define INT32_C(c)	c ## L
 #define INT64_C(c)	c ## LL
+#define INTMAX_C(c)	c ## LL
 
 #define UINT8_C(c)	c ## U
 #define UINT16_C(c)	c ## U
 #define UINT32_C(c)	c ## UL
 #define UINT64_C(c)	c ## ULL
-
-#define INTMAX_C(c)	c ## LL
 #define UINTMAX_C(c)	c ## ULL
+
+#define INT8_MIN(c)     INT8_C(0X80)
+#define INT16_MIN(c)    INT16_C(0X8000)
+#define INT32_MIN(c)    INT32_C(0X80000000)
+#define INT64_MIN(c)    INT64_C(0X8000000000000000)
+
+#define INT8_MAX(c)     INT8_C(0X7F)
+#define INT16_MAX(c)    INT16_C(0X7FFF)
+#define INT32_MAX(c)    INT32_C(0X7FFFFFFF)
+#define INT64_MAX(c)    INT64_C(0X7FFFFFFFFFFFFFFF)
+
+#define UINT8_MIN(c)     UINT8_C(0)
+#define UINT16_MIN(c)    UINT16_C(0)
+#define UINT32_MIN(c)    UINT32_C(0)
+#define UINT64_MIN(c)    UINT64_C(0)
+
+#define UINT8_MAX(c)     UINT8_C(0XFF)
+#define UINT16_MAX(c)    UINT16_C(0XFFFF)
+#define UINT32_MAX(c)    UINT32_C(0XFFFFFFFF)
+#define UINT64_MAX(c)    UINT64_C(0XFFFFFFFFFFFFFFFF)
 
 #define PRIu32 "lu"
 #define PRIX32 "lX"
@@ -192,6 +212,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define wchar_t char
 #define wint_t int
 #define WEOF EOF
+#define WCHAR_MAX 0XFF
 
 #define wmemchr memchr
 #define wmemcmp memcmp
