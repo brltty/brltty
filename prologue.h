@@ -92,23 +92,25 @@ typedef signed char		int8_t;
 typedef signed short		int16_t;
 typedef signed long		int32_t;
 typedef signed long long	int64_t;
+typedef int64_t	                intmax_t;
 
 typedef unsigned char		uint8_t;
 typedef unsigned short		uint16_t;
 typedef unsigned long		uint32_t;
 typedef unsigned long long	uint64_t;
+typedef uint64_t        	uintmax_t;
 
 #define INT8_C(c)	c
 #define INT16_C(c)	c
 #define INT32_C(c)	c ## L
 #define INT64_C(c)	c ## LL
-#define INTMAX_C(c)	c ## LL
+#define INTMAX_C(c)	INT64_C(c)
 
 #define UINT8_C(c)	c ## U
 #define UINT16_C(c)	c ## U
 #define UINT32_C(c)	c ## UL
 #define UINT64_C(c)	c ## ULL
-#define UINTMAX_C(c)	c ## ULL
+#define UINTMAX_C(c)	UINT64_C(c)
 
 #define INT8_MIN(c)     INT8_C(0X80)
 #define INT16_MIN(c)    INT16_C(0X8000)
@@ -264,6 +266,18 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 
 #define swprintf snprintf
 #define vswprintf vsnprintf
+
+static inline size_t
+mbstowcs (wchar_t *dest, const char *src, size_t n) {
+  size_t length = strlen(src);
+
+  if (dest) {
+    strncpy(dest, src, n);
+    if (length > n) return n;
+  }
+
+  return length;
+}
 
 #define WC_C(wc) wc
 #define WS_C(ws) ws
