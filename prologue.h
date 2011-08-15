@@ -314,7 +314,7 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
   return length;
 }
 
-#define WC_C(wc) wc
+#define WC_C(wc) (wchar_t)wc
 #define WS_C(ws) (const wchar_t *)ws
 #define PRIwc "c"
 #define PRIws "s"
