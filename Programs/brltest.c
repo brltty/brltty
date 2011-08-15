@@ -83,7 +83,7 @@ message (const char *mode, const char *text, short flags) {
   const wchar_t *character = characters;
 
   clearStatusCells(&brl);
-  mbstowcs(characters, text, ARRAY_COUNT(characters));
+  convertTextToWchars(characters, text, ARRAY_COUNT(characters));
 
   while (length) {
     int count = (length <= size)? length: (size - 1);

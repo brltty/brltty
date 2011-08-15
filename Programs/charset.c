@@ -308,21 +308,7 @@ convertWcharToChar (wchar_t wc) {
 
 size_t
 getTextLength (const char *text) {
-  return mbstowcs(NULL, text, 0);
-}
-
-wchar_t *
-convertTextToWchars (const char *text) {
-  size_t count = getTextLength(text) + 1;
-  wchar_t *characters = malloc(count * sizeof(*characters));
-
-  if (characters) {
-    mbstowcs(characters, text, count);
-  } else {
-    logMallocError();
-  }
-
-  return characters;
+  return convertTextToWchars(NULL, text, 0);
 }
 
 size_t

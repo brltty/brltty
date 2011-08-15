@@ -48,7 +48,6 @@ extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
 
 extern size_t getTextLength (const char *text);
-extern wchar_t *convertTextToWchars (const char *text);
 
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);

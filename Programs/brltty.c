@@ -272,7 +272,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
   {
     size_t modeLength = mode? getUtf8Length(mode): 0;
     wchar_t modeCharacters[modeLength + 1];
-    mbstowcs(modeCharacters, mode, ARRAY_COUNT(modeCharacters));
+    convertTextToWchars(modeCharacters, mode, ARRAY_COUNT(modeCharacters));
     fillTextRegion(textBuffer, brl.buffer,
                    statusStart, statusCount, brl.textColumns, brl.textRows,
                    modeCharacters, modeLength);
@@ -287,7 +287,7 @@ int
 writeBrailleText (const char *mode, const char *text) {
   size_t count = getTextLength(text) + 1;
   wchar_t characters[count];
-  size_t length = mbstowcs(characters, text, count);
+  size_t length = convertTextToWchars(characters, text, count);
   return writeBrailleCharacters(mode, characters, length);
 }
 
@@ -2717,7 +2717,7 @@ message (const char *mode, const char *text, short flags) {
     if (api) api_unlink(&brl);
 #endif /* ENABLE_API */
 
-    mbstowcs(characters, text, ARRAY_COUNT(characters));
+    convertTextToWchars(characters, text, ARRAY_COUNT(characters));
     while (length) {
       int count;
 

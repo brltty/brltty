@@ -112,25 +112,25 @@ typedef uint64_t        	uintmax_t;
 #define UINT64_C(c)	c ## ULL
 #define UINTMAX_C(c)	UINT64_C(c)
 
-#define INT8_MIN(c)     INT8_C(0X80)
-#define INT16_MIN(c)    INT16_C(0X8000)
-#define INT32_MIN(c)    INT32_C(0X80000000)
-#define INT64_MIN(c)    INT64_C(0X8000000000000000)
+#define INT8_MIN     INT8_C(0X80)
+#define INT16_MIN    INT16_C(0X8000)
+#define INT32_MIN    INT32_C(0X80000000)
+#define INT64_MIN    INT64_C(0X8000000000000000)
 
-#define INT8_MAX(c)     INT8_C(0X7F)
-#define INT16_MAX(c)    INT16_C(0X7FFF)
-#define INT32_MAX(c)    INT32_C(0X7FFFFFFF)
-#define INT64_MAX(c)    INT64_C(0X7FFFFFFFFFFFFFFF)
+#define INT8_MAX     INT8_C(0X7F)
+#define INT16_MAX    INT16_C(0X7FFF)
+#define INT32_MAX    INT32_C(0X7FFFFFFF)
+#define INT64_MAX    INT64_C(0X7FFFFFFFFFFFFFFF)
 
-#define UINT8_MIN(c)     UINT8_C(0)
-#define UINT16_MIN(c)    UINT16_C(0)
-#define UINT32_MIN(c)    UINT32_C(0)
-#define UINT64_MIN(c)    UINT64_C(0)
+#define UINT8_MIN     UINT8_C(0)
+#define UINT16_MIN    UINT16_C(0)
+#define UINT32_MIN    UINT32_C(0)
+#define UINT64_MIN    UINT64_C(0)
 
-#define UINT8_MAX(c)     UINT8_C(0XFF)
-#define UINT16_MAX(c)    UINT16_C(0XFFFF)
-#define UINT32_MAX(c)    UINT32_C(0XFFFFFFFF)
-#define UINT64_MAX(c)    UINT64_C(0XFFFFFFFFFFFFFFFF)
+#define UINT8_MAX     UINT8_C(0XFF)
+#define UINT16_MAX    UINT16_C(0XFFFF)
+#define UINT32_MAX    UINT32_C(0XFFFFFFFF)
+#define UINT64_MAX    UINT64_C(0XFFFFFFFFFFFFFFFF)
 
 #define PRId8 "d"
 #define PRIi8 "i"
@@ -230,6 +230,8 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #include <wchar.h>
 #include <wctype.h>
 
+#define convertTextToWchars mbstowcs
+
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
 #define PRIwc "lc"
@@ -296,17 +298,17 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define vswprintf vsnprintf
 
 static inline size_t
-mbstowcs (wchar_t *dest, const char *src, size_t n) {
-  size_t length = strlen(src);
+convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
+  size_t length = strlen(text);
 
-  if (dest) {
-    if (length > n) {
-      length = n;
-    } else if (length < n) {
+  if (characters) {
+    if (length > size) {
+      length = size;
+    } else if (length < size) {
       length += 1;
     }
 
-    memcpy(dest, src, length);
+    memcpy(characters, text, length);
   }
 
   return length;
