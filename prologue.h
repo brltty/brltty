@@ -241,61 +241,61 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #include <ctype.h>
 #include <string.h>
 
-#define wchar_t char
+#define wchar_t unsigned char
 #define wint_t int
 #define WEOF EOF
 #define WCHAR_MAX 0XFF
 
-#define wmemchr memchr
-#define wmemcmp memcmp
-#define wmemcpy memcpy
-#define wmemmove memmove
-#define wmemset memset
+#define wmemchr(source,character,count) memchr((const wchar_t *)(source), (wchar_t)(character), (count))
+#define wmemcmp(source1,source2,count) memcmp((const wchar_t *)(source1), (const wchar_t *)(source2), (count))
+#define wmemcpy(target,source,count) memcpy((wchar_t *)(target), (const wchar_t *)(source), (count))
+#define wmemmove(target,source,count) memmove((wchar_t *)(target), (const wchar_t *)(source), (count))
+#define wmemset(target,character,count) memset((wchar_t *)(target), (wchar_t)(character), (count))
 
-#define wcscasecmp strcasecmp
-#define wcsncasecmp strncasecmp
-#define wcscat strcat
-#define wcsncat strncat
-#define wcscmp strcmp
-#define wcsncmp strncmp
-#define wcscpy strcpy
-#define wcsncpy strncpy
-#define wcslen strlen
-#define wcsnlen strnlen
+#define wcscasecmp(source1,source2) strcasecmp((const wchar_t *)(source1), (const wchar_t *)(source2))
+#define wcsncasecmp(source1,source2,count) strncasecmp((const wchar_t *)(source1), (const wchar_t *)(source2), (count))
+#define wcscat(target,source) strcat((wchar_t *)(target), (const wchar_t *)(source))
+#define wcsncat(target,source,count) strncat((wchar_t *)(target), (const wchar_t *)(source), (count))
+#define wcscmp(source1,source2) strcmp((const wchar_t *)(source1), (const wchar_t *)(source2))
+#define wcsncmp(source1,source2,count) strncmp((const wchar_t *)(source1), (const wchar_t *)(source2), (count))
+#define wcscpy(target,source) strcpy((wchar_t *)(target), (const wchar_t *)(source))
+#define wcsncpy(target,source,count) strncpy((wchar_t *)(target), (const wchar_t *)(source), (count))
+#define wcslen(source) strlen((const wchar_t *)(source))
+#define wcsnlen(source,count) strnlen((const wchar_t *)(source), (count))
 
-#define wcschr strchr
-#define wcscoll strcoll
-#define wcscspn strcspn
-#define wcsdup strdup
-#define wcspbrk strpbrk
-#define wcsrchr strrchr
-#define wcsspn strspn
-#define wcsstr strstr
-#define wcstok strtok
-#define wcswcs strstr
-#define wcsxfrm strxfrm
+#define wcschr(source,character) strchr((const wchar_t *)(source), (wchar_t)(character))
+#define wcscoll(source1,source2) strcoll((const wchar_t *)(source1), (const wchar_t *)(source2))
+#define wcscspn(source,reject) strcspn((const wchar_t *)(source), (const wchar_t *)(reject))
+#define wcsdup(source) strdup((const wchar_t *)(source))
+#define wcspbrk(source,accept) strpbrk((const wchar_t *)(source), (const wchar_t *)(accept))
+#define wcsrchr(source,character) strrchr((const wchar_t *)(source), (wchar_t)(character))
+#define wcsspn(source,accept) strspn((const wchar_t *)(source), (const wchar_t *)(accept))
+#define wcsstr(source,substring) strstr((const wchar_t *)(source), (const wchar_t *)(substring))
+#define wcstok(target,delimiters,end) strtok_r((wchar_t *)(target), (const wchar_t *)(delimiters), (wchar_t **)(end))
+#define wcswcs(source,substring) strstr((const wchar_t *)(source), (const wchar_t *)(substring))
+#define wcsxfrm(target,source,count) strxfrm((wchar_t *)(target), (const wchar_t *)(source), (count))
 
-#define wcstol strtol
-#define wcstoll strtoll
+#define wcstol(source,end,base) strtol((const wchar_t *)(source), (wchar_t **)(end), (base))
+#define wcstoll(source,end,base) strtoll((const wchar_t *)(source), (wchar_t **)(end), (base))
 
-#define iswalnum isalnum
-#define iswalpha isalpha
-#define iswblank isblank
-#define iswcntrl iscntrl
-#define iswdigit isdigit
-#define iswgraph isgraph
-#define iswlower islower
-#define iswprint isprint
-#define iswpunct ispunct
-#define iswspace isspace
-#define iswupper isupper
-#define iswxdigit isxdigit
+#define iswalnum(character) isalnum((wint_t)(character))
+#define iswalpha(character) isalpha((wint_t)(character))
+#define iswblank(character) isblank((wint_t)(character))
+#define iswcntrl(character) iscntrl((wint_t)(character))
+#define iswdigit(character) isdigit((wint_t)(character))
+#define iswgraph(character) isgraph((wint_t)(character))
+#define iswlower(character) islower((wint_t)(character))
+#define iswprint(character) isprint((wint_t)(character))
+#define iswpunct(character) ispunct((wint_t)(character))
+#define iswspace(character) isspace((wint_t)(character))
+#define iswupper(character) isupper((wint_t)(character))
+#define iswxdigit(character) isxdigit((wint_t)(character))
 
-#define towlower tolower
-#define towupper toupper
+#define towlower(character) tolower((wint_t)(character))
+#define towupper(character) toupper((wint_t)(character))
 
-#define swprintf snprintf
-#define vswprintf vsnprintf
+#define swprintf(target,count,source,...) snprintf((wchar_t *)(target), (count), (const wchar_t *)(source), ## __VARARGS__)
+#define vswprintf(target,count,source,args) vsnprintf((wchar_t *)(target), (count), (const wchar_t *)(source), (args))
 
 static inline size_t
 convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
