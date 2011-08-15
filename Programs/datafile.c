@@ -48,7 +48,10 @@ struct DataFileStruct {
   const wchar_t *end;
 };
 
-const wchar_t brlDotNumbers[BRL_DOT_COUNT] = WS_C("12345678");
+const wchar_t brlDotNumbers[BRL_DOT_COUNT] = {
+  WC_C('1'), WC_C('2'), WC_C('3'), WC_C('4'),
+  WC_C('5'), WC_C('6'), WC_C('7'), WC_C('8')
+};
 const unsigned char brlDotBits[BRL_DOT_COUNT] = {
   BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
   BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8

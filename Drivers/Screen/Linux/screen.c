@@ -29,6 +29,7 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 
+#include "ascii.h"
 #include "log.h"
 #include "device.h"
 #include "parse.h"
@@ -1491,8 +1492,8 @@ insertCode (ScreenKey key, int raw) {
 static int
 insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   wchar_t buffer[2];
-  wchar_t *sequence;
-  wchar_t *end;
+  const wchar_t *sequence;
+  const wchar_t *end;
 
   setKeyModifiers(&key, 0);
 
@@ -1607,8 +1608,10 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
     }
     end = sequence + wcslen(sequence);
   } else {
-    sequence = end = buffer + ARRAY_COUNT(buffer);
-    *--sequence = key & SCR_KEY_CHAR_MASK;
+    wchar_t *character = buffer + ARRAY_COUNT(buffer);
+
+    end = character;
+    *--character = key & SCR_KEY_CHAR_MASK;
 
     if (key & SCR_KEY_ALT_LEFT) {
       int meta;
@@ -1616,12 +1619,12 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 
       switch (meta) {
         case K_ESCPREFIX:
-          *--sequence = 0X1B;
+          *--character = ESC;
           break;
 
         case K_METABIT:
-          if (*sequence < 0X80) {
-            *sequence |= 0X80;
+          if (*character < 0X80) {
+            *character |= 0X80;
             break;
           }
 
@@ -1630,6 +1633,8 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
           return 0;
       }
     }
+
+    sequence = character;
   }
 
   while (sequence != end)
