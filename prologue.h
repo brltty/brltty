@@ -132,12 +132,40 @@ typedef uint64_t        	uintmax_t;
 #define UINT32_MAX(c)    UINT32_C(0XFFFFFFFF)
 #define UINT64_MAX(c)    UINT64_C(0XFFFFFFFFFFFFFFFF)
 
-#define PRIu32 "lu"
-#define PRIX32 "lX"
-#define PRIu16 "u"
-#define PRIX16 "X"
+#define PRId8 "d"
+#define PRIi8 "i"
 #define PRIu8 "u"
+#define PRIo8 "o"
+#define PRIx8 "x"
 #define PRIX8 "X"
+
+#define PRId16 "d"
+#define PRIi16 "i"
+#define PRIu16 "u"
+#define PRIo16 "o"
+#define PRIx16 "x"
+#define PRIX16 "X"
+
+#define PRId32 "ld"
+#define PRIi32 "li"
+#define PRIu32 "lu"
+#define PRIo32 "lo"
+#define PRIx32 "lx"
+#define PRIX32 "lX"
+
+#define PRId64 "lld"
+#define PRIi64 "lli"
+#define PRIu64 "llu"
+#define PRIo64 "llo"
+#define PRIx64 "llx"
+#define PRIX64 "llX"
+
+#define PRIdMAX PRId64
+#define PRIiMAX PRIi64
+#define PRIuMAX PRIu64
+#define PRIoMAX PRIo64
+#define PRIxMAX PRIx64
+#define PRIXMAX PRIX64
 
 #else /* __MSDOS__ */
 #include <inttypes.h>
