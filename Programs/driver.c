@@ -25,8 +25,8 @@ static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
 void
-unsupportedDevice (const char *path) {
-  logMessage(LOG_WARNING, "unsupported device: %s", path);
+unsupportedDevice (const char *identifier) {
+  logMessage(LOG_WARNING, "unsupported device: %s", identifier);
 }
 
 static void

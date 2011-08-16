@@ -48,7 +48,7 @@ typedef struct {
 #define DRIVER_VERSION_STRING (PACKAGE_VERSION "@" PACKAGE_REVISION)
 #define DRIVER_VERSION_DECLARATION(type) const char CONCATENATE(type##_version_,DRIVER_CODE)[] = DRIVER_VERSION_STRING
 
-extern void unsupportedDevice (const char *path);
+extern void unsupportedDevice (const char *identifier);
 
 extern void logOutputPacket (const void *packet, size_t size);
 extern void logInputPacket (const void *packet, size_t size);
