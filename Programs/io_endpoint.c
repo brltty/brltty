@@ -29,7 +29,9 @@
 typedef void CloseHandleMethod (void *handle);
 
 typedef ssize_t WriteDataMethod (void *handle, const void *data, size_t size, int timeout);
+
 typedef int AwaitInputMethod (void *handle, int timeout);
+
 typedef ssize_t ReadDataMethod (
   void *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
@@ -99,7 +101,7 @@ ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specificati
   specification->serial.applicationData = NULL;
 
   specification->usb.channelDefinitions = NULL;
-  specification->usb.inputTimeout = 100;
+  specification->usb.inputTimeout = 1000;
   specification->usb.outputTimeout = 1000;
   specification->usb.applicationData = NULL;
 
@@ -112,9 +114,9 @@ ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specificati
 void
 ioInitializeSerialParameters (SerialParameters *parameters) {
   parameters->baud = 9600;
-  parameters->flow = SERIAL_FLOW_NONE;
-  parameters->data = 8;
-  parameters->stop = 1;
+  parameters->flowControl = SERIAL_FLOW_NONE;
+  parameters->dataBits = 8;
+  parameters->stopBits = 1;
   parameters->parity = SERIAL_PARITY_NONE;
 }
 

@@ -1677,8 +1677,8 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
       return 0;
 
   if (!serial->setBaud(device, parameters->baud)) return 0;
-  if (!serial->setFlowControl(device, parameters->flow)) return 0;
-  if (!serial->setDataFormat(device, parameters->data, parameters->stop, parameters->parity)) return 0;
+  if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
+  if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
 
   return 1;
 }

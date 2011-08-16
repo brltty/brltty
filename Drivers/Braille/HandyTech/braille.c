@@ -787,9 +787,9 @@ static int
 openUsbPort (char **parameters, const char *device) {
   const SerialParameters serial = {
     .baud = baud,
-    .flow = SERIAL_FLOW_NONE,
-    .data = 8,
-    .stop = 1,
+    .flowControl = SERIAL_FLOW_NONE,
+    .dataBits = 8,
+    .stopBits = 1,
     .parity = SERIAL_PARITY_ODD
   };
 

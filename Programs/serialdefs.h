@@ -51,9 +51,9 @@ typedef enum {
 
 typedef struct {
   int baud;
-  SerialFlowControl flow;
-  int data;
-  int stop;
+  SerialFlowControl flowControl;
+  int dataBits;
+  int stopBits;
   SerialParity parity;
 } SerialParameters;
 

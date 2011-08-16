@@ -2514,9 +2514,9 @@ static int
 configureUsbPort (void) {
   const SerialParameters parameters = {
     .baud = protocol->serialBaud,
-    .flow = SERIAL_FLOW_NONE,
-    .data = 8,
-    .stop = 1,
+    .flowControl = SERIAL_FLOW_NONE,
+    .dataBits = 8,
+    .stopBits = 1,
     .parity = protocol->serialParity
   };
 

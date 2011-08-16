@@ -808,10 +808,10 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 int
 serialSetParameters (SerialDevice *serial, const SerialParameters *parameters) {
   if (!serialSetBaud(serial, parameters->baud)) return 0;
-  if (!serialSetDataBits(serial, parameters->data)) return 0;
-  if (!serialSetStopBits(serial, parameters->stop)) return 0;
+  if (!serialSetDataBits(serial, parameters->dataBits)) return 0;
+  if (!serialSetStopBits(serial, parameters->stopBits)) return 0;
   if (!serialSetParity(serial, parameters->parity)) return 0;
-  if (!serialSetFlowControl(serial, parameters->flow)) return 0;
+  if (!serialSetFlowControl(serial, parameters->flowControl)) return 0;
   return 1;
 }
 
