@@ -28,12 +28,12 @@
 typedef struct {
   void (*closeHandle) (void *handle);
 
+  ssize_t (*writeData) (void *handle, const void *data, size_t size, int timeout);
   int (*awaitInput) (void *handle, int timeout);
   ssize_t (*readData) (
     void *handle, void *buffer, size_t size,
     int initialTimeout, int subsequentTimeout
   );
-  ssize_t (*writeData) (void *handle, const void *data, size_t size, int timeout);
 
   int (*tellDevice) (
     void *handle, uint8_t recipient, uint8_t type,
@@ -44,6 +44,26 @@ typedef struct {
   int (*askDevice) (
     void *handle, uint8_t recipient, uint8_t type,
     uint8_t request, uint16_t value, uint16_t index,
+    void *buffer, uint16_t size, int timeout
+  );
+
+  ssize_t (*setHidReport) (
+    void *handle, unsigned char interface, unsigned char report,
+    const void *data, uint16_t size, int timeout
+  );
+
+  ssize_t (*getHidReport) (
+    void *handle, unsigned char interface, unsigned char report,
+    void *buffer, uint16_t size, int timeout
+  );
+
+  ssize_t (*setHidFeature) (
+    void *handle, unsigned char interface, unsigned char report,
+    const void *data, uint16_t size, int timeout
+  );
+
+  ssize_t (*getHidFeature) (
+    void *handle, unsigned char interface, unsigned char report,
     void *buffer, uint16_t size, int timeout
   );
 } InputOutputMethods;
@@ -88,6 +108,11 @@ closeSerialHandle (void *handle) {
   serialCloseDevice(handle);
 }
 
+static ssize_t
+writeSerialData (void *handle, const void *data, size_t size, int timeout) {
+  return serialWriteData(handle, data, size);
+}
+
 static int
 awaitSerialInput (void *handle, int timeout) {
   return serialAwaitInput(handle, timeout);
@@ -102,21 +127,26 @@ readSerialData (
                         initialTimeout, subsequentTimeout);
 }
 
-static ssize_t
-writeSerialData (void *handle, const void *data, size_t size, int timeout) {
-  return serialWriteData(handle, data, size);
-}
-
 static const InputOutputMethods serialMethods = {
   .closeHandle = closeSerialHandle,
+
+  .writeData = writeSerialData,
   .awaitInput = awaitSerialInput,
-  .readData = readSerialData,
-  .writeData = writeSerialData
+  .readData = readSerialData
 };
 
 static void
 closeUsbHandle (void *handle) {
   usbCloseChannel(handle);
+}
+
+static int
+writeUsbData (void *handle, const void *data, size_t size, int timeout) {
+  UsbChannel *channel = handle;
+
+  return usbWriteEndpoint(channel->device,
+                          channel->definition.outputEndpoint,
+                          data, size, timeout);
 }
 
 static int
@@ -145,15 +175,6 @@ readUsbData (
 }
 
 static int
-writeUsbData (void *handle, const void *data, size_t size, int timeout) {
-  UsbChannel *channel = handle;
-
-  return usbWriteEndpoint(channel->device,
-                          channel->definition.outputEndpoint,
-                          data, size, timeout);
-}
-
-static int
 tellUsbDevice (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
@@ -177,18 +198,70 @@ askUsbDevice (
                         request, value, index, buffer, size, timeout);
 }
 
+static ssize_t
+setUsbHidReport (
+  void *handle, unsigned char interface, unsigned char report,
+  const void *data, uint16_t size, int timeout
+) {
+  UsbChannel *channel = handle;
+
+  return usbHidSetReport(channel->device, interface, report, data, size, timeout);
+}
+
+static ssize_t
+getUsbHidReport (
+  void *handle, unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size, int timeout
+) {
+  UsbChannel *channel = handle;
+
+  return usbHidGetReport(channel->device, interface, report, buffer, size, timeout);
+}
+
+static ssize_t
+setUsbHidFeature (
+  void *handle, unsigned char interface, unsigned char report,
+  const void *data, uint16_t size, int timeout
+) {
+  UsbChannel *channel = handle;
+
+  return usbHidSetFeature(channel->device, interface, report, data, size, timeout);
+}
+
+static ssize_t
+getUsbHidFeature (
+  void *handle, unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size, int timeout
+) {
+  UsbChannel *channel = handle;
+
+  return usbHidGetFeature(channel->device, interface, report, buffer, size, timeout);
+}
+
 static const InputOutputMethods usbMethods = {
   .closeHandle = closeUsbHandle,
+
+  .writeData = writeUsbData,
   .awaitInput = awaitUsbInput,
   .readData = readUsbData,
-  .writeData = writeUsbData,
+
   .tellDevice = tellUsbDevice,
-  .askDevice = askUsbDevice
+  .askDevice = askUsbDevice,
+
+  .setHidReport = setUsbHidReport,
+  .getHidReport = getUsbHidReport,
+  .setHidFeature = setUsbHidFeature,
+  .getHidFeature = getUsbHidFeature
 };
 
 static void
 closeBluetoothHandle (void *handle) {
   bthCloseConnection(handle);
+}
+
+static ssize_t
+writeBluetoothData (void *handle, const void *data, size_t size, int timeout) {
+  return bthWriteData(handle, data, size);
 }
 
 static int
@@ -205,16 +278,12 @@ readBluetoothData (
                      initialTimeout, subsequentTimeout);
 }
 
-static ssize_t
-writeBluetoothData (void *handle, const void *data, size_t size, int timeout) {
-  return bthWriteData(handle, data, size);
-}
-
 static const InputOutputMethods bluetoothMethods = {
   .closeHandle = closeBluetoothHandle,
+
+  .writeData = writeBluetoothData,
   .awaitInput = awaitBluetoothInput,
-  .readData = readBluetoothData,
-  .writeData = writeBluetoothData
+  .readData = readBluetoothData
 };
 
 InputOutputEndpoint *
@@ -291,6 +360,11 @@ ioGetApplicationData (InputOutputEndpoint *endpoint) {
   return endpoint->applicationData;
 }
 
+ssize_t
+ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
+  return endpoint->methods->writeData(endpoint->handle, data, size, endpoint->outputTimeout);
+}
+
 int
 ioAwaitInput (InputOutputEndpoint *endpoint, int timeout) {
   return endpoint->methods->awaitInput(endpoint->handle, timeout);
@@ -313,11 +387,6 @@ ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait) {
 }
 
 ssize_t
-ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
-  return endpoint->methods->writeData(endpoint->handle, data, size, endpoint->outputTimeout);
-}
-
-ssize_t
 ioTellDevice (
   InputOutputEndpoint *endpoint, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
@@ -337,4 +406,44 @@ ioAskDevice (
   return endpoint->methods->askDevice(endpoint->handle, recipient, type,
                                       request, value, index, buffer, size,
                                       endpoint->inputTimeout);
+}
+
+ssize_t
+ioSetHidReport (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  const void *data, uint16_t size
+) {
+  return endpoint->methods->setHidReport(endpoint->handle, interface, report,
+                                         data, size, endpoint->outputTimeout);
+}
+
+ssize_t
+ioGetHidReport (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size
+) {
+  return endpoint->methods->getHidReport(endpoint->handle, interface, report,
+                                         buffer, size, endpoint->inputTimeout);
+}
+
+ssize_t
+ioSetHidFeature (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  const void *data, uint16_t size
+) {
+  return endpoint->methods->setHidFeature(endpoint->handle, interface, report,
+                                          data, size, endpoint->outputTimeout);
+}
+
+ssize_t
+ioGetHidFeature (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size
+) {
+  return endpoint->methods->getHidFeature(endpoint->handle, interface, report,
+                                          buffer, size, endpoint->inputTimeout);
 }

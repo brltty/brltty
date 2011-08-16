@@ -61,10 +61,10 @@ extern InputOutputEndpoint *ioOpenEndpoint (
 extern void ioCloseEndpoint (InputOutputEndpoint *endpoint);
 extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
 
+extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
 extern int ioAwaitInput (InputOutputEndpoint *endpoint, int timeout);
 extern ssize_t ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait);
 extern int ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait);
-extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
 
 extern ssize_t ioTellDevice (
   InputOutputEndpoint *endpoint, uint8_t recipient, uint8_t type,
@@ -75,6 +75,30 @@ extern ssize_t ioTellDevice (
 extern ssize_t ioAskDevice (
   InputOutputEndpoint *endpoint, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
+  void *buffer, uint16_t size
+);
+
+extern ssize_t ioSetHidReport (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  const void *data, uint16_t size
+);
+
+extern ssize_t ioGetHidReport (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size
+);
+
+extern ssize_t ioSetHidFeature (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
+  const void *data, uint16_t size
+);
+
+extern ssize_t ioGetHidFeature (
+  InputOutputEndpoint *endpoint,
+  unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 );
 
