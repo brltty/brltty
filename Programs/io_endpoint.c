@@ -21,6 +21,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
 #include "io_endpoint.h"
 #include "io_serial.h"
 #include "io_usb.h"
@@ -88,27 +89,31 @@ typedef struct {
 struct InputOutputEndpointStruct {
   void *handle;
   const InputOutputMethods *methods;
-  int inputTimeout;
-  int outputTimeout;
-  const void *applicationData;
+  InputOutputEndpointAttributes attributes;
 };
+
+static void
+initializeEndpointAttributes (InputOutputEndpointAttributes *attributes) {
+  attributes->applicationData = NULL;
+  attributes->openDelay = 0;
+  attributes->inputTimeout = 0;
+  attributes->outputTimeout = 0;
+}
 
 void
 ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specification) {
   specification->serial.parameters = NULL;
-  specification->serial.inputTimeout = 100;
-  specification->serial.outputTimeout = 0;
-  specification->serial.applicationData = NULL;
+  initializeEndpointAttributes(&specification->serial.attributes);
+  specification->serial.attributes.inputTimeout = 100;
 
   specification->usb.channelDefinitions = NULL;
-  specification->usb.inputTimeout = 1000;
-  specification->usb.outputTimeout = 1000;
-  specification->usb.applicationData = NULL;
+  initializeEndpointAttributes(&specification->usb.attributes);
+  specification->usb.attributes.inputTimeout = 1000;
+  specification->usb.attributes.outputTimeout = 1000;
 
   specification->bluetooth.channelNumber = 0;
-  specification->bluetooth.inputTimeout = 100;
-  specification->bluetooth.outputTimeout = 0;
-  specification->bluetooth.applicationData = NULL;
+  initializeEndpointAttributes(&specification->bluetooth.attributes);
+  specification->bluetooth.attributes.inputTimeout = 100;
 }
 
 void
@@ -322,10 +327,8 @@ ioOpenEndpoint (
           if (serialSetParameters(endpoint->handle, specification->serial.parameters)) {
             if (serialRestartDevice(endpoint->handle, specification->serial.parameters->baud)) {
               endpoint->methods = &serialMethods;
-              endpoint->inputTimeout = specification->serial.inputTimeout;
-              endpoint->outputTimeout = specification->serial.outputTimeout;
-              endpoint->applicationData = specification->serial.applicationData;
-              return endpoint;
+              endpoint->attributes = specification->serial.attributes;
+              goto opened;
             }
           }
 
@@ -340,10 +343,8 @@ ioOpenEndpoint (
       if (isUsbDevice(&identifier)) {
         if ((endpoint->handle = usbFindChannel(specification->usb.channelDefinitions, identifier))) {
           endpoint->methods = &usbMethods;
-          endpoint->inputTimeout = specification->usb.inputTimeout;
-          endpoint->outputTimeout = specification->usb.outputTimeout;
-          endpoint->applicationData = specification->usb.applicationData;
-          return endpoint;
+          endpoint->attributes = specification->usb.attributes;
+          goto opened;
         }
 
         goto openFailed;
@@ -354,10 +355,8 @@ ioOpenEndpoint (
       if (isBluetoothDevice(&identifier)) {
         if ((endpoint->handle = bthOpenConnection(identifier, specification->bluetooth.channelNumber, 1))) {
           endpoint->methods = &bluetoothMethods;
-          endpoint->inputTimeout = specification->bluetooth.inputTimeout;
-          endpoint->outputTimeout = specification->bluetooth.outputTimeout;
-          endpoint->applicationData = specification->bluetooth.applicationData;
-          return endpoint;
+          endpoint->attributes = specification->bluetooth.attributes;
+          goto opened;
         }
 
         goto openFailed;
@@ -374,6 +373,14 @@ ioOpenEndpoint (
   }
 
   return NULL;
+
+opened:
+  {
+    int delay = endpoint->attributes.openDelay;
+    if (delay) approximateDelay(delay);
+  }
+
+  return endpoint;
 }
 
 int
@@ -393,14 +400,15 @@ ioCloseEndpoint (InputOutputEndpoint *endpoint) {
 
 const void *
 ioGetApplicationData (InputOutputEndpoint *endpoint) {
-  return endpoint->applicationData;
+  return endpoint->attributes.applicationData;
 }
 
 ssize_t
 ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
   WriteDataMethod *method = endpoint->methods->writeData;
   if (!method) return logUnsupportedOperation("ioWriteData");
-  return method(endpoint->handle, data, size, endpoint->outputTimeout);
+  return method(endpoint->handle, data, size,
+                endpoint->attributes.outputTimeout);
 }
 
 int
@@ -416,7 +424,7 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
   if (!method) return logUnsupportedOperation("ioReadData");
 
   {
-    int timeout = endpoint->inputTimeout;
+    int timeout = endpoint->attributes.inputTimeout;
     ssize_t result = method(endpoint->handle, buffer, size,
                             (wait? timeout: 0), timeout);
 
@@ -446,7 +454,7 @@ ioTellDevice (
   if (!method) return logUnsupportedOperation("ioTellDevice");
   return method(endpoint->handle, recipient, type,
                 request, value, index, data, size,
-                endpoint->outputTimeout);
+                endpoint->attributes.outputTimeout);
 }
 
 ssize_t
@@ -460,7 +468,7 @@ ioAskDevice (
   if (!method) return logUnsupportedOperation("ioAskDevice");
   return method(endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
-                endpoint->inputTimeout);
+                endpoint->attributes.inputTimeout);
 }
 
 ssize_t
@@ -472,7 +480,7 @@ ioSetHidReport (
   SetHidReportMethod *method = endpoint->methods->setHidReport;
   if (!method) return logUnsupportedOperation("ioSetHidReport");
   return method(endpoint->handle, interface, report,
-                data, size, endpoint->outputTimeout);
+                data, size, endpoint->attributes.outputTimeout);
 }
 
 ssize_t
@@ -484,7 +492,7 @@ ioGetHidReport (
   GetHidReportMethod *method = endpoint->methods->getHidReport;
   if (!method) return logUnsupportedOperation("ioGetHidReport");
   return method(endpoint->handle, interface, report,
-                buffer, size, endpoint->inputTimeout);
+                buffer, size, endpoint->attributes.inputTimeout);
 }
 
 ssize_t
@@ -496,7 +504,7 @@ ioSetHidFeature (
   SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
   if (!method) return logUnsupportedOperation("ioSetHidFeature");
   return method(endpoint->handle, interface, report,
-                data, size, endpoint->outputTimeout);
+                data, size, endpoint->attributes.outputTimeout);
 }
 
 ssize_t
@@ -508,5 +516,5 @@ ioGetHidFeature (
   GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
   if (!method) return logUnsupportedOperation("ioGetHidFeature");
   return method(endpoint->handle, interface, report,
-                buffer, size, endpoint->inputTimeout);
+                buffer, size, endpoint->attributes.inputTimeout);
 }

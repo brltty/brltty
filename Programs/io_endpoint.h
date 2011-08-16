@@ -29,25 +29,26 @@ extern "C" {
 typedef struct InputOutputEndpointStruct InputOutputEndpoint;
 
 typedef struct {
+  const void *applicationData;
+  int openDelay;
+  int inputTimeout;
+  int outputTimeout;
+} InputOutputEndpointAttributes;
+
+typedef struct {
   struct {
     const SerialParameters *parameters;
-    int inputTimeout;
-    int outputTimeout;
-    const void *applicationData;
+    InputOutputEndpointAttributes attributes;
   } serial;
 
   struct {
     const UsbChannelDefinition *channelDefinitions;
-    int inputTimeout;
-    int outputTimeout;
-    const void *applicationData;
+    InputOutputEndpointAttributes attributes;
   } usb;
 
   struct {
     uint8_t channelNumber;
-    int inputTimeout;
-    int outputTimeout;
-    const void *applicationData;
+    InputOutputEndpointAttributes attributes;
   } bluetooth;
 } InputOutputEndpointSpecification;
 
