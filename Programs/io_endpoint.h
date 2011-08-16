@@ -58,7 +58,7 @@ extern InputOutputEndpoint *ioOpenEndpoint (
   const char *identifier,
   const InputOutputEndpointSpecification *specification
 );
-extern void ioCloseEndpoint (InputOutputEndpoint *endpoint);
+extern int ioCloseEndpoint (InputOutputEndpoint *endpoint);
 extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
 
 extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
@@ -67,13 +67,15 @@ extern ssize_t ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t s
 extern int ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait);
 
 extern ssize_t ioTellDevice (
-  InputOutputEndpoint *endpoint, uint8_t recipient, uint8_t type,
+  InputOutputEndpoint *endpoint,
+  uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 );
 
 extern ssize_t ioAskDevice (
-  InputOutputEndpoint *endpoint, uint8_t recipient, uint8_t type,
+  InputOutputEndpoint *endpoint,
+  uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 );
