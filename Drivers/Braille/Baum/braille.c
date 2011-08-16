@@ -25,7 +25,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "io_defs.h"
+#include "serialdefs.h"
 #include "ascii.h"
 
 typedef enum {

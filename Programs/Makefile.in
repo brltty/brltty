@@ -157,6 +157,11 @@ unicode.$O:
 
 ###############################################################################
 
+io_endpoint.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_endpoint.c
+
+###############################################################################
+
 SERIAL_OBJECTS = serial.$O
 
 serial.$O:
@@ -213,7 +218,8 @@ bluetooth_windows.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+IO_OBJECTS = io_endpoint.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRAILLE_OBJECTS = brl.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
 
 brl.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c

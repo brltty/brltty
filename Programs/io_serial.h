@@ -27,7 +27,7 @@ extern "C" {
 
 #include <stdio.h>
 
-#include "io_defs.h"
+#include "serialdefs.h"
 
 typedef struct SerialDeviceStruct SerialDevice;
 
@@ -55,6 +55,7 @@ extern ssize_t serialWriteData (
   const void *data, size_t size
 );
 
+extern int serialSetParameters (SerialDevice *serial, const SerialParameters *parameters);
 extern int serialSetBaud (SerialDevice *serial, int baud);
 extern int serialSetDataBits (SerialDevice *serial, int bits);
 extern int serialSetStopBits (SerialDevice *serial, int bits);

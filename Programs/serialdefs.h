@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_IO_DEFS
-#define BRLTTY_INCLUDED_IO_DEFS
+#ifndef BRLTTY_INCLUDED_SERIALDEFS
+#define BRLTTY_INCLUDED_SERIALDEFS
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,4 +61,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_IO_DEFS */
+#endif /* BRLTTY_INCLUDED_SERIALDEFS */
