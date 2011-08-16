@@ -20,52 +20,67 @@
 
 #include <errno.h>
 
+#include "log.h"
 #include "io_endpoint.h"
 #include "io_serial.h"
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
+typedef void CloseHandleMethod (void *handle);
+
+typedef ssize_t WriteDataMethod (void *handle, const void *data, size_t size, int timeout);
+typedef int AwaitInputMethod (void *handle, int timeout);
+typedef ssize_t ReadDataMethod (
+  void *handle, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
+
+typedef int TellDeviceMethod (
+  void *handle, uint8_t recipient, uint8_t type,
+  uint8_t request, uint16_t value, uint16_t index,
+  const void *data, uint16_t size, int timeout
+);
+
+typedef int AskDeviceMethod (
+  void *handle, uint8_t recipient, uint8_t type,
+  uint8_t request, uint16_t value, uint16_t index,
+  void *buffer, uint16_t size, int timeout
+);
+
+typedef ssize_t SetHidReportMethod (
+  void *handle, unsigned char interface, unsigned char report,
+  const void *data, uint16_t size, int timeout
+);
+
+typedef ssize_t GetHidReportMethod (
+  void *handle, unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size, int timeout
+);
+
+typedef ssize_t SetHidFeatureMethod (
+  void *handle, unsigned char interface, unsigned char report,
+  const void *data, uint16_t size, int timeout
+);
+
+typedef ssize_t GetHidFeatureMethod (
+  void *handle, unsigned char interface, unsigned char report,
+  void *buffer, uint16_t size, int timeout
+);
+
 typedef struct {
-  void (*closeHandle) (void *handle);
+  CloseHandleMethod *closeHandle;
 
-  ssize_t (*writeData) (void *handle, const void *data, size_t size, int timeout);
-  int (*awaitInput) (void *handle, int timeout);
-  ssize_t (*readData) (
-    void *handle, void *buffer, size_t size,
-    int initialTimeout, int subsequentTimeout
-  );
+  WriteDataMethod *writeData;
+  AwaitInputMethod *awaitInput;
+  ReadDataMethod *readData;
 
-  int (*tellDevice) (
-    void *handle, uint8_t recipient, uint8_t type,
-    uint8_t request, uint16_t value, uint16_t index,
-    const void *data, uint16_t size, int timeout
-  );
+  TellDeviceMethod *tellDevice;
+  AskDeviceMethod *askDevice;
 
-  int (*askDevice) (
-    void *handle, uint8_t recipient, uint8_t type,
-    uint8_t request, uint16_t value, uint16_t index,
-    void *buffer, uint16_t size, int timeout
-  );
-
-  ssize_t (*setHidReport) (
-    void *handle, unsigned char interface, unsigned char report,
-    const void *data, uint16_t size, int timeout
-  );
-
-  ssize_t (*getHidReport) (
-    void *handle, unsigned char interface, unsigned char report,
-    void *buffer, uint16_t size, int timeout
-  );
-
-  ssize_t (*setHidFeature) (
-    void *handle, unsigned char interface, unsigned char report,
-    const void *data, uint16_t size, int timeout
-  );
-
-  ssize_t (*getHidFeature) (
-    void *handle, unsigned char interface, unsigned char report,
-    void *buffer, uint16_t size, int timeout
-  );
+  SetHidReportMethod *setHidReport;
+  GetHidReportMethod *getHidReport;
+  SetHidFeatureMethod *setHidFeature;
+  GetHidFeatureMethod *getHidFeature;
 } InputOutputMethods;
 
 struct InputOutputEndpointStruct {
@@ -349,9 +364,23 @@ ioOpenEndpoint (
   return NULL;
 }
 
+static int
+logNoMethod (const char *name) {
+  errno = ENOSYS;
+  logSystemError(name);
+  return -1;
+}
+
 void
 ioCloseEndpoint (InputOutputEndpoint *endpoint) {
-  if (endpoint->handle) endpoint->methods->closeHandle(endpoint->handle);
+  CloseHandleMethod *method = endpoint->methods->closeHandle;
+
+  if (method) {
+    method(endpoint->handle);
+  } else {
+    logNoMethod("ioCloseEndpoint");
+  }
+
   free(endpoint);
 }
 
@@ -362,20 +391,26 @@ ioGetApplicationData (InputOutputEndpoint *endpoint) {
 
 ssize_t
 ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
-  return endpoint->methods->writeData(endpoint->handle, data, size, endpoint->outputTimeout);
+  WriteDataMethod *method = endpoint->methods->writeData;
+  if (!method) return logNoMethod("ioWriteData");
+  return method(endpoint->handle, data, size, endpoint->outputTimeout);
 }
 
 int
 ioAwaitInput (InputOutputEndpoint *endpoint, int timeout) {
-  return endpoint->methods->awaitInput(endpoint->handle, timeout);
+  AwaitInputMethod *method = endpoint->methods->awaitInput;
+  if (!method) return logNoMethod("ioAwaitInput");
+  return method(endpoint->handle, timeout);
 }
 
 ssize_t
 ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) {
+  ReadDataMethod *method = endpoint->methods->readData;
   int timeout = endpoint->inputTimeout;
 
-  return endpoint->methods->readData(endpoint->handle, buffer, size,
-                                     (wait? timeout: 0), timeout);
+  if (!method) return logNoMethod("ioReadData");
+  return method(endpoint->handle, buffer, size,
+                (wait? timeout: 0), timeout);
 }
 
 int
@@ -392,9 +427,11 @@ ioTellDevice (
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 ) {
-  return endpoint->methods->tellDevice(endpoint->handle, recipient, type,
-                                       request, value, index, data, size,
-                                       endpoint->outputTimeout);
+  TellDeviceMethod *method = endpoint->methods->tellDevice;
+  if (!method) return logNoMethod("ioTellDevice");
+  return method(endpoint->handle, recipient, type,
+                request, value, index, data, size,
+                endpoint->outputTimeout);
 }
 
 ssize_t
@@ -403,9 +440,11 @@ ioAskDevice (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 ) {
-  return endpoint->methods->askDevice(endpoint->handle, recipient, type,
-                                      request, value, index, buffer, size,
-                                      endpoint->inputTimeout);
+  AskDeviceMethod *method = endpoint->methods->askDevice;
+  if (!method) return logNoMethod("ioAskDevice");
+  return method(endpoint->handle, recipient, type,
+                request, value, index, buffer, size,
+                endpoint->inputTimeout);
 }
 
 ssize_t
@@ -414,8 +453,10 @@ ioSetHidReport (
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 ) {
-  return endpoint->methods->setHidReport(endpoint->handle, interface, report,
-                                         data, size, endpoint->outputTimeout);
+  SetHidReportMethod *method = endpoint->methods->setHidReport;
+  if (!method) return logNoMethod("ioSetHidReport");
+  return method(endpoint->handle, interface, report,
+                data, size, endpoint->outputTimeout);
 }
 
 ssize_t
@@ -424,8 +465,10 @@ ioGetHidReport (
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 ) {
-  return endpoint->methods->getHidReport(endpoint->handle, interface, report,
-                                         buffer, size, endpoint->inputTimeout);
+  GetHidReportMethod *method = endpoint->methods->getHidReport;
+  if (!method) return logNoMethod("ioGetHidReport");
+  return method(endpoint->handle, interface, report,
+                buffer, size, endpoint->inputTimeout);
 }
 
 ssize_t
@@ -434,8 +477,10 @@ ioSetHidFeature (
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 ) {
-  return endpoint->methods->setHidFeature(endpoint->handle, interface, report,
-                                          data, size, endpoint->outputTimeout);
+  SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
+  if (!method) return logNoMethod("ioSetHidFeature");
+  return method(endpoint->handle, interface, report,
+                data, size, endpoint->outputTimeout);
 }
 
 ssize_t
@@ -444,6 +489,8 @@ ioGetHidFeature (
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 ) {
-  return endpoint->methods->getHidFeature(endpoint->handle, interface, report,
-                                          buffer, size, endpoint->inputTimeout);
+  GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
+  if (!method) return logNoMethod("ioGetHidFeature");
+  return method(endpoint->handle, interface, report,
+                buffer, size, endpoint->inputTimeout);
 }
