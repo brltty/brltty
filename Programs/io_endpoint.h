@@ -63,6 +63,7 @@ extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
 
 extern int ioAwaitInput (InputOutputEndpoint *endpoint, int timeout);
 extern ssize_t ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait);
+extern int ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait);
 extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
 
 extern ssize_t ioTellDevice (

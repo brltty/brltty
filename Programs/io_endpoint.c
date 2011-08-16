@@ -304,6 +304,14 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
                                      (wait? timeout: 0), timeout);
 }
 
+int
+ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait) {
+  ssize_t result = ioReadData(endpoint, byte, 1, wait);
+  if (result > 0) return 1;
+  if (result == 0) errno = EAGAIN;
+  return 0;
+}
+
 ssize_t
 ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
   return endpoint->methods->writeData(endpoint->handle, data, size, endpoint->outputTimeout);
@@ -328,5 +336,5 @@ ioAskDevice (
 ) {
   return endpoint->methods->askDevice(endpoint->handle, recipient, type,
                                       request, value, index, buffer, size,
-                                      endpoint->outputTimeout);
+                                      endpoint->inputTimeout);
 }
