@@ -305,15 +305,15 @@ static const InputOutputMethods bluetoothMethods = {
 
 InputOutputEndpoint *
 ioOpenEndpoint (
-  const char *path,
+  const char *identifier,
   const InputOutputEndpointSpecification *specification
 ) {
   InputOutputEndpoint *endpoint;
 
   if ((endpoint = malloc(sizeof(*endpoint)))) {
     if (specification->serial.parameters) {
-      if (isSerialDevice(&path)) {
-        if ((endpoint->handle = serialOpenDevice(path))) {
+      if (isSerialDevice(&identifier)) {
+        if ((endpoint->handle = serialOpenDevice(identifier))) {
           if (serialSetParameters(endpoint->handle, specification->serial.parameters)) {
             if (serialRestartDevice(endpoint->handle, specification->serial.parameters->baud)) {
               endpoint->methods = &serialMethods;
@@ -332,8 +332,8 @@ ioOpenEndpoint (
     }
 
     if (specification->usb.channelDefinitions) {
-      if (isUsbDevice(&path)) {
-        if ((endpoint->handle = usbFindChannel(specification->usb.channelDefinitions, path))) {
+      if (isUsbDevice(&identifier)) {
+        if ((endpoint->handle = usbFindChannel(specification->usb.channelDefinitions, identifier))) {
           endpoint->methods = &usbMethods;
               endpoint->inputTimeout = specification->usb.inputTimeout;
               endpoint->outputTimeout = specification->usb.outputTimeout;
@@ -346,8 +346,8 @@ ioOpenEndpoint (
     }
 
     if (specification->bluetooth.channelNumber) {
-      if (isBluetoothDevice(&path)) {
-        if ((endpoint->handle = bthOpenConnection(path, specification->bluetooth.channelNumber, 1))) {
+      if (isBluetoothDevice(&identifier)) {
+        if ((endpoint->handle = bthOpenConnection(identifier, specification->bluetooth.channelNumber, 1))) {
           endpoint->methods = &bluetoothMethods;
               endpoint->inputTimeout = specification->bluetooth.inputTimeout;
               endpoint->outputTimeout = specification->bluetooth.outputTimeout;
@@ -359,6 +359,7 @@ ioOpenEndpoint (
       }
     }
 
+    logMessage(LOG_WARNING, "unsupported device: %s", identifier);
   openFailed:
     free(endpoint);
   }

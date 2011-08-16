@@ -33,12 +33,12 @@ extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);
 extern const char *resolveDeviceName (const char *const *names, const char *description, int mode);
 
-extern int isQualifiedDevice (const char **path, const char *qualifier);
+extern int isQualifiedDevice (const char **identifier, const char *qualifier);
 
 #undef ALLOW_DOS_DEVICE_NAMES
 #if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN32__))
 #define ALLOW_DOS_DEVICE_NAMES 1
-extern int isDosDevice (const char *path, const char *prefix);
+extern int isDosDevice (const char *identifier, const char *prefix);
 #endif /* DOS or Windows (but not Cygwin) */
 
 #ifdef __cplusplus

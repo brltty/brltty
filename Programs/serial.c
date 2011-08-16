@@ -1600,15 +1600,15 @@ serialGetStream (SerialDevice *serial) {
 }
 
 int
-isSerialDevice (const char **path) {
+isSerialDevice (const char **identifier) {
 #ifdef ALLOW_DOS_DEVICE_NAMES
-  if (isDosDevice(*path, "COM")) return 1;
+  if (isDosDevice(*identifier, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
-  if (!isQualifiedDevice(path, "serial"))
-    if (isQualifiedDevice(path, NULL))
+  if (!isQualifiedDevice(identifier, "serial"))
+    if (isQualifiedDevice(identifier, NULL))
       return 0;
 
-  if (!**path) *path = FIRST_SERIAL_DEVICE;
+  if (!**identifier) *identifier = FIRST_SERIAL_DEVICE;
   return 1;
 }

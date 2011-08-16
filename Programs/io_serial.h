@@ -31,7 +31,7 @@ extern "C" {
 
 typedef struct SerialDeviceStruct SerialDevice;
 
-extern int isSerialDevice (const char **path);
+extern int isSerialDevice (const char **identifier);
 extern int serialValidateBaud (int *baud, const char *description, const char *word, const int *choices);
 
 extern SerialDevice *serialOpenDevice (const char *path);

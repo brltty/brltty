@@ -190,9 +190,9 @@ bthCloseConnection (BluetoothConnection *connection) {
 }
 
 int
-isBluetoothDevice (const char **path) {
-  if (isQualifiedDevice(path, "bluetooth:")) return 1;
-  if (isQualifiedDevice(path, "bt:")) return 1;
-  if (isQualifiedDevice(path, "bluez:")) return 1;
+isBluetoothDevice (const char **identifier) {
+  if (isQualifiedDevice(identifier, "bluetooth")) return 1;
+  if (isQualifiedDevice(identifier, "bt")) return 1;
+  if (isQualifiedDevice(identifier, "bluez")) return 1;
   return 0;
 }

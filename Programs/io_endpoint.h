@@ -55,7 +55,7 @@ extern void ioInitializeEndpointSpecification (InputOutputEndpointSpecification 
 extern void ioInitializeSerialParameters (SerialParameters *parameters);
 
 extern InputOutputEndpoint *ioOpenEndpoint (
-  const char *path,
+  const char *identifier,
   const InputOutputEndpointSpecification *specification
 );
 extern void ioCloseEndpoint (InputOutputEndpoint *endpoint);

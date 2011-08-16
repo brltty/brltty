@@ -304,7 +304,7 @@ typedef struct {
 extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumber);
 extern void usbCloseChannel (UsbChannel *channel);
 
-extern int isUsbDevice (const char **path);
+extern int isUsbDevice (const char **identifier);
 
 #ifdef __cplusplus
 }

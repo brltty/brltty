@@ -165,27 +165,27 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
 }
 
 int
-isQualifiedDevice (const char **path, const char *qualifier) {
-  size_t count = strcspn(*path, ":");
-  if (count == strlen(*path)) return 0;
+isQualifiedDevice (const char **identifier, const char *qualifier) {
+  size_t count = strcspn(*identifier, ":");
+  if (count == strlen(*identifier)) return 0;
   if (!qualifier) return 1;
   if (!count) return 0;
 
   {
-    int ok = strncasecmp(*path, qualifier, count) == 0;
-    if (ok) *path += count + 1;
+    int ok = strncasecmp(*identifier, qualifier, count) == 0;
+    if (ok) *identifier += count + 1;
     return ok;
   }
 }
 
 #ifdef ALLOW_DOS_DEVICE_NAMES
 int
-isDosDevice (const char *path, const char *prefix) {
-  size_t count = strcspn(path, ":");
+isDosDevice (const char *identifier, const char *prefix) {
+  size_t count = strcspn(identifier, ":");
   size_t length = strlen(prefix);
   if (length > count) return 0;
-  if (strncasecmp(path, prefix, length) != 0) return 0;
-  if (strspn(path+length, "0123456789") != (count - length)) return 0;
+  if (strncasecmp(identifier, prefix, length) != 0) return 0;
+  if (strspn(identifier+length, "0123456789") != (count - length)) return 0;
   return 1;
 }
 #endif /* ALLOW_DOS_DEVICE_NAMES */
