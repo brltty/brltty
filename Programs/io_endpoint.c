@@ -27,7 +27,7 @@
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
-typedef int CloseHandleMethod (void *handle);
+typedef int DisconnectResourceMethod (void *handle);
 
 typedef ssize_t WriteDataMethod (void *handle, const void *data, size_t size, int timeout);
 
@@ -38,13 +38,13 @@ typedef ssize_t ReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
-typedef int TellDeviceMethod (
+typedef int TellResourceMethod (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 );
 
-typedef int AskDeviceMethod (
+typedef int AskResourceMethod (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
@@ -71,14 +71,14 @@ typedef ssize_t GetHidFeatureMethod (
 );
 
 typedef struct {
-  CloseHandleMethod *closeHandle;
+  DisconnectResourceMethod *disconnectResource;
 
   WriteDataMethod *writeData;
   AwaitInputMethod *awaitInput;
   ReadDataMethod *readData;
 
-  TellDeviceMethod *tellDevice;
-  AskDeviceMethod *askDevice;
+  TellResourceMethod *tellResource;
+  AskResourceMethod *askResource;
 
   SetHidReportMethod *setHidReport;
   GetHidReportMethod *getHidReport;
@@ -90,12 +90,13 @@ struct InputOutputEndpointStruct {
   void *handle;
   const InputOutputMethods *methods;
   InputOutputEndpointAttributes attributes;
+  int bytesPerSecond;
 };
 
 static void
 initializeEndpointAttributes (InputOutputEndpointAttributes *attributes) {
   attributes->applicationData = NULL;
-  attributes->openDelay = 0;
+  attributes->readyDelay = 0;
   attributes->inputTimeout = 0;
   attributes->outputTimeout = 0;
 }
@@ -126,7 +127,7 @@ ioInitializeSerialParameters (SerialParameters *parameters) {
 }
 
 static int
-closeSerialHandle (void *handle) {
+disconnectSerialResource (void *handle) {
   serialCloseDevice(handle);
   return 1;
 }
@@ -151,7 +152,7 @@ readSerialData (
 }
 
 static const InputOutputMethods serialMethods = {
-  .closeHandle = closeSerialHandle,
+  .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
   .awaitInput = awaitSerialInput,
@@ -159,7 +160,7 @@ static const InputOutputMethods serialMethods = {
 };
 
 static int
-closeUsbHandle (void *handle) {
+disconnectUsbResource (void *handle) {
   usbCloseChannel(handle);
   return 1;
 }
@@ -194,7 +195,7 @@ readUsbData (
 }
 
 static int
-tellUsbDevice (
+tellUsbResource (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
@@ -206,7 +207,7 @@ tellUsbDevice (
 }
 
 static int
-askUsbDevice (
+askUsbResource (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
@@ -258,14 +259,14 @@ getUsbHidFeature (
 }
 
 static const InputOutputMethods usbMethods = {
-  .closeHandle = closeUsbHandle,
+  .disconnectResource = disconnectUsbResource,
 
   .writeData = writeUsbData,
   .awaitInput = awaitUsbInput,
   .readData = readUsbData,
 
-  .tellDevice = tellUsbDevice,
-  .askDevice = askUsbDevice,
+  .tellResource = tellUsbResource,
+  .askResource = askUsbResource,
 
   .setHidReport = setUsbHidReport,
   .getHidReport = getUsbHidReport,
@@ -274,7 +275,7 @@ static const InputOutputMethods usbMethods = {
 };
 
 static int
-closeBluetoothHandle (void *handle) {
+disconnectBluetoothResource (void *handle) {
   bthCloseConnection(handle);
   return 1;
 }
@@ -299,7 +300,7 @@ readBluetoothData (
 }
 
 static const InputOutputMethods bluetoothMethods = {
-  .closeHandle = closeBluetoothHandle,
+  .disconnectResource = disconnectBluetoothResource,
 
   .writeData = writeBluetoothData,
   .awaitInput = awaitBluetoothInput,
@@ -314,13 +315,15 @@ logUnsupportedOperation (const char *name) {
 }
 
 InputOutputEndpoint *
-ioOpenEndpoint (
+ioConnectResource (
   const char *identifier,
   const InputOutputEndpointSpecification *specification
 ) {
   InputOutputEndpoint *endpoint;
 
   if ((endpoint = malloc(sizeof(*endpoint)))) {
+    endpoint->bytesPerSecond = 0;
+
     if (specification->serial.parameters) {
       if (isSerialDevice(&identifier)) {
         if ((endpoint->handle = serialOpenDevice(identifier))) {
@@ -328,6 +331,7 @@ ioOpenEndpoint (
             if (serialRestartDevice(endpoint->handle, specification->serial.parameters->baud)) {
               endpoint->methods = &serialMethods;
               endpoint->attributes = specification->serial.attributes;
+              endpoint->bytesPerSecond = specification->serial.parameters->baud / serialGetCharacterBits(endpoint->handle);
               goto opened;
             }
           }
@@ -364,7 +368,7 @@ ioOpenEndpoint (
     }
 
     errno = ENOSYS;
-    logMessage(LOG_WARNING, "unsupported I/O endpoint identifier: %s", identifier);
+    logMessage(LOG_WARNING, "unsupported input/output resource identifier: %s", identifier);
 
   openFailed:
     free(endpoint);
@@ -376,7 +380,7 @@ ioOpenEndpoint (
 
 opened:
   {
-    int delay = endpoint->attributes.openDelay;
+    int delay = endpoint->attributes.readyDelay;
     if (delay) approximateDelay(delay);
   }
 
@@ -384,12 +388,12 @@ opened:
 }
 
 int
-ioCloseEndpoint (InputOutputEndpoint *endpoint) {
+ioDisconnectResource (InputOutputEndpoint *endpoint) {
   int ok = 0;
-  CloseHandleMethod *method = endpoint->methods->closeHandle;
+  DisconnectResourceMethod *method = endpoint->methods->disconnectResource;
 
   if (!method) {
-    logUnsupportedOperation("ioCloseEndpoint");
+    logUnsupportedOperation("ioDisconnectResource");
   } else if (method(endpoint->handle)) {
     ok = 1;
   }
@@ -401,6 +405,11 @@ ioCloseEndpoint (InputOutputEndpoint *endpoint) {
 const void *
 ioGetApplicationData (InputOutputEndpoint *endpoint) {
   return endpoint->attributes.applicationData;
+}
+
+int
+ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
+  return endpoint->bytesPerSecond;
 }
 
 ssize_t
@@ -444,28 +453,28 @@ ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait) {
 }
 
 ssize_t
-ioTellDevice (
+ioTellResource (
   InputOutputEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 ) {
-  TellDeviceMethod *method = endpoint->methods->tellDevice;
-  if (!method) return logUnsupportedOperation("ioTellDevice");
+  TellResourceMethod *method = endpoint->methods->tellResource;
+  if (!method) return logUnsupportedOperation("ioTellResource");
   return method(endpoint->handle, recipient, type,
                 request, value, index, data, size,
                 endpoint->attributes.outputTimeout);
 }
 
 ssize_t
-ioAskDevice (
+ioAskResource (
   InputOutputEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 ) {
-  AskDeviceMethod *method = endpoint->methods->askDevice;
-  if (!method) return logUnsupportedOperation("ioAskDevice");
+  AskResourceMethod *method = endpoint->methods->askResource;
+  if (!method) return logUnsupportedOperation("ioAskResource");
   return method(endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
                 endpoint->attributes.inputTimeout);

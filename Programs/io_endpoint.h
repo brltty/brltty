@@ -30,7 +30,7 @@ typedef struct InputOutputEndpointStruct InputOutputEndpoint;
 
 typedef struct {
   const void *applicationData;
-  int openDelay;
+  int readyDelay;
   int inputTimeout;
   int outputTimeout;
 } InputOutputEndpointAttributes;
@@ -55,26 +55,27 @@ typedef struct {
 extern void ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specification);
 extern void ioInitializeSerialParameters (SerialParameters *parameters);
 
-extern InputOutputEndpoint *ioOpenEndpoint (
+extern InputOutputEndpoint *ioConnectResource (
   const char *identifier,
   const InputOutputEndpointSpecification *specification
 );
-extern int ioCloseEndpoint (InputOutputEndpoint *endpoint);
+extern int ioDisconnectResource (InputOutputEndpoint *endpoint);
 extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
+extern int ioGetBytesPerSecond (InputOutputEndpoint *endpoint);
 
 extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
 extern int ioAwaitInput (InputOutputEndpoint *endpoint, int timeout);
 extern ssize_t ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait);
 extern int ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait);
 
-extern ssize_t ioTellDevice (
+extern ssize_t ioTellResource (
   InputOutputEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 );
 
-extern ssize_t ioAskDevice (
+extern ssize_t ioAskResource (
   InputOutputEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
