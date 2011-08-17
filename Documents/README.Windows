@@ -9,7 +9,6 @@ both cases, you also need the following additional packages:
 *  gcc
 *  make
 *  w32api (version 3.6 or later)
-*  yacc or bison
 
 If you'd like to build BRLTTY from its source repository rather than from one
 of the supplied tarballs then you'll also need these additional packages:
