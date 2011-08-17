@@ -254,7 +254,13 @@ askResource (
 ) {
   ssize_t result = ioAskResource(ioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                                  request, value, index, buffer, size);
-  return result != -1;
+  int ok = result != -1;
+
+  if (ok) {
+    logInputPacket(buffer, result);
+  }
+
+  return ok;
 }
 
 
@@ -634,13 +640,9 @@ updateUsbKeys (BrailleDisplay *brl) {
 
     {
       ssize_t result = ioReadData(ioEndpoint, packet, sizeof(packet), 0);
+      if (!result) return 1;
 
       if (result < 0) {
-        if (errno == EAGAIN) {
-          /* no input */
-          return 1;
-        }
-
         if (errno == ENODEV) {
           /* Display was disconnected */
           return 0;
@@ -651,17 +653,14 @@ updateUsbKeys (BrailleDisplay *brl) {
         return 1;
       }
 
-      if ((result > 0) && (result < sizeof(packet))) {
-        /* The display handles read requests of only and exactly 8 bytes */
-        logMessage(LOG_WARNING, "short USB read: %ld", (long int)result);
+      if (result < sizeof(packet)) {
+        /* The display should only ever deliver packets of exactly 8 bytes */
+        logPartialPacket(packet, result);
         keysInitialized = 0;
         return 1;
       }
 
-      if (result == 0) {
-        /* no new key */
-        return 1;
-      }
+      logInputPacket(packet, result);
     }
 
     updateKeys(packet);
