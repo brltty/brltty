@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_IO_ENDPOINT
-#define BRLTTY_INCLUDED_IO_ENDPOINT
+#ifndef BRLTTY_INCLUDED_IO_GENERIC
+#define BRLTTY_INCLUDED_IO_GENERIC
 
 #include "serialdefs.h"
 #include "usbdefs.h"
@@ -110,4 +110,4 @@ extern ssize_t ioGetHidFeature (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_IO_ENDPOINT */
+#endif /* BRLTTY_INCLUDED_IO_GENERIC */

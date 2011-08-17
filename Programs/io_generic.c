@@ -22,7 +22,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "io_endpoint.h"
+#include "io_generic.h"
 #include "io_serial.h"
 #include "io_usb.h"
 #include "io_bluetooth.h"

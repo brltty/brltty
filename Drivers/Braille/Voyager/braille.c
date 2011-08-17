@@ -51,7 +51,7 @@
 #include "timing.h"
 #include "ascii.h"
 #include "bitfield.h"
-#include "io_endpoint.h"
+#include "io_generic.h"
 
 #include "brl_driver.h"
 #include "brldefs-vo.h"
