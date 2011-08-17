@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <errno.h>
 
 #include "log.h"
@@ -91,6 +92,13 @@ struct InputOutputEndpointStruct {
   const InputOutputMethods *methods;
   InputOutputEndpointAttributes attributes;
   int bytesPerSecond;
+
+  struct {
+    int error;
+    unsigned int from;
+    unsigned int to;
+    unsigned char buffer[0X40];
+  } input;
 };
 
 static void
@@ -379,6 +387,10 @@ ioConnectResource (
   return NULL;
 
 opened:
+  endpoint->input.error = 0;
+  endpoint->input.from = 0;
+  endpoint->input.to = 0;
+
   {
     int delay = endpoint->attributes.readyDelay;
     if (delay) approximateDelay(delay);
@@ -390,7 +402,9 @@ opened:
   }
 
   if (errno != EAGAIN) {
+    int originalErrno = errno;
     ioDisconnectResource(endpoint);
+    errno = originalErrno;
     return NULL;
   }
 
@@ -443,16 +457,53 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
   if (!method) return logUnsupportedOperation("ioReadData");
 
   {
-    int timeout = endpoint->attributes.inputTimeout;
-    ssize_t result = method(endpoint->handle, buffer, size,
-                            (wait? timeout: 0), timeout);
+    unsigned char *start = buffer;
+    unsigned char *next = start;
+    int timeout = wait? endpoint->attributes.inputTimeout: 0;
 
-    if (!result) errno = EAGAIN;
-    if (result != -1) return result;
-    if (errno == EAGAIN) return 0;
+    while (size) {
+      {
+        unsigned int count = endpoint->input.to - endpoint->input.from;
+
+        if (count) {
+          if (count > size) count = size;
+          memcpy(next, &endpoint->input.buffer[endpoint->input.from], count);
+
+          endpoint->input.from += count;
+          next += count;
+          size -= count;
+          continue;
+        }
+
+        endpoint->input.from = endpoint->input.to = 0;
+      }
+
+      if (endpoint->input.error) {
+        if (next != start) break;
+        errno = endpoint->input.error;
+        endpoint->input.error = 0;
+        return -1;
+      }
+
+      {
+        ssize_t result = method(endpoint->handle,
+                                &endpoint->input.buffer[endpoint->input.from],
+                                sizeof(endpoint->input.buffer) - endpoint->input.from,
+                                timeout, 0);
+
+        if (result > 0) {
+          endpoint->input.to += result;
+        } else {
+          if (!result) break;
+          if (errno == EAGAIN) break;
+          endpoint->input.error = errno;
+        }
+      }
+    }
+
+    if (next == start) errno = EAGAIN;
+    return next - start;
   }
-
-  return -1;
 }
 
 int
