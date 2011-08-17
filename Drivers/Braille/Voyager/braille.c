@@ -50,6 +50,8 @@
 #include "log.h"
 #include "timing.h"
 #include "ascii.h"
+#include "bitfield.h"
+#include "io_endpoint.h"
 
 #include "brl_driver.h"
 #include "brldefs-vo.h"
@@ -221,29 +223,42 @@ typedef struct {
   int (*soundBeep) (BrailleDisplay *brl, unsigned char duration);
 } ProtocolOperations;
 
-typedef struct {
-  const ProtocolOperations *protocol;
-  int (*openPort) (char **parameters, const char *device);
-  void (*closePort) (void);
-  int (*awaitInput) (int timeout);
-  ssize_t (*readData) (void *buffer, size_t size, int wait);
-  ssize_t (*writeData) (const void *data, size_t size);
-} InputOutputOperations;
+static const ProtocolOperations *protocol;
 
-static const InputOutputOperations *io;
 
+static InputOutputEndpoint *ioEndpoint = NULL;
+static int bytesPerSecond;
 
 #define SERIAL_BAUD 38400
-#define SERIAL_INITIAL_TIMEOUT 200
-#define SERIAL_SUBSEQUENT_TIMEOUT 100
+#define SERIAL_READY_DELAY 400
+#define SERIAL_INPUT_TIMEOUT 100
+#define SERIAL_WAIT_TIMEOUT 200
 
-static const char *serialDeviceNames[] = {"Serial Adapter", "Base Unit"};
-static unsigned int serialCharactersPerSecond;
+#define BLUETOOTH_CHANNEL_NUMBER 1
+#define BLUETOOTH_READY_DELAY 800
 
-static inline void
-setSerialCharactersPerSecond (int bits) {
-  serialCharactersPerSecond = SERIAL_BAUD / bits;
+static int
+tellResource (
+  uint8_t request, uint16_t value, uint16_t index,
+  const unsigned char *data, uint16_t size
+) {
+  ssize_t result = ioTellResource(ioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+                                  request, value, index, data, size);
+  return result != -1;
 }
+
+static int
+askResource (
+  uint8_t request, uint16_t value, uint16_t index,
+  unsigned char *buffer, uint16_t size
+) {
+  ssize_t result = ioAskResource(ioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+                                 request, value, index, buffer, size);
+  return result != -1;
+}
+
+
+static const char *const serialDeviceNames[] = {"Serial Adapter", "Base Unit"};
 
 static int
 writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data, unsigned char count) {
@@ -259,8 +274,8 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
       buffer[size++] = buffer[0];
 
   logOutputPacket(buffer, size);
-  brl->writeDelay += (size * 1000 / serialCharactersPerSecond) + 1;
-  return io->writeData(buffer, size) != -1;
+  if (bytesPerSecond) brl->writeDelay += (size * 1000 / bytesPerSecond) + 1;
+  return ioWriteData(ioEndpoint, buffer, size) != -1;
 }
 
 static int
@@ -273,18 +288,9 @@ readSerialPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    {
-      ssize_t result = io->readData(&byte, 1, (started || escape));
-
-      if (result == 0) {
-        errno = EAGAIN;
-        result = -1;
-      }
-
-      if (result == -1) {
-        if (started) logPartialPacket(packet, offset);
-        return 0;
-      }
+    if (!ioReadByte(ioEndpoint, &byte, (started || escape))) {
+      if (started) logPartialPacket(packet, offset);
+      return 0;
     }
 
     if (byte == ESC) {
@@ -363,7 +369,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait)
   int length;
 
   if (wait)
-    if (!io->awaitInput(SERIAL_INITIAL_TIMEOUT))
+    if (!ioAwaitInput(ioEndpoint, SERIAL_WAIT_TIMEOUT))
       return 0;
 
   while ((length = readSerialPacket(buffer, size))) {
@@ -521,174 +527,50 @@ static const ProtocolOperations serialProtocolOperations = {
 };
 
 
-#include "io_serial.h"
-
-#define SERIAL_OPEN_DELAY 4000
-
-static SerialDevice *serialDevice = NULL;
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, SERIAL_BAUD)) {
-      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) {
-        setSerialCharactersPerSecond(serialGetCharacterBits(serialDevice));
-        approximateDelay(SERIAL_OPEN_DELAY);
-        return 1;
-      }
-    }
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static int
-awaitSerialInput (int timeout) {
-  return serialAwaitInput(serialDevice, timeout);
-}
-
-static ssize_t
-readSerialData (void *buffer, size_t size, int wait) {
-  const int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
-  return serialReadData(serialDevice, buffer, size,
-                        (wait? timeout: 0), timeout);
-}
-
-static ssize_t
-writeSerialData (const void *data, size_t size) {
-  return serialWriteData(serialDevice, data, size);
-}
-
-static const InputOutputOperations serialInputOutputOperations = {
-  .protocol = &serialProtocolOperations,
-  .openPort = openSerialPort,
-  .closePort = closeSerialPort,
-  .awaitInput = awaitSerialInput,
-  .readData = readSerialData,
-  .writeData = writeSerialData
-};
-
-
-#include "io_bluetooth.h"
-
-#define BLUETOOTH_CHANNEL_NUMBER 1
-#define BLUETOOTH_CHARACTER_BITS 8
-#define BLUETOOTH_OPEN_DELAY 800
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (char **parameters, const char *device) {
-  if (!(bluetoothConnection = bthOpenConnection(device, BLUETOOTH_CHANNEL_NUMBER, 0))) return 0;
-  setSerialCharactersPerSecond(BLUETOOTH_CHARACTER_BITS);
-  approximateDelay(BLUETOOTH_OPEN_DELAY);
-  return 1;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int timeout) {
-  return bthAwaitInput(bluetoothConnection, timeout);
-}
-
-static ssize_t
-readBluetoothData (void *buffer, size_t size, int wait) {
-  const int timeout = SERIAL_SUBSEQUENT_TIMEOUT;
-  return bthReadData(bluetoothConnection, buffer, size,
-                     (wait? timeout: 0), timeout);
-}
-
-static ssize_t
-writeBluetoothData (const void *data, size_t size) {
-  return bthWriteData(bluetoothConnection, data, size);
-}
-
-static const InputOutputOperations bluetoothInputOutputOperations = {
-  .protocol = &serialProtocolOperations,
-  .openPort = openBluetoothPort,
-  .closePort = closeBluetoothPort,
-  .awaitInput = awaitBluetoothInput,
-  .readData = readBluetoothData,
-  .writeData = writeBluetoothData
-};
-
-
-#include "io_usb.h"
-
-/* Workarounds for control transfer flakiness (at least in this demo model) */
-#define USB_RETRIES 6
-
-static UsbChannel *usbChannel = NULL;
-
-static int
-putUsbData (
-  uint8_t request, uint16_t value, uint16_t index,
-  const unsigned char *buffer, uint16_t size
-) {
-  int retry = 0;
-  while (1) {
-    int ret = usbControlWrite(usbChannel->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
-                              request, value, index, buffer, size, 100);
-    if (ret != -1) return 1;
-    if ((errno != EPIPE) || (retry == USB_RETRIES)) return 0;
-    logMessage(LOG_WARNING, "USB request 0X%X retry #%d", request, ++retry);
-  }
-}
-
-static int
-getUsbData (
-  uint8_t request, uint16_t value, uint16_t index,
-  unsigned char *buffer, uint16_t size
-) {
-  int retry = 0;
-
-  while (1) {
-    int ret = usbControlRead(usbChannel->device, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
-                             request, value, index, buffer, size, 100);
-    if ((ret != -1) || (errno != EPIPE) || (retry == USB_RETRIES)) return ret;
-    logMessage(LOG_WARNING, "USB request 0X%X retry #%d", request, ++retry);
-  }
-}
-
 static int
 getUsbCellCount (BrailleDisplay *brl, unsigned char *count) {
   unsigned char buffer[2];
-  int size = getUsbData(0X06, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
 
+  if (!askResource(0X06, 0, 0, buffer, sizeof(buffer))) return 0;
   *count = buffer[1];
   return 1;
 }
 
-static int
-logUsbString (uint8_t request, const char *description) {
+static wchar_t *
+getUsbString (uint8_t request) {
   UsbDescriptor descriptor;
-  if (getUsbData(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes)) != -1) {
-    char *string = usbDecodeString(&descriptor.string);
+
+  if (askResource(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes))) {
+    size_t count = (descriptor.string.bLength - 2) / sizeof(descriptor.string.wData[0]);
+    wchar_t *string = malloc((count + 1) * sizeof(*string));
+
     if (string) {
-      logMessage(LOG_INFO, "%s: %s", description, string);
-      free(string);
-      return 1;
+      string[count] = 0;
+
+      while (count) {
+        count -= 1;
+        string[count] = getLittleEndian(descriptor.string.wData[count]);
+      }
+
+      return string;
+    } else {
+      logMallocError();
     }
   }
+
+  return NULL;
+}
+
+static int
+logUsbString (uint8_t request, const char *description) {
+  wchar_t *string = getUsbString(request);
+
+  if (string) {
+    logMessage(LOG_INFO, "%s: %" PRIws, description, string);
+    free(string);
+    return 1;
+  }
+
   return 0;
 }
 
@@ -700,9 +582,8 @@ logUsbSerialNumber (BrailleDisplay *brl) {
 static int
 logUsbHardwareVersion (BrailleDisplay *brl) {
   unsigned char buffer[2];
-  int size = getUsbData(0X04, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
 
+  if (!askResource(0X04, 0, 0, buffer, sizeof(buffer))) return 0;
   logMessage(LOG_INFO, "Hardware Version: %u.%u",
              buffer[0], buffer[1]);
   return 1;
@@ -715,15 +596,14 @@ logUsbFirmwareVersion (BrailleDisplay *brl) {
 
 static int
 setUsbDisplayVoltage (BrailleDisplay *brl, unsigned char voltage) {
-  return putUsbData(0X01, voltage, 0, NULL, 0);
+  return tellResource(0X01, voltage, 0, NULL, 0);
 }
 
 static int
 getUsbDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
   unsigned char buffer[1];
-  int size = getUsbData(0X02, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
 
+  if (!askResource(0X02, 0, 0, buffer, sizeof(buffer))) return 0;
   *voltage = buffer[0];
   return 1;
 }
@@ -731,21 +611,20 @@ getUsbDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
 static int
 getUsbDisplayCurrent (BrailleDisplay *brl, unsigned char *current) {
   unsigned char buffer[1];
-  int size = getUsbData(0X08, 0, 0, buffer, sizeof(buffer));
-  if (size == -1) return 0;
 
+  if (!askResource(0X08, 0, 0, buffer, sizeof(buffer))) return 0;
   *current = buffer[0];
   return 1;
 }
 
 static int
 setUsbDisplayState (BrailleDisplay *brl, unsigned char state) {
-  return putUsbData(0X00, state, 0, NULL, 0);
+  return tellResource(0X00, state, 0, NULL, 0);
 }
 
 static int
 writeUsbBraille (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
-  return putUsbData(0X07, 0, start, cells, count);
+  return tellResource(0X07, 0, start, cells, count);
 }
 
 static int
@@ -754,7 +633,7 @@ updateUsbKeys (BrailleDisplay *brl) {
     unsigned char packet[8];
 
     {
-      ssize_t result = io->readData(packet, sizeof(packet), 0);
+      ssize_t result = ioReadData(ioEndpoint, packet, sizeof(packet), 0);
 
       if (result < 0) {
         if (errno == EAGAIN) {
@@ -791,7 +670,7 @@ updateUsbKeys (BrailleDisplay *brl) {
 
 static int
 soundUsbBeep (BrailleDisplay *brl, unsigned char duration) {
-  return putUsbData(0X09, duration, 0, NULL, 0);
+  return tellResource(0X09, duration, 0, NULL, 0);
 }
 
 static const ProtocolOperations usbProtocolOperations = {
@@ -810,8 +689,10 @@ static const ProtocolOperations usbProtocolOperations = {
 
 
 static int
-openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
+connectResource (const char *identifier) {
+  SerialParameters serialParameters;
+
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { .vendor=0X0798, .product=0X0001, 
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1
@@ -820,48 +701,34 @@ openUsbPort (char **parameters, const char *device) {
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+  InputOutputEndpointSpecification specification;
+  ioInitializeEndpointSpecification(&specification);
+
+  ioInitializeSerialParameters(&serialParameters);
+  serialParameters.baud = SERIAL_BAUD;
+  serialParameters.flowControl = SERIAL_FLOW_HARDWARE;
+
+  specification.serial.parameters = &serialParameters;
+  specification.serial.attributes.applicationData = &serialProtocolOperations;
+  specification.serial.attributes.readyDelay = SERIAL_READY_DELAY;
+  specification.serial.attributes.inputTimeout = SERIAL_INPUT_TIMEOUT;
+
+  specification.usb.channelDefinitions = usbChannelDefinitions;
+  specification.usb.attributes.applicationData = &usbProtocolOperations;
+
+  specification.bluetooth.channelNumber = BLUETOOTH_CHANNEL_NUMBER;
+  specification.bluetooth.attributes.applicationData = &serialProtocolOperations;
+  specification.bluetooth.attributes.readyDelay = BLUETOOTH_READY_DELAY;
+  specification.bluetooth.attributes.inputTimeout = SERIAL_INPUT_TIMEOUT;
+
+  if ((ioEndpoint = ioConnectResource(identifier, &specification))) {
+    protocol = ioGetApplicationData(ioEndpoint);
+    bytesPerSecond = ioGetBytesPerSecond(ioEndpoint);
     return 1;
   }
 
   return 0;
 }
-
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int timeout) {
-  return usbAwaitInput(usbChannel->device,
-                       usbChannel->definition.inputEndpoint,
-                       timeout);
-}
-
-static ssize_t
-readUsbData (void *buffer, size_t size, int wait) {
-  const int timeout = 100;
-  ssize_t result = usbReapInput(usbChannel->device,
-                                usbChannel->definition.inputEndpoint,
-                                buffer, size,
-                                (wait? timeout: 0), timeout);
-
-  if (result != -1) return result;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static const InputOutputOperations usbInputOutputOperations = {
-  .protocol = &usbProtocolOperations,
-  .openPort = openUsbPort,
-  .closePort = closeUsbPort,
-  .awaitInput = awaitUsbInput,
-  .readData = readUsbData
-};
 
 
 typedef struct {
@@ -930,7 +797,7 @@ addActualCells (WriteBrailleData *wbd, unsigned char size) {
 
 static int
 writeBraille0 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
-  return io->protocol->writeBraille(brl, cells, count, start);
+  return protocol->writeBraille(brl, cells, count, start);
 }
 
 static int
@@ -952,10 +819,10 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
     addHiddenCells(&wbd, 2);
     addActualCells(&wbd, 0);
-    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
+    return protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
   }
 
-  return io->protocol->writeBraille(brl, cells, count, start+2);
+  return protocol->writeBraille(brl, cells, count, start+2);
 }
 
 static int
@@ -979,15 +846,15 @@ writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
     addActualCells(&wbd, 6);
     addHiddenCells(&wbd, 2);
     addActualCells(&wbd, 0);
-    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
+    return protocol->writeBraille(brl, buffer, sizeof(buffer), 0);
   }
 
   if (start >= 6) {
-    return io->protocol->writeBraille(brl, &cells[start], count, start+4);
+    return protocol->writeBraille(brl, &cells[start], count, start+4);
   }
 
   if ((start + count) <= 6) {
-    return io->protocol->writeBraille(brl, &cells[start], count, start+2);
+    return protocol->writeBraille(brl, &cells[start], count, start+2);
   }
 
   {
@@ -1008,7 +875,7 @@ writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
     addActualCells(&wbd, 6-start);
     addHiddenCells(&wbd, 2);
     addActualCells(&wbd, 0);
-    return io->protocol->writeBraille(brl, buffer, sizeof(buffer), start+2);
+    return protocol->writeBraille(brl, buffer, sizeof(buffer), start+2);
   }
 }
 
@@ -1050,31 +917,20 @@ static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
   logMessage(LOG_DEBUG, "setting display voltage: %02X", voltage);
-  return io->protocol->setDisplayVoltage(brl, voltage);
+  return protocol->setDisplayVoltage(brl, voltage);
 }
 
 static int
 soundBeep (BrailleDisplay *brl, unsigned char duration) {
-  if (!io->protocol->soundBeep(brl, duration)) return 0;
+  if (!protocol->soundBeep(brl, duration)) return 0;
   approximateDelay(duration);
   return 1;
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialInputOutputOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbInputOutputOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothInputOutputOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
-  }
-
-  if (io->openPort(parameters, device)) {
-    if (io->protocol->getCellCount(brl, &cellCount)) {
+  if (connectResource(device)) {
+    if (protocol->getCellCount(brl, &cellCount)) {
       deviceModel = deviceModels;
 
       while (deviceModel->deviceType) {
@@ -1085,9 +941,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           logMessage(LOG_INFO, "Device Type: %s", deviceType->productName);
           logMessage(LOG_INFO, "Cell Count: %u", cellCount);
 
-          io->protocol->logSerialNumber(brl);
-          io->protocol->logHardwareVersion(brl);
-          io->protocol->logFirmwareVersion(brl);
+          protocol->logSerialNumber(brl);
+          protocol->logHardwareVersion(brl);
+          protocol->logFirmwareVersion(brl);
 
           /* translatedCells holds the status cells and the text cells.
            * We export directly to BRLTTY only the text cells.
@@ -1105,7 +961,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           if ((previousCells = malloc(cellCount))) {
             if ((translatedCells = malloc(cellCount))) {
-              if (io->protocol->setDisplayState(brl, 1)) {
+              if (protocol->setDisplayState(brl, 1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
                 cellsInitialized = 0;
@@ -1138,7 +994,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    io->closePort();
+    ioDisconnectResource(ioEndpoint);
+    ioEndpoint = NULL;
   }
 
   return 0;
@@ -1146,7 +1003,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  io->closePort();
+  if (ioEndpoint) {
+    ioDisconnectResource(ioEndpoint);
+    ioEndpoint = NULL;
+  }
 
   if (translatedCells) {
     free(translatedCells);
@@ -1185,5 +1045,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return io->protocol->updateKeys(brl)? EOF: BRL_CMD_RESTARTBRL;
+  return protocol->updateKeys(brl)? EOF: BRL_CMD_RESTARTBRL;
 }
