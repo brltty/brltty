@@ -26,8 +26,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct InputOutputEndpointStruct InputOutputEndpoint;
-
 typedef struct {
   const void *applicationData;
   int readyDelay;
@@ -55,6 +53,8 @@ typedef struct {
 extern void ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specification);
 extern void ioInitializeSerialParameters (SerialParameters *parameters);
 
+typedef struct InputOutputEndpointStruct InputOutputEndpoint;
+
 extern InputOutputEndpoint *ioConnectResource (
   const char *identifier,
   const InputOutputEndpointSpecification *specification
@@ -81,6 +81,8 @@ extern ssize_t ioAskResource (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 );
+
+extern ssize_t ioGetHidReportSize (InputOutputEndpoint *endpoint, unsigned char number);
 
 extern ssize_t ioSetHidReport (
   InputOutputEndpoint *endpoint,

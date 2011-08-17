@@ -28,6 +28,11 @@
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
+typedef struct {
+  void *address;
+  size_t size;
+} HidReportItemsData;
+
 typedef int DisconnectResourceMethod (void *handle);
 
 typedef ssize_t WriteDataMethod (void *handle, const void *data, size_t size, int timeout);
@@ -50,6 +55,10 @@ typedef int AskResourceMethod (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
 );
+
+typedef int GetHidReportItemsMethod (void *handle, HidReportItemsData *items, int timeout);
+
+typedef ssize_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char number);
 
 typedef ssize_t SetHidReportMethod (
   void *handle, unsigned char interface, unsigned char report,
@@ -81,8 +90,12 @@ typedef struct {
   TellResourceMethod *tellResource;
   AskResourceMethod *askResource;
 
+  GetHidReportItemsMethod *getHidReportItems;
+  GetHidReportSizeMethod *getHidReportSize;
+
   SetHidReportMethod *setHidReport;
   GetHidReportMethod *getHidReport;
+
   SetHidFeatureMethod *setHidFeature;
   GetHidFeatureMethod *getHidFeature;
 } InputOutputMethods;
@@ -92,6 +105,7 @@ struct InputOutputEndpointStruct {
   const InputOutputMethods *methods;
   InputOutputEndpointAttributes attributes;
   int bytesPerSecond;
+  HidReportItemsData hidReportItems;
 
   struct {
     int error;
@@ -226,6 +240,26 @@ askUsbResource (
                         request, value, index, buffer, size, timeout);
 }
 
+static int
+getUsbHidReportItems (void *handle, HidReportItemsData *items, int timeout) {
+  UsbChannel *channel = handle;
+  unsigned char *address;
+  ssize_t result = usbHidGetItems(channel->device,
+                                  channel->definition.interface, 0,
+                                  &address, timeout);
+
+  if (!address) return 0;
+  items->address = address;
+  items->size = result;
+  return 1;
+}
+
+static ssize_t
+getUsbHidReportSize (const HidReportItemsData *items, unsigned char number) {
+  size_t size;
+  return usbHidGetReportSize(items->address, items->size, number, &size)? size: 0;
+}
+
 static ssize_t
 setUsbHidReport (
   void *handle, unsigned char interface, unsigned char report,
@@ -276,8 +310,12 @@ static const InputOutputMethods usbMethods = {
   .tellResource = tellUsbResource,
   .askResource = askUsbResource,
 
+  .getHidReportItems = getUsbHidReportItems,
+  .getHidReportSize = getUsbHidReportSize,
+
   .setHidReport = setUsbHidReport,
   .getHidReport = getUsbHidReport,
+
   .setHidFeature = setUsbHidFeature,
   .getHidFeature = getUsbHidFeature
 };
@@ -331,6 +369,13 @@ ioConnectResource (
 
   if ((endpoint = malloc(sizeof(*endpoint)))) {
     endpoint->bytesPerSecond = 0;
+
+    endpoint->input.error = 0;
+    endpoint->input.from = 0;
+    endpoint->input.to = 0;
+
+    endpoint->hidReportItems.address = NULL;
+    endpoint->hidReportItems.size = 0;
 
     if (specification->serial.parameters) {
       if (isSerialDevice(&identifier)) {
@@ -387,10 +432,6 @@ ioConnectResource (
   return NULL;
 
 opened:
-  endpoint->input.error = 0;
-  endpoint->input.from = 0;
-  endpoint->input.to = 0;
-
   {
     int delay = endpoint->attributes.readyDelay;
     if (delay) approximateDelay(delay);
@@ -417,11 +458,12 @@ ioDisconnectResource (InputOutputEndpoint *endpoint) {
   DisconnectResourceMethod *method = endpoint->methods->disconnectResource;
 
   if (!method) {
-    logUnsupportedOperation("ioDisconnectResource");
+    logUnsupportedOperation("disconnectResource");
   } else if (method(endpoint->handle)) {
     ok = 1;
   }
 
+  if (endpoint->hidReportItems.address) free(endpoint->hidReportItems.address);
   free(endpoint);
   return ok;
 }
@@ -439,7 +481,7 @@ ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
 ssize_t
 ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
   WriteDataMethod *method = endpoint->methods->writeData;
-  if (!method) return logUnsupportedOperation("ioWriteData");
+  if (!method) return logUnsupportedOperation("writeData");
   return method(endpoint->handle, data, size,
                 endpoint->attributes.outputTimeout);
 }
@@ -447,14 +489,14 @@ ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
 int
 ioAwaitInput (InputOutputEndpoint *endpoint, int timeout) {
   AwaitInputMethod *method = endpoint->methods->awaitInput;
-  if (!method) return logUnsupportedOperation("ioAwaitInput");
+  if (!method) return logUnsupportedOperation("awaitInput");
   return method(endpoint->handle, timeout);
 }
 
 ssize_t
 ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) {
   ReadDataMethod *method = endpoint->methods->readData;
-  if (!method) return logUnsupportedOperation("ioReadData");
+  if (!method) return logUnsupportedOperation("readData");
 
   {
     unsigned char *start = buffer;
@@ -522,7 +564,7 @@ ioTellResource (
   const void *data, uint16_t size
 ) {
   TellResourceMethod *method = endpoint->methods->tellResource;
-  if (!method) return logUnsupportedOperation("ioTellResource");
+  if (!method) return logUnsupportedOperation("tellResource");
   return method(endpoint->handle, recipient, type,
                 request, value, index, data, size,
                 endpoint->attributes.outputTimeout);
@@ -536,10 +578,29 @@ ioAskResource (
   void *buffer, uint16_t size
 ) {
   AskResourceMethod *method = endpoint->methods->askResource;
-  if (!method) return logUnsupportedOperation("ioAskResource");
+  if (!method) return logUnsupportedOperation("askResource");
   return method(endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
                 endpoint->attributes.inputTimeout);
+}
+
+ssize_t
+ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char number) {
+  if (!endpoint->hidReportItems.address) {
+    GetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
+    if (!method) return logUnsupportedOperation("getHidReportItems");
+
+    if (!method(endpoint->handle, &endpoint->hidReportItems,
+                endpoint->attributes.inputTimeout)) {
+      return -1;
+    }
+  }
+
+  {
+    GetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
+    if (!method) return logUnsupportedOperation("getHidReportSize");
+    return method(&endpoint->hidReportItems, number);
+  }
 }
 
 ssize_t
@@ -549,7 +610,7 @@ ioSetHidReport (
   const void *data, uint16_t size
 ) {
   SetHidReportMethod *method = endpoint->methods->setHidReport;
-  if (!method) return logUnsupportedOperation("ioSetHidReport");
+  if (!method) return logUnsupportedOperation("setHidReport");
   return method(endpoint->handle, interface, report,
                 data, size, endpoint->attributes.outputTimeout);
 }
@@ -561,7 +622,7 @@ ioGetHidReport (
   void *buffer, uint16_t size
 ) {
   GetHidReportMethod *method = endpoint->methods->getHidReport;
-  if (!method) return logUnsupportedOperation("ioGetHidReport");
+  if (!method) return logUnsupportedOperation("getHidReport");
   return method(endpoint->handle, interface, report,
                 buffer, size, endpoint->attributes.inputTimeout);
 }
@@ -573,7 +634,7 @@ ioSetHidFeature (
   const void *data, uint16_t size
 ) {
   SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
-  if (!method) return logUnsupportedOperation("ioSetHidFeature");
+  if (!method) return logUnsupportedOperation("setHidFeature");
   return method(endpoint->handle, interface, report,
                 data, size, endpoint->attributes.outputTimeout);
 }
@@ -585,7 +646,7 @@ ioGetHidFeature (
   void *buffer, uint16_t size
 ) {
   GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
-  if (!method) return logUnsupportedOperation("ioGetHidFeature");
+  if (!method) return logUnsupportedOperation("getHidFeature");
   return method(endpoint->handle, interface, report,
                 buffer, size, endpoint->attributes.inputTimeout);
 }
