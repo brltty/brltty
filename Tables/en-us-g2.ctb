@@ -637,6 +637,7 @@ contraction myf
 always n 1345
 always N 1345
 always name 5-1345
+always namee = McNamee
 always nament 1345-1-56-2345 tournament
 always namese =
 endnum nd = (second)
