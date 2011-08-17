@@ -384,6 +384,16 @@ opened:
     if (delay) approximateDelay(delay);
   }
 
+  {
+    unsigned char byte;
+    while (ioReadByte(endpoint, &byte, 0));
+  }
+
+  if (errno != EAGAIN) {
+    ioDisconnectResource(endpoint);
+    return NULL;
+  }
+
   return endpoint;
 }
 
@@ -437,6 +447,7 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
     ssize_t result = method(endpoint->handle, buffer, size,
                             (wait? timeout: 0), timeout);
 
+    if (!result) errno = EAGAIN;
     if (result != -1) return result;
     if (errno == EAGAIN) return 0;
   }
