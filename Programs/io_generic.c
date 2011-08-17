@@ -58,7 +58,7 @@ typedef int AskResourceMethod (
 
 typedef int GetHidReportItemsMethod (void *handle, HidReportItemsData *items, int timeout);
 
-typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char number);
+typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char report);
 
 typedef ssize_t SetHidReportMethod (
   void *handle, unsigned char interface, unsigned char report,
@@ -255,9 +255,9 @@ getUsbHidReportItems (void *handle, HidReportItemsData *items, int timeout) {
 }
 
 static size_t
-getUsbHidReportSize (const HidReportItemsData *items, unsigned char number) {
+getUsbHidReportSize (const HidReportItemsData *items, unsigned char report) {
   size_t size;
-  if (usbHidGetReportSize(items->address, items->size, number, &size)) return size;
+  if (usbHidGetReportSize(items->address, items->size, report, &size)) return size;
   errno = ENOSYS;
   return 0;
 }
@@ -362,6 +362,11 @@ logUnsupportedOperation (const char *name) {
   return -1;
 }
 
+static void
+setBytesPerSecond (InputOutputEndpoint *endpoint, const SerialParameters *parameters) {
+  endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
+}
+
 InputOutputEndpoint *
 ioConnectResource (
   const char *identifier,
@@ -386,15 +391,15 @@ ioConnectResource (
             if (serialRestartDevice(endpoint->handle, specification->serial.parameters->baud)) {
               endpoint->methods = &serialMethods;
               endpoint->attributes = specification->serial.attributes;
-              endpoint->bytesPerSecond = specification->serial.parameters->baud / serialGetCharacterBits(endpoint->handle);
-              goto opened;
+              setBytesPerSecond(endpoint, specification->serial.parameters);
+              goto connectSucceeded;
             }
           }
 
           serialCloseDevice(endpoint->handle);
         }
 
-        goto openFailed;
+        goto connectFailed;
       }
     }
 
@@ -403,10 +408,17 @@ ioConnectResource (
         if ((endpoint->handle = usbFindChannel(specification->usb.channelDefinitions, identifier))) {
           endpoint->methods = &usbMethods;
           endpoint->attributes = specification->usb.attributes;
-          goto opened;
+
+          {
+            UsbChannel *channel = endpoint->handle;
+            const SerialParameters *parameters = channel->definition.serial;
+            if (parameters) setBytesPerSecond(endpoint, parameters);
+          }
+
+          goto connectSucceeded;
         }
 
-        goto openFailed;
+        goto connectFailed;
       }
     }
 
@@ -415,17 +427,17 @@ ioConnectResource (
         if ((endpoint->handle = bthOpenConnection(identifier, specification->bluetooth.channelNumber, 1))) {
           endpoint->methods = &bluetoothMethods;
           endpoint->attributes = specification->bluetooth.attributes;
-          goto opened;
+          goto connectSucceeded;
         }
 
-        goto openFailed;
+        goto connectFailed;
       }
     }
 
     errno = ENOSYS;
     logMessage(LOG_WARNING, "unsupported input/output resource identifier: %s", identifier);
 
-  openFailed:
+  connectFailed:
     free(endpoint);
   } else {
     logMallocError();
@@ -433,7 +445,7 @@ ioConnectResource (
 
   return NULL;
 
-opened:
+connectSucceeded:
   {
     int delay = endpoint->attributes.readyDelay;
     if (delay) approximateDelay(delay);
@@ -587,7 +599,7 @@ ioAskResource (
 }
 
 size_t
-ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char number) {
+ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char report) {
   if (!endpoint->hidReportItems.address) {
     GetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
 
@@ -605,7 +617,7 @@ ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char number) {
   {
     GetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
     if (!method) return logUnsupportedOperation("getHidReportSize");
-    return method(&endpoint->hidReportItems, number);
+    return method(&endpoint->hidReportItems, report);
   }
 }
 

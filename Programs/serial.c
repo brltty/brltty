@@ -816,52 +816,72 @@ serialSetParameters (SerialDevice *serial, const SerialParameters *parameters) {
 }
 
 int
-serialGetCharacterBits (SerialDevice *serial) {
-  int bits = 2; /* 1 start bit + 1 stop bit */
+serialGetCharacterSize (const SerialParameters *parameters) {
+  return 1 + parameters->dataBits + parameters->stopBits +
+         ((parameters->parity != SERIAL_PARITY_NONE)? 1: 0);
+}
 
+int
+serialGetDataBits (SerialDevice *serial) {
 #if defined(__MINGW32__)
-  bits += serial->pendingAttributes.ByteSize;
-  if (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY)) ++bits;
-  if (serial->pendingAttributes.StopBits == TWOSTOPBITS) {
-    ++bits;
-  } else if (serial->pendingAttributes.StopBits != ONESTOPBIT) {
-    logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
-  }
+  return serial->pendingAttributes.ByteSize;
 #elif defined(__MSDOS__)
-  bits += serial->pendingAttributes.bios.fields.bits + 5;
-  if (serial->pendingAttributes.bios.fields.parity) ++bits;
-  if (serial->pendingAttributes.bios.fields.stop) ++bits;
+  return serial->pendingAttributes.bios.fields.bits + 5;
 #else /* UNIX */
-  {
-    tcflag_t size = serial->pendingAttributes.c_cflag & CSIZE;
-    switch (size) {
-  #ifdef CS5
-      case CS5: bits += 5; break;
-  #endif /* CS5 */
+  tcflag_t size = serial->pendingAttributes.c_cflag & CSIZE;
 
-  #ifdef CS6
-      case CS6: bits += 6; break;
-  #endif /* CS6 */
+  switch (size) {
+#ifdef CS5
+    case CS5: return 5;
+#endif /* CS5 */
 
-  #ifdef CS7
-      case CS7: bits += 7; break;
-  #endif /* CS7 */
+#ifdef CS6
+    case CS6: return 6;
+#endif /* CS6 */
 
-  #ifdef CS8
-      case CS8: bits += 8; break;
-  #endif /* CS8 */
+#ifdef CS7
+    case CS7: return 7;
+#endif /* CS7 */
 
-      default:
-        logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
-        break;
-    }
+#ifdef CS8
+    case CS8: return 8;
+#endif /* CS8 */
+
+    default:
+      logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
+      return 0;
   }
+#endif /* data bits */
+}
 
-  if (serial->pendingAttributes.c_cflag & PARENB) ++bits;
-  if (serial->pendingAttributes.c_cflag & CSTOPB) ++bits;
-#endif /* increment bits */
+int
+serialGetParityBits (SerialDevice *serial) {
+#if defined(__MINGW32__)
+  return (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY))? 1: 0;
+#elif defined(__MSDOS__)
+  return serial->pendingAttributes.bios.fields.parity? 1: 0;
+#else /* UNIX */
+  return (serial->pendingAttributes.c_cflag & PARENB)? 1: 0;
+#endif /* parity bits */
+}
 
-  return bits;
+int
+serialGetStopBits (SerialDevice *serial) {
+#if defined(__MINGW32__)
+  if (serial->pendingAttributes.StopBits == ONESTOPBIT) return 1;
+  if (serial->pendingAttributes.StopBits == TWOSTOPBITS) return 2;
+  logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
+  return 0;
+#elif defined(__MSDOS__)
+  return serial->pendingAttributes.bios.fields.stop? 2: 1;
+#else /* UNIX */
+  return (serial->pendingAttributes.c_cflag & CSTOPB)? 2: 1;
+#endif /* stop bits */
+}
+
+int
+serialGetCharacterBits (SerialDevice *serial) {
+  return 1 + serialGetDataBits(serial) + serialGetParityBits(serial) + serialGetStopBits(serial);
 }
 
 int

@@ -61,7 +61,12 @@ extern int serialSetDataBits (SerialDevice *serial, int bits);
 extern int serialSetStopBits (SerialDevice *serial, int bits);
 extern int serialSetParity (SerialDevice *serial, SerialParity parity);
 extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
+
+extern int serialGetCharacterSize (const SerialParameters *parameters);
 extern int serialGetCharacterBits (SerialDevice *serial);
+extern int serialGetDataBits (SerialDevice *serial);
+extern int serialGetParityBits (SerialDevice *serial);
+extern int serialGetStopBits (SerialDevice *serial);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);
