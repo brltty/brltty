@@ -82,7 +82,7 @@ extern ssize_t ioAskResource (
   void *buffer, uint16_t size
 );
 
-extern ssize_t ioGetHidReportSize (InputOutputEndpoint *endpoint, unsigned char number);
+extern size_t ioGetHidReportSize (InputOutputEndpoint *endpoint, unsigned char number);
 
 extern ssize_t ioSetHidReport (
   InputOutputEndpoint *endpoint,

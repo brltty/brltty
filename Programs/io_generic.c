@@ -58,7 +58,7 @@ typedef int AskResourceMethod (
 
 typedef int GetHidReportItemsMethod (void *handle, HidReportItemsData *items, int timeout);
 
-typedef ssize_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char number);
+typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char number);
 
 typedef ssize_t SetHidReportMethod (
   void *handle, unsigned char interface, unsigned char report,
@@ -254,10 +254,12 @@ getUsbHidReportItems (void *handle, HidReportItemsData *items, int timeout) {
   return 1;
 }
 
-static ssize_t
+static size_t
 getUsbHidReportSize (const HidReportItemsData *items, unsigned char number) {
   size_t size;
-  return usbHidGetReportSize(items->address, items->size, number, &size)? size: 0;
+  if (usbHidGetReportSize(items->address, items->size, number, &size)) return size;
+  errno = ENOSYS;
+  return 0;
 }
 
 static ssize_t
@@ -584,15 +586,19 @@ ioAskResource (
                 endpoint->attributes.inputTimeout);
 }
 
-ssize_t
+size_t
 ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char number) {
   if (!endpoint->hidReportItems.address) {
     GetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
-    if (!method) return logUnsupportedOperation("getHidReportItems");
+
+    if (!method) {
+      logUnsupportedOperation("getHidReportItems");
+      return 0;
+    }
 
     if (!method(endpoint->handle, &endpoint->hidReportItems,
                 endpoint->attributes.inputTimeout)) {
-      return -1;
+      return 0;
     }
   }
 
