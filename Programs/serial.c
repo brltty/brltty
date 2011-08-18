@@ -482,7 +482,7 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
 
 int
 serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices) {
-  if (!*word || isInteger(baud, word)) {
+  if (!*word || isUnsignedInteger(baud, word)) {
     const BaudEntry *entry = getBaudEntry(*baud);
 
     if (entry) {

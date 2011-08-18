@@ -30,6 +30,7 @@ extern char *joinStrings (const char *const *strings, int count);
 extern int rescaleInteger (int value, int from, int to);
 
 extern int isInteger (int *value, const char *string);
+extern int isUnsignedInteger (unsigned int *value, const char *string);
 extern int isFloat (float *value, const char *string);
 
 extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);

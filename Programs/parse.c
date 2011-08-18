@@ -118,6 +118,19 @@ isInteger (int *value, const char *string) {
 }
 
 int
+isUnsignedInteger (unsigned int *value, const char *string) {
+  if (*string) {
+    char *end;
+    unsigned long l = strtoul(string, &end, 0);
+    if (!*end) {
+      *value = l;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int
 isFloat (float *value, const char *string) {
   if (*string) {
     char *end;
