@@ -29,7 +29,7 @@
 #include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
-static int charactersPerSecond;
+static unsigned int charactersPerSecond;
 static unsigned char *outputBuffer = NULL;
 
 static int
@@ -177,7 +177,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if ((serialDevice = serialOpenDevice(device))) {
-    static const int baud = 9600;
+    static const unsigned int baud = 9600;
     charactersPerSecond = baud / 10;
     if (serialRestartDevice(serialDevice, baud)) {
       if (identifyDisplay(brl)) {

@@ -90,7 +90,7 @@ typedef struct {
 static const InputOutputOperations *io;
 
 #define SERIAL_BAUD 9600
-static const int charactersPerSecond = SERIAL_BAUD / 10;
+static const unsigned int charactersPerSecond = SERIAL_BAUD / 10;
 
 static unsigned char textCells[40];
 

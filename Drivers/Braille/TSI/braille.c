@@ -288,8 +288,8 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 /* Global variables */
 
 static SerialDevice *serialDevice;              /* file descriptor for comm port */
-static int serialBaud;
-static int charactersPerSecond;
+static unsigned int serialBaud;
+static unsigned int charactersPerSecond;
 static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;

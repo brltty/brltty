@@ -35,8 +35,8 @@ typedef enum {
 static const int showOutputMapping = 0;
 
 static SerialDevice *serialDevice = NULL;
-static int serialBaud;
-static int charactersPerSecond;
+static unsigned int serialBaud;
+static unsigned int charactersPerSecond;
 static const int *initialCommand;
 
 typedef enum {
@@ -71,7 +71,7 @@ static unsigned char statusCells[GSC_COUNT];
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   {
-    static const int baudTable[] = {9600, 19200, 0};
+    static const unsigned int baudTable[] = {9600, 19200, 0};
     const char *baudParameter = parameters[PARM_BAUD];
 
     if (!*baudParameter ||

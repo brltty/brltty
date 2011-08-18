@@ -183,7 +183,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 #endif /* SendIdReq */
   int ds = BRAILLEDISPLAYSIZE;
   int promVersion = 4;
-  int ttyBaud = 57600;
+  unsigned int ttyBaud = 57600;
   if (*parameters[PARM_DISPSIZE]) {
     int dsmin=20, dsmax=40;
     if (!validateInteger(&ds, parameters[PARM_DISPSIZE], &dsmin, &dsmax))
@@ -195,7 +195,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       logMessage(LOG_WARNING, "%s: %s", "invalid PROM version", parameters[PARM_PROMVER]);
   }
   if (*parameters[PARM_BAUD]) {
-    int baud;
+    unsigned int baud;
     if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL)) {
       ttyBaud = baud;
     }

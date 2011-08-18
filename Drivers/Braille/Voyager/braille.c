@@ -227,7 +227,6 @@ static const ProtocolOperations *protocol;
 
 
 static InputOutputEndpoint *ioEndpoint = NULL;
-static int bytesPerSecond;
 
 #define SERIAL_BAUD 38400
 #define SERIAL_READY_DELAY 400
@@ -280,7 +279,7 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
       buffer[size++] = buffer[0];
 
   logOutputPacket(buffer, size);
-  if (bytesPerSecond) brl->writeDelay += (size * 1000 / bytesPerSecond) + 1;
+  brl->writeDelay += ioGetMillisecondsToTransfer(ioEndpoint, size);
   return ioWriteData(ioEndpoint, buffer, size) != -1;
 }
 
@@ -722,7 +721,6 @@ connectResource (const char *identifier) {
 
   if ((ioEndpoint = ioConnectResource(identifier, &specification))) {
     protocol = ioGetApplicationData(ioEndpoint);
-    bytesPerSecond = ioGetBytesPerSecond(ioEndpoint);
     return 1;
   }
 

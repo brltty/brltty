@@ -61,7 +61,9 @@ extern InputOutputEndpoint *ioConnectResource (
 );
 extern int ioDisconnectResource (InputOutputEndpoint *endpoint);
 extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
-extern int ioGetBytesPerSecond (InputOutputEndpoint *endpoint);
+
+extern unsigned int ioGetBytesPerSecond (InputOutputEndpoint *endpoint);
+extern unsigned int ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes);
 
 extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
 extern int ioAwaitInput (InputOutputEndpoint *endpoint, int timeout);

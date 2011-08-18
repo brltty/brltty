@@ -32,11 +32,11 @@ extern "C" {
 typedef struct SerialDeviceStruct SerialDevice;
 
 extern int isSerialDevice (const char **identifier);
-extern int serialValidateBaud (int *baud, const char *description, const char *word, const int *choices);
+extern int serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices);
 
 extern SerialDevice *serialOpenDevice (const char *path);
 extern void serialCloseDevice (SerialDevice *serial);
-extern int serialRestartDevice (SerialDevice *serial, int baud);
+extern int serialRestartDevice (SerialDevice *serial, unsigned int baud);
 extern FILE *serialGetStream (SerialDevice *serial);
 
 extern int serialAwaitInput (SerialDevice *serial, int timeout);
@@ -56,17 +56,17 @@ extern ssize_t serialWriteData (
 );
 
 extern int serialSetParameters (SerialDevice *serial, const SerialParameters *parameters);
-extern int serialSetBaud (SerialDevice *serial, int baud);
-extern int serialSetDataBits (SerialDevice *serial, int bits);
-extern int serialSetStopBits (SerialDevice *serial, int bits);
+extern int serialSetBaud (SerialDevice *serial, unsigned int baud);
+extern int serialSetDataBits (SerialDevice *serial, unsigned int bits);
+extern int serialSetStopBits (SerialDevice *serial, unsigned int bits);
 extern int serialSetParity (SerialDevice *serial, SerialParity parity);
 extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 
-extern int serialGetCharacterSize (const SerialParameters *parameters);
-extern int serialGetCharacterBits (SerialDevice *serial);
-extern int serialGetDataBits (SerialDevice *serial);
-extern int serialGetParityBits (SerialDevice *serial);
-extern int serialGetStopBits (SerialDevice *serial);
+extern unsigned int serialGetCharacterSize (const SerialParameters *parameters);
+extern unsigned int serialGetCharacterBits (SerialDevice *serial);
+extern unsigned int serialGetDataBits (SerialDevice *serial);
+extern unsigned int serialGetParityBits (SerialDevice *serial);
+extern unsigned int serialGetStopBits (SerialDevice *serial);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);

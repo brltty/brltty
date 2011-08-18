@@ -244,7 +244,7 @@ static unsigned char switchSettings;
 
 typedef struct {
   const char *name;
-  int serialBaud;
+  unsigned int serialBaud;
   SerialParity serialParity;
   const DotsTable *dotsTable;
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
@@ -267,7 +267,7 @@ typedef struct {
 
 static const InputOutputOperations *io;
 static const ProtocolOperations *protocol;
-static int charactersPerSecond;
+static unsigned int charactersPerSecond;
 
 /* Internal Routines */
 
@@ -2664,7 +2664,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
 
         {
-          int bits = 10;
+          unsigned int bits = 10;
           if (protocol->serialParity != SERIAL_PARITY_NONE) ++bits;
           charactersPerSecond = protocol->serialBaud / bits;
         }

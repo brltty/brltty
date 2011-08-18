@@ -277,9 +277,9 @@ write_prebrl (void) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
-  static const int good_baudrates[] =
+  static const unsigned int good_baudrates[] =
     {300,600,1200,2400,4800,9600,19200,38400, 0};
-  int baudrate;
+  unsigned int baudrate;
   /* Init string for Model detection */
 
   if (!*parameters[PARM_BAUDRATE] ||

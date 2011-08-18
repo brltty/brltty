@@ -57,7 +57,7 @@ static const ModelEntry *model = NULL;
 /*--- Input/Output Operations ---*/
 
 typedef struct {
-  const int *bauds;
+  const unsigned int *bauds;
   unsigned char protocol1;
   unsigned char protocol2;
   int (*openPort) (char **parameters, const char *device);
@@ -69,14 +69,14 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static const int *baud;
-static int charactersPerSecond;
+static const unsigned int *baud;
+static unsigned int charactersPerSecond;
 
 /*--- Serial Operations ---*/
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
-static const int serialBauds[] = {19200, 38400, 0};
+static const unsigned int serialBauds[] = {19200, 38400, 0};
 
 static int
 openSerialPort (char **parameters, const char *device) {
@@ -132,7 +132,7 @@ static const InputOutputOperations serialOperations = {
 
 #include "io_usb.h"
 static UsbChannel *usb = NULL;
-static const int usbBauds[] = {115200, 57600, 0};
+static const unsigned int usbBauds[] = {115200, 57600, 0};
 
 static int
 openUsbPort (char **parameters, const char *device) {
@@ -202,7 +202,7 @@ static const InputOutputOperations usbOperations = {
 #include "io_bluetooth.h"
 
 static BluetoothConnection *bluetoothConnection = NULL;
-static const int bluetoothBauds[] = {115200, 0};
+static const unsigned int bluetoothBauds[] = {115200, 0};
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
@@ -1231,7 +1231,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   baud = io->bauds;
   while (*baud) {
-    logMessage(LOG_DEBUG, "Probing Papenmeier display at %d baud.", *baud);
+    logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud.", *baud);
     charactersPerSecond = *baud / 10;
 
     if (io->openPort(parameters, device)) {

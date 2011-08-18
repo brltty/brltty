@@ -104,7 +104,7 @@ struct InputOutputEndpointStruct {
   void *handle;
   const InputOutputMethods *methods;
   InputOutputEndpointAttributes attributes;
-  int bytesPerSecond;
+  unsigned int bytesPerSecond;
   HidReportItemsData hidReportItems;
 
   struct {
@@ -487,9 +487,14 @@ ioGetApplicationData (InputOutputEndpoint *endpoint) {
   return endpoint->attributes.applicationData;
 }
 
-int
+unsigned int
 ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
   return endpoint->bytesPerSecond;
+}
+
+unsigned int
+ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes) {
+  return endpoint->bytesPerSecond? (((bytes * 1000) / endpoint->bytesPerSecond) + 1): 0;
 }
 
 ssize_t

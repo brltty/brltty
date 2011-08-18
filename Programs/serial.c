@@ -175,7 +175,7 @@ struct SerialDeviceStruct {
 };
 
 typedef struct {
-  int baud;
+  unsigned int baud;
   SerialSpeed speed;
 } BaudEntry;
 static const BaudEntry baudTable[] = {
@@ -380,7 +380,7 @@ static const BaudEntry baudTable[] = {
 };
 
 static const BaudEntry *
-getBaudEntry (int baud) {
+getBaudEntry (unsigned int baud) {
   const BaudEntry *entry = baudTable;
   while (entry->baud) {
     if (baud == entry->baud) return entry;
@@ -468,7 +468,7 @@ serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
 }
 
 int
-serialSetBaud (SerialDevice *serial, int baud) {
+serialSetBaud (SerialDevice *serial, unsigned int baud) {
   const BaudEntry *entry = getBaudEntry(baud);
   if (entry) {
     if (serialSetSpeed(serial, entry->speed)) {
@@ -481,28 +481,29 @@ serialSetBaud (SerialDevice *serial, int baud) {
 }
 
 int
-serialValidateBaud (int *baud, const char *description, const char *word, const int *choices) {
+serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices) {
   if (!*word || isInteger(baud, word)) {
     const BaudEntry *entry = getBaudEntry(*baud);
+
     if (entry) {
       if (!choices) return 1;
 
       while (*choices) {
         if (*baud == *choices) return 1;
-        ++choices;
+        choices += 1;
       }
 
-      logMessage(LOG_ERR, "Unsupported %s: %d", description, *baud);
+      logMessage(LOG_ERR, "unsupported %s: %u", description, *baud);
       return 0;
     }
   }
 
-  logMessage(LOG_ERR, "Invalid %s: %d", description, *baud);
+  logMessage(LOG_ERR, "invalid %s: %u", description, *baud);
   return 0;
 }
 
 int
-serialSetDataBits (SerialDevice *serial, int bits) {
+serialSetDataBits (SerialDevice *serial, unsigned int bits) {
 #if defined(__MINGW32__) || defined(__MSDOS__)
   if ((bits < 5) || (bits > 8)) {
 #else /* UNIX */
@@ -542,7 +543,7 @@ serialSetDataBits (SerialDevice *serial, int bits) {
 }
 
 int
-serialSetStopBits (SerialDevice *serial, int bits) {
+serialSetStopBits (SerialDevice *serial, unsigned int bits) {
 #if defined(__MINGW32__)
   if (bits == 1) {
     serial->pendingAttributes.StopBits = ONESTOPBIT;
@@ -815,13 +816,13 @@ serialSetParameters (SerialDevice *serial, const SerialParameters *parameters) {
   return 1;
 }
 
-int
+unsigned int
 serialGetCharacterSize (const SerialParameters *parameters) {
   return 1 + parameters->dataBits + parameters->stopBits +
          ((parameters->parity != SERIAL_PARITY_NONE)? 1: 0);
 }
 
-int
+unsigned int
 serialGetDataBits (SerialDevice *serial) {
 #if defined(__MINGW32__)
   return serial->pendingAttributes.ByteSize;
@@ -854,7 +855,7 @@ serialGetDataBits (SerialDevice *serial) {
 #endif /* data bits */
 }
 
-int
+unsigned int
 serialGetParityBits (SerialDevice *serial) {
 #if defined(__MINGW32__)
   return (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY))? 1: 0;
@@ -865,7 +866,7 @@ serialGetParityBits (SerialDevice *serial) {
 #endif /* parity bits */
 }
 
-int
+unsigned int
 serialGetStopBits (SerialDevice *serial) {
 #if defined(__MINGW32__)
   if (serial->pendingAttributes.StopBits == ONESTOPBIT) return 1;
@@ -879,7 +880,7 @@ serialGetStopBits (SerialDevice *serial) {
 #endif /* stop bits */
 }
 
-int
+unsigned int
 serialGetCharacterBits (SerialDevice *serial) {
   return 1 + serialGetDataBits(serial) + serialGetParityBits(serial) + serialGetStopBits(serial);
 }
@@ -1525,7 +1526,7 @@ serialCloseDevice (SerialDevice *serial) {
 }
 
 int
-serialRestartDevice (SerialDevice *serial, int baud) {
+serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   SerialLines highLines = 0;
   SerialLines lowLines = 0;
   int usingB0;

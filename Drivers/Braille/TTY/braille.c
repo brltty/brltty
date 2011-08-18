@@ -110,7 +110,7 @@ my_getch (void) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  int ttyBaud = 9600;
+  unsigned int ttyBaud = 9600;
   char *ttyType = "vt100";
   int windowLines = 1;
   int windowColumns = 40;
@@ -125,7 +125,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   {
-    int baud = ttyBaud;
+    unsigned int baud = ttyBaud;
     if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
       ttyBaud = baud;
   }
@@ -188,7 +188,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->textColumns = windowColumns;
             brl->textRows = windowLines; 
 
-            logMessage(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
+            logMessage(LOG_INFO, "TTY: type=%s baud=%u size=%dx%d",
                        ttyType, ttyBaud, windowColumns, windowLines);
             return 1;
 #ifdef USE_CURSES

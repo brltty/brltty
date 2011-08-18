@@ -50,11 +50,11 @@ typedef enum {
 } SerialFlowControl;
 
 typedef struct {
-  int baud;
-  SerialFlowControl flowControl;
-  int dataBits;
-  int stopBits;
+  unsigned int baud;
+  unsigned int dataBits;
+  unsigned int stopBits;
   SerialParity parity;
+  SerialFlowControl flowControl;
 } SerialParameters;
 
 #ifdef __cplusplus

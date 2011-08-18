@@ -111,7 +111,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   int (*openPort) (const char *device);
-  int (*configurePort) (int baud);
+  int (*configurePort) (unsigned int baud);
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, size_t size, int wait);
@@ -119,7 +119,7 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static int charactersPerSecond;
+static unsigned int charactersPerSecond;
 
 #include "io_serial.h"
 
@@ -132,7 +132,7 @@ openSerialPort (const char *device) {
 }
 
 static int
-configureSerialPort (int baud) {
+configureSerialPort (unsigned int baud) {
   return serialRestartDevice(serialDevice, baud);
 }
 
@@ -190,7 +190,7 @@ openUsbPort (const char *device) {
 }
 
 static int
-configureUsbPort (int baud) {
+configureUsbPort (unsigned int baud) {
   const SerialParameters parameters = {
     .baud = baud,
     .flowControl = SERIAL_FLOW_NONE,
@@ -438,8 +438,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(device)) {
-    int baudTable[] = {19200, 9600, 0};
-    const int *baud = baudTable;
+    unsigned int baudTable[] = {19200, 9600, 0};
+    const unsigned int *baud = baudTable;
 
     while (io->configurePort(*baud)) {
       time_t start = time(NULL);
@@ -449,7 +449,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       charactersPerSecond = *baud / 10;
       controlKey = NO_CONTROL_KEY;
 
-      logMessage(LOG_DEBUG, "Trying Albatross at %d baud.", *baud);
+      logMessage(LOG_DEBUG, "trying Albatross at %u baud.", *baud);
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;

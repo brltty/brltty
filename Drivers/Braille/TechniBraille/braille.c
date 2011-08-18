@@ -31,7 +31,7 @@ static wchar_t visualText[0XFF];
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
-static int charactersPerSecond;
+static unsigned int charactersPerSecond;
 
 static int
 readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
@@ -145,7 +145,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if ((serialDevice = serialOpenDevice(device))) {
-    int baud = 19200;
+    unsigned int baud = 19200;
     charactersPerSecond = baud / 11;
 
     if (serialRestartDevice(serialDevice, baud)) {

@@ -44,8 +44,8 @@
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
-static const int serialBaud = 9600;
-static int serialCharactersPerSecond;
+static const unsigned int serialBaud = 9600;
+static unsigned int serialCharactersPerSecond;
 
 #define KEY_F1     0x01
 #define KEY_F2     0x02

@@ -37,8 +37,8 @@
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
-static const int serialBaud = 38400;
-static int charactersPerSecond;
+static const unsigned int serialBaud = 38400;
+static unsigned int charactersPerSecond;
 
 typedef union {
   unsigned char bytes[3];

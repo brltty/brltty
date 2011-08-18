@@ -88,7 +88,7 @@ typedef struct {
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
-static int charactersPerSecond;
+static unsigned int charactersPerSecond;
 
 typedef enum {
   IPT_CURSOR  = 0X00,

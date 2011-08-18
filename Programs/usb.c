@@ -1089,16 +1089,16 @@ usbHidSetFeature (
 }
 
 static int
-usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, int value, int index) {
+usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
   logMessage(LOG_DEBUG, "Belkin Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
 static int
-usbSetBaud_Belkin (UsbDevice *device, int rate) {
-  const int base = 230400;
+usbSetBaud_Belkin (UsbDevice *device, unsigned int rate) {
+  const unsigned int base = 230400;
   if (base % rate) {
-    logMessage(LOG_WARNING, "Unsupported Belkin baud: %d", rate);
+    logMessage(LOG_WARNING, "unsupported Belkin baud: %u", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1106,7 +1106,7 @@ usbSetBaud_Belkin (UsbDevice *device, int rate) {
 }
 static int
 usbSetFlowControl_Belkin (UsbDevice *device, SerialFlowControl flow) {
-  int value = 0;
+  unsigned int value = 0;
 #define BELKIN_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), value |= (to)
   BELKIN_FLOW(SERIAL_FLOW_OUTPUT_CTS, 0X0001);
   BELKIN_FLOW(SERIAL_FLOW_OUTPUT_DSR, 0X0002);
@@ -1118,23 +1118,23 @@ usbSetFlowControl_Belkin (UsbDevice *device, SerialFlowControl flow) {
   BELKIN_FLOW(SERIAL_FLOW_INPUT_XON , 0X0100);
 #undef BELKIN_FLOW
   if (flow) {
-    logMessage(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
+    logMessage(LOG_WARNING, "unsupported Belkin flow control: %02X", flow);
   }
   return usbSetAttribute_Belkin(device, 16, value, 0);
 }
 static int
-usbSetDataBits_Belkin (UsbDevice *device, int bits) {
+usbSetDataBits_Belkin (UsbDevice *device, unsigned int bits) {
   if ((bits < 5) || (bits > 8)) {
-    logMessage(LOG_WARNING, "Unsupported Belkin data bits: %d", bits);
+    logMessage(LOG_WARNING, "unsupported Belkin data bits: %u", bits);
     errno = EINVAL;
     return 0;
   }
   return usbSetAttribute_Belkin(device, 2, bits-5, 0);
 }
 static int
-usbSetStopBits_Belkin (UsbDevice *device, int bits) {
+usbSetStopBits_Belkin (UsbDevice *device, unsigned int bits) {
   if ((bits < 1) || (bits > 2)) {
-    logMessage(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
+    logMessage(LOG_WARNING, "unsupported Belkin stop bits: %u", bits);
     errno = EINVAL;
     return 0;
   }
@@ -1142,7 +1142,7 @@ usbSetStopBits_Belkin (UsbDevice *device, int bits) {
 }
 static int
 usbSetParity_Belkin (UsbDevice *device, SerialParity parity) {
-  int value;
+  unsigned int value;
   switch (parity) {
     case SERIAL_PARITY_SPACE: value = 4; break;
     case SERIAL_PARITY_ODD:   value = 2; break;
@@ -1150,14 +1150,14 @@ usbSetParity_Belkin (UsbDevice *device, SerialParity parity) {
     case SERIAL_PARITY_MARK:  value = 3; break;
     case SERIAL_PARITY_NONE:  value = 0; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported Belkin parity: %d", parity);
+      logMessage(LOG_WARNING, "unsupported Belkin parity: %u", parity);
       errno = EINVAL;
       return 0;
   }
   return usbSetAttribute_Belkin(device, 3, value, 0);
 }
 static int
-usbSetDataFormat_Belkin (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
+usbSetDataFormat_Belkin (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
   if (usbSetDataBits_Belkin(device, dataBits))
     if (usbSetStopBits_Belkin(device, stopBits))
       if (usbSetParity_Belkin(device, parity))
@@ -1203,18 +1203,18 @@ usbInputFilter_FTDI (UsbInputFilterData *data) {
   return 1;
 }
 static int
-usbSetAttribute_FTDI (UsbDevice *device, unsigned char request, int value, int index) {
+usbSetAttribute_FTDI (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
   logMessage(LOG_DEBUG, "FTDI Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
 static int
-usbSetBaud_FTDI (UsbDevice *device, int divisor) {
+usbSetBaud_FTDI (UsbDevice *device, unsigned int divisor) {
   return usbSetAttribute_FTDI(device, 3, divisor&0XFFFF, divisor>>0X10);
 }
 static int
-usbSetBaud_FTDI_SIO (UsbDevice *device, int rate) {
-  int divisor;
+usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int rate) {
+  unsigned int divisor;
   switch (rate) {
     case    300: divisor = 0; break;
     case    600: divisor = 1; break;
@@ -1227,23 +1227,23 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, int rate) {
     case  57600: divisor = 8; break;
     case 115200: divisor = 9; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported FTDI SIO baud: %d", rate);
+      logMessage(LOG_WARNING, "unsupported FTDI SIO baud: %u", rate);
       errno = EINVAL;
       return 0;
   }
   return usbSetBaud_FTDI(device, divisor);
 }
 static int
-usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, int rate) {
+usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int rate) {
   if (rate > 3000000) {
-    logMessage(LOG_WARNING, "Unsupported FTDI FT8U232AM baud: %d", rate);
+    logMessage(LOG_WARNING, "unsupported FTDI FT8U232AM baud: %u", rate);
     errno = EINVAL;
     return 0;
   }
   {
-    const int base = 48000000;
-    int eighths = base / 2 / rate;
-    int divisor;
+    const unsigned int base = 48000000;
+    unsigned int eighths = base / 2 / rate;
+    unsigned int divisor;
     if ((eighths & 07) == 7) eighths++;
     divisor = eighths >> 3;
     divisor |= (eighths & 04)? 0X4000:
@@ -1255,17 +1255,17 @@ usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, int rate) {
   }
 }
 static int
-usbSetBaud_FTDI_FT232BM (UsbDevice *device, int rate) {
+usbSetBaud_FTDI_FT232BM (UsbDevice *device, unsigned int rate) {
   if (rate > 3000000) {
-    logMessage(LOG_WARNING, "Unsupported FTDI FT232BM baud: %d", rate);
+    logMessage(LOG_WARNING, "unsupported FTDI FT232BM baud: %u", rate);
     errno = EINVAL;
     return 0;
   }
   {
     static const unsigned char mask[8] = {00, 03, 02, 04, 01, 05, 06, 07};
-    const int base = 48000000;
-    const int eighths = base / 2 / rate;
-    int divisor = (eighths >> 3) | (mask[eighths & 07] << 14);
+    const unsigned int base = 48000000;
+    const unsigned int eighths = base / 2 / rate;
+    unsigned int divisor = (eighths >> 3) | (mask[eighths & 07] << 14);
     if (divisor == 1) {
       divisor = 0;
     } else if (divisor == 0X4001) {
@@ -1276,23 +1276,23 @@ usbSetBaud_FTDI_FT232BM (UsbDevice *device, int rate) {
 }
 static int
 usbSetFlowControl_FTDI (UsbDevice *device, SerialFlowControl flow) {
-  int index = 0;
+  unsigned int index = 0;
 #define FTDI_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), index |= (to)
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_CTS|SERIAL_FLOW_INPUT_RTS, 0X0100);
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_DSR|SERIAL_FLOW_INPUT_DTR, 0X0200);
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_XON|SERIAL_FLOW_INPUT_XON, 0X0400);
 #undef FTDI_FLOW
   if (flow) {
-    logMessage(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
+    logMessage(LOG_WARNING, "unsupported FTDI flow control: %02X", flow);
   }
   return usbSetAttribute_FTDI(device, 2, ((index & 0X0400)? 0X1311: 0), index);
 }
 static int
-usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
+usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
   int ok = 1;
-  int value = dataBits & 0XFF;
+  unsigned int value = dataBits & 0XFF;
   if (dataBits != value) {
-    logMessage(LOG_WARNING, "Unsupported FTDI data bits: %d", dataBits);
+    logMessage(LOG_WARNING, "unsupported FTDI data bits: %u", dataBits);
     ok = 0;
   }
   switch (parity) {
@@ -1302,7 +1302,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
     case SERIAL_PARITY_MARK:  value |= 0X300; break;
     case SERIAL_PARITY_SPACE: value |= 0X400; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported FTDI parity: %d", parity);
+      logMessage(LOG_WARNING, "unsupported FTDI parity: %u", parity);
       ok = 0;
       break;
   }
@@ -1310,7 +1310,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, int dataBits, int stopBits, SerialPari
     case 1: value |= 0X0000; break;
     case 2: value |= 0X1000; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported FTDI stop bits: %d", stopBits);
+      logMessage(LOG_WARNING, "unsupported FTDI stop bits: %u", stopBits);
       ok = 0;
       break;
   }
@@ -1383,17 +1383,17 @@ usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *d
                          request, 0, 0, data, length, 1000) != -1;
 }
 static int
-usbSetAttribute_CP2101 (UsbDevice *device, unsigned char request, int value, int index) {
+usbSetAttribute_CP2101 (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
   logMessage(LOG_DEBUG, "CP2101 Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
 static int
-usbSetBaud_CP2101 (UsbDevice *device, int rate) {
-  const int base = 0X384000;
-  int divisor = base / rate;
+usbSetBaud_CP2101 (UsbDevice *device, unsigned int rate) {
+  const unsigned int base = 0X384000;
+  unsigned int divisor = base / rate;
   if ((rate * divisor) != base) {
-    logMessage(LOG_WARNING, "Unsupported CP2101 baud: %d", rate);
+    logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", rate);
     errno = EINVAL;
     return 0;
   }
@@ -1406,17 +1406,17 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   if (!count) return 0;
 
   if (flow) {
-    logMessage(LOG_WARNING, "Unsupported CP2101 flow control: %02X", flow);
+    logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
   }
 
   return usbSetAttributes_CP2101(device, 19, bytes, count) != -1;
 }
 static int
-usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
+usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
   int ok = 1;
-  int value = dataBits & 0XF;
+  unsigned int value = dataBits & 0XF;
   if (dataBits != value) {
-    logMessage(LOG_WARNING, "Unsupported CP2101 data bits: %d", dataBits);
+    logMessage(LOG_WARNING, "unsupported CP2101 data bits: %u", dataBits);
     ok = 0;
   }
   value <<= 8;
@@ -1427,7 +1427,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
     case SERIAL_PARITY_MARK:  value |= 0X30; break;
     case SERIAL_PARITY_SPACE: value |= 0X40; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported CP2101 parity: %d", parity);
+      logMessage(LOG_WARNING, "unsupported CP2101 parity: %u", parity);
       ok = 0;
       break;
   }
@@ -1435,7 +1435,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, int dataBits, int stopBits, SerialPa
     case 1: value |= 0X0; break;
     case 2: value |= 0X2; break;
     default:
-      logMessage(LOG_WARNING, "Unsupported CP2101 stop bits: %d", stopBits);
+      logMessage(LOG_WARNING, "unsupported CP2101 stop bits: %u", stopBits);
       ok = 0;
       break;
   }

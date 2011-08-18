@@ -406,8 +406,8 @@ typedef struct {
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
-static const int baud = 19200;
-static int charactersPerSecond;
+static const unsigned int baud = 19200;
+static unsigned int charactersPerSecond;
 
 /* Serial IO */
 #include "io_serial.h"
