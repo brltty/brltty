@@ -44,6 +44,8 @@ typedef ssize_t ReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
+typedef int ReconfigureResourceMethod (void *handle, const SerialParameters *parameters);
+
 typedef int TellResourceMethod (
   void *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
@@ -86,6 +88,8 @@ typedef struct {
   WriteDataMethod *writeData;
   AwaitInputMethod *awaitInput;
   ReadDataMethod *readData;
+
+  ReconfigureResourceMethod *reconfigureResource;
 
   TellResourceMethod *tellResource;
   AskResourceMethod *askResource;
@@ -173,12 +177,19 @@ readSerialData (
                         initialTimeout, subsequentTimeout);
 }
 
+static int
+reconfigureSerialResource (void *handle, const SerialParameters *parameters) {
+  return serialSetParameters(handle, parameters);
+}
+
 static const InputOutputMethods serialMethods = {
   .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
   .awaitInput = awaitSerialInput,
-  .readData = readSerialData
+  .readData = readSerialData,
+
+  .reconfigureResource = reconfigureSerialResource
 };
 
 static int
@@ -214,6 +225,12 @@ readUsbData (
 
   return usbReapInput(channel->device, channel->definition.inputEndpoint,
                       buffer, size, initialTimeout, subsequentTimeout);
+}
+
+static int
+reconfigureUsbResource (void *handle, const SerialParameters *parameters) {
+  UsbChannel *channel = handle;
+  return usbSetSerialParameters(channel->device, parameters);
 }
 
 static int
@@ -308,6 +325,8 @@ static const InputOutputMethods usbMethods = {
   .writeData = writeUsbData,
   .awaitInput = awaitUsbInput,
   .readData = readUsbData,
+
+  .reconfigureResource = reconfigureUsbResource,
 
   .tellResource = tellUsbResource,
   .askResource = askUsbResource,
@@ -487,16 +506,6 @@ ioGetApplicationData (InputOutputEndpoint *endpoint) {
   return endpoint->attributes.applicationData;
 }
 
-unsigned int
-ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
-  return endpoint->bytesPerSecond;
-}
-
-unsigned int
-ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes) {
-  return endpoint->bytesPerSecond? (((bytes * 1000) / endpoint->bytesPerSecond) + 1): 0;
-}
-
 ssize_t
 ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
   WriteDataMethod *method = endpoint->methods->writeData;
@@ -573,6 +582,34 @@ ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait) {
   if (result > 0) return 1;
   if (result == 0) errno = EAGAIN;
   return 0;
+}
+
+int
+ioReconfigureResource (
+  InputOutputEndpoint *endpoint,
+  const SerialParameters *parameters
+) {
+  int ok = 0;
+  ReconfigureResourceMethod *method = endpoint->methods->reconfigureResource;
+
+  if (!method) {
+    logUnsupportedOperation("reconfigureResource");
+  } else if (method(endpoint->handle, parameters)) {
+    setBytesPerSecond(endpoint, parameters);
+    ok = 1;
+  }
+
+  return ok;
+}
+
+unsigned int
+ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
+  return endpoint->bytesPerSecond;
+}
+
+unsigned int
+ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes) {
+  return endpoint->bytesPerSecond? (((bytes * 1000) / endpoint->bytesPerSecond) + 1): 0;
 }
 
 ssize_t
