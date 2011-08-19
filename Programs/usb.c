@@ -1658,10 +1658,6 @@ usbSetSerialOperations (UsbDevice *device) {
 
       sa += 1;
     }
-
-    if (!device->serial)
-      logMessage(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
-                 device->descriptor.idVendor, device->descriptor.idProduct);
   }
 
   return 1;
@@ -1670,7 +1666,13 @@ usbSetSerialOperations (UsbDevice *device) {
 int
 usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
   const UsbSerialOperations *serial = usbGetSerialOperations(device);
-  if (!serial) return 0;
+
+  if (!serial) {
+    logMessage(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
+               device->descriptor.idVendor, device->descriptor.idProduct);
+    errno = ENOSYS;
+    return 0;
+  }
 
   if (serial->enableAdapter)
     if (!serial->enableAdapter(device))
