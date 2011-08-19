@@ -469,6 +469,7 @@ insertKey_WindowsScreen (ScreenKey key) {
       logMessage(LOG_DEBUG, "vk is %4.4X", vk);
       if (vk & 0x100) controlKeyState |= SHIFT_PRESSED;
       if ((vk & 0x600) == 0x600) {
+	controlKeyState |= RIGHT_CTRL_PRESSED;
 	controlKeyState |= RIGHT_ALT_PRESSED;
       } else {
         if (vk & 0x200) controlKeyState |= LEFT_CTRL_PRESSED;
