@@ -226,7 +226,7 @@ typedef struct {
 static const ProtocolOperations *protocol;
 
 
-static InputOutputEndpoint *ioEndpoint = NULL;
+static GioEndpoint *gioEndpoint = NULL;
 
 #define SERIAL_BAUD 38400
 #define SERIAL_READY_DELAY 400
@@ -241,8 +241,8 @@ tellResource (
   uint8_t request, uint16_t value, uint16_t index,
   const unsigned char *data, uint16_t size
 ) {
-  ssize_t result = ioTellResource(ioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
-                                  request, value, index, data, size);
+  ssize_t result = gioTellResource(gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+                                   request, value, index, data, size);
   return result != -1;
 }
 
@@ -251,8 +251,8 @@ askResource (
   uint8_t request, uint16_t value, uint16_t index,
   unsigned char *buffer, uint16_t size
 ) {
-  ssize_t result = ioAskResource(ioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
-                                 request, value, index, buffer, size);
+  ssize_t result = gioAskResource(gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+                                  request, value, index, buffer, size);
   int ok = result != -1;
 
   if (ok) {
@@ -279,8 +279,8 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
       buffer[size++] = buffer[0];
 
   logOutputPacket(buffer, size);
-  brl->writeDelay += ioGetMillisecondsToTransfer(ioEndpoint, size);
-  return ioWriteData(ioEndpoint, buffer, size) != -1;
+  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, size);
+  return gioWriteData(gioEndpoint, buffer, size) != -1;
 }
 
 static int
@@ -293,7 +293,7 @@ readSerialPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    if (!ioReadByte(ioEndpoint, &byte, (started || escape))) {
+    if (!gioReadByte(gioEndpoint, &byte, (started || escape))) {
       if (started) logPartialPacket(packet, offset);
       return 0;
     }
@@ -374,7 +374,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait)
   int length;
 
   if (wait)
-    if (!ioAwaitInput(ioEndpoint, SERIAL_WAIT_TIMEOUT))
+    if (!gioAwaitInput(gioEndpoint, SERIAL_WAIT_TIMEOUT))
       return 0;
 
   while ((length = readSerialPacket(buffer, size))) {
@@ -638,7 +638,7 @@ updateUsbKeys (BrailleDisplay *brl) {
     unsigned char packet[8];
 
     {
-      ssize_t result = ioReadData(ioEndpoint, packet, sizeof(packet), 0);
+      ssize_t result = gioReadData(gioEndpoint, packet, sizeof(packet), 0);
       if (!result) return 1;
 
       if (result < 0) {
@@ -699,28 +699,28 @@ connectResource (const char *identifier) {
     { .vendor=0 }
   };
 
-  InputOutputEndpointSpecification specification;
-  ioInitializeEndpointSpecification(&specification);
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
 
-  ioInitializeSerialParameters(&serialParameters);
+  gioInitializeSerialParameters(&serialParameters);
   serialParameters.baud = SERIAL_BAUD;
   serialParameters.flowControl = SERIAL_FLOW_HARDWARE;
 
-  specification.serial.parameters = &serialParameters;
-  specification.serial.attributes.applicationData = &serialProtocolOperations;
-  specification.serial.attributes.readyDelay = SERIAL_READY_DELAY;
-  specification.serial.attributes.inputTimeout = SERIAL_INPUT_TIMEOUT;
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &serialProtocolOperations;
+  descriptor.serial.options.readyDelay = SERIAL_READY_DELAY;
+  descriptor.serial.options.inputTimeout = SERIAL_INPUT_TIMEOUT;
 
-  specification.usb.channelDefinitions = usbChannelDefinitions;
-  specification.usb.attributes.applicationData = &usbProtocolOperations;
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &usbProtocolOperations;
 
-  specification.bluetooth.channelNumber = BLUETOOTH_CHANNEL_NUMBER;
-  specification.bluetooth.attributes.applicationData = &serialProtocolOperations;
-  specification.bluetooth.attributes.readyDelay = BLUETOOTH_READY_DELAY;
-  specification.bluetooth.attributes.inputTimeout = SERIAL_INPUT_TIMEOUT;
+  descriptor.bluetooth.channelNumber = BLUETOOTH_CHANNEL_NUMBER;
+  descriptor.bluetooth.options.applicationData = &serialProtocolOperations;
+  descriptor.bluetooth.options.readyDelay = BLUETOOTH_READY_DELAY;
+  descriptor.bluetooth.options.inputTimeout = SERIAL_INPUT_TIMEOUT;
 
-  if ((ioEndpoint = ioConnectResource(identifier, &specification))) {
-    protocol = ioGetApplicationData(ioEndpoint);
+  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    protocol = gioGetApplicationData(gioEndpoint);
     return 1;
   }
 
@@ -991,8 +991,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    ioDisconnectResource(ioEndpoint);
-    ioEndpoint = NULL;
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
   }
 
   return 0;
@@ -1000,9 +1000,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (ioEndpoint) {
-    ioDisconnectResource(ioEndpoint);
-    ioEndpoint = NULL;
+  if (gioEndpoint) {
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
   }
 
   if (translatedCells) {

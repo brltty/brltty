@@ -28,57 +28,71 @@
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
+typedef union {
+  struct {
+    SerialDevice *device;
+  } serial;
+
+  struct {
+    UsbChannel *channel;
+  } usb;
+
+  struct {
+    BluetoothConnection *connection;
+  } bluetooth;
+} GioHandle;
+
 typedef struct {
   void *address;
   size_t size;
 } HidReportItemsData;
 
-typedef int DisconnectResourceMethod (void *handle);
+typedef int DisconnectResourceMethod (GioHandle *handle);
 
-typedef ssize_t WriteDataMethod (void *handle, const void *data, size_t size, int timeout);
+typedef ssize_t WriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
 
-typedef int AwaitInputMethod (void *handle, int timeout);
+typedef int AwaitInputMethod (GioHandle *handle, int timeout);
 
 typedef ssize_t ReadDataMethod (
-  void *handle, void *buffer, size_t size,
+  GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 
-typedef int ReconfigureResourceMethod (void *handle, const SerialParameters *parameters);
+typedef int ReconfigureResourceMethod (GioHandle *handle, const SerialParameters *parameters);
 
 typedef int TellResourceMethod (
-  void *handle, uint8_t recipient, uint8_t type,
+  GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 );
 
 typedef int AskResourceMethod (
-  void *handle, uint8_t recipient, uint8_t type,
+  GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
 );
 
-typedef int GetHidReportItemsMethod (void *handle, HidReportItemsData *items, int timeout);
+typedef int GetHidReportItemsMethod (GioHandle *handle, HidReportItemsData *items, int timeout);
 
 typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char report);
 
 typedef ssize_t SetHidReportMethod (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GetHidReportMethod (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
 typedef ssize_t SetHidFeatureMethod (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GetHidFeatureMethod (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
@@ -104,10 +118,10 @@ typedef struct {
   GetHidFeatureMethod *getHidFeature;
 } InputOutputMethods;
 
-struct InputOutputEndpointStruct {
-  void *handle;
+struct GioEndpointStruct {
+  GioHandle handle;
   const InputOutputMethods *methods;
-  InputOutputEndpointAttributes attributes;
+  GioOptions options;
   unsigned int bytesPerSecond;
   HidReportItemsData hidReportItems;
 
@@ -120,31 +134,31 @@ struct InputOutputEndpointStruct {
 };
 
 static void
-initializeEndpointAttributes (InputOutputEndpointAttributes *attributes) {
-  attributes->applicationData = NULL;
-  attributes->readyDelay = 0;
-  attributes->inputTimeout = 0;
-  attributes->outputTimeout = 0;
+initializeOptions (GioOptions *options) {
+  options->applicationData = NULL;
+  options->readyDelay = 0;
+  options->inputTimeout = 0;
+  options->outputTimeout = 0;
 }
 
 void
-ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specification) {
-  specification->serial.parameters = NULL;
-  initializeEndpointAttributes(&specification->serial.attributes);
-  specification->serial.attributes.inputTimeout = 100;
+gioInitializeDescriptor (GioDescriptor *descriptor) {
+  descriptor->serial.parameters = NULL;
+  initializeOptions(&descriptor->serial.options);
+  descriptor->serial.options.inputTimeout = 100;
 
-  specification->usb.channelDefinitions = NULL;
-  initializeEndpointAttributes(&specification->usb.attributes);
-  specification->usb.attributes.inputTimeout = 1000;
-  specification->usb.attributes.outputTimeout = 1000;
+  descriptor->usb.channelDefinitions = NULL;
+  initializeOptions(&descriptor->usb.options);
+  descriptor->usb.options.inputTimeout = 1000;
+  descriptor->usb.options.outputTimeout = 1000;
 
-  specification->bluetooth.channelNumber = 0;
-  initializeEndpointAttributes(&specification->bluetooth.attributes);
-  specification->bluetooth.attributes.inputTimeout = 100;
+  descriptor->bluetooth.channelNumber = 0;
+  initializeOptions(&descriptor->bluetooth.options);
+  descriptor->bluetooth.options.inputTimeout = 100;
 }
 
 void
-ioInitializeSerialParameters (SerialParameters *parameters) {
+gioInitializeSerialParameters (SerialParameters *parameters) {
   parameters->baud = 9600;
   parameters->flowControl = SERIAL_FLOW_NONE;
   parameters->dataBits = 8;
@@ -153,33 +167,33 @@ ioInitializeSerialParameters (SerialParameters *parameters) {
 }
 
 static int
-disconnectSerialResource (void *handle) {
-  serialCloseDevice(handle);
+disconnectSerialResource (GioHandle *handle) {
+  serialCloseDevice(handle->serial.device);
   return 1;
 }
 
 static ssize_t
-writeSerialData (void *handle, const void *data, size_t size, int timeout) {
-  return serialWriteData(handle, data, size);
+writeSerialData (GioHandle *handle, const void *data, size_t size, int timeout) {
+  return serialWriteData(handle->serial.device, data, size);
 }
 
 static int
-awaitSerialInput (void *handle, int timeout) {
-  return serialAwaitInput(handle, timeout);
+awaitSerialInput (GioHandle *handle, int timeout) {
+  return serialAwaitInput(handle->serial.device, timeout);
 }
 
 static ssize_t
 readSerialData (
-  void *handle, void *buffer, size_t size,
+  GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return serialReadData(handle, buffer, size,
+  return serialReadData(handle->serial.device, buffer, size,
                         initialTimeout, subsequentTimeout);
 }
 
 static int
-reconfigureSerialResource (void *handle, const SerialParameters *parameters) {
-  return serialSetParameters(handle, parameters);
+reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters) {
+  return serialSetParameters(handle->serial.device, parameters);
 }
 
 static const InputOutputMethods serialMethods = {
@@ -193,14 +207,14 @@ static const InputOutputMethods serialMethods = {
 };
 
 static int
-disconnectUsbResource (void *handle) {
-  usbCloseChannel(handle);
+disconnectUsbResource (GioHandle *handle) {
+  usbCloseChannel(handle->usb.channel);
   return 1;
 }
 
 static int
-writeUsbData (void *handle, const void *data, size_t size, int timeout) {
-  UsbChannel *channel = handle;
+writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
+  UsbChannel *channel = handle->usb.channel;
 
   return usbWriteEndpoint(channel->device,
                           channel->definition.outputEndpoint,
@@ -208,8 +222,8 @@ writeUsbData (void *handle, const void *data, size_t size, int timeout) {
 }
 
 static int
-awaitUsbInput (void *handle, int timeout) {
-  UsbChannel *channel = handle;
+awaitUsbInput (GioHandle *handle, int timeout) {
+  UsbChannel *channel = handle->usb.channel;
 
   return usbAwaitInput(channel->device,
                        channel->definition.inputEndpoint,
@@ -218,28 +232,29 @@ awaitUsbInput (void *handle, int timeout) {
 
 static ssize_t
 readUsbData (
-  void *handle, void *buffer, size_t size,
+  GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbReapInput(channel->device, channel->definition.inputEndpoint,
                       buffer, size, initialTimeout, subsequentTimeout);
 }
 
 static int
-reconfigureUsbResource (void *handle, const SerialParameters *parameters) {
-  UsbChannel *channel = handle;
+reconfigureUsbResource (GioHandle *handle, const SerialParameters *parameters) {
+  UsbChannel *channel = handle->usb.channel;
+
   return usbSetSerialParameters(channel->device, parameters);
 }
 
 static int
 tellUsbResource (
-  void *handle, uint8_t recipient, uint8_t type,
+  GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbControlWrite(channel->device, recipient, type,
                          request, value, index, data, size, timeout);
@@ -247,19 +262,19 @@ tellUsbResource (
 
 static int
 askUsbResource (
-  void *handle, uint8_t recipient, uint8_t type,
+  GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbControlRead(channel->device, recipient, type,
                         request, value, index, buffer, size, timeout);
 }
 
 static int
-getUsbHidReportItems (void *handle, HidReportItemsData *items, int timeout) {
-  UsbChannel *channel = handle;
+getUsbHidReportItems (GioHandle *handle, HidReportItemsData *items, int timeout) {
+  UsbChannel *channel = handle->usb.channel;
   unsigned char *address;
   ssize_t result = usbHidGetItems(channel->device,
                                   channel->definition.interface, 0,
@@ -281,40 +296,40 @@ getUsbHidReportSize (const HidReportItemsData *items, unsigned char report) {
 
 static ssize_t
 setUsbHidReport (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbHidSetReport(channel->device, interface, report, data, size, timeout);
 }
 
 static ssize_t
 getUsbHidReport (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbHidGetReport(channel->device, interface, report, buffer, size, timeout);
 }
 
 static ssize_t
 setUsbHidFeature (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbHidSetFeature(channel->device, interface, report, data, size, timeout);
 }
 
 static ssize_t
 getUsbHidFeature (
-  void *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char interface, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle;
+  UsbChannel *channel = handle->usb.channel;
 
   return usbHidGetFeature(channel->device, interface, report, buffer, size, timeout);
 }
@@ -342,27 +357,27 @@ static const InputOutputMethods usbMethods = {
 };
 
 static int
-disconnectBluetoothResource (void *handle) {
-  bthCloseConnection(handle);
+disconnectBluetoothResource (GioHandle *handle) {
+  bthCloseConnection(handle->bluetooth.connection);
   return 1;
 }
 
 static ssize_t
-writeBluetoothData (void *handle, const void *data, size_t size, int timeout) {
-  return bthWriteData(handle, data, size);
+writeBluetoothData (GioHandle *handle, const void *data, size_t size, int timeout) {
+  return bthWriteData(handle->bluetooth.connection, data, size);
 }
 
 static int
-awaitBluetoothInput (void *handle, int timeout) {
-  return bthAwaitInput(handle, timeout);
+awaitBluetoothInput (GioHandle *handle, int timeout) {
+  return bthAwaitInput(handle->bluetooth.connection, timeout);
 }
 
 static ssize_t
 readBluetoothData (
-  void *handle, void *buffer, size_t size,
+  GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return bthReadData(handle, buffer, size,
+  return bthReadData(handle->bluetooth.connection, buffer, size,
                      initialTimeout, subsequentTimeout);
 }
 
@@ -382,16 +397,16 @@ logUnsupportedOperation (const char *name) {
 }
 
 static void
-setBytesPerSecond (InputOutputEndpoint *endpoint, const SerialParameters *parameters) {
+setBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters) {
   endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
 }
 
-InputOutputEndpoint *
-ioConnectResource (
+GioEndpoint *
+gioConnectResource (
   const char *identifier,
-  const InputOutputEndpointSpecification *specification
+  const GioDescriptor *descriptor
 ) {
-  InputOutputEndpoint *endpoint;
+  GioEndpoint *endpoint;
 
   if ((endpoint = malloc(sizeof(*endpoint)))) {
     endpoint->bytesPerSecond = 0;
@@ -403,33 +418,33 @@ ioConnectResource (
     endpoint->hidReportItems.address = NULL;
     endpoint->hidReportItems.size = 0;
 
-    if (specification->serial.parameters) {
+    if (descriptor->serial.parameters) {
       if (isSerialDevice(&identifier)) {
-        if ((endpoint->handle = serialOpenDevice(identifier))) {
-          if (serialSetParameters(endpoint->handle, specification->serial.parameters)) {
-            if (serialRestartDevice(endpoint->handle, specification->serial.parameters->baud)) {
+        if ((endpoint->handle.serial.device = serialOpenDevice(identifier))) {
+          if (serialSetParameters(endpoint->handle.serial.device, descriptor->serial.parameters)) {
+            if (serialRestartDevice(endpoint->handle.serial.device, descriptor->serial.parameters->baud)) {
               endpoint->methods = &serialMethods;
-              endpoint->attributes = specification->serial.attributes;
-              setBytesPerSecond(endpoint, specification->serial.parameters);
+              endpoint->options = descriptor->serial.options;
+              setBytesPerSecond(endpoint, descriptor->serial.parameters);
               goto connectSucceeded;
             }
           }
 
-          serialCloseDevice(endpoint->handle);
+          serialCloseDevice(endpoint->handle.serial.device);
         }
 
         goto connectFailed;
       }
     }
 
-    if (specification->usb.channelDefinitions) {
+    if (descriptor->usb.channelDefinitions) {
       if (isUsbDevice(&identifier)) {
-        if ((endpoint->handle = usbFindChannel(specification->usb.channelDefinitions, identifier))) {
+        if ((endpoint->handle.usb.channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
           endpoint->methods = &usbMethods;
-          endpoint->attributes = specification->usb.attributes;
+          endpoint->options = descriptor->usb.options;
 
           {
-            UsbChannel *channel = endpoint->handle;
+            UsbChannel *channel = endpoint->handle.usb.channel;
             const SerialParameters *parameters = channel->definition.serial;
             if (parameters) setBytesPerSecond(endpoint, parameters);
           }
@@ -441,11 +456,11 @@ ioConnectResource (
       }
     }
 
-    if (specification->bluetooth.channelNumber) {
+    if (descriptor->bluetooth.channelNumber) {
       if (isBluetoothDevice(&identifier)) {
-        if ((endpoint->handle = bthOpenConnection(identifier, specification->bluetooth.channelNumber, 1))) {
+        if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 1))) {
           endpoint->methods = &bluetoothMethods;
-          endpoint->attributes = specification->bluetooth.attributes;
+          endpoint->options = descriptor->bluetooth.options;
           goto connectSucceeded;
         }
 
@@ -466,18 +481,18 @@ ioConnectResource (
 
 connectSucceeded:
   {
-    int delay = endpoint->attributes.readyDelay;
+    int delay = endpoint->options.readyDelay;
     if (delay) approximateDelay(delay);
   }
 
   {
     unsigned char byte;
-    while (ioReadByte(endpoint, &byte, 0));
+    while (gioReadByte(endpoint, &byte, 0));
   }
 
   if (errno != EAGAIN) {
     int originalErrno = errno;
-    ioDisconnectResource(endpoint);
+    gioDisconnectResource(endpoint);
     errno = originalErrno;
     return NULL;
   }
@@ -486,13 +501,13 @@ connectSucceeded:
 }
 
 int
-ioDisconnectResource (InputOutputEndpoint *endpoint) {
+gioDisconnectResource (GioEndpoint *endpoint) {
   int ok = 0;
   DisconnectResourceMethod *method = endpoint->methods->disconnectResource;
 
   if (!method) {
     logUnsupportedOperation("disconnectResource");
-  } else if (method(endpoint->handle)) {
+  } else if (method(&endpoint->handle)) {
     ok = 1;
   }
 
@@ -502,34 +517,33 @@ ioDisconnectResource (InputOutputEndpoint *endpoint) {
 }
 
 const void *
-ioGetApplicationData (InputOutputEndpoint *endpoint) {
-  return endpoint->attributes.applicationData;
+gioGetApplicationData (GioEndpoint *endpoint) {
+  return endpoint->options.applicationData;
 }
 
 ssize_t
-ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size) {
+gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
   WriteDataMethod *method = endpoint->methods->writeData;
   if (!method) return logUnsupportedOperation("writeData");
-  return method(endpoint->handle, data, size,
-                endpoint->attributes.outputTimeout);
+  return method(&endpoint->handle, data, size,
+                endpoint->options.outputTimeout);
 }
 
 int
-ioAwaitInput (InputOutputEndpoint *endpoint, int timeout) {
+gioAwaitInput (GioEndpoint *endpoint, int timeout) {
   AwaitInputMethod *method = endpoint->methods->awaitInput;
   if (!method) return logUnsupportedOperation("awaitInput");
-  return method(endpoint->handle, timeout);
+  return method(&endpoint->handle, timeout);
 }
 
 ssize_t
-ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) {
+gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
   ReadDataMethod *method = endpoint->methods->readData;
   if (!method) return logUnsupportedOperation("readData");
 
   {
     unsigned char *start = buffer;
     unsigned char *next = start;
-    int timeout = wait? endpoint->attributes.inputTimeout: 0;
 
     while (size) {
       {
@@ -556,13 +570,14 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
       }
 
       {
-        ssize_t result = method(endpoint->handle,
-                                &endpoint->input.buffer[endpoint->input.from],
-                                sizeof(endpoint->input.buffer) - endpoint->input.from,
-                                timeout, 0);
+        ssize_t result = method(&endpoint->handle,
+                                &endpoint->input.buffer[endpoint->input.to],
+                                sizeof(endpoint->input.buffer) - endpoint->input.to,
+                                (wait? endpoint->options.inputTimeout: 0), 0);
 
         if (result > 0) {
           endpoint->input.to += result;
+          wait = 1;
         } else {
           if (!result) break;
           if (errno == EAGAIN) break;
@@ -577,16 +592,16 @@ ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait) 
 }
 
 int
-ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait) {
-  ssize_t result = ioReadData(endpoint, byte, 1, wait);
+gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait) {
+  ssize_t result = gioReadData(endpoint, byte, 1, wait);
   if (result > 0) return 1;
   if (result == 0) errno = EAGAIN;
   return 0;
 }
 
 int
-ioReconfigureResource (
-  InputOutputEndpoint *endpoint,
+gioReconfigureResource (
+  GioEndpoint *endpoint,
   const SerialParameters *parameters
 ) {
   int ok = 0;
@@ -594,7 +609,7 @@ ioReconfigureResource (
 
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
-  } else if (method(endpoint->handle, parameters)) {
+  } else if (method(&endpoint->handle, parameters)) {
     setBytesPerSecond(endpoint, parameters);
     ok = 1;
   }
@@ -603,45 +618,45 @@ ioReconfigureResource (
 }
 
 unsigned int
-ioGetBytesPerSecond (InputOutputEndpoint *endpoint) {
+gioGetBytesPerSecond (GioEndpoint *endpoint) {
   return endpoint->bytesPerSecond;
 }
 
 unsigned int
-ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes) {
+gioGetMillisecondsToTransfer (GioEndpoint *endpoint, size_t bytes) {
   return endpoint->bytesPerSecond? (((bytes * 1000) / endpoint->bytesPerSecond) + 1): 0;
 }
 
 ssize_t
-ioTellResource (
-  InputOutputEndpoint *endpoint,
+gioTellResource (
+  GioEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 ) {
   TellResourceMethod *method = endpoint->methods->tellResource;
   if (!method) return logUnsupportedOperation("tellResource");
-  return method(endpoint->handle, recipient, type,
+  return method(&endpoint->handle, recipient, type,
                 request, value, index, data, size,
-                endpoint->attributes.outputTimeout);
+                endpoint->options.outputTimeout);
 }
 
 ssize_t
-ioAskResource (
-  InputOutputEndpoint *endpoint,
+gioAskResource (
+  GioEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 ) {
   AskResourceMethod *method = endpoint->methods->askResource;
   if (!method) return logUnsupportedOperation("askResource");
-  return method(endpoint->handle, recipient, type,
+  return method(&endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
-                endpoint->attributes.inputTimeout);
+                endpoint->options.inputTimeout);
 }
 
 size_t
-ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char report) {
+gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
   if (!endpoint->hidReportItems.address) {
     GetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
 
@@ -650,8 +665,8 @@ ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char report) {
       return 0;
     }
 
-    if (!method(endpoint->handle, &endpoint->hidReportItems,
-                endpoint->attributes.inputTimeout)) {
+    if (!method(&endpoint->handle, &endpoint->hidReportItems,
+                endpoint->options.inputTimeout)) {
       return 0;
     }
   }
@@ -664,49 +679,49 @@ ioGetHidReportSize ( InputOutputEndpoint *endpoint, unsigned char report) {
 }
 
 ssize_t
-ioSetHidReport (
-  InputOutputEndpoint *endpoint,
+gioSetHidReport (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 ) {
   SetHidReportMethod *method = endpoint->methods->setHidReport;
   if (!method) return logUnsupportedOperation("setHidReport");
-  return method(endpoint->handle, interface, report,
-                data, size, endpoint->attributes.outputTimeout);
+  return method(&endpoint->handle, interface, report,
+                data, size, endpoint->options.outputTimeout);
 }
 
 ssize_t
-ioGetHidReport (
-  InputOutputEndpoint *endpoint,
+gioGetHidReport (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 ) {
   GetHidReportMethod *method = endpoint->methods->getHidReport;
   if (!method) return logUnsupportedOperation("getHidReport");
-  return method(endpoint->handle, interface, report,
-                buffer, size, endpoint->attributes.inputTimeout);
+  return method(&endpoint->handle, interface, report,
+                buffer, size, endpoint->options.inputTimeout);
 }
 
 ssize_t
-ioSetHidFeature (
-  InputOutputEndpoint *endpoint,
+gioSetHidFeature (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 ) {
   SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
   if (!method) return logUnsupportedOperation("setHidFeature");
-  return method(endpoint->handle, interface, report,
-                data, size, endpoint->attributes.outputTimeout);
+  return method(&endpoint->handle, interface, report,
+                data, size, endpoint->options.outputTimeout);
 }
 
 ssize_t
-ioGetHidFeature (
-  InputOutputEndpoint *endpoint,
+gioGetHidFeature (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 ) {
   GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
   if (!method) return logUnsupportedOperation("getHidFeature");
-  return method(endpoint->handle, interface, report,
-                buffer, size, endpoint->attributes.inputTimeout);
+  return method(&endpoint->handle, interface, report,
+                buffer, size, endpoint->options.inputTimeout);
 }

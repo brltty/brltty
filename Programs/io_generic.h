@@ -31,86 +31,86 @@ typedef struct {
   int readyDelay;
   int inputTimeout;
   int outputTimeout;
-} InputOutputEndpointAttributes;
+} GioOptions;
 
 typedef struct {
   struct {
     const SerialParameters *parameters;
-    InputOutputEndpointAttributes attributes;
+    GioOptions options;
   } serial;
 
   struct {
     const UsbChannelDefinition *channelDefinitions;
-    InputOutputEndpointAttributes attributes;
+    GioOptions options;
   } usb;
 
   struct {
     uint8_t channelNumber;
-    InputOutputEndpointAttributes attributes;
+    GioOptions options;
   } bluetooth;
-} InputOutputEndpointSpecification;
+} GioDescriptor;
 
-extern void ioInitializeEndpointSpecification (InputOutputEndpointSpecification *specification);
-extern void ioInitializeSerialParameters (SerialParameters *parameters);
+extern void gioInitializeDescriptor (GioDescriptor *descriptor);
+extern void gioInitializeSerialParameters (SerialParameters *parameters);
 
-typedef struct InputOutputEndpointStruct InputOutputEndpoint;
+typedef struct GioEndpointStruct GioEndpoint;
 
-extern InputOutputEndpoint *ioConnectResource (
+extern GioEndpoint *gioConnectResource (
   const char *identifier,
-  const InputOutputEndpointSpecification *specification
+  const GioDescriptor *descriptor
 );
-extern int ioDisconnectResource (InputOutputEndpoint *endpoint);
-extern const void *ioGetApplicationData (InputOutputEndpoint *endpoint);
+extern int gioDisconnectResource (GioEndpoint *endpoint);
+extern const void *gioGetApplicationData (GioEndpoint *endpoint);
 
-extern ssize_t ioWriteData (InputOutputEndpoint *endpoint, const void *data, size_t size);
-extern int ioAwaitInput (InputOutputEndpoint *endpoint, int timeout);
-extern ssize_t ioReadData (InputOutputEndpoint *endpoint, void *buffer, size_t size, int wait);
-extern int ioReadByte (InputOutputEndpoint *endpoint, unsigned char *byte, int wait);
+extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t size);
+extern int gioAwaitInput (GioEndpoint *endpoint, int timeout);
+extern ssize_t gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait);
+extern int gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait);
 
-extern int ioReconfigureResource (
-  InputOutputEndpoint *endpoint,
+extern int gioReconfigureResource (
+  GioEndpoint *endpoint,
   const SerialParameters *parameters
 );
 
-extern unsigned int ioGetBytesPerSecond (InputOutputEndpoint *endpoint);
-extern unsigned int ioGetMillisecondsToTransfer (InputOutputEndpoint *endpoint, size_t bytes);
+extern unsigned int gioGetBytesPerSecond (GioEndpoint *endpoint);
+extern unsigned int gioGetMillisecondsToTransfer (GioEndpoint *endpoint, size_t bytes);
 
-extern ssize_t ioTellResource (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioTellResource (
+  GioEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 );
 
-extern ssize_t ioAskResource (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioAskResource (
+  GioEndpoint *endpoint,
   uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 );
 
-extern size_t ioGetHidReportSize (InputOutputEndpoint *endpoint, unsigned char report);
+extern size_t gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report);
 
-extern ssize_t ioSetHidReport (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioSetHidReport (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 );
 
-extern ssize_t ioGetHidReport (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioGetHidReport (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 );
 
-extern ssize_t ioSetHidFeature (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioSetHidFeature (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   const void *data, uint16_t size
 );
 
-extern ssize_t ioGetHidFeature (
-  InputOutputEndpoint *endpoint,
+extern ssize_t gioGetHidFeature (
+  GioEndpoint *endpoint,
   unsigned char interface, unsigned char report,
   void *buffer, uint16_t size
 );
