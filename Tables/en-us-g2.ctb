@@ -171,7 +171,14 @@ begword beribb 23-1235-24-23 beribboned
 begword bering 23-1235-346 beringed (assume Bering with no suffix refers to the Sea and use "er")
 begword bero 23-1235-135 berobed
 always best 12-15-34
+begword besta 23-34-1 bestad bestain
+sufword bestar 23-34-345
+sufword bestead 23-34-2-145
+sufword bestick 23-34-24-14-13
+sufword bestir 23-34-24-1235
 sufword bestow 23-34-246
+begword bestr 23-34-1235 bestraddle bestreak
+begword bestu 23-34-136 bestuck bestudded
 always beth 12-15-1456 Bethany
 always bethe 12-15-2346 Bethel (Hans) Bethe
 sufword bethink 23-1456-35-13
@@ -438,6 +445,7 @@ always fore 123456-15
 begword forens 123456-26-234 forensic
 always forever 123456-5-15 forevermore
 always foot =
+sufword forbes 123456-12-15-234 Forbestown
 word from 124
 before vowel always friend 124-1235-24-26-145
 always friend 124-1235
