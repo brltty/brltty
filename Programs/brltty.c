@@ -381,7 +381,11 @@ slideWindowVertically (int y) {
 
 static void 
 placeWindowHorizontally (int x) {
-  ses->winx = x / textCount * textCount;
+  if (prefs.slidingWindow) {
+    ses->winx = MAX(0, (x - (int)(textCount / 2)));
+  } else {
+    ses->winx = x / textCount * textCount;
+  }
 }
 
 static int
@@ -413,23 +417,28 @@ trackCursor (int place) {
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  if (place)
+  if (place) {
     if ((scr.posx < ses->winx) || (scr.posx >= (ses->winx + textCount)) ||
-        (scr.posy < ses->winy) || (scr.posy >= (ses->winy + brl.textRows)))
+        (scr.posy < ses->winy) || (scr.posy >= (ses->winy + brl.textRows))) {
       placeWindowHorizontally(scr.posx);
+    }
+  }
 
   if (prefs.slidingWindow) {
     int reset = textCount * 3 / 10;
     int trigger = prefs.eagerSlidingWindow? textCount*3/20: 0;
-    if (scr.posx < (ses->winx + trigger))
+
+    if (scr.posx < (ses->winx + trigger)) {
       ses->winx = MAX(scr.posx-reset, 0);
-    else if (scr.posx >= (ses->winx + textCount - trigger))
+    } else if (scr.posx >= (ses->winx + textCount - trigger)) {
       ses->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)textCount, 0);
+    }
   } else if (scr.posx < ses->winx) {
     ses->winx -= ((ses->winx - scr.posx - 1) / textCount + 1) * textCount;
     if (ses->winx < 0) ses->winx = 0;
-  } else
+  } else {
     ses->winx += (scr.posx - ses->winx) / textCount * textCount;
+  }
 
   slideWindowVertically(scr.posy);
   return 1;
@@ -2276,6 +2285,7 @@ brlttyUpdate (void) {
             setBlinkingCursor(1);
           }
         }
+
         /* If the cursor moves in cursor tracking mode: */
         if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
           trackCursor(0);
