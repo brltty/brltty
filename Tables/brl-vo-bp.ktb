@@ -17,40 +17,17 @@
 ###############################################################################
 
 title Braille Pen 12
+note The six round keys near the back are a braille keyboard.
+note From left to right, they're named: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note From left to right, the three long function keys are named: Shift, Space, Control.
+note This table maps Shift to Dot7, and Control to Dot8.
+note The joystick between the dot and function keys has five positions named: Up, Down, Left, Right, Enter.
+note The round scroll keys at either end of the braille display are named: Left, Right.
 
 
 ####################
 # Default Bindings #
 ####################
-
-map Dot1 DOT1
-map Dot2 DOT2
-map Dot3 DOT3
-map Dot4 DOT4
-map Dot5 DOT5
-map Dot6 DOT6
-map Shift DOT7
-map Control DOT8
-map Space SPACE
-
-bind Shift KEY_BACKSPACE
-bind Control KEY_ENTER
-bind Shift+Space KEY_DELETE
-bind Control+Space KEY_TAB
-bind Shift+Control KEY_ESCAPE
-
-bind Space+Dot1 KEY_CURSOR_LEFT
-bind Space+Dot4 KEY_CURSOR_RIGHT
-bind Space+Dot2 KEY_CURSOR_UP
-bind Space+Dot5 KEY_CURSOR_DOWN
-bind Space+Dot3 KEY_PAGE_UP
-bind Space+Dot6 KEY_PAGE_DOWN
-
-bind Space+Dot1+Dot4+Dot5 KEY_DELETE
-bind Space+Dot1+Dot5 KEY_END
-bind Space+Dot1+Dot2+Dot5 KEY_HOME
-bind Space+Dot2+Dot4 KEY_INSERT
-bind Space+Dot2+Dot3+Dot4+Dot5 KEY_TAB
 
 bind ScrollLeft+ScrollRight HOME
 bind ScrollLeft FWINLT
@@ -59,12 +36,6 @@ bind ScrollLeft+Space LNUP
 bind ScrollRight+Space LNDN
 bind ScrollLeft+Shift FWINLTSKIP
 bind ScrollRight+Control FWINRTSKIP
-
-bind JoystickEnter ROUTE
-bind JoystickLeft KEY_CURSOR_LEFT
-bind JoystickRight KEY_CURSOR_RIGHT
-bind JoystickUp KEY_CURSOR_UP
-bind JoystickDown KEY_CURSOR_DOWN
 
 bind ScrollLeft+JoystickEnter SETLEFT
 bind ScrollLeft+JoystickLeft CHRLT
@@ -90,17 +61,11 @@ bind Shift+JoystickRight LNEND
 bind Shift+JoystickUp TOP
 bind Shift+JoystickDown BOT
 
-bind Space+JoystickEnter PASTE
-bind Space+JoystickLeft CUTBEGIN
-bind Space+JoystickUp CUTAPPEND
-bind Space+JoystickRight CUTLINE
-bind Space+JoystickDown CUTRECT
-
-bind Control+JoystickEnter KEY_INSERT
-bind Control+JoystickLeft KEY_HOME
-bind Control+JoystickRight KEY_END
-bind Control+JoystickUp KEY_PAGE_UP
-bind Control+JoystickDown KEY_PAGE_DOWN
+bind Control+JoystickLeft CUTBEGIN
+bind Control+JoystickUp CUTAPPEND
+bind Control+JoystickRight CUTLINE
+bind Control+JoystickDown CUTRECT
+bind Control+JoystickEnter PASTE
 
 bind Dot1+JoystickEnter DISPMD
 bind Dot1+JoystickLeft DISPMD+off
@@ -133,59 +98,89 @@ bind Dot2+Dot4+Dot5+Dot6+JoystickRight SLIDEWIN+on
 bind Dot2+Dot3+Dot5+JoystickEnter SIXDOTS+on
 bind Dot2+Dot3+Dot6+JoystickEnter SIXDOTS+off
 
-bind Shift+Space+Dot1 KEY_FUNCTION+0
-bind Shift+Space+Dot1+Dot2 KEY_FUNCTION+1
-bind Shift+Space+Dot1+Dot4 KEY_FUNCTION+2
-bind Shift+Space+Dot1+Dot4+Dot5 KEY_FUNCTION+3
-bind Shift+Space+Dot1+Dot5 KEY_FUNCTION+4
-bind Shift+Space+Dot1+Dot2+Dot4 KEY_FUNCTION+5
-bind Shift+Space+Dot1+Dot2+Dot4+Dot5 KEY_FUNCTION+6
-bind Shift+Space+Dot1+Dot2+Dot5 KEY_FUNCTION+7
-bind Shift+Space+Dot2+Dot4 KEY_FUNCTION+8
-bind Shift+Space+Dot2+Dot4+Dot5 KEY_FUNCTION+9
-bind Shift+Space+Dot1+Dot3 KEY_FUNCTION+10
-bind Shift+Space+Dot1+Dot2+Dot3 KEY_FUNCTION+11
-bind Shift+Space+Dot1+Dot3+Dot4 KEY_FUNCTION+12
-bind Shift+Space+Dot1+Dot3+Dot4+Dot5 KEY_FUNCTION+13
-bind Shift+Space+Dot1+Dot3+Dot5 KEY_FUNCTION+14
-bind Shift+Space+Dot1+Dot2+Dot3+Dot4 KEY_FUNCTION+15
-bind Shift+Space+Dot1+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+16
-bind Shift+Space+Dot1+Dot2+Dot3+Dot5 KEY_FUNCTION+17
-bind Shift+Space+Dot2+Dot3+Dot4 KEY_FUNCTION+18
-bind Shift+Space+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+19
-bind Shift+Space+Dot1+Dot3+Dot6 KEY_FUNCTION+20
-bind Shift+Space+Dot1+Dot2+Dot3+Dot6 KEY_FUNCTION+21
-bind Shift+Space+Dot2+Dot4+Dot5+Dot6 KEY_FUNCTION+22
-bind Shift+Space+Dot1+Dot3+Dot4+Dot6 KEY_FUNCTION+23
-bind Shift+Space+Dot1+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+24
-bind Shift+Space+Dot1+Dot3+Dot5+Dot6 KEY_FUNCTION+25
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Shift DOT7
+map Control DOT8
+map Space SPACE
 
-bind Control+Space+Dot1 SWITCHVT+0
-bind Control+Space+Dot1+Dot2 SWITCHVT+1
-bind Control+Space+Dot1+Dot4 SWITCHVT+2
-bind Control+Space+Dot1+Dot4+Dot5 SWITCHVT+3
-bind Control+Space+Dot1+Dot5 SWITCHVT+4
-bind Control+Space+Dot1+Dot2+Dot4 SWITCHVT+5
-bind Control+Space+Dot1+Dot2+Dot4+Dot5 SWITCHVT+6
-bind Control+Space+Dot1+Dot2+Dot5 SWITCHVT+7
-bind Control+Space+Dot2+Dot4 SWITCHVT+8
-bind Control+Space+Dot2+Dot4+Dot5 SWITCHVT+9
-bind Control+Space+Dot1+Dot3 SWITCHVT+10
-bind Control+Space+Dot1+Dot2+Dot3 SWITCHVT+11
-bind Control+Space+Dot1+Dot3+Dot4 SWITCHVT+12
-bind Control+Space+Dot1+Dot3+Dot4+Dot5 SWITCHVT+13
-bind Control+Space+Dot1+Dot3+Dot5 SWITCHVT+14
-bind Control+Space+Dot1+Dot2+Dot3+Dot4 SWITCHVT+15
-bind Control+Space+Dot1+Dot2+Dot3+Dot4+Dot5 SWITCHVT+16
-bind Control+Space+Dot1+Dot2+Dot3+Dot5 SWITCHVT+17
-bind Control+Space+Dot2+Dot3+Dot4 SWITCHVT+18
-bind Control+Space+Dot2+Dot3+Dot4+Dot5 SWITCHVT+19
-bind Control+Space+Dot1+Dot3+Dot6 SWITCHVT+20
-bind Control+Space+Dot1+Dot2+Dot3+Dot6 SWITCHVT+21
-bind Control+Space+Dot2+Dot4+Dot5+Dot6 SWITCHVT+22
-bind Control+Space+Dot1+Dot3+Dot4+Dot6 SWITCHVT+23
-bind Control+Space+Dot1+Dot3+Dot4+Dot5+Dot6 SWITCHVT+24
-bind Control+Space+Dot1+Dot3+Dot5+Dot6 SWITCHVT+25
+bind Space+Shift KEY_BACKSPACE
+bind Space+Control KEY_ENTER
+bind Space+Shift+Control KEY_ESCAPE
+
+bind Space+Dot1 KEY_CURSOR_LEFT
+bind Space+Dot4 KEY_CURSOR_RIGHT
+bind Space+Dot2 KEY_CURSOR_UP
+bind Space+Dot5 KEY_CURSOR_DOWN
+bind Space+Dot3 KEY_PAGE_UP
+bind Space+Dot6 KEY_PAGE_DOWN
+
+bind Space+Dot1+Dot2 KEY_BACKSPACE
+bind Space+Dot1+Dot4+Dot5 KEY_DELETE
+bind Space+Dot1+Dot5 KEY_END
+bind Space+Dot1+Dot2+Dot5 KEY_HOME
+bind Space+Dot2+Dot4 KEY_INSERT
+bind Space+Dot1+Dot2+Dot3+Dot5 KEY_ENTER
+bind Space+Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind Space+Dot1+Dot3+Dot4+Dot6 KEY_ESCAPE
+
+bind JoystickEnter ROUTE
+bind JoystickLeft KEY_CURSOR_LEFT
+bind JoystickRight KEY_CURSOR_RIGHT
+bind JoystickUp KEY_CURSOR_UP
+bind JoystickDown KEY_CURSOR_DOWN
+
+bind Space+JoystickEnter KEY_INSERT
+bind Space+JoystickLeft KEY_HOME
+bind Space+JoystickRight KEY_END
+bind Space+JoystickUp KEY_PAGE_UP
+bind Space+JoystickDown KEY_PAGE_DOWN
+
+bind Space+Shift+Dot1 KEY_FUNCTION+0
+bind Space+Shift+Dot1+Dot2 KEY_FUNCTION+1
+bind Space+Shift+Dot1+Dot4 KEY_FUNCTION+2
+bind Space+Shift+Dot1+Dot4+Dot5 KEY_FUNCTION+3
+bind Space+Shift+Dot1+Dot5 KEY_FUNCTION+4
+bind Space+Shift+Dot1+Dot2+Dot4 KEY_FUNCTION+5
+bind Space+Shift+Dot1+Dot2+Dot4+Dot5 KEY_FUNCTION+6
+bind Space+Shift+Dot1+Dot2+Dot5 KEY_FUNCTION+7
+bind Space+Shift+Dot2+Dot4 KEY_FUNCTION+8
+bind Space+Shift+Dot2+Dot4+Dot5 KEY_FUNCTION+9
+bind Space+Shift+Dot1+Dot3 KEY_FUNCTION+10
+bind Space+Shift+Dot1+Dot2+Dot3 KEY_FUNCTION+11
+bind Space+Shift+Dot1+Dot3+Dot4 KEY_FUNCTION+12
+bind Space+Shift+Dot1+Dot3+Dot4+Dot5 KEY_FUNCTION+13
+bind Space+Shift+Dot1+Dot3+Dot5 KEY_FUNCTION+14
+bind Space+Shift+Dot1+Dot2+Dot3+Dot4 KEY_FUNCTION+15
+bind Space+Shift+Dot1+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+16
+bind Space+Shift+Dot1+Dot2+Dot3+Dot5 KEY_FUNCTION+17
+bind Space+Shift+Dot2+Dot3+Dot4 KEY_FUNCTION+18
+bind Space+Shift+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+19
+
+bind Space+Control+Dot1 SWITCHVT+0
+bind Space+Control+Dot1+Dot2 SWITCHVT+1
+bind Space+Control+Dot1+Dot4 SWITCHVT+2
+bind Space+Control+Dot1+Dot4+Dot5 SWITCHVT+3
+bind Space+Control+Dot1+Dot5 SWITCHVT+4
+bind Space+Control+Dot1+Dot2+Dot4 SWITCHVT+5
+bind Space+Control+Dot1+Dot2+Dot4+Dot5 SWITCHVT+6
+bind Space+Control+Dot1+Dot2+Dot5 SWITCHVT+7
+bind Space+Control+Dot2+Dot4 SWITCHVT+8
+bind Space+Control+Dot2+Dot4+Dot5 SWITCHVT+9
+bind Space+Control+Dot1+Dot3 SWITCHVT+10
+bind Space+Control+Dot1+Dot2+Dot3 SWITCHVT+11
+bind Space+Control+Dot1+Dot3+Dot4 SWITCHVT+12
+bind Space+Control+Dot1+Dot3+Dot4+Dot5 SWITCHVT+13
+bind Space+Control+Dot1+Dot3+Dot5 SWITCHVT+14
+bind Space+Control+Dot1+Dot2+Dot3+Dot4 SWITCHVT+15
+bind Space+Control+Dot1+Dot2+Dot3+Dot4+Dot5 SWITCHVT+16
+bind Space+Control+Dot1+Dot2+Dot3+Dot5 SWITCHVT+17
+bind Space+Control+Dot2+Dot3+Dot4 SWITCHVT+18
+bind Space+Control+Dot2+Dot3+Dot4+Dot5 SWITCHVT+19
 
 
 #################
