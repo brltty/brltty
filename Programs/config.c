@@ -1671,10 +1671,12 @@ newTimeMenuItem (Menu *menu, unsigned char *setting, const char *label) {
   return newNumericMenuItem(menu, setting, label, 1, 100, updateInterval/10);
 }
 
+#if defined(ENABLE_PCM_SUPPORT) || defined(ENABLE_MIDI_SUPPORT) || defined(ENABLE_FM_SUPPORT)
 static MenuItem *
 newVolumeMenuItem (Menu *menu, unsigned char *setting, const char *label) {
   return newNumericMenuItem(menu, setting, label, 0, 100, 5);
 }
+#endif /* defined(ENABLE_PCM_SUPPORT) || defined(ENABLE_MIDI_SUPPORT) || defined(ENABLE_FM_SUPPORT) */
 
 static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
 
@@ -2232,7 +2234,11 @@ updatePreferences (void) {
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
             case BRL_CMD_BACK:
             case BRL_CMD_MENU_PREV_SETTING:
-              if (!changeMenuItemPrevious(item)) playTune(&tune_command_rejected);
+              if (changeMenuItemPrevious(item)) {
+                settingChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
 
             case BRL_CMD_WINDN:
@@ -2241,7 +2247,11 @@ updatePreferences (void) {
             case BRL_CMD_HOME:
             case BRL_CMD_RETURN:
             case BRL_CMD_MENU_NEXT_SETTING:
-              if (!changeMenuItemNext(item)) playTune(&tune_command_rejected);
+              if (changeMenuItemNext(item)) {
+                settingChanged = 1;
+              } else {
+                playTune(&tune_command_rejected);
+              }
               break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2259,7 +2269,11 @@ updatePreferences (void) {
                 int key = command - BRL_BLK_ROUTE;
 
                 if ((key >= textStart) && (key < (textStart + textCount))) {
-                  if (!changeMenuItemScaled(item, key-textStart, textCount)) playTune(&tune_command_rejected);
+                  if (changeMenuItemScaled(item, key-textStart, textCount)) {
+                    settingChanged = 1;
+                  } else {
+                    playTune(&tune_command_rejected);
+                  }
                 } else if ((key >= statusStart) && (key < (statusStart + statusCount))) {
                   switch (key - statusStart) {
                     default:
