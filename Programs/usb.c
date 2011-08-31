@@ -1000,7 +1000,7 @@ usbHidGetReportSize (
   const unsigned char *items,
   size_t length,
   unsigned char identifier,
-  uint32_t *size
+  size_t *size
 ) {
   UsbHidReportDescription description;
 
