@@ -406,6 +406,86 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   return 0;
 }
 
+int
+enqueueKey (unsigned char set, unsigned char key) {
+  if (enqueueKeyEvent(set, key, 1))
+    if (enqueueKeyEvent(set, key, 0))
+      return 1;
+
+  return 0;
+}
+
+int
+enqueueKeys (uint32_t bits, unsigned char set, unsigned char key) {
+  unsigned char stack[0X20];
+  unsigned char count = 0;
+
+  while (bits) {
+    if (bits & 0X1) {
+      if (!enqueueKeyEvent(set, key, 1)) return 0;
+      stack[count++] = key;
+    }
+
+    bits >>= 1;
+    key += 1;
+  }
+
+  while (count)
+    if (!enqueueKeyEvent(set, stack[--count], 0))
+      return 0;
+
+  return 1;
+}
+
+int
+enqueueUpdatedKeys (uint32_t new, uint32_t *old, unsigned char set, unsigned char key) {
+  uint32_t bit = 0X1;
+  unsigned char stack[0X20];
+  unsigned char count = 0;
+
+  while (*old != new) {
+    if ((new & bit) && !(*old & bit)) {
+      stack[count++] = key;
+      *old |= bit;
+    } else if (!(new & bit) && (*old & bit)) {
+      if (!enqueueKeyEvent(set, key, 0)) return 0;
+      *old &= ~bit;
+    }
+
+    key += 1;
+    bit <<= 1;
+  }
+
+  while (count)
+    if (!enqueueKeyEvent(set, stack[--count], 1))
+      return 0;
+
+  return 1;
+}
+
+int
+enqueueXtScanCode (
+  unsigned char key, unsigned char escape,
+  unsigned char set00, unsigned char setE0, unsigned char setE1
+) {
+  int command = BRL_BLK_PASSXT | key;
+  switch (escape) {
+    case 0XE0:
+      command |= BRL_FLG_KBD_EMUL0;
+      break;
+
+    case 0XE1:
+      command |= BRL_FLG_KBD_EMUL1;
+      break;
+
+    default:
+    case 0X00:
+      break;
+  }
+
+  return enqueueCommand(command);
+}
+
 static KeyTableCommandContext currentCommandContext = KTB_CTX_DEFAULT;
 
 int
