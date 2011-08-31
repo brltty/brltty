@@ -212,7 +212,7 @@ disconnectUsbResource (GioHandle *handle) {
   return 1;
 }
 
-static int
+static ssize_t
 writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
   UsbChannel *channel = handle->usb.channel;
 
