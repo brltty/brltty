@@ -63,7 +63,7 @@ buildRoot=`cd "${buildRoot}" && pwd` || semanticError
 [ -n "${outputFile}" ] || outputFile="${packageName}.pot"
 [ "${outputFile#/}" != "${outputFile}" ] || outputFile="${initialDirectory}/${outputFile}"
 
-xgettext --output - --force-po --no-wrap --sort-output \
+xgettext --output - --force-po --no-wrap --sort-output --from-code utf-8 \
    ${packageName:+--package-name "${packageName}"} \
    ${packageVersion:+--package-version "${packageVersion}"} \
    ${bugsAddress:+--msgid-bugs-address "${bugsAddress}"} \
