@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all install uninstall install-programs install-help install-tables install-drivers:
+all install uninstall install-documents:
 	cd $(PGM_DIR) && $(MAKE) $@
 
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
