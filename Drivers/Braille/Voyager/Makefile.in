@@ -18,7 +18,7 @@
 
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
-DRIVER_COMMENT = 44/70
+DRIVER_COMMENT = 44/70, Part232 (serial adapter), BraillePen/EasyLink
 DRIVER_VERSION = 0.3 (June 2009)
 DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
 include $(SRC_TOP)braille.mk

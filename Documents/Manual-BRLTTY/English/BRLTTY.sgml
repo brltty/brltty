@@ -5443,6 +5443,8 @@ BRLTTY supports the following braille displays:
       |20/40@
     Voyager
       |44/70@
+      |Part232 (serial adapter)@
+      |BraillePen/EasyLink@
     XWindow
       |X11@
       |Windows@

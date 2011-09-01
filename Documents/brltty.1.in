@@ -718,7 +718,7 @@ TTY
 VideoBraille
 .TP 4
 .B vo
-Voyager
+Voyager, Part232 (serial adapter), BraillePen/EasyLink
 .TP 4
 .B vr
 Virtual

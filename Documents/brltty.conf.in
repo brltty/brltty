@@ -62,7 +62,7 @@
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
 #braille-driver	vd	# VideoBraille
-#braille-driver	vo	# Voyager
+#braille-driver	vo	# Voyager, Part232 (serial adapter), BraillePen/EasyLink
 #braille-driver	vr	# Virtual
 #braille-driver	vs	# VisioBraille
 #braille-driver	xw	# XWindow
