@@ -97,7 +97,7 @@ BRLTTY_ARG_WITH(
 
 if test "${packages}" = "no"
 then
-   packages=""
+   $1_package="none"
 elif test "${packages}" = "yes"
 then
    packages="$3"
@@ -135,15 +135,12 @@ test -z "${$1_package}" && {
 
          AC_MSG_NOTICE([$2 package not available: ${package}])
       done
-
-      test -z "${$1_package}" && {
-         AC_MSG_WARN([no $2 support])
-      }
    }
 }
 
 test -z "${$1_package}" && {
    $1_package="none"
+   AC_MSG_WARN([$2 support not available on this platform])
 }
 
 AC_SUBST([$1_package])
