@@ -16,38 +16,41 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all:: pot linguas
+all:: template languages
 
-POT_EXT = pot
-PO_EXT = po
-MO_EXT = mo
+COPYRIGHT_HOLDER = The BRLTTY Developers
+BUGS_ADDRESS = dave@mielke.cc
 
-POT_FILE = $(PACKAGE_NAME).$(POT_EXT)
-$(POT_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
-	$(SRC_TOP)mkpot -n "$(PACKAGE_NAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "dave@mielke.cc" -c "The BRLTTY Developers" $(SRC_TOP) $(BLD_TOP)
-pot: $(POT_FILE)
+TEMPLATE_EXTENSION = pot
+SOURCE_EXTENSION = po
+OBJECT_EXTENSION = mo
 
-%.$(PO_EXT): $(POT_FILE)
-	msgmerge --force-po --no-wrap --sort-output --update -- $@ $(POT_FILE)
+TEMPLATE_FILE = $(PACKAGE_NAME).$(TEMPLATE_EXTENSION)
+$(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
+	$(SRC_TOP)mkpot -n "$(PACKAGE_NAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "$(BUGS_ADDRESS)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
+template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
 
-PO_LIST = LINGUAS
-$(PO_LIST):
-	ls -1 *.$(PO_EXT) | sed -e 's/\..*//' | sort >$@
-linguas: $(PO_LIST)
+%.$(SOURCE_EXTENSION): $(TEMPLATE_FILE)
+	msgmerge --force-po --no-wrap --sort-output --update -- $@ $(TEMPLATE_FILE)
+
+LANGUAGES_FILE = LINGUAS
+$(LANGUAGES_FILE):
+	ls -1 *.$(SOURCE_EXTENSION) | sed -e 's/\..*//' | sort >$@
+languages: $(LANGUAGES_FILE)
 
 clean::
-	-rm -f -- *.$(POT_EXT) $(PO_LIST)
+	-rm -f -- *.$(TEMPLATE_EXTENSION) $(LANGUAGES_FILE)
 
 install:: install-locale-directory
-	for inputFile in "$(SRC_DIR)/"*.$(PO_EXT); \
+	for inputFile in "$(SRC_DIR)/"*.$(SOURCE_EXTENSION); \
 	do \
-	   localeName=`basename "$${inputFile}" .$(PO_EXT)`; \
+	   localeName=`basename "$${inputFile}" .$(SOURCE_EXTENSION)`; \
 	   outputDirectory="$(INSTALL_LOCALE_DIRECTORY)/$${localeName}/LC_MESSAGES"; \
-	   outputFile="$${outputDirectory}/$(PACKAGE_NAME).$(MO_EXT)"; \
+	   outputFile="$${outputDirectory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
            $(INSTALL_DIRECTORY) "$${outputDirectory}"; \
 	   msgfmt -o "$${outputFile}" "$${inputFile}"; \
 	done
 
 uninstall::
-	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_NAME).$(MO_EXT)
+	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_NAME).$(OBJECT_EXTENSION)
 
