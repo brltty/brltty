@@ -79,7 +79,7 @@ $(BIN_TAR_XZ): $(BIN_TAR)
 	xz -9 -c $(BIN_TAR) >$@
 bin-tar-xz: $(BIN_TAR_XZ)
 
-ITERATE = -for directory in $(PGM_DIR) $(INT_DIR); do (cd $$directory && $(MAKE) $@); done
+ITERATE = -for directory in $(PGM_DIR) $(MSG_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
 	-rm -f -- *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(ZIP_EXTENSION) *.rpm
