@@ -365,10 +365,17 @@ startRouting (int column, int row, int screen) {
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTING_ERROR;
-      nice(ROUTING_NICENESS);
-      if (constructRoutingScreen())
+      int niceness = nice(ROUTING_NICENESS);
+
+      if (niceness == -1) {
+        logSystemError("nice");
+      }
+
+      if (constructRoutingScreen()) {
         result = doRouting(column, row, screen);		/* terminate child process */
-      destructRoutingScreen();		/* close second thread of screen reading */
+        destructRoutingScreen();		/* close second thread of screen reading */
+      }
+
       _exit(result);		/* terminate child process */
     }
 

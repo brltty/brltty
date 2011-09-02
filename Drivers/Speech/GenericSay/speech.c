@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 
@@ -48,17 +49,30 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
-{
-  if (!commandStream)
-    commandStream = popen(commandPath, "w");
-  if (commandStream)
-    {
-      const char *trailer = "\n";
-      fwrite(buffer, length, 1, commandStream);
-      fwrite(trailer, strlen(trailer), 1, commandStream);
-      fflush(commandStream);
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+  if (!commandStream) {
+    if (!(commandStream = popen(commandPath, "w"))) {
+      logMessage(LOG_WARNING, "cannot start command: %s: %s",
+                 commandPath, strerror(errno));
     }
+  }
+
+  if (commandStream) {
+    if (fwrite(buffer, length, 1, commandStream)) {
+      static const char trailer[] = {'\n'};
+
+      if (fwrite(trailer, sizeof(trailer), 1, commandStream)) {
+        if (fflush(commandStream) == EOF) {
+        } else {
+          logSystemError("fflush");
+        }
+      } else {
+        logSystemError("fwrite");
+      }
+    } else {
+      logSystemError("fwrite");
+    }
+  }
 }
 
 static void

@@ -3323,13 +3323,20 @@ startup (int argc, char *argv[]) {
     {
       const char *nullDevice = "/dev/null";
 
-      freopen(nullDevice, "r", stdin);
-      freopen(nullDevice, "a", stdout);
+      if (!freopen(nullDevice, "r", stdin)) {
+        logSystemError("freopen[stdin]");
+      }
+
+      if (!freopen(nullDevice, "a", stdout)) {
+        logSystemError("freopen[stdout]");
+      }
 
       if (opt_standardError) {
         fflush(stderr);
       } else {
-        freopen(nullDevice, "a", stderr);
+        if (!freopen(nullDevice, "a", stderr)) {
+          logSystemError("freopen[stderr]");
+        }
       }
     }
 

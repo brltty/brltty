@@ -327,11 +327,16 @@ closeVisualDisplay (int vt) {
   }
 }
 
-static void
+static int
 writeVisualDisplay (unsigned char c) {
   if (displayDescriptor != -1) {
-    write(displayDescriptor, &c, 1);
+    if (write(displayDescriptor, &c, 1) == -1) {
+      logSystemError("write");
+      return 0;
+    }
   }
+
+  return 1;
 }
 
 static int
