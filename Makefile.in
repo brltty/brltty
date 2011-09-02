@@ -19,6 +19,9 @@
 all install uninstall install-documents:
 	cd $(PGM_DIR) && $(MAKE) $@
 
+install-messages uninstall-messages:
+	cd $(MSG_DIR) && $(MAKE) $(@:-messages=)
+
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
