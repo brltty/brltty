@@ -56,13 +56,21 @@ do { \
   else brlapi__ ## function ((brlapi_handle_t *) Data_custom_val(Field(handle, 0)), ## __VA_ARGS__); \
 } while (0)
 
-#define brlapiCheckError(function, ret, ...) \
+#define brlapiCheckError(function, ...) \
 do { \
   int res_; \
   if (Is_long(handle)) res_ = brlapi_ ##function (__VA_ARGS__); \
   else res_ = brlapi__ ##function ((brlapi_handle_t *) Data_custom_val(Field(handle, 0)), ## __VA_ARGS__); \
   if (res_==-1) raise_brlapi_error(); \
-  if (ret!=NULL) (*(int *)ret) = res_; \
+} while (0)
+
+#define brlapiCheckErrorWithCode(function, ret, ...) \
+do { \
+  int res_; \
+  if (Is_long(handle)) res_ = brlapi_ ##function (__VA_ARGS__); \
+  else res_ = brlapi__ ##function ((brlapi_handle_t *) Data_custom_val(Field(handle, 0)), ## __VA_ARGS__); \
+  if (res_==-1) raise_brlapi_error(); \
+  (*(int *)ret) = res_; \
 } while (0)
 
 static int compareHandle(value h1, value h2)
@@ -214,7 +222,7 @@ CAMLprim value brlapiml_getDriverName(value handle, value unit)
 {
   CAMLparam2(handle, unit);
   char name[BRLAPI_MAXNAMELENGTH];
-  brlapiCheckError(getDriverName, NULL, name, sizeof(name));
+  brlapiCheckError(getDriverName, name, sizeof(name));
   CAMLreturn(caml_copy_string(name));
 }
 
@@ -223,7 +231,7 @@ CAMLprim value brlapiml_getDisplaySize(value handle, value unit)
   CAMLparam2(handle, unit);
   CAMLlocal1(size);
   unsigned int x, y;
-  brlapiCheckError(getDisplaySize, NULL, &x, &y);
+  brlapiCheckError(getDisplaySize, &x, &y);
   size = caml_alloc_tuple(2);
   Store_field(size, 0, Val_int(x));
   Store_field(size, 1, Val_int(y));
@@ -234,7 +242,7 @@ CAMLprim value brlapiml_enterTtyMode(value handle, value tty, value driverName)
 {
   CAMLparam3(handle, tty, driverName);
   int res;
-  brlapiCheckError(enterTtyMode, &res, Int_val(tty), String_val(driverName));
+  brlapiCheckErrorWithCode(enterTtyMode, &res, Int_val(tty), String_val(driverName));
   CAMLreturn(Val_int(res));
 }
 
@@ -244,7 +252,7 @@ CAMLprim value brlapiml_enterTtyModeWithPath(value handle, value ttyPathCaml, va
   int i, size = Wosize_val(ttyPathCaml);
   int ttyPath[size];
   for (i=0; i<size; i++) ttyPath[i] = Int_val(Field(ttyPathCaml, i));
-  brlapiCheckError(enterTtyModeWithPath, NULL, ttyPath, size, String_val(driverName));
+  brlapiCheckError(enterTtyModeWithPath, ttyPath, size, String_val(driverName));
   CAMLreturn(Val_unit);
 }
 
@@ -258,14 +266,14 @@ CAMLprim value brlapiml_leaveTtyMode(value handle, value unit)
 CAMLprim value brlapiml_setFocus(value handle, value tty)
 {
   CAMLparam2(handle, tty);
-  brlapiCheckError(setFocus, NULL, Int_val(tty));
+  brlapiCheckError(setFocus, Int_val(tty));
   CAMLreturn(Val_unit);
 }
 
 CAMLprim value brlapiml_writeText(value handle, value cursor, value text)
 {
   CAMLparam3(handle, cursor, text);
-  brlapiCheckError(writeText, NULL, Int_val(cursor), String_val(text));
+  brlapiCheckError(writeText, Int_val(cursor), String_val(text));
   CAMLreturn(Val_unit);
 }
 
@@ -275,7 +283,7 @@ CAMLprim value brlapiml_writeDots(value handle, value camlDots)
   int size = Wosize_val(camlDots);
   unsigned char dots[size];
   packDots(camlDots, dots, size);
-  brlapiCheckError(writeDots, NULL, dots);
+  brlapiCheckError(writeDots, dots);
   CAMLreturn(Val_unit);
 }
 
@@ -296,7 +304,7 @@ CAMLprim value brlapiml_write(value handle, value writeArguments)
   wa.orMask = orMask;
   wa.cursor = Val_int(Field(writeArguments, 6));
   wa.charset = String_val(Field(writeArguments, 7));
-  brlapiCheckError(write, NULL, &wa);
+  brlapiCheckError(write, &wa);
   CAMLreturn(Val_unit);
 }
 
@@ -306,7 +314,7 @@ CAMLprim value brlapiml_readKey(value handle, value unit)
   int res;
   brlapi_keyCode_t keyCode;
   CAMLlocal1(retVal);
-  brlapiCheckError(readKey, &res, 0, &keyCode);
+  brlapiCheckErrorWithCode(readKey, &res, 0, &keyCode);
   if (res==0) CAMLreturn(Val_int(0));
   retVal = caml_alloc(1, 1);
   Store_field(retVal, 0, caml_copy_int64(keyCode));
@@ -317,7 +325,7 @@ CAMLprim value brlapiml_waitKey(value handle, value unit)
 {
   CAMLparam2(handle, unit);
   brlapi_keyCode_t keyCode;
-  brlapiCheckError(readKey, NULL, 1, &keyCode);
+  brlapiCheckError(readKey, 1, &keyCode);
   CAMLreturn(caml_copy_int64(keyCode));
 }
 
@@ -328,7 +336,7 @@ CAMLprim value brlapiml_expandKeyCode(value handle, value camlKeyCode)
   CAMLparam2(handle, camlKeyCode);
   CAMLlocal1(result);
   brlapi_expandedKeyCode_t ekc;
-  brlapiCheckError(expandKeyCode, NULL, Int64_val(camlKeyCode), &ekc);
+  brlapiCheckError(expandKeyCode, Int64_val(camlKeyCode), &ekc);
   result = caml_alloc_tuple(4);
   Store_field(result, 0, caml_copy_int32(ekc.type));
   Store_field(result, 1, caml_copy_int32(ekc.command));
@@ -343,7 +351,7 @@ CAMLprim value brlapiml_ignoreKeys(value handle, value rt, value camlKeys)
   unsigned int i, size = Wosize_val(camlKeys);
   brlapi_keyCode_t keys[size];
   for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
-  brlapiCheckError(ignoreKeys, NULL, Int_val(rt), keys, size);
+  brlapiCheckError(ignoreKeys, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }
 
@@ -353,21 +361,21 @@ CAMLprim value brlapiml_acceptKeys(value handle, value rt, value camlKeys)
   unsigned int i, size = Wosize_val(camlKeys);
   brlapi_keyCode_t keys[size];
   for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
-  brlapiCheckError(acceptKeys, NULL, Int_val(rt), keys, size);
+  brlapiCheckError(acceptKeys, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }
 
 CAMLprim value brlapiml_ignoreAllKeys(value handle, value unit)
 {
   CAMLparam2(handle, unit);
-  brlapiCheckError(ignoreAllKeys, NULL);
+  brlapiCheckError(ignoreAllKeys);
   CAMLreturn(Val_unit);
 }
 
 CAMLprim value brlapiml_acceptAllKeys(value handle, value unit)
 {
   CAMLparam2(handle, unit);
-  brlapiCheckError(acceptAllKeys, NULL);
+  brlapiCheckError(acceptAllKeys);
   CAMLreturn(Val_unit);
 }
 
@@ -382,7 +390,7 @@ CAMLprim value brlapiml_ignoreKeyRanges(value handle, value camlRanges)
     ranges[i].first = Int64_val(Field(r, 0));
     ranges[i].last = Int64_val(Field(r, 1));
   }
-  brlapiCheckError(ignoreKeyRanges, NULL, ranges, size);
+  brlapiCheckError(ignoreKeyRanges, ranges, size);
   CAMLreturn(Val_unit);
 }
 
@@ -397,14 +405,14 @@ CAMLprim value brlapiml_acceptKeyRanges(value handle, value camlRanges)
     ranges[i].first = Int64_val(Field(r, 0));
     ranges[i].last = Int64_val(Field(r, 1));
   }
-  brlapiCheckError(acceptKeyRanges, NULL, ranges, size);
+  brlapiCheckError(acceptKeyRanges, ranges, size);
   CAMLreturn(Val_unit);
 }
 
 CAMLprim value brlapiml_enterRawMode(value handle, value driverName)
 {
   CAMLparam2(handle, driverName);
-  brlapiCheckError(enterRawMode, NULL, String_val(driverName));
+  brlapiCheckError(enterRawMode, String_val(driverName));
   CAMLreturn(Val_unit);
 }
 
@@ -422,7 +430,7 @@ CAMLprim value brlapiml_sendRaw(value handle, value str)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   ssize_t i, size = MIN(sizeof(packet), caml_string_length(str));
   for (i=0; i<size; i++) packet[i] = Byte(str, i);
-  brlapiCheckError(sendRaw, &res, packet, size);
+  brlapiCheckErrorWithCode(sendRaw, &res, packet, size);
   CAMLreturn(Val_int(res));
 }
 
@@ -432,7 +440,7 @@ CAMLprim value brlapiml_recvRaw(value handle, value unit)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   int i, size;
   CAMLlocal1(str);
-  brlapiCheckError(recvRaw, &size, packet, sizeof(packet));
+  brlapiCheckErrorWithCode(recvRaw, &size, packet, sizeof(packet));
   str = caml_alloc_string(size);
   for (i=0; i<size; i++) Byte(str, i) = packet[i];
   CAMLreturn(str);
@@ -441,7 +449,7 @@ CAMLprim value brlapiml_recvRaw(value handle, value unit)
 CAMLprim value brlapiml_suspendDriver(value handle, value driverName)
 {
   CAMLparam2(handle, driverName);
-  brlapiCheckError(suspendDriver, NULL, String_val(driverName));
+  brlapiCheckError(suspendDriver, String_val(driverName));
   CAMLreturn(Val_unit);
 }
 
