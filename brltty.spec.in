@@ -160,25 +160,18 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --without-x --with-braille-driver=-tt
+%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --with-braille-driver=-tt,-vr,-xw
 make
 
-directory="doc"
-mkdir -p "${directory}"
-for file in `find . \( -path "./${directory}" -o -path ./Documents \) -prune -o \( -name 'README*' -o -name '*.patch' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' -o \( -path "./Bootdisks/*" -type f -perm +ugo=x \) \) -print`
-do
-   mkdir -p "${directory}/${file%/*}"
-   cp -rp "${file}" "${directory}/${file}"
-done
-
 %install
-make install
+make install install-documents install-messages
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
+%find_lang %{name}
 
 %clean
 rm -fr "${RPM_BUILD_ROOT}"
 
-%files
+%files -f %{name}.lang
 %defattr(-,root,root)
 %{_bindir}/brltty
 %{_bindir}/brltty-*
@@ -186,17 +179,21 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/brltty
 %{_sysconfdir}/brltty
 %doc %{_mandir}/man1/*
-%doc Documents/Manual-BRLTTY/English/*.{sgml,txt,html}
-%doc LICENSE-GPL
-%doc Documents/ChangeLog Documents/TODO
-%doc doc/*
+%doc %{_docdir}/*/LICENSE*
+%doc %{_docdir}/*/README*
+%doc %{_docdir}/*/ChangeLog
+%doc %{_docdir}/*/CONTRIBUTORS
+%doc %{_docdir}/*/TODO
+%doc %{_docdir}/*/brltty.conf
+%doc %{_docdir}/*/KeyTables
+%doc %{_docdir}/*/Manual-BRLTTY
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
 
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
 %{_bindir}/xbrlapi
-%doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
+%doc %{_docdir}/*/Manual-BrlAPI
 
 %files -n brlapi-caml
 @OCAMLLIB@/brlapi
@@ -220,7 +217,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brlapi_*.h
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
-%doc Documents/BrlAPIref
+%doc %{_docdir}/*/BrlAPIref
 
 %changelog
 * Mon May  0 2010 Dave Mielke <dave@mielke.cc> 4.2

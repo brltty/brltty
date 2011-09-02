@@ -77,7 +77,7 @@ else
    buildRoot="${sourceRoot}"
 fi
 
-updateFiles "${sourceRoot}" "." "." "README"
+updateFiles "${sourceRoot}" "." "." "README" "LICENSE-*"
 
 [ -z "${documentsSubdirectory}" ] || {
    updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "ChangeLog" "CONTRIBUTORS" "README.*" "TODO"
