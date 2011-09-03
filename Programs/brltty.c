@@ -2697,7 +2697,7 @@ brlttyUpdate (void) {
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  processSpeechFifo(&spk);
+  processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   return 1;

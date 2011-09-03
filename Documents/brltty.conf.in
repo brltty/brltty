@@ -2,7 +2,7 @@
 # Uncomment those entries which apply to your personal needs and system
 # requirements.
 
-# BRLTTY expects to find its configuration file in "@CONFIGURATION_DIRECTORY@/@configuration_file@"
+# BRLTTY expects to find its configuration file in "@CONFIGURATION_DIRECTORY@/@CONFIGURATION_FILE@"
 # (can be overridden with the -f [--configuration-file=] option).
 # If it doesn't exist, then BRLTTY silently continues but may require
 # that certain command line options be explicitly supplied.
@@ -295,11 +295,13 @@
 #speech-driver	vv	# ViaVoice (text to speech engine)
 #speech-driver	xs	# ExternalSpeech (executes /usr/local/bin/externalspeech)
 
-# The speech-fifo directive specifies the path to the FIFO used by the speech
-# pass-through facility. Relative paths are anchored at the current working
-# directory. If not specified, the speech pass-through facility isn't enabled.
-# (can be overridden with the -F [--speech-fifo=] option)
-#speech-fifo	spk
+# The speech-input directive specifies the name of the file system object
+# (FIFO, named pipe, named socket, etc) which can be used by external
+# applications for text-to-speech conversion via BRLTTY's speech driver.
+# Relative paths are anchored at the current working directory. If not
+# specified, the file system object isn't created.
+# (can be overridden with the -i [--speech-input=] option)
+#speech-input	/path/to/file-system-object
 
 
 ############################
@@ -409,6 +411,12 @@
 ##########################
 # Miscellaneous Settings #
 ##########################
+
+# The preferences-file directive specifies the file in which to save the user's
+# preferences. Relative paths are anchored at "@STATE_DIRECTORY@". If not
+# specified, "@PREFERENCES_FILE@" will be used.
+# (can be overridden with the -F [--preferences-file=] option)
+#preferences-file	@PREFERENCES_FILE@
 
 # The log-level directive specifies the severity threshold for diagnostics
 # written to the system log. Less severe diagnostics will not be logged. If not

@@ -162,7 +162,7 @@ static const SpeechDriver *speechDriver = NULL;
 static void *speechObject;
 static char *opt_speechParameters;
 static char **speechParameters = NULL;
-static char *opt_speechFifo;
+static char *opt_speechInput;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
@@ -257,7 +257,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to default settings file.")
   },
 
-  { .letter = 'z',
+  { .letter = 'F',
     .word = "preferences-file",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
@@ -406,12 +406,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Parameters for the speech driver.")
   },
 
-  { .letter = 'F',
-    .word = "speech-fifo",
+  { .letter = 'i',
+    .word = "speech-input",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
-    .setting.string = &opt_speechFifo,
-    .description = strtext("Path to speech pass-through FIFO.")
+    .setting.string = &opt_speechInput,
+    .description = strtext("Path to speech input file system object.")
   },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -3511,11 +3511,11 @@ startup (int argc, char *argv[]) {
     trySpeechDriver();
   }
 
-  /* Create the speech pass-through FIFO. */
-  logMessage(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
-             *opt_speechFifo? opt_speechFifo: gettext("none"));
+  /* Create the file system object for speech input. */
+  logMessage(LOG_INFO, "%s: %s", gettext("Speech Input"),
+             *opt_speechInput? opt_speechInput: gettext("none"));
   if (!opt_verify) {
-    if (*opt_speechFifo) openSpeechFifo(opt_speechFifo);
+    if (*opt_speechInput) enableSpeechInput(opt_speechInput);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

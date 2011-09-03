@@ -2508,6 +2508,13 @@ The following directives are recognized:
     <ref id="options-pcm-device" name="-p"> command line option.
     It isn't available if the
     <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
+  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
+    Specify the location of the file which is to be used
+    for the saving and loading of user preferences.
+    If a relative path is supplied, then it's anchored at <tt>/var/lib/brltty</>.
+    The default is to use <tt/brltty.prefs/.
+    This directive can be overridden with the
+    <ref id="options-preferences-file" name="-F"> command line option.
   <tag><tt/release-device/ <em/boolean/<label id="configure-release-device"></tag>
     Whether or not to release the device to which the braille display is connected
     when the current screen or window can't be read.
@@ -2548,12 +2555,13 @@ The following directives are recognized:
     <ref id="options-speech-driver" name="-s"> command line option.
     It isn't available if the
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
-  <tag><tt/speech-fifo/ <em/file/<label id="configure-speech-fifo"></tag>
-    Specify the FIFO (a special file which works like a pipe)
-    which is to be used by other applications
-    that wish to gain access to BRLTTY's speech driver.
+  <tag><tt/speech-input/ <em/name/<label id="configure-speech-input"></tag>
+    Specify the name of the file system object
+    (FIFO, named pipe, named socket, etc)
+    which can be used by other applications
+    for text-to-speech conversion via BRLTTY's speech driver.
     This directive can be overridden with the
-    <ref id="options-speech-fifo" name="-F"> command line option.
+    <ref id="options-speech-input" name="-i"> command line option.
     It isn't available if the
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/speech-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-speech-parameters"></tag>
@@ -2637,6 +2645,16 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
     Display a summary of the command line options accepted by BRLTTY,
     and then exit.
+  <tag><tt/-i/<em/name/ <tt/--speech-input=/<em/name/<label id="options-speech-input"></tag>
+    Specify the name of the file system object
+    (FIFO, named pipe, named socket, etc)
+    which can be used by other applications
+    for text-to-speech conversion via BRLTTY's speech driver.
+    If not specified, the file system object is not created.
+    See the <ref id="configure-speech-input" name="speech-input">
+    configuration file directive for the default run-time setting.
+    This option isn't available if the
+    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-k/<em/file/ <tt/--key-table=/<em/file/<label id="options-key-table"></tag>
     Specify the key table
     (see section <ref id="table-key" name="Key Tables"> for details).
@@ -2809,6 +2827,10 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_PCM_DEVICE/</tag>
         The digital audio device
         (see the <ref id="options-pcm-device" name="-p"> command line option).
+      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
+        The location of the file which is to be used
+        for the saving and loading of user preferences
+        (see the <ref id="options-preferences-file" name="-F"> command line option).
       <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
         Whether or not to release the device to which the braille display is connected
         when the current screen or window can't be read
@@ -2819,9 +2841,11 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_SPEECH_DRIVER/</tag>
         The speech synthesizer driver
         (see the <ref id="options-speech-driver" name="-s"> command line option).
-      <tag><tt/BRLTTY_SPEECH_FIFO/</tag>
-        The speech pass-through FIFO
-        (see the <ref id="options-speech-fifo" name="-F"> command line option).
+      <tag><tt/BRLTTY_SPEECH_INPUT/</tag>
+        The name of the file system object
+        which can be used by other applications
+        for text-to-speech conversion via BRLTTY's speech driver
+        (see the <ref id="options-speech-input" name="-i"> command line option).
       <tag><tt/BRLTTY_SPEECH_PARAMETERS/</tag>
         Parameters for the speech synthesizer driver
         (see the <ref id="options-speech-parameters" name="-S"> command line option).
@@ -2829,15 +2853,12 @@ The <tt/brltty/ command accepts the following options:
         The text table
         (see the <ref id="options-text-table" name="-t"> command line option).
     </descrip>
-  <tag><tt/-F/<em/file/ <tt/--speech-fifo=/<em/file/<label id="options-speech-fifo"></tag>
-    Specify the FIFO (a special file which works like a pipe)
-    which is to be used by other applications
-    that wish to gain access to BRLTTY's speech driver.
-    If not specified, no FIFO is created.
-    See the <ref id="configure-speech-fifo" name="speech-fifo">
+  <tag><tt/-F/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
+    Specify the location of the file which is to be used
+    for the saving and loading of user preferences.
+    If a relative path is supplied, then it's anchored at <tt>/var/lib/brltty</>.
+    See the <ref id="configure-preferences-file" name="preferences-file">
     configuration file directive for the default run-time setting.
-    This option isn't available if the
-    <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-I/ <tt/--install-service/<label id="options-install-service"></tag>
     Install BRLTTY as the BrlAPI service.
     This means that:

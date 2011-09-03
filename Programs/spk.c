@@ -222,45 +222,47 @@ setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say
   speech->punctuation(spk, setting);
 }
 
-static char *speechFifoPath = NULL;
+static char *speechInputPath = NULL;
 #ifdef __MINGW32__
-static HANDLE speechFifoHandle = INVALID_HANDLE_VALUE;
-static int speechFifoConnected;
+static HANDLE speechInputHandle = INVALID_HANDLE_VALUE;
+static int speechInputConnected;
 #else /* __MINGW32__ */
-static int speechFifoDescriptor = -1;
+static int speechInputDescriptor = -1;
 #endif /* __MINGW32__ */
 
 static void
-exitSpeechFifo (void) {
-  if (speechFifoPath) {
+exitSpeechInput (void) {
+  if (speechInputPath) {
 #ifndef __MINGW32__
-    unlink(speechFifoPath);
+    unlink(speechInputPath);
 #endif /* __MINGW32__ */
-    free(speechFifoPath);
-    speechFifoPath = NULL;
+
+    free(speechInputPath);
+    speechInputPath = NULL;
   }
 
 #ifdef __MINGW32__
-  if (speechFifoHandle != INVALID_HANDLE_VALUE) {
-    if (speechFifoConnected) {
-      DisconnectNamedPipe(speechFifoHandle);
-      speechFifoConnected = 0;
+  if (speechInputHandle != INVALID_HANDLE_VALUE) {
+    if (speechInputConnected) {
+      DisconnectNamedPipe(speechInputHandle);
+      speechInputConnected = 0;
     }
-    CloseHandle(speechFifoHandle);
-    speechFifoHandle = INVALID_HANDLE_VALUE;
+
+    CloseHandle(speechInputHandle);
+    speechInputHandle = INVALID_HANDLE_VALUE;
   }
 #else /* __MINGW32__ */
-  if (speechFifoDescriptor != -1) {
-    close(speechFifoDescriptor);
-    speechFifoDescriptor = -1;
+  if (speechInputDescriptor != -1) {
+    close(speechInputDescriptor);
+    speechInputDescriptor = -1;
   }
 #endif /* __MINGW32__ */
 }
 
 int
-openSpeechFifo (const char *path) {
+enableSpeechInput (const char *name) {
   const char *directory;
-  atexit(exitSpeechFifo);
+  atexit(exitSpeechInput);
 
 #ifdef __MINGW32__
   directory = "//./pipe";
@@ -268,79 +270,81 @@ openSpeechFifo (const char *path) {
   directory = ".";
 #endif /* __MINGW32__ */
 
-  if ((speechFifoPath = makePath(directory, path))) {
+  if ((speechInputPath = makePath(directory, name))) {
 #ifdef __MINGW32__
-    if ((speechFifoHandle = CreateNamedPipe(speechFifoPath, PIPE_ACCESS_INBOUND,
-                                            PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_NOWAIT,
-                                            1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
-      logMessage(LOG_DEBUG, "Speech FIFO created: %s: handle=%u",
-                 speechFifoPath, (unsigned)speechFifoHandle);
+    if ((speechInputHandle = CreateNamedPipe(speechInputPath, PIPE_ACCESS_INBOUND,
+                                             PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_NOWAIT,
+                                             1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
+      logMessage(LOG_DEBUG, "speech input pipe created: %s: handle=%u",
+                 speechInputPath, (unsigned)speechInputHandle);
       return 1;
     } else {
       logWindowsSystemError("CreateNamedPipe");
     }
 #else /* __MINGW32__ */
-    int ret = mkfifo(speechFifoPath, 0);
+    int result = mkfifo(speechInputPath, 0);
 
-    if ((ret == -1) && (errno == EEXIST)) {
+    if ((result == -1) && (errno == EEXIST)) {
       struct stat fifo;
-      if ((lstat(speechFifoPath, &fifo) != -1) && S_ISFIFO(fifo.st_mode)) ret = 0;
+
+      if ((lstat(speechInputPath, &fifo) != -1) && S_ISFIFO(fifo.st_mode)) result = 0;
     }
 
-    if (ret != -1) {
-      chmod(speechFifoPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
-      if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NONBLOCK)) != -1) {
-        logMessage(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
-                   speechFifoPath, speechFifoDescriptor);
+    if (result != -1) {
+      chmod(speechInputPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
+
+      if ((speechInputDescriptor = open(speechInputPath, O_RDONLY|O_NONBLOCK)) != -1) {
+        logMessage(LOG_DEBUG, "speech input FIFO created: %s: fd=%d",
+                   speechInputPath, speechInputDescriptor);
         return 1;
       } else {
-        logMessage(LOG_ERR, "cannot open speech FIFO: %s: %s",
-                   speechFifoPath, strerror(errno));
+        logMessage(LOG_ERR, "cannot open speech input FIFO: %s: %s",
+                   speechInputPath, strerror(errno));
       }
 
-      unlink(speechFifoPath);
+      unlink(speechInputPath);
     } else {
-      logMessage(LOG_ERR, "cannot create speech FIFO: %s: %s",
-                 speechFifoPath, strerror(errno));
+      logMessage(LOG_ERR, "cannot create speech input FIFO: %s: %s",
+                 speechInputPath, strerror(errno));
     }
 #endif /* __MINGW32__ */
 
-    free(speechFifoPath);
-    speechFifoPath = NULL;
+    free(speechInputPath);
+    speechInputPath = NULL;
   }
 
   return 0;
 }
 
 void
-processSpeechFifo (SpeechSynthesizer *spk) {
+processSpeechInput (SpeechSynthesizer *spk) {
 #ifdef __MINGW32__
-  if (speechFifoHandle != INVALID_HANDLE_VALUE) {
-    if (speechFifoConnected ||
-        (speechFifoConnected = ConnectNamedPipe(speechFifoHandle, NULL)) ||
-        (speechFifoConnected = (GetLastError() == ERROR_PIPE_CONNECTED))) {
+  if (speechInputHandle != INVALID_HANDLE_VALUE) {
+    if (speechInputConnected ||
+        (speechInputConnected = ConnectNamedPipe(speechInputHandle, NULL)) ||
+        (speechInputConnected = (GetLastError() == ERROR_PIPE_CONNECTED))) {
       char buffer[0X1000];
       DWORD count;
 
-      if (ReadFile(speechFifoHandle, buffer, sizeof(buffer), &count, NULL)) {
+      if (ReadFile(speechInputHandle, buffer, sizeof(buffer), &count, NULL)) {
         if (count) sayCharacters(spk, buffer, count, 0);
       } else {
         DWORD error = GetLastError();
 
         if (error != ERROR_NO_DATA) {
-          speechFifoConnected = 0;
-          DisconnectNamedPipe(speechFifoHandle);
+          speechInputConnected = 0;
+          DisconnectNamedPipe(speechInputHandle);
 
           if (error != ERROR_BROKEN_PIPE)
-            logWindowsSystemError("Speech FIFO read");
+            logWindowsSystemError("speech input FIFO read");
         }
       }
     }
   }
 #else /* __MINGW32__ */
-  if (speechFifoDescriptor != -1) {
+  if (speechInputDescriptor != -1) {
     char buffer[0X1000];
-    int count = read(speechFifoDescriptor, buffer, sizeof(buffer));
+    int count = read(speechInputDescriptor, buffer, sizeof(buffer));
     if (count > 0) sayCharacters(spk, buffer, count, 0);
   }
 #endif /* __MINGW32__ */
