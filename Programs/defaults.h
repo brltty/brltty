@@ -19,6 +19,10 @@
 #ifndef BRLTTY_INCLUDED_DEFAULTS
 #define BRLTTY_INCLUDED_DEFAULTS
 
+#include "brldefs.h"
+#include "spkdefs.h"
+#include "tunedefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -80,6 +84,8 @@ extern "C" {
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
+
+#define DEFAULT_TUNE_DEVICE (canBeep()? tdBeeper: tdPcm)
 #define DEFAULT_PCM_VOLUME 70		/* 0 to 100 (percent) */
 #define DEFAULT_MIDI_VOLUME 70		/* 0 to 100 (percent) */
 #define DEFAULT_MIDI_INSTRUMENT 0	/* 0 to 127 */

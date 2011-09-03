@@ -439,11 +439,6 @@ static NoteDevice *noteDevice = NULL;
 static unsigned int closeTimer = 0;
 static int openErrorLevel = LOG_ERR;
 
-TuneDevice
-getDefaultTuneDevice (void) {
-  return canBeep()? tdBeeper: tdPcm;
-}
-
 void
 suppressTuneDeviceOpenErrors (void) {
   openErrorLevel = LOG_DEBUG;

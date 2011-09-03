@@ -66,11 +66,6 @@ int messageDelay = DEFAULT_MESSAGE_DELAY;
 
 static volatile int terminationSignal = 0;
 
-/*
- * Misc param variables
- */
-Preferences prefs;                /* environment (i.e. global) parameters */
-
 BrailleDisplay brl;                        /* For the Braille routines */
 unsigned int textStart;
 unsigned int textCount;

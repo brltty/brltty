@@ -36,7 +36,6 @@
 #include "brl.h"
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
-Preferences prefs;
 
 static char *opt_tuneDevice;
 static char *opt_outputVolume;
@@ -135,13 +134,6 @@ validateInstrument (unsigned char *value, const char *string) {
 
 int
 main (int argc, char *argv[]) {
-  TuneDevice tuneDevice;
-  unsigned char outputVolume;
-
-#ifdef ENABLE_MIDI_SUPPORT
-  unsigned char midiInstrument;
-#endif /* ENABLE_MIDI_SUPPORT */
-
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -151,25 +143,32 @@ main (int argc, char *argv[]) {
     processOptions(&descriptor, &argc, &argv);
   }
 
+  resetPreferences();
+  prefs.alertMessages = 0;
+  prefs.alertDots = 0;
+  prefs.alertTunes = 1;
+
   if (opt_tuneDevice && *opt_tuneDevice) {
     unsigned int device;
+
     if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
       logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
       exit(2);
     }
-    tuneDevice = device;
-  } else {
-    tuneDevice = getDefaultTuneDevice();
+
+    prefs.tuneDevice = device;
   }
 
 #ifdef ENABLE_MIDI_SUPPORT
   if (opt_midiInstrument && *opt_midiInstrument) {
-    if (!validateInstrument(&midiInstrument, opt_midiInstrument)) {
+    unsigned char instrument;
+
+    if (!validateInstrument(&instrument, opt_midiInstrument)) {
       logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
       exit(2);
     }
-  } else {
-    midiInstrument = 0;
+
+    prefs.midiInstrument = instrument;
   }
 #endif /* ENABLE_MIDI_SUPPORT */
 
@@ -177,13 +176,28 @@ main (int argc, char *argv[]) {
     static const int minimum = 0;
     static const int maximum = 100;
     int volume;
+
     if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
       exit(2);
     }
-    outputVolume = volume;
-  } else {
-    outputVolume = 50;
+
+    switch (prefs.tuneDevice) {
+      case tdPcm:
+        prefs.pcmVolume = volume;
+        break;
+
+      case tdMidi:
+        prefs.midiVolume = volume;
+        break;
+
+      case tdFm:
+        prefs.fmVolume = volume;
+        break;
+
+      default:
+        break;
+    }
   }
 
   if (!argc) {
@@ -238,36 +252,10 @@ main (int argc, char *argv[]) {
       *element = te;
     }
 
-    if (!setTuneDevice(tuneDevice)) {
-      logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[tuneDevice]);
+    if (!setTuneDevice(prefs.tuneDevice)) {
+      logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[prefs.tuneDevice]);
       exit(3);
     }
-
-    memset(&prefs, 0, sizeof(prefs));
-    prefs.alertMessages = 0;
-    prefs.alertDots = 0;
-    prefs.alertTunes = 1;
-
-    switch (tuneDevice) {
-      case tdPcm:
-        prefs.pcmVolume = outputVolume;
-        break;
-
-      case tdMidi:
-        prefs.midiVolume = outputVolume;
-        break;
-
-      case tdFm:
-        prefs.fmVolume = outputVolume;
-        break;
-
-      default:
-        break;
-    }
-
-#ifdef ENABLE_MIDI_SUPPORT
-    prefs.midiInstrument = midiInstrument;
-#endif /* ENABLE_MIDI_SUPPORT */
 
     {
       TuneDefinition tune = {NULL, 0, elements};

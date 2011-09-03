@@ -19,11 +19,12 @@
 #ifndef BRLTTY_INCLUDED_SPK
 #define BRLTTY_INCLUDED_SPK
 
+#include "spkdefs.h"
+#include "driver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "driver.h"
 
 typedef struct SpeechDataStruct SpeechData;
 
@@ -36,29 +37,18 @@ extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 extern void sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute);
 extern void sayString (SpeechSynthesizer *spk, const char *string, int mute);
 
-#define SPK_RATE_DEFAULT 10
-#define SPK_RATE_MAXIMUM (SPK_RATE_DEFAULT * 2)
 extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
 extern float getFloatSpeechRate (unsigned char setting);
 
-#define SPK_VOLUME_DEFAULT 10
-#define SPK_VOLUME_MAXIMUM (SPK_VOLUME_DEFAULT * 2)
 extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 extern float getFloatSpeechVolume (unsigned char setting);
 
-#define SPK_PITCH_DEFAULT 10
-#define SPK_PITCH_MAXIMUM (SPK_PITCH_DEFAULT * 2)
 extern void setSpeechPitch (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
 extern float getFloatSpeechPitch (unsigned char setting);
 
-typedef enum {
-  SPK_PUNCTUATION_NONE,
-  SPK_PUNCTUATION_SOME,
-  SPK_PUNCTUATION_ALL
-} SpeechPunctuation;
 extern void setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
 
 typedef struct {

@@ -29,22 +29,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  BRL_FIRMNESS_MINIMUM,
-  BRL_FIRMNESS_LOW,
-  BRL_FIRMNESS_MEDIUM,
-  BRL_FIRMNESS_HIGH,
-  BRL_FIRMNESS_MAXIMUM
-} BrailleFirmness;
-
-typedef enum {
-  BRL_SENSITIVITY_MINIMUM,
-  BRL_SENSITIVITY_LOW,
-  BRL_SENSITIVITY_MEDIUM,
-  BRL_SENSITIVITY_HIGH,
-  BRL_SENSITIVITY_MAXIMUM
-} BrailleSensitivity;
-
 typedef struct BrailleDataStruct BrailleData;
 
 typedef struct BrailleDisplayStruct BrailleDisplay;

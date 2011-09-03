@@ -38,8 +38,6 @@
 #include "ttb.h"
 #include "ctb.h"
 
-Preferences prefs;
-
 static char *opt_tablesDirectory;
 static char *opt_contractionTable;
 static char *opt_textTable;
@@ -318,7 +316,7 @@ int
 main (int argc, char *argv[]) {
   int status = 3;
 
-  memset(&prefs, 0, sizeof(prefs));
+  resetPreferences();
   prefs.expandCurrentWord = 0;
 
   {

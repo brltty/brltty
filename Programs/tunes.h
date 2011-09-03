@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_TUNES
 #define BRLTTY_INCLUDED_TUNES
 
+#include "tunedefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -62,14 +64,6 @@ extern TuneDefinition tune_routing_started;
 extern TuneDefinition tune_routing_succeeded;
 extern TuneDefinition tune_routing_failed;
 
-typedef enum {
-  tdBeeper,
-  tdPcm,
-  tdMidi,
-  tdFm
-} TuneDevice;
-
-extern TuneDevice getDefaultTuneDevice (void);
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);
 extern void closeTuneDevice (int force);
