@@ -117,8 +117,11 @@ extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
 extern void resetPreferences (void);
-extern int loadPreferencesFile (const char *preferencesFile);
 extern void setStatusFields (const unsigned char *fields);
+
+extern char *makePreferencesFilePath (const char *name);
+extern int loadPreferencesFile (const char *path);
+extern int savePreferencesFile (const char *path);
 
 #ifdef __cplusplus
 }

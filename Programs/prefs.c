@@ -126,10 +126,16 @@ resetPreferences (void) {
   resetStatusPreferences();
 }
 
+char *
+makePreferencesFilePath (const char *name) {
+  if (!name) name = PREFERENCES_FILE;
+  return makePath(STATE_DIRECTORY, name);
+}
+
 int
-loadPreferencesFile (const char *preferencesFile) {
+loadPreferencesFile (const char *path) {
   int ok = 0;
-  FILE *file = openDataFile(preferencesFile, "rb", 1);
+  FILE *file = openDataFile(path, "rb", 1);
 
   if (file) {
     Preferences newPreferences;
@@ -137,11 +143,11 @@ loadPreferencesFile (const char *preferencesFile) {
 
     if (ferror(file)) {
       logMessage(LOG_ERR, "%s: %s: %s",
-                 gettext("cannot read preferences file"), preferencesFile, strerror(errno));
+                 gettext("cannot read preferences file"), path, strerror(errno));
     } else if ((length < 40) ||
                (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
                (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
-      logMessage(LOG_ERR, "%s: %s", gettext("invalid preferences file"), preferencesFile);
+      logMessage(LOG_ERR, "%s: %s", gettext("invalid preferences file"), path);
     } else {
       prefs = newPreferences;
       ok = 1;
@@ -284,6 +290,28 @@ loadPreferencesFile (const char *preferencesFile) {
         prefs.version++;
         prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
       }
+    }
+
+    fclose(file);
+  }
+
+  return ok;
+}
+
+int
+savePreferencesFile (const char *path) {
+  int ok = 0;
+  FILE *file = openDataFile(path, "w+b", 0);
+
+  if (file) {
+    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
+
+    if (length == sizeof(prefs)) {
+      ok = 1;
+    } else {
+      if (!ferror(file)) errno = EIO;
+      logMessage(LOG_ERR, "%s: %s: %s",
+                 gettext("cannot write to preferences file"), path, strerror(errno));
     }
 
     fclose(file);

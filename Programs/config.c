@@ -865,17 +865,12 @@ resetStatusFields (void) {
   setStatusFields(fields);
 }
 
-static char *
-makePreferencesFilePath (void) {
-  return makePath(STATE_DIRECTORY, opt_preferencesFile);
-}
-
 int
 loadPreferences (void) {
   int ok = 0;
 
   {
-    char *path = makePreferencesFilePath();
+    char *path = makePreferencesFilePath(opt_preferencesFile);
 
     if (path) {
       if (testPath(path)) {
@@ -899,24 +894,12 @@ loadPreferences (void) {
 int 
 savePreferences (void) {
   int ok = 0;
-  char *path = makePreferencesFilePath();
+  char *path = makePreferencesFilePath(opt_preferencesFile);
 
   if (path) {
-    FILE *file = openDataFile(path, "w+b", 0);
-
-    if (file) {
-      size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
-
-      if (length == sizeof(prefs)) {
-        ok = 1;
-        oldPreferencesEnabled = 0;
-      } else {
-        if (!ferror(file)) errno = EIO;
-        logMessage(LOG_ERR, "%s: %s: %s",
-                   gettext("cannot write to preferences file"), path, strerror(errno));
-      }
-
-      fclose(file);
+    if (savePreferencesFile(path)) {
+      ok = 1;
+      oldPreferencesEnabled = 0;
     }
 
     free(path);
