@@ -656,7 +656,8 @@ void toX_f(const char *display) {
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
 	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_SYM)) {
-	  fprintf(stderr,gettext("unexpected block type %" BRLAPI_PRIxKEYCODE "\n"),code);
+	  fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
+                  gettext("unexpected block type"), code);
 	  continue;
 	}
 
