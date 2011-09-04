@@ -1307,6 +1307,7 @@ testSlidingWindow (void) {
 
 static int
 changedWindowOverlap (unsigned char setting) {
+  if (setting >= textCount) return 0;
   reconfigureWindow();
   return 1;
 }
@@ -1598,7 +1599,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_BEEPER_SUPPORT
         strtext("console tone generator")
 #else /* ENABLE_BEEPER_SUPPORT */
-        strtext("unsupported")
+        strtext("unavailable")
 #endif /* ENABLE_BEEPER_SUPPORT */
         ")",
 
@@ -1607,7 +1608,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_PCM_SUPPORT
         strtext("soundcard digital audio")
 #else /* ENABLE_PCM_SUPPORT */
-        strtext("unsupported")
+        strtext("unavailable")
 #endif /* ENABLE_PCM_SUPPORT */
         ")",
 
@@ -1616,7 +1617,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_MIDI_SUPPORT
         strtext("Musical Instrument Digital Interface")
 #else /* ENABLE_MIDI_SUPPORT */
-        strtext("unsupported")
+        strtext("unavailable")
 #endif /* ENABLE_MIDI_SUPPORT */
         ")",
 
@@ -1625,7 +1626,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_FM_SUPPORT
         strtext("soundcard synthesizer")
 #else /* ENABLE_FM_SUPPORT */
-        strtext("unsupported")
+        strtext("unavailable")
 #endif /* ENABLE_FM_SUPPORT */
         ")"
     };
@@ -1870,23 +1871,13 @@ updatePreferences (void) {
             case BRL_CMD_NOOP:
               continue;
 
-            case BRL_CMD_HELP:
-              /* This is quick and dirty... Something more intelligent 
-               * and friendly needs to be done here...
-               */
-              message(mode,
-                  "Press UP and DOWN to select an item, "
-                  "HOME to toggle the setting. "
-                  "Routing keys are available too! "
-                  "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
-              break;
-
             case BRL_BLK_PASSKEY+BRL_KEY_HOME:
             case BRL_CMD_PREFLOAD:
               prefs = oldPreferences;
               applyAllPreferences();
               message(mode, gettext("changes discarded"), 0);
               break;
+
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
               saveOnExit = 1;
@@ -1903,6 +1894,7 @@ updatePreferences (void) {
                 playTune(&tune_command_rejected);
               }
               break;
+
             case BRL_CMD_BOT:
             case BRL_CMD_BOT_LEFT:
             case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
@@ -1926,6 +1918,7 @@ updatePreferences (void) {
                 playTune(&tune_command_rejected);
               }
               break;
+
             case BRL_CMD_LNDN:
             case BRL_CMD_NXDIFLN:
             case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
@@ -1935,21 +1928,6 @@ updatePreferences (void) {
                 indexChanged = 1;
               } else {
                 playTune(&tune_command_rejected);
-              }
-              break;
-
-            case BRL_CMD_FWINLT:
-              if (lineIndent > 0) {
-                lineIndent -= MIN(textLength, lineIndent);
-              } else {
-                playTune(&tune_bounce);
-              }
-              break;
-            case BRL_CMD_FWINRT:
-              if ((lineLength - lineIndent) > textLength) {
-                lineIndent += textLength;
-              } else {
-                playTune(&tune_bounce);
               }
               break;
 
@@ -1978,10 +1956,27 @@ updatePreferences (void) {
               }
               break;
 
+            case BRL_CMD_FWINLT:
+              if (lineIndent > 0) {
+                lineIndent -= MIN(textLength, lineIndent);
+              } else {
+                playTune(&tune_bounce);
+              }
+              break;
+
+            case BRL_CMD_FWINRT:
+              if ((lineLength - lineIndent) > textLength) {
+                lineIndent += textLength;
+              } else {
+                playTune(&tune_bounce);
+              }
+              break;
+
 #ifdef ENABLE_SPEECH_SUPPORT
             case BRL_CMD_SAY_LINE:
               sayCharacters(&spk, line, lineLength, 1);
               break;
+
             case BRL_CMD_MUTE:
               speech->mute(&spk);
               break;
