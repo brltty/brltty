@@ -36,7 +36,7 @@ struct MenuStruct {
 struct MenuItemStruct {
   Menu *menu;
   unsigned char *setting;                 /* pointer to current value */
-  MenuString label;                      /* item name for presentation */
+  MenuString name;                      /* item name for presentation */
 
   MenuItemTester *test;                     /* returns true if item should be presented */
   MenuItemChanged *changed;
@@ -49,9 +49,8 @@ struct MenuItemStruct {
 };
 
 char *
-getInternationalizedString (const char *string) {
-  if (string && *string) return gettext(string);
-  return "";
+getLocalText (const char *string) {
+  return (string && *string)? gettext(string): "";
 }
 
 Menu *
@@ -93,16 +92,16 @@ testMenuItem (Menu *menu, unsigned int index) {
 }
 
 const MenuString *
-getMenuItemLabel (MenuItem *item) {
-  return &item->label;
+getMenuItemName (MenuItem *item) {
+  return &item->name;
 }
 
 const char *
 getMenuItemValue (MenuItem *item) {
   if (item->strings) {
-    const char *keyword = item->strings[*item->setting - item->minimum].keyword;
-    if (!keyword || !*keyword) keyword = strtext("<off>");
-    return getInternationalizedString(keyword);
+    const char *label = item->strings[*item->setting - item->minimum].label;
+    if (!label || !*label) label = strtext("<off>");
+    return getLocalText(label);
   }
 
   {
@@ -115,14 +114,14 @@ getMenuItemValue (MenuItem *item) {
 const char *
 getMenuItemComment (MenuItem *item) {
   if (item->strings) {
-    return getInternationalizedString(item->strings[*item->setting - item->minimum].comment);
+    return getLocalText(item->strings[*item->setting - item->minimum].comment);
   }
 
   return "";
 }
 
 MenuItem *
-newMenuItem (Menu *menu, unsigned char *setting, const MenuString *label) {
+newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   if (menu->count == menu->size) {
     unsigned int newSize = menu->size? (menu->size << 1): 0X10;
     MenuItem *newItems = realloc(menu->items, (newSize * sizeof(*newItems)));
@@ -142,8 +141,8 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *label) {
     item->menu = menu;
     item->setting = setting;
 
-    item->label.keyword = getInternationalizedString(label->keyword);
-    item->label.comment = getInternationalizedString(label->comment);
+    item->name.label = getLocalText(name->label);
+    item->name.comment = getLocalText(name->comment);
 
     item->test = NULL;
     item->changed = NULL;
@@ -177,11 +176,11 @@ setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char cou
 }
 
 void
-setMenuItemKeywords (MenuItem *item, const char *const *keywords, unsigned char count) {
+setMenuItemValues (MenuItem *item, const char *const *values, unsigned char count) {
   unsigned int index;
 
   for (index=0; index<count; index+=1) {
-    *((const char **)&item->strings[index].keyword) = keywords[index];
+    *((const char **)&item->strings[index].label) = values[index];
   }
 
   item->maximum = count - 1;
@@ -189,10 +188,10 @@ setMenuItemKeywords (MenuItem *item, const char *const *keywords, unsigned char 
 
 MenuItem *
 newNumericMenuItem (
-  Menu *menu, unsigned char *setting, const MenuString *label,
+  Menu *menu, unsigned char *setting, const MenuString *name,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 ) {
-  MenuItem *item = newMenuItem(menu, setting, label);
+  MenuItem *item = newMenuItem(menu, setting, name);
 
   if (item) {
     item->minimum = minimum;
@@ -205,10 +204,10 @@ newNumericMenuItem (
 
 MenuItem *
 newStringsMenuItem (
-  Menu *menu, unsigned char *setting, const MenuString *label,
+  Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 ) {
-  MenuItem *item = newMenuItem(menu, setting, label);
+  MenuItem *item = newMenuItem(menu, setting, name);
 
   if (item) {
     setMenuItemStrings(item, strings, count);
@@ -218,13 +217,13 @@ newStringsMenuItem (
 }
 
 MenuItem *
-newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *label) {
+newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   static const MenuString strings[] = {
-    {.keyword=strtext("No")},
-    {.keyword=strtext("Yes")}
+    {.label=strtext("No")},
+    {.label=strtext("Yes")}
   };
 
-  return newEnumeratedMenuItem(menu, setting, label, strings);
+  return newEnumeratedMenuItem(menu, setting, name, strings);
 }
 
 static int

@@ -29,26 +29,26 @@ typedef struct MenuStruct Menu;
 typedef struct MenuItemStruct MenuItem;
 
 typedef struct {
-  const char *keyword;
+  const char *label;
   const char *comment;
 } MenuString;
 
 extern Menu *newMenu (void);
 extern void deallocateMenu (Menu *menu);
-extern MenuItem *newMenuItem (Menu *menu, unsigned char *setting, const MenuString *label);
+extern MenuItem *newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
 extern MenuItem *newNumericMenuItem (
-  Menu *menu, unsigned char *setting, const MenuString *label,
+  Menu *menu, unsigned char *setting, const MenuString *name,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 );
 
 extern MenuItem *newStringsMenuItem (
-  Menu *menu, unsigned char *setting, const MenuString *label,
+  Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 );
 
-#define newEnumeratedMenuItem(menu, setting, label, strings) newStringsMenuItem(menu, setting, label, strings, ARRAY_COUNT(strings))
-extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *label);
+#define newEnumeratedMenuItem(menu, setting, name, strings) newStringsMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
+extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
 typedef int MenuItemTester (void);
 extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
@@ -57,10 +57,10 @@ typedef int MenuItemChanged (unsigned char setting);
 extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
 extern void setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count);
-extern void setMenuItemKeywords (MenuItem *item, const char *const *keywords, unsigned char count);
+extern void setMenuItemValues (MenuItem *item, const char *const *labels, unsigned char count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
-extern const MenuString *getMenuItemLabel (MenuItem *item);
+extern const MenuString *getMenuItemName (MenuItem *item);
 extern const char *getMenuItemValue (MenuItem *item);
 extern const char *getMenuItemComment (MenuItem *item);
 
