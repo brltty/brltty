@@ -1892,7 +1892,7 @@ updatePreferences (void) {
 
   if (setStatusText(&brl, mode) &&
       message(mode, gettext("Preferences Menu"), 0)) {
-    unsigned int lineIndent = 0;                                /* braille window pos in buffer */
+    size_t lineIndent = 0;                                /* braille window pos in buffer */
     int indexChanged = 1;
     int settingChanged = 0;                        /* 1 when item's value has changed */
 
@@ -1902,39 +1902,62 @@ updatePreferences (void) {
     if (prefs.autorepeat) resetAutorepeat();
 
     while (ok) {
-      MenuItem *item = getCurrentMenuItem(menu);
-      const MenuString *name = getMenuItemName(item);
-      const char *value = getMenuItemValue(item);
-      const char *comment = getMenuItemComment(item);
-
-      const char *nameDelimiter = *name->comment? " ": "";
-      const char *nameSuffix = ": ";
-      unsigned int settingIndent = strlen(name->label) + strlen(nameDelimiter) + strlen(name->comment) + strlen(nameSuffix);
-
-      const char *commentPrefix = *comment? " (": "";
-      const char *commentSuffix = *comment? ")": "";
-      unsigned int valueLength = strlen(value) + strlen(commentPrefix) + strlen(comment) + strlen(commentSuffix);
-
-      unsigned int lineLength = settingIndent + valueLength;
-      char line[lineLength + 1];
+      const MenuItem *item = getCurrentMenuItem(menu);
+      char line[0X100];
+      size_t lineLength;
+      size_t settingIndent;
 
       testProgramTermination();
       closeTuneDevice(0);
 
       {
-        unsigned int textLength = textCount * brl.textRows;
+        const MenuString *name = getMenuItemName(item);
+        const char *value = getMenuItemValue(item);
+        const char *comment = getMenuItemComment(item);
 
-        /* First we draw the current menu item in the buffer */
-        snprintf(line,  sizeof(line), "%s%s%s%s%s%s%s%s",
-                 name->label, nameDelimiter, name->comment, nameSuffix,
-                 value, commentPrefix, comment, commentSuffix);
+        char *next = line;
+        size_t size = sizeof(line);
+
+        {
+          int length;
+          snprintf(next, size, "%s%n", name->label, &length);
+          next += length, size -= length;
+        }
+
+        if (*name->comment) {
+          int length;
+          snprintf(next, size, " %s%n", name->comment, &length);
+          next += length, size -= length;
+        }
+
+        {
+          int indent;
+
+          int length;
+          snprintf(next, size, ": %n%s%n", &indent, value, &length);
+          next += length, size -= length;
+
+          settingIndent = indent;
+        }
+
+        if (*comment) {
+          int length;
+          snprintf(next, size, " (%s)%n", comment, &length);
+          next += length, size -= length;
+        }
+
+        lineLength = next - line;
+      }
+
+      {
+        unsigned int textLength = textCount * brl.textRows;
 
 #ifdef ENABLE_SPEECH_SUPPORT
         if (prefs.autospeak) {
           if (indexChanged) {
             sayString(&spk, line, 1);
           } else if (settingChanged) {
-            sayString(&spk, value, 1);
+            sayString(&spk, &line[settingIndent], 1);
           }
         }
 #endif /* ENABLE_SPEECH_SUPPORT */

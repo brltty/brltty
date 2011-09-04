@@ -92,12 +92,12 @@ testMenuItem (Menu *menu, unsigned int index) {
 }
 
 const MenuString *
-getMenuItemName (MenuItem *item) {
+getMenuItemName (const MenuItem *item) {
   return &item->name;
 }
 
 const char *
-getMenuItemValue (MenuItem *item) {
+getMenuItemValue (const MenuItem *item) {
   if (item->strings) {
     const char *label = item->strings[*item->setting - item->minimum].label;
     if (!label || !*label) label = strtext("<off>");
@@ -112,7 +112,7 @@ getMenuItemValue (MenuItem *item) {
 }
 
 const char *
-getMenuItemComment (MenuItem *item) {
+getMenuItemComment (const MenuItem *item) {
   if (item->strings) {
     return getLocalText(item->strings[*item->setting - item->minimum].comment);
   }
@@ -227,7 +227,7 @@ newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) 
 }
 
 static int
-adjustMenuItem (MenuItem *item, void (*adjust) (MenuItem *item)) {
+adjustMenuItem (const MenuItem *item, void (*adjust) (const MenuItem *item)) {
   int count = item->maximum - item->minimum + 1;
 
   do {
@@ -239,27 +239,27 @@ adjustMenuItem (MenuItem *item, void (*adjust) (MenuItem *item)) {
 }
 
 static void
-decrementMenuItem (MenuItem *item) {
+decrementMenuItem (const MenuItem *item) {
   if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
 }
 
 int
-changeMenuItemPrevious (MenuItem *item) {
+changeMenuItemPrevious (const MenuItem *item) {
   return adjustMenuItem(item, decrementMenuItem);
 }
 
 static void
-incrementMenuItem (MenuItem *item) {
+incrementMenuItem (const MenuItem *item) {
   if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
 }
 
 int
-changeMenuItemNext (MenuItem *item) {
+changeMenuItemNext (const MenuItem *item) {
   return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
-changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
+changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char oldSetting = *item->setting;
 
   if (item->strings) {
