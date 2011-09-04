@@ -1594,41 +1594,10 @@ makePreferencesMenu (void) {
 
   {
     static MenuItemString strings[] = {
-      "Beeper"
-        " ("
-#ifdef ENABLE_BEEPER_SUPPORT
-        strtext("console tone generator")
-#else /* ENABLE_BEEPER_SUPPORT */
-        strtext("unavailable")
-#endif /* ENABLE_BEEPER_SUPPORT */
-        ")",
-
-      "PCM"
-        " ("
-#ifdef ENABLE_PCM_SUPPORT
-        strtext("soundcard digital audio")
-#else /* ENABLE_PCM_SUPPORT */
-        strtext("unavailable")
-#endif /* ENABLE_PCM_SUPPORT */
-        ")",
-
-      "MIDI"
-        " ("
-#ifdef ENABLE_MIDI_SUPPORT
-        strtext("Musical Instrument Digital Interface")
-#else /* ENABLE_MIDI_SUPPORT */
-        strtext("unavailable")
-#endif /* ENABLE_MIDI_SUPPORT */
-        ")",
-
-      "FM"
-        " ("
-#ifdef ENABLE_FM_SUPPORT
-        strtext("soundcard synthesizer")
-#else /* ENABLE_FM_SUPPORT */
-        strtext("unavailable")
-#endif /* ENABLE_FM_SUPPORT */
-        ")"
+      strtext("Beeper") " (" strtext("console tone generator") ")",
+      strtext("PCM") " (" strtext("soundcard digital audio") ")",
+      strtext("MIDI") " (" strtext("Musical Instrument Digital Interface") ")",
+      strtext("FM") " (" strtext("soundcard synthesizer") ")"
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.tuneDevice, strtext("Tune Device"), strings));
