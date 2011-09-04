@@ -71,6 +71,7 @@ extern void playTune (const TuneDefinition *tune);
 
 extern const char *const midiInstrumentTable[];
 extern const unsigned int midiInstrumentCount;
+extern const char *midiGetInstrumentType (unsigned char instrument);
 
 extern int showDotPattern (unsigned char dots, unsigned char duration);
 

@@ -1239,7 +1239,7 @@ globBegin (GlobData *data) {
     }
   }
 
-  setMenuItemStrings(data->menuItem, data->paths, data->count);
+  setMenuItemKeywords(data->menuItem, data->paths, data->count);
 }
 
 static void
@@ -1350,11 +1350,32 @@ testBlinkingCapitals (void) {
 
 static MenuItem *
 newGlobMenuItem (Menu *menu, GlobData *data, const char *label) {
-  static MenuItemString strings[] = {
-    NULL
-  };
+  MenuString *strings = malloc((MENU_MAXIMUM_ITEM_VALUE + 1) * sizeof(*strings));
 
-  return newEnumeratedMenuItem(menu, &data->setting, label, strings);
+  if (strings) {
+    MenuItem *item = newMenuItem(menu, &data->setting, label);
+
+    if (item) {
+      {
+        unsigned int index;
+
+        for (index=0; index<=MENU_MAXIMUM_ITEM_VALUE; index+=1) {
+          MenuString *string = &strings[index];
+          string->keyword = NULL;
+          string->comment = NULL;
+        }
+      }
+
+      setMenuItemStrings(item, strings, 1);
+      return item;
+    }
+
+    free(strings);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
 }
 
 static MenuItem *
@@ -1362,23 +1383,23 @@ newStatusFieldMenuItem (
   Menu *menu, unsigned char number, const char *label,
   MenuItemTester *test, MenuItemChanged *changed
 ) {
-  static MenuItemString strings[] = {
-    strtext("End"),
-    strtext("Window Coordinates (2 cells)"),
-    strtext("Window Column (1 cell)"),
-    strtext("Window Row (1 cell)"),
-    strtext("Cursor Coordinates (2 cells)"),
-    strtext("Cursor Column (1 cell)"),
-    strtext("Cursor Row (1 cell)"),
-    strtext("Cursor and Window Column (2 cells)"),
-    strtext("Cursor and Window Row (2 cells)"),
-    strtext("Screen Number (1 cell)"),
-    strtext("State Dots (1 cell)"),
-    strtext("State Letter (1 cell)"),
-    strtext("Time (2 cells)"),
-    strtext("Alphabetic Window Coordinates (1 cell)"),
-    strtext("Alphabetic Cursor Coordinates (1 cell)"),
-    strtext("Generic")
+  static const MenuString strings[] = {
+    {.keyword=strtext("End")},
+    {.keyword=strtext("Window Coordinates"), .comment=strtext("2 cells")},
+    {.keyword=strtext("Window Column"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Window Row"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Cursor Coordinates"), .comment=strtext("2 cells")},
+    {.keyword=strtext("Cursor Column"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Cursor Row"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Cursor and Window Column"), .comment=strtext("2 cells")},
+    {.keyword=strtext("Cursor and Window Row"), .comment=strtext("2 cells")},
+    {.keyword=strtext("Screen Number"), .comment=strtext("1 cell")},
+    {.keyword=strtext("State Dots"), .comment=strtext("1 cell")},
+    {.keyword=strtext("State Letter"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Time"), .comment=strtext("2 cells")},
+    {.keyword=strtext("Alphabetic Window Coordinates"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Alphabetic Cursor Coordinates"), .comment=strtext("1 cell")},
+    {.keyword=strtext("Generic")}
   };
 
   MenuItem *item = newEnumeratedMenuItem(menu, &prefs.statusFields[number-1], label, strings);
@@ -1403,6 +1424,25 @@ newVolumeMenuItem (Menu *menu, unsigned char *setting, const char *label) {
 }
 #endif /* defined(ENABLE_PCM_SUPPORT) || defined(ENABLE_MIDI_SUPPORT) || defined(ENABLE_FM_SUPPORT) */
 
+#ifdef ENABLE_MIDI_SUPPORT
+MenuString *
+makeMidiInstrumentMenuStrings (void) {
+  MenuString *strings = malloc(midiInstrumentCount * sizeof(*strings));
+
+  if (strings) {
+    unsigned int instrument;
+
+    for (instrument=0; instrument<midiInstrumentCount; instrument+=1) {
+      MenuString *string = &strings[instrument];
+      string->keyword = midiInstrumentTable[instrument];
+      string->comment = midiGetInstrumentType(instrument);
+    }
+  }
+
+  return strings;
+}
+#endif /* ENABLE_MIDI_SUPPORT */
+
 static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
 
 static Menu *
@@ -1419,10 +1459,10 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("8-Dot Computer Braille"),
-      strtext("Contracted Braille"),
-      strtext("6-Dot Computer Braille")
+    static const MenuString strings[] = {
+      {.keyword=strtext("8-Dot Computer Braille")},
+      {.keyword=strtext("Contracted Braille")},
+      {.keyword=strtext("6-Dot Computer Braille")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.textStyle, strtext("Text Style"), strings));
@@ -1444,10 +1484,10 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("All"),
-      strtext("End of Line"),
-      strtext("Rest of Line")
+    static const MenuString strings[] = {
+      {.keyword=strtext("All")},
+      {.keyword=strtext("End of Line")},
+      {.keyword=strtext("Rest of Line")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.blankWindowsSkipMode, strtext("Which Blank Windows"), strings));
@@ -1493,9 +1533,9 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("Underline"),
-      strtext("Block")
+    static const MenuString strings[] = {
+      {.keyword=strtext("Underline")},
+      {.keyword=strtext("Block")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.cursorStyle, strtext("Cursor Style"), strings));
@@ -1551,12 +1591,12 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("Minimum"),
-      strtext("Low"),
-      strtext("Medium"),
-      strtext("High"),
-      strtext("Maximum")
+    static const MenuString strings[] = {
+      {.keyword=strtext("Minimum")},
+      {.keyword=strtext("Low")},
+      {.keyword=strtext("Medium")},
+      {.keyword=strtext("High")},
+      {.keyword=strtext("Maximum")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.brailleFirmness, strtext("Braille Firmness"), strings));
@@ -1565,12 +1605,12 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("Minimum"),
-      strtext("Low"),
-      strtext("Medium"),
-      strtext("High"),
-      strtext("Maximum")
+    static const MenuString strings[] = {
+      {.keyword=strtext("Minimum")},
+      {.keyword=strtext("Low")},
+      {.keyword=strtext("Medium")},
+      {.keyword=strtext("High")},
+      {.keyword=strtext("Maximum")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.brailleSensitivity, strtext("Braille Sensitivity"), strings));
@@ -1593,11 +1633,11 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("Beeper") " (" strtext("console tone generator") ")",
-      strtext("PCM") " (" strtext("soundcard digital audio") ")",
-      strtext("MIDI") " (" strtext("Musical Instrument Digital Interface") ")",
-      strtext("FM") " (" strtext("soundcard synthesizer") ")"
+    static const MenuString strings[] = {
+      {.keyword=strtext("Beeper"), .comment=strtext("console tone generator")},
+      {.keyword=strtext("PCM"), .comment=strtext("soundcard digital audio")},
+      {.keyword=strtext("MIDI"), .comment=strtext("Musical Instrument Digital Interface")},
+      {.keyword=strtext("FM"), .comment=strtext("soundcard synthesizer")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.tuneDevice, strtext("Tune Device"), strings));
@@ -1619,8 +1659,13 @@ makePreferencesMenu (void) {
   }
 
   {
-    ITEM(newStringsMenuItem(menu, &prefs.midiInstrument, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount));
-    TEST(TunesMidi);
+    const MenuString *strings = makeMidiInstrumentMenuStrings();
+    if (!strings) goto noItem;
+
+    {
+      ITEM(newStringsMenuItem(menu, &prefs.midiInstrument, strtext("MIDI Instrument"), strings, midiInstrumentCount));
+      TEST(TunesMidi);
+    }
   }
 #endif /* ENABLE_MIDI_SUPPORT */
 
@@ -1641,9 +1686,9 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    static MenuItemString strings[] = {
-      strtext("Immediate"),
-      strtext("Enqueue")
+    static const MenuString strings[] = {
+      {.keyword=strtext("Immediate")},
+      {.keyword=strtext("Enqueue")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.sayLineMode, strtext("Say-Line Mode"), strings));
@@ -1672,10 +1717,10 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("None"),
-      strtext("Some"),
-      strtext("All")
+    static const MenuString strings[] = {
+      {.keyword=strtext("None")},
+      {.keyword=strtext("Some")},
+      {.keyword=strtext("All")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.speechPunctuation, strtext("Speech Punctuation"), strings));
@@ -1685,10 +1730,10 @@ makePreferencesMenu (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   {
-    static MenuItemString strings[] = {
-      strtext("None"),
-      strtext("Left"),
-      strtext("Right")
+    static const MenuString strings[] = {
+      {.keyword=strtext("None")},
+      {.keyword=strtext("Left")},
+      {.keyword=strtext("Right")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.statusPosition, strtext("Status Position"), strings));
@@ -1703,12 +1748,12 @@ makePreferencesMenu (void) {
   }
 
   {
-    static MenuItemString strings[] = {
-      strtext("None"),
-      strtext("Space"),
-      strtext("Block"),
-      strtext("Status Side"),
-      strtext("Text Side")
+    static const MenuString strings[] = {
+      {.keyword=strtext("None")},
+      {.keyword=strtext("Space")},
+      {.keyword=strtext("Block")},
+      {.keyword=strtext("Status Side")},
+      {.keyword=strtext("Text Side")}
     };
 
     ITEM(newEnumeratedMenuItem(menu, &prefs.statusSeparator, strtext("Status Separator"), strings));
@@ -1789,22 +1834,29 @@ updatePreferences (void) {
 
     while (ok) {
       MenuItem *item = getCurrentMenuItem(menu);
+      const char *label = getMenuItemLabel(item);
       const char *value = getMenuItemValue(item);
+      const char *comment = getMenuItemComment(item);
+
+      const char *delimiter = ": ";
+      unsigned int settingIndent = strlen(label) + strlen(delimiter);
+
+      const char *commentPrefix = *comment? " (": "";
+      const char *commentSuffix = *comment? ")": "";
+      unsigned int valueLength = strlen(value) + strlen(commentPrefix) + strlen(comment) + strlen(commentSuffix);
+
+      unsigned int lineLength = settingIndent + valueLength;
+      char line[lineLength + 1];
 
       testProgramTermination();
       closeTuneDevice(0);
 
       {
-        const char *label = getMenuItemLabel(item);
-        const char *delimiter = ": ";
-        unsigned int settingIndent = strlen(label) + strlen(delimiter);
-        unsigned int valueLength = strlen(value);
-        unsigned int lineLength = settingIndent + valueLength;
-        char line[lineLength + 1];
         unsigned int textLength = textCount * brl.textRows;
 
         /* First we draw the current menu item in the buffer */
-        snprintf(line,  sizeof(line), "%s%s%s", label, delimiter, value);
+        snprintf(line,  sizeof(line), "%s%s%s%s%s%s",
+                 label, delimiter, value, commentPrefix, comment, commentSuffix);
 
 #ifdef ENABLE_SPEECH_SUPPORT
         if (prefs.autospeak) {

@@ -41,7 +41,7 @@ struct MenuItemStruct {
   MenuItemTester *test;                     /* returns true if item should be presented */
   MenuItemChanged *changed;
 
-  MenuItemString *strings;               /* symbolic names of values */
+  const MenuString *strings;               /* symbolic names of values */
 
   unsigned char minimum;                  /* lowest valid value */
   unsigned char maximum;                  /* highest valid value */
@@ -94,9 +94,9 @@ getMenuItemLabel (MenuItem *item) {
 const char *
 getMenuItemValue (MenuItem *item) {
   if (item->strings) {
-    const char *string = item->strings[*item->setting - item->minimum];
-    if (!*string) string = strtext("<off>");
-    return gettext(string);
+    const char *keyword = item->strings[*item->setting - item->minimum].keyword;
+    if (!*keyword) keyword = strtext("<off>");
+    return gettext(keyword);
   }
 
   {
@@ -104,6 +104,16 @@ getMenuItemValue (MenuItem *item) {
     snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
     return menu->valueBuffer;
   }
+}
+
+const char *
+getMenuItemComment (MenuItem *item) {
+  if (item->strings) {
+    const char *comment = item->strings[*item->setting - item->minimum].comment;
+    if (comment) return gettext(comment);
+  }
+
+  return "";
 }
 
 MenuItem *
@@ -152,11 +162,22 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 }
 
 void
-setMenuItemStrings (MenuItem *item, MenuItemString *strings, unsigned char count) {
+setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
   item->strings = strings;
   item->minimum = 0;
   item->maximum = count - 1;
   item->divisor = 1;
+}
+
+void
+setMenuItemKeywords (MenuItem *item, const char *const *keywords, unsigned char count) {
+  unsigned int index;
+
+  for (index=0; index<count; index+=1) {
+    *((const char **)&item->strings[index].keyword) = keywords[index];
+  }
+
+  item->maximum = count - 1;
 }
 
 MenuItem *
@@ -178,7 +199,7 @@ newNumericMenuItem (
 MenuItem *
 newStringsMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
-  MenuItemString *strings, unsigned char count
+  const MenuString *strings, unsigned char count
 ) {
   MenuItem *item = newMenuItem(menu, setting, label);
 
@@ -191,9 +212,9 @@ newStringsMenuItem (
 
 MenuItem *
 newBooleanMenuItem (Menu *menu, unsigned char *setting, const char *label) {
-  static MenuItemString strings[] = {
-    strtext("No"),
-    strtext("Yes")
+  static const MenuString strings[] = {
+    {.keyword=strtext("No")},
+    {.keyword=strtext("Yes")}
   };
 
   return newEnumeratedMenuItem(menu, setting, label, strings);

@@ -23,9 +23,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MENU_MAXIMUM_ITEM_VALUE 0XFF
+
 typedef struct MenuStruct Menu;
 typedef struct MenuItemStruct MenuItem;
-typedef const char *const MenuItemString;
+
+typedef struct {
+  const char *keyword;
+  const char *comment;
+} MenuString;
 
 extern Menu *newMenu (void);
 extern void deallocateMenu (Menu *menu);
@@ -38,7 +44,7 @@ extern MenuItem *newNumericMenuItem (
 
 extern MenuItem *newStringsMenuItem (
   Menu *menu, unsigned char *setting, const char *label,
-  MenuItemString *strings, unsigned char count
+  const MenuString *strings, unsigned char count
 );
 
 #define newEnumeratedMenuItem(menu, setting, label, strings) newStringsMenuItem(menu, setting, label, strings, ARRAY_COUNT(strings))
@@ -50,11 +56,13 @@ extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 typedef int MenuItemChanged (unsigned char setting);
 extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
-extern void setMenuItemStrings (MenuItem *item, MenuItemString *strings, unsigned char count);
+extern void setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count);
+extern void setMenuItemKeywords (MenuItem *item, const char *const *keywords, unsigned char count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
 extern const char *getMenuItemLabel (MenuItem *item);
 extern const char *getMenuItemValue (MenuItem *item);
+extern const char *getMenuItemComment (MenuItem *item);
 
 extern int changeMenuItemPrevious (MenuItem *item);
 extern int changeMenuItemNext (MenuItem *item);
