@@ -1915,19 +1915,14 @@ updatePreferences (void) {
         const char *value = getMenuItemValue(item);
         const char *comment = getMenuItemComment(item);
 
-        char *next = line;
-        size_t size = sizeof(line);
-
-#define APPEND(format, ...) { int length; snprintf(next, size, format "%n", ## __VA_ARGS__, &length); next += length, size -= length; }
-        APPEND("%s", name->label);
-        if (*name->comment) APPEND(" %s", name->comment);
-        APPEND(": ");
-        settingIndent = next - line;
-        APPEND("%s", value);
-        if (*comment) APPEND(" (%s)", comment);
-#undef APPEND
-
-        lineLength = next - line;
+        STR_BEGIN(line, sizeof(line));
+        STR_APPEND("%s", name->label);
+        if (*name->comment) STR_APPEND(" %s", name->comment);
+        STR_APPEND(": ");
+        STR_LENGTH(settingIndent);
+        STR_APPEND("%s", value);
+        if (*comment) STR_APPEND(" (%s)", comment);
+        STR_END(lineLength);
       }
 
       {
