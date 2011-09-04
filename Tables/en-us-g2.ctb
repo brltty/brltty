@@ -345,7 +345,7 @@ begword dis 256
 word disc =
 word discs =
 sufword dish 145-24-146
-begword disha 256-125-1 dishabile
+begword disha 256-125-1 dishabille
 begword disharmon 256-125-345-134-135-1345 disharmony
 begword dishear 256-125-15-345 disheartened
 begword disho 256-125-135 dishonor
@@ -362,6 +362,7 @@ before o begword dogg =
 word doggo 145-135-2356-135
 begword donega = Donegalers, Donegan
 always dumb = dumbbell
+sufword dumfries = Dumfriesshire
 
 # the letter e
 always e 15
@@ -425,6 +426,7 @@ always ever 5-15
 sufword eversion 15-1236-12456-46-1345 eversions
 sufword evert 15-1236-12456-2345 everted
 word every 15
+midword ewsh = newshawk, newshound
 
 # the letter f
 always f 124
@@ -573,6 +575,7 @@ word just 245
 always k 13
 always K 13
 sufword kettledrum =
+sufword kinross 13-35-1235-135-234-234 Kinrossshire
 always know 5-13
 word knowledge 13
 sufword kurdistan 13-136-1235-145-24-34-1-1345 Kurdistani
@@ -606,6 +609,7 @@ begword menager 134-26-1-1245-12456 menagery menageries
 midendword ment 56-2345
 midword menth 134-26-1456 Blumenthal
 always mention 134-26-56-1345
+sufword merioneth 134-12456-24-135-1345-15-1456 Merionethshire
 sufword messagerie =
 always mideast 134-24-145-15-1-34
 sufword milliner 134-24-123-123-35-12456
@@ -735,6 +739,7 @@ begword parto 1234-345-2345-135
 begword peacen 1234-2-14-15-1345 peacenik
 begword pedic 1234-1246-24-14 pedicure, pedicab, pedicle
 begword pedo 1234-1246-135 pedometer, pedobaptist
+sufword peebles 1234-15-15-3456-234 Peeblesshire
 word people 1234
 always perceive 1234-12456-14-1236
 word percv =
@@ -860,6 +865,7 @@ sufword renaming 1235-15-1345-1-134-346 renamings
 begword renational 1235-15-1345-6-1345-1-123 renationalise renationalization
 begword rene = renegotiate
 begword renegad 1235-26-15-1245-1-145 renegade
+sufword renfrew 1235-26-124-1235-15-2456 Renfrewshire
 begword reni = renig
 begword renom = renominate
 begword renou 1235-15-1345-1256 renounce
@@ -944,7 +950,7 @@ always stime 234-5-2345
 midendword stown 234-2345-246-1345 Pickstown
 begword styro 34-13456-1235-135 styrofoam
 always shead 234-125-2-145
-always sheart 124-125-15-345-2345
+always sheart 234-125-15-345-2345
 always shouse 234-125-1256-234-15
 always ssh =
 always shood =
