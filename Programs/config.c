@@ -1406,22 +1406,28 @@ newStatusFieldMenuItem (
     .keyword = strtext("Status Field")
   };
 
+  char *comment;
   {
     char buffer[0X3];
     snprintf(buffer, sizeof(buffer), "%u", number);
-    if (!(label.comment = strdup(buffer))) return NULL;
+    label.comment = comment = strdup(buffer);
   }
 
-  {
+  if (comment) {
     MenuItem *item = newEnumeratedMenuItem(menu, &prefs.statusFields[number-1], &label, strings);
 
     if (item) {
       setMenuItemTester(item, test);
       setMenuItemChanged(item, changed);
+      return item;
     }
 
-    return item;
+    free(comment);
+  } else {
+    logMallocError();
   }
+
+  return NULL;
 }
 
 static MenuItem *
