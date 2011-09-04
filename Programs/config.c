@@ -1918,31 +1918,14 @@ updatePreferences (void) {
         char *next = line;
         size_t size = sizeof(line);
 
-        {
-          int length;
-          snprintf(next, size, "%s%n", name->label, &length);
-          next += length, size -= length;
-        }
-
-        if (*name->comment) {
-          int length;
-          snprintf(next, size, " %s%n", name->comment, &length);
-          next += length, size -= length;
-        }
-
-        {
-          int length;
-          int indent;
-          snprintf(next, size, ": %n%s%n", &indent, value, &length);
-          settingIndent = (next + indent) - line;
-          next += length, size -= length;
-        }
-
-        if (*comment) {
-          int length;
-          snprintf(next, size, " (%s)%n", comment, &length);
-          next += length, size -= length;
-        }
+#define APPEND(format, ...) { int length; snprintf(next, size, format "%n", ## __VA_ARGS__, &length); next += length, size -= length; }
+        APPEND("%s", name->label);
+        if (*name->comment) APPEND(" %s", name->comment);
+        APPEND(": ");
+        settingIndent = next - line;
+        APPEND("%s", value);
+        if (*comment) APPEND(" (%s)", comment);
+#undef APPEND
 
         lineLength = next - line;
       }
