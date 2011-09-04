@@ -44,9 +44,9 @@ extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
 typedef enum {
-  CDO_IncludeName,
-  CDO_IncludeOperand,
-  CDO_DefaultOperand
+  CDO_IncludeName    = 0X1,
+  CDO_IncludeOperand = 0X2,
+  CDO_DefaultOperand = 0X4
 } CommandDescriptionOption;
 
 extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);

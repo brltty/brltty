@@ -117,7 +117,8 @@ getCommandEntry (int code) {
 
 size_t
 describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options) {
-  const char *start = buffer;
+  size_t length;
+  STR_BEGIN(buffer, size);
 
   int blk = command & BRL_MSK_BLK;
   unsigned int arg = BRL_ARG_GET(command);
@@ -126,34 +127,32 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
-    int length;
-    snprintf(buffer, size, "unknown: %06X%n", command, &length);
-    buffer += length, size -= length;
+    STR_APPEND("unknown: %06X", command);
   } else {
-    int length;
-
     if (options & CDO_IncludeName) {
-      snprintf(buffer, size, "%s: %n", cmd->name, &length);
-      buffer += length, size -= length;
+      STR_APPEND("%s: ", cmd->name);
     }
 
-    snprintf(buffer, size, "%s%n", gettext(cmd->description), &length);
     if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
       const char *oldVerb = "toggle";
       size_t oldLength = strlen(oldVerb);
 
-      if (strncmp(buffer, oldVerb, oldLength) == 0) {
+      size_t length = strlen(cmd->description);
+      char description[length + 1];
+      strcpy(description, cmd->description);
+
+      if (strncmp(description, oldVerb, oldLength) == 0) {
         const char *newVerb = "set";
         size_t newLength = strlen(newVerb);
 
-        memmove(buffer+newLength, buffer+oldLength, length-oldLength+1);
-        memcpy(buffer, newVerb, newLength);
+        memmove(description+newLength, description+oldLength, length-oldLength+1);
+        memcpy(description, newVerb, newLength);
 
         if (command & BRL_FLG_TOGGLE_ON) {
-          char *end = strrchr(buffer, '/');
+          char *end = strrchr(description, '/');
           if (end) *end = 0;
         } else {
-          char *target = strrchr(buffer, ' ');
+          char *target = strrchr(description, ' ');
 
           if (target) {
             const char *source = strchr(++target, '/');
@@ -161,51 +160,45 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
             if (source) memmove(target, source+1, strlen(source));
           }
         }
-
-        length = strlen(buffer);
       }
+
+      STR_APPEND("%s", description);
+    } else {
+      STR_APPEND("%s", gettext(cmd->description));
     }
-    buffer += length, size -= length;
 
     if (cmd->isMotion) {
       if (command & BRL_FLG_MOTION_ROUTE) {
-        snprintf(buffer, size, ", drag cursor%n", &length);
-        buffer += length, size -= length;
+        STR_APPEND(", drag cursor");
       }
 
       if (cmd->isRow) {
         if (command & BRL_FLG_LINE_SCALED) {
-          snprintf(buffer, size, " (scaled)%n", &length);
-          buffer += length, size -= length;
+          STR_APPEND(" (scaled)");
         }
 
         if (command & BRL_FLG_LINE_TOLEFT) {
-          snprintf(buffer, size, ", beginning of line%n", &length);
-          buffer += length, size -= length;
+          STR_APPEND(", beginning of line");
         }
       }
     }
 
     if (options & CDO_IncludeOperand) {
       if ((options & CDO_DefaultOperand) && cmd->isColumn && !cmd->isRouting && !arg) {
-        snprintf(buffer, size, " at cursor%n", &length);
-        buffer += length, size -= length;
+        STR_APPEND(" at cursor");
+      } else if (cmd->isColumn && !cmd->isRouting && (arg == BRL_MSK_ARG)) {
+        STR_APPEND(" at cursor");
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
-        snprintf(buffer, size, " #%u%n",
-                 arg - (cmd->code & BRL_MSK_ARG) + 1,
-                 &length);
-        buffer += length, size -= length;
+        STR_APPEND(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
       } else if (cmd->isRange) {
-        snprintf(buffer, size, " #%u-%u%n", arg1, arg2, &length);
-        buffer += length, size -= length;
+        STR_APPEND(" #%u-%u", arg1, arg2);
       } else if (blk) {
         switch (blk) {
           case BRL_BLK_PASSKEY:
             break;
 
           case BRL_BLK_PASSCHAR:
-            snprintf(buffer, size, " [U+%04" PRIX16 "]%n", arg, &length);
-            buffer += length, size -= length;
+            STR_APPEND(" [U+%04" PRIX16 "]", arg);
             break;
 
           case BRL_BLK_PASSDOTS:
@@ -220,26 +213,22 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
                 }
               }
 
-              snprintf(buffer, size, " [%s %u]%n",
-                       ((number < 10)? "dot": "dots"), number,
-                       &length);
-              buffer += length, size -= length;
+              STR_APPEND(" [%s %u]", ((number < 10)? "dot": "dots"), number);
             } else {
-              snprintf(buffer, size, " [space]%n", &length);
-              buffer += length, size -= length;
+              STR_APPEND(" [space]");
             }
             break;
 
           default:
-            snprintf(buffer, size, " 0X%02X%n", arg, &length);
-            buffer += length, size -= length;
+            STR_APPEND(" 0X%02X", arg);
             break;
         }
       }
     }
   }
 
-  return buffer - start;
+  STR_END(length);
+  return length;
 }
 
 static size_t
