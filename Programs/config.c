@@ -1931,13 +1931,11 @@ updatePreferences (void) {
         }
 
         {
-          int indent;
-
           int length;
+          int indent;
           snprintf(next, size, ": %n%s%n", &indent, value, &length);
+          settingIndent = (next + indent) - line;
           next += length, size -= length;
-
-          settingIndent = indent;
         }
 
         if (*comment) {
