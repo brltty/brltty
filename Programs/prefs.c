@@ -28,8 +28,9 @@
 #include "system.h"
 #include "log.h"
 #include "file.h"
+#include "parse.h"
 
-//#define PREFS_TEXTUAL
+#define PREFS_TEXTUAL
 #define PREFS_MAGIC_NUMBER 0x4005
 
 Preferences prefs;                /* environment (i.e. global) parameters */
@@ -107,7 +108,9 @@ PREFERENCE_STRING_TABLE(statusField,
 
 typedef struct {
   const char *name;
+  unsigned char *encountered;
   const PreferenceStringTable *settingNames;
+  unsigned char settingCount;
   unsigned char *setting;
 } PreferenceEntry;
 
@@ -321,12 +324,13 @@ static const PreferenceEntry preferenceTable[] = {
   }
   ,
   { .name = "status-fields",
+    .encountered = &statusFieldsSet,
     .settingNames = &preferenceStringTable_statusField,
+    .settingCount = ARRAY_COUNT(prefs.statusFields),
     .setting = prefs.statusFields
   }
-  ,
-  { .name = NULL }
 };
+static const unsigned char preferenceCount = ARRAY_COUNT(preferenceTable);
 
 void
 setStatusFields (const unsigned char *fields) {
@@ -428,6 +432,111 @@ makePreferencesFilePath (const char *name) {
   return makePath(STATE_DIRECTORY, name);
 }
 
+#ifdef PREFS_TEXTUAL
+static int
+sortPreferences (const void *element1, const void *element2) {
+  const PreferenceEntry *const *pref1 = element1;
+  const PreferenceEntry *const *pref2 = element2;
+  return strcmp((*pref1)->name, (*pref2)->name);
+}
+
+static int
+searchPreference (const void *target, const void *element) {
+  const char *name = target;
+  const PreferenceEntry *const *pref = element;
+  return strcmp(name, (*pref)->name);
+}
+
+static const PreferenceEntry *
+findPreferenceEntry (const char *name) {
+  static const PreferenceEntry **sortedEntries = NULL;
+
+  if (!sortedEntries) {
+    if (!(sortedEntries = malloc(preferenceCount * sizeof(*sortedEntries)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    {
+      unsigned int index;
+
+      for (index=0; index<preferenceCount; index+=1) {
+        sortedEntries[index] = &preferenceTable[index];
+      }
+    }
+
+    qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferences);
+  }
+
+  {
+    const PreferenceEntry *const *pref = bsearch(name, sortedEntries, preferenceCount, sizeof(*sortedEntries), searchPreference);
+    return *pref;
+  }
+}
+
+static int
+getPreferenceSetting (const char *delimiters, unsigned char *setting, const PreferenceStringTable *names) {
+  const char *operand = strtok(NULL, delimiters);
+
+  if (operand) {
+    int value;
+
+    if (isInteger(&value, operand)) {
+      if ((value >= 0) && (value <= 0XFF)) {
+        *setting = value;
+        return 1;
+      }
+    } else {
+      for (value=0; value<names->count; value+=1) {
+        if (strcmp(operand, names->table[value]) == 0) {
+          *setting = value;
+          return 1;
+        }
+      }
+    }
+
+    logMessage(LOG_WARNING, "invalid preference setting: %s", operand);
+  }
+
+  return 0;
+}
+
+static int
+processPreferenceLine (char *line, void *data) {
+  static const char delimiters[] = " \t";
+  const char *name = strtok(line, delimiters);
+
+  if (name) {
+    const PreferenceEntry *pref = findPreferenceEntry(name);
+
+    if (pref) {
+      if (pref->encountered) *pref->encountered = 1;
+
+      if (pref->settingCount) {
+        unsigned char count = pref->settingCount;
+        unsigned char *setting = pref->setting;
+
+        while (count) {
+          if (!getPreferenceSetting(delimiters, setting, pref->settingNames)) {
+            *setting = 0;
+            break;
+          }
+
+          setting += 1;
+          count -= 1;
+        }
+      } else if (!getPreferenceSetting(delimiters, pref->setting, pref->settingNames)) {
+        logMessage(LOG_WARNING, "missing preference setting: %s", name);
+      }
+    } else {
+      logMessage(LOG_WARNING, "unknown preference: %s", name);
+    }
+  }
+
+  return 1;
+}
+#endif /* PREFS_TEXTUAL */
+
 int
 loadPreferencesFile (const char *path) {
   int ok = 0;
@@ -443,7 +552,16 @@ loadPreferencesFile (const char *path) {
     } else if ((length < 40) ||
                (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
                (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
+#ifdef PREFS_TEXTUAL
+      rewind(file);
+      resetPreferences();
+
+      if (processLines(file, processPreferenceLine, NULL)) {
+        ok = 1;
+      }
+#else /* PREFS_TEXTUAL */
       logMessage(LOG_ERR, "%s: %s", gettext("invalid preferences file"), path);
+#endif /* PREFS_TEXTUAL */
     } else {
       prefs = newPreferences;
       ok = 1;
@@ -594,6 +712,21 @@ loadPreferencesFile (const char *path) {
   return ok;
 }
 
+#ifdef PREFS_TEXTUAL
+static int
+putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
+  if (fputc(' ', file) == EOF) return 0;
+
+  if (names && (setting < names->count)) {
+    if (fputs(names->table[setting], file) == EOF) return 0;
+  } else {
+    if (fprintf(file, "%u", setting) < 0) return 0;
+  }
+
+  return 1;
+}
+#endif /* PREFS_TEXTUAL */
+
 int
 savePreferencesFile (const char *path) {
   int ok = 0;
@@ -602,27 +735,35 @@ savePreferencesFile (const char *path) {
   if (file) {
 #ifdef PREFS_TEXTUAL
     const PreferenceEntry *pref = preferenceTable;
+    const PreferenceEntry *const end = pref + preferenceCount;
 
-    while (pref->name) {
-      unsigned char setting = *pref->setting;
+    while (pref < end) {
 
-      if (fprintf(file, "%s ", pref->name) < 0) break;
-      if (pref->settingNames && (setting < pref->settingNames->count)) {
-        if (fputs(pref->settingNames->table[setting], file) == EOF) break;
-      } else {
-        if (fprintf(file, "%u", setting) < 0) break;
+      if (fputs(pref->name, file) == EOF) break;
+
+      if (pref->settingCount) {
+        unsigned char count = pref->settingCount;
+        unsigned char *setting = pref->setting;
+
+        while (count-- && *setting) {
+          if (!putPreferenceSetting(file, *setting++, pref->settingNames)) goto done;
+        }
+      } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
+        break;
       }
+
       if (fputc('\n', file) == EOF) break;
 
       pref += 1;
     }
 
-    if (!pref->name) ok = 1;
+    if (pref == end) ok = 1;
 #else /* PREFS_TEXTUAL */
     size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
     if (length == sizeof(prefs)) ok = 1;
 #endif /* PREFS_TEXTUAL */
 
+  done:
     if (!ok) {
       if (!ferror(file)) errno = EIO;
       logMessage(LOG_ERR, "%s: %s: %s",
