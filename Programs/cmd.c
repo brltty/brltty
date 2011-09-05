@@ -184,9 +184,9 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
     }
 
     if (options & CDO_IncludeOperand) {
-      if ((options & CDO_DefaultOperand) && cmd->isColumn && !cmd->isRouting && !arg) {
-        STR_PRINTF(" at cursor");
-      } else if (cmd->isColumn && !cmd->isRouting && (arg == BRL_MSK_ARG)) {
+      if (cmd->isColumn && !cmd->isRouting &&
+          ((arg == BRL_MSK_ARG) ||
+           ((options & CDO_DefaultOperand) && !arg))) {
         STR_PRINTF(" at cursor");
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         STR_PRINTF(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
