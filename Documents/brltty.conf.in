@@ -242,6 +242,9 @@
 #braille-parameters bm:Protocols=default # [default,all,native]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
+# EuroBraille Braille Driver Parameters
+#braille-parameters eu:Protocol= # [clio,esysiris]
+
 # HandyTech Braille Driver Parameters
 #braille-parameters ht:SetTime=no # [no,yes]
 
