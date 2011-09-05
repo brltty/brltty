@@ -29,8 +29,304 @@
 #include "log.h"
 #include "file.h"
 
+//#define PREFS_TEXTUAL
+#define PREFS_MAGIC_NUMBER 0x4005
+
 Preferences prefs;                /* environment (i.e. global) parameters */
 static unsigned char statusFieldsSet;
+
+typedef struct {
+  const char *const *table;
+  unsigned char count;
+} PreferenceStringTable;
+
+#define PREFERENCE_STRING_TABLE(name, ...) \
+static const char *const preferenceStringArray_##name[] = {__VA_ARGS__}; \
+static const PreferenceStringTable preferenceStringTable_##name = { \
+  .table = preferenceStringArray_##name, \
+  .count = ARRAY_COUNT(preferenceStringArray_##name) \
+};
+
+PREFERENCE_STRING_TABLE(boolean,
+  "no", "yes"
+)
+
+PREFERENCE_STRING_TABLE(textStyle,
+  "8-dot-computer-braille",
+  "contracted-braille",
+  "6-dot-computer-braille"
+)
+
+PREFERENCE_STRING_TABLE(blankWindowsSkipMode,
+  "all", "end-of-line", "rest-of-line"
+)
+
+PREFERENCE_STRING_TABLE(cursorStyle,
+  "underline", "block"
+)
+
+PREFERENCE_STRING_TABLE(brailleFirmness,
+  "minimum", "low", "medium", "high", "maximum"
+)
+
+PREFERENCE_STRING_TABLE(brailleSensitivity,
+  "minimum", "low", "medium", "high", "maximum"
+)
+
+PREFERENCE_STRING_TABLE(tuneDevice,
+  "beeper", "pcm", "midi", "fm"
+)
+
+PREFERENCE_STRING_TABLE(sayLineMode,
+  "immediate", "enqueue"
+)
+
+PREFERENCE_STRING_TABLE(speechPunctuation,
+  "none", "some", "all"
+)
+
+PREFERENCE_STRING_TABLE(statusPosition,
+  "none", "left", "right"
+)
+
+PREFERENCE_STRING_TABLE(statusSeparator,
+  "none", "space", "block", "status-side", "text-side"
+)
+
+PREFERENCE_STRING_TABLE(statusField,
+  "end",
+  "window-coordinates", "window-column", "window-row",
+  "cursor-coordinates", "cursor-column", "cursor-row",
+  "cursor-and-window-column", "cursor-and-window-row",
+  "screen-number",
+  "state-dots", "state-letter",
+  "time",
+  "alphabetic-window-coordinates", "alphabetic-cursor-coordinates",
+  "generic"
+)
+
+typedef struct {
+  const char *name;
+  const PreferenceStringTable *settingNames;
+  unsigned char *setting;
+} PreferenceEntry;
+
+static const PreferenceEntry preferenceTable[] = {
+  { .name = "text-style",
+    .settingNames = &preferenceStringTable_textStyle,
+    .setting = &prefs.textStyle
+  }
+  ,
+  { .name = "expand-current-word",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.expandCurrentWord
+  }
+  ,
+  { .name = "skip-identical-lines",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.skipIdenticalLines
+  }
+  ,
+  { .name = "skip-blank-windows",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.skipBlankWindows
+  }
+  ,
+  { .name = "blank-windows-skip-mode",
+    .settingNames = &preferenceStringTable_blankWindowsSkipMode,
+    .setting = &prefs.blankWindowsSkipMode
+  }
+  ,
+  { .name = "sliding-window",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.slidingWindow
+  }
+  ,
+  { .name = "eager-sliding-window",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.eagerSlidingWindow
+  }
+  ,
+  { .name = "window-overlap",
+    .setting = &prefs.windowOverlap
+  }
+  ,
+  { .name = "autorepeat",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autorepeat
+  }
+  ,
+  { .name = "autorepeat-panning",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autorepeatPanning
+  }
+  ,
+  { .name = "autorepeat-delay",
+    .setting = &prefs.autorepeatDelay
+  }
+  ,
+  { .name = "autorepeat-interval",
+    .setting = &prefs.autorepeatInterval
+  }
+  ,
+  { .name = "show-cursor",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showCursor
+  }
+  ,
+  { .name = "cursor-style",
+    .settingNames = &preferenceStringTable_cursorStyle,
+    .setting = &prefs.cursorStyle
+  }
+  ,
+  { .name = "blinking-cursor",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.blinkingCursor
+  }
+  ,
+  { .name = "cursor-visible-time",
+    .setting = &prefs.cursorVisibleTime
+  }
+  ,
+  { .name = "cursor-invisible-time",
+    .setting = &prefs.cursorInvisibleTime
+  }
+  ,
+  { .name = "show-attributes",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showAttributes
+  }
+  ,
+  { .name = "blinking-attributes",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.blinkingAttributes
+  }
+  ,
+  { .name = "attributes-visible-time",
+    .setting = &prefs.attributesVisibleTime
+  }
+  ,
+  { .name = "attributes-invisible-time",
+    .setting = &prefs.attributesInvisibleTime
+  }
+  ,
+  { .name = "blinking-capitals",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.blinkingCapitals
+  }
+  ,
+  { .name = "capitals-visible-time",
+    .setting = &prefs.capitalsVisibleTime
+  }
+  ,
+  { .name = "capitals-invisible-time",
+    .setting = &prefs.capitalsInvisibleTime
+  }
+  ,
+  { .name = "braille-firmness",
+    .settingNames = &preferenceStringTable_brailleFirmness,
+    .setting = &prefs.brailleFirmness
+  }
+  ,
+  { .name = "braille-sensitivity",
+    .settingNames = &preferenceStringTable_brailleSensitivity,
+    .setting = &prefs.brailleSensitivity
+  }
+  ,
+  { .name = "window-follows-pointer",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.windowFollowsPointer
+  }
+  ,
+  { .name = "highlight-window",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.highlightWindow
+  }
+  ,
+  { .name = "alert-tunes",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.alertTunes
+  }
+  ,
+  { .name = "tune-device",
+    .settingNames = &preferenceStringTable_tuneDevice,
+    .setting = &prefs.tuneDevice
+  }
+  ,
+  { .name = "pcm-volume",
+    .setting = &prefs.pcmVolume
+  }
+  ,
+  { .name = "midi-volume",
+    .setting = &prefs.midiVolume
+  }
+  ,
+  { .name = "midi-instrument",
+    .setting = &prefs.midiInstrument
+  }
+  ,
+  { .name = "fm-volume",
+    .setting = &prefs.fmVolume
+  }
+  ,
+  { .name = "alert-dots",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.alertDots
+  }
+  ,
+  { .name = "alert-messages",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.alertMessages
+  }
+  ,
+  { .name = "say-line-mode",
+    .settingNames = &preferenceStringTable_sayLineMode,
+    .setting = &prefs.sayLineMode
+  }
+  ,
+  { .name = "autospeak",
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeak
+  }
+  ,
+  { .name = "speech-volume",
+    .setting = &prefs.speechVolume
+  }
+  ,
+  { .name = "speech-rate",
+    .setting = &prefs.speechRate
+  }
+  ,
+  { .name = "speech-pitch",
+    .setting = &prefs.speechPitch
+  }
+  ,
+  { .name = "speech-punctuation",
+    .settingNames = &preferenceStringTable_speechPunctuation,
+    .setting = &prefs.speechPunctuation
+  }
+  ,
+  { .name = "status-position",
+    .settingNames = &preferenceStringTable_statusPosition,
+    .setting = &prefs.statusPosition
+  }
+  ,
+  { .name = "status-count",
+    .setting = &prefs.statusCount
+  }
+  ,
+  { .name = "status-separator",
+    .settingNames = &preferenceStringTable_statusSeparator,
+    .setting = &prefs.statusSeparator
+  }
+  ,
+  { .name = "status-fields",
+    .settingNames = &preferenceStringTable_statusField,
+    .setting = prefs.statusFields
+  }
+  ,
+  { .name = NULL }
+};
 
 void
 setStatusFields (const unsigned char *fields) {
@@ -304,11 +600,30 @@ savePreferencesFile (const char *path) {
   FILE *file = openDataFile(path, "w+b", 0);
 
   if (file) {
-    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
+#ifdef PREFS_TEXTUAL
+    const PreferenceEntry *pref = preferenceTable;
 
-    if (length == sizeof(prefs)) {
-      ok = 1;
-    } else {
+    while (pref->name) {
+      unsigned char setting = *pref->setting;
+
+      if (fprintf(file, "%s ", pref->name) < 0) break;
+      if (pref->settingNames && (setting < pref->settingNames->count)) {
+        if (fputs(pref->settingNames->table[setting], file) == EOF) break;
+      } else {
+        if (fprintf(file, "%u", setting) < 0) break;
+      }
+      if (fputc('\n', file) == EOF) break;
+
+      pref += 1;
+    }
+
+    if (!pref->name) ok = 1;
+#else /* PREFS_TEXTUAL */
+    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
+    if (length == sizeof(prefs)) ok = 1;
+#endif /* PREFS_TEXTUAL */
+
+    if (!ok) {
       if (!ferror(file)) errno = EIO;
       logMessage(LOG_ERR, "%s: %s: %s",
                  gettext("cannot write to preferences file"), path, strerror(errno));

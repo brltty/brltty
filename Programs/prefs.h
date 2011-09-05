@@ -56,12 +56,7 @@ typedef enum {
 
 /*
  * Structure definition for preferences (settings which are saveable).
- * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
- * Preferences is modified otherwise this structure could be
- * filled with incompatible data from disk.
  */
-#define PREFS_MAGIC_NUMBER 0x4005
-
 typedef struct {
   unsigned char magic[2];
   unsigned char showCursor;
