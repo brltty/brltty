@@ -1757,17 +1757,17 @@ makePreferencesMenu (void) {
   }
 
   {
-    NAME(strtext("Speech Rate"));
-    ITEM(newNumericMenuItem(menu, &prefs.speechRate, &name, 0, SPK_RATE_MAXIMUM, 1));
-    TEST(SpeechRate);
-    CHANGED(SpeechRate);
-  }
-
-  {
     NAME(strtext("Speech Volume"));
     ITEM(newNumericMenuItem(menu, &prefs.speechVolume, &name, 0, SPK_VOLUME_MAXIMUM, 1));
     TEST(SpeechVolume);
     CHANGED(SpeechVolume);
+  }
+
+  {
+    NAME(strtext("Speech Rate"));
+    ITEM(newNumericMenuItem(menu, &prefs.speechRate, &name, 0, SPK_RATE_MAXIMUM, 1));
+    TEST(SpeechRate);
+    CHANGED(SpeechRate);
   }
 
   {
@@ -1928,18 +1928,18 @@ updatePreferences (void) {
         STR_END;
       }
 
+#ifdef ENABLE_SPEECH_SUPPORT
+      if (prefs.autospeak) {
+        if (indexChanged) {
+          sayString(&spk, line, 1);
+        } else if (settingChanged) {
+          sayString(&spk, &line[settingIndent], 1);
+        }
+      }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
       {
         unsigned int textLength = textCount * brl.textRows;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-        if (prefs.autospeak) {
-          if (indexChanged) {
-            sayString(&spk, line, 1);
-          } else if (settingChanged) {
-            sayString(&spk, &line[settingIndent], 1);
-          }
-        }
-#endif /* ENABLE_SPEECH_SUPPORT */
 
         /* Next we deal with the braille window position in the buffer.
          * This is intended for small displays and/or long item descriptions 
@@ -1960,6 +1960,7 @@ updatePreferences (void) {
         /* Now process any user interaction */
         command = readBrailleCommand(&brl, KTB_CTX_MENU);
         handleAutorepeat(&command, NULL);
+
         if (command != EOF) {
           switch (command) {
             case BRL_CMD_NOOP:
