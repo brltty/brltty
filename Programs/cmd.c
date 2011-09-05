@@ -127,10 +127,10 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
-    STR_APPEND("unknown: %06X", command);
+    STR_PRINTF("unknown: %06X", command);
   } else {
     if (options & CDO_IncludeName) {
-      STR_APPEND("%s: ", cmd->name);
+      STR_PRINTF("%s: ", cmd->name);
     }
 
     if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
@@ -162,43 +162,43 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
         }
       }
 
-      STR_APPEND("%s", description);
+      STR_PRINTF("%s", description);
     } else {
-      STR_APPEND("%s", gettext(cmd->description));
+      STR_PRINTF("%s", gettext(cmd->description));
     }
 
     if (cmd->isMotion) {
       if (command & BRL_FLG_MOTION_ROUTE) {
-        STR_APPEND(", drag cursor");
+        STR_PRINTF(", drag cursor");
       }
 
       if (cmd->isRow) {
         if (command & BRL_FLG_LINE_SCALED) {
-          STR_APPEND(" (scaled)");
+          STR_PRINTF(" (scaled)");
         }
 
         if (command & BRL_FLG_LINE_TOLEFT) {
-          STR_APPEND(", beginning of line");
+          STR_PRINTF(", beginning of line");
         }
       }
     }
 
     if (options & CDO_IncludeOperand) {
       if ((options & CDO_DefaultOperand) && cmd->isColumn && !cmd->isRouting && !arg) {
-        STR_APPEND(" at cursor");
+        STR_PRINTF(" at cursor");
       } else if (cmd->isColumn && !cmd->isRouting && (arg == BRL_MSK_ARG)) {
-        STR_APPEND(" at cursor");
+        STR_PRINTF(" at cursor");
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
-        STR_APPEND(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
+        STR_PRINTF(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
       } else if (cmd->isRange) {
-        STR_APPEND(" #%u-%u", arg1, arg2);
+        STR_PRINTF(" #%u-%u", arg1, arg2);
       } else if (blk) {
         switch (blk) {
           case BRL_BLK_PASSKEY:
             break;
 
           case BRL_BLK_PASSCHAR:
-            STR_APPEND(" [U+%04" PRIX16 "]", arg);
+            STR_PRINTF(" [U+%04" PRIX16 "]", arg);
             break;
 
           case BRL_BLK_PASSDOTS:
@@ -213,47 +213,43 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
                 }
               }
 
-              STR_APPEND(" [%s %u]", ((number < 10)? "dot": "dots"), number);
+              STR_PRINTF(" [%s %u]", ((number < 10)? "dot": "dots"), number);
             } else {
-              STR_APPEND(" [space]");
+              STR_PRINTF(" [space]");
             }
             break;
 
           default:
-            STR_APPEND(" 0X%02X", arg);
+            STR_PRINTF(" 0X%02X", arg);
             break;
         }
       }
     }
   }
 
-  STR_END(length);
+  length = STR_LENGTH;
+  STR_END;
   return length;
 }
 
 static size_t
 formatCommand (char *buffer, size_t size, int command) {
-  const char *start = buffer;
+  size_t length;
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF("%06X (", command);
 
   {
-    int length;
-    snprintf(buffer, size, "%06X (%n", command, &length);
-    buffer += length, size -= length;
-  }
-
-  {
-    size_t length = describeCommand(command, buffer, size, 
+    size_t length = describeCommand(command, STR_NEXT, STR_LEFT, 
                                     CDO_IncludeName | CDO_IncludeOperand);
-    buffer += length, size -= length;
+    STR_ADJUST(length);
   }
 
-  {
-    int length;
-    snprintf(buffer, size, ")%n", &length);
-    buffer += length, size -= length;
-  }
+  STR_PRINTF(")");
 
-  return buffer - start;
+  length = STR_LENGTH;
+  STR_END;
+  return length;
 }
 
 typedef struct {
@@ -263,20 +259,17 @@ typedef struct {
 static const char *
 formatLogCommandData (char *buffer, size_t size, const void *data) {
   const LogCommandData *cmd = data;
-  const char *start = buffer;
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF("command: ");
 
   {
-    int length;
-    snprintf(buffer, size, "command: %n", &length);
-    buffer += length, size -= length;
+    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->command);
+    STR_ADJUST(length);
   }
 
-  {
-    size_t length = formatCommand(buffer, size, cmd->command);
-    buffer += length, size -= length;
-  }
-
-  return start;
+  STR_END;
+  return buffer;
 }
 
 void
@@ -296,31 +289,24 @@ typedef struct {
 static const char *
 formatLogTransformedCommandData (char *buffer, size_t size, const void *data) {
   const LogTransformedCommandData *cmd = data;
-  const char *start = buffer;
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF("command: ");
 
   {
-    int length;
-    snprintf(buffer, size, "command: %n", &length);
-    buffer += length, size -= length;
+    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->oldCommand);
+    STR_ADJUST(length);
   }
+
+  STR_PRINTF(" -> ");
 
   {
-    size_t length = formatCommand(buffer, size, cmd->oldCommand);
-    buffer += length, size -= length;
+    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->newCommand);
+    STR_ADJUST(length);
   }
 
-  {
-    int length;
-    snprintf(buffer, size, " -> %n", &length);
-    buffer += length, size -= length;
-  }
-
-  {
-    size_t length = formatCommand(buffer, size, cmd->newCommand);
-    buffer += length, size -= length;
-  }
-
-  return start;
+  STR_END;
+  return buffer;
 }
 
 void

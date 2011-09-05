@@ -40,16 +40,18 @@ extern "C" {
 
 #define STR_BEGIN(buffer, size) { \
   char *strNext = (buffer); \
-  size_t strSize = (size); \
-  const char *strStart = strNext;
-#define STR_APPEND(format, ...) { \
+  char *strStart = strNext; \
+  char *strEnd = strStart + (size);
+#define STR_END }
+#define STR_LENGTH (strNext - strStart)
+#define STR_NEXT strNext
+#define STR_LEFT (strEnd - strNext)
+#define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
+#define STR_PRINTF(format, ...) { \
   int strLength; \
-  snprintf(strNext, strSize, format "%n", ## __VA_ARGS__, &strLength); \
-  if (strLength > strSize) strLength = strSize; \
-  strNext += strLength, strSize -= strLength; \
+  snprintf(STR_NEXT, STR_LEFT, format "%n", ## __VA_ARGS__, &strLength); \
+  STR_ADJUST(strLength); \
 }
-#define STR_LENGTH(lhs) ((lhs) = strNext - strStart)
-#define STR_END(lhs) STR_LENGTH((lhs)); }
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS

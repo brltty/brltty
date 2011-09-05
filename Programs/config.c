@@ -1916,13 +1916,16 @@ updatePreferences (void) {
         const char *comment = getMenuItemComment(item);
 
         STR_BEGIN(line, sizeof(line));
-        STR_APPEND("%s", name->label);
-        if (*name->comment) STR_APPEND(" %s", name->comment);
-        STR_APPEND(": ");
-        STR_LENGTH(settingIndent);
-        STR_APPEND("%s", value);
-        if (*comment) STR_APPEND(" (%s)", comment);
-        STR_END(lineLength);
+        STR_PRINTF("%s", name->label);
+        if (*name->comment) STR_PRINTF(" %s", name->comment);
+        STR_PRINTF(": ");
+
+        settingIndent = STR_LENGTH;
+        STR_PRINTF("%s", value);
+        if (*comment) STR_PRINTF(" (%s)", comment);
+
+        lineLength = STR_LENGTH;
+        STR_END;
       }
 
       {
