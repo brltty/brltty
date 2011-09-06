@@ -473,29 +473,27 @@ findPreferenceEntry (const char *name) {
 }
 
 static int
-getPreferenceSetting (const char *delimiters, unsigned char *setting, const PreferenceStringTable *names) {
-  const char *operand = strtok(NULL, delimiters);
+getPreferenceSetting (
+  const char *name, const char *operand,
+  unsigned char *setting, const PreferenceStringTable *names
+) {
+  int value;
 
-  if (operand) {
-    int value;
-
-    if (isInteger(&value, operand)) {
-      if ((value >= 0) && (value <= 0XFF)) {
+  if (isInteger(&value, operand)) {
+    if ((value >= 0) && (value <= 0XFF)) {
+      *setting = value;
+      return 1;
+    }
+  } else {
+    for (value=0; value<names->count; value+=1) {
+      if (strcmp(operand, names->table[value]) == 0) {
         *setting = value;
         return 1;
       }
-    } else {
-      for (value=0; value<names->count; value+=1) {
-        if (strcmp(operand, names->table[value]) == 0) {
-          *setting = value;
-          return 1;
-        }
-      }
     }
-
-    logMessage(LOG_WARNING, "invalid preference setting: %s", operand);
   }
 
+  logMessage(LOG_WARNING, "invalid preference setting: %s %s", name, operand);
   return 0;
 }
 
@@ -508,6 +506,8 @@ processPreferenceLine (char *line, void *data) {
     const PreferenceEntry *pref = findPreferenceEntry(name);
 
     if (pref) {
+      const char *operand;
+
       if (pref->encountered) *pref->encountered = 1;
 
       if (pref->settingCount) {
@@ -515,16 +515,20 @@ processPreferenceLine (char *line, void *data) {
         unsigned char *setting = pref->setting;
 
         while (count) {
-          if (!getPreferenceSetting(delimiters, setting, pref->settingNames)) {
-            *setting = 0;
-            break;
+          if ((operand = strtok(NULL, delimiters))) {
+            if (getPreferenceSetting(name, operand, setting, pref->settingNames)) {
+              setting += 1;
+              count -= 1;
+              continue;
+            }
           }
 
-          setting += 1;
-          count -= 1;
+          *setting = 0;
+          break;
         }
-      } else if (!getPreferenceSetting(delimiters, pref->setting, pref->settingNames)) {
+      } else if (!(operand = strtok(NULL, delimiters))) {
         logMessage(LOG_WARNING, "missing preference setting: %s", name);
+      } else if (!getPreferenceSetting(name, operand, pref->setting, pref->settingNames)) {
       }
     } else {
       logMessage(LOG_WARNING, "unknown preference: %s", name);
