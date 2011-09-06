@@ -30,7 +30,6 @@
 #include "file.h"
 #include "parse.h"
 
-#define PREFS_TEXTUAL
 #define PREFS_MAGIC_NUMBER 0x4005
 
 Preferences prefs;                /* environment (i.e. global) parameters */
@@ -430,7 +429,6 @@ makePreferencesFilePath (const char *name) {
   return makePath(STATE_DIRECTORY, name);
 }
 
-#ifdef PREFS_TEXTUAL
 static int
 sortPreferences (const void *element1, const void *element2) {
   const PreferenceEntry *const *pref1 = element1;
@@ -537,7 +535,6 @@ processPreferenceLine (char *line, void *data) {
 
   return 1;
 }
-#endif /* PREFS_TEXTUAL */
 
 int
 loadPreferencesFile (const char *path) {
@@ -554,16 +551,9 @@ loadPreferencesFile (const char *path) {
     } else if ((length < 40) ||
                (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
                (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
-#ifdef PREFS_TEXTUAL
       rewind(file);
       resetPreferences();
-
-      if (processLines(file, processPreferenceLine, NULL)) {
-        ok = 1;
-      }
-#else /* PREFS_TEXTUAL */
-      logMessage(LOG_ERR, "%s: %s", gettext("invalid preferences file"), path);
-#endif /* PREFS_TEXTUAL */
+      if (processLines(file, processPreferenceLine, NULL)) ok = 1;
     } else {
       prefs = newPreferences;
       ok = 1;
@@ -714,7 +704,6 @@ loadPreferencesFile (const char *path) {
   return ok;
 }
 
-#ifdef PREFS_TEXTUAL
 static int
 putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
   if (fputc(' ', file) == EOF) return 0;
@@ -727,7 +716,6 @@ putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringT
 
   return 1;
 }
-#endif /* PREFS_TEXTUAL */
 
 int
 savePreferencesFile (const char *path) {
@@ -735,7 +723,6 @@ savePreferencesFile (const char *path) {
   FILE *file = openDataFile(path, "w+b", 0);
 
   if (file) {
-#ifdef PREFS_TEXTUAL
     const PreferenceEntry *pref = preferenceTable;
     const PreferenceEntry *const end = pref + preferenceCount;
 
@@ -758,12 +745,7 @@ savePreferencesFile (const char *path) {
 
       pref += 1;
     }
-
     if (pref == end) ok = 1;
-#else /* PREFS_TEXTUAL */
-    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
-    if (length == sizeof(prefs)) ok = 1;
-#endif /* PREFS_TEXTUAL */
 
   done:
     if (!ok) {
