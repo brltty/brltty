@@ -91,7 +91,7 @@ typedef struct {
   unsigned char tuneDevice;
   unsigned char skipIdenticalLines;
   unsigned char alertMessages;
-  unsigned char blankWindowsSkipMode;
+  unsigned char skipBlankWindowsMode;
   unsigned char alertDots;
   unsigned char skipBlankWindows;
   unsigned char midiInstrument;

@@ -53,13 +53,11 @@ PREFERENCE_STRING_TABLE(boolean,
 )
 
 PREFERENCE_STRING_TABLE(textStyle,
-  "8-dot-computer-braille",
-  "contracted-braille",
-  "6-dot-computer-braille"
+  "8dot", "contracted", "6dot"
 )
 
-PREFERENCE_STRING_TABLE(blankWindowsSkipMode,
-  "all", "end-of-line", "rest-of-line"
+PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
+  "all", "end", "rest"
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,
@@ -91,18 +89,18 @@ PREFERENCE_STRING_TABLE(statusPosition,
 )
 
 PREFERENCE_STRING_TABLE(statusSeparator,
-  "none", "space", "block", "status-side", "text-side"
+  "none", "space", "block", "status", "text"
 )
 
 PREFERENCE_STRING_TABLE(statusField,
   "end",
-  "window-coordinates", "window-column", "window-row",
-  "cursor-coordinates", "cursor-column", "cursor-row",
-  "cursor-and-window-column", "cursor-and-window-row",
-  "screen-number",
-  "state-dots", "state-letter",
+  "wxy", "wx", "wy",
+  "cxy", "cx", "cy",
+  "cwx", "cwy",
+  "sn",
+  "dots", "letter",
   "time",
-  "alphabetic-window-coordinates", "alphabetic-cursor-coordinates",
+  "wxya", "cxya",
   "generic"
 )
 
@@ -135,9 +133,9 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.skipBlankWindows
   }
   ,
-  { .name = "blank-windows-skip-mode",
-    .settingNames = &preferenceStringTable_blankWindowsSkipMode,
-    .setting = &prefs.blankWindowsSkipMode
+  { .name = "skip-blank-windows-mode",
+    .settingNames = &preferenceStringTable_skipBlankWindowsMode,
+    .setting = &prefs.skipBlankWindowsMode
   }
   ,
   { .name = "sliding-window",
@@ -401,7 +399,7 @@ resetPreferences (void) {
 
   prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
   prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
-  prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
+  prefs.skipBlankWindowsMode = DEFAULT_SKIP_BLANK_WINDOWS_MODE;
 
   prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
   prefs.alertDots = DEFAULT_ALERT_DOTS;
@@ -470,7 +468,7 @@ findPreferenceEntry (const char *name) {
 
   {
     const PreferenceEntry *const *pref = bsearch(name, sortedEntries, preferenceCount, sizeof(*sortedEntries), searchPreference);
-    return *pref;
+    return pref? *pref: NULL;
   }
 }
 

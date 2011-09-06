@@ -1515,7 +1515,7 @@ makePreferencesMenu (void) {
     };
 
     NAME(strtext("Which Blank Windows"));
-    ITEM(newEnumeratedMenuItem(menu, &prefs.blankWindowsSkipMode, &name, strings));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.skipBlankWindowsMode, &name, strings));
     TEST(SkipBlankWindows);
   }
 

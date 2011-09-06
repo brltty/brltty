@@ -1417,12 +1417,12 @@ doCommand:
         break;
 
       case BRL_CMD_FWINLT:
-        if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
+        if (!(prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwAll))) {
           int oldX = ses->winx;
           if (shiftWindowLeft(fullWindowShift)) {
             if (prefs.skipBlankWindows) {
               int charCount;
-              if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
+              if (prefs.skipBlankWindowsMode == sbwEndOfLine) goto skipEndOfLine;
               charCount = MIN(scr.cols, ses->winx+textCount);
               if (!showCursor() ||
                   (scr.posy != ses->winy) ||
@@ -1450,7 +1450,7 @@ doCommand:
           upLine(isSameText);
           placeWindowRight();
         skipEndOfLine:
-          if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
+          if (prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwEndOfLine)) {
             int charIndex;
             ScreenCharacter characters[scr.cols];
             readScreen(0, ses->winy, scr.cols, 1, characters);
@@ -1503,7 +1503,7 @@ doCommand:
       }
 
       case BRL_CMD_FWINRT:
-        if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
+        if (!(prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwAll))) {
           int oldX = ses->winx;
           if (shiftWindowRight(fullWindowShift)) {
             if (prefs.skipBlankWindows) {

@@ -79,7 +79,7 @@ extern "C" {
 
 #define DEFAULT_SKIP_IDENTICAL_LINES 0		/* 1 = skip all identical lines after first */
 #define DEFAULT_SKIP_BLANK_WINDOWS 0       /* 1 = skip blank windows */
-#define DEFAULT_BLANK_WINDOWS_SKIP_MODE sbwEndOfLine
+#define DEFAULT_SKIP_BLANK_WINDOWS_MODE sbwEndOfLine
 
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
