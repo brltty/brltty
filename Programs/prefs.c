@@ -551,9 +551,12 @@ loadPreferencesFile (const char *path) {
     } else if ((length < 40) ||
                (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
                (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
-      rewind(file);
-      resetPreferences();
-      if (processLines(file, processPreferenceLine, NULL)) ok = 1;
+      fclose(file);
+
+      if ((file = openDataFile(path, "r", 1))) {
+        resetPreferences();
+        if (processLines(file, processPreferenceLine, NULL)) ok = 1;
+      }
     } else {
       prefs = newPreferences;
       ok = 1;
@@ -698,7 +701,10 @@ loadPreferencesFile (const char *path) {
       }
     }
 
-    fclose(file);
+    if (file) {
+      fclose(file);
+      file = NULL;
+    }
   }
 
   return ok;
@@ -720,7 +726,7 @@ putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringT
 int
 savePreferencesFile (const char *path) {
   int ok = 0;
-  FILE *file = openDataFile(path, "w+b", 0);
+  FILE *file = openDataFile(path, "w", 0);
 
   if (file) {
     const PreferenceEntry *pref = preferenceTable;
