@@ -430,17 +430,22 @@ makePreferencesFilePath (const char *name) {
 }
 
 static int
-sortPreferences (const void *element1, const void *element2) {
-  const PreferenceEntry *const *pref1 = element1;
-  const PreferenceEntry *const *pref2 = element2;
-  return strcmp((*pref1)->name, (*pref2)->name);
+comparePreferenceNames (const char *name1, const char *name2) {
+  return strcmp(name1, name2);
 }
 
 static int
-searchPreference (const void *target, const void *element) {
+sortPreferencesByName (const void *element1, const void *element2) {
+  const PreferenceEntry *const *pref1 = element1;
+  const PreferenceEntry *const *pref2 = element2;
+  return comparePreferenceNames((*pref1)->name, (*pref2)->name);
+}
+
+static int
+searchPreferenceByName (const void *target, const void *element) {
   const char *name = target;
   const PreferenceEntry *const *pref = element;
-  return strcmp(name, (*pref)->name);
+  return comparePreferenceNames(name, (*pref)->name);
 }
 
 static const PreferenceEntry *
@@ -461,11 +466,11 @@ findPreferenceEntry (const char *name) {
       }
     }
 
-    qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferences);
+    qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferencesByName);
   }
 
   {
-    const PreferenceEntry *const *pref = bsearch(name, sortedEntries, preferenceCount, sizeof(*sortedEntries), searchPreference);
+    const PreferenceEntry *const *pref = bsearch(name, sortedEntries, preferenceCount, sizeof(*sortedEntries), searchPreferenceByName);
     return pref? *pref: NULL;
   }
 }
