@@ -21,12 +21,13 @@ title Alva Braille Controller [6nn]
 note The four keys at the ends of the text cell area are named ETouch:
 note * Each is subnamed according to the side its on (Left, Right),
 note * and according to its position on that side (Rear, Front).
-note The nine-key pad in front of the text cell area is named  Smartpad:
+note The nine-key pad in front of the text cell area is named Smartpad:
 note * Its center key is subnamed Enter.
 note * Its four inner keys are subnamed Left, Right, Up, and Down.
 note * The two long keys on its left are subnamed F1 and F2.
 note * The two long keys on its right are subnamed F3 and F4.
-note The five keys on the front are named Thumb1 through Thumb5.
+note The five keys on the front are named Thumb:
+note * From left to right, they're subnamed: Left, Up, Home, Down, Right.
 
 
 ####################
@@ -38,26 +39,26 @@ bind ETouchLeftRear+ETouchRightFront LEARN
 bind ETouchLeftFront+ETouchRightRear INFO
 bind ETouchLeftFront+ETouchRightFront PREFMENU
 
-bind Thumb3 RETURN
-bind Thumb2 LNUP
-bind Thumb4 LNDN
-bind Thumb1 FWINLT
-bind Thumb5 FWINRT
+bind ThumbHome RETURN
+bind ThumbUp LNUP
+bind ThumbDown LNDN
+bind ThumbLeft FWINLT
+bind ThumbRight FWINRT
 
-bind Thumb3+Thumb2 PRDIFLN
-bind Thumb3+Thumb4 NXDIFLN
-bind Thumb3+Thumb1 FWINLTSKIP
-bind Thumb3+Thumb5 FWINRTSKIP
+bind ThumbHome+ThumbUp PRDIFLN
+bind ThumbHome+ThumbDown NXDIFLN
+bind ThumbHome+ThumbLeft FWINLTSKIP
+bind ThumbHome+ThumbRight FWINRTSKIP
 
-bind Thumb3+ETouchLeftRear TOP_LEFT
-bind Thumb3+ETouchLeftFront BOT_LEFT
-bind Thumb3+ETouchRightRear ATTRUP
-bind Thumb3+ETouchRightFront ATTRDN
+bind ThumbHome+ETouchLeftRear TOP_LEFT
+bind ThumbHome+ETouchLeftFront BOT_LEFT
+bind ThumbHome+ETouchRightRear ATTRUP
+bind ThumbHome+ETouchRightFront ATTRDN
 
-bind Thumb1+Thumb4 PRPROMPT
-bind Thumb1+Thumb5 NXPROMPT
-bind Thumb2+Thumb4 PRPGRPH
-bind Thumb2+Thumb5 NXPGRPH
+bind ThumbLeft+ThumbDown PRPROMPT
+bind ThumbLeft+ThumbRight NXPROMPT
+bind ThumbUp+ThumbDown PRPGRPH
+bind ThumbUp+ThumbRight NXPGRPH
 
 bind ETouchLeftRear LNBEG
 bind ETouchRightRear LNEND
@@ -68,27 +69,27 @@ bind !RoutingKey1 ROUTE
 bind ETouchLeftRear+ETouchLeftFront CSRJMP_VERT
 
 bind RoutingKey1+!RoutingKey1 COPYCHARS
-bind Thumb1+!RoutingKey1 CUTBEGIN
-bind Thumb2+!RoutingKey1 CUTAPPEND
-bind Thumb4+!RoutingKey1 CUTLINE
-bind Thumb5+!RoutingKey1 CUTRECT
+bind ThumbLeft+!RoutingKey1 CUTBEGIN
+bind ThumbUp+!RoutingKey1 CUTAPPEND
+bind ThumbDown+!RoutingKey1 CUTLINE
+bind ThumbRight+!RoutingKey1 CUTRECT
 bind ETouchRightRear+ETouchRightFront PASTE
 
 bind !RoutingKey2 DESCCHAR
-bind Thumb2+!RoutingKey2 PRINDENT
-bind Thumb4+!RoutingKey2 NXINDENT
-bind Thumb1+!RoutingKey2 PRDIFCHAR
-bind Thumb5+!RoutingKey2 NXDIFCHAR
+bind ThumbUp+!RoutingKey2 PRINDENT
+bind ThumbDown+!RoutingKey2 NXINDENT
+bind ThumbLeft+!RoutingKey2 PRDIFCHAR
+bind ThumbRight+!RoutingKey2 NXDIFCHAR
 
-bind Thumb3+!RoutingKey1 SETLEFT
+bind ThumbHome+!RoutingKey1 SETLEFT
 
-bind Thumb1+Thumb2 SIXDOTS
-bind Thumb4+Thumb5 CSRTRK
+bind ThumbLeft+ThumbUp SIXDOTS
+bind ThumbDown+ThumbRight CSRTRK
 
-bind Thumb1+ETouchLeftRear CSRVIS
-bind Thumb1+ETouchLeftFront ATTRVIS
-bind Thumb2+ETouchLeftRear FREEZE
-bind Thumb2+ETouchLeftFront DISPMD
+bind ThumbLeft+ETouchLeftRear CSRVIS
+bind ThumbLeft+ETouchLeftFront ATTRVIS
+bind ThumbUp+ETouchLeftRear FREEZE
+bind ThumbUp+ETouchLeftFront DISPMD
 
 bind SmartpadLeft KEY_CURSOR_LEFT
 bind SmartpadRight KEY_CURSOR_RIGHT
@@ -114,16 +115,16 @@ bind SmartpadF4+SmartpadEnter SPKHOME
 
 context menu
 
-bind Thumb1 FWINLT
-bind Thumb5 FWINRT
-bind Thumb2 MENU_PREV_ITEM
-bind Thumb4 MENU_NEXT_ITEM
+bind ThumbLeft FWINLT
+bind ThumbRight FWINRT
+bind ThumbUp MENU_PREV_ITEM
+bind ThumbDown MENU_NEXT_ITEM
 bind ETouchLeftRear MENU_FIRST_ITEM
 bind ETouchLeftFront MENU_LAST_ITEM
 bind ETouchRightRear MENU_PREV_SETTING
 bind ETouchRightFront MENU_NEXT_SETTING
 
-bind Thumb3 PREFMENU
+bind ThumbHome PREFMENU
 bind ETouchLeftRear+ETouchLeftFront PREFLOAD
 bind ETouchRightRear+ETouchRightFront PREFSAVE
 
