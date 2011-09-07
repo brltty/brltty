@@ -39,7 +39,9 @@ bind ETouchLeftRear+ETouchRightFront LEARN
 bind ETouchLeftFront+ETouchRightRear INFO
 bind ETouchLeftFront+ETouchRightFront PREFMENU
 
-bind ThumbHome RETURN
+bind ThumbHome HOME
+bind ETouchLeftRear+ETouchLeftFront BACK
+
 bind ThumbUp LNUP
 bind ThumbDown LNDN
 bind ThumbLeft FWINLT
@@ -66,14 +68,14 @@ bind ETouchLeftFront CHRLT
 bind ETouchRightFront CHRRT
 
 bind RoutingKey1 ROUTE
-bind ETouchLeftRear+ETouchLeftFront CSRJMP_VERT
+bind ETouchRightRear+ETouchRightFront CSRJMP_VERT
 
 bind RoutingKey1+!RoutingKey1 COPYCHARS
 bind ThumbLeft+!RoutingKey1 CUTBEGIN
 bind ThumbUp+!RoutingKey1 CUTAPPEND
 bind ThumbDown+!RoutingKey1 CUTLINE
 bind ThumbRight+!RoutingKey1 CUTRECT
-bind ETouchRightRear+ETouchRightFront PASTE
+bind SmartpadEnter PASTE
 
 bind !RoutingKey2 DESCCHAR
 bind ThumbUp+!RoutingKey2 PRINDENT
