@@ -65,7 +65,7 @@ bind ETouchRightRear LNEND
 bind ETouchLeftFront CHRLT
 bind ETouchRightFront CHRRT
 
-bind !RoutingKey1 ROUTE
+bind RoutingKey1 ROUTE
 bind ETouchLeftRear+ETouchLeftFront CSRJMP_VERT
 
 bind RoutingKey1+!RoutingKey1 COPYCHARS
