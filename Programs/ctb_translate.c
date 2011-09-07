@@ -263,7 +263,7 @@ selectRule (int length) {
               }
             }
 
-            if ((current > CS_Lower) && (next == CS_UpperSingle)) {
+            if ((prefs.capitalizationMode == CTB_CAP_SIGN) && (current > CS_Lower) && (next == CS_UpperSingle)) {
               current = CS_UpperMultiple;
             } else if (next != CS_Any) {
               current = next;
