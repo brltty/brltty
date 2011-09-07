@@ -79,6 +79,7 @@ HKR,,Icon,,-20
 "LibUsb HandyTech (FTDI)" = LIBUSB_DEV, USB\VID_0403&PID_6001
 "LibUsb HandyTech (USB-HID converter)" = LIBUSB_DEV, USB\VID_1FE4&PID_0003
 "LibUsb HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUsb HandyTech Active Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0054
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
@@ -131,6 +132,7 @@ HKR,,Icon,,-20
 "LibUsb HandyTech (FTDI)" = LIBUSB_DEV, USB\VID_0403&PID_6001
 "LibUsb HandyTech (USB-HID converter)" = LIBUSB_DEV, USB\VID_1FE4&PID_0003
 "LibUsb HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUsb HandyTech Active Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0054
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
