@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_DEFAULTS
 #define BRLTTY_INCLUDED_DEFAULTS
 
+#include "ctbdefs.h"
 #include "brldefs.h"
 #include "spkdefs.h"
 #include "tunedefs.h"
@@ -70,6 +71,8 @@ extern "C" {
 
 #define DEFAULT_TEXT_STYLE tsComputerBraille8
 #define DEFAULT_EXPAND_CURRENT_WORD 1
+#define DEFAULT_CAPITALIZATION_MODE CTB_CAP_SIGN
+
 #define DEFAULT_BRAILLE_FIRMNESS BRL_FIRMNESS_MEDIUM
 #define DEFAULT_BRAILLE_SENSITIVITY BRL_SENSITIVITY_MEDIUM
 

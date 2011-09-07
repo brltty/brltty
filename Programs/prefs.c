@@ -55,6 +55,10 @@ PREFERENCE_STRING_TABLE(textStyle,
   "8dot", "contracted", "6dot"
 )
 
+PREFERENCE_STRING_TABLE(capitalizationMode,
+  "none", "sign", "dot7"
+)
+
 PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
   "all", "end", "rest"
 )
@@ -120,6 +124,11 @@ static const PreferenceEntry preferenceTable[] = {
   { .name = "expand-current-word",
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.expandCurrentWord
+  }
+  ,
+  { .name = "capitalization-mode",
+    .settingNames = &preferenceStringTable_capitalizationMode,
+    .setting = &prefs.capitalizationMode
   }
   ,
   { .name = "skip-identical-lines",
@@ -389,6 +398,8 @@ resetPreferences (void) {
 
   prefs.textStyle = DEFAULT_TEXT_STYLE;
   prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
+  prefs.capitalizationMode = DEFAULT_CAPITALIZATION_MODE;
+
   prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
   prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
 

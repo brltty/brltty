@@ -1495,6 +1495,18 @@ makePreferencesMenu (void) {
     ITEM(newBooleanMenuItem(menu, &prefs.expandCurrentWord, &name));
     TEST(ContractedBraille);
   }
+
+  {
+    static const MenuString strings[] = {
+      {.label=strtext("No Capitalization")},
+      {.label=strtext("Use Capital Sign")},
+      {.label=strtext("Superimpose Dot 7")}
+    };
+
+    NAME(strtext("Capitalization Mode"));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.capitalizationMode, &name, strings));
+    TEST(ContractedBraille);
+  }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {

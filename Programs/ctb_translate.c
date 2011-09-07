@@ -236,33 +236,44 @@ selectRule (int length) {
       setAfter(currentFindLength);
 
       if (!maximumLength) {
-        typedef enum {CS_Any, CS_Lower, CS_UpperSingle, CS_UpperMultiple} CapitalizationState;
-#define STATE(c) (testCharacter((c), CTC_UpperCase)? CS_UpperSingle: testCharacter((c), CTC_LowerCase)? CS_Lower: CS_Any)
-        CapitalizationState current = STATE(before);
-        int i;
         maximumLength = currentFindLength;
 
-        for (i=0; i<currentFindLength; ++i) {
-          wchar_t character = src[i];
-          CapitalizationState next = STATE(character);
+        if (prefs.capitalizationMode != CTB_CAP_NONE) {
+          typedef enum {CS_Any, CS_Lower, CS_UpperSingle, CS_UpperMultiple} CapitalizationState;
+#define STATE(c) (testCharacter((c), CTC_UpperCase)? CS_UpperSingle: testCharacter((c), CTC_LowerCase)? CS_Lower: CS_Any)
 
-          if ((i > 0) &&
-              (((current == CS_Lower) && (next == CS_UpperSingle)) ||
-               ((current == CS_UpperMultiple) && (next == CS_Lower)))) {
-            maximumLength = i;
-            break;
-          }
+          CapitalizationState current = STATE(before);
+          int i;
 
-          if ((current > CS_Lower) && (next == CS_UpperSingle)) {
-            current = CS_UpperMultiple;
-          } else if (next != CS_Any) {
-            current = next;
-          } else if (current == CS_Any) {
-            current = CS_Lower;
+          for (i=0; i<currentFindLength; i+=1) {
+            wchar_t character = src[i];
+            CapitalizationState next = STATE(character);
+
+            if (i > 0) {
+              if (((current == CS_Lower) && (next == CS_UpperSingle)) ||
+                  ((current == CS_UpperMultiple) && (next == CS_Lower))) {
+                maximumLength = i;
+                break;
+              }
+
+              if ((prefs.capitalizationMode != CTB_CAP_SIGN) &&
+                  (next == CS_UpperSingle)) {
+                maximumLength = i;
+                break;
+              }
+            }
+
+            if ((current > CS_Lower) && (next == CS_UpperSingle)) {
+              current = CS_UpperMultiple;
+            } else if (next != CS_Any) {
+              current = next;
+            } else if (current == CS_Any) {
+              current = CS_Lower;
+            }
           }
-        }
 
 #undef STATE
+        }
       }
 
       if ((currentFindLength <= maximumLength) &&
@@ -404,8 +415,17 @@ putCell (BYTE byte) {
 }
 
 static int
-putReplace (const ContractionTableRule *rule) {
-  return putCells((BYTE *)&rule->findrep[rule->findlen], rule->replen);
+putReplace (const ContractionTableRule *rule, wchar_t character) {
+  const BYTE *cells = (BYTE *)&rule->findrep[rule->findlen];
+  int count = rule->replen;
+
+  if ((prefs.capitalizationMode == CTB_CAP_DOT7) &&
+      testCharacter(character, CTC_UpperCase)) {
+    if (!putCell(*cells++ | BRL_DOT7)) return 0;
+    if (!(count -= 1)) return 1;
+  }
+
+  return putCells(cells, count);
 }
 
 static const ContractionTableRule *
@@ -446,7 +466,7 @@ putCharacter (wchar_t character) {
     };
 
     if (handleBestCharacter(character, setCharacterRule, &scr)) {
-      return putReplace(scr.rule);
+      return putReplace(scr.rule, character);
     }
   }
 
@@ -460,7 +480,7 @@ putCharacter (wchar_t character) {
 
     if (replacementCharacter != character) {
       const ContractionTableRule *rule = getAlwaysRule(replacementCharacter);
-      if (rule) return putReplace(rule);
+      if (rule) return putReplace(rule, character);
     }
   }
 
@@ -958,19 +978,21 @@ contractText (
         }
       }
 
-      if (testCharacter(*src, CTC_UpperCase)) {
-        if (!testCharacter(before, CTC_UpperCase)) {
-          if (table->header.fields->beginCapitalSign &&
-              (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
-            if (!putSequence(table->header.fields->beginCapitalSign)) break;
-          } else if (table->header.fields->capitalSign) {
-            if (!putSequence(table->header.fields->capitalSign)) break;
+      if (prefs.capitalizationMode == CTB_CAP_SIGN) {
+        if (testCharacter(*src, CTC_UpperCase)) {
+          if (!testCharacter(before, CTC_UpperCase)) {
+            if (table->header.fields->beginCapitalSign &&
+                (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
+              if (!putSequence(table->header.fields->beginCapitalSign)) break;
+            } else if (table->header.fields->capitalSign) {
+              if (!putSequence(table->header.fields->capitalSign)) break;
+            }
           }
-        }
-      } else if (testCharacter(*src, CTC_LowerCase)) {
-        if (table->header.fields->endCapitalSign && (src - 2 >= srcmin) &&
-            testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
-          if (!putSequence(table->header.fields->endCapitalSign)) break;
+        } else if (testCharacter(*src, CTC_LowerCase)) {
+          if (table->header.fields->endCapitalSign && (src - 2 >= srcmin) &&
+              testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
+            if (!putSequence(table->header.fields->endCapitalSign)) break;
+          }
         }
       }
 
@@ -1000,7 +1022,7 @@ contractText (
       if (currentRule->replen &&
           !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
         const wchar_t *srcnxt = src + currentFindLength;
-        if (!putReplace(currentRule)) goto done;
+        if (!putReplace(currentRule, *src)) goto done;
         while (++src != srcnxt) clearOffset();
       } else {
         const wchar_t *srclim = src + currentFindLength;

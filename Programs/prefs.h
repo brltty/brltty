@@ -106,6 +106,7 @@ typedef struct {
   unsigned char statusCount;
   unsigned char statusSeparator;
   unsigned char statusFields[10];
+  unsigned char capitalizationMode;
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */

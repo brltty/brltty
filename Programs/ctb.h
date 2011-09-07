@@ -19,14 +19,13 @@
 #ifndef BRLTTY_INCLUDED_CTB
 #define BRLTTY_INCLUDED_CTB
 
+#include "ctbdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 typedef struct ContractionTableStruct ContractionTable;
-
-#define CTB_NO_OFFSET -1
-#define CTB_NO_CURSOR -1
 
 extern ContractionTable *compileContractionTable (const char *fileName);
 extern void destroyContractionTable (ContractionTable *table);
