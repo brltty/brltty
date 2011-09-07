@@ -818,7 +818,7 @@ applyAllPreferences (void) {
 }
 
 static void
-resetStatusFields (void) {
+ensureStatusFields (void) {
   const unsigned char *fields = braille->statusFields;
   unsigned int count = brl.statusColumns * brl.statusRows;
 
@@ -2503,7 +2503,7 @@ startBrailleDriver (void) {
       applyBraillePreferences();
     }
 
-    resetStatusFields();
+    ensureStatusFields();
     playTune(&tune_braille_on);
 
     if (clearStatusCells(&brl)) {

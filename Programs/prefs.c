@@ -25,7 +25,6 @@
 #include "prefs.h"
 #include "statdefs.h"
 #include "defaults.h"
-#include "system.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"
@@ -111,225 +110,273 @@ typedef struct {
   const char *name;
   unsigned char *encountered;
   const PreferenceStringTable *settingNames;
+  unsigned char defaultValue;
   unsigned char settingCount;
   unsigned char *setting;
 } PreferenceEntry;
 
 static const PreferenceEntry preferenceTable[] = {
   { .name = "text-style",
+    .defaultValue = DEFAULT_TEXT_STYLE,
     .settingNames = &preferenceStringTable_textStyle,
     .setting = &prefs.textStyle
   }
   ,
   { .name = "expand-current-word",
+    .defaultValue = DEFAULT_EXPAND_CURRENT_WORD,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.expandCurrentWord
   }
   ,
   { .name = "capitalization-mode",
+    .defaultValue = DEFAULT_CAPITALIZATION_MODE,
     .settingNames = &preferenceStringTable_capitalizationMode,
     .setting = &prefs.capitalizationMode
   }
   ,
   { .name = "skip-identical-lines",
+    .defaultValue = DEFAULT_SKIP_IDENTICAL_LINES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.skipIdenticalLines
   }
   ,
   { .name = "skip-blank-windows",
+    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.skipBlankWindows
   }
   ,
   { .name = "skip-blank-windows-mode",
+    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS_MODE,
     .settingNames = &preferenceStringTable_skipBlankWindowsMode,
     .setting = &prefs.skipBlankWindowsMode
   }
   ,
   { .name = "sliding-window",
+    .defaultValue = DEFAULT_SLIDING_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.slidingWindow
   }
   ,
   { .name = "eager-sliding-window",
+    .defaultValue = DEFAULT_EAGER_SLIDING_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.eagerSlidingWindow
   }
   ,
   { .name = "window-overlap",
+    .defaultValue = DEFAULT_WINDOW_OVERLAP,
     .setting = &prefs.windowOverlap
   }
   ,
   { .name = "autorepeat",
+    .defaultValue = DEFAULT_AUTOREPEAT,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autorepeat
   }
   ,
   { .name = "autorepeat-panning",
+    .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autorepeatPanning
   }
   ,
   { .name = "autorepeat-delay",
+    .defaultValue = DEFAULT_AUTOREPEAT_DELAY,
     .setting = &prefs.autorepeatDelay
   }
   ,
   { .name = "autorepeat-interval",
+    .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
     .setting = &prefs.autorepeatInterval
   }
   ,
   { .name = "show-cursor",
+    .defaultValue = DEFAULT_SHOW_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showCursor
   }
   ,
   { .name = "cursor-style",
+    .defaultValue = DEFAULT_CURSOR_STYLE,
     .settingNames = &preferenceStringTable_cursorStyle,
     .setting = &prefs.cursorStyle
   }
   ,
   { .name = "blinking-cursor",
+    .defaultValue = DEFAULT_BLINKING_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingCursor
   }
   ,
   { .name = "cursor-visible-time",
+    .defaultValue = DEFAULT_CURSOR_VISIBLE_TIME,
     .setting = &prefs.cursorVisibleTime
   }
   ,
   { .name = "cursor-invisible-time",
+    .defaultValue = DEFAULT_CURSOR_INVISIBLE_TIME,
     .setting = &prefs.cursorInvisibleTime
   }
   ,
   { .name = "show-attributes",
+    .defaultValue = DEFAULT_SHOW_ATTRIBUTES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showAttributes
   }
   ,
   { .name = "blinking-attributes",
+    .defaultValue = DEFAULT_BLINKING_ATTRIBUTES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingAttributes
   }
   ,
   { .name = "attributes-visible-time",
+    .defaultValue = DEFAULT_ATTRIBUTES_VISIBLE_TIME,
     .setting = &prefs.attributesVisibleTime
   }
   ,
   { .name = "attributes-invisible-time",
+    .defaultValue = DEFAULT_ATTRIBUTES_INVISIBLE_TIME,
     .setting = &prefs.attributesInvisibleTime
   }
   ,
   { .name = "blinking-capitals",
+    .defaultValue = DEFAULT_BLINKING_CAPITALS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingCapitals
   }
   ,
   { .name = "capitals-visible-time",
+    .defaultValue = DEFAULT_CAPITALS_VISIBLE_TIME,
     .setting = &prefs.capitalsVisibleTime
   }
   ,
   { .name = "capitals-invisible-time",
+    .defaultValue = DEFAULT_CAPITALS_INVISIBLE_TIME,
     .setting = &prefs.capitalsInvisibleTime
   }
   ,
   { .name = "braille-firmness",
+    .defaultValue = DEFAULT_BRAILLE_FIRMNESS,
     .settingNames = &preferenceStringTable_brailleFirmness,
     .setting = &prefs.brailleFirmness
   }
   ,
   { .name = "braille-sensitivity",
+    .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
     .settingNames = &preferenceStringTable_brailleSensitivity,
     .setting = &prefs.brailleSensitivity
   }
   ,
   { .name = "window-follows-pointer",
+    .defaultValue = DEFAULT_WINDOW_FOLLOWS_POINTER,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.windowFollowsPointer
   }
   ,
   { .name = "highlight-window",
+    .defaultValue = DEFAULT_HIGHLIGHT_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.highlightWindow
   }
   ,
   { .name = "alert-tunes",
+    .defaultValue = DEFAULT_ALERT_TUNES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertTunes
   }
   ,
   { .name = "tune-device",
+    .defaultValue = DEFAULT_TUNE_DEVICE,
     .settingNames = &preferenceStringTable_tuneDevice,
     .setting = &prefs.tuneDevice
   }
   ,
   { .name = "pcm-volume",
+    .defaultValue = DEFAULT_PCM_VOLUME,
     .setting = &prefs.pcmVolume
   }
   ,
   { .name = "midi-volume",
+    .defaultValue = DEFAULT_MIDI_VOLUME,
     .setting = &prefs.midiVolume
   }
   ,
   { .name = "midi-instrument",
+    .defaultValue = DEFAULT_MIDI_INSTRUMENT,
     .setting = &prefs.midiInstrument
   }
   ,
   { .name = "fm-volume",
+    .defaultValue = DEFAULT_FM_VOLUME,
     .setting = &prefs.fmVolume
   }
   ,
   { .name = "alert-dots",
+    .defaultValue = DEFAULT_ALERT_DOTS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertDots
   }
   ,
   { .name = "alert-messages",
+    .defaultValue = DEFAULT_ALERT_MESSAGES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertMessages
   }
   ,
   { .name = "say-line-mode",
+    .defaultValue = DEFAULT_SAY_LINE_MODE,
     .settingNames = &preferenceStringTable_sayLineMode,
     .setting = &prefs.sayLineMode
   }
   ,
   { .name = "autospeak",
+    .defaultValue = DEFAULT_AUTOSPEAK,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autospeak
   }
   ,
   { .name = "speech-volume",
+    .defaultValue = DEFAULT_SPEECH_VOLUME,
     .setting = &prefs.speechVolume
   }
   ,
   { .name = "speech-rate",
+    .defaultValue = DEFAULT_SPEECH_RATE,
     .setting = &prefs.speechRate
   }
   ,
   { .name = "speech-pitch",
+    .defaultValue = DEFAULT_SPEECH_PITCH,
     .setting = &prefs.speechPitch
   }
   ,
   { .name = "speech-punctuation",
+    .defaultValue = DEFAULT_SPEECH_PUNCTUATION,
     .settingNames = &preferenceStringTable_speechPunctuation,
     .setting = &prefs.speechPunctuation
   }
   ,
   { .name = "status-position",
+    .defaultValue = DEFAULT_STATUS_POSITION,
     .settingNames = &preferenceStringTable_statusPosition,
     .setting = &prefs.statusPosition
   }
   ,
   { .name = "status-count",
+    .defaultValue = DEFAULT_STATUS_COUNT,
     .setting = &prefs.statusCount
   }
   ,
   { .name = "status-separator",
+    .defaultValue = DEFAULT_STATUS_SEPARATOR,
     .settingNames = &preferenceStringTable_statusSeparator,
     .setting = &prefs.statusSeparator
   }
   ,
   { .name = "status-fields",
+    .defaultValue = sfEnd,
     .encountered = &statusFieldsSet,
     .settingNames = &preferenceStringTable_statusField,
     .settingCount = ARRAY_COUNT(prefs.statusFields),
@@ -356,11 +403,7 @@ setStatusFields (const unsigned char *fields) {
 }
 
 static void
-resetStatusPreferences (void) {
-  prefs.statusPosition = spNone;
-  prefs.statusCount = 0;
-  prefs.statusSeparator = ssNone;
-
+resetStatusFields (void) {
   memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
   statusFieldsSet = 0;
 }
@@ -373,65 +416,22 @@ resetPreferences (void) {
   prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
   prefs.version = 6;
 
-  prefs.autorepeat = DEFAULT_AUTOREPEAT;
-  prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
-  prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-  prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+  {
+    const PreferenceEntry *pref = preferenceTable;
+    const PreferenceEntry *end = pref + preferenceCount;
 
-  prefs.showCursor = DEFAULT_SHOW_CURSOR;
-  prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
-  prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
-  prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
-  prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
+    while (pref < end) {
+      if (pref->settingCount) {
+        memset(pref->setting, pref->defaultValue, pref->settingCount);
+      } else {
+        *pref->setting = pref->defaultValue;
+      }
 
-  prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
-  prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
-  prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
-  prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
+      pref += 1;
+    }
+  }
 
-  prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
-  prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
-  prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
-
-  prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
-  prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
-
-  prefs.textStyle = DEFAULT_TEXT_STYLE;
-  prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
-  prefs.capitalizationMode = DEFAULT_CAPITALIZATION_MODE;
-
-  prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-  prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
-
-  prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
-  prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
-  prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
-
-  prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
-  prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
-  prefs.skipBlankWindowsMode = DEFAULT_SKIP_BLANK_WINDOWS_MODE;
-
-  prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
-  prefs.alertDots = DEFAULT_ALERT_DOTS;
-  prefs.alertTunes = DEFAULT_ALERT_TUNES;
-
-  prefs.tuneDevice = DEFAULT_TUNE_DEVICE;
-  prefs.pcmVolume = DEFAULT_PCM_VOLUME;
-  prefs.midiVolume = DEFAULT_MIDI_VOLUME;
-  prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
-  prefs.fmVolume = DEFAULT_FM_VOLUME;
-
-  prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
-  prefs.autospeak = DEFAULT_AUTOSPEAK;
-  prefs.speechRate = DEFAULT_SPEECH_RATE;
-  prefs.speechVolume = DEFAULT_SPEECH_VOLUME;
-  prefs.speechPitch = DEFAULT_SPEECH_PITCH;
-  prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
-
-  prefs.statusPosition = DEFAULT_STATUS_POSITION;
-  prefs.statusCount = DEFAULT_STATUS_COUNT;
-  prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-  resetStatusPreferences();
+  resetStatusFields();
 }
 
 char *
@@ -705,7 +705,10 @@ loadPreferencesFile (const char *path) {
         }
 
         length = 58;
-        resetStatusPreferences();
+        prefs.statusPosition = DEFAULT_STATUS_POSITION;
+        prefs.statusCount = DEFAULT_STATUS_COUNT;
+        prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
+        resetStatusFields();
         setStatusFields(fields);
       } else {
         statusFieldsSet = 1;
