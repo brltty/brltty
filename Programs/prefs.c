@@ -402,12 +402,6 @@ setStatusFields (const unsigned char *fields) {
   }
 }
 
-static void
-resetStatusFields (void) {
-  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
-  statusFieldsSet = 0;
-}
-
 void
 resetPreferences (void) {
   memset(&prefs, 0, sizeof(prefs));
@@ -427,11 +421,10 @@ resetPreferences (void) {
         *pref->setting = pref->defaultValue;
       }
 
+      if (pref->encountered) *pref->encountered = 0;
       pref += 1;
     }
   }
-
-  resetStatusFields();
 }
 
 char *
@@ -708,7 +701,9 @@ loadPreferencesFile (const char *path) {
         prefs.statusPosition = DEFAULT_STATUS_POSITION;
         prefs.statusCount = DEFAULT_STATUS_COUNT;
         prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-        resetStatusFields();
+
+        memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
+        statusFieldsSet = 0;
         setStatusFields(fields);
       } else {
         statusFieldsSet = 1;
