@@ -52,15 +52,15 @@ bind ThumbHome+ThumbDown NXDIFLN
 bind ThumbHome+ThumbLeft FWINLTSKIP
 bind ThumbHome+ThumbRight FWINRTSKIP
 
-bind ThumbHome+ETouchLeftRear TOP_LEFT
-bind ThumbHome+ETouchLeftFront BOT_LEFT
-bind ThumbHome+ETouchRightRear ATTRUP
-bind ThumbHome+ETouchRightFront ATTRDN
+bind ThumbLeft+ThumbUp TOP_LEFT
+bind ThumbLeft+ThumbDown BOT_LEFT
+bind ThumbRight+ThumbUp ATTRUP
+bind ThumbRight+ThumbDown ATTRDN
 
-bind ThumbLeft+ThumbDown PRPROMPT
-bind ThumbLeft+ThumbRight NXPROMPT
-bind ThumbUp+ThumbDown PRPGRPH
-bind ThumbUp+ThumbRight NXPGRPH
+bind ThumbHome+ETouchLeftRear PRPROMPT
+bind ThumbHome+ETouchLeftFront NXPROMPT
+bind ThumbHome+ETouchRightRear PRPGRPH
+bind ThumbHome+ETouchRightFront NXPGRPH
 
 bind ETouchLeftRear LNBEG
 bind ETouchRightRear LNEND
@@ -85,8 +85,8 @@ bind ThumbRight+!RoutingKey2 NXDIFCHAR
 
 bind ThumbHome+!RoutingKey1 SETLEFT
 
-bind ThumbLeft+ThumbUp SIXDOTS
-bind ThumbDown+ThumbRight CSRTRK
+bind ThumbUp+ThumbDown CSRTRK
+bind ThumbLeft+ThumbRight SIXDOTS
 
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
