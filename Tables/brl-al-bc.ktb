@@ -39,6 +39,7 @@ bind ETouchLeftRear+ETouchRightFront LEARN
 bind ETouchLeftFront+ETouchRightRear INFO
 bind ETouchLeftFront+ETouchRightFront PREFMENU
 
+bind ThumbUp+ThumbDown CSRTRK
 bind ThumbHome HOME
 bind ETouchLeftRear+ETouchLeftFront BACK
 
@@ -73,9 +74,10 @@ bind ETouchRightRear+ETouchRightFront CSRJMP_VERT
 bind RoutingKey1+!RoutingKey1 COPYCHARS
 bind ThumbLeft+!RoutingKey1 CUTBEGIN
 bind ThumbUp+!RoutingKey1 CUTAPPEND
-bind ThumbDown+!RoutingKey1 CUTLINE
-bind ThumbRight+!RoutingKey1 CUTRECT
+bind ThumbDown+!RoutingKey1 CUTRECT
+bind ThumbRight+!RoutingKey1 CUTLINE
 bind SmartpadEnter PASTE
+bind ThumbLeft+ThumbRight PASTE
 
 bind !RoutingKey2 DESCCHAR
 bind ThumbUp+!RoutingKey2 PRINDENT
@@ -84,9 +86,6 @@ bind ThumbLeft+!RoutingKey2 PRDIFCHAR
 bind ThumbRight+!RoutingKey2 NXDIFCHAR
 
 bind ThumbHome+!RoutingKey1 SETLEFT
-
-bind ThumbUp+ThumbDown CSRTRK
-bind ThumbLeft+ThumbRight SIXDOTS
 
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
@@ -129,5 +128,13 @@ bind ETouchRightFront MENU_NEXT_SETTING
 bind ThumbHome PREFMENU
 bind ETouchLeftRear+ETouchLeftFront PREFLOAD
 bind ETouchRightRear+ETouchRightFront PREFSAVE
+
+bind SmartpadF1 PREFMENU
+bind SmartpadF2 PREFLOAD
+bind SmartpadUp MENU_PREV_ITEM
+bind SmartpadDown MENU_NEXT_ITEM
+bind SmartpadLeft MENU_PREV_SETTING
+bind SmartpadRight MENU_NEXT_SETTING
+bind SmartpadEnter PREFSAVE
 
 
