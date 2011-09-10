@@ -116,6 +116,12 @@ typedef struct {
 } PreferenceEntry;
 
 static const PreferenceEntry preferenceTable[] = {
+  { .name = "save-on-exit",
+    .defaultValue = DEFAULT_SAVE_ON_EXIT,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.saveOnExit
+  }
+  ,
   { .name = "text-style",
     .defaultValue = DEFAULT_TEXT_STYLE,
     .settingNames = &preferenceStringTable_textStyle,

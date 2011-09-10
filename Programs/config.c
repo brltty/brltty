@@ -1461,8 +1461,6 @@ makeMidiInstrumentMenuStrings (void) {
 }
 #endif /* ENABLE_MIDI_SUPPORT */
 
-static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
-
 static Menu *
 makePreferencesMenu (void) {
   Menu *menu = newMenu();
@@ -1475,7 +1473,7 @@ makePreferencesMenu (void) {
 
   {
     NAME(strtext("Save on Exit"));
-    ITEM(newBooleanMenuItem(menu, &saveOnExit, &name));
+    ITEM(newBooleanMenuItem(menu, &prefs.saveOnExit, &name));
   }
 
   {
@@ -1987,8 +1985,7 @@ updatePreferences (void) {
 
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
-              saveOnExit = 1;
-              goto exitMenu;
+              goto saveAndExitMenu;
 
             case BRL_CMD_TOP:
             case BRL_CMD_TOP_LEFT:
@@ -2130,7 +2127,8 @@ updatePreferences (void) {
   }
 
 exitMenu:
-  if (saveOnExit) {
+  if (prefs.saveOnExit) {
+  saveAndExitMenu:
     if (savePreferences()) {
       playTune(&tune_command_done);
     }

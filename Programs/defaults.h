@@ -28,9 +28,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*
- * Edit as necessary for your system.
- */
+/* Edit as necessary for your system. */
 
 /* Delay times, measured in milliseconds. */
 #define DEFAULT_UPDATE_INTERVAL 40	/* sleep time per cycle - overall speed */
@@ -40,6 +38,8 @@ extern "C" {
  * is good as that allows "exiting" to be replaced by "terminated"
  * on the display.
  */
+
+#define DEFAULT_SAVE_ON_EXIT 0
 
 #define DEFAULT_TEXT_STYLE tsComputerBraille8
 #define DEFAULT_EXPAND_CURRENT_WORD 1

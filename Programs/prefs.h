@@ -107,6 +107,7 @@ typedef struct {
   unsigned char statusSeparator;
   unsigned char statusFields[10];
   unsigned char capitalizationMode;
+  unsigned char saveOnExit;
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */
