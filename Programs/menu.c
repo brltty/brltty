@@ -498,7 +498,7 @@ adjustMenuItem (const MenuItem *item, void (*adjust) (const MenuItem *item)) {
   do {
     adjust(item);
     if (!--count) break;
-  } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
+  } while ((*item->setting % item->divisor) || (item->changed && !item->changed(item, *item->setting)));
 
   return !!count;
 }
@@ -533,7 +533,7 @@ changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int cou
     *item->setting = index % (item->maximum + 1);
   }
 
-  if (!item->changed || item->changed(*item->setting)) return 1;
+  if (!item->changed || item->changed(item, *item->setting)) return 1;
   *item->setting = oldSetting;
   return 0;
 }

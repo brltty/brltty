@@ -59,7 +59,7 @@ extern MenuItem *newFileMenuItem (
 typedef int MenuItemTester (void);
 extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 
-typedef int MenuItemChanged (unsigned char setting);
+typedef int MenuItemChanged (const MenuItem *item, unsigned char setting);
 extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
 extern void setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count);

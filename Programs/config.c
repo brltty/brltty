@@ -907,7 +907,7 @@ testBrailleFirmness (void) {
 }
 
 static int
-changedBrailleFirmness (unsigned char setting) {
+changedBrailleFirmness (const MenuItem *item, unsigned char setting) {
   return setBrailleFirmness(&brl, setting);
 }
 
@@ -917,7 +917,7 @@ testBrailleSensitivity (void) {
 }
 
 static int
-changedBrailleSensitivity (unsigned char setting) {
+changedBrailleSensitivity (const MenuItem *item, unsigned char setting) {
   return setBrailleSensitivity(&brl, setting);
 }
 
@@ -927,7 +927,7 @@ testStatusPosition (void) {
 }
 
 static int
-changedStatusPosition (unsigned char setting) {
+changedStatusPosition (const MenuItem *item, unsigned char setting) {
   reconfigureWindow();
   return 1;
 }
@@ -938,7 +938,7 @@ testStatusCount (void) {
 }
 
 static int
-changedStatusCount (unsigned char setting) {
+changedStatusCount (const MenuItem *item, unsigned char setting) {
   reconfigureWindow();
   return 1;
 }
@@ -949,7 +949,7 @@ testStatusSeparator (void) {
 }
 
 static int
-changedStatusSeparator (unsigned char setting) {
+changedStatusSeparator (const MenuItem *item, unsigned char setting) {
   reconfigureWindow();
   return 1;
 }
@@ -984,7 +984,7 @@ changedStatusField (unsigned char index, unsigned char setting) {
 
 #define STATUS_FIELD_HANDLERS(n) \
   static int testStatusField##n (void) { return testStatusField(n-1); } \
-  static int changedStatusField##n (unsigned char setting) { return changedStatusField(n-1, setting); }
+  static int changedStatusField##n (const MenuItem *item, unsigned char setting) { return changedStatusField(n-1, setting); }
 STATUS_FIELD_HANDLERS(1)
 STATUS_FIELD_HANDLERS(2)
 STATUS_FIELD_HANDLERS(3)
@@ -1003,7 +1003,7 @@ testSpeechRate (void) {
 }
 
 static int
-changedSpeechRate (unsigned char setting) {
+changedSpeechRate (const MenuItem *item, unsigned char setting) {
   setSpeechRate(&spk, setting, 1);
   return 1;
 }
@@ -1014,7 +1014,7 @@ testSpeechVolume (void) {
 }
 
 static int
-changedSpeechVolume (unsigned char setting) {
+changedSpeechVolume (const MenuItem *item, unsigned char setting) {
   setSpeechVolume(&spk, setting, 1);
   return 1;
 }
@@ -1025,7 +1025,7 @@ testSpeechPitch (void) {
 }
 
 static int
-changedSpeechPitch (unsigned char setting) {
+changedSpeechPitch (const MenuItem *item, unsigned char setting) {
   setSpeechPitch(&spk, setting, 1);
   return 1;
 }
@@ -1036,7 +1036,7 @@ testSpeechPunctuation (void) {
 }
 
 static int
-changedSpeechPunctuation (unsigned char setting) {
+changedSpeechPunctuation (const MenuItem *item, unsigned char setting) {
   setSpeechPunctuation(&spk, setting, 1);
   return 1;
 }
@@ -1048,7 +1048,7 @@ testTunes (void) {
 }
 
 static int
-changedTuneDevice (unsigned char setting) {
+changedTuneDevice (const MenuItem *item, unsigned char setting) {
   return setTuneDevice(setting);
 }
 
@@ -1073,16 +1073,14 @@ testTunesFm (void) {
 }
 #endif /* ENABLE_FM_SUPPORT */
 
-static const MenuItem *savedMenuItem_TextTable;
 static int
-changedTextTable (unsigned char setting) {
-  return replaceTextTable(getMenuItemValue(savedMenuItem_TextTable));
+changedTextTable (const MenuItem *item, unsigned char setting) {
+  return replaceTextTable(getMenuItemValue(item));
 }
 
-static const MenuItem *savedMenuItem_AttributesTable;
 static int
-changedAttributesTable (unsigned char setting) {
-  return replaceAttributesTable(getMenuItemValue(savedMenuItem_AttributesTable));
+changedAttributesTable (const MenuItem *item, unsigned char setting) {
+  return replaceAttributesTable(getMenuItemValue(item));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1091,10 +1089,9 @@ testContractedBraille (void) {
   return prefs.textStyle == tsContractedBraille;
 }
 
-static const MenuItem *savedMenuItem_ContractionTable;
 static int
-changedContractionTable (unsigned char setting) {
-  return loadContractionTable(getMenuItemValue(savedMenuItem_ContractionTable));
+changedContractionTable (const MenuItem *item, unsigned char setting) {
+  return loadContractionTable(getMenuItemValue(item));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -1109,7 +1106,7 @@ testSlidingWindow (void) {
 }
 
 static int
-changedWindowOverlap (unsigned char setting) {
+changedWindowOverlap (const MenuItem *item, unsigned char setting) {
   if (setting >= textCount) return 0;
   reconfigureWindow();
   return 1;
@@ -1121,7 +1118,7 @@ testAutorepeat (void) {
 }
 
 static int
-changedAutorepeat (unsigned char setting) {
+changedAutorepeat (const MenuItem *item, unsigned char setting) {
   if (setting) resetAutorepeat();
   return 1;
 }
@@ -1243,7 +1240,6 @@ makePreferencesMenu (void) {
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
 #define TEST(property) setMenuItemTester(item, test##property)
 #define CHANGED(setting) setMenuItemChanged(item, changed##setting)
-#define SAVE(setting) savedMenuItem_##setting = item
 
   {
     NAME(strtext("Save on Exit"));
@@ -1628,14 +1624,12 @@ makePreferencesMenu (void) {
     NAME(strtext("Text Table"));
     ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
     CHANGED(TextTable);
-    SAVE(TextTable);
   }
 
   {
     NAME(strtext("Attributes Table"));
     ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
     CHANGED(AttributesTable);
-    SAVE(AttributesTable);
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1643,7 +1637,6 @@ makePreferencesMenu (void) {
     NAME(strtext("Contraction Table"));
     ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
     CHANGED(ContractionTable);
-    SAVE(ContractionTable);
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -1651,7 +1644,6 @@ makePreferencesMenu (void) {
 #undef ITEM
 #undef TEST
 #undef CHANGED
-#undef SAVE
 
   return menu;
 
