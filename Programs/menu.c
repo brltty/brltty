@@ -261,7 +261,7 @@ setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char cou
 }
 
 MenuItem *
-newStringsMenuItem (
+newStringMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 ) {

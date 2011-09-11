@@ -23,8 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define MENU_MAXIMUM_ITEM_VALUE 0XFF
-
 typedef struct MenuStruct Menu;
 typedef struct MenuItemStruct MenuItem;
 
@@ -42,12 +40,12 @@ extern MenuItem *newNumericMenuItem (
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 );
 
-extern MenuItem *newStringsMenuItem (
+extern MenuItem *newStringMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 );
 
-#define newEnumeratedMenuItem(menu, setting, name, strings) newStringsMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
+#define newEnumeratedMenuItem(menu, setting, name, strings) newStringMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
 extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
 extern MenuItem *newFileMenuItem (

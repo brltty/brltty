@@ -1496,7 +1496,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("MIDI Instrument"));
-      ITEM(newStringsMenuItem(menu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
+      ITEM(newStringMenuItem(menu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
       TEST(TunesMidi);
     }
   }
