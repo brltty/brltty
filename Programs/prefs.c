@@ -575,7 +575,6 @@ loadPreferencesFile (const char *path) {
     } else {
       prefs = newPreferences;
       ok = 1;
-      prefs.saveOnExit = 0;
 
       if (prefs.version == 0) {
         prefs.version++;
@@ -720,6 +719,9 @@ loadPreferencesFile (const char *path) {
         prefs.version++;
         prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
       }
+
+      prefs.capitalizationMode = DEFAULT_CAPITALIZATION_MODE;
+      prefs.saveOnExit = DEFAULT_SAVE_ON_EXIT;
     }
 
     if (file) {
