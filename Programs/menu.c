@@ -41,11 +41,13 @@ struct MenuItemStruct {
   MenuItemTester *test;                     /* returns true if item should be presented */
   MenuItemChanged *changed;
 
-  const MenuString *strings;               /* symbolic names of values */
-
   unsigned char minimum;                  /* lowest valid value */
   unsigned char maximum;                  /* highest valid value */
   unsigned char divisor;                  /* present only multiples of this value */
+
+  const char * (*getValue) (const MenuItem *item);
+  const char * (*getComment) (const MenuItem *item);
+  const void *data;
 };
 
 char *
@@ -96,28 +98,40 @@ getMenuItemName (const MenuItem *item) {
   return &item->name;
 }
 
+static const char *
+getMenuItemValue_numeric (const MenuItem *item) {
+  Menu *menu = item->menu;
+  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
+  return menu->valueBuffer;
+}
+
+static const char *
+getMenuItemValue_strings (const MenuItem *item) {
+  const MenuString *strings = item->data;
+  const char *label = strings[*item->setting - item->minimum].label;
+  if (!label || !*label) label = strtext("<off>");
+  return getLocalText(label);
+}
+
 const char *
 getMenuItemValue (const MenuItem *item) {
-  if (item->strings) {
-    const char *label = item->strings[*item->setting - item->minimum].label;
-    if (!label || !*label) label = strtext("<off>");
-    return getLocalText(label);
-  }
+  return item->getValue(item);
+}
 
-  {
-    Menu *menu = item->menu;
-    snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
-    return menu->valueBuffer;
-  }
+static const char *
+getMenuItemComment_none (const MenuItem *item) {
+  return "";
+}
+
+static const char *
+getMenuItemComment_strings (const MenuItem *item) {
+  const MenuString *strings = item->data;
+  return getLocalText(strings[*item->setting - item->minimum].comment);
 }
 
 const char *
 getMenuItemComment (const MenuItem *item) {
-  if (item->strings) {
-    return getLocalText(item->strings[*item->setting - item->minimum].comment);
-  }
-
-  return "";
+  return item->getComment(item);
 }
 
 MenuItem *
@@ -147,11 +161,13 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
     item->test = NULL;
     item->changed = NULL;
 
-    item->strings = NULL;
-
     item->minimum = 0;
     item->maximum = 0;
     item->divisor = 1;
+
+    item->getValue = getMenuItemValue_numeric;
+    item->getComment = getMenuItemComment_none;
+    item->data = NULL;
 
     return item;
   }
@@ -169,7 +185,10 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 
 void
 setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
-  item->strings = strings;
+  item->getValue = getMenuItemValue_strings;
+  item->getComment = getMenuItemComment_strings;
+  item->data = strings;
+
   item->minimum = 0;
   item->maximum = count - 1;
   item->divisor = 1;
@@ -177,10 +196,11 @@ setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char cou
 
 void
 setMenuItemValues (MenuItem *item, const char *const *values, unsigned char count) {
+  const MenuString *strings = item->data;
   unsigned int index;
 
   for (index=0; index<count; index+=1) {
-    *((const char **)&item->strings[index].label) = values[index];
+    *((const char **)&strings[index].label) = values[index];
   }
 
   item->maximum = count - 1;
@@ -262,7 +282,7 @@ int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char oldSetting = *item->setting;
 
-  if (item->strings) {
+  if (item->data) {
     *item->setting = index % (item->maximum + 1);
   } else {
     *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
