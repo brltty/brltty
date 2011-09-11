@@ -575,6 +575,7 @@ loadPreferencesFile (const char *path) {
     } else {
       prefs = newPreferences;
       ok = 1;
+      prefs.saveOnExit = 0;
 
       if (prefs.version == 0) {
         prefs.version++;
