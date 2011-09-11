@@ -408,6 +408,17 @@ setStatusFields (const unsigned char *fields) {
   }
 }
 
+static void
+resetPreference (const PreferenceEntry *pref) {
+  if (pref->settingCount) {
+    memset(pref->setting, pref->defaultValue, pref->settingCount);
+  } else {
+    *pref->setting = pref->defaultValue;
+  }
+
+  if (pref->encountered) *pref->encountered = 0;
+}
+
 void
 resetPreferences (void) {
   memset(&prefs, 0, sizeof(prefs));
@@ -420,16 +431,7 @@ resetPreferences (void) {
     const PreferenceEntry *pref = preferenceTable;
     const PreferenceEntry *end = pref + preferenceCount;
 
-    while (pref < end) {
-      if (pref->settingCount) {
-        memset(pref->setting, pref->defaultValue, pref->settingCount);
-      } else {
-        *pref->setting = pref->defaultValue;
-      }
-
-      if (pref->encountered) *pref->encountered = 0;
-      pref += 1;
-    }
+    while (pref < end) resetPreference(pref++);
   }
 }
 
@@ -551,6 +553,52 @@ processPreferenceLine (char *line, void *data) {
   return 1;
 }
 
+static void
+setStatusStyle (unsigned char style) {
+  static const unsigned char styleNone[] = {
+    sfEnd
+  };
+
+  static const unsigned char styleAlva[] = {
+    sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
+  };
+
+  static const unsigned char styleTieman[] = {
+    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+  };
+
+  static const unsigned char stylePB80[] = {
+    sfWindowRow, sfEnd
+  };
+
+  static const unsigned char styleConfigurable[] = {
+    sfGeneric, sfEnd
+  };
+
+  static const unsigned char styleMDV[] = {
+    sfWindowCoordinates, sfEnd
+  };
+
+  static const unsigned char styleVoyager[] = {
+    sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+  };
+
+  static const unsigned char styleTime[] = {
+    sfTime, sfEnd
+  };
+
+  static const unsigned char *const styleTable[] = {
+    styleNone, styleAlva, styleTieman, stylePB80,
+    styleConfigurable, styleMDV, styleVoyager, styleTime
+  };
+  static const unsigned char styleCount = ARRAY_COUNT(styleTable);
+
+  if (style < styleCount) {
+    const unsigned char *fields = styleTable[style];
+    if (*fields != sfEnd) setStatusFields(fields);
+  }
+}
+
 int
 loadPreferencesFile (const char *path) {
   int ok = 0;
@@ -576,25 +624,49 @@ loadPreferencesFile (const char *path) {
       prefs = newPreferences;
       ok = 1;
 
+      {
+        const PreferenceEntry *pref = preferenceTable;
+        const PreferenceEntry *end = pref + preferenceCount;
+
+        const unsigned char *from = prefs.magic;
+        const unsigned char *to = from + length;
+
+        while (pref < end) {
+          unsigned char count = pref->settingCount;
+          if (!count) count = 1;
+
+          if ((pref->setting < from) || ((pref->setting + count) > to)) {
+            resetPreference(pref);
+          }
+
+          pref += 1;
+        }
+      }
+
+      if (length < (prefs.statusFields + sizeof(prefs.statusFields) - prefs.magic)) {
+        setStatusStyle(prefs.expandCurrentWord);
+      } else {
+        statusFieldsSet = 1;
+      }
+
       if (prefs.version == 0) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.pcmVolume = DEFAULT_PCM_VOLUME;
         prefs.midiVolume = DEFAULT_MIDI_VOLUME;
         prefs.fmVolume = DEFAULT_FM_VOLUME;
       }
 
       if (prefs.version == 1) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
         prefs.autospeak = DEFAULT_AUTOSPEAK;
       }
 
       if (prefs.version == 2) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.autorepeat = DEFAULT_AUTOREPEAT;
         prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
         prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-
         prefs.cursorVisibleTime *= 4;
         prefs.cursorInvisibleTime *= 4;
         prefs.attributesVisibleTime *= 4;
@@ -603,125 +675,20 @@ loadPreferencesFile (const char *path) {
         prefs.capitalsInvisibleTime *= 4;
       }
 
-      if (length == 40) {
-        length++;
-        prefs.speechRate = DEFAULT_SPEECH_RATE;
-      }
-
-      if (length == 41) {
-        length++;
-        prefs.speechVolume = DEFAULT_SPEECH_VOLUME;
-      }
-
-      if (length == 42) {
-        length++;
-        prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-      }
-
-      if (length == 43) {
-        length++;
-        prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
-      }
-
-      if (length == 44) {
-        length++;
-        prefs.speechPitch = DEFAULT_SPEECH_PITCH;
-      }
-
       if (prefs.version == 3) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
       }
 
       if (prefs.version == 4) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
       }
 
-      if (length == 45) {
-        length++;
-        prefs.statusPosition = DEFAULT_STATUS_POSITION;
-      }
-
-      if (length == 46) {
-        length++;
-        prefs.statusCount = DEFAULT_STATUS_COUNT;
-      }
-
-      if (length == 47) {
-        length++;
-        prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-      }
-
-      if (length < 58) {
-        const unsigned char *fields = NULL;
-
-        {
-          static const unsigned char styleNone[] = {
-            sfEnd
-          };
-
-          static const unsigned char styleAlva[] = {
-            sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
-          };
-
-          static const unsigned char styleTieman[] = {
-            sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-          };
-
-          static const unsigned char stylePB80[] = {
-            sfWindowRow, sfEnd
-          };
-
-          static const unsigned char styleConfigurable[] = {
-            sfGeneric, sfEnd
-          };
-
-          static const unsigned char styleMDV[] = {
-            sfWindowCoordinates, sfEnd
-          };
-
-          static const unsigned char styleVoyager[] = {
-            sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
-          };
-
-          static const unsigned char styleTime[] = {
-            sfTime, sfEnd
-          };
-
-          static const unsigned char *const styleTable[] = {
-            styleNone, styleAlva, styleTieman, stylePB80,
-            styleConfigurable, styleMDV, styleVoyager, styleTime
-          };
-          static const unsigned char styleCount = ARRAY_COUNT(styleTable);
-
-          unsigned char style = ((const unsigned char *)&prefs)[38];
-
-          if (style < styleCount) {
-            fields = styleTable[style];
-            if (*fields == sfEnd) fields = NULL;
-          }
-        }
-
-        length = 58;
-        prefs.statusPosition = DEFAULT_STATUS_POSITION;
-        prefs.statusCount = DEFAULT_STATUS_COUNT;
-        prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-
-        memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
-        statusFieldsSet = 0;
-        setStatusFields(fields);
-      } else {
-        statusFieldsSet = 1;
-      }
-
       if (prefs.version == 5) {
-        prefs.version++;
+        prefs.version += 1;
         prefs.expandCurrentWord = DEFAULT_EXPAND_CURRENT_WORD;
       }
-
-      prefs.capitalizationMode = DEFAULT_CAPITALIZATION_MODE;
-      prefs.saveOnExit = DEFAULT_SAVE_ON_EXIT;
     }
 
     if (file) {

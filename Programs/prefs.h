@@ -106,6 +106,11 @@ typedef struct {
   unsigned char statusCount;
   unsigned char statusSeparator;
   unsigned char statusFields[10];
+  /* No fields above this point should be added, removed, or reordered so that
+   * backward compatibility with old binary preference files will be retained.
+   */
+
+  /* Fields below this point may be modified as needed. */
   unsigned char capitalizationMode;
   unsigned char saveOnExit;
 } PACKED Preferences;
