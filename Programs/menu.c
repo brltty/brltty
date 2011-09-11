@@ -19,10 +19,44 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#if defined(HAVE_GLOB_H)
+#include <glob.h>
+#elif defined(__MINGW32__)
+#include <io.h>
+#else /* glob: paradigm-specific global definitions */
+#warning file globbing support not available on this platform
+#endif /* glob: paradigm-specific global definitions */
 
 #include "log.h"
+#include "file.h"
 #include "menu.h"
 #include "parse.h"
+
+typedef struct {
+  const char *directory;
+  const char *extension;
+  const char *pattern;
+  char *initial;
+  char *current;
+  unsigned none:1;
+
+#if defined(HAVE_GLOB_H)
+  glob_t glob;
+#elif defined(__MINGW32__)
+  char **names;
+  int offset;
+#endif /* glob: paradigm-specific field declarations */
+
+  const char **paths;
+  int count;
+  unsigned char setting;
+  const char *pathsArea[3];
+} FileData;
 
 struct MenuStruct {
   MenuItem *items;
@@ -30,6 +64,7 @@ struct MenuStruct {
   unsigned int count;
   unsigned int index;
 
+  MenuItem *activeItem;
   char valueBuffer[0X10];
 };
 
@@ -45,9 +80,15 @@ struct MenuItemStruct {
   unsigned char maximum;                  /* highest valid value */
   unsigned char divisor;                  /* present only multiples of this value */
 
+  void (*beginItem) (MenuItem *item);
+  void (*endItem) (MenuItem *item);
   const char * (*getValue) (const MenuItem *item);
   const char * (*getComment) (const MenuItem *item);
-  const void *data;
+
+  union {
+    const MenuString *strings;
+    FileData *files;
+  } data;
 };
 
 char *
@@ -64,6 +105,7 @@ newMenu (void) {
     menu->size = 0;
     menu->count = 0;
     menu->index = 0;
+    menu->activeItem = NULL;
   }
 
   return menu;
@@ -84,7 +126,16 @@ getMenuItem (Menu *menu, unsigned int index) {
 
 MenuItem *
 getCurrentMenuItem (Menu *menu) {
-  return getMenuItem(menu, menu->index);
+  MenuItem *newItem = getMenuItem(menu, menu->index);
+  MenuItem *oldItem = menu->activeItem;
+
+  if (newItem != oldItem) {
+    if (oldItem && oldItem->endItem) oldItem->endItem(oldItem);
+    if (newItem->beginItem) newItem->beginItem(newItem);
+    menu->activeItem = newItem;
+  }
+
+  return newItem;
 }
 
 static int
@@ -98,6 +149,16 @@ getMenuItemName (const MenuItem *item) {
   return &item->name;
 }
 
+const char *
+getMenuItemValue (const MenuItem *item) {
+  return item->getValue(item);
+}
+
+const char *
+getMenuItemComment (const MenuItem *item) {
+  return item->getComment(item);
+}
+
 static const char *
 getMenuItemValue_numeric (const MenuItem *item) {
   Menu *menu = item->menu;
@@ -106,32 +167,8 @@ getMenuItemValue_numeric (const MenuItem *item) {
 }
 
 static const char *
-getMenuItemValue_strings (const MenuItem *item) {
-  const MenuString *strings = item->data;
-  const char *label = strings[*item->setting - item->minimum].label;
-  if (!label || !*label) label = strtext("<off>");
-  return getLocalText(label);
-}
-
-const char *
-getMenuItemValue (const MenuItem *item) {
-  return item->getValue(item);
-}
-
-static const char *
 getMenuItemComment_none (const MenuItem *item) {
   return "";
-}
-
-static const char *
-getMenuItemComment_strings (const MenuItem *item) {
-  const MenuString *strings = item->data;
-  return getLocalText(strings[*item->setting - item->minimum].comment);
-}
-
-const char *
-getMenuItemComment (const MenuItem *item) {
-  return item->getComment(item);
 }
 
 MenuItem *
@@ -165,9 +202,10 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
     item->maximum = 0;
     item->divisor = 1;
 
+    item->beginItem = NULL;
+    item->endItem = NULL;
     item->getValue = getMenuItemValue_numeric;
     item->getComment = getMenuItemComment_none;
-    item->data = NULL;
 
     return item;
   }
@@ -181,29 +219,6 @@ setMenuItemTester (MenuItem *item, MenuItemTester *handler) {
 void
 setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
   item->changed = handler;
-}
-
-void
-setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
-  item->getValue = getMenuItemValue_strings;
-  item->getComment = getMenuItemComment_strings;
-  item->data = strings;
-
-  item->minimum = 0;
-  item->maximum = count - 1;
-  item->divisor = 1;
-}
-
-void
-setMenuItemValues (MenuItem *item, const char *const *values, unsigned char count) {
-  const MenuString *strings = item->data;
-  unsigned int index;
-
-  for (index=0; index<count; index+=1) {
-    *((const char **)&strings[index].label) = values[index];
-  }
-
-  item->maximum = count - 1;
 }
 
 MenuItem *
@@ -220,6 +235,29 @@ newNumericMenuItem (
   }
 
   return item;
+}
+
+static const char *
+getMenuItemValue_strings (const MenuItem *item) {
+  const MenuString *strings = item->data.strings;
+  return getLocalText(strings[*item->setting - item->minimum].label);
+}
+
+static const char *
+getMenuItemComment_strings (const MenuItem *item) {
+  const MenuString *strings = item->data.strings;
+  return getLocalText(strings[*item->setting - item->minimum].comment);
+}
+
+void
+setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
+  item->getValue = getMenuItemValue_strings;
+  item->getComment = getMenuItemComment_strings;
+  item->data.strings = strings;
+
+  item->minimum = 0;
+  item->maximum = count - 1;
+  item->divisor = 1;
 }
 
 MenuItem *
@@ -244,6 +282,213 @@ newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) 
   };
 
   return newEnumeratedMenuItem(menu, setting, name, strings);
+}
+
+static int
+qsortCompare_fileNames (const void *element1, const void *element2) {
+  const char *const *name1 = element1;
+  const char *const *name2 = element2;
+  return strcmp(*name1, *name2);
+}
+
+static void
+beginMenuItem_files (MenuItem *item) {
+  FileData *files = item->data.files;
+  int index;
+
+  files->paths = files->pathsArea;
+  files->count = ARRAY_COUNT(files->pathsArea) - 1;
+  files->paths[files->count] = NULL;
+  index = files->count;
+
+  {
+#ifdef HAVE_FCHDIR
+    int originalDirectory = open(".", O_RDONLY);
+
+    if (originalDirectory != -1)
+#else /* HAVE_FCHDIR */
+    char *originalDirectory = getWorkingDirectory();
+
+    if (originalDirectory)
+#endif /* HAVE_FCHDIR */
+    {
+      if (chdir(files->directory) != -1) {
+#if defined(HAVE_GLOB_H)
+        memset(&files->glob, 0, sizeof(files->glob));
+        files->glob.gl_offs = files->count;
+
+        if (glob(files->pattern, GLOB_DOOFFS, NULL, &files->glob) == 0) {
+          files->paths = (const char **)files->glob.gl_pathv;
+          /* The behaviour of gl_pathc is inconsistent. Some implementations
+           * include the leading NULL pointers and some don't. Let's just
+           * figure it out the hard way by finding the trailing NULL.
+           */
+          while (files->paths[files->count]) files->count += 1;
+        }
+#elif defined(__MINGW32__)
+        struct _finddata_t findData;
+        long findHandle = _findfirst(files->pattern, &findData);
+        int allocated = files->count | 0XF;
+
+        files->offset = files->count;
+        files->names = malloc(allocated * sizeof(*files->names));
+
+        if (findHandle != -1) {
+          do {
+            if (files->count >= allocated) {
+              allocated = allocated * 2;
+              files->names = realloc(files->names, allocated * sizeof(*files->names));
+            }
+
+            files->names[files->count++] = strdup(findData.name);
+          } while (_findnext(findHandle, &findData) == 0);
+
+          _findclose(findHandle);
+        }
+
+        files->names = realloc(files->names, files->count * sizeof(*files->names));
+        files->paths = files->names;
+#endif /* glob: paradigm-specific field initialization */
+
+#ifdef HAVE_FCHDIR
+        if (fchdir(originalDirectory) == -1) logSystemError("fchdir");
+#else /* HAVE_FCHDIR */
+        if (chdir(originalDirectory) == -1) logSystemError("chdir");
+#endif /* HAVE_FCHDIR */
+      } else {
+        logMessage(LOG_ERR, "%s: %s: %s",
+                   gettext("cannot set working directory"), files->directory, strerror(errno));
+      }
+
+#ifdef HAVE_FCHDIR
+      close(originalDirectory);
+#else /* HAVE_FCHDIR */
+      free(originalDirectory);
+#endif /* HAVE_FCHDIR */
+    } else {
+#ifdef HAVE_FCHDIR
+      logMessage(LOG_ERR, "%s: %s",
+                 gettext("cannot open working directory"), strerror(errno));
+#else /* HAVE_FCHDIR */
+      logMessage(LOG_ERR, "%s", gettext("cannot determine working directory"));
+#endif /* HAVE_FCHDIR */
+    }
+  }
+
+  qsort(&files->paths[index], files->count-index, sizeof(*files->paths), qsortCompare_fileNames);
+  if (files->none) files->paths[--index] = "";
+  files->paths[--index] = files->initial;
+  files->paths += index;
+  files->count -= index;
+  files->setting = 0;
+
+  for (index=1; index<files->count; index+=1) {
+    if (strcmp(files->paths[index], files->initial) == 0) {
+      files->paths += 1;
+      files->count -= 1;
+      break;
+    }
+  }
+
+  for (index=0; index<files->count; index+=1) {
+    if (strcmp(files->paths[index], files->current) == 0) {
+      files->setting = index;
+      break;
+    }
+  }
+
+  item->maximum = files->count - 1;
+}
+
+static void
+endMenuItem_files (MenuItem *item) {
+  FileData *files = item->data.files;
+
+  if (files->current) free(files->current);
+  files->current = strdup(files->paths[files->setting]);
+
+#if defined(HAVE_GLOB_H)
+  if (files->glob.gl_pathc) {
+    int i;
+
+    for (i=0; i<files->glob.gl_offs; i+=1) files->glob.gl_pathv[i] = NULL;
+    globfree(&files->glob);
+  }
+#elif defined(__MINGW32__)
+  if (files->names) {
+    int i;
+
+    for (i=files->offset; files->count; i+=1) free(files->names[i]);
+    free(files->names);
+  }
+#endif /* glob: paradigm-specific memory deallocation */
+}
+
+static const char *
+getMenuItemValue_files (const MenuItem *item) {
+  const FileData *files = item->data.files;
+  const char *path = files->paths[files->setting];
+  if (!path) path = "";
+  return path;
+}
+
+MenuItem *
+newFileMenuItem (
+  Menu *menu, const MenuString *name,
+  const char *directory, const char *extension,
+  const char *initial, int none
+) {
+  FileData *files;
+
+  if ((files = malloc(sizeof(*files)))) {
+    char *pattern;
+
+    memset(files, 0, sizeof(*files));
+    files->directory = directory;
+    files->extension = extension;
+    files->none = !!none;
+
+    {
+      const char *strings[] = {"*", extension};
+      pattern = joinStrings(strings, ARRAY_COUNT(strings));
+    }
+
+    if (pattern) {
+      files->pattern = pattern; 
+
+      if ((files->initial = *initial? ensureExtension(initial, extension): strdup(""))) {
+        if ((files->current = strdup(files->initial))) {
+          MenuItem *item = newMenuItem(menu, &files->setting, name);
+
+          if (item) {
+            item->beginItem = beginMenuItem_files;
+            item->endItem = endMenuItem_files;
+            item->getValue = getMenuItemValue_files;
+            item->data.files = files;
+            return item;
+          }
+
+          free(files->current);
+        } else {
+          logMallocError();
+        }
+
+        free(files->initial);
+      } else {
+        logMallocError();
+      }
+
+      free(pattern);
+    } else {
+      logMallocError();
+    }
+
+    free(files);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
 }
 
 static int
@@ -282,10 +527,10 @@ int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char oldSetting = *item->setting;
 
-  if (item->data) {
-    *item->setting = index % (item->maximum + 1);
-  } else {
+  if (item->getValue == getMenuItemValue_numeric) {
     *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
+  } else {
+    *item->setting = index % (item->maximum + 1);
   }
 
   if (!item->changed || item->changed(*item->setting)) return 1;

@@ -35,14 +35,6 @@
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
 
-#if defined(HAVE_GLOB_H)
-#include <glob.h>
-#elif defined(__MINGW32__)
-#include <io.h>
-#else /* glob: paradigm-specific global definitions */
-#warning file globbing support not available on this platform
-#endif /* glob: paradigm-specific global definitions */
-
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
@@ -1081,217 +1073,28 @@ testTunesFm (void) {
 }
 #endif /* ENABLE_FM_SUPPORT */
 
-typedef struct {
-  const char *directory;
-  const char *extension;
-  const char *pattern;
-  char *initial;
-  char *current;
-  unsigned none:1;
-
-#if defined(HAVE_GLOB_H)
-  glob_t glob;
-#elif defined(__MINGW32__)
-  char **names;
-  int offset;
-#endif /* glob: paradigm-specific field declarations */
-
-  const char **paths;
-  int count;
-  unsigned char setting;
-  const char *pathsArea[3];
-
-  MenuItem *menuItem;
-} GlobData;
-
-static GlobData glob_textTable;
-static GlobData glob_attributesTable;
-
-static int
-qsortCompare_fileNames (const void *element1, const void *element2) {
-  const char *const *name1 = element1;
-  const char *const *name2 = element2;
-  return strcmp(*name1, *name2);
-}
-
-static void
-globPrepare (
-  GlobData *data, MenuItem *menuItem,
-  const char *directory, const char *extension,
-  const char *initial, int none
-) {
-  memset(data, 0, sizeof(*data));
-
-  data->directory = directory;
-  data->extension = extension;
-  data->none = !!none;
-  data->menuItem = menuItem;
-
-  {
-    const char *strings[] = {"*", extension};
-    data->pattern = joinStrings(strings, ARRAY_COUNT(strings));
-  }
-
-  data->initial = *initial? ensureExtension(initial, extension): strdup("");
-  data->current = strdup(data->initial);
-}
-
-static void
-globBegin (GlobData *data) {
-  int index;
-
-  data->paths = data->pathsArea;
-  data->count = ARRAY_COUNT(data->pathsArea) - 1;
-  data->paths[data->count] = NULL;
-  index = data->count;
-
-  {
-#ifdef HAVE_FCHDIR
-    int originalDirectory = open(".", O_RDONLY);
-    if (originalDirectory != -1)
-#else /* HAVE_FCHDIR */
-    char *originalDirectory = getWorkingDirectory();
-    if (originalDirectory)
-#endif /* HAVE_FCHDIR */
-    {
-      if (chdir(data->directory) != -1) {
-#if defined(HAVE_GLOB_H)
-        memset(&data->glob, 0, sizeof(data->glob));
-        data->glob.gl_offs = data->count;
-
-        if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
-          data->paths = (const char **)data->glob.gl_pathv;
-          /* The behaviour of gl_pathc is inconsistent. Some implementations
-           * include the leading NULL pointers and some don't. Let's just
-           * figure it out the hard way by finding the trailing NULL.
-           */
-          while (data->paths[data->count]) data->count += 1;
-        }
-#elif defined(__MINGW32__)
-        struct _finddata_t findData;
-        long findHandle = _findfirst(data->pattern, &findData);
-        int allocated = data->count | 0XF;
-
-        data->offset = data->count;
-        data->names = malloc(allocated * sizeof(*data->names));
-
-        if (findHandle != -1) {
-          do {
-            if (data->count >= allocated) {
-              allocated = allocated * 2;
-              data->names = realloc(data->names, allocated * sizeof(*data->names));
-            }
-
-            data->names[data->count++] = strdup(findData.name);
-          } while (_findnext(findHandle, &findData) == 0);
-
-          _findclose(findHandle);
-        }
-
-        data->names = realloc(data->names, data->count * sizeof(*data->names));
-        data->paths = data->names;
-#endif /* glob: paradigm-specific field initialization */
-
-#ifdef HAVE_FCHDIR
-        if (fchdir(originalDirectory) == -1) logSystemError("fchdir");
-#else /* HAVE_FCHDIR */
-        if (chdir(originalDirectory) == -1) logSystemError("chdir");
-#endif /* HAVE_FCHDIR */
-      } else {
-        logMessage(LOG_ERR, "%s: %s: %s",
-                   gettext("cannot set working directory"), data->directory, strerror(errno));
-      }
-
-#ifdef HAVE_FCHDIR
-      close(originalDirectory);
-#else /* HAVE_FCHDIR */
-      free(originalDirectory);
-#endif /* HAVE_FCHDIR */
-    } else {
-#ifdef HAVE_FCHDIR
-      logMessage(LOG_ERR, "%s: %s",
-                 gettext("cannot open working directory"), strerror(errno));
-#else /* HAVE_FCHDIR */
-      logMessage(LOG_ERR, "%s", gettext("cannot determine working directory"));
-#endif /* HAVE_FCHDIR */
-    }
-  }
-
-  qsort(&data->paths[index], data->count-index, sizeof(*data->paths), qsortCompare_fileNames);
-  if (data->none) data->paths[--index] = "";
-  data->paths[--index] = data->initial;
-  data->paths += index;
-  data->count -= index;
-  data->setting = 0;
-
-  for (index=1; index<data->count; index+=1) {
-    if (strcmp(data->paths[index], data->initial) == 0) {
-      data->paths += 1;
-      data->count -= 1;
-      break;
-    }
-  }
-
-  for (index=0; index<data->count; index+=1) {
-    if (strcmp(data->paths[index], data->current) == 0) {
-      data->setting = index;
-      break;
-    }
-  }
-
-  setMenuItemValues(data->menuItem, data->paths, data->count);
-}
-
-static void
-globEnd (GlobData *data) {
-#if defined(HAVE_GLOB_H)
-  if (data->glob.gl_pathc) {
-    int i;
-    for (i=0; i<data->glob.gl_offs; i+=1) data->glob.gl_pathv[i] = NULL;
-    globfree(&data->glob);
-  }
-#elif defined(__MINGW32__)
-  if (data->names) {
-    int i;
-    for (i=data->offset; i<data->count; i++) free(data->names[i]);
-    free(data->names);
-  }
-#endif /* glob: paradigm-specific memory deallocation */
-}
-
-static const char *
-globChanged (GlobData *data) {
-  char *path = strdup(data->paths[data->setting]);
-  if (path) {
-    free(data->current);
-    return data->current = path;
-  } else {
-    logSystemError("strdup");
-  }
-  return NULL;
-}
-
+static const MenuItem *savedMenuItem_TextTable;
 static int
 changedTextTable (unsigned char setting) {
-  return replaceTextTable(globChanged(&glob_textTable));
+  return replaceTextTable(getMenuItemValue(savedMenuItem_TextTable));
 }
 
+static const MenuItem *savedMenuItem_AttributesTable;
 static int
 changedAttributesTable (unsigned char setting) {
-  return replaceAttributesTable(globChanged(&glob_attributesTable));
+  return replaceAttributesTable(getMenuItemValue(savedMenuItem_AttributesTable));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static GlobData glob_contractionTable;
-
 static int
 testContractedBraille (void) {
   return prefs.textStyle == tsContractedBraille;
 }
 
+static const MenuItem *savedMenuItem_ContractionTable;
 static int
 changedContractionTable (unsigned char setting) {
-  return loadContractionTable(globChanged(&glob_contractionTable));
+  return loadContractionTable(getMenuItemValue(savedMenuItem_ContractionTable));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -1346,36 +1149,6 @@ testBlinkingAttributes (void) {
 static int
 testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
-}
-
-static MenuItem *
-newGlobMenuItem (Menu *menu, GlobData *data, const MenuString *name) {
-  MenuString *strings = malloc((MENU_MAXIMUM_ITEM_VALUE + 1) * sizeof(*strings));
-
-  if (strings) {
-    MenuItem *item = newMenuItem(menu, &data->setting, name);
-
-    if (item) {
-      {
-        unsigned int index;
-
-        for (index=0; index<=MENU_MAXIMUM_ITEM_VALUE; index+=1) {
-          MenuString *string = &strings[index];
-          string->label = NULL;
-          string->comment = NULL;
-        }
-      }
-
-      setMenuItemStrings(item, strings, 1);
-      return item;
-    }
-
-    free(strings);
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
 }
 
 static MenuItem *
@@ -1470,6 +1243,7 @@ makePreferencesMenu (void) {
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
 #define TEST(property) setMenuItemTester(item, test##property)
 #define CHANGED(setting) setMenuItemChanged(item, changed##setting)
+#define SAVE(setting) savedMenuItem_##setting = item
 
   {
     NAME(strtext("Save on Exit"));
@@ -1852,24 +1626,24 @@ makePreferencesMenu (void) {
 
   {
     NAME(strtext("Text Table"));
-    ITEM(newGlobMenuItem(menu, &glob_textTable, &name));
+    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
     CHANGED(TextTable);
-    globPrepare(&glob_textTable, item, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
+    SAVE(TextTable);
   }
 
   {
     NAME(strtext("Attributes Table"));
-    ITEM(newGlobMenuItem(menu, &glob_attributesTable, &name));
+    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
     CHANGED(AttributesTable);
-    globPrepare(&glob_attributesTable, item, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
+    SAVE(AttributesTable);
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {
     NAME(strtext("Contraction Table"));
-    ITEM(newGlobMenuItem(menu, &glob_contractionTable, &name));
+    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
     CHANGED(ContractionTable);
-    globPrepare(&glob_contractionTable, item, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
+    SAVE(ContractionTable);
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -1877,6 +1651,7 @@ makePreferencesMenu (void) {
 #undef ITEM
 #undef TEST
 #undef CHANGED
+#undef SAVE
 
   return menu;
 
@@ -1893,12 +1668,6 @@ updatePreferences (void) {
   int ok = 1;
 
   if (!menu) menu = makePreferencesMenu();
-
-  globBegin(&glob_textTable);
-  globBegin(&glob_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  globBegin(&glob_contractionTable);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (setStatusText(&brl, mode) &&
       message(mode, gettext("Preferences Menu"), 0)) {
@@ -1924,6 +1693,8 @@ updatePreferences (void) {
         const MenuString *name = getMenuItemName(item);
         const char *value = getMenuItemValue(item);
         const char *comment = getMenuItemComment(item);
+
+        if (!*value) value = gettext("<off>");
 
         STR_BEGIN(line, sizeof(line));
         STR_PRINTF("%s", name->label);
@@ -2133,12 +1904,6 @@ exitMenu:
       playTune(&tune_command_done);
     }
   }
-
-  globEnd(&glob_textTable);
-  globEnd(&glob_attributesTable);
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  globEnd(&glob_contractionTable);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   return ok;
 }

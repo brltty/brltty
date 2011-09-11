@@ -50,6 +50,12 @@ extern MenuItem *newStringsMenuItem (
 #define newEnumeratedMenuItem(menu, setting, name, strings) newStringsMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
 extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
+extern MenuItem *newFileMenuItem (
+  Menu *menu, const MenuString *name,
+  const char *directory, const char *extension,
+  const char *initial, int none
+);
+
 typedef int MenuItemTester (void);
 extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 
@@ -57,7 +63,6 @@ typedef int MenuItemChanged (unsigned char setting);
 extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
 extern void setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count);
-extern void setMenuItemValues (MenuItem *item, const char *const *labels, unsigned char count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
 extern const MenuString *getMenuItemName (const MenuItem *item);
