@@ -29,6 +29,7 @@
 #include "scr.h"
 #include "ses.h"
 #include "menu.h"
+#include "prefs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +63,7 @@ extern ContractionTable *contractionTable;
 extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);
 
+extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
 extern Menu *getPreferencesMenu (void);

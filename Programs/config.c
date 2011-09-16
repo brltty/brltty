@@ -809,6 +809,12 @@ applyAllPreferences (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 }
 
+void
+setPreferences (const Preferences *newPreferences) {
+  prefs = *newPreferences;
+  applyAllPreferences();
+}
+
 static void
 ensureStatusFields (void) {
   const unsigned char *fields = braille->statusFields;
@@ -1746,8 +1752,7 @@ updatePreferences (void) {
 
             case BRL_BLK_PASSKEY+BRL_KEY_HOME:
             case BRL_CMD_PREFLOAD:
-              prefs = oldPreferences;
-              applyAllPreferences();
+              setPreferences(&oldPreferences);
               message(mode, gettext("changes discarded"), 0);
               break;
 

@@ -17,7 +17,7 @@
  */
 
 #include "prologue.h"
-//#define USE_MENU_SCREEN
+#define USE_MENU_SCREEN
 
 #include <stdio.h>
 #include <string.h>
@@ -1142,6 +1142,9 @@ brlttyConstruct (int argc, char *argv[]) {
 
 static int
 brlttyCommand (void) {
+  static const char modeString_preferences[] = "prf";
+  static Preferences savedPreferences;
+
   int oldmotx = ses->winx;
   int oldmoty = ses->winy;
 
@@ -1695,10 +1698,9 @@ doCommand:
 
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
-          static const char mode[] = "prf";
-
-          setStatusText(&brl, mode);
-          message(mode, gettext("Preferences Menu"), 0);
+          setStatusCells();
+          message(modeString_preferences, gettext("Preferences Menu"), 0);
+          savedPreferences = prefs;
         } else {
           playTune(&tune_command_rejected);
         }
@@ -1717,7 +1719,10 @@ doCommand:
         }
         break;
       case BRL_CMD_PREFLOAD:
-        if (loadPreferences()) {
+        if (isMenuScreen()) {
+          setPreferences(&savedPreferences);
+          message(modeString_preferences, gettext("changes discarded"), 0);
+        } else if (loadPreferences()) {
           resetBlinkingStates();
           playTune(&tune_command_done);
         } else {
