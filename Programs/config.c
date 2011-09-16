@@ -998,24 +998,24 @@ STATUS_FIELD_HANDLERS(9)
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
-testSpeechRate (void) {
-  return speech->rate != NULL;
-}
-
-static int
-changedSpeechRate (const MenuItem *item, unsigned char setting) {
-  setSpeechRate(&spk, setting, 1);
-  return 1;
-}
-
-static int
 testSpeechVolume (void) {
   return speech->volume != NULL;
 }
 
 static int
 changedSpeechVolume (const MenuItem *item, unsigned char setting) {
-  setSpeechVolume(&spk, setting, 1);
+  setSpeechVolume(&spk, setting, !prefs.autospeak);
+  return 1;
+}
+
+static int
+testSpeechRate (void) {
+  return speech->rate != NULL;
+}
+
+static int
+changedSpeechRate (const MenuItem *item, unsigned char setting) {
+  setSpeechRate(&spk, setting, !prefs.autospeak);
   return 1;
 }
 
@@ -1026,7 +1026,7 @@ testSpeechPitch (void) {
 
 static int
 changedSpeechPitch (const MenuItem *item, unsigned char setting) {
-  setSpeechPitch(&spk, setting, 1);
+  setSpeechPitch(&spk, setting, !prefs.autospeak);
   return 1;
 }
 
@@ -1037,7 +1037,7 @@ testSpeechPunctuation (void) {
 
 static int
 changedSpeechPunctuation (const MenuItem *item, unsigned char setting) {
-  setSpeechPunctuation(&spk, setting, 1);
+  setSpeechPunctuation(&spk, setting, !prefs.autospeak);
   return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */

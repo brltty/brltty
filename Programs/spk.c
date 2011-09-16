@@ -28,7 +28,6 @@
 #include "file.h"
 #include "parse.h"
 #include "charset.h"
-#include "prefs.h"
 #include "drivers.h"
 #include "spk.h"
 #include "spk.auto.h"
@@ -132,11 +131,9 @@ sayString (SpeechSynthesizer *spk, const char *string, int mute) {
 
 static void
 saySpeechSetting (SpeechSynthesizer *spk, int setting, const char *name) {
-  if (!prefs.autospeak) {
-    char phrase[0X40];
-    snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
-    sayString(spk, phrase, 1);
-  }
+  char phrase[0X40];
+  snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
+  sayString(spk, phrase, 1);
 }
 
 static unsigned int
@@ -145,10 +142,27 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
 }
 
 void
+setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
+  logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
+  speech->volume(spk, setting);
+  if (say) saySpeechSetting(spk, setting, gettext("volume"));
+}
+
+unsigned int
+getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
+  return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
+}
+
+float
+getFloatSpeechVolume (unsigned char setting) {
+  return (float)setting / (float)SPK_VOLUME_DEFAULT;
+}
+
+void
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
   speech->rate(spk, setting);
-  if (say) saySpeechSetting(spk, setting, "rate");
+  if (say) saySpeechSetting(spk, setting, gettext("rate"));
 }
 
 unsigned int
@@ -186,27 +200,10 @@ getFloatSpeechRate (unsigned char setting) {
 }
 
 void
-setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
-  logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
-  speech->volume(spk, setting);
-  if (say) saySpeechSetting(spk, setting, "volume");
-}
-
-unsigned int
-getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
-}
-
-float
-getFloatSpeechVolume (unsigned char setting) {
-  return (float)setting / (float)SPK_VOLUME_DEFAULT;
-}
-
-void
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
   logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
   speech->pitch(spk, setting);
-  if (say) saySpeechSetting(spk, setting, "pitch");
+  if (say) saySpeechSetting(spk, setting, gettext("pitch"));
 }
 
 unsigned int
