@@ -166,9 +166,9 @@ bind !Home MENU_PREV_SETTING
 bind !End MENU_NEXT_SETTING
 bind !Up MENU_PREV_ITEM
 bind !Down MENU_NEXT_ITEM
-bind !Dot1 MENU_FIRST_ITEM
-bind !Dot4 MENU_LAST_ITEM
-bind !Dot2 PREFLOAD
-bind !Dot5 PREFSAVE
-bind !Dot7 FWINLT
-bind !Dot8 FWINRT
+bind Dot1 MENU_FIRST_ITEM
+bind Dot4 MENU_LAST_ITEM
+bind Dot2 PREFLOAD
+bind Dot5 PREFSAVE
+bind Dot7 FWINLT
+bind Dot8 FWINRT
