@@ -28,6 +28,7 @@
 #include "file.h"
 #include "parse.h"
 #include "charset.h"
+#include "prefs.h"
 #include "drivers.h"
 #include "spk.h"
 #include "spk.auto.h"
@@ -131,9 +132,11 @@ sayString (SpeechSynthesizer *spk, const char *string, int mute) {
 
 static void
 saySpeechSetting (SpeechSynthesizer *spk, int setting, const char *name) {
-  char phrase[0X40];
-  snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
-  sayString(spk, phrase, 1);
+  if (!prefs.autospeak) {
+    char phrase[0X40];
+    snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
+    sayString(spk, phrase, 1);
+  }
 }
 
 static unsigned int
