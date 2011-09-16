@@ -28,6 +28,7 @@
 #include "ktb.h"
 #include "scr.h"
 #include "ses.h"
+#include "menu.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,8 +61,10 @@ extern ContractionTable *contractionTable;
 
 extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);
+
 extern int loadPreferences (void);
 extern int savePreferences (void);
+extern Menu *getPreferencesMenu (void);
 extern int updatePreferences (void);
 
 extern unsigned char cursorDots (void);

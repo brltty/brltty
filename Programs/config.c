@@ -1653,13 +1653,18 @@ noMenu:
   return NULL;
 }
 
+Menu *
+getPreferencesMenu (void) {
+  static Menu *menu = NULL;
+  if (!menu) menu = makePreferencesMenu();
+  return menu;
+}
+
 int
 updatePreferences (void) {
+  Menu *menu = getPreferencesMenu();
   const char *mode = "prf";
-  static Menu *menu = NULL;
   int ok = 1;
-
-  if (!menu) menu = makePreferencesMenu();
 
   if (setStatusText(&brl, mode) &&
       message(mode, gettext("Preferences Menu"), 0)) {

@@ -143,7 +143,7 @@ getPointer_BaseScreen (int *column, int *row) {
 }
 
 static int
-executeCommand_BaseScreen (int command) {
+executeCommand_BaseScreen (int *command) {
   return 0;
 }
 

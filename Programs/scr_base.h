@@ -37,7 +37,7 @@ typedef struct {
   int (*selectVirtualTerminal) (int vt);
   int (*switchVirtualTerminal) (int vt);
   int (*currentVirtualTerminal) (void);
-  int (*executeCommand) (int command);
+  int (*executeCommand) (int *command);
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);

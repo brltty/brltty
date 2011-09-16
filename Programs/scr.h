@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
+#include "driver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "driver.h"
 
 #define SCR_ATTR_FG_BLUE   0X01
 #define SCR_ATTR_FG_GREEN  0X02
@@ -33,6 +33,34 @@ extern "C" {
 #define SCR_ATTR_BG_GREEN  0X20
 #define SCR_ATTR_BG_RED    0X40
 #define SCR_ATTR_BLINK     0X80
+
+#define SCR_COLOUR_FG_BLACK 0
+#define SCR_COLOUR_FG_BLUE (SCR_ATTR_FG_BLUE)
+#define SCR_COLOUR_FG_GREEN (SCR_ATTR_FG_GREEN)
+#define SCR_COLOUR_FG_CYAN (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_GREEN)
+#define SCR_COLOUR_FG_RED (SCR_ATTR_FG_RED)
+#define SCR_COLOUR_FG_MAGENTA (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_RED)
+#define SCR_COLOUR_FG_BROWN (SCR_ATTR_FG_GREEN | SCR_ATTR_FG_RED)
+#define SCR_COLOUR_FG_LIGHT_GREY (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_GREEN | SCR_ATTR_FG_RED)
+#define SCR_COLOUR_FG_DARK_GREY (SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_LIGHT__BLUE (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_LIGHT__GREEN (SCR_ATTR_FG_GREEN | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_LIGHT__CYAN (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_GREEN | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_LIGHT__RED (SCR_ATTR_FG_RED | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_LIGHT__MAGENTA (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_RED | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_YELLOW (SCR_ATTR_FG_GREEN | SCR_ATTR_FG_RED | SCR_ATTR_FG_BRIGHT)
+#define SCR_COLOUR_FG_WHITE (SCR_ATTR_FG_BLUE | SCR_ATTR_FG_GREEN | SCR_ATTR_FG_RED | SCR_ATTR_FG_BRIGHT)
+
+#define SCR_COLOUR_BG_BLACK 0
+#define SCR_COLOUR_BG_BLUE (SCR_ATTR_BG_BLUE)
+#define SCR_COLOUR_BG_GREEN (SCR_ATTR_BG_GREEN)
+#define SCR_COLOUR_BG_CYAN (SCR_ATTR_BG_BLUE | SCR_ATTR_BG_GREEN)
+#define SCR_COLOUR_BG_RED (SCR_ATTR_BG_RED)
+#define SCR_COLOUR_BG_MAGENTA (SCR_ATTR_BG_BLUE | SCR_ATTR_BG_RED)
+#define SCR_COLOUR_BG_BROWN (SCR_ATTR_BG_GREEN | SCR_ATTR_BG_RED)
+#define SCR_COLOUR_BG_LIGHT_GREY (SCR_ATTR_BG_BLUE | SCR_ATTR_BG_GREEN | SCR_ATTR_BG_RED)
+
+#define SCR_COLOUR_DEFAULT (SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLACK)
 
 typedef struct {
   wchar_t text;
@@ -56,7 +84,7 @@ extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message);
 
 extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
-extern void setScreenCharacterText (ScreenCharacter *characters, char text, size_t count);
+extern void setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count);
 extern void copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count);
 extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
 
@@ -118,15 +146,20 @@ extern void destructSpecialScreens (void);
 
 extern int isLiveScreen (void);
 
-extern int isFrozenScreen (void);
-extern int haveFrozenScreen (void);
-extern int activateFrozenScreen (void);
-extern void deactivateFrozenScreen (void);
-
 extern int isHelpScreen (void);
 extern int haveHelpScreen (void);
 extern int activateHelpScreen (void);
 extern void deactivateHelpScreen (void);
+
+extern int isMenuScreen (void);
+extern int haveMenuScreen (void);
+extern int activateMenuScreen (void);
+extern void deactivateMenuScreen (void);
+
+extern int isFrozenScreen (void);
+extern int haveFrozenScreen (void);
+extern int activateFrozenScreen (void);
+extern void deactivateFrozenScreen (void);
 
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */
@@ -141,7 +174,7 @@ extern int selectVirtualTerminal (int vt);
 extern int switchVirtualTerminal (int vt);
 extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
-extern int executeScreenCommand (int);
+extern int executeScreenCommand (int *);
 
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.

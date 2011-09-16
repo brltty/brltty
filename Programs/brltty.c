@@ -17,6 +17,7 @@
  */
 
 #include "prologue.h"
+//#define USE_MENU_SCREEN
 
 #include <stdio.h>
 #include <string.h>
@@ -954,17 +955,17 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
   unsigned char dots;
 
   switch (attributes) {
-    case 0x08: /* dark-gray on black */
-    case 0x07: /* light-gray on black */
-    case 0x17: /* light-gray on blue */
-    case 0x30: /* black on cyan */
+    case SCR_COLOUR_FG_DARK_GREY | SCR_COLOUR_BG_BLACK:
+    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLACK:
+    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLUE:
+    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_CYAN:
       return;
 
-    case 0x70: /* black on light-gray */
+    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY:
       dots = BRL_DOT7 | BRL_DOT8;
       break;
 
-    case 0x0F: /* white on black */
+    case SCR_COLOUR_FG_WHITE | SCR_COLOUR_BG_BLACK:
     default:
       dots = BRL_DOT8;
       break;
@@ -1143,11 +1144,13 @@ static int
 brlttyCommand (void) {
   int oldmotx = ses->winx;
   int oldmoty = ses->winy;
+
+  KeyTableCommandContext context = isMenuScreen()? KTB_CTX_MENU: KTB_CTX_DEFAULT;
   int command;
 
   testProgramTermination();
 
-  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, KTB_CTX_DEFAULT);
+  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, context);
 
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;
@@ -1204,7 +1207,7 @@ brlttyCommand (void) {
   if (command == EOF) return 0;
 
 doCommand:
-  if (!executeScreenCommand(command)) {
+  if (!executeScreenCommand(&command)) {
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_NOOP:        /* do nothing but loop */
         if (command & BRL_FLG_TOGGLE_ON)
@@ -1684,10 +1687,30 @@ doCommand:
         break;
 
       case BRL_CMD_PREFMENU:
+#ifdef USE_MENU_SCREEN
+        if (isMenuScreen()) {
+          if (prefs.saveOnExit)
+            if (savePreferences())
+              playTune(&tune_command_done);
+
+          deactivateMenuScreen();
+        } else if (activateMenuScreen()) {
+          static const char mode[] = "prf";
+
+          setStatusText(&brl, mode);
+          message(mode, gettext("Preferences Menu"), 0);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+#else /* USE_MENU_SCREEN */
         if (!updatePreferences()) restartRequired = 1;
+#endif /* USE_MENU_SCREEN */
         break;
       case BRL_CMD_PREFSAVE:
-        if (savePreferences()) {
+        if (isMenuScreen()) {
+          if (savePreferences()) playTune(&tune_command_done);
+          deactivateMenuScreen();
+        } else if (savePreferences()) {
           playTune(&tune_command_done);
         } else {
           playTune(&tune_command_rejected);

@@ -32,13 +32,16 @@
 #include "log.h"
 #include "system.h"
 #include "drivers.h"
+#include "brltty.h"
 #include "scr.h"
-#include "scr_frozen.h"
 #include "scr_help.h"
+#include "scr_menu.h"
+#include "scr_frozen.h"
 #include "scr_real.h"
 #include "scr.auto.h"
 
 static HelpScreen helpScreen;
+static MenuScreen menuScreen;
 static FrozenScreen frozenScreen;                
 static MainScreen mainScreen;
 static BaseScreen *currentScreen = &mainScreen.base;
@@ -128,19 +131,22 @@ identifyScreenDrivers (int full) {
 void
 constructSpecialScreens (void) {
   initializeHelpScreen(&helpScreen);
+  initializeMenuScreen(&menuScreen);
   initializeFrozenScreen(&frozenScreen);
 }
 
 void
 destructSpecialScreens (void) {
-  frozenScreen.destruct();
   helpScreen.destruct();
+  menuScreen.destruct();
+  frozenScreen.destruct();
 }
 
 
 typedef enum {
   SCR_HELP   = 0X01,
-  SCR_FROZEN = 0X02
+  SCR_MENU   = 0X02,
+  SCR_FROZEN = 0X04
 } ActiveScreen;
 static ActiveScreen activeScreens = 0;
 
@@ -150,8 +156,10 @@ selectScreen (void) {
     ActiveScreen which;
     BaseScreen *screen;
   } ScreenEntry;
+
   static const ScreenEntry screenEntries[] = {
     {SCR_HELP  , &helpScreen.base},
+    {SCR_MENU  , &menuScreen.base},
     {SCR_FROZEN, &frozenScreen.base},
     {0         , &mainScreen.base}
   };
@@ -159,10 +167,15 @@ selectScreen (void) {
 
   while (entry->which) {
     if (entry->which & activeScreens) break;
-    ++entry;
+    entry += 1;
   }
 
   currentScreen = entry->screen;
+}
+
+int
+haveScreen (ActiveScreen which) {
+  return (activeScreens & which) != 0;
 }
 
 static void
@@ -200,7 +213,7 @@ validateScreenBox (const ScreenBox *box, int columns, int rows) {
 }
 
 void
-setScreenCharacterText (ScreenCharacter *characters, char text, size_t count) {
+setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count) {
   while (count > 0) {
     characters[--count].text = text;
   }
@@ -223,8 +236,8 @@ setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attribu
 
 void
 clearScreenCharacters (ScreenCharacter *characters, size_t count) {
-  setScreenCharacterText(characters, ' ', count);
-  setScreenCharacterAttributes(characters, 0X07, count);
+  setScreenCharacterText(characters, WC_C(' '), count);
+  setScreenCharacterAttributes(characters, SCR_COLOUR_DEFAULT, count);
 }
 
 void
@@ -315,7 +328,7 @@ userVirtualTerminal (int number) {
 }
 
 int
-executeScreenCommand (int command) {
+executeScreenCommand (int *command) {
   return currentScreen->executeCommand(command);
 }
 
@@ -336,7 +349,7 @@ destructRoutingScreen (void) {
 }
 
 
-static int helpConstructed = 0;
+static int helpScreenConstructed = 0;
 
 int
 isHelpScreen (void) {
@@ -345,12 +358,12 @@ isHelpScreen (void) {
 
 int
 haveHelpScreen (void) {
-  return (activeScreens & SCR_HELP) != 0;
+  return haveScreen(SCR_HELP);
 }
 
 int
 activateHelpScreen (void) {
-  if (!helpConstructed) return 0;
+  if (!helpScreenConstructed) return 0;
   activateScreen(SCR_HELP);
   return 1;
 }
@@ -362,14 +375,14 @@ deactivateHelpScreen (void) {
 
 int
 constructHelpScreen (void) {
-  return (helpConstructed = helpScreen.construct());
+  return (helpScreenConstructed = helpScreen.construct());
 }
 
 void
 destructHelpScreen (void) {
-  if (helpConstructed) {
+  if (helpScreenConstructed) {
     helpScreen.destruct();
-    helpConstructed = 0;
+    helpScreenConstructed = 0;
   }
 }
 
@@ -384,6 +397,38 @@ getHelpLineCount (void) {
 }
 
 
+static int menuScreenConstructed = 0;
+
+int
+isMenuScreen (void) {
+  return currentScreen == &menuScreen.base;
+}
+
+int
+haveMenuScreen (void) {
+  return haveScreen(SCR_MENU);
+}
+
+int
+activateMenuScreen (void) {
+  if (!menuScreenConstructed) {
+    Menu *menu = getPreferencesMenu();
+
+    if (!menu) return 0;
+    if (!menuScreen.construct(menu)) return 0;
+    menuScreenConstructed = 1;
+  }
+
+  activateScreen(SCR_MENU);
+  return 1;
+}
+
+void
+deactivateMenuScreen (void) {
+  deactivateScreen(SCR_MENU);
+}
+
+
 int
 isFrozenScreen (void) {
   return currentScreen == &frozenScreen.base;
@@ -391,7 +436,7 @@ isFrozenScreen (void) {
 
 int
 haveFrozenScreen (void) {
-  return (activeScreens & SCR_FROZEN) != 0;
+  return haveScreen(SCR_FROZEN);
 }
 
 int

@@ -233,7 +233,7 @@ spk.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O scr_real.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_menu.$O scr_frozen.$O scr_main.$O scr_real.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
 
 scr.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr.c
@@ -243,6 +243,9 @@ scr_base.$O:
 
 scr_help.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_help.c
+
+scr_menu.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_menu.c
 
 scr_frozen.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_frozen.c

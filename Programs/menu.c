@@ -119,9 +119,19 @@ deallocateMenu (Menu *menu) {
   }
 }
 
-static MenuItem *
+MenuItem *
 getMenuItem (Menu *menu, unsigned int index) {
   return (index < menu->count)? &menu->items[index]: NULL;
+}
+
+unsigned int
+getMenuSize (const Menu *menu) {
+  return menu->count;
+}
+
+unsigned int
+getMenuIndex (const Menu *menu) {
+  return menu->index;
 }
 
 MenuItem *
@@ -427,7 +437,14 @@ endMenuItem_files (MenuItem *item) {
 static const char *
 getMenuItemValue_files (const MenuItem *item) {
   const FileData *files = item->data.files;
-  const char *path = files->paths[files->setting];
+  const char *path;
+
+  if (item == item->menu->activeItem) {
+    path = files->paths[files->setting];
+  } else {
+    path = files->current;
+  }
+
   if (!path) path = "";
   return path;
 }
