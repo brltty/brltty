@@ -1769,9 +1769,9 @@ currentVirtualTerminal_LinuxScreen (void) {
 }
 
 static int
-executeCommand_LinuxScreen (int command) {
-  int blk = command & BRL_MSK_BLK;
-  int arg UNUSED = command & BRL_MSK_ARG;
+executeCommand_LinuxScreen (int *command) {
+  int blk = *command & BRL_MSK_BLK;
+  int arg UNUSED = *command & BRL_MSK_ARG;
   int cmd = blk | arg;
 
   switch (cmd) {
@@ -1789,14 +1789,14 @@ executeCommand_LinuxScreen (int command) {
             int press = !(arg & 0X80);
             arg &= 0X7F;
 
-            if (command & BRL_FLG_KBD_EMUL0) {
+            if (*command & BRL_FLG_KBD_EMUL0) {
               unsigned char code = emul0XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		logMessage(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;
-	    } else if (command & BRL_FLG_KBD_EMUL1) {
+	    } else if (*command & BRL_FLG_KBD_EMUL1) {
               unsigned int code = emul1XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		logMessage(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
@@ -1812,19 +1812,19 @@ executeCommand_LinuxScreen (int command) {
           {
             int handled = 0;
 
-            if (command & BRL_FLG_KBD_RELEASE) {
+            if (*command & BRL_FLG_KBD_RELEASE) {
               at2Pressed = 0;
             } else if (arg == 0XF0) {
               at2Pressed = 0;
               handled = 1;
             }
 
-            if (command & BRL_FLG_KBD_EMUL0) {
+            if (*command & BRL_FLG_KBD_EMUL0) {
               at2Keys = at2KeysE0;
             } else if (arg == 0XE0) {
               at2Keys = at2KeysE0;
               handled = 1;
-	    } else if (command & BRL_FLG_KBD_EMUL1) {
+	    } else if (*command & BRL_FLG_KBD_EMUL1) {
               at2Keys = at2KeysE1;
             } else if (arg == 0XE1) {
               at2Keys = at2KeysE1;

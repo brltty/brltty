@@ -525,9 +525,9 @@ insertKey_WindowsScreen (ScreenKey key) {
 }
 
 static int
-executeCommand_WindowsScreen (int command) {
-  int blk = command & BRL_MSK_BLK;
-  int arg = command & BRL_MSK_ARG;
+executeCommand_WindowsScreen (int *command) {
+  int blk = *command & BRL_MSK_BLK;
+  int arg = *command & BRL_MSK_ARG;
   int press = 0;
 
   switch (blk) {
@@ -536,19 +536,19 @@ executeCommand_WindowsScreen (int command) {
       arg &= 0X7F;
       /* fallthrough */
     case BRL_BLK_PASSAT: {
-      press |= !(command & BRL_FLG_KBD_RELEASE);
+      press |= !(*command & BRL_FLG_KBD_RELEASE);
 
       if (arg >= 0X80)
 	return 0;
 
-      if (command & BRL_FLG_KBD_EMUL1)
+      if (*command & BRL_FLG_KBD_EMUL1)
 	return 0;
 
       if (blk == BRL_BLK_PASSAT)
 	arg = at2Xt[arg];
 
       return doInsertSendInput (press, 0, 0, arg,
-	  command & BRL_FLG_KBD_EMUL0 ? KEYEVENTF_EXTENDEDKEY : 0);
+	  *command & BRL_FLG_KBD_EMUL0 ? KEYEVENTF_EXTENDEDKEY : 0);
     }
   }
 

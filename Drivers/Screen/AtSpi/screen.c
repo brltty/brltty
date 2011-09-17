@@ -746,9 +746,9 @@ insertKey_AtSpiScreen (ScreenKey key) {
 }
 
 static int
-executeCommand_AtSpiScreen (int command) {
-  int blk UNUSED = command & BRL_MSK_BLK;
-  int arg UNUSED = command & BRL_MSK_ARG;
+executeCommand_AtSpiScreen (int *command) {
+  int blk UNUSED = *command & BRL_MSK_BLK;
+  int arg UNUSED = *command & BRL_MSK_ARG;
 
   return 0;
 }

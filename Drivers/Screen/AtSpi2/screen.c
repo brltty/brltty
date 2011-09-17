@@ -1033,9 +1033,9 @@ insertKey_AtSpi2Screen (ScreenKey key) {
 }
 
 static int
-executeCommand_AtSpi2Screen (int command) {
-  int blk UNUSED = command & BRL_MSK_BLK;
-  int arg UNUSED = command & BRL_MSK_ARG;
+executeCommand_AtSpi2Screen (int *command) {
+  int blk UNUSED = *command & BRL_MSK_BLK;
+  int arg UNUSED = *command & BRL_MSK_ARG;
 
   return 0;
 }

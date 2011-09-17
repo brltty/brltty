@@ -190,9 +190,9 @@ currentVirtualTerminal_PcBiosScreen (void) {
 }
 
 static int
-executeCommand_PcBiosScreen (int command) {
-  int blk = command & BRL_MSK_BLK;
-  int arg = command & BRL_MSK_ARG;
+executeCommand_PcBiosScreen (int *command) {
+  int blk = *command & BRL_MSK_BLK;
+  int arg = *command & BRL_MSK_ARG;
   int press = 0;
 
   switch (blk) {
@@ -201,15 +201,15 @@ executeCommand_PcBiosScreen (int command) {
       arg &= 0X7F;
       /* fallthrough */
     case BRL_BLK_PASSAT: {
-      press |= !(command & BRL_FLG_KBD_RELEASE);
+      press |= !(*command & BRL_FLG_KBD_RELEASE);
 
       if (arg >= 0X80)
 	return 0;
 
-      if (command & BRL_FLG_KBD_EMUL0) {
+      if (*command & BRL_FLG_KBD_EMUL0) {
 	if (!simulateKey(0XE0, 0))
 	  return 0;
-      } else if (command & BRL_FLG_KBD_EMUL1) {
+      } else if (*command & BRL_FLG_KBD_EMUL1) {
 	if (!simulateKey(0XE1, 0))
 	  return 0;
       }

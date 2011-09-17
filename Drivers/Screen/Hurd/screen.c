@@ -433,9 +433,9 @@ currentVirtualTerminal_HurdScreen (void) {
 }
 
 static int
-executeCommand_HurdScreen (int command) {
-  int blk UNUSED = command & BRL_MSK_BLK;
-  int arg UNUSED = command & BRL_MSK_ARG;
+executeCommand_HurdScreen (int *command) {
+  int blk UNUSED = *command & BRL_MSK_BLK;
+  int arg UNUSED = *command & BRL_MSK_ARG;
 
   return 0;
 }
