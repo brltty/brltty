@@ -43,7 +43,7 @@ static int
 construct_MenuScreen (Menu *menu) {
   menuHandle = menu;
   screenHeight = getMenuSize(menu);
-  screenWidth = 0X100;
+  screenWidth = 1;
   return 1;
 }
 
@@ -102,9 +102,11 @@ readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
     for (row=0; row<box->height; row+=1) {
       int column;
-      wchar_t line[screenWidth];
+      wchar_t line[0X100];
       size_t length = formatMenuItem(getMenuItem(menuHandle, box->top+row),
                                      line, ARRAY_COUNT(line));
+
+      if (screenWidth < length) screenWidth = length;
 
       for (column=0; column<box->width; column+=1) {
         int index = box->left + column;
