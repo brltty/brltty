@@ -106,11 +106,11 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (validateScreenBox(box, screenWidth, screenHeight)) {
-    int row = box->height;
+    wchar_t line[screenWidth + 1];
+    unsigned int row = box->height;
 
     while (row > 0) {
-      int column;
-      wchar_t line[screenWidth + 1];
+      unsigned int column;
 
       formatMenuItem(getMenuItem(menuHandle, box->top+--row),
                      line, ARRAY_COUNT(line));
