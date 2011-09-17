@@ -259,6 +259,11 @@ executeCommand_MenuScreen (int *command) {
   return 0;
 }
 
+static KeyTableCommandContext
+getCommandContext_MenuScreen (void) {
+  return KTB_CTX_MENU;
+}
+
 void
 initializeMenuScreen (MenuScreen *menu) {
   initializeBaseScreen(&menu->base);
@@ -266,6 +271,7 @@ initializeMenuScreen (MenuScreen *menu) {
   menu->base.describe = describe_MenuScreen;
   menu->base.readCharacters = readCharacters_MenuScreen;
   menu->base.executeCommand = executeCommand_MenuScreen;
+  menu->base.getCommandContext = getCommandContext_MenuScreen;
   menu->construct = construct_MenuScreen;
   menu->destruct = destruct_MenuScreen;
 }

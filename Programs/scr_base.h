@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SCR_BASE
 #define BRLTTY_INCLUDED_SCR_BASE
 
+#include "ktbdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -38,6 +40,7 @@ typedef struct {
   int (*switchVirtualTerminal) (int vt);
   int (*currentVirtualTerminal) (void);
   int (*executeCommand) (int *command);
+  KeyTableCommandContext (*getCommandContext) (void);
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);

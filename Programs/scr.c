@@ -332,6 +332,11 @@ executeScreenCommand (int *command) {
   return currentScreen->executeCommand(command);
 }
 
+KeyTableCommandContext
+getScreenCommandContext (void) {
+  return currentScreen->getCommandContext();
+}
+
 
 int
 constructRoutingScreen (void) {

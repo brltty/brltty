@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
+#include "ktbdefs.h"
 #include "driver.h"
 
 #ifdef __cplusplus
@@ -175,6 +176,7 @@ extern int switchVirtualTerminal (int vt);
 extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
 extern int executeScreenCommand (int *);
+extern KeyTableCommandContext getScreenCommandContext (void);
 
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.

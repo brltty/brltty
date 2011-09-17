@@ -486,12 +486,8 @@ enqueueXtScanCode (
   return enqueueCommand(command);
 }
 
-static KeyTableCommandContext currentCommandContext = KTB_CTX_DEFAULT;
-
 int
 readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  currentCommandContext = context;
-
   {
     int command = dequeueCommand();
     if (command != EOF) return command;
@@ -517,11 +513,6 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
 
   return dequeueCommand();
-}
-
-KeyTableCommandContext
-getCurrentCommandContext (void) {
-  return currentCommandContext;
 }
 
 #ifdef ENABLE_LEARN_MODE

@@ -1147,12 +1147,11 @@ brlttyCommand (void) {
   int oldmotx = ses->winx;
   int oldmoty = ses->winy;
 
-  KeyTableCommandContext context = isMenuScreen()? KTB_CTX_MENU: KTB_CTX_DEFAULT;
   int command;
 
   testProgramTermination();
 
-  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, context);
+  command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, getScreenCommandContext());
 
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;

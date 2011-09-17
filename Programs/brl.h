@@ -88,7 +88,6 @@ extern int enqueueXtScanCode (
 );
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
-extern KeyTableCommandContext getCurrentCommandContext (void);
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);

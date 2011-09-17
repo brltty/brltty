@@ -147,6 +147,11 @@ executeCommand_BaseScreen (int *command) {
   return 0;
 }
 
+static KeyTableCommandContext
+getCommandContext_BaseScreen (void) {
+  return KTB_CTX_DEFAULT;
+}
+
 void
 initializeBaseScreen (BaseScreen *base) {
   base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
@@ -160,6 +165,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
   base->executeCommand = executeCommand_BaseScreen;
+  base->getCommandContext = getCommandContext_BaseScreen;
 }
 
 void
