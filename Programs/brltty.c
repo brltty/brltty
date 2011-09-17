@@ -17,7 +17,6 @@
  */
 
 #include "prologue.h"
-#define USE_MENU_SCREEN
 
 #include <stdio.h>
 #include <string.h>
@@ -1690,7 +1689,6 @@ doCommand:
         break;
 
       case BRL_CMD_PREFMENU:
-#ifdef USE_MENU_SCREEN
         if (isMenuScreen()) {
           if (prefs.saveOnExit)
             if (savePreferences())
@@ -1704,9 +1702,6 @@ doCommand:
         } else {
           playTune(&tune_command_rejected);
         }
-#else /* USE_MENU_SCREEN */
-        if (!updatePreferences()) restartRequired = 1;
-#endif /* USE_MENU_SCREEN */
         break;
       case BRL_CMD_PREFSAVE:
         if (isMenuScreen()) {

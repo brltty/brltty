@@ -67,7 +67,6 @@ extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
 extern Menu *getPreferencesMenu (void);
-extern int updatePreferences (void);
 
 extern unsigned char cursorDots (void);
 
