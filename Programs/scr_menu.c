@@ -66,59 +66,61 @@ describe_MenuScreen (ScreenDescription *description) {
   description->number = currentVirtualTerminal_MenuScreen();
 }
 
-static size_t
+static void
 formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
-  char line[0X100];
+  char label[0X100];
+  char setting[0X100];
 
   {
     const MenuString *name = getMenuItemName(item);
-    const char *value = getMenuItemValue(item);
-    const char *comment = getMenuItemComment(item);
 
-    STR_BEGIN(line, sizeof(line));
+    STR_BEGIN(label, ARRAY_COUNT(label));
     STR_PRINTF("%s", name->label);
     if (*name->comment) STR_PRINTF(" %s", name->comment);
     STR_PRINTF(": ");
-
-    if (!*value) value = gettext("<off>");
-    STR_PRINTF("%s", value);
-    if (*comment) STR_PRINTF(" (%s)", comment);
-
     STR_END;
   }
 
   {
-    ssize_t length = convertTextToWchars(buffer, line, size);
+    const char *value = getMenuItemValue(item);
+    const char *comment = getMenuItemComment(item);
+    if (!*value) value = gettext("<off>");
 
-    if (length == -1) length = 0;
-    return length;
+    STR_BEGIN(setting, ARRAY_COUNT(setting));
+    STR_PRINTF("%s", value);
+    if (*comment) STR_PRINTF(" (%s)", comment);
+    STR_END;
+  }
+
+  {
+    int indent;
+    int length;
+    swprintf(buffer, size, WS_C("%s%n%s%n"), label, &indent, setting, &length);
+
+    lineLength = MIN(length, size);
+    settingIndent = MIN(indent, lineLength);
+    if (screenWidth < length) screenWidth = length;
   }
 }
 
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (validateScreenBox(box, screenWidth, screenHeight)) {
-    int row;
+    int row = box->height;
 
-    for (row=0; row<box->height; row+=1) {
+    while (row > 0) {
       int column;
-      wchar_t line[0X100];
-      size_t length = formatMenuItem(getMenuItem(menuHandle, box->top+row),
-                                     line, ARRAY_COUNT(line));
+      wchar_t line[screenWidth + 1];
 
-      if (screenWidth < length) screenWidth = length;
+      formatMenuItem(getMenuItem(menuHandle, box->top+--row),
+                     line, ARRAY_COUNT(line));
 
       for (column=0; column<box->width; column+=1) {
         int index = box->left + column;
         ScreenCharacter *character = buffer++;
 
-        character->text = (index < length)? line[index]: WC_C(' ');
+        character->text = (index < lineLength)? line[index]: WC_C(' ');
         character->attributes = SCR_COLOUR_DEFAULT;
-
-        if (column == 0) {
-          lineLength = length;
-          settingIndent = wmemchr(line, WC_C(':'), length) - line + 2;
-        }
       }
     }
 
