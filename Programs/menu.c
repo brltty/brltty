@@ -81,7 +81,7 @@ struct MenuItemStruct {
   unsigned char divisor;                  /* present only multiples of this value */
 
   void (*beginItem) (MenuItem *item);
-  void (*endItem) (MenuItem *item);
+  void (*endItem) (MenuItem *item, int deallocating);
   const char * (*getValue) (const MenuItem *item);
   const char * (*getComment) (const MenuItem *item);
 
@@ -111,10 +111,31 @@ newMenu (void) {
   return menu;
 }
 
+static void
+beginMenuItem (MenuItem *item) {
+  if (item->beginItem) {
+    item->beginItem(item);
+  }
+}
+
+static void
+endMenuItem (MenuItem *item, int deallocating) {
+  if (item->endItem) {
+    item->endItem(item, deallocating);
+  }
+}
+
 void
 deallocateMenu (Menu *menu) {
   if (menu) {
-    if (menu->items) free(menu->items);
+    if (menu->items) {
+      MenuItem *item = menu->items;
+      const MenuItem *end = item + menu->count;
+
+      while (item < end) endMenuItem(item++, 1);
+      free(menu->items);
+    }
+
     free(menu);
   }
 }
@@ -140,8 +161,8 @@ getCurrentMenuItem (Menu *menu) {
   MenuItem *oldItem = menu->activeItem;
 
   if (newItem != oldItem) {
-    if (oldItem && oldItem->endItem) oldItem->endItem(oldItem);
-    if (newItem->beginItem) newItem->beginItem(newItem);
+    if (oldItem) endMenuItem(oldItem, 0);
+    beginMenuItem(newItem);
     menu->activeItem = newItem;
   }
 
@@ -411,11 +432,11 @@ beginMenuItem_files (MenuItem *item) {
 }
 
 static void
-endMenuItem_files (MenuItem *item) {
+endMenuItem_files (MenuItem *item, int deallocating) {
   FileData *files = item->data.files;
 
   if (files->current) free(files->current);
-  files->current = strdup(files->paths[files->setting]);
+  files->current = deallocating? NULL: strdup(files->paths[files->setting]);
 
 #if defined(HAVE_GLOB_H)
   if (files->glob.gl_pathc) {
@@ -423,13 +444,15 @@ endMenuItem_files (MenuItem *item) {
 
     for (i=0; i<files->glob.gl_offs; i+=1) files->glob.gl_pathv[i] = NULL;
     globfree(&files->glob);
+    files->glob.gl_pathc = 0;
   }
 #elif defined(__MINGW32__)
   if (files->names) {
     int i;
 
-    for (i=files->offset; files->count; i+=1) free(files->names[i]);
+    for (i=files->offset; i<files->count; i+=1) free(files->names[i]);
     free(files->names);
+    files->names = NULL;
   }
 #endif /* glob: paradigm-specific memory deallocation */
 }
