@@ -135,9 +135,11 @@ static void
 renderStatusField_stateLetter (unsigned char *cells) {
   *cells = convertCharacterToDots(textTable,
                                   ses->displayMode? WC_C('a'):
+                                  isHelpScreen()  ? WC_C('h'):
+                                  isMenuScreen()  ? WC_C('m'):
                                   isFrozenScreen()? WC_C('f'):
                                   ses->trackCursor? WC_C('t'):
-                                  WC_C(' '));
+                                                    WC_C(' '));
 }
 
 static void
