@@ -37,13 +37,13 @@ extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 extern void sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute);
 extern void sayString (SpeechSynthesizer *spk, const char *string, int mute);
 
-extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
-extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
-extern float getFloatSpeechRate (unsigned char setting);
-
 extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 extern float getFloatSpeechVolume (unsigned char setting);
+
+extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
+extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
+extern float getFloatSpeechRate (unsigned char setting);
 
 extern void setSpeechPitch (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);

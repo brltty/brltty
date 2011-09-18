@@ -130,10 +130,17 @@ sayString (SpeechSynthesizer *spk, const char *string, int mute) {
 }
 
 static void
-saySpeechSetting (SpeechSynthesizer *spk, int setting, const char *name) {
-  char phrase[0X40];
-  snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
-  sayString(spk, phrase, 1);
+saySpeechStringSetting (SpeechSynthesizer *spk, const char *name, const char *string) {
+  char statement[0X40];
+  snprintf(statement, sizeof(statement), "%s %s", name, string);
+  sayString(spk, statement, 1);
+}
+
+static void
+saySpeechIntegerSetting (SpeechSynthesizer *spk, const char *name, int integer) {
+  char string[0X40];
+  snprintf(string, sizeof(string), "%d", integer);
+  saySpeechStringSetting(spk, name, string);
 }
 
 static unsigned int
@@ -145,7 +152,7 @@ void
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
   logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
   speech->volume(spk, setting);
-  if (say) saySpeechSetting(spk, setting, gettext("volume"));
+  if (say) saySpeechIntegerSetting(spk, gettext("volume"), setting);
 }
 
 unsigned int
@@ -162,7 +169,7 @@ void
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
   speech->rate(spk, setting);
-  if (say) saySpeechSetting(spk, setting, gettext("rate"));
+  if (say) saySpeechIntegerSetting(spk, gettext("rate"), setting);
 }
 
 unsigned int
@@ -203,7 +210,7 @@ void
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
   logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
   speech->pitch(spk, setting);
-  if (say) saySpeechSetting(spk, setting, gettext("pitch"));
+  if (say) saySpeechIntegerSetting(spk, gettext("pitch"), setting);
 }
 
 unsigned int
