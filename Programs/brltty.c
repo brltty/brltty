@@ -168,7 +168,7 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
 }
 
 static int
-setStatusCells (void) {
+writeStatusCells (void) {
   if (braille->writeStatus) {
     const unsigned char *fields = prefs.statusFields;
     unsigned int length = getStatusFieldsLength(fields);
@@ -1696,7 +1696,7 @@ doCommand:
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
           updateSessionAttributes();
-          setStatusCells();
+          writeStatusCells();
           message(modeString_preferences, gettext("Preferences Menu"), 0);
           savedPreferences = prefs;
         } else {
@@ -2222,7 +2222,7 @@ brlttyUpdate (void) {
   if (opt_releaseDevice) {
     if (scr.unreadable) {
       if (!isSuspended) {
-        setStatusCells();
+        writeStatusCells();
         writeBrailleText("wrn", scr.unreadable);
 
 #ifdef ENABLE_API
@@ -2691,7 +2691,7 @@ brlttyUpdate (void) {
         fillStatusSeparator(textBuffer, brl.buffer);
       }
 
-      if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
+      if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
     }
 
 #ifdef ENABLE_API
