@@ -1695,6 +1695,7 @@ doCommand:
 
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
+          updateSessionAttributes();
           setStatusCells();
           message(modeString_preferences, gettext("Preferences Menu"), 0);
           savedPreferences = prefs;
