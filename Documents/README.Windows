@@ -3,9 +3,13 @@ System Requirements
 
 The earliest release of Windows which is supported by BRLTTY is Windows 98.
 
-In order to build BRLTTY from a supplied tarball, you need either Cygwin (see
-[http://www.cygwin.com/]) or MinGW (see [http://mingw.sourceforge.net/]). In 
-both cases, you also need the following additional packages:
+Pre-built versions of brltty are available for download on
+http://mielke.cc/brltty or on http://youpibouh.thefreecat.org/brltty/
+
+In order to build BRLTTY yourself from a supplied tarball, you
+need either Cygwin (see [http://www.cygwin.com/]) or MinGW (see
+[http://mingw.sourceforge.net/]). In both cases, you also need the following
+additional packages:
 *  gcc
 *  make
 *  w32api (version 3.6 or later)
@@ -67,8 +71,13 @@ USB Support
 ===========
 
 USB devices are supported thanks to the libusb-win32 or libusb-1.0
-packages. This means that, _before_ compiling BRLTTY, you need to install at
-least one of them.
+packages.
+
+Pre-built versions of brltty have USB support compiled in, and the required
+drivers are shipped, you just need to let the installer set them up.
+
+In order to build BRLTTY yourself with USB support enabled, _before_ compiling
+BRLTTY, you need to install at least one of libusb-win32 or libusb-1.0.
 
 At the time of this writing, libusb-win32 binaries can be found on
 [http://libusb-win32.sourceforge.net/]. The file will be called something
@@ -79,6 +88,9 @@ Unpack it in some place.
 As of the time of this writing, the libusb-1.0 binary snapshots can be found on
 http://www.libusb.org/wiki/windows_backend . The file will be called something
 like "libusb_<date>.7z". Unpack it in some place.
+
+The Cygwin or mingw toolchain then needs to get aware of the presence of
+libusb-win32 or libusb1.0-devel.
 
 For Cygwin:
 
@@ -130,7 +142,7 @@ runtime files in the brltty source.
 and then right-click on brltty/hotplug/brltty.inf and select install, or on
 braille device plug, point at the brltty/hotplug/brltty.inf file.
 
-To actually be able to use the libusb-win32 driver, right-click on
+To actually be able to use the libusb-1.0 driver, right-click on
 brltty/hotplug/brltty-libusb-1.0.inf and select install, or on braille
 device plug, point at the brltty/hotplug/brltty-libusb-1.0.inf file.
 
