@@ -76,7 +76,6 @@ bind ThumbLeft+!RoutingKey1 CUTBEGIN
 bind ThumbUp+!RoutingKey1 CUTAPPEND
 bind ThumbDown+!RoutingKey1 CUTRECT
 bind ThumbRight+!RoutingKey1 CUTLINE
-bind SmartpadEnter PASTE
 bind ThumbLeft+ThumbRight PASTE
 
 bind !RoutingKey2 DESCCHAR
@@ -89,6 +88,7 @@ bind ThumbHome+!RoutingKey1 SETLEFT
 
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
+bind ThumbLeft+ETouchRightFront SIXDOTS
 bind ThumbUp+ETouchLeftRear FREEZE
 bind ThumbUp+ETouchLeftFront DISPMD
 
@@ -96,6 +96,7 @@ bind SmartpadLeft KEY_CURSOR_LEFT
 bind SmartpadRight KEY_CURSOR_RIGHT
 bind SmartpadUp KEY_CURSOR_UP
 bind SmartpadDown KEY_CURSOR_DOWN
+bind SmartpadEnter PASTE
 
 bind SmartpadF1+SmartpadLeft SAY_SLOWER
 bind SmartpadF1+SmartpadRight SAY_FASTER
