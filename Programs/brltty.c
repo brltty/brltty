@@ -720,7 +720,7 @@ getCursorOffset (void) {
 
 static int
 getContractedCursor (int offset) {
-  return (offset >= 0)? offset: CTB_NO_CURSOR;
+  return ((offset >= 0) && !ses->hideCursor)? offset: CTB_NO_CURSOR;
 }
 
 static int
@@ -1696,6 +1696,7 @@ doCommand:
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
           updateSessionAttributes();
+          ses->hideCursor = 1;
           writeStatusCells();
           message(modeString_preferences, gettext("Preferences Menu"), 0);
           savedPreferences = prefs;
