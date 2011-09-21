@@ -569,11 +569,11 @@ msgstr "Sofort"
 
 #: Programs/xbrlapi.c:520
 msgid "Incompatible XKB library\n"
-msgstr "Nicht kompatible XKB Bibliothek\\n"
+msgstr "Nicht kompatible XKB Bibliothek\n"
 
 #: Programs/xbrlapi.c:522
 msgid "Incompatible XKB server support\n"
-msgstr "Nicht kompatible XKB Server Unterstützung\\n"
+msgstr "Nicht kompatible XKB Server Unterstützung\n"
 
 #: Programs/config.c:211
 #, c-format
