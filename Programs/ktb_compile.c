@@ -39,7 +39,7 @@ const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
   [KBF_Dot7] = {.name="dot7", .bit=BRL_DOT7},
   [KBF_Dot8] = {.name="dot8", .bit=BRL_DOT8},
 
-  [KBF_Space] = {.name="space", .bit=0},
+  [KBF_Space] = {.name="space", .bit=BRL_DOTC},
   [KBF_Shift] = {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
   [KBF_Uppercase] = {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
   [KBF_Control] = {.name="control", .bit=BRL_FLG_CHAR_CONTROL},

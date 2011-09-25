@@ -150,8 +150,6 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
 
   if ((ctx = getKeyContext(table, context))) {
     int keyboardCommand = BRL_BLK_PASSDOTS;
-    int dotPressed = 0;
-    int spacePressed = 0;
 
     {
       unsigned int pressedIndex;
@@ -166,22 +164,20 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
           const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[map->keyboardFunction];
 
           keyboardCommand |= kbf->bit;
-
-          if (!kbf->bit) {
-            spacePressed = 1;
-          } else if (kbf->bit & BRL_MSK_ARG) {
-            dotPressed = 1;
-          }
         }
       }
-
-      if (dotPressed) keyboardCommand |= ctx->superimposedBits;
     }
 
-    if (chordsRequested && spacePressed) {
-      keyboardCommand |= BRL_DOTC;
-    } else if (dotPressed == spacePressed) {
-      return EOF;
+    {
+      int dotPressed = !!(keyboardCommand & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8));
+      int spacePressed = !!(keyboardCommand & BRL_DOTC);
+
+      if (dotPressed) keyboardCommand |= ctx->superimposedBits;
+
+      if (!chordsRequested) {
+        if (dotPressed == spacePressed) return EOF;
+        keyboardCommand &= ~BRL_DOTC;
+      }
     }
 
     return keyboardCommand;
