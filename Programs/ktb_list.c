@@ -190,7 +190,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 
     for (index=0; index<ctx->mappedKeyCount; index+=1) {
       const MappedKeyEntry *map = &ctx->mappedKeyTable[index];
-      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[map->keyboardFunction];
+      const KeyboardFunction *kbf = map->keyboardFunction;
 
       if (!putUtf8String(lgd, prefix)) return 0;
       if (!putUtf8String(lgd, kbf->name)) return 0;
@@ -201,17 +201,18 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   }
 
   {
-    KeyboardFunction function;
+    const KeyboardFunction *kbf = keyboardFunctionTable;
+    const KeyboardFunction *end = kbf + keyboardFunctionCount;
 
-    for (function=0; function<KeyboardFunctionCount; function+=1) {
-      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
-
+    while (kbf < end) {
       if (ctx->superimposedBits & kbf->bit) {
         if (!putUtf8String(lgd, prefix)) return 0;
         if (!putUtf8String(lgd, kbf->name)) return 0;
         if (!putCharacterString(lgd, WS_C(": superimposed"))) return 0;
         if (!endLine(lgd)) return 0;
       }
+
+      kbf += 1;
     }
   }
 

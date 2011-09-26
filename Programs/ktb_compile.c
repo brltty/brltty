@@ -29,22 +29,22 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
-const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
-  [KBF_Dot1] = {.name="dot1", .bit=BRL_DOT1},
-  [KBF_Dot2] = {.name="dot2", .bit=BRL_DOT2},
-  [KBF_Dot3] = {.name="dot3", .bit=BRL_DOT3},
-  [KBF_Dot4] = {.name="dot4", .bit=BRL_DOT4},
-  [KBF_Dot5] = {.name="dot5", .bit=BRL_DOT5},
-  [KBF_Dot6] = {.name="dot6", .bit=BRL_DOT6},
-  [KBF_Dot7] = {.name="dot7", .bit=BRL_DOT7},
-  [KBF_Dot8] = {.name="dot8", .bit=BRL_DOT8},
-
-  [KBF_Space] = {.name="space", .bit=BRL_DOTC},
-  [KBF_Shift] = {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
-  [KBF_Uppercase] = {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
-  [KBF_Control] = {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
-  [KBF_Meta] = {.name="meta", .bit=BRL_FLG_CHAR_META}
+const KeyboardFunction keyboardFunctionTable[] = {
+  {.name="dot1", .bit=BRL_DOT1},
+  {.name="dot2", .bit=BRL_DOT2},
+  {.name="dot3", .bit=BRL_DOT3},
+  {.name="dot4", .bit=BRL_DOT4},
+  {.name="dot5", .bit=BRL_DOT5},
+  {.name="dot6", .bit=BRL_DOT6},
+  {.name="dot7", .bit=BRL_DOT7},
+  {.name="dot8", .bit=BRL_DOT8},
+  {.name="space", .bit=BRL_DOTC},
+  {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
+  {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
+  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
+  {.name="meta", .bit=BRL_FLG_CHAR_META}
 };
+unsigned char keyboardFunctionCount = ARRAY_COUNT(keyboardFunctionTable);
 
 typedef struct {
   KeyTable *table;
@@ -321,7 +321,7 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   return 0;
 }
 
-static const KeyNameEntry **
+static const KeyNameEntry *const *
 findKeyName (const wchar_t *characters, int length, KeyTableData *ktd) {
   const DataOperand name = {
     .characters = characters,
@@ -353,7 +353,7 @@ parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int le
   }
 
   {
-    const KeyNameEntry **kne = findKeyName(characters, prefixLength, ktd);
+    const KeyNameEntry *const *kne = findKeyName(characters, prefixLength, ktd);
 
     if (!kne) {
       reportDataError(file, "unknown key name: %.*" PRIws, prefixLength, characters);
@@ -515,24 +515,24 @@ getKeysOperand (DataFile *file, KeyCombination *combination, KeyTableData *ktd) 
 
 static int
 sortKeyboardFunctionNames (const void *element1, const void *element2) {
-  const KeyboardFunctionEntry *const *kbf1 = element1;
-  const KeyboardFunctionEntry *const *kbf2 = element2;
+  const KeyboardFunction *const *kbf1 = element1;
+  const KeyboardFunction *const *kbf2 = element2;
   return strcasecmp((*kbf1)->name, (*kbf2)->name);
 }
 
 static int
 searchKeyboardFunctionName (const void *target, const void *element) {
   const DataOperand *name = target;
-  const KeyboardFunctionEntry *const *kbf = element;
+  const KeyboardFunction *const *kbf = element;
   return compareToName(name->characters, name->length, (*kbf)->name);
 }
 
 static int
-parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_t *characters, int length, KeyTableData *ktd) {
-  static const KeyboardFunctionEntry **sortedKeyboardFunctions = NULL;
+parseKeyboardFunctionName (DataFile *file, const KeyboardFunction **keyboardFunction, const wchar_t *characters, int length, KeyTableData *ktd) {
+  static const KeyboardFunction **sortedKeyboardFunctions = NULL;
 
   if (!sortedKeyboardFunctions) {
-    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KeyboardFunctionCount));
+    const KeyboardFunction **newTable = malloc(ARRAY_SIZE(newTable, keyboardFunctionCount));
 
     if (!newTable) {
       logMallocError();
@@ -540,15 +540,15 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
     }
 
     {
-      const KeyboardFunctionEntry *source = keyboardFunctionTable;
-      const KeyboardFunctionEntry **target = newTable;
-      unsigned int count = KeyboardFunctionCount;
+      const KeyboardFunction *source = keyboardFunctionTable;
+      const KeyboardFunction **target = newTable;
+      unsigned int count = keyboardFunctionCount;
 
       do {
         *target++ = source++;
       } while (--count);
 
-      qsort(newTable, KeyboardFunctionCount, sizeof(*newTable), sortKeyboardFunctionNames);
+      qsort(newTable, keyboardFunctionCount, sizeof(*newTable), sortKeyboardFunctionNames);
     }
 
     sortedKeyboardFunctions = newTable;
@@ -559,10 +559,10 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
       .characters = characters,
       .length = length
     };
-    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KeyboardFunctionCount, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
+    const KeyboardFunction *const *kbf = bsearch(&name, sortedKeyboardFunctions, keyboardFunctionCount, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
 
     if (kbf) {
-      *function = *kbf - keyboardFunctionTable;
+      *keyboardFunction = *kbf;
       return 1;
     }
   }
@@ -572,11 +572,11 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
 }
 
 static int
-getKeyboardFunctionOperand (DataFile *file, unsigned char *function, KeyTableData *ktd) {
+getKeyboardFunctionOperand (DataFile *file, const KeyboardFunction **keyboardFunction, KeyTableData *ktd) {
   DataOperand name;
 
   if (getDataOperand(file, &name, "keyboard function name")) {
-    if (parseKeyboardFunctionName(file, function, name.characters, name.length, ktd)) return 1;
+    if (parseKeyboardFunctionName(file, keyboardFunction, name.characters, name.length, ktd)) return 1;
   }
 
   return 0;
@@ -628,7 +628,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
   int offsetDone = 0;
 
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
-  const CommandEntry **command;
+  const CommandEntry *const *command;
 
   {
     const DataOperand name = {
@@ -988,16 +988,9 @@ processSuperimposeOperands (DataFile *file, void *data) {
   if (!ctx) return 0;
 
   {
-    unsigned char function;
+    const KeyboardFunction *kbf;
 
-    if (getKeyboardFunctionOperand(file, &function, ktd)) {
-      const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
-
-      if (!kbf->bit) {
-        reportDataError(file, "unsuperimposable keyboard function");
-        return 0;
-      }
-
+    if (getKeyboardFunctionOperand(file, &kbf, ktd)) {
       ctx->superimposedBits |= kbf->bit;
       return 1;
     }

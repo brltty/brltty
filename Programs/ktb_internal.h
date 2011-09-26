@@ -25,31 +25,13 @@ extern "C" {
 
 #define MAX_MODIFIERS_PER_COMBINATION 10
 
-typedef enum {
-  KBF_Dot1,
-  KBF_Dot2,
-  KBF_Dot3,
-  KBF_Dot4,
-  KBF_Dot5,
-  KBF_Dot6,
-  KBF_Dot7,
-  KBF_Dot8,
-
-  KBF_Space,
-  KBF_Shift,
-  KBF_Uppercase,
-  KBF_Control,
-  KBF_Meta,
-
-  KeyboardFunctionCount /* must be last */
-} KeyboardFunction;
-
 typedef struct {
   const char *name;
   int bit;
-} KeyboardFunctionEntry;
+} KeyboardFunction;
 
-extern const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount];
+extern const KeyboardFunction keyboardFunctionTable[];
+extern unsigned char keyboardFunctionCount;
 
 typedef enum {
   KCF_IMMEDIATE_KEY = 0X01
@@ -92,7 +74,7 @@ typedef struct {
 
 typedef struct {
   KeyValue keyValue;
-  unsigned char keyboardFunction;
+  const KeyboardFunction *keyboardFunction;
 } MappedKeyEntry;
 
 typedef struct {

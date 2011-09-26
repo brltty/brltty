@@ -75,7 +75,7 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
         qsort(target.combination.modifierKeys, table->pressedCount, sizeof(*target.combination.modifierKeys), sortModifierKeys);
 
         {
-          const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
+          const KeyBinding *const *binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
 
           if (binding) {
             if ((*binding)->command != EOF) return *binding;
@@ -110,7 +110,7 @@ findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValu
     };
 
     {
-      const HotkeyEntry **hotkey = bsearch(&target, ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), searchHotkeyEntry);
+      const HotkeyEntry *const *hotkey = bsearch(&target, ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), searchHotkeyEntry);
       if (hotkey) return *hotkey;
     }
   }
@@ -133,7 +133,7 @@ findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
     };
 
     {
-      const MappedKeyEntry **map = bsearch(&target, ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), searchMappedKeyEntry);
+      const MappedKeyEntry *const *map = bsearch(&target, ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), searchMappedKeyEntry);
       if (map) return *map;
     }
   }
@@ -159,12 +159,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
         const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
 
         if (!map) return EOF;
-
-        {
-          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[map->keyboardFunction];
-
-          keyboardCommand |= kbf->bit;
-        }
+        keyboardCommand |= map->keyboardFunction->bit;
       }
     }
 
