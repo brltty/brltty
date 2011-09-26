@@ -649,13 +649,12 @@ Les lignes de commande suivantes sont reconnues:
     <ref id="options-speech-driver" name="-s">.
     Elle n'est pas disponible si vous avez spécifié l'option de
     compilation <ref id="build-speech-support" name="--disable-speech-support">.
-  <tag><tt>speech-fifo</tt> <em>file</em><label id="configure-speech-fifo"></tag>
-    Spécifie le FIFO (un fichier spécial qui fonctionne comme un
-    tuyau en mode "first in first out", premier entré premier sorti) qui doit être
-    utilisé par les autres applications voulant
-    accéder au pilote de la synthèse de BRLTTY.
+  <tag><tt>speech-input</tt> <em>file</em><label id="configure-speech-input"></tag>
+    Spécifie le nom de l'objet du système de fichiers (FIFO, tuyau (pipe)
+    nommé, socket nommée, etc) que d'autres applications peuvent utiliser pour
+    convertir du texte en parole avec le pilote de synthèse de BRLTTY.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
-    <ref id="options-speech-fifo" name="-F">.
+    <ref id="options-speech-input" name="-F">.
     Elle n'est pas disponible si vous avez spécifié <ref id="build-speech-support" name="--disable-speech-support">.
   <tag><tt>speech-parameters</tt> [<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="configure-speech-parameters"></tag>
     Spécifie les paramètres pour les pilotes de synthèse vocale. Si
@@ -743,6 +742,15 @@ suivantes:
    <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
     Affiche un résumé des options en ligne de commande acceptées par BRLTTY,
     puis quitte.
+  <tag><tt/-i/<em/nom/ <tt/--speech-input=/<em/nom/<label id="options-speech-input"></tag>
+    Spécifie le nom de l'objet du système de fichiers (FIFO, tuyau (pipe) nommé,
+    socket nommée, etc) que les applications peuvent utiliser pour convertir du
+    texte en parole avec le pilote de synthèse de BRLTTY. Si elle n'est pas
+    spécifiée, l'objet du système de fichiers n'est pas créé.
+    Voir la ligne <ref id="configure-speech-input" name="speech-input"> du
+    fichier de configuration pour le réglage par défaut au moment de l'exécution.
+    Cette option n'est pas disponible si vous avez spécifié l'option de
+    compilation <ref id="build-speech-support" name="--disable-speech-support">.
   <tag><tt/-k/<em/file/ <tt/--key-table=/<em/file/<label id="options-key-table"></tag>
     Spécifie la table de touches
     (voir la section <ref id="table-key" name="Key Tables"> pour plus de détails).
@@ -908,6 +916,10 @@ suivantes:
       <tag><tt>BRLTTY_PCM_DEVICE</tt></tag>
         Le périphérique audio (voir l'option <ref id="options-pcm-device" name="-p">
         en ligne de commande).
+      <tag><tt/BRLTTY_PREFERENCES_FILE/</tag>
+        L'emplacement du fichier qui doit être utilisé pour sauvegarder et charger
+        les préférences de l'utilisateur.(voir l'option
+        <ref id="options-preferences-file" name="-F"> en ligne de commande).
       <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
         Crée ou non le périphérique auquel l'afficheur est connecté quand 
         l'écran ou la fenêtre suivant ne peuvent pas être lus 
@@ -918,9 +930,11 @@ suivantes:
       <tag><tt>BRLTTY_SPEECH_DRIVER</tt></tag>
         Le pilote de la synthèse vocale (voir l'option <ref id="options-speech-driver" name="-s">
         en ligne de commande).
-      <tag><tt>BRLTTY_SPEECH_FIFO</tt></tag>
-        Le pont de passage de la synthèse FIFO (voir l'option 
-        <ref id="options-speech-fifo" name="-F"> en ligne de commande).
+      <tag><tt>BRLTTY_SPEECH_INPUT</tt></tag>
+        Le nom de l'objet du système de fichiers que d'autres applications
+        peuvent utiliser pour convertir du texte en parole avec le pilote de
+        synthèse de BRLTTY (voir l'option <ref id="options-speech-input" name="-i">
+        en ligne de commande).
       <tag><tt>BRLTTY_SPEECH_PARAMETERS</tt></tag>
         Paramètres pour le pilote de la synthèse vocale (voir l'option 
         <ref id="options-speech-parameters" name="-S"> en ligne de commande).
@@ -928,8 +942,12 @@ suivantes:
         La table de texte (voir l'option
         <ref id="options-text-table" name="-a"> en ligne de commande).
     </descrip>
-  <tag><tt>-F</tt><em>fichier</em> <tt>--speech-fifo=</tt><em>file</em><label id="options-speech-fifo"></tag>
-    Spécifie le FIFO (un fichier spécial qui fonctionne comme un tube)
+  <tag><tt/-F/<em/file/ <tt/--preferences-file=/<em/file/<label id="options-preferences-file"></tag>
+    Spécifie l'emplacement du fichier qui doit être utilisé pour sauvegarder et
+    charger les les préférences de l'utilisateur. Si vous spécifiez un chemin
+    relatif, il est encré sur <tt>/var/lib/brltty</>. Voir la ligne
+    <ref id="configure-preferences-file" name="preferences-file"> du fichier de
+    configuration pour le réglage par défaut au moment de l'exécution.
     qui doit être utilisé par les autres applications souhaitant avoir
     accès au pilote de synthèse de BRLTTY. Si ce n'est pas spécifié,
     aucun FIFO n'est créé. Voir la ligne 

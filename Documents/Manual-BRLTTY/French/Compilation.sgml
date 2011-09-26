@@ -1,13 +1,3 @@
-
-    Le chemin du système de fichiers de la table d'abrégé
-    à utiliser. S'il est relatif, il est lié au répertoire configuré
-    par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">. Si cette
-    option n'est pas spécifiée, c'est la table définie par l'option de
-    compilation <ref id="build-text-table" name="--with-text-table"> qui est utilisé.
-    L'extension .ttb et le préfixe text. sont facultatifs. Si vous ne
-    fournissez pas cette option,  la table configurée avec l'option de compilation
-    <ref id="build-data-directory" name="--with-text-table"> est assumée.
-    
 <sect>La procédure de compilation<p>
 On peut télécharger BRLTTY depuis son site Web (voir la section <ref
 id="contact" name="Contacts"> pour son adresse).  Toutes les versions
@@ -1072,7 +1062,7 @@ dépend de la distribution. Voici les emplacements que nous connaissons:
   <tag>Debian</tag>
     <tt>/etc/init.d/boot</tt> (pour les vieilles versions)
     <newline>
-    <tt>/etc/init.d</tt> (pour les versions récentes)
+    <tt>/etc/init.d/</tt> (pour les versions récentes)
     <newline>
     Un paquet <tt>brltty</tt> est fourni
     (voir [<htmlurl url="http://paquets.debian.org/brltty" name="http://paquets.debian.org/brltty">])
@@ -1081,7 +1071,9 @@ dépend de la distribution. Voici les emplacements que nous connaissons:
     besoin pour l'utilisateur de fournir quoique ce soit, s'il est
     installé. Si vous avez besoin que le démon se lance avec des options en ligne
     de commande, vous pouvez modifier le contenu entre guillemets du fichier
-    <tt>/etc/default/brltty</>.
+    <tt>/etc/default/brltty</>. Si vous avez besoin que le démon se lance avec 
+    des options en ligne de commande, vous pouvez modifier le contenu entre 
+    guillemets de la ligne <tt/ARGUMENTS/ du fichier <tt>/etc/default/brltty</>.
   <tag>RedHat</tag>
     <tt>/etc/rc.d/rc.sysinit</tt>
     <newline>
@@ -1649,7 +1641,15 @@ soyez obligés de l'exécuter en tant que root.
   <tag><tt>-p</tt><em>device</em> <tt>--pcm-device=</tt><em>device</em></tag>
     Spécifie le périphérique à utiliser pour le son (voir la
     section <ref id="operand-pcm-device" name="spécification du périphérique PCM">). Cette option ne
-    fonctionne pas si vous avez spécifié l'option de compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
+    fonctionne pas si vous avez spécifié l'option de compilation 
+    <ref id="build-pcm-support" name="--disable-pcm-support">.
+  <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
+    Spécifie l'emplacement du fichier qui doit être utilisé pour sauvegarder
+    et charger les préférences de l'utilisateur. Si vous fournissez un chemin
+    relatif, il est ancré sur <tt>/var/lib/brltty</>. Le réglage par défaut
+    consiste à utiliser <tt/brltty.prefs/. Vous pouvez outre-passer cette
+    ligne avec l'option <ref id="options-preferences-file" name="-F"> en
+    ligne de commande.
   <tag><tt>-m</tt><em>peripherique</em> <tt>--midi-device=</tt><em>peripherique</em></tag>
     Spécifie le périphérique à utiliser pour l'interface numérique d'instrument
     de musique (voir la section <ref id="operand-midi-device" name="spécification du

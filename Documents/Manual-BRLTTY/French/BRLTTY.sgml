@@ -74,33 +74,55 @@ Public License</bf> pour plus de détails.
 BRLTTY est le travail d'une équipe. Pour des informations actualisées,
 voyez la page Web de BRLTTY sur [<htmlurl url="http://mielke.cc/brltty/" name="http://mielke.cc/brltty/">]. Ont
 participé à ce document et au logiciel:
+
 <itemize>
   <item>
-    <htmlurl url="http://mielke.cc/" name="Dave Mielke">
-    <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-    (maintaineur actuel, dévelopeur actif)
+    Dave Mielke (responsable, actif)
+    <descrip>
+      <tag/Web/<htmlurl url="http://mielke.cc/" name="http://mielke.cc/">
+      <tag/E-Mail/<htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;">
+    </descrip>
   <item>
-    <htmlurl url="http://www.cam.org/~nico/" name="Nicolas Pitre">
-    <tt><htmlurl url="mailto:nico@fluxnic.net" name="&lt;nico@fluxnic.net&gt;"></tt>
-    (dévelopeur actif)
+    Samuel Thibault (actif)
+    <descrip>
+      <tag/Web/<htmlurl url="http://dept-info.labri.fr/~thibault/" name="http://dept-info.labri.fr/~thibault/">
+      <tag/E-Mail/<htmlurl url="mailto:samuel.thibault@ens-lyon.org" name="&lt;samuel.thibault@ens-lyon.org&gt;">
+    </descrip>
   <item>
-    <htmlurl url="http://pages.infinit.net/sdoyon/" name="Stéphane Doyon">
-    <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
-    (dévelopeur actif)
+    Mario Lang (actif)
+    <descrip>
+      <tag/Web/<htmlurl url="http://delysid.org/" name="http://delysid.org/">
+      <tag/E-Mail/<htmlurl url="mailto:mlang@delysid.org" name="&lt;mlang@delysid.org&gt;">
+    </descrip>
   <item>
-    Nikhil Nair 
-    <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
-    (auteur originel, n'est plus actif)
+    Nicolas Pitre
+    <descrip>
+      <tag/Web/<htmlurl url="http://www.cam.org/~nico/" name="http://www.cam.org/~nico/">
+      <tag/E-Mail/<htmlurl url="mailto:nico@fluxnic.net" name="&lt;nico@fluxnic.net&gt;">
+    </descrip>
+  <item>
+    Stéphane Doyon
+    <descrip>
+      <tag/Web/<htmlurl url="http://pages.infinit.net/sdoyon/" name="http://pages.infinit.net/sdoyon/">
+      <tag/E-Mail/<htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;">
+    </descrip>
+  <item>
+    Nikhil Nair  (auteur)
+    <descrip>
+      <tag/E-Mail/<htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;">
+    </descrip>
+
 </itemize>
 
-Tous les commentaires, suggestions, critiques et contributions sont
-les bienvenus. Nous essaierons de répondre rapidement aux mails
-(pertinents) mais ne pouvons le garantir. En général, nous vous
-recommandons d'envoyer les messages à tous les développeurs actifs. Si
-vous avez des questions sur un type d'afficheur particulier supporté par
-BRLTTY, il se peut que vous souhaitiez contacter l'auteur de son pilote (voir
-le fichier <tt>README</tt> dans son sous-répertoire pour plus de
-détails).
+Toute question, tout commentaire, toute suggestions, critiques et contributions 
+sont les bienvenus. Même si nos adresses de messagerie sont listées ci-dessus,
+le meilleur moyen de nous contacter est la liste de diffusion BRLTTY. Vous
+pouvez poster sur la liste en envoyant votre message à
+<htmlurl url="mailto:BRLTTY@mielke.cc" name="&lt;BRLTTY@mielke.cc&gt;">. Si
+vous n'êtes pas abonné à la liste, vos messages seront soumis à l'approbation
+du modérateur. Pour vous abonner, vous désabonner, modifier les paramètres de
+voir les archives, etc, rendez-vous sur la page d'information de la liste, sur
+<htmlurl url="http://mielke.cc/mailman/listinfo/brltty" name="http://mielke.cc/mailman/listinfo/brltty">.
 
 &introduction
 &compilation

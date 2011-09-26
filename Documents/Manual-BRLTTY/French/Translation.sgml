@@ -113,7 +113,14 @@ Les instructions suivantes sont fournies:
 <descrip>
   <tag><tt/char/ <em/caractère/ <em/points/ &num; <em/commentaire/</tag>
     Utilise l'instruction <tt/char/ pour spécifier la façon dont un caractère 
-    Unicode sera représenté en braille.
+    Unicode sera représenté en braille. Les caractères définis par cette
+    instruction peuvent également être saisies au clavier braille. Si plusieurs
+    caractères ont la même représentation braille, vous ne devriez en définir
+    qu'un avec la ligne <tt/char/ - vous devriez définir l'autre avec la ligne
+    <tt/glyph/ (dont la syntaxe est identique). Si plus d'un caractère ayant la
+    même représentation braille est défini avec l'instruction <tt/char/
+    (ce qui est actuellement possible pour des questions de rétrocompatibilité),
+    c'est la première qui est sélectionnée. 
 
     <descrip>
       <tag><em/caractère/</tag>
@@ -164,6 +171,12 @@ Les instructions suivantes sont fournies:
       <item><tt/char \x20 ()/
       <item><tt/char \&lt;LATIN_SMALL_LETTER_D&gt; 145/
     </itemize>
+  <tag><tt/glyph/ <em/caractère/ <em/dots/ &num; <em/comment/</tag>
+    Utilisez l'instruction <tt/glyph/ pour spécifier la façon dont doit être
+    représenté en braille un caractère Unicode. Les caractères définis avec
+    cette instruction peuvent uniquement être affichés. On ne peut pas les
+    saisir au clavier braille. Voir la ligne <tt/char/ pour les détails sur
+    la syntaxe et pour des exemples.
   <tag><tt/byte/ <em/byte/ <em/points/ &num; <em/commentaire/</tag>
     Utilisez l'instruction <tt/byte/ pour spécifier comment un caractère en encodage local
     doit être représenté en braille. Il a été retenu pour des raisons de
