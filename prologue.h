@@ -309,7 +309,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define towlower(character) tolower((int)(character))
 #define towupper(character) toupper((int)(character))
 
-#define swprintf(target,count,source,...) snprintf((char *)(target), (count), (const char *)(source), ## __VARARGS__)
+#define swprintf(target,count,source,...) snprintf((char *)(target), (count), (const char *)(source), ## __VA_ARGS__)
 #define vswprintf(target,count,source,args) vsnprintf((char *)(target), (count), (const char *)(source), (args))
 
 static inline size_t
