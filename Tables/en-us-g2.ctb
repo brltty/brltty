@@ -110,6 +110,7 @@ begword auto = autofocus
 always b 12
 always B 12
 always balone = abalone baloney
+sufword bathorse =
 midword bb 23
 midendword bble 12-3456
 lowword be 23
@@ -242,6 +243,7 @@ sufword cheat 16-2-2345 Cheatham
 always chloro 16-123-135-1235-135
 sufword citron = citronella
 sufword clemenceau 14-123-15-134-26-14-2-136
+sufword clothes 14-123-135-2346-234 clotheshorse
 sufword coed 14-135-1246
 begword coen 14-135-26 coenzyme (Bana)
 begword cofac = cofactor
@@ -526,6 +528,8 @@ lowword his 236
 sufword his\s-\s 125-24-234-36-36
 word holloware 125-135-123-123-135-2456-345-15
 sufword horse = horseradish
+word horsed 125-135-1235-234-1246
+sufword horser 125-135-1235-234-12456 nine-horsers
 sufword houghton 125-1256-126-2345-135-1345
 sufword humidistat 125-136-134-24-145-24-34-1-2345
 always hydro =
