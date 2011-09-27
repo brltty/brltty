@@ -330,6 +330,7 @@ word nicht 1345
 always nicht 2-1345
 word so 1234
 always so 2-1234
+always cursor = shouldn't use the so-contraction
 begword		absol		=
 begword		absorb		=
 begword		absorp		=
