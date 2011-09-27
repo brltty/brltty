@@ -313,9 +313,9 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 
 static int
 doListKeyTable (ListGenerationData *lgd) {
-  if (!putCharacterString(lgd, WS_C("Key Table"))) return 0;
+  if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
   if (lgd->keyTable->title) {
-    if (!putCharacterString(lgd, WS_C(" for "))) return 0;
+    if (!putCharacterString(lgd, WS_C(": "))) return 0;
     if (!putCharacterString(lgd, lgd->keyTable->title)) return 0;
     if (!endLine(lgd)) return 0;
   }
