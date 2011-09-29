@@ -111,6 +111,7 @@
 #include "log.h"
 #include "timing.h"
 #include "ascii.h"
+#include "hidkeys.h"
 #include "brltty.h"
 
 #define BRL_STATUS_FIELDS sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter
@@ -935,9 +936,18 @@ static const ProtocolOperations protocol1Operations = {
 
 static uint32_t firmwareVersion2;
 static unsigned char splitOffset2;
+static HidKeyboardPacket hidKeyboardPacket2;
 
 static void
 initializeVariables2 (void) {
+  initializeHidKeyboardPacket(&hidKeyboardPacket2);
+}
+
+static int
+interpretKeyboardEvent2 (BrailleDisplay *brl, const unsigned char *packet) {
+  const void *newPacket = packet;
+  processHidKeyboardPacket(&hidKeyboardPacket2, newPacket);
+  return EOF;
 }
 
 static int
@@ -1241,6 +1251,10 @@ readPacket2u (unsigned char *packet, int size) {
 
     if (offset == 0) {
       switch (byte) {
+        case 0X01:
+          length = 9;
+          break;
+
         case 0X04:
           length = 3;
           break;
@@ -1324,6 +1338,12 @@ readCommand2u (BrailleDisplay *brl) {
     if (length < 0) return BRL_CMD_RESTARTBRL;
 
     switch (packet[0]) {
+      case 0X01: {
+        int command = interpretKeyboardEvent2(brl, &packet[1]);
+        if (command != EOF) return command;
+        continue;
+      }
+
       case 0X04: {
         int command = interpretKeyEvent2(brl, packet[2], packet[1]);
         if (command != EOF) return command;
