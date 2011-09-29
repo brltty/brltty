@@ -176,19 +176,25 @@ enqueueScanCode (uint8_t code) {
 
 static int
 enqueueHidKey (unsigned char key, int press) {
-  uint16_t code = hidKeyTable[key].set1;
+  if (key < ARRAY_COUNT(hidKeyTable)) {
+    uint16_t code = hidKeyTable[key].set1;
 
-  {
-    uint8_t escape = (code >> 8) & 0XFF;
+    if (code) {
+      {
+        uint8_t escape = (code >> 8) & 0XFF;
 
-    if (escape)
-      if (!enqueueScanCode(escape))
-        return 0;
+        if (escape)
+          if (!enqueueScanCode(escape))
+            return 0;
+      }
+
+      code &= 0XFF;
+      if (!press) code |= 0X80;
+      if (!enqueueScanCode(code)) return 0;
+    }
   }
 
-  code &= 0XFF;
-  if (!press) code |= 0X80;
-  return enqueueScanCode(code);
+  return 1;
 }
 
 static unsigned char
