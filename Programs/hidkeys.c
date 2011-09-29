@@ -99,6 +99,7 @@ static const HidKeyEntry hidKeyTable[] = {
   [0X45] = {.set1=0X0058, .set2=0X0007} /* F12 */,
   [0X46] = {.set1=0XE037, .set2=0XE07C} /* Print Screen (Note 1) */,
   [0X47] = {.set1=0X0046, .set2=0X007E} /* Scroll Lock */,
+
   [0X49] = {.set1=0XE052, .set2=0XE070} /* Insert (Note 1) */,
   [0X4A] = {.set1=0XE047, .set2=0XE06C} /* Home (Note 1) */,
   [0X4B] = {.set1=0XE049, .set2=0XE07D} /* Page Up (Note 1) */,
@@ -159,6 +160,39 @@ static const HidKeyEntry hidKeyTable[] = {
   [0X82] = {.set1=0X0000, .set2=0X0000} /* Caps Lock */,
   [0X83] = {.set1=0X0000, .set2=0X0000} /* Num Lock */,
   [0X84] = {.set1=0X0000, .set2=0X0000} /* Scroll Lock */,
+  [0X85] = {.set1=0X007E, .set2=0X006D} /* Keypad , (Brazilian Keypad .) */,
+  [0X86] = {.set1=0X0000, .set2=0X0000} /* Keyboard Equal Sign */,
+  [0X87] = {.set1=0X0073, .set2=0X0051} /* Keyboard Int'l 1 (Ro) */,
+  [0X88] = {.set1=0X0070, .set2=0X0013} /* Keyboard Intl'2 (Katakana/Hiragana) */,
+  [0X89] = {.set1=0X007D, .set2=0X006A} /* Keyboard Int'l 3 (Yen) */,
+  [0X8A] = {.set1=0X0079, .set2=0X0064} /* Keyboard Int'l 4 (Henkan) */,
+  [0X8B] = {.set1=0X007B, .set2=0X0067} /* Keyboard Int'l 5 (Muhenkan) */,
+  [0X8C] = {.set1=0X005C, .set2=0X0027} /* Keyboard Int'l 6 (PC9800 Keypad ,) */,
+  [0X8D] = {.set1=0X0000, .set2=0X0000} /* Keyboard Int'l 7 */,
+  [0X8E] = {.set1=0X0000, .set2=0X0000} /* Keyboard Int'l 8 */,
+  [0X8F] = {.set1=0X0000, .set2=0X0000} /* Keyboard Int'l 9 */,
+  [0X90] = {.set1=0X00F2, .set2=0X00F2} /* Keyboard Lang 1 (Hanguel/English) */,
+  [0X91] = {.set1=0X00F1, .set2=0X00F1} /* Keyboard Lang 2 (Hanja) */,
+  [0X92] = {.set1=0X0078, .set2=0X0063} /* Keyboard Lang 3 (Katakana) */,
+  [0X93] = {.set1=0X0077, .set2=0X0062} /* Keyboard Lang 4 (Hiragana) */,
+  [0X94] = {.set1=0X0076, .set2=0X005F} /* Keyboard Lang 5 (Zenkaku/Hankaku) */,
+  [0X95] = {.set1=0X0000, .set2=0X0000} /* Keyboard Lang 6 */,
+  [0X96] = {.set1=0X0000, .set2=0X0000} /* Keyboard Lang 7 */,
+  [0X97] = {.set1=0X0000, .set2=0X0000} /* Keyboard Lang 8 */,
+  [0X98] = {.set1=0X0000, .set2=0X0000} /* Keyboard Lang 9 */,
+  [0X99] = {.set1=0X0000, .set2=0X0000} /* Keyboard Alternate Erase */,
+  [0X9A] = {.set1=0X0000, .set2=0X0000} /* Keyboard SysReq/Attention */,
+  [0X9B] = {.set1=0X0000, .set2=0X0000} /* Keyboard Cancel */,
+  [0X9C] = {.set1=0X0000, .set2=0X0000} /* Keyboard Clear */,
+  [0X9D] = {.set1=0X0000, .set2=0X0000} /* Keyboard Prior */,
+  [0X9E] = {.set1=0X0000, .set2=0X0000} /* Keyboard Return */,
+  [0X9F] = {.set1=0X0000, .set2=0X0000} /* Keyboard Separator */,
+  [0XA0] = {.set1=0X0000, .set2=0X0000} /* Keyboard Out */,
+  [0XA1] = {.set1=0X0000, .set2=0X0000} /* Keyboard Oper */,
+  [0XA2] = {.set1=0X0000, .set2=0X0000} /* Keyboard Clear/Again */,
+  [0XA3] = {.set1=0X0000, .set2=0X0000} /* Keyboard CrSel/Props */,
+  [0XA4] = {.set1=0X0000, .set2=0X0000} /* Keyboard ExSel */,
+
   [0XE0] = {.set1=0X001D, .set2=0X0014} /* Left Control */,
   [0XE1] = {.set1=0X002A, .set2=0X0012} /* Left Shift */,
   [0XE2] = {.set1=0X0038, .set2=0X0011} /* Left Alt */,
@@ -175,7 +209,7 @@ enqueueScanCode (uint8_t code) {
 }
 
 static int
-enqueueHidKey (unsigned char key, int press) {
+enqueueHidKeyEvent (unsigned char key, int press) {
   if (key < ARRAY_COUNT(hidKeyTable)) {
     uint16_t code = hidKeyTable[key].set1;
 
@@ -251,7 +285,7 @@ processHidKeyboardPacket (
     unsigned char key = newKeys[index];
     if (!key) break;
 
-    BITMASK_SET(pressedKeys, newKeys[index]);
+    BITMASK_SET(pressedKeys, key);
   }
 
   for (index=0; index<oldCount; index+=1) {
@@ -261,7 +295,7 @@ processHidKeyboardPacket (
     if (BITMASK_TEST(pressedKeys, key)) {
       BITMASK_CLEAR(pressedKeys, key);
     } else {
-      enqueueHidKey(key, 0);
+      enqueueHidKeyEvent(key, 0);
     }
   }
 
@@ -270,7 +304,7 @@ processHidKeyboardPacket (
     if (!key) break;
 
     if (BITMASK_TEST(pressedKeys, key)) {
-      enqueueHidKey(key, 1);
+      enqueueHidKeyEvent(key, 1);
     }
   }
 
