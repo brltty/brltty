@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
 "POT-Creation-Date: 2011-09-28 16:04+0200\n"
-"PO-Revision-Date: 2011-09-28 16:15+0200\n"
+"PO-Revision-Date: 2011-09-28 18:25+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -710,7 +710,7 @@ msgstr "Nein"
 
 #: Programs/config.c:1275
 msgid "No Capitalization"
-msgstr "Kein Großschreibung"
+msgstr "Keine Großschreibung"
 
 #: Programs/config.c:1568 Programs/config.c:1582 Programs/config.c:1602
 msgid "None"
