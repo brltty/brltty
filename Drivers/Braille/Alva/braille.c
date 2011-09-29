@@ -1072,6 +1072,7 @@ readPacket2s (unsigned char *packet, int size) {
       switch (byte) {
         case 0X3F: /* ? */ length =  3; break;
         case 0X45: /* E */ length =  3; break;
+        case 0X48: /* H */ length = 10; break;
         case 0X4B: /* K */ length =  4; break;
         case 0X54: /* T */ length =  4; break;
         case 0X56: /* V */ length = 13; break;
@@ -1192,6 +1193,12 @@ readCommand2s (BrailleDisplay *brl) {
     switch (packet[0]) {
       case ESC:
         switch (packet[1]) {
+          case 0X48: /* H */ {
+            int command = interpretKeyboardEvent2(brl, &packet[2]);
+            if (command != EOF) return command;
+            continue;
+          }
+
           case 0X4B: /* K */ {
             int command = interpretKeyEvent2(brl, packet[2], packet[3]);
             if (command != EOF) return command;
