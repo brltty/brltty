@@ -1367,7 +1367,6 @@ detectModel2u (BrailleDisplay *brl) {
     }
 
     if (updated) {
-      logBytes(LOG_NOTICE, "buffer", buffer, length);
       io->setFeatureReport(0X06, buffer, length);
     }
   }
