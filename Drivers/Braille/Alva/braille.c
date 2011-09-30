@@ -1353,12 +1353,21 @@ detectModel2u (BrailleDisplay *brl) {
   }
 
   {
+    int updated = 0;
     unsigned char buffer[0X20];
     int length = io->getFeatureReport(0X06, buffer, sizeof(buffer));
 
     if (length >= 2) {
-      buffer[1] &= ~(0X10); /* enable keyboard */
-      buffer[1] |= 0X20; /* send raw keyboard key messages */
+      unsigned char byte = (buffer[1] | 0X20) & ~(0X10);
+
+      if (byte != buffer[1]) {
+        buffer[1] = byte;
+        updated = 1;
+      }
+    }
+
+    if (updated) {
+      logBytes(LOG_NOTICE, "buffer", buffer, length);
       io->setFeatureReport(0X06, buffer, length);
     }
   }
