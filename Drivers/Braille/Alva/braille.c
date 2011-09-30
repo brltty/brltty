@@ -221,6 +221,22 @@ BEGIN_KEY_NAME_TABLE(thumb)
   KEY_NAME_ENTRY(AL_KEY_THUMB+4, "ThumbRight"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(featurepack)
+  KEY_NAME_ENTRY(AL_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(AL_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(AL_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(AL_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(AL_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(AL_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(AL_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(AL_KEY_Dot8, "Dot8"),
+  KEY_NAME_ENTRY(AL_KEY_Control, "Control"),
+  KEY_NAME_ENTRY(AL_KEY_Windows, "Windows"),
+  KEY_NAME_ENTRY(AL_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(AL_KEY_Alt, "Alt"),
+  KEY_NAME_ENTRY(AL_KEY_Enter, "Enter"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(abt_small)
   KEY_NAME_TABLE(abt_basic),
   KEY_NAME_TABLE(status1),
@@ -255,6 +271,7 @@ BEGIN_KEY_NAME_TABLES(bc)
   KEY_NAME_TABLE(etouch),
   KEY_NAME_TABLE(smartpad),
   KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(featurepack),
   KEY_NAME_TABLE(routing1),
   KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
@@ -429,6 +446,7 @@ typedef struct {
   int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
   int (*getFeatureReport) (unsigned char report, unsigned char *buffer, int length);
+  int (*setFeatureReport) (unsigned char report, const unsigned char *data, int length);
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
@@ -991,6 +1009,12 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       secondary = 1;
       goto doKey;
 
+    case 0X78: /* feature pack key */
+      base = AL_KEY_FEATUREPACK;
+      count = AL_KEYS_FEATUREPACK;
+      secondary = 0;
+      goto doKey;
+
     doKey:
       if (secondary) {
         if ((key / count) == 1) {
@@ -1072,10 +1096,10 @@ readPacket2s (unsigned char *packet, int size) {
       switch (byte) {
         case 0X3F: /* ? */ length =  3; break;
         case 0X45: /* E */ length =  3; break;
-        case 0X48: /* H */ length = 10; break;
         case 0X4B: /* K */ length =  4; break;
         case 0X54: /* T */ length =  4; break;
         case 0X56: /* V */ length = 13; break;
+        case 0X68: /* h */ length = 10; break;
       }
     }
 
@@ -1193,14 +1217,14 @@ readCommand2s (BrailleDisplay *brl) {
     switch (packet[0]) {
       case ESC:
         switch (packet[1]) {
-          case 0X48: /* H */ {
-            int command = interpretKeyboardEvent2(brl, &packet[2]);
+          case 0X4B: /* K */ {
+            int command = interpretKeyEvent2(brl, packet[2], packet[3]);
             if (command != EOF) return command;
             continue;
           }
 
-          case 0X4B: /* K */ {
-            int command = interpretKeyEvent2(brl, packet[2], packet[3]);
+          case 0X68: /* h */ {
+            int command = interpretKeyboardEvent2(brl, &packet[2]);
             if (command != EOF) return command;
             continue;
           }
@@ -1328,6 +1352,17 @@ detectModel2u (BrailleDisplay *brl) {
     if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
   }
 
+  {
+    unsigned char buffer[0X20];
+    int length = io->getFeatureReport(0X06, buffer, sizeof(buffer));
+
+    if (length >= 2) {
+      buffer[1] &= ~(0X10); /* enable keyboard */
+      buffer[1] |= 0X20; /* send raw keyboard key messages */
+      io->setFeatureReport(0X06, buffer, length);
+    }
+  }
+
   if (setDefaultConfiguration(brl))
     if (updateConfiguration2u(brl, 1, NULL))
       return 1;
@@ -1443,10 +1478,16 @@ getSerialFeatureReport (unsigned char report, unsigned char *buffer, int length)
   return -1;
 }
 
+static int
+setSerialFeatureReport (unsigned char report, const unsigned char *data, int length) {
+  errno = ENOSYS;
+  return -1;
+}
+
 static const InputOutputOperations serialOperations = {
   openSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes,
-  getSerialFeatureReport
+  getSerialFeatureReport, setSerialFeatureReport
 };
 
 #include "io_usb.h"
@@ -1541,10 +1582,15 @@ getUsbFeatureReport (unsigned char report, unsigned char *buffer, int length) {
   return usbHidGetFeature(usbChannel->device, usbChannel->definition.interface, report, buffer, length, 1000);
 }
 
+static int
+setUsbFeatureReport (unsigned char report, const unsigned char *data, int length) {
+  return usbHidSetFeature(usbChannel->device, usbChannel->definition.interface, report, data, length, 1000);
+}
+
 static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes,
-  getUsbFeatureReport
+  getUsbFeatureReport, setUsbFeatureReport
 };
 
 #include "io_bluetooth.h"

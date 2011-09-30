@@ -24,6 +24,7 @@
 #define AL_KEYS_ETOUCH 4
 #define AL_KEYS_SMARTPAD 9
 #define AL_KEYS_THUMB 5
+#define AL_KEYS_FEATUREPACK 14
 
 typedef enum {
   AL_KEY_OPERATION = 1,
@@ -34,6 +35,7 @@ typedef enum {
   AL_KEY_ETOUCH = AL_KEY_RIGHT_PAD + AL_KEYS_SATELLITE,
   AL_KEY_SMARTPAD = AL_KEY_ETOUCH + AL_KEYS_ETOUCH,
   AL_KEY_THUMB = AL_KEY_SMARTPAD + AL_KEYS_SMARTPAD,
+  AL_KEY_FEATUREPACK = AL_KEY_THUMB + AL_KEYS_THUMB,
 
   AL_KEY_Prog = AL_KEY_OPERATION,
   AL_KEY_Home,
@@ -78,6 +80,20 @@ typedef enum {
   AL_KEY_SmartpadRight,
   AL_KEY_SmartpadF3,
   AL_KEY_SmartpadF4,
+
+  AL_KEY_Dot1 = AL_KEY_FEATUREPACK + 1,
+  AL_KEY_Dot2,
+  AL_KEY_Dot3,
+  AL_KEY_Dot4,
+  AL_KEY_Dot5,
+  AL_KEY_Dot6,
+  AL_KEY_Dot7,
+  AL_KEY_Dot8,
+  AL_KEY_Control,
+  AL_KEY_Windows,
+  AL_KEY_Space,
+  AL_KEY_Alt,
+  AL_KEY_Enter,
 
   AL_KEY_RELEASE = 0X80
 } AL_NavigationKey;

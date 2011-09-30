@@ -110,6 +110,19 @@ bind SmartpadF4+SmartpadUp SAY_ABOVE
 bind SmartpadF4+SmartpadDown SAY_BELOW
 bind SmartpadF4+SmartpadEnter SPKHOME
 
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map Space SPACE
+map Control CONTROL
+map Alt META
+bind Enter KEY_ENTER
+
 
 #################
 # Menu Bindings #
