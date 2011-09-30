@@ -223,7 +223,12 @@ enqueueHidKeyEvent (unsigned char key, int press) {
       }
 
       code &= 0XFF;
-      if (!press) code |= 0X80;
+
+      if (!press) {
+        if (code & 0X80) return 1;
+        code |= 0X80;
+      }
+
       if (!enqueueScanCode(code)) return 0;
     }
   }
