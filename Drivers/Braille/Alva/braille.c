@@ -1100,6 +1100,7 @@ readPacket2s (unsigned char *packet, int size) {
         case 0X54: /* T */ length =  4; break;
         case 0X56: /* V */ length = 13; break;
         case 0X68: /* h */ length = 10; break;
+        case 0X72: /* r */ length = 3; break;
       }
     }
 
@@ -1117,14 +1118,15 @@ readPacket2s (unsigned char *packet, int size) {
 }
 
 static int
-getAttributes2s (unsigned char item, unsigned char *packet, int size) {
-  unsigned char request[] = {ESC, item, 0X3F};
+tellDevice2s (unsigned char command, unsigned char operand, unsigned char *response, int size) {
+  unsigned char packet[] = {ESC, command, operand};
 
-  if (writeBytes(request, sizeof(request), NULL)) {
+  logOutputPacket(packet, sizeof(packet));
+  if (writeBytes(packet, sizeof(packet), NULL)) {
     while (io->awaitInput(200)) {
-      int length = protocol->readPacket(packet, size);
+      int length = protocol->readPacket(response, size);
       if (length <= 0) break;
-      if ((packet[0] == ESC) && (packet[1] == item)) return 1;
+      if ((response[0] == ESC) && (response[1] == command)) return 1;
     }
   }
 
@@ -1132,15 +1134,20 @@ getAttributes2s (unsigned char item, unsigned char *packet, int size) {
 }
 
 static int
+askDevice2s (unsigned char command, unsigned char *response, int size) {
+  return tellDevice2s(command, 0X3F, response, size);
+}
+
+static int
 updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
-  unsigned char buffer[0X20];
+  unsigned char response[0X20];
 
-  if (getAttributes2s(0X45, buffer, sizeof(buffer))) {
-    unsigned char textColumns = buffer[2];
+  if (askDevice2s(0X45, response, sizeof(response))) {
+    unsigned char textColumns = response[2];
 
-    if (getAttributes2s(0X54, buffer, sizeof(buffer))) {
-      unsigned char statusColumns = buffer[2];
-      unsigned char statusSide = buffer[3];
+    if (askDevice2s(0X54, response, sizeof(response))) {
+      unsigned char statusColumns = response[2];
+      unsigned char statusSide = response[3];
 
       if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
                               (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
@@ -1160,19 +1167,20 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
     NULL
   };
 
-  unsigned char packet[0X20];
+  unsigned char response[0X20];
   const ModelEntry *const *modelEntry = models;
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
       firmwareVersion2 = 0;
-      if (getAttributes2s(0X56, packet, sizeof(packet))) {
-        firmwareVersion2 |= (packet[4] << 16);
-        firmwareVersion2 |= (packet[5] <<  8);
-        firmwareVersion2 |= (packet[6] <<  0);
+      if (askDevice2s(0X56, response, sizeof(response))) {
+        firmwareVersion2 |= (response[4] << 16);
+        firmwareVersion2 |= (response[5] <<  8);
+        firmwareVersion2 |= (response[6] <<  0);
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
+            tellDevice2s(0X72, 1, response, sizeof(response));
             return 1;
           }
         }
@@ -1191,10 +1199,10 @@ detectModel2s (BrailleDisplay *brl) {
   int probes = 0;
 
   do {
-    unsigned char packet[0X20];
+    unsigned char response[0X20];
 
-    if (getAttributes2s(0X3F, packet, sizeof(packet))) {
-      if (identifyModel2s(brl, packet[2])) {
+    if (askDevice2s(0X3F, response, sizeof(response))) {
+      if (identifyModel2s(brl, response[2])) {
         return 1;
       }
     } else if (errno != EAGAIN) {
@@ -1655,10 +1663,16 @@ getBluetoothFeatureReport (unsigned char report, unsigned char *buffer, int leng
   return -1;
 }
 
+static int
+setBluetoothFeatureReport (unsigned char report, const unsigned char *data, int length) {
+  errno = ENOSYS;
+  return -1;
+}
+
 static const InputOutputOperations bluetoothOperations = {
   openBluetoothPort, closeBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes,
-  getBluetoothFeatureReport
+  getBluetoothFeatureReport, setBluetoothFeatureReport
 };
 
 int
