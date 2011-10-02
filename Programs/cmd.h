@@ -38,6 +38,7 @@ typedef struct {
   unsigned isRow:1;
   unsigned isOffset:1;
   unsigned isRange:1;
+  unsigned isKey:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
@@ -52,6 +53,15 @@ typedef enum {
 extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
 extern void logCommand (int command);
 extern void logTransformedCommand (int oldCommand, int newCommand);
+
+typedef struct {
+  const char *name;
+  int bit;
+} CommandFlagEntry;
+
+extern const CommandFlagEntry commandFlagTable_key[];
+extern const CommandFlagEntry commandFlagTable_motion[];
+extern const CommandFlagEntry commandFlagTable_toggle[];
 
 typedef struct {
   int command;

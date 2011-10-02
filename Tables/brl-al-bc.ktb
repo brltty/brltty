@@ -123,6 +123,39 @@ map Control CONTROL
 map Alt META
 bind Enter KEY_ENTER
 
+bind Space+Dot3 KEY_CURSOR_LEFT
+bind Space+Dot6 KEY_CURSOR_RIGHT
+#bind Space+Dot2 KEY_WORD_LEFT
+#bind Space+Dot5 KEY_WORD_RIGHT
+bind Space+Dot1 KEY_CURSOR_UP
+bind Space+Dot4 KEY_CURSOR_DOWN
+bind Space+Dot1+Dot3 KEY_PAGE_UP
+bind Space+Dot4+Dot6 KEY_PAGE_DOWN
+bind Space+Dot1+Dot2+Dot3 KEY_HOME
+bind Space+Dot4+Dot5+Dot6 KEY_END
+bind Space+Dot4+Dot5 KEY_DELETE
+bind Space+Dot5+Dot6 KEY_TAB
+
+bind Space+Dot1+Dot2 KEY_BACKSPACE
+#bind Space+Dot1+Dot4 KEY_CAPSLOCK
+bind Space+Dot1+Dot5 KEY_ESCAPE
+bind Space+Dot2+Dot4 KEY_INSERT
+#bind Space+Dot1+Dot3+Dot6 KEY_NUMLOCK
+
+bind Space+Dot3+Dot7 KEY_CURSOR_LEFT+shift
+bind Space+Dot6+Dot7 KEY_CURSOR_RIGHT+shift
+bind Space+Dot1+Dot7 KEY_CURSOR_UP+shift
+bind Space+Dot4+Dot7 KEY_CURSOR_DOWN+shift
+bind Space+Dot1+Dot3+Dot7 KEY_PAGE_UP+shift
+bind Space+Dot4+Dot6+Dot7 KEY_PAGE_DOWN+shift
+bind Space+Dot1+Dot2+Dot3+Dot7 KEY_HOME+shift
+bind Space+Dot4+Dot5+Dot6+Dot7 KEY_END+shift
+bind Space+Dot4+Dot5+Dot7 KEY_DELETE+shift
+bind Space+Dot2+Dot3 KEY_TAB+shift
+#bind Space+Dot7 KEY_SPACE+shift
+
+bind Space+Dot1+Dot5+Dot7 KEY_ESCAPE+shift
+
 
 #################
 # Menu Bindings #

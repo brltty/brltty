@@ -35,6 +35,25 @@ const CommandEntry commandTable[] = {
   {.name=NULL, .code=EOF, .description=NULL}
 };
 
+const CommandFlagEntry commandFlagTable_key[] = {
+  {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
+  {.name="upper"  , .bit=BRL_FLG_CHAR_UPPER  },
+  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
+  {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
+  {.name=NULL     , .bit=0                   }
+};
+
+const CommandFlagEntry commandFlagTable_motion[] = {
+  {.name="route", .bit=BRL_FLG_MOTION_ROUTE},
+  {.name=NULL   , .bit=0                   }
+};
+
+const CommandFlagEntry commandFlagTable_toggle[] = {
+  {.name="on" , .bit=BRL_FLG_TOGGLE_ON },
+  {.name="off", .bit=BRL_FLG_TOGGLE_OFF},
+  {.name=NULL , .bit=0                 }
+};
+
 static int
 compareCommandCodes (const void *element1, const void *element2) {
   const CommandEntry *const *cmd1 = element1;
@@ -165,6 +184,18 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       STR_PRINTF("%s", description);
     } else {
       STR_PRINTF("%s", gettext(cmd->description));
+    }
+
+    if (cmd->isKey) {
+      const CommandFlagEntry *flag = commandFlagTable_key;
+
+      while (flag->name) {
+        if (command & flag->bit) {
+          STR_PRINTF(" + %s", flag->name);
+        }
+
+        flag += 1;
+      }
     }
 
     if (cmd->isMotion) {

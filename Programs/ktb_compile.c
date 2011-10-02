@@ -622,6 +622,24 @@ allocateCommandTable (KeyTableData *ktd) {
   return 0;
 }
 
+static int
+applyCommandFlag (int *command, const CommandFlagEntry *table, const DataOperand *name) {
+  const CommandFlagEntry *flag = table;
+
+  while (flag->name) {
+    if (!(*command & flag->bit)) {
+      if (compareToName(name->characters, name->length, flag->name) == 0) {
+        *command |= flag->bit;
+        return 1;
+      }
+    }
+
+    flag += 1;
+  }
+
+  return 0;
+}
+
 static const CommandEntry *
 parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   int toggleDone = 0;
@@ -710,6 +728,10 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
         }
       }
     }
+
+    if ((*command)->isKey)
+      if (applyCommandFlag(value, commandFlagTable_key, &modifier))
+        continue;
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
     return NULL;
