@@ -182,32 +182,26 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       const char *text = gettext(cmd->description);
       size_t length = strlen(text);
       char buffer[length + 1];
+      char *delimiter;
+
       strcpy(buffer, text);
+      delimiter = strchr(buffer, '/');
 
-      if (command & BRL_FLG_TOGGLE_ON) {
-        char *target = strchr(buffer, '/');
+      if (delimiter) {
+        char *source;
+        char *target;
 
-        if (target) {
-          char *source = strchr(target, ' ');
-
-          if (source) {
-            memmove(target, source, (strlen(source) + 1));
-          } else {
-            *target = 0;
-          }
-        }
-      } else if (command & BRL_FLG_TOGGLE_OFF) {
-        char *source = strchr(buffer, '/');
-
-        if (source) {
-          char *target;
+        if (command & BRL_FLG_TOGGLE_ON) {
+          target = delimiter;
+          if (!(source = strchr(target, ' '))) source = target + strlen(target);
+        } else if (command & BRL_FLG_TOGGLE_OFF) {
+          source = delimiter + 1;
 
           {
-            char oldSource = *source;
-
-            *source = 0;
+            char oldDelimiter = *delimiter;
+            *delimiter = 0;
             target = strrchr(buffer, ' ');
-            *source = oldSource;
+            *delimiter = oldDelimiter;
           }
 
           if (target) {
@@ -215,12 +209,14 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
           } else {
             target = buffer;
           }
-
-          source += 1;
-          memmove(target, source, (strlen(source) + 1));
+        } else {
+          goto toggleReady;
         }
+
+        memmove(target, source, (strlen(source) + 1));
       }
 
+    toggleReady:
       STR_PRINTF("%s", buffer);
     } else {
       STR_PRINTF("%s", gettext(cmd->description));
@@ -255,9 +251,11 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
     }
 
     if (options & CDO_IncludeOperand) {
-      if (cmd->isColumn && !cmd->isRouting &&
-          ((arg == BRL_MSK_ARG) ||
-           ((options & CDO_DefaultOperand) && !arg))) {
+      if (cmd->isColumn && !cmd->isRouting && (
+           (arg == BRL_MSK_ARG) /* key event processing */
+         ||
+           ((options & CDO_DefaultOperand) && !arg) /* key table listing */
+         )) {
         STR_PRINTF(" at cursor");
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         STR_PRINTF(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
