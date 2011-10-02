@@ -642,7 +642,6 @@ applyCommandFlag (int *command, const CommandFlagEntry *table, const DataOperand
 
 static const CommandEntry *
 parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
-  int toggleDone = 0;
   int offsetDone = 0;
 
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
@@ -680,40 +679,16 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     modifier.characters = characters;
     modifier.length = end? end-characters: length;
 
-    if ((*command)->isToggle && !toggleDone) {
-      if (isKeyword(WS_C("on"), modifier.characters, modifier.length)) {
-        *value |= BRL_FLG_TOGGLE_ON;
-      } else if (isKeyword(WS_C("off"), modifier.characters, modifier.length)) {
-        *value |= BRL_FLG_TOGGLE_OFF;
-      } else {
-        goto notToggle;
-      }
-
-      toggleDone = 1;
-      continue;
-    }
-  notToggle:
+    if ((*command)->isToggle && !(*value & BRL_FLG_TOGGLE_MASK))
+      if (applyCommandFlag(value, commandFlagTable_toggle, &modifier))
+        continue;
 
     if ((*command)->isMotion) {
-      if (isKeyword(WS_C("route"), modifier.characters, modifier.length) &&
-          !(*value & BRL_FLG_MOTION_ROUTE)) {
-        *value |= BRL_FLG_MOTION_ROUTE;
-        continue;
-      }
+      if (applyCommandFlag(value, commandFlagTable_motion, &modifier)) continue;
 
-      if ((*command)->isRow) {
-        if (isKeyword(WS_C("scaled"), modifier.characters, modifier.length) &&
-            !(*value & BRL_FLG_LINE_SCALED)) {
-          *value |= BRL_FLG_LINE_SCALED;
+      if ((*command)->isRow)
+        if (applyCommandFlag(value, commandFlagTable_line, &modifier))
           continue;
-        }
-
-        if (isKeyword(WS_C("toleft"), modifier.characters, modifier.length) &&
-            !(*value & BRL_FLG_LINE_TOLEFT)) {
-          *value |= BRL_FLG_LINE_TOLEFT;
-          continue;
-        }
-      }
     }
 
     if ((*command)->isOffset && !offsetDone) {
