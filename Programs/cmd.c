@@ -179,35 +179,49 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
     }
 
     if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
-      const char *oldVerb = "toggle";
-      size_t oldLength = strlen(oldVerb);
+      const char *text = gettext(cmd->description);
+      size_t length = strlen(text);
+      char buffer[length + 1];
+      strcpy(buffer, text);
 
-      size_t length = strlen(cmd->description);
-      char description[length + 1];
-      strcpy(description, cmd->description);
+      if (command & BRL_FLG_TOGGLE_ON) {
+        char *target = strchr(buffer, '/');
 
-      if (strncmp(description, oldVerb, oldLength) == 0) {
-        const char *newVerb = "set";
-        size_t newLength = strlen(newVerb);
+        if (target) {
+          char *source = strchr(target, ' ');
 
-        memmove(description+newLength, description+oldLength, length-oldLength+1);
-        memcpy(description, newVerb, newLength);
+          if (source) {
+            memmove(target, source, (strlen(source) + 1));
+          } else {
+            *target = 0;
+          }
+        }
+      } else if (command & BRL_FLG_TOGGLE_OFF) {
+        char *source = strchr(buffer, '/');
 
-        if (command & BRL_FLG_TOGGLE_ON) {
-          char *end = strrchr(description, '/');
-          if (end) *end = 0;
-        } else {
-          char *target = strrchr(description, ' ');
+        if (source) {
+          char *target;
+
+          {
+            char oldSource = *source;
+
+            *source = 0;
+            target = strrchr(buffer, ' ');
+            *source = oldSource;
+          }
 
           if (target) {
-            const char *source = strchr(++target, '/');
-
-            if (source) memmove(target, source+1, strlen(source));
+            target += 1;
+          } else {
+            target = buffer;
           }
+
+          source += 1;
+          memmove(target, source, (strlen(source) + 1));
         }
       }
 
-      STR_PRINTF("%s", description);
+      STR_PRINTF("%s", buffer);
     } else {
       STR_PRINTF("%s", gettext(cmd->description));
     }
