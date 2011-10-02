@@ -38,6 +38,7 @@ typedef struct {
   unsigned isRow:1;
   unsigned isOffset:1;
   unsigned isRange:1;
+  unsigned isInput:1;
   unsigned isCharacter:1;
   unsigned isBraille:1;
 } CommandEntry;
@@ -62,6 +63,7 @@ typedef struct {
 
 extern const CommandModifierEntry commandModifierTable_braille[];
 extern const CommandModifierEntry commandModifierTable_character[];
+extern const CommandModifierEntry commandModifierTable_input[];
 extern const CommandModifierEntry commandModifierTable_keyboard[];
 extern const CommandModifierEntry commandModifierTable_line[];
 extern const CommandModifierEntry commandModifierTable_motion[];

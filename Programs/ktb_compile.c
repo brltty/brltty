@@ -679,16 +679,29 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     modifier.characters = characters;
     modifier.length = end? end-characters: length;
 
-    if ((*command)->isToggle && !(*value & BRL_FLG_TOGGLE_MASK))
-      if (applyCommandModifier(value, commandModifierTable_toggle, &modifier))
-        continue;
+    if ((*command)->isToggle && !(*value & BRL_FLG_TOGGLE_MASK)) {
+      if (applyCommandModifier(value, commandModifierTable_toggle, &modifier)) continue;
+    }
 
     if ((*command)->isMotion) {
       if (applyCommandModifier(value, commandModifierTable_motion, &modifier)) continue;
 
-      if ((*command)->isRow)
-        if (applyCommandModifier(value, commandModifierTable_line, &modifier))
-          continue;
+      if ((*command)->isRow) {
+        if (applyCommandModifier(value, commandModifierTable_line, &modifier)) continue;
+      }
+    }
+
+    if ((*command)->isInput) {
+      if (applyCommandModifier(value, commandModifierTable_input, &modifier)) continue;
+    }
+
+    if ((*command)->isCharacter) {
+      if (applyCommandModifier(value, commandModifierTable_character, &modifier)) continue;
+    }
+
+    if ((*command)->isBraille) {
+      if (applyCommandModifier(value, commandModifierTable_braille, &modifier)) continue;
+      if (applyCommandModifier(value, commandModifierTable_character, &modifier)) continue;
     }
 
     if ((*command)->isOffset && !offsetDone) {
@@ -703,14 +716,6 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
         }
       }
     }
-
-    if ((*command)->isCharacter)
-      if (applyCommandModifier(value, commandModifierTable_character, &modifier))
-        continue;
-
-    if ((*command)->isBraille)
-      if (applyCommandModifier(value, commandModifierTable_braille, &modifier))
-        continue;
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
     return NULL;

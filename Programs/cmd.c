@@ -49,8 +49,12 @@ const CommandModifierEntry commandModifierTable_braille[] = {
 };
 
 const CommandModifierEntry commandModifierTable_character[] = {
+  {.name="upper", .bit=BRL_FLG_CHAR_UPPER},
+  {.name=NULL   , .bit=0                 }
+};
+
+const CommandModifierEntry commandModifierTable_input[] = {
   {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
-  {.name="upper"  , .bit=BRL_FLG_CHAR_UPPER  },
   {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
   {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
   {.name=NULL     , .bit=0                   }
@@ -195,8 +199,6 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
           target = delimiter;
           if (!(source = strchr(target, ' '))) source = target + strlen(target);
         } else if (command & BRL_FLG_TOGGLE_OFF) {
-          source = delimiter + 1;
-
           {
             char oldDelimiter = *delimiter;
             *delimiter = 0;
@@ -204,11 +206,8 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
             *delimiter = oldDelimiter;
           }
 
-          if (target) {
-            target += 1;
-          } else {
-            target = buffer;
-          }
+          target = target? (target + 1): buffer;
+          source = delimiter + 1;
         } else {
           goto toggleReady;
         }
@@ -222,8 +221,8 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       STR_PRINTF("%s", gettext(cmd->description));
     }
 
-    if (cmd->isCharacter) {
-      const CommandModifierEntry *modifier = commandModifierTable_character;
+    if (cmd->isInput) {
+      const CommandModifierEntry *modifier = commandModifierTable_input;
 
       while (modifier->name) {
         if (command & modifier->bit) {

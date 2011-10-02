@@ -28,6 +28,10 @@ function writeCommandEntry(name, symbol, help) {
   if (symbol ~ /^BRL_BLK_/) {
     if (symbol ~ /^BRL_BLK_PASS/) {
       if (symbol ~ /PASS(CHAR|DOTS|KEY)/) {
+        print "  .isInput = 1,"
+      }
+
+      if (symbol ~ /PASSCHAR/) {
         print "  .isCharacter = 1,"
       }
 
