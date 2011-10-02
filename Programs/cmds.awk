@@ -31,6 +31,10 @@ function writeCommandEntry(name, symbol, help) {
         print "  .isCharacter = 1,"
       }
 
+      if (symbol ~ /PASSDOTS/) {
+        print "  .isBraille = 1,"
+      }
+
       if (symbol ~ /PASSKEY.*KEY_FUNCTION/) {
         print "  .isOffset = 1,"
       }

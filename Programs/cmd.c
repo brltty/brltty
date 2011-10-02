@@ -35,7 +35,20 @@ const CommandEntry commandTable[] = {
   {.name=NULL, .code=EOF, .description=NULL}
 };
 
-const CommandFlagEntry commandFlagTable_character[] = {
+const CommandModifierEntry commandModifierTable_braille[] = {
+  {.name="dot1" , .bit=BRL_DOT1},
+  {.name="dot2" , .bit=BRL_DOT2},
+  {.name="dot3" , .bit=BRL_DOT3},
+  {.name="dot4" , .bit=BRL_DOT4},
+  {.name="dot5" , .bit=BRL_DOT5},
+  {.name="dot6" , .bit=BRL_DOT6},
+  {.name="dot7" , .bit=BRL_DOT7},
+  {.name="dot8" , .bit=BRL_DOT8},
+  {.name="space", .bit=BRL_DOTC},
+  {.name=NULL   , .bit=0       }
+};
+
+const CommandModifierEntry commandModifierTable_character[] = {
   {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
   {.name="upper"  , .bit=BRL_FLG_CHAR_UPPER  },
   {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
@@ -43,25 +56,25 @@ const CommandFlagEntry commandFlagTable_character[] = {
   {.name=NULL     , .bit=0                   }
 };
 
-const CommandFlagEntry commandFlagTable_keyboard[] = {
+const CommandModifierEntry commandModifierTable_keyboard[] = {
   {.name="release", .bit=BRL_FLG_KBD_RELEASE},
   {.name="emul0"  , .bit=BRL_FLG_KBD_EMUL0  },
   {.name="emul1"  , .bit=BRL_FLG_KBD_EMUL1  },
   {.name=NULL     , .bit=0                  }
 };
 
-const CommandFlagEntry commandFlagTable_line[] = {
+const CommandModifierEntry commandModifierTable_line[] = {
   {.name="scaled", .bit=BRL_FLG_LINE_SCALED},
   {.name="toleft", .bit=BRL_FLG_LINE_TOLEFT},
   {.name=NULL    , .bit=0                  }
 };
 
-const CommandFlagEntry commandFlagTable_motion[] = {
+const CommandModifierEntry commandModifierTable_motion[] = {
   {.name="route", .bit=BRL_FLG_MOTION_ROUTE},
   {.name=NULL   , .bit=0                   }
 };
 
-const CommandFlagEntry commandFlagTable_toggle[] = {
+const CommandModifierEntry commandModifierTable_toggle[] = {
   {.name="on" , .bit=BRL_FLG_TOGGLE_ON },
   {.name="off", .bit=BRL_FLG_TOGGLE_OFF},
   {.name=NULL , .bit=0                 }
@@ -200,14 +213,14 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
     }
 
     if (cmd->isCharacter) {
-      const CommandFlagEntry *flag = commandFlagTable_character;
+      const CommandModifierEntry *modifier = commandModifierTable_character;
 
-      while (flag->name) {
-        if (command & flag->bit) {
-          STR_PRINTF(" + %s", flag->name);
+      while (modifier->name) {
+        if (command & modifier->bit) {
+          STR_PRINTF(" + %s", modifier->name);
         }
 
-        flag += 1;
+        modifier += 1;
       }
     }
 

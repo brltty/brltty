@@ -39,6 +39,7 @@ typedef struct {
   unsigned isOffset:1;
   unsigned isRange:1;
   unsigned isCharacter:1;
+  unsigned isBraille:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
@@ -57,13 +58,14 @@ extern void logTransformedCommand (int oldCommand, int newCommand);
 typedef struct {
   const char *name;
   int bit;
-} CommandFlagEntry;
+} CommandModifierEntry;
 
-extern const CommandFlagEntry commandFlagTable_character[];
-extern const CommandFlagEntry commandFlagTable_keyboard[];
-extern const CommandFlagEntry commandFlagTable_line[];
-extern const CommandFlagEntry commandFlagTable_motion[];
-extern const CommandFlagEntry commandFlagTable_toggle[];
+extern const CommandModifierEntry commandModifierTable_braille[];
+extern const CommandModifierEntry commandModifierTable_character[];
+extern const CommandModifierEntry commandModifierTable_keyboard[];
+extern const CommandModifierEntry commandModifierTable_line[];
+extern const CommandModifierEntry commandModifierTable_motion[];
+extern const CommandModifierEntry commandModifierTable_toggle[];
 
 typedef struct {
   int command;

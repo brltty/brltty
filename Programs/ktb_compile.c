@@ -623,18 +623,18 @@ allocateCommandTable (KeyTableData *ktd) {
 }
 
 static int
-applyCommandFlag (int *command, const CommandFlagEntry *table, const DataOperand *name) {
-  const CommandFlagEntry *flag = table;
+applyCommandModifier (int *command, const CommandModifierEntry *modifiers, const DataOperand *name) {
+  const CommandModifierEntry *modifier = modifiers;
 
-  while (flag->name) {
-    if (!(*command & flag->bit)) {
-      if (compareToName(name->characters, name->length, flag->name) == 0) {
-        *command |= flag->bit;
+  while (modifier->name) {
+    if (!(*command & modifier->bit)) {
+      if (compareToName(name->characters, name->length, modifier->name) == 0) {
+        *command |= modifier->bit;
         return 1;
       }
     }
 
-    flag += 1;
+    modifier += 1;
   }
 
   return 0;
@@ -680,14 +680,14 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     modifier.length = end? end-characters: length;
 
     if ((*command)->isToggle && !(*value & BRL_FLG_TOGGLE_MASK))
-      if (applyCommandFlag(value, commandFlagTable_toggle, &modifier))
+      if (applyCommandModifier(value, commandModifierTable_toggle, &modifier))
         continue;
 
     if ((*command)->isMotion) {
-      if (applyCommandFlag(value, commandFlagTable_motion, &modifier)) continue;
+      if (applyCommandModifier(value, commandModifierTable_motion, &modifier)) continue;
 
       if ((*command)->isRow)
-        if (applyCommandFlag(value, commandFlagTable_line, &modifier))
+        if (applyCommandModifier(value, commandModifierTable_line, &modifier))
           continue;
     }
 
@@ -705,7 +705,11 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     }
 
     if ((*command)->isCharacter)
-      if (applyCommandFlag(value, commandFlagTable_character, &modifier))
+      if (applyCommandModifier(value, commandModifierTable_character, &modifier))
+        continue;
+
+    if ((*command)->isBraille)
+      if (applyCommandModifier(value, commandModifierTable_braille, &modifier))
         continue;
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
