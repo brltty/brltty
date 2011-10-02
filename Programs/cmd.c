@@ -35,12 +35,25 @@ const CommandEntry commandTable[] = {
   {.name=NULL, .code=EOF, .description=NULL}
 };
 
-const CommandFlagEntry commandFlagTable_key[] = {
+const CommandFlagEntry commandFlagTable_character[] = {
   {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
   {.name="upper"  , .bit=BRL_FLG_CHAR_UPPER  },
   {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
   {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
   {.name=NULL     , .bit=0                   }
+};
+
+const CommandFlagEntry commandFlagTable_keyboard[] = {
+  {.name="release", .bit=BRL_FLG_KBD_RELEASE},
+  {.name="emul0"  , .bit=BRL_FLG_KBD_EMUL0  },
+  {.name="emul1"  , .bit=BRL_FLG_KBD_EMUL1  },
+  {.name=NULL     , .bit=0                  }
+};
+
+const CommandFlagEntry commandFlagTable_line[] = {
+  {.name="scaled", .bit=BRL_FLG_LINE_SCALED},
+  {.name="toleft", .bit=BRL_FLG_LINE_TOLEFT},
+  {.name=NULL    , .bit=0                  }
 };
 
 const CommandFlagEntry commandFlagTable_motion[] = {
@@ -186,8 +199,8 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       STR_PRINTF("%s", gettext(cmd->description));
     }
 
-    if (cmd->isKey) {
-      const CommandFlagEntry *flag = commandFlagTable_key;
+    if (cmd->isCharacter) {
+      const CommandFlagEntry *flag = commandFlagTable_character;
 
       while (flag->name) {
         if (command & flag->bit) {

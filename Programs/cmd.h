@@ -38,7 +38,7 @@ typedef struct {
   unsigned isRow:1;
   unsigned isOffset:1;
   unsigned isRange:1;
-  unsigned isKey:1;
+  unsigned isCharacter:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
@@ -59,7 +59,9 @@ typedef struct {
   int bit;
 } CommandFlagEntry;
 
-extern const CommandFlagEntry commandFlagTable_key[];
+extern const CommandFlagEntry commandFlagTable_character[];
+extern const CommandFlagEntry commandFlagTable_keyboard[];
+extern const CommandFlagEntry commandFlagTable_line[];
 extern const CommandFlagEntry commandFlagTable_motion[];
 extern const CommandFlagEntry commandFlagTable_toggle[];
 

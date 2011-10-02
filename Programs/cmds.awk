@@ -27,12 +27,12 @@ function writeCommandEntry(name, symbol, help) {
 
   if (symbol ~ /^BRL_BLK_/) {
     if (symbol ~ /^BRL_BLK_PASS/) {
-      if (symbol ~ /^BRL_BLK_PASSKEY/) {
-        print "  .isKey = 1,"
+      if (symbol ~ /PASS(CHAR|DOTS|KEY)/) {
+        print "  .isCharacter = 1,"
+      }
 
-        if (symbol ~ /KEY_FUNCTION/) {
-          print "  .isOffset = 1,"
-        }
+      if (symbol ~ /PASSKEY.*KEY_FUNCTION/) {
+        print "  .isOffset = 1,"
       }
     } else if (help ~ / character$/) {
       print "  .isColumn = 1,"

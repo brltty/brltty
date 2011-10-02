@@ -683,7 +683,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     if ((*command)->isToggle && !toggleDone) {
       if (isKeyword(WS_C("on"), modifier.characters, modifier.length)) {
         *value |= BRL_FLG_TOGGLE_ON;
-      }  else if (isKeyword(WS_C("off"), modifier.characters, modifier.length)) {
+      } else if (isKeyword(WS_C("off"), modifier.characters, modifier.length)) {
         *value |= BRL_FLG_TOGGLE_OFF;
       } else {
         goto notToggle;
@@ -729,8 +729,8 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
       }
     }
 
-    if ((*command)->isKey)
-      if (applyCommandFlag(value, commandFlagTable_key, &modifier))
+    if ((*command)->isCharacter)
+      if (applyCommandFlag(value, commandFlagTable_character, &modifier))
         continue;
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
