@@ -152,7 +152,7 @@ bind Space+Dot1+Dot2+Dot3+Dot7 KEY_HOME+shift
 bind Space+Dot4+Dot5+Dot6+Dot7 KEY_END+shift
 bind Space+Dot4+Dot5+Dot7 KEY_DELETE+shift
 bind Space+Dot2+Dot3 KEY_TAB+shift
-bind Space+Dot7 PASSDOTS+shift
+bind Space+Dot7 PASSCHAR+\s+shift
 
 bind Space+Dot1+Dot5+Dot7 KEY_ESCAPE+shift
 
