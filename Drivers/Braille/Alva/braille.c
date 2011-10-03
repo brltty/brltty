@@ -1118,11 +1118,16 @@ readPacket2s (unsigned char *packet, int size) {
 }
 
 static int
-tellDevice2s (unsigned char command, unsigned char operand, unsigned char *response, int size) {
+tellDevice2s (unsigned char command, unsigned char operand) {
   unsigned char packet[] = {ESC, command, operand};
 
   logOutputPacket(packet, sizeof(packet));
-  if (writeBytes(packet, sizeof(packet), NULL)) {
+  return writeBytes(packet, sizeof(packet), NULL);
+}
+
+static int
+askDevice2s (unsigned char command, unsigned char *response, int size) {
+  if (tellDevice2s(command, 0X3F)) {
     while (io->awaitInput(200)) {
       int length = protocol->readPacket(response, size);
       if (length <= 0) break;
@@ -1131,11 +1136,6 @@ tellDevice2s (unsigned char command, unsigned char operand, unsigned char *respo
   }
 
   return 0;
-}
-
-static int
-askDevice2s (unsigned char command, unsigned char *response, int size) {
-  return tellDevice2s(command, 0X3F, response, size);
 }
 
 static int
@@ -1180,7 +1180,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
-            tellDevice2s(0X72, 1, response, sizeof(response));
+            tellDevice2s(0X72, 1);
             return 1;
           }
         }
@@ -1366,10 +1366,11 @@ detectModel2u (BrailleDisplay *brl) {
     int length = io->getFeatureReport(0X06, buffer, sizeof(buffer));
 
     if (length >= 2) {
-      unsigned char byte = (buffer[1] | 0X20) & ~(0X10);
+      unsigned char *old = &buffer[1];
+      unsigned char new = (*old | 0X20) & ~(0X10);
 
-      if (byte != buffer[1]) {
-        buffer[1] = byte;
+      if (new != *old) {
+        *old = new;
         updated = 1;
       }
     }
