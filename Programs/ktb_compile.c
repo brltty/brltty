@@ -643,6 +643,7 @@ applyCommandModifier (int *command, const CommandModifierEntry *modifiers, const
 static const CommandEntry *
 parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
   int offsetDone = 0;
+  int unicodeDone = 0;
 
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
   const CommandEntry *const *command;
@@ -697,6 +698,14 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
     if ((*command)->isCharacter) {
       if (applyCommandModifier(value, commandModifierTable_character, &modifier)) continue;
+
+      if (!unicodeDone) {
+        if (modifier.length == 1) {
+          *value |= BRL_ARG_SET(modifier.characters[0]);
+          unicodeDone = 1;
+          continue;
+        }
+      }
     }
 
     if ((*command)->isBraille) {
