@@ -164,19 +164,37 @@ getCommandEntry (int code) {
   return NULL;
 }
 
+static size_t
+formatCommandModifiers (char *buffer, size_t size, int command, const CommandModifierEntry *modifiers) {
+  const CommandModifierEntry *modifier = modifiers;
+  size_t length;
+  STR_BEGIN(buffer, size);
+
+  while (modifier->name) {
+    if (command & modifier->bit) {
+      STR_PRINTF(" + %s", modifier->name);
+    }
+
+    modifier += 1;
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
 size_t
 describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options) {
   size_t length;
   STR_BEGIN(buffer, size);
 
-  int blk = command & BRL_MSK_BLK;
   unsigned int arg = BRL_ARG_GET(command);
   unsigned int arg1 = BRL_CODE_GET(ARG, command);
   unsigned int arg2 = BRL_CODE_GET(EXT, command);
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
-    STR_PRINTF("unknown: %06X", command);
+    STR_PRINTF("%s: %06X", gettext("unknown command"), command);
   } else {
     if (options & CDO_IncludeName) {
       STR_PRINTF("%s: ", cmd->name);
@@ -221,76 +239,79 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       STR_PRINTF("%s", gettext(cmd->description));
     }
 
-    if (cmd->isInput) {
-      const CommandModifierEntry *modifier = commandModifierTable_input;
-
-      while (modifier->name) {
-        if (command & modifier->bit) {
-          STR_PRINTF(" + %s", modifier->name);
-        }
-
-        modifier += 1;
-      }
-    }
-
-    if (cmd->isMotion) {
-      if (command & BRL_FLG_MOTION_ROUTE) {
-        STR_PRINTF(", drag cursor");
-      }
-
-      if (cmd->isRow) {
-        if (command & BRL_FLG_LINE_SCALED) {
-          STR_PRINTF(" (scaled)");
-        }
-
-        if (command & BRL_FLG_LINE_TOLEFT) {
-          STR_PRINTF(", beginning of line");
-        }
-      }
-    }
-
     if (options & CDO_IncludeOperand) {
+      if (cmd->isCharacter) {
+        STR_PRINTF(" [U+%04" PRIX16 "]", arg);
+      }
+
+      if (cmd->isBraille) {
+        int none = 1;
+        STR_PRINTF(" [");
+
+        {
+          static const int dots[] = {
+            BRL_DOTC,
+            BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+            BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8,
+            0
+          };
+          const int *dot = dots;
+
+          while (*dot) {
+            if (command & *dot) {
+              none = 0;
+
+              if (dot == dots) {
+                STR_PRINTF("C");
+              } else {
+                STR_PRINTF("%u", dot-dots);
+              }
+            }
+
+            dot += 1;
+          }
+        }
+
+        if (none) STR_PRINTF("%s", gettext("space"));
+        STR_PRINTF("]");
+      }
+
       if (cmd->isColumn && !cmd->isRouting && (
            (arg == BRL_MSK_ARG) /* key event processing */
          ||
            ((options & CDO_DefaultOperand) && !arg) /* key table listing */
          )) {
-        STR_PRINTF(" at cursor");
+        STR_PRINTF(" %s", gettext("at cursor"));
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
         STR_PRINTF(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
       } else if (cmd->isRange) {
         STR_PRINTF(" #%u-%u", arg1, arg2);
-      } else if (blk) {
-        switch (blk) {
-          case BRL_BLK_PASSKEY:
-            break;
+      }
 
-          case BRL_BLK_PASSCHAR:
-            STR_PRINTF(" [U+%04" PRIX16 "]", arg);
-            break;
+      if (cmd->isInput) {
+        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_input);
+        STR_ADJUST(length);
+      }
 
-          case BRL_BLK_PASSDOTS:
-            if (arg) {
-              static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
-              int dot;
-              unsigned int number = 0;
+      if (cmd->isCharacter) {
+        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_character);
+        STR_ADJUST(length);
+      }
+    }
 
-              for (dot=0; dot<sizeof(dots); dot+=1) {
-                if (arg & dots[dot]) {
-                  number = (number * 10) + (dot + 1);
-                }
-              }
-
-              STR_PRINTF(" [%s %u]", ((number < 10)? "dot": "dots"), number);
-            } else {
-              STR_PRINTF(" [space]");
-            }
-            break;
-
-          default:
-            STR_PRINTF(" 0X%02X", arg);
-            break;
+    if (cmd->isMotion) {
+      if (cmd->isRow) {
+        if (command & BRL_FLG_LINE_TOLEFT) {
+          STR_PRINTF(", %s", gettext("left margin"));
         }
+
+        if (command & BRL_FLG_LINE_SCALED) {
+          STR_PRINTF(", %s", gettext("normalized position"));
+        }
+      }
+
+      if (command & BRL_FLG_MOTION_ROUTE) {
+        STR_PRINTF(", %s", gettext("drag cursor"));
       }
     }
   }

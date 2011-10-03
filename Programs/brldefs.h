@@ -212,7 +212,7 @@ typedef enum {
 #define BRL_BLK_APNDCHARS 0X1100 /* append characters to cut buffer */
 
 /* For entering a special key. */
-#define BRL_BLK_PASSKEY 0X2000 /* input keyboard key */
+#define BRL_BLK_PASSKEY 0X2000 /* emulate special key */
 typedef enum {
   BRL_KEY_ENTER,
   BRL_KEY_TAB,
@@ -231,8 +231,8 @@ typedef enum {
   BRL_KEY_FUNCTION
 } BRL_Key;
 
-#define BRL_BLK_PASSCHAR 0X2100 /* input unicode character */
-#define BRL_BLK_PASSDOTS 0X2200 /* input braille character */
+#define BRL_BLK_PASSCHAR 0X2100 /* type unicode character */
+#define BRL_BLK_PASSDOTS 0X2200 /* type braille character */
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
