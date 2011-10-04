@@ -1,11 +1,69 @@
-One way to pair a Bluetooth device on Linux is as follows:
+Pairing a Bluetooth Device on Linux
+===================================
 
-Find out your host's Bluetooth Device Address via the command "hciconfig hci0". 
-Then go into the directory "/var/lib/bluetooth/<host-address>. In there (create 
-if necessary) is the file "pincodes". This file contains one device per record. 
-Each record has two fields separated by space. The first field is the device's 
-Bluetooth Device Address and the second field is its PIN. The Bluetooth Device 
-Address must be in uppercase. So:
+You need to "pair" your device with the host on which you wish to use it. You 
+can pair a device with more than one host, but you can usually only use it with 
+one host at a time.
+
+Pairing a Bluetooth device on Linux is relatively easy if you're comfortable 
+working within the graphical (X) environment. All you need to do is to run 
+"bluetooth-applet" and follow the steps it presents to you. It's a little 
+trickier to pair a Bluetooth device via the command line, but it can be done.
+One way to do it is as follows:
+
+You need to find out your host's Bluetooth Device Address (referred to later in 
+this document as <host-address>). To do this, run the command "hciconfig hci0". 
+Look for the (indented) line which begins with "BD Address:". The very next 
+"word" on that line is your host's Bluetooth Device Address. It'll be six 
+two-digit hexadecimal numbers separated by colons (:). Examples in this 
+document use the value "01:23:45:67:89:AB".
+
+You need to find out your device's Bluetooth Device Address (referred to later 
+in this document as <device-address>). To do this, run the command "hcitool 
+scan". This command can take a while to complete as it gives devices a fair bit 
+of time to respond. Each device which responds creates one two-column output 
+line. The first column is its Bluetooth Device Address (examples in this 
+document use the value "12:34:56:78:9A:BC"), and the second column is its 
+current name. Manufacturers usually set a device's initial name to its product 
+name and model number so that it's easy to spot within the scan output. If your 
+device allows you to change its name, it's okay to do so even after you've 
+paired it.
+
+A device needs to be "visible" in order for the scan to find it. Most devices 
+are "invisible" by default, but have a way to be made temporarily visible. You 
+should check your device's manual to find out how to do this. In many cases 
+there's either a button which needs to be pressed or a menu item which needs to 
+be selected. Since both the device's temporary visibility and the host's scan 
+time out, Make your device visible just before you initiate the scan.
+
+You need to know what PIN (password) your device is expecting. Your device's 
+documentation should contain this information. Many devices allow you to set 
+the PIN, in which case they'll have a menu which allows you to do this. 
+Examples in this document use the value "1234".
+
+Go into the directory "/var/lib/bluetooth/<host-address>. In there (create if 
+necessary) is the file "pincodes". Each line in this file associates a device 
+with its PIN. It has two fields separated by space. The first field is the 
+device's Bluetooth Device Address and the second field is its PIN. The 
+Bluetooth Device Address must be in uppercase. For example:
 
    cat /var/lib/bluetooth/01:23:45:67:89:AB/pincodes
    12:34:56:78:9A:BC 1234
+
+
+Using a Bluetooth Device with BRLTTY
+====================================
+
+After your device has been paired with your host, it's ready to be used by 
+BRLTTY. You can tell BRLTTY to use your Bluetooth device either via the -d (or 
+--braille-device=) command line option or via the braille-device line in the 
+file "/etc/brltty.conf". The device should be specified as the word 
+"bluetooth", a colon (:), and the device's Bluetooth Device Address. For 
+example:
+
+   brltty -d bluetooth:12:34:56:78:9A:BC
+or
+   cat /etc/brltty.conf
+   braille-device bluetooth:12:34:56:78:9A:BC
+
+
