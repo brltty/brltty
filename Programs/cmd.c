@@ -297,6 +297,11 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
         size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_character);
         STR_ADJUST(length);
       }
+
+      if (cmd->isKeyboard) {
+        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_keyboard);
+        STR_ADJUST(length);
+      }
     }
 
     if (cmd->isMotion) {

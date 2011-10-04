@@ -41,6 +41,7 @@ typedef struct {
   unsigned isInput:1;
   unsigned isCharacter:1;
   unsigned isBraille:1;
+  unsigned isKeyboard:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];

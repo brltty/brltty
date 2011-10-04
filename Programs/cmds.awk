@@ -42,6 +42,10 @@ function writeCommandEntry(name, symbol, help) {
       if (symbol ~ /PASSKEY.*KEY_FUNCTION/) {
         print "  .isOffset = 1,"
       }
+
+      if (symbol ~ /PASS(XT|AT|PS2)/) {
+        print "  .isKeyboard = 1,"
+      }
     } else if (help ~ / character$/) {
       print "  .isColumn = 1,"
     } else if (help ~ / characters /) {
