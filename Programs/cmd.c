@@ -276,6 +276,10 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
         STR_PRINTF("]");
       }
 
+      if (cmd->isKeyboard) {
+        STR_PRINTF(" [\\X%02" PRIX8 "]", arg1);
+      }
+
       if (cmd->isColumn && !cmd->isRouting && (
            (arg == BRL_MSK_ARG) /* key event processing */
          ||
