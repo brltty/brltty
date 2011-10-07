@@ -25,5 +25,5 @@ SPK_OBJS = @speech_libraries_fl@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOICE:16=) -DUNREGISTER_VOX=unregister_$(FLITE_VOICE:16=) -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -I$(FLITE_ROOT)/include/flite -DREGISTER_VOX=register_$(FLITE_VOICE) -DUNREGISTER_VOX=unregister_$(FLITE_VOICE) -c $(SRC_DIR)/speech.c
 

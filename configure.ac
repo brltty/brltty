@@ -1417,7 +1417,7 @@ BRLTTY_ARG_DISABLE(
       BRLTTY_ARG_REQUIRED(
          [flite-voice], [VOICE],
          [the FestivalLite voice to use],
-         [flite_voice], ["cmu_us_kal16"]
+         [flite_voice], ["cmu_us_kal"]
       )
 
       BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite -lm])
