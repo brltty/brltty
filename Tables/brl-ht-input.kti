@@ -29,6 +29,7 @@ bind \{space} PASSDOTS
 bind \{enter} KEY_ENTER
 map \{space} CONTROL
 map \{enter} META
+bind \{brailleOff} CONTEXT+0
 
 context default
 bind \{brailleOn} CONTEXT+\{brailleContext}
