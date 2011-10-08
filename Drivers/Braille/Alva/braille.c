@@ -1367,7 +1367,7 @@ detectModel2u (BrailleDisplay *brl) {
 
     if (length >= 2) {
       unsigned char *old = &buffer[1];
-      unsigned char new = (*old | 0X20) & ~(0X10);
+      unsigned char new = *old | 0X20;
 
       if (new != *old) {
         *old = new;
