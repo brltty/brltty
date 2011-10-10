@@ -99,7 +99,7 @@ endLayoutEntry() {
    exec 4<&-
 
    description="${description} "
-   description="${description#* for }"
+   description="${description#*: }"
    [ -z "${category}" ] || description="${description#${category} }"
    description="${description% }"
 
