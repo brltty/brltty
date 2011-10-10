@@ -220,96 +220,131 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/BrlAPIref
 
 %changelog
-* Mon May  0 2010 Dave Mielke <dave@mielke.cc> 4.2
-+  Ending a cut operation beyond the right edge of the screen has been fixed.
-+  Key/character insertion works with newer versions of Xorg.
-+  The braille driver help files have been converted to plain text.
-+  Multiple instances of brltty may not use the same PID file.
-+  The keypad keyboard key table provides a braille input mode.
-+  The working directory is no longer set to the data directory.
-+  The writable directory is created if it doesn't already exist.
-+  USB I/O via libusb1 is supported.
-+  The Metec braille driver has been added.
-+  The eSpeak speech driver has been added.
-+  The AtSpi2 screen driver has been added.
-+  A BrlAPI client for Window-Eyes has been developed.
-+  Albatross braille driver changes:
-      Converted to use key tables.
-      USB support has been added.
+* Mon Oct 10 2011 Dave Mielke <dave@mielke.cc> 4.3
++  New options:
+      The -F [--speech-fifo=] option has been renamed to -i [--speech-input=].
+      The -F [--preferences-file=] option sets the path to the preferences file.
+      The -L [--log-file=] brltty option writes timestamped logs to a file.
+      The -q [--quiet] xbrlapi option suppresses the displaying of window titles.
+      The -r [--reformat-text] ctbtest option joins unindented input lines.
+      The log level can now be specified within brltty.conf.
++  New device support:
+      A braille driver for BrailComm displays has been added.
+      The HandyTech braille driver now supports the Active Braille.
+      The Voyager braille driver now supports the part 232 serial adapter.
+      The Voyager braille driver now supports the Braille Pen (aka Easy Link).
++  Preferences menu changes:
+      The preference selections now apply to the preferences menu itself, too.
+      Keyboard key bindings now work correctly within the preferences menu.
+      The "Text Style" preference has new settings:
+         8-Dot Computer Braille (formerly 8-dot)
+         Contracted Braille (formerly 6-dot)
+         6-Dot Computer Braille
+      The "Expand Current Word" preference has been added.
+         It's only visible if "Text Style" is set to "Contracted Braille".
+         It can be set to:
+            Yes (don't contract the word the cursor is on)
+            No (contract the whole line)
+      The "Capitalization Mode" preference has been added.
+         It's only visible if "Text Style" is set to "Contracted Braille".
+         It can be set to:
+            No Capitalization
+            Use Capital Sign
+            Superimpose Dot 7
++  General changes:
+      Internationalization support has been improved.
+      French and German translations have been added.
+      Support for multi-byte local character sets has been improved.
+      Horizontal window motions now work correctly with contracted braille.
+      The half window left motion no longer can move to a bad location.
+      Alert messages no longer disappear unexpectedly.
+      The speech FIFO is now created relative to the current working directory.
+      Serial flow control is now enabled before device probing.
+      The following global variables for use within tables are now predefined:
+         tablesDirectory
+         tableExtension
+         subtableExtension
 +  Alva braille driver changes:
-      Converted to use key tables.
+      The BC key bindings have been changed significantly in order to add
+      more functions and to support the USB640 (which has no smartpad).
+      The braille keyboard of the BC Feature Pack is now supported.
 +  Baum braille driver changes:
-      Converted to use key tables.
-      Vario Pro wheels are supported.
-      For Vario Pro models, only update the text cells which have changed.
-+  CombiBraille braille driver changes:
-      Converted to use key tables.
-+  FreedomScientific braille driver changes:
-      Converted to use key tables.
-      Bluetooth support has been added.
-      The Focus Blue is supported.
-      Rockers and bumper bars are recognized as distinct keys.
+      Updating the text and status cells of the Vario 80 has been fixed.
+      The front and command keys of the Vario 80 are now supported.
++  EuroBraille braille driver changes:
+      Reading keys is faster and no longer generates spurious input errors.
 +  HandyTech braille driver changes:
-      Converted to use key tables.
-      Pressing two routing keys simultaneously immediately cuts the selected text.
-      Newer models which use the USB HID interface are supported.
-      The InputMode= parameter has been removed.
-+  HIMS braille driver changes:
-      Converted to use key tables.
+      Support for the Active Braille has been added.
+      The help screen now describes how the keypad keys are named.
 +  Papenmeier braille driver changes:
-      Converted to use key tables.
-      The DebugReads= and DebugWrites= parameters have been removed.
-      Support for the configuration file has been removed (now uses key tables).
-+  Pegasus braille driver changes:
-      Converted to use key tables.
+      The initial state of the switches and keys of EL models is detected.
 +  Seika braille driver changes:
-      Converted to use key tables.
+      The help screen now describes the key layout.
++  TTY braille driver changes:
+      A few more key bindings have been defined.
 +  Voyager braille driver changes:
-      Converted to use key tables.
-+  BrlAPI changes:
-      Key event support has been added.
-      Various client fixes for the Windows environment.
-      Various fixes for when threads aren't available.
-      No more extraneous connection to localhost when using a TCP/IP host name.
-      A fix to exception handling within the Python bindings.
-+  ExternalSpeech speech driver changes:
-      Two-letter driver identification code changed to "xs" (from "es").
-+  AtSpi screen driver changes:
-      Static linking is supported.
-      A problem causing crashes on 64-bit platforms has been resolved.
-+  Windows screen driver changes:
-      Significant reductions in memory usage.
-      Better handling of unreadable screens.
-      Better handling of the Alt+Tab window.
-+  DOS changes:
-      Log records are written to the file "brltty.log".
-      The TSI braille driver stays at 9600 baud.
-+  Key table changes:
-      Add the following directives:
-         assign, context, hide, hotkey, ifkey, map, note, superimpose, title.
-      Add the \{name} variable name expansion syntax.
-      Add the ! immediate key syntax.
-      A command may have more than one modifier.
-      The line command modifiers are supported.
-      Keyboard key table names are now prefixed with "kbd-".
-      The ktbtest tool has been added.
-+  Linux changes:
-      USB device inspection is more efficient.
-      Fixes to keyboard connect/disconnect monitoring.
-      Fixes to key event handling.
-      PCM and MIDI support defaults to ALSA (instead of to OSS).
-+  Windows changes:
-      Improved conversion of Windows errors to system errors (errno values).
+      Serial support has been added.
       Bluetooth support has been added.
-      Text table autoselection has been fixed.
-      Text table editing (ttbtest -e) is supported.
+      Support for the part 232 serial adapter has been added.
+      Support for the Braille Pen (aka Easy Link) has been added.
++  XWindow braille driver changes:
+      More and less restrictive fonts are supported.
+      Hard program exits have been removed.
++  eSpeak speech driver changes:
+      The full advertized speech rate range can now be used.
++  FestivalLite speech driver changes:
+      The default voice has been changed to kal (from kal16).
++  AtSpi screen driver changes:
+      No more annoying warnings when not on an AtSpi widget.
++  BrlAPI fixes:
+      ISO-8859-1 is now accepted as a character set when iconv isn't available.
+      The autorepeat flags are now handled on a per session basis.
+      Commands are now processed when the device is released.
++  WindowEyes BrlAPI driver changes:
+      Testing for BrlAPI open errors has been improved.
++  Text table changes:
+      A common subtable for the block characters has been added.
+      The glyph directive has been added.
+      Several alternate fonts for the Latin letters are now defined.
+      If a character isn't defined then check for an alternative which is:
+         (its Unicode base character, its iconv-defined ASCII equivalent, etc).
+      The en_UK text table has been renamed to en_GB (to comply with ISO 3166).
+      Updated text tables:
+         bo (Tibetan)
+         brf: dot 7 is no longer presented
+         fr_FR (French France)
+         fr-vs (French table used by VisioBraille devices)
+         is (Icelandic): updated to the newly adopted standard
++  Contraction table changes:
+      If a zero-width character isn't defined then don't show it.
+      Updated tables:
+         de-kurzschrift (German)
+         en-us-g2 (American English)
+         es (Spanish)
+         fr-abrege (French)
+         zh-tw (Taiwanese Chinese)
++  Key table changes:
+      A specific key within a set can now be specified by number.
+      A key combination can now include specific keys which aren't in set 0.
+      Keys which aren't in set 0 can now be mapped to keyboard functions.
+      A key set name can now be used to define a hotkey.
+      The help text no longer includes hidden hotkeys.
+      The help text now handles context-specific hotkeys correctly.
+      The note directive now supports the use of variables.
++  Windows changes:
+      Serial devices beyond COM9 may now be specified.
+      The WindowEyes driver is now copied into the correct installation directory.
 +  Build changes:
-      --enable-usb-support changed to --with-usb-package[=package,...].
-      --disable-usb-support changed to --without-usb-package.
-      --enable-bluetooth-support changed to --with-bluetooth-package[=package,...].
-      --disable-bluetooth-support changed to --without-bluetooth-package.
-+  Text tables updated:
-      hu, sk.
-+  Contraction tables updated:
-      de-kurzschrift, en-us-g2, zh-tw.
+      Building an exported (not checked out) copy now "knows" its revision number.
+      Make support for install/uninstall of /usr/share/doc/brltty has been added.
+      The make targets for source archives are now prefixed with "src-".
+      The bin-tar, bin-tar-gzip, and bin-tar-bzip2 make targets have been added.
+      Support for xz compression of binary and source archives has been added.
+      The preferences file has been moved to /var/lib/brltty/brltty.prefs.
+      There's now only one preferences file (instead of one per braille driver).
+      The preferences file is now text-based (instead of binary).
+      The "writable" directory has been moved to /var/run/brltty.
+      The "library" directory is now known as the "drivers" directory.
+      The "data" directory no longer has a use and has been removed.
+      Support for the "gjar" command has been added.
 

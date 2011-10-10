@@ -1,6 +1,135 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+Oct 10, 2011:
+ - BRLTTY 4.3 released:
+   New options:
+      The -F [--speech-fifo=] option has been renamed to -i [--speech-input=].
+      The -F [--preferences-file=] option sets the path to the preferences file.
+      The -L [--log-file=] brltty option writes timestamped logs to a file.
+      The -q [--quiet] xbrlapi option suppresses the displaying of window titles.
+      The -r [--reformat-text] ctbtest option joins unindented input lines.
+      The log level can now be specified within brltty.conf.
+   New device support:
+      A braille driver for BrailComm displays has been added.
+      The HandyTech braille driver now supports the Active Braille.
+      The Voyager braille driver now supports the part 232 serial adapter.
+      The Voyager braille driver now supports the Braille Pen (aka Easy Link).
+   Preferences menu changes:
+      The preference selections now apply to the preferences menu itself, too.
+      Keyboard key bindings now work correctly within the preferences menu.
+      The "Text Style" preference has new settings:
+         8-Dot Computer Braille (formerly 8-dot)
+         Contracted Braille (formerly 6-dot)
+         6-Dot Computer Braille
+      The "Expand Current Word" preference has been added.
+         It's only visible if "Text Style" is set to "Contracted Braille".
+         It can be set to:
+            Yes (don't contract the word the cursor is on)
+            No (contract the whole line)
+      The "Capitalization Mode" preference has been added.
+         It's only visible if "Text Style" is set to "Contracted Braille".
+         It can be set to:
+            No Capitalization
+            Use Capital Sign
+            Superimpose Dot 7
+   General changes:
+      Internationalization support has been improved.
+      French and German translations have been added.
+      Support for multi-byte local character sets has been improved.
+      Horizontal window motions now work correctly with contracted braille.
+      The half window left motion no longer can move to a bad location.
+      Alert messages no longer disappear unexpectedly.
+      The speech FIFO is now created relative to the current working directory.
+      Serial flow control is now enabled before device probing.
+      The following global variables for use within tables are now predefined:
+         tablesDirectory
+         tableExtension
+         subtableExtension
+   Alva braille driver changes:
+      The BC key bindings have been changed significantly in order to add
+      more functions and to support the USB640 (which has no smartpad).
+      The braille keyboard of the BC Feature Pack is now supported.
+   Baum braille driver changes:
+      Updating the text and status cells of the Vario 80 has been fixed.
+      The front and command keys of the Vario 80 are now supported.
+   EuroBraille braille driver changes:
+      Reading keys is faster and no longer generates spurious input errors.
+   HandyTech braille driver changes:
+      Support for the Active Braille has been added.
+      The help screen now describes how the keypad keys are named.
+   Papenmeier braille driver changes:
+      The initial state of the switches and keys of EL models is detected.
+   Seika braille driver changes:
+      The help screen now describes the key layout.
+   TTY braille driver changes:
+      A few more key bindings have been defined.
+   Voyager braille driver changes:
+      Serial support has been added.
+      Bluetooth support has been added.
+      Support for the part 232 serial adapter has been added.
+      Support for the Braille Pen (aka Easy Link) has been added.
+   XWindow braille driver changes:
+      More and less restrictive fonts are supported.
+      Hard program exits have been removed.
+   eSpeak speech driver changes:
+      The full advertized speech rate range can now be used.
+   FestivalLite speech driver changes:
+      The default voice has been changed to kal (from kal16).
+   AtSpi screen driver changes:
+      No more annoying warnings when not on an AtSpi widget.
+   BrlAPI fixes:
+      ISO-8859-1 is now accepted as a character set when iconv isn't available.
+      The autorepeat flags are now handled on a per session basis.
+      Commands are now processed when the device is released.
+   WindowEyes BrlAPI driver changes:
+      Testing for BrlAPI open errors has been improved.
+   Text table changes:
+      A common subtable for the block characters has been added.
+      The glyph directive has been added.
+      Several alternate fonts for the Latin letters are now defined.
+      If a character isn't defined then check for an alternative which is:
+         (its Unicode base character, its iconv-defined ASCII equivalent, etc).
+      The en_UK text table has been renamed to en_GB (to comply with ISO 3166).
+      Updated text tables:
+         bo (Tibetan)
+         brf: dot 7 is no longer presented
+         fr_FR (French France)
+         fr-vs (French table used by VisioBraille devices)
+         is (Icelandic): updated to the newly adopted standard
+   Contraction table changes:
+      If a zero-width character isn't defined then don't show it.
+      Updated tables:
+         de-kurzschrift (German)
+         en-us-g2 (American English)
+         es (Spanish)
+         fr-abrege (French)
+         zh-tw (Taiwanese Chinese)
+   Key table changes:
+      A specific key within a set can now be specified by number.
+      A key combination can now include specific keys which aren't in set 0.
+      Keys which aren't in set 0 can now be mapped to keyboard functions.
+      A key set name can now be used to define a hotkey.
+      The help text no longer includes hidden hotkeys.
+      The help text now handles context-specific hotkeys correctly.
+      The note directive now supports the use of variables.
+   Windows changes:
+      Serial devices beyond COM9 may now be specified.
+      The WindowEyes driver is now copied into the correct installation directory.
+   Build changes:
+      Building an exported (not checked out) copy now "knows" its revision number.
+      Make support for install/uninstall of /usr/share/doc/brltty has been added.
+      The make targets for source archives are now prefixed with "src-".
+      The bin-tar, bin-tar-gzip, and bin-tar-bzip2 make targets have been added.
+      Support for xz compression of binary and source archives has been added.
+      The preferences file has been moved to /var/lib/brltty/brltty.prefs.
+      There's now only one preferences file (instead of one per braille driver).
+      The preferences file is now text-based (instead of binary).
+      The "writable" directory has been moved to /var/run/brltty.
+      The "library" directory is now known as the "drivers" directory.
+      The "data" directory no longer has a use and has been removed.
+      Support for the "gjar" command has been added.
+
 May 10, 2010:
  - BRLTTY 4.2 released:
    Ending a cut operation beyond the right edge of the screen has been fixed.
