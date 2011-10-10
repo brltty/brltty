@@ -951,7 +951,7 @@ suivantes:
     qui doit être utilisé par les autres applications souhaitant avoir
     accès au pilote de synthèse de BRLTTY. Si ce n'est pas spécifié,
     aucun FIFO n'est créé. Voir la ligne 
-    <ref id="configure-speech-fifo" name="speech-fifo"> du fichier de
+    <ref id="configure-speech-input" name="speech-fifo"> du fichier de
     configuration pour les paramètres par défaut à l'exécution.
     Cette option n'est pas disponible si vous avez spécifié l'option
     de compilation 
