@@ -17,294 +17,627 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
-"POT-Creation-Date: 2011-05-10 19:38+0200\n"
+"POT-Creation-Date: 2011-10-10 02:42+0200\n"
 "PO-Revision-Date: 2011-05-10 19:39+0200\n"
 "Last-Translator: Jean-Philippe MENGUAL (de Traduc.org) <mengualjeanphi@free.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
 
 #: Programs/main.c:135
 #, c-format
 msgid "\"%s\" started as \"%s\"\n"
-msgstr "\"%s\" démarré par \"%s\"\n"
+msgstr "\"%s\" dÃ©marrÃ© par \"%s\"\n"
 
-#: Programs/config.c:1660
-msgid "6-dot"
-msgstr "6 points"
+#: Programs/config.c:1165 Programs/config.c:1166 Programs/config.c:1168
+#: Programs/config.c:1169 Programs/config.c:1172 Programs/config.c:1173
+#: Programs/config.c:1174 Programs/config.c:1176 Programs/config.c:1177
+msgid "1 cell"
+msgstr "1 cellule"
 
-#: Programs/config.c:1659
-msgid "8-dot"
-msgstr "8 points"
+#: Programs/config.c:1164 Programs/config.c:1167 Programs/config.c:1170
+#: Programs/config.c:1171 Programs/config.c:1175
+msgid "2 cells"
+msgstr "2 cellules"
 
-#: Programs/config.c:1815
+#: Programs/config.c:1259
+msgid "6-Dot Computer Braille"
+msgstr "Braille informatique 6 points"
+
+#: Programs/config.c:1257
+msgid "8-Dot Computer Braille"
+msgstr "Braille informatique 8 points"
+
+#: Programs/scr_menu.c:87
 msgid "<off>"
 msgstr "<Inactif>"
 
-#: Programs/config.c:3189
+#: Programs/config.c:2826
 msgid "API Parameter"
-msgstr "Paramètre de l'API"
+msgstr "ParamÃštre de l'API"
 
-#: Programs/config.c:1766
+#: Programs/cmds.auto.h:773
+msgid "AT (set 2) keyboard scan code"
+msgstr "Scancode AT du clavier (rÃ©glÃ© Ã  2)"
+
+#: Programs/midi.c:79
+msgid "Accordion"
+msgstr "AccordÃ©on"
+
+#: Programs/midi.c:92
+msgid "Acoustic Bass"
+msgstr "Basse accoustique"
+
+#: Programs/midi.c:56
+msgid "Acoustic Grand Piano"
+msgstr "Piano Ã  queue accoustique"
+
+#: Programs/midi.c:83
+msgid "Acoustic Guitar (nylon)"
+msgstr "Guitare accoustique (nylon)"
+
+#: Programs/midi.c:84
+msgid "Acoustic Guitar (steel)"
+msgstr "Guitare accoustique (mÃ©tal)"
+
+#: Programs/midi.c:183
+msgid "Agogo"
+msgstr "Agogo"
+
+#: Programs/config.c:1520
 msgid "Alert Dots"
 msgstr "Points d'avertissement"
 
-#: Programs/config.c:1767
+#: Programs/config.c:1525
 msgid "Alert Messages"
 msgstr "Messages d'avertissement"
 
-#: Programs/config.c:1754
+#: Programs/config.c:1466
 msgid "Alert Tunes"
 msgstr "Sons d'avertissement"
 
-#: Programs/config.c:1620 Programs/config.c:1710
+#: Programs/config.c:1298 Programs/config.c:1570
 msgid "All"
 msgstr "Toutes"
 
-#: Programs/config.c:1654
-msgid "Alphabetic Cursor Coordinates (1 cell)"
-msgstr "Coordonnées alphabétiques du curseur (1 cellule)"
+#: Programs/config.c:1177
+msgid "Alphabetic Cursor Coordinates"
+msgstr "CoordonnÃ©es alphabÃ©tiques du curseur"
 
-#: Programs/config.c:1653
-msgid "Alphabetic Window Coordinates (1 cell)"
-msgstr "Coordonnées alphabétiques de la fenêtre (1 cellule)"
+#: Programs/config.c:1176
+msgid "Alphabetic Window Coordinates"
+msgstr "CoordonnÃ©es alphabÃ©tiques de la fenÃªtre"
 
-#: Programs/config.c:1744
+#: Programs/midi.c:129
+msgid "Alto Sax"
+msgstr "Saxo Alto"
+
+#: Programs/midi.c:197
+msgid "Applause"
+msgstr "Applaudissements"
+
+#: Programs/config.c:1401
 msgid "Attributes Invisible Time"
-msgstr "Durée de l'invisibilité des attributs"
+msgstr "DurÃ©e de l'invisibilitÃ© des attributs"
 
-#: Programs/config.c:1789 Programs/config.c:3149
+#: Programs/config.c:1636 Programs/config.c:2788
 msgid "Attributes Table"
 msgstr "Table d'attributs"
 
-#: Programs/config.c:1743
+#: Programs/config.c:1395
 msgid "Attributes Visible Time"
-msgstr "Durée de visibilité des attributs"
+msgstr "DurÃ©e de visibilitÃ© des attributs"
 
-#: Programs/config.c:1732
+#: Programs/config.c:1326
 msgid "Autorepeat"
-msgstr "Répétition automatique"
+msgstr "RÃ©pÃ©tition automatique"
 
-#: Programs/config.c:1734
+#: Programs/config.c:1338
 msgid "Autorepeat Delay"
-msgstr "Délai de la répétition automatique"
+msgstr "DÃ©lai de la rÃ©pÃ©tition automatique"
 
-#: Programs/config.c:1735
+#: Programs/config.c:1344
 msgid "Autorepeat Interval"
-msgstr "Intervalle de la répétition automatique"
+msgstr "Intervalle de la rÃ©pÃ©tition automatique"
 
-#: Programs/config.c:1733
+#: Programs/config.c:1332
 msgid "Autorepeat Panning"
-msgstr "Répétition automatique du défilement"
+msgstr "RÃ©pÃ©tition automatique du dÃ©filement"
 
-#: Programs/config.c:1770
+#: Programs/config.c:1541
 msgid "Autospeak"
 msgstr "Parole automatique"
 
-#: Programs/config.c:2451
+#: Programs/config.c:2081
 msgid "BRLTTY terminated"
-msgstr "Arrêt de BRLTTY"
+msgstr "ArrÃªt de BRLTTY"
 
-#: Programs/config.c:1742
+#: Programs/midi.c:178
+msgid "Bag Pipe"
+msgstr "Cornemuse"
+
+#: Programs/midi.c:174
+msgid "Banjo"
+msgstr "Banjo"
+
+#: Programs/midi.c:131
+msgid "Baritone Sax"
+msgstr "Saxo bariton"
+
+#: Programs/midi.c:40
+msgid "Bass"
+msgstr "Basse"
+
+#: Programs/midi.c:134
+msgid "Bassoon"
+msgstr "Basson"
+
+#: Programs/config.c:1472
+msgid "Beeper"
+msgstr "Beepeur"
+
+#: Programs/midi.c:194
+msgid "Bird Tweet"
+msgstr "Gazouillement d'oiseaux"
+
+#: Programs/config.c:1389
 msgid "Blinking Attributes"
 msgstr "Clignotement des attributs"
 
-#: Programs/config.c:1745
+#: Programs/config.c:1407
 msgid "Blinking Capitals"
 msgstr "Clignotement des majuscules"
 
-#: Programs/config.c:1738
+#: Programs/config.c:1366
 msgid "Blinking Cursor"
 msgstr "Clignotement du curseur"
 
-#: Programs/config.c:1600 Programs/config.c:1634
+#: Programs/config.c:1357 Programs/config.c:1604
 msgid "Block"
-msgstr "Pavé"
+msgstr "PavÃ©"
 
-#: Programs/config.c:2276
+#: Programs/midi.c:141
+msgid "Blown Bottle"
+msgstr "Bouteille cassÃ©e"
+
+#: Programs/config.c:1896
 msgid "Braille Device"
-msgstr "Périphérique braille"
+msgstr "PÃ©riphÃ©rique braille"
 
-#: Programs/config.c:2272
+#: Programs/config.c:1892
 msgid "Braille Driver"
 msgstr "Pilote braille"
 
-#: Programs/config.c:1748
+#: Programs/config.c:1432
 msgid "Braille Firmness"
-msgstr "Rugosité du braille"
+msgstr "RugositÃ© du braille"
 
-#: Programs/config.c:2275
+#: Programs/config.c:1895
 msgid "Braille Parameter"
-msgstr "Paramètre braille"
+msgstr "ParamÃštre braille"
 
-#: Programs/config.c:1749
+#: Programs/config.c:1447
 msgid "Braille Sensitivity"
-msgstr "Sensibilité du braille"
+msgstr "SensibilitÃ© du braille"
 
-#: Programs/config.c:288
+#: Programs/config.c:292
 #, c-format
 msgid "Braille driver: one of {%s}"
 msgstr "Pilote braille : un parmi {%s}"
 
-#: Programs/config.c:449
+#: Programs/config.c:453
 msgid "Braille window update interval [4]."
-msgstr "Intervalle de rafraîchissement de la fenêtre [4]."
+msgstr "Intervalle de rafraÃ®chissement de la fenÃªtre [4]."
 
-#: Programs/xbrlapi.c:88
+#: Programs/midi.c:43
+msgid "Brass"
+msgstr "Cuivres"
+
+#: Programs/midi.c:124
+msgid "Brass Section"
+msgstr "Section cuivres"
+
+#: Programs/midi.c:192
+msgid "Breath Noise"
+msgstr "Bruit de souffle"
+
+#: Programs/midi.c:57
+msgid "Bright Acoustic Piano"
+msgstr "Piano accoustique brillaq"
+
+#: Programs/xbrlapi.c:87
 msgid "BrlAPI authorization/authentication string"
-msgstr "Chaîne d'autorisation/authentification de BrlAPI"
+msgstr "ChaÃ®ne d'autorisation/authentification de BrlAPI"
 
-#: Programs/xbrlapi.c:81
+#: Programs/xbrlapi.c:80
 msgid "BrlAPI host and/or port to connect to"
-msgstr "Hôte de BrlAPI et port auquel se connecter"
+msgstr "HÃŽte de BrlAPI et port auquel se connecter"
 
-#: Programs/config.c:1747
+#: Programs/config.c:1280
+msgid "Capitalization Mode"
+msgstr "Mode de majuscules"
+
+#: Programs/config.c:1418
 msgid "Capitals Invisible Time"
-msgstr "Durée d'invisibilité des majuscules"
+msgstr "DurÃ©e d'invisibilitÃ© des majuscules"
 
-#: Programs/config.c:1746
+#: Programs/config.c:1412
 msgid "Capitals Visible Time"
-msgstr "Durée de visibilité des majuscules"
+msgstr "DurÃ©e de visibilitÃ© des majuscules"
 
-#: Programs/config.c:3099
+#: Programs/midi.c:65
+msgid "Celesta"
+msgstr "Celesta"
+
+#: Programs/midi.c:103
+msgid "Cello"
+msgstr "violoncelle"
+
+#: Programs/midi.c:114
+msgid "Choir Aahs"
+msgstr "Haha de choeur"
+
+#: Programs/midi.c:37
+msgid "Chromatic Percussion"
+msgstr "Percussions chromatiques"
+
+#: Programs/midi.c:77
+msgid "Church Organ"
+msgstr "Orgue d'Ã©glise"
+
+#: Programs/midi.c:135
+msgid "Clarinet"
+msgstr "Clarinette"
+
+#: Programs/midi.c:63
+msgid "Clavi"
+msgstr "Claviers"
+
+#: Programs/config.c:2736
 msgid "Configuration File"
 msgstr "Fichier de configuration"
 
-#: Programs/config.c:1791 Programs/config.c:3156
+#: Programs/midi.c:104
+msgid "Contrabass"
+msgstr "Contrebasse"
+
+#: Programs/config.c:1258
+#, fuzzy
+msgid "Contracted Braille"
+msgstr "Table de braille abrÃ©gÃ©"
+
+#: Programs/config.c:1643 Programs/config.c:2794
 msgid "Contraction Table"
-msgstr "Table de braille abrégé"
+msgstr "Table de braille abrÃ©gÃ©"
 
 #: Programs/xbrlapi.c:692
 #, c-format
 msgid "Couldn't find modifiers to apply to %d for getting keysym %08X\n"
-msgstr "N'a pas pu trouver de modificateur applicable à %d pour obtenir le keysym %08X\n"
+msgstr "N'a pas pu trouver de modificateur applicable Ã  %d pour obtenir le keysym %08X\n"
 
 #: Programs/xbrlapi.c:668
 #, c-format
 msgid "Couldn't translate keysym %08X to keycode.\n"
 msgstr "N'a pas pu traduire le keysum %08X en keycode \n"
 
-#: Programs/config.c:1645
-msgid "Cursor Column (1 cell)"
-msgstr "Colonne du curseur (1 cellule)"
+#: Programs/config.c:1168
+msgid "Cursor Column"
+msgstr "Colonne du curseur"
 
-#: Programs/config.c:1644
-msgid "Cursor Coordinates (2 cells)"
-msgstr "Coordonnées du curseur (2 cellules)"
+#: Programs/config.c:1167
+msgid "Cursor Coordinates"
+msgstr "CoordonnÃ©es du curseur"
 
-#: Programs/config.c:1740
+#: Programs/config.c:1378
 msgid "Cursor Invisible Time"
-msgstr "Durée d'invisibilité du curseur"
+msgstr "DurÃ©e d'invisibilitÃ© du curseur"
 
-#: Programs/config.c:1646
-msgid "Cursor Row (1 cell)"
-msgstr "Ligne du curseur (1 cellule)"
+#: Programs/config.c:1169
+msgid "Cursor Row"
+msgstr "Ligne du curseur"
 
-#: Programs/config.c:1737
+#: Programs/config.c:1360
 msgid "Cursor Style"
 msgstr "Apparence du curseur"
 
-#: Programs/config.c:1739
+#: Programs/config.c:1372
 msgid "Cursor Visible Time"
-msgstr "Durée de visibilité du curseur"
+msgstr "DurÃ©e de visibilitÃ© du curseur"
 
-#: Programs/config.c:1647
-msgid "Cursor and Window Column (2 cells)"
-msgstr "Colonne du curseur et de la fenêtre (2 cellules)"
+#: Programs/config.c:1170
+msgid "Cursor and Window Column"
+msgstr "Colonne du curseur et de la fenÃªtre"
 
-#: Programs/config.c:1648
-msgid "Cursor and Window Row (2 cells)"
-msgstr "Ligne du curseur et de la fenêtre (2 cellules)"
+#: Programs/config.c:1171
+msgid "Cursor and Window Row"
+msgstr "Ligne du curseur et de la fenÃªtre"
 
-#: Programs/config.c:430
+#: Programs/config.c:434
 msgid "Device specifier for soundcard digital audio."
-msgstr "Spécificateur de périphérique pour le son numérique de la carte son."
+msgstr "SpÃ©cificateur de pÃ©riphÃ©rique pour le son numÃ©rique de la carte son."
 
-#: Programs/config.c:440
+#: Programs/config.c:444
 msgid "Device specifier for the Musical Instrument Digital Interface."
-msgstr "Spécificateur de périphérique pour l'interface numérique d'instrument de musique."
+msgstr "SpÃ©cificateur de pÃ©riphÃ©rique pour l'interface numÃ©rique d'instrument de musique."
 
-#: Programs/config.c:471
+#: Programs/config.c:475
 #, c-format
 msgid "Diagnostic logging level: %s, or one of {%s}"
 msgstr "Niveau de journalisation des diagnostics : %s ou un parmi {%s}"
 
-#: Programs/config.c:277
+#: Programs/config.c:281
 msgid "Disable the application programming interface."
-msgstr "Désactiver l'interface de programmation de l'application (API)."
+msgstr "DÃ©sactiver l'interface de programmation de l'application (API)."
 
-#: Programs/xbrlapi.c:101
+#: Programs/midi.c:89
+msgid "Distortion Guitar"
+msgstr "Guitare avec distortion"
+
+#: Programs/xbrlapi.c:100
 msgid "Do not write any text to the braille device"
-msgstr "Ne pas écrire de texte sur le périphérique braille"
+msgstr "Ne pas Ã©crire de texte sur le pÃ©riphÃ©rique braille"
 
-#: Programs/config.c:3100
+#: Programs/tunes.c:61
+msgid "Done"
+msgstr "Fait"
+
+#: Programs/midi.c:74
+msgid "Drawbar Organ"
+msgstr "Orgue drawbar"
+
+#: Programs/config.c:2740
 msgid "Drivers Directory"
-msgstr "Répertoire des pilotes"
+msgstr "RÃ©pertoire des pilotes"
 
-#: Programs/config.c:1730
+#: Programs/midi.c:72
+msgid "Dulcimer"
+msgstr "Dulcimer"
+
+#: Programs/config.c:1314
 msgid "Eager Sliding Window"
-msgstr "Défilement dynamique de la fenêtre"
+msgstr "DÃ©filement dynamique de la fenÃªtre"
 
-#: Programs/config.c:1640
+#: Programs/midi.c:93
+msgid "Electric Bass (finger)"
+msgstr "Basse Ã©lectrique (doigt)"
+
+#: Programs/midi.c:94
+msgid "Electric Bass (pick)"
+msgstr "Basse Ã©lectrique (plectre)"
+
+#: Programs/midi.c:58
+msgid "Electric Grand Piano"
+msgstr "Piano Ã  queue Ã©lectrique"
+
+#: Programs/midi.c:86
+msgid "Electric Guitar (clean)"
+msgstr "Guitare Ã©lectrique (propre)"
+
+#: Programs/midi.c:85
+msgid "Electric Guitar (jazz)"
+msgstr "Guitare Ã©lectrique (jazz)"
+
+#: Programs/midi.c:87
+msgid "Electric Guitar (muted)"
+msgstr "Guitare Ã©lectrique (Ã©touffÃ©e)"
+
+#: Programs/midi.c:60
+msgid "Electric Piano 1"
+msgstr "Piano Ã©lectrique 1"
+
+#: Programs/midi.c:61
+msgid "Electric Piano 2"
+msgstr "Piano Ã©lectrique 2"
+
+#: Programs/config.c:1163
 msgid "End"
 msgstr "Fin"
 
-#: Programs/config.c:1621
+#: Programs/config.c:1299
 msgid "End of Line"
 msgstr "Fin de la ligne"
 
-#: Programs/config.c:1704
+#: Programs/midi.c:133
+msgid "English Horn"
+msgstr "Corne anglaise"
+
+#: Programs/config.c:1533
 msgid "Enqueue"
 msgstr "Dans la file"
 
-#: Programs/config.c:1764
+#: Programs/midi.c:42
+msgid "Ensemble"
+msgstr "Ensemble"
+
+#: Programs/midi.c:49
+#, fuzzy
+msgid "Ethnic Instruments"
+msgstr "Instrument MIDI"
+
+#: Programs/config.c:1268
+msgid "Expand Current Word"
+msgstr "Extension du mot actuel"
+
+#: Programs/config.c:1475
+msgid "FM"
+msgstr "FM"
+
+#: Programs/config.c:1513
 msgid "FM Volume"
 msgstr "Volume FM"
 
-#: Programs/config.c:1655
-msgid "Generic"
-msgstr "Générique"
+#: Programs/midi.c:164
+msgid "FX 1 (rain)"
+msgstr "FX 1 (pluie)"
 
-#: Programs/config.c:2205
+#: Programs/midi.c:165
+msgid "FX 2 (soundtrack)"
+msgstr "FX 2 (piste son)"
+
+#: Programs/midi.c:166
+msgid "FX 3 (crystal)"
+msgstr "FX 3 (cristal)"
+
+#: Programs/midi.c:167
+msgid "FX 4 (atmosphere)"
+msgstr "FX 4 (atmosphÃšre)"
+
+#: Programs/midi.c:168
+msgid "FX 5 (brightness)"
+msgstr "FX 5 (Ã©clat)"
+
+#: Programs/midi.c:169
+msgid "FX 6 (goblins)"
+msgstr "FX 6 (lutin)"
+
+#: Programs/midi.c:170
+msgid "FX 7 (echoes)"
+msgstr "FX 7 (Ã©chos)"
+
+#: Programs/midi.c:171
+msgid "FX 8 (sci-fi)"
+msgstr "FX 8 (SF)"
+
+#: Programs/midi.c:179
+msgid "Fiddle"
+msgstr "violon"
+
+#: Programs/midi.c:138
+msgid "Flute"
+msgstr "flÃ»te"
+
+#: Programs/midi.c:123
+msgid "French Horn"
+msgstr "Corne franÃ§aise"
+
+#: Programs/midi.c:95
+msgid "Fretless Bass"
+msgstr "Basse glissÃ©e"
+
+#: Programs/tunes.c:173
+msgid "Frozen"
+msgstr "GelÃ©"
+
+#: Programs/config.c:1178
+msgid "Generic"
+msgstr "GÃ©nÃ©rique"
+
+#: Programs/midi.c:66
+msgid "Glockenspiel"
+msgstr "Glockenspiel"
+
+#: Programs/midi.c:39
+msgid "Guitar"
+msgstr "Guitare"
+
+#: Programs/midi.c:191
+msgid "Guitar Fret Noise"
+msgstr "Bruit de glissement sur une guitare"
+
+#: Programs/midi.c:90
+msgid "Guitar Harmonics"
+msgstr "Harmoniques de guitare"
+
+#: Programs/midi.c:198
+msgid "Gunshot"
+msgstr "Coup de feu"
+
+#: Programs/midi.c:80
+msgid "Harmonica"
+msgstr "Harmonica"
+
+#: Programs/midi.c:62
+msgid "Harpsichord"
+msgstr "Clavecin"
+
+#: Programs/midi.c:196
+msgid "Helicopter"
+msgstr "HÃ©licoptÃšre"
+
+#: Programs/config.c:1825
 msgid "Help Path"
 msgstr "Chemin de l'aide"
 
-#: Programs/config.c:1607 Programs/config.c:1615
+#: Programs/config.c:1428 Programs/config.c:1443
 msgid "High"
 msgstr "Forte"
 
-#: Programs/config.c:1753
+#: Programs/config.c:1461
 msgid "Highlight Window"
-msgstr "Surlignement de la fenêtre"
+msgstr "Surlignement de la fenÃªtre"
 
-#: Programs/config.c:1703
+#: Programs/midi.c:59
+msgid "Honkytonk Piano"
+msgstr "Piano bastringue"
+
+#: Programs/config.c:1532
 msgid "Immediate"
-msgstr "Immédiat"
+msgstr "ImmÃ©diat"
 
-#: Programs/xbrlapi.c:521
+#: Programs/xbrlapi.c:520
 msgid "Incompatible XKB library\n"
-msgstr "Bibliothèque XKB incompatible\n"
+msgstr "BibliothÃšque XKB incompatible\n"
 
-#: Programs/xbrlapi.c:523
+#: Programs/xbrlapi.c:522
 msgid "Incompatible XKB server support\n"
 msgstr "Support du serveur XKB incompatible\n"
 
-#: Programs/config.c:208
+#: Programs/config.c:203
 #, c-format
 msgid "Install the %s service, and then exit."
 msgstr "Installe le service %s et quittez."
 
-#: Programs/config.c:2151
+#: Programs/midi.c:177
+msgid "Kalimba"
+msgstr "Kalimba"
+
+#: Programs/config.c:1771
 msgid "Key Bindings"
 msgstr "Associations de touches"
 
-#: Programs/config.c:2168 Programs/config.c:3164
+#: Programs/config.c:1788 Programs/config.c:2801 Programs/ktb_list.c:316
 msgid "Key Table"
 msgstr "Table de touches"
 
-#: Programs/config.c:1627
+#: Programs/midi.c:176
+msgid "Koto"
+msgstr "Koto"
+
+#: Programs/midi.c:146
+msgid "Lead 1 (square)"
+msgstr "Position 1 (carrÃ©)"
+
+#: Programs/midi.c:147
+msgid "Lead 2 (sawtooth)"
+msgstr "Position 2 (en dents de scie)"
+
+#: Programs/midi.c:148
+msgid "Lead 3 (calliope)"
+msgstr "Position 3 (Calliope)"
+
+#: Programs/midi.c:149
+msgid "Lead 4 (chiff)"
+msgstr "Position 4 (chiff)"
+
+#: Programs/midi.c:150
+msgid "Lead 5 (charang)"
+msgstr "Position 5 (charang)"
+
+#: Programs/midi.c:151
+msgid "Lead 6 (voice)"
+msgstr "Position 6 (voix)"
+
+#: Programs/midi.c:152
+msgid "Lead 7 (fifths)"
+msgstr "Position 7 (cinquiÃšmes)"
+
+#: Programs/midi.c:153
+msgid "Lead 8 (bass + lead)"
+msgstr "Position 8 (basse + position)"
+
+#: Programs/config.c:1583
 msgid "Left"
 msgstr "Gauche"
 
@@ -316,605 +649,944 @@ msgstr "Liste les noms de touche sur la sortie standard."
 msgid "List key table on standard output."
 msgstr "Liste la table de touches sur la sortie standard"
 
-#: Programs/config.c:506
+#: Programs/config.c:510
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
-msgstr "Enregistre les versions de l'application principale, de l'API, des pilotes intégrés puis quitter"
+msgstr "Enregistre les versions de l'application principale, de l'API, des pilotes intÃ©grÃ©s puis quitter"
 
-#: Programs/config.c:487
+#: Programs/config.c:491
 msgid "Log to standard error rather than to the system log."
-msgstr "Enregistre sur l'erreur standard plutôt que sur le journal du système."
+msgstr "Enregistre sur l'erreur standard plutÃŽt que sur le journal du systÃšme."
 
-#: Programs/config.c:1605 Programs/config.c:1613
+#: Programs/config.c:1426 Programs/config.c:1441
 msgid "Low"
 msgstr "Faible"
 
-#: Programs/config.c:1761
+#: Programs/config.c:1474
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/config.c:1504
 msgid "MIDI Instrument"
 msgstr "Instrument MIDI"
 
-#: Programs/config.c:1760
+#: Programs/config.c:1494
 msgid "MIDI Volume"
 msgstr "Volume MIDI"
 
-#: Programs/config.c:1608 Programs/config.c:1616
+#: Programs/midi.c:69
+msgid "Marimba"
+msgstr "Marimba"
+
+#: Programs/config.c:1429 Programs/config.c:1444
 msgid "Maximum"
 msgstr "Maximum"
 
-#: Programs/config.c:1606 Programs/config.c:1614
+#: Programs/config.c:1427 Programs/config.c:1442
 msgid "Medium"
 msgstr "Moyenne"
 
-#: Programs/config.c:457
-msgid "Message hold time [400]."
-msgstr "Durée d'apparition du message [400]"
+#: Programs/midi.c:187
+msgid "Melodic Tom"
+msgstr "tom mÃ©lodique"
 
-#: Programs/config.c:1604 Programs/config.c:1612
+#: Programs/config.c:461
+msgid "Message hold time [400]."
+msgstr "DurÃ©e d'apparition du message [400]"
+
+#: Programs/config.c:1425 Programs/config.c:1440
 msgid "Minimum"
 msgstr "Minimum"
 
-#: Programs/config.c:1685
-msgid "Musical Instrument Digital Interface"
-msgstr "Interface numérique d'instrument de musique"
+#: Programs/midi.c:67
+msgid "Music Box"
+msgstr "BoÃ®te Ã  musique"
 
-#: Programs/config.c:1594
+#: Programs/config.c:1474
+msgid "Musical Instrument Digital Interface"
+msgstr "Interface numÃ©rique d'instrument de musique"
+
+#: Programs/midi.c:122
+msgid "Muted Trumpet"
+msgstr "Trompette bouchÃ©e"
+
+#: Programs/menu.c:311
 msgid "No"
 msgstr "Non"
 
-#: Programs/config.c:1626 Programs/config.c:1632 Programs/config.c:1708
+#: Programs/config.c:1275
+msgid "No Capitalization"
+msgstr "Pas de mise en majuscule"
+
+#: Programs/config.c:1568 Programs/config.c:1582 Programs/config.c:1602
 msgid "None"
 msgstr "Aucune"
 
-#: Programs/config.c:1757
+#: Programs/midi.c:132
+msgid "Oboe"
+msgstr "Hautbois"
+
+#: Programs/midi.c:144
+msgid "Ocarina"
+msgstr "Ocarina"
+
+#: Programs/config.c:1909
+msgid "Old Preferences File"
+msgstr "Ancien fichier des prÃ©fÃ©rences"
+
+#: Programs/midi.c:117
+msgid "Orchestra Hit"
+msgstr "Orchestre de percussions"
+
+#: Programs/midi.c:107
+msgid "Orchestral Harp"
+msgstr "Harpe d'orchestre"
+
+#: Programs/midi.c:38
+msgid "Organ"
+msgstr "Orgue"
+
+#: Programs/midi.c:88
+msgid "Overdriven Guitar"
+msgstr "Guitare overdriven"
+
+#: Programs/config.c:1473
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/config.c:1486
 msgid "PCM Volume"
 msgstr "Volume PCM"
 
-#: Programs/config.c:270
+#: Programs/cmds.auto.h:787
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr "Scancode de clavier PS/2 (rÃ©glÃ© Ã  3)"
+
+#: Programs/midi.c:155
+msgid "Pad 1 (new age)"
+msgstr "bloc 1 ("
+
+#: Programs/midi.c:156
+msgid "Pad 2 (warm)"
+msgstr "bloc 2 (chaud)"
+
+#: Programs/midi.c:157
+msgid "Pad 3 (polysynth)"
+msgstr "Bloc 3 (polysynthÃ©)"
+
+#: Programs/midi.c:158
+msgid "Pad 4 (choir)"
+msgstr "Bloc 4 (choeur)"
+
+#: Programs/midi.c:159
+msgid "Pad 5 (bowed)"
+msgstr "Bloc 5 (huÃ©es)"
+
+#: Programs/midi.c:160
+msgid "Pad 6 (metallic)"
+msgstr "Bloc 6 (mÃ©tallique)"
+
+#: Programs/midi.c:161
+msgid "Pad 7 (halo)"
+msgstr "Bloc 7 (acclamations)"
+
+#: Programs/midi.c:162
+msgid "Pad 8 (sweep)"
+msgstr "Bloc 8 (coup de balai)"
+
+#: Programs/midi.c:140
+msgid "Pan Flute"
+msgstr "FlÃ»te de pan"
+
+#: Programs/config.c:274
 msgid "Parameters for the application programming interface."
-msgstr "Paramètres pour l'interface de programmation de l'application."
+msgstr "ParamÃštres pour l'interface de programmation de l'application."
 
-#: Programs/config.c:298
+#: Programs/config.c:302
 msgid "Parameters for the braille driver."
-msgstr "Paramètres pour le pilote braille."
+msgstr "ParamÃštres pour le pilote braille."
 
-#: Programs/config.c:421
+#: Programs/config.c:425
 msgid "Parameters for the screen driver."
-msgstr "Paramètres pour le pilote de l'écran."
+msgstr "ParamÃštres pour le pilote de l'Ã©cran."
 
-#: Programs/config.c:393
+#: Programs/config.c:397
 msgid "Parameters for the speech driver."
-msgstr "Paramètres pour le pilote de synthèse vocale."
+msgstr "ParamÃštres pour le pilote de synthÃšse vocale."
 
-#: Programs/config.c:347
+#: Programs/config.c:351
 msgid "Path to attributes translation table file."
 msgstr "Chemin du fichier de la table de traduction des attributs."
 
-#: Programs/config.c:356
+#: Programs/config.c:360
 msgid "Path to contraction table file."
-msgstr "Chemin du fichier de la table de traduction de l'abrégé."
+msgstr "Chemin du fichier de la table de traduction de l'abrÃ©gÃ©."
 
-#: Programs/config.c:253
+#: Programs/config.c:257
+msgid "Path to default preferences file."
+msgstr "Chemin du fichier des prÃ©fÃ©rences par dÃ©faut."
+
+#: Programs/config.c:248
 msgid "Path to default settings file."
-msgstr "Chemin du fichier des paramètres par défaut."
+msgstr "Chemin du fichier des paramÃštres par dÃ©faut."
 
-#: Programs/config.c:308
+#: Programs/config.c:312
 msgid "Path to device for accessing braille display."
-msgstr "Chemin du périphérique d'accès à l'afficheur braille."
+msgstr "Chemin du pÃ©riphÃ©rique d'accÃšs Ã  l'afficheur braille."
 
-#: Programs/ctbtest.c:54 Programs/ktbtest.c:69
+#: Programs/ctbtest.c:55 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
-msgstr "Chemin du répertoire contenant les tables."
+msgstr "Chemin du rÃ©pertoire contenant les tables."
 
-#: Programs/ktbtest.c:60 Programs/config.c:235
+#: Programs/ktbtest.c:60 Programs/config.c:230
 msgid "Path to directory for loading drivers."
-msgstr "Chemin du répertoire de chargement des pilotes."
+msgstr "Chemin du rÃ©pertoire de chargement des pilotes."
 
-#: Programs/config.c:329
+#: Programs/config.c:333
 msgid "Path to directory for text and attributes tables."
-msgstr "Chemin du répertoire des tables de texte et d'attributs."
+msgstr "Chemin du rÃ©pertoire des tables de texte et d'attributs."
 
-#: Programs/brltest.c:64 Programs/config.c:244
+#: Programs/brltest.c:64 Programs/config.c:239
 msgid "Path to directory which can be written to."
-msgstr "Chemin du répertoire oÃ¹ il est possible d'écrire."
+msgstr "Chemin du rÃ©pertoire oÃÂ¹ il est possible d'Ã©crire."
 
-#: Programs/config.c:365
+#: Programs/config.c:369
 msgid "Path to key table file."
 msgstr "Chemin du fichier de la table de touches."
 
-#: Programs/config.c:480
+#: Programs/config.c:484
 msgid "Path to log file."
 msgstr "Chemin du fichier journal."
 
-#: Programs/config.c:226
+#: Programs/config.c:221
 msgid "Path to process identifier file."
 msgstr "Chemin du fichier d'identifiants de processus."
 
-#: Programs/config.c:401
-msgid "Path to speech pass-through FIFO."
-msgstr "Chemin vers le FIFO d'interface avec la synthèse."
+#: Programs/config.c:405
+msgid "Path to speech input file system object."
+msgstr "Chemin vers l'objet systÃšme du fichier d'entrÃ©e de la parole"
 
-#: Programs/config.c:339
+#: Programs/config.c:343
 msgid "Path to text translation table file."
 msgstr "Chemin du fichier de table de traduction de texte."
 
-#: Programs/config.c:2288
-msgid "Preferences File"
-msgstr "Fichier des préférences"
+#: Programs/midi.c:50
+msgid "Percussive Instruments"
+msgstr "Instruments Ã  percussions"
 
-#: Programs/config.c:1592
+#: Programs/midi.c:75
+msgid "Percussive Organ"
+msgstr "Orgue Ã  percussion"
+
+#: Programs/midi.c:36
+msgid "Piano"
+msgstr "Piano"
+
+#: Programs/midi.c:137
+msgid "Piccolo"
+msgstr "Piccolo"
+
+#: Programs/midi.c:45
+msgid "Pipe"
+msgstr "Tuyau"
+
+#: Programs/midi.c:106
+msgid "Pizzicato Strings"
+msgstr "Pizzicati"
+
+#: Programs/config.c:2737
+msgid "Preferences File"
+msgstr "Fichier des prÃ©fÃ©rences"
+
+#: Programs/brltty.c:1701
 msgid "Preferences Menu"
-msgstr "Menu des préférences"
+msgstr "Menu des prÃ©fÃ©rences"
 
 #: Programs/options.h:60
 msgid "Print a usage summary (all options), and then exit."
-msgstr "Afficher un résumé de l'utilisation (toutes les options) et quitter."
+msgstr "Afficher un rÃ©sumÃ© de l'utilisation (toutes les options) et quitter."
 
 #: Programs/options.h:55
 msgid "Print a usage summary (commonly used options only), and then exit."
-msgstr "Affiche un résumé de l'utilisation (seulement les options couramment utilisées), puis quitte."
+msgstr "Affiche un rÃ©sumÃ© de l'utilisation (seulement les options couramment utilisÃ©es), puis quitte."
 
-#: Programs/config.c:373
+#: Programs/config.c:377
 msgid "Properties of the keyboard."
-msgstr "Propriétés du clavier."
+msgstr "PropriÃ©tÃ©s du clavier."
 
-#: Programs/config.c:260
+#: Programs/config.c:264
 msgid "Recognize environment variables."
-msgstr "Reconnaît les variables d'environnement."
+msgstr "ReconnaÃ®t les variables d'environnement."
 
-#: Programs/config.c:320
+#: Programs/midi.c:139
+msgid "Recorder"
+msgstr "MagnÃ©tophone"
+
+#: Programs/midi.c:44
+msgid "Reed"
+msgstr "Anche"
+
+#: Programs/midi.c:78
+msgid "Reed Organ"
+msgstr "Orgue Ã  hanche"
+
+#: Programs/config.c:324
 msgid "Release braille device when screen or window is unreadable."
-msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire l'écran ou la fenêtre."
+msgstr "Abandonne le pÃ©riphÃ©rique braille quand il n'est pas possible de lire l'Ã©cran ou la fenÃªtre."
 
-#: Programs/config.c:494
+#: Programs/config.c:498
 msgid "Remain a foreground process."
-msgstr "Rappelle un processus en tÃ¢che de fond."
+msgstr "Rappelle un processus en tÃÂ¢che de fond."
 
-#: Programs/config.c:216
+#: Programs/config.c:211
 #, c-format
 msgid "Remove the %s service, and then exit."
 msgstr "Supprime le service %s et quitte."
 
-#: Programs/config.c:1622
+#: Programs/config.c:1300
 msgid "Rest of Line"
 msgstr "Reste de la ligne"
 
-#: Programs/config.c:1628
+#: Programs/midi.c:189
+msgid "Reverse Cymbal"
+msgstr "Cymballes renversÃ©es"
+
+#: Programs/config.c:1584
 msgid "Right"
 msgstr "Droite"
 
-#: Programs/config.c:1724
+#: Programs/midi.c:76
+msgid "Rock Organ"
+msgstr "Orgue de rock"
+
+#: Programs/config.c:1251
 msgid "Save on Exit"
 msgstr "Enregistrer en quittant"
 
-#: Programs/config.c:1769
+#: Programs/config.c:1536
 msgid "Say-Line Mode"
 msgstr "Mode Dire la ligne"
 
-#: Programs/config.c:2635
+#: Programs/config.c:2265
 msgid "Screen Driver"
-msgstr "Pilote de l'écran"
+msgstr "Pilote de l'Ã©cran"
 
-#: Programs/config.c:1649
-msgid "Screen Number (1 cell)"
-msgstr "Numéro de l'écran (1 cellule)"
+#: Programs/config.c:1172
+msgid "Screen Number"
+msgstr "NumÃ©ro de l'Ã©cran"
 
-#: Programs/config.c:2641
+#: Programs/config.c:2271
 msgid "Screen Parameter"
-msgstr "Paramètre de l'écran"
+msgstr "ParamÃštre de l'Ã©cran"
 
-#: Programs/config.c:411
+#: Programs/config.c:415
 #, c-format
 msgid "Screen driver: one of {%s}"
-msgstr "Pilote de l'écran : un parmi {%s}"
+msgstr "Pilote de l'Ã©cran : un parmi {%s}"
 
-#: Programs/config.c:1741
+#: Programs/midi.c:193
+msgid "Seashore"
+msgstr "Bord de mer"
+
+#: Programs/midi.c:142
+msgid "Shakuhachi"
+msgstr "Shakuhachi"
+
+#: Programs/midi.c:175
+msgid "Shamisen"
+msgstr "Shamisen"
+
+#: Programs/midi.c:180
+msgid "Shanai"
+msgstr "Shanai"
+
+#: Programs/config.c:1384
 msgid "Show Attributes"
 msgstr "Afficher les attributs"
 
-#: Programs/config.c:1736
+#: Programs/config.c:1350
 msgid "Show Cursor"
 msgstr "Afficher le curseur"
 
-#: Programs/config.c:1727
-msgid "Skip Blank Windows"
-msgstr "Passer les fenêtres vierges"
+#: Programs/midi.c:173
+msgid "Sitar"
+msgstr "Cithare"
 
-#: Programs/config.c:1726
+#: Programs/config.c:1292
+msgid "Skip Blank Windows"
+msgstr "Passer les fenÃªtres vierges"
+
+#: Programs/config.c:1287
 msgid "Skip Identical Lines"
 msgstr "Passer les lignes identiques"
 
-#: Programs/config.c:1729
-msgid "Sliding Window"
-msgstr "Faire défiler la fenêtre"
+#: Programs/midi.c:96
+msgid "Slap Bass 1"
+msgstr "Basse frappÃ©e 1"
 
-#: Programs/config.c:1709
+#: Programs/midi.c:97
+msgid "Slap Bass 2"
+msgstr "Basse frappÃ©e 2"
+
+#: Programs/config.c:1309
+msgid "Sliding Window"
+msgstr "Faire dÃ©filer la fenÃªtre"
+
+#: Programs/config.c:1569
 msgid "Some"
 msgstr "Quelques"
 
-#: Programs/config.c:1633
+#: Programs/midi.c:128
+msgid "Soprano Sax"
+msgstr "Saxo soprano"
+
+#: Programs/midi.c:51
+msgid "Sound Effects"
+msgstr "Effets sonore"
+
+#: Programs/config.c:1603
 msgid "Space"
 msgstr "Espace"
 
-#: Programs/config.c:2511
+#: Programs/config.c:2141
 msgid "Speech Driver"
-msgstr "Pilote de synthèse vocale"
+msgstr "Pilote de synthÃšse vocale"
 
-#: Programs/config.c:3228
-msgid "Speech FIFO"
-msgstr "FIFO de la synthèse vocale"
+#: Programs/config.c:2864
+msgid "Speech Input"
+msgstr "EntrÃ©e de la parole"
 
-#: Programs/config.c:2514
+#: Programs/config.c:2144
 msgid "Speech Parameter"
-msgstr "Paramètre de synthèse vocale"
+msgstr "ParamÃštre de synthÃšse vocale"
 
-#: Programs/config.c:1773
+#: Programs/config.c:1560
 msgid "Speech Pitch"
 msgstr "Ton de la voix"
 
-#: Programs/config.c:1774
+#: Programs/config.c:1573
 msgid "Speech Punctuation"
-msgstr "Ponctuation pour la synthèse"
+msgstr "Ponctuation pour la synthÃšse"
 
-#: Programs/config.c:1771
+#: Programs/config.c:1553
 msgid "Speech Rate"
-msgstr "Vitesse de la synthèse"
+msgstr "Vitesse de la synthÃšse"
 
-#: Programs/config.c:1772
+#: Programs/config.c:1546
 msgid "Speech Volume"
-msgstr "Volume de la synthèse"
+msgstr "Volume de la synthÃšse"
 
-#: Programs/config.c:383
+#: Programs/config.c:387
 #, c-format
 msgid "Speech driver: one of {%s}"
-msgstr "Pilote de synthèse : un parmi {%S}"
+msgstr "Pilote de synthÃšse : un parmi {%S}"
 
-#: Programs/config.c:1650
-msgid "State Dots (1 cell)"
-msgstr "Points d'état (1 cellule)"
+#: Programs/config.c:1173
+msgid "State Dots"
+msgstr "Points d'Ã©tat"
 
-#: Programs/config.c:1651
-msgid "State Letter (1 cell)"
-msgstr "Lettre d'état (1 cellule)"
+#: Programs/config.c:1174
+#, fuzzy
+msgid "State Letter"
+msgstr "Lettre d'Ã©tat (1 cellule)"
 
-#: Programs/config.c:1777
+#: Programs/config.c:1594
 msgid "Status Count"
-msgstr "Taille de la zone d'état"
+msgstr "Taille de la zone d'Ã©tat"
 
-#: Programs/config.c:1722
-msgid "Status Field "
-msgstr "Champ de l'état "
+#: Programs/config.c:1182
+#, fuzzy
+msgid "Status Field"
+msgstr "Champ de l'Ã©tat "
 
-#: Programs/config.c:1776
+#: Programs/config.c:1587
 msgid "Status Position"
-msgstr "Position de l'état"
+msgstr "Position de l'Ã©tat"
 
-#: Programs/config.c:1778
+#: Programs/config.c:1609
 msgid "Status Separator"
-msgstr "Séparateur de l'état"
+msgstr "SÃ©parateur de l'Ã©tat"
 
-#: Programs/config.c:1635
+#: Programs/config.c:1605
 msgid "Status Side"
-msgstr "Limite de l'état"
+msgstr "Limite de l'Ã©tat"
 
-#: Programs/config.c:463
+#: Programs/midi.c:184
+msgid "Steel Drums"
+msgstr "Batterie mÃ©tal"
+
+#: Programs/midi.c:110
+msgid "String Ensemble 1"
+msgstr "Ensemble de cordes 1"
+
+#: Programs/midi.c:111
+msgid "String Ensemble 2"
+msgstr "Ensemble de cordes 2"
+
+#: Programs/midi.c:41
+msgid "Strings"
+msgstr "Cordes"
+
+#: Programs/config.c:1277
+msgid "Superimpose Dot 7"
+msgstr "Point 7 superposÃ©"
+
+#: Programs/config.c:467
 msgid "Suppress start-up messages."
-msgstr "Supprime les messages au démarrage."
+msgstr "Supprime les messages au dÃ©marrage."
 
-#: Programs/config.c:3102
+#: Programs/midi.c:98
+msgid "Synth Bass 1"
+msgstr "Basse synthÃ©tique 1"
+
+#: Programs/midi.c:99
+msgid "Synth Bass 2"
+msgstr "Basse synthÃ©tique 2"
+
+#: Programs/midi.c:188
+msgid "Synth Drum"
+msgstr "Batterie synthÃ©tique"
+
+#: Programs/midi.c:48
+msgid "Synth FM"
+msgstr "FM synthÃ©tique"
+
+#: Programs/midi.c:46
+msgid "Synth Lead"
+msgstr "Position synthÃ©"
+
+#: Programs/midi.c:47
+msgid "Synth Pad"
+msgstr "Bloc synthÃ©"
+
+#: Programs/midi.c:116
+msgid "Synth Voice"
+msgstr "Voix synthÃ©tique"
+
+#: Programs/midi.c:125
+msgid "SynthBrass 1"
+msgstr "Cuivre synthÃ©tique 1"
+
+#: Programs/midi.c:126
+msgid "SynthBrass 2"
+msgstr "Cuivre synthÃ©tique 2"
+
+#: Programs/midi.c:112
+msgid "SynthStrings 1"
+msgstr "Cordes synthÃ©tiques 1"
+
+#: Programs/midi.c:113
+msgid "SynthStrings 2"
+msgstr "Cordes synthÃ©tiques 2"
+
+#: Programs/config.c:2742
 msgid "Tables Directory"
-msgstr "Répertoire des tables"
+msgstr "RÃ©pertoire des tables"
 
-#: Programs/config.c:1636
+#: Programs/midi.c:186
+msgid "Taiko Drum"
+msgstr "Batterie Taiko"
+
+#: Programs/midi.c:81
+msgid "Tango Accordion"
+msgstr "AccordÃ©on tango"
+
+#: Programs/midi.c:195
+msgid "Telephone Ring"
+msgstr "Sonnerie de tÃ©lÃ©phone"
+
+#: Programs/midi.c:130
+msgid "Tenor Sax"
+msgstr "Saxo tenor"
+
+#: Programs/config.c:1606
 msgid "Text Side"
 msgstr "Limite du texte"
 
-#: Programs/config.c:1725
+#: Programs/config.c:1262
 msgid "Text Style"
 msgstr "Apparence du texte"
 
-#: Programs/config.c:1788 Programs/config.c:3141
+#: Programs/config.c:1630 Programs/config.c:2781
 msgid "Text Table"
 msgstr "Table de texte"
 
-#: Programs/config.c:1652
-msgid "Time (2 cells)"
-msgstr "Temps (2 cellules)"
+#: Programs/config.c:1175
+msgid "Time"
+msgstr "Heure"
 
-#: Programs/config.c:1755
+#: Programs/midi.c:108
+msgid "Timpani"
+msgstr "Timballes"
+
+#: Programs/midi.c:182
+msgid "Tinkle Bell"
+msgstr "Tintement de cloches"
+
+#: Programs/midi.c:105
+msgid "Tremolo Strings"
+msgstr "Cordes de tremolo"
+
+#: Programs/midi.c:120
+msgid "Trombone"
+msgstr "Trombonne"
+
+#: Programs/midi.c:119
+msgid "Trumpet"
+msgstr "Trompette"
+
+#: Programs/midi.c:121
+msgid "Tuba"
+msgstr "Tuba"
+
+#: Programs/midi.c:71
+msgid "Tubular Bells"
+msgstr "Cloches tubulaires"
+
+#: Programs/config.c:1478
 msgid "Tune Device"
-msgstr "Périphérique pour les sons"
+msgstr "PÃ©riphÃ©rique pour les sons"
 
-#: Programs/config.c:1599
+#: Programs/config.c:1356
 msgid "Underline"
-msgstr "Souligné"
+msgstr "SoulignÃ©"
+
+#: Programs/tunes.c:204
+msgid "Unfrozen"
+msgstr "DÃ©gelÃ©"
 
 #: Programs/options.c:135
 msgid "Usage"
 msgstr "Utilisation"
 
-#: Programs/config.c:1728
+#: Programs/config.c:1276
+msgid "Use Capital Sign"
+msgstr "Utilisation du signe majuscule"
+
+#: Programs/midi.c:68
+msgid "Vibraphone"
+msgstr "Vibraphone"
+
+#: Programs/midi.c:102
+msgid "Viola"
+msgstr "Alto"
+
+#: Programs/midi.c:101
+msgid "Violin"
+msgstr "Violon"
+
+#: Programs/midi.c:115
+msgid "Voice Oohs"
+msgstr "Hoos vocaux"
+
+#: Programs/config.c:1303
 msgid "Which Blank Windows"
-msgstr "Quelles fenêtres vierges"
+msgstr "Quelles fenÃªtres vierges"
 
-#: Programs/config.c:1642
-msgid "Window Column (1 cell)"
-msgstr "Colonne de la fenêtre (1 cellule)"
+#: Programs/midi.c:143
+msgid "Whistle"
+msgstr "sifflet"
 
-#: Programs/config.c:1641
-msgid "Window Coordinates (2 cells)"
-msgstr "Coordonnées de la fenêtre (2 cellules)"
+#: Programs/config.c:1165
+msgid "Window Column"
+msgstr "Colonne de la fenÃªtre"
 
-#: Programs/config.c:1751
+#: Programs/config.c:1164
+msgid "Window Coordinates"
+msgstr "CoordonnÃ©es de la fenÃªtre"
+
+#: Programs/config.c:1455
 msgid "Window Follows Pointer"
-msgstr "La fenêtre suit le pointeur"
+msgstr "La fenÃªtre suit le pointeur"
 
-#: Programs/config.c:1731
+#: Programs/config.c:1320
 msgid "Window Overlap"
-msgstr "Chevauchement de fenêtre"
+msgstr "Chevauchement de fenÃªtre"
 
-#: Programs/config.c:1643
-msgid "Window Row (1 cell)"
-msgstr "Ligne de la fenêtre (1 cellule)"
+#: Programs/config.c:1166
+msgid "Window Row"
+msgstr "Ligne de la fenÃªtre"
 
-#: Programs/config.c:3089
+#: Programs/midi.c:185
+msgid "Woodblock"
+msgstr "bloc de boip"
+
+#: Programs/config.c:2726
 msgid "Working Directory"
-msgstr "Répertoire de travail"
+msgstr "RÃ©pertoire de travail"
 
-#: Programs/config.c:3096
+#: Programs/config.c:2733
 msgid "Writable Directory"
-msgstr "Répertoire accessible en écriture"
+msgstr "RÃ©pertoire accessible en Ã©criture"
 
-#: Programs/config.c:500
+#: Programs/config.c:504
 msgid "Write the start-up logs, and then exit."
-msgstr "Ãcrit les journaux de démarrage et quitte."
+msgstr "Ãcrit les journaux de dÃ©marrage et quitte."
 
-#: Programs/xbrlapi.c:297
+#: Programs/xbrlapi.c:296
 #, c-format
 msgid "X Error %d, %s on display %s\n"
 msgstr "Erreur X %d, %s sur l'afficheur %s\n"
 
-#: Programs/xbrlapi.c:95
+#: Programs/xbrlapi.c:94
 msgid "X display to connect to"
 msgstr "Afficheur X auquel se connecter"
 
-#: Programs/xbrlapi.c:629
+#: Programs/xbrlapi.c:628
 msgid "XFree(wm_name) for change"
 msgstr "Pour changer XFree(wm_name)"
 
-#: Programs/config.c:1595
+#: Programs/cmds.auto.h:780
+msgid "XT (set 1) keyboard scan code"
+msgstr "Scancode de clavier XT (rÃ©glÃ© Ã  1)"
+
+#: Programs/midi.c:70
+msgid "Xylophone"
+msgstr "Xylophone"
+
+#: Programs/menu.c:312
 msgid "Yes"
 msgstr "Oui"
 
-#: Programs/xbrlapi.c:79
+#: Programs/xbrlapi.c:78
 msgid "[host][:port]"
-msgstr "[hôte][:port]"
+msgstr "[hÃŽte][:port]"
 
-#: Programs/cmds.auto.h:635
+#: Programs/cmds.auto.h:637
 msgid "append characters to cut buffer"
-msgstr "envoie des caractères dans le presse-papier"
+msgstr "envoie des caractÃšres dans le presse-papier"
 
-#: Programs/cmds.auto.h:531
+#: Programs/cmds.auto.h:533
 msgid "append to existing cut buffer from character"
-msgstr "ajoute le caractère au presse-papier existant"
+msgstr "ajoute le caractÃšre au presse-papier existant"
 
-#: Programs/config.c:267 Programs/config.c:295 Programs/config.c:371
-#: Programs/config.c:390 Programs/config.c:418
+#: Programs/config.c:271 Programs/config.c:299 Programs/config.c:375
+#: Programs/config.c:394 Programs/config.c:422
 msgid "arg,..."
 msgstr "arg,..."
 
-#: Programs/cmds.auto.h:659
-msgid "backspace key"
-msgstr "Touche retour arrière"
+#: Programs/cmd.c:288
+msgid "at cursor"
+msgstr "au curseur"
 
-#: Programs/xbrlapi.c:339
+#: Programs/cmds.auto.h:665
+msgid "backspace key"
+msgstr "Touche retour arriÃšre"
+
+#: Programs/xbrlapi.c:338
 #, c-format
 msgid "bad format for VT number\n"
-msgstr "Mauvais format de numéro de terminal virtuel\n"
+msgstr "Mauvais format de numÃ©ro de terminal virtuel\n"
 
-#: Programs/xbrlapi.c:342
+#: Programs/xbrlapi.c:341
 #, c-format
 msgid "bad type for VT number\n"
-msgstr "Mauvais type de numéro de terminal virtuel\n"
+msgstr "Mauvais type de numÃ©ro de terminal virtuel\n"
 
-#: Programs/brltty.c:1971
+#: Programs/brltty.c:2004
 msgid "black"
 msgstr "noir"
 
-#: Programs/brltty.c:2011
+#: Programs/brltty.c:2044
 msgid "blink"
 msgstr "clignotant"
 
-#: Programs/brltty.c:1972
+#: Programs/brltty.c:2005
 msgid "blue"
 msgstr "bleu"
 
-#: Programs/config.c:3201
+#: Programs/config.c:2838
 #, c-format
 msgid "braille device not specified"
-msgstr "Périphérique braille non spécifié"
+msgstr "PÃ©riphÃ©rique braille non spÃ©cifiÃ©"
 
-#: Programs/cmds.auto.h:510
+#: Programs/cmds.auto.h:511
 msgid "braille display temporarily unavailable"
 msgstr "Afficheur braille temporairement non disponible"
 
-#: Programs/config.c:2227
+#: Programs/config.c:1847
 msgid "braille driver initialization failed"
 msgstr "Ãchec de l'initialisation du pilote braille"
 
-#: Programs/config.c:2299
+#: Programs/config.c:1922
 msgid "braille driver not loadable"
 msgstr "Impossible de charger le pilote braille"
 
-#: Programs/cmds.auto.h:517
+#: Programs/cmds.auto.h:519
 msgid "bring cursor to character"
-msgstr "Amener le curseur au caractère"
+msgstr "Amener le curseur au caractÃšre"
 
-#: Programs/cmds.auto.h:486
+#: Programs/cmds.auto.h:487
 msgid "bring cursor to line"
-msgstr "Amène le curseur sur la ligne"
+msgstr "AmÃšne le curseur sur la ligne"
 
-#: Programs/brltty.c:1977
+#: Programs/brltty.c:2010
 msgid "brown"
 msgstr "marron"
 
-#: Programs/config.c:590
+#: Programs/config.c:594
 msgid "cannot compile attributes table"
 msgstr "Ne peut pas compiler la table des attributs"
 
-#: Programs/config.c:637
+#: Programs/config.c:641
 msgid "cannot compile contraction table"
-msgstr "Ne peut pas compiler la table de braille abrégé"
+msgstr "Ne peut pas compiler la table de braille abrÃ©gÃ©"
 
-#: Programs/config.c:691
+#: Programs/config.c:695
 msgid "cannot compile key table"
 msgstr "Ne peut pas compiler la table des touches"
 
-#: Programs/config.c:559
+#: Programs/config.c:563
 msgid "cannot compile text table"
 msgstr "Ne peut pas compiler la table des texte"
 
-#: Programs/xbrlapi.c:176
+#: Programs/xbrlapi.c:175
 #, c-format
 msgid "cannot connect to brltty at %s\n"
-msgstr "Ne peut pas se connecter à brltty sur %s\n"
+msgstr "Ne peut pas se connecter Ã  brltty sur %s\n"
 
-#: Programs/xbrlapi.c:509
+#: Programs/xbrlapi.c:508
 #, c-format
 msgid "cannot connect to display %s\n"
-msgstr "Ne peut pas se connecter à l'afficheur %s\n"
+msgstr "Ne peut pas se connecter Ã  l'afficheur %s\n"
 
-#: Programs/program.c:147
+#: Programs/program.c:155
 #, c-format
 msgid "cannot determine program directory"
-msgstr "Ne peut pas déterminer le répertoire du programme"
+msgstr "Ne peut pas dÃ©terminer le rÃ©pertoire du programme"
 
-#: Programs/config.c:1430 Programs/config.c:3092
+#: Programs/config.c:2729 Programs/menu.c:404
 msgid "cannot determine working directory"
-msgstr "Ne peut pas déterminer le répertoire de travail"
+msgstr "Ne peut pas dÃ©terminer le rÃ©pertoire de travail"
 
 #: Programs/sys_windows.c:108
 msgid "cannot find procedure"
-msgstr "Ne peut pas trouver la procédure"
+msgstr "Ne peut pas trouver la procÃ©dure"
 
-#: Programs/program.c:159
+#: Programs/program.c:167
 msgid "cannot fix install path"
 msgstr "Ne peut pas corriger le chemin d'installation"
 
-#: Programs/xbrlapi.c:321
+#: Programs/xbrlapi.c:320
 #, c-format
 msgid "cannot get root window XFree86_VT property\n"
-msgstr "Ne peut pas trouver la propriété de la fenêtre racine XFree86_VT\n"
+msgstr "Ne peut pas trouver la propriÃ©tÃ© de la fenÃªtre racine XFree86_VT\n"
 
-#: Programs/xbrlapi.c:193
+#: Programs/xbrlapi.c:192
 msgid "cannot get tty\n"
-msgstr "Ne peut pas récupérer de tty\n"
+msgstr "Ne peut pas rÃ©cupÃ©rer de tty\n"
 
-#: Programs/xbrlapi.c:196
+#: Programs/xbrlapi.c:195
 #, c-format
 msgid "cannot get tty %d\n"
-msgstr "Ne peut pas récupérer le tty %d\n"
+msgstr "Ne peut pas rÃ©cupÃ©rer le tty %d\n"
 
-#: Programs/xbrlapi.c:553
+#: Programs/xbrlapi.c:552
 #, c-format
 msgid "cannot grab windows on screen %d\n"
-msgstr "Ne peut pas extraire de fenêtres sur l'écran %d\n"
+msgstr "Ne peut pas extraire de fenÃªtres sur l'Ã©cran %d\n"
 
-#: Programs/xbrlapi.c:200
+#: Programs/xbrlapi.c:199
 msgid "cannot ignore keys\n"
 msgstr "Ne peut pas ignorer des touches\n"
 
-#: Programs/config.c:599
+#: Programs/config.c:603
 msgid "cannot load attributes table"
 msgstr "Ne peut pas charger la table des attributs"
 
 #: Programs/sys_windows.c:101
 msgid "cannot load library"
-msgstr "Ne peut pas charger la bibliothèque"
+msgstr "Ne peut pas charger la bibliothÃšque"
 
-#: Programs/config.c:568
+#: Programs/config.c:572
 msgid "cannot load text table"
 msgstr "Ne peut pas charger la table de texte"
 
-#: Programs/config.c:2207
+#: Programs/config.c:1827
 msgid "cannot open help file"
 msgstr "Ne peut pas ouvrir le fichier d'aide"
 
-#: Programs/config.c:2174
+#: Programs/config.c:1794
 msgid "cannot open key table"
 msgstr "Ne peut pas ouvrir la table des touches"
 
-#: Programs/program.c:249
+#: Programs/program.c:257
 msgid "cannot open process identifier file"
 msgstr "Ne peut pas ouvrir le fichier d'identifiants de processus"
 
-#: Programs/config.c:1428
+#: Programs/menu.c:402
 msgid "cannot open working directory"
-msgstr "Ne peut pas ouvrir le répertoire de travail"
+msgstr "Ne peut pas ouvrir le rÃ©pertoire de travail"
 
-#: Programs/config.c:961
+#: Programs/prefs.c:613
 msgid "cannot read preferences file"
-msgstr "Ne peut pas lire le fichier des préférences"
+msgstr "Ne peut pas lire le fichier des prÃ©fÃ©rences"
 
-#: Programs/xbrlapi.c:228
+#: Programs/xbrlapi.c:227
 #, c-format
 msgid "cannot set focus to %#010x\n"
-msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
+msgstr "Ne peut pas paramÃ©trer le focus sur %#010x\n"
 
-#: Programs/file.c:216 Programs/config.c:1417
+#: Programs/file.c:245 Programs/menu.c:391
 msgid "cannot set working directory"
-msgstr "Ne peut pas paramétrer le répertoire de travail"
+msgstr "Ne peut pas paramÃ©trer le rÃ©pertoire de travail"
 
-#: Programs/config.c:1126
+#: Programs/prefs.c:750
 msgid "cannot write to preferences file"
-msgstr "Ne peut pas écrire dans le fichier des préférences"
+msgstr "Ne peut pas Ã©crire dans le fichier des prÃ©fÃ©rences"
 
-#: Programs/xbrlapi.c:221
+#: Programs/xbrlapi.c:220
 #, c-format
 msgid "cannot write window name %s\n"
-msgstr "Ne peut pas écrire le nom de la fenêtre %s\n"
+msgstr "Ne peut pas Ã©crire le nom de la fenÃªtre %s\n"
 
-#: Programs/config.c:1884
+#: Programs/brltty.c:1720
 msgid "changes discarded"
-msgstr "Changements annulés"
+msgstr "Changements annulÃ©s"
+
+#: Programs/brl.c:524
+
+msgid "command learn mode"
+msgstr "mode d'apprentissage des commandes"
 
 #: Programs/options.c:638
 msgid "configuration directive specified more than once"
-msgstr "Ligne de configuration spécifiée plus d'une fois"
+msgstr "Ligne de configuration spÃ©cifiÃ©e plus d'une fois"
 
-#: Programs/config.c:1667
+#: Programs/config.c:1472
 msgid "console tone generator"
-msgstr "Générateur de beep de console"
+msgstr "GÃ©nÃ©rateur de beep de console"
 
-#: Programs/cmds.auto.h:628
+#: Programs/cmds.auto.h:630
 msgid "copy characters to cut buffer"
-msgstr "Copie les caractères dans le presse-papier"
+msgstr "Copie les caractÃšres dans le presse-papier"
 
-#: Programs/config.c:447 Programs/config.c:455
+#: Programs/config.c:451 Programs/config.c:459
 msgid "csecs"
 msgstr "csecs"
 
-#: Programs/cmds.auto.h:689
+#: Programs/cmds.auto.h:700
 msgid "cursor-down key"
 msgstr "Touche curseur vers le bas"
 
-#: Programs/cmds.auto.h:671
+#: Programs/cmds.auto.h:679
 msgid "cursor-left key"
-msgstr "Touche curseur à gauche"
+msgstr "Touche curseur Ã  gauche"
 
-#: Programs/cmds.auto.h:677
+#: Programs/cmds.auto.h:686
 msgid "cursor-right key"
-msgstr "Touche curseur à droite"
+msgstr "Touche curseur Ã  droite"
 
-#: Programs/cmds.auto.h:683
+#: Programs/cmds.auto.h:693
 msgid "cursor-up key"
 msgstr "Touche curseur vers le haut"
 
-#: Programs/brltty.c:1974
+#: Programs/brltty.c:2007
 msgid "cyan"
 msgstr "cyan"
 
-#: Programs/brltty.c:1979
+#: Programs/brltty.c:2012
 msgid "dark grey"
-msgstr "gris foncé"
+msgstr "gris foncÃ©"
 
 #: Programs/cmds.auto.h:450
 msgid "decrease speech rate"
@@ -924,40 +1596,40 @@ msgstr "Diminuer la vitesse de la parole"
 msgid "decrease speech volume"
 msgstr "Diminuer le volume de la parole"
 
-#: Programs/cmds.auto.h:725
+#: Programs/cmds.auto.h:742
 msgid "delete key"
 msgstr "Touche supprimer"
 
-#: Programs/cmds.auto.h:575
+#: Programs/cmds.auto.h:577
 msgid "describe character"
-msgstr "Décrire le caractère"
+msgstr "DÃ©crire le caractÃšre"
 
-#: Programs/config.c:305 Programs/config.c:428 Programs/config.c:438
+#: Programs/config.c:309 Programs/config.c:432 Programs/config.c:442
 msgid "device"
-msgstr "périphérique"
+msgstr "pÃ©riphÃ©rique"
 
-#: Programs/xbrlapi.c:607
+#: Programs/xbrlapi.c:606
 #, c-format
 msgid "didn't grab parent of %#010lx\n"
 msgstr "n'a pas extrait le parent de %#010lx\n"
 
-#: Programs/xbrlapi.c:625
+#: Programs/xbrlapi.c:624
 #, c-format
 msgid "didn't grab window %#010lx\n"
-msgstr "n'a pas extrait la fenêtre de %#010lx\n"
+msgstr "n'a pas extrait la fenÃªtre de %#010lx\n"
 
-#: Programs/xbrlapi.c:464
+#: Programs/xbrlapi.c:463
 #, c-format
 msgid "didn't grab window %#010lx but got focus\n"
-msgstr "n'a pas extrait la fenêtre %#010lx mais a récupéré le focus\n"
+msgstr "n'a pas extrait la fenÃªtre %#010lx mais a rÃ©cupÃ©rÃ© le focus\n"
 
-#: Programs/ctbtest.c:51 Programs/brltest.c:61 Programs/ktbtest.c:57
-#: Programs/ktbtest.c:66 Programs/config.c:232 Programs/config.c:241
-#: Programs/config.c:326
+#: Programs/ctbtest.c:52 Programs/brltest.c:61 Programs/ktbtest.c:57
+#: Programs/ktbtest.c:66 Programs/config.c:227 Programs/config.c:236
+#: Programs/config.c:330
 msgid "directory"
-msgstr "répertoire"
+msgstr "rÃ©pertoire"
 
-#: Programs/xbrlapi.c:93
+#: Programs/xbrlapi.c:92
 msgid "display"
 msgstr "affichage"
 
@@ -965,17 +1637,25 @@ msgstr "affichage"
 msgid "do nothing"
 msgstr "Ne fait rien"
 
-#: Programs/config.c:285 Programs/config.c:380 Programs/config.c:408
+#: Programs/cmd.c:323
+msgid "drag cursor"
+msgstr "EntraÃ®ne le curseur"
+
+#: Programs/config.c:289 Programs/config.c:384 Programs/config.c:412
 msgid "driver"
 msgstr "pilote"
 
-#: Programs/cmds.auto.h:713
+#: Programs/cmds.auto.h:644
+msgid "emulate special key"
+msgstr "Ãmuler une touche spÃ©ciale"
+
+#: Programs/cmds.auto.h:728
 msgid "end key"
 msgstr "touche fin"
 
-#: Programs/cmds.auto.h:647
+#: Programs/cmds.auto.h:651
 msgid "enter key"
-msgstr "touche entrée"
+msgstr "touche entrÃ©e"
 
 #: Programs/cmds.auto.h:355
 msgid "enter/leave command learn mode"
@@ -987,37 +1667,38 @@ msgstr "entrer/quitter l'affichage de l'aide"
 
 #: Programs/cmds.auto.h:361
 msgid "enter/leave preferences menu"
-msgstr "entrer/quitter le menu des préférences"
+msgstr "entrer/quitter le menu des prÃ©fÃ©rences"
 
 #: Programs/cmds.auto.h:349
 msgid "enter/leave status display"
-msgstr "entrer/quitter l'affichage de l'état"
+msgstr "entrer/quitter l'affichage de l'Ã©tat"
 
-#: Programs/cmds.auto.h:665
+#: Programs/cmds.auto.h:672
 msgid "escape key"
-msgstr "Touche Ãchap"
+msgstr "Touche ÃÂchap"
 
-#: Programs/config.c:2921
+#: Programs/config.c:2551
 msgid "excess argument"
 msgstr "Trop d'arguments"
 
 #: Programs/main.c:145
 #, c-format
 msgid "executing \"%s\" (from \"%s\")\n"
-msgstr "exécution de \"%s\" (à partir de \"%s\")\n"
+msgstr "exÃ©cution de \"%s\" (Ã  partir de \"%s\")\n"
 
 #: Programs/main.c:152
 #, c-format
 msgid "execution of \"%s\" failed: %s\n"
-msgstr "Ãchec de l'exécution de \"%s\" : %s\n"
+msgstr "Ãchec de l'exÃ©cution de \"%s\" : %s\n"
 
-#: Programs/xbrlapi.c:560
+#: Programs/xbrlapi.c:559
 msgid "failed to get first focus\n"
-msgstr "échec de la récupÃ§ration du premier focus\n"
+msgstr "Ã©chec de la rÃ©cupÃÂ§ration du premier focus\n"
 
-#: Programs/config.c:224 Programs/config.c:250 Programs/config.c:336
-#: Programs/config.c:345 Programs/config.c:354 Programs/config.c:363
-#: Programs/config.c:399 Programs/config.c:478 Programs/xbrlapi.c:86
+#: Programs/config.c:219 Programs/config.c:245 Programs/config.c:254
+#: Programs/config.c:340 Programs/config.c:349 Programs/config.c:358
+#: Programs/config.c:367 Programs/config.c:403 Programs/config.c:482
+#: Programs/xbrlapi.c:85
 msgid "file"
 msgstr "fichier"
 
@@ -1033,15 +1714,15 @@ msgstr "Ãchec du fork de \"%s\" : %s\n"
 
 #: Programs/cmds.auto.h:225
 msgid "freeze/unfreeze screen image"
-msgstr "Gèle/dégèle l'image de l'écran"
+msgstr "GÃšle/dÃ©gÃšle l'image de l'Ã©cran"
 
-#: Programs/cmds.auto.h:732
+#: Programs/cmds.auto.h:750
 msgid "function key"
 msgstr "Touche de fonction"
 
 #: Programs/cmds.auto.h:212
 msgid "go back after cursor tracking"
-msgstr "Revenir après la poursuite du curseur"
+msgstr "Revenir aprÃšs la poursuite du curseur"
 
 #: Programs/cmds.auto.h:18
 msgid "go down one line"
@@ -1053,79 +1734,79 @@ msgstr "Descend de plusieurs lignes"
 
 #: Programs/cmds.auto.h:102
 msgid "go down to first line of next paragraph"
-msgstr "Descend à la première ligne du paragraphe suivant"
+msgstr "Descend Ã  la premiÃšre ligne du paragraphe suivant"
 
-#: Programs/cmds.auto.h:621
+#: Programs/cmds.auto.h:623
 msgid "go down to nearest line with different character"
-msgstr "Descend à la ligne la plus proche ayant un caractère différent"
+msgstr "Descend Ã  la ligne la plus proche ayant un caractÃšre diffÃ©rent"
 
 #: Programs/cmds.auto.h:46
 msgid "go down to nearest line with different content"
-msgstr "Descend à la ligne la plus proche ayant un contenu différent"
+msgstr "Descend Ã  la ligne la plus proche ayant un contenu diffÃ©rent"
 
 #: Programs/cmds.auto.h:60
 msgid "go down to nearest line with different highlighting"
-msgstr "Descend à la ligne la plus proche ayant un surlignement différent"
+msgstr "Descend Ã  la ligne la plus proche ayant un surlignement diffÃ©rent"
 
-#: Programs/cmds.auto.h:568
+#: Programs/cmds.auto.h:570
 msgid "go down to nearest line with less indent than character"
-msgstr "Descend à la ligne la plus proche ayant moins d'indentation que de caractère"
+msgstr "Descend Ã  la ligne la plus proche ayant moins d'indentation que de caractÃšre"
 
 #: Programs/cmds.auto.h:116
 msgid "go down to next command prompt"
-msgstr "Descend à l'invite de commande suivant"
+msgstr "Descend Ã  l'invite de commande suivant"
 
 #: Programs/cmds.auto.h:149
 msgid "go left half a window"
-msgstr "Va d'une demi-fenêtre à gauche"
+msgstr "Va d'une demi-fenÃªtre Ã  gauche"
 
 #: Programs/cmds.auto.h:135
 msgid "go left one character"
-msgstr "Va au caractère à gauche"
+msgstr "Va au caractÃšre Ã  gauche"
 
 #: Programs/cmds.auto.h:163
 msgid "go left one window"
-msgstr "Va à la fenêtre à gauche"
+msgstr "Va Ã  la fenÃªtre Ã  gauche"
 
 #: Programs/cmds.auto.h:177
 msgid "go left to nearest non-blank window"
-msgstr "Va à gauche sur la ligne non vierge la plus proche"
+msgstr "Va Ã  gauche sur la ligne non vierge la plus proche"
 
 #: Programs/cmds.auto.h:156
 msgid "go right half a window"
-msgstr "Va d'une moitié de fenêtre à droite"
+msgstr "Va d'une moitiÃ© de fenÃªtre Ã  droite"
 
 #: Programs/cmds.auto.h:142
 msgid "go right one character"
-msgstr "Va à droite d'un caractère"
+msgstr "Va Ã  droite d'un caractÃšre"
 
 #: Programs/cmds.auto.h:170
 msgid "go right one window"
-msgstr "Va une fenêtre à droite"
+msgstr "Va une fenÃªtre Ã  droite"
 
 #: Programs/cmds.auto.h:184
 msgid "go right to nearest non-blank window"
-msgstr "Va à droite sur la ligne non vierge la plus proche"
+msgstr "Va Ã  droite sur la ligne non vierge la plus proche"
 
 #: Programs/cmds.auto.h:88
 msgid "go to beginning of bottom line"
-msgstr "Va au début de la toute dernière ligne"
+msgstr "Va au dÃ©but de la toute derniÃšre ligne"
 
 #: Programs/cmds.auto.h:191
 msgid "go to beginning of line"
-msgstr "Va au début de la ligne"
+msgstr "Va au dÃ©but de la ligne"
 
 #: Programs/cmds.auto.h:81
 msgid "go to beginning of top line"
-msgstr "Va au début de la toute première ligne"
+msgstr "Va au dÃ©but de la toute premiÃšre ligne"
 
 #: Programs/cmds.auto.h:74
 msgid "go to bottom line"
-msgstr "Va à la toute dernière ligne"
+msgstr "Va Ã  la toute derniÃšre ligne"
 
 #: Programs/cmds.auto.h:426
 msgid "go to current speech position"
-msgstr "Va à la position actuelle de la synthèse vocale"
+msgstr "Va Ã  la position actuelle de la synthÃšse vocale"
 
 #: Programs/cmds.auto.h:205
 msgid "go to cursor"
@@ -1133,39 +1814,39 @@ msgstr "Va au curseur"
 
 #: Programs/cmds.auto.h:219
 msgid "go to cursor or go back after cursor tracking"
-msgstr "Va au curseur ou revient après la poursuite du curseur"
+msgstr "Va au curseur ou revient aprÃšs la poursuite du curseur"
 
 #: Programs/cmds.auto.h:198
 msgid "go to end of line"
-msgstr "Va à la fin de la ligne"
+msgstr "Va Ã  la fin de la ligne"
 
 #: Programs/cmds.auto.h:380
 msgid "go to first item"
-msgstr "Va au premier élément"
+msgstr "Va au premier Ã©lÃ©ment"
 
 #: Programs/cmds.auto.h:387
 msgid "go to last item"
-msgstr "Va au dernier élément"
+msgstr "Va au dernier Ã©lÃ©ment"
 
 #: Programs/cmds.auto.h:401
 msgid "go to next item"
-msgstr "Va à l'élément suivant"
+msgstr "Va Ã  l'Ã©lÃ©ment suivant"
 
 #: Programs/cmds.auto.h:394
 msgid "go to previous item"
-msgstr "Va à l'élément précédent"
+msgstr "Va Ã  l'Ã©lÃ©ment prÃ©cÃ©dent"
 
-#: Programs/cmds.auto.h:597
+#: Programs/cmds.auto.h:599
 msgid "go to remembered window position"
-msgstr "Va à la position de la fenêtre dont on se rappelle"
+msgstr "Va Ã  la position de la fenÃªtre dont on se rappelle"
 
-#: Programs/cmds.auto.h:605
+#: Programs/cmds.auto.h:607
 msgid "go to selected line"
-msgstr "Va à la ligne sélectionnée"
+msgstr "Va Ã  la ligne sÃ©lectionnÃ©e"
 
 #: Programs/cmds.auto.h:67
 msgid "go to top line"
-msgstr "Va à la toute première ligne"
+msgstr "Va Ã  la toute premiÃšre ligne"
 
 #: Programs/cmds.auto.h:11
 msgid "go up one line"
@@ -1177,37 +1858,37 @@ msgstr "Remonte de plusieurs ligne"
 
 #: Programs/cmds.auto.h:95
 msgid "go up to last line of previous paragraph"
-msgstr "Remonte à la dernière ligne du paragraphe précédent"
+msgstr "Remonte Ã  la derniÃšre ligne du paragraphe prÃ©cÃ©dent"
 
-#: Programs/cmds.auto.h:613
+#: Programs/cmds.auto.h:615
 msgid "go up to nearest line with different character"
-msgstr "Remonte à la ligne la plus proche ayant un caractère différent"
+msgstr "Remonte Ã  la ligne la plus proche ayant un caractÃšre diffÃ©rent"
 
 #: Programs/cmds.auto.h:39
 msgid "go up to nearest line with different content"
-msgstr "Remonte à la ligne la plus proche ayant un contenu différent"
+msgstr "Remonte Ã  la ligne la plus proche ayant un contenu diffÃ©rent"
 
 #: Programs/cmds.auto.h:53
 msgid "go up to nearest line with different highlighting"
-msgstr "Remonte à la ligne la plus proche ayant un surlignement différent"
+msgstr "Remonte Ã  la ligne la plus proche ayant un surlignement diffÃ©rent"
 
-#: Programs/cmds.auto.h:560
+#: Programs/cmds.auto.h:562
 msgid "go up to nearest line with less indent than character"
-msgstr "Remonte à la ligne la plus proche ayant moins d'indentation que de caractère"
+msgstr "Remonte Ã  la ligne la plus proche ayant moins d'indentation que de caractÃšre"
 
 #: Programs/cmds.auto.h:109
 msgid "go up to previous command prompt"
-msgstr "Remonte à l'invite de commande précédent"
+msgstr "Remonte Ã  l'invite de commande prÃ©cÃ©dent"
 
-#: Programs/brltty.c:1973
+#: Programs/brltty.c:2006
 msgid "green"
 msgstr "vert"
 
-#: Programs/brltty.c:1701
+#: Programs/brltty.c:1734
 msgid "help not available"
 msgstr "Aide non disponible"
 
-#: Programs/cmds.auto.h:707
+#: Programs/cmds.auto.h:721
 msgid "home key"
 msgstr "Touche origine"
 
@@ -1219,212 +1900,208 @@ msgstr "Augmente la vitesse de la parole"
 msgid "increase speech volume"
 msgstr "Augmente le volume de la parole"
 
-#: Programs/cmds.auto.h:750
-msgid "input AT (set 2) keyboard scan code"
-msgstr "Scancode du clavier d'entrée AT (réglé à 2)"
-
-#: Programs/cmds.auto.h:762
-msgid "input PS/2 (set 3) keyboard scan code"
-msgstr "Scancode de clavier d'entrée PS/2 (réglé à 3)"
-
-#: Programs/cmds.auto.h:756
-msgid "input XT (set 1) keyboard scan code"
-msgstr "Scancode de clavier d'entrée XT (réglé à 1)"
-
-#: Programs/cmds.auto.h:744
-msgid "input braille character"
-msgstr "Caractère de l'entrée braille"
-
-#: Programs/cmds.auto.h:641
-msgid "input keyboard key"
-msgstr "Touche clavier de l'entrée"
-
-#: Programs/cmds.auto.h:738
-msgid "input unicode character"
-msgstr "Caractère d'entrée unicode"
-
-#: Programs/cmds.auto.h:492
+#: Programs/cmds.auto.h:493
 msgid "insert cut text at cursor"
-msgstr "Insérer le texte copié au niveau du curseur"
+msgstr "InsÃ©rer le texte copiÃ© au niveau du curseur"
 
-#: Programs/cmds.auto.h:719
+#: Programs/cmds.auto.h:735
 msgid "insert key"
-msgstr "touche Insère"
+msgstr "touche InsÃšre"
 
-#: Programs/program.c:161
+#: Programs/program.c:169
 msgid "install path not absolute"
 msgstr "Chemin d'installation non absolu"
 
 #: Programs/options.c:107
 msgid "invalid counter setting"
-msgstr "Paramètre de compteur invalide"
+msgstr "ParamÃštre de compteur invalide"
+
+#: Programs/datafile.c:398
+msgid "invalid escape sequence"
+msgstr "SÃ©quence d'Ã©chappement non valide"
 
 #: Programs/options.c:100
 msgid "invalid flag setting"
-msgstr "Paramètre du drapeau invalide"
+msgstr "ParamÃštre du drapeau invalide"
 
-#: Programs/config.c:2963
+#: Programs/config.c:2593
 msgid "invalid log level"
 msgstr "Niveau de journalisation non valide"
 
-#: Programs/config.c:2929
+#: Programs/config.c:2559
 msgid "invalid message delay"
-msgstr "Délai du message non valide"
+msgstr "DÃ©lai du message non valide"
 
-#: Programs/config.c:965
-msgid "invalid preferences file"
-msgstr "Fichier de préférences non valide"
-
-#: Programs/config.c:2925
+#: Programs/config.c:2555
 msgid "invalid update interval"
-msgstr "Intervalle de mise à jour non valide"
+msgstr "Intervalle de mise Ã  jour non valide"
 
-#: Programs/config.c:469
+#: Programs/cmd.c:314
+msgid "left margin"
+msgstr "Marge de gauche"
+
+#: Programs/config.c:473
 msgid "level"
 msgstr "niveau"
 
-#: Programs/brltty.c:1980
+#: Programs/brltty.c:2013
 msgid "light blue"
 msgstr "bleu clair"
 
-#: Programs/brltty.c:1982
+#: Programs/brltty.c:2015
 msgid "light cyan"
 msgstr "cyan clair"
 
-#: Programs/brltty.c:1981
+#: Programs/brltty.c:2014
 msgid "light green"
 msgstr "vert clair"
 
-#: Programs/brltty.c:1978
+#: Programs/brltty.c:2011
 msgid "light grey"
 msgstr "gris clair"
 
-#: Programs/brltty.c:1984
+#: Programs/brltty.c:2017
 msgid "light magenta"
 msgstr "magenta clair"
 
-#: Programs/brltty.c:1983
+#: Programs/brltty.c:2016
 msgid "light red"
 msgstr "rouge clair"
 
-#: Programs/cmds.auto.h:545
+#: Programs/cmds.auto.h:547
 msgid "linear cut to character"
-msgstr "copie linéaire jusqu'au caractère"
+msgstr "copie linÃ©aire jusqu'au caractÃšre"
 
-#: Programs/brltty.c:1976
+#: Programs/brltty.c:2009
 msgid "magenta"
 msgstr "magenta"
 
 #: Programs/options.c:475
 msgid "missing operand"
-msgstr "Opérande manquant"
+msgstr "OpÃ©rande manquant"
 
-#: Programs/parse.c:215
+#: Programs/parse.c:228
 msgid "missing parameter name"
-msgstr "Nm du paramètre manquant"
+msgstr "Nm du paramÃštre manquant"
 
-#: Programs/parse.c:227
+#: Programs/parse.c:240
 msgid "missing parameter qualifier"
-msgstr "Qualifieur du paramètre manquant"
+msgstr "Qualifieur du paramÃštre manquant"
 
-#: Programs/parse.c:212
+#: Programs/parse.c:225
 msgid "missing parameter value"
-msgstr "Valeur du paramètre manquante"
+msgstr "Valeur du paramÃštre manquante"
 
-#: Programs/xbrlapi.c:330
+#: Programs/xbrlapi.c:329
 #, c-format
 msgid "more than one item for VT number\n"
-msgstr "Plus d'un élément pour le terminal virtuel numéro\n"
+msgstr "Plus d'un Ã©lÃ©ment pour le terminal virtuel numÃ©ro\n"
 
-#: Programs/xbrlapi.c:315
+#: Programs/xbrlapi.c:314
 #, c-format
 msgid "no XFree86_VT atom\n"
 msgstr "Pas d'atome XFree86_VT\n"
 
-#: Programs/xbrlapi.c:326
+#: Programs/xbrlapi.c:325
 #, c-format
 msgid "no items for VT number\n"
-msgstr "Pas d'éléments pour le terminal virtuel numéro\n"
+msgstr "Pas d'Ã©lÃ©ments pour le terminal virtuel numÃ©ro\n"
 
-#: Programs/config.c:2152 Programs/config.c:3157 Programs/config.c:3165
-#: Programs/config.c:3229
+#: Programs/config.c:1772 Programs/config.c:2795 Programs/config.c:2802
+#: Programs/config.c:2865
 msgid "none"
 msgstr "Aucun"
 
-#: Programs/config.c:1130
+#: Programs/cmd.c:318
+msgid "normalized position"
+msgstr "Position normalisÃ©e"
+
+#: Programs/config.c:906
 msgid "not saved"
-msgstr "Non enregistré"
+msgstr "Non enregistrÃ©"
 
 #: Programs/options.c:628
 msgid "operand not supplied for configuration directive"
-msgstr "Opérande non fourni pour la ligne de configuration"
+msgstr "OpÃ©rande non fourni pour la ligne de configuration"
 
 #: Programs/options.c:139
 msgid "option"
 msgstr "option"
 
-#: Programs/cmds.auto.h:701
+#: Programs/cmds.auto.h:714
 msgid "page-down key"
 msgstr "Touche page suivante"
 
-#: Programs/cmds.auto.h:695
+#: Programs/cmds.auto.h:707
 msgid "page-up key"
-msgstr "touche page précédente"
+msgstr "touche page prÃ©cÃ©dente"
 
-#: Programs/cmds.auto.h:582
+#: Programs/spk.c:213
+msgid "pitch"
+msgstr "Ton"
+
+#: Programs/cmds.auto.h:584
 msgid "place left end of window at character"
-msgstr "met le côté gauche de la fenêtre braille sur le caractère"
+msgstr "met le cÃŽtÃ© gauche de la fenÃªtre braille sur le caractÃšre"
 
-#: Programs/cmds.auto.h:538
+#: Programs/spk.c:172
+msgid "rate"
+msgstr "DÃ©bit"
+
+#: Programs/cmds.auto.h:540
 msgid "rectangular cut to character"
-msgstr "copie rectangulaire jusqu'au caractère"
+msgstr "copie rectangulaire jusqu'au caractÃšre"
 
-#: Programs/brltty.c:1975
+#: Programs/brltty.c:2008
 msgid "red"
 msgstr "rouge"
 
-#: Programs/config.c:2443
+#: Programs/config.c:2073
 #, c-format
 msgid "reinitializing braille driver"
-msgstr "Réinitialisation du pilote braille"
+msgstr "RÃ©initialisation du pilote braille"
 
-#: Programs/config.c:2604
+#: Programs/config.c:2234
 #, c-format
 msgid "reinitializing speech driver"
-msgstr "Réinitialisation de la synthèse vocale"
+msgstr "RÃ©initialisation de la synthÃšse vocale"
 
-#: Programs/cmds.auto.h:589
+#: Programs/cmds.auto.h:591
 msgid "remember current window position"
-msgstr "Rappelle la position de la fenêtre actuelle"
+msgstr "Rappelle la position de la fenÃªtre actuelle"
 
-#: Programs/xbrlapi.c:298
+#: Programs/xbrlapi.c:297
 #, c-format
 msgid "resource %#010lx, req %u:%u\n"
-msgstr ""
+msgstr "ressource %#010lx, req %u:%u\n"
 
-#: Programs/cmds.auto.h:498
+#: Programs/cmds.auto.h:499
 msgid "restart braille driver"
-msgstr "Redémarre le pilote braille"
+msgstr "RedÃ©marre le pilote braille"
 
-#: Programs/cmds.auto.h:504
+#: Programs/cmds.auto.h:505
 msgid "restart speech driver"
-msgstr "Redémarre le pilote de synthèse vocale"
+msgstr "RedÃ©marre le pilote de synthÃšse vocale"
 
 #: Programs/cmds.auto.h:373
 msgid "restore preferences from disk"
-msgstr "Restaure les préférences à partir du disque"
+msgstr "Restaure les prÃ©fÃ©rences Ã  partir du disque"
 
 #: Programs/cmds.auto.h:367
 msgid "save preferences to disk"
-msgstr "Enregistre les préférences sur le disque"
+msgstr "Enregistre les prÃ©fÃ©rences sur le disque"
 
-#: Programs/config.c:2652
+#: Programs/config.c:2282
 msgid "screen driver not loadable"
-msgstr "Pilote d'écran non chargeable"
+msgstr "Pilote d'Ã©cran non chargeable"
+
+#: Drivers/Screen/Linux/screen.c:1057
+msgid "screen not in text mode"
+msgstr "L'Ã©cran n'est pas en mode texte"
 
 #: Programs/cmds.auto.h:122
 msgid "search backward for cut text"
-msgstr "Recherche en arrière du texte dans le presse papier"
+msgstr "Recherche en arriÃšre du texte dans le presse papier"
 
 #: Programs/cmds.auto.h:128
 msgid "search forward for cut text"
@@ -1432,19 +2109,88 @@ msgstr "Recherche en avant du texte dans le presse papier"
 
 #: Programs/cmds.auto.h:413
 msgid "select next choice"
-msgstr "Sélection du choix suivant"
+msgstr "SÃ©lection du choix suivant"
 
 #: Programs/cmds.auto.h:407
 msgid "select previous choice"
-msgstr "Sélection du choix précédent"
+msgstr "SÃ©lection du choix prÃ©cÃ©dent"
 
-#: Programs/config.c:1676
+#: Programs/cmds.auto.h:323
+msgid "set alert tunes on/off"
+msgstr "Active ou dÃ©sactive les sons d'avertissement"
+
+#: Programs/cmds.auto.h:309
+msgid "set attribute blinking on/off"
+msgstr "Active ou dÃ©sactive le clignottement des attributs"
+
+#: Programs/cmds.auto.h:302
+msgid "set attribute underlining on/off"
+msgstr "Active ou dÃ©sactive le soulignement des attributs"
+
+#: Programs/cmds.auto.h:330
+msgid "set autorepeat on/off"
+msgstr "Active ou dÃ©sactive la rÃ©pÃ©tition automatique"
+
+#: Programs/cmds.auto.h:337
+msgid "set autospeak on/off"
+msgstr "Active ou dÃ©sactive la parle automatique"
+
+#: Programs/cmds.auto.h:316
+msgid "set capital letter blinking on/off"
+msgstr "Active ou dÃ©sactive le clignottement des lettres majuscules"
+
+#: Programs/cmds.auto.h:295
+msgid "set cursor blinking on/off"
+msgstr "Active ou dÃ©sactive le clignotement du curseur"
+
+#: Programs/cmds.auto.h:288
+msgid "set cursor style block/underline"
+msgstr "Bascule entre un style de curseur soulignÃ© ou en bloc"
+
+#: Programs/cmds.auto.h:281
+msgid "set cursor tracking on/off"
+msgstr "Active ou dÃ©sactive la poursuite du curseur"
+
+#: Programs/cmds.auto.h:267
+msgid "set cursor visibility on/off"
+msgstr "Rend le curseur visible ou invisible"
+
+#: Programs/cmds.auto.h:232
+msgid "set display mode attributes/text"
+msgstr "Bascule l'affichage entre les modes attributs-texte"
+
+#: Programs/cmds.auto.h:274
+msgid "set hidden cursor on/off"
+msgstr "Cache ou fait apparaÃÂ±tre le curseur"
+
+#: Programs/cmds.auto.h:260
+msgid "set skipping of blank windows on/off"
+msgstr "Active ou dÃ©sactive le saut des fenÃªtres vides"
+
+#: Programs/cmds.auto.h:253
+#, fuzzy
+msgid "set skipping of lines with identical content on/off"
+msgstr "Activation/dÃ©sactivation du saut de ligne ayant un contenu identique"
+
+#: Programs/cmds.auto.h:246
+msgid "set sliding window on/off"
+msgstr "Active ou dÃ©sactive le glissement de la fenÃªtre"
+
+#: Programs/cmds.auto.h:239
+msgid "set text style 6-dot/8-dot"
+msgstr "Bascule l'apparencu de texte entre 6 et 8 points"
+
+#: Programs/config.c:1473
 msgid "soundcard digital audio"
-msgstr "Son numérique de la carte son"
+msgstr "Son numÃ©rique de la carte son"
 
-#: Programs/config.c:1694
+#: Programs/config.c:1475
 msgid "soundcard synthesizer"
-msgstr "Synthétiseur de la carte son"
+msgstr "SynthÃ©tiseur de la carte son"
+
+#: Programs/cmd.c:275
+msgid "space"
+msgstr "Espace"
 
 #: Programs/cmds.auto.h:432
 msgid "speak current line"
@@ -1452,29 +2198,29 @@ msgstr "Lit vocalement la ligne actuelle"
 
 #: Programs/cmds.auto.h:444
 msgid "speak from current line through bottom of screen"
-msgstr "Lit vocalement depuis la ligne actuelle jusqu'au bas de l'écran"
+msgstr "Lit vocalement depuis la ligne actuelle jusqu'au bas de l'Ã©cran"
 
 #: Programs/cmds.auto.h:438
 msgid "speak from top of screen through current line"
-msgstr "Lit vocalement du haut de l'écran jusquà la ligne actuelle"
+msgstr "Lit vocalement du haut de l'Ã©cran jusquÃ  la ligne actuelle"
 
-#: Programs/config.c:2525
+#: Programs/config.c:2155
 msgid "speech driver not loadable"
-msgstr "Pilote de synthèse vocale non chargeable"
+msgstr "Pilote de synthÃšse vocale non chargeable"
 
-#: Programs/cmds.auto.h:524
+#: Programs/cmds.auto.h:526
 msgid "start new cut buffer at character"
-msgstr "Démarre un nouveau presse-papier au caractère donné"
+msgstr "DÃ©marre un nouveau presse-papier au caractÃšre donnÃ©"
 
 #: Programs/cmds.auto.h:419
 msgid "stop speaking"
-msgstr "Arrêt de la parole"
+msgstr "ArrÃªt de la parole"
 
-#: Programs/xbrlapi.c:511
+#: Programs/xbrlapi.c:510
 msgid "strange old error handler\n"
-msgstr "Gestionnaire d'étranges erreurs anciennes\n"
+msgstr "Gestionnaire d'Ã©tranges erreurs anciennes\n"
 
-#: Programs/cmds.auto.h:769
+#: Programs/cmds.auto.h:794
 msgid "switch to command context"
 msgstr "Va au contexte de la commande"
 
@@ -1484,92 +2230,40 @@ msgstr "Va au terminal virtuel suivant"
 
 #: Programs/cmds.auto.h:474
 msgid "switch to previous virtual terminal"
-msgstr "Va au terminal virtuel précédent"
+msgstr "Va au terminal virtuel prÃ©cÃ©dent"
 
-#: Programs/cmds.auto.h:552
+#: Programs/cmds.auto.h:554
 msgid "switch to virtual terminal"
 msgstr "Change de terminal virtuel"
 
-#: Programs/cmds.auto.h:653
+#: Programs/cmds.auto.h:658
 msgid "tab key"
 msgstr "Touche tab"
 
-#: Programs/cmds.auto.h:323
-msgid "toggle alert tunes on/off"
-msgstr "Active ou désactive les sons d'avertissement"
-
-#: Programs/cmds.auto.h:309
-msgid "toggle attribute blinking on/off"
-msgstr "Active ou désactive le clignottement des attributs"
-
-#: Programs/cmds.auto.h:302
-msgid "toggle attribute underlining on/off"
-msgstr "Active ou désactive le soulignement des attributs"
-
-#: Programs/cmds.auto.h:330
-msgid "toggle autorepeat on/off"
-msgstr "Active ou désactive la répétition automatique"
-
-#: Programs/cmds.auto.h:337
-msgid "toggle autospeak on/off"
-msgstr "Active ou désactive la parle automatique"
-
-#: Programs/cmds.auto.h:316
-msgid "toggle capital letter blinking on/off"
-msgstr "Active ou désactive le clignottement des lettres majuscules"
-
-#: Programs/cmds.auto.h:295
-msgid "toggle cursor blinking on/off"
-msgstr "Active ou désactive le clignotement du curseur"
-
-#: Programs/cmds.auto.h:288
-msgid "toggle cursor style block/underline"
-msgstr "Bascule entre un style de curseur souligné ou en bloc"
-
-#: Programs/cmds.auto.h:281
-msgid "toggle cursor tracking on/off"
-msgstr "Active ou désactive la poursuite du curseur"
-
-#: Programs/cmds.auto.h:267
-msgid "toggle cursor visibility on/off"
-msgstr "Rend le curseur visible ou invisible"
-
-#: Programs/cmds.auto.h:232
-msgid "toggle display mode attributes/text"
-msgstr "Bascule l'affichage entre les modes attributs-texte"
-
-#: Programs/cmds.auto.h:274
-msgid "toggle hidden cursor on/off"
-msgstr "Cache ou fait apparaÂ±tre le curseur"
-
-#: Programs/cmds.auto.h:260
-msgid "toggle skipping of blank windows on/off"
-msgstr "Active ou désactive le saut des fenêtres vides"
-
-#: Programs/cmds.auto.h:253
-msgid "toggle skipping of lines with identical content on/off"
-msgstr "Activation/désactivation du saut de ligne ayant un contenu identique"
-
-#: Programs/cmds.auto.h:246
-msgid "toggle sliding window on/off"
-msgstr "Active ou désactive le glissement de la fenêtre"
-
-#: Programs/cmds.auto.h:239
-msgid "toggle text style 6-dot/8-dot"
-msgstr "Bascule l'apparencu de texte entre 6 et 8 points"
-
 #: Programs/options.c:632
 msgid "too many operands for configuration directive"
-msgstr "Trop d'opérandes pour la ligne de configuration"
+msgstr "Trop d'opÃ©randes pour la ligne de configuration"
+
+#: Programs/cmds.auto.h:766
+msgid "type braille character"
+msgstr "CaractÃšre de type braille"
+
+#: Programs/cmds.auto.h:758
+msgid "type unicode character"
+msgstr "CaractÃšre de type unicode"
 
 #: Programs/xbrlapi.c:660
-msgid "unexpected block type %"
-msgstr "Type de bloc inattendu %"
+msgid "unexpected block type"
+msgstr "Type de bloc inattendu"
 
-#: Programs/xbrlapi.c:653
+#: Programs/xbrlapi.c:652
 #, c-format
 msgid "unhandled event type: %d\n"
-msgstr "Type d'éqénement non pris en charge: %d\n"
+msgstr "Type d'Ã©qÃ©nement non pris en charge: %d\n"
+
+#: Programs/cmd.c:197
+msgid "unknown command"
+msgstr "Commande inconnue"
 
 #: Programs/options.c:655
 msgid "unknown configuration directive"
@@ -1579,28 +2273,42 @@ msgstr "Ligne de configuration non reconnue"
 msgid "unknown option"
 msgstr "Option non reconnue"
 
-#: Programs/brltty.c:2125
+#: Programs/brltty.c:2158
 msgid "unrecognized command"
 msgstr "Commande non reconnue"
 
-#: Programs/config.c:1669 Programs/config.c:1678 Programs/config.c:1687
-#: Programs/config.c:1696
-msgid "unsupported"
-msgstr "Non supporté"
-
-#: Programs/parse.c:250
+#: Programs/parse.c:263
 msgid "unsupported parameter"
-msgstr "Paramètre non supporté"
+msgstr "ParamÃštre non supportÃ©"
 
-#: Programs/brltty.c:1986
+#: Programs/spk.c:155
+msgid "volume"
+msgstr "Volume"
+
+#: Programs/brltty.c:2019
 msgid "white"
 msgstr "blanc"
 
-#: Programs/xbrlapi.c:633
+#: Programs/xbrlapi.c:632
 #, c-format
 msgid "window %#010lx changed to NULL name\n"
-msgstr "Le nom de la fenêtre %#010lx est devenu NULL\n"
+msgstr "Le nom de la fenÃªtre %#010lx est devenu NULL\n"
 
-#: Programs/brltty.c:1985
+#: Programs/brltty.c:2018
 msgid "yellow"
 msgstr "jaune"
+
+#~ msgid "6-dot"
+#~ msgstr "6 points"
+
+#~ msgid "8-dot"
+#~ msgstr "8 points"
+
+#~ msgid "Path to speech pass-through FIFO."
+#~ msgstr "Chemin vers le FIFO d'interface avec la synthÃšse."
+
+#~ msgid "input keyboard key"
+#~ msgstr "Touche clavier de l'entrÃ©e"
+
+#~ msgid "unsupported"
+#~ msgstr "Non supportÃ©"
