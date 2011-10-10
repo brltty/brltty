@@ -103,27 +103,14 @@ getDeviceDirectory (void) {
 char *
 getDevicePath (const char *device) {
   const char *directory = getDeviceDirectory();
-  const unsigned int directoryLength = strlen(directory);
-  const unsigned int deviceLength = strlen(device);
 
-  if (directoryLength) {
-    if (*device != '/') {
-      char path[directoryLength + 1 +  deviceLength + 1];
-      unsigned int length = 0;
-
-      memcpy(&path[length], directory, directoryLength);
-      length += directoryLength;
-
-      if (path[length-1] != '/') path[length++] = '/';
-
-      memcpy(&path[length], device, deviceLength);
-      length += deviceLength;
-
-      path[length] = 0;
-      return strdupWrapper(path);
-    }
+#ifdef ALLOW_DOS_DEVICE_NAMES
+  if (isDosDevice(device, NULl)) {
+  //directory = NULL;
   }
-  return strdupWrapper(device);
+#endif /* ALLOW_DOS_DEVICE_NAMES */
+
+  return makePath(directory, device);
 }
 
 const char *
@@ -182,10 +169,23 @@ isQualifiedDevice (const char **identifier, const char *qualifier) {
 int
 isDosDevice (const char *identifier, const char *prefix) {
   size_t count = strcspn(identifier, ":");
-  size_t length = strlen(prefix);
-  if (length > count) return 0;
-  if (strncasecmp(identifier, prefix, length) != 0) return 0;
-  if (strspn(identifier+length, "0123456789") != (count - length)) return 0;
+  size_t length;
+
+  if (!count) return 0;
+
+  if (prefix) {
+    if (!(length = strlen(prefix))) return 0;
+    if (length > count) return 0;
+    if (strncasecmp(identifier, prefix, length) != 0) return 0;
+  } else {
+    length = strspn(identifier, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+    if (!length) return 0;
+  }
+
+  identifier += length;
+  count -= length;
+
+  if (strspn(identifier, "0123456789") != count) return 0;
   return 1;
 }
 #endif /* ALLOW_DOS_DEVICE_NAMES */
