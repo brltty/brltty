@@ -2,9 +2,9 @@
 <table loc="h">
   <tabular ca="lrl">
     <hline>Piano
-      |0|Grand Piano acoustique@
-      |1|Piano acoustique brillant@
-      |2|Grand piano électrique@
+      |0|Piano à queue accoustique@
+      |1|Piano accoustique brillant@
+      |2|Piano à queue électrique@
       |3|Piano bastringue@
       |4|Piano 1@
       |5|Piano électrique 2@
@@ -29,8 +29,8 @@
       |22|Harmonica@
       |23|Accordéon de tango@
     <hline>Guitare
-      |24|Guitare acoustique Nylon Acoustic Guitar@
-      |25|Guitare acoustique métal@
+      |24|Guitare accoustique Nylon Acoustic Guitar@
+      |25|Guitare accoustique métal@
       |26|Guitare électrique Jazz@
       |27|Guitare électrique propre@
       |28|Guitare électrique bouchée@
@@ -38,7 +38,7 @@
       |30|Distortion Guitar@
       |31|Harmoniques de guitare@
     <hline>Basse
-      |32|Basse acoustique@
+      |32|Basse accoustique@
       |33|Basse électrique au doigt@
       |34|Pick Electric Bass@
       |35|Fretless Bass@
