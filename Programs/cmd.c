@@ -264,7 +264,8 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
               if (dot == dots) {
                 STR_PRINTF("C");
               } else {
-                STR_PRINTF("%u", dot-dots);
+                unsigned int number = dot - dots;
+                STR_PRINTF("%u", number);
               }
             }
 
