@@ -1,4 +1,4 @@
-Help for MDV
+Help: MDV
 
 "CR#" means cursor routing key over text cell number #.
 

@@ -1,4 +1,4 @@
-Help for VideoBraille
+Help: VideoBraille
 
 Movement keys:
     Up  Up one line

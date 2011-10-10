@@ -1,4 +1,4 @@
-Help for Braudi
+Help: Braudi
 
 1: go to top-left corner
 2: go left one window

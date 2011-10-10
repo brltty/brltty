@@ -1,4 +1,4 @@
-Help for LogText (Danish)
+Help: LogText (Danish)
 
 Specielle kommandoer til brltty startes med dot 37,
 efterfulgt af nedenstående koder.

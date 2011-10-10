@@ -1,4 +1,4 @@
-Help for IrisLinux
+Help: IrisLinux
 
 To enter in the Learn-Mode, click on the "I Z" cell to enter in the 
 internal

@@ -1,4 +1,4 @@
-Help for EcoBraille (Spanish)
+Help: EcoBraille (Spanish)
 Teclado frontal de izquierda a derecha
   ARRIBA   IZQUIERDA   CENTRO   DERECHA   ABAJO
 

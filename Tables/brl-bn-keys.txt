@@ -1,4 +1,4 @@
-Help for BrailleNote (keys)
+Help: BrailleNote (keys)
 
 Thumb Keys:
 Keys      Description

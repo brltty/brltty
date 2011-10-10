@@ -1,4 +1,4 @@
-Help for MultiBraille
+Help: MultiBraille
 
 Movement keys:
 321          top of screen
