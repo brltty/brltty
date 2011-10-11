@@ -50,13 +50,11 @@ clean::
 	-rm -f -- *.$(OBJECT_EXTENSION) *.$(TEMPLATE_EXTENSION) $(LANGUAGES_FILE) *~
 
 install:: objects install-locale-directory
-	for inputFile in *.$(OBJECT_EXTENSION); \
+	for language in $(LANGUAGE_CODES); \
 	do \
-	   localeName=`basename "$${inputFile}" .$(OBJECT_EXTENSION)`; \
-	   outputDirectory="$(INSTALL_LOCALE_DIRECTORY)/$${localeName}/LC_MESSAGES"; \
-	   outputFile="$${outputDirectory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
-           $(INSTALL_DIRECTORY) "$${outputDirectory}"; \
-	   cp -- "$${inputFile}" "$${outputFile}"; \
+	   directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
+           $(INSTALL_DIRECTORY) "$${directory}"; \
+	   $(INSTALL) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
 	done
 
 uninstall::
