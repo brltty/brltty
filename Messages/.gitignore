@@ -1,4 +1,5 @@
 Makefile
 reldeps.mk
+*.mo
 *.pot
 LINGUAS
