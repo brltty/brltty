@@ -63,6 +63,9 @@ extern void logUnexpectedPacket (const void *packet, size_t size);
 extern void logCorruptPacket (const void *packet, size_t size);
 extern void logDiscardedBytes (const unsigned char *bytes, size_t count);
 
+extern void setLogInputPackets (void);
+extern void setLogOutputPackets (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

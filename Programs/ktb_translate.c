@@ -182,6 +182,26 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
 }
 
 static int
+findPressedKey (KeyTable *table, const KeyValue *value, unsigned int *position) {
+  return findKeyValue(table->pressedKeys, table->pressedCount, value, position);
+}
+
+static int
+insertPressedKey (KeyTable *table, const KeyValue *value, unsigned int position) {
+  return insertKeyValue(&table->pressedKeys, &table->pressedCount, &table->pressedSize, value, position);
+}
+
+static void
+removePressedKey (KeyTable *table, unsigned int position) {
+  removeKeyValue(table->pressedKeys, &table->pressedCount, position);
+}
+
+static inline void
+deleteExplicitKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
+  if (value->key != KTB_KEY_ANY) deleteKeyValue(values, count, value);
+}
+
+static int
 processCommand (KeyTable *table, int command) {
   int blk = command & BRL_MSK_BLK;
   int arg = command & BRL_MSK_ARG;
@@ -206,26 +226,6 @@ processCommand (KeyTable *table, int command) {
   }
 
   return enqueueCommand(command);
-}
-
-static int
-findPressedKey (KeyTable *table, const KeyValue *value, unsigned int *position) {
-  return findKeyValue(table->pressedKeys, table->pressedCount, value, position);
-}
-
-static int
-insertPressedKey (KeyTable *table, const KeyValue *value, unsigned int position) {
-  return insertKeyValue(&table->pressedKeys, &table->pressedCount, &table->pressedSize, value, position);
-}
-
-static void
-removePressedKey (KeyTable *table, unsigned int position) {
-  removeKeyValue(table->pressedKeys, &table->pressedCount, position);
-}
-
-static inline void
-deleteExplicitKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
-  if (value->key != KTB_KEY_ANY) deleteKeyValue(values, count, value);
 }
 
 static int
@@ -399,6 +399,6 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 }
 
 void
-logKeyEvents (KeyTable *table) {
+setLogKeyEvents (KeyTable *table) {
   table->logKeyEvents = 1;
 }

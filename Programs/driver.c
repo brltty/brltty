@@ -93,3 +93,13 @@ void
 logDiscardedBytes (const unsigned char *bytes, size_t count) {
   logInputProblem("Discarded Bytes", bytes, count);
 }
+
+void
+setLogInputPackets (void) {
+  logInputPackets = 1;
+}
+
+void
+setLogOutputPackets (void) {
+  logOutputPackets = 1;
+}
