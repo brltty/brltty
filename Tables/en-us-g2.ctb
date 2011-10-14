@@ -297,6 +297,7 @@ always children 16-1345
 word chn =
 sufword chisholm 16-24-234-125-135-123-134
 sufword clever 14-123-5-15 cleverest
+sufword credo 14-1235-1246-135 credos
 
 # the letter d
 always d 145
@@ -391,6 +392,7 @@ sufword edacious 15-145-1-14-24-1256-234 edaciousness
 always edic = edict Benedict
 sufword edition 15-145-24-56-1345 editions
 midword edo 15-145-135
+midendword edown 15-145-246-1345 facedown
 sufword torpedo 2345-135-1235-1234-1246-135
 sufword tuxedo 2345-136-1346-1246-135
 always edraw =
@@ -916,7 +918,6 @@ word severer 234-15-1236-12456-12456 severe-r (could also be sever-er)
 word severers 234-5-15-12456-234
 always severit 234-15-1236-12456-24-2345 severities
 always severity 234-15-1236-12456-56-13456
-begword shaked 146-1-13-15-145 shakedown
 word shall 146
 word sh =
 always sh 146
