@@ -105,7 +105,7 @@ getDevicePath (const char *device) {
   const char *directory = getDeviceDirectory();
 
 #ifdef ALLOW_DOS_DEVICE_NAMES
-  if (isDosDevice(device, NULl)) {
+  if (isDosDevice(device, NULL)) {
   //directory = NULL;
   }
 #endif /* ALLOW_DOS_DEVICE_NAMES */
