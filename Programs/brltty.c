@@ -2307,7 +2307,14 @@ brlttyUpdate (void) {
 
         /* If the cursor moves in cursor tracking mode: */
         if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
+          int oldx = ses->winx;
+          int oldy = ses->winy;
+
           trackCursor(0);
+          logMessage(LOG_DEBUG, "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                     scr.number,
+                     ses->trkx, ses->trky, scr.posx, scr.posy,
+                     oldx, oldy, ses->winx, ses->winy);
           ses->trkx = scr.posx;
           ses->trky = scr.posy;
         } else if (checkPointer()) {
