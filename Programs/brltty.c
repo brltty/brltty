@@ -1750,12 +1750,18 @@ doCommand:
 #endif /* ENABLE_LEARN_MODE */
 
       case BRL_CMD_SWITCHVT_PREV:
-        if (!switchVirtualTerminal(scr.number-1))
+        if (switchVirtualTerminal(scr.number-1)) {
+          updateSessionAttributes();
+        } else {
           playTune(&tune_command_rejected);
+        }
         break;
       case BRL_CMD_SWITCHVT_NEXT:
-        if (!switchVirtualTerminal(scr.number+1))
+        if (switchVirtualTerminal(scr.number+1)) {
+          updateSessionAttributes();
+        } else {
           playTune(&tune_command_rejected);
+        }
         break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2104,8 +2110,11 @@ doCommand:
           }
 
           case BRL_BLK_SWITCHVT:
-            if (!switchVirtualTerminal(arg+1))
+            if (switchVirtualTerminal(arg+1)) {
+              updateSessionAttributes();
+            } else {
               playTune(&tune_command_rejected);
+            }
             break;
 
           {
