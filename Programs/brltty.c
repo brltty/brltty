@@ -1071,6 +1071,19 @@ highlightWindow (void) {
 }
 
 static int
+switchVirtualTerminal (int vt) {
+  int switched = switchScreenVirtualTerminal(vt);
+
+  if (switched) {
+    updateSessionAttributes();
+  } else {
+    playTune(&tune_command_rejected);
+  }
+
+  return switched;
+}
+
+static int
 brlttyPrepare_unconstructed (void) {
   logMessage(LOG_ERR, "not constructed yet");
   return 0;
@@ -1750,18 +1763,10 @@ doCommand:
 #endif /* ENABLE_LEARN_MODE */
 
       case BRL_CMD_SWITCHVT_PREV:
-        if (switchVirtualTerminal(scr.number-1)) {
-          updateSessionAttributes();
-        } else {
-          playTune(&tune_command_rejected);
-        }
+        switchVirtualTerminal(scr.number-1);
         break;
       case BRL_CMD_SWITCHVT_NEXT:
-        if (switchVirtualTerminal(scr.number+1)) {
-          updateSessionAttributes();
-        } else {
-          playTune(&tune_command_rejected);
-        }
+        switchVirtualTerminal(scr.number+1);
         break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2110,11 +2115,7 @@ doCommand:
           }
 
           case BRL_BLK_SWITCHVT:
-            if (switchVirtualTerminal(arg+1)) {
-              updateSessionAttributes();
-            } else {
-              playTune(&tune_command_rejected);
-            }
+            switchVirtualTerminal(arg+1);
             break;
 
           {
