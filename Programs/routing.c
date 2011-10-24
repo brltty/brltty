@@ -144,8 +144,12 @@ insertCursorKey (RoutingData *routing, ScreenKey key) {
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction) {
+  int oldx = (routing->oldx = routing->curx);
+  int oldy = (routing->oldy = routing->cury);
   long timeout = routing->timeSum / routing->timeCount;
+  int moved = 0;
   struct timeval start;
+
   gettimeofday(&start, NULL);
 
   while (1) {
@@ -190,24 +194,31 @@ awaitCursorMotion (RoutingData *routing, int direction) {
       routing->verticalDelta = bestRow - routing->cury;
     }
 
-    routing->oldy = routing->cury;
-    routing->oldx = routing->curx;
+    oldy = routing->cury;
+    oldx = routing->curx;
     if (!getCurrentPosition(routing)) return 0;
 
-    if ((routing->cury != routing->oldy) || (routing->curx != routing->oldx)) {
+    if ((routing->cury != oldy) || (routing->curx != oldx)) {
       if (logRoutingProgress) {
         logMessage(LOG_WARNING, "routing: moved: [%d,%d] -> [%d,%d]",
-                   routing->oldx, routing->oldy,
+                   oldx, oldy,
                    routing->curx, routing->cury);
       }
 
-      routing->timeSum += time * 8;
-      routing->timeCount += 1;
-      break;
-    }
+      if (!moved) {
+        moved = 1;
+        timeout = time * 2;
 
-    if (time > timeout) {
-      if (logRoutingProgress) logMessage(LOG_WARNING, "routing: timed out");
+        routing->timeSum += time * 8;
+        routing->timeCount += 1;
+      }
+    } else if (time > timeout) {
+      if (!moved) {
+        if (logRoutingProgress) {
+          logMessage(LOG_WARNING, "routing: timed out");
+        }
+      }
+
       break;
     }
   }
