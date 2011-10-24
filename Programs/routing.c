@@ -40,8 +40,10 @@
  * give up until the timeout has elapsed!
  */
 #define ROUTING_NICENESS	10	/* niceness of cursor routing subprocess */
-#define ROUTING_INTERVAL	0	/* how often to check for response */
+#define ROUTING_INTERVAL	1	/* how often to check for response */
 #define ROUTING_TIMEOUT	2000	/* max wait for response to key press */
+
+static int logRoutingProgress = 0;
 
 typedef enum {
   CRR_DONE,
@@ -78,6 +80,11 @@ getCurrentPosition (RoutingData *routing) {
   describeScreen(&description);
 
   if (description.number != routing->screenNumber) {
+    if (logRoutingProgress) {
+      logMessage(LOG_WARNING, "routing: screen changed: num=%d",
+                 description.number);
+    }
+
     routing->screenNumber = description.number;
     return 0;
   }
@@ -86,15 +93,34 @@ getCurrentPosition (RoutingData *routing) {
     routing->screenRows = description.rows;
     routing->screenColumns = description.cols;
     routing->verticalDelta = 0;
-    if (!(routing->rowBuffer = calloc(routing->screenColumns, sizeof(*routing->rowBuffer)))) goto error;
+
+    if (!(routing->rowBuffer = calloc(routing->screenColumns, sizeof(*routing->rowBuffer)))) {
+      logMallocError();
+      goto error;
+    }
+
+    if (logRoutingProgress) {
+      logMessage(LOG_WARNING, "routing: screen: num=%d cols=%d rows=%d",
+                 routing->screenNumber,
+                 routing->screenColumns, routing->screenRows);
+    }
   } else if ((routing->screenRows != description.rows) ||
              (routing->screenColumns != description.cols)) {
+    if (logRoutingProgress) {
+      logMessage(LOG_WARNING, "routing: size changed: cols=%d rows=%d",
+                 description.cols, description.rows);
+    }
+
     goto error;
   }
 
   routing->cury = description.posy - routing->verticalDelta;
   routing->curx = description.posx;
   if (readScreenRow(routing, NULL, description.posy)) return 1;
+
+  if (logRoutingProgress) {
+    logMessage(LOG_WARNING, "routing: read failed: row=%d", description.posy);
+  }
 
 error:
   routing->screenNumber = -1;
@@ -108,6 +134,7 @@ insertCursorKey (RoutingData *routing, ScreenKey key) {
   sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
 #endif /* SIGUSR1 */
 
+  if (logRoutingProgress) logMessage(LOG_WARNING, "routing: key: %x", key);
   insertScreenKey(key);
 
 #ifdef SIGUSR1
@@ -123,6 +150,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 
   while (1) {
     long time;
+
     approximateDelay(ROUTING_INTERVAL);
     time = millisecondsSince(&start) + 1;
 
@@ -167,12 +195,21 @@ awaitCursorMotion (RoutingData *routing, int direction) {
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != routing->oldy) || (routing->curx != routing->oldx)) {
+      if (logRoutingProgress) {
+        logMessage(LOG_WARNING, "routing: moved: [%d,%d] -> [%d,%d]",
+                   routing->oldx, routing->oldy,
+                   routing->curx, routing->cury);
+      }
+
       routing->timeSum += time * 8;
       routing->timeCount += 1;
       break;
     }
 
-    if (time > timeout) break;
+    if (time > timeout) {
+      if (logRoutingProgress) logMessage(LOG_WARNING, "routing: timed out");
+      break;
+    }
   }
 
   return 1;
@@ -180,6 +217,10 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 
 static RoutingResult
 adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
+  if (logRoutingProgress) {
+    logMessage(LOG_WARNING, "routing: to: [%d,%d]", trgx, trgy);
+  }
+
   while (1) {
     int dify = trgy - routing->cury;
     int difx = (trgx < 0)? 0: (trgx - routing->curx);
@@ -266,6 +307,11 @@ doRouting (int column, int row, int screen) {
   routing.timeCount = 1;
 
   if (getCurrentPosition(&routing)) {
+    if (logRoutingProgress) {
+      logMessage(LOG_WARNING, "routing: from: [%d,%d]",
+                 routing.curx, routing.cury);
+    }
+
     if (column < 0) {
       adjustCursorVertically(&routing, 0, row);
     } else {
