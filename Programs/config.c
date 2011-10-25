@@ -2563,34 +2563,10 @@ startup (int argc, char *argv[]) {
   {
     int level = LOG_NOTICE;
 
-    if (*opt_logLevel) {
-      {
-        int length = strlen(opt_logLevel);
-        int index;
-
-        for (index=0; index<logLevelCount; index+=1) {
-          const char *name = logLevelNames[index];
-
-          if (strncasecmp(opt_logLevel, name, length) == 0) {
-            level = index;
-            goto setLevel;
-          }
-        }
-      }
-
-      {
-        int value;
-
-        if (isInteger(&value, opt_logLevel) && (value >= 0) && (value < logLevelCount)) {
-          level = value;
-          goto setLevel;
-        }
-      }
-
+    if (!isLogLevel(&level, opt_logLevel)) {
       logMessage(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
     }
 
-  setLevel:
     setLogLevel(level);
 
     if (opt_standardError) {

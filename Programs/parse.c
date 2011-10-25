@@ -144,6 +144,34 @@ isFloat (float *value, const char *string) {
 }
 
 int
+isLogLevel (int *level, const char *string) {
+  if (!*string) return 1;
+
+  {
+    int length = strlen(string);
+    int index;
+
+    for (index=0; index<logLevelCount; index+=1) {
+      if (strncasecmp(string, logLevelNames[index], length) == 0) {
+        *level = index;
+        return 1;
+      }
+    }
+  }
+
+  {
+    int value;
+
+    if (isInteger(&value, string) && (value >= 0) && (value < logLevelCount)) {
+      *level = value;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
 validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
   if (*string) {
     int i;
