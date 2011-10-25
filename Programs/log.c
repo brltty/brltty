@@ -43,6 +43,12 @@ localtime_r (const time_t *timep, struct tm *result) {
 
 #include "log.h"
 
+const char *const logLevelNames[] = {
+  "emergency", "alert", "critical", "error",
+  "warning", "notice", "information", "debug"
+};
+const unsigned int logLevelCount = ARRAY_COUNT(logLevelNames);
+
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
 

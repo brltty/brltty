@@ -42,6 +42,9 @@ typedef enum {
 } SyslogLevel;
 #endif /* system log external definitions */
 
+extern const char *const logLevelNames[];
+extern const unsigned int logLevelCount;
+
 extern void openLogFile (const char *path);
 extern void closeLogFile (void);
 
