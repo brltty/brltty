@@ -219,16 +219,21 @@ formatLogMessageData (char *buffer, size_t size, const void *data) {
 }
 
 void
-logMessage (int level, const char *format, ...) {
-  va_list arguments;
+vlogMessage (int level, const char *format, va_list *arguments) {
   const LogMessageData msg = {
     .format = format,
-    .arguments = &arguments
+    .arguments = arguments
   };
 
-  va_start(arguments, format);
   logData(level, formatLogMessageData, &msg);
-  va_end(arguments);
+}
+
+void
+logMessage (int level, const char *format, ...) {
+  va_list arguments;
+
+  va_start(arguments, format);
+  vlogMessage(level, format, &arguments);
 }
 
 typedef struct {

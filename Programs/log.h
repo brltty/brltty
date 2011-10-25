@@ -21,6 +21,8 @@
 
 #include "prologue.h"
 
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -56,6 +58,8 @@ typedef const char *LogDataFormatter (char *buffer, size_t size, const void *dat
 extern void logData (int level, LogDataFormatter *formatLogData, const void *data);
 
 extern void logMessage (int level, const char *format, ...) PRINTF(2, 3);
+extern void vlogMessage (int level, const char *format, va_list *arguments);
+
 extern void logBytes (int level, const char *description, const void *data, size_t length);
 
 extern void logSystemError (const char *action);
