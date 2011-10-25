@@ -68,6 +68,47 @@ typedef struct {
   int timeCount;
 } RoutingData;
 
+typedef enum {
+  CURSOR_DIR_LEFT,
+  CURSOR_DIR_RIGHT,
+  CURSOR_DIR_UP,
+  CURSOR_DIR_DOWN
+} CursorDirection;
+
+typedef struct {
+  const char *name;
+  ScreenKey key;
+} CursorDirectionEntry;
+
+static const CursorDirectionEntry cursorDirectionTable[] = {
+  [CURSOR_DIR_LEFT]  = {.name="left" , .key=SCR_KEY_CURSOR_LEFT },
+  [CURSOR_DIR_RIGHT] = {.name="right", .key=SCR_KEY_CURSOR_RIGHT},
+  [CURSOR_DIR_UP]    = {.name="up"   , .key=SCR_KEY_CURSOR_UP   },
+  [CURSOR_DIR_DOWN]  = {.name="down" , .key=SCR_KEY_CURSOR_DOWN }
+};
+
+typedef enum {
+  CURSOR_AXIS_HORIZONTAL,
+  CURSOR_AXIS_VERTICAL
+} CursorAxis;
+
+typedef struct {
+  const CursorDirectionEntry *forward;
+  const CursorDirectionEntry *backward;
+} CursorAxisEntry;
+
+static const CursorAxisEntry cursorAxisTable[] = {
+  [CURSOR_AXIS_HORIZONTAL] = {
+    .forward  = &cursorDirectionTable[CURSOR_DIR_RIGHT],
+    .backward = &cursorDirectionTable[CURSOR_DIR_LEFT]
+  }
+  ,
+  [CURSOR_AXIS_VERTICAL] = {
+    .forward  = &cursorDirectionTable[CURSOR_DIR_DOWN],
+    .backward = &cursorDirectionTable[CURSOR_DIR_UP]
+  }
+};
+
 static int
 readScreenRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = routing->rowBuffer;
@@ -128,14 +169,14 @@ error:
 }
 
 static void
-insertCursorKey (RoutingData *routing, ScreenKey key) {
+moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 #ifdef SIGUSR1
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
 #endif /* SIGUSR1 */
 
-  if (logRoutingProgress) logMessage(LOG_WARNING, "routing: key: %x", key);
-  insertScreenKey(key);
+  if (logRoutingProgress) logMessage(LOG_WARNING, "routing: move: %s", direction->name);
+  insertScreenKey(direction->key);
 
 #ifdef SIGUSR1
   sigprocmask(SIG_SETMASK, &oldMask, NULL);
@@ -227,7 +268,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 }
 
 static RoutingResult
-adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
+adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const CursorAxisEntry *axis) {
   if (logRoutingProgress) {
     logMessage(LOG_WARNING, "routing: to: [%d,%d]", trgx, trgy);
   }
@@ -247,7 +288,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, Scree
     }
 
     /* tell the cursor to move in the needed direction */
-    insertCursorKey(routing, ((dir > 0)? forward: backward));
+    moveCursor(routing, ((dir > 0)? axis->forward: axis->backward));
     if (!awaitCursorMotion(routing, dir)) return CRR_FAIL;
 
     if (routing->cury != routing->oldy) {
@@ -285,19 +326,19 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, Scree
      * try going back to the previous position since it was obviously
      * the nearest ever reached.
      */
-    insertCursorKey(routing, ((dir > 0)? backward: forward));
+    moveCursor(routing, ((dir > 0)? axis->backward: axis->forward));
     return awaitCursorMotion(routing, -dir)? CRR_NEAR: CRR_FAIL;
   }
 }
 
 static RoutingResult
 adjustCursorHorizontally (RoutingData *routing, int where, int row, int column) {
-  return adjustCursorPosition(routing, where, row, column, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
+  return adjustCursorPosition(routing, where, row, column, &cursorAxisTable[CURSOR_AXIS_HORIZONTAL]);
 }
 
 static RoutingResult
 adjustCursorVertically (RoutingData *routing, int where, int row) {
-  return adjustCursorPosition(routing, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
+  return adjustCursorPosition(routing, where, row, -1, &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
 }
 
 static RoutingStatus
