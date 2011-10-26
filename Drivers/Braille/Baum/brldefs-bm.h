@@ -45,7 +45,9 @@ typedef enum {
   BM_SET_RoutingKeys,
   BM_SET_HorizontalSensors,
   BM_SET_LeftSensors,
-  BM_SET_RightSensors
+  BM_SET_RightSensors,
+  BM_SET_ScaledLeftSensors,
+  BM_SET_ScaledRightSensors
 } BM_KeySet;
 
 #endif /* BRLTTY_INCLUDED_BM_BRLDEFS */ 

@@ -154,6 +154,8 @@ END_KEY_NAME_TABLE
 BEGIN_KEY_NAME_TABLE(vertical)
   KEY_SET_ENTRY(BM_SET_LeftSensors, "LeftSensor"),
   KEY_SET_ENTRY(BM_SET_RightSensors, "RightSensor"),
+  KEY_SET_ENTRY(BM_SET_ScaledLeftSensors, "ScaledLeftSensor"),
+  KEY_SET_ENTRY(BM_SET_ScaledRightSensors, "ScaledRightSensor"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(inka)
@@ -331,7 +333,7 @@ resetKeyGroup (unsigned char *group, unsigned char count, unsigned char key) {
 static void
 updateKeyGroup (
   unsigned char *group, const unsigned char *new,
-  unsigned char set, unsigned char base, unsigned char count
+  unsigned char set, unsigned char base, unsigned char count, int scaled
 ) {
   unsigned char pressTable[count];
   unsigned char pressCount = 0;
@@ -342,6 +344,8 @@ updateKeyGroup (
     int press = (new[offset / 8] & (1 << (offset % 8))) != 0;
 
     if (setGroupedKey(group, key, press)) {
+      if (scaled) key = rescaleInteger(key, count-1, BRL_MSK_ARG);
+
       if (press) {
         pressTable[pressCount++] = key;
       } else {
@@ -355,7 +359,7 @@ updateKeyGroup (
 
 static void
 updateNavigationKeys (const unsigned char *new, unsigned char base, unsigned char count) {
-  updateKeyGroup(keysState.navigationKeys, new, BM_SET_NavigationKeys, base, count);
+  updateKeyGroup(keysState.navigationKeys, new, BM_SET_NavigationKeys, base, count, 0);
 }
 
 static void
@@ -365,7 +369,7 @@ updateDisplayKeys (unsigned char new) {
 
 static void
 updateRoutingKeys (const unsigned char *new, unsigned char count) {
-  updateKeyGroup(keysState.routingKeys, new, BM_SET_RoutingKeys, 0, count);
+  updateKeyGroup(keysState.routingKeys, new, BM_SET_RoutingKeys, 0, count, 0);
 }
 
 static int
@@ -1644,7 +1648,7 @@ updateBaumKeys (BrailleDisplay *brl) {
       case BAUM_RSP_HorizontalSensors:
         if (!(switchSettings & BAUM_SWT_DisableSensors)) {
           updateKeyGroup(keysState.horizontalSensors, packet.data.values.horizontalSensors,
-                         BM_SET_HorizontalSensors, 0, brl->textColumns);
+                         BM_SET_HorizontalSensors, 0, brl->textColumns, 0);
         }
         continue;
 
@@ -1668,10 +1672,14 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       case BAUM_RSP_VerticalSensors:
         if (!(switchSettings & BAUM_SWT_DisableSensors)) {
+          int scaled = (switchSettings & BAUM_SWT_ScaledVertical) != 0;
+
           updateKeyGroup(keysState.leftSensors, packet.data.values.verticalSensors.left,
-                         BM_SET_LeftSensors, 0, VERTICAL_SENSOR_COUNT);
+                         (scaled? BM_SET_ScaledLeftSensors: BM_SET_LeftSensors),
+                         0, VERTICAL_SENSOR_COUNT, scaled);
           updateKeyGroup(keysState.rightSensors, packet.data.values.verticalSensors.right,
-                         BM_SET_RightSensors, 0, VERTICAL_SENSOR_COUNT);
+                         (scaled? BM_SET_ScaledRightSensors: BM_SET_RightSensors),
+                         0, VERTICAL_SENSOR_COUNT, scaled);
         }
         continue;
 
@@ -1687,7 +1695,7 @@ updateBaumKeys (BrailleDisplay *brl) {
 
       doRoutingKeys:
         updateKeyGroup(keysState.routingKeys, packet.data.values.routingKeys,
-                       BM_SET_RoutingKeys, 0, cellCount);
+                       BM_SET_RoutingKeys, 0, cellCount, 0);
         continue;
 
       case BAUM_RSP_Switches:
@@ -2191,7 +2199,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl) {
 
         case PB_RSP_SENSORS:
           updateKeyGroup(keysState.routingKeys, packet.data.values.sensors.horizontal,
-                         BM_SET_RoutingKeys, 0, brl->textColumns);
+                         BM_SET_RoutingKeys, 0, brl->textColumns, 0);
           continue;
 
         default:
