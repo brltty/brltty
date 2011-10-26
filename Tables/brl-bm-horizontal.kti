@@ -18,4 +18,24 @@
 
 # This key subtable is for Baum displays which have horizontal sensors.
 
-bind !HorizontalSensor ROUTE
+bind HorizontalSensor ROUTE
+
+bind Display1+HorizontalSensor CUTBEGIN
+bind Display2+HorizontalSensor CUTAPPEND
+bind Display4+HorizontalSensor CUTLINE
+bind Display5+HorizontalSensor CUTRECT
+bind HorizontalSensor+!HorizontalSensor COPYCHARS
+bind Display2+HorizontalSensor+!HorizontalSensor APNDCHARS
+
+bind Display3+HorizontalSensor DESCCHAR
+bind Display6+HorizontalSensor SETLEFT
+
+bind Display2+Display1+HorizontalSensor PRINDENT
+bind Display2+Display3+HorizontalSensor NXINDENT
+
+bind Display5+Display4+HorizontalSensor PRDIFCHAR
+bind Display5+Display6+HorizontalSensor NXDIFCHAR
+
+bind Display1+Display3+HorizontalSensor SETMARK
+bind Display4+Display6+HorizontalSensor GOTOMARK
+
