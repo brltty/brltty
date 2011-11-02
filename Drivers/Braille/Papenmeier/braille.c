@@ -182,6 +182,7 @@ readUsbBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout)
   int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
                            (*offset? timeout: 0), timeout);
   if (count == -1) return 0;
+  if (count == 0) return 0;
   *offset += count;
   return 1;
 }
