@@ -485,12 +485,7 @@ connectSucceeded:
     if (delay) approximateDelay(delay);
   }
 
-  {
-    unsigned char byte;
-    while (gioReadByte(endpoint, &byte, 0));
-  }
-
-  if (errno != EAGAIN) {
+  if (!gioDiscardInput(endpoint)) {
     int originalErrno = errno;
     gioDisconnectResource(endpoint);
     errno = originalErrno;
@@ -597,6 +592,13 @@ gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait) {
   if (result > 0) return 1;
   if (result == 0) errno = EAGAIN;
   return 0;
+}
+
+int
+gioDiscardInput (GioEndpoint *endpoint) {
+  unsigned char byte;
+  while (gioReadByte(endpoint, &byte, 0));
+  return errno == EAGAIN;
 }
 
 int

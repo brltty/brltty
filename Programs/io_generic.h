@@ -66,6 +66,7 @@ extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t siz
 extern int gioAwaitInput (GioEndpoint *endpoint, int timeout);
 extern ssize_t gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait);
 extern int gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait);
+extern int gioDiscardInput (GioEndpoint *endpoint);
 
 extern int gioReconfigureResource (
   GioEndpoint *endpoint,
