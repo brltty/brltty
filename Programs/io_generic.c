@@ -422,12 +422,10 @@ gioConnectResource (
       if (isSerialDevice(&identifier)) {
         if ((endpoint->handle.serial.device = serialOpenDevice(identifier))) {
           if (serialSetParameters(endpoint->handle.serial.device, descriptor->serial.parameters)) {
-            if (serialRestartDevice(endpoint->handle.serial.device, descriptor->serial.parameters->baud)) {
-              endpoint->methods = &serialMethods;
-              endpoint->options = descriptor->serial.options;
-              setBytesPerSecond(endpoint, descriptor->serial.parameters);
-              goto connectSucceeded;
-            }
+            endpoint->methods = &serialMethods;
+            endpoint->options = descriptor->serial.options;
+            setBytesPerSecond(endpoint, descriptor->serial.parameters);
+            goto connectSucceeded;
           }
 
           serialCloseDevice(endpoint->handle.serial.device);
