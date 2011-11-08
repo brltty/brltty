@@ -1101,15 +1101,12 @@ connectResource (const char *identifier) {
   gioInitializeSerialParameters(&serialParameters);
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.applicationData = &serialOperations;
-  descriptor.serial.options.inputTimeout = 1000;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
   descriptor.usb.options.applicationData = &usbOperations;
-  descriptor.usb.options.inputTimeout = 1000;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
-  descriptor.bluetooth.options.inputTimeout = 1000;
 
   if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     io = gioGetApplicationData(gioEndpoint);
