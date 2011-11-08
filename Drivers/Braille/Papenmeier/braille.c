@@ -44,6 +44,7 @@
 #include "bitfield.h"
 #include "timing.h"
 #include "ascii.h"
+#include "io_generic.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
@@ -57,199 +58,43 @@ static const ModelEntry *model = NULL;
 /*--- Input/Output Operations ---*/
 
 typedef struct {
-  const unsigned int *bauds;
+  const unsigned int *baudList;
+  const SerialFlowControl flowControl;
   unsigned char protocol1;
   unsigned char protocol2;
-  int (*openPort) (char **parameters, const char *device);
-  void (*closePort) (void);
-  void (*flushPort) (BrailleDisplay *brl);
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, size_t *offset, size_t length, int timeout);
-  int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
 
+static GioEndpoint *gioEndpoint = NULL;
 static const InputOutputOperations *io;
-static const unsigned int *baud;
-static unsigned int charactersPerSecond;
 
 /*--- Serial Operations ---*/
 
-#include "io_serial.h"
-static SerialDevice *serialDevice = NULL;
 static const unsigned int serialBauds[] = {19200, 38400, 0};
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, *baud))
-      if (serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE))
-        return 1;
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static void
-flushSerialPort (BrailleDisplay *brl) {
-  serialDiscardOutput(serialDevice);
-  drainBrailleOutput(brl, 100);
-  serialDiscardInput(serialDevice);
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
-  return serialReadChunk(serialDevice, buffer, offset, length, 0, timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length) {
-  return serialWriteData(serialDevice, buffer, length);
-}
-
 static const InputOutputOperations serialOperations = {
-  serialBauds, 1, 1,
-  openSerialPort, closeSerialPort, flushSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes
+  .baudList = serialBauds,
+  .flowControl = SERIAL_FLOW_HARDWARE,
+  .protocol1 = 1,
+  .protocol2 = 1
 };
 
 /*--- USB Operations ---*/
 
-#include "io_usb.h"
-static UsbChannel *usb = NULL;
 static const unsigned int usbBauds[] = {115200, 57600, 0};
-
-static int
-openUsbPort (char **parameters, const char *device) {
-  const SerialParameters serial = {
-    .baud = *baud,
-    .flowControl = SERIAL_FLOW_NONE,
-    .dataBits = 8,
-    .stopBits = 1,
-    .parity = SERIAL_PARITY_NONE
-  };
-
-  const UsbChannelDefinition definitions[] = {
-    { .vendor=0X0403, .product=0Xf208,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2,
-      .serial = &serial
-    }
-    ,
-    { .vendor=0 }
-  };
-
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
-    return 1;
-  }
-  return 0;
-}
-
-static void
-closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
-}
-
-static void
-flushUsbPort (BrailleDisplay *brl) {
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
-                           (*offset? timeout: 0), timeout);
-  if (count == -1) return 0;
-  if (count == 0) return 0;
-  *offset += count;
-  return 1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
-}
-
 static const InputOutputOperations usbOperations = {
-  usbBauds, 0, 3,
-  openUsbPort, closeUsbPort, flushUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes
+  .baudList = usbBauds,
+  .flowControl = SERIAL_FLOW_NONE,
+  .protocol1 = 0,
+  .protocol2 = 3
 };
 
 /*--- Bluetooth Operations ---*/
 
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
 static const unsigned int bluetoothBauds[] = {115200, 0};
-
-static int
-openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static void
-flushBluetoothPort (BrailleDisplay *brl) {
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
-  return bthReadData(bluetoothConnection, buffer+*offset, length-*offset,
-                     (*offset? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = bthWriteData(bluetoothConnection, buffer, length);
-  if (count != length) {
-    if (count == -1) {
-      logSystemError("Papenmeier Bluetooth write");
-    } else {
-      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-  return count;
-}
-
 static const InputOutputOperations bluetoothOperations = {
-  bluetoothBauds, 0, 3,
-  openBluetoothPort, closeBluetoothPort, flushBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
+  .baudList = bluetoothBauds,
+  .flowControl = SERIAL_FLOW_NONE,
+  .protocol1 = 0,
+  .protocol2 = 3
 };
 
 /*--- Protocol Operation Utilities ---*/
@@ -270,10 +115,29 @@ static unsigned char currentText[BRLCOLSMAX];
 
 
 static int
+flushTerminal (BrailleDisplay *brl) {
+  drainBrailleOutput(brl, 100);
+  return gioDiscardInput(gioEndpoint);
+}
+
+static int
+readBytes (unsigned char *buffer, size_t *offset, size_t length) {
+  ssize_t result = gioReadData(gioEndpoint, buffer+*offset, length, !!*offset);
+
+  if (result > 0) {
+    *offset += result;
+    return 1;
+  }
+
+  return 0;
+}
+
+
+static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   logOutputPacket(bytes, count);
-  if (io->writeBytes(bytes, count) != -1) {
-    brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
+  if (gioWriteData(gioEndpoint, bytes, count) != -1) {
+    brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
     return 1;
   } else {
     logSystemError("Write");
@@ -368,7 +232,7 @@ static void
 resetTerminal1 (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {STX, 0X01, ETX};
   logMessage(LOG_WARNING, "Resetting terminal.");
-  io->flushPort(brl);
+  flushTerminal(brl);
   writeBytes(brl, sequence, sizeof(sequence));
 }
 
@@ -376,7 +240,7 @@ resetTerminal1 (BrailleDisplay *brl) {
 #define RBF_RESET 2
 static int
 readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t count, int flags) {
-  if (io->readBytes(buffer, &offset, count, 1000)) {
+  if (readBytes(buffer, &offset, count)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == ETX) return 1;
     logCorruptPacket(buffer, offset);
@@ -686,9 +550,9 @@ identifyTerminal1 (BrailleDisplay *brl) {
     ETX
   };
 
-  io->flushPort(brl);
+  flushTerminal(brl);
   if (writeBytes(brl, badPacket, sizeof(badPacket))) {
-    if (io->awaitInput(1000)) {
+    if (gioAwaitInput(gioEndpoint, 1000)) {
       unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
       if (readBytes1(brl, identity, 0, 1, 0)) {
         if (identity[0] == STX) {
@@ -748,7 +612,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
   volatile int identity;
 
   while (1) {
-    if (!io->readBytes(buffer, &offset, 1, 1000)) {
+    if (!readBytes(buffer, &offset, 1)) {
       if (offset > 0) logPartialPacket(buffer, offset);
       return 0;
     }
@@ -1161,9 +1025,9 @@ mapInputModules2 (void) {
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
   int tries = 0;
-  io->flushPort(brl);
+  flushTerminal(brl);
   while (writePacket2(brl, 2, 0, NULL)) {
-    while (io->awaitInput(100)) {
+    while (gioAwaitInput(gioEndpoint, 100)) {
       Packet2 packet;			/* answer has 10 chars */
       if (readPacket2(brl, &packet)) {
         if (packet.type == 0X0A) {
@@ -1218,47 +1082,87 @@ identifyTerminal (BrailleDisplay *brl) {
 }
 
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    goto failed;
+connectResource (const char *identifier) {
+  SerialParameters serialParameters;
+
+  const UsbChannelDefinition usbChannelDefinitions[] = {
+    { .vendor=0X0403, .product=0Xf208,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .serial = &serialParameters
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  gioInitializeSerialParameters(&serialParameters);
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &serialOperations;
+  descriptor.serial.options.inputTimeout = 1000;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &usbOperations;
+  descriptor.usb.options.inputTimeout = 1000;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &bluetoothOperations;
+  descriptor.bluetooth.options.inputTimeout = 1000;
+
+  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    io = gioGetApplicationData(gioEndpoint);
+    return 1;
   }
 
-  baud = io->bauds;
-  while (*baud) {
-    logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud.", *baud);
-    charactersPerSecond = *baud / 10;
+  return 0;
+}
 
-    if (io->openPort(parameters, device)) {
-      if (identifyTerminal(brl)) {
-        brl->setFirmness = protocol->setFirmness;
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if (connectResource(device)) {
+    const unsigned int *baud = io->baudList;
 
-        memset(currentText, 0, model->textColumns);
-        memset(currentStatus, 0, model->statusCount);
+    while (*baud) {
+      SerialParameters serialParameters;
 
-        protocol->initializeTerminal(brl);
-        return 1;
+      gioInitializeSerialParameters(&serialParameters);
+      serialParameters.baud = *baud;
+      serialParameters.flowControl = io->flowControl;
+      logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
+
+      if (gioReconfigureResource(gioEndpoint, &serialParameters)) {
+        if (gioDiscardInput(gioEndpoint)) {
+          if (identifyTerminal(brl)) {
+            brl->setFirmness = protocol->setFirmness;
+
+            memset(currentText, 0, model->textColumns);
+            memset(currentStatus, 0, model->statusCount);
+
+            protocol->initializeTerminal(brl);
+            return 1;
+          }
+        }
       }
 
-      io->closePort();
+      baud += 1;
     }
 
-    baud += 1;
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
   }
 
-failed:
   return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  io->closePort();
+  if (gioEndpoint) {
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
+  }
+
   protocol->releaseResources();
 }
 
