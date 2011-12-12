@@ -361,6 +361,8 @@ main (int argc, char *argv[]) {
           if (*opt_textTable) {
             char *textTableFile;
 
+            putCell = putMappedCharacter;
+
             if ((textTableFile = ensureTextTableExtension(opt_textTable))) {
               char *textTablePath;
 
@@ -377,13 +379,11 @@ main (int argc, char *argv[]) {
               status = 4;
             }
           } else {
-            textTable = NULL;
+            putCell = putUnicodeBraille;
             status = 0;
           }
 
           if (!status) {
-            putCell = textTable? putMappedCharacter: putUnicodeBraille;
-
             if (argc) {
               do {
                 char *path = *argv;
