@@ -732,11 +732,10 @@ getContractedLength (unsigned int outputLimit) {
   unsigned char outputBuffer[outputLength];
 
   readScreenText(ses->winx, ses->winy, inputLength, 1, inputBuffer);
-  if (!contractText(contractionTable,
-                    inputBuffer, &inputLength,
-                    outputBuffer, &outputLength,
-                    NULL, getContractedCursor(getCursorOffset())))
-    return 0;
+  contractText(contractionTable,
+               inputBuffer, &inputLength,
+               outputBuffer, &outputLength,
+               NULL, getContractedCursor(getCursorOffset()));
   return inputLength;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -2508,11 +2507,10 @@ brlttyUpdate (void) {
             }
           }
 
-          if (!contractText(contractionTable,
-                            inputText, &inputLength,
-                            outputBuffer, &outputLength,
-                            contractedOffsets, getContractedCursor(cursorOffset)))
-            break;
+          contractText(contractionTable,
+                       inputText, &inputLength,
+                       outputBuffer, &outputLength,
+                       contractedOffsets, getContractedCursor(cursorOffset));
 
           {
             int inputEnd = inputLength;

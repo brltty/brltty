@@ -715,14 +715,19 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
-  if (table->data.internal.characters) {
-    free(table->data.internal.characters);
-    table->data.internal.characters = NULL;
-  }
-
-  if (table->data.internal.size) {
-    free(table->data.internal.header.fields);
+  if (table->executable) {
+    free(table->executable);
     free(table);
+  } else {
+    if (table->data.internal.characters) {
+      free(table->data.internal.characters);
+      table->data.internal.characters = NULL;
+    }
+
+    if (table->data.internal.size) {
+      free(table->data.internal.header.fields);
+      free(table);
+    }
   }
 }
 

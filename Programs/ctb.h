@@ -29,7 +29,7 @@ typedef struct ContractionTableStruct ContractionTable;
 
 extern ContractionTable *compileContractionTable (const char *fileName);
 extern void destroyContractionTable (ContractionTable *table);
-extern int contractText (
+extern void contractText (
   ContractionTable *contractionTable, /* Pointer to translation table */
   const wchar_t *inputBuffer, /* What is to be translated */
   int *inputLength, /* Its length */

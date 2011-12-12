@@ -157,7 +157,6 @@ putUnicodeBraille (unsigned char cell, void *data) {
 
 static int
 writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
-  LineProcessingData *lpd = data;
   const wchar_t *inputBuffer = inputLine;
 
   while (inputLength) {
@@ -171,13 +170,10 @@ writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
       }
     }
 
-    if (!contractText(contractionTable,
-                      inputBuffer, &inputCount,
-                      outputBuffer, &outputCount,
-                      NULL, CTB_NO_CURSOR)) {
-      lpd->exitStatus = 11;
-      return 0;
-    }
+    contractText(contractionTable,
+                 inputBuffer, &inputCount,
+                 outputBuffer, &outputCount,
+                 NULL, CTB_NO_CURSOR);
 
     if ((inputCount < inputLength) && outputExtend) {
       free(outputBuffer);

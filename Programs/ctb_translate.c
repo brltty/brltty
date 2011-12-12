@@ -26,6 +26,7 @@
 
 #include "ctb.h"
 #include "ctb_internal.h"
+#include "ttb.h"
 #include "prefs.h"
 #include "unicode.h"
 #include "ascii.h"
@@ -1141,23 +1142,29 @@ contractTextExternally (void) {
   return 0;
 }
 
-int
+void
 contractText (
   ContractionTable *contractionTable,
   const wchar_t *inputBuffer, int *inputLength,
   BYTE *outputBuffer, int *outputLength,
   int *offsetsMap, const int cursorOffset
 ) {
-  int result;
-
   table = contractionTable;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
   cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
 
-  result = table->executable? contractTextExternally(): contractTextInternally();
+  if (!(table->executable? contractTextExternally(): contractTextInternally())) {
+    src = srcmin;
+    dest = destmin;
+
+    while ((src < srcmax) && (dest < destmax)) {
+      setOffset();
+      *dest++ = convertCharacterToDots(textTable, *src++);
+    }
+  }
+
   *inputLength = src - srcmin;
   *outputLength = dest - destmin;
-  return result;
 }
