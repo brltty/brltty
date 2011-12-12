@@ -45,16 +45,21 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 #define setOffset() assignOffset(dest-destmin)
 #define clearOffset() assignOffset(CTB_NO_OFFSET)
 
+static inline ContractionTableHeader *
+getContractionTableHeader (void) {
+  return table->data.internal.header.fields;
+}
+
 static inline const void *
 getContractionTableItem (ContractionTableOffset offset) {
-  return &table->header.bytes[offset];
+  return &table->data.internal.header.bytes[offset];
 }
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
-  const ContractionTableCharacter *characters = getContractionTableItem(table->header.fields->characters);
+  const ContractionTableCharacter *characters = getContractionTableItem(getContractionTableHeader()->characters);
   int first = 0;
-  int last = table->header.fields->characterCount - 1;
+  int last = getContractionTableHeader()->characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
@@ -75,11 +80,11 @@ getContractionTableCharacter (wchar_t character) {
 static CharacterEntry *
 getCharacterEntry (wchar_t character) {
   int first = 0;
-  int last = table->characterCount - 1;
+  int last = table->data.internal.characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    CharacterEntry *entry = &table->characters[current];
+    CharacterEntry *entry = &table->data.internal.characters[current];
 
     if (entry->value < character) {
       first = current + 1;
@@ -90,26 +95,26 @@ getCharacterEntry (wchar_t character) {
     }
   }
 
-  if (table->characterCount == table->charactersSize) {
-    int newSize = table->charactersSize;
+  if (table->data.internal.characterCount == table->data.internal.charactersSize) {
+    int newSize = table->data.internal.charactersSize;
     newSize = newSize? newSize<<1: 0X80;
 
     {
-      CharacterEntry *newCharacters = realloc(table->characters, (newSize * sizeof(*newCharacters)));
+      CharacterEntry *newCharacters = realloc(table->data.internal.characters, (newSize * sizeof(*newCharacters)));
       if (!newCharacters) return NULL;
 
-      table->characters = newCharacters;
-      table->charactersSize = newSize;
+      table->data.internal.characters = newCharacters;
+      table->data.internal.charactersSize = newSize;
     }
   }
 
-  memmove(&table->characters[first+1],
-          &table->characters[first],
-          (table->characterCount - first) * sizeof(*table->characters));
-  table->characterCount += 1;
+  memmove(&table->data.internal.characters[first+1],
+          &table->data.internal.characters[first],
+          (table->data.internal.characterCount - first) * sizeof(*table->data.internal.characters));
+  table->data.internal.characterCount += 1;
 
   {
-    CharacterEntry *entry = &table->characters[first];
+    CharacterEntry *entry = &table->data.internal.characters[first];
     memset(entry, 0, sizeof(*entry));
     entry->value = entry->uppercase = entry->lowercase = character;
 
@@ -221,7 +226,7 @@ selectRule (int length) {
     wchar_t characters[2];
     characters[0] = toLowerCase(src[0]);
     characters[1] = toLowerCase(src[1]);
-    ruleOffset = table->header.fields->rules[CTH(characters)];
+    ruleOffset = getContractionTableHeader()->rules[CTH(characters)];
     maximumLength = 0;
   }
 
@@ -904,8 +909,8 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
 #endif /* HAVE_ICU */
 }
 
-int
-contractText (
+static int
+contractTextInternally (
   ContractionTable *contractionTable,
   const wchar_t *inputBuffer, int *inputLength,
   BYTE *outputBuffer, int *outputLength,
@@ -961,10 +966,10 @@ contractText (
         continue;
       }
 
-      if (table->header.fields->numberSign && (previousOpcode != CTO_MidNum) &&
+      if (getContractionTableHeader()->numberSign && (previousOpcode != CTO_MidNum) &&
           !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
-        if (!putSequence(table->header.fields->numberSign)) break;
-      } else if (table->header.fields->englishLetterSign && testCharacter(*src, CTC_Letter)) {
+        if (!putSequence(getContractionTableHeader()->numberSign)) break;
+      } else if (getContractionTableHeader()->englishLetterSign && testCharacter(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
             ((currentOpcode != CTO_EndNum) && testCharacter(before, CTC_Digit)) ||
             (testCharacter(*src, CTC_Letter) &&
@@ -974,24 +979,24 @@ contractText (
              (((src + 1) == srcmax) ||
               testCharacter(src[1], CTC_Space) ||
               (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
-          if (!putSequence(table->header.fields->englishLetterSign)) break;
+          if (!putSequence(getContractionTableHeader()->englishLetterSign)) break;
         }
       }
 
       if (prefs.capitalizationMode == CTB_CAP_SIGN) {
         if (testCharacter(*src, CTC_UpperCase)) {
           if (!testCharacter(before, CTC_UpperCase)) {
-            if (table->header.fields->beginCapitalSign &&
+            if (getContractionTableHeader()->beginCapitalSign &&
                 (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
-              if (!putSequence(table->header.fields->beginCapitalSign)) break;
-            } else if (table->header.fields->capitalSign) {
-              if (!putSequence(table->header.fields->capitalSign)) break;
+              if (!putSequence(getContractionTableHeader()->beginCapitalSign)) break;
+            } else if (getContractionTableHeader()->capitalSign) {
+              if (!putSequence(getContractionTableHeader()->capitalSign)) break;
             }
           }
         } else if (testCharacter(*src, CTC_LowerCase)) {
-          if (table->header.fields->endCapitalSign && (src - 2 >= srcmin) &&
+          if (getContractionTableHeader()->endCapitalSign && (src - 2 >= srcmin) &&
               testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
-            if (!putSequence(table->header.fields->endCapitalSign)) break;
+            if (!putSequence(getContractionTableHeader()->endCapitalSign)) break;
           }
         }
       }
@@ -1141,4 +1146,34 @@ done:
   *inputLength = src - srcmin;
   *outputLength = dest - destmin;
   return 1;
+}
+
+static int
+contractTextExternally (
+  ContractionTable *contractionTable,
+  const wchar_t *inputBuffer, int *inputLength,
+  BYTE *outputBuffer, int *outputLength,
+  int *offsetsMap, const int cursorOffset
+) {
+  return 0;
+}
+
+int
+contractText (
+  ContractionTable *contractionTable,
+  const wchar_t *inputBuffer, int *inputLength,
+  BYTE *outputBuffer, int *outputLength,
+  int *offsetsMap, const int cursorOffset
+) {
+  if (contractionTable->executable) {
+    return contractTextExternally(contractionTable,
+                                  inputBuffer, inputLength,
+                                  outputBuffer, outputLength,
+                                  offsetsMap, cursorOffset);
+  } else {
+    return contractTextInternally(contractionTable,
+                                  inputBuffer, inputLength,
+                                  outputBuffer, outputLength,
+                                  offsetsMap, cursorOffset);
+  }
 }

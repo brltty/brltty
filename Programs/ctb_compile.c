@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
  
+#include "log.h"
 #include "file.h"
 #include "ctb.h"
 #include "ctb_internal.h"
@@ -641,6 +642,25 @@ ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
 
+  if (access(fileName, X_OK) != -1) {
+    if ((table = malloc(sizeof(*table)))) {
+      memset(table, 0, sizeof(*table));
+
+      if ((table->executable = strdup(fileName))) {
+        table->data.external.fileDescriptor = -1;
+        return table;
+      } else {
+        logMallocError();
+      }
+
+      free(table);
+    } else {
+      logMallocError();
+    }
+
+    return NULL;
+  }
+
   if (setGlobalTableVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
     ContractionTableData ctd;
     memset(&ctd, 0, sizeof(ctd));
@@ -665,13 +685,17 @@ compileContractionTable (const char *fileName) {
           if (processDataFile(fileName, processContractionTableLine, &ctd)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
-                table->header.fields = getContractionTableHeader(&ctd);
-                table->size = getDataSize(ctd.area);
+                table->executable = NULL;
+
+                table->data.internal.header.fields = getContractionTableHeader(&ctd);
+                table->data.internal.size = getDataSize(ctd.area);
                 resetDataArea(ctd.area);
 
-                table->characters = NULL;
-                table->charactersSize = 0;
-                table->characterCount = 0;
+                table->data.internal.characters = NULL;
+                table->data.internal.charactersSize = 0;
+                table->data.internal.characterCount = 0;
+              } else {
+                logMallocError();
               }
             }
           }
@@ -691,13 +715,13 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
-  if (table->characters) {
-    free(table->characters);
-    table->characters = NULL;
+  if (table->data.internal.characters) {
+    free(table->data.internal.characters);
+    table->data.internal.characters = NULL;
   }
 
-  if (table->size) {
-    free(table->header.fields);
+  if (table->data.internal.size) {
+    free(table->data.internal.header.fields);
     free(table);
   }
 }

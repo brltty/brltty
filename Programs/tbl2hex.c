@@ -88,8 +88,8 @@ loadContractionTable (const char *path, TableData *data) {
   if (!table) return 0;
 
   data->object = table;
-  data->bytes = table->header.bytes;
-  data->size = table->size;
+  data->bytes = table->data.internal.header.bytes;
+  data->size = table->data.internal.size;
   return 1;
 }
 

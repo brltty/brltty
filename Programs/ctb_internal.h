@@ -47,7 +47,7 @@ typedef struct {
   ContractionTableCharacterAttributes attributes;
 } ContractionTableCharacter;
 
-typedef enum { /*Op codes*/
+typedef enum {
   CTO_CapitalSign, /*dot pattern for capital sign*/
   CTO_BeginCapitalSign, /*dot pattern for beginning capital block*/
   CTO_EndCapitalSign, /*dot pattern for ending capital block*/
@@ -99,7 +99,7 @@ typedef struct {
   wchar_t findrep[1]; /*find and replacement strings*/
 } ContractionTableRule;
 
-typedef struct { /*translation table*/
+typedef struct {
   ContractionTableOffset capitalSign; /*capitalization sign*/
   ContractionTableOffset beginCapitalSign; /*begin capitals sign*/
   ContractionTableOffset endCapitalSign; /*end capitals sign*/
@@ -118,16 +118,26 @@ typedef struct {
 } CharacterEntry;
 
 struct ContractionTableStruct {
+  char *executable;
+
   union {
-    ContractionTableHeader *fields;
-    const unsigned char *bytes;
-  } header;
+    struct {
+      union {
+        ContractionTableHeader *fields;
+        const unsigned char *bytes;
+      } header;
 
-  size_t size;
+      size_t size;
 
-  CharacterEntry *characters;
-  int charactersSize;
-  int characterCount;
+      CharacterEntry *characters;
+      int charactersSize;
+      int characterCount;
+    } internal;
+
+    struct {
+      int fileDescriptor;
+    } external;
+  } data;
 };
 
 #ifdef __cplusplus
