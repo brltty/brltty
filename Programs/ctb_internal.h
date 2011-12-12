@@ -118,7 +118,7 @@ typedef struct {
 } CharacterEntry;
 
 struct ContractionTableStruct {
-  char *executable;
+  char *command;
 
   union {
     struct {
@@ -135,7 +135,7 @@ struct ContractionTableStruct {
     } internal;
 
     struct {
-      int fileDescriptor;
+      FILE *stream;
     } external;
   } data;
 };

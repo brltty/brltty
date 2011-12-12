@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
  
 #include "log.h"
 #include "file.h"
@@ -638,6 +639,26 @@ processContractionTableLine (DataFile *file, void *data) {
   }
 }
 
+int
+startContractionCommand (ContractionTable *table) {
+  if (!table->data.external.stream) {
+    if (!(table->data.external.stream = popen(table->command, "w+"))) {
+      logMessage(LOG_ERR, "command not started: %s: %s", table->command, strerror(errno));
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+void
+stopContractionCommand (ContractionTable *table) {
+  if (table->data.external.stream) {
+    pclose(table->data.external.stream);
+    table->data.external.stream = NULL;
+  }
+}
+
 ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
@@ -646,9 +667,14 @@ compileContractionTable (const char *fileName) {
     if ((table = malloc(sizeof(*table)))) {
       memset(table, 0, sizeof(*table));
 
-      if ((table->executable = strdup(fileName))) {
-        table->data.external.fileDescriptor = -1;
-        return table;
+      if ((table->command = strdup(fileName))) {
+        table->data.external.stream = NULL;
+
+        if (startContractionCommand(table)) {
+          return table;
+        }
+
+        free(table->command);
       } else {
         logMallocError();
       }
@@ -685,7 +711,7 @@ compileContractionTable (const char *fileName) {
           if (processDataFile(fileName, processContractionTableLine, &ctd)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
-                table->executable = NULL;
+                table->command = NULL;
 
                 table->data.internal.header.fields = getContractionTableHeader(&ctd);
                 table->data.internal.size = getDataSize(ctd.area);
@@ -715,8 +741,9 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
-  if (table->executable) {
-    free(table->executable);
+  if (table->command) {
+    stopContractionCommand(table);
+    free(table->command);
     free(table);
   } else {
     if (table->data.internal.characters) {

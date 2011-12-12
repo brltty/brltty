@@ -1155,7 +1155,7 @@ contractText (
   offsets = offsetsMap;
   cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
 
-  if (!(table->executable? contractTextExternally(): contractTextInternally())) {
+  if (!(table->command? contractTextExternally(): contractTextInternally())) {
     src = srcmin;
     dest = destmin;
 
