@@ -35,6 +35,7 @@ static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;
 static BYTE *dest, *destmin, *destmax;
 static int *offsets;
+
 static wchar_t before, after;	/*the characters before and after a string */
 static int currentFindLength;		/*length of current find string */
 static ContractionTableOpcode currentOpcode;
@@ -910,12 +911,7 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
 }
 
 static int
-contractTextInternally (
-  ContractionTable *contractionTable,
-  const wchar_t *inputBuffer, int *inputLength,
-  BYTE *outputBuffer, int *outputLength,
-  int *offsetsMap, const int cursorOffset
-) {
+contractTextInternally (void) {
   const wchar_t *srcword = NULL;
   BYTE *destword = NULL;
 
@@ -924,15 +920,9 @@ contractTextInternally (
 
   BYTE *destlast = NULL;
   const wchar_t *literal = NULL;
-  unsigned char lineBreakOpportunities[*inputLength];
+  unsigned char lineBreakOpportunities[srcmax - srcmin];
 
-  table = contractionTable;
-  srcmax = (srcmin = src = inputBuffer) + *inputLength;
-  destmax = (destmin = dest = outputBuffer) + *outputLength;
-  offsets = offsetsMap;
-  cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
-
-  findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
+  findLineBreakOpportunities(lineBreakOpportunities, srcmin, ARRAY_COUNT(lineBreakOpportunities));
   previousOpcode = CTO_None;
 
   while (src < srcmax) {
@@ -1143,18 +1133,11 @@ done:
     if (!done) src = srcorig;
   }
 
-  *inputLength = src - srcmin;
-  *outputLength = dest - destmin;
   return 1;
 }
 
 static int
-contractTextExternally (
-  ContractionTable *contractionTable,
-  const wchar_t *inputBuffer, int *inputLength,
-  BYTE *outputBuffer, int *outputLength,
-  int *offsetsMap, const int cursorOffset
-) {
+contractTextExternally (void) {
   return 0;
 }
 
@@ -1165,15 +1148,16 @@ contractText (
   BYTE *outputBuffer, int *outputLength,
   int *offsetsMap, const int cursorOffset
 ) {
-  if (contractionTable->executable) {
-    return contractTextExternally(contractionTable,
-                                  inputBuffer, inputLength,
-                                  outputBuffer, outputLength,
-                                  offsetsMap, cursorOffset);
-  } else {
-    return contractTextInternally(contractionTable,
-                                  inputBuffer, inputLength,
-                                  outputBuffer, outputLength,
-                                  offsetsMap, cursorOffset);
-  }
+  int result;
+
+  table = contractionTable;
+  srcmax = (srcmin = src = inputBuffer) + *inputLength;
+  destmax = (destmin = dest = outputBuffer) + *outputLength;
+  offsets = offsetsMap;
+  cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
+
+  result = table->executable? contractTextExternally(): contractTextInternally();
+  *inputLength = src - srcmin;
+  *outputLength = dest - destmin;
+  return result;
 }
