@@ -219,6 +219,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
     translateOutputCells(cells, brl->data->textCells, brl->textColumns);
     if (!writePacket(brl, HW_MSG_DISPLAY, brl->textColumns, cells)) return 0;
+    brl->data->cellsInitialized = 1;
   }
 
   return 1;
