@@ -681,6 +681,9 @@ HIMS
 .B ht
 HandyTech
 .TP 4
+.B hw
+HumanWare
+.TP 4
 .B il
 IrisLinux
 .TP 4

@@ -1183,6 +1183,7 @@ BRLTTY_BRAILLE_DRIVER([eu], [EuroBraille])
 BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
 BRLTTY_BRAILLE_DRIVER([hm], [HIMS])
 BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
+BRLTTY_BRAILLE_DRIVER([hw], [HumanWare])
 case "${host_os}"
 in
    linux*)

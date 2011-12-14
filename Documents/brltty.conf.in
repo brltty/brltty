@@ -48,6 +48,7 @@
 #braille-driver	fs	# FreedomScientific
 #braille-driver	hm	# HIMS
 #braille-driver	ht	# HandyTech
+#braille-driver	hw	# HumanWare
 #braille-driver	il	# IrisLinux
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText

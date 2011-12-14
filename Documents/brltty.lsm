@@ -48,6 +48,7 @@ Platforms: Linux (kernel 1.1.92 or later)
                         Active Braille, Braille Wave, Easy Braille,
                         Braille Star 40/80, Bookworm, Braillino]
            - HIMS [Braille Sense, SyncBraille]
+           - HumanWare [Brailliant 32/40/80 bi]
            - IrisLinux
            - Libbraille
            - LogText [32]
