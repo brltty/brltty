@@ -156,24 +156,32 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           switch (packet.fields.type) {
             case HW_MSG_INIT_RESP:
-              brl->textColumns = packet.fields.data.init.cellCount;
-              brl->textRows = 1;
+              logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
+                         packet.fields.data.init.modelIdentifier,
+                         packet.fields.data.init.cellCount);
 
-              {
-                const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-                brl->keyBindings = ktd->bindings;
-                brl->keyNameTables = ktd->names;
+              if (packet.fields.data.init.communicationDisabled) {
+                logMessage(LOG_WARNING, "communication channel not available");
+              } else {
+                brl->textColumns = packet.fields.data.init.cellCount;
+                brl->textRows = 1;
+
+                {
+                  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+                  brl->keyBindings = ktd->bindings;
+                  brl->keyNameTables = ktd->names;
+                }
+
+                makeOutputTable(dotsTable_ISO11548_1);
+                brl->data->cellsInitialized = 0;
+                return 1;
               }
-
-              makeOutputTable(dotsTable_ISO11548_1);
-              brl->data->cellsInitialized = 0;
-              return 1;
+              break;
 
             default:
+              logUnexpectedPacket(&packet, length);
               break;
           }
-
-          logUnexpectedPacket(&packet, length);
         }
       }
 

@@ -45,7 +45,7 @@ typedef union {
       unsigned char bytes[0XFF];
 
       struct {
-        unsigned char commnicationDisabled;
+        unsigned char communicationDisabled;
         unsigned char modelIdentifier;
         unsigned char cellCount;
       } PACKED init;
