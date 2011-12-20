@@ -18,10 +18,22 @@
 
 title HumanWare
 
-bind Thumb1 FWINLT
-bind Thumb4 FWINRT
+bind Thumb2+Thumb3 HOME
 bind Thumb2 LNUP
 bind Thumb3 LNDN
+bind Thumb1 FWINLT
+bind Thumb4 FWINRT
+
+bind Thumb1+Thumb2 TOP_LEFT
+bind Thumb1+Thumb3 BOT_LEFT
+bind Thumb4+Thumb2 PRDIFLN
+bind Thumb4+Thumb3 NXDIFLN
+
+bind Thumb1+RoutingKey CUTBEGIN
+bind Thumb2+RoutingKey CUTAPPEND
+bind Thumb3+RoutingKey CUTRECT
+bind Thumb4+RoutingKey CUTLINE
+bind Thumb1+Thumb4 PASTE
 
 map Dot1 DOT1
 map Dot2 DOT2
