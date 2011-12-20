@@ -126,6 +126,15 @@ static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   SerialParameters serialParameters;
 
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
+    { .vendor=0X1C71, .product=0XC005, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=3
+    }
+    ,
+    { .vendor=0 }
+  };
+
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
 
@@ -133,6 +142,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   serialParameters.baud = 115200;
   serialParameters.parity = SERIAL_PARITY_EVEN;
   descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.readyDelay = 100;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.readyDelay = 100;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.readyDelay = 100;
 
   if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
