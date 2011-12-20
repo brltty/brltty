@@ -41,17 +41,19 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(HW_KEY_Dot8, "Dot8"),
   KEY_NAME_ENTRY(HW_KEY_Space, "Space"),
 
-  KEY_NAME_ENTRY(HW_KEY_Nav1, "Nav1"),
-  KEY_NAME_ENTRY(HW_KEY_Nav2, "Nav2"),
-  KEY_NAME_ENTRY(HW_KEY_Nav3, "Nav3"),
-  KEY_NAME_ENTRY(HW_KEY_Nav4, "Nav4"),
-  KEY_NAME_ENTRY(HW_KEY_Nav5, "Nav5"),
-  KEY_NAME_ENTRY(HW_KEY_Nav6, "Nav6"),
+  KEY_NAME_ENTRY(HW_KEY_Nav1, "Display1"),
+  KEY_NAME_ENTRY(HW_KEY_Nav2, "Display2"),
+  KEY_NAME_ENTRY(HW_KEY_Nav3, "Display3"),
+  KEY_NAME_ENTRY(HW_KEY_Nav4, "Display4"),
+  KEY_NAME_ENTRY(HW_KEY_Nav5, "Display5"),
+  KEY_NAME_ENTRY(HW_KEY_Nav6, "Display6"),
 
   KEY_NAME_ENTRY(HW_KEY_Thumb1, "Thumb1"),
   KEY_NAME_ENTRY(HW_KEY_Thumb2, "Thumb2"),
   KEY_NAME_ENTRY(HW_KEY_Thumb3, "Thumb3"),
   KEY_NAME_ENTRY(HW_KEY_Thumb4, "Thumb4"),
+
+  KEY_SET_ENTRY(HW_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)

@@ -33,3 +33,5 @@ map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
 
+include brl-bm-display6.kti
+include brl-bm-routing6.kti
