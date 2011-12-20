@@ -1091,12 +1091,39 @@ usbHidSetFeature (
                          buffer, length, timeout);
 }
 
+static const UsbInterfaceDescriptor *
+usbCommunicationInterfaceDescriptor (UsbDevice *device) {
+  if (device->descriptor.bDeviceClass == 0X02) {
+    const UsbDescriptor *descriptor = NULL;
+
+    while (usbNextDescriptor(device, &descriptor)) {
+      if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
+        if (descriptor->interface.bInterfaceClass == 0X02)
+          if (descriptor->interface.bInterfaceSubClass == 0X02)
+            return &descriptor->interface;
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
 static int
-usbEnableAdapter_Abstract (UsbDevice *device) {
+usbEnableAdapter_CDC_ACM (UsbDevice *device) {
+  const UsbInterfaceDescriptor *interface = usbCommunicationInterfaceDescriptor(device);
+
+  if (interface) {
+    ssize_t result = usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Class,
+                                     0X22, 0X1, interface->bInterfaceNumber,
+                                     NULL, 0, 1000);
+
+    if (result != -1) return 1;
+  }
+
   return 0;
 }
-static const UsbSerialOperations usbSerialOperations_Abstract = {
-  .enableAdapter = usbEnableAdapter_Abstract
+static const UsbSerialOperations usbSerialOperations_CDC_ACM = {
+  .enableAdapter = usbEnableAdapter_CDC_ACM
 };
 
 static int
@@ -1650,7 +1677,7 @@ usbSetSerialOperations (UsbDevice *device) {
       ,
       { /* HumanWare (serial protocol) */
         .vendor=0X1C71, .product=0XC005,
-        .operations = &usbSerialOperations_Abstract
+        .operations = &usbSerialOperations_CDC_ACM
       }
       ,
       {.vendor=0, .product=0}

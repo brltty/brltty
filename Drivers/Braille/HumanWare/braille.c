@@ -143,11 +143,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeSerialParameters(&serialParameters);
   serialParameters.baud = 115200;
   serialParameters.parity = SERIAL_PARITY_EVEN;
+
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.readyDelay = 100;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.readyDelay = 100;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.readyDelay = 100;
