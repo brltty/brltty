@@ -18,6 +18,11 @@
 
 title HumanWare
 
+
+####################
+# Default Bindings #
+####################
+
 bind Thumb2+Thumb3 HOME
 bind Thumb2 LNUP
 bind Thumb3 LNDN
@@ -44,6 +49,41 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
+map Thumb2 META
+map Thumb3 CONTROL
+
+bind Space+Dot1 KEY_CURSOR_LEFT
+bind Space+Dot4 KEY_CURSOR_RIGHT
+bind Space+Dot2 KEY_CURSOR_UP
+bind Space+Dot5 KEY_CURSOR_DOWN
+bind Space+Dot3 KEY_PAGE_UP
+bind Space+Dot6 KEY_PAGE_DOWN
+bind Space+Dot7 KEY_BACKSPACE
+bind Space+Dot8 KEY_ENTER
+bind Space+Dot1+Dot4+Dot5 KEY_DELETE
+bind Space+Dot2+Dot4 KEY_INSERT
+bind Space+Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind Space+RoutingKey KEY_FUNCTION
 
 include brl-bm-display6.kti
 include brl-bm-routing6.kti
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind Thumb1 FWINLT
+bind Thumb4 FWINRT
+bind Thumb2 MENU_PREV_ITEM
+bind Thumb3 MENU_NEXT_ITEM
+bind Thumb1+Thumb2 MENU_FIRST_ITEM
+bind Thumb1+Thumb3 MENU_LAST_ITEM
+bind Thumb4+Thumb2 MENU_PREV_SETTING
+bind Thumb4+Thumb3 MENU_NEXT_SETTING
+bind Thumb2+Thumb3 PREFMENU
+bind Thumb1+Thumb2 PREFLOAD
+bind Thumb3+Thumb4 PREFSAVE
+

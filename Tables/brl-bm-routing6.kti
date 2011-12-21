@@ -39,3 +39,5 @@ bind Display5+Display6+RoutingKey NXDIFCHAR
 bind Display1+Display3+RoutingKey SETMARK
 bind Display4+Display6+RoutingKey GOTOMARK
 
+bind Display4+Display5+Display6+RoutingKey SWITCHVT
+
