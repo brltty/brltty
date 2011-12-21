@@ -65,8 +65,6 @@ HKR,,Icon,,-20
 "LibUsb Baum EcoVario 80" = LIBUSB_DEV, USB\VID_0904&PID_2016
 "LibUsb Baum Refreshabraille 18" = LIBUSB_DEV, USB\VID_0904&PID_3000
 
-"LibUsb Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
-
 "LibUsb EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1122
 "LibUsb EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1124
 
@@ -81,6 +79,10 @@ HKR,,Icon,,-20
 "LibUsb HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
 "LibUsb HandyTech Active Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0054
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+"LibUsb HIMS Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb HumanWare (serial protocol)" = LIBUSB_DEV, USB\VID_1C71&PID_C005
 
 "LibUsb Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
 
@@ -118,8 +120,6 @@ HKR,,Icon,,-20
 "LibUsb Baum EcoVario 80" = LIBUSB_DEV, USB\VID_0904&PID_2016
 "LibUsb Baum Refreshabraille 18" = LIBUSB_DEV, USB\VID_0904&PID_3000
 
-"LibUsb Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
-
 "LibUsb EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1122
 "LibUsb EuroBraille ESYS 12/40" = LIBUSB_DEV, USB\VID_C251&PID_1124
 
@@ -134,6 +134,10 @@ HKR,,Icon,,-20
 "LibUsb HandyTech Easy Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0044
 "LibUsb HandyTech Active Braille (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0054
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+"LibUsb HIMS Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb HumanWare (serial protocol)" = LIBUSB_DEV, USB\VID_1C71&PID_C005
 
 "LibUsb Metec" = LIBUSB_DEV, USB\VID_0452&PID_0100
 
