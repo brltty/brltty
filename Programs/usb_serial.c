@@ -491,171 +491,167 @@ static const UsbSerialOperations usbSerialOperations_CP2101 = {
 };
 
 
-const UsbSerialOperations *
-usbGetSerialOperations (UsbDevice *device) {
-  return device->serial;
-}
+typedef struct {
+  uint16_t vendor;
+  uint16_t product;
+  const UsbSerialOperations *operations;
+  UsbInputFilter inputFilter;
+} UsbSerialAdapter;
+
+static const UsbSerialAdapter usbSerialAdapters[] = {
+  { /* HandyTech GoHubs */
+    .vendor=0X0921, .product=0X1200,
+    .operations = &usbSerialOperations_Belkin
+  }
+  ,
+  { /* HandyTech FTDI */
+    .vendor=0X0403, .product=0X6001,
+    .operations = &usbSerialOperations_FTDI_FT8U232AM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Papenmeier FTDI */
+    .vendor=0X0403, .product=0XF208,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum Vario40 (40 cells) */
+    .vendor=0X0403, .product=0XFE70,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum PocketVario (24 cells) */
+    .vendor=0X0403, .product=0XFE71,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum SuperVario 40 (40 cells) */
+    .vendor=0X0403, .product=0XFE72,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum SuperVario 32 (32 cells) */
+    .vendor=0X0403, .product=0XFE73,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum SuperVario 64 (64 cells) */
+    .vendor=0X0403, .product=0XFE74,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum SuperVario 80 (80 cells) */
+    .vendor=0X0403, .product=0XFE75,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioPro 80 (80 cells) */
+    .vendor=0X0403, .product=0XFE76,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioPro 64 (64 cells) */
+    .vendor=0X0403, .product=0XFE77,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioPro 40 (40 cells) */
+    .vendor=0X0904, .product=0X2000,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum EcoVario 24 (24 cells) */
+    .vendor=0X0904, .product=0X2001,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum EcoVario 40 (40 cells) */
+    .vendor=0X0904, .product=0X2002,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioConnect 40 (40 cells) */
+    .vendor=0X0904, .product=0X2007,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioConnect 32 (32 cells) */
+    .vendor=0X0904, .product=0X2008,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioConnect 24 (24 cells) */
+    .vendor=0X0904, .product=0X2009,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioConnect 64 (64 cells) */
+    .vendor=0X0904, .product=0X2010,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum VarioConnect 80 (80 cells) */
+    .vendor=0X0904, .product=0X2011,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum EcoVario 32 (32 cells) */
+    .vendor=0X0904, .product=0X2014,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum EcoVario 64 (64 cells) */
+    .vendor=0X0904, .product=0X2015,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum EcoVario 80 (80 cells) */
+    .vendor=0X0904, .product=0X2016,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Baum Refreshabraille 18 (18 cells) */
+    .vendor=0X0904, .product=0X3000,
+    .operations = &usbSerialOperations_FTDI_FT232BM,
+    .inputFilter = usbInputFilter_FTDI
+  }
+  ,
+  { /* Seika (40 cells) */
+    .vendor=0X10C4, .product=0XEA60,
+    .operations = &usbSerialOperations_CP2101
+  }
+  ,
+  { /* HumanWare (serial protocol) */
+    .vendor=0X1C71, .product=0XC005,
+    .operations = &usbSerialOperations_CDC_ACM
+  }
+  ,
+  {.vendor=0, .product=0}
+};
 
 int
 usbSetSerialOperations (UsbDevice *device) {
   if (!device->serial) {
-    typedef struct {
-      uint16_t vendor;
-      uint16_t product;
-      const UsbSerialOperations *operations;
-      UsbInputFilter inputFilter;
-    } UsbSerialAdapter;
-
-    static const UsbSerialAdapter usbSerialAdapters[] = {
-      { /* HandyTech GoHubs */
-        .vendor=0X0921, .product=0X1200,
-        .operations = &usbSerialOperations_Belkin
-      }
-      ,
-      { /* HandyTech FTDI */
-        .vendor=0X0403, .product=0X6001,
-        .operations = &usbSerialOperations_FTDI_FT8U232AM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Papenmeier FTDI */
-        .vendor=0X0403, .product=0XF208,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum Vario40 (40 cells) */
-        .vendor=0X0403, .product=0XFE70,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum PocketVario (24 cells) */
-        .vendor=0X0403, .product=0XFE71,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum SuperVario 40 (40 cells) */
-        .vendor=0X0403, .product=0XFE72,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum SuperVario 32 (32 cells) */
-        .vendor=0X0403, .product=0XFE73,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum SuperVario 64 (64 cells) */
-        .vendor=0X0403, .product=0XFE74,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum SuperVario 80 (80 cells) */
-        .vendor=0X0403, .product=0XFE75,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioPro 80 (80 cells) */
-        .vendor=0X0403, .product=0XFE76,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioPro 64 (64 cells) */
-        .vendor=0X0403, .product=0XFE77,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioPro 40 (40 cells) */
-        .vendor=0X0904, .product=0X2000,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum EcoVario 24 (24 cells) */
-        .vendor=0X0904, .product=0X2001,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum EcoVario 40 (40 cells) */
-        .vendor=0X0904, .product=0X2002,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioConnect 40 (40 cells) */
-        .vendor=0X0904, .product=0X2007,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioConnect 32 (32 cells) */
-        .vendor=0X0904, .product=0X2008,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioConnect 24 (24 cells) */
-        .vendor=0X0904, .product=0X2009,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioConnect 64 (64 cells) */
-        .vendor=0X0904, .product=0X2010,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum VarioConnect 80 (80 cells) */
-        .vendor=0X0904, .product=0X2011,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum EcoVario 32 (32 cells) */
-        .vendor=0X0904, .product=0X2014,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum EcoVario 64 (64 cells) */
-        .vendor=0X0904, .product=0X2015,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum EcoVario 80 (80 cells) */
-        .vendor=0X0904, .product=0X2016,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Baum Refreshabraille 18 (18 cells) */
-        .vendor=0X0904, .product=0X3000,
-        .operations = &usbSerialOperations_FTDI_FT232BM,
-        .inputFilter = usbInputFilter_FTDI
-      }
-      ,
-      { /* Seika (40 cells) */
-        .vendor=0X10C4, .product=0XEA60,
-        .operations = &usbSerialOperations_CP2101
-      }
-      ,
-      { /* HumanWare (serial protocol) */
-        .vendor=0X1C71, .product=0XC005,
-        .operations = &usbSerialOperations_CDC_ACM
-      }
-      ,
-      {.vendor=0, .product=0}
-    };
     const UsbSerialAdapter *sa = usbSerialAdapters;
 
     while (sa->vendor) {
@@ -672,6 +668,11 @@ usbSetSerialOperations (UsbDevice *device) {
   }
 
   return 1;
+}
+
+const UsbSerialOperations *
+usbGetSerialOperations (UsbDevice *device) {
+  return device->serial;
 }
 
 int
