@@ -74,23 +74,29 @@ extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpoi
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern int usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *length);
 
+extern int usbSetSerialOperations (UsbDevice *device);
+
 extern int usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration
 );
+
 extern int usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
 );
+
 extern int usbReleaseInterface (
   UsbDevice *device,
   unsigned char interface
 );
+
 extern int usbSetAlternative (
   UsbDevice *device,
   unsigned char interface,
   unsigned char alternative
 );
+
 extern ssize_t usbControlTransfer (
   UsbDevice *device,
   uint8_t direction,
@@ -103,6 +109,7 @@ extern ssize_t usbControlTransfer (
   uint16_t length,
   int timeout
 );
+
 extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
 extern void usbDeallocateEndpointExtension (UsbEndpointExtension *eptx);
