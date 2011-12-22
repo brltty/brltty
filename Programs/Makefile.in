@@ -172,6 +172,9 @@ serial.$O:
 usb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb.c
 
+usb_hid.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_hid.c
+
 usb_serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_serial.c
 
