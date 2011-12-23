@@ -91,7 +91,7 @@ struct MenuItemStruct {
   } data;
 };
 
-char *
+static inline const char *
 getLocalText (const char *string) {
   return (string && *string)? gettext(string): "";
 }
