@@ -84,6 +84,6 @@ bind Thumb1+Thumb3 MENU_LAST_ITEM
 bind Thumb4+Thumb2 MENU_PREV_SETTING
 bind Thumb4+Thumb3 MENU_NEXT_SETTING
 bind Thumb2+Thumb3 PREFMENU
-bind Thumb1+Thumb2 PREFLOAD
-bind Thumb3+Thumb4 PREFSAVE
+bind Thumb2+Thumb3+Thumb1 PREFLOAD
+bind Thumb2+Thumb3+Thumb4 PREFSAVE
 
