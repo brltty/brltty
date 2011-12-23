@@ -2524,7 +2524,7 @@ configureUsbPort (void) {
     .baud = protocol->serialBaud,
     .flowControl = SERIAL_FLOW_NONE,
     .dataBits = 8,
-    .stopBits = 1,
+    .stopBits = SERIAL_STOP_1,
     .parity = protocol->serialParity
   };
 

@@ -58,7 +58,7 @@ extern ssize_t serialWriteData (
 extern int serialSetParameters (SerialDevice *serial, const SerialParameters *parameters);
 extern int serialSetBaud (SerialDevice *serial, unsigned int baud);
 extern int serialSetDataBits (SerialDevice *serial, unsigned int bits);
-extern int serialSetStopBits (SerialDevice *serial, unsigned int bits);
+extern int serialSetStopBits (SerialDevice *serial, SerialStopBits bits);
 extern int serialSetParity (SerialDevice *serial, SerialParity parity);
 extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 

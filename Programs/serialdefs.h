@@ -24,6 +24,12 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
+  SERIAL_STOP_1   = 1,
+  SERIAL_STOP_2   = 2,
+  SERIAL_STOP_1_5 = 3
+} SerialStopBits;
+
+typedef enum {
   SERIAL_PARITY_SPACE,
   SERIAL_PARITY_ODD,
   SERIAL_PARITY_EVEN,
@@ -52,7 +58,7 @@ typedef enum {
 typedef struct {
   unsigned int baud;
   unsigned int dataBits;
-  unsigned int stopBits;
+  SerialStopBits stopBits;
   SerialParity parity;
   SerialFlowControl flowControl;
 } SerialParameters;

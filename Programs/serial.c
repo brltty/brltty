@@ -543,23 +543,23 @@ serialSetDataBits (SerialDevice *serial, unsigned int bits) {
 }
 
 int
-serialSetStopBits (SerialDevice *serial, unsigned int bits) {
+serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
 #if defined(__MINGW32__)
-  if (bits == 1) {
+  if (bits == SERIAL_STOP_1) {
     serial->pendingAttributes.StopBits = ONESTOPBIT;
-  } else if (bits == 15) {
+  } else if (bits == SERIAL_STOP_1_5) {
     serial->pendingAttributes.StopBits = ONE5STOPBITS;
-  } else if (bits == 2) {
+  } else if (bits == SERIAL_STOP_2) {
     serial->pendingAttributes.StopBits = TWOSTOPBITS;
 #elif defined(__MSDOS__)
-  if (bits == 1) {
+  if (bits == SERIAL_STOP_1) {
     serial->pendingAttributes.bios.fields.stop = 0;
-  } else if (bits == 15 || bits == 2) {
+  } else if (bits == 15 || bits == SERIAL_STOP_2) {
     serial->pendingAttributes.bios.fields.stop = 1;
 #else /* UNIX */
-  if (bits == 1) {
+  if (bits == SERIAL_STOP_1) {
     serial->pendingAttributes.c_cflag &= ~CSTOPB;
-  } else if (bits == 2) {
+  } else if (bits == SERIAL_STOP_2) {
     serial->pendingAttributes.c_cflag |= CSTOPB;
 #endif /* set stop bits */
   } else {
@@ -818,8 +818,10 @@ serialSetParameters (SerialDevice *serial, const SerialParameters *parameters) {
 
 unsigned int
 serialGetCharacterSize (const SerialParameters *parameters) {
-  return 1 + parameters->dataBits + parameters->stopBits +
-         ((parameters->parity != SERIAL_PARITY_NONE)? 1: 0);
+  unsigned int size = 1 + parameters->dataBits;
+  size += (parameters->stopBits == SERIAL_STOP_1)? 1: 2;
+  if (parameters->parity != SERIAL_PARITY_NONE) size += 1;
+  return size;
 }
 
 unsigned int

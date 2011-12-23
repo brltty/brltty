@@ -112,13 +112,17 @@ usbSetDataBits_Belkin (UsbDevice *device, unsigned int bits) {
 }
 
 static int
-usbSetStopBits_Belkin (UsbDevice *device, unsigned int bits) {
-  if ((bits < 1) || (bits > 2)) {
-    logMessage(LOG_WARNING, "unsupported Belkin stop bits: %u", bits);
-    errno = EINVAL;
-    return 0;
+usbSetStopBits_Belkin (UsbDevice *device, SerialStopBits bits) {
+  unsigned int value;
+  switch (bits) {
+    case SERIAL_STOP_1: value = 0; break;
+    case SERIAL_STOP_2: value = 1; break;
+    default:
+      logMessage(LOG_WARNING, "unsupported Belkin stop bits: %u", bits);
+      errno = EINVAL;
+      return 0;
   }
-  return usbSetAttribute_Belkin(device, 1, bits-1, 0);
+  return usbSetAttribute_Belkin(device, 1, value, 0);
 }
 
 static int
@@ -139,7 +143,7 @@ usbSetParity_Belkin (UsbDevice *device, SerialParity parity) {
 }
 
 static int
-usbSetDataFormat_Belkin (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
+usbSetDataFormat_Belkin (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   if (usbSetDataBits_Belkin(device, dataBits))
     if (usbSetStopBits_Belkin(device, stopBits))
       if (usbSetParity_Belkin(device, parity))
@@ -280,7 +284,7 @@ usbSetFlowControl_FTDI (UsbDevice *device, SerialFlowControl flow) {
 }
 
 static int
-usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
+usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   int ok = 1;
   unsigned int value = dataBits & 0XFF;
   if (dataBits != value) {
@@ -299,8 +303,8 @@ usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, unsigned int st
       break;
   }
   switch (stopBits) {
-    case 1: value |= 0X0000; break;
-    case 2: value |= 0X1000; break;
+    case SERIAL_STOP_1: value |= 0X0000; break;
+    case SERIAL_STOP_2: value |= 0X1000; break;
     default:
       logMessage(LOG_WARNING, "unsupported FTDI stop bits: %u", stopBits);
       ok = 0;
@@ -413,7 +417,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
 }
 
 static int
-usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, unsigned int stopBits, SerialParity parity) {
+usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   int ok = 1;
   unsigned int value = dataBits & 0XF;
   if (dataBits != value) {
@@ -433,8 +437,8 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, unsigned int 
       break;
   }
   switch (stopBits) {
-    case 1: value |= 0X0; break;
-    case 2: value |= 0X2; break;
+    case SERIAL_STOP_1: value |= 0X0; break;
+    case SERIAL_STOP_2: value |= 0X2; break;
     default:
       logMessage(LOG_WARNING, "unsupported CP2101 stop bits: %u", stopBits);
       ok = 0;
