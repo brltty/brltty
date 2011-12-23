@@ -126,12 +126,19 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
-  SerialParameters serialParameters;
+  static const SerialParameters serialParameters = {
+    .baud = 115200,
+    .dataBits = 8,
+    .stopBits = SERIAL_STOP_1,
+    .parity = SERIAL_PARITY_EVEN,
+    .flowControl = SERIAL_FLOW_NONE
+  };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
     { .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=3
+      .inputEndpoint=2, .outputEndpoint=3,
+      .serial = &serialParameters
     }
     ,
     { .vendor=0 }
@@ -139,10 +146,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
-
-  gioInitializeSerialParameters(&serialParameters);
-  serialParameters.baud = 115200;
-  serialParameters.parity = SERIAL_PARITY_EVEN;
 
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.readyDelay = 100;

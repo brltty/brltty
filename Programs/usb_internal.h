@@ -57,7 +57,7 @@ struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   UsbDeviceExtension *extension;
   const UsbSerialOperations *serialOperations;
-  void *serialData;
+  const void *serialData;
   UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
   Queue *endpoints;

@@ -78,23 +78,123 @@ usbCommunicationInterfaceDescriptor (UsbDevice *device) {
 }
 
 static int
+usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int rate, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
+  USB_CDC_ACM_LineCoding lineCoding;
+  memset(&lineCoding, 0, sizeof(lineCoding));
+
+  lineCoding.dwDTERate = rate;
+
+  switch (dataBits) {
+    case  5:
+    case  6:
+    case  7:
+    case  8:
+    case 16:
+      lineCoding.bDataBits = dataBits;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CDC ACM data bits: %u", dataBits);
+      errno = EINVAL;
+      return 0;
+  }
+
+  switch (stopBits) {
+    case SERIAL_STOP_1:
+      lineCoding.bCharFormat = USB_CDC_ACM_STOP_1;
+      break;
+
+    case SERIAL_STOP_1_5:
+      lineCoding.bCharFormat = USB_CDC_ACM_STOP_1_5;
+      break;
+
+    case SERIAL_STOP_2:
+      lineCoding.bCharFormat = USB_CDC_ACM_STOP_2;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CDC ACM stop bits: %u", stopBits);
+      errno = EINVAL;
+      return 0;
+  }
+
+  switch (parity) {
+    case SERIAL_PARITY_NONE:
+      lineCoding.bParityType = USB_CDC_ACM_PARITY_NONE;
+      break;
+
+    case SERIAL_PARITY_ODD:
+      lineCoding.bParityType = USB_CDC_ACM_PARITY_ODD;
+      break;
+
+    case SERIAL_PARITY_EVEN:
+      lineCoding.bParityType = USB_CDC_ACM_PARITY_EVEN;
+      break;
+
+    case SERIAL_PARITY_MARK:
+      lineCoding.bParityType = USB_CDC_ACM_PARITY_MARK;
+      break;
+
+    case SERIAL_PARITY_SPACE:
+      lineCoding.bParityType = USB_CDC_ACM_PARITY_SPACE;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CDC ACM parity: %u", parity);
+      errno = EINVAL;
+      return 0;
+  }
+
+  {
+    const UsbInterfaceDescriptor *interface = device->serialData;
+    ssize_t result = usbControlWrite(device,
+                                     UsbControlRecipient_Interface, UsbControlType_Class,
+                                     USB_CDC_ACM_CTL_SetLineCoding,
+                                     0,
+                                     interface->bInterfaceNumber,
+                                     &lineCoding, sizeof(lineCoding), 1000);
+
+    if (result == -1) return 0;
+  }
+
+  return 1;
+}
+
+static int
+usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
+  if (flow) {
+    logMessage(LOG_WARNING, "unsupported CDC ACM flow control: %02X", flow);
+    errno = EINVAL;
+    return 0;
+  }
+
+  return 1;
+}
+
+static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
   const UsbInterfaceDescriptor *interface = usbCommunicationInterfaceDescriptor(device);
 
   if (interface) {
-    ssize_t result = usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Class,
+    ssize_t result = usbControlWrite(device,
+                                     UsbControlRecipient_Interface, UsbControlType_Class,
                                      USB_CDC_ACM_CTL_SetControlLines,
                                      USB_CDC_ACM_LINE_DTR,
                                      interface->bInterfaceNumber,
                                      NULL, 0, 1000);
 
-    if (result != -1) return 1;
+    if (result != -1) {
+      device->serialData = interface;
+      return 1;
+    }
   }
 
   return 0;
 }
 
 static const UsbSerialOperations usbSerialOperations_CDC_ACM = {
+  .setLineProperties = usbSetLineProperties_CDC_ACM,
+  .setFlowControl = usbSetFlowControl_CDC_ACM,
   .enableAdapter = usbEnableAdapter_CDC_ACM
 };
 
@@ -208,8 +308,8 @@ usbSetRtsState_Belkin (UsbDevice *device, int state) {
 
 static const UsbSerialOperations usbSerialOperations_Belkin = {
   .setBaud = usbSetBaud_Belkin,
-  .setFlowControl = usbSetFlowControl_Belkin,
   .setDataFormat = usbSetDataFormat_Belkin,
+  .setFlowControl = usbSetFlowControl_Belkin,
   .setDtrState = usbSetDtrState_Belkin,
   .setRtsState = usbSetRtsState_Belkin
 };
@@ -374,24 +474,24 @@ usbSetRtsState_FTDI (UsbDevice *device, int state) {
 
 static const UsbSerialOperations usbSerialOperations_FTDI_SIO = {
   .setBaud = usbSetBaud_FTDI_SIO,
-  .setFlowControl = usbSetFlowControl_FTDI,
   .setDataFormat = usbSetDataFormat_FTDI,
+  .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
   .setRtsState = usbSetRtsState_FTDI
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM = {
   .setBaud = usbSetBaud_FTDI_FT8U232AM,
-  .setFlowControl = usbSetFlowControl_FTDI,
   .setDataFormat = usbSetDataFormat_FTDI,
+  .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
   .setRtsState = usbSetRtsState_FTDI
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
   .setBaud = usbSetBaud_FTDI_FT232BM,
-  .setFlowControl = usbSetFlowControl_FTDI,
   .setDataFormat = usbSetDataFormat_FTDI,
+  .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
   .setRtsState = usbSetRtsState_FTDI
 };
@@ -522,8 +622,8 @@ usbEnableAdapter_CP2101 (UsbDevice *device) {
 
 static const UsbSerialOperations usbSerialOperations_CP2101 = {
   .setBaud = usbSetBaud_CP2101,
-  .setFlowControl = usbSetFlowControl_CP2101,
   .setDataFormat = usbSetDataFormat_CP2101,
+  .setFlowControl = usbSetFlowControl_CP2101,
   .setDtrState = usbSetDtrState_CP2101,
   .setRtsState = usbSetRtsState_CP2101,
   .enableAdapter = usbEnableAdapter_CP2101
@@ -725,9 +825,13 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
     return 0;
   }
 
-  if (!serial->setBaud(device, parameters->baud)) return 0;
-  if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
-  if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+  if (serial->setLineProperties) {
+    if (!serial->setLineProperties(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+  } else {
+    if (!serial->setBaud(device, parameters->baud)) return 0;
+    if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+  }
 
+  if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
   return 1;
 }
