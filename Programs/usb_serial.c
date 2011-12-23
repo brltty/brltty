@@ -26,6 +26,39 @@
 #include "usb_internal.h"
 
 
+typedef enum {
+  USB_CDC_ACM_CTL_SetLineCoding   = 0X20,
+  USB_CDC_ACM_CTL_GetLineCoding   = 0X21,
+  USB_CDC_ACM_CTL_SetControlLines = 0X22,
+  USB_CDC_ACM_CTL_SendBreak       = 0X23
+} USB_CDC_ACM_ControlRequest;
+
+typedef enum {
+  USB_CDC_ACM_LINE_DTR = 0X01,
+  USB_CDC_ACM_LINE_RTS = 0X02
+} USB_CDC_ACM_ControlLine;
+
+typedef enum {
+  USB_CDC_ACM_STOP_1,
+  USB_CDC_ACM_STOP_1_5,
+  USB_CDC_ACM_STOP_2
+} USB_CDC_ACM_StopBits;
+
+typedef enum {
+  USB_CDC_ACM_PARITY_NONE,
+  USB_CDC_ACM_PARITY_ODD,
+  USB_CDC_ACM_PARITY_EVEN,
+  USB_CDC_ACM_PARITY_MARK,
+  USB_CDC_ACM_PARITY_SPACE
+} USB_CDC_ACM_Parity;
+
+typedef struct {
+  uint32_t dwDTERate; /* transmission rate - bits per second */
+  uint8_t bCharFormat; /* number of stop bits */
+  uint8_t bParityType; /* type of parity */
+  uint8_t bDataBits; /* number of data bits - 5,6,7,8,16 */
+} PACKED USB_CDC_ACM_LineCoding;
+
 static const UsbInterfaceDescriptor *
 usbCommunicationInterfaceDescriptor (UsbDevice *device) {
   if (device->descriptor.bDeviceClass == 0X02) {
@@ -50,7 +83,9 @@ usbEnableAdapter_CDC_ACM (UsbDevice *device) {
 
   if (interface) {
     ssize_t result = usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Class,
-                                     0X22, 0X1, interface->bInterfaceNumber,
+                                     USB_CDC_ACM_CTL_SetControlLines,
+                                     USB_CDC_ACM_LINE_DTR,
+                                     interface->bInterfaceNumber,
                                      NULL, 0, 1000);
 
     if (result != -1) return 1;
@@ -655,14 +690,14 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
 
 int
 usbSetSerialOperations (UsbDevice *device) {
-  if (!device->serial) {
+  if (!device->serialOperations) {
     const UsbSerialAdapter *sa = usbSerialAdapters;
 
     while (sa->vendor) {
       if (sa->vendor == device->descriptor.idVendor) {
         if (!sa->product || (sa->product == device->descriptor.idProduct)) {
           if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) return 0;
-          device->serial = sa->operations;
+          device->serialOperations = sa->operations;
           break;
         }
       }
@@ -676,7 +711,7 @@ usbSetSerialOperations (UsbDevice *device) {
 
 const UsbSerialOperations *
 usbGetSerialOperations (UsbDevice *device) {
-  return device->serial;
+  return device->serialOperations;
 }
 
 int

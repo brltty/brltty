@@ -652,7 +652,8 @@ usbOpenDevice (UsbDeviceExtension *extension) {
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
     device->extension = extension;
-    device->serial = NULL;
+    device->serialOperations = NULL;
+    device->serialData = NULL;
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
       if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
@@ -886,9 +887,9 @@ usbChooseChannel (UsbDevice *device, void *data) {
               ok = 0;
 
           if (ok)
-            if (device->serial)
-              if (device->serial->enableAdapter)
-                if (!device->serial->enableAdapter(device))
+            if (device->serialOperations)
+              if (device->serialOperations->enableAdapter)
+                if (!device->serialOperations->enableAdapter(device))
                   ok = 0;
 
           if (ok)

@@ -56,7 +56,8 @@ typedef struct UsbDeviceExtensionStruct UsbDeviceExtension;
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   UsbDeviceExtension *extension;
-  const UsbSerialOperations *serial;
+  const UsbSerialOperations *serialOperations;
+  void *serialData;
   UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
   Queue *endpoints;
