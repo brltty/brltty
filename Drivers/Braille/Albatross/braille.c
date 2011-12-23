@@ -193,10 +193,10 @@ static int
 configureUsbPort (unsigned int baud) {
   const SerialParameters parameters = {
     .baud = baud,
-    .flowControl = SERIAL_FLOW_NONE,
     .dataBits = 8,
     .stopBits = SERIAL_STOP_1,
-    .parity = SERIAL_PARITY_NONE
+    .parity = SERIAL_PARITY_NONE,
+    .flowControl = SERIAL_FLOW_NONE
   };
 
   return usbSetSerialParameters(usbChannel->device, &parameters);

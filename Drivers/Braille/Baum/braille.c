@@ -2522,10 +2522,10 @@ static int
 configureUsbPort (void) {
   const SerialParameters parameters = {
     .baud = protocol->serialBaud,
-    .flowControl = SERIAL_FLOW_NONE,
     .dataBits = 8,
     .stopBits = SERIAL_STOP_1,
-    .parity = protocol->serialParity
+    .parity = protocol->serialParity,
+    .flowControl = SERIAL_FLOW_NONE
   };
 
   return usbSetSerialParameters(usbChannel->device, &parameters);
