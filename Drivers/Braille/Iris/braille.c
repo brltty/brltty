@@ -797,6 +797,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
   if (memcmp(previousBrailleWindow, brl->buffer,size)==0 && !refreshBrailleWindow) return 1;
   if (writeWindow(brl, &internalPort, brl->buffer)==0) return 0;
   memcpy(previousBrailleWindow, brl->buffer, size);
+  refreshBrailleWindow = 0;
   return 1;
 }
 
