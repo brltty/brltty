@@ -1190,6 +1190,7 @@ in
       BRLTTY_BRAILLE_DRIVER([il], [IrisLinux])
       ;;
 esac
+BRLTTY_BRAILLE_DRIVER([ir], [Iris])
 BRLTTY_IF_PACKAGE([Libbraille], [libbraille], [include/braille.h], [dnl
    BRLTTY_BRAILLE_DRIVER([lb], [Libbraille], [-L$(LIBBRAILLE_ROOT)/lib -lbraille])
 ])

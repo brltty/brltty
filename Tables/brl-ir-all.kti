@@ -1,0 +1,37 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2010 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for bindings common to all Iris displays.
+note RoutingKey refers to any of the keys behind the text cells.
+
+bind \{Dot1}+\{Dot2}+\{Dot4} FREEZE
+bind \{Dot1}+\{Dot2}+\{Dot5} HELP
+bind \{Dot2}+\{Dot4} INFO
+bind \{Dot1}+\{Dot2}+\{Dot3} LEARN
+bind \{Dot1}+\{Dot2}+\{Dot3}+\{Dot4} PREFMENU
+bind \{Dot2}+\{Dot3}+\{Dot5} SIXDOTS+on
+bind \{Dot2}+\{Dot3}+\{Dot6} SIXDOTS+off
+
+bind !RoutingKey ROUTE
+bind L1+!RoutingKey CUTBEGIN
+bind L2+!RoutingKey CUTAPPEND
+bind L8+!RoutingKey CUTLINE
+bind L7+!RoutingKey CUTRECT
+bind L3+!RoutingKey SETLEFT
+bind L6+!RoutingKey DESCCHAR
+
