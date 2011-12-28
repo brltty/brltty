@@ -1207,7 +1207,7 @@ brlttyCommand (void) {
           logMessage(LOG_DEBUG, "braille display offline");
           isOffline = 1;
         }
-        return 1;
+        return 0;
     }
   }
 
@@ -2474,240 +2474,242 @@ brlttyUpdate (void) {
       oldwiny = ses->winy;
     }
 
-    if (infoMode) {
-      if (!showInfo()) restartRequired = 1;
-    } else {
-      const unsigned int windowLength = brl.textColumns * brl.textRows;
-      const unsigned int textLength = textCount * brl.textRows;
-      wchar_t textBuffer[windowLength];
+    if (!isOffline) {
+      if (infoMode) {
+        if (!showInfo()) restartRequired = 1;
+      } else {
+        const unsigned int windowLength = brl.textColumns * brl.textRows;
+        const unsigned int textLength = textCount * brl.textRows;
+        wchar_t textBuffer[windowLength];
 
-      memset(brl.buffer, 0, windowLength);
-      wmemset(textBuffer, WC_C(' '), windowLength);
-      brl.cursor = -1;
+        memset(brl.buffer, 0, windowLength);
+        wmemset(textBuffer, WC_C(' '), windowLength);
+        brl.cursor = -1;
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
-      contracted = 0;
-      if (isContracting()) {
-        while (1) {
-          int cursorOffset = getCursorOffset();
+  #ifdef ENABLE_CONTRACTED_BRAILLE
+        contracted = 0;
+        if (isContracting()) {
+          while (1) {
+            int cursorOffset = getCursorOffset();
 
-          int inputLength = scr.cols - ses->winx;
-          ScreenCharacter inputCharacters[inputLength];
-          wchar_t inputText[inputLength];
+            int inputLength = scr.cols - ses->winx;
+            ScreenCharacter inputCharacters[inputLength];
+            wchar_t inputText[inputLength];
 
-          int outputLength = textLength;
-          unsigned char outputBuffer[outputLength];
+            int outputLength = textLength;
+            unsigned char outputBuffer[outputLength];
 
-          readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
+            readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
 
-          {
-            int i;
-            for (i=0; i<inputLength; ++i) {
-              inputText[i] = inputCharacters[i].text;
-            }
-          }
-
-          contractText(contractionTable,
-                       inputText, &inputLength,
-                       outputBuffer, &outputLength,
-                       contractedOffsets, getContractedCursor(cursorOffset));
-
-          {
-            int inputEnd = inputLength;
-
-            if (contractedTrack) {
-              if (outputLength == textLength) {
-                int inputIndex = inputEnd;
-                while (inputIndex) {
-                  int offset = contractedOffsets[--inputIndex];
-                  if (offset != CTB_NO_OFFSET) {
-                    if (offset != outputLength) break;
-                    inputEnd = inputIndex;
-                  }
-                }
-              }
-
-              if (scr.posx >= (ses->winx + inputEnd)) {
-                int offset = 0;
-                int length = scr.cols - ses->winx;
-                int onspace = 0;
-
-                while (offset < length) {
-                  if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
-                    if (onspace) break;
-                    onspace = 1;
-                  }
-                  ++offset;
-                }
-
-                if ((offset += ses->winx) > scr.posx) {
-                  ses->winx = (ses->winx + scr.posx) / 2;
-                } else {
-                  ses->winx = offset;
-                }
-
-                continue;
-              }
-            }
-
-            if (cursorOffset < inputEnd) {
-              while (cursorOffset >= 0) {
-                int offset = contractedOffsets[cursorOffset];
-                if (offset != CTB_NO_OFFSET) {
-                  brl.cursor = ((offset / textCount) * brl.textColumns) + textStart + (offset % textCount);
-                  break;
-                }
-                --cursorOffset;
-              }
-            }
-          }
-
-          contractedStart = ses->winx;
-          contractedLength = inputLength;
-          contractedTrack = 0;
-          contracted = 1;
-
-          if (ses->displayMode || showAttributesUnderline()) {
-            int inputOffset;
-            int outputOffset = 0;
-            unsigned char attributes = 0;
-            unsigned char attributesBuffer[outputLength];
-
-            for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
-              int offset = contractedOffsets[inputOffset];
-              if (offset != CTB_NO_OFFSET) {
-                while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
-                attributes = 0;
-              }
-              attributes |= inputCharacters[inputOffset].attributes;
-            }
-            while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
-
-            if (ses->displayMode) {
-              for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
-              }
-            } else {
+            {
               int i;
-              for (i=0; i<outputLength; ++i) {
-                overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
+              for (i=0; i<inputLength; ++i) {
+                inputText[i] = inputCharacters[i].text;
+              }
+            }
+
+            contractText(contractionTable,
+                         inputText, &inputLength,
+                         outputBuffer, &outputLength,
+                         contractedOffsets, getContractedCursor(cursorOffset));
+
+            {
+              int inputEnd = inputLength;
+
+              if (contractedTrack) {
+                if (outputLength == textLength) {
+                  int inputIndex = inputEnd;
+                  while (inputIndex) {
+                    int offset = contractedOffsets[--inputIndex];
+                    if (offset != CTB_NO_OFFSET) {
+                      if (offset != outputLength) break;
+                      inputEnd = inputIndex;
+                    }
+                  }
+                }
+
+                if (scr.posx >= (ses->winx + inputEnd)) {
+                  int offset = 0;
+                  int length = scr.cols - ses->winx;
+                  int onspace = 0;
+
+                  while (offset < length) {
+                    if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
+                      if (onspace) break;
+                      onspace = 1;
+                    }
+                    ++offset;
+                  }
+
+                  if ((offset += ses->winx) > scr.posx) {
+                    ses->winx = (ses->winx + scr.posx) / 2;
+                  } else {
+                    ses->winx = offset;
+                  }
+
+                  continue;
+                }
+              }
+
+              if (cursorOffset < inputEnd) {
+                while (cursorOffset >= 0) {
+                  int offset = contractedOffsets[cursorOffset];
+                  if (offset != CTB_NO_OFFSET) {
+                    brl.cursor = ((offset / textCount) * brl.textColumns) + textStart + (offset % textCount);
+                    break;
+                  }
+                  --cursorOffset;
+                }
+              }
+            }
+
+            contractedStart = ses->winx;
+            contractedLength = inputLength;
+            contractedTrack = 0;
+            contracted = 1;
+
+            if (ses->displayMode || showAttributesUnderline()) {
+              int inputOffset;
+              int outputOffset = 0;
+              unsigned char attributes = 0;
+              unsigned char attributesBuffer[outputLength];
+
+              for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
+                int offset = contractedOffsets[inputOffset];
+                if (offset != CTB_NO_OFFSET) {
+                  while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
+                  attributes = 0;
+                }
+                attributes |= inputCharacters[inputOffset].attributes;
+              }
+              while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
+
+              if (ses->displayMode) {
+                for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
+                  outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
+                }
+              } else {
+                int i;
+                for (i=0; i<outputLength; ++i) {
+                  overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
+                }
+              }
+            }
+
+            fillDotsRegion(textBuffer, brl.buffer,
+                           textStart, textCount, brl.textColumns, brl.textRows,
+                           outputBuffer, outputLength);
+            break;
+          }
+        }
+
+        if (!contracted)
+  #endif /* ENABLE_CONTRACTED_BRAILLE */
+        {
+          int windowColumns = MIN(textCount, scr.cols-ses->winx);
+          ScreenCharacter characters[textLength];
+
+          readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
+          if (windowColumns < textCount) {
+            /* We got a rectangular piece of text with readScreen but the display
+             * is in an off-right position with some cells at the end blank
+             * so we'll insert these cells and blank them.
+             */
+            int i;
+
+            for (i=brl.textRows-1; i>0; i--) {
+              memmove(characters + (i * textCount),
+                      characters + (i * windowColumns),
+                      windowColumns * sizeof(*characters));
+            }
+
+            for (i=0; i<brl.textRows; i++) {
+              clearScreenCharacters(characters + (i * textCount) + windowColumns,
+                                    textCount-windowColumns);
+            }
+          }
+
+          /*
+           * If the cursor is visible and in range: 
+           */
+          if ((scr.posx >= ses->winx) && (scr.posx < (ses->winx + textCount)) &&
+              (scr.posy >= ses->winy) && (scr.posy < (ses->winy + brl.textRows)) &&
+              (scr.posx < scr.cols) && (scr.posy < scr.rows))
+            brl.cursor = ((scr.posy - ses->winy) * brl.textColumns) + textStart + scr.posx - ses->winx;
+
+          /* blank out capital letters if they're blinking and should be off */
+          if (prefs.blinkingCapitals && !capitalsState) {
+            int i;
+            for (i=0; i<textCount*brl.textRows; i++) {
+              ScreenCharacter *character = &characters[i];
+              if (iswupper(character->text)) character->text = WC_C(' ');
+            }
+          }
+
+          /* convert to dots using the current translation table */
+          if (ses->displayMode) {
+            int row;
+
+            for (row=0; row<brl.textRows; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned int start = (row * brl.textColumns) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
+              }
+            }
+          } else {
+            int underline = showAttributesUnderline();
+            int row;
+
+            for (row=0; row<brl.textRows; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned int start = (row * brl.textColumns) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                const ScreenCharacter *character = &source[column];
+                unsigned char *dots = &target[column];
+
+                *dots = convertCharacterToDots(textTable, character->text);
+                if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
+                if (underline) overlayAttributesUnderline(dots, character->attributes);
+
+                text[column] = character->text;
               }
             }
           }
-
-          fillDotsRegion(textBuffer, brl.buffer,
-                         textStart, textCount, brl.textColumns, brl.textRows,
-                         outputBuffer, outputLength);
-          break;
         }
+
+        if (brl.cursor >= 0) {
+          if (showCursor()) {
+            brl.buffer[brl.cursor] |= cursorDots();
+          }
+        }
+
+        if (statusCount > 0) {
+          const unsigned char *fields = prefs.statusFields;
+          unsigned int length = getStatusFieldsLength(fields);
+
+          if (length > 0) {
+            unsigned char cells[length];
+            memset(cells, 0, length);
+            renderStatusFields(fields, cells);
+            fillDotsRegion(textBuffer, brl.buffer,
+                           statusStart, statusCount, brl.textColumns, brl.textRows,
+                           cells, length);
+          }
+
+          fillStatusSeparator(textBuffer, brl.buffer);
+        }
+
+        if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
       }
-
-      if (!contracted)
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-      {
-        int windowColumns = MIN(textCount, scr.cols-ses->winx);
-        ScreenCharacter characters[textLength];
-
-        readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
-        if (windowColumns < textCount) {
-          /* We got a rectangular piece of text with readScreen but the display
-           * is in an off-right position with some cells at the end blank
-           * so we'll insert these cells and blank them.
-           */
-          int i;
-
-          for (i=brl.textRows-1; i>0; i--) {
-            memmove(characters + (i * textCount),
-                    characters + (i * windowColumns),
-                    windowColumns * sizeof(*characters));
-          }
-
-          for (i=0; i<brl.textRows; i++) {
-            clearScreenCharacters(characters + (i * textCount) + windowColumns,
-                                  textCount-windowColumns);
-          }
-        }
-
-        /*
-         * If the cursor is visible and in range: 
-         */
-        if ((scr.posx >= ses->winx) && (scr.posx < (ses->winx + textCount)) &&
-            (scr.posy >= ses->winy) && (scr.posy < (ses->winy + brl.textRows)) &&
-            (scr.posx < scr.cols) && (scr.posy < scr.rows))
-          brl.cursor = ((scr.posy - ses->winy) * brl.textColumns) + textStart + scr.posx - ses->winx;
-
-        /* blank out capital letters if they're blinking and should be off */
-        if (prefs.blinkingCapitals && !capitalsState) {
-          int i;
-          for (i=0; i<textCount*brl.textRows; i++) {
-            ScreenCharacter *character = &characters[i];
-            if (iswupper(character->text)) character->text = WC_C(' ');
-          }
-        }
-
-        /* convert to dots using the current translation table */
-        if (ses->displayMode) {
-          int row;
-
-          for (row=0; row<brl.textRows; row+=1) {
-            const ScreenCharacter *source = &characters[row * textCount];
-            unsigned int start = (row * brl.textColumns) + textStart;
-            unsigned char *target = &brl.buffer[start];
-            wchar_t *text = &textBuffer[start];
-            int column;
-
-            for (column=0; column<textCount; column+=1) {
-              text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
-            }
-          }
-        } else {
-          int underline = showAttributesUnderline();
-          int row;
-
-          for (row=0; row<brl.textRows; row+=1) {
-            const ScreenCharacter *source = &characters[row * textCount];
-            unsigned int start = (row * brl.textColumns) + textStart;
-            unsigned char *target = &brl.buffer[start];
-            wchar_t *text = &textBuffer[start];
-            int column;
-
-            for (column=0; column<textCount; column+=1) {
-              const ScreenCharacter *character = &source[column];
-              unsigned char *dots = &target[column];
-
-              *dots = convertCharacterToDots(textTable, character->text);
-              if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
-              if (underline) overlayAttributesUnderline(dots, character->attributes);
-
-              text[column] = character->text;
-            }
-          }
-        }
-      }
-
-      if (brl.cursor >= 0) {
-        if (showCursor()) {
-          brl.buffer[brl.cursor] |= cursorDots();
-        }
-      }
-
-      if (statusCount > 0) {
-        const unsigned char *fields = prefs.statusFields;
-        unsigned int length = getStatusFieldsLength(fields);
-
-        if (length > 0) {
-          unsigned char cells[length];
-          memset(cells, 0, length);
-          renderStatusFields(fields, cells);
-          fillDotsRegion(textBuffer, brl.buffer,
-                         statusStart, statusCount, brl.textColumns, brl.textRows,
-                         cells, length);
-        }
-
-        fillStatusSeparator(textBuffer, brl.buffer);
-      }
-
-      if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
     }
 
 #ifdef ENABLE_API
