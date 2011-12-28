@@ -718,7 +718,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
     if (!deviceSleeping) suspendDevice(brl);
     else {
       resumeDevice(brl);
-      return BRL_CMD_NOOP;
+      return EOF;
     }
   }
   if (deviceSleeping) return BRL_CMD_OFFLINE;
@@ -735,7 +735,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
       return BRL_CMD_OFFLINE;
     } else {
       leavePacketForwardMode(brl);
-      return BRL_CMD_NOOP;
+      return EOF;
     }
   }
   if (packetForwardMode) {
