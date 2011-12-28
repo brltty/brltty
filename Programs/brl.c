@@ -512,7 +512,15 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     if (command != EOF) enqueueCommand(command);
   }
 
-  return dequeueCommand();
+  {
+    int command = dequeueCommand();
+
+#ifdef ENABLE_API
+    if (command == EOF) command = api_handleCommand(command);
+#endif /* ENABLE_API */
+
+    return command;
+  }
 }
 
 #ifdef ENABLE_LEARN_MODE
