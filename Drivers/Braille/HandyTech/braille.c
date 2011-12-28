@@ -786,10 +786,8 @@ static const UsbOperations usbOperations3 = {
 static int
 openUsbPort (char **parameters, const char *device) {
   const SerialParameters serial = {
+    SERIAL_DEFAULT_PARAMETERS,
     .baud = baud,
-    .flowControl = SERIAL_FLOW_NONE,
-    .dataBits = 8,
-    .stopBits = SERIAL_STOP_1,
     .parity = SERIAL_PARITY_ODD
   };
 

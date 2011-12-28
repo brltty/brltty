@@ -580,11 +580,8 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (const char *device) {
   static const SerialParameters serial = {
-    .baud = SERIAL_BAUD,
-    .dataBits = 8,
-    .stopBits = SERIAL_STOP_1,
-    .parity = SERIAL_PARITY_NONE,
-    .flowControl = SERIAL_FLOW_NONE
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = SERIAL_BAUD
   };
 
   static const UsbChannelDefinition definitions[] = {

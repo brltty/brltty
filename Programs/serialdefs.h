@@ -63,6 +63,21 @@ typedef struct {
   SerialFlowControl flowControl;
 } SerialParameters;
 
+#define SERIAL_DEFAULT_BAUD 9600
+#define SERIAL_DEFAULT_DATA_BITS 8
+#define SERIAL_DEFAULT_STOP_BITS SERIAL_STOP_1
+#define SERIAL_DEFAULT_PARITY SERIAL_PARITY_NONE
+#define SERIAL_DEFAULT_FLOW_CONTROL SERIAL_FLOW_NONE
+
+#define SERIAL_DEFAULT_PARAMETERS \
+  .baud = SERIAL_DEFAULT_BAUD, \
+  .dataBits = SERIAL_DEFAULT_DATA_BITS, \
+  .stopBits = SERIAL_DEFAULT_STOP_BITS, \
+  .parity = SERIAL_DEFAULT_PARITY, \
+  .flowControl = SERIAL_DEFAULT_FLOW_CONTROL
+
+#define SERIAL_PARAMETERS_INITIALIZER {SERIAL_DEFAULT_PARAMETERS}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

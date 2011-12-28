@@ -161,11 +161,11 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
 
 void
 gioInitializeSerialParameters (SerialParameters *parameters) {
-  parameters->baud = 9600;
-  parameters->dataBits = 8;
-  parameters->stopBits = SERIAL_STOP_1;
-  parameters->parity = SERIAL_PARITY_NONE;
-  parameters->flowControl = SERIAL_FLOW_NONE;
+  parameters->baud = SERIAL_DEFAULT_BAUD;
+  parameters->dataBits = SERIAL_DEFAULT_DATA_BITS;
+  parameters->stopBits = SERIAL_DEFAULT_STOP_BITS;
+  parameters->parity = SERIAL_DEFAULT_PARITY;
+  parameters->flowControl = SERIAL_DEFAULT_FLOW_CONTROL;
 }
 
 static int

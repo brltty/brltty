@@ -127,11 +127,9 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
     .baud = 115200,
-    .dataBits = 8,
-    .stopBits = SERIAL_STOP_1,
-    .parity = SERIAL_PARITY_EVEN,
-    .flowControl = SERIAL_FLOW_NONE
+    .parity = SERIAL_PARITY_EVEN
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {

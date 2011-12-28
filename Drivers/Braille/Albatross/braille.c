@@ -192,11 +192,8 @@ openUsbPort (const char *device) {
 static int
 configureUsbPort (unsigned int baud) {
   const SerialParameters parameters = {
-    .baud = baud,
-    .dataBits = 8,
-    .stopBits = SERIAL_STOP_1,
-    .parity = SERIAL_PARITY_NONE,
-    .flowControl = SERIAL_FLOW_NONE
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = baud
   };
 
   return usbSetSerialParameters(usbChannel->device, &parameters);
