@@ -37,10 +37,11 @@ bind Xt PASSXT
 bind XtE0 PASSXT+emul0
 bind XtE1 PASSXT+emul1
 
-bind L5+XtE0.0X4B FWINLT
-bind L5+XtE0.0X4D FWINRT
-bind L5+XtE0.0X48 LNUP
-bind L5+XtE0.0X50 LNDN
+# The XT key numbers need to be 1 greater than the actual XT key codes.
+bind L5+!XtE0.0X4C FWINLT
+bind L5+!XtE0.0X4E FWINRT
+bind L5+!XtE0.0X49 LNUP
+bind L5+!XtE0.0X51 LNDN
 
 assign Dot1 L1
 assign Dot2 L2
