@@ -476,7 +476,7 @@ enqueueXtScanCode (
     case 0XE1: set = setE1; break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported XT key code: %02X %02X", escape, key);
+      logMessage(LOG_WARNING, "unsupported XT scan code: %02X %02X", escape, key);
       return 0;
   }
 
