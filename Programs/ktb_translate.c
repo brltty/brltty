@@ -335,7 +335,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
                   if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
                 }
 
-                command |= BRL_ARG(keyValues[0].key);
+                command += keyValues[0].key;
               } else if (binding->flags & KBF_COLUMN) {
                 if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
               }
