@@ -45,14 +45,14 @@ bind L5+L7 PASTE
 bind L3+L4 CONTEXT+1 # RoutingKey -> CUTBEGIN
 bind L5+L6 CONTEXT+2 # RoutingKey -> CUTLINE
 
-assign Dot1 DOT1
-assign Dot2 DOT2
-assign Dot3 DOT3
-assign Dot4 DOT4
-assign Dot5 DOT5
-assign Dot6 DOT6
-assign Dot7 DOT7
-assign Dot8 DOT8
+assign Dot1 L4
+assign Dot2 L3
+assign Dot3 L2
+assign Dot4 L5
+assign Dot5 L6
+assign Dot6 L7
+assign Dot7 L1
+assign Dot8 L8
 include brl-ir-all.kti
 
 map Dot1 DOT1
