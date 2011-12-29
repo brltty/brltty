@@ -47,12 +47,13 @@ typedef struct {
 } KeyCombination;
 
 typedef enum {
-  KBF_HIDDEN = 0X01,
-  KBF_OFFSET = 0X02,
-  KBF_COLUMN = 0X04,
-  KBF_ROW    = 0X08,
-  KBF_RANGE  = 0X10,
-  KBF_ROUTE  = 0X20
+  KBF_HIDDEN   = 0X01,
+  KBF_OFFSET   = 0X02,
+  KBF_COLUMN   = 0X04,
+  KBF_ROW      = 0X08,
+  KBF_RANGE    = 0X10,
+  KBF_ROUTE    = 0X20,
+  KBF_KEYBOARD = 0X40
 } KeyBindingFlag;
 
 typedef struct {

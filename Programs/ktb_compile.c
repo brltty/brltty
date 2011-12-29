@@ -791,6 +791,7 @@ processBindOperands (DataFile *file, void *data) {
       if (cmd->isRow) binding.flags |= KBF_ROW;
       if (cmd->isRange) binding.flags |= KBF_RANGE;
       if (cmd->isRouting) binding.flags |= KBF_ROUTE;
+      if (cmd->isKeyboard) binding.flags |= KBF_KEYBOARD;
       if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }

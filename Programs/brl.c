@@ -468,22 +468,19 @@ enqueueXtScanCode (
   unsigned char key, unsigned char escape,
   unsigned char set00, unsigned char setE0, unsigned char setE1
 ) {
-  int command = BRL_BLK_PASSXT | key;
-  switch (escape) {
-    case 0XE0:
-      command |= BRL_FLG_KBD_EMUL0;
-      break;
+  unsigned char set;
 
-    case 0XE1:
-      command |= BRL_FLG_KBD_EMUL1;
-      break;
+  switch (escape) {
+    case 0X00: set = set00; break;
+    case 0XE0: set = setE0; break;
+    case 0XE1: set = setE1; break;
 
     default:
-    case 0X00:
-      break;
+      logMessage(LOG_WARNING, "unsupported XT key code: %02X %02X", escape, key);
+      return 0;
   }
 
-  return enqueueCommand(command);
+  return enqueueKey(set, key);
 }
 
 int

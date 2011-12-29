@@ -312,7 +312,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       } else {
         if (command != table->command) {
           if (binding) {
-            if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE)) {
+            if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
               unsigned int keyCount = table->pressedCount;
               KeyValue keyValues[keyCount];
               copyKeyValues(keyValues, table->pressedKeys, keyCount);
@@ -335,7 +335,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
                   if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
                 }
 
-                command += keyValues[0].key;
+                command |= BRL_ARG(keyValues[0].key);
               } else if (binding->flags & KBF_COLUMN) {
                 if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
               }
