@@ -498,10 +498,9 @@ static int writeDots (const BrailleDisplay *brl, Port *port, const unsigned char
 /* No check is performed to avoid several consecutive identical writes at this level */
 static int writeWindow (const BrailleDisplay *brl, Port *port, const unsigned char *text)
 {
-  int i;
   ssize_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
-  for (i=0; i<size; i++) dots[i] = translateOutputCell(text[i]);
+  translateOutputCells(dots, text, size);
   return writeDots(brl, port, dots);
 }
 
