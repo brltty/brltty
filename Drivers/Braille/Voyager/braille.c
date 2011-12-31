@@ -554,7 +554,7 @@ getUsbString (uint8_t request) {
 
       while (count) {
         count -= 1;
-        string[count] = getLittleEndian(descriptor.string.wData[count]);
+        string[count] = getLittleEndian16(descriptor.string.wData[count]);
       }
 
       return string;

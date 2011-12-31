@@ -53,7 +53,7 @@ usbHidGetItems (
   if (hid) {
     if (number < hid->bNumDescriptors) {
       const UsbClassDescriptor *descriptor = &hid->descriptors[number];
-      uint16_t length = getLittleEndian(descriptor->wDescriptorLength);
+      uint16_t length = getLittleEndian16(descriptor->wDescriptorLength);
       void *buffer = malloc(length);
 
       if (buffer) {

@@ -82,7 +82,7 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int rate, unsigned int
   USB_CDC_ACM_LineCoding lineCoding;
   memset(&lineCoding, 0, sizeof(lineCoding));
 
-  lineCoding.dwDTERate = rate;
+  putLittleEndian32(&lineCoding.dwDTERate, rate);
 
   switch (dataBits) {
     case  5:

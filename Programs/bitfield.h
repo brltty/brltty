@@ -29,37 +29,79 @@ extern "C" {
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
 
 static inline uint16_t
-getSameEndian (uint16_t from) {
+getSameEndian16 (uint16_t from) {
   return from;
 }
 
 static inline uint16_t
-getOtherEndian (uint16_t from) {
-  return ((from & 0XFF) << 8) | ((from >> 8) & 0XFF);
+getOtherEndian16 (uint16_t from) {
+  const unsigned char *bytes = (const unsigned char *)&from;
+
+  return (bytes[0] << 0x08)
+       | (bytes[1] << 0x00);
 }
 
 static inline void
-putSameEndian (uint16_t *to, uint16_t from) {
-  *to = getSameEndian(from);
+putSameEndian16 (uint16_t *to, uint16_t from) {
+  *to = getSameEndian16(from);
 }
 
 static inline void
-putOtherEndian (uint16_t *to, uint16_t from) {
-  *to = getOtherEndian(from);
+putOtherEndian16 (uint16_t *to, uint16_t from) {
+  *to = getOtherEndian16(from);
+}
+
+static inline uint32_t
+getSameEndian32 (uint32_t from) {
+  return from;
+}
+
+static inline uint32_t
+getOtherEndian32 (uint32_t from) {
+  const unsigned char *bytes = (const unsigned char *)&from;
+
+  return (bytes[0] << 0x18)
+       | (bytes[1] << 0x10)
+       | (bytes[2] << 0x08)
+       | (bytes[3] << 0x00);
+}
+
+static inline void
+putSameEndian32 (uint32_t *to, uint32_t from) {
+  *to = getSameEndian32(from);
+}
+
+static inline void
+putOtherEndian32 (uint32_t *to, uint32_t from) {
+  *to = getOtherEndian32(from);
 }
 
 #ifdef WORDS_BIGENDIAN
-#  define getLittleEndian getOtherEndian
-#  define putLittleEndian putOtherEndian
+#  define getLittleEndian16 getOtherEndian16
+#  define putLittleEndian16 putOtherEndian16
 
-#  define getBigEndian getSameEndian
-#  define putBigEndian putSameEndian
+#  define getBigEndian16 getSameEndian16
+#  define putBigEndian16 putSameEndian16
+
+#  define getLittleEndian32 getOtherEndian32
+#  define putLittleEndian32 putOtherEndian32
+
+#  define getBigEndian32 getSameEndian32
+#  define putBigEndian32 putSameEndian32
+
 #else /* WORDS_BIGENDIAN */
-#  define getLittleEndian getSameEndian
-#  define putLittleEndian putSameEndian
+#  define getLittleEndian16 getSameEndian16
+#  define putLittleEndian16 putSameEndian16
 
-#  define getBigEndian getOtherEndian
-#  define putBigEndian putOtherEndian
+#  define getBigEndian16 getOtherEndian16
+#  define putBigEndian16 putOtherEndian16
+
+#  define getLittleEndian32 getSameEndian32
+#  define putLittleEndian32 putSameEndian32
+
+#  define getBigEndian32 getOtherEndian32
+#  define putBigEndian32 putOtherEndian32
+
 #endif /* WORDS_BIGENDIAN */
 
 #ifdef __cplusplus

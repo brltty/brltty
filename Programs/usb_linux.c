@@ -335,9 +335,9 @@ usbControlTransfer (
     memset(&arg, 0, sizeof(arg));
     arg.setup.bRequestType = direction | recipient | type;
     arg.setup.bRequest = request;
-    putLittleEndian(&arg.setup.wValue, value);
-    putLittleEndian(&arg.setup.wIndex, index);
-    putLittleEndian(&arg.setup.wLength, length);
+    putLittleEndian16(&arg.setup.wValue, value);
+    putLittleEndian16(&arg.setup.wIndex, index);
+    putLittleEndian16(&arg.setup.wLength, length);
     arg.transfer.data = buffer;
     arg.transfer.timeout = timeout;
 
@@ -867,10 +867,10 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
       ok = 1;
 
       if (sysfs) {
-        host->usbDescriptor.bcdUSB = getLittleEndian(host->usbDescriptor.bcdUSB);
-        host->usbDescriptor.idVendor = getLittleEndian(host->usbDescriptor.idVendor);
-        host->usbDescriptor.idProduct = getLittleEndian(host->usbDescriptor.idProduct);
-        host->usbDescriptor.bcdDevice = getLittleEndian(host->usbDescriptor.bcdDevice);
+        host->usbDescriptor.bcdUSB = getLittleEndian16(host->usbDescriptor.bcdUSB);
+        host->usbDescriptor.idVendor = getLittleEndian16(host->usbDescriptor.idVendor);
+        host->usbDescriptor.idProduct = getLittleEndian16(host->usbDescriptor.idProduct);
+        host->usbDescriptor.bcdDevice = getLittleEndian16(host->usbDescriptor.bcdDevice);
       }
     }
 

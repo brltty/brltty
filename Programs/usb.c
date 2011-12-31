@@ -106,7 +106,7 @@ usbGetLanguage (
                               0, 0, &descriptor, timeout);
   if (size != -1) {
     if (size >= 4) {
-      *language = getLittleEndian(descriptor.string.wData[0]);
+      *language = getLittleEndian16(descriptor.string.wData[0]);
       logMessage(LOG_DEBUG, "USB Language: %02X", *language);
       return 1;
     }
@@ -122,7 +122,7 @@ usbDecodeString (const UsbStringDescriptor *descriptor) {
   if (string) {
     string[count] = 0;
     while (count--) {
-      uint16_t character = getLittleEndian(descriptor->wData[count]);
+      uint16_t character = getLittleEndian16(descriptor->wData[count]);
       if (character & 0XFF00) character = '?';
       string[count] = character;
     }
@@ -296,7 +296,7 @@ usbConfigurationDescriptor (
       }
 
       if (number < device->descriptor.bNumConfigurations) {
-        int length = getLittleEndian(descriptor.configuration.wTotalLength);
+        int length = getLittleEndian16(descriptor.configuration.wTotalLength);
         UsbDescriptor *descriptors;
 
         if ((descriptors = malloc(length))) {
@@ -359,7 +359,7 @@ usbNextDescriptor (
   if (*descriptor) {
     const UsbDescriptor *next = (UsbDescriptor *)&(*descriptor)->bytes[(*descriptor)->header.bLength];
     const UsbDescriptor *first = (UsbDescriptor *)device->configuration;
-    unsigned int length = getLittleEndian(first->configuration.wTotalLength);
+    unsigned int length = getLittleEndian16(first->configuration.wTotalLength);
     if ((&next->bytes[0] - &first->bytes[0]) >= length) return 0;
     if ((&next->bytes[next->header.bLength] - &first->bytes[0]) > length) return 0;
     *descriptor = next;
@@ -488,7 +488,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
       logMessage(LOG_DEBUG, "USB: ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
                  descriptor->bEndpointAddress, direction, transfer,
-                 getLittleEndian(descriptor->wMaxPacketSize),
+                 getLittleEndian16(descriptor->wMaxPacketSize),
                  descriptor->bInterval);
     }
 
@@ -707,7 +707,7 @@ usbAddPendingInputRequest (
   void *request = usbSubmitRequest(endpoint->device,
                                    endpoint->descriptor->bEndpointAddress,
                                    NULL,
-                                   getLittleEndian(endpoint->descriptor->wMaxPacketSize),
+                                   getLittleEndian16(endpoint->descriptor->wMaxPacketSize),
                                    endpoint);
   if (request) {
     Element *element = enqueueItem(endpoint->direction.input.pending, request);
@@ -757,7 +757,7 @@ usbAwaitInput (
   interval = MAX(20, interval);
 
   if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
-    int size = getLittleEndian(endpoint->descriptor->wMaxPacketSize);
+    int size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
     unsigned char *buffer = malloc(size);
     if (buffer) {
       ssize_t count;

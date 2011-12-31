@@ -1181,7 +1181,7 @@ logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
              " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
              " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
              model->name,
-             getBigEndian(dateTime->year), dateTime->month, dateTime->day,
+             getBigEndian16(dateTime->year), dateTime->month, dateTime->day,
              dateTime->hour, dateTime->minute, dateTime->second);
 
   return 1;
@@ -1190,7 +1190,7 @@ logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
 static int
 synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
   struct tm t0 = {
-    .tm_year = getBigEndian(dateTime->year) - 1900,
+    .tm_year = getBigEndian16(dateTime->year) - 1900,
     .tm_mon = dateTime->month - 1,
     .tm_mday = dateTime->day,
     .tm_hour = dateTime->hour,
@@ -1213,7 +1213,7 @@ synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
       .minute = t->tm_min,
       .second = t->tm_sec
     };
-    putLittleEndian(&payload.year, t->tm_year + 1900);
+    putLittleEndian16(&payload.year, t->tm_year + 1900);
 
     logMessage(LOG_DEBUG, "Time difference between host and device: %.0f", delta);
 

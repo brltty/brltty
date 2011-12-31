@@ -177,9 +177,9 @@ usbControlTransfer (
 
   setup.bRequestType = direction | recipient | type;
   setup.bRequest = request;
-  putLittleEndian(&setup.wValue, value);
-  putLittleEndian(&setup.wIndex, index);
-  putLittleEndian(&setup.wLength, length);
+  putLittleEndian16(&setup.wValue, value);
+  putLittleEndian16(&setup.wIndex, index);
+  putLittleEndian16(&setup.wLength, length);
 
   switch (direction) {
     case UsbControlDirection_Input: {
@@ -438,10 +438,10 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   int count = usbGetDeviceDescriptor(device, &device->descriptor);
 
   if (count == UsbDescriptorSize_Device) {
-    device->descriptor.bcdUSB = getLittleEndian(device->descriptor.bcdUSB);
-    device->descriptor.idVendor = getLittleEndian(device->descriptor.idVendor);
-    device->descriptor.idProduct = getLittleEndian(device->descriptor.idProduct);
-    device->descriptor.bcdDevice = getLittleEndian(device->descriptor.bcdDevice);
+    device->descriptor.bcdUSB = getLittleEndian16(device->descriptor.bcdUSB);
+    device->descriptor.idVendor = getLittleEndian16(device->descriptor.idVendor);
+    device->descriptor.idProduct = getLittleEndian16(device->descriptor.idProduct);
+    device->descriptor.bcdDevice = getLittleEndian16(device->descriptor.bcdDevice);
     return 1;
   }
 
