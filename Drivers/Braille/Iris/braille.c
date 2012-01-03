@@ -79,7 +79,7 @@ const iris_protocol iris_protocols[] = {
 #include "brl_driver.h"
 #include "brldefs-ir.h"
 
-#include "io_serial.h"
+#include "io_generic.h"
 #include "system.h"
 #include "message.h"
 
@@ -141,7 +141,7 @@ END_KEY_TABLE_LIST
 typedef struct {
   const char *name;
   int speed;
-  SerialDevice *serialDevice;
+  GioEndpoint *gioEndpoint;
   int reading;
   int declaredSize; /* useful when reading Eurobraille packets */
   int prefix;
@@ -162,7 +162,7 @@ static unsigned int deviceConnected = 1;
 static unsigned int embeddedDriver = 1;
 static unsigned int packetForwardMode = 0;
 static Port internalPort = {
-  .name = "/dev/ttyS1",
+  .name = "serial:ttyS1",
   .speed = INTERNALSPEED
 }, externalPort;
 static unsigned char *previousBrailleWindow = NULL;
@@ -204,25 +204,29 @@ static void leaveDebugMode(void)
 
 static int openPort(Port *port)
 {
-  if (!(port->serialDevice = serialOpenDevice(port->name))) return -1;
-  if (! serialSetParity(port->serialDevice, SERIAL_PARITY_EVEN) )
-  {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "could not set serial parity");
-    return -1;
+  const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = port->speed,
+    .parity = SERIAL_PARITY_EVEN
+  };
+
+  GioDescriptor gioDescriptor;
+  gioInitializeDescriptor(&gioDescriptor);
+
+  gioDescriptor.serial.parameters = &serialParameters;
+
+  if ((port->gioEndpoint = gioConnectResource(port->name, &gioDescriptor))) {
+    return 1;
   }
-  if (serialRestartDevice(port->serialDevice, port->speed) != 1)
-  {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "serialRestartDevice failed");
-    return -1;
-  }
+
   return 0;
 }
 
 static void closePort(Port *port)
 {
-  if (port->serialDevice) {
-    serialCloseDevice (port->serialDevice);
-    port->serialDevice = NULL;
+  if (port->gioEndpoint) {
+    gioDisconnectResource (port->gioEndpoint);
+    port->gioEndpoint = NULL;
   }
 }
 
@@ -277,12 +281,11 @@ static int checkLatchState()
 /* Returns the size of the read packet. */
 /* 0 means no packet has been read and there is no error. */
 /* -1 means an error occurred */
-static ssize_t readPacket(Port *port, void *packet, size_t size)
+static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
 {
   unsigned char ch;
   size_t size_;
-  ssize_t res;
-  while ( (res = serialReadData (port->serialDevice, &ch, 1, 0, 0)) == 1) {
+  while ( (gioReadByte (port->gioEndpoint, &ch, (port->reading || port->prefix)))) {
     if (port->reading) {
       switch (ch) {
         case DLE:
@@ -319,8 +322,8 @@ static ssize_t readPacket(Port *port, void *packet, size_t size)
           port->waitingForAck = 0;
           if (packetForwardMode) {
             char ack = ACK;
-            serialWriteData(externalPort.serialDevice, &ack, sizeof(ack));
-            serialDrainOutput(externalPort.serialDevice);
+            gioWriteData(externalPort.gioEndpoint, &ack, sizeof(ack));
+            brl->writeDelay += gioGetMillisecondsToTransfer(externalPort.gioEndpoint, sizeof(ack));
           }
         } else {
           logMessage(LOG_INFO, DRIVER_LOG_PREFIX "readPacket: ignoring byte 0x%.2x",ch);
@@ -328,8 +331,7 @@ static ssize_t readPacket(Port *port, void *packet, size_t size)
       }
     }
   }
-  if (res==0) return 0;
-  if ( (res==-1) && (errno == EAGAIN) )  return 0;
+  if ( errno == EAGAIN )  return 0;
   logSystemError("readPacket");
   return -1;
 }
@@ -338,7 +340,7 @@ static ssize_t readEurobraillePacket(Port *port, void *packet, size_t size)
 {
   unsigned char ch;
   size_t size_;
-  while (serialReadData (port->serialDevice, &ch, 1, 0, 0) == 1) {
+  while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
     logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
     switch (port->reading)
     {
@@ -416,7 +418,7 @@ static inline int needsEscape(unsigned char ch)
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 /* A write can be ignored if the previous packet has not been */
 /* acknowledged so far */
-static ssize_t writePacket (Port *port, const void *packet, size_t size)
+static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
 {
   const unsigned char *data = packet;
   unsigned char	buf[2*(size + 1) +3];
@@ -439,18 +441,13 @@ static ssize_t writePacket (Port *port, const void *packet, size_t size)
     data++;
   }
   *p++ = EOT;
-  res = serialWriteData(port->serialDevice, buf, p - buf);
+  res = gioWriteData(port->gioEndpoint, buf, p - buf);
   if (res<0)
   {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: serialWriteData failed");
+    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gioWriteData failed");
     return -1;
   }
-  res = serialDrainOutput(port->serialDevice);
-  if (res!=1)
-  {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: serialDrainOutput failed");
-    return -1;
-  }  
+  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, p-buf);
   res = gettimeofday(&port->lastWriteTime, NULL);
   if (res==-11)
   {
@@ -461,7 +458,7 @@ static ssize_t writePacket (Port *port, const void *packet, size_t size)
   return 1;
 }
 
-static ssize_t writeEurobraillePacket (Port *port, const void *packet, size_t size)
+static ssize_t writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
 {
   int packetSize = size + 2;
   unsigned char	buf[packetSize + 2];
@@ -471,20 +468,20 @@ static ssize_t writeEurobraillePacket (Port *port, const void *packet, size_t si
   *p++ = packetSize & 0x00FF;  
   memcpy(p, packet, size);
   buf[sizeof(buf)-1] = ETX;
-  serialWriteData(port->serialDevice, buf, sizeof(buf));
-  serialDrainOutput(port->serialDevice);
+  gioWriteData(port->gioEndpoint, buf, sizeof(buf));
+  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, sizeof(buf));
   gettimeofday(&port->lastWriteTime, NULL);
   return 1;
 }
 
-static ssize_t writeEurobraillePacketFromString (Port *port, const char *str)
+static ssize_t writeEurobraillePacketFromString (BrailleDisplay *brl, Port *port, const char *str)
 {
-  return writeEurobraillePacket(port, str, strlen(str) + 1);
+  return writeEurobraillePacket(brl, port, str, strlen(str) + 1);
 }
 
 /* Low-level write of dots to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static int writeDots (const BrailleDisplay *brl, Port *port, const unsigned char *dots)
+static int writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
 {
   ssize_t size = brl->textColumns * brl->textRows;
   unsigned char packet[IR_MAXWINDOWSIZE+1] = { IR_OPT_WriteBraille };
@@ -492,12 +489,12 @@ static int writeDots (const BrailleDisplay *brl, Port *port, const unsigned char
   int i;
   for (i=0; i<IR_MAXWINDOWSIZE-size; i++) *(p++) = 0; 
   for (i=0; i<size; i++) *(p++) = dots[size-i-1];
-  return (writePacket(port, packet, sizeof(packet)) >= 0 ) ? 1 : 0;
+  return (writePacket(brl, port, packet, sizeof(packet)) >= 0 ) ? 1 : 0;
 }
 
 /* Low-level write of text to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static int writeWindow (const BrailleDisplay *brl, Port *port, const unsigned char *text)
+static int writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text)
 {
   ssize_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
@@ -530,7 +527,7 @@ static void suspendDevice(BrailleDisplay *brl)
   internalPort.waitingForAck = 0;
   if (packetForwardMode) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
-    writePacket(&externalPort, keyPacket, sizeof(keyPacket));
+    writePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
     closePort(&externalPort);
   }
   deactivateBraille();
@@ -542,7 +539,7 @@ static void resumeDevice(BrailleDisplay *brl)
   if (!embeddedDriver) return;
   logMessage(LOG_INFO, DRIVER_LOG_PREFIX "resuming device");
   deviceSleeping = 0;
-  if ( openPort(&internalPort) == -1 )
+  if ( !openPort(&internalPort) )
   {
     logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "openPort failed");
     return;
@@ -551,14 +548,14 @@ static void resumeDevice(BrailleDisplay *brl)
   if (packetForwardMode) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
     openPort(&externalPort);
-    writePacket(&externalPort, keyPacket, sizeof(keyPacket));
+    writePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
   } else refreshBrailleWindow = 1;
 }
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 {
   if (embeddedDriver && (deviceSleeping || packetForwardMode)) return 0;
-  return readPacket(&internalPort, packet, size);
+  return readPacket(brl, &internalPort, packet, size);
 }
 
 /* Function brl_writePacket */
@@ -566,7 +563,7 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
   if (deviceSleeping || packetForwardMode) return 0;
-  return writePacket(&internalPort, packet, size);
+  return writePacket(brl, &internalPort, packet, size);
 }
 
 static int brl_reset (BrailleDisplay *brl)
@@ -574,24 +571,24 @@ static int brl_reset (BrailleDisplay *brl)
   return 0;
 }
 
-static void enterPacketForwardMode(const BrailleDisplay *brl)
+static void enterPacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
   char msg[brl->textColumns+1];
   externalPort.speed = iris_protocols[protocol].speed;
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", externalPort.name, iris_protocols[protocol].name, externalPort.speed);
-  if (openPort(&externalPort)==-1) return;
+  if (!openPort(&externalPort)) return;
   snprintf(msg, sizeof(msg), "PC mode (%s)", iris_protocols[protocol].name);
   message(NULL, msg, MSG_NODELAY);
-  if (protocol==IR_PROTOCOL_NATIVE) writePacket(&externalPort, p, sizeof(p));
+  if (protocol==IR_PROTOCOL_NATIVE) writePacket(brl, &externalPort, p, sizeof(p));
   packetForwardMode = 1;
 }
 
-static void leavePacketForwardMode(const BrailleDisplay *brl)
+static void leavePacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Leaving packet forward mode");
-  if (protocol==IR_PROTOCOL_NATIVE) writePacket(&externalPort, p, sizeof(p));
+  if (protocol==IR_PROTOCOL_NATIVE) writePacket(brl, &externalPort, p, sizeof(p));
   packetForwardMode = 0;
   closePort(&externalPort);
   refreshBrailleWindow = 1;
@@ -630,7 +627,7 @@ static int packetToCommand(BrailleDisplay *brl, unsigned char *packet, size_t si
   return EOF;
 }
 
-static void handleNativePacket(const BrailleDisplay *brl, unsigned char *packet1, size_t size)
+static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size_t size)
 {
   unsigned char packet2[MAXPACKETSIZE];
   if (size==2) {
@@ -642,7 +639,7 @@ static void handleNativePacket(const BrailleDisplay *brl, unsigned char *packet1
         packet2[0] = 'K';
         packet2[1] = 'I';
         packet2[2] = packet1[1];
-        writeEurobraillePacket(&externalPort, packet2, 3);
+        writeEurobraillePacket(brl, &externalPort, packet2, 3);
       }
     }
   } else if (size==3) {
@@ -679,28 +676,28 @@ static void handleNativePacket(const BrailleDisplay *brl, unsigned char *packet1
   }
 }
 
-static void handleEurobraillePacket(const BrailleDisplay *brl, const unsigned char *packet, size_t size)
+static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *packet, size_t size)
 {
   if (size==2 && packet[0]=='S' && packet[1]=='I')
   { /* Send system information */
     char str[256];
     Port *port = &externalPort;
-    writeEurobraillePacketFromString(port, "SNIRIS_KB_40");
-    writeEurobraillePacketFromString(port, "SHIR4");
+    writeEurobraillePacketFromString(brl, port, "SNIRIS_KB_40");
+    writeEurobraillePacketFromString(brl, port, "SHIR4");
     snprintf(str, sizeof(str), "SS%s", serialNumber);
-    writeEurobraillePacketFromString(port, str);
-    writeEurobraillePacketFromString(port, "SLFR");
+    writeEurobraillePacketFromString(brl, port, str);
+    writeEurobraillePacketFromString(brl, port, "SLFR");
     str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
-    writeEurobraillePacket(port, str, 3);
+    writeEurobraillePacket(brl, port, str, 3);
     str[0] = 'S'; str[1] = 'T'; str[2] = 6;
-    writeEurobraillePacket(port, str, 3);
+    writeEurobraillePacket(brl, port, str, 3);
     snprintf(str, sizeof(str), "So%d%da", 0xef, 0xf8);
-    writeEurobraillePacketFromString(port, str);
-    writeEurobraillePacketFromString(port, "SW1.92");
-    writeEurobraillePacketFromString(port, "SP1.00 30-10-2006");
+    writeEurobraillePacketFromString(brl, port, str);
+    writeEurobraillePacketFromString(brl, port, "SW1.92");
+    writeEurobraillePacketFromString(brl, port, "SP1.00 30-10-2006");
     sprintf(str, "SM%d", 0x08);
-    writeEurobraillePacketFromString(port, str);
-    writeEurobraillePacketFromString(port, "SI");
+    writeEurobraillePacketFromString(brl, port, str);
+    writeEurobraillePacketFromString(brl, port, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
   { /* Write dots to braille display */
     const unsigned char *dots = packet+2;
@@ -723,7 +720,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
   }
   if (deviceSleeping) return BRL_CMD_OFFLINE;
 
-  size = readPacket(&internalPort, packet, sizeof(packet));
+  size = readPacket(brl, &internalPort, packet, sizeof(packet));
   if (size==-1) return BRL_CMD_RESTARTBRL;
 
   /* The test for Menu key should come first since this key toggles */
@@ -742,15 +739,15 @@ static int readCommand_embedded (BrailleDisplay *brl)
     if (size>0) {
       if (protocol==IR_PROTOCOL_NATIVE)
       {
-        writePacket(&externalPort, packet, size);
+        writePacket(brl, &externalPort, packet, size);
       } else { /* forward using Eurobraille's protocol */
         handleNativePacket(brl, packet, size);
       }
     }
     if (protocol==IR_PROTOCOL_NATIVE)
     { /* Read native packet from external port and forward it to internal port */
-      size = readPacket(&externalPort, packet, sizeof(packet));
-      if (size>0) writePacket(&internalPort, packet, size);
+      size = readPacket(brl, &externalPort, packet, sizeof(packet));
+      if (size>0) writePacket(brl, &internalPort, packet, size);
     } else { /* Read Eurobraille packet from external port and handle it */
       size = readEurobraillePacket(&externalPort, packet, sizeof(packet));
       if (size>0) handleEurobraillePacket(brl, packet, size);
@@ -764,7 +761,7 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
 {
   unsigned char packet[MAXPACKETSIZE];
   ssize_t size;
-  size = readPacket(&internalPort, packet, sizeof(packet));
+  size = readPacket(brl, &internalPort, packet, sizeof(packet));
   if (size<0) return BRL_CMD_RESTARTBRL;
   /* The test for Menu key should come first since this key toggles */
   /* packet forward mode on/off */
@@ -822,10 +819,10 @@ static void brl_writeVisual(BrailleDisplay *brl)
 static ssize_t sendRequest(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response)
 {
   unsigned char req = request;
-  writePacket(&internalPort, &req, sizeof(req));
+  writePacket(brl, &internalPort, &req, sizeof(req));
   drainBrailleOutput (brl, 100);
-  serialAwaitInput(internalPort.serialDevice, 1000);
-  return readPacket(&internalPort, response, MAXPACKETSIZE);
+  gioAwaitInput(internalPort.gioEndpoint, 1000);
+  return readPacket(brl, &internalPort, response, MAXPACKETSIZE);
 }
 
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
@@ -855,17 +852,13 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
       logSystemError("ioperm");
       return 0;
     }
-    if (openPort(&internalPort)==-1) return 0;
+    if (!openPort(&internalPort)) return 0;
     activateBraille();
     externalPort.speed = iris_protocols[protocol].speed;
   } else {
-    if (!isSerialDevice(&device)) {
-      unsupportedDevice(device);
-      return 0;
-    }
     internalPort.name = device;
     internalPort.speed = EXTERNALSPEED_NATIVE;
-    if (openPort(&internalPort)==-1) return 0;
+    if (!openPort(&internalPort)) return 0;
     deviceConnected = 1;
   }
   brl->textRows = 1;
