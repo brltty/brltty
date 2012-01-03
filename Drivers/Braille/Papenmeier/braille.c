@@ -1083,9 +1083,11 @@ identifyTerminal (BrailleDisplay *brl) {
 
 static int
 connectResource (const char *identifier) {
-  SerialParameters serialParameters;
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS
+  };
 
-  const UsbChannelDefinition usbChannelDefinitions[] = {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { .vendor=0X0403, .product=0Xf208,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
@@ -1098,7 +1100,6 @@ connectResource (const char *identifier) {
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
 
-  gioInitializeSerialParameters(&serialParameters);
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.applicationData = &serialOperations;
 
