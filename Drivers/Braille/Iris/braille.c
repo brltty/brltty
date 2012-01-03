@@ -330,6 +330,7 @@ static ssize_t readPacket(Port *port, void *packet, size_t size)
   }
   if (res==0) return 0;
   if ( (res==-1) && (errno == EAGAIN) )  return 0;
+  logSystemError("readPacket");
   return -1;
 }
 
@@ -794,7 +795,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
 {
   ssize_t size = brl->textColumns * brl->textRows;
   if (memcmp(previousBrailleWindow, brl->buffer,size)==0 && !refreshBrailleWindow) return 1;
-  if (writeWindow(brl, &internalPort, brl->buffer)==0) return 0;
+  if ( !writeWindow(brl, &internalPort, brl->buffer) ) return 0;
   memcpy(previousBrailleWindow, brl->buffer, size);
   refreshBrailleWindow = 0;
   return 1;
