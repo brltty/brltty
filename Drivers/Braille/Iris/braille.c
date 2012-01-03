@@ -443,19 +443,19 @@ static ssize_t writePacket (Port *port, const void *packet, size_t size)
   if (res<0)
   {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: serialWriteData failed");
-    return 0;
+    return -1;
   }
   res = serialDrainOutput(port->serialDevice);
   if (res!=1)
   {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: serialDrainOutput failed");
-    return 0;
+    return -1;
   }  
   res = gettimeofday(&port->lastWriteTime, NULL);
   if (res==-11)
   {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gettimeofday failed");
-    return 0;
+    return -1;
   }    
   if (port==&internalPort) port->waitingForAck = 1;
   return 1;
@@ -492,7 +492,7 @@ static int writeDots (const BrailleDisplay *brl, Port *port, const unsigned char
   int i;
   for (i=0; i<IR_MAXWINDOWSIZE-size; i++) *(p++) = 0; 
   for (i=0; i<size; i++) *(p++) = dots[size-i-1];
-  return writePacket(port, packet, sizeof(packet));
+  return (writePacket(port, packet, sizeof(packet)) >= 0 ) ? 1 : 0;
 }
 
 /* Low-level write of text to the braile display */
@@ -869,10 +869,6 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
     deviceConnected = 1;
   }
   brl->textRows = 1;
-  deviceType = IR_DT_KB;
-  keyTableDefinition = &KEY_TABLE_DEFINITION(pc);
-  brl->textColumns = IR_MAXWINDOWSIZE;  
-  goto end;
   size = sendRequest(brl, IR_OPT_VersionRequest, deviceResponse);
   if (size <= 0)
   {
@@ -959,7 +955,6 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
              brl->textColumns,
              hasVisualDisplay ? "a" : "no" 
   );
-end:
   makeOutputTable(dotsTable_ISO11548_1);
 
   brl->keyBindings = keyTableDefinition->bindings;
