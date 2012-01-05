@@ -285,7 +285,7 @@ static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t 
 {
   unsigned char ch;
   size_t size_;
-  while ( (gioReadByte (port->gioEndpoint, &ch, (port->reading || port->prefix)))) {
+  while ( gioReadByte (port->gioEndpoint, &ch, port->reading) ) {
     if (port->reading) {
       switch (ch) {
         case DLE:
@@ -326,7 +326,7 @@ static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t 
             brl->writeDelay += gioGetMillisecondsToTransfer(externalPort.gioEndpoint, sizeof(ack));
           }
         } else {
-          logMessage(LOG_INFO, DRIVER_LOG_PREFIX "readPacket: ignoring byte 0x%.2x",ch);
+          logIgnoredByte(ch);
         }
       }
     }
@@ -351,7 +351,7 @@ static ssize_t readEurobraillePacket(Port *port, void *packet, size_t size)
           port->position = port->packet;
           port->declaredSize = 0;
         } else {
-          logMessage(LOG_INFO, DRIVER_LOG_PREFIX "readEurobraillePacket: ignoring byte 0x%.2x",ch);
+          logIgnoredByte(ch);
         };
         break;
       case 1:
