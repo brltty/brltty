@@ -794,8 +794,8 @@ usbSetSerialOperations (UsbDevice *device) {
     const UsbSerialAdapter *sa = usbSerialAdapters;
 
     while (sa->vendor) {
-      if (sa->vendor == device->descriptor.idVendor) {
-        if (!sa->product || (sa->product == device->descriptor.idProduct)) {
+      if (sa->vendor == getLittleEndian16(device->descriptor.idVendor)) {
+        if (!sa->product || (sa->product == getLittleEndian16(device->descriptor.idProduct))) {
           if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) return 0;
           device->serialOperations = sa->operations;
           break;
@@ -820,7 +820,8 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
 
   if (!serial) {
     logMessage(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
-               device->descriptor.idVendor, device->descriptor.idProduct);
+               getLittleEndian16(device->descriptor.idVendor),
+               getLittleEndian16(device->descriptor.idProduct));
     errno = ENOSYS;
     return 0;
   }

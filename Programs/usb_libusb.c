@@ -335,7 +335,8 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                   usb_close(devx->handle);
                 } else {
                   logMessage(LOG_ERR, "USB open error: vendor=%X product=%X",
-                             dev->descriptor.idVendor, dev->descriptor.idProduct);
+                             getLittleEndian16(dev->descriptor.idVendor),
+                             getLittleEndian16(dev->descriptor.idProduct));
                 }
 
                 free(devx);

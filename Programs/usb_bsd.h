@@ -244,10 +244,6 @@ int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   if (ioctl(devx->file, USB_GET_DEVICE_DESC, &device->descriptor) != -1) {
-    device->descriptor.bcdUSB = getLittleEndian16(device->descriptor.bcdUSB);
-    device->descriptor.idVendor = getLittleEndian16(device->descriptor.idVendor);
-    device->descriptor.idProduct = getLittleEndian16(device->descriptor.idProduct);
-    device->descriptor.bcdDevice = getLittleEndian16(device->descriptor.bcdDevice);
     return 1;
   }
   logSystemError("USB device descriptor read");

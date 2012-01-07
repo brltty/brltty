@@ -866,7 +866,7 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
     } else {
       ok = 1;
 
-      if (sysfs) {
+      if (!sysfs) {
         host->usbDescriptor.bcdUSB = getLittleEndian16(host->usbDescriptor.bcdUSB);
         host->usbDescriptor.idVendor = getLittleEndian16(host->usbDescriptor.idVendor);
         host->usbDescriptor.idProduct = getLittleEndian16(host->usbDescriptor.idProduct);

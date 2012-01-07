@@ -677,8 +677,8 @@ usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *da
   UsbDevice *device;
   if ((device = usbOpenDevice(extension))) {
     logMessage(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
-               device->descriptor.idVendor,
-               device->descriptor.idProduct);
+               getLittleEndian16(device->descriptor.idVendor),
+               getLittleEndian16(device->descriptor.idProduct));
     if (chooser(device, data)) {
       usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
       usbLogString(device, device->descriptor.iProduct, "Product Description");

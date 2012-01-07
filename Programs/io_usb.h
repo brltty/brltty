@@ -36,7 +36,7 @@ extern int usbResetDevice (UsbDevice *device);
 extern int usbDisableAutosuspend (UsbDevice *device);
 
 extern const UsbDeviceDescriptor *usbDeviceDescriptor (UsbDevice *device);
-#define USB_IS_PRODUCT(descriptor,vendor,product) (((descriptor)->idVendor == (vendor)) && ((descriptor)->idProduct == (product)))
+#define USB_IS_PRODUCT(descriptor,vendor,product) ((getLittleEndian16((descriptor)->idVendor) == (vendor)) && (getLittleEndian16((descriptor)->idProduct) == (product)))
 
 extern int usbNextDescriptor (
   UsbDevice *device,

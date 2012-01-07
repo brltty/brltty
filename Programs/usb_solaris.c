@@ -438,10 +438,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   int count = usbGetDeviceDescriptor(device, &device->descriptor);
 
   if (count == UsbDescriptorSize_Device) {
-    device->descriptor.bcdUSB = getLittleEndian16(device->descriptor.bcdUSB);
-    device->descriptor.idVendor = getLittleEndian16(device->descriptor.idVendor);
-    device->descriptor.idProduct = getLittleEndian16(device->descriptor.idProduct);
-    device->descriptor.bcdDevice = getLittleEndian16(device->descriptor.bcdDevice);
     return 1;
   }
 
