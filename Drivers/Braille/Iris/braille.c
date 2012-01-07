@@ -784,8 +784,7 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
 
 static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 {
-  if (embeddedDriver) return readCommand_embedded(brl);
-  else return readCommand_nonembedded(brl);
+  return embeddedDriver ? readCommand_embedded(brl) : readCommand_nonembedded(brl);
 }
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
