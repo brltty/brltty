@@ -1172,7 +1172,7 @@ updateCells (
 ) {
   unsigned int from, to;
 
-  if (cellsHaveChanged(cells, data, count, &from, &to)) {
+  if (cellsHaveChanged(cells, data, count, &from, &to, NULL)) {
     writeCells(brl, from, to-from);
   }
 }

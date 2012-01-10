@@ -135,7 +135,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
   *  could most likely cause some problems in redraw situations etc
   *  but since the darn thing wants to redraw quite frequently otherwise 
   *  this still makes a better lookin result */ 
-  if (cellsHaveChanged(lastbuff, brl->buffer, cells, NULL, NULL)) {
+  if (cellsHaveChanged(lastbuff, brl->buffer, cells, NULL, NULL, NULL)) {
     translateOutputCells(outbuff, brl->buffer, cells);
     vbdisplay(outbuff);
     vbdisplay(outbuff);

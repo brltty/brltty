@@ -287,7 +287,7 @@ writeCells (BrailleDisplay *brl) {
 
 static void
 updateCells (unsigned char *target, const unsigned char *source, unsigned int count) {
-  if (cellsHaveChanged(target, source, count, NULL, NULL)) {
+  if (cellsHaveChanged(target, source, count, NULL, NULL, NULL)) {
     rewriteRequired = 1;
   }
 }

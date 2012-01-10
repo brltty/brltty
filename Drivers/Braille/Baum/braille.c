@@ -403,7 +403,7 @@ putCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int start, u
   unsigned int from;
   unsigned int to;
 
-  if (cellsHaveChanged(&internalCells[start], cells, count, &from, &to)) {
+  if (cellsHaveChanged(&internalCells[start], cells, count, &from, &to, NULL)) {
     if (!updateCellRange(brl, start+from, to-from)) return 0;
   }
 

@@ -434,12 +434,12 @@ void	esysiris_writeWindow(BrailleDisplay *brl)
     return;
   }
 
-  if (!cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL))
-    return;
-  buf[0] = 'B';
-  buf[1] = 'S';
-  memcpy(buf + 2, brl->buffer, displaySize);
-  esysiris_writePacket(brl, buf, sizeof(buf));
+  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, NULL)) {
+    buf[0] = 'B';
+    buf[1] = 'S';
+    memcpy(buf + 2, brl->buffer, displaySize);
+    esysiris_writePacket(brl, buf, sizeof(buf));
+  }
 }
 
 int	esysiris_hasLcdSupport(BrailleDisplay *brl)

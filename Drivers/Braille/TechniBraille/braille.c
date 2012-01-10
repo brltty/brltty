@@ -198,7 +198,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     }
   }
 
-  if (cellsHaveChanged(brailleCells, brl->buffer, brl->textColumns, NULL, NULL)) {
+  if (cellsHaveChanged(brailleCells, brl->buffer, brl->textColumns, NULL, NULL, NULL)) {
     if (!writeBrailleCells(brl)) return 0;
   }
   return 1;

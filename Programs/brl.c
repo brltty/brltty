@@ -562,21 +562,19 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 int
 cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to
+  unsigned int *from, unsigned int *to, int *force
 ) {
-  if (memcmp(cells, new, count) == 0) return 0;
+  unsigned int first = 0;
 
-  {
-    unsigned int first = 0;
-
+  if (force && *force) {
+    *force = 0;
+  } else if (memcmp(cells, new, count) != 0) {
     if (to) {
       while (count) {
         unsigned int last = count - 1;
         if (cells[last] != new[last]) break;
         count = last;
       }
-
-      *to = count;
     }
 
     if (from) {
@@ -584,13 +582,15 @@ cellsHaveChanged (
         if (cells[first] != new[first]) break;
         first += 1;
       }
-
-      *from = first;
     }
-
-    memcpy(cells+first, new+first, count-first);
+  } else {
+    return 0;
   }
 
+  if (from) *from = first;
+  if (to) *to = count;
+
+  memcpy(cells+first, new+first, count-first);
   return 1;
 }
 

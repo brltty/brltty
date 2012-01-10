@@ -1090,7 +1090,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     }
   }
 
-  if (cellsHaveChanged(brailleCells, brl->buffer, brailleCount, NULL, NULL)) {
+  if (cellsHaveChanged(brailleCells, brl->buffer, brailleCount, NULL, NULL, NULL)) {
     writeString("Braille \"");
     writeDots(brl->buffer, brailleCount);
     writeString("\"");
@@ -1114,7 +1114,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
     count = statusCount;
   }
 
-  if (cellsHaveChanged(cells, status, count, NULL, NULL)) {
+  if (cellsHaveChanged(cells, status, count, NULL, NULL, NULL)) {
     if (generic) {
       int all = cells[GSC_FIRST] != GSC_MARKER;
       int i;

@@ -179,7 +179,7 @@ static int		NbCols = 0;			/* number of cells available */
 static char		IdentString[41] = "Device not recognized!";
 static int		gio_fd = -1;
 
-static short	ReWrite = 0;		/* 1 if display need to be rewritten */
+static int	ReWrite = 0;		/* 1 if display need to be rewritten */
 static short	ReWrite_LCD = 0;		/* same as rewrite, for LCD */
 static int	OffsetType = BRL_BLK_ROUTE;
 static int	context = 0;
@@ -409,13 +409,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
      {
        return 1;
      }
-   if (!ReWrite)
-     /* We update the display only if it has changed */
-     if (cellsHaveChanged(prevdata, brl->buffer, NbCols, NULL, NULL))
-       {
-	 ReWrite = 1;
-       }
-   if (ReWrite)
+   if (cellsHaveChanged(prevdata, brl->buffer, NbCols, NULL, NULL, &ReWrite))
      {
       /* right end cells don't have to be transmitted if all dots down */
        char OutBuf[i + 1];
@@ -428,7 +422,6 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
        for (j = NbCols - 1; j >= 0; j--)
 	 *p++ = translateOutputCell(brl->buffer[j]);
        WriteToBrlDisplay (brl, p - OutBuf, OutBuf);
-       ReWrite = 0;
      }
    return 1;
 }

@@ -127,7 +127,7 @@ extern const BrailleDriver noBraille;
 
 extern int cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to
+  unsigned int *from, unsigned int *to, int *force
 );
 
 #define TRANSLATION_TABLE_SIZE 0X100

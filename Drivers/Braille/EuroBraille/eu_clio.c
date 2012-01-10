@@ -444,14 +444,13 @@ void     clio_writeWindow(BrailleDisplay *brl)
     logMessage(LOG_WARNING, "[eu] Discarding too large braille window" );
     return;
   }
-  if (!cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL) && !refreshDisplay)
-    return;
-  refreshDisplay = 0;
-  buf[0] = (unsigned char)(displaySize + 2);
-  buf[1] = 'D';
-  buf[2] = 'P';
-  memcpy(buf + 3, brl->buffer, displaySize);
-  clio_writePacket(brl, buf, sizeof(buf));
+  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &refreshDisplay)) {
+    buf[0] = (unsigned char)(displaySize + 2);
+    buf[1] = 'D';
+    buf[2] = 'P';
+    memcpy(buf + 3, brl->buffer, displaySize);
+    clio_writePacket(brl, buf, sizeof(buf));
+  }
 }
 
 void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)

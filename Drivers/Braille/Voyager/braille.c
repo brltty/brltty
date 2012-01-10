@@ -121,7 +121,7 @@ END_KEY_TABLE_LIST
 #define READY_BEEP_DURATION 200
 #define MAXIMUM_CELL_COUNT 70 /* arbitrary max for allocations */
 
-static unsigned char cellsInitialized;
+static int forceWrite;
 static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
@@ -961,7 +961,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               if (protocol->setDisplayState(brl, 1)) {
                 makeOutputTable(dotsTable_ISO11548_1);
                 keysInitialized = 0;
-                cellsInitialized = 0;
+                forceWrite = 1;
 
                 soundBeep(brl, READY_BEEP_DURATION);
                 return 1;
@@ -1022,14 +1022,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int to = cellCount;
   int changed;
 
-  if (!cellsInitialized) {
-    memcpy(previousCells, brl->buffer, cellCount);
-    changed = 1;
-    cellsInitialized = 1;
-  } else if (deviceModel->partialUpdates) {
-    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to);
+  if (deviceModel->partialUpdates) {
+    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to, &forceWrite);
   } else {
-    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL);
+    changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL, &forceWrite);
   }
 
   if (changed) {

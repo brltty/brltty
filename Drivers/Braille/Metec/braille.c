@@ -208,7 +208,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   int moduleNumber;
 
   for (moduleNumber=0; moduleNumber<moduleCount; moduleNumber+=1) {
-    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL) || forceWrite) {
+    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL, NULL) || forceWrite) {
       unsigned char buffer[MT_MODULE_SIZE];
 
       translateOutputCells(buffer, source, MT_MODULE_SIZE);

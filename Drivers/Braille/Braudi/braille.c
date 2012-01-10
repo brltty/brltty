@@ -226,7 +226,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(outputBuffer, brl->buffer, brl->textColumns, NULL, NULL)) {
+  if (cellsHaveChanged(outputBuffer, brl->buffer, brl->textColumns, NULL, NULL, NULL)) {
     writeCells(brl);
   }
   return 1;

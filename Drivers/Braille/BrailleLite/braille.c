@@ -465,7 +465,7 @@ brl_writeWindow (BrailleDisplay * brl, const wchar_t *text)
   }
 
   /* Only refresh display if the data has changed: */
-  if (cellsHaveChanged(prevdata, rawdata, blitesz, NULL, NULL))
+  if (cellsHaveChanged(prevdata, rawdata, blitesz, NULL, NULL, NULL))
     {
       /* Dot mapping from standard to BrailleLite: */
       translateOutputCells(rawdata, rawdata, blitesz);

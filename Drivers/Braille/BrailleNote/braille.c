@@ -455,7 +455,7 @@ brl_reset (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(dataArea, brl->buffer, dataCells, NULL, NULL)) {
+  if (cellsHaveChanged(dataArea, brl->buffer, dataCells, NULL, NULL, NULL)) {
     refreshCells(brl);
   }
   return 1;

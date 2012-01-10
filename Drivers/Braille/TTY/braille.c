@@ -268,9 +268,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   static int previousCursor = -1;
   char *previousLocale;
 
-  if (!cellsHaveChanged(previousContent, brl->buffer, brl->textColumns*brl->textRows, NULL, NULL) &&
-      (brl->cursor == previousCursor))
+  if (!cellsHaveChanged(previousContent, brl->buffer, brl->textColumns*brl->textRows, NULL, NULL, NULL) &&
+      (brl->cursor == previousCursor)) {
     return 1;
+  }
+
   previousCursor = brl->cursor;
 
   if (classificationLocale) {

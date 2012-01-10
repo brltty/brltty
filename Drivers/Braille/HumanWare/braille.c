@@ -68,7 +68,7 @@ END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
   GioEndpoint *gioEndpoint;
-  unsigned cellsInitialized:1;
+  int forceWrite;
   unsigned char textCells[0XFF];
 };
 
@@ -192,7 +192,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 }
 
                 makeOutputTable(dotsTable_ISO11548_1);
-                brl->data->cellsInitialized = 0;
+                brl->data->forceWrite = 1;
                 return 1;
               }
               break;
@@ -232,21 +232,11 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int changed;
-
-  if (brl->data->cellsInitialized) {
-    changed = cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL);
-  } else {
-    memcpy(brl->data->textCells, brl->buffer, brl->textColumns);
-    changed = 1;
-  }
-
-  if (changed) {
+  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceWrite)) {
     unsigned char cells[brl->textColumns];
 
     translateOutputCells(cells, brl->data->textCells, brl->textColumns);
     if (!writePacket(brl, HW_MSG_DISPLAY, brl->textColumns, cells)) return 0;
-    brl->data->cellsInitialized = 1;
   }
 
   return 1;

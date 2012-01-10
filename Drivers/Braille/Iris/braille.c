@@ -789,11 +789,12 @@ static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
 {
-  ssize_t size = brl->textColumns * brl->textRows;
-  if (memcmp(previousBrailleWindow, brl->buffer,size)==0 && !refreshBrailleWindow) return 1;
-  if ( !writeWindow(brl, &internalPort, brl->buffer) ) return 0;
-  memcpy(previousBrailleWindow, brl->buffer, size);
-  refreshBrailleWindow = 0;
+  const size_t size = brl->textColumns * brl->textRows;
+
+  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, size, NULL, NULL, &refreshBrailleWindow)) {
+    if (writeWindow(brl, &internalPort, brl->buffer) == 0) return 0;
+  }
+
   return 1;
 }
 

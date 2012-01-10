@@ -435,8 +435,8 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 static int 
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
-  unsigned int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl_cols, NULL, NULL);
-  unsigned int statusChanged = cellsHaveChanged(prevstatbuf, statbuf, nrstatcells, NULL, NULL);
+  unsigned int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl_cols, NULL, NULL, NULL);
+  unsigned int statusChanged = cellsHaveChanged(prevstatbuf, statbuf, nrstatcells, NULL, NULL, NULL);
   unsigned char *p;
 
   if(!(textChanged || statusChanged))

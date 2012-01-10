@@ -638,7 +638,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   }else if(no_multiple_updates){
     unsigned int from, to;
     
-    if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to)) {
+    if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to, NULL)) {
       display (brl, dispbuf, from, to);
     }
   }else{

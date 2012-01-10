@@ -276,9 +276,13 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   static unsigned char brailleDisplay[81]= { 0x3e }; /* should be large enough for everyone */
   static unsigned char prevData[80];
-  if (!cellsHaveChanged(prevData,brl->buffer,brl->textColumns,NULL,NULL)) return 1;
-  translateOutputCells(brailleDisplay+1, brl->buffer, brl->textColumns);
-  return brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->textColumns+1)==0;
+
+  if (cellsHaveChanged(prevData, brl->buffer, brl->textColumns, NULL, NULL, NULL)) {
+    translateOutputCells(brailleDisplay+1, brl->buffer, brl->textColumns);
+    if (brl_writePacket(brl, (unsigned char *)&brailleDisplay, brl->textColumns+1) == -1) return 0;
+  }
+
+  return 1;
 }
 
 /* Function : brl_keyToCommand */

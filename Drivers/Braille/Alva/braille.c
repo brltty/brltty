@@ -1738,21 +1738,12 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     if (textRewriteRequired) textRewriteTime = now;
   }
 
-  if (textRewriteRequired) {
-    from = 0;
-    to = brl->textColumns;
-    memcpy(previousText, brl->buffer, brl->textColumns);
-  } else if (!cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to)) {
-    return 1;
-  }
-
-  {
+  if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to, &textRewriteRequired)) {
     size_t count = to - from;
     unsigned char cells[count];
 
     translateOutputCells(cells, &brl->buffer[from], count);
     if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
-    textRewriteRequired = 0;
   }
 
   return 1;
@@ -1762,13 +1753,11 @@ static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   size_t cellCount = brl->statusColumns;
 
-  if (cellsHaveChanged(previousStatus, status, cellCount, NULL, NULL) || statusRewriteRequired) {
+  if (cellsHaveChanged(previousStatus, status, cellCount, NULL, NULL, &statusRewriteRequired)) {
     unsigned char cells[cellCount];
 
     translateOutputCells(cells, status, cellCount);
-
     if (!protocol->writeBraille(brl, cells, statusOffset, cellCount)) return 0;
-    statusRewriteRequired = 0;
   }
 
   return 1;

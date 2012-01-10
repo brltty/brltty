@@ -653,7 +653,7 @@ updateCells (
   unsigned int from;
   unsigned int to;
 
-  if (cellsHaveChanged(&outputBuffer[offset], cells, count, &from, &to)) {
+  if (cellsHaveChanged(&outputBuffer[offset], cells, count, &from, &to, NULL)) {
     int first = from + offset;
     int last = to + offset - 1;
 

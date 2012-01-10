@@ -93,7 +93,7 @@ writeCells  (BrailleDisplay *brl) {
 
 static void
 updateCells (unsigned char *target, const unsigned char *source, size_t count) {
-  if (cellsHaveChanged(target, source, count, NULL, NULL)) {
+  if (cellsHaveChanged(target, source, count, NULL, NULL, NULL)) {
     refreshNeeded = 1;
   }
 }

@@ -1252,7 +1252,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   }
 
 #if defined(USE_XAW) || defined(USE_WINDOWS)
-  if (!cellsHaveChanged(displayedWindow,brl->buffer,brl->textRows*brl->textColumns,&from,&to) || !displayb[0]) return 1;
+  if (!cellsHaveChanged(displayedWindow,brl->buffer,brl->textRows*brl->textColumns,&from,&to,NULL) || !displayb[0]) return 1;
 
   for (i=from;i<to;i++) {
     unsigned char c = brl->buffer[i];
