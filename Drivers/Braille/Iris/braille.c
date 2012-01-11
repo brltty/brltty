@@ -425,16 +425,13 @@ static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet,
   unsigned char *p = buf;
   size_t count;
   ssize_t res;
-  int ms = millisecondsSince(&port->lastWriteTime);
-
-  if (port->waitingForAck && (ms > 1000)) {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
-    port->waitingForAck = 0;
-  }
 
   if (port->waitingForAck) {
+    int ms = millisecondsSince(&port->lastWriteTime);
+
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s after %d ms",port->name, ms);
-    return 0;
+    if (ms < 1000) return 0;
+    port->waitingForAck = 0;
   }
 
   *p++ = SOH;
