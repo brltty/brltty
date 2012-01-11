@@ -67,8 +67,8 @@ typedef struct {
 } iris_protocol;
 
 const iris_protocol iris_protocols[] = {
-  { IR_PROTOCOL_EUROBRAILLE, "eurobraille", EXTERNALSPEED_EUROBRAILLE },
-  { IR_PROTOCOL_NATIVE, "native", EXTERNALSPEED_NATIVE }
+  { IR_PROTOCOL_EUROBRAILLE, strtext("eurobraille"), EXTERNALSPEED_EUROBRAILLE },
+  { IR_PROTOCOL_NATIVE, strtext("native"), EXTERNALSPEED_NATIVE }
 };
 
 #define nb_protocols (  sizeof(iris_protocols) / sizeof(iris_protocol) )
@@ -584,7 +584,7 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
   externalPort.speed = iris_protocols[protocol].speed;
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", externalPort.name, iris_protocols[protocol].name, externalPort.speed);
   if (!openPort(&externalPort)) return;
-  snprintf(msg, sizeof(msg), "PC mode (%s)", iris_protocols[protocol].name);
+  snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(iris_protocols[protocol].name));
   message(NULL, msg, MSG_NODELAY);
   if (protocol==IR_PROTOCOL_NATIVE) writePacket(brl, &externalPort, p, sizeof(p));
   packetForwardMode = 1;

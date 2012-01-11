@@ -584,8 +584,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	    dot8shift = 0;
 #endif /* USE_TEXTTRANS */
 	    if(kbemu)
-	      message (NULL, "keyboard emu on", MSG_SILENT);
-	    else message (NULL, "keyboard emu off", MSG_SILENT);
+	      message (NULL, gettext("keyboard emu on"), MSG_SILENT);
+	    else message (NULL, gettext("keyboard emu off"), MSG_SILENT);
 	    return BRL_CMD_NOOP;
 	  case BLT_ROTATE:	/* rotate Braille Lite by 180 degrees */
 	    reverse_kbd ^= 1;
@@ -596,13 +596,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	    return BRL_CMD_NOOP;
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
-	    sprintf (outmsg, "Repeat count:");
+	    sprintf (outmsg, "%s:", gettext("repeat count"));
 	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_REPEAT;
 	    return BRL_CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
-	    sprintf (outmsg, "Config? [m/s/r/z]");
+	    sprintf (outmsg, "%s? [m/s/r/z]", gettext("config"));
 	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_CONFIG;
@@ -663,7 +663,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	    return BRL_CMD_NOOP;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
-	    message (NULL, "keyboard emu off", MSG_SILENT);
+	    message (NULL, gettext("keyboard emu off"), MSG_SILENT);
 	    return BRL_CMD_NOOP;
 	  default:		/* unrecognised command */
 	    shift = shiftlck = ctrl = meta = 0;
@@ -774,9 +774,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       if (key.asc >= '0' && key.asc <= '9')
 	{
 	  hold = (hold * 10 + key.asc - '0') % 100;
-	  if(hold)
-	    sprintf (outmsg, "Repeat count: %d", hold);
-	  else sprintf (outmsg, "Repeat count: ");
+	  if (hold) {
+	    sprintf (outmsg, "%s: %d", gettext("repeat count"), hold);
+	  } else {
+            sprintf (outmsg, "%s: ", gettext("repeat count"));
+          }
 	  intoverride = 0;
 	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
@@ -784,7 +786,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       else if (key.routing)
 	{
 	  hold = key.routing +1;
-	  sprintf (outmsg, "Repeat count: %d", hold);
+	  sprintf (outmsg, "%s: %d", gettext("repeat count"), hold);
 	  intoverride = 0;
 	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;

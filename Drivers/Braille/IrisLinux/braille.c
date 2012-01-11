@@ -434,7 +434,7 @@ static int Program(BrailleDisplay *brl)
 
   if (p)
     {
-      message(NULL, "Level 1 ...", MSG_NODELAY);
+      message(NULL, gettext("level 1 ..."), MSG_NODELAY);
       while ((key = readbrlkey(brl, CTX_COMMANDS)) != VK_FGB)
 	{
 	  for (i = 0; p[i].brl_key; i++)
@@ -458,7 +458,7 @@ static int Program(BrailleDisplay *brl)
 
 static int SynthControl(BrailleDisplay *brl)
 {
-  message(NULL, "Level 4 ...", MSG_NODELAY);
+  message(NULL, gettext("level 4 ..."), MSG_NODELAY);
   context = IN_LEVEL4;
   return (EOF);
 }
@@ -540,9 +540,9 @@ static int handle_routekey(BrailleDisplay *brl, int routekey)
 	   case 0x06: /* Console Switching */
  	     context = 0;
 	     if (NbCols == 20)
-	       message(NULL, "switch:1 2 3 4 5 6 t", MSG_NODELAY);
+	       message(NULL, gettext("switch:1 2 3 4 5 6 t"), MSG_NODELAY);
 	     else
-	       message(NULL, "switch:1 2 3 4 5 6 7 t", MSG_NODELAY);
+	       message(NULL, gettext("switch:1 2 3 4 5 6 7 t"), MSG_NODELAY);
 	     context = 2;
 	     ReWrite = 0;
 	     res = BRL_CMD_NOOP;
@@ -618,7 +618,7 @@ static int handle_routekey(BrailleDisplay *brl, int routekey)
 	  }
 	if (flag == 1)
 	  {
-	    message(NULL, "i:tty hlp info t", MSG_NODELAY);
+	    message(NULL, gettext("i:tty hlp info t"), MSG_NODELAY);
 	    context = 1;
 	    res = BRL_CMD_NOOP;
 	  }
@@ -689,7 +689,7 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf, char key_context)
     }
   if (keys == 0x280 && !alt && !control) /* alt */
     {
-      message(NULL, "! alt", MSG_NODELAY);
+      message(NULL, gettext("! alt"), MSG_NODELAY);
       context = 4;
       ReWrite = 0;
       alt = 1;
@@ -698,7 +698,7 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf, char key_context)
   if (alt && control)
     {
       context = 0;
-      message(NULL, "! alt control", MSG_NODELAY);
+      message(NULL, gettext("! alt control"), MSG_NODELAY);
       context = 4;
     }
   if (keys == 0x2c0 && control)
@@ -711,7 +711,7 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf, char key_context)
   if (keys == 0x2c0 && !control) /* control */
     {
       control = 1;
-      message(NULL, "! control ", MSG_NODELAY);
+      message(NULL, gettext("! control"), MSG_NODELAY);
       context = 4;
       ReWrite = 0;
       res = BRL_CMD_NOOP;

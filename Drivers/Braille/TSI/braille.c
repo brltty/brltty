@@ -979,9 +979,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   }
 
   if(packtype == K_BATTERY){
-    const char *text = "-><- Display battery is low";
-    if(brl_cols < strlen(text)) text = "Display battery low";
-    message(NULL, text, MSG_WAITKEY);
+    message(NULL, gettext("battery low"), MSG_WAITKEY);
     return (EOF);
   }else if(packtype == K_QUERYREP){
     /* flush the last 10bytes of the reply. */

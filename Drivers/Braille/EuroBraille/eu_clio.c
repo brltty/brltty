@@ -215,9 +215,9 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       if (flagLevel2)
 	{
 	  if (brlModel >= IR2)
-	    message(NULL, "Layer 2 ...", MSG_NODELAY);
+	    message(NULL, gettext("layer 2 ..."), MSG_NODELAY);
 	  else
-	    message(NULL, "Programming on ...", MSG_NODELAY);
+	    message(NULL, gettext("programming on ..."), MSG_NODELAY);
 	}
     }
   else if (key == CL_SHARP && !flagLevel2)
@@ -226,9 +226,9 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       if (flagLevel1)
 	{
 	  if (brlModel >= IR2) 
-	    message(NULL, "Layer 1 ...", MSG_NODELAY);
+	    message(NULL, gettext("layer 1 ..."), MSG_NODELAY);
 	  else
-	    message(NULL, "View on ...", MSG_NODELAY);
+	    message(NULL, gettext("view on ..."), MSG_NODELAY);
 	}
     }
   if (flagLevel1)
