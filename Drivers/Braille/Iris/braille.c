@@ -423,39 +423,45 @@ static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet,
   const unsigned char *data = packet;
   unsigned char	buf[2*(size + 1) +3];
   unsigned char *p = buf;
+  size_t count;
   ssize_t res;
   int ms = millisecondsSince(&port->lastWriteTime);
-  if ((port->waitingForAck) && (ms>1000)) {
+
+  if (port->waitingForAck && (ms > 1000)) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
     port->waitingForAck = 0;
   }
-  if (port->waitingForAck)
-  {
+
+  if (port->waitingForAck) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s after %d ms",port->name, ms);
     return 0;
   }
+
   *p++ = SOH;
   while (size--) {
     if (needsEscape(*data)) *p++ = DLE;
-    *p++ = *data;
-    data++;
+    *p++ = *data++;
   }
   *p++ = EOT;
-  res = gioWriteData(port->gioEndpoint, buf, p - buf);
-  if (res<0)
-  {
+
+  count = p - buf;
+  logOutputPacket(buf, count);
+  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
+
+  res = gioWriteData(port->gioEndpoint, buf, count);
+  if (res == -1) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gioWriteData failed");
     return -1;
   }
-  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, p-buf);
+
   res = gettimeofday(&port->lastWriteTime, NULL);
-  if (res==-11)
-  {
+  if (res == -11) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gettimeofday failed");
     return -1;
   }    
+
   if (port==&internalPort) port->waitingForAck = 1;
-  return 1;
+  return count;
 }
 
 static ssize_t writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
@@ -481,7 +487,7 @@ static ssize_t writeEurobraillePacketFromString (BrailleDisplay *brl, Port *port
 
 /* Low-level write of dots to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static int writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
+static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
 {
   ssize_t size = brl->textColumns * brl->textRows;
   unsigned char packet[IR_MAXWINDOWSIZE+1] = { IR_OPT_WriteBraille };
@@ -489,12 +495,12 @@ static int writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots
   int i;
   for (i=0; i<IR_MAXWINDOWSIZE-size; i++) *(p++) = 0; 
   for (i=0; i<size; i++) *(p++) = dots[size-i-1];
-  return (writePacket(brl, port, packet, sizeof(packet)) >= 0 ) ? 1 : 0;
+  return writePacket(brl, port, packet, sizeof(packet));
 }
 
 /* Low-level write of text to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static int writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text)
+static ssize_t writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text)
 {
   ssize_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
@@ -792,7 +798,9 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
   const size_t size = brl->textColumns * brl->textRows;
 
   if (cellsHaveChanged(previousBrailleWindow, brl->buffer, size, NULL, NULL, &refreshBrailleWindow)) {
-    if (writeWindow(brl, &internalPort, brl->buffer) == 0) return 0;
+    ssize_t res = writeWindow(brl, &internalPort, brl->buffer);
+    if (res == -1) return 0;
+    if (res == 0) refreshBrailleWindow = 1;
   }
 
   return 1;
