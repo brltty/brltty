@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_CTB_INTERNAL
 #define BRLTTY_INCLUDED_CTB_INTERNAL
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
