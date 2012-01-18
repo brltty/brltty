@@ -68,16 +68,20 @@ describe_MenuScreen (ScreenDescription *description) {
 
 static void
 formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
-  char label[0X100];
-  char setting[0X100];
+  char labelString[0X100];
+  size_t labelLength;
+
+  char settingString[0X100];
+  size_t settingLength;
 
   {
     const MenuString *name = getMenuItemName(item);
 
-    STR_BEGIN(label, ARRAY_COUNT(label));
+    STR_BEGIN(labelString, ARRAY_COUNT(labelString));
     STR_PRINTF("%s", name->label);
     if (*name->comment) STR_PRINTF(" %s", name->comment);
     STR_PRINTF(": ");
+    labelLength = STR_LENGTH;
     STR_END;
   }
 
@@ -86,29 +90,35 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
     const char *comment = getMenuItemComment(item);
     if (!*value) value = gettext("<off>");
 
-    STR_BEGIN(setting, ARRAY_COUNT(setting));
+    STR_BEGIN(settingString, ARRAY_COUNT(settingString));
     STR_PRINTF("%s", value);
     if (*comment) STR_PRINTF(" (%s)", comment);
+    settingLength = STR_LENGTH;
     STR_END;
   }
 
   {
-    size_t length = 0;
+    size_t maximumLength = labelLength + settingLength;
+    wchar_t characters[maximumLength];
+    size_t currentLength = 0;
 
-    length += convertTextToWchars(&buffer[length], label, size-length);
-    settingIndent = length;
+    currentLength += convertTextToWchars(&characters[currentLength], labelString, maximumLength-currentLength);
+    settingIndent = MIN(currentLength, size);
 
-    length += convertTextToWchars(&buffer[length], setting, size-length);
-    lineLength = length;
+    currentLength += convertTextToWchars(&characters[currentLength], settingString, maximumLength-currentLength);
+    lineLength = MIN(currentLength, size);
 
-    if (screenWidth < length) screenWidth = length;
+    if (screenWidth < currentLength) screenWidth = currentLength;
+    if (currentLength > size) currentLength = size;
+    wmemcpy(buffer, characters, currentLength);
+    wmemset(&buffer[currentLength], WC_C(' '), size-currentLength);
   }
 }
 
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (validateScreenBox(box, screenWidth, screenHeight)) {
-    wchar_t line[screenWidth + 1];
+    wchar_t line[screenWidth];
     unsigned int row = box->height;
 
     while (row > 0) {
