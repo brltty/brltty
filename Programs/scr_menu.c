@@ -93,12 +93,14 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
   }
 
   {
-    int indent;
-    int length;
-    swprintf(buffer, size, WS_C("%s%n%s%n"), label, &indent, setting, &length);
+    size_t length = 0;
 
-    lineLength = MIN(length, size);
-    settingIndent = MIN(indent, lineLength);
+    length += convertTextToWchars(&buffer[length], label, size-length);
+    settingIndent = length;
+
+    length += convertTextToWchars(&buffer[length], setting, size-length);
+    lineLength = length;
+
     if (screenWidth < length) screenWidth = length;
   }
 }
