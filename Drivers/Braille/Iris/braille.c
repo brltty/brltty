@@ -30,7 +30,6 @@
 #include "cmd.h"
 #include "log.h"
 #include "parse.h"
-#include "scancodes.h"
 #include "timing.h"
 
 #define INTERNALSPEED 9600
@@ -461,25 +460,580 @@ static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet,
   return count;
 }
 
-static ssize_t writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
+static int writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size)
 {
   int packetSize = size + 2;
-  unsigned char	buf[packetSize + 2];
-  unsigned char *p = buf;
+  unsigned char	packet[packetSize + 2];
+  unsigned char *p = packet;
+
   *p++ = STX;
   *p++ = (packetSize >> 8) & 0x00FF;
   *p++ = packetSize & 0x00FF;  
-  memcpy(p, packet, size);
-  buf[sizeof(buf)-1] = ETX;
-  gioWriteData(port->gioEndpoint, buf, sizeof(buf));
-  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, sizeof(buf));
+  p = mempcpy(p, data, size);
+  *p++ = ETX;
+
+  if (gioWriteData(port->gioEndpoint, packet, sizeof(packet)) == -1) return 0;
+  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, sizeof(packet));
   gettimeofday(&port->lastWriteTime, NULL);
   return 1;
 }
 
-static ssize_t writeEurobraillePacketFromString (BrailleDisplay *brl, Port *port, const char *str)
+typedef enum {
+  XT_KEYS_00,
+  XT_KEYS_E0,
+  XT_KEYS_E1
+} XT_KEY_SET;
+
+#define XT_KEY(set,key) ((XT_KEYS_##set << 7) | (key))
+
+typedef enum {
+  XKM_leftShift,
+  XKM_rightShift,
+  XKM_leftControl,
+  XKM_rightControl,
+  XKM_leftAlt,
+  XKM_rightAlt,
+  XKM_leftWindows,
+  XKM_rightWindows,
+  XKM_fn
+} XtKeyModifier;
+
+static uint16_t xtModifiers;
+#define XKM(mod) (1 << (mod))
+
+typedef enum {
+  XKL_shift
+} XtKeyLock;
+
+static uint8_t xtLocks;
+#define XKL(lock) (1 << (lock))
+
+typedef enum {
+  XtKeyType_modifier,
+  XtKeyType_lock,
+  XtKeyType_character,
+  XtKeyType_function,
+  XtKeyType_special,
+  XtKeyType_ignore
+} XtKeyType;
+
+typedef struct {
+  unsigned char type;
+  unsigned char arg1;
+  unsigned char arg2;
+  unsigned char arg3;
+} XtKeyEntry;
+
+static const XtKeyEntry xtKeyTable[] = {
+  /* row 1 */
+  [XT_KEY(00,0X01)] = { // key 1: escape
+    .type = XtKeyType_function,
+    .arg1=0X1B
+  }
+  ,
+  [XT_KEY(00,0X3B)] = { // key 2: F1
+    .type = XtKeyType_function,
+    .arg1=0X70
+  }
+  ,
+  [XT_KEY(00,0X3C)] = { // key 3: F2
+    .type = XtKeyType_function,
+    .arg1=0X71
+  }
+  ,
+  [XT_KEY(00,0X3D)] = { // key 4: F3
+    .type = XtKeyType_function,
+    .arg1=0X72
+  }
+  ,
+  [XT_KEY(00,0X3E)] = { // key 5: F4
+    .type = XtKeyType_function,
+    .arg1=0X73
+  }
+  ,
+  [XT_KEY(00,0X3F)] = { // key 6: F5
+    .type = XtKeyType_function,
+    .arg1=0X74
+  }
+  ,
+  [XT_KEY(00,0X40)] = { // key 7: F6
+    .type = XtKeyType_function,
+    .arg1=0X75
+  }
+  ,
+  [XT_KEY(00,0X41)] = { // key 8: F7
+    .type = XtKeyType_function,
+    .arg1=0X76
+  }
+  ,
+  [XT_KEY(00,0X42)] = { // key 9: F8
+    .type = XtKeyType_function,
+    .arg1=0X77
+  }
+  ,
+  [XT_KEY(00,0X43)] = { // key 10: F9
+    .type = XtKeyType_function,
+    .arg1=0X78
+  }
+  ,
+  [XT_KEY(00,0X44)] = { // key 11: F10
+    .type = XtKeyType_function,
+    .arg1=0X79
+  }
+  ,
+  [XT_KEY(00,0X57)] = { // key 12: F11
+    .type = XtKeyType_function,
+    .arg1=0X7A
+  }
+  ,
+  [XT_KEY(00,0X58)] = { // key 13: F12
+    .type = XtKeyType_function,
+    .arg1=0X7B
+  }
+  ,
+  [XT_KEY(00,0X46)] = { // key 14: scroll lock
+    .type = XtKeyType_ignore
+  }
+  ,
+  [XT_KEY(E1,0X1D)] = { // key 15: pause break
+    .type = XtKeyType_ignore
+  }
+  ,
+  [XT_KEY(E0,0X52)] = { // key 16: insert
+    .type = XtKeyType_special,
+    .arg1=0X0F
+  }
+  ,
+  [XT_KEY(E0,0X53)] = { // key 17: delete
+    .type = XtKeyType_special,
+    .arg1=0X10
+  }
+  ,
+
+  /* row 2 */
+  [XT_KEY(00,0X02)] = { // key 1: &1
+    .type = XtKeyType_character,
+    .arg1=0X26, .arg2=0X31
+  }
+  ,
+  [XT_KEY(00,0X03)] = { // key 2: é2~
+    .type = XtKeyType_character,
+    .arg1=0XE9, .arg2=0X32, .arg3=0X7E
+  }
+  ,
+  [XT_KEY(00,0X04)] = { // key 3: "3#
+    .type = XtKeyType_character,
+    .arg1=0X22, .arg2=0X33, .arg3=0X23
+  }
+  ,
+  [XT_KEY(00,0X05)] = { // key 4: '4{
+    .type = XtKeyType_character,
+    .arg1=0X27, .arg2=0X34, .arg3=0X7B
+  }
+  ,
+  [XT_KEY(00,0X06)] = { // key 5: (5[
+    .type = XtKeyType_character,
+    .arg1=0X28, .arg2=0X35, .arg3=0X5B
+  }
+  ,
+  [XT_KEY(00,0X07)] = { // key 6: -6|
+    .type = XtKeyType_character,
+    .arg1=0X2D, .arg2=0X36, .arg3=0X7C
+  }
+  ,
+  [XT_KEY(00,0X08)] = { // key 7: è7`
+    .type = XtKeyType_character,
+    .arg1=0XE8, .arg2=0X37, .arg3=0X60
+  }
+  ,
+  [XT_KEY(00,0X09)] = { // key 8: _8
+    .type = XtKeyType_character,
+    .arg1=0X5F, .arg2=0X38, .arg3=0X5C
+  }
+  ,
+  [XT_KEY(00,0X0A)] = { // key 9: ç9^
+    .type = XtKeyType_character,
+    .arg1=0XE7, .arg2=0X39, .arg3=0X5E
+  }
+  ,
+  [XT_KEY(00,0X0B)] = { // key 10: à0@
+    .type = XtKeyType_character,
+    .arg1=0XE0, .arg2=0X30, .arg3=0X40
+  }
+  ,
+  [XT_KEY(00,0X0C)] = { // key 11: )°]
+    .type = XtKeyType_character,
+    .arg1=0X29, .arg2=0XB0, .arg3=0X5D
+  }
+  ,
+  [XT_KEY(00,0X0D)] = { // key 12: =+}
+    .type = XtKeyType_character,
+    .arg1=0X3D, .arg2=0X2B, .arg3=0X7D
+  }
+  ,
+  [XT_KEY(00,0X29)] = { // key 13: ²
+    .type = XtKeyType_character,
+    .arg1=0XB2
+  }
+  ,
+  [XT_KEY(00,0X0E)] = { // key 14: backspace
+    .type = XtKeyType_function,
+    .arg1=0X08
+  }
+  ,
+
+  /* row 3 */
+  [XT_KEY(00,0X0F)] = { // key 1: tab
+    .type = XtKeyType_function,
+    .arg1=0X09
+  }
+  ,
+  [XT_KEY(00,0X10)] = { // key 2: aA
+    .type = XtKeyType_character,
+    .arg1=0X61, .arg2=0X41
+  }
+  ,
+  [XT_KEY(00,0X11)] = { // key 3: zZ
+    .type = XtKeyType_character,
+    .arg1=0X7A, .arg2=0X5A
+  }
+  ,
+  [XT_KEY(00,0X12)] = { // key 4: eE
+    .type = XtKeyType_character,
+    .arg1=0X65, .arg2=0X45, .arg3=0X80
+  }
+  ,
+  [XT_KEY(00,0X13)] = { // key 5: rR®
+    .type = XtKeyType_character,
+    .arg1=0X72, .arg2=0X52, .arg3=0XAE
+  }
+  ,
+  [XT_KEY(00,0X14)] = { // key 6: tT
+    .type = XtKeyType_character,
+    .arg1=0X74, .arg2=0X54, .arg3=0X99
+  }
+  ,
+  [XT_KEY(00,0X15)] = { // key 7: yY
+    .type = XtKeyType_character,
+    .arg1=0X79, .arg2=0X59
+  }
+  ,
+  [XT_KEY(00,0X16)] = { // key 8: uU
+    .type = XtKeyType_character,
+    .arg1=0X75, .arg2=0X55
+  }
+  ,
+  [XT_KEY(00,0X17)] = { // key 9: iI
+    .type = XtKeyType_character,
+    .arg1=0X69, .arg2=0X49
+  }
+  ,
+  [XT_KEY(00,0X18)] = { // key 10: oO
+    .type = XtKeyType_character,
+    .arg1=0X6F, .arg2=0X4F
+  }
+  ,
+  [XT_KEY(00,0X19)] = { // key 11: pP
+    .type = XtKeyType_character,
+    .arg1=0X70, .arg2=0X50
+  }
+  ,
+  [XT_KEY(00,0X1A)] = { // key 12: circumflex tréma
+    .type = XtKeyType_ignore
+  }
+  ,
+  [XT_KEY(00,0X1B)] = { // key 13: $£¤
+    .type = XtKeyType_character,
+    .arg1=0X24, .arg2=0XA3, .arg3=0XA4
+  }
+  ,
+  [XT_KEY(00,0X1C)] = { // key 14: return
+    .type = XtKeyType_function,
+    .arg1=0X0D
+  }
+  ,
+
+  /* row 4 */
+  [XT_KEY(00,0X3A)] = { // key 1: shift lock
+    .type = XtKeyType_lock,
+    .arg1=XKL_shift
+  }
+  ,
+  [XT_KEY(00,0X1E)] = { // key 2: qQ
+    .type = XtKeyType_character,
+    .arg1=0X71, .arg2=0X51
+  }
+  ,
+  [XT_KEY(00,0X1F)] = { // key 3: sS
+    .type = XtKeyType_character,
+    .arg1=0X73, .arg2=0X53
+  }
+  ,
+  [XT_KEY(00,0X20)] = { // key 4: dD
+    .type = XtKeyType_character,
+    .arg1=0X64, .arg2=0X44
+  }
+  ,
+  [XT_KEY(00,0X21)] = { // key 5: fF
+    .type = XtKeyType_character,
+    .arg1=0X66, .arg2=0X46
+  }
+  ,
+  [XT_KEY(00,0X22)] = { // key 6: gG
+    .type = XtKeyType_character,
+    .arg1=0X67, .arg2=0X47
+  }
+  ,
+  [XT_KEY(00,0X23)] = { // key 7: hH
+    .type = XtKeyType_character,
+    .arg1=0X68, .arg2=0X48
+  }
+  ,
+  [XT_KEY(00,0X24)] = { // key 8: jJ
+    .type = XtKeyType_character,
+    .arg1=0X6A, .arg2=0X4A
+  }
+  ,
+  [XT_KEY(00,0X25)] = { // key 9: kK
+    .type = XtKeyType_character,
+    .arg1=0X6B, .arg2=0X4B
+  }
+  ,
+  [XT_KEY(00,0X26)] = { // key 10: lL
+    .type = XtKeyType_character,
+    .arg1=0X6C, .arg2=0X4C
+  }
+  ,
+  [XT_KEY(00,0X27)] = { // key 11: mM
+    .type = XtKeyType_character,
+    .arg1=0X6D, .arg2=0X4D
+  }
+  ,
+  [XT_KEY(00,0X28)] = { // key 12: ù%
+    .type = XtKeyType_character,
+    .arg1=0XF9, .arg2=0X25
+  }
+  ,
+  [XT_KEY(00,0X2B)] = { // key 13: *µ
+    .type = XtKeyType_character,
+    .arg1=0X2A, .arg2=0XB5
+  }
+  ,
+  [XT_KEY(00,0X1C)] = { // key 14: return
+    .type = XtKeyType_function,
+    .arg1=0X0D
+  }
+  ,
+
+  /* row 5 */
+  [XT_KEY(00,0X2A)] = { // key 1: left shift
+    .type = XtKeyType_modifier,
+    .arg1=XKM_leftShift,
+    .arg2=XKL_shift
+  }
+  ,
+  [XT_KEY(00,0X2C)] = { // key 2: wW
+    .type = XtKeyType_character,
+    .arg1=0X77, .arg2=0X57
+  }
+  ,
+  [XT_KEY(00,0X2D)] = { // key 3: xX
+    .type = XtKeyType_character,
+    .arg1=0X78, .arg2=0X58
+  }
+  ,
+  [XT_KEY(00,0X2E)] = { // key 4: cC©
+    .type = XtKeyType_character,
+    .arg1=0X63, .arg2=0X43, .arg3=0XA9
+  }
+  ,
+  [XT_KEY(00,0X2F)] = { // key 5: vV
+    .type = XtKeyType_character,
+    .arg1=0X76, .arg2=0X56
+  }
+  ,
+  [XT_KEY(00,0X30)] = { // key 6: bB
+    .type = XtKeyType_character,
+    .arg1=0X62, .arg2=0X42
+  }
+  ,
+  [XT_KEY(00,0X31)] = { // key 7: nN
+    .type = XtKeyType_character,
+    .arg1=0X6E, .arg2=0X4E
+  }
+  ,
+  [XT_KEY(00,0X32)] = { // key 8: ,?
+    .type = XtKeyType_character,
+    .arg1=0X2C, .arg2=0X3F
+  }
+  ,
+  [XT_KEY(00,0X33)] = { // key 9: ;.
+    .type = XtKeyType_character,
+    .arg1=0X3B, .arg2=0X2E
+  }
+  ,
+  [XT_KEY(00,0X34)] = { // key 10: :/
+    .type = XtKeyType_character,
+    .arg1=0X3A, .arg2=0X2F
+  }
+  ,
+  [XT_KEY(00,0X35)] = { // key 11: !§
+    .type = XtKeyType_character,
+    .arg1=0X21, .arg2=0XA7
+  }
+  ,
+  [XT_KEY(00,0X56)] = { // key 12: <>
+    .type = XtKeyType_character,
+    .arg1=0X3C, .arg2=0X3E
+  }
+  ,
+  [XT_KEY(00,0X36)] = { // key 13: right shift
+    .type = XtKeyType_modifier,
+    .arg1=XKM_rightShift,
+    .arg2=XKL_shift
+  }
+  ,
+
+  /* row 6 */
+  [XT_KEY(00,0X1D)] = { // key 1: left control
+    .type = XtKeyType_modifier,
+    .arg1=XKM_leftControl
+  }
+  ,
+  [XT_KEY(E1,0X01)] = { // key 2: fn
+    .type = XtKeyType_modifier,
+    .arg1=XKM_fn
+  }
+  ,
+  [XT_KEY(E0,0X5B)] = { // key 3: left windows
+    .type = XtKeyType_modifier,
+    .arg1=XKM_leftWindows
+  }
+  ,
+  [XT_KEY(00,0X38)] = { // key 4: left alt
+    .type = XtKeyType_modifier,
+    .arg1=XKM_leftAlt
+  }
+  ,
+  [XT_KEY(00,0X39)] = { // key 5: space
+    .type = XtKeyType_function,
+    .arg1=0X20
+  }
+  ,
+  [XT_KEY(E0,0X38)] = { // key 6: right alt
+    .type = XtKeyType_modifier,
+    .arg1=XKM_rightAlt
+  }
+  ,
+  [XT_KEY(E0,0X5D)] = { // key 7: right windows
+    .type = XtKeyType_modifier,
+    .arg1=XKM_rightWindows
+  }
+  ,
+  [XT_KEY(E0,0X1D)] = { // key 8: right control
+    .type = XtKeyType_modifier,
+    .arg1=XKM_rightControl
+  }
+  ,
+
+  /* arrow keys */
+  [XT_KEY(E0,0X48)] = { // key 1: up arrow
+    .type = XtKeyType_special,
+    .arg1=0X0D
+  }
+  ,
+  [XT_KEY(E0,0X4B)] = { // key 2: left arrow
+    .type = XtKeyType_special,
+    .arg1=0X0B
+  }
+  ,
+  [XT_KEY(E0,0X50)] = { // key 3: down arrow
+    .type = XtKeyType_special,
+    .arg1=0X0E
+  }
+  ,
+  [XT_KEY(E0,0X4D)] = { // key 4: right arrow
+    .type = XtKeyType_special,
+    .arg1=0X0C
+  }
+};
+
+static int writeEurobrailleKeyPacket (BrailleDisplay *brl, Port *port, unsigned char escape, unsigned char key)
 {
-  return writeEurobraillePacket(brl, port, str, strlen(str) + 1);
+  unsigned char data[] = {0X4B, 0X5A, 0, 0, 0, 0};
+
+  const unsigned char xtRelease = 0X80;
+  unsigned char isRelease = key & xtRelease;
+  const XtKeyEntry *xke = &xtKeyTable[key & ~xtRelease];
+
+  switch (escape) {
+    case 0XE0:
+      xke += XT_KEY(E0, 0);
+      break;
+
+    case 0XE1:
+      xke += XT_KEY(E1, 0);
+      break;
+
+    default:
+    case 0X00:
+      xke += XT_KEY(00, 0);
+      break;
+  }
+
+  switch (xke->type) {
+    case XtKeyType_modifier:
+      if (isRelease) {
+        xtModifiers &= ~XKM(xke->arg1);
+      } else {
+        xtModifiers |= XKM(xke->arg1);
+        xtLocks &= ~XKL(xke->arg2);
+      }
+      return 1;
+
+    case XtKeyType_lock:
+      if (!isRelease) xtLocks |= XKL(xke->arg1);
+      return 1;
+
+    case XtKeyType_character:
+      if (isRelease) return 1;
+      if (xke->arg3 && (xtModifiers & XKM(XKM_rightAlt))) {
+        data[5] = xke->arg3;
+      } else if (xke->arg2 && ((xtModifiers & (XKM(XKM_leftShift) | XKM(XKM_rightShift))) || (xtLocks & XKL(XKL_shift)))) {
+        data[5] = xke->arg2;
+      } else {
+        data[5] = xke->arg1;
+      }
+      break;
+
+    case XtKeyType_function:
+      if (isRelease) return 1;
+      data[3] = xke->arg1;
+      break;
+
+    case XtKeyType_special:
+      if (isRelease) return 1;
+      data[2] = 1;
+      data[3] = xke->arg1;
+      break;
+
+    case XtKeyType_ignore:
+      return 1;
+  }
+
+  if (xtModifiers & (XKM(XKM_leftShift) | XKM(XKM_rightShift))) data[4] |= 0X01;
+  if (xtModifiers & (XKM(XKM_leftControl) | XKM(XKM_rightControl))) data[4] |= 0X02;
+  if (xtModifiers & XKM(XKM_leftAlt)) data[4] |= 0X04;
+  if (xtLocks & XKL(XKL_shift)) data[4] |= 0X08;
+  if (xtModifiers & XKM(XKM_leftWindows)) data[4] |= 0X10;
+  if (xtModifiers & XKM(XKM_rightAlt)) data[4] |= 0X20;
+
+  return writeEurobraillePacket(brl, port, data, sizeof(data));
+}
+
+static int writeEurobraillePacketFromString (BrailleDisplay *brl, Port *port, const char *string)
+{
+  return writeEurobraillePacket(brl, port, string, strlen(string) + 1);
 }
 
 /* Low-level write of dots to the braile display */
@@ -576,15 +1130,32 @@ static int brl_reset (BrailleDisplay *brl)
 
 static void enterPacketForwardMode(BrailleDisplay *brl)
 {
-  static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
-  char msg[brl->textColumns+1];
-  externalPort.speed = iris_protocols[protocol].speed;
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", externalPort.name, iris_protocols[protocol].name, externalPort.speed);
+
+  externalPort.speed = iris_protocols[protocol].speed;
   if (!openPort(&externalPort)) return;
-  snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(iris_protocols[protocol].name));
-  message(NULL, msg, MSG_NODELAY);
-  if (protocol==IR_PROTOCOL_NATIVE) writePacket(brl, &externalPort, p, sizeof(p));
   packetForwardMode = 1;
+
+  {
+    char msg[brl->textColumns+1];
+
+    snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(iris_protocols[protocol].name));
+    message(NULL, msg, MSG_NODELAY);
+  }
+
+  switch (protocol) {
+    case IR_PROTOCOL_NATIVE: {
+      static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
+
+      writePacket(brl, &externalPort, p, sizeof(p));
+      break;
+    }
+
+    case IR_PROTOCOL_EUROBRAILLE:
+      xtModifiers = 0;
+      xtLocks = 0;
+      break;
+  }
 }
 
 static void leavePacketForwardMode(BrailleDisplay *brl)
@@ -637,8 +1208,7 @@ static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size
     if (packet1[0]==IR_IPT_InteractiveKey) {
       if (packet1[1]=='W') {
         logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "handleNativePacket: discarding Z key");
-      } else 
-      if ((1<=packet1[1]) && (packet1[1]<=brl->textColumns * brl->textRows)) {
+      } else if ((1<=packet1[1]) && (packet1[1]<=brl->textColumns * brl->textRows)) {
         packet2[0] = 'K';
         packet2[1] = 'I';
         packet2[2] = packet1[1];
@@ -647,24 +1217,7 @@ static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size
     }
   } else if (size==3) {
     if (packet1[0]==IR_IPT_XtKeyCode) { /* IrisKB's PC keyboard */
-      char description[0x100];
-      int command, res;
-      unsigned char escape = packet1[1];
-      unsigned char key = packet1[2];
-      res = xtInterpretScanCode(&command, escape);
-      if (res<0)
-      {
-        logMessage(LOG_ERR, DRIVER_LOG_PREFIX "handleNativePacket: could not interprete escape code 0x%2x", escape);
-        return;
-      }
-      res = xtInterpretScanCode(&command, key);
-      if (res<0)
-      {
-        logMessage(LOG_ERR, DRIVER_LOG_PREFIX "handleNativePacket: could not interprete key code 0x%2x", key);
-        return;
-      }
-      describeCommand(command, description, sizeof(description), 1);
-      logMessage(LOG_NOTICE, "handleNativePacket: command: %s", description);
+      writeEurobrailleKeyPacket(brl, &externalPort, packet1[1], packet1[2]);
     }
     if (packet1[0]==IR_IPT_LinearKeys) {
       /* enqueueUpdatedKeys((packet[1] << 8) | packet[2],
