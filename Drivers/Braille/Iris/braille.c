@@ -939,22 +939,22 @@ static const XtKeyEntry xtKeyTable[] = {
   /* arrow keys */
   [XT_KEY(E0,0X48)] = { // key 1: up arrow
     .type = XtKeyType_special,
-    .arg1=0X0D
+    .arg1=0X0D, .arg2=0X09
   }
   ,
   [XT_KEY(E0,0X4B)] = { // key 2: left arrow
     .type = XtKeyType_special,
-    .arg1=0X0B
+    .arg1=0X0B, .arg2=0X07
   }
   ,
   [XT_KEY(E0,0X50)] = { // key 3: down arrow
     .type = XtKeyType_special,
-    .arg1=0X0E
+    .arg1=0X0E, .arg2=0X0A
   }
   ,
   [XT_KEY(E0,0X4D)] = { // key 4: right arrow
     .type = XtKeyType_special,
-    .arg1=0X0C
+    .arg1=0X0C, .arg2=0X08
   }
 };
 
@@ -1014,7 +1014,11 @@ static int writeEurobrailleKeyPacket (BrailleDisplay *brl, Port *port, unsigned 
     case XtKeyType_special:
       if (isRelease) return 1;
       data[2] = 1;
-      data[3] = xke->arg1;
+      if (xke->arg2 && (xtModifiers & XKM(XKM_fn))) {
+        data[3] = xke->arg2;
+      } else {
+        data[3] = xke->arg1;
+      }
       break;
 
     case XtKeyType_ignore:
