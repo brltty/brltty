@@ -460,8 +460,8 @@ static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet,
   return count;
 }
 
-static int writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size)
-{
+static int
+writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size) {
   int packetSize = size + 2;
   unsigned char	packet[packetSize + 2];
   unsigned char *p = packet;
@@ -489,6 +489,13 @@ static const CompositeCharacterEntry compositeCharacterTable_circumflex[] = {
   {.base=0X69, 0XEE}, // iî
   {.base=0X6F, 0XF4}, // oô
   {.base=0X75, 0XFB}, // uû
+
+  {.base=0X41, 0XC2}, // AÂ
+  {.base=0X45, 0XCA}, // EÊ
+  {.base=0X49, 0XCE}, // IÎ
+  {.base=0X4F, 0XD4}, // OÔ
+  {.base=0X55, 0XDB}, // UÛ
+
   {.base=0}
 };
 
@@ -498,54 +505,50 @@ static const CompositeCharacterEntry compositeCharacterTable_trema[] = {
   {.base=0X69, 0XEF}, // iï
   {.base=0X6F, 0XF6}, // oö
   {.base=0X75, 0XFC}, // uü
+  {.base=0X79, 0XFF}, // yÿ
+
+  {.base=0X41, 0XC4}, // AÄ
+  {.base=0X45, 0XCB}, // EË
+  {.base=0X49, 0XCF}, // IÏ
+  {.base=0X4F, 0XD6}, // OÖ
+  {.base=0X55, 0XDC}, // UÜ
+
   {.base=0}
 };
 
 static const CompositeCharacterEntry *compositeCharacterTables[] = {
   compositeCharacterTable_circumflex,
-  compositeCharacterTable_trema,
-  NULL
+  compositeCharacterTable_trema
 };
 
 static const CompositeCharacterEntry *compositeCharacterTable;
 
 typedef enum {
-  XT_KEYS_00,
-  XT_KEYS_E0,
-  XT_KEYS_E1
-} XT_KEY_SET;
+  xtsLeftShiftPressed,
+  xtsRightShiftPressed,
+  xtsShiftLocked,
 
-#define XT_RELEASE 0X80
-#define XT_KEY(set,key) ((XT_KEYS_##set << 7) | (key))
+  xtsLeftControlPressed,
+  xtsRightControlPressed,
 
-typedef enum {
-  xkmLeftShift,
-  xkmRightShift,
-  xkmLeftControl,
-  xkmRightControl,
-  xkmLeftAlt,
-  xkmRightAlt,
-  xkmLeftWindows,
-  xkmRightWindows,
-  xkmFn
-} XtKeyModifier;
+  xtsLeftAltPressed,
+  xtsRightAltPressed,
 
-static uint16_t xtKeyModifiers;
-#define XKM(mod) (1 << (mod))
-#define XKM_SHIFT (XKM(xkmLeftShift) | XKM(xkmRightShift))
-#define XKM_CONTROL (XKM(xkmLeftControl) | XKM(xkmRightControl))
-#define XKM_ALT XKM(xkmLeftAlt)
-#define XKM_ALTGR XKM(xkmRightAlt)
-#define XKM_WIN XKM(xkmLeftWindows)
-#define XKM_FN XKM(xkmFn)
+  xtsLeftWindowsPressed,
+  xtsRightWindowsPressed,
 
-typedef enum {
-  xklShift
-} XtKeyLock;
+  xtsFnPressed
+} XtState;
 
-static uint8_t xtKeyLocks;
-#define XKL(lock) (1 << (lock))
-#define XKL_SHIFT XKL(xklShift)
+static uint16_t xtState;
+#define XTS_BIT(number) (1 << (number))
+#define XTS_TEST(bits) (xtState & (bits))
+#define XTS_SHIFT XTS_TEST(XTS_BIT(xtsLeftShiftPressed) | XTS_BIT(xtsRightShiftPressed) | XTS_BIT(xtsShiftLocked))
+#define XTS_CONTROL XTS_TEST(XTS_BIT(xtsLeftControlPressed) | XTS_BIT(xtsRightControlPressed))
+#define XTS_ALT XTS_TEST(XTS_BIT(xtsLeftAltPressed))
+#define XTS_ALTGR XTS_TEST(XTS_BIT(xtsRightAltPressed))
+#define XTS_WIN XTS_TEST(XTS_BIT(xtsLeftWindowsPressed))
+#define XTS_FN XTS_TEST(XTS_BIT(xtsFnPressed))
 
 typedef enum {
   XtKeyType_ignore = 0, /* required for uninitialized entries */
@@ -563,6 +566,16 @@ typedef struct {
   unsigned char arg2;
   unsigned char arg3;
 } XtKeyEntry;
+
+typedef enum {
+  XT_KEYS_00,
+  XT_KEYS_E0,
+  XT_KEYS_E1
+} XT_KEY_SET;
+
+static const XtKeyEntry *xtLastKey;
+#define XT_RELEASE 0X80
+#define XT_KEY(set,key) ((XT_KEYS_##set << 7) | (key))
 
 static const XtKeyEntry xtKeyTable[] = {
   /* row 1 */
@@ -797,7 +810,7 @@ static const XtKeyEntry xtKeyTable[] = {
   /* row 4 */
   [XT_KEY(00,0X3A)] = { // key 1: shift lock
     .type = XtKeyType_lock,
-    .arg1=xklShift
+    .arg1=xtsShiftLocked
   }
   ,
   [XT_KEY(00,0X1E)] = { // key 2: qQ
@@ -869,8 +882,7 @@ static const XtKeyEntry xtKeyTable[] = {
   /* row 5 */
   [XT_KEY(00,0X2A)] = { // key 1: left shift
     .type = XtKeyType_modifier,
-    .arg1=xkmLeftShift,
-    .arg2=xklShift
+    .arg1=xtsLeftShiftPressed, .arg2=xtsShiftLocked
   }
   ,
   [XT_KEY(00,0X2C)] = { // key 2: wW
@@ -930,30 +942,29 @@ static const XtKeyEntry xtKeyTable[] = {
   ,
   [XT_KEY(00,0X36)] = { // key 13: right shift
     .type = XtKeyType_modifier,
-    .arg1=xkmRightShift,
-    .arg2=xklShift
+    .arg1=xtsRightShiftPressed, .arg2=xtsShiftLocked
   }
   ,
 
   /* row 6 */
   [XT_KEY(00,0X1D)] = { // key 1: left control
     .type = XtKeyType_modifier,
-    .arg1=xkmLeftControl
+    .arg1=xtsLeftControlPressed
   }
   ,
   [XT_KEY(E1,0X01)] = { // key 2: fn
     .type = XtKeyType_modifier,
-    .arg1=xkmFn
+    .arg1=xtsFnPressed
   }
   ,
   [XT_KEY(E0,0X5B)] = { // key 3: left windows
     .type = XtKeyType_modifier,
-    .arg1=xkmLeftWindows
+    .arg1=xtsLeftWindowsPressed, .arg3=0X5B
   }
   ,
   [XT_KEY(00,0X38)] = { // key 4: left alt
     .type = XtKeyType_modifier,
-    .arg1=xkmLeftAlt
+    .arg1=xtsLeftAltPressed
   }
   ,
   [XT_KEY(00,0X39)] = { // key 5: space
@@ -963,17 +974,17 @@ static const XtKeyEntry xtKeyTable[] = {
   ,
   [XT_KEY(E0,0X38)] = { // key 6: right alt
     .type = XtKeyType_modifier,
-    .arg1=xkmRightAlt
+    .arg1=xtsRightAltPressed
   }
   ,
   [XT_KEY(E0,0X5D)] = { // key 7: right windows
-    .type = XtKeyType_modifier,
-    .arg1=xkmRightWindows
+    .type = XtKeyType_function,
+    .arg1=0X5D
   }
   ,
   [XT_KEY(E0,0X1D)] = { // key 8: right control
     .type = XtKeyType_modifier,
-    .arg1=xkmRightControl
+    .arg1=xtsRightControlPressed
   }
   ,
 
@@ -1000,9 +1011,8 @@ static const XtKeyEntry xtKeyTable[] = {
 };
 
 static int
-writeEurobrailleKeyPacket (BrailleDisplay *brl, Port *port, unsigned char escape, unsigned char key) {
+writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char escape, unsigned char key) {
   unsigned char data[] = {0X4B, 0X5A, 0, 0, 0, 0};
-  unsigned char isRelease = key & XT_RELEASE;
   const XtKeyEntry *xke = &xtKeyTable[key & ~XT_RELEASE];
 
   switch (escape) {
@@ -1019,65 +1029,83 @@ writeEurobrailleKeyPacket (BrailleDisplay *brl, Port *port, unsigned char escape
       xke += XT_KEY(00, 0);
       break;
   }
-  if (xke >= (xtKeyTable + ARRAY_COUNT(xtKeyTable))) return 1;
 
-  switch (xke->type) {
-    default:
-    case XtKeyType_ignore:
-      return 1;
+  if (xke >= (xtKeyTable + ARRAY_COUNT(xtKeyTable))) {
+    static const XtKeyEntry xtKeyEntry = {
+      .type = XtKeyType_ignore
+    };
 
-    case XtKeyType_modifier:
-      if (isRelease) {
-        xtKeyModifiers &= ~XKM(xke->arg1);
-      } else {
-        xtKeyModifiers |= XKM(xke->arg1);
-        xtKeyLocks &= ~XKL(xke->arg2);
-      }
-      return 1;
+    xke = &xtKeyEntry;
+  }
 
-    case XtKeyType_lock:
-      if (!isRelease) xtKeyLocks |= XKL(xke->arg1);
-      return 1;
+  if (key & XT_RELEASE) {
+    const XtKeyEntry *lastKey = xtLastKey;
+    xtLastKey = NULL;
 
-    case XtKeyType_character:
-      if (isRelease) return 1;
-      if (xke->arg3 && (xtKeyModifiers & XKM_ALTGR)) {
-        data[5] = xke->arg3;
-      } else if (xke->arg2 && ((xtKeyModifiers & XKM_SHIFT) || (xtKeyLocks & XKL_SHIFT))) {
-        data[5] = xke->arg2;
-      } else {
-        data[5] = xke->arg1;
-      }
-      break;
+    switch (xke->type) {
+      case XtKeyType_modifier:
+        xtState &= ~XTS_BIT(xke->arg1);
+        if (xke->arg3 && (xke == lastKey)) {
+          data[3] = xke->arg3;
+          break;
+        }
+        return 1;
 
-    case XtKeyType_function:
-      if (isRelease) return 1;
-      data[3] = xke->arg1;
-      break;
+      default:
+        return 1;
+    }
+  } else {
+    xtLastKey = xke;
 
-    case XtKeyType_special:
-      if (isRelease) return 1;
-      data[2] = 1;
-      if (xke->arg2 && (xtKeyModifiers & XKM_FN)) {
-        data[3] = xke->arg2;
-      } else {
+    switch (xke->type) {
+      case XtKeyType_modifier:
+        xtState |= XTS_BIT(xke->arg1);
+        xtState &= ~XTS_BIT(xke->arg2);
+        return 1;
+
+      case XtKeyType_lock:
+        xtState |= XTS_BIT(xke->arg1);
+        return 1;
+
+      case XtKeyType_character:
+        if (xke->arg3 && XTS_ALTGR) {
+          data[5] = xke->arg3;
+        } else if (xke->arg2 && XTS_SHIFT) {
+          data[5] = xke->arg2;
+        } else {
+          data[5] = xke->arg1;
+        }
+        break;
+
+      case XtKeyType_function:
         data[3] = xke->arg1;
-      }
-      break;
+        break;
 
-    case XtKeyType_composite:
-      if (!isRelease) {
+      case XtKeyType_special:
+        data[2] = 1;
+        if (xke->arg2 && XTS_FN) {
+          data[3] = xke->arg2;
+        } else {
+          data[3] = xke->arg1;
+        }
+        break;
+
+      case XtKeyType_composite: {
         unsigned char index;
 
-        if (xke->arg2 && (xtKeyModifiers & XKM_SHIFT)) {
+        if (xke->arg2 && XTS_SHIFT) {
           index = xke->arg2;
         } else {
           index = xke->arg1;
         }
 
         if (index) compositeCharacterTable = compositeCharacterTables[index - 1];
+        return 1;
       }
-      return 1;
+
+      default:
+        return 1;
+    }
   }
 
   if (compositeCharacterTable) {
@@ -1093,12 +1121,12 @@ writeEurobrailleKeyPacket (BrailleDisplay *brl, Port *port, unsigned char escape
     compositeCharacterTable = NULL;
   }
 
-  if (xtKeyModifiers & XKM_SHIFT) data[4] |= 0X01;
-  if (xtKeyModifiers & XKM_CONTROL) data[4] |= 0X02;
-  if (xtKeyModifiers & XKM_ALT) data[4] |= 0X04;
-  if (xtKeyLocks & XKL_SHIFT) data[4] |= 0X08;
-  if (xtKeyModifiers & XKM_WIN) data[4] |= 0X10;
-  if (xtKeyModifiers & XKM_ALTGR) data[4] |= 0X20;
+  if (XTS_TEST(XTS_BIT(xtsLeftShiftPressed) | XTS_BIT(xtsRightShiftPressed))) data[4] |= 0X01;
+  if (XTS_CONTROL) data[4] |= 0X02;
+  if (XTS_ALT) data[4] |= 0X04;
+  if (XTS_TEST(XTS_BIT(xtsShiftLocked))) data[4] |= 0X08;
+  if (XTS_WIN) data[4] |= 0X10;
+  if (XTS_ALTGR) data[4] |= 0X20;
 
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
@@ -1225,8 +1253,8 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
 
     case IR_PROTOCOL_EUROBRAILLE:
       compositeCharacterTable = NULL;
-      xtKeyModifiers = 0;
-      xtKeyLocks = 0;
+      xtLastKey = NULL;
+      xtState = 0;
       break;
   }
 }
@@ -1290,7 +1318,7 @@ static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size
     }
   } else if (size==3) {
     if (packet1[0]==IR_IPT_XtKeyCode) { /* IrisKB's PC keyboard */
-      writeEurobrailleKeyPacket(brl, &externalPort, packet1[1], packet1[2]);
+      writeEurobrailleKeyboardPacket(brl, &externalPort, packet1[1], packet1[2]);
     }
     if (packet1[0]==IR_IPT_LinearKeys) {
       /* enqueueUpdatedKeys((packet[1] << 8) | packet[2],
