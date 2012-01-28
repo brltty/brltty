@@ -500,7 +500,7 @@ static const CompositeCharacterEntry compositeCharacterTable_circumflex[] = {
 };
 
 static const CompositeCharacterEntry compositeCharacterTable_trema[] = {
-  {.base=0X61, 0XE4}, // ä
+  {.base=0X61, 0XE4}, // aä
   {.base=0X65, 0XEB}, // eë
   {.base=0X69, 0XEF}, // iï
   {.base=0X6F, 0XF6}, // oö
@@ -573,7 +573,7 @@ typedef enum {
   XT_KEYS_E1
 } XT_KEY_SET;
 
-static const XtKeyEntry *xtLastKey;
+static const XtKeyEntry *xtCurrentKey;
 #define XT_RELEASE 0X80
 #define XT_KEY(set,key) ((XT_KEYS_##set << 7) | (key))
 
@@ -1039,13 +1039,13 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
   }
 
   if (key & XT_RELEASE) {
-    const XtKeyEntry *lastKey = xtLastKey;
-    xtLastKey = NULL;
+    int current = xke == xtCurrentKey;
+    xtCurrentKey = NULL;
 
     switch (xke->type) {
       case XtKeyType_modifier:
         xtState &= ~XTS_BIT(xke->arg1);
-        if (xke->arg3 && (xke == lastKey)) {
+        if (xke->arg3 && current) {
           data[3] = xke->arg3;
           break;
         }
@@ -1055,7 +1055,7 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
         return 1;
     }
   } else {
-    xtLastKey = xke;
+    xtCurrentKey = xke;
 
     switch (xke->type) {
       case XtKeyType_modifier:
@@ -1109,13 +1109,17 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
   }
 
   if (compositeCharacterTable) {
-    while (compositeCharacterTable->base) {
-      if (compositeCharacterTable->base == data[5]) {
-        data[5] = compositeCharacterTable->composite;
-        break;
-      }
+    unsigned char *character = &data[5];
 
-      compositeCharacterTable += 1;
+    if (*character) {
+      while (compositeCharacterTable->base) {
+        if (compositeCharacterTable->base == *character) {
+          *character = compositeCharacterTable->composite;
+          break;
+        }
+
+        compositeCharacterTable += 1;
+      }
     }
 
     compositeCharacterTable = NULL;
@@ -1131,8 +1135,8 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
 
-static int writeEurobraillePacketFromString (BrailleDisplay *brl, Port *port, const char *string)
-{
+static int
+writeEurobrailleStringPacket (BrailleDisplay *brl, Port *port, const char *string) {
   return writeEurobraillePacket(brl, port, string, strlen(string) + 1);
 }
 
@@ -1253,7 +1257,7 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
 
     case IR_PROTOCOL_EUROBRAILLE:
       compositeCharacterTable = NULL;
-      xtLastKey = NULL;
+      xtCurrentKey = NULL;
       xtState = 0;
       break;
   }
@@ -1321,8 +1325,15 @@ static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size
       writeEurobrailleKeyboardPacket(brl, &externalPort, packet1[1], packet1[2]);
     }
     if (packet1[0]==IR_IPT_LinearKeys) {
-      /* enqueueUpdatedKeys((packet[1] << 8) | packet[2],
-                         &linearKeys, IR_SET_NavigationKeys, IR_KEY_L1); */
+      uint16_t keys = (packet1[1] << 8) | packet1[2];
+      unsigned char data[] = {
+        0X4B, 0X43, 0, (
+          ((keys & 0X1E0) >> 1) |
+          (keys & 0XF)
+        )
+      };
+
+      writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
       return;
     }
     if (packet1[0]==IR_IPT_BrailleKeys) {
@@ -1339,22 +1350,22 @@ static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *pa
   { /* Send system information */
     char str[256];
     Port *port = &externalPort;
-    writeEurobraillePacketFromString(brl, port, "SNIRIS_KB_40");
-    writeEurobraillePacketFromString(brl, port, "SHIR4");
+    writeEurobrailleStringPacket(brl, port, "SNIRIS_KB_40");
+    writeEurobrailleStringPacket(brl, port, "SHIR4");
     snprintf(str, sizeof(str), "SS%s", serialNumber);
-    writeEurobraillePacketFromString(brl, port, str);
-    writeEurobraillePacketFromString(brl, port, "SLFR");
+    writeEurobrailleStringPacket(brl, port, str);
+    writeEurobrailleStringPacket(brl, port, "SLFR");
     str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
     writeEurobraillePacket(brl, port, str, 3);
     str[0] = 'S'; str[1] = 'T'; str[2] = 6;
     writeEurobraillePacket(brl, port, str, 3);
     snprintf(str, sizeof(str), "So%d%da", 0xef, 0xf8);
-    writeEurobraillePacketFromString(brl, port, str);
-    writeEurobraillePacketFromString(brl, port, "SW1.92");
-    writeEurobraillePacketFromString(brl, port, "SP1.00 30-10-2006");
+    writeEurobrailleStringPacket(brl, port, str);
+    writeEurobrailleStringPacket(brl, port, "SW1.92");
+    writeEurobrailleStringPacket(brl, port, "SP1.00 30-10-2006");
     sprintf(str, "SM%d", 0x08);
-    writeEurobraillePacketFromString(brl, port, str);
-    writeEurobraillePacketFromString(brl, port, "SI");
+    writeEurobrailleStringPacket(brl, port, str);
+    writeEurobrailleStringPacket(brl, port, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
   { /* Write dots to braille display */
     const unsigned char *dots = packet+2;
