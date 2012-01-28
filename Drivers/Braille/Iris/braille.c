@@ -472,8 +472,14 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   p = mempcpy(p, data, size);
   *p++ = ETX;
 
-  if (gioWriteData(port->gioEndpoint, packet, sizeof(packet)) == -1) return 0;
-  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, sizeof(packet));
+  {
+    size_t count = p - packet;
+
+    logOutputPacket(packet, count);
+    if (gioWriteData(port->gioEndpoint, packet, count) == -1) return 0;
+    brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
+  }
+
   gettimeofday(&port->lastWriteTime, NULL);
   return 1;
 }
@@ -1306,45 +1312,51 @@ static int packetToCommand(BrailleDisplay *brl, unsigned char *packet, size_t si
   return EOF;
 }
 
-static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size_t size)
-{
-  unsigned char packet2[MAXPACKETSIZE];
-  if (size==2) {
-    if (packet1[0]==IR_IPT_InteractiveKey) {
-      if (packet1[1]=='W') {
+static int
+handleNativePacket (BrailleDisplay *brl, unsigned char *packet, size_t size) {
+  if (size == 2) {
+    if (packet[0] == IR_IPT_InteractiveKey) {
+      if (packet[1] == 'W') {
         logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "handleNativePacket: discarding Z key");
-      } else if ((1<=packet1[1]) && (packet1[1]<=brl->textColumns * brl->textRows)) {
-        packet2[0] = 'K';
-        packet2[1] = 'I';
-        packet2[2] = packet1[1];
-        writeEurobraillePacket(brl, &externalPort, packet2, 3);
+        return 1;
+      }
+
+      if ((1 <= packet[1]) && (packet[1] <= (brl->textColumns * brl->textRows))) {
+        unsigned char data[] = {
+          0X4B, 0X49, packet[1]
+        };
+
+        return writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
       }
     }
-  } else if (size==3) {
-    if (packet1[0]==IR_IPT_XtKeyCode) { /* IrisKB's PC keyboard */
-      writeEurobrailleKeyboardPacket(brl, &externalPort, packet1[1], packet1[2]);
+  } else if (size == 3) {
+    if (packet[0] == IR_IPT_XtKeyCode) {
+      return writeEurobrailleKeyboardPacket(brl, &externalPort, packet[1], packet[2]);
     }
-    if (packet1[0]==IR_IPT_LinearKeys) {
-      uint16_t keys = (packet1[1] << 8) | packet1[2];
+
+    if (packet[0] == IR_IPT_LinearKeys) {
+      uint16_t keys = (packet[1] << 8) | packet[2];
       unsigned char data[] = {
         0X4B, 0X43, 0, (
-          ((keys & 0X1E0) >> 1) |
-          (keys & 0XF)
+          (keys & 0XF) |
+          ((keys >> 1) & 0XF0)
         )
       };
 
-      writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
-      return;
+      return writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
     }
-    if (packet1[0]==IR_IPT_BrailleKeys) {
+
+    if (packet[0] == IR_IPT_BrailleKeys) {
       unsigned char data[] = {
-        0X4B, 0X42, packet1[1], packet1[2]
+        0X4B, 0X42, packet[1], packet[2]
       };
 
-      writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
-      return;
+      return writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
     }
   }
+
+  logBytes(LOG_WARNING, "unhandled Iris packet", packet, size);
+  return 0;
 }
 
 static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *packet, size_t size)
