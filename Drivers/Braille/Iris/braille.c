@@ -1337,8 +1337,11 @@ static void handleNativePacket(BrailleDisplay *brl, unsigned char *packet1, size
       return;
     }
     if (packet1[0]==IR_IPT_BrailleKeys) {
-      /* enqueueKeys((packet[1] << 8) | packet[2],
-                  IR_SET_NavigationKeys, IR_KEY_Dot1); */
+      unsigned char data[] = {
+        0X4B, 0X42, packet1[1], packet1[2]
+      };
+
+      writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
       return;
     }
   }
