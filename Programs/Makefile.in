@@ -143,6 +143,9 @@ dataarea.$O:
 datafile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/datafile.c
 
+hostcmd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/hostcmd.c
+
 lock.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
 
@@ -353,7 +356,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O prefs.$O menu.$O ses.$O status.$O cut.$O touch.$O async.$O unicode.$O charset.$O dataarea.$O datafile.$O lock.$O mount.$O queue.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = main.$O brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O prefs.$O menu.$O ses.$O status.$O cut.$O touch.$O async.$O charset.$O dataarea.$O datafile.$O hostcmd.$O lock.$O mount.$O queue.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -422,7 +425,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) async.$O queue.$O unicode.$O charset.$O lock.$O scancodes.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) async.$O charset.$O hostcmd.$O lock.$O queue.$O unicode.$O scancodes.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
@@ -468,7 +471,7 @@ atb_translate.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) prefs.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O unicode.$O charset.$O
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) prefs.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O charset.$O hostcmd.$O lock.$O unicode.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -575,7 +578,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_queue.$O host_dataarea.$O host_ttb_compile.$O host_ttb_native.$O host_atb_compile.$O host_ctb_compile.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_charset.$O host_dataarea.$O host_datafile.$O host_hostcmd.$O host_lock.$O host_queue.$O host_ttb_compile.$O host_ttb_native.$O host_atb_compile.$O host_ctb_compile.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
