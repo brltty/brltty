@@ -137,10 +137,15 @@ struct ContractionTableStruct {
     } internal;
 
     struct {
-      FILE *stream;
+      unsigned commandStarted:1;
+      FILE *standardInput;
+      FILE *standardOutput;
     } external;
   } data;
 };
+
+extern int startContractionCommand (ContractionTable *table);
+extern void stopContractionCommand (ContractionTable *table);
 
 #ifdef __cplusplus
 }

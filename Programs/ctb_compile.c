@@ -29,6 +29,7 @@
 #include "datafile.h"
 #include "dataarea.h"
 #include "brldots.h"
+#include "hostcmd.h"
 
 typedef struct {
   unsigned char length;
@@ -641,11 +642,17 @@ processContractionTableLine (DataFile *file, void *data) {
 
 int
 startContractionCommand (ContractionTable *table) {
-  if (!table->data.external.stream) {
-    if (!(table->data.external.stream = popen(table->command, "w+"))) {
-      logMessage(LOG_ERR, "command not started: %s: %s", table->command, strerror(errno));
-      return 0;
-    }
+  if (!table->data.external.commandStarted) {
+    const char *command[] = {table->command, NULL};
+    HostCommandOptions options;
+
+    initializeHostCommandOptions(&options);
+    options.asynchronous = 1;
+    options.standardInput = &table->data.external.standardInput;
+    options.standardOutput = &table->data.external.standardOutput;
+
+    if (runHostCommand(command, &options) != 0) return 0;
+    table->data.external.commandStarted = 1;
   }
 
   return 1;
@@ -653,9 +660,10 @@ startContractionCommand (ContractionTable *table) {
 
 void
 stopContractionCommand (ContractionTable *table) {
-  if (table->data.external.stream) {
-    pclose(table->data.external.stream);
-    table->data.external.stream = NULL;
+  if (table->data.external.commandStarted) {
+    fclose(table->data.external.standardInput);
+    fclose(table->data.external.standardOutput);
+    table->data.external.commandStarted = 0;
   }
 }
 
@@ -668,7 +676,7 @@ compileContractionTable (const char *fileName) {
       memset(table, 0, sizeof(*table));
 
       if ((table->command = strdup(fileName))) {
-        table->data.external.stream = NULL;
+        table->data.external.commandStarted = 0;
 
         if (startContractionCommand(table)) {
           return table;
