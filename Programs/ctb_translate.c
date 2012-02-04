@@ -33,6 +33,7 @@
 #include "ascii.h"
 #include "brldots.h"
 #include "file.h"
+#include "parse.h"
 
 static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;
@@ -1139,6 +1140,93 @@ done:
   return 1;
 }
 
+static int
+putExternalRequests (void) {
+  typedef enum {
+    REQ_TEXT,
+    REQ_NUMBER
+  } ExternalRequestType;
+
+  typedef struct {
+    const char *name;
+    unsigned char type;
+
+    union {
+      struct {
+        const wchar_t *start;
+        size_t count;
+      } text;
+
+      unsigned int number;
+    } value;
+  } ExternalRequestEntry;
+
+  const ExternalRequestEntry externalRequestTable[] = {
+    { .name = "cursor",
+      .type = REQ_NUMBER,
+      .value.number = cursor? cursor-srcmin+1: 0
+    },
+
+    { .name = "ecw",
+      .type = REQ_NUMBER,
+      .value.number = prefs.expandCurrentWord
+    },
+
+    { .name = "outmax",
+      .type = REQ_NUMBER,
+      .value.number = destmax - destmin
+    },
+
+    { .name = "text",
+      .type = REQ_TEXT,
+      .value.text = {
+        .start = srcmin,
+        .count = srcmax - srcmin
+      }
+    },
+
+    { .name = NULL }
+  };
+
+  FILE *stream = table->data.external.standardInput;
+  const ExternalRequestEntry *req = externalRequestTable;
+
+  while (req->name) {
+    if (fputs(req->name, stream) == EOF) return 0;
+    if (fputc('=', stream) == EOF) return 0;
+
+    switch (req->type) {
+      case REQ_TEXT: {
+        const wchar_t *character = req->value.text.start;
+        const wchar_t *end = character + req->value.text.count;
+
+        while (character < end) {
+          Utf8Buffer utf8;
+          size_t utfs = convertWcharToUtf8(*character++, utf8);
+
+          if (!utfs) return 0;
+          if (fputs(utf8, stream) == EOF) return 0;
+        }
+
+        break;
+      }
+
+      case REQ_NUMBER:
+        if (fprintf(stream, "%u", req->value.number) == EOF) return 0;
+        break;
+
+      default:
+        return 0;
+    }
+
+    if (fputc('\n', stream) == EOF) return 0;
+    req += 1;
+  }
+
+  if (fflush(stream) == EOF) return 0;
+  return 1;
+}
+
 static const unsigned char brfTable[0X40] = {
   /* 0X20   */ 0,
   /* 0X21 ! */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
@@ -1207,7 +1295,7 @@ static const unsigned char brfTable[0X40] = {
 };
 
 static int
-xcfHandler_brf (const char *value) {
+handleExternalResponse_brf (const char *value) {
   while (*value && (dest < destmax)) {
     char brf = *value++;
     *dest++ = ((brf >= 0X20) && (brf <= 0X5F))? brfTable[brf - 0X20]: 0;
@@ -1216,73 +1304,76 @@ xcfHandler_brf (const char *value) {
   return 1;
 }
 
+static int
+handleExternalResponse_inputLength (const char *value) {
+  int length;
+
+  if (!isInteger(&length, value)) return 0;
+  if (length < 1) return 0;
+  if (length > (srcmax - srcmin)) return 0;
+
+  src = srcmin + length;
+  return 1;
+}
+
 typedef struct {
   const char *name;
   int (*handler) (const char *value);
   unsigned stop:1;
-} ExternalContractionFunction;
+} ExternalResponseEntry;
 
-static const ExternalContractionFunction externalContractionFunctions[] = {
+static const ExternalResponseEntry externalResponseTable[] = {
   { .name = "brf",
     .stop = 1,
-    .handler = xcfHandler_brf
+    .handler = handleExternalResponse_brf
+  },
+
+  { .name = "inlen",
+    .handler = handleExternalResponse_inputLength
   },
 
   { .name = NULL }
 };
 
 static int
-contractTextExternally (void) {
-  if (startContractionCommand(table)) {
-    {
-      FILE *stream = table->data.external.standardInput;
+getExternalResponses (void) {
+  static char *buffer = NULL;
+  static size_t size = 0;
 
-      if (fprintf(stream, "cursor=%u\n", cursor? cursor-srcmin+1: 0) == EOF) goto error;
-      if (fprintf(stream, "xcw=%s\n", prefs.expandCurrentWord? "yes": "no") == EOF) goto error;
-      if (fprintf(stream, "outmax=%u\n", destmax-destmin) == EOF) goto error;
+  FILE *stream = table->data.external.standardOutput;
 
-      if (fputs("text=", stream) == EOF) goto error;
-      while (src < srcmax) {
-        Utf8Buffer utf8;
-        size_t utfs = convertWcharToUtf8(*src++, utf8);
+  while (readLine(stream, &buffer, &size)) {
+    char *delimiter = strchr(buffer, '=');
 
-        if (!utfs) goto error;
-        if (fputs(utf8, stream) == EOF) goto error;
-      }
-      if (fputc('\n', stream) == EOF) goto error;
+    if (delimiter) {
+      const char *value = delimiter + 1;
+      const ExternalResponseEntry *rsp = externalResponseTable;
+      *delimiter = 0;
 
-      if (fflush(stream) == EOF) goto error;
-    }
-
-    {
-      static char *buffer = NULL;
-      static size_t size = 0;
-
-      FILE *stream = table->data.external.standardOutput;
-
-      while (readLine(stream, &buffer, &size)) {
-        char *delimiter = strchr(buffer, '=');
-
-        if (delimiter) {
-          const char *value = delimiter + 1;
-          const ExternalContractionFunction *xcf = externalContractionFunctions;
-          *delimiter = 0;
-
-          while (xcf->name) {
-            if (strcmp(buffer, xcf->name) == 0) {
-              if (!xcf->handler(value)) goto error;
-              if (xcf->stop) return 1;
-              break;
-            }
-
-            xcf += 1;
-          }
+      while (rsp->name) {
+        if (strcmp(buffer, rsp->name) == 0) {
+          if (!rsp->handler(value)) return 0;
+          if (rsp->stop) return 1;
+          break;
         }
+
+        rsp += 1;
       }
     }
   }
 
-error:
+  return 1;
+}
+
+static int
+contractTextExternally (void) {
+  src = srcmax;
+
+  if (startContractionCommand(table))
+    if (putExternalRequests())
+      if (getExternalResponses())
+        return 1;
+
   stopContractionCommand(table);
   return 0;
 }
