@@ -29,8 +29,10 @@
 #include "ttb.h"
 #include "prefs.h"
 #include "unicode.h"
+#include "charset.h"
 #include "ascii.h"
 #include "brldots.h"
+#include "file.h"
 
 static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;
@@ -1137,8 +1139,151 @@ done:
   return 1;
 }
 
+static const unsigned char brfTable[0X40] = {
+  /* 0X20   */ 0,
+  /* 0X21 ! */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
+  /* 0X22 " */ BRL_DOT5,
+  /* 0X23 # */ BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X24 $ */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT6,
+  /* 0X25 % */ BRL_DOT1 | BRL_DOT4 | BRL_DOT6,
+  /* 0X26 & */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
+  /* 0X27 ' */ BRL_DOT3,
+  /* 0X28 ( */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
+  /* 0X29 ) */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X2A * */ BRL_DOT1 | BRL_DOT6,
+  /* 0X2B + */ BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
+  /* 0X2C , */ BRL_DOT6,
+  /* 0X2D - */ BRL_DOT3 | BRL_DOT6,
+  /* 0X2E . */ BRL_DOT4 | BRL_DOT6,
+  /* 0X2F / */ BRL_DOT3 | BRL_DOT4,
+  /* 0X30 0 */ BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
+  /* 0X31 1 */ BRL_DOT2,
+  /* 0X32 2 */ BRL_DOT2 | BRL_DOT3,
+  /* 0X33 3 */ BRL_DOT2 | BRL_DOT5,
+  /* 0X34 4 */ BRL_DOT2 | BRL_DOT5 | BRL_DOT6,
+  /* 0X35 5 */ BRL_DOT2 | BRL_DOT6,
+  /* 0X36 6 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT5,
+  /* 0X37 7 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
+  /* 0X38 8 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT6,
+  /* 0X39 9 */ BRL_DOT3 | BRL_DOT5,
+  /* 0X3A : */ BRL_DOT1 | BRL_DOT5 | BRL_DOT6,
+  /* 0X3B ; */ BRL_DOT5 | BRL_DOT6,
+  /* 0X3C < */ BRL_DOT1 | BRL_DOT2 | BRL_DOT6,
+  /* 0X3D = */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X3E > */ BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
+  /* 0X3F ? */ BRL_DOT1 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X40 @ */ BRL_DOT4,
+  /* 0X41 A */ BRL_DOT1,
+  /* 0X42 B */ BRL_DOT1 | BRL_DOT2,
+  /* 0X43 C */ BRL_DOT1 | BRL_DOT4,
+  /* 0X44 D */ BRL_DOT1 | BRL_DOT4 | BRL_DOT5,
+  /* 0X45 E */ BRL_DOT1 | BRL_DOT5,
+  /* 0X46 F */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4,
+  /* 0X47 G */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT5,
+  /* 0X48 H */ BRL_DOT1 | BRL_DOT2 | BRL_DOT5,
+  /* 0X49 I */ BRL_DOT2 | BRL_DOT4,
+  /* 0X4A J */ BRL_DOT2 | BRL_DOT4 | BRL_DOT5,
+  /* 0X4B K */  BRL_DOT1 | BRL_DOT3,
+  /* 0X4C L */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3,
+  /* 0X4D M */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4,
+  /* 0X4E N */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
+  /* 0X4F O */ BRL_DOT1 | BRL_DOT3 | BRL_DOT5,
+  /* 0X50 P */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
+  /* 0X51 Q */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
+  /* 0X52 R */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
+  /* 0X53 S */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
+  /* 0X54 T */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
+  /* 0X55 U */ BRL_DOT1 | BRL_DOT3 | BRL_DOT6,
+  /* 0X56 V */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT6,
+  /* 0X57 W */ BRL_DOT2 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X58 X */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
+  /* 0X59 Y */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X5A Z */ BRL_DOT1 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
+  /* 0X5B [ */ BRL_DOT2 | BRL_DOT4 | BRL_DOT6,
+  /* 0X5C \ */ BRL_DOT1 | BRL_DOT2 | BRL_DOT5 | BRL_DOT6,
+  /* 0X5D ] */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
+  /* 0X5E ^ */ BRL_DOT4 | BRL_DOT5,
+  /* 0X5F _ */ BRL_DOT4 | BRL_DOT5 | BRL_DOT6
+};
+
+static int
+xcfHandler_brf (const char *value) {
+  while (*value && (dest < destmax)) {
+    char brf = *value++;
+    *dest++ = ((brf >= 0X20) && (brf <= 0X5F))? brfTable[brf - 0X20]: 0;
+  }
+
+  return 1;
+}
+
+typedef struct {
+  const char *name;
+  int (*handler) (const char *value);
+  unsigned stop:1;
+} ExternalContractionFunction;
+
+static const ExternalContractionFunction externalContractionFunctions[] = {
+  { .name = "brf",
+    .stop = 1,
+    .handler = xcfHandler_brf
+  },
+
+  { .name = NULL }
+};
+
 static int
 contractTextExternally (void) {
+  if (startContractionCommand(table)) {
+    {
+      FILE *stream = table->data.external.standardInput;
+
+      if (fprintf(stream, "cursor=%u\n", cursor? cursor-srcmin+1: 0) == EOF) goto error;
+      if (fprintf(stream, "xcw=%s\n", prefs.expandCurrentWord? "yes": "no") == EOF) goto error;
+      if (fprintf(stream, "outmax=%u\n", destmax-destmin) == EOF) goto error;
+
+      if (fputs("text=", stream) == EOF) goto error;
+      while (src < srcmax) {
+        Utf8Buffer utf8;
+        size_t utfs = convertWcharToUtf8(*src++, utf8);
+
+        if (!utfs) goto error;
+        if (fputs(utf8, stream) == EOF) goto error;
+      }
+      if (fputc('\n', stream) == EOF) goto error;
+
+      if (fflush(stream) == EOF) goto error;
+    }
+
+    {
+      static char *buffer = NULL;
+      static size_t size = 0;
+
+      FILE *stream = table->data.external.standardOutput;
+
+      while (readLine(stream, &buffer, &size)) {
+        char *delimiter = strchr(buffer, '=');
+
+        if (delimiter) {
+          const char *value = delimiter + 1;
+          const ExternalContractionFunction *xcf = externalContractionFunctions;
+          *delimiter = 0;
+
+          while (xcf->name) {
+            if (strcmp(buffer, xcf->name) == 0) {
+              if (!xcf->handler(value)) goto error;
+              if (xcf->stop) return 1;
+              break;
+            }
+
+            xcf += 1;
+          }
+        }
+      }
+    }
+  }
+
+error:
+  stopContractionCommand(table);
   return 0;
 }
 
