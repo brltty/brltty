@@ -32,6 +32,7 @@
 #include "charset.h"
 #include "ascii.h"
 #include "brldots.h"
+#include "log.h"
 #include "file.h"
 #include "parse.h"
 
@@ -46,9 +47,20 @@ static ContractionTableOpcode currentOpcode;
 static ContractionTableOpcode previousOpcode;
 static const ContractionTableRule *currentRule;	/*pointer to current rule in table */
 
-#define assignOffset(value) if (offsets) offsets[src - srcmin] = (value)
-#define setOffset() assignOffset(dest-destmin)
-#define clearOffset() assignOffset(CTB_NO_OFFSET)
+static inline void
+assignOffset (size_t value) {
+  if (offsets) offsets[src - srcmin] = value;
+}
+
+static inline void
+setOffset (void) {
+  assignOffset(dest - destmin);
+}
+
+static inline void
+clearOffset (void) {
+  assignOffset(CTB_NO_OFFSET);
+}
 
 static inline ContractionTableHeader *
 getContractionTableHeader (void) {
@@ -85,11 +97,11 @@ getContractionTableCharacter (wchar_t character) {
 static CharacterEntry *
 getCharacterEntry (wchar_t character) {
   int first = 0;
-  int last = table->data.internal.characterCount - 1;
+  int last = table->characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    CharacterEntry *entry = &table->data.internal.characters[current];
+    CharacterEntry *entry = &table->characters[current];
 
     if (entry->value < character) {
       first = current + 1;
@@ -100,26 +112,30 @@ getCharacterEntry (wchar_t character) {
     }
   }
 
-  if (table->data.internal.characterCount == table->data.internal.charactersSize) {
-    int newSize = table->data.internal.charactersSize;
+  if (table->characterCount == table->charactersSize) {
+    int newSize = table->charactersSize;
     newSize = newSize? newSize<<1: 0X80;
 
     {
-      CharacterEntry *newCharacters = realloc(table->data.internal.characters, (newSize * sizeof(*newCharacters)));
-      if (!newCharacters) return NULL;
+      CharacterEntry *newCharacters = realloc(table->characters, (newSize * sizeof(*newCharacters)));
 
-      table->data.internal.characters = newCharacters;
-      table->data.internal.charactersSize = newSize;
+      if (!newCharacters) {
+        logMallocError();
+        return NULL;
+      }
+
+      table->characters = newCharacters;
+      table->charactersSize = newSize;
     }
   }
 
-  memmove(&table->data.internal.characters[first+1],
-          &table->data.internal.characters[first],
-          (table->data.internal.characterCount - first) * sizeof(*table->data.internal.characters));
-  table->data.internal.characterCount += 1;
+  memmove(&table->characters[first+1],
+          &table->characters[first],
+          (table->characterCount - first) * sizeof(*table->characters));
+  table->characterCount += 1;
 
   {
-    CharacterEntry *entry = &table->data.internal.characters[first];
+    CharacterEntry *entry = &table->characters[first];
     memset(entry, 0, sizeof(*entry));
     entry->value = entry->uppercase = entry->lowercase = character;
 
@@ -143,7 +159,7 @@ getCharacterEntry (wchar_t character) {
       entry->attributes |= CTC_Punctuation;
     }
 
-    {
+    if (!table->command) {
       const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
       if (ctc) entry->attributes |= ctc->attributes;
     }
@@ -1115,28 +1131,6 @@ done:
     }
   }
 
-  if (src < srcmax) {
-    const wchar_t *srcorig = src;
-    int done = 1;
-
-    setOffset();
-    while (1) {
-      if (done && !testCharacter(*src, CTC_Space)) {
-        done = 0;
-
-        if ((cursor < srcorig) || (cursor >= src)) {
-          setOffset();
-          srcorig = src;
-        }
-      }
-
-      if (++src == srcmax) break;
-      clearOffset();
-    }
-
-    if (!done) src = srcorig;
-  }
-
   return 1;
 }
 
@@ -1367,7 +1361,8 @@ getExternalResponses (void) {
 
 static int
 contractTextExternally (void) {
-  src = srcmax;
+  setOffset();
+  while (++src < srcmax) clearOffset();
 
   if (startContractionCommand(table))
     if (putExternalRequests())
@@ -1399,6 +1394,28 @@ contractText (
       setOffset();
       *dest++ = convertCharacterToDots(textTable, *src++);
     }
+  }
+
+  if (src < srcmax) {
+    const wchar_t *srcorig = src;
+    int done = 1;
+
+    setOffset();
+    while (1) {
+      if (done && !testCharacter(*src, CTC_Space)) {
+        done = 0;
+
+        if (!cursor || (cursor < srcorig) || (cursor >= src)) {
+          setOffset();
+          srcorig = src;
+        }
+      }
+
+      if (++src == srcmax) break;
+      clearOffset();
+    }
+
+    if (!done) src = srcorig;
   }
 
   *inputLength = src - srcmin;

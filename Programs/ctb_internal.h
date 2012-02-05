@@ -120,6 +120,10 @@ typedef struct {
 } CharacterEntry;
 
 struct ContractionTableStruct {
+  CharacterEntry *characters;
+  int charactersSize;
+  int characterCount;
+
   char *command;
 
   union {
@@ -130,10 +134,6 @@ struct ContractionTableStruct {
       } header;
 
       size_t size;
-
-      CharacterEntry *characters;
-      int charactersSize;
-      int characterCount;
     } internal;
 
     struct {

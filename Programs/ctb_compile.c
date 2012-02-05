@@ -667,6 +667,13 @@ stopContractionCommand (ContractionTable *table) {
   }
 }
 
+static void
+initializeCommonFields (ContractionTable *table) {
+  table->characters = NULL;
+  table->charactersSize = 0;
+  table->characterCount = 0;
+}
+
 ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
@@ -676,6 +683,7 @@ compileContractionTable (const char *fileName) {
       memset(table, 0, sizeof(*table));
 
       if ((table->command = strdup(fileName))) {
+        initializeCommonFields(table);
         table->data.external.commandStarted = 0;
 
         if (startContractionCommand(table)) {
@@ -719,15 +727,12 @@ compileContractionTable (const char *fileName) {
           if (processDataFile(fileName, processContractionTableLine, &ctd)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
+                initializeCommonFields(table);
                 table->command = NULL;
 
                 table->data.internal.header.fields = getContractionTableHeader(&ctd);
                 table->data.internal.size = getDataSize(ctd.area);
                 resetDataArea(ctd.area);
-
-                table->data.internal.characters = NULL;
-                table->data.internal.charactersSize = 0;
-                table->data.internal.characterCount = 0;
               } else {
                 logMallocError();
               }
@@ -749,16 +754,16 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
+  if (table->characters) {
+    free(table->characters);
+    table->characters = NULL;
+  }
+
   if (table->command) {
     stopContractionCommand(table);
     free(table->command);
     free(table);
   } else {
-    if (table->data.internal.characters) {
-      free(table->data.internal.characters);
-      table->data.internal.characters = NULL;
-    }
-
     if (table->data.internal.size) {
       free(table->data.internal.header.fields);
       free(table);
