@@ -163,6 +163,8 @@ childHostCommandStream (HostCommandStream *hcs) {
     logSystemError("fcntl[F_DUPFD]");
     return 0;
   }
+
+  close(*local);
   *local = -1;
 
   return 1;
