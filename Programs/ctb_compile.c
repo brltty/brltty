@@ -669,9 +669,21 @@ stopContractionCommand (ContractionTable *table) {
 
 static void
 initializeCommonFields (ContractionTable *table) {
-  table->characters = NULL;
-  table->charactersSize = 0;
-  table->characterCount = 0;
+  table->characters.array = NULL;
+  table->characters.size = 0;
+  table->characters.count = 0;
+
+  table->cache.input.characters = NULL;
+  table->cache.input.size = 0;
+  table->cache.input.count = 0;
+
+  table->cache.output.cells = NULL;
+  table->cache.output.size = 0;
+  table->cache.output.count = 0;
+
+  table->cache.offsets.array = NULL;
+  table->cache.offsets.size = 0;
+  table->cache.offsets.count = 0;
 }
 
 ContractionTable *
@@ -754,9 +766,24 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
-  if (table->characters) {
-    free(table->characters);
-    table->characters = NULL;
+  if (table->characters.array) {
+    free(table->characters.array);
+    table->characters.array = NULL;
+  }
+
+  if (table->cache.input.characters) {
+    free(table->cache.input.characters);
+    table->cache.input.characters = NULL;
+  }
+
+  if (table->cache.output.cells) {
+    free(table->cache.output.cells);
+    table->cache.output.cells = NULL;
+  }
+
+  if (table->cache.offsets.array) {
+    free(table->cache.offsets.array);
+    table->cache.offsets.array = NULL;
   }
 
   if (table->command) {

@@ -120,9 +120,34 @@ typedef struct {
 } CharacterEntry;
 
 struct ContractionTableStruct {
-  CharacterEntry *characters;
-  int charactersSize;
-  int characterCount;
+  struct {
+    CharacterEntry *array;
+    int size;
+    int count;
+  } characters;
+
+  struct {
+    struct {
+      wchar_t *characters;
+      unsigned int size;
+      unsigned int count;
+    } input;
+
+    struct {
+      unsigned char *cells;
+      unsigned int size;
+      unsigned int count;
+    } output;
+
+    struct {
+      int *array;
+      unsigned int size;
+      unsigned int count;
+    } offsets;
+
+    int cursorOffset;
+    unsigned char expandCurrentWord;
+  } cache;
 
   char *command;
 

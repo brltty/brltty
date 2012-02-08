@@ -97,11 +97,11 @@ getContractionTableCharacter (wchar_t character) {
 static CharacterEntry *
 getCharacterEntry (wchar_t character) {
   int first = 0;
-  int last = table->characterCount - 1;
+  int last = table->characters.count - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    CharacterEntry *entry = &table->characters[current];
+    CharacterEntry *entry = &table->characters.array[current];
 
     if (entry->value < character) {
       first = current + 1;
@@ -112,30 +112,30 @@ getCharacterEntry (wchar_t character) {
     }
   }
 
-  if (table->characterCount == table->charactersSize) {
-    int newSize = table->charactersSize;
+  if (table->characters.count == table->characters.size) {
+    int newSize = table->characters.size;
     newSize = newSize? newSize<<1: 0X80;
 
     {
-      CharacterEntry *newCharacters = realloc(table->characters, (newSize * sizeof(*newCharacters)));
+      CharacterEntry *newArray = realloc(table->characters.array, (newSize * sizeof(*newArray)));
 
-      if (!newCharacters) {
+      if (!newArray) {
         logMallocError();
         return NULL;
       }
 
-      table->characters = newCharacters;
-      table->charactersSize = newSize;
+      table->characters.array = newArray;
+      table->characters.size = newSize;
     }
   }
 
-  memmove(&table->characters[first+1],
-          &table->characters[first],
-          (table->characterCount - first) * sizeof(*table->characters));
-  table->characterCount += 1;
+  memmove(&table->characters.array[first+1],
+          &table->characters.array[first],
+          (table->characters.count - first) * sizeof(*table->characters.array));
+  table->characters.count += 1;
 
   {
-    CharacterEntry *entry = &table->characters[first];
+    CharacterEntry *entry = &table->characters.array[first];
     memset(entry, 0, sizeof(*entry));
     entry->value = entry->uppercase = entry->lowercase = character;
 
@@ -1373,6 +1373,105 @@ contractTextExternally (void) {
   return 0;
 }
 
+static inline int
+makeCachedCursorOffset (void) {
+  return cursor? (cursor - srcmin): CTB_NO_CURSOR;
+}
+
+static int
+checkCache (void) {
+  if (!table->cache.input.characters) return 0;
+  if (!table->cache.output.cells) return 0;
+  if (offsets && !table->cache.offsets.count) return 0;
+  if (table->cache.cursorOffset != makeCachedCursorOffset()) return 0;
+  if (table->cache.expandCurrentWord != prefs.expandCurrentWord) return 0;
+
+  {
+    unsigned int count = srcmax - srcmin;
+    if (table->cache.input.count != count) return 0;
+    if (wmemcmp(srcmin, table->cache.input.characters, count) != 0) return 0;
+  }
+
+  return 1;
+}
+
+static void
+updateCache (void) {
+  {
+    unsigned int count = src - srcmin;
+
+    if (count > table->cache.input.size) {
+      unsigned int newSize = count | 0X7F;
+      wchar_t *newCharacters = malloc(ARRAY_SIZE(newCharacters, newSize));
+
+      if (!newCharacters) {
+        logMallocError();
+        table->cache.input.count = 0;
+        goto inputDone;
+      }
+
+      if (table->cache.input.characters) free(table->cache.input.characters);
+      table->cache.input.characters = newCharacters;
+      table->cache.input.size = newSize;
+    }
+
+    wmemcpy(table->cache.input.characters, srcmin, count);
+    table->cache.input.count = count;
+  }
+inputDone:
+
+  {
+    unsigned int count = dest - destmin;
+
+    if (count > table->cache.output.size) {
+      unsigned int newSize = count | 0X7F;
+      unsigned char *newCells = malloc(ARRAY_SIZE(newCells, newSize));
+
+      if (!newCells) {
+        logMallocError();
+        table->cache.output.count = 0;
+        goto outputDone;
+      }
+
+      if (table->cache.output.cells) free(table->cache.output.cells);
+      table->cache.output.cells = newCells;
+      table->cache.output.size = newSize;
+    }
+
+    memcpy(table->cache.output.cells, destmin, count);
+    table->cache.output.count = count;
+  }
+outputDone:
+
+  if (offsets) {
+    unsigned int count = src - srcmin;
+
+    if (count > table->cache.offsets.size) {
+      unsigned int newSize = count | 0X7F;
+      int *newArray = malloc(ARRAY_SIZE(newArray, newSize));
+
+      if (!newArray) {
+        logMallocError();
+        table->cache.offsets.count = 0;
+        goto offsetsDone;
+      }
+
+      if (table->cache.offsets.array) free(table->cache.offsets.array);
+      table->cache.offsets.array = newArray;
+      table->cache.offsets.size = newSize;
+    }
+
+    memcpy(table->cache.offsets.array, offsets, ARRAY_SIZE(offsets, count));
+    table->cache.offsets.count = count;
+  } else {
+    table->cache.offsets.count = 0;
+  }
+offsetsDone:
+
+  table->cache.cursorOffset = makeCachedCursorOffset();
+  table->cache.expandCurrentWord = prefs.expandCurrentWord;
+}
+
 void
 contractText (
   ContractionTable *contractionTable,
@@ -1386,36 +1485,49 @@ contractText (
   offsets = offsetsMap;
   cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
 
-  if (!(table->command? contractTextExternally(): contractTextInternally())) {
-    src = srcmin;
-    dest = destmin;
+  if (checkCache()) {
+    src = srcmin + table->cache.input.count;
+    if (offsets)
+      memcpy(offsets, table->cache.offsets.array,
+             ARRAY_SIZE(offsets, table->cache.offsets.count));
 
-    while ((src < srcmax) && (dest < destmax)) {
-      setOffset();
-      *dest++ = convertCharacterToDots(textTable, *src++);
+    dest = destmin + table->cache.output.count;
+    memcpy(destmin, table->cache.output.cells,
+           ARRAY_SIZE(destmin, table->cache.output.count));
+  } else {
+    if (!(table->command? contractTextExternally(): contractTextInternally())) {
+      src = srcmin;
+      dest = destmin;
+
+      while ((src < srcmax) && (dest < destmax)) {
+        setOffset();
+        *dest++ = convertCharacterToDots(textTable, *src++);
+      }
     }
-  }
 
-  if (src < srcmax) {
-    const wchar_t *srcorig = src;
-    int done = 1;
+    if (src < srcmax) {
+      const wchar_t *srcorig = src;
+      int done = 1;
 
-    setOffset();
-    while (1) {
-      if (done && !testCharacter(*src, CTC_Space)) {
-        done = 0;
+      setOffset();
+      while (1) {
+        if (done && !testCharacter(*src, CTC_Space)) {
+          done = 0;
 
-        if (!cursor || (cursor < srcorig) || (cursor >= src)) {
-          setOffset();
-          srcorig = src;
+          if (!cursor || (cursor < srcorig) || (cursor >= src)) {
+            setOffset();
+            srcorig = src;
+          }
         }
+
+        if (++src == srcmax) break;
+        clearOffset();
       }
 
-      if (++src == srcmax) break;
-      clearOffset();
+      if (!done) src = srcorig;
     }
 
-    if (!done) src = srcorig;
+    updateCache();
   }
 
   *inputLength = src - srcmin;
