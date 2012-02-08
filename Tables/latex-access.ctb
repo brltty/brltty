@@ -1,0 +1,141 @@
+#!/usr/bin/python
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Contraction Table - latex-access (executable)
+
+import sys, os
+
+def putProgramMessage (message):
+  stream = sys.stderr
+  stream.write(os.path.basename(sys.argv[0]) + ": " + message + "\n")
+  stream.flush()
+
+def syntaxError (message):
+  putProgramMessage(message)
+  exit(2)
+
+def semanticError (message):
+  putProgramMessage(message)
+  exit(3)
+
+def systemError (message):
+  putProgramMessage(message)
+  exit(4)
+
+def missingPackage (name):
+  systemError("package not installed: " + name)
+
+def putResponseProperty (keyword, value):
+  global programArguments
+  if programArguments.verbose: putProgramMessage("rsp: " + keyword + "=" + value)
+
+  stream = sys.stdout
+  stream.write(keyword + "=" + value + "\n")
+  stream.flush()
+
+def getRequest ():
+  request = {}
+
+  while True:
+    try:
+      line = raw_input()
+    except EOFError:
+      if len(request) == 0: return None
+      semanticError("unexpected end-of-file on standard input")
+
+    line = line.decode("UTF-8")
+    components = line.split("=", 1)
+
+    if len(components) > 1:
+      (keyword, value) = components
+      keyword = keyword.strip().lower()
+
+      global programArguments
+      if programArguments.verbose: putProgramMessage("req: " + keyword + "=" + value)
+
+      request[keyword] = value
+      if keyword == "text": break
+
+  return request
+
+def processRequest ():
+  request = getRequest()
+  if not request: return False
+
+  brf = brailleTranslator.translate(textPreprocessor.translate(request["text"]))
+  putResponseProperty("brf", brf)
+  return True
+
+def parseProgramArguments ():
+  import argparse
+  parser = argparse.ArgumentParser(
+    prog = os.path.basename(sys.argv[0]),
+    usage = "%(prog)s [option ...]",
+    description = """
+      This is an executable contraction table for BRLTTY
+      which uses the latex-access package
+      to translate LaTeX mathematical notation into braille.
+      BRLTTY can be found at [http://mielke.cc/brltty/].
+      latex-access can be found at [http://www.latex-access.sourceforge.net/].
+    """
+  )
+
+  parser.add_argument(
+    "-n", "--nemeth",
+    action = "store_const",
+    const = "nemeth",
+    dest = "translator",
+    help = "translate into Nemeth Code"
+  )
+
+  parser.add_argument(
+    "-u", "--ueb",
+    action = "store_const",
+    const = "ueb",
+    dest = "translator",
+    help = "translate into Unified English Braille"
+  )
+
+  parser.add_argument(
+    "-v", "--verbose",
+    action = "store_true",
+    dest = "verbose",
+    help = "show request and response properties on standard error"
+  )
+
+  return parser.parse_args()
+
+if __name__ == "__main__":
+  try:
+    import nemeth, ueb, preprocessor, settings
+  except ImportError:
+    missingPackage("latex-access")
+
+  settings.loadSettings(os.path.expanduser("~/.latex-access"))
+  programArguments = parseProgramArguments()
+
+  if programArguments.translator:
+    settings.settings["brailletable"] = programArguments.translator
+
+  brailleTranslator = settings.brailleTableToUse()
+  textPreprocessor = preprocessor.preprocessor()
+
+  settings.activateSettings({"braille":brailleTranslator})
+  while processRequest(): pass
+
