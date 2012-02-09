@@ -59,6 +59,11 @@ processHostCommandStreams (HostCommandStreamProcessor *processor, HostCommandStr
 }
 
 #if defined(__MINGW32__)
+int
+isHostCommand (const char *path) {
+  return 0;
+}
+
 static void
 subconstructHostCommandStream (HostCommandStream *hcs) {
 }
@@ -78,6 +83,11 @@ runCommand (
 }
 
 #else /* Unix */
+int
+isHostCommand (const char *path) {
+  return access(path, X_OK) != -1;
+}
+
 static void
 subconstructHostCommandStream (HostCommandStream *hcs) {
   hcs->pipe[0] = hcs->pipe[1] = -1;

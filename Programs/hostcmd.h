@@ -25,6 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int isHostCommand (const char *path);
+
 typedef struct {
   unsigned asynchronous:1;
 
