@@ -42,6 +42,8 @@ def missingPackage (name):
   systemError("package not installed: " + name)
 
 def putResponseProperty (keyword, value):
+  value = str(value)
+
   global programArguments
   if programArguments.verbose: putProgramMessage("rsp: " + keyword + "=" + value)
 
@@ -78,7 +80,18 @@ def processRequest ():
   request = getRequest()
   if not request: return False
 
+  for attribute in ("brlttyLength", "brlttyInChars"):
+    if hasattr(brailleTranslator, attribute):
+      delattr(brailleTranslator, attribute)
+
+  if request.has_key("outmax"):
+    brailleTranslator.brlttyLength = request["outmax"]
+
   brf = brailleTranslator.translate(textPreprocessor.translate(request["text"]))
+
+  if hasattr(brailleTranslator, "brlttyInChars"):
+    putResponseProperty("inlen", brailleTranslator.brlttyInChars)
+
   putResponseProperty("brf", brf)
   return True
 
@@ -123,7 +136,7 @@ def parseProgramArguments ():
 
 if __name__ == "__main__":
   try:
-    import nemeth, ueb, preprocessor, settings
+    from latex_access import nemeth, ueb, preprocessor, settings
   except ImportError:
     missingPackage("latex-access")
 
