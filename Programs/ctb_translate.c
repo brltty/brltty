@@ -1291,8 +1291,12 @@ static const unsigned char brfTable[0X40] = {
 static int
 handleExternalResponse_brf (const char *value) {
   while (*value && (dest < destmax)) {
+    unsigned char dots = 0;
     char brf = *value++;
-    *dest++ = ((brf >= 0X20) && (brf <= 0X5F))? brfTable[brf - 0X20]: 0;
+
+    if ((brf >= 0X60) && (brf <= 0X7F)) brf -= 0X20;
+    if ((brf >= 0X20) && (brf <= 0X5F)) dots = brfTable[brf - 0X20];
+    *dest++ = dots;
   }
 
   return 1;
