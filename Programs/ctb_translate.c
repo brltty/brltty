@@ -1156,17 +1156,17 @@ putExternalRequests (void) {
   } ExternalRequestEntry;
 
   const ExternalRequestEntry externalRequestTable[] = {
-    { .name = "cursor",
+    { .name = "cursor-position",
       .type = REQ_NUMBER,
       .value.number = cursor? cursor-srcmin+1: 0
     },
 
-    { .name = "ecw",
+    { .name = "expand-current-word",
       .type = REQ_NUMBER,
       .value.number = prefs.expandCurrentWord
     },
 
-    { .name = "outmax",
+    { .name = "maximum-length",
       .type = REQ_NUMBER,
       .value.number = destmax - destmin
     },
@@ -1303,7 +1303,7 @@ handleExternalResponse_brf (const char *value) {
 }
 
 static int
-handleExternalResponse_inputLength (const char *value) {
+handleExternalResponse_consumedLength (const char *value) {
   int length;
 
   if (!isInteger(&length, value)) return 0;
@@ -1326,8 +1326,8 @@ static const ExternalResponseEntry externalResponseTable[] = {
     .handler = handleExternalResponse_brf
   },
 
-  { .name = "inlen",
-    .handler = handleExternalResponse_inputLength
+  { .name = "consumed-length",
+    .handler = handleExternalResponse_consumedLength
   },
 
   { .name = NULL }
