@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
@@ -1186,8 +1187,8 @@ putExternalRequests (void) {
   const ExternalRequestEntry *req = externalRequestTable;
 
   while (req->name) {
-    if (fputs(req->name, stream) == EOF) return 0;
-    if (fputc('=', stream) == EOF) return 0;
+    if (fputs(req->name, stream) == EOF) goto outputError;
+    if (fputc('=', stream) == EOF) goto outputError;
 
     switch (req->type) {
       case REQ_TEXT: {
@@ -1199,26 +1200,31 @@ putExternalRequests (void) {
           size_t utfs = convertWcharToUtf8(*character++, utf8);
 
           if (!utfs) return 0;
-          if (fputs(utf8, stream) == EOF) return 0;
+          if (fputs(utf8, stream) == EOF) goto outputError;
         }
 
         break;
       }
 
       case REQ_NUMBER:
-        if (fprintf(stream, "%u", req->value.number) == EOF) return 0;
+        if (fprintf(stream, "%u", req->value.number) == EOF) goto outputError;
         break;
 
       default:
+        logMessage(LOG_WARNING, "unimplemented external contraction table request property type: %s: %u (%s)", table->command, req->type, req->name);
         return 0;
     }
 
-    if (fputc('\n', stream) == EOF) return 0;
+    if (fputc('\n', stream) == EOF) goto outputError;
     req += 1;
   }
 
-  if (fflush(stream) == EOF) return 0;
+  if (fflush(stream) == EOF) goto outputError;
   return 1;
+
+outputError:
+  logMessage(LOG_WARNING, "external contraction table output error: %s: %s", table->command, strerror(errno));
+  return 0;
 }
 
 static const unsigned char brfTable[0X40] = {
@@ -1341,26 +1347,37 @@ getExternalResponses (void) {
   FILE *stream = table->data.external.standardOutput;
 
   while (readLine(stream, &buffer, &size)) {
+    int ok = 0;
     char *delimiter = strchr(buffer, '=');
 
     if (delimiter) {
       const char *value = delimiter + 1;
       const ExternalResponseEntry *rsp = externalResponseTable;
+
+      char oldDelimiter = *delimiter;
       *delimiter = 0;
 
       while (rsp->name) {
         if (strcmp(buffer, rsp->name) == 0) {
-          if (!rsp->handler(value)) return 0;
-          if (rsp->stop) return 1;
+          if (rsp->handler(value)) {
+            if (rsp->stop) return 1;
+            ok = 1;
+          }
+
           break;
         }
 
         rsp += 1;
       }
+
+      *delimiter = oldDelimiter;
     }
+
+    if (!ok) logMessage(LOG_WARNING, "unexpected external contraction table response: %s: %s", table->command, buffer);
   }
 
-  return 1;
+  logMessage(LOG_WARNING, "unexpected end-of-file from external contraction table: %s", table->command);
+  return 0;
 }
 
 static int
@@ -1368,10 +1385,13 @@ contractTextExternally (void) {
   setOffset();
   while (++src < srcmax) clearOffset();
 
-  if (startContractionCommand(table))
-    if (putExternalRequests())
-      if (getExternalResponses())
+  if (startContractionCommand(table)) {
+    if (putExternalRequests()) {
+      if (getExternalResponses()) {
         return 1;
+      }
+    }
+  }
 
   stopContractionCommand(table);
   return 0;

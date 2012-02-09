@@ -651,7 +651,10 @@ startContractionCommand (ContractionTable *table) {
     options.standardInput = &table->data.external.standardInput;
     options.standardOutput = &table->data.external.standardOutput;
 
+    logMessage(LOG_DEBUG, "starting external contraction table: %s", table->command);
     if (runHostCommand(command, &options) != 0) return 0;
+    logMessage(LOG_DEBUG, "external contraction table started: %s", table->command);
+
     table->data.external.commandStarted = 1;
   }
 
@@ -663,6 +666,8 @@ stopContractionCommand (ContractionTable *table) {
   if (table->data.external.commandStarted) {
     fclose(table->data.external.standardInput);
     fclose(table->data.external.standardOutput);
+
+    logMessage(LOG_DEBUG, "external contraction table stopped: %s", table->command);
     table->data.external.commandStarted = 0;
   }
 }
