@@ -1211,7 +1211,7 @@ putExternalRequests (void) {
         break;
 
       default:
-        logMessage(LOG_WARNING, "unimplemented external contraction table request property type: %s: %u (%s)", table->command, req->type, req->name);
+        logMessage(LOG_WARNING, "unimplemented external contraction request property type: %s: %u (%s)", table->command, req->type, req->name);
         return 0;
     }
 
@@ -1223,7 +1223,7 @@ putExternalRequests (void) {
   return 1;
 
 outputError:
-  logMessage(LOG_WARNING, "external contraction table output error: %s: %s", table->command, strerror(errno));
+  logMessage(LOG_WARNING, "external contraction output error: %s: %s", table->command, strerror(errno));
   return 0;
 }
 
@@ -1348,6 +1348,7 @@ getExternalResponses (void) {
 
   while (readLine(stream, &buffer, &size)) {
     int ok = 0;
+    int stop = 0;
     char *delimiter = strchr(buffer, '=');
 
     if (delimiter) {
@@ -1359,11 +1360,8 @@ getExternalResponses (void) {
 
       while (rsp->name) {
         if (strcmp(buffer, rsp->name) == 0) {
-          if (rsp->handler(value)) {
-            if (rsp->stop) return 1;
-            ok = 1;
-          }
-
+          if (rsp->handler(value)) ok = 1;
+          if (rsp->stop) stop = 1;
           break;
         }
 
@@ -1373,10 +1371,11 @@ getExternalResponses (void) {
       *delimiter = oldDelimiter;
     }
 
-    if (!ok) logMessage(LOG_WARNING, "unexpected external contraction table response: %s: %s", table->command, buffer);
+    if (!ok) logMessage(LOG_WARNING, "unexpected external contraction response: %s: %s", table->command, buffer);
+    if (stop) return 1;
   }
 
-  logMessage(LOG_WARNING, "unexpected end-of-file from external contraction table: %s", table->command);
+  logMessage(LOG_WARNING, "incomplete external contraction response: %s", table->command);
   return 0;
 }
 
