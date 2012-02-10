@@ -1014,6 +1014,26 @@ static const XtKeyEntry xtKeyTable[] = {
     .type = XtKeyType_special,
     .arg1=0X0C, .arg2=0X08
   }
+  ,
+  [XT_KEY(E0,0X49)] = { // fn + key 1: page up
+    .type = XtKeyType_special,
+    .arg1=0X09
+  }
+  ,
+  [XT_KEY(E0,0X47)] = { // fn + key 2: home
+    .type = XtKeyType_special,
+    .arg1=0X07
+  }
+  ,
+  [XT_KEY(E0,0X51)] = { // fn + key 3: page down
+    .type = XtKeyType_special,
+    .arg1=0X0A
+  }
+  ,
+  [XT_KEY(E0,0X4F)] = { // fn + key 4: end
+    .type = XtKeyType_special,
+    .arg1=0X08
+  }
 };
 
 static int
@@ -1089,11 +1109,7 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
 
       case XtKeyType_special:
         data[2] = 1;
-        if (xke->arg2 && XTS_FN) {
-          data[3] = xke->arg2;
-        } else {
-          data[3] = xke->arg1;
-        }
+        data[3] = xke->arg1;
         break;
 
       case XtKeyType_composite: {
