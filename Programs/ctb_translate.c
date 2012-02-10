@@ -1320,6 +1320,49 @@ handleExternalResponse_consumedLength (const char *value) {
   return 1;
 }
 
+static int
+handleExternalResponse_outputOffsets (const char *value) {
+  if (offsets) {
+    int previous = -1;
+    unsigned int count = srcmax - srcmin;
+    unsigned int index = 0;
+
+    while (*value && (index < count)) {
+      int offset;
+
+      {
+        char *delimiter = strchr(value, ',');
+
+        if (delimiter) {
+          int ok;
+
+          {
+            char oldDelimiter = *delimiter;
+            *delimiter = 0;
+            ok = isInteger(&offset, value);
+            *delimiter = oldDelimiter;
+          }
+
+          if (!ok) return 0;
+          value = delimiter + 1;
+        } else if (isInteger(&offset, value)) {
+          value += strlen(value);
+        } else {
+          return 0;
+        }
+      }
+
+      if (offset < ((index == 0)? 0: previous)) return 0;
+      if (offset >= (destmax - destmin)) return 0;
+
+      offsets[index++] = (offset == previous)? CTB_NO_OFFSET: offset;
+      previous = offset;
+    }
+  }
+
+  return 1;
+}
+
 typedef struct {
   const char *name;
   int (*handler) (const char *value);
@@ -1334,6 +1377,10 @@ static const ExternalResponseEntry externalResponseTable[] = {
 
   { .name = "consumed-length",
     .handler = handleExternalResponse_consumedLength
+  },
+
+  { .name = "output-offsets",
+    .handler = handleExternalResponse_outputOffsets
   },
 
   { .name = NULL }

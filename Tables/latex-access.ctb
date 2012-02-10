@@ -99,7 +99,7 @@ def processRequest ():
   if hasattr(brailleTranslator, "src2trans"):
     offsets = brailleTranslator.src2trans
     if len(offsets) > consumedLength: offsets = offsets[:consumedLength]
-    putResponseProperty("offsets", "'".join([str(offset) for offset in offsets]))
+    putResponseProperty("output-offsets", ",".join((str(offset) for offset in offsets)))
 
   putResponseProperty("brf", brf)
   return True
