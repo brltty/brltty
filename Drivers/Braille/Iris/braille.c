@@ -1130,6 +1130,13 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
     }
   }
 
+  if (XTS_TEST(XTS_BIT(xtsLeftShiftPressed) | XTS_BIT(xtsRightShiftPressed))) data[4] |= 0X01;
+  if (XTS_CONTROL) data[4] |= 0X02;
+  if (XTS_ALT) data[4] |= 0X04;
+  if (XTS_TEST(XTS_BIT(xtsShiftLocked))) data[4] |= 0X08;
+  if (XTS_WIN) data[4] |= 0X10;
+  if (XTS_ALTGR) data[4] |= 0X20;
+
   if (compositeCharacterTable) {
     unsigned char *character = &data[5];
 
@@ -1142,17 +1149,17 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
 
         compositeCharacterTable += 1;
       }
+
+      if (!compositeCharacterTable->base && compositeCharacterTable->composite) {
+        unsigned char original = *character;
+        *character = compositeCharacterTable->composite;
+        if (!writeEurobraillePacket(brl, port, data, sizeof(data))) return 0;
+        *character = original;
+      }
     }
 
     compositeCharacterTable = NULL;
   }
-
-  if (XTS_TEST(XTS_BIT(xtsLeftShiftPressed) | XTS_BIT(xtsRightShiftPressed))) data[4] |= 0X01;
-  if (XTS_CONTROL) data[4] |= 0X02;
-  if (XTS_ALT) data[4] |= 0X04;
-  if (XTS_TEST(XTS_BIT(xtsShiftLocked))) data[4] |= 0X08;
-  if (XTS_WIN) data[4] |= 0X10;
-  if (XTS_ALTGR) data[4] |= 0X20;
 
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
