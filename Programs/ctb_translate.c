@@ -1421,7 +1421,7 @@ checkCache (void) {
 static void
 updateCache (void) {
   {
-    unsigned int count = src - srcmin;
+    unsigned int count = srcmax - srcmin;
 
     if (count > table->cache.input.size) {
       unsigned int newSize = count | 0X7F;
@@ -1467,7 +1467,7 @@ inputDone:
 outputDone:
 
   if (offsets) {
-    unsigned int count = src - srcmin;
+    unsigned int count = srcmax - srcmin;
 
     if (count > table->cache.offsets.size) {
       unsigned int newSize = count | 0X7F;
