@@ -1323,7 +1323,7 @@ handleNativePacket (BrailleDisplay *brl, unsigned char *packet, size_t size) {
 
       if ((1 <= packet[1]) && (packet[1] <= (brl->textColumns * brl->textRows))) {
         unsigned char data[] = {
-          0X4B, 0X49, packet[1]
+          0X4B, 0X49, 1, packet[1]
         };
 
         return writeEurobraillePacket(brl, &externalPort, data, sizeof(data));
