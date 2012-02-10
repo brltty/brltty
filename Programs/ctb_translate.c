@@ -1396,6 +1396,16 @@ contractTextExternally (void) {
   return 0;
 }
 
+static inline unsigned int
+makeCachedInputCount (void) {
+  return srcmax - srcmin;
+}
+
+static inline unsigned int
+makeCachedOutputMaximum (void) {
+  return destmax - destmin;
+}
+
 static inline int
 makeCachedCursorOffset (void) {
   return cursor? (cursor - srcmin): CTB_NO_CURSOR;
@@ -1406,11 +1416,12 @@ checkCache (void) {
   if (!table->cache.input.characters) return 0;
   if (!table->cache.output.cells) return 0;
   if (offsets && !table->cache.offsets.count) return 0;
+  if (table->cache.output.maximum != makeCachedOutputMaximum()) return 0;
   if (table->cache.cursorOffset != makeCachedCursorOffset()) return 0;
   if (table->cache.expandCurrentWord != prefs.expandCurrentWord) return 0;
 
   {
-    unsigned int count = srcmax - srcmin;
+    unsigned int count = makeCachedInputCount();
     if (table->cache.input.count != count) return 0;
     if (wmemcmp(srcmin, table->cache.input.characters, count) != 0) return 0;
   }
@@ -1421,7 +1432,7 @@ checkCache (void) {
 static void
 updateCache (void) {
   {
-    unsigned int count = srcmax - srcmin;
+    unsigned int count = makeCachedInputCount();
 
     if (count > table->cache.input.size) {
       unsigned int newSize = count | 0X7F;
@@ -1440,6 +1451,7 @@ updateCache (void) {
 
     wmemcpy(table->cache.input.characters, srcmin, count);
     table->cache.input.count = count;
+    table->cache.input.consumed = src - srcmin;
   }
 inputDone:
 
@@ -1463,11 +1475,12 @@ inputDone:
 
     memcpy(table->cache.output.cells, destmin, count);
     table->cache.output.count = count;
+    table->cache.output.maximum = makeCachedOutputMaximum();
   }
 outputDone:
 
   if (offsets) {
-    unsigned int count = srcmax - srcmin;
+    unsigned int count = makeCachedInputCount();
 
     if (count > table->cache.offsets.size) {
       unsigned int newSize = count | 0X7F;
@@ -1509,7 +1522,7 @@ contractText (
   cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
 
   if (checkCache()) {
-    src = srcmin + table->cache.input.count;
+    src = srcmin + table->cache.input.consumed;
     if (offsets)
       memcpy(offsets, table->cache.offsets.array,
              ARRAY_SIZE(offsets, table->cache.offsets.count));

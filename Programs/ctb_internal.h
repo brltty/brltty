@@ -131,12 +131,14 @@ struct ContractionTableStruct {
       wchar_t *characters;
       unsigned int size;
       unsigned int count;
+      unsigned int consumed;
     } input;
 
     struct {
       unsigned char *cells;
       unsigned int size;
       unsigned int count;
+      unsigned int maximum;
     } output;
 
     struct {
