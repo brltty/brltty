@@ -85,7 +85,7 @@ def processRequest ():
       delattr(brailleTranslator, attribute)
 
   if request.has_key("maximum-length"):
-    brailleTranslator.displayLength = request["maximum-length"]
+    brailleTranslator.displayLength = int(request["maximum-length"])
 
   brf = brailleTranslator.translate(textPreprocessor.translate(request["text"]))
 
