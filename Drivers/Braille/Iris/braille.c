@@ -490,36 +490,35 @@ typedef struct {
 } CompositeCharacterEntry;
 
 static const CompositeCharacterEntry compositeCharacterTable_circumflex[] = {
-  {.base=0X61, 0XE2}, // aâ
-  {.base=0X65, 0XEA}, // eê
-  {.base=0X69, 0XEE}, // iî
-  {.base=0X6F, 0XF4}, // oô
-  {.base=0X75, 0XFB}, // uû
+  {.base=0X61, .composite=0XE2}, // aâ
+  {.base=0X65, .composite=0XEA}, // eê
+  {.base=0X69, .composite=0XEE}, // iî
+  {.base=0X6F, .composite=0XF4}, // oô
+  {.base=0X75, .composite=0XFB}, // uû
 
-  {.base=0X41, 0XC2}, // AÂ
-  {.base=0X45, 0XCA}, // EÊ
-  {.base=0X49, 0XCE}, // IÎ
-  {.base=0X4F, 0XD4}, // OÔ
-  {.base=0X55, 0XDB}, // UÛ
+  {.base=0X41, .composite=0XC2}, // AÂ
+  {.base=0X45, .composite=0XCA}, // EÊ
+  {.base=0X49, .composite=0XCE}, // IÎ
+  {.base=0X4F, .composite=0XD4}, // OÔ
+  {.base=0X55, .composite=0XDB}, // UÛ
 
-  {.base=0}
+  {.base=0X00, .composite=0XA8}
 };
 
 static const CompositeCharacterEntry compositeCharacterTable_trema[] = {
-  {.base=0X61, 0XE4}, // aä
-  {.base=0X65, 0XEB}, // eë
-  {.base=0X69, 0XEF}, // iï
-  {.base=0X6F, 0XF6}, // oö
-  {.base=0X75, 0XFC}, // uü
-  {.base=0X79, 0XFF}, // yÿ
+  {.base=0X61, .composite=0XE4}, // aä
+  {.base=0X65, .composite=0XEB}, // eë
+  {.base=0X69, .composite=0XEF}, // iï
+  {.base=0X6F, .composite=0XF6}, // oö
+  {.base=0X75, .composite=0XFC}, // uü
 
-  {.base=0X41, 0XC4}, // AÄ
-  {.base=0X45, 0XCB}, // EË
-  {.base=0X49, 0XCF}, // IÏ
-  {.base=0X4F, 0XD6}, // OÖ
-  {.base=0X55, 0XDC}, // UÜ
+  {.base=0X41, .composite=0XC4}, // AÄ
+  {.base=0X45, .composite=0XCB}, // EË
+  {.base=0X49, .composite=0XCF}, // IÏ
+  {.base=0X4F, .composite=0XD6}, // OÖ
+  {.base=0X55, .composite=0XDC}, // UÜ
 
-  {.base=0}
+  {.base=0X00, .composite=0X5E}
 };
 
 static const CompositeCharacterEntry *compositeCharacterTables[] = {
