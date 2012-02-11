@@ -80,12 +80,21 @@ def processRequest ():
   request = getRequest()
   if not request: return False
 
-  for attribute in ("displayLength", "consumedChars"):
+  for attribute in ("displayLength", "cursorOffset", "expandCurrentWord", "consumedChars"):
     if hasattr(brailleTranslator, attribute):
       delattr(brailleTranslator, attribute)
 
   if request.has_key("maximum-length"):
     brailleTranslator.displayLength = int(request["maximum-length"])
+
+  if request.has_key("cursor-position"):
+    position = int(request["cursor-position"])
+
+    if position > 0:
+      brailleTranslator.cursorOffset = position - 1
+
+      if request.has_key("expand-current-word"):
+        brailleTranslator.expandCurrentWord = int(request["expand-current-word"]) != 0
 
   text = request["text"]
   brf = brailleTranslator.translate(textPreprocessor.translate(text))
