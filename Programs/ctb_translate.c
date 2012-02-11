@@ -1278,7 +1278,7 @@ static const unsigned char brfTable[0X40] = {
   /* 0X4F O */ BRL_DOT1 | BRL_DOT3 | BRL_DOT5,
   /* 0X50 P */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
   /* 0X51 Q */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
-  /* 0X52 R */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
+  /* 0X52 R */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT5,
   /* 0X53 S */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
   /* 0X54 T */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
   /* 0X55 U */ BRL_DOT1 | BRL_DOT3 | BRL_DOT6,
@@ -1323,7 +1323,7 @@ handleExternalResponse_consumedLength (const char *value) {
 static int
 handleExternalResponse_outputOffsets (const char *value) {
   if (offsets) {
-    int previous = -1;
+    int previous = CTB_NO_OFFSET;
     unsigned int count = srcmax - srcmin;
     unsigned int index = 0;
 
