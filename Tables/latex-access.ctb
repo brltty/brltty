@@ -42,13 +42,13 @@ def missingPackage (name):
   systemError("package not installed: " + name)
 
 def putResponseProperty (keyword, value):
-  value = str(value)
+  value = unicode(value)
 
   global programArguments
   if programArguments.verbose: putProgramMessage("rsp: " + keyword + "=" + value)
 
   stream = sys.stdout
-  stream.write(keyword + "=" + value + "\n")
+  stream.write(keyword + "=" + value.encode("UTF-8") + "\n")
   stream.flush()
 
 def getRequest ():
