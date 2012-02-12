@@ -319,11 +319,6 @@ static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t 
       } else {
         if ((port->waitingForAck) && (ch==ACK)) {
           port->waitingForAck = 0;
-          if (packetForwardMode) {
-            char ack = ACK;
-            gioWriteData(externalPort.gioEndpoint, &ack, sizeof(ack));
-            brl->writeDelay += gioGetMillisecondsToTransfer(externalPort.gioEndpoint, sizeof(ack));
-          }
         } else {
           logIgnoredByte(ch);
         }
