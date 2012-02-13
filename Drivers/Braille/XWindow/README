@@ -5,7 +5,7 @@ It is mostly intended for sighted developers who don't have access to a real
 device, but still want to have an idea of the accessiblity of their application.
 
 Assuming you're under X, first launch brltty:
-$ brltty -b xw -x as
+$ brltty -b xw -x as -A auth=none
 
 Then you can launch a BrlAPI application:
 $ ~/brltty/Programs/apitest
