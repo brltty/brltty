@@ -153,12 +153,22 @@ def parseProgramArguments ():
   return parser.parse_args()
 
 if __name__ == "__main__":
+  packageName = "latex-access"
+
   try:
     from latex_access import nemeth, ueb, preprocessor, settings
   except ImportError:
-    missingPackage("latex-access")
+    missingPackage(packageName)
 
-  settings.loadSettings(os.path.expanduser("~/.latex-access"))
+  configurationFiles = (
+    os.path.expanduser("~/." + packageName),
+    "/etc/" + packageName + ".conf"
+  )
+  for configurationFile in configurationFiles:
+    if os.path.exists(configurationFile):
+      break
+      
+  settings.loadSettings(configurationFile)
   programArguments = parseProgramArguments()
 
   if programArguments.translator:
