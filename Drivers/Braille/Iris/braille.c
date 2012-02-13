@@ -319,6 +319,11 @@ static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t 
       } else {
         if ((port->waitingForAck) && (ch==ACK)) {
           port->waitingForAck = 0;
+          if (packetForwardMode && (protocol == IR_PROTOCOL_NATIVE) ) {
+            char acknowledgement[] = {ACK};
+            gioWriteData(externalPort.gioEndpoint, acknowledgement, sizeof(acknowledgement));
+            brl->writeDelay += gioGetMillisecondsToTransfer(externalPort.gioEndpoint, sizeof(acknowledgement));
+          }
         } else {
           logIgnoredByte(ch);
         }
@@ -537,6 +542,7 @@ typedef enum {
   xtsLeftWindowsPressed,
   xtsRightWindowsPressed,
 
+  xtsInsertPressed,
   xtsFnPressed
 } XtState;
 
@@ -548,6 +554,7 @@ static uint16_t xtState;
 #define XTS_ALT XTS_TEST(XTS_BIT(xtsLeftAltPressed))
 #define XTS_ALTGR XTS_TEST(XTS_BIT(xtsRightAltPressed))
 #define XTS_WIN XTS_TEST(XTS_BIT(xtsLeftWindowsPressed))
+#define XTS_INSERT XTS_TEST(XTS_BIT(xtsInsertPressed))
 #define XTS_FN XTS_TEST(XTS_BIT(xtsFnPressed))
 
 typedef enum {
@@ -1130,25 +1137,28 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
   if (XTS_TEST(XTS_BIT(xtsShiftLocked))) data[4] |= 0X08;
   if (XTS_WIN) data[4] |= 0X10;
   if (XTS_ALTGR) data[4] |= 0X20;
+  if (XTS_INSERT) data[4] |= 0X80;
 
   if (compositeCharacterTable) {
-    unsigned char *character = &data[5];
+    unsigned char *byte = &data[5];
 
-    if (*character) {
-      while (compositeCharacterTable->base) {
-        if (compositeCharacterTable->base == *character) {
-          *character = compositeCharacterTable->composite;
+    if (*byte) {
+      const CompositeCharacterEntry *cce = compositeCharacterTable;
+
+      while (cce->base) {
+        if (cce->base == *byte) {
+          *byte = cce->composite;
           break;
         }
 
-        compositeCharacterTable += 1;
+        cce += 1;
       }
 
-      if (!compositeCharacterTable->base && compositeCharacterTable->composite) {
-        unsigned char original = *character;
-        *character = compositeCharacterTable->composite;
+      if (!cce->base && cce->composite) {
+        unsigned char original = *byte;
+        *byte = cce->composite;
         if (!writeEurobraillePacket(brl, port, data, sizeof(data))) return 0;
-        *character = original;
+        *byte = original;
       }
     }
 
