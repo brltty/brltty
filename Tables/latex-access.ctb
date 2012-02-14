@@ -128,10 +128,22 @@ def parseProgramArguments ():
   )
 
   parser.add_argument(
+    "-c", "--configuration",
+    action = "store",
+    nargs = 1,
+    dest = "configuration_file",
+    default = (
+      os.path.expanduser("~/." + packageName),
+      "/etc/" + packageName + ".conf"
+    ),
+    help = "the configuration file to use"
+  )
+
+  parser.add_argument(
     "-n", "--nemeth",
     action = "store_const",
     const = "nemeth",
-    dest = "translator",
+    dest = "braille_translator",
     help = "translate into Nemeth Code"
   )
 
@@ -139,7 +151,7 @@ def parseProgramArguments ():
     "-u", "--ueb",
     action = "store_const",
     const = "ueb",
-    dest = "translator",
+    dest = "braille_translator",
     help = "translate into Unified English Braille"
   )
 
@@ -155,24 +167,21 @@ def parseProgramArguments ():
 if __name__ == "__main__":
   packageName = "latex-access"
 
+  programArguments = parseProgramArguments()
+
   try:
     from latex_access import nemeth, ueb, preprocessor, settings
   except ImportError:
     missingPackage(packageName)
 
-  configurationFiles = (
-    os.path.expanduser("~/." + packageName),
-    "/etc/" + packageName + ".conf"
-  )
-  for configurationFile in configurationFiles:
+  for configurationFile in programArguments.configuration_file:
     if os.path.exists(configurationFile):
       break
       
   settings.loadSettings(configurationFile)
-  programArguments = parseProgramArguments()
 
-  if programArguments.translator:
-    settings.settings["brailletable"] = programArguments.translator
+  if programArguments.braille_translator:
+    settings.settings["brailletable"] = programArguments.braille_translator
 
   brailleTranslator = settings.brailleTableToUse()
   textPreprocessor = preprocessor.preprocessor()
