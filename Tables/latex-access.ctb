@@ -43,8 +43,6 @@ def missingPackage (name):
 
 def putResponseProperty (keyword, value):
   value = unicode(value)
-
-  global programArguments
   if programArguments.verbose: putProgramMessage("rsp: " + keyword + "=" + value)
 
   stream = sys.stdout
@@ -56,7 +54,10 @@ def getRequest ():
 
   while True:
     try:
-      line = raw_input()
+      if programArguments.interactive:
+        line = raw_input(packageName + "> ")
+      else:
+        line = raw_input()
     except EOFError:
       if len(request) == 0: return None
       semanticError("unexpected end-of-file on standard input")
@@ -68,9 +69,7 @@ def getRequest ():
       (keyword, value) = components
       keyword = keyword.strip().lower()
 
-      global programArguments
       if programArguments.verbose: putProgramMessage("req: " + keyword + "=" + value)
-
       request[keyword] = value
       if keyword == "text": break
 
@@ -131,7 +130,7 @@ def parseProgramArguments ():
     "-c", "--configuration",
     action = "store",
     nargs = 1,
-    dest = "configuration_file",
+    dest = "configuration",
     default = (
       os.path.expanduser("~/." + packageName),
       "/etc/" + packageName + ".conf"
@@ -143,7 +142,7 @@ def parseProgramArguments ():
     "-n", "--nemeth",
     action = "store_const",
     const = "nemeth",
-    dest = "braille_translator",
+    dest = "translator",
     help = "translate into Nemeth Code"
   )
 
@@ -151,8 +150,15 @@ def parseProgramArguments ():
     "-u", "--ueb",
     action = "store_const",
     const = "ueb",
-    dest = "braille_translator",
+    dest = "translator",
     help = "translate into Unified English Braille"
+  )
+
+  parser.add_argument(
+    "-i", "--interactive",
+    action = "store_true",
+    dest = "interactive",
+    help = "enable input editing and history"
   )
 
   parser.add_argument(
@@ -169,19 +175,21 @@ if __name__ == "__main__":
 
   programArguments = parseProgramArguments()
 
+  if programArguments.interactive:
+    import readline
+
   try:
     from latex_access import nemeth, ueb, preprocessor, settings
   except ImportError:
     missingPackage(packageName)
 
-  for configurationFile in programArguments.configuration_file:
+  for configurationFile in programArguments.configuration:
     if os.path.exists(configurationFile):
+      settings.loadSettings(configurationFile)
       break
-      
-  settings.loadSettings(configurationFile)
 
-  if programArguments.braille_translator:
-    settings.settings["brailletable"] = programArguments.braille_translator
+  if programArguments.translator:
+    settings.settings["brailletable"] = programArguments.translator
 
   brailleTranslator = settings.brailleTableToUse()
   textPreprocessor = preprocessor.preprocessor()
