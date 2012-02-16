@@ -37,6 +37,7 @@ typedef enum {
   IR_IPT_InteractiveKey  = 'I',
   IR_IPT_SerialNumberResponse    = 'S', 
   IR_IPT_XtKeyCode       = 'U',
+  IR_IPT_XtKeyCodeRepeat = 'u',
   IR_IPT_VersionResponse = 'V'
 } IrisInputPacketType;
 

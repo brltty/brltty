@@ -1357,7 +1357,8 @@ handleNativePacket (BrailleDisplay *brl, unsigned char *packet, size_t size) {
       }
     }
   } else if (size == 3) {
-    if (packet[0] == IR_IPT_XtKeyCode) {
+    if ((packet[0] == IR_IPT_XtKeyCode) ||
+        (packet[0] == IR_IPT_XtKeyCodeRepeat)) {
       return writeEurobrailleKeyboardPacket(brl, &externalPort, packet[1], packet[2]);
     }
 
