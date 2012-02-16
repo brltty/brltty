@@ -132,7 +132,7 @@ def parseProgramArguments ():
     nargs = 1,
     dest = "configuration",
     default = (
-      os.path.expanduser("~/." + packageName),
+      os.path.join(os.path.expanduser("~"), "." + packageName),
       "/etc/" + packageName + ".conf"
     ),
     help = "the configuration file to use"
@@ -176,7 +176,10 @@ if __name__ == "__main__":
   programArguments = parseProgramArguments()
 
   if programArguments.interactive:
-    import readline
+    import readline, atexit
+    historyFile=os.path.join(os.path.expanduser("~"), "." + packageName + ".history")
+    atexit.register(readline.write_history_file, historyFile)
+    readline.read_history_file(historyFile)
 
   try:
     from latex_access import nemeth, ueb, preprocessor, settings
@@ -185,6 +188,9 @@ if __name__ == "__main__":
 
   for configurationFile in programArguments.configuration:
     if os.path.exists(configurationFile):
+      if programArguments.verbose:
+        putProgramMessage("configuration file: " + configurationFile)
+
       settings.loadSettings(configurationFile)
       break
 
