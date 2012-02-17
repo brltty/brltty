@@ -563,7 +563,7 @@ typedef enum {
   XtKeyType_lock,
   XtKeyType_character,
   XtKeyType_function,
-  XtKeyType_special,
+  XtKeyType_complex,
   XtKeyType_composite
 } XtKeyType;
 
@@ -660,13 +660,13 @@ static const XtKeyEntry xtKeyTable[] = {
   }
   ,
   [XT_KEY(E0,0X52)] = { // key 16: insert
-    .type = XtKeyType_special,
-    .arg1=0X0F
+    .type = XtKeyType_complex,
+    .arg1=0X0F, .arg2=1, .arg3=xtsInsertPressed
   }
   ,
   [XT_KEY(E0,0X53)] = { // key 17: delete
-    .type = XtKeyType_special,
-    .arg1=0X10
+    .type = XtKeyType_function,
+    .arg1=0X10, .arg2=1
   }
   ,
 
@@ -965,8 +965,8 @@ static const XtKeyEntry xtKeyTable[] = {
   }
   ,
   [XT_KEY(E0,0X5B)] = { // key 3: left windows
-    .type = XtKeyType_modifier,
-    .arg1=xtsLeftWindowsPressed, .arg3=0X5B
+    .type = XtKeyType_complex,
+    .arg1=0X5B, .arg3=xtsLeftWindowsPressed
   }
   ,
   [XT_KEY(00,0X38)] = { // key 4: left alt
@@ -997,43 +997,43 @@ static const XtKeyEntry xtKeyTable[] = {
 
   /* arrow keys */
   [XT_KEY(E0,0X48)] = { // key 1: up arrow
-    .type = XtKeyType_special,
-    .arg1=0X0D, .arg2=0X09
+    .type = XtKeyType_function,
+    .arg1=0X0D, .arg2=1
   }
   ,
   [XT_KEY(E0,0X4B)] = { // key 2: left arrow
-    .type = XtKeyType_special,
-    .arg1=0X0B, .arg2=0X07
+    .type = XtKeyType_function,
+    .arg1=0X0B, .arg2=1
   }
   ,
   [XT_KEY(E0,0X50)] = { // key 3: down arrow
-    .type = XtKeyType_special,
-    .arg1=0X0E, .arg2=0X0A
+    .type = XtKeyType_function,
+    .arg1=0X0E, .arg2=1
   }
   ,
   [XT_KEY(E0,0X4D)] = { // key 4: right arrow
-    .type = XtKeyType_special,
-    .arg1=0X0C, .arg2=0X08
+    .type = XtKeyType_function,
+    .arg1=0X0C, .arg2=1
   }
   ,
   [XT_KEY(E0,0X49)] = { // fn + key 1: page up
-    .type = XtKeyType_special,
-    .arg1=0X09
+    .type = XtKeyType_function,
+    .arg1=0X09, .arg2=1
   }
   ,
   [XT_KEY(E0,0X47)] = { // fn + key 2: home
-    .type = XtKeyType_special,
-    .arg1=0X07
+    .type = XtKeyType_function,
+    .arg1=0X07, .arg2=1
   }
   ,
   [XT_KEY(E0,0X51)] = { // fn + key 3: page down
-    .type = XtKeyType_special,
-    .arg1=0X0A
+    .type = XtKeyType_function,
+    .arg1=0X0A, .arg2=1
   }
   ,
   [XT_KEY(E0,0X4F)] = { // fn + key 4: end
-    .type = XtKeyType_special,
-    .arg1=0X08
+    .type = XtKeyType_function,
+    .arg1=0X08, .arg2=1
   }
 };
 
@@ -1072,10 +1072,11 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
     switch (xke->type) {
       case XtKeyType_modifier:
         xtState &= ~XTS_BIT(xke->arg1);
-        if (xke->arg3 && current) {
-          data[3] = xke->arg3;
-          break;
-        }
+        return 1;
+
+      case XtKeyType_complex:
+        xtState &= ~XTS_BIT(xke->arg3);
+        if (current) goto isFunction;
         return 1;
 
       default:
@@ -1088,6 +1089,10 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
       case XtKeyType_modifier:
         xtState |= XTS_BIT(xke->arg1);
         xtState &= ~XTS_BIT(xke->arg2);
+        return 1;
+
+      case XtKeyType_complex:
+        xtState |= XTS_BIT(xke->arg3);
         return 1;
 
       case XtKeyType_lock:
@@ -1105,12 +1110,9 @@ writeEurobrailleKeyboardPacket (BrailleDisplay *brl, Port *port, unsigned char e
         break;
 
       case XtKeyType_function:
+      isFunction:
         data[3] = xke->arg1;
-        break;
-
-      case XtKeyType_special:
-        data[2] = 1;
-        data[3] = xke->arg1;
+        data[2] = xke->arg2;
         break;
 
       case XtKeyType_composite: {
