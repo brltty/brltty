@@ -95,6 +95,11 @@ def processRequest ():
       if request.has_key("expand-current-word"):
         brailleTranslator.expandCurrentWord = int(request["expand-current-word"]) != 0
 
+  brailleTranslator.capitalisation = "6dot"
+  if request.has_key("capitalization-mode"):
+    if int(request["capitalization-mode"]) != 1:
+      brailleTranslator.capitalisation = "8dot"
+
   text = request["text"]
   brf = brailleTranslator.translate(textPreprocessor.translate(text))
 
