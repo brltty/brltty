@@ -1167,6 +1167,11 @@ putExternalRequests (void) {
       .value.number = prefs.expandCurrentWord
     },
 
+    { .name = "capitalization-mode",
+      .type = REQ_NUMBER,
+      .value.number = prefs.capitalizationMode
+    },
+
     { .name = "maximum-length",
       .type = REQ_NUMBER,
       .value.number = destmax - destmin
@@ -1296,12 +1301,20 @@ static const unsigned char brfTable[0X40] = {
 
 static int
 handleExternalResponse_brf (const char *value) {
-  while (*value && (dest < destmax)) {
-    unsigned char dots = 0;
-    char brf = *value++;
+  int useDot7 = prefs.capitalizationMode == CTB_CAP_DOT7;
 
-    if ((brf >= 0X60) && (brf <= 0X7F)) brf -= 0X20;
-    if ((brf >= 0X20) && (brf <= 0X5F)) dots = brfTable[brf - 0X20];
+  while (*value && (dest < destmax)) {
+    char brf = *value++;
+    unsigned char dots = 0;
+    unsigned char superimpose = 0;
+
+    if ((brf >= 0X60) && (brf <= 0X7F)) {
+      brf -= 0X20;
+    } else if ((brf >= 0X41) && (brf <= 0X5A)) {
+      if (useDot7) superimpose |= BRL_DOT7;
+    }
+
+    if ((brf >= 0X20) && (brf <= 0X5F)) dots = brfTable[brf - 0X20] | superimpose;
     *dest++ = dots;
   }
 
@@ -1466,6 +1479,7 @@ checkCache (void) {
   if (table->cache.output.maximum != makeCachedOutputMaximum()) return 0;
   if (table->cache.cursorOffset != makeCachedCursorOffset()) return 0;
   if (table->cache.expandCurrentWord != prefs.expandCurrentWord) return 0;
+  if (table->cache.capitalizationMode != prefs.capitalizationMode) return 0;
 
   {
     unsigned int count = makeCachedInputCount();
@@ -1553,6 +1567,7 @@ offsetsDone:
 
   table->cache.cursorOffset = makeCachedCursorOffset();
   table->cache.expandCurrentWord = prefs.expandCurrentWord;
+  table->cache.capitalizationMode = prefs.capitalizationMode;
 }
 
 void

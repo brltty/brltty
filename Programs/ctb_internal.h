@@ -149,6 +149,7 @@ struct ContractionTableStruct {
 
     int cursorOffset;
     unsigned char expandCurrentWord;
+    unsigned char capitalizationMode;
   } cache;
 
   char *command;
