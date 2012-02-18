@@ -1323,7 +1323,8 @@ static int packetToCommand(BrailleDisplay *brl, unsigned char *packet, size_t si
       }
     }
   } else if (size==3) {
-    if (packet[0]==IR_IPT_XtKeyCode) { /* IrisKB's PC keyboard */
+    if ((packet[0] == IR_IPT_XtKeyCode) ||
+        (packet[0] == IR_IPT_XtKeyCodeRepeat)) {
       enqueueXtScanCode(packet[2], packet[1], IR_SET_Xt, IR_SET_XtE0, IR_SET_XtE1);
       return EOF;
     }
