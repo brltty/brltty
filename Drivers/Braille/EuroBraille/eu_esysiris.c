@@ -261,11 +261,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
             key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;
           else if (b >= 0x70 && b <= 0x7b) {
             int functionKey = b - 0x70;
-            if (c & 0x04)
-              key = EUBRL_PC_KEY | BRL_BLK_SWITCHVT | functionKey;
-            else
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + b-0x70);
-            goto end;
+            key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + functionKey);
           } else if (b)
             key = EUBRL_PC_KEY | BRL_BLK_PASSCHAR | b;
           if (c & 0x02)
@@ -309,7 +305,6 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
     }
     break;
     }
-end:
   return key;
 }
 
