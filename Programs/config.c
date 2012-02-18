@@ -1502,7 +1502,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("MIDI Instrument"));
-      ITEM(newStringMenuItem(menu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
+      ITEM(newStringsMenuItem(menu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
       TEST(TunesMidi);
     }
   }
@@ -1628,20 +1628,20 @@ makePreferencesMenu (void) {
 
   {
     NAME(strtext("Text Table"));
-    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
+    ITEM(newFilesMenuItem(menu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
     CHANGED(TextTable);
   }
 
   {
     NAME(strtext("Attributes Table"));
-    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
+    ITEM(newFilesMenuItem(menu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
     CHANGED(AttributesTable);
   }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {
     NAME(strtext("Contraction Table"));
-    ITEM(newFileMenuItem(menu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
+    ITEM(newFilesMenuItem(menu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
     CHANGED(ContractionTable);
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */

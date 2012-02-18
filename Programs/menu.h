@@ -33,22 +33,21 @@ typedef struct {
 
 extern Menu *newMenu (void);
 extern void deallocateMenu (Menu *menu);
-extern MenuItem *newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
 extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
 );
 
-extern MenuItem *newStringMenuItem (
+extern MenuItem *newStringsMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 );
 
-#define newEnumeratedMenuItem(menu, setting, name, strings) newStringMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
+#define newEnumeratedMenuItem(menu, setting, name, strings) newStringsMenuItem(menu, setting, name, strings, ARRAY_COUNT(strings))
 extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name);
 
-extern MenuItem *newFileMenuItem (
+extern MenuItem *newFilesMenuItem (
   Menu *menu, const MenuString *name,
   const char *directory, const char *extension,
   const char *initial, int none

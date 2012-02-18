@@ -68,22 +68,25 @@ struct MenuStruct {
   char valueBuffer[0X10];
 };
 
+typedef struct {
+  void (*beginItem) (MenuItem *item);
+  void (*endItem) (MenuItem *item, int deallocating);
+  const char * (*getValue) (const MenuItem *item);
+  const char * (*getComment) (const MenuItem *item);
+} MenuItemMethods;
+
 struct MenuItemStruct {
   Menu *menu;
   unsigned char *setting;                 /* pointer to current value */
   MenuString name;                      /* item name for presentation */
 
+  const MenuItemMethods *methods;
   MenuItemTester *test;                     /* returns true if item should be presented */
   MenuItemChanged *changed;
 
   unsigned char minimum;                  /* lowest valid value */
   unsigned char maximum;                  /* highest valid value */
   unsigned char divisor;                  /* present only multiples of this value */
-
-  void (*beginItem) (MenuItem *item);
-  void (*endItem) (MenuItem *item, int deallocating);
-  const char * (*getValue) (const MenuItem *item);
-  const char * (*getComment) (const MenuItem *item);
 
   union {
     const MenuString *strings;
@@ -113,15 +116,15 @@ newMenu (void) {
 
 static void
 beginMenuItem (MenuItem *item) {
-  if (item->beginItem) {
-    item->beginItem(item);
+  if (item->methods->beginItem) {
+    item->methods->beginItem(item);
   }
 }
 
 static void
 endMenuItem (MenuItem *item, int deallocating) {
-  if (item->endItem) {
-    item->endItem(item, deallocating);
+  if (item->methods->endItem) {
+    item->methods->endItem(item, deallocating);
   }
 }
 
@@ -182,27 +185,15 @@ getMenuItemName (const MenuItem *item) {
 
 const char *
 getMenuItemValue (const MenuItem *item) {
-  return item->getValue(item);
+  return item->methods->getValue(item);
 }
 
 const char *
 getMenuItemComment (const MenuItem *item) {
-  return item->getComment(item);
+  return item->methods->getComment? item->methods->getComment(item): "";
 }
 
-static const char *
-getMenuItemValue_numeric (const MenuItem *item) {
-  Menu *menu = item->menu;
-  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
-  return menu->valueBuffer;
-}
-
-static const char *
-getMenuItemComment_none (const MenuItem *item) {
-  return "";
-}
-
-MenuItem *
+static MenuItem *
 newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   if (menu->count == menu->size) {
     unsigned int newSize = menu->size? (menu->size << 1): 0X10;
@@ -226,17 +217,13 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
     item->name.label = getLocalText(name->label);
     item->name.comment = getLocalText(name->comment);
 
+    item->methods = NULL;
     item->test = NULL;
     item->changed = NULL;
 
     item->minimum = 0;
     item->maximum = 0;
     item->divisor = 1;
-
-    item->beginItem = NULL;
-    item->endItem = NULL;
-    item->getValue = getMenuItemValue_numeric;
-    item->getComment = getMenuItemComment_none;
 
     return item;
   }
@@ -252,6 +239,17 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
   item->changed = handler;
 }
 
+static const char *
+getMenuItemValue_numeric (const MenuItem *item) {
+  Menu *menu = item->menu;
+  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
+  return menu->valueBuffer;
+}
+
+static const MenuItemMethods numericMenuItemMethods = {
+  .getValue = getMenuItemValue_numeric
+};
+
 MenuItem *
 newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
@@ -260,6 +258,7 @@ newNumericMenuItem (
   MenuItem *item = newMenuItem(menu, setting, name);
 
   if (item) {
+    item->methods = &numericMenuItemMethods;
     item->minimum = minimum;
     item->maximum = maximum;
     item->divisor = divisor;
@@ -280,19 +279,22 @@ getMenuItemComment_strings (const MenuItem *item) {
   return getLocalText(strings[*item->setting - item->minimum].comment);
 }
 
+static const MenuItemMethods stringsMenuItemMethods = {
+  .getValue = getMenuItemValue_strings,
+  .getComment = getMenuItemComment_strings
+};
+
 void
 setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
-  item->getValue = getMenuItemValue_strings;
-  item->getComment = getMenuItemComment_strings;
+  item->methods = &stringsMenuItemMethods;
   item->data.strings = strings;
-
   item->minimum = 0;
   item->maximum = count - 1;
   item->divisor = 1;
 }
 
 MenuItem *
-newStringMenuItem (
+newStringsMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   const MenuString *strings, unsigned char count
 ) {
@@ -472,8 +474,14 @@ getMenuItemValue_files (const MenuItem *item) {
   return path;
 }
 
+static const MenuItemMethods filesMenuItemMethods = {
+  .beginItem = beginMenuItem_files,
+  .endItem = endMenuItem_files,
+  .getValue = getMenuItemValue_files
+};
+
 MenuItem *
-newFileMenuItem (
+newFilesMenuItem (
   Menu *menu, const MenuString *name,
   const char *directory, const char *extension,
   const char *initial, int none
@@ -501,9 +509,7 @@ newFileMenuItem (
           MenuItem *item = newMenuItem(menu, &files->setting, name);
 
           if (item) {
-            item->beginItem = beginMenuItem_files;
-            item->endItem = endMenuItem_files;
-            item->getValue = getMenuItemValue_files;
+            item->methods = &filesMenuItemMethods;
             item->data.files = files;
             return item;
           }
@@ -567,7 +573,7 @@ int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char oldSetting = *item->setting;
 
-  if (item->getValue == getMenuItemValue_numeric) {
+  if (item->methods->getValue == getMenuItemValue_numeric) {
     *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
   } else {
     *item->setting = index % (item->maximum + 1);
