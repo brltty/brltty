@@ -59,17 +59,19 @@ typedef struct {
 } FileData;
 
 struct MenuStruct {
-  MenuItem *items;
-  unsigned int size;
-  unsigned int count;
-  unsigned int index;
+  struct {
+    MenuItem *array;
+    unsigned int size;
+    unsigned int count;
+    unsigned int index;
+  } items;
 
   MenuItem *activeItem;
   char valueBuffer[0X10];
 };
 
 typedef struct {
-  void (*beginItem) (MenuItem *item);
+  int (*beginItem) (MenuItem *item);
   void (*endItem) (MenuItem *item, int deallocating);
   const char * (*getValue) (const MenuItem *item);
   const char * (*getComment) (const MenuItem *item);
@@ -104,39 +106,35 @@ newMenu (void) {
   Menu *menu = malloc(sizeof(*menu));
 
   if (menu) {
-    menu->items = NULL;
-    menu->size = 0;
-    menu->count = 0;
-    menu->index = 0;
+    menu->items.array = NULL;
+    menu->items.size = 0;
+    menu->items.count = 0;
+    menu->items.index = 0;
     menu->activeItem = NULL;
   }
 
   return menu;
 }
 
-static void
+static int
 beginMenuItem (MenuItem *item) {
-  if (item->methods->beginItem) {
-    item->methods->beginItem(item);
-  }
+  return !item->methods->beginItem || item->methods->beginItem(item);
 }
 
 static void
 endMenuItem (MenuItem *item, int deallocating) {
-  if (item->methods->endItem) {
-    item->methods->endItem(item, deallocating);
-  }
+  if (item->methods->endItem) item->methods->endItem(item, deallocating);
 }
 
 void
 deallocateMenu (Menu *menu) {
   if (menu) {
-    if (menu->items) {
-      MenuItem *item = menu->items;
-      const MenuItem *end = item + menu->count;
+    if (menu->items.array) {
+      MenuItem *item = menu->items.array;
+      const MenuItem *end = item + menu->items.count;
 
       while (item < end) endMenuItem(item++, 1);
-      free(menu->items);
+      free(menu->items.array);
     }
 
     free(menu);
@@ -145,28 +143,27 @@ deallocateMenu (Menu *menu) {
 
 MenuItem *
 getMenuItem (Menu *menu, unsigned int index) {
-  return (index < menu->count)? &menu->items[index]: NULL;
+  return (index < menu->items.count)? &menu->items.array[index]: NULL;
 }
 
 unsigned int
 getMenuSize (const Menu *menu) {
-  return menu->count;
+  return menu->items.count;
 }
 
 unsigned int
 getMenuIndex (const Menu *menu) {
-  return menu->index;
+  return menu->items.index;
 }
 
 MenuItem *
 getCurrentMenuItem (Menu *menu) {
-  MenuItem *newItem = getMenuItem(menu, menu->index);
+  MenuItem *newItem = getMenuItem(menu, menu->items.index);
   MenuItem *oldItem = menu->activeItem;
 
   if (newItem != oldItem) {
     if (oldItem) endMenuItem(oldItem, 0);
-    beginMenuItem(newItem);
-    menu->activeItem = newItem;
+    menu->activeItem = beginMenuItem(newItem)? newItem: NULL;
   }
 
   return newItem;
@@ -195,21 +192,21 @@ getMenuItemComment (const MenuItem *item) {
 
 static MenuItem *
 newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  if (menu->count == menu->size) {
-    unsigned int newSize = menu->size? (menu->size << 1): 0X10;
-    MenuItem *newItems = realloc(menu->items, (newSize * sizeof(*newItems)));
+  if (menu->items.count == menu->items.size) {
+    unsigned int newSize = menu->items.size? (menu->items.size << 1): 0X10;
+    MenuItem *newArray = realloc(menu->items.array, (newSize * sizeof(*newArray)));
 
-    if (!newItems) {
+    if (!newArray) {
       logMallocError();
       return NULL;
     }
 
-    menu->items = newItems;
-    menu->size = newSize;
+    menu->items.array = newArray;
+    menu->items.size = newSize;
   }
 
   {
-    MenuItem *item = getMenuItem(menu, menu->count++);
+    MenuItem *item = getMenuItem(menu, menu->items.count++);
 
     item->menu = menu;
     item->setting = setting;
@@ -240,14 +237,14 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 }
 
 static const char *
-getMenuItemValue_numeric (const MenuItem *item) {
+getValue_numeric (const MenuItem *item) {
   Menu *menu = item->menu;
   snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
   return menu->valueBuffer;
 }
 
 static const MenuItemMethods numericMenuItemMethods = {
-  .getValue = getMenuItemValue_numeric
+  .getValue = getValue_numeric
 };
 
 MenuItem *
@@ -268,20 +265,20 @@ newNumericMenuItem (
 }
 
 static const char *
-getMenuItemValue_strings (const MenuItem *item) {
+getValue_strings (const MenuItem *item) {
   const MenuString *strings = item->data.strings;
   return getLocalText(strings[*item->setting - item->minimum].label);
 }
 
 static const char *
-getMenuItemComment_strings (const MenuItem *item) {
+getComment_strings (const MenuItem *item) {
   const MenuString *strings = item->data.strings;
   return getLocalText(strings[*item->setting - item->minimum].comment);
 }
 
 static const MenuItemMethods stringsMenuItemMethods = {
-  .getValue = getMenuItemValue_strings,
-  .getComment = getMenuItemComment_strings
+  .getValue = getValue_strings,
+  .getComment = getComment_strings
 };
 
 void
@@ -324,8 +321,8 @@ qsortCompare_fileNames (const void *element1, const void *element2) {
   return strcmp(*name1, *name2);
 }
 
-static void
-beginMenuItem_files (MenuItem *item) {
+static int
+beginItem_files (MenuItem *item) {
   FileData *files = item->data.files;
   int index;
 
@@ -352,6 +349,7 @@ beginMenuItem_files (MenuItem *item) {
 
         if (glob(files->pattern, GLOB_DOOFFS, NULL, &files->glob) == 0) {
           files->paths = (const char **)files->glob.gl_pathv;
+
           /* The behaviour of gl_pathc is inconsistent. Some implementations
            * include the leading NULL pointers and some don't. Let's just
            * figure it out the hard way by finding the trailing NULL.
@@ -431,10 +429,11 @@ beginMenuItem_files (MenuItem *item) {
   }
 
   item->maximum = files->count - 1;
+  return 1;
 }
 
 static void
-endMenuItem_files (MenuItem *item, int deallocating) {
+endItem_files (MenuItem *item, int deallocating) {
   FileData *files = item->data.files;
 
   if (files->current) free(files->current);
@@ -460,7 +459,7 @@ endMenuItem_files (MenuItem *item, int deallocating) {
 }
 
 static const char *
-getMenuItemValue_files (const MenuItem *item) {
+getValue_files (const MenuItem *item) {
   const FileData *files = item->data.files;
   const char *path;
 
@@ -475,9 +474,9 @@ getMenuItemValue_files (const MenuItem *item) {
 }
 
 static const MenuItemMethods filesMenuItemMethods = {
-  .beginItem = beginMenuItem_files,
-  .endItem = endMenuItem_files,
-  .getValue = getMenuItemValue_files
+  .beginItem = beginItem_files,
+  .endItem = endItem_files,
+  .getValue = getValue_files
 };
 
 MenuItem *
@@ -573,7 +572,7 @@ int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
   unsigned char oldSetting = *item->setting;
 
-  if (item->methods->getValue == getMenuItemValue_numeric) {
+  if (item->methods->getValue == getValue_numeric) {
     *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
   } else {
     *item->setting = index % (item->maximum + 1);
@@ -587,34 +586,34 @@ changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int cou
 int
 setMenuPreviousItem (Menu *menu) {
   do {
-    if (!menu->index) menu->index = menu->count;
-    if (!menu->index) return 0;
-  } while (!testMenuItem(menu, --menu->index));
+    if (!menu->items.index) menu->items.index = menu->items.count;
+    if (!menu->items.index) return 0;
+  } while (!testMenuItem(menu, --menu->items.index));
 
   return 1;
 }
 
 int
 setMenuNextItem (Menu *menu) {
-  if (menu->index >= menu->count) return 0;
+  if (menu->items.index >= menu->items.count) return 0;
 
   do {
-    if (++menu->index == menu->count) menu->index = 0;
-  } while (!testMenuItem(menu, menu->index));
+    if (++menu->items.index == menu->items.count) menu->items.index = 0;
+  } while (!testMenuItem(menu, menu->items.index));
 
   return 1;
 }
 
 int
 setMenuFirstItem (Menu *menu) {
-  if (!menu->count) return 0;
-  menu->index = 0;
-  return testMenuItem(menu, menu->index) || setMenuNextItem(menu);
+  if (!menu->items.count) return 0;
+  menu->items.index = 0;
+  return testMenuItem(menu, menu->items.index) || setMenuNextItem(menu);
 }
 
 int
 setMenuLastItem (Menu *menu) {
-  if (!menu->count) return 0;
-  menu->index = menu->count - 1;
-  return testMenuItem(menu, menu->index) || setMenuPreviousItem(menu);
+  if (!menu->items.count) return 0;
+  menu->items.index = menu->items.count - 1;
+  return testMenuItem(menu, menu->items.index) || setMenuPreviousItem(menu);
 }
