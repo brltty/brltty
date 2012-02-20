@@ -36,16 +36,19 @@
 # define	READ_BUFFER_LENGTH 2048
 
 typedef enum {
-  IRIS_UNKNOWN = 0X00,
-  IRIS_20      = 0X01,
-  IRIS_40      = 0X02,
-  IRIS_S20     = 0X03,
-  IRIS_S32     = 0X04,
-  IRIS_KB20    = 0X05,
-  IRIS_KB40    = 0X06,
-  ESYS_12      = 0X07,
-  ESYS_40      = 0X08,
-  ESYS_64      = 0X0B
+  IRIS_UNKNOWN  = 0X00,
+  IRIS_20       = 0X01,
+  IRIS_40       = 0X02,
+  IRIS_S20      = 0X03,
+  IRIS_S32      = 0X04,
+  IRIS_KB20     = 0X05,
+  IRIS_KB40     = 0X06,
+  ESYS_12       = 0X07,
+  ESYS_40       = 0X08,
+  ESYS_LIGHT_40 = 0X09,
+  ESYS_24       = 0X0A,
+  ESYS_64       = 0X0B,
+  ESYS_80       = 0X0C
 } ModelType;
 
 typedef struct {
@@ -56,52 +59,67 @@ typedef struct {
 
 static const ModelEntry modelTable[] = {
   [IRIS_UNKNOWN] = {
-    .name = "Unknown Model",
+    .name = "Iris (unknown)",
     .isIris = 1
   },
 
   [IRIS_20] = {
-    .name = "IRIS 20",
+    .name = "Iris 20",
     .isIris = 1
   },
 
   [IRIS_40] = {
-    .name = "IRIS 40",
+    .name = "Iris 40",
     .isIris = 1
   },
 
   [IRIS_S20] = {
-    .name = "IRIS S-20",
+    .name = "Iris S-20",
     .isIris = 1
   },
 
   [IRIS_S32] = {
-    .name = "IRIS S-32",
+    .name = "Iris S-32",
     .isIris = 1
   },
 
   [IRIS_KB20] = {
-    .name = "IRIS KB-20",
+    .name = "Iris KB-20",
     .isIris = 1
   },
 
   [IRIS_KB40] = {
-    .name = "IRIS KB-40",
+    .name = "Iris KB-40",
     .isIris = 1
   },
 
   [ESYS_12] = {
-    .name = "ESYS 12",
+    .name = "Esys 12",
     .isEsys = 1
   },
 
   [ESYS_40] = {
-    .name = "ESYS 40",
+    .name = "Esys 40",
+    .isEsys = 1
+  },
+
+  [ESYS_LIGHT_40] = {
+    .name = "Esys Light 40",
+    .isEsys = 1
+  },
+
+  [ESYS_24] = {
+    .name = "Esys 24",
     .isEsys = 1
   },
 
   [ESYS_64] = {
-    .name = "ESYS 64",
+    .name = "Esys 64",
+    .isEsys = 1
+  },
+
+  [ESYS_80] = {
+    .name = "Esys 80",
     .isEsys = 1
   },
 };
