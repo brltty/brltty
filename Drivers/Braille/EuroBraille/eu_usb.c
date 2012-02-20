@@ -86,9 +86,18 @@ eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length, int wait)
 ssize_t
 eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
 {
-  if(length>USB_PACKET_SIZE) return(-1);
-  char packetToSend[USB_PACKET_SIZE];
-  memset(packetToSend,0x55,USB_PACKET_SIZE);
-  memcpy(packetToSend,buffer,length);
-  return usbHidSetReport(usb->device, usb->definition.interface, 0, packetToSend, USB_PACKET_SIZE, 10);
+  size_t pos = 0;
+  while (pos < length) {
+    char packetToSend[USB_PACKET_SIZE];
+    size_t tosend = length - pos;
+    if (tosend > USB_PACKET_SIZE) {
+      tosend = USB_PACKET_SIZE;
+    }
+    memset(packetToSend,0x55,USB_PACKET_SIZE);
+    memcpy(packetToSend,buffer+pos,tosend);
+    if (usbHidSetReport(usb->device, usb->definition.interface, 0, packetToSend, USB_PACKET_SIZE, 10) < 0)
+      return -1;
+    pos += tosend;
+  }
+  return length;
 }
