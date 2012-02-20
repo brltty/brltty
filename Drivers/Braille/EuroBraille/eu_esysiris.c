@@ -35,37 +35,82 @@
 
 # define	READ_BUFFER_LENGTH 2048
 
-enum hardwareType {
-  UNKNOWN = 0x00,
-  IRIS_20,
-  IRIS_40,
-  IRIS_S20,
-  IRIS_S32,
-  IRIS_KB20,
-  IRIS_KB40,
-  ESYS_12,
-  ESYS_40,
-  TYPE_LAST
-};
+typedef enum {
+  IRIS_UNKNOWN = 0X00,
+  IRIS_20      = 0X01,
+  IRIS_40      = 0X02,
+  IRIS_S20     = 0X03,
+  IRIS_S32     = 0X04,
+  IRIS_KB20    = 0X05,
+  IRIS_KB40    = 0X06,
+  ESYS_12      = 0X07,
+  ESYS_40      = 0X08,
+  ESYS_64      = 0X0B
+} ModelType;
 
-static
-const char	modelTable[TYPE_LAST][20] = {
-  "Unknown hardware",
-  "IRIS 20",
-  "IRIS 40",
-  "IRIS S-20",
-  "IRIS S-32",
-  "IRIS KB-20",
-  "IRIS KB-40",
-  "ESYS 12",
-  "ESYS 40",
+typedef struct {
+  const char *name;
+  unsigned isIris:1;
+  unsigned isEsys:1;
+} ModelEntry;
+
+static const ModelEntry modelTable[] = {
+  [IRIS_UNKNOWN] = {
+    .name = "Unknown Model",
+    .isIris = 1
+  },
+
+  [IRIS_20] = {
+    .name = "IRIS 20",
+    .isIris = 1
+  },
+
+  [IRIS_40] = {
+    .name = "IRIS 40",
+    .isIris = 1
+  },
+
+  [IRIS_S20] = {
+    .name = "IRIS S-20",
+    .isIris = 1
+  },
+
+  [IRIS_S32] = {
+    .name = "IRIS S-32",
+    .isIris = 1
+  },
+
+  [IRIS_KB20] = {
+    .name = "IRIS KB-20",
+    .isIris = 1
+  },
+
+  [IRIS_KB40] = {
+    .name = "IRIS KB-40",
+    .isIris = 1
+  },
+
+  [ESYS_12] = {
+    .name = "ESYS 12",
+    .isEsys = 1
+  },
+
+  [ESYS_40] = {
+    .name = "ESYS 40",
+    .isEsys = 1
+  },
+
+  [ESYS_64] = {
+    .name = "ESYS 64",
+    .isEsys = 1
+  },
 };
 
 
 /** Static Local Variables */
 
 static int brlCols = 0;
-static enum hardwareType brlType = UNKNOWN;
+static ModelType modelType = IRIS_UNKNOWN;
 static t_eubrl_io*	iop = NULL;
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
@@ -86,9 +131,7 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   unsigned int subkey = 0;
   static char flagLevel1 = 0, flagLevel2 = 0;
 
-  if (brlType == IRIS_20 || brlType == IRIS_S20 || brlType == IRIS_KB20
-      || brlType == IRIS_S32
-      || brlType == IRIS_40 || brlType == IRIS_KB40)
+  if (modelTable[modelType].isIris)
     { /** Iris models keys */
       if (key == VK_FDB && !flagLevel1)
 	{
@@ -163,7 +206,7 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	    }
 	}
     }
-  if (brlType == ESYS_12 || brlType == ESYS_40)
+  if (modelTable[modelType].isEsys)
     { /** Esys models keys */
       if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
       if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
@@ -211,7 +254,11 @@ static int esysiris_SysIdentity(BrailleDisplay *brl, char *packet)
       brlCols = packet[1];
       break;
     case 'T':
-      brlType = packet[1];
+      modelType = packet[1];
+      if ((modelType >= ARRAY_COUNT(modelTable)) || !modelTable[modelType].name) {
+        logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", modelType);
+        modelType = IRIS_UNKNOWN;
+      }
       break;
     default:
       LogUnknownProtocolKey("esysiris_SysIdentity", packet[0]);
@@ -235,7 +282,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
       break;
     case 'C':
       {
-	if (brlType == ESYS_12 || brlType == ESYS_40)
+	if (modelTable[modelType].isEsys)
 	  {
             key = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
 	  }
@@ -343,11 +390,11 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
       approximateDelay(100);
     }
   if (brlCols > 0)
-    { /* Succesfully identified hardware. */
+    { /* Succesfully identified model. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
       logMessage(LOG_INFO, "eu: %s connected.",
-	         modelTable[brlType]);
+	         modelTable[modelType].name);
       return (1);
     }
   return (0);
@@ -408,7 +455,7 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommand
     }
   if (key & EUBRL_COMMAND_KEY)
     {
-      if (brlType == ESYS_12 || brlType == ESYS_40) res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
+      if (modelTable[modelType].isEsys) res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
        else res = esysiris_handleCommandKey(brl, key & 0x00000fff);
     }
   if (key & EUBRL_PC_KEY)
