@@ -132,6 +132,7 @@ static ModelType modelType = IRIS_UNKNOWN;
 static t_eubrl_io*	iop = NULL;
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
+static int forceRewrite;
 
 
 
@@ -411,6 +412,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
     { /* Succesfully identified model. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
+      forceRewrite = 1;
       logMessage(LOG_INFO, "eu: %s connected.",
 	         modelTable[modelType].name);
       return (1);
@@ -439,6 +441,12 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
 	  break;
 	case 'K':
 	  res = esysiris_KeyboardHandling(brl, (char *)inPacket + 4);
+	  break;
+	case 'R':
+	  if (inPacket[4] == 'P') {
+            /* return from internal menu */
+            forceRewrite = 1;
+	  }
 	  break;
 	default:
 	  LogUnknownProtocolKey("esysiris_readKey", inPacket[3]);
@@ -494,7 +502,7 @@ void	esysiris_writeWindow(BrailleDisplay *brl)
     return;
   }
 
-  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, NULL)) {
+  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &forceRewrite)) {
     buf[0] = 'B';
     buf[1] = 'S';
     memcpy(buf + 2, brl->buffer, displaySize);
