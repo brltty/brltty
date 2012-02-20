@@ -481,12 +481,12 @@ typedef enum {
   HT_HID_CMD_FlushBuffers = 0X01, /* flush input and output buffers */
 } HtHidCommand;
 
-static uint32_t hidReportSize_OutData;
-static uint32_t hidReportSize_InData;
-static uint32_t hidReportSize_InCommand;
-static uint32_t hidReportSize_OutVersion;
-static uint32_t hidReportSize_OutBaud;
-static uint32_t hidReportSize_InBaud;
+static size_t hidReportSize_OutData;
+static size_t hidReportSize_InData;
+static size_t hidReportSize_InCommand;
+static size_t hidReportSize_OutVersion;
+static size_t hidReportSize_OutBaud;
+static size_t hidReportSize_InBaud;
 
 static uint16_t hidFirmwareVersion;
 static unsigned char *hidInputReport = NULL;
@@ -516,7 +516,7 @@ setHidReport (const unsigned char *report, int size) {
 
 typedef struct {
   HT_HidReportNumber number;
-  uint32_t *size;
+  size_t *size;
 } ReportEntry;
 
 static void
