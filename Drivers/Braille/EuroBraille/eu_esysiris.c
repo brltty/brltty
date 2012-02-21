@@ -547,6 +547,9 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
             forceRewrite = 1;
 	  }
 	  break;
+        case 'V':
+          /* ignore visualization */
+          break;
 	default:
 	  LogUnknownProtocolKey("esysiris_readKey", inPacket[3]);
 	  break;
