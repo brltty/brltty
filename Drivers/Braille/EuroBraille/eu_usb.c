@@ -39,18 +39,70 @@ static UsbChannel *usb = NULL;
 int
 eubrl_usbInit (BrailleDisplay *brl, char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* ESYS 12/40 (with SD-Card inserted) */
+    { /* Esys, version < 3.0, without SD card */
       .vendor=0XC251, .product=0X1122,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0,
-      .disableAutosuspend=0
+      .inputEndpoint=1, .outputEndpoint=0
     }
     ,
-    { /* ESYS 12/40 (with SD-Card not inserted) */
+    { /* reserved */
+      .vendor=0XC251, .product=0X1123,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version < 3.0, with SD card */
       .vendor=0XC251, .product=0X1124,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0,
-      .disableAutosuspend=0
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1125,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version >= 3.0, without SD card */
+      .vendor=0XC251, .product=0X1126,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1127,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version >= 3.0, with SD card */
+      .vendor=0XC251, .product=0X1128,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1129,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esytime */
+      .vendor=0XC251, .product=0X1130,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1131,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1132,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
     }
     ,
     { .vendor=0 }
