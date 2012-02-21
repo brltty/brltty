@@ -36,25 +36,28 @@
 # define	READ_BUFFER_LENGTH 2048
 
 typedef enum {
-  IRIS_UNKNOWN  = 0X00,
-  IRIS_20       = 0X01,
-  IRIS_40       = 0X02,
-  IRIS_S20      = 0X03,
-  IRIS_S32      = 0X04,
-  IRIS_KB20     = 0X05,
-  IRIS_KB40     = 0X06,
-  ESYS_12       = 0X07,
-  ESYS_40       = 0X08,
-  ESYS_LIGHT_40 = 0X09,
-  ESYS_24       = 0X0A,
-  ESYS_64       = 0X0B,
-  ESYS_80       = 0X0C
+  IRIS_UNKNOWN        = 0X00,
+  IRIS_20             = 0X01,
+  IRIS_40             = 0X02,
+  IRIS_S20            = 0X03,
+  IRIS_S32            = 0X04,
+  IRIS_KB20           = 0X05,
+  IRIS_KB40           = 0X06,
+  ESYS_12             = 0X07,
+  ESYS_40             = 0X08,
+  ESYS_LIGHT_40       = 0X09,
+  ESYS_24             = 0X0A,
+  ESYS_64             = 0X0B,
+  ESYS_80             = 0X0C,
+  ESYTIME_32          = 0X0E,
+  ESYTIME_32_STANDARD = 0X0F
 } ModelType;
 
 typedef struct {
   const char *name;
   unsigned isIris:1;
   unsigned isEsys:1;
+  unsigned isEsytime:1;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
@@ -121,6 +124,16 @@ static const ModelEntry modelTable[] = {
   [ESYS_80] = {
     .name = "Esys 80",
     .isEsys = 1
+  },
+
+  [ESYTIME_32] = {
+    .name = "Esytime 32",
+    .isEsytime = 1
+  },
+
+  [ESYTIME_32_STANDARD] = {
+    .name = "Esytime 32 Standard",
+    .isEsytime = 1
   },
 };
 
@@ -265,24 +278,110 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   return res;
 }
 
-static int esysiris_SysIdentity(BrailleDisplay *brl, char *packet)
-{
-  switch(packet[0])
-    {
+static int esysiris_systemInformation(BrailleDisplay *brl, unsigned char *packet) {
+  int logLevel = LOG_INFO;
+  const char *infoDescription;
+  enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
+
+  switch(packet[0]) {
+    case 'H': 
+      infoType = String;
+      infoDescription = "Short Name";
+      break;
+
+    case 'I': 
+      infoType = End;
+      break;
+
     case 'G': 
       brlCols = packet[1];
+
+      infoType = Dec8;
+      infoDescription = "Cell Count";
       break;
+
+    case 'L': 
+      infoType = String;
+      infoDescription = "Country Code";
+      break;
+
+    case 'M': 
+      infoType = Dec16;
+      infoDescription = "Maximum Frame Length";
+      break;
+
+    case 'N': 
+      infoType = String;
+      infoDescription = "Long Name";
+      break;
+
+    case 'O': 
+      infoType = Hex32;
+      infoDescription = "Options";
+      break;
+
+    case 'P': 
+      infoType = String;
+      infoDescription = "Protocol Version";
+      break;
+
+    case 'S': 
+      infoType = String;
+      infoDescription = "Serial Number";
+      break;
+
     case 'T':
       modelType = packet[1];
       if ((modelType >= ARRAY_COUNT(modelTable)) || !modelTable[modelType].name) {
         logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", modelType);
         modelType = IRIS_UNKNOWN;
       }
+
+      infoType = Dec8;
+      infoDescription = "Model Type";
       break;
+
+    case 'W': 
+      infoType = String;
+      infoDescription = "Firmware Version";
+      break;
+
     default:
-      LogUnknownProtocolKey("esysiris_SysIdentity", packet[0]);
+      infoType = Unknown;
       break;
-    }
+  }
+
+  switch (infoType) {
+    case Unknown:
+      logMessage(LOG_WARNING, "unknown Esysiris system information code: 0X%02X", packet[0]);
+      break;
+
+    case End:
+      logMessage(LOG_DEBUG, "end of Esysiris system information");
+      break;
+
+    case String:
+      logMessage(logLevel, "Esysiris %s: %s", infoDescription, &packet[1]);
+      break;
+
+    case Dec8:
+      logMessage(logLevel, "Esysiris %s: %u", infoDescription, packet[1]);
+      break;
+
+    case Dec16:
+      logMessage(logLevel, "Esysiris %s: %u", infoDescription, (packet[2] << 8) | packet[1]);
+      break;
+
+    case Hex32:
+      logMessage(logLevel, "Esysiris %s: 0X%02X%02X%02X%02X",
+                 infoDescription, packet[1], packet[2], packet[3], packet[4]);
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unimplemented Esysiris system information code type: 0X%02X", infoType);
+      break;
+  }
+
   return 0;
 }
 
@@ -437,7 +536,7 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
       switch (inPacket[3])
 	{
 	case 'S':
-	  esysiris_SysIdentity(brl, (char *)inPacket + 4);
+	  esysiris_systemInformation(brl, inPacket + 4);
 	  break;
 	case 'K':
 	  res = esysiris_KeyboardHandling(brl, (char *)inPacket + 4);
