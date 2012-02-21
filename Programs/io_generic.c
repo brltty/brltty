@@ -79,22 +79,22 @@ typedef int GetHidReportItemsMethod (GioHandle *handle, HidReportItemsData *item
 typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char report);
 
 typedef ssize_t SetHidReportMethod (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GetHidReportMethod (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
 typedef ssize_t SetHidFeatureMethod (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GetHidFeatureMethod (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
@@ -298,42 +298,46 @@ getUsbHidReportSize (const HidReportItemsData *items, unsigned char report) {
 
 static ssize_t
 setUsbHidReport (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbHidSetReport(channel->device, interface, report, data, size, timeout);
+  return usbHidSetReport(channel->device, channel->definition.interface,
+                         report, data, size, timeout);
 }
 
 static ssize_t
 getUsbHidReport (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbHidGetReport(channel->device, interface, report, buffer, size, timeout);
+  return usbHidGetReport(channel->device, channel->definition.interface,
+                         report, buffer, size, timeout);
 }
 
 static ssize_t
 setUsbHidFeature (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbHidSetFeature(channel->device, interface, report, data, size, timeout);
+  return usbHidSetFeature(channel->device, channel->definition.interface,
+                          report, data, size, timeout);
 }
 
 static ssize_t
 getUsbHidFeature (
-  GioHandle *handle, unsigned char interface, unsigned char report,
+  GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbHidGetFeature(channel->device, interface, report, buffer, size, timeout);
+  return usbHidGetFeature(channel->device, channel->definition.interface,
+                          report, buffer, size, timeout);
 }
 
 static const InputOutputMethods usbMethods = {
@@ -683,48 +687,44 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
 
 ssize_t
 gioSetHidReport (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 ) {
   SetHidReportMethod *method = endpoint->methods->setHidReport;
   if (!method) return logUnsupportedOperation("setHidReport");
-  return method(&endpoint->handle, interface, report,
+  return method(&endpoint->handle, report,
                 data, size, endpoint->options.outputTimeout);
 }
 
 ssize_t
 gioGetHidReport (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 ) {
   GetHidReportMethod *method = endpoint->methods->getHidReport;
   if (!method) return logUnsupportedOperation("getHidReport");
-  return method(&endpoint->handle, interface, report,
+  return method(&endpoint->handle, report,
                 buffer, size, endpoint->options.inputTimeout);
 }
 
 ssize_t
 gioSetHidFeature (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 ) {
   SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
   if (!method) return logUnsupportedOperation("setHidFeature");
-  return method(&endpoint->handle, interface, report,
+  return method(&endpoint->handle, report,
                 data, size, endpoint->options.outputTimeout);
 }
 
 ssize_t
 gioGetHidFeature (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 ) {
   GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
   if (!method) return logUnsupportedOperation("getHidFeature");
-  return method(&endpoint->handle, interface, report,
+  return method(&endpoint->handle, report,
                 buffer, size, endpoint->options.inputTimeout);
 }

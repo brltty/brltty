@@ -93,26 +93,22 @@ extern ssize_t gioAskResource (
 extern size_t gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report);
 
 extern ssize_t gioSetHidReport (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 );
 
 extern ssize_t gioGetHidReport (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 );
 
 extern ssize_t gioSetHidFeature (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 );
 
 extern ssize_t gioGetHidFeature (
-  GioEndpoint *endpoint,
-  unsigned char interface, unsigned char report,
+  GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 );
 
