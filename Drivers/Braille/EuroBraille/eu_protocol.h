@@ -28,74 +28,33 @@
 #ifndef __EU_PROTOCOL_H__
 #define __EU_PROTOCOL_H__
 
-#include	"eu_io.h"
-#include	"string.h"
+#include <string.h>
+#include "eu_braille.h"
 
-#define SPEED 9600
-#define CHARSPERSEC ( SPEED / 11 ) /* 1 start + 8 data + 1 parity + 1 stop */
-static inline void updateWriteDelay(BrailleDisplay *brl, unsigned int chars)
-{
-  brl->writeDelay += 1000 * ( chars / CHARSPERSEC ) + 1;
-}
+typedef struct {
+  const char *name;
+  int (*init) (BrailleDisplay *brl);
+  int (*reset) (BrailleDisplay *brl);
+  unsigned int (*readKey) (BrailleDisplay *brl);
+  int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext c);
+  int (*keyToCommand) (BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx);
+  void (*writeWindow) (BrailleDisplay *brl);
+  int (*hasLcdSupport) (BrailleDisplay *brl);
+  void (*writeVisual) (BrailleDisplay *brl, const wchar_t *text);
+  ssize_t (*readPacket) (BrailleDisplay *brl, void *packet, size_t size);
+  ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
+} t_eubrl_protocol;
 
-/** Enum which define what protocol is used. */
+typedef struct {
+  const t_eubrl_protocol *protocol;
+  ssize_t (*read) (BrailleDisplay *brl, void *buffer, size_t bufsize, int wait);
+  ssize_t (*write) (BrailleDisplay *brl, const void *buf, size_t size);
+} t_eubrl_io;
 
-typedef enum	u_eubrl_protocolType
-{
-  UNITIALIZED_PROTOCOL = 0,
-    CLIO_PROTOCOL,	/* Old protocolunsil Iris version 1.71. */
-    ESYSIRIS_PROTOCOL,	/* New Iris (>= 1.71) and ESYS protocol */
-}		t_eubrl_protocolType;
+extern const t_eubrl_io *iop;
+extern const t_eubrl_protocol clioProtocol;
+extern const t_eubrl_protocol esysirisProtocol;
 
+extern unsigned int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx);
 
-/** Structure which will store generic methods for protocol handling */
-
-typedef struct	s_eubrl_protocol
-{
-  int		(*init)(BrailleDisplay *brl, t_eubrl_io *io);
-  int		(*reset)(BrailleDisplay *brl);
-  unsigned int	(*readKey)(BrailleDisplay *brl);
-  int		(*readCommand)(BrailleDisplay *brl, KeyTableCommandContext c);
-  int		(*keyToCommand)(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx);
-  void		(*writeWindow)(BrailleDisplay *brl);
-  int		(*hasLcdSupport)(BrailleDisplay *brl);
-  void		(*writeVisual)(BrailleDisplay *brl, const wchar_t *text);
-  ssize_t	(*readPacket)(BrailleDisplay *brl, void *packet, size_t size);
-  ssize_t	(*writePacket)(BrailleDisplay *brl, const void *packet, size_t size);
-  
-  t_eubrl_protocolType	protocolType;
-}		t_eubrl_protocol;
-
-
-
-/** Here are the corresponding headers for each protocol. */
-
-/** Notebraille/Clio/Scriba/Iris <1.71 protocol driver */
-
-int		clio_init(BrailleDisplay *brl, t_eubrl_io *io);
-int		clio_reset(BrailleDisplay *brl);
-unsigned int	clio_readKey(BrailleDisplay *brl);
-int		clio_readCommand(BrailleDisplay *brl, KeyTableCommandContext c);
-int		clio_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext c);
-void		clio_writeWindow(BrailleDisplay *brl);
-int		clio_hasLcdSupport(BrailleDisplay *brl);
-void		clio_writeVisual(BrailleDisplay *brl, const wchar_t *text);
-ssize_t		clio_readPacket(BrailleDisplay *brl, void *packet, size_t size);
-ssize_t		clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
-
-/** Esys/Iris >= 1.71  protocol headers */
-
-
-int		esysiris_init(BrailleDisplay *brl, t_eubrl_io *io);
-int		esysiris_reset(BrailleDisplay *brl);
-unsigned int	esysiris_readKey(BrailleDisplay *brl);
-int		esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext c);
-int		esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext c);
-void		esysiris_writeWindow(BrailleDisplay *brl);
-int		esysiris_hasLcdSupport(BrailleDisplay *brl);
-void		esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text);
-ssize_t		esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size);
-ssize_t		esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
-
-unsigned int		protocol_handleBrailleKey(unsigned int key, KeyTableCommandContext ctx);
 #endif /* __EU_PROTOCOL_H__ */

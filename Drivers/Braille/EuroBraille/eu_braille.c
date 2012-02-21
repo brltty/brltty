@@ -40,10 +40,7 @@ typedef enum {
 #include "brl_driver.h"
 #include "parse.h"
 #include "timing.h"
-
-#include "io_serial.h"
-#include "io_usb.h"
-#include "io_bluetooth.h"
+#include "io_generic.h"
 
 #include	"eu_protocol.h"
 
@@ -52,13 +49,170 @@ typedef enum {
 ** Externs, declared in protocol.c and io.c
 */
 
-extern t_eubrl_protocol esysirisProtocol, clioProtocol;
-extern t_eubrl_io eubrl_usbIos, eubrl_serialIos;
-extern t_eubrl_io eubrl_bluetoothIos, eubrl_ethernetIos;
+static GioEndpoint *gioEndpoint = NULL;
+const t_eubrl_io *iop = NULL;
+static const t_eubrl_protocol *protocolp = NULL;
 
+static inline void
+updateWriteDelay (BrailleDisplay *brl, size_t count) {
+  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
+}
 
-static t_eubrl_io *iop = NULL;
-static t_eubrl_protocol *protocolp = NULL;
+static ssize_t
+eubrl_genericRead (BrailleDisplay *brl, void *buffer, size_t length, int wait) {
+  return gioReadData(gioEndpoint, buffer, length, wait);
+}
+
+static ssize_t
+eubrl_genericWrite (BrailleDisplay *brl, const void *data, size_t length) {
+  updateWriteDelay(brl, length);
+  return gioWriteData(gioEndpoint, data, length);
+}
+
+static ssize_t
+eubrl_usbWrite (BrailleDisplay *brl, const void *data, size_t length) {
+  const unsigned int USB_PACKET_SIZE = 64;
+  size_t pos = 0;
+  while (pos < length) {
+    char packetToSend[USB_PACKET_SIZE];
+    size_t tosend = length - pos;
+    if (tosend > USB_PACKET_SIZE) {
+      tosend = USB_PACKET_SIZE;
+    }
+    memset(packetToSend,0x55,USB_PACKET_SIZE);
+    memcpy(packetToSend,data+pos,tosend);
+    updateWriteDelay(brl, USB_PACKET_SIZE);
+    if (gioSetHidReport(gioEndpoint, 0, packetToSend, USB_PACKET_SIZE) < 0) {
+      return -1;
+    }
+    pos += tosend;
+  }
+  return length;
+}
+
+static const t_eubrl_io	eubrl_serialIos = {
+  .read = eubrl_genericRead,
+  .write = eubrl_genericWrite
+};
+
+static const t_eubrl_io	eubrl_usbIos = {
+  .protocol = &esysirisProtocol,
+  .read = eubrl_genericRead,
+  .write = eubrl_usbWrite
+};
+
+static const t_eubrl_io	eubrl_bluetoothIos = {
+  .protocol = &esysirisProtocol,
+  .read = eubrl_genericRead,
+  .write = eubrl_genericWrite
+};
+
+static int
+connectResource (const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 9600,
+    .parity = SERIAL_PARITY_EVEN
+  };
+
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
+    { /* Esys, version < 3.0, without SD card */
+      .vendor=0XC251, .product=0X1122,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1123,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version < 3.0, with SD card */
+      .vendor=0XC251, .product=0X1124,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1125,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version >= 3.0, without SD card */
+      .vendor=0XC251, .product=0X1126,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1127,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esys, version >= 3.0, with SD card */
+      .vendor=0XC251, .product=0X1128,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1129,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Esytime */
+      .vendor=0XC251, .product=0X1130,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1131,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X1132,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &eubrl_serialIos;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &eubrl_usbIos;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &eubrl_bluetoothIos;
+
+  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    iop = gioGetApplicationData(gioEndpoint);
+    if (iop->protocol) protocolp = iop->protocol;
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+disconnectResource (void) {
+  if (gioEndpoint) {
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
+  }
+}
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) 
@@ -94,46 +248,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if (strlen(parameters[PARAM_PROTOCOLTYPE]) == 0)
     protocolp = NULL;
 
-  /*
-  ** Now, let's select and initialize our IO subsystem 
-  */ 
-  if (isSerialDevice(&device))
-    {
-      iop = &eubrl_serialIos;
-    }
-
-  else if (isUsbDevice(&device))
-    {
-      iop = &eubrl_usbIos;
-      protocolp = &esysirisProtocol;
-    }
-
-  else if (isBluetoothDevice(&device))
-    {
-      iop = &eubrl_bluetoothIos;
-      protocolp = &esysirisProtocol;
-    }
-
-#ifndef __MSDOS__
-  else if (!strncasecmp(device, "net:", 4))
-    {
-      iop = &eubrl_ethernetIos;
-      protocolp = &esysirisProtocol;
-    }
-#endif /* __MSDOS__ */
-
-  else
-    {
-      unsupportedDevice(device);
-      return (0);
-    }
-
-  if (!iop)
-    {
-      unsupportedDevice(device);
-      return (0);
-    }
-  if (iop->init(brl, parameters, device) == 0)
+  if (!connectResource(device))
     {
       logMessage(LOG_DEBUG, "eu: Failed to initialize IO subsystem.");
       return (0);
@@ -143,35 +258,32 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     { 
       protocolp = &esysirisProtocol;
       logMessage(LOG_INFO, "eu: Starting auto-detection process...");
-      if (protocolp->init(brl, iop) == 0)
+      if (!protocolp->init(brl))
 	{
 	  logMessage(LOG_INFO, "eu: Esysiris detection failed.");
-	  iop->close(brl);
+	  disconnectResource();
 	  approximateDelay(700);
-	  if (iop->init(brl, parameters, device) == 0)
+	  if (!connectResource(device))
 	    {
 	      logMessage(LOG_ERR, "Failed to initialize IO for second autodetection.");
 	      return (0);
 	    }
 	  protocolp = &clioProtocol;
-	  if (protocolp->init(brl, iop) == 0)
+	  if (!protocolp->init(brl))
 	    {
 	      logMessage(LOG_ERR, "eu: Autodetection failed.");
-	      iop->close(brl);
+	      disconnectResource();
 	      return (0);
 	    }
 	}
     }
   else
     {
-      if (protocolp->protocolType == CLIO_PROTOCOL)
-	logMessage(LOG_INFO, "Initializing clio protocol.");
-      else
-	logMessage(LOG_INFO, "Initializing EsysIris protocol.");
-      if (protocolp->init(brl, iop) == 0)
+      logMessage(LOG_INFO, "initializing %s protocol", protocolp->name);
+      if (!protocolp->init(brl))
 	{
 	  logMessage(LOG_ERR, "eu: Unable to connect to Braille display.");
-	  iop->close(brl);
+	  disconnectResource();
 	  return (0);
 	}      
     }
@@ -186,11 +298,7 @@ brl_destruct (BrailleDisplay *brl)
     {
       protocolp = NULL;
     }
-  if (iop)
-    {
-      iop->close(brl);
-      iop = NULL;
-    }
+  disconnectResource();
 }
 
 #ifdef BRL_HAVE_PACKET_IO

@@ -25,11 +25,6 @@ include $(SRC_TOP)braille.mk
 
 SRC_FILES = \
 	eu_braille.c \
-	eu_io.c \
-  	eu_serial.c \
-	eu_usb.c \
-  	eu_bluetooth.c \
-  	eu_net.c \
 	eu_protocol.c \
 	eu_clio.c \
 	eu_esysiris.c

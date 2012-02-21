@@ -27,39 +27,10 @@
 
 #include "eu_protocol.h"
 
-t_eubrl_protocol	esysirisProtocol = {
-  .init = esysiris_init,
-  .reset = esysiris_reset,
-  .readPacket = esysiris_readPacket,
-  .writePacket = esysiris_writePacket,
-  .readCommand = esysiris_readCommand,
-  .readKey = esysiris_readKey,
-  .keyToCommand = esysiris_keyToCommand,
-  .writeWindow = esysiris_writeWindow,
-  .hasLcdSupport = esysiris_hasLcdSupport,
-  .writeVisual = esysiris_writeVisual,
-  .protocolType = ESYSIRIS_PROTOCOL
-};
-
-/** Eurobraille Clio protocol **/
-t_eubrl_protocol	clioProtocol = {
-  .init = clio_init,
-  .reset = clio_reset,
-  .readPacket = clio_readPacket,
-  .writePacket = clio_writePacket,
-  .readCommand = clio_readCommand,
-  .readKey = clio_readKey,
-  .keyToCommand = clio_keyToCommand,
-  .writeWindow = clio_writeWindow,
-  .hasLcdSupport = clio_hasLcdSupport,
-  .writeVisual = clio_writeVisual,
-  .protocolType = CLIO_PROTOCOL
-};
-
 /*
 ** Handles a braille key : converts it to a BRLTTY Command
 */
-unsigned int		protocol_handleBrailleKey(unsigned int key, KeyTableCommandContext ctx)
+unsigned int		eubrl_handleBrailleKey(unsigned int key, KeyTableCommandContext ctx)
 {
   unsigned int res = EOF;
   unsigned int dots = key & 0x000003ff;
