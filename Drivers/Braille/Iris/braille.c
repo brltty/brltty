@@ -276,11 +276,11 @@ static int checkLatchState()
   return 0;
 }
 
-/* Function readPacket */
+/* Function readNativePacket */
 /* Returns the size of the read packet. */
 /* 0 means no packet has been read and there is no error. */
 /* -1 means an error occurred */
-static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
+static ssize_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
 {
   unsigned char ch;
   size_t size_;
@@ -331,7 +331,7 @@ static ssize_t readPacket(BrailleDisplay *brl, Port *port, void *packet, size_t 
     }
   }
   if ( errno == EAGAIN )  return 0;
-  logSystemError("readPacket");
+  logSystemError("readNativePacket");
   return -1;
 }
 
@@ -413,11 +413,11 @@ static inline int needsEscape(unsigned char ch)
   else return 0;
 }
 
-/* Function writePacket */
+/* Function writeNativePacket */
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 /* A write can be ignored if the previous packet has not been */
 /* acknowledged so far */
-static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
+static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
 {
   const unsigned char *data = packet;
   unsigned char	buf[2*(size + 1) +3];
@@ -446,13 +446,13 @@ static ssize_t writePacket (BrailleDisplay *brl, Port *port, const void *packet,
 
   res = gioWriteData(port->gioEndpoint, buf, count);
   if (res == -1) {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gioWriteData failed");
+    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gioWriteData failed");
     return -1;
   }
 
   res = gettimeofday(&port->lastWriteTime, NULL);
   if (res == -11) {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writePacket: gettimeofday failed");
+    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gettimeofday failed");
     return -1;
   }    
 
@@ -1052,7 +1052,7 @@ static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *
   int i;
   for (i=0; i<IR_MAXWINDOWSIZE-size; i++) *(p++) = 0; 
   for (i=0; i<size; i++) *(p++) = dots[size-i-1];
-  return writePacket(brl, port, packet, sizeof(packet));
+  return writeNativePacket(brl, port, packet, sizeof(packet));
 }
 
 /* Low-level write of text to the braile display */
@@ -1090,7 +1090,7 @@ static void suspendDevice(BrailleDisplay *brl)
   internalPort.waitingForAck = 0;
   if (packetForwardMode) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
-    writePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
+    writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
     closePort(&externalPort);
   }
   deactivateBraille();
@@ -1111,14 +1111,14 @@ static void resumeDevice(BrailleDisplay *brl)
   if (packetForwardMode) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
     openPort(&externalPort);
-    writePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
+    writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
   } else refreshBrailleWindow = 1;
 }
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 {
   if (embeddedDriver && (deviceSleeping || packetForwardMode)) return 0;
-  return readPacket(brl, &internalPort, packet, size);
+  return readNativePacket(brl, &internalPort, packet, size);
 }
 
 /* Function brl_writePacket */
@@ -1126,7 +1126,7 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
   if (deviceSleeping || packetForwardMode) return 0;
-  return writePacket(brl, &internalPort, packet, size);
+  return writeNativePacket(brl, &internalPort, packet, size);
 }
 
 static int brl_reset (BrailleDisplay *brl)
@@ -1153,7 +1153,7 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
     case IR_PROTOCOL_NATIVE: {
       static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
 
-      writePacket(brl, &externalPort, p, sizeof(p));
+      writeNativePacket(brl, &externalPort, p, sizeof(p));
       break;
     }
 
@@ -1169,7 +1169,7 @@ static void leavePacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Leaving packet forward mode");
-  if (protocol==IR_PROTOCOL_NATIVE) writePacket(brl, &externalPort, p, sizeof(p));
+  if (protocol==IR_PROTOCOL_NATIVE) writeNativePacket(brl, &externalPort, p, sizeof(p));
   packetForwardMode = 0;
   closePort(&externalPort);
   refreshBrailleWindow = 1;
@@ -1456,81 +1456,98 @@ static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *pa
   }
 }
 
+static inline int
+isMenuKey (const unsigned char *packet, size_t size) {
+  return (size == 2) && (packet[0] == IR_IPT_InteractiveKey) && (packet[1] == 'Q');
+}
+
 static int readCommand_embedded (BrailleDisplay *brl)
 {
   unsigned char packet[MAXPACKETSIZE];
   ssize_t size;
+
   if (checkLatchState()) {
-    if (!deviceSleeping) suspendDevice(brl);
-    else {
+    if (deviceSleeping) {
       resumeDevice(brl);
       return EOF;
     }
+
+    suspendDevice(brl);
   }
+
   if (deviceSleeping) return BRL_CMD_OFFLINE;
 
-  size = readPacket(brl, &internalPort, packet, sizeof(packet));
-  if (size==-1) return BRL_CMD_RESTARTBRL;
+  while ((size = readNativePacket(brl, &internalPort, packet, sizeof(packet)))) {
+    if (size == -1) return BRL_CMD_RESTARTBRL;
 
-  /* The test for Menu key should come first since this key toggles */
-  /* packet forward mode on/off */
-  if ((size==2) && (packet[0]==IR_IPT_InteractiveKey) && (packet[1]=='Q')) {
-    logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Menu key pressed");
-    if (!packetForwardMode) {
-      enterPacketForwardMode(brl);
-      return BRL_CMD_OFFLINE;
-    } else {
-      leavePacketForwardMode(brl);
-      return EOF;
-    }
-  }
-  if (packetForwardMode) {
-    if (size>0) {
-      if (protocol==IR_PROTOCOL_NATIVE)
-      {
-        writePacket(brl, &externalPort, packet, size);
-      } else { /* forward using Eurobraille's protocol */
-        handleNativePacket(brl, &externalPort, &eurobrlIrisKeyboardHandler, packet, size);
+    /* The test for Menu key should come first since this key toggles */
+    /* packet forward mode on/off */
+    if (isMenuKey(packet, size)) {
+      logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Menu key pressed");
+      if (packetForwardMode) {
+        leavePacketForwardMode(brl);
+        continue;
+      } else {
+        enterPacketForwardMode(brl);
+        break;
       }
     }
-    if (protocol==IR_PROTOCOL_NATIVE)
-    { /* Read native packet from external port and forward it to internal port */
-      size = readPacket(brl, &externalPort, packet, sizeof(packet));
-      if (size>0) writePacket(brl, &internalPort, packet, size);
-    } else { /* Read Eurobraille packet from external port and handle it */
-      size = readEurobraillePacket(&externalPort, packet, sizeof(packet));
-      if (size>0) handleEurobraillePacket(brl, packet, size);
+
+    if (!packetForwardMode) {
+      handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
+    } else if (protocol == IR_PROTOCOL_NATIVE) {
+      writeNativePacket(brl, &externalPort, packet, size);
+    } else {
+      handleNativePacket(brl, &externalPort, &eurobrlIrisKeyboardHandler, packet, size);
     }
+  }
+
+  if (packetForwardMode) {
+    if (protocol == IR_PROTOCOL_NATIVE) {
+      while ((size = readNativePacket(brl, &externalPort, packet, sizeof(packet)))) {
+        writeNativePacket(brl, &internalPort, packet, size);
+      }
+    } else { /* Read Eurobraille packet from external port and handle it */
+      while ((size = readEurobraillePacket(&externalPort, packet, sizeof(packet)))) {
+        handleEurobraillePacket(brl, packet, size);
+      }
+    }
+
     return BRL_CMD_OFFLINE;
   }
-  handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
+
   return EOF;
 }
 
 static int readCommand_nonembedded (BrailleDisplay *brl)
 {
-  unsigned char packet[MAXPACKETSIZE];
-  ssize_t size;
-  size = readPacket(brl, &internalPort, packet, sizeof(packet));
-  if (size<0) return BRL_CMD_RESTARTBRL;
-  /* The test for Menu key should come first since this key toggles */
-  /* packet forward mode on/off */
-  if ((size==2) && (packet[0]==IR_IPT_InteractiveKey) && (packet[1]=='Q')) {
-    logMessage(LOG_DEBUG,DRIVER_LOG_PREFIX "Menu key pressed");
-    if (deviceConnected) {
-      deviceConnected = 0;
-      return BRL_CMD_OFFLINE;
-    }
-  }
-  if (size>0) {
-    if (!deviceConnected) refreshBrailleWindow = 1;
-    deviceConnected = 1;
-  }
+  while (1) {
+    unsigned char packet[MAXPACKETSIZE];
+    ssize_t size;
 
-  if (!deviceConnected) return BRL_CMD_OFFLINE;
-  
-  handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
-  return EOF;
+    size = readNativePacket(brl, &internalPort, packet, sizeof(packet));
+    if (size < 0) return BRL_CMD_RESTARTBRL;
+
+    /* The test for Menu key should come first since this key toggles */
+    /* packet forward mode on/off */
+    if (isMenuKey(packet, size)) {
+      logMessage(LOG_DEBUG,DRIVER_LOG_PREFIX "Menu key pressed");
+      if (deviceConnected) {
+        deviceConnected = 0;
+        return BRL_CMD_OFFLINE;
+      }
+    }
+
+    if (size > 0) {
+      if (!deviceConnected) refreshBrailleWindow = 1;
+      deviceConnected = 1;
+    }
+
+    if (!deviceConnected) return BRL_CMD_OFFLINE;
+    if (!size) return EOF;
+    
+    handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
+  }
 }
 
 static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
@@ -1572,10 +1589,10 @@ static void brl_writeVisual(BrailleDisplay *brl)
 static ssize_t sendRequest(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response)
 {
   unsigned char req = request;
-  writePacket(brl, &internalPort, &req, sizeof(req));
+  writeNativePacket(brl, &internalPort, &req, sizeof(req));
   drainBrailleOutput (brl, 100);
   gioAwaitInput(internalPort.gioEndpoint, 1000);
-  return readPacket(brl, &internalPort, response, MAXPACKETSIZE);
+  return readNativePacket(brl, &internalPort, response, MAXPACKETSIZE);
 }
 
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
