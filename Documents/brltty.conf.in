@@ -244,10 +244,15 @@
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
 # EuroBraille Braille Driver Parameters
-#braille-parameters eu:Protocol= # [clio,esysiris]
+#braille-parameters eu:Protocol= # [auto,clio,esysiris]
 
 # HandyTech Braille Driver Parameters
 #braille-parameters ht:SetTime=no # [no,yes]
+
+# Iris Braille Driver Parameters
+#braille-parameters ir:Embedded= # [no,yes]
+#braille-parameters ir:LatchDelay= # [0-10000]
+#braille-parameters ir:Protocol= # [eurobraille,native]
 
 # Libbraille Braille Driver Parameters
 #braille-parameters lb:Device=/dev/ttyS0 # 
