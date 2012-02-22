@@ -24,6 +24,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 
 #include "log.h"
@@ -130,7 +131,7 @@ static const struct s_clioModelType		clioModels[] =
 /* Local functions */
 static int sendbyte(BrailleDisplay *brl, unsigned char c)
 {
-  return iop->write(brl, (char*)&c, 1);
+  return io->write(brl, (char*)&c, 1);
 }
 
 static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
@@ -144,7 +145,7 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
       int started = offset > 0;
       int escaped = 0;
       unsigned char byte;
-      ssize_t result = iop->read(brl, &byte, 1, (started || escape));
+      ssize_t result = io->read(brl, &byte, 1, (started || escape));
 
       if (!result)
         {
@@ -289,10 +290,10 @@ static ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t 
    *q++ = EOT;
    packetSize = q - buf;
    logOutputPacket(buf, packetSize);
-   return iop->write(brl, buf, packetSize);
+   return io->write(brl, buf, packetSize);
 }
 
-static int     clio_reset(BrailleDisplay *brl)
+static int     clio_resetDevice(BrailleDisplay *brl)
 {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
 
@@ -613,7 +614,7 @@ static int     clio_init(BrailleDisplay *brl)
 
   while (leftTries-- && brlCols == 0)
     {
-      clio_reset(brl);      
+      clio_resetDevice(brl);      
       approximateDelay(500);
       clio_readCommand(brl, KTB_CTX_DEFAULT);
     }
@@ -632,15 +633,19 @@ static int     clio_init(BrailleDisplay *brl)
 }
 
 
-const t_eubrl_protocol	clioProtocol = {
+const t_eubrl_protocol clioProtocol = {
   .name = "clio",
+
   .init = clio_init,
-  .reset = clio_reset,
+  .resetDevice = clio_resetDevice,
+
   .readPacket = clio_readPacket,
   .writePacket = clio_writePacket,
-  .readCommand = clio_readCommand,
+
   .readKey = clio_readKey,
+  .readCommand = clio_readCommand,
   .keyToCommand = clio_keyToCommand,
+
   .writeWindow = clio_writeWindow,
   .hasLcdSupport = clio_hasLcdSupport,
   .writeVisual = clio_writeVisual

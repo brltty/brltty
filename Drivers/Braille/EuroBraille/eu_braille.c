@@ -24,7 +24,7 @@
 #include "prologue.h"
 
 typedef enum {
-  PARAM_PROTOCOLTYPE,
+  PARM_PROTOCOL
 }		DriverParameter;
 
 #define BRLPARMS "protocol"
@@ -50,8 +50,8 @@ typedef enum {
 */
 
 static GioEndpoint *gioEndpoint = NULL;
-const t_eubrl_io *iop = NULL;
-static const t_eubrl_protocol *protocolp = NULL;
+const t_eubrl_io *io = NULL;
+static const t_eubrl_protocol *protocol = NULL;
 
 static inline void
 updateWriteDelay (BrailleDisplay *brl, size_t count) {
@@ -198,8 +198,7 @@ connectResource (const char *identifier) {
   descriptor.bluetooth.options.applicationData = &eubrl_bluetoothIos;
 
   if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
-    iop = gioGetApplicationData(gioEndpoint);
-    if (iop->protocol) protocolp = iop->protocol;
+    io = gioGetApplicationData(gioEndpoint);
     return 1;
   }
 
@@ -217,86 +216,69 @@ disconnectResource (void) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) 
 {
-  protocolp = NULL;
-  brl->textColumns = 0;
-  iop = NULL;
+  io = NULL;
+  protocol = NULL;
   makeOutputTable(dotsTable_ISO11548_1);
-  if (parameters[PARAM_PROTOCOLTYPE])
-    {
-      unsigned int choice = 0;
-      char* choices[3];
-      logMessage(LOG_DEBUG, "Detecting param %s", parameters[PARAM_PROTOCOLTYPE]);
-      choices[0] = "clio";
-      choices[1] = "esysiris";
-      choices[2] = NULL;
-      if (!validateChoice(&choice, parameters[PARAM_PROTOCOLTYPE], (const char **)choices))
-	{
-	  logMessage(LOG_ERR, "%s: unknown protocol type.", 
-		     parameters[PARAM_PROTOCOLTYPE]);
-	  return 0;
-	}
-      else if (choice == 0)
-	protocolp = &clioProtocol;
-      else if (choice == 1)
-	protocolp = &esysirisProtocol;
-      if (protocolp == NULL)
-	{
-	  logMessage(LOG_ERR, "eu: Undefined NULL protocol subsystem.");
-	  return (0);
-	}
-    }
-  if (strlen(parameters[PARAM_PROTOCOLTYPE]) == 0)
-    protocolp = NULL;
 
-  if (!connectResource(device))
-    {
-      logMessage(LOG_DEBUG, "eu: Failed to initialize IO subsystem.");
-      return (0);
+  if (parameters[PARM_PROTOCOL]) {
+    static const char *const choices[] = {
+      "auto", "clio", "esysiris",
+      NULL
+    };
+
+    static const t_eubrl_protocol *const protocols[] = {
+      NULL, &clioProtocol, &esysirisProtocol
+    };
+
+    unsigned int choice;
+
+    if (!validateChoice(&choice, parameters[PARM_PROTOCOL], choices)) {
+      logMessage(LOG_ERR, "unknown EuroBraille protocol: %s", 
+                 parameters[PARM_PROTOCOL]);
+      return 0;
     }
 
-  if (!protocolp) /* Autodetecting */
-    { 
-      protocolp = &esysirisProtocol;
-      logMessage(LOG_INFO, "eu: Starting auto-detection process...");
-      if (!protocolp->init(brl))
-	{
-	  logMessage(LOG_INFO, "eu: Esysiris detection failed.");
-	  disconnectResource();
-	  approximateDelay(700);
-	  if (!connectResource(device))
-	    {
-	      logMessage(LOG_ERR, "Failed to initialize IO for second autodetection.");
-	      return (0);
-	    }
-	  protocolp = &clioProtocol;
-	  if (!protocolp->init(brl))
-	    {
-	      logMessage(LOG_ERR, "eu: Autodetection failed.");
-	      disconnectResource();
-	      return (0);
-	    }
-	}
+    protocol = protocols[choice];
+  }
+
+  if (connectResource(device)) {
+    if (protocol) {
+      if (!io->protocol || (io->protocol == protocol)) {
+        if (protocol->init(brl)) return 1;
+      } else {
+        logMessage(LOG_ERR, "protocol not supported by device: %s", protocol->name);
+      }
+    } else if (io->protocol) {
+      protocol = io->protocol;
+      if (protocol->init(brl)) return 1;
+    } else {
+      static const t_eubrl_protocol *const protocols[] = {
+        &esysirisProtocol, &clioProtocol,
+        NULL
+      };
+      const t_eubrl_protocol *const *p = protocols;
+
+      while (*p) {
+        const t_eubrl_protocol *protocol = *p++;
+
+        logMessage(LOG_NOTICE, "trying protocol: %s", protocol->name);
+        if (protocol->init(brl)) return 1;
+	approximateDelay(700);
+      }
     }
-  else
-    {
-      logMessage(LOG_INFO, "initializing %s protocol", protocolp->name);
-      if (!protocolp->init(brl))
-	{
-	  logMessage(LOG_ERR, "eu: Unable to connect to Braille display.");
-	  disconnectResource();
-	  return (0);
-	}      
-    }
-  logMessage(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->textColumns);
-  return (1);
+
+    disconnectResource();
+  }
+
+  return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) 
 {
-  if (protocolp)
+  if (protocol)
     {
-      protocolp = NULL;
+      protocol = NULL;
     }
   disconnectResource();
 }
@@ -305,25 +287,25 @@ brl_destruct (BrailleDisplay *brl)
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) 
 {
-  if (!protocolp || !iop)
+  if (!protocol || !io)
     return (-1);
-  return protocolp->readPacket(brl, buffer, size);
+  return protocol->readPacket(brl, buffer, size);
 }
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) 
 {
-  if (!protocolp || !iop)
+  if (!protocol || !io)
     return (-1);
-  return protocolp->writePacket(brl, packet, length);
+  return protocol->writePacket(brl, packet, length);
 }
 
 static int
 brl_reset (BrailleDisplay *brl) 
 {
-  if (!protocolp || !iop)
+  if (!protocol || !io)
     return (-1);
-  return protocolp->reset(brl);
+  return protocol->resetDevice(brl);
 }
 #endif /* BRL_HAVE_PACKET_IO */
 
@@ -331,16 +313,16 @@ brl_reset (BrailleDisplay *brl)
 static int
 brl_readKey (BrailleDisplay *brl) 
 {
-  if (protocolp)
-    return protocolp->readKey(brl);
+  if (protocol)
+    return protocol->readKey(brl);
   return EOF;
 }
 
 static int
 brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 {
-  if (protocolp)
-    return protocolp->keyToCommand(brl, key, context);
+  if (protocol)
+    return protocol->keyToCommand(brl, key, context);
   return BRL_CMD_NOOP;
 }
 #endif /* BRL_HAVE_KEY_CODES */
@@ -348,18 +330,18 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key)
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) 
 {
-  if (!protocolp)
+  if (!protocol)
     return 1;
   if (text)
-    protocolp->writeVisual(brl, text);  
-  protocolp->writeWindow(brl);
+    protocol->writeVisual(brl, text);  
+  protocol->writeWindow(brl);
   return 1;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) 
 {
-  if (protocolp)
-    return protocolp->readCommand(brl, context);
+  if (protocol)
+    return protocol->readCommand(brl, context);
   return EOF;
 }

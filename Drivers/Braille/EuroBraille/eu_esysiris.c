@@ -24,6 +24,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 
 #include "log.h"
@@ -172,7 +173,7 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
     {
       int started = offset > 0;
       unsigned char byte;
-      ssize_t result = iop->read(brl, &byte, 1, started);
+      ssize_t result = io->read(brl, &byte, 1, started);
 
       if (!result)
         {
@@ -236,7 +237,7 @@ static ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, siz
 {
   int packetSize = size + 2;
   unsigned char buf[packetSize + 2];
-  if (!iop || !packet || !size)
+  if (!io || !packet || !size)
     return (-1);
   buf[0] = STX;
   buf[1] = (packetSize >> 8) & 0x00FF;
@@ -244,10 +245,11 @@ static ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, siz
   memcpy(buf + 3, packet, size);
   buf[sizeof(buf)-1] = ETX;
   logOutputPacket(buf, sizeof(buf));
-  return iop->write(brl, buf, sizeof(buf));
+  return io->write(brl, buf, sizeof(buf));
 }
 
-static int esysiris_systemInformation(BrailleDisplay *brl, unsigned char *packet) {
+static int
+handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
   int logLevel = LOG_INFO;
   const char *infoDescription;
   enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
@@ -328,7 +330,7 @@ static int esysiris_systemInformation(BrailleDisplay *brl, unsigned char *packet
 
     case End:
       logMessage(LOG_DEBUG, "end of Esysiris system information");
-      break;
+      return 1;
 
     case String:
       logMessage(logLevel, "Esysiris %s: %s", infoDescription, &packet[1]);
@@ -453,7 +455,7 @@ static unsigned int	esysiris_readKey(BrailleDisplay *brl)
       switch (inPacket[3])
 	{
 	case 'S':
-	  esysiris_systemInformation(brl, inPacket + 4);
+	  handleSystemInformation(brl, inPacket+4);
 	  break;
 	case 'K':
 	  res = esysiris_KeyboardHandling(brl, (char *)inPacket + 4);
@@ -668,7 +670,7 @@ static int	esysiris_init(BrailleDisplay *brl)
   return (0);
 }
 
-static int	esysiris_reset(BrailleDisplay *brl)
+static int	esysiris_resetDevice(BrailleDisplay *brl)
 {
   (void)brl;
   return 1;
@@ -704,15 +706,19 @@ static void	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
   return;
 }
 
-const t_eubrl_protocol	esysirisProtocol = {
+const t_eubrl_protocol esysirisProtocol = {
   .name = "esysiris",
+
   .init = esysiris_init,
-  .reset = esysiris_reset,
+  .resetDevice = esysiris_resetDevice,
+
   .readPacket = esysiris_readPacket,
   .writePacket = esysiris_writePacket,
-  .readCommand = esysiris_readCommand,
+
   .readKey = esysiris_readKey,
+  .readCommand = esysiris_readCommand,
   .keyToCommand = esysiris_keyToCommand,
+
   .writeWindow = esysiris_writeWindow,
   .hasLcdSupport = esysiris_hasLcdSupport,
   .writeVisual = esysiris_writeVisual
