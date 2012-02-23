@@ -139,10 +139,12 @@ static const ModelEntry modelTable[] = {
 
 /** Static Local Variables */
 
-static ModelIdentifier modelIdentifier = IRIS_UNKNOWN;
-static int brlCols = 0;
-static unsigned char	brlFirmwareVersion[21];
-static int		routingMode = BRL_BLK_ROUTE;
+static int haveSystemInformation;
+static unsigned char modelIdentifier;
+static uint32_t firmwareVersion;
+static uint32_t protocolVersion;
+static uint32_t deviceOptions;
+static int routingMode;
 static int forceRewrite;
 
 static unsigned char sequenceCheck;
@@ -277,7 +279,7 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'G': 
-      brlCols = packet[1];
+      brl->textColumns = packet[1];
 
       infoType = Dec8;
       infoDescription = "Cell Count";
@@ -299,11 +301,22 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'O': 
+      deviceOptions = (packet[1] << 24)
+                    | (packet[2] << 16)
+                    | (packet[3] <<  8)
+                    | (packet[4] <<  0)
+                    ;
+
       infoType = Hex32;
-      infoDescription = "Options";
+      infoDescription = "Device Options";
       break;
 
     case 'P': 
+      protocolVersion = ((packet[1] - '0') << 16)
+                      | ((packet[3] - '0') <<  8)
+                      | ((packet[4] - '0') <<  0)
+                      ;
+
       infoType = String;
       infoDescription = "Protocol Version";
       break;
@@ -326,6 +339,11 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'W': 
+      firmwareVersion = ((packet[1] - '0') << 16)
+                      | ((packet[3] - '0') <<  8)
+                      | ((packet[4] - '0') <<  0)
+                      ;
+
       infoType = String;
       infoDescription = "Firmware Version";
       break;
@@ -369,13 +387,13 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
   return 0;
 }
 
-static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
+static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
 {
   unsigned int key = EOF;
   switch(packet[0])
     {
     case 'B':
-      key = (packet[1] * 256 + (unsigned char)packet[2]) & 0x000003ff;
+      key = (packet[1] * 256 + packet[2]) & 0x000003ff;
       key |= EUBRL_BRAILLE_KEY;
       break;
     case 'I':
@@ -390,7 +408,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
 	  }
 	else
 	  {
-	    key = ((unsigned char)packet[1] * 256 + (unsigned char)packet[2]) & 0x00000fff;
+	    key = (packet[1] * 256 + packet[2]) & 0x00000fff;
 	  }
       }
       key |= EUBRL_COMMAND_KEY;
@@ -459,21 +477,21 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
 
 static unsigned int	esysiris_readKey(BrailleDisplay *brl)
 {
-  static unsigned char	inPacket[2048];
+  unsigned char	packet[2048];
   unsigned int res = 0;
 
-  if (esysiris_readPacket(brl, inPacket, 2048) > 0)
+  if (esysiris_readPacket(brl, packet, sizeof(packet)) > 0)
     { /* We got a packet */
-      switch (inPacket[3])
+      switch (packet[3])
 	{
 	case 'S':
-	  handleSystemInformation(brl, inPacket+4);
+	  if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
 	  break;
 	case 'K':
-	  res = esysiris_KeyboardHandling(brl, (char *)inPacket + 4);
+	  res = esysiris_KeyboardHandling(brl, packet + 4);
 	  break;
 	case 'R':
-	  if (inPacket[4] == 'P') {
+	  if (packet[4] == 'P') {
             /* return from internal menu */
             forceRewrite = 1;
 	  }
@@ -482,7 +500,7 @@ static unsigned int	esysiris_readKey(BrailleDisplay *brl)
           /* ignore visualization */
           break;
 	default:
-	  LogUnknownProtocolKey("esysiris_readKey", inPacket[3]);
+	  LogUnknownProtocolKey("esysiris_readKey", packet[3]);
 	  break;
 	}
     }
@@ -650,15 +668,20 @@ static int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
 
 static int	esysiris_init(BrailleDisplay *brl)
 {
-  memset(brlFirmwareVersion, 0, 21);
   char outPacket[2] = {'S', 'I'};
   int	leftTries = 24;
       
+  haveSystemInformation = 0;
+  modelIdentifier = IRIS_UNKNOWN;
+  firmwareVersion = 0;
+  protocolVersion = 0;
+  deviceOptions = 0;
+  routingMode = BRL_BLK_ROUTE;
   forceRewrite = 1;
   sequenceCheck = 0;
   sequenceKnown = 0;
 
-  while (leftTries-- && brlCols == 0)
+  while (leftTries-- && !haveSystemInformation)
     {
       if (esysiris_writePacket(brl, (unsigned char *)outPacket, 2) == -1)
 	{
@@ -667,20 +690,17 @@ static int	esysiris_init(BrailleDisplay *brl)
 	  continue;
 	}
       int i=60;
-      while(i-- && brlCols==0)
+      while(i-- && !haveSystemInformation)
         {
           esysiris_readCommand(brl, KTB_CTX_DEFAULT);
           approximateDelay(10);
         }
       approximateDelay(100);
     }
-  if (brlCols > 0)
+  if (haveSystemInformation)
     { /* Succesfully identified model. */
-      brl->textRows = 1;
-      brl->textColumns = brlCols;
-
-      logMessage(LOG_DEBUG, "eu: %s connected.",
-	         modelTable[modelIdentifier].name);
+      logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
+	         modelTable[modelIdentifier].name, brl->textColumns);
       return (1);
     }
   return (0);
