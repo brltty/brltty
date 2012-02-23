@@ -33,6 +33,152 @@
 #include "ascii.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"
+#include "brldefs-eu.h"
+#include "ktbdefs.h"
+
+#define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
+#define COMMAND_KEY_ENTRY(k,n) KEY_ENTRY(CommandKeys, CMD, k, n)
+#define BRAILLE_KEY_ENTRY(k,n) KEY_ENTRY(BrailleKeys, BRL, k, n)
+
+BEGIN_KEY_NAME_TABLE(linear)
+  COMMAND_KEY_ENTRY(L1, "L1"),
+  COMMAND_KEY_ENTRY(L2, "L2"),
+  COMMAND_KEY_ENTRY(L3, "L3"),
+  COMMAND_KEY_ENTRY(L4, "L4"),
+  COMMAND_KEY_ENTRY(L5, "L5"),
+  COMMAND_KEY_ENTRY(L6, "L6"),
+  COMMAND_KEY_ENTRY(L7, "L7"),
+  COMMAND_KEY_ENTRY(L8, "L8"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(arrow)
+  COMMAND_KEY_ENTRY(LA, "LA"),
+  COMMAND_KEY_ENTRY(RA, "RA"),
+  COMMAND_KEY_ENTRY(UA, "UA"),
+  COMMAND_KEY_ENTRY(DA, "DA"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(function)
+  COMMAND_KEY_ENTRY(F1, "L1"),
+  COMMAND_KEY_ENTRY(F2, "L2"),
+  COMMAND_KEY_ENTRY(F3, "L3"),
+  COMMAND_KEY_ENTRY(F4, "L4"),
+  COMMAND_KEY_ENTRY(F5, "L5"),
+  COMMAND_KEY_ENTRY(F6, "L6"),
+  COMMAND_KEY_ENTRY(F7, "L7"),
+  COMMAND_KEY_ENTRY(F8, "L8"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch1)
+  COMMAND_KEY_ENTRY(S1L, "S1L"),
+  COMMAND_KEY_ENTRY(S1R, "S1R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch2)
+  COMMAND_KEY_ENTRY(S2L, "S2L"),
+  COMMAND_KEY_ENTRY(S2R, "S2R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch3)
+  COMMAND_KEY_ENTRY(S3L, "S3L"),
+  COMMAND_KEY_ENTRY(S3R, "S3R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch4)
+  COMMAND_KEY_ENTRY(S4L, "S4L"),
+  COMMAND_KEY_ENTRY(S4R, "S4R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch5)
+  COMMAND_KEY_ENTRY(S5L, "S5L"),
+  COMMAND_KEY_ENTRY(S5R, "S5R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(switch6)
+  COMMAND_KEY_ENTRY(S6L, "S6L"),
+  COMMAND_KEY_ENTRY(S6R, "S6R"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(joystick1)
+  COMMAND_KEY_ENTRY(J1L, "J1L"),
+  COMMAND_KEY_ENTRY(J1R, "J1R"),
+  COMMAND_KEY_ENTRY(J1U, "J1U"),
+  COMMAND_KEY_ENTRY(J1D, "J1D"),
+  COMMAND_KEY_ENTRY(J1P, "J1P"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(joystick2)
+  COMMAND_KEY_ENTRY(J2L, "J2L"),
+  COMMAND_KEY_ENTRY(J2R, "J2R"),
+  COMMAND_KEY_ENTRY(J2U, "J2U"),
+  COMMAND_KEY_ENTRY(J2D, "J2D"),
+  COMMAND_KEY_ENTRY(J2P, "J2P"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(common)
+  BRAILLE_KEY_ENTRY(Dot1, "Dot1"),
+  BRAILLE_KEY_ENTRY(Dot2, "Dot2"),
+  BRAILLE_KEY_ENTRY(Dot3, "Dot3"),
+  BRAILLE_KEY_ENTRY(Dot4, "Dot4"),
+  BRAILLE_KEY_ENTRY(Dot5, "Dot5"),
+  BRAILLE_KEY_ENTRY(Dot6, "Dot6"),
+  BRAILLE_KEY_ENTRY(Dot7, "Dot7"),
+  BRAILLE_KEY_ENTRY(Dot8, "Dot8"),
+  BRAILLE_KEY_ENTRY(Backspace, "Backspace"),
+  BRAILLE_KEY_ENTRY(Space, "Space"),
+
+  KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_SET_ENTRY(EU_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(iris)
+  KEY_NAME_TABLE(linear),
+  KEY_NAME_TABLE(arrow),
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(esys_small)
+  KEY_NAME_TABLE(switch1),
+  KEY_NAME_TABLE(switch2),
+  KEY_NAME_TABLE(joystick1),
+  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(esys_medium)
+  KEY_NAME_TABLE(switch1),
+  KEY_NAME_TABLE(switch2),
+  KEY_NAME_TABLE(switch3),
+  KEY_NAME_TABLE(switch4),
+  KEY_NAME_TABLE(joystick1),
+  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(esys_large)
+  KEY_NAME_TABLE(switch1),
+  KEY_NAME_TABLE(switch2),
+  KEY_NAME_TABLE(switch3),
+  KEY_NAME_TABLE(switch4),
+  KEY_NAME_TABLE(switch5),
+  KEY_NAME_TABLE(switch6),
+  KEY_NAME_TABLE(joystick1),
+  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(esytime)
+  KEY_NAME_TABLE(function),
+  KEY_NAME_TABLE(joystick1),
+  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(iris)
+DEFINE_KEY_TABLE(esys_small)
+DEFINE_KEY_TABLE(esys_medium)
+DEFINE_KEY_TABLE(esys_large)
+DEFINE_KEY_TABLE(esytime)
 
 typedef enum {
   IRIS_UNKNOWN        = 0X00,
@@ -53,7 +199,8 @@ typedef enum {
 } ModelIdentifier;
 
 typedef struct {
-  const char *name;
+  const char *modelName;
+  const KeyTableDefinition *keyTable;
   unsigned isIris:1;
   unsigned isEsys:1;
   unsigned isEsytime:1;
@@ -61,78 +208,93 @@ typedef struct {
 
 static const ModelEntry modelTable[] = {
   [IRIS_UNKNOWN] = {
-    .name = "Iris (unknown)",
-    .isIris = 1
+    .modelName = "Iris (unknown)",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_20] = {
-    .name = "Iris 20",
-    .isIris = 1
+    .modelName = "Iris 20",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_40] = {
-    .name = "Iris 40",
-    .isIris = 1
+    .modelName = "Iris 40",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_S20] = {
-    .name = "Iris S-20",
-    .isIris = 1
+    .modelName = "Iris S-20",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_S32] = {
-    .name = "Iris S-32",
-    .isIris = 1
+    .modelName = "Iris S-32",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_KB20] = {
-    .name = "Iris KB-20",
-    .isIris = 1
+    .modelName = "Iris KB-20",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_KB40] = {
-    .name = "Iris KB-40",
-    .isIris = 1
+    .modelName = "Iris KB-40",
+    .isIris = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [ESYS_12] = {
-    .name = "Esys 12",
-    .isEsys = 1
+    .modelName = "Esys 12",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
   [ESYS_40] = {
-    .name = "Esys 40",
-    .isEsys = 1
+    .modelName = "Esys 40",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_LIGHT_40] = {
-    .name = "Esys Light 40",
-    .isEsys = 1
+    .modelName = "Esys Light 40",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_24] = {
-    .name = "Esys 24",
-    .isEsys = 1
+    .modelName = "Esys 24",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
   [ESYS_64] = {
-    .name = "Esys 64",
-    .isEsys = 1
+    .modelName = "Esys 64",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_80] = {
-    .name = "Esys 80",
-    .isEsys = 1
+    .modelName = "Esys 80",
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_large)
   },
 
   [ESYTIME_32] = {
-    .name = "Esytime 32",
-    .isEsytime = 1
+    .modelName = "Esytime 32",
+    .isEsytime = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
 
   [ESYTIME_32_STANDARD] = {
-    .name = "Esytime 32 Standard",
-    .isEsytime = 1
+    .modelName = "Esytime 32 Standard",
+    .isEsytime = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
 };
 
@@ -338,7 +500,7 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
     case 'T':
       modelIdentifier = packet[1];
       if ((modelIdentifier >= ARRAY_COUNT(modelTable)) ||
-          !modelTable[modelIdentifier].name) {
+          !modelTable[modelIdentifier].modelName) {
         logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", modelIdentifier);
         modelIdentifier = IRIS_UNKNOWN;
       }
@@ -732,7 +894,7 @@ static int	esysiris_init(BrailleDisplay *brl)
       }
 
       logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
-	         model->name, brl->textColumns);
+	         model->modelName, brl->textColumns);
       return (1);
     }
   return (0);
