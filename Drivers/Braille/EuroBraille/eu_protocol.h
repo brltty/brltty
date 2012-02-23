@@ -39,9 +39,9 @@ typedef struct {
   ssize_t (*readPacket) (BrailleDisplay *brl, void *packet, size_t size);
   ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
 
-  unsigned int (*readKey) (BrailleDisplay *brl);
+  int (*readKey) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext c);
-  int (*keyToCommand) (BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx);
+  int (*keyToCommand) (BrailleDisplay *brl, int key, KeyTableCommandContext ctx);
 
   void (*writeWindow) (BrailleDisplay *brl);
   int (*hasLcdSupport) (BrailleDisplay *brl);
@@ -58,6 +58,6 @@ extern const t_eubrl_io *io;
 extern const t_eubrl_protocol clioProtocol;
 extern const t_eubrl_protocol esysirisProtocol;
 
-extern unsigned int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx);
+extern int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx);
 
 #endif /* __EU_PROTOCOL_H__ */

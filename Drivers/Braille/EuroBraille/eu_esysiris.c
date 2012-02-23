@@ -146,6 +146,7 @@ static uint32_t protocolVersion;
 static uint32_t deviceOptions;
 static int routingMode;
 static int forceRewrite;
+static int keyReadError;
 
 static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;
@@ -475,35 +476,45 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
   return key;
 }
 
-static unsigned int	esysiris_readKey(BrailleDisplay *brl)
+static int	esysiris_readKey(BrailleDisplay *brl)
 {
   unsigned char	packet[2048];
-  unsigned int res = 0;
+  ssize_t size = esysiris_readPacket(brl, packet, sizeof(packet));
+  int res = 0;
 
-  if (esysiris_readPacket(brl, packet, sizeof(packet)) > 0)
-    { /* We got a packet */
-      switch (packet[3])
-	{
-	case 'S':
-	  if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
-	  break;
-	case 'K':
-	  res = esysiris_KeyboardHandling(brl, packet + 4);
-	  break;
-	case 'R':
-	  if (packet[4] == 'P') {
-            /* return from internal menu */
-            forceRewrite = 1;
-	  }
-	  break;
-        case 'V':
-          /* ignore visualization */
-          break;
-	default:
-	  LogUnknownProtocolKey("esysiris_readKey", packet[3]);
-	  break;
-	}
+  if (size == 0) return EOF;
+
+  if (size == -1) {
+    keyReadError = 1;
+    return EOF;
+  }
+
+  switch (packet[3])
+    {
+    case 'S':
+      if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
+      break;
+
+    case 'K':
+      res = esysiris_KeyboardHandling(brl, packet + 4);
+      break;
+
+    case 'R':
+      if (packet[4] == 'P') {
+        /* return from internal menu */
+        forceRewrite = 1;
+      }
+      break;
+
+    case 'V':
+      /* ignore visualization */
+      break;
+
+    default:
+      LogUnknownProtocolKey("esysiris_readKey", packet[3]);
+      break;
     }
+
   return res;
 }
 
@@ -628,25 +639,23 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   return res;
 }
 
-static int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx)
+static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx)
 {
   int res = EOF;
 
-  if (key == EOF) 
-    return EOF;
-  if (key == 0) 
-    return EOF;
+  if (key == EOF) return EOF;
+  if (key == 0) return EOF;
 
   if (key & EUBRL_BRAILLE_KEY)
     {
       res = eubrl_handleBrailleKey(key, ctx);
     }
-  if (key & EUBRL_ROUTING_KEY)
+  else if (key & EUBRL_ROUTING_KEY)
     {
       res = routingMode | ((key - 1) & 0x0000007f);
       routingMode = BRL_BLK_ROUTE;
     }
-  if (key & EUBRL_COMMAND_KEY)
+  else if (key & EUBRL_COMMAND_KEY)
     {
       if (modelTable[modelIdentifier].isEsys) {
         res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
@@ -654,7 +663,7 @@ static int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTable
         res = esysiris_handleCommandKey(brl, key & 0x00000fff);
       }
     }
-  if (key & EUBRL_PC_KEY)
+  else if (key & EUBRL_PC_KEY)
     {
       res = key & 0xFFFFFF;
     }
@@ -663,7 +672,9 @@ static int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTable
 
 static int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
 {
-  return esysiris_keyToCommand(brl, esysiris_readKey(brl), ctx);
+  int key = esysiris_readKey(brl);
+  if (keyReadError) return BRL_CMD_RESTARTBRL;
+  return esysiris_keyToCommand(brl, key, ctx);
 }
 
 static int	esysiris_init(BrailleDisplay *brl)
@@ -678,6 +689,8 @@ static int	esysiris_init(BrailleDisplay *brl)
   deviceOptions = 0;
   routingMode = BRL_BLK_ROUTE;
   forceRewrite = 1;
+  keyReadError = 0;
+
   sequenceCheck = 0;
   sequenceKnown = 0;
 

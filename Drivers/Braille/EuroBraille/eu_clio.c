@@ -450,10 +450,10 @@ static int clio_KeyboardHandling(BrailleDisplay *brl, char *packet)
   return key;
 }
 
-static unsigned int	clio_readKey(BrailleDisplay *brl)
+static int	clio_readKey(BrailleDisplay *brl)
 {
   static unsigned char	inPacket[READ_BUFFER_LENGTH];
-  unsigned int res = 0;
+  int res = 0;
 
   while (clio_readPacket(brl, inPacket, READ_BUFFER_LENGTH) > 0)
     {
@@ -573,9 +573,9 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   return res;
 }
 
-static int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, KeyTableCommandContext ctx)
+static int	clio_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx)
 {
-  unsigned int res = EOF;
+  int res = EOF;
 
   if (key & EUBRL_BRAILLE_KEY)
     {
