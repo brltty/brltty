@@ -139,11 +139,15 @@ static const ModelEntry modelTable[] = {
 
 /** Static Local Variables */
 
-static int haveSystemInformation;
 static unsigned char modelIdentifier;
+static const ModelEntry *model;
+
+static int haveSystemInformation;
 static uint32_t firmwareVersion;
 static uint32_t protocolVersion;
 static uint32_t deviceOptions;
+static uint16_t maximumFrameLength;
+
 static int routingMode;
 static int forceRewrite;
 static int keyReadError;
@@ -292,6 +296,10 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'M': 
+      maximumFrameLength = (packet[1] << 8)
+                         | (packet[2] << 0)
+                         ;
+
       infoType = Dec16;
       infoDescription = "Maximum Frame Length";
       break;
@@ -372,7 +380,7 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case Dec16:
-      logMessage(logLevel, "Esysiris %s: %u", infoDescription, (packet[2] << 8) | packet[1]);
+      logMessage(logLevel, "Esysiris %s: %u", infoDescription, (packet[1] << 8) | packet[2]);
       break;
 
     case Hex32:
@@ -403,7 +411,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
       break;
     case 'C':
       {
-	if (modelTable[modelIdentifier].isEsys)
+	if (model->isEsys)
 	  {
             key = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
 	  }
@@ -524,7 +532,7 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   unsigned int subkey = 0;
   static char flagLevel1 = 0, flagLevel2 = 0;
 
-  if (modelTable[modelIdentifier].isIris)
+  if (model->isIris)
     { /** Iris models keys */
       if (key == VK_FDB && !flagLevel1)
 	{
@@ -599,7 +607,7 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	    }
 	}
     }
-  if (modelTable[modelIdentifier].isEsys)
+  if (model->isEsys)
     { /** Esys models keys */
       if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
       if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
@@ -657,7 +665,7 @@ static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandCo
     }
   else if (key & EUBRL_COMMAND_KEY)
     {
-      if (modelTable[modelIdentifier].isEsys) {
+      if (model->isEsys) {
         res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
       } else {
         res = esysiris_handleCommandKey(brl, key & 0x00000fff);
@@ -680,13 +688,17 @@ static int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
 static int	esysiris_init(BrailleDisplay *brl)
 {
   char outPacket[2] = {'S', 'I'};
-  int	leftTries = 24;
+  int leftTries = 24;
       
-  haveSystemInformation = 0;
   modelIdentifier = IRIS_UNKNOWN;
+  model = NULL;
+
+  haveSystemInformation = 0;
   firmwareVersion = 0;
   protocolVersion = 0;
   deviceOptions = 0;
+  maximumFrameLength = 0;
+
   routingMode = BRL_BLK_ROUTE;
   forceRewrite = 1;
   keyReadError = 0;
@@ -712,8 +724,15 @@ static int	esysiris_init(BrailleDisplay *brl)
     }
   if (haveSystemInformation)
     { /* Succesfully identified model. */
+      model = &modelTable[modelIdentifier];
+
+      if (!maximumFrameLength) {
+        if (model->isIris) maximumFrameLength = 2048;
+        if (model->isEsys) maximumFrameLength = 128;
+      }
+
       logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
-	         modelTable[modelIdentifier].name, brl->textColumns);
+	         model->name, brl->textColumns);
       return (1);
     }
   return (0);
