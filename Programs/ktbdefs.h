@@ -58,6 +58,11 @@ typedef struct {
   KEY_NAME_TABLES_REFERENCE names;
 } KeyTableDefinition;
 
+#define KEY_TABLE_DEFINITION(name) keyTableDefinition_##name
+#define DEFINE_KEY_TABLE(name) \
+  static const KeyTableDefinition KEY_TABLE_DEFINITION(name) = \
+  {.bindings=#name, .names=KEY_NAME_TABLES(name)};
+
 typedef enum {
   KTS_UNBOUND,
   KTS_MODIFIERS,

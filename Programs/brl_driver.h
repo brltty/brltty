@@ -98,11 +98,6 @@ const BrailleDriver BRLSYMBOL = {
 
 DRIVER_VERSION_DECLARATION(brl);
 
-#define KEY_TABLE_DEFINITION(name) keyTableDefinition_##name
-#define DEFINE_KEY_TABLE(name) \
-  static const KeyTableDefinition KEY_TABLE_DEFINITION(name) = \
-  {.bindings=#name, .names=KEY_NAME_TABLES(name)};
-
 #define KEY_TABLE_LIST_REFERENCE const KeyTableDefinition *const *
 #define KEY_TABLE_LIST_SYMBOL CONCATENATE(brl_ktb_,DRIVER_CODE)
 #define KEY_TABLE_LIST_DECLARATION const KeyTableDefinition *const KEY_TABLE_LIST_SYMBOL[]
