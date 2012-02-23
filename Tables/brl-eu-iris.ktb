@@ -1,0 +1,86 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title EuroBraille Iris
+
+bind DownArrow+LeftArrow CONTEXT+1
+bind DownArrow+RightArrow CONTEXT+2
+
+bind L1 FWINLT
+bind L2 LNUP
+bind L3 PRPROMPT
+bind L4 PREFMENU
+bind L5 INFO
+bind L6 NXPROMPT
+bind L7 LNDN
+bind L8 FWINRT
+bind LeftArrow KEY_CURSOR_LEFT
+bind RightArrow KEY_CURSOR_RIGHT
+bind UpArrow KEY_CURSOR_UP
+bind DownArrow KEY_CURSOR_DOWN
+bind L1+L2 TOP_LEFT
+bind L3+L4 FREEZE
+bind L6+L7 HOME
+bind L7+L8 BOT_LEFT
+bind L1+L2+L3+L4 RESTARTBRL
+bind L5+L6+L7+L8 RESTARTSPEECH
+
+
+context 1
+bind L1 TOP_LEFT
+bind L3 PRSEARCH
+bind L4 HELP
+bind L5 LEARN
+bind L6 NXSEARCH
+bind L8 BOT_LEFT
+bind LeftArrow LNBEG
+bind RightArrow LNEND
+bind UpArrow HOME
+bind DownArrow BACK
+
+
+context 2
+bind L1 CONTEXT+3
+bind L2 CONTEXT+4
+bind L3 CSRVIS
+bind L6 CONTEXT+5
+bind L7 PASTE
+bind L8 CONTEXT+6
+bind UpArrow PREFMENU
+bind DownArrow CSRTRK
+bind RightArrow TUNES
+
+
+context 3
+bind RoutingKey1 CUTBEGIN
+
+
+context 4
+bind RoutingKey1 CUTAPPEND
+
+
+context 5
+bind RoutingKey1 CUTRECT
+
+
+context 6
+bind RoutingKey1 CUTLINE
+
+
+context default
+include brl-eu-common.kti
