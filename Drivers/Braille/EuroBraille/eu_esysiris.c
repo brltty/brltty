@@ -34,8 +34,6 @@
 #include "eu_protocol.h"
 #include "eu_keys.h"
 
-# define	READ_BUFFER_LENGTH 2048
-
 typedef enum {
   IRIS_UNKNOWN        = 0X00,
   IRIS_20             = 0X01,
@@ -141,12 +139,15 @@ static const ModelEntry modelTable[] = {
 
 /** Static Local Variables */
 
-static int brlCols = 0;
 static ModelIdentifier modelIdentifier = IRIS_UNKNOWN;
+static int brlCols = 0;
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
 static int forceRewrite;
 
+static unsigned char sequenceCheck;
+static unsigned char sequenceKnown;
+static unsigned char sequenceNumber;
 
 
 /*** Local functions */
@@ -160,14 +161,9 @@ LogUnknownProtocolKey(const char *function, unsigned char key) {
 static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
   unsigned char *buffer = packet;
-  int offset = 0;
-  int length = 3;
-
-  if (size < length)
-    {
-      logMessage(LOG_WARNING, "input buffer too small");
-      return 0;
-    }
+  const unsigned char pad = 0X55;
+  unsigned int offset = 0;
+  unsigned int length = 3;
 
   while (1)
     {
@@ -189,14 +185,36 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
 
       switch (offset)
         {
-          case 0:
-            if (byte == 0X55) continue;
+          case 0: {
+            unsigned char sequence = sequenceCheck;
+            sequenceCheck = 0;
 
-            if (byte != STX)
-              {
-                logIgnoredByte(byte);
-                continue;
-              }
+            if (sequence && sequenceKnown) {
+              if (byte == ++sequenceNumber) continue;
+              logInputProblem("Unexpected Sequence Number", &byte, 1);
+              sequenceKnown = 0;
+            }
+
+            if (byte == pad) continue;
+            if (byte == STX) break;
+
+            if (sequence && !sequenceKnown) {
+              sequenceNumber = byte;
+              sequenceKnown = 1;
+            } else {
+              logIgnoredByte(byte);
+            }
+
+            continue;
+          }
+
+          case 1:
+            if ((byte == pad) && !sequenceKnown) {
+              sequenceNumber = buffer[0];
+              sequenceKnown = 1;
+              offset = 0;
+              continue;
+            }
             break;
 
           case 2:
@@ -207,7 +225,7 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
             break;
         }
 
-      if (offset < length)
+      if (offset < size)
         {
           buffer[offset] = byte;
         }
@@ -227,6 +245,7 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
               continue;
             }
 
+          sequenceCheck = 1;
           logInputPacket(buffer, offset);
           return 1;
         }
@@ -662,7 +681,11 @@ static int	esysiris_init(BrailleDisplay *brl)
     { /* Succesfully identified model. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
+
       forceRewrite = 1;
+      sequenceCheck = 0;
+      sequenceKnown = 0;
+
       logMessage(LOG_INFO, "eu: %s connected.",
 	         modelTable[modelIdentifier].name);
       return (1);
