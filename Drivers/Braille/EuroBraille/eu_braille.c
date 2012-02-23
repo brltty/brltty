@@ -59,18 +59,18 @@ updateWriteDelay (BrailleDisplay *brl, size_t count) {
 }
 
 static ssize_t
-eubrl_genericRead (BrailleDisplay *brl, void *buffer, size_t length, int wait) {
-  return gioReadData(gioEndpoint, buffer, length, wait);
+eubrl_genericReadByte (BrailleDisplay *brl, unsigned char *byte, int wait) {
+  return gioReadByte(gioEndpoint, byte, wait);
 }
 
 static ssize_t
-eubrl_genericWrite (BrailleDisplay *brl, const void *data, size_t length) {
+eubrl_genericWriteData (BrailleDisplay *brl, const void *data, size_t length) {
   updateWriteDelay(brl, length);
   return gioWriteData(gioEndpoint, data, length);
 }
 
 static ssize_t
-eubrl_usbWrite (BrailleDisplay *brl, const void *data, size_t length) {
+eubrl_usbWriteData (BrailleDisplay *brl, const void *data, size_t length) {
   const unsigned int USB_PACKET_SIZE = 64;
   size_t pos = 0;
   while (pos < length) {
@@ -91,20 +91,20 @@ eubrl_usbWrite (BrailleDisplay *brl, const void *data, size_t length) {
 }
 
 static const t_eubrl_io	eubrl_serialIos = {
-  .read = eubrl_genericRead,
-  .write = eubrl_genericWrite
+  .readByte = eubrl_genericReadByte,
+  .writeData = eubrl_genericWriteData
 };
 
 static const t_eubrl_io	eubrl_usbIos = {
   .protocol = &esysirisProtocol,
-  .read = eubrl_genericRead,
-  .write = eubrl_usbWrite
+  .readByte = eubrl_genericReadByte,
+  .writeData = eubrl_usbWriteData
 };
 
 static const t_eubrl_io	eubrl_bluetoothIos = {
   .protocol = &esysirisProtocol,
-  .read = eubrl_genericRead,
-  .write = eubrl_genericWrite
+  .readByte = eubrl_genericReadByte,
+  .writeData = eubrl_genericWriteData
 };
 
 static int

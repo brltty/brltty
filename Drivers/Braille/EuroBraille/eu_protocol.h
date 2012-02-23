@@ -50,8 +50,8 @@ typedef struct {
 
 typedef struct {
   const t_eubrl_protocol *protocol;
-  ssize_t (*read) (BrailleDisplay *brl, void *buffer, size_t bufsize, int wait);
-  ssize_t (*write) (BrailleDisplay *brl, const void *buf, size_t size);
+  ssize_t (*readByte) (BrailleDisplay *brl, unsigned char *byte, int wait);
+  ssize_t (*writeData) (BrailleDisplay *brl, const void *data, size_t size);
 } t_eubrl_io;
 
 extern const t_eubrl_io *io;

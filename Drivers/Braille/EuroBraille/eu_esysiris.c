@@ -169,15 +169,8 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
     {
       int started = offset > 0;
       unsigned char byte;
-      ssize_t result = io->read(brl, &byte, 1, started);
 
-      if (!result)
-        {
-          errno = EAGAIN;
-          result = -1;
-        }
-
-      if (result == -1)
+      if (!io->readByte(brl, &byte, started))
         {
           if (started) logPartialPacket(buffer, offset);
           return (errno == EAGAIN)? 0: -1;
@@ -247,7 +240,7 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
 
           sequenceCheck = 1;
           logInputPacket(buffer, offset);
-          return 1;
+          return offset;
         }
     }
 }
@@ -264,7 +257,7 @@ static ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, siz
   memcpy(buf + 3, packet, size);
   buf[sizeof(buf)-1] = ETX;
   logOutputPacket(buf, sizeof(buf));
-  return io->write(brl, buf, sizeof(buf));
+  return io->writeData(brl, buf, sizeof(buf));
 }
 
 static int
@@ -469,7 +462,7 @@ static unsigned int	esysiris_readKey(BrailleDisplay *brl)
   static unsigned char	inPacket[2048];
   unsigned int res = 0;
 
-  if (esysiris_readPacket(brl, inPacket, 2048) == 1)
+  if (esysiris_readPacket(brl, inPacket, 2048) > 0)
     { /* We got a packet */
       switch (inPacket[3])
 	{
@@ -661,6 +654,10 @@ static int	esysiris_init(BrailleDisplay *brl)
   char outPacket[2] = {'S', 'I'};
   int	leftTries = 24;
       
+  forceRewrite = 1;
+  sequenceCheck = 0;
+  sequenceKnown = 0;
+
   while (leftTries-- && brlCols == 0)
     {
       if (esysiris_writePacket(brl, (unsigned char *)outPacket, 2) == -1)
@@ -682,11 +679,7 @@ static int	esysiris_init(BrailleDisplay *brl)
       brl->textRows = 1;
       brl->textColumns = brlCols;
 
-      forceRewrite = 1;
-      sequenceCheck = 0;
-      sequenceKnown = 0;
-
-      logMessage(LOG_INFO, "eu: %s connected.",
+      logMessage(LOG_DEBUG, "eu: %s connected.",
 	         modelTable[modelIdentifier].name);
       return (1);
     }

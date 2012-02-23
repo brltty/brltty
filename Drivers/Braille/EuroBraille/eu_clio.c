@@ -131,7 +131,7 @@ static const struct s_clioModelType		clioModels[] =
 /* Local functions */
 static int sendbyte(BrailleDisplay *brl, unsigned char c)
 {
-  return io->write(brl, (char*)&c, 1);
+  return io->writeData(brl, (char*)&c, 1);
 }
 
 static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
@@ -145,15 +145,8 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
       int started = offset > 0;
       int escaped = 0;
       unsigned char byte;
-      ssize_t result = io->read(brl, &byte, 1, (started || escape));
 
-      if (!result)
-        {
-          errno = EAGAIN;
-          result = -1;
-        }
-
-      if (result == -1)
+      if (!io->readByte(brl, &byte, (started || escape)))
         {
           if (started) logPartialPacket(buffer, offset);
           return (errno == EAGAIN)? 0: -1;
@@ -259,7 +252,7 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
           previousPacketNumber = buffer[offset];
 
           memcpy(packet, &buffer[1], offset-1);
-          return 1;
+          return offset;
         }
     }
 }
@@ -290,7 +283,7 @@ static ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t 
    *q++ = EOT;
    packetSize = q - buf;
    logOutputPacket(buf, packetSize);
-   return io->write(brl, buf, packetSize);
+   return io->writeData(brl, buf, packetSize);
 }
 
 static int     clio_resetDevice(BrailleDisplay *brl)
