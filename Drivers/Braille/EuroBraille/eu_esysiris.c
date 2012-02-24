@@ -592,12 +592,15 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
 static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
 {
   int key = EOF;
+
   switch(packet[0])
     {
-    case 'B':
-      key = (packet[1] * 256 + packet[2]) & 0x000003ff;
-      key |= EUBRL_BRAILLE_KEY;
+    case 'B': {
+      uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
+      enqueueKeys(keys, EU_SET_BrailleKeys, 0);
       break;
+    }
+
     case 'I': {
       unsigned char key = packet[2];
 
