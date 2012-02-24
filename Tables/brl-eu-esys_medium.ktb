@@ -21,7 +21,7 @@ title EuroBraille Esys 40,64
 bind S1L FWINLT
 bind S1R FWINRT
 
-bind J1L+S1P MUTE
+bind J1L+S1L+S1R MUTE
 bind J1L+S1L SAY_SLOWER
 bind J1L+S1R SAY_FASTER
 
