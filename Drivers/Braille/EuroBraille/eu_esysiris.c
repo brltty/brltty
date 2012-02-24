@@ -200,7 +200,11 @@ typedef enum {
 
 typedef struct {
   const char *modelName;
+  unsigned char cellCount;
   const KeyTableDefinition *keyTable;
+  unsigned hasBrailleKeyboard:1;
+  unsigned hasAzertyKeyboard:1;
+  unsigned hasOpticalRouting:1;
   unsigned isIris:1;
   unsigned isEsys:1;
   unsigned isEsytime:1;
@@ -215,84 +219,112 @@ static const ModelEntry modelTable[] = {
 
   [IRIS_20] = {
     .modelName = "Iris 20",
+    .cellCount = 20,
+    .hasBrailleKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_40] = {
     .modelName = "Iris 40",
+    .cellCount = 40,
+    .hasBrailleKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_S20] = {
     .modelName = "Iris S-20",
+    .cellCount = 20,
+    .hasBrailleKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_S32] = {
     .modelName = "Iris S-32",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_KB20] = {
     .modelName = "Iris KB-20",
+    .cellCount = 20,
+    .hasAzertyKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [IRIS_KB40] = {
     .modelName = "Iris KB-40",
+    .cellCount = 40,
+    .hasAzertyKeyboard = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
   [ESYS_12] = {
     .modelName = "Esys 12",
+    .cellCount = 12,
+    .hasBrailleKeyboard = 1,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
   [ESYS_40] = {
     .modelName = "Esys 40",
+    .cellCount = 40,
+    .hasBrailleKeyboard = 1,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_LIGHT_40] = {
     .modelName = "Esys Light 40",
+    .cellCount = 40,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_24] = {
     .modelName = "Esys 24",
+    .cellCount = 24,
+    .hasBrailleKeyboard = 1,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
   [ESYS_64] = {
     .modelName = "Esys 64",
+    .cellCount = 64,
+    .hasBrailleKeyboard = 1,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
   [ESYS_80] = {
     .modelName = "Esys 80",
+    .cellCount = 80,
+    .hasBrailleKeyboard = 1,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_large)
   },
 
   [ESYTIME_32] = {
     .modelName = "Esytime 32",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
+    .hasOpticalRouting = 1,
     .isEsytime = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
 
   [ESYTIME_32_STANDARD] = {
     .modelName = "Esytime 32 Standard",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
     .isEsytime = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
@@ -310,13 +342,14 @@ static uint32_t protocolVersion;
 static uint32_t deviceOptions;
 static uint16_t maximumFrameLength;
 
-static int routingMode;
 static int forceRewrite;
 static int keyReadError;
 
 static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;
 static unsigned char sequenceNumber;
+
+static uint32_t commandKeys;
 
 
 /*** Local functions */
@@ -599,7 +632,11 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
         keys = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
       }
 
-      enqueueKeys(keys, EU_SET_CommandKeys, 0);
+      if (model->isIris) {
+        enqueueKeys(keys, EU_SET_CommandKeys, 0);
+      } else {
+        enqueueUpdatedKeys(keys, &commandKeys, EU_SET_CommandKeys, 0);
+      }
       break;
     }
 
@@ -746,12 +783,13 @@ static int	esysiris_init(BrailleDisplay *brl)
   deviceOptions = 0;
   maximumFrameLength = 0;
 
-  routingMode = BRL_BLK_ROUTE;
   forceRewrite = 1;
   keyReadError = 0;
 
   sequenceCheck = 0;
   sequenceKnown = 0;
+
+  commandKeys = 0;
 
   while (leftTries-- && !haveSystemInformation)
     {
