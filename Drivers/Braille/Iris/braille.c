@@ -280,7 +280,7 @@ static int checkLatchState()
 /* Returns the size of the read packet. */
 /* 0 means no packet has been read and there is no error. */
 /* -1 means an error occurred */
-static ssize_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
+static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
 {
   unsigned char ch;
   size_t size_;
@@ -330,12 +330,11 @@ static ssize_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, s
       }
     }
   }
-  if ( errno == EAGAIN )  return 0;
-  logSystemError("readNativePacket");
-  return -1;
+  if ( errno != EAGAIN )  logSystemError("readNativePacket");
+  return 0;
 }
 
-static ssize_t readEurobraillePacket(Port *port, void *packet, size_t size)
+static size_t readEurobraillePacket(Port *port, void *packet, size_t size)
 {
   unsigned char ch;
   size_t size_;
@@ -1046,7 +1045,7 @@ writeEurobrailleStringPacket (BrailleDisplay *brl, Port *port, const char *strin
 /* No check is performed to avoid several consecutive identical writes at this level */
 static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
 {
-  ssize_t size = brl->textColumns * brl->textRows;
+  size_t size = brl->textColumns * brl->textRows;
   unsigned char packet[IR_MAXWINDOWSIZE+1] = { IR_OPT_WriteBraille };
   unsigned char *p = packet+1;
   int i;
@@ -1059,7 +1058,7 @@ static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *
 /* No check is performed to avoid several consecutive identical writes at this level */
 static ssize_t writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text)
 {
-  ssize_t size = brl->textColumns * brl->textRows;
+  size_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
   translateOutputCells(dots, text, size);
   return writeDots(brl, port, dots);
@@ -1464,7 +1463,7 @@ isMenuKey (const unsigned char *packet, size_t size) {
 static int readCommand_embedded (BrailleDisplay *brl)
 {
   unsigned char packet[MAXPACKETSIZE];
-  ssize_t size;
+  size_t size;
 
   if (checkLatchState()) {
     if (deviceSleeping) {
@@ -1478,8 +1477,6 @@ static int readCommand_embedded (BrailleDisplay *brl)
   if (deviceSleeping) return BRL_CMD_OFFLINE;
 
   while ((size = readNativePacket(brl, &internalPort, packet, sizeof(packet)))) {
-    if (size == -1) return BRL_CMD_RESTARTBRL;
-
     /* The test for Menu key should come first since this key toggles */
     /* packet forward mode on/off */
     if (isMenuKey(packet, size)) {
@@ -1502,6 +1499,8 @@ static int readCommand_embedded (BrailleDisplay *brl)
     }
   }
 
+  if ( errno != EAGAIN )  return BRL_CMD_RESTARTBRL;
+
   if (packetForwardMode) {
     if (protocol == IR_PROTOCOL_NATIVE) {
       while ((size = readNativePacket(brl, &externalPort, packet, sizeof(packet)))) {
@@ -1523,10 +1522,10 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
 {
   while (1) {
     unsigned char packet[MAXPACKETSIZE];
-    ssize_t size;
+    size_t size;
 
     size = readNativePacket(brl, &internalPort, packet, sizeof(packet));
-    if (size < 0) return BRL_CMD_RESTARTBRL;
+    if (!size && (errno != EAGAIN)) return BRL_CMD_RESTARTBRL;
 
     /* The test for Menu key should come first since this key toggles */
     /* packet forward mode on/off */
@@ -1632,21 +1631,17 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
     deviceConnected = 1;
   }
   brl->textRows = 1;
-  size = sendRequest(brl, IR_OPT_VersionRequest, deviceResponse);
-  if (size <= 0)
-  {
+  if ( ! (size = sendRequest(brl, IR_OPT_VersionRequest, deviceResponse) )) {
     logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to version request.");
     closePort(&internalPort);
     return 0;
   }
-  if (size < 3)
-  {
+  if (size < 3) {
     logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent a too small response to version request", deviceResponse, size);
     closePort(&internalPort);
     return 0;
   } 
-  if (deviceResponse[0] != IR_IPT_VersionResponse)
-  {
+  if (deviceResponse[0] != IR_IPT_VersionResponse) {
     logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent an unexpected response to version request", deviceResponse, size);
     closePort(&internalPort);
     return 0;
@@ -1688,27 +1683,22 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
   memcpy(firmwareVersion, deviceResponse+2, size-2);
   firmwareVersion[size-2] = 0;
   logMessage(LOG_INFO, DRIVER_LOG_PREFIX "The device's firmware version is %s", firmwareVersion);
-  size = sendRequest(brl, IR_OPT_SerialNumberRequest, deviceResponse);
-  if (size <= 0)
-  {
+  if ( ! ( size = sendRequest(brl, IR_OPT_SerialNumberRequest, deviceResponse) )) {
     logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to serial number request.");
     closePort(&internalPort);
     return 0;
   }
-  if (size != IR_OPT_SERIALNUMBERRESPONSE_LENGTH)
-  {
+  if (size != IR_OPT_SERIALNUMBERRESPONSE_LENGTH) {
     logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent a response whose length is invalid to serial number request", deviceResponse, size);
     closePort(&internalPort);
     return 0;
   } 
-  if (deviceResponse[0] != IR_IPT_SerialNumberResponse)
-  {
+  if (deviceResponse[0] != IR_IPT_SerialNumberResponse) {
     logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent an unexpected response to serial number request", deviceResponse, size);
     closePort(&internalPort);
     return 0;
   } 
-  if (deviceResponse[1] != IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH)
-  {
+  if (deviceResponse[1] != IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH) {
     brl->textColumns = deviceResponse[1];
   }
   memcpy(serialNumber, deviceResponse+2, 4);
