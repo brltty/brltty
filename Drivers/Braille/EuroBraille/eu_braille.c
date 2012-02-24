@@ -57,8 +57,12 @@ static inline void
 updateWriteDelay (BrailleDisplay *brl, size_t count) {
   brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
 }
+static int
+eubrl_genericAwaitInput (int timeout) {
+  return gioAwaitInput(gioEndpoint, timeout);
+}
 
-static ssize_t
+static int
 eubrl_genericReadByte (BrailleDisplay *brl, unsigned char *byte, int wait) {
   return gioReadByte(gioEndpoint, byte, wait);
 }
@@ -91,18 +95,21 @@ eubrl_usbWriteData (BrailleDisplay *brl, const void *data, size_t length) {
 }
 
 static const t_eubrl_io	eubrl_serialIos = {
+  .awaitInput = eubrl_genericAwaitInput,
   .readByte = eubrl_genericReadByte,
   .writeData = eubrl_genericWriteData
 };
 
 static const t_eubrl_io	eubrl_usbIos = {
   .protocol = &esysirisProtocol,
+  .awaitInput = eubrl_genericAwaitInput,
   .readByte = eubrl_genericReadByte,
   .writeData = eubrl_usbWriteData
 };
 
 static const t_eubrl_io	eubrl_bluetoothIos = {
   .protocol = &esysirisProtocol,
+  .awaitInput = eubrl_genericAwaitInput,
   .readByte = eubrl_genericReadByte,
   .writeData = eubrl_genericWriteData
 };

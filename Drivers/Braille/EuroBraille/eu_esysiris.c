@@ -28,8 +28,6 @@
 #include <errno.h>
 
 #include "log.h"
-#include "timing.h"
-#include "message.h"
 #include "ascii.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"
@@ -769,10 +767,10 @@ static int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
   return esysiris_keyToCommand(brl, key, ctx);
 }
 
-static int	esysiris_init(BrailleDisplay *brl)
-{
-  char outPacket[2] = {'S', 'I'};
-  int leftTries = 24;
+static int
+esysiris_init(BrailleDisplay *brl) {
+  static const unsigned char packet[] = {'S', 'I'};
+  int leftTries = 4;
       
   modelIdentifier = IRIS_UNKNOWN;
   model = NULL;
@@ -791,43 +789,40 @@ static int	esysiris_init(BrailleDisplay *brl)
 
   commandKeys = 0;
 
-  while (leftTries-- && !haveSystemInformation)
-    {
-      if (esysiris_writePacket(brl, (unsigned char *)outPacket, 2) == -1)
-	{
-	  logMessage(LOG_WARNING, "eu: EsysIris: Failed to send ident request.");
-	  leftTries = 0;
-	  continue;
-	}
-      int i=60;
-      while(i-- && !haveSystemInformation)
-        {
-          esysiris_readCommand(brl, KTB_CTX_DEFAULT);
-          approximateDelay(10);
+  while (leftTries-- && !haveSystemInformation) {
+    if (esysiris_writePacket(brl, packet, sizeof(packet)) != -1) {
+      while (io->awaitInput(500)) {
+        esysiris_readCommand(brl, KTB_CTX_DEFAULT);
+
+        if (haveSystemInformation) {
+          model = &modelTable[modelIdentifier];
+
+          {
+            const KeyTableDefinition *ktd = model->keyTable;
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
+          if (!maximumFrameLength) {
+            if (model->isIris) maximumFrameLength = 2048;
+            if (model->isEsys) maximumFrameLength = 128;
+          }
+
+          logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
+                     model->modelName, brl->textColumns);
+          return 1;
         }
-      approximateDelay(100);
-    }
-  if (haveSystemInformation)
-    { /* Succesfully identified model. */
-      model = &modelTable[modelIdentifier];
-
-      {
-        const KeyTableDefinition *ktd = model->keyTable;
-
-        brl->keyBindings = ktd->bindings;
-        brl->keyNameTables = ktd->names;
       }
 
-      if (!maximumFrameLength) {
-        if (model->isIris) maximumFrameLength = 2048;
-        if (model->isEsys) maximumFrameLength = 128;
-      }
-
-      logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
-	         model->modelName, brl->textColumns);
-      return (1);
+      if (errno != EAGAIN) leftTries = 0;
+    } else {
+      logMessage(LOG_WARNING, "eu: EsysIris: Failed to send ident request.");
+      leftTries = 0;
     }
-  return (0);
+  }
+
+  return 0;
 }
 
 static int	esysiris_resetDevice(BrailleDisplay *brl)
