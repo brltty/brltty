@@ -168,6 +168,11 @@ typedef enum {
 
   BRL_CMD_OFFLINE /* braille display temporarily unavailable */,
 
+  BRL_CMD_SHIFT /* add shift modifier to next typed character or emulated key */,
+  BRL_CMD_UPPER /* add upper modifier to next typed character or emulated key */,
+  BRL_CMD_CONTROL /* add control modifier to next typed character or emulated key */,
+  BRL_CMD_META /* add meta modifier to next typed character or emulated key */,
+
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
 

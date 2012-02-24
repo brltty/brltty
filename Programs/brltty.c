@@ -1094,6 +1094,7 @@ static int oldwiny;
 static int restartRequired;
 static int isOffline;
 static int isSuspended;
+static int inputModifiers;
 
 static int
 brlttyPrepare_next (void) {
@@ -1103,6 +1104,20 @@ brlttyPrepare_next (void) {
   return 1;
 }
 
+static void
+resetBrailleState (void) {
+  resetScanCodes();
+  resetBlinkingStates();
+  if (prefs.autorepeat) resetAutorepeat();
+  inputModifiers = 0;
+}
+
+static void
+applyInputModifiers (int *modifiers) {
+  *modifiers |= inputModifiers;
+  inputModifiers = 0;
+}
+
 static int
 brlttyPrepare_first (void) {
   setSessionEntry();
@@ -1110,17 +1125,14 @@ brlttyPrepare_first (void) {
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
 
-  oldwinx = ses->winx;
-  oldwiny = ses->winy;
+  oldwinx = ses->winx; oldwiny = ses->winy;
   restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
 
   highlightWindow();
   checkPointer();
-  resetScanCodes();
-  resetBlinkingStates();
-  if (prefs.autorepeat) resetAutorepeat();
+  resetBrailleState();
 
   brlttyPrepare = brlttyPrepare_next;
   return 1;
@@ -1223,10 +1235,11 @@ doCommand:
   if (!executeScreenCommand(&command)) {
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_NOOP:        /* do nothing but loop */
-        if (command & BRL_FLG_TOGGLE_ON)
+        if (command & BRL_FLG_TOGGLE_ON) {
           playTune(&tune_toggle_on);
-        else if (command & BRL_FLG_TOGGLE_OFF)
+        } else if (command & BRL_FLG_TOGGLE_OFF) {
           playTune(&tune_toggle_off);
+        }
         break;
 
       case BRL_CMD_TOP_LEFT:
@@ -1600,7 +1613,7 @@ doCommand:
 
       case BRL_CMD_RESTARTBRL:
         restartBrailleDriver();
-        resetScanCodes();
+        resetBrailleState();
         restartRequired = 0;
         break;
       case BRL_CMD_PASTE:
@@ -1698,6 +1711,34 @@ doCommand:
           playTune(&tune_command_rejected);
         }
         break;
+
+      {
+        int modifier;
+
+      case BRL_CMD_SHIFT:
+        modifier = BRL_FLG_CHAR_SHIFT;
+        goto doModifier;
+
+      case BRL_CMD_UPPER:
+        modifier = BRL_FLG_CHAR_UPPER;
+        goto doModifier;
+
+      case BRL_CMD_CONTROL:
+        modifier = BRL_FLG_CHAR_CONTROL;
+        goto doModifier;
+
+      case BRL_CMD_META:
+        modifier = BRL_FLG_CHAR_META;
+        goto doModifier;
+
+      doModifier:
+        if (inputModifiers & modifier) {
+          inputModifiers &= ~modifier;
+        } else {
+          inputModifiers |= modifier;
+        }
+        break;
+      }
 
       case BRL_CMD_PREFMENU:
         if (isMenuScreen()) {
@@ -1886,6 +1927,7 @@ doCommand:
                 break;
             }
 
+            applyInputModifiers(&flags);
             if (!insertKey(key, flags)) {
             badKey:
               playTune(&tune_command_rejected);
@@ -1894,11 +1936,13 @@ doCommand:
           }
 
           case BRL_BLK_PASSCHAR: {
+            applyInputModifiers(&flags);
             if (!insertKey(BRL_ARG_GET(command), flags)) playTune(&tune_command_rejected);
             break;
           }
 
           case BRL_BLK_PASSDOTS:
+            applyInputModifiers(&flags);
             if (!insertKey(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
             break;
 
