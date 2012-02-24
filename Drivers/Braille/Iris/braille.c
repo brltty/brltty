@@ -1365,13 +1365,18 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
 
 static int
 eurobrl_handleFunctionKeys(BrailleDisplay *brl, Port *port, uint16_t keys) {
-  unsigned char data[] = {
-    0X4B, 0X43, 0, (
-      (keys & 0XF) |
-      ((keys >> 1) & 0XF0)
-    )
-  };
-  return writeEurobraillePacket(brl, port, data, sizeof(data));
+  if (keys) {
+    unsigned char data[] = {
+      0X4B, 0X43, 0, (
+        (keys & 0XF) |
+        ((keys >> 1) & 0XF0)
+      )
+    };
+
+    if (!writeEurobraillePacket(brl, port, data, sizeof(data))) return 0;
+  }
+
+  return 1;
 }
 
 static int
