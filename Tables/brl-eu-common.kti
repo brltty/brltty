@@ -32,6 +32,10 @@ map Space SPACE
 bind Backspace KEY_BACKSPACE
 bind Backspace+Space KEY_ENTER
 
+bind Space+Dot7 SHIFT
+bind Space+Dot8 META
+bind Space+Dot7+Dot8 CONTROL
+
 bind Space+Dot2+Dot5+Dot6 KEY_TAB
 bind Space+Dot2+Dot3+Dot6 KEY_TAB+shift
 
