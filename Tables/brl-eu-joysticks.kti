@@ -1,0 +1,62 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+bind J2P HOME
+bind J2L FWINLT
+bind J2R FWINRT
+bind J2U LNUP
+bind J2D LNDN
+
+bind J1L PRPROMPT
+bind J1R NXPROMPT
+bind J1U TOP_LEFT
+bind J1D BOT_LEFT
+
+bind J1D+J2L CONTEXT+1
+bind J1D+J2U CONTEXT+2
+bind J1D+J2D CONTEXT+3
+bind J1D+J2R CONTEXT+4
+bind J1D+J2P PASTE
+
+bind J1L+J2P SAY_LINE
+bind J1L+J2U SAY_ABOVE
+bind J1L+J2D SAY_BELOW
+bind J1L+J2L SAY_SOFTER
+bind J1L+J2R SAY_LOUDER
+
+bind J1R+J2U LEARN
+bind J1R+J2D HELP
+
+
+context 1
+bind RoutingKey1 CUTBEGIN
+
+
+context 2
+bind RoutingKey1 CUTAPPEND
+
+
+context 3
+bind RoutingKey1 CUTRECT
+
+
+context 4
+bind RoutingKey1 CUTLINE
+
+
+context default
