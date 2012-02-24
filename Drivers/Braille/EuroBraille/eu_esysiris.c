@@ -52,10 +52,10 @@ BEGIN_KEY_NAME_TABLE(linear)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(arrow)
-  COMMAND_KEY_ENTRY(LA, "LA"),
-  COMMAND_KEY_ENTRY(RA, "RA"),
-  COMMAND_KEY_ENTRY(UA, "UA"),
-  COMMAND_KEY_ENTRY(DA, "DA"),
+  COMMAND_KEY_ENTRY(LA, "LeftArrow"),
+  COMMAND_KEY_ENTRY(RA, "RightArrow"),
+  COMMAND_KEY_ENTRY(UA, "UpArrow"),
+  COMMAND_KEY_ENTRY(DA, "DownArrow"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(function)
@@ -560,30 +560,49 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
 
 static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
 {
-  unsigned int key = EOF;
+  int key = EOF;
   switch(packet[0])
     {
     case 'B':
       key = (packet[1] * 256 + packet[2]) & 0x000003ff;
       key |= EUBRL_BRAILLE_KEY;
       break;
-    case 'I':
-      key = packet[2] & 0xbf;
-      key |= EUBRL_ROUTING_KEY;
-      break;
-    case 'C':
-      {
-	if (model->isEsys)
-	  {
-            key = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
-	  }
-	else
-	  {
-	    key = (packet[1] * 256 + packet[2]) & 0x00000fff;
-	  }
+    case 'I': {
+      unsigned char key = packet[2];
+
+      if ((key > 0) && (key <= brl->textColumns)) {
+        key -= 1;
+
+        switch (packet[1]) {
+          case 1:
+            enqueueKey(EU_SET_RoutingKeys1, key);
+            break;
+
+          case 3:
+            enqueueKey(EU_SET_RoutingKeys2, key);
+            break;
+
+          default:
+            break;
+        }
       }
-      key |= EUBRL_COMMAND_KEY;
+
       break;
+    }
+
+    case 'C': {
+      uint32_t keys;
+
+      if (model->isIris) {
+        keys = ((packet[1] << 8) | packet[2]) & 0XFFF;
+      } else {
+        keys = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
+      }
+
+      enqueueKeys(keys, EU_SET_CommandKeys, 0);
+      break;
+    }
+
     case 'Z':
       {
         unsigned char a = packet[1];
@@ -688,127 +707,6 @@ static int	esysiris_readKey(BrailleDisplay *brl)
   return res;
 }
 
-static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
-{
-  int res = EOF;
-  unsigned int subkey = 0;
-  static char flagLevel1 = 0, flagLevel2 = 0;
-
-  if (model->isIris)
-    { /** Iris models keys */
-      if (key == VK_FDB && !flagLevel1)
-	{
-	  flagLevel2 = !flagLevel2;
-	  if (flagLevel2) message(NULL, gettext("level 2 ..."), MSG_NODELAY);
-	}
-      else if (key == VK_FGB && !flagLevel2)
-	{
-	  flagLevel1 = !flagLevel1;
-	  if (flagLevel1) message(NULL, gettext("level 1 ..."), MSG_NODELAY);
-	}
-      if (flagLevel1)
-	{
-	  while ((subkey = esysiris_readKey(brl)) == 0) approximateDelay(20);
-	  flagLevel1 = 0;
-	  switch (subkey & 0x00000fff)
-	    {
-	    case VK_L1 : res = BRL_CMD_TOP_LEFT; break;
-	    case VK_L3 : res = BRL_CMD_PRSEARCH; break;
-	    case VK_L4 : res = BRL_CMD_HELP; break;
-	    case VK_L5 : res = BRL_CMD_LEARN; break;
-	    case VK_L6 : res = BRL_CMD_NXSEARCH; break;
-	    case VK_L8 : res = BRL_CMD_BOT_LEFT; break;
-	    case VK_FG : res = BRL_CMD_LNBEG; break;
-	    case VK_FD : res = BRL_CMD_LNEND; break;
-	    case VK_FH : res = BRL_CMD_HOME; break;
-	    case VK_FB : res = BRL_CMD_RETURN; break;
-	    default: res = BRL_CMD_NOOP; break;
-	    }
-	}
-      else if (flagLevel2)
-	{
-	  while ((subkey = esysiris_readKey(brl)) == 0) approximateDelay(20);
-	  flagLevel2 = 0;
-	  switch (subkey & 0x00000fff)
-	    {
-	    case VK_L1: routingMode = BRL_BLK_CUTBEGIN; break;
-	    case VK_L2: routingMode = BRL_BLK_CUTAPPEND; break;
-	    case VK_L3 : res = BRL_CMD_CSRVIS; break;
-	    case VK_L6: routingMode = BRL_BLK_CUTRECT; break;
-	    case VK_L7: res = BRL_CMD_PASTE; break;
-	    case VK_L8: routingMode = BRL_BLK_CUTLINE; break;
-	    case VK_FH: res = BRL_CMD_PREFMENU; break;
-	    case VK_FB: res = BRL_CMD_CSRTRK; break;
-	    case VK_FD : res = BRL_CMD_TUNES; break;
-	    default: res = BRL_CMD_NOOP; break;
-	    }
-	}
-      else
-	{
-	  switch (key)
-	    {
-	    case VK_NONE:     res = BRL_CMD_NOOP; break;
-	    case VK_L1:	res = BRL_CMD_FWINLT; break;
-	    case VK_L2:	res = BRL_CMD_LNUP; break;
-	    case VK_L3:	res = BRL_CMD_PRPROMPT; break;
-	    case VK_L4:	res = BRL_CMD_PREFMENU; break;
-	    case VK_L5:	res = BRL_CMD_INFO; break;
-	    case VK_L6:	res = BRL_CMD_NXPROMPT; break;
-	    case VK_L7:	res = BRL_CMD_LNDN; break;
-	    case VK_L8:	res = BRL_CMD_FWINRT; break;
-	    case VK_FB:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN; break;
-	    case VK_FH:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP; break;
-	    case VK_FG:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT; break;
-	    case VK_FD:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT; break;
-	    case VK_L12:	res = BRL_CMD_TOP_LEFT; break;
-	    case VK_L34:        res = BRL_CMD_FREEZE; break;
-	    case VK_L67:	res = BRL_CMD_HOME; break;
-	    case VK_L78:	res = BRL_CMD_BOT_LEFT; break;
-	    case VK_L1234:	res = BRL_CMD_RESTARTBRL; break;
-	    case VK_L5678:	res = BRL_CMD_RESTARTSPEECH; break;
-	    }
-	}
-    }
-  if (model->isEsys)
-    { /** Esys models keys */
-      if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
-      if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
-      if (key == VK_JDG) res = BRL_CMD_FWINLT;
-      if (key == VK_JDH) res = BRL_CMD_LNUP;
-      if (key == VK_JDD) res = BRL_CMD_FWINRT;
-      if (key == VK_JDB) res = BRL_CMD_LNDN;
-
-      if (key == VK_JDM) res = BRL_CMD_HOME;
-
-      if (key == VK_M1M || key == VK_M2M || key == VK_M3M || key == VK_M4M) res = BRL_CMD_FREEZE;
-
-      if (key == VK_JGH) res = BRL_CMD_TOP_LEFT;
-      if (key == VK_JGB) res = BRL_CMD_BOT_LEFT;
-
-      if (key == (VK_JGD | VK_JDG)) routingMode = BRL_BLK_CUTBEGIN;
-      if (key == (VK_JGD | VK_JDD)) routingMode = BRL_BLK_CUTLINE;
-      if (key == (VK_JGD | VK_JDM)) res = BRL_CMD_PASTE;
-
-      if (key == (VK_JGG | VK_JDG)) res = BRL_CMD_SAY_SOFTER;
-      if (key == (VK_JGG | VK_JDH)) res = BRL_CMD_SAY_ABOVE;
-      if (key == (VK_JGG | VK_JDD)) res = BRL_CMD_SAY_LOUDER;
-      if (key == (VK_JGG | VK_JDB)) res = BRL_CMD_SAY_BELOW;
-      if (key == (VK_JGG | VK_JDM)) res = BRL_CMD_SAY_LINE;
-      if ((key == (VK_JGG | VK_M1G)) || (key == (VK_JGG | VK_M2G)) || (key == (VK_JGG | VK_M3G)) || (key == (VK_JGG | VK_M4G))) res = BRL_CMD_SAY_SLOWER;
-      if ((key == (VK_JGG | VK_M1D)) || (key == (VK_JGG | VK_M2D)) || (key == (VK_JGG | VK_M3D)) || (key == (VK_JGG | VK_M4D))) res = BRL_CMD_SAY_FASTER;
-      if ((key == (VK_JGG | VK_M1M)) || (key == (VK_JGG | VK_M2M)) || (key == (VK_JGG | VK_M3M)) || (key == (VK_JGG | VK_M4M))) res = BRL_CMD_MUTE;
-
-      if ((key == (VK_JGD | VK_M1G)) || (key == (VK_JGD | VK_M2G)) || (key == (VK_JGD | VK_M3G)) || (key == (VK_JGD | VK_M4G))) res = BRL_CMD_LNBEG;
-      if ((key == (VK_JGD | VK_M1D)) || (key == (VK_JGD | VK_M2D)) || (key == (VK_JGD | VK_M3D)) || (key == (VK_JGD | VK_M4D))) res = BRL_CMD_LNEND;
-
-      if (key == (VK_JGD | VK_JDH)) res = BRL_CMD_LEARN;
-      if (key == (VK_JGD | VK_JDB)) res = BRL_CMD_HELP;
-      if (key == (VK_JGD | VK_M1M)) res = BRL_CMD_PREFMENU;
-      if (key == (VK_JGD | VK_M4M)) res = BRL_CMD_CSRTRK;
-    }
-  return res;
-}
-
 static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx)
 {
   int res = EOF;
@@ -819,19 +717,6 @@ static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandCo
   if (key & EUBRL_BRAILLE_KEY)
     {
       res = eubrl_handleBrailleKey(key, ctx);
-    }
-  else if (key & EUBRL_ROUTING_KEY)
-    {
-      res = routingMode | ((key - 1) & 0x0000007f);
-      routingMode = BRL_BLK_ROUTE;
-    }
-  else if (key & EUBRL_COMMAND_KEY)
-    {
-      if (model->isEsys) {
-        res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
-      } else {
-        res = esysiris_handleCommandKey(brl, key & 0x00000fff);
-      }
     }
   else if (key & EUBRL_PC_KEY)
     {
@@ -887,6 +772,13 @@ static int	esysiris_init(BrailleDisplay *brl)
   if (haveSystemInformation)
     { /* Succesfully identified model. */
       model = &modelTable[modelIdentifier];
+
+      {
+        const KeyTableDefinition *ktd = model->keyTable;
+
+        brl->keyBindings = ktd->bindings;
+        brl->keyNameTables = ktd->names;
+      }
 
       if (!maximumFrameLength) {
         if (model->isIris) maximumFrameLength = 2048;
