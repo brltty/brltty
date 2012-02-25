@@ -32,9 +32,9 @@
 #include "eu_braille.h"
 
 typedef struct {
-  const char *name;
+  const char *protocolName;
 
-  int (*init) (BrailleDisplay *brl);
+  int (*initializeDevice) (BrailleDisplay *brl);
   int (*resetDevice) (BrailleDisplay *brl);
 
   ssize_t (*readPacket) (BrailleDisplay *brl, void *packet, size_t size);

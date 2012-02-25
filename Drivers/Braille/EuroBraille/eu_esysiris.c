@@ -331,9 +331,6 @@ static const ModelEntry modelTable[] = {
   },
 };
 
-
-/** Static Local Variables */
-
 static unsigned char modelIdentifier;
 static const ModelEntry *model;
 
@@ -352,17 +349,8 @@ static unsigned char sequenceNumber;
 
 static uint32_t commandKeys;
 
-
-/*** Local functions */
-
-
-static inline void
-LogUnknownProtocolKey(const char *function, unsigned char key) {
-  logMessage(LOG_NOTICE,"[eu] %s: unknown protocol key %c (%x)",function,key,key);
-}
-
-static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
-{
+static ssize_t
+readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   unsigned char *buffer = packet;
   const unsigned char pad = 0X55;
   unsigned int offset = 0;
@@ -448,8 +436,8 @@ static ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t siz
     }
 }
 
-static ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
-{
+static ssize_t
+writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   int packetSize = size + 2;
   unsigned char buf[packetSize + 2];
   if (!io || !packet || !size)
@@ -464,7 +452,7 @@ static ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, siz
 }
 
 static int
-handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
+handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
   int logLevel = LOG_INFO;
   const char *infoDescription;
   enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
@@ -592,8 +580,8 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
   return 0;
 }
 
-static void
-enqueueKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
+static int
+makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
   unsigned char a = packet[1];
   unsigned char b = packet[2];
   unsigned char c = packet[3];
@@ -686,18 +674,15 @@ enqueueKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
       break;
   }
 
-  if (command) {
-    if (c & 0X02) command |= BRL_FLG_CHAR_CONTROL;
-    if (c & 0X04) command |= BRL_FLG_CHAR_META;
-  } else {
-    command = BRL_CMD_NOOP;
-  }
+  if (!command) return BRL_CMD_NOOP;
 
-  enqueueCommand(command);
+  if (c & 0X02) command |= BRL_FLG_CHAR_CONTROL;
+  if (c & 0X04) command |= BRL_FLG_CHAR_META;
+  return command;
 }
 
 static int
-esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet) {
+handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
   switch(packet[0]) {
     case 'B': {
       uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
@@ -747,7 +732,7 @@ esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet) {
     }
 
     case 'Z':
-      enqueueKeyboardCommand(brl, packet);
+      enqueueCommand(makeKeyboardCommand(brl, packet));
       break;
 
     default:
@@ -757,10 +742,10 @@ esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet) {
   return EOF;
 }
 
-static int	esysiris_readKey(BrailleDisplay *brl)
-{
+static int
+readKey (BrailleDisplay *brl) {
   unsigned char	packet[2048];
-  ssize_t size = esysiris_readPacket(brl, packet, sizeof(packet));
+  ssize_t size = readPacket(brl, packet, sizeof(packet));
   int res = 0;
 
   if (size == 0) return EOF;
@@ -777,7 +762,7 @@ static int	esysiris_readKey(BrailleDisplay *brl)
       break;
 
     case 'K':
-      res = esysiris_KeyboardHandling(brl, packet + 4);
+      res = handleKeyEvent(brl, packet + 4);
       break;
 
     case 'R':
@@ -792,7 +777,8 @@ static int	esysiris_readKey(BrailleDisplay *brl)
       break;
 
     default:
-      LogUnknownProtocolKey("esysiris_readKey", packet[3]);
+      logMessage(LOG_WARNING, "unknown esysiris protocol code: %c (%x)",
+                 packet[3], packet[3]);
       break;
     }
 
@@ -800,7 +786,7 @@ static int	esysiris_readKey(BrailleDisplay *brl)
 }
 
 static int
-esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
+keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
   int res = EOF;
 
   if (key == EOF) return EOF;
@@ -809,15 +795,15 @@ esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx) 
   return res;
 }
 
-static int	esysiris_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
-{
-  int key = esysiris_readKey(brl);
+static int
+readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
+  int key = readKey(brl);
   if (keyReadError) return BRL_CMD_RESTARTBRL;
-  return esysiris_keyToCommand(brl, key, ctx);
+  return keyToCommand(brl, key, ctx);
 }
 
 static int
-esysiris_init(BrailleDisplay *brl) {
+initializeDevice (BrailleDisplay *brl) {
   static const unsigned char packet[] = {'S', 'I'};
   int leftTries = 4;
       
@@ -839,9 +825,9 @@ esysiris_init(BrailleDisplay *brl) {
   commandKeys = 0;
 
   while (leftTries-- && !haveSystemInformation) {
-    if (esysiris_writePacket(brl, packet, sizeof(packet)) != -1) {
+    if (writePacket(brl, packet, sizeof(packet)) != -1) {
       while (io->awaitInput(500)) {
-        esysiris_readCommand(brl, KTB_CTX_DEFAULT);
+        readCommand(brl, KTB_CTX_DEFAULT);
 
         if (haveSystemInformation) {
           model = &modelTable[modelIdentifier];
@@ -874,15 +860,14 @@ esysiris_init(BrailleDisplay *brl) {
   return 0;
 }
 
-static int	esysiris_resetDevice(BrailleDisplay *brl)
-{
+static int
+resetDevice (BrailleDisplay *brl) {
   (void)brl;
   return 1;
 }
 
-
-static int	esysiris_writeWindow(BrailleDisplay *brl)
-{
+static int
+writeWindow (BrailleDisplay *brl) {
   static unsigned char previousBrailleWindow[80];
   int displaySize = brl->textColumns * brl->textRows;
   
@@ -898,19 +883,19 @@ static int	esysiris_writeWindow(BrailleDisplay *brl)
     buf[1] = 'S';
     memcpy(buf + 2, brl->buffer, displaySize);
 
-    if (esysiris_writePacket(brl, buf, sizeof(buf)) == -1) return 0;
+    if (writePacket(brl, buf, sizeof(buf)) == -1) return 0;
   }
 
   return 1;
 }
 
-static int	esysiris_hasVisualDisplay(BrailleDisplay *brl)
-{
+static int
+hasVisualDisplay (BrailleDisplay *brl) {
   return model->hasVisualDisplay;
 }
 
-static int	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
-{
+static int
+writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   if (model->hasVisualDisplay) {
   }
 
@@ -918,19 +903,19 @@ static int	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 }
 
 const t_eubrl_protocol esysirisProtocol = {
-  .name = "esysiris",
+  .protocolName = "esysiris",
 
-  .init = esysiris_init,
-  .resetDevice = esysiris_resetDevice,
+  .initializeDevice = initializeDevice,
+  .resetDevice = resetDevice,
 
-  .readPacket = esysiris_readPacket,
-  .writePacket = esysiris_writePacket,
+  .readPacket = readPacket,
+  .writePacket = writePacket,
 
-  .readKey = esysiris_readKey,
-  .readCommand = esysiris_readCommand,
-  .keyToCommand = esysiris_keyToCommand,
+  .readKey = readKey,
+  .readCommand = readCommand,
+  .keyToCommand = keyToCommand,
 
-  .writeWindow = esysiris_writeWindow,
-  .hasVisualDisplay = esysiris_hasVisualDisplay,
-  .writeVisual = esysiris_writeVisual
+  .writeWindow = writeWindow,
+  .hasVisualDisplay = hasVisualDisplay,
+  .writeVisual = writeVisual
 };

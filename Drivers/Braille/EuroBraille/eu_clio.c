@@ -600,7 +600,7 @@ static int	clio_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
   return clio_keyToCommand(brl, clio_readKey(brl), ctx);
 }
 
-static int     clio_init(BrailleDisplay *brl)
+static int     clio_initializeDevice(BrailleDisplay *brl)
 {
   int	leftTries = 2;
 
@@ -629,9 +629,9 @@ static int     clio_init(BrailleDisplay *brl)
 
 
 const t_eubrl_protocol clioProtocol = {
-  .name = "clio",
+  .protocolName = "clio",
 
-  .init = clio_init,
+  .initializeDevice = clio_initializeDevice,
   .resetDevice = clio_resetDevice,
 
   .readPacket = clio_readPacket,

@@ -255,13 +255,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if (connectResource(device)) {
     if (protocol) {
       if (!io->protocol || (io->protocol == protocol)) {
-        if (protocol->init(brl)) return 1;
+        if (protocol->initializeDevice(brl)) return 1;
       } else {
-        logMessage(LOG_ERR, "protocol not supported by device: %s", protocol->name);
+        logMessage(LOG_ERR, "protocol not supported by device: %s", protocol->protocolName);
       }
     } else if (io->protocol) {
       protocol = io->protocol;
-      if (protocol->init(brl)) return 1;
+      if (protocol->initializeDevice(brl)) return 1;
     } else {
       static const t_eubrl_protocol *const protocols[] = {
         &esysirisProtocol, &clioProtocol,
@@ -272,8 +272,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       while (*p) {
         const t_eubrl_protocol *protocol = *p++;
 
-        logMessage(LOG_NOTICE, "trying protocol: %s", protocol->name);
-        if (protocol->init(brl)) return 1;
+        logMessage(LOG_NOTICE, "trying protocol: %s", protocol->protocolName);
+        if (protocol->initializeDevice(brl)) return 1;
 	approximateDelay(700);
       }
     }
