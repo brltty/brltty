@@ -687,7 +687,6 @@ enqueueKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
   }
 
   if (command) {
-    if (c & 0X09) command |= BRL_FLG_CHAR_UPPER;
     if (c & 0X02) command |= BRL_FLG_CHAR_CONTROL;
     if (c & 0X04) command |= BRL_FLG_CHAR_META;
   } else {
