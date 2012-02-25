@@ -16,9 +16,16 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title EuroBraille Esys 40,64
+bind S1L FWINLT
+bind S1R FWINRT
 
-include brl-eu-common.kti
-include brl-eu-joysticks.kti
-include brl-eu-sw12.kti
-include brl-eu-sw34.kti
+bind J1L+S1L+S1R MUTE
+bind J1L+S1L SAY_SLOWER
+bind J1L+S1R SAY_FASTER
+
+bind J1R+S1L LNBEG
+bind J1R+S1R LNEND
+
+bind J1R+S1l+S1R PREFMENU
+bind J1R+S2l+S2R CSRTRK
+
