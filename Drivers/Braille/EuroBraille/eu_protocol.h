@@ -43,9 +43,9 @@ typedef struct {
   int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext c);
   int (*keyToCommand) (BrailleDisplay *brl, int key, KeyTableCommandContext ctx);
 
-  void (*writeWindow) (BrailleDisplay *brl);
-  int (*hasLcdSupport) (BrailleDisplay *brl);
-  void (*writeVisual) (BrailleDisplay *brl, const wchar_t *text);
+  int (*writeWindow) (BrailleDisplay *brl);
+  int (*hasVisualDisplay) (BrailleDisplay *brl);
+  int (*writeVisual) (BrailleDisplay *brl, const wchar_t *text);
 } t_eubrl_protocol;
 
 typedef struct {

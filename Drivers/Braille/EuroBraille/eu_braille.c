@@ -335,14 +335,14 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key)
 #endif /* BRL_HAVE_KEY_CODES */
 
 static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) 
-{
-  if (!protocol)
-    return 1;
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  if (!protocol) return 1;
+
   if (text)
-    protocol->writeVisual(brl, text);  
-  protocol->writeWindow(brl);
-  return 1;
+    if (!protocol->writeVisual(brl, text))
+      return 0;
+
+  return protocol->writeWindow(brl);
 }
 
 static int

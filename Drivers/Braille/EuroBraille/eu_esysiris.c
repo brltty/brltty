@@ -202,6 +202,7 @@ typedef struct {
   const KeyTableDefinition *keyTable;
   unsigned hasBrailleKeyboard:1;
   unsigned hasAzertyKeyboard:1;
+  unsigned hasVisualDisplay:1;
   unsigned hasOpticalRouting:1;
   unsigned isIris:1;
   unsigned isEsys:1;
@@ -219,6 +220,7 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris 20",
     .cellCount = 20,
     .hasBrailleKeyboard = 1,
+    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
@@ -227,6 +229,7 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris 40",
     .cellCount = 40,
     .hasBrailleKeyboard = 1,
+    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
@@ -251,6 +254,7 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris KB-20",
     .cellCount = 20,
     .hasAzertyKeyboard = 1,
+    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
@@ -259,6 +263,7 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris KB-40",
     .cellCount = 40,
     .hasAzertyKeyboard = 1,
+    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
@@ -752,14 +757,11 @@ static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandCo
   if (key == EOF) return EOF;
   if (key == 0) return EOF;
 
-  if (key & EUBRL_BRAILLE_KEY)
-    {
-      res = eubrl_handleBrailleKey(key, ctx);
-    }
-  else if (key & EUBRL_PC_KEY)
+  if (key & EUBRL_PC_KEY)
     {
       res = key & 0xFFFFFF;
     }
+
   return res;
 }
 
@@ -835,33 +837,40 @@ static int	esysiris_resetDevice(BrailleDisplay *brl)
 }
 
 
-static void	esysiris_writeWindow(BrailleDisplay *brl)
+static int	esysiris_writeWindow(BrailleDisplay *brl)
 {
   static unsigned char previousBrailleWindow[80];
   int displaySize = brl->textColumns * brl->textRows;
-  unsigned char buf[displaySize + 2];
   
   if (displaySize > sizeof(previousBrailleWindow)) {
     logMessage(LOG_WARNING, "[eu] Discarding too large braille window");
-    return;
+    return 0;
   }
 
   if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &forceRewrite)) {
+    unsigned char buf[displaySize + 2];
+
     buf[0] = 'B';
     buf[1] = 'S';
     memcpy(buf + 2, brl->buffer, displaySize);
-    esysiris_writePacket(brl, buf, sizeof(buf));
+
+    if (esysiris_writePacket(brl, buf, sizeof(buf)) == -1) return 0;
   }
+
+  return 1;
 }
 
-static int	esysiris_hasLcdSupport(BrailleDisplay *brl)
+static int	esysiris_hasVisualDisplay(BrailleDisplay *brl)
 {
-  return (0);
+  return model->hasVisualDisplay;
 }
 
-static void	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
+static int	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 {
-  return;
+  if (model->hasVisualDisplay) {
+  }
+
+  return 1;
 }
 
 const t_eubrl_protocol esysirisProtocol = {
@@ -878,6 +887,6 @@ const t_eubrl_protocol esysirisProtocol = {
   .keyToCommand = esysiris_keyToCommand,
 
   .writeWindow = esysiris_writeWindow,
-  .hasLcdSupport = esysiris_hasLcdSupport,
+  .hasVisualDisplay = esysiris_hasVisualDisplay,
   .writeVisual = esysiris_writeVisual
 };

@@ -368,7 +368,7 @@ static int		convert(char *keys)
   return res;
 }
 
-static void     clio_writeWindow(BrailleDisplay *brl)
+static int     clio_writeWindow(BrailleDisplay *brl)
 {
   static unsigned char previousBrailleWindow[80];
   int displaySize = brl->textColumns * brl->textRows;
@@ -376,7 +376,7 @@ static void     clio_writeWindow(BrailleDisplay *brl)
 
   if ( displaySize > sizeof(previousBrailleWindow) ) {
     logMessage(LOG_WARNING, "[eu] Discarding too large braille window" );
-    return;
+    return 0;
   }
   if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &refreshDisplay)) {
     buf[0] = (unsigned char)(displaySize + 2);
@@ -385,9 +385,10 @@ static void     clio_writeWindow(BrailleDisplay *brl)
     memcpy(buf + 3, brl->buffer, displaySize);
     clio_writePacket(brl, buf, sizeof(buf));
   }
+  return 1;
 }
 
-static void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
+static int     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 {
   static wchar_t previousVisualDisplay[80];
   int displaySize = brl->textColumns * brl->textRows;
@@ -396,11 +397,11 @@ static void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 
   if ( displaySize > sizeof(previousVisualDisplay) ) {
     logMessage(LOG_WARNING, "[eu] Discarding too large visual display" );
-    return;
+    return 0;
   }
 
   if (wmemcmp(previousVisualDisplay, text, displaySize) == 0)
-    return;
+    return 1;
   wmemcpy(previousVisualDisplay, text, displaySize);
   buf[0] = (unsigned char)(displaySize + 2);
   buf[1] = 'D';
@@ -411,9 +412,10 @@ static void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
       buf[i+3] = iswLatin1(wc)? wc: '?';
     }
   clio_writePacket(brl, buf, sizeof(buf));
+  return 1;
 }
 
-static int	clio_hasLcdSupport(BrailleDisplay *brl)
+static int	clio_hasVisualDisplay(BrailleDisplay *brl)
 {
   return (1);
 }
@@ -640,6 +642,6 @@ const t_eubrl_protocol clioProtocol = {
   .keyToCommand = clio_keyToCommand,
 
   .writeWindow = clio_writeWindow,
-  .hasLcdSupport = clio_hasLcdSupport,
+  .hasVisualDisplay = clio_hasVisualDisplay,
   .writeVisual = clio_writeVisual
 };
