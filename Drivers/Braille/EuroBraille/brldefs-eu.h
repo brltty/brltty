@@ -29,9 +29,9 @@ typedef enum {
   EU_CMD_L7    =  6,
   EU_CMD_L8    =  7,
   EU_CMD_Up    =  8,
-  EU_CMD_Left  =  9,
+  EU_CMD_Down  =  9,
   EU_CMD_Right = 10,
-  EU_CMD_Down  = 11,
+  EU_CMD_Left  = 11,
 
   /* Esytime function keys */
   EU_CMD_F1 =  0,
