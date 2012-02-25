@@ -130,6 +130,12 @@ extern int cellsHaveChanged (
   unsigned int *from, unsigned int *to, int *force
 );
 
+extern int
+textHasChanged (
+  wchar_t *text, const wchar_t *new, unsigned int count,
+  unsigned int *from, unsigned int *to, int *force
+);
+
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 
