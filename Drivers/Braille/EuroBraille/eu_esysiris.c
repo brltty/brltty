@@ -32,6 +32,8 @@
 #include "brldefs-eu.h"
 #include "eu_protocol.h"
 
+#define MAXIMUM_DISPLAY_SIZE 80
+
 #define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
 #define COMMAND_KEY_ENTRY(k,n) KEY_ENTRY(CommandKeys, CMD, k, n)
 #define BRAILLE_KEY_ENTRY(k,n) KEY_ENTRY(BrailleKeys, BRL, k, n)
@@ -340,7 +342,8 @@ static uint32_t protocolVersion;
 static uint32_t deviceOptions;
 static uint16_t maximumFrameLength;
 
-static int forceRewrite;
+static int forceWindowRewrite;
+static int forceVisualRewrite;
 static int keyReadError;
 
 static unsigned char sequenceCheck;
@@ -768,7 +771,8 @@ readKey (BrailleDisplay *brl) {
     case 'R':
       if (packet[4] == 'P') {
         /* return from internal menu */
-        forceRewrite = 1;
+        forceWindowRewrite = 1;
+        forceVisualRewrite = 1;
       }
       break;
 
@@ -816,7 +820,8 @@ initializeDevice (BrailleDisplay *brl) {
   deviceOptions = 0;
   maximumFrameLength = 0;
 
-  forceRewrite = 1;
+  forceWindowRewrite = 1;
+  forceVisualRewrite = 1;
   keyReadError = 0;
 
   sequenceCheck = 0;
@@ -868,22 +873,18 @@ resetDevice (BrailleDisplay *brl) {
 
 static int
 writeWindow (BrailleDisplay *brl) {
-  static unsigned char previousBrailleWindow[80];
-  int displaySize = brl->textColumns * brl->textRows;
+  static unsigned char previousCells[MAXIMUM_DISPLAY_SIZE];
+  unsigned int size = brl->textColumns * brl->textRows;
   
-  if (displaySize > sizeof(previousBrailleWindow)) {
-    logMessage(LOG_WARNING, "[eu] Discarding too large braille window");
-    return 0;
-  }
+  if (cellsHaveChanged(previousCells, brl->buffer, size, NULL, NULL, &forceWindowRewrite)) {
+    unsigned char data[size + 2];
+    unsigned char *byte = data;
 
-  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &forceRewrite)) {
-    unsigned char buf[displaySize + 2];
+    *byte++ = 'B';
+    *byte++ = 'S';
+    byte = translateOutputCells(byte, brl->buffer, size);
 
-    buf[0] = 'B';
-    buf[1] = 'S';
-    memcpy(buf + 2, brl->buffer, displaySize);
-
-    if (writePacket(brl, buf, sizeof(buf)) == -1) return 0;
+    if (writePacket(brl, data, byte-data) == -1) return 0;
   }
 
   return 1;
@@ -897,6 +898,28 @@ hasVisualDisplay (BrailleDisplay *brl) {
 static int
 writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   if (model->hasVisualDisplay) {
+    static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
+    unsigned int size = brl->textColumns * brl->textRows;
+    
+    if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
+      unsigned char data[size + 2];
+      unsigned char *byte = data;
+
+      *byte++ = 'L';
+      *byte++ = 'T';
+
+      {
+        const wchar_t *character = text;
+        const wchar_t *end = character + size;
+
+        while (character < end) {
+          *byte++ = iswLatin1(*character)? *character: '?';
+          character += 1;
+        }
+      }
+
+//    if (writePacket(brl, data, byte-data) == -1) return 0;
+    }
   }
 
   return 1;
