@@ -16,16 +16,16 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind S1L FWINLT
-bind S1R FWINRT
+bind Switch1Left FWINLT
+bind Switch1Right FWINRT
 
-bind J1L+S1L+S1R MUTE
-bind J1L+S1L SAY_SLOWER
-bind J1L+S1R SAY_FASTER
+bind LeftJoystickLeft+Switch1Left+Switch1Right MUTE
+bind LeftJoystickLeft+Switch1Left SAY_SLOWER
+bind LeftJoystickLeft+Switch1Right SAY_FASTER
 
-bind J1R+S1L LNBEG
-bind J1R+S1R LNEND
+bind LeftJoystickRight+Switch1Left LNBEG
+bind LeftJoystickRight+Switch1Right LNEND
 
-bind J1R+S1l+S1R PREFMENU
-bind J1R+S2l+S2R CSRTRK
+bind LeftJoystickRight+Switch1Left+Switch1Right PREFMENU
+bind LeftJoystickRight+Switch2Left+Switch2Right CSRTRK
 

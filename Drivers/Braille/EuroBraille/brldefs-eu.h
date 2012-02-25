@@ -19,19 +19,21 @@
 #define BRLTTY_INCLUDED_EU_BRLDEFS
 
 typedef enum {
-  EU_CMD_L1 = 0,
-  EU_CMD_L2 =  1,
-  EU_CMD_L3 =  2,
-  EU_CMD_L4 =  3,
-  EU_CMD_L5 =  4,
-  EU_CMD_L6 =  5,
-  EU_CMD_L7 =  6,
-  EU_CMD_L8 =  7,
-  EU_CMD_UA =  8,
-  EU_CMD_LA =  9,
-  EU_CMD_RA = 10,
-  EU_CMD_DA = 11,
+  /* Iris linear and arrow keys */
+  EU_CMD_L1    =  0,
+  EU_CMD_L2    =  1,
+  EU_CMD_L3    =  2,
+  EU_CMD_L4    =  3,
+  EU_CMD_L5    =  4,
+  EU_CMD_L6    =  5,
+  EU_CMD_L7    =  6,
+  EU_CMD_L8    =  7,
+  EU_CMD_Up    =  8,
+  EU_CMD_Left  =  9,
+  EU_CMD_Right = 10,
+  EU_CMD_Down  = 11,
 
+  /* Esytime function keys */
   EU_CMD_F1 =  0,
   EU_CMD_F2 =  1,
   EU_CMD_F3 =  2,
@@ -41,30 +43,33 @@ typedef enum {
   EU_CMD_F6 =  6,
   EU_CMD_F5 =  7,
 
-  EU_CMD_S1R =  0,
-  EU_CMD_S1L =  1,
-  EU_CMD_S2R =  2,
-  EU_CMD_S2L =  3,
-  EU_CMD_S3R =  4,
-  EU_CMD_S3L =  5,
-  EU_CMD_S4R =  6,
-  EU_CMD_S4L =  7,
-  EU_CMD_S5R =  8,
-  EU_CMD_S5L =  9,
-  EU_CMD_S6R = 10,
-  EU_CMD_S6L = 11,
+  /* Esys switches */
+  EU_CMD_Switch1Right =  0,
+  EU_CMD_Switch1Left  =  1,
+  EU_CMD_Switch2Right =  2,
+  EU_CMD_Switch2Left  =  3,
+  EU_CMD_Switch3Right =  4,
+  EU_CMD_Switch3Left  =  5,
+  EU_CMD_Switch4Right =  6,
+  EU_CMD_Switch4Left  =  7,
+  EU_CMD_Switch5Right =  8,
+  EU_CMD_Switch5Left  =  9,
+  EU_CMD_Switch6Right = 10,
+  EU_CMD_Switch6Left  = 11,
 
-  EU_CMD_J1U = 16,
-  EU_CMD_J1D = 17,
-  EU_CMD_J1R = 18,
-  EU_CMD_J1L = 19,
-  EU_CMD_J1P = 20, // activates internal menu
+  /* Esys and Esytime joystick #1 */
+  EU_CMD_LeftJoystickUp    = 16,
+  EU_CMD_LeftJoystickDown  = 17,
+  EU_CMD_LeftJoystickRight = 18,
+  EU_CMD_LeftJoystickLeft  = 19,
+  EU_CMD_LeftJoystickPress = 20, // activates internal menu
 
-  EU_CMD_J2U = 24,
-  EU_CMD_J2D = 25,
-  EU_CMD_J2R = 26,
-  EU_CMD_J2L = 27,
-  EU_CMD_J2P = 28,
+  /* Esys and Esytime joystick #2 */
+  EU_CMD_RightJoystickUp    = 24,
+  EU_CMD_RightJoystickDown  = 25,
+  EU_CMD_RightJoystickRight = 26,
+  EU_CMD_RightJoystickLeft  = 27,
+  EU_CMD_RightJoystickPress = 28,
 } EU_CommandKey;
 
 typedef enum {

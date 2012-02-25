@@ -18,8 +18,8 @@
 
 title EuroBraille Iris
 
-bind DownArrow+LeftArrow CONTEXT+1
-bind DownArrow+RightArrow CONTEXT+2
+bind Down+Left CONTEXT+1
+bind Down+Right CONTEXT+2
 
 bind L1 FWINLT
 bind L2 LNUP
@@ -29,10 +29,10 @@ bind L5 INFO
 bind L6 NXPROMPT
 bind L7 LNDN
 bind L8 FWINRT
-bind LeftArrow KEY_CURSOR_LEFT
-bind RightArrow KEY_CURSOR_RIGHT
-bind UpArrow KEY_CURSOR_UP
-bind DownArrow KEY_CURSOR_DOWN
+bind Left KEY_CURSOR_LEFT
+bind Right KEY_CURSOR_RIGHT
+bind Up KEY_CURSOR_UP
+bind Down KEY_CURSOR_DOWN
 bind L1+L2 TOP_LEFT
 bind L3+L4 FREEZE
 bind L6+L7 HOME
@@ -48,10 +48,10 @@ bind L4 HELP
 bind L5 LEARN
 bind L6 NXSEARCH
 bind L8 BOT_LEFT
-bind LeftArrow LNBEG
-bind RightArrow LNEND
-bind UpArrow HOME
-bind DownArrow BACK
+bind Left LNBEG
+bind Right LNEND
+bind Up HOME
+bind Down BACK
 
 
 context 2
@@ -61,9 +61,9 @@ bind L3 CSRVIS
 bind L6 CONTEXT+5
 bind L7 PASTE
 bind L8 CONTEXT+6
-bind UpArrow PREFMENU
-bind DownArrow CSRTRK
-bind RightArrow TUNES
+bind Up PREFMENU
+bind Down CSRTRK
+bind Right TUNES
 
 
 context 3

@@ -16,31 +16,31 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind J2P HOME
-bind J2L FWINLT
-bind J2R FWINRT
-bind J2U LNUP
-bind J2D LNDN
+bind RightJoystickPress HOME
+bind RightJoystickLeft FWINLT
+bind RightJoystickRight FWINRT
+bind RightJoystickUp LNUP
+bind RightJoystickDown LNDN
 
-bind J1L PRPROMPT
-bind J1R NXPROMPT
-bind J1U TOP_LEFT
-bind J1D BOT_LEFT
+bind LeftJoystickLeft PRPROMPT
+bind LeftJoystickRight NXPROMPT
+bind LeftJoystickUp TOP_LEFT
+bind LeftJoystickDown BOT_LEFT
 
-bind J1D+J2L CONTEXT+1
-bind J1D+J2U CONTEXT+2
-bind J1D+J2D CONTEXT+3
-bind J1D+J2R CONTEXT+4
-bind J1D+J2P PASTE
+bind LeftJoystickDown+RightJoystickLeft CONTEXT+1
+bind LeftJoystickDown+RightJoystickUp CONTEXT+2
+bind LeftJoystickDown+RightJoystickDown CONTEXT+3
+bind LeftJoystickDown+RightJoystickRight CONTEXT+4
+bind LeftJoystickDown+RightJoystickPress PASTE
 
-bind J1L+J2P SAY_LINE
-bind J1L+J2U SAY_ABOVE
-bind J1L+J2D SAY_BELOW
-bind J1L+J2L SAY_SOFTER
-bind J1L+J2R SAY_LOUDER
+bind LeftJoystickLeft+RightJoystickPress SAY_LINE
+bind LeftJoystickLeft+RightJoystickUp SAY_ABOVE
+bind LeftJoystickLeft+RightJoystickDown SAY_BELOW
+bind LeftJoystickLeft+RightJoystickLeft SAY_SOFTER
+bind LeftJoystickLeft+RightJoystickRight SAY_LOUDER
 
-bind J1R+J2U LEARN
-bind J1R+J2D HELP
+bind LeftJoystickRight+RightJoystickUp LEARN
+bind LeftJoystickRight+RightJoystickDown HELP
 
 
 context 1
