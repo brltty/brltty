@@ -45,9 +45,13 @@ typedef enum {
 #include	"eu_protocol.h"
 
 
-/*
-** Externs, declared in protocol.c and io.c
-*/
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(iris),
+  &KEY_TABLE_DEFINITION(esys_small),
+  &KEY_TABLE_DEFINITION(esys_medium),
+  &KEY_TABLE_DEFINITION(esys_large),
+  &KEY_TABLE_DEFINITION(esytime),
+END_KEY_TABLE_LIST
 
 static GioEndpoint *gioEndpoint = NULL;
 const t_eubrl_io *io = NULL;

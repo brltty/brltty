@@ -28,6 +28,7 @@
 #ifndef __EU_PROTOCOL_H__
 #define __EU_PROTOCOL_H__
 
+#include "ktbdefs.h"
 #include "eu_braille.h"
 
 typedef struct {
@@ -58,6 +59,12 @@ typedef struct {
 extern const t_eubrl_io *io;
 extern const t_eubrl_protocol clioProtocol;
 extern const t_eubrl_protocol esysirisProtocol;
+
+EXTERNAL_KEY_TABLE(iris)
+EXTERNAL_KEY_TABLE(esys_small)
+EXTERNAL_KEY_TABLE(esys_medium)
+EXTERNAL_KEY_TABLE(esys_large)
+EXTERNAL_KEY_TABLE(esytime)
 
 extern int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx);
 

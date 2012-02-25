@@ -32,7 +32,6 @@
 #include "eu_protocol.h"
 #include "eu_keys.h"
 #include "brldefs-eu.h"
-#include "ktbdefs.h"
 
 #define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
 #define COMMAND_KEY_ENTRY(k,n) KEY_ENTRY(CommandKeys, CMD, k, n)
@@ -172,11 +171,11 @@ BEGIN_KEY_NAME_TABLES(esytime)
   KEY_NAME_TABLE(common),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(iris)
-DEFINE_KEY_TABLE(esys_small)
-DEFINE_KEY_TABLE(esys_medium)
-DEFINE_KEY_TABLE(esys_large)
-DEFINE_KEY_TABLE(esytime)
+PUBLIC_KEY_TABLE(iris)
+PUBLIC_KEY_TABLE(esys_small)
+PUBLIC_KEY_TABLE(esys_medium)
+PUBLIC_KEY_TABLE(esys_large)
+PUBLIC_KEY_TABLE(esytime)
 
 typedef enum {
   IRIS_UNKNOWN        = 0X00,
