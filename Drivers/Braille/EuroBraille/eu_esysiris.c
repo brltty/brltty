@@ -29,9 +29,8 @@
 
 #include "log.h"
 #include "ascii.h"
-#include "eu_protocol.h"
-#include "eu_keys.h"
 #include "brldefs-eu.h"
+#include "eu_protocol.h"
 
 #define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
 #define COMMAND_KEY_ENTRY(k,n) KEY_ENTRY(CommandKeys, CMD, k, n)
@@ -593,12 +592,114 @@ handleSystemInformation(BrailleDisplay *brl, unsigned char *packet) {
   return 0;
 }
 
-static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
-{
-  int key = EOF;
+static void
+enqueueKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
+  unsigned char a = packet[1];
+  unsigned char b = packet[2];
+  unsigned char c = packet[3];
+  unsigned char d = packet[4];
+  int command = 0;
 
-  switch(packet[0])
-    {
+  switch (a) {
+    case 0:
+      switch (b) {
+        case 0:
+          command = BRL_BLK_PASSCHAR | d;
+          break;
+
+        case BS:
+          command = BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;
+          break;
+
+        case HT:
+          command = BRL_BLK_PASSKEY | BRL_KEY_TAB;
+          break;
+
+        case CR:
+          command = BRL_BLK_PASSKEY | BRL_KEY_ENTER;
+          break;
+
+        case ESC:
+          command = BRL_BLK_PASSKEY | BRL_KEY_ESCAPE;
+          break;
+
+        case 0X20: // space
+          command = BRL_BLK_PASSCHAR | b;
+          break;
+
+        default:
+          if ((b >= 0X70) && (b <= 0X7B)) {
+            command = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + (b - 0X70));
+          }
+          break;
+      }
+      break;
+
+    case 1:
+      switch (b) {
+        case 0X07:
+          command = BRL_BLK_PASSKEY | BRL_KEY_HOME;
+          break;
+
+        case 0X08:
+          command = BRL_BLK_PASSKEY | BRL_KEY_END;
+          break;
+
+        case 0X09:
+          command = BRL_BLK_PASSKEY | BRL_KEY_PAGE_UP;
+          break;
+
+        case 0X0A:
+          command = BRL_BLK_PASSKEY | BRL_KEY_PAGE_DOWN;
+          break;
+
+        case 0X0B:
+          command = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;
+          break;
+
+        case 0X0C:
+          command = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;
+          break;
+
+        case 0X0D:
+          command = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;
+          break;
+
+        case 0X0E:
+          command = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;
+          break;
+
+        case 0X0F:
+          command = BRL_BLK_PASSKEY | BRL_KEY_INSERT;
+          break;
+
+        case 0X10:
+          command = BRL_BLK_PASSKEY | BRL_KEY_DELETE;
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  if (command) {
+    if (c & 0X09) command |= BRL_FLG_CHAR_UPPER;
+    if (c & 0X02) command |= BRL_FLG_CHAR_CONTROL;
+    if (c & 0X04) command |= BRL_FLG_CHAR_META;
+  } else {
+    command = BRL_CMD_NOOP;
+  }
+
+  enqueueCommand(command);
+}
+
+static int
+esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet) {
+  switch(packet[0]) {
     case 'B': {
       uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
       enqueueKeys(keys, EU_SET_BrailleKeys, 0);
@@ -642,69 +743,19 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, unsigned char *packet)
       } else {
         enqueueUpdatedKeys(keys, &commandKeys, EU_SET_CommandKeys, 0);
       }
+
       break;
     }
 
     case 'Z':
-      {
-        unsigned char a = packet[1];
-        unsigned char b = packet[2];
-        unsigned char c = packet[3];
-        unsigned char d = packet[4];
-        key = 0;
-        logMessage(LOG_DEBUG, "PC key %x %x %x %x", a, b, c, d);
-        if (!a) {
-          if (d)
-            key = EUBRL_PC_KEY | BRL_BLK_PASSCHAR | d;
-          else if (b == 0x08)
-            key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;
-          else if (b >= 0x70 && b <= 0x7b) {
-            int functionKey = b - 0x70;
-            key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + functionKey);
-          } else if (b)
-            key = EUBRL_PC_KEY | BRL_BLK_PASSCHAR | b;
-          if (c & 0x02)
-            key |= BRL_FLG_CHAR_CONTROL;
-          if (c & 0x04)
-            key |= BRL_FLG_CHAR_META;
-        } else if (a == 1) {
-          switch (b)
-            {
-            case 0x07:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_HOME;
-              break;
-            case 0x08:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_END;
-              break;
-            case 0x09:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_PAGE_UP;
-              break;
-            case 0x0a:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_PAGE_DOWN;
-              break;
-            case 0x0b:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;
-              break;
-            case 0x0c:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;
-              break;
-            case 0x0d:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;
-              break;
-            case 0x0e:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;
-              break;
-            case 0x10:
-              key = EUBRL_PC_KEY | BRL_BLK_PASSKEY | BRL_KEY_DELETE;
-              break;
-            default:
-              break;
-            }
-        }
-    }
-    break;
-    }
-  return key;
+      enqueueKeyboardCommand(brl, packet);
+      break;
+
+    default:
+      break;
+  }
+
+  return EOF;
 }
 
 static int	esysiris_readKey(BrailleDisplay *brl)
@@ -749,17 +800,12 @@ static int	esysiris_readKey(BrailleDisplay *brl)
   return res;
 }
 
-static int	esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx)
-{
+static int
+esysiris_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
   int res = EOF;
 
   if (key == EOF) return EOF;
   if (key == 0) return EOF;
-
-  if (key & EUBRL_PC_KEY)
-    {
-      res = key & 0xFFFFFF;
-    }
 
   return res;
 }
