@@ -16,6 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note The joysticks are the small, round, five-way (left, right, up, down, press) controls to the left and right of the cursor routing keys.
+
 bind RightJoystickPress HOME
 bind RightJoystickLeft FWINLT
 bind RightJoystickRight FWINRT

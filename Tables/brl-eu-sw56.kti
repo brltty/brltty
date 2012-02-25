@@ -16,3 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note Switch5 is between Switch1 and Switch3.
+note Switch6 is between Switch2 and Switch4.
+

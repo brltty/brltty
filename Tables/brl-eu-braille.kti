@@ -16,6 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note The eight dot keys of the braille keyboard are behind the cursor routing keys.
+note From left to right, they are: Dot7, Dot3, Dot2, Dot1, Dot4, Dot5, Dot6, Dot8.
+note The two keys of the braille keyboard in front of the braille cells, from left to right, are: Backspace, Space.
+
 map Dot1 DOT1
 map Dot2 DOT2
 map Dot3 DOT3

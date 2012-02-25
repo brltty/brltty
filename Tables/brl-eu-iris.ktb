@@ -18,6 +18,10 @@
 
 title EuroBraille Iris
 
+include brl-eu-common.kti
+note The Menu key is the small, round button to the left of the cursor routing keys.
+note The Z key is the small, round button to the right of the cursor routing keys.
+
 bind Down+Left CONTEXT+1
 bind Down+Right CONTEXT+2
 
@@ -82,5 +86,3 @@ context 6
 bind RoutingKey1 CUTLINE
 
 
-context default
-include brl-eu-common.kti

@@ -16,6 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note The switches are three-way (left, right, press) controls on the front surface.
+note Switch1 is the left outer switch.
+note Switch2 is the right outer switch.
+
 bind Switch1Left FWINLT
 bind Switch1Right FWINRT
 
