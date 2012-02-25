@@ -59,9 +59,13 @@ typedef struct {
 } KeyTableDefinition;
 
 #define KEY_TABLE_DEFINITION(name) keyTableDefinition_##name
+#define KEY_TABLE_DECLARATION(name) const KeyTableDefinition KEY_TABLE_DEFINITION(name)
+#define KEY_TABLE_INITIALIZER(name) = {.bindings=#name, .names=KEY_NAME_TABLES(name)}
 #define DEFINE_KEY_TABLE(name) \
-  static const KeyTableDefinition KEY_TABLE_DEFINITION(name) = \
-  {.bindings=#name, .names=KEY_NAME_TABLES(name)};
+  static KEY_TABLE_DECLARATION(name) KEY_TABLE_INITIALIZER(name);
+#define PUBLIC_KEY_TABLE(name) \
+  KEY_TABLE_DECLARATION(name) KEY_TABLE_INITIALIZER(name);
+#define EXTERNAL_KEY_TABLE(name) extern KEY_TABLE_DECLARATION(name);
 
 typedef enum {
   KTS_UNBOUND,
