@@ -178,28 +178,11 @@ PUBLIC_KEY_TABLE(esys_medium)
 PUBLIC_KEY_TABLE(esys_large)
 PUBLIC_KEY_TABLE(esytime)
 
-typedef enum {
-  IRIS_UNKNOWN        = 0X00,
-  IRIS_20             = 0X01,
-  IRIS_40             = 0X02,
-  IRIS_S20            = 0X03,
-  IRIS_S32            = 0X04,
-  IRIS_KB20           = 0X05,
-  IRIS_KB40           = 0X06,
-  ESYS_12             = 0X07,
-  ESYS_40             = 0X08,
-  ESYS_LIGHT_40       = 0X09,
-  ESYS_24             = 0X0A,
-  ESYS_64             = 0X0B,
-  ESYS_80             = 0X0C,
-  ESYTIME_32          = 0X0E,
-  ESYTIME_32_STANDARD = 0X0F
-} ModelIdentifier;
-
 typedef struct {
   const char *modelName;
-  unsigned char cellCount;
   const KeyTableDefinition *keyTable;
+  unsigned char modelIdentifier;
+  unsigned char cellCount;
   unsigned hasBrailleKeyboard:1;
   unsigned hasAzertyKeyboard:1;
   unsigned hasVisualDisplay:1;
@@ -210,13 +193,7 @@ typedef struct {
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
-  [IRIS_UNKNOWN] = {
-    .modelName = "Iris (unknown)",
-    .isIris = 1,
-    .keyTable = &KEY_TABLE_DEFINITION(iris)
-  },
-
-  [IRIS_20] = {
+  { .modelIdentifier = EU_IRIS_20,
     .modelName = "Iris 20",
     .cellCount = 20,
     .hasBrailleKeyboard = 1,
@@ -225,7 +202,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [IRIS_40] = {
+  { .modelIdentifier = EU_IRIS_40,
     .modelName = "Iris 40",
     .cellCount = 40,
     .hasBrailleKeyboard = 1,
@@ -234,7 +211,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [IRIS_S20] = {
+  { .modelIdentifier = EU_IRIS_S20,
     .modelName = "Iris S-20",
     .cellCount = 20,
     .hasBrailleKeyboard = 1,
@@ -242,7 +219,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [IRIS_S32] = {
+  { .modelIdentifier = EU_IRIS_S32,
     .modelName = "Iris S-32",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
@@ -250,7 +227,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [IRIS_KB20] = {
+  { .modelIdentifier = EU_IRIS_KB20,
     .modelName = "Iris KB-20",
     .cellCount = 20,
     .hasAzertyKeyboard = 1,
@@ -259,7 +236,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [IRIS_KB40] = {
+  { .modelIdentifier = EU_IRIS_KB40,
     .modelName = "Iris KB-40",
     .cellCount = 40,
     .hasAzertyKeyboard = 1,
@@ -268,7 +245,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
 
-  [ESYS_12] = {
+  { .modelIdentifier = EU_ESYS_12,
     .modelName = "Esys 12",
     .cellCount = 12,
     .hasBrailleKeyboard = 1,
@@ -276,7 +253,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
-  [ESYS_40] = {
+  { .modelIdentifier = EU_ESYS_40,
     .modelName = "Esys 40",
     .cellCount = 40,
     .hasBrailleKeyboard = 1,
@@ -284,14 +261,14 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
-  [ESYS_LIGHT_40] = {
+  { .modelIdentifier = EU_ESYS_LIGHT_40,
     .modelName = "Esys Light 40",
     .cellCount = 40,
     .isEsys = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
-  [ESYS_24] = {
+  { .modelIdentifier = EU_ESYS_24,
     .modelName = "Esys 24",
     .cellCount = 24,
     .hasBrailleKeyboard = 1,
@@ -299,7 +276,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_small)
   },
 
-  [ESYS_64] = {
+  { .modelIdentifier = EU_ESYS_64,
     .modelName = "Esys 64",
     .cellCount = 64,
     .hasBrailleKeyboard = 1,
@@ -307,7 +284,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_medium)
   },
 
-  [ESYS_80] = {
+  { .modelIdentifier = EU_ESYS_80,
     .modelName = "Esys 80",
     .cellCount = 80,
     .hasBrailleKeyboard = 1,
@@ -315,7 +292,7 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_large)
   },
 
-  [ESYTIME_32] = {
+  { .modelIdentifier = EU_ESYTIME_32,
     .modelName = "Esytime 32",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
@@ -324,19 +301,19 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
 
-  [ESYTIME_32_STANDARD] = {
+  { .modelIdentifier = EU_ESYTIME_32_STANDARD,
     .modelName = "Esytime 32 Standard",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
     .isEsytime = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
+
+  { .modelName = NULL }
 };
 
-static unsigned char modelIdentifier;
-static const ModelEntry *model;
-
 static int haveSystemInformation;
+static const ModelEntry *model;
 static uint32_t firmwareVersion;
 static uint32_t protocolVersion;
 static uint32_t deviceOptions;
@@ -454,6 +431,18 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   return io->writeData(brl, buf, sizeof(buf));
 }
 
+static const ModelEntry *
+getModelEntry (unsigned char identifier) {
+  const ModelEntry *mdl = modelTable;
+
+  while (mdl->modelName) {
+    if (mdl->modelIdentifier == identifier) return mdl;
+    mdl += 1;
+  }
+
+  return NULL;
+}
+
 static int
 handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
   int logLevel = LOG_INFO;
@@ -523,11 +512,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'T':
-      modelIdentifier = packet[1];
-      if ((modelIdentifier >= ARRAY_COUNT(modelTable)) ||
-          !modelTable[modelIdentifier].modelName) {
-        logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", modelIdentifier);
-        modelIdentifier = IRIS_UNKNOWN;
+      {
+        unsigned char identifier = packet[1];
+
+        if (!(model = getModelEntry(identifier))) {
+          logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", identifier);
+        }
       }
 
       infoType = Dec8;
@@ -802,10 +792,8 @@ initializeDevice (BrailleDisplay *brl) {
   static const unsigned char packet[] = {'S', 'I'};
   int leftTries = 4;
       
-  modelIdentifier = IRIS_UNKNOWN;
-  model = NULL;
-
   haveSystemInformation = 0;
+  model = NULL;
   firmwareVersion = 0;
   protocolVersion = 0;
   deviceOptions = 0;
@@ -820,13 +808,13 @@ initializeDevice (BrailleDisplay *brl) {
 
   commandKeys = 0;
 
-  while (leftTries-- && !haveSystemInformation) {
+  while (leftTries--) {
     if (writePacket(brl, packet, sizeof(packet)) != -1) {
       while (io->awaitInput(500)) {
         readCommand(brl, KTB_CTX_DEFAULT);
 
         if (haveSystemInformation) {
-          model = &modelTable[modelIdentifier];
+          if (!model) return 0;
 
           {
             const KeyTableDefinition *ktd = model->keyTable;
