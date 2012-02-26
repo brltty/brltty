@@ -321,7 +321,6 @@ static uint16_t maximumFrameLength;
 
 static int forceWindowRewrite;
 static int forceVisualRewrite;
-static int keyReadError;
 
 static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;
@@ -460,6 +459,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       break;
 
     case 'G': 
+      if (haveSystemInformation) brl->resizeRequired = 1;
       brl->textColumns = packet[1];
 
       infoType = Dec8;
@@ -789,8 +789,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
 static int
 initializeDevice (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {'S', 'I'};
-  int leftTries = 4;
+  int triesLeft = 4;
       
   haveSystemInformation = 0;
   model = NULL;
@@ -801,44 +800,42 @@ initializeDevice (BrailleDisplay *brl) {
 
   forceWindowRewrite = 1;
   forceVisualRewrite = 1;
-  keyReadError = 0;
 
   sequenceCheck = 0;
   sequenceKnown = 0;
 
   commandKeys = 0;
 
-  while (leftTries--) {
-    if (writePacket(brl, packet, sizeof(packet)) != -1) {
-      while (io->awaitInput(500)) {
-        readCommand(brl, KTB_CTX_DEFAULT);
-
-        if (haveSystemInformation) {
-          if (!model) return 0;
-
-          {
-            const KeyTableDefinition *ktd = model->keyTable;
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNameTables = ktd->names;
-          }
-
-          if (!maximumFrameLength) {
-            if (model->isIris) maximumFrameLength = 2048;
-            if (model->isEsys) maximumFrameLength = 128;
-          }
-
-          logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
-                     model->modelName, brl->textColumns);
-          return 1;
-        }
-      }
-
-      if (errno != EAGAIN) leftTries = 0;
-    } else {
-      logMessage(LOG_WARNING, "eu: EsysIris: Failed to send ident request.");
-      leftTries = 0;
+  while (triesLeft--) {
+    {
+      static const unsigned char packet[] = {'S', 'I'};
+      if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
     }
+
+    while (io->awaitInput(500)) {
+      if (readCommand(brl, KTB_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) return 0;
+
+      if (haveSystemInformation) {
+        if (!model) return 0;
+
+        {
+          const KeyTableDefinition *ktd = model->keyTable;
+          brl->keyBindings = ktd->bindings;
+          brl->keyNameTables = ktd->names;
+        }
+
+        if (!maximumFrameLength) {
+          if (model->isIris) maximumFrameLength = 2048;
+          if (model->isEsys) maximumFrameLength = 128;
+        }
+
+        logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
+                   model->modelName, brl->textColumns);
+        return 1;
+      }
+    }
+
+    if (errno != EAGAIN) return 0;
   }
 
   return 0;
