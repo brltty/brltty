@@ -30,8 +30,7 @@
 /*
 ** Handles a braille key : converts it to a BRLTTY Command
 */
-int		eubrl_handleBrailleKey(unsigned int key, KeyTableCommandContext ctx)
-{
+int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx) {
   int res = EOF;
   unsigned int dots = key & 0x000003ff;
   static char altFlag = 0, controlFlag = 0, shiftFlag = 0;

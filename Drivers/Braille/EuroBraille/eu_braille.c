@@ -61,24 +61,25 @@ static inline void
 updateWriteDelay (BrailleDisplay *brl, size_t count) {
   brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
 }
+
 static int
-eubrl_genericAwaitInput (int timeout) {
+awaitInput_generic (int timeout) {
   return gioAwaitInput(gioEndpoint, timeout);
 }
 
 static int
-eubrl_genericReadByte (BrailleDisplay *brl, unsigned char *byte, int wait) {
+readByte_generic (BrailleDisplay *brl, unsigned char *byte, int wait) {
   return gioReadByte(gioEndpoint, byte, wait);
 }
 
 static ssize_t
-eubrl_genericWriteData (BrailleDisplay *brl, const void *data, size_t length) {
+writeData_generic (BrailleDisplay *brl, const void *data, size_t length) {
   updateWriteDelay(brl, length);
   return gioWriteData(gioEndpoint, data, length);
 }
 
 static ssize_t
-eubrl_usbWriteData (BrailleDisplay *brl, const void *data, size_t length) {
+writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
   const unsigned int USB_PACKET_SIZE = 64;
   size_t pos = 0;
   while (pos < length) {
@@ -98,24 +99,24 @@ eubrl_usbWriteData (BrailleDisplay *brl, const void *data, size_t length) {
   return length;
 }
 
-static const t_eubrl_io	eubrl_serialIos = {
-  .awaitInput = eubrl_genericAwaitInput,
-  .readByte = eubrl_genericReadByte,
-  .writeData = eubrl_genericWriteData
+static const t_eubrl_io	serialOperations = {
+  .awaitInput = awaitInput_generic,
+  .readByte = readByte_generic,
+  .writeData = writeData_generic
 };
 
-static const t_eubrl_io	eubrl_usbIos = {
+static const t_eubrl_io	usbOperations = {
   .protocol = &esysirisProtocol,
-  .awaitInput = eubrl_genericAwaitInput,
-  .readByte = eubrl_genericReadByte,
-  .writeData = eubrl_usbWriteData
+  .awaitInput = awaitInput_generic,
+  .readByte = readByte_generic,
+  .writeData = writeData_USB
 };
 
-static const t_eubrl_io	eubrl_bluetoothIos = {
+static const t_eubrl_io	bluetoothOperations = {
   .protocol = &esysirisProtocol,
-  .awaitInput = eubrl_genericAwaitInput,
-  .readByte = eubrl_genericReadByte,
-  .writeData = eubrl_genericWriteData
+  .awaitInput = awaitInput_generic,
+  .readByte = readByte_generic,
+  .writeData = writeData_generic
 };
 
 static int
@@ -200,13 +201,13 @@ connectResource (const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &eubrl_serialIos;
+  descriptor.serial.options.applicationData = &serialOperations;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = &eubrl_usbIos;
+  descriptor.usb.options.applicationData = &usbOperations;
 
   descriptor.bluetooth.channelNumber = 1;
-  descriptor.bluetooth.options.applicationData = &eubrl_bluetoothIos;
+  descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
   if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     io = gioGetApplicationData(gioEndpoint);
@@ -225,8 +226,7 @@ disconnectResource (void) {
 }
 
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) 
-{
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   io = NULL;
   protocol = NULL;
   makeOutputTable(dotsTable_ISO11548_1);
@@ -285,8 +285,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 }
 
 static void
-brl_destruct (BrailleDisplay *brl) 
-{
+brl_destruct (BrailleDisplay *brl) {
   if (protocol)
     {
       protocol = NULL;
@@ -296,24 +295,21 @@ brl_destruct (BrailleDisplay *brl)
 
 #ifdef BRL_HAVE_PACKET_IO
 static ssize_t
-brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) 
-{
+brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
   if (!protocol || !io)
     return (-1);
   return protocol->readPacket(brl, buffer, size);
 }
 
 static ssize_t
-brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) 
-{
+brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
   if (!protocol || !io)
     return (-1);
   return protocol->writePacket(brl, packet, length);
 }
 
 static int
-brl_reset (BrailleDisplay *brl) 
-{
+brl_reset (BrailleDisplay *brl) {
   if (!protocol || !io)
     return (-1);
   return protocol->resetDevice(brl);
@@ -322,16 +318,14 @@ brl_reset (BrailleDisplay *brl)
 
 #ifdef BRL_HAVE_KEY_CODES
 static int
-brl_readKey (BrailleDisplay *brl) 
-{
+brl_readKey (BrailleDisplay *brl) {
   if (protocol)
     return protocol->readKey(brl);
   return EOF;
 }
 
 static int
-brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
-{
+brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
   if (protocol)
     return protocol->keyToCommand(brl, key, context);
   return BRL_CMD_NOOP;
@@ -350,8 +344,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) 
-{
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   if (protocol)
     return protocol->readCommand(brl, context);
   return EOF;
