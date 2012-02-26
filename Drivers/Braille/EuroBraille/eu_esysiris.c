@@ -686,11 +686,11 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
 
 static int
 handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
-  switch(packet[0]) {
+  switch (packet[0]) {
     case 'B': {
       uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
       enqueueKeys(keys, EU_SET_BrailleKeys, 0);
-      break;
+      return 1;
     }
 
     case 'I': {
@@ -700,13 +700,14 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
         key -= 1;
 
         switch (packet[1]) {
-          case 1:
+          case 1: // single click
             enqueueKey(EU_SET_RoutingKeys1, key);
-            break;
+          case 2: // repeat
+            return 1;
 
-          case 3:
+          case 3: // double click
             enqueueKey(EU_SET_RoutingKeys2, key);
-            break;
+            return 1;
 
           default:
             break;
@@ -731,79 +732,69 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
         enqueueUpdatedKeys(keys, &commandKeys, EU_SET_CommandKeys, 0);
       }
 
-      break;
+      return 1;
     }
 
-    case 'Z':
-      enqueueCommand(makeKeyboardCommand(brl, packet));
+    case 'Z': {
+      int command = makeKeyboardCommand(brl, packet);
+
+      enqueueCommand(command);
+      if (command != BRL_CMD_NOOP) return 1;
       break;
+    }
 
     default:
       break;
   }
 
-  return EOF;
+  return 0;
 }
 
 static int
 readKey (BrailleDisplay *brl) {
-  unsigned char	packet[2048];
-  ssize_t size = readPacket(brl, packet, sizeof(packet));
-  int res = 0;
-
-  if (size == 0) return EOF;
-
-  if (size == -1) {
-    keyReadError = 1;
-    return EOF;
-  }
-
-  switch (packet[3])
-    {
-    case 'S':
-      if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
-      break;
-
-    case 'K':
-      res = handleKeyEvent(brl, packet + 4);
-      break;
-
-    case 'R':
-      if (packet[4] == 'P') {
-        /* return from internal menu */
-        forceWindowRewrite = 1;
-        forceVisualRewrite = 1;
-      }
-      break;
-
-    case 'V':
-      /* ignore visualization */
-      break;
-
-    default:
-      logMessage(LOG_WARNING, "unknown esysiris protocol code: %c (%x)",
-                 packet[3], packet[3]);
-      break;
-    }
-
-  return res;
+  return EOF;
 }
 
 static int
 keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
-  int res = EOF;
-
-  if (key == EOF) return EOF;
-  if (key == 0) return EOF;
-
-  return res;
+  return EOF;
 }
 
 static int
 readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
-  int key = readKey(brl);
-  if (keyReadError) return BRL_CMD_RESTARTBRL;
-  return keyToCommand(brl, key, ctx);
+  unsigned char	packet[2048];
+  ssize_t size;
+
+  while ((size = readPacket(brl, packet, sizeof(packet))) > 0) {
+    switch (packet[3]) {
+      case 'S':
+        if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
+        continue;
+
+      case 'K':
+        if (handleKeyEvent(brl, packet+4)) continue;
+        break;
+
+      case 'R':
+        if (packet[4] == 'P') {
+          /* return from internal menu */
+          forceWindowRewrite = 1;
+          forceVisualRewrite = 1;
+        }
+        continue;
+
+      case 'V':
+        /* ignore visualization */
+        continue;
+
+      default:
+        break;
+    }
+
+    logUnexpectedPacket(packet, size);
+  }
+
+  return (size == -1)? BRL_CMD_RESTARTBRL: EOF;
 }
 
 static int
