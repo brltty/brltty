@@ -42,23 +42,9 @@
 # define PRT_E_DON 0x05		/* data error */
 # define PRT_E_SYN 0x06		/* syntax error */
 
-static int
-needsEscape(unsigned char code) {
-  switch (code) {
-    case SOH:
-    case EOT:
-    case DLE:
-    case ACK:
-    case NAK:
-      return 1;
-  }
+#define	READ_BUFFER_LENGTH 1024
 
-  return 0;
-}
-
-# define	READ_BUFFER_LENGTH 1024
-
-enum	clioModelType {
+typedef enum {
   UNKNOWN = 0x00,
   CE2,
   CE4,
@@ -83,59 +69,167 @@ enum	clioModelType {
   IS2,
   IS3,
   TYPE_LAST
-}clioModelType;
+} clioModel;
 
-struct		s_clioModelType
-{
-  enum clioModelType	type;
-  char		modelCode[3];
-  const char	*modelDesc;
-}	t_clioModelType;
+typedef struct {
+  unsigned char modelIdentifier;
+  char modelCode[3];
+  const char *modelName;
+} ModelEntry;
+
+static const ModelEntry modelTable[] = {
+  { .modelIdentifier = UNKNOWN,
+    .modelCode = "",
+    .modelName = ""
+  },
+
+  { .modelIdentifier = CE2,
+    .modelCode = "CE2",
+    .modelName = "Clio-EuroBraille 20"
+  },
+
+  { .modelIdentifier = CE4,
+    .modelCode = "CE4",
+    .modelName = "Clio-EuroBraille 40"
+  },
+
+  { .modelIdentifier = CE8,
+    .modelCode = "CE8",
+    .modelName = "Clio-EuroBraille 80"
+  },
+
+  { .modelIdentifier = CN2,
+    .modelCode = "CN2",
+    .modelName = "Clio-NoteBraille 20"
+  },
+
+  { .modelIdentifier = CN4,
+    .modelCode = "CN4",
+    .modelName = "Clio-NoteBraille 40"
+  },
+
+  { .modelIdentifier = CN8,
+    .modelCode = "CN8",
+    .modelName = "Clio-NoteBraille 80"
+  },
+
+  { .modelIdentifier = CP2,
+    .modelCode = "Cp2",
+    .modelName = "Clio-PupiBraille 20"
+  },
+
+  { .modelIdentifier = CP4,
+    .modelCode = "Cp4",
+    .modelName = "Clio-PupiBraille 40"
+  },
+
+  { .modelIdentifier = CP8,
+    .modelCode = "Cp8",
+    .modelName = "Clio-PupiBraille 80"
+  },
+
+  { .modelIdentifier = CZ4,
+    .modelCode = "CZ4",
+    .modelName = "Clio-AzerBraille 40"
+  },
+
+  { .modelIdentifier = JN2,
+    .modelCode = "JN2",
+    .modelName = ""
+  },
+
+  { .modelIdentifier = NB2,
+    .modelCode = "NB2",
+    .modelName = "NoteBraille 20"
+  },
+
+  { .modelIdentifier = NB4,
+    .modelCode = "NB4",
+    .modelName = "NoteBraille 40"
+  },
+
+  { .modelIdentifier = NB8,
+    .modelCode = "NB8",
+    .modelName = "NoteBraille 80"
+  },
+
+  { .modelIdentifier = SB2,
+    .modelCode = "SB2",
+    .modelName = "Scriba 20"
+  },
+
+  { .modelIdentifier = SB4,
+    .modelCode = "SB4",
+    .modelName = "Scriba 40"
+  },
+
+  { .modelIdentifier = SC2,
+    .modelCode = "SC2",
+    .modelName = "Scriba 20"
+  },
+
+  { .modelIdentifier = SC4,
+    .modelCode = "SC4",
+    .modelName = "Scriba 40"
+  },
+
+  { .modelIdentifier = IR2,
+    .modelCode = "IR2",
+    .modelName = "Iris 20"
+  },
+
+  { .modelIdentifier = IR4,
+    .modelCode = "IR4",
+    .modelName = "Iris 40"
+  },
+
+  { .modelIdentifier = IS2,
+    .modelCode = "IS2",
+    .modelName = "Iris S20"
+  },
+
+  { .modelIdentifier = IS3,
+    .modelCode = "IS3",
+    .modelName = "Iris S32"
+  },
+
+  { .modelIdentifier = TYPE_LAST,
+    .modelCode = "",
+    .modelName = ""
+  },
+};
 
 /** Static Local Variables */
 
 static int brlCols = 0; /* Number of braille cells */
-static enum clioModelType brlModel = 0; /* brl display model currently used */
+static clioModel brlModel = 0; /* brl display model currently used */
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
 static int previousPacketNumber;
-static const struct s_clioModelType		clioModels[] =
-  {
-    {UNKNOWN, "", ""},
-    {CE2, "CE2", "Clio-EuroBraille 20"},
-    {CE4, "CE4", "Clio-EuroBraille 40"},
-    {CE8, "CE8", "Clio-EuroBraille 80"},
-    {CN2, "CN2", "Clio-NoteBraille 20"},
-    {CN4, "CN4", "Clio-NoteBraille 40"},
-    {CN8, "CN8", "Clio-NoteBraille 80"},
-    {CP2, "Cp2", "Clio-PupiBraille 20"},
-    {CP4, "Cp4", "Clio-PupiBraille 40"},
-    {CP8, "Cp8", "Clio-PupiBraille 80"},
-    {CZ4, "CZ4", "Clio-AzerBraille 40"},
-    {JN2, "JN2", ""},
-    {NB2, "NB2", "NoteBraille 20"}, 
-    {NB4, "NB4", "NoteBraille 40"}, 
-    {NB8, "NB8", "NoteBraille 80"}, 
-    {SB2, "SB2", "Scriba 20"},
-    {SB4, "SB4", "Scriba 40"},
-    {SC2, "SC2", "Scriba 20"},
-    {SC4, "SC4", "Scriba 40"},
-    {IR2, "IR2", "Iris 20"},
-    {IR4, "IR4", "Iris 40"},
-    {IS2, "IS2", "Iris S20"},
-    {IS3, "IS3", "Iris S32"},
-    {TYPE_LAST, "", ""},
-  };
+
+static int
+needsEscape (unsigned char code) {
+  switch (code) {
+    case SOH:
+    case EOT:
+    case DLE:
+    case ACK:
+    case NAK:
+      return 1;
+  }
+
+  return 0;
+}
 
 /* Local functions */
-static int sendbyte(BrailleDisplay *brl, unsigned char c)
-{
+static int
+sendByte (BrailleDisplay *brl, unsigned char c) {
   return io->writeData(brl, (char*)&c, 1);
 }
 
-static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
-{
+static ssize_t
+readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   unsigned char buffer[size + 4];
   int offset = 0;
   int escape = 0;
@@ -233,8 +327,8 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 
             if (parity)
               {
-                sendbyte(brl, NAK);
-                sendbyte(brl, PRT_E_PAR);
+                sendByte(brl, NAK);
+                sendByte(brl, PRT_E_PAR);
 
                 offset = 0;
                 continue;
@@ -242,7 +336,7 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
           }
 
           offset -= 1; /* remove parity */
-          sendbyte(brl, ACK);
+          sendByte(brl, ACK);
 
           if (buffer[--offset] == previousPacketNumber)
             {
@@ -257,8 +351,8 @@ static ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
     }
 }
 
-static ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
-{
+static ssize_t
+writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   /* limit case, every char is escaped */
   unsigned char		buf[(size + 3) * 2]; 
   unsigned char		*q = buf;
@@ -286,12 +380,12 @@ static ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t 
    return io->writeData(brl, buf, packetSize);
 }
 
-static int     clio_resetDevice(BrailleDisplay *brl)
-{
+static int
+resetDevice (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
 
   logMessage(LOG_INFO, "eu Clio hardware reset requested");
-  if (clio_writePacket(brl, packet, sizeof(packet)) == -1)
+  if (writePacket(brl, packet, sizeof(packet)) == -1)
     {
       logMessage(LOG_WARNING, "Clio: Failed to send ident request.");
       return -1;
@@ -299,8 +393,8 @@ static int     clio_resetDevice(BrailleDisplay *brl)
   return 1;
 }
 
-static void		clio_sysIdentify(BrailleDisplay *brl, char* packet)
-{
+static void
+handleSystemInformation (BrailleDisplay *brl, char* packet) {
   char *p;
   unsigned char ln = 0;
   int i;
@@ -336,13 +430,13 @@ static void		clio_sysIdentify(BrailleDisplay *brl, char* packet)
     break;
   }
   i = 0;
-  while (clioModels[i].type != TYPE_LAST)
+  while (modelTable[i].modelIdentifier != TYPE_LAST)
     {
-      if (!strncasecmp(clioModels[i].modelCode, (char*)brlFirmwareVersion, 3))
+      if (!strncasecmp(modelTable[i].modelCode, (char*)brlFirmwareVersion, 3))
 	break;
       i++;
     }
-  brlModel = clioModels[i].type;
+  brlModel = modelTable[i].modelIdentifier;
   brl->resizeRequired = 1;
 }
 
@@ -351,8 +445,8 @@ static void		clio_sysIdentify(BrailleDisplay *brl, char* packet)
 ** The new model is also compatible with brltty, so no conversion s needed 
 ** after that.
 */
-static int		convert(char *keys)
-{
+static int
+convert (char *keys) {
   unsigned int res = 0;
 
   res = (keys[1] & 1 ? BRL_DOT7 : 0);
@@ -368,8 +462,8 @@ static int		convert(char *keys)
   return res;
 }
 
-static int     clio_writeWindow(BrailleDisplay *brl)
-{
+static int
+writeWindow (BrailleDisplay *brl) {
   static unsigned char previousBrailleWindow[80];
   int displaySize = brl->textColumns * brl->textRows;
   unsigned char buf[displaySize + 3];
@@ -383,13 +477,13 @@ static int     clio_writeWindow(BrailleDisplay *brl)
     buf[1] = 'D';
     buf[2] = 'P';
     memcpy(buf + 3, brl->buffer, displaySize);
-    clio_writePacket(brl, buf, sizeof(buf));
+    writePacket(brl, buf, sizeof(buf));
   }
   return 1;
 }
 
-static int     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
-{
+static int
+writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   static wchar_t previousVisualDisplay[80];
   int displaySize = brl->textColumns * brl->textRows;
   unsigned char buf[displaySize + 3];
@@ -411,26 +505,26 @@ static int     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
       wchar_t wc = text[i];
       buf[i+3] = iswLatin1(wc)? wc: '?';
     }
-  clio_writePacket(brl, buf, sizeof(buf));
+  writePacket(brl, buf, sizeof(buf));
   return 1;
 }
 
-static int	clio_hasVisualDisplay(BrailleDisplay *brl)
-{
+static int
+hasVisualDisplay (BrailleDisplay *brl) {
   return (1);
 }
 
-static void	clio_ModeHandling(BrailleDisplay *brl, char* packet)
-{
+static void
+handleMode (BrailleDisplay *brl, char* packet) {
   if (*packet == 'B')
     {
       refreshDisplay = 1;
-      clio_writeWindow(brl);
+      writeWindow(brl);
     }
 }
 
-static int clio_KeyboardHandling(BrailleDisplay *brl, char *packet)
-{
+static int
+handleKeyboard (BrailleDisplay *brl, char *packet) {
   unsigned int key = 0;
   switch (packet[0])
     {
@@ -452,22 +546,22 @@ static int clio_KeyboardHandling(BrailleDisplay *brl, char *packet)
   return key;
 }
 
-static int	clio_readKey(BrailleDisplay *brl)
-{
+static int
+readKey (BrailleDisplay *brl) {
   static unsigned char	inPacket[READ_BUFFER_LENGTH];
   int res = 0;
 
-  while (clio_readPacket(brl, inPacket, READ_BUFFER_LENGTH) > 0)
+  while (readPacket(brl, inPacket, READ_BUFFER_LENGTH) > 0)
     {
       switch (inPacket[1]) {
       case 'S' : 
-	clio_sysIdentify(brl, (char*)inPacket);
+	handleSystemInformation(brl, (char*)inPacket);
 	break;
       case 'R' : 
-	clio_ModeHandling(brl, (char *)inPacket + 2);
+	handleMode(brl, (char *)inPacket + 2);
 	break;
       case 'K' : 
-	res = clio_KeyboardHandling(brl, (char *)inPacket + 2);
+	res = handleKeyboard(brl, (char *)inPacket + 2);
 	break;
       default: 
 	break;
@@ -476,8 +570,8 @@ static int	clio_readKey(BrailleDisplay *brl)
   return res;
 }
 
-static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
-{
+static int
+handleCommandKey (BrailleDisplay *brl, unsigned int key) {
   static char flagLevel1 = 0, flagLevel2 = 0;
   unsigned int res = EOF;
   unsigned int	subkey;
@@ -506,7 +600,7 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
     }
   if (flagLevel1)
     {
-      while ((subkey = clio_readKey(brl)) == 0) approximateDelay(20);
+      while ((subkey = readKey(brl)) == 0) approximateDelay(20);
       flagLevel1 = 0;
       switch (subkey & 0x000000ff)
 	{
@@ -529,7 +623,7 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
     }
   else if (flagLevel2)
     {
-      while ((subkey = clio_readKey(brl)) == 0) approximateDelay(20);
+      while ((subkey = readKey(brl)) == 0) approximateDelay(20);
       flagLevel2 = 0;
       switch (subkey & 0x000000ff)
 	{
@@ -575,8 +669,8 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   return res;
 }
 
-static int	clio_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContext ctx)
-{
+static int
+keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
   int res = EOF;
 
   if (key & EUBRL_BRAILLE_KEY)
@@ -590,18 +684,18 @@ static int	clio_keyToCommand(BrailleDisplay *brl, int key, KeyTableCommandContex
     }
   if (key & EUBRL_COMMAND_KEY)
     {
-      res = clio_handleCommandKey(brl, key & 0x000000ff);
+      res = handleCommandKey(brl, key & 0x000000ff);
     }
   return res;
 }
  
-static int	clio_readCommand(BrailleDisplay *brl, KeyTableCommandContext ctx)
-{
-  return clio_keyToCommand(brl, clio_readKey(brl), ctx);
+static int
+readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
+  return keyToCommand(brl, readKey(brl), ctx);
 }
 
-static int     clio_initializeDevice(BrailleDisplay *brl)
-{
+static int
+initializeDevice (BrailleDisplay *brl) {
   int	leftTries = 2;
 
   brlCols = 0;
@@ -609,9 +703,9 @@ static int     clio_initializeDevice(BrailleDisplay *brl)
 
   while (leftTries-- && brlCols == 0)
     {
-      clio_resetDevice(brl);      
+      resetDevice(brl);      
       approximateDelay(500);
-      clio_readCommand(brl, KTB_CTX_DEFAULT);
+      readCommand(brl, KTB_CTX_DEFAULT);
     }
   if (brlCols > 0)
     { /* Succesfully identified hardware. */
@@ -621,27 +715,26 @@ static int     clio_initializeDevice(BrailleDisplay *brl)
       previousPacketNumber = -1;
 
       logMessage(LOG_INFO, "eu: %s connected.",
-	         clioModels[brlModel].modelDesc);
+	         modelTable[brlModel].modelName);
       return (1);
     }
   return (0);
 }
 
-
 const t_eubrl_protocol clioProtocol = {
   .protocolName = "clio",
 
-  .initializeDevice = clio_initializeDevice,
-  .resetDevice = clio_resetDevice,
+  .initializeDevice = initializeDevice,
+  .resetDevice = resetDevice,
 
-  .readPacket = clio_readPacket,
-  .writePacket = clio_writePacket,
+  .readPacket = readPacket,
+  .writePacket = writePacket,
 
-  .readKey = clio_readKey,
-  .readCommand = clio_readCommand,
-  .keyToCommand = clio_keyToCommand,
+  .readKey = readKey,
+  .readCommand = readCommand,
+  .keyToCommand = keyToCommand,
 
-  .writeWindow = clio_writeWindow,
-  .hasVisualDisplay = clio_hasVisualDisplay,
-  .writeVisual = clio_writeVisual
+  .writeWindow = writeWindow,
+  .hasVisualDisplay = hasVisualDisplay,
+  .writeVisual = writeVisual
 };
