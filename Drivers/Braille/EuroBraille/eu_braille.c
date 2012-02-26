@@ -80,22 +80,25 @@ writeData_generic (BrailleDisplay *brl, const void *data, size_t length) {
 
 static ssize_t
 writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
-  const unsigned int USB_PACKET_SIZE = 64;
-  size_t pos = 0;
-  while (pos < length) {
-    char packetToSend[USB_PACKET_SIZE];
-    size_t tosend = length - pos;
-    if (tosend > USB_PACKET_SIZE) {
-      tosend = USB_PACKET_SIZE;
+  size_t offset = 0;
+
+  while (offset < length) {
+    unsigned char report[64];
+    size_t count = length - offset;
+
+    if (count > sizeof(report)) {
+      count = sizeof(report);
+    } else {
+      memset(&report[count], 0X55, (sizeof(report) - count));
     }
-    memset(packetToSend,0x55,USB_PACKET_SIZE);
-    memcpy(packetToSend,data+pos,tosend);
-    updateWriteDelay(brl, USB_PACKET_SIZE);
-    if (gioSetHidReport(gioEndpoint, 0, packetToSend, USB_PACKET_SIZE) < 0) {
-      return -1;
-    }
-    pos += tosend;
+    memcpy(report, data+offset, count);
+
+    updateWriteDelay(brl, sizeof(report));
+    if (gioSetHidReport(gioEndpoint, 0, report, sizeof(report)) < 0) return -1;
+
+    offset += count;
   }
+
   return length;
 }
 
