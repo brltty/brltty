@@ -789,7 +789,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
 static int
 initializeDevice (BrailleDisplay *brl) {
-  int triesLeft = 4;
+  int retriesLeft = 2;
       
   haveSystemInformation = 0;
   model = NULL;
@@ -806,7 +806,7 @@ initializeDevice (BrailleDisplay *brl) {
 
   commandKeys = 0;
 
-  while (triesLeft--) {
+  do {
     {
       static const unsigned char packet[] = {'S', 'I'};
       if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
@@ -834,9 +834,7 @@ initializeDevice (BrailleDisplay *brl) {
         return 1;
       }
     }
-
-    if (errno != EAGAIN) return 0;
-  }
+  } while (retriesLeft-- && (errno == EAGAIN));
 
   return 0;
 }
