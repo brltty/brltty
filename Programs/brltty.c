@@ -1734,8 +1734,10 @@ doCommand:
       doModifier:
         if (inputModifiers & modifier) {
           inputModifiers &= ~modifier;
+          playTune(&tune_toggle_off);
         } else {
           inputModifiers |= modifier;
+          playTune(&tune_toggle_on);
         }
         break;
       }
