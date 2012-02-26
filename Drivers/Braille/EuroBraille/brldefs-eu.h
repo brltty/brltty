@@ -33,7 +33,49 @@ typedef enum {
   EU_ESYS_80             = 0X0C,
   EU_ESYTIME_32          = 0X0E,
   EU_ESYTIME_32_STANDARD = 0X0F
-} EsysirisModelIdentifier;
+} EU_EsysirisModel;
+
+typedef enum {
+  EU_IRIS_OPT_UnimanualKeyboard    = 0X00000001,
+  EU_IRIS_OPT_DialogueMode         = 0X00000002,
+  EU_IRIS_OPT_Grade2Braille        = 0X00001000,
+  EU_IRIS_OPT_MsnMessenger         = 0X00002000,
+  EU_IRIS_OPT_DaisyReader          = 0X00004000,
+  EU_IRIS_OPT_TelephoneExchange    = 0X00008000,
+  EU_IRIS_OPT_Mathematics          = 0X00010000,
+  EU_IRIS_OPT_Music                = 0X00020000,
+  EU_IRIS_OPT_HqVoiceSynthesis     = 0X00040000,
+  EU_IRIS_OPT_Documentation        = 0X00080000,
+  EU_IRIS_OPT_FileExplorer         = 0X00100000,
+  EU_IRIS_OPT_VocalMemo            = 0X00200000,
+  EU_IRIS_OPT_PcSerial             = 0X00400000,
+  EU_IRIS_OPT_PcEthernet           = 0X00800000,
+  EU_IRIS_OPT_Editor               = 0X01000000,
+  EU_IRIS_OPT_Spreadsheet          = 0X02000000,
+  EU_IRIS_OPT_Internet             = 0X04000000,
+  EU_IRIS_OPT_Calculator           = 0X08000000,
+  EU_IRIS_OPT_ScientificCalculator = 0X10000000,
+  EU_IRIS_OPT_Contact              = 0X20000000,
+  EU_IRIS_OPT_Agenda               = 0X40000000,
+  EU_IRIS_OPT_Libbraille           = 0X80000000
+} EU_IrisOption;
+
+typedef enum {
+  EU_ESYS_OPT_Editor                = 0X00040001,
+  EU_ESYS_OPT_Calculator            = 0X00040002,
+  EU_ESYS_OPT_AlarmClock            = 0X00040004,
+  EU_ESYS_OPT_Bluetooth             = 0X00000008,
+  EU_ESYS_OPT_USB                   = 0X00000010,
+  EU_ESYS_OPT_Readmath              = 0X00000100,
+  EU_ESYS_OPT_Jaws                  = 0X0001000,
+  EU_ESYS_OPT_WindowEyes            = 0X0002000,
+  EU_ESYS_OPT_SuperNova             = 0X0004000,
+  EU_ESYS_OPT_MobileSpeakPocket     = 0X01000000,
+  EU_ESYS_OPT_MobileSpeakSmartphone = 0X02000000,
+  EU_ESYS_OPT_Talks                 = 0X04000000,
+  EU_ESYS_OPT_Orange                = 0X08000000,
+  EU_ESYS_OPT_Tracker               = 0X10000000
+} EU_EsysOption;
 
 typedef enum {
   /* Iris linear and arrow keys */
