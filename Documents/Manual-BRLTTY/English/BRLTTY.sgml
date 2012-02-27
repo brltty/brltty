@@ -5424,10 +5424,10 @@ BRLTTY supports the following braille displays:
     EuroBraille
       |AzerBraille@
       |Clio@
+      |Esys@
       |Iris@
       |NoteBraille@
       |Scriba@
-      |Esys 12/40@
     FreedomScientific
       |Focus 1 44/70/84@
       |Focus 2 40/80@
