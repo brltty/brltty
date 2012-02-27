@@ -53,7 +53,22 @@ ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # EuroBraille
 ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1123/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="c251/1124/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1125/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1126/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1127/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1128/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1129/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112a/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112b/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112c/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112d/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112e/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112f/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1130/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # FreedomScientific
 ENV{PRODUCT}=="f4e/100/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
