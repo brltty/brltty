@@ -231,7 +231,6 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris KB-20",
     .cellCount = 20,
     .hasAzertyKeyboard = 1,
-    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
@@ -240,7 +239,6 @@ static const ModelEntry modelTable[] = {
     .modelName = "Iris KB-40",
     .cellCount = 40,
     .hasAzertyKeyboard = 1,
-    .hasVisualDisplay = 1,
     .isIris = 1,
     .keyTable = &KEY_TABLE_DEFINITION(iris)
   },
