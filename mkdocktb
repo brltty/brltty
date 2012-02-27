@@ -151,6 +151,9 @@ shift $((OPTIND - 1))
 verifyInputDirectory "${sourceRoot}"
 verifyOutputDirectory "${outputRoot}"
 
+sourceRoot="$(cd "${sourceRoot}" && pwd)"
+buildRoot="$(cd "${buildRoot}" && pwd)"
+
 driversSubdirectory="Drivers/Braille"
 driversDirectory="${sourceRoot}/${driversSubdirectory}"
 
