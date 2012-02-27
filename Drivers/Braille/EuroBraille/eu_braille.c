@@ -179,6 +179,42 @@ connectResource (const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0
     }
     ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112B,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112C,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112D,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112E,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* reserved */
+      .vendor=0XC251, .product=0X112F,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
     { /* Esytime */
       .vendor=0XC251, .product=0X1130,
       .configuration=1, .interface=0, .alternative=0,
