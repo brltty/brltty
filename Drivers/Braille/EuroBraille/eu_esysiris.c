@@ -186,7 +186,7 @@ typedef struct {
   unsigned hasBrailleKeyboard:1;
   unsigned hasAzertyKeyboard:1;
   unsigned hasVisualDisplay:1;
-  unsigned hasOpticalRouting:1;
+  unsigned hasOpticalBar:1;
   unsigned isIris:1;
   unsigned isEsys:1;
   unsigned isEsytime:1;
@@ -294,7 +294,7 @@ static const ModelEntry modelTable[] = {
     .modelName = "Esytime 32",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
-    .hasOpticalRouting = 1,
+    .hasOpticalBar = 1,
     .isEsytime = 1,
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
