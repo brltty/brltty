@@ -827,6 +827,7 @@ initializeDevice (BrailleDisplay *brl) {
         if (!maximumFrameLength) {
           if (model->isIris) maximumFrameLength = 2048;
           if (model->isEsys) maximumFrameLength = 128;
+          if (model->isEsytime) maximumFrameLength = 512;
         }
 
         logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
