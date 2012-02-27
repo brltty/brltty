@@ -13,12 +13,12 @@ SUPPORTED HARDWARE
 ==================
 All EuroBraille's displays should be supported here. However it has been tested
 on the following hardware:
-   - a Clio-Notebraille display (20 40 and 80 cells);
-   - a Scriba display (20 and 40);
-   - an Azerbraille 40 and 80 display;
-   - a Clio-PupiBraille display (80 cells)
-   - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
-   - An ESYS display.
+   - a Clio-Notebraille (20,40,80);
+   - a Scriba (20,40);
+   - an Azerbraille (40,80);
+   - a Clio-PupiBraille (80);
+   - an Iris (S20, S32, 40, KB40);
+   - an EsyS (12,40,64).
    - The driver is also tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
