@@ -37,21 +37,7 @@
 
 #define NAVIGATION_KEY_ENTRY(k,n) KEY_ENTRY(NavigationKeys, NAV, k, n)
 
-BEGIN_KEY_NAME_TABLE(navigation)
-  NAVIGATION_KEY_ENTRY(Sharp, "Sharp"),
-  NAVIGATION_KEY_ENTRY(Star, "Star"),
-
-  NAVIGATION_KEY_ENTRY(0, "0"),
-  NAVIGATION_KEY_ENTRY(1, "1"),
-  NAVIGATION_KEY_ENTRY(2, "Up"),
-  NAVIGATION_KEY_ENTRY(3, "3"),
-  NAVIGATION_KEY_ENTRY(4, "Left"),
-  NAVIGATION_KEY_ENTRY(5, "5"),
-  NAVIGATION_KEY_ENTRY(6, "Right"),
-  NAVIGATION_KEY_ENTRY(7, "7"),
-  NAVIGATION_KEY_ENTRY(8, "Down"),
-  NAVIGATION_KEY_ENTRY(9, "9"),
-
+BEGIN_KEY_NAME_TABLE(letters)
   NAVIGATION_KEY_ENTRY(A, "A"),
   NAVIGATION_KEY_ENTRY(B, "B"),
   NAVIGATION_KEY_ENTRY(C, "C"),
@@ -65,14 +51,36 @@ BEGIN_KEY_NAME_TABLE(navigation)
   NAVIGATION_KEY_ENTRY(K, "K"),
   NAVIGATION_KEY_ENTRY(L, "L"),
   NAVIGATION_KEY_ENTRY(M, "M"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(numbers)
+  NAVIGATION_KEY_ENTRY(1, "1"),
+  NAVIGATION_KEY_ENTRY(2, "Up"),
+  NAVIGATION_KEY_ENTRY(3, "3"),
+
+  NAVIGATION_KEY_ENTRY(4, "Left"),
+  NAVIGATION_KEY_ENTRY(5, "5"),
+  NAVIGATION_KEY_ENTRY(6, "Right"),
+
+  NAVIGATION_KEY_ENTRY(7, "7"),
+  NAVIGATION_KEY_ENTRY(8, "Down"),
+  NAVIGATION_KEY_ENTRY(9, "9"),
+
+  NAVIGATION_KEY_ENTRY(Star, "Star"),
+  NAVIGATION_KEY_ENTRY(0, "0"),
+  NAVIGATION_KEY_ENTRY(Sharp, "Sharp"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(sets)
   KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey"),
   KEY_SET_ENTRY(EU_SET_SeparatorKeys, "SeparatorKey"),
   KEY_SET_ENTRY(EU_SET_StatusKeys, "StatusKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(clio)
-  KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(letters),
+  KEY_NAME_TABLE(numbers),
+  KEY_NAME_TABLE(sets),
 END_KEY_NAME_TABLES
 
 PUBLIC_KEY_TABLE(clio)
@@ -320,7 +328,6 @@ static const ModelEntry modelTable[] = {
 static int brlCols = 0; /* Number of braille cells */
 static clioModel brlModel = 0; /* brl display model currently used */
 static unsigned char	brlFirmwareVersion[21];
-static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
 static int previousPacketNumber;
 
@@ -648,13 +655,18 @@ handleKeyboard (BrailleDisplay *brl, char *packet) {
       key = convert(packet + 1);
       key |= EUBRL_BRAILLE_KEY;
       break;
-    case 'I' :
+    case 'I':
       key = packet[1];
-      key |= EUBRL_ROUTING_KEY;
+      if (key >= 0X88) {
+        enqueueKey(EU_SET_StatusKeys, key-0X88);
+      } else if (key >= 0X80) {
+        enqueueKey(EU_SET_SeparatorKeys, key-0X80);
+      } else if (key >= 1) {
+        enqueueKey(EU_SET_RoutingKeys1, key-1);
+      }
       break;
-    case 'T' : 
-      key = packet[1];
-      key |= EUBRL_COMMAND_KEY;
+    case 'T': 
+      enqueueKey(EU_SET_NavigationKeys, packet[1]);
       break;
     default :
       break;
@@ -687,120 +699,12 @@ readKey (BrailleDisplay *brl) {
 }
 
 static int
-handleCommandKey (BrailleDisplay *brl, unsigned int key) {
-  static char flagLevel1 = 0, flagLevel2 = 0;
-  unsigned int res = EOF;
-  unsigned int	subkey;
-  
-  if (key == CL_STAR && !flagLevel1)
-    {
-      flagLevel2 = !flagLevel2;
-      if (flagLevel2)
-	{
-	  if (brlModel >= IR2)
-	    message(NULL, gettext("layer 2 ..."), MSG_NODELAY);
-	  else
-	    message(NULL, gettext("programming on ..."), MSG_NODELAY);
-	}
-    }
-  else if (key == CL_SHARP && !flagLevel2)
-    {
-      flagLevel1 = !flagLevel1;
-      if (flagLevel1)
-	{
-	  if (brlModel >= IR2) 
-	    message(NULL, gettext("layer 1 ..."), MSG_NODELAY);
-	  else
-	    message(NULL, gettext("view on ..."), MSG_NODELAY);
-	}
-    }
-  if (flagLevel1)
-    {
-      while ((subkey = readKey(brl)) == 0) approximateDelay(20);
-      flagLevel1 = 0;
-      switch (subkey & 0x000000ff)
-	{
-	case CL_1 : res = BRL_CMD_LEARN; break;
-	case CL_3 : res = BRL_CMD_TOP_LEFT; break;
-	case CL_9 : res = BRL_CMD_BOT_LEFT; break;
-	case CL_A : res = BRL_CMD_DISPMD; break;
-	case CL_E : res = BRL_CMD_TOP_LEFT; break;
-	case CL_G : res = BRL_CMD_PRSEARCH; break;
-	case CL_H : res = BRL_CMD_HELP; break;
-	case CL_K : res = BRL_CMD_NXSEARCH; break;
-	case CL_L : res = BRL_CMD_LEARN; break;
-	case CL_M : res = BRL_CMD_BOT_LEFT; break;
-	case CL_FG: res = BRL_CMD_LNBEG; break;
-	case CL_FD: res = BRL_CMD_LNEND; break;
-	case CL_FH : res = BRL_CMD_HOME; break;
-	case CL_FB : res = BRL_CMD_RETURN; break;
-	default : res = BRL_CMD_NOOP; break;
-	}
-    }
-  else if (flagLevel2)
-    {
-      while ((subkey = readKey(brl)) == 0) approximateDelay(20);
-      flagLevel2 = 0;
-      switch (subkey & 0x000000ff)
-	{
-	case CL_E : routingMode = BRL_BLK_CUTBEGIN; break;
-	case CL_F : routingMode = BRL_BLK_CUTAPPEND; break;
-	case CL_G : res = BRL_CMD_CSRVIS; break;
-	case CL_K : routingMode = BRL_BLK_CUTRECT; break;
-	case CL_L : res = BRL_CMD_PASTE; break;
-	case CL_M : routingMode = BRL_BLK_CUTLINE; break;
-	case CL_FH : res = BRL_CMD_PREFMENU; break;
-	case CL_FB : res = BRL_CMD_CSRTRK; break;
-	case CL_FD : res = BRL_CMD_TUNES; break;
-	default : res = BRL_CMD_NOOP; break;
-	}
-    }
-  else
-    {
-      switch (key)
-	{
-	case CL_NONE:	res = BRL_CMD_NOOP; break;
-	case CL_0:	res = BRL_CMD_CSRTRK; break;
-	case CL_1 :	res = BRL_CMD_TOP_LEFT; break;
-	case CL_3 :	res = BRL_CMD_PRDIFLN; break;
-	case CL_5:	res = BRL_CMD_HOME; break;
-	case CL_9 :	res = BRL_CMD_NXDIFLN; break;
-	case CL_7 :	res = BRL_CMD_BOT_LEFT; break;
-	case CL_A:	res = BRL_CMD_FREEZE; break;
-	case CL_E:	res = BRL_CMD_FWINLT; break;
-	case CL_F:	res = BRL_CMD_LNUP; break;
-	case CL_G:	res = BRL_CMD_PRPROMPT; break;
-	case CL_H:	res = BRL_CMD_PREFMENU; break;
-	case CL_I:	res = BRL_CMD_INFO; break;
-	case CL_J:	res = BRL_CMD_INFO; break;
-	case CL_K:	res = BRL_CMD_NXPROMPT; break;
-	case CL_L:	res = BRL_CMD_LNDN; break;
-	case CL_M:	res = BRL_CMD_FWINRT; break;
-	case CL_FB:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN; break;
-	case CL_FH:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP; break;
-	case CL_FG:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT; break;
-	case CL_FD:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT; break;
-	}
-    }
-  return res;
-}
-
-static int
 keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
   int res = EOF;
 
   if (key & EUBRL_BRAILLE_KEY)
     {
       res = eubrl_handleBrailleKey(key, ctx);
-    }
-  if (key & EUBRL_ROUTING_KEY)
-    {
-      res = routingMode | ((key - 1) & 0x0000007f);
-      routingMode = BRL_BLK_ROUTE;
-    }
-  if (key & EUBRL_COMMAND_KEY)
-    {
-      res = handleCommandKey(brl, key & 0x000000ff);
     }
   return res;
 }
