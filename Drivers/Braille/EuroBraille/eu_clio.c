@@ -530,12 +530,11 @@ resetDevice (BrailleDisplay *brl) {
 }
 
 static void
-handleSystemInformation (BrailleDisplay *brl, char* packet) {
-  char *p;
+handleSystemInformation (BrailleDisplay *brl, const void *packet) {
+  const char *p = packet;
   unsigned char ln = 0;
   int i;
 
-  p = packet;
   while (1)
     {
       ln = *(p++);
@@ -629,12 +628,11 @@ hasVisualDisplay (BrailleDisplay *brl) {
 }
 
 static void
-handleMode (BrailleDisplay *brl, char* packet) {
-  if (*packet == 'B')
-    {
-      refreshDisplay = 1;
-      writeWindow(brl);
-    }
+handleMode (BrailleDisplay *brl, const unsigned char *packet) {
+  if (*packet == 'B') {
+    refreshDisplay = 1;
+    writeWindow(brl);
+  }
 }
 
 static int
@@ -680,26 +678,7 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
 
 static int
 readKey (BrailleDisplay *brl) {
-  static unsigned char	inPacket[READ_BUFFER_LENGTH];
-  int res = 0;
-
-  while (readPacket(brl, inPacket, READ_BUFFER_LENGTH) > 0)
-    {
-      switch (inPacket[1]) {
-      case 'S' : 
-	handleSystemInformation(brl, (char*)inPacket);
-	break;
-      case 'R' : 
-	handleMode(brl, (char *)inPacket + 2);
-	break;
-      case 'K' : 
-	res = handleKeyEvent(brl, inPacket + 2);
-	break;
-      default: 
-	break;
-      }
-    }
-  return res;
+  return EOF;
 }
 
 static int
@@ -709,7 +688,31 @@ keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
  
 static int
 readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
-  return keyToCommand(brl, readKey(brl), ctx);
+  unsigned char	packet[READ_BUFFER_LENGTH];
+  ssize_t length;
+
+  while ((length = readPacket(brl, packet, sizeof(packet))) > 0) {
+    switch (packet[1]) {
+      case 'S': 
+        handleSystemInformation(brl, packet);
+        continue;
+
+      case 'R': 
+        handleMode(brl, packet+2);
+        continue;
+
+      case 'K': 
+        if (handleKeyEvent(brl, packet+2)) continue;
+        break;
+
+      default: 
+        break;
+    }
+
+    logUnexpectedPacket(packet, length);
+  }
+
+  return (length == -1)? BRL_CMD_RESTARTBRL: EOF;
 }
 
 static int
