@@ -29,13 +29,25 @@
 
 #include "log.h"
 #include "timing.h"
-#include "message.h"
 #include "ascii.h"
 #include "brldefs-eu.h"
 #include "eu_protocol.h"
-#include "eu_keys.h"
 
+#define BRAILLE_KEY_ENTRY(k,n) KEY_ENTRY(BrailleKeys, DOT, k, n)
 #define NAVIGATION_KEY_ENTRY(k,n) KEY_ENTRY(NavigationKeys, NAV, k, n)
+
+BEGIN_KEY_NAME_TABLE(braille)
+  BRAILLE_KEY_ENTRY(1, "Dot1"),
+  BRAILLE_KEY_ENTRY(2, "Dot2"),
+  BRAILLE_KEY_ENTRY(3, "Dot3"),
+  BRAILLE_KEY_ENTRY(4, "Dot4"),
+  BRAILLE_KEY_ENTRY(5, "Dot5"),
+  BRAILLE_KEY_ENTRY(6, "Dot6"),
+  BRAILLE_KEY_ENTRY(7, "Dot7"),
+  BRAILLE_KEY_ENTRY(8, "Dot8"),
+  BRAILLE_KEY_ENTRY(B, "Backspace"),
+  BRAILLE_KEY_ENTRY(S, "Space"),
+END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(letters)
   NAVIGATION_KEY_ENTRY(A, "A"),
@@ -78,6 +90,7 @@ BEGIN_KEY_NAME_TABLE(sets)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(clio)
+  KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(letters),
   KEY_NAME_TABLE(numbers),
   KEY_NAME_TABLE(sets),
@@ -563,28 +576,6 @@ handleSystemInformation (BrailleDisplay *brl, char* packet) {
   brl->resizeRequired = 1;
 }
 
-/*
-** Converts an old protocol dots model to a new protocol compatible one.
-** The new model is also compatible with brltty, so no conversion s needed 
-** after that.
-*/
-static int
-convert (char *keys) {
-  unsigned int res = 0;
-
-  res = (keys[1] & 1 ? BRL_DOT7 : 0);
-  res += (keys[1] & 2 ? BRL_DOT8 : 0);
-  res += (keys[0] & 0x01 ? BRL_DOT1 : 0);
-  res += (keys[0] & 0x02 ? BRL_DOT2 : 0);
-  res += (keys[0] & 0x04 ? BRL_DOT3 : 0);
-  res += (keys[0] & 0x08 ? BRL_DOT4 : 0);
-  res += (keys[0] & 0x10 ? BRL_DOT5 : 0);
-  res += (keys[0] & 0x20 ? BRL_DOT6 : 0);
-  res += (keys[0] & 0x40 ? 0x0100 : 0);
-  res += (keys[0] & 0x80 ? 0x0200 : 0);  
-  return res;
-}
-
 static int
 writeWindow (BrailleDisplay *brl) {
   static unsigned char previousBrailleWindow[80];
@@ -651,10 +642,11 @@ handleKeyboard (BrailleDisplay *brl, char *packet) {
   unsigned int key = 0;
   switch (packet[0])
     {
-    case 'B' :
-      key = convert(packet + 1);
-      key |= EUBRL_BRAILLE_KEY;
+    case 'B' : {
+      unsigned int keys = (packet[1] << 8) | packet[0];
+      enqueueKeys(EU_SET_BrailleKeys, keys, 0);
       break;
+    }
     case 'I':
       key = packet[1];
       if (key >= 0X88) {
@@ -700,13 +692,7 @@ readKey (BrailleDisplay *brl) {
 
 static int
 keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
-  int res = EOF;
-
-  if (key & EUBRL_BRAILLE_KEY)
-    {
-      res = eubrl_handleBrailleKey(key, ctx);
-    }
-  return res;
+  return EOF;
 }
  
 static int

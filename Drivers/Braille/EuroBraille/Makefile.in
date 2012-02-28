@@ -23,11 +23,7 @@ DRIVER_VERSION = 2.0
 DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@mistigri.org>, Nicolas PITRE <nico@fluxnic.net>
 include $(SRC_TOP)braille.mk
 
-SRC_FILES = \
-	eu_braille.c \
-	eu_protocol.c \
-	eu_clio.c \
-	eu_esysiris.c
+SRC_FILES = eu_braille.c eu_clio.c eu_esysiris.c
 
 OBJ_FILES = $(SRC_FILES:.c=.$O)
 

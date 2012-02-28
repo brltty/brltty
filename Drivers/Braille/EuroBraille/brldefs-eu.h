@@ -108,6 +108,19 @@ typedef enum {
 } EU_NavigationKey;
 
 typedef enum {
+  EU_DOT_1 =  0,
+  EU_DOT_2 =  1,
+  EU_DOT_3 =  2,
+  EU_DOT_4 =  3,
+  EU_DOT_5 =  4,
+  EU_DOT_6 =  5,
+  EU_DOT_B =  6,
+  EU_DOT_S =  7,
+  EU_DOT_7 =  8,
+  EU_DOT_8 =  9
+} EU_DotKey;
+
+typedef enum {
   /* Iris linear and arrow keys */
   EU_CMD_L1    =  0,
   EU_CMD_L2    =  1,

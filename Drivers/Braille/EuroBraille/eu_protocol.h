@@ -68,6 +68,4 @@ EXTERNAL_KEY_TABLE(esys_medium)
 EXTERNAL_KEY_TABLE(esys_large)
 EXTERNAL_KEY_TABLE(esytime)
 
-extern int eubrl_handleBrailleKey (unsigned int key, KeyTableCommandContext ctx);
-
 #endif /* __EU_PROTOCOL_H__ */

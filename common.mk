@@ -22,7 +22,6 @@ brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api
 
 $(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_braille.$O
-$(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_protocol.$O
 $(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_clio.$O
 $(BLD_TOP)$(BRL_DIR)/EuroBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/EuroBraille/eu_esysiris.$O
 	cd $(@D) && $(MAKE) $(@F)
