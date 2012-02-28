@@ -29,7 +29,7 @@
 #define __EU_PROTOCOL_H__
 
 #include "ktbdefs.h"
-#include "eu_braille.h"
+#include "brl.h"
 
 typedef struct {
   const char *protocolName;
