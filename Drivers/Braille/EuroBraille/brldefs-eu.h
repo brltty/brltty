@@ -78,6 +78,41 @@ typedef enum {
 } EU_EsysOption;
 
 typedef enum {
+  EU_NAV_Sharp = 0X23,
+  EU_NAV_Star  = 0X2A,
+
+  EU_NAV_0     = 0X30,
+  EU_NAV_1     = 0X31,
+  EU_NAV_2     = 0X32,
+  EU_NAV_3     = 0X33,
+  EU_NAV_4     = 0X34,
+  EU_NAV_5     = 0X35,
+  EU_NAV_6     = 0X36,
+  EU_NAV_7     = 0X37,
+  EU_NAV_8     = 0X38,
+  EU_NAV_9     = 0X39,
+
+  EU_NAV_A     = 0X41,
+  EU_NAV_B     = 0X42,
+  EU_NAV_C     = 0X43,
+  EU_NAV_D     = 0X44,
+  EU_NAV_E     = 0X45,
+  EU_NAV_F     = 0X46,
+  EU_NAV_G     = 0X47,
+  EU_NAV_H     = 0X48,
+  EU_NAV_I     = 0X49,
+  EU_NAV_J     = 0X4A,
+  EU_NAV_K     = 0X4B,
+  EU_NAV_L     = 0X4C,
+  EU_NAV_M     = 0X4D,
+
+  EU_NAV_Up    = EU_NAV_2,
+  EU_NAV_Left  = EU_NAV_4,
+  EU_NAV_Right = EU_NAV_6,
+  EU_NAV_Down  = EU_NAV_8
+} EU_NavigationKey;
+
+typedef enum {
   /* Iris linear and arrow keys */
   EU_CMD_L1    =  0,
   EU_CMD_L2    =  1,
@@ -145,6 +180,9 @@ typedef enum {
 } EU_BrailleKey;
 
 typedef enum {
+  EU_SET_NavigationKeys,
+  EU_SET_StstusKeys,
+  EU_SET_BlankKeys,
   EU_SET_CommandKeys,
   EU_SET_BrailleKeys,
   EU_SET_RoutingKeys1,
