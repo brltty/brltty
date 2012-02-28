@@ -18,6 +18,8 @@
 
 title EuroBraille AzerBraille, Clio, NoteBraille, PupiBraille, Scriba
 
+include brl-eu-braille.kti
+
 bind Star CONTEXT+1
 bind Sharp CONTEXT+2
 
