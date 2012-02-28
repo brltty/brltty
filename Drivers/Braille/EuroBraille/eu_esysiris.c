@@ -891,7 +891,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
         }
       }
 
-//    if (writePacket(brl, data, byte-data) == -1) return 0;
+      if (writePacket(brl, data, byte-data) == -1) return 0;
     }
   }
 
