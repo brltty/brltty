@@ -20,82 +20,82 @@ title EuroBraille AzerBraille, Clio, NoteBraille, PupiBraille, Scriba
 
 include brl-eu-braille.kti
 
-bind Star CONTEXT+1
-bind Sharp CONTEXT+2
+bind !Star CONTEXT+1
+bind !Sharp CONTEXT+2
 
-bind RoutingKey ROUTE
+bind !RoutingKey ROUTE
 
-bind Up KEY_CURSOR_UP
-bind Left KEY_CURSOR_LEFT
-bind Right KEY_CURSOR_Right
-bind Down KEY_CURSOR_DOWN
+bind !Up KEY_CURSOR_UP
+bind !Left KEY_CURSOR_LEFT
+bind !Right KEY_CURSOR_Right
+bind !Down KEY_CURSOR_DOWN
 
-bind Zero CSRTRK
-bind One TOP_LEFT
-bind Three PRDIFLN
-bind Five HOME
-bind Seven BOT_LEFT
-bind Nine NXDIFLN
+bind !Zero CSRTRK
+bind !One TOP_LEFT
+bind !Three PRDIFLN
+bind !Five HOME
+bind !Seven BOT_LEFT
+bind !Nine NXDIFLN
 
-bind A FREEZE
-bind E FWINLT
-bind F LNUP
-bind G PRPROMPT
-bind H PREFMENU
-bind I INFO
-bind J INFO
-bind K NXPROMPT
-bind L LNDN
-bind M FWINRT
+bind !A FREEZE
+bind !E FWINLT
+bind !F LNUP
+bind !G PRPROMPT
+bind !H PREFMENU
+bind !I INFO
+bind !J INFO
+bind !K NXPROMPT
+bind !L LNDN
+bind !M FWINRT
 
 
 context 1
 
-bind Up PREFMENU
-bind Down CSRTRK
-bind Right TUNES
+bind !Up PREFMENU
+bind !Down CSRTRK
+bind !Right TUNES
 
-bind E CONTEXT+3
-bind F CONTEXT+4
-bind G CSRVIS
-bind K CONTEXT+5
-bind L PASTE
-bind M CONTEXT+6
+bind !E CONTEXT+3
+bind !F CONTEXT+4
+bind !G CSRVIS
+bind !K CONTEXT+5
+bind !L PASTE
+bind !M CONTEXT+6
 
 
 context 2
 
-bind Left LNBEG
-bind Right LNEND
-bind Up HOME
-bind Down BACK
+bind !Left LNBEG
+bind !Right LNEND
+bind !Up HOME
+bind !Down BACK
 
-bind One LEARN
-bind Three TOP_LEFT
-bind Nine BOT_LEFT
+bind !One LEARN
+bind !Three TOP_LEFT
+bind !Nine BOT_LEFT
 
-bind A DISPMD
-bind E TOP_LEFT
-bind G PRSEARCH
-bind H HELP
-bind K NXSEARCH
-bind L LEARN
-bind M BOT_LEFT
+bind !A DISPMD
+bind !E TOP_LEFT
+bind !G PRSEARCH
+bind !H HELP
+bind !K NXSEARCH
+bind !L LEARN
+bind !M BOT_LEFT
 
 
 context 3
-bind RoutingKey CUTBEGIN
+bind !RoutingKey CUTBEGIN
 
 
 context 4
-bind RoutingKey CUTAPPEND
+bind !RoutingKey CUTAPPEND
 
 
 context 5
-bind RoutingKey CUTRECT
+bind !RoutingKey CUTRECT
 
 
 context 6
-bind RoutingKey CUTLINE
+bind !RoutingKey CUTLINE
 
 
