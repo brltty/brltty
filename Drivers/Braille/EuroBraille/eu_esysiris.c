@@ -887,7 +887,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
-const t_eubrl_protocol esysirisProtocol = {
+const ProtocolOperations esysirisProtocolOperations = {
   .protocolName = "esysiris",
 
   .initializeDevice = initializeDevice,

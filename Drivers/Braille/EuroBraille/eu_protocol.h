@@ -45,18 +45,18 @@ typedef struct {
 
   int (*hasVisualDisplay) (BrailleDisplay *brl);
   int (*writeVisual) (BrailleDisplay *brl, const wchar_t *text);
-} t_eubrl_protocol;
+} ProtocolOperations;
 
 typedef struct {
-  const t_eubrl_protocol *protocol;
+  const ProtocolOperations *protocol;
   int (*awaitInput) (int timeout);
   int (*readByte) (BrailleDisplay *brl, unsigned char *byte, int wait);
   ssize_t (*writeData) (BrailleDisplay *brl, const void *data, size_t size);
-} t_eubrl_io;
+} InputOutputOperations;
 
-extern const t_eubrl_io *io;
-extern const t_eubrl_protocol clioProtocol;
-extern const t_eubrl_protocol esysirisProtocol;
+extern const InputOutputOperations *io;
+extern const ProtocolOperations clioProtocolOperations;
+extern const ProtocolOperations esysirisProtocolOperations;
 
 #define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
 EXTERNAL_KEY_TABLE(clio)

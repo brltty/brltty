@@ -732,7 +732,7 @@ initializeDevice (BrailleDisplay *brl) {
   return (0);
 }
 
-const t_eubrl_protocol clioProtocol = {
+const ProtocolOperations clioProtocolOperations = {
   .protocolName = "clio",
 
   .initializeDevice = initializeDevice,

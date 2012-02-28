@@ -55,8 +55,8 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 static GioEndpoint *gioEndpoint = NULL;
-const t_eubrl_io *io = NULL;
-static const t_eubrl_protocol *protocol = NULL;
+const InputOutputOperations *io = NULL;
+static const ProtocolOperations *protocol = NULL;
 
 static inline void
 updateWriteDelay (BrailleDisplay *brl, size_t count) {
@@ -103,21 +103,21 @@ writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
   return length;
 }
 
-static const t_eubrl_io	serialOperations = {
+static const InputOutputOperations serialOperations = {
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_generic
 };
 
-static const t_eubrl_io	usbOperations = {
-  .protocol = &esysirisProtocol,
+static const InputOutputOperations usbOperations = {
+  .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_USB
 };
 
-static const t_eubrl_io	bluetoothOperations = {
-  .protocol = &esysirisProtocol,
+static const InputOutputOperations bluetoothOperations = {
+  .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_generic
@@ -277,8 +277,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       NULL
     };
 
-    static const t_eubrl_protocol *const protocols[] = {
-      NULL, &clioProtocol, &esysirisProtocol
+    static const ProtocolOperations *const protocols[] = {
+      NULL, &clioProtocolOperations, &esysirisProtocolOperations
     };
 
     unsigned int choice;
@@ -303,14 +303,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       protocol = io->protocol;
       if (protocol->initializeDevice(brl)) return 1;
     } else {
-      static const t_eubrl_protocol *const protocols[] = {
-        &esysirisProtocol, &clioProtocol,
+      static const ProtocolOperations *const protocols[] = {
+        &esysirisProtocolOperations, &clioProtocolOperations,
         NULL
       };
-      const t_eubrl_protocol *const *p = protocols;
+      const ProtocolOperations *const *p = protocols;
 
       while (*p) {
-        const t_eubrl_protocol *protocol = *p++;
+        const ProtocolOperations *protocol = *p++;
 
         logMessage(LOG_NOTICE, "trying protocol: %s", protocol->protocolName);
         if (protocol->initializeDevice(brl)) return 1;
