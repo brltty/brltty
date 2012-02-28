@@ -60,6 +60,8 @@ extern const t_eubrl_io *io;
 extern const t_eubrl_protocol clioProtocol;
 extern const t_eubrl_protocol esysirisProtocol;
 
+#define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
+EXTERNAL_KEY_TABLE(clio)
 EXTERNAL_KEY_TABLE(iris)
 EXTERNAL_KEY_TABLE(esys_small)
 EXTERNAL_KEY_TABLE(esys_medium)

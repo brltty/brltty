@@ -31,8 +31,52 @@
 #include "timing.h"
 #include "message.h"
 #include "ascii.h"
+#include "brldefs-eu.h"
 #include "eu_protocol.h"
 #include "eu_keys.h"
+
+#define NAVIGATION_KEY_ENTRY(k,n) KEY_ENTRY(NavigationKeys, NAV, k, n)
+
+BEGIN_KEY_NAME_TABLE(navigation)
+  NAVIGATION_KEY_ENTRY(Sharp, "Sharp"),
+  NAVIGATION_KEY_ENTRY(Star, "Star"),
+
+  NAVIGATION_KEY_ENTRY(0, "0"),
+  NAVIGATION_KEY_ENTRY(1, "1"),
+  NAVIGATION_KEY_ENTRY(2, "2"),
+  NAVIGATION_KEY_ENTRY(3, "3"),
+  NAVIGATION_KEY_ENTRY(4, "4"),
+  NAVIGATION_KEY_ENTRY(5, "5"),
+  NAVIGATION_KEY_ENTRY(6, "6"),
+  NAVIGATION_KEY_ENTRY(7, "7"),
+  NAVIGATION_KEY_ENTRY(8, "8"),
+  NAVIGATION_KEY_ENTRY(9, "9"),
+
+  NAVIGATION_KEY_ENTRY(A, "A"),
+  NAVIGATION_KEY_ENTRY(B, "B"),
+  NAVIGATION_KEY_ENTRY(C, "C"),
+  NAVIGATION_KEY_ENTRY(D, "D"),
+  NAVIGATION_KEY_ENTRY(E, "E"),
+  NAVIGATION_KEY_ENTRY(F, "F"),
+  NAVIGATION_KEY_ENTRY(G, "G"),
+  NAVIGATION_KEY_ENTRY(H, "H"),
+  NAVIGATION_KEY_ENTRY(I, "I"),
+  NAVIGATION_KEY_ENTRY(J, "J"),
+  NAVIGATION_KEY_ENTRY(K, "K"),
+  NAVIGATION_KEY_ENTRY(L, "L"),
+  NAVIGATION_KEY_ENTRY(M, "M"),
+
+  NAVIGATION_KEY_ENTRY(Up, "Up"),
+  NAVIGATION_KEY_ENTRY(Left, "Left"),
+  NAVIGATION_KEY_ENTRY(Right, "Right"),
+  NAVIGATION_KEY_ENTRY(Down, "Down"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(clio)
+  KEY_NAME_TABLE(navigation),
+END_KEY_NAME_TABLES
+
+PUBLIC_KEY_TABLE(clio)
 
 /* Communication codes */
 # define PRT_E_PAR 0x01		/* parity error */

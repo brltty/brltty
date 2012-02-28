@@ -34,7 +34,6 @@
 
 #define MAXIMUM_DISPLAY_SIZE 80
 
-#define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
 #define COMMAND_KEY_ENTRY(k,n) KEY_ENTRY(CommandKeys, CMD, k, n)
 #define BRAILLE_KEY_ENTRY(k,n) KEY_ENTRY(BrailleKeys, BRL, k, n)
 

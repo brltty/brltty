@@ -46,6 +46,7 @@ typedef enum {
 
 
 BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(clio),
   &KEY_TABLE_DEFINITION(iris),
   &KEY_TABLE_DEFINITION(esys_small),
   &KEY_TABLE_DEFINITION(esys_medium),
