@@ -677,16 +677,6 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
 }
 
 static int
-readKey (BrailleDisplay *brl) {
-  return EOF;
-}
-
-static int
-keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
-  return EOF;
-}
- 
-static int
 readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
   unsigned char	packet[READ_BUFFER_LENGTH];
   ssize_t length;
@@ -751,11 +741,9 @@ const t_eubrl_protocol clioProtocol = {
   .readPacket = readPacket,
   .writePacket = writePacket,
 
-  .readKey = readKey,
   .readCommand = readCommand,
-  .keyToCommand = keyToCommand,
-
   .writeWindow = writeWindow,
+
   .hasVisualDisplay = hasVisualDisplay,
   .writeVisual = writeVisual
 };

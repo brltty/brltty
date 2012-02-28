@@ -738,21 +738,11 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
 }
 
 static int
-readKey (BrailleDisplay *brl) {
-  return EOF;
-}
-
-static int
-keyToCommand (BrailleDisplay *brl, int key, KeyTableCommandContext ctx) {
-  return EOF;
-}
-
-static int
 readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
   unsigned char	packet[2048];
-  ssize_t size;
+  ssize_t length;
 
-  while ((size = readPacket(brl, packet, sizeof(packet))) > 0) {
+  while ((length = readPacket(brl, packet, sizeof(packet))) > 0) {
     switch (packet[3]) {
       case 'S':
         if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
@@ -778,10 +768,10 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
         break;
     }
 
-    logUnexpectedPacket(packet, size);
+    logUnexpectedPacket(packet, length);
   }
 
-  return (size == -1)? BRL_CMD_RESTARTBRL: EOF;
+  return (length == -1)? BRL_CMD_RESTARTBRL: EOF;
 }
 
 static int
@@ -906,11 +896,9 @@ const t_eubrl_protocol esysirisProtocol = {
   .readPacket = readPacket,
   .writePacket = writePacket,
 
-  .readKey = readKey,
   .readCommand = readCommand,
-  .keyToCommand = keyToCommand,
-
   .writeWindow = writeWindow,
+
   .hasVisualDisplay = hasVisualDisplay,
   .writeVisual = writeVisual
 };

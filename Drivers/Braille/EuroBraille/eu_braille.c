@@ -356,22 +356,6 @@ brl_reset (BrailleDisplay *brl) {
 }
 #endif /* BRL_HAVE_PACKET_IO */
 
-#ifdef BRL_HAVE_KEY_CODES
-static int
-brl_readKey (BrailleDisplay *brl) {
-  if (protocol)
-    return protocol->readKey(brl);
-  return EOF;
-}
-
-static int
-brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
-  if (protocol)
-    return protocol->keyToCommand(brl, key, context);
-  return BRL_CMD_NOOP;
-}
-#endif /* BRL_HAVE_KEY_CODES */
-
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (!protocol) return 1;

@@ -40,11 +40,9 @@ typedef struct {
   ssize_t (*readPacket) (BrailleDisplay *brl, void *packet, size_t size);
   ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
 
-  int (*readKey) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext c);
-  int (*keyToCommand) (BrailleDisplay *brl, int key, KeyTableCommandContext ctx);
-
   int (*writeWindow) (BrailleDisplay *brl);
+
   int (*hasVisualDisplay) (BrailleDisplay *brl);
   int (*writeVisual) (BrailleDisplay *brl, const wchar_t *text);
 } t_eubrl_protocol;
