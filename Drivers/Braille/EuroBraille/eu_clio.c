@@ -345,8 +345,8 @@ static int refreshDisplay = 0;
 static int previousPacketNumber;
 
 static int
-needsEscape (unsigned char code) {
-  switch (code) {
+needsEscape (unsigned char byte) {
+  switch (byte) {
     case SOH:
     case EOT:
     case DLE:
@@ -360,8 +360,8 @@ needsEscape (unsigned char code) {
 
 /* Local functions */
 static int
-sendByte (BrailleDisplay *brl, unsigned char c) {
-  return io->writeData(brl, (char*)&c, 1);
+sendByte (BrailleDisplay *brl, unsigned char byte) {
+  return io->writeData(brl, &byte, 1);
 }
 
 static ssize_t
@@ -652,8 +652,8 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
         return 1;
       }
 
-      if (key >= 0X80) {
-        enqueueKey(EU_SET_SeparatorKeys, key-0X80);
+      if (key >= 0X81) {
+        enqueueKey(EU_SET_SeparatorKeys, key-0X81);
         return 1;
       }
 
@@ -722,6 +722,12 @@ initializeDevice (BrailleDisplay *brl) {
     { /* Succesfully identified hardware. */
       brl->textRows = 1;
       brl->textColumns = brlCols;
+
+      {
+        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
+        brl->keyBindings = ktd->bindings;
+        brl->keyNameTables = ktd->names;
+      }
 
       previousPacketNumber = -1;
 
