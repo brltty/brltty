@@ -106,7 +106,8 @@ PUBLIC_KEY_TABLE(clio)
 # define PRT_E_DON 0x05		/* data error */
 # define PRT_E_SYN 0x06		/* syntax error */
 
-#define	READ_BUFFER_LENGTH 1024
+#define	INPUT_BUFFER_SIZE 1024
+#define MAXIMUM_DISPLAY_SIZE 80
 
 typedef enum {
   UNKNOWN = 0x00,
@@ -340,9 +341,11 @@ static const ModelEntry modelTable[] = {
 
 static int brlCols = 0; /* Number of braille cells */
 static clioModel brlModel = 0; /* brl display model currently used */
-static unsigned char	brlFirmwareVersion[21];
-static int refreshDisplay = 0;
-static int previousPacketNumber;
+static unsigned char firmwareVersion[21];
+static int forceWindowRewrite;
+static int forceVisualRewrite;
+static int inputPacketNumber;
+static int outputPacketNumber;
 
 static int
 needsEscape (unsigned char byte) {
@@ -474,12 +477,12 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
           offset -= 1; /* remove parity */
           sendByte(brl, ACK);
 
-          if (buffer[--offset] == previousPacketNumber)
+          if (buffer[--offset] == inputPacketNumber)
             {
               offset = 0;
               continue;
             }
-          previousPacketNumber = buffer[offset];
+          inputPacketNumber = buffer[offset];
 
           memcpy(packet, &buffer[1], offset-1);
           return offset;
@@ -494,7 +497,6 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   unsigned char		*q = buf;
   const unsigned char *p = packet;
   unsigned char		parity = 0;
-  static int pktNbr = 127; /* packet number = 127 at first time */
   size_t packetSize;
 
   *q++ = SOH;
@@ -504,10 +506,10 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
         *q++ = *p;
 	parity ^= *p++;
      }
-   *q++ = pktNbr; /* Doesn't need to be prefixed since greater than 128 */
-   parity ^= pktNbr;
-   if (++pktNbr >= 256)
-     pktNbr = 128;
+   *q++ = outputPacketNumber; /* Doesn't need to be prefixed since greater than 128 */
+   parity ^= outputPacketNumber;
+   if (++outputPacketNumber >= 256)
+     outputPacketNumber = 128;
    if (needsEscape(parity)) *q++ = DLE;
    *q++ = parity;
    *q++ = EOT;
@@ -541,13 +543,13 @@ handleSystemInformation (BrailleDisplay *brl, const void *packet) {
       if (ln == 22 && 
 	  (!strncmp(p, "SI", 2) || !strncmp(p, "si", 2 )))
 	{
-	  memcpy(brlFirmwareVersion, p + 2, 20);
+	  memcpy(firmwareVersion, p+2, 20);
 	  break;
 	}
       else
 	p += ln;
     }
-  switch (brlFirmwareVersion[2]) {
+  switch (firmwareVersion[2]) {
   case '2' : 
     brlCols = 20;
     break;
@@ -567,7 +569,7 @@ handleSystemInformation (BrailleDisplay *brl, const void *packet) {
   i = 0;
   while (modelTable[i].modelIdentifier != TYPE_LAST)
     {
-      if (!strncasecmp(modelTable[i].modelCode, (char*)brlFirmwareVersion, 3))
+      if (!strncasecmp(modelTable[i].modelCode, (char*)firmwareVersion, 3))
 	break;
       i++;
     }
@@ -577,48 +579,42 @@ handleSystemInformation (BrailleDisplay *brl, const void *packet) {
 
 static int
 writeWindow (BrailleDisplay *brl) {
-  static unsigned char previousBrailleWindow[80];
-  int displaySize = brl->textColumns * brl->textRows;
-  unsigned char buf[displaySize + 3];
+  static unsigned char previousCells[MAXIMUM_DISPLAY_SIZE];
+  size_t size = brl->textColumns * brl->textRows;
+  unsigned char buffer[size + 3];
 
-  if ( displaySize > sizeof(previousBrailleWindow) ) {
-    logMessage(LOG_WARNING, "[eu] Discarding too large braille window" );
-    return 0;
+  if (cellsHaveChanged(previousCells, brl->buffer, size, NULL, NULL, &forceWindowRewrite)) {
+    buffer[0] = size + 2;
+    buffer[1] = 'D';
+    buffer[2] = 'P';
+    translateOutputCells(buffer+3, brl->buffer, size);
+    writePacket(brl, buffer, sizeof(buffer));
   }
-  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, displaySize, NULL, NULL, &refreshDisplay)) {
-    buf[0] = (unsigned char)(displaySize + 2);
-    buf[1] = 'D';
-    buf[2] = 'P';
-    memcpy(buf + 3, brl->buffer, displaySize);
-    writePacket(brl, buf, sizeof(buf));
-  }
+
   return 1;
 }
 
 static int
 writeVisual (BrailleDisplay *brl, const wchar_t *text) {
-  static wchar_t previousVisualDisplay[80];
-  int displaySize = brl->textColumns * brl->textRows;
-  unsigned char buf[displaySize + 3];
-  int i;
+  static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
+  size_t size = brl->textColumns * brl->textRows;
+  unsigned char buffer[size + 3];
 
-  if ( displaySize > sizeof(previousVisualDisplay) ) {
-    logMessage(LOG_WARNING, "[eu] Discarding too large visual display" );
-    return 0;
+  if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
+    int i;
+
+    buffer[0] = size + 2;
+    buffer[1] = 'D';
+    buffer[2] = 'L';
+
+    for (i=0; i<size; i+=1) {
+      wchar_t wc = text[i];
+      buffer[i+3] = iswLatin1(wc)? wc: '?';
+    }
+
+    writePacket(brl, buffer, sizeof(buffer));
   }
 
-  if (wmemcmp(previousVisualDisplay, text, displaySize) == 0)
-    return 1;
-  wmemcpy(previousVisualDisplay, text, displaySize);
-  buf[0] = (unsigned char)(displaySize + 2);
-  buf[1] = 'D';
-  buf[2] = 'L';
-  for (i = 0; i < displaySize; i++)
-    {
-      wchar_t wc = text[i];
-      buf[i+3] = iswLatin1(wc)? wc: '?';
-    }
-  writePacket(brl, buf, sizeof(buf));
   return 1;
 }
 
@@ -627,19 +623,22 @@ hasVisualDisplay (BrailleDisplay *brl) {
   return (1);
 }
 
-static void
+static int
 handleMode (BrailleDisplay *brl, const unsigned char *packet) {
   if (*packet == 'B') {
-    refreshDisplay = 1;
-    writeWindow(brl);
+    forceWindowRewrite = 1;
+    forceVisualRewrite = 1;
+    return 1;
   }
+
+  return 0;
 }
 
 static int
 handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
-      unsigned int keys = (packet[1] << 8) | packet[0];
+      unsigned int keys = (packet[2] << 8) | packet[1];
       enqueueKeys(keys, EU_SET_BrailleKeys, 0);
       return 1;
     }
@@ -678,7 +677,7 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
 
 static int
 readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
-  unsigned char	packet[READ_BUFFER_LENGTH];
+  unsigned char	packet[INPUT_BUFFER_SIZE];
   ssize_t length;
 
   while ((length = readPacket(brl, packet, sizeof(packet))) > 0) {
@@ -688,8 +687,8 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
         continue;
 
       case 'R': 
-        handleMode(brl, packet+2);
-        continue;
+        if (handleMode(brl, packet+2)) continue;
+        break;
 
       case 'K': 
         if (handleKeyEvent(brl, packet+2)) continue;
@@ -707,10 +706,14 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
 static int
 initializeDevice (BrailleDisplay *brl) {
-  int	leftTries = 2;
+  int leftTries = 2;
 
   brlCols = 0;
-  memset(brlFirmwareVersion, 0, 21);
+  memset(firmwareVersion, 0, sizeof(firmwareVersion));
+  forceWindowRewrite = 1;
+  forceVisualRewrite = 1;
+  inputPacketNumber = -1;
+  outputPacketNumber = 127;
 
   while (leftTries-- && brlCols == 0)
     {
@@ -728,8 +731,6 @@ initializeDevice (BrailleDisplay *brl) {
         brl->keyBindings = ktd->bindings;
         brl->keyNameTables = ktd->names;
       }
-
-      previousPacketNumber = -1;
 
       logMessage(LOG_INFO, "eu: %s connected.",
 	         modelTable[brlModel].modelName);
