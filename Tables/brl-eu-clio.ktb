@@ -1,0 +1,99 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title EuroBraille AzerBraille, Clio, NoteBraille, PupiBraille, Scriba
+
+bind Star CONTEXT+1
+bind Sharp CONTEXT+2
+
+bind RoutingKey ROUTE
+
+bind Up KEY_CURSOR_UP
+bind Left KEY_CURSOR_LEFT
+bind Right KEY_CURSOR_Right
+bind Down KEY_CURSOR_DOWN
+
+bind 0 CSRTRK
+bind 1 TOP_LEFT
+bind 3 PRDIFLN
+bind 5 HOME
+bind 7 BOT_LEFT
+bind 9 NXDIFLN
+
+bind A FREEZE
+bind E FWINLT
+bind F LNUP
+bind G PRPROMPT
+bind H PREFMENU
+bind I INFO
+bind J INFO
+bind K NXPROMPT
+bind L LNDN
+bind M FWINRT
+
+
+context 1
+
+bind Up PREFMENU
+bind Down CSRTRK
+bind Right TUNES
+
+bind E CONTEXT+3
+bind F CONTEXT+4
+bind G CSRVIS
+bind K CONTEXT+5
+bind L PASTE
+bind M CONTEXT+6
+
+
+context 2
+
+bind Left LNBEG
+bind Right LNEND
+bind Up HOME
+bind Down BACK
+
+bind 1 LEARN
+bind 3 TOP_LEFT
+bind 9 BOT_LEFT
+
+bind A DISPMD
+bind E TOP_LEFT
+bind G PRSEARCH
+bind H HELP
+bind K NXSEARCH
+bind L LEARN
+bind M BOT_LEFT
+
+
+context 3
+bind RoutingKey CUTBEGIN
+
+
+context 4
+bind RoutingKey CUTAPPEND
+
+
+context 5
+bind RoutingKey CUTRECT
+
+
+context 6
+bind RoutingKey CUTLINE
+
+
