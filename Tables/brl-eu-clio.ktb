@@ -30,12 +30,12 @@ bind Left KEY_CURSOR_LEFT
 bind Right KEY_CURSOR_Right
 bind Down KEY_CURSOR_DOWN
 
-bind 0 CSRTRK
-bind 1 TOP_LEFT
-bind 3 PRDIFLN
-bind 5 HOME
-bind 7 BOT_LEFT
-bind 9 NXDIFLN
+bind Zero CSRTRK
+bind One TOP_LEFT
+bind Three PRDIFLN
+bind Five HOME
+bind Seven BOT_LEFT
+bind Nine NXDIFLN
 
 bind A FREEZE
 bind E FWINLT
@@ -70,9 +70,9 @@ bind Right LNEND
 bind Up HOME
 bind Down BACK
 
-bind 1 LEARN
-bind 3 TOP_LEFT
-bind 9 BOT_LEFT
+bind One LEARN
+bind Three TOP_LEFT
+bind Nine BOT_LEFT
 
 bind A DISPMD
 bind E TOP_LEFT
