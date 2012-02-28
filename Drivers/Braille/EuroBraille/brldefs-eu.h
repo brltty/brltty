@@ -105,11 +105,6 @@ typedef enum {
   EU_NAV_K     = 0X4B,
   EU_NAV_L     = 0X4C,
   EU_NAV_M     = 0X4D,
-
-  EU_NAV_Up    = EU_NAV_2,
-  EU_NAV_Left  = EU_NAV_4,
-  EU_NAV_Right = EU_NAV_6,
-  EU_NAV_Down  = EU_NAV_8
 } EU_NavigationKey;
 
 typedef enum {
@@ -181,8 +176,8 @@ typedef enum {
 
 typedef enum {
   EU_SET_NavigationKeys,
-  EU_SET_StstusKeys,
-  EU_SET_BlankKeys,
+  EU_SET_StatusKeys,
+  EU_SET_SeparatorKeys,
   EU_SET_CommandKeys,
   EU_SET_BrailleKeys,
   EU_SET_RoutingKeys1,
