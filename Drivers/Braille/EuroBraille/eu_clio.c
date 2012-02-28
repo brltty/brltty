@@ -75,6 +75,15 @@ typedef struct {
   unsigned char modelIdentifier;
   char modelCode[3];
   const char *modelName;
+  unsigned char cellCount;
+  unsigned isAzerBraille:1;
+  unsigned isEuroBraille:1;
+  unsigned isIris:1;
+  unsigned isNoteBraille:1;
+  unsigned isPupiBraille:1;
+  unsigned isScriba:1;
+  unsigned hasClioInteractive:1;
+  unsigned hasVisualDisplay:1;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
@@ -85,112 +94,176 @@ static const ModelEntry modelTable[] = {
 
   { .modelIdentifier = CE2,
     .modelCode = "CE2",
-    .modelName = "Clio-EuroBraille 20"
+    .modelName = "Clio-EuroBraille 20",
+    .cellCount = 20,
+    .hasClioInteractive = 1,
+    .isEuroBraille = 1
   },
 
   { .modelIdentifier = CE4,
     .modelCode = "CE4",
-    .modelName = "Clio-EuroBraille 40"
+    .modelName = "Clio-EuroBraille 40",
+    .cellCount = 40,
+    .hasClioInteractive = 1,
+    .isEuroBraille = 1
   },
 
   { .modelIdentifier = CE8,
     .modelCode = "CE8",
-    .modelName = "Clio-EuroBraille 80"
+    .modelName = "Clio-EuroBraille 80",
+    .cellCount = 80,
+    .hasClioInteractive = 1,
+    .isEuroBraille = 1
   },
 
   { .modelIdentifier = CN2,
     .modelCode = "CN2",
-    .modelName = "Clio-NoteBraille 20"
+    .modelName = "Clio-NoteBraille 20",
+    .cellCount = 20,
+    .hasClioInteractive = 1,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = CN4,
     .modelCode = "CN4",
-    .modelName = "Clio-NoteBraille 40"
+    .modelName = "Clio-NoteBraille 40",
+    .cellCount = 40,
+    .hasClioInteractive = 1,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = CN8,
     .modelCode = "CN8",
-    .modelName = "Clio-NoteBraille 80"
+    .modelName = "Clio-NoteBraille 80",
+    .cellCount = 80,
+    .hasClioInteractive = 1,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = CP2,
     .modelCode = "Cp2",
-    .modelName = "Clio-PupiBraille 20"
+    .modelName = "Clio-PupiBraille 20",
+    .cellCount = 20,
+    .hasClioInteractive = 1,
+    .isPupiBraille = 1
   },
 
   { .modelIdentifier = CP4,
     .modelCode = "Cp4",
-    .modelName = "Clio-PupiBraille 40"
+    .modelName = "Clio-PupiBraille 40",
+    .cellCount = 40,
+    .hasClioInteractive = 1,
+    .isPupiBraille = 1
   },
 
   { .modelIdentifier = CP8,
     .modelCode = "Cp8",
-    .modelName = "Clio-PupiBraille 80"
+    .modelName = "Clio-PupiBraille 80",
+    .cellCount = 80,
+    .hasClioInteractive = 1,
+    .isPupiBraille = 1
   },
 
   { .modelIdentifier = CZ4,
     .modelCode = "CZ4",
-    .modelName = "Clio-AzerBraille 40"
+    .modelName = "Clio-AzerBraille 40",
+    .cellCount = 40,
+    .hasClioInteractive = 1,
+    .hasVisualDisplay = 1,
+    .isAzerBraille = 1
   },
 
   { .modelIdentifier = JN2,
     .modelCode = "JN2",
-    .modelName = ""
+    .modelName = "",
+    .cellCount = 20,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = NB2,
     .modelCode = "NB2",
-    .modelName = "NoteBraille 20"
+    .modelName = "NoteBraille 20",
+    .cellCount = 20,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = NB4,
     .modelCode = "NB4",
-    .modelName = "NoteBraille 40"
+    .modelName = "NoteBraille 40",
+    .cellCount = 40,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = NB8,
     .modelCode = "NB8",
-    .modelName = "NoteBraille 80"
+    .modelName = "NpoteBraille 80",
+    .cellCount = 80,
+    .hasVisualDisplay = 1,
+    .isNoteBraille = 1
   },
 
   { .modelIdentifier = SB2,
     .modelCode = "SB2",
-    .modelName = "Scriba 20"
+    .modelName = "Scriba 20",
+    .cellCount = 20,
+    .hasClioInteractive = 1,
+    .isScriba = 1
   },
 
   { .modelIdentifier = SB4,
     .modelCode = "SB4",
-    .modelName = "Scriba 40"
+    .modelName = "Scriba 40",
+    .cellCount = 40,
+    .hasClioInteractive = 1,
+    .isScriba = 1
   },
 
   { .modelIdentifier = SC2,
     .modelCode = "SC2",
-    .modelName = "Scriba 20"
+    .modelName = "Scriba 20",
+    .cellCount = 20
   },
 
   { .modelIdentifier = SC4,
     .modelCode = "SC4",
-    .modelName = "Scriba 40"
+    .modelName = "Scriba 40",
+    .cellCount = 40
   },
 
   { .modelIdentifier = IR2,
     .modelCode = "IR2",
-    .modelName = "Iris 20"
+    .modelName = "Iris 20",
+    .cellCount = 20,
+    .hasVisualDisplay = 1,
+    .isIris = 1
   },
 
   { .modelIdentifier = IR4,
     .modelCode = "IR4",
-    .modelName = "Iris 40"
+    .modelName = "Iris 40",
+    .cellCount = 40,
+    .hasVisualDisplay = 1,
+    .isIris = 1
   },
 
   { .modelIdentifier = IS2,
     .modelCode = "IS2",
-    .modelName = "Iris S20"
+    .modelName = "Iris S20",
+    .cellCount = 20,
+    .isIris = 1
   },
 
   { .modelIdentifier = IS3,
     .modelCode = "IS3",
-    .modelName = "Iris S32"
+    .modelName = "Iris S32",
+    .cellCount = 32,
+    .isIris = 1
   },
 
   { .modelIdentifier = TYPE_LAST,
