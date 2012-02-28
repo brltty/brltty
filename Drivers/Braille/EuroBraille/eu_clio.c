@@ -638,32 +638,44 @@ handleMode (BrailleDisplay *brl, char* packet) {
 }
 
 static int
-handleKeyboard (BrailleDisplay *brl, char *packet) {
-  unsigned int key = 0;
-  switch (packet[0])
-    {
-    case 'B' : {
+handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
+  switch (packet[0]) {
+    case 'B': {
       unsigned int keys = (packet[1] << 8) | packet[0];
-      enqueueKeys(EU_SET_BrailleKeys, keys, 0);
-      break;
+      enqueueKeys(keys, EU_SET_BrailleKeys, 0);
+      return 1;
     }
-    case 'I':
-      key = packet[1];
+
+    case 'I': {
+      unsigned char key = packet[1];
+
       if (key >= 0X88) {
         enqueueKey(EU_SET_StatusKeys, key-0X88);
-      } else if (key >= 0X80) {
-        enqueueKey(EU_SET_SeparatorKeys, key-0X80);
-      } else if (key >= 1) {
-        enqueueKey(EU_SET_RoutingKeys1, key-1);
+        return 1;
       }
-      break;
-    case 'T': 
-      enqueueKey(EU_SET_NavigationKeys, packet[1]);
-      break;
-    default :
+
+      if (key >= 0X80) {
+        enqueueKey(EU_SET_SeparatorKeys, key-0X80);
+        return 1;
+      }
+
+      if (key >= 1) {
+        enqueueKey(EU_SET_RoutingKeys1, key-1);
+        return 1;
+      }
+
       break;
     }
-  return key;
+
+    case 'T': 
+      enqueueKey(EU_SET_NavigationKeys, packet[1]);
+      return 1;
+
+    default :
+      break;
+  }
+
+  return 0;
 }
 
 static int
@@ -681,7 +693,7 @@ readKey (BrailleDisplay *brl) {
 	handleMode(brl, (char *)inPacket + 2);
 	break;
       case 'K' : 
-	res = handleKeyboard(brl, (char *)inPacket + 2);
+	res = handleKeyEvent(brl, inPacket + 2);
 	break;
       default: 
 	break;
