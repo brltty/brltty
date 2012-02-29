@@ -43,7 +43,6 @@ bind !F LNUP
 bind !G PRPROMPT
 bind !H PREFMENU
 bind !I INFO
-bind !J INFO
 bind !K NXPROMPT
 bind !L LNDN
 bind !M FWINRT
@@ -52,7 +51,6 @@ bind !M FWINRT
 context 1
 bind !Star CONTEXT+0
 
-bind !Up PREFMENU
 bind !Down CSRTRK
 bind !Right TUNES
 
