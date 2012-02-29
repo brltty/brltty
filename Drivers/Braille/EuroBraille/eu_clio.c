@@ -467,23 +467,34 @@ getModelEntry (const unsigned char *code) {
 }
 
 static void
-handleSystemInformation (BrailleDisplay *brl, const void *packet) {
-  const char *p = packet;
-  unsigned char ln = 0;
+handleSystemInformation (BrailleDisplay *brl, const unsigned char *packet) {
+  const unsigned char *p = packet;
 
-  while (1)
-    {
-      ln = *(p++);
-      if (ln == 22 && 
-	  (!strncmp(p, "SI", 2) || !strncmp(p, "si", 2 )))
-	{
-	  memcpy(firmwareVersion, p+2, 20);
-	  break;
-	}
-      else
-	p += ln;
+  while (1) {
+    unsigned char length = *(p++);
+
+    switch (p[0]) {
+      case 'S':
+        switch (p[1]) {
+          case 'I':
+            if (length == 22) {
+              memcpy(firmwareVersion, p+2, 20);
+              model = getModelEntry(firmwareVersion);
+              return;
+            }
+            break;
+
+          default:
+            break;
+        }
+        break;
+
+      default:
+        break;
     }
-  model = getModelEntry(firmwareVersion);
+
+    p += length;
+  }
 }
 
 static int
