@@ -422,35 +422,42 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
 static ssize_t
 writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
-  /* limit case, every char is escaped */
-  unsigned char		buf[(size + 3) * 2]; 
-  unsigned char		*q = buf;
-  const unsigned char *p = packet;
-  unsigned char		parity = 0;
-  size_t packetSize;
+#define PUT(byte) \
+  if (needsEscape((byte))) *target++ = DLE; \
+  *target++ = (byte); \
+  parity ^= (byte);
 
-  *q++ = SOH;
-  while (size--)
-    {
-	if (needsEscape(*p)) *q++ = DLE;
-        *q++ = *p;
-	parity ^= *p++;
-     }
-   *q++ = outputPacketNumber; /* Doesn't need to be prefixed since greater than 128 */
-   parity ^= outputPacketNumber;
-   if (++outputPacketNumber >= 256)
-     outputPacketNumber = 128;
-   if (needsEscape(parity)) *q++ = DLE;
-   *q++ = parity;
-   *q++ = EOT;
-   packetSize = q - buf;
-   logOutputPacket(buf, packetSize);
-   return io->writeData(brl, buf, packetSize);
+  /* limit case, every char is escaped */
+  unsigned char	buffer[(size + 4) * 2]; 
+  unsigned char	*target = buffer;
+  const unsigned char *source = packet;
+  unsigned char	parity = 0;
+
+  *target++ = SOH;
+  PUT(size);
+
+  while (size--) {
+    PUT(*source);
+    source += 1;
+  }
+
+  PUT(outputPacketNumber);
+  if (++outputPacketNumber >= 256) outputPacketNumber = 128;
+
+  PUT(parity);
+  *target++ = EOT;
+
+  {
+    size_t count = target - buffer;
+    logOutputPacket(buffer, count);
+    return io->writeData(brl, buffer, count);
+  }
+#undef PUT
 }
 
 static int
 resetDevice (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {0X02, 'S', 'I'};
+  static const unsigned char packet[] = {'S', 'I'};
   return writePacket(brl, packet, sizeof(packet)) != -1;
 }
 
@@ -501,13 +508,12 @@ static int
 writeWindow (BrailleDisplay *brl) {
   static unsigned char previousCells[MAXIMUM_DISPLAY_SIZE];
   size_t size = brl->textColumns * brl->textRows;
-  unsigned char buffer[size + 3];
+  unsigned char buffer[size + 2];
 
   if (cellsHaveChanged(previousCells, brl->buffer, size, NULL, NULL, &forceWindowRewrite)) {
-    buffer[0] = size + 2;
-    buffer[1] = 'D';
-    buffer[2] = 'P';
-    translateOutputCells(buffer+3, brl->buffer, size);
+    buffer[0] = 'D';
+    buffer[1] = 'P';
+    translateOutputCells(buffer+2, brl->buffer, size);
     writePacket(brl, buffer, sizeof(buffer));
   }
 
@@ -519,15 +525,15 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   if (model->hasVisualDisplay) {
     static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
     size_t size = brl->textColumns * brl->textRows;
-    unsigned char buffer[size + 5]; // length, code, subcode, and possibly two bytes for cursor
 
     if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
       const wchar_t *source = text;
       const wchar_t *end = source + size;
       const wchar_t *cursor = (brl->cursor >= 0)? source+brl->cursor: NULL;
+
+      unsigned char buffer[size + 4]; // code, subcode, and possibly two bytes for cursor
       unsigned char *target = buffer;
 
-      *target++ = size + 2;
       *target++ = 'D';
       *target++ = 'L';
 
@@ -544,7 +550,6 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
         }
       }
 
-      buffer[0] = target - buffer - 1;
       writePacket(brl, buffer, target-buffer);
     }
   }
