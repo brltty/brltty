@@ -213,12 +213,17 @@ processCommand (KeyTable *table, int command) {
         const KeyContext *ctx = getKeyContext(table, context);
 
         if (ctx) {
+          command = BRL_CMD_NOOP;
           table->currentContext = context;
-          if (!isTemporaryKeyContext(table, ctx)) table->persistentContext = context;
+
+          if (isTemporaryKeyContext(table, ctx)) {
+            command |= BRL_FLG_TOGGLE_ON;
+          } else {
+            table->persistentContext = context;
+            command |= BRL_FLG_TOGGLE_OFF;
+          }
         }
       }
-
-      command = BRL_CMD_NOOP;
       break;
 
     default:
