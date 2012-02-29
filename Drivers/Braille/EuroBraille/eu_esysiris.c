@@ -513,7 +513,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
         unsigned char identifier = packet[1];
 
         if (!(model = getModelEntry(identifier))) {
-          logMessage(LOG_WARNING, "unknown Esysiris model: 0X%02X", identifier);
+          logMessage(LOG_WARNING, "unknown EuroBraille model: 0X%02X", identifier);
         }
       }
 
@@ -829,8 +829,7 @@ initializeDevice (BrailleDisplay *brl) {
 
 static int
 resetDevice (BrailleDisplay *brl) {
-  (void)brl;
-  return 1;
+  return 0;
 }
 
 static int
