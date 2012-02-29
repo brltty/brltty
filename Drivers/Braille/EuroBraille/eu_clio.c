@@ -623,7 +623,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
 static int
 initializeDevice (BrailleDisplay *brl) {
-  int leftTries = 2;
+  int retriesLeft = 2;
 
   haveSystemInformation = 0;
   memset(firmwareVersion, 0, sizeof(firmwareVersion));
@@ -634,48 +634,54 @@ initializeDevice (BrailleDisplay *brl) {
   inputPacketNumber = -1;
   outputPacketNumber = 127;
 
-  while (leftTries-- && !haveSystemInformation) {
+  do {
     resetDevice(brl);      
-    approximateDelay(500);
-    readCommand(brl, KTB_CTX_DEFAULT);
-  }
 
-  if (haveSystemInformation) {
-    if (model) {
-      brl->textColumns = model->cellCount;
+    while (io->awaitInput(500)) {
+      if (readCommand(brl, KTB_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) return 0;
 
-      switch (firmwareVersion[2]) {
-        default:
-        case '2':
-          brl->textColumns = 20;
-          break;
+      if (haveSystemInformation) {
+        if (!model) {
+          return 0;
+        }
 
-        case '4':
-          brl->textColumns = 40;
-          break;
+        brl->textColumns = model->cellCount;
 
-        case '3':
-          brl->textColumns = 32;
-          break;
+        switch (firmwareVersion[2]) {
+          case '2':
+            brl->textColumns = 20;
+            break;
 
-        case '8':
-          brl->textColumns = 80;
-          break;
+          case '3':
+            brl->textColumns = 32;
+            break;
+
+          case '4':
+            brl->textColumns = 40;
+            break;
+
+          case '8':
+            brl->textColumns = 80;
+            break;
+
+          default:
+            break;
+        }
+
+        {
+          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
+          brl->keyBindings = ktd->bindings;
+          brl->keyNameTables = ktd->names;
+        }
+
+        logMessage(LOG_NOTICE, "unknown EuroBraille model: %.*s",
+                   sizeof(model->modelCode), firmwareVersion);
+        logMessage(LOG_NOTICE, "Model Detected: %s (%u cells)",
+                   model->modelName, brl->textColumns);
+        return 1;
       }
-
-      {
-        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
-        brl->keyBindings = ktd->bindings;
-        brl->keyNameTables = ktd->names;
-      }
-
-      logMessage(LOG_NOTICE, "Unsupported EuroBraille Model: %.*s",
-                 sizeof(model->modelCode), firmwareVersion);
-      logMessage(LOG_NOTICE, "Model Detected: %s (%u cells)",
-                 model->modelName, brl->textColumns);
-      return 1;
     }
-  }
+  } while (retriesLeft-- && (errno == EAGAIN));
 
   return 0;
 }
