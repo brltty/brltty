@@ -98,14 +98,6 @@ END_KEY_NAME_TABLES
 
 PUBLIC_KEY_TABLE(clio)
 
-/* Communication codes */
-# define PRT_E_PAR 0x01		/* parity error */
-# define PRT_E_NUM 0x02		/* frame numver error */
-# define PRT_E_ING 0x03		/* length error */
-# define PRT_E_COM 0x04		/* command error */
-# define PRT_E_DON 0x05		/* data error */
-# define PRT_E_SYN 0x06		/* syntax error */
-
 #define	INPUT_BUFFER_SIZE 1024
 #define MAXIMUM_DISPLAY_SIZE 80
 
@@ -459,7 +451,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
             }
 
             if (parity) {
-              const unsigned char message[] = {NAK, PRT_E_PAR};
+              static const unsigned char message[] = {NAK, EU_NAK_PAR};
 
               io->writeData(brl, message, sizeof(message));
               offset = 0;

@@ -18,6 +18,13 @@
 #ifndef BRLTTY_INCLUDED_EU_BRLDEFS
 #define BRLTTY_INCLUDED_EU_BRLDEFS
 
+#define EU_NAK_PAR 0X01		/* parity error */
+#define EU_NAK_NUM 0X02		/* frame numver error */
+#define EU_NAK_ING 0X03		/* length error */
+#define EU_NAK_COM 0X04		/* command error */
+#define EU_NAK_DON 0X05		/* data error */
+#define EU_NAK_SYN 0X06		/* syntax error */
+
 typedef enum {
   EU_IRIS_20             = 0X01,
   EU_IRIS_40             = 0X02,
