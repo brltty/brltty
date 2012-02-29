@@ -476,13 +476,13 @@ handleSystemInformation (BrailleDisplay *brl, const unsigned char *packet) {
     switch (p[0]) {
       case 'S':
         switch (p[1]) {
-          case 'I':
-            if (length == 22) {
-              memcpy(firmwareVersion, p+2, 20);
-              model = getModelEntry(firmwareVersion);
-              return;
-            }
-            break;
+          case 'I': {
+            unsigned char count = length - 2;
+            if (count >= sizeof(firmwareVersion)) count = sizeof(firmwareVersion) - 1;
+            memcpy(firmwareVersion, p+2, count);
+            model = getModelEntry(firmwareVersion);
+            return;
+          }
 
           default:
             break;
@@ -646,6 +646,8 @@ initializeDevice (BrailleDisplay *brl) {
 
       if (haveSystemInformation) {
         if (!model) {
+          logMessage(LOG_WARNING, "unknown EuroBraille model: %.*s",
+                     sizeof(model->modelCode), firmwareVersion);
           return 0;
         }
 
@@ -678,9 +680,7 @@ initializeDevice (BrailleDisplay *brl) {
           brl->keyNameTables = ktd->names;
         }
 
-        logMessage(LOG_NOTICE, "unknown EuroBraille model: %.*s",
-                   sizeof(model->modelCode), firmwareVersion);
-        logMessage(LOG_NOTICE, "Model Detected: %s (%u cells)",
+        logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
                    model->modelName, brl->textColumns);
         return 1;
       }
