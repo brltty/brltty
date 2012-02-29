@@ -273,12 +273,26 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (parameters[PARM_PROTOCOL]) {
     static const char *const choices[] = {
-      "auto", "clio", "esysiris",
+      "auto",
+      "azerbraille", "clio", "eurobraille",
+      "notebraille", "pupibraille", "scriba",
+      "esys", "esytime", "iris",
       NULL
     };
 
     static const ProtocolOperations *const protocols[] = {
-      NULL, &clioProtocolOperations, &esysirisProtocolOperations
+      NULL, // auto
+
+      &clioProtocolOperations, // azerbraille
+      &clioProtocolOperations, // clio
+      &clioProtocolOperations, // eurobraille
+      &clioProtocolOperations, // notebraille
+      &clioProtocolOperations, // pupibraille
+      &clioProtocolOperations, // scriba
+
+      &esysirisProtocolOperations, // esys
+      &esysirisProtocolOperations, // esytime
+      &esysirisProtocolOperations  // iris
     };
 
     unsigned int choice;
@@ -286,7 +300,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (!validateChoice(&choice, parameters[PARM_PROTOCOL], choices)) {
       logMessage(LOG_ERR, "unknown EuroBraille protocol: %s", 
                  parameters[PARM_PROTOCOL]);
-      return 0;
+      choice = 0;
     }
 
     protocol = protocols[choice];
