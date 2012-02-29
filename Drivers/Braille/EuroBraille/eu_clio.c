@@ -361,12 +361,6 @@ needsEscape (unsigned char byte) {
   return 0;
 }
 
-/* Local functions */
-static int
-sendByte (BrailleDisplay *brl, unsigned char byte) {
-  return io->writeData(brl, &byte, 1);
-}
-
 static ssize_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   unsigned char buffer[size + 4];
@@ -464,18 +458,21 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
                 }
             }
 
-            if (parity)
-              {
-                sendByte(brl, NAK);
-                sendByte(brl, PRT_E_PAR);
+            if (parity) {
+              const unsigned char message[] = {NAK, PRT_E_PAR};
 
-                offset = 0;
-                continue;
-              }
+              io->writeData(brl, message, sizeof(message));
+              offset = 0;
+              continue;
+            }
           }
 
           offset -= 1; /* remove parity */
-          sendByte(brl, ACK);
+
+          {
+            static const unsigned char message[] = {ACK};
+            io->writeData(brl, message, sizeof(message));
+          }
 
           if (buffer[--offset] == inputPacketNumber)
             {
