@@ -205,6 +205,12 @@ if __name__ == "__main__":
   brailleTranslator = settings.brailleTableToUse()
   textPreprocessor = preprocessor.preprocessor()
 
-  settings.activateSettings({"braille":brailleTranslator})
+  settings.activateSettings(
+    {
+      "braille": brailleTranslator,
+      "preprocessor": textPreprocessor
+    }
+  )
+
   while processRequest(): pass
 
