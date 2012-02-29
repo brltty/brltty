@@ -516,23 +516,37 @@ writeWindow (BrailleDisplay *brl) {
 
 static int
 writeVisual (BrailleDisplay *brl, const wchar_t *text) {
-  static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
-  size_t size = brl->textColumns * brl->textRows;
-  unsigned char buffer[size + 3];
+  if (model->hasVisualDisplay) {
+    static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
+    size_t size = brl->textColumns * brl->textRows;
+    unsigned char buffer[size + 5]; // length, code, subcode, and possibly two bytes for cursor
 
-  if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
-    int i;
+    if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
+      const wchar_t *source = text;
+      const wchar_t *end = source + size;
+      const wchar_t *cursor = (brl->cursor >= 0)? source+brl->cursor: NULL;
+      unsigned char *target = buffer;
 
-    buffer[0] = size + 2;
-    buffer[1] = 'D';
-    buffer[2] = 'L';
+      *target++ = size + 2;
+      *target++ = 'D';
+      *target++ = 'L';
 
-    for (i=0; i<size; i+=1) {
-      wchar_t wc = text[i];
-      buffer[i+3] = iswLatin1(wc)? wc: '?';
+      while (source < end) {
+        if (source == cursor) {
+          *target++ = ESC;
+          *target++ = 0X02;
+        }
+
+        {
+          wchar_t wc = *source++;
+          if (!iswLatin1(wc)) wc = '?';
+          *target++ = wc;
+        }
+      }
+
+      buffer[0] = target - buffer - 1;
+      writePacket(brl, buffer, target-buffer);
     }
-
-    writePacket(brl, buffer, sizeof(buffer));
   }
 
   return 1;
@@ -540,7 +554,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 hasVisualDisplay (BrailleDisplay *brl) {
-  return (1);
+  return model->hasVisualDisplay;
 }
 
 static int
