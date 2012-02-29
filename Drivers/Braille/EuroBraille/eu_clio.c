@@ -451,14 +451,7 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 resetDevice (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
-
-  logMessage(LOG_INFO, "eu Clio hardware reset requested");
-  if (writePacket(brl, packet, sizeof(packet)) == -1)
-    {
-      logMessage(LOG_WARNING, "Clio: Failed to send ident request.");
-      return -1;
-    }
-  return 1;
+  return writePacket(brl, packet, sizeof(packet)) != -1;
 }
 
 static const ModelEntry *
@@ -635,7 +628,7 @@ initializeDevice (BrailleDisplay *brl) {
   outputPacketNumber = 127;
 
   do {
-    resetDevice(brl);      
+    if (!resetDevice(brl)) return 0;
 
     while (io->awaitInput(500)) {
       if (readCommand(brl, KTB_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) return 0;
