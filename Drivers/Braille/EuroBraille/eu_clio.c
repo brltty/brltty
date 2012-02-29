@@ -49,11 +49,7 @@ BEGIN_KEY_NAME_TABLE(braille)
   BRAILLE_KEY_ENTRY(S, "Space"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(letters)
-  NAVIGATION_KEY_ENTRY(A, "A"),
-  NAVIGATION_KEY_ENTRY(B, "B"),
-  NAVIGATION_KEY_ENTRY(C, "C"),
-  NAVIGATION_KEY_ENTRY(D, "D"),
+BEGIN_KEY_NAME_TABLE(function)
   NAVIGATION_KEY_ENTRY(E, "E"),
   NAVIGATION_KEY_ENTRY(F, "F"),
   NAVIGATION_KEY_ENTRY(G, "G"),
@@ -65,22 +61,26 @@ BEGIN_KEY_NAME_TABLE(letters)
   NAVIGATION_KEY_ENTRY(M, "M"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(numbers)
+BEGIN_KEY_NAME_TABLE(keypad)
   NAVIGATION_KEY_ENTRY(One, "One"),
   NAVIGATION_KEY_ENTRY(Two, "Up"),
   NAVIGATION_KEY_ENTRY(Three, "Three"),
+  NAVIGATION_KEY_ENTRY(A, "A"),
 
   NAVIGATION_KEY_ENTRY(Four, "Left"),
   NAVIGATION_KEY_ENTRY(Five, "Five"),
   NAVIGATION_KEY_ENTRY(Six, "Right"),
+  NAVIGATION_KEY_ENTRY(B, "B"),
 
   NAVIGATION_KEY_ENTRY(Seven, "Seven"),
   NAVIGATION_KEY_ENTRY(Eight, "Down"),
   NAVIGATION_KEY_ENTRY(Nine, "Nine"),
+  NAVIGATION_KEY_ENTRY(C, "C"),
 
   NAVIGATION_KEY_ENTRY(Star, "Star"),
   NAVIGATION_KEY_ENTRY(Zero, "Zero"),
   NAVIGATION_KEY_ENTRY(Sharp, "Sharp"),
+  NAVIGATION_KEY_ENTRY(D, "D"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(sets)
@@ -91,8 +91,8 @@ END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(clio)
   KEY_NAME_TABLE(braille),
-  KEY_NAME_TABLE(letters),
-  KEY_NAME_TABLE(numbers),
+  KEY_NAME_TABLE(function),
+  KEY_NAME_TABLE(keypad),
   KEY_NAME_TABLE(sets),
 END_KEY_NAME_TABLES
 
@@ -638,7 +638,7 @@ static int
 handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
-      unsigned int keys = (packet[2] << 8) | packet[1];
+      unsigned int keys = ((packet[2] << 8) | packet[1]) & 0X3FF;
       enqueueKeys(keys, EU_SET_BrailleKeys, 0);
       return 1;
     }
