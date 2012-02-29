@@ -101,35 +101,7 @@ PUBLIC_KEY_TABLE(clio)
 #define	INPUT_BUFFER_SIZE 1024
 #define MAXIMUM_DISPLAY_SIZE 80
 
-typedef enum {
-  UNKNOWN = 0x00,
-  CE2,
-  CE4,
-  CE8,
-  CN2,
-  CN4,
-  CN8,
-  CP2,
-  CP4,
-  CP8,
-  CZ4,
-  JN2,
-  NB2,
-  NB4, 
-  NB8, 
-  SB2,
-  SB4,
-  SC2,
-  SC4,
-  IR2,
-  IR4,
-  IS2,
-  IS3,
-  TYPE_LAST
-} clioModel;
-
 typedef struct {
-  unsigned char modelIdentifier;
   char modelCode[3];
   const char *modelName;
   unsigned char cellCount;
@@ -144,37 +116,28 @@ typedef struct {
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
-  { .modelIdentifier = UNKNOWN,
-    .modelCode = "",
-    .modelName = ""
-  },
-
-  { .modelIdentifier = CE2,
-    .modelCode = "CE2",
+  { .modelCode = "CE2",
     .modelName = "Clio-EuroBraille 20",
     .cellCount = 20,
     .hasClioInteractive = 1,
     .isEuroBraille = 1
   },
 
-  { .modelIdentifier = CE4,
-    .modelCode = "CE4",
+  { .modelCode = "CE4",
     .modelName = "Clio-EuroBraille 40",
     .cellCount = 40,
     .hasClioInteractive = 1,
     .isEuroBraille = 1
   },
 
-  { .modelIdentifier = CE8,
-    .modelCode = "CE8",
+  { .modelCode = "CE8",
     .modelName = "Clio-EuroBraille 80",
     .cellCount = 80,
     .hasClioInteractive = 1,
     .isEuroBraille = 1
   },
 
-  { .modelIdentifier = CN2,
-    .modelCode = "CN2",
+  { .modelCode = "CN2",
     .modelName = "Clio-NoteBraille 20",
     .cellCount = 20,
     .hasClioInteractive = 1,
@@ -182,8 +145,7 @@ static const ModelEntry modelTable[] = {
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = CN4,
-    .modelCode = "CN4",
+  { .modelCode = "CN4",
     .modelName = "Clio-NoteBraille 40",
     .cellCount = 40,
     .hasClioInteractive = 1,
@@ -191,8 +153,7 @@ static const ModelEntry modelTable[] = {
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = CN8,
-    .modelCode = "CN8",
+  { .modelCode = "CN8",
     .modelName = "Clio-NoteBraille 80",
     .cellCount = 80,
     .hasClioInteractive = 1,
@@ -200,32 +161,28 @@ static const ModelEntry modelTable[] = {
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = CP2,
-    .modelCode = "Cp2",
+  { .modelCode = "Cp2",
     .modelName = "Clio-PupiBraille 20",
     .cellCount = 20,
     .hasClioInteractive = 1,
     .isPupiBraille = 1
   },
 
-  { .modelIdentifier = CP4,
-    .modelCode = "Cp4",
+  { .modelCode = "Cp4",
     .modelName = "Clio-PupiBraille 40",
     .cellCount = 40,
     .hasClioInteractive = 1,
     .isPupiBraille = 1
   },
 
-  { .modelIdentifier = CP8,
-    .modelCode = "Cp8",
+  { .modelCode = "Cp8",
     .modelName = "Clio-PupiBraille 80",
     .cellCount = 80,
     .hasClioInteractive = 1,
     .isPupiBraille = 1
   },
 
-  { .modelIdentifier = CZ4,
-    .modelCode = "CZ4",
+  { .modelCode = "CZ4",
     .modelName = "Clio-AzerBraille 40",
     .cellCount = 40,
     .hasClioInteractive = 1,
@@ -233,107 +190,91 @@ static const ModelEntry modelTable[] = {
     .isAzerBraille = 1
   },
 
-  { .modelIdentifier = JN2,
-    .modelCode = "JN2",
+  { .modelCode = "JN2",
     .modelName = "",
     .cellCount = 20,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = NB2,
-    .modelCode = "NB2",
+  { .modelCode = "NB2",
     .modelName = "NoteBraille 20",
     .cellCount = 20,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = NB4,
-    .modelCode = "NB4",
+  { .modelCode = "NB4",
     .modelName = "NoteBraille 40",
     .cellCount = 40,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = NB8,
-    .modelCode = "NB8",
+  { .modelCode = "NB8",
     .modelName = "NpoteBraille 80",
     .cellCount = 80,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
 
-  { .modelIdentifier = SB2,
-    .modelCode = "SB2",
+  { .modelCode = "SB2",
     .modelName = "Scriba 20",
     .cellCount = 20,
     .hasClioInteractive = 1,
     .isScriba = 1
   },
 
-  { .modelIdentifier = SB4,
-    .modelCode = "SB4",
+  { .modelCode = "SB4",
     .modelName = "Scriba 40",
     .cellCount = 40,
     .hasClioInteractive = 1,
     .isScriba = 1
   },
 
-  { .modelIdentifier = SC2,
-    .modelCode = "SC2",
+  { .modelCode = "SC2",
     .modelName = "Scriba 20",
     .cellCount = 20
   },
 
-  { .modelIdentifier = SC4,
-    .modelCode = "SC4",
+  { .modelCode = "SC4",
     .modelName = "Scriba 40",
     .cellCount = 40
   },
 
-  { .modelIdentifier = IR2,
-    .modelCode = "IR2",
+  { .modelCode = "IR2",
     .modelName = "Iris 20",
     .cellCount = 20,
     .hasVisualDisplay = 1,
     .isIris = 1
   },
 
-  { .modelIdentifier = IR4,
-    .modelCode = "IR4",
+  { .modelCode = "IR4",
     .modelName = "Iris 40",
     .cellCount = 40,
     .hasVisualDisplay = 1,
     .isIris = 1
   },
 
-  { .modelIdentifier = IS2,
-    .modelCode = "IS2",
+  { .modelCode = "IS2",
     .modelName = "Iris S20",
     .cellCount = 20,
     .isIris = 1
   },
 
-  { .modelIdentifier = IS3,
-    .modelCode = "IS3",
+  { .modelCode = "IS3",
     .modelName = "Iris S32",
     .cellCount = 32,
     .isIris = 1
   },
 
-  { .modelIdentifier = TYPE_LAST,
-    .modelCode = "",
-    .modelName = ""
-  },
+  { .modelCode = "" }
 };
 
-/** Static Local Variables */
-
-static int brlCols = 0; /* Number of braille cells */
-static clioModel brlModel = 0; /* brl display model currently used */
+static int haveSystemInformation;
 static unsigned char firmwareVersion[21];
+static const ModelEntry *model;
+
 static int forceWindowRewrite;
 static int forceVisualRewrite;
 static int inputPacketNumber;
@@ -520,11 +461,22 @@ resetDevice (BrailleDisplay *brl) {
   return 1;
 }
 
+static const ModelEntry *
+getModelEntry (const unsigned char *code) {
+  const ModelEntry *mdl = modelTable;
+
+  while (mdl->modelCode[0]) {
+    if (memcmp(mdl->modelCode, code, sizeof(mdl->modelCode)) == 0) return mdl;
+    mdl += 1;
+  }
+
+  return NULL;
+}
+
 static void
 handleSystemInformation (BrailleDisplay *brl, const void *packet) {
   const char *p = packet;
   unsigned char ln = 0;
-  int i;
 
   while (1)
     {
@@ -538,32 +490,7 @@ handleSystemInformation (BrailleDisplay *brl, const void *packet) {
       else
 	p += ln;
     }
-  switch (firmwareVersion[2]) {
-  case '2' : 
-    brlCols = 20;
-    break;
-  case '4' : 
-    brlCols = 40;
-    break;
-  case '3' : 
-    brlCols = 32;
-    break;
-  case '8' : 
-    brlCols = 80;
-    break;
-  default : 
-    brlCols = 20;
-    break;
-  }
-  i = 0;
-  while (modelTable[i].modelIdentifier != TYPE_LAST)
-    {
-      if (!strncasecmp(modelTable[i].modelCode, (char*)firmwareVersion, 3))
-	break;
-      i++;
-    }
-  brlModel = modelTable[i].modelIdentifier;
-  brl->resizeRequired = 1;
+  model = getModelEntry(firmwareVersion);
 }
 
 static int
@@ -673,6 +600,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
     switch (packet[1]) {
       case 'S': 
         handleSystemInformation(brl, packet);
+        haveSystemInformation = 1;
         continue;
 
       case 'R': 
@@ -697,23 +625,43 @@ static int
 initializeDevice (BrailleDisplay *brl) {
   int leftTries = 2;
 
-  brlCols = 0;
+  haveSystemInformation = 0;
   memset(firmwareVersion, 0, sizeof(firmwareVersion));
+  model = NULL;
+
   forceWindowRewrite = 1;
   forceVisualRewrite = 1;
   inputPacketNumber = -1;
   outputPacketNumber = 127;
 
-  while (leftTries-- && brlCols == 0)
-    {
-      resetDevice(brl);      
-      approximateDelay(500);
-      readCommand(brl, KTB_CTX_DEFAULT);
-    }
-  if (brlCols > 0)
-    { /* Succesfully identified hardware. */
-      brl->textRows = 1;
-      brl->textColumns = brlCols;
+  while (leftTries-- && !haveSystemInformation) {
+    resetDevice(brl);      
+    approximateDelay(500);
+    readCommand(brl, KTB_CTX_DEFAULT);
+  }
+
+  if (haveSystemInformation) {
+    if (model) {
+      brl->textColumns = model->cellCount;
+
+      switch (firmwareVersion[2]) {
+        default:
+        case '2':
+          brl->textColumns = 20;
+          break;
+
+        case '4':
+          brl->textColumns = 40;
+          break;
+
+        case '3':
+          brl->textColumns = 32;
+          break;
+
+        case '8':
+          brl->textColumns = 80;
+          break;
+      }
 
       {
         const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
@@ -721,11 +669,15 @@ initializeDevice (BrailleDisplay *brl) {
         brl->keyNameTables = ktd->names;
       }
 
-      logMessage(LOG_INFO, "eu: %s connected.",
-	         modelTable[brlModel].modelName);
-      return (1);
+      logMessage(LOG_NOTICE, "Unsupported EuroBraille Model: %.*s",
+                 sizeof(model->modelCode), firmwareVersion);
+      logMessage(LOG_NOTICE, "Model Detected: %s (%u cells)",
+                 model->modelName, brl->textColumns);
+      return 1;
     }
-  return (0);
+  }
+
+  return 0;
 }
 
 const ProtocolOperations clioProtocolOperations = {
