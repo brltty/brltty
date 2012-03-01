@@ -35,6 +35,7 @@
 
 #define BRAILLE_KEY_ENTRY(k,n) KEY_ENTRY(BrailleKeys, DOT, k, n)
 #define NAVIGATION_KEY_ENTRY(k,n) KEY_ENTRY(NavigationKeys, NAV, k, n)
+#define INTERACTIVE_KEY_ENTRY(k,n) KEY_ENTRY(InteractiveKeys, INT, k, n)
 
 BEGIN_KEY_NAME_TABLE(braille)
   BRAILLE_KEY_ENTRY(1, "Dot1"),
@@ -83,9 +84,12 @@ BEGIN_KEY_NAME_TABLE(keypad)
   NAVIGATION_KEY_ENTRY(D, "D"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(sets)
+BEGIN_KEY_NAME_TABLE(interactive)
+  INTERACTIVE_KEY_ENTRY(Dollar, "Dollar"),
+  INTERACTIVE_KEY_ENTRY(Y, "Y"),
+  INTERACTIVE_KEY_ENTRY(Z, "Z"),
+
   KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey"),
-  KEY_SET_ENTRY(EU_SET_SeparatorKeys, "SeparatorKey"),
   KEY_SET_ENTRY(EU_SET_StatusKeys, "StatusKey"),
 END_KEY_NAME_TABLE
 
@@ -93,7 +97,7 @@ BEGIN_KEY_NAME_TABLES(clio)
   KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(function),
   KEY_NAME_TABLE(keypad),
-  KEY_NAME_TABLE(sets),
+  KEY_NAME_TABLE(interactive),
 END_KEY_NAME_TABLES
 
 PUBLIC_KEY_TABLE(clio)
@@ -111,7 +115,7 @@ typedef struct {
   unsigned isNoteBraille:1;
   unsigned isPupiBraille:1;
   unsigned isScriba:1;
-  unsigned hasClioInteractive:1;
+  unsigned hasRoutingKeys:1;
   unsigned hasVisualDisplay:1;
 } ModelEntry;
 
@@ -119,28 +123,28 @@ static const ModelEntry modelTable[] = {
   { .modelCode = "CE2",
     .modelName = "Clio-EuroBraille 20",
     .cellCount = 20,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isEuroBraille = 1
   },
 
   { .modelCode = "CE4",
     .modelName = "Clio-EuroBraille 40",
     .cellCount = 40,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isEuroBraille = 1
   },
 
   { .modelCode = "CE8",
     .modelName = "Clio-EuroBraille 80",
     .cellCount = 80,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isEuroBraille = 1
   },
 
   { .modelCode = "CN2",
     .modelName = "Clio-NoteBraille 20",
     .cellCount = 20,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
@@ -148,7 +152,7 @@ static const ModelEntry modelTable[] = {
   { .modelCode = "CN4",
     .modelName = "Clio-NoteBraille 40",
     .cellCount = 40,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
@@ -156,7 +160,7 @@ static const ModelEntry modelTable[] = {
   { .modelCode = "CN8",
     .modelName = "Clio-NoteBraille 80",
     .cellCount = 80,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
   },
@@ -164,34 +168,34 @@ static const ModelEntry modelTable[] = {
   { .modelCode = "Cp2",
     .modelName = "Clio-PupiBraille 20",
     .cellCount = 20,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isPupiBraille = 1
   },
 
   { .modelCode = "Cp4",
     .modelName = "Clio-PupiBraille 40",
     .cellCount = 40,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isPupiBraille = 1
   },
 
   { .modelCode = "Cp8",
     .modelName = "Clio-PupiBraille 80",
     .cellCount = 80,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isPupiBraille = 1
   },
 
   { .modelCode = "CZ4",
     .modelName = "Clio-AzerBraille 40",
     .cellCount = 40,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .hasVisualDisplay = 1,
     .isAzerBraille = 1
   },
 
   { .modelCode = "JN2",
-    .modelName = "",
+    .modelName = "Junior-NoteBraille 20",
     .cellCount = 20,
     .hasVisualDisplay = 1,
     .isNoteBraille = 1
@@ -218,17 +222,24 @@ static const ModelEntry modelTable[] = {
     .isNoteBraille = 1
   },
 
+  { .modelCode = "JS2",
+    .modelName = "Junior-Scriba 20",
+    .cellCount = 20,
+    .hasRoutingKeys = 1,
+    .isScriba = 1
+  },
+
   { .modelCode = "SB2",
     .modelName = "Scriba 20",
     .cellCount = 20,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isScriba = 1
   },
 
   { .modelCode = "SB4",
     .modelName = "Scriba 40",
     .cellCount = 40,
-    .hasClioInteractive = 1,
+    .hasRoutingKeys = 1,
     .isScriba = 1
   },
 
@@ -540,7 +551,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
       while (source < end) {
         if (source == cursor) {
           *target++ = ESC;
-          *target++ = 0X02;
+          *target++ = EU_LCD_CURSOR;
         }
 
         {
@@ -585,22 +596,15 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
     case 'I': {
       unsigned char key = packet[1];
 
-      if (key >= 0X88) {
-        enqueueKey(EU_SET_StatusKeys, key-0X88);
-        return 1;
-      }
-
-      if (key >= 0X81) {
-        enqueueKey(EU_SET_SeparatorKeys, key-0X81);
-        return 1;
-      }
-
-      if (key >= 1) {
+      if ((key >= 1) && (key <= brl->textColumns)) {
         enqueueKey(EU_SET_RoutingKeys1, key-1);
-        return 1;
+      } else if ((key >= 0X88) && (key <= 0X8B)) {
+        enqueueKey(EU_SET_StatusKeys, key-0X88);
+      } else {
+        enqueueKey(EU_SET_InteractiveKeys, key);
       }
 
-      break;
+      return 1;
     }
 
     case 'T': 

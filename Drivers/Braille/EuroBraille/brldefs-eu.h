@@ -20,10 +20,13 @@
 
 #define EU_NAK_PAR 0X01		/* parity error */
 #define EU_NAK_NUM 0X02		/* frame numver error */
-#define EU_NAK_ING 0X03		/* length error */
+#define EU_NAK_LNG 0X03		/* length error */
 #define EU_NAK_COM 0X04		/* command error */
 #define EU_NAK_DON 0X05		/* data error */
 #define EU_NAK_SYN 0X06		/* syntax error */
+#define EU_NAK_VOC 0X80		/* RV: Régime Vocal not supported by host */
+
+#define EU_LCD_CURSOR 0X02
 
 typedef enum {
   EU_IRIS_20             = 0X01,
@@ -115,6 +118,12 @@ typedef enum {
 } EU_NavigationKey;
 
 typedef enum {
+  EU_INT_Dollar = 0X81,
+  EU_INT_Y      = 0X82,
+  EU_INT_Z      = 0X83
+} EU_InteractiveKey;
+
+typedef enum {
   EU_DOT_1 =  0,
   EU_DOT_2 =  1,
   EU_DOT_3 =  2,
@@ -197,7 +206,7 @@ typedef enum {
 typedef enum {
   EU_SET_NavigationKeys,
   EU_SET_StatusKeys,
-  EU_SET_SeparatorKeys,
+  EU_SET_InteractiveKeys,
   EU_SET_CommandKeys,
   EU_SET_BrailleKeys,
   EU_SET_RoutingKeys1,
