@@ -318,12 +318,20 @@ static uint16_t maximumFrameLength;
 
 static int forceWindowRewrite;
 static int forceVisualRewrite;
+static int forceCursorRewrite;
 
 static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;
 static unsigned char sequenceNumber;
 
 static uint32_t commandKeys;
+
+static inline void
+forceRewrite (void) {
+  forceWindowRewrite = 1;
+  forceVisualRewrite = 1;
+  forceCursorRewrite = 1;
+}
 
 static ssize_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
@@ -755,8 +763,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
       case 'R':
         if (packet[4] == 'P') {
           /* return from internal menu */
-          forceWindowRewrite = 1;
-          forceVisualRewrite = 1;
+          forceRewrite();
         }
         continue;
 
@@ -785,9 +792,7 @@ initializeDevice (BrailleDisplay *brl) {
   deviceOptions = 0;
   maximumFrameLength = 0;
 
-  forceWindowRewrite = 1;
-  forceVisualRewrite = 1;
-
+  forceRewrite();
   sequenceCheck = 0;
   sequenceKnown = 0;
 
@@ -859,27 +864,43 @@ hasVisualDisplay (BrailleDisplay *brl) {
 static int
 writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   if (model->hasVisualDisplay) {
-    static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
-    unsigned int size = brl->textColumns * brl->textRows;
-    
-    if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
-      unsigned char data[size + 2];
-      unsigned char *byte = data;
+    {
+      static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
+      unsigned int size = brl->textColumns * brl->textRows;
+      
+      if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
+        unsigned char data[size + 2];
+        unsigned char *byte = data;
 
-      *byte++ = 'L';
-      *byte++ = 'T';
+        *byte++ = 'L';
+        *byte++ = 'T';
 
-      {
-        const wchar_t *character = text;
-        const wchar_t *end = character + size;
+        {
+          const wchar_t *character = text;
+          const wchar_t *end = character + size;
 
-        while (character < end) {
-          *byte++ = iswLatin1(*character)? *character: '?';
-          character += 1;
+          while (character < end) {
+            *byte++ = iswLatin1(*character)? *character: '?';
+            character += 1;
+          }
         }
-      }
 
-      if (writePacket(brl, data, byte-data) == -1) return 0;
+        if (writePacket(brl, data, byte-data) == -1) return 0;
+      }
+    }
+
+    {
+      static int previousCursor;
+
+      if (forceCursorRewrite || (brl->cursor != previousCursor)) {
+        const unsigned char packet[] = {
+          'L', 'C', ((brl->cursor >= 0)? (brl->cursor + 1): 0)
+        };
+
+        if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
+        previousCursor = brl->cursor;
+        forceCursorRewrite = 0;
+      }
     }
   }
 
