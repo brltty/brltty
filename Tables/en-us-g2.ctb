@@ -615,7 +615,7 @@ sufword little 123-123
 contraction ll
 always lord 5-123
 begword lordos = lordosis lordoses
-sufword lordotic 123-135-1235-145-135-2345-24-14
+sufword lordotic =
 sufword lucknow 123-136-14-13-1345-246
 
 # the letter m
@@ -721,6 +721,7 @@ midendword oned 135-1345-1246 honed
 always one 5-135
 always aione = zabaione
 midendword mione = Hermione
+begword oneiric =
 always onent 135-1345-26-2345
 midendword oneous 135-1345-15-1256-234 erroneous
 always oner 135-1345-12456
