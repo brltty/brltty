@@ -113,6 +113,7 @@ begword auto = autofocus
 # the letter b
 always b 12
 always B 12
+sufword bachelordom 12-1-16-15-123-135-1235-145-135-134
 always balone = abalone baloney
 sufword bathorse =
 midword bb 23
@@ -244,7 +245,7 @@ word carthage 14-345-1456-1-1245-15
 midword cch 14-16
 sufword chalcedon 16-1-123-14-1246-135-1345 chalcedony chalcedonies
 sufword cheat 16-2-2345 Cheatham
-always chloro 16-123-135-1235-135
+always chlor 16-123-135-1235 dichlordiphenylethylene, chloroform
 sufword christmas 16-1235-24-34-134-1-234 Christmastide
 sufword citron = citronella
 sufword clemenceau 14-123-15-134-26-14-2-136
@@ -613,6 +614,8 @@ word lionel =
 sufword little 123-123
 contraction ll
 always lord 5-123
+begword lordos = lordosis lordoses
+sufword lordotic 123-135-1235-145-135-2345-24-14
 sufword lucknow 123-136-14-13-1345-246
 
 # the letter m
@@ -620,6 +623,7 @@ always m 134
 always M 134
 begword maha = maharaja, maharani
 sufword mahoney = 
+sufword mailorder 134-1-24-123-135-1235-145-12456
 always many 456-134
 begword mc =
 always medic 134-1246-24-14 medicare
