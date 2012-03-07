@@ -80,22 +80,22 @@ TuneDefinition tune_mark_set = {
   NULL, 0, elements_mark_set
 };
 
-static TuneElement elements_cut_begin[] = {
+static TuneElement elements_copy_begin[] = {
   TUNE_NOTE( 40,  74),
   TUNE_NOTE( 20,  86),
   TUNE_STOP()
 };
-TuneDefinition tune_cut_begin = {
-  NULL, 0, elements_cut_begin
+TuneDefinition tune_copy_begin = {
+  NULL, 0, elements_copy_begin
 };
 
-static TuneElement elements_cut_end[] = {
+static TuneElement elements_copy_end[] = {
   TUNE_NOTE( 50,  86),
   TUNE_NOTE( 30,  74),
   TUNE_STOP()
 };
-TuneDefinition tune_cut_end = {
-  NULL, 0, elements_cut_end
+TuneDefinition tune_copy_end = {
+  NULL, 0, elements_copy_end
 };
 
 static TuneElement elements_toggle_on[] = {

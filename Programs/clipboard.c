@@ -24,11 +24,11 @@
 
 #include "scr.h"
 #include "tunes.h"
-#include "cut.h"
+#include "clipboard.h"
 
 /* Global state variables */
-wchar_t *cutBuffer = NULL;
-size_t cutLength = 0;
+wchar_t *cpbBuffer = NULL;
+size_t cpbLength = 0;
 
 static int beginColumn = 0;
 static int beginRow = 0;
@@ -40,7 +40,7 @@ mallocWchars (size_t count) {
 }
 
 static wchar_t *
-cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
+copy (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
   wchar_t *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
@@ -88,54 +88,54 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
 
 static int
 append (wchar_t *buffer, size_t length) {
-  if (cutBuffer) {
+  if (cpbBuffer) {
     size_t newLength = beginOffset + length;
     wchar_t *newBuffer = mallocWchars(newLength);
     if (!newBuffer) return 0;
 
-    wmemcpy(wmempcpy(newBuffer, cutBuffer, beginOffset), buffer, length);
+    wmemcpy(wmempcpy(newBuffer, cpbBuffer, beginOffset), buffer, length);
 
     free(buffer);
-    free(cutBuffer);
+    free(cpbBuffer);
 
-    cutBuffer = newBuffer;
-    cutLength = newLength;
+    cpbBuffer = newBuffer;
+    cpbLength = newLength;
   } else {
-    cutBuffer = buffer;
-    cutLength = length;
+    cpbBuffer = buffer;
+    cpbLength = length;
   }
 
-  playTune(&tune_cut_end);
+  playTune(&tune_copy_end);
   return 1;
 }
 
 void
-cutClear (void) {
-  if (cutBuffer) {
-    free(cutBuffer);
-    cutBuffer = NULL;
+cpbClear (void) {
+  if (cpbBuffer) {
+    free(cpbBuffer);
+    cpbBuffer = NULL;
   }
-  cutLength = 0;
+  cpbLength = 0;
 }
 
 void
-cutBegin (int column, int row) {
-  cutClear();
-  cutAppend(column, row);
+cpbStart (int column, int row) {
+  cpbClear();
+  cpbExtend(column, row);
 }
 
 void
-cutAppend (int column, int row) {
+cpbExtend (int column, int row) {
   beginColumn = column;
   beginRow = row;
-  beginOffset = cutLength;
-  playTune(&tune_cut_begin);
+  beginOffset = cpbLength;
+  playTune(&tune_copy_begin);
 }
 
 int
-cutRectangle (int column, int row) {
+cpbRectangularCopy (int column, int row) {
   size_t length;
-  wchar_t *buffer = cut(&length, beginColumn, beginRow, column, row);
+  wchar_t *buffer = copy(&length, beginColumn, beginRow, column, row);
 
   if (buffer) {
     {
@@ -177,14 +177,14 @@ cutRectangle (int column, int row) {
 }
 
 int
-cutLine (int column, int row) {
+cpbLinearCopy (int column, int row) {
   ScreenDescription screen;
   describeScreen(&screen);
 
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    wchar_t *buffer = cut(&length, 0, beginRow, rightColumn, row);
+    wchar_t *buffer = copy(&length, 0, beginRow, rightColumn, row);
 
     if (buffer) {
       if (column < rightColumn) {
@@ -257,13 +257,13 @@ cutLine (int column, int row) {
 }
 
 int
-cutPaste (void) {
-  if (!cutLength) return 0;
+cpbPaste (void) {
+  if (!cpbLength) return 0;
 
   {
     int i;
-    for (i=0; i<cutLength; ++i)
-      if (!insertScreenKey(cutBuffer[i]))
+    for (i=0; i<cpbLength; ++i)
+      if (!insertScreenKey(cpbBuffer[i]))
         return 0;
   }
 

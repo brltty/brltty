@@ -16,24 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CUT
-#define BRLTTY_INCLUDED_CUT
+#ifndef BRLTTY_INCLUDED_CLIPBOARD
+#define BRLTTY_INCLUDED_CLIPBOARD
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern wchar_t *cutBuffer;
-extern size_t cutLength;
+extern wchar_t *cpbBuffer;
+extern size_t cpbLength;
 
-extern void cutBegin (int column, int row);
-extern void cutAppend (int column, int row);
-extern int cutRectangle (int column, int row);
-extern int cutLine (int column, int row);
-extern int cutPaste (void);
+extern void cpbStart (int column, int row);
+extern void cpbExtend (int column, int row);
+extern int cpbRectangularCopy (int column, int row);
+extern int cpbLinearCopy (int column, int row);
+extern int cpbPaste (void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CUT */
+#endif /* BRLTTY_INCLUDED_CLIPBOARD */

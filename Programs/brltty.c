@@ -43,7 +43,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "routing.h"
-#include "cut.h"
+#include "clipboard.h"
 #include "touch.h"
 #include "cmd.h"
 #include "charset.h"
@@ -1358,9 +1358,9 @@ doCommand:
       case BRL_CMD_NXSEARCH:
         increment = 1;
       doSearch:
-        if (cutBuffer) {
+        if (cpbBuffer) {
           int found = 0;
-          size_t count = cutLength;
+          size_t count = cpbLength;
           if (count <= scr.cols) {
             int line = ses->winy;
             wchar_t buffer[scr.cols];
@@ -1368,7 +1368,7 @@ doCommand:
 
             {
               int i;
-              for (i=0; i<count; i++) characters[i] = towlower(cutBuffer[i]);
+              for (i=0; i<count; i++) characters[i] = towlower(cpbBuffer[i]);
             }
 
             while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
@@ -1618,7 +1618,7 @@ doCommand:
         break;
       case BRL_CMD_PASTE:
         if (isLiveScreen() && !isRouting()) {
-          if (cutPaste()) break;
+          if (cpbPaste()) break;
         }
         playTune(&tune_command_rejected);
         break;
@@ -1983,7 +1983,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              cutBegin(column, row);
+              cpbStart(column, row);
             } else {
               playTune(&tune_command_rejected);
             }
@@ -1994,7 +1994,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              cutAppend(column, row);
+              cpbExtend(column, row);
             } else {
               playTune(&tune_command_rejected);
             }
@@ -2005,7 +2005,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-              if (cutRectangle(column, row))
+              if (cpbRectangularCopy(column, row))
                 break;
 
             playTune(&tune_command_rejected);
@@ -2016,7 +2016,7 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-              if (cutLine(column, row))
+              if (cpbLinearCopy(column, row))
                 break;
 
             playTune(&tune_command_rejected);
@@ -2027,11 +2027,11 @@ doCommand:
             void (*start) (int column, int row);
 
           case BRL_BLK_CLIP_COPY:
-            start = cutBegin;
+            start = cpbStart;
             goto doCopy;
 
           case BRL_BLK_CLIP_APPEND:
-            start = cutAppend;
+            start = cpbExtend;
             goto doCopy;
 
           doCopy:
@@ -2043,7 +2043,7 @@ doCommand:
 
                 if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
                   start(column1, row1);
-                  if (cutLine(column2, row2)) break;
+                  if (cpbLinearCopy(column2, row2)) break;
                 }
               }
             }
