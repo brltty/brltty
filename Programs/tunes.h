@@ -30,39 +30,41 @@ typedef struct {
                           /* 1 through 127 are semitones, 60 is middle C */
   unsigned char duration; /* milliseconds (0 means stop) */
 } TuneElement;
+
 #define TUNE_NOTE(duration,note) {note, duration}
 #define TUNE_REST(duration) TUNE_NOTE(duration, 0)
 #define TUNE_STOP() TUNE_REST(0)
 
 typedef struct {
-  char *message;
+  const char *message;
   unsigned int tactile;
-  TuneElement *elements;
+  const TuneElement *elements;
 } TuneDefinition;
+
 #define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
 
-extern TuneDefinition tune_braille_on;
-extern TuneDefinition tune_braille_off;
-extern TuneDefinition tune_command_done;
-extern TuneDefinition tune_command_rejected;
-extern TuneDefinition tune_mark_set;
-extern TuneDefinition tune_copy_begin;
-extern TuneDefinition tune_copy_end;
-extern TuneDefinition tune_toggle_on;
-extern TuneDefinition tune_toggle_off;
-extern TuneDefinition tune_cursor_linked;
-extern TuneDefinition tune_cursor_unlinked;
-extern TuneDefinition tune_screen_frozen;
-extern TuneDefinition tune_screen_unfrozen;
-extern TuneDefinition tune_wrap_down;
-extern TuneDefinition tune_wrap_up;
-extern TuneDefinition tune_skip_first;
-extern TuneDefinition tune_skip;
-extern TuneDefinition tune_skip_more;
-extern TuneDefinition tune_bounce;
-extern TuneDefinition tune_routing_started;
-extern TuneDefinition tune_routing_succeeded;
-extern TuneDefinition tune_routing_failed;
+extern const TuneDefinition tune_braille_on;
+extern const TuneDefinition tune_braille_off;
+extern const TuneDefinition tune_command_done;
+extern const TuneDefinition tune_command_rejected;
+extern const TuneDefinition tune_mark_set;
+extern const TuneDefinition tune_copy_begin;
+extern const TuneDefinition tune_copy_end;
+extern const TuneDefinition tune_toggle_on;
+extern const TuneDefinition tune_toggle_off;
+extern const TuneDefinition tune_cursor_linked;
+extern const TuneDefinition tune_cursor_unlinked;
+extern const TuneDefinition tune_screen_frozen;
+extern const TuneDefinition tune_screen_unfrozen;
+extern const TuneDefinition tune_wrap_down;
+extern const TuneDefinition tune_wrap_up;
+extern const TuneDefinition tune_skip_first;
+extern const TuneDefinition tune_skip;
+extern const TuneDefinition tune_skip_more;
+extern const TuneDefinition tune_bounce;
+extern const TuneDefinition tune_routing_started;
+extern const TuneDefinition tune_routing_succeeded;
+extern const TuneDefinition tune_routing_failed;
 
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);

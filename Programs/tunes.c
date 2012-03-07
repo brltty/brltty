@@ -29,25 +29,25 @@
 #include "tunes.h"
 #include "notes.h"
 
-static TuneElement elements_braille_on[] = {
+static const TuneElement elements_braille_on[] = {
   TUNE_NOTE( 60,  64),
   TUNE_NOTE(100,  69),
   TUNE_STOP()
 };
-TuneDefinition tune_braille_on = {
+const TuneDefinition tune_braille_on = {
   NULL, 0, elements_braille_on
 };
 
-static TuneElement elements_braille_off[] = {
+static const TuneElement elements_braille_off[] = {
   TUNE_NOTE( 60,  64),
   TUNE_NOTE( 60,  57),
   TUNE_STOP()
 };
-TuneDefinition tune_braille_off = {
+const TuneDefinition tune_braille_off = {
   NULL, 0, elements_braille_off
 };
 
-static TuneElement elements_command_done[] = {
+static const TuneElement elements_command_done[] = {
   TUNE_NOTE( 40,  74),
   TUNE_REST( 30),
   TUNE_NOTE( 40,  74),
@@ -57,48 +57,48 @@ static TuneElement elements_command_done[] = {
   TUNE_NOTE( 50,  79),
   TUNE_STOP()
 };
-TuneDefinition tune_command_done = {
+const TuneDefinition tune_command_done = {
   strtext("Done"), 0, elements_command_done
 };
 
-static TuneElement elements_command_rejected[] = {
+static const TuneElement elements_command_rejected[] = {
   TUNE_NOTE(100,  78),
   TUNE_STOP()
 };
-TuneDefinition tune_command_rejected = {
+const TuneDefinition tune_command_rejected = {
   NULL, TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8), elements_command_rejected
 };
 
-static TuneElement elements_mark_set[] = {
+static const TuneElement elements_mark_set[] = {
   TUNE_NOTE( 20,  83),
   TUNE_NOTE( 15,  81),
   TUNE_NOTE( 15,  79),
   TUNE_NOTE( 25,  84),
   TUNE_STOP()
 };
-TuneDefinition tune_mark_set = {
+const TuneDefinition tune_mark_set = {
   NULL, 0, elements_mark_set
 };
 
-static TuneElement elements_copy_begin[] = {
+static const TuneElement elements_copy_begin[] = {
   TUNE_NOTE( 40,  74),
   TUNE_NOTE( 20,  86),
   TUNE_STOP()
 };
-TuneDefinition tune_copy_begin = {
+const TuneDefinition tune_copy_begin = {
   NULL, 0, elements_copy_begin
 };
 
-static TuneElement elements_copy_end[] = {
+static const TuneElement elements_copy_end[] = {
   TUNE_NOTE( 50,  86),
   TUNE_NOTE( 30,  74),
   TUNE_STOP()
 };
-TuneDefinition tune_copy_end = {
+const TuneDefinition tune_copy_end = {
   NULL, 0, elements_copy_end
 };
 
-static TuneElement elements_toggle_on[] = {
+static const TuneElement elements_toggle_on[] = {
   TUNE_NOTE( 30,  74),
   TUNE_REST( 30),
   TUNE_NOTE( 30,  79),
@@ -106,11 +106,11 @@ static TuneElement elements_toggle_on[] = {
   TUNE_NOTE( 40,  86),
   TUNE_STOP()
 };
-TuneDefinition tune_toggle_on = {
+const TuneDefinition tune_toggle_on = {
   NULL, TUNE_TACTILE(30,BRL_DOT1|BRL_DOT2|BRL_DOT4|BRL_DOT5), elements_toggle_on
 };
 
-static TuneElement elements_toggle_off[] = {
+static const TuneElement elements_toggle_off[] = {
   TUNE_NOTE( 30,  86),
   TUNE_REST( 30),
   TUNE_NOTE( 30,  79),
@@ -118,31 +118,31 @@ static TuneElement elements_toggle_off[] = {
   TUNE_NOTE( 30,  74),
   TUNE_STOP()
 };
-TuneDefinition tune_toggle_off = {
+const TuneDefinition tune_toggle_off = {
   NULL, TUNE_TACTILE(30,BRL_DOT3|BRL_DOT7|BRL_DOT6|BRL_DOT8), elements_toggle_off
 };
 
-static TuneElement elements_cursor_linked[] = {
+static const TuneElement elements_cursor_linked[] = {
   TUNE_NOTE(  7,  80),
   TUNE_NOTE(  7,  79),
   TUNE_NOTE( 12,  76),
   TUNE_STOP()
 };
-TuneDefinition tune_cursor_linked = {
+const TuneDefinition tune_cursor_linked = {
   NULL, 0, elements_cursor_linked
 };
 
-static TuneElement elements_cursor_unlinked[] = {
+static const TuneElement elements_cursor_unlinked[] = {
   TUNE_NOTE(  7,  78),
   TUNE_NOTE(  7,  79),
   TUNE_NOTE( 20,  83),
   TUNE_STOP()
 };
-TuneDefinition tune_cursor_unlinked = {
+const TuneDefinition tune_cursor_unlinked = {
   NULL, 0, elements_cursor_unlinked
 };
 
-static TuneElement elements_screen_frozen[] = {
+static const TuneElement elements_screen_frozen[] = {
   TUNE_NOTE(  5,  58),
   TUNE_NOTE(  5,  59),
   TUNE_NOTE(  5,  60),
@@ -169,11 +169,11 @@ static TuneElement elements_screen_frozen[] = {
   TUNE_NOTE(  5,  95),
   TUNE_STOP()
 };
-TuneDefinition tune_screen_frozen = {
+const TuneDefinition tune_screen_frozen = {
   strtext("Frozen"), 0, elements_screen_frozen
 };
 
-static TuneElement elements_screen_unfrozen[] = {
+static const TuneElement elements_screen_unfrozen[] = {
   TUNE_NOTE(  5,  95),
   TUNE_NOTE(  5,  90),
   TUNE_NOTE(  5,  86),
@@ -200,33 +200,33 @@ static TuneElement elements_screen_unfrozen[] = {
   TUNE_NOTE(  5,  58),
   TUNE_STOP()
 };
-TuneDefinition tune_screen_unfrozen = {
+const TuneDefinition tune_screen_unfrozen = {
   strtext("Unfrozen"), 0, elements_screen_unfrozen
 };
 
-static TuneElement elements_wrap_down[] = {
+static const TuneElement elements_wrap_down[] = {
   TUNE_NOTE(  6,  86),
   TUNE_NOTE(  6,  74),
   TUNE_NOTE(  6,  62),
   TUNE_NOTE( 10,  50),
   TUNE_STOP()
 };
-TuneDefinition tune_wrap_down = {
+const TuneDefinition tune_wrap_down = {
   NULL, TUNE_TACTILE(20,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT7), elements_wrap_down
 };
 
-static TuneElement elements_wrap_up[] = {
+static const TuneElement elements_wrap_up[] = {
   TUNE_NOTE(  6,  50),
   TUNE_NOTE(  6,  62),
   TUNE_NOTE(  6,  74),
   TUNE_NOTE( 10,  86),
   TUNE_STOP()
 };
-TuneDefinition tune_wrap_up = {
+const TuneDefinition tune_wrap_up = {
   NULL, TUNE_TACTILE(20,BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT8), elements_wrap_up
 };
 
-static TuneElement elements_skip_first[] = {
+static const TuneElement elements_skip_first[] = {
   TUNE_REST( 40),
   TUNE_NOTE(  4,  62),
   TUNE_NOTE(  6,  67),
@@ -234,29 +234,29 @@ static TuneElement elements_skip_first[] = {
   TUNE_REST( 25),
   TUNE_STOP()
 };
-TuneDefinition tune_skip_first = {
+const TuneDefinition tune_skip_first = {
   NULL, TUNE_TACTILE(30,BRL_DOT1|BRL_DOT4|BRL_DOT7|BRL_DOT8), elements_skip_first
 };
 
-static TuneElement elements_skip[] = {
+static const TuneElement elements_skip[] = {
   TUNE_NOTE( 10,  74),
   TUNE_REST( 18),
   TUNE_STOP()
 };
-TuneDefinition tune_skip = {
+const TuneDefinition tune_skip = {
   NULL, 0, elements_skip
 };
 
-static TuneElement elements_skip_more[] = {
+static const TuneElement elements_skip_more[] = {
   TUNE_NOTE( 20,  73),
   TUNE_REST(  1),
   TUNE_STOP()
 };
-TuneDefinition tune_skip_more = {
+const TuneDefinition tune_skip_more = {
   NULL, 0, elements_skip_more
 };
 
-static TuneElement elements_bounce[] = {
+static const TuneElement elements_bounce[] = {
   TUNE_NOTE(  6,  98),
   TUNE_NOTE(  6,  86),
   TUNE_NOTE(  6,  74),
@@ -264,30 +264,30 @@ static TuneElement elements_bounce[] = {
   TUNE_NOTE( 10,  50),
   TUNE_STOP()
 };
-TuneDefinition tune_bounce = {
+const TuneDefinition tune_bounce = {
   NULL, TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8), elements_bounce
 };
 
-static TuneElement elements_routing_started[] = {
+static const TuneElement elements_routing_started[] = {
   TUNE_NOTE( 10,  55),
   TUNE_REST( 60),
   TUNE_NOTE( 15,  60),
   TUNE_STOP()
 };
-TuneDefinition tune_routing_started = {
+const TuneDefinition tune_routing_started = {
   NULL, 0, elements_routing_started
 };
 
-static TuneElement elements_routing_succeeded[] = {
+static const TuneElement elements_routing_succeeded[] = {
   TUNE_NOTE( 60,  64),
   TUNE_NOTE( 20,  76),
   TUNE_STOP()
 };
-TuneDefinition tune_routing_succeeded = {
+const TuneDefinition tune_routing_succeeded = {
   NULL, 0, elements_routing_succeeded
 };
 
-static TuneElement elements_routing_failed[] = {
+static const TuneElement elements_routing_failed[] = {
   TUNE_NOTE( 80,  80),
   TUNE_NOTE( 90,  79),
   TUNE_NOTE(100,  78),
@@ -298,7 +298,7 @@ static TuneElement elements_routing_failed[] = {
   TUNE_NOTE(150,  77),
   TUNE_STOP()
 };
-TuneDefinition tune_routing_failed = {
+const TuneDefinition tune_routing_failed = {
   NULL, 0, elements_routing_failed
 };
 
@@ -516,7 +516,7 @@ playTune (const TuneDefinition *tune) {
 
   if (prefs.alertTunes && tune->elements) {
     if (openTuneDevice()) {
-      TuneElement *element = tune->elements;
+      const TuneElement *element = tune->elements;
 
       tunePlayed = 1;
       closeTimer = 2000 / updateInterval;
