@@ -1180,7 +1180,7 @@ typedef struct {
   int (*handlePCKey) (BrailleDisplay *brl, Port *port, int repeat, unsigned char escape, unsigned char key);
   int (*handleFunctionKeys) (BrailleDisplay *brl, Port *port, uint16_t keys);
   int (*handleBrailleKeys) (BrailleDisplay *brl, Port *port, unsigned int keys);
-} IrisKeyboardHandler;
+} KeyHandlers;
 
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
@@ -1208,7 +1208,7 @@ core_handleBrailleKeys(BrailleDisplay *brl, Port *port, unsigned int keys) {
   return enqueueKeys(keys, IR_SET_NavigationKeys, IR_KEY_Dot1);
 }
 
-static IrisKeyboardHandler coreIrisKeyboardHandler = {
+static const KeyHandlers coreKeyHandlers = {
   .handleZKey = core_handleZKey,
   .handleRoutingKey = core_handleRoutingKey,
   .handlePCKey = core_handlePCKey,
@@ -1389,7 +1389,7 @@ eurobrl_handleBrailleKeys(BrailleDisplay *brl, Port *port, unsigned int keys) {
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
 
-static IrisKeyboardHandler eurobrlIrisKeyboardHandler = {
+static const KeyHandlers eurobrailleKeyHandlers = {
   .handleZKey = eurobrl_handleZKey,
   .handleRoutingKey = eurobrl_handleRoutingKey,
   .handlePCKey = eurobrl_handlePCKey,
@@ -1398,31 +1398,31 @@ static IrisKeyboardHandler eurobrlIrisKeyboardHandler = {
 };
 
 static int
-handleNativePacket (BrailleDisplay *brl, Port *port, IrisKeyboardHandler *keyboardHandler, unsigned char *packet, size_t size) {
+handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandlers, unsigned char *packet, size_t size) {
   if (size == 2) {
     if (packet[0] == IR_IPT_InteractiveKey) {
       if (packet[1] == 'W') {
-        return keyboardHandler->handleZKey(brl, port);
+        return keyHandlers->handleZKey(brl, port);
       }
 
       if ((1 <= packet[1]) && (packet[1] <= (brl->textColumns * brl->textRows))) {
-        return keyboardHandler->handleRoutingKey(brl, port, packet[1]);
+        return keyHandlers->handleRoutingKey(brl, port, packet[1]);
       }
     }
   } else if (size == 3) {
     int repeat = (packet[0] == IR_IPT_XtKeyCodeRepeat);
     if ((packet[0] == IR_IPT_XtKeyCode) || repeat) {
-      return keyboardHandler->handlePCKey(brl, port, repeat, packet[1], packet[2]);
+      return keyHandlers->handlePCKey(brl, port, repeat, packet[1], packet[2]);
     }
 
     if (packet[0] == IR_IPT_LinearKeys) {
       uint16_t keys = (packet[1] << 8) | packet[2];
-      return keyboardHandler->handleFunctionKeys(brl, port, keys);
+      return keyHandlers->handleFunctionKeys(brl, port, keys);
     }
 
     if (packet[0] == IR_IPT_BrailleKeys) {
       unsigned int keys = (packet[1] << 8) | packet[2];
-      return keyboardHandler->handleBrailleKeys(brl, port, keys);
+      return keyHandlers->handleBrailleKeys(brl, port, keys);
     }
   }
   logBytes(LOG_WARNING, "unhandled Iris packet", packet, size);
@@ -1496,11 +1496,11 @@ static int readCommand_embedded (BrailleDisplay *brl)
     }
 
     if (!packetForwardMode) {
-      handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
+      handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
     } else if (protocol == IR_PROTOCOL_NATIVE) {
       writeNativePacket(brl, &externalPort, packet, size);
     } else {
-      handleNativePacket(brl, &externalPort, &eurobrlIrisKeyboardHandler, packet, size);
+      handleNativePacket(brl, &externalPort, &eurobrailleKeyHandlers, packet, size);
     }
   }
 
@@ -1550,7 +1550,7 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
     if (!deviceConnected) return BRL_CMD_OFFLINE;
     if (!size) return EOF;
     
-    handleNativePacket(brl, NULL, &coreIrisKeyboardHandler, packet, size);
+    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
 }
 
