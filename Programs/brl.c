@@ -629,6 +629,18 @@ textHasChanged (
   return 1;
 }
 
+int
+cursorHasChanged (int *cursor, int new, int *force) {
+  if (force && *force) {
+    *force = 0;
+  } else if (new == *cursor) {
+    return 0;
+  }
+
+  *cursor = new;
+  return 1;
+}
+
 const DotsTable dotsTable_ISO11548_1 = {
   BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
   BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8

@@ -136,6 +136,8 @@ textHasChanged (
   unsigned int *from, unsigned int *to, int *force
 );
 
+extern int cursorHasChanged (int *cursor, int new, int *force);
+
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 
