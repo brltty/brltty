@@ -669,8 +669,9 @@ initializeDevice (BrailleDisplay *brl) {
 
       if (haveSystemInformation) {
         if (!model) {
+          int length = sizeof(model->modelCode);
           logMessage(LOG_WARNING, "unknown EuroBraille model: %.*s",
-                     sizeof(model->modelCode), firmwareVersion);
+                     length, firmwareVersion);
           return 0;
         }
 
