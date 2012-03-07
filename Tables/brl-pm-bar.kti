@@ -39,16 +39,16 @@ bind BarUp1+!RoutingKey1 PRINDENT
 bind BarDown1+!RoutingKey1 NXINDENT
 bind BarUp2+!RoutingKey1 SETLEFT
 bind BarDown2+!RoutingKey1 DESCCHAR
-bind BarLeft1+!RoutingKey1 CUTAPPEND
-bind BarRight1+!RoutingKey1 CUTLINE
-bind BarLeft2+!RoutingKey1 CUTBEGIN
-bind BarRight2+!RoutingKey1 CUTRECT
+bind BarLeft1+!RoutingKey1 CLIP_ADD
+bind BarRight1+!RoutingKey1 COPY_LINE
+bind BarLeft2+!RoutingKey1 CLIP_NEW
+bind BarRight2+!RoutingKey1 COPY_RECT
 
 hide on
 bind BarUp1+BarUp2+!RoutingKey1 SETLEFT
 bind BarDown1+BarDown2+!RoutingKey1 DESCCHAR
-bind BarLeft1+BarLeft2+!RoutingKey1 CUTBEGIN
-bind BarRight1+BarRight2+!RoutingKey1 CUTRECT
+bind BarLeft1+BarLeft2+!RoutingKey1 CLIP_NEW
+bind BarRight1+BarRight2+!RoutingKey1 COPY_RECT
 hide off
 
 assign toggleOff BarLeft1

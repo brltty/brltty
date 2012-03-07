@@ -38,11 +38,11 @@ bind	!ControlRight			MUTE
 bind KPInsert+!KPArrowRight Autospeak
 bind KPInsert+!KPDelete Csrtrk
 bind KPInsert+!KPEnter Home
-bind KPInsert+!KPSlash CutBegin
-bind KPInsert+!KPAsterisk CutLine
-bind KPInsert+!KPMinus CutRect
+bind KPInsert+!KPSlash Clip_New
+bind KPInsert+!KPAsterisk Copy_Line
+bind KPInsert+!KPMinus Copy_Rect
 bind KPInsert+!KPPlus Paste
-bind ControlLeft+KPInsert+!KPPlus CutAppend
+bind ControlLeft+KPInsert+!KPPlus Clip_Add
 bind ControlLeft+ShiftLeft+KPInsert+!KP2 PrefMenu
 bind ControlLeft+ShiftLeft+KPInsert+!KPArrowLeft PrefLoad
 bind ControlLeft+ShiftLeft+KPInsert+!KPArrowRight PrefSave

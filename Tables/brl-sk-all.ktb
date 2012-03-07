@@ -65,10 +65,10 @@ bind K1+K8+K5 CONTEXT+6 # RoutingKey -> DESCCHAR
 bind K1+K8+K6 CONTEXT+9 # RoutingKey -> PRDIFCHAR
 bind K1+K8+K7 CONTEXT+10 # RoutingKey -> NXDIFCHAR
 
-bind K1+K8+K2+K6 CONTEXT+1 # RoutingKey -> CUTBEGIN
-bind K1+K8+K2+K7 CONTEXT+2 # RoutingKey -> CUTAPPEND
-bind K1+K8+K3+K6 CONTEXT+3 # RoutingKey -> CUTLINE
-bind K1+K8+K3+K7 CONTEXT+4 # RoutingKey -> CUTRECT
+bind K1+K8+K2+K6 CONTEXT+1 # RoutingKey -> CLIP_NEW
+bind K1+K8+K2+K7 CONTEXT+2 # RoutingKey -> CLIP_ADD
+bind K1+K8+K3+K6 CONTEXT+3 # RoutingKey -> COPY_LINE
+bind K1+K8+K3+K7 CONTEXT+4 # RoutingKey -> COPY_RECT
 
 bind K1+K2 HELP
 bind K1+K3 LEARN
@@ -107,16 +107,16 @@ bind K5 MENU_LAST_ITEM
 ############################
 
 context 1
-bind !RoutingKey CUTBEGIN
+bind !RoutingKey CLIP_NEW
 
 context 2
-bind !RoutingKey CUTAPPEND
+bind !RoutingKey CLIP_ADD
 
 context 3
-bind !RoutingKey CUTLINE
+bind !RoutingKey COPY_LINE
 
 context 4
-bind !RoutingKey CUTRECT
+bind !RoutingKey COPY_RECT
 
 context 5
 bind !RoutingKey SETLEFT

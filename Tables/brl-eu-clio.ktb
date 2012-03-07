@@ -85,18 +85,18 @@ bind !M BOT_LEFT
 
 
 context 3
-bind !RoutingKey CUTBEGIN
+bind !RoutingKey CLIP_NEW
 
 
 context 4
-bind !RoutingKey CUTAPPEND
+bind !RoutingKey CLIP_ADD
 
 
 context 5
-bind !RoutingKey CUTRECT
+bind !RoutingKey COPY_RECT
 
 
 context 6
-bind !RoutingKey CUTLINE
+bind !RoutingKey COPY_LINE
 
 

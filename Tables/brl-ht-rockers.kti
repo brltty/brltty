@@ -52,9 +52,9 @@ bind LeftRockerBottom+RightRockerBottom ATTRDN
 bind LeftRockerBottom+B2 ATTRDN
 bind RightRockerBottom+B7 ATTRDN
 
-bind LeftRockerTop+RoutingKey CUTBEGIN
+bind LeftRockerTop+RoutingKey CLIP_NEW
 bind LeftRockerTop+LeftRockerBottom+RoutingKey KEY_FUNCTION
-bind LeftRockerBottom+RoutingKey CUTAPPEND
-bind RightRockerTop+RoutingKey CUTLINE
+bind LeftRockerBottom+RoutingKey CLIP_ADD
+bind RightRockerTop+RoutingKey COPY_LINE
 bind RightRockerTop+RightRockerBottom+RoutingKey SWITCHVT
-bind RightRockerBottom+RoutingKey CUTRECT
+bind RightRockerBottom+RoutingKey COPY_RECT

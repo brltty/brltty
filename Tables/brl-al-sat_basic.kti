@@ -60,10 +60,10 @@ bind Home+!RoutingKey1 GOTOMARK
 bind Cursor+!RoutingKey2 PRINDENT
 bind Cursor+!RoutingKey1 NXINDENT
 
-bind RightPadF1+!RoutingKey1 CUTBEGIN
-bind RightPadF1+!RoutingKey2 CUTAPPEND
-bind RightPadF2+!RoutingKey1 CUTRECT
-bind RightPadF2+!RoutingKey2 CUTLINE
+bind RightPadF1+!RoutingKey1 CLIP_NEW
+bind RightPadF1+!RoutingKey2 CLIP_ADD
+bind RightPadF2+!RoutingKey1 COPY_RECT
+bind RightPadF2+!RoutingKey2 COPY_LINE
 
 bind !Status1A CSRVIS
 bind !Status2A SKPIDLNS

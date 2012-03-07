@@ -71,18 +71,18 @@ bind Right TUNES
 
 
 context 3
-bind RoutingKey1 CUTBEGIN
+bind RoutingKey1 CLIP_NEW
 
 
 context 4
-bind RoutingKey1 CUTAPPEND
+bind RoutingKey1 CLIP_ADD
 
 
 context 5
-bind RoutingKey1 CUTRECT
+bind RoutingKey1 COPY_RECT
 
 
 context 6
-bind RoutingKey1 CUTLINE
+bind RoutingKey1 COPY_LINE
 
 

@@ -45,8 +45,8 @@ bind	CapsLock+ShiftLeft+!4		SETMARK+4
 bind	CapsLock+!4			GOTOMARK+4
 
 # cut and paste
-bind	CapsLock+!X			CUTBEGIN
-bind	CapsLock+!C			CUTRECT
+bind	CapsLock+!X			CLIP_NEW
+bind	CapsLock+!C			COPY_RECT
 bind	CapsLock+!V			PASTE
 
 # speech

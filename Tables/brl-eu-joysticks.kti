@@ -46,19 +46,19 @@ bind LeftJoystickRight+RightJoystickDown HELP
 
 
 context 1
-bind RoutingKey1 CUTBEGIN
+bind RoutingKey1 CLIP_NEW
 
 
 context 2
-bind RoutingKey1 CUTAPPEND
+bind RoutingKey1 CLIP_ADD
 
 
 context 3
-bind RoutingKey1 CUTRECT
+bind RoutingKey1 COPY_RECT
 
 
 context 4
-bind RoutingKey1 CUTLINE
+bind RoutingKey1 COPY_LINE
 
 
 context default

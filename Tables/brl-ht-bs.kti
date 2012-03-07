@@ -19,7 +19,7 @@
 # Key subtable for HandyTech Braille Star
 
 bind RoutingKey ROUTE
-bind RoutingKey+!RoutingKey COPYCHARS
+bind RoutingKey+!RoutingKey CLIP_COPY
 
 bind SpaceLeft+RoutingKey PRINDENT
 bind SpaceRight+RoutingKey NXINDENT

@@ -1979,7 +1979,7 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CUTBEGIN: {
+          case BRL_BLK_CLIP_NEW: {
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
@@ -1990,7 +1990,7 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CUTAPPEND: {
+          case BRL_BLK_CLIP_ADD: {
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
@@ -2001,7 +2001,7 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CUTRECT: {
+          case BRL_BLK_COPY_RECT: {
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
@@ -2012,7 +2012,7 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CUTLINE: {
+          case BRL_BLK_COPY_LINE: {
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 1, 1))
@@ -2026,11 +2026,11 @@ doCommand:
           {
             void (*start) (int column, int row);
 
-          case BRL_BLK_COPYCHARS:
+          case BRL_BLK_CLIP_COPY:
             start = cutBegin;
             goto doCopy;
 
-          case BRL_BLK_APNDCHARS:
+          case BRL_BLK_CLIP_APPEND:
             start = cutAppend;
             goto doCopy;
 

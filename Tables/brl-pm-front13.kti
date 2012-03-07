@@ -92,10 +92,10 @@ bind Dot8+!End SAY_FASTER
 bind Dot8+!Up SAY_SOFTER
 bind Dot8+!Down SAY_LOUDER
 
-bind Dot7+!RoutingKey1 CUTBEGIN
-bind Dot3+!RoutingKey1 CUTAPPEND
-bind Dot6+!RoutingKey1 CUTLINE
-bind Dot8+!RoutingKey1 CUTRECT
+bind Dot7+!RoutingKey1 CLIP_NEW
+bind Dot3+!RoutingKey1 CLIP_ADD
+bind Dot6+!RoutingKey1 COPY_LINE
+bind Dot8+!RoutingKey1 COPY_RECT
 
 bind Dot1+Dot4 CSRVIS
 bind Dot1+Dot4+Dot7 CSRVIS+off

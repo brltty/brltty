@@ -540,7 +540,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	  /* I thought I was smart when I suggested to remove CMD_CUT_END.
 	     Well now there's this nasty exception: the command offset
 	     depends on the display size! */
-	  if(key.cmd == BRL_BLK_CUTRECT || key.cmd == BRL_BLK_CUTLINE)
+	  if(key.cmd == BRL_BLK_COPY_RECT || key.cmd == BRL_BLK_COPY_LINE)
 	    key.cmd += blitesz-1;
 
 	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == BRL_BLK_PASSKEY) {
@@ -736,8 +736,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case BRL_BLK_CUTBEGIN:	/* begin cut */
-	case BRL_BLK_CUTAPPEND:
+	case BRL_BLK_CLIP_NEW:	/* begin copy */
+	case BRL_BLK_CLIP_ADD:
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
@@ -745,8 +745,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case BRL_BLK_CUTRECT:	/* end cut */
-	case BRL_BLK_CUTLINE:
+	case BRL_BLK_COPY_RECT:	/* end copy */
+	case BRL_BLK_COPY_LINE:
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;

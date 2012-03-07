@@ -92,10 +92,10 @@ bind LeftFront+RightRear+RightFront AUTOSPEAK
 
 bind !RoutingKey1 ROUTE
 
-bind LeftRear+!RoutingKey1 CUTBEGIN
-bind LeftMiddle+!RoutingKey1 CUTAPPEND
-bind RightRear+!RoutingKey1 CUTLINE
-bind RightMiddle+!RoutingKey1 CUTRECT
+bind LeftRear+!RoutingKey1 CLIP_NEW
+bind LeftMiddle+!RoutingKey1 CLIP_ADD
+bind RightRear+!RoutingKey1 COPY_LINE
+bind RightMiddle+!RoutingKey1 COPY_RECT
 
 bind LeftFront+!RoutingKey1 DESCCHAR
 bind RightFront+!RoutingKey1 SETLEFT

@@ -82,10 +82,10 @@ bind !LeftWheelDown LNDN
 bind !RightWheelDown LNDN
 
 bind !RoutingKey1 ROUTE
-bind Attribute2+!RoutingKey1 CUTBEGIN
-bind Attribute1+!RoutingKey1 CUTAPPEND
-bind Attribute4+!RoutingKey1 CUTLINE
-bind Attribute3+!RoutingKey1 CUTRECT
+bind Attribute2+!RoutingKey1 CLIP_NEW
+bind Attribute1+!RoutingKey1 CLIP_ADD
+bind Attribute4+!RoutingKey1 COPY_LINE
+bind Attribute3+!RoutingKey1 COPY_RECT
 
 bind !RoutingKey2 DESCCHAR
 bind Attribute2+!RoutingKey2 PRINDENT

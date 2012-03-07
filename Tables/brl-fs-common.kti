@@ -60,7 +60,7 @@ bind !RoutingKey ROUTE
 bind LeftWheelPress+!RoutingKey SETLEFT
 bind RightWheelPress+!RoutingKey DESCCHAR
 
-bind LeftAdvance+!RoutingKey CUTBEGIN
-bind RightAdvance+!RoutingKey CUTRECT
-bind LeftGdf+!RoutingKey CUTAPPEND
-bind RightGdf+!RoutingKey CUTLINE
+bind LeftAdvance+!RoutingKey CLIP_NEW
+bind RightAdvance+!RoutingKey COPY_RECT
+bind LeftGdf+!RoutingKey CLIP_ADD
+bind RightGdf+!RoutingKey COPY_LINE

@@ -716,16 +716,16 @@ interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandCon
       return BRL_BLK_PASSCHAR + character;
     }
     case BNC_LPAREN:
-      temporaryRoutingOperation = BRL_BLK_CUTBEGIN;
+      temporaryRoutingOperation = BRL_BLK_CLIP_NEW;
       return BRL_CMD_NOOP;
     case BNC_LBRACE:
-      temporaryRoutingOperation = BRL_BLK_CUTAPPEND;
+      temporaryRoutingOperation = BRL_BLK_CLIP_ADD;
       return BRL_CMD_NOOP;
     case BNC_RPAREN:
-      temporaryRoutingOperation = BRL_BLK_CUTRECT;
+      temporaryRoutingOperation = BRL_BLK_COPY_RECT;
       return BRL_CMD_NOOP;
     case BNC_RBRACE:
-      temporaryRoutingOperation = BRL_BLK_CUTLINE;
+      temporaryRoutingOperation = BRL_BLK_COPY_LINE;
       return BRL_CMD_NOOP;
     case BNC_BAR:
       return BRL_CMD_CSRJMP_VERT;

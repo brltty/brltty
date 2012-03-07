@@ -22,10 +22,10 @@ bind !RoutingKey ROUTE
 
 bind Display5+!RoutingKey DESCCHAR
 
-bind Display3+!RoutingKey CUTBEGIN
-bind Display4+!RoutingKey CUTAPPEND
-bind Display6+!RoutingKey CUTLINE
-bind Display7+!RoutingKey CUTRECT
+bind Display3+!RoutingKey CLIP_NEW
+bind Display4+!RoutingKey CLIP_ADD
+bind Display6+!RoutingKey COPY_LINE
+bind Display7+!RoutingKey COPY_RECT
 
 bind Display5+Display3+!RoutingKey PRINDENT
 bind Display5+Display4+!RoutingKey NXINDENT

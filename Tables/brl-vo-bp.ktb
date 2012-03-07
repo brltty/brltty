@@ -61,10 +61,10 @@ bind Shift+JoystickRight LNEND
 bind Shift+JoystickUp TOP
 bind Shift+JoystickDown BOT
 
-bind Control+JoystickLeft CUTBEGIN
-bind Control+JoystickUp CUTAPPEND
-bind Control+JoystickRight CUTLINE
-bind Control+JoystickDown CUTRECT
+bind Control+JoystickLeft CLIP_NEW
+bind Control+JoystickUp CLIP_ADD
+bind Control+JoystickRight COPY_LINE
+bind Control+JoystickDown COPY_RECT
 bind Control+JoystickEnter PASTE
 
 bind Dot1+JoystickEnter DISPMD

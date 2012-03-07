@@ -186,11 +186,11 @@ struct InputModeStruct {
 static const InputMode inputMode_char_f1 = {
   BIND_BLOCK(F1, SETLEFT),
   BIND_BLOCK(F2, DESCCHAR),
-  BIND_BLOCK(Left, CUTAPPEND),
-  BIND_BLOCK(Up, CUTBEGIN),
+  BIND_BLOCK(Left, CLIP_ADD),
+  BIND_BLOCK(Up, CLIP_NEW),
   BIND_BLOCK(Center, ROUTE),
-  BIND_BLOCK(Down, CUTRECT),
-  BIND_BLOCK(Right, CUTLINE),
+  BIND_BLOCK(Down, COPY_RECT),
+  BIND_BLOCK(Right, COPY_LINE),
 
   .temporary = 1,
   .name = "Char-F1"

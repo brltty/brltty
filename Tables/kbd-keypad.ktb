@@ -54,10 +54,10 @@ bind KPEnter+!KP1 Say_Softer
 bind KPEnter+!KP3 Say_Louder
 
 bind KPPlus+!KP5 Paste
-bind KPPlus+!KP7 CutBegin
-bind KPPlus+!KP1 CutAppend
-bind KPPlus+!KP9 CutLine
-bind KPPlus+!KP3 CutRect
+bind KPPlus+!KP7 Clip_New
+bind KPPlus+!KP1 Clip_Add
+bind KPPlus+!KP9 Copy_Line
+bind KPPlus+!KP3 Copy_Rect
 bind KPPlus+!KPArrowUp PrIndent
 bind KPPlus+!KPArrowDown NxIndent
 bind KPPlus+!KPArrowLeft PrDifChar

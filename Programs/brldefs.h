@@ -88,8 +88,8 @@ typedef enum {
   BRL_CMD_NXPGRPH /* go down to first line of next paragraph */,
   BRL_CMD_PRPROMPT /* go up to previous command prompt */,
   BRL_CMD_NXPROMPT /* go down to next command prompt */,
-  BRL_CMD_PRSEARCH /* search backward for cut text */,
-  BRL_CMD_NXSEARCH /* search forward for cut text */,
+  BRL_CMD_PRSEARCH /* search backward for clipboard text */,
+  BRL_CMD_NXSEARCH /* search forward for clipboard text */,
   
   /* horizontal motion */
   BRL_CMD_CHRLT /* go left one character */,
@@ -162,7 +162,7 @@ typedef enum {
   
   /* miscellaneous */
   BRL_CMD_CSRJMP_VERT /* bring cursor to line */,
-  BRL_CMD_PASTE /* insert cut text at cursor */,
+  BRL_CMD_PASTE /* insert clipboard text at cursor */,
   BRL_CMD_RESTARTBRL /* restart braille driver */,
   BRL_CMD_RESTARTSPEECH /* restart speech driver */,
 
@@ -195,10 +195,10 @@ typedef enum {
  * used during automatic help file generation.
  */
 #define BRL_BLK_ROUTE     0X0100 /* bring cursor to character */
-#define BRL_BLK_CUTBEGIN  0X0200 /* start new cut buffer at character */
-#define BRL_BLK_CUTAPPEND 0X0300 /* append to existing cut buffer from character */
-#define BRL_BLK_CUTRECT   0X0400 /* rectangular cut to character */
-#define BRL_BLK_CUTLINE   0X0500 /* linear cut to character */
+#define BRL_BLK_CLIP_NEW  0X0200 /* start new clipboard at character */
+#define BRL_BLK_CLIP_ADD  0X0300 /* append to clipboard from character */
+#define BRL_BLK_COPY_RECT 0X0400 /* rectangular copy to character */
+#define BRL_BLK_COPY_LINE 0X0500 /* linear copy to character */
 #define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
 #define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line with less indent than character */
 #define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line with less indent than character */
@@ -211,10 +211,10 @@ typedef enum {
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
-#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to nearest line with different character */
-#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to nearest line with different character */
-#define BRL_BLK_COPYCHARS 0X1000 /* copy characters to cut buffer */
-#define BRL_BLK_APNDCHARS 0X1100 /* append characters to cut buffer */
+#define BRL_BLK_PRDIFCHAR   0X0E00 /* go up to nearest line with different character */
+#define BRL_BLK_NXDIFCHAR   0X0F00 /* go down to nearest line with different character */
+#define BRL_BLK_CLIP_COPY   0X1000 /* copy characters to clipboard */
+#define BRL_BLK_CLIP_APPEND 0X1100 /* append characters to clipboard */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* emulate special key */

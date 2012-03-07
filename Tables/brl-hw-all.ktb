@@ -34,10 +34,10 @@ bind Thumb1+Thumb3 BOT_LEFT
 bind Thumb4+Thumb2 PRDIFLN
 bind Thumb4+Thumb3 NXDIFLN
 
-bind Thumb1+RoutingKey CUTBEGIN
-bind Thumb2+RoutingKey CUTAPPEND
-bind Thumb3+RoutingKey CUTRECT
-bind Thumb4+RoutingKey CUTLINE
+bind Thumb1+RoutingKey CLIP_NEW
+bind Thumb2+RoutingKey CLIP_ADD
+bind Thumb3+RoutingKey COPY_RECT
+bind Thumb4+RoutingKey COPY_LINE
 bind Thumb1+Thumb4 PASTE
 
 map Dot1 DOT1

@@ -310,8 +310,8 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case 0:
         if (descchar) { descchar = 0; return ((int) ch) | BRL_BLK_DESCCHAR; }
         else return ((int) ch) | BRL_BLK_ROUTE;
-      case 1: cut++; return ((int) ch) | BRL_BLK_CUTBEGIN;
-      case 2: cut = 0; return ((int) ch) | BRL_BLK_CUTLINE;
+      case 1: cut++; return ((int) ch) | BRL_BLK_CLIP_NEW;
+      case 2: cut = 0; return ((int) ch) | BRL_BLK_COPY_LINE;
     }
     return EOF; /* Should not be reached */
   } else if (type==BRL_VSMSK_FUNCTIONKEY) {

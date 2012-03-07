@@ -284,7 +284,7 @@ static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 		else
 			keystroke.key = cmd_S_trans[keystroke.key];
 		status = 0;
-                if ((keystroke.key == BRL_BLK_CUTLINE) || (keystroke.key == BRL_BLK_CUTRECT))
+                if ((keystroke.key == BRL_BLK_COPY_LINE) || (keystroke.key == BRL_BLK_COPY_RECT))
                   keystroke.key += brlcols - 1;
 		return keystroke.key;
 	} else { /* directly process 'R' events */
@@ -304,10 +304,10 @@ static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 				return keystroke.key + BRL_BLK_ROUTE - MB_CR_EXTRAKEYS;
 			case 1:			/* begin block */
 				status = 0;
-				return keystroke.key + BRL_BLK_CUTBEGIN - MB_CR_EXTRAKEYS;
+				return keystroke.key + BRL_BLK_CLIP_NEW - MB_CR_EXTRAKEYS;
 			case 2:			/* end block */
 				status = 0;
-				return keystroke.key + BRL_BLK_CUTRECT - MB_CR_EXTRAKEYS;
+				return keystroke.key + BRL_BLK_COPY_RECT - MB_CR_EXTRAKEYS;
 		}
 		status = 0;
 	}

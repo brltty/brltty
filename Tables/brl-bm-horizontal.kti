@@ -20,10 +20,10 @@
 
 bind !HorizontalSensor ROUTE
 
-bind Display1+!HorizontalSensor CUTBEGIN
-bind Display2+!HorizontalSensor CUTAPPEND
-bind Display4+!HorizontalSensor CUTLINE
-bind Display5+!HorizontalSensor CUTRECT
+bind Display1+!HorizontalSensor CLIP_NEW
+bind Display2+!HorizontalSensor CLIP_ADD
+bind Display4+!HorizontalSensor COPY_LINE
+bind Display5+!HorizontalSensor COPY_RECT
 
 bind Display3+!HorizontalSensor DESCCHAR
 bind Display6+!HorizontalSensor SETLEFT

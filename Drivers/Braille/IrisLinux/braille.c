@@ -193,13 +193,13 @@ static int readbrlkey(BrailleDisplay *brl, char key_context);
 
 static int begblk(BrailleDisplay *brl)
 {
-  OffsetType = BRL_BLK_CUTBEGIN;
+  OffsetType = BRL_BLK_CLIP_NEW;
   return (EOF);
 }
 
 static int endblk(BrailleDisplay *brl)
 {
-  OffsetType = BRL_BLK_CUTLINE;
+  OffsetType = BRL_BLK_COPY_LINE;
   return (EOF);
 }
 

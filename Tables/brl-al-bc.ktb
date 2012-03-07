@@ -71,11 +71,11 @@ bind ETouchRightFront CHRRT
 bind RoutingKey1 ROUTE
 bind ETouchRightRear+ETouchRightFront CSRJMP_VERT
 
-bind RoutingKey1+!RoutingKey1 COPYCHARS
-bind ThumbLeft+!RoutingKey1 CUTBEGIN
-bind ThumbUp+!RoutingKey1 CUTAPPEND
-bind ThumbDown+!RoutingKey1 CUTRECT
-bind ThumbRight+!RoutingKey1 CUTLINE
+bind RoutingKey1+!RoutingKey1 CLIP_COPY
+bind ThumbLeft+!RoutingKey1 CLIP_NEW
+bind ThumbUp+!RoutingKey1 CLIP_ADD
+bind ThumbDown+!RoutingKey1 COPY_RECT
+bind ThumbRight+!RoutingKey1 COPY_LINE
 bind ThumbLeft+ThumbRight PASTE
 
 bind !RoutingKey2 DESCCHAR

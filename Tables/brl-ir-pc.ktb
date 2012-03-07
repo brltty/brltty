@@ -23,7 +23,7 @@ note * The four at the left, from top to bottom, are named L1 through L4.
 note * The four at the right, from bottom to top, are named L5 through L8.
 
 bind L1 FWINLTSKIP
-bind L2 CUTBEGIN
+bind L2 CLIP_NEW
 bind L3 PASTE
 bind L4 CSRVIS
 bind L8 FWINRTSKIP

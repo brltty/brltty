@@ -766,15 +766,15 @@ cut_cursor (BrailleDisplay *brl)
       prevdata[pos] = oldchar;
 
       while ((key = brl_readCommand (brl, KTB_CTX_DEFAULT)) == EOF) approximateDelay(1); /* just yield */
-      if((key &BRL_MSK_BLK) == BRL_BLK_CUTBEGIN)
-	  res = BRL_BLK_CUTBEGIN + pos;
-      else if((key &BRL_MSK_BLK) == BRL_BLK_CUTAPPEND)
-	  res = BRL_BLK_CUTAPPEND + pos;
-      else if((key &BRL_MSK_BLK) == BRL_BLK_CUTRECT) {
-	  res = BRL_BLK_CUTRECT + pos;
+      if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_NEW)
+	  res = BRL_BLK_CLIP_NEW + pos;
+      else if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_ADD)
+	  res = BRL_BLK_CLIP_ADD + pos;
+      else if((key &BRL_MSK_BLK) == BRL_BLK_COPY_RECT) {
+	  res = BRL_BLK_COPY_RECT + pos;
 	  pos = -1;
-      }else if((key &BRL_MSK_BLK) == BRL_BLK_CUTLINE) {
-	  res = BRL_BLK_CUTLINE + pos;
+      }else if((key &BRL_MSK_BLK) == BRL_BLK_COPY_LINE) {
+	  res = BRL_BLK_COPY_LINE + pos;
 	  pos = -1;
       }else switch (key)
 	{
@@ -1054,8 +1054,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     ignore_routing = 1;
     if(sw_howmany == 1){
       switch(code){
-	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CUTBEGIN + sw_which[0]);
-	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_CUTRECT + sw_which[0]);
+	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CLIP_NEW + sw_which[0]);
+	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_COPY_RECT + sw_which[0]);
 	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_BLK_NXINDENT + sw_which[0]);
 	KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_BLK_PRINDENT + sw_which[0]);
 	KEY (KEY_CROUND, BRL_BLK_SETMARK + sw_which[0]);
@@ -1068,10 +1068,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     }else if(sw_howmany == 2) {
       if(sw_which[0]+1 == sw_which[1]
 	 && (code == KEY_BRIGHT || code == KEY_BUT3))
-	res = BRL_BLK_CUTAPPEND + sw_which[0];
+	res = BRL_BLK_CLIP_ADD + sw_which[0];
       else if(sw_which[0]+1 == sw_which[1]
 	 && (code == KEY_BLEFT || code == KEY_BUT2))
-	res = BRL_BLK_CUTLINE + sw_which[1];
+	res = BRL_BLK_COPY_LINE + sw_which[1];
       else if(sw_which[0]==0 && sw_which[1]==1){
 	switch(code){
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXPGRPH);
@@ -1096,9 +1096,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 #if 0
      else if (sw_howmany == 3 && sw_which[1] == sw_lastkey - 1
 	       && sw_which[2] == sw_lastkey)
-	res = BRL_BLK_CUTBEGIN + sw_which[0];
+	res = BRL_BLK_CLIP_NEW + sw_which[0];
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
- 	res = BRL_BLK_CUTRECT + sw_which[2];
+ 	res = BRL_BLK_COPY_RECT + sw_which[2];
 #endif /* 0 */
       else if(sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
  	res = BRL_CMD_PASTE;
@@ -1128,8 +1128,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	}
 #endif /* 0 */
       else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
-	  res = BRL_BLK_CUTBEGIN + sw_which[0];
-	  pending_cmd = BRL_BLK_CUTRECT + sw_which[2];
+	  res = BRL_BLK_CLIP_NEW + sw_which[0];
+	  pending_cmd = BRL_BLK_COPY_RECT + sw_which[2];
 	}
     }
   else switch (code){
@@ -1194,10 +1194,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, BRL_BLK_ROUTE + 3 * brl_cols / 4 - 1);
 
   /* Emulation of routing keys for cut&paste */
-    KEY (KEY_CLEFT | KEY_BROUND, BRL_BLK_CUTBEGIN +0);
-    KEY (KEY_CLEFT | KEY_BROUND | KEY_BUP, BRL_BLK_CUTAPPEND +0);
-    KEY (KEY_CRIGHT | KEY_BROUND, BRL_BLK_CUTRECT +brl_cols-1);
-    KEY (KEY_CRIGHT | KEY_BROUND | KEY_BUP, BRL_BLK_CUTLINE +brl_cols-1);
+    KEY (KEY_CLEFT | KEY_BROUND, BRL_BLK_CLIP_NEW +0);
+    KEY (KEY_CLEFT | KEY_BROUND | KEY_BUP, BRL_BLK_CLIP_ADD +0);
+    KEY (KEY_CRIGHT | KEY_BROUND, BRL_BLK_COPY_RECT +brl_cols-1);
+    KEY (KEY_CRIGHT | KEY_BROUND | KEY_BUP, BRL_BLK_COPY_LINE +brl_cols-1);
     KEY (KEY_CLEFT | KEY_CRIGHT | KEY_BROUND, CMD_CUT_CURSOR);  /* special: see
 	 				    at the end of this fn */
   /* paste */

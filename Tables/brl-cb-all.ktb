@@ -96,13 +96,13 @@ bind RoutingKey ROUTE
 ############################
 
 context 1
-bind !RoutingKey CUTBEGIN
+bind !RoutingKey CLIP_NEW
 
 context 2
-bind !RoutingKey CUTAPPEND
+bind !RoutingKey CLIP_ADD
 
 context 3
-bind !RoutingKey CUTLINE
+bind !RoutingKey COPY_LINE
 
 context 4
-bind !RoutingKey CUTRECT
+bind !RoutingKey COPY_RECT

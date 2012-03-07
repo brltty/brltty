@@ -42,8 +42,8 @@ bind L2+L3 CSRVIS
 bind L6+L7 TUNES
 bind L6+L8 RESTARTSPEECH
 bind L5+L7 PASTE
-bind L3+L4 CONTEXT+1 # RoutingKey -> CUTBEGIN
-bind L5+L6 CONTEXT+2 # RoutingKey -> CUTLINE
+bind L3+L4 CONTEXT+1 # RoutingKey -> CLIP_NEW
+bind L5+L6 CONTEXT+2 # RoutingKey -> COPY_LINE
 
 assign Dot1 L4
 assign Dot2 L3
@@ -119,8 +119,8 @@ bind Backspace+Dot6 SWITCHVT_NEXT
 ############################
 
 context 1
-bind !RoutingKey CUTBEGIN
+bind !RoutingKey CLIP_NEW
 
 context 2
-bind !RoutingKey CUTLINE
+bind !RoutingKey COPY_LINE
 

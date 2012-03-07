@@ -53,8 +53,8 @@ bind !RoutingKey1 ROUTE
 bind Prog+Home+!RoutingKey1 DESCCHAR
 bind Home+Cursor+!RoutingKey1 SETLEFT
 
-bind Prog+!RoutingKey1 CUTBEGIN
-bind Home+!RoutingKey1 CUTRECT
+bind Prog+!RoutingKey1 CLIP_NEW
+bind Home+!RoutingKey1 COPY_RECT
 bind Prog+Home+!Down PASTE
 
 bind Prog HELP

@@ -69,10 +69,10 @@ bind F1+F2+Forward BOT_LEFT
 bind F3+F4+Backward CHRLT
 bind F3+F4+Forward CHRRT
 
-bind F1+F3+F4 CONTEXT+1 # RoutingKey -> CUTBEGIN
-bind F2+F3+F4 CONTEXT+2 # RoutingKey -> CUTAPPEND
-bind F1+F2+F3 CONTEXT+3 # RoutingKey -> CUTLINE
-bind F1+F2+F4 CONTEXT+4 # RoutingKey -> CUTRECT
+bind F1+F3+F4 CONTEXT+1 # RoutingKey -> CLIP_NEW
+bind F2+F3+F4 CONTEXT+2 # RoutingKey -> CLIP_ADD
+bind F1+F2+F3 CONTEXT+3 # RoutingKey -> COPY_LINE
+bind F1+F2+F4 CONTEXT+4 # RoutingKey -> COPY_RECT
 bind F1+F2+F3+F4 PASTE
 
 bind F1+F3 CONTEXT+5 # RoutingKey -> SETLEFT
@@ -150,16 +150,16 @@ bind F3+F4 MENU_LAST_ITEM
 ############################
 
 context 1
-bind !RoutingKey CUTBEGIN
+bind !RoutingKey CLIP_NEW
 
 context 2
-bind !RoutingKey CUTAPPEND
+bind !RoutingKey CLIP_ADD
 
 context 3
-bind !RoutingKey CUTLINE
+bind !RoutingKey COPY_LINE
 
 context 4
-bind !RoutingKey CUTRECT
+bind !RoutingKey COPY_RECT
 
 context 5
 bind !RoutingKey SETLEFT
