@@ -288,8 +288,16 @@ static const ModelEntry *model;
 
 static int forceWindowRewrite;
 static int forceVisualRewrite;
+static int forceCursorRewrite;
 static int inputPacketNumber;
 static int outputPacketNumber;
+
+static inline void
+forceRewrite (void) {
+  forceWindowRewrite = 1;
+  forceVisualRewrite = 1;
+  forceCursorRewrite = 1;
+}
 
 static int
 needsEscape (unsigned char byte) {
@@ -534,10 +542,22 @@ writeWindow (BrailleDisplay *brl) {
 static int
 writeVisual (BrailleDisplay *brl, const wchar_t *text) {
   if (model->hasVisualDisplay) {
-    static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
     size_t size = brl->textColumns * brl->textRows;
+    int changed = 0;
 
-    if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
+    {
+      static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
+
+      if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) changed = 1;
+    }
+
+    {
+      static int previousCursor;
+
+      if (cursorHasChanged(&previousCursor, brl->cursor, &forceCursorRewrite)) changed = 1;
+    }
+
+    if (changed) {
       const wchar_t *source = text;
       const wchar_t *end = source + size;
       const wchar_t *cursor = (brl->cursor >= 0)? source+brl->cursor: NULL;
@@ -576,8 +596,7 @@ hasVisualDisplay (BrailleDisplay *brl) {
 static int
 handleMode (BrailleDisplay *brl, const unsigned char *packet) {
   if (*packet == 'B') {
-    forceWindowRewrite = 1;
-    forceVisualRewrite = 1;
+    forceRewrite();
     return 1;
   }
 
@@ -656,8 +675,7 @@ initializeDevice (BrailleDisplay *brl) {
   memset(firmwareVersion, 0, sizeof(firmwareVersion));
   model = NULL;
 
-  forceWindowRewrite = 1;
-  forceVisualRewrite = 1;
+  forceRewrite();
   inputPacketNumber = -1;
   outputPacketNumber = 127;
 

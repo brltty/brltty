@@ -892,14 +892,12 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
     {
       static int previousCursor;
 
-      if (forceCursorRewrite || (brl->cursor != previousCursor)) {
+      if (cursorHasChanged(&previousCursor, brl->cursor, &forceCursorRewrite )) {
         const unsigned char packet[] = {
           'L', 'C', ((brl->cursor >= 0)? (brl->cursor + 1): 0)
         };
 
         if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
-        previousCursor = brl->cursor;
-        forceCursorRewrite = 0;
       }
     }
   }
