@@ -86,11 +86,13 @@ END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(interactive)
   INTERACTIVE_KEY_ENTRY(Dollar, "Dollar"),
+  KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey"),
+  INTERACTIVE_KEY_ENTRY(U, "U"),
+  INTERACTIVE_KEY_ENTRY(V, "V"),
+  INTERACTIVE_KEY_ENTRY(W, "W"),
+  INTERACTIVE_KEY_ENTRY(X, "X"),
   INTERACTIVE_KEY_ENTRY(Y, "Y"),
   INTERACTIVE_KEY_ENTRY(Z, "Z"),
-
-  KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey"),
-  KEY_SET_ENTRY(EU_SET_StatusKeys, "StatusKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(clio)
@@ -617,8 +619,6 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
 
       if ((key >= 1) && (key <= brl->textColumns)) {
         enqueueKey(EU_SET_RoutingKeys1, key-1);
-      } else if ((key >= 0X88) && (key <= 0X8B)) {
-        enqueueKey(EU_SET_StatusKeys, key-0X88);
       } else {
         enqueueKey(EU_SET_InteractiveKeys, key);
       }

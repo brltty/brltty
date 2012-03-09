@@ -119,8 +119,13 @@ typedef enum {
 
 typedef enum {
   EU_INT_Dollar = 0X81,
-  EU_INT_Y      = 0X82,
-  EU_INT_Z      = 0X83
+  EU_INT_U      = 0X82,
+  EU_INT_Z      = 0X83,
+
+  EU_INT_V      = 0X88,
+  EU_INT_W      = 0X89,
+  EU_INT_X      = 0X8A,
+  EU_INT_Y      = 0X8B
 } EU_InteractiveKey;
 
 typedef enum {
@@ -205,7 +210,6 @@ typedef enum {
 
 typedef enum {
   EU_SET_NavigationKeys,
-  EU_SET_StatusKeys,
   EU_SET_InteractiveKeys,
   EU_SET_CommandKeys,
   EU_SET_BrailleKeys,
