@@ -807,7 +807,12 @@ usbSetSerialOperations (UsbDevice *device) {
 
       if (device->serialOperations) {
         device->serialData = interface;
-        return 1;
+
+        if (usbClaimInterface(device, interface->bInterfaceNumber)) {
+          if (usbSetAlternative(device, interface->bInterfaceNumber, interface->bAlternateSetting)) {
+            return 1;
+          }
+        }
       }
     }
   }
