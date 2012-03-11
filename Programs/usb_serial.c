@@ -59,24 +59,6 @@ typedef struct {
   uint8_t bDataBits; /* number of data bits - 5,6,7,8,16 */
 } PACKED USB_CDC_ACM_LineCoding;
 
-static const UsbInterfaceDescriptor *
-usbCommunicationInterfaceDescriptor (UsbDevice *device) {
-  if (device->descriptor.bDeviceClass == 0X02) {
-    const UsbDescriptor *descriptor = NULL;
-
-    while (usbNextDescriptor(device, &descriptor)) {
-      if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
-        if (descriptor->interface.bInterfaceClass == 0X02)
-          if (descriptor->interface.bInterfaceSubClass == 0X02)
-            return &descriptor->interface;
-    }
-  }
-
-  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
-  errno = ENOENT;
-  return NULL;
-}
-
 static int
 usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int rate, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   USB_CDC_ACM_LineCoding lineCoding;
@@ -173,22 +155,15 @@ usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
 
 static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
-  const UsbInterfaceDescriptor *interface = usbCommunicationInterfaceDescriptor(device);
+  const UsbInterfaceDescriptor *interface = device->serialData;
+  ssize_t result = usbControlWrite(device,
+                                   UsbControlRecipient_Interface, UsbControlType_Class,
+                                   USB_CDC_ACM_CTL_SetControlLines,
+                                   USB_CDC_ACM_LINE_DTR,
+                                   interface->bInterfaceNumber,
+                                   NULL, 0, 1000);
 
-  if (interface) {
-    ssize_t result = usbControlWrite(device,
-                                     UsbControlRecipient_Interface, UsbControlType_Class,
-                                     USB_CDC_ACM_CTL_SetControlLines,
-                                     USB_CDC_ACM_LINE_DTR,
-                                     interface->bInterfaceNumber,
-                                     NULL, 0, 1000);
-
-    if (result != -1) {
-      device->serialData = interface;
-      return 1;
-    }
-  }
-
+  if (result != -1) return 1;
   return 0;
 }
 
@@ -780,17 +755,28 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
     .operations = &usbSerialOperations_CP2101
   }
   ,
-  { /* HumanWare (serial protocol) */
-    .vendor=0X1C71, .product=0XC005,
-    .operations = &usbSerialOperations_CDC_ACM
-  }
-  ,
   {.vendor=0, .product=0}
 };
 
+static const UsbInterfaceDescriptor *
+usbCommunicationInterfaceDescriptor (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor))
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
+      if (descriptor->interface.bInterfaceClass == 0X02)
+        return &descriptor->interface;
+
+  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
 int
 usbSetSerialOperations (UsbDevice *device) {
-  if (!device->serialOperations) {
+  if (device->serialOperations) return 1;
+
+  {
     const UsbSerialAdapter *sa = usbSerialAdapters;
 
     while (sa->vendor) {
@@ -798,7 +784,7 @@ usbSetSerialOperations (UsbDevice *device) {
         if (!sa->product || (sa->product == getLittleEndian16(device->descriptor.idProduct))) {
           if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) return 0;
           device->serialOperations = sa->operations;
-          break;
+          return 1;
         }
       }
 
@@ -806,7 +792,27 @@ usbSetSerialOperations (UsbDevice *device) {
     }
   }
 
-  return 1;
+  if (device->descriptor.bDeviceClass == 0X02) {
+    const UsbInterfaceDescriptor *interface = usbCommunicationInterfaceDescriptor(device);
+
+    if (interface) {
+      switch (interface->bInterfaceSubClass) {
+        case 0X02:
+          device->serialOperations = &usbSerialOperations_CDC_ACM;
+          break;
+
+        default:
+          break;
+      }
+
+      if (device->serialOperations) {
+        device->serialData = interface;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
 }
 
 const UsbSerialOperations *
