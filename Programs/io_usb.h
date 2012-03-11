@@ -151,6 +151,12 @@ extern int usbVerifyManufacturer (UsbDevice *device, const char *eRegExp);
 extern int usbVerifyProduct (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
+extern int usbBeginInput (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  int count
+);
+
 extern ssize_t usbReadEndpoint (
   UsbDevice *device,
   unsigned char endpointNumber,

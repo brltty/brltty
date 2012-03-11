@@ -810,6 +810,7 @@ usbSetSerialOperations (UsbDevice *device) {
 
         if (usbClaimInterface(device, interface->bInterfaceNumber)) {
           if (usbSetAlternative(device, interface->bInterfaceNumber, interface->bAlternateSetting)) {
+            usbBeginInput(device, 1, 8);
             return 1;
           }
         }

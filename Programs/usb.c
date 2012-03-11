@@ -717,7 +717,7 @@ usbAddPendingInputRequest (
   return NULL;
 }
 
-static int
+int
 usbBeginInput (
   UsbDevice *device,
   unsigned char endpointNumber,
