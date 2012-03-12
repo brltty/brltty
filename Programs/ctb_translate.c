@@ -1304,7 +1304,7 @@ handleExternalResponse_brf (const char *value) {
   int useDot7 = prefs.capitalizationMode == CTB_CAP_DOT7;
 
   while (*value && (dest < destmax)) {
-    char brf = *value++;
+    unsigned char brf = *value++ & 0XFF;
     unsigned char dots = 0;
     unsigned char superimpose = 0;
 
