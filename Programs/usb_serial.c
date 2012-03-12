@@ -818,7 +818,7 @@ usbSetSerialOperations (UsbDevice *device) {
     }
   }
 
-  return 0;
+  return 1;
 }
 
 const UsbSerialOperations *
