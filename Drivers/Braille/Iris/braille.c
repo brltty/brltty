@@ -425,10 +425,8 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   ssize_t res;
 
   if (port->waitingForAck) {
-    int ms = millisecondsSince(&port->lastWriteTime);
-
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s after %d ms",port->name, ms);
-    if (ms < 1000) return 0;
+    if ( millisecondsSince(&port->lastWriteTime) < 1000) return 0;
+    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
     port->waitingForAck = 0;
   }
 
