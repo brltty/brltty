@@ -759,15 +759,33 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
 };
 
 static const UsbInterfaceDescriptor *
-usbCommunicationInterfaceDescriptor (UsbDevice *device) {
+usbFindCommunicationInterface (UsbDevice *device) {
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor))
-    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface)
       if (descriptor->interface.bInterfaceClass == 0X02)
         return &descriptor->interface;
 
   logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+static const UsbEndpointDescriptor *
+usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *interface) {
+  const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) break;
+
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint)
+      if (USB_ENDPOINT_DIRECTION(&descriptor->endpoint) == UsbEndpointDirection_Input)
+        if (USB_ENDPOINT_TRANSFER(&descriptor->endpoint) == UsbEndpointTransfer_Interrupt)
+          return &descriptor->endpoint;
+  }
+
+  logMessage(LOG_WARNING, "USB: interrupt input endpoint descriptor not found");
   errno = ENOENT;
   return NULL;
 }
@@ -793,7 +811,7 @@ usbSetSerialOperations (UsbDevice *device) {
   }
 
   if (device->descriptor.bDeviceClass == 0X02) {
-    const UsbInterfaceDescriptor *interface = usbCommunicationInterfaceDescriptor(device);
+    const UsbInterfaceDescriptor *interface = usbFindCommunicationInterface(device);
 
     if (interface) {
       switch (interface->bInterfaceSubClass) {
@@ -810,7 +828,14 @@ usbSetSerialOperations (UsbDevice *device) {
 
         if (usbClaimInterface(device, interface->bInterfaceNumber)) {
           if (usbSetAlternative(device, interface->bInterfaceNumber, interface->bAlternateSetting)) {
-            usbBeginInput(device, 1, 8);
+            {
+              const UsbEndpointDescriptor *endpoint = usbFindInterruptInputEndpoint(device, interface);
+
+              if (endpoint) {
+                usbBeginInput(device, USB_ENDPOINT_NUMBER(endpoint), 8);
+              }
+            }
+
             return 1;
           }
         }
