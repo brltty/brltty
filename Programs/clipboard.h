@@ -26,8 +26,8 @@ extern "C" {
 extern wchar_t *cpbBuffer;
 extern size_t cpbLength;
 
-extern void cpbStart (int column, int row);
-extern void cpbExtend (int column, int row);
+extern void cpbClearContent (void);
+extern void cpbBeginOperation (int column, int row);
 extern int cpbRectangularCopy (int column, int row);
 extern int cpbLinearCopy (int column, int row);
 extern int cpbPaste (void);

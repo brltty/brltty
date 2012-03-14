@@ -34,52 +34,47 @@ static int beginColumn = 0;
 static int beginRow = 0;
 static int beginOffset = -1;
 
-static wchar_t *
+static inline wchar_t *
 mallocWchars (size_t count) {
   return malloc(count * sizeof(wchar_t));
 }
 
 static wchar_t *
-copy (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
+getScreenText (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
   wchar_t *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
   if ((columns >= 1) && (rows >= 1) && (beginOffset >= 0)) {
-    wchar_t *fromBuffer = mallocWchars(rows * columns);
-    if (fromBuffer) {
-      wchar_t *toBuffer = mallocWchars(rows * (columns + 1));
-      if (toBuffer) {
-        if (readScreenText(fromColumn, fromRow, columns, rows, fromBuffer)) {
-          wchar_t *fromAddress = fromBuffer;
-          wchar_t *toAddress = toBuffer;
-          int row;
+    wchar_t fromBuffer[rows * columns];
 
-          for (row=fromRow; row<=toRow; row+=1) {
-            int column;
+    if (readScreenText(fromColumn, fromRow, columns, rows, fromBuffer)) {
+      wchar_t toBuffer[rows * (columns + 1)];
+      wchar_t *toAddress = toBuffer;
 
-            for (column=fromColumn; column<=toColumn; column+=1) {
-              wchar_t character = *fromAddress++;
-              if (iswcntrl(character) || iswspace(character)) character = WC_C(' ');
-              *toAddress++ = character;
-            }
+      const wchar_t *fromAddress = fromBuffer;
+      int row;
 
-            if (row != toRow) *toAddress++ = WC_C('\r');
-          }
+      for (row=fromRow; row<=toRow; row+=1) {
+        int column;
 
-          /* make a new permanent buffer of just the right size */
-          {
-            size_t newLength = toAddress - toBuffer;
-            if ((newBuffer = mallocWchars(newLength))) {
-              wmemcpy(newBuffer, toBuffer, (*length = newLength));
-            }
-          }
+        for (column=fromColumn; column<=toColumn; column+=1) {
+          wchar_t character = *fromAddress++;
+          if (iswcntrl(character) || iswspace(character)) character = WC_C(' ');
+          *toAddress++ = character;
         }
-        
-        free(toBuffer);
+
+        if (row != toRow) *toAddress++ = WC_C('\r');
       }
 
-      free(fromBuffer);
+      /* make a new permanent buffer of just the right size */
+      {
+        size_t newLength = toAddress - toBuffer;
+
+        if ((newBuffer = mallocWchars(newLength))) {
+          wmemcpy(newBuffer, toBuffer, (*length = newLength));
+        }
+      }
     }
   }
 
@@ -87,7 +82,7 @@ copy (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
 }
 
 static int
-append (wchar_t *buffer, size_t length) {
+cpbAppend (wchar_t *buffer, size_t length) {
   if (cpbBuffer) {
     size_t newLength = beginOffset + length;
     wchar_t *newBuffer = mallocWchars(newLength);
@@ -105,12 +100,12 @@ append (wchar_t *buffer, size_t length) {
     cpbLength = length;
   }
 
-  playTune(&tune_copy_end);
+  playTune(&tune_clipboard_end);
   return 1;
 }
 
 void
-cpbClear (void) {
+cpbClearContent (void) {
   if (cpbBuffer) {
     free(cpbBuffer);
     cpbBuffer = NULL;
@@ -119,23 +114,17 @@ cpbClear (void) {
 }
 
 void
-cpbStart (int column, int row) {
-  cpbClear();
-  cpbExtend(column, row);
-}
-
-void
-cpbExtend (int column, int row) {
+cpbBeginOperation (int column, int row) {
   beginColumn = column;
   beginRow = row;
   beginOffset = cpbLength;
-  playTune(&tune_copy_begin);
+  playTune(&tune_clipboard_begin);
 }
 
 int
 cpbRectangularCopy (int column, int row) {
   size_t length;
-  wchar_t *buffer = copy(&length, beginColumn, beginRow, column, row);
+  wchar_t *buffer = getScreenText(&length, beginColumn, beginRow, column, row);
 
   if (buffer) {
     {
@@ -170,7 +159,7 @@ cpbRectangularCopy (int column, int row) {
       length = to - buffer;
     }
 
-    if (append(buffer, length)) return 1;
+    if (cpbAppend(buffer, length)) return 1;
     free(buffer);
   }
   return 0;
@@ -184,7 +173,7 @@ cpbLinearCopy (int column, int row) {
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    wchar_t *buffer = copy(&length, 0, beginRow, rightColumn, row);
+    wchar_t *buffer = getScreenText(&length, 0, beginRow, rightColumn, row);
 
     if (buffer) {
       if (column < rightColumn) {
@@ -248,7 +237,7 @@ cpbLinearCopy (int column, int row) {
         length = to - buffer;
       }
 
-      if (append(buffer, length)) return 1;
+      if (cpbAppend(buffer, length)) return 1;
       free(buffer);
     }
   }

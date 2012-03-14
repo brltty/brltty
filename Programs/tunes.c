@@ -80,22 +80,22 @@ const TuneDefinition tune_mark_set = {
   NULL, 0, elements_mark_set
 };
 
-static const TuneElement elements_copy_begin[] = {
+static const TuneElement elements_clipboard_begin[] = {
   TUNE_NOTE( 40,  74),
   TUNE_NOTE( 20,  86),
   TUNE_STOP()
 };
-const TuneDefinition tune_copy_begin = {
-  NULL, 0, elements_copy_begin
+const TuneDefinition tune_clipboard_begin = {
+  NULL, 0, elements_clipboard_begin
 };
 
-static const TuneElement elements_copy_end[] = {
+static const TuneElement elements_clipboard_end[] = {
   TUNE_NOTE( 50,  86),
   TUNE_NOTE( 30,  74),
   TUNE_STOP()
 };
-const TuneDefinition tune_copy_end = {
-  NULL, 0, elements_copy_end
+const TuneDefinition tune_clipboard_end = {
+  NULL, 0, elements_clipboard_end
 };
 
 static const TuneElement elements_toggle_on[] = {

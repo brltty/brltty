@@ -1979,25 +1979,26 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_CLIP_NEW: {
+          {
+            int clear;
             int column, row;
 
+          case BRL_BLK_CLIP_NEW:
+            clear = 1;
+            goto doClipBegin;
+
+          case BRL_BLK_CLIP_ADD:
+            clear = 0;
+            goto doClipBegin;
+
+          doClipBegin:
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              cpbStart(column, row);
+              if (clear) cpbClearContent();
+              cpbBeginOperation(column, row);
             } else {
               playTune(&tune_command_rejected);
             }
-            break;
-          }
 
-          case BRL_BLK_CLIP_ADD: {
-            int column, row;
-
-            if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              cpbExtend(column, row);
-            } else {
-              playTune(&tune_command_rejected);
-            }
             break;
           }
 
@@ -2024,14 +2025,14 @@ doCommand:
           }
 
           {
-            void (*start) (int column, int row);
+            int clear;
 
           case BRL_BLK_CLIP_COPY:
-            start = cpbStart;
+            clear = 1;
             goto doCopy;
 
           case BRL_BLK_CLIP_APPEND:
-            start = cpbExtend;
+            clear = 0;
             goto doCopy;
 
           doCopy:
@@ -2042,7 +2043,8 @@ doCommand:
                 int column2, row2;
 
                 if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
-                  start(column1, row1);
+                  if (clear) cpbClearContent();
+                  cpbBeginOperation(column1, row1);
                   if (cpbLinearCopy(column2, row2)) break;
                 }
               }
@@ -2532,7 +2534,7 @@ brlttyUpdate (void) {
         wmemset(textBuffer, WC_C(' '), windowLength);
         brl.cursor = -1;
 
-  #ifdef ENABLE_CONTRACTED_BRAILLE
+#ifdef ENABLE_CONTRACTED_BRAILLE
         contracted = 0;
         if (isContracting()) {
           while (1) {
@@ -2650,7 +2652,7 @@ brlttyUpdate (void) {
         }
 
         if (!contracted)
-  #endif /* ENABLE_CONTRACTED_BRAILLE */
+#endif /* ENABLE_CONTRACTED_BRAILLE */
         {
           int windowColumns = MIN(textCount, scr.cols-ses->winx);
           ScreenCharacter characters[textLength];
