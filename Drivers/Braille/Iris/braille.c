@@ -1183,7 +1183,10 @@ typedef struct {
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Z key pressed");
-  return enqueueKey(IR_SET_NavigationKeys, IR_KEY_Z);
+  /* return enqueueKey(IR_SET_NavigationKeys, IR_KEY_Z); */
+  protocol = (protocol == IR_PROTOCOL_EUROBRAILLE) ?
+    IR_PROTOCOL_NATIVE : IR_PROTOCOL_EUROBRAILLE;
+  return 1;
 }
 
 static int
