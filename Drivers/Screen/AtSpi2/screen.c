@@ -728,7 +728,6 @@ static int finished;
 
 static void *doAtSpi2ScreenOpen(void *arg) {
   DBusError error;
-  int res = 0;
 
   sem_t *SPI2_init_sem = (sem_t *)arg;
 
@@ -761,8 +760,6 @@ static void *doAtSpi2ScreenOpen(void *arg) {
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'");
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'");
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'");
-
-  res = 1;
 
   /* TODO: use dbus_watch_get_unix_fd() or dbus_watch_get_socket() instead */
   sem_post(SPI2_init_sem);
