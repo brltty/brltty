@@ -570,7 +570,7 @@ BRLTTY_ARG_DISABLE(
             ;;
       esac
 
-      BRLTTY_BINDINGS([Caml])
+      BRLTTY_BINDINGS([OCaml])
       BRLTTY_BINDINGS([Java])
       BRLTTY_BINDINGS([Lisp])
       BRLTTY_BINDINGS([Python])
