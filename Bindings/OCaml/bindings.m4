@@ -33,22 +33,22 @@
 #   OCAMLWEB      "ocamlweb" (not mandatory)
 #   OCAMLWIN32    "yes"/"no" depending on Sys.os_type = "Win32"
 
-AC_DEFUN([BRLTTY_CAML_BINDINGS], [dnl
+AC_DEFUN([BRLTTY_OCAML_BINDINGS], [dnl
 # Check for Ocaml compilers
 
 # we first look for ocamlc in the path; if not present, we fail
 AC_CHECK_PROG(OCAMLC,ocamlc,ocamlc,no)
 if test "$OCAMLC" = no ; then
     AC_MSG_WARN([Cannot find ocamlc.])
-    CAML_OK=false
+    OCAML_OK=false
 else
     # checking for ocamlmklib
     AC_CHECK_PROG(OCAMLMKLIB,ocamlmklib,ocamlmklib,no)
     if test "$OCAMLMKLIB" = no ; then
         AC_MSG_WARN([Cannot find ocamlmklib.])
-        CAML_OK=false
+        OCAML_OK=false
     else    
-        CAML_OK=true
+        OCAML_OK=true
         # we extract Ocaml version number and library path
         OCAMLVERSION=`$OCAMLC -version`
         AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
@@ -152,5 +152,5 @@ AC_SUBST(OCAMLFIND)
 AC_SUBST(OCAML_INSTALL_TARGET)
 AC_SUBST(OCAML_UNINSTALL_TARGET)
 
-AC_SUBST([CAML_OK])
+AC_SUBST([OCAML_OK])
 ])
