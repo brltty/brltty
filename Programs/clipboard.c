@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "log.h"
 #include "scr.h"
 #include "tunes.h"
 #include "clipboard.h"
@@ -34,13 +35,19 @@ static int beginColumn = 0;
 static int beginRow = 0;
 static int beginOffset = -1;
 
-static inline wchar_t *
-mallocWchars (size_t count) {
-  return malloc(count * sizeof(wchar_t));
+static wchar_t *
+cpbAllocateCharacters (size_t count) {
+  {
+    wchar_t *characters;
+    if ((characters = malloc(count * sizeof(*characters)))) return characters;
+  }
+
+  logMallocError();
+  return NULL;
 }
 
 static wchar_t *
-getScreenText (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
+cpbReadScreen (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
   wchar_t *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
@@ -71,7 +78,7 @@ getScreenText (size_t *length, int fromColumn, int fromRow, int toColumn, int to
       {
         size_t newLength = toAddress - toBuffer;
 
-        if ((newBuffer = mallocWchars(newLength))) {
+        if ((newBuffer = cpbAllocateCharacters(newLength))) {
           wmemcpy(newBuffer, toBuffer, (*length = newLength));
         }
       }
@@ -85,7 +92,7 @@ static int
 cpbAppend (wchar_t *buffer, size_t length) {
   if (cpbBuffer) {
     size_t newLength = beginOffset + length;
-    wchar_t *newBuffer = mallocWchars(newLength);
+    wchar_t *newBuffer = cpbAllocateCharacters(newLength);
     if (!newBuffer) return 0;
 
     wmemcpy(wmempcpy(newBuffer, cpbBuffer, beginOffset), buffer, length);
@@ -124,7 +131,7 @@ cpbBeginOperation (int column, int row) {
 int
 cpbRectangularCopy (int column, int row) {
   size_t length;
-  wchar_t *buffer = getScreenText(&length, beginColumn, beginRow, column, row);
+  wchar_t *buffer = cpbReadScreen(&length, beginColumn, beginRow, column, row);
 
   if (buffer) {
     {
@@ -173,7 +180,7 @@ cpbLinearCopy (int column, int row) {
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    wchar_t *buffer = getScreenText(&length, 0, beginRow, rightColumn, row);
+    wchar_t *buffer = cpbReadScreen(&length, 0, beginRow, rightColumn, row);
 
     if (buffer) {
       if (column < rightColumn) {
