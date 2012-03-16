@@ -1555,9 +1555,11 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
   }
 }
 
+static int (*readCommand)(BrailleDisplay *brl) = NULL;
+
 static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 {
-  return embeddedDriver ? readCommand_embedded(brl) : readCommand_nonembedded(brl);
+  return readCommand(brl);
 }
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
@@ -1629,11 +1631,13 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
     if (!openPort(&internalPort)) return 0;
     activateBraille();
     externalPort.speed = iris_protocols[protocol].speed;
+    readCommand = &readCommand_embedded;
   } else {
     internalPort.name = device;
     internalPort.speed = EXTERNALSPEED_NATIVE;
     if (!openPort(&internalPort)) return 0;
     deviceConnected = 1;
+    readCommand = &readCommand_nonembedded;
   }
   brl->textRows = 1;
   if ( ! (size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse) )) {
