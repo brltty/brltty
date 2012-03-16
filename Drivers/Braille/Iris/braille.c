@@ -448,7 +448,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   }
 
   res = gettimeofday(&port->lastWriteTime, NULL);
-  if (res == -11) {
+  if (res == -1) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gettimeofday failed");
     return -1;
   }    
