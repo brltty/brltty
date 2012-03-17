@@ -58,12 +58,6 @@ typedef struct {
   FileDescriptor fileDescriptor;
 } MonitorEntry;
 
-#else /* monitor definitions */
-
-#include <time.h>
-
-typedef void MonitorEntry;
-
 #endif /* monitor definitions */
 
 #include "log.h"
@@ -396,21 +390,6 @@ beginUnixOutputFunction (FunctionEntry *function) {
   function->selectDescriptor = &selectDescriptor_write;
 }
 
-#else /* Unix I/O monitoring capabilities */
-
-static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
-  const struct timespec ts = {
-    .tv_sec = timeout / 1000,
-    .tv_nsec = (timeout % 1000) * 1000000
-  };
-
-  if (nanosleep(&ts, NULL) == -1) {
-    if (errno != EINTR) logSystemError("nanosleep");
-  }
-
-  return 0;
-}
 #endif /* Unix I/O monitoring capabilities */
 
 #ifdef ASYNC_CAN_MONITOR_IO
@@ -962,7 +941,7 @@ asyncWait (int duration) {
       if (monitorArray) free(monitorArray);
     }
 #else /* ASYNC_CAN_MONITOR_IO */
-    awaitOperation(NULL, 0, timeout-elapsed);
+    approximateDelay(timeout-elapsed);
 #endif /* ASYNC_CAN_MONITOR_IO */
   } while ((elapsed = millisecondsSince(&start)) < duration);
 }
