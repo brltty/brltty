@@ -750,7 +750,7 @@ asyncWrite (
   return createOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
-  logSystemError("asyncRead");
+  logSystemError("asyncWrite");
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
