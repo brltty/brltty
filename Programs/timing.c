@@ -18,12 +18,10 @@
 
 #include "prologue.h"
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
+#include <time.h>
+#include <errno.h>
 
+#include "log.h"
 #include "timing.h"
 
 #ifdef __MSDOS__
@@ -38,10 +36,14 @@ approximateDelay (int milliseconds) {
 #elif defined(__MSDOS__)
     tsr_usleep(milliseconds*1000);
 #else /* delay */
-    struct timeval timeout;
-    timeout.tv_sec = milliseconds / 1000;
-    timeout.tv_usec = (milliseconds % 1000) * 1000;
-    select(0, NULL, NULL, NULL, &timeout);
+    const struct timespec timeout = {
+      .tv_sec = milliseconds / 1000,
+      .tv_nsec = (milliseconds % 1000) * 1000000
+    };
+
+    if (nanosleep(&timeout, NULL) == -1) {
+      if (errno != EINTR) logSystemError("nanosleep");
+    }
 #endif /* delay */
   }
 }
