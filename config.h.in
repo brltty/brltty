@@ -92,7 +92,16 @@ extern "C" {
 
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
+
+/* Define this if the function select exists. */
+#undef HAVE_SELECT
 #endif /* __MINGW32__ */
+
+/* Define this if the header file signal.h exists. */
+#undef HAVE_SIGNAL_H
+
+/* Define this if the function sigaction exists. */
+#undef HAVE_SIGACTION
 
 /* Define this if the header file sys/wait.h exists,
  * but not for DOS since it wouldn't make sense. 
@@ -173,9 +182,6 @@ extern "C" {
 
 /* Define this if the function pause exists. */
 #undef HAVE_PAUSE
-
-/* Define this if the function sigaction exists. */
-#undef HAVE_SIGACTION
 
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG

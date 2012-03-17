@@ -22,8 +22,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <signal.h>
 #include <time.h>
+
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif /* HAVE_SIGNAL_H */
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -1151,9 +1154,13 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGPIPE, SIG_IGN);
 #endif /* SIGPIPE */
 
-  /* Install the program termination handler. */
+#ifdef SIGTERM
   handleSignal(SIGTERM, terminationHandler);
+#endif /* SIGTERM */
+
+#ifdef SIGINT
   handleSignal(SIGINT, terminationHandler);
+#endif /* SIGINT */
 
   /* Setup everything required on startup */
   startup(argc, argv);

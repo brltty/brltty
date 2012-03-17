@@ -26,16 +26,20 @@
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
 
+#undef ASYNC_CAN_MONITOR_IO
 #if defined(__MINGW32__)
+#define ASYNC_CAN_MONITOR_IO
 
 typedef HANDLE MonitorEntry;
 
 #elif defined(HAVE_SYS_POLL_H)
+#define ASYNC_CAN_MONITOR_IO
 
 #include <sys/poll.h>
 typedef struct pollfd MonitorEntry;
 
-#else /* monitor definitions */
+#elif defined(HAVE_SELECT)
+#define ASYNC_CAN_MONITOR_IO
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -53,6 +57,12 @@ typedef struct {
   fd_set *selectSet;
   FileDescriptor fileDescriptor;
 } MonitorEntry;
+
+#else /* monitor definitions */
+
+#include <time.h>
+
+typedef void MonitorEntry;
 
 #endif /* monitor definitions */
 
@@ -106,7 +116,7 @@ struct FunctionEntryStruct {
   OVERLAPPED ol;
 #elif defined(HAVE_SYS_POLL_H)
   short pollEvents;
-#else /* monitor definitions */
+#elif defined(HAVE_SELECT)
   SelectDescriptor *selectDescriptor;
 #endif /* monitor definitions */
 };
@@ -254,7 +264,9 @@ finishWindowsTransferOperation (OperationEntry *operation) {
   DWORD success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
   setWindowsTransferResult(operation, success, count);
 }
+
 #else /* __MINGW32__ */
+
 #ifdef HAVE_SYS_POLL_H
 static void
 prepareMonitors (void) {
@@ -293,7 +305,9 @@ static void
 beginUnixOutputFunction (FunctionEntry *function) {
   function->pollEvents = POLLOUT;
 }
-#else /* HAVE_SYS_POLL_H */
+
+#elif defined(HAVE_SELECT)
+
 static void
 prepareSelectDescriptor (SelectDescriptor *descriptor) {
   FD_ZERO(&descriptor->set);
@@ -381,8 +395,38 @@ static void
 beginUnixOutputFunction (FunctionEntry *function) {
   function->selectDescriptor = &selectDescriptor_write;
 }
-#endif /* HAVE_SYS_POLL_H */
 
+#else /* Unix I/O monitoring capabilities */
+
+static void
+prepareMonitors (void) {
+}
+
+static int
+awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+  const struct timespec ts = {
+    .tv_sec = timeout / 1000,
+    .tv_nsec = (timeout % 1000) * 1000000
+  };
+
+  if (nanosleep(&ts, NULL) == -1) {
+    if (errno != EINTR) logSystemError("nanosleep");
+  }
+
+  return 0;
+}
+
+static void
+initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
+}
+
+static int
+testMonitor (const MonitorEntry *monitor) {
+  return 0;
+}
+#endif /* Unix I/O monitoring capabilities */
+
+#ifdef ASYNC_CAN_MONITOR_IO
 static void
 setUnixTransferResult (OperationEntry *operation, ssize_t count) {
   TransferExtension *extension = operation->extension;
@@ -417,8 +461,42 @@ finishUnixWrite (OperationEntry *operation) {
                      extension->size - extension->length);
   setUnixTransferResult(operation, result);
 }
+#endif /* ASYNC_CAN_MONITOR_IO */
 #endif /* __MINGW32__ */
 
+static void
+deallocateFunctionEntry (void *item, void *data) {
+  FunctionEntry *function = item;
+  if (function->operations) deallocateQueue(function->operations);
+  if (function->methods->endFunction) function->methods->endFunction(function);
+  free(function);
+}
+
+static Queue *
+getFunctionQueue (int create) {
+  static Queue *functions = NULL;
+
+  if (!functions) {
+    if (create) {
+      if ((functions = newQueue(deallocateFunctionEntry, NULL))) {
+      }
+    }
+  }
+
+  return functions;
+}
+
+static void
+startOperation (OperationEntry *operation) {
+  if (operation->function->methods->startOperation) operation->function->methods->startOperation(operation);
+}
+
+static void
+finishOperation (OperationEntry *operation) {
+  if (operation->function->methods->finishOperation) operation->function->methods->finishOperation(operation);
+}
+
+#ifdef ASYNC_CAN_MONITOR_IO
 static int
 invokeInputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
@@ -471,14 +549,6 @@ invokeOutputCallback (OperationEntry *operation) {
   return 0;
 }
 
-static void
-deallocateFunctionEntry (void *item, void *data) {
-  FunctionEntry *function = item;
-  if (function->operations) deallocateQueue(function->operations);
-  if (function->methods->endFunction) function->methods->endFunction(function);
-  free(function);
-}
-
 static int
 testFunctionEntry (const void *item, const void *data) {
   const FunctionEntry *function = item;
@@ -492,20 +562,6 @@ deallocateOperationEntry (void *item, void *data) {
   OperationEntry *operation = item;
   if (operation->extension) free(operation->extension);
   free(operation);
-}
-
-static Queue *
-getFunctionQueue (int create) {
-  static Queue *functions = NULL;
-
-  if (!functions) {
-    if (create) {
-      if ((functions = newQueue(deallocateFunctionEntry, NULL))) {
-      }
-    }
-  }
-
-  return functions;
 }
 
 static Element *
@@ -549,16 +605,6 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
   }
 
   return NULL;
-}
-
-static void
-startOperation (OperationEntry *operation) {
-  if (operation->function->methods->startOperation) operation->function->methods->startOperation(operation);
-}
-
-static void
-finishOperation (OperationEntry *operation) {
-  if (operation->function->methods->finishOperation) operation->function->methods->finishOperation(operation);
 }
 
 static int
@@ -651,6 +697,7 @@ createOutputOperation (
   direction.output.callback = callback;
   return createTransferOperation(fileDescriptor, methods, &direction, size, buffer, data);
 }
+#endif /* ASYNC_CAN_MONITOR_IO */
 
 static OperationEntry *
 getFirstOperation (const FunctionEntry *function) {
@@ -663,6 +710,7 @@ asyncRead (
   size_t size,
   AsyncInputCallback callback, void *data
 ) {
+#ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -677,6 +725,11 @@ asyncRead (
   };
 
   return createInputOperation(fileDescriptor, &methods, callback, size, data);
+#else /* ASYNC_CAN_MONITOR_IO */
+  errno = ENOSYS;
+  logSystemError("asyncRead");
+  return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
@@ -685,6 +738,7 @@ asyncWrite (
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
 ) {
+#ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -699,6 +753,11 @@ asyncWrite (
   };
 
   return createOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
+#else /* ASYNC_CAN_MONITOR_IO */
+  errno = ENOSYS;
+  logSystemError("asyncRead");
+  return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 typedef struct {

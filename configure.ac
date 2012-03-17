@@ -683,9 +683,14 @@ test -z "$brltty_package_gui_toolkit" && {
    esac
 }
 
+AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
+AC_CHECK_FUNCS([select])
+
+AC_CHECK_HEADERS([signal.h])
+AC_CHECK_FUNCS([sigaction])
+
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h regex.h syslog.h])
 AC_CHECK_HEADERS([sys/file.h])
-AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
 
@@ -698,7 +703,7 @@ AC_CHECK_HEADERS([linux/input.h], [
 ])])
 
 AC_CHECK_FUNCS([getopt_long hstrerror realpath vsyslog])
-AC_CHECK_FUNCS([pause sigaction])
+AC_CHECK_FUNCS([pause])
 AC_CHECK_FUNCS([fchdir fchmod])
 AC_CHECK_FUNCS([shmget shm_open])
 AC_CHECK_FUNCS([getpeereid getpeerucred getzoneid])
