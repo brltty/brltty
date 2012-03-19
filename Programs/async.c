@@ -893,7 +893,7 @@ asyncWait (int duration) {
         if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
           AddMonitorData add = {
             .monitor = monitorArray
-          };;
+          };
 
           functionElement = processQueue(functions, addMonitor, &add);
 

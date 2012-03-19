@@ -30,7 +30,7 @@ typedef enum {
   CTB_CAP_NONE,
   CTB_CAP_SIGN,
   CTB_CAP_DOT7
-} CTB_CapitalizationMode;;
+} CTB_CapitalizationMode;
 
 #ifdef __cplusplus
 }
