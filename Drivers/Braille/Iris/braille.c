@@ -1595,10 +1595,18 @@ static void brl_writeVisual(BrailleDisplay *brl)
 
 static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response)
 {
-  const unsigned char data[] = {request};
-  writeNativePacket(brl, &internalPort, data, sizeof(data));
-  if (!gioAwaitInput(internalPort.gioEndpoint, 1000)) return 0;
-  return readNativePacket(brl, &internalPort, response, MAXPACKETSIZE);
+  {
+    const unsigned char data[] = {request};
+    writeNativePacket(brl, &internalPort, data, sizeof(data));
+  }
+
+  while (gioAwaitInput(internalPort.gioEndpoint, 1000)) {
+    size_t size = readNativePacket(brl, &internalPort, response, MAXPACKETSIZE);
+    if (size) return size;
+    if (errno != EAGAIN) break;
+  }
+
+  return 0;
 }
 
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
