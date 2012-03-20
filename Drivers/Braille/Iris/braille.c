@@ -1593,7 +1593,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
 
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 
-static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response)
+static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response, size_t size)
 {
   {
     const unsigned char data[] = {request};
@@ -1601,8 +1601,8 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
   }
 
   while (gioAwaitInput(internalPort.gioEndpoint, 1000)) {
-    size_t size = readNativePacket(brl, &internalPort, response, MAXPACKETSIZE);
-    if (size) return size;
+    size_t res = readNativePacket(brl, &internalPort, response, size);
+    if (res) return res;
     if (errno != EAGAIN) break;
   }
 
@@ -1648,7 +1648,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
     readCommand = &readCommand_nonembedded;
   }
   brl->textRows = 1;
-  if ( ! (size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse) )) {
+  if ( ! (size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse, sizeof(deviceResponse)) )) {
     logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to version request.");
     closePort(&internalPort);
     return 0;
@@ -1700,7 +1700,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
   memcpy(firmwareVersion, deviceResponse+2, size-2);
   firmwareVersion[size-2] = 0;
   logMessage(LOG_INFO, DRIVER_LOG_PREFIX "The device's firmware version is %s", firmwareVersion);
-  if ( ! ( size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse) )) {
+  if ( ! ( size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse, sizeof(deviceResponse)) )) {
     logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to serial number request.");
     closePort(&internalPort);
     return 0;
