@@ -1526,13 +1526,10 @@ static int readCommand_embedded (BrailleDisplay *brl)
 
 static int readCommand_nonembedded (BrailleDisplay *brl)
 {
-  while (1) {
-    unsigned char packet[MAXPACKETSIZE];
-    size_t size;
+  unsigned char packet[MAXPACKETSIZE];
+  size_t size;
 
-    size = readNativePacket(brl, &internalPort, packet, sizeof(packet));
-    if (!size && (errno != EAGAIN)) return BRL_CMD_RESTARTBRL;
-
+  while ( (size = readNativePacket(brl, &internalPort, packet, sizeof(packet)) )) {
     /* The test for Menu key should come first since this key toggles */
     /* packet forward mode on/off */
     if (isMenuKey(packet, size)) {
@@ -1543,16 +1540,17 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
       }
     }
 
-    if (size > 0) {
-      if (!deviceConnected) refreshBrailleWindow = 1;
+    if (!deviceConnected) {
+      refreshBrailleWindow = 1;
       deviceConnected = 1;
     }
-
-    if (!deviceConnected) return BRL_CMD_OFFLINE;
-    if (!size) return EOF;
     
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
+
+  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;  
+  if (!deviceConnected) return BRL_CMD_OFFLINE;
+  return EOF;
 }
 
 static int (*readCommand)(BrailleDisplay *brl) = NULL;
