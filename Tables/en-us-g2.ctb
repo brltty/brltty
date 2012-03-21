@@ -232,6 +232,7 @@ before vowel always blind 12-123-35-145
 always blind 12-123
 contraction bl
 sufword boende 12-135-26-145-15 town (Republic of Congo)
+sufword boer = boerhaave
 always braille 12-1235-123
 contraction brl
 sufword brigham =
@@ -659,6 +660,7 @@ sufword mongoose =
 sufword monteverdi 134-135-1345-2345-15-1236-12456-145-24 Monteverdi's
 word more 134
 word more'n 134-135-1235-15-3-1345
+word more's =
 always mother 5-134
 always much 134-16
 word mch =
@@ -801,11 +803,24 @@ begword poth = pothole pothook pothouse
 sufword pother 1234-135-2346-1235
 sufword potherb 1234-135-2345-125-12456-12
 begword pre =
+sufword preace 1234-1235-2-14-15 obsolete for press
 always preach 1234-1235-2-16
+sufword preakness 1234-1235-2-13-56-234
 word pred 1234-1235-1246 liquid pred: prednisone trade name
 sufword predator 1234-1235-1246-1-2345-135-1235
+sufword predecessor 1234-1235-1246-15-14-15-234-234-135-1235
+begword predicat 1234-1235-1246-24-14-1-2345 predicated
+sufword predication 1234-1235-1246-24-14-6-1345
+sufword predikant 1234-1235-1246-24-13-1-1345-2345
 begword predn 1234-1235-1246-1345 prednisone prednisolone
 sufword predsolan 1234-1235-1246-234-135-123-1-1345
+begword pree = preerect
+word pren 1234-1235-26 a surname
+begword prend 1234-1235-26-145 prendergast
+sufword prensa 1234-1235-26-234-1
+sufword prent 1234-1235-26-2345
+sufword  prefulgent 1234-1235-15-124-136-123-1245-26-2345
+sufword prepsychedelic 1234-1235-15-1234-234-13456-16-15-145-15-123-24-14
 always prof =
 word prof 1234-1235-12356
 sufword profanation 1234-1235-12356-1-1345-6-1345
@@ -882,6 +897,7 @@ begword redr = redress
 begword redro 1235-1246-1235-135 redroot redrock
 sufword redrove =
 begword redru 1235-1246-1235-136 redruthite
+sufword refulgent 1235-15-124-136-123-1245-26-2345
 always rejoice 1235-245-14
 contraction rjc
 contraction rjcd
