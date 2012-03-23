@@ -48,8 +48,7 @@ extern "C" {
 #define STR_LEFT (strEnd - strNext)
 #define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
 #define STR_PRINTF(format, ...) { \
-  int strLength; \
-  snprintf(STR_NEXT, STR_LEFT, format "%n", ## __VA_ARGS__, &strLength); \
+  int strLength = snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__); \
   STR_ADJUST(strLength); \
 }
 
