@@ -717,7 +717,7 @@ handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
 static void scheduleKeyboardMonitor (int interval);
 
 static void
-tryKeyboardMonitor (void *data) {
+tryKeyboardMonitor (void *data UNUSED) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
   if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
@@ -736,15 +736,15 @@ haveStatusCells (void) {
 }
 
 static void
-windowConfigurationChanged (int infoLevel, int rows, int columns) {
+windowConfigurationChanged (unsigned int rows, unsigned int columns) {
   textStart = 0;
   textCount = columns;
   statusStart = 0;
   statusCount = 0;
 
   if (!(textMaximized || haveStatusCells())) {
-    int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
-    int statusWidth = prefs.statusCount;
+    unsigned int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
+    unsigned int statusWidth = prefs.statusCount;
 
     if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
     statusWidth = MAX(MIN(statusWidth, brl.textColumns-1-separatorWidth), 0);
@@ -779,7 +779,7 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
 
 void
 reconfigureWindow (void) {
-  windowConfigurationChanged(LOG_INFO, brl.textRows, brl.textColumns);
+  windowConfigurationChanged(brl.textRows, brl.textColumns);
 }
 
 static void
@@ -913,7 +913,7 @@ testBrailleFirmness (void) {
 }
 
 static int
-changedBrailleFirmness (const MenuItem *item, unsigned char setting) {
+changedBrailleFirmness (const MenuItem *item UNUSED, unsigned char setting) {
   return setBrailleFirmness(&brl, setting);
 }
 
@@ -923,7 +923,7 @@ testBrailleSensitivity (void) {
 }
 
 static int
-changedBrailleSensitivity (const MenuItem *item, unsigned char setting) {
+changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
   return setBrailleSensitivity(&brl, setting);
 }
 
@@ -933,7 +933,7 @@ testStatusPosition (void) {
 }
 
 static int
-changedStatusPosition (const MenuItem *item, unsigned char setting) {
+changedStatusPosition (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
   reconfigureWindow();
   return 1;
 }
@@ -944,7 +944,7 @@ testStatusCount (void) {
 }
 
 static int
-changedStatusCount (const MenuItem *item, unsigned char setting) {
+changedStatusCount (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
   reconfigureWindow();
   return 1;
 }
@@ -955,7 +955,7 @@ testStatusSeparator (void) {
 }
 
 static int
-changedStatusSeparator (const MenuItem *item, unsigned char setting) {
+changedStatusSeparator (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
   reconfigureWindow();
   return 1;
 }
@@ -990,7 +990,7 @@ changedStatusField (unsigned char index, unsigned char setting) {
 
 #define STATUS_FIELD_HANDLERS(n) \
   static int testStatusField##n (void) { return testStatusField(n-1); } \
-  static int changedStatusField##n (const MenuItem *item, unsigned char setting) { return changedStatusField(n-1, setting); }
+  static int changedStatusField##n (const MenuItem *item UNUSED, unsigned char setting) { return changedStatusField(n-1, setting); }
 STATUS_FIELD_HANDLERS(1)
 STATUS_FIELD_HANDLERS(2)
 STATUS_FIELD_HANDLERS(3)
@@ -1009,7 +1009,7 @@ testSpeechVolume (void) {
 }
 
 static int
-changedSpeechVolume (const MenuItem *item, unsigned char setting) {
+changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
   setSpeechVolume(&spk, setting, !prefs.autospeak);
   return 1;
 }
@@ -1020,7 +1020,7 @@ testSpeechRate (void) {
 }
 
 static int
-changedSpeechRate (const MenuItem *item, unsigned char setting) {
+changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
   setSpeechRate(&spk, setting, !prefs.autospeak);
   return 1;
 }
@@ -1031,7 +1031,7 @@ testSpeechPitch (void) {
 }
 
 static int
-changedSpeechPitch (const MenuItem *item, unsigned char setting) {
+changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
   setSpeechPitch(&spk, setting, !prefs.autospeak);
   return 1;
 }
@@ -1042,7 +1042,7 @@ testSpeechPunctuation (void) {
 }
 
 static int
-changedSpeechPunctuation (const MenuItem *item, unsigned char setting) {
+changedSpeechPunctuation (const MenuItem *item UNUSED, unsigned char setting) {
   setSpeechPunctuation(&spk, setting, !prefs.autospeak);
   return 1;
 }
@@ -1054,7 +1054,7 @@ testTunes (void) {
 }
 
 static int
-changedTuneDevice (const MenuItem *item, unsigned char setting) {
+changedTuneDevice (const MenuItem *item UNUSED, unsigned char setting) {
   return setTuneDevice(setting);
 }
 
@@ -1080,12 +1080,12 @@ testTunesFm (void) {
 #endif /* ENABLE_FM_SUPPORT */
 
 static int
-changedTextTable (const MenuItem *item, unsigned char setting) {
+changedTextTable (const MenuItem *item, unsigned char setting UNUSED) {
   return replaceTextTable(getMenuItemValue(item));
 }
 
 static int
-changedAttributesTable (const MenuItem *item, unsigned char setting) {
+changedAttributesTable (const MenuItem *item, unsigned char setting UNUSED) {
   return replaceAttributesTable(getMenuItemValue(item));
 }
 
@@ -1096,7 +1096,7 @@ testContractedBraille (void) {
 }
 
 static int
-changedContractionTable (const MenuItem *item, unsigned char setting) {
+changedContractionTable (const MenuItem *item, unsigned char setting UNUSED) {
   return loadContractionTable(getMenuItemValue(item));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -1112,7 +1112,7 @@ testSlidingWindow (void) {
 }
 
 static int
-changedWindowOverlap (const MenuItem *item, unsigned char setting) {
+changedWindowOverlap (const MenuItem *item UNUSED, unsigned char setting) {
   if (setting >= textCount) return 0;
   reconfigureWindow();
   return 1;
@@ -1124,7 +1124,7 @@ testAutorepeat (void) {
 }
 
 static int
-changedAutorepeat (const MenuItem *item, unsigned char setting) {
+changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
   if (setting) resetAutorepeat();
   return 1;
 }
@@ -1667,7 +1667,7 @@ getPreferencesMenu (void) {
 }
 
 static int
-handleWcharHelpLine (const wchar_t *line, void *data) {
+handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
   return addHelpLine(line);
 }
 
@@ -2048,7 +2048,7 @@ startBrailleDriver (void) {
 static int tryBrailleDriver (void);
 
 static void
-retryBrailleDriver (void *data) {
+retryBrailleDriver (void *data UNUSED) {
   if (!brailleDriver) tryBrailleDriver();
 }
 
@@ -2211,7 +2211,7 @@ startSpeechDriver (void) {
 static int trySpeechDriver (void);
 
 static void
-retrySpeechDriver (void *data) {
+retrySpeechDriver (void *data UNUSED) {
   if (!speechDriver) trySpeechDriver();
 }
 
@@ -2330,7 +2330,7 @@ startScreenDriver (void) {
 static int tryScreenDriver (void);
 
 static void
-retryScreenDriver (void *data) {
+retryScreenDriver (void *data UNUSED) {
   if (!screenDriver) tryScreenDriver();
 }
 
@@ -2366,7 +2366,7 @@ exitPidFile (void) {
 static int tryPidFile (ProcessIdentifier pid);
 
 static void
-retryPidFile (void *data) {
+retryPidFile (void *data UNUSED) {
   tryPidFile(0);
 }
 

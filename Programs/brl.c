@@ -47,21 +47,21 @@
 #include "brl_driver.h"
 
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl UNUSED, char **parameters UNUSED, const char *device UNUSED) {
   return 1;
 }
 
 static void
-brl_destruct (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl UNUSED) {
 }
 
 static int
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+brl_readCommand (BrailleDisplay *brl UNUSED, KeyTableCommandContext context UNUSED) {
   return EOF;
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters) {
+brl_writeWindow (BrailleDisplay *brl UNUSED, const wchar_t *characters UNUSED) {
   return 1;
 }
 
@@ -237,7 +237,7 @@ brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
   logMessage(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
              brl->textRows, (brl->textRows == 1)? "row": "rows",
              brl->textColumns, (brl->textColumns == 1)? "column": "columns");
-  if (brl->bufferResized) brl->bufferResized(infoLevel, brl->textRows, brl->textColumns);
+  if (brl->bufferResized) brl->bufferResized(brl->textRows, brl->textColumns);
 }
 
 static int
