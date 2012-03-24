@@ -19,15 +19,44 @@
 #define BRLTTY_INCLUDED_SK_BRLDEFS
 
 typedef enum {
-  SK_KEY_K1 = 1,
-  SK_KEY_K7 = 2,
-  SK_KEY_K8 = 3,
-  SK_KEY_K6 = 4,
-  SK_KEY_K5 = 5,
-  SK_KEY_K2 = 10,
-  SK_KEY_K3 = 12,
-  SK_KEY_K4 = 13
+  SK_NAV_K1 =  0,
+  SK_NAV_K7 =  1,
+  SK_NAV_K8 =  2,
+  SK_NAV_K6 =  3,
+  SK_NAV_K5 =  4,
+  SK_NAV_K2 =  9,
+  SK_NAV_K3 = 11,
+  SK_NAV_K4 = 12
 } SK_NavigationKey;
+
+typedef enum {
+  SK_NTK_Dot1               =  0,
+  SK_NTK_Dot2               =  1,
+  SK_NTK_Dot3               =  2,
+  SK_NTK_Dot4               =  3,
+  SK_NTK_Dot5               =  4,
+  SK_NTK_Dot6               =  5,
+  SK_NTK_Dot7               =  6,
+  SK_NTK_Dot8               =  7,
+
+  SK_NTK_Backspace          =  8,
+  SK_NTK_Space              =  9,
+
+  SK_NTK_LeftButton         = 10,
+  SK_NTK_RightButton        = 11,
+
+  SK_NTK_LeftJoystickPress  = 12,
+  SK_NTK_LeftJoystickLeft   = 13,
+  SK_NTK_LeftJoystickRight  = 14,
+  SK_NTK_LeftJoystickUp     = 15,
+  SK_NTK_LeftJoystickDown   = 16,
+
+  SK_NTK_RightJoystickPress = 17,
+  SK_NTK_RightJoystickLeft  = 18,
+  SK_NTK_RightJoystickRight = 19,
+  SK_NTK_RightJoystickUp    = 20,
+  SK_NTK_RightJoystickDown  = 21
+} SK_NoteTakerKey;
 
 typedef enum {
   SK_SET_NavigationKeys = 0,

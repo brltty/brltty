@@ -22,92 +22,127 @@
 #include <errno.h>
 
 #include "log.h"
+#include "io_generic.h"
 
 #include "brl_driver.h"
 #include "brldefs-sk.h"
 
-BEGIN_KEY_NAME_TABLE(all)
-  KEY_NAME_ENTRY(SK_KEY_K1, "K1"),
-  KEY_NAME_ENTRY(SK_KEY_K2, "K2"),
-  KEY_NAME_ENTRY(SK_KEY_K3, "K3"),
-  KEY_NAME_ENTRY(SK_KEY_K4, "K4"),
-  KEY_NAME_ENTRY(SK_KEY_K5, "K5"),
-  KEY_NAME_ENTRY(SK_KEY_K6, "K6"),
-  KEY_NAME_ENTRY(SK_KEY_K7, "K7"),
-  KEY_NAME_ENTRY(SK_KEY_K8, "K8"),
+BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(SK_NAV_K1, "K1"),
+  KEY_NAME_ENTRY(SK_NAV_K2, "K2"),
+  KEY_NAME_ENTRY(SK_NAV_K3, "K3"),
+  KEY_NAME_ENTRY(SK_NAV_K4, "K4"),
+  KEY_NAME_ENTRY(SK_NAV_K5, "K5"),
+  KEY_NAME_ENTRY(SK_NAV_K6, "K6"),
+  KEY_NAME_ENTRY(SK_NAV_K7, "K7"),
+  KEY_NAME_ENTRY(SK_NAV_K8, "K8"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(notetaker)
+  KEY_NAME_ENTRY(SK_NTK_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(SK_NTK_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(SK_NTK_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(SK_NTK_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(SK_NTK_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(SK_NTK_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(SK_NTK_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(SK_NTK_Dot8, "Dot8"),
+
+  KEY_NAME_ENTRY(SK_NTK_Backspace, "Backspace"),
+  KEY_NAME_ENTRY(SK_NTK_Space, "Space"),
+
+  KEY_NAME_ENTRY(SK_NTK_LeftButton, "LeftButton"),
+  KEY_NAME_ENTRY(SK_NTK_RightButton, "RightButton"),
+
+  KEY_NAME_ENTRY(SK_NTK_LeftJoystickPress, "LeftJoystickPress"),
+  KEY_NAME_ENTRY(SK_NTK_LeftJoystickLeft, "LeftJoystickLeft"),
+  KEY_NAME_ENTRY(SK_NTK_LeftJoystickRight, "LeftJoystickRight"),
+  KEY_NAME_ENTRY(SK_NTK_LeftJoystickUp, "LeftJoystickUp"),
+  KEY_NAME_ENTRY(SK_NTK_LeftJoystickDown, "LeftJoystickDown"),
+
+  KEY_NAME_ENTRY(SK_NTK_RightJoystickPress, "RightJoystickPress"),
+  KEY_NAME_ENTRY(SK_NTK_RightJoystickLeft, "RightJoystickLeft"),
+  KEY_NAME_ENTRY(SK_NTK_RightJoystickRight, "RightJoystickRight"),
+  KEY_NAME_ENTRY(SK_NTK_RightJoystickUp, "RightJoystickUp"),
+  KEY_NAME_ENTRY(SK_NTK_RightJoystickDown, "RightJoystickDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(SK_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
+  KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(ntk)
+  KEY_NAME_TABLE(notetaker),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(ntk)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(ntk),
 END_KEY_TABLE_LIST
 
 typedef enum {
   IPT_identity,
   IPT_keys,
-  IPT_routing
+  IPT_routing,
+  IPT_combined
 } InputPacketType;
 
 typedef struct {
-  unsigned char bytes[24];
+  unsigned char bytes[4 + 0XFF];
   unsigned char type;
 
   union {
-    uint16_t keys;
+    uint32_t keys;
     const unsigned char *routing;
 
     struct {
+      uint32_t keys;
+      const unsigned char *routing;
+    } combined;
+
+    struct {
       unsigned int version;
-      unsigned char model;
-      unsigned char size;
+      unsigned char cellCount;
+      unsigned char keyCount;
+      unsigned char routingCount;
     } identity;
   } fields;
 } InputPacket;
 
 typedef struct {
   const char *name;
+  const KeyTableDefinition *keyTableDefinition;
   int (*readPacket) (BrailleDisplay *brl, InputPacket *packet);
   int (*probeDisplay) (BrailleDisplay *brl, InputPacket *response);
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
-static const ProtocolOperations *protocol;
 
 typedef struct {
   const ProtocolOperations *const *protocols;
-  int (*openPort) (const char *device);
-  void (*closePort) ();
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
+
+static GioEndpoint *gioEndpoint = NULL;
 static const InputOutputOperations *io;
+static const ProtocolOperations *protocol;
 
-#define SERIAL_BAUD 9600
-static const unsigned int charactersPerSecond = SERIAL_BAUD / 10;
-
-static unsigned char textCells[40];
-
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = io->readBytes(byte, 1, wait);
-  if (count > 0) return 1;
-
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
+static unsigned char keyCount;
+static unsigned char routingCount;
+static unsigned char textCells[80];
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
   logOutputPacket(buffer, length);
-  if (io->writeBytes(buffer, length) == -1) return 0;
-  brl->writeDelay += (length * 1000 / charactersPerSecond) + 1;
+  if (gioWriteData(gioEndpoint, buffer, length) == -1) return 0;
+  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, length);
   return 1;
 }
 
@@ -121,7 +156,7 @@ probeDisplay (
   do {
     if (!writeBytes(brl, requestAddress, requestSize)) break;
 
-    while (io->awaitInput(200)) {
+    while (gioAwaitInput(gioEndpoint, 200)) {
       if (!protocol->readPacket(NULL, response)) break;
       if (response->type == IPT_identity) return 1;
     }
@@ -183,7 +218,8 @@ readPacket_old (
 
     {
       int started = offset > 0;
-      if (!readByte(&byte, started)) {
+
+      if (!gioReadByte(gioEndpoint, &byte, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -271,15 +307,16 @@ readPacket_old (
 }
 
 static void
-interpretIdentity_330 (InputPacket *packet) {
+interpretIdentity_pbrl (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
                                     ((packet->bytes[7] - '0') << (4 * 1));
-  packet->fields.identity.model = 0;
-  packet->fields.identity.size = packet->bytes[2];
+  packet->fields.identity.cellCount = packet->bytes[2];
+  packet->fields.identity.keyCount = 8;
+  packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
 static int
-readPacket_330 (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_pbrl (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X00, 0X05, 0X28, 0X08,
     0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
@@ -287,17 +324,17 @@ readPacket_330 (BrailleDisplay *brl, InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_330);
+  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_pbrl);
 }
 
 static int
-probeDisplay_330 (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_pbrl (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0X0A};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_330 (BrailleDisplay *brl) {
+writeCells_pbrl (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04,
     0X00, 0X63, 0X00
@@ -321,11 +358,12 @@ writeCells_330 (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_330 = {
-  "V3.30",
-  readPacket_330,
-  probeDisplay_330,
-  writeCells_330
+static const ProtocolOperations protocolOperations_pbrl = {
+  .name = "PowerBraille",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
+  .readPacket = readPacket_pbrl,
+  .probeDisplay = probeDisplay_pbrl,
+  .writeCells = writeCells_pbrl
 };
 
 static void
@@ -333,8 +371,9 @@ interpretIdentity_331 (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
                                     ((packet->bytes[10] - '0') << (4 * 1)) |
                                     ((packet->bytes[11] - '0') << (4 * 0));
-  packet->fields.identity.model = packet->bytes[5] - '0';
-  packet->fields.identity.size = 40;
+  packet->fields.identity.cellCount = 40;
+  packet->fields.identity.keyCount = 8;
+  packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
 static int
@@ -379,10 +418,11 @@ writeCells_331 (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations protocolOperations_331 = {
-  "V3.31",
-  readPacket_331,
-  probeDisplay_331,
-  writeCells_331
+  .name = "V3.31",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
+  .readPacket = readPacket_331,
+  .probeDisplay = probeDisplay_331,
+  .writeCells = writeCells_331
 };
 
 static inline int
@@ -400,7 +440,8 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
 
     {
       int started = offset > 0;
-      if (!readByte(&byte, started)) {
+
+      if (!gioReadByte(gioEndpoint, &byte, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -459,8 +500,9 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
       switch (packet->type) {
         case IPT_identity:
           packet->fields.identity.version = 0;
-          packet->fields.identity.model = packet->bytes[9] - '0';
-          packet->fields.identity.size = packet->bytes[3];
+          packet->fields.identity.cellCount = packet->bytes[3];
+          packet->fields.identity.keyCount = 8;
+          packet->fields.identity.routingCount = packet->fields.identity.cellCount;
           break;
 
         case IPT_keys: {
@@ -505,206 +547,228 @@ writeCells_332 (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations protocolOperations_332 = {
-  "V3.32",
-  readPacket_332,
-  probeDisplay_332,
-  writeCells_332
+  .name = "V3.32",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
+  .readPacket = readPacket_332,
+  .probeDisplay = probeDisplay_332,
+  .writeCells = writeCells_332
+};
+
+static int
+readPacket_ntkr (BrailleDisplay *brl, InputPacket *packet) {
+  int offset = 0;
+  unsigned int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+
+      if (!gioReadByte(gioEndpoint, &byte, started)) {
+        if (started) logPartialPacket(packet->bytes, offset);
+        return 0;
+      }
+    }
+
+  gotByte:
+    {
+      int unexpected = 0;
+
+      switch (offset) {
+        case 0:
+          length = 4;
+        case 1:
+          if (byte != 0XFF) unexpected = 1;
+          break;
+
+        case 3:
+          length += byte;
+          break;
+
+        default:
+          break;
+      }
+
+      if (unexpected) {
+        if (offset) {
+          logShortPacket(packet->bytes, offset);
+          offset = 0;
+          length = 0;
+          goto gotByte;
+        }
+
+        logIgnoredByte(byte);
+        continue;
+      }
+    }
+
+    packet->bytes[offset++] = byte;
+    if (offset == length) {
+      logInputPacket(packet->bytes, offset);
+
+      switch (packet->bytes[2]) {
+        case 0XA2:
+          packet->type = IPT_identity;
+          packet->fields.identity.version = 0;
+          packet->fields.identity.cellCount = packet->bytes[5];
+          packet->fields.identity.keyCount = packet->bytes[4];
+          packet->fields.identity.routingCount = packet->bytes[6];
+          break;
+
+        case 0XA4:
+          packet->type = IPT_routing;
+          packet->fields.routing = &packet->bytes[4];
+          break;
+
+        {
+          uint32_t *keys;
+          const unsigned char *byte;
+
+        case 0XA6:
+          packet->type = IPT_keys;
+          keys = &packet->fields.keys;
+          byte = packet->bytes + offset;
+          goto doKeys;
+
+        case 0XA8:
+          packet->type = IPT_combined;
+          keys = &packet->fields.combined.keys;
+          byte = packet->fields.combined.routing = packet->bytes +  4 + ((keyCount + 7) / 8);
+          goto doKeys;
+
+        doKeys:
+          *keys = 0;
+
+          while (--byte != &packet->bytes[3]) {
+            *keys <<= 8;
+            *keys |= *byte;
+          }
+
+          break;
+        }
+
+        default:
+          logUnknownPacket(packet->bytes[2]);
+          offset = 0;
+          length = 0;
+          continue;
+      }
+
+      return offset;
+    }
+  }
+}
+
+static int
+probeDisplay_ntkr (BrailleDisplay *brl, InputPacket *response) {
+  static const unsigned char request[] = {0XFF, 0XFF, 0XA1};
+  return probeDisplay(brl, response, request, sizeof(request));
+}
+
+static int
+writeCells_ntkr (BrailleDisplay *brl) {
+  static const unsigned char header[] = {0XFF, 0XFF, 0XA3};
+  unsigned char packet[sizeof(header) + 1 + brl->textColumns];
+  unsigned char *byte = packet;
+
+  byte = mempcpy(byte, header, sizeof(header));
+  *byte++ = brl->textColumns;
+  byte = translateOutputCells(byte, textCells, brl->textColumns);
+
+  return writeBytes(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations protocolOperations_ntkr = {
+  .name = "NoteTaker",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
+  .readPacket = readPacket_ntkr,
+  .probeDisplay = probeDisplay_ntkr,
+  .writeCells = writeCells_ntkr
 };
 
 static const ProtocolOperations *const allProtocols[] = {
+  &protocolOperations_ntkr,
   &protocolOperations_332,
   &protocolOperations_331,
-  &protocolOperations_330,
+  &protocolOperations_pbrl,
   NULL
 };
 
 static const ProtocolOperations *const nativeProtocols[] = {
+  &protocolOperations_ntkr,
   &protocolOperations_332,
   &protocolOperations_331,
   NULL
 };
 
-/* Serial IO */
-#include "io_serial.h"
-
-static SerialDevice *serialDevice = NULL;
-
-static int
-openSerialPort (const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, SERIAL_BAUD)) return 1;
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length) {
-  return serialWriteData(serialDevice, buffer, length);
-}
-
 static const InputOutputOperations serialOperations = {
-  nativeProtocols,
-  openSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes
+  .protocols = nativeProtocols
 };
 
-/* USB IO */
-#include "io_usb.h"
+static const InputOutputOperations usbOperations = {
+  .protocols = allProtocols
+};
 
-static UsbChannel *usbChannel = NULL;
+static const InputOutputOperations bluetoothOperations = {
+  .protocols = nativeProtocols
+};
 
 static int
-openUsbPort (const char *device) {
-  static const SerialParameters serial = {
+connectResource (const char *identifier) {
+  static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
-    .baud = SERIAL_BAUD
+    .baud = 9600
   };
 
-  static const UsbChannelDefinition definitions[] = {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* Seika */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
-      .serial=&serial
+      .serial=&serialParameters
+    }
+    ,
+    { /* Seika notetaker */
+      .vendor=0X10C4, .product=0XEA80,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
     }
     ,
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &serialOperations;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &usbOperations;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &bluetoothOperations;
+
+  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    io = gioGetApplicationData(gioEndpoint);
     return 1;
   }
+
   return 0;
 }
 
 static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
+disconnectResource (void) {
+  if (gioEndpoint) {
+    gioDisconnectResource(gioEndpoint);
+    gioEndpoint = NULL;
   }
 }
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device,
-                       usbChannel->definition.inputEndpoint,
-                       milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  int count = usbReapInput(usbChannel->device,
-                           usbChannel->definition.inputEndpoint,
-                           buffer, length,
-                           (wait? timeout: 0), timeout);
-  if (count != -1) return count;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usbChannel->device,
-                          usbChannel->definition.outputEndpoint,
-                          buffer, length, 1000);
-}
-
-static const InputOutputOperations usbOperations = {
-  allProtocols,
-  openUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes
-};
-
-/* Bluetooth IO */
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (const char *device) {
-  if (!(bluetoothConnection = bthOpenConnection(device, 1, 0))) return 0;
-  return 1;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  return bthReadData(bluetoothConnection, buffer, length,
-                     (wait? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = bthWriteData(bluetoothConnection, buffer, length);
-  if (count != length) {
-    if (count == -1) {
-      logSystemError("Bluetooth write");
-    } else {
-      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-  return count;
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  nativeProtocols,
-  openBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
-};
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
-  }
-
-  if (io->openPort(device)) {
+  if (connectResource(device)) {
     const ProtocolOperations *const *protocolAddress = io->protocols;
 
     while ((protocol = *protocolAddress++)) {
@@ -713,16 +777,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       logMessage(LOG_DEBUG, "trying protocol %s", protocol->name);
       if (protocol->probeDisplay(brl, &response)) {
         logMessage(LOG_DEBUG, "Seika Protocol: %s", protocol->name);
-        logMessage(LOG_DEBUG, "Seika Model: %u", response.fields.identity.model);
-        logMessage(LOG_DEBUG, "Seika Size: %u", response.fields.identity.size);
+        logMessage(LOG_DEBUG, "Seika Size: %u", response.fields.identity.cellCount);
 
-        brl->textColumns = response.fields.identity.size;
-        brl->textRows = 1;
+        brl->textColumns = response.fields.identity.cellCount;
+        keyCount = response.fields.identity.keyCount;
+        routingCount = response.fields.identity.routingCount;
 
         makeOutputTable(dotsTable_ISO11548_1);
   
         {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+          const KeyTableDefinition *ktd = protocol->keyTableDefinition;
           brl->keyBindings = ktd->bindings;
           brl->keyNameTables = ktd->names;
         }
@@ -732,7 +796,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    io->closePort();
+    disconnectResource();
   }
 
   return 0;
@@ -740,7 +804,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  io->closePort();
+  disconnectResource();
 }
 
 static int
@@ -752,69 +816,75 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static void
+processKeys (uint32_t keys, const unsigned char *routing) {
+  KeyValue pressedKeys[keyCount + routingCount];
+  unsigned int pressedCount = 0;
+
+  if (keys) {
+    uint32_t bit = UINT32_C(0X1);
+    unsigned char key = 0;
+
+    while (key < keyCount) {
+      if (keys & bit) {
+        KeyValue *kv = &pressedKeys[pressedCount++];
+        enqueueKeyEvent((kv->set = SK_SET_NavigationKeys), (kv->key = key), 1);
+        if (!(keys &= ~bit)) break;
+      }
+
+      bit <<= 1;
+      key += 1;
+    }
+  }
+
+  if (routing) {
+    const unsigned char *byte = routing;
+    unsigned char key = 0;
+
+    while (key < routingCount) {
+      if (*byte) {
+        unsigned char bit = 0X1;
+
+        do {
+          if (*byte & bit) {
+            KeyValue *kv = &pressedKeys[pressedCount++];
+            enqueueKeyEvent((kv->set = SK_SET_RoutingKeys), (kv->key = key), 1);
+          }
+
+          key += 1;
+        } while ((bit <<= 1));
+      } else {
+        key += 8;
+      }
+
+      byte += 1;
+    }
+  }
+
+  while (pressedCount) {
+    KeyValue *kv = &pressedKeys[--pressedCount];
+    enqueueKeyEvent(kv->set, kv->key, 0);
+  }
+}
+
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   InputPacket packet;
   size_t length;
 
-nextPacket:
   while ((length = protocol->readPacket(brl, &packet))) {
     switch (packet.type) {
-      case IPT_keys: {
-        uint16_t bit = 0X1;
-        unsigned char key = 0;
+      case IPT_keys:
+        processKeys(packet.fields.keys, NULL);
+        continue;
 
-        unsigned char keys[0X10];
-        unsigned int keyCount = 0;
+      case IPT_routing:
+        processKeys(0, packet.fields.routing);
+        continue;
 
-        while (++key <= 0X10) {
-          if (packet.fields.keys & bit) {
-            enqueueKeyEvent(SK_SET_NavigationKeys, key, 1);
-            keys[keyCount++] = key;
-          }
-
-          bit <<= 1;
-        }
-
-        if (keyCount) {
-          do {
-            enqueueKeyEvent(SK_SET_NavigationKeys, keys[--keyCount], 0);
-          } while (keyCount);
-
-          continue;
-        }
-
-        break;
-      }
-
-      case IPT_routing: {
-        const unsigned char *byte = packet.fields.routing;
-        unsigned char key = 0;
-
-        while (key < brl->textColumns) {
-          if (*byte) {
-            unsigned char bit = 0X1;
-
-            do {
-              if (*byte & bit) {
-                enqueueKeyEvent(SK_SET_RoutingKeys, key, 1);
-                enqueueKeyEvent(SK_SET_RoutingKeys, key, 0);
-                goto nextPacket;
-              }
-
-              key += 1;
-            } while ((bit <<= 1));
-
-            break;
-          } else {
-            key += 8;
-          }
-
-          byte += 1;
-        }
-
-        break;
-      }
+      case IPT_combined:
+        processKeys(packet.fields.combined.keys, packet.fields.combined.routing);
+        continue;
 
       default:
         break;
