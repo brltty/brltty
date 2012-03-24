@@ -55,10 +55,10 @@ bind LeftJoystickRight+RightJoystickRight FWINRTSKIP
 bind LeftJoystickUp+RightJoystickLeft PRSEARCH
 bind LeftJoystickUp+RightJoystickRight NXSEARCH
 
-bind LeftJoystickPress+RightJoystickUp INFO
-bind LeftJoystickPress+RightJoystickDown PREFMENU
-bind LeftJoystickPress+RightJoystickLeft BACK
-bind LeftJoystickPress+RightJoystickRight CSRJMP_VERT
+bind LeftJoystickPress+RightJoystickUp BACK
+bind LeftJoystickPress+RightJoystickDown CSRJMP_VERT
+bind LeftJoystickPress+RightJoystickLeft INFO
+bind LeftJoystickPress+RightJoystickRight PREFMENU
 
 bind RoutingKey ROUTE
 bind LeftButton+RoutingKey SETLEFT
@@ -125,9 +125,10 @@ map Dot5 DOT5
 map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
+map Backspace CONTROL
+map Space SPACE
 
 bind Backspace KEY_BACKSPACE
-map Space SPACE
 bind Backspace+Space KEY_ENTER
 
 bind Space+Dot7 KEY_ESCAPE
