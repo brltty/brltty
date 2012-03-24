@@ -101,6 +101,7 @@ ENV{PRODUCT}=="4242/1/*", ENV{BRLTTY_DRIVER}="pg", GOTO="brltty_usb_run"
 
 # Seika
 ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_DRIVER}="sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_DRIVER}="sk", GOTO="brltty_usb_run"
 
 # Voyager
 ENV{PRODUCT}=="798/1/*", ENV{BRLTTY_DRIVER}="vo", GOTO="brltty_usb_run"
