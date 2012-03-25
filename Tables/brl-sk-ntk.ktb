@@ -54,11 +54,13 @@ bind LeftJoystickRight+RightJoystickLeft FWINLTSKIP
 bind LeftJoystickRight+RightJoystickRight FWINRTSKIP
 bind LeftJoystickUp+RightJoystickLeft PRSEARCH
 bind LeftJoystickUp+RightJoystickRight NXSEARCH
+bind LeftJoystickDown+RightJoystickLeft BACK
+bind LeftJoystickDown+RightJoystickRight CSRJMP_VERT
 
-bind LeftJoystickPress+RightJoystickUp BACK
-bind LeftJoystickPress+RightJoystickDown CSRJMP_VERT
-bind LeftJoystickPress+RightJoystickLeft INFO
-bind LeftJoystickPress+RightJoystickRight PREFMENU
+bind LeftJoystickPress+RightJoystickUp INFO
+bind LeftJoystickPress+RightJoystickDown PREFMENU
+bind LeftJoystickPress+RightJoystickLeft PREFLOAD
+bind LeftJoystickPress+RightJoystickRight PREFSAVE
 
 bind RoutingKey ROUTE
 bind LeftButton+RoutingKey SETLEFT
