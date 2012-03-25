@@ -136,6 +136,8 @@ static const ProtocolOperations *protocol;
 
 static unsigned char keyCount;
 static unsigned char routingCount;
+
+static int forceRewrite;
 static unsigned char textCells[80];
 
 static int
@@ -791,7 +793,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->keyNameTables = ktd->names;
         }
 
-        memset(textCells, 0XFF, brl->textColumns);
+        forceRewrite = 1;;
         return 1;
       }
     }
@@ -809,7 +811,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(textCells, brl->buffer, brl->textColumns, NULL, NULL, NULL)) {
+  if (cellsHaveChanged(textCells, brl->buffer, brl->textColumns, NULL, NULL, &forceRewrite)) {
     if (!protocol->writeCells(brl)) return 0;
   }
 
