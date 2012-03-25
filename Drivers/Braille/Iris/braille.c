@@ -425,7 +425,10 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   ssize_t res;
 
   if (port->waitingForAck) {
-    if ( millisecondsSince(&port->lastWriteTime) < 1000) return 0;
+    if ( millisecondsSince(&port->lastWriteTime) < 1000) {
+      errno = EAGAIN;
+      return 0;
+    }
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
     port->waitingForAck = 0;
   }
@@ -444,14 +447,10 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   res = gioWriteData(port->gioEndpoint, buf, count);
   if (res == -1) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gioWriteData failed");
-    return -1;
+    return 0;
   }
 
-  res = gettimeofday(&port->lastWriteTime, NULL);
-  if (res == -1) {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gettimeofday failed");
-    return -1;
-  }    
+  gettimeofday(&port->lastWriteTime, NULL);
 
   if (port==&internalPort) port->waitingForAck = 1;
   return count;
@@ -1122,7 +1121,10 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
-  if (deviceSleeping || packetForwardMode) return 0;
+  if (deviceSleeping || packetForwardMode) {
+    errno = EAGAIN;
+    return 0;
+  }
   return writeNativePacket(brl, &internalPort, packet, size);
 }
 
@@ -1566,8 +1568,11 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
 
   if (cellsHaveChanged(previousBrailleWindow, brl->buffer, size, NULL, NULL, &refreshBrailleWindow)) {
     ssize_t res = writeWindow(brl, &internalPort, brl->buffer);
-    if (res == -1) return 0;
-    if (res == 0) refreshBrailleWindow = 1;
+
+    if (!res) {
+      if (errno != EAGAIN) return 0;
+      refreshBrailleWindow = 1;
+    }
   }
 
   return 1;
