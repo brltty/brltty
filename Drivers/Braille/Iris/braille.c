@@ -458,7 +458,8 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
 
 static int
 writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size) {
-  int packetSize = size + 2;
+  size_t count;
+  size_t packetSize = size + 2;
   unsigned char	packet[packetSize + 2];
   unsigned char *p = packet;
 
@@ -468,16 +469,13 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   p = mempcpy(p, data, size);
   *p++ = ETX;
 
-  {
-    size_t count = p - packet;
-
-    logOutputPacket(packet, count);
-    if (gioWriteData(port->gioEndpoint, packet, count) == -1) return 0;
-    brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
-  }
+  count = p - packet;
+  logOutputPacket(packet, count);
+  if (gioWriteData(port->gioEndpoint, packet, count) == -1) return 0;
+  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
 
   gettimeofday(&port->lastWriteTime, NULL);
-  return 1;
+  return count;
 }
 
 typedef struct {
