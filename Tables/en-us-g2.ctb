@@ -664,7 +664,8 @@ word more's =
 always mother 5-134
 always much 134-16
 word mch =
-begword muchach 134-136-16-1-16 muchacho muchacha
+sufword mucha 134-136-16-1 muchacho muchas
+sufword mucho 134-136-16-135
 word must 134-34
 word mst =
 begword musti 134-34-24 mustiness
