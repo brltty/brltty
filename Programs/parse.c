@@ -256,6 +256,7 @@ parseParameters (
     if (copiedParameters) {
       char *name = copiedParameters;
 
+      ok = 1;
       while (1) {
         char *end = strchr(name, ',');
         int done = !end;
@@ -305,6 +306,7 @@ parseParameters (
                     values[index] = copiedValue;
                   } else {
                     logMallocError();
+                    ok = 0;
                   }
 
                   break;
@@ -313,18 +315,13 @@ parseParameters (
                 index += 1;
               }
 
-              if (!names[index]) {
-                logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
-              }
+              if (!ok) break;
+              if (!names[index]) logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
             }
           }
         }
 
-        if (done) {
-          ok = 1;
-          break;
-        }
-
+        if (done) break;
         name = end + 1;
       }
 
