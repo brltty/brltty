@@ -565,7 +565,13 @@ readLine (FILE *file, char **buffer, size_t *size) {
 
   if (ferror(file)) return 0;
   if (feof(file)) return 0;
-  if (!*size) *buffer = mallocWrapper(*size = 0X80);
+
+  if (!*size) {
+    if (!(*buffer = malloc(*size = 0X80))) {
+      logMallocError();
+      return 0;
+    }
+  }
 
   if ((line = fgets(*buffer, *size, file))) {
     size_t length = strlen(line); /* Line length including new-line. */
@@ -573,8 +579,19 @@ readLine (FILE *file, char **buffer, size_t *size) {
     /* No trailing new-line means that the buffer isn't big enough. */
     while (line[length-1] != '\n') {
       /* If necessary, extend the buffer. */
-      if ((*size - (length + 1)) == 0)
-        *buffer = reallocWrapper(*buffer, (*size <<= 1));
+      if ((*size - (length + 1)) == 0) {
+        size_t newSize = *size << 1;
+        char *newBuffer = realloc(*buffer, newSize);
+
+        if (!newBuffer) {
+          logMallocError();
+          return 0;
+        }
+logMessage(LOG_NOTICE, "size: %u -> %u", *size, newSize);
+
+        *buffer = newBuffer;
+        *size = newSize;
+      }
 
       /* Read the rest of the line into the end of the buffer. */
       if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
