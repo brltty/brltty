@@ -53,25 +53,37 @@ wordMeansFalse (const char *word) {
   return strcasecmp(word, FLAG_FALSE_WORD) == 0;
 }
 
-static void
+static int
 extendSetting (char **setting, const char *value, int prepend) {
   if (value && *value) {
     if (!*setting) {
-      *setting = strdupWrapper(value);
-    } else if (prepend) {
-      char *area = mallocWrapper(strlen(value) + 1 + strlen(*setting) + 1);
-      sprintf(area, "%s,%s", value, *setting);
-      free(*setting);
-      *setting = area;
+      if (!(*setting = strdup(value))) {
+        logMallocError();
+        return 0;
+      }
     } else {
-      size_t length = strlen(*setting);
-      *setting = reallocWrapper(*setting, length+1+strlen(value)+1);
-      sprintf((*setting)+length, ",%s", value);
+      char *newSetting = malloc(strlen(*setting) + 1 + strlen(value) + 1);
+
+      if (!newSetting) {
+        logMallocError();
+        return 0;
+      }
+
+      if (prepend) {
+        sprintf(newSetting, "%s,%s", value, *setting);
+      } else {
+        sprintf(newSetting, "%s,%s", *setting, value);
+      }
+
+      free(*setting);
+      *setting = newSetting;
     }
   }
+
+  return 1;
 }
 
-static void
+static int
 ensureSetting (
   OptionProcessingInformation *info,
   const OptionEntry *option,
@@ -85,9 +97,12 @@ ensureSetting (
     if (option->argument) {
       if (option->setting.string) {
         if (option->flags & OPT_Extend) {
-          extendSetting(option->setting.string, value, 1);
+          if (!extendSetting(option->setting.string, value, 1)) return 0;
         } else {
-          *option->setting.string = strdupWrapper(value);
+          if (!(*option->setting.string = strdup(value))) {
+            logMallocError();
+            return 0;
+          }
         }
       }
     } else {
@@ -111,6 +126,8 @@ ensureSetting (
       }
     }
   }
+
+  return 1;
 }
 
 static void
@@ -266,24 +283,28 @@ processCommandLine (
         opt->has_arg = entry->argument? required_argument: no_argument;
         opt->flag = NULL;
         opt->val = entry->letter;
-        ++opt;
+        opt += 1;
 
         if (!entry->argument && entry->setting.flag) {
           static const char *prefix = "no-";
-          int length = strlen(prefix);
+          size_t length = strlen(prefix);
+          char *name;
 
           if (strncasecmp(prefix, entry->word, length) == 0) {
-            opt->name = strdupWrapper(entry->word + length);
-          } else {
-            char *name = mallocWrapper(length + strlen(entry->word) + 1);
+            name = strdup(entry->word + length);
+          } else if ((name = malloc(length + strlen(entry->word) + 1))) {
             sprintf(name, "%s%s", prefix, entry->word);
-            opt->name = name;
           }
 
-          opt->has_arg = no_argument;
-          opt->flag = &resetLetter;
-          opt->val = entry->letter;
-          ++opt;
+          if (name) {
+            opt->name = name;
+            opt->has_arg = no_argument;
+            opt->flag = &resetLetter;
+            opt->val = entry->letter;
+            opt += 1;
+          } else {
+            logMallocError();
+          }
         }
       }
     }
@@ -292,7 +313,7 @@ processCommandLine (
   }
 #endif /* HAVE_GETOPT_LONG */
 
-  for (index=0; index<0X100; ++index) optionEntries[index] = NULL;
+  for (index=0; index<0X100; index+=1) optionEntries[index] = NULL;
 
   {
     char *opt = shortOptions;
@@ -493,9 +514,10 @@ processCommandLine (
 #ifdef HAVE_GETOPT_LONG
   {
     struct option *opt = longOptions;
+
     while (opt->name) {
       if (opt->flag) free((char *)opt->name);
-      ++opt;
+      opt += 1;
     }
   }
 #endif /* HAVE_GETOPT_LONG */
@@ -637,14 +659,18 @@ processConfigurationLine (
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
               logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
               conf->info->errorCount++;
+
               free(*setting);
               *setting = NULL;
             }
 
             if (*setting) {
-              extendSetting(setting, operand, 0);
+              if (!extendSetting(setting, operand, 0)) return 0;
             } else {
-              *setting = strdupWrapper(operand);
+              if (!(*setting = strdup(operand))) {
+                logMallocError();
+                return 0;
+              }
             }
           }
 
@@ -658,45 +684,49 @@ processConfigurationLine (
   return 1;
 }
 
-static int
+static void
 processConfigurationFile (
   OptionProcessingInformation *info,
   const char *path,
   int optional
 ) {
   FILE *file = openDataFile(path, "r", optional);
-  if (file != NULL) { /* The configuration file has been successfully opened. */
-    int processed;
 
-    {
-      ConfigurationFileProcessingData conf;
-      int index;
+  if (file) {
+    ConfigurationFileProcessingData conf;
 
-      conf.info = info;
-      conf.settings = mallocWrapper(info->optionCount * sizeof(*conf.settings));
-      for (index=0; index<info->optionCount; ++index) conf.settings[index] = NULL;
+    conf.info = info;
+      ;
+    if ((conf.settings = malloc(info->optionCount * sizeof(*conf.settings)))) {
+      int processed;
+      unsigned int index;
 
+      for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
       processed = processLines(file, processConfigurationLine, &conf);
 
-      for (index=0; index<info->optionCount; ++index) {
+      for (index=0; index<info->optionCount; index+=1) {
         char *setting = conf.settings[index];
+
         if (setting) {
           ensureSetting(info, &info->optionTable[index], setting);
           free(setting);
         }
       }
+
+      if (!processed) {
+        logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
+        info->errorCount++;
+      }
+
       free(conf.settings);
+    } else {
+      logMallocError();
     }
 
     fclose(file);
-    if (processed) return 1;
-    logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
-    info->errorCount++;
-  } else {
-    if (optional && (errno == ENOENT)) return 1;
+  } else if (!optional || (errno != ENOENT)) {
     info->errorCount++;
   }
-  return 0;
 }
 
 int
