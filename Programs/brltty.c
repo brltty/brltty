@@ -2499,8 +2499,12 @@ brlttyUpdate (void) {
 
       {
         size_t size = newWidth * sizeof(*oldCharacters);
-        oldCharacters = reallocWrapper(oldCharacters, size);
-        memcpy(oldCharacters, newCharacters, size);
+
+        if ((oldCharacters = realloc(oldCharacters, size))) {
+          memcpy(oldCharacters, newCharacters, size);
+        } else {
+          logMallocError();
+        }
       }
 
       oldScreen = newScreen;
