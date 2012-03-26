@@ -39,12 +39,19 @@ splitString (const char *string, char delimiter, int *count) {
           size_t length = end? (size_t)(end-start): strlen(start);
 
           if (array) {
-            char *element = mallocWrapper(length+1);
+            char *element = malloc(length+1);
+
+            if (!(array[index] = element)) {
+              logMallocError();
+              deallocateStrings(array);
+              array = NULL;
+              goto done;
+            }
+
             memcpy(element, start, length);
             element[length] = 0;
-            array[index] = element;
           }
-          index++;
+          index += 1;
 
           if (!end) break;
           start = end + 1;
@@ -57,12 +64,15 @@ splitString (const char *string, char delimiter, int *count) {
         break;
       }
 
-      array = mallocWrapper((index + 1) * sizeof(*array));
+      if (!(array = malloc((index + 1) * sizeof(*array)))) {
+        logMallocError();
+        break;
+      }
     }
-  } else if (count) {
-    *count = 0;
   }
 
+done:
+  if (!array && count) *count = 0;
   return array;
 }
 
@@ -231,96 +241,140 @@ validateYesNo (unsigned int *value, const char *string) {
   return validateFlag(value, string, "yes", "no");
 }
 
-static void
+static int
 parseParameters (
   char **values,
   const char *const *names,
   const char *qualifier,
   const char *parameters
 ) {
+  int ok = 0;
+
   if (parameters && *parameters) {
-    char *copy = strdupWrapper(parameters);
-    char *name = copy;
+    char *copiedParameters = strdup(parameters);
 
-    while (1) {
-      char *end = strchr(name, ',');
-      int done = end == NULL;
-      if (!done) *end = 0;
+    if (copiedParameters) {
+      char *name = copiedParameters;
 
-      if (*name) {
-        char *value = strchr(name, '=');
-        if (!value) {
-          logMessage(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
-        } else if (value == name) {
-        noName:
-          logMessage(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
-        } else {
-          int nameLength = value++ - name;
-          int eligible = 1;
+      while (1) {
+        char *end = strchr(name, ',');
+        int done = !end;
+        if (!done) *end = 0;
 
-          if (qualifier) {
-            char *colon = memchr(name, ':', nameLength);
-            if (colon) {
-              size_t qualifierLength = (size_t)(colon - name);
-              int nameAdjustment = qualifierLength + 1;
-              eligible = 0;
-              if (!qualifierLength) {
-                logMessage(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
-              } else if (!(nameLength -= nameAdjustment)) {
-                goto noName;
-              } else if ((qualifierLength == strlen(qualifier)) &&
-                         (memcmp(name, qualifier, qualifierLength) == 0)) {
-                name += nameAdjustment;
-                eligible = 1;
+        if (*name) {
+          char *value = strchr(name, '=');
+
+          if (!value) {
+            logMessage(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
+          } else if (value == name) {
+          noName:
+            logMessage(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
+          } else {
+            size_t nameLength = value++ - name;
+            int eligible = 1;
+
+            if (qualifier) {
+              char *colon = memchr(name, ':', nameLength);
+
+              if (colon) {
+                size_t qualifierLength = (size_t)(colon - name);
+                size_t nameAdjustment = qualifierLength + 1;
+
+                eligible = 0;
+                if (!qualifierLength) {
+                  logMessage(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
+                } else if (!(nameLength -= nameAdjustment)) {
+                  goto noName;
+                } else if ((qualifierLength == strlen(qualifier)) &&
+                           (memcmp(name, qualifier, qualifierLength) == 0)) {
+                  name += nameAdjustment;
+                  eligible = 1;
+                }
               }
             }
-          }
 
-          if (eligible) {
-            unsigned int index = 0;
-            while (names[index]) {
-              if (strncasecmp(name, names[index], nameLength) == 0) {
-                free(values[index]);
-                values[index] = strdupWrapper(value);
-                break;
+            if (eligible) {
+              unsigned int index = 0;
+
+              while (names[index]) {
+                if (strncasecmp(name, names[index], nameLength) == 0) {
+                  char *copiedValue = strdup(value);
+
+                  if (copiedValue) {
+                    free(values[index]);
+                    values[index] = copiedValue;
+                  } else {
+                    logMallocError();
+                  }
+
+                  break;
+                }
+
+                index += 1;
               }
-              ++index;
-            }
 
-            if (!names[index]) {
-              logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
+              if (!names[index]) {
+                logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
+              }
             }
           }
         }
+
+        if (done) {
+          ok = 1;
+          break;
+        }
+
+        name = end + 1;
       }
 
-      if (done) break;
-      name = end + 1;
+      free(copiedParameters);
+    } else {
+      logMallocError();
     }
-
-    free(copy);
+  } else {
+    ok = 1;
   }
+
+  return ok;
 }
 
 char **
 getParameters (const char *const *names, const char *qualifier, const char *parameters) {
-  char **values;
-
   if (!names) {
     static const char *const noNames[] = {NULL};
     names = noNames;
   }
 
   {
+    char **values;
     unsigned int count = 0;
-    while (names[count]) ++count;
-    values = mallocWrapper((count + 1) * sizeof(*values));
-    values[count] = NULL;
-    while (count--) values[count] = strdupWrapper("");
+    while (names[count]) count += 1;
+
+    if ((values = malloc((count + 1) * sizeof(*values)))) {
+      unsigned int index = 0;
+
+      while (index < count) {
+        if (!(values[index] = strdup(""))) {
+          logMallocError();
+          break;
+        }
+
+        index += 1;
+      }
+
+      if (index == count) {
+        values[index] = NULL;
+        if (parseParameters(values, names, qualifier, parameters)) return values;
+      }
+
+      deallocateStrings(values);
+    } else {
+      logMallocError();
+    }
   }
 
-  parseParameters(values, names, qualifier, parameters);
-  return values;
+  return NULL;
 }
 
 void
