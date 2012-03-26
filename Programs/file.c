@@ -587,7 +587,6 @@ readLine (FILE *file, char **buffer, size_t *size) {
           logMallocError();
           return 0;
         }
-logMessage(LOG_NOTICE, "size: %u -> %u", *size, newSize);
 
         *buffer = newBuffer;
         *size = newSize;
