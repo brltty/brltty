@@ -116,7 +116,13 @@ prepareProgram (int argumentCount, char **argumentVector) {
       char *path = realpath(programPath, buffer);
 
       if (path) {
-        programPath = strdupWrapper(path);
+        char *realPath = strdup(path);
+
+        if (realPath) {
+          programPath = realPath;
+        } else {
+          logMallocError();
+        }
       } else {
         logSystemError("realpath");
       }
