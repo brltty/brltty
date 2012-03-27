@@ -33,7 +33,6 @@
 #include "log.h"
 #include "device.h"
 #include "parse.h"
-#include "misc.h"
 #include "system.h"
 #include "sys_linux.h"
 #include "charset.h"
@@ -309,15 +308,22 @@ setDeviceName (const char **name, const char *const *names, const char *descript
 
 static char *
 vtName (const char *name, unsigned char vt) {
+  char *string;
+
   if (vt) {
     size_t length = strlen(name);
     char buffer[length+4];
+
     if (name[length-1] == '0') length -= 1;
     strncpy(buffer, name, length);
     sprintf(buffer+length,  "%u", vt);
-    return strdupWrapper(buffer);
+    string = strdup(buffer);
+  } else {
+    string = strdup(name);
   }
-  return strdupWrapper(name);
+
+  if (!string) logMallocError();
+  return string;
 }
 
 static const char *consoleName = NULL;
