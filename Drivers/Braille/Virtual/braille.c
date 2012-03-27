@@ -65,7 +65,6 @@
 #include "device.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 #include "charset.h"
 #include "cmd.h"
 
@@ -162,11 +161,15 @@ static const OperationsEntry socketOperationsEntry = {
 
 static char *
 formatSocketAddress (const struct sockaddr *address) {
+  char *string;
+
   switch (address->sa_family) {
 #ifdef AF_LOCAL
     case AF_LOCAL: {
       const struct sockaddr_un *localAddress = (const struct sockaddr_un *)address;
-      return strdupWrapper(localAddress->sun_path);
+
+      string = strdup(localAddress->sun_path);
+      break;
     }
 #endif /* AF_LOCAL */
 
@@ -175,13 +178,19 @@ formatSocketAddress (const struct sockaddr *address) {
       const char *host = inet_ntoa(inetAddress->sin_addr);
       unsigned short port = ntohs(inetAddress->sin_port);
       char buffer[strlen(host) + 7];
+
       snprintf(buffer, sizeof(buffer), "%s:%u", host, port);
-      return strdupWrapper(buffer);
+      string = strdup(buffer);
+      break;
     }
 
     default:
-      return strdupWrapper("");
+      string = strdup("");
+      break;
   }
+
+  if (!string) logMallocError();
+  return string;
 }
 
 static int
@@ -203,8 +212,11 @@ acceptSocketConnection (
 
           {
             char *address = formatSocketAddress(localAddress);
-            logMessage(LOG_NOTICE, "listening on: %s", address);
-            free(address);
+
+            if (address) {
+              logMessage(LOG_NOTICE, "listening on: %s", address);
+              free(address);
+            }
           }
 
           while (1) {
@@ -233,8 +245,11 @@ acceptSocketConnection (
 
                 if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
                   char *address = formatSocketAddress(remoteAddress);
-                  logMessage(LOG_NOTICE, "client is: %s", address);
-                  free(address);
+
+                  if (address) {
+                    logMessage(LOG_NOTICE, "client is: %s", address);
+                    free(address);
+                  }
                 } else {
                   LogSocketError("accept");
                 }
@@ -270,16 +285,22 @@ requestConnection (
 
   {
     char *address = formatSocketAddress(remoteAddress);
-    logMessage(LOG_DEBUG, "connecting to: %s", address);
-    free(address);
+
+    if (address) {
+      logMessage(LOG_DEBUG, "connecting to: %s", address);
+      free(address);
+    }
   }
 
   if ((clientSocket = getSocket()) != -1) {
     if (connect(clientSocket, remoteAddress, remoteSize) != -1) {
       {
         char *address = formatSocketAddress(remoteAddress);
-        logMessage(LOG_NOTICE, "connected to: %s", address);
-        free(address);
+
+        if (address) {
+          logMessage(LOG_NOTICE, "connected to: %s", address);
+          free(address);
+        }
       }
 
       operations = &socketOperationsEntry;
@@ -466,53 +487,62 @@ requestNamedPipeConnection (const char *path) {
 static int
 setInetAddress (const char *string, struct sockaddr_in *address) {
   int ok = 1;
-  char *hostName = strdupWrapper(string);
-  char *portNumber = strchr(hostName, ':');
+  char *hostName = strdup(string);
 
-  if (portNumber) {
-    *portNumber++ = 0;
-  } else {
-    portNumber = "";
-  }
+  if (hostName) {
+    char *portNumber = strchr(hostName, ':');
 
-  memset(address, 0, sizeof(*address));
-  address->sin_family = AF_INET;
-
-  if (*hostName) {
-    const struct hostent *host = gethostbyname(hostName);
-    if (host && (host->h_addrtype == AF_INET) && (host->h_length == sizeof(address->sin_addr))) {
-      memcpy(&address->sin_addr, host->h_addr, sizeof(address->sin_addr));
+    if (portNumber) {
+      *portNumber++ = 0;
     } else {
-      ok = 0;
-      logMessage(LOG_WARNING, "Unknown host name: %s", hostName);
+      portNumber = "";
     }
-  } else {
-    address->sin_addr.s_addr = INADDR_ANY;
-  }
 
-  if (*portNumber) {
-    int port;
-    if (isInteger(&port, portNumber)) {
-      if ((port > 0) && (port <= 0XFFFF)) {
-        address->sin_port = htons(port);
+    memset(address, 0, sizeof(*address));
+    address->sin_family = AF_INET;
+
+    if (*hostName) {
+      const struct hostent *host = gethostbyname(hostName);
+      if (host && (host->h_addrtype == AF_INET) && (host->h_length == sizeof(address->sin_addr))) {
+        memcpy(&address->sin_addr, host->h_addr, sizeof(address->sin_addr));
       } else {
         ok = 0;
-        logMessage(LOG_WARNING, "Invalid port number: %s", portNumber);
+        logMessage(LOG_WARNING, "Unknown host name: %s", hostName);
       }
     } else {
-      const struct servent *service = getservbyname(portNumber, "tcp");
-      if (service) {
-        address->sin_port = service->s_port;
-      } else {
-        ok = 0;
-        logMessage(LOG_WARNING, "Unknown service: %s", portNumber);
-      }
+      address->sin_addr.s_addr = INADDR_ANY;
     }
+
+    if (*portNumber) {
+      int port;
+
+      if (isInteger(&port, portNumber)) {
+        if ((port > 0) && (port <= 0XFFFF)) {
+          address->sin_port = htons(port);
+        } else {
+          ok = 0;
+          logMessage(LOG_WARNING, "Invalid port number: %s", portNumber);
+        }
+      } else {
+        const struct servent *service = getservbyname(portNumber, "tcp");
+
+        if (service) {
+          address->sin_port = service->s_port;
+        } else {
+          ok = 0;
+          logMessage(LOG_WARNING, "Unknown service: %s", portNumber);
+        }
+      }
+    } else {
+      address->sin_port = htons(VR_DEFAULT_PORT);
+    }
+
+    free(hostName);
   } else {
-    address->sin_port = htons(VR_DEFAULT_PORT);
+    ok = 0;
+    logMallocError();
   }
 
-  free(hostName);
   return ok;
 }
 
@@ -545,9 +575,15 @@ requestInetConnection (const struct sockaddr_in *remoteAddress) {
 
 static char *
 makeString (const char *characters, int count) {
-  char *string = mallocWrapper(count+1);
-  memcpy(string, characters, count);
-  string[count] = 0;
+  char *string = malloc(count+1);
+
+  if (string) {
+    memcpy(string, characters, count);
+    string[count] = 0;
+  } else {
+    logMallocError();
+  }
+
   return string;
 }
 
@@ -576,14 +612,17 @@ readCommandLine (void) {
   if (fillInputBuffer()) {
     if (inputStart < inputLength) {
       const char *newline = memchr(&inputBuffer[inputStart], '\n', inputLength-inputStart);
+
       if (newline) {
         char *string;
         int stringLength = newline - inputBuffer;
         inputCarriageReturn = 0;
+
         if ((newline != inputBuffer) && (*(newline-1) == '\r')) {
           inputCarriageReturn = 1;
-          --stringLength;
+          stringLength -= 1;
         }
+
         string = makeString(inputBuffer, stringLength);
         inputLength -= ++newline - inputBuffer;
         memmove(inputBuffer, newline, inputLength);
@@ -594,6 +633,7 @@ readCommandLine (void) {
       }
     } else if (inputEnd) {
       char *string;
+
       if (inputLength) {
         string = makeString(inputBuffer, inputLength);
         inputLength = 0;
@@ -601,9 +641,11 @@ readCommandLine (void) {
       } else {
         string = copyString("quit");
       }
+
       return string;
     }
   }
+
   return NULL;
 }
 
@@ -779,11 +821,16 @@ sortCommandsByName (void) {
   sortCommands(compareCommandNames);
 }
 
-static void
+static int
 allocateCommandDescriptors (void) {
   if (!commandDescriptors) {
     commandCount = getCommandCount();
-    commandDescriptors = mallocWrapper(commandCount * commandSize);
+    commandDescriptors = malloc(commandCount * commandSize);
+
+    if (!commandDescriptors) {
+      logMallocError();
+      return 0;
+    }
 
     {
       CommandDescriptor *descriptor = commandDescriptors;
@@ -815,6 +862,8 @@ allocateCommandDescriptors (void) {
 
     sortCommandsByName();
   }
+
+  return 1;
 }
 
 static void
@@ -933,7 +982,7 @@ dimensionsChanged (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  allocateCommandDescriptors();
+  if (!allocateCommandDescriptors()) return 0;
 
   inputLength = 0;
   inputStart = 0;
