@@ -780,6 +780,7 @@ static int generateToplevel(void)
     free(argv);
   } else {
     logMallocError();
+    toplevel = NULL;
   }
 
 #elif defined(USE_WINDOWS)
