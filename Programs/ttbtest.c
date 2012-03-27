@@ -31,7 +31,6 @@
 #include "options.h"
 #include "log.h"
 #include "file.h"
-#include "misc.h"
 #include "brldots.h"
 #include "charset.h"
 #include "ttb.h"

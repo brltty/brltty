@@ -27,7 +27,6 @@
 #include "device.h"
 #include "log.h"
 #include "file.h"
-#include "misc.h"
 
 int
 getConsole (void) {

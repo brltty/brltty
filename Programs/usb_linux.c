@@ -41,7 +41,6 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 #include "mount.h"
 #include "io_usb.h"
 #include "usb_internal.h"

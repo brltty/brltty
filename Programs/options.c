@@ -29,7 +29,6 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "misc.h"
 #include "system.h"
 
 #ifdef HAVE_GETOPT_H

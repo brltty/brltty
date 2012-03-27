@@ -22,7 +22,6 @@
 
 #include "parse.h"
 #include "log.h"
-#include "misc.h"
 
 char **
 splitString (const char *string, char delimiter, int *count) {

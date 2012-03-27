@@ -34,7 +34,6 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 
 int
 isPathDelimiter (const char character) {

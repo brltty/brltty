@@ -29,7 +29,6 @@
 #include "tunes.h"
 #include "log.h"
 #include "parse.h"
-#include "misc.h"
 #include "defaults.h"
 #include "prefs.h"
 #include "message.h"
