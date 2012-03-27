@@ -212,44 +212,50 @@ main (int argc, char *argv[]) {
 
   {
     unsigned int count = argc / 2;
-    TuneElement *elements = mallocWrapper((sizeof(*elements) * count) + 1);
-    TuneElement *element = elements;
+    TuneElement *elements = malloc((sizeof(*elements) * count) + 1);
 
-    while (argc) {
-      int note;
-      int duration;
+    if (elements) {
+      TuneElement *element = elements;
 
-      {
-        static const int minimum = 0X01;
-        static const int maximum = 0X7F;
-        const char *argument = *argv++;
-        if (!validateInteger(&note, argument, &minimum, &maximum)) {
-          logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
-          exit(2);
+      while (argc) {
+        int note;
+        int duration;
+
+        {
+          static const int minimum = 0X01;
+          static const int maximum = 0X7F;
+          const char *argument = *argv++;
+          if (!validateInteger(&note, argument, &minimum, &maximum)) {
+            logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
+            exit(2);
+          }
+          --argc;
         }
-        --argc;
-      }
 
-      {
-        static const int minimum = 1;
-        static const int maximum = 255;
-        const char *argument = *argv++;
-        if (!validateInteger(&duration, argument, &minimum, &maximum)) {
-          logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
-          exit(2);
+        {
+          static const int minimum = 1;
+          static const int maximum = 255;
+          const char *argument = *argv++;
+          if (!validateInteger(&duration, argument, &minimum, &maximum)) {
+            logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
+            exit(2);
+          }
+          --argc;
         }
-        --argc;
+
+        {
+          TuneElement te = TUNE_NOTE(duration, note);
+          *(element++) = te;
+        }
       }
 
       {
-        TuneElement te = TUNE_NOTE(duration, note);
-        *(element++) = te;
+        TuneElement te = TUNE_STOP();
+        *element = te;
       }
-    }
-
-    {
-      TuneElement te = TUNE_STOP();
-      *element = te;
+    } else {
+      logMallocError();
+      exit(0);
     }
 
     if (!setTuneDevice(prefs.tuneDevice)) {
