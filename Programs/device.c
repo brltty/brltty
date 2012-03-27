@@ -79,17 +79,17 @@ getDeviceDirectory (void) {
         const unsigned int rootLength = strlen(root);
         char path[rootLength + directoryLength + 1];
         snprintf(path, sizeof(path), "%s%s", root, directory);
-        if (testPath(path)) {
-          deviceDirectory = strdupWrapper(path);
-          goto found;
-        }
 
-        if (errno != ENOENT)
+        if (testPath(path)) {
+          if ((deviceDirectory = strdup(path))) goto found;
+          logMallocError();
+        } else if (errno != ENOENT) {
           logMessage(LOG_ERR, "device directory error: %s (%s): %s",
                      path, *variable, strerror(errno));
+        }
       }
 
-      ++variable;
+      variable += 1;
     }
 
     deviceDirectory = directory;
