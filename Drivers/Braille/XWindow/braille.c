@@ -25,7 +25,6 @@
 
 #include "log.h"
 #include "parse.h"
-#include "misc.h"
 #include "charset.h"
 #include "unicode.h"
 
@@ -763,22 +762,25 @@ static int generateToplevel(void)
 
 #if defined(USE_XT)
   argc = xtArgc;
-  argv = mallocWrapper((xtArgc + 1) * sizeof(*xtArgv));
-  memcpy(argv, xtArgv, (xtArgc + 1) * sizeof(*xtArgv));
+  if ((argv = malloc((xtArgc + 1) * sizeof(*xtArgv)))) {
+    memcpy(argv, xtArgv, (xtArgc + 1) * sizeof(*xtArgv));
 
-  /* toplevel */
-  toplevel = XtVaOpenApplication(&app_con, "Brltty",
-    NULL, 0,
-    &argc, argv, fallback_resources,
-    sessionShellWidgetClass,
-    XtNallowShellResize, True,
-    XtNinput, input ? True : False,
-    NULL);
+    /* toplevel */
+    toplevel = XtVaOpenApplication(&app_con, "Brltty",
+      NULL, 0,
+      &argc, argv, fallback_resources,
+      sessionShellWidgetClass,
+      XtNallowShellResize, True,
+      XtNinput, input ? True : False,
+      NULL);
 
-  free(argv);
+    XtAppAddActions(app_con,actions,XtNumber(actions));
+    XtOverrideTranslations(toplevel,XtParseTranslationTable(translations));
 
-  XtAppAddActions(app_con,actions,XtNumber(actions));
-  XtOverrideTranslations(toplevel,XtParseTranslationTable(translations));
+    free(argv);
+  } else {
+    logMallocError();
+  }
 
 #elif defined(USE_WINDOWS)
   {
@@ -1103,13 +1105,43 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   }
 
   if (*parameters[PARM_TKPARMS]) {
-    if (xtArgv != xtDefArgv)
-      deallocateStrings(xtArgv);
-    xtArgv = splitString(parameters[PARM_TKPARMS],' ',&xtArgc);
-    xtArgv = reallocWrapper(xtArgv, (xtArgc+2) * sizeof(char *));
-    memmove(xtArgv+1,xtArgv,(xtArgc+1) * sizeof(char *));
-    xtArgv[0] = strdupWrapper(xtDefArgv[0]);
-    xtArgc++;
+    int reallocated = 0;
+
+    {
+      int count;
+      char **args1 = splitString(parameters[PARM_TKPARMS], ' ', &count);
+
+      if (args1) {
+        char **args2 = realloc(args1, (count+2) * sizeof(char *));
+
+        if (args2) {
+          char *name = strdup(xtDefArgv[0]);
+
+          args1 = NULL;
+
+          if (name) {
+            memmove(args2+1, args2, (count+1) * sizeof(char *));
+            args2[0] = name;
+            count += 1;
+
+            if (xtArgv != xtDefArgv) deallocateStrings(xtArgv);
+            xtArgv = args2;
+            xtArgc = count;
+            reallocated = 1;
+          } else {
+            logMallocError();
+          }
+
+          deallocateStrings(args2);
+        } else {
+          logMallocError();
+        }
+
+        if (args1) deallocateStrings(args1);
+      }
+    }
+
+    if (!reallocated) return 0;
   }
 
   if (*parameters[PARM_MODEL]) {
