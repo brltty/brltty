@@ -29,7 +29,6 @@
 
 #include "log.h"
 #include "timing.h"
-#include "misc.h"
 #include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
@@ -148,29 +147,30 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             }
               
             if (model->textColumns) {
-              brl->textColumns = model->textColumns;
-              brl->textRows = 1;
+              if ((prevdata = malloc(brl->textColumns))) {
+                brl->textColumns = model->textColumns;
+                brl->textRows = 1;
 
-              brl->statusColumns = 5;
-              brl->statusRows = 1;
+                brl->statusColumns = 5;
+                brl->statusRows = 1;
 
-              {
-                const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-                brl->keyBindings = ktd->bindings;
-                brl->keyNameTables = ktd->names;
+                {
+                  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+                  brl->keyBindings = ktd->bindings;
+                  brl->keyNameTables = ktd->names;
+                }
+
+                {
+                  static const DotsTable dots = {
+                    0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
+                  };
+                  makeOutputTable(dots);
+                }
+
+                return 1;
+              } else {
+                logMallocError();
               }
-
-              {
-                static const DotsTable dots = {
-                  0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
-                };
-                makeOutputTable(dots);
-              }
-
-              /* Allocate space for buffers */
-              prevdata = mallocWrapper(brl->textColumns);
-
-              return 1;
             } else {
               logMessage(LOG_ERR, "detected unknown CombiBraille model with ID %02X", id);
             }
