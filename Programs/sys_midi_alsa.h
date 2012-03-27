@@ -21,7 +21,6 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 
 struct MidiDeviceStruct {
   snd_seq_t *sequencer;
@@ -67,41 +66,51 @@ MIDI_ALSA_SYMBOL(seq_set_client_name);
 
 static int
 findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
-  snd_seq_client_info_t *clientInformation = mallocWrapper(midiAlsa_seq_client_info_sizeof());
-  memset(clientInformation, 0, midiAlsa_seq_client_info_sizeof());
-  midiAlsa_seq_client_info_set_client(clientInformation, -1);
+  snd_seq_client_info_t *clientInformation = malloc(midiAlsa_seq_client_info_sizeof());
 
-  while (midiAlsa_seq_query_next_client(midi->sequencer, clientInformation) >= 0) {
-    int clientIdentifier = midiAlsa_seq_client_info_get_client(clientInformation);
+  if (clientInformation) {
+    memset(clientInformation, 0, midiAlsa_seq_client_info_sizeof());
+    midiAlsa_seq_client_info_set_client(clientInformation, -1);
 
-    snd_seq_port_info_t *portInformation = mallocWrapper(midiAlsa_seq_port_info_sizeof());
-    memset(portInformation, 0, midiAlsa_seq_port_info_sizeof());
-    midiAlsa_seq_port_info_set_client(portInformation, clientIdentifier);
-    midiAlsa_seq_port_info_set_port(portInformation, -1);
+    while (midiAlsa_seq_query_next_client(midi->sequencer, clientInformation) >= 0) {
+      int clientIdentifier = midiAlsa_seq_client_info_get_client(clientInformation);
+      snd_seq_port_info_t *portInformation = malloc(midiAlsa_seq_port_info_sizeof());
 
-    while (midiAlsa_seq_query_next_port(midi->sequencer, portInformation) >= 0) {
-      int portIdentifier = midiAlsa_seq_port_info_get_port(portInformation);
-      int actualCapabilities = midiAlsa_seq_port_info_get_capability(portInformation);
-      const int neededCapabilties = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
+      if (portInformation) {
+        memset(portInformation, 0, midiAlsa_seq_port_info_sizeof());
+        midiAlsa_seq_port_info_set_client(portInformation, clientIdentifier);
+        midiAlsa_seq_port_info_set_port(portInformation, -1);
 
-      if (((actualCapabilities & neededCapabilties) == neededCapabilties) &&
-          !(actualCapabilities & SND_SEQ_PORT_CAP_NO_EXPORT)) {
-        *client = clientIdentifier;
-        *port = portIdentifier;
-        logMessage(LOG_DEBUG, "Using ALSA MIDI device: %d[%s] %d[%s]",
-                   clientIdentifier, midiAlsa_seq_client_info_get_name(clientInformation),
-                   portIdentifier, midiAlsa_seq_port_info_get_name(portInformation));
+        while (midiAlsa_seq_query_next_port(midi->sequencer, portInformation) >= 0) {
+          int portIdentifier = midiAlsa_seq_port_info_get_port(portInformation);
+          int actualCapabilities = midiAlsa_seq_port_info_get_capability(portInformation);
+          const int neededCapabilties = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
+
+          if (((actualCapabilities & neededCapabilties) == neededCapabilties) &&
+              !(actualCapabilities & SND_SEQ_PORT_CAP_NO_EXPORT)) {
+            *client = clientIdentifier;
+            *port = portIdentifier;
+            logMessage(LOG_DEBUG, "Using ALSA MIDI device: %d[%s] %d[%s]",
+                       clientIdentifier, midiAlsa_seq_client_info_get_name(clientInformation),
+                       portIdentifier, midiAlsa_seq_port_info_get_name(portInformation));
+
+            free(portInformation);
+            free(clientInformation);
+            return 1;
+          }
+        }
 
         free(portInformation);
-        free(clientInformation);
-        return 1;
+      } else {
+        logMallocError();
       }
     }
 
-    free(portInformation);
+    free(clientInformation);
+  } else {
+    logMallocError();
   }
 
-  free(clientInformation);
   logMessage(errorLevel, "No MDII devices.");
   return 0;
 }
@@ -109,81 +118,106 @@ findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
 static int
 parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *client, int *port) {
   char **components = splitString(device, ':', NULL);
-  char **component = components;
-  if (*component && **component) {
-    const char *clientSpecifier = *component++;
+
+  if (components) {
+    char **component = components;
 
     if (*component && **component) {
-      const char *portSpecifier = *component++;
+      const char *clientSpecifier = *component++;
 
-      if (!*component) {
-        int clientIdentifier;
-        int clientOk = 0;
+      if (*component && **component) {
+        const char *portSpecifier = *component++;
 
-        if (isInteger(&clientIdentifier, clientSpecifier)) {
-          if ((clientIdentifier >= 0) && (clientIdentifier <= 0XFFFF)) clientOk = 1;
-        } else {
-          snd_seq_client_info_t *info = mallocWrapper(midiAlsa_seq_client_info_sizeof());
-          memset(info, 0, midiAlsa_seq_client_info_sizeof());
-          midiAlsa_seq_client_info_set_client(info, -1);
-          while (midiAlsa_seq_query_next_client(midi->sequencer, info) >= 0) {
-            const char *name = midiAlsa_seq_client_info_get_name(info);
-            if (strstr(name, clientSpecifier)) {
-              clientIdentifier = midiAlsa_seq_client_info_get_client(info);
-              clientOk = 1;
-              logMessage(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
-                         clientIdentifier, name);
-              break;
+        if (!*component) {
+          int clientIdentifier;
+          int clientOk = 0;
+
+          if (isInteger(&clientIdentifier, clientSpecifier)) {
+            if ((clientIdentifier >= 0) && (clientIdentifier <= 0XFFFF)) clientOk = 1;
+          } else {
+            snd_seq_client_info_t *info = malloc(midiAlsa_seq_client_info_sizeof());
+
+            if (info) {
+              memset(info, 0, midiAlsa_seq_client_info_sizeof());
+              midiAlsa_seq_client_info_set_client(info, -1);
+
+              while (midiAlsa_seq_query_next_client(midi->sequencer, info) >= 0) {
+                const char *name = midiAlsa_seq_client_info_get_name(info);
+
+                if (strstr(name, clientSpecifier)) {
+                  clientIdentifier = midiAlsa_seq_client_info_get_client(info);
+                  clientOk = 1;
+                  logMessage(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
+                             clientIdentifier, name);
+                  break;
+                }
+              }
+
+              free(info);
+            } else {
+              logMallocError();
             }
           }
-          free(info);
-        }
 
-        if (clientOk) {
-          int portIdentifier;
-          int portOk = 0;
+          if (clientOk) {
+            int portIdentifier;
+            int portOk = 0;
 
-          if (isInteger(&portIdentifier, portSpecifier)) {
-            if ((portIdentifier >= 0) && (portIdentifier <= 0XFFFF)) portOk = 1;
-          } else {
-            snd_seq_port_info_t *info = mallocWrapper(midiAlsa_seq_port_info_sizeof());
-            memset(info, 0, midiAlsa_seq_port_info_sizeof());
-            midiAlsa_seq_port_info_set_client(info, clientIdentifier);
-            midiAlsa_seq_port_info_set_port(info, -1);
-            while (midiAlsa_seq_query_next_port(midi->sequencer, info) >= 0) {
-              const char *name = midiAlsa_seq_port_info_get_name(info);
-              if (strstr(name, portSpecifier)) {
-                portIdentifier = midiAlsa_seq_port_info_get_port(info);
-                portOk = 1;
-                logMessage(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
-                           portIdentifier, name);
-                break;
+            if (isInteger(&portIdentifier, portSpecifier)) {
+              if ((portIdentifier >= 0) && (portIdentifier <= 0XFFFF)) portOk = 1;
+            } else {
+              snd_seq_port_info_t *info = malloc(midiAlsa_seq_port_info_sizeof());
+
+              if (info) {
+                memset(info, 0, midiAlsa_seq_port_info_sizeof());
+                midiAlsa_seq_port_info_set_client(info, clientIdentifier);
+                midiAlsa_seq_port_info_set_port(info, -1);
+
+                while (midiAlsa_seq_query_next_port(midi->sequencer, info) >= 0) {
+                  const char *name = midiAlsa_seq_port_info_get_name(info);
+
+                  if (strstr(name, portSpecifier)) {
+                    portIdentifier = midiAlsa_seq_port_info_get_port(info);
+                    portOk = 1;
+                    logMessage(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
+                               portIdentifier, name);
+                    break;
+                  }
+                }
+
+                free(info);
+              } else {
+                logMallocError();
               }
             }
-            free(info);
-          }
 
-          if (portOk) {
-            *client = clientIdentifier;
-            *port = portIdentifier;
-            return 1;
+            if (portOk) {
+              *client = clientIdentifier;
+              *port = portIdentifier;
+
+              deallocateStrings(components);
+              return 1;
+            } else {
+              logMessage(errorLevel, "Invalid ALSA MIDI port: %s", device);
+            }
           } else {
-            logMessage(errorLevel, "Invalid ALSA MIDI port: %s", device);
+            logMessage(errorLevel, "Invalid ALSA MIDI client: %s", device);
           }
         } else {
-          logMessage(errorLevel, "Invalid ALSA MIDI client: %s", device);
+          logMessage(errorLevel, "Too many ALSA MIDI device components: %s", device);
         }
       } else {
-        logMessage(errorLevel, "Too many ALSA MIDI device components: %s", device);
+        logMessage(errorLevel, "Missing ALSA MIDI port specifier: %s", device);
       }
     } else {
-      logMessage(errorLevel, "Missing ALSA MIDI port specifier: %s", device);
+      logMessage(errorLevel, "Missing ALSA MIDI client specifier: %s", device);
     }
+
+    deallocateStrings(components);
   } else {
-    logMessage(errorLevel, "Missing ALSA MIDI client specifier: %s", device);
+    logMallocError();
   }
 
-  deallocateStrings(components);
   return 0;
 }
 

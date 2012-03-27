@@ -21,7 +21,6 @@
 
 #include "log.h"
 #include "timing.h"
-#include "misc.h"
 
 struct PcmDeviceStruct {
   snd_pcm_t *handle;
