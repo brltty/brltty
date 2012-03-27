@@ -486,7 +486,7 @@ getWcharCharset (void) {
 #endif /* WORDS_BIGENDIAN */
             );
 
-    wcharCharset = strdupWrapper(charset);
+    if (!(wcharCharset = strdup(charset))) logMallocError();
   }
 
   return wcharCharset;
