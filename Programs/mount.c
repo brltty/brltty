@@ -161,7 +161,7 @@ findMountPoint (MountPointTester test) {
 
     while ((entry = readMountsTable(table))) {
       if (test(entry->mountPath, entry->mountType)) {
-        path = strdupWrapper(entry->mountPath);
+        if (!(path = strdup(entry->mountPath))) logMallocError();
         break;
       }
     }
@@ -209,20 +209,43 @@ updateMountsTable (MountEntry *entry) {
 int
 makeMountPoint (const char *path, const char *reference, const char *type) {
   if (mountFileSystem(path, reference, type)) {
+    MountEntry *entry;
+
     logMessage(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
                type, reference, path);
 
-    {
-      MountEntry *entry = mallocWrapper(sizeof(*entry));
+    if ((entry = malloc(sizeof(*entry)))) {
       memset(entry, 0, sizeof(*entry));
-      entry->mountPath = strdupWrapper(path);
-      entry->mountReference = strdupWrapper(reference);
-      entry->mountType = strdupWrapper(type);
-      entry->mountOptions = strdupWrapper(MOUNT_OPTION_RW);
-      updateMountsTable(entry);
-    }
 
-    return 1;
+      if ((entry->mountPath = strdup(path))) {
+        if ((entry->mountReference = strdup(reference))) {
+          if ((entry->mountType = strdup(type))) {
+            if ((entry->mountOptions = strdup(MOUNT_OPTION_RW))) {
+              updateMountsTable(entry);
+              return 1;
+            } else {
+              logMallocError();
+            }
+
+            free(entry->mountType);
+          } else {
+            logMallocError();
+          }
+
+          free(entry->mountReference);
+        } else {
+          logMallocError();
+        }
+
+        free(entry->mountPath);
+      } else {
+        logMallocError();
+      }
+
+      free(entry);
+    } else {
+      logMallocError();
+    }
   } else {
     logMessage(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
                type, reference, path, strerror(errno));
