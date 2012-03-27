@@ -17,7 +17,6 @@
  */
 
 #include "log.h"
-#include "misc.h"
 
 char *
 getProgramPath (void) {
@@ -29,7 +28,16 @@ getProgramPath (void) {
     char *buffer = NULL;
 
     while (1) {
-      buffer = reallocWrapper(buffer, size<<=1);
+      {
+        char *newBuffer = realloc(buffer, size<<=1);
+
+        if (!newBuffer) {
+          logMallocError();
+          break;
+        }
+
+        buffer = newBuffer;
+      }
 
       {
         DWORD length = GetModuleFileName(handle, buffer, size);
@@ -41,11 +49,13 @@ getProgramPath (void) {
 
         if (length < size) {
           buffer[length] = 0;
-          path = strdupWrapper(buffer);
-
-          while (length > 0)
-            if (path[--length] == '\\')
-              path[length] = '/';
+          if ((path = strdup(buffer))) {
+            while (length > 0)
+              if (path[--length] == '\\')
+                path[length] = '/';
+          } else {
+            logMallocError();
+          }
 
           break;
         }
