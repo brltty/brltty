@@ -28,7 +28,6 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "misc.h"
 #include "ascii.h"
 
 typedef enum {
@@ -392,10 +391,6 @@ static unsigned char *prevData = NULL;	/* previously sent raw data */
 static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
 static const ModelEntry *model;		/* points to terminal model config struct */
-
-static unsigned char *at2Buffer;
-static int at2Size;
-static int at2Count;
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -1230,10 +1225,6 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   unsigned int setTime = 0;
 
-  at2Buffer = NULL;
-  at2Size = 0;
-  at2Count = 0;
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else if (isUsbDevice(&device)) {
@@ -1305,11 +1296,6 @@ brl_destruct (BrailleDisplay *brl) {
     brl_writePacket(brl, model->sessionEndAddress, model->sessionEndLength);
   }
   io->closePort();
-
-  if (at2Buffer) {
-    free(at2Buffer);
-    at2Buffer = NULL;
-  }
 
   deallocateBuffers();
 }
@@ -1443,12 +1429,6 @@ static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int noInput = 1;
 
-  if (at2Count) {
-    unsigned char code = at2Buffer[0];
-    memmove(at2Buffer, at2Buffer+1, --at2Count);
-    return BRL_BLK_PASSAT + code;
-  }
-
   while (1) {
     HT_Packet packet;
     int size = brl_readPacket(brl, &packet, sizeof(packet));
@@ -1544,19 +1524,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                     break;
 
                   case HT_EXTPKT_Scancode: {
-                    if (length) {
-                      unsigned char code = bytes++[0];
-                      if (--length) {
-                        int newCount = at2Count + length;
-                        if (newCount > at2Size) {
-                          int newSize = (newCount | 0XF) + 1;
-                          at2Buffer = reallocWrapper(at2Buffer, newSize);
-                          at2Size = newSize;
-                        }
-                        memcpy(at2Buffer+at2Count, bytes, length);
-                        at2Count = newCount;
-                      }
-                      return BRL_BLK_PASSAT + code;
+                    while (length) {
+                      enqueueCommand(BRL_BLK_PASSAT + bytes++[0]);
+                      length -= 1;
                     }
                     break;
                   }
