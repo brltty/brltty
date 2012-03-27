@@ -23,7 +23,6 @@
 #include <fcntl.h>
 
 #include "log.h"
-#include "misc.h"
 #include "system.h"
 
 char *
@@ -33,7 +32,16 @@ getProgramPath (void) {
   char *buffer = NULL;
 
   while (1) {
-    buffer = reallocWrapper(buffer, size<<=1);
+    {
+      char *newBuffer = realloc(buffer, size<<=1);
+
+      if (!newBuffer) {
+        logMallocError();
+        break;
+      }
+
+      buffer = newBuffer;
+    }
 
     {
       int length = readlink("/proc/self/path/a.out", buffer, size);
@@ -45,13 +53,13 @@ getProgramPath (void) {
 
       if (length < size) {
         buffer[length] = 0;
-        path = strdupWrapper(buffer);
+        if (!(path = strdup(buffer))) logMallocError();
         break;
       }
     }
   }
 
-  free(buffer);
+  if (buffer) free(buffer);
   return path;
 }
 
