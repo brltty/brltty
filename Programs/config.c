@@ -2741,9 +2741,19 @@ startup (int argc, char *argv[]) {
           }
         }
 
-        if (name[0])
-          if (replaceTextTable(name))
-            opt_textTable = strdupWrapper(name);
+        if (name[0]) {
+          char *textTableName = strdup(name);
+
+          if (textTableName) {
+            if (replaceTextTable(name)) {
+              opt_textTable = textTableName;
+            } else {
+              free(textTableName);
+            }
+          } else {
+            logMallocError();
+          }
+        }
       }
     } else {
       if (!replaceTextTable(opt_textTable)) opt_textTable = "";
