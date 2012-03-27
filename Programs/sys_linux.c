@@ -34,7 +34,6 @@
 #include "file.h"
 #include "device.h"
 #include "timing.h"
-#include "misc.h"
 #include "system.h"
 #include "sys_linux.h"
 #include "bitmask.h"
@@ -79,7 +78,16 @@ getProgramPath (void) {
   char *buffer = NULL;
 
   while (1) {
-    buffer = reallocWrapper(buffer, size<<=1);
+    {
+      char *newBuffer = realloc(buffer, size<<=1);
+
+      if (!newBuffer) {
+        logMallocError();
+        break;
+      }
+
+      buffer = newBuffer;
+    }
 
     {
       int length = readlink("/proc/self/exe", buffer, size);
@@ -91,40 +99,56 @@ getProgramPath (void) {
 
       if (length < size) {
         buffer[length] = 0;
-        path = strdupWrapper(buffer);
+        if (!(path = strdup(buffer))) logMallocError();
         break;
       }
     }
   }
 
-  free(buffer);
+  if (buffer) free(buffer);
   return path;
 }
 
 char *
 getBootParameters (const char *name) {
   size_t nameLength = strlen(name);
-  const char *path = "/proc/cmdline";
-  FILE *file = fopen(path, "r");
-  if (file) {
-    char *parameters = strdupWrapper("");
-    char buffer[0X1000];
-    char *line = fgets(buffer, sizeof(buffer), file);
-    if (line) {
-      char *token;
-      while ((token = strtok(line, " \n"))) {
-        line = NULL;
-        if ((strncmp(token, name, nameLength) == 0) &&
-            (token[nameLength] == '=')) {
-          free(parameters);
-          parameters = strdupWrapper(token + nameLength + 1);
+  char *parameters;
+
+  if ((parameters = strdup(""))) {
+    const char *path = "/proc/cmdline";
+    FILE *file;
+
+    if ((file = fopen(path, "r"))) {
+      char buffer[0X1000];
+      char *line = fgets(buffer, sizeof(buffer), file);
+
+      if (line) {
+        char *token;
+
+        while ((token = strtok(line, " \n"))) {
+          line = NULL;
+
+          if ((strncmp(token, name, nameLength) == 0) &&
+              (token[nameLength] == '=')) {
+            char *newParameters = strdup(token + nameLength + 1);
+
+            if (newParameters) {
+              free(parameters);
+              parameters = newParameters;
+            } else {
+              logMallocError();
+            }
+          }
         }
       }
+
+      fclose(file);
     }
-    fclose(file);
-    return parameters;
+  } else {
+    logMallocError();
   }
-  return NULL;
+
+  return parameters;
 }
 
 #include "sys_exec_unix.h"
