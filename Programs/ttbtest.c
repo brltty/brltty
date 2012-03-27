@@ -1929,7 +1929,11 @@ main (int argc, char *argv[]) {
     int prefix = extension? (extension - inputPath): strlen(inputPath);
     char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
     snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
-    outputPath = strdupWrapper(buffer);
+
+    if (!(outputPath = strdup(buffer))) {
+      logMallocError();
+      exit(9);
+    }
   } else {
     outputPath = NULL;
   }
@@ -1948,7 +1952,7 @@ main (int argc, char *argv[]) {
 
   if (*opt_charset && !setCharset(opt_charset)) {
     logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
-    exit(9);
+    exit(8);
   }
 
 #ifdef ENABLE_API
