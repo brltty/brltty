@@ -22,7 +22,6 @@
 
 #include "log.h"
 #include "timing.h"
-#include "misc.h"
 
 struct MidiDeviceStruct {
   AUGraph graph;
@@ -39,7 +38,10 @@ openMidiDevice (int errorLevel, const char *device) {
   ComponentDescription cd;
   UInt32 propVal;
 
-  midi = mallocWrapper(sizeof(*midi));
+  if (!(midi = malloc(sizeof(*midi)))) {
+    logMallocError();
+    return NULL;
+  }
 
   /* Create a graph with a software synth and a default output unit. */
 
