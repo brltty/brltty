@@ -41,7 +41,7 @@ options.$O:
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O misc.$O io_misc.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O io_misc.$O $(SYSTEM_OBJECT)
 
 log.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/log.c
@@ -57,9 +57,6 @@ parse.$O:
 
 timing.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/timing.c
-
-misc.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
 
 io_misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_misc.c
@@ -121,7 +118,7 @@ kbd_linux.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_misc.$O host_io_misc.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_pid.$O host_options.$O host_log.$O host_file.$O host_device.$O host_parse.$O host_timing.$O host_io_misc.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
