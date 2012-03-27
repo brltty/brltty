@@ -59,7 +59,6 @@
 
 #include "log.h"
 #include "timing.h"
-#include "misc.h"
 #include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
@@ -146,36 +145,39 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	}
 	while (!hasTimedOut (ACK_TIMEOUT) && n <= init_ack[0]);
 
-	if (!success) goto failure;
+	if (success && (brlcols != 25)) {
+          if ((prevdata = malloc(brl->textColumns * brl->textRows))) {
+            if ((rawdata = malloc(20 + (brl->textColumns * brl->textRows * 2)))) {
+              brl->textColumns = brlcols;
+              brl->textRows = BRLROWS;
 
-	if (brlcols == 25) goto failure;						/* MultiBraille Vertical uses a different protocol --> not supported */
-	brl->textColumns = brlcols;
-	brl->textRows = BRLROWS;
-	brl->statusColumns = 5;
-	brl->statusRows = 1;
+              brl->statusColumns = 5;
+              brl->statusRows = 1;
 
-	{
-		static const DotsTable dots = {
-			0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
-		};
-		makeOutputTable(dots);
-	}
+              {
+                static const DotsTable dots = {
+                  0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
+                };
 
-	/* Allocate space for buffers */
-	prevdata = mallocWrapper (brl->textColumns * brl->textRows);
-	/* rawdata has to have room for the pre- and post-data sequences,
-	 * the status cells, and escaped escapes: */
-	rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
+                makeOutputTable(dots);
+              }
 
-	return 1;
+              return 1;
+            } else {
+              logMallocError();
+            }
 
-failure:
-	if (prevdata)
-		free (prevdata);
-	if (rawdata)
-		free (rawdata);
-	if (MB_serialDevice)
-		serialCloseDevice (MB_serialDevice);
+            free(prevdata);
+          } else {
+            logMallocError();
+          }
+        }
+
+      failure:
+	if (MB_serialDevice) {
+           serialCloseDevice(MB_serialDevice);
+           MB_serialDevice = NULL;
+        }
 	return 0;
 }
 
