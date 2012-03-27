@@ -966,7 +966,13 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
 
     while (candidate->path) {
       logMessage(LOG_DEBUG, "verifying file system path: %s: %s", type, candidate->path);
-      if (candidate->verify(candidate->path)) return strdupWrapper(candidate->path);
+
+      if (candidate->verify(candidate->path)) {
+        char *path = strdup(candidate->path);
+        if (path) return path;
+        logMallocError();
+      }
+
       candidate += 1;
     }
   }
