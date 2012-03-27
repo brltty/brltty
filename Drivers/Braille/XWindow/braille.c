@@ -1127,12 +1127,14 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
             if (xtArgv != xtDefArgv) deallocateStrings(xtArgv);
             xtArgv = args2;
             xtArgc = count;
+            args2 = NULL;
+
             reallocated = 1;
           } else {
             logMallocError();
           }
 
-          deallocateStrings(args2);
+          if (args2) deallocateStrings(args2);
         } else {
           logMallocError();
         }
