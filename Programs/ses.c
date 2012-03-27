@@ -20,9 +20,9 @@
 
 #include <string.h>
 
+#include "log.h"
 #include "ses.h"
 #include "defaults.h"
-#include "misc.h"
 
 static const SessionEntry initialSessionEntry = {
   .number = 0,
@@ -56,22 +56,44 @@ getSessionEntry (int number) {
   }
 
   if (sessionCount == sessionLimit) {
-    sessionLimit = sessionLimit? sessionLimit<<1: 0X10;
-    sessionArray = reallocWrapper(sessionArray, ARRAY_SIZE(sessionArray, sessionLimit));
+    unsigned int newLimit = sessionLimit? sessionLimit<<1: 0X10;
+    SessionEntry **newArray;
+
+    if ((newArray = realloc(sessionArray, ARRAY_SIZE(newArray, newLimit)))) {
+      sessionArray = newArray;
+      sessionLimit = newLimit;
+    } else {
+      logMallocError();
+    }
+  }
+
+  if (sessionCount < sessionLimit) {
+    SessionEntry *entry = malloc(sizeof(*entry));
+
+    if (entry) {
+      *entry = initialSessionEntry;
+      entry->number = number;
+
+      memmove(&sessionArray[first+1], &sessionArray[first],
+              ARRAY_SIZE(sessionArray, sessionCount-first));
+      sessionArray[first] = entry;
+      sessionCount += 1;
+      return entry;
+    } else {
+      logMallocError();
+    }
   }
 
   {
-    SessionEntry *entry = mallocWrapper(sizeof(*entry));
+    static SessionEntry fallbackEntry;
+    static int initialized = 0;
 
-    *entry = initialSessionEntry;
-    entry->number = number;
+    if (!initialized) {
+      fallbackEntry = initialSessionEntry;
+      initialized = 1;
+    }
 
-    memmove(&sessionArray[first+1], &sessionArray[first],
-            ARRAY_SIZE(sessionArray, sessionCount-first));
-    sessionArray[first] = entry;
-    sessionCount += 1;
-
-    return entry;
+    return &fallbackEntry;
   }
 }
 
