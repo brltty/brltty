@@ -291,13 +291,15 @@ typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
 typedef struct {
-  int (*setLineProperties) (UsbDevice *device, unsigned int rate, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
-  int (*setBaud) (UsbDevice *device, unsigned int rate);
+  int (*setLineConfiguration) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl);
+  int (*setLineProperties) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
+  int (*setBaud) (UsbDevice *device, unsigned int baud);
   int (*setDataFormat) (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
   int (*setFlowControl) (UsbDevice *device, SerialFlowControl flow);
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
   int (*enableAdapter) (UsbDevice *device);
+  ssize_t (*writeData) (UsbDevice *device, const void *data, size_t size);
 } UsbSerialOperations;
 
 extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);

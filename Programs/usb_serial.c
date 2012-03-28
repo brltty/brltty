@@ -60,11 +60,11 @@ typedef struct {
 } PACKED USB_CDC_ACM_LineCoding;
 
 static int
-usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int rate, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
+usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   USB_CDC_ACM_LineCoding lineCoding;
   memset(&lineCoding, 0, sizeof(lineCoding));
 
-  putLittleEndian32(&lineCoding.dwDTERate, rate);
+  putLittleEndian32(&lineCoding.dwDTERate, baud);
 
   switch (dataBits) {
     case  5:
@@ -182,14 +182,14 @@ usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, unsigned int v
 }
 
 static int
-usbSetBaud_Belkin (UsbDevice *device, unsigned int rate) {
+usbSetBaud_Belkin (UsbDevice *device, unsigned int baud) {
   const unsigned int base = 230400;
-  if (base % rate) {
-    logMessage(LOG_WARNING, "unsupported Belkin baud: %u", rate);
+  if (base % baud) {
+    logMessage(LOG_WARNING, "unsupported Belkin baud: %u", baud);
     errno = EINVAL;
     return 0;
   }
-  return usbSetAttribute_Belkin(device, 0, base/rate, 0);
+  return usbSetAttribute_Belkin(device, 0, base/baud, 0);
 }
 
 static int
@@ -315,9 +315,9 @@ usbSetBaud_FTDI (UsbDevice *device, unsigned int divisor) {
 }
 
 static int
-usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int rate) {
+usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int baud) {
   unsigned int divisor;
-  switch (rate) {
+  switch (baud) {
     case    300: divisor = 0; break;
     case    600: divisor = 1; break;
     case   1200: divisor = 2; break;
@@ -329,7 +329,7 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int rate) {
     case  57600: divisor = 8; break;
     case 115200: divisor = 9; break;
     default:
-      logMessage(LOG_WARNING, "unsupported FTDI SIO baud: %u", rate);
+      logMessage(LOG_WARNING, "unsupported FTDI SIO baud: %u", baud);
       errno = EINVAL;
       return 0;
   }
@@ -337,15 +337,15 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int rate) {
 }
 
 static int
-usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int rate) {
-  if (rate > 3000000) {
-    logMessage(LOG_WARNING, "unsupported FTDI FT8U232AM baud: %u", rate);
+usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int baud) {
+  if (baud > 3000000) {
+    logMessage(LOG_WARNING, "unsupported FTDI FT8U232AM baud: %u", baud);
     errno = EINVAL;
     return 0;
   }
   {
     const unsigned int base = 48000000;
-    unsigned int eighths = base / 2 / rate;
+    unsigned int eighths = base / 2 / baud;
     unsigned int divisor;
     if ((eighths & 07) == 7) eighths++;
     divisor = eighths >> 3;
@@ -359,16 +359,16 @@ usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int rate) {
 }
 
 static int
-usbSetBaud_FTDI_FT232BM (UsbDevice *device, unsigned int rate) {
-  if (rate > 3000000) {
-    logMessage(LOG_WARNING, "unsupported FTDI FT232BM baud: %u", rate);
+usbSetBaud_FTDI_FT232BM (UsbDevice *device, unsigned int baud) {
+  if (baud > 3000000) {
+    logMessage(LOG_WARNING, "unsupported FTDI FT232BM baud: %u", baud);
     errno = EINVAL;
     return 0;
   }
   {
     static const unsigned char mask[8] = {00, 03, 02, 04, 01, 05, 06, 07};
     const unsigned int base = 48000000;
-    const unsigned int eighths = base / 2 / rate;
+    const unsigned int eighths = base / 2 / baud;
     unsigned int divisor = (eighths >> 3) | (mask[eighths & 07] << 14);
     if (divisor == 1) {
       divisor = 0;
@@ -502,11 +502,11 @@ usbSetAttribute_CP2101 (UsbDevice *device, unsigned char request, unsigned int v
 }
 
 static int
-usbSetBaud_CP2101 (UsbDevice *device, unsigned int rate) {
+usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
   const unsigned int base = 0X384000;
-  unsigned int divisor = base / rate;
-  if ((rate * divisor) != base) {
-    logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", rate);
+  unsigned int divisor = base / baud;
+  if ((baud * divisor) != base) {
+    logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", baud);
     errno = EINVAL;
     return 0;
   }
@@ -605,6 +605,152 @@ static const UsbSerialOperations usbSerialOperations_CP2101 = {
 };
 
 
+typedef enum {
+  USB_CP2110_PARITY_NONE,
+  USB_CP2110_PARITY_EVEN,
+  USB_CP2110_PARITY_ODD,
+  USB_CP2110_PARITY_MARK,
+  USB_CP2110_PARITY_SPACE
+} USB_CP2110_Parity;
+
+typedef enum {
+  USB_CP2110_FLOW_NONE,
+  USB_CP2110_FLOW_HARDWARE
+} USB_CP2110_FlowControl;
+
+typedef enum {
+  USB_CP2110_STOP_SHORT,
+  USB_CP2110_STOP_LONG
+} USB_CP2110_StopBits;
+
+typedef struct {
+  uint8_t reportIdentifier;
+  uint32_t baudRate;
+  uint8_t parity;
+  uint8_t flowControl;
+  uint8_t dataBits;
+  uint8_t stopBits;
+} PACKED USB_CP2110_UartConfigurationReport;
+
+static int
+usbSetReport_CP2110 (UsbDevice *device, const void *report, size_t size) {
+  const unsigned char *bytes = report;
+  ssize_t result = usbHidSetReport(device, 0, bytes[0], report, size, 1000);
+  return result != -1;
+}
+
+static int
+usbSetLineConfiguration_CP2110 (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl) {
+  USB_CP2110_UartConfigurationReport report;
+
+  memset(&report, 0, sizeof(report));
+  report.reportIdentifier = 0X50;
+
+  if ((baud >= 300) && (baud <= 500000)) {
+    putBigEndian32(&report.baudRate, baud);
+  } else {
+    logMessage(LOG_WARNING, "unsupported CP2110 baud: %u", baud);
+    errno = EINVAL;
+    return 0;
+  }
+
+  if ((dataBits >= 5) && (dataBits <= 8)) {
+    report.dataBits = dataBits;
+  } else {
+    logMessage(LOG_WARNING, "unsupported CP2110 data bits: %u", dataBits);
+    errno = EINVAL;
+    return 0;
+  }
+
+  if (stopBits == SERIAL_STOP_1) {
+    report.stopBits = USB_CP2110_STOP_SHORT;
+  } else if (stopBits == ((dataBits > 5)? SERIAL_STOP_2: SERIAL_STOP_1_5)) {
+    report.stopBits = USB_CP2110_STOP_LONG;
+  } else {
+    logMessage(LOG_WARNING, "unsupported CP2110 stop bits: %u", stopBits);
+    errno = EINVAL;
+    return 0;
+  }
+
+  switch (parity) {
+    case SERIAL_PARITY_NONE:
+      report.parity = USB_CP2110_PARITY_NONE;
+      break;
+
+    case SERIAL_PARITY_ODD:
+      report.parity = USB_CP2110_PARITY_ODD;
+      break;
+
+    case SERIAL_PARITY_EVEN:
+      report.parity = USB_CP2110_PARITY_EVEN;
+      break;
+
+    case SERIAL_PARITY_MARK:
+      report.parity = USB_CP2110_PARITY_MARK;
+      break;
+
+    case SERIAL_PARITY_SPACE:
+      report.parity = USB_CP2110_PARITY_SPACE;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CP2110 parity: %u", parity);
+      errno = EINVAL;
+      return 0;
+  }
+
+  switch (flowControl) {
+    case SERIAL_FLOW_NONE:
+      report.flowControl = USB_CP2110_FLOW_NONE;
+      break;
+
+    case SERIAL_FLOW_HARDWARE:
+      report.flowControl = USB_CP2110_FLOW_HARDWARE;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CP2110 flow control: %u", flowControl);
+      errno = EINVAL;
+      return 0;
+  }
+
+  return usbSetReport_CP2110(device, &report, sizeof(report));
+}
+
+static int
+usbEnableAdapter_CP2110 (UsbDevice *device) {
+  const unsigned char report[] = {0X41, 0X01};
+  return usbSetReport_CP2110(device, &report, sizeof(report));
+}
+
+static ssize_t
+usbWriteData_CP2110 (UsbDevice *device, const void *data, size_t size) {
+  const unsigned char *first = data;
+  const unsigned char *next = first;
+
+  while (size) {
+    unsigned char report[0X40];
+    size_t count = sizeof(report) - 1;
+
+    if (count > size) count = size;
+    report[0] = count;
+    memcpy(&report[1], next, count);
+    if (!usbSetReport_CP2110(device, &report, count+1)) return -1;
+
+    next += count;
+    size -= count;
+  }
+
+  return next - first;
+}
+
+static const UsbSerialOperations usbSerialOperations_CP2110 = {
+  .setLineConfiguration = &usbSetLineConfiguration_CP2110,
+  .enableAdapter = usbEnableAdapter_CP2110,
+  .writeData = usbWriteData_CP2110
+};
+
+
 typedef struct {
   uint16_t vendor;
   uint16_t product;
@@ -616,145 +762,150 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
   { /* HandyTech GoHubs */
     .vendor=0X0921, .product=0X1200,
     .operations = &usbSerialOperations_Belkin
-  }
-  ,
+  },
+
   { /* HandyTech FTDI */
     .vendor=0X0403, .product=0X6001,
     .operations = &usbSerialOperations_FTDI_FT8U232AM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Papenmeier FTDI */
     .vendor=0X0403, .product=0XF208,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum Vario40 (40 cells) */
     .vendor=0X0403, .product=0XFE70,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum PocketVario (24 cells) */
     .vendor=0X0403, .product=0XFE71,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum SuperVario 40 (40 cells) */
     .vendor=0X0403, .product=0XFE72,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum SuperVario 32 (32 cells) */
     .vendor=0X0403, .product=0XFE73,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum SuperVario 64 (64 cells) */
     .vendor=0X0403, .product=0XFE74,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum SuperVario 80 (80 cells) */
     .vendor=0X0403, .product=0XFE75,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioPro 80 (80 cells) */
     .vendor=0X0403, .product=0XFE76,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioPro 64 (64 cells) */
     .vendor=0X0403, .product=0XFE77,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioPro 40 (40 cells) */
     .vendor=0X0904, .product=0X2000,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum EcoVario 24 (24 cells) */
     .vendor=0X0904, .product=0X2001,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum EcoVario 40 (40 cells) */
     .vendor=0X0904, .product=0X2002,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioConnect 40 (40 cells) */
     .vendor=0X0904, .product=0X2007,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioConnect 32 (32 cells) */
     .vendor=0X0904, .product=0X2008,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioConnect 24 (24 cells) */
     .vendor=0X0904, .product=0X2009,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioConnect 64 (64 cells) */
     .vendor=0X0904, .product=0X2010,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum VarioConnect 80 (80 cells) */
     .vendor=0X0904, .product=0X2011,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum EcoVario 32 (32 cells) */
     .vendor=0X0904, .product=0X2014,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum EcoVario 64 (64 cells) */
     .vendor=0X0904, .product=0X2015,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum EcoVario 80 (80 cells) */
     .vendor=0X0904, .product=0X2016,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Baum Refreshabraille 18 (18 cells) */
     .vendor=0X0904, .product=0X3000,
     .operations = &usbSerialOperations_FTDI_FT232BM,
     .inputFilter = usbInputFilter_FTDI
-  }
-  ,
+  },
+
   { /* Seika (40 cells) */
     .vendor=0X10C4, .product=0XEA60,
     .operations = &usbSerialOperations_CP2101
-  }
-  ,
+  },
+
+  { /* Seika NoteTaker */
+    .vendor=0X10C4, .product=0XEA80,
+    .operations = &usbSerialOperations_CP2110
+  },
+
   {.vendor=0, .product=0}
 };
 
@@ -863,13 +1014,18 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
     return 0;
   }
 
-  if (serial->setLineProperties) {
-    if (!serial->setLineProperties(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+  if (serial->setLineConfiguration) {
+    if (!serial->setLineConfiguration(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity, parameters->flowControl)) return 0;
   } else {
-    if (!serial->setBaud(device, parameters->baud)) return 0;
-    if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+    if (serial->setLineProperties) {
+      if (!serial->setLineProperties(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+    } else {
+      if (!serial->setBaud(device, parameters->baud)) return 0;
+      if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+    }
+
+    if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
   }
 
-  if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
   return 1;
 }

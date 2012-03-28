@@ -218,9 +218,24 @@ static ssize_t
 writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbWriteEndpoint(channel->device,
-                          channel->definition.outputEndpoint,
-                          data, size, timeout);
+  if (channel->definition.outputEndpoint) {
+    return usbWriteEndpoint(channel->device,
+                            channel->definition.outputEndpoint,
+                            data, size, timeout);
+  }
+
+  {
+    const UsbSerialOperations *serial = usbGetSerialOperations(channel->device);
+
+    if (serial) {
+      if (serial->writeData) {
+        return serial->writeData(channel->device, data, size);
+      }
+    }
+  }
+
+  errno = ENOSYS;
+  return -1;
 }
 
 static int
