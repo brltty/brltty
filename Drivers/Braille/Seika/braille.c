@@ -309,7 +309,7 @@ readPacket_old (
 }
 
 static void
-interpretIdentity_pbrl (InputPacket *packet) {
+interpretIdentity_pbc (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
                                     ((packet->bytes[7] - '0') << (4 * 1));
   packet->fields.identity.cellCount = packet->bytes[2];
@@ -318,7 +318,7 @@ interpretIdentity_pbrl (InputPacket *packet) {
 }
 
 static int
-readPacket_pbrl (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_pbc (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X00, 0X05, 0X28, 0X08,
     0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
@@ -326,17 +326,17 @@ readPacket_pbrl (BrailleDisplay *brl, InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_pbrl);
+  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_pbc);
 }
 
 static int
-probeDisplay_pbrl (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_pbc (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0X0A};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_pbrl (BrailleDisplay *brl) {
+writeCells_pbc (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04,
     0X00, 0X63, 0X00
@@ -360,16 +360,16 @@ writeCells_pbrl (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_pbrl = {
-  .name = "PowerBraille",
+static const ProtocolOperations protocolOperations_pbc = {
+  .name = "PowerBraille Compatibility",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
-  .readPacket = readPacket_pbrl,
-  .probeDisplay = probeDisplay_pbrl,
-  .writeCells = writeCells_pbrl
+  .readPacket = readPacket_pbc,
+  .probeDisplay = probeDisplay_pbc,
+  .writeCells = writeCells_pbc
 };
 
 static void
-interpretIdentity_331 (InputPacket *packet) {
+interpretIdentity_ntv (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
                                     ((packet->bytes[10] - '0') << (4 * 1)) |
                                     ((packet->bytes[11] - '0') << (4 * 0));
@@ -379,24 +379,24 @@ interpretIdentity_331 (InputPacket *packet) {
 }
 
 static int
-readPacket_331 (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_ntv (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
     0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_331);
+  return readPacket_old(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_ntv);
 }
 
 static int
-probeDisplay_331 (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_ntv (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0X1C};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_331 (BrailleDisplay *brl) {
+writeCells_ntv (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF,
     0X73, 0X65, 0X69, 0X6B, 0X61,
@@ -419,145 +419,16 @@ writeCells_331 (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_331 = {
-  .name = "V3.31",
+static const ProtocolOperations protocolOperations_ntv = {
+  .name = "Seika Native",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
-  .readPacket = readPacket_331,
-  .probeDisplay = probeDisplay_331,
-  .writeCells = writeCells_331
-};
-
-static inline int
-routingBytes_332 (BrailleDisplay *brl) {
-  return (brl->textColumns + 7) / 8;
-}
-
-static int
-readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
-  int offset = 0;
-  int length = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet->bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    if (!offset) {
-      switch (byte) {
-        case 0X1D:
-          length = 2;
-          break;
-
-        default:
-          logIgnoredByte(byte);
-          continue;
-      }
-    } else {
-      int unexpected = 0;
-
-      if (offset == 1) {
-        switch (byte) {
-          case 0X02:
-            packet->type = IPT_identity;
-            length = 10;
-            break;
-
-          case 0X04:
-            packet->type = IPT_routing;
-            length = 2;
-            if (brl) length += routingBytes_332(brl);
-            break;
-
-          case 0X05:
-            packet->type = IPT_keys;
-            length = 4;
-            break;
-
-          default:
-            unexpected = 1;
-            break;
-        }
-      }
-
-      if (unexpected) {
-        logShortPacket(packet->bytes, offset);
-        offset = 0;
-        length = 0;
-        goto gotByte;
-      }
-    }
-
-    packet->bytes[offset++] = byte;
-    if (offset == length) {
-      logInputPacket(packet->bytes, offset);
-
-      switch (packet->type) {
-        case IPT_identity:
-          packet->fields.identity.version = 0;
-          packet->fields.identity.cellCount = packet->bytes[3];
-          packet->fields.identity.keyCount = 8;
-          packet->fields.identity.routingCount = packet->fields.identity.cellCount;
-          break;
-
-        case IPT_keys: {
-          const unsigned char *byte = packet->bytes + offset;
-          packet->fields.keys = 0;
-
-          do {
-            packet->fields.keys <<= 8;
-            packet->fields.keys |= *--byte;
-          } while (byte != packet->bytes);
-
-          break;
-        }
-
-        case IPT_routing:
-          packet->fields.routing = &packet->bytes[2];
-          break;
-      }
-
-      return offset;
-    }
-  }
-}
-
-static int
-probeDisplay_332 (BrailleDisplay *brl, InputPacket *response) {
-  static const unsigned char request[] = {0XFF, 0XFF, 0X1D, 0X01};
-  return probeDisplay(brl, response, request, sizeof(request));
-}
-
-static int
-writeCells_332 (BrailleDisplay *brl) {
-  static const unsigned char header[] = {0XFF, 0XFF, 0X1D, 0X03};
-  unsigned char packet[sizeof(header) + 1 + brl->textColumns];
-  unsigned char *byte = packet;
-
-  byte = mempcpy(byte, header, sizeof(header));
-  *byte++ = brl->textColumns;
-  byte = translateOutputCells(byte, textCells, brl->textColumns);
-
-  return writeBytes(brl, packet, byte-packet);
-}
-
-static const ProtocolOperations protocolOperations_332 = {
-  .name = "V3.32",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
-  .readPacket = readPacket_332,
-  .probeDisplay = probeDisplay_332,
-  .writeCells = writeCells_332
+  .readPacket = readPacket_ntv,
+  .probeDisplay = probeDisplay_ntv,
+  .writeCells = writeCells_ntv
 };
 
 static int
-readPacket_ntkr (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
   int offset = 0;
   unsigned int length = 0;
 
@@ -663,13 +534,13 @@ readPacket_ntkr (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-probeDisplay_ntkr (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_ntk (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0XA1};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_ntkr (BrailleDisplay *brl) {
+writeCells_ntk (BrailleDisplay *brl) {
   static const unsigned char header[] = {0XFF, 0XFF, 0XA3};
   unsigned char packet[sizeof(header) + 1 + brl->textColumns];
   unsigned char *byte = packet;
@@ -681,26 +552,24 @@ writeCells_ntkr (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_ntkr = {
-  .name = "NoteTaker",
+static const ProtocolOperations protocolOperations_ntk = {
+  .name = "Seika NoteTaker",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
-  .readPacket = readPacket_ntkr,
-  .probeDisplay = probeDisplay_ntkr,
-  .writeCells = writeCells_ntkr
+  .readPacket = readPacket_ntk,
+  .probeDisplay = probeDisplay_ntk,
+  .writeCells = writeCells_ntk
 };
 
 static const ProtocolOperations *const allProtocols[] = {
-  &protocolOperations_ntkr,
-  &protocolOperations_332,
-  &protocolOperations_331,
-  &protocolOperations_pbrl,
+  &protocolOperations_ntk,
+  &protocolOperations_ntv,
+  &protocolOperations_pbc,
   NULL
 };
 
 static const ProtocolOperations *const nativeProtocols[] = {
-  &protocolOperations_ntkr,
-  &protocolOperations_332,
-  &protocolOperations_331,
+  &protocolOperations_ntk,
+  &protocolOperations_ntv,
   NULL
 };
 
