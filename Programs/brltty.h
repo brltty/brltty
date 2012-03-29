@@ -61,7 +61,7 @@ extern int messageDelay;
 extern ContractionTable *contractionTable;
 
 extern void testProgramTermination (void);
-extern void startup (int argc, char *argv[]);
+extern int startup (int argc, char *argv[]);
 
 extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);

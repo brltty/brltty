@@ -620,7 +620,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
 
     if (!(name && *++name)) {
       logMessage(LOG_ERR, "unspecified %s format.", description);
-      exit(2);
+      exit(OPT_EXIT_SYNTAX);
     }
   }
 
@@ -630,7 +630,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
   }
 
   logMessage(LOG_ERR, "unknown %s format: %s", description, name);
-  exit(2);
+  exit(OPT_EXIT_SYNTAX);
 }
 
 static const char *inputPath;
@@ -1904,7 +1904,8 @@ main (int argc, char *argv[]) {
       .applicationName = "ttbtest",
       .argumentsSummary = "input-table [output-table]"
     };
-    processOptions(&descriptor, &argc, &argv);
+    OptionsResult result = processOptions(&descriptor, &argc, &argv);
+    handleOptionsResult(result);
   }
 
   {
@@ -1917,7 +1918,7 @@ main (int argc, char *argv[]) {
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing input table.");
-    exit(2);
+    exit(OPT_EXIT_SYNTAX);
   }
   inputPath = *argv++, argc--;
 
@@ -1931,7 +1932,7 @@ main (int argc, char *argv[]) {
 
     if (!(outputPath = strdup(buffer))) {
       logMallocError();
-      exit(9);
+      exit(OPT_EXIT_FATAL);
     }
   } else {
     outputPath = NULL;
@@ -1939,7 +1940,7 @@ main (int argc, char *argv[]) {
 
   if (argc > 0) {
     logMessage(LOG_ERR, "too many parameters.");
-    exit(2);
+    exit(OPT_EXIT_SYNTAX);
   }
 
   inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
@@ -1951,7 +1952,7 @@ main (int argc, char *argv[]) {
 
   if (*opt_charset && !setCharset(opt_charset)) {
     logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
-    exit(8);
+    exit(OPT_EXIT_SEMANTIC);
   }
 
 #ifdef ENABLE_API

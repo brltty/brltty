@@ -1161,8 +1161,10 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGINT, terminationHandler);
 #endif /* SIGINT */
 
-  /* Setup everything required on startup */
-  startup(argc, argv);
+  {
+    int exitStatus = startup(argc, argv);
+    if (exitStatus) return exitStatus;
+  }
 
   atexit(exitSessions);
   brlttyPrepare = brlttyPrepare_first;

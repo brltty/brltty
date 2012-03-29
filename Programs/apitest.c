@@ -98,7 +98,7 @@ static void showDisplaySize(void)
   fprintf(stderr,"Getting display size: ");
   if (brlapi_getDisplaySize(&x, &y)<0) {
     brlapi_perror("failed");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
   fprintf(stderr, "%dX%d\n", x, y);
 }
@@ -109,7 +109,7 @@ static void showDriverName(void)
   fprintf(stderr, "Getting driver name: ");
   if (brlapi_getDriverName(name, sizeof(name))<0) {
     brlapi_perror("failed");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
   fprintf(stderr, "%s\n", name);
 }
@@ -124,15 +124,15 @@ static void showDots(void)
   brlapi_keyCode_t k;
   if (brlapi_getDisplaySize(&x, &y)<0) {
     brlapi_perror("failed");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
   if (brlapi_enterTtyMode(-1, NULL)<0) {
     brlapi_perror("enterTtyMode");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
   if (x*y<DOTS_TOTALLEN) {
     fprintf(stderr,"can't show dots with a braille display with less than %d cells\n",(int)DOTS_TOTALLEN);
-    exit(1);
+    exit(OPT_EXIT_SEMANTIC);
   }
   {
     char text[x*y];
@@ -156,7 +156,7 @@ static void showDots(void)
     wa.orMask = or;
     if (brlapi_write(&wa)<0) {
       brlapi_perror("brlapi_write");
-      exit(1);
+      exit(OPT_EXIT_FATAL);
     }
   }
   brlapi_readKey(1, &k);
@@ -177,7 +177,7 @@ static void enterLearnMode(void)
 
   if (brlapi_writeText(BRLAPI_CURSOR_OFF, "command learn mode")<0) {
     brlapi_perror("brlapi_writeText");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
 
   while ((res = brlapi_readKey(1, &code)) != -1) {
@@ -215,7 +215,7 @@ static void showKeyCodes(void)
 
   if (brlapi_writeText(BRLAPI_CURSOR_OFF, "show key codes")<0) {
     brlapi_perror("brlapi_writeText");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
 
   while ((res = brlapi_readKey(1, &cmd)) != -1) {
@@ -236,7 +236,7 @@ static void suspendDriver(void)
   fprintf(stderr, "Getting driver name: ");
   if (brlapi_getDriverName(name, sizeof(name))<0) {
     brlapi_perror("failed");
-    exit(1);
+    exit(OPT_EXIT_FATAL);
   }
   fprintf(stderr, "%s\n", name);
   fprintf(stderr, "Suspending\n");
@@ -270,7 +270,8 @@ int main(int argc, char *argv[])
       OPTION_TABLE(programOptions),
       .applicationName = "apitest"
     };
-    processOptions(&descriptor, &argc, &argv);
+    OptionsResult result = processOptions(&descriptor, &argc, &argv);
+    handleOptionsResult(result);
   }
 
   fprintf(stderr, "Connecting to BrlAPI... ");

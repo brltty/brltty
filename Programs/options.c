@@ -38,8 +38,12 @@
 typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
+
   unsigned char ensuredSettings[0X100];
-  int errorCount;
+
+  unsigned exitImmediately:1;
+  unsigned warning:1;
+  unsigned syntaxError:1;
 } OptionProcessingInformation;
 
 static int
@@ -112,14 +116,14 @@ ensureSetting (
           *option->setting.flag = 0;
         } else if (!(option->flags & OPT_Extend)) {
           logMessage(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
-          info->errorCount++;
+          info->warning = 1;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
             *option->setting.flag = count;
           } else {
             logMessage(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
-            info->errorCount++;
+            info->warning = 1;
           }
         }
       }
@@ -468,7 +472,7 @@ processCommandLine (
         } else {
           if (entry->setting.flag) {
             if (entry->flags & OPT_Extend) {
-              ++*entry->setting.flag;
+              *entry->setting.flag += 1;
             } else {
               *entry->setting.flag = 1;
             }
@@ -488,12 +492,12 @@ processCommandLine (
 
       case '?':
         logMessage(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
-        info->errorCount++;
+        info->syntaxError = 1;
         break;
 
       case ':': /* An invalid option has been specified. */
         logMessage(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
-        info->errorCount++;
+        info->syntaxError = 1;
         break;
 
       case 'H':                /* help */
@@ -507,7 +511,7 @@ processCommandLine (
 
   if (optHelp) {
     printHelp(info, stdout, 79, argumentsSummary, optHelpAll);
-    exit(0);
+    info->exitImmediately = 1;
   }
 
 #ifdef HAVE_GETOPT_LONG
@@ -647,17 +651,17 @@ processConfigurationLine (
 
           if (!operand) {
             logMessage(LOG_ERR, "%s: %s", gettext("operand not supplied for configuration directive"), line);
-            conf->info->errorCount++;
+            conf->info->warning = 1;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
             logMessage(LOG_ERR, "%s: %s", gettext("too many operands for configuration directive"), line);
-            conf->info->errorCount++;
+            conf->info->warning = 1;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
               logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
-              conf->info->errorCount++;
+              conf->info->warning = 1;
 
               free(*setting);
               *setting = NULL;
@@ -678,7 +682,7 @@ processConfigurationLine (
       }
     }
     logMessage(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), line);
-    conf->info->errorCount++;
+    conf->info->warning = 1;
   }
   return 1;
 }
@@ -714,7 +718,7 @@ processConfigurationFile (
 
       if (!processed) {
         logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
-        info->errorCount++;
+        info->warning = 1;
       }
 
       free(conf.settings);
@@ -724,16 +728,19 @@ processConfigurationFile (
 
     fclose(file);
   } else if (!optional || (errno != ENOENT)) {
-    info->errorCount++;
+    info->warning = 1;
   }
 }
 
-int
+OptionsResult
 processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   OptionProcessingInformation info = {
     .optionTable = descriptor->optionTable,
     .optionCount = descriptor->optionCount,
-    .errorCount = 0
+
+    .exitImmediately = 0,
+    .warning = 0,
+    .syntaxError = 0
   };
 
   {
@@ -763,5 +770,7 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     setDefaultOptions(&info, 1);
   }
 
-  return info.errorCount;
+  if (info.exitImmediately) return OPT_EXIT;
+  if (info.syntaxError) return OPT_SYNTAX;
+  return OPT_OK;
 }

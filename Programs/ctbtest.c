@@ -321,7 +321,8 @@ main (int argc, char *argv[]) {
       .applicationName = "ctbtest",
       .argumentsSummary = "[{input-file | -} ...]"
     };
-    processOptions(&descriptor, &argc, &argv);
+    OptionsResult result = processOptions(&descriptor, &argc, &argv);
+    handleOptionsResult(result);
   }
 
   {
@@ -346,7 +347,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
       logMessage(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
-      exit(2);
+      exit(OPT_EXIT_SYNTAX);
     }
   }
 

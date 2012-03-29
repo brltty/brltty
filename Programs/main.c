@@ -98,6 +98,8 @@ serviceMain (DWORD argc, LPSTR *argv) {
         } else {
           serviceReturnCode = 1;
         }
+      } else if (serviceReturnCode == 1) {
+        serviceReturnCode = 0;
       }
 
       setServiceState(SERVICE_STOPPED, serviceReturnCode, "SERVICE_STOPPED");
@@ -176,7 +178,11 @@ main (int argc, char *argv[]) {
 
   {
     int returnCode = brlttyConstruct(argc, argv);
-    if (!returnCode) returnCode = brlttyRun();
+    if (!returnCode) {
+      returnCode = brlttyRun();
+    } else if (returnCode == 1) {
+      returnCode = 0;
+    }
     return returnCode;
   }
 }

@@ -126,7 +126,8 @@ main (int argc, char *argv[]) {
       .applicationName = "brltest",
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
-    processOptions(&descriptor, &argc, &argv);
+    OptionsResult result = processOptions(&descriptor, &argc, &argv);
+    handleOptionsResult(result);
   }
 
   {
@@ -161,8 +162,8 @@ main (int argc, char *argv[]) {
       while (*name) ++name;
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-        logMessage(LOG_ERR, "insufficient memory.");
-        exit(9);
+        logMallocError();
+        exit(OPT_EXIT_FATAL);
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -189,7 +190,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid braille driver parameter: %s", assignment);
       }
-      if (!ok) exit(2);
+      if (!ok) exit(OPT_EXIT_SYNTAX);
       --argc;
     }
 

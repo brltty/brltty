@@ -174,7 +174,8 @@ main (int argc, char *argv[]) {
       .applicationName = "ktbtest",
       .argumentsSummary = "key-table"
     };
-    processOptions(&descriptor, &argc, &argv);
+    OptionsResult result = processOptions(&descriptor, &argc, &argv);
+    handleOptionsResult(result);
   }
 
   {
