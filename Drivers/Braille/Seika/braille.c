@@ -27,15 +27,15 @@
 #include "brl_driver.h"
 #include "brldefs-sk.h"
 
-BEGIN_KEY_NAME_TABLE(navigation)
-  KEY_NAME_ENTRY(SK_NAV_K1, "K1"),
-  KEY_NAME_ENTRY(SK_NAV_K2, "K2"),
-  KEY_NAME_ENTRY(SK_NAV_K3, "K3"),
-  KEY_NAME_ENTRY(SK_NAV_K4, "K4"),
-  KEY_NAME_ENTRY(SK_NAV_K5, "K5"),
-  KEY_NAME_ENTRY(SK_NAV_K6, "K6"),
-  KEY_NAME_ENTRY(SK_NAV_K7, "K7"),
-  KEY_NAME_ENTRY(SK_NAV_K8, "K8"),
+BEGIN_KEY_NAME_TABLE(display)
+  KEY_NAME_ENTRY(SK_BDP_K1, "K1"),
+  KEY_NAME_ENTRY(SK_BDP_K2, "K2"),
+  KEY_NAME_ENTRY(SK_BDP_K3, "K3"),
+  KEY_NAME_ENTRY(SK_BDP_K4, "K4"),
+  KEY_NAME_ENTRY(SK_BDP_K5, "K5"),
+  KEY_NAME_ENTRY(SK_BDP_K6, "K6"),
+  KEY_NAME_ENTRY(SK_BDP_K7, "K7"),
+  KEY_NAME_ENTRY(SK_BDP_K8, "K8"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(notetaker)
@@ -71,8 +71,8 @@ BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(SK_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(navigation),
+BEGIN_KEY_NAME_TABLES(bdp)
+  KEY_NAME_TABLE(display),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
@@ -81,11 +81,11 @@ BEGIN_KEY_NAME_TABLES(ntk)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(bdp)
 DEFINE_KEY_TABLE(ntk)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(bdp),
   &KEY_TABLE_DEFINITION(ntk),
 END_KEY_TABLE_LIST
 
@@ -362,14 +362,14 @@ writeCells_pbc (BrailleDisplay *brl) {
 
 static const ProtocolOperations protocolOperations_pbc = {
   .name = "PowerBraille Compatibility",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
   .readPacket = readPacket_pbc,
   .probeDisplay = probeDisplay_pbc,
   .writeCells = writeCells_pbc
 };
 
 static void
-interpretIdentity_ntv (InputPacket *packet) {
+interpretIdentity_bdp (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
                                     ((packet->bytes[10] - '0') << (4 * 1)) |
                                     ((packet->bytes[11] - '0') << (4 * 0));
@@ -379,24 +379,24 @@ interpretIdentity_ntv (InputPacket *packet) {
 }
 
 static int
-readPacket_ntv (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_bdp (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
     0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_ntv);
+  return readPacket_old(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_bdp);
 }
 
 static int
-probeDisplay_ntv (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_bdp (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0X1C};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_ntv (BrailleDisplay *brl) {
+writeCells_bdp (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF,
     0X73, 0X65, 0X69, 0X6B, 0X61,
@@ -419,12 +419,12 @@ writeCells_ntv (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_ntv = {
-  .name = "Seika Native",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(all),
-  .readPacket = readPacket_ntv,
-  .probeDisplay = probeDisplay_ntv,
-  .writeCells = writeCells_ntv
+static const ProtocolOperations protocolOperations_bdp = {
+  .name = "Seika Braille Display",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
+  .readPacket = readPacket_bdp,
+  .probeDisplay = probeDisplay_bdp,
+  .writeCells = writeCells_bdp
 };
 
 static int
@@ -553,7 +553,7 @@ writeCells_ntk (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations protocolOperations_ntk = {
-  .name = "Seika NoteTaker",
+  .name = "Seika Note Taker",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
   .readPacket = readPacket_ntk,
   .probeDisplay = probeDisplay_ntk,
@@ -562,14 +562,14 @@ static const ProtocolOperations protocolOperations_ntk = {
 
 static const ProtocolOperations *const allProtocols[] = {
   &protocolOperations_ntk,
-  &protocolOperations_ntv,
+  &protocolOperations_bdp,
   &protocolOperations_pbc,
   NULL
 };
 
 static const ProtocolOperations *const nativeProtocols[] = {
   &protocolOperations_ntk,
-  &protocolOperations_ntv,
+  &protocolOperations_bdp,
   NULL
 };
 
@@ -593,14 +593,14 @@ connectResource (const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* Seika */
+    { /* Seika Braille Display */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial=&serialParameters
     }
     ,
-    { /* Seika notetaker */
+    { /* Seika Note Taker */
       .vendor=0X10C4, .product=0XEA80,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2

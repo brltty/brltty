@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Seika
+title Seika Braille Display
 
 note The round keys to the left/right of the braille cells are named K1 and K8.
 note The left/right ends of the left rocker are named K2 and K3.

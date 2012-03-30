@@ -19,15 +19,15 @@
 #define BRLTTY_INCLUDED_SK_BRLDEFS
 
 typedef enum {
-  SK_NAV_K1 =  0,
-  SK_NAV_K7 =  1,
-  SK_NAV_K8 =  2,
-  SK_NAV_K6 =  3,
-  SK_NAV_K5 =  4,
-  SK_NAV_K2 =  9,
-  SK_NAV_K3 = 11,
-  SK_NAV_K4 = 12
-} SK_NavigationKey;
+  SK_BDP_K1 =  0,
+  SK_BDP_K7 =  1,
+  SK_BDP_K8 =  2,
+  SK_BDP_K6 =  3,
+  SK_BDP_K5 =  4,
+  SK_BDP_K2 =  9,
+  SK_BDP_K3 = 11,
+  SK_BDP_K4 = 12
+} SK_BrailleDisplayKey;
 
 typedef enum {
   SK_NTK_Dot1               =  0,
