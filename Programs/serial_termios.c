@@ -374,3 +374,17 @@ serialDrainOutput (SerialDevice *serial) {
   return 0;
 }
 
+int
+serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
+  if (tcgetattr(serial->fileDescriptor, attributes) != -1) return 1;
+  logSystemError("tcgetattr");
+  return 0;
+}
+
+int
+serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
+  if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) != -1) return 1;
+  logSystemError("tcsetattr");
+  return 0;
+}
+

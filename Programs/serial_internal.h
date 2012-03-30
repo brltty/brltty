@@ -167,6 +167,9 @@ extern int serialCancelInput (SerialDevice *serial);
 extern int serialCancelOutput (SerialDevice *serial);
 extern int serialDrainOutput (SerialDevice *serial);
 
+extern int serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes);
+extern int serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

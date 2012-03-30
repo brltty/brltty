@@ -247,3 +247,18 @@ serialDrainOutput (SerialDevice *serial) {
   return 0;
 }
 
+int
+serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
+  attributes->DCBlength = sizeof(serial->currentAttributes);
+  if (GetCommState(serial->fileHandle, attributes)) return 1;
+  logWindowsSystemError("GetCommState");
+  return 0;
+}
+
+int
+serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
+  if (SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) return 1;
+  logWindowsSystemError("SetCommState");
+  return 0;
+}
+

@@ -259,83 +259,17 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
 
 static int
 serialReadAttributes (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  serial->currentAttributes.DCBlength = sizeof(serial->currentAttributes);
-  if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
-  logWindowsSystemError("GetCommState");
-#elif defined(__MSDOS__)
-  int interruptsWereEnabled = disable();
-  unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
-  int divisor;
-
-  serialWritePort(serial, SERIAL_PORT_LCR,
-                  lcr | SERIAL_FLAG_LCR_DLAB);
-  divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
-            serialReadPort(serial, SERIAL_PORT_DLL);
-  serialWritePort(serial, SERIAL_PORT_LCR, lcr);
-  if (interruptsWereEnabled) enable();
-
-  serial->currentAttributes.bios.byte = lcr;
-  {
-    const SerialBaudEntry *baud = serialGetBaudEntry(SERIAL_DIVISOR_BASE/divisor);
-    if (baud) {
-      serial->currentAttributes.speed = baud->speed;
-    } else {
-      memset(&serial->currentAttributes.speed, 0,
-             sizeof(serial->currentAttributes.speed));
-    }
-  }
-  serial->currentAttributes.bios.fields.bps = serial->currentAttributes.speed.biosBPS;
-
-  return 1;
-#else /* UNIX */
-  if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
-  logSystemError("tcgetattr");
-#endif /* read attributes */
-  return 0;
+  return serialGetAttributes(serial, &serial->currentAttributes);
 }
 
 static int
 serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
     if (!serialAwaitOutput(serial)) return 0;
-
-#if defined(__MINGW32__)
-    if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {
-      logWindowsSystemError("SetCommState");
-      return 0;
-    }
-#elif defined(__MSDOS__)
-    {
-      if (attributes->speed.biosBPS <= 7) {
-        if (bioscom(0, attributes->bios.byte, serial->port) & 0X0700) {
-          logMessage(LOG_ERR, "serialWriteAttributes failed");
-          return 0;
-        }
-      } else {
-        int interruptsWereEnabled = disable();
-        SerialBiosConfiguration lcr = attributes->bios;
-        lcr.fields.bps = 0;
-
-        serialWritePort(serial, SERIAL_PORT_LCR,
-                        lcr.byte | SERIAL_FLAG_LCR_DLAB);
-        serialWritePort(serial, SERIAL_PORT_DLL,
-                        attributes->speed.divisor & 0XFF);
-        serialWritePort(serial, SERIAL_PORT_DLH,
-                        attributes->speed.divisor >> 8);
-        serialWritePort(serial, SERIAL_PORT_LCR, lcr.byte);
-        if (interruptsWereEnabled) enable();
-      }
-    }
-#else /* UNIX */
-    if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) == -1) {
-      logSystemError("tcsetattr");
-      return 0;
-    }
-#endif /* write attributes */
-
+    if (!serialPutAttributes(serial, attributes)) return 0;
     serialCopyAttributes(&serial->currentAttributes, attributes);
   }
+
   return 1;
 }
 

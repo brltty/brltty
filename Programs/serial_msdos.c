@@ -165,3 +165,58 @@ serialDrainOutput (SerialDevice *serial) {
   return 1;
 }
 
+int
+serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
+  int interruptsWereEnabled = disable();
+  unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
+  int divisor;
+
+  serialWritePort(serial, SERIAL_PORT_LCR,
+                  lcr | SERIAL_FLAG_LCR_DLAB);
+  divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
+            serialReadPort(serial, SERIAL_PORT_DLL);
+  serialWritePort(serial, SERIAL_PORT_LCR, lcr);
+  if (interruptsWereEnabled) enable();
+
+  attributes->bios.byte = lcr;
+  {
+    const SerialBaudEntry *baud = serialGetBaudEntry(SERIAL_DIVISOR_BASE/divisor);
+    if (baud) {
+      attributes->speed = baud->speed;
+    } else {
+      memset(attributes.speed, 0,
+             sizeof(attributes->speed));
+    }
+  }
+  attributes->bios.fields.bps = attributes->speed.biosBPS;
+
+  return 1;
+}
+
+int
+serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
+  {
+    if (attributes->speed.biosBPS <= 7) {
+      if (bioscom(0, attributes->bios.byte, serial->port) & 0X0700) {
+        logMessage(LOG_ERR, "bioscom failed");
+        return 0;
+      }
+    } else {
+      int interruptsWereEnabled = disable();
+      SerialBiosConfiguration lcr = attributes->bios;
+      lcr.fields.bps = 0;
+
+      serialWritePort(serial, SERIAL_PORT_LCR,
+                      lcr.byte | SERIAL_FLAG_LCR_DLAB);
+      serialWritePort(serial, SERIAL_PORT_DLL,
+                      attributes->speed.divisor & 0XFF);
+      serialWritePort(serial, SERIAL_PORT_DLH,
+                      attributes->speed.divisor >> 8);
+      serialWritePort(serial, SERIAL_PORT_LCR, lcr.byte);
+      if (interruptsWereEnabled) enable();
+    }
+  }
+
+  return 1;
+}
+
