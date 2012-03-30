@@ -144,7 +144,7 @@ END_SERIAL_BAUD_TABLE
 
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
-  attributes->c_cflag = CREAD | CLOCAL | CS8;
+  attributes->c_cflag = CREAD | CLOCAL;
   attributes->c_iflag = IGNPAR | IGNBRK;
 
 #ifdef IEXTEN
@@ -153,8 +153,9 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
 
 #ifdef _POSIX_VDISABLE
   if (_POSIX_VDISABLE) {
-    int i;
-    for (i=0; i<NCCS; ++i) {
+    unsigned int i;
+
+    for (i=0; i<NCCS; i+=1) {
       if (i == VTIME) continue;
       if (i == VMIN) continue;
       attributes->c_cc[i] = _POSIX_VDISABLE;
@@ -164,9 +165,9 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
 }
 
 int
-serialPutSpeed (SerialDevice *serial, SerialSpeed speed) {
-  if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
-    if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
+serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
+  if (cfsetospeed(attributes, speed) != -1) {
+    if (cfsetispeed(attributes, speed) != -1) {
       return 1;
     } else {
       logSystemError("cfsetispeed");

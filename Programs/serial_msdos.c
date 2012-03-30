@@ -75,15 +75,12 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
 
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
-  attributes->speed = serialGetBaudEntry(9600)->speed;
-  attributes->bios.fields.bps = attributes->speed.biosBPS;
-  attributes->bios.fields.bits = 8 - 5;
 }
 
 int
-serialPutSpeed (SerialDevice *serial, SerialSpeed speed) {
-  serial->pendingAttributes.speed = speed;
-  serial->pendingAttributes.bios.fields.bps = serial->pendingAttributes.speed.biosBPS;
+serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
+  attributes->speed = speed;
+  attributes->bios.fields.bps = attributes->speed.biosBPS;
   return 1;
 }
 

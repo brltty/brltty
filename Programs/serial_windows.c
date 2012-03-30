@@ -82,18 +82,14 @@ void
 serialPutInitialAttributes (SerialAttributes *attributes) {
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
-  attributes->ByteSize = 8;
-  attributes->BaudRate = CBR_9600;
-  attributes->fRtsControl = RTS_CONTROL_ENABLE;
-  attributes->fDtrControl = DTR_CONTROL_ENABLE;
   attributes->fTXContinueOnXoff = TRUE;
   attributes->XonChar = 0X11;
   attributes->XoffChar = 0X13;
 }
 
 int
-serialPutSpeed (SerialDevice *serial, SerialSpeed speed) {
-  serial->pendingAttributes.BaudRate = speed;
+serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
+  attributes->BaudRate = speed;
   return 1;
 }
 

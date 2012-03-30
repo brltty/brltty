@@ -34,6 +34,32 @@ static void
 serialInitializeAttributes (SerialAttributes *attributes) {
   memset(attributes, 0, sizeof(*attributes));
   serialPutInitialAttributes(attributes);
+
+  {
+    const SerialBaudEntry *entry = serialGetBaudEntry(SERIAL_DEFAULT_BAUD);
+
+    if (!entry) {
+      logMessage(LOG_WARNING, "default serial baud not defined: %u", SERIAL_DEFAULT_BAUD);
+    } else if (!serialPutSpeed(attributes, entry->speed)) {
+      logMessage(LOG_WARNING, "default serial baud not supported: %u", SERIAL_DEFAULT_BAUD);
+    }
+  }
+
+  if (!serialPutDataBits(attributes, SERIAL_DEFAULT_DATA_BITS)) {
+    logMessage(LOG_WARNING, "default serial data bits not supported: %u", SERIAL_DEFAULT_DATA_BITS);
+  }
+
+  if (!serialPutStopBits(attributes, SERIAL_DEFAULT_STOP_BITS)) {
+    logMessage(LOG_WARNING, "default serial stop bits not supported: %u", SERIAL_DEFAULT_STOP_BITS);
+  }
+
+  if (!serialPutParity(attributes, SERIAL_DEFAULT_PARITY)) {
+    logMessage(LOG_WARNING, "default serial parity not supported: %u", SERIAL_DEFAULT_PARITY);
+  }
+
+  if (serialPutFlowControl(attributes, SERIAL_DEFAULT_FLOW_CONTROL)) {
+    logMessage(LOG_WARNING, "default serial flow control not supported: 0X%04X", SERIAL_DEFAULT_FLOW_CONTROL);
+  }
 }
 
 int
@@ -41,7 +67,7 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
   const SerialBaudEntry *entry = serialGetBaudEntry(baud);
 
   if (entry) {
-    if (serialPutSpeed(serial, entry->speed)) {
+    if (serialPutSpeed(&serial->pendingAttributes, entry->speed)) {
       return 1;
     } else {
       logMessage(LOG_WARNING, "unsupported serial baud: %d", baud);
@@ -155,7 +181,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingFlowControlProc = NULL;
   }
 
-  serialPutModemState(&serial->pendingAttributes, !serial->pendingFlowControlProc);
+  serialPutModemState(&serial->pendingAttributes, !!serial->pendingFlowControlProc);
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
@@ -853,7 +879,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
 #endif /* HAVE_POSIX_THREADS */
 
 #ifdef B0
-  if (!serialPutSpeed(serial, B0)) return 0;
+  if (!serialPutSpeed(&serial->pendingAttributes, B0)) return 0;
   usingB0 = 1;
 #else /* B0 */
   usingB0 = 0;

@@ -152,7 +152,7 @@ extern SERIAL_BAUD_TABLE_DECLARATION;
 #define END_SERIAL_BAUD_TABLE {0} };
 
 extern void serialPutInitialAttributes (SerialAttributes *attributes);
-extern int serialPutSpeed (SerialDevice *serial, SerialSpeed speed);
+extern int serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed);
 extern int serialPutDataBits (SerialAttributes *attributes, unsigned int bits);
 extern int serialPutStopBits (SerialAttributes *attributes, SerialStopBits bits);
 extern int serialPutParity (SerialAttributes *attributes, SerialParity parity);
