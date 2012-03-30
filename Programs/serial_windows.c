@@ -203,3 +203,22 @@ void
 serialPutModemState (SerialAttributes *attributes, int enabled) {
 }
 
+unsigned int
+serialGetDataBits (const SerialAttributes *attributes) {
+  return attributes->ByteSize;
+}
+
+unsigned int
+serialGetStopBits (const SerialAttributes *attributes) {
+  if (attributes->StopBits == ONESTOPBIT) return 1;
+  if (attributes->StopBits == TWOSTOPBITS) return 2;
+
+  logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", attributes->StopBits);
+  return 0;
+}
+
+unsigned int
+serialGetParityBits (const SerialAttributes *attributes) {
+  return (attributes->fParity && (attributes->Parity != NOPARITY))? 1: 0;
+}
+

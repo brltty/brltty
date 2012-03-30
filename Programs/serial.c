@@ -179,66 +179,13 @@ serialGetCharacterSize (const SerialParameters *parameters) {
 }
 
 unsigned int
-serialGetDataBits (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  return serial->pendingAttributes.ByteSize;
-#elif defined(__MSDOS__)
-  return serial->pendingAttributes.bios.fields.bits + 5;
-#else /* UNIX */
-  tcflag_t size = serial->pendingAttributes.c_cflag & CSIZE;
-
-  switch (size) {
-#ifdef CS5
-    case CS5: return 5;
-#endif /* CS5 */
-
-#ifdef CS6
-    case CS6: return 6;
-#endif /* CS6 */
-
-#ifdef CS7
-    case CS7: return 7;
-#endif /* CS7 */
-
-#ifdef CS8
-    case CS8: return 8;
-#endif /* CS8 */
-
-    default:
-      logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
-      return 0;
-  }
-#endif /* data bits */
-}
-
-unsigned int
-serialGetParityBits (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  return (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY))? 1: 0;
-#elif defined(__MSDOS__)
-  return serial->pendingAttributes.bios.fields.parity? 1: 0;
-#else /* UNIX */
-  return (serial->pendingAttributes.c_cflag & PARENB)? 1: 0;
-#endif /* parity bits */
-}
-
-unsigned int
-serialGetStopBits (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  if (serial->pendingAttributes.StopBits == ONESTOPBIT) return 1;
-  if (serial->pendingAttributes.StopBits == TWOSTOPBITS) return 2;
-  logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
-  return 0;
-#elif defined(__MSDOS__)
-  return serial->pendingAttributes.bios.fields.stop? 2: 1;
-#else /* UNIX */
-  return (serial->pendingAttributes.c_cflag & CSTOPB)? 2: 1;
-#endif /* stop bits */
-}
-
-unsigned int
 serialGetCharacterBits (SerialDevice *serial) {
-  return 1 + serialGetDataBits(serial) + serialGetParityBits(serial) + serialGetStopBits(serial);
+  const SerialAttributes *attributes = &serial->pendingAttributes;
+  return 1
+       + serialGetDataBits(attributes)
+       + serialGetParityBits(attributes)
+       + serialGetStopBits(attributes)
+       ;
 }
 
 int

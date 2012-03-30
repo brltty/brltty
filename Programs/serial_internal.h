@@ -158,6 +158,10 @@ extern int serialPutParity (SerialAttributes *attributes, SerialParity parity);
 extern SerialFlowControl serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow);
 extern void serialPutModemState (SerialAttributes *attributes, int enabled);
 
+extern unsigned int serialGetDataBits (const SerialAttributes *attributes);
+extern unsigned int serialGetStopBits (const SerialAttributes *attributes);
+extern unsigned int serialGetParityBits (const SerialAttributes *attributes);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

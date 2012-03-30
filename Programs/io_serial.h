@@ -64,9 +64,6 @@ extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 
 extern unsigned int serialGetCharacterSize (const SerialParameters *parameters);
 extern unsigned int serialGetCharacterBits (SerialDevice *serial);
-extern unsigned int serialGetDataBits (SerialDevice *serial);
-extern unsigned int serialGetParityBits (SerialDevice *serial);
-extern unsigned int serialGetStopBits (SerialDevice *serial);
 
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);

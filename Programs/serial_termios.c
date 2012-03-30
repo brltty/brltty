@@ -310,3 +310,40 @@ serialPutModemState (SerialAttributes *attributes, int enabled) {
   }
 }
 
+unsigned int
+serialGetDataBits (const SerialAttributes *attributes) {
+  tcflag_t size = attributes->c_cflag & CSIZE;
+
+  switch (size) {
+#ifdef CS5
+    case CS5: return 5;
+#endif /* CS5 */
+
+#ifdef CS6
+    case CS6: return 6;
+#endif /* CS6 */
+
+#ifdef CS7
+    case CS7: return 7;
+#endif /* CS7 */
+
+#ifdef CS8
+    case CS8: return 8;
+#endif /* CS8 */
+
+    default:
+      logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long)size);
+      return 0;
+  }
+}
+
+unsigned int
+serialGetStopBits (const SerialAttributes *attributes) {
+  return (attributes->c_cflag & CSTOPB)? 2: 1;
+}
+
+unsigned int
+serialGetParityBits (const SerialAttributes *attributes) {
+  return (attributes->c_cflag & PARENB)? 1: 0;
+}
+

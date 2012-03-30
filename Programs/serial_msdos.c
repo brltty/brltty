@@ -138,3 +138,18 @@ void
 serialPutModemState (SerialAttributes *attributes, int enabled) {
 }
 
+unsigned int
+serialGetDataBits (const SerialAttributes *attributes) {
+  return attributes->bios.fields.bits + 5;
+}
+
+unsigned int
+serialGetStopBits (const SerialAttributes *attributes) {
+  return attributes->bios.fields.stop? 2: 1;
+}
+
+unsigned int
+serialGetParityBits (const SerialAttributes *attributes) {
+  return attributes->bios.fields.parity? 1: 0;
+}
+
