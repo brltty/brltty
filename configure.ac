@@ -1124,6 +1124,21 @@ in
       ;;
 esac
 
+BRLTTY_ARG_PACKAGE([serial], [SERIAL], [termios], [dnl
+   mingw*)
+      serial_package="windows"
+      ;;
+   msdos*)
+      serial_package="msdos"
+      ;;
+], [dnl
+   termios)
+      AC_CHECK_HEADER([termios.h], [dnl
+         serial_package="termios"
+      ])
+      ;;
+])
+
 BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
    linux*|eabi*)
       usb_package="linux"

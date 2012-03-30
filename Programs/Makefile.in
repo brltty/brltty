@@ -162,10 +162,17 @@ io_generic.$O:
 
 ###############################################################################
 
-SERIAL_OBJECTS = serial.$O
-
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
+
+serial_termios.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_termios.c
+
+serial_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_windows.c
+
+serial_msdos.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_msdos.c
 
 ###############################################################################
 

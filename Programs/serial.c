@@ -18,370 +18,11 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#ifdef HAVE_SYS_MODEM_H
-#include <sys/modem.h>
-#endif /* HAVE_SYS_MODEM_H */
-
-#ifdef HAVE_POSIX_THREADS
-#ifdef __MINGW32__
-#include "win_pthread.h"
-#else /* __MINGW32__ */
-#include <pthread.h>
-#endif /* __MINGW32__ */
-#endif /* HAVE_POSIX_THREADS */
-
-#if defined(__MINGW32__)
-
-#ifdef __MINGW32__
-#include <io.h>
-#else /* __MINGW32__ */
-#include <sys/cygwin.h>
-#endif /* __MINGW32__ */
-
-typedef DWORD SerialSpeed;
-typedef DCB SerialAttributes;
-
-typedef DWORD SerialLines;
-#define SERIAL_LINE_RTS 0X01
-#define SERIAL_LINE_DTR 0X02
-#define SERIAL_LINE_CTS MS_CTS_ON
-#define SERIAL_LINE_DSR MS_DSR_ON
-#define SERIAL_LINE_RNG MS_RING_ON
-#define SERIAL_LINE_CAR MS_RLSD_ON
-
-#elif defined(__MSDOS__)
-
-#include <dos.h>
-#include <dpmi.h>
-#include <bios.h>
-#include <go32.h>
-#include <sys/farptr.h>
-#include "system.h"
-
-typedef struct {
-  unsigned short divisor;
-  unsigned short biosBPS;
-} SerialSpeed;
-
-#define SERIAL_DIVISOR_BASE 115200
-#define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
-#define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
-#define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
-#define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
-#define SERIAL_SPEED_300    SERIAL_SPEED(   300,  2)
-#define SERIAL_SPEED_600    SERIAL_SPEED(   600,  3)
-#define SERIAL_SPEED_1200   SERIAL_SPEED(  1200,  4)
-#define SERIAL_SPEED_2400   SERIAL_SPEED(  2400,  5)
-#define SERIAL_SPEED_4800   SERIAL_SPEED(  4800,  6)
-#define SERIAL_SPEED_9600   SERIAL_SPEED(  9600,  7)
-#define SERIAL_SPEED_19200  SERIAL_SPEED( 19200,  8)
-#define SERIAL_SPEED_38400  SERIAL_SPEED( 38400,  9)
-#define SERIAL_SPEED_57600  SERIAL_SPEED( 57600, 10)
-#define SERIAL_SPEED_115200 SERIAL_SPEED(115200, 11)
-
-typedef union {
-  unsigned char byte;
-  struct {
-    unsigned bits:2;
-    unsigned stop:1;
-    unsigned parity:2;
-    unsigned bps:3;
-  } fields;
-} SerialBiosConfiguration;
-
-typedef struct {
-  SerialBiosConfiguration bios;
-  SerialSpeed speed;
-} SerialAttributes;
-
-typedef unsigned char SerialLines;
-#define SERIAL_LINE_DTR 0X01
-#define SERIAL_LINE_RTS 0X02
-#define SERIAL_LINE_CTS 0X10
-#define SERIAL_LINE_DSR 0X20
-#define SERIAL_LINE_RNG 0X40
-#define SERIAL_LINE_CAR 0X80
-
-#define SERIAL_PORT_RBR 0 /* receive buffered register */
-#define SERIAL_PORT_THR 0 /* transmit holding register */
-#define SERIAL_PORT_DLL 0 /* divisor latch low */
-#define SERIAL_PORT_IER 1 /* interrupt enable register */
-#define SERIAL_PORT_DLH 1 /* divisor latch high */
-#define SERIAL_PORT_IIR 2 /* interrupt id register */
-#define SERIAL_PORT_LCR 3 /* line control register */
-#define SERIAL_PORT_MCR 4 /* modem control register */
-#define SERIAL_PORT_MSR 6 /* modem status register */
-
-#define SERIAL_FLAG_LCR_DLAB 0X80 /* divisor latch access bit */
-
-#else /* UNIX */
-
-#include <sys/ioctl.h>
-#include <termios.h>
-
-typedef speed_t SerialSpeed;
-typedef struct termios SerialAttributes;
-
-typedef int SerialLines;
-#define SERIAL_LINE_RTS TIOCM_RTS
-#define SERIAL_LINE_DTR TIOCM_DTR
-#define SERIAL_LINE_CTS TIOCM_CTS
-#define SERIAL_LINE_DSR TIOCM_DSR
-#define SERIAL_LINE_RNG TIOCM_RNG
-#define SERIAL_LINE_CAR TIOCM_CAR
-
-#endif /* definitions */
-
-#include "io_serial.h"
-#include "io_misc.h"
-#include "log.h"
-#include "device.h"
-#include "parse.h"
-#include "timing.h"
-
-typedef void * (*FlowControlProc) (void *arg);
-
-struct SerialDeviceStruct {
-  int fileDescriptor;
-  SerialAttributes originalAttributes;
-  SerialAttributes currentAttributes;
-  SerialAttributes pendingAttributes;
-  FILE *stream;
-
-  SerialLines linesState;
-  SerialLines waitLines;
-
-#ifdef HAVE_POSIX_THREADS
-  FlowControlProc currentFlowControlProc;
-  FlowControlProc pendingFlowControlProc;
-  pthread_t flowControlThread;
-  unsigned flowControlRunning:1;
-#endif /* HAVE_POSIX_THREADS */
-
-#ifdef __MINGW32__
-  HANDLE fileHandle;
-  int pending;
-#endif /* __MINGW32__ */
-
-#ifdef __MSDOS__
-  int port;
-#endif /* __MSDOS__ */
-};
-
-typedef struct {
-  unsigned int baud;
-  SerialSpeed speed;
-} BaudEntry;
-static const BaudEntry baudTable[] = {
-#if defined(__MINGW32__)
-
-#ifdef CBR_110
-  {110, CBR_110},
-#endif /* CBR_110 */
-
-#ifdef CBR_300
-  {300, CBR_300},
-#endif /* CBR_300 */
-
-#ifdef CBR_600
-  {600, CBR_600},
-#endif /* CBR_600 */
-
-#ifdef CBR_1200
-  {1200, CBR_1200},
-#endif /* CBR_1200 */
-
-#ifdef CBR_2400
-  {2400, CBR_2400},
-#endif /* CBR_2400 */
-
-#ifdef CBR_4800
-  {4800, CBR_4800},
-#endif /* CBR_4800 */
-
-#ifdef CBR_9600
-  {9600, CBR_9600},
-#endif /* CBR_9600 */
-
-#ifdef CBR_14400
-  {14400, CBR_14400},
-#endif /* CBR_14400 */
-
-#ifdef CBR_19200
-  {19200, CBR_19200},
-#endif /* CBR_19200 */
-
-#ifdef CBR_38400
-  {38400, CBR_38400},
-#endif /* CBR_38400 */
-
-#ifdef CBR_56000
-  {56000, CBR_56000},
-#endif /* CBR_56000 */
-
-#ifdef CBR_57600
-  {57600, CBR_57600},
-#endif /* CBR_57600 */
-
-#ifdef CBR_115200
-  {115200, CBR_115200},
-#endif /* CBR_115200 */
-
-#ifdef CBR_256000
-  {256000, CBR_256000},
-#endif /* CBR_256000 */
-
-#elif defined(__MSDOS__)
-
-  {110, SERIAL_SPEED_110},
-  {150, SERIAL_SPEED_150},
-  {300, SERIAL_SPEED_300},
-  {600, SERIAL_SPEED_600},
-  {1200, SERIAL_SPEED_1200},
-  {2400, SERIAL_SPEED_2400},
-  {4800, SERIAL_SPEED_4800},
-  {9600, SERIAL_SPEED_9600},
-  {19200, SERIAL_SPEED_19200},
-  {38400, SERIAL_SPEED_38400},
-  {57600, SERIAL_SPEED_57600},
-  {115200, SERIAL_SPEED_115200},
-
-#else /* UNIX */
-
-#ifdef B50
-  {50, B50},
-#endif /* B50 */
-
-#ifdef B75
-  {75, B75},
-#endif /* B75 */
-
-#ifdef B110
-  {110, B110},
-#endif /* B110 */
-
-#ifdef B134
-  {134, B134},
-#endif /* B134 */
-
-#ifdef B150
-  {150, B150},
-#endif /* B150 */
-
-#ifdef B200
-  {200, B200},
-#endif /* B200 */
-
-#ifdef B300
-  {300, B300},
-#endif /* B300 */
-
-#ifdef B600
-  {600, B600},
-#endif /* B600 */
-
-#ifdef B1200
-  {1200, B1200},
-#endif /* B1200 */
-
-#ifdef B1800
-  {1800, B1800},
-#endif /* B1800 */
-
-#ifdef B2400
-  {2400, B2400},
-#endif /* B2400 */
-
-#ifdef B4800
-  {4800, B4800},
-#endif /* B4800 */
-
-#ifdef B9600
-  {9600, B9600},
-#endif /* B9600 */
-
-#ifdef B19200
-  {19200, B19200},
-#endif /* B19200 */
-
-#ifdef B38400
-  {38400, B38400},
-#endif /* B38400 */
-
-#ifdef B57600
-  {57600, B57600},
-#endif /* B57600 */
-
-#ifdef B115200
-  {115200, B115200},
-#endif /* B115200 */
-
-#ifdef B230400
-  {230400, B230400},
-#endif /* B230400 */
-
-#ifdef B460800
-  {460800, B460800},
-#endif /* B460800 */
-
-#ifdef B500000
-  {500000, B500000},
-#endif /* B500000 */
-
-#ifdef B576000
-  {576000, B576000},
-#endif /* B576000 */
-
-#ifdef B921600
-  {921600, B921600},
-#endif /* B921600 */
-
-#ifdef B1000000
-  {1000000, B1000000},
-#endif /* B1000000 */
-
-#ifdef B1152000
-  {1152000, B1152000},
-#endif /* B1152000 */
-
-#ifdef B1500000
-  {1500000, B1500000},
-#endif /* B1500000 */
-
-#ifdef B2000000
-  {2000000, B2000000},
-#endif /* B2000000 */
-
-#ifdef B2500000
-  {2500000, B2500000},
-#endif /* B2500000 */
-
-#ifdef B3000000
-  {3000000, B3000000},
-#endif /* B3000000 */
-
-#ifdef B3500000
-  {3500000, B3500000},
-#endif /* B3500000 */
-
-#ifdef B4000000
-  {4000000, B4000000},
-#endif /* B4000000 */
-
-#endif /* baud table */
-
-  {0}
-};
+#include "serial_internal.h"
 
 static const BaudEntry *
 getBaudEntry (unsigned int baud) {
-  const BaudEntry *entry = baudTable;
+  const BaudEntry *entry = serialBaudTable;
   while (entry->baud) {
     if (baud == entry->baud) return entry;
     ++entry;
@@ -389,94 +30,26 @@ getBaudEntry (unsigned int baud) {
   return NULL;
 }
 
-#ifdef __MSDOS__
-static unsigned short
-serialPortBase (SerialDevice *serial) {
-  return _farpeekw(_dos_ds, 0X0400 + 2*serial->port);
-}
-
-static unsigned char
-serialReadPort (SerialDevice *serial, unsigned char port) {
-  return readPort1(serialPortBase(serial)+port);
-}
-
-static void
-serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) {
-  writePort1(serialPortBase(serial)+port, value);
-}
-#endif /* __MSDOS__ */
-
 static void
 serialInitializeAttributes (SerialAttributes *attributes) {
   memset(attributes, 0, sizeof(*attributes));
-#if defined(__MINGW32__)
-  attributes->DCBlength = sizeof(*attributes);
-  attributes->fBinary = TRUE;
-  attributes->ByteSize = 8;
-  attributes->BaudRate = CBR_9600;
-  attributes->fRtsControl = RTS_CONTROL_ENABLE;
-  attributes->fDtrControl = DTR_CONTROL_ENABLE;
-  attributes->fTXContinueOnXoff = TRUE;
-  attributes->XonChar = 0X11;
-  attributes->XoffChar = 0X13;
-#elif defined(__MSDOS__)
-  attributes->speed = SERIAL_SPEED_9600;
-  attributes->bios.fields.bps = attributes->speed.biosBPS;
-  attributes->bios.fields.bits = 8 - 5;
-#else /* UNIX */
-  attributes->c_cflag = CREAD | CLOCAL | CS8;
-  attributes->c_iflag = IGNPAR | IGNBRK;
-
-#ifdef IEXTEN
-  attributes->c_lflag |= IEXTEN;
-#endif /* IEXTEN */
-
-#ifdef _POSIX_VDISABLE
-  if (_POSIX_VDISABLE) {
-    int i;
-    for (i=0; i<NCCS; ++i) {
-      if (i == VTIME) continue;
-      if (i == VMIN) continue;
-      attributes->c_cc[i] = _POSIX_VDISABLE;
-    }
-  }
-#endif /* _POSIX_VDISABLE */
-#endif /* initialize attributes */
-}
-
-static int
-serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
-#if defined(__MINGW32__)
-  serial->pendingAttributes.BaudRate = speed;
-  return 1;
-#elif defined(__MSDOS__)
-  serial->pendingAttributes.speed = speed;
-  serial->pendingAttributes.bios.fields.bps = serial->pendingAttributes.speed.biosBPS;
-  return 1;
-#else /* UNIX */
-  if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
-    if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
-      return 1;
-    } else {
-      logSystemError("cfsetispeed");
-    }
-  } else {
-    logSystemError("cfsetospeed");
-  }
-  return 0;
-#endif /* set speed */
+  serialPutInitialAttributes(attributes);
 }
 
 int
 serialSetBaud (SerialDevice *serial, unsigned int baud) {
   const BaudEntry *entry = getBaudEntry(baud);
+
   if (entry) {
-    if (serialSetSpeed(serial, entry->speed)) {
+    if (serialPutSpeed(serial, entry->speed)) {
       return 1;
+    } else {
+      logMessage(LOG_WARNING, "unsupported serial baud: %d", baud);
     }
   } else {
-    logMessage(LOG_WARNING, "unsupported serial baud: %d", baud);
+    logMessage(LOG_WARNING, "undefined serial baud: %d", baud);
   }
+
   return 0;
 }
 
@@ -504,147 +77,21 @@ serialValidateBaud (unsigned int *baud, const char *description, const char *wor
 
 int
 serialSetDataBits (SerialDevice *serial, unsigned int bits) {
-#if defined(__MINGW32__) || defined(__MSDOS__)
-  if ((bits < 5) || (bits > 8)) {
-#else /* UNIX */
-  tcflag_t size;
-  switch (bits) {
-#ifdef CS5
-    case 5: size = CS5; break;
-#endif /* CS5 */
-
-#ifdef CS6
-    case 6: size = CS6; break;
-#endif /* CS6 */
-
-#ifdef CS7
-    case 7: size = CS7; break;
-#endif /* CS7 */
-
-#ifdef CS8
-    case 8: size = CS8; break;
-#endif /* CS8 */
-
-    default:
-#endif /* test data bits */
-      logMessage(LOG_WARNING, "unsupported serial data bit count: %d", bits);
-      return 0;
-  }
-
-#if defined(__MINGW32__)
-  serial->pendingAttributes.ByteSize = bits;
-#elif defined(__MSDOS__)
-  serial->pendingAttributes.bios.fields.bits = bits - 5;
-#else /* UNIX */
-  serial->pendingAttributes.c_cflag &= ~CSIZE;
-  serial->pendingAttributes.c_cflag |= size;
-#endif /* set data bits */
-  return 1;
+  if (serialPutDataBits(&serial->pendingAttributes, bits)) return 1;
+  logMessage(LOG_WARNING, "unsupported serial data bit count: %d", bits);
+  return 0;
 }
 
 int
 serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
-#if defined(__MINGW32__)
-  if (bits == SERIAL_STOP_1) {
-    serial->pendingAttributes.StopBits = ONESTOPBIT;
-  } else if (bits == SERIAL_STOP_1_5) {
-    serial->pendingAttributes.StopBits = ONE5STOPBITS;
-  } else if (bits == SERIAL_STOP_2) {
-    serial->pendingAttributes.StopBits = TWOSTOPBITS;
-#elif defined(__MSDOS__)
-  if (bits == SERIAL_STOP_1) {
-    serial->pendingAttributes.bios.fields.stop = 0;
-  } else if (bits == 15 || bits == SERIAL_STOP_2) {
-    serial->pendingAttributes.bios.fields.stop = 1;
-#else /* UNIX */
-  if (bits == SERIAL_STOP_1) {
-    serial->pendingAttributes.c_cflag &= ~CSTOPB;
-  } else if (bits == SERIAL_STOP_2) {
-    serial->pendingAttributes.c_cflag |= CSTOPB;
-#endif /* set stop bits */
-  } else {
-    logMessage(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
-    return 0;
-  }
-  return 1;
+  if (serialPutStopBits(&serial->pendingAttributes, bits)) return 1;
+  logMessage(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
+  return 0;
 }
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
-#if defined(__MINGW32__)
-  serial->pendingAttributes.fParity = FALSE;
-  serial->pendingAttributes.Parity = NOPARITY;
-
-  if (parity != SERIAL_PARITY_NONE) {
-    switch (parity) {
-      case SERIAL_PARITY_ODD:
-        serial->pendingAttributes.Parity = ODDPARITY;
-        break;
-
-      case SERIAL_PARITY_EVEN:
-        serial->pendingAttributes.Parity = EVENPARITY;
-        break;
-
-      case SERIAL_PARITY_MARK:
-        serial->pendingAttributes.Parity = MARKPARITY;
-        break;
-
-      case SERIAL_PARITY_SPACE:
-        serial->pendingAttributes.Parity = SPACEPARITY;
-        break;
-
-      default:
-        goto unsupportedParity;
-    }
-
-    serial->pendingAttributes.fParity = TRUE;
-  }
-#elif defined(__MSDOS__)
-  switch (parity) {
-    case SERIAL_PARITY_NONE:
-      serial->pendingAttributes.bios.fields.parity = 0;
-      break;
-
-    case SERIAL_PARITY_ODD:
-      serial->pendingAttributes.bios.fields.parity = 1;
-      break;
-
-    case SERIAL_PARITY_EVEN:
-      serial->pendingAttributes.bios.fields.parity = 2;
-      break;
-
-    default:
-      goto unsupportedParity;
-  }
-#else /* UNIX */
-  serial->pendingAttributes.c_cflag &= ~(PARENB | PARODD);
-
-#ifdef PARSTK
-  serial->pendingAttributes.c_cflag &= ~PARSTK;
-#endif /* PARSTK */
-
-  if (parity != SERIAL_PARITY_NONE) {
-    if (parity == SERIAL_PARITY_ODD) {
-      serial->pendingAttributes.c_cflag |= PARODD;
-    } else
-
-#ifdef PARSTK
-    if (parity == SERIAL_PARITY_SPACE) {
-      serial->pendingAttributes.c_cflag |= PARSTK;
-    } else
-
-    if (parity == SERIAL_PARITY_MARK) {
-      serial->pendingAttributes.c_cflag |= PARSTK | PARODD;
-    } else
-#endif /* PARSTK */
-
-    if (parity != SERIAL_PARITY_EVEN) goto unsupportedParity;
-    serial->pendingAttributes.c_cflag |= PARENB;
-  }
-#endif /* set parity */
-  return 1;
-
-unsupportedParity:
+  if (serialPutParity(&serial->pendingAttributes, parity)) return 1;
   logMessage(LOG_WARNING, "unsupported serial parity: %d", parity);
   return 0;
 }
@@ -695,92 +142,7 @@ serialStopFlowControlThread (SerialDevice *serial) {
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
-#if defined(__MINGW32__)
-  if (flow & SERIAL_FLOW_INPUT_RTS) {
-    flow &= ~SERIAL_FLOW_INPUT_RTS;
-    serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
-  } else {
-    serial->pendingAttributes.fRtsControl = RTS_CONTROL_ENABLE;
-  }
-
-  if (flow & SERIAL_FLOW_INPUT_DTR) {
-    flow &= ~SERIAL_FLOW_INPUT_DTR;
-    serial->pendingAttributes.fDtrControl = DTR_CONTROL_HANDSHAKE;
-  } else {
-    serial->pendingAttributes.fDtrControl = DTR_CONTROL_ENABLE;
-  }
-
-  if (flow & SERIAL_FLOW_INPUT_XON) {
-    flow &= ~SERIAL_FLOW_INPUT_XON;
-    serial->pendingAttributes.fInX = TRUE;
-  } else {
-    serial->pendingAttributes.fInX = FALSE;
-  }
-
-  if (flow & SERIAL_FLOW_OUTPUT_CTS) {
-    flow &= ~SERIAL_FLOW_OUTPUT_CTS;
-    serial->pendingAttributes.fOutxCtsFlow = TRUE;
-  } else {
-    serial->pendingAttributes.fOutxCtsFlow = FALSE;
-  }
-
-  if (flow & SERIAL_FLOW_OUTPUT_DSR) {
-    flow &= ~SERIAL_FLOW_OUTPUT_DSR;
-    serial->pendingAttributes.fOutxDsrFlow = TRUE;
-  } else {
-    serial->pendingAttributes.fOutxDsrFlow = FALSE;
-  }
-
-  if (flow & SERIAL_FLOW_OUTPUT_XON) {
-    flow &= ~SERIAL_FLOW_OUTPUT_XON;
-    serial->pendingAttributes.fOutX = TRUE;
-  } else {
-    serial->pendingAttributes.fOutX = FALSE;
-  }
-#elif defined(__MSDOS__)
-  /* no supported flow control */
-#else /* UNIX */
-  typedef struct {
-    tcflag_t *field;
-    tcflag_t flag;
-    SerialFlowControl flow;
-  } FlowControlEntry;
-
-  const FlowControlEntry flowControlTable[] = {
-#ifdef CRTSCTS
-    {&serial->pendingAttributes.c_cflag, CRTSCTS, SERIAL_FLOW_INPUT_RTS | SERIAL_FLOW_OUTPUT_CTS},
-#endif /* CRTSCTS */
-
-#ifdef IHFLOW
-    {&serial->pendingAttributes.c_cflag, IHFLOW, SERIAL_FLOW_INPUT_RTS},
-#endif /* IHFLOW */
-
-#ifdef OHFLOW
-    {&serial->pendingAttributes.c_cflag, OHFLOW, SERIAL_FLOW_OUTPUT_CTS},
-#endif /* OHFLOW */
-
-#ifdef IXOFF
-    {&serial->pendingAttributes.c_iflag, IXOFF, SERIAL_FLOW_INPUT_XON},
-#endif /* IXOFF */
-
-#ifdef IXON
-    {&serial->pendingAttributes.c_iflag, IXON, SERIAL_FLOW_OUTPUT_XON},
-#endif /* IXON */
-
-    {NULL, 0, 0}
-  };
-  const FlowControlEntry *entry = flowControlTable;
-
-  while (entry->field) {
-    if ((flow & entry->flow) == entry->flow) {
-      flow &= ~entry->flow;
-      *entry->field |= entry->flag;
-    } else if (!(flow & entry->flow)) {
-      *entry->field &= ~entry->flag;
-    }
-    ++entry;
-  }
-#endif /* set flow control */
+  flow = serialPutFlowControl(&serial->pendingAttributes, flow);
 
 #ifdef HAVE_POSIX_THREADS
   if (flow & SERIAL_FLOW_INPUT_CTS) {
@@ -790,15 +152,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingFlowControlProc = NULL;
   }
 
-#if defined(__MINGW32__)
-#elif defined(__MSDOS__)
-#else /* UNIX */
-  if (serial->pendingFlowControlProc) {
-    serial->pendingAttributes.c_cflag &= ~CLOCAL;
-  } else {
-    serial->pendingAttributes.c_cflag |= CLOCAL;
-  }
-#endif /* adjust attributes */
+  serialPutModemState(&serial->pendingAttributes, !serial->pendingFlowControlProc);
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
@@ -1549,7 +903,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
 #endif /* HAVE_POSIX_THREADS */
 
 #ifdef B0
-  if (!serialSetSpeed(serial, B0)) return 0;
+  if (!serialPutSpeed(serial, B0)) return 0;
   usingB0 = 1;
 #else /* B0 */
   usingB0 = 0;
