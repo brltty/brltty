@@ -143,11 +143,12 @@ struct SerialDeviceStruct {
 typedef struct {
   unsigned int baud;
   SerialSpeed speed;
-} BaudEntry;
+} SerialBaudEntry;
 
-extern const BaudEntry serialBaudTable[];
-extern const BaudEntry *getBaudEntry (unsigned int baud);
-#define BEGIN_SERIAL_BAUD_TABLE const BaudEntry serialBaudTable[] = {
+extern const SerialBaudEntry *serialGetBaudEntry (unsigned int baud);
+#define SERIAL_BAUD_TABLE_DECLARATION  const SerialBaudEntry serialBaudTable[]
+extern SERIAL_BAUD_TABLE_DECLARATION;
+#define BEGIN_SERIAL_BAUD_TABLE SERIAL_BAUD_TABLE_DECLARATION = {
 #define END_SERIAL_BAUD_TABLE {0} };
 
 extern void serialPutInitialAttributes (SerialAttributes *attributes);

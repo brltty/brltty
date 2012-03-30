@@ -75,7 +75,7 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
 
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
-  attributes->speed = getBaudEntry(9600)->speed;
+  attributes->speed = serialGetBaudEntry(9600)->speed;
   attributes->bios.fields.bps = attributes->speed.biosBPS;
   attributes->bios.fields.bits = 8 - 5;
 }

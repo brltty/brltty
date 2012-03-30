@@ -20,9 +20,9 @@
 
 #include "serial_internal.h"
 
-const BaudEntry *
-getBaudEntry (unsigned int baud) {
-  const BaudEntry *entry = serialBaudTable;
+const SerialBaudEntry *
+serialGetBaudEntry (unsigned int baud) {
+  const SerialBaudEntry *entry = serialBaudTable;
   while (entry->baud) {
     if (baud == entry->baud) return entry;
     ++entry;
@@ -38,7 +38,7 @@ serialInitializeAttributes (SerialAttributes *attributes) {
 
 int
 serialSetBaud (SerialDevice *serial, unsigned int baud) {
-  const BaudEntry *entry = getBaudEntry(baud);
+  const SerialBaudEntry *entry = serialGetBaudEntry(baud);
 
   if (entry) {
     if (serialPutSpeed(serial, entry->speed)) {
@@ -56,7 +56,7 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
 int
 serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices) {
   if (!*word || isUnsignedInteger(baud, word)) {
-    const BaudEntry *entry = getBaudEntry(*baud);
+    const SerialBaudEntry *entry = serialGetBaudEntry(*baud);
 
     if (entry) {
       if (!choices) return 1;
@@ -68,10 +68,13 @@ serialValidateBaud (unsigned int *baud, const char *description, const char *wor
 
       logMessage(LOG_ERR, "unsupported %s: %u", description, *baud);
       return 0;
+    } else {
+      logMessage(LOG_ERR, "undefined %s: %u", description, *baud);
     }
+  } else {
+    logMessage(LOG_ERR, "invalid %s: %u", description, *baud);
   }
 
-  logMessage(LOG_ERR, "invalid %s: %u", description, *baud);
   return 0;
 }
 
@@ -280,7 +283,7 @@ serialReadAttributes (SerialDevice *serial) {
 
   serial->currentAttributes.bios.byte = lcr;
   {
-    const BaudEntry *baud = getBaudEntry(SERIAL_DIVISOR_BASE/divisor);
+    const SerialBaudEntry *baud = serialGetBaudEntry(SERIAL_DIVISOR_BASE/divisor);
     if (baud) {
       serial->currentAttributes.speed = baud->speed;
     } else {
