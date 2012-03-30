@@ -74,22 +74,6 @@ typedef struct {
   unsigned short biosBPS;
 } SerialSpeed;
 
-#define SERIAL_DIVISOR_BASE 115200
-#define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
-#define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
-#define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
-#define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
-#define SERIAL_SPEED_300    SERIAL_SPEED(   300,  2)
-#define SERIAL_SPEED_600    SERIAL_SPEED(   600,  3)
-#define SERIAL_SPEED_1200   SERIAL_SPEED(  1200,  4)
-#define SERIAL_SPEED_2400   SERIAL_SPEED(  2400,  5)
-#define SERIAL_SPEED_4800   SERIAL_SPEED(  4800,  6)
-#define SERIAL_SPEED_9600   SERIAL_SPEED(  9600,  7)
-#define SERIAL_SPEED_19200  SERIAL_SPEED( 19200,  8)
-#define SERIAL_SPEED_38400  SERIAL_SPEED( 38400,  9)
-#define SERIAL_SPEED_57600  SERIAL_SPEED( 57600, 10)
-#define SERIAL_SPEED_115200 SERIAL_SPEED(115200, 11)
-
 typedef union {
   unsigned char byte;
   struct {
@@ -112,18 +96,6 @@ typedef unsigned char SerialLines;
 #define SERIAL_LINE_DSR 0X20
 #define SERIAL_LINE_RNG 0X40
 #define SERIAL_LINE_CAR 0X80
-
-#define SERIAL_PORT_RBR 0 /* receive buffered register */
-#define SERIAL_PORT_THR 0 /* transmit holding register */
-#define SERIAL_PORT_DLL 0 /* divisor latch low */
-#define SERIAL_PORT_IER 1 /* interrupt enable register */
-#define SERIAL_PORT_DLH 1 /* divisor latch high */
-#define SERIAL_PORT_IIR 2 /* interrupt id register */
-#define SERIAL_PORT_LCR 3 /* line control register */
-#define SERIAL_PORT_MCR 4 /* modem control register */
-#define SERIAL_PORT_MSR 6 /* modem status register */
-
-#define SERIAL_FLAG_LCR_DLAB 0X80 /* divisor latch access bit */
 
 #else /* UNIX */
 
