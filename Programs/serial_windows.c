@@ -226,3 +226,24 @@ serialGetParityBits (const SerialAttributes *attributes) {
   return (attributes->fParity && (attributes->Parity != NOPARITY))? 1: 0;
 }
 
+int
+serialCancelInput (SerialDevice *serial) {
+  if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
+  logWindowsSystemError("PurgeComm");
+  return 0;
+}
+
+int
+serialCancelOutput (SerialDevice *serial) {
+  if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
+  logWindowsSystemError("PurgeComm");
+  return 0;
+}
+
+int
+serialDrainOutput (SerialDevice *serial) {
+  if (FlushFileBuffers(serial->fileHandle)) return 1;
+  logWindowsSystemError("FlushFileBuffers");
+  return 0;
+}
+

@@ -68,7 +68,7 @@ extern unsigned int serialGetCharacterBits (SerialDevice *serial);
 extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);
 extern int serialFlushOutput (SerialDevice *serial);
-extern int serialDrainOutput (SerialDevice *serial);
+extern int serialAwaitOutput (SerialDevice *serial);
 
 extern int serialSetLineRTS (SerialDevice *serial, int up);
 extern int serialSetLineDTR (SerialDevice *serial, int up);

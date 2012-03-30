@@ -348,3 +348,29 @@ serialGetParityBits (const SerialAttributes *attributes) {
   return (attributes->c_cflag & PARENB)? 1: 0;
 }
 
+int
+serialCancelInput (SerialDevice *serial) {
+  if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
+  if (errno == EINVAL) return 1;
+  logSystemError("TCIFLUSH");
+  return 0;
+}
+
+int
+serialCancelOutput (SerialDevice *serial) {
+  if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
+  if (errno == EINVAL) return 1;
+  logSystemError("TCOFLUSH");
+  return 0;
+}
+
+int
+serialDrainOutput (SerialDevice *serial) {
+  do {
+    if (tcdrain(serial->fileDescriptor) != -1) return 1;
+  } while (errno == EINTR);
+
+  logSystemError("tcdrain");
+  return 0;
+}
+

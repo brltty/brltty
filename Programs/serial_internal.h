@@ -163,6 +163,10 @@ extern unsigned int serialGetDataBits (const SerialAttributes *attributes);
 extern unsigned int serialGetStopBits (const SerialAttributes *attributes);
 extern unsigned int serialGetParityBits (const SerialAttributes *attributes);
 
+extern int serialCancelInput (SerialDevice *serial);
+extern int serialCancelOutput (SerialDevice *serial);
+extern int serialDrainOutput (SerialDevice *serial);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

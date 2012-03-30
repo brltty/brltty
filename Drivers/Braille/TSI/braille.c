@@ -465,7 +465,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
-    serialDrainOutput(serialDevice);
+    serialAwaitOutput(serialDevice);
     approximateDelay(BAUD_DELAY);
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     logMessage(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
@@ -475,7 +475,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       logMessage(LOG_INFO,"Display did not respond at 19200bps, "
 	         "falling back to 9600bps.");
       if(!serialSetBaud(serialDevice, serialBaud=9600)) goto failure;
-      serialDrainOutput(serialDevice);
+      serialAwaitOutput(serialDevice);
       approximateDelay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(reply)) {
 	logMessage(LOG_INFO,"Found display again at 9600bps.");
@@ -914,13 +914,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	return BRL_CMD_RESTARTBRL;
       else if(ping_due){
 	logMessage(LOG_DEBUG,"Display idle: sending query");
-	serialDrainOutput(serialDevice);
+	serialAwaitOutput(serialDevice);
 	approximateDelay(2*SEND_DELAY);
 	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
 	if(slow_update == 1)
-	  serialDrainOutput(serialDevice);
+	  serialAwaitOutput(serialDevice);
 	else if(slow_update == 2){
-	  serialDrainOutput(serialDevice);
+	  serialAwaitOutput(serialDevice);
 	  approximateDelay(SEND_DELAY);
 	}
 	pings++;

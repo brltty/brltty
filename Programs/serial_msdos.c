@@ -150,3 +150,18 @@ serialGetParityBits (const SerialAttributes *attributes) {
   return attributes->bios.fields.parity? 1: 0;
 }
 
+int
+serialCancelInput (SerialDevice *serial) {
+  return 1;
+}
+
+int
+serialCancelOutput (SerialDevice *serial) {
+  return 1;
+}
+
+int
+serialDrainOutput (SerialDevice *serial) {
+  return 1;
+}
+

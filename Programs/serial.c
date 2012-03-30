@@ -221,34 +221,12 @@ serialGetCharacterBits (SerialDevice *serial) {
 
 int
 serialDiscardInput (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
-  logWindowsSystemError("PurgeComm");
-#elif defined(__MSDOS__)
-  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
-  return 1;
-#else /* UNIX */
-  if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
-  if (errno == EINVAL) return 1;
-  logSystemError("TCIFLUSH");
-#endif /* discard input */
-  return 0;
+  return serialCancelInput(serial);
 }
 
 int
 serialDiscardOutput (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
-  logWindowsSystemError("PurgeComm");
-#elif defined(__MSDOS__)
-  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
-  return 1;
-#else /* UNIX */
-  if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
-  if (errno == EINVAL) return 1;
-  logSystemError("TCOFLUSH");
-#endif /* discard output */
-  return 0;
+  return serialCancelOutput(serial);
 }
 
 int
@@ -263,22 +241,10 @@ serialFlushOutput (SerialDevice *serial) {
 }
 
 int
-serialDrainOutput (SerialDevice *serial) {
+serialAwaitOutput (SerialDevice *serial) {
   if (!serialFlushOutput(serial)) return 0;
-
-#if defined(__MINGW32__)
-  if (FlushFileBuffers(serial->fileHandle)) return 1;
-  logWindowsSystemError("FlushFileBuffers");
-#elif defined(__MSDOS__)
-  logMessage(LOG_DEBUG, "function not supported: %s", __func__);
+  if (!serialDrainOutput(serial)) return 0;
   return 1;
-#else /* UNIX */
-  do {
-    if (tcdrain(serial->fileDescriptor) != -1) return 1;
-  } while (errno == EINTR);
-  logSystemError("tcdrain");
-#endif /* drain output */
-  return 0;
 }
 
 static void
@@ -332,7 +298,7 @@ serialReadAttributes (SerialDevice *serial) {
 static int
 serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
-    if (!serialDrainOutput(serial)) return 0;
+    if (!serialAwaitOutput(serial)) return 0;
 
 #if defined(__MINGW32__)
     if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {

@@ -320,7 +320,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if(serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
      != PACKET_HDR_LEN+NRCKSUMBYTES)
     goto failure;
-  serialDrainOutput(serialDevice);
+  serialAwaitOutput(serialDevice);
   while(1){
     if(!expect_receive_packet(recvpacket))
       goto failure;
@@ -450,7 +450,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   put_cksum(sendpacket);
 
   serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+nrstatcells+brl_cols+NRCKSUMBYTES);
-  serialDrainOutput(serialDevice);
+  serialAwaitOutput(serialDevice);
 
   if(expect_receive_packet(recvpacket)){
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) == 0)
