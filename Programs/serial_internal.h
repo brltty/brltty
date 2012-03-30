@@ -43,11 +43,7 @@ extern "C" {
 
 #if defined(__MINGW32__)
 
-#ifdef __MINGW32__
 #include <io.h>
-#else /* __MINGW32__ */
-#include <sys/cygwin.h>
-#endif /* __MINGW32__ */
 
 typedef DWORD SerialSpeed;
 typedef DCB SerialAttributes;
@@ -61,13 +57,6 @@ typedef DWORD SerialLines;
 #define SERIAL_LINE_CAR MS_RLSD_ON
 
 #elif defined(__MSDOS__)
-
-#include <dos.h>
-#include <dpmi.h>
-#include <bios.h>
-#include <go32.h>
-#include <sys/farptr.h>
-#include "system.h"
 
 typedef struct {
   unsigned short divisor;

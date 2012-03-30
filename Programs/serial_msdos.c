@@ -18,7 +18,14 @@
 
 #include "prologue.h"
 
+#include <dos.h>
+#include <dpmi.h>
+#include <bios.h>
+#include <go32.h>
+#include <sys/farptr.h>
+
 #include "serial_internal.h"
+#include "system.h"
 
 #define SERIAL_DIVISOR_BASE 115200
 #define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
