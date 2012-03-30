@@ -60,6 +60,8 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   if (serialPutFlowControl(attributes, SERIAL_DEFAULT_FLOW_CONTROL)) {
     logMessage(LOG_WARNING, "default serial flow control not supported: 0X%04X", SERIAL_DEFAULT_FLOW_CONTROL);
   }
+
+  serialPutModemState(attributes, 0);
 }
 
 int

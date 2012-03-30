@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "serial_internal.h"
+#include "ascii.h"
 
 BEGIN_SERIAL_BAUD_TABLE
 #ifdef CBR_110
@@ -73,6 +74,10 @@ BEGIN_SERIAL_BAUD_TABLE
   {115200, CBR_115200},
 #endif /* CBR_115200 */
 
+#ifdef CBR_128000
+  {128000, CBR_128000},
+#endif /* CBR_128000 */
+
 #ifdef CBR_256000
   {256000, CBR_256000},
 #endif /* CBR_256000 */
@@ -83,8 +88,8 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
   attributes->fTXContinueOnXoff = TRUE;
-  attributes->XonChar = 0X11;
-  attributes->XoffChar = 0X13;
+  attributes->XonChar = DC1;
+  attributes->XoffChar = DC3;
 }
 
 int
@@ -150,18 +155,14 @@ serialPutParity (SerialAttributes *attributes, SerialParity parity) {
 
 SerialFlowControl
 serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
-  if (flow & SERIAL_FLOW_INPUT_RTS) {
+  if (flow & SERIAL_FLOW_OUTPUT_RTS) {
+    flow &= ~SERIAL_FLOW_OUTPUT_RTS;
+    attributes->fRtsControl = RTS_CONTROL_TOGGLE;
+  } else if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     attributes->fRtsControl = RTS_CONTROL_HANDSHAKE;
   } else {
     attributes->fRtsControl = RTS_CONTROL_ENABLE;
-  }
-
-  if (flow & SERIAL_FLOW_INPUT_DTR) {
-    flow &= ~SERIAL_FLOW_INPUT_DTR;
-    attributes->fDtrControl = DTR_CONTROL_HANDSHAKE;
-  } else {
-    attributes->fDtrControl = DTR_CONTROL_ENABLE;
   }
 
   if (flow & SERIAL_FLOW_INPUT_XON) {
@@ -197,6 +198,13 @@ serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
 
 void
 serialPutModemState (SerialAttributes *attributes, int enabled) {
+  if (enabled) {
+    attributes->fDtrControl = DTR_CONTROL_HANDSHAKE;
+    attributes->fDsrSensitivity = TRUE;
+  } else {
+    attributes->fDtrControl = DTR_CONTROL_ENABLE;
+    attributes->fDsrSensitivity = FALSE;
+  }
 }
 
 unsigned int

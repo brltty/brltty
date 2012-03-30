@@ -144,7 +144,7 @@ END_SERIAL_BAUD_TABLE
 
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
-  attributes->c_cflag = CREAD | CLOCAL;
+  attributes->c_cflag = CREAD;
   attributes->c_iflag = IGNPAR | IGNBRK;
 
 #ifdef IEXTEN
