@@ -24,32 +24,19 @@
 #define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
 #define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
 
-#define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
-#define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
-#define SERIAL_SPEED_300    SERIAL_SPEED(   300,  2)
-#define SERIAL_SPEED_600    SERIAL_SPEED(   600,  3)
-#define SERIAL_SPEED_1200   SERIAL_SPEED(  1200,  4)
-#define SERIAL_SPEED_2400   SERIAL_SPEED(  2400,  5)
-#define SERIAL_SPEED_4800   SERIAL_SPEED(  4800,  6)
-#define SERIAL_SPEED_9600   SERIAL_SPEED(  9600,  7)
-#define SERIAL_SPEED_19200  SERIAL_SPEED( 19200,  8)
-#define SERIAL_SPEED_38400  SERIAL_SPEED( 38400,  9)
-#define SERIAL_SPEED_57600  SERIAL_SPEED( 57600, 10)
-#define SERIAL_SPEED_115200 SERIAL_SPEED(115200, 11)
-
 BEGIN_SERIAL_BAUD_TABLE
-  {110, SERIAL_SPEED_110},
-  {150, SERIAL_SPEED_150},
-  {300, SERIAL_SPEED_300},
-  {600, SERIAL_SPEED_600},
-  {1200, SERIAL_SPEED_1200},
-  {2400, SERIAL_SPEED_2400},
-  {4800, SERIAL_SPEED_4800},
-  {9600, SERIAL_SPEED_9600},
-  {19200, SERIAL_SPEED_19200},
-  {38400, SERIAL_SPEED_38400},
-  {57600, SERIAL_SPEED_57600},
-  {115200, SERIAL_SPEED_115200},
+  {   110, SERIAL_SPEED(   110,  0)},
+  {   150, SERIAL_SPEED(   150,  1)},
+  {   300, SERIAL_SPEED(   300,  2)},
+  {   600, SERIAL_SPEED(   600,  3)},
+  {  1200, SERIAL_SPEED(  1200,  4)},
+  {  2400, SERIAL_SPEED(  2400,  5)},
+  {  4800, SERIAL_SPEED(  4800,  6)},
+  {  9600, SERIAL_SPEED(  9600,  7)},
+  { 19200, SERIAL_SPEED( 19200,  8)},
+  { 38400, SERIAL_SPEED( 38400,  9)},
+  { 57600, SERIAL_SPEED( 57600, 10)},
+  {115200, SERIAL_SPEED(115200, 11)},
 END_SERIAL_BAUD_TABLE
 
 #define SERIAL_PORT_RBR 0 /* receive buffered register */
@@ -81,7 +68,7 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
 
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
-  attributes->speed = SERIAL_SPEED_9600;
+  attributes->speed = getBaudEntry(9600)->speed;
   attributes->bios.fields.bps = attributes->speed.biosBPS;
   attributes->bios.fields.bits = 8 - 5;
 }

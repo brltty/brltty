@@ -20,7 +20,7 @@
 
 #include "serial_internal.h"
 
-static const BaudEntry *
+const BaudEntry *
 getBaudEntry (unsigned int baud) {
   const BaudEntry *entry = serialBaudTable;
   while (entry->baud) {

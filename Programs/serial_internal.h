@@ -157,6 +157,7 @@ typedef struct {
 } BaudEntry;
 
 extern const BaudEntry serialBaudTable[];
+extern const BaudEntry *getBaudEntry (unsigned int baud);
 #define BEGIN_SERIAL_BAUD_TABLE const BaudEntry serialBaudTable[] = {
 #define END_SERIAL_BAUD_TABLE {0} };
 
