@@ -218,7 +218,7 @@ BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
 
 AC_PROG_MAKE_SET
 
-brltty_gcc_options="-Wall"
+brltty_gcc_options="-std=gnu99 -Wall"
 case "${build_os} ${host_os}"
 in
    linux*\ eabi*)
@@ -1124,7 +1124,7 @@ in
       ;;
 esac
 
-BRLTTY_ARG_PACKAGE([serial], [SERIAL], [termios], [dnl
+BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
    mingw*)
       serial_package="windows"
       ;;
