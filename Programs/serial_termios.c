@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "serial_internal.h"
+#include "io_misc.h"
 
 BEGIN_SERIAL_BAUD_TABLE
 #ifdef B50
@@ -351,6 +352,20 @@ serialGetParityBits (const SerialAttributes *attributes) {
 }
 
 int
+serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
+  if (tcgetattr(serial->fileDescriptor, attributes) != -1) return 1;
+  logSystemError("tcgetattr");
+  return 0;
+}
+
+int
+serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
+  if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) != -1) return 1;
+  logSystemError("tcsetattr");
+  return 0;
+}
+
+int
 serialCancelInput (SerialDevice *serial) {
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
   if (errno == EINVAL) return 1;
@@ -367,6 +382,11 @@ serialCancelOutput (SerialDevice *serial) {
 }
 
 int
+serialPollInput (SerialDevice *serial, int timeout) {
+  return awaitInput(serial->fileDescriptor, timeout);
+}
+
+int
 serialDrainOutput (SerialDevice *serial) {
   do {
     if (tcdrain(serial->fileDescriptor) != -1) return 1;
@@ -377,16 +397,28 @@ serialDrainOutput (SerialDevice *serial) {
 }
 
 int
-serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
-  if (tcgetattr(serial->fileDescriptor, attributes) != -1) return 1;
-  logSystemError("tcgetattr");
-  return 0;
+serialGetChunk (
+  SerialDevice *serial,
+  void *buffer, size_t *offset, size_t count,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
 }
 
-int
-serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
-  if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) != -1) return 1;
-  logSystemError("tcsetattr");
-  return 0;
+ssize_t
+serialGetData (
+  SerialDevice *serial,
+  void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+serialPutData (
+  SerialDevice *serial,
+  const void *data, size_t size
+) {
+  return writeData(serial->fileDescriptor, data, size);
 }
 

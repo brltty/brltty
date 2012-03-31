@@ -25,6 +25,7 @@
 #include <sys/farptr.h>
 
 #include "serial_internal.h"
+#include "io_misc.h"
 #include "system.h"
 
 #define SERIAL_DIVISOR_BASE 115200
@@ -153,21 +154,6 @@ serialGetParityBits (const SerialAttributes *attributes) {
 }
 
 int
-serialCancelInput (SerialDevice *serial) {
-  return 1;
-}
-
-int
-serialCancelOutput (SerialDevice *serial) {
-  return 1;
-}
-
-int
-serialDrainOutput (SerialDevice *serial) {
-  return 1;
-}
-
-int
 serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
   int interruptsWereEnabled = disable();
   unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
@@ -220,5 +206,51 @@ serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   }
 
   return 1;
+}
+
+int
+serialCancelInput (SerialDevice *serial) {
+  return 1;
+}
+
+int
+serialCancelOutput (SerialDevice *serial) {
+  return 1;
+}
+
+int
+serialPollInput (SerialDevice *serial, int timeout) {
+  return awaitInput(serial->fileDescriptor, timeout);
+}
+
+int
+serialDrainOutput (SerialDevice *serial) {
+  return 1;
+}
+
+int
+serialGetChunk (
+  SerialDevice *serial,
+  void *buffer, size_t *offset, size_t count,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+serialGetData (
+  SerialDevice *serial,
+  void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+serialPutData (
+  SerialDevice *serial,
+  const void *data, size_t size
+) {
+  return writeData(serial->fileDescriptor, data, size);
 }
 

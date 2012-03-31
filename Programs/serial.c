@@ -215,7 +215,7 @@ serialSetParameters (SerialDevice *serial, const SerialParameters *parameters) {
 
 unsigned int
 serialGetCharacterSize (const SerialParameters *parameters) {
-  unsigned int size = 1 + parameters->dataBits;
+  unsigned int size = 1 /* start bit */ + parameters->dataBits;
   size += (parameters->stopBits == SERIAL_STOP_1)? 1: 2;
   if (parameters->parity != SERIAL_PARITY_NONE) size += 1;
   return size;
@@ -224,7 +224,7 @@ serialGetCharacterSize (const SerialParameters *parameters) {
 unsigned int
 serialGetCharacterBits (SerialDevice *serial) {
   const SerialAttributes *attributes = &serial->pendingAttributes;
-  return 1
+  return 1 /* start bit */
        + serialGetDataBits(attributes)
        + serialGetParityBits(attributes)
        + serialGetStopBits(attributes)
@@ -307,38 +307,8 @@ serialFlushAttributes (SerialDevice *serial) {
 int
 serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!serialFlushAttributes(serial)) return 0;
-
-#ifdef __MINGW32__
-  if (serial->pending != -1) return 1;
-
-  {
-    COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
-    DWORD bytesRead;
-    char c;
-
-    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      logWindowsSystemError("SetCommTimeouts serialAwaitInput");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (!ReadFile(serial->fileHandle, &c, 1, &bytesRead, NULL)) {
-      logWindowsSystemError("ReadFile");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (bytesRead) {
-      serial->pending = (unsigned char)c;
-      return 1;
-    }
-  }
-  errno = EAGAIN;
-
-  return 0;
-#else /* __MINGW32__ */
-  return awaitInput(serial->fileDescriptor, timeout);
-#endif /* __MINGW32__ */
+  if (!serialPollInput(serial, timeout)) return 0;
+  return 1;
 }
 
 int
@@ -348,60 +318,7 @@ serialReadChunk (
   int initialTimeout, int subsequentTimeout
 ) {
   if (!serialFlushAttributes(serial)) return 0;
-
-#ifdef __MINGW32__
-  COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
-  DWORD bytesRead;
-
-  if (serial->pending != -1) {
-    * (unsigned char *) buffer = serial->pending;
-    serial->pending = -1;
-    bytesRead = 1;
-  } else {
-    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      logWindowsSystemError("SetCommTimeouts serialReadChunk1");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-      logWindowsSystemError("ReadFile");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (!bytesRead) {
-      errno = EAGAIN;
-      return 0;
-    }
-  }
-
-  count -= bytesRead;
-  *offset += bytesRead;
-  timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
-  if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-    logWindowsSystemError("SetCommTimeouts serialReadChunk2");
-    setSystemErrno();
-    return 0;
-  }
-
-  while (count && ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-    if (!bytesRead) {
-      errno = EAGAIN;
-      return 0;
-    }
-
-    count -= bytesRead;
-    *offset += bytesRead;
-  }
-
-  if (!count) return 1;
-  logWindowsSystemError("ReadFile");
-  setSystemErrno();
-  return 0;
-#else /* __MINGW32__ */
-  return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
-#endif /* __MINGW32__ */
+  return serialGetChunk(serial, buffer, offset, count, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
@@ -410,15 +327,8 @@ serialReadData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-#ifdef __MINGW32__
-  size_t length = 0;
-  if (serialReadChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
-  if (errno == EAGAIN) return length;
-  return -1;
-#else /* __MINGW32__ */
   if (!serialFlushAttributes(serial)) return -1;
-  return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
-#endif /* __MINGW32__ */
+  return serialGetData(serial, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
@@ -426,32 +336,8 @@ serialWriteData (
   SerialDevice *serial,
   const void *data, size_t size
 ) {
-  if (serialFlushAttributes(serial)) {
-#ifdef __MINGW32__
-    COMMTIMEOUTS timeouts = {MAXDWORD, 0, 0, 0, 15000};
-    size_t left = size;
-    DWORD bytesWritten;
-
-    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-      logWindowsSystemError("SetCommTimeouts serialWriteData");
-      setSystemErrno();
-      return -1;
-    }
-
-    while (left && WriteFile(serial->fileHandle, data, left, &bytesWritten, NULL)) {
-      if (!bytesWritten) break;
-      left -= bytesWritten;
-      data += bytesWritten;
-    }
-
-    if (!left) return size;
-    logWindowsSystemError("WriteFile");
-#else /* __MINGW32__ */
-    if (writeData(serial->fileDescriptor, data, size) != -1) return size;
-    logSystemError("serial write");
-#endif /* __MINGW32__ */
-  }
-  return -1;
+  if (!serialFlushAttributes(serial)) return -1;
+  return serialPutData(serial, data, size);
 }
 
 static int

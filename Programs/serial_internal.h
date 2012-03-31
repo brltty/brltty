@@ -105,7 +105,6 @@ typedef int SerialLines;
 #endif /* definitions */
 
 #include "io_serial.h"
-#include "io_misc.h"
 #include "log.h"
 #include "device.h"
 #include "parse.h"
@@ -163,12 +162,31 @@ extern unsigned int serialGetDataBits (const SerialAttributes *attributes);
 extern unsigned int serialGetStopBits (const SerialAttributes *attributes);
 extern unsigned int serialGetParityBits (const SerialAttributes *attributes);
 
-extern int serialCancelInput (SerialDevice *serial);
-extern int serialCancelOutput (SerialDevice *serial);
-extern int serialDrainOutput (SerialDevice *serial);
-
 extern int serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes);
 extern int serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes);
+
+extern int serialCancelInput (SerialDevice *serial);
+extern int serialCancelOutput (SerialDevice *serial);
+
+extern int serialPollInput (SerialDevice *serial, int timeout);
+extern int serialDrainOutput (SerialDevice *serial);
+
+extern int serialGetChunk (
+  SerialDevice *serial,
+  void *buffer, size_t *offset, size_t count,
+  int initialTimeout, int subsequentTimeout
+);
+
+extern ssize_t serialGetData (
+  SerialDevice *serial,
+  void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
+
+extern ssize_t serialPutData (
+  SerialDevice *serial,
+  const void *data, size_t size
+);
 
 #ifdef __cplusplus
 }

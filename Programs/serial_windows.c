@@ -229,6 +229,21 @@ serialGetParityBits (const SerialAttributes *attributes) {
 }
 
 int
+serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
+  attributes->DCBlength = sizeof(serial->currentAttributes);
+  if (GetCommState(serial->fileHandle, attributes)) return 1;
+  logWindowsSystemError("GetCommState");
+  return 0;
+}
+
+int
+serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
+  if (SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) return 1;
+  logWindowsSystemError("SetCommState");
+  return 0;
+}
+
+int
 serialCancelInput (SerialDevice *serial) {
   if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
   logWindowsSystemError("PurgeComm");
@@ -243,6 +258,37 @@ serialCancelOutput (SerialDevice *serial) {
 }
 
 int
+serialPollInput (SerialDevice *serial, int timeout) {
+  if (serial->pending != -1) return 1;
+
+  {
+    COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
+    DWORD bytesRead;
+    char c;
+
+    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+      logWindowsSystemError("SetCommTimeouts serialAwaitInput");
+      setSystemErrno();
+      return 0;
+    }
+
+    if (!ReadFile(serial->fileHandle, &c, 1, &bytesRead, NULL)) {
+      logWindowsSystemError("ReadFile");
+      setSystemErrno();
+      return 0;
+    }
+
+    if (bytesRead) {
+      serial->pending = (unsigned char)c;
+      return 1;
+    }
+  }
+  errno = EAGAIN;
+
+  return 0;
+}
+
+int
 serialDrainOutput (SerialDevice *serial) {
   if (FlushFileBuffers(serial->fileHandle)) return 1;
   logWindowsSystemError("FlushFileBuffers");
@@ -250,17 +296,99 @@ serialDrainOutput (SerialDevice *serial) {
 }
 
 int
-serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
-  attributes->DCBlength = sizeof(serial->currentAttributes);
-  if (GetCommState(serial->fileHandle, attributes)) return 1;
-  logWindowsSystemError("GetCommState");
+serialGetChunk (
+  SerialDevice *serial,
+  void *buffer, size_t *offset, size_t count,
+  int initialTimeout, int subsequentTimeout
+) {
+  COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
+  DWORD bytesRead;
+
+  if (serial->pending != -1) {
+    *(unsigned char *)buffer = serial->pending;
+    serial->pending = -1;
+    bytesRead = 1;
+  } else {
+    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+      logWindowsSystemError("SetCommTimeouts serialReadChunk1");
+      setSystemErrno();
+      return 0;
+    }
+
+    if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
+      logWindowsSystemError("ReadFile");
+      setSystemErrno();
+      return 0;
+    }
+
+    if (!bytesRead) {
+      errno = EAGAIN;
+      return 0;
+    }
+  }
+
+  count -= bytesRead;
+  *offset += bytesRead;
+  timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
+
+  if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+    logWindowsSystemError("SetCommTimeouts serialReadChunk2");
+    setSystemErrno();
+    return 0;
+  }
+
+  while (count && ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
+    if (!bytesRead) {
+      errno = EAGAIN;
+      return 0;
+    }
+
+    count -= bytesRead;
+    *offset += bytesRead;
+  }
+
+  if (!count) return 1;
+  logWindowsSystemError("ReadFile");
+  setSystemErrno();
   return 0;
 }
 
-int
-serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
-  if (SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) return 1;
-  logWindowsSystemError("SetCommState");
-  return 0;
+ssize_t
+serialGetData (
+  SerialDevice *serial,
+  void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  size_t length = 0;
+
+  if (serialGetChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
+  if (errno == EAGAIN) return length;
+  return -1;
+}
+
+ssize_t
+serialPutData (
+  SerialDevice *serial,
+  const void *data, size_t size
+) {
+  COMMTIMEOUTS timeouts = {MAXDWORD, 0, 0, 0, 15000};
+  size_t left = size;
+  DWORD bytesWritten;
+
+  if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+    logWindowsSystemError("SetCommTimeouts serialWriteData");
+    setSystemErrno();
+    return -1;
+  }
+
+  while (left && WriteFile(serial->fileHandle, data, left, &bytesWritten, NULL)) {
+    if (!bytesWritten) break;
+    left -= bytesWritten;
+    data += bytesWritten;
+  }
+
+  if (!left) return size;
+  logWindowsSystemError("WriteFile");
+  return -1;
 }
 
