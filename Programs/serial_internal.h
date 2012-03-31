@@ -84,8 +84,12 @@ typedef unsigned char SerialLines;
 
 #else /* UNIX */
 
-#include <sys/ioctl.h>
 #include <termios.h>
+#include <sys/ioctl.h>
+
+#ifdef HAVE_SYS_MODEM_H
+#include <sys/modem.h>
+#endif /* HAVE_SYS_MODEM_H */
 
 typedef speed_t SerialSpeed;
 typedef struct termios SerialAttributes;
@@ -184,8 +188,11 @@ extern ssize_t serialPutData (
   const void *data, size_t size
 );
 
-extern int serialGetLines (SerialDevice *serial, SerialLines *lines);
+extern int serialGetLines (SerialDevice *serial);
 extern int serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low);
+
+extern int serialRegisterWaitLines (SerialDevice *serial, SerialLines lines);
+extern int serialMonitorWaitLines (SerialDevice *serial);
 
 #ifdef __cplusplus
 }

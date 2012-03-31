@@ -18,10 +18,6 @@
 
 #include "prologue.h"
 
-#ifdef HAVE_SYS_MODEM_H
-#include <sys/modem.h>
-#endif /* HAVE_SYS_MODEM_H */
-
 #include "serial_internal.h"
 #include "io_misc.h"
 
@@ -427,15 +423,15 @@ serialPutData (
 }
 
 int
-serialGetLines (SerialDevice *serial, SerialLines *lines) {
+serialGetLines (SerialDevice *serial) {
 #ifdef TIOCMGET
-  if (ioctl(serial->fileDescriptor, TIOCMGET, lines) == -1) {
+  if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
     logSystemError("TIOCMGET");
     return 0;
   }
 #else /* TIOCMGET */
 #warning getting modem lines not supported on this platform
-  *lines = SERIAL_LINE_RTS | SERIAL_LINE_CTS | SERIAL_LINE_DTR | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
+  serial->linesState = SERIAL_LINE_RTS | SERIAL_LINE_CTS | SERIAL_LINE_DTR | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
 #endif /* TIOCMGET */
 
   return 1;
@@ -444,9 +440,8 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
 int
 serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
 #ifdef TIOCMSET
-  SerialLines lines;
-
-  if (serialGetLines(serial, &lines)) {
+  if (serialGetLines(serial)) {
+    SerialLines lines = serial->linesState;
     lines |= high;
     lines &= ~low;
 
@@ -456,6 +451,27 @@ serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
 #else /* TIOCMSET */
 #warning setting modem lines not supported on this platform
 #endif /* TIOCMSET */
+
+  return 0;
+}
+
+int
+serialRegisterWaitLines (SerialDevice *serial, SerialLines lines) {
+  return 1;
+}
+
+int
+serialMonitorWaitLines (SerialDevice *serial) {
+#ifdef TIOCMIWAIT
+  if (ioctl(serial->fileDescriptor, TIOCMIWAIT, serial->waitLines) != -1) return 1;
+  logSystemError("TIOCMIWAIT");
+#else /* TIOCMIWAIT */
+  SerialLines old = serial->linesState & serial->waitLines;
+
+  while (serialGetLines(serial)) {
+    if ((serial->linesState & serial->waitLines) != old) return 1;
+  }
+#endif /* TIOCMIWAIT */
 
   return 0;
 }

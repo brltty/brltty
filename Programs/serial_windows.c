@@ -393,8 +393,8 @@ serialPutData (
 }
 
 int
-serialGetLines (SerialDevice *serial, SerialLines *lines) {
-  if (!GetCommModemStatus(serial->fileHandle, lines)) {
+serialGetLines (SerialDevice *serial) {
+  if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
     logWindowsSystemError("GetCommModemStatus");
     return 0;
   }
@@ -408,8 +408,8 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
       return 0;
     }
 
-    if (dcb.fRtsControl == RTS_CONTROL_ENABLE) *lines |= SERIAL_LINE_RTS;
-    if (dcb.fDtrControl == DTR_CONTROL_ENABLE) *lines |= SERIAL_LINE_DTR;
+    if (dcb.fRtsControl == RTS_CONTROL_ENABLE) serial->linesState |= SERIAL_LINE_RTS;
+    if (dcb.fDtrControl == DTR_CONTROL_ENABLE) serial->linesState |= SERIAL_LINE_DTR;
   }
 
   return 1;
@@ -439,6 +439,29 @@ serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
     logWindowsSystemError("GetCommState");
   }
 
+  return 0;
+}
+
+int
+serialRegisterWaitLines (SerialDevice *serial, SerialLines lines) {
+  DWORD eventMask = 0;
+
+  if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
+  if (lines & SERIAL_LINE_DSR) eventMask |= EV_DSR;
+  if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
+  if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
+
+  if (SetCommMask(serial->fileHandle, eventMask)) return 1;
+  logWindowsSystemError("SetCommMask");
+  return 0;
+}
+
+int
+serialMonitorWaitLines (SerialDevice *serial) {
+  DWORD event;
+
+  if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
+  logWindowsSystemError("WaitCommEvent");
   return 0;
 }
 

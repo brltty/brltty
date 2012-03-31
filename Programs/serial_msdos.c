@@ -255,8 +255,8 @@ serialPutData (
 }
 
 int
-serialGetLines (SerialDevice *serial, SerialLines *lines) {
-  *lines = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
+serialGetLines (SerialDevice *serial) {
+  serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
   return 1;
 }
 
@@ -269,5 +269,15 @@ serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
                   (oldMCR | high) & ~low);
   if (interruptsWereEnabled) enable();
   return 1;
+}
+
+int
+serialRegisterWaitLines (SerialDevice *serial, SerialLines lines) {
+  return 1;
+}
+
+int
+serialMonitorWaitLines (SerialDevice *serial) {
+  return 0;
 }
 

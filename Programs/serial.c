@@ -342,7 +342,7 @@ serialWriteData (
 
 static int
 serialReadLines (SerialDevice *serial, SerialLines *lines) {
-  int result = serialGetLines(serial, &serial->linesState);
+  int result = serialGetLines(serial);
   if (result) *lines = serial->linesState;
   return result;
 }
@@ -389,20 +389,7 @@ serialTestLineDSR (SerialDevice *serial) {
 static int
 serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
   if (lines != serial->waitLines) {
-#ifdef __MINGW32__
-    DWORD eventMask = 0;
-
-    if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
-    if (lines & SERIAL_LINE_DSR) eventMask |= EV_DSR;
-    if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
-    if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
-
-    if (!SetCommMask(serial->fileHandle, eventMask)) {
-      logWindowsSystemError("SetCommMask");
-      return 0;
-    }
-#endif /* __MINGW32__ */
-
+    if (!serialRegisterWaitLines(serial, lines)) return 0;
     serial->waitLines = lines;
   }
 
@@ -410,23 +397,8 @@ serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
 }
 
 static int
-serialMonitorWaitLines (SerialDevice *serial) {
-#if defined(__MINGW32__)
-  DWORD event;
-  if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
-  logWindowsSystemError("WaitCommEvent");
-#elif defined(TIOCMIWAIT)
-  if (ioctl(serial->fileDescriptor, TIOCMIWAIT, serial->waitLines) != -1) return 1;
-  logSystemError("TIOCMIWAIT");
-#else
-  SerialLines old = serial->linesState & serial->waitLines;
-  SerialLines new;
-
-  while (serialReadLines(serial, &new))
-    if ((new & serial->waitLines) != old)
-      return 1;
-#endif
-  return 0;
+serialAwaitLineChange (SerialDevice *serial) {
+  return serialMonitorWaitLines(serial);
 }
 
 static int
@@ -436,7 +408,7 @@ serialWaitLines (SerialDevice *serial, SerialLines high, SerialLines low) {
 
   if (serialDefineWaitLines(serial, lines)) {
     while (!serialTestLines(serial, high, low))
-      if (!serialMonitorWaitLines(serial))
+      if (!serialAwaitLineChange(serial))
         goto done;
     ok = 1;
   }
@@ -452,9 +424,9 @@ serialWaitFlank (SerialDevice *serial, SerialLines line, int up) {
 
   if (serialDefineWaitLines(serial, line)) {
     while (!serialTestLines(serial, up?0:line, up?line:0))
-      if (!serialMonitorWaitLines(serial))
+      if (!serialAwaitLineChange(serial))
         goto done;
-    if (serialMonitorWaitLines(serial)) ok = 1;
+    if (serialAwaitLineChange(serial)) ok = 1;
   }
 
 done:
