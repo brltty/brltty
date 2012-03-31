@@ -166,7 +166,7 @@ getKeyNameTables (const char *keyTableName) {
 
 int
 main (int argc, char *argv[]) {
-  int status = PROG_EXIT_SUCCESS;
+  ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -208,9 +208,9 @@ main (int argc, char *argv[]) {
       if (keyNameTables) {
         if (opt_listKeyNames)
           if (!listKeyNames(keyNameTables, listLine, NULL))
-            status = 5;
+            exitStatus = PROG_EXIT_FATAL;
 
-        if (!status) {
+        if (exitStatus == PROG_EXIT_SUCCESS) {
           char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
 
           if (keyTablePath) {
@@ -219,32 +219,32 @@ main (int argc, char *argv[]) {
             if (keyTable) {
               if (opt_listKeyTable)
                 if (!listKeyTable(keyTable, listLine, NULL))
-                  status = 5;
+                  exitStatus = PROG_EXIT_FATAL;
 
               destroyKeyTable(keyTable);
             } else {
-              status = 4;
+              exitStatus = PROG_EXIT_FATAL;
             }
 
             free(keyTablePath);
           } else {
-            status = 10;
+            exitStatus = PROG_EXIT_FATAL;
           }
         }
       } else {
-        status = 3;
+        exitStatus = PROG_EXIT_FATAL;
       }
 
       free(keyTableFile);
     } else {
-      status = 10;
+      exitStatus = PROG_EXIT_FATAL;
     }
   } else {
     logMessage(LOG_ERR, "missing key table name");
-    status = PROG_EXIT_SYNTAX;
+    exitStatus = PROG_EXIT_SYNTAX;
   }
 
-  return status;
+  return exitStatus;
 }
 
 KeyTableState

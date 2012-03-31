@@ -128,7 +128,7 @@ setRegion (
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  ProgramExitStatus exitStatus;
   void *driverObject;
 
   {
@@ -231,21 +231,21 @@ main (int argc, char *argv[]) {
             }
             putchar('\n');
           }
-          status = 0;
+          exitStatus = PROG_EXIT_SUCCESS;
         } else {
           logMessage(LOG_ERR, "Can't read screen.");
-          status = 4;
+          exitStatus = PROG_EXIT_FATAL;
         }
       }
     } else {
       logMessage(LOG_ERR, "can't open screen.");
-      status = 3;
+      exitStatus = PROG_EXIT_FATAL;
     }
 
     destructScreenDriver();
   } else {
     logMessage(LOG_ERR, "can't load screen driver.");
-    status = 3;
+    exitStatus = PROG_EXIT_FATAL;
   }
-  return status;
+  return exitStatus;
 }

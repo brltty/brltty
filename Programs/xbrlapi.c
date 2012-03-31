@@ -727,5 +727,5 @@ int main(int argc, char *argv[]) {
 
   toX_f(xDisplay);
 
-  return 0;
+  return PROG_EXIT_SUCCESS;
 }

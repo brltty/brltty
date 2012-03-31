@@ -660,9 +660,9 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   }
 }
 
-static int
+static ProgramExitStatus
 convertTable (void) {
-  int status;
+  ProgramExitStatus exitStatus;
   FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, "<standard-input>");
 
   if (inputFile) {
@@ -674,30 +674,30 @@ convertTable (void) {
 
         if (outputFile) {
           if (outputFormat->write(outputPath, outputFile, ttd, outputFormat->data)) {
-            status = 0;
+            exitStatus = PROG_EXIT_SUCCESS;
           } else {
-            status = 6;
+            exitStatus = PROG_EXIT_FATAL;
           }
 
           fclose(outputFile);
         } else {
-          status = 5;
+          exitStatus = PROG_EXIT_FATAL;
         }
       } else {
-        status = 0;
+        exitStatus = PROG_EXIT_SUCCESS;
       }
 
       destroyTextTableData(ttd);
     } else {
-      status = 4;
+      exitStatus = PROG_EXIT_FATAL;
     }
 
     fclose(inputFile);
   } else {
-    status = 3;
+    exitStatus = PROG_EXIT_FATAL;
   }
 
-  return status;
+  return exitStatus;
 }
 
 #ifdef ENABLE_API
@@ -1768,9 +1768,9 @@ doBrailleCommand (EditTableData *etd) {
   return 1;
 }
 
-static int
+static ProgramExitStatus
 editTable (void) {
-  int status;
+  ProgramExitStatus exitStatus;
   EditTableData etd;
 
   etd.ttd = NULL;
@@ -1781,18 +1781,18 @@ editTable (void) {
 
     if (inputFile) {
       if ((etd.ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
-        status = 0;
+        exitStatus = PROG_EXIT_SUCCESS;
       } else {
-        status = 4;
+        exitStatus = PROG_EXIT_FATAL;
       }
 
       fclose(inputFile);
     } else {
-      status = 3;
+      exitStatus = PROG_EXIT_FATAL;
     }
   }
 
-  if (!status) {
+  if (exitStatus == PROG_EXIT_SUCCESS) {
     claimBrailleDisplay(&etd);
 
 #if defined(USE_CURSES)
@@ -1890,13 +1890,13 @@ editTable (void) {
     if (etd.ttd) destroyTextTableData(etd.ttd);
   }
 
-  return status;
+  return exitStatus;
 }
 #endif /* ENABLE_API */
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  ProgramExitStatus exitStatus;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -1957,13 +1957,13 @@ main (int argc, char *argv[]) {
 
 #ifdef ENABLE_API
   if (opt_edit) {
-    status = editTable();
+    exitStatus = editTable();
   } else
 #endif /* ENABLE_API */
 
   {
-    status = convertTable();
+    exitStatus = convertTable();
   }
 
-  return status;
+  return exitStatus;
 }

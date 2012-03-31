@@ -89,7 +89,7 @@ sayLine (char *line, void *data) {
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  ProgramExitStatus exitStatus;
   const char *driver = NULL;
   void *object;
   float speechRate;
@@ -197,14 +197,14 @@ main (int argc, char *argv[]) {
         processLines(stdin, sayLine, NULL);
       }
       speech->destruct(&spk);		/* finish with the display */
-      status = 0;
+      exitStatus = PROG_EXIT_SUCCESS;
     } else {
       logMessage(LOG_ERR, "can't initialize speech driver.");
-      status = 5;
+      exitStatus = PROG_EXIT_FATAL;
     }
   } else {
     logMessage(LOG_ERR, "can't load speech driver.");
-    status = 3;
+    exitStatus = PROG_EXIT_FATAL;
   }
-  return status;
+  return exitStatus;
 }

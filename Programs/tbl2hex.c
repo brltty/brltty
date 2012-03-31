@@ -203,7 +203,7 @@ outputError:
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  ProgramExitStatus exitStatus;
   char *path;
 
   {
@@ -232,23 +232,23 @@ main (int argc, char *argv[]) {
         TableData data;
         if (entry->load(path, &data)) {
           if (dumpBytes(stdout, data.bytes, data.size)) {
-            status = 0;
+            exitStatus = PROG_EXIT_SUCCESS;
           } else {
-            status = 4;
+            exitStatus = PROG_EXIT_FATAL;
           }
 
           entry->unload(&data);
         } else {
-          status = 3;
+          exitStatus = PROG_EXIT_FATAL;
         }
       } else {
-        status = 6;
+        exitStatus = PROG_EXIT_SEMANTIC;
       }
     } else {
       logMessage(LOG_ERR, "no file extension");
-      status = 5;
+      exitStatus = PROG_EXIT_SEMANTIC;
     }
   }
 
-  return status;
+  return exitStatus;
 }

@@ -116,7 +116,7 @@ message (const char *mode, const char *text, short flags) {
 
 int
 main (int argc, char *argv[]) {
-  int status;
+  ProgramExitStatus exitStatus;
   const char *driver = NULL;
   void *object;
 
@@ -204,20 +204,20 @@ main (int argc, char *argv[]) {
         message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */
         braille->destruct(&brl);		/* finish with the display */
-        status = 0;
+        exitStatus = PROG_EXIT_SUCCESS;
       } else {
         logMessage(LOG_ERR, "can't allocate braille buffer.");
-        status = 6;
+        exitStatus = PROG_EXIT_FATAL;
       }
     } else {
       logMessage(LOG_ERR, "can't initialize braille driver.");
-      status = 5;
+      exitStatus = PROG_EXIT_FATAL;
     }
   } else {
     logMessage(LOG_ERR, "can't load braille driver.");
-    status = 3;
+    exitStatus = PROG_EXIT_FATAL;
   }
-  return status;
+  return exitStatus;
 }
 
 /* dummy functions to allow drivers to link... */

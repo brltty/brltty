@@ -271,7 +271,7 @@ main (int argc, char *argv[]) {
 
     free(elements);
   }
-  return 0;
+  return PROG_EXIT_SUCCESS;
 }
 
 int

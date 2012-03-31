@@ -104,7 +104,7 @@ static ContractionTable *contractionTable;
 static int (*putCell) (unsigned char cell, void *data);
 
 typedef struct {
-  unsigned char exitStatus;
+  ProgramExitStatus exitStatus;
 } LineProcessingData;
 
 static void
@@ -112,7 +112,7 @@ noMemory (void *data) {
   LineProcessingData *lpd = data;
 
   logMallocError();
-  lpd->exitStatus = 10;
+  lpd->exitStatus = PROG_EXIT_FATAL;
 }
 
 static int
@@ -121,7 +121,7 @@ checkOutputStream (void *data) {
 
   if (ferror(outputStream)) {
     logSystemError("output");
-    lpd->exitStatus = 12;
+    lpd->exitStatus = PROG_EXIT_FATAL;
     return 0;
   }
 
@@ -294,14 +294,14 @@ processLine (char *line, void *data) {
   return 1;
 }
 
-static int
+static ProgramExitStatus
 processStream (FILE *stream) {
   LineProcessingData lpd = {
-    .exitStatus = 0
+    .exitStatus = PROG_EXIT_SUCCESS
   };
-  unsigned char exitStatus = processLines(stream, processLine, &lpd)? lpd.exitStatus: 5;
+  ProgramExitStatus exitStatus = processLines(stream, processLine, &lpd)? lpd.exitStatus: PROG_EXIT_FATAL;
 
-  if (!exitStatus)
+  if (exitStatus == PROG_EXIT_SUCCESS)
     if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd)))
       exitStatus = lpd.exitStatus;
 
@@ -310,7 +310,7 @@ processStream (FILE *stream) {
 
 int
 main (int argc, char *argv[]) {
-  int status = 3;
+  ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   resetPreferences();
   prefs.expandCurrentWord = 0;
@@ -368,42 +368,42 @@ main (int argc, char *argv[]) {
               char *textTablePath;
 
               if ((textTablePath = makePath(opt_tablesDirectory, textTableFile))) {
-                status = (textTable = compileTextTable(textTablePath))? 0: 4;
+                exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
 
                 free(textTablePath);
               } else {
-                status = 4;
+                exitStatus = PROG_EXIT_FATAL;
               }
 
               free(textTableFile);
             } else {
-              status = 4;
+              exitStatus = PROG_EXIT_FATAL;
             }
           } else {
             putCell = putUnicodeBraille;
-            status = 0;
+            exitStatus = PROG_EXIT_SUCCESS;
           }
 
-          if (!status) {
+          if (exitStatus == PROG_EXIT_SUCCESS) {
             if (argc) {
               do {
                 char *path = *argv;
                 if (strcmp(path, "-") == 0) {
-                  status = processStream(stdin);
+                  exitStatus = processStream(stdin);
                 } else {
                   FILE *stream = fopen(path, "r");
                   if (stream) {
-                    status = processStream(stream);
+                    exitStatus = processStream(stream);
                     fclose(stream);
                   } else {
                     logMessage(LOG_ERR, "cannot open input file: %s: %s",
                                path, strerror(errno));
-                    status = 6;
+                    exitStatus = PROG_EXIT_FATAL;
                   }
                 }
-              } while ((status == 0) && (++argv, --argc));
+              } while ((exitStatus == PROG_EXIT_SUCCESS) && (++argv, --argc));
             } else {
-              status = processStream(stdin);
+              exitStatus = processStream(stdin);
             }
 
             if (textTable) destroyTextTable(textTable);
@@ -411,12 +411,12 @@ main (int argc, char *argv[]) {
 
           destroyContractionTable(contractionTable);
         } else {
-          status = 3;
+          exitStatus = PROG_EXIT_FATAL;
         }
 
         free(contractionTablePath);
       } else {
-        status = 3;
+        exitStatus = PROG_EXIT_FATAL;
       }
 
       free(contractionTableFile);
@@ -425,5 +425,5 @@ main (int argc, char *argv[]) {
 
   if (outputBuffer) free(outputBuffer);
   if (inputBuffer) free(inputBuffer);
-  return status;
+  return exitStatus;
 }

@@ -261,7 +261,7 @@ static void suspendDriver(void)
 
 int main(int argc, char *argv[])
 {
-  int status = 0;
+  ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   brlapi_fileDescriptor fd;
   settings.host = NULL; settings.auth = NULL;
 
@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
   } else {
     fprintf(stderr, "failed to connect to %s using auth %s",settings.host, settings.auth);
     brlapi_perror("");
-    status = 1;
+    exitStatus = PROG_EXIT_FATAL;
   }
-  return status;
+  return exitStatus;
 }
