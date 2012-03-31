@@ -98,7 +98,7 @@ setRegion (
       const int maximum = sizeLimit - 1;
       if (!validateInteger(offsetValue, offsetOption, &minimum, &maximum)) {
         logMessage(LOG_ERR, "invalid %s: %s", offsetName, offsetOption);
-        exit(OPT_EXIT_SYNTAX);
+        exit(PROG_EXIT_SYNTAX);
       }
     }
 
@@ -107,7 +107,7 @@ setRegion (
       const int maximum = sizeLimit - *offsetValue;
       if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
         logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
-        exit(OPT_EXIT_SYNTAX);
+        exit(PROG_EXIT_SYNTAX);
       }
       return;
     }
@@ -116,7 +116,7 @@ setRegion (
     const int maximum = sizeLimit;
     if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
       logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
     *offsetValue = (sizeLimit - *sizeValue) / 2;
     return;
@@ -166,7 +166,7 @@ main (int argc, char *argv[]) {
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
-        exit(OPT_EXIT_FATAL);
+        exit(PROG_EXIT_FATAL);
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -194,7 +194,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid screen parameter: %s", assignment);
       }
-      if (!ok) exit(OPT_EXIT_SYNTAX);
+      if (!ok) exit(PROG_EXIT_SYNTAX);
       --argc;
     }
 

@@ -2372,7 +2372,7 @@ tryPidFile (ProcessIdentifier pid) {
     if (created) {
       atexit(exitPidFile);
     } else if (errno == EEXIST) {
-      exit(OPT_EXIT_SEMANTIC);
+      exit(PROG_EXIT_SEMANTIC);
     } else {
       asyncRelativeAlarm(5000, retryPidFile, NULL);
     }
@@ -2418,14 +2418,14 @@ background (void) {
 
     if (!SetEnvironmentVariable(variableName, "")) {
       logWindowsSystemError("SetEnvironmentVariable");
-      exit(OPT_EXIT_FATAL);
+      exit(PROG_EXIT_FATAL);
     }
 
     if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE,
                        CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED,
                        NULL, NULL, &startupInfo, &processInfo)) {
       logWindowsSystemError("CreateProcess");
-      exit(OPT_EXIT_FATAL);
+      exit(PROG_EXIT_FATAL);
     }
 
     {
@@ -2459,7 +2459,7 @@ background (void) {
 
   if (pipe(fds) == -1) {
     logSystemError("pipe");
-    exit(OPT_EXIT_FATAL);
+    exit(PROG_EXIT_FATAL);
   }
 
   fflush(stdout);
@@ -2470,7 +2470,7 @@ background (void) {
 
     if (child == -1) {
       logSystemError("fork");
-      exit(OPT_EXIT_FATAL);
+      exit(PROG_EXIT_FATAL);
     }
 
     if (child) {
@@ -2500,7 +2500,7 @@ background (void) {
 
   if (setsid() == -1) {                        
     logSystemError("setsid");
-    exit(OPT_EXIT_FATAL);
+    exit(PROG_EXIT_FATAL);
   }
 }
 #endif /* background() */
@@ -2517,8 +2517,8 @@ validateInterval (int *value, const char *string) {
   }
 }
 
-int
-startup (int argc, char *argv[]) {
+ProgramExitStatus
+brlttyStart (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -2528,7 +2528,7 @@ startup (int argc, char *argv[]) {
       .applicationName = "brltty"
     };
     OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    if (result == OPT_EXIT) return OPT_EXIT_FORCE;
+    if (result == OPT_EXIT) return PROG_EXIT_FORCE;
   }
 
   {
@@ -2603,7 +2603,7 @@ startup (int argc, char *argv[]) {
     identifySpeechDrivers(1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-    return OPT_EXIT_FORCE;
+    return PROG_EXIT_FORCE;
   }
 
 #ifdef __MINGW32__
@@ -2620,7 +2620,7 @@ startup (int argc, char *argv[]) {
       stop = 1;
     }
 
-    if (stop) return OPT_EXIT_FORCE;
+    if (stop) return PROG_EXIT_FORCE;
   }
 #endif /* __MINGW32__ */
 
@@ -2814,7 +2814,7 @@ startup (int argc, char *argv[]) {
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
     logMessage(LOG_ERR, gettext("braille device not specified"));
-    return OPT_EXIT_SYNTAX;
+    return PROG_EXIT_SYNTAX;
   }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
 
@@ -2846,5 +2846,5 @@ startup (int argc, char *argv[]) {
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  return opt_verify? OPT_EXIT_FORCE: OPT_EXIT_SUCCESS;
+  return opt_verify? PROG_EXIT_FORCE: PROG_EXIT_SUCCESS;
 }

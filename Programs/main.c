@@ -27,25 +27,25 @@
 #include "brltty.h"
 #include "log.h"
 
-static int
+static ProgramExitStatus
 brlttyRun (void) {
   while (brlttyUpdate());
-  return 1;
+  return PROG_EXIT_SUCCESS;
 }
 
 #ifdef __MINGW32__
 static SERVICE_STATUS_HANDLE serviceStatusHandle;
 static DWORD serviceState;
-static int serviceReturnCode;
+static ProgramExitStatus serviceExitStatus;
 
 static BOOL
-setServiceState (DWORD state, int exitCode, const char *name) {
+setServiceState (DWORD state, ProgramExitStatus exitStatus, const char *name) {
   SERVICE_STATUS status = {
     .dwServiceType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
     .dwCurrentState = state,
     .dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE,
-    .dwWin32ExitCode = exitCode? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
-    .dwServiceSpecificExitCode = exitCode,
+    .dwWin32ExitCode = (exitStatus == PROG_EXIT_SUCCESS)? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
+    .dwServiceSpecificExitCode = exitStatus,
     .dwCheckPoint = 0,
     .dwWaitHint = 10000, /* milliseconds */
   };
@@ -61,29 +61,29 @@ static void WINAPI
 serviceHandler (DWORD code) {
   switch (code) {
     case SERVICE_CONTROL_STOP:
-      setServiceState(SERVICE_STOP_PENDING, 0, "SERVICE_STOP_PENDING");
+      setServiceState(SERVICE_STOP_PENDING, PROG_EXIT_SUCCESS, "SERVICE_STOP_PENDING");
       raise(SIGTERM);
       break;
 
     case SERVICE_CONTROL_PAUSE:
-      setServiceState(SERVICE_PAUSE_PENDING, 0, "SERVICE_PAUSE_PENDING");
+      setServiceState(SERVICE_PAUSE_PENDING, PROG_EXIT_SUCCESS, "SERVICE_PAUSE_PENDING");
       /* TODO: suspend */
       break;
 
     case SERVICE_CONTROL_CONTINUE:
-      setServiceState(SERVICE_CONTINUE_PENDING, 0, "SERVICE_CONTINUE_PENDING");
+      setServiceState(SERVICE_CONTINUE_PENDING, PROG_EXIT_SUCCESS, "SERVICE_CONTINUE_PENDING");
       /* TODO: resume */
       break;
 
     default:
-      setServiceState(serviceState, 0, "SetServiceStatus");
+      setServiceState(serviceState, PROG_EXIT_SUCCESS, "SetServiceStatus");
       break;
   }
 }
 
 static void
 exitService (void) {
-  setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
+  setServiceState(SERVICE_STOPPED, PROG_EXIT_SUCCESS, "SERVICE_STOPPED");
 }
 
 static void WINAPI
@@ -91,18 +91,18 @@ serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
 
   if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
-    if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
-      if (!(serviceReturnCode = brlttyConstruct(argc, argv))) {
-        if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
-          serviceReturnCode = brlttyRun();
+    if ((setServiceState(SERVICE_START_PENDING, PROG_EXIT_SUCCESS, "SERVICE_START_PENDING"))) {
+      if ((serviceExitStatus = brlttyConstruct(argc, argv)) == PROG_EXIT_SUCCESS) {
+        if ((setServiceState(SERVICE_RUNNING, PROG_EXIT_SUCCESS, "SERVICE_RUNNING"))) {
+          serviceExitStatus = brlttyRun();
         } else {
-          serviceReturnCode = 1;
+          serviceExitStatus = PROG_EXIT_FATAL;
         }
-      } else if (serviceReturnCode == 1) {
-        serviceReturnCode = 0;
+      } else if (serviceExitStatus == PROG_EXIT_FORCE) {
+        serviceExitStatus = PROG_EXIT_SUCCESS;
       }
 
-      setServiceState(SERVICE_STOPPED, serviceReturnCode, "SERVICE_STOPPED");
+      setServiceState(SERVICE_STOPPED, serviceExitStatus, "SERVICE_STOPPED");
     }
   } else {
     logWindowsSystemError("RegisterServiceCtrlHandler");
@@ -120,7 +120,7 @@ main (int argc, char *argv[]) {
     };
 
     isWindowsService = 1;
-    if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
+    if (StartServiceCtrlDispatcher(serviceTable)) return serviceExitStatus;
     isWindowsService = 0;
 
     if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
@@ -177,12 +177,14 @@ main (int argc, char *argv[]) {
 #endif /* STDERR_PATH */
 
   {
-    int returnCode = brlttyConstruct(argc, argv);
-    if (!returnCode) {
-      returnCode = brlttyRun();
-    } else if (returnCode == 1) {
-      returnCode = 0;
+    ProgramExitStatus exitStatus = brlttyConstruct(argc, argv);
+
+    if (exitStatus == PROG_EXIT_SUCCESS) {
+      exitStatus = brlttyRun();
+    } else if (exitStatus == PROG_EXIT_FORCE) {
+      exitStatus = PROG_EXIT_SUCCESS;
     }
-    return returnCode;
+
+    return exitStatus;
   }
 }

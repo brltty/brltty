@@ -218,7 +218,7 @@ main (int argc, char *argv[]) {
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing table file.");
-    exit(OPT_EXIT_SYNTAX);
+    exit(PROG_EXIT_SYNTAX);
   }
   path = *argv++, argc--;
 

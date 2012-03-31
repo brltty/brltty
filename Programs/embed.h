@@ -19,11 +19,13 @@
 #ifndef BRLTTY_INCLUDED_EMBED
 #define BRLTTY_INCLUDED_EMBED
 
+#include "program.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int brlttyConstruct (int argc, char *argv[]);
+extern ProgramExitStatus brlttyConstruct (int argc, char *argv[]);
 extern int brlttyUpdate (void);
 
 #ifdef __cplusplus

@@ -163,7 +163,7 @@ main (int argc, char *argv[]) {
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
-        exit(OPT_EXIT_FATAL);
+        exit(PROG_EXIT_FATAL);
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -190,7 +190,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid braille driver parameter: %s", assignment);
       }
-      if (!ok) exit(OPT_EXIT_SYNTAX);
+      if (!ok) exit(PROG_EXIT_SYNTAX);
       --argc;
     }
 

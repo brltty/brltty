@@ -153,7 +153,7 @@ main (int argc, char *argv[]) {
 
     if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
       logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
 
     prefs.tuneDevice = device;
@@ -165,7 +165,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInstrument(&instrument, opt_midiInstrument)) {
       logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
 
     prefs.midiInstrument = instrument;
@@ -179,7 +179,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
 
     switch (prefs.tuneDevice) {
@@ -202,12 +202,12 @@ main (int argc, char *argv[]) {
 
   if (!argc) {
     logMessage(LOG_ERR, "missing tune.");
-    exit(OPT_EXIT_SYNTAX);
+    exit(PROG_EXIT_SYNTAX);
   }
 
   if (argc % 2) {
     logMessage(LOG_ERR, "missing note duration.");
-    exit(OPT_EXIT_SYNTAX);
+    exit(PROG_EXIT_SYNTAX);
   }
 
   {
@@ -227,7 +227,7 @@ main (int argc, char *argv[]) {
           const char *argument = *argv++;
           if (!validateInteger(&note, argument, &minimum, &maximum)) {
             logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
-            exit(OPT_EXIT_SYNTAX);
+            exit(PROG_EXIT_SYNTAX);
           }
           --argc;
         }
@@ -238,7 +238,7 @@ main (int argc, char *argv[]) {
           const char *argument = *argv++;
           if (!validateInteger(&duration, argument, &minimum, &maximum)) {
             logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
-            exit(OPT_EXIT_SYNTAX);
+            exit(PROG_EXIT_SYNTAX);
           }
           --argc;
         }
@@ -255,12 +255,12 @@ main (int argc, char *argv[]) {
       }
     } else {
       logMallocError();
-      exit(OPT_EXIT_FATAL);
+      exit(PROG_EXIT_FATAL);
     }
 
     if (!setTuneDevice(prefs.tuneDevice)) {
       logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[prefs.tuneDevice]);
-      exit(OPT_EXIT_SEMANTIC);
+      exit(PROG_EXIT_SEMANTIC);
     }
 
     {

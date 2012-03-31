@@ -1144,7 +1144,7 @@ brlttyPrepare_first (void) {
   return 1;
 }
 
-int
+ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   atexit(exitLog);
   openSystemLog();
@@ -1153,9 +1153,8 @@ brlttyConstruct (int argc, char *argv[]) {
   terminationTime = time(NULL);
 
 #ifdef SIGPIPE
-  /* We install SIGPIPE handler before startup() so that drivers which
-   * use pipes can't cause program termination (the call to message() in
-   * startup() in particular).
+  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
+   * a broken pipe won't abort program execution.
    */
   handleSignal(SIGPIPE, SIG_IGN);
 #endif /* SIGPIPE */
@@ -1169,13 +1168,13 @@ brlttyConstruct (int argc, char *argv[]) {
 #endif /* SIGINT */
 
   {
-    int exitStatus = startup(argc, argv);
-    if (exitStatus) return exitStatus;
+    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
+    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
   atexit(exitSessions);
   brlttyPrepare = brlttyPrepare_first;
-  return 0;
+  return PROG_EXIT_SUCCESS;
 }
 
 static int

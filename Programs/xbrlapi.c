@@ -113,7 +113,7 @@ void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
     vfprintf(stderr,fmt,va);
     va_end(va);
   }
-  exit(OPT_EXIT_FATAL);
+  exit(PROG_EXIT_FATAL);
 }
 
 void fatal_errno(const char *msg, const char *fmt, ...) {
@@ -124,7 +124,7 @@ void fatal_errno(const char *msg, const char *fmt, ...) {
     vfprintf(stderr,fmt,va);
     va_end(va);
   }
-  exit(OPT_EXIT_FATAL);
+  exit(PROG_EXIT_FATAL);
 }
 
 void fatal(const char *fmt, ...) {
@@ -134,7 +134,7 @@ void fatal(const char *fmt, ...) {
     vfprintf(stderr,fmt,va);
     va_end(va);
   }
-  exit(OPT_EXIT_FATAL);
+  exit(PROG_EXIT_FATAL);
 }
 
 /******************************************************************************
@@ -150,7 +150,7 @@ static int brlapi_fd;
 
 void api_cleanExit(int foo) {
   close(brlapi_fd);
-  exit(OPT_EXIT_SUCCESS);
+  exit(PROG_EXIT_SUCCESS);
 }
 
 void tobrltty_init(char *auth, char *host) {
@@ -295,7 +295,7 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
     fatal("XGetErrorText");
   fprintf(stderr,gettext("X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
   fprintf(stderr,gettext("resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
-  exit(OPT_EXIT_FATAL);
+  exit(PROG_EXIT_FATAL);
 }
 
 static int getXVTnb(void) {

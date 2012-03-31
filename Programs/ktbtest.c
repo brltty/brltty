@@ -166,7 +166,7 @@ getKeyNameTables (const char *keyTableName) {
 
 int
 main (int argc, char *argv[]) {
-  int status = 0;
+  int status = PROG_EXIT_SUCCESS;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -241,7 +241,7 @@ main (int argc, char *argv[]) {
     }
   } else {
     logMessage(LOG_ERR, "missing key table name");
-    status = 2;
+    status = PROG_EXIT_SYNTAX;
   }
 
   return status;

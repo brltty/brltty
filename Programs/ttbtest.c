@@ -620,7 +620,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
 
     if (!(name && *++name)) {
       logMessage(LOG_ERR, "unspecified %s format.", description);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
   }
 
@@ -630,7 +630,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
   }
 
   logMessage(LOG_ERR, "unknown %s format: %s", description, name);
-  exit(OPT_EXIT_SYNTAX);
+  exit(PROG_EXIT_SYNTAX);
 }
 
 static const char *inputPath;
@@ -1918,7 +1918,7 @@ main (int argc, char *argv[]) {
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing input table.");
-    exit(OPT_EXIT_SYNTAX);
+    exit(PROG_EXIT_SYNTAX);
   }
   inputPath = *argv++, argc--;
 
@@ -1932,7 +1932,7 @@ main (int argc, char *argv[]) {
 
     if (!(outputPath = strdup(buffer))) {
       logMallocError();
-      exit(OPT_EXIT_FATAL);
+      exit(PROG_EXIT_FATAL);
     }
   } else {
     outputPath = NULL;
@@ -1940,7 +1940,7 @@ main (int argc, char *argv[]) {
 
   if (argc > 0) {
     logMessage(LOG_ERR, "too many parameters.");
-    exit(OPT_EXIT_SYNTAX);
+    exit(PROG_EXIT_SYNTAX);
   }
 
   inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
@@ -1952,7 +1952,7 @@ main (int argc, char *argv[]) {
 
   if (*opt_charset && !setCharset(opt_charset)) {
     logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
-    exit(OPT_EXIT_SEMANTIC);
+    exit(PROG_EXIT_SEMANTIC);
   }
 
 #ifdef ENABLE_API

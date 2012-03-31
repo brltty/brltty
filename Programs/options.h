@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_OPTIONS
 #define BRLTTY_INCLUDED_OPTIONS
 
+#include "program.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -81,27 +83,19 @@ typedef enum {
 
 extern OptionsResult processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
 
-typedef enum {
-  OPT_EXIT_SUCCESS = 0,
-  OPT_EXIT_FORCE = 1,
-  OPT_EXIT_SYNTAX = 2,
-  OPT_EXIT_SEMANTIC = 3,
-  OPT_EXIT_FATAL = 4
-} OptionsExitStatus;
-
 static inline void handleOptionsResult (OptionsResult result) {
   switch (result) {
     case OPT_OK:
       return;
 
     case OPT_EXIT:
-      exit(OPT_EXIT_SUCCESS);
+      exit(PROG_EXIT_SUCCESS);
 
     case OPT_SYNTAX:
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
 
     default:
-      exit(OPT_EXIT_FORCE);
+      exit(PROG_EXIT_FORCE);
   }
 }
 

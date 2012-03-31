@@ -120,7 +120,7 @@ main (int argc, char *argv[]) {
     static const float maximum = 10.0;
     if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
   }
 
@@ -130,7 +130,7 @@ main (int argc, char *argv[]) {
     static const float maximum = 2.0;
     if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
   }
 
@@ -154,7 +154,7 @@ main (int argc, char *argv[]) {
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
-        exit(OPT_EXIT_FATAL);
+        exit(PROG_EXIT_FATAL);
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -181,7 +181,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid speech driver parameter: %s", assignment);
       }
-      if (!ok) exit(OPT_EXIT_SYNTAX);
+      if (!ok) exit(PROG_EXIT_SYNTAX);
       --argc;
     }
 

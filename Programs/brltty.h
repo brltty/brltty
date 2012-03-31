@@ -21,6 +21,7 @@
 
 #include "prologue.h"
 
+#include "program.h"
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
@@ -60,7 +61,7 @@ extern int updateInterval;
 extern int messageDelay;
 extern ContractionTable *contractionTable;
 
-extern int startup (int argc, char *argv[]);
+extern ProgramExitStatus brlttyStart (int argc, char *argv[]);
 
 extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);

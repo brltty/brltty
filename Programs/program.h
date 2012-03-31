@@ -25,6 +25,14 @@ extern "C" {
 
 #include "pid.h"
 
+typedef enum {
+  PROG_EXIT_SUCCESS  = 0,
+  PROG_EXIT_FORCE    = 1,
+  PROG_EXIT_SYNTAX   = 2,
+  PROG_EXIT_SEMANTIC = 3,
+  PROG_EXIT_FATAL    = 4
+} ProgramExitStatus;
+
 extern const char *programPath;
 extern const char *programName;
 

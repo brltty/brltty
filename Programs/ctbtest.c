@@ -347,7 +347,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
       logMessage(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
-      exit(OPT_EXIT_SYNTAX);
+      exit(PROG_EXIT_SYNTAX);
     }
   }
 
