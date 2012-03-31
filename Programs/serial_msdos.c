@@ -132,8 +132,9 @@ serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
   return flow;
 }
 
-void
+int
 serialPutModemState (SerialAttributes *attributes, int enabled) {
+  return !enabled;
 }
 
 unsigned int

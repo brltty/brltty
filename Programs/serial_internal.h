@@ -157,7 +157,7 @@ extern int serialPutDataBits (SerialAttributes *attributes, unsigned int bits);
 extern int serialPutStopBits (SerialAttributes *attributes, SerialStopBits bits);
 extern int serialPutParity (SerialAttributes *attributes, SerialParity parity);
 extern SerialFlowControl serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow);
-extern void serialPutModemState (SerialAttributes *attributes, int enabled);
+extern int serialPutModemState (SerialAttributes *attributes, int enabled);
 
 extern unsigned int serialGetDataBits (const SerialAttributes *attributes);
 extern unsigned int serialGetStopBits (const SerialAttributes *attributes);

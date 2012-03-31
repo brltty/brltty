@@ -196,7 +196,7 @@ serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
   return flow;
 }
 
-void
+int
 serialPutModemState (SerialAttributes *attributes, int enabled) {
   if (enabled) {
     attributes->fDtrControl = DTR_CONTROL_HANDSHAKE;
@@ -205,6 +205,8 @@ serialPutModemState (SerialAttributes *attributes, int enabled) {
     attributes->fDtrControl = DTR_CONTROL_ENABLE;
     attributes->fDsrSensitivity = FALSE;
   }
+
+  return 1;
 }
 
 unsigned int

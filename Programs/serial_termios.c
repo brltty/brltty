@@ -302,13 +302,15 @@ serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
   return flow;
 }
 
-void
+int
 serialPutModemState (SerialAttributes *attributes, int enabled) {
   if (enabled) {
     attributes->c_cflag &= ~CLOCAL;
   } else {
     attributes->c_cflag |= CLOCAL;
   }
+
+  return 1;
 }
 
 unsigned int

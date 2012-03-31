@@ -61,7 +61,13 @@ serialInitializeAttributes (SerialAttributes *attributes) {
     logMessage(LOG_WARNING, "default serial flow control not supported: 0X%04X", SERIAL_DEFAULT_FLOW_CONTROL);
   }
 
-  serialPutModemState(attributes, 0);
+  {
+    int state = 0;
+
+    if (!serialPutModemState(attributes, state)) {
+      logMessage(LOG_WARNING, "default serial modem state not supported: %d", state);
+    }
+  }
 }
 
 int
@@ -183,7 +189,13 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingFlowControlProc = NULL;
   }
 
-  serialPutModemState(&serial->pendingAttributes, !!serial->pendingFlowControlProc);
+  {
+    int state = !!serial->pendingFlowControlProc;
+
+    if (!serialPutModemState(&serial->pendingAttributes, state)) {
+      logMessage(LOG_WARNING, "unsupported serial modem state: %d", state);
+    }
+  }
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
