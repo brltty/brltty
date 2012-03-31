@@ -66,7 +66,10 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
 
-static volatile int terminationSignal = 0;
+static volatile unsigned int terminationCount;
+static volatile time_t terminationTime;
+#define TERMINATION_COUNT_EXIT_THRESHOLD 3
+#define TERMINATION_COUNT_RESET_TIME 5
 
 BrailleDisplay brl;                        /* For the Braille routines */
 unsigned int textStart;
@@ -135,6 +138,7 @@ exitLog (void) {
   closeLogFile();
 }
 
+#ifdef HAVE_SIGNAL_H
 static void
 handleSignal (int number, void (*handler) (int)) {
 #ifdef HAVE_SIGACTION
@@ -152,15 +156,15 @@ handleSignal (int number, void (*handler) (int)) {
 #endif /* HAVE_SIGACTION */
 }
 
-void
-testProgramTermination (void) {
-  if (terminationSignal) exit(0);
-}
-
 static void 
-terminationHandler (int signalNumber) {
-  terminationSignal = signalNumber;
+handleTerminationRequest (int signalNumber) {
+  time_t now = time(NULL);
+  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
+  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
+  terminationTime = now;
 }
+#endif /* HAVE_SIGNAL_H */
+
 
 static void
 checkRoutingStatus (RoutingStatus ok, int wait) {
@@ -1145,6 +1149,9 @@ brlttyConstruct (int argc, char *argv[]) {
   atexit(exitLog);
   openSystemLog();
 
+  terminationCount = 0;
+  terminationTime = time(NULL);
+
 #ifdef SIGPIPE
   /* We install SIGPIPE handler before startup() so that drivers which
    * use pipes can't cause program termination (the call to message() in
@@ -1154,11 +1161,11 @@ brlttyConstruct (int argc, char *argv[]) {
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
-  handleSignal(SIGTERM, terminationHandler);
+  handleSignal(SIGTERM, handleTerminationRequest);
 #endif /* SIGTERM */
 
 #ifdef SIGINT
-  handleSignal(SIGINT, terminationHandler);
+  handleSignal(SIGINT, handleTerminationRequest);
 #endif /* SIGINT */
 
   {
@@ -1180,8 +1187,6 @@ brlttyCommand (void) {
   int oldmoty = ses->winy;
 
   int command;
-
-  testProgramTermination();
 
   command = restartRequired? BRL_CMD_RESTARTBRL: readBrailleCommand(&brl, getScreenCommandContext());
 
@@ -2280,8 +2285,8 @@ doCommand:
 int
 brlttyUpdate (void) {
   if (!brlttyPrepare()) return 0;
+  if (terminationCount) return 0;
 
-  testProgramTermination();
   closeTuneDevice(0);
   checkRoutingStatus(ROUTING_DONE, 0);
 
@@ -2324,7 +2329,9 @@ brlttyUpdate (void) {
     /*
      * Process any Braille input 
      */
-    while (brlttyCommand());
+    do {
+      if (terminationCount) return 0;
+    } while (brlttyCommand());
 
     /* some commands (key insertion, virtual terminal switching, etc)
      * may have moved the cursor
@@ -2854,7 +2861,7 @@ message (const char *mode, const char *text, short flags) {
       if (flags & MSG_WAITKEY) {
         while (1) {
           int command = readCommand(KTB_CTX_WAITING);
-          testProgramTermination();
+          if (terminationCount) break;
           if (command == EOF) {
             drainBrailleOutput(&brl, updateInterval);
             closeTuneDevice(0);
@@ -2867,7 +2874,7 @@ message (const char *mode, const char *text, short flags) {
         for (i=0; i<messageDelay; i+=updateInterval) {
           int command;
 
-          testProgramTermination();
+          if (terminationCount) break;
           drainBrailleOutput(&brl, updateInterval);
 
           command = readCommand(KTB_CTX_WAITING);
