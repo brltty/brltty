@@ -341,84 +341,20 @@ serialWriteData (
 }
 
 static int
-serialGetLines (SerialDevice *serial, SerialLines *lines) {
-#if defined(__MINGW32__)
-  DCB dcb;
-  if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
-    logWindowsSystemError("GetCommModemStatus");
-    return 0;
-  }
-  dcb.DCBlength = sizeof(dcb);
-  if (!GetCommState(serial->fileHandle, &dcb)) {
-    logWindowsSystemError("GetCommState");
-    return 0;
-  }
-  if (dcb.fRtsControl == RTS_CONTROL_ENABLE)
-    serial->linesState |= SERIAL_LINE_RTS;
-  if (dcb.fDtrControl == DTR_CONTROL_ENABLE)
-    serial->linesState |= SERIAL_LINE_DTR;
-#elif defined(__MSDOS__)
-  serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
-#elif defined(TIOCMGET)
-  if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
-    logSystemError("TIOCMGET");
-    return 0;
-  }
-#else /* get lines */
-#warning getting modem lines not supported on this platform
-  serial->linesState = SERIAL_LINE_RTS | SERIAL_LINE_CTS | SERIAL_LINE_DTR | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
-#endif /* get lines */
-
-  *lines = serial->linesState;
-  return 1;
+serialReadLines (SerialDevice *serial, SerialLines *lines) {
+  int result = serialGetLines(serial, &serial->linesState);
+  if (result) *lines = serial->linesState;
+  return result;
 }
 
 static int
-serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
-#if defined(__MINGW32__)
-  DCB dcb;
-  dcb.DCBlength = sizeof(dcb);
-  if (GetCommState(serial->fileHandle, &dcb)) {
-    if (low & SERIAL_LINE_RTS)
-      dcb.fRtsControl = RTS_CONTROL_DISABLE;
-    else if (high & SERIAL_LINE_RTS)
-      dcb.fRtsControl = RTS_CONTROL_ENABLE;
-
-    if (low & SERIAL_LINE_DTR)
-      dcb.fDtrControl = DTR_CONTROL_DISABLE;
-    else if (high & SERIAL_LINE_DTR)
-      dcb.fDtrControl = DTR_CONTROL_ENABLE;
-
-    if (SetCommState(serial->fileHandle, &dcb)) return 1;
-    logWindowsSystemError("SetCommState");
-  } else {
-    logWindowsSystemError("GetCommState");
-  }
-#elif defined(__MSDOS__)
-  int interruptsWereEnabled = disable();
-  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_MCR);
-
-  serialWritePort(serial, SERIAL_PORT_MCR,
-                  (oldMCR | high) & ~low);
-  if (interruptsWereEnabled) enable();
-  return 1;
-#elif defined(TIOCMSET)
-  int status;
-  if (serialGetLines(serial, &status) != -1) {
-    status |= high;
-    status &= ~low;
-    if (ioctl(serial->fileDescriptor, TIOCMSET, &status) != -1) return 1;
-    logSystemError("TIOCMSET");
-  }
-#else /* set lines */
-#warning setting modem lines not supported on this platform
-#endif /* set lines */
-  return 0;
+serialWriteLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+  return serialPutLines(serial, high, low);
 }
 
 static int
 serialSetLine (SerialDevice *serial, SerialLines line, int up) {
-  return serialSetLines(serial, up?line:0, up?0:line);
+  return serialWriteLines(serial, up?line:0, up?0:line);
 }
 
 int
@@ -434,7 +370,7 @@ serialSetLineDTR (SerialDevice *serial, int up) {
 static int
 serialTestLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   SerialLines lines;
-  if (serialGetLines(serial, &lines))
+  if (serialReadLines(serial, &lines))
     if (((lines & high) == high) && ((~lines & low) == low))
       return 1;
   return 0;
@@ -486,7 +422,7 @@ serialMonitorWaitLines (SerialDevice *serial) {
   SerialLines old = serial->linesState & serial->waitLines;
   SerialLines new;
 
-  while (serialGetLines(serial, &new))
+  while (serialReadLines(serial, &new))
     if ((new & serial->waitLines) != old)
       return 1;
 #endif
@@ -694,7 +630,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
 
   if (!usingB0) {
     SerialLines lines;
-    if (!serialGetLines(serial, &lines)) return 0;
+    if (!serialReadLines(serial, &lines)) return 0;
 
     {
       static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
@@ -706,7 +642,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
     }
 
     if (highLines)
-      if (!serialSetLines(serial, 0, highLines|lowLines))
+      if (!serialWriteLines(serial, 0, highLines|lowLines))
         return 0;
   }
 
@@ -714,7 +650,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   if (!serialDiscardInput(serial)) return 0;
 
   if (!usingB0)
-    if (!serialSetLines(serial, highLines, lowLines))
+    if (!serialWriteLines(serial, highLines, lowLines))
       return 0;
 
 #ifdef HAVE_POSIX_THREADS

@@ -254,3 +254,20 @@ serialPutData (
   return writeData(serial->fileDescriptor, data, size);
 }
 
+int
+serialGetLines (SerialDevice *serial, SerialLines *lines) {
+  *lines = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
+  return 1;
+}
+
+int
+serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+  int interruptsWereEnabled = disable();
+  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_MCR);
+
+  serialWritePort(serial, SERIAL_PORT_MCR,
+                  (oldMCR | high) & ~low);
+  if (interruptsWereEnabled) enable();
+  return 1;
+}
+

@@ -392,3 +392,53 @@ serialPutData (
   return -1;
 }
 
+int
+serialGetLines (SerialDevice *serial, SerialLines *lines) {
+  if (!GetCommModemStatus(serial->fileHandle, lines)) {
+    logWindowsSystemError("GetCommModemStatus");
+    return 0;
+  }
+
+  {
+    DCB dcb;
+    dcb.DCBlength = sizeof(dcb);
+
+    if (!GetCommState(serial->fileHandle, &dcb)) {
+      logWindowsSystemError("GetCommState");
+      return 0;
+    }
+
+    if (dcb.fRtsControl == RTS_CONTROL_ENABLE) *lines |= SERIAL_LINE_RTS;
+    if (dcb.fDtrControl == DTR_CONTROL_ENABLE) *lines |= SERIAL_LINE_DTR;
+  }
+
+  return 1;
+}
+
+int
+serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+  DCB dcb;
+  dcb.DCBlength = sizeof(dcb);
+
+  if (GetCommState(serial->fileHandle, &dcb)) {
+    if (low & SERIAL_LINE_RTS) {
+      dcb.fRtsControl = RTS_CONTROL_DISABLE;
+    } else if (high & SERIAL_LINE_RTS) {
+      dcb.fRtsControl = RTS_CONTROL_ENABLE;
+    }
+
+    if (low & SERIAL_LINE_DTR) {
+      dcb.fDtrControl = DTR_CONTROL_DISABLE;
+    } else if (high & SERIAL_LINE_DTR) {
+      dcb.fDtrControl = DTR_CONTROL_ENABLE;
+    }
+
+    if (SetCommState(serial->fileHandle, &dcb)) return 1;
+    logWindowsSystemError("SetCommState");
+  } else {
+    logWindowsSystemError("GetCommState");
+  }
+
+  return 0;
+}
+

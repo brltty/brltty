@@ -29,10 +29,6 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef HAVE_SYS_MODEM_H
-#include <sys/modem.h>
-#endif /* HAVE_SYS_MODEM_H */
-
 #ifdef HAVE_POSIX_THREADS
 #ifdef __MINGW32__
 #include "win_pthread.h"
@@ -187,6 +183,9 @@ extern ssize_t serialPutData (
   SerialDevice *serial,
   const void *data, size_t size
 );
+
+extern int serialGetLines (SerialDevice *serial, SerialLines *lines);
+extern int serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low);
 
 #ifdef __cplusplus
 }

@@ -18,6 +18,10 @@
 
 #include "prologue.h"
 
+#ifdef HAVE_SYS_MODEM_H
+#include <sys/modem.h>
+#endif /* HAVE_SYS_MODEM_H */
+
 #include "serial_internal.h"
 #include "io_misc.h"
 
@@ -420,5 +424,39 @@ serialPutData (
   const void *data, size_t size
 ) {
   return writeData(serial->fileDescriptor, data, size);
+}
+
+int
+serialGetLines (SerialDevice *serial, SerialLines *lines) {
+#ifdef TIOCMGET
+  if (ioctl(serial->fileDescriptor, TIOCMGET, lines) == -1) {
+    logSystemError("TIOCMGET");
+    return 0;
+  }
+#else /* TIOCMGET */
+#warning getting modem lines not supported on this platform
+  *lines = SERIAL_LINE_RTS | SERIAL_LINE_CTS | SERIAL_LINE_DTR | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
+#endif /* TIOCMGET */
+
+  return 1;
+}
+
+int
+serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+#ifdef TIOCMSET
+  SerialLines lines;
+
+  if (serialGetLines(serial, &lines)) {
+    lines |= high;
+    lines &= ~low;
+
+    if (ioctl(serial->fileDescriptor, TIOCMSET, &lines) != -1) return 1;
+    logSystemError("TIOCMSET");
+  }
+#else /* TIOCMSET */
+#warning setting modem lines not supported on this platform
+#endif /* TIOCMSET */
+
+  return 0;
 }
 
