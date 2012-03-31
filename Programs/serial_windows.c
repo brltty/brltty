@@ -259,7 +259,7 @@ serialCancelOutput (SerialDevice *serial) {
 
 int
 serialPollInput (SerialDevice *serial, int timeout) {
-  if (serial->pending != -1) return 1;
+  if (serial->pendingCharacter != -1) return 1;
 
   {
     COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
@@ -279,7 +279,7 @@ serialPollInput (SerialDevice *serial, int timeout) {
     }
 
     if (bytesRead) {
-      serial->pending = (unsigned char)c;
+      serial->pendingCharacter = (unsigned char)c;
       return 1;
     }
   }
@@ -304,9 +304,9 @@ serialGetChunk (
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
   DWORD bytesRead;
 
-  if (serial->pending != -1) {
-    *(unsigned char *)buffer = serial->pending;
-    serial->pending = -1;
+  if (serial->pendingCharacter != -1) {
+    *(unsigned char *)buffer = serial->pendingCharacter;
+    serial->pendingCharacter = -1;
     bytesRead = 1;
   } else {
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
@@ -463,5 +463,48 @@ serialMonitorWaitLines (SerialDevice *serial) {
   if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
   logWindowsSystemError("WaitCommEvent");
   return 0;
+}
+
+int
+serialConnectDevice (SerialDevice *serial, const char *device) {
+  if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
+    serial->pendingCharacter = -1;
+
+    if (serialPrepareDevice(serial)) {
+      logMessage(LOG_DEBUG, "serial device opened: %s: fh=%" PRIfd,
+                 device, serial->fileHandle);
+      return 1;
+    }
+
+    CloseHandle(serial->fileHandle);
+  } else {
+    logWindowsSystemError("CreateFile");
+    logMessage(LOG_ERR, "cannot open serial device: %s", device);
+  }
+
+  return 0;
+}
+
+void
+serialDisconnectDevice (SerialDevice *serial) {
+  CloseHandle(serial->fileHandle);
+}
+
+int
+serialEnsureFileDescriptor (SerialDevice *serial) {
+#ifdef __CYGWIN32__
+  if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) >= 0) return 1;
+  logSystemError("cygwin_attach_handle_to_fd");
+#else /* __CYGWIN32__ */
+  if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) >= 0) return 1;
+  logSystemError("open_osfhandle");
+#endif /* __CYGWIN32__ */
+
+  return 0;
+}
+
+void
+serialClearError (SerialDevice *serial) {
+  ClearCommError(serial->fileHandle, NULL, NULL);
 }
 

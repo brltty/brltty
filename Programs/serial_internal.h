@@ -114,10 +114,11 @@ typedef void * (*FlowControlProc) (void *arg);
 
 struct SerialDeviceStruct {
   int fileDescriptor;
+  FILE *stream;
+
   SerialAttributes originalAttributes;
   SerialAttributes currentAttributes;
   SerialAttributes pendingAttributes;
-  FILE *stream;
 
   SerialLines linesState;
   SerialLines waitLines;
@@ -131,7 +132,7 @@ struct SerialDeviceStruct {
 
 #ifdef __MINGW32__
   HANDLE fileHandle;
-  int pending;
+  int pendingCharacter;
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
@@ -193,6 +194,13 @@ extern int serialPutLines (SerialDevice *serial, SerialLines high, SerialLines l
 
 extern int serialRegisterWaitLines (SerialDevice *serial, SerialLines lines);
 extern int serialMonitorWaitLines (SerialDevice *serial);
+
+extern int serialConnectDevice (SerialDevice *serial, const char *device);
+extern int serialPrepareDevice (SerialDevice *serial);
+
+extern void serialDisconnectDevice (SerialDevice *serial);
+extern int serialEnsureFileDescriptor (SerialDevice *serial);
+extern void serialClearError (SerialDevice *serial);
 
 #ifdef __cplusplus
 }

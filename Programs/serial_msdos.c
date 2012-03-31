@@ -281,3 +281,53 @@ serialMonitorWaitLines (SerialDevice *serial) {
   return 0;
 }
 
+int
+serialConnectDevice (SerialDevice *serial, const char *device) {
+  if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+    serial->port = -1;
+
+    {
+      char *truePath;
+
+      if ((truePath = _truename(path, NULL))) {
+        char *com;
+
+        if ((com = strstr(truePath, "COM"))) {
+          serial->port = atoi(com+3) - 1;
+        }
+
+        free(truePath);
+      }
+    }
+
+    if (serial->port >= 0) {
+      if (serialPrepareDevice(serial)) {
+        logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
+                   device, serial->fileDescriptor);
+        return 1;
+      }
+    } else {
+      logMessage(LOG_ERR, "could not determine serial device port number: %s", device);
+    }
+
+    close(serial->fileDescriptor);
+  } else {
+    logMessage(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
+  }
+
+  return 0;
+}
+
+void
+serialDisconnectDevice (SerialDevice *serial) {
+}
+
+int
+serialEnsureFileDescriptor (SerialDevice *serial) {
+  return 1;
+}
+
+void
+serialClearError (SerialDevice *serial) {
+}
+

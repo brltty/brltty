@@ -450,83 +450,41 @@ serialWaitLineDSR (SerialDevice *serial, int up, int flank) {
   return serialWaitLine(serial, SERIAL_LINE_DSR, up, flank);
 }
 
+int
+serialPrepareDevice (SerialDevice *serial) {
+  if (serialReadAttributes(serial)) {
+    serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
+    serialInitializeAttributes(&serial->pendingAttributes);
+
+    serial->linesState = 0;
+    serial->waitLines = 0;
+
+#ifdef HAVE_POSIX_THREADS
+    serial->currentFlowControlProc = NULL;
+    serial->pendingFlowControlProc = NULL;
+    serial->flowControlRunning = 0;
+#endif /* HAVE_POSIX_THREADS */
+
+    return 1;
+  }
+
+  return 0;
+}
+
 SerialDevice *
 serialOpenDevice (const char *path) {
   SerialDevice *serial;
+
   if ((serial = malloc(sizeof(*serial)))) {
     char *device;
+
     if ((device = getDevicePath(path))) {
-#ifdef __MINGW32__
-      if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
-        serial->fileDescriptor = -1;
-#else /* __MINGW32__ */
-      if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-#ifdef __MSDOS__
-        char *truePath, *com;
+      serial->fileDescriptor = -1;
+      serial->stream = NULL;
 
-        if ((truePath = _truename(path, NULL)) &&
-            (com = strstr(truePath,"COM"))) {
-          serial->port = atoi(com+3) - 1;
-#else /* __MSDOS__ */
-        if (isatty(serial->fileDescriptor)) {
-#endif /* __MSDOS__ */
-#endif /* __MINGW32__ */
-
-          if (serialReadAttributes(serial)) {
-            serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
-            serialInitializeAttributes(&serial->pendingAttributes);
-
-            serial->stream = NULL;
-
-            serial->linesState = 0;
-            serial->waitLines = 0;
-
-#ifdef HAVE_POSIX_THREADS
-            serial->currentFlowControlProc = NULL;
-            serial->pendingFlowControlProc = NULL;
-            serial->flowControlRunning = 0;
-#endif /* HAVE_POSIX_THREADS */
-
-#ifdef __MINGW32__
-            serial->pending = -1;
-#endif /* __MINGW32__ */
-
-            logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
-                       device,
-#ifdef __MINGW32__
-                       (int)serial->fileHandle
-#else /* __MINGW32__ */
-                       serial->fileDescriptor
-#endif /* __MINGW32__ */
-                       );
-            free(device);
-            return serial;
-          }
-
-#ifdef __MINGW32__
-        CloseHandle(serial->fileHandle);
-#else /* __MINGW32__ */
-#ifdef __MSDOS__
-        } else {
-          logMessage(LOG_ERR, "could not determine serial device port number: %s", device);
-        }
-
-        if (truePath) free(truePath);
-#else /* __MSDOS__ */
-        } else {
-          logMessage(LOG_ERR, "not a serial device: %s", device);
-        }
-#endif /* __MSDOS__ */
-
-        close(serial->fileDescriptor);
-#endif /* __MINGW32__ */
-      } else {
-#ifdef __MINGW32__
-        logWindowsSystemError("CreateFile");
-        logMessage(LOG_ERR, "cannot open serial device: %s", device);
-#else /* __MINGW32__ */
-        logMessage(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
-#endif /* __MINGW32__ */
+      if (serialConnectDevice(serial, device)) {
+        free(device);
+        return serial;
       }
 
       free(device);
@@ -550,16 +508,10 @@ serialCloseDevice (SerialDevice *serial) {
 
   if (serial->stream) {
     fclose(serial->stream);
-  }
-
-#ifdef __MINGW32__
-  else if (serial->fileDescriptor < 0) {
-    CloseHandle(serial->fileHandle);
-  }
-#endif /* __MINGW32__ */
-
-  else {
+  } else if (serial->fileDescriptor != -1) {
     close(serial->fileDescriptor);
+  } else {
+    serialDisconnectDevice(serial);
   }
 
   free(serial);
@@ -575,11 +527,9 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   FlowControlProc flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
-#ifdef __MINGW32__
-  if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
-#endif /* __MINGW32__ */
-
   if (serial->stream) clearerr(serial->stream);
+  serialClearError(serial);
+
   if (!serialDiscardOutput(serial)) return 0;
 
 #ifdef HAVE_POSIX_THREADS
@@ -607,9 +557,10 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
     {
       static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
       const SerialLines *line = linesTable;
+
       while (*line) {
         *((lines & *line)? &highLines: &lowLines) |= *line;
-        line++;
+        line += 1;
       }
     }
 
@@ -637,19 +588,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
 FILE *
 serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
-#ifdef __MINGW32__
-    if (serial->fileDescriptor < 0) {
-#ifdef __CYGWIN32__
-      if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
-        logSystemError("cygwin_attach_handle_to_fd");
-#else /* __CYGWIN32__ */
-      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
-        logSystemError("open_osfhandle");
-#endif /* __CYGWIN32__ */
-        return NULL;
-      }
-    }
-#endif /* __MINGW32__ */
+    if (!serialEnsureFileDescriptor(serial)) return NULL;
 
     if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
       logSystemError("fdopen");

@@ -476,3 +476,37 @@ serialMonitorWaitLines (SerialDevice *serial) {
   return 0;
 }
 
+int
+serialConnectDevice (SerialDevice *serial, const char *device) {
+  if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+    if (isatty(serial->fileDescriptor)) {
+      if (serialPrepareDevice(serial)) {
+        logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
+                   device, serial->fileDescriptor);
+        return 1;
+      }
+    } else {
+      logMessage(LOG_ERR, "not a serial device: %s", device);
+    }
+
+    close(serial->fileDescriptor);
+  } else {
+    logMessage(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
+  }
+
+  return 0;
+}
+
+void
+serialDisconnectDevice (SerialDevice *serial) {
+}
+
+int
+serialEnsureFileDescriptor (SerialDevice *serial) {
+  return 1;
+}
+
+void
+serialClearError (SerialDevice *serial) {
+}
+
