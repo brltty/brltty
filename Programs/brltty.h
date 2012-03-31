@@ -60,7 +60,6 @@ extern int updateInterval;
 extern int messageDelay;
 extern ContractionTable *contractionTable;
 
-extern void testProgramTermination (void);
 extern int startup (int argc, char *argv[]);
 
 extern void setPreferences (const Preferences *newPreferences);
