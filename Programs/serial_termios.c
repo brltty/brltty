@@ -18,9 +18,16 @@
 
 #include "prologue.h"
 
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "log.h"
+#include "io_misc.h"
+
 #include "serial_termios.h"
 #include "serial_internal.h"
-#include "io_misc.h"
 
 BEGIN_SERIAL_BAUD_TABLE
 #ifdef B50
