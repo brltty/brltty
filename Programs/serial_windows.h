@@ -19,8 +19,6 @@
 #ifndef BRLTTY_INCLUDED_SERIAL_WINDOWS
 #define BRLTTY_INCLUDED_SERIAL_WINDOWS
 
-#include <io.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

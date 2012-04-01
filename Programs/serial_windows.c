@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <errno.h>
+#include <io.h>
 
 #include "log.h"
 #include "ascii.h"
