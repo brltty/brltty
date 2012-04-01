@@ -72,6 +72,9 @@ sys_darwin.$O:
 sys_freebsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
 
+sys_grub.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_grub.c
+
 sys_hpux.$O:
 	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
 
@@ -165,14 +168,20 @@ io_generic.$O:
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
+serial_none.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_none.c
+
+serial_grub.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_grub.c
+
+serial_msdos.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_msdos.c
+
 serial_termios.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_termios.c
 
 serial_windows.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_windows.c
-
-serial_msdos.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial_msdos.c
 
 ###############################################################################
 
@@ -193,6 +202,9 @@ usb_darwin.$O:
 
 usb_freebsd.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
+
+usb_grub.$O:
+	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_grub.c
 
 usb_kfreebsd.$O:
 	$(CC) $(CFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_kfreebsd.c

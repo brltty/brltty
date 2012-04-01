@@ -82,7 +82,9 @@ typedef unsigned char SerialLines;
 #define SERIAL_LINE_RNG 0X40
 #define SERIAL_LINE_CAR 0X80
 
-#else /* UNIX */
+#elif defined(GRUB_RUNTIME)
+
+#elif defined(HAVE_TERMIOS_H)
 
 #include <termios.h>
 #include <sys/ioctl.h>
