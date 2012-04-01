@@ -19,10 +19,6 @@
 #ifndef BRLTTY_INCLUDED_SERIAL_INTERNAL
 #define BRLTTY_INCLUDED_SERIAL_INTERNAL
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -38,72 +34,13 @@ extern "C" {
 #endif /* HAVE_POSIX_THREADS */
 
 #if defined(__MINGW32__)
-
-#include <io.h>
-
-typedef DWORD SerialSpeed;
-typedef DCB SerialAttributes;
-
-typedef DWORD SerialLines;
-#define SERIAL_LINE_RTS 0X01
-#define SERIAL_LINE_DTR 0X02
-#define SERIAL_LINE_CTS MS_CTS_ON
-#define SERIAL_LINE_DSR MS_DSR_ON
-#define SERIAL_LINE_RNG MS_RING_ON
-#define SERIAL_LINE_CAR MS_RLSD_ON
-
+#include "serial_windows.h"
 #elif defined(__MSDOS__)
-
-typedef struct {
-  unsigned short divisor;
-  unsigned short biosBPS;
-} SerialSpeed;
-
-typedef union {
-  unsigned char byte;
-  struct {
-    unsigned bits:2;
-    unsigned stop:1;
-    unsigned parity:2;
-    unsigned bps:3;
-  } fields;
-} SerialBiosConfiguration;
-
-typedef struct {
-  SerialBiosConfiguration bios;
-  SerialSpeed speed;
-} SerialAttributes;
-
-typedef unsigned char SerialLines;
-#define SERIAL_LINE_DTR 0X01
-#define SERIAL_LINE_RTS 0X02
-#define SERIAL_LINE_CTS 0X10
-#define SERIAL_LINE_DSR 0X20
-#define SERIAL_LINE_RNG 0X40
-#define SERIAL_LINE_CAR 0X80
-
+#include "serial_msdos.h"
 #elif defined(GRUB_RUNTIME)
-
+#include "serial_grub.h"
 #else /* termios */
-
-#include <termios.h>
-#include <sys/ioctl.h>
-
-#ifdef HAVE_SYS_MODEM_H
-#include <sys/modem.h>
-#endif /* HAVE_SYS_MODEM_H */
-
-typedef speed_t SerialSpeed;
-typedef struct termios SerialAttributes;
-
-typedef int SerialLines;
-#define SERIAL_LINE_RTS TIOCM_RTS
-#define SERIAL_LINE_DTR TIOCM_DTR
-#define SERIAL_LINE_CTS TIOCM_CTS
-#define SERIAL_LINE_DSR TIOCM_DSR
-#define SERIAL_LINE_RNG TIOCM_RNG
-#define SERIAL_LINE_CAR TIOCM_CAR
-
+#include "serial_termios.h"
 #endif /* definitions */
 
 #include "io_serial.h"
@@ -111,6 +48,10 @@ typedef int SerialLines;
 #include "device.h"
 #include "parse.h"
 #include "timing.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef void * (*FlowControlProc) (void *arg);
 
@@ -132,17 +73,7 @@ struct SerialDeviceStruct {
   unsigned flowControlRunning:1;
 #endif /* HAVE_POSIX_THREADS */
 
-#ifdef __MINGW32__
-  HANDLE fileHandle;
-  int pendingCharacter;
-#endif /* __MINGW32__ */
-
-#ifdef __MSDOS__
-  int port;
-#endif /* __MSDOS__ */
-
-#ifdef GRUB_RUNTIME
-#endif /* GRUB_RUNTIME */
+  CONCATENATE(SerialPackageFields_, SERIAL_PACKAGE) SERIAL_PACKAGE;
 };
 
 typedef struct {

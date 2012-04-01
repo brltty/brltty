@@ -146,6 +146,7 @@ test -z "${$1_package}" && {
 AC_SUBST([$1_package])
 AC_SUBST([$1_cflags])
 AC_SUBST([$1_libs])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_package]), [${$1_package}], [Define this to the name of the selected $2 package.])
 BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])])
 
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl

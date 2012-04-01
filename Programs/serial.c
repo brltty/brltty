@@ -609,6 +609,6 @@ isSerialDevice (const char **identifier) {
     if (isQualifiedDevice(identifier, NULL))
       return 0;
 
-  if (!**identifier) *identifier = FIRST_SERIAL_DEVICE;
+  if (!**identifier) *identifier = SERIAL_FIRST_DEVICE;
   return 1;
 }

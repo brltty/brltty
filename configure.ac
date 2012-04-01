@@ -1297,8 +1297,8 @@ in
       AC_MSG_WARN([no default braille device])
       ;;
 esac])
-AC_SUBST([first_serial_device], [${brltty_cv_device_serial_first}])
-AC_DEFINE_UNQUOTED([FIRST_SERIAL_DEVICE], ["${first_serial_device}"],
+AC_SUBST([serial_first_device], [${brltty_cv_device_serial_first}])
+AC_DEFINE_UNQUOTED([SERIAL_FIRST_DEVICE], ["${serial_first_device}"],
                    [Define this to be a string containing the path to the first serial device.])
 
 BRLTTY_ARG_WITH(
@@ -1315,7 +1315,7 @@ then
    then
       braille_device="usb:"
    else
-      braille_device="serial:${first_serial_device}"
+      braille_device="serial:${serial_first_device}"
    fi
 fi
 AC_SUBST([braille_device])
