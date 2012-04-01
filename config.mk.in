@@ -227,6 +227,10 @@ HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
 HOSTCMD_CFLAGS = @hostcmd_cflags@
 HOSTCMD_LIBS = @hostcmd_libs@
 
+MOUNT_OBJECTS = mount.$O mount_@mount_package@.$O
+MOUNT_CFLAGS = @mount_cflags@
+MOUNT_LIBS = @mount_libs@
+
 CTB_OBJECTS = @contracted_braille_objects@
 
 SPEECH_OBJECT = @speech_support_object@

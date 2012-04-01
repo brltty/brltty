@@ -68,12 +68,6 @@ extern "C" {
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
-/* Define this if the header file mntent.h exists. */
-#undef HAVE_MNTENT_H
-
-/* Define this if the header file sys/mnttab.h exists. */
-#undef HAVE_SYS_MNTTAB_H
-
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 
@@ -130,9 +124,6 @@ extern "C" {
 
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
-
-/* Define this if the function addmntent exists. */
-#undef HAVE_ADDMNTENT
 
 /* Define this if the function mempcpy exists. */
 #undef HAVE_MEMPCPY
@@ -274,6 +265,17 @@ extern "C" {
 /* Define only one of the following serial packages. */
 #undef USE_HOSTCMD_PACKAGE_NONE
 #undef USE_HOSTCMD_PACKAGE_UNIX
+
+/* Define this to be a string containing the name of the selected mount package. */
+#undef MOUNT_PACKAGE
+
+/* Define only one of the following serial packages. */
+#undef USE_MOUNT_PACKAGE_NONE
+#undef USE_MOUNT_PACKAGE_MNTENT
+#undef USE_MOUNT_PACKAGE_MNTTAB
+
+/* Define this if the function addmntent exists. */
+#undef HAVE_ADDMNTENT
 
 /* Define this to be a string containing the path to the default text table. */
 #undef TEXT_TABLE

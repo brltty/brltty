@@ -694,9 +694,6 @@ AC_CHECK_HEADERS([sys/file.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
 
-AC_CHECK_HEADERS([mntent.h sys/mnttab.h])
-AC_CHECK_FUNCS([addmntent])
-
 AC_CHECK_HEADERS([linux/input.h], [
    AC_CHECK_HEADERS([linux/uinput.h], [], [], [
 #include <linux/input.h>
@@ -1192,6 +1189,21 @@ BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
    unix)
       AC_CHECK_FUNC([execvp], [dnl
          hostcmd_package=unix
+      ])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([mount], [mount], [mntent mnttab], [dnl
+], [dnl
+   mntent)
+      AC_CHECK_HEADER([mntent.h], [dnl
+         mount_package=mntent
+         AC_CHECK_FUNCS([addmntent])
+      ])
+      ;;
+   mnttab)
+      AC_CHECK_HEADER([sys/mnttab.h], [dnl
+         mount_package=mnttab
       ])
       ;;
 ])

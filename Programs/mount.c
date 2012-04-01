@@ -27,122 +27,18 @@
 #include "async.h"
 #include "mount.h"
 
-#if defined(HAVE_MNTENT_H)
-#include <mntent.h>
+#if defined(USE_MOUNT_PACKAGE_NONE)
+#include "mount_none.h"
+#elif defined(USE_MOUNT_PACKAGE_MNTENT)
+#include "mount_mntent.h"
+#elif defined(USE_MOUNT_PACKAGE_MNTTAB)
+#include "mount_mnttab.h"
+#else /* serial package */
+#error mount package not selected
+#include "mount_none.h"
+#endif /* mount package */
 
-#if defined(MOUNTED)
-#define MOUNTS_TABLE_PATH MOUNTED
-#elif defined(MNT_MNTTAB)
-#define MOUNTS_TABLE_PATH MNT_MNTTAB
-#endif /* MOUNTS_TABLE_PATH */
-
-typedef struct mntent MountEntry;
-#define mountPath mnt_dir
-#define mountReference mnt_fsname
-#define mountType mnt_type
-#define mountOptions mnt_opts
-
-static FILE *
-openMountsTable (int update) {
-  FILE *table = setmntent(MOUNTS_TABLE_PATH, (update? "a": "r"));
-  if (!table)
-    logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-               "mounted file systems table open erorr: %s: %s",
-               MOUNTS_TABLE_PATH, strerror(errno));
-  return table;
-}
-
-static void
-closeMountsTable (FILE *table) {
-  endmntent(table);
-}
-
-static MountEntry *
-readMountsTable (FILE *table) {
-  return getmntent(table);
-}
-
-static int
-addMountEntry (FILE *table, MountEntry *entry) {
-#ifdef HAVE_ADDMNTENT
-  if (addmntent(table, entry)) {
-    logMessage(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-               entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
-    return 0;
-  }
-#endif /* HAVE_ADDMNTENT */
-  return 1;
-}
-
-#elif defined(HAVE_SYS_MNTTAB_H)
-#include <sys/mnttab.h>
-
-typedef struct mnttab MountEntry;
-#define mountPath mnt_mountp
-#define mountReference mnt_special
-#define mountType mnt_fstype
-#define mountOptions mnt_mntopts
-
-static FILE *
-openMountsTable (int update) {
-  FILE *table = fopen(MNTTAB, (update? "a": "r"));
-  if (!table)
-    logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-               "mounted file systems table open erorr: %s: %s",
-               MNTTAB, strerror(errno));
-  return table;
-}
-
-static void
-closeMountsTable (FILE *table) {
-  fclose(table);
-}
-
-static MountEntry *
-readMountsTable (FILE *table) {
-  static struct mnttab entry;
-  if (getmntent(table, &entry) == 0) return &entry;
-  return NULL;
-}
-
-static int
-addMountEntry (FILE *table, MountEntry *entry) {
-  errno = ENOSYS;
-  if (!putmntent(table, entry)) return 1;
-  logMessage(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-             entry->mnt_fstype, entry->mnt_special, entry->mnt_mountp, strerror(errno));
-  return 0;
-}
-
-#else /* mount paradigm */
-#warning mounts table support not available on this platform
-
-typedef struct {
-  char *mountPath;
-  char *mountReference;
-  char *mountType;
-  char *mountOptions;
-} MountEntry;
-
-static FILE *
-openMountsTable (int update) {
-  return NULL;
-}
-
-static void
-closeMountsTable (FILE *table) {
-}
-
-static MountEntry *
-readMountsTable (FILE *table) {
-  return NULL;
-}
-
-static int
-addMountEntry (FILE *table, MountEntry *entry) {
-  return 0;
-}
-#endif /* mount paradigm */
+#include "mount_internal.h"
 
 #if defined(MNTOPT_RW)
 #define MOUNT_OPTION_RW MNTOPT_RW
