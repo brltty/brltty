@@ -140,6 +140,9 @@ struct SerialDeviceStruct {
 #ifdef __MSDOS__
   int port;
 #endif /* __MSDOS__ */
+
+#ifdef GRUB_RUNTIME
+#endif /* GRUB_RUNTIME */
 };
 
 typedef struct {
