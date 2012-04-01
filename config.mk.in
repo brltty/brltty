@@ -223,6 +223,10 @@ BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_@bluetooth_package@.$O
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
+HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
+HOSTCMD_CFLAGS = @hostcmd_cflags@
+HOSTCMD_LIBS = @hostcmd_libs@
+
 CTB_OBJECTS = @contracted_braille_objects@
 
 SPEECH_OBJECT = @speech_support_object@

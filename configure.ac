@@ -1187,6 +1187,15 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
+], [dnl
+   unix)
+      AC_CHECK_FUNC([execvp], [dnl
+         hostcmd_package=unix
+      ])
+      ;;
+])
+
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 test -n "${api_objects}" && {
