@@ -18,9 +18,13 @@
 
 #include "prologue.h"
 
+#include <errno.h>
+
+#include "log.h"
+#include "ascii.h"
+
 #include "serial_windows.h"
 #include "serial_internal.h"
-#include "ascii.h"
 
 BEGIN_SERIAL_BAUD_TABLE
 #ifdef CBR_110
@@ -232,55 +236,55 @@ serialGetParityBits (const SerialAttributes *attributes) {
 int
 serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
   attributes->DCBlength = sizeof(serial->currentAttributes);
-  if (GetCommState(serial->windows.fileHandle, attributes)) return 1;
+  if (GetCommState(serial->package.fileHandle, attributes)) return 1;
   logWindowsSystemError("GetCommState");
   return 0;
 }
 
 int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
-  if (SetCommState(serial->windows.fileHandle, (SerialAttributes *)attributes)) return 1;
+  if (SetCommState(serial->package.fileHandle, (SerialAttributes *)attributes)) return 1;
   logWindowsSystemError("SetCommState");
   return 0;
 }
 
 int
 serialCancelInput (SerialDevice *serial) {
-  if (PurgeComm(serial->windows.fileHandle, PURGE_RXCLEAR)) return 1;
+  if (PurgeComm(serial->package.fileHandle, PURGE_RXCLEAR)) return 1;
   logWindowsSystemError("PurgeComm");
   return 0;
 }
 
 int
 serialCancelOutput (SerialDevice *serial) {
-  if (PurgeComm(serial->windows.fileHandle, PURGE_TXCLEAR)) return 1;
+  if (PurgeComm(serial->package.fileHandle, PURGE_TXCLEAR)) return 1;
   logWindowsSystemError("PurgeComm");
   return 0;
 }
 
 int
 serialPollInput (SerialDevice *serial, int timeout) {
-  if (serial->windows.pendingCharacter != -1) return 1;
+  if (serial->package.pendingCharacter != -1) return 1;
 
   {
     COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
     DWORD bytesRead;
     char c;
 
-    if (!(SetCommTimeouts(serial->windows.fileHandle, &timeouts))) {
+    if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
       logWindowsSystemError("SetCommTimeouts serialAwaitInput");
       setSystemErrno();
       return 0;
     }
 
-    if (!ReadFile(serial->windows.fileHandle, &c, 1, &bytesRead, NULL)) {
+    if (!ReadFile(serial->package.fileHandle, &c, 1, &bytesRead, NULL)) {
       logWindowsSystemError("ReadFile");
       setSystemErrno();
       return 0;
     }
 
     if (bytesRead) {
-      serial->windows.pendingCharacter = (unsigned char)c;
+      serial->package.pendingCharacter = (unsigned char)c;
       return 1;
     }
   }
@@ -291,7 +295,7 @@ serialPollInput (SerialDevice *serial, int timeout) {
 
 int
 serialDrainOutput (SerialDevice *serial) {
-  if (FlushFileBuffers(serial->windows.fileHandle)) return 1;
+  if (FlushFileBuffers(serial->package.fileHandle)) return 1;
   logWindowsSystemError("FlushFileBuffers");
   return 0;
 }
@@ -305,18 +309,18 @@ serialGetChunk (
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
   DWORD bytesRead;
 
-  if (serial->windows.pendingCharacter != -1) {
-    *(unsigned char *)buffer = serial->windows.pendingCharacter;
-    serial->windows.pendingCharacter = -1;
+  if (serial->package.pendingCharacter != -1) {
+    *(unsigned char *)buffer = serial->package.pendingCharacter;
+    serial->package.pendingCharacter = -1;
     bytesRead = 1;
   } else {
-    if (!(SetCommTimeouts(serial->windows.fileHandle, &timeouts))) {
+    if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
       logWindowsSystemError("SetCommTimeouts serialReadChunk1");
       setSystemErrno();
       return 0;
     }
 
-    if (!ReadFile(serial->windows.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
+    if (!ReadFile(serial->package.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
       logWindowsSystemError("ReadFile");
       setSystemErrno();
       return 0;
@@ -332,13 +336,13 @@ serialGetChunk (
   *offset += bytesRead;
   timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
 
-  if (!(SetCommTimeouts(serial->windows.fileHandle, &timeouts))) {
+  if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
     logWindowsSystemError("SetCommTimeouts serialReadChunk2");
     setSystemErrno();
     return 0;
   }
 
-  while (count && ReadFile(serial->windows.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
+  while (count && ReadFile(serial->package.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
     if (!bytesRead) {
       errno = EAGAIN;
       return 0;
@@ -376,13 +380,13 @@ serialPutData (
   size_t left = size;
   DWORD bytesWritten;
 
-  if (!(SetCommTimeouts(serial->windows.fileHandle, &timeouts))) {
+  if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
     logWindowsSystemError("SetCommTimeouts serialWriteData");
     setSystemErrno();
     return -1;
   }
 
-  while (left && WriteFile(serial->windows.fileHandle, data, left, &bytesWritten, NULL)) {
+  while (left && WriteFile(serial->package.fileHandle, data, left, &bytesWritten, NULL)) {
     if (!bytesWritten) break;
     left -= bytesWritten;
     data += bytesWritten;
@@ -395,7 +399,7 @@ serialPutData (
 
 int
 serialGetLines (SerialDevice *serial) {
-  if (!GetCommModemStatus(serial->windows.fileHandle, &serial->linesState)) {
+  if (!GetCommModemStatus(serial->package.fileHandle, &serial->linesState)) {
     logWindowsSystemError("GetCommModemStatus");
     return 0;
   }
@@ -404,7 +408,7 @@ serialGetLines (SerialDevice *serial) {
     DCB dcb;
     dcb.DCBlength = sizeof(dcb);
 
-    if (!GetCommState(serial->windows.fileHandle, &dcb)) {
+    if (!GetCommState(serial->package.fileHandle, &dcb)) {
       logWindowsSystemError("GetCommState");
       return 0;
     }
@@ -421,7 +425,7 @@ serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   DCB dcb;
   dcb.DCBlength = sizeof(dcb);
 
-  if (GetCommState(serial->windows.fileHandle, &dcb)) {
+  if (GetCommState(serial->package.fileHandle, &dcb)) {
     if (low & SERIAL_LINE_RTS) {
       dcb.fRtsControl = RTS_CONTROL_DISABLE;
     } else if (high & SERIAL_LINE_RTS) {
@@ -434,7 +438,7 @@ serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
       dcb.fDtrControl = DTR_CONTROL_ENABLE;
     }
 
-    if (SetCommState(serial->windows.fileHandle, &dcb)) return 1;
+    if (SetCommState(serial->package.fileHandle, &dcb)) return 1;
     logWindowsSystemError("SetCommState");
   } else {
     logWindowsSystemError("GetCommState");
@@ -452,7 +456,7 @@ serialRegisterWaitLines (SerialDevice *serial, SerialLines lines) {
   if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
   if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
 
-  if (SetCommMask(serial->windows.fileHandle, eventMask)) return 1;
+  if (SetCommMask(serial->package.fileHandle, eventMask)) return 1;
   logWindowsSystemError("SetCommMask");
   return 0;
 }
@@ -461,23 +465,23 @@ int
 serialMonitorWaitLines (SerialDevice *serial) {
   DWORD event;
 
-  if (WaitCommEvent(serial->windows.fileHandle, &event, NULL)) return 1;
+  if (WaitCommEvent(serial->package.fileHandle, &event, NULL)) return 1;
   logWindowsSystemError("WaitCommEvent");
   return 0;
 }
 
 int
 serialConnectDevice (SerialDevice *serial, const char *device) {
-  if ((serial->windows.fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
-    serial->windows.pendingCharacter = -1;
+  if ((serial->package.fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
+    serial->package.pendingCharacter = -1;
 
     if (serialPrepareDevice(serial)) {
       logMessage(LOG_DEBUG, "serial device opened: %s: fh=%" PRIfd,
-                 device, serial->windows.fileHandle);
+                 device, serial->package.fileHandle);
       return 1;
     }
 
-    CloseHandle(serial->windows.fileHandle);
+    CloseHandle(serial->package.fileHandle);
   } else {
     logWindowsSystemError("CreateFile");
     logMessage(LOG_ERR, "cannot open serial device: %s", device);
@@ -488,16 +492,16 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
 
 void
 serialDisconnectDevice (SerialDevice *serial) {
-  CloseHandle(serial->windows.fileHandle);
+  CloseHandle(serial->package.fileHandle);
 }
 
 int
 serialEnsureFileDescriptor (SerialDevice *serial) {
 #ifdef __CYGWIN32__
-  if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->windows.fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) >= 0) return 1;
+  if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->package.fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) >= 0) return 1;
   logSystemError("cygwin_attach_handle_to_fd");
 #else /* __CYGWIN32__ */
-  if ((serial->fileDescriptor = _open_osfhandle((long)serial->windows.fileHandle, O_RDWR)) >= 0) return 1;
+  if ((serial->fileDescriptor = _open_osfhandle((long)serial->package.fileHandle, O_RDWR)) >= 0) return 1;
   logSystemError("open_osfhandle");
 #endif /* __CYGWIN32__ */
 
@@ -506,6 +510,6 @@ serialEnsureFileDescriptor (SerialDevice *serial) {
 
 void
 serialClearError (SerialDevice *serial) {
-  ClearCommError(serial->windows.fileHandle, NULL, NULL);
+  ClearCommError(serial->package.fileHandle, NULL, NULL);
 }
 

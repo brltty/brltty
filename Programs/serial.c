@@ -18,6 +18,13 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
+#include "parse.h"
+#include "device.h"
+#include "timing.h"
+
 #if defined(USE_SERIAL_PACKAGE_NONE)
 #include "serial_none.h"
 #elif defined(USE_SERIAL_PACKAGE_GRUB)

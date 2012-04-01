@@ -54,7 +54,7 @@ typedef unsigned char SerialLines;
 
 typedef struct {
   int deviceIndex;
-} SerialPackageFields_msdos;
+} SerialPackageFields;
 
 #ifdef __cplusplus
 }

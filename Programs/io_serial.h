@@ -19,15 +19,13 @@
 #ifndef BRLTTY_INCLUDED_IO_SERIAL
 #define BRLTTY_INCLUDED_IO_SERIAL
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-#include "prologue.h"
-
 #include <stdio.h>
 
 #include "serialdefs.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef struct SerialDeviceStruct SerialDevice;
 

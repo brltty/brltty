@@ -18,16 +18,21 @@
 
 #include "prologue.h"
 
+#include <string.h>
+#include <errno.h>
+
+#include "log.h"
+#include "io_misc.h"
+#include "system.h"
+
+#include "serial_msdos.h"
+#include "serial_internal.h"
+
 #include <dos.h>
 #include <dpmi.h>
 #include <bios.h>
 #include <go32.h>
 #include <sys/farptr.h>
-
-#include "serial_msdos.h"
-#include "serial_internal.h"
-#include "io_misc.h"
-#include "system.h"
 
 #define SERIAL_DIVISOR_BASE 115200
 #define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
@@ -63,7 +68,7 @@ END_SERIAL_BAUD_TABLE
 
 static unsigned short
 serialPortBase (SerialDevice *serial) {
-  return _farpeekw(_dos_ds, (0X0400 + (2 * serial->msdos.deviceIndex)));
+  return _farpeekw(_dos_ds, (0X0400 + (2 * serial->package.deviceIndex)));
 }
 
 static unsigned char
@@ -186,7 +191,7 @@ int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   {
     if (attributes->speed.biosBPS <= 7) {
-      if (bioscom(0, attributes->bios.byte, serial->msdos.deviceIndex) & 0X0700) {
+      if (bioscom(0, attributes->bios.byte, serial->package.deviceIndex) & 0X0700) {
         logMessage(LOG_ERR, "bioscom failed");
         return 0;
       }
@@ -286,7 +291,7 @@ serialMonitorWaitLines (SerialDevice *serial) {
 int
 serialConnectDevice (SerialDevice *serial, const char *device) {
   if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-    serial->msdos.deviceIndex = -1;
+    serial->package.deviceIndex = -1;
 
     {
       char *truePath;
@@ -295,14 +300,14 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
         char *com;
 
         if ((com = strstr(truePath, "COM"))) {
-          serial->msdos.deviceIndex = atoi(com+3) - 1;
+          serial->package.deviceIndex = atoi(com+3) - 1;
         }
 
         free(truePath);
       }
     }
 
-    if (serial->msdos.deviceIndex >= 0) {
+    if (serial->package.deviceIndex >= 0) {
       if (serialPrepareDevice(serial)) {
         logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
                    device, serial->fileDescriptor);

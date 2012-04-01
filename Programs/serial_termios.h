@@ -43,7 +43,7 @@ typedef int SerialLines;
 
 typedef struct {
   char dummy;
-} SerialPackageFields_termios;
+} SerialPackageFields;
 
 #ifdef __cplusplus
 }

@@ -39,7 +39,7 @@ typedef DWORD SerialLines;
 typedef struct {
   HANDLE fileHandle;
   int pendingCharacter;
-} SerialPackageFields_windows;
+} SerialPackageFields;
 
 #ifdef __cplusplus
 }

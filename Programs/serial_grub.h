@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct {
   char dummy;
-} SerialPackageFields_grub;
+} SerialPackageFields;
 
 #ifdef __cplusplus
 }

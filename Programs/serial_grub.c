@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <errno.h>
+
 #include "serial_grub.h"
 #include "serial_internal.h"
 

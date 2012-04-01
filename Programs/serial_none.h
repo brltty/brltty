@@ -36,7 +36,7 @@ typedef unsigned char SerialLines;
 
 typedef struct {
   char dummy;
-} SerialPackageFields_none;
+} SerialPackageFields;
 
 #ifdef __cplusplus
 }

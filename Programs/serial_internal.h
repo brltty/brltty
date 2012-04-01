@@ -19,11 +19,9 @@
 #ifndef BRLTTY_INCLUDED_SERIAL_INTERNAL
 #define BRLTTY_INCLUDED_SERIAL_INTERNAL
 
+#include "prologue.h"
+
 #include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #ifdef HAVE_POSIX_THREADS
 #ifdef __MINGW32__
@@ -34,10 +32,6 @@
 #endif /* HAVE_POSIX_THREADS */
 
 #include "io_serial.h"
-#include "log.h"
-#include "device.h"
-#include "parse.h"
-#include "timing.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,7 +57,7 @@ struct SerialDeviceStruct {
   unsigned flowControlRunning:1;
 #endif /* HAVE_POSIX_THREADS */
 
-  CONCATENATE(SerialPackageFields_, SERIAL_PACKAGE) SERIAL_PACKAGE;
+  SerialPackageFields package;
 };
 
 typedef struct {
