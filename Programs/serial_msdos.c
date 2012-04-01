@@ -24,6 +24,7 @@
 #include <go32.h>
 #include <sys/farptr.h>
 
+#include "serial_msdos.h"
 #include "serial_internal.h"
 #include "io_misc.h"
 #include "system.h"

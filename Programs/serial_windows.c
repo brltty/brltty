@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "serial_windows.h"
 #include "serial_internal.h"
 #include "ascii.h"
 

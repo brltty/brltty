@@ -23,6 +23,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef unsigned char SerialSpeed;
+typedef unsigned char SerialAttributes;
+
+typedef unsigned char SerialLines;
+#define SERIAL_LINE_DTR 0X01
+#define SERIAL_LINE_RTS 0X02
+#define SERIAL_LINE_CTS 0X10
+#define SERIAL_LINE_DSR 0X20
+#define SERIAL_LINE_RNG 0X40
+#define SERIAL_LINE_CAR 0X80
+
 typedef struct {
   char dummy;
 } SerialPackageFields_none;

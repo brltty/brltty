@@ -33,16 +33,6 @@
 #endif /* __MINGW32__ */
 #endif /* HAVE_POSIX_THREADS */
 
-#if defined(__MINGW32__)
-#include "serial_windows.h"
-#elif defined(__MSDOS__)
-#include "serial_msdos.h"
-#elif defined(GRUB_RUNTIME)
-#include "serial_grub.h"
-#else /* termios */
-#include "serial_termios.h"
-#endif /* definitions */
-
 #include "io_serial.h"
 #include "log.h"
 #include "device.h"

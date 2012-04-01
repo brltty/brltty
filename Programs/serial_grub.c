@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "serial_grub.h"
 #include "serial_internal.h"
 
 BEGIN_SERIAL_BAUD_TABLE

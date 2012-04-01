@@ -258,6 +258,13 @@ extern "C" {
 /* Define this to be a string containing the name of the selected serial package. */
 #undef SERIAL_PACKAGE
 
+/* Define only one of the following serial packages. */
+#undef USE_SERIAL_PACKAGE_NONE
+#undef USE_SERIAL_PACKAGE_GRUB
+#undef USE_SERIAL_PACKAGE_MSDOS
+#undef USE_SERIAL_PACKAGE_TERMIOS
+#undef USE_SERIAL_PACKAGE_WINDOWS
+
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 

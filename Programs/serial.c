@@ -18,6 +18,21 @@
 
 #include "prologue.h"
 
+#if defined(USE_SERIAL_PACKAGE_NONE)
+#include "serial_none.h"
+#elif defined(USE_SERIAL_PACKAGE_GRUB)
+#include "serial_grub.h"
+#elif defined(USE_SERIAL_PACKAGE_MSDOS)
+#include "serial_msdos.h"
+#elif defined(USE_SERIAL_PACKAGE_TERMIOS)
+#include "serial_termios.h"
+#elif defined(USE_SERIAL_PACKAGE_WINDOWS)
+#include "serial_windows.h"
+#else /* serial package */
+#error serial package not selected
+#include "serial_none.h"
+#endif /* serial package */
+
 #include "serial_internal.h"
 
 const SerialBaudEntry *

@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "serial_termios.h"
 #include "serial_internal.h"
 #include "io_misc.h"
 
