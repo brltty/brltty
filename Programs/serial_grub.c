@@ -142,7 +142,7 @@ serialGetLines (SerialDevice *serial) {
 
 int
 serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
-  ertrno = ENOSYS;
+  errno = ENOSYS;
   return 0;
 }
 

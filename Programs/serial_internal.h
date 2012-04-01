@@ -84,7 +84,7 @@ typedef unsigned char SerialLines;
 
 #elif defined(GRUB_RUNTIME)
 
-#elif defined(HAVE_TERMIOS_H)
+#else /* termios */
 
 #include <termios.h>
 #include <sys/ioctl.h>
