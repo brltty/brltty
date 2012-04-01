@@ -2357,28 +2357,29 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-static int tryPidFile (ProcessIdentifier pid);
+static int
+makePidFile (ProcessIdentifier pid) {
+  return createPidFile(opt_pidFile, pid);
+}
+
+static int tryPidFile (void);
 
 static void
 retryPidFile (void *data UNUSED) {
-  tryPidFile(0);
+  tryPidFile();
 }
 
 static int
-tryPidFile (ProcessIdentifier pid) {
-  int created = createPidFile(opt_pidFile, pid);
-
-  if (!pid) {
-    if (created) {
-      atexit(exitPidFile);
-    } else if (errno == EEXIST) {
-      exit(PROG_EXIT_SEMANTIC);
-    } else {
-      asyncRelativeAlarm(5000, retryPidFile, NULL);
-    }
+tryPidFile (void) {
+  if (makePidFile(0)) {
+    atexit(exitPidFile);
+  } else if (errno == EEXIST) {
+    return 0;
+  } else {
+    asyncRelativeAlarm(5000, retryPidFile, NULL);
   }
 
-  return created;
+  return 1;
 }
 
 #if defined(__MINGW32__)
@@ -2429,22 +2430,22 @@ background (void) {
     }
 
     {
-      int created = tryPidFile(processInfo.dwProcessId);
+      int created = makePidFile(processInfo.dwProcessId);
       int resumed = ResumeThread(processInfo.hThread) != -1;
 
       if (!created) {
         if (errno == EEXIST) {
-          ExitProcess(12);
+          ExitProcess(PROG_EXIT_FATAL);
         }
       }
 
       if (!resumed) {
         logWindowsSystemError("ResumeThread");
-        ExitProcess(13);
+        ExitProcess(PROG_EXIT_FATAL);
       }
     }
 
-    ExitProcess(0);
+    ExitProcess(PROG_EXIT_SUCCESS);
   }
 
   free(variableName);
@@ -2474,18 +2475,18 @@ background (void) {
     }
 
     if (child) {
-      int returnCode = 0;
+      ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
 
       if (close(fds[0]) == -1) logSystemError("close");
 
-      if (!tryPidFile(child)) {
+      if (!makePidFile(child)) {
         if (errno == EEXIST) {
-          returnCode = 12;
+          exitStatus = PROG_EXIT_SEMANTIC;
         }
       }
 
       if (close(fds[1]) == -1) logSystemError("close");
-      _exit(returnCode);
+      _exit(exitStatus);
     }
   }
 
@@ -2632,7 +2633,7 @@ brlttyStart (int argc, char *argv[]) {
      ) {
     background();
   }
-  tryPidFile(0);
+  if (!tryPidFile()) return PROG_EXIT_SEMANTIC;
 
   if (!opt_noDaemon) {
     setPrintOff();
@@ -2690,6 +2691,7 @@ brlttyStart (int argc, char *argv[]) {
 
   {
     char *directory;
+
     if ((directory = getWorkingDirectory())) {
       logMessage(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);
       free(directory);
