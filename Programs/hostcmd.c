@@ -23,6 +23,8 @@
 
 #if defined(__MINGW32__)
 
+#elif defined(__MSDOS__)
+
 #else /* Unix */
 #include <fcntl.h>
 #include <signal.h>
@@ -36,6 +38,8 @@ typedef struct {
   const unsigned input:1;
 
 #if defined(__MINGW32__)
+
+#elif defined(__MSDOS__)
 
 #else /* Unix */
   int pipe[2];
@@ -70,6 +74,40 @@ subconstructHostCommandStream (HostCommandStream *hcs) {
 
 static void
 subdestructHostCommandStream (HostCommandStream *hcs) {
+}
+
+static int
+prepareHostCommandStream (HostCommandStream *hcs) {
+  return 1;
+}
+
+static int
+runCommand (
+  int *result,
+  const char *const *command,
+  HostCommandStream *streams,
+  int asynchronous
+) {
+  return 0;
+}
+
+#elif defined(__MSDOS__)
+int
+isHostCommand (const char *path) {
+  return 0;
+}
+
+static void
+subconstructHostCommandStream (HostCommandStream *hcs) {
+}
+
+static void
+subdestructHostCommandStream (HostCommandStream *hcs) {
+}
+
+static int
+prepareHostCommandStream (HostCommandStream *hcs) {
+  return 1;
 }
 
 static int

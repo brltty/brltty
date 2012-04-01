@@ -38,8 +38,8 @@
 
 #define SERIAL_DIVISOR_BASE 115200
 #define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
-#define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
-#define SERIAL_BAUD_ENTRY(baud,, bios) {(baud), SERIAL_SPEED((baud),  (bios))}
+#define SERIAL_SPEED(baud, bios) {SERIAL_DIVISOR((baud)), (bios)}
+#define SERIAL_BAUD_ENTRY(baud, bios) {(baud), SERIAL_SPEED((baud),  (bios))}
 
 BEGIN_SERIAL_BAUD_TABLE
   SERIAL_BAUD_ENTRY(   110,  0),
@@ -180,7 +180,7 @@ serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
     if (baud) {
       attributes->speed = baud->speed;
     } else {
-      memset(attributes.speed, 0,
+      memset(&attributes->speed, 0,
              sizeof(attributes->speed));
     }
   }
@@ -298,7 +298,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
     {
       char *truePath;
 
-      if ((truePath = _truename(path, NULL))) {
+      if ((truePath = _truename(device, NULL))) {
         char *com;
 
         if ((com = strstr(truePath, "COM"))) {
