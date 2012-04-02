@@ -1184,10 +1184,25 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([charset], [charset], [iconv], [dnl
+   mingw*)
+      charset_package=windows
+      ;;
+   msdos*)
+      charset_package=msdos
+      ;;
+], [dnl
+   iconv)
+      AC_CHECK_HEADER([iconv.h], [dnl
+         charset_package=iconv
+      ])
+      ;;
+])
+
 BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
 ], [dnl
    unix)
-      AC_CHECK_FUNC([execvp], [dnl
+      AC_CHECK_FUNC([fork], [dnl
          hostcmd_package=unix
       ])
       ;;
