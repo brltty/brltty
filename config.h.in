@@ -246,9 +246,6 @@ extern "C" {
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
 
-/* Define this to be a string containing the name of the selected serial package. */
-#undef SERIAL_PACKAGE
-
 /* Define only one of the following serial packages. */
 #undef USE_SERIAL_PACKAGE_NONE
 #undef USE_SERIAL_PACKAGE_GRUB
@@ -259,17 +256,11 @@ extern "C" {
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 
-/* Define this to be a string containing the name of the selected hostcmd package. */
-#undef HOSTCMD_PACKAGE
-
-/* Define only one of the following serial packages. */
+/* Define only one of the following host command packages. */
 #undef USE_HOSTCMD_PACKAGE_NONE
 #undef USE_HOSTCMD_PACKAGE_UNIX
 
-/* Define this to be a string containing the name of the selected mount package. */
-#undef MOUNT_PACKAGE
-
-/* Define only one of the following serial packages. */
+/* Define only one of the following mount packages. */
 #undef USE_MOUNT_PACKAGE_NONE
 #undef USE_MOUNT_PACKAGE_MNTENT
 #undef USE_MOUNT_PACKAGE_MNTTAB
