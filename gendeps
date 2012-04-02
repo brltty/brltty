@@ -118,7 +118,13 @@ proc getBuildDirectories {{root ""}} {
 
    foreach name [readdir $root] {
       eval $setPath
-      if {[file isdirectory $path]} {
+      set type [file type $path]
+
+      if {[string equal $type link]} {
+         continue
+      }
+
+      if {[string equal $type directory]} {
          lvarcat directories [getBuildDirectories $path]
       }
    }
