@@ -218,9 +218,31 @@ BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
 
 AC_PROG_MAKE_SET
 
-brltty_gcc_options="-std=gnu99 -Wall"
+AC_PROG_CC
+if test -z "${CXX}"
+then
+   if test "${GCC}" = "yes"
+   then
+      AC_SEARCH_LIBS([__cxa_pure_virtual], [supc++])
+      AC_CACHE_CHECK([if the C compiler can compile C++], [brltty_cv_prog_cc_cxx], [dnl
+      brltty_save_ac_ext="${ac_ext}"
+      ac_ext="cc"
+      AC_TRY_LINK([], [class c {};],
+                  [brltty_cv_prog_cc_cxx="yes"],
+                  [brltty_cv_prog_cc_cxx="no"])
+      ac_ext="${brltty_save_ac_ext}"])
+      test "${brltty_cv_prog_cc_cxx}" = "yes" && CXX="${CC}"
+   fi
+fi
+AC_PROG_CXX
+
+brltty_gcc_cflags="-std=gnu99 -Wall"
+brltty_gcc_cppflags="-std=gnu99 -Wall"
 case "${build_os} ${host_os}"
 in
+   cygwin*\ mingw*)
+      brltty_gcc_cflags="${brltty_gcc_cflags} -mno-cygwin"
+      ;;
    linux*\ eabi*)
       if test -z "${ANDROID_HOME}"
       then
@@ -248,33 +270,35 @@ in
       LIBS="${LIBS} -nostdlib -L${ANDROID_LIBS_PATH} -lm -lc"
       LIBS="${LIBS} ${ANDROID_TOOLCHAIN_PATH}/lib/gcc/${host_cpu}-eabi/${ANDROID_TOOLCHAIN_VERSION}/interwork/libgcc.a"
 
-      brltty_gcc_options="${brltty_gcc_options} -march=armv5te -mtune=xscale -msoft-float -mthumb-interwork -fpic -fno-exceptions -ffunction-sections -funwind-tables -fstack-protector -fmessage-length=0"
-      ;;
-   cygwin*\ mingw*)
-      brltty_gcc_options="${brltty_gcc_options} -mno-cygwin"
+      brltty_gcc_cflags="${brltty_gcc_cflags} -march=armv5te -mtune=xscale -msoft-float -mthumb-interwork -fpic -fno-exceptions -ffunction-sections -funwind-tables -fstack-protector -fmessage-length=0"
       ;;
 esac
 
-AC_PROG_CC
-test "${GCC}" = "yes" && CFLAGS="${CFLAGS} ${brltty_gcc_options}"
+case "${host_os}"
+in
+   elf*)
+      brltty_gcc_cppflags="${brltty_gcc_cppflags} -ffreestanding -nostdinc -nostdlib"
+      CPPFLAGS="${CPPFLAGS} -DGRUB_RUNTIME -DGRUB_FILE=__FILE__ -DNESTED_FUNC_ATTR='__attribute__ ((__regparm__ (1)))' -D_WCHAR_T_DECLARED=1"
 
-if test -z "${CXX}"
-then
-   if test "${GCC}" = "yes"
-   then
-      AC_SEARCH_LIBS([__cxa_pure_virtual], [supc++])
-      AC_CACHE_CHECK([if the C compiler can compile C++], [brltty_cv_prog_cc_cxx], [dnl
-      brltty_save_ac_ext="${ac_ext}"
-      ac_ext="cc"
-      AC_TRY_LINK([], [class c {};],
-                  [brltty_cv_prog_cc_cxx="yes"],
-                  [brltty_cv_prog_cc_cxx="no"])
-      ac_ext="${brltty_save_ac_ext}"])
-      test "${brltty_cv_prog_cc_cxx}" = "yes" && CXX="${CC}"
-   fi
-fi
-AC_PROG_CXX
-test "${GXX}" = "yes" && CXXFLAGS="${CXXFLAGS} ${brltty_gcc_options}"
+      brltty_include_directory=`$CC -print-file-name=include`
+      CPPFLAGS="${CPPFLAGS} -isystem $brltty_include_directory"
+
+      brltty_grub_root="`pwd`/grub-root"
+      test -d $brltty_grub_root || {
+         AC_MSG_ERROR([symbolic link not found: $brltty_grub_root])
+      }
+      CPPFLAGS="${CPPFLAGS} -I$brltty_grub_root -I$brltty_grub_root/grub-core/lib/posix_wrap/include -I$brltty_grub_root/include"
+      ;;
+esac
+
+test "${GCC}" = "yes" && {
+   CFLAGS="${CFLAGS} ${brltty_gcc_cflags}"
+   CPPFLAGS="${CPPFLAGS} ${brltty_gcc_cppflags}"
+}
+
+test "${GXX}" = "yes" && {
+   CXXFLAGS="${CXXFLAGS} ${brltty_gcc_cflags}"
+}
 
 AC_CHECK_PROGS([LD], [ld], [ld])
 AC_PROG_RANLIB
@@ -305,6 +329,9 @@ in
    darwin*)
       brltty_cv_prog_ld_flags=""
       ;;
+   elf*)
+      brltty_cv_prog_ld_flags=""
+      ;;
    eabi*)
       brltty_cv_prog_ld_flags="-Bdynamic -Wl,-T,${ANDROID_HOME}/build/core/armelf.x -Wl,-dynamic-linker,/system/bin/linker -Wl,--gc-sections -Wl,-z,nocopyreloc"
       ;;
@@ -321,7 +348,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|eabi*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|elf*|eabi*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -379,7 +406,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|eabi*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*|eabi*)
       brltty_mkmod_ld_make="-shared"
       ;;
    solaris*)
@@ -416,7 +443,7 @@ AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|eabi*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|elf*|eabi*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
@@ -461,7 +488,7 @@ AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|kfreebsd*|eabi*)
+   linux*|gnu*|kfreebsd*|elf*|eabi*)
       brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
       ;;
    *)
@@ -1014,6 +1041,9 @@ in
       system_object="darwin"
       LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
       ;;
+   elf*)
+      system_object="grub"
+      ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
@@ -1128,6 +1158,9 @@ BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
    msdos*)
       serial_package="msdos"
       ;;
+   elf*)
+      serial_package="grub"
+      ;;
 ], [dnl
    termios)
       AC_CHECK_HEADER([termios.h], [dnl
@@ -1161,6 +1194,9 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
    darwin*)
       usb_package="darwin"
       ;;
+   elf*)
+      usb_package="grub"
+      ;;
 ], [dnl
    libusb)
       AC_CHECK_HEADER([usb.h], [dnl
@@ -1190,6 +1226,9 @@ BRLTTY_ARG_PACKAGE([charset], [charset], [iconv], [dnl
       ;;
    msdos*)
       charset_package=msdos
+      ;;
+   elf*)
+      charset_package=grub
       ;;
 ], [dnl
    iconv)
@@ -1327,6 +1366,9 @@ in
       ;;
    mingw*|msdos*)
       brltty_cv_device_serial_first="COM1"
+      ;;
+   elf*)
+      brltty_cv_device_serial_first="com0"
       ;;
    *)
       brltty_cv_device_serial_first=""
@@ -1506,19 +1548,25 @@ in
    msdos*)
       BRLTTY_SCREEN_DRIVER([pb], [PcBios])
       ;;
+   elf*)
+      BRLTTY_SCREEN_DRIVER([gb], [Grub])
+      ;;
    *)
       AC_MSG_WARN([no native screen driver for ${host_os}])
       ;;
 esac
 BRLTTY_SCREEN_DRIVER([sc], [Screen])
 
-BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
-   AC_CHECK_HEADER([X11/keysym.h], [dnl
-      AC_CHECK_HEADER([X11/Xlib.h], [dnl
-         BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X_LIBS) $(CSPI_LIBS)])
+if test "${brltty_enabled_x}" = "yes"
+then
+   BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
+      AC_CHECK_HEADER([X11/keysym.h], [dnl
+         AC_CHECK_HEADER([X11/Xlib.h], [dnl
+            BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X_LIBS) $(CSPI_LIBS)])
+         ])
       ])
    ])
-])
+fi
 
 BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
    AC_CHECK_HEADER([X11/keysym.h], [dnl

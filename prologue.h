@@ -380,8 +380,6 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 #define PRIX_KEY_T PRIX32
 #elif SIZEOF_KEY_T == 8
 #define PRIX_KEY_T PRIX64
-#else /* SIZEOF_KEY_T */
-#error unsupported size for type key_t
 #endif /* SIZEOF_KEY_T */
 #endif /* HAVE_SHMGET */
 
