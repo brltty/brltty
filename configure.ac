@@ -1317,6 +1317,9 @@ in
    mingw*)
       brltty_cv_device_directory="//."
       ;;
+   elf*)
+      brltty_cv_device_directory=""
+      ;;
    *)
       brltty_cv_device_directory="/dev"
       ;;
