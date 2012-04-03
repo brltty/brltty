@@ -41,6 +41,7 @@
 static int
 awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 #if defined(GRUB_RUNTIME)
+  errno = EAGAIN;
   return 0;
 #else
 
