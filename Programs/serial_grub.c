@@ -178,16 +178,6 @@ serialDrainOutput (SerialDevice *serial) {
   return 1;
 }
 
-int
-serialGetChunk (
-  SerialDevice *serial,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-) {
-  errno = ENOSYS;
-  return 0;
-}
-
 ssize_t
 serialGetData (
   SerialDevice *serial,

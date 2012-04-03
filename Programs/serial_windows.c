@@ -301,64 +301,6 @@ serialDrainOutput (SerialDevice *serial) {
   return 0;
 }
 
-int
-serialGetChunk (
-  SerialDevice *serial,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-) {
-  COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
-  DWORD bytesRead;
-
-  if (serial->package.pendingCharacter != -1) {
-    *(unsigned char *)buffer = serial->package.pendingCharacter;
-    serial->package.pendingCharacter = -1;
-    bytesRead = 1;
-  } else {
-    if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
-      logWindowsSystemError("SetCommTimeouts serialReadChunk1");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (!ReadFile(serial->package.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-      logWindowsSystemError("ReadFile");
-      setSystemErrno();
-      return 0;
-    }
-
-    if (!bytesRead) {
-      errno = EAGAIN;
-      return 0;
-    }
-  }
-
-  count -= bytesRead;
-  *offset += bytesRead;
-  timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
-
-  if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
-    logWindowsSystemError("SetCommTimeouts serialReadChunk2");
-    setSystemErrno();
-    return 0;
-  }
-
-  while (count && ReadFile(serial->package.fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-    if (!bytesRead) {
-      errno = EAGAIN;
-      return 0;
-    }
-
-    count -= bytesRead;
-    *offset += bytesRead;
-  }
-
-  if (!count) return 1;
-  logWindowsSystemError("ReadFile");
-  setSystemErrno();
-  return 0;
-}
-
 ssize_t
 serialGetData (
   SerialDevice *serial,

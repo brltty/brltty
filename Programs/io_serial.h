@@ -37,17 +37,25 @@ extern void serialCloseDevice (SerialDevice *serial);
 extern int serialRestartDevice (SerialDevice *serial, unsigned int baud);
 extern FILE *serialGetStream (SerialDevice *serial);
 
+extern int serialDiscardInput (SerialDevice *serial);
+extern int serialDiscardOutput (SerialDevice *serial);
+extern int serialFlushOutput (SerialDevice *serial);
+
 extern int serialAwaitInput (SerialDevice *serial, int timeout);
+extern int serialAwaitOutput (SerialDevice *serial);
+
 extern ssize_t serialReadData (
   SerialDevice *serial,
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
+
 extern int serialReadChunk (
   SerialDevice *serial,
   void *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 );
+
 extern ssize_t serialWriteData (
   SerialDevice *serial,
   const void *data, size_t size
@@ -62,11 +70,6 @@ extern int serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow);
 
 extern unsigned int serialGetCharacterSize (const SerialParameters *parameters);
 extern unsigned int serialGetCharacterBits (SerialDevice *serial);
-
-extern int serialDiscardInput (SerialDevice *serial);
-extern int serialDiscardOutput (SerialDevice *serial);
-extern int serialFlushOutput (SerialDevice *serial);
-extern int serialAwaitOutput (SerialDevice *serial);
 
 extern int serialSetLineRTS (SerialDevice *serial, int up);
 extern int serialSetLineDTR (SerialDevice *serial, int up);

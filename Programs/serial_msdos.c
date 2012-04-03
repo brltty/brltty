@@ -225,15 +225,6 @@ serialDrainOutput (SerialDevice *serial) {
   return 1;
 }
 
-int
-serialGetChunk (
-  SerialDevice *serial,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-) {
-  return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
-}
-
 ssize_t
 serialGetData (
   SerialDevice *serial,

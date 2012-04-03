@@ -92,12 +92,6 @@ extern int serialCancelOutput (SerialDevice *serial);
 extern int serialPollInput (SerialDevice *serial, int timeout);
 extern int serialDrainOutput (SerialDevice *serial);
 
-extern int serialGetChunk (
-  SerialDevice *serial,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-);
-
 extern ssize_t serialGetData (
   SerialDevice *serial,
   void *buffer, size_t size,

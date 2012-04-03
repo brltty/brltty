@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "parse.h"
@@ -333,16 +334,6 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   return 1;
 }
 
-int
-serialReadChunk (
-  SerialDevice *serial,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-) {
-  if (!serialFlushAttributes(serial)) return 0;
-  return serialGetChunk(serial, buffer, offset, count, initialTimeout, subsequentTimeout);
-}
-
 ssize_t
 serialReadData (
   SerialDevice *serial,
@@ -351,6 +342,41 @@ serialReadData (
 ) {
   if (!serialFlushAttributes(serial)) return -1;
   return serialGetData(serial, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+int
+serialReadChunk (
+  SerialDevice *serial,
+  void *buffer, size_t *offset, size_t count,
+  int initialTimeout, int subsequentTimeout
+) {
+  unsigned char *byte = buffer;
+  const unsigned char *const first = byte;
+  const unsigned char *const end = first + count;
+  int timeout = *offset? subsequentTimeout: initialTimeout;
+
+  if (!serialFlushAttributes(serial)) return 0;
+  byte += *offset;
+
+  while (byte < end) {
+    ssize_t result = serialGetData(serial, byte, 1, timeout, subsequentTimeout);
+
+    if (!result) {
+      result = -1;
+      errno = EAGAIN;
+    }
+
+    if (result == -1) {
+      if (errno == EINTR) continue;
+      return 0;
+    }
+
+    byte += 1;
+    *offset += 1;
+    timeout = subsequentTimeout;
+  }
+
+  return 1;
 }
 
 ssize_t
