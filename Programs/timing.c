@@ -112,6 +112,27 @@ approximateDelay (int milliseconds) {
   }
 }
 
+static int
+getTickLength (void) {
+  static int tickLength = 0;
+
+  if (!tickLength) {
+#if defined(_SC_CLK_TCK)
+    tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
+#elif defined(CLK_TCK)
+    tickLength = MSECS_PER_SEC / CLK_TCK;
+#elif defined(HZ)
+    tickLength = MSECS_PER_SEC / HZ;
+#else /* tick length */
+#error cannot determine tick length
+#endif /* tick length */
+
+    if (!tickLength) tickLength = 1;
+  }
+
+  return tickLength;
+}
+
 size_t
 formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
   time_t time = seconds;
@@ -174,25 +195,10 @@ millisecondsSince (const TimeValue *from) {
 
 void
 accurateDelay (int milliseconds) {
-  static int tickLength = 0;
-
   TimeValue start;
+  int tickLength = getTickLength();
+
   getCurrentTime(&start);
-
-  if (!tickLength) {
-#if defined(_SC_CLK_TCK)
-    tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
-#elif defined(CLK_TCK)
-    tickLength = MSECS_PER_SEC / CLK_TCK;
-#elif defined(HZ)
-    tickLength = MSECS_PER_SEC / HZ;
-#else /* tick length */
-#error cannot determine tick length
-#endif /* tick length */
-
-    if (!tickLength) tickLength = 1;
-  }
-
   if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
 
   while (millisecondsSince(&start) < milliseconds) {
