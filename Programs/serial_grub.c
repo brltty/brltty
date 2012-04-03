@@ -20,10 +20,29 @@
 
 #include <errno.h>
 
+#include "log.h"
+#include "timing.h"
+
 #include "serial_grub.h"
 #include "serial_internal.h"
 
+#define SERIAL_NO_BYTE -1
+
+#define SERIAL_BAUD_ENTRY(baud) {(baud), (baud)}
+
 BEGIN_SERIAL_BAUD_TABLE
+  SERIAL_BAUD_ENTRY(   110),
+  SERIAL_BAUD_ENTRY(   150),
+  SERIAL_BAUD_ENTRY(   300),
+  SERIAL_BAUD_ENTRY(   600),
+  SERIAL_BAUD_ENTRY(  1200),
+  SERIAL_BAUD_ENTRY(  2400),
+  SERIAL_BAUD_ENTRY(  4800),
+  SERIAL_BAUD_ENTRY(  9600),
+  SERIAL_BAUD_ENTRY( 19200),
+  SERIAL_BAUD_ENTRY( 38400),
+  SERIAL_BAUD_ENTRY( 57600),
+  SERIAL_BAUD_ENTRY(115200),
 END_SERIAL_BAUD_TABLE
 
 void
@@ -32,22 +51,55 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
 
 int
 serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
-  return 0;
+  attributes->speed = speed;
+  return 1;
 }
 
 int
 serialPutDataBits (SerialAttributes *attributes, unsigned int bits) {
-  return 0;
+  if ((bits < 5) || (bits > 8)) return 0;
+  attributes->word_len = bits;
+  return 1;
 }
 
 int
 serialPutStopBits (SerialAttributes *attributes, SerialStopBits bits) {
-  return 0;
+  switch (bits) {
+    case SERIAL_STOP_1:
+      attributes->stop_bits = GRUB_SERIAL_STOP_BITS_1;
+      break;
+
+    case SERIAL_STOP_2:
+      attributes->stop_bits = GRUB_SERIAL_STOP_BITS_2;
+      break;
+
+    default:
+      return 0;
+  }
+
+  return 1;
 }
 
 int
 serialPutParity (SerialAttributes *attributes, SerialParity parity) {
-  return 0;
+  switch (parity) {
+    case SERIAL_PARITY_NONE:
+      attributes->parity = GRUB_SERIAL_PARITY_NONE;
+      break;
+
+    case SERIAL_PARITY_ODD:
+      attributes->parity = GRUB_SERIAL_PARITY_ODD;
+      break;
+
+    case SERIAL_PARITY_EVEN:
+      attributes->parity = GRUB_SERIAL_PARITY_EVEN;
+      break;
+
+    default: 
+      return 0;
+  }
+
+  return 1;
 }
 
 SerialFlowControl
@@ -62,28 +114,33 @@ serialPutModemState (SerialAttributes *attributes, int enabled) {
 
 unsigned int
 serialGetDataBits (const SerialAttributes *attributes) {
-  return 8;
+  return attributes->word_len;
 }
 
 unsigned int
 serialGetStopBits (const SerialAttributes *attributes) {
-  return 1;
+  switch (attributes->stop_bits) {
+    case GRUB_SERIAL_STOP_BITS_1: return 1;
+    case GRUB_SERIAL_STOP_BITS_2: return 2;
+    default:                      return 0;
+  }
 }
 
 unsigned int
 serialGetParityBits (const SerialAttributes *attributes) {
-  return 0;
+  return (attributes->parity == GRUB_SERIAL_PARITY_NONE)? 0: 1;
 }
 
 int
 serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
-  errno = ENOSYS;
-  return 0;
+  *attributes = serial->package.port->config;
+  return 1;
 }
 
 int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
-  errno = ENOSYS;
+  grub_err_t result = serial->package.port->driver->configure(serial->package.port, attributes);
+  if (result == GRUB_ERR_NONE) return 1;
   return 0;
 }
 
@@ -99,8 +156,21 @@ serialCancelOutput (SerialDevice *serial) {
 
 int
 serialPollInput (SerialDevice *serial, int timeout) {
-  errno = EAGAIN;
-  return 0;
+  if (serial->package.byte == SERIAL_NO_BYTE) {
+    TimeValue start;
+    getCurrentTime(&start);
+
+    while ((serial->package.byte = serial->package.port->driver->fetch(serial->package.port)) == SERIAL_NO_BYTE) {
+      if (millisecondsSince(&start) > timeout) {
+        errno = EAGAIN;
+        return 0;
+      }
+
+      approximateDelay(1);
+    }
+  }
+
+  return 1;
 }
 
 int
@@ -124,7 +194,24 @@ serialGetData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  errno = ENOSYS;
+  unsigned char *byte = buffer;
+  const unsigned char *const first = byte;
+  const unsigned char *const end = first + size;
+  int timeout = initialTimeout;
+
+  while (byte < end) {
+    if (!serialPollInput(serial, timeout)) break;
+    *byte++ = serial->package.byte;
+    serial->package.byte = SERIAL_NO_BYTE;
+    timeout = subsequentTimeout;
+  }
+
+  {
+    size_t count = byte - first;
+    if (count) return count;
+  }
+
+  errno = EAGAIN;
   return -1;
 }
 
@@ -133,8 +220,14 @@ serialPutData (
   SerialDevice *serial,
   const void *data, size_t size
 ) {
-  errno = ENOSYS;
-  return -1;
+  const unsigned char *byte = data;
+  const unsigned char *end = byte + size;
+
+  while (byte < end) {
+    serial->package.port->driver->put(serial->package.port, *byte++);
+  }
+
+  return size;
 }
 
 int
@@ -161,12 +254,25 @@ serialMonitorWaitLines (SerialDevice *serial) {
 
 int
 serialConnectDevice (SerialDevice *serial, const char *device) {
-  errno = ENOENT;
+  if ((serial->package.port = grub_serial_find(device))) {
+    serial->package.byte = SERIAL_NO_BYTE;
+
+    if (serialPrepareDevice(serial)) {
+      logMessage(LOG_DEBUG, "serial device opened: %s",
+                 device);
+      return 1;
+    }
+  } else {
+    logMessage(LOG_ERR, "cannot find serial device: %s", device);
+    errno = ENOENT;
+  }
+
   return 0;
 }
 
 void
 serialDisconnectDevice (SerialDevice *serial) {
+  serial->package.port = NULL;
 }
 
 int
