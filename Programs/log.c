@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <time.h>
-#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -42,6 +40,7 @@ localtime_r (const time_t *timep, struct tm *result) {
 #endif /* __MSDOS__ */
 
 #include "log.h"
+#include "timing.h"
 
 const char *const logLevelNames[] = {
   "emergency", "alert", "critical", "error",
@@ -90,15 +89,14 @@ static void
 writeLogRecord (const char *record) {
   if (logFile) {
     {
-      struct timeval now;
-      struct tm description;
+      TimeValue now;
       char buffer[0X20];
-      int length;
+      size_t length;
 
-      gettimeofday(&now, NULL);
-      localtime_r(&now.tv_sec, &description);
-      length = strftime(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", &description);
-      fprintf(logFile, "%.*s.%03ld ", length, buffer, now.tv_usec/1000);
+      getCurrentTime(&now);
+      length = formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", now.seconds);
+
+      fprintf(logFile, "%.*s.%03"PRIi32" ", length, buffer, now.nanoseconds/NSECS_PER_MSEC);
     }
 
     fputs(record, logFile);

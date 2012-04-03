@@ -42,13 +42,6 @@
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
 
-#define MSECS_PER_SEC  1000u
-#define USECS_PER_MSEC 1000u
-#define NSECS_PER_USEC 1000u
-#define USECS_PER_SEC  (USECS_PER_MSEC * MSECS_PER_SEC)
-#define NSECS_PER_MSEC (NSECS_PER_USEC * USECS_PER_MSEC)
-#define NSECS_PER_SEC  (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
-
 void
 getCurrentTime (TimeValue *now) {
 #if defined(GRUB_RUNTIME)
@@ -79,9 +72,11 @@ getCurrentTime (TimeValue *now) {
 }
 
 size_t
-formatSeconds (char *buffer, size_t size, const char *format, time_t seconds) {
+formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
+  time_t time = seconds;
   struct tm description;
-  localtime_r(&seconds, &description);
+
+  localtime_r(&time, &description);
   return strftime(buffer, size, format, &description);
 }
 

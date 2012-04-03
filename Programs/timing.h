@@ -23,13 +23,20 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MSECS_PER_SEC  1000u
+#define USECS_PER_MSEC 1000u
+#define NSECS_PER_USEC 1000u
+#define USECS_PER_SEC  (USECS_PER_MSEC * MSECS_PER_SEC)
+#define NSECS_PER_MSEC (NSECS_PER_USEC * USECS_PER_MSEC)
+#define NSECS_PER_SEC  (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
+
 typedef struct {
   int32_t seconds;
-  uint32_t nanoseconds;
+  int32_t nanoseconds;
 } TimeValue;
 
 extern void getCurrentTime (TimeValue *time);
-extern size_t formatSeconds (char *buffer, size_t size, const char *format, time_t seconds);
+extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
 
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int amount);
