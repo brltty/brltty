@@ -29,6 +29,7 @@ typedef struct {
 } TimeValue;
 
 extern void getCurrentTime (TimeValue *time);
+extern size_t formatSeconds (char *buffer, size_t size, const char *format, time_t seconds);
 
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int amount);

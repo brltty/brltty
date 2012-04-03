@@ -19,18 +19,11 @@
 #include "prologue.h"
 
 #include <errno.h>
-
-#ifdef HAVE_CLOCK_GETTIME
 #include <time.h>
-#endif /* HAVE_CLOCK_GETTIME */
 
 #ifdef HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif /* HAVE_GETTIMEOFDAY */
-
-#ifdef HAVE_TIME
-#include <time.h>
-#endif /* HAVE_TIME */
 
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -49,9 +42,21 @@
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
 
+#define MSECS_PER_SEC  1000u
+#define USECS_PER_MSEC 1000u
+#define NSECS_PER_USEC 1000u
+#define USECS_PER_SEC  (USECS_PER_MSEC * MSECS_PER_SEC)
+#define NSECS_PER_MSEC (NSECS_PER_USEC * USECS_PER_MSEC)
+#define NSECS_PER_SEC  (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
+
 void
 getCurrentTime (TimeValue *now) {
-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
+#if defined(GRUB_RUNTIME)
+  uint64_t milliseconds = grub_get_time_ms();
+  now->seconds = milliseconds / MSECS_PER_SEC;
+  now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
+
+#elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   now->seconds = ts.tv_sec;
@@ -61,7 +66,7 @@ getCurrentTime (TimeValue *now) {
   struct timeval tv;
   gettimeofday(&tv, NULL);
   now->seconds = tv.tv_sec;
-  now->nanoseconds = tv.tv_usec * 1000;
+  now->nanoseconds = tv.tv_usec * USECS_PER_MSEC;
 
 #elif defined(HAVE_TIME)
   now->seconds = time(NULL);
@@ -73,6 +78,13 @@ getCurrentTime (TimeValue *now) {
 #endif /* get current time */
 }
 
+size_t
+formatSeconds (char *buffer, size_t size, const char *format, time_t seconds) {
+  struct tm description;
+  localtime_r(&seconds, &description);
+  return strftime(buffer, size, format, &description);
+}
+
 void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
@@ -80,12 +92,15 @@ approximateDelay (int milliseconds) {
     Sleep(milliseconds);
 
 #elif defined(__MSDOS__)
-    tsr_usleep(milliseconds*1000);
+    tsr_usleep(milliseconds * USECS_PER_MSEC);
+
+#elif defined (GRUB_RUNTIME)
+    grub_millisleep(milliseconds);
 
 #elif defined(HAVE_NANOSLEEP)
     const struct timespec timeout = {
-      .tv_sec = milliseconds / 1000,
-      .tv_nsec = (milliseconds % 1000) * 1000000
+      .tv_sec = milliseconds / MSECS_PER_SEC,
+      .tv_nsec = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC
     };
 
     if (nanosleep(&timeout, NULL) == -1) {
@@ -99,8 +114,8 @@ approximateDelay (int milliseconds) {
 
 #elif defined(HAVE_SELECT)
     struct timeval timeout = {
-      .tv_sec = milliseconds / 1000,
-      .tv_usec = (milliseconds % 1000) * 1000
+      .tv_sec = milliseconds / MSECS_PER_SEC,
+      .tv_usec = (milliseconds % MSECS_PER_SEC) * USECS_PER_MSEC
     };
 
     if (select(0, NULL, NULL, NULL, &timeout) == -1) {
@@ -113,18 +128,18 @@ approximateDelay (int milliseconds) {
 
 void
 normalizeTimeValue (TimeValue *time) {
-  time->seconds += time->nanoseconds / 1000000000;
-  time->nanoseconds = time->nanoseconds % 1000000000;
+  time->seconds += time->nanoseconds / NSECS_PER_SEC;
+  time->nanoseconds = time->nanoseconds % NSECS_PER_SEC;
 }
 
 void
 adjustTimeValue (TimeValue *time, int amount) {
-  int quotient = amount / 1000;
-  int remainder = amount % 1000;
+  int quotient = amount / MSECS_PER_SEC;
+  int remainder = amount % MSECS_PER_SEC;
 
-  if (remainder < 0) remainder += 1000, quotient -= 1;
+  if (remainder < 0) remainder += MSECS_PER_SEC, quotient -= 1;
   time->seconds += quotient;
-  time->nanoseconds += remainder * 1000000;
+  time->nanoseconds += remainder * NSECS_PER_MSEC;
   normalizeTimeValue(time);
 }
 
@@ -141,8 +156,8 @@ compareTimeValues (const TimeValue *first, const TimeValue *second) {
 
 long int
 millisecondsBetween (const TimeValue *from, const TimeValue *to) {
-  return ((to->seconds - from->seconds) * 1000)
-       + ((to->nanoseconds - from->nanoseconds) / 1000000);
+  return ((to->seconds - from->seconds) * MSECS_PER_SEC)
+       + ((to->nanoseconds - from->nanoseconds) / NSECS_PER_MSEC);
 }
 
 long int
@@ -161,11 +176,11 @@ accurateDelay (int milliseconds) {
 
   if (!tickLength) {
 #if defined(_SC_CLK_TCK)
-    tickLength = 1000 / sysconf(_SC_CLK_TCK);
+    tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
 #elif defined(CLK_TCK)
-    tickLength = 1000 / CLK_TCK;
+    tickLength = MSECS_PER_SEC / CLK_TCK;
 #elif defined(HZ)
-    tickLength = 1000 / HZ;
+    tickLength = MSECS_PER_SEC / HZ;
 #else /* tick length */
 #error cannot determine tick length
 #endif /* tick length */
