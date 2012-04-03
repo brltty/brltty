@@ -21,6 +21,8 @@
 
 #include <grub/serial.h>
 
+#include "serial_uart.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -29,12 +31,12 @@ typedef struct grub_serial_config SerialAttributes;
 typedef unsigned SerialSpeed;
 
 typedef unsigned char SerialLines;
-#define SERIAL_LINE_DTR 0X01
-#define SERIAL_LINE_RTS 0X02
-#define SERIAL_LINE_CTS 0X10
-#define SERIAL_LINE_DSR 0X20
-#define SERIAL_LINE_RNG 0X40
-#define SERIAL_LINE_CAR 0X80
+#define SERIAL_LINE_DTR UART_FLAG_MCR_DTR
+#define SERIAL_LINE_RTS UART_FLAG_MCR_RTS
+#define SERIAL_LINE_CTS UART_FLAG_MSR_CTS
+#define SERIAL_LINE_DSR UART_FLAG_MSR_DSR
+#define SERIAL_LINE_RNG UART_FLAG_MSR_RNG
+#define SERIAL_LINE_CAR UART_FLAG_MSR_CAR
 
 typedef struct {
   struct grub_serial_port *port;

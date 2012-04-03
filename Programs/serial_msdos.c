@@ -56,18 +56,6 @@ BEGIN_SERIAL_BAUD_TABLE
   SERIAL_BAUD_ENTRY(115200, 11),
 END_SERIAL_BAUD_TABLE
 
-#define SERIAL_PORT_RBR 0 /* receive buffered register */
-#define SERIAL_PORT_THR 0 /* transmit holding register */
-#define SERIAL_PORT_DLL 0 /* divisor latch low */
-#define SERIAL_PORT_IER 1 /* interrupt enable register */
-#define SERIAL_PORT_DLH 1 /* divisor latch high */
-#define SERIAL_PORT_IIR 2 /* interrupt id register */
-#define SERIAL_PORT_LCR 3 /* line control register */
-#define SERIAL_PORT_MCR 4 /* modem control register */
-#define SERIAL_PORT_MSR 6 /* modem status register */
-
-#define SERIAL_FLAG_LCR_DLAB 0X80 /* divisor latch access bit */
-
 static unsigned short
 serialPortBase (SerialDevice *serial) {
   return _farpeekw(_dos_ds, (0X0400 + (2 * serial->package.deviceIndex)));
@@ -164,14 +152,14 @@ serialGetParityBits (const SerialAttributes *attributes) {
 int
 serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
   int interruptsWereEnabled = disable();
-  unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
+  unsigned char lcr = serialReadPort(serial, UART_PORT_LCR);
   int divisor;
 
-  serialWritePort(serial, SERIAL_PORT_LCR,
-                  lcr | SERIAL_FLAG_LCR_DLAB);
-  divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
-            serialReadPort(serial, SERIAL_PORT_DLL);
-  serialWritePort(serial, SERIAL_PORT_LCR, lcr);
+  serialWritePort(serial, UART_PORT_LCR,
+                  lcr | UART_FLAG_LCR_DLAB);
+  divisor = (serialReadPort(serial, UART_PORT_DLH) << 8) |
+            serialReadPort(serial, UART_PORT_DLL);
+  serialWritePort(serial, UART_PORT_LCR, lcr);
   if (interruptsWereEnabled) enable();
 
   attributes->bios.byte = lcr;
@@ -202,13 +190,13 @@ serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
       SerialBiosConfiguration lcr = attributes->bios;
       lcr.fields.bps = 0;
 
-      serialWritePort(serial, SERIAL_PORT_LCR,
-                      lcr.byte | SERIAL_FLAG_LCR_DLAB);
-      serialWritePort(serial, SERIAL_PORT_DLL,
+      serialWritePort(serial, UART_PORT_LCR,
+                      lcr.byte | UART_FLAG_LCR_DLAB);
+      serialWritePort(serial, UART_PORT_DLL,
                       attributes->speed.divisor & 0XFF);
-      serialWritePort(serial, SERIAL_PORT_DLH,
+      serialWritePort(serial, UART_PORT_DLH,
                       attributes->speed.divisor >> 8);
-      serialWritePort(serial, SERIAL_PORT_LCR, lcr.byte);
+      serialWritePort(serial, UART_PORT_LCR, lcr.byte);
 
       if (interruptsWereEnabled) enable();
     }
@@ -265,16 +253,16 @@ serialPutData (
 
 int
 serialGetLines (SerialDevice *serial) {
-  serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
+  serial->linesState = serialReadPort(serial, UART_PORT_MSR) & 0XF0;
   return 1;
 }
 
 int
 serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   int interruptsWereEnabled = disable();
-  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_MCR);
+  unsigned char oldMCR = serialReadPort(serial, UART_PORT_MCR);
 
-  serialWritePort(serial, SERIAL_PORT_MCR,
+  serialWritePort(serial, UART_PORT_MCR,
                   (oldMCR | high) & ~low);
   if (interruptsWereEnabled) enable();
   return 1;

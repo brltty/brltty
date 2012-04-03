@@ -19,44 +19,29 @@
 #ifndef BRLTTY_INCLUDED_SERIAL_MSDOS
 #define BRLTTY_INCLUDED_SERIAL_MSDOS
 
-#include "serial_uart.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  unsigned short divisor;
-  unsigned short biosBPS;
-} SerialSpeed;
+#define UART_PORT_RBR 0 /* receive buffered register */
+#define UART_PORT_THR 0 /* transmit holding register */
+#define UART_PORT_DLL 0 /* divisor latch low */
+#define UART_PORT_IER 1 /* interrupt enable register */
+#define UART_PORT_DLH 1 /* divisor latch high */
+#define UART_PORT_IIR 2 /* interrupt id register */
+#define UART_PORT_LCR 3 /* line control register */
+#define UART_PORT_MCR 4 /* modem control register */
+#define UART_PORT_MSR 6 /* modem status register */
 
-typedef union {
-  unsigned char byte;
+#define UART_FLAG_LCR_DLAB 0X80 /* divisor latch access bit */
 
-  struct {
-    unsigned bits:2;
-    unsigned stop:1;
-    unsigned parity:2;
-    unsigned bps:3;
-  } fields;
-} SerialBiosConfiguration;
+#define UART_FLAG_MCR_DTR 0X01 /* data terminal ready */
+#define UART_FLAG_MCR_RTS 0X02 /* ready to send */
 
-typedef struct {
-  SerialBiosConfiguration bios;
-  SerialSpeed speed;
-} SerialAttributes;
-
-typedef unsigned char SerialLines;
-#define SERIAL_LINE_DTR UART_FLAG_MCR_DTR
-#define SERIAL_LINE_RTS UART_FLAG_MCR_RTS
-#define SERIAL_LINE_CTS UART_FLAG_MSR_CTS
-#define SERIAL_LINE_DSR UART_FLAG_MSR_DSR
-#define SERIAL_LINE_RNG UART_FLAG_MSR_RNG
-#define SERIAL_LINE_CAR UART_FLAG_MSR_CAR
-
-typedef struct {
-  int deviceIndex;
-} SerialPackageFields;
+#define UART_FLAG_MSR_CTS 0X10 /* clear to send */
+#define UART_FLAG_MSR_DSR 0X20 /* data set ready */
+#define UART_FLAG_MSR_RNG 0X40 /* ring indicator */
+#define UART_FLAG_MSR_CAR 0X80 /* carrier detect */
 
 #ifdef __cplusplus
 }
