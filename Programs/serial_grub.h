@@ -37,7 +37,8 @@ typedef unsigned char SerialLines;
 #define SERIAL_LINE_CAR 0X80
 
 typedef struct {
-  char dummy;
+  struct grub_serial_port *port;
+  int byte;
 } SerialPackageFields;
 
 #ifdef __cplusplus
