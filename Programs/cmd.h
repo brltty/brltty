@@ -19,8 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
-#include <sys/time.h>
-
+#include "timing.h"
 #include "brlapi_keycodes.h"
 
 #ifdef __cplusplus
@@ -74,7 +73,7 @@ typedef struct {
   int command;
   int timeout;
   int started;
-  struct timeval time;
+  TimeValue time;
 } RepeatState;
 extern void resetRepeatState (RepeatState *state);
 extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);

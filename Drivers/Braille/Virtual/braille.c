@@ -34,12 +34,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
 #endif /* __MINGW32__ */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
@@ -62,6 +56,7 @@
 #endif /* __MINGW32__ */
 
 #include "log.h"
+#include "io_misc.h"
 #include "device.h"
 #include "parse.h"
 #include "timing.h"
@@ -127,29 +122,10 @@ static const OperationsEntry *operations;
 
 static int
 readSocket (int descriptor, void *buffer, int size) {
-  fd_set readMask;
-  struct timeval timeout;
-
-  FD_ZERO(&readMask);
-  FD_SET(fileDescriptor, &readMask);
-
-  memset(&timeout, 0, sizeof(timeout));
-
-  switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
-    case -1:
-      LogSocketError("select");
-      break;
-
-    case 0:
-      errno = EAGAIN;
-      break;
-  
-    default: {
-      int count = recv(descriptor, buffer, size, 0);
-      if (count != -1) return count;
-      LogSocketError("recv");
-      break;
-    }
+  if (awaitInput(descriptor, 0)) {
+    int count = recv(descriptor, buffer, size, 0);
+    if (count != -1) return count;
+    LogSocketError("recv");
   }
 
   return -1;

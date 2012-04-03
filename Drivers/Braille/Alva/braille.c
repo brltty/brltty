@@ -475,7 +475,7 @@ static unsigned char statusOffset;
 
 static int textRewriteRequired = 0;
 static int textRewriteInterval;
-static struct timeval textRewriteTime;
+static TimeValue textRewriteTime;
 static int statusRewriteRequired;
 
 static int
@@ -1732,8 +1732,8 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int to;
 
   if (textRewriteInterval) {
-    struct timeval now;
-    gettimeofday(&now, NULL);
+    TimeValue now;
+    getCurrentTime(&now);
     if (millisecondsBetween(&textRewriteTime, &now) > textRewriteInterval) textRewriteRequired = 1;
     if (textRewriteRequired) textRewriteTime = now;
   }

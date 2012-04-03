@@ -630,10 +630,10 @@ initializeUsb2 (void) {
 static int
 awaitUsbInput2 (int milliseconds) {
   if (hidReportSize_OutData) {
-    struct timeval startTime;
+    TimeValue startTime;
 
     if (hidInputOffset < hidInputLength) return 1;
-    gettimeofday(&startTime, NULL);
+    getCurrentTime(&startTime);
 
     while (1) {
       int result = getHidReport(HT_HID_RPT_OutData, hidInputReport,
@@ -721,10 +721,10 @@ initializeUsb3 (void) {
 static int
 awaitUsbInput3 (int milliseconds) {
   if (hidReportSize_OutData) {
-    struct timeval startTime;
+    TimeValue startTime;
 
     if (hidInputOffset < hidInputLength) return 1;
-    gettimeofday(&startTime, NULL);
+    getCurrentTime(&startTime);
 
     while (1) {
       int result = usbReapInput(usb->device, usb->definition.inputEndpoint,
@@ -934,7 +934,7 @@ typedef enum {
   BDS_WRITING
 } BrailleDisplayState;
 static BrailleDisplayState currentState = BDS_OFF;
-static struct timeval stateTime;
+static TimeValue stateTime;
 static unsigned int retryCount = 0;
 static unsigned char updateRequired = 0;
 
@@ -1036,7 +1036,7 @@ setState (BrailleDisplayState state) {
     retryCount = 0;
     currentState = state;
   }
-  gettimeofday(&stateTime, NULL);
+  getCurrentTime(&stateTime);
   // logMessage(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 

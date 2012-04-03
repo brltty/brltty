@@ -430,8 +430,8 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
   if (state) {
     if (*command == EOF) {
       if (state->timeout) {
-        struct timeval now;
-        gettimeofday(&now, NULL);
+        TimeValue now;
+        getCurrentTime(&now);
         if (millisecondsBetween(&state->time, &now) >= state->timeout) {
           *command = state->command;
           state->time = now;
@@ -493,7 +493,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
       state->command = *command;
 
       if (flags & BRL_FLG_REPEAT_DELAY) {
-        gettimeofday(&state->time, NULL);
+        getCurrentTime(&state->time);
         state->timeout = delay;
         if (flags & BRL_FLG_REPEAT_INITIAL) {
           state->started = 1;
@@ -501,7 +501,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
           *command = BRL_CMD_NOOP;
         }
       } else if (flags & BRL_FLG_REPEAT_INITIAL) {
-        gettimeofday(&state->time, NULL);
+        getCurrentTime(&state->time);
         state->timeout = interval;
         state->started = 1;
       } else {

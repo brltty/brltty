@@ -24,7 +24,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
 
 #include "ascii.h"
 #include "cmd.h"
@@ -147,7 +146,7 @@ typedef struct {
   unsigned char packet[MAXPACKETSIZE];
   unsigned char *position;
   int waitingForAck;
-  struct timeval lastWriteTime;
+  TimeValue lastWriteTime;
 } Port;
 
 static IrisDeviceType deviceType;
@@ -245,15 +244,12 @@ static void deactivateBraille(void)
 
 static int checkLatchState()
 {
-  static struct timeval startTime;
+  static TimeValue startTime;
   static int latchPulled = 0;
   static int elapsedTime = 0;
   unsigned char currentState = readPort1(IRIS_GIO_INPUT) & 0x04;
   if (!latchPulled && !currentState) {
-    if (gettimeofday(&startTime, NULL)==-1) {
-      logSystemError("gettimeofday");
-      return 0;
-    }
+    getCurrentTime(&startTime);
     latchPulled = 1;
     logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
     return 0;
@@ -450,7 +446,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
     return 0;
   }
 
-  gettimeofday(&port->lastWriteTime, NULL);
+  getCurrentTime(&port->lastWriteTime);
 
   if (port==&internalPort) port->waitingForAck = 1;
   return count;
@@ -474,7 +470,7 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   if (gioWriteData(port->gioEndpoint, packet, count) == -1) return 0;
   brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
 
-  gettimeofday(&port->lastWriteTime, NULL);
+  getCurrentTime(&port->lastWriteTime);
   return count;
 }
 

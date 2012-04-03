@@ -23,13 +23,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <sys/time.h>
+typedef struct {
+  int32_t seconds;
+  uint32_t nanoseconds;
+} TimeValue;
+
+extern void getCurrentTime (TimeValue *time);
+
+extern void normalizeTimeValue (TimeValue *time);
+extern void adjustTimeValue (TimeValue *time, int amount);
+extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void accurateDelay (int milliseconds);
 
-extern long int millisecondsBetween (const struct timeval *from, const struct timeval *to);
-extern long int millisecondsSince (const struct timeval *from);
+extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
+extern long int millisecondsSince (const TimeValue *from);
 
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 

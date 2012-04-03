@@ -20,7 +20,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
 #include <signal.h>
 
 #ifdef SIGUSR1
@@ -189,9 +188,9 @@ awaitCursorMotion (RoutingData *routing, int direction) {
   int oldy = (routing->oldy = routing->cury);
   long timeout = routing->timeSum / routing->timeCount;
   int moved = 0;
-  struct timeval start;
+  TimeValue start;
 
-  gettimeofday(&start, NULL);
+  getCurrentTime(&start);
 
   while (1) {
     long time;

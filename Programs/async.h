@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_ASYNC
 #define BRLTTY_INCLUDED_ASYNC
 
+#include "timing.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -62,7 +64,7 @@ extern int asyncWrite (
 typedef void (*AsyncAlarmCallback) (void *data);
 
 extern int asyncAbsoluteAlarm (
-  const struct timeval *time,
+  const TimeValue *time,
   AsyncAlarmCallback callback,
   void *data
 );

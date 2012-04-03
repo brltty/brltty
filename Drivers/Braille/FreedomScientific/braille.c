@@ -448,7 +448,7 @@ static int writingLast;
 
 typedef void (*AcknowledgementHandler) (int ok);
 static AcknowledgementHandler acknowledgementHandler;
-static struct timeval acknowledgementTime;
+static TimeValue acknowledgementTime;
 static int acknowledgementsMissing;
 static unsigned char configFlags;
 static int firmnessSetting;
@@ -598,7 +598,7 @@ handleWriteAcknowledgement (int ok) {
 static void
 setAcknowledgementHandler (AcknowledgementHandler handler) {
   acknowledgementHandler = handler;
-  gettimeofday(&acknowledgementTime, NULL);
+  getCurrentTime(&acknowledgementTime);
 }
 
 static int

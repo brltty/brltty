@@ -80,6 +80,18 @@ extern "C" {
 /* Define this if the header file sys/file.h exists. */
 #undef HAVE_SYS_FILE_H
 
+/* Define this if the function time exists. */
+#undef HAVE_TIME
+
+/* Define this if the function gettimeofday exists. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define this if the function clock_gettime exists. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define this if the function nanosleep exists. */
+#undef HAVE_NANOSLEEP
+
 #ifndef __MINGW32__
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H

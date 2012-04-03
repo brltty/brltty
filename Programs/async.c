@@ -20,7 +20,6 @@
 
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"
@@ -756,7 +755,7 @@ asyncWrite (
 }
 
 typedef struct {
-  struct timeval time;
+  TimeValue time;
   AsyncAlarmCallback callback;
   void *data;
 } AlarmEntry;
@@ -771,9 +770,7 @@ static int
 compareAlarmEntries (const void *item1, const void *item2, void *data) {
   const AlarmEntry *alarm1 = item1;
   const AlarmEntry *alarm2 = item2;
-  if (alarm2->time.tv_sec < alarm1->time.tv_sec) return 0;
-  if (alarm2->time.tv_sec > alarm1->time.tv_sec) return 1;
-  return alarm2->time.tv_usec > alarm1->time.tv_usec;
+  return compareTimeValues(&alarm1->time, &alarm2->time) < 0;
 }
 
 static Queue *
@@ -790,26 +787,9 @@ getAlarmQueue (int create) {
   return alarms;
 }
 
-static void
-normalizeTime (struct timeval *time) {
-  time->tv_sec += time->tv_usec / 1000000;
-  time->tv_usec = time->tv_usec % 1000000;
-}
-
-static void
-adjustTime (struct timeval *time, int amount) {
-  int quotient = amount / 1000;
-  int remainder = amount % 1000;
-
-  if (remainder < 0) remainder += 1000, --quotient;
-  time->tv_sec += quotient;
-  time->tv_usec += remainder * 1000;
-  normalizeTime(time);
-}
-
 int
 asyncAbsoluteAlarm (
-  const struct timeval *time,
+  const TimeValue *time,
   AsyncAlarmCallback callback,
   void *data
 ) {
@@ -840,17 +820,17 @@ asyncRelativeAlarm (
   AsyncAlarmCallback callback,
   void *data
 ) {
-  struct timeval time;
-  gettimeofday(&time, NULL);
-  adjustTime(&time, interval);
+  TimeValue time;
+  getCurrentTime(&time);
+  adjustTimeValue(&time, interval);
   return asyncAbsoluteAlarm(&time, callback, data);
 }
 
 void
 asyncWait (int duration) {
   long int elapsed = 0;
-  struct timeval start;
-  gettimeofday(&start, NULL);
+  TimeValue start;
+  getCurrentTime(&start);
 
   do {
     long int timeout = duration;

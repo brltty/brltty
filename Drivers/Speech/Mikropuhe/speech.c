@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
+#include <sys/time.h>
 
 #ifdef __MINGW32__
 #include "win_pthread.h"

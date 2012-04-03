@@ -116,7 +116,7 @@ static int fullFreshenEvery;
    if the display was turned off. */
 /* We record the time at which the last ping reply was received,
    and the time at which the last ping (query) was sent. */
-static struct timeval last_ping, last_ping_sent;
+static TimeValue last_ping, last_ping_sent;
 /* that many pings are sent, that many chances to reply */
 #define PING_MAXNQUERY 2
 static int pings; /* counts number of pings sent since last reply */
@@ -131,7 +131,7 @@ static int must_init_oldstat = 1;
 #define NONREPEAT_TIMEOUT 300
 #define READBRL_SKIP_TIME 300
 static int lastcmd = EOF;
-static struct timeval lastcmd_time, last_readbrl_time;
+static TimeValue lastcmd_time, last_readbrl_time;
 /* Those functions it is OK to repeat */
 static int repeat_list[] =
 {BRL_CMD_FWINRT, BRL_CMD_FWINLT, BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_WINUP, BRL_CMD_WINDN,
@@ -492,9 +492,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   charactersPerSecond = serialBaud / serialGetCharacterBits(serialDevice);
 
   /* Mark time of last command to initialize typematic watch */
-  gettimeofday (&last_ping, NULL);
-  memcpy(&last_readbrl_time, &last_ping, sizeof(struct timeval));
-  memcpy(&lastcmd_time, &last_ping, sizeof(struct timeval));
+  getCurrentTime(&last_ping);
+  last_readbrl_time = last_ping;
+  lastcmd_time = last_ping;
   lastcmd = EOF;
   pings=0;
   must_init_oldstat = 1;
@@ -871,10 +871,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   char buf[MAXREAD], /* read buffer */
        packtype = 0; /* type of packet being received (state) */
   unsigned i;
-  struct timeval now;
+  TimeValue now;
   int skip_this_cmd = 0;
 
-  gettimeofday (&now, NULL);
+  getCurrentTime(&now);
   if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME)
     /* if the key we get this time is the same as the one we returned at last
        call, and if it has been abnormally long since we were called
@@ -882,7 +882,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
        the bytes we will read can be old... so we forget this key, if it is
        a repeat. */
     skip_this_cmd = 1;
-  memcpy(&last_readbrl_time, &now, sizeof(struct timeval));
+  last_readbrl_time = now;
        
   if(pending_cmd != EOF){
     res = pending_cmd;
@@ -924,13 +924,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	  approximateDelay(SEND_DELAY);
 	}
 	pings++;
-	gettimeofday(&last_ping_sent, NULL);
+	getCurrentTime(&last_ping_sent);
       }
     }
     return (EOF);
   }
   /* there was some input, we heard something. */
-  gettimeofday(&last_ping, NULL);
+  getCurrentTime(&last_ping);
   pings=0;
 
 #ifdef RECV_DELAY
@@ -1258,11 +1258,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   /* If this is a typematic repetition of some key other than movement keys */
   if (lastcmd == res && !is_repeat_cmd (res)){
     if(skip_this_cmd){
-      gettimeofday (&lastcmd_time, NULL);
+      getCurrentTime(&lastcmd_time);
       res = EOF;
     }else{
       /* if to short a time has elapsed since last command, ignore this one */
-      gettimeofday (&now, NULL);
+      getCurrentTime(&now);
       if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
 	res = EOF;
     }
@@ -1270,7 +1270,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   /* reset timer to avoid unwanted typematic */
   if (res != EOF){
     lastcmd = res;
-    gettimeofday (&lastcmd_time, NULL);
+    getCurrentTime(&lastcmd_time);
   }
 
   /* Special: */

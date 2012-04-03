@@ -318,7 +318,7 @@ static const InputMode inputMode_basic = {
 };
 
 static const InputMode *inputMode;
-static struct timeval inputTime;
+static TimeValue inputTime;
 
 static void
 setInputMode (const InputMode *mode) {
@@ -329,7 +329,7 @@ setInputMode (const InputMode *mode) {
   }
 
   inputMode = mode;
-  gettimeofday(&inputTime, NULL);
+  getCurrentTime(&inputTime);
 }
 
 static void
