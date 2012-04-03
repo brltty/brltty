@@ -117,7 +117,9 @@ getTickLength (void) {
   static int tickLength = 0;
 
   if (!tickLength) {
-#if defined(_SC_CLK_TCK)
+#if defined(GRUB_TICKS_PER_SECOND)
+    tickLength = MSECS_PER_SEC / GRUB_TICKS_PER_SECOND;
+#elif defined(_SC_CLK_TCK)
     tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
 #elif defined(CLK_TCK)
     tickLength = MSECS_PER_SEC / CLK_TCK;
