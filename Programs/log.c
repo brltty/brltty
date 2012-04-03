@@ -92,11 +92,13 @@ writeLogRecord (const char *record) {
       TimeValue now;
       char buffer[0X20];
       size_t length;
+      unsigned int milliseconds;
 
       getCurrentTime(&now);
       length = formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", now.seconds);
+      milliseconds = now.nanoseconds / NSECS_PER_MSEC;
 
-      fprintf(logFile, "%.*s.%03"PRIi32" ", length, buffer, now.nanoseconds/NSECS_PER_MSEC);
+      fprintf(logFile, "%.*s.%03u ", length, buffer, milliseconds);
     }
 
     fputs(record, logFile);
@@ -109,8 +111,7 @@ void
 openSystemLog (void) {
 #if defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
-    int flags = LOG_PID;
-    openlog(PACKAGE_NAME, flags, LOG_DAEMON);
+    openlog(PACKAGE_NAME, LOG_PID, LOG_DAEMON);
     syslogOpened = 1;
   }
 #elif defined(WINDOWS)
