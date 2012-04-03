@@ -40,6 +40,10 @@
 
 static int
 awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
+#if defined(GRUB_RUNTIME)
+  return 0;
+#else
+
 #ifdef __MSDOS__
   int left = milliseconds * 1000;
 #endif /* __MSDOS__ */
@@ -114,6 +118,7 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
     errno = EAGAIN;
     return 0;
   }
+#endif
 }
 
 int
