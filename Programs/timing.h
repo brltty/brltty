@@ -39,7 +39,7 @@ extern void getCurrentTime (TimeValue *time);
 extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
 
 extern void normalizeTimeValue (TimeValue *time);
-extern void adjustTimeValue (TimeValue *time, int amount);
+extern void adjustTimeValue (TimeValue *time, int milliseconds);
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */

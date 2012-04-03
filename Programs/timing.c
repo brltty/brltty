@@ -71,15 +71,6 @@ getCurrentTime (TimeValue *now) {
 #endif /* get current time */
 }
 
-size_t
-formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
-  time_t time = seconds;
-  struct tm description;
-
-  localtime_r(&time, &description);
-  return strftime(buffer, size, format, &description);
-}
-
 void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
@@ -121,20 +112,39 @@ approximateDelay (int milliseconds) {
   }
 }
 
-void
-normalizeTimeValue (TimeValue *time) {
-  time->seconds += time->nanoseconds / NSECS_PER_SEC;
-  time->nanoseconds = time->nanoseconds % NSECS_PER_SEC;
+size_t
+formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
+  time_t time = seconds;
+  struct tm description;
+
+  localtime_r(&time, &description);
+  return strftime(buffer, size, format, &description);
 }
 
 void
-adjustTimeValue (TimeValue *time, int amount) {
-  int quotient = amount / MSECS_PER_SEC;
-  int remainder = amount % MSECS_PER_SEC;
+normalizeTimeValue (TimeValue *time) {
+  while (time->nanoseconds < 0) {
+    time->seconds -= 1;
+    time->nanoseconds += NSECS_PER_SEC;
+  }
 
-  if (remainder < 0) remainder += MSECS_PER_SEC, quotient -= 1;
-  time->seconds += quotient;
-  time->nanoseconds += remainder * NSECS_PER_MSEC;
+  while (time->nanoseconds >= NSECS_PER_SEC) {
+    time->seconds += 1;
+    time->nanoseconds -= NSECS_PER_SEC;
+  }
+}
+
+void
+adjustTimeValue (TimeValue *time, int milliseconds) {
+  TimeValue amount = {
+    .seconds = milliseconds / MSECS_PER_SEC,
+    .nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC
+  };
+
+  normalizeTimeValue(time);
+  normalizeTimeValue(&amount);
+  time->seconds += amount.seconds;
+  time->nanoseconds += amount.nanoseconds;
   normalizeTimeValue(time);
 }
 
