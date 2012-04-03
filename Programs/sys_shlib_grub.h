@@ -16,30 +16,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#include <grub/dl.h>
 
-#include "system.h"
+void *
+loadSharedObject (const char *name) {
+  return grub_dl_load (name);
+}
 
-#include "sys_prog_none.h"
+void 
+unloadSharedObject (void *object) {
+  grub_dl_unload (object);
+}
 
-#include "sys_boot_none.h"
-
-#include "sys_exec_none.h"
-
-#include "sys_mount_none.h"
-
-#ifdef ENABLE_SHARED_OBJECTS
-#include "sys_shlib_grub.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+int 
+findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
+  void **address = pointerAddress;
+  grub_symbol_t sym;
+  sym = grub_get_symbol (symbol, object);
+  if (!sym)
+    return 0;
+  *address = sym->addr;
+  return 1;
+}
