@@ -33,6 +33,7 @@
 
 #include "io_misc.h"
 #include "log.h"
+#include "timing.h"
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"
@@ -41,6 +42,7 @@
 static int
 awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 #if defined(GRUB_RUNTIME)
+  approximateDelay(milliseconds);
   errno = EAGAIN;
   return 0;
 #else
