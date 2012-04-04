@@ -41,6 +41,7 @@ extern int testFilePath (const char *path);
 extern int testProgramPath (const char *path);
 extern int testDirectoryPath (const char *path);
 
+extern int makeDirectory (const char *path);
 extern int ensureDirectory (const char *path);
 
 extern const char *writableDirectory;
@@ -48,7 +49,7 @@ extern const char *getWritableDirectory (void);
 extern char *makeWritablePath (const char *file);
 
 extern char *getWorkingDirectory (void);
-extern int setWorkingDirectory (const char *directory);
+extern int setWorkingDirectory (const char *path);
 
 extern char *getHomeDirectory (void);
 extern const char *getOverrideDirectory (void);

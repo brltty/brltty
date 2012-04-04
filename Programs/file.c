@@ -206,6 +206,25 @@ testDirectoryPath (const char *path) {
 }
 
 int
+makeDirectory (const char *path) {
+#if defined(GRUB_RUNTIME)
+  errno = EROFS;
+
+#else /* make directory */
+  if (mkdir(path
+#ifndef __MINGW32__
+           ,S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+#endif /* __MINGW32__ */
+           ) != -1) return 1;
+#endif /* make directory */
+
+  logMessage(LOG_WARNING, "%s: %s: %s",
+             gettext("cannot make directory"),
+             path, strerror(errno));
+  return 0;
+}
+
+int
 ensureDirectory (const char *path) {
   if (testDirectoryPath(path)) return 1;
 
@@ -225,11 +244,7 @@ ensureDirectory (const char *path) {
       }
     }
 
-    if (mkdir(path
-#ifndef __MINGW32__
-             ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-#endif /* __MINGW32__ */
-             ) != -1) {
+    if (makeDirectory(path)) {
       logMessage(LOG_NOTICE, "directory created: %s", path);
       return 1;
     } else {
@@ -261,6 +276,9 @@ makeWritablePath (const char *file) {
 
 char *
 getWorkingDirectory (void) {
+#if defined(GRUB_RUNTIME)
+  errno = ENOSYS;
+#else /* get working directory */
   size_t size = 0X80;
   char *buffer = NULL;
 
@@ -285,23 +303,41 @@ getWorkingDirectory (void) {
   }
 
   if (buffer) free(buffer);
+#endif /* get working directory */
+
+  logMessage(LOG_WARNING, "%s: %s",
+             gettext("cannot get working directory"),
+             strerror(errno));
   return NULL;
 }
 
 int
-setWorkingDirectory (const char *directory) {
-  if (chdir(directory) != -1) return 1;                /* * change to directory containing data files  */
+setWorkingDirectory (const char *path) {
+#if defined(GRUB_RUNTIME)
+  errno = ENOSYS;
+#else /* set working directory */
+  if (chdir(path) != -1) return 1;
+#endif /* set working directory */
+
   logMessage(LOG_WARNING, "%s: %s: %s",
              gettext("cannot set working directory"),
-           directory, strerror(errno));
+             path, strerror(errno));
   return 0;
 }
 
 char *
 getHomeDirectory (void) {
+#if defined(GRUB_RUNTIME)
+#else /* get home directory */
   char *path = getenv("HOME");
-  if (!path || !*path) return NULL;
-  return strdup(path);
+
+  if (path && *path) {
+    if ((path = strdup(path))) return path;
+    logMallocError();
+  }
+#endif /* get home directory */
+
+  return NULL;
 }
 
 const char *
