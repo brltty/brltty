@@ -38,7 +38,10 @@ extern const NoteMethods midiMethods;
 extern const NoteMethods fmMethods;
 
 extern unsigned int getIntegerNoteFrequency (unsigned char note);
+
+#ifndef NO_FLOAT
 extern float getRealNoteFrequency (unsigned char note);
+#endif /* NO_FLOAT */
 
 #ifdef __cplusplus
 }

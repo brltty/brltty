@@ -190,10 +190,20 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * expensive math functions like sin(). Considerations like
      * these are especially important on PDAs without any FPU.
      */ 
-    float maxAmplitude = 32767.0 * prefs.pcmVolume / 100;
-    float waveLength = device->sampleRate / getRealNoteFrequency(note);
-    float stepSample = 4 * maxAmplitude / waveLength;
-    float currSample = 0;
+
+#ifdef NO_FLOAT
+#define TYPE int32_t
+    TYPE frequency = getIntegerNoteFrequency(note);
+#else /* NO_FLOAT */
+#define TYPE float
+    TYPE frequency = getRealNoteFrequency(note);
+#endif /* NO_FLOAT */
+
+    TYPE maxAmplitude = (TYPE)INT16_MAX * prefs.pcmVolume / 100;
+    TYPE waveLength = device->sampleRate / frequency;
+    TYPE stepSample = 4 * maxAmplitude / waveLength;
+    TYPE currSample = 0;
+#undef TYPE
 
     if (waveLength <= 2) stepSample = 0;
     logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",

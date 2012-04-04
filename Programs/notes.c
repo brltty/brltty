@@ -161,7 +161,9 @@ getIntegerNoteFrequency (unsigned char note) {
   return frequency;
 }
 
+#ifndef NO_FLOAT
 float
 getRealNoteFrequency (unsigned char note) {
   return (float)noteFrequencies[note] / (float)NOTE_FREQUENCY_FACTOR;
 }
+#endif /* NO_FLOAT */
