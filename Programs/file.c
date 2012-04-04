@@ -165,7 +165,7 @@ testFilePath (const char *path) {
 
   if (stat(path, &status) != -1) {
     if (S_ISREG(status.st_mode)) return 1;
-    errno = ENOTDIR;
+    errno = EEXIST;
   }
 #else /* S_ISREG */
   int result = open(path, O_RDONLY);
@@ -196,7 +196,7 @@ testDirectoryPath (const char *path) {
 
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
-    errno = ENOTDIR;
+    errno = EEXIST;
   }
 #else /* S_ISDIR */
   errno = ENOSYS;
@@ -209,7 +209,7 @@ int
 ensureDirectory (const char *path) {
   if (testDirectoryPath(path)) return 1;
 
-  if (errno == ENOTDIR) {
+  if (errno == EEXIST) {
     logMessage(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
     logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
