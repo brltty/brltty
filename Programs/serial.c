@@ -645,7 +645,6 @@ serialGetStream (SerialDevice *serial) {
     if (!serialEnsureFileDescriptor(serial)) return NULL;
 
 #if defined(GRUB_RUNTIME)
-    serial->stream = NULL;
     errno = ENOSYS;
 #else /* fdopen() */
     serial->stream = fdopen(serial->fileDescriptor, "ab+");
