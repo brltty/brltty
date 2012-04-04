@@ -575,7 +575,13 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   FlowControlProc flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
-  if (serial->stream) clearerr(serial->stream);
+  if (serial->stream) {
+#if defined(GRUB_RUNTIME)
+#else /* clearerr() */
+    clearerr(serial->stream);
+#endif /* clear error on stdio stream */
+  }
+
   serialClearError(serial);
 
   if (!serialDiscardOutput(serial)) return 0;
@@ -638,7 +644,14 @@ serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
     if (!serialEnsureFileDescriptor(serial)) return NULL;
 
-    if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
+#if defined(GRUB_RUNTIME)
+    serial->stream = NULL;
+    errno = ENOSYS;
+#else /* fdopen() */
+    serial->stream = fdopen(serial->fileDescriptor, "ab+");
+#endif /* create stdio stream */
+
+    if (!serial->stream) {
       logSystemError("fdopen");
       return NULL;
     }
