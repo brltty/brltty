@@ -35,6 +35,9 @@ typedef struct {
   int32_t nanoseconds;
 } TimeValue;
 
+#define PRIsec PRIi32
+#define PRInsec PRIi32
+
 extern void getCurrentTime (TimeValue *time);
 extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
 
