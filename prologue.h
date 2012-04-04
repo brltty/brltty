@@ -94,6 +94,14 @@ extern void usleep (int usec);
 #endif /* usleep */
 #endif /* __MINGW32__ */
 
+#ifdef GRUB_RUNTIME
+#define INT16_MAX 32767
+#define GRUB_POSIX_GETTEXT_DOMAIN "UTF-8"
+#define NO_FLOAT
+#define float NO_FLOAT
+#define double NO_DOUBLE
+#endif /* GRUB_RUNHTIME */
+
 #ifdef __MSDOS__
 #include <stdarg.h>
 
@@ -382,6 +390,12 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 #define PRIX_KEY_T PRIX64
 #endif /* SIZEOF_KEY_T */
 #endif /* HAVE_SHMGET */
+
+#ifdef GRUB_RUNTIME
+#ifdef HAVE_SIGNAL_H
+#undef HAVE_SIGNAL_H
+#endif /* HAVE_SIGNAL_H */
+#endif /* GRUB_RUNTIME */
 
 #ifdef __cplusplus
 }

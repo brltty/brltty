@@ -278,7 +278,7 @@ case "${host_os}"
 in
    elf*)
       brltty_gcc_cppflags="${brltty_gcc_cppflags} -ffreestanding -nostdinc -nostdlib"
-      CPPFLAGS="${CPPFLAGS} -DGRUB_RUNTIME -DGRUB_FILE=__FILE__ -DNO_FLOAT -Dfloat=NO_FLOAT -Ddouble=NO_DOUBLE -DNESTED_FUNC_ATTR= -D_WCHAR_T_DECLARED=1"
+      CPPFLAGS="${CPPFLAGS} -DGRUB_RUNTIME -DGRUB_FILE=__FILE__ -DNESTED_FUNC_ATTR= -D_WCHAR_T_DECLARED=1"
 
       brltty_include_directory=`$CC -print-file-name=include`
       CPPFLAGS="${CPPFLAGS} -isystem $brltty_include_directory"
