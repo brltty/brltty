@@ -20,7 +20,10 @@
 
 #include <string.h>
 #include <errno.h>
+
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif /* HAVE_SIGNAL_H */
 
 #ifdef SIGUSR1
 #include <sys/wait.h>
@@ -51,7 +54,9 @@ typedef enum {
 } RoutingResult;
 
 typedef struct {
+#ifdef HAVE_SIGNAL_H
   sigset_t signalMask;
+#endif /* HAVE_SIGNAL_H */
 
   int screenNumber;
   int screenRows;

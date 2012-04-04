@@ -46,7 +46,10 @@ testProcessIdentifier (ProcessIdentifier pid) {
 }
 
 #else /* Unix */
+
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif /* HAVE_SIGNAL_H */
 
 ProcessIdentifier
 getProcessIdentifier (void) {
