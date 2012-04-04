@@ -160,10 +160,12 @@ getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
   return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
 }
 
+#ifndef NO_FLOAT
 float
 getFloatSpeechVolume (unsigned char setting) {
   return (float)setting / (float)SPK_VOLUME_DEFAULT;
 }
+#endif /* NO_FLOAT */
 
 void
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
@@ -177,6 +179,7 @@ getIntegerSpeechRate (unsigned char setting, unsigned int normal) {
   return getIntegerSetting(setting, SPK_RATE_DEFAULT, normal);
 }
 
+#ifndef NO_FLOAT
 float
 getFloatSpeechRate (unsigned char setting) {
   static const float spkRateTable[] = {
@@ -205,6 +208,7 @@ getFloatSpeechRate (unsigned char setting) {
 
   return spkRateTable[setting];
 }
+#endif /* NO_FLOAT */
 
 void
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
@@ -218,10 +222,12 @@ getIntegerSpeechPitch (unsigned char setting, unsigned int normal) {
   return getIntegerSetting(setting, SPK_PITCH_DEFAULT, normal);
 }
 
+#ifndef NO_FLOAT
 float
 getFloatSpeechPitch (unsigned char setting) {
   return (float)setting / (float)SPK_PITCH_DEFAULT;
 }
+#endif /* NO_FLOAT */
 
 void
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
