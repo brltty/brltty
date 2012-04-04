@@ -191,6 +191,10 @@ fixInstallPath (char **path) {
 
 int
 createPidFile (const char *path, ProcessIdentifier pid) {
+#if defined(GRUB_RUNTIME)
+  errno = EROFS;
+
+#else /* create pid file */
   if (!pid) pid = getProcessIdentifier();
 
   if (path && *path) {
@@ -283,6 +287,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
         break;
     }
   }
+#endif /* create pid file */
 
   return 0;
 }
