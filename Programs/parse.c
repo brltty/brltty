@@ -140,19 +140,6 @@ isUnsignedInteger (unsigned int *value, const char *string) {
 }
 
 int
-isFloat (float *value, const char *string) {
-  if (*string) {
-    char *end;
-    double d = strtod(string, &end);
-    if (!*end) {
-      *value = d;
-      return 1;
-    }
-  }
-  return 0;
-}
-
-int
 isLogLevel (int *level, const char *string) {
   if (!*string) return 1;
 
@@ -193,18 +180,6 @@ validateInteger (int *value, const char *string, const int *minimum, const int *
 }
 
 int
-validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
-  if (*string) {
-    float f;
-    if (!isFloat(&f, string)) return 0;
-    if (minimum && (f < *minimum)) return 0;
-    if (maximum && (f > *maximum)) return 0;
-    *value = f;
-  }
-  return 1;
-}
-
-int
 validateChoice (unsigned int *value, const char *string, const char *const *choices) {
   int length = strlen(string);
   *value = 0;
@@ -239,6 +214,33 @@ int
 validateYesNo (unsigned int *value, const char *string) {
   return validateFlag(value, string, "yes", "no");
 }
+
+#ifndef NO_FLOAT
+int
+isFloat (float *value, const char *string) {
+  if (*string) {
+    char *end;
+    double d = strtod(string, &end);
+    if (!*end) {
+      *value = d;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int
+validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
+  if (*string) {
+    float f;
+    if (!isFloat(&f, string)) return 0;
+    if (minimum && (f < *minimum)) return 0;
+    if (maximum && (f > *maximum)) return 0;
+    *value = f;
+  }
+  return 1;
+}
+#endif /* NO_FLOAT */
 
 static int
 parseParameters (

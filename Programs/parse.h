@@ -31,15 +31,18 @@ extern int rescaleInteger (int value, int from, int to);
 
 extern int isInteger (int *value, const char *string);
 extern int isUnsignedInteger (unsigned int *value, const char *string);
-extern int isFloat (float *value, const char *string);
 extern int isLogLevel (int *level, const char *string);
 
 extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);
-extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
 extern int validateChoice (unsigned int *value, const char *string, const char *const *choices);
 extern int validateFlag (unsigned int *value, const char *string, const char *on, const char *off);
 extern int validateOnOff (unsigned int *value, const char *string);
 extern int validateYesNo (unsigned int *value, const char *string);
+
+#ifndef NO_FLOAT
+extern int isFloat (float *value, const char *string);
+extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
+#endif /* NO_FLOAT */
 
 extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
 extern void logParameters (const char *const *names, char **values, char *description);
