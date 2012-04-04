@@ -1243,7 +1243,7 @@ BRLTTY_ARG_PACKAGE([charset], [charset], [iconv], [dnl
 BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
 ], [dnl
    unix)
-      AC_CHECK_FUNC([fork], [dnl
+      AC_CHECK_DECL([fork], [dnl
          hostcmd_package=unix
       ])
       ;;
