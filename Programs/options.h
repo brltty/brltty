@@ -83,6 +83,7 @@ typedef enum {
 
 extern OptionsResult processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
 
+#if !defined(GRUB_RUNTIME)
 static inline void handleOptionsResult (OptionsResult result) {
   switch (result) {
     case OPT_OK:
@@ -98,6 +99,7 @@ static inline void handleOptionsResult (OptionsResult result) {
       exit(PROG_EXIT_FORCE);
   }
 }
+#endif /* references to exit() */
 
 #ifdef __cplusplus
 }
