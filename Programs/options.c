@@ -65,7 +65,8 @@ extendSetting (char **setting, const char *value, int prepend) {
         return 0;
       }
     } else {
-      char *newSetting = malloc(strlen(*setting) + 1 + strlen(value) + 1);
+      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
+      char *newSetting = malloc(newSize);
 
       if (!newSetting) {
         logMallocError();
@@ -73,9 +74,9 @@ extendSetting (char **setting, const char *value, int prepend) {
       }
 
       if (prepend) {
-        sprintf(newSetting, "%s,%s", value, *setting);
+        snprintf(newSetting, newSize, "%s,%s", value, *setting);
       } else {
-        sprintf(newSetting, "%s,%s", *setting, value);
+        snprintf(newSetting, newSize, "%s,%s", *setting, value);
       }
 
       free(*setting);
@@ -289,14 +290,18 @@ processCommandLine (
         opt += 1;
 
         if (!entry->argument && entry->setting.flag) {
-          static const char *prefix = "no-";
-          size_t length = strlen(prefix);
+          static const char *const noPrefix = "no-";
+          size_t noLength = strlen(noPrefix);
           char *name;
 
-          if (strncasecmp(prefix, entry->word, length) == 0) {
-            name = strdup(entry->word + length);
-          } else if ((name = malloc(length + strlen(entry->word) + 1))) {
-            sprintf(name, "%s%s", prefix, entry->word);
+          if (strncasecmp(noPrefix, entry->word, noLength) == 0) {
+            name = strdup(&entry->word[noLength]);
+          } else {
+            size_t size = noLength + strlen(entry->word) + 1;
+
+            if ((name = malloc(size))) {
+              snprintf(name, size, "%s%s", noPrefix, entry->word);
+            }
           }
 
           if (name) {
@@ -529,26 +534,23 @@ processCommandLine (
 static void
 processBootParameters (
   OptionProcessingInformation *info,
-  const char *parameterName
+  const char *parameter
 ) {
-  char *parameterString;
-  int allocated = 0;
+  const char *value;
+  char *allocated = NULL;
 
-  if ((parameterString = getBootParameters(parameterName))) {
-    allocated = 1;
-  } else if ((parameterString = getenv(parameterName))) {
-    allocated = 0;
-  } else {
-    return;
-  }
+  if (!(value = allocated = getBootParameters(parameter)))
+    if (!(value = getenv(parameter)))
+      return;
 
   {
     int count = 0;
-    char **parameters = splitString(parameterString, ',', &count);
+    char **parameters = splitString(value, ',', &count);
     int optionIndex;
 
     for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
       const OptionEntry *option = &info->optionTable[optionIndex];
+
       if ((option->bootParameter) && (option->bootParameter <= count)) {
         char *parameter = parameters[option->bootParameter-1];
 
@@ -569,7 +571,7 @@ processBootParameters (
     deallocateStrings(parameters);
   }
 
-  if (allocated) free(parameterString);
+  if (allocated) free(allocated);
 }
 
 static void
@@ -577,28 +579,35 @@ processEnvironmentVariables (
   OptionProcessingInformation *info,
   const char *prefix
 ) {
-  int prefixLength = strlen(prefix);
-  int optionIndex;
-  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+  size_t prefixLength = strlen(prefix);
+  unsigned int optionIndex;
+
+  for (optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
+
     if ((option->flags & OPT_Environ) && option->word) {
-      char name[prefixLength + 1 + strlen(option->word) + 1];
-      sprintf(name, "%s_%s", prefix, option->word);
+      size_t nameSize = prefixLength + 1 + strlen(option->word) + 1;
+      char name[nameSize];
+
+      snprintf(name, nameSize, "%s_%s", prefix, option->word);
 
       {
         char *character = name;
+
         while (*character) {
           if (*character == '-') {
             *character = '_';
 	  } else if (islower(*character)) {
             *character = toupper(*character);
           }
-          ++character;
+
+          character += 1;
         }
       }
 
       {
-        char *setting = getenv(name);
+        const char *setting = getenv(name);
+
         if (setting && *setting) ensureSetting(info, option, setting);
       }
     }
