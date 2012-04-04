@@ -27,7 +27,7 @@ typedef struct NoteDeviceStruct NoteDevice;
 
 typedef struct {
   NoteDevice * (*construct) (int errorLevel);
-  int (*play) (NoteDevice *device, int note, int duration);
+  int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
   int (*flush) (NoteDevice *device);
   void (*destruct) (NoteDevice *device);
 } NoteMethods;
@@ -37,8 +37,8 @@ extern const NoteMethods pcmMethods;
 extern const NoteMethods midiMethods;
 extern const NoteMethods fmMethods;
 
-extern const float noteFrequencies[];
-extern const unsigned int noteCount;
+extern unsigned int getIntegerNoteFrequency (unsigned char note);
+extern float getRealNoteFrequency (unsigned char note);
 
 #ifdef __cplusplus
 }

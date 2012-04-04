@@ -39,7 +39,7 @@ extern void AL_disablePorts (void);
 extern int AL_testCard (int errorLevel);
 extern void AL_resetCard (void);
 
-extern void AL_playTone (int channel, int pitch, unsigned long int duration, int volume);
+extern void AL_playTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume);
 extern void AL_startTone (int channel, int pitch);
 extern void AL_stopTone (int channel);
 

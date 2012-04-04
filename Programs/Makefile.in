@@ -322,10 +322,13 @@ routing.$O:
 
 ###############################################################################
 
-TUNE_OBJECTS = tunes.$O $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
+TUNE_OBJECTS = tunes.$O notes.$O $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
 
 tunes.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunes.c
+
+notes.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/notes.c
 
 beeper.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/beeper.c

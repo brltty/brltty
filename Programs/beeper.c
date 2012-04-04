@@ -47,7 +47,7 @@ beeperConstruct (int errorLevel) {
 }
 
 static int
-beeperPlay (NoteDevice *device, int note, int duration) {
+beeperPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
 
   if (!note) {
@@ -55,19 +55,19 @@ beeperPlay (NoteDevice *device, int note, int duration) {
     return 1;
   }
 
-  if (asynchronousBeep((int)noteFrequencies[note], duration*4)) {
+  if (asynchronousBeep(getIntegerNoteFrequency(note), duration*4)) {
     accurateDelay(duration);
     stopBeep();
     return 1;
   }
 
-  if (startBeep((int)noteFrequencies[note])) {
+  if (startBeep(getIntegerNoteFrequency(note))) {
     accurateDelay(duration);
     stopBeep();
     return 1;
   }
 
-  return synchronousBeep((int)noteFrequencies[note], duration);
+  return synchronousBeep(getIntegerNoteFrequency(note), duration);
 }
 
 static int

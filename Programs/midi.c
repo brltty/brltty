@@ -227,7 +227,7 @@ midiConstruct (int errorLevel) {
 }
 
 static int
-midiPlay (NoteDevice *device, int note, int duration) {
+midiPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   beginMidiBlock(device->midi);
 
   if (note) {

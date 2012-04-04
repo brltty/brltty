@@ -54,12 +54,12 @@ fmConstruct (int errorLevel) {
 }
 
 static int
-fmPlay (NoteDevice *device, int note, int duration) {
+fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d",
              duration, note);
 
   if (note) {
-    AL_playTone(device->channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
+    AL_playTone(device->channelNumber, getIntegerNoteFrequency(note), duration, prefs.fmVolume);
   } else {
     accurateDelay(duration);
   }

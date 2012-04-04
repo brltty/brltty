@@ -181,7 +181,7 @@ writeSample (NoteDevice *device, int amplitude) {
 }
 
 static int
-pcmPlay (NoteDevice *device, int note, int duration) {
+pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   long int sampleCount = device->sampleRate * duration / 1000;
 
   if (note) {
@@ -191,7 +191,7 @@ pcmPlay (NoteDevice *device, int note, int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
     float maxAmplitude = 32767.0 * prefs.pcmVolume / 100;
-    float waveLength = device->sampleRate / noteFrequencies[note];
+    float waveLength = device->sampleRate / getRealNoteFrequency(note);
     float stepSample = 4 * maxAmplitude / waveLength;
     float currSample = 0;
 

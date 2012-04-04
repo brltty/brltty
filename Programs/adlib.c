@@ -154,7 +154,7 @@ AL_stopTone (int channel) {
 }
 
 void
-AL_playTone (int channel, int pitch, unsigned long int duration, int volume) {
+AL_playTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume) {
   /* Play tone at fundamental frequency. */
   AL_writeRegister(ALR_MODULATOR(ALG_EFFECT, channel),
                    (AL_HARMONIC_1 << AL_HARMONIC_SHIFT));
