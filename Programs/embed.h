@@ -27,6 +27,7 @@ extern "C" {
 
 extern ProgramExitStatus brlttyConstruct (int argc, char *argv[]);
 extern int brlttyUpdate (void);
+extern void brlttyDestruct (void);
 
 #ifdef __cplusplus
 }

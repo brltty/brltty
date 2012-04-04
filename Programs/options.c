@@ -757,7 +757,7 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   }
 
-  prepareProgram(*argumentCount, *argumentVector);
+  beginProgram(*argumentCount, *argumentVector);
   processCommandLine(&info, argumentCount, argumentVector, descriptor->argumentsSummary);
 
   {

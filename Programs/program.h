@@ -36,7 +36,12 @@ typedef enum {
 extern const char *programPath;
 extern const char *programName;
 
-extern void prepareProgram (int argumentCount, char **argumentVector);
+extern void beginProgram (int argumentCount, char **argumentVector);
+extern void endProgram (void);
+
+typedef void ProgramExitHandler (void);
+extern void onProgramExit (ProgramExitHandler *handler);
+
 extern void makeProgramBanner (char *buffer, size_t size);
 
 extern void fixInstallPaths (char **const *paths);

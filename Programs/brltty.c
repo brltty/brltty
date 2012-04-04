@@ -1146,7 +1146,7 @@ brlttyPrepare_first (void) {
 
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
-  atexit(exitLog);
+  onProgramExit(exitLog);
   openSystemLog();
 
   terminationCount = 0;
@@ -1172,9 +1172,14 @@ brlttyConstruct (int argc, char *argv[]) {
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
-  atexit(exitSessions);
+  onProgramExit(exitSessions);
   brlttyPrepare = brlttyPrepare_first;
   return PROG_EXIT_SUCCESS;
+}
+
+void
+brlttyDestruct (void) {
+  endProgram();
 }
 
 static int

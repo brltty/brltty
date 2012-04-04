@@ -2372,7 +2372,7 @@ retryPidFile (void *data UNUSED) {
 static int
 tryPidFile (void) {
   if (makePidFile(0)) {
-    atexit(exitPidFile);
+    onProgramExit(exitPidFile);
   } else if (errno == EEXIST) {
     return 0;
   } else {
@@ -2686,7 +2686,7 @@ brlttyStart (int argc, char *argv[]) {
    * be used instead.
    */
 
-  atexit(exitTunes);
+  onProgramExit(exitTunes);
   suppressTuneDeviceOpenErrors();
 
   {
@@ -2769,14 +2769,14 @@ brlttyStart (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
-  atexit(exitContractionTable);
+  onProgramExit(exitContractionTable);
   if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
-  atexit(exitKeyTable);
+  onProgramExit(exitKeyTable);
   if (*opt_keyTable) loadKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
@@ -2786,7 +2786,7 @@ brlttyStart (int argc, char *argv[]) {
       scheduleKeyboardMonitor(0);
 
   /* initialize screen driver */
-  atexit(exitScreen);
+  onProgramExit(exitScreen);
   constructSpecialScreens();
   screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   if (opt_verify) {
@@ -2806,7 +2806,7 @@ brlttyStart (int argc, char *argv[]) {
                   gettext("API Parameter"));
     if (!opt_verify) {
       if (api_start(&brl, apiParameters)) {
-        atexit(exitApi);
+        onProgramExit(exitApi);
         apiStarted = 1;
       }
     }
@@ -2826,7 +2826,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
-    atexit(exitBrailleDriver);
+    onProgramExit(exitBrailleDriver);
     tryBrailleDriver();
   }
 
@@ -2836,7 +2836,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
-    atexit(exitSpeechDriver);
+    onProgramExit(exitSpeechDriver);
     trySpeechDriver();
   }
 

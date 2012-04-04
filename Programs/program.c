@@ -93,7 +93,11 @@ findProgram (const char *name) {
 }
 
 void
-prepareProgram (int argumentCount, char **argumentVector) {
+beginProgram (int argumentCount, char **argumentVector) {
+#ifndef GRUB_RUNTIME
+  atexit(endProgram);
+#endif /* GRUB_RUNTIME */
+
 #ifdef WINDOWS
   sysInit();
 #endif /* WINDOWS */
@@ -281,4 +285,36 @@ createPidFile (const char *path, ProcessIdentifier pid) {
   }
 
   return 0;
+}
+
+typedef struct ProgramExitEntryStruct ProgramExitEntry;
+static ProgramExitEntry *programExitEntries = NULL;
+
+struct ProgramExitEntryStruct {
+  ProgramExitEntry *next;
+  ProgramExitHandler *handler;
+};
+
+void
+onProgramExit (ProgramExitHandler *handler) {
+  ProgramExitEntry *pxe;
+
+  if ((pxe = malloc(sizeof(*pxe)))) {
+    pxe->handler = handler;
+    pxe->next = programExitEntries;
+    programExitEntries = pxe;
+  } else {
+    logMallocError();
+  }
+}
+
+void
+endProgram (void) {
+  while (programExitEntries) {
+    ProgramExitEntry *pxe = programExitEntries;
+    programExitEntries = pxe->next;
+
+    pxe->handler();
+    free(pxe);
+  }
 }

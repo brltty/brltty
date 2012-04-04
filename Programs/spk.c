@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include "log.h"
+#include "program.h"
 #include "file.h"
 #include "parse.h"
 #include "charset.h"
@@ -275,7 +276,7 @@ exitSpeechInput (void) {
 int
 enableSpeechInput (const char *name) {
   const char *directory;
-  atexit(exitSpeechInput);
+  onProgramExit(exitSpeechInput);
 
 #ifdef __MINGW32__
   directory = "//./pipe";

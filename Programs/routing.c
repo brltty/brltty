@@ -30,6 +30,7 @@
 #endif /* SIGUSR1 */
 
 #include "log.h"
+#include "program.h"
 #include "timing.h"
 #include "scr.h"
 #include "routing.h"
@@ -491,7 +492,7 @@ startRouting (int column, int row, int screen) {
         static int first = 1;
         if (first) {
           first = 0;
-          atexit(exitRouting);
+          onProgramExit(exitRouting);
         }
       }
 
