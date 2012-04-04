@@ -193,14 +193,14 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
 
 #ifdef NO_FLOAT
 #define TYPE int32_t
-    TYPE frequency = getIntegerNoteFrequency(note);
+#define GET_NOTE_FREQUENCY getIntegerNoteFrequency
 #else /* NO_FLOAT */
 #define TYPE float
-    TYPE frequency = getRealNoteFrequency(note);
+#define GET_NOTE_FREQUENCY getRealNoteFrequency
 #endif /* NO_FLOAT */
 
     TYPE maxAmplitude = (TYPE)INT16_MAX * prefs.pcmVolume / 100;
-    TYPE waveLength = device->sampleRate / frequency;
+    TYPE waveLength = device->sampleRate / GET_NOTE_FREQUENCY(note);
     TYPE stepSample = 4 * maxAmplitude / waveLength;
     TYPE currSample = 0;
 #undef TYPE
