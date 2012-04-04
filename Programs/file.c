@@ -206,7 +206,7 @@ testDirectoryPath (const char *path) {
 }
 
 int
-makeDirectory (const char *path) {
+createDirectory (const char *path) {
 #if defined(GRUB_RUNTIME)
   errno = EROFS;
 
@@ -219,7 +219,7 @@ makeDirectory (const char *path) {
 #endif /* make directory */
 
   logMessage(LOG_WARNING, "%s: %s: %s",
-             gettext("cannot make directory"),
+             gettext("cannot create directory"),
              path, strerror(errno));
   return 0;
 }
@@ -244,12 +244,9 @@ ensureDirectory (const char *path) {
       }
     }
 
-    if (makeDirectory(path)) {
+    if (createDirectory(path)) {
       logMessage(LOG_NOTICE, "directory created: %s", path);
       return 1;
-    } else {
-      logMessage(LOG_WARNING, "cannot create directory: %s: %s",
-                 path, strerror(errno));
     }
   }
 

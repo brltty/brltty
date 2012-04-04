@@ -41,7 +41,7 @@ extern int testFilePath (const char *path);
 extern int testProgramPath (const char *path);
 extern int testDirectoryPath (const char *path);
 
-extern int makeDirectory (const char *path);
+extern int createDirectory (const char *path);
 extern int ensureDirectory (const char *path);
 
 extern const char *writableDirectory;
