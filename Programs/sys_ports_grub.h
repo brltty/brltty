@@ -16,30 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#include <grub/cpu/io.h>
 
-#include "system.h"
+int
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  return 1;
+}
 
-#include "sys_prog_none.h"
+int
+disablePorts (unsigned short int base, unsigned short int count) {
+  return 1;
+}
 
-#include "sys_boot_none.h"
+unsigned char
+readPort1 (unsigned short int port) {
+  return grub_inb(port);
+}
 
-#include "sys_exec_none.h"
-
-#include "sys_mount_none.h"
-
-#ifdef ENABLE_SHARED_OBJECTS
-#include "sys_shlib_grub.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_grub.h"
+void
+writePort1 (unsigned short int port, unsigned char value) {
+  grub_outb(value, port);
+}
