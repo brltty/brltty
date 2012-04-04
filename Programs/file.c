@@ -150,15 +150,45 @@ ensureExtension (const char *path, const char *extension) {
 
 int
 testPath (const char *path) {
+#ifdef F_OK
   return access(path, F_OK) != -1;
+#else /* F_OK */
+  errno = ENOSYS;
+  return 0;
+#endif /* F_OK */
 }
 
 int
-ensureDirectory (const char *path) {
+testProgramPath (const char *path) {
+#ifdef X_OK
+  return access(path, X_OK) != -1;
+#else /* X_OK */
+  errno = ENOSYS;
+  return 0;
+#endif /* X_OK */
+}
+
+int
+testDirectoryPath (const char *path) {
+#ifdef S_ISDIR
   struct stat status;
 
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
+    errno = ENOTDIR;
+  }
+#else /* S_ISDIR */
+  errno = ENOSYS;
+#endif /* S_ISDIR */
+
+  return 0;
+}
+
+int
+ensureDirectory (const char *path) {
+  if (testDirectoryPath(path)) return 1;
+
+  if (errno == ENOTDIR) {
     logMessage(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
     logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));

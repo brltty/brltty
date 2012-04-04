@@ -59,7 +59,7 @@ testProgram (const char *directory, const char *name) {
   char *path;
 
   if ((path = makePath(directory, name))) {
-    if (access(path, X_OK) != -1) return path;
+    if (testProgramPath(path)) return path;
 
     free(path);
   }
