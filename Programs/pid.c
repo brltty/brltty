@@ -20,7 +20,18 @@
 
 #include "pid.h"
 
-#if defined(__MINGW32__)
+#if defined(__MSDOS__) || defined(GRUB_RUNTIME)
+ProcessIdentifier
+getProcessIdentifier (void) {
+  return MY_PROCESS_ID;
+}
+
+int
+testProcessIdentifier (ProcessIdentifier pid) {
+  return pid == MY_PROCESS_ID;
+}
+
+#elif defined(__MINGW32__)
 ProcessIdentifier
 getProcessIdentifier (void) {
   return GetCurrentProcessId();
@@ -32,17 +43,6 @@ testProcessIdentifier (ProcessIdentifier pid) {
   if (!handle) return 0;
   CloseHandle(handle);
   return 1;
-}
-
-#elif defined(__MSDOS__)
-ProcessIdentifier
-getProcessIdentifier (void) {
-  return DOS_PROCESS_ID;
-}
-
-int
-testProcessIdentifier (ProcessIdentifier pid) {
-  return pid == DOS_PROCESS_ID;
 }
 
 #else /* Unix */

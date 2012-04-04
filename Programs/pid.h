@@ -23,16 +23,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if defined(__MINGW32__)
-typedef DWORD ProcessIdentifier;
-#define PRIpid "lu"
-#define SCNpid "lu"
-
-#elif defined(__MSDOS__)
+#if defined(__MSDOS__) || defined(GRUB_RUNTIME)
 typedef int ProcessIdentifier;
 #define PRIpid "d"
 #define SCNpid "d"
-#define DOS_PROCESS_ID 1
+#define MY_PROCESS_ID 1
+
+#elif defined(__MINGW32__)
+typedef DWORD ProcessIdentifier;
+#define PRIpid "lu"
+#define SCNpid "lu"
 
 #else /* Unix */
 typedef pid_t ProcessIdentifier;
