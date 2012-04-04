@@ -37,6 +37,7 @@ extern char *makePath (const char *directory, const char *file);
 extern char *ensureExtension (const char *path, const char *extension);
 
 extern int testPath (const char *path);
+extern int testFilePath (const char *path);
 extern int testProgramPath (const char *path);
 extern int testDirectoryPath (const char *path);
 

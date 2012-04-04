@@ -159,6 +159,27 @@ testPath (const char *path) {
 }
 
 int
+testFilePath (const char *path) {
+#ifdef S_ISREG
+  struct stat status;
+
+  if (stat(path, &status) != -1) {
+    if (S_ISREG(status.st_mode)) return 1;
+    errno = ENOTDIR;
+  }
+#else /* S_ISREG */
+  int result = open(path, O_RDONLY);
+
+  if (result != -1) {
+    close(result);
+    return 1;
+  }
+#endif /* S_ISREG */
+
+  return 0;
+}
+
+int
 testProgramPath (const char *path) {
 #ifdef X_OK
   return access(path, X_OK) != -1;
