@@ -191,18 +191,10 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-#ifdef NO_FLOAT
-#define TYPE int32_t
-#define GET_NOTE_FREQUENCY getIntegerNoteFrequency
-#else /* NO_FLOAT */
-#define TYPE float
-#define GET_NOTE_FREQUENCY getRealNoteFrequency
-#endif /* NO_FLOAT */
-
-    TYPE maxAmplitude = (TYPE)INT16_MAX * prefs.pcmVolume / 100;
-    TYPE waveLength = device->sampleRate / GET_NOTE_FREQUENCY(note);
-    TYPE stepSample = 4 * maxAmplitude / waveLength;
-    TYPE currSample = 0;
+    NOTE_FREQUENCY_TYPE maxAmplitude = (NOTE_FREQUENCY_TYPE)INT16_MAX * prefs.pcmVolume / 100;
+    NOTE_FREQUENCY_TYPE waveLength = device->sampleRate / GET_NOTE_FREQUENCY(note);
+    NOTE_FREQUENCY_TYPE stepSample = 4 * maxAmplitude / waveLength;
+    NOTE_FREQUENCY_TYPE currSample = 0;
 #undef TYPE
 
     if (waveLength <= 2) stepSample = 0;

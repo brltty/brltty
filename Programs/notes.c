@@ -23,7 +23,7 @@
 
 #define NOTE_FREQUENCY_FACTOR 1000
 
-static const uint32_t noteFrequencies[] = {
+static const int32_t noteFrequencies[] = {
   /*   0 -5C  */     8176,
   /*   1 -5C# */     8662,
   /*   2 -5D  */     9177,
@@ -153,11 +153,11 @@ static const uint32_t noteFrequencies[] = {
   /* 126 +5F# */ 11839822,
   /* 127 +5G  */ 12543854
 };
-const unsigned int noteCount = ARRAY_COUNT(noteFrequencies);
+static const unsigned char noteCount = ARRAY_COUNT(noteFrequencies);
 
-unsigned int
+int32_t
 getIntegerNoteFrequency (unsigned char note) {
-  unsigned int frequency = noteFrequencies[note] / NOTE_FREQUENCY_FACTOR;
+  int32_t frequency = noteFrequencies[note] / NOTE_FREQUENCY_FACTOR;
   return frequency;
 }
 
