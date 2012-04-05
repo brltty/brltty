@@ -27,6 +27,10 @@
 
 #elif defined(__MSDOS__)
 
+#elif defined(GRUB_RUNTIME)
+typedef unsigned int uid_t;
+typedef unsigned int gid_t;
+
 #else /* Unix */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -629,9 +633,7 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
 
 void
 formatAddress (char *buffer, int bufferSize, const void *address, int addressSize) {
-#ifdef __MSDOS__
-  snprintf(buffer, bufferSize, "unknown");
-#else /* __MSDOS__ */
+#ifdef AF_INET
   const struct sockaddr *sa = address;
   switch (sa->sa_family) {
 #ifndef __MINGW32__
@@ -700,5 +702,7 @@ formatAddress (char *buffer, int bufferSize, const void *address, int addressSiz
       }
       break;
   }
-#endif /* __MSDOS__ */
+#else /* AF_INET */
+  snprintf(buffer, bufferSize, "unknown");
+#endif /* AF_INET */
 }
