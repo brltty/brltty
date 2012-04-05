@@ -2452,6 +2452,15 @@ background (void) {
 }
 
 #elif defined(__MSDOS__)
+static void
+background (void) {
+  msdosBackground();
+}
+
+#elif defined(GRUB_RUNTIME)
+static void
+background (void) {
+}
 
 #else /* Unix */
 static void

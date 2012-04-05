@@ -245,7 +245,7 @@ tsr_exit(void) {
 
 /* go to background: TSR */
 void
-background(void) {
+msdosBackground(void) {
   saveState(&mainState);
   if (!setjmp(mainCtx)) {
     __dpmi_regs regs;

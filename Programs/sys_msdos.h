@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void background (void);
+extern void msdosBackground (void);
 
 extern unsigned long tsr_usleep (unsigned long usec);
 
