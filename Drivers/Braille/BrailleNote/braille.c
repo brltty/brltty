@@ -264,8 +264,9 @@ static int
 getVirtualTerminal (void) {
   int vt = -1;
 #ifdef HAVE_LINUX_VT_H
-  int consoleDescriptor = getConsole();
-  if (consoleDescriptor != -1) {
+  FILE *console = getConsole();
+  if (console) {
+    int consoleDescriptor = fileno(console);
     struct vt_stat state;
     if (ioctl(consoleDescriptor, VT_GETSTATE, &state) != -1) {
       vt = state.v_active;
@@ -278,8 +279,9 @@ getVirtualTerminal (void) {
 static void
 setVirtualTerminal (int vt) {
 #ifdef HAVE_LINUX_VT_H
-  int consoleDescriptor = getConsole();
-  if (consoleDescriptor != -1) {
+  FILE *console = getConsole();
+  if (console) {
+    int consoleDescriptor = fileno(console);
     logMessage(LOG_DEBUG, "switching to virtual terminal %d", vt);
     if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
       if (ioctl(consoleDescriptor, VT_WAITACTIVE, vt) != -1) {
@@ -298,8 +300,9 @@ static void
 openVisualDisplay (void) {
 #ifdef HAVE_LINUX_VT_H
   if (displayDescriptor == -1) {
-    int consoleDescriptor = getConsole();
-    if (consoleDescriptor != -1) {
+    FILE *console = getConsole();
+    if (console) {
+      int consoleDescriptor = fileno(console);
       if (ioctl(consoleDescriptor, VT_OPENQRY, &displayTerminal) != -1) {
         char path[0X20];
         snprintf(path, sizeof(path), "/dev/tty%d", displayTerminal);

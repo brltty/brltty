@@ -28,30 +28,44 @@
 #include "log.h"
 #include "file.h"
 
-int
+FILE *
 getConsole (void) {
-  static int console = -1;
-  if (console == -1) {
-    if ((console = open("/dev/console", O_WRONLY)) != -1) {
-      logMessage(LOG_DEBUG, "Console opened: fd=%d", console);
+#if defined(GRUB_RUNTIME)
+  return stdout;
+#else /* get console */
+  static FILE *console = NULL;
+
+  if (!console) {
+    if ((console = fopen("/dev/console", "wb"))) {
+      logMessage(LOG_DEBUG, "console opened: fd=%d", fileno(console));
     } else {
-      logSystemError("Console open");
+      logSystemError("console open");
     }
   }
+
   return console;
+#endif /* get console */
 }
 
 int
-writeConsole (const unsigned char *address, size_t count) {
-  int console = getConsole();
-  if (console != -1) {
-    if (write(console, address, count) != -1) {
-      return 1;
-    } else {
-      logSystemError("Console write");
+writeConsole (const unsigned char *bytes, size_t count) {
+  FILE *console = getConsole();
+  if (!console) return 0;
+
+  while (count) {
+    size_t result = fwrite(bytes, 1, count, console);
+    if (!ferror(console)) fflush(console);
+
+    if (ferror(console)) {
+      logSystemError("console write");
+      return 0;
     }
+
+    bytes += result;
+    count -= result;
   }
-  return 0;
+
+  return 1;
 }
 
 int
@@ -113,7 +127,7 @@ getDevicePath (const char *device) {
 }
 
 const char *
-resolveDeviceName (const char *const *names, const char *description, int mode) {
+resolveDeviceName (const char *const *names, const char *description) {
   const char *first = *names;
   const char *device = NULL;
   const char *name;
@@ -124,7 +138,7 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
     if (!path) break;
     logMessage(LOG_DEBUG, "checking %s device: %s", description, path);
 
-    if (access(path, mode) != -1) {
+    if (testPath(path)) {
       device = name;
       free(path);
       break;

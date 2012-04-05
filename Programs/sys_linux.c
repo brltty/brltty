@@ -318,7 +318,7 @@ getUinputDevice (void) {
 
     {
       static const char *const names[] = {"uinput", "input/uinput", NULL};
-      name = resolveDeviceName(names, "uinput", W_OK);
+      name = resolveDeviceName(names, "uinput");
     }
 
     if (name) {

@@ -23,7 +23,7 @@
 
 int
 canBeep (void) {
-  return getConsole() != -1;
+  return !!getConsole();
 }
 
 int
@@ -33,14 +33,14 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 
 int
 asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  int console = getConsole();
-  if (console != -1) {
+  FILE *console = getConsole();
+  if (console) {
     struct wskbd_bell_data bell;
     if (!(bell.period = milliseconds)) return 1;
     bell.pitch = frequency;
     bell.volume = 100;
     bell.which = WSKBD_BELL_DOALL;
-    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
+    if (ioctl(fileno(console), WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
     logSystemError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;
@@ -53,13 +53,13 @@ startBeep (unsigned short frequency) {
 
 int
 stopBeep (void) {
-  int console = getConsole();
-  if (console != -1) {
+  FILE *console = getConsole();
+  if (console) {
     struct wskbd_bell_data bell;
     bell.which = WSKBD_BELL_DOVOLUME | WSKBD_BELL_DOPERIOD;
     bell.volume = 0;
     bell.period = 0;
-    if (ioctl(console, WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
+    if (ioctl(fileno(console), WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
     logSystemError("ioctl WSKBDIO_COMPLEXBELL");
   }
   return 0;

@@ -103,12 +103,12 @@ routeCursor_RealScreen (int column, int row, int screen) {
 
 static int
 highlightRegion_RealScreen (int left, int right, int top, int bottom) {
-  int console = getConsole();
+  FILE *console = getConsole();
 
-  if (console != -1) {
+  if (console) {
 #ifdef HAVE_LIBGPM
     if (gpmOpenConnection() && (gpm_fd >= 0)) {
-      if (Gpm_DrawPointer(left, top, console) != -1) return 1;
+      if (Gpm_DrawPointer(left, top, fileno(console)) != -1) return 1;
 
       if (errno != EINVAL) {
         logMessage(GPM_LOG_LEVEL, "Gpm_DrawPointer error: %s", strerror(errno));

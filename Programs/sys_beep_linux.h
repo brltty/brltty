@@ -30,7 +30,7 @@ enableBeeps (void) {
 int
 canBeep (void) {
   enableBeeps();
-  return getConsole() != -1;
+  return !!getConsole();
 }
 
 int
@@ -40,9 +40,9 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 
 int
 asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
+  FILE *console = getConsole();
+  if (console) {
+    if (ioctl(fileno(console), KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
     logSystemError("ioctl KDMKTONE");
   }
   return 0;
@@ -50,9 +50,9 @@ asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 
 int
 startBeep (unsigned short frequency) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
+  FILE *console = getConsole();
+  if (console) {
+    if (ioctl(fileno(console), KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
     logSystemError("ioctl KIOCSOUND");
   }
   return 0;
@@ -60,9 +60,9 @@ startBeep (unsigned short frequency) {
 
 int
 stopBeep (void) {
-  int console = getConsole();
-  if (console != -1) {
-    if (ioctl(console, KIOCSOUND, 0) != -1) return 1;
+  FILE *console = getConsole();
+  if (console) {
+    if (ioctl(fileno(console), KIOCSOUND, 0) != -1) return 1;
     logSystemError("ioctl KIOCSOUND");
   }
   return 0;

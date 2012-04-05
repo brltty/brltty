@@ -302,8 +302,8 @@ convertCharacter (const wchar_t *character) {
 }
 
 static int
-setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
-  return (*name = resolveDeviceName(names, description, mode)) != NULL;
+setDeviceName (const char **name, const char *const *names, const char *description) {
+  return (*name = resolveDeviceName(names, description)) != NULL;
 }
 
 static char *
@@ -332,7 +332,7 @@ static int consoleDescriptor;
 static int
 setConsoleName (void) {
   static const char *const names[] = {"tty0", "vc/0", NULL};
-  return setDeviceName(&consoleName, names, "console", R_OK|W_OK);
+  return setDeviceName(&consoleName, names, "console");
 }
 
 static void
@@ -370,7 +370,7 @@ static unsigned char virtualTerminal;
 static int
 setScreenName (void) {
   static const char *const names[] = {"vcsa", "vcsa0", "vcc/a", NULL};
-  return setDeviceName(&screenName, names, "screen", R_OK|W_OK);
+  return setDeviceName(&screenName, names, "screen");
 }
 
 static void

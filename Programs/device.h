@@ -19,19 +19,21 @@
 #ifndef BRLTTY_INCLUDED_DEVICE
 #define BRLTTY_INCLUDED_DEVICE
 
+#include "prologue.h"
+
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include "prologue.h"
-
-extern int getConsole (void);
-extern int writeConsole (const unsigned char *address, size_t count);
+extern FILE *getConsole (void);
+extern int writeConsole (const unsigned char *bytes, size_t count);
 extern int ringBell (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);
-extern const char *resolveDeviceName (const char *const *names, const char *description, int mode);
+extern const char *resolveDeviceName (const char *const *names, const char *description);
 
 extern int isQualifiedDevice (const char **identifier, const char *qualifier);
 
