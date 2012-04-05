@@ -237,25 +237,26 @@ setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say
 }
 
 static char *speechInputPath = NULL;
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
 static HANDLE speechInputHandle = INVALID_HANDLE_VALUE;
 static int speechInputConnected;
-#else /* __MINGW32__ */
+#elif defined(S_ISFIFO)
 static int speechInputDescriptor = -1;
-#endif /* __MINGW32__ */
+#endif /* speech input definitions */
 
 static void
 exitSpeechInput (void) {
   if (speechInputPath) {
-#ifndef __MINGW32__
+#if defined(__MINGW32__)
+#elif defined(S_ISFIFO)
     unlink(speechInputPath);
-#endif /* __MINGW32__ */
+#endif /* cleanup speech input */
 
     free(speechInputPath);
     speechInputPath = NULL;
   }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
   if (speechInputHandle != INVALID_HANDLE_VALUE) {
     if (speechInputConnected) {
       DisconnectNamedPipe(speechInputHandle);
@@ -265,12 +266,12 @@ exitSpeechInput (void) {
     CloseHandle(speechInputHandle);
     speechInputHandle = INVALID_HANDLE_VALUE;
   }
-#else /* __MINGW32__ */
+#elif defined(S_ISFIFO)
   if (speechInputDescriptor != -1) {
     close(speechInputDescriptor);
     speechInputDescriptor = -1;
   }
-#endif /* __MINGW32__ */
+#endif /* disable speech input */
 }
 
 int
@@ -278,14 +279,14 @@ enableSpeechInput (const char *name) {
   const char *directory;
   onProgramExit(exitSpeechInput);
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
   directory = "//./pipe";
-#else /* __MINGW32__ */
+#else /* set speech input directory */
   directory = ".";
-#endif /* __MINGW32__ */
+#endif /* set speech input directory */
 
   if ((speechInputPath = makePath(directory, name))) {
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
     if ((speechInputHandle = CreateNamedPipe(speechInputPath, PIPE_ACCESS_INBOUND,
                                              PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_NOWAIT,
                                              1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
@@ -295,7 +296,7 @@ enableSpeechInput (const char *name) {
     } else {
       logWindowsSystemError("CreateNamedPipe");
     }
-#else /* __MINGW32__ */
+#elif defined(S_ISFIFO)
     int result = mkfifo(speechInputPath, 0);
 
     if ((result == -1) && (errno == EEXIST)) {
@@ -321,7 +322,7 @@ enableSpeechInput (const char *name) {
       logMessage(LOG_ERR, "cannot create speech input FIFO: %s: %s",
                  speechInputPath, strerror(errno));
     }
-#endif /* __MINGW32__ */
+#endif /* enable speech input */
 
     free(speechInputPath);
     speechInputPath = NULL;
@@ -332,7 +333,7 @@ enableSpeechInput (const char *name) {
 
 void
 processSpeechInput (SpeechSynthesizer *spk) {
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
   if (speechInputHandle != INVALID_HANDLE_VALUE) {
     if (speechInputConnected ||
         (speechInputConnected = ConnectNamedPipe(speechInputHandle, NULL)) ||
@@ -355,11 +356,11 @@ processSpeechInput (SpeechSynthesizer *spk) {
       }
     }
   }
-#else /* __MINGW32__ */
+#elif defined(S_ISFIFO)
   if (speechInputDescriptor != -1) {
     char buffer[0X1000];
     int count = read(speechInputDescriptor, buffer, sizeof(buffer));
     if (count > 0) sayCharacters(spk, buffer, count, 0);
   }
-#endif /* __MINGW32__ */
+#endif /* process speech input */
 }
