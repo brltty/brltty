@@ -20,42 +20,20 @@
 
 #include <errno.h>
 
+#undef CAN_LOCK
 #ifdef __MINGW32__
+#define CAN_LOCK
 #include "win_pthread.h"
 
-#elif defined(__MSDOS__)
-
-#else /* posix threads */
+#elif !defined(__MSDOS__) && !defined(GRUB_RUNTIME)
+#define CAN_LOCK
 #include <pthread.h>
+
 #endif /* posix threads */
 
 #include "lock.h"
 
-#ifdef __MSDOS__
-LockDescriptor *
-newLockDescriptor (void) {
-  return NULL;
-}
-
-void
-freeLockDescriptor (LockDescriptor *lock) {
-}
-
-int
-obtainLock (LockDescriptor *lock, LockOptions options) {
-  return 1;
-}
-
-void
-releaseLock (LockDescriptor *lock) {
-}
-
-LockDescriptor *
-getLockDescriptor (LockDescriptor **lock) {
-  *lock = NULL;
-  return NULL;
-}
-#else /* __MSDOS__ */
+#ifdef CAN_LOCK
 #ifdef PTHREAD_RWLOCK_INITIALIZER
 struct LockDescriptorStruct {
   pthread_rwlock_t lock;
@@ -199,4 +177,28 @@ getLockDescriptor (LockDescriptor **lock) {
   }
   return *lock;
 }
-#endif /* __MSDOS__ */
+#else /* CAN_LOCK */
+LockDescriptor *
+newLockDescriptor (void) {
+  return NULL;
+}
+
+void
+freeLockDescriptor (LockDescriptor *lock) {
+}
+
+int
+obtainLock (LockDescriptor *lock, LockOptions options) {
+  return 1;
+}
+
+void
+releaseLock (LockDescriptor *lock) {
+}
+
+LockDescriptor *
+getLockDescriptor (LockDescriptor **lock) {
+  *lock = NULL;
+  return NULL;
+}
+#endif /* CAN_LOCK */
