@@ -139,8 +139,7 @@ main (int argc, char *argv[]) {
       .applicationName = "tunetest",
       .argumentsSummary = "{note duration} ..."
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   resetPreferences();
@@ -153,7 +152,7 @@ main (int argc, char *argv[]) {
 
     if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
       logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
-      exit(PROG_EXIT_SYNTAX);
+      return PROG_EXIT_SYNTAX;
     }
 
     prefs.tuneDevice = device;
@@ -165,7 +164,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInstrument(&instrument, opt_midiInstrument)) {
       logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
-      exit(PROG_EXIT_SYNTAX);
+      return PROG_EXIT_SYNTAX;
     }
 
     prefs.midiInstrument = instrument;
@@ -179,7 +178,7 @@ main (int argc, char *argv[]) {
 
     if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
-      exit(PROG_EXIT_SYNTAX);
+      return PROG_EXIT_SYNTAX;
     }
 
     switch (prefs.tuneDevice) {
@@ -202,12 +201,12 @@ main (int argc, char *argv[]) {
 
   if (!argc) {
     logMessage(LOG_ERR, "missing tune.");
-    exit(PROG_EXIT_SYNTAX);
+    return PROG_EXIT_SYNTAX;
   }
 
   if (argc % 2) {
     logMessage(LOG_ERR, "missing note duration.");
-    exit(PROG_EXIT_SYNTAX);
+    return PROG_EXIT_SYNTAX;
   }
 
   {
@@ -227,7 +226,7 @@ main (int argc, char *argv[]) {
           const char *argument = *argv++;
           if (!validateInteger(&note, argument, &minimum, &maximum)) {
             logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
-            exit(PROG_EXIT_SYNTAX);
+            return PROG_EXIT_SYNTAX;
           }
           --argc;
         }
@@ -238,7 +237,7 @@ main (int argc, char *argv[]) {
           const char *argument = *argv++;
           if (!validateInteger(&duration, argument, &minimum, &maximum)) {
             logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
-            exit(PROG_EXIT_SYNTAX);
+            return PROG_EXIT_SYNTAX;
           }
           --argc;
         }
@@ -255,12 +254,12 @@ main (int argc, char *argv[]) {
       }
     } else {
       logMallocError();
-      exit(PROG_EXIT_FATAL);
+      return PROG_EXIT_FATAL;
     }
 
     if (!setTuneDevice(prefs.tuneDevice)) {
       logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[prefs.tuneDevice]);
-      exit(PROG_EXIT_SEMANTIC);
+      return PROG_EXIT_SEMANTIC;
     }
 
     {

@@ -212,13 +212,12 @@ main (int argc, char *argv[]) {
       .applicationName = "tbl2hex",
       .argumentsSummary = "table-file"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing table file.");
-    exit(PROG_EXIT_SYNTAX);
+    return PROG_EXIT_SYNTAX;
   }
   path = *argv++, argc--;
 

@@ -1904,8 +1904,7 @@ main (int argc, char *argv[]) {
       .applicationName = "ttbtest",
       .argumentsSummary = "input-table [output-table]"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   {
@@ -1918,7 +1917,7 @@ main (int argc, char *argv[]) {
 
   if (argc == 0) {
     logMessage(LOG_ERR, "missing input table.");
-    exit(PROG_EXIT_SYNTAX);
+    return PROG_EXIT_SYNTAX;
   }
   inputPath = *argv++, argc--;
 
@@ -1932,7 +1931,7 @@ main (int argc, char *argv[]) {
 
     if (!(outputPath = strdup(buffer))) {
       logMallocError();
-      exit(PROG_EXIT_FATAL);
+      return PROG_EXIT_FATAL;
     }
   } else {
     outputPath = NULL;
@@ -1940,7 +1939,7 @@ main (int argc, char *argv[]) {
 
   if (argc > 0) {
     logMessage(LOG_ERR, "too many parameters.");
-    exit(PROG_EXIT_SYNTAX);
+    return PROG_EXIT_SYNTAX;
   }
 
   inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
@@ -1952,7 +1951,7 @@ main (int argc, char *argv[]) {
 
   if (*opt_charset && !setCharset(opt_charset)) {
     logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
-    exit(PROG_EXIT_SEMANTIC);
+    return PROG_EXIT_SEMANTIC;
   }
 
 #ifdef ENABLE_API

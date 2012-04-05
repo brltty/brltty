@@ -713,14 +713,14 @@ void toX_f(const char *display) {
  * main 
  */
 
-int main(int argc, char *argv[]) {
+int
+main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "xbrlapi"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   tobrltty_init(auth,host);

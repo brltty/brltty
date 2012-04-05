@@ -87,7 +87,7 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static void
+static int
 setRegion (
   int *offsetValue, const char *offsetOption, const char *offsetName,
   int *sizeValue, const char *sizeOption, int sizeLimit, const char *sizeName
@@ -98,7 +98,7 @@ setRegion (
       const int maximum = sizeLimit - 1;
       if (!validateInteger(offsetValue, offsetOption, &minimum, &maximum)) {
         logMessage(LOG_ERR, "invalid %s: %s", offsetName, offsetOption);
-        exit(PROG_EXIT_SYNTAX);
+        return 0;
       }
     }
 
@@ -107,23 +107,24 @@ setRegion (
       const int maximum = sizeLimit - *offsetValue;
       if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
         logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
-        exit(PROG_EXIT_SYNTAX);
+        return 0;
       }
-      return;
+      return 1;
     }
   } else if (*sizeOption) {
     const int minimum = 1;
     const int maximum = sizeLimit;
     if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
       logMessage(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
-      exit(PROG_EXIT_SYNTAX);
+      return 0;
     }
     *offsetValue = (sizeLimit - *sizeValue) / 2;
-    return;
+    return 1;
   } else {
     *offsetValue = sizeLimit / 4;
   }
   if ((*sizeValue = sizeLimit - (*offsetValue * 2)) < 1) *sizeValue = 1;
+  return 1;
 }
 
 int
@@ -137,8 +138,7 @@ main (int argc, char *argv[]) {
       .applicationName = "scrtest",
       .argumentsSummary = "[parameter=value ...]"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   {
@@ -166,7 +166,7 @@ main (int argc, char *argv[]) {
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
-        exit(PROG_EXIT_FATAL);
+        return PROG_EXIT_FATAL;
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -194,7 +194,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid screen parameter: %s", assignment);
       }
-      if (!ok) exit(PROG_EXIT_SYNTAX);
+      if (!ok) return PROG_EXIT_SYNTAX;
       --argc;
     }
 
@@ -206,36 +206,42 @@ main (int argc, char *argv[]) {
       printf("Screen: %dx%d\n", description.cols, description.rows);
       printf("Cursor: [%d,%d]\n", description.posx, description.posy);
 
-      setRegion(&left, opt_boxLeft, "starting column",
-                &width, opt_boxWidth, description.cols, "region width");
-      setRegion(&top, opt_boxTop, "starting row",
-                &height, opt_boxHeight, description.rows, "region height");
-      printf("Region: %dx%d@[%d,%d]\n", width, height, left, top);
+      if (setRegion(&left, opt_boxLeft, "starting column",
+                &width, opt_boxWidth, description.cols, "region width")) {
+        if (setRegion(&top, opt_boxTop, "starting row",
+                  &height, opt_boxHeight, description.rows, "region height")) {
+          printf("Region: %dx%d@[%d,%d]\n", width, height, left, top);
 
-      {
-        ScreenCharacter buffer[width * height];
+          {
+            ScreenCharacter buffer[width * height];
 
-        if (readScreen(left, top, width, height, buffer)) {
-          int line;
-          for (line=0; line<height; line++) {
-            int column;
-            for (column=0; column<width; column++) {
-              wchar_t character = buffer[line * width + column].text;
-              if (!iswprint(character)) {
-                putchar('?');
-              } else if (!isprint(character)) {
-                putchar('*');
-              } else {
-                putchar(character);
+            if (readScreen(left, top, width, height, buffer)) {
+              int line;
+              for (line=0; line<height; line++) {
+                int column;
+                for (column=0; column<width; column++) {
+                  wchar_t character = buffer[line * width + column].text;
+                  if (!iswprint(character)) {
+                    putchar('?');
+                  } else if (!isprint(character)) {
+                    putchar('*');
+                  } else {
+                    putchar(character);
+                  }
+                }
+                putchar('\n');
               }
+              exitStatus = PROG_EXIT_SUCCESS;
+            } else {
+              logMessage(LOG_ERR, "Can't read screen.");
+              exitStatus = PROG_EXIT_FATAL;
             }
-            putchar('\n');
           }
-          exitStatus = PROG_EXIT_SUCCESS;
         } else {
-          logMessage(LOG_ERR, "Can't read screen.");
-          exitStatus = PROG_EXIT_FATAL;
+          exitStatus = PROG_EXIT_SYNTAX;
         }
+      } else {
+        exitStatus = PROG_EXIT_SYNTAX;
       }
     } else {
       logMessage(LOG_ERR, "can't open screen.");

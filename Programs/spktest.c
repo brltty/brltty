@@ -101,8 +101,7 @@ main (int argc, char *argv[]) {
       .applicationName = "spktest",
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   {
@@ -120,7 +119,7 @@ main (int argc, char *argv[]) {
     static const float maximum = 10.0;
     if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
-      exit(PROG_EXIT_SYNTAX);
+      return PROG_EXIT_SYNTAX;
     }
   }
 
@@ -130,7 +129,7 @@ main (int argc, char *argv[]) {
     static const float maximum = 2.0;
     if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
-      exit(PROG_EXIT_SYNTAX);
+      return PROG_EXIT_SYNTAX;
     }
   }
 
@@ -154,7 +153,7 @@ main (int argc, char *argv[]) {
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
-        exit(PROG_EXIT_FATAL);
+        return PROG_EXIT_FATAL;
       }
       setting = parameterSettings;
       while (count--) *setting++ = "";
@@ -181,7 +180,7 @@ main (int argc, char *argv[]) {
         }
         if (!ok) logMessage(LOG_ERR, "invalid speech driver parameter: %s", assignment);
       }
-      if (!ok) exit(PROG_EXIT_SYNTAX);
+      if (!ok) return PROG_EXIT_SYNTAX;
       --argc;
     }
 

@@ -259,8 +259,8 @@ static void suspendDriver(void)
   }
 }
 
-int main(int argc, char *argv[])
-{
+int
+main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   brlapi_fileDescriptor fd;
   settings.host = NULL; settings.auth = NULL;
@@ -270,8 +270,7 @@ int main(int argc, char *argv[])
       OPTION_TABLE(programOptions),
       .applicationName = "apitest"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    handleOptionsResult(result);
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   fprintf(stderr, "Connecting to BrlAPI... ");

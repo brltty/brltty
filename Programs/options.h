@@ -75,31 +75,13 @@ typedef struct {
 
 #define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
 
-typedef enum {
-  OPT_OK,
-  OPT_EXIT,
-  OPT_SYNTAX
-} OptionsResult;
+extern ProgramExitStatus processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
 
-extern OptionsResult processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
-
-#if !defined(GRUB_RUNTIME)
-static inline void handleOptionsResult (OptionsResult result) {
-  switch (result) {
-    case OPT_OK:
-      return;
-
-    case OPT_EXIT:
-      exit(PROG_EXIT_SUCCESS);
-
-    case OPT_SYNTAX:
-      exit(PROG_EXIT_SYNTAX);
-
-    default:
-      exit(PROG_EXIT_FORCE);
-  }
+#define PROCESS_OPTIONS(descriptorVariable, argcVariable, argvVariable) { \
+  ProgramExitStatus exitStatus = processOptions(&descriptorVariable, &argcVariable, &argvVariable); \
+  if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_SUCCESS; \
+  if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
-#endif /* references to exit() */
 
 #ifdef __cplusplus
 }

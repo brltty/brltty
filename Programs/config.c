@@ -2537,8 +2537,8 @@ brlttyStart (int argc, char *argv[]) {
       .configurationFile = &opt_configurationFile,
       .applicationName = "brltty"
     };
-    OptionsResult result = processOptions(&descriptor, &argc, &argv);
-    if (result == OPT_EXIT) return PROG_EXIT_FORCE;
+    ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);
+    if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_FORCE;
   }
 
   {

@@ -741,7 +741,7 @@ processConfigurationFile (
   }
 }
 
-OptionsResult
+ProgramExitStatus
 processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   OptionProcessingInformation info = {
     .optionTable = descriptor->optionTable,
@@ -779,7 +779,7 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     setDefaultOptions(&info, 1);
   }
 
-  if (info.exitImmediately) return OPT_EXIT;
-  if (info.syntaxError) return OPT_SYNTAX;
-  return OPT_OK;
+  if (info.exitImmediately) return PROG_EXIT_FORCE;
+  if (info.syntaxError) return PROG_EXIT_SYNTAX;
+  return PROG_EXIT_SUCCESS;
 }
