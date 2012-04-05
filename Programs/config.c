@@ -2354,7 +2354,11 @@ exitTunes (void) {
 
 static void
 exitPidFile (void) {
+#if defined(GRUB_RUNTIME)
+
+#else /* remove pid file */
   unlink(opt_pidFile);
+#endif /* remove pid file */
 }
 
 static int
@@ -2645,8 +2649,13 @@ brlttyStart (int argc, char *argv[]) {
   if (!tryPidFile()) return PROG_EXIT_SEMANTIC;
 
   if (!opt_noDaemon) {
+    fflush(stdout);
+    fflush(stderr);
     setPrintOff();
 
+#if defined(GRUB_RUNTIME)
+
+#else /* redirect stdio streams to /dev/null */
     {
       const char *nullDevice = "/dev/null";
 
@@ -2658,14 +2667,13 @@ brlttyStart (int argc, char *argv[]) {
         logSystemError("freopen[stdout]");
       }
 
-      if (opt_standardError) {
-        fflush(stderr);
-      } else {
+      if (!opt_standardError) {
         if (!freopen(nullDevice, "a", stderr)) {
           logSystemError("freopen[stderr]");
         }
       }
     }
+#endif /* redirect stdio streams to /dev/null */
 
 #ifdef __MINGW32__
     {
@@ -2679,9 +2687,7 @@ brlttyStart (int argc, char *argv[]) {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);
 
-        if (opt_standardError) {
-          fflush(stderr);
-        } else {
+        if (!opt_standardError) {
           SetStdHandle(STD_ERROR_HANDLE, h);
         }
       }
