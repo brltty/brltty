@@ -45,7 +45,7 @@ extern int validateFloat (float *value, const char *string, const float *minimum
 #endif /* NO_FLOAT */
 
 extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
-extern void logParameters (const char *const *names, char **values, char *description);
+extern void logParameters (const char *const *names, char **values, const char *description);
 
 #ifdef __cplusplus
 }

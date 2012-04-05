@@ -376,7 +376,7 @@ getParameters (const char *const *names, const char *qualifier, const char *para
 }
 
 void
-logParameters (const char *const *names, char **values, char *description) {
+logParameters (const char *const *names, char **values, const char *description) {
   if (names && values) {
     while (*names) {
       logMessage(LOG_INFO, "%s: %s=%s", description, *names, *values);
