@@ -94,9 +94,11 @@ findProgram (const char *name) {
 
 void
 beginProgram (int argumentCount, char **argumentVector) {
-#ifndef GRUB_RUNTIME
+#if defined(GRUB_RUNTIME)
+
+#else /* at exit */
   atexit(endProgram);
-#endif /* GRUB_RUNTIME */
+#endif /* at exit */
 
 #ifdef WINDOWS
   sysInit();

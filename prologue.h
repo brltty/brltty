@@ -95,8 +95,16 @@ extern void usleep (int usec);
 #endif /* __MINGW32__ */
 
 #ifdef GRUB_RUNTIME
+#undef NESTED_FUNC_ATTR
+#define NESTED_FUNC_ATTR __attribute__((__regparm__(1)))
+
+/* missing needed standard integer definitions */
 #define INT16_MAX 32767
-#define GRUB_POSIX_GETTEXT_DOMAIN "UTF-8"
+
+/* to get gettext() declared */
+#define GRUB_POSIX_GETTEXT_DOMAIN "brltty"
+
+/* disable the use of floating-point operations */
 #define NO_FLOAT
 #define float NO_FLOAT
 #define double NO_DOUBLE
@@ -391,10 +399,12 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 #endif /* SIZEOF_KEY_T */
 #endif /* HAVE_SHMGET */
 
+/* configure is still making a few mistakes with respect to the grub environment */
 #ifdef GRUB_RUNTIME
-#ifdef HAVE_SIGNAL_H
 #undef HAVE_SIGNAL_H
-#endif /* HAVE_SIGNAL_H */
+
+#undef HAVE_FCHDIR
+#undef HAVE_SELECT
 #endif /* GRUB_RUNTIME */
 
 #ifdef __cplusplus

@@ -21,15 +21,19 @@
 #include <errno.h>
 
 #undef CAN_LOCK
-#ifdef __MINGW32__
+#if defined(__MINGW32__)
 #define CAN_LOCK
 #include "win_pthread.h"
 
-#elif !defined(__MSDOS__) && !defined(GRUB_RUNTIME)
+#elif defined(__MSDOS__)
+
+#elif defined(GRUB_RUNTIME)
+
+#else /* posix thread definitions */
 #define CAN_LOCK
 #include <pthread.h>
 
-#endif /* posix threads */
+#endif /* posix thread definitions */
 
 #include "lock.h"
 
@@ -178,6 +182,8 @@ getLockDescriptor (LockDescriptor **lock) {
   return *lock;
 }
 #else /* CAN_LOCK */
+#warning thread lock support not available on this platform
+
 LockDescriptor *
 newLockDescriptor (void) {
   return NULL;
