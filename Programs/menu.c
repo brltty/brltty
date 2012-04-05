@@ -24,10 +24,15 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#undef CAN_GLOB
 #if defined(HAVE_GLOB_H)
+#define CAN_GLOB
 #include <glob.h>
+
 #elif defined(__MINGW32__)
+#define CAN_GLOB
 #include <io.h>
+
 #else /* glob: paradigm-specific global definitions */
 #warning file globbing support not available on this platform
 #endif /* glob: paradigm-specific global definitions */
@@ -331,6 +336,7 @@ beginItem_files (MenuItem *item) {
   files->paths[files->count] = NULL;
   index = files->count;
 
+#ifdef CAN_GLOB
   {
 #ifdef HAVE_FCHDIR
     int originalDirectory = open(".", O_RDONLY);
@@ -405,6 +411,7 @@ beginItem_files (MenuItem *item) {
 #endif /* HAVE_FCHDIR */
     }
   }
+#endif /* CAN_GLOB */
 
   qsort(&files->paths[index], files->count-index, sizeof(*files->paths), qsortCompare_fileNames);
   if (files->none) files->paths[--index] = "";
