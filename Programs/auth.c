@@ -441,24 +441,30 @@ authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 /* general functions */
 
 static const MethodDefinition methodDefinitions[] = {
-  { "keyfile",
-    authKeyfile_initialize, authKeyfile_release,
-    authKeyfile_client, authKeyfile_server
+  { .name = "keyfile",
+    .initialize = authKeyfile_initialize,
+    .release = authKeyfile_release,
+    .client = authKeyfile_client,
+    .server = authKeyfile_server
   },
 
 #ifdef CAN_CHECK_CREDENTIALS
-  { "user",
-    authUser_initialize, authUser_release,
-    NULL, authUser_server
+  { .name = "user",
+    .initialize = authUser_initialize,
+    .release = authUser_release,
+    .client = NULL,
+    .server = authUser_server
   },
 
-  { "group",
-    authGroup_initialize, authGroup_release,
-    NULL, authGroup_server
+  { .name = "group",
+    .initialize = authGroup_initialize,
+    .release = authGroup_release,
+    .client = NULL,
+    .server = authGroup_server
   },
 #endif /* CAN_CHECK_CREDENTIALS */
 
-  {NULL}
+  {.name = NULL}
 };
 
 static void
