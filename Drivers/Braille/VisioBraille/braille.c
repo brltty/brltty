@@ -405,7 +405,7 @@ static int brl_readKey(BrailleDisplay *brl)
   ch = packet[1];
   if (printcode) {
     char buf [100];
-    sprintf(buf,"Keycode: 0x%x",ch);
+    snprintf(buf,sizeof(buf),"Keycode: 0x%x",ch);
     printcode = 0; /* MUST BE DONE BEFORE THE CALL TO MESSAGE */
     message(NULL,buf,MSG_WAITKEY | MSG_NODELAY);
     return EOF;
