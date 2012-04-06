@@ -191,30 +191,47 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    NOTE_FREQUENCY_TYPE maxAmplitude = (NOTE_FREQUENCY_TYPE)INT16_MAX * prefs.pcmVolume / 100;
-    NOTE_FREQUENCY_TYPE waveLength = device->sampleRate / GET_NOTE_FREQUENCY(note);
-    NOTE_FREQUENCY_TYPE stepSample = 4 * maxAmplitude / waveLength;
-    NOTE_FREQUENCY_TYPE currSample = 0;
-#undef TYPE
+    int32_t positiveShiftsPerQuarterWave = INT32_MAX / 8;
+    int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
 
-    if (waveLength <= 2) stepSample = 0;
+    int32_t positiveShiftsPerHalfWave = 2 * positiveShiftsPerQuarterWave;
+    int32_t negativeSiftsPerHalfWave = -positiveShiftsPerHalfWave;
+
+    int32_t positiveShiftsPerFullWave = 2 * positiveShiftsPerHalfWave;
+    int32_t currentShift = 0;
+
+    int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
+                            / (NOTE_FREQUENCY_TYPE)device->sampleRate
+                            * GET_NOTE_FREQUENCY(note);
+
+    int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume / 100;
+    int32_t amplitudeGranularity = positiveShiftsPerQuarterWave / maximumAmplitude;
+
     logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
                duration, sampleCount, note);
 
     while (sampleCount > 0) {
       do {
-        sampleCount--;
-        if (!writeSample(device, currSample)) return 0;
-        currSample += stepSample;
+        {
+          int32_t normalizedAmplitude = positiveShiftsPerHalfWave - currentShift;
 
-        if (currSample >= maxAmplitude) {
-          currSample = (2 * maxAmplitude) - currSample;
-          stepSample = -stepSample;
-        } else if (currSample <= -maxAmplitude) {
-          currSample = (-2 * maxAmplitude) - currSample;
-          stepSample = -stepSample;
+          if (normalizedAmplitude > positiveShiftsPerQuarterWave) {
+            normalizedAmplitude = positiveShiftsPerHalfWave - normalizedAmplitude;
+          } else if (normalizedAmplitude < negativeShiftsPerQuarterWave) {
+            normalizedAmplitude = negativeSiftsPerHalfWave - normalizedAmplitude;
+          }
+
+          {
+            int32_t actualAmplitude = normalizedAmplitude / amplitudeGranularity;
+            if (!writeSample(device, actualAmplitude)) return 0;
+            sampleCount -= 1;
+          }
         }
-      } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
+      } while ((currentShift += shiftsPerSample) < positiveShiftsPerFullWave);
+
+      do {
+        currentShift -= positiveShiftsPerFullWave;
+      } while (currentShift >= positiveShiftsPerFullWave);
     }
   } else {
     logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
