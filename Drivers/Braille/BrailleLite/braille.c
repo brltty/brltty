@@ -596,13 +596,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	    return BRL_CMD_NOOP;
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
-	    sprintf (outmsg, "%s:", gettext("repeat count"));
+	    snprintf (outmsg, sizeof(outmsg), "%s:", gettext("repeat count"));
 	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_REPEAT;
 	    return BRL_CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
-	    sprintf (outmsg, "%s? [m/s/r/z]", gettext("config"));
+	    snprintf (outmsg, sizeof(outmsg), "%s? [m/s/r/z]", gettext("config"));
 	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_CONFIG;
@@ -775,9 +775,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	{
 	  hold = (hold * 10 + key.asc - '0') % 100;
 	  if (hold) {
-	    sprintf (outmsg, "%s: %d", gettext("repeat count"), hold);
+	    snprintf (outmsg, sizeof(outmsg), "%s: %d", gettext("repeat count"), hold);
 	  } else {
-            sprintf (outmsg, "%s: ", gettext("repeat count"));
+            snprintf (outmsg, sizeof(outmsg), "%s: ", gettext("repeat count"));
           }
 	  intoverride = 0;
 	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
@@ -786,7 +786,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       else if (key.routing)
 	{
 	  hold = key.routing +1;
-	  sprintf (outmsg, "%s: %d", gettext("repeat count"), hold);
+	  snprintf (outmsg, sizeof(outmsg), "%s: %d", gettext("repeat count"), hold);
 	  intoverride = 0;
 	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
