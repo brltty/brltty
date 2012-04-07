@@ -134,15 +134,8 @@ readBytes (unsigned char *buffer, size_t *offset, size_t length) {
 
 
 static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  logOutputPacket(bytes, count);
-  if (gioWriteData(gioEndpoint, bytes, count) != -1) {
-    brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
-    return 1;
-  } else {
-    logSystemError("Write");
-    return 0;
-  }
+writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
+  return writeBraillePacket(brl, gioEndpoint, packet, size);
 }
 
 static int
@@ -228,25 +221,103 @@ static unsigned char xmtTextOffset;
 
 static unsigned char switchState1;
 
-static void
-resetTerminal1 (BrailleDisplay *brl) {
-  static const unsigned char sequence[] = {STX, 0X01, ETX};
-  logMessage(LOG_WARNING, "Resetting terminal.");
-  flushTerminal(brl);
-  writeBytes(brl, sequence, sizeof(sequence));
-}
+static size_t
+readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
+  size_t offset = 0;
+  size_t length = 0;
 
-#define RBF_ETX 1
-#define RBF_RESET 2
-static int
-readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t count, int flags) {
-  if (readBytes(buffer, &offset, count)) {
-    if (!(flags & RBF_ETX)) return 1;
-    if (*(buffer+offset-1) == ETX) return 1;
-    logCorruptPacket(buffer, offset);
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+
+      if (!gioReadByte(gioEndpoint, &byte, started)) {
+        if (started) logPartialPacket(packet, offset);
+        return 0;
+      }
+    }
+
+  gotByte:
+    {
+      int unexpected = 0;
+
+      switch (offset) {
+        case 0:
+          length = 2;
+          if (byte != STX) unexpected = 1;
+          break;
+
+        case 1:
+          switch (byte) {
+            case cIdIdentify:
+              length = 10;
+              break;
+
+            case cIdReceive:
+              length = 6;
+              break;
+
+            case 0X03:
+            case 0X04:
+            case 0X05:
+            case 0X06:
+            case 0X07:
+              length = 3;
+              break;
+
+            default:
+              unexpected = 1;
+              break;
+          }
+          break;
+
+        case 5:
+          switch (packet[1]) {
+            case cIdReceive:
+              length = (packet[4] << 8) | byte;
+              if (length != 10) unexpected = 1;
+              break;
+
+            default:
+              break;
+          }
+          break;
+
+        default:
+          break;
+      }
+
+      if (unexpected) {
+        if (offset) {
+          logShortPacket(packet, offset);
+          offset = 0;
+          length = 0;
+          goto gotByte;
+        }
+
+        logIgnoredByte(byte);
+        continue;
+      }
+    }
+
+    if (offset < length) packet[offset] = byte;
+    if (++offset == length) {
+      if (byte == ETX) {
+        logInputPacket(packet, offset);
+        return offset;
+      }
+
+      logCorruptPacket(packet, offset);
+    } else if (offset > length) {
+      logDiscardedByte(byte);
+
+      if (byte == ETX) {
+        offset = 0;
+        length = 0;
+      }
+    }
   }
-  if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
-  return 0;
 }
 
 static int
@@ -274,7 +345,7 @@ writePacket1 (BrailleDisplay *brl, unsigned int xmtAddress, unsigned int count, 
     byte = mempcpy(byte, data, count);
     byte = mempcpy(byte, trailer, sizeof(trailer));
 
-    if (!writeBytes(brl, buffer, byte-buffer)) return 0;
+    if (!writePacket(brl, buffer, byte-buffer)) return 0;
   }
   return 1;
 }
@@ -432,67 +503,24 @@ initializeTerminal1 (BrailleDisplay *brl) {
   drainBrailleOutput(brl, 0);
 }
 
-static void
-restartTerminal1 (BrailleDisplay *brl) {
-  initializeTerminal1(brl);
-}
-
 static int
 readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
-#define READ(offset,count,flags) { if (!readBytes1(brl, buf, offset, count, RBF_RESET|(flags))) return EOF; }
-  while (1) {
-    unsigned char buf[0X100];
+  unsigned char packet[49];
+  size_t length;
 
-    while (1) {
-      READ(0, 1, 0);
-      if (buf[0] == STX) break;
-      logIgnoredByte(buf[0]);
-    }
-
-    READ(1, 1, 0);
-    switch (buf[1]) {
-      default: {
-        int i;
-
-        logUnknownPacket(buf[1]);
-        for (i=2; i<sizeof(buf); i++) {
-          READ(i, 1, 0);
-          logDiscardedByte(buf[i]);
-        }
-        break;
-      }
-
-      case cIdIdentify: {
-        const int length = 10;
-        READ(2, length-2, RBF_ETX);
-        logInputPacket(buf, length);
-        if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
-
+  while ((length = readPacket1(brl, packet))) {
+    switch (packet[1]) {
+      case cIdIdentify:
+        if (interpretIdentity1(brl, packet)) brl->resizeRequired = 1;
         approximateDelay(200);
-        restartTerminal1(brl);
+        initializeTerminal1(brl);
         break;
-      }
 
-      case cIdReceive: {
-        int length;
-
-        READ(2, 4, 0);
-        length = (buf[4] << 8) | buf[5];	/* packet size */
-
-        if (length != 10) {
-          logMessage(LOG_WARNING, "Unexpected input packet length: %d", length);
-          resetTerminal1(brl);
-          return EOF;
-        }
-
-        READ(6, length-6, RBF_ETX);			/* Data */
-        logInputPacket(buf, length);
-
-        handleKey1(brl, ((buf[2] << 8) | buf[3]),
-                   (buf[6] == PRESSED),
-                   ((buf[7] << 8) | buf[8]));
+      case cIdReceive:
+        handleKey1(brl, ((packet[2] << 8) | packet[3]),
+                   (packet[6] == PRESSED),
+                   ((packet[7] << 8) | packet[8]));
         continue;
-      }
 
       {
         const char *message;
@@ -518,15 +546,18 @@ readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
         goto logError;
 
       logError:
-        READ(2, 1, RBF_ETX);
-        logInputPacket(buf, 3);
-        logMessage(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
-        restartTerminal1(brl);
+        logMessage(LOG_WARNING, "Output packet error: %02X: %s", packet[1], message);
+        initializeTerminal1(brl);
         break;
       }
+
+      default:
+        logUnexpectedPacket(packet, length);
+        break;
     }
   }
-#undef READ
+
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
 
 static void
@@ -551,30 +582,24 @@ identifyTerminal1 (BrailleDisplay *brl) {
   };
 
   flushTerminal(brl);
-  if (writeBytes(brl, badPacket, sizeof(badPacket))) {
+  if (writePacket(brl, badPacket, sizeof(badPacket))) {
     if (gioAwaitInput(gioEndpoint, 1000)) {
-      unsigned char identity[IDENTITY_LENGTH];			/* answer has 10 chars */
-      if (readBytes1(brl, identity, 0, 1, 0)) {
-        if (identity[0] == STX) {
-          if (readBytes1(brl, identity, 1, sizeof(identity)-1, RBF_ETX)) {
-            if (identity[1] == cIdIdentify) {
-              if (interpretIdentity1(brl, identity)) {
-                protocol = &protocolOperations1;
-                switchState1 = 0;
+      unsigned char response[49];			/* answer has 10 chars */
 
-                makeOutputTable(dotsTable_ISO11548_1);
-                return 1;
-              }
-            } else {
-              logMessage(LOG_WARNING, "Not an identification packet: %02X", identity[1]);
-            }
-          } else {
-            logMessage(LOG_WARNING, "Malformed identification packet.");
+      if (readPacket1(brl, response)) {
+        if (response[1] == cIdIdentify) {
+          if (interpretIdentity1(brl, response)) {
+            protocol = &protocolOperations1;
+            switchState1 = 0;
+
+            makeOutputTable(dotsTable_ISO11548_1);
+            return 1;
           }
         }
       }
     }
   }
+
   return 0;
 }
 
@@ -603,7 +628,7 @@ static int inputKeySize2;
 static unsigned char *inputState2 = NULL;
 static int refreshRequired2;
 
-static int
+static size_t
 readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
   unsigned char buffer[0X203];
   size_t offset = 0;
@@ -633,7 +658,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
         case ETX:
           if ((offset >= 5) && (offset == size)) {
             logInputPacket(buffer, offset);
-            return 1;
+            return offset;
           }
 
           logShortPacket(buffer, offset);
@@ -677,7 +702,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               }
 
               {
-                int index = offset - 5;
+                size_t index = offset - 5;
                 if (identity) {
                   packet->data.bytes[index] = byte;
                 } else {
@@ -718,7 +743,7 @@ writePacket2 (BrailleDisplay *brl, unsigned char command, unsigned char count, c
   }
 
   *byte++ = ETX;
-  return writeBytes(brl, buffer, byte-buffer);
+  return writePacket(brl, buffer, byte-buffer);
 }
 
 static int
