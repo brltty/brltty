@@ -25,6 +25,18 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
+static int
+usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count) {
+  if (data->length > count) {
+    unsigned char *buffer = data->buffer;
+    memmove(buffer, buffer+count, data->length-=count);
+  } else {
+    data->length = 0;
+  }
+
+  return 1;
+}
+
 
 typedef enum {
   USB_CDC_ACM_CTL_SetLineCoding   = 0X20,
@@ -292,14 +304,7 @@ static const UsbSerialOperations usbSerialOperations_Belkin = {
 
 static int
 usbInputFilter_FTDI (UsbInputFilterData *data) {
-  const int count = 2;
-  if (data->length > count) {
-    unsigned char *buffer = data->buffer;
-    memmove(buffer, buffer+count, data->length-=count);
-  } else {
-    data->length = 0;
-  }
-  return 1;
+  return usbSkipInitialBytes(data, 2);
 }
 
 static int
@@ -641,14 +646,7 @@ typedef struct {
 
 static int
 usbInputFilter_CP2110 (UsbInputFilterData *data) {
-  const int count = 1;
-  if (data->length > count) {
-    unsigned char *buffer = data->buffer;
-    memmove(buffer, buffer+count, data->length-=count);
-  } else {
-    data->length = 0;
-  }
-  return 1;
+  return usbSkipInitialBytes(data, 1);
 }
 
 static int
