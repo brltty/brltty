@@ -166,7 +166,7 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
 /*--- Protocol 1 Operations ---*/
 
 #define cIdSend 'S'
-#define cIdIdentify 'I'
+#define cIdIdentity 'I'
 #define cIdReceive 'K'
 #define PRESSED 1
 #define IDENTITY_LENGTH 10
@@ -222,7 +222,8 @@ static unsigned char xmtTextOffset;
 static unsigned char switchState1;
 
 static size_t
-readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
+readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
+  unsigned char *bytes = packet;
   size_t offset = 0;
   size_t length = 0;
 
@@ -233,7 +234,7 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
       int started = offset > 0;
 
       if (!gioReadByte(gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet, offset);
+        if (started) logPartialPacket(bytes, offset);
         return 0;
       }
     }
@@ -250,7 +251,7 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
 
         case 1:
           switch (byte) {
-            case cIdIdentify:
+            case cIdIdentity:
               length = 10;
               break;
 
@@ -273,9 +274,9 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
           break;
 
         case 5:
-          switch (packet[1]) {
+          switch (bytes[1]) {
             case cIdReceive:
-              length = (packet[4] << 8) | byte;
+              length = (bytes[4] << 8) | byte;
               if (length != 10) unexpected = 1;
               break;
 
@@ -290,7 +291,7 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
 
       if (unexpected) {
         if (offset) {
-          logShortPacket(packet, offset);
+          logShortPacket(bytes, offset);
           offset = 0;
           length = 0;
           goto gotByte;
@@ -301,14 +302,14 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet) {
       }
     }
 
-    if (offset < length) packet[offset] = byte;
+    if (offset < length) bytes[offset] = byte;
     if (++offset == length) {
       if (byte == ETX) {
-        logInputPacket(packet, offset);
+        logInputPacket(bytes, offset);
         return offset;
       }
 
-      logCorruptPacket(packet, offset);
+      logCorruptPacket(bytes, offset);
     } else if (offset > length) {
       logDiscardedByte(byte);
 
@@ -508,9 +509,9 @@ readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char packet[49];
   size_t length;
 
-  while ((length = readPacket1(brl, packet))) {
+  while ((length = readPacket1(brl, packet, sizeof(packet)))) {
     switch (packet[1]) {
-      case cIdIdentify:
+      case cIdIdentity:
         if (interpretIdentity1(brl, packet)) brl->resizeRequired = 1;
         approximateDelay(200);
         initializeTerminal1(brl);
@@ -572,31 +573,33 @@ static const ProtocolOperations protocolOperations1 = {
 };
 
 static int
+testIdentityPacket1 (BrailleDisplay *brl, const void *packet, size_t size) {
+  const unsigned char *pkt = packet;
+  return pkt[1] == cIdIdentity;
+}
+
+static int
 identifyTerminal1 (BrailleDisplay *brl) {
-  static const unsigned char badPacket[] = { 
+  static const unsigned char badPacket[] = {
     STX,
     cIdSend,
     0, 0,			/* position */
     0, 0,			/* wrong number of bytes */
     ETX
   };
+  unsigned char response[49];			/* answer has 10 chars */
+  int ok = probeBrailleDisplay(brl, gioEndpoint, 1000, 0,
+                               writePacket, badPacket, sizeof(badPacket),
+                               readPacket1, response, sizeof(response),
+                               testIdentityPacket1);
 
-  flushTerminal(brl);
-  if (writePacket(brl, badPacket, sizeof(badPacket))) {
-    if (gioAwaitInput(gioEndpoint, 1000)) {
-      unsigned char response[49];			/* answer has 10 chars */
+  if (ok) {
+    if (interpretIdentity1(brl, response)) {
+      protocol = &protocolOperations1;
+      switchState1 = 0;
 
-      if (readPacket1(brl, response)) {
-        if (response[1] == cIdIdentify) {
-          if (interpretIdentity1(brl, response)) {
-            protocol = &protocolOperations1;
-            switchState1 = 0;
-
-            makeOutputTable(dotsTable_ISO11548_1);
-            return 1;
-          }
-        }
-      }
+      makeOutputTable(dotsTable_ISO11548_1);
+      return 1;
     }
   }
 
