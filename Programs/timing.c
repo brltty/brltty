@@ -45,9 +45,20 @@
 void
 getCurrentTime (TimeValue *now) {
 #if defined(GRUB_RUNTIME)
-  uint64_t milliseconds = grub_get_time_ms();
-  now->seconds = milliseconds / MSECS_PER_SEC;
-  now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
+  static time_t baseSeconds = 0;
+  static uint64_t baseMilliseconds;
+
+  if (!baseSeconds) {
+    baseSeconds = time(NULL);
+    baseMilliseconds = grub_get_time_ms();
+  }
+
+  {
+    uint64_t milliseconds = grub_get_time_ms() - baseMilliseconds;
+
+    now->seconds = baseSeconds + (milliseconds / MSECS_PER_SEC);
+    now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
+  }
 
 #elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
   struct timespec ts;
