@@ -619,6 +619,13 @@ typedef enum {
 } USB_CP2110_FlowControl;
 
 typedef enum {
+  USB_CP2110_DATA_5,
+  USB_CP2110_DATA_6,
+  USB_CP2110_DATA_7,
+  USB_CP2110_DATA_8
+} USB_CP2110_DataBits;
+
+typedef enum {
   USB_CP2110_STOP_SHORT,
   USB_CP2110_STOP_LONG
 } USB_CP2110_StopBits;
@@ -654,12 +661,27 @@ usbSetLineConfiguration_CP2110 (UsbDevice *device, unsigned int baud, unsigned i
     return 0;
   }
 
-  if ((dataBits >= 5) && (dataBits <= 8)) {
-    report.dataBits = dataBits;
-  } else {
-    logMessage(LOG_WARNING, "unsupported CP2110 data bits: %u", dataBits);
-    errno = EINVAL;
-    return 0;
+  switch (dataBits) {
+    case 5:
+      report.dataBits = USB_CP2110_DATA_5;
+      break;
+
+    case 6:
+      report.dataBits = USB_CP2110_DATA_6;
+      break;
+
+    case 7:
+      report.dataBits = USB_CP2110_DATA_7;
+      break;
+
+    case 8:
+      report.dataBits = USB_CP2110_DATA_8;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unsupported CP2110 data bits: %u", dataBits);
+      errno = EINVAL;
+      return 0;
   }
 
   if (stopBits == SERIAL_STOP_1) {
@@ -718,9 +740,18 @@ usbSetLineConfiguration_CP2110 (UsbDevice *device, unsigned int baud, unsigned i
 }
 
 static int
+usbSetUartStatus_CP2110 (UsbDevice *device, unsigned char status) {
+  const unsigned char report[] = {0X41, status};
+  return usbSetReport_CP2110(device, report, sizeof(report));
+}
+
+static int
 usbEnableAdapter_CP2110 (UsbDevice *device) {
-  const unsigned char report[] = {0X41, 0X01};
-  return usbSetReport_CP2110(device, &report, sizeof(report));
+  if (usbSetUartStatus_CP2110(device, 0X01)) {
+    return 1;
+  }
+
+  return 0;
 }
 
 static ssize_t
@@ -735,7 +766,11 @@ usbWriteData_CP2110 (UsbDevice *device, const void *data, size_t size) {
     if (count > size) count = size;
     report[0] = count;
     memcpy(&report[1], next, count);
-    if (!usbSetReport_CP2110(device, &report, count+1)) return -1;
+
+    {
+      ssize_t result = usbWriteEndpoint(device, 2, report, count+1, 1000);
+      if (result == -1) return result;
+    }
 
     next += count;
     size -= count;
