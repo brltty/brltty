@@ -640,6 +640,18 @@ typedef struct {
 } PACKED USB_CP2110_UartConfigurationReport;
 
 static int
+usbInputFilter_CP2110 (UsbInputFilterData *data) {
+  const int count = 1;
+  if (data->length > count) {
+    unsigned char *buffer = data->buffer;
+    memmove(buffer, buffer+count, data->length-=count);
+  } else {
+    data->length = 0;
+  }
+  return 1;
+}
+
+static int
 usbSetReport_CP2110 (UsbDevice *device, const void *report, size_t size) {
   const unsigned char *bytes = report;
   ssize_t result = usbHidSetReport(device, 0, bytes[0], report, size, 1000);
@@ -938,7 +950,8 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
 
   { /* Seika NoteTaker */
     .vendor=0X10C4, .product=0XEA80,
-    .operations = &usbSerialOperations_CP2110
+    .operations = &usbSerialOperations_CP2110,
+    .inputFilter = usbInputFilter_CP2110
   },
 
   {.vendor=0, .product=0}
