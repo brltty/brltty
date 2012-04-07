@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <string.h>
-#include <sys/ioctl.h>
 
 #include "ascii.h"
 #include "cmd.h"
@@ -231,14 +230,14 @@ static void closePort(Port *port)
 static void activateBraille(void)
 {
   writePort1(IRIS_GIO_OUTPUT, 0x01);
-  usleep(8500);
+  approximateDelay(9);
   writePort1(IRIS_GIO_OUTPUT, 0);
 }
 
 static void deactivateBraille(void)
 {
   writePort1(IRIS_GIO_OUTPUT, 0x02);
-  usleep(8500);
+  approximateDelay(9);
   writePort1(IRIS_GIO_OUTPUT, 0);
 }
 
@@ -1091,7 +1090,7 @@ static int suspendDevice(BrailleDisplay *brl)
   while (! clearWindow(brl, &internalPort)) {
     if (errno != EAGAIN) return 0;
   }
-  usleep(10000);
+  approximateDelay(10);
   closePort(&internalPort);
   internalPort.waitingForAck = 0;
 
@@ -1465,7 +1464,7 @@ static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *pa
     writeEurobrailleStringPacket(brl, port, str);
     writeEurobrailleStringPacket(brl, port, "SW1.92");
     writeEurobrailleStringPacket(brl, port, "SP1.00 30-10-2006");
-    sprintf(str, "SM%d", 0x08);
+    snprintf(str, sizeof(str), "SM%d", 0x08);
     writeEurobrailleStringPacket(brl, port, str);
     writeEurobrailleStringPacket(brl, port, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
