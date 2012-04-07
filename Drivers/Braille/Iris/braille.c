@@ -452,6 +452,15 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   return count;
 }
 
+static ssize_t
+tryWriteNativePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size) {
+  ssize_t res;
+  while ( ! (res = writeNativePacket(brl, port, packet, size)) ) {
+    if (errno != EAGAIN) return 0;
+  }
+  return res;
+}
+
 static int
 writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size) {
   size_t count;
@@ -1055,12 +1064,12 @@ static ssize_t writeWindow (BrailleDisplay *brl, Port *port, const unsigned char
   return writeDots(brl, port, dots);
 }
 
-static void clearWindow(BrailleDisplay *brl, Port *port)
+static int clearWindow(BrailleDisplay *brl, Port *port)
 {
   int windowSize = brl->textColumns * brl->textRows;
   unsigned char window[windowSize];
   memset(window, 0, sizeof(window));
-  writeWindow(brl, port, window);
+  return writeWindow(brl, port, window);
 }
 
 /*
@@ -1070,39 +1079,44 @@ static void refreshWindow(BrailleDisplay *brl, Port *port)
 }
 */
 
-static void suspendDevice(BrailleDisplay *brl)
+static int suspendDevice(BrailleDisplay *brl)
 {
-  if (!embeddedDriver) return;
+  if (!embeddedDriver) return 1;
   logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Suspending device");
-  clearWindow(brl, &internalPort);
+  if (packetForwardMode) {
+    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
+    if ( ! tryWriteNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
+    closePort(&externalPort);
+  }
+  while (! clearWindow(brl, &internalPort)) {
+    if (errno != EAGAIN) return 0;
+  }
   usleep(10000);
   closePort(&internalPort);
   internalPort.waitingForAck = 0;
-  if (packetForwardMode) {
-    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
-    writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
-    closePort(&externalPort);
-  }
+
   deactivateBraille();
   deviceSleeping = 1;
+  return 1;
 }
 
-static void resumeDevice(BrailleDisplay *brl)
+static int resumeDevice(BrailleDisplay *brl)
 {
-  if (!embeddedDriver) return;
+  if (!embeddedDriver) return 1;
   logMessage(LOG_INFO, DRIVER_LOG_PREFIX "resuming device");
   deviceSleeping = 0;
   if ( !openPort(&internalPort) )
   {
     logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "openPort failed");
-    return;
+    return 0;
   }
   activateBraille();
   if (packetForwardMode) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
-    openPort(&externalPort);
-    writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket));
+    if (! openPort(&externalPort) ) return 0;
+    if (! tryWriteNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
   } else refreshBrailleWindow = 1;
+  return 1;
 }
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
@@ -1127,13 +1141,12 @@ static int brl_reset (BrailleDisplay *brl)
   return 0;
 }
 
-static void enterPacketForwardMode(BrailleDisplay *brl)
+static int enterPacketForwardMode(BrailleDisplay *brl)
 {
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", externalPort.name, iris_protocols[protocol].name, externalPort.speed);
 
   externalPort.speed = iris_protocols[protocol].speed;
-  if (!openPort(&externalPort)) return;
-  packetForwardMode = 1;
+  if (!openPort(&externalPort)) return 0;
 
   {
     char msg[brl->textColumns+1];
@@ -1146,7 +1159,7 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
     case IR_PROTOCOL_NATIVE: {
       static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
 
-      writeNativePacket(brl, &externalPort, p, sizeof(p));
+      if (! tryWriteNativePacket(brl, &externalPort, p, sizeof(p))) return 0;
       break;
     }
 
@@ -1156,16 +1169,23 @@ static void enterPacketForwardMode(BrailleDisplay *brl)
       xtState = 0;
       break;
   }
+
+  packetForwardMode = 1;
+  return 1;
 }
 
-static void leavePacketForwardMode(BrailleDisplay *brl)
+static int leavePacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
   logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Leaving packet forward mode");
-  if (protocol==IR_PROTOCOL_NATIVE) writeNativePacket(brl, &externalPort, p, sizeof(p));
+  if (protocol==IR_PROTOCOL_NATIVE) {
+    if (! tryWriteNativePacket(brl, &externalPort, p, sizeof(p)) ) return 0;
+  }
+
   packetForwardMode = 0;
   closePort(&externalPort);
   refreshBrailleWindow = 1;
+  return 1;
 }
 
 typedef struct {
@@ -1469,11 +1489,12 @@ static int readCommand_embedded (BrailleDisplay *brl)
 
   if (checkLatchState()) {
     if (deviceSleeping) {
-      resumeDevice(brl);
+      if (! resumeDevice(brl) ) return BRL_CMD_RESTARTBRL;
       return EOF;
     }
 
-    suspendDevice(brl);
+    if (! suspendDevice(brl) ) return BRL_CMD_RESTARTBRL;
+    return EOF;
   }
 
   if (deviceSleeping) return BRL_CMD_OFFLINE;
@@ -1484,10 +1505,10 @@ static int readCommand_embedded (BrailleDisplay *brl)
     if (isMenuKey(packet, size)) {
       logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Menu key pressed");
       if (packetForwardMode) {
-        leavePacketForwardMode(brl);
+        if (! leavePacketForwardMode(brl) ) return BRL_CMD_RESTARTBRL;
         continue;
       } else {
-        enterPacketForwardMode(brl);
+        if (! enterPacketForwardMode(brl) ) return BRL_CMD_RESTARTBRL;
         break;
       }
     }
@@ -1495,7 +1516,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
     if (!packetForwardMode) {
       handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
     } else if (protocol == IR_PROTOCOL_NATIVE) {
-      writeNativePacket(brl, &externalPort, packet, size);
+      if (! tryWriteNativePacket(brl, &externalPort, packet, size)) return BRL_CMD_RESTARTBRL;
     } else {
       handleNativePacket(brl, &externalPort, &eurobrailleKeyHandlers, packet, size);
     }
@@ -1506,7 +1527,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
   if (packetForwardMode) {
     if (protocol == IR_PROTOCOL_NATIVE) {
       while ((size = readNativePacket(brl, &externalPort, packet, sizeof(packet)))) {
-        writeNativePacket(brl, &internalPort, packet, size);
+        if (! tryWriteNativePacket(brl, &internalPort, packet, size) ) return BRL_CMD_RESTARTBRL;
       }
     } else { /* Read Eurobraille packet from external port and handle it */
       while ((size = readEurobraillePacket(&externalPort, packet, sizeof(packet)))) {
@@ -1594,7 +1615,7 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 {
   {
     const unsigned char data[] = {request};
-    writeNativePacket(brl, &internalPort, data, sizeof(data));
+    if (! tryWriteNativePacket(brl, &internalPort, data, sizeof(data)) ) return 0;
   }
 
   while (gioAwaitInput(internalPort.gioEndpoint, 1000)) {
