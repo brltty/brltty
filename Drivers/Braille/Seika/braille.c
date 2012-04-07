@@ -162,6 +162,7 @@ probeDisplay (
       if (!protocol->readPacket(NULL, response)) break;
       if (response->type == IPT_identity) return 1;
     }
+
     if (errno != EAGAIN) break;
   } while (++probeCount < 3);
 
@@ -603,7 +604,8 @@ connectResource (const char *identifier) {
     { /* Seika Note Taker */
       .vendor=0X10C4, .product=0XEA80,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1,
+      .serial=&serialParameters
     }
     ,
     { .vendor=0 }
