@@ -22,6 +22,7 @@
 #include "prologue.h"
 
 #include "driver.h"
+#include "io_generic.h"
 #include "brldefs.h"
 #include "ktbdefs.h"
 
@@ -88,6 +89,34 @@ extern int enqueueXtScanCode (
 );
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
+
+extern int writeBraillePacket (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  const void *packet, size_t size
+);
+
+typedef int BraillePacketWriter (
+  BrailleDisplay *brl,
+  const void *packet, size_t size
+);
+
+typedef size_t BraillePacketReader (
+  BrailleDisplay *brl,
+  void *packet, size_t size
+);
+
+typedef int BraillePacketTester (
+  BrailleDisplay *brl,
+  const void *packet, size_t size
+);
+
+extern size_t probeBrailleDisplay (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  int inputTimeout, unsigned int retryLimit,
+  BraillePacketWriter writePacket, const void *requestPacket, size_t requestSize,
+  BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
+  BraillePacketTester *testPacket
+);
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);

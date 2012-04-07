@@ -30,6 +30,7 @@
 #include "charset.h"
 #include "unicode.h"
 #include "drivers.h"
+#include "io_generic.h"
 #include "brl.h"
 #include "ttb.h"
 #include "ktb.h"
@@ -518,6 +519,42 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     return command;
   }
+}
+
+int
+writeBraillePacket (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  const void *packet, size_t size
+) {
+  logOutputPacket(packet, size);
+  if (gioWriteData(endpoint, packet, size) == -1) return 0;
+  brl->writeDelay += gioGetMillisecondsToTransfer(endpoint, size);
+  return 1;
+}
+
+size_t
+probeBrailleDisplay (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  int inputTimeout, unsigned int retryLimit,
+  BraillePacketWriter writePacket, const void *requestPacket, size_t requestSize,
+  BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
+  BraillePacketTester *testPacket
+) {
+  unsigned int retryCount = 0;
+
+  while (writePacket(brl, requestPacket, requestSize)) {
+    while (gioAwaitInput(endpoint, inputTimeout)) {
+      size_t size = readPacket(brl, responsePacket, responseSize);
+      if (!size) break;
+      if (testPacket(brl, responsePacket, size)) return size;
+    }
+
+    if (errno != EAGAIN) break;
+    if (retryCount == retryLimit) break;
+    retryCount += 1;
+  }
+
+  return 0;
 }
 
 #ifdef ENABLE_LEARN_MODE
