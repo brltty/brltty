@@ -1493,7 +1493,6 @@ static int readCommand_embedded (BrailleDisplay *brl)
     }
 
     if (! suspendDevice(brl) ) return BRL_CMD_RESTARTBRL;
-    return EOF;
   }
 
   if (deviceSleeping) return BRL_CMD_OFFLINE;
