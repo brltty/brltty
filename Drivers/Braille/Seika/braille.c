@@ -161,7 +161,7 @@ probeDisplay (
   BrailleDisplay *brl, InputPacket *responsePacket,
   const unsigned char *requestPacket, size_t requestSize
 ) {
-  return probeBrailleDisplay(brl, gioEndpoint, 200, 3,
+  return probeBrailleDisplay(brl, gioEndpoint, 200, 2,
                              writePacket, requestPacket, requestSize,
                              readPacket, responsePacket, sizeof(*responsePacket),
                              testIdentityPacket);
