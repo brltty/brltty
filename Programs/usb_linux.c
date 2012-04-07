@@ -686,7 +686,7 @@ usbWriteEndpoint (
         struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, (void *)buffer, length, timeout);
 
         if (urb) {
-          int count = urb->actual_length;
+          ssize_t count = urb->actual_length;
           free(urb);
           return count;
         }
