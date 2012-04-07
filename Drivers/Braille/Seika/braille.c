@@ -140,33 +140,31 @@ static unsigned char routingCount;
 static int forceRewrite;
 static unsigned char textCells[80];
 
+static size_t
+readPacket (BrailleDisplay *brl, void *packet, size_t size) {
+  return protocol->readPacket(brl, packet);
+}
+
 static int
-writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
-  logOutputPacket(buffer, length);
-  if (gioWriteData(gioEndpoint, buffer, length) == -1) return 0;
-  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, length);
-  return 1;
+writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
+  return writeBraillePacket(brl, gioEndpoint, packet, size);
+}
+
+static int
+testIdentityPacket (BrailleDisplay *brl, const void *packet, size_t size) {
+  const InputPacket *pkt = packet;
+  return pkt->type == IPT_identity;
 }
 
 static int
 probeDisplay (
-  BrailleDisplay *brl, InputPacket *response,
-  const unsigned char *requestAddress, size_t requestSize
+  BrailleDisplay *brl, InputPacket *responsePacket,
+  const unsigned char *requestPacket, size_t requestSize
 ) {
-  int probeCount = 0;
-
-  do {
-    if (!writeBytes(brl, requestAddress, requestSize)) break;
-
-    while (gioAwaitInput(gioEndpoint, 200)) {
-      if (!protocol->readPacket(NULL, response)) break;
-      if (response->type == IPT_identity) return 1;
-    }
-
-    if (errno != EAGAIN) break;
-  } while (++probeCount < 3);
-
-  return 0;
+  return probeBrailleDisplay(brl, gioEndpoint, 200, 3,
+                             writePacket, requestPacket, requestSize,
+                             readPacket, responsePacket, sizeof(*responsePacket),
+                             testIdentityPacket);
 }
 
 typedef enum {
@@ -358,7 +356,7 @@ writeCells_pbc (BrailleDisplay *brl) {
     }
   }
 
-  return writeBytes(brl, packet, byte-packet);
+  return writePacket(brl, packet, byte-packet);
 }
 
 static const ProtocolOperations protocolOperations_pbc = {
@@ -417,7 +415,7 @@ writeCells_bdp (BrailleDisplay *brl) {
     }
   }
 
-  return writeBytes(brl, packet, byte-packet);
+  return writePacket(brl, packet, byte-packet);
 }
 
 static const ProtocolOperations protocolOperations_bdp = {
@@ -550,7 +548,7 @@ writeCells_ntk (BrailleDisplay *brl) {
   *byte++ = brl->textColumns;
   byte = translateOutputCells(byte, textCells, brl->textColumns);
 
-  return writeBytes(brl, packet, byte-packet);
+  return writePacket(brl, packet, byte-packet);
 }
 
 static const ProtocolOperations protocolOperations_ntk = {
