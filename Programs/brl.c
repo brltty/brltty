@@ -533,22 +533,22 @@ writeBraillePacket (
 }
 
 size_t
-detectBrailleDisplay (
+probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,
-  BrailleProbeWriter writeProbe,
+  BrailleRequestWriter writeRequest,
   BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
-  BraillePacketTester *isIdentityPacket
+  BrailleResponseTester *testResponse
 ) {
   unsigned int retryCount = 0;
 
-  while (writeProbe(brl)) {
+  while (writeRequest(brl)) {
     drainBrailleOutput(brl, 0);
 
     while (gioAwaitInput(endpoint, inputTimeout)) {
       size_t size = readPacket(brl, responsePacket, responseSize);
       if (!size) break;
-      if (isIdentityPacket(brl, responsePacket, size)) return size;
+      if (testResponse(brl, responsePacket, size)) return size;
     }
 
     if (errno != EAGAIN) break;

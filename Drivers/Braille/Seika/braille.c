@@ -122,7 +122,7 @@ typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
   int (*readPacket) (BrailleDisplay *brl, InputPacket *packet);
-  int (*detectDisplay) (BrailleDisplay *brl, InputPacket *response);
+  BrailleRequestWriter *writeIdentifyRequest;
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 
@@ -151,16 +151,9 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
 }
 
 static int
-isIdentityPacket (BrailleDisplay *brl, const void *packet, size_t size) {
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const InputPacket *pkt = packet;
   return pkt->type == IPT_identity;
-}
-
-static int
-detectDisplay (BrailleDisplay *brl, BrailleProbeWriter *writeProbe, InputPacket *response) {
-  return detectBrailleDisplay(brl, 2, gioEndpoint, 200, writeProbe,
-                              readPacket, response, sizeof(*response->bytes),
-                              isIdentityPacket);
 }
 
 typedef enum {
@@ -325,14 +318,9 @@ readPacket_pbc (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-writeProbe_pbc (BrailleDisplay *brl) {
+writeIdentifyRequest_pbc (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0X0A};
   return writePacket(brl, packet, sizeof(packet));
-}
-
-static int
-detectDisplay_pbc (BrailleDisplay *brl, InputPacket *response) {
-  return detectDisplay(brl, writeProbe_pbc, response);
 }
 
 static int
@@ -364,7 +352,7 @@ static const ProtocolOperations protocolOperations_pbc = {
   .name = "PowerBraille Compatibility",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
   .readPacket = readPacket_pbc,
-  .detectDisplay = detectDisplay_pbc,
+  .writeIdentifyRequest = writeIdentifyRequest_pbc,
   .writeCells = writeCells_pbc
 };
 
@@ -390,14 +378,9 @@ readPacket_bdp (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-writeProbe_bdp (BrailleDisplay *brl) {
+writeIdentifyRequest_bdp (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0X1C};
   return writePacket(brl, packet, sizeof(packet));
-}
-
-static int
-detectDisplay_bdp (BrailleDisplay *brl, InputPacket *response) {
-  return detectDisplay(brl, writeProbe_bdp, response);
 }
 
 static int
@@ -428,7 +411,7 @@ static const ProtocolOperations protocolOperations_bdp = {
   .name = "Seika Braille Display",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
   .readPacket = readPacket_bdp,
-  .detectDisplay = detectDisplay_bdp,
+  .writeIdentifyRequest = writeIdentifyRequest_bdp,
   .writeCells = writeCells_bdp
 };
 
@@ -539,14 +522,9 @@ readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-writeProbe_ntk (BrailleDisplay *brl) {
+writeIdentifyRequest_ntk (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0XA1};
   return writePacket(brl, packet, sizeof(packet));
-}
-
-static int
-detectDisplay_ntk (BrailleDisplay *brl, InputPacket *response) {
-  return detectDisplay(brl, writeProbe_ntk, response);
 }
 
 static int
@@ -566,7 +544,7 @@ static const ProtocolOperations protocolOperations_ntk = {
   .name = "Seika Note Taker",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
   .readPacket = readPacket_ntk,
-  .detectDisplay = detectDisplay_ntk,
+  .writeIdentifyRequest = writeIdentifyRequest_ntk,
   .writeCells = writeCells_ntk
 };
 
@@ -657,7 +635,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       InputPacket response;
 
       logMessage(LOG_DEBUG, "trying protocol %s", protocol->name);
-      if (protocol->detectDisplay(brl, &response)) {
+      if (probeBrailleDisplay(brl, 2, gioEndpoint, 200,
+                              protocol->writeIdentifyRequest,
+                              readPacket, &response, sizeof(response.bytes),
+                              isIdentityResponse)) {
         logMessage(LOG_DEBUG, "Seika Protocol: %s", protocol->name);
         logMessage(LOG_DEBUG, "Seika Size: %u", response.fields.identity.cellCount);
 

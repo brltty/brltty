@@ -570,7 +570,7 @@ static const ProtocolOperations protocolOperations1 = {
 };
 
 static int
-writeProbe1 (BrailleDisplay *brl) {
+writeIdentifyRequest1 (BrailleDisplay *brl) {
   static const unsigned char badPacket[] = {
     STX,
     PM1_PKT_SEND,
@@ -583,7 +583,7 @@ writeProbe1 (BrailleDisplay *brl) {
 }
 
 static int
-isIdentityPacket1 (BrailleDisplay *brl, const void *packet, size_t size) {
+isIdentityResponse1 (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *packet1 = packet;
   return packet1[1] == PM1_PKT_IDENTITY;
 }
@@ -591,11 +591,11 @@ isIdentityPacket1 (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 identifyTerminal1 (BrailleDisplay *brl) {
   unsigned char response[PM1_MAX_PACKET_SIZE];			/* answer has 10 chars */
-  int detected = detectBrailleDisplay(brl, 0,
-                                      gioEndpoint, 1000,
-                                      writeProbe1,
-                                      readPacket1, response, sizeof(response),
-                                      isIdentityPacket1);
+  int detected = probeBrailleDisplay(brl, 0,
+                                     gioEndpoint, 1000,
+                                     writeIdentifyRequest1,
+                                     readPacket1, response, sizeof(response),
+                                     isIdentityResponse1);
 
   if (detected) {
     if (interpretIdentity1(brl, response)) {
@@ -1063,12 +1063,12 @@ mapInputModules2 (void) {
 }
 
 static int
-writeProbe2 (BrailleDisplay *brl) {
+writeIdentifyRequest2 (BrailleDisplay *brl) {
   return writePacket2(brl, 2, 0, NULL);
 }
 
 static int
-isIdentityPacket2 (BrailleDisplay *brl, const void *packet, size_t size) {
+isIdentityResponse2 (BrailleDisplay *brl, const void *packet, size_t size) {
   const Packet2 *packet2 = packet;
   return packet2->type == 0X0A;
 }
@@ -1076,11 +1076,11 @@ isIdentityPacket2 (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
   Packet2 packet;			/* answer has 10 chars */
-  int detected = detectBrailleDisplay(brl, io->protocol2-1,
-                                      gioEndpoint, 100,
-                                      writeProbe2,
-                                      readPacket2, &packet, PM2_MAX_PACKET_SIZE,
-                                      isIdentityPacket2);
+  int detected = probeBrailleDisplay(brl, io->protocol2-1,
+                                     gioEndpoint, 100,
+                                     writeIdentifyRequest2,
+                                     readPacket2, &packet, PM2_MAX_PACKET_SIZE,
+                                     isIdentityResponse2);
 
   if (detected) {
     if (interpretIdentity2(brl, packet.data.bytes)) {
