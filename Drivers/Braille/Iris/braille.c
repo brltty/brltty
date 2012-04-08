@@ -315,9 +315,8 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
         if ((port->waitingForAck) && (ch==ACK)) {
           port->waitingForAck = 0;
           if (packetForwardMode && (protocol == IR_PROTOCOL_NATIVE) ) {
-            char acknowledgement[] = {ACK};
-            gioWriteData(externalPort.gioEndpoint, acknowledgement, sizeof(acknowledgement));
-            brl->writeDelay += gioGetMillisecondsToTransfer(externalPort.gioEndpoint, sizeof(acknowledgement));
+            static const char acknowledgement[] = {ACK};
+            writeBraillePacket(brl, externalPort.gioEndpoint, acknowledgement, sizeof(acknowledgement));
           }
         } else {
           logIgnoredByte(ch);
@@ -417,7 +416,6 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   unsigned char	buf[2*(size + 1) +3];
   unsigned char *p = buf;
   size_t count;
-  ssize_t res;
 
   if (port->waitingForAck) {
     if ( millisecondsSince(&port->lastWriteTime) < 1000) {
@@ -436,11 +434,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   *p++ = EOT;
 
   count = p - buf;
-  logOutputPacket(buf, count);
-  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
-
-  res = gioWriteData(port->gioEndpoint, buf, count);
-  if (res == -1) {
+  if (!writeBraillePacket(brl, port->gioEndpoint, buf, count)) {
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gioWriteData failed");
     return 0;
   }
@@ -474,9 +468,7 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   *p++ = ETX;
 
   count = p - packet;
-  logOutputPacket(packet, count);
-  if (gioWriteData(port->gioEndpoint, packet, count) == -1) return 0;
-  brl->writeDelay += gioGetMillisecondsToTransfer(port->gioEndpoint, count);
+  if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;
 
   getCurrentTime(&port->lastWriteTime);
   return count;
