@@ -278,9 +278,7 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
     if ((buffer[size++] = data[index]) == buffer[0])
       buffer[size++] = buffer[0];
 
-  logOutputPacket(buffer, size);
-  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, size);
-  return gioWriteData(gioEndpoint, buffer, size) != -1;
+  return writeBraillePacket(brl, gioEndpoint, buffer, size);
 }
 
 static int
