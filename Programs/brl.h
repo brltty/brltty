@@ -95,10 +95,7 @@ extern int writeBraillePacket (
   const void *packet, size_t size
 );
 
-typedef int BraillePacketWriter (
-  BrailleDisplay *brl,
-  const void *packet, size_t size
-);
+typedef int BrailleProbeWriter (BrailleDisplay *brl);
 
 typedef size_t BraillePacketReader (
   BrailleDisplay *brl,
@@ -110,12 +107,12 @@ typedef int BraillePacketTester (
   const void *packet, size_t size
 );
 
-extern size_t probeBrailleDisplay (
-  BrailleDisplay *brl, GioEndpoint *endpoint,
-  int inputTimeout, unsigned int retryLimit,
-  BraillePacketWriter writePacket, const void *requestPacket, size_t requestSize,
+extern size_t detectBrailleDisplay (
+  BrailleDisplay *brl, unsigned int retryLimit,
+  GioEndpoint *endpoint, int inputTimeout,
+  BrailleProbeWriter writeProbe,
   BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
-  BraillePacketTester *testPacket
+  BraillePacketTester *isIdentityPacket
 );
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);

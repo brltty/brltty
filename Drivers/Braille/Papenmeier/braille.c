@@ -115,25 +115,6 @@ static unsigned char currentText[BRLCOLSMAX];
 
 
 static int
-flushTerminal (BrailleDisplay *brl) {
-  drainBrailleOutput(brl, 100);
-  return gioDiscardInput(gioEndpoint);
-}
-
-static int
-readBytes (unsigned char *buffer, size_t *offset, size_t length) {
-  ssize_t result = gioReadData(gioEndpoint, buffer+*offset, length, !!*offset);
-
-  if (result > 0) {
-    *offset += result;
-    return 1;
-  }
-
-  return 0;
-}
-
-
-static int
 writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   return writeBraillePacket(brl, gioEndpoint, packet, size);
 }
@@ -165,11 +146,11 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
 
 /*--- Protocol 1 Operations ---*/
 
-#define cIdSend 'S'
-#define cIdIdentity 'I'
-#define cIdReceive 'K'
+#define PM1_MAX_PACKET_SIZE 100
+#define PM1_PKT_SEND 'S'
+#define PM1_PKT_RECEIVE 'K'
+#define PM1_PKT_IDENTITY 'I'
 #define PRESSED 1
-#define IDENTITY_LENGTH 10
 
 /* offsets within input data structure */
 #define RCV_KEYFUNC  0X0000 /* physical and logical function keys */
@@ -251,11 +232,11 @@ readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
 
         case 1:
           switch (byte) {
-            case cIdIdentity:
+            case PM1_PKT_IDENTITY:
               length = 10;
               break;
 
-            case cIdReceive:
+            case PM1_PKT_RECEIVE:
               length = 6;
               break;
 
@@ -275,7 +256,7 @@ readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
 
         case 5:
           switch (bytes[1]) {
-            case cIdReceive:
+            case PM1_PKT_RECEIVE:
               length = (bytes[4] << 8) | byte;
               if (length != 10) unexpected = 1;
               break;
@@ -326,7 +307,7 @@ writePacket1 (BrailleDisplay *brl, unsigned int xmtAddress, unsigned int count, 
   if (count) {
     unsigned char header[] = {
       STX,
-      cIdSend,
+      PM1_PKT_SEND,
       0, 0, /* big endian data offset */
       0, 0  /* big endian packet length */
     };
@@ -506,18 +487,18 @@ initializeTerminal1 (BrailleDisplay *brl) {
 
 static int
 readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[49];
+  unsigned char packet[PM1_MAX_PACKET_SIZE];
   size_t length;
 
   while ((length = readPacket1(brl, packet, sizeof(packet)))) {
     switch (packet[1]) {
-      case cIdIdentity:
+      case PM1_PKT_IDENTITY:
         if (interpretIdentity1(brl, packet)) brl->resizeRequired = 1;
         approximateDelay(200);
         initializeTerminal1(brl);
         break;
 
-      case cIdReceive:
+      case PM1_PKT_RECEIVE:
         handleKey1(brl, ((packet[2] << 8) | packet[3]),
                    (packet[6] == PRESSED),
                    ((packet[7] << 8) | packet[8]));
@@ -573,27 +554,34 @@ static const ProtocolOperations protocolOperations1 = {
 };
 
 static int
-testIdentityPacket1 (BrailleDisplay *brl, const void *packet, size_t size) {
-  const unsigned char *pkt = packet;
-  return pkt[1] == cIdIdentity;
-}
-
-static int
-identifyTerminal1 (BrailleDisplay *brl) {
+writeProbe1 (BrailleDisplay *brl) {
   static const unsigned char badPacket[] = {
     STX,
-    cIdSend,
+    PM1_PKT_SEND,
     0, 0,			/* position */
     0, 0,			/* wrong number of bytes */
     ETX
   };
-  unsigned char response[49];			/* answer has 10 chars */
-  int ok = probeBrailleDisplay(brl, gioEndpoint, 1000, 0,
-                               writePacket, badPacket, sizeof(badPacket),
-                               readPacket1, response, sizeof(response),
-                               testIdentityPacket1);
 
-  if (ok) {
+  return writePacket(brl, badPacket, sizeof(badPacket));
+}
+
+static int
+isIdentityPacket1 (BrailleDisplay *brl, const void *packet, size_t size) {
+  const unsigned char *packet1 = packet;
+  return packet1[1] == PM1_PKT_IDENTITY;
+}
+
+static int
+identifyTerminal1 (BrailleDisplay *brl) {
+  unsigned char response[PM1_MAX_PACKET_SIZE];			/* answer has 10 chars */
+  int detected = detectBrailleDisplay(brl, 0,
+                                      gioEndpoint, 1000,
+                                      writeProbe1,
+                                      readPacket1, response, sizeof(response),
+                                      isIdentityPacket1);
+
+  if (detected) {
     if (interpretIdentity1(brl, response)) {
       protocol = &protocolOperations1;
       switchState1 = 0;
@@ -616,6 +604,7 @@ typedef struct {
   } data;
 } Packet2;
 
+#define PM2_MAX_PACKET_SIZE 0X203
 #define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
@@ -632,17 +621,24 @@ static unsigned char *inputState2 = NULL;
 static int refreshRequired2;
 
 static size_t
-readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
-  unsigned char buffer[0X203];
+readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
+  Packet2 *packet2 = packet;
+  unsigned char buffer[PM2_MAX_PACKET_SIZE];
   size_t offset = 0;
 
-  volatile size_t size;
+  volatile size_t length;
   volatile int identity;
 
   while (1) {
-    if (!readBytes(buffer, &offset, 1)) {
-      if (offset > 0) logPartialPacket(buffer, offset);
-      return 0;
+    {
+      int started = offset > 0;
+
+      if (!gioReadByte(gioEndpoint, &buffer[offset], started)) {
+        if (started) logPartialPacket(buffer, offset);
+        return 0;
+      }
+
+      offset += 1;
     }
 
     {
@@ -659,7 +655,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
           continue;
 
         case ETX:
-          if ((offset >= 5) && (offset == size)) {
+          if ((offset >= 5) && (offset == length)) {
             logInputPacket(buffer, offset);
             return offset;
           }
@@ -677,28 +673,28 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
     
             case 2:
               if (type != 0X40) break;
-              packet->type = value;
+              packet2->type = value;
               identity = value == 0X0A;
               continue;
     
             case 3:
               if (type != 0X50) break;
-              packet->length = value << 4;
+              packet2->length = value << 4;
               continue;
     
             case 4:
               if (type != 0X50) break;
-              packet->length |= value;
+              packet2->length |= value;
 
-              size = packet->length;
-              if (!identity) size *= 2;
-              size += 5;
+              length = packet2->length;
+              if (!identity) length *= 2;
+              length += 5;
               continue;
     
             default:
               if (type != 0X30) break;
 
-              if (offset == size) {
+              if (offset == length) {
                 logCorruptPacket(buffer, offset);
                 offset = 0;
                 continue;
@@ -707,14 +703,14 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               {
                 size_t index = offset - 5;
                 if (identity) {
-                  packet->data.bytes[index] = byte;
+                  packet2->data.bytes[index] = byte;
                 } else {
                   int high = !(index % 2);
                   index /= 2;
                   if (high) {
-                    packet->data.bytes[index] = value << 4;
+                    packet2->data.bytes[index] = value << 4;
                   } else {
-                    packet->data.bytes[index] |= value;
+                    packet2->data.bytes[index] |= value;
                   }
                 }
               }
@@ -844,7 +840,7 @@ static int
 readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
   Packet2 packet;
 
-  while (readPacket2(brl, &packet)) {
+  while (readPacket2(brl, &packet, PM2_MAX_PACKET_SIZE)) {
     switch (packet.type) {
       default:
         logMessage(LOG_DEBUG, "Packet ignored: %02X", packet.type);
@@ -1051,52 +1047,59 @@ mapInputModules2 (void) {
 }
 
 static int
+writeProbe2 (BrailleDisplay *brl) {
+  return writePacket2(brl, 2, 0, NULL);
+}
+
+static int
+isIdentityPacket2 (BrailleDisplay *brl, const void *packet, size_t size) {
+  const Packet2 *packet2 = packet;
+  return packet2->type == 0X0A;
+}
+
+static int
 identifyTerminal2 (BrailleDisplay *brl) {
-  int tries = 0;
-  flushTerminal(brl);
-  while (writePacket2(brl, 2, 0, NULL)) {
-    while (gioAwaitInput(gioEndpoint, 100)) {
-      Packet2 packet;			/* answer has 10 chars */
-      if (readPacket2(brl, &packet)) {
-        if (packet.type == 0X0A) {
-          if (interpretIdentity2(brl, packet.data.bytes)) {
-            protocol = &protocolOperations2;
+  Packet2 packet;			/* answer has 10 chars */
+  int detected = detectBrailleDisplay(brl, io->protocol2-1,
+                                      gioEndpoint, 100,
+                                      writeProbe2,
+                                      readPacket2, &packet, PM2_MAX_PACKET_SIZE,
+                                      isIdentityPacket2);
 
-            {
-              static const DotsTable dots = {
-                0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
-              };
-              makeOutputTable(dots);
-            }
+  if (detected) {
+    if (interpretIdentity2(brl, packet.data.bytes)) {
+      protocol = &protocolOperations2;
 
-            inputKeySize2 = (model->protocolRevision < 2)? 4: 8;
-            {
-              int keyCount = model->leftKeys + model->rightKeys;
-              inputBytes2 = keyCount + 1 +
-                            ((((keyCount * inputKeySize2) +
-                               ((model->textColumns + model->statusCount) * 2)
-                              ) + 7) / 8);
-            }
-            inputBits2 = inputBytes2 * 8;
+      {
+        static const DotsTable dots = {
+          0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
+        };
+        makeOutputTable(dots);
+      }
 
-            if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
-              mapInputModules2();
+      inputKeySize2 = (model->protocolRevision < 2)? 4: 8;
+      {
+        int keyCount = model->leftKeys + model->rightKeys;
+        inputBytes2 = keyCount + 1 +
+                      ((((keyCount * inputKeySize2) +
+                         ((model->textColumns + model->statusCount) * 2)
+                        ) + 7) / 8);
+      }
+      inputBits2 = inputBytes2 * 8;
 
-              if ((inputState2 = malloc(inputBytes2))) {
-                return 1;
-              }
+      if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
+        mapInputModules2();
 
-              free(inputMap2);
-              inputMap2 = NULL;
-            }
-          }
+        if ((inputState2 = malloc(inputBytes2))) {
+          return 1;
         }
+
+        free(inputMap2);
+        inputMap2 = NULL;
       }
     }
-    if (errno != EAGAIN) break;
-
-    if (++tries == io->protocol2) break;
   }
+
   return 0;
 }
 
