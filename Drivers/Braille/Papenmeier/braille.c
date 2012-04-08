@@ -284,19 +284,35 @@ readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
     }
 
     if (offset < length) bytes[offset] = byte;
-    if (++offset == length) {
-      if (byte == ETX) {
-        logInputPacket(bytes, offset);
-        return offset;
-      }
+    if (++offset < length) continue;
 
-      logCorruptPacket(bytes, offset);
-    } else if (offset > length) {
-      logDiscardedByte(byte);
+    {
+      int isLength = offset == length;
 
-      if (byte == ETX) {
-        offset = 0;
-        length = 0;
+      switch (byte) {
+        case STX:
+          if (isLength) logPartialPacket(bytes, offset-1);
+          offset = 0;
+          length = 0;
+          goto gotByte;
+
+        case ETX:
+          if (isLength) {
+            logInputPacket(bytes, offset);
+            return offset;
+          }
+
+          offset = 0;
+          length = 0;
+          continue;
+
+        default:
+          if (isLength) {
+            logCorruptPacket(bytes, offset);
+          } else {
+            logDiscardedByte(byte);
+          }
+          break;
       }
     }
   }
