@@ -1606,6 +1606,7 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
   {
     const unsigned char data[] = {request};
     if (! tryWriteNativePacket(brl, &internalPort, data, sizeof(data)) ) return 0;
+    drainBrailleOutput(brl, 0);
   }
 
   while (gioAwaitInput(internalPort.gioEndpoint, 1000)) {
