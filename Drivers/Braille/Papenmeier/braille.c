@@ -585,7 +585,10 @@ writeIdentifyRequest1 (BrailleDisplay *brl) {
 static int
 isIdentityResponse1 (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *packet1 = packet;
-  return packet1[1] == PM1_PKT_IDENTITY;
+
+  if (packet1[1] == PM1_PKT_IDENTITY) return 1;
+  logUnexpectedPacket(packet1, size);
+  return 0;
 }
 
 static int
@@ -612,17 +615,19 @@ identifyTerminal1 (BrailleDisplay *brl) {
 
 /*--- Protocol 2 Operations ---*/
 
+#define PM2_MAX_PACKET_SIZE 0X203
+#define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
+#define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
+
 typedef struct {
+  unsigned char bytes[PM2_MAX_PACKET_SIZE];
   unsigned char type;
   unsigned char length;
+
   union {
     unsigned char bytes[0XFF];
   } data;
 } Packet2;
-
-#define PM2_MAX_PACKET_SIZE 0X203
-#define PM2_MAKE_BYTE(high, low) ((LOW_NIBBLE((high)) << 4) | LOW_NIBBLE((low)))
-#define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
 typedef struct {
   unsigned char set;
@@ -639,7 +644,6 @@ static int refreshRequired2;
 static size_t
 readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
   Packet2 *packet2 = packet;
-  unsigned char buffer[PM2_MAX_PACKET_SIZE];
   size_t offset = 0;
 
   volatile size_t length;
@@ -649,8 +653,8 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
     {
       int started = offset > 0;
 
-      if (!gioReadByte(gioEndpoint, &buffer[offset], started)) {
-        if (started) logPartialPacket(buffer, offset);
+      if (!gioReadByte(gioEndpoint, &packet2->bytes[offset], started)) {
+        if (started) logPartialPacket(packet2->bytes, offset);
         return 0;
       }
 
@@ -658,32 +662,32 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
     }
 
     {
-      unsigned char byte = buffer[offset-1];
+      unsigned char byte = packet2->bytes[offset-1];
       unsigned char type = HIGH_NIBBLE(byte);
       unsigned char value = LOW_NIBBLE(byte);
 
       switch (byte) {
         case STX:
           if (offset > 1) {
-            logDiscardedBytes(buffer, offset-1);
+            logDiscardedBytes(packet2->bytes, offset-1);
             offset = 1;
           }
           continue;
 
         case ETX:
           if ((offset >= 5) && (offset == length)) {
-            logInputPacket(buffer, offset);
+            logInputPacket(packet2->bytes, offset);
             return offset;
           }
 
-          logShortPacket(buffer, offset);
+          logShortPacket(packet2->bytes, offset);
           offset = 0;
           continue;
 
         default:
           switch (offset) {
             case 1:
-              logIgnoredByte(buffer[0]);
+              logIgnoredByte(packet2->bytes[0]);
               offset = 0;
               continue;
     
@@ -711,7 +715,7 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
               if (type != 0X30) break;
 
               if (offset == length) {
-                logCorruptPacket(buffer, offset);
+                logCorruptPacket(packet2->bytes, offset);
                 offset = 0;
                 continue;
               }
@@ -736,7 +740,7 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
       }
     }
 
-    logCorruptPacket(buffer, offset);
+    logCorruptPacket(packet2->bytes, offset);
     offset = 0;
   }
 }
@@ -1070,7 +1074,10 @@ writeIdentifyRequest2 (BrailleDisplay *brl) {
 static int
 isIdentityResponse2 (BrailleDisplay *brl, const void *packet, size_t size) {
   const Packet2 *packet2 = packet;
-  return packet2->type == 0X0A;
+
+  if (packet2->type == 0X0A) return 1;
+  logUnexpectedPacket(packet2->bytes, size);
+  return 0;
 }
 
 static int
