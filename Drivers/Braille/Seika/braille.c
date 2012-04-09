@@ -153,7 +153,10 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const InputPacket *pkt = packet;
-  return pkt->type == IPT_identity;
+
+  if (pkt->type == IPT_identity) return 1;
+  logUnexpectedPacket(pkt->bytes, size);
+  return 0;
 }
 
 typedef enum {
