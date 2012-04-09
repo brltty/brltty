@@ -538,7 +538,7 @@ probeBrailleDisplay (
   GioEndpoint *endpoint, int inputTimeout,
   BrailleRequestWriter writeRequest,
   BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
-  BrailleResponseTester *testResponse
+  BrailleResponseHandler *handleResponse
 ) {
   unsigned int retryCount = 0;
 
@@ -548,7 +548,7 @@ probeBrailleDisplay (
     while (gioAwaitInput(endpoint, inputTimeout)) {
       size_t size = readPacket(brl, responsePacket, responseSize);
       if (!size) break;
-      if (testResponse(brl, responsePacket, size)) return size;
+      if (handleResponse(brl, responsePacket, size)) return size;
     }
 
     if (errno != EAGAIN) break;

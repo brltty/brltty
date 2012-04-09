@@ -102,7 +102,7 @@ typedef size_t BraillePacketReader (
   void *packet, size_t size
 );
 
-typedef int BrailleResponseTester (
+typedef int BrailleResponseHandler (
   BrailleDisplay *brl,
   const void *packet, size_t size
 );
@@ -112,7 +112,7 @@ extern size_t probeBrailleDisplay (
   GioEndpoint *endpoint, int inputTimeout,
   BrailleRequestWriter writeRequest,
   BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
-  BrailleResponseTester *testResponse
+  BrailleResponseHandler *handleResponse
 );
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
