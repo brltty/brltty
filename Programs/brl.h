@@ -102,7 +102,14 @@ typedef size_t BraillePacketReader (
   void *packet, size_t size
 );
 
-typedef int BrailleResponseHandler (
+typedef enum {
+  BRL_RSP_CONTINUE,
+  BRL_RSP_DONE,
+  BRL_RSP_FAIL,
+  BRL_RSP_UNEXPECTED
+} BrailleResponseResult;
+
+typedef BrailleResponseResult BrailleResponseHandler (
   BrailleDisplay *brl,
   const void *packet, size_t size
 );

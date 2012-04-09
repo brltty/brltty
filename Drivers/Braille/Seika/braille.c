@@ -150,13 +150,13 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   return writeBraillePacket(brl, gioEndpoint, packet, size);
 }
 
-static int
+static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const InputPacket *pkt = packet;
 
-  if (pkt->type == IPT_identity) return 1;
+  if (pkt->type == IPT_identity) return BRL_RSP_DONE;
   logUnexpectedPacket(pkt->bytes, size);
-  return 0;
+  return BRL_RSP_CONTINUE;
 }
 
 typedef enum {

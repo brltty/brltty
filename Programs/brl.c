@@ -548,7 +548,29 @@ probeBrailleDisplay (
     while (gioAwaitInput(endpoint, inputTimeout)) {
       size_t size = readPacket(brl, responsePacket, responseSize);
       if (!size) break;
-      if (handleResponse(brl, responsePacket, size)) return size;
+
+      {
+        BrailleResponseResult result = handleResponse(brl, responsePacket, size);
+
+        switch (result) {
+          case BRL_RSP_CONTINUE:
+            break;
+
+          case BRL_RSP_DONE:
+            return 1;
+
+          case BRL_RSP_FAIL:
+            return 0;
+
+          case BRL_RSP_UNEXPECTED:
+            logUnexpectedPacket(responsePacket, size);
+            break;
+
+          default:
+            logMessage(LOG_WARNING, "unimplemented braille response result: %u", result);
+            return 0;
+        }
+      }
     }
 
     if (errno != EAGAIN) break;

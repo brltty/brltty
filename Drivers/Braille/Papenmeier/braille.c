@@ -582,13 +582,11 @@ writeIdentifyRequest1 (BrailleDisplay *brl) {
   return writePacket(brl, badPacket, sizeof(badPacket));
 }
 
-static int
+static BrailleResponseResult
 isIdentityResponse1 (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *packet1 = packet;
 
-  if (packet1[1] == PM1_PKT_IDENTITY) return 1;
-  logUnexpectedPacket(packet1, size);
-  return 0;
+  return (packet1[1] == PM1_PKT_IDENTITY)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
 }
 
 static int
@@ -1071,13 +1069,13 @@ writeIdentifyRequest2 (BrailleDisplay *brl) {
   return writePacket2(brl, 2, 0, NULL);
 }
 
-static int
+static BrailleResponseResult
 isIdentityResponse2 (BrailleDisplay *brl, const void *packet, size_t size) {
   const Packet2 *packet2 = packet;
 
-  if (packet2->type == 0X0A) return 1;
+  if (packet2->type == 0X0A) return BRL_RSP_DONE;
   logUnexpectedPacket(packet2->bytes, size);
-  return 0;
+  return BRL_RSP_CONTINUE;
 }
 
 static int
