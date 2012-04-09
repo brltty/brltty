@@ -74,7 +74,7 @@ struct BrailleDataStruct {
 
 static size_t
 readPacket (BrailleDisplay *brl, HW_Packet *packet) {
-  off_t offset = 0;
+  size_t offset = 0;
   size_t length = 0;
 
   while (1) {
@@ -119,9 +119,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
   memcpy(packet.fields.data.bytes, data, length);
   length += packet.fields.data.bytes - packet.bytes;
 
-  logOutputPacket(&packet, length);
-  brl->writeDelay += gioGetMillisecondsToTransfer(brl->data->gioEndpoint, length);
-  return gioWriteData(brl->data->gioEndpoint, &packet, length) != -1;
+  return writeBraillePacket(brl, brl->data->gioEndpoint, &packet, length);
 }
 
 static int
@@ -161,46 +159,54 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
+writeIdentifyRequest (BrailleDisplay *brl) {
+  return writePacket(brl, HW_MSG_INIT, 0, NULL);
+}
+
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readPacket(brl, packet);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const HW_Packet *response = packet;
+
+  return (response->fields.type == HW_MSG_INIT_RESP)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      if (writePacket(brl, HW_MSG_INIT, 0, NULL)) {
-        while (gioAwaitInput(brl->data->gioEndpoint, 1000)) {
-          HW_Packet packet;
-          size_t length = readPacket(brl, &packet);
-          if (!length) break;
+      HW_Packet response;
 
-          switch (packet.fields.type) {
-            case HW_MSG_INIT_RESP:
-              logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
-                         packet.fields.data.init.modelIdentifier,
-                         packet.fields.data.init.cellCount);
+      if (probeBrailleDisplay(brl, 0, brl->data->gioEndpoint, 1000,
+                              writeIdentifyRequest,
+                              readResponse, &response, sizeof(response.bytes),
+                              isIdentityResponse)) {
+        logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
+                   response.fields.data.init.modelIdentifier,
+                   response.fields.data.init.cellCount);
 
-              if (packet.fields.data.init.communicationDisabled) {
-                logMessage(LOG_WARNING, "communication channel not available");
-              } else {
-                brl->textColumns = packet.fields.data.init.cellCount;
-                brl->textRows = 1;
+        if (response.fields.data.init.communicationDisabled) {
+          logMessage(LOG_WARNING, "communication channel not available");
+        } else {
+          brl->textColumns = response.fields.data.init.cellCount;
+          brl->textRows = 1;
 
-                {
-                  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-                  brl->keyBindings = ktd->bindings;
-                  brl->keyNameTables = ktd->names;
-                }
-
-                makeOutputTable(dotsTable_ISO11548_1);
-                brl->data->forceWrite = 1;
-                return 1;
-              }
-              break;
-
-            default:
-              logUnexpectedPacket(&packet, length);
-              break;
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
           }
+
+          makeOutputTable(dotsTable_ISO11548_1);
+          brl->data->forceWrite = 1;
+          return 1;
         }
       }
 
