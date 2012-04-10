@@ -505,68 +505,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static int
-replaceTextTable (const char *name) {
-  int ok = 0;
-  char *file;
-
-  if ((file = ensureTextTableExtension(name))) {
-    char *path;
-
-    if ((path = makePath(opt_tablesDirectory, file))) {
-      TextTable *newTable;
-
-      logMessage(LOG_DEBUG, "compiling text table: %s", path);
-      if ((newTable = compileTextTable(path))) {
-        TextTable *oldTable = textTable;
-        textTable = newTable;
-        destroyTextTable(oldTable);
-        ok = 1;
-      } else {
-        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
-      }
-
-      free(path);
-    }
-
-    free(file);
-  }
-
-  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
-  return ok;
-}
-
-static int
-replaceAttributesTable (const char *name) {
-  int ok = 0;
-  char *file;
-
-  if ((file = ensureAttributesTableExtension(name))) {
-    char *path;
-
-    if ((path = makePath(opt_tablesDirectory, file))) {
-      AttributesTable *newTable;
-
-      logMessage(LOG_DEBUG, "compiling attributes table: %s", path);
-      if ((newTable = compileAttributesTable(path))) {
-        AttributesTable *oldTable = attributesTable;
-        attributesTable = newTable;
-        destroyAttributesTable(oldTable);
-        ok = 1;
-      } else {
-        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
-      }
-
-      free(path);
-    }
-
-    free(file);
-  }
-
-  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
-  return ok;
-}
-
 int
 readCommand (KeyTableCommandContext context) {
   int command = readBrailleCommand(&brl, context);
@@ -1044,12 +982,12 @@ testTunesFm (void) {
 
 static int
 changedTextTable (const MenuItem *item, unsigned char setting UNUSED) {
-  return replaceTextTable(getMenuItemValue(item));
+  return replaceTextTable(opt_tablesDirectory, getMenuItemValue(item));
 }
 
 static int
 changedAttributesTable (const MenuItem *item, unsigned char setting UNUSED) {
-  return replaceAttributesTable(getMenuItemValue(item));
+  return replaceAttributesTable(opt_tablesDirectory, getMenuItemValue(item));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -2703,14 +2641,14 @@ brlttyStart (int argc, char *argv[]) {
       opt_textTable = "";
 
       if (name) {
-        if (replaceTextTable(name)) {
+        if (replaceTextTable(opt_tablesDirectory, name)) {
           opt_textTable = name;
         } else {
           free(name);
         }
       }
     } else {
-      if (!replaceTextTable(opt_textTable)) opt_textTable = "";
+      if (!replaceTextTable(opt_tablesDirectory, opt_textTable)) opt_textTable = "";
     }
   }
 
@@ -2719,7 +2657,7 @@ brlttyStart (int argc, char *argv[]) {
 
   /* handle attributes table option */
   if (*opt_attributesTable)
-    if (!replaceAttributesTable(opt_attributesTable))
+    if (!replaceAttributesTable(opt_tablesDirectory, opt_attributesTable))
       opt_attributesTable = "";
   if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
   logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);

@@ -286,29 +286,29 @@ getTextTableLocale (void) {
 }
 
 static int
-testTextTable (const char *tablesDirectory, char *tableName) {
-  int tableExists = 0;
-  char *tableFile;
+testTextTable (const char *directory, char *name) {
+  int exists = 0;
+  char *file;
 
-  if ((tableFile = ensureTextTableExtension(tableName))) {
-    char *tablePath;
+  if ((file = ensureTextTableExtension(name))) {
+    char *path;
 
-    logMessage(LOG_DEBUG, "checking for text table: %s", tableFile);
+    logMessage(LOG_DEBUG, "checking for text table: %s", file);
 
-    if ((tablePath = makePath(tablesDirectory, tableFile))) {
-      if (testFilePath(tablePath)) tableExists = 1;
+    if ((path = makePath(directory, file))) {
+      if (testFilePath(path)) exists = 1;
 
-      free(tablePath);
+      free(path);
     }
 
-    free(tableFile);
+    free(file);
   }
 
-  return tableExists;
+  return exists;
 }
 
 char *
-selectTextTable (const char *tablesDirectory) {
+selectTextTable (const char *directory) {
   const char *locale = getTextTableLocale();
 
   if (locale) {
@@ -322,12 +322,12 @@ selectTextTable (const char *tablesDirectory) {
 
     if (strcmp(name, "C") == 0) {
       name[0] = 0;
-    } else if (!testTextTable(tablesDirectory, name)) {
+    } else if (!testTextTable(directory, name)) {
       char *delimiter = strchr(name, '_');
 
       if (delimiter) {
         *delimiter = 0;
-        if (!testTextTable(tablesDirectory, name)) name[0] = 0;
+        if (!testTextTable(directory, name)) name[0] = 0;
       }
     }
 

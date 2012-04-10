@@ -20,6 +20,8 @@
 
 #include <stdio.h>
 
+#include "log.h"
+#include "file.h"
 #include "charset.h"
 #include "ttb.h"
 #include "ttb_internal.h"
@@ -144,4 +146,35 @@ convertDotsToCharacter (TextTable *table, unsigned char dots) {
   const TextTableHeader *header = table->header.fields;
   if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return header->dotsToCharacter[dots];
   return UNICODE_REPLACEMENT_CHARACTER;
+}
+
+int
+replaceTextTable (const char *directory, const char *name) {
+  int ok = 0;
+  char *file;
+
+  if ((file = ensureTextTableExtension(name))) {
+    char *path;
+
+    if ((path = makePath(directory, file))) {
+      TextTable *newTable;
+
+      logMessage(LOG_DEBUG, "compiling text table: %s", path);
+      if ((newTable = compileTextTable(path))) {
+        TextTable *oldTable = textTable;
+        textTable = newTable;
+        destroyTextTable(oldTable);
+        ok = 1;
+      } else {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
+      }
+
+      free(path);
+    }
+
+    free(file);
+  }
+
+  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
+  return ok;
 }

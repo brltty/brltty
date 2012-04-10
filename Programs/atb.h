@@ -34,6 +34,8 @@ extern char *ensureAttributesTableExtension (const char *path);
 
 extern unsigned char convertAttributesToDots (AttributesTable *table, unsigned char attributes);
 
+extern int replaceAttributesTable (const char *directory, const char *name);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

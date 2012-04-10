@@ -31,10 +31,12 @@ extern TextTable *compileTextTable (const char *name);
 extern void destroyTextTable (TextTable *table);
 
 extern char *ensureTextTableExtension (const char *path);
-extern char *selectTextTable (const char *tablesDirectory);
+extern char *selectTextTable (const char *directory);
 
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
 extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
+
+extern int replaceTextTable (const char *directory, const char *name);
 
 #ifdef __cplusplus
 }

@@ -545,7 +545,7 @@ check-contraction-tables: ctbtest$X
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O queue.$O unicode.$O $(CHARSET_OBJECTS) lock.$O cmd.$O async.$O scancodes.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(MOUNT_OBJECTS) touch.$O ttb_translate.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O queue.$O unicode.$O $(CHARSET_OBJECTS) lock.$O cmd.$O async.$O scancodes.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(MOUNT_OBJECTS) touch.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -580,7 +580,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) cmd.$O ttb_translate.$O unicode.$O $(CHARSET_OBJECTS) lock.$O
+APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) cmd.$O ttb_translate.$O ttb_compile.$O ttb_native.$O unicode.$O $(CHARSET_OBJECTS) lock.$O datafile.$O dataarea.$O queue.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(ICU_LIBRARIES) $(LDLIBS)

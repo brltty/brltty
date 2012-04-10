@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include "log.h"
+#include "file.h"
 #include "atb.h"
 #include "atb_internal.h"
 
@@ -35,4 +37,35 @@ AttributesTable *attributesTable = &internalAttributesTable;
 unsigned char
 convertAttributesToDots (AttributesTable *table, unsigned char attributes) {
   return table->header.fields->attributesToDots[attributes];
+}
+
+int
+replaceAttributesTable (const char *directory, const char *name) {
+  int ok = 0;
+  char *file;
+
+  if ((file = ensureAttributesTableExtension(name))) {
+    char *path;
+
+    if ((path = makePath(directory, file))) {
+      AttributesTable *newTable;
+
+      logMessage(LOG_DEBUG, "compiling attributes table: %s", path);
+      if ((newTable = compileAttributesTable(path))) {
+        AttributesTable *oldTable = attributesTable;
+        attributesTable = newTable;
+        destroyAttributesTable(oldTable);
+        ok = 1;
+      } else {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
+      }
+
+      free(path);
+    }
+
+    free(file);
+  }
+
+  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
+  return ok;
 }
