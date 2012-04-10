@@ -30,15 +30,6 @@
 #include <pthread.h>
 #endif /* __MINGW32__ */
 
-#ifdef __MSDOS__
-/* DJGCC doesn't define localtime_r() but localtime() is safe */
-static inline struct tm *
-localtime_r (const time_t *timep, struct tm *result) {
-  *result = *localtime(timep);
-  return result;
-}
-#endif /* __MSDOS__ */
-
 #include "log.h"
 #include "timing.h"
 
@@ -60,8 +51,6 @@ toEventType (int level) {
   if (level <= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
   return EVENTLOG_INFORMATION_TYPE;
 }
-
-#elif defined(__MSDOS__)
 
 #endif /* system log internal definitions */
 

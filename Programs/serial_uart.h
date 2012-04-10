@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SERIAL_MSDOS
-#define BRLTTY_INCLUDED_SERIAL_MSDOS
+#ifndef BRLTTY_INCLUDED_SERIAL_UART
+#define BRLTTY_INCLUDED_SERIAL_UART
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SERIAL_MSDOS */
+#endif /* BRLTTY_INCLUDED_SERIAL_UART */

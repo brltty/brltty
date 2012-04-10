@@ -42,6 +42,8 @@ typedef struct pollfd MonitorEntry;
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
 typedef struct {

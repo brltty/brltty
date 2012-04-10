@@ -32,6 +32,8 @@
 #ifdef HAVE_SELECT
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#else /* HAVE_SYS_SELECT_H */
+#include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* HAVE_SELECT */
 
@@ -40,6 +42,13 @@
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"
+
+/* DJGCC doesn't define localtime_r() but localtime() is safe */
+static inline struct tm *
+localtime_r (const time_t *timep, struct tm *result) {
+  *result = *localtime(timep);
+  return result;
+}
 #endif /* __MSDOS__ */
 
 void
