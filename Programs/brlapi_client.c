@@ -1123,7 +1123,10 @@ static size_t getCharset(unsigned char *buffer)
     /* not default locale, tell charset to server */
 #ifdef WINDOWS
     UINT CP;
-    if ((CP = GetACP() || (CP = GetOEMCP()))) {
+    CP = GetACP();
+    if (!CP)
+      CP = GetOEMCP();
+    if (CP) {
       len = sprintf(p+3, "%u", CP);
       *p++ = 2 + len;
       *p++ = 'C';
