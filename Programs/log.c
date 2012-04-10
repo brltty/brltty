@@ -87,7 +87,7 @@ writeLogRecord (const char *record) {
       length = formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", now.seconds);
       milliseconds = now.nanoseconds / NSECS_PER_MSEC;
 
-      fprintf(logFile, "%.*s.%03u ", length, buffer, milliseconds);
+      fprintf(logFile, "%.*s.%03u ", (int)length, buffer, milliseconds);
     }
 
     fputs(record, logFile);
