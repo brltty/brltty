@@ -525,7 +525,7 @@ testTextTable (char *table) {
     logMessage(LOG_DEBUG, "checking for text table: %s", file);
 
     if ((path = makePath(opt_tablesDirectory, file))) {
-      if (testPath(path)) exists = 1;
+      if (testFilePath(path)) exists = 1;
 
       free(path);
     }
@@ -865,7 +865,7 @@ loadPreferences (void) {
     char *path = makePreferencesFilePath(opt_preferencesFile);
 
     if (path) {
-      if (testPath(path)) {
+      if (testFilePath(path)) {
         oldPreferencesEnabled = 0;
         if (loadPreferencesFile(path)) ok = 1;
       }

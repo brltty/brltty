@@ -400,7 +400,7 @@ openDataFile (const char *path, const char *mode, int optional) {
   if (!overrideDirectory) {
     overridePath = NULL;
   } else if ((overridePath = makePath(overrideDirectory, name))) {
-    if (testPath(overridePath)) {
+    if (testFilePath(overridePath)) {
       file = openFile(overridePath, mode, optional);
       goto done;
     }

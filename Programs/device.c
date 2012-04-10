@@ -80,20 +80,20 @@ getDeviceDirectory (void) {
 
   if (!deviceDirectory) {
     const char *directory = DEVICE_DIRECTORY;
-    const unsigned int directoryLength = strlen(directory);
+    const size_t directoryLength = strlen(directory);
 
     static const char *const variables[] = {"DTDEVROOT", "UTDEVROOT", NULL};
-    const char *const*variable = variables;
+    const char *const *variable = variables;
 
     while (*variable) {
       const char *root = getenv(*variable);
 
       if (root && *root) {
-        const unsigned int rootLength = strlen(root);
+        const size_t rootLength = strlen(root);
         char path[rootLength + directoryLength + 1];
         snprintf(path, sizeof(path), "%s%s", root, directory);
 
-        if (testPath(path)) {
+        if (testDirectoryPath(path)) {
           if ((deviceDirectory = strdup(path))) goto found;
           logMallocError();
         } else if (errno != ENOENT) {
