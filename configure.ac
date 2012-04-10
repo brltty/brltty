@@ -1260,7 +1260,13 @@ BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
 ], [dnl
    unix)
       AC_CHECK_DECL([fork], [dnl
-         hostcmd_package=unix
+         AC_CHECK_HEADER([signal.h], [dnl
+            AC_CHECK_DECL([SIGCHLD], [dnl
+               hostcmd_package=unix
+            ], [], [dnl
+#include <signal.h>
+            ])
+         ])
       ])
       ;;
 ])
