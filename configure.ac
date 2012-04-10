@@ -799,6 +799,22 @@ then
 fi
 
 AC_CACHE_CHECK(
+   [if the compiler understands __attribute__((noreturn))],
+   [brltty_cv_c_attribute_noreturn],
+   [AC_TRY_COMPILE([
+extern void conf_attribute_noreturn(void)
+       __attribute__((noreturn));
+],
+[],
+[brltty_cv_c_attribute_noreturn=yes],
+[brltty_cv_c_attribute_noreturn=no])])
+if test "${brltty_cv_c_attribute_noreturn}" = "yes"
+then
+   AC_DEFINE([HAVE_ATTRIBUTE_NORETURN], [1],
+             [Define this if the noreturn attribute is supported.])
+fi
+
+AC_CACHE_CHECK(
    [if the compiler understands __attribute__((packed))],
    [brltty_cv_c_attribute_packed],
    [AC_TRY_COMPILE([

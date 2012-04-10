@@ -65,7 +65,7 @@ int _stklen = 8192;
 void __crt0_load_environment_file(char *_app_name) { return; }
 char **__crt0_glob_function(char *_arg) { return 0; }
 
-static void tsr_exit(void);
+static void tsr_exit(void) NORETURN;
 /* Start undocumented way to make exception handling disappear (v2.03) */
 short __djgpp_ds_alias;
 void __djgpp_exception_processor(void) { return; }

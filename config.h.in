@@ -41,6 +41,9 @@ extern "C" {
 /* Define this if the printf format attribute is supported. */
 #undef HAVE_ATTRIBUTE_FORMAT_PRINTF
 
+/* Define this if the noreturn attribute is supported. */
+#undef HAVE_ATTRIBUTE_NORETURN
+
 /* Define this if the packed attribute is supported. */
 #undef HAVE_ATTRIBUTE_PACKED
 

@@ -363,6 +363,22 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 #define WRITABLE_DIRECTORY ""
 #endif /* WRITABLE_DIRECTORY */
 
+#ifndef PRINTF
+#ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
+#define PRINTF(fmt,var) __attribute__((format(__printf__, fmt, var)))
+#else /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
+#define PRINTF(fmt,var)
+#endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
+#endif /* PRINTF */
+
+#ifndef NORETURN
+#ifdef HAVE_ATTRIBUTE_NORETURN
+#define NORETURN __attribute__((noreturn))
+#else /* HAVE_ATTRIBUTE_NORETURN */
+#define NORETURN
+#endif /* HAVE_ATTRIBUTE_NORETURN */
+#endif /* NORETURN */
+
 #ifndef PACKED
 #ifdef HAVE_ATTRIBUTE_PACKED
 #define PACKED __attribute__((packed))
@@ -371,17 +387,13 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 #endif /* HAVE_ATTRIBUTE_PACKED */
 #endif /* PACKED */
 
-#ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
-#define PRINTF(fmt,var) __attribute__((format(__printf__, fmt, var)))
-#else /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
-#define PRINTF(fmt,var)
-#endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
-
+#ifndef UNUSED
 #ifdef HAVE_ATTRIBUTE_UNUSED
 #define UNUSED __attribute__((unused))
 #else /* HAVE_ATTRIBUTE_UNUSED */
 #define UNUSED
 #endif /* HAVE_ATTRIBUTE_UNUSED */
+#endif /* UNUSED */
 
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>
