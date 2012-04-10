@@ -1560,7 +1560,10 @@ in
       AC_MSG_WARN([no native screen driver for ${host_os}])
       ;;
 esac
-BRLTTY_SCREEN_DRIVER([sc], [Screen])
+
+AC_CHECK_HEADER([sys/shm.h], [dnl
+   BRLTTY_SCREEN_DRIVER([sc], [Screen])
+])
 
 if test "${brltty_enabled_x}" = "yes"
 then
