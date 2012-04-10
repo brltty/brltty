@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "log.h"
 #include "file.h"
 #include "datafile.h"
 #include "dataarea.h"
@@ -27,6 +28,10 @@
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"
+
+#ifdef __MINGW32__
+#include "sys_windows.h"
+#endif /* __MINGW32__ */
 
 struct TextTableDataStruct {
   DataArea *area;
@@ -269,4 +274,70 @@ destroyTextTable (TextTable *table) {
 char *
 ensureTextTableExtension (const char *path) {
   return ensureExtension(path, TEXT_TABLE_EXTENSION);
+}
+
+static const char *
+getTextTableLocale (void) {
+#if defined(__MINGW32__)
+  return win_getLocale();
+#else /* unix */
+  return setlocale(LC_CTYPE, NULL);
+#endif /* text table locale */
+}
+
+static int
+testTextTable (const char *tablesDirectory, char *tableName) {
+  int tableExists = 0;
+  char *tableFile;
+
+  if ((tableFile = ensureTextTableExtension(tableName))) {
+    char *tablePath;
+
+    logMessage(LOG_DEBUG, "checking for text table: %s", tableFile);
+
+    if ((tablePath = makePath(tablesDirectory, tableFile))) {
+      if (testFilePath(tablePath)) tableExists = 1;
+
+      free(tablePath);
+    }
+
+    free(tableFile);
+  }
+
+  return tableExists;
+}
+
+char *
+selectTextTable (const char *tablesDirectory) {
+  const char *locale = getTextTableLocale();
+
+  if (locale) {
+    char name[strlen(locale) + 1];
+
+    {
+      size_t length = strcspn(locale, ".@");
+      strncpy(name, locale, length);
+      name[length] = 0;
+    }
+
+    if (strcmp(name, "C") == 0) {
+      name[0] = 0;
+    } else if (!testTextTable(tablesDirectory, name)) {
+      char *delimiter = strchr(name, '_');
+
+      if (delimiter) {
+        *delimiter = 0;
+        if (!testTextTable(tablesDirectory, name)) name[0] = 0;
+      }
+    }
+
+    if (name[0]) {
+      char *textTableName = strdup(name);
+
+      if (textTableName) return textTableName;
+      logMallocError();
+    }
+  }
+
+  return NULL;
 }

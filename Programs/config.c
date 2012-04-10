@@ -505,37 +505,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static const char *
-getTextTableLocale (void) {
-#if defined(__MINGW32__)
-  return win_getLocale();
-#else /* unix */
-  return setlocale(LC_CTYPE, NULL);
-#endif /* text table locale */
-}
-
-static int
-testTextTable (char *table) {
-  int exists = 0;
-  char *file;
-
-  if ((file = ensureTextTableExtension(table))) {
-    char *path;
-
-    logMessage(LOG_DEBUG, "checking for text table: %s", file);
-
-    if ((path = makePath(opt_tablesDirectory, file))) {
-      if (testFilePath(path)) exists = 1;
-
-      free(path);
-    }
-
-    free(file);
-  }
-
-  return exists;
-}
-
 static int
 replaceTextTable (const char *name) {
   int ok = 0;
@@ -2730,41 +2699,14 @@ brlttyStart (int argc, char *argv[]) {
   /* handle text table option */
   if (*opt_textTable) {
     if (strcmp(opt_textTable, "auto") == 0) {
-      const char *locale = getTextTableLocale();
+      char *name = selectTextTable(opt_tablesDirectory);
       opt_textTable = "";
 
-      if (locale) {
-        char name[strlen(locale) + 1];
-
-        {
-          size_t length = strcspn(locale, ".@");
-          strncpy(name, locale, length);
-          name[length] = 0;
-        }
-
-        if (strcmp(name, "C") == 0) {
-          name[0] = 0;
-        } else if (!testTextTable(name)) {
-          char *delimiter = strchr(name, '_');
-
-          if (delimiter) {
-            *delimiter = 0;
-            if (!testTextTable(name)) name[0] = 0;
-          }
-        }
-
-        if (name[0]) {
-          char *textTableName = strdup(name);
-
-          if (textTableName) {
-            if (replaceTextTable(name)) {
-              opt_textTable = textTableName;
-            } else {
-              free(textTableName);
-            }
-          } else {
-            logMallocError();
-          }
+      if (name) {
+        if (replaceTextTable(name)) {
+          opt_textTable = name;
+        } else {
+          free(name);
         }
       }
     } else {
