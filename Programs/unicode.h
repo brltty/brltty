@@ -23,7 +23,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef HAVE_WCHAR_H 
 #define UNICODE_REPLACEMENT_CHARACTER 0XFFFD
+#else /* HAVE_WCHAR_H */
+#define UNICODE_REPLACEMENT_CHARACTER '?'
+#endif /* HAVE_WCHAR_H */
+
 #define UNICODE_ZERO_WIDTH_SPACE 0X200B
 #define UNICODE_BRAILLE_ROW 0X2800
 
