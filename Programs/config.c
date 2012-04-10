@@ -27,7 +27,6 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
-#include <locale.h>
 #include <fcntl.h>
 
 #include "cmd.h"

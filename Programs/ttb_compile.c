@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <locale.h>
 
 #include "log.h"
 #include "file.h"
