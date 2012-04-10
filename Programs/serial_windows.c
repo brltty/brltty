@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <io.h>
+#include <fcntl.h>
 
 #include "log.h"
 #include "ascii.h"
