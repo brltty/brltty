@@ -309,9 +309,50 @@ serialGetData (
   int initialTimeout, int subsequentTimeout
 ) {
   size_t length = 0;
+  COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
+  DWORD bytesRead;
 
-  if (serialGetChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
-  if (errno == EAGAIN) return length;
+  if (serial->package.pendingCharacter != -1) {
+    * (unsigned char *) buffer = serial->package.pendingCharacter;
+    serial->package.pendingCharacter = -1;
+    bytesRead = 1;
+  } else {
+    if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
+      logWindowsSystemError("SetCommTimeouts serialReadChunk1");
+      setSystemErrno();
+      return -1;
+    }
+
+    if (!ReadFile(serial->package.fileHandle, buffer, size, &bytesRead, NULL)) {
+      logWindowsSystemError("ReadFile");
+      setSystemErrno();
+      return -1;
+    }
+
+    if (!bytesRead)
+      return 0;
+  }
+
+  size -= bytesRead;
+  length += bytesRead;
+  timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
+  if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
+    logWindowsSystemError("SetCommTimeouts serialReadChunk2");
+    setSystemErrno();
+    return -1;
+  }
+
+  while (size && ReadFile(serial->package.fileHandle, buffer + length, size, &bytesRead, NULL)) {
+    if (!bytesRead)
+      return length;
+
+    size -= bytesRead;
+    length += bytesRead;
+  }
+
+  if (!size) return length;
+  logWindowsSystemError("ReadFile");
+  setSystemErrno();
   return -1;
 }
 
