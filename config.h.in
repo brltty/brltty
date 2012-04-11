@@ -95,6 +95,9 @@ extern "C" {
 /* Define this if the function nanosleep exists. */
 #undef HAVE_NANOSLEEP
 
+/* Define this if the function localtime_r is declared. */
+#undef HAVE_DECL_LOCALTIME_R
+
 #ifndef __MINGW32__
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H

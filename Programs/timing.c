@@ -42,14 +42,15 @@
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"
+#endif /* __MSDOS__ */
 
-/* DJGCC doesn't define localtime_r() but localtime() is safe */
+#ifndef HAVE_DECL_LOCALTIME_R
 static inline struct tm *
 localtime_r (const time_t *timep, struct tm *result) {
   *result = *localtime(timep);
   return result;
 }
-#endif /* __MSDOS__ */
+#endif /* HAVE_DECL_LOCALTIME_R */
 
 void
 getCurrentTime (TimeValue *now) {

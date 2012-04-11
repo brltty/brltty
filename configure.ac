@@ -712,6 +712,10 @@ test -z "$brltty_package_gui_toolkit" && {
 
 AC_CHECK_FUNCS([time gettimeofday clock_gettime nanosleep])
 
+AC_CHECK_DECLS([localtime_r], [], [], [dnl
+#include <time.h>
+])
+
 AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
 AC_CHECK_FUNCS([select])
 
