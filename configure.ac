@@ -713,11 +713,7 @@ test -z "$brltty_package_gui_toolkit" && {
 
 AC_CHECK_FUNCS([time gettimeofday nanosleep])
 
-AC_CHECK_DECL([clock_gettime], [dnl
-   BRLTTY_SEARCH_LIBS([clock_gettime], [rt])
-], [], [dnl
-#include <time.h>
-])
+BRLTTY_CHECK_FUNCTION([clock_gettime], [time.h], [rt])
 
 AC_CHECK_DECLS([localtime_r], [], [], [dnl
 #include <time.h>

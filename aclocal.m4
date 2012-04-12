@@ -4,6 +4,20 @@ AC_DEFUN([BRLTTY_TRANSLATE_ASSIGN], [$1=`echo "$2" | sed -e 'y%$3%$4%'`])
 AC_DEFUN([BRLTTY_UPPERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [abcdefghijklmnopqrstuvwxyz$3], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$4])])
 AC_DEFUN([BRLTTY_LOWERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$3], [abcdefghijklmnopqrstuvwxyz$4])])
 
+AC_DEFUN([BRLTTY_INCLUDE_HEADERS], [dnl
+ifelse(len([$1]), 0, [], [
+[#]include <$1>
+])ifelse($#, 1, [], [BRLTTY_INCLUDE_HEADERS(m4_shift($@))])])
+
+AC_DEFUN([BRLTTY_CHECK_FUNCTION], [dnl
+   AC_CHECK_DECL([$1], [dnl
+      AC_SEARCH_LIBS([$1], [$3], [dnl
+         BRLTTY_UPPERCASE_ASSIGN([brltty_define], [have_$1])
+         AC_DEFINE_UNQUOTED(${brltty_define}, [1], [Define this if the function $1 is available.])
+      ])
+   ], [], [BRLTTY_INCLUDE_HEADERS(m4_translit([$2], [ ], [,]))])
+])
+
 AC_DEFUN([BRLTTY_SEARCH_LIBS], [dnl
 BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [$1])
 AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc}, [1], [Define this if the function $1 is available.])])])
