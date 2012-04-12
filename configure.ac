@@ -48,7 +48,8 @@ AC_DEFINE_UNQUOTED([BRLAPI_MINOR], [${api_minor}],
 AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
                    [Define this to be the API library revision number.])
 
-AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
+BRLTTY_UPPERCASE_ASSIGN([PACKAGE_TITLE], [${PACKAGE_NAME}])
+AC_SUBST([PACKAGE_TITLE])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
                    [Define this to be a string containing the package title.])
 
@@ -710,7 +711,13 @@ test -z "$brltty_package_gui_toolkit" && {
    esac
 }
 
-AC_CHECK_FUNCS([time gettimeofday clock_gettime nanosleep])
+AC_CHECK_FUNCS([time gettimeofday nanosleep])
+
+AC_CHECK_DECL([clock_gettime], [dnl
+   BRLTTY_SEARCH_LIBS([clock_gettime], [rt])
+], [], [dnl
+#include <time.h>
+])
 
 AC_CHECK_DECLS([localtime_r], [], [], [dnl
 #include <time.h>

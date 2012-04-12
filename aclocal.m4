@@ -1,7 +1,11 @@
-AC_DEFUN([BRLTTY_UPPERCASE], [translit([$1], [a-z], [A-Z])])
+AC_DEFUN([BRLTTY_UPPERCASE_TRANSLATE], [translit([$1], [a-z], [A-Z])])
+
+AC_DEFUN([BRLTTY_TRANSLATE_ASSIGN], [$1=`echo "$2" | sed -e 'y%$3%$4%'`])
+AC_DEFUN([BRLTTY_UPPERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [abcdefghijklmnopqrstuvwxyz$3], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$4])])
+AC_DEFUN([BRLTTY_LOWERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$3], [abcdefghijklmnopqrstuvwxyz$4])])
 
 AC_DEFUN([BRLTTY_SEARCH_LIBS], [dnl
-brltty_uc="`echo "$1" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
+BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [$1])
 AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc}, [1], [Define this if the function $1 is available.])])])
 
 AC_DEFUN([BRLTTY_VAR_TRIM], [dnl
@@ -63,7 +67,7 @@ then
 fi
 AC_SUBST([install_$1_tables])
 BRLTTY_SUMMARY_ITEM([$1-table], [$1_table])
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"],
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_table]), ["${$1_table}"],
                    [Define this to be a string containing the path to the default $1 table.])
 AC_SUBST([$1_table])])
 
@@ -80,7 +84,7 @@ elif test "${$1_parameters}" = "yes"
 then
    $1_parameters=""
 fi
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_parameters]), ["${$1_parameters}"],
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameters}"],
                    [Define this to be a string containing the default $2 parameters.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
@@ -146,8 +150,8 @@ test -z "${$1_package}" && {
 AC_SUBST([$1_package])
 AC_SUBST([$1_cflags])
 AC_SUBST([$1_libs])
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_package]), [${$1_package}], [Define this to the name of the selected $2 package.])
-brltty_uc="`echo "use_$1_package_${$1_package}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz-%ABCDEFGHIJKLMNOPQRSTUVWXYZ_%'`"
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_package]), [${$1_package}], [Define this to the name of the selected $2 package.])
+BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [use_$1_package_${$1_package}])
 AC_DEFINE_UNQUOTED([${brltty_uc}])
 BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])])
 
@@ -197,7 +201,7 @@ ifelse(len([$5]), 0, [], [dnl
    then
 ifelse(len([$5]), 0, [], [dnl
       test "${#}" -gt 0 && {
-         brltty_uc="`echo "use_$1_${enableval}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz-%ABCDEFGHIJKLMNOPQRSTUVWXYZ_%'`"
+         BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [use_$1_${enableval}], [-], [_])
          AC_DEFINE_UNQUOTED([${brltty_uc}])
       }
 ])dnl
@@ -253,7 +257,7 @@ in
 esac
 
 BRLTTY_ARG_WITH(
-   [$1-$2], BRLTTY_UPPERCASE([$2]),
+   [$1-$2], BRLTTY_UPPERCASE_TRANSLATE([$2]),
    [$1 $2(s) to build in]brltty_item_list_$1,
    [brltty_items], ["${brltty_default}"]
 )
@@ -356,7 +360,7 @@ AC_SUBST([brltty_internal_names_$1])
 
 set -- ${brltty_internal_codes_$1} ${brltty_external_codes_$1}
 brltty_default_code_$1="${1}"
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${*}"], 
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_$2_codes]), ["${*}"], 
                    [Define this to be a string containing a list of the $1 $2 codes.])
 
 $1_driver_libraries=""
@@ -393,7 +397,7 @@ then
    [brltty_item_entry=`expr "${brltty_items_left_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`]
    if test -z "${brltty_item_entry}"
    then
-      brltty_lowercase=`echo "${brltty_items_left_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`
+      BRLTTY_LOWERCASE_ASSIGN([brltty_lowercase], [${brltty_items_left_$1}])
       [brltty_item_code=`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`]
       if test -n "${brltty_item_code}"
       then
@@ -523,7 +527,7 @@ AC_SUBST([$2_root])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 if test -n "${$2_root}"
 then
-   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$2_root]), ["${$2_root}"],
+   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$2_root]), ["${$2_root}"],
                       [Define this to be a string containing the path to the root of the $1 package.])
    $4
 fi])
@@ -614,7 +618,7 @@ else
 fi
 AC_SUBST([brltty_package_$1])
 test -n "${brltty_package_$1}" && {
-   brltty_uc="`echo "${brltty_package_$1}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
+   BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [${brltty_package_$1}])
    AC_DEFINE_UNQUOTED([HAVE_PKG_${brltty_uc}])
    BRLTTY_SUMMARY_ITEM([translit([$1], [_], [-])-package], [brltty_package_$1])
 }])
@@ -683,7 +687,7 @@ main (void) {
    [brltty_cv_function_$1=no])])
 if test "${brltty_cv_function_$1}" = "yes"
 then
-   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_$1]), [1],
+   AC_DEFINE(BRLTTY_UPPERCASE_TRANSLATE([HAVE_$1]), [1],
              [Define this if the function $1 is available.])
    $3
 else
