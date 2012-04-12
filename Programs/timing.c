@@ -44,7 +44,7 @@
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
 
-#ifndef HAVE_DECL_LOCALTIME_R
+#if !HAVE_DECL_LOCALTIME_R
 static inline struct tm *
 localtime_r (const time_t *timep, struct tm *result) {
   *result = *localtime(timep);
