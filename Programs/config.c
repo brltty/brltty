@@ -529,22 +529,16 @@ loadContractionTable (const char *name) {
   ContractionTable *table = NULL;
 
   if (*name) {
-    char *file;
+    char *path;
 
-    if ((file = ensureContractionTableExtension(name))) {
-      char *path;
+    if ((path = makeContractionTablePath(opt_tablesDirectory, name))) {
+      logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
 
-      if ((path = makePath(opt_tablesDirectory, file))) {
-        logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
-
-        if (!(table = compileContractionTable(path))) {
-          logMessage(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
-        }
-
-        free(path);
+      if (!(table = compileContractionTable(path))) {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
       }
 
-      free(file);
+      free(path);
     }
 
     if (!table) return 0;

@@ -351,65 +351,57 @@ main (int argc, char *argv[]) {
   }
 
   {
-    char *contractionTableFile;
+    char *contractionTablePath;
 
-    if ((contractionTableFile = ensureContractionTableExtension(opt_contractionTable))) {
-      char *contractionTablePath;
+    if ((contractionTablePath = makeContractionTablePath(opt_tablesDirectory, opt_contractionTable))) {
+      if ((contractionTable = compileContractionTable(contractionTablePath))) {
+        if (*opt_textTable) {
+          char *textTablePath;
 
-      if ((contractionTablePath = makePath(opt_tablesDirectory, contractionTableFile))) {
-        if ((contractionTable = compileContractionTable(contractionTablePath))) {
-          if (*opt_textTable) {
-            char *textTablePath;
+          putCell = putMappedCharacter;
 
-            putCell = putMappedCharacter;
-
-            if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
-              exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
-              free(textTablePath);
-            } else {
-              exitStatus = PROG_EXIT_FATAL;
-            }
+          if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
+            exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+            free(textTablePath);
           } else {
-            putCell = putUnicodeBraille;
-            exitStatus = PROG_EXIT_SUCCESS;
+            exitStatus = PROG_EXIT_FATAL;
           }
-
-          if (exitStatus == PROG_EXIT_SUCCESS) {
-            if (argc) {
-              do {
-                char *path = *argv;
-                if (strcmp(path, standardStreamArgument) == 0) {
-                  exitStatus = processStream(stdin);
-                } else {
-                  FILE *stream = fopen(path, "r");
-                  if (stream) {
-                    exitStatus = processStream(stream);
-                    fclose(stream);
-                  } else {
-                    logMessage(LOG_ERR, "cannot open input file: %s: %s",
-                               path, strerror(errno));
-                    exitStatus = PROG_EXIT_FATAL;
-                  }
-                }
-              } while ((exitStatus == PROG_EXIT_SUCCESS) && (++argv, --argc));
-            } else {
-              exitStatus = processStream(stdin);
-            }
-
-            if (textTable) destroyTextTable(textTable);
-          }
-
-          destroyContractionTable(contractionTable);
         } else {
-          exitStatus = PROG_EXIT_FATAL;
+          putCell = putUnicodeBraille;
+          exitStatus = PROG_EXIT_SUCCESS;
         }
 
-        free(contractionTablePath);
+        if (exitStatus == PROG_EXIT_SUCCESS) {
+          if (argc) {
+            do {
+              char *path = *argv;
+              if (strcmp(path, standardStreamArgument) == 0) {
+                exitStatus = processStream(stdin);
+              } else {
+                FILE *stream = fopen(path, "r");
+                if (stream) {
+                  exitStatus = processStream(stream);
+                  fclose(stream);
+                } else {
+                  logMessage(LOG_ERR, "cannot open input file: %s: %s",
+                             path, strerror(errno));
+                  exitStatus = PROG_EXIT_FATAL;
+                }
+              }
+            } while ((exitStatus == PROG_EXIT_SUCCESS) && (++argv, --argc));
+          } else {
+            exitStatus = processStream(stdin);
+          }
+
+          if (textTable) destroyTextTable(textTable);
+        }
+
+        destroyContractionTable(contractionTable);
       } else {
         exitStatus = PROG_EXIT_FATAL;
       }
 
-      free(contractionTableFile);
+      free(contractionTablePath);
     }
   }
 
