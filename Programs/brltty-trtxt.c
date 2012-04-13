@@ -126,23 +126,12 @@ processStream (FILE *inputStream, const char *inputName) {
   memset(&inputState, 0, sizeof(inputState));
   memset(&outputState, 0, sizeof(outputState));
 
-  while (1) {
+  while (!feof(inputStream)) {
     char inputBuffer[0X1000];
     size_t inputCount = fread(inputBuffer, 1, sizeof(inputBuffer), inputStream);
+
     if (ferror(inputStream)) goto inputError;
-
-    if (!inputCount) {
-      if (!writeCharacter(NULL, &outputState)) goto outputError;
-      fflush(outputStream);
-      if (ferror(outputStream)) goto outputError;
-
-      if (!mbsinit(&inputState)) {
-        errno = EILSEQ;
-        goto inputError;
-      }
-
-      return 1;
-    }
+    if (!inputCount) break;
 
     {
       char *byte = inputBuffer;
@@ -170,6 +159,17 @@ processStream (FILE *inputStream, const char *inputName) {
       }
     }
   }
+
+  if (!writeCharacter(NULL, &outputState)) goto outputError;
+  fflush(outputStream);
+  if (ferror(outputStream)) goto outputError;
+
+  if (!mbsinit(&inputState)) {
+    errno = EILSEQ;
+    goto inputError;
+  }
+
+  return 1;
 
 inputError:
   logMessage(LOG_ERR, "input error: %s: %s", inputName, strerror(errno));
