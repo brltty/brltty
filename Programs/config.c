@@ -565,7 +565,7 @@ exitKeyTable (void) {
 }
 
 static int
-loadKeyTable (const char *name) {
+replaceKeyboardKeyTable (const char *name) {
   KeyTable *table = NULL;
 
   if (*name) {
@@ -2671,7 +2671,7 @@ brlttyStart (int argc, char *argv[]) {
 
   /* handle key table option */
   onProgramExit(exitKeyTable);
-  if (*opt_keyTable) loadKeyTable(opt_keyTable);
+  replaceKeyboardKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
 

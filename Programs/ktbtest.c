@@ -188,13 +188,13 @@ main (int argc, char *argv[]) {
 
   if (argc) {
     const char *keyTableName = (argc--, *argv++);
-    char *keyTableFile = ensureKeyTableExtension(keyTableName);
+    char *keyTablePath = makeKeyTablePath(opt_tablesDirectory, keyTableName);
 
-    if (keyTableFile) {
+    if (keyTablePath) {
       KEY_NAME_TABLES_REFERENCE keyNameTables;
 
       {
-        const char *file = locatePathName(keyTableFile);
+        const char *file = locatePathName(keyTablePath);
         size_t length = strrchr(file, '.') - file;
         char name[length + 1];
 
@@ -210,22 +210,14 @@ main (int argc, char *argv[]) {
             exitStatus = PROG_EXIT_FATAL;
 
         if (exitStatus == PROG_EXIT_SUCCESS) {
-          char *keyTablePath = makePath(opt_tablesDirectory, keyTableFile);
+          KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
 
-          if (keyTablePath) {
-            KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
+          if (keyTable) {
+            if (opt_listKeyTable)
+              if (!listKeyTable(keyTable, listLine, NULL))
+                exitStatus = PROG_EXIT_FATAL;
 
-            if (keyTable) {
-              if (opt_listKeyTable)
-                if (!listKeyTable(keyTable, listLine, NULL))
-                  exitStatus = PROG_EXIT_FATAL;
-
-              destroyKeyTable(keyTable);
-            } else {
-              exitStatus = PROG_EXIT_FATAL;
-            }
-
-            free(keyTablePath);
+            destroyKeyTable(keyTable);
           } else {
             exitStatus = PROG_EXIT_FATAL;
           }
@@ -234,7 +226,7 @@ main (int argc, char *argv[]) {
         exitStatus = PROG_EXIT_FATAL;
       }
 
-      free(keyTableFile);
+      free(keyTablePath);
     } else {
       exitStatus = PROG_EXIT_FATAL;
     }
