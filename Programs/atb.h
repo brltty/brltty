@@ -31,6 +31,7 @@ extern AttributesTable *compileAttributesTable (const char *name);
 extern void destroyAttributesTable (AttributesTable *table);
 
 extern char *ensureAttributesTableExtension (const char *path);
+extern char *makeAttributesTablePath (const char *directory, const char *name);
 
 extern unsigned char convertAttributesToDots (AttributesTable *table, unsigned char attributes);
 

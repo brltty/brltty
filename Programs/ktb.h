@@ -33,6 +33,7 @@ extern int listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *
 extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, void *data);
 
 extern char *ensureKeyTableExtension (const char *path);
+extern char *makeKeyTablePath (const char *directory, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
 extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);

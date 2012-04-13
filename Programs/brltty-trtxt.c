@@ -150,19 +150,6 @@ outputError:
   return 0;
 }
 
-static char *
-makeTextTablePath (const char *directory, const char *name) {
-  char *path = NULL;
-  char *file = ensureTextTableExtension(name);
-
-  if (file) {
-    path = makePath(directory, file);
-    free(file);
-  }
-
-  return path;
-}
-
 static int
 getTable (TextTable **table, const char *directory, const char *name) {
   *table = NULL;

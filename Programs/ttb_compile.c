@@ -277,6 +277,11 @@ ensureTextTableExtension (const char *path) {
   return ensureExtension(path, TEXT_TABLE_EXTENSION);
 }
 
+char *
+makeTextTablePath (const char *directory, const char *name) {
+  return makeFilePath(directory, name, TEXT_TABLE_EXTENSION);
+}
+
 static const char *
 getTextTableLocale (void) {
 #if defined(__MINGW32__)
@@ -289,20 +294,12 @@ getTextTableLocale (void) {
 static int
 testTextTable (const char *directory, char *name) {
   int exists = 0;
-  char *file;
+  char *path;
 
-  if ((file = ensureTextTableExtension(name))) {
-    char *path;
-
-    logMessage(LOG_DEBUG, "checking for text table: %s", file);
-
-    if ((path = makePath(directory, file))) {
-      if (testFilePath(path)) exists = 1;
-
-      free(path);
-    }
-
-    free(file);
+  if ((path = makeTextTablePath(directory, name))) {
+    logMessage(LOG_DEBUG, "checking for text table: %s", path);
+    if (testFilePath(path)) exists = 1;
+    free(path);
   }
 
   return exists;

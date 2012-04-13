@@ -1434,3 +1434,8 @@ char *
 ensureKeyTableExtension (const char *path) {
   return ensureExtension(path, KEY_TABLE_EXTENSION);
 }
+
+char *
+makeKeyTablePath (const char *directory, const char *name) {
+  return makeFilePath(directory, name, KEY_TABLE_EXTENSION);
+}

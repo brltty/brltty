@@ -148,6 +148,19 @@ ensureExtension (const char *path, const char *extension) {
   return joinStrings(strings, count);
 }
 
+char *
+makeFilePath (const char *directory, const char *name, const char *extension) {
+  char *path = NULL;
+  char *file = ensureExtension(name, extension);
+
+  if (file) {
+    path = makePath(directory, file);
+    free(file);
+  }
+
+  return path;
+}
+
 int
 testPath (const char *path) {
 #ifdef F_OK

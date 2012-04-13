@@ -807,3 +807,8 @@ char *
 ensureContractionTableExtension (const char *path) {
   return ensureExtension(path, CONTRACTION_TABLE_EXTENSION);
 }
+
+char *
+makeContractionTablePath (const char *directory, const char *name) {
+  return makeFilePath(directory, name, CONTRACTION_TABLE_EXTENSION);
+}

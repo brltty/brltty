@@ -204,3 +204,8 @@ char *
 ensureAttributesTableExtension (const char *path) {
   return ensureExtension(path, ATTRIBUTES_TABLE_EXTENSION);
 }
+
+char *
+makeAttributesTablePath (const char *directory, const char *name) {
+  return makeFilePath(directory, name, ATTRIBUTES_TABLE_EXTENSION);
+}

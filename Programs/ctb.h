@@ -40,6 +40,7 @@ extern void contractText (
 );
 
 extern char *ensureContractionTableExtension (const char *path);
+extern char *makeContractionTablePath (const char *directory, const char *name);
 
 #ifdef __cplusplus
 }
