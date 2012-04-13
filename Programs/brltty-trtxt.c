@@ -107,6 +107,18 @@ toCharacter_unicode (unsigned char dots) {
 }
 
 static int
+writeCharacter (const wchar_t *character, mbstate_t *state) {
+  char bytes[0X1000];
+  size_t result = wcrtomb(bytes, (character? *character: WC_C('\0')), state);
+
+  if (result == (size_t)-1) return 0;
+  if (!character) result -= 1;
+
+  fwrite(bytes, 1, result, outputStream);
+  return !ferror(outputStream);
+}
+
+static int
 processStream (FILE *inputStream, const char *inputName) {
   mbstate_t inputState;
   mbstate_t outputState;
@@ -120,8 +132,15 @@ processStream (FILE *inputStream, const char *inputName) {
     if (ferror(inputStream)) goto inputError;
 
     if (!inputCount) {
+      if (!writeCharacter(NULL, &outputState)) goto outputError;
       fflush(outputStream);
       if (ferror(outputStream)) goto outputError;
+
+      if (!mbsinit(&inputState)) {
+        errno = EILSEQ;
+        goto inputError;
+      }
+
       return 1;
     }
 
@@ -147,14 +166,7 @@ processStream (FILE *inputStream, const char *inputName) {
           character = toCharacter(dots);
         }
 
-        {
-          char mb[0X1000];
-          size_t result = wcrtomb(mb, character, &outputState);
-
-          if (result == (size_t)-1) goto outputError;
-          fwrite(mb, 1, result, outputStream);
-          if (ferror(outputStream)) goto outputError;
-        }
+        if (!writeCharacter(&character, &outputState)) goto outputError;
       }
     }
   }
