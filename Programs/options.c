@@ -31,6 +31,11 @@
 #include "parse.h"
 #include "system.h"
 
+#undef ALLOW_DOS_OPTION_SYNTAX
+#if defined(__MINGW32__) || defined(__MSDOS__)
+#define ALLOW_DOS_OPTION_SYNTAX
+#endif /* allow DOS syntax */
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
@@ -266,8 +271,10 @@ processCommandLine (
   const char *reset = NULL;
   int resetLetter;
 
+#ifdef ALLOW_DOS_OPTION_SYNTAX
   const char dosPrefix = '/';
   int dosSyntax = 0;
+#endif /* ALLOW_DOS_OPTION_SYNTAX */
 
   int optHelp = 0;
   int optHelpAll = 0;
@@ -345,8 +352,9 @@ processCommandLine (
   }
 
   if (*argumentCount > 1)
-    if (*(*argumentVector)[1] == dosPrefix)
-      dosSyntax = 1;
+#ifdef ALLOW_DOS_OPTION_SYNTAX
+    if (*(*argumentVector)[1] == dosPrefix) dosSyntax = 1;
+#endif /* ALLOW_DOS_OPTION_SYNTAX */
 
   opterr = 0;
   optind = 1;
@@ -360,6 +368,7 @@ processCommandLine (
     } else {
       char *argument = (*argumentVector)[optind];
 
+#ifdef ALLOW_DOS_OPTION_SYNTAX
       if (dosSyntax) {
         prefix = dosPrefix;
         optind++;
@@ -420,7 +429,10 @@ processCommandLine (
             }
           }
         }
-      } else if (reset) {
+      } else
+#endif /* ALLOW_DOS_OPTION_SYNTAX */
+
+      if (reset) {
         prefix = resetPrefix;
 
         if (!(option = *reset++)) {
