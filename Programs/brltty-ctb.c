@@ -359,22 +359,13 @@ main (int argc, char *argv[]) {
       if ((contractionTablePath = makePath(opt_tablesDirectory, contractionTableFile))) {
         if ((contractionTable = compileContractionTable(contractionTablePath))) {
           if (*opt_textTable) {
-            char *textTableFile;
+            char *textTablePath;
 
             putCell = putMappedCharacter;
 
-            if ((textTableFile = ensureTextTableExtension(opt_textTable))) {
-              char *textTablePath;
-
-              if ((textTablePath = makePath(opt_tablesDirectory, textTableFile))) {
-                exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
-
-                free(textTablePath);
-              } else {
-                exitStatus = PROG_EXIT_FATAL;
-              }
-
-              free(textTableFile);
+            if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
+              exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+              free(textTablePath);
             } else {
               exitStatus = PROG_EXIT_FATAL;
             }
