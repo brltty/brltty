@@ -34,6 +34,7 @@
 static char *opt_tablesDirectory;
 static char *opt_inputTable;
 static char *opt_outputTable;
+static int opt_sixDots;
 
 static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
@@ -64,6 +65,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_outputTable,
     .defaultSetting = tableName_unicode,
     .description = strtext("Path to output text table.")
+  },
+
+  { .letter = '6',
+    .word = "six-dots",
+    .flags = OPT_Config | OPT_Environ,
+    .setting.flag = &opt_sixDots,
+    .description = strtext("Remove dots seven and eight.")
   },
 END_OPTION_TABLE
 
@@ -109,7 +117,13 @@ processStream (FILE *inputStream, const char *inputName) {
   while (1) {
     char inputBuffer[0X1000];
     size_t inputCount = fread(inputBuffer, 1, sizeof(inputBuffer), inputStream);
-    if (!inputCount) return 1;
+    if (ferror(inputStream)) goto inputError;
+
+    if (!inputCount) {
+      fflush(outputStream);
+      if (ferror(outputStream)) goto outputError;
+      return 1;
+    }
 
     {
       char *byte = inputBuffer;
@@ -127,7 +141,11 @@ processStream (FILE *inputStream, const char *inputName) {
           inputCount -= result;
         }
 
-        if (!iswcntrl(character)) character = toCharacter(toDots(character));
+        if (!iswcntrl(character)) {
+          unsigned char dots = toDots(character);
+          if (opt_sixDots) dots &= ~(BRL_DOT7 | BRL_DOT8);
+          character = toCharacter(dots);
+        }
 
         {
           char mb[0X1000];
