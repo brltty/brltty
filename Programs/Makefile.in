@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty brltty-trtxt$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-everything: all all-brltest all-scrtest all-spktest ttbtest$X ctbtest$X all-ktbtest tunetest$X $(ALL_API)
+all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-ctb$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+everything: all all-brltest all-scrtest all-spktest all-ktbtest tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -470,6 +470,53 @@ brltty-trtxt.$O:
 
 ###############################################################################
 
+BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O $(CHARSET_OBJECTS) datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
+
+brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
+
+brltty-ttb.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c
+
+ttb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
+
+ttb_native.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
+
+ttb_gnome.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
+
+ttb_louis.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_louis.c
+
+ttb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
+
+check-text-tables: brltty-ttb$X
+	for file in $(SRC_TOP)$(TBL_DIR)/*.ttb; do LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
+
+###############################################################################
+
+BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) prefs.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS) $(HOSTCMD_OBJECTS) lock.$O unicode.$O
+
+brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+
+brltty-ctb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
+
+ctb_compile.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
+
+ctb_translate.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
+
+check-contraction-tables: brltty-ctb$X
+	for file in $(SRC_TOP)$(TBL_DIR)/*.ctb; do ./brltty-ctb$X -T$(SRC_TOP)$(TBL_DIR) -c$$file </dev/null; done
+
+###############################################################################
+
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(MOUNT_OBJECTS) ttb_translate.$O cmd.$O $(CHARSET_OBJECTS) lock.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
@@ -500,58 +547,11 @@ scrtest.$O:
 
 ###############################################################################
 
-TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O $(CHARSET_OBJECTS) datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
-
-ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(TTBTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
-
-ttbtest.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ttbtest.c
-
-ttb_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
-
-ttb_native.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
-
-ttb_gnome.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
-
-ttb_louis.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_louis.c
-
-ttb_translate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
-
-check-text-tables: ttbtest$X
-	for file in $(SRC_TOP)$(TBL_DIR)/*.ttb; do LD_LIBRARY_PATH=$(BLD_DIR) ./ttbtest$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
-
-###############################################################################
-
 atb_compile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_compile.c
 
 atb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_translate.c
-
-###############################################################################
-
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) prefs.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS) $(HOSTCMD_OBJECTS) lock.$O unicode.$O
-
-ctbtest$X: $(CTBTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
-
-ctbtest.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctbtest.c
-
-ctb_compile.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
-
-ctb_translate.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
-
-check-contraction-tables: ctbtest$X
-	for file in $(SRC_TOP)$(TBL_DIR)/*.ctb; do ./ctbtest$X -T$(SRC_TOP)$(TBL_DIR) -c$$file </dev/null; done
 
 ###############################################################################
 
@@ -679,9 +679,11 @@ check-speech: brltty speech-drivers
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X brltty-trtxt$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
 
