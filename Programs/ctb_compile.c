@@ -805,7 +805,7 @@ destroyContractionTable (ContractionTable *table) {
 
 char *
 ensureContractionTableExtension (const char *path) {
-  return ensureExtension(path, CONTRACTION_TABLE_EXTENSION);
+  return ensureFileExtension(path, CONTRACTION_TABLE_EXTENSION);
 }
 
 char *

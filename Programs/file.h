@@ -34,7 +34,7 @@ extern const char *locatePathExtension (const char *path);
 extern int isExplicitPath (const char *path);
 
 extern char *makePath (const char *directory, const char *file);
-extern char *ensureExtension (const char *path, const char *extension);
+extern char *ensureFileExtension (const char *path, const char *extension);
 extern char *makeFilePath (const char *directory, const char *name, const char *extension);
 
 extern int testPath (const char *path);

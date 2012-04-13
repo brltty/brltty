@@ -510,7 +510,7 @@ newFilesMenuItem (
     if (pattern) {
       files->pattern = pattern; 
 
-      if ((files->initial = *initial? ensureExtension(initial, extension): strdup(""))) {
+      if ((files->initial = *initial? ensureFileExtension(initial, extension): strdup(""))) {
         if ((files->current = strdup(files->initial))) {
           MenuItem *item = newMenuItem(menu, &files->setting, name);
 

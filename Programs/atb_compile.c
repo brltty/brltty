@@ -202,7 +202,7 @@ destroyAttributesTable (AttributesTable *table) {
 
 char *
 ensureAttributesTableExtension (const char *path) {
-  return ensureExtension(path, ATTRIBUTES_TABLE_EXTENSION);
+  return ensureFileExtension(path, ATTRIBUTES_TABLE_EXTENSION);
 }
 
 char *

@@ -274,7 +274,7 @@ destroyTextTable (TextTable *table) {
 
 char *
 ensureTextTableExtension (const char *path) {
-  return ensureExtension(path, TEXT_TABLE_EXTENSION);
+  return ensureFileExtension(path, TEXT_TABLE_EXTENSION);
 }
 
 char *

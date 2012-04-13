@@ -1432,7 +1432,7 @@ destroyKeyTable (KeyTable *table) {
 
 char *
 ensureKeyTableExtension (const char *path) {
-  return ensureExtension(path, KEY_TABLE_EXTENSION);
+  return ensureFileExtension(path, KEY_TABLE_EXTENSION);
 }
 
 char *

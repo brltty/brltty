@@ -133,7 +133,7 @@ makePath (const char *directory, const char *file) {
 }
 
 char *
-ensureExtension (const char *path, const char *extension) {
+ensureFileExtension (const char *path, const char *extension) {
   const char *strings[2];
   int count = 0;
   const size_t pathLength = strlen(path);
@@ -151,7 +151,7 @@ ensureExtension (const char *path, const char *extension) {
 char *
 makeFilePath (const char *directory, const char *name, const char *extension) {
   char *path = NULL;
-  char *file = ensureExtension(name, extension);
+  char *file = ensureFileExtension(name, extension);
 
   if (file) {
     path = makePath(directory, file);
