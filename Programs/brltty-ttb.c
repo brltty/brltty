@@ -1901,7 +1901,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "ttbtest",
+      .applicationName = "brltty-ttb",
       .argumentsSummary = "input-table [output-table]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);

@@ -318,7 +318,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "ctbtest",
+      .applicationName = "brltty-ctb",
       .argumentsSummary = "[{input-file | -} ...]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
