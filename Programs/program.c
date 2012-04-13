@@ -44,6 +44,11 @@
 const char *programPath;
 const char *programName;
 
+const char *const standardStreamArgument = "-";
+const char *const standardInputName = "<standard-input>";
+const char *const standardOutputName = "<standard-output>";
+const char *const standardErrorName = "<standard-error>";
+
 static void
 prepareLocale (void) {
   setlocale(LC_ALL, "");

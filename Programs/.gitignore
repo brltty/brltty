@@ -13,6 +13,7 @@ brlapi_constants.h
 *.exe
 brltty
 brltty-config
+brltty-trtxt
 apitest
 brltest
 ctbtest

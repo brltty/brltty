@@ -387,7 +387,7 @@ main (int argc, char *argv[]) {
             if (argc) {
               do {
                 char *path = *argv;
-                if (strcmp(path, "-") == 0) {
+                if (strcmp(path, standardStreamArgument) == 0) {
                   exitStatus = processStream(stdin);
                 } else {
                   FILE *stream = fopen(path, "r");

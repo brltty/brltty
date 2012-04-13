@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-everything: all-brltty all-brltest all-scrtest all-spktest$X ttbtest$X ctbtest$X all-ktbtest tunetest$X $(ALL_API)
+all: all-brltty brltty-trtxt$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+everything: all all-brltest all-scrtest all-spktest ttbtest$X ctbtest$X all-ktbtest tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -460,6 +460,16 @@ driver.$O:
 
 ###############################################################################
 
+BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ttb_translate.$O ttb_compile.$O ttb_native.$O unicode.$O $(CHARSET_OBJECTS) datafile.$O lock.$O queue.$O dataarea.$O
+
+brltty-trtxt$X: $(BRLTTY_TRTXT_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+
+brltty-trtxt.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-trtxt.c
+
+###############################################################################
+
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(MOUNT_OBJECTS) ttb_translate.$O cmd.$O $(CHARSET_OBJECTS) lock.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
@@ -669,8 +679,9 @@ check-speech: brltty speech-drivers
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-trtxt$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
 
@@ -744,7 +755,7 @@ uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-manp
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
-	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-install
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 

@@ -641,7 +641,7 @@ static const FormatEntry *outputFormat;
 static FILE *
 openTable (const char **file, const char *mode, const char *directory, FILE *stdStream, const char *stdName) {
   if (stdStream) {
-    if (strcmp(*file, "-") == 0) {
+    if (strcmp(*file, standardStreamArgument) == 0) {
       *file = stdName;
       return stdStream;
     }
@@ -663,14 +663,14 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
 static ProgramExitStatus
 convertTable (void) {
   ProgramExitStatus exitStatus;
-  FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, "<standard-input>");
+  FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, standardInputName);
 
   if (inputFile) {
     TextTableData *ttd;
 
     if ((ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
       if (outputPath) {
-        FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
+        FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, standardOutputName);
 
         if (outputFile) {
           if (outputFormat->write(outputPath, outputFile, ttd, outputFormat->data)) {
@@ -1373,7 +1373,7 @@ saveTable (EditTableData *etd) {
   if (!outputPath) outputPath = inputPath;
   if (!outputFormat) outputFormat = inputFormat;
 
-  if ((outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>"))) {
+  if ((outputFile = openTable(&outputPath, "w", NULL, stdout, standardOutputName))) {
     if (outputFormat->write(outputPath, outputFile, etd->ttd, outputFormat->data)) {
       ok = 1;
       etd->updated = 0;
