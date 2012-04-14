@@ -36,10 +36,10 @@ typedef enum {
 extern const char *programPath;
 extern const char *programName;
 
-extern const char *const standardStreamArgument;
-extern const char *const standardInputName;
-extern const char *const standardOutputName;
-extern const char *const standardErrorName;
+extern const char standardStreamArgument[];
+extern const char standardInputName[];
+extern const char standardOutputName[];
+extern const char standardErrorName[];
 
 extern void beginProgram (int argumentCount, char **argumentVector);
 extern void endProgram (void);

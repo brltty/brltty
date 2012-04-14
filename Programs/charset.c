@@ -26,7 +26,7 @@
 #include "lock.h"
 #include "unicode.h"
 
-const char *const defaultCharset = "ISO-8859-1";
+const char defaultCharset[] = "ISO-8859-1";
 
 static char *currentCharset = NULL;
 
