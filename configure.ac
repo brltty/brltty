@@ -598,9 +598,9 @@ BRLTTY_ARG_DISABLE(
             ;;
       esac
 
-      BRLTTY_BINDINGS([OCaml])
       BRLTTY_BINDINGS([Java])
       BRLTTY_BINDINGS([Lisp])
+      BRLTTY_BINDINGS([OCaml])
       BRLTTY_BINDINGS([Python])
       BRLTTY_BINDINGS([Tcl])
 
