@@ -253,30 +253,14 @@ Install this package if you have an application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-ocaml
-Version: @api_release@
-Group: Applications/System
-License: LGPL
-
-AutoProv: 1
-
-AutoReq: 1
-
-Summary: OCaml bindings for BrlAPI.
-%description -n brlapi-ocaml
-This package provides the OCaml bindings for BrlAPI,
-which is the Application Programming Interface to BRLTTY.
-
-Install this package if you have an OCaml application
-which directly accesses a refreshable braille display.
-
-
 %package -n brlapi-java
 Version: @api_release@
 Group: Applications/System
 License: LGPL
 
-AutoProv: 1
+AutoProv: 0
+Provides: @JAVA_JAR_DIR@/brlapi.jar
+Provides: @JAVA_JNI_DIR@/libbrlapi_java.so
 
 AutoReq: 1
 
@@ -289,12 +273,32 @@ Install this package if you have a Java application
 which directly accesses a refreshable braille display.
 
 
+%package -n brlapi-ocaml
+Version: @api_release@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 0
+Provides: @OCAMLLIB@/brlapi
+
+AutoReq: 1
+
+Summary: OCaml bindings for BrlAPI.
+%description -n brlapi-ocaml
+This package provides the OCaml bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have an OCaml application
+which directly accesses a refreshable braille display.
+
+
 %package -n brlapi-python
 Version: @api_release@
 Group: Applications/System
 License: LGPL
 
-AutoProv: 1
+AutoProv: 0
+Provides: @PYTHON_SITE_PKG@/brlapi.so
 
 AutoReq: 1
 
@@ -312,7 +316,8 @@ Version: @api_release@
 Group: Applications/System
 License: LGPL
 
-AutoProv: 1
+AutoProv: 0
+Provides: @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
 
 AutoReq: 1
 
@@ -425,12 +430,12 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_bindir}/xbrlapi
 %doc %{_docdir}/*/Manual-BrlAPI
 
-%files -n brlapi-ocaml
-@OCAMLLIB@/brlapi
-
 %files -n brlapi-java
 @JAVA_JAR_DIR@/*
 @JAVA_JNI_DIR@/*
+
+%files -n brlapi-ocaml
+@OCAMLLIB@/brlapi
 
 %files -n brlapi-python
 @PYTHON_SITE_PKG@/[bB]rlapi[-.]*
