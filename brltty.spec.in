@@ -4,7 +4,7 @@ Release: 1
 
 Group: System Environment/Daemons
 License: GPL
-Vendor: The BRLTTY Team
+Vendor: The BRLTTY Developers
 Packager: Dave Mielke <dave@mielke.cc>
 URL: http://mielke.cc/brltty/
 Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
@@ -47,6 +47,194 @@ has also been incorporated.
 
 Install this package if you use a refreshable braille display.
 
+
+%package -n brltty-braille-brlapi
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: brlapi
+
+Summary: BrlAPI braille driver for BRLTTY.
+%description -n brltty-braille-brlapi
+This package provides the BrlAPI braille driver for BRLTTY.
+
+Install this package if you need to communicate with
+another instance of BRLTTY which is actually in control
+of the braille device.
+
+
+%package -n brltty-braille-xwindow
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: XWindow braille driver for BRLTTY.
+%description -n brltty-braille-xwindow
+This package provides the XWindow braille driver for BRLTTY.
+This driver presents a virtual braille device within a graphical
+user interface. It is primarily intended for sighted developers
+who don't have access to a real braille device but still wish to
+assess the accessibility of their applications.
+
+Install this package if you would like to see how usable an
+application would be by a blind person using a braille device.
+
+
+%package -n brltty-speech-espeak
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: espeak
+
+Summary: eSpeak speech driver for BRLTTY.
+%description -n brltty-speech-espeak
+This package provides the eSpeak speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+eSpeak text-to-speech engine.
+
+
+%package -n brltty-speech-festival
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: festival
+
+Summary: Festival speech driver for BRLTTY.
+%description -n brltty-speech-festival
+This package provides the Festival speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Festival text-to-speech engine.
+
+
+%package -n brltty-speech-flite
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: flite
+
+Summary: Festival Lite speech driver for BRLTTY.
+%description -n brltty-speech-flite
+This package provides the Festival Lite speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Festival Lite text-to-speech engine.
+
+
+%package -n brltty-speech-speechd
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: speech-dispatcher
+
+Summary: Speech Dispatcher speech driver for BRLTTY.
+%description -n brltty-speech-speechd
+This package provides the Speech Dispatcher speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Speech Dispatcher text-to-speech server.
+
+
+%package -n brltty-screen-atspi
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: at-spi
+
+Summary: AT-SPI screen driver for BRLTTY.
+%description -n brltty-screen-atspi
+This package provides the AT-SPI screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+access GTK-based applications via the Assistive
+Technology Service Provider Interface.
+
+
+%package -n brltty-screen-atspi2
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: dbus
+
+Summary: AT-SPI2 screen driver for BRLTTY.
+%description -n brltty-screen-atspi2
+This package provides the AT-SPI2 screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+access graphical applications via the D-Bus port of
+the Assistive Technology Service Provider Interface.
+
+
+%package -n brltty-screen-screen
+Version: @PACKAGE_VERSION@
+Release: 1
+
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: 1
+
+AutoReq: 1
+Requires: screen
+
+Summary: Screen screen driver for BRLTTY.
+%description -n brltty-screen-screen
+This package provides the Screen screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+directly access session windows maintained by the
+screen program.
+
+
 %package -n brlapi
 Version: @api_release@
 Group: Applications/System
@@ -64,7 +252,8 @@ Programming Interface to BRLTTY.
 Install this package if you have an application
 which directly accesses a refreshable braille display.
 
-%package -n brlapi-caml
+
+%package -n brlapi-ocaml
 Version: @api_release@
 Group: Applications/System
 License: LGPL
@@ -73,13 +262,14 @@ AutoProv: 1
 
 AutoReq: 1
 
-Summary: Caml bindings for BrlAPI.
-%description -n brlapi-caml
-This package provides the Caml bindings for BrlAPI,
+Summary: OCaml bindings for BrlAPI.
+%description -n brlapi-ocaml
+This package provides the OCaml bindings for BrlAPI,
 which is the Application Programming Interface to BRLTTY.
 
-Install this package if you have a Caml application
+Install this package if you have an OCaml application
 which directly accesses a refreshable braille display.
+
 
 %package -n brlapi-java
 Version: @api_release@
@@ -98,6 +288,7 @@ which is the Application Programming Interface to BRLTTY.
 Install this package if you have a Java application
 which directly accesses a refreshable braille display.
 
+
 %package -n brlapi-python
 Version: @api_release@
 Group: Applications/System
@@ -115,6 +306,7 @@ which is the Application Programming Interface to BRLTTY.
 Install this package if you have a Python application
 which directly accesses a refreshable braille display.
 
+
 %package -n brlapi-tcl
 Version: @api_release@
 Group: Applications/System
@@ -131,6 +323,7 @@ which is the Application Programming Interface to BRLTTY.
 
 Install this package if you have a Tcl application
 which directly accesses a refreshable braille display.
+
 
 %package -n brlapi-devel
 Version: @api_release@
@@ -160,7 +353,7 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --with-braille-driver=-tt,-vr,-xw
+%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --with-braille-driver=-tt,-vr
 make
 
 %install
@@ -171,12 +364,22 @@ install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 %clean
 rm -fr "${RPM_BUILD_ROOT}"
 
+
 %files -f %{name}.lang
 %defattr(-,root,root)
 %{_bindir}/brltty
 %{_bindir}/brltty-*
 %{_bindir}/vstp
 %{_libdir}/brltty
+%exclude %{_libdir}/brltty/libbrlttybba.so
+%exclude %{_libdir}/brltty/libbrlttybxw.so
+%exclude %{_libdir}/brltty/libbrlttyses.so
+%exclude %{_libdir}/brltty/libbrlttysfl.so
+%exclude %{_libdir}/brltty/libbrlttysfv.so
+%exclude %{_libdir}/brltty/libbrlttyssd.so
+%exclude %{_libdir}/brltty/libbrlttyxas.so
+%exclude %{_libdir}/brltty/libbrlttyxa2.so
+%exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
 %doc %{_mandir}/man1/*
 %doc %{_docdir}/*/LICENSE*
@@ -189,13 +392,40 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/Manual-BRLTTY
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
 
+%files -n brltty-braille-brlapi
+%{_libdir}/brltty/libbrlttybba.so
+
+%files -n brltty-braille-xwindow
+%{_libdir}/brltty/libbrlttybxw.so
+
+%files -n brltty-speech-espeak
+%{_libdir}/brltty/libbrlttyses.so
+
+%files -n brltty-speech-festival
+%{_libdir}/brltty/libbrlttysfv.so
+
+%files -n brltty-speech-flite
+%{_libdir}/brltty/libbrlttysfl.so
+
+%files -n brltty-speech-speechd
+%{_libdir}/brltty/libbrlttyssd.so
+
+%files -n brltty-screen-atspi
+%{_libdir}/brltty/libbrlttyxas.so
+
+%files -n brltty-screen-atspi2
+%{_libdir}/brltty/libbrlttyxa2.so
+
+%files -n brltty-screen-screen
+%{_libdir}/brltty/libbrlttyxsc.so
+
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
 %{_bindir}/xbrlapi
 %doc %{_docdir}/*/Manual-BrlAPI
 
-%files -n brlapi-caml
+%files -n brlapi-ocaml
 @OCAMLLIB@/brlapi
 
 %files -n brlapi-java
@@ -218,6 +448,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
 %doc %{_docdir}/*/BrlAPIref
+
 
 %changelog
 * Mon Oct 10 2011 Dave Mielke <dave@mielke.cc> 4.3
