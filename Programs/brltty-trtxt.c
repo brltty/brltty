@@ -144,6 +144,7 @@ processStream (FILE *inputStream, const char *inputName) {
 
           if (result == (size_t)-2) break;
           if (result == (size_t)-1) goto inputError;
+          if (!result) result = 1;
 
           byte += result;
           inputCount -= result;
