@@ -32,9 +32,10 @@ updateFiles() {
    executeCommand mkdir -p -- "${outputRoot}/${toDirectory}"
    set -- `cd "${fromRoot}/${fromDirectory}" && echo ${*}`
 
-   for file
+   for fromFile
    do
-      executeCommand cp -a -- "${fromRoot}/${fromDirectory}/${file}" "${outputRoot}/${toDirectory}/"
+      fromPath="${fromRoot}/${fromDirectory}/${fromFile}"
+      [ -e "${fromPath}" ] && executeCommand cp -a -- "${fromPath}" "${outputRoot}/${toDirectory}/"
    done
 }
 
@@ -85,8 +86,10 @@ updateFiles "${sourceRoot}" "." "." "README" "LICENSE-*"
 
    for manual in `cd "${sourceRoot}/${documentsSubdirectory}" && echo Manual-*/*`
    do
-      updateFiles "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.sgml"
-      updateFiles "${buildRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.txt" "*.html"
+      for documentExtension in doc htm html pdf sgml txt
+      do
+         updateFiles "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.${documentExtension}"
+      done
    done
 
    for manual in BrlAPIref
