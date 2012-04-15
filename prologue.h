@@ -99,7 +99,11 @@ extern void usleep (int usec);
 #define NESTED_FUNC_ATTR __attribute__((__regparm__(1)))
 
 /* missing needed standard integer definitions */
-#define INT16_MAX 32767
+#define INT16_MAX 0X7FFF
+#define INT32_MAX 0X7FFFFFFF
+#define UINT32_C(i) (i)
+#define PRIuGRUB_UINT16_T "u"
+#define PRIuGRUB_UINT8_T "u"
 
 /* to get gettext() declared */
 #define GRUB_POSIX_GETTEXT_DOMAIN "brltty"
@@ -413,8 +417,15 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 
 /* configure is still making a few mistakes with respect to the grub environment */
 #ifdef GRUB_RUNTIME
+
+/* some headers exist but probably shouldn't */
 #undef HAVE_SIGNAL_H
 
+/* including <time.h> on its own yields compile errors */
+#undef HAVE_DECL_LOCALTIME_R
+#define HAVE_DECL_LOCALTIME_R 1
+
+/* AC_CHECK_FUNC() is checking local libraries - these are the errors that matter */
 #undef HAVE_FCHDIR
 #undef HAVE_SELECT
 #endif /* GRUB_RUNTIME */
