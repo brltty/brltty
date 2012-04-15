@@ -194,19 +194,19 @@ expandSeconds (
   uint16_t *year, uint8_t *month, uint8_t *day,
   uint8_t *hour, uint8_t *minute, uint8_t *second
 ) {
-#if defined(GRUB_RUNTIME)
-  *year = 0;
-  *month = 0;
-  *day = 0;
-  *hour = 0;
-  *minute = 0;
-  *second = 0;
-
-#else /* expand seconds */
   time_t time = seconds;
   struct tm description;
-
   localtime_r(&time, &description);
+
+#if defined(GRUB_RUNTIME)
+  *year = description.tm.year;
+  *month = description.tm.month - 1;
+  *day = description.tm.day - 1;
+  *hour = description.tm.hour;
+  *minute = description.tm.minute;
+  *second = description.tm.second;
+
+#else /* expand seconds */
   *year = description.tm_year + 1900;
   *month = description.tm_mon;
   *day = description.tm_mday - 1;
