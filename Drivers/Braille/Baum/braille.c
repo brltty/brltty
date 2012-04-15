@@ -919,15 +919,18 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
   int length = 0;
   char delimiter = ':';
 
-  sprintf(&buffer[length], "Baum Powerdown%n", &length);
-  for (entry=reasonTable; entry->bit; ++entry) {
+  STR_BEGIN(buffer, sizeof(buffer));
+  STR_PRINTF("Baum Powerdown");
+
+  for (entry=reasonTable; entry->bit; entry+=1) {
     if (reason & entry->bit) {
-      int count;
-      sprintf(&buffer[length], "%c %s%n", delimiter, entry->explanation, &count);
-      length += count;
+      STR_PRINTF("%c %s", delimiter, entry->explanation);
       delimiter = ',';
     }
   }
+
+  length = STR_LENGTH;
+  STR_END;
 
   logMessage(LOG_WARNING, "%.*s", length, buffer);
   return 1;
