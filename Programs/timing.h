@@ -41,6 +41,11 @@ typedef struct {
 extern void getCurrentTime (TimeValue *time);
 extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
 
+extern int32_t makeSeconds (
+  uint16_t year, uint8_t month, uint8_t day,
+  uint8_t hour, uint8_t minute, uint8_t second
+);
+
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int milliseconds);
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);

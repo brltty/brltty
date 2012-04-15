@@ -156,6 +156,24 @@ getTickLength (void) {
   return tickLength;
 }
 
+int32_t
+makeSeconds (
+  uint16_t year, uint8_t month, uint8_t day,
+  uint8_t hour, uint8_t minute, uint8_t second
+) {
+  struct tm time = {
+    .tm_year = year - 1900,
+    .tm_mon = month,
+    .tm_mday = day + 1,
+    .tm_hour = hour,
+    .tm_min = minute,
+    .tm_sec = second,
+    .tm_isdst = -1
+  };
+
+  return mktime(&time);
+}
+
 size_t
 formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
   time_t time = seconds;
