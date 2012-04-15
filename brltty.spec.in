@@ -1,30 +1,13 @@
 Name: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
+
 Vendor: The BRLTTY Developers
 Packager: Dave Mielke <dave@mielke.cc>
 URL: http://mielke.cc/brltty/
 Source: http://mielke.cc/brltty/releases/%{name}-%{version}.tar.gz
-
-BuildRequires: autoconf >= 2.53
-BuildRequires: make
-BuildRequires: gcc
-BuildRequires: /bin/sh
-BuildRequires: /bin/ln
-BuildRequires: /usr/bin/ld
-BuildRequires: /sbin/ldconfig
-BuildRequires: /usr/bin/ranlib
-BuildRequires: /usr/bin/ar
-BuildRequires: /usr/bin/awk
-BuildRequires: /usr/bin/bison
-BuildRequires: /usr/bin/install
-BuildRequires: glibc-devel
-BuildRequires: Pyrex
-BuildRequires: tcl
-BuildRequires: gcc-java
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _bindir /bin
@@ -32,10 +15,29 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _sysconfdir /etc
 
-AutoProv: 1
+BuildRequires: autoconf >= 2.53
+BuildRequires: make
+BuildRequires: gcc
+BuildRequires: /bin/sh
+BuildRequires: coreutils
+BuildRequires: binutils
+BuildRequires: ldconfig
+BuildRequires: /usr/bin/awk
+BuildRequires: glibc-devel
 
-AutoReq: 1
-Requires: /bin/sh
+BuildRequires: gcc-java
+
+BuildRequires: ocaml
+BuildRequires: ocaml-findlib
+
+BuildRequires: Pyrex
+
+BuildRequires: tcl
+BuildRequires: tcl-devel
+
+AutoProv: no
+Provides: brlapi-server
+AutoReq: yes
 
 Summary: Braille display driver for Linux/Unix.
 %description
@@ -51,14 +53,11 @@ Install this package if you use a refreshable braille display.
 %package -n brltty-braille-brlapi
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
-Requires: brlapi
+AutoProv: no
+AutoReq: yes
 
 Summary: BrlAPI braille driver for BRLTTY.
 %description -n brltty-braille-brlapi
@@ -72,13 +71,11 @@ of the braille device.
 %package -n brltty-braille-xwindow
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 
 Summary: XWindow braille driver for BRLTTY.
 %description -n brltty-braille-xwindow
@@ -95,13 +92,11 @@ application would be by a blind person using a braille device.
 %package -n brltty-speech-espeak
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: espeak
 
 Summary: eSpeak speech driver for BRLTTY.
@@ -115,13 +110,11 @@ eSpeak text-to-speech engine.
 %package -n brltty-speech-festival
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: festival
 
 Summary: Festival speech driver for BRLTTY.
@@ -135,13 +128,11 @@ Festival text-to-speech engine.
 %package -n brltty-speech-flite
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: flite
 
 Summary: Festival Lite speech driver for BRLTTY.
@@ -155,13 +146,11 @@ Festival Lite text-to-speech engine.
 %package -n brltty-speech-speechd
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: speech-dispatcher
 
 Summary: Speech Dispatcher speech driver for BRLTTY.
@@ -175,13 +164,11 @@ Speech Dispatcher text-to-speech server.
 %package -n brltty-screen-atspi
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: at-spi
 
 Summary: AT-SPI screen driver for BRLTTY.
@@ -196,13 +183,11 @@ Technology Service Provider Interface.
 %package -n brltty-screen-atspi2
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: dbus
 
 Summary: AT-SPI2 screen driver for BRLTTY.
@@ -217,13 +202,11 @@ the Assistive Technology Service Provider Interface.
 %package -n brltty-screen-screen
 Version: @PACKAGE_VERSION@
 Release: 1
-
 Group: System Environment/Daemons
 License: GPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: no
+AutoReq: yes
 Requires: screen
 
 Summary: Screen screen driver for BRLTTY.
@@ -235,14 +218,28 @@ directly access session windows maintained by the
 screen program.
 
 
+%package -n brltty-utils
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: Development/Tools
+License: GPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Commands for maintaining BRLTTY data files.
+%description -n brltty-utils
+This package provides a set of commands for maintaining BRLTTY's datafiles.
+
+
 %package -n brlapi
 Version: @api_release@
-Group: Applications/System
+Release: 1
+Group: System Environment/Libraries
 License: LGPL
 
-AutoProv: 1
-
-AutoReq: 1
+AutoProv: yes
+AutoReq: yes
 
 Summary: Appliation Programming Interface for BRLTTY.
 %description -n brlapi
@@ -253,92 +250,14 @@ Install this package if you have an application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-java
-Version: @api_release@
-Group: Applications/System
-License: LGPL
-
-AutoProv: 0
-Provides: @JAVA_JAR_DIR@/brlapi.jar
-Provides: @JAVA_JNI_DIR@/libbrlapi_java.so
-
-AutoReq: 1
-
-Summary: Java bindings for BrlAPI.
-%description -n brlapi-java
-This package provides the Java bindings for BrlAPI,
-which is the Application Programming Interface to BRLTTY.
-
-Install this package if you have a Java application
-which directly accesses a refreshable braille display.
-
-
-%package -n brlapi-ocaml
-Version: @api_release@
-Group: Applications/System
-License: LGPL
-
-AutoProv: 0
-Provides: @OCAMLLIB@/brlapi
-
-AutoReq: 1
-
-Summary: OCaml bindings for BrlAPI.
-%description -n brlapi-ocaml
-This package provides the OCaml bindings for BrlAPI,
-which is the Application Programming Interface to BRLTTY.
-
-Install this package if you have an OCaml application
-which directly accesses a refreshable braille display.
-
-
-%package -n brlapi-python
-Version: @api_release@
-Group: Applications/System
-License: LGPL
-
-AutoProv: 0
-Provides: @PYTHON_SITE_PKG@/brlapi.so
-
-AutoReq: 1
-
-Summary: Python bindings for BrlAPI.
-%description -n brlapi-python
-This package provides the Python bindings for BrlAPI,
-which is the Application Programming Interface to BRLTTY.
-
-Install this package if you have a Python application
-which directly accesses a refreshable braille display.
-
-
-%package -n brlapi-tcl
-Version: @api_release@
-Group: Applications/System
-License: LGPL
-
-AutoProv: 0
-Provides: @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
-
-AutoReq: 1
-
-Summary: Tcl bindings for BrlAPI.
-%description -n brlapi-tcl
-This package provides the Tcl bindings for BrlAPI,
-which is the Application Programming Interface to BRLTTY.
-
-Install this package if you have a Tcl application
-which directly accesses a refreshable braille display.
-
-
 %package -n brlapi-devel
 Version: @api_release@
-Group: Development/System
+Release: 1
+Group: Development/Libraries
 License: LGPL
 
-AutoProv: 1
-
-AutoReq: 1
-Requires: brlapi = @api_release@
+AutoProv: yes
+AutoReq: yes
 
 Summary: Headers, static archive, and documentation for BrlAPI.
 %description -n brlapi-devel
@@ -353,12 +272,99 @@ interfaces which are more specifically atuned to their needs.
 Install this package if you're developing or maintaining an application
 which directly accesses a refreshable braille display.
 
+
+%package -n brlapi-java
+Version: @api_release@
+Release: 1
+Group: System Environment/Libraries
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Java bindings for BrlAPI.
+%description -n brlapi-java
+This package provides the Java bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Java application
+which directly accesses a refreshable braille display.
+
+
+%package -n brlapi-ocaml
+Version: @api_release@
+Release: 1
+Group: System Environment/Libraries
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: OCaml bindings for BrlAPI.
+%description -n brlapi-ocaml
+This package provides the OCaml bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have an OCaml application
+which directly accesses a refreshable braille display.
+
+
+%package -n brlapi-python
+Version: @api_release@
+Release: 1
+Group: System Environment/Libraries
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Python bindings for BrlAPI.
+%description -n brlapi-python
+This package provides the Python bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Python application
+which directly accesses a refreshable braille display.
+
+
+%package -n brlapi-tcl
+Version: @api_release@
+Release: 1
+Group: System Environment/Libraries
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Tcl bindings for BrlAPI.
+%description -n brlapi-tcl
+This package provides the Tcl bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Tcl application
+which directly accesses a refreshable braille display.
+
+
+%package -n brlapi-utils
+Version: @api_release@
+Release: 1
+Group: Applications/System
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Appliation Programming Interface for BRLTTY.
+%description -n brlapi-utils
+This package provides a set of commands for maintaining BRLTTY's datafiles.
+
+
 %prep
 # %setup -n %{name}-%{version}
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --with-braille-driver=-tt,-vr
+%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --with-braille-driver=-tt,-vr
 make
 
 %install
@@ -373,8 +379,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -f %{name}.lang
 %defattr(-,root,root)
 %{_bindir}/brltty
-%{_bindir}/brltty-*
-%{_bindir}/vstp
 %{_libdir}/brltty
 %exclude %{_libdir}/brltty/libbrlttybba.so
 %exclude %{_libdir}/brltty/libbrlttybxw.so
@@ -386,7 +390,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
 %exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
-%doc %{_mandir}/man1/*
+%doc %{_mandir}/man1/brltty.1.gz
 %doc %{_docdir}/*/LICENSE*
 %doc %{_docdir}/*/README*
 %doc %{_docdir}/*/ChangeLog
@@ -424,10 +428,14 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-screen-screen
 %{_libdir}/brltty/libbrlttyxsc.so
 
+%files -n brltty-utils
+%{_bindir}/brltty-*
+%{_bindir}/vstp
+%doc %{_mandir}/man1/vstp.1.gz
+
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
-%{_bindir}/xbrlapi
 %doc %{_docdir}/*/Manual-BrlAPI
 
 %files -n brlapi-java
@@ -453,6 +461,10 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
 %doc %{_docdir}/*/BrlAPIref
+
+%files -n brlapi-utils
+%{_bindir}/xbrlapi
+%doc %{_mandir}/man1/xbrlapi.1.gz
 
 
 %changelog
