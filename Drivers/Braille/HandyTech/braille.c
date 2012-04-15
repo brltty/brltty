@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -1184,33 +1183,44 @@ logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
 
 static int
 synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
-  struct tm t0 = {
-    .tm_year = getBigEndian16(dateTime->year) - 1900,
-    .tm_mon = dateTime->month - 1,
-    .tm_mday = dateTime->day,
-    .tm_hour = dateTime->hour,
-    .tm_min = dateTime->minute,
-    .tm_sec = dateTime->second,
-    .tm_isdst = -1
-  };
+  long int delta;
+  TimeValue hostTime;
+  getCurrentTime(&hostTime);
 
-  time_t deviceTime = mktime(&t0);
-  time_t hostTime = time(NULL);
-  double delta = difftime(deviceTime, hostTime);
-
-  if (fabs(delta) > 1) {
-    const struct tm *t = localtime(&hostTime);
-
-    HT_DateTime payload = {
-      .month = t->tm_mon + 1,
-      .day = t->tm_mday,
-      .hour = t->tm_hour,
-      .minute = t->tm_min,
-      .second = t->tm_sec
+  {
+    const TimeValue deviceTime = {
+      .seconds = makeSeconds(
+        getBigEndian16(dateTime->year),
+        dateTime->month - 1,
+        dateTime->day - 1,
+        dateTime->hour,
+        dateTime->minute,
+        dateTime->second
+      )
     };
-    putLittleEndian16(&payload.year, t->tm_year + 1900);
 
-    logMessage(LOG_DEBUG, "Time difference between host and device: %.0f", delta);
+    delta = millisecondsBetween(&hostTime, &deviceTime);
+    if (delta < 0) delta = -delta;
+  }
+
+  if (delta > 1000) {
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    HT_DateTime payload;
+
+    expandSeconds(hostTime.seconds, &year, &month, &day, &hour, &minute, &second);
+    putLittleEndian16(&payload.year, year);
+    payload.month = month + 1;
+    payload.day = day + 1;
+    payload.hour = hour;
+    payload.minute = minute;
+    payload.second = second;
+    logMessage(LOG_DEBUG, "Time difference between host and device: %ld.%03ld",
+               (delta / MSECS_PER_SEC), (delta % MSECS_PER_SEC));
 
     if (writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
                             (unsigned char *)&payload, sizeof(payload))) {
