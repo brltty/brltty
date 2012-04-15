@@ -411,7 +411,10 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O prefs.$O menu.$O ses.$O status.$O clipboard.$O touch.$O async.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O $(HOSTCMD_OBJECTS) lock.$O $(MOUNT_OBJECTS) queue.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+BRLTTY_CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) config.$O prefs.$O menu.$O ses.$O status.$O clipboard.$O touch.$O async.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O $(HOSTCMD_OBJECTS) lock.$O $(MOUNT_OBJECTS) queue.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+brltty-core: $(BRLTTY_CORE_OBJECTS)
+
+BRLTTY_OBJECTS = main.$O $(BRLTTY_CORE_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
