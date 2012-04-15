@@ -156,11 +156,24 @@ getTickLength (void) {
   return tickLength;
 }
 
+size_t
+formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
+  time_t time = seconds;
+  struct tm description;
+
+  localtime_r(&time, &description);
+  return strftime(buffer, size, format, &description);
+}
+
 int32_t
 makeSeconds (
   uint16_t year, uint8_t month, uint8_t day,
   uint8_t hour, uint8_t minute, uint8_t second
 ) {
+#if defined(GRUB_RUNTIME)
+  return 0;
+
+#else /* make seconds */
   struct tm time = {
     .tm_year = year - 1900,
     .tm_mon = month,
@@ -172,15 +185,7 @@ makeSeconds (
   };
 
   return mktime(&time);
-}
-
-size_t
-formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
-  time_t time = seconds;
-  struct tm description;
-
-  localtime_r(&time, &description);
-  return strftime(buffer, size, format, &description);
+#endif /* make seconds */
 }
 
 void
@@ -189,6 +194,15 @@ expandSeconds (
   uint16_t *year, uint8_t *month, uint8_t *day,
   uint8_t *hour, uint8_t *minute, uint8_t *second
 ) {
+#if defined(GRUB_RUNTIME)
+  *year = 0;
+  *month = 0;
+  *day = 0;
+  *hour = 0;
+  *minute = 0;
+  *second = 0;
+
+#else /* expand seconds */
   time_t time = seconds;
   struct tm description;
 
@@ -199,6 +213,7 @@ expandSeconds (
   *hour = description.tm_hour;
   *minute = description.tm_min;
   *second = description.tm_sec;
+#endif /* expand seconds */
 }
 
 void
