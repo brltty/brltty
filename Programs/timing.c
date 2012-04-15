@@ -184,6 +184,24 @@ formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
 }
 
 void
+expandSeconds (
+  int32_t seconds,
+  uint16_t *year, uint8_t *month, uint8_t *day,
+  uint8_t *hour, uint8_t *minute, uint8_t *second
+) {
+  time_t time = seconds;
+  struct tm description;
+
+  localtime_r(&time, &description);
+  *year = description.tm_year + 1900;
+  *month = description.tm_mon;
+  *day = description.tm_mday - 1;
+  *hour = description.tm_hour;
+  *minute = description.tm_min;
+  *second = description.tm_sec;
+}
+
+void
 normalizeTimeValue (TimeValue *time) {
   while (time->nanoseconds < 0) {
     time->seconds -= 1;
