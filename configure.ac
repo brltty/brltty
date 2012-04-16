@@ -161,22 +161,6 @@ BRLTTY_ARG_REQUIRED(
    [include_directory], ["${includedir}/${PACKAGE_NAME}"]
 )
 
-brltty_default_compiler_prefix="${host_os}-"
-BRLTTY_ARG_WITH(
-   [compiler-prefix], [PREFIX],
-   [prefix for compiler programs],
-   [compiler_prefix], [""]
-)
-if test "${compiler_prefix}" = "no"
-then
-   compiler_prefix=""
-elif test "${compiler_prefix}" = "yes"
-then
-   compiler_prefix="${brltty_default_compiler_prefix}"
-fi
-AC_SUBST([compiler_prefix])
-BRLTTY_SUMMARY_ITEM([compiler-prefix], [compiler_prefix])
-
 brltty_default_init_path=/sbin/init_real
 BRLTTY_ARG_WITH(
    [init-path], [FILE],
@@ -240,7 +224,7 @@ AC_PROG_CXX
 AC_CHECK_PROGS([CC_FOR_BUILD], [gcc cc])
 
 brltty_gcc_cflags="-std=gnu99 -Wall"
-brltty_gcc_cppflags="-std=gnu99 -Wall"
+brltty_gcc_cppflags=""
 case "${build_os} ${host_os}"
 in
    cygwin*\ mingw*)
@@ -303,9 +287,9 @@ test "${GXX}" = "yes" && {
    CXXFLAGS="${CXXFLAGS} ${brltty_gcc_cflags}"
 }
 
-AC_CHECK_PROGS([LD_FOR_BUILD], [ld])
 AC_CHECK_TOOL([LD], [ld])
 AC_PROG_RANLIB
+
 AC_PROG_AWK
 AC_PROG_LN_S
 
@@ -877,8 +861,7 @@ in
       brltty_cv_prog_cc_sysflags=""
       ;;
 esac])
-SYSCFLAGS="${brltty_cv_prog_cc_sysflags}"
-AC_SUBST([SYSCFLAGS])
+CPPFLAGS="${CPPFLAGS} ${brltty_cv_prog_cc_sysflags}"
 
 AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
 if test "${GCC}" = "yes"
@@ -1032,7 +1015,7 @@ in
       system_object="hpux"
       if test -d /opt/audio/include
       then
-         SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
+         CPPFLAGS="${CPPFLAGS} -I/opt/audio/include"
          LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
          AC_DEFINE([HAVE_HPUX_AUDIO], [1],
                    [Define this if HP-UX audio support is available.])
