@@ -27,7 +27,7 @@ include $(SRC_DIR)/reldeps.mk
 B = build.$O
 
 %.$B: $(SRC_DIR)/%.c
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $<
+	$(CC_FOR_BUILD) $(HOSTCFLAGS) -o $@ -c $<
 
 brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api

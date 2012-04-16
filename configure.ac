@@ -237,6 +237,8 @@ then
 fi
 AC_PROG_CXX
 
+AC_CHECK_PROGS([CC_FOR_BUILD], [gcc cc])
+
 brltty_gcc_cflags="-std=gnu99 -Wall"
 brltty_gcc_cppflags="-std=gnu99 -Wall"
 case "${build_os} ${host_os}"
@@ -301,7 +303,8 @@ test "${GXX}" = "yes" && {
    CXXFLAGS="${CXXFLAGS} ${brltty_gcc_cflags}"
 }
 
-AC_CHECK_PROGS([LD], [ld], [ld])
+AC_CHECK_PROGS([LD_FOR_BUILD], [ld])
+AC_CHECK_TOOL([LD], [ld])
 AC_PROG_RANLIB
 AC_PROG_AWK
 AC_PROG_LN_S
