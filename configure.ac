@@ -1670,7 +1670,7 @@ AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
 
 [brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
-s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk.in:\1/Makefile.in%g
+s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 '`"]
 
 AC_OUTPUT([

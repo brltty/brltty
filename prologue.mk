@@ -1,3 +1,4 @@
+# @configure_input@
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -18,20 +19,10 @@
 
 SRC_TOP = @top_srcdir@/
 SRC_DIR = @srcdir@
-# VPATH = @srcdir@
+VPATH = @srcdir@
 
 BLD_TOP = ./@top_builddir@/
 BLD_DIR = @builddir@
 
-O = @OBJEXT@
-X = @EXEEXT@
-
-@SET_MAKE@
-
-default: all
-
-include $(BLD_TOP)config.mk
 include $(SRC_TOP)common.mk
-include $(SRC_TOP)absdeps.mk
-include $(SRC_DIR)/reldeps.mk
 

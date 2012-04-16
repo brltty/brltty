@@ -1,3 +1,4 @@
+# @configure_input@
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #

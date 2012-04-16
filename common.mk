@@ -16,7 +16,18 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+default: all
+
 FORCE:
+
+include $(BLD_TOP)config.mk
+include $(SRC_TOP)absdeps.mk
+include $(SRC_DIR)/reldeps.mk
+
+B = build.$O
+
+%.$B: $(SRC_DIR)/%.c
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $<
 
 brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api

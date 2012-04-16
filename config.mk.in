@@ -1,3 +1,4 @@
+# @configure_input@
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -16,20 +17,28 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-BUILD = @build@
+@SET_MAKE@
+
+BUILD_ALIAS = @build_alias@
+BUILD_SYSTEM = @build@
 BUILD_CPU = @build_cpu@
-BUILD_OS = @build_os@
 BUILD_VENDOR = @build_vendor@
+BUILD_OS = @build_os@
 
-HOST = @host@
+HOST_ALIAS = @host_alias@
+HOST_SYSTEM = @host@
 HOST_CPU = @host_cpu@
-HOST_OS = @host_os@
 HOST_VENDOR = @host_vendor@
+HOST_OS = @host_os@
 
-TARGET = @target@
+TARGET_ALIAS = @target_alias@
+TARGET_SYSTEM = @target@
 TARGET_CPU = @target_cpu@
-TARGET_OS = @target_os@
 TARGET_VENDOR = @target_vendor@
+TARGET_OS = @target_os@
+
+O = @OBJEXT@
+X = @EXEEXT@
 
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
