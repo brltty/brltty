@@ -107,10 +107,10 @@ If a relative path is given then it's anchored at
 (the usual location where devices are defined on a Unix-like system).
 The following device specifications all refer
 to the primary serial device:
-.BR "serial:/dev/@first_serial_device@" ","
-.BR "serial:@first_serial_device@" ","
-.BR "/dev/@first_serial_device@" ","
-.BR "@first_serial_device@" "."
+.BR "serial:/dev/@serial_first_device@" ","
+.BR "serial:@serial_first_device@" ","
+.BR "/dev/@serial_first_device@" ","
+.BR "@serial_first_device@" "."
 .TP
 .B USB
 For a USB device, specify \fBusb:\fR.

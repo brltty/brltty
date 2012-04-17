@@ -36,7 +36,7 @@
 # processing is not case sensitive. Examples of valid entries are:
 #
 #	Braille-Driver	pm	# Papenmeier braille displays.
-#	braille-device	serial:@first_serial_device@	# The first serial device.
+#	braille-device	serial:@serial_first_device@	# The first serial device.
 #	SPEECH-DRIVER	fv	# The Festival Text to Speech System.
 
 # The default settings given within the following descriptions assume no
@@ -96,7 +96,7 @@
 #    bluetooth:address
 # If not specified, "@braille_device@" will be used.
 # (can be overridden with the -d [--braille-device=] option)
-#braille-device	serial:@first_serial_device@	# First serial device.
+#braille-device	serial:@serial_first_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
 #braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.

@@ -1346,13 +1346,7 @@ AC_CACHE_CHECK([for first serial device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
 in
    linux*|eabi*)
-      for brltty_device in "ttyS0" "tts/0"
-      do
-         test -c "${brltty_cv_device_directory}/${brltty_device}" && {
-            brltty_cv_device_serial_first="${brltty_device}"
-            break
-         }
-      done
+      brltty_cv_device_serial_first="ttyS0"
       ;;
    gnu*)
       brltty_cv_device_serial_first="com0"
