@@ -1057,7 +1057,6 @@ in
       AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
 esac
-system_object="sys_${system_object}."'$O'
 AC_SUBST([system_object])
 
 keyboard_object=""

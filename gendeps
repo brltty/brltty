@@ -151,7 +151,11 @@ proc generatedFile {file} {
 }
 
 proc sourceFile {file} {
-   if {[file exists [set path "$file.in"]]} {
+   set name [lindex [set components [file split $file]] end]
+   regsub {^forbuild(\.)} $name {config\1} name
+   set path [eval file join [lreplace $components end end "$name.in"]]
+
+   if {[file exists $path]} {
       return $path
    }
 

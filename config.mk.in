@@ -196,7 +196,7 @@ ICU_LIBRARIES = @icu_libraries@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
-SYSTEM_OBJECT = @system_object@
+SYSTEM_OBJECT = sys_@system_object@.$O
 KEYBOARD_OBJECTS = @keyboard_objects@
 
 SERIAL_OBJECTS = serial.$O serial_@serial_package@.$O
