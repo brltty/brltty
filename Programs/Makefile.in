@@ -620,12 +620,12 @@ screen-drivers:
 ###############################################################################
 
 TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE).ttb
-text.auto.h: $(TEXT_TABLE_FILE) tbl2hex$X
-	./tbl2hex$X -- $(TEXT_TABLE_FILE) >$@
+text.auto.h: $(TEXT_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+	./tbl2hex$(X_FOR_BUILD) -- $(TEXT_TABLE_FILE) >$@
 
 ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE).atb
-attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$X
-	./tbl2hex$X -- $(ATTRIBUTES_TABLE_FILE) >$@
+attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
@@ -819,7 +819,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X xbrlapi$X tbl2hex$X *test$X *-static$X
+	-rm -f brltty$X xbrlapi$X tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
