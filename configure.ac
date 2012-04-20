@@ -221,8 +221,6 @@ then
 fi
 AC_PROG_CXX
 
-AC_CHECK_PROGS([CC_FOR_BUILD], [gcc cc])
-
 brltty_gcc_cflags="-std=gnu99 -Wall"
 brltty_gcc_cppflags=""
 case "${build_os} ${host_os}"
@@ -1386,7 +1384,7 @@ in
       ;;
    *)
       brltty_cv_device_serial_first=""
-      AC_MSG_WARN([no default braille device])
+      AC_MSG_WARN([primary serial device not configured for ${host_os}])
       ;;
 esac])
 AC_SUBST([serial_first_device], [${brltty_cv_device_serial_first}])
@@ -1649,6 +1647,10 @@ exec_prefix="${original_exec_prefix}"
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
 
+AC_CONFIG_COMMANDS([build-configure], [dnl
+   "${srcdir}/mk4build"
+])
+
 [brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
 s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 '`"]
@@ -1662,4 +1664,5 @@ AC_OUTPUT([
    Documents/BrlAPIref.doxy
    Bindings/Lisp/brlapi.lisp
    Bindings/Python/setup.py
-   ${brltty_make_files}])
+   ${brltty_make_files}
+])

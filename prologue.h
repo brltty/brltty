@@ -257,7 +257,11 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define setSocketErrno() setErrno(getSocketError())
 
 #ifdef HAVE_CONFIG_H
+#ifdef FOR_BUILD
+#include "forbuild.h"
+#else /* FOR_BUILD */
 #include "config.h"
+#endif /* FOR_BUILD */
 #endif /* HAVE_CONFIG_H */
 
 #ifdef HAVE_WCHAR_H 

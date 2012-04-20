@@ -475,7 +475,7 @@ brltty_summary_lines="Options Summary:"
 ])
 
 AC_DEFUN([BRLTTY_SUMMARY_END], [dnl
-AC_CONFIG_COMMANDS([brltty-summary],
+AC_CONFIG_COMMANDS([item-summary],
    [AC_MSG_NOTICE([${brltty_summary_lines}])],
    [brltty_summary_lines="${brltty_summary_lines}"]
 )])
