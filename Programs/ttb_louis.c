@@ -138,19 +138,19 @@ processInclude (DataFile *file, void *data) {
 static int
 processLibLouisLine (DataFile *file, void *data) {
   static const DataProperty propertyTable[] = {
-    {.name=WC_C("space"), .processor=processChar},
-    {.name=WC_C("punctuation"), .processor=processChar},
-    {.name=WC_C("digit"), .processor=processChar},
-    {.name=WC_C("uplow"), .processor=processUplow},
-    {.name=WC_C("letter"), .processor=processChar},
-    {.name=WC_C("lowercase"), .processor=processChar},
-    {.name=WC_C("uppercase"), .processor=processChar},
-    {.name=WC_C("litdigit"), .processor=processChar},
-    {.name=WC_C("sign"), .processor=processChar},
-    {.name=WC_C("math"), .processor=processChar},
-    {.name=WC_C("decpoint"), .processor=processChar},
-    {.name=WC_C("hyphen"), .processor=processChar},
-    {.name=WC_C("include"), .processor=processInclude},
+    {.name=WS_C("space"), .processor=processChar},
+    {.name=WS_C("punctuation"), .processor=processChar},
+    {.name=WS_C("digit"), .processor=processChar},
+    {.name=WS_C("uplow"), .processor=processUplow},
+    {.name=WS_C("letter"), .processor=processChar},
+    {.name=WS_C("lowercase"), .processor=processChar},
+    {.name=WS_C("uppercase"), .processor=processChar},
+    {.name=WS_C("litdigit"), .processor=processChar},
+    {.name=WS_C("sign"), .processor=processChar},
+    {.name=WS_C("math"), .processor=processChar},
+    {.name=WS_C("decpoint"), .processor=processChar},
+    {.name=WS_C("hyphen"), .processor=processChar},
+    {.name=WS_C("include"), .processor=processInclude},
     {.name=NULL, .processor=NULL}
   };
 

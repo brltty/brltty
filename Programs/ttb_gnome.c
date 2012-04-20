@@ -173,23 +173,23 @@ processGnomeBrailleLine (DataFile *file, void *data) {
 
   if (inUcsBlock) {
     static const DataProperty propertyTable[] = {
-      {.name=WC_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
+      {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
       {.name=NULL, .processor=processUcsCharOperands}
     };
 
     properties = propertyTable;
   } else {
     static const DataProperty propertyTable[] = {
-      {.name=WC_C("ENCODING"), .processor=processEncodingOperands},
-  //  {.name=WC_C("NAME"), .processor=processNameOperands},
-  //  {.name=WC_C("LOCALES"), .processor=processLocalesOperands},
-  //  {.name=WC_C("UCS-SUFFIX"), .processor=processUcsSuffixOperands},
-      {.name=WC_C("DELEGATE"), .processor=processDelegateOperands},
-  //  {.name=WC_C("UTF8-STRING"), .processor=processUtf8StringOperands},
-      {.name=WC_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
-      {.name=WC_C("UCS-CHAR"), .processor=processUcsCharOperands},
-      {.name=WC_C("UNICODE-CHAR"), .processor=processUnicodeCharOperands},
-  //  {.name=WC_C("UNKNOWN-CHAR"), .processor=processUnknownCharOperands},
+      {.name=WS_C("ENCODING"), .processor=processEncodingOperands},
+  //  {.name=WS_C("NAME"), .processor=processNameOperands},
+  //  {.name=WS_C("LOCALES"), .processor=processLocalesOperands},
+  //  {.name=WS_C("UCS-SUFFIX"), .processor=processUcsSuffixOperands},
+      {.name=WS_C("DELEGATE"), .processor=processDelegateOperands},
+  //  {.name=WS_C("UTF8-STRING"), .processor=processUtf8StringOperands},
+      {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
+      {.name=WS_C("UCS-CHAR"), .processor=processUcsCharOperands},
+      {.name=WS_C("UNICODE-CHAR"), .processor=processUnicodeCharOperands},
+  //  {.name=WS_C("UNKNOWN-CHAR"), .processor=processUnknownCharOperands},
       {.name=NULL, .processor=NULL}
     };
 
