@@ -563,7 +563,7 @@ static int
 writeCharacter_JAWS (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, void *data) {
   uint32_t value = character;
 
-  if (fprintf(file, "U+%04X=", value) == EOF) return 0;
+  if (fprintf(file, "U+%04" PRIX32 "=", value) == EOF) return 0;
   if (!writeDots(file, dots)) return 0;
   if (fprintf(file, "\n") == EOF) return 0;
   return 1;
