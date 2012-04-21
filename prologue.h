@@ -352,6 +352,28 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
   return length;
 }
 
+typedef unsigned char mbstate_t;
+
+static inline size_t
+mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps) {
+  if (!s) return 0;
+  if (!n) return 0;
+  if (pwc) *pwc = *s & 0XFF;
+  if (!*s) return 0;
+  return 1;
+}
+
+static inline size_t
+wcrtomb (char *s, wchar_t wc, mbstate_t *ps) {
+  if (s) *s = wc;
+  return 1;
+}
+
+static inline int
+mbsinit (const mbstate_t *ps) {
+  return 1;
+}
+
 #define WC_C(wc) (wchar_t)wc
 #define WS_C(ws) (const wchar_t *)ws
 #define PRIwc "c"
