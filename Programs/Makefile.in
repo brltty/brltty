@@ -598,7 +598,7 @@ apitest.$O:
 
 ###############################################################################
 
-braille-drivers:
+braille-drivers: $(BUILD_API)
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver) || exit 1; \
 	done
