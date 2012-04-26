@@ -47,6 +47,7 @@ bind KPPeriod+!KP7 PRPROMPT
 bind KPPeriod+!KP1 NXPROMPT
 bind KPPeriod+!KP9 ATTRUP
 bind KPPeriod+!KP3 ATTRDN
+bind KPPeriod+!KPEnter FREEZE
 bind KPPeriod+!KPMinus CHRLT
 bind KPPeriod+!KPPlus CHRRT
 bind KPPeriod+!KPAsterisk CSRVIS
@@ -72,6 +73,7 @@ bind KPPlus+!KP6 SAY_NEXT_WORD
 bind KPPlus+!KP8 SPELL_WORD
 bind KPPlus+!KP7 SAY_PREV_LINE
 bind KPPlus+!KP9 SAY_NEXT_LINE
+bind KPPlus+!KP0 ROUTE_TO_SPEECH
 
 bind KPMinus+!KP5 PREFMENU
 bind KPMinus+!KP4 PREFLOAD

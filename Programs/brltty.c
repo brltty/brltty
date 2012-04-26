@@ -169,8 +169,13 @@ handleTerminationRequest (int signalNumber) {
 static void
 checkRoutingStatus (RoutingStatus ok, int wait) {
   RoutingStatus status = getRoutingStatus(wait);
-  if (status != ROUTING_NONE)
+
+  if (status != ROUTING_NONE) {
     playTune((status > ok)? &tune_routing_failed: &tune_routing_succeeded);
+
+    ses->spkx = scr.posx;
+    ses->spky = scr.posy;
+  }
 }
 
 static int
@@ -2131,6 +2136,14 @@ doCommand:
       sayDone:
         placeWindowHorizontally(ses->spkx);
         slideWindowVertically(ses->spky);
+        break;
+
+      case BRL_CMD_ROUTE_TO_SPEECH:
+        if (routeCursor(ses->spkx, ses->spky, scr.number)) {
+          playTune(&tune_routing_started);
+        } else {
+          playTune(&tune_command_rejected);
+        }
         break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
