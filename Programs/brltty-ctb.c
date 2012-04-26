@@ -216,8 +216,12 @@ flushCharacters (wchar_t end, void *data) {
 
 static int
 processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *data) {
-  if (opt_reformatText) {
-    if (count && !iswspace(characters[0])) {
+  if (opt_reformatText && count) {
+    if (iswspace(characters[0]))
+      if (!flushCharacters('\n', data))
+        return 0;
+
+    {
       unsigned int spaces = !inputLength? 0: 1;
       size_t newLength = inputLength + spaces + count;
 
@@ -244,19 +248,18 @@ processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *d
 
       wmemcpy(&inputBuffer[inputLength], characters, count);
       inputLength += count;
-
-      if (end != '\n') {
-        if (!flushCharacters(0, data)) return 0;
-        if (!putCharacter(end, data)) return 0;
-      }
-
-      return 1;
     }
+
+    if (end != '\n') {
+      if (!flushCharacters(0, data)) return 0;
+      if (!putCharacter(end, data)) return 0;
+    }
+  } else {
+    if (!flushCharacters('\n', data)) return 0;
+    if (!writeCharacters(characters, count, data)) return 0;
+    if (!putCharacter(end, data)) return 0;
   }
 
-  if (!flushCharacters('\n', data)) return 0;
-  if (!writeCharacters(characters, count, data)) return 0;
-  if (!putCharacter(end, data)) return 0;
   return 1;
 }
 
