@@ -1961,9 +1961,6 @@ doCommand:
         int direction;
         int spell;
 
-        int row;
-        int column;
-
       case BRL_CMD_SAY_PREV_WORD:
         direction = -1;
         spell = 0;
@@ -1985,25 +1982,26 @@ doCommand:
         goto sayWord;
 
       sayWord:
-        row = ses->spky;
-        column = ses->spkx;
-
-      findWord:
         {
+          int row = ses->spky;
+          int column = ses->spkx;
+
           ScreenCharacter characters[scr.cols];
+          ScreenCharacterType type;
+          int onCurrentWord;
+
           int from = column;
           int to = from + 1;
-          ScreenCharacterType type;
 
+        findWord:
           readScreen(0, row, scr.cols, 1, characters);
-          type = getScreenCharacterType(&characters[from]);
+          type = (row == ses->spky)? getScreenCharacterType(&characters[column]): SCT_SPACE;
+          onCurrentWord = type != SCT_SPACE;
 
           if (direction < 0) {
-            int current = (row == ses->spky) && (type != SCT_SPACE);
-
             while (1) {
               if (column == 0) {
-                if ((type != SCT_SPACE) && !current) {
+                if ((type != SCT_SPACE) && !onCurrentWord) {
                   ses->spkx = from = column;
                   ses->spky = row;
                   break;
@@ -2011,8 +2009,7 @@ doCommand:
 
                 if (row == 0) goto noWord;
                 if (row-- == ses->spky) playTune(&tune_wrap_up);
-                column = scr.cols - 1;
-                type = SCT_SPACE;
+                column = scr.cols;
                 goto findWord;
               }
 
@@ -2020,8 +2017,8 @@ doCommand:
                 ScreenCharacterType newType = getScreenCharacterType(&characters[--column]);
 
                 if (newType != type) {
-                  if (current) {
-                    current = 0;
+                  if (onCurrentWord) {
+                    onCurrentWord = 0;
                   } else if (type != SCT_SPACE) {
                     ses->spkx = from = column + 1;
                     ses->spky = row;
@@ -2034,12 +2031,9 @@ doCommand:
               }
             }
           } else if (direction > 0) {
-            int current = (row == ses->spky) && (type != SCT_SPACE);
-            if (current) column += 1;
-
             while (1) {
-              if (column == scr.cols) {
-                if ((type != SCT_SPACE) && !current) {
+              if (++column == scr.cols) {
+                if ((type != SCT_SPACE) && !onCurrentWord) {
                   to = column;
                   ses->spkx = from;
                   ses->spky = row;
@@ -2048,8 +2042,7 @@ doCommand:
 
                 if (row == (scr.rows - 1)) goto noWord;
                 if (row++ == ses->spky) playTune(&tune_wrap_down);
-                column = 0;
-                type = SCT_SPACE;
+                column = -1;
                 goto findWord;
               }
 
@@ -2057,8 +2050,8 @@ doCommand:
                 ScreenCharacterType newType = getScreenCharacterType(&characters[column]);
 
                 if (newType != type) {
-                  if (current) {
-                    current = 0;
+                  if (onCurrentWord) {
+                    onCurrentWord = 0;
                   } else if (type != SCT_SPACE) {
                     to = column;
                     ses->spkx = from;
@@ -2070,8 +2063,6 @@ doCommand:
                   type = newType;
                 }
               }
-
-              column += 1;
             }
           } else if (type != SCT_SPACE) {
             while (from > 0) {
@@ -2087,7 +2078,9 @@ doCommand:
             }
           }
 
-          if (spell) {
+          if (((to - from) == 1) && (characters[from].text == WC_C(' '))) {
+            sayString(&spk, gettext("space"), 1);
+          } else if (spell) {
             wchar_t string[(to - from) * 2];
             size_t length = 0;
 
