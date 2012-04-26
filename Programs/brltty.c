@@ -930,6 +930,72 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
   return 1;
 }
 
+static void
+describeCharacter (int column, int row) {
+  static char *const colours[] = {
+    strtext("black"),
+    strtext("blue"),
+    strtext("green"),
+    strtext("cyan"),
+    strtext("red"),
+    strtext("magenta"),
+    strtext("brown"),
+    strtext("light grey"),
+    strtext("dark grey"),
+    strtext("light blue"),
+    strtext("light green"),
+    strtext("light cyan"),
+    strtext("light red"),
+    strtext("light magenta"),
+    strtext("yellow"),
+    strtext("white")
+  };
+
+  char buffer[0X50];
+  int size = sizeof(buffer);
+  int length = 0;
+  ScreenCharacter character;
+
+  readScreen(column, row, 1, 1, &character);
+
+  {
+    uint32_t text = character.text;
+    int count;
+    snprintf(&buffer[length], size-length,
+             "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
+             text, text,
+             gettext(colours[character.attributes & 0X0F]),
+             gettext(colours[(character.attributes & 0X70) >> 4]),
+             &count);
+    length += count;
+  }
+
+  if (character.attributes & SCR_ATTR_BLINK) {
+    int count;
+    snprintf(&buffer[length], size-length,
+             " %s%n",
+             gettext("blink"),
+             &count);
+    length += count;
+  }
+
+#ifdef HAVE_ICU
+  {
+    char name[0X40];
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+    if (U_SUCCESS(error)) {
+      int count;
+      snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
+      length += count;
+    }
+  }
+#endif /* HAVE_ICU */
+
+  message(NULL, buffer, 0);
+}
+
 static int cursorState;                /* display cursor on (toggled during blink) */
 static int cursorTimer;
 unsigned char
@@ -1981,7 +2047,7 @@ doCommand:
         spell = 0;
         goto sayWord;
 
-      case BRL_CMD_SPELL_WORD:
+      case BRL_CMD_SPELL_CURR_WORD:
         direction = 0;
         spell = 1;
         goto sayWord;
@@ -2138,7 +2204,11 @@ doCommand:
         slideWindowVertically(ses->spky);
         break;
 
-      case BRL_CMD_ROUTE_TO_SPEECH:
+      case BRL_CMD_DESC_CURR_CHAR:
+        describeCharacter(ses->spkx, ses->spky);
+        break;
+
+      case BRL_CMD_ROUTE_CURR_CHAR:
         if (routeCursor(ses->spkx, ses->spky, scr.number)) {
           playTune(&tune_routing_started);
         } else {
@@ -2335,69 +2405,10 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              static char *colours[] = {
-                strtext("black"),
-                strtext("blue"),
-                strtext("green"),
-                strtext("cyan"),
-                strtext("red"),
-                strtext("magenta"),
-                strtext("brown"),
-                strtext("light grey"),
-                strtext("dark grey"),
-                strtext("light blue"),
-                strtext("light green"),
-                strtext("light cyan"),
-                strtext("light red"),
-                strtext("light magenta"),
-                strtext("yellow"),
-                strtext("white")
-              };
-              char buffer[0X50];
-              int size = sizeof(buffer);
-              int length = 0;
-              ScreenCharacter character;
-
-              readScreen(column, row, 1, 1, &character);
-
-              {
-                uint32_t text = character.text;
-                int count;
-                snprintf(&buffer[length], size-length,
-                         "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
-                         text, text,
-                         gettext(colours[character.attributes & 0X0F]),
-                         gettext(colours[(character.attributes & 0X70) >> 4]),
-                         &count);
-                length += count;
-              }
-
-              if (character.attributes & SCR_ATTR_BLINK) {
-                int count;
-                snprintf(&buffer[length], size-length,
-                         " %s%n",
-                         gettext("blink"),
-                         &count);
-                length += count;
-              }
-
-#ifdef HAVE_ICU
-              {
-                char name[0X40];
-                UErrorCode error = U_ZERO_ERROR;
-
-                u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-                if (U_SUCCESS(error)) {
-                  int count;
-                  snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
-                  length += count;
-                }
-              }
-#endif /* HAVE_ICU */
-
-              message(NULL, buffer, 0);
-            } else
+              describeCharacter(column, row);
+            } else {
               playTune(&tune_command_rejected);
+            }
             break;
           }
 

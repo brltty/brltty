@@ -181,8 +181,9 @@ typedef enum {
   BRL_CMD_SAY_NEXT_WORD /* go to and speak next word */,
   BRL_CMD_SAY_PREV_LINE /* go to and speak previous line */,
   BRL_CMD_SAY_NEXT_LINE /* go to and speak next line */,
-  BRL_CMD_SPELL_WORD /* spell current word */,
-  BRL_CMD_ROUTE_TO_SPEECH /* bring cursor to speech location */,
+  BRL_CMD_SPELL_CURR_WORD /* spell current word */,
+  BRL_CMD_DESC_CURR_CHAR /* describe current character */,
+  BRL_CMD_ROUTE_CURR_CHAR /* bring cursor to current character */,
 
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
