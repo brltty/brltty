@@ -121,8 +121,8 @@ bind KP0+!KPMinus PREFLOAD
 #################
 
 assign brailleContext 1
-assign brailleOff KP0+!KPSlash
-assign brailleOn KP0+!KPAsterisk
+assign brailleOff KPEnter+!KPMinus
+assign brailleOn KPEnter+!KPPlus
 include kbd-braille.kti
 
 
