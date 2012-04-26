@@ -53,15 +53,15 @@ bind KPEnter+!KP9 Say_Faster
 bind KPEnter+!KP1 Say_Softer
 bind KPEnter+!KP3 Say_Louder
 
-bind KPPlus+!KP5 Paste
-bind KPPlus+!KP7 Clip_New
-bind KPPlus+!KP1 Clip_Add
-bind KPPlus+!KP9 Copy_Line
-bind KPPlus+!KP3 Copy_Rect
-bind KPPlus+!KPArrowUp PrIndent
-bind KPPlus+!KPArrowDown NxIndent
-bind KPPlus+!KPArrowLeft PrDifChar
-bind KPPlus+!KPArrowRight NxDifChar
+bind KPPlus+!KPArrowDown Say_Curr_Char
+bind KPPlus+!KP1 Say_Prev_Char
+bind KPPlus+!KP3 Say_Next_Char
+bind KPPlus+!KP5 Say_Curr_Word
+bind KPPlus+!KPArrowLeft Say_Prev_Word
+bind KPPlus+!KPArrowRight Say_Next_Word
+bind KPPlus+!KPArrowUp Spell_Word
+bind KPPlus+!KP7 Say_Prev_Line
+bind KPPlus+!KP9 Say_Next_Line
 
 bind KPMinus+!KP5 PrefMenu
 bind KPMinus+!KPArrowLeft PrefLoad
@@ -72,6 +72,16 @@ bind KPMinus+!KP7 Help
 bind KPMinus+!KP9 Learn
 bind KPMinus+!KP1 RestartBrl
 bind KPMinus+!KP3 RestartSpeech
+
+bind KPAsterisk+!KP5 Paste
+bind KPAsterisk+!KP7 Clip_New
+bind KPAsterisk+!KP1 Clip_Add
+bind KPAsterisk+!KP9 Copy_Line
+bind KPAsterisk+!KP3 Copy_Rect
+bind KPAsterisk+!KPArrowUp PrIndent
+bind KPAsterisk+!KPArrowDown NxIndent
+bind KPAsterisk+!KPArrowLeft PrDifChar
+bind KPAsterisk+!KPArrowRight NxDifChar
 
 
 #################

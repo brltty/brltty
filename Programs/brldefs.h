@@ -173,6 +173,16 @@ typedef enum {
   BRL_CMD_CONTROL /* add control modifier to next typed character or emulated key */,
   BRL_CMD_META /* add meta modifier to next typed character or emulated key */,
 
+  BRL_CMD_SAY_CURR_CHAR /* speak current character */,
+  BRL_CMD_SAY_PREV_CHAR /* speak previous character */,
+  BRL_CMD_SAY_NEXT_CHAR /* speak next character */,
+  BRL_CMD_SAY_CURR_WORD /* speak current word */,
+  BRL_CMD_SAY_PREV_WORD /* speak previous word */,
+  BRL_CMD_SAY_NEXT_WORD /* speak next word */,
+  BRL_CMD_SAY_PREV_LINE /* speak previous line */,
+  BRL_CMD_SAY_NEXT_LINE /* speak next line */,
+  BRL_CMD_SPELL_WORD /* spell current word */,
+
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
 

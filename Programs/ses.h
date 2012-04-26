@@ -38,10 +38,13 @@ typedef struct {
   unsigned char trackCursor;		/* cursor tracking mode */
   unsigned char hideCursor;		/* for temporarily hiding the cursor */
   unsigned char displayMode;		/* text or attributes display */
+
   int winx, winy;	/* upper-left corner of braille window */
   int motx, moty;	/* last user motion of braille window */
   int trkx, trky;	/* tracked cursor position */
   int ptrx, ptry;	/* last known mouse/pointer position */
+  int spkx, spky;	/* current speech position */
+
   ScreenLocation marks[0X100];
 } SessionEntry;
 

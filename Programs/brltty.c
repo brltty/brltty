@@ -459,27 +459,22 @@ trackSpeech (int index) {
 }
 
 static void
-sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
+sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, size_t count, int immediate) {
   unsigned char text[(count * UTF8_LEN_MAX) + 1];
   unsigned char *t = text;
 
-  unsigned char attributes[count];
-  unsigned char *a = attributes;
-
   {
-    int i;
+    unsigned int i;
+
     for (i=0; i<count; i+=1) {
-      const ScreenCharacter *character = &characters[i];
       Utf8Buffer utf8;
-      int length = convertWcharToUtf8(character->text, utf8);
+      size_t length = convertWcharToUtf8(characters[i], utf8);
 
       if (length) {
         t = mempcpy(t, utf8, length);
       } else {
         *t++ = ' ';
       }
-
-      *a++ = character->attributes;
     }
 
     *t = 0;
@@ -487,6 +482,27 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immedi
 
   if (immediate) speech->mute(&spk);
   speech->say(&spk, text, t-text, count, attributes);
+}
+
+static void
+sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
+  wchar_t text[count];
+  wchar_t *t = text;
+
+  unsigned char attributes[count];
+  unsigned char *a = attributes;
+
+  {
+    unsigned int i;
+
+    for (i=0; i<count; i+=1) {
+      const ScreenCharacter *character = &characters[i];
+      *t++ = character->text;
+      *a++ = character->attributes;
+    }
+  }
+
+  sayWideCharacters(text, attributes, count, immediate);
 }
 
 static void
@@ -505,6 +521,20 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
 static void
 sayScreenLines (int line, int count, int track, SayMode mode) {
   sayScreenRegion(0, line, scr.cols, count, track, mode);
+}
+
+typedef enum {
+  SCT_WORD,
+  SCT_NONWORD,
+  SCT_SPACE
+} ScreenCharacterType;
+
+static ScreenCharacterType
+getScreenCharacterType (const ScreenCharacter *character) {
+  if (iswspace(character->text)) return SCT_SPACE;
+  if (iswalnum(character->text)) return SCT_WORD;
+  if (wcschr(WS_C("_"), character->text)) return SCT_WORD;
+  return SCT_NONWORD;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1130,6 +1160,7 @@ brlttyPrepare_first (void) {
   ses->trkx = scr.posx; ses->trky = scr.posy;
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
+  ses->spkx = ses->winx; ses->spky = ses->winy;
 
   oldwinx = ses->winx; oldwiny = ses->winy;
   restartRequired = 0;
@@ -1885,6 +1916,229 @@ doCommand:
           playTune(&tune_command_rejected);
         }
         break;
+
+      case BRL_CMD_SAY_PREV_CHAR:
+        if (ses->spkx > 0) {
+          ses->spkx -= 1;
+          goto sayCharacter;
+        }
+
+        if (ses->spky > 0) {
+          ses->spky -= 1;
+          ses->spkx = scr.cols - 1;
+          playTune(&tune_wrap_up);
+          goto sayCharacter;
+        }
+
+        playTune(&tune_bounce);
+        break;
+
+      case BRL_CMD_SAY_NEXT_CHAR:
+        if (ses->spkx < (scr.cols - 1)) {
+          ses->spkx += 1;
+          goto sayCharacter;
+        }
+
+        if (ses->spky < (scr.rows - 1)) {
+          ses->spky += 1;
+          ses->spkx = 0;
+          playTune(&tune_wrap_down);
+          goto sayCharacter;
+        }
+
+        playTune(&tune_bounce);
+        break;
+
+      case BRL_CMD_SAY_CURR_CHAR:
+      sayCharacter: {
+        ScreenCharacter character;
+        readScreen(ses->spkx, ses->spky, 1, 1, &character);
+        sayScreenCharacters(&character, 1, 1);
+        goto sayDone;
+      }
+
+      {
+        int direction;
+        int spell;
+
+        int row;
+        int column;
+
+      case BRL_CMD_SAY_PREV_WORD:
+        direction = -1;
+        spell = 0;
+        goto sayWord;
+
+      case BRL_CMD_SAY_NEXT_WORD:
+        direction = 1;
+        spell = 0;
+        goto sayWord;
+
+      case BRL_CMD_SAY_CURR_WORD:
+        direction = 0;
+        spell = 0;
+        goto sayWord;
+
+      case BRL_CMD_SPELL_WORD:
+        direction = 0;
+        spell = 1;
+        goto sayWord;
+
+      sayWord:
+        row = ses->spky;
+        column = ses->spkx;
+
+      findWord:
+        {
+          ScreenCharacter characters[scr.cols];
+          int from = column;
+          int to = from + 1;
+          ScreenCharacterType type;
+
+          readScreen(0, row, scr.cols, 1, characters);
+          type = getScreenCharacterType(&characters[from]);
+
+          if (direction < 0) {
+            int current = (row == ses->spky) && (type != SCT_SPACE);
+
+            while (1) {
+              if (column == 0) {
+                if ((type != SCT_SPACE) && !current) {
+                  ses->spkx = from = column;
+                  ses->spky = row;
+                  break;
+                }
+
+                if (row == 0) goto noWord;
+                if (row-- == ses->spky) playTune(&tune_wrap_up);
+                column = scr.cols - 1;
+                type = SCT_SPACE;
+                goto findWord;
+              }
+
+              {
+                ScreenCharacterType newType = getScreenCharacterType(&characters[--column]);
+
+                if (newType != type) {
+                  if (current) {
+                    current = 0;
+                  } else if (type != SCT_SPACE) {
+                    ses->spkx = from = column + 1;
+                    ses->spky = row;
+                    break;
+                  }
+
+                  if (newType != SCT_SPACE) to = column + 1;
+                  type = newType;
+                }
+              }
+            }
+          } else if (direction > 0) {
+            int current = (row == ses->spky) && (type != SCT_SPACE);
+            if (current) column += 1;
+
+            while (1) {
+              if (column == scr.cols) {
+                if ((type != SCT_SPACE) && !current) {
+                  to = column;
+                  ses->spkx = from;
+                  ses->spky = row;
+                  break;
+                }
+
+                if (row == (scr.rows - 1)) goto noWord;
+                if (row++ == ses->spky) playTune(&tune_wrap_down);
+                column = 0;
+                type = SCT_SPACE;
+                goto findWord;
+              }
+
+              {
+                ScreenCharacterType newType = getScreenCharacterType(&characters[column]);
+
+                if (newType != type) {
+                  if (current) {
+                    current = 0;
+                  } else if (type != SCT_SPACE) {
+                    to = column;
+                    ses->spkx = from;
+                    ses->spky = row;
+                    break;
+                  }
+
+                  if (newType != SCT_SPACE) from = column;
+                  type = newType;
+                }
+              }
+
+              column += 1;
+            }
+          } else if (type != SCT_SPACE) {
+            while (from > 0) {
+              if (getScreenCharacterType(&characters[--from]) != type) {
+                from += 1;
+                break;
+              }
+            }
+
+            while (to < scr.cols) {
+              if (getScreenCharacterType(&characters[to]) != type) break;
+              to += 1;
+            }
+          }
+
+          if (spell) {
+            wchar_t string[(to - from) * 2];
+            size_t length = 0;
+
+            while (from < to) {
+              string[length++] = characters[from++].text;
+              string[length++] = WC_C(' ');
+            }
+
+            string[length] = WC_C('\0');
+            sayWideCharacters(string, NULL, length, 1);
+          } else {
+            sayScreenCharacters(&characters[from], to-from, 1);
+          }
+
+          goto sayDone;
+        }
+
+      noWord:
+        playTune(&tune_bounce);
+        break;
+      }
+
+      case BRL_CMD_SAY_PREV_LINE:
+        if (ses->spky > 0) {
+          ses->spky -= 1;
+          goto sayLine;
+        }
+
+        playTune(&tune_bounce);
+        break;
+
+      case BRL_CMD_SAY_NEXT_LINE:
+        if (ses->spky < (scr.rows - 1)) {
+          ses->spky += 1;
+          goto sayLine;
+        }
+
+        playTune(&tune_bounce);
+        break;
+
+      sayLine: {
+        ScreenCharacter characters[scr.cols];
+        readScreen(0, ses->spky, scr.cols, 1, characters);
+        sayScreenCharacters(characters, scr.cols, 1);
+        goto sayDone;
+      }
+
+      sayDone:
+        placeWindowHorizontally(ses->spkx);
+        slideWindowVertically(ses->spky);
+        break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       default: {
@@ -2391,8 +2645,9 @@ brlttyUpdate (void) {
                      scr.number,
                      ses->trkx, ses->trky, scr.posx, scr.posy,
                      oldx, oldy, ses->winx, ses->winy);
-          ses->trkx = scr.posx;
-          ses->trky = scr.posy;
+
+          ses->spkx = ses->trkx = scr.posx;
+          ses->spky = ses->trky = scr.posy;
         } else if (checkPointer()) {
           pointerMoved = 1;
         }
@@ -2540,6 +2795,9 @@ brlttyUpdate (void) {
            stationnary and the attributes themselves are moving
            (example: tin). */
       }
+
+      if ((ses->spky < ses->winy) || (ses->spky >= (ses->winy + brl.textRows))) ses->spky = ses->winy;
+      if ((ses->spkx < ses->winx) || (ses->spkx >= (ses->winx + textCount))) ses->spkx = ses->winx;
 
       oldwinx = ses->winx;
       oldwiny = ses->winy;
