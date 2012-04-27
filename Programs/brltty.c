@@ -2702,13 +2702,13 @@ brlttyUpdate (void) {
                   int x = newX + 1;
 
                   while (oldLength > oldX) {
-                    if (oldCharacters[oldLength-1].text != WC_C(' ')) break;
-                    --oldLength;
+                    if (!iswspace(oldCharacters[oldLength-1].text)) break;
+                    oldLength -= 1;
                   }
 
                   while (newLength > newX) {
-                    if (newCharacters[newLength-1].text != WC_C(' ')) break;
-                    --newLength;
+                    if (!iswspace(newCharacters[newLength-1].text)) break;
+                    newLength -= 1;
                   }
 
                   while (1) {
@@ -2746,6 +2746,18 @@ brlttyUpdate (void) {
                     isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
                   column = oldX;
                   count = newX - oldX;
+
+                  if (iswspace(characters[column+count-1].text)) {
+                    while (column > 0) {
+                      if (iswspace(characters[--column].text)) {
+                        column += 1;
+                        break;
+                      }
+
+                      count += 1;
+                    }
+                  }
+
                   goto speak;
                 }
 
@@ -2766,6 +2778,30 @@ brlttyUpdate (void) {
             } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
               column = newX;
               count = 1;
+
+              if (column >= 2) {
+                int length = newWidth;
+
+                while (length > 0) {
+                  if (!iswspace(characters[--length].text)) {
+                    length += 1;
+                    break;
+                  }
+                }
+
+                if ((length + 1) == column) {
+                  column = length - 1;
+
+                  while (column > 0) {
+                    if (iswspace(characters[--column].text)) {
+                      column += 1;
+                      break;
+                    }
+                  }
+
+                  count = length - column;
+                }
+              }
             } else {
               count = 0;
             }
