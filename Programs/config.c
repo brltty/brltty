@@ -898,6 +898,11 @@ STATUS_FIELD_HANDLERS(9)
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
+testAutospeak (void) {
+  return prefs.autospeak;
+}
+
+static int
 testSpeechVolume (void) {
   return speech->volume != NULL;
 }
@@ -1434,6 +1439,36 @@ makePreferencesMenu (void) {
   {
     NAME(strtext("Autospeak"));
     ITEM(newBooleanMenuItem(menu, &prefs.autospeak, &name));
+  }
+
+  {
+    NAME(strtext("Speak Current Character"));
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeakCurrentCharacter, &name));
+    TEST(Autospeak);
+  }
+
+  {
+    NAME(strtext("Speak Inserted Characters"));
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeakInsertedCharacters, &name));
+    TEST(Autospeak);
+  }
+
+  {
+    NAME(strtext("Speak Deleted Characters"));
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeakDeletedCharacters, &name));
+    TEST(Autospeak);
+  }
+
+  {
+    NAME(strtext("Speak Replaced Characters"));
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeakReplacedCharacters, &name));
+    TEST(Autospeak);
+  }
+
+  {
+    NAME(strtext("Speak Completed Words"));
+    ITEM(newBooleanMenuItem(menu, &prefs.autospeakCompletedWords, &name));
+    TEST(Autospeak);
   }
 
   {

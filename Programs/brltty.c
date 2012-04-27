@@ -2717,7 +2717,7 @@ brlttyUpdate (void) {
                     if (x < newLength) {
                       if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
                         column = newX;
-                        count = x - newX;
+                        count = prefs.autospeakInsertedCharacters? (x - newX): 0;
                         goto speak;
                       }
 
@@ -2726,9 +2726,9 @@ brlttyUpdate (void) {
 
                     if (x < oldLength) {
                       if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
-                        column = oldX;
-                        count = x - oldX;
                         characters = oldCharacters;
+                        column = oldX;
+                        count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
                         goto speak;
                       }
 
@@ -2747,17 +2747,25 @@ brlttyUpdate (void) {
                   column = oldX;
                   count = newX - oldX;
 
-                  if (iswspace(characters[column+count-1].text)) {
-                    while (column > 0) {
-                      if (iswspace(characters[--column].text)) {
-                        column += 1;
-                        break;
-                      }
+                  if (prefs.autospeakCompletedWords) {
+                    int found = 0;
 
-                      count += 1;
+                    if (iswspace(characters[column+count-1].text)) {
+                      while (column > 0) {
+                        if (iswspace(characters[--column].text)) {
+                          column += 1;
+                          break;
+                        }
+
+                        count += 1;
+                        found = 1;
+                      }
                     }
+
+                    if (found) goto speak;
                   }
 
+                  if (!prefs.autospeakInsertedCharacters) count = 0;
                   goto speak;
                 }
 
@@ -2765,41 +2773,45 @@ brlttyUpdate (void) {
                 if ((newX < oldX) &&
                     isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
                     isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
-                  column = newX;
-                  count = oldX - newX;
                   characters = oldCharacters;
+                  column = newX;
+                  count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
                   goto speak;
                 }
-
-                while (newCharacters[column].text == oldCharacters[column].text) ++column;
-                while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
-                count -= column;
               }
+
+              while (newCharacters[column].text == oldCharacters[column].text) ++column;
+              while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
+              count -= column;
+              if (!prefs.autospeakReplacedCharacters) count = 0;
             } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
               column = newX;
-              count = 1;
+              count = prefs.autospeakCurrentCharacter? 1: 0;
 
-              if (column >= 2) {
-                int length = newWidth;
+              if (prefs.autospeakCompletedWords) {
+                if (column >= 2) {
+                  int length = newWidth;
 
-                while (length > 0) {
-                  if (!iswspace(characters[--length].text)) {
-                    length += 1;
-                    break;
-                  }
-                }
-
-                if ((length + 1) == column) {
-                  column = length - 1;
-
-                  while (column > 0) {
-                    if (iswspace(characters[--column].text)) {
-                      column += 1;
+                  while (length > 0) {
+                    if (!iswspace(characters[--length].text)) {
+                      length += 1;
                       break;
                     }
                   }
 
-                  count = length - column;
+                  if ((length + 1) == column) {
+                    column = length - 1;
+
+                    while (column > 0) {
+                      if (iswspace(characters[--column].text)) {
+                        column += 1;
+                        break;
+                      }
+                    }
+
+                    count = length - column;
+                    goto speak;
+                  }
                 }
               }
             } else {

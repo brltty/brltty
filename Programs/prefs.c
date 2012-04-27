@@ -120,267 +120,297 @@ static const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_SAVE_ON_EXIT,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.saveOnExit
-  }
-  ,
+  },
+
   { .name = "text-style",
     .defaultValue = DEFAULT_TEXT_STYLE,
     .settingNames = &preferenceStringTable_textStyle,
     .setting = &prefs.textStyle
-  }
-  ,
+  },
+
   { .name = "expand-current-word",
     .defaultValue = DEFAULT_EXPAND_CURRENT_WORD,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.expandCurrentWord
-  }
-  ,
+  },
+
   { .name = "capitalization-mode",
     .defaultValue = DEFAULT_CAPITALIZATION_MODE,
     .settingNames = &preferenceStringTable_capitalizationMode,
     .setting = &prefs.capitalizationMode
-  }
-  ,
+  },
+
   { .name = "skip-identical-lines",
     .defaultValue = DEFAULT_SKIP_IDENTICAL_LINES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.skipIdenticalLines
-  }
-  ,
+  },
+
   { .name = "skip-blank-windows",
     .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.skipBlankWindows
-  }
-  ,
+  },
+
   { .name = "skip-blank-windows-mode",
     .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS_MODE,
     .settingNames = &preferenceStringTable_skipBlankWindowsMode,
     .setting = &prefs.skipBlankWindowsMode
-  }
-  ,
+  },
+
   { .name = "sliding-window",
     .defaultValue = DEFAULT_SLIDING_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.slidingWindow
-  }
-  ,
+  },
+
   { .name = "eager-sliding-window",
     .defaultValue = DEFAULT_EAGER_SLIDING_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.eagerSlidingWindow
-  }
-  ,
+  },
+
   { .name = "window-overlap",
     .defaultValue = DEFAULT_WINDOW_OVERLAP,
     .setting = &prefs.windowOverlap
-  }
-  ,
+  },
+
   { .name = "autorepeat",
     .defaultValue = DEFAULT_AUTOREPEAT,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autorepeat
-  }
-  ,
+  },
+
   { .name = "autorepeat-panning",
     .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autorepeatPanning
-  }
-  ,
+  },
+
   { .name = "autorepeat-delay",
     .defaultValue = DEFAULT_AUTOREPEAT_DELAY,
     .setting = &prefs.autorepeatDelay
-  }
-  ,
+  },
+
   { .name = "autorepeat-interval",
     .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
     .setting = &prefs.autorepeatInterval
-  }
-  ,
+  },
+
   { .name = "show-cursor",
     .defaultValue = DEFAULT_SHOW_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showCursor
-  }
-  ,
+  },
+
   { .name = "cursor-style",
     .defaultValue = DEFAULT_CURSOR_STYLE,
     .settingNames = &preferenceStringTable_cursorStyle,
     .setting = &prefs.cursorStyle
-  }
-  ,
+  },
+
   { .name = "blinking-cursor",
     .defaultValue = DEFAULT_BLINKING_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingCursor
-  }
-  ,
+  },
+
   { .name = "cursor-visible-time",
     .defaultValue = DEFAULT_CURSOR_VISIBLE_TIME,
     .setting = &prefs.cursorVisibleTime
-  }
-  ,
+  },
+
   { .name = "cursor-invisible-time",
     .defaultValue = DEFAULT_CURSOR_INVISIBLE_TIME,
     .setting = &prefs.cursorInvisibleTime
-  }
-  ,
+  },
+
   { .name = "show-attributes",
     .defaultValue = DEFAULT_SHOW_ATTRIBUTES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showAttributes
-  }
-  ,
+  },
+
   { .name = "blinking-attributes",
     .defaultValue = DEFAULT_BLINKING_ATTRIBUTES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingAttributes
-  }
-  ,
+  },
+
   { .name = "attributes-visible-time",
     .defaultValue = DEFAULT_ATTRIBUTES_VISIBLE_TIME,
     .setting = &prefs.attributesVisibleTime
-  }
-  ,
+  },
+
   { .name = "attributes-invisible-time",
     .defaultValue = DEFAULT_ATTRIBUTES_INVISIBLE_TIME,
     .setting = &prefs.attributesInvisibleTime
-  }
-  ,
+  },
+
   { .name = "blinking-capitals",
     .defaultValue = DEFAULT_BLINKING_CAPITALS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingCapitals
-  }
-  ,
+  },
+
   { .name = "capitals-visible-time",
     .defaultValue = DEFAULT_CAPITALS_VISIBLE_TIME,
     .setting = &prefs.capitalsVisibleTime
-  }
-  ,
+  },
+
   { .name = "capitals-invisible-time",
     .defaultValue = DEFAULT_CAPITALS_INVISIBLE_TIME,
     .setting = &prefs.capitalsInvisibleTime
-  }
-  ,
+  },
+
   { .name = "braille-firmness",
     .defaultValue = DEFAULT_BRAILLE_FIRMNESS,
     .settingNames = &preferenceStringTable_brailleFirmness,
     .setting = &prefs.brailleFirmness
-  }
-  ,
+  },
+
   { .name = "braille-sensitivity",
     .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
     .settingNames = &preferenceStringTable_brailleSensitivity,
     .setting = &prefs.brailleSensitivity
-  }
-  ,
+  },
+
   { .name = "window-follows-pointer",
     .defaultValue = DEFAULT_WINDOW_FOLLOWS_POINTER,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.windowFollowsPointer
-  }
-  ,
+  },
+
   { .name = "highlight-window",
     .defaultValue = DEFAULT_HIGHLIGHT_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.highlightWindow
-  }
-  ,
+  },
+
   { .name = "alert-tunes",
     .defaultValue = DEFAULT_ALERT_TUNES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertTunes
-  }
-  ,
+  },
+
   { .name = "tune-device",
     .defaultValue = DEFAULT_TUNE_DEVICE,
     .settingNames = &preferenceStringTable_tuneDevice,
     .setting = &prefs.tuneDevice
-  }
-  ,
+  },
+
   { .name = "pcm-volume",
     .defaultValue = DEFAULT_PCM_VOLUME,
     .setting = &prefs.pcmVolume
-  }
-  ,
+  },
+
   { .name = "midi-volume",
     .defaultValue = DEFAULT_MIDI_VOLUME,
     .setting = &prefs.midiVolume
-  }
-  ,
+  },
+
   { .name = "midi-instrument",
     .defaultValue = DEFAULT_MIDI_INSTRUMENT,
     .setting = &prefs.midiInstrument
-  }
-  ,
+  },
+
   { .name = "fm-volume",
     .defaultValue = DEFAULT_FM_VOLUME,
     .setting = &prefs.fmVolume
-  }
-  ,
+  },
+
   { .name = "alert-dots",
     .defaultValue = DEFAULT_ALERT_DOTS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertDots
-  }
-  ,
+  },
+
   { .name = "alert-messages",
     .defaultValue = DEFAULT_ALERT_MESSAGES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.alertMessages
-  }
-  ,
+  },
+
   { .name = "say-line-mode",
     .defaultValue = DEFAULT_SAY_LINE_MODE,
     .settingNames = &preferenceStringTable_sayLineMode,
     .setting = &prefs.sayLineMode
-  }
-  ,
+  },
+
   { .name = "autospeak",
     .defaultValue = DEFAULT_AUTOSPEAK,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autospeak
-  }
-  ,
+  },
+
+  { .name = "autospeak-current-character",
+    .defaultValue = DEFAULT_AUTOSPEAK_CURRENT_CHARACTER,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakCurrentCharacter
+  },
+
+  { .name = "autospeak-inserted-characters",
+    .defaultValue = DEFAULT_AUTOSPEAK_INSERTED_CHARACTERS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakInsertedCharacters
+  },
+
+  { .name = "autospeak-deleted-characters",
+    .defaultValue = DEFAULT_AUTOSPEAK_DELETED_CHARACTERS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakDeletedCharacters
+  },
+
+  { .name = "autospeak-replaced-characters",
+    .defaultValue = DEFAULT_AUTOSPEAK_REPLACED_CHARACTERS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakReplacedCharacters
+  },
+
+  { .name = "autospeak-completed-words",
+    .defaultValue = DEFAULT_AUTOSPEAK_COMPLETED_WORDS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakCompletedWords
+  },
+
   { .name = "speech-volume",
     .defaultValue = DEFAULT_SPEECH_VOLUME,
     .setting = &prefs.speechVolume
-  }
-  ,
+  },
+
   { .name = "speech-rate",
     .defaultValue = DEFAULT_SPEECH_RATE,
     .setting = &prefs.speechRate
-  }
-  ,
+  },
+
   { .name = "speech-pitch",
     .defaultValue = DEFAULT_SPEECH_PITCH,
     .setting = &prefs.speechPitch
-  }
-  ,
+  },
+
   { .name = "speech-punctuation",
     .defaultValue = DEFAULT_SPEECH_PUNCTUATION,
     .settingNames = &preferenceStringTable_speechPunctuation,
     .setting = &prefs.speechPunctuation
-  }
-  ,
+  },
+
   { .name = "status-position",
     .defaultValue = DEFAULT_STATUS_POSITION,
     .settingNames = &preferenceStringTable_statusPosition,
     .setting = &prefs.statusPosition
-  }
-  ,
+  },
+
   { .name = "status-count",
     .defaultValue = DEFAULT_STATUS_COUNT,
     .setting = &prefs.statusCount
-  }
-  ,
+  },
+
   { .name = "status-separator",
     .defaultValue = DEFAULT_STATUS_SEPARATOR,
     .settingNames = &preferenceStringTable_statusSeparator,
     .setting = &prefs.statusSeparator
-  }
-  ,
+  },
+
   { .name = "status-fields",
     .defaultValue = sfEnd,
     .encountered = &statusFieldsSet,
