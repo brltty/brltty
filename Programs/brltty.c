@@ -930,8 +930,8 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
   return 1;
 }
 
-static void
-describeCharacter (int column, int row) {
+static size_t
+formatCharacterDescription (char *buffer, size_t size, int column, int row) {
   static char *const colours[] = {
     strtext("black"),
     strtext("blue"),
@@ -951,32 +951,23 @@ describeCharacter (int column, int row) {
     strtext("white")
   };
 
-  char buffer[0X50];
-  int size = sizeof(buffer);
-  int length = 0;
+  size_t length;
   ScreenCharacter character;
 
   readScreen(column, row, 1, 1, &character);
+  STR_BEGIN(buffer, size);
 
   {
     uint32_t text = character.text;
-    int count;
-    snprintf(&buffer[length], size-length,
-             "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
-             text, text,
-             gettext(colours[character.attributes & 0X0F]),
-             gettext(colours[(character.attributes & 0X70) >> 4]),
-             &count);
-    length += count;
+
+    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "): %s on %s",
+               text, text,
+               gettext(colours[character.attributes & 0X0F]),
+               gettext(colours[(character.attributes & 0X70) >> 4]));
   }
 
   if (character.attributes & SCR_ATTR_BLINK) {
-    int count;
-    snprintf(&buffer[length], size-length,
-             " %s%n",
-             gettext("blink"),
-             &count);
-    length += count;
+    STR_PRINTF(" %s", gettext("blink"));
   }
 
 #ifdef HAVE_ICU
@@ -986,14 +977,14 @@ describeCharacter (int column, int row) {
 
     u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
     if (U_SUCCESS(error)) {
-      int count;
-      snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
-      length += count;
+      STR_PRINTF(" [%s]", name);
     }
   }
 #endif /* HAVE_ICU */
 
-  message(NULL, buffer, 0);
+  length = STR_LENGTH;
+  STR_END;
+  return length;
 }
 
 static int cursorState;                /* display cursor on (toggled during blink) */
@@ -1988,40 +1979,40 @@ doCommand:
         }
         break;
 
-      case BRL_CMD_SAY_PREV_CHAR:
+      case BRL_CMD_SPEAK_PREV_CHAR:
         if (ses->spkx > 0) {
           ses->spkx -= 1;
-          goto sayCharacter;
+          goto speakCharacter;
         }
 
         if (ses->spky > 0) {
           ses->spky -= 1;
           ses->spkx = scr.cols - 1;
           playTune(&tune_wrap_up);
-          goto sayCharacter;
+          goto speakCharacter;
         }
 
         playTune(&tune_bounce);
         break;
 
-      case BRL_CMD_SAY_NEXT_CHAR:
+      case BRL_CMD_SPEAK_NEXT_CHAR:
         if (ses->spkx < (scr.cols - 1)) {
           ses->spkx += 1;
-          goto sayCharacter;
+          goto speakCharacter;
         }
 
         if (ses->spky < (scr.rows - 1)) {
           ses->spky += 1;
           ses->spkx = 0;
           playTune(&tune_wrap_down);
-          goto sayCharacter;
+          goto speakCharacter;
         }
 
         playTune(&tune_bounce);
         break;
 
-      case BRL_CMD_SAY_CURR_CHAR:
-      sayCharacter: {
+      case BRL_CMD_SPEAK_CURR_CHAR:
+      speakCharacter: {
         ScreenCharacter character;
         readScreen(ses->spkx, ses->spky, 1, 1, &character);
         sayScreenCharacters(&character, 1, 1);
@@ -2032,27 +2023,27 @@ doCommand:
         int direction;
         int spell;
 
-      case BRL_CMD_SAY_PREV_WORD:
+      case BRL_CMD_SPEAK_PREV_WORD:
         direction = -1;
         spell = 0;
-        goto sayWord;
+        goto speakWord;
 
-      case BRL_CMD_SAY_NEXT_WORD:
+      case BRL_CMD_SPEAK_NEXT_WORD:
         direction = 1;
         spell = 0;
-        goto sayWord;
+        goto speakWord;
 
-      case BRL_CMD_SAY_CURR_WORD:
+      case BRL_CMD_SPEAK_CURR_WORD:
         direction = 0;
         spell = 0;
-        goto sayWord;
+        goto speakWord;
 
       case BRL_CMD_SPELL_CURR_WORD:
         direction = 0;
         spell = 1;
-        goto sayWord;
+        goto speakWord;
 
-      sayWord:
+      speakWord:
         {
           int row = ses->spky;
           int column = ses->spkx;
@@ -2174,25 +2165,26 @@ doCommand:
         break;
       }
 
-      case BRL_CMD_SAY_PREV_LINE:
+      case BRL_CMD_SPEAK_PREV_LINE:
         if (ses->spky > 0) {
           ses->spky -= 1;
-          goto sayLine;
+          goto speakLine;
         }
 
         playTune(&tune_bounce);
         break;
 
-      case BRL_CMD_SAY_NEXT_LINE:
+      case BRL_CMD_SPEAK_NEXT_LINE:
         if (ses->spky < (scr.rows - 1)) {
           ses->spky += 1;
-          goto sayLine;
+          goto speakLine;
         }
 
         playTune(&tune_bounce);
         break;
 
-      sayLine: {
+      case BRL_CMD_SPEAK_CURR_LINE:
+      speakLine: {
         ScreenCharacter characters[scr.cols];
         readScreen(0, ses->spky, scr.cols, 1, characters);
         sayScreenCharacters(characters, scr.cols, 1);
@@ -2204,9 +2196,12 @@ doCommand:
         slideWindowVertically(ses->spky);
         break;
 
-      case BRL_CMD_DESC_CURR_CHAR:
-        describeCharacter(ses->spkx, ses->spky);
+      case BRL_CMD_DESC_CURR_CHAR: {
+        char description[0X50];
+        formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
+        sayString(&spk, description, 1);
         break;
+      }
 
       case BRL_CMD_ROUTE_CURR_CHAR:
         if (routeCursor(ses->spkx, ses->spky, scr.number)) {
@@ -2405,7 +2400,9 @@ doCommand:
             int column, row;
 
             if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-              describeCharacter(column, row);
+              char description[0X50];
+              formatCharacterDescription(description, sizeof(description), column, row);
+              message(NULL, description, 0);
             } else {
               playTune(&tune_command_rejected);
             }
