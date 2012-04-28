@@ -46,14 +46,20 @@ cpbAllocateCharacters (size_t count) {
   return NULL;
 }
 
-void
-cpbClearContent (void) {
-  clipboardLength = 0;
+const wchar_t *
+cpbGetContent (size_t *length) {
+  *length = clipboardLength;
+  return clipboardCharacters;
 }
 
 void
 cpbTruncateContent (size_t length) {
   if (length < clipboardLength) clipboardLength = length;
+}
+
+void
+cpbClearContent (void) {
+  cpbTruncateContent(0);
 }
 
 int
@@ -77,8 +83,6 @@ cpbAddContent (const wchar_t *characters, size_t length) {
 
   wmemcpy(&clipboardCharacters[clipboardLength], characters, length);
   clipboardLength += length;
-
-  playTune(&tune_clipboard_end);
   return 1;
 }
 
@@ -86,12 +90,6 @@ int
 cpbSetContent (const wchar_t *characters, size_t length) {
   cpbClearContent();
   return cpbAddContent(characters, length);
-}
-
-const wchar_t *
-cpbGetContent (size_t *length) {
-  *length = clipboardLength;
-  return clipboardCharacters;
 }
 
 static wchar_t *
@@ -137,9 +135,11 @@ cpbReadScreen (size_t *length, int fromColumn, int fromRow, int toColumn, int to
 }
 
 static int
-cpbAppend (const wchar_t *characters, size_t length) {
+cpbEndOperation (const wchar_t *characters, size_t length) {
   cpbTruncateContent(beginOffset);
-  return cpbAddContent(characters, length);
+  if (!cpbAddContent(characters, length)) return 0;
+  playTune(&tune_clipboard_end);
+  return 1;
 }
 
 void
@@ -189,7 +189,7 @@ cpbRectangularCopy (int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbAppend(buffer, length)) copied = 1;
+    if (cpbEndOperation(buffer, length)) copied = 1;
     free(buffer);
   }
 
@@ -269,7 +269,7 @@ cpbLinearCopy (int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbAppend(buffer, length)) copied = 1;
+      if (cpbEndOperation(buffer, length)) copied = 1;
       free(buffer);
     }
   }
