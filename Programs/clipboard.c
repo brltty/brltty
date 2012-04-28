@@ -27,9 +27,9 @@
 #include "tunes.h"
 #include "clipboard.h"
 
-/* Global state variables */
-wchar_t *cpbBuffer = NULL;
-size_t cpbLength = 0;
+static wchar_t *clipboardCharacters = NULL;
+static size_t clipboardSize = 0;
+static size_t clipboardLength = 0;
 
 static int beginColumn = 0;
 static int beginRow = 0;
@@ -44,6 +44,54 @@ cpbAllocateCharacters (size_t count) {
 
   logMallocError();
   return NULL;
+}
+
+void
+cpbClearContent (void) {
+  clipboardLength = 0;
+}
+
+void
+cpbTruncateContent (size_t length) {
+  if (length < clipboardLength) clipboardLength = length;
+}
+
+int
+cpbAddContent (const wchar_t *characters, size_t length) {
+  size_t newLength = clipboardLength + length;
+
+  if (newLength > clipboardSize) {
+    size_t newSize = newLength | 0XFF;
+    wchar_t *newCharacters = cpbAllocateCharacters(newSize);
+
+    if (!newCharacters) {
+      logMallocError();
+      return 0;
+    }
+
+    wmemcpy(newCharacters, clipboardCharacters, clipboardLength);
+    if (clipboardCharacters) free(clipboardCharacters);
+    clipboardCharacters = newCharacters;
+    clipboardSize = newSize;
+  }
+
+  wmemcpy(&clipboardCharacters[clipboardLength], characters, length);
+  clipboardLength += length;
+
+  playTune(&tune_clipboard_end);
+  return 1;
+}
+
+int
+cpbSetContent (const wchar_t *characters, size_t length) {
+  cpbClearContent();
+  return cpbAddContent(characters, length);
+}
+
+const wchar_t *
+cpbGetContent (size_t *length) {
+  *length = clipboardLength;
+  return clipboardCharacters;
 }
 
 static wchar_t *
@@ -89,47 +137,22 @@ cpbReadScreen (size_t *length, int fromColumn, int fromRow, int toColumn, int to
 }
 
 static int
-cpbAppend (wchar_t *buffer, size_t length) {
-  if (cpbBuffer) {
-    size_t newLength = beginOffset + length;
-    wchar_t *newBuffer = cpbAllocateCharacters(newLength);
-    if (!newBuffer) return 0;
-
-    wmemcpy(wmempcpy(newBuffer, cpbBuffer, beginOffset), buffer, length);
-
-    free(buffer);
-    free(cpbBuffer);
-
-    cpbBuffer = newBuffer;
-    cpbLength = newLength;
-  } else {
-    cpbBuffer = buffer;
-    cpbLength = length;
-  }
-
-  playTune(&tune_clipboard_end);
-  return 1;
-}
-
-void
-cpbClearContent (void) {
-  if (cpbBuffer) {
-    free(cpbBuffer);
-    cpbBuffer = NULL;
-  }
-  cpbLength = 0;
+cpbAppend (const wchar_t *characters, size_t length) {
+  cpbTruncateContent(beginOffset);
+  return cpbAddContent(characters, length);
 }
 
 void
 cpbBeginOperation (int column, int row) {
   beginColumn = column;
   beginRow = row;
-  beginOffset = cpbLength;
+  beginOffset = clipboardLength;
   playTune(&tune_clipboard_begin);
 }
 
 int
 cpbRectangularCopy (int column, int row) {
+  int copied = 0;
   size_t length;
   wchar_t *buffer = cpbReadScreen(&length, beginColumn, beginRow, column, row);
 
@@ -166,14 +189,16 @@ cpbRectangularCopy (int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbAppend(buffer, length)) return 1;
+    if (cpbAppend(buffer, length)) copied = 1;
     free(buffer);
   }
-  return 0;
+
+  return copied;
 }
 
 int
 cpbLinearCopy (int column, int row) {
+  int copied = 0;
   ScreenDescription screen;
   describeScreen(&screen);
 
@@ -244,22 +269,26 @@ cpbLinearCopy (int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbAppend(buffer, length)) return 1;
+      if (cpbAppend(buffer, length)) copied = 1;
       free(buffer);
     }
   }
 
-  return 0;
+  return copied;
 }
 
 int
 cpbPaste (void) {
-  if (!cpbLength) return 0;
+  size_t length;
+  const wchar_t *characters = cpbGetContent(&length);
+
+  if (!length) return 0;
 
   {
-    int i;
-    for (i=0; i<cpbLength; ++i)
-      if (!insertScreenKey(cpbBuffer[i]))
+    unsigned int i;
+
+    for (i=0; i<length; i+=1)
+      if (!insertScreenKey(characters[i]))
         return 0;
   }
 

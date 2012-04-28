@@ -23,10 +23,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern wchar_t *cpbBuffer;
-extern size_t cpbLength;
-
 extern void cpbClearContent (void);
+extern void cpbTruncateContent (size_t length);
+extern int cpbAddContent (const wchar_t *characters, size_t length);
+extern int cpbSetContent (const wchar_t *characters, size_t length);
+extern const wchar_t *cpbGetContent (size_t *length);
+
 extern void cpbBeginOperation (int column, int row);
 extern int cpbRectangularCopy (int column, int row);
 extern int cpbLinearCopy (int column, int row);

@@ -1462,23 +1462,31 @@ doCommand:
 
       {
         int increment;
+
+        const wchar_t *cpbBuffer;
+        size_t cpbLength;
+
       case BRL_CMD_PRSEARCH:
         increment = -1;
         goto doSearch;
+
       case BRL_CMD_NXSEARCH:
         increment = 1;
+        goto doSearch;
+
       doSearch:
-        if (cpbBuffer) {
+        if ((cpbBuffer = cpbGetContent(&cpbLength))) {
           int found = 0;
           size_t count = cpbLength;
+
           if (count <= scr.cols) {
             int line = ses->winy;
             wchar_t buffer[scr.cols];
             wchar_t characters[count];
 
             {
-              int i;
-              for (i=0; i<count; i++) characters[i] = towlower(cpbBuffer[i]);
+              unsigned int i;
+              for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
             }
 
             while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
@@ -1515,10 +1523,12 @@ doCommand:
               line += increment;
             }
           }
+
           if (!found) playTune(&tune_bounce);
         } else {
           playTune(&tune_command_rejected);
         }
+
         break;
       }
 
