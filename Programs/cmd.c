@@ -474,6 +474,13 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
+
+            case BRL_CMD_SPEAK_PREV_CHAR:
+            case BRL_CMD_SPEAK_NEXT_CHAR:
+            case BRL_CMD_SPEAK_PREV_WORD:
+            case BRL_CMD_SPEAK_NEXT_WORD:
+            case BRL_CMD_SPEAK_PREV_LINE:
+            case BRL_CMD_SPEAK_NEXT_LINE:
               break;
           }
 
