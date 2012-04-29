@@ -541,6 +541,72 @@ getScreenCharacterType (const ScreenCharacter *character) {
   if (wcschr(WS_C("_"), character->text)) return SCT_WORD;
   return SCT_NONWORD;
 }
+
+static int
+findFirstNonblankCharacter (const ScreenCharacter *characters, int count) {
+  int index = 0;
+
+  while (index < count) {
+    if (getScreenCharacterType(&characters[index]) != SCT_SPACE) return index;
+    index += 1;
+  }
+
+  return -1;
+}
+
+static int
+findLastNonblankCharacter (const ScreenCharacter *characters, int count) {
+  int index = count;
+
+  while (index > 0)
+    if (getScreenCharacterType(&characters[--index]) != SCT_SPACE)
+      return index;
+
+  return -1;
+}
+
+static void
+speakDone (const ScreenCharacter *line, int column, int count, int spell) {
+  ScreenCharacter internalBuffer[count];
+
+  if (line) {
+    line = &line[column];
+  } else {
+    readScreen(column, ses->spky, count, 1, internalBuffer);
+    line = internalBuffer;
+  }
+
+  if (findFirstNonblankCharacter(line, count) < 0) {
+    sayString(&spk, gettext("space"), 1);
+  } else if (spell) {
+    wchar_t string[count * 2];
+    size_t length = 0;
+    unsigned int index = 0;
+
+    while (index < count) {
+      string[length++] = line[index++].text;
+      string[length++] = WC_C(' ');
+    }
+
+    string[length] = WC_C('\0');
+    sayWideCharacters(string, NULL, length, 1);
+  } else {
+    sayScreenCharacters(line, count, 1);
+  }
+
+  placeWindowHorizontally(ses->spkx);
+  slideWindowVertically(ses->spky);
+}
+
+static void
+speakCurrentCharacter (void) {
+  speakDone(NULL, ses->spkx, 1, 0);
+}
+
+static void
+speakCurrentLine (void) {
+  speakDone(NULL, 0, scr.cols, 0);
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static inline int
@@ -1989,44 +2055,66 @@ doCommand:
         }
         break;
 
+      case BRL_CMD_SPEAK_CURR_CHAR:
+        speakCurrentCharacter();
+        break;
+
       case BRL_CMD_SPEAK_PREV_CHAR:
         if (ses->spkx > 0) {
           ses->spkx -= 1;
-          goto speakCharacter;
-        }
-
-        if (ses->spky > 0) {
+          speakCurrentCharacter();
+        } else if (ses->spky > 0) {
           ses->spky -= 1;
           ses->spkx = scr.cols - 1;
           playTune(&tune_wrap_up);
-          goto speakCharacter;
+          speakCurrentCharacter();
+        } else {
+          playTune(&tune_bounce);
         }
-
-        playTune(&tune_bounce);
         break;
 
       case BRL_CMD_SPEAK_NEXT_CHAR:
         if (ses->spkx < (scr.cols - 1)) {
           ses->spkx += 1;
-          goto speakCharacter;
-        }
-
-        if (ses->spky < (scr.rows - 1)) {
+          speakCurrentCharacter();
+        } else if (ses->spky < (scr.rows - 1)) {
           ses->spky += 1;
           ses->spkx = 0;
           playTune(&tune_wrap_down);
-          goto speakCharacter;
+          speakCurrentCharacter();
+        } else {
+          playTune(&tune_bounce);
         }
-
-        playTune(&tune_bounce);
         break;
 
-      case BRL_CMD_SPEAK_CURR_CHAR:
-      speakCharacter: {
-        ScreenCharacter character;
-        readScreen(ses->spkx, ses->spky, 1, 1, &character);
-        sayScreenCharacters(&character, 1, 1);
-        goto sayDone;
+      case BRL_CMD_SPEAK_FRST_CHAR: {
+        ScreenCharacter characters[scr.cols];
+        int column;
+
+        readScreen(0, ses->spky, scr.cols, 1, characters);
+        if ((column = findFirstNonblankCharacter(characters, scr.cols)) >= 0) {
+          ses->spkx = column;
+          speakDone(characters, column, 1, 0);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+
+        break;
+      }
+
+      case BRL_CMD_SPEAK_LAST_CHAR: {
+        ScreenCharacter characters[scr.cols];
+        int column;
+
+        readScreen(0, ses->spky, scr.cols, 1, characters);
+        if ((column = findLastNonblankCharacter(characters, scr.cols)) >= 0) {
+          ses->spkx = column;
+          speakDone(characters, column, 1, 0);
+        } else {
+          playTune(&tune_command_rejected);
+        }
+
+        break;
       }
 
       {
@@ -2150,24 +2238,8 @@ doCommand:
             }
           }
 
-          if (((to - from) == 1) && (characters[from].text == WC_C(' '))) {
-            sayString(&spk, gettext("space"), 1);
-          } else if (spell) {
-            wchar_t string[(to - from) * 2];
-            size_t length = 0;
-
-            while (from < to) {
-              string[length++] = characters[from++].text;
-              string[length++] = WC_C(' ');
-            }
-
-            string[length] = WC_C('\0');
-            sayWideCharacters(string, NULL, length, 1);
-          } else {
-            sayScreenCharacters(&characters[from], to-from, 1);
-          }
-
-          goto sayDone;
+          speakDone(characters, from, to-from, spell);
+          break;
         }
 
       noWord:
@@ -2175,36 +2247,67 @@ doCommand:
         break;
       }
 
+      case BRL_CMD_SPEAK_CURR_LINE:
+        speakCurrentLine();
+        break;
+
       case BRL_CMD_SPEAK_PREV_LINE:
         if (ses->spky > 0) {
           ses->spky -= 1;
-          goto speakLine;
+          speakCurrentLine();
+        } else {
+          playTune(&tune_bounce);
         }
-
-        playTune(&tune_bounce);
         break;
 
       case BRL_CMD_SPEAK_NEXT_LINE:
         if (ses->spky < (scr.rows - 1)) {
           ses->spky += 1;
-          goto speakLine;
+          speakCurrentLine();
+        } else {
+          playTune(&tune_bounce);
+        }
+        break;
+
+      case BRL_CMD_SPEAK_FRST_LINE: {
+        ScreenCharacter characters[scr.cols];
+        int row = 0;
+
+        while (row < scr.rows) {
+          readScreen(0, row, scr.cols, 1, characters);
+          if (findFirstNonblankCharacter(characters, scr.cols) >= 0) break;
+          row += 1;
         }
 
-        playTune(&tune_bounce);
-        break;
+        if (row < scr.rows) {
+          ses->spky = row;
+          speakCurrentLine();
+        } else {
+          playTune(&tune_command_rejected);
+        }
 
-      case BRL_CMD_SPEAK_CURR_LINE:
-      speakLine: {
-        ScreenCharacter characters[scr.cols];
-        readScreen(0, ses->spky, scr.cols, 1, characters);
-        sayScreenCharacters(characters, scr.cols, 1);
-        goto sayDone;
+        break;
       }
 
-      sayDone:
-        placeWindowHorizontally(ses->spkx);
-        slideWindowVertically(ses->spky);
+      case BRL_CMD_SPEAK_LAST_LINE: {
+        ScreenCharacter characters[scr.cols];
+        int row = scr.rows - 1;
+
+        while (row >= 0) {
+          readScreen(0, row, scr.cols, 1, characters);
+          if (findFirstNonblankCharacter(characters, scr.cols) >= 0) break;
+          row -= 1;
+        }
+
+        if (row >= 0) {
+          ses->spky = row;
+          speakCurrentLine();
+        } else {
+          playTune(&tune_command_rejected);
+        }
+
         break;
+      }
 
       case BRL_CMD_DESC_CURR_CHAR: {
         char description[0X50];
@@ -2213,13 +2316,20 @@ doCommand:
         break;
       }
 
-      case BRL_CMD_ROUTE_CURR_CHAR:
+      case BRL_CMD_ROUTE_LOCATION:
         if (routeCursor(ses->spkx, ses->spky, scr.number)) {
           playTune(&tune_routing_started);
         } else {
           playTune(&tune_command_rejected);
         }
         break;
+
+      case BRL_CMD_SPEAK_LOCATION: {
+        char buffer[0X50];
+        snprintf(buffer, sizeof(buffer), "%d, %d", ses->spky+1, ses->spkx+1);
+        sayString(&spk, buffer, 1);
+        break;
+      }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       default: {

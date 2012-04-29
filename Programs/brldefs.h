@@ -176,15 +176,20 @@ typedef enum {
   BRL_CMD_SPEAK_CURR_CHAR /* speak current character */,
   BRL_CMD_SPEAK_PREV_CHAR /* go to and speak previous character */,
   BRL_CMD_SPEAK_NEXT_CHAR /* go to and speak next character */,
+  BRL_CMD_SPEAK_FRST_CHAR /* go to and speak first non-blank character on line */,
+  BRL_CMD_SPEAK_LAST_CHAR /* go to and speak last non-blank character on line */,
   BRL_CMD_SPEAK_CURR_WORD /* speak current word */,
   BRL_CMD_SPEAK_PREV_WORD /* go to and speak previous word */,
   BRL_CMD_SPEAK_NEXT_WORD /* go to and speak next word */,
   BRL_CMD_SPEAK_CURR_LINE /* speak current line */,
   BRL_CMD_SPEAK_PREV_LINE /* go to and speak previous line */,
   BRL_CMD_SPEAK_NEXT_LINE /* go to and speak next line */,
-  BRL_CMD_SPELL_CURR_WORD /* spell current word */,
+  BRL_CMD_SPEAK_FRST_LINE /* go to and speak first non-blank character on screen */,
+  BRL_CMD_SPEAK_LAST_LINE /* go to and speak last non-blank character on screen */,
   BRL_CMD_DESC_CURR_CHAR /* describe current character */,
-  BRL_CMD_ROUTE_CURR_CHAR /* bring cursor to current character */,
+  BRL_CMD_SPELL_CURR_WORD /* spell current word */,
+  BRL_CMD_ROUTE_LOCATION /* bring cursor to speech location */,
+  BRL_CMD_SPEAK_LOCATION /* speak speech location */,
 
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
