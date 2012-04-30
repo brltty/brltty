@@ -1321,6 +1321,7 @@ BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X_LIBS)])
 }
+BRLTTY_BRAILLE_DRIVER([np], [NinePoint])
 BRLTTY_ARG_DRIVER([braille], [Braille])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
