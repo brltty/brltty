@@ -1305,6 +1305,7 @@ brlttyPrepare_first (void) {
 
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
+  srand((unsigned int)time(NULL));
   onProgramExit(exitLog);
   openSystemLog();
 
@@ -2513,6 +2514,26 @@ doCommand:
             }
 
             playTune(&tune_command_rejected);
+            break;
+          }
+
+          case BRL_BLK_PWGEN: {
+            static const wchar_t codeset[] =
+              WS_C("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+              WS_C("abcdefghijklmnopqrstuvwxyz")
+              WS_C("0123456789");
+            const size_t codesetLength = wcslen(codeset);
+
+            wchar_t password[arg + 1];
+            wchar_t *character = password;
+            const wchar_t *end = character + ARRAY_COUNT(password);
+
+            while (character < end) {
+              *character++ = codeset[rand() % codesetLength];
+            }
+
+            cpbSetContent(password, character-password);
+            playTune(&tune_clipboard_end);
             break;
           }
 

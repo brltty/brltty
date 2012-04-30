@@ -233,6 +233,7 @@ typedef enum {
 #define BRL_BLK_NXDIFCHAR   0X0F00 /* go down to nearest line with different character */
 #define BRL_BLK_CLIP_COPY   0X1000 /* copy characters to clipboard */
 #define BRL_BLK_CLIP_APPEND 0X1100 /* append characters to clipboard */
+#define BRL_BLK_PWGEN       0X1200 /* put random password into clipboard */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* emulate special key */
