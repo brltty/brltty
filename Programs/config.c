@@ -898,6 +898,16 @@ STATUS_FIELD_HANDLERS(9)
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
+testShowSpeechCursor (void) {
+  return prefs.showSpeechCursor;
+}
+
+static int
+testBlinkingSpeechCursor (void) {
+  return testShowSpeechCursor() && prefs.blinkingSpeechCursor;
+}
+
+static int
 testAutospeak (void) {
   return prefs.autospeak;
 }
@@ -1138,6 +1148,13 @@ makeMidiInstrumentMenuStrings (void) {
 
 static Menu *
 makePreferencesMenu (void) {
+  static const MenuString cursorStyles[] = {
+    {.label=strtext("Underline"), .comment=strtext("dots 7 and 8")},
+    {.label=strtext("Block"), .comment=strtext("all dots")},
+    {.label=strtext("Lower Left Dot"), .comment=strtext("dot 7")},
+    {.label=strtext("Lower Right Dot"), .comment=strtext("dot 8")}
+  };
+
   Menu *menu = newMenu();
   if (!menu) goto noMenu;
 
@@ -1251,13 +1268,8 @@ makePreferencesMenu (void) {
   }
 
   {
-    static const MenuString strings[] = {
-      {.label=strtext("Underline")},
-      {.label=strtext("Block")}
-    };
-
     NAME(strtext("Cursor Style"));
-    ITEM(newEnumeratedMenuItem(menu, &prefs.cursorStyle, &name, strings));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.cursorStyle, &name, cursorStyles));
     TEST(ShowCursor);
   }
 
@@ -1427,13 +1439,32 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    static const MenuString strings[] = {
-      {.label=strtext("Immediate")},
-      {.label=strtext("Enqueue")}
-    };
+    NAME(strtext("Show Speech Cursor"));
+    ITEM(newBooleanMenuItem(menu, &prefs.showSpeechCursor, &name));
+  }
 
-    NAME(strtext("Say-Line Mode"));
-    ITEM(newEnumeratedMenuItem(menu, &prefs.sayLineMode, &name, strings));
+  {
+    NAME(strtext("Speech Cursor Style"));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.speechCursorStyle, &name, cursorStyles));
+    TEST(ShowSpeechCursor);
+  }
+
+  {
+    NAME(strtext("Blinking Speech Cursor"));
+    ITEM(newBooleanMenuItem(menu, &prefs.blinkingSpeechCursor, &name));
+    TEST(ShowSpeechCursor);
+  }
+
+  {
+    NAME(strtext("Speech Cursor Visible Time"));
+    ITEM(newTimeMenuItem(menu, &prefs.speechCursorVisibleTime, &name));
+    TEST(BlinkingSpeechCursor);
+  }
+
+  {
+    NAME(strtext("Speech Cursor Invisible Time"));
+    ITEM(newTimeMenuItem(menu, &prefs.speechCursorInvisibleTime, &name));
+    TEST(BlinkingSpeechCursor);
   }
 
   {
@@ -1469,6 +1500,16 @@ makePreferencesMenu (void) {
     NAME(strtext("Speak Completed Words"));
     ITEM(newBooleanMenuItem(menu, &prefs.autospeakCompletedWords, &name));
     TEST(Autospeak);
+  }
+
+  {
+    static const MenuString strings[] = {
+      {.label=strtext("Immediate")},
+      {.label=strtext("Enqueue")}
+    };
+
+    NAME(strtext("Say Line Mode"));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.sayLineMode, &name, strings));
   }
 
   {

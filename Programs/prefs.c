@@ -63,7 +63,7 @@ PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,
-  "underline", "block"
+  "underline", "block", "dot7", "dot8"
 )
 
 PREFERENCE_STRING_TABLE(brailleFirmness,
@@ -331,10 +331,32 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.alertMessages
   },
 
-  { .name = "say-line-mode",
-    .defaultValue = DEFAULT_SAY_LINE_MODE,
-    .settingNames = &preferenceStringTable_sayLineMode,
-    .setting = &prefs.sayLineMode
+  { .name = "show-speech-cursor",
+    .defaultValue = DEFAULT_SHOW_SPEECH_CURSOR,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showSpeechCursor
+  },
+
+  { .name = "speech-cursor-style",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_STYLE,
+    .settingNames = &preferenceStringTable_cursorStyle,
+    .setting = &prefs.speechCursorStyle
+  },
+
+  { .name = "blinking-speech-cursor",
+    .defaultValue = DEFAULT_BLINKING_SPEECH_CURSOR,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.blinkingSpeechCursor
+  },
+
+  { .name = "speech-cursor-visible-time",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_VISIBLE_TIME,
+    .setting = &prefs.speechCursorVisibleTime
+  },
+
+  { .name = "speech-cursor-invisible-time",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_INVISIBLE_TIME,
+    .setting = &prefs.speechCursorInvisibleTime
   },
 
   { .name = "autospeak",
@@ -371,6 +393,12 @@ static const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_AUTOSPEAK_COMPLETED_WORDS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autospeakCompletedWords
+  },
+
+  { .name = "say-line-mode",
+    .defaultValue = DEFAULT_SAY_LINE_MODE,
+    .settingNames = &preferenceStringTable_sayLineMode,
+    .setting = &prefs.sayLineMode
   },
 
   { .name = "speech-volume",

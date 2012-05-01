@@ -1053,46 +1053,76 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
   return length;
 }
 
-static void
-setBlinkingState (int *state, int *timer, int visible, unsigned char invisibleTime, unsigned char visibleTime) {
-  *timer = PREFERENCES_TIME((*state = visible)? visibleTime: invisibleTime);
+typedef struct {
+  const unsigned char *const blinkingEnabled;
+  const unsigned char *const visibleTime;
+  const unsigned char *const invisibleTime;
+
+  int isVisible;
+  int timer;
+} BlinkingState;
+
+static BlinkingState cursorBlinkingState = {
+  .blinkingEnabled = &prefs.blinkingCursor,
+  .visibleTime = &prefs.cursorVisibleTime,
+  .invisibleTime = &prefs.cursorInvisibleTime
+};
+
+static BlinkingState attributesBlinkingState = {
+  .blinkingEnabled = &prefs.blinkingAttributes,
+  .visibleTime = &prefs.attributesVisibleTime,
+  .invisibleTime = &prefs.attributesInvisibleTime
+};
+
+static BlinkingState capitalsBlinkingState = {
+  .blinkingEnabled = &prefs.blinkingCapitals,
+  .visibleTime = &prefs.capitalsVisibleTime,
+  .invisibleTime = &prefs.capitalsInvisibleTime
+};
+
+static BlinkingState speechCursorBlinkingState = {
+  .blinkingEnabled = &prefs.blinkingSpeechCursor,
+  .visibleTime = &prefs.speechCursorVisibleTime,
+  .invisibleTime = &prefs.speechCursorInvisibleTime
+};
+
+static int
+isBlinkedOn (const BlinkingState *state) {
+  if (!*state->blinkingEnabled) return 1;
+  return state->isVisible;
 }
 
-static int cursorState;                /* display cursor on (toggled during blink) */
-static int cursorTimer;
 static void
-setBlinkingCursor (int visible) {
-  setBlinkingState(&cursorState, &cursorTimer, visible,
-                   prefs.cursorInvisibleTime, prefs.cursorVisibleTime);
+setBlinkingState (BlinkingState *state, int visible) {
+  state->timer = PREFERENCES_TIME((state->isVisible = visible)? *state->visibleTime: *state->invisibleTime);
 }
 
-static int attributesState;
-static int attributesTimer;
 static void
-setBlinkingAttributes (int visible) {
-  setBlinkingState(&attributesState, &attributesTimer, visible,
-                   prefs.attributesInvisibleTime, prefs.attributesVisibleTime);
-}
-
-static int capitalsState;                /* display caps off (toggled during blink) */
-static int capitalsTimer;
-static void
-setBlinkingCapitals (int visible) {
-  setBlinkingState(&capitalsState, &capitalsTimer, visible,
-                   prefs.capitalsInvisibleTime, prefs.capitalsVisibleTime);
+updateBlinkingState (BlinkingState *state) {
+  if (*state->blinkingEnabled)
+      if ((state->timer -= updateInterval) <= 0)
+        setBlinkingState(state, !state->isVisible);
 }
 
 static void
 resetBlinkingStates (void) {
-  setBlinkingCursor(0);
-  setBlinkingAttributes(1);
-  setBlinkingCapitals(1);
+  setBlinkingState(&cursorBlinkingState, 0);
+  setBlinkingState(&attributesBlinkingState, 1);
+  setBlinkingState(&capitalsBlinkingState, 1);
+  setBlinkingState(&speechCursorBlinkingState, 0);
 }
+
+static const unsigned char cursorStyles[] = {
+  [csUnderline] = (BRL_DOT7 | BRL_DOT8),
+  [csBlock] = (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8),
+  [csLowerLeftDot] = (BRL_DOT7),
+  [csLowerRightDot] = (BRL_DOT8)
+};
 
 unsigned char
 getCursorDots (void) {
-  if (prefs.blinkingCursor && !cursorState) return 0;
-  return prefs.cursorStyle? (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
+  if (!isBlinkedOn(&cursorBlinkingState)) return 0;
+  return cursorStyles[prefs.cursorStyle];
 }
 
 static int
@@ -1109,7 +1139,7 @@ toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const T
 
 static inline int
 showAttributesUnderline (void) {
-  return prefs.showAttributes && (!prefs.blinkingAttributes || attributesState);
+  return prefs.showAttributes && isBlinkedOn(&attributesBlinkingState);
 }
 
 static void
@@ -1839,10 +1869,8 @@ doCommand:
         }
         break;
       case BRL_CMD_CSRBLINK:
-        setBlinkingCursor(1);
         if (TOGGLE_PLAY(prefs.blinkingCursor)) {
-          setBlinkingAttributes(1);
-          setBlinkingCapitals(0);
+          setBlinkingState(&cursorBlinkingState, 1);
         }
         break;
 
@@ -1850,18 +1878,14 @@ doCommand:
         TOGGLE_PLAY(prefs.showAttributes);
         break;
       case BRL_CMD_ATTRBLINK:
-        setBlinkingAttributes(1);
         if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
-          setBlinkingCapitals(1);
-          setBlinkingCursor(0);
+          setBlinkingState(&attributesBlinkingState, 1);
         }
         break;
 
       case BRL_CMD_CAPBLINK:
-        setBlinkingCapitals(1);
         if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
-          setBlinkingAttributes(0);
-          setBlinkingCursor(0);
+          setBlinkingState(&capitalsBlinkingState, 1);
         }
         break;
 
@@ -2754,15 +2778,10 @@ brlttyUpdate (void) {
     /*
      * Update blink counters: 
      */
-    if (prefs.blinkingCursor)
-      if ((cursorTimer -= updateInterval) <= 0)
-        setBlinkingCursor(!cursorState);
-    if (prefs.blinkingAttributes)
-      if ((attributesTimer -= updateInterval) <= 0)
-        setBlinkingAttributes(!attributesState);
-    if (prefs.blinkingCapitals)
-      if ((capitalsTimer -= updateInterval) <= 0)
-        setBlinkingCapitals(!capitalsState);
+    updateBlinkingState(&cursorBlinkingState);
+    updateBlinkingState(&attributesBlinkingState);
+    updateBlinkingState(&capitalsBlinkingState);
+    updateBlinkingState(&speechCursorBlinkingState);
 
 #ifdef ENABLE_SPEECH_SUPPORT
     /* called continually even if we're not tracking so that the pipe doesn't fill up. */
@@ -2783,10 +2802,10 @@ brlttyUpdate (void) {
         if (prefs.blinkingCursor) {
           if (scr.posy != ses->trky) {
             /* turn off cursor to see what's under it while changing lines */
-            setBlinkingCursor(0);
+            setBlinkingState(&cursorBlinkingState, 0);
           } else if (scr.posx != ses->trkx) {
             /* turn on cursor to see it moving on the line */
-            setBlinkingCursor(1);
+            setBlinkingState(&cursorBlinkingState, 1);
           }
         }
 
@@ -2993,7 +3012,7 @@ brlttyUpdate (void) {
            We could check to see if we changed screen, but that doesn't
            really matter... this is mainly for when you are hunting up/down
            for the line with attributes. */
-        setBlinkingAttributes(1);
+        setBlinkingState(&attributesBlinkingState, 1);
         /* problem: this still doesn't help when the braille window is
            stationnary and the attributes themselves are moving
            (example: tin). */
@@ -3170,9 +3189,9 @@ brlttyUpdate (void) {
             brl.cursor = ((scr.posy - ses->winy) * brl.textColumns) + textStart + scr.posx - ses->winx;
 
           /* blank out capital letters if they're blinking and should be off */
-          if (prefs.blinkingCapitals && !capitalsState) {
-            int i;
-            for (i=0; i<textCount*brl.textRows; i++) {
+          if (!isBlinkedOn(&capitalsBlinkingState)) {
+            unsigned int i;
+            for (i=0; i<textCount*brl.textRows; i+=1) {
               ScreenCharacter *character = &characters[i];
               if (iswupper(character->text)) character->text = WC_C(' ');
             }
@@ -3221,6 +3240,15 @@ brlttyUpdate (void) {
         if (brl.cursor >= 0) {
           if (showCursor()) {
             brl.buffer[brl.cursor] |= getCursorDots();
+          }
+        }
+
+        if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
+          if ((ses->spky >= ses->winy) && (ses->spky < (ses->winy + brl.textRows))) {
+            if ((ses->spkx >= ses->winx) && (ses->spkx < (ses->winx + textCount))) {
+              int offset = ((ses->spky - ses->winy) * brl.textColumns) + textStart + ses->spkx - ses->winx;
+              brl.buffer[offset] |= cursorStyles[prefs.speechCursorStyle];
+            }
           }
         }
 

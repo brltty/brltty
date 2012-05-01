@@ -59,7 +59,7 @@ extern "C" {
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 
 #define DEFAULT_SHOW_CURSOR 1		/* 1 for yes, 0 for no */
-#define DEFAULT_CURSOR_STYLE 0		/* 1 for block, 0 for underline */
+#define DEFAULT_CURSOR_STYLE csUnderline
 #define DEFAULT_BLINKING_CURSOR 0		/* 1 for on, 0 for off */
 #define DEFAULT_CURSOR_VISIBLE_TIME 40	/* for blinking cursor */
 #define DEFAULT_CURSOR_INVISIBLE_TIME 40
@@ -92,7 +92,12 @@ extern "C" {
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 
-#define DEFAULT_SAY_LINE_MODE sayImmediate
+#define DEFAULT_SHOW_SPEECH_CURSOR 0
+#define DEFAULT_SPEECH_CURSOR_STYLE csUnderline
+#define DEFAULT_BLINKING_SPEECH_CURSOR 0
+#define DEFAULT_SPEECH_CURSOR_VISIBLE_TIME 40
+#define DEFAULT_SPEECH_CURSOR_INVISIBLE_TIME 40
+
 #define DEFAULT_AUTOSPEAK 0		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOSPEAK_CURRENT_CHARACTER 1
 #define DEFAULT_AUTOSPEAK_INSERTED_CHARACTERS 1
@@ -100,6 +105,7 @@ extern "C" {
 #define DEFAULT_AUTOSPEAK_REPLACED_CHARACTERS 1
 #define DEFAULT_AUTOSPEAK_COMPLETED_WORDS 1
 
+#define DEFAULT_SAY_LINE_MODE sayImmediate
 #define DEFAULT_SPEECH_VOLUME SPK_VOLUME_DEFAULT
 #define DEFAULT_SPEECH_RATE SPK_RATE_DEFAULT
 #define DEFAULT_SPEECH_PITCH SPK_PITCH_DEFAULT

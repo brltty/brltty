@@ -24,6 +24,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
+  csUnderline,
+  csBlock,
+  csLowerLeftDot,
+  csLowerRightDot
+} CursorStyles;
+
+typedef enum {
   tsComputerBraille8,
   tsContractedBraille,
   tsComputerBraille6
@@ -112,12 +119,20 @@ typedef struct {
 
   /* Fields below this point may be modified as needed. */
   unsigned char capitalizationMode;
-  unsigned char saveOnExit;
+
   unsigned char autospeakCurrentCharacter;
   unsigned char autospeakInsertedCharacters;
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
+
+  unsigned char showSpeechCursor;
+  unsigned char speechCursorStyle;
+  unsigned char blinkingSpeechCursor;
+  unsigned char speechCursorVisibleTime;
+  unsigned char speechCursorInvisibleTime;
+
+  unsigned char saveOnExit;
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */
