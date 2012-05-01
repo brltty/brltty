@@ -46,44 +46,44 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 typedef struct {
-  unsigned char modelIdentifier;
+  unsigned char identifier;
   unsigned char cellCount;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
-  { .modelIdentifier = 0X70,
+  { .identifier = 0X70,
     .cellCount = 0
   },
 
-  { .modelIdentifier = 0X72,
+  { .identifier = 0X72,
     .cellCount = 20
   },
 
-  { .modelIdentifier = 0X74,
+  { .identifier = 0X74,
     .cellCount = 40
   },
 
-  { .modelIdentifier = 0X76,
+  { .identifier = 0X76,
     .cellCount = 60
   },
 
-  { .modelIdentifier = 0X78,
+  { .identifier = 0X78,
     .cellCount = 80
   },
 
-  { .modelIdentifier = 0X7A,
+  { .identifier = 0X7A,
     .cellCount = 100
   },
 
-  { .modelIdentifier = 0X7C,
+  { .identifier = 0X7C,
     .cellCount = 120
   },
 
-  { .modelIdentifier = 0X7E,
+  { .identifier = 0X7E,
     .cellCount = 140
   },
 
-  { .modelIdentifier = 0 }
+  { .identifier = 0 }
 };
 
 struct BrailleDataStruct {
@@ -96,11 +96,11 @@ struct BrailleDataStruct {
 
 static const ModelEntry *
 getModelEntry (unsigned char identifier) {
-  const ModelEntry *entry = modelTable;
+  const ModelEntry *model = modelTable;
 
-  while (entry->modelIdentifier) {
-    if (identifier == entry->modelIdentifier) return entry;
-    entry += 1;
+  while (model->identifier) {
+    if (identifier == model->identifier) return model;
+    model += 1;
   }
 
   logMessage(LOG_WARNING, "unknown NinePoint model: 0X%02X", identifier);
@@ -118,7 +118,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, size_t size, const unsigne
   unsigned char *byte = bytes;
 
   *byte++ = NP_PKT_BEGIN;
-  *byte++ = brl->data->model->modelIdentifier;
+  *byte++ = brl->data->model->identifier;
   *byte++ = size + 1;
   *byte++ = type;
   byte = mempcpy(byte, data, size);
@@ -166,7 +166,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
       switch (bytes[0]) {
         case NP_PKT_BEGIN:
           if (offset == 1) {
-            if (byte != brl->data->model->modelIdentifier) unexpected = 1;
+            if (byte != brl->data->model->identifier) unexpected = 1;
           } else if (offset == 2) {
             length += byte + 1;
           } else if (offset == (length-1)) {
