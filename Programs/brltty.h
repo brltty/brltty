@@ -68,7 +68,7 @@ extern int loadPreferences (void);
 extern int savePreferences (void);
 extern Menu *getPreferencesMenu (void);
 
-extern unsigned char cursorDots (void);
+extern unsigned char getCursorDots (void);
 
 extern BrailleDisplay brl;			/* braille driver reference */
 extern unsigned int textStart;

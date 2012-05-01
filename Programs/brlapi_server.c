@@ -2447,7 +2447,7 @@ int api_flush(BrailleDisplay *brl) {
       }
     }
     pthread_mutex_unlock(&driverMutex);
-    newCursorShape = cursorDots();
+    newCursorShape = getCursorDots();
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
     }

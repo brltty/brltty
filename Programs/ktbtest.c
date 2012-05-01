@@ -250,7 +250,7 @@ unsigned int textCount;
 int apiStarted = 0;
 
 unsigned char
-cursorDots (void) {
+getCursorDots (void) {
   return 0;
 }
 

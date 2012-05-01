@@ -221,7 +221,7 @@ main (int argc, char *argv[]) {
 
 /* dummy functions to allow drivers to link... */
 unsigned char
-cursorDots (void) {
+getCursorDots (void) {
   return (BRL_DOT7 | BRL_DOT8);
 }
 

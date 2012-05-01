@@ -1053,19 +1053,13 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
   return length;
 }
 
-static int cursorState;                /* display cursor on (toggled during blink) */
-static int cursorTimer;
-unsigned char
-cursorDots (void) {
-  if (prefs.blinkingCursor && !cursorState) return 0;
-  return prefs.cursorStyle? (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
-}
-
 static void
 setBlinkingState (int *state, int *timer, int visible, unsigned char invisibleTime, unsigned char visibleTime) {
   *timer = PREFERENCES_TIME((*state = visible)? visibleTime: invisibleTime);
 }
 
+static int cursorState;                /* display cursor on (toggled during blink) */
+static int cursorTimer;
 static void
 setBlinkingCursor (int visible) {
   setBlinkingState(&cursorState, &cursorTimer, visible,
@@ -1093,6 +1087,12 @@ resetBlinkingStates (void) {
   setBlinkingCursor(0);
   setBlinkingAttributes(1);
   setBlinkingCapitals(1);
+}
+
+unsigned char
+getCursorDots (void) {
+  if (prefs.blinkingCursor && !cursorState) return 0;
+  return prefs.cursorStyle? (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
 }
 
 static int
@@ -3220,7 +3220,7 @@ brlttyUpdate (void) {
 
         if (brl.cursor >= 0) {
           if (showCursor()) {
-            brl.buffer[brl.cursor] |= cursorDots();
+            brl.buffer[brl.cursor] |= getCursorDots();
           }
         }
 
