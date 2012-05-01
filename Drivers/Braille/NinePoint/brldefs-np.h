@@ -18,4 +18,12 @@
 #ifndef BRLTTY_INCLUDED_NP_BRLDEFS
 #define BRLTTY_INCLUDED_NP_BRLDEFS
 
+#define NP_REQ_Identify 0XF8
+#define NP_RSP_Identity 0XFE
+
+#define NP_PKT_BEGIN 0X79
+#define NP_PKT_END 0X16
+#define NP_PKT_REQ_Write 0X01
+#define NP_PKT_RSP_Confirm 0X07
+
 #endif /* BRLTTY_INCLUDED_NP_BRLDEFS */ 

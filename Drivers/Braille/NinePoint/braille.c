@@ -27,6 +27,15 @@
 #include "brl_driver.h"
 #include "brldefs-np.h"
 
+BEGIN_KEY_NAME_TABLES(all)
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
+
 typedef struct {
   unsigned char modelIdentifier;
   unsigned char cellCount;
@@ -72,19 +81,20 @@ struct BrailleDataStruct {
   GioEndpoint *gioEndpoint;
   const ModelEntry *model;
   int forceRewrite;
+  int acknowledgementPending;
   unsigned char textCells[140];
 };
 
 static const ModelEntry *
 getModelEntry (unsigned char identifier) {
-  const ModelEntry *entry;
+  const ModelEntry *entry = modelTable;
 
   while (entry->modelIdentifier) {
     if (identifier == entry->modelIdentifier) return entry;
     entry += 1;
   }
 
-  logMessage(LOG_WARNING, "model not found: 0X%02X", identifier);
+  logMessage(LOG_WARNING, "unknown NinePoint model: 0X%02X", identifier);
   return NULL;
 }
 
@@ -98,12 +108,12 @@ writePacket (BrailleDisplay *brl, unsigned char type, size_t size, const unsigne
   unsigned char bytes[size + 5];
   unsigned char *byte = bytes;
 
-  *byte++ = 0X79;
+  *byte++ = NP_PKT_BEGIN;
   *byte++ = brl->data->model->modelIdentifier;
   *byte++ = size + 1;
   *byte++ = type;
   byte = mempcpy(byte, data, size);
-  *byte++ = 0X16;
+  *byte++ = NP_PKT_END;
 
   return writeBytes(brl, bytes, byte-bytes);
 }
@@ -129,11 +139,11 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   gotByte:
     if (offset == 0) {
       switch (byte) {
-        case 0XFE:
+        case NP_RSP_Identity:
           length = 2;
           break;
 
-        case 0X79:
+        case NP_PKT_BEGIN:
           length = 3;
           break;
 
@@ -145,13 +155,13 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
       int unexpected = 0;
 
       switch (bytes[0]) {
-        case 0X79:
+        case NP_PKT_BEGIN:
           if (offset == 1) {
             if (byte != brl->data->model->modelIdentifier) unexpected = 1;
           } else if (offset == 2) {
             length += byte + 1;
           } else if (offset == (length-1)) {
-            if (byte != 0X16) unexpected = 1;
+            if (byte != NP_PKT_END) unexpected = 1;
           }
           break;
 
@@ -167,12 +177,19 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
       }
     }
 
-    bytes[offset++] = byte;
+    if (offset < size) {
+      bytes[offset] = byte;
 
-    if (offset == length) {
-      logInputPacket(bytes, offset);
-      return length;
+      if (offset == (length - 1)) {
+        logInputPacket(bytes, length);
+        return length;
+      }
+    } else {
+      if (offset == size) logTruncatedPacket(bytes, offset);
+      logDiscardedByte(byte);
     }
+
+    offset += 1;
   }
 }
 
@@ -208,7 +225,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 writeIdentityRequest (BrailleDisplay *brl) {
-  static const unsigned char bytes[] = {0XF8};
+  static const unsigned char bytes[] = {NP_REQ_Identify};
   return writeBytes(brl, bytes, sizeof(bytes));
 }
 
@@ -216,7 +233,7 @@ static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *bytes = packet;
 
-  return (bytes[0] == 0XFE)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+  return (bytes[0] == NP_RSP_Identity)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
 }
 
 static int
@@ -228,15 +245,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       unsigned char response[0X200];
 
-      if (probeBrailleDisplay(brl, 0, brl->data->gioEndpoint, 1000,
+      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         if ((brl->data->model = getModelEntry(response[1]))) {
           brl->textColumns = brl->data->model->cellCount;
 
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
           makeOutputTable(dotsTable_ISO11548_1);
           brl->data->forceRewrite = 1;
+          brl->data->acknowledgementPending = 0;
           return 1;
         }
       }
@@ -262,11 +287,14 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
-    unsigned char cells[brl->textColumns];
+  if (!brl->data->acknowledgementPending) {
+    if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+      unsigned char cells[brl->textColumns];
 
-    translateOutputCells(cells, brl->data->textCells, brl->textColumns);
-    if (!writePacket(brl, 0X01, brl->textColumns, cells)) return 0;
+      translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+      if (!writePacket(brl, NP_PKT_REQ_Write, brl->textColumns, cells)) return 0;
+      brl->data->acknowledgementPending = 1;
+    }
   }
 
   return 1;
@@ -279,11 +307,26 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
     switch (packet[0]) {
-      case 0X79: {
+      case NP_PKT_BEGIN: {
         const unsigned char *bytes = &packet[4];
         size_t count = packet[2] - 1;
 
         switch (packet[3]) {
+          case NP_PKT_RSP_Confirm:
+            if (count > 0) {
+              switch (bytes[0]) {
+                case 0X7D:
+                  brl->data->forceRewrite = 1;
+                case 0X7E:
+                  brl->data->acknowledgementPending = 0;
+                  continue;
+
+                default:
+                  break;
+              }
+            }
+            break;
+
           default:
             break;
         }
