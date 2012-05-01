@@ -27,7 +27,16 @@
 #include "brl_driver.h"
 #include "brldefs-np.h"
 
+#define PROBE_RETRY_LIMIT 2
+#define PROBE_INPUT_TIMEOUT 1000
+#define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
+#define MAXIMUM_CELL_COUNT 140
+
+BEGIN_KEY_NAME_TABLE(navigation)
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(all)
+  KEY_NAME_TABLE(navigation),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(all)
@@ -82,7 +91,7 @@ struct BrailleDataStruct {
   const ModelEntry *model;
   int forceRewrite;
   int acknowledgementPending;
-  unsigned char textCells[140];
+  unsigned char textCells[MAXIMUM_CELL_COUNT];
 };
 
 static const ModelEntry *
@@ -100,7 +109,7 @@ getModelEntry (unsigned char identifier) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return gioWriteData(brl->data->gioEndpoint, bytes, count) != -1;
+  return writeBraillePacket(brl, brl->data->gioEndpoint, bytes, count);
 }
 
 static int
@@ -243,9 +252,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      unsigned char response[0X200];
+      unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
-      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
+      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT,
+                              brl->data->gioEndpoint, PROBE_INPUT_TIMEOUT,
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
@@ -302,7 +312,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[0X200];
+  unsigned char packet[MAXIMUM_RESPONSE_SIZE];
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
