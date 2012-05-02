@@ -27,19 +27,31 @@
 #define NP_PKT_RSP_Confirm 0X07
 
 typedef enum {
-  NP_KEY_PadLeft     = 0X0C,
-  NP_KEY_PadUp       = 0X0F,
-  NP_KEY_PadMiddle   = 0X10,
-  NP_KEY_PadDown     = 0X13,
-  NP_KEY_PadRight    = 0X14,
+  NP_KEY_PadLeft1     = 0X0C,
+  NP_KEY_PadUp1       = 0X0F,
+  NP_KEY_PadCenter1   = 0X10,
+  NP_KEY_PadDown1     = 0X13,
+  NP_KEY_PadRight1    = 0X14,
 
-  NP_KEY_LeftUpper   = 0X07,
-  NP_KEY_LeftMiddle  = 0X0B,
-  NP_KEY_LeftLower   = 0X1B,
+  NP_KEY_LeftUpper1   = 0X07,
+  NP_KEY_LeftMiddle1  = 0X0B,
+  NP_KEY_LeftLower1   = 0X1B,
+  NP_KEY_RightUpper1  = 0X03,
+  NP_KEY_RightMiddle1 = 0X17,
+  NP_KEY_RightLower1  = 0X1F,
 
-  NP_KEY_RightUpper  = 0X03,
-  NP_KEY_RightMiddle = 0X17,
-  NP_KEY_RightLower  = 0X1F,
+  NP_KEY_PadLeft2     = 0X06,
+  NP_KEY_PadUp2       = 0X1A,
+  NP_KEY_PadCenter2   = 0X0A,
+  NP_KEY_PadDown2     = 0X19,
+  NP_KEY_PadRight2    = 0X0E,
+
+  NP_KEY_LeftUpper2   = 0X16,
+  NP_KEY_LeftMiddle2  = 0X12,
+  NP_KEY_LeftLower2   = 0X15,
+  NP_KEY_RightUpper2  = 0X1E,
+  NP_KEY_RightMiddle2 = 0X0D,
+  NP_KEY_RightLower2  = 0X1D,
 
   NP_KEY_ROUTING_MIN = 0X20,
   NP_KEY_ROUTING_MAX = 0X6F,

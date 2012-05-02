@@ -33,19 +33,31 @@
 #define MAXIMUM_CELL_COUNT 140
 
 BEGIN_KEY_NAME_TABLE(navigation)
-  KEY_NAME_ENTRY(NP_KEY_PadLeft, "PadLeft"),
-  KEY_NAME_ENTRY(NP_KEY_PadUp, "PadUp"),
-  KEY_NAME_ENTRY(NP_KEY_PadMiddle, "PadMiddle"),
-  KEY_NAME_ENTRY(NP_KEY_PadDown, "PadDown"),
-  KEY_NAME_ENTRY(NP_KEY_PadRight, "PadRight"),
+  KEY_NAME_ENTRY(NP_KEY_PadLeft1, "PadLeft1"),
+  KEY_NAME_ENTRY(NP_KEY_PadUp1, "PadUp1"),
+  KEY_NAME_ENTRY(NP_KEY_PadCenter1, "PadCenter1"),
+  KEY_NAME_ENTRY(NP_KEY_PadDown1, "PadDown1"),
+  KEY_NAME_ENTRY(NP_KEY_PadRight1, "PadRight1"),
 
-  KEY_NAME_ENTRY(NP_KEY_LeftUpper, "LeftUpper"),
-  KEY_NAME_ENTRY(NP_KEY_LeftMiddle, "LeftMiddle"),
-  KEY_NAME_ENTRY(NP_KEY_LeftLower, "LeftLower"),
+  KEY_NAME_ENTRY(NP_KEY_LeftUpper1, "LeftUpper1"),
+  KEY_NAME_ENTRY(NP_KEY_LeftMiddle1, "LeftMiddle1"),
+  KEY_NAME_ENTRY(NP_KEY_LeftLower1, "LeftLower1"),
+  KEY_NAME_ENTRY(NP_KEY_RightUpper1, "RightUpper1"),
+  KEY_NAME_ENTRY(NP_KEY_RightMiddle1, "RightMiddle1"),
+  KEY_NAME_ENTRY(NP_KEY_RightLower1, "RightLower1"),
 
-  KEY_NAME_ENTRY(NP_KEY_RightUpper, "RightUpper"),
-  KEY_NAME_ENTRY(NP_KEY_RightMiddle, "RightMiddle"),
-  KEY_NAME_ENTRY(NP_KEY_RightLower, "RightLower"),
+  KEY_NAME_ENTRY(NP_KEY_PadLeft2, "PadLeft2"),
+  KEY_NAME_ENTRY(NP_KEY_PadUp2, "PadUp2"),
+  KEY_NAME_ENTRY(NP_KEY_PadCenter2, "PadCenter2"),
+  KEY_NAME_ENTRY(NP_KEY_PadDown2, "PadDown2"),
+  KEY_NAME_ENTRY(NP_KEY_PadRight2, "PadRight2"),
+
+  KEY_NAME_ENTRY(NP_KEY_LeftUpper2, "LeftUpper2"),
+  KEY_NAME_ENTRY(NP_KEY_LeftMiddle2, "LeftMiddle2"),
+  KEY_NAME_ENTRY(NP_KEY_LeftLower2, "LeftLower2"),
+  KEY_NAME_ENTRY(NP_KEY_RightUpper2, "RightUpper2"),
+  KEY_NAME_ENTRY(NP_KEY_RightMiddle2, "RightMiddle2"),
+  KEY_NAME_ENTRY(NP_KEY_RightLower2, "RightLower2"),
 
   KEY_SET_ENTRY(NP_SET_RoutingKey, "RoutingKey"),
 END_KEY_NAME_TABLE
@@ -342,9 +354,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               unsigned char set;
               unsigned char key = bytes[0];
               int press = !(key & NP_KEY_RELEASE);
-
               key &= ~NP_KEY_RELEASE;
-              set = ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX))? NP_SET_RoutingKey: NP_SET_NavigationKey;
+
+              if ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX)) {
+                set = NP_SET_RoutingKey;
+                key -= NP_KEY_ROUTING_MIN;
+              } else {
+                set = NP_SET_NavigationKey;
+              }
+
               enqueueKeyEvent(set, key, press);
               continue;
             }

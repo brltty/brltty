@@ -18,10 +18,52 @@
 
 title NinePoint
 
-bind PadMiddle HOME
-bind PadLeft FWINLT
-bind PadRight FWINRT
-bind PadUp LNUP
-bind PadDown LNDN
+bind PadCenter1 HOME
+bind PadLeft1 FWINLT
+bind PadRight1 FWINRT
+bind PadUp1 LNUP
+bind PadDown1 LNDN
+
+bind LeftUpper1 TOP_LEFT
+bind LeftLower1 BOT_LEFT
+bind RightUpper1 PRDIFLN
+bind RightLower1 NXDIFLN
+bind LeftMiddle1 SIXDOTS
+bind RightMiddle1 CSRTRK
+
+bind LeftMiddle1+PadCenter1 BACK
+bind LeftMiddle1+PadLeft1 FWINLTSKIP
+bind LeftMiddle1+PadRight1 FWINRTSKIP
+bind LeftMiddle1+PadUp1 ATTRUP
+bind LeftMiddle1+PadDown1 ATTRDN
+
+bind LeftUpper1+PadCenter1 PASTE
+bind LeftUpper1+PadLeft1 PRSEARCH
+bind LeftUpper1+PadRight1 NXSEARCH
+bind LeftUpper1+PadUp1 PRPGRPH
+bind LeftUpper1+PadDown1 NXPGRPH
+
+bind LeftLower1+PadCenter1 CSRJMP_VERT
+bind LeftLower1+PadLeft1 LNBEG
+bind LeftLower1+PadRight1 LNEND
+bind LeftLower1+PadUp1 PRPROMPT
+bind LeftLower1+PadDown1 NXPROMPT
+
+bind PadCenter1+PadLeft1 HELP
+bind PadCenter1+PadRight1 LEARN
+bind PadCenter1+PadUp1 INFO
+bind PadCenter1+PadDown1 PREFMENU
 
 bind !RoutingKey ROUTE
+bind PadCenter1+!RoutingKey DESCCHAR
+bind PadUp1+!RoutingKey PRINDENT
+bind PadDown1+!RoutingKey NXINDENT
+bind PadLeft1+!RoutingKey PRDIFCHAR
+bind PadRight1+!RoutingKey NXDIFCHAR
+bind LeftMiddle1+!RoutingKey SETLEFT
+
+bind LeftUpper1+!RoutingKey CLIP_NEW
+bind LeftLower1+!RoutingKey CLIP_ADD
+bind RightUpper1+!RoutingKey COPY_LINE
+bind RightLower1+!RoutingKey COPY_RECT
+
