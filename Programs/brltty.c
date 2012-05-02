@@ -821,8 +821,8 @@ isContracting (void) {
 }
 
 static int
-getCursorOffset (void) {
-  return ((scr.posy == ses->winy) && (scr.posx >= ses->winx) && (scr.posx < scr.cols))? (scr.posx - ses->winx): -1;
+getUncontractedCursorOffset (int x, int y) {
+  return ((y == ses->winy) && (x >= ses->winx) && (x < scr.cols))? (x - ses->winx): -1;
 }
 
 static int
@@ -842,7 +842,7 @@ getContractedLength (unsigned int outputLimit) {
   contractText(contractionTable,
                inputBuffer, &inputLength,
                outputBuffer, &outputLength,
-               NULL, getContractedCursor(getCursorOffset()));
+               NULL, getContractedCursor(getUncontractedCursorOffset(scr.posx, scr.posy)));
   return inputLength;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -1123,6 +1123,38 @@ unsigned char
 getCursorDots (void) {
   if (!isBlinkedOn(&cursorBlinkingState)) return 0;
   return cursorStyles[prefs.cursorStyle];
+}
+
+static int
+getCursorPosition (int x, int y) {
+  int position = -1;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (contracted) {
+    int uncontractedOffset = getUncontractedCursorOffset(x, y);
+
+    if (uncontractedOffset < contractedLength) {
+      while (uncontractedOffset >= 0) {
+        int contractedOffset = contractedOffsets[uncontractedOffset];
+        if (contractedOffset != CTB_NO_OFFSET) {
+          position = ((contractedOffset / textCount) * brl.textColumns) + textStart + (contractedOffset % textCount);
+          break;
+        }
+
+        uncontractedOffset -= 1;
+      }
+    }
+  } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  {
+    if ((x >= ses->winx) && (x < (ses->winx + textCount)) &&
+        (y >= ses->winy) && (y < (ses->winy + brl.textRows)) &&
+        (x < scr.cols) && (y < scr.rows))
+      position = ((y - ses->winy) * brl.textColumns) + textStart + x - ses->winx;
+  }
+
+  return position;
 }
 
 static int
@@ -3041,7 +3073,7 @@ brlttyUpdate (void) {
         contracted = 0;
         if (isContracting()) {
           while (1) {
-            int cursorOffset = getCursorOffset();
+            int cursorOffset = getUncontractedCursorOffset(scr.posx, scr.posy);
 
             int inputLength = scr.cols - ses->winx;
             ScreenCharacter inputCharacters[inputLength];
@@ -3183,10 +3215,7 @@ brlttyUpdate (void) {
           /*
            * If the cursor is visible and in range: 
            */
-          if ((scr.posx >= ses->winx) && (scr.posx < (ses->winx + textCount)) &&
-              (scr.posy >= ses->winy) && (scr.posy < (ses->winy + brl.textRows)) &&
-              (scr.posx < scr.cols) && (scr.posy < scr.rows))
-            brl.cursor = ((scr.posy - ses->winy) * brl.textColumns) + textStart + scr.posx - ses->winx;
+          brl.cursor = getCursorPosition(scr.posx, scr.posy);
 
           /* blank out capital letters if they're blinking and should be off */
           if (!isBlinkedOn(&capitalsBlinkingState)) {
@@ -3244,12 +3273,9 @@ brlttyUpdate (void) {
         }
 
         if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
-          if ((ses->spky >= ses->winy) && (ses->spky < (ses->winy + brl.textRows))) {
-            if ((ses->spkx >= ses->winx) && (ses->spkx < (ses->winx + textCount))) {
-              int offset = ((ses->spky - ses->winy) * brl.textColumns) + textStart + ses->spkx - ses->winx;
-              brl.buffer[offset] |= cursorStyles[prefs.speechCursorStyle];
-            }
-          }
+          int position = getCursorPosition(ses->spkx, ses->spky);
+
+          if (position >= 0) brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
         }
 
         if (statusCount > 0) {
