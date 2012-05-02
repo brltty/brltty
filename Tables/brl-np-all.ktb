@@ -32,8 +32,8 @@ bind LeftMiddle1 SIXDOTS
 bind RightMiddle1 CSRTRK
 
 bind LeftMiddle1+PadCenter1 BACK
-bind LeftMiddle1+PadLeft1 FWINLTSKIP
-bind LeftMiddle1+PadRight1 FWINRTSKIP
+bind LeftMiddle1+PadLeft1 LNBEG
+bind LeftMiddle1+PadRight1 LNEND
 bind LeftMiddle1+PadUp1 ATTRUP
 bind LeftMiddle1+PadDown1 ATTRDN
 
@@ -44,10 +44,28 @@ bind LeftUpper1+PadUp1 PRPGRPH
 bind LeftUpper1+PadDown1 NXPGRPH
 
 bind LeftLower1+PadCenter1 CSRJMP_VERT
-bind LeftLower1+PadLeft1 LNBEG
-bind LeftLower1+PadRight1 LNEND
+bind LeftLower1+PadLeft1 FWINLTSKIP
+bind LeftLower1+PadRight1 FWINRTSKIP
 bind LeftLower1+PadUp1 PRPROMPT
 bind LeftLower1+PadDown1 NXPROMPT
+
+bind RightMiddle1+PadCenter1 NOOP
+bind RightMiddle1+PadLeft1 CHRLT
+bind RightMiddle1+PadRight1 CHRRT
+bind RightMiddle1+PadUp1 TOP
+bind RightMiddle1+PadDown1 BOT
+
+bind RightUpper1+PadCenter1 NOOP
+bind RightUpper1+PadLeft1 ATTRVIS
+bind RightUpper1+PadRight1 CSRVIS
+bind RightUpper1+PadUp1 FREEZE
+bind RightUpper1+PadDown1 DISPMD
+
+bind RightLower1+PadCenter1 NOOP
+bind RightLower1+PadLeft1 PREFLOAD
+bind RightLower1+PadRight1 PREFSAVE
+bind RightLower1+PadUp1 AUTOSPEAK
+bind RightLower1+PadDown1 AUTOREPEAT
 
 bind PadCenter1+PadLeft1 HELP
 bind PadCenter1+PadRight1 LEARN
