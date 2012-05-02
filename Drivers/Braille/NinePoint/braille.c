@@ -352,5 +352,4 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
-  return EOF;
 }
