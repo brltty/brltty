@@ -188,8 +188,9 @@ typedef enum {
   BRL_CMD_SPEAK_LAST_LINE /* go to and speak last non-blank character on screen */,
   BRL_CMD_DESC_CURR_CHAR /* describe current character */,
   BRL_CMD_SPELL_CURR_WORD /* spell current word */,
-  BRL_CMD_ROUTE_LOCATION /* bring cursor to speech location */,
-  BRL_CMD_SPEAK_LOCATION /* speak speech location */,
+  BRL_CMD_ROUTE_CURR_LOCN /* bring cursor to speech location */,
+  BRL_CMD_SPEAK_CURR_LOCN /* speak speech location */,
+  BRL_CMD_SPKVIS /* set speech cursor visibility on/off */,
 
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;

@@ -2374,7 +2374,7 @@ doCommand:
         break;
       }
 
-      case BRL_CMD_ROUTE_LOCATION:
+      case BRL_CMD_ROUTE_CURR_LOCN:
         if (routeCursor(ses->spkx, ses->spky, scr.number)) {
           playTune(&tune_routing_started);
         } else {
@@ -2382,12 +2382,16 @@ doCommand:
         }
         break;
 
-      case BRL_CMD_SPEAK_LOCATION: {
+      case BRL_CMD_SPEAK_CURR_LOCN: {
         char buffer[0X50];
         snprintf(buffer, sizeof(buffer), "%d, %d", ses->spky+1, ses->spkx+1);
         sayString(&spk, buffer, 1);
         break;
       }
+
+      case BRL_CMD_SPKVIS:
+        TOGGLE_PLAY(prefs.showSpeechCursor);
+        break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       default: {
