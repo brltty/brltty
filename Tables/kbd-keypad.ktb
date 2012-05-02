@@ -24,21 +24,19 @@ title Bindings for Keypad-based Navigation
 ####################
 
 bind KP0+!KP5 HOME
-bind KP0+!KP4 BACK
-bind KP0+!KP6 CSRTRK
+bind KP0+!KP4 FWINLT
+bind KP0+!KP6 FWINRT
 bind KP0+!KP8 LNUP
 bind KP0+!KP2 LNDN
 bind KP0+!KP7 TOP_LEFT
 bind KP0+!KP1 BOT_LEFT
 bind KP0+!KP9 PRDIFLN
 bind KP0+!KP3 NXDIFLN
-bind KP0+!KPEnter SETLEFT
-bind KP0+!KPMinus LNBEG
-bind KP0+!KPPlus LNEND
-bind KP0+!KPAsterisk SIXDOTS
-bind KP0+!KPSlash DISPMD
+bind KP0+!KPSlash CSRTRK
+bind KP0+!KPAsterisk DISPMD
+bind KP0+!KPMinus SIXDOTS
 
-bind KPPeriod+!KP5 DESCCHAR
+bind KPPeriod+!KP5 BACK
 bind KPPeriod+!KP4 FWINLTSKIP
 bind KPPeriod+!KP6 FWINRTSKIP
 bind KPPeriod+!KP8 PRPGRPH
@@ -47,11 +45,9 @@ bind KPPeriod+!KP7 PRPROMPT
 bind KPPeriod+!KP1 NXPROMPT
 bind KPPeriod+!KP9 ATTRUP
 bind KPPeriod+!KP3 ATTRDN
-bind KPPeriod+!KPEnter FREEZE
-bind KPPeriod+!KPMinus CHRLT
-bind KPPeriod+!KPPlus CHRRT
-bind KPPeriod+!KPAsterisk CSRVIS
-bind KPPeriod+!KPSlash ATTRVIS
+bind KPPeriod+!KPSlash CSRVIS
+bind KPPeriod+!KPAsterisk ATTRVIS
+bind KPPeriod+!KPMinus FREEZE
 
 bind KPEnter+!KP5 SAY_LINE
 bind KPEnter+!KP8 SAY_ABOVE
@@ -79,9 +75,9 @@ bind KPPlus+!KP7 SPEAK_PREV_LINE
 bind KPPlus+kp0+!KP7 SPEAK_FRST_LINE
 bind KPPlus+!KP9 SPEAK_NEXT_LINE
 bind KPPlus+kp0+!KP9 SPEAK_LAST_LINE
-bind KPPlus+!KPSlash ROUTE_CURR_LOCN
-bind KPPlus+KP0+!KPSlash SPEAK_CURR_LOCN
-bind KPPlus+!KPAsterisk SPKVIS
+bind KPPlus+!KPSlash SPKVIS
+bind KPPlus+!KPAsterisk SPEAK_CURR_LOCN
+bind KPPlus+KP0+!KPAsterisk ROUTE_CURR_LOCN
 
 bind KPMinus+!KP5 PREFMENU
 bind KPMinus+!KP4 PREFLOAD
