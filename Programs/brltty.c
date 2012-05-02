@@ -566,20 +566,13 @@ findLastNonblankCharacter (const ScreenCharacter *characters, int count) {
 }
 
 static void
-speakDone (const ScreenCharacter *line, int column, int count, int spell) {
-  ScreenCharacter internalBuffer[count];
+speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
+  int immediate = 1;
 
-  if (line) {
-    line = &line[column];
-  } else {
-    readScreen(column, ses->spky, count, 1, internalBuffer);
-    line = internalBuffer;
-  }
-
-  if (findFirstNonblankCharacter(line, count) < 0) {
-    sayString(&spk, gettext("space"), 1);
+  if (findFirstNonblankCharacter(characters, count) < 0) {
+    sayString(&spk, gettext("space"), immediate);
   } else if (count == 1) {
-    wchar_t character = line[0].text;
+    wchar_t character = characters[0].text;
     int restorePitch = 0;
     int restorePunctuation = 0;
 
@@ -604,7 +597,7 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
       }
     }
 
-    sayWideCharacters(&character, NULL, 1, 1);
+    sayWideCharacters(&character, NULL, 1, immediate);
     if (restorePunctuation) speech->punctuation(&spk, prefs.speechPunctuation);
     if (restorePitch) speech->pitch(&spk, prefs.speechPitch);
   } else if (spell) {
@@ -613,16 +606,29 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
     unsigned int index = 0;
 
     while (index < count) {
-      string[length++] = line[index++].text;
+      string[length++] = characters[index++].text;
       string[length++] = WC_C(' ');
     }
 
     string[length] = WC_C('\0');
-    sayWideCharacters(string, NULL, length, 1);
+    sayWideCharacters(string, NULL, length, immediate);
   } else {
-    sayScreenCharacters(line, count, 1);
+    sayScreenCharacters(characters, count, immediate);
+  }
+}
+
+static void
+speakDone (const ScreenCharacter *line, int column, int count, int spell) {
+  ScreenCharacter internalBuffer[count];
+
+  if (line) {
+    line = &line[column];
+  } else {
+    readScreen(column, ses->spky, count, 1, internalBuffer);
+    line = internalBuffer;
   }
 
+  speakCharacters(line, count, spell);
   placeWindowHorizontally(ses->spkx);
   slideWindowVertically(ses->spky);
 }
@@ -3048,7 +3054,7 @@ brlttyUpdate (void) {
 
       speak:
         if (count) {
-          sayScreenCharacters(characters+column, count, 1);
+          speakCharacters(characters+column, count, 0);
         }
       }
 
