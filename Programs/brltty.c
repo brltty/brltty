@@ -578,6 +578,35 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
 
   if (findFirstNonblankCharacter(line, count) < 0) {
     sayString(&spk, gettext("space"), 1);
+  } else if (count == 1) {
+    wchar_t character = line[0].text;
+    int restorePitch = 0;
+    int restorePunctuation = 0;
+
+    if (iswupper(character)) {
+      if (speech->pitch) {
+        unsigned char pitch = prefs.speechPitch + 7;
+        if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
+
+        if (pitch != prefs.speechPitch) {
+          speech->pitch(&spk, pitch);
+          restorePitch = 1;
+        }
+      }
+    }
+
+    if (speech->punctuation) {
+      unsigned char punctuation = SPK_PUNCTUATION_ALL;
+
+      if (punctuation != prefs.speechPunctuation) {
+        speech->punctuation(&spk, punctuation);
+        restorePunctuation = 1;
+      }
+    }
+
+    sayWideCharacters(&character, NULL, 1, 1);
+    if (restorePunctuation) speech->punctuation(&spk, prefs.speechPunctuation);
+    if (restorePitch) speech->pitch(&spk, prefs.speechPitch);
   } else if (spell) {
     wchar_t string[count * 2];
     size_t length = 0;
