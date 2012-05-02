@@ -18,3 +18,10 @@
 
 title NinePoint
 
+bind PadMiddle HOME
+bind PadLeft FWINLT
+bind PadRight FWINRT
+bind PadUp LNUP
+bind PadDown LNDN
+
+bind !RoutingKey ROUTE

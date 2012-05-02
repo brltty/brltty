@@ -26,4 +26,30 @@
 #define NP_PKT_REQ_Write 0X01
 #define NP_PKT_RSP_Confirm 0X07
 
+typedef enum {
+  NP_KEY_PadLeft     = 0X0C,
+  NP_KEY_PadUp       = 0X0F,
+  NP_KEY_PadMiddle   = 0X10,
+  NP_KEY_PadDown     = 0X13,
+  NP_KEY_PadRight    = 0X14,
+
+  NP_KEY_LeftUpper   = 0X07,
+  NP_KEY_LeftMiddle  = 0X0B,
+  NP_KEY_LeftLower   = 0X1B,
+
+  NP_KEY_RightUpper  = 0X03,
+  NP_KEY_RightMiddle = 0X17,
+  NP_KEY_RightLower  = 0X1F,
+
+  NP_KEY_ROUTING_MIN = 0X20,
+  NP_KEY_ROUTING_MAX = 0X6F,
+
+  NP_KEY_RELEASE     = 0X80
+} NP_NavigationKey;
+
+typedef enum {
+  NP_SET_NavigationKey,
+  NP_SET_RoutingKey
+} NP_KeySet;
+
 #endif /* BRLTTY_INCLUDED_NP_BRLDEFS */ 

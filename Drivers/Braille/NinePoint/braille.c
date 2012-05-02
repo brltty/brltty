@@ -33,6 +33,21 @@
 #define MAXIMUM_CELL_COUNT 140
 
 BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(NP_KEY_PadLeft, "PadLeft"),
+  KEY_NAME_ENTRY(NP_KEY_PadUp, "PadUp"),
+  KEY_NAME_ENTRY(NP_KEY_PadMiddle, "PadMiddle"),
+  KEY_NAME_ENTRY(NP_KEY_PadDown, "PadDown"),
+  KEY_NAME_ENTRY(NP_KEY_PadRight, "PadRight"),
+
+  KEY_NAME_ENTRY(NP_KEY_LeftUpper, "LeftUpper"),
+  KEY_NAME_ENTRY(NP_KEY_LeftMiddle, "LeftMiddle"),
+  KEY_NAME_ENTRY(NP_KEY_LeftLower, "LeftLower"),
+
+  KEY_NAME_ENTRY(NP_KEY_RightUpper, "RightUpper"),
+  KEY_NAME_ENTRY(NP_KEY_RightMiddle, "RightMiddle"),
+  KEY_NAME_ENTRY(NP_KEY_RightLower, "RightLower"),
+
+  KEY_SET_ENTRY(NP_SET_RoutingKey, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -322,6 +337,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         size_t count = packet[2] - 1;
 
         switch (packet[3]) {
+          case 0X04:
+            if (count > 0) {
+              unsigned char set;
+              unsigned char key = bytes[0];
+              int press = !(key & NP_KEY_RELEASE);
+
+              key &= ~NP_KEY_RELEASE;
+              set = ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX))? NP_SET_RoutingKey: NP_SET_NavigationKey;
+              enqueueKeyEvent(set, key, press);
+              continue;
+            }
+            break;
+
           case NP_PKT_RSP_Confirm:
             if (count > 0) {
               switch (bytes[0]) {
