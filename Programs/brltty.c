@@ -826,7 +826,8 @@ getUncontractedCursorOffset (int x, int y) {
 }
 
 static int
-getContractedCursor (int offset) {
+getContractedCursor (void) {
+  int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
   return ((offset >= 0) && !ses->hideCursor)? offset: CTB_NO_CURSOR;
 }
 
@@ -842,7 +843,7 @@ getContractedLength (unsigned int outputLimit) {
   contractText(contractionTable,
                inputBuffer, &inputLength,
                outputBuffer, &outputLength,
-               NULL, getContractedCursor(getUncontractedCursorOffset(scr.posx, scr.posy)));
+               NULL, getContractedCursor());
   return inputLength;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -3067,14 +3068,11 @@ brlttyUpdate (void) {
 
         memset(brl.buffer, 0, windowLength);
         wmemset(textBuffer, WC_C(' '), windowLength);
-        brl.cursor = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
         contracted = 0;
         if (isContracting()) {
           while (1) {
-            int cursorOffset = getUncontractedCursorOffset(scr.posx, scr.posy);
-
             int inputLength = scr.cols - ses->winx;
             ScreenCharacter inputCharacters[inputLength];
             wchar_t inputText[inputLength];
@@ -3094,7 +3092,7 @@ brlttyUpdate (void) {
             contractText(contractionTable,
                          inputText, &inputLength,
                          outputBuffer, &outputLength,
-                         contractedOffsets, getContractedCursor(cursorOffset));
+                         contractedOffsets, getContractedCursor());
 
             {
               int inputEnd = inputLength;
@@ -3131,17 +3129,6 @@ brlttyUpdate (void) {
                   }
 
                   continue;
-                }
-              }
-
-              if (cursorOffset < inputEnd) {
-                while (cursorOffset >= 0) {
-                  int offset = contractedOffsets[cursorOffset];
-                  if (offset != CTB_NO_OFFSET) {
-                    brl.cursor = ((offset / textCount) * brl.textColumns) + textStart + (offset % textCount);
-                    break;
-                  }
-                  --cursorOffset;
                 }
               }
             }
@@ -3212,11 +3199,6 @@ brlttyUpdate (void) {
             }
           }
 
-          /*
-           * If the cursor is visible and in range: 
-           */
-          brl.cursor = getCursorPosition(scr.posx, scr.posy);
-
           /* blank out capital letters if they're blinking and should be off */
           if (!isBlinkedOn(&capitalsBlinkingState)) {
             unsigned int i;
@@ -3266,7 +3248,7 @@ brlttyUpdate (void) {
           }
         }
 
-        if (brl.cursor >= 0) {
+        if ((brl.cursor = getCursorPosition(scr.posx, scr.posy)) >= 0) {
           if (showCursor()) {
             brl.buffer[brl.cursor] |= getCursorDots();
           }
