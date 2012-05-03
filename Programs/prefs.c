@@ -82,6 +82,10 @@ PREFERENCE_STRING_TABLE(sayLineMode,
   "immediate", "enqueue"
 )
 
+PREFERENCE_STRING_TABLE(uppercaseIndicator,
+  "none", "cap", "higher"
+)
+
 PREFERENCE_STRING_TABLE(speechPunctuation,
   "none", "some", "all"
 )
@@ -399,6 +403,12 @@ static const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_SAY_LINE_MODE,
     .settingNames = &preferenceStringTable_sayLineMode,
     .setting = &prefs.sayLineMode
+  },
+
+  { .name = "uppercase-indicator",
+    .defaultValue = DEFAULT_UPPERCASE_INDICATOR,
+    .settingNames = &preferenceStringTable_uppercaseIndicator,
+    .setting = &prefs.uppercaseIndicator
   },
 
   { .name = "speech-volume",

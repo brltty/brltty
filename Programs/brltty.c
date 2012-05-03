@@ -573,18 +573,31 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     sayString(&spk, gettext("space"), immediate);
   } else if (count == 1) {
     wchar_t character = characters[0].text;
+    const wchar_t *prefix = NULL;
     int restorePitch = 0;
     int restorePunctuation = 0;
 
     if (iswupper(character)) {
-      if (speech->pitch) {
-        unsigned char pitch = prefs.speechPitch + 7;
-        if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
+      switch (prefs.uppercaseIndicator) {
+        default:
+        case ucNone:
+          break;
 
-        if (pitch != prefs.speechPitch) {
-          speech->pitch(&spk, pitch);
-          restorePitch = 1;
-        }
+        case ucSayCap:
+          prefix = WS_C("cap");
+          break;
+
+        case ucRaisePitch:
+          if (speech->pitch) {
+            unsigned char pitch = prefs.speechPitch + 7;
+            if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
+
+            if (pitch != prefs.speechPitch) {
+              speech->pitch(&spk, pitch);
+              restorePitch = 1;
+            }
+          }
+          break;
       }
     }
 
@@ -597,7 +610,22 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       }
     }
 
-    sayWideCharacters(&character, NULL, 1, immediate);
+    if (prefix) {
+      size_t prefixLength = wcslen(prefix);
+      wchar_t phrase[prefixLength + 2];
+      wchar_t *wc = phrase;
+
+      wmemcpy(wc, prefix, prefixLength);
+      wc += prefixLength;
+
+      *wc++ = WC_C(' ');
+      *wc++ = character;
+
+      sayWideCharacters(phrase, NULL, wc-phrase, immediate);
+    } else {
+      sayWideCharacters(&character, NULL, 1, immediate);
+    }
+
     if (restorePunctuation) speech->punctuation(&spk, prefs.speechPunctuation);
     if (restorePitch) speech->pitch(&spk, prefs.speechPitch);
   } else if (spell) {

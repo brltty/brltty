@@ -48,6 +48,12 @@ typedef enum {
 } SayMode;
 
 typedef enum {
+  ucNone,
+  ucSayCap,
+  ucRaisePitch
+} UppercaseIndicator;
+
+typedef enum {
   spNone,
   spLeft,
   spRight
@@ -120,17 +126,19 @@ typedef struct {
   /* Fields below this point may be modified as needed. */
   unsigned char capitalizationMode;
 
+  unsigned char showSpeechCursor;
+  unsigned char speechCursorStyle;
+  unsigned char blinkingSpeechCursor;
+  unsigned char speechCursorVisibleTime;
+  unsigned char speechCursorInvisibleTime;
+
   unsigned char autospeakCurrentCharacter;
   unsigned char autospeakInsertedCharacters;
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
 
-  unsigned char showSpeechCursor;
-  unsigned char speechCursorStyle;
-  unsigned char blinkingSpeechCursor;
-  unsigned char speechCursorVisibleTime;
-  unsigned char speechCursorInvisibleTime;
+  unsigned char uppercaseIndicator;
 
   unsigned char saveOnExit;
 } PACKED Preferences;

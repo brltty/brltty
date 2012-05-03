@@ -1513,6 +1513,17 @@ makePreferencesMenu (void) {
   }
 
   {
+    static const MenuString strings[] = {
+      {.label=strtext("None")},
+      {.label=strtext("Say Cap")},
+      {.label=strtext("Raise Pitch")}
+    };
+
+    NAME(strtext("Uppercase Indicator"));
+    ITEM(newEnumeratedMenuItem(menu, &prefs.uppercaseIndicator, &name, strings));
+  }
+
+  {
     NAME(strtext("Speech Volume"));
     ITEM(newNumericMenuItem(menu, &prefs.speechVolume, &name, 0, SPK_VOLUME_MAXIMUM, 1));
     TEST(SpeechVolume);
