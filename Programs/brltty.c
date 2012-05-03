@@ -2931,17 +2931,19 @@ brlttyUpdate (void) {
                     isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
                   int oldLength = oldWidth;
                   int newLength = newWidth;
-                  int x = newX + 1;
+                  int x = newX;
 
                   while (oldLength > oldX) {
                     if (!iswspace(oldCharacters[oldLength-1].text)) break;
                     oldLength -= 1;
                   }
+                  if (oldLength < oldWidth) oldLength += 1;
 
                   while (newLength > newX) {
                     if (!iswspace(newCharacters[newLength-1].text)) break;
                     newLength -= 1;
                   }
+                  if (newLength < newWidth) newLength += 1;
 
                   while (1) {
                     int done = 1;
