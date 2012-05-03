@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 
 #include "log.h"
 
@@ -327,6 +328,7 @@ openStream (void) {
   if ((festivalStream = popen(command, "w"))) {
     setvbuf(festivalStream, NULL, _IOLBF, 0X1000);
 
+    if (!writeCommand("(gc-status nil)", 0)) return 0;
     if (!writeCommand("(audio_mode 'async)", 0)) return 0;
     if (!writeCommand("(Parameter.set 'Audio_Method 'netaudio)", 0)) return 0;
 
@@ -338,7 +340,7 @@ openStream (void) {
         } else if (strcasecmp(name, "Kal") == 0) {
           if (!writeCommand("(voice_kal_diphone)", 0)) return 0;
         } else {
-          logMessage(LOG_WARNING, "Unknown Festival voice name: %s", name);
+          logMessage(LOG_WARNING, "unknown Festival voice name: %s", name);
         }
       }
     }
@@ -388,11 +390,20 @@ spk_destruct (SpeechSynthesizer *spk) {
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  if (writeString("(SayText \"", 1)) {
-    int index;
-    for (index=0; index<length; index++) {
-      unsigned char byte = buffer[index];
+  int started = 0;
+  unsigned int index;
+
+  for (index=0; index<length; index+=1) {
+    unsigned char byte = buffer[index];
+
+    if (!isspace(byte)) {
       const char *word = wordTable[byte];
+
+      if (!started) {
+        if (!writeString("(SayText \"", 1)) return;
+        started = 1;
+      }
+
       if (word) {
         if (!writeString(word, 0)) return;
       } else {
@@ -400,7 +411,9 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
         if (!writeString(string, 0)) return;
       }
     }
+  }
 
+  if (started) {
     if (!writeString("\")\n", 0)) return;
   }
 }
