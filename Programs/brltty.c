@@ -3296,7 +3296,9 @@ brlttyUpdate (void) {
         if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
           int position = getCursorPosition(ses->spkx, ses->spky);
 
-          if (position >= 0) brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
+          if (position >= 0)
+            if (position != brl.cursor)
+              brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
         }
 
         if (statusCount > 0) {
