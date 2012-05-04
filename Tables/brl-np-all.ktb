@@ -18,6 +18,11 @@
 
 title NinePoint
 
+
+####################
+# Default Bindings #
+####################
+
 bind PadCenter1 HOME
 bind PadLeft1 FWINLT
 bind PadRight1 FWINRT
@@ -84,4 +89,25 @@ bind LeftUpper1+!RoutingKey CLIP_NEW
 bind LeftLower1+!RoutingKey CLIP_ADD
 bind RightUpper1+!RoutingKey COPY_LINE
 bind RightLower1+!RoutingKey COPY_RECT
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind PadUp1 MENU_PREV_ITEM
+bind PadDown1 MENU_NEXT_ITEM
+bind PadLeft1 MENU_PREV_SETTING
+bind PadRight1 MENU_NEXT_SETTING
+bind PadCenter1 PREFMENU
+
+bind LeftMiddle1 FWINLT
+bind RightMiddle1 FWINRT
+bind LeftUpper1 MENU_FIRST_ITEM
+bind LeftLower1 MENU_LAST_ITEM
+bind RightUpper1 PREFLOAD
+bind RightLower1 PREFSAVE
+
 
