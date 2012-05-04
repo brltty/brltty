@@ -135,6 +135,22 @@ getModelEntry (unsigned char identifier) {
 }
 
 static int
+setModel (BrailleDisplay *brl, unsigned char identifier) {
+  const ModelEntry *model = getModelEntry(identifier);
+
+  if (model) {
+    logMessage(LOG_NOTICE, "NinePoint Model: 0X%02X, %u cells",
+               model->identifier, model->cellCount);
+
+    brl->data->model = model;
+    brl->textColumns = model->cellCount;
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
   return writeBraillePacket(brl, brl->data->gioEndpoint, bytes, count);
 }
@@ -193,7 +209,13 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
       switch (bytes[0]) {
         case NP_PKT_BEGIN:
           if (offset == 1) {
-            if (byte != brl->data->model->identifier) unexpected = 1;
+            if (byte != brl->data->model->identifier) {
+              if (setModel(brl, byte)) {
+                brl->resizeRequired = 1;
+              } else {
+                unexpected = 1;
+              }
+            }
           } else if (offset == 2) {
             length += byte + 1;
           } else if (offset == (length-1)) {
@@ -286,9 +308,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        if ((brl->data->model = getModelEntry(response[1]))) {
-          brl->textColumns = brl->data->model->cellCount;
-
+        if (setModel(brl, response[1])) {
           {
             const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
