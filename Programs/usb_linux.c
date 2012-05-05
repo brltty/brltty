@@ -153,6 +153,9 @@ usbGetDriver (UsbDevice *device, unsigned char interface) {
     if (ioctl(devx->usbfsFile, USBDEVFS_GETDRIVER, &arg) != -1) {
       char *name = strdup(arg.driver);
       if (name) return name;
+      logMallocError();
+    } else {
+      logSystemError("USB get driver name");
     }
   }
 
@@ -188,8 +191,10 @@ usbDisconnectDriver (UsbDevice *device, unsigned char interface) {
 #ifdef USBDEVFS_DISCONNECT
   if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
 #else /* USBDEVFS_DISCONNECT */
-  logMessage(LOG_WARNING, "USB driver disconnection not available.");
+  errno = ENOSYS;
 #endif /* USBDEVFS_DISCONNECT */
+
+  logSystemError("USAB driver disconnect");
   return 0;
 }
 
@@ -198,10 +203,16 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
   char *driver = usbGetDriver(device, interface);
 
   if (driver) {
+    int isUsbfs = strcmp(driver, "usbfs") == 0;
+
     logMessage(LOG_WARNING, "USB interface in use: %u (%s)", interface, driver);
     free(driver);
 
-    if (usbDisconnectDriver(device, interface)) return 1;
+    if (isUsbfs) {
+      errno = EBUSY;
+    } else if (usbDisconnectDriver(device, interface)) {
+      return 1;
+    }
   }
 
   return 0;
