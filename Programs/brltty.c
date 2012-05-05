@@ -570,10 +570,12 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
   int immediate = 1;
 
   if (findFirstNonblankCharacter(characters, count) < 0) {
-    sayString(&spk, gettext("space"), immediate);
+    wchar_t buffer[0X100];
+    size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
+    sayWideCharacters(buffer, NULL, length, immediate);
   } else if (count == 1) {
     wchar_t character = characters[0].text;
-    const wchar_t *prefix = NULL;
+    const char *prefix = NULL;
     int restorePitch = 0;
     int restorePunctuation = 0;
 
@@ -584,7 +586,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
           break;
 
         case ucSayCap:
-          prefix = WS_C("cap");
+          prefix = gettext("cap");
           break;
 
         case ucRaisePitch:
@@ -611,17 +613,11 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     }
 
     if (prefix) {
-      size_t prefixLength = wcslen(prefix);
-      wchar_t phrase[prefixLength + 2];
-      wchar_t *wc = phrase;
-
-      wmemcpy(wc, prefix, prefixLength);
-      wc += prefixLength;
-
-      *wc++ = WC_C(' ');
-      *wc++ = character;
-
-      sayWideCharacters(phrase, NULL, wc-phrase, immediate);
+      wchar_t buffer[0X100];
+      size_t length = convertTextToWchars(buffer, prefix, ARRAY_COUNT(buffer));
+      buffer[length++] = WC_C(' ');
+      buffer[length++] = character;
+      sayWideCharacters(buffer, NULL, length, immediate);
     } else {
       sayWideCharacters(&character, NULL, 1, immediate);
     }
