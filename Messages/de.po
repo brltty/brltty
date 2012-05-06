@@ -1056,7 +1056,7 @@ msgstr "Soundeffekte"
 
 #: Programs/config.c:1603
 msgid "Space"
-msgstr "Leerschlag"
+msgstr "Leer"
 
 #: Programs/config.c:2141
 msgid "Speech Driver"
@@ -2267,7 +2267,7 @@ msgstr "Synthesizer der Soundkarte"
 
 #: Programs/cmd.c:276
 msgid "space"
-msgstr "Leerschlag"
+msgstr "Leer"
 
 #: Programs/cmds.auto.h:432
 msgid "speak current line"
