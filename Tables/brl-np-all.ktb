@@ -84,11 +84,24 @@ bind PadDown1+!RoutingKey NXINDENT
 bind PadLeft1+!RoutingKey PRDIFCHAR
 bind PadRight1+!RoutingKey NXDIFCHAR
 bind LeftMiddle1+!RoutingKey SETLEFT
-
 bind LeftUpper1+!RoutingKey CLIP_NEW
 bind LeftLower1+!RoutingKey CLIP_ADD
 bind RightUpper1+!RoutingKey COPY_LINE
 bind RightLower1+!RoutingKey COPY_RECT
+
+hide on
+bind RightMiddle1+!RoutingKey ROUTE+80
+bind PadCenter1+RightMiddle1+!RoutingKey DESCCHAR+80
+bind PadUp1+RightMiddle1+!RoutingKey PRINDENT+80
+bind PadDown1+RightMiddle1+!RoutingKey NXINDENT+80
+bind PadLeft1+RightMiddle1+!RoutingKey PRDIFCHAR+80
+bind PadRight1+RightMiddle1+!RoutingKey NXDIFCHAR+80
+bind LeftMiddle1+RightMiddle1+!RoutingKey SETLEFT+80
+bind LeftUpper1+RightMiddle1+!RoutingKey CLIP_NEW+80
+bind LeftLower1+RightMiddle1+!RoutingKey CLIP_ADD+80
+bind RightUpper1+RightMiddle1+!RoutingKey COPY_LINE+80
+bind RightLower1+RightMiddle1+!RoutingKey COPY_RECT+80
+hide off
 
 
 #################
