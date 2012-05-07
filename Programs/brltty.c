@@ -586,6 +586,8 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
           break;
 
         case ucSayCap:
+          // "cap" here, used during speech output, is short for "capital".
+          // It is spoken just before an uppercase letter, e.g. "cap A".
           prefix = gettext("cap");
           break;
 

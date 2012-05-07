@@ -1515,6 +1515,8 @@ makePreferencesMenu (void) {
   {
     static const MenuString strings[] = {
       {.label=strtext("None")},
+      // "cap" here, used during speech output, is short for "capital".
+      // It is spoken just before an uppercase letter, e.g. "cap A".
       {.label=strtext("Say Cap")},
       {.label=strtext("Raise Pitch")}
     };
