@@ -69,6 +69,7 @@ xgettext --output - --force-po --no-wrap --sort-output --from-code utf-8 \
    ${bugsAddress:+--msgid-bugs-address "${bugsAddress}"} \
    ${copyrightHolder:+--copyright-holder "${copyrightHolder}"} \
    --keyword=strtext:1 --flag=logMessage:2:c-format \
+   --add-comments \
    -- `find ${sourceRoot} ${buildRoot} -name '*.c' -o -name '*.h'` |
 sed >"${outputFile}" -e "
   s/PACKAGE/${packageName}/
