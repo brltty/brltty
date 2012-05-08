@@ -1203,49 +1203,20 @@ makePreferencesMenu (void) {
       TEST(ContractedBraille);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  }
-
-  {
-    NAME(strtext("Navigation"));
-    SUBMENU(navigationSubmenu, &name);
-
-    {
-      NAME(strtext("Skip Identical Lines"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &name));
-    }
-
-    {
-      NAME(strtext("Skip Blank Windows"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &name));
-    }
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("All")},
-        {.label=strtext("End of Line")},
-        {.label=strtext("Rest of Line")}
+        {.label=strtext("Minimum")},
+        {.label=strtext("Low")},
+        {.label=strtext("Medium")},
+        {.label=strtext("High")},
+        {.label=strtext("Maximum")}
       };
 
-      NAME(strtext("Which Blank Windows"));
-      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &name, strings));
-      TEST(SkipBlankWindows);
-    }
-
-    {
-      NAME(strtext("Sliding Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &name));
-    }
-
-    {
-      NAME(strtext("Eager Sliding Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &name));
-      TEST(SlidingWindow);
-    }
-
-    {
-      NAME(strtext("Window Overlap"));
-      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &name, 0, 20, 1));
-      CHANGED(WindowOverlap);
+      NAME(strtext("Braille Firmness"));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleFirmness, &name, strings));
+      TEST(BrailleFirmness);
+      CHANGED(BrailleFirmness);
     }
   }
 
@@ -1324,69 +1295,103 @@ makePreferencesMenu (void) {
   }
 
   {
-    NAME(strtext("Autorepeat"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.autorepeat, &name));
-    CHANGED(Autorepeat);
-  }
+    NAME(strtext("Navigation"));
+    SUBMENU(navigationSubmenu, &name);
 
-  {
-    NAME(strtext("Autorepeat Panning"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.autorepeatPanning, &name));
-    TEST(Autorepeat);
-  }
+    {
+      NAME(strtext("Skip Identical Lines"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &name));
+    }
 
-  {
-    NAME(strtext("Autorepeat Delay"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.autorepeatDelay, &name));
-    TEST(Autorepeat);
-  }
+    {
+      NAME(strtext("Skip Blank Windows"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &name));
+    }
 
-  {
-    NAME(strtext("Autorepeat Interval"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.autorepeatInterval, &name));
-    TEST(Autorepeat);
-  }
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("All")},
+        {.label=strtext("End of Line")},
+        {.label=strtext("Rest of Line")}
+      };
 
-  {
-    static const MenuString strings[] = {
-      {.label=strtext("Minimum")},
-      {.label=strtext("Low")},
-      {.label=strtext("Medium")},
-      {.label=strtext("High")},
-      {.label=strtext("Maximum")}
-    };
+      NAME(strtext("Which Blank Windows"));
+      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &name, strings));
+      TEST(SkipBlankWindows);
+    }
 
-    NAME(strtext("Braille Firmness"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.brailleFirmness, &name, strings));
-    TEST(BrailleFirmness);
-    CHANGED(BrailleFirmness);
-  }
+    {
+      NAME(strtext("Sliding Window"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &name));
+    }
 
-  {
-    static const MenuString strings[] = {
-      {.label=strtext("Minimum")},
-      {.label=strtext("Low")},
-      {.label=strtext("Medium")},
-      {.label=strtext("High")},
-      {.label=strtext("Maximum")}
-    };
+    {
+      NAME(strtext("Eager Sliding Window"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &name));
+      TEST(SlidingWindow);
+    }
 
-    NAME(strtext("Braille Sensitivity"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.brailleSensitivity, &name, strings));
-    TEST(BrailleSensitivity);
-    CHANGED(BrailleSensitivity);
-  }
+    {
+      NAME(strtext("Window Overlap"));
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &name, 0, 20, 1));
+      CHANGED(WindowOverlap);
+    }
 
 #ifdef HAVE_LIBGPM
-  {
-    NAME(strtext("Window Follows Pointer"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.windowFollowsPointer, &name));
-  }
+    {
+      NAME(strtext("Window Follows Pointer"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.windowFollowsPointer, &name));
+    }
 #endif /* HAVE_LIBGPM */
 
+    {
+      NAME(strtext("Highlight Window"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightWindow, &name));
+    }
+  }
+
   {
-    NAME(strtext("Highlight Window"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.highlightWindow, &name));
+    NAME(strtext("Controls"));
+    SUBMENU(controlsSubmenu, &name);
+
+    {
+      NAME(strtext("Autorepeat"));
+      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeat, &name));
+      CHANGED(Autorepeat);
+    }
+
+    {
+      NAME(strtext("Autorepeat Panning"));
+      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeatPanning, &name));
+      TEST(Autorepeat);
+    }
+
+    {
+      NAME(strtext("Autorepeat Delay"));
+      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatDelay, &name));
+      TEST(Autorepeat);
+    }
+
+    {
+      NAME(strtext("Autorepeat Interval"));
+      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatInterval, &name));
+      TEST(Autorepeat);
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Minimum")},
+        {.label=strtext("Low")},
+        {.label=strtext("Medium")},
+        {.label=strtext("High")},
+        {.label=strtext("Maximum")}
+      };
+
+      NAME(strtext("Braille Sensitivity"));
+      ITEM(newEnumeratedMenuItem(controlsSubmenu, &prefs.brailleSensitivity, &name, strings));
+      TEST(BrailleSensitivity);
+      CHANGED(BrailleSensitivity);
+    }
   }
 
   {
