@@ -1375,67 +1375,72 @@ makePreferencesMenu (void) {
   }
 
   {
-    NAME(strtext("Alert Tunes"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.alertTunes, &name));
-  }
+    NAME(strtext("Alerts"));
+    SUBMENU(alertsSubmenu, &name);
 
-  {
-    static const MenuString strings[] = {
-      {.label=strtext("Beeper"), .comment=strtext("console tone generator")},
-      {.label=strtext("PCM"), .comment=strtext("soundcard digital audio")},
-      {.label=strtext("MIDI"), .comment=strtext("Musical Instrument Digital Interface")},
-      {.label=strtext("FM"), .comment=strtext("soundcard synthesizer")}
-    };
+    {
+      NAME(strtext("Alert Tunes"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertTunes, &name));
+    }
 
-    NAME(strtext("Tune Device"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.tuneDevice, &name, strings));
-    TEST(Tunes);
-    CHANGED(TuneDevice);
-  }
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Beeper"), .comment=strtext("console tone generator")},
+        {.label=strtext("PCM"), .comment=strtext("soundcard digital audio")},
+        {.label=strtext("MIDI"), .comment=strtext("Musical Instrument Digital Interface")},
+        {.label=strtext("FM"), .comment=strtext("soundcard synthesizer")}
+      };
+
+      NAME(strtext("Tune Device"));
+      ITEM(newEnumeratedMenuItem(alertsSubmenu, &prefs.tuneDevice, &name, strings));
+      TEST(Tunes);
+      CHANGED(TuneDevice);
+    }
 
 #ifdef ENABLE_PCM_SUPPORT
-  {
-    NAME(strtext("PCM Volume"));
-    ITEM(newVolumeMenuItem(mainMenu, &prefs.pcmVolume, &name));
-    TEST(TunesPcm);
-  }
+    {
+      NAME(strtext("PCM Volume"));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.pcmVolume, &name));
+      TEST(TunesPcm);
+    }
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {
-    NAME(strtext("MIDI Volume"));
-    ITEM(newVolumeMenuItem(mainMenu, &prefs.midiVolume, &name));
-    TEST(TunesMidi);
-  }
-
-  {
-    const MenuString *strings = makeMidiInstrumentMenuStrings();
-    if (!strings) goto noItem;
-
     {
-      NAME(strtext("MIDI Instrument"));
-      ITEM(newStringsMenuItem(mainMenu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
+      NAME(strtext("MIDI Volume"));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.midiVolume, &name));
       TEST(TunesMidi);
     }
-  }
+
+    {
+      const MenuString *strings = makeMidiInstrumentMenuStrings();
+      if (!strings) goto noItem;
+
+      {
+        NAME(strtext("MIDI Instrument"));
+        ITEM(newStringsMenuItem(alertsSubmenu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
+        TEST(TunesMidi);
+      }
+    }
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #ifdef ENABLE_FM_SUPPORT
-  {
-    NAME(strtext("FM Volume"));
-    ITEM(newVolumeMenuItem(mainMenu, &prefs.fmVolume, &name));
-    TEST(TunesFm);
-  }
+    {
+      NAME(strtext("FM Volume"));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.fmVolume, &name));
+      TEST(TunesFm);
+    }
 #endif /* ENABLE_FM_SUPPORT */
 
-  {
-    NAME(strtext("Alert Dots"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.alertDots, &name));
-  }
+    {
+      NAME(strtext("Alert Dots"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertDots, &name));
+    }
 
-  {
-    NAME(strtext("Alert Messages"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.alertMessages, &name));
+    {
+      NAME(strtext("Alert Messages"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &name));
+    }
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1565,75 +1570,84 @@ makePreferencesMenu (void) {
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
-
   {
-    static const MenuString strings[] = {
-      {.label=strtext("None")},
-      {.label=strtext("Left")},
-      {.label=strtext("Right")}
-    };
+    NAME(strtext("Status Cells"));
+    SUBMENU(statusSubmenu, &name);
 
-    NAME(strtext("Status Position"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.statusPosition, &name, strings));
-    TEST(StatusPosition);
-    CHANGED(StatusPosition);
-  }
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("Left")},
+        {.label=strtext("Right")}
+      };
 
-  {
-    NAME(strtext("Status Count"));
-    ITEM(newNumericMenuItem(mainMenu, &prefs.statusCount, &name, 0, MAX((int)brl.textColumns/2-1, 0), 1));
-    TEST(StatusCount);
-    CHANGED(StatusCount);
-  }
+      NAME(strtext("Status Position"));
+      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusPosition, &name, strings));
+      TEST(StatusPosition);
+      CHANGED(StatusPosition);
+    }
 
-  {
-    static const MenuString strings[] = {
-      {.label=strtext("None")},
-      {.label=strtext("Space")},
-      {.label=strtext("Block")},
-      {.label=strtext("Status Side")},
-      {.label=strtext("Text Side")}
-    };
+    {
+      NAME(strtext("Status Count"));
+      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &name, 0, MAX((int)brl.textColumns/2-1, 0), 1));
+      TEST(StatusCount);
+      CHANGED(StatusCount);
+    }
 
-    NAME(strtext("Status Separator"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.statusSeparator, &name, strings));
-    TEST(StatusSeparator);
-    CHANGED(StatusSeparator);
-  }
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("Space")},
+        {.label=strtext("Block")},
+        {.label=strtext("Status Side")},
+        {.label=strtext("Text Side")}
+      };
 
-  {
-#define STATUS_FIELD_ITEM(number) { ITEM(newStatusFieldMenuItem(mainMenu, number, testStatusField##number, changedStatusField##number)); }
-    STATUS_FIELD_ITEM(1);
-    STATUS_FIELD_ITEM(2);
-    STATUS_FIELD_ITEM(3);
-    STATUS_FIELD_ITEM(4);
-    STATUS_FIELD_ITEM(5);
-    STATUS_FIELD_ITEM(6);
-    STATUS_FIELD_ITEM(7);
-    STATUS_FIELD_ITEM(8);
-    STATUS_FIELD_ITEM(9);
+      NAME(strtext("Status Separator"));
+      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusSeparator, &name, strings));
+      TEST(StatusSeparator);
+      CHANGED(StatusSeparator);
+    }
+
+    {
+#define STATUS_FIELD_ITEM(number) { ITEM(newStatusFieldMenuItem(statusSubmenu, number, testStatusField##number, changedStatusField##number)); }
+      STATUS_FIELD_ITEM(1);
+      STATUS_FIELD_ITEM(2);
+      STATUS_FIELD_ITEM(3);
+      STATUS_FIELD_ITEM(4);
+      STATUS_FIELD_ITEM(5);
+      STATUS_FIELD_ITEM(6);
+      STATUS_FIELD_ITEM(7);
+      STATUS_FIELD_ITEM(8);
+      STATUS_FIELD_ITEM(9);
 #undef STATUS_FIELD_ITEM
+    }
   }
 
   {
-    NAME(strtext("Text Table"));
-    ITEM(newFilesMenuItem(mainMenu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
-    CHANGED(TextTable);
-  }
+    NAME(strtext("Tables"));
+    SUBMENU(tablesSubmenu, &name);
 
-  {
-    NAME(strtext("Attributes Table"));
-    ITEM(newFilesMenuItem(mainMenu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
-    CHANGED(AttributesTable);
-  }
+    {
+      NAME(strtext("Text Table"));
+      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
+      CHANGED(TextTable);
+    }
+
+    {
+      NAME(strtext("Attributes Table"));
+      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
+      CHANGED(AttributesTable);
+    }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {
-    NAME(strtext("Contraction Table"));
-    ITEM(newFilesMenuItem(mainMenu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
-    CHANGED(ContractionTable);
-  }
+    {
+      NAME(strtext("Contraction Table"));
+      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
+      CHANGED(ContractionTable);
+    }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+  }
 
 #undef NAME
 #undef ITEM
