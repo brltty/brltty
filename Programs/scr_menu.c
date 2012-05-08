@@ -28,21 +28,24 @@
 #include "scr_menu.h"
 
 static Menu *menuHandle = NULL;
-static unsigned int screenHeight;
 static unsigned int screenWidth;
 
 static unsigned int lineLength;
 static unsigned int settingIndent;
 
+static inline Menu *
+getSubmenu (void) {
+  return getCurrentSubmenu(menuHandle);
+}
+
 static inline MenuItem *
 getItem (void) {
-  return getCurrentMenuItem(menuHandle);
+  return getCurrentMenuItem(getSubmenu());
 }
 
 static int
 construct_MenuScreen (Menu *menu) {
   menuHandle = menu;
-  screenHeight = getMenuSize(menu);
   screenWidth = 1;
   return 1;
 }
@@ -59,10 +62,12 @@ currentVirtualTerminal_MenuScreen (void) {
 
 static void
 describe_MenuScreen (ScreenDescription *description) {
+  Menu *submenu = getSubmenu();
+
   description->posx = 0;
-  description->posy = getMenuIndex(menuHandle);
+  description->posy = getMenuIndex(submenu);
   description->cols = screenWidth;
-  description->rows = screenHeight;
+  description->rows = getMenuSize(submenu);
   description->number = currentVirtualTerminal_MenuScreen();
 }
 
@@ -117,14 +122,16 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
 
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  if (validateScreenBox(box, screenWidth, screenHeight)) {
+  Menu *submenu = getSubmenu();
+
+  if (validateScreenBox(box, screenWidth, getMenuSize(submenu))) {
     wchar_t line[screenWidth];
     unsigned int row = box->height;
 
     while (row > 0) {
       unsigned int column;
 
-      formatMenuItem(getMenuItem(menuHandle, box->top+--row),
+      formatMenuItem(getMenuItem(submenu, box->top+--row),
                      line, ARRAY_COUNT(line));
 
       for (column=0; column<box->width; column+=1) {
@@ -181,7 +188,7 @@ executeCommand_MenuScreen (int *command) {
     case BRL_CMD_TOP_LEFT:
     case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
     case BRL_CMD_MENU_FIRST_ITEM:
-      if (setMenuFirstItem(menuHandle)) {
+      if (setMenuFirstItem(getSubmenu())) {
         itemChanged();
       } else {
         commandRejected();
@@ -192,7 +199,7 @@ executeCommand_MenuScreen (int *command) {
     case BRL_CMD_BOT_LEFT:
     case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
     case BRL_CMD_MENU_LAST_ITEM:
-      if (setMenuLastItem(menuHandle)) {
+      if (setMenuLastItem(getSubmenu())) {
         itemChanged();
       } else {
         commandRejected();
@@ -203,7 +210,7 @@ executeCommand_MenuScreen (int *command) {
     case BRL_CMD_PRDIFLN:
     case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
     case BRL_CMD_MENU_PREV_ITEM:
-      if (setMenuPreviousItem(menuHandle)) {
+      if (setMenuPreviousItem(getSubmenu())) {
         itemChanged();
       } else {
         commandRejected();
@@ -214,7 +221,7 @@ executeCommand_MenuScreen (int *command) {
     case BRL_CMD_NXDIFLN:
     case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
     case BRL_CMD_MENU_NEXT_ITEM:
-      if (setMenuNextItem(menuHandle)) {
+      if (setMenuNextItem(getSubmenu())) {
         itemChanged();
       } else {
         commandRejected();

@@ -53,6 +53,10 @@ extern MenuItem *newFilesMenuItem (
   const char *initial, int none
 );
 
+extern Menu *newSubmenuMenuItem (
+  Menu *menu, const MenuString *name
+);
+
 typedef int MenuItemTester (void);
 extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 
@@ -64,6 +68,8 @@ extern void setMenuItemStrings (MenuItem *item, const MenuString *strings, unsig
 extern unsigned int getMenuSize (const Menu *menu);
 extern unsigned int getMenuIndex (const Menu *menu);
 extern MenuItem *getMenuItem (Menu *menu, unsigned int index);
+
+extern Menu *getCurrentSubmenu (Menu *menu);
 extern MenuItem *getCurrentMenuItem (Menu *menu);
 
 extern const MenuString *getMenuItemName (const MenuItem *item);

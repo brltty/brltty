@@ -63,7 +63,14 @@ typedef struct {
   const char *pathsArea[3];
 } FileData;
 
+typedef struct {
+  Menu *menu;
+  unsigned opened:1;
+} SubmenuData;
+
 struct MenuStruct {
+  Menu *parent;
+
   struct {
     MenuItem *array;
     unsigned int size;
@@ -98,6 +105,7 @@ struct MenuItemStruct {
   union {
     const MenuString *strings;
     FileData *files;
+    SubmenuData *submenu;
   } data;
 };
 
@@ -111,6 +119,7 @@ newMenu (void) {
   Menu *menu = malloc(sizeof(*menu));
 
   if (menu) {
+    menu->parent = NULL;
     menu->items.array = NULL;
     menu->items.size = 0;
     menu->items.count = 0;
@@ -159,19 +168,6 @@ getMenuSize (const Menu *menu) {
 unsigned int
 getMenuIndex (const Menu *menu) {
   return menu->items.index;
-}
-
-MenuItem *
-getCurrentMenuItem (Menu *menu) {
-  MenuItem *newItem = getMenuItem(menu, menu->items.index);
-  MenuItem *oldItem = menu->activeItem;
-
-  if (newItem != oldItem) {
-    if (oldItem) endMenuItem(oldItem, 0);
-    menu->activeItem = beginMenuItem(newItem)? newItem: NULL;
-  }
-
-  return newItem;
 }
 
 static int
@@ -248,7 +244,7 @@ getValue_numeric (const MenuItem *item) {
   return menu->valueBuffer;
 }
 
-static const MenuItemMethods numericMenuItemMethods = {
+static const MenuItemMethods menuItemMethods_numeric = {
   .getValue = getValue_numeric
 };
 
@@ -260,7 +256,7 @@ newNumericMenuItem (
   MenuItem *item = newMenuItem(menu, setting, name);
 
   if (item) {
-    item->methods = &numericMenuItemMethods;
+    item->methods = &menuItemMethods_numeric;
     item->minimum = minimum;
     item->maximum = maximum;
     item->divisor = divisor;
@@ -281,14 +277,14 @@ getComment_strings (const MenuItem *item) {
   return getLocalText(strings[*item->setting - item->minimum].comment);
 }
 
-static const MenuItemMethods stringsMenuItemMethods = {
+static const MenuItemMethods menuItemMethods_strings = {
   .getValue = getValue_strings,
   .getComment = getComment_strings
 };
 
 void
 setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
-  item->methods = &stringsMenuItemMethods;
+  item->methods = &menuItemMethods_strings;
   item->data.strings = strings;
   item->minimum = 0;
   item->maximum = count - 1;
@@ -480,7 +476,7 @@ getValue_files (const MenuItem *item) {
   return path;
 }
 
-static const MenuItemMethods filesMenuItemMethods = {
+static const MenuItemMethods menuItemMethods_files = {
   .beginItem = beginItem_files,
   .endItem = endItem_files,
   .getValue = getValue_files
@@ -515,7 +511,7 @@ newFilesMenuItem (
           MenuItem *item = newMenuItem(menu, &files->setting, name);
 
           if (item) {
-            item->methods = &filesMenuItemMethods;
+            item->methods = &menuItemMethods_files;
             item->data.files = files;
             return item;
           }
@@ -543,6 +539,59 @@ newFilesMenuItem (
   return NULL;
 }
 
+static const char *
+getValue_submenu (const MenuItem *item) {
+  return "--->";
+}
+
+static const MenuItemMethods menuItemMethods_submenu = {
+  .getValue = getValue_submenu
+};
+
+static const char *
+getValue_close (const MenuItem *item) {
+  return "<---";
+}
+
+static const MenuItemMethods menuItemMethods_close = {
+  .getValue = getValue_close
+};
+
+Menu *
+newSubmenuMenuItem (
+  Menu *menu, const MenuString *name
+) {
+  SubmenuData *submenu;
+
+  if ((submenu = malloc(sizeof(*submenu)))) {
+    if ((submenu->menu = newMenu())) {
+      MenuItem *close;
+
+      if ((close = newMenuItem(submenu->menu, NULL, name))) {
+        MenuItem *item;
+
+        if ((item = newMenuItem(menu, NULL, name))) {
+          submenu->menu->parent = menu;
+          submenu->opened = 0;
+          close->methods = &menuItemMethods_close;
+
+          item->methods = &menuItemMethods_submenu;
+          item->data.submenu = submenu;
+          return submenu->menu;
+        }
+      }
+
+      deallocateMenu(submenu->menu);
+    }
+
+    free(submenu);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 static int
 adjustMenuItem (const MenuItem *item, void (*adjust) (const MenuItem *item)) {
   int count = item->maximum - item->minimum + 1;
@@ -562,6 +611,7 @@ decrementMenuItem (const MenuItem *item) {
 
 int
 changeMenuItemPrevious (const MenuItem *item) {
+  if (!item->setting) return 0;
   return adjustMenuItem(item, decrementMenuItem);
 }
 
@@ -572,21 +622,38 @@ incrementMenuItem (const MenuItem *item) {
 
 int
 changeMenuItemNext (const MenuItem *item) {
+  if (!item->setting) {
+    if (item->methods == &menuItemMethods_submenu) {
+      item->data.submenu->opened = 1;
+      return 1;
+    }
+
+    if (item->methods == &menuItemMethods_close) {
+      item->menu->parent->activeItem->data.submenu->opened = 0;
+      return 1;
+    }
+
+    return 0;
+  }
+
   return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
-  unsigned char oldSetting = *item->setting;
+  if (item->setting) {
+    unsigned char oldSetting = *item->setting;
 
-  if (item->methods->getValue == getValue_numeric) {
-    *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
-  } else {
-    *item->setting = index % (item->maximum + 1);
+    if (item->methods->getValue == getValue_numeric) {
+      *item->setting = rescaleInteger(index, count-1, item->maximum-item->minimum) + item->minimum;
+    } else {
+      *item->setting = index % (item->maximum + 1);
+    }
+
+    if (!item->changed || item->changed(item, *item->setting)) return 1;
+    *item->setting = oldSetting;
   }
 
-  if (!item->changed || item->changed(item, *item->setting)) return 1;
-  *item->setting = oldSetting;
   return 0;
 }
 
@@ -623,4 +690,30 @@ setMenuLastItem (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = menu->items.count - 1;
   return testMenuItem(menu, menu->items.index) || setMenuPreviousItem(menu);
+}
+
+MenuItem *
+getCurrentMenuItem (Menu *menu) {
+  MenuItem *newItem = getMenuItem(menu, menu->items.index);
+  MenuItem *oldItem = menu->activeItem;
+
+  if (newItem != oldItem) {
+    if (oldItem) endMenuItem(oldItem, 0);
+    menu->activeItem = beginMenuItem(newItem)? newItem: NULL;
+  }
+
+  return newItem;
+}
+
+Menu *
+getCurrentSubmenu (Menu *menu) {
+  while (1) {
+    MenuItem *item = getCurrentMenuItem(menu);
+
+    if (item->methods != &menuItemMethods_submenu) break;
+    if (!item->data.submenu->opened) break;
+    menu = item->data.submenu->menu;
+  }
+
+  return menu;
 }
