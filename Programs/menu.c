@@ -604,6 +604,21 @@ newSubmenuMenuItem (
 }
 
 static int
+activateMenuItem (const MenuItem *item) {
+  if (item->methods == &menuItemMethods_submenu) {
+    item->data.submenu->opened = 1;
+    return 1;
+  }
+
+  if (item->methods == &menuItemMethods_close) {
+    item->menu->parent->activeItem->data.submenu->opened = 0;
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
 adjustMenuItem (const MenuItem *item, void (*adjust) (const MenuItem *item)) {
   int count = item->maximum - item->minimum + 1;
 
@@ -622,6 +637,7 @@ decrementMenuItem (const MenuItem *item) {
 
 int
 changeMenuItemPrevious (const MenuItem *item) {
+  if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
   return adjustMenuItem(item, decrementMenuItem);
 }
@@ -633,25 +649,15 @@ incrementMenuItem (const MenuItem *item) {
 
 int
 changeMenuItemNext (const MenuItem *item) {
-  if (!item->setting) {
-    if (item->methods == &menuItemMethods_submenu) {
-      item->data.submenu->opened = 1;
-      return 1;
-    }
-
-    if (item->methods == &menuItemMethods_close) {
-      item->menu->parent->activeItem->data.submenu->opened = 0;
-      return 1;
-    }
-
-    return 0;
-  }
-
+  if (activateMenuItem(item)) return 1;
+  if (!item->setting) return 0;
   return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
 changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
+  if (activateMenuItem(item)) return 1;
+
   if (item->setting) {
     unsigned char oldSetting = *item->setting;
 
