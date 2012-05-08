@@ -1158,20 +1158,22 @@ makePreferencesMenu (void) {
   Menu *mainMenu = newMenu();
   if (!mainMenu) goto noMenu;
 
-#define NAME(kw) static const MenuString name = {.label=kw}
+#define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
 #define TEST(property) setMenuItemTester(item, test##property)
 #define CHANGED(setting) setMenuItemChanged(item, changed##setting)
-#define SUBMENU(variable, name) Menu *variable = newSubmenuMenuItem(mainMenu, name); if (!variable) goto noItem
+#define SUBMENU(variable, parent, name) \
+  NAME(name); \
+  Menu *variable = newSubmenuMenuItem(parent, &itemName); \
+  if (!variable) goto noItem
 
   {
     NAME(strtext("Save on Exit"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.saveOnExit, &name));
+    ITEM(newBooleanMenuItem(mainMenu, &prefs.saveOnExit, &itemName));
   }
 
   {
-    NAME(strtext("Presentation"));
-    SUBMENU(presentationSubmenu, &name);
+    SUBMENU(presentationSubmenu, mainMenu, strtext("Presentation"));
 
     {
       static const MenuString strings[] = {
@@ -1181,13 +1183,13 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Text Style"));
-      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.textStyle, &name, strings));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.textStyle, &itemName, strings));
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
     {
       NAME(strtext("Expand Current Word"));
-      ITEM(newBooleanMenuItem(presentationSubmenu, &prefs.expandCurrentWord, &name));
+      ITEM(newBooleanMenuItem(presentationSubmenu, &prefs.expandCurrentWord, &itemName));
       TEST(ContractedBraille);
     }
 
@@ -1199,7 +1201,7 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Capitalization Mode"));
-      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.capitalizationMode, &name, strings));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.capitalizationMode, &itemName, strings));
       TEST(ContractedBraille);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -1214,98 +1216,96 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Braille Firmness"));
-      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleFirmness, &name, strings));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleFirmness, &itemName, strings));
       TEST(BrailleFirmness);
       CHANGED(BrailleFirmness);
     }
   }
 
   {
-    NAME(strtext("Indicators"));
-    SUBMENU(indicatorsSubmenu, &name);
+    SUBMENU(indicatorsSubmenu, mainMenu, strtext("Indicators"));
 
     {
       NAME(strtext("Show Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showCursor, &name));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showCursor, &itemName));
     }
 
     {
       NAME(strtext("Cursor Style"));
-      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.cursorStyle, &name, cursorStyles));
+      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.cursorStyle, &itemName, cursorStyles));
       TEST(ShowCursor);
     }
 
     {
       NAME(strtext("Blinking Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &name));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &itemName));
       TEST(ShowCursor);
     }
 
     {
       NAME(strtext("Cursor Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorVisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorVisibleTime, &itemName));
       TEST(BlinkingCursor);
     }
 
     {
       NAME(strtext("Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorInvisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorInvisibleTime, &itemName));
       TEST(BlinkingCursor);
     }
 
     {
       NAME(strtext("Show Attributes"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showAttributes, &name));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showAttributes, &itemName));
     }
 
     {
       NAME(strtext("Blinking Attributes"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingAttributes, &name));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingAttributes, &itemName));
       TEST(ShowAttributes);
     }
 
     {
       NAME(strtext("Attributes Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesVisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesVisibleTime, &itemName));
       TEST(BlinkingAttributes);
     }
 
     {
       NAME(strtext("Attributes Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesInvisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesInvisibleTime, &itemName));
       TEST(BlinkingAttributes);
     }
 
     {
       NAME(strtext("Blinking Capitals"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCapitals, &name));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCapitals, &itemName));
     }
 
     {
       NAME(strtext("Capitals Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsVisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsVisibleTime, &itemName));
       TEST(BlinkingCapitals);
     }
 
     {
       NAME(strtext("Capitals Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsInvisibleTime, &name));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsInvisibleTime, &itemName));
       TEST(BlinkingCapitals);
     }
   }
 
   {
-    NAME(strtext("Navigation"));
-    SUBMENU(navigationSubmenu, &name);
+    SUBMENU(navigationSubmenu, mainMenu, strtext("Navigation"));
 
     {
       NAME(strtext("Skip Identical Lines"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &itemName));
     }
 
     {
       NAME(strtext("Skip Blank Windows"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &itemName));
     }
 
     {
@@ -1316,65 +1316,64 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Which Blank Windows"));
-      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &name, strings));
+      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &itemName, strings));
       TEST(SkipBlankWindows);
     }
 
     {
       NAME(strtext("Sliding Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &itemName));
     }
 
     {
       NAME(strtext("Eager Sliding Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &itemName));
       TEST(SlidingWindow);
     }
 
     {
       NAME(strtext("Window Overlap"));
-      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &name, 0, 20, 1));
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &itemName, 0, 20, 1));
       CHANGED(WindowOverlap);
     }
 
 #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Window Follows Pointer"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.windowFollowsPointer, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.windowFollowsPointer, &itemName));
     }
 #endif /* HAVE_LIBGPM */
 
     {
       NAME(strtext("Highlight Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightWindow, &name));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightWindow, &itemName));
     }
   }
 
   {
-    NAME(strtext("Controls"));
-    SUBMENU(controlsSubmenu, &name);
+    SUBMENU(controlsSubmenu, mainMenu, strtext("Controls"));
 
     {
       NAME(strtext("Autorepeat"));
-      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeat, &name));
+      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeat, &itemName));
       CHANGED(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Panning"));
-      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeatPanning, &name));
+      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeatPanning, &itemName));
       TEST(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Delay"));
-      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatDelay, &name));
+      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatDelay, &itemName));
       TEST(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Interval"));
-      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatInterval, &name));
+      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatInterval, &itemName));
       TEST(Autorepeat);
     }
 
@@ -1388,19 +1387,18 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Braille Sensitivity"));
-      ITEM(newEnumeratedMenuItem(controlsSubmenu, &prefs.brailleSensitivity, &name, strings));
+      ITEM(newEnumeratedMenuItem(controlsSubmenu, &prefs.brailleSensitivity, &itemName, strings));
       TEST(BrailleSensitivity);
       CHANGED(BrailleSensitivity);
     }
   }
 
   {
-    NAME(strtext("Alerts"));
-    SUBMENU(alertsSubmenu, &name);
+    SUBMENU(alertsSubmenu, mainMenu, strtext("Alerts"));
 
     {
       NAME(strtext("Alert Tunes"));
-      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertTunes, &name));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertTunes, &itemName));
     }
 
     {
@@ -1412,7 +1410,7 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Tune Device"));
-      ITEM(newEnumeratedMenuItem(alertsSubmenu, &prefs.tuneDevice, &name, strings));
+      ITEM(newEnumeratedMenuItem(alertsSubmenu, &prefs.tuneDevice, &itemName, strings));
       TEST(Tunes);
       CHANGED(TuneDevice);
     }
@@ -1420,7 +1418,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_PCM_SUPPORT
     {
       NAME(strtext("PCM Volume"));
-      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.pcmVolume, &name));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.pcmVolume, &itemName));
       TEST(TunesPcm);
     }
 #endif /* ENABLE_PCM_SUPPORT */
@@ -1428,7 +1426,7 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_MIDI_SUPPORT
     {
       NAME(strtext("MIDI Volume"));
-      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.midiVolume, &name));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.midiVolume, &itemName));
       TEST(TunesMidi);
     }
 
@@ -1438,7 +1436,7 @@ makePreferencesMenu (void) {
 
       {
         NAME(strtext("MIDI Instrument"));
-        ITEM(newStringsMenuItem(alertsSubmenu, &prefs.midiInstrument, &name, strings, midiInstrumentCount));
+        ITEM(newStringsMenuItem(alertsSubmenu, &prefs.midiInstrument, &itemName, strings, midiInstrumentCount));
         TEST(TunesMidi);
       }
     }
@@ -1447,88 +1445,87 @@ makePreferencesMenu (void) {
 #ifdef ENABLE_FM_SUPPORT
     {
       NAME(strtext("FM Volume"));
-      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.fmVolume, &name));
+      ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.fmVolume, &itemName));
       TEST(TunesFm);
     }
 #endif /* ENABLE_FM_SUPPORT */
 
     {
       NAME(strtext("Alert Dots"));
-      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertDots, &name));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertDots, &itemName));
     }
 
     {
       NAME(strtext("Alert Messages"));
-      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &name));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &itemName));
     }
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    NAME(strtext("Speech"));
-    SUBMENU(speechSubmenu, &name);
+    SUBMENU(speechSubmenu, mainMenu, strtext("Speech"));
 
     {
       NAME(strtext("Show Speech Cursor"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &itemName));
     }
 
     {
       NAME(strtext("Speech Cursor Style"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechCursorStyle, &name, cursorStyles));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechCursorStyle, &itemName, cursorStyles));
       TEST(ShowSpeechCursor);
     }
 
     {
       NAME(strtext("Blinking Speech Cursor"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.blinkingSpeechCursor, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.blinkingSpeechCursor, &itemName));
       TEST(ShowSpeechCursor);
     }
 
     {
       NAME(strtext("Speech Cursor Visible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorVisibleTime, &name));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorVisibleTime, &itemName));
       TEST(BlinkingSpeechCursor);
     }
 
     {
       NAME(strtext("Speech Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorInvisibleTime, &name));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorInvisibleTime, &itemName));
       TEST(BlinkingSpeechCursor);
     }
 
     {
       NAME(strtext("Autospeak"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeak, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeak, &itemName));
     }
 
     {
       NAME(strtext("Speak Current Character"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCurrentCharacter, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCurrentCharacter, &itemName));
       TEST(Autospeak);
     }
 
     {
       NAME(strtext("Speak Inserted Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakInsertedCharacters, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakInsertedCharacters, &itemName));
       TEST(Autospeak);
     }
 
     {
       NAME(strtext("Speak Deleted Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakDeletedCharacters, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakDeletedCharacters, &itemName));
       TEST(Autospeak);
     }
 
     {
       NAME(strtext("Speak Replaced Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakReplacedCharacters, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakReplacedCharacters, &itemName));
       TEST(Autospeak);
     }
 
     {
       NAME(strtext("Speak Completed Words"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCompletedWords, &name));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCompletedWords, &itemName));
       TEST(Autospeak);
     }
 
@@ -1539,7 +1536,7 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Say Line Mode"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.sayLineMode, &name, strings));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.sayLineMode, &itemName, strings));
     }
 
     {
@@ -1552,26 +1549,26 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Uppercase Indicator"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.uppercaseIndicator, &name, strings));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.uppercaseIndicator, &itemName, strings));
     }
 
     {
       NAME(strtext("Speech Volume"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &name, 0, SPK_VOLUME_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
       NAME(strtext("Speech Rate"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &name, 0, SPK_RATE_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
       NAME(strtext("Speech Pitch"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &name, 0, SPK_PITCH_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
     }
@@ -1584,15 +1581,14 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Speech Punctuation"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &name, strings));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
       TEST(SpeechPunctuation);
       CHANGED(SpeechPunctuation);
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
   {
-    NAME(strtext("Status Cells"));
-    SUBMENU(statusSubmenu, &name);
+    SUBMENU(statusSubmenu, mainMenu, strtext("Status Cells"));
 
     {
       static const MenuString strings[] = {
@@ -1602,14 +1598,14 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Status Position"));
-      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusPosition, &name, strings));
+      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusPosition, &itemName, strings));
       TEST(StatusPosition);
       CHANGED(StatusPosition);
     }
 
     {
       NAME(strtext("Status Count"));
-      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &name, 0, MAX((int)brl.textColumns/2-1, 0), 1));
+      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &itemName, 0, MAX((int)brl.textColumns/2-1, 0), 1));
       TEST(StatusCount);
       CHANGED(StatusCount);
     }
@@ -1624,7 +1620,7 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Status Separator"));
-      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusSeparator, &name, strings));
+      ITEM(newEnumeratedMenuItem(statusSubmenu, &prefs.statusSeparator, &itemName, strings));
       TEST(StatusSeparator);
       CHANGED(StatusSeparator);
     }
@@ -1645,25 +1641,24 @@ makePreferencesMenu (void) {
   }
 
   {
-    NAME(strtext("Tables"));
-    SUBMENU(tablesSubmenu, &name);
+    SUBMENU(tablesSubmenu, mainMenu, strtext("Tables"));
 
     {
       NAME(strtext("Text Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
       CHANGED(TextTable);
     }
 
     {
       NAME(strtext("Attributes Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
       CHANGED(AttributesTable);
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
     {
       NAME(strtext("Contraction Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &name, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
       CHANGED(ContractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
