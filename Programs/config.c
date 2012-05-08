@@ -1170,73 +1170,157 @@ makePreferencesMenu (void) {
   }
 
   {
-    static const MenuString strings[] = {
-      {.label=strtext("8-Dot Computer Braille")},
-      {.label=strtext("Contracted Braille")},
-      {.label=strtext("6-Dot Computer Braille")}
-    };
+    NAME(strtext("Presentation"));
+    SUBMENU(presentationSubmenu, &name);
 
-    NAME(strtext("Text Style"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.textStyle, &name, strings));
-  }
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("8-Dot Computer Braille")},
+        {.label=strtext("Contracted Braille")},
+        {.label=strtext("6-Dot Computer Braille")}
+      };
+
+      NAME(strtext("Text Style"));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.textStyle, &name, strings));
+    }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {
-    NAME(strtext("Expand Current Word"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.expandCurrentWord, &name));
-    TEST(ContractedBraille);
-  }
+    {
+      NAME(strtext("Expand Current Word"));
+      ITEM(newBooleanMenuItem(presentationSubmenu, &prefs.expandCurrentWord, &name));
+      TEST(ContractedBraille);
+    }
 
-  {
-    static const MenuString strings[] = {
-      {.label=strtext("No Capitalization")},
-      {.label=strtext("Use Capital Sign")},
-      {.label=strtext("Superimpose Dot 7")}
-    };
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("No Capitalization")},
+        {.label=strtext("Use Capital Sign")},
+        {.label=strtext("Superimpose Dot 7")}
+      };
 
-    NAME(strtext("Capitalization Mode"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.capitalizationMode, &name, strings));
-    TEST(ContractedBraille);
-  }
+      NAME(strtext("Capitalization Mode"));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.capitalizationMode, &name, strings));
+      TEST(ContractedBraille);
+    }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-
-  {
-    NAME(strtext("Skip Identical Lines"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.skipIdenticalLines, &name));
   }
 
   {
-    NAME(strtext("Skip Blank Windows"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.skipBlankWindows, &name));
+    NAME(strtext("Navigation"));
+    SUBMENU(navigationSubmenu, &name);
+
+    {
+      NAME(strtext("Skip Identical Lines"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &name));
+    }
+
+    {
+      NAME(strtext("Skip Blank Windows"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &name));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("All")},
+        {.label=strtext("End of Line")},
+        {.label=strtext("Rest of Line")}
+      };
+
+      NAME(strtext("Which Blank Windows"));
+      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &name, strings));
+      TEST(SkipBlankWindows);
+    }
+
+    {
+      NAME(strtext("Sliding Window"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &name));
+    }
+
+    {
+      NAME(strtext("Eager Sliding Window"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &name));
+      TEST(SlidingWindow);
+    }
+
+    {
+      NAME(strtext("Window Overlap"));
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &name, 0, 20, 1));
+      CHANGED(WindowOverlap);
+    }
   }
 
   {
-    static const MenuString strings[] = {
-      {.label=strtext("All")},
-      {.label=strtext("End of Line")},
-      {.label=strtext("Rest of Line")}
-    };
+    NAME(strtext("Indicators"));
+    SUBMENU(indicatorsSubmenu, &name);
 
-    NAME(strtext("Which Blank Windows"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.skipBlankWindowsMode, &name, strings));
-    TEST(SkipBlankWindows);
-  }
+    {
+      NAME(strtext("Show Cursor"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showCursor, &name));
+    }
 
-  {
-    NAME(strtext("Sliding Window"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.slidingWindow, &name));
-  }
+    {
+      NAME(strtext("Cursor Style"));
+      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.cursorStyle, &name, cursorStyles));
+      TEST(ShowCursor);
+    }
 
-  {
-    NAME(strtext("Eager Sliding Window"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.eagerSlidingWindow, &name));
-    TEST(SlidingWindow);
-  }
+    {
+      NAME(strtext("Blinking Cursor"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &name));
+      TEST(ShowCursor);
+    }
 
-  {
-    NAME(strtext("Window Overlap"));
-    ITEM(newNumericMenuItem(mainMenu, &prefs.windowOverlap, &name, 0, 20, 1));
-    CHANGED(WindowOverlap);
+    {
+      NAME(strtext("Cursor Visible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorVisibleTime, &name));
+      TEST(BlinkingCursor);
+    }
+
+    {
+      NAME(strtext("Cursor Invisible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorInvisibleTime, &name));
+      TEST(BlinkingCursor);
+    }
+
+    {
+      NAME(strtext("Show Attributes"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showAttributes, &name));
+    }
+
+    {
+      NAME(strtext("Blinking Attributes"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingAttributes, &name));
+      TEST(ShowAttributes);
+    }
+
+    {
+      NAME(strtext("Attributes Visible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesVisibleTime, &name));
+      TEST(BlinkingAttributes);
+    }
+
+    {
+      NAME(strtext("Attributes Invisible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesInvisibleTime, &name));
+      TEST(BlinkingAttributes);
+    }
+
+    {
+      NAME(strtext("Blinking Capitals"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCapitals, &name));
+    }
+
+    {
+      NAME(strtext("Capitals Visible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsVisibleTime, &name));
+      TEST(BlinkingCapitals);
+    }
+
+    {
+      NAME(strtext("Capitals Invisible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsInvisibleTime, &name));
+      TEST(BlinkingCapitals);
+    }
   }
 
   {
@@ -1261,75 +1345,6 @@ makePreferencesMenu (void) {
     NAME(strtext("Autorepeat Interval"));
     ITEM(newTimeMenuItem(mainMenu, &prefs.autorepeatInterval, &name));
     TEST(Autorepeat);
-  }
-
-  {
-    NAME(strtext("Show Cursor"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.showCursor, &name));
-  }
-
-  {
-    NAME(strtext("Cursor Style"));
-    ITEM(newEnumeratedMenuItem(mainMenu, &prefs.cursorStyle, &name, cursorStyles));
-    TEST(ShowCursor);
-  }
-
-  {
-    NAME(strtext("Blinking Cursor"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.blinkingCursor, &name));
-    TEST(ShowCursor);
-  }
-
-  {
-    NAME(strtext("Cursor Visible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.cursorVisibleTime, &name));
-    TEST(BlinkingCursor);
-  }
-
-  {
-    NAME(strtext("Cursor Invisible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.cursorInvisibleTime, &name));
-    TEST(BlinkingCursor);
-  }
-
-  {
-    NAME(strtext("Show Attributes"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.showAttributes, &name));
-  }
-
-  {
-    NAME(strtext("Blinking Attributes"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.blinkingAttributes, &name));
-    TEST(ShowAttributes);
-  }
-
-  {
-    NAME(strtext("Attributes Visible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.attributesVisibleTime, &name));
-    TEST(BlinkingAttributes);
-  }
-
-  {
-    NAME(strtext("Attributes Invisible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.attributesInvisibleTime, &name));
-    TEST(BlinkingAttributes);
-  }
-
-  {
-    NAME(strtext("Blinking Capitals"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.blinkingCapitals, &name));
-  }
-
-  {
-    NAME(strtext("Capitals Visible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.capitalsVisibleTime, &name));
-    TEST(BlinkingCapitals);
-  }
-
-  {
-    NAME(strtext("Capitals Invisible Time"));
-    ITEM(newTimeMenuItem(mainMenu, &prefs.capitalsInvisibleTime, &name));
-    TEST(BlinkingCapitals);
   }
 
   {
@@ -1445,7 +1460,7 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    NAME(strtext("Speech Settings"));
+    NAME(strtext("Speech"));
     SUBMENU(speechSubmenu, &name);
 
     {
