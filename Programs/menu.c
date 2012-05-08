@@ -282,7 +282,7 @@ static const MenuItemMethods menuItemMethods_strings = {
   .getComment = getComment_strings
 };
 
-void
+static void
 setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char count) {
   item->methods = &menuItemMethods_strings;
   item->data.strings = strings;
@@ -539,12 +539,23 @@ newFilesMenuItem (
   return NULL;
 }
 
+static void
+endItem_submenu (MenuItem *item, int deallocating) {
+  if (deallocating) {
+    SubmenuData *submenu = item->data.submenu;
+
+    deallocateMenu(submenu->menu);
+    free(submenu);
+  }
+}
+
 static const char *
 getValue_submenu (const MenuItem *item) {
   return "--->";
 }
 
 static const MenuItemMethods menuItemMethods_submenu = {
+  .endItem = endItem_submenu,
   .getValue = getValue_submenu
 };
 
