@@ -156,61 +156,10 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.capitalizationMode
   },
 
-  { .name = "skip-identical-lines",
-    .defaultValue = DEFAULT_SKIP_IDENTICAL_LINES,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.skipIdenticalLines
-  },
-
-  { .name = "skip-blank-windows",
-    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.skipBlankWindows
-  },
-
-  { .name = "skip-blank-windows-mode",
-    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS_MODE,
-    .settingNames = &preferenceStringTable_skipBlankWindowsMode,
-    .setting = &prefs.skipBlankWindowsMode
-  },
-
-  { .name = "sliding-window",
-    .defaultValue = DEFAULT_SLIDING_WINDOW,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.slidingWindow
-  },
-
-  { .name = "eager-sliding-window",
-    .defaultValue = DEFAULT_EAGER_SLIDING_WINDOW,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.eagerSlidingWindow
-  },
-
-  { .name = "window-overlap",
-    .defaultValue = DEFAULT_WINDOW_OVERLAP,
-    .setting = &prefs.windowOverlap
-  },
-
-  { .name = "autorepeat",
-    .defaultValue = DEFAULT_AUTOREPEAT,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autorepeat
-  },
-
-  { .name = "autorepeat-panning",
-    .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autorepeatPanning
-  },
-
-  { .name = "autorepeat-delay",
-    .defaultValue = DEFAULT_AUTOREPEAT_DELAY,
-    .setting = &prefs.autorepeatDelay
-  },
-
-  { .name = "autorepeat-interval",
-    .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
-    .setting = &prefs.autorepeatInterval
+  { .name = "braille-firmness",
+    .defaultValue = DEFAULT_BRAILLE_FIRMNESS,
+    .settingNames = &preferenceStringTable_brailleFirmness,
+    .setting = &prefs.brailleFirmness
   },
 
   { .name = "show-cursor",
@@ -279,16 +228,39 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.capitalsInvisibleTime
   },
 
-  { .name = "braille-firmness",
-    .defaultValue = DEFAULT_BRAILLE_FIRMNESS,
-    .settingNames = &preferenceStringTable_brailleFirmness,
-    .setting = &prefs.brailleFirmness
+  { .name = "skip-identical-lines",
+    .defaultValue = DEFAULT_SKIP_IDENTICAL_LINES,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.skipIdenticalLines
   },
 
-  { .name = "braille-sensitivity",
-    .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
-    .settingNames = &preferenceStringTable_brailleSensitivity,
-    .setting = &prefs.brailleSensitivity
+  { .name = "skip-blank-windows",
+    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.skipBlankWindows
+  },
+
+  { .name = "skip-blank-windows-mode",
+    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS_MODE,
+    .settingNames = &preferenceStringTable_skipBlankWindowsMode,
+    .setting = &prefs.skipBlankWindowsMode
+  },
+
+  { .name = "sliding-window",
+    .defaultValue = DEFAULT_SLIDING_WINDOW,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.slidingWindow
+  },
+
+  { .name = "eager-sliding-window",
+    .defaultValue = DEFAULT_EAGER_SLIDING_WINDOW,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.eagerSlidingWindow
+  },
+
+  { .name = "window-overlap",
+    .defaultValue = DEFAULT_WINDOW_OVERLAP,
+    .setting = &prefs.windowOverlap
   },
 
   { .name = "window-follows-pointer",
@@ -301,6 +273,34 @@ static const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_HIGHLIGHT_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.highlightWindow
+  },
+
+  { .name = "autorepeat",
+    .defaultValue = DEFAULT_AUTOREPEAT,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autorepeat
+  },
+
+  { .name = "autorepeat-panning",
+    .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autorepeatPanning
+  },
+
+  { .name = "autorepeat-delay",
+    .defaultValue = DEFAULT_AUTOREPEAT_DELAY,
+    .setting = &prefs.autorepeatDelay
+  },
+
+  { .name = "autorepeat-interval",
+    .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
+    .setting = &prefs.autorepeatInterval
+  },
+
+  { .name = "braille-sensitivity",
+    .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
+    .settingNames = &preferenceStringTable_brailleSensitivity,
+    .setting = &prefs.brailleSensitivity
   },
 
   { .name = "alert-tunes",
@@ -347,32 +347,37 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.alertMessages
   },
 
-  { .name = "show-speech-cursor",
-    .defaultValue = DEFAULT_SHOW_SPEECH_CURSOR,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.showSpeechCursor
+  { .name = "speech-volume",
+    .defaultValue = DEFAULT_SPEECH_VOLUME,
+    .setting = &prefs.speechVolume
   },
 
-  { .name = "speech-cursor-style",
-    .defaultValue = DEFAULT_SPEECH_CURSOR_STYLE,
-    .settingNames = &preferenceStringTable_cursorStyle,
-    .setting = &prefs.speechCursorStyle
+  { .name = "speech-rate",
+    .defaultValue = DEFAULT_SPEECH_RATE,
+    .setting = &prefs.speechRate
   },
 
-  { .name = "blinking-speech-cursor",
-    .defaultValue = DEFAULT_BLINKING_SPEECH_CURSOR,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.blinkingSpeechCursor
+  { .name = "speech-pitch",
+    .defaultValue = DEFAULT_SPEECH_PITCH,
+    .setting = &prefs.speechPitch
   },
 
-  { .name = "speech-cursor-visible-time",
-    .defaultValue = DEFAULT_SPEECH_CURSOR_VISIBLE_TIME,
-    .setting = &prefs.speechCursorVisibleTime
+  { .name = "speech-punctuation",
+    .defaultValue = DEFAULT_SPEECH_PUNCTUATION,
+    .settingNames = &preferenceStringTable_speechPunctuation,
+    .setting = &prefs.speechPunctuation
   },
 
-  { .name = "speech-cursor-invisible-time",
-    .defaultValue = DEFAULT_SPEECH_CURSOR_INVISIBLE_TIME,
-    .setting = &prefs.speechCursorInvisibleTime
+  { .name = "uppercase-indicator",
+    .defaultValue = DEFAULT_UPPERCASE_INDICATOR,
+    .settingNames = &preferenceStringTable_uppercaseIndicator,
+    .setting = &prefs.uppercaseIndicator
+  },
+
+  { .name = "say-line-mode",
+    .defaultValue = DEFAULT_SAY_LINE_MODE,
+    .settingNames = &preferenceStringTable_sayLineMode,
+    .setting = &prefs.sayLineMode
   },
 
   { .name = "autospeak",
@@ -411,37 +416,32 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autospeakCompletedWords
   },
 
-  { .name = "say-line-mode",
-    .defaultValue = DEFAULT_SAY_LINE_MODE,
-    .settingNames = &preferenceStringTable_sayLineMode,
-    .setting = &prefs.sayLineMode
+  { .name = "show-speech-cursor",
+    .defaultValue = DEFAULT_SHOW_SPEECH_CURSOR,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showSpeechCursor
   },
 
-  { .name = "uppercase-indicator",
-    .defaultValue = DEFAULT_UPPERCASE_INDICATOR,
-    .settingNames = &preferenceStringTable_uppercaseIndicator,
-    .setting = &prefs.uppercaseIndicator
+  { .name = "speech-cursor-style",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_STYLE,
+    .settingNames = &preferenceStringTable_cursorStyle,
+    .setting = &prefs.speechCursorStyle
   },
 
-  { .name = "speech-volume",
-    .defaultValue = DEFAULT_SPEECH_VOLUME,
-    .setting = &prefs.speechVolume
+  { .name = "blinking-speech-cursor",
+    .defaultValue = DEFAULT_BLINKING_SPEECH_CURSOR,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.blinkingSpeechCursor
   },
 
-  { .name = "speech-rate",
-    .defaultValue = DEFAULT_SPEECH_RATE,
-    .setting = &prefs.speechRate
+  { .name = "speech-cursor-visible-time",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_VISIBLE_TIME,
+    .setting = &prefs.speechCursorVisibleTime
   },
 
-  { .name = "speech-pitch",
-    .defaultValue = DEFAULT_SPEECH_PITCH,
-    .setting = &prefs.speechPitch
-  },
-
-  { .name = "speech-punctuation",
-    .defaultValue = DEFAULT_SPEECH_PUNCTUATION,
-    .settingNames = &preferenceStringTable_speechPunctuation,
-    .setting = &prefs.speechPunctuation
+  { .name = "speech-cursor-invisible-time",
+    .defaultValue = DEFAULT_SPEECH_CURSOR_INVISIBLE_TIME,
+    .setting = &prefs.speechCursorInvisibleTime
   },
 
   { .name = "status-position",

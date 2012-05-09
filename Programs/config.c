@@ -1480,32 +1480,60 @@ makePreferencesMenu (void) {
     SUBMENU(speechSubmenu, mainMenu, strtext("Speech"));
 
     {
-      NAME(strtext("Show Speech Cursor"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &itemName));
+      NAME(strtext("Speech Volume"));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1));
+      TEST(SpeechVolume);
+      CHANGED(SpeechVolume);
     }
 
     {
-      NAME(strtext("Speech Cursor Style"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechCursorStyle, &itemName, cursorStyles));
-      TEST(ShowSpeechCursor);
+      NAME(strtext("Speech Rate"));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1));
+      TEST(SpeechRate);
+      CHANGED(SpeechRate);
     }
 
     {
-      NAME(strtext("Blinking Speech Cursor"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.blinkingSpeechCursor, &itemName));
-      TEST(ShowSpeechCursor);
+      NAME(strtext("Speech Pitch"));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1));
+      TEST(SpeechPitch);
+      CHANGED(SpeechPitch);
     }
 
     {
-      NAME(strtext("Speech Cursor Visible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorVisibleTime, &itemName));
-      TEST(BlinkingSpeechCursor);
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("Some")},
+        {.label=strtext("All")}
+      };
+
+      NAME(strtext("Speech Punctuation"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
+      TEST(SpeechPunctuation);
+      CHANGED(SpeechPunctuation);
     }
 
     {
-      NAME(strtext("Speech Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorInvisibleTime, &itemName));
-      TEST(BlinkingSpeechCursor);
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        // "cap" here, used during speech output, is short for "capital".
+        // It is spoken just before an uppercase letter, e.g. "cap A".
+        {.label=strtext("Say Cap")},
+        {.label=strtext("Raise Pitch")}
+      };
+
+      NAME(strtext("Uppercase Indicator"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.uppercaseIndicator, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Immediate")},
+        {.label=strtext("Enqueue")}
+      };
+
+      NAME(strtext("Say Line Mode"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.sayLineMode, &itemName, strings));
     }
 
     {
@@ -1544,60 +1572,32 @@ makePreferencesMenu (void) {
     }
 
     {
-      static const MenuString strings[] = {
-        {.label=strtext("Immediate")},
-        {.label=strtext("Enqueue")}
-      };
-
-      NAME(strtext("Say Line Mode"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.sayLineMode, &itemName, strings));
+      NAME(strtext("Show Speech Cursor"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &itemName));
     }
 
     {
-      static const MenuString strings[] = {
-        {.label=strtext("None")},
-        // "cap" here, used during speech output, is short for "capital".
-        // It is spoken just before an uppercase letter, e.g. "cap A".
-        {.label=strtext("Say Cap")},
-        {.label=strtext("Raise Pitch")}
-      };
-
-      NAME(strtext("Uppercase Indicator"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.uppercaseIndicator, &itemName, strings));
+      NAME(strtext("Speech Cursor Style"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechCursorStyle, &itemName, cursorStyles));
+      TEST(ShowSpeechCursor);
     }
 
     {
-      NAME(strtext("Speech Volume"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1));
-      TEST(SpeechVolume);
-      CHANGED(SpeechVolume);
+      NAME(strtext("Blinking Speech Cursor"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.blinkingSpeechCursor, &itemName));
+      TEST(ShowSpeechCursor);
     }
 
     {
-      NAME(strtext("Speech Rate"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1));
-      TEST(SpeechRate);
-      CHANGED(SpeechRate);
+      NAME(strtext("Speech Cursor Visible Time"));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorVisibleTime, &itemName));
+      TEST(BlinkingSpeechCursor);
     }
 
     {
-      NAME(strtext("Speech Pitch"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1));
-      TEST(SpeechPitch);
-      CHANGED(SpeechPitch);
-    }
-
-    {
-      static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Some")},
-        {.label=strtext("All")}
-      };
-
-      NAME(strtext("Speech Punctuation"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
-      TEST(SpeechPunctuation);
-      CHANGED(SpeechPunctuation);
+      NAME(strtext("Speech Cursor Invisible Time"));
+      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorInvisibleTime, &itemName));
+      TEST(BlinkingSpeechCursor);
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */

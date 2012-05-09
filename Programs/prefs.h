@@ -125,6 +125,7 @@ typedef struct {
 
   /* Fields below this point may be modified as needed. */
   unsigned char capitalizationMode;
+  unsigned char uppercaseIndicator;
 
   unsigned char showSpeechCursor;
   unsigned char speechCursorStyle;
@@ -137,8 +138,6 @@ typedef struct {
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
-
-  unsigned char uppercaseIndicator;
 
   unsigned char saveOnExit;
   unsigned char showAllItems;
