@@ -480,7 +480,7 @@ for any additional display-specific instructions.
         Link all of the drivers into the binary.
         Don't build any of them as dynamically loadable shared objects.
         This word may also be specified as the final element of a driver list.
-        This is how to specify the dfault driver when all the drivers are to be linked in.
+        This is how to specify the default driver when all the drivers are to be linked in.
       <tag/-all/
         Only build those drivers which have been explicitly included via this option.
       <tag/no/
