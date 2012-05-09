@@ -141,6 +141,8 @@ typedef struct {
   unsigned char uppercaseIndicator;
 
   unsigned char saveOnExit;
+  unsigned char showAllItems;
+  unsigned char showSubmenuSizes;
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */

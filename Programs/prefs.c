@@ -126,6 +126,18 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.saveOnExit
   },
 
+  { .name = "show-all-items",
+    .defaultValue = DEFAULT_SHOW_ALL_ITEMS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showAllItems
+  },
+
+  { .name = "show-submenu-sizes",
+    .defaultValue = DEFAULT_SHOW_SUBMENU_SIZES,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showSubmenuSizes
+  },
+
   { .name = "text-style",
     .defaultValue = DEFAULT_TEXT_STYLE,
     .settingNames = &preferenceStringTable_textStyle,

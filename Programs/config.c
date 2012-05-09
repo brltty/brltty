@@ -1168,8 +1168,22 @@ makePreferencesMenu (void) {
   if (!variable) goto noItem
 
   {
-    NAME(strtext("Save on Exit"));
-    ITEM(newBooleanMenuItem(mainMenu, &prefs.saveOnExit, &itemName));
+    SUBMENU(optionsSubmenu, mainMenu, strtext("Menu Options"));
+
+    {
+      NAME(strtext("Save on Exit"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.saveOnExit, &itemName));
+    }
+
+    {
+      NAME(strtext("Show All Items"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAllItems, &itemName));
+    }
+
+    {
+      NAME(strtext("Show Submenu Sizes"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showSubmenuSizes, &itemName));
+    }
   }
 
   {

@@ -40,6 +40,8 @@ extern "C" {
  */
 
 #define DEFAULT_SAVE_ON_EXIT 0
+#define DEFAULT_SHOW_ALL_ITEMS 0
+#define DEFAULT_SHOW_SUBMENU_SIZES 0
 
 #define DEFAULT_TEXT_STYLE tsComputerBraille8
 #define DEFAULT_EXPAND_CURRENT_WORD 1

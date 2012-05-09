@@ -40,6 +40,7 @@
 #include "log.h"
 #include "file.h"
 #include "menu.h"
+#include "prefs.h"
 #include "parse.h"
 
 typedef struct {
@@ -115,6 +116,12 @@ getLocalText (const char *string) {
   return (string && *string)? gettext(string): "";
 }
 
+static const char *
+formatNumericValue (Menu *menu, unsigned int value) {
+  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", value);
+  return menu->valueBuffer;
+}
+
 Menu *
 newMenu (void) {
   Menu *menu = malloc(sizeof(*menu));
@@ -174,7 +181,11 @@ getMenuIndex (const Menu *menu) {
 static int
 testMenuItem (Menu *menu, unsigned int index) {
   MenuItem *item = getMenuItem(menu, index);
-  return item && (!item->test || item->test());
+
+  if (!item) return 0;
+  if (prefs.showAllItems) return 1;
+  if (!item->test) return 1;
+  return item->test();
 }
 
 const MenuString *
@@ -240,9 +251,7 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 
 static const char *
 getValue_numeric (const MenuItem *item) {
-  Menu *menu = item->menu;
-  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", *item->setting);
-  return menu->valueBuffer;
+  return formatNumericValue(item->menu, *item->setting);;
 }
 
 static const MenuItemMethods menuItemMethods_numeric = {
@@ -560,10 +569,17 @@ getValue_submenu (const MenuItem *item) {
   return "--->";
 }
 
+static const char *
+getComment_submenu (const MenuItem *item) {
+  if (!prefs.showSubmenuSizes) return "";
+  return formatNumericValue(item->menu, getMenuSize(item->data.submenu->menu)-1);
+}
+
 static const MenuItemMethods menuItemMethods_submenu = {
   .endItem = endItem_submenu,
   .activateItem = activateItem_submenu,
-  .getValue = getValue_submenu
+  .getValue = getValue_submenu,
+  .getComment = getComment_submenu
 };
 
 static void
@@ -614,6 +630,41 @@ newSubmenuMenuItem (
   }
 
   return NULL;
+}
+
+int
+setMenuPreviousItem (Menu *menu) {
+  do {
+    if (!menu->items.index) menu->items.index = menu->items.count;
+    if (!menu->items.index) return 0;
+  } while (!testMenuItem(menu, --menu->items.index));
+
+  return 1;
+}
+
+int
+setMenuNextItem (Menu *menu) {
+  if (menu->items.index >= menu->items.count) return 0;
+
+  do {
+    if (++menu->items.index == menu->items.count) menu->items.index = 0;
+  } while (!testMenuItem(menu, menu->items.index));
+
+  return 1;
+}
+
+int
+setMenuFirstItem (Menu *menu) {
+  if (!menu->items.count) return 0;
+  menu->items.index = 0;
+  return testMenuItem(menu, menu->items.index) || setMenuNextItem(menu);
+}
+
+int
+setMenuLastItem (Menu *menu) {
+  if (!menu->items.count) return 0;
+  menu->items.index = menu->items.count - 1;
+  return testMenuItem(menu, menu->items.index) || setMenuPreviousItem(menu);
 }
 
 static int
@@ -677,41 +728,6 @@ changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int cou
   }
 
   return 0;
-}
-
-int
-setMenuPreviousItem (Menu *menu) {
-  do {
-    if (!menu->items.index) menu->items.index = menu->items.count;
-    if (!menu->items.index) return 0;
-  } while (!testMenuItem(menu, --menu->items.index));
-
-  return 1;
-}
-
-int
-setMenuNextItem (Menu *menu) {
-  if (menu->items.index >= menu->items.count) return 0;
-
-  do {
-    if (++menu->items.index == menu->items.count) menu->items.index = 0;
-  } while (!testMenuItem(menu, menu->items.index));
-
-  return 1;
-}
-
-int
-setMenuFirstItem (Menu *menu) {
-  if (!menu->items.count) return 0;
-  menu->items.index = 0;
-  return testMenuItem(menu, menu->items.index) || setMenuNextItem(menu);
-}
-
-int
-setMenuLastItem (Menu *menu) {
-  if (!menu->items.count) return 0;
-  menu->items.index = menu->items.count - 1;
-  return testMenuItem(menu, menu->items.index) || setMenuPreviousItem(menu);
 }
 
 MenuItem *
