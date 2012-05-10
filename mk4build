@@ -61,6 +61,13 @@ if [ "${hostSystem}" != "${buildSystem}" ]
 then
    needTemporaryDirectory
 
+   for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS
+   do
+      unset "${variable}"
+      variableForBuild="${variable}_FOR_BUILD"
+      eval test '"${'"${variableForBuild}"'+set}"' != "set" || eval "${variable}"'="${'"${variableForBuild}"'}"'
+   done
+
    "${sourceRoot}/configure" \
       --disable-api --disable-x \
       --without-libbraille --disable-speech-support \
