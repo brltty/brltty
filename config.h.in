@@ -271,6 +271,9 @@ extern "C" {
 #undef USE_SERIAL_PACKAGE_TERMIOS
 #undef USE_SERIAL_PACKAGE_WINDOWS
 
+/* Define this if the function tcdrain exists. */
+#undef HAVE_TCDRAIN
+
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 

@@ -396,9 +396,13 @@ serialPollInput (SerialDevice *serial, int timeout) {
 
 int
 serialDrainOutput (SerialDevice *serial) {
+#ifdef HAVE_TCDRAIN
   do {
     if (tcdrain(serial->fileDescriptor) != -1) return 1;
   } while (errno == EINTR);
+#else /* HAVE_TCDRAIN */
+  errno = ENOSYS;
+#endif /* HAVE_TCDRAIN */
 
   logSystemError("tcdrain");
   return 0;

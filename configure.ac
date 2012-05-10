@@ -1173,6 +1173,7 @@ BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
    termios)
       AC_CHECK_HEADER([termios.h], [dnl
          serial_package="termios"
+         AC_CHECK_FUNCS([tcdrain])
       ])
       ;;
 ])
