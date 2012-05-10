@@ -2640,11 +2640,11 @@ doCommand:
           }
 
           case BRL_BLK_PWGEN: {
-            static const wchar_t codeset[] =
-              WS_C("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-              WS_C("abcdefghijklmnopqrstuvwxyz")
-              WS_C("0123456789");
-            const size_t codesetLength = wcslen(codeset);
+            static const char codeset[] =
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+              "abcdefghijklmnopqrstuvwxyz"
+              "0123456789";
+            const size_t codesetLength = strlen(codeset);
 
             wchar_t password[arg + 1];
             wchar_t *character = password;
