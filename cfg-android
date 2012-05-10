@@ -48,6 +48,9 @@ toolchainRoot="${buildRoot}/android-toolchain"
 export toolchainBinaries="${toolchainRoot}/bin"
 export PATH="${toolchainBinaries}:${PATH}"
 export CC=`set -- "${toolchainBinaries}/"*"-gcc" && basename "${1}"`
+export LD=`set -- "${toolchainBinaries}/"*"-ld" && basename "${1}"`
+export CFLAGS="-mthumb"
+export LDFLAGS="-Wl,--fix-cortex-a8"
 
 # Braille drivers already disabled:
 # il (not on Linux)
