@@ -1265,8 +1265,10 @@ BRLTTY_ARG_PACKAGE([mount], [mount], [mntent mnttab], [dnl
 ], [dnl
    mntent)
       AC_CHECK_HEADER([mntent.h], [dnl
-         mount_package=mntent
-         AC_CHECK_FUNCS([addmntent])
+         AC_CHECK_FUNC([setmntent], [dnl
+            mount_package=mntent
+            AC_CHECK_FUNCS([addmntent])
+         ])
       ])
       ;;
    mnttab)
