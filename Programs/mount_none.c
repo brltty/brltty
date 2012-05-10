@@ -19,12 +19,16 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <errno.h>
 
+#include "log.h"
 #include "mount_none.h"
 #include "mount_internal.h"
 
 FILE *
 openMountsTable (int update) {
+  errno = ENOSYS;
+  logSystemError("openMountsTable");
   return NULL;
 }
 
