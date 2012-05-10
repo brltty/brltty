@@ -1,0 +1,69 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+androidPlatform=android-4
+androidArchitecture=arm
+hostSystem=arm-linux-eabi
+
+programName="${0##*/}"
+programMessage() {
+   echo >&2 "${programName}: ${1}"
+}
+
+semanticError() {
+   programMessage "${1}"
+   exit 3
+}
+
+buildRoot=`pwd`
+sourceRoot=`dirname "${0}"`
+
+ndkRoot="${buildRoot}/android-ndk"
+[ -d "${ndkRoot}" ] || semanticError "directory not defined: ${ndkRoot}"
+
+toolchainRoot="${buildRoot}/android-toolchain"
+[ -d "${toolchainRoot}" ] || {
+   "${ndkRoot}/build/tools/make-standalone-toolchain.sh" \
+      --platform="${androidPlatform}" \
+      --arch="${androidArchitecture}" \
+      --install-dir="${toolchainRoot}" || exit "${?}"
+}
+
+export toolchainBinaries="${toolchainRoot}/bin"
+export PATH="${toolchainBinaries}:${PATH}"
+export CC=`set -- "${toolchainBinaries}/"*"-gcc" && basename "${1}"`
+
+# Braille drivers already disabled:
+# il (not on Linux)
+# lb (by --without-libbraille)
+# xw (by --disable-x)
+
+"${sourceRoot}/configure" \
+   --with-braille-driver=-tt,-vr \
+   --without-libbraille \
+   --disable-speech-support \
+   --disable-x \
+   --disable-pcm-support \
+   --disable-midi-support \
+   --disable-fm-support \
+   --disable-icu \
+   --disable-gpm \
+   --host="${hostSystem}" \
+   "${@}"
+exit "${?}"
