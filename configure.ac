@@ -228,35 +228,6 @@ in
    cygwin*\ mingw*)
       brltty_gcc_cflags="${brltty_gcc_cflags} -mno-cygwin"
       ;;
-   linux*\ eabi*)
-      if test -z "${ANDROID_HOME}"
-      then
-         AC_MSG_ERROR([ANDROID_HOME not set])
-      fi
-
-      if test -z "${ANDROID_TOOLCHAIN_VERSION}"
-      then
-         AC_MSG_ERROR([ANDROID_TOOLCHAIN_VERSION not set])
-      fi
-
-      ANDROID_LIBS_PATH="${ANDROID_HOME}/out/target/product/generic/obj/lib"
-      ANDROID_TOOLCHAIN_PATH="${ANDROID_HOME}/prebuilt/linux-x86/toolchain/${host_cpu}-eabi-${ANDROID_TOOLCHAIN_VERSION}"
-
-      CPPFLAGS="${CPPFLAGS} -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__"
-      CPPFLAGS="${CPPFLAGS} -DANDROID -DSK_RELEASE"
-      CPPFLAGS="${CPPFLAGS} -DNDEBUG -include ${ANDROID_HOME}/system/core/include/arch/linux-${host_cpu}/AndroidConfig.h -UDEBUG"
-
-      CPPFLAGS="${CPPFLAGS} -I${ANDROID_HOME}/bionic/libc/include -I${ANDROID_HOME}/bionic/libc/arch-${host_cpu}/include"
-      CPPFLAGS="${CPPFLAGS} -I${ANDROID_HOME}/bionic/libc/kernel/common -I${ANDROID_HOME}/bionic/libc/kernel/arch-${host_cpu}"
-
-      LIBS="${LIBS} -Wl,-rpath-link=${ANDROID_LIBS_PATH}"
-      LIBS="${LIBS} ${ANDROID_LIBS_PATH}/crtend_android.o"
-      LIBS="${LIBS} ${ANDROID_LIBS_PATH}/crtbegin_dynamic.o"
-      LIBS="${LIBS} -nostdlib -L${ANDROID_LIBS_PATH} -lm -lc"
-      LIBS="${LIBS} ${ANDROID_TOOLCHAIN_PATH}/lib/gcc/${host_cpu}-eabi/${ANDROID_TOOLCHAIN_VERSION}/interwork/libgcc.a"
-
-      brltty_gcc_cflags="${brltty_gcc_cflags} -march=armv5te -mtune=xscale -msoft-float -mthumb-interwork -fpic -fno-exceptions -ffunction-sections -funwind-tables -fstack-protector -fmessage-length=0"
-      ;;
 esac
 
 case "${host_os}"
