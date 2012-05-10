@@ -1,0 +1,40 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Braille drivers already disabled:
+# ba (by --disable-api)
+# il (not on Linux)
+# lb (by --without-libbraille)
+# xw (by --disable-x)
+
+directory=`dirname "${0}"`
+"${directory}/configure" \
+   --with-braille-driver=-lt,-tt,-vd,-vr \
+   --without-libbraille \
+   --disable-speech-support \
+   --disable-api \
+   --disable-x \
+   --disable-pcm-support \
+   --disable-midi-support \
+   --disable-fm-support \
+   --disable-icu \
+   --disable-gpm \
+   --host=i386-elf \
+   "${@}"
+exit "${?}"
