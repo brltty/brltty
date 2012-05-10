@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <search.h>
 
 #include "log.h"
 #include "timing.h"
