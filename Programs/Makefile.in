@@ -452,6 +452,17 @@ driver.$O:
 
 ###############################################################################
 
+BRLTTY_OBJECTS = main.$O $(CORE_OBJECTS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
+
+brltty$X: $(BRLTTY_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
+
+main.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
+
+###############################################################################
+
 CORE_ARCHIVE = $(ARC_PFX)$(CORE_NAME).$(ARC_EXT)
 
 core-archive: $(CORE_ARCHIVE)
@@ -474,20 +485,10 @@ brltty.class: $(SRC_DIR)/brltty.java
 	javac $(SRC_DIR)/brltty.java
 
 $(JAVA_LIB_FILE): jni.$O $(CORE_ARCHIVE)
-	$(MKLIB:<name>=$@) $@ jni.$O -L. -l$(CORE_NAME)
+	$(MKLIB:<name>=$@) $@ jni.$O -L. -l$(CORE_NAME) $(BRLTTY_LIBRARIES)
 
 jni.$O: $(SRC_DIR)/jni.c
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/jni.c
-
-###############################################################################
-
-BRLTTY_OBJECTS = main.$O $(CORE_OBJECTS)
-
-brltty$X: $(BRLTTY_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
-
-main.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
 
 ###############################################################################
 
