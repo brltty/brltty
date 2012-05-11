@@ -18,35 +18,54 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <jni.h>
 
 #include "embed.h"
+#include "log.h"
 
 static jobject jProgramArguments = NULL;
 static const char **cProgramArguments = NULL;
 
 JNIEXPORT jint JNICALL
-Java_brltty_construct (JNIEnv *env, jobject object, jobject argumentArray) {
-  jint argumentCount = (*env)->GetArrayLength(env, argumentArray);
+Java_brltty_construct (JNIEnv *env, jobject object, jobjectArray arguments) {
+  jsize count = (*env)->GetArrayLength(env, arguments);
 
-  jProgramArguments = argumentArray;
-  cProgramArguments = malloc((argumentCount + 2) * sizeof(*cProgramArguments));
+  if ((jProgramArguments = (*env)->NewGlobalRef(env, arguments))) {
+    if ((cProgramArguments = malloc((count + 2) * sizeof(*cProgramArguments)))) {
+      cProgramArguments[0] = PACKAGE_NAME;
+      cProgramArguments[count+1] = NULL;
 
-  cProgramArguments[0] = PACKAGE_NAME;
-  cProgramArguments[argumentCount+1] = NULL;
+      {
+        unsigned int i;
 
-  {
-    unsigned int i;
+        for (i=1; i<=count; i+=1) cProgramArguments[i] = NULL;
 
-    for (i=0; i<argumentCount; i+=1) {
-      jstring jArgument = (*env)->GetObjectArrayElement(env, argumentArray, i);
-      jboolean isCopy;
-      cProgramArguments[i+1] = (*env)->GetStringUTFChars(env, jArgument, &isCopy);
+        for (i=1; i<=count; i+=1) {
+          jstring jArgument = (*env)->GetObjectArrayElement(env, arguments, i-1);
+          jboolean isCopy;
+          const char *cArgument = (*env)->GetStringUTFChars(env, jArgument, &isCopy);
+
+          (*env)->DeleteLocalRef(env, jArgument);
+          jArgument = NULL;
+
+          if (!cArgument) {
+            logMallocError();
+            break;
+          }
+
+          cProgramArguments[i] = cArgument;
+        }
+
+        if (i > count) return brlttyConstruct(count+1, (char **)cProgramArguments);
+      }
+    } else {
+      logMallocError();
     }
+  } else {
+    logMallocError();
   }
 
-  return brlttyConstruct(argumentCount+1, cProgramArguments);
+  return PROG_EXIT_FATAL;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -62,19 +81,18 @@ Java_brltty_destruct (JNIEnv *env, jobject object) {
     if (cProgramArguments) {
       unsigned int i = 0;
 
-printf("length=%d\n", (*env)->GetArrayLength(env, jProgramArguments)); fflush(stdout);
       while (cProgramArguments[++i]) {
-printf("arg=%d\n", i); fflush(stdout);
         jstring jArgument = (*env)->GetObjectArrayElement(env, jProgramArguments, i-1);
-printf("releasing\n"); fflush(stdout);
         (*env)->ReleaseStringUTFChars(env, jArgument, cProgramArguments[i]);
-printf("released\n"); fflush(stdout);
+        (*env)->DeleteLocalRef(env, jArgument);
+        jArgument = NULL;
       }
 
       free(cProgramArguments);
       cProgramArguments = NULL;
     }
 
+    (*env)->DeleteGlobalRef(env, jProgramArguments);
     jProgramArguments = NULL;
   }
 }
