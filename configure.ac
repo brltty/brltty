@@ -289,9 +289,6 @@ in
    elf*)
       brltty_cv_prog_ld_flags=""
       ;;
-   eabi*)
-      brltty_cv_prog_ld_flags="-Bdynamic -Wl,-T,${ANDROID_HOME}/build/core/armelf.x -Wl,-dynamic-linker,/system/bin/linker -Wl,--gc-sections -Wl,-z,nocopyreloc"
-      ;;
    *)
       AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
       ;;
@@ -305,7 +302,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|elf*|eabi*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|elf*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -363,7 +360,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*|eabi*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*)
       brltty_mkmod_ld_make="-shared"
       ;;
    solaris*)
@@ -400,7 +397,7 @@ AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|elf*|eabi*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|elf*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
@@ -445,7 +442,7 @@ AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|kfreebsd*|elf*|eabi*)
+   linux*|gnu*|kfreebsd*|elf*)
       brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
       ;;
    *)
@@ -959,7 +956,7 @@ brltty_pcm_interfaces=""
 brltty_midi_interfaces=""
 case "${host_os}"
 in
-   linux*|eabi*)
+   linux*)
       system_object="linux"
       brltty_pcm_interfaces=""
       brltty_midi_interfaces=""
@@ -1120,7 +1117,7 @@ BRLTTY_ARG_DISABLE(
 
 case "${host_os}"
 in
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*|eabi*)
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -1150,7 +1147,7 @@ BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
-   linux*|eabi*)
+   linux*)
       usb_package="linux"
       ;;
    solaris*)
@@ -1187,7 +1184,7 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
-   linux*|eabi*)
+   linux*)
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"
       ])
@@ -1317,7 +1314,7 @@ AC_DEFINE_UNQUOTED([DEVICE_DIRECTORY], ["${brltty_cv_device_directory}"],
 AC_CACHE_CHECK([for first serial device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
 in
-   linux*|eabi*)
+   linux*)
       brltty_cv_device_serial_first="ttyS0"
       ;;
    gnu*)
@@ -1521,7 +1518,7 @@ BRLTTY_ARG_DRIVER([speech], [Speech])
 
 case "${host_os}"
 in
-   linux*|eabi*)
+   linux*)
       BRLTTY_SCREEN_DRIVER([lx], [Linux])
       ;;
    gnu*)
