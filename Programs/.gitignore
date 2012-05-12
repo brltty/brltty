@@ -11,6 +11,8 @@ brlapi_constants.h
 *.def
 *.lib
 *.exe
+*.class
+*.jar
 brltty
 brltty-trtxt
 brltty-ttb
