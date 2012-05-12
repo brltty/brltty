@@ -51,7 +51,6 @@ BRL_DIR = Drivers/Braille
 SPK_DIR = Drivers/Speech
 SCR_DIR = Drivers/Screen
 DRV_DIR = lib
-DAT_DIR = data
 BND_DIR = Bindings
 API_LIBS = -L$(BLD_TOP)$(PGM_DIR) -lbrlapi
 
