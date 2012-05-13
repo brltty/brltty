@@ -463,27 +463,27 @@ main.$O:
 
 ###############################################################################
 
-CORE_LIB_FILE = $(LIB_PFX)$(CORE_NAME)_core.$(LIB_EXT)
+BRLTTY_CORE_LIB = $(LIB_PFX)$(CORE_NAME)_core.$(LIB_EXT)
 
-core-library: $(CORE_LIB_FILE)
+core-library: $(BRLTTY_CORE_LIB)
 
-$(CORE_LIB_FILE): $(CORE_OBJECTS)
+$(BRLTTY_CORE_LIB): $(CORE_OBJECTS)
 	$(MKLIB:<name>=$@) $@ $(CORE_OBJECTS) $(BRLTTY_LIBRARIES)
 
 ###############################################################################
 
-CORE_JAR_FILE = $(CORE_NAME).jar
-CORE_JNI_FILE = $(LIB_PFX)$(CORE_NAME)_jni.$(LIB_EXT)
+BRLTTY_JNI_JAR = $(CORE_NAME).jar
+BRLTTY_JNI_LIB = $(LIB_PFX)$(CORE_NAME)_jni.$(LIB_EXT)
 
-brltty-java: $(CORE_JAR_FILE) $(CORE_JNI_FILE)
+brltty-jni: $(BRLTTY_JNI_JAR) $(BRLTTY_JNI_LIB)
 
-$(CORE_JAR_FILE): brltty.class
+$(BRLTTY_JNI_JAR): brltty.class
 	jar cf $@ brltty.class
 
 brltty.class: $(SRC_DIR)/brltty.java
 	javac $(SRC_DIR)/brltty.java
 
-$(CORE_JNI_FILE): brltty_jni.$O $(CORE_LIB_FILE)
+$(BRLTTY_JNI_LIB): brltty_jni.$O $(BRLTTY_CORE_LIB)
 	$(MKLIB:<name>=$@) $@ brltty_jni.$O
 
 brltty_jni.$O:
