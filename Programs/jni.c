@@ -82,8 +82,8 @@ logError (JNIEnv *env, const char *class, const char *format, ...) {
 }
 
 static void
-logNoMemory (JNIEnv *env) {
-  logError(env, "OutOfMemoryError", "out of memory");
+logNoMemory (JNIEnv *env, const char *description) {
+  logError(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
 }
 
 static int
@@ -109,7 +109,7 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
           jArgument = NULL;
 
           if (!cArgument) {
-            logNoMemory(env);
+            logNoMemory(env, "C argument string");
             break;
           }
 
@@ -122,10 +122,10 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
         }
       }
     } else {
-      logNoMemory(env);
+      logNoMemory(env, "C argument array");
     }
   } else {
-    logNoMemory(env);
+    logNoMemory(env, "Java arguments array global reference");
   }
 
   return 0;
@@ -147,7 +147,7 @@ loadCoreLibrary (JNIEnv *env) {
   }
 
 error:
-  logError(env, "java.lang.UnsatisfiedLinkError", "%s", dlerror());
+  logError(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
   return 0;
 }
 
