@@ -25,10 +25,10 @@
 
 #include "embed.h"
 
-#define FUNCTION_POINTER(name) static FUNCTION_TYPE(name) *name##_p = NULL;
-FUNCTION_POINTER(brlttyConstruct);
-FUNCTION_POINTER(brlttyUpdate);
-FUNCTION_POINTER(brlttyDestruct);
+#define SYMBOL_POINTER(name) static const SYMBOL_TYPE(name) *name##_p = NULL;
+SYMBOL_POINTER(brlttyConstruct);
+SYMBOL_POINTER(brlttyUpdate);
+SYMBOL_POINTER(brlttyDestruct);
 
 typedef struct {
   const char *name;
@@ -140,11 +140,11 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
 
 static int
 loadCoreLibrary (JNIEnv *env) {
-  if ((coreHandle = dlopen("libbrltty.so", RTLD_NOW | RTLD_GLOBAL))) {
+  if ((coreHandle = dlopen("libbrltty_core.so", RTLD_NOW | RTLD_GLOBAL))) {
     const SymbolEntry *symbol = symbolTable;
 
     while (symbol->name) {
-      void **pointer = symbol->pointer;
+      const void **pointer = symbol->pointer;
 
       if (!(*pointer = dlsym(coreHandle, symbol->name))) goto error;
       symbol += 1;
@@ -177,6 +177,16 @@ Java_brltty_update (JNIEnv *env, jobject this) {
 JNIEXPORT void JNICALL
 Java_brltty_destruct (JNIEnv *env, jobject this) {
   brlttyDestruct_p();
+
+  {
+    const SymbolEntry *symbol = symbolTable;
+
+    while (symbol->name) {
+      const void **pointer = symbol->pointer;
+      *pointer = NULL;
+      symbol += 1;
+    }
+  }
 
   if (coreHandle) {
     dlclose(coreHandle);

@@ -52,6 +52,6 @@ public class brltty {
   }
 
   static {
-    System.loadLibrary("brltty_java");
+    System.loadLibrary("brltty_jni");
   }
 }
