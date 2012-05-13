@@ -19,12 +19,11 @@
 #include "prologue.h"
 
 #include <jni.h>
-#include <dlfcn.h>
-#include <stdarg.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <dlfcn.h>
 
 #include "embed.h"
-#include "log.h"
 
 #define FUNCTION_POINTER(name) static FUNCTION_TYPE(name) *name##_p = NULL;
 FUNCTION_POINTER(brlttyConstruct);
@@ -52,8 +51,16 @@ static jobject jArgumentArray = NULL;
 static const char **cArgumentArray = NULL;
 static int cArgumentCount;
 
+static void throwException (
+  JNIEnv *env, const char *exception,
+  const char *format, ...
+) PRINTF(3, 4);
+
 static void
-logError (JNIEnv *env, const char *class, const char *format, ...) {
+throwException (
+  JNIEnv *env, const char *exception,
+  const char *format, ...
+) {
   char message[0X100];
 
   {
@@ -72,7 +79,7 @@ logError (JNIEnv *env, const char *class, const char *format, ...) {
   }
 
   {
-    jclass c = (*env)->FindClass(env, class);
+    jclass c = (*env)->FindClass(env, exception);
 
     if (c) {
       (*env)->ThrowNew(env, c, message);
@@ -82,8 +89,8 @@ logError (JNIEnv *env, const char *class, const char *format, ...) {
 }
 
 static void
-logNoMemory (JNIEnv *env, const char *description) {
-  logError(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
+throwOutOfMemory (JNIEnv *env, const char *description) {
+  throwException(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
 }
 
 static int
@@ -109,7 +116,7 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
           jArgument = NULL;
 
           if (!cArgument) {
-            logNoMemory(env, "C argument string");
+            throwOutOfMemory(env, "C argument string");
             break;
           }
 
@@ -122,10 +129,10 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
         }
       }
     } else {
-      logNoMemory(env, "C argument array");
+      throwOutOfMemory(env, "C argument array");
     }
   } else {
-    logNoMemory(env, "Java arguments array global reference");
+    throwOutOfMemory(env, "Java arguments array global reference");
   }
 
   return 0;
@@ -147,7 +154,7 @@ loadCoreLibrary (JNIEnv *env) {
   }
 
 error:
-  logError(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
+  throwException(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
   return 0;
 }
 

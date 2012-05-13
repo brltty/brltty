@@ -25,10 +25,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define FUNCTION_DECLARATION(name,returns,arguments) returns name arguments
-#define FUNCTION_TYPE(name) name##_t
-#define FUNCTION_TYPEDEF(name,returns,arguments) typedef FUNCTION_DECLARATION(FUNCTION_TYPE(name), returns, arguments)
-#define FUNCTION_DECLARE(name,returns,arguments) FUNCTION_TYPEDEF(name, returns, arguments); extern FUNCTION_TYPE(name) name
+#define FUNCTION_TYPE(functionName) functionName ## _t
+
+#define FUNCTION_DECLARATION(functionName, returnType, argumentList) \
+  returnType functionName argumentList
+
+#define FUNCTION_TYPEDEF(functionName, returnType, argumentList) \
+  typedef FUNCTION_DECLARATION(FUNCTION_TYPE(functionName), returnType, argumentList)
+
+#define FUNCTION_DECLARE(functionName, returnType, argumentList) \
+  FUNCTION_TYPEDEF(functionName, returnType, argumentList); \
+  extern FUNCTION_TYPE(functionName) functionName
 
 FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
 FUNCTION_DECLARE(brlttyUpdate, int, (void));
