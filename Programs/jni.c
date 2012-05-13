@@ -20,6 +20,7 @@
 
 #include <jni.h>
 #include <dlfcn.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "embed.h"
@@ -31,13 +32,13 @@ FUNCTION_POINTER(brlttyUpdate);
 FUNCTION_POINTER(brlttyDestruct);
 
 typedef struct {
-  const char *symbolName;
-  void *pointerAddress;
+  const char *name;
+  void *pointer;
 } SymbolEntry;
 
 #define BEGIN_SYMBOL_TABLE static const SymbolEntry symbolTable[] = {
-#define END_SYMBOL_TABLE {.symbolName=NULL} };
-#define SYMBOL_ENTRY(symbol) {.symbolName=#symbol, .pointerAddress=&symbol##_p}
+#define END_SYMBOL_TABLE {.name=NULL} };
+#define SYMBOL_ENTRY(symbol) {.name=#symbol, .pointer=&symbol##_p}
 
 BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
@@ -50,6 +51,40 @@ static void *coreHandle = NULL;
 static jobject jArgumentArray = NULL;
 static const char **cArgumentArray = NULL;
 static int cArgumentCount;
+
+static void
+logError (JNIEnv *env, const char *class, const char *format, ...) {
+  char message[0X100];
+
+  {
+    va_list arguments;
+
+    va_start(arguments, format);
+    vsnprintf(message, sizeof(message), format, arguments);
+    va_end(arguments);
+  }
+
+  if (0) {
+    FILE *stream = stderr;
+
+    fprintf(stream, "%s\n", message);
+    fflush(stream);
+  }
+
+  {
+    jclass c = (*env)->FindClass(env, class);
+
+    if (c) {
+      (*env)->ThrowNew(env, c, message);
+      (*env)->DeleteLocalRef(env, c);
+    }
+  }
+}
+
+static void
+logNoMemory (JNIEnv *env) {
+  logError(env, "OutOfMemoryError", "out of memory");
+}
 
 static int
 prepareProgramArguments (JNIEnv *env, jstring arguments) {
@@ -74,7 +109,7 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
           jArgument = NULL;
 
           if (!cArgument) {
-//          logMallocError_p();
+            logNoMemory(env);
             break;
           }
 
@@ -87,40 +122,39 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
         }
       }
     } else {
-//    logMallocError_p();
+      logNoMemory(env);
     }
   } else {
-//  logMallocError_p();
+    logNoMemory(env);
   }
 
   return 0;
 }
 
 static int
-loadCoreLibrary (void) {
+loadCoreLibrary (JNIEnv *env) {
   if ((coreHandle = dlopen("libbrltty.so", RTLD_NOW | RTLD_GLOBAL))) {
     const SymbolEntry *symbol = symbolTable;
 
-    while (symbol->symbolName) {
-      void **pointer = symbol->pointerAddress;
+    while (symbol->name) {
+      void **pointer = symbol->pointer;
 
-      if (!(*pointer = dlsym(coreHandle, symbol->symbolName))) {
-        return 0;
-      }
-
+      if (!(*pointer = dlsym(coreHandle, symbol->name))) goto error;
       symbol += 1;
     }
 
     return 1;
   }
 
+error:
+  logError(env, "java.lang.UnsatisfiedLinkError", "%s", dlerror());
   return 0;
 }
 
 JNIEXPORT jint JNICALL
 Java_brltty_construct (JNIEnv *env, jobject object, jobjectArray arguments) {
   if (prepareProgramArguments(env, arguments)) {
-    if (loadCoreLibrary()) {
+    if (loadCoreLibrary(env)) {
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
     }
   }
