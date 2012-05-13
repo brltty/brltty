@@ -463,13 +463,12 @@ main.$O:
 
 ###############################################################################
 
-CORE_ARCHIVE = $(ARC_PFX)$(CORE_NAME).$(ARC_EXT)
+CORE_LIB_FILE = $(LIB_PFX)$(CORE_NAME).$(LIB_EXT)
 
-core-archive: $(CORE_ARCHIVE)
+core-library: $(CORE_LIB_FILE)
 
-$(CORE_ARCHIVE): $(CORE_OBJECTS)
-	ar rc $@ $(CORE_OBJECTS)
-	$(RANLIB) $@
+$(CORE_LIB_FILE): $(CORE_OBJECTS)
+	$(MKLIB:<name>=$@) $@ $(CORE_OBJECTS) $(BRLTTY_LIBRARIES)
 
 ###############################################################################
 
@@ -484,10 +483,10 @@ $(JAVA_JAR_FILE): brltty.class
 brltty.class: $(SRC_DIR)/brltty.java
 	javac $(SRC_DIR)/brltty.java
 
-$(JAVA_LIB_FILE): jni.$O $(CORE_ARCHIVE)
-	$(MKLIB:<name>=$@) $@ jni.$O -L. -l$(CORE_NAME) $(BRLTTY_LIBRARIES)
+$(JAVA_LIB_FILE): jni.$O $(CORE_LIB_FILE)
+	$(MKLIB:<name>=$@) $@ jni.$O
 
-jni.$O: $(SRC_DIR)/jni.c
+jni.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/jni.c
 
 ###############################################################################

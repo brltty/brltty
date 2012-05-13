@@ -25,9 +25,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern ProgramExitStatus brlttyConstruct (int argc, char *argv[]);
-extern int brlttyUpdate (void);
-extern void brlttyDestruct (void);
+#define FUNCTION_DECLARATION(name,returns,arguments) returns name arguments
+#define FUNCTION_TYPE(name) name##_t
+#define FUNCTION_TYPEDEF(name,returns,arguments) typedef FUNCTION_DECLARATION(FUNCTION_TYPE(name), returns, arguments)
+#define FUNCTION_DECLARE(name,returns,arguments) FUNCTION_TYPEDEF(name, returns, arguments); extern FUNCTION_TYPE(name) name
+
+FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
+FUNCTION_DECLARE(brlttyUpdate, int, (void));
+FUNCTION_DECLARE(brlttyDestruct, void, (void));
 
 #ifdef __cplusplus
 }
