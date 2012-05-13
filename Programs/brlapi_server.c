@@ -35,16 +35,20 @@
 
 #ifdef __MINGW32__
 #include "sys_windows.h"
-
-#ifdef __MINGW32__
 #include "win_pthread.h"
-#endif /* __MINGW32__ */
+
 #else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#ifdef __ANDROID__
+#ifndef PAGE_SIZE
+#include <asm/page.h>
+#endif /* PAGE_SIZE */
+#endif /* __ANDROID__ */
 
 #include <pthread.h>
 
