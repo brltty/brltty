@@ -162,7 +162,7 @@ flowControlProc_InputCts (void *arg) {
   SerialDevice *serial = arg;
   int up = serialTestLineCTS(serial);
 
-  while (1) {
+  while (!serial->flowControlStop) {
     serialSetLineRTS(serial, up);
     serialWaitLineCTS(serial, (up = !up), 0);
   }
@@ -179,6 +179,7 @@ serialStartFlowControlThread (SerialDevice *serial) {
     pthread_attr_init(&attributes);
     pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 
+    serial->flowControlStop = 0;
     if (pthread_create(&thread, &attributes, serial->currentFlowControlProc, serial)) {
       logSystemError("pthread_create");
       return 0;
@@ -194,7 +195,7 @@ serialStartFlowControlThread (SerialDevice *serial) {
 static void
 serialStopFlowControlThread (SerialDevice *serial) {
   if (serial->flowControlRunning) {
-    pthread_cancel(serial->flowControlThread);
+    serial->flowControlStop = 1;
     serial->flowControlRunning = 0;
   }
 }

@@ -55,6 +55,7 @@ struct SerialDeviceStruct {
   FlowControlProc pendingFlowControlProc;
   pthread_t flowControlThread;
   unsigned flowControlRunning:1;
+  unsigned flowControlStop:1;
 #endif /* HAVE_POSIX_THREADS */
 
   SerialPackageFields package;
