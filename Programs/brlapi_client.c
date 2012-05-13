@@ -1105,7 +1105,7 @@ static size_t getCharset(
   const char *locale = setlocale(LC_CTYPE, NULL);
 
 #ifdef WINDOWS
-  const char *WIN_WCHAR_T =
+  static const char WIN_WCHAR_T[] =
 #ifdef WORDS_BIGENDIAN
     "UCS-2BE"
 #else /* WORDS_BIGENDIAN */
@@ -1113,12 +1113,11 @@ static size_t getCharset(
 #endif /* WORDS_BIGENDIAN */
     ;
 
-#ifdef __CYGWIN32__
-  if (wide)
-#else /* __CYGWIN32__ */
-  if (CHECKPROC("ntdll.dll", wcslen) && wide)
+  if (wide
+#ifndef __CYGWIN32__
+      && CHECKPROC("ntdll.dll", wcslen)
 #endif /* __CYGWIN32__ */
-  {
+  ) {
     size_t length = strlen(WIN_WCHAR_T);
     *p++ = length;
     p = mempcpy(p, WIN_WCHAR_T, length);
