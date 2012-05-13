@@ -1095,21 +1095,23 @@ int BRLAPI_STDCALL brlapi_setFocus(int tty)
   return brlapi__setFocus(&defaultHandle, tty);
 }
 
+static size_t getCharset(
+  unsigned char *buffer
 #ifdef WINDOWS
-static size_t getCharset(unsigned char *buffer, int wide)
-#else /* WINDOWS */
-static size_t getCharset(unsigned char *buffer)
+, int wide
 #endif /* WINDOWS */
-{
+) {
   unsigned char *p = buffer;
   const char *locale = setlocale(LC_CTYPE, NULL);
 
 #ifdef WINDOWS
+  const char *WIN_WCHAR_T =
 #ifdef WORDS_BIGENDIAN
-#define WIN_WCHAR_T "UCS-2BE"
+    "UCS-2BE"
 #else /* WORDS_BIGENDIAN */
-#define WIN_WCHAR_T "UCS-2LE"
+    "UCS-2LE"
 #endif /* WORDS_BIGENDIAN */
+    ;
 
 #ifdef __CYGWIN32__
   if (wide)
