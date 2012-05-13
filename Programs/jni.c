@@ -51,14 +51,14 @@ static jobject jArgumentArray = NULL;
 static const char **cArgumentArray = NULL;
 static int cArgumentCount;
 
-static void throwException (
-  JNIEnv *env, const char *exception,
+static void reportProblem (
+  JNIEnv *env, const char *throwable,
   const char *format, ...
 ) PRINTF(3, 4);
 
 static void
-throwException (
-  JNIEnv *env, const char *exception,
+reportProblem (
+  JNIEnv *env, const char *throwable,
   const char *format, ...
 ) {
   char message[0X100];
@@ -79,18 +79,18 @@ throwException (
   }
 
   {
-    jclass c = (*env)->FindClass(env, exception);
+    jclass object = (*env)->FindClass(env, throwable);
 
-    if (c) {
-      (*env)->ThrowNew(env, c, message);
-      (*env)->DeleteLocalRef(env, c);
+    if (object) {
+      (*env)->ThrowNew(env, object, message);
+      (*env)->DeleteLocalRef(env, object);
     }
   }
 }
 
 static void
-throwOutOfMemory (JNIEnv *env, const char *description) {
-  throwException(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
+reportOutOfMemory (JNIEnv *env, const char *description) {
+  reportProblem(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
 }
 
 static int
@@ -116,7 +116,7 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
           jArgument = NULL;
 
           if (!cArgument) {
-            throwOutOfMemory(env, "C argument string");
+            reportOutOfMemory(env, "C argument string");
             break;
           }
 
@@ -129,10 +129,10 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
         }
       }
     } else {
-      throwOutOfMemory(env, "C argument array");
+      reportOutOfMemory(env, "C argument array");
     }
   } else {
-    throwOutOfMemory(env, "Java arguments array global reference");
+    reportOutOfMemory(env, "Java arguments array global reference");
   }
 
   return 0;
@@ -154,12 +154,12 @@ loadCoreLibrary (JNIEnv *env) {
   }
 
 error:
-  throwException(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
+  reportProblem(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
   return 0;
 }
 
 JNIEXPORT jint JNICALL
-Java_brltty_construct (JNIEnv *env, jobject object, jobjectArray arguments) {
+Java_brltty_construct (JNIEnv *env, jobject this, jobjectArray arguments) {
   if (prepareProgramArguments(env, arguments)) {
     if (loadCoreLibrary(env)) {
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
@@ -170,12 +170,12 @@ Java_brltty_construct (JNIEnv *env, jobject object, jobjectArray arguments) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_brltty_update (JNIEnv *env, jobject object) {
+Java_brltty_update (JNIEnv *env, jobject this) {
   return brlttyUpdate_p()? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL
-Java_brltty_destruct (JNIEnv *env, jobject object) {
+Java_brltty_destruct (JNIEnv *env, jobject this) {
   brlttyDestruct_p();
 
   if (coreHandle) {
