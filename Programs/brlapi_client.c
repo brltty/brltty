@@ -1102,47 +1102,47 @@ static size_t getCharset(unsigned char *buffer)
 #endif /* WINDOWS */
 {
   unsigned char *p = buffer;
-  char *locale;
-  unsigned int len;
-  locale = setlocale(LC_CTYPE,NULL);
+  const char *locale = setlocale(LC_CTYPE, NULL);
+
 #ifdef WINDOWS
 #ifdef WORDS_BIGENDIAN
 #define WIN_WCHAR_T "UCS-2BE"
 #else /* WORDS_BIGENDIAN */
 #define WIN_WCHAR_T "UCS-2LE"
 #endif /* WORDS_BIGENDIAN */
+
 #ifdef __CYGWIN32__
-  if (wide) {
+  if (wide)
 #else /* __CYGWIN32__ */
-  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
+  if (CHECKPROC("ntdll.dll", wcslen) && wide)
 #endif /* __CYGWIN32__ */
-    *p++ = strlen(WIN_WCHAR_T);
-    strcpy((char*) p, WIN_WCHAR_T);
-    p += strlen(WIN_WCHAR_T);
+  {
+    size_t length = strlen(WIN_WCHAR_T);
+    *p++ = length;
+    p = mempcpy(p, WIN_WCHAR_T, length);
   } else
 #endif /* WINDOWS */
-  if (locale && strcmp(locale,"C")) {
+
+  if (locale && strcmp(locale, "C")) {
     /* not default locale, tell charset to server */
 #ifdef WINDOWS
-    UINT CP;
-    CP = GetACP();
-    if (!CP)
-      CP = GetOEMCP();
+    UINT CP = GetACP();
+    if (!CP) CP = GetOEMCP();
+
     if (CP) {
-      len = sprintf(p+3, "%u", CP);
-      *p++ = 2 + len;
-      *p++ = 'C';
-      *p++ = 'P';
-      p += len;
+      size_t length = sprintf(p+1, "CP%u", CP);
+      *p++ = length;
+      p += length;
     }
 #elif defined(CODESET)
-    char *lang = nl_langinfo(CODESET);
-    len = strlen(lang);
-    *p++ = len;
-    memcpy(p, lang, len);
-    p += len;
+    char *language = nl_langinfo(CODESET);
+    size_t length = strlen(language);
+
+    *p++ = length;
+    p = mempcpy(p, language, length);
 #endif /* get non-wide character set */
   }
+
   return p-buffer;
 }
 
