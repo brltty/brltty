@@ -59,6 +59,9 @@ extern "C" {
 /* Define this if the header file glob.h exists. */
 #undef HAVE_GLOB_H
 
+/* Define this if the header file langinfo.h exists. */
+#undef HAVE_LANGINFO_H
+
 /* Define this if the header file grp.h exists. */
 #undef HAVE_GRP_H
 

@@ -23,7 +23,10 @@
 #include <errno.h>
 #include <iconv.h>
 #include <locale.h>
+
+#ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
 
 #include "log.h"
 #include "charset_internal.h"

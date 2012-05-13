@@ -31,7 +31,9 @@
 #include <locale.h>
 
 #ifndef __MINGW32__
+#ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
 #endif /* __MINGW32__ */
 
 #ifdef __MINGW32__
@@ -1133,13 +1135,13 @@ static size_t getCharset(unsigned char *buffer)
       *p++ = 'P';
       p += len;
     }
-#else /* WINDOWS */
+#elif defined(CODESET)
     char *lang = nl_langinfo(CODESET);
     len = strlen(lang);
     *p++ = len;
     memcpy(p, lang, len);
     p += len;
-#endif /* WINDOWS */
+#endif /* get non-wide character set */
   }
   return p-buffer;
 }

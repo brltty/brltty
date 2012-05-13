@@ -25,7 +25,10 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <string.h>
+
+#ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
