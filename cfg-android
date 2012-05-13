@@ -43,6 +43,20 @@ toolchainRoot="${buildRoot}/android-toolchain"
       --platform="${androidPlatform}" \
       --arch="${androidArchitecture}" \
       --install-dir="${toolchainRoot}" || exit "${?}"
+
+   buildInclude="/usr/include"
+   hostInclude="${toolchainRoot}/sysroot${buildInclude}"
+
+   for header in bluetooth
+   do
+      hostHeader="${hostInclude}/${header}"
+      [ ! -e "${hostHeader}" ] || continue;
+
+      buildHeader="${buildInclude}/${header}"
+      [ -e "${buildHeader}" ] || continue;
+
+      ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
+   done
 }
 
 export toolchainBinaries="${toolchainRoot}/bin"
