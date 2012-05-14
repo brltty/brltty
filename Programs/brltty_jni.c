@@ -140,6 +140,8 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
 
 static int
 loadCoreLibrary (JNIEnv *env) {
+  if (coreHandle) return 1;
+
   if ((coreHandle = dlopen("libbrltty_core.so", RTLD_NOW | RTLD_GLOBAL))) {
     const SymbolEntry *symbol = symbolTable;
 
@@ -178,6 +180,7 @@ JNIEXPORT void JNICALL
 Java_brltty_destruct (JNIEnv *env, jobject this) {
   brlttyDestruct_p();
 
+/*
   {
     const SymbolEntry *symbol = symbolTable;
 
@@ -192,6 +195,7 @@ Java_brltty_destruct (JNIEnv *env, jobject this) {
     dlclose(coreHandle);
     coreHandle = NULL;
   }
+*/
 
   if (jArgumentArray) {
     if (cArgumentArray) {
