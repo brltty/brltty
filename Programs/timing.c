@@ -256,8 +256,14 @@ compareTimeValues (const TimeValue *first, const TimeValue *second) {
 
 long int
 millisecondsBetween (const TimeValue *from, const TimeValue *to) {
-  return ((to->seconds - from->seconds) * MSECS_PER_SEC)
-       + ((to->nanoseconds - from->nanoseconds) / NSECS_PER_MSEC);
+  TimeValue elapsed = {
+    .seconds = to->seconds - from->seconds,
+    .nanoseconds = to->nanoseconds - from->nanoseconds
+  };
+
+  normalizeTimeValue(&elapsed);
+  return (elapsed.seconds * MSECS_PER_SEC)
+       + (elapsed.nanoseconds / NSECS_PER_MSEC);
 }
 
 long int
