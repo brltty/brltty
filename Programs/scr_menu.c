@@ -229,7 +229,6 @@ executeCommand_MenuScreen (int *command) {
       return 1;
 
     case BRL_CMD_WINUP:
-    case BRL_CMD_CHRLT:
     case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
     case BRL_CMD_BACK:
     case BRL_CMD_MENU_PREV_SETTING:
@@ -241,7 +240,6 @@ executeCommand_MenuScreen (int *command) {
       return 1;
 
     case BRL_CMD_WINDN:
-    case BRL_CMD_CHRRT:
     case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
     case BRL_CMD_HOME:
     case BRL_CMD_RETURN:
