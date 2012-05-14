@@ -24,7 +24,9 @@
 #define NP_PKT_BEGIN 0X79
 #define NP_PKT_END 0X16
 #define NP_PKT_REQ_Write 0X01
-#define NP_PKT_RSP_Confirm 0X07
+#define NP_PKT_RSP_NavigationKey 0X04
+#define NP_PKT_RSP_Confirmation 0X07
+#define NP_PKT_RSP_KeyboardKey 0X09
 
 typedef enum {
   NP_KEY_PadLeft1     = 0X0C,

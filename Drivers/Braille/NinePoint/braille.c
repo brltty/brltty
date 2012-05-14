@@ -388,7 +388,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             }
             break;
 
-          case NP_PKT_RSP_Confirm:
+          case NP_PKT_RSP_Confirmation:
             if (count > 0) {
               switch (bytes[0]) {
                 case 0X7D:
