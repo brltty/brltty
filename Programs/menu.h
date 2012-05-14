@@ -76,9 +76,9 @@ extern int setMenuNextItem (Menu *menu);
 extern int setMenuFirstItem (Menu *menu);
 extern int setMenuLastItem (Menu *menu);
 
-extern int changeMenuItemPrevious (const MenuItem *item);
-extern int changeMenuItemNext (const MenuItem *item);
-extern int changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count);
+extern int changeMenuItemPrevious (MenuItem *item);
+extern int changeMenuItemNext (MenuItem *item);
+extern int changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
 extern Menu *getCurrentSubmenu (Menu *menu);

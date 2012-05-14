@@ -89,7 +89,7 @@ struct MenuStruct {
 typedef struct {
   int (*beginItem) (MenuItem *item);
   void (*endItem) (MenuItem *item, int deallocating);
-  void (*activateItem) (const MenuItem *item);
+  void (*activateItem) (MenuItem *item);
   const char * (*getValue) (const MenuItem *item);
   const char * (*getComment) (const MenuItem *item);
 } MenuItemMethods;
@@ -597,7 +597,8 @@ endItem_submenu (MenuItem *item, int deallocating) {
 }
 
 static void
-activateItem_submenu (const MenuItem *item) {
+activateItem_submenu (MenuItem *item) {
+  endMenuItem(item, 0);
   item->data.submenu->opened = 1;
 }
 
@@ -623,8 +624,11 @@ static const MenuItemMethods menuItemMethods_submenu = {
 };
 
 static void
-activateItem_close (const MenuItem *item) {
-  item->menu->parent->activeItem->data.submenu->opened = 0;
+activateItem_close (MenuItem *item) {
+  Menu *menu = item->menu->parent;
+  item = getMenuItem(menu, getMenuIndex(menu));
+  item->data.submenu->opened = 0;
+  beginMenuItem(item);
 }
 
 static const char *
@@ -708,7 +712,7 @@ setMenuLastItem (Menu *menu) {
 }
 
 static int
-activateMenuItem (const MenuItem *item) {
+activateMenuItem (MenuItem *item) {
   if (!item->methods->activateItem) return 0;
   item->methods->activateItem(item);
   return 1;
@@ -732,7 +736,7 @@ decrementMenuItem (const MenuItem *item) {
 }
 
 int
-changeMenuItemPrevious (const MenuItem *item) {
+changeMenuItemPrevious (MenuItem *item) {
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
   return adjustMenuItem(item, decrementMenuItem);
@@ -744,14 +748,14 @@ incrementMenuItem (const MenuItem *item) {
 }
 
 int
-changeMenuItemNext (const MenuItem *item) {
+changeMenuItemNext (MenuItem *item) {
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
   return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
-changeMenuItemScaled (const MenuItem *item, unsigned int index, unsigned int count) {
+changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
   if (activateMenuItem(item)) return 1;
 
   if (item->setting) {
