@@ -173,6 +173,8 @@ typedef enum {
   BRL_CMD_CONTROL /* add control modifier to next typed character or emulated key */,
   BRL_CMD_META /* add meta modifier to next typed character or emulated key */,
 
+  BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,
+
   BRL_CMD_SPEAK_CURR_CHAR /* speak current character */,
   BRL_CMD_SPEAK_PREV_CHAR /* go to and speak previous character */,
   BRL_CMD_SPEAK_NEXT_CHAR /* go to and speak next character */,

@@ -27,7 +27,7 @@
 #include "scr.h"
 #include "scr_menu.h"
 
-static Menu *menuHandle = NULL;
+static Menu *rootMenu = NULL;
 static unsigned int screenWidth;
 
 static unsigned int lineLength;
@@ -35,7 +35,7 @@ static unsigned int settingIndent;
 
 static inline Menu *
 getSubmenu (void) {
-  return getCurrentSubmenu(menuHandle);
+  return getCurrentSubmenu(rootMenu);
 }
 
 static inline MenuItem *
@@ -45,14 +45,14 @@ getItem (void) {
 
 static int
 construct_MenuScreen (Menu *menu) {
-  menuHandle = menu;
+  rootMenu = menu;
   screenWidth = 1;
   return 1;
 }
 
 static void
 destruct_MenuScreen (void) {
-  menuHandle = NULL;
+  rootMenu = NULL;
 }
 
 static int
@@ -184,8 +184,21 @@ executeCommand_MenuScreen (int *command) {
       *command = BRL_CMD_PREFSAVE;
       return 0;
 
-    case BRL_CMD_TOP:
     case BRL_CMD_TOP_LEFT:
+    case BRL_CMD_BOT_LEFT:
+    case BRL_CMD_MENU_PREV_LEVEL: {
+      Menu *menu = getSubmenu();
+
+      if (menu == rootMenu) {
+        commandRejected();
+      } else if (!changeMenuItemNext(getMenuItem(menu, 0))) {
+        commandRejected();
+      }
+
+      return 1;
+    }
+
+    case BRL_CMD_TOP:
     case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
     case BRL_CMD_MENU_FIRST_ITEM:
       if (setMenuFirstItem(getSubmenu())) {
@@ -196,7 +209,6 @@ executeCommand_MenuScreen (int *command) {
       return 1;
 
     case BRL_CMD_BOT:
-    case BRL_CMD_BOT_LEFT:
     case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
     case BRL_CMD_MENU_LAST_ITEM:
       if (setMenuLastItem(getSubmenu())) {

@@ -1155,8 +1155,8 @@ makePreferencesMenu (void) {
     {.label=strtext("Lower Right Dot"), .comment=strtext("dot 8")}
   };
 
-  Menu *mainMenu = newMenu();
-  if (!mainMenu) goto noMenu;
+  Menu *rootMenu = newMenu();
+  if (!rootMenu) goto noMenu;
 
 #define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
@@ -1168,7 +1168,7 @@ makePreferencesMenu (void) {
   if (!variable) goto noItem
 
   {
-    SUBMENU(optionsSubmenu, mainMenu, strtext("Menu Options"));
+    SUBMENU(optionsSubmenu, rootMenu, strtext("Menu Options"));
 
     {
       NAME(strtext("Save on Exit"));
@@ -1187,7 +1187,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(presentationSubmenu, mainMenu, strtext("Presentation"));
+    SUBMENU(presentationSubmenu, rootMenu, strtext("Presentation"));
 
     {
       static const MenuString strings[] = {
@@ -1237,7 +1237,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(indicatorsSubmenu, mainMenu, strtext("Indicators"));
+    SUBMENU(indicatorsSubmenu, rootMenu, strtext("Indicators"));
 
     {
       NAME(strtext("Show Cursor"));
@@ -1310,7 +1310,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(navigationSubmenu, mainMenu, strtext("Navigation"));
+    SUBMENU(navigationSubmenu, rootMenu, strtext("Navigation"));
 
     {
       NAME(strtext("Skip Identical Lines"));
@@ -1365,7 +1365,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(controlsSubmenu, mainMenu, strtext("Controls"));
+    SUBMENU(controlsSubmenu, rootMenu, strtext("Controls"));
 
     {
       NAME(strtext("Autorepeat"));
@@ -1408,7 +1408,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(alertsSubmenu, mainMenu, strtext("Alerts"));
+    SUBMENU(alertsSubmenu, rootMenu, strtext("Alerts"));
 
     {
       NAME(strtext("Alert Tunes"));
@@ -1477,7 +1477,7 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    SUBMENU(speechSubmenu, mainMenu, strtext("Speech"));
+    SUBMENU(speechSubmenu, rootMenu, strtext("Speech"));
 
     {
       NAME(strtext("Speech Volume"));
@@ -1602,7 +1602,7 @@ makePreferencesMenu (void) {
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
   {
-    SUBMENU(statusSubmenu, mainMenu, strtext("Status Cells"));
+    SUBMENU(statusSubmenu, rootMenu, strtext("Status Cells"));
 
     {
       static const MenuString strings[] = {
@@ -1655,7 +1655,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(tablesSubmenu, mainMenu, strtext("Tables"));
+    SUBMENU(tablesSubmenu, rootMenu, strtext("Tables"));
 
     {
       NAME(strtext("Text Table"));
@@ -1684,10 +1684,10 @@ makePreferencesMenu (void) {
 #undef CHANGED
 #undef SUBMENU
 
-  return mainMenu;
+  return rootMenu;
 
 noItem:
-  deallocateMenu(mainMenu);
+  deallocateMenu(rootMenu);
 noMenu:
   return NULL;
 }
