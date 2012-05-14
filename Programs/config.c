@@ -686,10 +686,10 @@ applyBraillePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
 applySpeechPreferences (void) {
-  if (speech->rate) setSpeechRate(&spk, prefs.speechRate, 0);
-  if (speech->volume) setSpeechVolume(&spk, prefs.speechVolume, 0);
-  if (speech->pitch) setSpeechPitch(&spk, prefs.speechPitch, 0);
-  if (speech->punctuation) setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
+  setSpeechVolume(&spk, prefs.speechVolume, 0);
+  setSpeechRate(&spk, prefs.speechRate, 0);
+  setSpeechPitch(&spk, prefs.speechPitch, 0);
+  setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
