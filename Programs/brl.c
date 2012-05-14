@@ -592,6 +592,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
   hasTimedOut(0);
   do {
     int command = readBrailleCommand(brl, KTB_CTX_DEFAULT);
+
     if (command != EOF) {
       logMessage(LOG_DEBUG, "Learn: command=%06X", command);
       if (BRL_DELAYED_COMMAND(command)) continue;
@@ -607,7 +608,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         describeCommand(command, buffer, sizeof(buffer),
                         CDO_IncludeName | CDO_IncludeOperand);
         logMessage(LOG_DEBUG, "Learn: %s", buffer);
-        if (!message(mode, buffer, MSG_NODELAY|MSG_SILENT)) return 0;
+        if (!message(mode, buffer, MSG_NODELAY)) return 0;
       }
 
       hasTimedOut(0);
