@@ -585,11 +585,12 @@ probeBrailleDisplay (
 int
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
   const char *mode = "lrn";
+  TimeValue start;
 
   if (!setStatusText(brl, mode)) return 0;
   if (!message(mode, gettext("Command Learn Mode"), MSG_NODELAY)) return 0;
 
-  hasTimedOut(0);
+  getCurrentTime(&start);
   do {
     int command = readBrailleCommand(brl, KTB_CTX_DEFAULT);
 
@@ -611,11 +612,11 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         if (!message(mode, buffer, MSG_NODELAY)) return 0;
       }
 
-      hasTimedOut(0);
+      getCurrentTime(&start);
     }
 
     drainBrailleOutput(brl, poll);
-  } while (!hasTimedOut(timeout));
+  } while (millisecondsSince(&start) < timeout);
 
   return message(mode, gettext("done"), 0);
 }
