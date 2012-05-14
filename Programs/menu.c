@@ -189,13 +189,23 @@ getMenuIndex (const Menu *menu) {
 }
 
 static int
-testMenuItem (Menu *menu, unsigned int index) {
+testMenuItem (Menu *menu, unsigned int index, int all) {
   MenuItem *item = getMenuItem(menu, index);
 
   if (!item) return 0;
-  if (prefs.showAllItems) return 1;
+  if (all) return 1;
   if (!item->test) return 1;
   return item->test();
+}
+
+static inline int
+testMenuItemActive (Menu *menu, unsigned int index) {
+  return testMenuItem(menu, index, 0);
+}
+
+static inline int
+testMenuItemVisible (Menu *menu, unsigned int index) {
+  return testMenuItem(menu, index, prefs.showAllItems);
 }
 
 const MenuString *
@@ -569,7 +579,7 @@ beginItem_submenu (MenuItem *item) {
     unsigned int index;
 
     for (index=1; index<size; index+=1)
-      if (testMenuItem(menu, index))
+      if (testMenuItemActive(menu, index))
         item->data.submenu->count += 1;
   }
 
@@ -667,7 +677,7 @@ setMenuPreviousItem (Menu *menu) {
   do {
     if (!menu->items.index) menu->items.index = menu->items.count;
     if (!menu->items.index) return 0;
-  } while (!testMenuItem(menu, --menu->items.index));
+  } while (!testMenuItemVisible(menu, --menu->items.index));
 
   return 1;
 }
@@ -678,7 +688,7 @@ setMenuNextItem (Menu *menu) {
 
   do {
     if (++menu->items.index == menu->items.count) menu->items.index = 0;
-  } while (!testMenuItem(menu, menu->items.index));
+  } while (!testMenuItemVisible(menu, menu->items.index));
 
   return 1;
 }
@@ -687,14 +697,14 @@ int
 setMenuFirstItem (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = 0;
-  return testMenuItem(menu, menu->items.index) || setMenuNextItem(menu);
+  return testMenuItemVisible(menu, menu->items.index) || setMenuNextItem(menu);
 }
 
 int
 setMenuLastItem (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = menu->items.count - 1;
-  return testMenuItem(menu, menu->items.index) || setMenuPreviousItem(menu);
+  return testMenuItemVisible(menu, menu->items.index) || setMenuPreviousItem(menu);
 }
 
 static int
