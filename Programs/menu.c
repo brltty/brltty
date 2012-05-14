@@ -69,7 +69,8 @@ typedef struct {
   Menu *menu;
   unsigned opened:1;
 
-  unsigned int count;
+  unsigned int total;
+  unsigned int visible;
 } SubmenuData;
 
 struct MenuStruct {
@@ -176,6 +177,11 @@ deallocateMenu (Menu *menu) {
 MenuItem *
 getMenuItem (Menu *menu, unsigned int index) {
   return (index < menu->items.count)? &menu->items.array[index]: NULL;
+}
+
+static MenuItem *
+getSelectedMenuItem (Menu *menu) {
+  return getMenuItem(menu, menu->items.index);
 }
 
 unsigned int
@@ -571,7 +577,7 @@ newFilesMenuItem (
 
 static int
 beginItem_submenu (MenuItem *item) {
-  item->data.submenu->count = 0;
+  item->data.submenu->visible = 0;
 
   {
     Menu *menu = item->data.submenu->menu;
@@ -580,7 +586,9 @@ beginItem_submenu (MenuItem *item) {
 
     for (index=1; index<size; index+=1)
       if (testMenuItemActive(menu, index))
-        item->data.submenu->count += 1;
+        item->data.submenu->visible += 1;
+
+    item->data.submenu->total = size - 1;
   }
 
   return 1;
@@ -610,9 +618,14 @@ getValue_submenu (const MenuItem *item) {
 static const char *
 getComment_submenu (const MenuItem *item) {
   if (!prefs.showSubmenuSizes) return "";
-  return formatValue(item->menu, "%u/%u",
-                     item->data.submenu->count,
-                     getMenuSize(item->data.submenu->menu)-1);
+
+  {
+    const SubmenuData *submenu = item->data.submenu;
+
+    return prefs.showAllItems?
+             formatValue(item->menu, "%u", submenu->total):
+             formatValue(item->menu, "%u/%u", submenu->visible, submenu->total);
+  }
 }
 
 static const MenuItemMethods menuItemMethods_submenu = {
@@ -625,8 +638,7 @@ static const MenuItemMethods menuItemMethods_submenu = {
 
 static void
 activateItem_close (MenuItem *item) {
-  Menu *menu = item->menu->parent;
-  item = getMenuItem(menu, getMenuIndex(menu));
+  item = getSelectedMenuItem(item->menu->parent);
   item->data.submenu->opened = 0;
   beginMenuItem(item);
 }
@@ -776,7 +788,7 @@ changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
 
 MenuItem *
 getCurrentMenuItem (Menu *menu) {
-  MenuItem *newItem = getMenuItem(menu, menu->items.index);
+  MenuItem *newItem = getSelectedMenuItem(menu);
   MenuItem *oldItem = menu->activeItem;
 
   if (newItem != oldItem) {
