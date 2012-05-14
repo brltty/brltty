@@ -3008,21 +3008,31 @@ brlttyUpdate (void) {
                   count = newX - oldX;
 
                   if (prefs.autospeakCompletedWords) {
-                    int found = 0;
+                    int last = column + count - 1;
 
-                    if (iswspace(characters[column+count-1].text)) {
-                      while (column > 0) {
-                        if (iswspace(characters[--column].text)) {
-                          column += 1;
+                    if (iswspace(characters[last].text)) {
+                      int first = column;
+
+                      while (first > 0) {
+                        if (iswspace(characters[--first].text)) {
+                          first += 1;
                           break;
                         }
+                      }
 
-                        count += 1;
-                        found = 1;
+                      if (first < column) {
+                        while (last >= first) {
+                          if (!iswspace(characters[last].text)) break;
+                          last -= 1;
+                        }
+
+                        if (last > first) {
+                          column = first;
+                          count = last - first + 1;
+                          goto speak;
+                        }
                       }
                     }
-
-                    if (found) goto speak;
                   }
 
                   if (!prefs.autospeakInsertedCharacters) count = 0;
@@ -3060,17 +3070,20 @@ brlttyUpdate (void) {
                   }
 
                   if ((length + 1) == column) {
-                    column = length - 1;
+                    int first = length - 1;
 
-                    while (column > 0) {
-                      if (iswspace(characters[--column].text)) {
-                        column += 1;
+                    while (first > 0) {
+                      if (iswspace(characters[--first].text)) {
+                        first += 1;
                         break;
                       }
                     }
 
-                    count = length - column;
-                    goto speak;
+                    if ((length -= first) > 1) {
+                      column = first;
+                      count = length;
+                      goto speak;
+                    }
                   }
                 }
               }
