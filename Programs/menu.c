@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -67,6 +68,8 @@ typedef struct {
 typedef struct {
   Menu *menu;
   unsigned opened:1;
+
+  unsigned int count;
 } SubmenuData;
 
 struct MenuStruct {
@@ -117,8 +120,15 @@ getLocalText (const char *string) {
 }
 
 static const char *
-formatNumericValue (Menu *menu, unsigned int value) {
-  snprintf(menu->valueBuffer, sizeof(menu->valueBuffer), "%u", value);
+formatValue (Menu *menu, const char *format, ...) {
+  {
+    va_list arguments;
+
+    va_start(arguments, format);
+    vsnprintf(menu->valueBuffer, sizeof(menu->valueBuffer), format, arguments);
+    va_end(arguments);
+  }
+
   return menu->valueBuffer;
 }
 
@@ -251,7 +261,7 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 
 static const char *
 getValue_numeric (const MenuItem *item) {
-  return formatNumericValue(item->menu, *item->setting);;
+  return formatValue(item->menu, "%u", *item->setting);;
 }
 
 static const MenuItemMethods menuItemMethods_numeric = {
@@ -549,6 +559,23 @@ newFilesMenuItem (
   return NULL;
 }
 
+static int
+beginItem_submenu (MenuItem *item) {
+  item->data.submenu->count = 0;
+
+  {
+    Menu *menu = item->data.submenu->menu;
+    unsigned int size = getMenuSize(menu);
+    unsigned int index;
+
+    for (index=1; index<size; index+=1)
+      if (testMenuItem(menu, index))
+        item->data.submenu->count += 1;
+  }
+
+  return 1;
+}
+
 static void
 endItem_submenu (MenuItem *item, int deallocating) {
   if (deallocating) {
@@ -572,10 +599,13 @@ getValue_submenu (const MenuItem *item) {
 static const char *
 getComment_submenu (const MenuItem *item) {
   if (!prefs.showSubmenuSizes) return "";
-  return formatNumericValue(item->menu, getMenuSize(item->data.submenu->menu)-1);
+  return formatValue(item->menu, "%u/%u",
+                     item->data.submenu->count,
+                     getMenuSize(item->data.submenu->menu)-1);
 }
 
 static const MenuItemMethods menuItemMethods_submenu = {
+  .beginItem = beginItem_submenu,
   .endItem = endItem_submenu,
   .activateItem = activateItem_submenu,
   .getValue = getValue_submenu,
