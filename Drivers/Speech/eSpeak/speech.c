@@ -147,7 +147,7 @@ spk_isSpeaking(SpeechSynthesizer *spk)
 }
 
 static void
-spk_rate(SpeechSynthesizer *spk, unsigned char setting)
+spk_setRate(SpeechSynthesizer *spk, unsigned char setting)
 {
 	int h_range = (espeakRATE_MAXIMUM - espeakRATE_MINIMUM)/2;
 	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
@@ -155,21 +155,21 @@ spk_rate(SpeechSynthesizer *spk, unsigned char setting)
 }
 
 static void
-spk_volume(SpeechSynthesizer *spk, unsigned char setting)
+spk_setVolume(SpeechSynthesizer *spk, unsigned char setting)
 {
 	int volume = getIntegerSpeechVolume(setting, 50);
 	espeak_SetParameter(espeakVOLUME, volume, 0);
 }
 
 static void
-spk_pitch(SpeechSynthesizer *spk, unsigned char setting)
+spk_setPitch(SpeechSynthesizer *spk, unsigned char setting)
 {
 	int pitch = getIntegerSpeechPitch(setting, 50);
 	espeak_SetParameter(espeakPITCH, pitch, 0);
 }
 
 static void
-spk_punctuation(SpeechSynthesizer *spk, SpeechPunctuation setting)
+spk_setPunctuation(SpeechSynthesizer *spk, SpeechPunctuation setting)
 {
 	espeak_PUNCT_TYPE punct;
 	if (setting <= SPK_PUNCTUATION_NONE)

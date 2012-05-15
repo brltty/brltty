@@ -888,20 +888,14 @@ portraitFlag (int number, int on) {
 
 int
 setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  if (brl->setFirmness) {
-    logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
-    if (brl->setFirmness(brl, setting)) return 1;
-  }
-
-  return 0;
+  if (!brl->setFirmness) return 0;
+  logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
+  return brl->setFirmness(brl, setting);
 }
 
 int
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  if (brl->setSensitivity) {
-    logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
-    if (brl->setSensitivity(brl, setting)) return 1;
-  }
-
-  return 0;
+  if (!brl->setSensitivity) return 0;
+  logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
+  return brl->setSensitivity(brl, setting);
 }

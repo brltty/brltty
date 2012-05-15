@@ -178,11 +178,11 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   setRate((int)(getFloatSpeechRate(setting) * 170.0));
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   setVolume(getIntegerSpeechVolume(setting, 100));
 }

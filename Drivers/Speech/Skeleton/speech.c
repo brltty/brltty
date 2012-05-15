@@ -62,24 +62,24 @@ spk_isSpeaking (SpeechSynthesizer *spk) {
 
 #ifdef SPK_HAVE_RATE
 static void
-spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
 static void
-spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_VOLUME */
 
 #ifdef SPK_HAVE_PITCH
 static void
-spk_pitch (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_PITCH */
 
 #ifdef SPK_HAVE_PUNCTUATION
 static void
-spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
 }
 #endif /* SPK_HAVE_PUNCTUATION */

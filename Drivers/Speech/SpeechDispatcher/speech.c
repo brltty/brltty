@@ -249,28 +249,28 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   relativeRate = getIntegerSpeechRate(setting, 100) - 100;
   speechdAction(setRate, NULL);
   logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
   speechdAction(setVolume, NULL);
   logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
 }
 
 static void
-spk_pitch (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
   relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
   speechdAction(setPitch, NULL);
   logMessage(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
 }
 
 static void
-spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
   punctuationVerbosity = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
                          (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
                          SPD_PUNCT_SOME;

@@ -149,13 +149,13 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
   return rescaleInteger(setting, internal, external);
 }
 
-void
+int
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
-  if (speech->volume) {
-    logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
-    speech->volume(spk, setting);
-    if (say) sayIntegerSetting(spk, gettext("volume"), setting);
-  }
+  if (!speech->setVolume) return 0;
+  logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
+  speech->setVolume(spk, setting);
+  if (say) sayIntegerSetting(spk, gettext("volume"), setting);
+  return 1;
 }
 
 unsigned int
@@ -170,13 +170,13 @@ getFloatSpeechVolume (unsigned char setting) {
 }
 #endif /* NO_FLOAT */
 
-void
+int
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
-  if (speech->rate) {
-    logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
-    speech->rate(spk, setting);
-    if (say) sayIntegerSetting(spk, gettext("rate"), setting);
-  }
+  if (!speech->setRate) return 0;
+  logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
+  speech->setRate(spk, setting);
+  if (say) sayIntegerSetting(spk, gettext("rate"), setting);
+  return 1;
 }
 
 unsigned int
@@ -215,13 +215,13 @@ getFloatSpeechRate (unsigned char setting) {
 }
 #endif /* NO_FLOAT */
 
-void
+int
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
-  if (speech->pitch) {
-    logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
-    speech->pitch(spk, setting);
-    if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
-  }
+  if (!speech->setPitch) return 0;
+  logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
+  speech->setPitch(spk, setting);
+  if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
+  return 1;
 }
 
 unsigned int
@@ -236,12 +236,12 @@ getFloatSpeechPitch (unsigned char setting) {
 }
 #endif /* NO_FLOAT */
 
-void
+int
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
-  if (speech->punctuation) {
-    logMessage(LOG_DEBUG, "setting speech punctuation: %d", setting);
-    speech->punctuation(spk, setting);
-  }
+  if (!speech->setPunctuation) return 0;
+  logMessage(LOG_DEBUG, "setting speech punctuation: %d", setting);
+  speech->setPunctuation(spk, setting);
+  return 1;
 }
 
 static char *speechInputPath = NULL;

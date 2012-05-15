@@ -592,12 +592,12 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
           break;
 
         case ucRaisePitch:
-          if (speech->pitch) {
+          if (speech->setPitch) {
             unsigned char pitch = prefs.speechPitch + 7;
             if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
             if (pitch != prefs.speechPitch) {
-              speech->pitch(&spk, pitch);
+              speech->setPitch(&spk, pitch);
               restorePitch = 1;
             }
           }
@@ -605,11 +605,11 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       }
     }
 
-    if (speech->punctuation) {
+    if (speech->setPunctuation) {
       unsigned char punctuation = SPK_PUNCTUATION_ALL;
 
       if (punctuation != prefs.speechPunctuation) {
-        speech->punctuation(&spk, punctuation);
+        speech->setPunctuation(&spk, punctuation);
         restorePunctuation = 1;
       }
     }
@@ -624,8 +624,8 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       sayWideCharacters(&character, NULL, 1, immediate);
     }
 
-    if (restorePunctuation) speech->punctuation(&spk, prefs.speechPunctuation);
-    if (restorePitch) speech->pitch(&spk, prefs.speechPitch);
+    if (restorePunctuation) speech->setPunctuation(&spk, prefs.speechPunctuation);
+    if (restorePitch) speech->setPitch(&spk, prefs.speechPitch);
   } else if (spell) {
     wchar_t string[count * 2];
     size_t length = 0;
@@ -2145,14 +2145,14 @@ doCommand:
         break;
 
       case BRL_CMD_SAY_SLOWER:
-        if (speech->rate && (prefs.speechRate > 0)) {
+        if (speech->setRate && (prefs.speechRate > 0)) {
           setSpeechRate(&spk, --prefs.speechRate, 1);
         } else {
           playTune(&tune_command_rejected);
         }
         break;
       case BRL_CMD_SAY_FASTER:
-        if (speech->rate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
+        if (speech->setRate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
           setSpeechRate(&spk, ++prefs.speechRate, 1);
         } else {
           playTune(&tune_command_rejected);
@@ -2160,14 +2160,14 @@ doCommand:
         break;
 
       case BRL_CMD_SAY_SOFTER:
-        if (speech->volume && (prefs.speechVolume > 0)) {
+        if (speech->setVolume && (prefs.speechVolume > 0)) {
           setSpeechVolume(&spk, --prefs.speechVolume, 1);
         } else {
           playTune(&tune_command_rejected);
         }
         break;
       case BRL_CMD_SAY_LOUDER:
-        if (speech->volume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
+        if (speech->setVolume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
           setSpeechVolume(&spk, ++prefs.speechVolume, 1);
         } else {
           playTune(&tune_command_rejected);

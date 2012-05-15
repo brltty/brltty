@@ -487,7 +487,7 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
            getIntegerSpeechRate(setting, 10)-10);
@@ -495,7 +495,7 @@ spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
   unsigned int percentage = getIntegerSpeechVolume(setting, 100);
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",

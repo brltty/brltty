@@ -187,8 +187,8 @@ main (int argc, char *argv[]) {
     initializeSpeechSynthesizer(&spk);
     identifySpeechDriver(speech, 0);		/* start-up messages */
     if (speech->construct(&spk, parameterSettings)) {
-      if (speech->rate) speech->rate(&spk, speechRate);
-      if (speech->volume) speech->volume(&spk, speechVolume);
+      if (speech->setVolume) speech->setVolume(&spk, speechVolume);
+      if (speech->setRate) speech->setRate(&spk, speechRate);
 
       if (opt_textString && *opt_textString) {
         sayString(&spk, opt_textString, 0);

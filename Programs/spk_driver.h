@@ -47,28 +47,28 @@ static int spk_getTrack (SpeechSynthesizer *spk) { return 0; }
 static int spk_isSpeaking (SpeechSynthesizer *spk) { return 0; }
 #endif /* SPK_HAVE_TRACK */
 
-#ifdef SPK_HAVE_RATE
-static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);
-#else /* SPK_HAVE_RATE */
-#define spk_rate NULL
-#endif /* SPK_HAVE_RATE */
-
 #ifdef SPK_HAVE_VOLUME
-static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);
+static void spk_setVolume (SpeechSynthesizer *spk, unsigned char setting);
 #else /* SPK_HAVE_VOLUME */
-#define spk_volume NULL
+#define spk_setVolume NULL
 #endif /* SPK_HAVE_VOLUME */
 
+#ifdef SPK_HAVE_RATE
+static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting);
+#else /* SPK_HAVE_RATE */
+#define spk_setRate NULL
+#endif /* SPK_HAVE_RATE */
+
 #ifdef SPK_HAVE_PITCH
-static void spk_pitch (SpeechSynthesizer *spk, unsigned char setting);
+static void spk_setPitch (SpeechSynthesizer *spk, unsigned char setting);
 #else /* SPK_HAVE_PITCH */
-#define spk_pitch NULL
+#define spk_setPitch NULL
 #endif /* SPK_HAVE_PITCH */
 
 #ifdef SPK_HAVE_PUNCTUATION
-static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
+static void spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
 #else /* SPK_HAVE_PUNCTUATION */
-#define spk_punctuation NULL
+#define spk_setPunctuation NULL
 #endif /* SPK_HAVE_PUNCTUATION */
 
 #ifndef SPKSYMBOL
@@ -95,10 +95,10 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   spk_getTrack,
   spk_isSpeaking,
 
-  spk_rate,
-  spk_volume,
-  spk_pitch,
-  spk_punctuation
+  spk_setVolume,
+  spk_setRate,
+  spk_setPitch,
+  spk_setPunctuation
 };
 
 DRIVER_VERSION_DECLARATION(spk);

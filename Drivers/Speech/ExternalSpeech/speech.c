@@ -340,7 +340,7 @@ static void spk_mute (SpeechSynthesizer *spk)
   mywrite(spk, helper_fd_out, &c,1);
 }
 
-static void spk_rate (SpeechSynthesizer *spk, unsigned char setting)
+static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
 {
   float expand = 1.0 / getFloatSpeechRate(setting); 
   unsigned char *p = (unsigned char *)&expand;

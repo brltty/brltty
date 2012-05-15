@@ -222,11 +222,11 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   theta_set_rate_stretch(voice, 1.0/getFloatSpeechRate(setting), NULL);
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   theta_set_rescale(voice, getFloatSpeechVolume(setting), NULL);
 }

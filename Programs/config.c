@@ -914,46 +914,42 @@ testAutospeak (void) {
 
 static int
 testSpeechVolume (void) {
-  return speech->volume != NULL;
+  return speech->setVolume != NULL;
 }
 
 static int
 changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
-  setSpeechVolume(&spk, setting, !prefs.autospeak);
-  return 1;
+  return setSpeechVolume(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechRate (void) {
-  return speech->rate != NULL;
+  return speech->setRate != NULL;
 }
 
 static int
 changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
-  setSpeechRate(&spk, setting, !prefs.autospeak);
-  return 1;
+  return setSpeechRate(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechPitch (void) {
-  return speech->pitch != NULL;
+  return speech->setPitch != NULL;
 }
 
 static int
 changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
-  setSpeechPitch(&spk, setting, !prefs.autospeak);
-  return 1;
+  return setSpeechPitch(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechPunctuation (void) {
-  return speech->punctuation != NULL;
+  return speech->setPunctuation != NULL;
 }
 
 static int
 changedSpeechPunctuation (const MenuItem *item UNUSED, unsigned char setting) {
-  setSpeechPunctuation(&spk, setting, !prefs.autospeak);
-  return 1;
+  return setSpeechPunctuation(&spk, setting, !prefs.autospeak);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
