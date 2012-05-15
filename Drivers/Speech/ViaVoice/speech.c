@@ -704,11 +704,11 @@ setExternalUnits (void) {
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-   if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+   if (setInternalUnits()) setVoiceParameter(eci, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-   if (setInternalUnits()) setVoiceParameter(eci, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+   if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
 }

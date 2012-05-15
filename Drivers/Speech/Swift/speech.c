@@ -70,13 +70,13 @@ setIntegerParameter (const char *name, int value) {
 }
 
 static int
-setRate (int wordsPerMinute) {
-  return setIntegerParameter("speech/rate", wordsPerMinute);
+setVolume (int percentage) {
+  return setIntegerParameter("audio/volume", percentage);
 }
 
 static int
-setVolume (int percentage) {
-  return setIntegerParameter("audio/volume", percentage);
+setRate (int wordsPerMinute) {
+  return setIntegerParameter("speech/rate", wordsPerMinute);
 }
 
 static int
@@ -178,11 +178,11 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  setRate((int)(getFloatSpeechRate(setting) * 170.0));
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+  setVolume(getIntegerSpeechVolume(setting, 100));
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  setVolume(getIntegerSpeechVolume(setting, 100));
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  setRate((int)(getFloatSpeechRate(setting) * 170.0));
 }

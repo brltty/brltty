@@ -60,17 +60,17 @@ spk_isSpeaking (SpeechSynthesizer *spk) {
 }
 #endif /* SPK_HAVE_TRACK */
 
-#ifdef SPK_HAVE_RATE
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-}
-#endif /* SPK_HAVE_RATE */
-
 #ifdef SPK_HAVE_VOLUME
 static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_VOLUME */
+
+#ifdef SPK_HAVE_RATE
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+}
+#endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_PITCH
 static void

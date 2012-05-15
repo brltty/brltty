@@ -94,13 +94,13 @@ setVoice (const void *data) {
 }
 
 static void
-setRate (const void *data) {
-  spd_set_voice_rate(connectionHandle, relativeRate);
+setVolume (const void *data) {
+  spd_set_volume(connectionHandle, relativeVolume);
 }
 
 static void
-setVolume (const void *data) {
-  spd_set_volume(connectionHandle, relativeVolume);
+setRate (const void *data) {
+  spd_set_voice_rate(connectionHandle, relativeRate);
 }
 
 static void
@@ -131,8 +131,8 @@ openConnection (void) {
         setModule,
         setLanguage,
         setVoice,
-        setRate,
         setVolume,
+        setRate,
         setPitch,
         setPunctuation,
         NULL
@@ -249,17 +249,17 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  relativeRate = getIntegerSpeechRate(setting, 100) - 100;
-  speechdAction(setRate, NULL);
-  logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
-}
-
-static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
   speechdAction(setVolume, NULL);
   logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
+}
+
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  relativeRate = getIntegerSpeechRate(setting, 100) - 100;
+  speechdAction(setRate, NULL);
+  logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
 }
 
 static void

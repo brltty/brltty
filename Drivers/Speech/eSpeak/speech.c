@@ -147,18 +147,18 @@ spk_isSpeaking(SpeechSynthesizer *spk)
 }
 
 static void
+spk_setVolume(SpeechSynthesizer *spk, unsigned char setting)
+{
+	int volume = getIntegerSpeechVolume(setting, 50);
+	espeak_SetParameter(espeakVOLUME, volume, 0);
+}
+
+static void
 spk_setRate(SpeechSynthesizer *spk, unsigned char setting)
 {
 	int h_range = (espeakRATE_MAXIMUM - espeakRATE_MINIMUM)/2;
 	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
 	espeak_SetParameter(espeakRATE, rate, 0);
-}
-
-static void
-spk_setVolume(SpeechSynthesizer *spk, unsigned char setting)
-{
-	int volume = getIntegerSpeechVolume(setting, 50);
-	espeak_SetParameter(espeakVOLUME, volume, 0);
 }
 
 static void
