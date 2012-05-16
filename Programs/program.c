@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -297,6 +298,34 @@ createPidFile (const char *path, ProcessIdentifier pid) {
 #endif /* create pid file */
 
   return 0;
+}
+
+int
+cancelProgram (const char *pidFile) {
+  int cancelled = 0;
+  FILE *file;
+
+  if ((file = fopen(pidFile, "r"))) {
+    char buffer[0X100];
+    const char *line;
+
+    if ((line = fgets(buffer, sizeof(buffer), file))) {
+      char *end;
+      long int pid = strtol(line, &end, 10);
+
+      if (!*end || isspace(*end)) {
+        if (cancelProcess(pid)) cancelled = 1;
+      }
+    }
+
+    fclose(file);
+  } else {
+    logMessage(LOG_ERR, "%s: %s: %s",
+               gettext("pid file open error"),
+               pidFile, strerror(errno));
+  }
+
+  return cancelled;
 }
 
 typedef struct ProgramExitEntryStruct ProgramExitEntry;

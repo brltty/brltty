@@ -53,6 +53,7 @@ extern void fixInstallPaths (char **const *paths);
 extern void fixInstallPath (char **path);
 
 extern int createPidFile (const char *path, ProcessIdentifier pid);
+extern int cancelProgram (const char *pidFile);
 
 #ifdef __cplusplus
 }

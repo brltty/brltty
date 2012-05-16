@@ -42,6 +42,7 @@ typedef pid_t ProcessIdentifier;
 
 extern ProcessIdentifier getProcessIdentifier (void);
 extern int testProcessIdentifier (ProcessIdentifier pid);
+extern int cancelProcess (ProcessIdentifier pid);
 
 #ifdef __cplusplus
 }

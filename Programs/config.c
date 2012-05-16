@@ -96,6 +96,12 @@ static int opt_environmentVariables;
 static char *opt_updateInterval;
 static char *opt_messageDelay;
 
+static int opt_cancelExecution;
+static const char *const optionStrings_CancelExecution[] = {
+  PACKAGE_NAME,
+  NULL
+};
+
 static char *opt_configurationFile;
 static char *opt_preferencesFile;
 static char *opt_pidFile;
@@ -205,6 +211,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings = optionStrings_RemoveService
   },
 #endif /* __MINGW32__ */
+
+  { .letter = 'C',
+    .word = "cancel-execution",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_cancelExecution,
+    .description = strtext("Stop an existing instance of %s, and then exit."),
+    .strings = optionStrings_CancelExecution
+  },
 
   { .letter = 'P',
     .word = "pid-file",
@@ -2593,6 +2607,21 @@ brlttyStart (int argc, char *argv[]) {
 
   if (argc) {
     logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
+  }
+
+  if (opt_cancelExecution) {
+    ProgramExitStatus exitStatus;
+
+    if (!*opt_pidFile) {
+      exitStatus = PROG_EXIT_SEMANTIC;
+      logMessage(LOG_ERR, "%s", gettext("pid file not specified"));
+    } else if (cancelProgram(opt_pidFile)) {
+      exitStatus = PROG_EXIT_FORCE;
+    } else {
+      exitStatus = PROG_EXIT_FATAL;
+    }
+
+    return exitStatus;
   }
 
   if (!validateInterval(&updateInterval, opt_updateInterval)) {

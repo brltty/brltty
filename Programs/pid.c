@@ -61,4 +61,10 @@ testProcessIdentifier (ProcessIdentifier pid) {
   return kill(pid, 0) != -1;
 }
 
+int
+cancelProcess (ProcessIdentifier pid) {
+  if (kill(pid, SIGTERM) != -1) return 1;
+  return 0;
+}
+
 #endif /* pid support */
