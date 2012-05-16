@@ -161,24 +161,19 @@ identifyDriver (
 ) {
   {
     char buffer[0X100];
-    int length;
-    snprintf(buffer, sizeof(buffer), "%s %s Driver:%n", 
-             definition->name, type, &length);
+
+    STR_BEGIN(buffer, sizeof(buffer));
+    STR_PRINTF("%s %s Driver:", definition->name, type);
 
     if (definition->version && *definition->version) {
-      int count;
-      snprintf(&buffer[length], sizeof(buffer)-length, " version %s%n",
-               definition->version, &count);
-      length += count;
+      STR_PRINTF(" version %s", definition->version);
     }
 
     if (full) {
-      int count;
-      snprintf(&buffer[length], sizeof(buffer)-length, " [compiled on %s at %s]%n",
-               definition->date, definition->time, &count);
-      length += count;
+      STR_PRINTF(" [compiled on %s at %s]", definition->date, definition->time);
     }
 
+    STR_END;
     logMessage(LOG_NOTICE, "%s", buffer);
   }
 

@@ -66,7 +66,7 @@ typedef int LineHandler (char *line, void *data);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
 extern int readLine (FILE *file, char **buffer, size_t *size);
 
-void formatInputError (char *buffer, int size, const char *file, const int *line, const char *format, va_list argp);
+extern size_t formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp);
 
 #ifdef __cplusplus
 }

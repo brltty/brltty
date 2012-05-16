@@ -739,27 +739,16 @@ processLines (FILE *file, LineHandler handleLine, void *data) {
   return !ferror(file);
 }
 
-void
-formatInputError (char *buffer, int size, const char *file, const int *line, const char *format, va_list argp) {
-  int length = 0;
+size_t
+formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp) {
+  size_t length;
 
-  if (file) {
-    int count;
-    snprintf(&buffer[length], size-length, "%s%n", file, &count);
-    length += count;
-  }
-
-  if (line) {
-    int count;
-    snprintf(&buffer[length], size-length, "[%d]%n", *line, &count);
-    length += count;
-  }
-
-  if (length) {
-    int count;
-    snprintf(&buffer[length], size-length, ": %n", &count);
-    length += count;
-  }
-
-  vsnprintf(&buffer[length], size-length, format, argp);
+  STR_BEGIN(buffer, size);
+  if (file) STR_PRINTF("%s", file);
+  if (line) STR_PRINTF("[%d]", *line);
+  if (STR_LENGTH) STR_PRINTF(": ");
+  STR_VPRINTF(format, argp);
+  length = STR_LENGTH;
+  STR_END
+  return length;
 }
