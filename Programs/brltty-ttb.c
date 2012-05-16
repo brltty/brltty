@@ -818,9 +818,9 @@ getCharacter (EditTableData *etd, wchar_t *character) {
 static wchar_t *
 makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length, int *defined, unsigned char *braille) {
   char buffer[0X100];
-  int characterIndex;
-  int brailleIndex;
-  int descriptionLength;
+  size_t characterIndex;
+  size_t brailleIndex;
+  size_t descriptionLength;
 
   unsigned char dots = 0;
   int gotDots = getDots(ttd, character, &dots);
@@ -848,13 +848,17 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   {
     uint32_t value = character;
 
-    snprintf(buffer, sizeof(buffer),
-             "%04" PRIX32 " %c%nx %nx %c%c%c%c%c%c%c%c%c%c%n",
-             value, printablePrefix, &characterIndex, &brailleIndex,
+    STR_BEGIN(buffer, sizeof(buffer));
+    STR_PRINTF("%04" PRIX32 " %c", value, printablePrefix);
+    characterIndex = STR_LENGTH;
+    STR_PRINTF("x ");
+    brailleIndex = STR_LENGTH;
+    STR_PRINTF("x %c%c%c%c%c%c%c%c%c%c",
              (gotDots? '[': ' '),
              DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
-             (gotDots? ']': ' '),
-             &descriptionLength);
+             (gotDots? ']': ' '));
+    descriptionLength = STR_LENGTH;
+    STR_END
   }
 #undef DOT
 
@@ -875,7 +879,8 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   {
     wchar_t *description = calloc(descriptionLength+1, sizeof(*description));
     if (description) {
-      int i;
+      unsigned int i;
+
       for (i=0; i<descriptionLength; i+=1) {
         wint_t wc = convertCharToWchar(buffer[i]);
         if (wc == WEOF) wc = WC_C(' ');

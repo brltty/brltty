@@ -383,20 +383,17 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (table->logKeyEvents) {
     char buffer[0X40];
-    size_t size = sizeof(buffer);
-    int offset = 0;
-    int length;
 
-    snprintf(&buffer[offset], size, "Key %s: Ctx:%u Set:%u Key:%u%n",
-             press? "Press": "Release",
-             context, set, key, &length);
-    offset += length, size -= length;
+    STR_BEGIN(buffer, sizeof(buffer));
+    STR_PRINTF("Key %s: Ctx:%u Set:%u Key:%u",
+               press? "Press": "Release",
+               context, set, key);
 
     if (command != EOF) {
-      snprintf(&buffer[offset], size, " Cmd:%06X%n", command, &length);
-      offset += length, size -= length;
+      STR_PRINTF(" Cmd:%06X", command);
     }
 
+    STR_END
     logMessage(LOG_DEBUG, "%s", buffer);
   }
 
