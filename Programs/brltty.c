@@ -317,7 +317,8 @@ showInfo (void) {
    */
   if (size < 21) {
     wchar_t characters[size];
-    int length;
+    size_t length;
+
     const int cellCount = 5;
     unsigned char cells[cellCount];
     char prefix[cellCount];
@@ -332,22 +333,22 @@ showInfo (void) {
     }
 
     memset(prefix, 'x', cellCount);
-    snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
-             cellCount, prefix,
-             scr.number,
-             ses->trackCursor? 't': ' ',
-             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                               (prefs.blinkingCursor? 'b': ' '),
-             ses->displayMode? 'a': 't',
-             isFrozenScreen()? 'f': ' ',
-             prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ',
-             &length);
+    length = snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c",
+                      cellCount, prefix,
+                      scr.number,
+                      ses->trackCursor? 't': ' ',
+                      prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                                        (prefs.blinkingCursor? 'b': ' '),
+                      ses->displayMode? 'a': 't',
+                      isFrozenScreen()? 'f': ' ',
+                      prefs.textStyle? '6': '8',
+                      prefs.blinkingCapitals? 'B': ' ');
     if (length > size) length = size;
 
     {
-      int i;
-      for (i=0; i<length; ++i) {
+      unsigned int i;
+
+      for (i=0; i<length; i+=1) {
         if (i < cellCount) {
           characters[i] = UNICODE_BRAILLE_ROW | cells[i];
         } else {
