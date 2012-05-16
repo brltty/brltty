@@ -223,7 +223,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
 
       if (locked || (errno == ENOSYS)) {
         char buffer[0X20];
-        int length;
+        ssize_t length;
 
         if ((length = read(file, buffer, sizeof(buffer))) != -1) {
           ProcessIdentifier oldPid;
@@ -253,7 +253,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
 
           if (lseek(file, 0, SEEK_SET) != -1) {
             if (ftruncate(file, 0) != -1) {
-              snprintf(buffer, sizeof(buffer), "%" PRIpid "\n%n", pid, &length);
+              length = snprintf(buffer, sizeof(buffer), "%" PRIpid "\n", pid);
 
               if (write(file, buffer, length) != -1) {
                 state = PFS_ready;
