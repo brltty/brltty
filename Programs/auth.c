@@ -638,7 +638,7 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
 }
 
 void
-formatAddress (char *buffer, int bufferSize, const void *address, int addressSize) {
+formatAddress (char *buffer, size_t bufferSize, const void *address, int addressSize) {
 #ifdef AF_INET
   const struct sockaddr *sa = address;
   switch (sa->sa_family) {
@@ -692,19 +692,17 @@ formatAddress (char *buffer, int bufferSize, const void *address, int addressSiz
 #endif /* GETNAMEINFO */
 
       {
-        int length;
-        snprintf(buffer, bufferSize, "address family %d:%n", sa->sa_family, &length);
+        STR_BEGIN(buffer, bufferSize);
+        STR_PRINTF("address family %d:", sa->sa_family);
 
         {
           const unsigned char *byte = address;
           const unsigned char *end = byte + addressSize;
-          while (byte < end) {
-            int count;
-            snprintf(&buffer[length], bufferSize-length,
-                     " %02X%n", *byte++, &count);
-            length += count;
-          }
+
+          while (byte < end) STR_PRINTF(" %02X", *byte++);
         }
+
+        STR_END
       }
       break;
   }
