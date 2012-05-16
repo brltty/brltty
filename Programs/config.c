@@ -208,7 +208,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'P',
     .word = "pid-file",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
     .description = strtext("Path to process identifier file.")
