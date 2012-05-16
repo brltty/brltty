@@ -140,7 +140,7 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
   const unsigned char *byte = bytes;
   const unsigned char *end = byte + count;
   int first = 1;
-  size_t digits;
+  int digits;
 
   if (count) {
     char buffer[0X10];
