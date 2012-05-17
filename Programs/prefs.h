@@ -127,18 +127,18 @@ typedef struct {
   unsigned char capitalizationMode;
   unsigned char uppercaseIndicator;
 
-  unsigned char showSpeechCursor;
-  unsigned char speechCursorStyle;
-  unsigned char blinkingSpeechCursor;
-  unsigned char speechCursorVisibleTime;
-  unsigned char speechCursorInvisibleTime;
-
   unsigned char autospeakCurrentCharacter;
   unsigned char autospeakInsertedCharacters;
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
   unsigned char autospeakWhiteSpace;
+
+  unsigned char showSpeechCursor;
+  unsigned char speechCursorStyle;
+  unsigned char blinkingSpeechCursor;
+  unsigned char speechCursorVisibleTime;
+  unsigned char speechCursorInvisibleTime;
 
   unsigned char saveOnExit;
   unsigned char showAllItems;
