@@ -386,6 +386,12 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autospeak
   },
 
+  { .name = "autospeak-new-line",
+    .defaultValue = DEFAULT_AUTOSPEAK_NEW_LINE,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakNewLine
+  },
+
   { .name = "autospeak-current-character",
     .defaultValue = DEFAULT_AUTOSPEAK_CURRENT_CHARACTER,
     .settingNames = &preferenceStringTable_boolean,

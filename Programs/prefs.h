@@ -127,6 +127,7 @@ typedef struct {
   unsigned char capitalizationMode;
   unsigned char uppercaseIndicator;
 
+  unsigned char autospeakNewLine;
   unsigned char autospeakCurrentCharacter;
   unsigned char autospeakInsertedCharacters;
   unsigned char autospeakDeletedCharacters;

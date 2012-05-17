@@ -1552,6 +1552,12 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Speak New Line"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakNewLine, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
       NAME(strtext("Speak Current Character"));
       ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCurrentCharacter, &itemName));
       TEST(Autospeak);

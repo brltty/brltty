@@ -2984,7 +2984,7 @@ brlttyUpdate (void) {
                       if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
                         column = newX;
                         count = prefs.autospeakInsertedCharacters? (x - newX): 0;
-                        goto speak;
+                        goto autospeak;
                       }
 
                       done = 0;
@@ -2995,7 +2995,7 @@ brlttyUpdate (void) {
                         characters = oldCharacters;
                         column = oldX;
                         count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
-                        goto speak;
+                        goto autospeak;
                       }
 
                       done = 0;
@@ -3035,14 +3035,14 @@ brlttyUpdate (void) {
                         if (last > first) {
                           column = first;
                           count = last - first + 1;
-                          goto speak;
+                          goto autospeak;
                         }
                       }
                     }
                   }
 
                   if (!prefs.autospeakInsertedCharacters) count = 0;
-                  goto speak;
+                  goto autospeak;
                 }
 
                 if (oldX >= oldWidth) oldX = oldWidth - 1;
@@ -3052,7 +3052,7 @@ brlttyUpdate (void) {
                   characters = oldCharacters;
                   column = newX;
                   count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
-                  goto speak;
+                  goto autospeak;
                 }
               }
 
@@ -3088,7 +3088,7 @@ brlttyUpdate (void) {
                     if ((length -= first) > 1) {
                       column = first;
                       count = length;
-                      goto speak;
+                      goto autospeak;
                     }
                   }
                 }
@@ -3096,17 +3096,22 @@ brlttyUpdate (void) {
             } else {
               count = 0;
             }
+          } else if (!prefs.autospeakNewLine) {
+            count = 0;
           }
         }
 
-      speak:
+      autospeak:
         characters += column;
 
-        if (!prefs.autospeakWhiteSpace)
-          if (isAllSpaceCharacters(characters, count))
-            count = 0;
-
-        if (count) speakCharacters(characters, count, 0);
+        if (count) {
+          if (prefs.autospeakWhiteSpace ||
+              !isAllSpaceCharacters(characters, count)) {
+            speakCharacters(characters, count, 0);
+          } else {
+            speech->mute(&spk);
+          }
+        }
       }
 
       {
