@@ -1538,6 +1538,16 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("Say Space")},
+      };
+
+      NAME(strtext("Whitespace Indicator"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.whitespaceIndicator, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
         {.label=strtext("Immediate")},
         {.label=strtext("Enqueue")}
       };
@@ -1584,12 +1594,6 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Speak Completed Words"));
       ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCompletedWords, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak White-Space"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakWhiteSpace, &itemName));
       TEST(Autospeak);
     }
 

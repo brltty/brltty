@@ -576,9 +576,20 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
   int immediate = 1;
 
   if (isAllSpaceCharacters(characters, count)) {
-    wchar_t buffer[0X100];
-    size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
-    sayWideCharacters(buffer, NULL, length, immediate);
+    switch (prefs.whitespaceIndicator) {
+      default:
+      case wsNone:
+        speech->mute(&spk);
+        break;
+
+      case wsSaySpace: {
+        wchar_t buffer[0X100];
+        size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
+
+        sayWideCharacters(buffer, NULL, length, immediate);
+        break;
+      }
+    }
   } else if (count == 1) {
     wchar_t character = characters[0].text;
     const char *prefix = NULL;
@@ -3099,19 +3110,14 @@ brlttyUpdate (void) {
           } else if (!prefs.autospeakNewLine) {
             count = 0;
           }
+        } else {
+          count = 0;
         }
 
       autospeak:
         characters += column;
 
-        if (count) {
-          if (prefs.autospeakWhiteSpace ||
-              !isAllSpaceCharacters(characters, count)) {
-            speakCharacters(characters, count, 0);
-          } else {
-            speech->mute(&spk);
-          }
-        }
+        if (count) speakCharacters(characters, count, 0);
       }
 
       {

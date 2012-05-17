@@ -78,16 +78,20 @@ PREFERENCE_STRING_TABLE(tuneDevice,
   "beeper", "pcm", "midi", "fm"
 )
 
-PREFERENCE_STRING_TABLE(sayLineMode,
-  "immediate", "enqueue"
+PREFERENCE_STRING_TABLE(speechPunctuation,
+  "none", "some", "all"
 )
 
 PREFERENCE_STRING_TABLE(uppercaseIndicator,
   "none", "cap", "higher"
 )
 
-PREFERENCE_STRING_TABLE(speechPunctuation,
-  "none", "some", "all"
+PREFERENCE_STRING_TABLE(whitespaceIndicator,
+  "none", "space"
+)
+
+PREFERENCE_STRING_TABLE(sayLineMode,
+  "immediate", "enqueue"
 )
 
 PREFERENCE_STRING_TABLE(statusPosition,
@@ -374,6 +378,12 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.uppercaseIndicator
   },
 
+  { .name = "whitespace-indicator",
+    .defaultValue = DEFAULT_WHITESPACE_INDICATOR,
+    .settingNames = &preferenceStringTable_whitespaceIndicator,
+    .setting = &prefs.whitespaceIndicator
+  },
+
   { .name = "say-line-mode",
     .defaultValue = DEFAULT_SAY_LINE_MODE,
     .settingNames = &preferenceStringTable_sayLineMode,
@@ -420,12 +430,6 @@ static const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_AUTOSPEAK_COMPLETED_WORDS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autospeakCompletedWords
-  },
-
-  { .name = "autospeak-white-space",
-    .defaultValue = DEFAULT_AUTOSPEAK_WHITE_SPACE,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autospeakWhiteSpace
   },
 
   { .name = "show-speech-cursor",
