@@ -544,7 +544,7 @@ getScreenCharacterType (const ScreenCharacter *character) {
 }
 
 static int
-findFirstNonblankCharacter (const ScreenCharacter *characters, int count) {
+findFirstNonSpaceCharacter (const ScreenCharacter *characters, int count) {
   int index = 0;
 
   while (index < count) {
@@ -556,7 +556,7 @@ findFirstNonblankCharacter (const ScreenCharacter *characters, int count) {
 }
 
 static int
-findLastNonblankCharacter (const ScreenCharacter *characters, int count) {
+findLastNonSpaceCharacter (const ScreenCharacter *characters, int count) {
   int index = count;
 
   while (index > 0)
@@ -566,11 +566,16 @@ findLastNonblankCharacter (const ScreenCharacter *characters, int count) {
   return -1;
 }
 
+static int
+isAllSpaceCharacters (const ScreenCharacter *characters, int count) {
+  return findFirstNonSpaceCharacter(characters, count) < 0;
+}
+
 static void
 speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
   int immediate = 1;
 
-  if (findFirstNonblankCharacter(characters, count) < 0) {
+  if (isAllSpaceCharacters(characters, count)) {
     wchar_t buffer[0X100];
     size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
     sayWideCharacters(buffer, NULL, length, immediate);
@@ -2212,7 +2217,7 @@ doCommand:
         int column;
 
         readScreen(0, ses->spky, scr.cols, 1, characters);
-        if ((column = findFirstNonblankCharacter(characters, scr.cols)) >= 0) {
+        if ((column = findFirstNonSpaceCharacter(characters, scr.cols)) >= 0) {
           ses->spkx = column;
           speakDone(characters, column, 1, 0);
         } else {
@@ -2227,7 +2232,7 @@ doCommand:
         int column;
 
         readScreen(0, ses->spky, scr.cols, 1, characters);
-        if ((column = findLastNonblankCharacter(characters, scr.cols)) >= 0) {
+        if ((column = findLastNonSpaceCharacter(characters, scr.cols)) >= 0) {
           ses->spkx = column;
           speakDone(characters, column, 1, 0);
         } else {
@@ -2395,7 +2400,7 @@ doCommand:
 
         while (row < scr.rows) {
           readScreen(0, row, scr.cols, 1, characters);
-          if (findFirstNonblankCharacter(characters, scr.cols) >= 0) break;
+          if (!isAllSpaceCharacters(characters, scr.cols)) break;
           row += 1;
         }
 
@@ -2415,7 +2420,7 @@ doCommand:
 
         while (row >= 0) {
           readScreen(0, row, scr.cols, 1, characters);
-          if (findFirstNonblankCharacter(characters, scr.cols) >= 0) break;
+          if (!isAllSpaceCharacters(characters, scr.cols)) break;
           row -= 1;
         }
 
@@ -3098,7 +3103,7 @@ brlttyUpdate (void) {
         characters += column;
 
         if (!prefs.autospeakWhiteSpace)
-          if (findFirstNonblankCharacter(characters, count) < 0)
+          if (isAllSpaceCharacters(characters, count))
             count = 0;
 
         if (count) speakCharacters(characters, count, 0);
