@@ -3095,9 +3095,13 @@ brlttyUpdate (void) {
         }
 
       speak:
-        if (count) {
-          speakCharacters(characters+column, count, 0);
-        }
+        characters += column;
+
+        if (!prefs.autospeakWhiteSpace)
+          if (findFirstNonblankCharacter(characters, count) < 0)
+            count = 0;
+
+        if (count) speakCharacters(characters, count, 0);
       }
 
       {

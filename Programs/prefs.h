@@ -138,6 +138,7 @@ typedef struct {
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
+  unsigned char autospeakWhiteSpace;
 
   unsigned char saveOnExit;
   unsigned char showAllItems;

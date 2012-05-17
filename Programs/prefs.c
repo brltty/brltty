@@ -416,6 +416,12 @@ static const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autospeakCompletedWords
   },
 
+  { .name = "autospeak-white-space",
+    .defaultValue = DEFAULT_AUTOSPEAK_WHITE_SPACE,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakWhiteSpace
+  },
+
   { .name = "show-speech-cursor",
     .defaultValue = DEFAULT_SHOW_SPEECH_CURSOR,
     .settingNames = &preferenceStringTable_boolean,

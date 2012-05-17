@@ -1582,6 +1582,12 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Speak White-Space"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakWhiteSpace, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
       NAME(strtext("Show Speech Cursor"));
       ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &itemName));
     }
