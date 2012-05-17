@@ -60,9 +60,8 @@ toolchainRoot="${buildRoot}/android-toolchain"
 }
 
 export toolchainBinaries="${toolchainRoot}/bin"
-export PATH="${toolchainBinaries}:${PATH}"
-export CC=`set -- "${toolchainBinaries}/"*"-gcc" && basename "${1}"`
-export LD=`set -- "${toolchainBinaries}/"*"-ld" && basename "${1}"`
+export CC=`set -- "${toolchainBinaries}/"*"-gcc" && echo "${1}"`
+export LD=`set -- "${toolchainBinaries}/"*"-ld" && echo "${1}"`
 export CFLAGS="-mthumb"
 export LDFLAGS="-Wl,--fix-cortex-a8"
 
@@ -74,7 +73,8 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 "${sourceRoot}/configure" \
    --enable-standalone-programs \
    --disable-api \
-   --with-braille-driver=-tt,-vr \
+   --with-braille-driver=-tt,-vr,all \
+   --without-screen-driver \
    --without-libbraille \
    --disable-speech-support \
    --disable-x \
