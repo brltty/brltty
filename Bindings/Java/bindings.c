@@ -17,11 +17,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <jni.h>
-#include <errno.h>
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <jni.h>
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
@@ -755,7 +756,6 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
   jfieldID handleID, errnoID, typeID, bufID;
   jarray jbuf;
   brlapi_handle_t *handle;
-  int errno;
   long type;
   jbyte *buf;
   int size;
