@@ -3079,7 +3079,7 @@ brlttyUpdate (void) {
             count = prefs.autospeakCurrentCharacter? 1: 0;
 
             if (prefs.autospeakCompletedWords) {
-              if (column >= 2) {
+              if ((newX > oldX) && (column >= 2)) {
                 int length = newWidth;
 
                 while (length > 0) {
