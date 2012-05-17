@@ -579,7 +579,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     switch (prefs.whitespaceIndicator) {
       default:
       case wsNone:
-        speech->mute(&spk);
+        if (immediate) speech->mute(&spk);
         break;
 
       case wsSaySpace: {
@@ -2964,130 +2964,74 @@ brlttyUpdate (void) {
         int count = newWidth;
         const ScreenCharacter *characters = newCharacters;
 
-        if (oldCharacters) {
-          if ((newScreen == oldScreen) && (ses->winy == oldwiny) && (newWidth == oldWidth)) {
-            int onScreen = (newX >= 0) && (newX < newWidth);
+        if (!oldCharacters) {
+          count = 0;
+        } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
+          if (!prefs.autospeakNewLine) count = 0;
+        } else {
+          int onScreen = (newX >= 0) && (newX < newWidth);
 
-            if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
-              if ((newY == ses->winy) && (newY == oldY) && onScreen) {
-                if ((newX == oldX) &&
-                    isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
-                  int oldLength = oldWidth;
-                  int newLength = newWidth;
-                  int x = newX;
+          if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
+            if ((newY == ses->winy) && (newY == oldY) && onScreen) {
+              if ((newX == oldX) &&
+                  isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
+                int oldLength = oldWidth;
+                int newLength = newWidth;
+                int x = newX;
 
-                  while (oldLength > oldX) {
-                    if (!iswspace(oldCharacters[oldLength-1].text)) break;
-                    oldLength -= 1;
-                  }
-                  if (oldLength < oldWidth) oldLength += 1;
-
-                  while (newLength > newX) {
-                    if (!iswspace(newCharacters[newLength-1].text)) break;
-                    newLength -= 1;
-                  }
-                  if (newLength < newWidth) newLength += 1;
-
-                  while (1) {
-                    int done = 1;
-
-                    if (x < newLength) {
-                      if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
-                        column = newX;
-                        count = prefs.autospeakInsertedCharacters? (x - newX): 0;
-                        goto autospeak;
-                      }
-
-                      done = 0;
-                    }
-
-                    if (x < oldLength) {
-                      if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
-                        characters = oldCharacters;
-                        column = oldX;
-                        count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
-                        goto autospeak;
-                      }
-
-                      done = 0;
-                    }
-
-                    if (done) break;
-                    x += 1;
-                  }
+                while (oldLength > oldX) {
+                  if (!iswspace(oldCharacters[oldLength-1].text)) break;
+                  oldLength -= 1;
                 }
+                if (oldLength < oldWidth) oldLength += 1;
 
-                if (oldX < 0) oldX = 0;
-                if ((newX > oldX) &&
-                    isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
-                    isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
-                  column = oldX;
-                  count = newX - oldX;
+                while (newLength > newX) {
+                  if (!iswspace(newCharacters[newLength-1].text)) break;
+                  newLength -= 1;
+                }
+                if (newLength < newWidth) newLength += 1;
 
-                  if (prefs.autospeakCompletedWords) {
-                    int last = column + count - 1;
+                while (1) {
+                  int done = 1;
 
-                    if (iswspace(characters[last].text)) {
-                      int first = column;
-
-                      while (first > 0) {
-                        if (iswspace(characters[--first].text)) {
-                          first += 1;
-                          break;
-                        }
-                      }
-
-                      if (first < column) {
-                        while (last >= first) {
-                          if (!iswspace(characters[last].text)) break;
-                          last -= 1;
-                        }
-
-                        if (last > first) {
-                          column = first;
-                          count = last - first + 1;
-                          goto autospeak;
-                        }
-                      }
+                  if (x < newLength) {
+                    if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
+                      column = newX;
+                      count = prefs.autospeakInsertedCharacters? (x - newX): 0;
+                      goto autospeak;
                     }
+
+                    done = 0;
                   }
 
-                  if (!prefs.autospeakInsertedCharacters) count = 0;
-                  goto autospeak;
-                }
+                  if (x < oldLength) {
+                    if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
+                      characters = oldCharacters;
+                      column = oldX;
+                      count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
+                      goto autospeak;
+                    }
 
-                if (oldX >= oldWidth) oldX = oldWidth - 1;
-                if ((newX < oldX) &&
-                    isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
-                    isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
-                  characters = oldCharacters;
-                  column = newX;
-                  count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
-                  goto autospeak;
+                    done = 0;
+                  }
+
+                  if (done) break;
+                  x += 1;
                 }
               }
 
-              while (newCharacters[column].text == oldCharacters[column].text) ++column;
-              while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
-              count -= column;
-              if (!prefs.autospeakReplacedCharacters) count = 0;
-            } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
-              column = newX;
-              count = prefs.autospeakCurrentCharacter? 1: 0;
+              if (oldX < 0) oldX = 0;
+              if ((newX > oldX) &&
+                  isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
+                  isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
+                column = oldX;
+                count = newX - oldX;
 
-              if (prefs.autospeakCompletedWords) {
-                if (column >= 2) {
-                  int length = newWidth;
+                if (prefs.autospeakCompletedWords) {
+                  int last = column + count - 1;
 
-                  while (length > 0) {
-                    if (!iswspace(characters[--length].text)) {
-                      length += 1;
-                      break;
-                    }
-                  }
-
-                  if ((length + 1) == column) {
-                    int first = length - 1;
+                  if (iswspace(characters[last].text)) {
+                    int first = column;
 
                     while (first > 0) {
                       if (iswspace(characters[--first].text)) {
@@ -3096,22 +3040,76 @@ brlttyUpdate (void) {
                       }
                     }
 
-                    if ((length -= first) > 1) {
-                      column = first;
-                      count = length;
-                      goto autospeak;
+                    if (first < column) {
+                      while (last >= first) {
+                        if (!iswspace(characters[last].text)) break;
+                        last -= 1;
+                      }
+
+                      if (last > first) {
+                        column = first;
+                        count = last - first + 1;
+                        goto autospeak;
+                      }
                     }
                   }
                 }
+
+                if (!prefs.autospeakInsertedCharacters) count = 0;
+                goto autospeak;
               }
-            } else {
-              count = 0;
+
+              if (oldX >= oldWidth) oldX = oldWidth - 1;
+              if ((newX < oldX) &&
+                  isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
+                  isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
+                characters = oldCharacters;
+                column = newX;
+                count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
+                goto autospeak;
+              }
             }
-          } else if (!prefs.autospeakNewLine) {
+
+            while (newCharacters[column].text == oldCharacters[column].text) ++column;
+            while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
+            count -= column;
+            if (!prefs.autospeakReplacedCharacters) count = 0;
+          } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
+            column = newX;
+            count = prefs.autospeakCurrentCharacter? 1: 0;
+
+            if (prefs.autospeakCompletedWords) {
+              if (column >= 2) {
+                int length = newWidth;
+
+                while (length > 0) {
+                  if (!iswspace(characters[--length].text)) {
+                    length += 1;
+                    break;
+                  }
+                }
+
+                if ((length + 1) == column) {
+                  int first = length - 1;
+
+                  while (first > 0) {
+                    if (iswspace(characters[--first].text)) {
+                      first += 1;
+                      break;
+                    }
+                  }
+
+                  if ((length -= first) > 1) {
+                    column = first;
+                    count = length;
+                    goto autospeak;
+                  }
+                }
+              }
+            }
+          } else {
             count = 0;
           }
-        } else {
-          count = 0;
         }
 
       autospeak:
