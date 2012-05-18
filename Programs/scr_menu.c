@@ -43,34 +43,6 @@ getItem (void) {
   return getCurrentMenuItem(getSubmenu());
 }
 
-static int
-construct_MenuScreen (Menu *menu) {
-  rootMenu = menu;
-  screenWidth = 1;
-  return 1;
-}
-
-static void
-destruct_MenuScreen (void) {
-  rootMenu = NULL;
-}
-
-static int
-currentVirtualTerminal_MenuScreen (void) {
-  return userVirtualTerminal(2);
-}
-
-static void
-describe_MenuScreen (ScreenDescription *description) {
-  Menu *submenu = getSubmenu();
-
-  description->posx = 0;
-  description->posy = getMenuIndex(submenu);
-  description->cols = screenWidth;
-  description->rows = getMenuSize(submenu);
-  description->number = currentVirtualTerminal_MenuScreen();
-}
-
 static void
 formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
   char labelString[0X100];
@@ -120,6 +92,43 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
   }
 }
 
+static void
+checkScreenWidth (void) {
+  wchar_t line[screenWidth];
+
+  formatMenuItem(getCurrentMenuItem(rootMenu), line, ARRAY_COUNT(line));
+}
+
+static int
+construct_MenuScreen (Menu *menu) {
+  rootMenu = menu;
+  screenWidth = 1;
+
+  checkScreenWidth();
+  return 1;
+}
+
+static void
+destruct_MenuScreen (void) {
+  rootMenu = NULL;
+}
+
+static int
+currentVirtualTerminal_MenuScreen (void) {
+  return userVirtualTerminal(2);
+}
+
+static void
+describe_MenuScreen (ScreenDescription *description) {
+  Menu *submenu = getSubmenu();
+
+  description->posx = 0;
+  description->posy = getMenuIndex(submenu);
+  description->cols = screenWidth;
+  description->rows = getMenuSize(submenu);
+  description->number = currentVirtualTerminal_MenuScreen();
+}
+
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   Menu *submenu = getSubmenu();
@@ -157,6 +166,7 @@ commandRejected (void) {
 static void
 itemChanged (void) {
   ses->winx = 0;
+  checkScreenWidth();
 }
 
 static void
@@ -166,6 +176,8 @@ settingChanged (void) {
   if (((lineLength - ses->winx) > textLength) && (ses->winx < settingIndent)) {
     ses->winx = settingIndent;
   }
+
+  checkScreenWidth();
 }
 
 static int
