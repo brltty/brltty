@@ -96,7 +96,7 @@ static void
 checkScreenWidth (void) {
   wchar_t line[screenWidth];
 
-  formatMenuItem(getCurrentMenuItem(rootMenu), line, ARRAY_COUNT(line));
+  formatMenuItem(getItem(), line, ARRAY_COUNT(line));
 }
 
 static int
