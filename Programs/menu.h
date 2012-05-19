@@ -67,6 +67,7 @@ extern unsigned int getMenuSize (const Menu *menu);
 extern unsigned int getMenuIndex (const Menu *menu);
 extern MenuItem *getMenuItem (Menu *menu, unsigned int index);
 
+extern int isSettableMenuItem (const MenuItem *item);
 extern const MenuString *getMenuItemName (const MenuItem *item);
 extern const char *getMenuItemValue (const MenuItem *item);
 extern const char *getMenuItemComment (const MenuItem *item);

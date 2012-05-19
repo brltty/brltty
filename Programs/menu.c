@@ -214,6 +214,11 @@ testMenuItemVisible (Menu *menu, unsigned int index) {
   return testMenuItem(menu, index, prefs.showAllItems);
 }
 
+int
+isSettableMenuItem (const MenuItem *item) {
+  return !!item->setting;
+}
+
 const MenuString *
 getMenuItemName (const MenuItem *item) {
   return &item->name;
@@ -650,7 +655,7 @@ activateItem_close (MenuItem *item) {
 
 static const char *
 getValue_close (const MenuItem *item) {
-  return getLocalText("Close");
+  return getLocalText(strtext("Close"));
 }
 
 static const char *

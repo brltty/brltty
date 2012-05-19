@@ -57,7 +57,8 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
     STR_BEGIN(labelString, ARRAY_COUNT(labelString));
     STR_PRINTF("%s", name->label);
     if (*name->comment) STR_PRINTF(" %s", name->comment);
-    STR_PRINTF(": ");
+    if (isSettableMenuItem(item)) STR_PRINTF(":");
+    STR_PRINTF(" ");
     labelLength = STR_LENGTH;
     STR_END;
   }
