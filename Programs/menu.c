@@ -575,6 +575,11 @@ newFilesMenuItem (
   return NULL;
 }
 
+static MenuItem *
+getParentMenuItem (const MenuItem *item) {
+  return getSelectedMenuItem(item->menu->parent);
+}
+
 static int
 beginItem_submenu (MenuItem *item) {
   item->data.submenu->visible = 0;
@@ -638,19 +643,25 @@ static const MenuItemMethods menuItemMethods_submenu = {
 
 static void
 activateItem_close (MenuItem *item) {
-  item = getSelectedMenuItem(item->menu->parent);
+  item = getParentMenuItem(item);
   item->data.submenu->opened = 0;
   beginMenuItem(item);
 }
 
 static const char *
 getValue_close (const MenuItem *item) {
-  return "<---";
+  return getLocalText("Close");
+}
+
+static const char *
+getComment_close (const MenuItem *item) {
+  return getLocalText(getMenuItemName(getParentMenuItem(item))->label);
 }
 
 static const MenuItemMethods menuItemMethods_close = {
   .activateItem = activateItem_close,
-  .getValue = getValue_close
+  .getValue = getValue_close,
+  .getComment = getComment_close
 };
 
 Menu *
@@ -661,9 +672,10 @@ newSubmenuMenuItem (
 
   if ((submenu = malloc(sizeof(*submenu)))) {
     if ((submenu->menu = newMenu())) {
+      static const MenuString closeName = {.label="<---"};
       MenuItem *close;
 
-      if ((close = newMenuItem(submenu->menu, NULL, name))) {
+      if ((close = newMenuItem(submenu->menu, NULL, &closeName))) {
         MenuItem *item;
 
         if ((item = newMenuItem(menu, NULL, name))) {
