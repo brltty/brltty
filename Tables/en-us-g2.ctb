@@ -1016,6 +1016,7 @@ sufword symoens 234-13456-134-135-26-234 (an author)
 # the letter t
 always t 2345
 always T 2345
+sufword takeaway =
 sufword tearoom 2345-2-1235-135-135-134 tearooms
 endnum th 1456 (fourth, fifth, ...)
 word th =
