@@ -60,3 +60,14 @@ bind	CapsLock+!F6			SAY_FASTER
 bind	CapsLock+!F7			SAY_SOFTER
 bind	CapsLock+!F8			SAY_LOUDER
 bind	CapsLock+!F9			AUTOSPEAK
+
+bind ShiftRight+!ArrowLeft SPEAK_PREV_WORD
+bind ShiftRight+!ArrowRight SPEAK_NEXT_WORD
+bind ShiftRight+!ArrowUp SPEAK_PREV_LINE
+bind ShiftRight+!ArrowDown SPEAK_NEXT_LINE
+bind ControlRight+!ArrowLeft SPEAK_FRST_CHAR
+bind ControlRight+!ArrowRight SPEAK_LAST_CHAR
+bind ControlRight+!ArrowUp SPEAK_FRST_LINE
+bind ControlRight+!ArrowDown SPEAK_LAST_LINE
+bind ControlRight+ShiftRight ROUTE_CURR_LOCN
+bind ShiftRight+!Enter SPEAK_CURR_LOCN
