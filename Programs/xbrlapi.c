@@ -649,6 +649,7 @@ void toX_f(const char *display) {
       case ConfigureRequest:
       case CirculateNotify:
       case CirculateRequest:
+      case ClientMessage:
 	break;
 
       /* "shouldn't happen" events */
