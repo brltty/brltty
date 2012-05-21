@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
 "POT-Creation-Date: 2012-05-14 21:59+0200\n"
-"PO-Revision-Date: 2012-05-14 22:33+0200\n"
+"PO-Revision-Date: 2012-05-21 14:20+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -341,7 +341,7 @@ msgstr "Kurzschrifttabelle"
 
 #: Programs/config.c:1368
 msgid "Controls"
-msgstr "Kontrollen"
+msgstr "Steuerung"
 
 #: Programs/xbrlapi.c:695
 #, c-format
@@ -703,11 +703,11 @@ msgstr "Niedrig"
 
 #: Programs/config.c:1154
 msgid "Lower Left Dot"
-msgstr ""
+msgstr "Unterer linker Punkt"
 
 #: Programs/config.c:1155
 msgid "Lower Right Dot"
-msgstr ""
+msgstr "Unterer rechter Punkt"
 
 #: Programs/config.c:1422
 msgid "MIDI"
@@ -739,7 +739,7 @@ msgstr "Melodische Trommel"
 
 #: Programs/config.c:1171
 msgid "Menu Options"
-msgstr "Menü Optionen"
+msgstr "Menüoptionen"
 
 #: Programs/config.c:454
 msgid "Message hold time [400]."
@@ -1055,7 +1055,7 @@ msgstr "Beim Verlassen speichern"
 #. It is spoken just before an uppercase letter, e.g. "cap A".
 #: Programs/config.c:1521
 msgid "Say Cap"
-msgstr ""
+msgstr "Sprich Groß"
 
 #: Programs/config.c:1535
 msgid "Say Line Mode"
@@ -1158,7 +1158,7 @@ msgstr "Leer"
 
 #: Programs/config.c:1569
 msgid "Speak Completed Words"
-msgstr ""
+msgstr "Sprich ganze Wörter"
 
 #: Programs/config.c:1545
 msgid "Speak Current Character"
@@ -1414,7 +1414,7 @@ msgstr "Aufgetaut"
 
 #: Programs/config.c:1525
 msgid "Uppercase Indicator"
-msgstr ""
+msgstr "Großschreibungsindikator"
 
 #: Programs/options.c:161
 msgid "Usage"
@@ -1744,7 +1744,7 @@ msgstr ""
 #. It is spoken just before an uppercase letter, e.g. "cap A".
 #: Programs/brltty.c:591
 msgid "cap"
-msgstr ""
+msgstr "Groß"
 
 #: Programs/brltty.c:2080
 msgid "changes discarded"
@@ -2025,19 +2025,19 @@ msgstr "gehe zur nächsten beschriebenen Braillezeile nach rechts"
 
 #: Programs/cmds.auto.h:562
 msgid "go to and speak first non-blank character on line"
-msgstr ""
+msgstr "gehe zu und sprich erstes nicht leeres Zeichen der Zeile"
 
 #: Programs/cmds.auto.h:616
 msgid "go to and speak first non-blank character on screen"
-msgstr ""
+msgstr "gehe zu und sprich erstes nicht leeres Zeichen des Bildschirms"
 
 #: Programs/cmds.auto.h:569
 msgid "go to and speak last non-blank character on line"
-msgstr ""
+msgstr "gehe zu und sprich letztes nicht leeres Zeichen der Zeile"
 
 #: Programs/cmds.auto.h:623
 msgid "go to and speak last non-blank character on screen"
-msgstr ""
+msgstr "gehe zu und sprich letztes nicht leeres Zeichen des Bildschirms"
 
 #: Programs/cmds.auto.h:555
 msgid "go to and speak next character"
@@ -2549,7 +2549,7 @@ msgstr "Sprechen stoppen"
 
 #: Programs/xbrlapi.c:513
 msgid "strange old error handler\n"
-msgstr ""
+msgstr "befremdlicher alter Fehlerbehandler\n"
 
 #: Programs/cmds.auto.h:938
 msgid "switch to command context"
