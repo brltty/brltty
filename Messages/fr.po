@@ -2622,7 +2622,7 @@ msgstr "Type de bloc inattendu"
 #: Programs/xbrlapi.c:655
 #, c-format
 msgid "unhandled event type: %d\n"
-msgstr "Type d'éqénement non pris en charge: %d\n"
+msgstr "Type d'événement non pris en charge: %d\n"
 
 #: Programs/cmd.c:196
 msgid "unknown command"
