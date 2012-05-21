@@ -34,10 +34,10 @@ BRLTTY supporte les afficheurs braille suivants:
     EuroBraille
       |AzerBraille@
       |Clio@
+      |Esys@
       |Iris@
       |NoteBraille@
       |Scriba@
-      |Esys 12/40@
     FreedomScientific
       |Focus 1 44/70/84@
       |Focus 2 40/80@
@@ -55,6 +55,8 @@ BRLTTY supporte les afficheurs braille suivants:
     HIMS
       |Braille Sense@
       |SyncBraille@
+    HumanWare
+      |Brailliant 32/40/80 bi@
     Libbraille@
     LogText
       |32@
