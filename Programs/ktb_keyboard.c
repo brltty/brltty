@@ -100,34 +100,34 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(KBD_KEY_LETTER_Z, "Z"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_One_Exclamation, "SYMBOL_One_Exclamation"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_One_Exclamation, "1"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_One_Exclamation, "One"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Two_At, "SYMBOL_Two_At"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Two_At, "2"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Two_At, "Two"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Three_Number, "SYMBOL_Three_Number"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Three_Number, "3"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Three_Number, "Three"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Four_Dollar, "SYMBOL_Four_Dollar"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Four_Dollar, "4"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Four_Dollar, "Four"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Five_Percent, "SYMBOL_Five_Percent"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Five_Percent, "5"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Five_Percent, "Five"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Six_Circumflex, "SYMBOL_Six_Circumflex"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Six_Circumflex, "6"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Six_Circumflex, "Six"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Seven_Ampersand, "SYMBOL_Seven_Ampersand"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Seven_Ampersand, "7"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Seven_Ampersand, "Seven"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Eight_Asterisk, "SYMBOL_Eight_Asterisk"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Eight_Asterisk, "8"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Eight_Asterisk, "Eight"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Nine_LeftParenthesis, "SYMBOL_Nine_LeftParenthesis"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Nine_LeftParenthesis, "9"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Nine_LeftParenthesis, "Nine"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Zero_RightParenthesis, "SYMBOL_Zero_RightParenthesis"),
-  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Zero_RightParenthesis, "0"),
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Zero_RightParenthesis, "Zero"),
 
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Grave_Tilde, "SYMBOL_Grave_Tilde"),
 
