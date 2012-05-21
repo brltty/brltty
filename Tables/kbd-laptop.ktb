@@ -35,14 +35,14 @@ bind	CapsLock+!DeleteBackward		BACK
 # marks
 bind	CapsLock+!M			SETMARK
 bind	CapsLock+!J			GOTOMARK
-bind	CapsLock+ShiftLeft+!1		SETMARK+1
-bind	CapsLock+!1			GOTOMARK+1
-bind	CapsLock+ShiftLeft+!2		SETMARK+2
-bind	CapsLock+!2			GOTOMARK+2
-bind	CapsLock+ShiftLeft+!3		SETMARK+3
-bind	CapsLock+!3			GOTOMARK+3
-bind	CapsLock+ShiftLeft+!4		SETMARK+4
-bind	CapsLock+!4			GOTOMARK+4
+bind	CapsLock+ShiftLeft+!One		SETMARK+1
+bind	CapsLock+!One			GOTOMARK+1
+bind	CapsLock+ShiftLeft+!Two		SETMARK+2
+bind	CapsLock+!Two			GOTOMARK+2
+bind	CapsLock+ShiftLeft+!Three		SETMARK+3
+bind	CapsLock+!Three			GOTOMARK+3
+bind	CapsLock+ShiftLeft+!Four		SETMARK+4
+bind	CapsLock+!Four			GOTOMARK+4
 
 # cut and paste
 bind	CapsLock+!X			CLIP_NEW
