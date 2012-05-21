@@ -769,7 +769,7 @@ for any additional display-specific instructions.
     </descrip>
     The first non-excluded driver becomes the default driver.
     If this option isn't specified,
-    or if no drivdr is specifically included,
+    or if no driver is specifically included,
     then an operating system appropriate default is selected.
     If a native driver for the current operating system is available,
     then that driver is selected;
@@ -1028,7 +1028,7 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     This feature allows the entire installed file hierarchy
     to be copied or moved, in tact, from one place to another,
     and is primarily intended for use on Windows platforms.
-  <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
+  <tag><tt/--disable-stripping/<label id="build-stripping"></tag>
     Don't remove the symbol tables from executables and shared objects when installing them.
   <tag><tt/--disable-learn-mode/<label id="build-learn-mode"></tag>
     Reduce program size by excluding command learn mode
@@ -1241,7 +1241,7 @@ each character should appear on the display as it's typed on the keyboard.
 
 If this is your experience, then leave BRLTTY running, and enjoy it.
 If this isn't your experience, then it may be necessary
-to test each driver separately in order to isolate the source of the probledm.
+to test each driver separately in order to isolate the source of the problem.
 The screen driver can be tested with <ref id="utility-scrtest" name="scrtest">,
 and the braille display driver can be tested with <ref id="utility-brltest" name="brltest">.
 
@@ -2963,7 +2963,7 @@ to a specific character within the braille window.
 You'll probably find this to be a rather difficult task for a number of reasons.
 One is that you may not know where the cursor is,
 and that you may lose your place while trying to find it.
-Another is that the cursor may move unrpedictably as the arrow keys are pressed
+Another is that the cursor may move unpredictably as the arrow keys are pressed
 (some editors, for example, don't allow the cursor to be
 more to the right than the end of the line it's on).
 Cursor routing provides just such a capability
@@ -3744,7 +3744,7 @@ Notes:
     The initial setting is <tt/Some/.
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
-    You shuldn't normally need to play with it.
+    You shouldn't normally need to play with it.
     It enables BRLTTY's developers to test status cell configurations
     for braille displays which they don't actually have.
     <descrip>
@@ -4221,7 +4221,7 @@ The following directives are provided:
     can also be entered from a braille keyboard.
     If several characters have the same braille representation
     then only one of them should be defined with the <tt/char/ directive -
-    the others should be defined with teh <tt/glyph/ directive
+    the others should be defined with the <tt/glyph/ directive
     (which has the same syntax).
     If more than one character with the same braille representation
     is defined with the <tt/char/ directive
@@ -4719,7 +4719,7 @@ The name then refers to any character within the class.
 A character may belong to more than one class.
 
 The following character classes are automatically predefined
-basdd on the selected locale:
+based on the selected locale:
 <descrip>
   <tag/digit/
     Numeric characters.
@@ -4998,7 +4998,7 @@ don't affect the context of the including key table or subtable.
 If a context has a title
 (all named contexts
 and those numeric contexts for which the <em/title/ operand has been supplied)
-then it is persisten.
+then it is persistent.
 When a key event causes a persistent context to be activated,
 that context remains current until a subsequent key event
 causes a different persistent context to be activated.
@@ -5289,7 +5289,7 @@ and the other is that you don't want to fiddle with your system's boot sequence
 each time you want to switch to a different version of BRLTTY.
 These problems are easily solved by adding a symbolic link for the executable.
 <tscreen>ln -s /brltty-3.1/bin/brltty /bin/brltty</tscreen>
-When it's time to switch to the newer version, just repoint the symbolc link.
+When it's time to switch to the newer version, just repoint the symbolic link.
 <tscreen>ln -s /brltty-3.2/bin/brltty /bin/brltty</tscreen>
 
 If you'd like to get really fancy, then introduce another level of indirection
@@ -5665,7 +5665,7 @@ The following device types are supported:
 A comma-delimited list of braille devices may be specified.
 If this is done then autodetection is performed on each listed device in sequence.
 This feature is particularly useful if you have
-a braille display with more than one interrface,
+a braille display with more than one interface,
 e.g. both a serial and a USB port.
 In this case it's usually better to list the USB port first,
 e.g. <tt>usb:,serial:/dev/ttyS0</tt>,
