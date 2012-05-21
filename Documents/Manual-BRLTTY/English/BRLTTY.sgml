@@ -1368,7 +1368,7 @@ You have two choices if you choose this route.
     <tscreen>brl::sysinit:/bin/brltty</tscreen>
   <item>
     If you don't mind it being started later
-    but do want it to be automatially restarted if it dies,
+    but do want it to be automatically restarted if it dies,
     then add a line like this anywhere within the file.
     <tscreen>brl:12345:respawn:/bin/brltty -n</tscreen>
     The <ref id="options-no-daemon" name="-n"> (<tt/--nodaemon/) option is very
@@ -1376,7 +1376,7 @@ You have two choices if you choose this route.
     You'll end up with hundreds of BRLTTY processes all running at the same time
     if you forget to specify it.
 </itemize>
-Check that the identifier (<tt/bt/ in these examples)
+Check that the identifier (<tt/brl/ in these examples)
 isn't already being used by another entry,
 and, if it is, choose a different one which isn't.
 
