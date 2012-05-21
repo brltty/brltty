@@ -2462,7 +2462,9 @@ doCommand:
 
       case BRL_CMD_SPEAK_CURR_LOCN: {
         char buffer[0X50];
-        snprintf(buffer, sizeof(buffer), "%d, %d", ses->spky+1, ses->spkx+1);
+        snprintf(buffer, sizeof(buffer), "%s %d, %s %d",
+                 gettext("line"), ses->spky+1,
+                 gettext("column"), ses->spkx+1);
         sayString(&spk, buffer, 1);
         break;
       }
