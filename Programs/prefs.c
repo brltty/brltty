@@ -94,6 +94,26 @@ PREFERENCE_STRING_TABLE(sayLineMode,
   "immediate", "enqueue"
 )
 
+PREFERENCE_STRING_TABLE(timeFormat,
+  "24hour", "12hour"
+)
+
+PREFERENCE_STRING_TABLE(timeSeparator,
+  "colon", "dot"
+)
+
+PREFERENCE_STRING_TABLE(datePosition,
+  "no", "before", "after"
+)
+
+PREFERENCE_STRING_TABLE(dateFormat,
+  "ymd", "mdy", "dmy"
+)
+
+PREFERENCE_STRING_TABLE(dateSeparator,
+  "dash", "slash", "dot"
+)
+
 PREFERENCE_STRING_TABLE(statusPosition,
   "none", "left", "right"
 )
@@ -458,6 +478,36 @@ static const PreferenceEntry preferenceTable[] = {
   { .name = "speech-cursor-invisible-time",
     .defaultValue = DEFAULT_SPEECH_CURSOR_INVISIBLE_TIME,
     .setting = &prefs.speechCursorInvisibleTime
+  },
+
+  { .name = "time-format",
+    .defaultValue = DEFAULT_TIME_FORMAT,
+    .settingNames = &preferenceStringTable_timeFormat,
+    .setting = &prefs.timeFormat
+  },
+
+  { .name = "time-separator",
+    .defaultValue = DEFAULT_TIME_SEPARATOR,
+    .settingNames = &preferenceStringTable_timeSeparator,
+    .setting = &prefs.timeSeparator
+  },
+
+  { .name = "date-position",
+    .defaultValue = DEFAULT_DATE_POSITION,
+    .settingNames = &preferenceStringTable_datePosition,
+    .setting = &prefs.datePosition
+  },
+
+  { .name = "date-format",
+    .defaultValue = DEFAULT_DATE_FORMAT,
+    .settingNames = &preferenceStringTable_dateFormat,
+    .setting = &prefs.dateFormat
+  },
+
+  { .name = "date-separator",
+    .defaultValue = DEFAULT_DATE_SEPARATOR,
+    .settingNames = &preferenceStringTable_dateSeparator,
+    .setting = &prefs.dateSeparator
   },
 
   { .name = "status-position",

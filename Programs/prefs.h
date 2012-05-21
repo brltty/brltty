@@ -59,6 +59,34 @@ typedef enum {
 } WhitespaceIndicator;
 
 typedef enum {
+  tf24Hour,
+  tf12Hour
+} TimeFormat;
+
+typedef enum {
+  tsColon,
+  tsDot
+} TimeSeparator;
+
+typedef enum {
+  dpNone,
+  dpBeforeTime,
+  dpAfterTime
+} DatePosition;
+
+typedef enum {
+  dfYearMonthDay,
+  dfMonthDayYear,
+  dfDayMonthYear
+} DateFormat;
+
+typedef enum {
+  dsDash,
+  dsSlash,
+  dsDot
+} DateSeparator;
+
+typedef enum {
   spNone,
   spLeft,
   spRight
@@ -145,6 +173,12 @@ typedef struct {
   unsigned char blinkingSpeechCursor;
   unsigned char speechCursorVisibleTime;
   unsigned char speechCursorInvisibleTime;
+
+  unsigned char timeFormat;
+  unsigned char timeSeparator;
+  unsigned char datePosition;
+  unsigned char dateFormat;
+  unsigned char dateSeparator;
 
   unsigned char saveOnExit;
   unsigned char showAllItems;

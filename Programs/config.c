@@ -836,6 +836,11 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
+testDatePosition (void) {
+  return prefs.datePosition != dpNone;
+}
+
+static int
 testStatusPosition (void) {
   return !haveStatusCells();
 }
@@ -1627,6 +1632,66 @@ makePreferencesMenu (void) {
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  {
+    SUBMENU(timeSubmenu, rootMenu, strtext("Time and Date"));
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("24 Hour")},
+        {.label=strtext("12 Hour")}
+      };
+
+      NAME(strtext("Time Format"));
+      ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.timeFormat, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Colon"), ":"},
+        {.label=strtext("Dot"), "."},
+      };
+
+      NAME(strtext("Time Separator"));
+      ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.timeSeparator, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("Before Time")},
+        {.label=strtext("After Time")}
+      };
+
+      NAME(strtext("Date Position"));
+      ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.datePosition, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Year Month Day")},
+        {.label=strtext("Month Day Year")},
+        {.label=strtext("Day Month Year")},
+      };
+
+      NAME(strtext("Date Format"));
+      ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.dateFormat, &itemName, strings));
+      TEST(DatePosition);
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Dash"), "-"},
+        {.label=strtext("Slash"), "/"},
+        {.label=strtext("Dot"), "."}
+      };
+
+      NAME(strtext("Date Separator"));
+      ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.dateSeparator, &itemName, strings));
+      TEST(DatePosition);
+    }
+  }
+
   {
     SUBMENU(statusSubmenu, rootMenu, strtext("Status Cells"));
 
@@ -1681,7 +1746,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(tablesSubmenu, rootMenu, strtext("Tables"));
+    SUBMENU(tablesSubmenu, rootMenu, strtext("Braille Tables"));
 
     {
       NAME(strtext("Text Table"));

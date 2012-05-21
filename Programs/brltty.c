@@ -378,6 +378,135 @@ showInfo (void) {
   }
 }
 
+static void
+renderTime (uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) {
+  char time[0X40];
+  const char *hourFormat = "%02" PRIu8;
+  const char *minuteFormat = "%02" PRIu8;
+  const char *secondFormat = "%02" PRIu8;
+
+  char string[0X80];
+  STR_BEGIN(string, sizeof(string));
+
+  month += 1;
+  day += 1;
+
+  {
+    char separator;
+    const char *suffix = NULL;
+
+    switch (prefs.timeSeparator) {
+      default:
+      case tsColon:
+        separator = ':';
+        break;
+
+      case tsDot:
+        separator = '.';
+        break;
+    }
+
+    switch (prefs.timeFormat) {
+      default:
+      case tf24Hour:
+        break;
+
+      case tf12Hour: {
+        const uint8_t twelve = 12;
+
+        hourFormat = "%" PRIu8;
+        suffix = (hour < twelve)? "am": "pm";
+        hour %= twelve;
+        if (!hour) hour = twelve;
+        break;
+      }
+    }
+
+    STR_BEGIN(time, sizeof(time));
+    STR_PRINTF(hourFormat, hour);
+    STR_PRINTF("%c", separator);
+    STR_PRINTF(minuteFormat, minute);
+    STR_PRINTF("%c", separator);
+    STR_PRINTF(secondFormat, second);
+    if (suffix) STR_PRINTF("%s", suffix);
+    STR_END
+  }
+
+  if (prefs.datePosition == dpNone) {
+    STR_PRINTF("%s", time);
+  } else {
+    char date[0X40];
+    const char *yearFormat = "%04" PRIu16;
+    const char *monthFormat = "%02" PRIu8;
+    const char *dayFormat = "%02" PRIu8;
+
+    {
+      char separator;
+
+      switch (prefs.dateSeparator) {
+        default:
+        case dsDash:
+          separator = '-';
+          break;
+
+        case dsSlash:
+          separator = '/';
+          break;
+
+        case dsDot:
+          separator = '.';
+          break;
+      }
+
+      STR_BEGIN(date, sizeof(date));
+      switch (prefs.dateFormat) {
+        default:
+        case dfYearMonthDay:
+          STR_PRINTF(yearFormat, year);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(monthFormat, month);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(dayFormat, day);
+          break;
+
+        case dfMonthDayYear:
+          STR_PRINTF(monthFormat, month);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(dayFormat, day);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(yearFormat, year);
+          break;
+
+        case dfDayMonthYear:
+          STR_PRINTF(dayFormat, day);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(monthFormat, month);
+          STR_PRINTF("%c", separator);
+          STR_PRINTF(yearFormat, year);
+          break;
+      }
+      STR_END
+
+      switch (prefs.datePosition) {
+        case dpBeforeTime:
+          STR_PRINTF("%s %s", date, time);
+          break;
+
+        case dpAfterTime:
+          STR_PRINTF("%s %s", time, date);
+          break;
+
+        default:
+          STR_PRINTF("%s", date);
+          break;
+      }
+    }
+  }
+
+  STR_END
+  message(NULL, string, MSG_SILENT);
+}
+
 static void 
 slideWindowVertically (int y) {
   if (y < ses->winy)
@@ -2133,6 +2262,25 @@ doCommand:
         switchVirtualTerminal(scr.number+1);
         break;
 
+      case BRL_CMD_TIME: {
+        TimeValue now;
+        uint16_t year;
+        uint8_t month;
+        uint8_t day;
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
+
+        getCurrentTime(&now);
+        expandSeconds(now.seconds, &year, &month, &day, &hour, &minute, &second);
+
+        renderTime(year, month, day, hour, minute, second);
+#ifdef ENABLE_SPEECH_SUPPORT
+        if (prefs.autospeak) sayTime(&spk, year, month, day, hour, minute, second);
+#endif /* ENABLE_SPEECH_SUPPORT */
+        break;
+      }
+
 #ifdef ENABLE_SPEECH_SUPPORT
       case BRL_CMD_RESTARTSPEECH:
         restartSpeechDriver();
@@ -2469,7 +2617,7 @@ doCommand:
         break;
       }
 
-      case BRL_CMD_SPKVIS:
+      case BRL_CMD_SHOW_CURR_LOCN:
         TOGGLE_PLAY(prefs.showSpeechCursor);
         break;
 #endif /* ENABLE_SPEECH_SUPPORT */
