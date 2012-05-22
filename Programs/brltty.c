@@ -571,8 +571,7 @@ formatSpeechTime (char *buffer, size_t size, uint8_t hour, uint8_t minute, uint8
   if (minute == 0) {
     STR_PRINTF("%s", oclock);
   } else {
-    if (minute < 10) STR_PRINTF("O ");
-    STR_PRINTF("%u", minute);
+    STR_PRINTF("%02u", minute);
   }
 
   if (meridian) {
@@ -676,10 +675,10 @@ doSpeechTime (
   uint16_t year, uint8_t month, uint8_t day,
   uint8_t hour, uint8_t minute, uint8_t second
 ) {
-  char statement[0X100];
+  char announcement[0X100];
   char time[0X80];
 
-  STR_BEGIN(statement, sizeof(statement));
+  STR_BEGIN(announcement, sizeof(announcement));
   formatSpeechTime(time, sizeof(time), hour, minute, second);
 
   if (prefs.datePosition == dpNone) {
@@ -705,7 +704,7 @@ doSpeechTime (
 
   STR_PRINTF(".");
   STR_END
-  sayString(&spk, statement, 1);
+  sayString(&spk, announcement, 1);
 }
 
 #endif /* ENABLE_SPEECH_SUPPORT */
