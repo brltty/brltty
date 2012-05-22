@@ -22,6 +22,7 @@ bind	CapsLock+!F1			HELP
 bind	CapsLock+ShiftLeft+!F1		LEARN
 bind	CapsLock+!R			RESTARTBRL
 bind	CapsLock+!D			DESCCHAR
+bind	CapsLock+ShiftLeft+!T			TIME
 bind	CapsLock+!ArrowUp		LNUP
 bind	CapsLock+!ArrowDown		LNDN
 bind	CapsLock+!ArrowLeft		CHRLT
