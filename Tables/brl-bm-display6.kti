@@ -66,6 +66,7 @@ bind Display1+Display3+Display4+Display6 CSRJMP_VERT
 bind Display2+Display5 INFO
 
 bind Display1+Display4+Display5 DISPMD
+bind Display1+Display5 TIME
 bind Display1+Display2+Display4 FREEZE
 bind Display1+Display2+Display5 HELP
 bind Display1+Display3+Display4 PREFMENU
