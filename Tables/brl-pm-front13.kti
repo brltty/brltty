@@ -98,7 +98,7 @@ bind Dot6+!RoutingKey1 COPY_LINE
 bind Dot8+!RoutingKey1 COPY_RECT
 
 bind Dot1+Dot2+Dot3+Dot7 TIME
-bind Dot1+Dot2+Dot3+Dot7+!RoutingKey PWGEN
+bind Dot1+Dot2+Dot3+Dot7+!RoutingKey1 PWGEN
 
 bind Dot1+Dot4 CSRVIS
 bind Dot1+Dot4+Dot7 CSRVIS+off
