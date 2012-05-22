@@ -97,6 +97,9 @@ bind Dot3+!RoutingKey1 CLIP_ADD
 bind Dot6+!RoutingKey1 COPY_LINE
 bind Dot8+!RoutingKey1 COPY_RECT
 
+bind Dot1+Dot2+Dot3+Dot7 TIME
+bind Dot1+Dot2+Dot3+Dot7+!RoutingKey PWGEN
+
 bind Dot1+Dot4 CSRVIS
 bind Dot1+Dot4+Dot7 CSRVIS+off
 bind Dot1+Dot4+Dot8 CSRVIS+on
@@ -173,5 +176,6 @@ bind Dot1 MENU_FIRST_ITEM
 bind Dot4 MENU_LAST_ITEM
 bind Dot2 PREFLOAD
 bind Dot5 PREFSAVE
+bind Dot3 MENU_PREV_LEVEL
 bind Dot7 FWINLT
 bind Dot8 FWINRT
