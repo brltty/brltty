@@ -619,6 +619,11 @@ replaceKeyboardKeyTable (const char *name) {
 
 static KeyTableState
 handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
+  if (scr.unreadable) {
+    resetKeyTable(keyboardKeyTable);
+    return KTS_UNBOUND;
+  }
+
   return processKeyEvent(keyboardKeyTable, getScreenCommandContext(), set, key, press);
 }
 
@@ -836,7 +841,7 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testDatePosition (void) {
+testShowDate (void) {
   return prefs.datePosition != dpNone;
 }
 
@@ -1202,7 +1207,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(presentationSubmenu, rootMenu, strtext("Presentation"));
+    SUBMENU(presentationSubmenu, rootMenu, strtext("Text Presentation"));
 
     {
       static const MenuString strings[] = {
@@ -1252,7 +1257,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(indicatorsSubmenu, rootMenu, strtext("Indicators"));
+    SUBMENU(indicatorsSubmenu, rootMenu, strtext("Text Indicators"));
 
     {
       NAME(strtext("Show Cursor"));
@@ -1423,7 +1428,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(alertsSubmenu, rootMenu, strtext("Alerts"));
+    SUBMENU(alertsSubmenu, rootMenu, strtext("Event Alerts"));
 
     {
       NAME(strtext("Alert Tunes"));
@@ -1492,7 +1497,7 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
-    SUBMENU(speechSubmenu, rootMenu, strtext("Speech"));
+    SUBMENU(speechSubmenu, rootMenu, strtext("Speech Options"));
 
     {
       NAME(strtext("Speech Volume"));
@@ -1634,7 +1639,7 @@ makePreferencesMenu (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   {
-    SUBMENU(timeSubmenu, rootMenu, strtext("Time and Date"));
+    SUBMENU(timeSubmenu, rootMenu, strtext("Time Presentation"));
 
     {
       static const MenuString strings[] = {
@@ -1676,7 +1681,7 @@ makePreferencesMenu (void) {
 
       NAME(strtext("Date Format"));
       ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.dateFormat, &itemName, strings));
-      TEST(DatePosition);
+      TEST(ShowDate);
     }
 
     {
@@ -1688,7 +1693,7 @@ makePreferencesMenu (void) {
 
       NAME(strtext("Date Separator"));
       ITEM(newEnumeratedMenuItem(timeSubmenu, &prefs.dateSeparator, &itemName, strings));
-      TEST(DatePosition);
+      TEST(ShowDate);
     }
   }
 
