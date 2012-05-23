@@ -484,8 +484,17 @@ enqueueXtScanCode (
   return enqueueKey(set, key);
 }
 
+static KeyTableCommandContext currentCommandContext = KTB_CTX_DEFAULT;
+
+KeyTableCommandContext
+getCurrentCommandContext (void) {
+  return currentCommandContext;
+}
+
 int
 readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+  currentCommandContext = context;
+
   {
     int command = dequeueCommand();
     if (command != EOF) return command;

@@ -624,7 +624,7 @@ handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
     return KTS_UNBOUND;
   }
 
-  return processKeyEvent(keyboardKeyTable, getScreenCommandContext(), set, key, press);
+  return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), set, key, press);
 }
 
 static void scheduleKeyboardMonitor (int interval);

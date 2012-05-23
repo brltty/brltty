@@ -90,6 +90,7 @@ extern int enqueueXtScanCode (
 );
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
+extern KeyTableCommandContext getCurrentCommandContext (void);
 
 extern int writeBraillePacket (
   BrailleDisplay *brl, GioEndpoint *endpoint,
