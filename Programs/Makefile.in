@@ -146,6 +146,16 @@ unicode.$O:
 
 ###############################################################################
 
+PREFS_OBJECTS = prefs.$O prefs_table.$O
+
+prefs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs.c
+
+prefs_table.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs_table.c
+
+###############################################################################
+
 io_generic.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
 
@@ -406,7 +416,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS_FOR_HOST) config.$O prefs.$O menu.$O ses.$O status.$O clipboard.$O touch.$O async.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O $(HOSTCMD_OBJECTS) lock.$O $(MOUNT_OBJECTS) queue.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS_FOR_HOST) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O async.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O $(HOSTCMD_OBJECTS) lock.$O $(MOUNT_OBJECTS) queue.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -416,9 +426,6 @@ brltty.$O:
 
 config.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/config.c
-
-prefs.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs.c
 
 menu.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/menu.c
@@ -529,7 +536,7 @@ check-text-tables: brltty-ttb$X
 
 ###############################################################################
 
-BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS_FOR_HOST) prefs.$O datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS) $(HOSTCMD_OBJECTS) lock.$O unicode.$O
+BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS_FOR_HOST) $(PREFS_OBJECTS) datafile.$O queue.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS) $(HOSTCMD_OBJECTS) lock.$O unicode.$O
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -611,7 +618,7 @@ check-key-tables: all-ktbtest
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS_FOR_HOST) prefs.$O $(TUNE_OBJECTS)
+TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS_FOR_HOST) $(PREFS_OBJECTS) $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)
