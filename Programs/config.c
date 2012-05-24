@@ -2959,6 +2959,7 @@ brlttyStart (int argc, char *argv[]) {
   onProgramExit(exitScreen);
   constructSpecialScreens();
   /* handle key table option */
+  enableBrailleHelpPage(); /* ensure that it's first */
   onProgramExit(exitKeyTable);
   replaceKeyboardKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
