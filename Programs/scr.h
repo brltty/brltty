@@ -189,7 +189,12 @@ extern void destructRoutingScreen (void);
 /* Routines which apply to the help screen. */
 extern int constructHelpScreen (void);
 extern void destructHelpScreen (void);
-extern int addHelpLine (const wchar_t *line);
+extern int addHelpPage (void);
+extern unsigned int getHelpPageCount (void);
+extern unsigned int getHelpPageNumber (void);
+extern int setHelpPageNumber (unsigned int number);
+extern int clearHelpPage (void);
+extern int addHelpLine (const wchar_t *characters);
 extern unsigned int getHelpLineCount (void);
 
 typedef struct ScreenDriverStruct ScreenDriver;

@@ -564,12 +564,76 @@ loadContractionTable (const char *name) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
+static unsigned int brailleHelpPageNumber = 0;
+static unsigned int keyboardHelpPageNumber = 0;
+
+static int
+enableHelpPage (unsigned int *pageNumber) {
+  if (!*pageNumber) {
+    if (!constructHelpScreen()) return 0;
+    if (!(*pageNumber = addHelpPage())) return 0;
+  }
+
+  return setHelpPageNumber(*pageNumber);
+}
+
+static int
+enableBrailleHelpPage (void) {
+  return enableHelpPage(&brailleHelpPageNumber);
+}
+
+static int
+enableKeyboardHelpPage (void) {
+  return enableHelpPage(&keyboardHelpPageNumber);
+}
+
+static void
+disableHelpPage (unsigned int pageNumber) {
+  if (pageNumber) {
+    if (setHelpPageNumber(pageNumber)) {
+      clearHelpPage();
+    }
+  }
+}
+
+static int
+handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
+  return addHelpLine(line);
+}
+
+static int
+handleUtf8HelpLine (char *line, void *data) {
+  const char *utf8 = line;
+  size_t count = strlen(utf8) + 1;
+  wchar_t buffer[count];
+  wchar_t *characters = buffer;
+
+  convertUtf8ToWchars(&utf8, &characters, count);
+  return handleWcharHelpLine(buffer, data);
+}
+
+static int
+loadHelpFile (const char *file) {
+  int loaded = 0;
+  FILE *stream;
+
+  if ((stream = openDataFile(file, "r", 0))) {
+    if (processLines(stream, handleUtf8HelpLine, NULL)) loaded = 1;
+
+    fclose(stream);
+  }
+
+  return loaded;
+}
+
 static void
 exitKeyTable (void) {
   if (keyboardKeyTable) {
     destroyKeyTable(keyboardKeyTable);
     keyboardKeyTable = NULL;
   }
+
+  disableHelpPage(keyboardHelpPageNumber);
 }
 
 static int
@@ -612,8 +676,17 @@ replaceKeyboardKeyTable (const char *name) {
     if (!table) return 0;
   }
 
-  if (keyboardKeyTable) destroyKeyTable(keyboardKeyTable);
-  keyboardKeyTable = table;
+  if (keyboardKeyTable) {
+    destroyKeyTable(keyboardKeyTable);
+    disableHelpPage(keyboardHelpPageNumber);
+  }
+
+  if ((keyboardKeyTable = table)) {
+    if (enableKeyboardHelpPage()) {
+      listKeyTable(keyboardKeyTable, handleWcharHelpLine, NULL);
+    }
+  }
+
   return 1;
 }
 
@@ -1795,36 +1868,6 @@ getPreferencesMenu (void) {
   return menu;
 }
 
-static int
-handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
-  return addHelpLine(line);
-}
-
-static int
-handleUtf8HelpLine (char *line, void *data) {
-  const char *utf8 = line;
-  size_t count = strlen(utf8) + 1;
-  wchar_t buffer[count];
-  wchar_t *characters = buffer;
-
-  convertUtf8ToWchars(&utf8, &characters, count);
-  return handleWcharHelpLine(buffer, data);
-}
-
-static int
-loadHelpFile (const char *file) {
-  int loaded = 0;
-  FILE *stream;
-
-  if ((stream = openDataFile(file, "r", 0))) {
-    if (processLines(stream, handleUtf8HelpLine, NULL)) loaded = 1;
-
-    fclose(stream);
-  }
-
-  return loaded;
-}
-
 typedef struct {
   const char *driverType;
   const char *const *requestedDrivers;
@@ -1916,7 +1959,7 @@ constructBrailleDriver (void) {
             if ((brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
               logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), path);
 
-              if (constructHelpScreen()) {
+              if (enableBrailleHelpPage()) {
                 listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
               }
             } else {
@@ -1946,7 +1989,7 @@ constructBrailleDriver (void) {
           if ((path = makePath(opt_tablesDirectory, file))) {
             int loaded = 0;
 
-            if (constructHelpScreen())
+            if (enableBrailleHelpPage())
               if (loadHelpFile(path))
                 loaded = 1;
 
@@ -1985,7 +2028,7 @@ destructBrailleDriver (void) {
   brailleConstructed = 0;
   drainBrailleOutput(&brl, 0);
   braille->destruct(&brl);
-  destructHelpScreen();
+  disableHelpPage(brailleHelpPageNumber);
 
   if (brl.keyTable) {
     destroyKeyTable(brl.keyTable);
@@ -2913,6 +2956,8 @@ brlttyStart (int argc, char *argv[]) {
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
+  onProgramExit(exitScreen);
+  constructSpecialScreens();
   /* handle key table option */
   onProgramExit(exitKeyTable);
   replaceKeyboardKeyTable(opt_keyTable);
@@ -2924,8 +2969,6 @@ brlttyStart (int argc, char *argv[]) {
       scheduleKeyboardMonitor(0);
 
   /* initialize screen driver */
-  onProgramExit(exitScreen);
-  constructSpecialScreens();
   screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();

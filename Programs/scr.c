@@ -166,7 +166,7 @@ selectScreen (void) {
   const ScreenEntry *entry = screenEntries;
 
   while (entry->which) {
-    if (entry->which & activeScreens) break;
+    if (activeScreens & entry->which) break;
     entry += 1;
   }
 
@@ -368,7 +368,7 @@ haveHelpScreen (void) {
 
 int
 activateHelpScreen (void) {
-  if (!helpScreenConstructed) return 0;
+  if (!constructHelpScreen()) return 0;
   activateScreen(SCR_HELP);
   return 1;
 }
@@ -380,7 +380,12 @@ deactivateHelpScreen (void) {
 
 int
 constructHelpScreen (void) {
-  return (helpScreenConstructed = helpScreen.construct());
+  if (!helpScreenConstructed) {
+    if (!helpScreen.construct()) return 0;
+    helpScreenConstructed = 1;
+  }
+
+  return 1;
 }
 
 void
@@ -392,8 +397,33 @@ destructHelpScreen (void) {
 }
 
 int
-addHelpLine (const wchar_t *line) {
-  return helpScreen.addLine(line);
+addHelpPage (void) {
+  return helpScreen.addPage();
+}
+
+unsigned int
+getHelpPageCount (void) {
+  return helpScreen.getPageCount();
+}
+
+unsigned int
+getHelpPageNumber (void) {
+  return helpScreen.getPageNumber();
+}
+
+int
+setHelpPageNumber (unsigned int number) {
+  return helpScreen.setPageNumber(number);
+}
+
+int
+clearHelpPage (void) {
+  return helpScreen.clearPage();
+}
+
+int
+addHelpLine (const wchar_t *characters) {
+  return helpScreen.addLine(characters);
 }
 
 unsigned int

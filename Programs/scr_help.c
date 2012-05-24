@@ -30,77 +30,177 @@ typedef struct {
   size_t length;
 } HelpLineEntry;
 
-static HelpLineEntry *lineTable = NULL;
-static unsigned int lineCount = 0;
+typedef struct {
+  HelpLineEntry *lineTable;
+  unsigned int lineLimit;
 
-static unsigned int lineTableSize;
-static size_t lineLength;
-static unsigned char cursorRow, cursorColumn;
+  unsigned int lineCount;
+  size_t lineLength;
+
+  unsigned char cursorRow;
+  unsigned char cursorColumn;
+} HelpPageEntry;
+
+static HelpPageEntry *pageTable;
+static unsigned int pageLimit;
+static unsigned int pageCount;
+static unsigned int pageIndex;
 
 static void
-clearHelpScreen (void) {
-  while (lineCount) {
-    HelpLineEntry *hle = &lineTable[--lineCount];
-    free(hle->characters);
-  }
-
-  if (lineTable) {
-    free(lineTable);
-    lineTable = NULL;
-  }
-
-  lineTableSize = 0;
-  lineLength = 1;
-  cursorRow = 0;
-  cursorColumn = 0;
+initializePageTable (void) {
+  pageTable = NULL;
+  pageLimit = 0;
+  pageCount = 0;
+  pageIndex = 0;
 }
 
-static int
-addLine_HelpScreen (const wchar_t *line) {
-  if (lineCount == lineTableSize) {
-    unsigned int newSize = lineTableSize? lineTableSize<<1: 0X40;
-    HelpLineEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
+static void
+initializePage (HelpPageEntry *page) {
+  page->lineTable = NULL;
+  page->lineLimit = 0;
+
+  page->lineCount = 0;
+  page->lineLength = 1;
+
+  page->cursorRow = 0;
+  page->cursorColumn = 0;
+}
+
+static unsigned int
+addPage (void) {
+  if (pageCount == pageLimit) {
+    unsigned int newLimit = pageLimit + 1;
+    HelpPageEntry *newTable = realloc(pageTable, ARRAY_SIZE(newTable, newLimit));
 
     if (!newTable) {
-      logSystemError("realloc");
-      return 0;
-    }
-
-    lineTable = newTable;
-    lineTableSize = newSize;
-  }
-
-  {
-    HelpLineEntry *hle = &lineTable[lineCount];
-    size_t length = wcslen(line);
-    if ((hle->length = length) > lineLength) lineLength = length;
-
-    if (!(hle->characters = malloc(ARRAY_SIZE(hle->characters, length)))) {
       logMallocError();
       return 0;
     }
 
-    wmemcpy(hle->characters, line, length);
+    pageTable = newTable;
+    pageLimit = newLimit;
   }
-  lineCount += 1;
 
+  {
+    HelpPageEntry *page = &pageTable[pageCount];
+    initializePage(page);
+  }
+
+  return pageCount += 1;
+}
+
+static void
+clearPage (HelpPageEntry *page) {
+  if (page->lineTable) {
+    while (page->lineCount) {
+      HelpLineEntry *line = &page->lineTable[--page->lineCount];
+
+      if (line->characters) free(line->characters);
+    }
+
+    free(page->lineTable);
+    initializePage(page);
+  }
+}
+
+static int
+addLine (HelpPageEntry *page, const wchar_t *characters) {
+  if (page->lineCount == page->lineLimit) {
+    unsigned int newLimit = page->lineLimit? page->lineLimit<<1: 0X40;
+    HelpLineEntry *newTable = realloc(page->lineTable, ARRAY_SIZE(newTable, newLimit));
+
+    if (!newTable) {
+      logMallocError();
+      return 0;
+    }
+
+    page->lineTable = newTable;
+    page->lineLimit = newLimit;
+  }
+
+  {
+    HelpLineEntry *line = &page->lineTable[page->lineCount];
+    size_t length = wcslen(characters);
+    if ((line->length = length) > page->lineLength) page->lineLength = length;
+
+    if (!(line->characters = malloc(ARRAY_SIZE(line->characters, length)))) {
+      logMallocError();
+      return 0;
+    }
+
+    wmemcpy(line->characters, characters, length);
+  }
+
+  page->lineCount += 1;
   return 1;
 }
 
-static unsigned int 
-getLineCount_HelpScreen (void) {
-  return lineCount;
+static HelpPageEntry *
+getPage (void) {
+  if (pageIndex < pageCount) return &pageTable[pageIndex];
+  logMessage(LOG_WARNING, "help page index out of range: %u >= %u", pageIndex, pageCount);
+  return NULL;
 }
 
 static int
 construct_HelpScreen (void) {
-  clearHelpScreen();
+  initializePageTable();
   return 1;
 }
 
 static void
 destruct_HelpScreen (void) {
-  clearHelpScreen();
+  if (pageTable) {
+    while (pageCount) clearPage(&pageTable[--pageCount]);
+    free(pageTable);
+  }
+
+  initializePageTable();
+}
+
+static unsigned int
+addPage_HelpScreen (void) {
+  return addPage();
+}
+
+static unsigned int
+getPageCount_HelpScreen (void) {
+  return pageCount;
+}
+
+static unsigned int
+getPageNumber_HelpScreen (void) {
+  return pageIndex + 1;
+}
+
+static int
+setPageNumber_HelpScreen (unsigned int number) {
+  if ((number < 1) || (number > pageCount)) return 0;
+  pageIndex = number - 1;
+  return 1;
+}
+
+static int
+clearPage_HelpScreen (void) {
+  HelpPageEntry *page = getPage();
+
+  if (!page) return 0;
+  clearPage(page);
+  return 1;
+}
+
+static int
+addLine_HelpScreen (const wchar_t *characters) {
+  HelpPageEntry *page = getPage();
+  if (!page) return 0;
+  return addLine(page, characters);
+}
+
+static unsigned int 
+getLineCount_HelpScreen (void) {
+  HelpPageEntry *page = getPage();
+
+  return page? page->lineCount: 0;
 }
 
 static int
@@ -110,75 +210,90 @@ currentVirtualTerminal_HelpScreen (void) {
 
 static void
 describe_HelpScreen (ScreenDescription *description) {
-  description->posx = cursorColumn;
-  description->posy = cursorRow;
-  description->cols = lineLength;
-  description->rows = lineCount;
-  description->number = currentVirtualTerminal_HelpScreen();
+  const HelpPageEntry *page = getPage();
+
+  if (page) {
+    description->posx = page->cursorColumn;
+    description->posy = page->cursorRow;
+    description->cols = page->lineLength;
+    description->rows = page->lineCount;
+    description->number = currentVirtualTerminal_HelpScreen();
+  } else {
+    description->unreadable = gettext("help screen not readable");
+  }
 }
 
 static int
 readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  if (validateScreenBox(box, lineLength, lineCount)) {
-    ScreenCharacter *character = buffer;
-    int row;
+  const HelpPageEntry *page = getPage();
 
-    for (row=0; row<box->height; row+=1) {
-      const HelpLineEntry *hle = &lineTable[box->top + row];
-      int column;
+  if (page) {
+    if (validateScreenBox(box, page->lineLength, page->lineCount)) {
+      ScreenCharacter *character = buffer;
+      int row;
 
-      for (column=0; column<box->width; column+=1) {
-        int index = box->left + column;
+      for (row=0; row<box->height; row+=1) {
+        const HelpLineEntry *line = &page->lineTable[box->top + row];
+        int column;
 
-        if (index < hle->length) {
-          character->text = hle->characters[index];
-        } else {
-          character->text = WC_C(' ');
+        for (column=0; column<box->width; column+=1) {
+          int index = box->left + column;
+
+          if (index < line->length) {
+            character->text = line->characters[index];
+          } else {
+            character->text = WC_C(' ');
+          }
+
+          character->attributes = SCR_COLOUR_DEFAULT;
+          character += 1;
         }
-
-        character->attributes = 0X07;
-        character += 1;
       }
-    }
 
-    return 1;
+      return 1;
+    }
   }
+
   return 0;
 }
 
 static int
 insertKey_HelpScreen (ScreenKey key) {
-  switch (key) {
-    case SCR_KEY_CURSOR_UP:
-      if (cursorRow > 0) {
-        cursorRow -= 1;
-        return 1;
-      }
-      break;
+  HelpPageEntry *page = getPage();
 
-    case SCR_KEY_CURSOR_DOWN:
-      if (cursorRow < (lineCount - 1)) {
-        cursorRow += 1;
-        return 1;
-      }
-      break;
+  if (page) {
+    switch (key) {
+      case SCR_KEY_CURSOR_UP:
+        if (page->cursorRow > 0) {
+          page->cursorRow -= 1;
+          return 1;
+        }
+        break;
 
-    case SCR_KEY_CURSOR_LEFT:
-      if (cursorColumn > 0) {
-        cursorColumn -= 1;
-        return 1;
-      }
-      break;
+      case SCR_KEY_CURSOR_DOWN:
+        if (page->cursorRow < (page->lineCount - 1)) {
+          page->cursorRow += 1;
+          return 1;
+        }
+        break;
 
-    case SCR_KEY_CURSOR_RIGHT:
-      if (cursorColumn < (lineLength - 1)) {
-        cursorColumn += 1;
-        return 1;
-      }
-      break;
+      case SCR_KEY_CURSOR_LEFT:
+        if (page->cursorColumn > 0) {
+          page->cursorColumn -= 1;
+          return 1;
+        }
+        break;
 
-    default:
-      break;
+      case SCR_KEY_CURSOR_RIGHT:
+        if (page->cursorColumn < (page->lineLength - 1)) {
+          page->cursorColumn += 1;
+          return 1;
+        }
+        break;
+
+      default:
+        break;
+    }
   }
 
   return 0;
@@ -186,14 +301,17 @@ insertKey_HelpScreen (ScreenKey key) {
 
 static int
 routeCursor_HelpScreen (int column, int row, int screen) {
+  HelpPageEntry *page = getPage();
+  if (!page) return 0;
+
   if (row != -1) {
-    if ((row < 0) || (row >= lineCount)) return 0;
-    cursorRow = row;
+    if ((row < 0) || (row >= page->lineCount)) return 0;
+    page->cursorRow = row;
   }
 
   if (column != -1) {
-    if ((column < 0) || (column >= lineLength)) return 0;
-    cursorColumn = column;
+    if ((column < 0) || (column >= page->lineLength)) return 0;
+    page->cursorColumn = column;
   }
 
   return 1;
@@ -207,8 +325,16 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.readCharacters = readCharacters_HelpScreen;
   help->base.insertKey = insertKey_HelpScreen;
   help->base.routeCursor = routeCursor_HelpScreen;
+
   help->construct = construct_HelpScreen;
   help->destruct = destruct_HelpScreen;
+
+  help->addPage = addPage_HelpScreen;
+  help->getPageCount = getPageCount_HelpScreen;
+  help->getPageNumber = getPageNumber_HelpScreen;
+  help->setPageNumber = setPageNumber_HelpScreen;
+
+  help->clearPage = clearPage_HelpScreen;
   help->addLine = addLine_HelpScreen;
   help->getLineCount = getLineCount_HelpScreen;
 }

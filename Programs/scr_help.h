@@ -29,7 +29,14 @@ typedef struct {
   BaseScreen base;
   int (*construct) (void);
   void (*destruct) (void);
-  int (*addLine) (const wchar_t *line);
+
+  unsigned int (*addPage) (void);
+  unsigned int (*getPageCount) (void);
+  unsigned int (*getPageNumber) (void);
+  int (*setPageNumber) (unsigned int number);
+
+  int (*clearPage) (void);
+  int (*addLine) (const wchar_t *characters);
   unsigned int (*getLineCount) (void);
 } HelpScreen;
 

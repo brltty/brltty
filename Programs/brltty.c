@@ -2426,9 +2426,7 @@ doCommand:
       case BRL_CMD_PREFMENU:
         if (isMenuScreen()) {
           if (prefs.saveOnExit)
-            if (savePreferences())
-              playTune(&tune_command_done);
-
+            if (savePreferences()) playTune(&tune_command_done);
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
           updateSessionAttributes();
@@ -2462,14 +2460,43 @@ doCommand:
         }
         break;
 
-      case BRL_CMD_HELP:
-        infoMode = 0;
-        if (isHelpScreen()) {
-          deactivateHelpScreen();
-        } else if (!activateHelpScreen()) {
+      case BRL_CMD_HELP: {
+        int ok;
+        unsigned int pageNumber;
+
+        if ((ok = haveHelpScreen())) {
+          pageNumber = getHelpPageNumber() + 1;
+        } else {
+          pageNumber = activateHelpScreen()? 1: 0;
+        }
+
+        if (pageNumber) {
+          unsigned int pageCount = getHelpPageCount();
+
+          while (pageNumber <= pageCount) {
+            if (setHelpPageNumber(pageNumber))
+              if (getHelpLineCount())
+                break;
+
+            pageNumber += 1;
+          }
+
+          if (pageNumber > pageCount) {
+            deactivateHelpScreen();
+          } else {
+            ok = 1;
+          }
+        }
+
+        if (ok) {
+          infoMode = 0;
+        } else {
           message(NULL, gettext("help not available"), 0);
         }
+
         break;
+      }
+
       case BRL_CMD_INFO:
         if ((prefs.statusPosition == spNone) || haveStatusCells()) {
           TOGGLE_NOPLAY(infoMode);
