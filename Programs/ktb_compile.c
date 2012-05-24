@@ -286,7 +286,11 @@ static int
 sortKeyValues (const void *element1, const void *element2) {
   const KeyNameEntry *const *kne1 = element1;
   const KeyNameEntry *const *kne2 = element2;
-  return compareKeyValues(&(*kne1)->value, &(*kne2)->value);
+  int result = compareKeyValues(&(*kne1)->value, &(*kne2)->value);
+  if (result != 0) return result;
+  if (*kne1 < *kne2) return -1;
+  if (*kne1 > *kne2) return 1;
+  return 0;
 }
 
 static int
