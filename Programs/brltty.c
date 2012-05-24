@@ -2424,20 +2424,26 @@ doCommand:
       }
 
       case BRL_CMD_PREFMENU:
-        if (isMenuScreen()) {
+        if (haveMenuScreen()) {
           if (prefs.saveOnExit)
-            if (savePreferences()) playTune(&tune_command_done);
+            if (savePreferences())
+              playTune(&tune_command_done);
+
           deactivateMenuScreen();
         } else if (activateMenuScreen()) {
           updateSessionAttributes();
           ses->hideCursor = 1;
-          writeStatusCells();
-          message(modeString_preferences, gettext("Preferences Menu"), 0);
           savedPreferences = prefs;
+
+          if (isMenuScreen()) {
+            writeStatusCells();
+            message(modeString_preferences, gettext("Preferences Menu"), 0);
+          }
         } else {
           playTune(&tune_command_rejected);
         }
         break;
+
       case BRL_CMD_PREFSAVE:
         if (isMenuScreen()) {
           if (savePreferences()) playTune(&tune_command_done);
