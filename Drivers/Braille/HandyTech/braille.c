@@ -1188,37 +1188,37 @@ synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
   getCurrentTime(&hostTime);
 
   {
-    const TimeValue deviceTime = {
-      .seconds = makeSeconds(
-        getBigEndian16(dateTime->year),
-        dateTime->month - 1,
-        dateTime->day - 1,
-        dateTime->hour,
-        dateTime->minute,
-        dateTime->second
-      )
-    };
+    TimeValue deviceTime;
+
+    {
+      TimeComponents components = {
+        .year = getBigEndian16(dateTime->year),
+        .month = dateTime->month - 1,
+        .day = dateTime->day - 1,
+        .hour = dateTime->hour,
+        .minute = dateTime->minute,
+        .second = dateTime->second
+      };
+
+      makeTimeValue(&deviceTime, &components);
+    }
 
     delta = millisecondsBetween(&hostTime, &deviceTime);
     if (delta < 0) delta = -delta;
   }
 
   if (delta > 1000) {
-    uint16_t year;
-    uint8_t month;
-    uint8_t day;
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
+    TimeComponents components;
     HT_DateTime payload;
 
-    expandSeconds(hostTime.seconds, &year, &month, &day, &hour, &minute, &second);
-    putLittleEndian16(&payload.year, year);
-    payload.month = month + 1;
-    payload.day = day + 1;
-    payload.hour = hour;
-    payload.minute = minute;
-    payload.second = second;
+    expandTimeValue(&hostTime, &components);
+    putLittleEndian16(&payload.year, components.year);
+    payload.month = components.month + 1;
+    payload.day = components.day + 1;
+    payload.hour = components.hour;
+    payload.minute = components.minute;
+    payload.second = components.second;
+
     logMessage(LOG_DEBUG, "Time difference between host and device: %ld.%03ld",
                (delta / MSECS_PER_SEC), (delta % MSECS_PER_SEC));
 

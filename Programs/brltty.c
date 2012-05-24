@@ -308,6 +308,11 @@ showBrailleText (const char *mode, const char *text, int minimumDelay) {
   return ok;
 }
 
+typedef struct {
+  TimeComponents time;
+  const char *meridian;
+} TimeFormattingData;
+
 static inline const char *
 getMeridianString_am (void) {
 #ifdef AM_STR
@@ -348,11 +353,7 @@ getMeridianString (uint8_t *hour) {
 }
 
 static size_t
-formatBrailleTime (
-  char *buffer, size_t size,
-  uint16_t year, uint8_t month, uint8_t day,
-  uint8_t hour, uint8_t minute, uint8_t second
-) {
+formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   size_t length;
   char time[0X40];
   STR_BEGIN(buffer, size);
@@ -362,7 +363,6 @@ formatBrailleTime (
     const char *minuteFormat = "%02" PRIu8;
     const char *secondFormat = "%02" PRIu8;
     char separator;
-    const char *meridian = getMeridianString(&hour);
 
     switch (prefs.timeSeparator) {
       default:
@@ -386,12 +386,12 @@ formatBrailleTime (
     }
 
     STR_BEGIN(time, sizeof(time));
-    STR_PRINTF(hourFormat, hour);
+    STR_PRINTF(hourFormat, fmt->time.hour);
     STR_PRINTF("%c", separator);
-    STR_PRINTF(minuteFormat, minute);
+    STR_PRINTF(minuteFormat, fmt->time.minute);
     STR_PRINTF("%c", separator);
-    STR_PRINTF(secondFormat, second);
-    if (meridian) STR_PRINTF("%s", meridian);
+    STR_PRINTF(secondFormat, fmt->time.second);
+    if (fmt->meridian) STR_PRINTF("%s", fmt->meridian);
     STR_END
   }
 
@@ -404,10 +404,11 @@ formatBrailleTime (
       const char *yearFormat = "%04" PRIu16;
       const char *monthFormat = "%02" PRIu8;
       const char *dayFormat = "%02" PRIu8;
-      char separator;
 
-      month += 1;
-      day += 1;
+      uint8_t month = fmt->time.month + 1;
+      uint8_t day = fmt->time.day + 1;
+
+      char separator;
 
       switch (prefs.dateSeparator) {
         default:
@@ -428,7 +429,7 @@ formatBrailleTime (
       switch (prefs.dateFormat) {
         default:
         case dfYearMonthDay:
-          STR_PRINTF(yearFormat, year);
+          STR_PRINTF(yearFormat, fmt->time.year);
           STR_PRINTF("%c", separator);
           STR_PRINTF(monthFormat, month);
           STR_PRINTF("%c", separator);
@@ -440,7 +441,7 @@ formatBrailleTime (
           STR_PRINTF("%c", separator);
           STR_PRINTF(dayFormat, day);
           STR_PRINTF("%c", separator);
-          STR_PRINTF(yearFormat, year);
+          STR_PRINTF(yearFormat, fmt->time.year);
           break;
 
         case dfDayMonthYear:
@@ -448,7 +449,7 @@ formatBrailleTime (
           STR_PRINTF("%c", separator);
           STR_PRINTF(monthFormat, month);
           STR_PRINTF("%c", separator);
-          STR_PRINTF(yearFormat, year);
+          STR_PRINTF(yearFormat, fmt->time.year);
           break;
       }
       STR_END
@@ -475,28 +476,24 @@ formatBrailleTime (
 }
 
 static void
-doBrailleTime (
-  uint16_t year, uint8_t month, uint8_t day,
-  uint8_t hour, uint8_t minute, uint8_t second
-) {
+doBrailleTime (const TimeFormattingData *fmt) {
   char buffer[0X80];
 
-  formatBrailleTime(buffer, sizeof(buffer), year, month, day, hour, minute, second);
+  formatBrailleTime(buffer, sizeof(buffer), fmt);
   message(NULL, buffer, MSG_SILENT);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static size_t
-formatSpeechTime (char *buffer, size_t size, uint8_t hour, uint8_t minute, uint8_t second) {
+formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   size_t length;
 
   const char *oclock;
-  const char *meridian = getMeridianString(&hour);
 
   switch (prefs.timeFormat) {
     default:
     case tf24Hour:
-      oclock = ngettext("hour", "hours", hour);
+      oclock = ngettext("hour", "hours", fmt->time.hour);
       break;
 
     case tf12Hour:
@@ -505,26 +502,26 @@ formatSpeechTime (char *buffer, size_t size, uint8_t hour, uint8_t minute, uint8
   }
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%u ", hour);
+  STR_PRINTF("%u ", fmt->time.hour);
 
-  if (minute == 0) {
+  if (fmt->time.minute == 0) {
     STR_PRINTF("%s", oclock);
   } else {
-    STR_PRINTF("%02u", minute);
+    STR_PRINTF("%02u", fmt->time.minute);
   }
 
-  if (meridian) {
-    const char *character = meridian;
+  if (fmt->meridian) {
+    const char *character = fmt->meridian;
     while (*character) STR_PRINTF(" %c", *character++);
   }
   STR_PRINTF(", ");
 
-  if (second == 0) {
+  if (fmt->time.second == 0) {
     STR_PRINTF("%s", gettext("exactly"));
   } else {
     STR_PRINTF("%s %u %s",
-               gettext("and"), second,
-               ngettext("second", "seconds", second));
+               gettext("and"), fmt->time.second,
+               ngettext("second", "seconds", fmt->time.second));
   }
 
   length = STR_LENGTH;
@@ -534,13 +531,15 @@ formatSpeechTime (char *buffer, size_t size, uint8_t hour, uint8_t minute, uint8
 }
 
 static size_t
-formatSpeechDate (char *buffer, size_t size, uint16_t year, uint8_t month, uint8_t day) {
+formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
   size_t length;
 
-  const char *monthName;
   const char *yearFormat = "%u";
   const char *monthFormat = "%s";
   const char *dayFormat = "%u";
+
+  const char *month;
+  uint8_t day = fmt->time.day + 1;
 
 #ifdef MON_1
   {
@@ -549,11 +548,11 @@ formatSpeechDate (char *buffer, size_t size, uint16_t year, uint8_t month, uint8
       MON_7, MON_8, MON_9, MON_10, MON_11, MON_12
     };
 
-    monthName = (month < ARRAY_COUNT(months))? nl_langinfo(months[month]): "?";
+    month = (fmt->time.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->time.month]): "?";
   }
 #else /* MON_1 */
   {
-    static const char *const monthNames[] = {
+    static const char *const months[] = {
       strtext("January"),
       strtext("February"),
       strtext("March"),
@@ -568,38 +567,36 @@ formatSpeechDate (char *buffer, size_t size, uint16_t year, uint8_t month, uint8
       strtext("December")
     };
 
-    monthName = (month < ARRAY_COUNT(monthNames))? gettext(monthNames[month]): "?";
+    month = (fmt->time.month < ARRAY_COUNT(months))? gettext(months[fmt->time.month]): "?";
   }
 #endif /* MON_1 */
-
-  day += 1;
 
   STR_BEGIN(buffer, size);
 
   switch (prefs.dateFormat) {
     default:
     case dfYearMonthDay:
-      STR_PRINTF(yearFormat, year);
+      STR_PRINTF(yearFormat, fmt->time.year);
       STR_PRINTF(" ");
-      STR_PRINTF(monthFormat, monthName);
+      STR_PRINTF(monthFormat, month);
       STR_PRINTF(" ");
       STR_PRINTF(dayFormat, day);
       break;
 
     case dfMonthDayYear:
-      STR_PRINTF(monthFormat, monthName);
+      STR_PRINTF(monthFormat, month);
       STR_PRINTF(" ");
       STR_PRINTF(dayFormat, day);
       STR_PRINTF(" ");
-      STR_PRINTF(yearFormat, year);
+      STR_PRINTF(yearFormat, fmt->time.year);
       break;
 
     case dfDayMonthYear:
       STR_PRINTF(dayFormat, day);
       STR_PRINTF(" ");
-      STR_PRINTF(monthFormat, monthName);
+      STR_PRINTF(monthFormat, month);
       STR_PRINTF(" ");
-      STR_PRINTF(yearFormat, year);
+      STR_PRINTF(yearFormat, fmt->time.year);
       break;
   }
 
@@ -610,21 +607,18 @@ formatSpeechDate (char *buffer, size_t size, uint16_t year, uint8_t month, uint8
 }
 
 static void
-doSpeechTime (
-  uint16_t year, uint8_t month, uint8_t day,
-  uint8_t hour, uint8_t minute, uint8_t second
-) {
+doSpeechTime (const TimeFormattingData *fmt) {
   char announcement[0X100];
   char time[0X80];
 
   STR_BEGIN(announcement, sizeof(announcement));
-  formatSpeechTime(time, sizeof(time), hour, minute, second);
+  formatSpeechTime(time, sizeof(time), fmt);
 
   if (prefs.datePosition == dpNone) {
     STR_PRINTF("%s", time);
   } else {
     char date[0X40];
-    formatSpeechDate(date, sizeof(date), year, month, day);
+    formatSpeechDate(date, sizeof(date), fmt);
 
     switch (prefs.datePosition) {
       case dpBeforeTime:
@@ -646,6 +640,15 @@ doSpeechTime (
   sayString(&spk, announcement, 1);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+static void
+getTimeFormattingData (TimeFormattingData *fmt) {
+  TimeValue now;
+
+  getCurrentTime(&now);
+  expandTimeValue(&now, &fmt->time);
+  fmt->meridian = getMeridianString(&fmt->time.hour);
+}
 
 static int
 showInfo (void) {
@@ -719,20 +722,12 @@ showInfo (void) {
              prefs.blinkingCapitals? 'B': ' ');
 
   {
-    TimeValue now;
-    uint16_t year;
-    uint8_t month;
-    uint8_t day;
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
-
-    getCurrentTime(&now);
-    expandSeconds(now.seconds, &year, &month, &day, &hour, &minute, &second);
+    TimeFormattingData fmt;
+    getTimeFormattingData(&fmt);
 
     {
       char buffer[0X80];
-      size_t length = formatBrailleTime(buffer, sizeof(buffer), year, month, day, hour, minute, second);
+      size_t length = formatBrailleTime(buffer, sizeof(buffer), &fmt);
 
       if (length < STR_LEFT) STR_PRINTF("%s", buffer);
     }
@@ -2498,21 +2493,14 @@ doCommand:
         break;
 
       case BRL_CMD_TIME: {
-        TimeValue now;
-        uint16_t year;
-        uint8_t month;
-        uint8_t day;
-        uint8_t hour;
-        uint8_t minute;
-        uint8_t second;
-
-        getCurrentTime(&now);
-        expandSeconds(now.seconds, &year, &month, &day, &hour, &minute, &second);
+        TimeFormattingData fmt;
+        getTimeFormattingData(&fmt);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-        if (prefs.autospeak) doSpeechTime(year, month, day, hour, minute, second);
+        if (prefs.autospeak) doSpeechTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */
-        doBrailleTime(year, month, day, hour, minute, second);
+
+        doBrailleTime(&fmt);
         break;
       }
 

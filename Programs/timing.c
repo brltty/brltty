@@ -156,6 +156,54 @@ getTickLength (void) {
   return tickLength;
 }
 
+void
+makeTimeValue (TimeValue *value, const TimeComponents *components) {
+  value->nanoseconds = components->nanosecond;
+
+#if defined(GRUB_RUNTIME)
+  value->seconds = 0;
+
+#else /* make seconds */
+  struct tm time = {
+    .tm_year = components->year - 1900,
+    .tm_mon = components->month,
+    .tm_mday = components->day + 1,
+    .tm_hour = components->hour,
+    .tm_min = components->minute,
+    .tm_sec = components->second,
+    .tm_isdst = -1
+  };
+
+  value->seconds = mktime(&time);
+#endif /* make seconds */
+}
+
+void
+expandTimeValue (const TimeValue *value, TimeComponents *components) {
+  time_t seconds = value->seconds;
+  struct tm time;
+
+  localtime_r(&seconds, &time);
+  components->nanosecond = value->nanoseconds;
+
+#if defined(GRUB_RUNTIME)
+  components->year = time.tm.year;
+  components->month = time.tm.month - 1;
+  components->day = time.tm.day - 1;
+  components->hour = time.tm.hour;
+  components->minute = time.tm.minute;
+  components->second = time.tm.second;
+
+#else /* expand seconds */
+  components->year = time.tm_year + 1900;
+  components->month = time.tm_mon;
+  components->day = time.tm_mday - 1;
+  components->hour = time.tm_hour;
+  components->minute = time.tm_min;
+  components->second = time.tm_sec;
+#endif /* expand seconds */
+}
+
 size_t
 formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
   time_t time = seconds;
@@ -163,57 +211,6 @@ formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds) {
 
   localtime_r(&time, &description);
   return strftime(buffer, size, format, &description);
-}
-
-int32_t
-makeSeconds (
-  uint16_t year, uint8_t month, uint8_t day,
-  uint8_t hour, uint8_t minute, uint8_t second
-) {
-#if defined(GRUB_RUNTIME)
-  return 0;
-
-#else /* make seconds */
-  struct tm time = {
-    .tm_year = year - 1900,
-    .tm_mon = month,
-    .tm_mday = day + 1,
-    .tm_hour = hour,
-    .tm_min = minute,
-    .tm_sec = second,
-    .tm_isdst = -1
-  };
-
-  return mktime(&time);
-#endif /* make seconds */
-}
-
-void
-expandSeconds (
-  int32_t seconds,
-  uint16_t *year, uint8_t *month, uint8_t *day,
-  uint8_t *hour, uint8_t *minute, uint8_t *second
-) {
-  time_t time = seconds;
-  struct tm description;
-  localtime_r(&time, &description);
-
-#if defined(GRUB_RUNTIME)
-  *year = description.tm.year;
-  *month = description.tm.month - 1;
-  *day = description.tm.day - 1;
-  *hour = description.tm.hour;
-  *minute = description.tm.minute;
-  *second = description.tm.second;
-
-#else /* expand seconds */
-  *year = description.tm_year + 1900;
-  *month = description.tm_mon;
-  *day = description.tm_mday - 1;
-  *hour = description.tm_hour;
-  *minute = description.tm_min;
-  *second = description.tm_sec;
-#endif /* expand seconds */
 }
 
 void

@@ -35,22 +35,23 @@ typedef struct {
   int32_t nanoseconds;
 } TimeValue;
 
+typedef struct {
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+  int32_t nanosecond;
+} TimeComponents;
+
 #define PRIsec PRIi32
 #define PRInsec PRIi32
 
 extern void getCurrentTime (TimeValue *time);
+extern void makeTimeValue (TimeValue *value, const TimeComponents *components);
+extern void expandTimeValue (const TimeValue *value, TimeComponents *components);
 extern size_t formatSeconds (char *buffer, size_t size, const char *format, int32_t seconds);
-
-extern int32_t makeSeconds (
-  uint16_t year, uint8_t month, uint8_t day,
-  uint8_t hour, uint8_t minute, uint8_t second
-);
-
-extern void expandSeconds (
-  int32_t seconds,
-  uint16_t *year, uint8_t *month, uint8_t *day,
-  uint8_t *hour, uint8_t *minute, uint8_t *second
-);
 
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int milliseconds);
