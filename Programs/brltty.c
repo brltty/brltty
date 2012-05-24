@@ -308,80 +308,6 @@ showBrailleText (const char *mode, const char *text, int minimumDelay) {
   return ok;
 }
 
-static int
-showInfo (void) {
-  const char *mode = "info";
-  const size_t size = brl.textColumns * brl.textRows;
-  char text[size + 1];
-
-  if (!setStatusText(&brl, mode)) return 0;
-
-  /* Here we must be careful. Some displays (e.g. Braille Lite 18)
-   * are very small, and others (e.g. Bookworm) are even smaller.
-   */
-  if (size < 21) {
-    wchar_t characters[size];
-    size_t length;
-
-    const int cellCount = 5;
-    unsigned char cells[cellCount];
-    char prefix[cellCount];
-
-    {
-      static const unsigned char fields[] = {
-        sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-      };
-
-      memset(cells, 0, cellCount);
-      renderStatusFields(fields, cells);
-    }
-
-    memset(prefix, 'x', cellCount);
-    length = snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c",
-                      cellCount, prefix,
-                      scr.number,
-                      ses->trackCursor? 't': ' ',
-                      prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                                        (prefs.blinkingCursor? 'b': ' '),
-                      ses->displayMode? 'a': 't',
-                      isFrozenScreen()? 'f': ' ',
-                      prefs.textStyle? '6': '8',
-                      prefs.blinkingCapitals? 'B': ' ');
-    if (length > size) length = size;
-
-    {
-      unsigned int i;
-
-      for (i=0; i<length; i+=1) {
-        if (i < cellCount) {
-          characters[i] = UNICODE_BRAILLE_ROW | cells[i];
-        } else {
-          wint_t character = convertCharToWchar(text[i]);
-          if (character == WEOF) character = WC_C('?');
-          characters[i] = character;
-        }
-      }
-    }
-
-    return writeBrailleCharacters(mode, characters, length);
-  }
-
-  {
-    snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
-             SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy),
-             scr.number, 
-             ses->trackCursor? 't': ' ',
-             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                               (prefs.blinkingCursor? 'b': ' '),
-             ses->displayMode? 'a': 't',
-             isFrozenScreen()? 'f': ' ',
-             prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ');
-    return writeBrailleText(mode, text);
-  }
-}
-
 static inline const char *
 getMeridianString_am (void) {
 #ifdef AM_STR
@@ -421,14 +347,15 @@ getMeridianString (uint8_t *hour) {
   return string;
 }
 
-static void
-doBrailleTime (
+static size_t
+formatBrailleTime (
+  char *buffer, size_t size,
   uint16_t year, uint8_t month, uint8_t day,
   uint8_t hour, uint8_t minute, uint8_t second
 ) {
+  size_t length;
   char time[0X40];
-  char string[0X80];
-  STR_BEGIN(string, sizeof(string));
+  STR_BEGIN(buffer, size);
 
   {
     const char *hourFormat = "%02" PRIu8;
@@ -542,8 +469,20 @@ doBrailleTime (
     }
   }
 
+  length = STR_LENGTH;
   STR_END
-  message(NULL, string, MSG_SILENT);
+  return length;
+}
+
+static void
+doBrailleTime (
+  uint16_t year, uint8_t month, uint8_t day,
+  uint8_t hour, uint8_t minute, uint8_t second
+) {
+  char buffer[0X80];
+
+  formatBrailleTime(buffer, sizeof(buffer), year, month, day, hour, minute, second);
+  message(NULL, buffer, MSG_SILENT);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -706,8 +645,102 @@ doSpeechTime (
   STR_END
   sayString(&spk, announcement, 1);
 }
-
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+static int
+showInfo (void) {
+  const char *mode = "info";
+  const size_t size = brl.textColumns * brl.textRows;
+  char text[size + 1];
+
+  if (!setStatusText(&brl, mode)) return 0;
+
+  /* Here we must be careful. Some displays (e.g. Braille Lite 18)
+   * are very small, and others (e.g. Bookworm) are even smaller.
+   */
+  if (size < 21) {
+    wchar_t characters[size];
+    size_t length;
+
+    const int cellCount = 5;
+    unsigned char cells[cellCount];
+    char prefix[cellCount];
+
+    {
+      static const unsigned char fields[] = {
+        sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+      };
+
+      memset(cells, 0, cellCount);
+      renderStatusFields(fields, cells);
+    }
+
+    memset(prefix, 'x', cellCount);
+    length = snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c",
+                      cellCount, prefix,
+                      scr.number,
+                      ses->trackCursor? 't': ' ',
+                      prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                                        (prefs.blinkingCursor? 'b': ' '),
+                      ses->displayMode? 'a': 't',
+                      isFrozenScreen()? 'f': ' ',
+                      prefs.textStyle? '6': '8',
+                      prefs.blinkingCapitals? 'B': ' ');
+    if (length > size) length = size;
+
+    {
+      unsigned int i;
+
+      for (i=0; i<length; i+=1) {
+        if (i < cellCount) {
+          characters[i] = UNICODE_BRAILLE_ROW | cells[i];
+        } else {
+          wint_t character = convertCharToWchar(text[i]);
+          if (character == WEOF) character = WC_C('?');
+          characters[i] = character;
+        }
+      }
+    }
+
+    return writeBrailleCharacters(mode, characters, length);
+  }
+
+  STR_BEGIN(text, sizeof(text));
+  STR_PRINTF("%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+             SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
+             SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy),
+             scr.number, 
+             ses->trackCursor? 't': ' ',
+             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                               (prefs.blinkingCursor? 'b': ' '),
+             ses->displayMode? 'a': 't',
+             isFrozenScreen()? 'f': ' ',
+             prefs.textStyle? '6': '8',
+             prefs.blinkingCapitals? 'B': ' ');
+
+  {
+    TimeValue now;
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+
+    getCurrentTime(&now);
+    expandSeconds(now.seconds, &year, &month, &day, &hour, &minute, &second);
+
+    {
+      char buffer[0X80];
+      size_t length = formatBrailleTime(buffer, sizeof(buffer), year, month, day, hour, minute, second);
+
+      if (length < STR_LEFT) STR_PRINTF("%s", buffer);
+    }
+  }
+
+  STR_END
+  return writeBrailleText(mode, text);
+}
 
 static void 
 slideWindowVertically (int y) {
