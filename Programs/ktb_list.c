@@ -108,15 +108,28 @@ searchKeyNameEntry (const void *target, const void *element) {
   return compareKeyValues(value, &(*kne)->value);
 }
 
-static const KeyNameEntry *const *
+static const KeyNameEntry *
 findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
-  return bsearch(value, lgd->keyTable->keyNameTable, lgd->keyTable->keyNameCount, sizeof(*lgd->keyTable->keyNameTable), searchKeyNameEntry);
+  const KeyNameEntry *const *array = lgd->keyTable->keyNameTable;
+  unsigned int count = lgd->keyTable->keyNameCount;
+
+  const KeyNameEntry *const *kne = bsearch(value, array, count, sizeof(*array), searchKeyNameEntry);
+  if (!kne) return NULL;
+
+  while (kne > array) {
+    if (compareKeyValues(value, &(*--kne)->value) != 0) {
+      kne += 1;
+      break;
+    }
+  }
+
+  return *kne;
 }
 
 static int
 putKeyName (ListGenerationData *lgd, const KeyValue *value) {
-  const KeyNameEntry *const *kne = findKeyNameEntry(lgd, value);
-  if (kne) return putUtf8String(lgd, (*kne)->name);
+  const KeyNameEntry *kne = findKeyNameEntry(lgd, value);
+  if (kne) return putUtf8String(lgd, kne->name);
 
   if (value->key != KTB_KEY_ANY) {
     const KeyValue anyKey = {
@@ -125,7 +138,7 @@ putKeyName (ListGenerationData *lgd, const KeyValue *value) {
     };
 
     if ((kne = findKeyNameEntry(lgd, &anyKey))) {
-      if (!putUtf8String(lgd, (*kne)->name)) return 0;
+      if (!putUtf8String(lgd, kne->name)) return 0;
       if (!putCharacter(lgd, WC_C('.'))) return 0;
       if (!putNumber(lgd, value->key+1)) return 0;
       return 1;
