@@ -21,9 +21,6 @@
 #include "log.h"
 #include "driver.h"
 
-static int logInputPackets = 0;
-static int logOutputPackets = 0;
-
 void
 unsupportedDevice (const char *identifier) {
   logMessage(LOG_WARNING, "unsupported device: %s", identifier);

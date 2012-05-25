@@ -1156,6 +1156,30 @@ testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
 }
 
+static int
+testBrailleKeyTable (void) {
+  return !!brl.keyTable;
+}
+
+static int
+changedBrailleKeyTable (const MenuItem *item UNUSED, unsigned char setting) {
+  if (!brl.keyTable) return 0;
+  setKeyEventLogging(brl.keyTable, setting);
+  return 1;
+}
+
+static int
+testKeyboardKeyTable (void) {
+  return !!keyboardKeyTable;
+}
+
+static int
+changedKeyboardKeyTable (const MenuItem *item UNUSED, unsigned char setting) {
+  if (!keyboardKeyTable) return 0;
+  setKeyEventLogging(keyboardKeyTable, setting);
+  return 1;
+}
+
 static MenuItem *
 newStatusFieldMenuItem (
   Menu *menu, unsigned char number,
@@ -1847,6 +1871,71 @@ makePreferencesMenu (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   }
 
+  {
+    SUBMENU(internalSubmenu, rootMenu, strtext("Internal Parameters"));
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Emergency")},
+        {.label=strtext("Alert")},
+        {.label=strtext("Critical")},
+        {.label=strtext("Errors")},
+        {.label=strtext("Warnings")},
+        {.label=strtext("Notices")},
+        {.label=strtext("Information")},
+        {.label=strtext("Debug")}
+      };
+
+      {
+        NAME(strtext("System Log Level"));
+        ITEM(newEnumeratedMenuItem(internalSubmenu, &systemLogLevel, &itemName, strings));
+      }
+
+      {
+        NAME(strtext("Standard Error Log Level"));
+        ITEM(newEnumeratedMenuItem(internalSubmenu, &stderrLogLevel, &itemName, strings));
+      }
+    }
+
+    {
+      NAME(strtext("Log Generic Input"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logGenericInput, &itemName));
+    }
+
+    {
+      NAME(strtext("Log Input Packets"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logInputPackets, &itemName));
+    }
+
+    {
+      NAME(strtext("Log Output Packets"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logOutputPackets, &itemName));
+    }
+
+    {
+      NAME(strtext("Log Braille Key Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logBrailleKeyEvents, &itemName));
+      TEST(BrailleKeyTable);
+      CHANGED(BrailleKeyTable);
+    }
+
+    {
+      NAME(strtext("Log Keyboard Key Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logKeyboardKeyEvents, &itemName));
+      TEST(KeyboardKeyTable);
+      CHANGED(KeyboardKeyTable);
+    }
+
+    {
+      NAME(strtext("Log Cursor Tracking"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logCursorTracking, &itemName));
+    }
+
+    {
+      NAME(strtext("Log Routing Progress"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logRoutingProgress, &itemName));
+    }
+  }
 #undef NAME
 #undef ITEM
 #undef TEST
@@ -2771,7 +2860,7 @@ brlttyStart (int argc, char *argv[]) {
       logMessage(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
     }
 
-    setLogLevel(level);
+    systemLogLevel = level;
 
     if (opt_standardError) {
       closeSystemLog();
@@ -2781,7 +2870,7 @@ brlttyStart (int argc, char *argv[]) {
       if (opt_quiet) level -= 1;
     }
 
-    setPrintLevel(level);
+    stderrLogLevel = level;
   }
 
   if (*opt_logFile) {
@@ -2846,7 +2935,7 @@ brlttyStart (int argc, char *argv[]) {
   if (!opt_noDaemon) {
     fflush(stdout);
     fflush(stderr);
-    setPrintOff();
+    stderrLogLevel = 0;
 
 #if defined(GRUB_RUNTIME)
 

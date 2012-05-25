@@ -54,8 +54,16 @@ toEventType (int level) {
 
 #endif /* system log internal definitions */
 
-static int printLevel = LOG_NOTICE;
-static int logLevel = LOG_NOTICE;
+unsigned char systemLogLevel = LOG_NOTICE;
+unsigned char stderrLogLevel = LOG_NOTICE;
+unsigned char logGenericInput = 0;
+unsigned char logInputPackets = 0;
+unsigned char logOutputPackets = 0;
+unsigned char logBrailleKeyEvents = 0;
+unsigned char logKeyboardKeyEvents = 0;
+unsigned char logCursorTracking = 0;
+unsigned char logRoutingProgress = 0;
+
 static const char *logPrefix = NULL;
 
 static FILE *logFile = NULL;
@@ -129,13 +137,6 @@ closeSystemLog (void) {
 #endif /* close system log */
 }
 
-int
-setLogLevel (int newLevel) {
-  int oldLevel = logLevel;
-  logLevel = newLevel;
-  return oldLevel;
-}
-
 const char *
 setLogPrefix (const char *newPrefix) {
   const char *oldPrefix = logPrefix;
@@ -143,22 +144,10 @@ setLogPrefix (const char *newPrefix) {
   return oldPrefix;
 }
 
-int
-setPrintLevel (int newLevel) {
-  int oldLevel = printLevel;
-  printLevel = newLevel;
-  return oldLevel;
-}
-
-int
-setPrintOff (void) {
-  return setPrintLevel(-1);
-}
-
 void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
-  int write = level <= logLevel;
-  int print = level <= printLevel;
+  int write = level <= systemLogLevel;
+  int print = level <= stderrLogLevel;
 
   if (write || print) {
     int reason = errno;

@@ -3328,10 +3328,12 @@ brlttyUpdate (void) {
           int oldy = ses->winy;
 
           trackCursor(0);
-          logMessage(LOG_DEBUG, "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
-                     scr.number,
-                     ses->trkx, ses->trky, scr.posx, scr.posy,
-                     oldx, oldy, ses->winx, ses->winy);
+          if (logCursorTracking) {
+            logMessage(LOG_DEBUG, "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                       scr.number,
+                       ses->trkx, ses->trky, scr.posx, scr.posy,
+                       oldx, oldy, ses->winx, ses->winy);
+          }
 
           ses->spkx = ses->trkx = scr.posx;
           ses->spky = ses->trky = scr.posy;

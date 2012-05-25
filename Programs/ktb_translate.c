@@ -347,15 +347,17 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
             }
           }
 
-          table->command = command;
-
           if (context == KTB_CTX_WAITING) {
             table->command = EOF;
             table->immediate = 0;
-          } else if ((table->immediate = immediate)) {
-            command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
           } else {
-            command |= BRL_FLG_REPEAT_DELAY;
+            table->command = command;
+
+            if ((table->immediate = immediate)) {
+              command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
+            } else {
+              command |= BRL_FLG_REPEAT_DELAY;
+            }
           }
 
           processCommand(table, command);
@@ -401,6 +403,6 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 }
 
 void
-setLogKeyEvents (KeyTable *table) {
-  table->logKeyEvents = 1;
+setKeyEventLogging (KeyTable *table, int on) {
+  table->logKeyEvents = !!on;
 }

@@ -28,8 +28,6 @@
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
-static int logInputBytes = 0;
-
 typedef union {
   struct {
     SerialDevice *device;
@@ -590,7 +588,10 @@ gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
                                 (wait? endpoint->options.inputTimeout: 0), 0);
 
         if (result > 0) {
-          if (logInputBytes) logBytes(LOG_WARNING, "input bytes", &endpoint->input.buffer[endpoint->input.to], result);
+          if (logGenericInput) {
+            logBytes(LOG_WARNING, "generic input", &endpoint->input.buffer[endpoint->input.to], result);
+          }
+
           endpoint->input.to += result;
           wait = 1;
         } else {

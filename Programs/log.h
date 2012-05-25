@@ -51,11 +51,7 @@ extern void closeLogFile (void);
 extern void openSystemLog (void);
 extern void closeSystemLog (void);
 
-extern int setLogLevel (int newLevel);
 extern const char *setLogPrefix (const char *newPrefix);
-
-extern int setPrintLevel (int newLevel);
-extern int setPrintOff (void);
 
 typedef const char *LogDataFormatter (char *buffer, size_t size, const void *data);
 extern void logData (int level, LogDataFormatter *formatLogData, const void *data);
@@ -76,6 +72,16 @@ extern void logWindowsSystemError (const char *action);
 extern void logWindowsSocketError (const char *action);
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
+
+extern unsigned char systemLogLevel;
+extern unsigned char stderrLogLevel;
+extern unsigned char logGenericInput;
+extern unsigned char logInputPackets;
+extern unsigned char logOutputPackets;
+extern unsigned char logBrailleKeyEvents;
+extern unsigned char logKeyboardKeyEvents;
+extern unsigned char logCursorTracking;
+extern unsigned char logRoutingProgress;
 
 #ifdef __cplusplus
 }

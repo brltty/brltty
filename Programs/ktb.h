@@ -37,7 +37,7 @@ extern char *makeKeyTablePath (const char *directory, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
 extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);
-extern void setLogKeyEvents (KeyTable *table);
+extern void setKeyEventLogging (KeyTable *table, int on);
 
 #ifdef __cplusplus
 }

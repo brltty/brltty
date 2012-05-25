@@ -46,8 +46,6 @@
 #define ROUTING_INTERVAL	1	/* how often to check for response */
 #define ROUTING_TIMEOUT	2000	/* max wait for response to key press */
 
-static int logRoutingProgress = 0;
-
 typedef enum {
   CRR_DONE,
   CRR_NEAR,
