@@ -488,27 +488,10 @@ static size_t
 formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   size_t length;
 
-  const char *oclock;
-
-  switch (prefs.timeFormat) {
-    default:
-    case tf24Hour:
-      oclock = ngettext("hour", "hours", fmt->time.hour);
-      break;
-
-    case tf12Hour:
-      oclock = gettext("o'clock");
-      break;
-  }
-
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%u ", fmt->time.hour);
-
-  if (fmt->time.minute == 0) {
-    STR_PRINTF("%s", oclock);
-  } else {
-    STR_PRINTF("%02u", fmt->time.minute);
-  }
+  STR_PRINTF("%u", fmt->time.hour);
+  if (fmt->time.minute < 10) STR_PRINTF(" 0");
+  STR_PRINTF(" %u", fmt->time.minute);
 
   if (fmt->meridian) {
     const char *character = fmt->meridian;
@@ -587,7 +570,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       STR_PRINTF(monthFormat, month);
       STR_PRINTF(" ");
       STR_PRINTF(dayFormat, day);
-      STR_PRINTF(" ");
+      STR_PRINTF(", ");
       STR_PRINTF(yearFormat, fmt->time.year);
       break;
 
@@ -595,7 +578,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       STR_PRINTF(dayFormat, day);
       STR_PRINTF(" ");
       STR_PRINTF(monthFormat, month);
-      STR_PRINTF(" ");
+      STR_PRINTF(", ");
       STR_PRINTF(yearFormat, fmt->time.year);
       break;
   }
@@ -622,11 +605,11 @@ doSpeechTime (const TimeFormattingData *fmt) {
 
     switch (prefs.datePosition) {
       case dpBeforeTime:
-        STR_PRINTF("%s %s %s", date, gettext("at"), time);
+        STR_PRINTF("%s, %s", date, time);
         break;
 
       case dpAfterTime:
-        STR_PRINTF("%s %s %s", time, gettext("on"), date);
+        STR_PRINTF("%s, %s", time, date);
         break;
 
       default:
