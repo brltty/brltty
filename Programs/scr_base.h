@@ -29,6 +29,7 @@ extern int isSpecialKey (ScreenKey key);
 extern void setKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
+  size_t (*formatTitle) (char *buffer, size_t size);
   void (*describe) (ScreenDescription *);
   int (*readCharacters) (const ScreenBox *box, ScreenCharacter *buffer);
   int (*insertKey) (ScreenKey key);

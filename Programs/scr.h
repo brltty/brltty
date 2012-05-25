@@ -163,6 +163,7 @@ extern int activateFrozenScreen (void);
 extern void deactivateFrozenScreen (void);
 
 /* Routines which apply to the current screen. */
+extern size_t formatScreenTitle (char *buffer, size_t size);
 extern void describeScreen (ScreenDescription *);		/* get screen status */
 extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);

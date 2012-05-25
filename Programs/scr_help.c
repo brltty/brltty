@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
@@ -208,6 +209,17 @@ currentVirtualTerminal_HelpScreen (void) {
   return userVirtualTerminal(1);
 }
 
+static size_t
+formatTitle_HelpScreen (char *buffer, size_t size) {
+  size_t length;
+
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s", gettext("Help Screen"));
+  length = STR_LENGTH;
+  STR_END
+  return length;
+}
+
 static void
 describe_HelpScreen (ScreenDescription *description) {
   const HelpPageEntry *page = getPage();
@@ -321,6 +333,7 @@ void
 initializeHelpScreen (HelpScreen *help) {
   initializeBaseScreen(&help->base);
   help->base.currentVirtualTerminal = currentVirtualTerminal_HelpScreen;
+  help->base.formatTitle = formatTitle_HelpScreen;
   help->base.describe = describe_HelpScreen;
   help->base.readCharacters = readCharacters_HelpScreen;
   help->base.insertKey = insertKey_HelpScreen;

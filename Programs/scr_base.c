@@ -99,6 +99,12 @@ currentVirtualTerminal_BaseScreen (void) {
   return -1;
 }
 
+static size_t
+formatTitle_BaseScreen (char *buffer, size_t size) {
+  *buffer = 0;
+  return 0;
+}
+
 static void
 describe_BaseScreen (ScreenDescription *description) {
   description->rows = 1;
@@ -154,6 +160,7 @@ getCommandContext_BaseScreen (void) {
 
 void
 initializeBaseScreen (BaseScreen *base) {
+  base->formatTitle = formatTitle_BaseScreen;
   base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
   base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;

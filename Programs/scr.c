@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "message.h"
 #include "system.h"
 #include "drivers.h"
 #include "brltty.h"
@@ -151,7 +152,7 @@ typedef enum {
 static ActiveScreen activeScreens = 0;
 
 static void
-selectScreen (void) {
+setScreen (ActiveScreen which) {
   typedef struct {
     ActiveScreen which;
     BaseScreen *screen;
@@ -166,11 +167,21 @@ selectScreen (void) {
   const ScreenEntry *entry = screenEntries;
 
   while (entry->which) {
-    if (activeScreens & entry->which) break;
+    if (which & entry->which) break;
     entry += 1;
   }
-
   currentScreen = entry->screen;
+
+  {
+    char buffer[0X80];
+    size_t length = formatScreenTitle(buffer, sizeof(buffer));
+    if (length) message(NULL, buffer, 0);
+  }
+}
+
+static void
+selectScreen (void) {
+  setScreen(activeScreens);
 }
 
 int
@@ -181,7 +192,7 @@ haveScreen (ActiveScreen which) {
 static void
 activateScreen (ActiveScreen which) {
   activeScreens |= which;
-  selectScreen();
+  setScreen(which);
 }
 
 static void
@@ -251,6 +262,11 @@ setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *mes
     if ((length -= box->left) > box->width) length = box->width;
     if (length) copyScreenCharacterText(buffer, &message[box->left], length);
   }
+}
+
+size_t
+formatScreenTitle (char *buffer, size_t size) {
+  return currentScreen->formatTitle(buffer, size);
 }
 
 void

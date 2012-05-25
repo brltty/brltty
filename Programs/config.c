@@ -2520,7 +2520,7 @@ stopScreenDriver (void) {
 }
 
 static void
-exitScreen (void) {
+exitScreens (void) {
   stopScreenDriver();
   destructSpecialScreens();
 }
@@ -2894,6 +2894,10 @@ brlttyStart (int argc, char *argv[]) {
    * be used instead.
    */
 
+  onProgramExit(exitScreens);
+  constructSpecialScreens();
+  enableBrailleHelpPage(); /* ensure that it's first */
+
   onProgramExit(exitTunes);
   suppressTuneDeviceOpenErrors();
 
@@ -2956,10 +2960,7 @@ brlttyStart (int argc, char *argv[]) {
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  onProgramExit(exitScreen);
-  constructSpecialScreens();
   /* handle key table option */
-  enableBrailleHelpPage(); /* ensure that it's first */
   onProgramExit(exitKeyTable);
   replaceKeyboardKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),

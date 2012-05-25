@@ -2423,26 +2423,31 @@ doCommand:
         break;
       }
 
-      case BRL_CMD_PREFMENU:
-        if (haveMenuScreen()) {
+      case BRL_CMD_PREFMENU: {
+        int ok = 0;
+
+        if (isMenuScreen()) {
           if (prefs.saveOnExit)
             if (savePreferences())
               playTune(&tune_command_done);
 
           deactivateMenuScreen();
+          ok = 1;
         } else if (activateMenuScreen()) {
           updateSessionAttributes();
           ses->hideCursor = 1;
           savedPreferences = prefs;
+          ok = 1;
+        }
 
-          if (isMenuScreen()) {
-            writeStatusCells();
-            message(modeString_preferences, gettext("Preferences Menu"), 0);
-          }
+        if (ok) {
+          infoMode = 0;
         } else {
           playTune(&tune_command_rejected);
         }
+
         break;
+      }
 
       case BRL_CMD_PREFSAVE:
         if (isMenuScreen()) {
@@ -2467,13 +2472,15 @@ doCommand:
         break;
 
       case BRL_CMD_HELP: {
-        int ok;
+        int ok = 0;
         unsigned int pageNumber;
 
-        if ((ok = haveHelpScreen())) {
+        if (isHelpScreen()) {
           pageNumber = getHelpPageNumber() + 1;
+          ok = 1;
         } else {
-          pageNumber = activateHelpScreen()? 1: 0;
+          pageNumber = haveHelpScreen()? getHelpPageNumber(): 1;
+          if (!activateHelpScreen()) pageNumber = 0;
         }
 
         if (pageNumber) {
@@ -2489,7 +2496,9 @@ doCommand:
 
           if (pageNumber > pageCount) {
             deactivateHelpScreen();
+            updateSessionAttributes();
           } else {
+            updateSessionAttributes();
             ok = 1;
           }
         }
