@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <errno.h>
+
 #include "pid.h"
 
 #if defined(__MSDOS__) || defined(GRUB_RUNTIME)
@@ -29,6 +31,12 @@ getProcessIdentifier (void) {
 int
 testProcessIdentifier (ProcessIdentifier pid) {
   return pid == MY_PROCESS_ID;
+}
+
+int
+cancelProcess (ProcessIdentifier pid) {
+  errno = ENOSYS;
+  return 0;
 }
 
 #elif defined(__MINGW32__)
@@ -43,6 +51,12 @@ testProcessIdentifier (ProcessIdentifier pid) {
   if (!handle) return 0;
   CloseHandle(handle);
   return 1;
+}
+
+int
+cancelProcess (ProcessIdentifier pid) {
+  errno = ENOSYS;
+  return 0;
 }
 
 #else /* Unix */
