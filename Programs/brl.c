@@ -49,6 +49,7 @@
 
 static int
 brl_construct (BrailleDisplay *brl UNUSED, char **parameters UNUSED, const char *device UNUSED) {
+  brl->keyBindings = NULL;
   return 1;
 }
 
