@@ -389,8 +389,12 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
     STR_PRINTF(hourFormat, fmt->time.hour);
     STR_PRINTF("%c", separator);
     STR_PRINTF(minuteFormat, fmt->time.minute);
-    STR_PRINTF("%c", separator);
-    STR_PRINTF(secondFormat, fmt->time.second);
+
+    if (prefs.showSeconds) {
+      STR_PRINTF("%c", separator);
+      STR_PRINTF(secondFormat, fmt->time.second);
+    }
+
     if (fmt->meridian) STR_PRINTF("%s", fmt->meridian);
     STR_END
   }
@@ -497,14 +501,17 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
     const char *character = fmt->meridian;
     while (*character) STR_PRINTF(" %c", *character++);
   }
-  STR_PRINTF(", ");
 
-  if (fmt->time.second == 0) {
-    STR_PRINTF("%s", gettext("exactly"));
-  } else {
-    STR_PRINTF("%s %u %s",
-               gettext("and"), fmt->time.second,
-               ngettext("second", "seconds", fmt->time.second));
+  if (prefs.showSeconds) {
+    STR_PRINTF(", ");
+
+    if (fmt->time.second == 0) {
+      STR_PRINTF("%s", gettext("exactly"));
+    } else {
+      STR_PRINTF("%s %u %s",
+                 gettext("and"), fmt->time.second,
+                 ngettext("second", "seconds", fmt->time.second));
+    }
   }
 
   length = STR_LENGTH;

@@ -176,6 +176,7 @@ typedef struct {
 
   unsigned char timeFormat;
   unsigned char timeSeparator;
+  unsigned char showSeconds;
   unsigned char datePosition;
   unsigned char dateFormat;
   unsigned char dateSeparator;

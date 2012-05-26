@@ -922,6 +922,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Show Seconds"));
+      ITEM(newBooleanMenuItem(timeSubmenu, &prefs.showSeconds, &itemName));
+    }
+
+    {
       static const MenuString strings[] = {
         {.label=strtext("None")},
         {.label=strtext("Before Time")},

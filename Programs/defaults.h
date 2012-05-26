@@ -119,6 +119,7 @@ extern "C" {
 
 #define DEFAULT_TIME_FORMAT tf24Hour
 #define DEFAULT_TIME_SEPARATOR tsColon
+#define DEFAULT_SHOW_SECONDS 1
 #define DEFAULT_DATE_POSITION dpNone
 #define DEFAULT_DATE_FORMAT dfYearMonthDay
 #define DEFAULT_DATE_SEPARATOR dsDash

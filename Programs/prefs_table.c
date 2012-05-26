@@ -473,6 +473,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.timeSeparator
   },
 
+  { .name = "show-seconds",
+    .defaultValue = DEFAULT_SHOW_SECONDS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showSeconds
+  },
+
   { .name = "date-position",
     .defaultValue = DEFAULT_DATE_POSITION,
     .settingNames = &preferenceStringTable_datePosition,
