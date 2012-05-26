@@ -31,6 +31,35 @@
 #include "ctb.h"
 #include "tunes.h"
 
+#define NAME(name) static const MenuString itemName = {.label=name}
+#define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
+#define TEST(property) setMenuItemTester(item, test##property)
+#define CHANGED(setting) setMenuItemChanged(item, changed##setting)
+#define SUBMENU(variable, parent, name) \
+  NAME(name); \
+  Menu *variable = newSubmenuMenuItem(parent, &itemName); \
+  if (!variable) goto noItem
+
+static int
+testAdvancedSubmenu (void) {
+  return prefs.showAdvancedSubmenus;
+}
+
+static void
+setAdvancedSubmenu (Menu *submenu) {
+  Menu *parent = getMenuParent(submenu);
+
+  if (parent) {
+    unsigned int size = getMenuSize(parent);
+
+    if (size) {
+      MenuItem *item = getMenuItem(parent, size-1);
+
+      if (item) setMenuItemTester(item, testAdvancedSubmenu);
+    }
+  }
+}
+
 static int
 testSkipBlankWindows (void) {
   return prefs.skipBlankWindows;
@@ -413,15 +442,6 @@ makePreferencesMenu (void) {
   Menu *rootMenu = newMenu();
   if (!rootMenu) goto noMenu;
 
-#define NAME(name) static const MenuString itemName = {.label=name}
-#define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
-#define TEST(property) setMenuItemTester(item, test##property)
-#define CHANGED(setting) setMenuItemChanged(item, changed##setting)
-#define SUBMENU(variable, parent, name) \
-  NAME(name); \
-  Menu *variable = newSubmenuMenuItem(parent, &itemName); \
-  if (!variable) goto noItem
-
   {
     SUBMENU(optionsSubmenu, rootMenu, strtext("Menu Options"));
 
@@ -431,13 +451,18 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Show All Items"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAllItems, &itemName));
+      NAME(strtext("Show Submenu Sizes"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showSubmenuSizes, &itemName));
     }
 
     {
-      NAME(strtext("Show Submenu Sizes"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showSubmenuSizes, &itemName));
+      NAME(strtext("Show Advanced Submenus"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAdvancedSubmenus, &itemName));
+    }
+
+    {
+      NAME(strtext("Show All Items"));
+      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAllItems, &itemName));
     }
   }
 
@@ -1011,6 +1036,7 @@ makePreferencesMenu (void) {
 
   {
     SUBMENU(internalSubmenu, rootMenu, strtext("Internal Parameters"));
+    setAdvancedSubmenu(internalSubmenu);
 
     {
       static const MenuString strings[] = {
@@ -1074,11 +1100,6 @@ makePreferencesMenu (void) {
       ITEM(newBooleanMenuItem(internalSubmenu, &logRoutingProgress, &itemName));
     }
   }
-#undef NAME
-#undef ITEM
-#undef TEST
-#undef CHANGED
-#undef SUBMENU
 
   return rootMenu;
 

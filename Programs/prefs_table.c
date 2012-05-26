@@ -125,16 +125,22 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.saveOnExit
   },
 
-  { .name = "show-all-items",
-    .defaultValue = DEFAULT_SHOW_ALL_ITEMS,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.showAllItems
-  },
-
   { .name = "show-submenu-sizes",
     .defaultValue = DEFAULT_SHOW_SUBMENU_SIZES,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showSubmenuSizes
+  },
+
+  { .name = "show-advanced-submenus",
+    .defaultValue = DEFAULT_SHOW_ADVANCED_SUBMENUS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showAdvancedSubmenus
+  },
+
+  { .name = "show-all-items",
+    .defaultValue = DEFAULT_SHOW_ALL_ITEMS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.showAllItems
   },
 
   { .name = "text-style",

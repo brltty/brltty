@@ -181,8 +181,9 @@ typedef struct {
   unsigned char dateSeparator;
 
   unsigned char saveOnExit;
-  unsigned char showAllItems;
   unsigned char showSubmenuSizes;
+  unsigned char showAdvancedSubmenus;
+  unsigned char showAllItems;
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */

@@ -174,14 +174,9 @@ deallocateMenu (Menu *menu) {
   }
 }
 
-MenuItem *
-getMenuItem (Menu *menu, unsigned int index) {
-  return (index < menu->items.count)? &menu->items.array[index]: NULL;
-}
-
-static MenuItem *
-getSelectedMenuItem (Menu *menu) {
-  return getMenuItem(menu, menu->items.index);
+Menu *
+getMenuParent (const Menu *menu) {
+  return menu->parent;
 }
 
 unsigned int
@@ -192,6 +187,16 @@ getMenuSize (const Menu *menu) {
 unsigned int
 getMenuIndex (const Menu *menu) {
   return menu->items.index;
+}
+
+MenuItem *
+getMenuItem (Menu *menu, unsigned int index) {
+  return (index < menu->items.count)? &menu->items.array[index]: NULL;
+}
+
+static MenuItem *
+getSelectedMenuItem (Menu *menu) {
+  return getMenuItem(menu, menu->items.index);
 }
 
 static int
