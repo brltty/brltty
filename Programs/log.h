@@ -75,6 +75,9 @@ extern void logWindowsSocketError (const char *action);
 
 extern unsigned char systemLogLevel;
 extern unsigned char stderrLogLevel;
+
+extern void disableLogEvents (void);
+extern int enableLogEvent (const char *name);
 extern unsigned char logGenericInput;
 extern unsigned char logInputPackets;
 extern unsigned char logOutputPackets;

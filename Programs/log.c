@@ -39,6 +39,33 @@ const char *const logLevelNames[] = {
 };
 const unsigned int logLevelCount = ARRAY_COUNT(logLevelNames);
 
+unsigned char systemLogLevel = LOG_NOTICE;
+unsigned char stderrLogLevel = LOG_NOTICE;
+
+unsigned char logGenericInput = 0;
+unsigned char logInputPackets = 0;
+unsigned char logOutputPackets = 0;
+unsigned char logBrailleKeyEvents = 0;
+unsigned char logKeyboardKeyEvents = 0;
+unsigned char logCursorTracking = 0;
+unsigned char logRoutingProgress = 0;
+
+typedef struct {
+  const char *name;
+  unsigned char *flag;
+} LogEventEntry;
+
+static const LogEventEntry logEventTable[] = {
+  {.name="ingio"  , .flag=&logGenericInput     },
+  {.name="inpkt"  , .flag=&logInputPackets     },
+  {.name="outpkt" , .flag=&logOutputPackets    },
+  {.name="brlkeys", .flag=&logBrailleKeyEvents },
+  {.name="kbdkeys", .flag=&logKeyboardKeyEvents},
+  {.name="csrtrk" , .flag=&logCursorTracking   },
+  {.name="routing", .flag=&logRoutingProgress  }
+};
+static const unsigned int logEventCount = ARRAY_COUNT(logEventTable);
+
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
 
@@ -54,19 +81,39 @@ toEventType (int level) {
 
 #endif /* system log internal definitions */
 
-unsigned char systemLogLevel = LOG_NOTICE;
-unsigned char stderrLogLevel = LOG_NOTICE;
-unsigned char logGenericInput = 0;
-unsigned char logInputPackets = 0;
-unsigned char logOutputPackets = 0;
-unsigned char logBrailleKeyEvents = 0;
-unsigned char logKeyboardKeyEvents = 0;
-unsigned char logCursorTracking = 0;
-unsigned char logRoutingProgress = 0;
-
 static const char *logPrefix = NULL;
-
 static FILE *logFile = NULL;
+
+void
+disableLogEvents (void) {
+  const LogEventEntry *event = logEventTable;
+  const LogEventEntry *end = event + logEventCount;
+  while (event < end) *event++->flag = 0;
+}
+
+int
+enableLogEvent (const char *name) {
+  const LogEventEntry *event = logEventTable;
+  const LogEventEntry *end = event + logEventCount;
+
+  while (event < end) {
+    if (strcasecmp(name, event->name) == 0) {
+      *event->flag = 1;
+      return 1;
+    }
+
+    event += 1;
+  }
+
+  return 0;
+}
+
+const char *
+setLogPrefix (const char *newPrefix) {
+  const char *oldPrefix = logPrefix;
+  logPrefix = newPrefix;
+  return oldPrefix;
+}
 
 void
 closeLogFile (void) {
@@ -135,13 +182,6 @@ closeSystemLog (void) {
 #elif defined(__MSDOS__)
   closeLogFile();
 #endif /* close system log */
-}
-
-const char *
-setLogPrefix (const char *newPrefix) {
-  const char *oldPrefix = logPrefix;
-  logPrefix = newPrefix;
-  return oldPrefix;
 }
 
 void

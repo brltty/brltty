@@ -1738,6 +1738,29 @@ validateInterval (int *value, const char *string) {
   }
 }
 
+static void
+processLogOperand (const char *operand) {
+  char **strings = splitString(operand, ',', NULL);
+
+  if (strings) {
+    char **string = strings;
+
+    while (*string) {
+      int level = LOG_NOTICE;
+
+      if (isLogLevel(&level, *string)) {
+        systemLogLevel = level;
+      } else if (!enableLogEvent(*string)) {
+        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or event"), *string);
+      }
+
+      string += 1;
+    }
+
+    deallocateStrings(strings);
+  }
+}
+
 ProgramExitStatus
 brlttyStart (int argc, char *argv[]) {
   {
@@ -1791,16 +1814,13 @@ brlttyStart (int argc, char *argv[]) {
   }
 
   /* Set logging levels. */
+  processLogOperand(opt_logLevel);
+
   {
-    int level = LOG_NOTICE;
-
-    if (!isLogLevel(&level, opt_logLevel)) {
-      logMessage(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
-    }
-
-    systemLogLevel = level;
+    unsigned char level;
 
     if (opt_standardError) {
+      level = systemLogLevel;
       closeSystemLog();
     } else {
       level = LOG_NOTICE;
