@@ -53,9 +53,9 @@ unsigned char logRoutingProgress = 0;
 typedef struct {
   const char *name;
   unsigned char *flag;
-} LogEventEntry;
+} LogCategoryEntry;
 
-static const LogEventEntry logEventTable[] = {
+static const LogCategoryEntry logCategoryTable[] = {
   {.name="ingio"  , .flag=&logGenericInput     },
   {.name="inpkts" , .flag=&logInputPackets     },
   {.name="outpkts", .flag=&logOutputPackets    },
@@ -64,7 +64,7 @@ static const LogEventEntry logEventTable[] = {
   {.name="csrtrk" , .flag=&logCursorTracking   },
   {.name="routing", .flag=&logRoutingProgress  }
 };
-static const unsigned int logEventCount = ARRAY_COUNT(logEventTable);
+static const unsigned int logCategoryCount = ARRAY_COUNT(logCategoryTable);
 
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
@@ -84,25 +84,18 @@ toEventType (int level) {
 static const char *logPrefix = NULL;
 static FILE *logFile = NULL;
 
-void
-disableLogEvents (void) {
-  const LogEventEntry *event = logEventTable;
-  const LogEventEntry *end = event + logEventCount;
-  while (event < end) *event++->flag = 0;
-}
-
 int
-enableLogEvent (const char *name) {
-  const LogEventEntry *event = logEventTable;
-  const LogEventEntry *end = event + logEventCount;
+enableLogCategory (const char *name) {
+  const LogCategoryEntry *category = logCategoryTable;
+  const LogCategoryEntry *end = category + logCategoryCount;
 
-  while (event < end) {
-    if (strcasecmp(name, event->name) == 0) {
-      *event->flag = 1;
+  while (category < end) {
+    if (strcasecmp(name, category->name) == 0) {
+      *category->flag = 1;
       return 1;
     }
 
-    event += 1;
+    category += 1;
   }
 
   return 0;

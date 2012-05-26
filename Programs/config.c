@@ -1750,8 +1750,8 @@ processLogOperand (const char *operand) {
 
       if (isLogLevel(&level, *string)) {
         systemLogLevel = level;
-      } else if (!enableLogEvent(*string)) {
-        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or event"), *string);
+      } else if (!enableLogCategory(*string)) {
+        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
       }
 
       string += 1;
