@@ -33,7 +33,7 @@
 #include "message.h"
 #include "system.h"
 #include "drivers.h"
-#include "brltty.h"
+#include "menu_prefs.h"
 #include "scr.h"
 #include "scr_help.h"
 #include "scr_menu.h"

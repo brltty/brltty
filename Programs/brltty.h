@@ -53,20 +53,28 @@ extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, 
 extern int writeBrailleText (const char *mode, const char *text);
 extern int showBrailleText (const char *mode, const char *text, int minimumDelay);
 
+extern char *opt_tablesDirectory;
+extern char *opt_textTable;
+extern char *opt_attributesTable;
+extern char *opt_contractionTable;
+
 extern int opt_releaseDevice;
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;
 
 extern int updateInterval;
 extern int messageDelay;
+
 extern ContractionTable *contractionTable;
+extern int loadContractionTable (const char *name);
+
+extern KeyTable *keyboardKeyTable;
 
 extern ProgramExitStatus brlttyStart (int argc, char *argv[]);
 
 extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
-extern Menu *getPreferencesMenu (void);
 
 extern unsigned char getCursorDots (void);
 
