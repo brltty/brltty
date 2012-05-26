@@ -5447,6 +5447,8 @@ BRLTTY supports the following braille displays:
       |SyncBraille@
     HumanWare
       |Brailliant 32/40/80 bi@
+    Iris@
+    IrisLinux@
     Libbraille@
     LogText
       |32@
@@ -5458,6 +5460,8 @@ BRLTTY supports the following braille displays:
       |20@
     MultiBraille
       |MB125CR/MB145CR/MB185CR@
+    NinePoint
+      |Cebra 20/40/60/80/100/120/140@
     Papenmeier
       |Compact 486@
       |Compact/Tiny@
@@ -5552,6 +5556,7 @@ BRLTTY supports the following speech synthesizers:
     ht|HandyTech@
     hw|HumanWare@
     il|IrisLinux@
+    ir|Iris@
     lb|Libbraille@
     lt|LogText@
     mb|MultiBraille@
@@ -5560,6 +5565,7 @@ BRLTTY supports the following speech synthesizers:
     mp|Mikropuhe@
     mt|Metec@
     no|no driver@
+    np|NinePoint@
     pg|Pegasus@
     pm|Papenmeier@
     sd|SpeechDispatcher@

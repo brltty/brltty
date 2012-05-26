@@ -195,6 +195,7 @@ The following braille displays are supported:
               Braillino]
 -  HIMS [Braille Sense, SyncBraille]
 -  HumanWare [Brailliant 32/40/80 bi]
+-  Iris
 -  IrisLinux
 -  Libbraille
 -  LogText [32]
@@ -202,6 +203,7 @@ The following braille displays are supported:
 -  Metec [BD-40]
 -  MiniBraille [20]
 -  MultiBraille [MB125CR/MB145CR/MB185CR]
+-  NinePoint [Cebra 20/40/60/80/100/120/140]
 -  Papenmeier [Compact 486, Compact/Tiny, IB 80 CR Soft, 2D Lite (plus),
                2D Screen Soft, EL 80, EL 2D 40/66/80, EL 40/66/70/80 S,
                EL 2D 80 S, EL 40 P, EL 80 II, Elba 20/32,

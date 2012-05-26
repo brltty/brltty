@@ -69,12 +69,14 @@
 #braille-driver	ht	# HandyTech
 #braille-driver	hw	# HumanWare
 #braille-driver	il	# IrisLinux
+#braille-driver	ir	# Iris
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille
 #braille-driver	md	# MDV (protocol 5)
 #braille-driver	mn	# MiniBraille
 #braille-driver	mt	# Metec
+#braille-driver	np	# NinePoint
 #braille-driver	pg	# Pegasus
 #braille-driver	pm	# Papenmeier
 #braille-driver	sk	# Seika

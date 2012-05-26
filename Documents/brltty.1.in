@@ -705,6 +705,9 @@ HumanWare
 .B il
 IrisLinux
 .TP 4
+.B ir
+Iris
+.TP 4
 .B lb
 Libbraille
 .TP 4
@@ -728,6 +731,9 @@ Metec
 .TP 4
 .B no
 no driver
+.TP 4
+.B np
+NinePoint
 .TP 4
 .B pg
 Pegasus
