@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 
@@ -112,6 +114,25 @@ static const CursorAxisEntry cursorAxisTable[] = {
   }
 };
 
+static void
+logRouting (const char *format, ...) {
+  if (logRoutingProgress) {
+    char buffer[0X100];
+    STR_BEGIN(buffer, sizeof(buffer));
+    STR_PRINTF("cursor routing: ");
+
+    {
+      va_list arguments;
+      va_start(arguments, format);
+      STR_VPRINTF(format, arguments);
+      va_end(arguments);
+    }
+
+    STR_END
+    logMessage(LOG_WARNING, "%s", buffer);
+  }
+}
+
 static int
 readScreenRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = routing->rowBuffer;
@@ -124,11 +145,7 @@ getCurrentPosition (RoutingData *routing) {
   describeScreen(&description);
 
   if (description.number != routing->screenNumber) {
-    if (logRoutingProgress) {
-      logMessage(LOG_WARNING, "routing: screen changed: num=%d",
-                 description.number);
-    }
-
+    logRouting("screen changed: num=%d", description.number);
     routing->screenNumber = description.number;
     return 0;
   }
@@ -143,28 +160,21 @@ getCurrentPosition (RoutingData *routing) {
       goto error;
     }
 
-    if (logRoutingProgress) {
-      logMessage(LOG_WARNING, "routing: screen: num=%d cols=%d rows=%d",
-                 routing->screenNumber,
-                 routing->screenColumns, routing->screenRows);
-    }
+    logRouting("screen: num=%d cols=%d rows=%d",
+               routing->screenNumber,
+               routing->screenColumns, routing->screenRows);
   } else if ((routing->screenRows != description.rows) ||
              (routing->screenColumns != description.cols)) {
-    if (logRoutingProgress) {
-      logMessage(LOG_WARNING, "routing: size changed: cols=%d rows=%d",
-                 description.cols, description.rows);
-    }
-
+    logRouting("size changed: cols=%d rows=%d",
+               description.cols, description.rows);
     goto error;
   }
 
   routing->cury = description.posy - routing->verticalDelta;
   routing->curx = description.posx;
-  if (readScreenRow(routing, NULL, description.posy)) return 1;
 
-  if (logRoutingProgress) {
-    logMessage(LOG_WARNING, "routing: read failed: row=%d", description.posy);
-  }
+  if (readScreenRow(routing, NULL, description.posy)) return 1;
+  logRouting("read failed: row=%d", description.posy);
 
 error:
   routing->screenNumber = -1;
@@ -178,7 +188,7 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
   sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
 #endif /* SIGUSR1 */
 
-  if (logRoutingProgress) logMessage(LOG_WARNING, "routing: move: %s", direction->name);
+  logRouting("move: %s", direction->name);
   insertScreenKey(direction->key);
 
 #ifdef SIGUSR1
@@ -243,11 +253,9 @@ awaitCursorMotion (RoutingData *routing, int direction) {
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
-      if (logRoutingProgress) {
-        logMessage(LOG_WARNING, "routing: moved: [%d,%d] -> [%d,%d]",
-                   oldx, oldy,
-                   routing->curx, routing->cury);
-      }
+      logRouting("moved: [%d,%d] -> [%d,%d]",
+                 oldx, oldy,
+                 routing->curx, routing->cury);
 
       if (!moved) {
         moved = 1;
@@ -258,9 +266,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
       }
     } else if (time > timeout) {
       if (!moved) {
-        if (logRoutingProgress) {
-          logMessage(LOG_WARNING, "routing: timed out");
-        }
+        logRouting("timed out");
       }
 
       break;
@@ -272,9 +278,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 
 static RoutingResult
 adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const CursorAxisEntry *axis) {
-  if (logRoutingProgress) {
-    logMessage(LOG_WARNING, "routing: to: [%d,%d]", trgx, trgy);
-  }
+  logRouting("to: [%d,%d]", trgx, trgy);
 
   while (1) {
     int dify = trgy - routing->cury;
@@ -362,10 +366,7 @@ doRouting (int column, int row, int screen) {
   routing.timeCount = 1;
 
   if (getCurrentPosition(&routing)) {
-    if (logRoutingProgress) {
-      logMessage(LOG_WARNING, "routing: from: [%d,%d]",
-                 routing.curx, routing.cury);
-    }
+    logRouting("from: [%d,%d]", routing.curx, routing.cury);
 
     if (column < 0) {
       adjustCursorVertically(&routing, 0, row);
