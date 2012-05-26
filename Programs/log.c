@@ -57,8 +57,8 @@ typedef struct {
 
 static const LogEventEntry logEventTable[] = {
   {.name="ingio"  , .flag=&logGenericInput     },
-  {.name="inpkt"  , .flag=&logInputPackets     },
-  {.name="outpkt" , .flag=&logOutputPackets    },
+  {.name="inpkts" , .flag=&logInputPackets     },
+  {.name="outpkts", .flag=&logOutputPackets    },
   {.name="brlkeys", .flag=&logBrailleKeyEvents },
   {.name="kbdkeys", .flag=&logKeyboardKeyEvents},
   {.name="csrtrk" , .flag=&logCursorTracking   },
