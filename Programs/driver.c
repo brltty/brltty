@@ -28,7 +28,7 @@ unsupportedDevice (const char *identifier) {
 
 static void
 logPacket (const char *description, const void *packet, size_t size) {
-  logBytes(LOG_WARNING, description, packet, size);
+  logBytes(categoryLogLevel, description, packet, size);
 }
 
 void

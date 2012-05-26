@@ -41,6 +41,7 @@ const unsigned int logLevelCount = ARRAY_COUNT(logLevelNames);
 
 unsigned char systemLogLevel = LOG_NOTICE;
 unsigned char stderrLogLevel = LOG_NOTICE;
+unsigned char categoryLogLevel = LOG_WARNING;
 
 unsigned char logGenericInput = 0;
 unsigned char logInputPackets = 0;
@@ -48,7 +49,7 @@ unsigned char logOutputPackets = 0;
 unsigned char logBrailleKeyEvents = 0;
 unsigned char logKeyboardKeyEvents = 0;
 unsigned char logCursorTracking = 0;
-unsigned char logRoutingProgress = 0;
+unsigned char logCursorRouting = 0;
 
 typedef struct {
   const char *name;
@@ -62,7 +63,7 @@ static const LogCategoryEntry logCategoryTable[] = {
   {.name="brlkeys", .flag=&logBrailleKeyEvents },
   {.name="kbdkeys", .flag=&logKeyboardKeyEvents},
   {.name="csrtrk" , .flag=&logCursorTracking   },
-  {.name="routing", .flag=&logRoutingProgress  }
+  {.name="csrrtg" , .flag=&logCursorRouting    }
 };
 static const unsigned int logCategoryCount = ARRAY_COUNT(logCategoryTable);
 

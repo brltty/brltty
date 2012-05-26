@@ -116,7 +116,7 @@ static const CursorAxisEntry cursorAxisTable[] = {
 
 static void
 logRouting (const char *format, ...) {
-  if (logRoutingProgress) {
+  if (logCursorRouting) {
     char buffer[0X100];
     STR_BEGIN(buffer, sizeof(buffer));
     STR_PRINTF("cursor routing: ");
@@ -129,7 +129,7 @@ logRouting (const char *format, ...) {
     }
 
     STR_END
-    logMessage(LOG_WARNING, "%s", buffer);
+    logMessage(categoryLogLevel, "%s", buffer);
   }
 }
 

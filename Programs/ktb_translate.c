@@ -396,7 +396,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
 
     STR_END
-    logMessage(LOG_DEBUG, "%s", buffer);
+    logMessage(categoryLogLevel, "%s", buffer);
   }
 
   return state;

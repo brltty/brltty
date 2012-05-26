@@ -1040,30 +1040,33 @@ makePreferencesMenu (void) {
   }
 
   {
+    static const MenuString logLevels[] = {
+      {.label=strtext("Emergency")},
+      {.label=strtext("Alert")},
+      {.label=strtext("Critical")},
+      {.label=strtext("Error")},
+      {.label=strtext("Warning")},
+      {.label=strtext("Notice")},
+      {.label=strtext("Information")},
+      {.label=strtext("Debug")}
+    };
+
     SUBMENU(internalSubmenu, rootMenu, strtext("Internal Parameters"));
     setAdvancedSubmenu(internalSubmenu);
 
     {
-      static const MenuString strings[] = {
-        {.label=strtext("Emergency")},
-        {.label=strtext("Alert")},
-        {.label=strtext("Critical")},
-        {.label=strtext("Error")},
-        {.label=strtext("Warning")},
-        {.label=strtext("Notice")},
-        {.label=strtext("Information")},
-        {.label=strtext("Debug")}
-      };
+      NAME(strtext("System Log Level"));
+      ITEM(newEnumeratedMenuItem(internalSubmenu, &systemLogLevel, &itemName, logLevels));
+    }
 
-      {
-        NAME(strtext("System Log Level"));
-        ITEM(newEnumeratedMenuItem(internalSubmenu, &systemLogLevel, &itemName, strings));
-      }
+    {
+      NAME(strtext("Standard Error Log Level"));
+      ITEM(newEnumeratedMenuItem(internalSubmenu, &stderrLogLevel, &itemName, logLevels));
+    }
 
-      {
-        NAME(strtext("Standard Error Log Level"));
-        ITEM(newEnumeratedMenuItem(internalSubmenu, &stderrLogLevel, &itemName, strings));
-      }
+    {
+      NAME(strtext("Category Log Level"));
+      ITEM(newEnumeratedMenuItem(internalSubmenu, &categoryLogLevel, &itemName, logLevels));
     }
 
     {
@@ -1101,8 +1104,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Log Routing Progress"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logRoutingProgress, &itemName));
+      NAME(strtext("Log Cursor Routing"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &logCursorRouting, &itemName));
     }
   }
 

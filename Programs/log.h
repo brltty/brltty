@@ -75,6 +75,7 @@ extern void logWindowsSocketError (const char *action);
 
 extern unsigned char systemLogLevel;
 extern unsigned char stderrLogLevel;
+extern unsigned char categoryLogLevel;
 
 extern int enableLogCategory (const char *name);
 extern unsigned char logGenericInput;
@@ -83,7 +84,7 @@ extern unsigned char logOutputPackets;
 extern unsigned char logBrailleKeyEvents;
 extern unsigned char logKeyboardKeyEvents;
 extern unsigned char logCursorTracking;
-extern unsigned char logRoutingProgress;
+extern unsigned char logCursorRouting;
 
 #ifdef __cplusplus
 }
