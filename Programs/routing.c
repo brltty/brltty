@@ -118,18 +118,18 @@ static void
 logRouting (const char *format, ...) {
   if (logCursorRouting) {
     char buffer[0X100];
+
     STR_BEGIN(buffer, sizeof(buffer));
-    STR_PRINTF("cursor routing: ");
+    STR_PRINTF("cursor routing: %s", format);
+    STR_END
 
     {
       va_list arguments;
+
       va_start(arguments, format);
-      STR_VPRINTF(format, arguments);
+      vlogMessage(categoryLogLevel, buffer, &arguments);
       va_end(arguments);
     }
-
-    STR_END
-    logMessage(categoryLogLevel, "%s", buffer);
   }
 }
 
