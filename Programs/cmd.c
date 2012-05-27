@@ -354,20 +354,22 @@ typedef struct {
   int command;
 } LogCommandData;
 
-static const char *
+static size_t
 formatLogCommandData (char *buffer, size_t size, const void *data) {
   const LogCommandData *cmd = data;
-  STR_BEGIN(buffer, size);
+  size_t length;
 
+  STR_BEGIN(buffer, size);
   STR_PRINTF("command: ");
 
   {
-    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->command);
-    STR_ADJUST(length);
+    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->command);
+    STR_ADJUST(sublength);
   }
 
-  STR_END;
-  return buffer;
+  length = STR_LENGTH;
+  STR_END
+  return length;
 }
 
 void
@@ -384,27 +386,29 @@ typedef struct {
   int newCommand;
 } LogTransformedCommandData;
 
-static const char *
+static size_t
 formatLogTransformedCommandData (char *buffer, size_t size, const void *data) {
   const LogTransformedCommandData *cmd = data;
-  STR_BEGIN(buffer, size);
+  size_t length;
 
+  STR_BEGIN(buffer, size);
   STR_PRINTF("command: ");
 
   {
-    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->oldCommand);
-    STR_ADJUST(length);
+    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->oldCommand);
+    STR_ADJUST(sublength);
   }
 
   STR_PRINTF(" -> ");
 
   {
-    size_t length = formatCommand(STR_NEXT, STR_LEFT, cmd->newCommand);
-    STR_ADJUST(length);
+    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->newCommand);
+    STR_ADJUST(sublength);
   }
 
-  STR_END;
-  return buffer;
+  length = STR_LENGTH;
+  STR_END
+  return length;
 }
 
 void

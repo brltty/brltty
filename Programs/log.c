@@ -44,35 +44,43 @@ unsigned char stderrLogLevel = LOG_NOTICE;
 
 typedef struct {
   const char *name;
+  const char *prefix;
 } LogCategoryEntry;
 
 static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
-  [LOG_CTG_GENERIC_INPUT] = {
-    .name = "ingio"
+  [LOG_CATEGORY(GENERIC_INPUT)] = {
+    .name = "ingio",
+    .prefix = "generic input"
   },
 
-  [LOG_CTG_INPUT_PACKETS] = {
-    .name = "inpkts"
+  [LOG_CATEGORY(INPUT_PACKETS)] = {
+    .name = "inpkts",
+    .prefix = "input packet"
   },
 
-  [LOG_CTG_OUTPUT_PACKETS] = {
-    .name = "outpkts"
+  [LOG_CATEGORY(OUTPUT_PACKETS)] = {
+    .name = "outpkts",
+    .prefix = "output packet"
   },
 
-  [LOG_CTG_BRAILLE_KEY_EVENTS] = {
-    .name = "brlkeys"
+  [LOG_CATEGORY(BRAILLE_KEY_EVENTS)] = {
+    .name = "brlkeys",
+    .prefix = "braille key"
   },
 
-  [LOG_CTG_KEYBOARD_KEY_EVENTS] = {
-    .name = "kbdkeys"
+  [LOG_CATEGORY(KEYBOARD_KEY_EVENTS)] = {
+    .name = "kbdkeys",
+    .prefix = "keyboard key"
   },
 
-  [LOG_CTG_CURSOR_TRACKING] = {
-    .name = "csrtrk"
+  [LOG_CATEGORY(CURSOR_TRACKING)] = {
+    .name = "csrtrk",
+    .prefix = "cursor tracking"
   },
 
-  [LOG_CTG_CURSOR_ROUTING] = {
-    .name = "csrrtg"
+  [LOG_CATEGORY(CURSOR_ROUTING)] = {
+    .name = "csrrtg",
+    .prefix = "cursor routing"
   },
 };
 
@@ -99,18 +107,18 @@ static FILE *logFile = NULL;
 
 int
 enableLogCategory (const char *name) {
-  const LogCategoryEntry *category = logCategoryTable;
-  const LogCategoryEntry *end = category + LOG_CATEGORY_COUNT;
+  const LogCategoryEntry *ctg = logCategoryTable;
+  const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
 
-  while (category < end) {
-    if (category->name) {
-      if (strcasecmp(name, category->name) == 0) {
-        logCategoryFlags[category - logCategoryTable] = 1;
+  while (ctg < end) {
+    if (ctg->name) {
+      if (strcasecmp(name, ctg->name) == 0) {
+        logCategoryFlags[ctg - logCategoryTable] = 1;
         return 1;
       }
     }
 
-    category += 1;
+    ctg += 1;
   }
 
   return 0;
@@ -194,15 +202,32 @@ closeSystemLog (void) {
 
 void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
-  int write = level <= systemLogLevel;
-  int print = level <= stderrLogLevel;
+  const char *prefix = NULL;
 
-  if (write || print) {
-    int reason = errno;
-    char buffer[0X1000];
-    const char *record = formatLogData(buffer, sizeof(buffer), data);
+  if (level & LOG_FLG_CATEGORY) {
+    int category = level & LOG_MSK_CATEGORY;
+    const LogCategoryEntry *ctg = &logCategoryTable[category];
 
-    if (*record) {
+    level = categoryLogLevel;
+    prefix = ctg->prefix;
+  }
+
+  {
+    int write = level <= systemLogLevel;
+    int print = level <= stderrLogLevel;
+
+    if (write || print) {
+      int oldErrno = errno;
+      char record[0X1000];
+
+      STR_BEGIN(record, sizeof(record));
+      if (prefix) STR_PRINTF("%s: ", prefix);
+      {
+        size_t sublength = formatLogData(STR_NEXT, STR_LEFT, data);
+        STR_ADJUST(sublength);
+      }
+      STR_END
+
       if (write) {
         writeLogRecord(record);
 
@@ -231,9 +256,9 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         fputc('\n', stream);
         fflush(stream);
       }
-    }
 
-    errno = reason;
+      errno = oldErrno;
+    }
   }
 }
 
@@ -242,11 +267,14 @@ typedef struct {
   va_list *arguments;
 } LogMessageData;
 
-static const char *
+static size_t
 formatLogMessageData (char *buffer, size_t size, const void *data) {
   const LogMessageData *msg = data;
-  vsnprintf(buffer, size, msg->format, *msg->arguments);
-  return buffer;
+  int length = vsnprintf(buffer, size, msg->format, *msg->arguments);
+
+  if (length < 0) return 0;
+  if (length < size) return length;
+  return size;
 }
 
 void
@@ -273,26 +301,19 @@ typedef struct {
   size_t length;
 } LogBytesData;
 
-static const char *
+static size_t
 formatLogBytesData (char *buffer, size_t size, const void *data) {
   const LogBytesData *bytes = data;
-  size_t length = bytes->length;
-  const unsigned char *in = bytes->data;
-  char *out = buffer;
+  const unsigned char *byte = bytes->data;
+  const unsigned char *end = byte + bytes->length;
+  size_t length;
 
-  {
-    size_t count = snprintf(out, size, "%s:", bytes->description);
-    out += count;
-    size -= count;
-  }
-
-  while (length-- && (size > 3)) {
-    size_t count = snprintf(out, size, " %2.2X", *in++);
-    out += count;
-    size -= count;
-  }
-
-  return buffer;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s:", bytes->description);
+  while (byte < end) STR_PRINTF(" %2.2X", *byte++);
+  length = STR_LENGTH;
+  STR_END
+  return length;
 }
 
 void
