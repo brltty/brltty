@@ -74,7 +74,6 @@ static const LogCategoryEntry logCategoryTable[] = {
   [LOG_CTG_CURSOR_ROUTING] = {
     .name = "csrrtg"
   },
-
 };
 static const unsigned int logCategoryCount = ARRAY_COUNT(logCategoryTable);
 
@@ -105,9 +104,11 @@ enableLogCategory (const char *name) {
   const LogCategoryEntry *end = category + logCategoryCount;
 
   while (category < end) {
-    if (strcasecmp(name, category->name) == 0) {
-      logCategoryFlags[category - logCategoryTable] = 1;
-      return 1;
+    if (category->name) {
+      if (strcasecmp(name, category->name) == 0) {
+        logCategoryFlags[category - logCategoryTable] = 1;
+        return 1;
+      }
     }
 
     category += 1;
