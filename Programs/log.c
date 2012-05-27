@@ -46,7 +46,7 @@ typedef struct {
   const char *name;
 } LogCategoryEntry;
 
-static const LogCategoryEntry logCategoryTable[] = {
+static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   [LOG_CTG_GENERIC_INPUT] = {
     .name = "ingio"
   },
@@ -75,10 +75,9 @@ static const LogCategoryEntry logCategoryTable[] = {
     .name = "csrrtg"
   },
 };
-static const unsigned int logCategoryCount = ARRAY_COUNT(logCategoryTable);
 
 unsigned char categoryLogLevel = LOG_WARNING;
-unsigned char logCategoryFlags[ARRAY_COUNT(logCategoryTable)];
+unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
 
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
@@ -101,7 +100,7 @@ static FILE *logFile = NULL;
 int
 enableLogCategory (const char *name) {
   const LogCategoryEntry *category = logCategoryTable;
-  const LogCategoryEntry *end = category + logCategoryCount;
+  const LogCategoryEntry *end = category + LOG_CATEGORY_COUNT;
 
   while (category < end) {
     if (category->name) {

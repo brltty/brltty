@@ -81,15 +81,20 @@ extern unsigned char categoryLogLevel;
 
 typedef enum {
   LOG_CTG_GENERIC_INPUT,
+
   LOG_CTG_INPUT_PACKETS,
   LOG_CTG_OUTPUT_PACKETS,
+
   LOG_CTG_BRAILLE_KEY_EVENTS,
   LOG_CTG_KEYBOARD_KEY_EVENTS,
+
   LOG_CTG_CURSOR_TRACKING,
-  LOG_CTG_CURSOR_ROUTING
+  LOG_CTG_CURSOR_ROUTING,
+
+  LOG_CATEGORY_COUNT /* must be last */
 } LogCategory;
 
-extern unsigned char logCategoryFlags[];
+extern unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
 #define LOG_CATEGORY_FLAG(category) logCategoryFlags[LOG_CTG_##category]
 
 #ifdef __cplusplus
