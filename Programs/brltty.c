@@ -3335,7 +3335,7 @@ brlttyUpdate (void) {
           int oldy = ses->winy;
 
           trackCursor(0);
-          if (logCursorTracking) {
+          if (LOG_CATEGORY_FLAG(CURSOR_TRACKING)) {
             logMessage(categoryLogLevel, "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
                        scr.number,
                        ses->trkx, ses->trky, scr.posx, scr.posy,

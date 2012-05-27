@@ -116,7 +116,7 @@ static const CursorAxisEntry cursorAxisTable[] = {
 
 static void
 logRouting (const char *format, ...) {
-  if (logCursorRouting) {
+  if (LOG_CATEGORY_FLAG(CURSOR_ROUTING)) {
     char buffer[0X100];
 
     STR_BEGIN(buffer, sizeof(buffer));

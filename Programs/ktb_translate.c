@@ -383,7 +383,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (table->logKeyEvents) {
+  if (table->logKeyEvents && *table->logKeyEvents) {
     char buffer[0X40];
 
     STR_BEGIN(buffer, sizeof(buffer));
@@ -403,6 +403,6 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 }
 
 void
-setKeyEventLogging (KeyTable *table, int on) {
-  table->logKeyEvents = !!on;
+setKeyEventLoggingFlag (KeyTable *table, const unsigned char *flag) {
+  table->logKeyEvents = flag;
 }

@@ -41,31 +41,45 @@ const unsigned int logLevelCount = ARRAY_COUNT(logLevelNames);
 
 unsigned char systemLogLevel = LOG_NOTICE;
 unsigned char stderrLogLevel = LOG_NOTICE;
-unsigned char categoryLogLevel = LOG_WARNING;
-
-unsigned char logGenericInput = 0;
-unsigned char logInputPackets = 0;
-unsigned char logOutputPackets = 0;
-unsigned char logBrailleKeyEvents = 0;
-unsigned char logKeyboardKeyEvents = 0;
-unsigned char logCursorTracking = 0;
-unsigned char logCursorRouting = 0;
 
 typedef struct {
   const char *name;
-  unsigned char *flag;
 } LogCategoryEntry;
 
 static const LogCategoryEntry logCategoryTable[] = {
-  {.name="ingio"  , .flag=&logGenericInput     },
-  {.name="inpkts" , .flag=&logInputPackets     },
-  {.name="outpkts", .flag=&logOutputPackets    },
-  {.name="brlkeys", .flag=&logBrailleKeyEvents },
-  {.name="kbdkeys", .flag=&logKeyboardKeyEvents},
-  {.name="csrtrk" , .flag=&logCursorTracking   },
-  {.name="csrrtg" , .flag=&logCursorRouting    }
+  [LOG_CTG_GENERIC_INPUT] = {
+    .name = "ingio"
+  },
+
+  [LOG_CTG_INPUT_PACKETS] = {
+    .name = "inpkts"
+  },
+
+  [LOG_CTG_OUTPUT_PACKETS] = {
+    .name = "outpkts"
+  },
+
+  [LOG_CTG_BRAILLE_KEY_EVENTS] = {
+    .name = "brlkeys"
+  },
+
+  [LOG_CTG_KEYBOARD_KEY_EVENTS] = {
+    .name = "kbdkeys"
+  },
+
+  [LOG_CTG_CURSOR_TRACKING] = {
+    .name = "csrtrk"
+  },
+
+  [LOG_CTG_CURSOR_ROUTING] = {
+    .name = "csrrtg"
+  },
+
 };
 static const unsigned int logCategoryCount = ARRAY_COUNT(logCategoryTable);
+
+unsigned char categoryLogLevel = LOG_WARNING;
+unsigned char logCategoryFlags[ARRAY_COUNT(logCategoryTable)];
 
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
@@ -92,7 +106,7 @@ enableLogCategory (const char *name) {
 
   while (category < end) {
     if (strcasecmp(name, category->name) == 0) {
-      *category->flag = 1;
+      logCategoryFlags[category - logCategoryTable] = 1;
       return 1;
     }
 

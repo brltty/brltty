@@ -75,16 +75,22 @@ extern void logWindowsSocketError (const char *action);
 
 extern unsigned char systemLogLevel;
 extern unsigned char stderrLogLevel;
-extern unsigned char categoryLogLevel;
 
 extern int enableLogCategory (const char *name);
-extern unsigned char logGenericInput;
-extern unsigned char logInputPackets;
-extern unsigned char logOutputPackets;
-extern unsigned char logBrailleKeyEvents;
-extern unsigned char logKeyboardKeyEvents;
-extern unsigned char logCursorTracking;
-extern unsigned char logCursorRouting;
+extern unsigned char categoryLogLevel;
+
+typedef enum {
+  LOG_CTG_GENERIC_INPUT,
+  LOG_CTG_INPUT_PACKETS,
+  LOG_CTG_OUTPUT_PACKETS,
+  LOG_CTG_BRAILLE_KEY_EVENTS,
+  LOG_CTG_KEYBOARD_KEY_EVENTS,
+  LOG_CTG_CURSOR_TRACKING,
+  LOG_CTG_CURSOR_ROUTING
+} LogCategory;
+
+extern unsigned char logCategoryFlags[];
+#define LOG_CATEGORY_FLAG(category) logCategoryFlags[LOG_CTG_##category]
 
 #ifdef __cplusplus
 }

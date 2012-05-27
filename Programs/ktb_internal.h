@@ -117,7 +117,8 @@ struct KeyTableStruct {
 
   int command;
   unsigned immediate:1;
-  unsigned logKeyEvents:1;
+
+  const unsigned char *logKeyEvents;
 };
 
 extern void copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count);

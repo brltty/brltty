@@ -681,7 +681,7 @@ replaceKeyboardKeyTable (const char *name) {
   }
 
   if ((keyboardKeyTable = table)) {
-    setKeyEventLogging(keyboardKeyTable, logKeyboardKeyEvents);
+    setKeyEventLoggingFlag(keyboardKeyTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEY_EVENTS));
 
     if (enableKeyboardHelpPage()) {
       listKeyTable(keyboardKeyTable, handleWcharHelpLine, NULL);
@@ -984,7 +984,7 @@ constructBrailleDriver (void) {
 
             if ((path = makePath(opt_tablesDirectory, file))) {
               if ((brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
-                setKeyEventLogging(brl.keyTable, logBrailleKeyEvents);
+                setKeyEventLoggingFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEY_EVENTS));
                 logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), path);
 
                 if (enableBrailleHelpPage()) {

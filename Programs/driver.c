@@ -33,12 +33,12 @@ logPacket (const char *description, const void *packet, size_t size) {
 
 void
 logOutputPacket (const void *packet, size_t size) {
-  if (logOutputPackets) logPacket("Output Packet", packet, size);
+  if (LOG_CATEGORY_FLAG(OUTPUT_PACKETS)) logPacket("Output Packet", packet, size);
 }
 
 void
 logInputPacket (const void *packet, size_t size) {
-  if (logInputPackets) logPacket("Input Packet", packet, size);
+  if (LOG_CATEGORY_FLAG(INPUT_PACKETS)) logPacket("Input Packet", packet, size);
 }
 
 void
@@ -89,14 +89,4 @@ logCorruptPacket (const void *packet, size_t size) {
 void
 logDiscardedBytes (const unsigned char *bytes, size_t count) {
   logInputProblem("Discarded Bytes", bytes, count);
-}
-
-void
-setLogInputPackets (void) {
-  logInputPackets = 1;
-}
-
-void
-setLogOutputPackets (void) {
-  logOutputPackets = 1;
 }

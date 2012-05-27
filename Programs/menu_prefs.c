@@ -329,22 +329,8 @@ testBrailleKeyTable (void) {
 }
 
 static int
-changedBrailleKeyTable (const MenuItem *item UNUSED, unsigned char setting) {
-  if (!brl.keyTable) return 0;
-  setKeyEventLogging(brl.keyTable, setting);
-  return 1;
-}
-
-static int
 testKeyboardKeyTable (void) {
   return !!keyboardKeyTable;
-}
-
-static int
-changedKeyboardKeyTable (const MenuItem *item UNUSED, unsigned char setting) {
-  if (!keyboardKeyTable) return 0;
-  setKeyEventLogging(keyboardKeyTable, setting);
-  return 1;
 }
 
 static MenuItem *
@@ -1071,41 +1057,39 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Log Generic Input"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logGenericInput, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(GENERIC_INPUT), &itemName));
     }
 
     {
       NAME(strtext("Log Input Packets"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logInputPackets, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(INPUT_PACKETS), &itemName));
     }
 
     {
       NAME(strtext("Log Output Packets"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logOutputPackets, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(OUTPUT_PACKETS), &itemName));
     }
 
     {
       NAME(strtext("Log Braille Key Events"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logBrailleKeyEvents, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(BRAILLE_KEY_EVENTS), &itemName));
       TEST(BrailleKeyTable);
-      CHANGED(BrailleKeyTable);
     }
 
     {
       NAME(strtext("Log Keyboard Key Events"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logKeyboardKeyEvents, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(KEYBOARD_KEY_EVENTS), &itemName));
       TEST(KeyboardKeyTable);
-      CHANGED(KeyboardKeyTable);
     }
 
     {
       NAME(strtext("Log Cursor Tracking"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logCursorTracking, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(CURSOR_TRACKING), &itemName));
     }
 
     {
       NAME(strtext("Log Cursor Routing"));
-      ITEM(newBooleanMenuItem(internalSubmenu, &logCursorRouting, &itemName));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(CURSOR_ROUTING), &itemName));
     }
   }
 
