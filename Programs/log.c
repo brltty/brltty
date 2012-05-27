@@ -206,10 +206,15 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
   if (level & LOG_FLG_CATEGORY) {
     int category = level & LOG_MSK_CATEGORY;
-    const LogCategoryEntry *ctg = &logCategoryTable[category];
 
+    if (!logCategoryFlags[category]) return;
     level = categoryLogLevel;
-    prefix = ctg->prefix;
+
+    {
+      const LogCategoryEntry *ctg = &logCategoryTable[category];
+
+      prefix = ctg->prefix;
+    }
   }
 
   {
