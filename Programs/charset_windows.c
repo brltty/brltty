@@ -43,11 +43,11 @@ convertCharToWchar (char c) {
 
 int
 convertWcharToChar (wchar_t wc) {
-  unsigned char c;
+  char c;
   int result = WideCharToMultiByte(CHARSET_WINDOWS_CODEPAGE, WC_NO_BEST_FIT_CHARS /* WC_ERR_INVALID_CHARS */,
                                    &wc, 1, &c, 1,
                                    NULL, NULL);
-  if (result) return c;
+  if (result) return c & 0XFF;
   logWindowsSystemError("WideCharToMultiByte[" STRINGIFY(CHARSET_WINDOWS_CODEPAGE) "]");
   return EOF;
 }
