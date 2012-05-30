@@ -1096,12 +1096,13 @@ int BRLAPI_STDCALL brlapi_setFocus(int tty)
 }
 
 static size_t getCharset(
-  unsigned char *buffer
+  void *buffer
 #ifdef WINDOWS
 , int wide
 #endif /* WINDOWS */
 ) {
-  unsigned char *p = buffer;
+  char *p = buffer;
+  const char *start = p;
   const char *locale = setlocale(LC_CTYPE, NULL);
 
 #ifdef WINDOWS
@@ -1144,7 +1145,7 @@ static size_t getCharset(
 #endif /* get non-wide character set */
   }
 
-  return p-buffer;
+  return p-start;
 }
 
 /* Function : brlapi_writeText */
