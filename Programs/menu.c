@@ -59,10 +59,10 @@ typedef struct {
   int offset;
 #endif /* glob: paradigm-specific field declarations */
 
-  const char **paths;
+  char **paths;
   int count;
   unsigned char setting;
-  const char *pathsArea[3];
+  char *pathsArea[3];
 } FileData;
 
 typedef struct {
@@ -396,7 +396,7 @@ beginItem_files (MenuItem *item) {
         files->glob.gl_offs = files->count;
 
         if (glob(files->pattern, GLOB_DOOFFS, NULL, &files->glob) == 0) {
-          files->paths = (const char **)files->glob.gl_pathv;
+          files->paths = files->glob.gl_pathv;
 
           /* The behaviour of gl_pathc is inconsistent. Some implementations
            * include the leading NULL pointers and some don't. Let's just
