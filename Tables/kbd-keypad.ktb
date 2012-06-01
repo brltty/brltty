@@ -67,24 +67,20 @@ bind KPEnter+!KP1 SAY_SOFTER
 bind KPEnter+!KP3 SAY_LOUDER
 bind KPEnter+!KP0 SPKHOME
 
-bind KPPlus+!KP2 SPEAK_CURR_CHAR
-bind KPPlus+kp0+!KP2 DESC_CURR_CHAR
-bind KPPlus+!KP1 SPEAK_PREV_CHAR
-bind KPPlus+kp0+!KP1 SPEAK_FRST_CHAR
-bind KPPlus+!KP3 SPEAK_NEXT_CHAR
-bind KPPlus+kp0+!KP3 SPEAK_LAST_CHAR
-bind KPPlus+!KP5 SPEAK_CURR_WORD
-bind KPPlus+kp0+!KP5 SPELL_CURR_WORD
-bind KPPlus+!KP4 SPEAK_PREV_WORD
-bind KPPlus+!KP6 SPEAK_NEXT_WORD
-bind KPPlus+!KP8 SPEAK_CURR_LINE
-bind KPPlus+!KP7 SPEAK_PREV_LINE
-bind KPPlus+kp0+!KP7 SPEAK_FRST_LINE
-bind KPPlus+!KP9 SPEAK_NEXT_LINE
-bind KPPlus+kp0+!KP9 SPEAK_LAST_LINE
-bind KPPlus+!KPSlash SPEAK_CURR_LOCN
-bind KPPlus+KP0+!KPSlash SHOW_CURR_LOCN
-bind KPPlus+!KPAsterisk ROUTE_CURR_LOCN
+assign speak KPPlus
+assign shift KP0
+assign charPrev KP1
+assign charCurr KP2
+assign charNext KP3
+assign wordPrev KP4
+assign wordCurr KP5
+assign wordNext KP6
+assign linePrev KP7
+assign lineCurr KP8
+assign lineNext KP9
+assign locnSpeak KPSlash
+assign locnRoute KPAsterisk
+include kbd-speak.kti
 
 bind KPMinus+!KP5 PREFMENU
 bind KPMinus+!KP4 PREFLOAD

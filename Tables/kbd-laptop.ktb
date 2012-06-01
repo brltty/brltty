@@ -72,3 +72,19 @@ bind ControlRight+!ArrowUp SPEAK_FRST_LINE
 bind ControlRight+!ArrowDown SPEAK_LAST_LINE
 bind ControlRight+ShiftRight ROUTE_CURR_LOCN
 bind ShiftRight+!Enter SPEAK_CURR_LOCN
+
+assign speak Tab
+assign shift Space
+assign charPrev M
+assign charCurr Comma
+assign charNext Period
+assign wordPrev J
+assign wordCurr K
+assign wordNext L
+assign linePrev U
+assign lineCurr I
+assign lineNext O
+assign locnSpeak Eight
+assign locnRoute Nine
+include kbd-speak.kti
+
