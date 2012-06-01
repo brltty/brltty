@@ -2820,6 +2820,7 @@ doCommand:
 
         if (row < scr.rows) {
           ses->spky = row;
+          ses->spkx = 0;
           speakCurrentLine();
         } else {
           playTune(&tune_command_rejected);
@@ -2840,6 +2841,7 @@ doCommand:
 
         if (row >= 0) {
           ses->spky = row;
+          ses->spkx = 0;
           speakCurrentLine();
         } else {
           playTune(&tune_command_rejected);
@@ -3335,12 +3337,11 @@ brlttyUpdate (void) {
           int oldy = ses->winy;
 
           trackCursor(0);
-          if (LOG_CATEGORY_FLAG(CURSOR_TRACKING)) {
-            logMessage(categoryLogLevel, "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
-                       scr.number,
-                       ses->trkx, ses->trky, scr.posx, scr.posy,
-                       oldx, oldy, ses->winx, ses->winy);
-          }
+          logMessage(LOG_CATEGORY(CURSOR_TRACKING),
+                     "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                     scr.number,
+                     ses->trkx, ses->trky, scr.posx, scr.posy,
+                     oldx, oldy, ses->winx, ses->winy);
 
           ses->spkx = ses->trkx = scr.posx;
           ses->spky = ses->trky = scr.posy;
