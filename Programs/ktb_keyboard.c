@@ -129,26 +129,37 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Zero_RightParenthesis, "Zero"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Zero_RightParenthesis, "SYMBOL_Zero_RightParenthesis"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Grave_Tilde, "Grave"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Grave_Tilde, "SYMBOL_Grave_Tilde"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Backslash_Bar, "Backslash"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Backslash_Bar, "SYMBOL_Backslash_Bar"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Minus_Underscore, "Minus"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Minus_Underscore, "SYMBOL_Minus_Underscore"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Equals_Plus, "Equals"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Equals_Plus, "SYMBOL_Equals_Plus"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_LeftBracket_LeftBrace, "LeftBracket"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_LeftBracket_LeftBrace, "SYMBOL_LeftBracket_LeftBrace"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_RightBracket_RightBrace, "RightBracket"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_RightBracket_RightBrace, "SYMBOL_RightBracket_RightBrace"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Semicolon_Colon, "Semicolon"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Semicolon_Colon, "SYMBOL_Semicolon_Colon"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Apostrophe_Quote, "Apostrophe"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Apostrophe_Quote, "SYMBOL_Apostrophe_Quote"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Comma_Less, "Comma"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Comma_Less, "SYMBOL_Comma_Less"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Period_Greater, "Period"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Period_Greater, "SYMBOL_Period_Greater"),
 
+  KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Slash_Question, "Slash"),
   KEY_NAME_ENTRY(KBD_KEY_SYMBOL_Slash_Question, "SYMBOL_Slash_Question"),
 
   KEY_NAME_ENTRY(KBD_KEY_FUNCTION_Escape, "Escape"),
