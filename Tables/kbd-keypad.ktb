@@ -56,32 +56,6 @@ bind KP0+KPPeriod+!KP4 LNBEG
 bind KP0+KPPeriod+!KP5 SETLEFT
 bind KP0+KPPeriod+!KP6 LNEND
 
-bind KPEnter+!KP5 SAY_LINE
-bind KPEnter+!KP8 SAY_ABOVE
-bind KPEnter+!KP2 SAY_BELOW
-bind KPEnter+!KP4 MUTE
-bind KPEnter+!KP6 AUTOSPEAK
-bind KPEnter+!KP7 SAY_SLOWER
-bind KPEnter+!KP9 SAY_FASTER
-bind KPEnter+!KP1 SAY_SOFTER
-bind KPEnter+!KP3 SAY_LOUDER
-bind KPEnter+!KP0 SPKHOME
-
-assign speak KPPlus
-assign kpZero KP0
-assign kpOne KP1
-assign kpTwo KP2
-assign kpThree KP3
-assign kpFour KP4
-assign kpFive KP5
-assign kpSix KP6
-assign kpSeven KP7
-assign kpEight KP8
-assign kpNine KP9
-assign kpSlash KPSlash
-assign kpAsterisk KPAsterisk
-include kbd-kp_speak.kti
-
 bind KPMinus+!KP5 PREFMENU
 bind KPMinus+!KP4 PREFLOAD
 bind KPMinus+!KP6 PREFSAVE
@@ -104,6 +78,25 @@ bind KPAsterisk+!KP4 PRDIFCHAR
 bind KPAsterisk+!KP6 NXDIFCHAR
 bind KPAsterisk+!KPMinus PRSEARCH
 bind KPAsterisk+!KPPlus NXSEARCH
+
+assign kpZero KP0
+assign kpOne KP1
+assign kpTwo KP2
+assign kpThree KP3
+assign kpFour KP4
+assign kpFive KP5
+assign kpSix KP6
+assign kpSeven KP7
+assign kpEight KP8
+assign kpNine KP9
+assign kpSlash KPSlash
+assign kpAsterisk KPAsterisk
+
+assign say KPEnter
+include kbd-kp_say.kti
+
+assign speak KPPlus
+include kbd-kp_speak.kti
 
 
 #################

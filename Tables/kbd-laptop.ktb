@@ -18,49 +18,49 @@
 
 title Bindings for Keyboards without a Keypad
 
-bind	CapsLock+!F1			HELP
-bind	CapsLock+ShiftLeft+!F1		LEARN
-bind	CapsLock+!R			RESTARTBRL
-bind	CapsLock+!D			DESCCHAR
-bind	CapsLock+ShiftLeft+!T			TIME
-bind	CapsLock+!ArrowUp		LNUP
-bind	CapsLock+!ArrowDown		LNDN
-bind	CapsLock+!ArrowLeft		CHRLT
-bind	CapsLock+!ArrowRight		CHRRT
-bind	CapsLock+!Home			TOP_LEFT
-bind	CapsLock+!End			BOT_LEFT
-bind	CapsLock+!Enter			CSRTRK
-bind	CapsLock+!O			CSRTRK+off
-bind	CapsLock+!DeleteBackward		BACK
+bind CapsLock+!F1 HELP
+bind CapsLock+ShiftLeft+!F1 LEARN
+bind CapsLock+!R RESTARTBRL
+bind CapsLock+!D DESCCHAR
+bind CapsLock+!T TIME
+bind CapsLock+!ArrowUp LNUP
+bind CapsLock+!ArrowDown LNDN
+bind CapsLock+!ArrowLeft CHRLT
+bind CapsLock+!ArrowRight CHRRT
+bind CapsLock+!Home TOP_LEFT
+bind CapsLock+!End BOT_LEFT
+bind CapsLock+!Enter CSRTRK
+bind CapsLock+!O CSRTRK+off
+bind CapsLock+!DeleteBackward BACK
 
 # marks
-bind	CapsLock+!M			SETMARK
-bind	CapsLock+!J			GOTOMARK
-bind	CapsLock+ShiftLeft+!One		SETMARK+1
-bind	CapsLock+!One			GOTOMARK+1
-bind	CapsLock+ShiftLeft+!Two		SETMARK+2
-bind	CapsLock+!Two			GOTOMARK+2
-bind	CapsLock+ShiftLeft+!Three		SETMARK+3
-bind	CapsLock+!Three			GOTOMARK+3
-bind	CapsLock+ShiftLeft+!Four		SETMARK+4
-bind	CapsLock+!Four			GOTOMARK+4
+bind CapsLock+!M SETMARK
+bind CapsLock+!J GOTOMARK
+bind CapsLock+ShiftLeft+!One SETMARK+1
+bind CapsLock+!One GOTOMARK+1
+bind CapsLock+ShiftLeft+!Two SETMARK+2
+bind CapsLock+!Two GOTOMARK+2
+bind CapsLock+ShiftLeft+!Three SETMARK+3
+bind CapsLock+!Three GOTOMARK+3
+bind CapsLock+ShiftLeft+!Four SETMARK+4
+bind CapsLock+!Four GOTOMARK+4
 
-# cut and paste
-bind	CapsLock+!X			CLIP_NEW
-bind	CapsLock+!C			COPY_RECT
-bind	CapsLock+!V			PASTE
+# copy and paste
+bind CapsLock+!X CLIP_NEW
+bind CapsLock+!C COPY_RECT
+bind CapsLock+!V PASTE
 
 # speech
-bind	!ControlLeft			MUTE
-bind	!ControlRight			MUTE
-bind	CapsLock+!PageUp			SAY_ABOVE
-bind	CapsLock+!Space			SAY_LINE
-bind	CapsLock+!PageDown		SAY_BELOW
-bind	CapsLock+!F5			SAY_SLOWER
-bind	CapsLock+!F6			SAY_FASTER
-bind	CapsLock+!F7			SAY_SOFTER
-bind	CapsLock+!F8			SAY_LOUDER
-bind	CapsLock+!F9			AUTOSPEAK
+bind !ControlLeft MUTE
+bind !ControlRight MUTE
+bind CapsLock+!PageUp SAY_ABOVE
+bind CapsLock+!Space SAY_LINE
+bind CapsLock+!PageDown SAY_BELOW
+bind CapsLock+!F5 SAY_SLOWER
+bind CapsLock+!F6 SAY_FASTER
+bind CapsLock+!F7 SAY_SOFTER
+bind CapsLock+!F8 SAY_LOUDER
+bind CapsLock+!F9 AUTOSPEAK
 
 bind ShiftRight+!ArrowLeft SPEAK_PREV_WORD
 bind ShiftRight+!ArrowRight SPEAK_NEXT_WORD
@@ -73,7 +73,6 @@ bind ControlRight+!ArrowDown SPEAK_LAST_LINE
 bind ControlRight+ShiftRight ROUTE_CURR_LOCN
 bind ShiftRight+!Enter SPEAK_CURR_LOCN
 
-assign speak Tab
 assign kpZero Space
 assign kpOne M
 assign kpTwo Comma
@@ -86,5 +85,10 @@ assign kpEight I
 assign kpNine O
 assign kpSlash Eight
 assign kpAsterisk Nine
+
+assign say CapsLock+ShiftLeft
+include kbd-kp_say.kti
+
+assign speak Tab
 include kbd-kp_speak.kti
 
