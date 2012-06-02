@@ -68,19 +68,19 @@ bind KPEnter+!KP3 SAY_LOUDER
 bind KPEnter+!KP0 SPKHOME
 
 assign speak KPPlus
-assign shift KP0
-assign charPrev KP1
-assign charCurr KP2
-assign charNext KP3
-assign wordPrev KP4
-assign wordCurr KP5
-assign wordNext KP6
-assign linePrev KP7
-assign lineCurr KP8
-assign lineNext KP9
-assign locnSpeak KPSlash
-assign locnRoute KPAsterisk
-include kbd-speak.kti
+assign kpZero KP0
+assign kpOne KP1
+assign kpTwo KP2
+assign kpThree KP3
+assign kpFour KP4
+assign kpFive KP5
+assign kpSix KP6
+assign kpSeven KP7
+assign kpEight KP8
+assign kpNine KP9
+assign kpSlash KPSlash
+assign kpAsterisk KPAsterisk
+include kbd-kp_speak.kti
 
 bind KPMinus+!KP5 PREFMENU
 bind KPMinus+!KP4 PREFLOAD

@@ -1,0 +1,40 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+bind \{speak}+!\{kpTwo} SPEAK_CURR_CHAR
+bind \{speak}+\{kpZero}+!\{kpTwo} DESC_CURR_CHAR
+bind \{speak}+!\{kpOne} SPEAK_PREV_CHAR
+bind \{speak}+\{kpZero}+!\{kpOne} SPEAK_FRST_CHAR
+bind \{speak}+!\{kpThree} SPEAK_NEXT_CHAR
+bind \{speak}+\{kpZero}+!\{kpThree} SPEAK_LAST_CHAR
+
+bind \{speak}+!\{kpFive} SPEAK_CURR_WORD
+bind \{speak}+\{kpZero}+!\{kpFive} SPELL_CURR_WORD
+bind \{speak}+!\{kpFour} SPEAK_PREV_WORD
+bind \{speak}+!\{kpSix} SPEAK_NEXT_WORD
+
+bind \{speak}+!\{kpEight} SPEAK_CURR_LINE
+bind \{speak}+!\{kpSeven} SPEAK_PREV_LINE
+bind \{speak}+\{kpZero}+!\{kpSeven} SPEAK_FRST_LINE
+bind \{speak}+!\{kpNine} SPEAK_NEXT_LINE
+bind \{speak}+\{kpZero}+!\{kpNine} SPEAK_LAST_LINE
+
+bind \{speak}+!\{kpSlash} SPEAK_CURR_LOCN
+bind \{speak}+\{kpZero}+!\{kpSlash} SHOW_CURR_LOCN
+bind \{speak}+!\{kpAsterisk} ROUTE_CURR_LOCN
+

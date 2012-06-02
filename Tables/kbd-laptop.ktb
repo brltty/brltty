@@ -74,17 +74,17 @@ bind ControlRight+ShiftRight ROUTE_CURR_LOCN
 bind ShiftRight+!Enter SPEAK_CURR_LOCN
 
 assign speak Tab
-assign shift Space
-assign charPrev M
-assign charCurr Comma
-assign charNext Period
-assign wordPrev J
-assign wordCurr K
-assign wordNext L
-assign linePrev U
-assign lineCurr I
-assign lineNext O
-assign locnSpeak Eight
-assign locnRoute Nine
-include kbd-speak.kti
+assign kpZero Space
+assign kpOne M
+assign kpTwo Comma
+assign kpThree Period
+assign kpFour J
+assign kpFive K
+assign kpSix L
+assign kpSeven U
+assign kpEight I
+assign kpNine O
+assign kpSlash Eight
+assign kpAsterisk Nine
+include kbd-kp_speak.kti
 
