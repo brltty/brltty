@@ -48,37 +48,37 @@ typedef struct {
 } LogCategoryEntry;
 
 static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
-  [LOG_CATEGORY(GENERIC_INPUT)] = {
+  [LOG_CATEGORY_INDEX(GENERIC_INPUT)] = {
     .name = "ingio",
     .prefix = "generic input"
   },
 
-  [LOG_CATEGORY(INPUT_PACKETS)] = {
+  [LOG_CATEGORY_INDEX(INPUT_PACKETS)] = {
     .name = "inpkts",
     .prefix = "input packet"
   },
 
-  [LOG_CATEGORY(OUTPUT_PACKETS)] = {
+  [LOG_CATEGORY_INDEX(OUTPUT_PACKETS)] = {
     .name = "outpkts",
     .prefix = "output packet"
   },
 
-  [LOG_CATEGORY(BRAILLE_KEY_EVENTS)] = {
+  [LOG_CATEGORY_INDEX(BRAILLE_KEY_EVENTS)] = {
     .name = "brlkeys",
     .prefix = "braille key"
   },
 
-  [LOG_CATEGORY(KEYBOARD_KEY_EVENTS)] = {
+  [LOG_CATEGORY_INDEX(KEYBOARD_KEY_EVENTS)] = {
     .name = "kbdkeys",
     .prefix = "keyboard key"
   },
 
-  [LOG_CATEGORY(CURSOR_TRACKING)] = {
+  [LOG_CATEGORY_INDEX(CURSOR_TRACKING)] = {
     .name = "csrtrk",
     .prefix = "cursor tracking"
   },
 
-  [LOG_CATEGORY(CURSOR_ROUTING)] = {
+  [LOG_CATEGORY_INDEX(CURSOR_ROUTING)] = {
     .name = "csrrtg",
     .prefix = "cursor routing"
   },

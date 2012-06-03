@@ -48,32 +48,32 @@ typedef enum {
 extern const char *const logLevelNames[];
 extern const unsigned int logLevelCount;
 
-#define LOG_FLG_CATEGORY 0X100
+#define LOG_FLG_CATEGORY 0X80
 #define LOG_MSK_CATEGORY (LOG_FLG_CATEGORY - 1)
 
-#define LOG_CATEGORY(category) LOG_CTG_##category
-#define LOG_LVL_CATEGORY(category) (LOG_FLG_CATEGORY | LOG_CATEGORY(category))
+#define LOG_CATEGORY_INDEX(name) LOG_CTG_##name
+#define LOG_CATEGORY(name) (LOG_FLG_CATEGORY | LOG_CATEGORY_INDEX(name))
 
 typedef enum {
-  LOG_CATEGORY(GENERIC_INPUT),
+  LOG_CATEGORY_INDEX(GENERIC_INPUT),
 
-  LOG_CATEGORY(INPUT_PACKETS),
-  LOG_CATEGORY(OUTPUT_PACKETS),
+  LOG_CATEGORY_INDEX(INPUT_PACKETS),
+  LOG_CATEGORY_INDEX(OUTPUT_PACKETS),
 
-  LOG_CATEGORY(BRAILLE_KEY_EVENTS),
-  LOG_CATEGORY(KEYBOARD_KEY_EVENTS),
+  LOG_CATEGORY_INDEX(BRAILLE_KEY_EVENTS),
+  LOG_CATEGORY_INDEX(KEYBOARD_KEY_EVENTS),
 
-  LOG_CATEGORY(CURSOR_TRACKING),
-  LOG_CATEGORY(CURSOR_ROUTING),
+  LOG_CATEGORY_INDEX(CURSOR_TRACKING),
+  LOG_CATEGORY_INDEX(CURSOR_ROUTING),
 
   LOG_CATEGORY_COUNT /* must be last */
-} LogCategory;
+} LogCategoryIndex;
 
 extern int enableLogCategory (const char *name);
 extern unsigned char categoryLogLevel;
 
 extern unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
-#define LOG_CATEGORY_FLAG(category) logCategoryFlags[LOG_CATEGORY(category)]
+#define LOG_CATEGORY_FLAG(name) logCategoryFlags[LOG_CATEGORY_INDEX(name)]
 
 extern void openLogFile (const char *path);
 extern void closeLogFile (void);

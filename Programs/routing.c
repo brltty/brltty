@@ -119,7 +119,7 @@ logRouting (const char *format, ...) {
   va_list arguments;
 
   va_start(arguments, format);
-  vlogMessage(LOG_LVL_CATEGORY(CURSOR_ROUTING), format, &arguments);
+  vlogMessage(LOG_CATEGORY(CURSOR_ROUTING), format, &arguments);
   va_end(arguments);
 }
 
