@@ -818,14 +818,14 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Speak New Line"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakNewLine, &itemName));
+      NAME(strtext("Speak Selected Line"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakSelectedLine, &itemName));
       TEST(Autospeak);
     }
 
     {
-      NAME(strtext("Speak Current Character"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCurrentCharacter, &itemName));
+      NAME(strtext("Speak Selected Character"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakSelectedCharacter, &itemName));
       TEST(Autospeak);
     }
 

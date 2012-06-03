@@ -397,16 +397,16 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autospeak
   },
 
-  { .name = "autospeak-new-line",
-    .defaultValue = DEFAULT_AUTOSPEAK_NEW_LINE,
+  { .name = "autospeak-selected-line",
+    .defaultValue = DEFAULT_AUTOSPEAK_SELECTED_LINE,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autospeakNewLine
+    .setting = &prefs.autospeakSelectedLine
   },
 
-  { .name = "autospeak-current-character",
-    .defaultValue = DEFAULT_AUTOSPEAK_CURRENT_CHARACTER,
+  { .name = "autospeak-selected-character",
+    .defaultValue = DEFAULT_AUTOSPEAK_SELECTED_CHARACTER,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autospeakCurrentCharacter
+    .setting = &prefs.autospeakSelectedCharacter
   },
 
   { .name = "autospeak-inserted-characters",

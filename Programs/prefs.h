@@ -161,8 +161,8 @@ typedef struct {
   unsigned char uppercaseIndicator;
   unsigned char whitespaceIndicator;
 
-  unsigned char autospeakNewLine;
-  unsigned char autospeakCurrentCharacter;
+  unsigned char autospeakSelectedLine;
+  unsigned char autospeakSelectedCharacter;
   unsigned char autospeakInsertedCharacters;
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;

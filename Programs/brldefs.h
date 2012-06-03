@@ -176,6 +176,13 @@ typedef enum {
   BRL_CMD_TIME /* show the current date and time */,
   BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,
 
+  BRL_CMD_ASPK_SEL_LINE /* set autospeak selected line on/off */,
+  BRL_CMD_ASPK_SEL_CHAR /* set autospeak selected character on/off */,
+  BRL_CMD_ASPK_INS_CHARS /* set autospeak inserted characters on/off */,
+  BRL_CMD_ASPK_DEL_CHARS /* set autospeak deleted characters on/off */,
+  BRL_CMD_ASPK_REP_CHARS /* set autospeak replaced characters on/off */,
+  BRL_CMD_ASPK_CMP_WORDS /* set autospeak completed words on/off */,
+
   BRL_CMD_SPEAK_CURR_CHAR /* speak current character */,
   BRL_CMD_SPEAK_PREV_CHAR /* go to and speak previous character */,
   BRL_CMD_SPEAK_NEXT_CHAR /* go to and speak next character */,

@@ -2550,6 +2550,31 @@ doCommand:
       case BRL_CMD_AUTOSPEAK:
         TOGGLE_PLAY(prefs.autospeak);
         break;
+
+      case BRL_CMD_ASPK_SEL_LINE:
+        TOGGLE_PLAY(prefs.autospeakSelectedLine);
+        break;
+
+      case BRL_CMD_ASPK_SEL_CHAR:
+        TOGGLE_PLAY(prefs.autospeakSelectedCharacter);
+        break;
+
+      case BRL_CMD_ASPK_INS_CHARS:
+        TOGGLE_PLAY(prefs.autospeakInsertedCharacters);
+        break;
+
+      case BRL_CMD_ASPK_DEL_CHARS:
+        TOGGLE_PLAY(prefs.autospeakDeletedCharacters);
+        break;
+
+      case BRL_CMD_ASPK_REP_CHARS:
+        TOGGLE_PLAY(prefs.autospeakReplacedCharacters);
+        break;
+
+      case BRL_CMD_ASPK_CMP_WORDS:
+        TOGGLE_PLAY(prefs.autospeakCompletedWords);
+        break;
+
       case BRL_CMD_MUTE:
         speech->mute(&spk);
         break;
@@ -3375,7 +3400,7 @@ brlttyUpdate (void) {
         if (!oldCharacters) {
           count = 0;
         } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
-          if (!prefs.autospeakNewLine) count = 0;
+          if (!prefs.autospeakSelectedLine) count = 0;
         } else {
           int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -3484,7 +3509,7 @@ brlttyUpdate (void) {
             if (!prefs.autospeakReplacedCharacters) count = 0;
           } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
             column = newX;
-            count = prefs.autospeakCurrentCharacter? 1: 0;
+            count = prefs.autospeakSelectedCharacter? 1: 0;
 
             if (prefs.autospeakCompletedWords) {
               if ((newX > oldX) && (column >= 2)) {
