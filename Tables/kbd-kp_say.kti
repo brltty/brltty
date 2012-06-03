@@ -25,4 +25,12 @@ bind \{say}+!\{kpSeven} SAY_SLOWER
 bind \{say}+!\{kpNine} SAY_FASTER
 bind \{say}+!\{kpOne} SAY_SOFTER
 bind \{say}+!\{kpThree} SAY_LOUDER
-bind \{say}+!\{kpZero} SPKHOME
+bind \{say}+!\{kpAsterisk} SPKHOME
+
+bind \{say}+\{kpZero}+!\{kpOne} ASPK_DEL_CHARS
+bind \{say}+\{kpZero}+!\{kpTwo} ASPK_REP_CHARS
+bind \{say}+\{kpZero}+!\{kpThree} ASPK_INS_CHARS
+bind \{say}+\{kpZero}+!\{kpFour} ASPK_SEL_CHAR
+bind \{say}+\{kpZero}+!\{kpFive} ASPK_SEL_LINE
+bind \{say}+\{kpZero}+!\{kpSix} ASPK_CMP_WORDS
+
