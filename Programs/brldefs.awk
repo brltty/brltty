@@ -17,17 +17,34 @@
 ###############################################################################
 
 BEGIN {
-  brlCommandCount = 0
-  keyCount = 0
+  brlCommandValue = 0
+  brlKeyValue = 0
+
+  brlBlockAlias["CLIP_NEW"] = "CUTBEGIN"
+  brlBlockAlias["CLIP_ADD"] = "CUTAPPEND"
+  brlBlockAlias["COPY_LINE"] = "CUTLINE"
+  brlBlockAlias["COPY_RECT"] = "CUTRECT"
+  brlBlockAlias["CLIP_COPY"] = "COPYCHARS"
+  brlBlockAlias["CLIP_APPEND"] = "APNDCHARS"
 }
 
 /^ *BRL_CMD_/ {
-  brlCommand(substr($1, 9), $1, brlCommandCount++, getComment($0))
+  brlCommand(substr($1, 9), $1, brlCommandValue++, getComment($0))
   next
 }
 
 /#define[ \t]*BRL_BLK_/ {
-  brlBlock(substr($2, 9), $2, getDefineValue(), getComment($0))
+  prefix = substr($2, 1, 8)
+  name = substr($2, 9)
+  value = getDefineValue()
+  help = getComment($0)
+  brlBlock(name, $2, value, help)
+
+  if (name in brlBlockAlias) {
+    alias = brlBlockAlias[name]
+    brlBlock(alias, prefix alias, value, "alias for " name " - " help)
+  }
+
   next
 }
 
@@ -35,7 +52,7 @@ BEGIN {
   gsub(",", "", $1)
   key = tolower(substr($1, 9))
   gsub("_", "-", key)
-  brlKey(substr($1, 9), $1, keyCount++, key " key")
+  brlKey(substr($1, 9), $1, brlKeyValue++, key " key")
   next
 }
 
