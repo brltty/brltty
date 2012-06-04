@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
-"POT-Creation-Date: 2012-05-30 19:06+0200\n"
-"PO-Revision-Date: 2012-05-30 19:36+0200\n"
+"POT-Creation-Date: 2012-06-04 00:40+0200\n"
+"PO-Revision-Date: 2012-06-04 10:27+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -81,7 +81,7 @@ msgstr "<aus>"
 msgid "API Parameter"
 msgstr "API Parameter"
 
-#: Programs/cmds.auto.h:931
+#: Programs/cmds.auto.h:979
 msgid "AT (set 2) keyboard scan code"
 msgstr "AT (set 2) Tastatur-Scancode"
 
@@ -110,7 +110,7 @@ msgstr "Akustische Gitarre (Stahl-Saiten"
 
 #: Programs/menu_prefs.c:919
 msgid "After Time"
-msgstr ""
+msgstr "Nach Uhrzeit"
 
 #: Programs/midi.c:183
 msgid "Agogo"
@@ -222,7 +222,7 @@ msgstr "Piepser"
 
 #: Programs/menu_prefs.c:918
 msgid "Before Time"
-msgstr ""
+msgstr "Vor Uhrzeit"
 
 #: Programs/midi.c:194
 msgid "Bird Tweet"
@@ -804,9 +804,8 @@ msgid "List key table on standard output."
 msgstr "Tastentabelle via Standardausgabe auflisten."
 
 #: Programs/menu_prefs.c:1074
-#, fuzzy
 msgid "Log Braille Key Events"
-msgstr "Braillegerät"
+msgstr "Protokolliere Tastenereignisse der Braillezeile"
 
 #: Programs/menu_prefs.c:1091
 msgid "Log Cursor Routing"
@@ -818,13 +817,12 @@ msgid "Log Cursor Tracking"
 msgstr "gehe zurück nach Cursor tracking"
 
 #: Programs/menu_prefs.c:1059
-#, fuzzy
 msgid "Log Generic Input"
-msgstr "Eingabe für die Sprachausgabe"
+msgstr "Protokolliere generische Eingabeereignisse"
 
 #: Programs/menu_prefs.c:1064
 msgid "Log Input Packets"
-msgstr ""
+msgstr "Protokolliere eingehende Datenpakete"
 
 #: Programs/menu_prefs.c:1080
 msgid "Log Keyboard Key Events"
@@ -832,7 +830,7 @@ msgstr "Protokolliere Tastaturtastenereignisse"
 
 #: Programs/menu_prefs.c:1069
 msgid "Log Output Packets"
-msgstr ""
+msgstr "Protokolliere ausgehende Datenpakete"
 
 #: Programs/config.c:516
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
@@ -988,7 +986,7 @@ msgstr "PCM"
 msgid "PCM Volume"
 msgstr "PCM Lautstärke"
 
-#: Programs/cmds.auto.h:945
+#: Programs/cmds.auto.h:993
 msgid "PS/2 (set 3) keyboard scan code"
 msgstr "PS/2 (set 3) Tastatur-Scancode"
 
@@ -1346,10 +1344,6 @@ msgstr "Leer"
 msgid "Speak Completed Words"
 msgstr "Sprich ganze Wörter"
 
-#: Programs/menu_prefs.c:827
-msgid "Speak Current Character"
-msgstr "Sprich aktuelles Zeichen"
-
 #: Programs/menu_prefs.c:839
 msgid "Speak Deleted Characters"
 msgstr "Sprich gelöschte Zeichen"
@@ -1358,13 +1352,17 @@ msgstr "Sprich gelöschte Zeichen"
 msgid "Speak Inserted Characters"
 msgstr "sprich eingefügte Zeichen"
 
-#: Programs/menu_prefs.c:821
-msgid "Speak New Line"
-msgstr "sprich neue Zeile"
-
 #: Programs/menu_prefs.c:845
 msgid "Speak Replaced Characters"
 msgstr "Sprich ersetztes Zeichen"
+
+#: Programs/menu_prefs.c:827
+msgid "Speak Selected Character"
+msgstr "Sprich ausgewähltes Zeichen"
+
+#: Programs/menu_prefs.c:821
+msgid "Speak Selected Line"
+msgstr "sprich ausgewählte Zeile"
 
 #: Programs/menu_prefs.c:880
 msgid "Speech Cursor Invisible Time"
@@ -1724,7 +1722,7 @@ msgstr "X Display mit dem Verbindung aufgenommen werden soll"
 msgid "XFree(wm_name) for change"
 msgstr ""
 
-#: Programs/cmds.auto.h:938
+#: Programs/cmds.auto.h:986
 msgid "XT (set 1) keyboard scan code"
 msgstr "XT (set 1) Tastatur-Scancode"
 
@@ -1768,11 +1766,11 @@ msgstr "alle Punkte"
 msgid "and"
 msgstr "und"
 
-#: Programs/cmds.auto.h:788
+#: Programs/cmds.auto.h:836
 msgid "append characters to clipboard"
 msgstr "hänge Zeichenkette an die Zwischenablage an"
 
-#: Programs/cmds.auto.h:684
+#: Programs/cmds.auto.h:732
 msgid "append to clipboard from character"
 msgstr "hänge an bestehender Zwischenablage von Zeichen an"
 
@@ -1785,7 +1783,7 @@ msgstr "arg,..."
 msgid "at cursor"
 msgstr "bei Cursor"
 
-#: Programs/cmds.auto.h:823
+#: Programs/cmds.auto.h:871
 msgid "backspace key"
 msgstr "Backspace Taste"
 
@@ -1832,7 +1830,7 @@ msgstr "Initialisierung des Brailletreibers fehlgeschlagen"
 msgid "braille driver not loadable"
 msgstr "Brailletreiber nicht ladbar"
 
-#: Programs/cmds.auto.h:670
+#: Programs/cmds.auto.h:718
 msgid "bring cursor to character"
 msgstr "bewege Cursor zu Zeichen"
 
@@ -1840,7 +1838,7 @@ msgstr "bewege Cursor zu Zeichen"
 msgid "bring cursor to line"
 msgstr "bewege Cursor zur aktuellen Braillezeilenposititon"
 
-#: Programs/cmds.auto.h:649
+#: Programs/cmds.auto.h:697
 msgid "bring cursor to speech location"
 msgstr "bewege Cursor zur Sprachposition"
 
@@ -1982,7 +1980,7 @@ msgstr "Groß"
 msgid "changes discarded"
 msgstr "Änderungen verworfen"
 
-#: Programs/brltty.c:2870
+#: Programs/brltty.c:2897
 msgid "column"
 msgstr "Spalte"
 
@@ -1999,7 +1997,7 @@ msgstr "Konfigurationsdirektive mehrfach angegeben"
 msgid "console tone generator"
 msgstr "Konsole Tongenerator"
 
-#: Programs/cmds.auto.h:781
+#: Programs/cmds.auto.h:829
 msgid "copy characters to clipboard"
 msgstr "kopiere Zeichenkette in die Zwischenablage"
 
@@ -2007,19 +2005,19 @@ msgstr "kopiere Zeichenkette in die Zwischenablage"
 msgid "csecs"
 msgstr ""
 
-#: Programs/cmds.auto.h:858
+#: Programs/cmds.auto.h:906
 msgid "cursor-down key"
 msgstr "Cursor-Runter Taste"
 
-#: Programs/cmds.auto.h:837
+#: Programs/cmds.auto.h:885
 msgid "cursor-left key"
 msgstr "Cursor-Links Taste"
 
-#: Programs/cmds.auto.h:844
+#: Programs/cmds.auto.h:892
 msgid "cursor-right key"
 msgstr "Cursor-Rechts Taste"
 
-#: Programs/cmds.auto.h:851
+#: Programs/cmds.auto.h:899
 msgid "cursor-up key"
 msgstr "Cursor-Rauf Taste"
 
@@ -2039,15 +2037,15 @@ msgstr "langsamer sprechen"
 msgid "decrease speech volume"
 msgstr "leiser sprechen"
 
-#: Programs/cmds.auto.h:900
+#: Programs/cmds.auto.h:948
 msgid "delete key"
 msgstr "Lösch Taste"
 
-#: Programs/cmds.auto.h:728
+#: Programs/cmds.auto.h:776
 msgid "describe character"
 msgstr "beschreibe Zeichen"
 
-#: Programs/cmds.auto.h:636
+#: Programs/cmds.auto.h:684
 msgid "describe current character"
 msgstr "beschreibe aktuelles Zeichen"
 
@@ -2108,15 +2106,15 @@ msgstr "ziehe Cursor"
 msgid "driver"
 msgstr "Treiber"
 
-#: Programs/cmds.auto.h:802
+#: Programs/cmds.auto.h:850
 msgid "emulate special key"
 msgstr "emuliere spezielle Taste"
 
-#: Programs/cmds.auto.h:886
+#: Programs/cmds.auto.h:934
 msgid "end key"
 msgstr "Ende Taste"
 
-#: Programs/cmds.auto.h:809
+#: Programs/cmds.auto.h:857
 msgid "enter key"
 msgstr "Enter Taste"
 
@@ -2136,7 +2134,7 @@ msgstr "Aufrufen/Verlassen des Einstellungsmenüs"
 msgid "enter/leave status display"
 msgstr "Aufrufen/Verlassen der Statusanzeige"
 
-#: Programs/cmds.auto.h:830
+#: Programs/cmds.auto.h:878
 msgid "escape key"
 msgstr "Escape Taste"
 
@@ -2190,7 +2188,7 @@ msgstr ""
 msgid "freeze/unfreeze screen image"
 msgstr "Bildschirm einfrieren/auftauen"
 
-#: Programs/cmds.auto.h:908
+#: Programs/cmds.auto.h:956
 msgid "function key"
 msgstr "Funktionstaste"
 
@@ -2210,7 +2208,7 @@ msgstr "gehe mehrere Zeilen nach unten"
 msgid "go down to first line of next paragraph"
 msgstr "gehe nach unten zur ersten Zeile des nächsten Absatzes"
 
-#: Programs/cmds.auto.h:774
+#: Programs/cmds.auto.h:822
 msgid "go down to nearest line with different character"
 msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlichem Zeichen"
 
@@ -2222,7 +2220,7 @@ msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlichem Inhalt"
 msgid "go down to nearest line with different highlighting"
 msgstr "gehe nach unten zur nächsten Zeile mit unterschiedlicher Hervorhebung"
 
-#: Programs/cmds.auto.h:721
+#: Programs/cmds.auto.h:769
 msgid "go down to nearest line with less indent than character"
 msgstr "gehe nach unten zur nächsten Zeile mit weniger Einrückung als Zeichen"
 
@@ -2262,43 +2260,43 @@ msgstr "gehe eine Braillezeile nach rechts"
 msgid "go right to nearest non-blank window"
 msgstr "gehe zur nächsten beschriebenen Braillezeile nach rechts"
 
-#: Programs/cmds.auto.h:569
+#: Programs/cmds.auto.h:657
 msgid "go to and speak first non-blank character on line"
 msgstr "gehe zu und sprich erstes nicht leeres Zeichen der Zeile"
 
-#: Programs/cmds.auto.h:623
-msgid "go to and speak first non-blank character on screen"
-msgstr "gehe zu und sprich erstes nicht leeres Zeichen des Bildschirms"
+#: Programs/cmds.auto.h:671
+msgid "go to and speak first non-blank line on screen"
+msgstr "gehe zu und sprich erste nicht leere Zeile am Bildschirm"
 
-#: Programs/cmds.auto.h:576
+#: Programs/cmds.auto.h:664
 msgid "go to and speak last non-blank character on line"
 msgstr "gehe zu und sprich letztes nicht leeres Zeichen der Zeile"
 
-#: Programs/cmds.auto.h:630
-msgid "go to and speak last non-blank character on screen"
-msgstr "gehe zu und sprich letztes nicht leeres Zeichen des Bildschirms"
+#: Programs/cmds.auto.h:678
+msgid "go to and speak last non-blank line on screen"
+msgstr "gehe zu und sprich letzte nicht leere Zeile am Bildschirm"
 
-#: Programs/cmds.auto.h:562
+#: Programs/cmds.auto.h:610
 msgid "go to and speak next character"
 msgstr "gehe zu und sprich nächstes Zeichen"
 
-#: Programs/cmds.auto.h:616
+#: Programs/cmds.auto.h:650
 msgid "go to and speak next line"
 msgstr "gehe zu und sprich nächste Zeile"
 
-#: Programs/cmds.auto.h:596
+#: Programs/cmds.auto.h:630
 msgid "go to and speak next word"
 msgstr "gehe zu und sprich nächstes Wort"
 
-#: Programs/cmds.auto.h:555
+#: Programs/cmds.auto.h:603
 msgid "go to and speak previous character"
 msgstr "gehe zu und sprich vorhergehendes Zeichen"
 
-#: Programs/cmds.auto.h:609
+#: Programs/cmds.auto.h:643
 msgid "go to and speak previous line"
 msgstr "gehe zu und sprich vorhergehende Zeile"
 
-#: Programs/cmds.auto.h:589
+#: Programs/cmds.auto.h:623
 msgid "go to and speak previous word"
 msgstr "gehe zu und sprich vorhergehendes Wort"
 
@@ -2350,15 +2348,15 @@ msgstr "gehe zum nächsten Punkt"
 msgid "go to previous item"
 msgstr "gehe zum vorherigen Punkt"
 
-#: Programs/cmds.auto.h:542
+#: Programs/cmds.auto.h:548
 msgid "go to previous menu level"
 msgstr "gehe zu vorhergehender Menüebene"
 
-#: Programs/cmds.auto.h:750
+#: Programs/cmds.auto.h:798
 msgid "go to remembered window position"
 msgstr "gehe zu gemerkter Braillezeilenposition"
 
-#: Programs/cmds.auto.h:758
+#: Programs/cmds.auto.h:806
 msgid "go to selected line"
 msgstr "gehe zu ausgewählter Zeile"
 
@@ -2378,7 +2376,7 @@ msgstr "gehe mehrere Zeilen nach oben"
 msgid "go up to last line of previous paragraph"
 msgstr "gehe nach oben zur letzten Zeile des vorhergehenden Absatzes"
 
-#: Programs/cmds.auto.h:766
+#: Programs/cmds.auto.h:814
 msgid "go up to nearest line with different character"
 msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlichem Zeichen"
 
@@ -2390,7 +2388,7 @@ msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlichem Inhalt"
 msgid "go up to nearest line with different highlighting"
 msgstr "gehe nach oben zur nächsten Zeile mit unterschiedlicher Hervorhebung"
 
-#: Programs/cmds.auto.h:713
+#: Programs/cmds.auto.h:761
 msgid "go up to nearest line with less indent than character"
 msgstr "gehe nach oben zur nächsten Zeile mit weniger Einrückung als Zeichen"
 
@@ -2410,7 +2408,7 @@ msgstr "Hilfe nicht verfügbar"
 msgid "help screen not readable"
 msgstr "Hilfe-Schirm nicht lesbar"
 
-#: Programs/cmds.auto.h:879
+#: Programs/cmds.auto.h:927
 msgid "home key"
 msgstr "Home Taste"
 
@@ -2430,7 +2428,7 @@ msgstr "lauter sprechen"
 msgid "insert clipboard text at cursor"
 msgstr "Zwischenablage an Cursorposition einfügen"
 
-#: Programs/cmds.auto.h:893
+#: Programs/cmds.auto.h:941
 msgid "insert key"
 msgstr "Einfüge Taste"
 
@@ -2507,11 +2505,11 @@ msgstr "hellmagenta"
 msgid "light red"
 msgstr "hellrot"
 
-#: Programs/brltty.c:2869
+#: Programs/brltty.c:2896
 msgid "line"
 msgstr "Zeile"
 
-#: Programs/cmds.auto.h:698
+#: Programs/cmds.auto.h:746
 #, fuzzy
 msgid "linear copy to character"
 msgstr "lineare Auswahl zu Zeichen"
@@ -2576,11 +2574,11 @@ msgstr "Operand für Konfigurationsdirektive nicht angegeben"
 msgid "option"
 msgstr "Option"
 
-#: Programs/cmds.auto.h:872
+#: Programs/cmds.auto.h:920
 msgid "page-down key"
 msgstr "Seite-Runter Taste"
 
-#: Programs/cmds.auto.h:865
+#: Programs/cmds.auto.h:913
 msgid "page-up key"
 msgstr "Seite-Rauf Taste"
 
@@ -2596,11 +2594,11 @@ msgstr "Fehler beim öffnen der PID-Datei"
 msgid "pitch"
 msgstr "Tonhöhe"
 
-#: Programs/cmds.auto.h:735
+#: Programs/cmds.auto.h:783
 msgid "place left end of window at character"
 msgstr "positioniere linken Rand der Braillezeile bei Zeichen"
 
-#: Programs/cmds.auto.h:795
+#: Programs/cmds.auto.h:843
 msgid "put random password into clipboard"
 msgstr "platziere zufälliges Passwort in der Zwischenablage"
 
@@ -2608,7 +2606,7 @@ msgstr "platziere zufälliges Passwort in der Zwischenablage"
 msgid "rate"
 msgstr "Geschwindigkeit"
 
-#: Programs/cmds.auto.h:691
+#: Programs/cmds.auto.h:739
 #, fuzzy
 msgid "rectangular copy to character"
 msgstr "rechtwinkelige Auswahl zu Zeichen"
@@ -2627,7 +2625,7 @@ msgstr "Neuinitialisierung des Brailletreibers"
 msgid "reinitializing speech driver"
 msgstr "Neuinitialisierung des Sprachausgabentreibers"
 
-#: Programs/cmds.auto.h:742
+#: Programs/cmds.auto.h:790
 msgid "remember current window position"
 msgstr "merke derzeitige Braillezeilenposition"
 
@@ -2672,9 +2670,8 @@ msgid "search backward for clipboard text"
 msgstr "Rückwärtsuche nach Zwischenablage"
 
 #: Programs/cmds.auto.h:128
-#, fuzzy
 msgid "search forward for clipboard text"
-msgstr "Vorwärtssuche nach Auswahl"
+msgstr "Vorwärtssuche nach Inhalt der Zwischenablage"
 
 #: Programs/brltty.c:513
 msgid "second"
@@ -2706,9 +2703,33 @@ msgstr "schalte Attributunterstreichung ein/aus"
 msgid "set autorepeat on/off"
 msgstr "schalte automatische Wiederholung ein/aus"
 
+#: Programs/cmds.auto.h:590
+msgid "set autospeak completed words on/off"
+msgstr "schalte automatisches Sprechen von vervollständigten Wörtern ein/aus"
+
+#: Programs/cmds.auto.h:576
+msgid "set autospeak deleted characters on/off"
+msgstr "schalte automatisches Sprechen von gelöschten Zeichen ein/aus"
+
+#: Programs/cmds.auto.h:569
+msgid "set autospeak inserted characters on/off"
+msgstr "schalte automatisches Sprechen von eingefügten Zeichen ein/aus"
+
 #: Programs/cmds.auto.h:337
 msgid "set autospeak on/off"
 msgstr "schalte automatisches Sprechen ein/aus"
+
+#: Programs/cmds.auto.h:583
+msgid "set autospeak replaced characters on/off"
+msgstr "schalte automatisches Sprechen von ersätzten Wörtern ein/aus"
+
+#: Programs/cmds.auto.h:562
+msgid "set autospeak selected character on/off"
+msgstr "schalte automatisches Sprechen des ausgewählten Zeichens ein/aus"
+
+#: Programs/cmds.auto.h:555
+msgid "set autospeak selected line on/off"
+msgstr "schalte automatisches Sprechen von ausgewählter Zeile ein/aus"
 
 #: Programs/cmds.auto.h:316
 msgid "set capital letter blinking on/off"
@@ -2750,13 +2771,18 @@ msgstr "setze überspringen von Zeilen mit identischem Inhalt ein/aus"
 msgid "set sliding window on/off"
 msgstr "überlappende Braillezeileninhalte ein/aus"
 
-#: Programs/cmds.auto.h:662
-msgid "set speech cursor visibility on/off"
+#: Programs/cmds.auto.h:710
+#, fuzzy
+msgid "set speech location visibility on/off"
 msgstr "schalte die Sichtbarkeit des Sprachcursors ein/aus"
 
 #: Programs/cmds.auto.h:239
 msgid "set text style 6-dot/8-dot"
 msgstr "umschalten zwischen 6-Punkt und 8-Punkt Braille"
+
+#: Programs/cmds.auto.h:541
+msgid "show the current date and time"
+msgstr ""
 
 #: Programs/menu_prefs.c:687
 msgid "soundcard digital audio"
@@ -2770,15 +2796,15 @@ msgstr "Synthesizer der Soundkarte"
 msgid "space"
 msgstr "Leer"
 
-#: Programs/cmds.auto.h:548
+#: Programs/cmds.auto.h:596
 msgid "speak current character"
 msgstr "sprich aktuelles Zeichen"
 
-#: Programs/cmds.auto.h:432 Programs/cmds.auto.h:602
+#: Programs/cmds.auto.h:432 Programs/cmds.auto.h:636
 msgid "speak current line"
 msgstr "sprich aktuelle Zeile"
 
-#: Programs/cmds.auto.h:582
+#: Programs/cmds.auto.h:616
 msgid "speak current word"
 msgstr "sprich aktuelles Word"
 
@@ -2790,7 +2816,7 @@ msgstr "sprich von der aktueller Zeile bis zum Ende des Bildschirms"
 msgid "speak from top of screen through current line"
 msgstr "sprich vom Beginn des Bildschirms bis zur aktuellen Zeile"
 
-#: Programs/cmds.auto.h:655
+#: Programs/cmds.auto.h:703
 msgid "speak speech location"
 msgstr "sprich Sprachposition"
 
@@ -2798,11 +2824,11 @@ msgstr "sprich Sprachposition"
 msgid "speech driver not loadable"
 msgstr "Sprachausgabentreiber konnte nicht geladen werden"
 
-#: Programs/cmds.auto.h:642
+#: Programs/cmds.auto.h:690
 msgid "spell current word"
 msgstr "buchstabiere aktuelles Wort"
 
-#: Programs/cmds.auto.h:677
+#: Programs/cmds.auto.h:725
 msgid "start new clipboard at character"
 msgstr "beginne neue Auswahl bei Zeichen"
 
@@ -2814,7 +2840,7 @@ msgstr "Sprechen stoppen"
 msgid "strange old error handler\n"
 msgstr "befremdlicher alter Fehlerbehandler\n"
 
-#: Programs/cmds.auto.h:952
+#: Programs/cmds.auto.h:1000
 msgid "switch to command context"
 msgstr "wechsle in den Kommandokontext"
 
@@ -2826,7 +2852,7 @@ msgstr "wechsle zum nächsten virtuellen Terminal"
 msgid "switch to previous virtual terminal"
 msgstr "wechsle zum vorherigen virtuellen Terminal"
 
-#: Programs/cmds.auto.h:705
+#: Programs/cmds.auto.h:753
 msgid "switch to virtual terminal"
 msgstr "wechsle zu virtuellem Terminal"
 
@@ -2838,7 +2864,7 @@ msgstr ""
 msgid "switch:1 2 3 4 5 6 t"
 msgstr ""
 
-#: Programs/cmds.auto.h:816
+#: Programs/cmds.auto.h:864
 msgid "tab key"
 msgstr "Tabulator Taste"
 
@@ -2846,11 +2872,11 @@ msgstr "Tabulator Taste"
 msgid "too many operands for configuration directive"
 msgstr "zu viele Operanden für Konfigurationsdirektive"
 
-#: Programs/cmds.auto.h:924
+#: Programs/cmds.auto.h:972
 msgid "type braille character"
 msgstr "Braillezeichen eingeben"
 
-#: Programs/cmds.auto.h:916
+#: Programs/cmds.auto.h:964
 msgid "type unicode character"
 msgstr "Uncode-Zeichen eingeben"
 
@@ -2880,7 +2906,7 @@ msgstr ""
 msgid "unknown option"
 msgstr "unbekannte Option"
 
-#: Programs/brltty.c:3185
+#: Programs/brltty.c:3212
 msgid "unrecognized command"
 msgstr "nicht erkanntes Kommando"
 
@@ -2905,11 +2931,3 @@ msgstr ""
 msgid "yellow"
 msgstr "gelb"
 
-#~ msgid "Speech"
-#~ msgstr "Sprache"
-
-#~ msgid "Tables"
-#~ msgstr "Tabellen"
-
-#~ msgid "invalid log level"
-#~ msgstr "ungültiges Log-Level"
