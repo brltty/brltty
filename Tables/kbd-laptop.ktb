@@ -73,7 +73,7 @@ bind ControlRight+!ArrowDown SPEAK_LAST_LINE
 bind ControlRight+ShiftRight ROUTE_CURR_LOCN
 bind ShiftRight+!Enter SPEAK_CURR_LOCN
 
-assign kpAlt Space
+assign kpAlt ControlLeft
 assign kpOne M
 assign kpTwo Comma
 assign kpThree Period
