@@ -20,12 +20,12 @@ BEGIN {
   brlCommandValue = 0
   brlKeyValue = 0
 
-  brlBlockAlias["CLIP_NEW"] = "CUTBEGIN"
-  brlBlockAlias["CLIP_ADD"] = "CUTAPPEND"
-  brlBlockAlias["COPY_LINE"] = "CUTLINE"
-  brlBlockAlias["COPY_RECT"] = "CUTRECT"
-  brlBlockAlias["CLIP_COPY"] = "COPYCHARS"
-  brlBlockAlias["CLIP_APPEND"] = "APNDCHARS"
+  brlBlockDeprecations["CLIP_NEW"] = "CUTBEGIN"
+  brlBlockDeprecations["CLIP_ADD"] = "CUTAPPEND"
+  brlBlockDeprecations["COPY_LINE"] = "CUTLINE"
+  brlBlockDeprecations["COPY_RECT"] = "CUTRECT"
+  brlBlockDeprecations["CLIP_COPY"] = "COPYCHARS"
+  brlBlockDeprecations["CLIP_APPEND"] = "APNDCHARS"
 }
 
 /^ *BRL_CMD_/ {
@@ -40,9 +40,9 @@ BEGIN {
   help = getComment($0)
   brlBlock(name, $2, value, help)
 
-  if (name in brlBlockAlias) {
-    alias = brlBlockAlias[name]
-    brlBlock(alias, prefix alias, value, "alias for " name " - " help)
+  if (name in brlBlockDeprecations) {
+    alias = brlBlockDeprecations[name]
+    brlBlock(alias, prefix alias, value, "deprecated definition of " name " - " help)
   }
 
   next
