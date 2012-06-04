@@ -17,6 +17,8 @@
 ###############################################################################
 
 function writeCommandEntry(name, symbol, help) {
+  if (help ~ /^deprecated /) return
+
   print "{"
   print "  .name = \"" name "\","
   print "  .code = " symbol ","
