@@ -73,7 +73,7 @@ bind ControlRight+!ArrowDown SPEAK_LAST_LINE
 bind ControlRight+ShiftRight ROUTE_CURR_LOCN
 bind ShiftRight+!Enter SPEAK_CURR_LOCN
 
-assign kpZero Space
+assign kpAlt Space
 assign kpOne M
 assign kpTwo Comma
 assign kpThree Period
@@ -86,9 +86,9 @@ assign kpNine O
 assign kpSlash Eight
 assign kpAsterisk Nine
 
-assign say CapsLock+ShiftLeft
+assign kpSay CapsLock+ShiftLeft
 include kbd-kp_say.kti
 
-assign speak Tab
+assign kpSpeak Tab
 include kbd-kp_speak.kti
 

@@ -16,25 +16,25 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{speak}+!\{kpTwo} SPEAK_CURR_CHAR
-bind \{speak}+\{kpZero}+!\{kpTwo} DESC_CURR_CHAR
-bind \{speak}+!\{kpOne} SPEAK_PREV_CHAR
-bind \{speak}+\{kpZero}+!\{kpOne} SPEAK_FRST_CHAR
-bind \{speak}+!\{kpThree} SPEAK_NEXT_CHAR
-bind \{speak}+\{kpZero}+!\{kpThree} SPEAK_LAST_CHAR
+bind \{kpSpeak}+!\{kpTwo} SPEAK_CURR_CHAR
+bind \{kpSpeak}+\{kpAlt}+!\{kpTwo} DESC_CURR_CHAR
+bind \{kpSpeak}+!\{kpOne} SPEAK_PREV_CHAR
+bind \{kpSpeak}+\{kpAlt}+!\{kpOne} SPEAK_FRST_CHAR
+bind \{kpSpeak}+!\{kpThree} SPEAK_NEXT_CHAR
+bind \{kpSpeak}+\{kpAlt}+!\{kpThree} SPEAK_LAST_CHAR
 
-bind \{speak}+!\{kpFive} SPEAK_CURR_WORD
-bind \{speak}+\{kpZero}+!\{kpFive} SPELL_CURR_WORD
-bind \{speak}+!\{kpFour} SPEAK_PREV_WORD
-bind \{speak}+!\{kpSix} SPEAK_NEXT_WORD
+bind \{kpSpeak}+!\{kpFive} SPEAK_CURR_WORD
+bind \{kpSpeak}+\{kpAlt}+!\{kpFive} SPELL_CURR_WORD
+bind \{kpSpeak}+!\{kpFour} SPEAK_PREV_WORD
+bind \{kpSpeak}+!\{kpSix} SPEAK_NEXT_WORD
 
-bind \{speak}+!\{kpEight} SPEAK_CURR_LINE
-bind \{speak}+!\{kpSeven} SPEAK_PREV_LINE
-bind \{speak}+\{kpZero}+!\{kpSeven} SPEAK_FRST_LINE
-bind \{speak}+!\{kpNine} SPEAK_NEXT_LINE
-bind \{speak}+\{kpZero}+!\{kpNine} SPEAK_LAST_LINE
+bind \{kpSpeak}+!\{kpEight} SPEAK_CURR_LINE
+bind \{kpSpeak}+!\{kpSeven} SPEAK_PREV_LINE
+bind \{kpSpeak}+\{kpAlt}+!\{kpSeven} SPEAK_FRST_LINE
+bind \{kpSpeak}+!\{kpNine} SPEAK_NEXT_LINE
+bind \{kpSpeak}+\{kpAlt}+!\{kpNine} SPEAK_LAST_LINE
 
-bind \{speak}+!\{kpSlash} SPEAK_CURR_LOCN
-bind \{speak}+\{kpZero}+!\{kpSlash} SHOW_CURR_LOCN
-bind \{speak}+!\{kpAsterisk} ROUTE_CURR_LOCN
+bind \{kpSpeak}+!\{kpSlash} SPEAK_CURR_LOCN
+bind \{kpSpeak}+\{kpAlt}+!\{kpSlash} SHOW_CURR_LOCN
+bind \{kpSpeak}+!\{kpAsterisk} ROUTE_CURR_LOCN
 

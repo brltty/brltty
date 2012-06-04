@@ -79,7 +79,7 @@ bind KPAsterisk+!KP6 NXDIFCHAR
 bind KPAsterisk+!KPMinus PRSEARCH
 bind KPAsterisk+!KPPlus NXSEARCH
 
-assign kpZero KP0
+assign kpAlt KP0
 assign kpOne KP1
 assign kpTwo KP2
 assign kpThree KP3
@@ -92,10 +92,10 @@ assign kpNine KP9
 assign kpSlash KPSlash
 assign kpAsterisk KPAsterisk
 
-assign say KPEnter
+assign kpSay KPEnter
 include kbd-kp_say.kti
 
-assign speak KPPlus
+assign kpSpeak KPPlus
 include kbd-kp_speak.kti
 
 

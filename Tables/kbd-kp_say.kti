@@ -16,21 +16,21 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{say}+!\{kpFive} SAY_LINE
-bind \{say}+!\{kpEight} SAY_ABOVE
-bind \{say}+!\{kpTwo} SAY_BELOW
-bind \{say}+!\{kpFour} MUTE
-bind \{say}+!\{kpSix} AUTOSPEAK
-bind \{say}+!\{kpSeven} SAY_SLOWER
-bind \{say}+!\{kpNine} SAY_FASTER
-bind \{say}+!\{kpOne} SAY_SOFTER
-bind \{say}+!\{kpThree} SAY_LOUDER
-bind \{say}+!\{kpAsterisk} SPKHOME
+bind \{kpSay}+!\{kpFive} SAY_LINE
+bind \{kpSay}+!\{kpEight} SAY_ABOVE
+bind \{kpSay}+!\{kpTwo} SAY_BELOW
+bind \{kpSay}+!\{kpFour} MUTE
+bind \{kpSay}+!\{kpSix} AUTOSPEAK
+bind \{kpSay}+!\{kpSeven} SAY_SLOWER
+bind \{kpSay}+!\{kpNine} SAY_FASTER
+bind \{kpSay}+!\{kpOne} SAY_SOFTER
+bind \{kpSay}+!\{kpThree} SAY_LOUDER
+bind \{kpSay}+!\{kpAsterisk} SPKHOME
 
-bind \{say}+\{kpZero}+!\{kpOne} ASPK_DEL_CHARS
-bind \{say}+\{kpZero}+!\{kpTwo} ASPK_REP_CHARS
-bind \{say}+\{kpZero}+!\{kpThree} ASPK_INS_CHARS
-bind \{say}+\{kpZero}+!\{kpFour} ASPK_SEL_CHAR
-bind \{say}+\{kpZero}+!\{kpFive} ASPK_SEL_LINE
-bind \{say}+\{kpZero}+!\{kpSix} ASPK_CMP_WORDS
+bind \{kpSay}+\{kpAlt}+!\{kpOne} ASPK_DEL_CHARS
+bind \{kpSay}+\{kpAlt}+!\{kpTwo} ASPK_REP_CHARS
+bind \{kpSay}+\{kpAlt}+!\{kpThree} ASPK_INS_CHARS
+bind \{kpSay}+\{kpAlt}+!\{kpFour} ASPK_SEL_CHAR
+bind \{kpSay}+\{kpAlt}+!\{kpFive} ASPK_SEL_LINE
+bind \{kpSay}+\{kpAlt}+!\{kpSix} ASPK_CMP_WORDS
 
