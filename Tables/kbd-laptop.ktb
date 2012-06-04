@@ -51,8 +51,8 @@ bind CapsLock+!C COPY_RECT
 bind CapsLock+!V PASTE
 
 # speech
-bind !ControlLeft MUTE
-bind !ControlRight MUTE
+bind ControlLeft MUTE
+bind ControlRight MUTE
 bind CapsLock+!PageUp SAY_ABOVE
 bind CapsLock+!Space SAY_LINE
 bind CapsLock+!PageDown SAY_BELOW

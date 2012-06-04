@@ -33,8 +33,8 @@ bind KP0+!KP1 BOT_LEFT
 bind KP0+!KP9 SAY_ABOVE
 bind KP0+!KP3 SAY_BELOW
 bind KP0+!KP4 MUTE
-bind !ControlLeft MUTE
-bind !ControlRight MUTE
+bind ControlLeft MUTE
+bind ControlRight MUTE
 bind KP0+!KP6 AUTOsPEAK
 bind KP0+!KPPeriod CSRTRK
 bind KP0+!KPEnter HOME
