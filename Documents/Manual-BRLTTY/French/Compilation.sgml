@@ -744,7 +744,7 @@ les fonctions inutiles.
     les options de compilation <ref id="build-braille-driver" name="--with-braille-driver">,
     <ref id="build-speech-driver" name="--with-speech-driver"> et
     <ref id="build-screen-driver" name="--with-screen-driver">) sont compilés.
-  <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
+  <tag><tt/--disable-stripping/<label id="build-stripping"></tag>
     Ne supprime pas les symboles des tables des exécutables et des objets
     partagés lors de leur installation.
     
@@ -1116,10 +1116,10 @@ choisissez cette solution, vous avez deux possibilités.
 
     L'option <ref id="options-no-daemon" name="-n"> (--nodaemon) quand BRLTTY est exécuté avec la
     facilité respawn de l'inittab. Si vous oubliez de la
-    spécifier, vous allez vous retrouver avec une centaine de
+    spécifier, vous allez vous retrouver avec des centaines de
     processus BRLTTY, tous exécutés en même temps.
 </itemize>
-Vérifiez que l'identificateur (<tt>bt</tt> dans cet exemple) n'est pas déjà
+Vérifiez que l'identificateur (<tt/brl/ dans ces exemples) n'est pas déjà
 utilisé par une autre entrée, et, si c'est le cas, choisissez-en un
 autre.
 
