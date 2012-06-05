@@ -26,3 +26,8 @@ voice
 	Specifies a voice/language to use.  The complete list of available
 	voices may be obtained with the command 'espeak --voices'.
 
+maxrate
+
+	Overrides the maximum speech rate value. The default is 450.
+	This cannot be lower than 80.
+

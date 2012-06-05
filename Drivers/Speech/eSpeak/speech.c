@@ -28,9 +28,10 @@
 typedef enum {
 	PARM_PATH,
 	PARM_PUNCTLIST,
-	PARM_VOICE
+	PARM_VOICE,
+	PARM_MAXRATE
 } DriverParameter;
-#define SPKPARMS "path", "punctlist", "voice"
+#define SPKPARMS "path", "punctlist", "voice", "maxrate"
 
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
@@ -46,6 +47,7 @@ typedef enum {
 #define espeakRATE_MAXIMUM	450
 #endif
 
+static int maxrate = espeakRATE_MAXIMUM;
 static int IndexPos;
 
 static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
@@ -95,6 +97,11 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 		int i = 0;
 		while ((w_punctlist[i] = punctlist[i]) != 0) i++;
 		espeak_SetPunctuationList(w_punctlist);
+	}
+
+	if (parameters[PARM_MAXRATE]) {
+		int val = atoi(parameters[PARM_MAXRATE]);
+		if (val > espeakRATE_MINIMUM) maxrate = val;
 	}
 
 	espeak_SetSynthCallback(SynthCallback);
@@ -156,7 +163,7 @@ spk_setVolume(SpeechSynthesizer *spk, unsigned char setting)
 static void
 spk_setRate(SpeechSynthesizer *spk, unsigned char setting)
 {
-	int h_range = (espeakRATE_MAXIMUM - espeakRATE_MINIMUM)/2;
+	int h_range = (maxrate - espeakRATE_MINIMUM)/2;
 	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
 	espeak_SetParameter(espeakRATE, rate, 0);
 }
