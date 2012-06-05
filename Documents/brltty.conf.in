@@ -344,9 +344,10 @@
 #speech-parameters driver:parameter=setting,...
 
 # eSpeak Speech Driver Parameters
+#speech-parameters es:MaxRate=450 # [80-]
 #speech-parameters es:Path=
 #speech-parameters es:PunctList=
-#speech-parameters es:Voice=
+#speech-parameters es:Voice=default
 
 # ExternalSpeech Speech Driver Parameters
 #speech-parameters xs:Program=/usr/local/bin/externalspeech
