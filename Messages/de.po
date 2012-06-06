@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: dave@mielke.cc\n"
-"POT-Creation-Date: 2012-06-04 00:40+0200\n"
-"PO-Revision-Date: 2012-06-04 10:27+0200\n"
+"POT-Creation-Date: 2012-06-07 01:02+0200\n"
+"PO-Revision-Date: 2012-06-07 01:05+0200\n"
 "Last-Translator: Mario Lang <mlang@delysid.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -974,7 +974,7 @@ msgstr "Orgel"
 msgid "Overdriven Guitar"
 msgstr "Übersteuerte Gitarre"
 
-#: Drivers/Braille/Iris/braille.c:1145
+#: Drivers/Braille/Iris/braille.c:1147
 msgid "PC mode"
 msgstr "PC-Modus"
 
@@ -1350,7 +1350,7 @@ msgstr "Sprich gelöschte Zeichen"
 
 #: Programs/menu_prefs.c:833
 msgid "Speak Inserted Characters"
-msgstr "sprich eingefügte Zeichen"
+msgstr "Sprich eingefügte Zeichen"
 
 #: Programs/menu_prefs.c:845
 msgid "Speak Replaced Characters"
@@ -1362,7 +1362,7 @@ msgstr "Sprich ausgewähltes Zeichen"
 
 #: Programs/menu_prefs.c:821
 msgid "Speak Selected Line"
-msgstr "sprich ausgewählte Zeile"
+msgstr "Sprich ausgewählte Zeile"
 
 #: Programs/menu_prefs.c:880
 msgid "Speech Cursor Invisible Time"
@@ -1980,7 +1980,7 @@ msgstr "Groß"
 msgid "changes discarded"
 msgstr "Änderungen verworfen"
 
-#: Programs/brltty.c:2897
+#: Programs/brltty.c:2928
 msgid "column"
 msgstr "Spalte"
 
@@ -2505,7 +2505,7 @@ msgstr "hellmagenta"
 msgid "light red"
 msgstr "hellrot"
 
-#: Programs/brltty.c:2896
+#: Programs/brltty.c:2927
 msgid "line"
 msgstr "Zeile"
 
@@ -2772,9 +2772,8 @@ msgid "set sliding window on/off"
 msgstr "überlappende Braillezeileninhalte ein/aus"
 
 #: Programs/cmds.auto.h:710
-#, fuzzy
 msgid "set speech location visibility on/off"
-msgstr "schalte die Sichtbarkeit des Sprachcursors ein/aus"
+msgstr "schalte die Sichtbarkeit der Position der Sprache ein/aus"
 
 #: Programs/cmds.auto.h:239
 msgid "set text style 6-dot/8-dot"
@@ -2906,7 +2905,7 @@ msgstr ""
 msgid "unknown option"
 msgstr "unbekannte Option"
 
-#: Programs/brltty.c:3212
+#: Programs/brltty.c:3243
 msgid "unrecognized command"
 msgstr "nicht erkanntes Kommando"
 
@@ -2930,4 +2929,3 @@ msgstr ""
 #: Programs/brltty.c:1444
 msgid "yellow"
 msgstr "gelb"
-
