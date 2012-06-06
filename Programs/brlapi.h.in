@@ -435,10 +435,10 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
 /* brlapi_writeText */
 /** Write the given \\0-terminated string to the braille display
  *
- * If the string is too long, it is cut. If it's too short, spaces are
- * appended.  The current LC_CTYPE locale is considered, unless it is left as
- * default "C", in which case the charset is assumed to be 8bits, and the same
- * as the server's.
+ * If the string is too long, it is truncated. If it's too short,
+ * it is padded with spaces. The text is assumed to be in the current
+ * locale charset, or latin1 if locales have not been initialized.
+ * To initialize locales, use setlocale(3).
  *
  * \param cursor gives the cursor position; if equal to ::BRLAPI_CURSOR_OFF, no cursor is shown at
  * all; if cursor==::BRLAPI_CURSOR_LEAVE, the cursor is left where it is
