@@ -2815,23 +2815,54 @@ doCommand:
         speakCurrentLine();
         break;
 
+      {
+        int increment;
+        int limit;
+
       case BRL_CMD_SPEAK_PREV_LINE:
-        if (ses->spky > 0) {
-          ses->spky -= 1;
-          speakCurrentLine();
-        } else {
-          playTune(&tune_bounce);
-        }
-        break;
+        increment = -1;
+        limit = 0;
+        goto speakLine;
 
       case BRL_CMD_SPEAK_NEXT_LINE:
-        if (ses->spky < (scr.rows - 1)) {
-          ses->spky += 1;
-          speakCurrentLine();
-        } else {
+        increment = 1;
+        limit = scr.rows - 1;
+        goto speakLine;
+
+      speakLine:
+        if (ses->spky == limit) {
           playTune(&tune_bounce);
+        } else {
+          if (prefs.skipIdenticalLines) {
+            ScreenCharacter original[scr.cols];
+            ScreenCharacter current[scr.cols];
+            int count = 0;
+
+            readScreen(0, ses->spky, scr.cols, 1, original);
+
+            do {
+              readScreen(0, ses->spky+=increment, scr.cols, 1, current);
+              if (!isSameRow(original, current, scr.cols, isSameText)) break;
+
+              if (!count) {
+                playTune(&tune_skip_first);
+              } else if (count < 4) {
+                playTune(&tune_skip);
+              } else if (!(count % 4)) {
+                playTune(&tune_skip_more);
+              }
+
+              count += 1;
+            } while (ses->spky != limit);
+          } else {
+            ses->spky += increment;
+          }
+
+          speakCurrentLine();
         }
+
         break;
+      }
 
       case BRL_CMD_SPEAK_FRST_LINE: {
         ScreenCharacter characters[scr.cols];
