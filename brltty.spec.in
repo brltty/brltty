@@ -487,131 +487,122 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* Mon Oct 10 2011 Dave Mielke <dave@mielke.cc> 4.3
-+  New options:
-      The -F [--speech-fifo=] option has been renamed to -i [--speech-input=].
-      The -F [--preferences-file=] option sets the path to the preferences file.
-      The -L [--log-file=] brltty option writes timestamped logs to a file.
-      The -q [--quiet] xbrlapi option suppresses the displaying of window titles.
-      The -r [--reformat-text] ctbtest option joins unindented input lines.
-      The log level can now be specified within brltty.conf.
-+  New device support:
-      A braille driver for BrailComm displays has been added.
-      The HandyTech braille driver now supports the Active Braille.
-      The Voyager braille driver now supports the part 232 serial adapter.
-      The Voyager braille driver now supports the Braille Pen (aka Easy Link).
-+  Preferences menu changes:
-      The preference selections now apply to the preferences menu itself, too.
-      Keyboard key bindings now work correctly within the preferences menu.
-      The "Text Style" preference has new settings:
-         8-Dot Computer Braille (formerly 8-dot)
-         Contracted Braille (formerly 6-dot)
-         6-Dot Computer Braille
-      The "Expand Current Word" preference has been added.
-         It's only visible if "Text Style" is set to "Contracted Braille".
-         It can be set to:
-            Yes (don't contract the word the cursor is on)
-            No (contract the whole line)
-      The "Capitalization Mode" preference has been added.
-         It's only visible if "Text Style" is set to "Contracted Braille".
-         It can be set to:
-            No Capitalization
-            Use Capital Sign
-            Superimpose Dot 7
-+  General changes:
-      Internationalization support has been improved.
-      French and German translations have been added.
-      Support for multi-byte local character sets has been improved.
-      Horizontal window motions now work correctly with contracted braille.
-      The half window left motion no longer can move to a bad location.
-      Alert messages no longer disappear unexpectedly.
-      The speech FIFO is now created relative to the current working directory.
-      Serial flow control is now enabled before device probing.
-      The following global variables for use within tables are now predefined:
-         tablesDirectory
-         tableExtension
-         subtableExtension
-+  Alva braille driver changes:
-      The BC key bindings have been changed significantly in order to add
-      more functions and to support the USB640 (which has no smartpad).
-      The braille keyboard of the BC Feature Pack is now supported.
+* Thu Jun 7 2012 Dave Mielke <dave@mielke.cc> 4.4
++  Changes:
+      DOS option syntax (/option[:value]) can only be used on DOS or Windows.
+      The clipboard functions have been renamed to accurately reflect what they do:
+         CUTBEGIN  -> CLIP_NEW
+         CUTAPPEND -> CLIP_ADD
+         CUTLINE   -> COPY_LINE
+         CUTRECT   -> COPY_RECT
+         COPYCHARS -> CLIP_COPY
+         APNDCHARS -> CLIP_APPEND
+      The Caml bindings for BrlAPI have been renamed to Ocaml.
+      The tbltest program has been renamed to brltty-ttb and is installed.
+      The ctbtest program has been renamed to brltty-ctb and is installed.
+      The --with-compiler-prefix= configure option has been removed.
++  Fixes:
+      Brltty keyboard key bindings no longer interfere with Orca key bindings.
+      The updating of status lines no longer confuses the cursor routing algorithm.
+      The same USB device can no longer be used by more than one brltty at a time.
++  New Features:
+      The help function cycles through all relevant pages.
+         For example, help for the current keyboard key table is viewable.
+      The info-mode line contains a clock.
+      The preferences menu has been divided into a set of category-based submenus.
+         Open a submenu with any key that would normally alter a setting.
+         Close a submenu either by scrolling to its Close item and activating it
+         or via the new MENU_PREV_LEVEL function.
+      The -l [--log-level=] option of brltty accepts log category names.
+         The names are: ingio, inpkts, outpkts, brlkeys, kbdkeys, csrtrk, csrrtg.
+         Specify the log level and/or category names as a comma-delimited list.
+      The -C [--cancel-execution] option has been added to brltty.
+         The same pid file must be specified by both the cancelling and the
+         already-running brltty.
+      The pid file may be specified within the configuration file (brltty.conf).
+      The brltty-trtxt program has been added and is installed.
++  New functions:
+      MENU_PREV_LEVEL: Close the current submenu.
+      TIME: Display the current time (format configurable via the menu).
+      PWGEN: Set the clipboard to a random password (length set by routing key).
+      Sticky input modifier functions:
+         SHIFT: Add the shift modifier to the next typed character.
+         UPPER: Add the uppercase modifier to the next typed character.
+         CONTROL: Add the control modifier to the next typed character.
+         META: Add the meta (left alt) modifier to the next typed character.
+      Autospeak suboption toggles:
+         ASPK_SEL_LINE: Set autospeak selected line on/off.
+         ASPK_SEL_CHAR: Set autospeak selected character on/off.
+         ASPK_INS_CHARS: Set autospeak inserted characters on/off.
+         ASPK_DEL_CHARS: Set autospeak deleted characters on/off.
+         ASPK_REP_CHARS: Set autospeak replaced characters on/off.
+         ASPK_CMP_WORDS: Set autospeak completed words on/off.
+      Many functions specifically for speech navigation:
+         SPEAK_CURR_CHAR: Speak current character.
+         SPEAK_PREV_CHAR: Go to and speak previous character.
+         SPEAK_NEXT_CHAR: Go to and speak next character.
+         SPEAK_CURR_WORD: Speak current word.
+         SPEAK_PREV_WORD: Go to and speak previous word.
+         SPEAK_NEXT_WORD: Go to and speak next word.
+         SPEAK_CURR_LINE: Speak current line.
+         SPEAK_PREV_LINE: Go to and speak previous line.
+         SPEAK_NEXT_LINE: Go to and speak next line.
+         SPEAK_FRST_CHAR: Go to and speak first non-blank character on line.
+         SPEAK_LAST_CHAR: Go to and speak last non-blank character on line.
+         SPEAK_FRST_LINE: Go to and speak first non-blank line on screen.
+         SPEAK_LAST_LINE: Go to and speak last non-blank line on screen.
+         DESC_CURR_CHAR: Describe current character.
+         SPELL_CURR_WORD: Spell current word.
+         ROUTE_CURR_LOCN: Bring cursor to speech location.
+         SPEAK_CURR_LOCN: Speak speech location.
+         SHOW_CURR_LOCN: Set speech location visibility on/off.
++  New braille drivers:
+      hw: HumanWare
+      ir: Iris
+      np: NinePoint (Cebra)
 +  Baum braille driver changes:
-      Updating the text and status cells of the Vario 80 has been fixed.
-      The front and command keys of the Vario 80 are now supported.
+      The Inka is fully supported.
+      New key bindings for models with six display keys:
+         Display1+Display5 displays the current time.
 +  EuroBraille braille driver changes:
-      Reading keys is faster and no longer generates spurious input errors.
+      The latest models are supported.
+      Key tables, rather than hard-coded bindings, are used.
+      The display is updated when returning from the internal menu.
+      The LCD (visual display) is supported.
+      Large displays work reliably when connected via USB.
+      The protocol= parameter takes a model (rather than a protocol) name.
++  FreedomScientific braille driver changes:
+      New key bindings:
+         LeftRockerUp goes up one line.
+         LeftRockerDown goes down one line.
 +  HandyTech braille driver changes:
-      Support for the Active Braille has been added.
-      The help screen now describes how the keypad keys are named.
+      New key bindings:
+         B2+B3+B5+B6 displays the current time.
+         B1+B2+!RoutingKey sets the clipboard to a random password.
 +  Papenmeier braille driver changes:
-      The initial state of the switches and keys of EL models is detected.
+      A serious USB problem has been fixed.
+      New key bindings for models with 13 front keys:
+         Dot3, when in the menu, closes the current submenu.
+         Dot1+Dot2+Dot3+Dot6 routes the cursor vertically.
+         Dot1+Dot2+Dot3+Dot6+Dot7 switches to the previous virtual console.
+         Dot1+Dot2+Dot3+Dot6+Dot8 switches to the next virtual console.
+         Dot1+Cot2+Dot3+Dot7 displays the current time.
+         Dot1+Dot2+Dot3+Dot7+!RoutingKey1 sets the clipboard to a random password.
 +  Seika braille driver changes:
-      The help screen now describes the key layout.
-+  TTY braille driver changes:
-      A few more key bindings have been defined.
-+  Voyager braille driver changes:
-      Serial support has been added.
-      Bluetooth support has been added.
-      Support for the part 232 serial adapter has been added.
-      Support for the Braille Pen (aka Easy Link) has been added.
-+  XWindow braille driver changes:
-      More and less restrictive fonts are supported.
-      Hard program exits have been removed.
+      The notetaker models are supported.
 +  eSpeak speech driver changes:
-      The full advertized speech rate range can now be used.
-+  FestivalLite speech driver changes:
-      The default voice has been changed to kal (from kal16).
-+  AtSpi screen driver changes:
-      No more annoying warnings when not on an AtSpi widget.
-+  BrlAPI fixes:
-      ISO-8859-1 is now accepted as a character set when iconv isn't available.
-      The autorepeat flags are now handled on a per session basis.
-      Commands are now processed when the device is released.
-+  WindowEyes BrlAPI driver changes:
-      Testing for BrlAPI open errors has been improved.
-+  Text table changes:
-      A common subtable for the block characters has been added.
-      The glyph directive has been added.
-      Several alternate fonts for the Latin letters are now defined.
-      If a character isn't defined then check for an alternative which is:
-         (its Unicode base character, its iconv-defined ASCII equivalent, etc).
-      The en_UK text table has been renamed to en_GB (to comply with ISO 3166).
-      Updated text tables:
-         bo (Tibetan)
-         brf: dot 7 is no longer presented
-         fr_FR (French France)
-         fr-vs (French table used by VisioBraille devices)
-         is (Icelandic): updated to the newly adopted standard
-+  Contraction table changes:
-      If a zero-width character isn't defined then don't show it.
-      Updated tables:
-         de-kurzschrift (German)
-         en-us-g2 (American English)
-         es (Spanish)
-         fr-abrege (French)
-         zh-tw (Taiwanese Chinese)
-+  Key table changes:
-      A specific key within a set can now be specified by number.
-      A key combination can now include specific keys which aren't in set 0.
-      Keys which aren't in set 0 can now be mapped to keyboard functions.
-      A key set name can now be used to define a hotkey.
-      The help text no longer includes hidden hotkeys.
-      The help text now handles context-specific hotkeys correctly.
-      The note directive now supports the use of variables.
-+  Windows changes:
-      Serial devices beyond COM9 may now be specified.
-      The WindowEyes driver is now copied into the correct installation directory.
-+  Build changes:
-      Building an exported (not checked out) copy now "knows" its revision number.
-      Make support for install/uninstall of /usr/share/doc/brltty has been added.
-      The make targets for source archives are now prefixed with "src-".
-      The bin-tar, bin-tar-gzip, and bin-tar-bzip2 make targets have been added.
-      Support for xz compression of binary and source archives has been added.
-      The preferences file has been moved to /var/lib/brltty/brltty.prefs.
-      There's now only one preferences file (instead of one per braille driver).
-      The preferences file is now text-based (instead of binary).
-      The "writable" directory has been moved to /var/run/brltty.
-      The "library" directory is now known as the "drivers" directory.
-      The "data" directory no longer has a use and has been removed.
-      Support for the "gjar" command has been added.
+      The maxrate= parameter has been added.
++  Text tables:
+      The de (German) table has been updated.
+      The hu (Hungarian) table has been updated.
+      Support for writing JAWS (.jbt) text tables has been added to brltty-ttb.
++  Contraction tables:
+      the en-us-g2 (US English - Grade 2) table has been updated.
+      A table may be implemented as an executable program.
+      The latex-access (braille math) executable table has been added.
+      The -r [--reformat-input] option of brltty-ctb handles paragraphs better.
++  Keyboard key tables:
+      Many bindings have been added to the keypad and laptop tables.
++  Documentation:
+      A portuguese translation of the manual has been added.
 
