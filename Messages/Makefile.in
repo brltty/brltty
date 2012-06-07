@@ -54,7 +54,7 @@ install:: objects install-locale-directory
 	do \
 	   directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
            $(INSTALL_DIRECTORY) "$${directory}"; \
-	   $(INSTALL) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
+	   $(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
 	done
 
 uninstall::
