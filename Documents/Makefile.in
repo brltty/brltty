@@ -34,6 +34,9 @@ BrlAPIref.made: BrlAPIref $(BLD_TOP)$(PGM_DIR)/brlapi.h $(BLD_TOP)$(PGM_DIR)/brl
 BrlAPIref:
 	mkdir BrlAPIref
 
+%.h:
+	cd $(@D) && $(MAKE) $(@F)
+
 clean::
 	-rm -f *.made
 	-rm -f -r BrlAPIref
