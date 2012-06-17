@@ -331,7 +331,11 @@ static int isRawCapable(const BrailleDriver *brl)
 /* Returns !0 if driver can return specific keycodes, 0 if not. */
 static int isKeyCapable(const BrailleDriver *brl)
 {
-  return (((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNameTables!=NULL));
+  int ret;
+  pthread_mutex_lock(&driverMutex);
+  ret = ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNameTables!=NULL);
+  pthread_mutex_unlock(&driverMutex);
+  return ret;
 }
 
 /* Function : suspendDriver */
@@ -2450,7 +2454,6 @@ int api_flush(BrailleDisplay *brl) {
 	goto out;
       }
     }
-    pthread_mutex_unlock(&driverMutex);
     newCursorShape = getCursorDots();
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
@@ -2459,13 +2462,12 @@ int api_flush(BrailleDisplay *brl) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
-      pthread_mutex_lock(&driverMutex);
       brl->cursor = c->brailleWindow.cursor-1;
       ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
       drain = 1;
-      pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
     }
+    pthread_mutex_unlock(&driverMutex);
     pthread_mutex_unlock(&c->brlMutex);
   } else {
     /* no RAW, no connection filling tty, hence suspend if needed */
@@ -2558,8 +2560,10 @@ void api_link(BrailleDisplay *brl)
   ApiBraille.readPacket = NULL;
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
+  pthread_mutex_lock(&driverMutex);
   brlResize(brl);
   driverConstructed=1;
+  pthread_mutex_unlock(&driverMutex);
   pthread_mutex_lock(&connectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   pthread_mutex_unlock(&connectionsMutex);
@@ -2582,8 +2586,8 @@ void api_unlink(BrailleDisplay *brl)
   pthread_mutex_lock(&driverMutex);
   if (!coreActive && driverConstructed)
     suspendDriver(disp);
-  pthread_mutex_unlock(&driverMutex);
   disp = NULL;
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_identify */
