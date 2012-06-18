@@ -2586,6 +2586,7 @@ void api_unlink(BrailleDisplay *brl)
   pthread_mutex_lock(&driverMutex);
   if (!coreActive && driverConstructed)
     suspendDriver(disp);
+  driverConstructed=0;
   disp = NULL;
   pthread_mutex_unlock(&driverMutex);
 }
