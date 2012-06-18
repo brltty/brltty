@@ -133,7 +133,7 @@ brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
       if(brl->cursor >= 0)
         {
-          braille_filter(translateOutputCell(cursorDots()), brl->cursor);
+          braille_filter(translateOutputCell(getCursorDots()), brl->cursor);
         }
 
       braille_render();
