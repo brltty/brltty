@@ -56,10 +56,11 @@ bind LeftGdf+!LeftWheelDown ATTRDN
 bind RightGdf+!LeftWheelUp PRSEARCH
 bind RightGdf+!LeftWheelDown NXSEARCH
 
-bind !RoutingKey ROUTE
+bind RoutingKey ROUTE
 bind LeftWheelPress+!RoutingKey SETLEFT
 bind RightWheelPress+!RoutingKey DESCCHAR
 
+bind RoutingKey+!RoutingKey CLIP_COPY
 bind LeftAdvance+!RoutingKey CLIP_NEW
 bind RightAdvance+!RoutingKey COPY_RECT
 bind LeftGdf+!RoutingKey CLIP_ADD
