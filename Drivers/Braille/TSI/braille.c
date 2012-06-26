@@ -867,7 +867,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   unsigned int code = 0; /* 32bits code representing pressed keys once the
 			    input bytes are interpreted */
   int res = EOF; /* command code to return. code is mapped to res. */
-  static int pending_cmd = EOF;
   char buf[MAXREAD], /* read buffer */
        packtype = 0; /* type of packet being received (state) */
   unsigned i;
@@ -884,13 +883,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     skip_this_cmd = 1;
   last_readbrl_time = now;
        
-  if(pending_cmd != EOF){
-    res = pending_cmd;
-    lastcmd = EOF;
-    pending_cmd = EOF;
-    return(res);
-  }
-
 /* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
    for pb65/80. Each byte has bits representing individual keys + a special
    mask/signature in the most significant 3bits.
@@ -1128,8 +1120,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	}
 #endif /* 0 */
       else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
-	  res = BRL_BLK_CLIP_NEW + sw_which[0];
-	  pending_cmd = BRL_BLK_COPY_RECT + sw_which[2];
+	  res = BRL_BLK_CLIP_COPY | BRL_ARG(sw_which[0]) | BRL_EXT(sw_which[2]);
 	}
     }
   else switch (code){
