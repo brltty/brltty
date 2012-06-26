@@ -18,6 +18,8 @@
 
 # This key subtable is for all FreedomScientific Focus displays.
 
+include brl-fs-common.kti
+
 bind Space+Dot2+Dot4 SKPIDLNS
 bind Space+Dot1+Dot2 SKPBLNKWINS
 
@@ -81,5 +83,3 @@ bind !NavrowKey DESCCHAR
 bind LeftAdvance+!NavrowKey PRINDENT
 bind RightAdvance+!NavrowKey NXINDENT
 bind LeftGdf+!NavrowKey SETLEFT
-
-include brl-fs-common.kti
