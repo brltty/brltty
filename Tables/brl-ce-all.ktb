@@ -1,0 +1,126 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Cebra
+
+
+####################
+# Default Bindings #
+####################
+
+bind PadCenter1 HOME
+bind PadLeft1 FWINLT
+bind PadRight1 FWINRT
+bind PadUp1 LNUP
+bind PadDown1 LNDN
+
+bind LeftUpper1 TOP_LEFT
+bind LeftLower1 BOT_LEFT
+bind RightUpper1 PRDIFLN
+bind RightLower1 NXDIFLN
+bind LeftMiddle1 SIXDOTS
+bind RightMiddle1 CSRTRK
+
+bind LeftMiddle1+PadCenter1 BACK
+bind LeftMiddle1+PadLeft1 LNBEG
+bind LeftMiddle1+PadRight1 LNEND
+bind LeftMiddle1+PadUp1 ATTRUP
+bind LeftMiddle1+PadDown1 ATTRDN
+
+bind LeftUpper1+PadCenter1 PASTE
+bind LeftUpper1+PadLeft1 PRSEARCH
+bind LeftUpper1+PadRight1 NXSEARCH
+bind LeftUpper1+PadUp1 PRPGRPH
+bind LeftUpper1+PadDown1 NXPGRPH
+
+bind LeftLower1+PadCenter1 CSRJMP_VERT
+bind LeftLower1+PadLeft1 FWINLTSKIP
+bind LeftLower1+PadRight1 FWINRTSKIP
+bind LeftLower1+PadUp1 PRPROMPT
+bind LeftLower1+PadDown1 NXPROMPT
+
+bind RightMiddle1+PadCenter1 NOOP
+bind RightMiddle1+PadLeft1 CHRLT
+bind RightMiddle1+PadRight1 CHRRT
+bind RightMiddle1+PadUp1 TOP
+bind RightMiddle1+PadDown1 BOT
+
+bind RightUpper1+PadCenter1 NOOP
+bind RightUpper1+PadLeft1 ATTRVIS
+bind RightUpper1+PadRight1 CSRVIS
+bind RightUpper1+PadUp1 FREEZE
+bind RightUpper1+PadDown1 DISPMD
+
+bind RightLower1+PadCenter1 NOOP
+bind RightLower1+PadLeft1 PREFLOAD
+bind RightLower1+PadRight1 PREFSAVE
+bind RightLower1+PadUp1 AUTOSPEAK
+bind RightLower1+PadDown1 AUTOREPEAT
+
+bind PadCenter1+PadLeft1 HELP
+bind PadCenter1+PadRight1 LEARN
+bind PadCenter1+PadUp1 INFO
+bind PadCenter1+PadDown1 PREFMENU
+
+bind !RoutingKey ROUTE
+bind PadCenter1+!RoutingKey DESCCHAR
+bind PadUp1+!RoutingKey PRINDENT
+bind PadDown1+!RoutingKey NXINDENT
+bind PadLeft1+!RoutingKey PRDIFCHAR
+bind PadRight1+!RoutingKey NXDIFCHAR
+bind LeftMiddle1+!RoutingKey SETLEFT
+bind LeftUpper1+!RoutingKey CLIP_NEW
+bind LeftLower1+!RoutingKey CLIP_ADD
+bind RightUpper1+!RoutingKey COPY_LINE
+bind RightLower1+!RoutingKey COPY_RECT
+
+hide on
+bind RightMiddle1+!RoutingKey ROUTE+80
+bind PadCenter1+RightMiddle1+!RoutingKey DESCCHAR+80
+bind PadUp1+RightMiddle1+!RoutingKey PRINDENT+80
+bind PadDown1+RightMiddle1+!RoutingKey NXINDENT+80
+bind PadLeft1+RightMiddle1+!RoutingKey PRDIFCHAR+80
+bind PadRight1+RightMiddle1+!RoutingKey NXDIFCHAR+80
+bind LeftMiddle1+RightMiddle1+!RoutingKey SETLEFT+80
+bind LeftUpper1+RightMiddle1+!RoutingKey CLIP_NEW+80
+bind LeftLower1+RightMiddle1+!RoutingKey CLIP_ADD+80
+bind RightUpper1+RightMiddle1+!RoutingKey COPY_LINE+80
+bind RightLower1+RightMiddle1+!RoutingKey COPY_RECT+80
+hide off
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind PadUp1 MENU_PREV_ITEM
+bind PadDown1 MENU_NEXT_ITEM
+bind PadLeft1 MENU_PREV_SETTING
+bind PadRight1 MENU_NEXT_SETTING
+bind PadCenter1 PREFMENU
+
+bind LeftMiddle1 FWINLT
+bind RightMiddle1 FWINRT
+bind LeftUpper1 MENU_FIRST_ITEM
+bind LeftLower1 MENU_LAST_ITEM
+bind RightUpper1 PREFLOAD
+bind RightLower1 PREFSAVE
+
+

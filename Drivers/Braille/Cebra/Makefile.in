@@ -16,9 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = np
-DRIVER_NAME = NinePoint
-DRIVER_COMMENT = 8
+DRIVER_CODE = ce
+DRIVER_NAME = Cebra
+DRIVER_COMMENT = 20/40/60/80/100/120/140
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 include $(SRC_TOP)braille.mk
