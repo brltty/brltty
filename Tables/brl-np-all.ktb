@@ -18,4 +18,14 @@
 
 title NinePoint
 
-bind RoutingKey ROUTE
+bind !RoutingKey ROUTE
+
+map Brl1 DOT4
+map Brl2 DOT5
+map Brl3 DOT6
+map Brl4 DOT8
+map Brl5 DOT7
+map Brl6 DOT3
+map Brl7 DOT2
+map Brl8 DOT1
+

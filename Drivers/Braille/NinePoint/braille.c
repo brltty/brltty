@@ -27,10 +27,21 @@
 #include "brl_driver.h"
 #include "brldefs-np.h"
 
+#define PROBE_RETRY_LIMIT 3
+#define PROBE_INPUT_TIMEOUT 1000
 #define MAXIMUM_RESPONSE_SIZE 3
 #define MAXIMUM_CELL_COUNT (NP_KEY_ROUTING_MAX - NP_KEY_ROUTING_MIN + 1)
 
 BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(NP_KEY_Brl1, "Brl1"),
+  KEY_NAME_ENTRY(NP_KEY_Brl2, "Brl2"),
+  KEY_NAME_ENTRY(NP_KEY_Brl3, "Brl3"),
+  KEY_NAME_ENTRY(NP_KEY_Brl4, "Brl4"),
+  KEY_NAME_ENTRY(NP_KEY_Brl5, "Brl5"),
+  KEY_NAME_ENTRY(NP_KEY_Brl6, "Brl6"),
+  KEY_NAME_ENTRY(NP_KEY_Brl7, "Brl7"),
+  KEY_NAME_ENTRY(NP_KEY_Brl8, "Brl8"),
+
   KEY_SET_ENTRY(NP_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
@@ -76,31 +87,32 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   gotByte:
     if (offset == 0) {
       switch (byte) {
+        case 0XFC:
+          length = 2;
+          break;
+
         case 0XFD:
           length = 2;
           break;
 
         default:
-          if ((byte >= NP_KEY_ROUTING_MIN) && (byte <= NP_KEY_ROUTING_MAX)) {
-            length = 1;
-          } else {
-            logIgnoredByte(byte);
-            continue;
-          }
-          break;
+          logIgnoredByte(byte);
+          continue;
       }
     } else {
       int unexpected = 0;
 
       if (offset == 1) {
-        switch (byte) {
-          case 0X2F:
-            length = 3;
-            break;
+        if (bytes[0] == 0XFD) {
+          switch (byte) {
+            case 0X2F:
+              length = 3;
+              break;
 
-          default:
-            unexpected = 1;
-            break;
+            default:
+              unexpected = 1;
+              break;
+          }
         }
       }
 
@@ -143,23 +155,54 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
+writeIdentityRequest (BrailleDisplay *brl) {
+  return 1;
+}
+  
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const unsigned char *bytes = packet;
+    
+  return ((size == 3) && (bytes[0] == 0XFD) && (bytes[1] == 0X2F))?
+         BRL_RSP_DONE:
+         BRL_RSP_UNEXPECTED;
+}
+                        
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      {
-        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+      unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
-        brl->keyBindings = ktd->bindings;
-        brl->keyNameTables = ktd->names;
+      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT,
+                              brl->data->gioEndpoint, PROBE_INPUT_TIMEOUT,
+                              writeIdentityRequest,
+                              readPacket, &response, sizeof(response),
+                              isIdentityResponse)) {
+        {
+          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+          brl->keyBindings = ktd->bindings;
+          brl->keyNameTables = ktd->names;
+        }
+
+        {
+          static const DotsTable dots = {
+            0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80
+          };
+
+          makeOutputTable(dots);
+        }
+
+        brl->textColumns = 8;
+        brl->data->forceRewrite = 1;
+        return 1;
       }
 
-      makeOutputTable(dotsTable_ISO11548_1);
-      brl->data->forceRewrite = 1;
-      brl->textColumns = 8;
-      return 1;
+      gioDisconnectResource(brl->data->gioEndpoint);
     }
 
     free(brl->data);
@@ -185,9 +228,9 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     unsigned char *byte = bytes;
 
     {
-      unsigned int i;
+      int i;
 
-      for (i=0; i<brl->textColumns; i+=1) {
+      for (i=brl->textColumns-1; i>=0; i-=1) {
         *byte++ = 0XFC;
         *byte++ = translateOutputCell(brl->data->textCells[i]);
       }
@@ -219,12 +262,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         }
         break;
 
-      default:
-        if ((packet[0] >= NP_KEY_ROUTING_MIN) && (packet[0] <= NP_KEY_ROUTING_MAX)) {
-          enqueueKey(NP_SET_RoutingKeys, (packet[0] - NP_KEY_ROUTING_MIN));
+      case 0XFC: {
+        unsigned int key = packet[1];
+        if ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX)) {
+          enqueueKey(NP_SET_RoutingKeys, (key - NP_KEY_ROUTING_MIN));
+          continue;
+        } else {
+          int press = !!(key & NP_KEY_NAVIGATION_PRESS);
+          if (press) key &= ~NP_KEY_NAVIGATION_PRESS;
+          enqueueKeyEvent(NP_SET_NavigationKeys, key, press);
           continue;
         }
         break;
+      }
     }
 
     logUnexpectedPacket(packet, size);
