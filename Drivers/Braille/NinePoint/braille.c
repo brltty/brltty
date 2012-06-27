@@ -42,6 +42,16 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(NP_KEY_Brl7, "Brl7"),
   KEY_NAME_ENTRY(NP_KEY_Brl8, "Brl8"),
 
+  KEY_NAME_ENTRY(NP_KEY_Enter,     "Enter"),
+  KEY_NAME_ENTRY(NP_KEY_Space,     "Space"),
+  KEY_NAME_ENTRY(NP_KEY_PadCenter, "PadCenter"),
+  KEY_NAME_ENTRY(NP_KEY_PadLeft,   "PadLeft"),
+  KEY_NAME_ENTRY(NP_KEY_PadRight,  "PadRight"),
+  KEY_NAME_ENTRY(NP_KEY_PadUp,     "PadUp"),
+  KEY_NAME_ENTRY(NP_KEY_PadDown,   "PadDown"),
+  KEY_NAME_ENTRY(NP_KEY_NavLeft,   "NavLeft"),
+  KEY_NAME_ENTRY(NP_KEY_NavRight,  "NavRight"),
+
   KEY_SET_ENTRY(NP_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
@@ -197,7 +207,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           makeOutputTable(dots);
         }
 
-        brl->textColumns = 8;
+        brl->textColumns = MAXIMUM_CELL_COUNT;
         brl->data->forceRewrite = 1;
         return 1;
       }

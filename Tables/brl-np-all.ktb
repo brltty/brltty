@@ -18,7 +18,19 @@
 
 title NinePoint
 
-bind !RoutingKey ROUTE
+bind RoutingKey ROUTE
+
+bind PadLeft FWINLT
+bind PadRight FWINRT
+bind PadUp LNUP
+bind PadDown LNDN
+bind PadCenter HOME
+
+bind NavLeft FWINLT
+bind NavRight FWINRT
+
+bind Space+Brl1+Brl6+Brl7+Brl8 PREFMENU
+bind Space+Brl2+Brl7+Brl8 HELP
 
 map Brl1 DOT4
 map Brl2 DOT5
@@ -28,4 +40,6 @@ map Brl5 DOT7
 map Brl6 DOT3
 map Brl7 DOT2
 map Brl8 DOT1
+map Space SPACE
+bind Enter KEY_ENTER
 

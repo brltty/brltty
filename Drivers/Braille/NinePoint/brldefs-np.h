@@ -23,21 +23,23 @@
 #define NP_KEY_ROUTING_MAX 0X87
 
 typedef enum {
-  NP_KEY_Brl1     = 0X41,
-  NP_KEY_Brl2     = 0X42,
-  NP_KEY_Brl3     = 0X43,
-  NP_KEY_Brl4     = 0X44,
-  NP_KEY_Brl5     = 0X45,
-  NP_KEY_Brl6     = 0X46,
-  NP_KEY_Brl7     = 0X47,
-  NP_KEY_Brl8     = 0X48,
-  NP_KEY_Up       = 0X49,
-  NP_KEY_Enter    = 0X4A,
-  NP_KEY_Right    = 0X4B,
-  NP_KEY_Space    = 0X4C,
-  NP_KEY_Menu     = 0X4D,
-  NP_KEY_Down     = 0X51,
-  NP_KEY_Left     = 0X53
+  NP_KEY_Brl1      = 0X41,
+  NP_KEY_Brl2      = 0X42,
+  NP_KEY_Brl3      = 0X43,
+  NP_KEY_Brl4      = 0X44,
+  NP_KEY_Brl5      = 0X45,
+  NP_KEY_Brl6      = 0X46,
+  NP_KEY_Brl7      = 0X47,
+  NP_KEY_Brl8      = 0X48,
+  NP_KEY_Enter     = 0X49,
+  NP_KEY_Space     = 0X4A,
+  NP_KEY_PadCenter = 0X4B,
+  NP_KEY_PadLeft   = 0X4C,
+  NP_KEY_PadRight  = 0X4D,
+  NP_KEY_PadUp     = 0X51,
+  NP_KEY_PadDown   = 0X53,
+  NP_KEY_NavLeft   = 0X55,
+  NP_KEY_NavRight  = 0X57
 } NP_NavigationKey;
 
 typedef enum {
