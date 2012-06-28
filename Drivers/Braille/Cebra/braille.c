@@ -274,6 +274,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
+  descriptor.bluetooth.channelNumber = 1;
+
   if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
