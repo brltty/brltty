@@ -2513,6 +2513,20 @@ int api_resume(BrailleDisplay *brl) {
   return (coreActive = driverConstructed);
 }
 
+/* try to get access to device. If suspended, returns 0 */
+int api_claimDriver (BrailleDisplay *brl)
+{
+  pthread_mutex_lock(&suspendMutex);
+  if (driverConstructed) return 1;
+  pthread_mutex_unlock(&suspendMutex);
+  return 0;
+}
+
+void api_releaseDriver(BrailleDisplay *brl)
+{
+  pthread_mutex_unlock(&suspendMutex);
+}
+
 void api_suspend(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
