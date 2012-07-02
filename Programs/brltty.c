@@ -3334,11 +3334,7 @@ brlttyUpdate (void) {
     }
   }
 
-  if (!isSuspended
-#ifdef ENABLE_API
-      && (!apiStarted || api_claimDriver(&brl))
-#endif /* ENABLE_API */
-      ) {
+  if (!isSuspended) {
     int pointerMoved = 0;
 
     /*
@@ -3846,7 +3842,6 @@ brlttyUpdate (void) {
     }
 
 #ifdef ENABLE_API
-    if (apiStarted) api_releaseDriver(&brl);
   } else if (apiStarted) {
     switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
       case BRL_CMD_RESTARTBRL:

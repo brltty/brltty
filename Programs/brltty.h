@@ -116,8 +116,6 @@ extern void api_link (BrailleDisplay *brl);
 extern void api_unlink (BrailleDisplay *brl);
 extern void api_suspend (BrailleDisplay *brl);
 extern int api_resume (BrailleDisplay *brl);
-extern int api_claimDriver (BrailleDisplay *brl);
-extern void api_releaseDriver (BrailleDisplay *brl);
 extern int api_flush (BrailleDisplay *brl);
 extern int api_handleCommand (int command);
 extern int api_handleKeyEvent (unsigned char set, unsigned char key, int press);
