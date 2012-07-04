@@ -18,20 +18,46 @@
 
 title Bindings for Keyboards without a Keypad
 
+
+####################
+# Default Bindings #
+####################
+
 bind CapsLock+!F1 HELP
 bind CapsLock+ShiftLeft+!F1 LEARN
-bind CapsLock+!R RESTARTBRL
-bind CapsLock+!D DESCCHAR
-bind CapsLock+!T TIME
+
+bind CapsLock+!F2 PREFMENU
+bind CapsLock+ShiftLeft+!F2 PREFSAVE
+
+bind CapsLock+!F5 SAY_SLOWER
+bind CapsLock+!F6 SAY_FASTER
+bind CapsLock+!F7 SAY_SOFTER
+bind CapsLock+!F8 SAY_LOUDER
+
+bind CapsLock+!F9 AUTOSPEAK
+
 bind CapsLock+!ArrowUp LNUP
 bind CapsLock+!ArrowDown LNDN
 bind CapsLock+!ArrowLeft CHRLT
 bind CapsLock+!ArrowRight CHRRT
 bind CapsLock+!Home TOP_LEFT
 bind CapsLock+!End BOT_LEFT
+
+bind CapsLock+ShiftLeft+!ArrowUp PRDIFLN
+bind CapsLock+ShiftLeft+!ArrowDown NXDIFLN
+bind CapsLock+ShiftLeft+!ArrowLeft LNBEG
+bind CapsLock+ShiftLeft+!ArrowRight LNEND
+bind CapsLock+ShiftLeft+!Home TOP
+bind CapsLock+ShiftLeft+!End BOT
+
 bind CapsLock+!Enter CSRTRK
-bind CapsLock+!O CSRTRK+off
+bind CapsLock+ShiftLeft+!Enter CSRTRK+off
 bind CapsLock+!DeleteBackward BACK
+
+bind CapsLock+!D DESCCHAR
+bind CapsLock+!F FREEZE
+bind CapsLock+!R RESTARTBRL
+bind CapsLock+!T TIME
 
 # marks
 bind CapsLock+!M SETMARK
@@ -47,20 +73,17 @@ bind CapsLock+!Four GOTOMARK+4
 
 # copy and paste
 bind CapsLock+!X CLIP_NEW
+bind CapsLock+ShiftLeft+!X CLIP_ADD
 bind CapsLock+!C COPY_RECT
+bind CapsLock+ShiftLeft+!C COPY_LINE
 bind CapsLock+!V PASTE
 
 # speech
 bind ControlLeft MUTE
 bind ControlRight MUTE
-bind CapsLock+!PageUp SAY_ABOVE
 bind CapsLock+!Space SAY_LINE
+bind CapsLock+!PageUp SAY_ABOVE
 bind CapsLock+!PageDown SAY_BELOW
-bind CapsLock+!F5 SAY_SLOWER
-bind CapsLock+!F6 SAY_FASTER
-bind CapsLock+!F7 SAY_SOFTER
-bind CapsLock+!F8 SAY_LOUDER
-bind CapsLock+!F9 AUTOSPEAK
 
 bind ShiftRight+!ArrowLeft SPEAK_PREV_WORD
 bind ShiftRight+!ArrowRight SPEAK_NEXT_WORD
@@ -91,4 +114,24 @@ include kbd-kp_say.kti
 
 assign kpSpeak Tab
 include kbd-kp_speak.kti
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind CapsLock+!ArrowUp MENU_PREV_ITEM
+bind CapsLock+!ArrowDown MENU_NEXT_ITEM
+bind CapsLock+!ArrowLeft MENU_PREV_SETTING
+bind CapsLock+!ArrowRight MENU_NEXT_SETTING
+bind CapsLock+!Home MENU_FIRST_ITEM
+bind CapsLock+!End MENU_LAST_ITEM
+
+bind CapsLock+ShiftLeft+!ArrowUp MENU_PREV_LEVEL
+bind CapsLock+ShiftLeft+!ArrowDown PREFMENU
+bind CapsLock+ShiftLeft+!ArrowLeft PREFLOAD
+bind CapsLock+ShiftLeft+!ArrowRight PREFSAVE
+
 
