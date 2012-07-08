@@ -231,14 +231,6 @@ setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count)
 }
 
 void
-copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count) {
-  while (count > 0) {
-    --count;
-    characters[count].text = text[count];
-  }
-}
-
-void
 setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
   while (count > 0) {
     characters[--count].attributes = attributes;
@@ -253,14 +245,26 @@ clearScreenCharacters (ScreenCharacter *characters, size_t count) {
 
 void
 setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message) {
-  int count = box->width * box->height;
+  const ScreenCharacter *end = buffer + box->width;
+  unsigned int index = 0;
   size_t length = strlen(message);
+  mbstate_t state;
 
-  clearScreenCharacters(buffer, count);
+  memset(&state, 0, sizeof(state));
+  clearScreenCharacters(buffer, (box->width * box->height));
 
-  if (length > box->left) {
-    if ((length -= box->left) > box->width) length = box->width;
-    if (length) copyScreenCharacterText(buffer, &message[box->left], length);
+  while (length) {
+    wchar_t wc;
+    size_t result = mbrtowc(&wc, message, length, &state);
+    if ((ssize_t)result < 1) break;
+
+    message += result;
+    length -= result;
+
+    if (index++ >= box->left) {
+      if (buffer == end) break;
+      (buffer++)->text = wc;
+    }
   }
 }
 

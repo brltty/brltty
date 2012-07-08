@@ -86,7 +86,6 @@ extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, con
 
 extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
 extern void setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count);
-extern void copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count);
 extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
 
 #define SCR_KEY_SHIFT     0X40000000
