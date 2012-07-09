@@ -30,6 +30,10 @@
 #include <pthread.h>
 #endif /* __MINGW32__ */
 
+#ifdef ANDROID
+#include <android/log.h>
+#endif /* ANDROID */
+
 #include "log.h"
 #include "timing.h"
 
@@ -87,14 +91,30 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
 unsigned char categoryLogLevel = LOG_WARNING;
 unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
 
-#if defined(HAVE_SYSLOG_H)
+#if defined(ANDROID)
+static int
+toAndroidLogPriority (int level) {
+  switch (level) {
+    case LOG_EMERG:   return ANDROID_LOG_FATAL;
+    case LOG_ALERT:   return ANDROID_LOG_FATAL;
+    case LOG_CRIT:    return ANDROID_LOG_FATAL;
+    case LOG_ERR:     return ANDROID_LOG_ERROR;
+    case LOG_WARNING: return ANDROID_LOG_WARN;
+    case LOG_NOTICE:  return ANDROID_LOG_INFO;
+    case LOG_INFO:    return ANDROID_LOG_INFO;
+    case LOG_DEBUG:   return ANDROID_LOG_DEBUG;
+    default:          return ANDROID_LOG_UNKNOWN;
+  }
+}
+
+#elif defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
 
 #elif defined(WINDOWS)
 static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
 
 static WORD
-toEventType (int level) {
+toWindowsEventType (int level) {
   if (level <= LOG_ERR) return EVENTLOG_ERROR_TYPE;
   if (level <= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
   return EVENTLOG_INFORMATION_TYPE;
@@ -169,7 +189,9 @@ writeLogRecord (const char *record) {
 
 void
 openSystemLog (void) {
-#if defined(HAVE_SYSLOG_H)
+#if defined(ANDROID)
+
+#elif defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
     openlog(PACKAGE_NAME, LOG_PID, LOG_DAEMON);
     syslogOpened = 1;
@@ -185,7 +207,9 @@ openSystemLog (void) {
 
 void
 closeSystemLog (void) {
-#if defined(HAVE_SYSLOG_H)
+#if defined(ANDROID)
+
+#elif defined(HAVE_SYSLOG_H)
   if (syslogOpened) {
     closelog();
     syslogOpened = 0;
@@ -236,12 +260,14 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
       if (write) {
         writeLogRecord(record);
 
-#if defined(HAVE_SYSLOG_H)
+#if defined(ANDROID)
+        __android_log_write(toAndroidLogPriority(level), PACKAGE_NAME, record);
+#elif defined(HAVE_SYSLOG_H)
         if (syslogOpened) syslog(level, "%s", record);
 #elif defined(WINDOWS)
         if (windowsEventLog != INVALID_HANDLE_VALUE) {
           const char *strings[] = {record};
-          ReportEvent(windowsEventLog, toEventType(level), 0, 0, NULL,
+          ReportEvent(windowsEventLog, toWindowsEventType(level), 0, 0, NULL,
                       ARRAY_COUNT(strings), 0, strings, NULL);
         }
 #elif defined(__MSDOS__)
