@@ -117,7 +117,6 @@ msgid "Agogo"
 msgstr "Agogo"
 
 #: Programs/menu_prefs.c:1031
-#, fuzzy
 msgid "Alert"
 msgstr "Alerte"
 
@@ -274,7 +273,6 @@ msgid "Braille Sensitivity"
 msgstr "Sensibilité du braille"
 
 #: Programs/menu_prefs.c:1005
-#, fuzzy
 msgid "Braille Tables"
 msgstr "Tables braille"
 
@@ -361,7 +359,6 @@ msgid "Close"
 msgstr "Fermer"
 
 #: Programs/menu_prefs.c:902
-#, fuzzy
 msgid "Colon"
 msgstr "Deux-points"
 
@@ -444,12 +441,10 @@ msgid "Date Format"
 msgstr "Format de la date"
 
 #: Programs/menu_prefs.c:922
-#, fuzzy
 msgid "Date Position"
 msgstr "Position de la date"
 
 #: Programs/menu_prefs.c:945
-#, fuzzy
 msgid "Date Separator"
 msgstr "Séparateur de la date"
 
@@ -462,7 +457,6 @@ msgid "Debug"
 msgstr "Débogage"
 
 #: Programs/brltty.c:557
-#, fuzzy
 msgid "December"
 msgstr "Décembre"
 
@@ -581,7 +575,6 @@ msgid "Ethnic Instruments"
 msgstr "Instruments folkloriques"
 
 #: Programs/menu_prefs.c:677
-#, fuzzy
 msgid "Event Alerts"
 msgstr "Signaux d'événements"
 
@@ -724,7 +717,6 @@ msgid "Incompatible XKB server support\n"
 msgstr "Support du serveur XKB incompatible\n"
 
 #: Programs/menu_prefs.c:1036
-#, fuzzy
 msgid "Information"
 msgstr "Informations"
 
@@ -734,7 +726,6 @@ msgid "Install the %s service, and then exit."
 msgstr "Installe le service %s et quittez."
 
 #: Programs/menu_prefs.c:1040
-#, fuzzy
 msgid "Internal Parameters"
 msgstr "Paramètres internes"
 
@@ -812,22 +803,18 @@ msgid "List key table on standard output."
 msgstr "Liste la table de touches sur la sortie standard"
 
 #: Programs/menu_prefs.c:1074
-#, fuzzy
 msgid "Log Braille Key Events"
 msgstr "Journal des événements du clavier braille"
 
 #: Programs/menu_prefs.c:1091
-#, fuzzy
 msgid "Log Cursor Routing"
 msgstr "Journal des routines curseur"
 
 #: Programs/menu_prefs.c:1086
-#, fuzzy
 msgid "Log Cursor Tracking"
 msgstr "Journal des poursuites du curseur"
 
 #: Programs/menu_prefs.c:1059
-#, fuzzy
 msgid "Log Generic Input"
 msgstr "Journal des ntrées génériques"
 
@@ -946,7 +933,6 @@ msgid "None"
 msgstr "Aucune"
 
 #: Programs/menu_prefs.c:1035
-#, fuzzy
 msgid "Notice"
 msgstr "Remarque"
 
@@ -1261,7 +1247,6 @@ msgid "Seashore"
 msgstr "Bord de mer"
 
 #: Programs/brltty.c:554
-#, fuzzy
 msgid "September"
 msgstr "Septembre"
 
@@ -1278,7 +1263,6 @@ msgid "Shanai"
 msgstr "Shanai"
 
 #: Programs/menu_prefs.c:445
-#, fuzzy
 msgid "Show Advanced Submenus"
 msgstr "Afficher les sous-menus avancés"
 
@@ -1295,7 +1279,6 @@ msgid "Show Cursor"
 msgstr "Afficher le curseur"
 
 #: Programs/menu_prefs.c:911
-#, fuzzy
 msgid "Show Seconds"
 msgstr "Afficher les secondes"
 
@@ -1329,7 +1312,6 @@ msgid "Slap Bass 2"
 msgstr "Basse frappée 2"
 
 #: Programs/menu_prefs.c:941
-#, fuzzy
 msgid "Slash"
 msgstr "Barre oblique"
 
@@ -1371,12 +1353,10 @@ msgid "Speak Replaced Characters"
 msgstr "Dire les caractères remplacés"
 
 #: Programs/menu_prefs.c:827
-#, fuzzy
 msgid "Speak Selected Character"
 msgstr "Dire le caractère sélectionné"
 
 #: Programs/menu_prefs.c:821
-#, fuzzy
 msgid "Speak Selected Line"
 msgstr "Lire la ligne sélectionnée"
 
@@ -1402,7 +1382,6 @@ msgid "Speech Input"
 msgstr "Entrée de la parole"
 
 #: Programs/menu_prefs.c:746
-#, fuzzy
 msgid "Speech Options"
 msgstr "Options de la synthèse"
 
@@ -1566,12 +1545,10 @@ msgid "Tenor Sax"
 msgstr "Saxo tenor"
 
 #: Programs/menu_prefs.c:506
-#, fuzzy
 msgid "Text Indicators"
 msgstr "Indicateurs de texte"
 
 #: Programs/menu_prefs.c:456
-#, fuzzy
 msgid "Text Presentation"
 msgstr "Présentation du texte"
 
@@ -1596,12 +1573,10 @@ msgid "Time Format"
 msgstr "Format de l'heure"
 
 #: Programs/menu_prefs.c:888
-#, fuzzy
 msgid "Time Presentation"
 msgstr "Présentation de l'heure"
 
 #: Programs/menu_prefs.c:906
-#, fuzzy
 msgid "Time Separator"
 msgstr "Séparateur de l'heure"
 
@@ -1782,7 +1757,6 @@ msgid "all dots"
 msgstr "Tous les points"
 
 #: Programs/brltty.c:512
-#, fuzzy
 msgid "and"
 msgstr "et"
 
@@ -2001,7 +1975,6 @@ msgid "changes discarded"
 msgstr "Changements annulés"
 
 #: Programs/brltty.c:2897
-#, fuzzy
 msgid "column"
 msgstr "colonne"
 
@@ -2286,7 +2259,6 @@ msgid "go to and speak first non-blank character on line"
 msgstr "Aller et lire le premier caractère non-vide de la ligne"
 
 #: Programs/cmds.auto.h:671
-#, fuzzy
 msgid "go to and speak first non-blank line on screen"
 msgstr "Aller et lire la première ligne non-vide de l'écran"
 
@@ -2295,7 +2267,6 @@ msgid "go to and speak last non-blank character on line"
 msgstr "Aller et lire le dernier caractère non-vide de la ligne"
 
 #: Programs/cmds.auto.h:678
-#, fuzzy
 msgid "go to and speak last non-blank line on screen"
 msgstr "Aller et lire la dernière ligne non-vide de l'écran"
 
@@ -2320,7 +2291,6 @@ msgid "go to and speak previous line"
 msgstr "Va et lit la ligne précédente"
 
 #: Programs/cmds.auto.h:623
-#, fuzzy
 msgid "go to and speak previous word"
 msgstr "Va et lit le mot précédent"
 
@@ -2429,7 +2399,6 @@ msgid "help not available"
 msgstr "Aide non disponible"
 
 #: Programs/scr_help.c:234
-#, fuzzy
 msgid "help screen not readable"
 msgstr "Écran d'aide illisible"
 
@@ -2531,7 +2500,6 @@ msgid "light red"
 msgstr "rouge clair"
 
 #: Programs/brltty.c:2896
-#, fuzzy
 msgid "line"
 msgstr "ligne"
 
@@ -2728,17 +2696,14 @@ msgid "set autorepeat on/off"
 msgstr "Active ou désactive la répétition automatique"
 
 #: Programs/cmds.auto.h:590
-#, fuzzy
 msgid "set autospeak completed words on/off"
 msgstr "Activer/désactiver la diction automatique des mots complétés"
 
 #: Programs/cmds.auto.h:576
-#, fuzzy
 msgid "set autospeak deleted characters on/off"
 msgstr "Activer/désactiver la diction automatique des mots effacés"
 
 #: Programs/cmds.auto.h:569
-#, fuzzy
 msgid "set autospeak inserted characters on/off"
 msgstr "Activer/désactiver la diction automatique des caractères insérés"
 
@@ -2747,17 +2712,14 @@ msgid "set autospeak on/off"
 msgstr "Active ou désactive la parle automatique"
 
 #: Programs/cmds.auto.h:583
-#, fuzzy
 msgid "set autospeak replaced characters on/off"
 msgstr "Active ou désactive la diction automatique des caractères remplacés"
 
 #: Programs/cmds.auto.h:562
-#, fuzzy
 msgid "set autospeak selected character on/off"
 msgstr "Activer/désactiver la diction automatique du caractère sélectionné"
 
 #: Programs/cmds.auto.h:555
-#, fuzzy
 msgid "set autospeak selected line on/off"
 msgstr "Activer/désactiver la diction automatique de la ligne sélectionnée"
 
@@ -2802,7 +2764,6 @@ msgid "set sliding window on/off"
 msgstr "Active ou désactive le glissement de la fenêtre"
 
 #: Programs/cmds.auto.h:710
-#, fuzzy
 msgid "set speech location visibility on/off"
 msgstr "Activer/désactiver la verbosité de la position"
 
