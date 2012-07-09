@@ -91,7 +91,19 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
 unsigned char categoryLogLevel = LOG_WARNING;
 unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
 
-#if defined(ANDROID)
+#if defined(WINDOWS)
+static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
+
+static WORD
+toWindowsEventType (int level) {
+  if (level <= LOG_ERR) return EVENTLOG_ERROR_TYPE;
+  if (level <= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
+  return EVENTLOG_INFORMATION_TYPE;
+}
+
+#elif defined(__MSDOS__)
+
+#elif defined(ANDROID)
 static int
 toAndroidLogPriority (int level) {
   switch (level) {
@@ -109,17 +121,6 @@ toAndroidLogPriority (int level) {
 
 #elif defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
-
-#elif defined(WINDOWS)
-static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
-
-static WORD
-toWindowsEventType (int level) {
-  if (level <= LOG_ERR) return EVENTLOG_ERROR_TYPE;
-  if (level <= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
-  return EVENTLOG_INFORMATION_TYPE;
-}
-
 #endif /* system log internal definitions */
 
 static const char *logPrefix = NULL;
@@ -189,38 +190,42 @@ writeLogRecord (const char *record) {
 
 void
 openSystemLog (void) {
-#if defined(ANDROID)
+#if defined(WINDOWS)
+  if (windowsEventLog == INVALID_HANDLE_VALUE) {
+    windowsEventLog = RegisterEventSource(NULL, PACKAGE_NAME);
+  }
+
+#elif defined(__MSDOS__)
+  openLogFile(PACKAGE_NAME ".log");
+
+#elif defined(ANDROID)
 
 #elif defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
     openlog(PACKAGE_NAME, LOG_PID, LOG_DAEMON);
     syslogOpened = 1;
   }
-#elif defined(WINDOWS)
-  if (windowsEventLog == INVALID_HANDLE_VALUE) {
-    windowsEventLog = RegisterEventSource(NULL, PACKAGE_NAME);
-  }
-#elif defined(__MSDOS__)
-  openLogFile(PACKAGE_NAME ".log");
 #endif /* open system log */
 }
 
 void
 closeSystemLog (void) {
-#if defined(ANDROID)
+#if defined(WINDOWS)
+  if (windowsEventLog != INVALID_HANDLE_VALUE) {
+    DeregisterEventSource(windowsEventLog);
+    windowsEventLog = INVALID_HANDLE_VALUE;
+  }
+
+#elif defined(__MSDOS__)
+  closeLogFile();
+
+#elif defined(ANDROID)
 
 #elif defined(HAVE_SYSLOG_H)
   if (syslogOpened) {
     closelog();
     syslogOpened = 0;
   }
-#elif defined(WINDOWS)
-  if (windowsEventLog != INVALID_HANDLE_VALUE) {
-    DeregisterEventSource(windowsEventLog);
-    windowsEventLog = INVALID_HANDLE_VALUE;
-  }
-#elif defined(__MSDOS__)
-  closeLogFile();
 #endif /* close system log */
 }
 
@@ -260,18 +265,20 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
       if (write) {
         writeLogRecord(record);
 
-#if defined(ANDROID)
-        __android_log_write(toAndroidLogPriority(level), PACKAGE_NAME, record);
-#elif defined(HAVE_SYSLOG_H)
-        if (syslogOpened) syslog(level, "%s", record);
-#elif defined(WINDOWS)
+#if defined(WINDOWS)
         if (windowsEventLog != INVALID_HANDLE_VALUE) {
           const char *strings[] = {record};
           ReportEvent(windowsEventLog, toWindowsEventType(level), 0, 0, NULL,
                       ARRAY_COUNT(strings), 0, strings, NULL);
         }
+
 #elif defined(__MSDOS__)
 
+#elif defined(ANDROID)
+        __android_log_write(toAndroidLogPriority(level), PACKAGE_NAME, record);
+
+#elif defined(HAVE_SYSLOG_H)
+        if (syslogOpened) syslog(level, "%s", record);
 #endif /* write system log */
       }
 
