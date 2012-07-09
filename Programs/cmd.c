@@ -527,6 +527,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
   }
 }
 
+#ifdef ENABLE_API
 static brlapi_keyCode_t
 cmdWCharToBrlapi (wchar_t wc) {
   if (iswLatin1(wc)) {
@@ -661,3 +662,4 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   | (code & BRLAPI_KEY_FLG_SHIFT		? BRL_FLG_CHAR_SHIFT	: 0)
     ;
 }
+#endif /* ENABLE_API */

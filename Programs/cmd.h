@@ -20,7 +20,9 @@
 #define BRLTTY_INCLUDED_CMD
 
 #include "timing.h"
+#ifdef ENABLE_API
 #include "brlapi_keycodes.h"
+#endif /* ENABLE_API */
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,8 +80,10 @@ typedef struct {
 extern void resetRepeatState (RepeatState *state);
 extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);
 
+#ifdef ENABLE_API
 extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
 extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);
+#endif /* ENABLE_API */
 
 #ifdef __cplusplus
 }
