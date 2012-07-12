@@ -205,6 +205,18 @@ void getVT(void) {
   brlapi_keyCode_t cmd = BRLAPI_KEY_TYPE_SYM;
   if (brlapi_acceptKeys(brlapi_rangeType_type, &cmd, 1))
     fatal_brlapi_errno("acceptKeys",NULL);
+  cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SHIFT;
+  if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+    fatal_brlapi_errno("acceptKeys",NULL);
+  cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_UPPER;
+  if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+    fatal_brlapi_errno("acceptKeys",NULL);
+  cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_CONTROL;
+  if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+    fatal_brlapi_errno("acceptKeys",NULL);
+  cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_META;
+  if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+    fatal_brlapi_errno("acceptKeys",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 
@@ -501,7 +513,7 @@ void toX_f(const char *display) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
   int res;
   brlapi_keyCode_t code;
-  unsigned int keysym, keycode, modifiers;
+  unsigned int keysym, keycode, modifiers, next_modifiers = 0;
   Bool haveXTest;
   int eventBase, errorBase, majorVersion, minorVersion;
 #endif /* CAN_SIMULATE_KEY_PRESSES */
@@ -659,52 +671,77 @@ void toX_f(const char *display) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
-	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_SYM)) {
-	  fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
-                  gettext("unexpected block type"), code);
-	  continue;
+	switch (code & BRLAPI_KEY_TYPE_MASK) {
+	  case BRLAPI_KEY_TYPE_CMD:
+	    switch (code & BRLAPI_KEY_CODE_MASK) {
+	      case BRLAPI_KEY_CMD_SHIFT:
+		next_modifiers |= ShiftMask;
+		break;
+	      case BRLAPI_KEY_CMD_UPPER:
+		next_modifiers |= ShiftMask;
+		break;
+	      case BRLAPI_KEY_CMD_CONTROL:
+		next_modifiers |= ControlMask;
+		break;
+	      case BRLAPI_KEY_CMD_META:
+		next_modifiers |= Mod1Mask;
+		break;
+	      default:
+		fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
+			gettext("unexpected cmd"), code);
+		break;
+	    }
+	    break;
+	  case BRLAPI_KEY_TYPE_SYM:
+	    modifiers = ((code & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT) & 0xFF;
+	    keysym = code & BRLAPI_KEY_CODE_MASK;
+	    keycode = XKeysymToKeycode(dpy,keysym);
+	    if (keycode == NoSymbol) {
+	      fprintf(stderr,gettext("Couldn't translate keysym %08X to keycode.\n"),keysym);
+	      continue;
+	    }
+
+	    {
+	      static const unsigned int tryTable[] = {
+		0,
+		ShiftMask,
+		Mod2Mask,
+		Mod3Mask,
+		Mod4Mask,
+		Mod5Mask,
+		ShiftMask|Mod2Mask,
+		ShiftMask|Mod3Mask,
+		ShiftMask|Mod4Mask,
+		ShiftMask|Mod5Mask,
+		0
+	      };
+	      const unsigned int *try = tryTable;
+
+	      do {
+		if (tryModifiers(keycode, &modifiers, *try, keysym)) goto foundModifiers;
+	      } while (*++try);
+
+	      fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
+	      continue;
+	    }
+	  foundModifiers:
+
+	    debugf("key %08X: (%d,%x,%x)\n", keysym, keycode, next_modifiers, modifiers);
+	    modifiers |= next_modifiers;
+	    next_modifiers = 0;
+	    if (modifiers)
+	      XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
+	    XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
+	    XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
+	    if (modifiers)
+	      XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, 0);
+	    break;
+	  default:
+	    fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
+		    gettext("unexpected block type"), code);
+	    next_modifiers = 0;
+	    break;
 	}
-
-	modifiers = ((code & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT) & 0xFF;
-	keysym = code & BRLAPI_KEY_CODE_MASK;
-	keycode = XKeysymToKeycode(dpy,keysym);
-	if (keycode == NoSymbol) {
-	  fprintf(stderr,gettext("Couldn't translate keysym %08X to keycode.\n"),keysym);
-	  continue;
-	}
-
-        {
-          static const unsigned int tryTable[] = {
-            0,
-            ShiftMask,
-            Mod2Mask,
-            Mod3Mask,
-            Mod4Mask,
-            Mod5Mask,
-            ShiftMask|Mod2Mask,
-            ShiftMask|Mod3Mask,
-            ShiftMask|Mod4Mask,
-            ShiftMask|Mod5Mask,
-            0
-          };
-          const unsigned int *try = tryTable;
-
-          do {
-            if (tryModifiers(keycode, &modifiers, *try, keysym)) goto foundModifiers;
-          } while (*++try);
-
-	  fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
-	  continue;
-        }
-      foundModifiers:
-
-	debugf("key %08X: (%d,%x)\n", keysym, keycode, modifiers);
-	if (modifiers)
-	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
-	XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
-	XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
-	if (modifiers)
-	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, 0);
       }
       if (res<0)
 	fatal_brlapi_errno("brlapi_readKey",NULL);
