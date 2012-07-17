@@ -39,7 +39,7 @@ typedef enum {
   NP_KEY_PadUp     = 0X51,
   NP_KEY_PadDown   = 0X53,
   NP_KEY_NavLeft   = 0X55,
-  NP_KEY_NavRight  = 0X57
+  NP_KEY_NavRight  = 0X52
 } NP_NavigationKey;
 
 typedef enum {
