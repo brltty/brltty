@@ -532,6 +532,10 @@ writeCharacter_XCompose (FILE *file, wchar_t character, unsigned char dots, cons
         if (fprintf(file, "\\\"") == EOF) return 0;
         break;
 
+      case WC_C('\\'):
+        if (fprintf(file, "\\\\") == EOF) return 0;
+        break;
+
       default:
         if (fprintf(file, "%lc", (wint_t)character) == EOF) return 0;
         break;
