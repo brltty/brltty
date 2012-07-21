@@ -849,6 +849,7 @@ always question 5-12345
 # the letter r
 always r 1235
 always R 1235
+sufword radio = radiofrequencies
 sufword rafter 1235-1-124-2345-12456
 word rather 1235
 begword ratho = rathole
