@@ -502,6 +502,7 @@
 #api-parameters Auth=group:brl		# Allow some local group
 #api-parameters Host=:0			# Accept only local Unix connections
 #api-parameters Host=0.0.0.0:0		# Accept any internet connection.
+#api-parameters RetainDots=no
 #api-parameters StackSize=65536
 
 

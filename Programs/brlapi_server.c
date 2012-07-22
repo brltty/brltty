@@ -99,10 +99,11 @@
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
+  PARM_RETAINDOTS,
   PARM_STACKSIZE
 } Parameters;
 
-const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
+const char *const api_parameters[] = { "auth", "host", "retaindots", "stacksize", NULL };
 
 static size_t stackSize;
 
@@ -306,7 +307,7 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
-static const int retainDots = 0;
+static unsigned int retainDots;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -2609,21 +2610,57 @@ int api_start(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
 
-  char *hosts=
+  char *hosts =
 #if defined(PF_LOCAL)
-	":0+127.0.0.1:0";
+	":0+127.0.0.1:0"
 #else /* PF_LOCAL */
-	"127.0.0.1:0";
+	"127.0.0.1:0"
 #endif /* PF_LOCAL */
+	;
 
   {
-    const char *parameter = parameters[PARM_AUTH];
-    if (!parameter || !*parameter) auth = BRLAPI_DEFAUTH;
-    else auth = parameter;
+    char *operand = parameters[PARM_HOST];
+
+    if (*operand) hosts = operand;
+  }
+
+  retainDots = 0;
+  {
+    const char *operand = parameters[PARM_RETAINDOTS];
+
+    if (*operand) {
+      if (!validateYesNo(&retainDots, operand)) {
+        logMessage(LOG_WARNING, "%s: %s", gettext("invalid retain dots setting"), operand);
+      }
+    }
+  }
+
+  stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
+  {
+    const char *operand = parameters[PARM_STACKSIZE];
+
+    if (*operand) {
+      int size;
+      static const int minSize = PTHREAD_STACK_MIN;
+
+      if (validateInteger(&size, operand, &minSize, NULL)) {
+        stackSize = size;
+      } else {
+        logMessage(LOG_WARNING, "%s: %s", gettext("invalid thread stack size"), operand);
+      }
+    }
+  }
+
+  auth = BRLAPI_DEFAUTH;
+  {
+    const char *operand = parameters[PARM_AUTH];
+
+    if (*operand) auth = operand;
   }
 
   if (auth && !isAbsolutePath(auth)) 
-    if (!(authDescriptor = authBeginServer(auth))) return 0;
+    if (!(authDescriptor = authBeginServer(auth)))
+      return 0;
 
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
@@ -2642,28 +2679,12 @@ int api_start(BrailleDisplay *brl, char **parameters)
   ttys.connections->prev = ttys.connections->next = ttys.connections;
   ttys.focus = -1;
 
-  if (*parameters[PARM_HOST]) hosts = parameters[PARM_HOST];
-
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&connectionsMutex,&mattr);
   pthread_mutex_init(&driverMutex,&mattr);
   pthread_mutex_init(&rawMutex,&mattr);
   pthread_mutex_init(&suspendMutex,&mattr);
-
-  stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
-  {
-    const char *operand = parameters[PARM_STACKSIZE];
-    if (*operand) {
-      int size;
-      const int minSize = PTHREAD_STACK_MIN;
-      if (validateInteger(&size, operand, &minSize, NULL)) {
-        stackSize = size;
-      } else {
-        logMessage(LOG_WARNING, "%s: %s", "invalid thread stack size", operand);
-      }
-    }
-  }
 
   pthread_attr_init(&attr);
 #ifndef __MINGW32__
