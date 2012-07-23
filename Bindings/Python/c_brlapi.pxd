@@ -116,6 +116,6 @@ cdef extern from "string.h":
 	void *memcpy(void *, void *, size_t)
 
 cdef extern from "Python.h":
-	# these are macros, we just need to make Pyrex aware of them
+	# these are macros, we just need to make Cython aware of them
 	int Py_BEGIN_ALLOW_THREADS
 	int Py_END_ALLOW_THREADS

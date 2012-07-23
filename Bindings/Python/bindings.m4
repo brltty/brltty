@@ -112,25 +112,25 @@ else
    fi
 fi
 
-AC_PATH_PROG([PYREXC], [pyrexc])
-if test -z "${PYREXC}"
+AC_PATH_PROG([CYTHON], [cython])
+if test -z "${CYTHON}"
 then
-   AC_MSG_WARN([Pyrex compiler not found])
+   AC_MSG_WARN([Cython compiler not found])
    PYTHON_OK=false
 fi
 
 if test "${GCC}" = "yes"
 then
-   PYREXC_CFLAGS="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
+   CYTHON_CFLAGS="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
 else
    case "${host_os}"
    in
       *)
-         PYREXC_CFLAGS=""
+         CYTHON_CFLAGS=""
          ;;
    esac
 fi
-AC_SUBST([PYREXC_CFLAGS])
+AC_SUBST([CYTHON_CFLAGS])
 
 AC_SUBST([PYTHON_OK])
 ])
