@@ -51,6 +51,8 @@
 # The braille-driver directive specifies the two-letter driver
 # identification code of the driver for the braille display.
 # If not specified, autodetection will be performed.
+# If more than one driver, separated by commas, is specified,
+# then autodetection will be performed amongst them.
 # (can be overridden with the -b [--braille-driver=] option)
 #braille-driver	auto	# autodetect
 #braille-driver	al	# Alva
@@ -98,6 +100,8 @@
 #    usb:[serial-number]
 #    bluetooth:address
 # If not specified, "@braille_device@" will be used.
+# If more than one driver, separated by commas, is specified,
+# then each of them will be probed in turn.
 # (can be overridden with the -d [--braille-device=] option)
 #braille-device	serial:@serial_first_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
@@ -310,6 +314,8 @@
 # The speech-driver directive specifies the two-letter driver
 # identification code of the driver for the speech synthesizer.
 # If not specified, autodetection will be performed.
+# If more than one driver, separated by commas, is specified,
+# then autodetection will be performed amongst them.
 # (can be overridden with the -s [--speech-driver=] option)
 #speech-driver	auto	# autodetect
 #speech-driver	al	# Alva
