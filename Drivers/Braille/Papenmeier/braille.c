@@ -89,9 +89,8 @@ static const InputOutputOperations usbOperations = {
 
 /*--- Bluetooth Operations ---*/
 
-static const unsigned int bluetoothBauds[] = {115200, 0};
 static const InputOutputOperations bluetoothOperations = {
-  .baudList = bluetoothBauds,
+  .baudList = NULL,
   .flowControl = SERIAL_FLOW_NONE,
   .protocol1 = 0,
   .protocol2 = 3
@@ -1134,6 +1133,23 @@ identifyTerminal (BrailleDisplay *brl) {
 }
 
 static int
+startTerminal (BrailleDisplay *brl) {
+  if (gioDiscardInput(gioEndpoint)) {
+    if (identifyTerminal(brl)) {
+      brl->setFirmness = protocol->setFirmness;
+
+      memset(currentText, 0, model->textColumns);
+      memset(currentStatus, 0, model->statusCount);
+
+      protocol->initializeTerminal(brl);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
 connectResource (const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS
@@ -1174,29 +1190,25 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(device)) {
     const unsigned int *baud = io->baudList;
 
-    while (*baud) {
-      SerialParameters serialParameters;
+    if (baud) {
+      while (*baud) {
+        SerialParameters serialParameters;
 
-      gioInitializeSerialParameters(&serialParameters);
-      serialParameters.baud = *baud;
-      serialParameters.flowControl = io->flowControl;
-      logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
+        gioInitializeSerialParameters(&serialParameters);
+        serialParameters.baud = *baud;
+        serialParameters.flowControl = io->flowControl;
+        logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
 
-      if (gioReconfigureResource(gioEndpoint, &serialParameters)) {
-        if (gioDiscardInput(gioEndpoint)) {
-          if (identifyTerminal(brl)) {
-            brl->setFirmness = protocol->setFirmness;
-
-            memset(currentText, 0, model->textColumns);
-            memset(currentStatus, 0, model->statusCount);
-
-            protocol->initializeTerminal(brl);
-            return 1;
+        if (gioReconfigureResource(gioEndpoint, &serialParameters)) {
+          if (startTerminal(brl)) {
+             return 1;
           }
         }
-      }
 
-      baud += 1;
+        baud += 1;
+      }
+    } else if (startTerminal(brl)) {
+      return 1;
     }
 
     gioDisconnectResource(gioEndpoint);
