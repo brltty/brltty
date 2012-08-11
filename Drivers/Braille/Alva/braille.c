@@ -1733,7 +1733,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   if (textRewriteInterval) {
     TimeValue now;
-    getCurrentTime(&now);
+    getMonotonicTime(&now);
     if (millisecondsBetween(&textRewriteTime, &now) > textRewriteInterval) textRewriteRequired = 1;
     if (textRewriteRequired) textRewriteTime = now;
   }

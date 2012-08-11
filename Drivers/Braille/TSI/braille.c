@@ -492,7 +492,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   charactersPerSecond = serialBaud / serialGetCharacterBits(serialDevice);
 
   /* Mark time of last command to initialize typematic watch */
-  getCurrentTime(&last_ping);
+  getMonotonicTime(&last_ping);
   last_readbrl_time = last_ping;
   lastcmd_time = last_ping;
   lastcmd = EOF;
@@ -873,7 +873,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   TimeValue now;
   int skip_this_cmd = 0;
 
-  getCurrentTime(&now);
+  getMonotonicTime(&now);
   if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME)
     /* if the key we get this time is the same as the one we returned at last
        call, and if it has been abnormally long since we were called
@@ -916,13 +916,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	  approximateDelay(SEND_DELAY);
 	}
 	pings++;
-	getCurrentTime(&last_ping_sent);
+	getMonotonicTime(&last_ping_sent);
       }
     }
     return (EOF);
   }
   /* there was some input, we heard something. */
-  getCurrentTime(&last_ping);
+  getMonotonicTime(&last_ping);
   pings=0;
 
 #ifdef RECV_DELAY
@@ -1249,11 +1249,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   /* If this is a typematic repetition of some key other than movement keys */
   if (lastcmd == res && !is_repeat_cmd (res)){
     if(skip_this_cmd){
-      getCurrentTime(&lastcmd_time);
+      getMonotonicTime(&lastcmd_time);
       res = EOF;
     }else{
       /* if to short a time has elapsed since last command, ignore this one */
-      getCurrentTime(&now);
+      getMonotonicTime(&now);
       if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
 	res = EOF;
     }
@@ -1261,7 +1261,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   /* reset timer to avoid unwanted typematic */
   if (res != EOF){
     lastcmd = res;
-    getCurrentTime(&lastcmd_time);
+    getMonotonicTime(&lastcmd_time);
   }
 
   /* Special: */
