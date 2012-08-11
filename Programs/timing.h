@@ -73,6 +73,7 @@ typedef struct {
 } TimePeriod;
 
 extern void startTimePeriod (TimePeriod *period, long int length);
+extern void restartTimePeriod (TimePeriod *period);
 extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
 
 #ifdef __cplusplus

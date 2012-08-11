@@ -670,7 +670,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         if (!message(mode, buffer, MSG_NODELAY)) return 0;
       }
 
-      startTimePeriod(&period, timeout);
+      restartTimePeriod(&period);
     }
 
     drainBrailleOutput(brl, poll);

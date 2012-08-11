@@ -326,9 +326,14 @@ getMonotonicElapsed (const TimeValue *start) {
 }
 
 void
-startTimePeriod (TimePeriod *period, long int length) {
+restartTimePeriod (TimePeriod *period) {
   getMonotonicTime(&period->start);
+}
+
+void
+startTimePeriod (TimePeriod *period, long int length) {
   period->length = length;
+  restartTimePeriod(period);
 }
 
 int
