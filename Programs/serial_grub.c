@@ -157,11 +157,11 @@ serialCancelOutput (SerialDevice *serial) {
 int
 serialPollInput (SerialDevice *serial, int timeout) {
   if (serial->package.byte == SERIAL_NO_BYTE) {
-    TimeValue start;
-    getCurrentTime(&start);
+    TimePeriod period;
+    startTimePeriod(&period, timeout);
 
     while ((serial->package.byte = serial->package.port->driver->fetch(serial->package.port)) == SERIAL_NO_BYTE) {
-      if (millisecondsSince(&start) > timeout) {
+      if (afterTimePeriod(&period, NULL)) {
         errno = EAGAIN;
         return 0;
       }

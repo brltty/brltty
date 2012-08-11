@@ -290,7 +290,12 @@ accurateDelay (int milliseconds) {
 
 void
 getMonotonicTime (TimeValue *now) {
-#if defined(CLOCK_MONOTONIC_HR)
+#if defined(GRUB_RUNTIME)
+  grub_uint64_t milliseconds = grub_get_time_ms();
+  now->seconds = milliseconds / MSECS_PER_SEC;
+  now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
+
+#elif defined(CLOCK_MONOTONIC_HR)
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC_HR, &ts);
   now->seconds = ts.tv_sec;
