@@ -267,13 +267,7 @@ static int checkLatchState()
       return 0;
     }
 
-    {
-      TimeValue now;
-
-      getMonotonicTime(&now);
-      ms = millisecondsBetween(&startTime, &now);
-    }
-
+    ms = getMonotonicElapsed(&startTime);
     logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %d milliseconds, elapsedTime=%d, latchDelay=%d", ms, elapsedTime, latchDelay);
 
     if ((elapsedTime <= latchDelay) && (ms > latchDelay)) {

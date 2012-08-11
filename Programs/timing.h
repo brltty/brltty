@@ -64,12 +64,14 @@ extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to)
 
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
+extern void getMonotonicTime (TimeValue *now);
+extern long int getMonotonicElapsed (const TimeValue *start);
+
 typedef struct {
   TimeValue start;
   long int length;
 } TimePeriod;
 
-extern void getMonotonicTime (TimeValue *now);
 extern void startTimePeriod (TimePeriod *period, long int length);
 extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
 

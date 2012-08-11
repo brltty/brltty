@@ -317,6 +317,14 @@ getMonotonicTime (TimeValue *now) {
 #endif /* get monotonic time */
 }
 
+long int
+getMonotonicElapsed (const TimeValue *start) {
+  TimeValue now;
+
+  getMonotonicTime(&now);
+  return millisecondsBetween(start, &now);
+}
+
 void
 startTimePeriod (TimePeriod *period, long int length) {
   getMonotonicTime(&period->start);
@@ -325,11 +333,7 @@ startTimePeriod (TimePeriod *period, long int length) {
 
 int
 afterTimePeriod (const TimePeriod *period, long int *elapsed) {
-  TimeValue now;
-  long int milliseconds;
-
-  getMonotonicTime(&now);
-  milliseconds = millisecondsBetween(&period->start, &now);
+  long int milliseconds = getMonotonicElapsed(&period->start);
 
   if (elapsed) *elapsed = milliseconds;
   return milliseconds >= period->length;

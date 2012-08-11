@@ -197,12 +197,10 @@ awaitCursorMotion (RoutingData *routing, int direction) {
   getMonotonicTime(&start);
 
   while (1) {
-    TimeValue now;
     long time;
 
     approximateDelay(ROUTING_INTERVAL);
-    getMonotonicTime(&now);
-    time = millisecondsBetween(&start, &now) + 1;
+    time = getMonotonicElapsed(&start) + 1;
 
     {
       int row = routing->cury + routing->verticalDelta;
