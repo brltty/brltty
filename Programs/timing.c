@@ -263,7 +263,7 @@ millisecondsBetween (const TimeValue *from, const TimeValue *to) {
        + (elapsed.nanoseconds / NSECS_PER_MSEC);
 }
 
-long int
+static long int
 millisecondsSince (const TimeValue *from) {
   TimeValue now;
   getCurrentTime(&now);
@@ -298,7 +298,7 @@ hasTimedOut (int milliseconds) {
   return 1;
 }
 
-static void
+void
 getMonotonicTime (TimeValue *now) {
 #if defined(CLOCK_MONOTONIC_HR)
   struct timespec ts;

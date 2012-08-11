@@ -448,7 +448,7 @@ static int writingLast;
 
 typedef void (*AcknowledgementHandler) (int ok);
 static AcknowledgementHandler acknowledgementHandler;
-static TimeValue acknowledgementTime;
+static TimePeriod acknowledgementPeriod;
 static int acknowledgementsMissing;
 static unsigned char configFlags;
 static int firmnessSetting;
@@ -598,7 +598,7 @@ handleWriteAcknowledgement (int ok) {
 static void
 setAcknowledgementHandler (AcknowledgementHandler handler) {
   acknowledgementHandler = handler;
-  getCurrentTime(&acknowledgementTime);
+  startTimePeriod(&acknowledgementPeriod, 500);
 }
 
 static int
@@ -789,7 +789,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
         }
       }
     } else if ((count == 0) && acknowledgementHandler &&
-               (millisecondsSince(&acknowledgementTime) > 500)) {
+               afterTimePeriod(&acknowledgementPeriod, NULL)) {
       if (++acknowledgementsMissing < 5) {
         logMessage(LOG_WARNING, "Missing ACK; assuming NAK.");
         goto handleNegativeAcknowledgement;

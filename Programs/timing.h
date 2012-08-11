@@ -61,7 +61,6 @@ extern void approximateDelay (int milliseconds);		/* sleep for `msec' millisecon
 extern void accurateDelay (int milliseconds);
 
 extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
-extern long int millisecondsSince (const TimeValue *from);
 
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
@@ -70,6 +69,7 @@ typedef struct {
   long int length;
 } TimePeriod;
 
+extern void getMonotonicTime (TimeValue *now);
 extern void startTimePeriod (TimePeriod *period, long int length);
 extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
 

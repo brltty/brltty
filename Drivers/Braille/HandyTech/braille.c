@@ -629,10 +629,10 @@ initializeUsb2 (void) {
 static int
 awaitUsbInput2 (int milliseconds) {
   if (hidReportSize_OutData) {
-    TimeValue startTime;
+    TimePeriod period;
 
     if (hidInputOffset < hidInputLength) return 1;
-    getCurrentTime(&startTime);
+    startTimePeriod(&period, milliseconds);
 
     while (1) {
       int result = getHidReport(HT_HID_RPT_OutData, hidInputReport,
@@ -642,7 +642,7 @@ awaitUsbInput2 (int milliseconds) {
       hidInputOffset = 0;
       if (hidInputLength > 0) return 1;
 
-      if (millisecondsSince(&startTime) >= milliseconds) break;
+      if (afterTimePeriod(&period, NULL)) break;
       approximateDelay(10);
     }
   }
@@ -720,10 +720,10 @@ initializeUsb3 (void) {
 static int
 awaitUsbInput3 (int milliseconds) {
   if (hidReportSize_OutData) {
-    TimeValue startTime;
+    TimePeriod period;
 
     if (hidInputOffset < hidInputLength) return 1;
-    getCurrentTime(&startTime);
+    startTimePeriod(&period, milliseconds);
 
     while (1) {
       int result = usbReapInput(usb->device, usb->definition.inputEndpoint,
@@ -734,7 +734,7 @@ awaitUsbInput3 (int milliseconds) {
       hidInputOffset = 0;
       if (hidInputLength > 0) return 1;
 
-      if (millisecondsSince(&startTime) >= milliseconds) break;
+      if (afterTimePeriod(&period, NULL)) break;
       approximateDelay(10);
     }
   }
@@ -933,7 +933,7 @@ typedef enum {
   BDS_WRITING
 } BrailleDisplayState;
 static BrailleDisplayState currentState = BDS_OFF;
-static TimeValue stateTime;
+static TimePeriod statePeriod;
 static unsigned int retryCount = 0;
 static unsigned char updateRequired = 0;
 
@@ -1035,7 +1035,8 @@ setState (BrailleDisplayState state) {
     retryCount = 0;
     currentState = state;
   }
-  getCurrentTime(&stateTime);
+
+  startTimePeriod(&statePeriod, 1000);
   // logMessage(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
 }
 
@@ -1644,7 +1645,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         break;
 
       case BDS_WRITING:
-        if (millisecondsSince(&stateTime) > 1000) {
+        if (afterTimePeriod(&statePeriod, NULL)) {
           if (retryCount > 3) return BRL_CMD_RESTARTBRL;
           if (!writeCells(brl)) return BRL_CMD_RESTARTBRL;
         }

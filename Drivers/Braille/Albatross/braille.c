@@ -439,11 +439,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     const unsigned int *baud = baudTable;
 
     while (io->configurePort(*baud)) {
-      TimeValue start;
+      TimePeriod period;
       int count = 0;
       unsigned char byte;
 
-      getCurrentTime(&start);
+      startTimePeriod(&period, 5);
       charactersPerSecond = *baud / 10;
       controlKey = NO_CONTROL_KEY;
 
@@ -473,7 +473,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }
 
         if (++count == 100) break;
-        if (millisecondsSince(&start) > 5) break;
+        if (afterTimePeriod(&period, NULL)) break;
       }
 
       if (!*++baud) baud = baudTable;

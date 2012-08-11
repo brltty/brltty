@@ -145,7 +145,7 @@ typedef struct {
   unsigned char packet[MAXPACKETSIZE];
   unsigned char *position;
   int waitingForAck;
-  TimeValue lastWriteTime;
+  TimePeriod acknowledgementPeriod;
 } Port;
 
 static IrisDeviceType deviceType;
@@ -246,28 +246,46 @@ static int checkLatchState()
   static TimeValue startTime;
   static int latchPulled = 0;
   static int elapsedTime = 0;
+
   unsigned char currentState = readPort1(IRIS_GIO_INPUT) & 0x04;
+
   if (!latchPulled && !currentState) {
-    getCurrentTime(&startTime);
+    getMonotonicTime(&startTime);
     latchPulled = 1;
     logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
     return 0;
   }
+
   if (latchPulled) {
-    int res, ms;
+    int res;
+    int ms;
+
     if (currentState) {
       latchPulled = 0;
       logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch released");
       elapsedTime = 0;
       return 0;
     }
-    ms = millisecondsSince(&startTime);
+
+    {
+      TimeValue now;
+
+      getMonotonicTime(&now);
+      ms = millisecondsBetween(&startTime, &now);
+    }
+
     logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %d milliseconds, elapsedTime=%d, latchDelay=%d", ms, elapsedTime, latchDelay);
-    if ((elapsedTime<=latchDelay) && (ms>latchDelay)) res = 1;
-    else res = 0;
+
+    if ((elapsedTime <= latchDelay) && (ms > latchDelay)) {
+      res = 1;
+    } else {
+      res = 0;
+    }
+
     elapsedTime = ms;
     return res;
   }
+
   return 0;
 }
 
@@ -406,6 +424,11 @@ static inline int needsEscape(unsigned char ch)
   else return 0;
 }
 
+static inline void
+startAcknowledgementPeriod (Port *port) {
+  startTimePeriod(&port->acknowledgementPeriod, 1000);
+}
+
 /* Function writeNativePacket */
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 /* A write can be ignored if the previous packet has not been */
@@ -418,10 +441,11 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
   size_t count;
 
   if (port->waitingForAck) {
-    if ( millisecondsSince(&port->lastWriteTime) < 1000) {
+    if (!afterTimePeriod(&port->acknowledgementPeriod, NULL)) {
       errno = EAGAIN;
       return 0;
     }
+
     logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
     port->waitingForAck = 0;
   }
@@ -439,7 +463,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
     return 0;
   }
 
-  getCurrentTime(&port->lastWriteTime);
+  startAcknowledgementPeriod(port);
 
   if (port==&internalPort) port->waitingForAck = 1;
   return count;
@@ -472,7 +496,7 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   count = p - packet;
   if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;
 
-  getCurrentTime(&port->lastWriteTime);
+  startAcknowledgementPeriod(port);
   return count;
 }
 

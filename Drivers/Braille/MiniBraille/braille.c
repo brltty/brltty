@@ -318,7 +318,7 @@ static const InputMode inputMode_basic = {
 };
 
 static const InputMode *inputMode;
-static TimeValue inputTime;
+static TimePeriod inputPeriod;
 
 static void
 setInputMode (const InputMode *mode) {
@@ -329,7 +329,7 @@ setInputMode (const InputMode *mode) {
   }
 
   inputMode = mode;
-  getCurrentTime(&inputTime);
+  startTimePeriod(&inputPeriod, 3000);
 }
 
 static void
@@ -421,7 +421,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     if (result == 0) {
       if (inputMode->temporary)
-        if (millisecondsSince(&inputTime) > 3000)
+        if (afterTimePeriod(&inputPeriod, NULL))
           resetInputMode();
 
       return EOF;
