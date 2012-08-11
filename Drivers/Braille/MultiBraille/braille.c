@@ -95,6 +95,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	unsigned char *init_seq = (unsigned char *)"\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = (unsigned char *)"\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
 	unsigned char c;
+	TimePeriod period;
 
 	if (!isSerialDevice(&device)) {
 		unsupportedDevice(device);
@@ -122,7 +123,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	if (init_seq[0])
 		if (serialWriteData (MB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
 			goto failure;
-	hasTimedOut (0);		/* initialise timeout testing */
+	startTimePeriod (&period, ACK_TIMEOUT);		/* initialise timeout testing */
 	n = 0;
 	do {
 		approximateDelay (20);
@@ -143,7 +144,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 		}
 		n++;
 	}
-	while (!hasTimedOut (ACK_TIMEOUT) && n <= init_ack[0]);
+	while (!afterTimePeriod (&period, NULL) && n <= init_ack[0]);
 
 	if (success && (brlcols != 25)) {
           if ((prevdata = malloc(brl->textColumns * brl->textRows))) {

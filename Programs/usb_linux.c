@@ -605,8 +605,10 @@ usbInterruptTransfer (
   if (urb) {
     UsbEndpointExtension *eptx = endpoint->extension;
     int interval = endpoint->descriptor->bInterval + 1;
+    TimePeriod period;
 
-    if (timeout) hasTimedOut(0);
+    if (timeout) startTimePeriod(&period, timeout);
+
     do {
       if (usbReapUrb(device, 0) &&
           deleteItem(eptx->completedRequests, urb)) {
@@ -616,7 +618,7 @@ usbInterruptTransfer (
         break;
       }
 
-      if (!timeout || hasTimedOut(timeout)) {
+      if (!timeout || afterTimePeriod(&period, NULL)) {
         usbCancelRequest(device, urb);
         errno = ETIMEDOUT;
         break;

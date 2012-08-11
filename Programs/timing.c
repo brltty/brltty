@@ -288,16 +288,6 @@ accurateDelay (int milliseconds) {
   }
 }
 
-int
-hasTimedOut (int milliseconds) {
-  static TimeValue start = {0, 0};
-
-  if (milliseconds) return millisecondsSince(&start) >= milliseconds;
-
-  getCurrentTime(&start);
-  return 1;
-}
-
 void
 getMonotonicTime (TimeValue *now) {
 #if defined(CLOCK_MONOTONIC_HR)

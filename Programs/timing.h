@@ -56,13 +56,10 @@ extern size_t formatSeconds (char *buffer, size_t size, const char *format, int3
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int milliseconds);
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
+extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
 extern void accurateDelay (int milliseconds);
-
-extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
-
-extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
 extern void getMonotonicTime (TimeValue *now);
 extern long int getMonotonicElapsed (const TimeValue *start);

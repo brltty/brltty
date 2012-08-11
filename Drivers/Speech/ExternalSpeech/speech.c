@@ -238,8 +238,9 @@ static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
 {
   char *pos = (char *)buf;
   int w;
+  TimePeriod period;
   if(fd<0) return;
-  hasTimedOut(0);
+  startTimePeriod(&period, 2000);
   do {
     if((w = write(fd, pos, len)) < 0) {
       if(errno == EINTR || errno == EAGAIN) continue;
@@ -250,7 +251,7 @@ static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
       return;
     }
     pos += w; len -= w;
-  } while(len && !hasTimedOut(2000));
+  } while(len && !afterTimePeriod(&period, NULL));
   if(len)
     myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
 }
@@ -260,8 +261,9 @@ static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
   char *pos = (char *)buf;
   int r;
   int firstTime = 1;
+  TimePeriod period;
   if(fd<0) return 0;
-  hasTimedOut(0);
+  startTimePeriod(&period, 400);
   do {
     if((r = read(fd, pos, len)) < 0) {
       if(errno == EINTR) continue;
@@ -274,7 +276,7 @@ static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
     if(r<=0) return 0;
     firstTime = 0;
     pos += r; len -= r;
-  } while(len && !hasTimedOut(400));
+  } while(len && !afterTimePeriod(&period, NULL));
   if(len) {
     myerror(spk, "ExternalSpeech: pipe to helper program: read timed out");
     return 0;

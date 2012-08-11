@@ -258,13 +258,14 @@ qflush (void)
 
 static int
 await_ack (void) {
-  hasTimedOut(0);
+  TimePeriod period;
+  startTimePeriod(&period, ACK_TIMEOUT);
   waiting_ack = 1;
   do {
     approximateDelay(10);	/* sleep for 10 ms */
     qfill();
     if (!waiting_ack) return 1;
-  } while (!hasTimedOut(ACK_TIMEOUT));
+  } while (!afterTimePeriod(&period, NULL));
   return 0;
 }
 

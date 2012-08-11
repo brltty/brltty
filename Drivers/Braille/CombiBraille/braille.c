@@ -102,8 +102,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           unsigned int n = 0;
           unsigned char c;
           signed char id = -1;
+          TimePeriod period;
 
-          hasTimedOut(0);		/* initialise timeout testing */
+          startTimePeriod(&period, ACK_TIMEOUT);		/* initialise timeout testing */
           do {
             approximateDelay(20);
             if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1) continue;
@@ -122,7 +123,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             }
 
             n += 1;
-          } while (!hasTimedOut(ACK_TIMEOUT));
+          } while (!afterTimePeriod(&period, NULL));
 
           if (id != -1) {
             typedef struct {
