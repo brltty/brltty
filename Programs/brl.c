@@ -347,7 +347,11 @@ typedef struct {
   unsigned char set;
   unsigned char key;
   unsigned press:1;
-} KeyEventQueueItem;
+} KeyEvent;
+
+static const int keyReleaseTimeout = 0;
+static TimeValue keyReleaseStart;
+static KeyEvent *keyReleaseEvent = NULL;
 
 static Queue *
 getKeyEventQueue (int create) {
@@ -360,20 +364,57 @@ getKeyEventQueue (int create) {
   return keyEventQueue;
 }
 
-int
-enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
+static int
+addKeyEvent (KeyEvent *event) {
   Queue *queue = getKeyEventQueue(1);
 
-  if (queue) {
-    KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
+  if (queue)
+    if (enqueueItem(queue, event))
+      return 1;
 
-    if (item) {
-      item->set = set;
-      item->key = key;
-      item->press = press;
-      if (enqueueItem(queue, item)) return 1;
+  return 0;
+}
 
-      free(item);
+int
+enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
+  if (keyReleaseEvent) {
+    if (press && (set == keyReleaseEvent->set) && (key == keyReleaseEvent->key)) {
+      if (millisecondsSince(&keyReleaseStart) < keyReleaseTimeout) {
+        free(keyReleaseEvent);
+        keyReleaseEvent = NULL;
+        return 1;
+      }
+    }
+
+    {
+      KeyEvent *event = keyReleaseEvent;
+      keyReleaseEvent = NULL;
+
+      if (!addKeyEvent(event)) {
+        free(event);
+        return 0;
+      }
+    }
+  }
+
+  {
+    KeyEvent *event;
+
+    if ((event = malloc(sizeof(*event)))) {
+      event->set = set;
+      event->key = key;
+      event->press = press;
+
+      if (keyReleaseTimeout && !press) {
+        keyReleaseEvent = event;
+        getCurrentTime(&keyReleaseStart);
+        return 1;
+      }
+
+      if (addKeyEvent(event)) return 1;
+      free(event);
+    } else {
+      logMallocError();
     }
   }
 
@@ -384,23 +425,30 @@ static int
 dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   Queue *queue = getKeyEventQueue(0);
 
-  if (queue) {
-    KeyEventQueueItem *item;
+  if (keyReleaseEvent) {
+    if (millisecondsSince(&keyReleaseStart) >= keyReleaseTimeout) {
+      if (!addKeyEvent(keyReleaseEvent)) return 0;
+      keyReleaseEvent = NULL;
+    }
+  }
 
-    while ((item = dequeueItem(queue))) {
+  if (queue) {
+    KeyEvent *event;
+
+    while ((event = dequeueItem(queue))) {
 #ifdef ENABLE_API
       if (apiStarted) {
-        if ((api_handleKeyEvent(item->set, item->key, item->press)) == EOF) {
-          free(item);
+        if ((api_handleKeyEvent(event->set, event->key, event->press)) == EOF) {
+          free(event);
 	  continue;
 	}
       }
 #endif /* ENABLE_API */
 
-      *set = item->set;
-      *key = item->key;
-      *press = item->press;
-      free(item);
+      *set = event->set;
+      *key = event->key;
+      *press = event->press;
+      free(event);
       return 1;
     }
   }
