@@ -3936,8 +3936,10 @@ message (const char *mode, const char *text, short flags) {
           }
         }
       } else if (length || !(flags & MSG_NODELAY)) {
-        int i;
-        for (i=0; i<messageDelay; i+=updateInterval) {
+        TimePeriod period;
+        startTimePeriod(&period, messageDelay);
+
+        do {
           int command;
 
           if (terminationCount) break;
@@ -3945,7 +3947,7 @@ message (const char *mode, const char *text, short flags) {
 
           command = readCommand(KTB_CTX_WAITING);
           if (command != EOF) break;
-        }
+        } while (!afterTimePeriod(&period, NULL));
       }
     }
 
