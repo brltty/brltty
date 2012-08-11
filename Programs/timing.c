@@ -93,70 +93,6 @@ getCurrentTime (TimeValue *now) {
 }
 
 void
-approximateDelay (int milliseconds) {
-  if (milliseconds > 0) {
-#if defined(__MINGW32__)
-    Sleep(milliseconds);
-
-#elif defined(__MSDOS__)
-    tsr_usleep(milliseconds * USECS_PER_MSEC);
-
-#elif defined (GRUB_RUNTIME)
-    grub_millisleep(milliseconds);
-
-#elif defined(HAVE_NANOSLEEP)
-    const struct timespec timeout = {
-      .tv_sec = milliseconds / MSECS_PER_SEC,
-      .tv_nsec = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC
-    };
-
-    if (nanosleep(&timeout, NULL) == -1) {
-      if (errno != EINTR) logSystemError("nanosleep");
-    }
-
-#elif defined(HAVE_SYS_POLL_H)
-    if (poll(NULL, 0, milliseconds) == -1) {
-      if (errno != EINTR) logSystemError("poll");
-    }
-
-#elif defined(HAVE_SELECT)
-    struct timeval timeout = {
-      .tv_sec = milliseconds / MSECS_PER_SEC,
-      .tv_usec = (milliseconds % MSECS_PER_SEC) * USECS_PER_MSEC
-    };
-
-    if (select(0, NULL, NULL, NULL, &timeout) == -1) {
-      if (errno != EINTR) logSystemError("select");
-    }
-
-#endif /* delay */
-  }
-}
-
-static int
-getTickLength (void) {
-  static int tickLength = 0;
-
-  if (!tickLength) {
-#if defined(GRUB_TICKS_PER_SECOND)
-    tickLength = MSECS_PER_SEC / GRUB_TICKS_PER_SECOND;
-#elif defined(_SC_CLK_TCK)
-    tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
-#elif defined(CLK_TCK)
-    tickLength = MSECS_PER_SEC / CLK_TCK;
-#elif defined(HZ)
-    tickLength = MSECS_PER_SEC / HZ;
-#else /* tick length */
-#error cannot determine tick length
-#endif /* tick length */
-
-    if (!tickLength) tickLength = 1;
-  }
-
-  return tickLength;
-}
-
-void
 makeTimeValue (TimeValue *value, const TimeComponents *components) {
   value->nanoseconds = components->nanosecond;
 
@@ -263,31 +199,6 @@ millisecondsBetween (const TimeValue *from, const TimeValue *to) {
        + (elapsed.nanoseconds / NSECS_PER_MSEC);
 }
 
-static long int
-millisecondsSince (const TimeValue *from) {
-  TimeValue now;
-  getCurrentTime(&now);
-  return millisecondsBetween(from, &now);
-}
-
-void
-accurateDelay (int milliseconds) {
-  TimeValue start;
-  int tickLength = getTickLength();
-
-  getCurrentTime(&start);
-  if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
-
-  while (millisecondsSince(&start) < milliseconds) {
-#ifdef __MSDOS__
-    /* We're executing as a system clock interrupt TSR so we need to allow
-     * them to occur in order for gettimeofday() to change.
-     */
-    tsr_usleep(1);
-#endif /* __MSDOS__ */
-  }
-}
-
 void
 getMonotonicTime (TimeValue *now) {
 #if defined(GRUB_RUNTIME)
@@ -307,7 +218,7 @@ getMonotonicTime (TimeValue *now) {
   now->seconds = ts.tv_sec;
   now->nanoseconds = ts.tv_nsec;
 
-#else /* fallback to clock time */
+#else /* fall back to clock time */
   getCurrentTime(now);
 #endif /* get monotonic time */
 }
@@ -337,4 +248,86 @@ afterTimePeriod (const TimePeriod *period, long int *elapsed) {
 
   if (elapsed) *elapsed = milliseconds;
   return milliseconds >= period->length;
+}
+
+void
+approximateDelay (int milliseconds) {
+  if (milliseconds > 0) {
+#if defined(__MINGW32__)
+    Sleep(milliseconds);
+
+#elif defined(__MSDOS__)
+    tsr_usleep(milliseconds * USECS_PER_MSEC);
+
+#elif defined (GRUB_RUNTIME)
+    grub_millisleep(milliseconds);
+
+#elif defined(HAVE_NANOSLEEP)
+    const struct timespec timeout = {
+      .tv_sec = milliseconds / MSECS_PER_SEC,
+      .tv_nsec = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC
+    };
+
+    if (nanosleep(&timeout, NULL) == -1) {
+      if (errno != EINTR) logSystemError("nanosleep");
+    }
+
+#elif defined(HAVE_SYS_POLL_H)
+    if (poll(NULL, 0, milliseconds) == -1) {
+      if (errno != EINTR) logSystemError("poll");
+    }
+
+#elif defined(HAVE_SELECT)
+    struct timeval timeout = {
+      .tv_sec = milliseconds / MSECS_PER_SEC,
+      .tv_usec = (milliseconds % MSECS_PER_SEC) * USECS_PER_MSEC
+    };
+
+    if (select(0, NULL, NULL, NULL, &timeout) == -1) {
+      if (errno != EINTR) logSystemError("select");
+    }
+
+#endif /* delay */
+  }
+}
+
+static int
+getTickLength (void) {
+  static int tickLength = 0;
+
+  if (!tickLength) {
+#if defined(GRUB_TICKS_PER_SECOND)
+    tickLength = MSECS_PER_SEC / GRUB_TICKS_PER_SECOND;
+#elif defined(_SC_CLK_TCK)
+    tickLength = MSECS_PER_SEC / sysconf(_SC_CLK_TCK);
+#elif defined(CLK_TCK)
+    tickLength = MSECS_PER_SEC / CLK_TCK;
+#elif defined(HZ)
+    tickLength = MSECS_PER_SEC / HZ;
+#else /* tick length */
+#error cannot determine tick length
+#endif /* tick length */
+
+    if (!tickLength) tickLength = 1;
+  }
+
+  return tickLength;
+}
+
+void
+accurateDelay (int milliseconds) {
+  TimePeriod period;
+  int tickLength = getTickLength();
+
+  startTimePeriod(&period, milliseconds);
+  if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
+
+  while (!afterTimePeriod(&period, NULL)) {
+#ifdef __MSDOS__
+    /* We're executing as a system clock interrupt TSR so we need to allow
+     * them to occur in order for gettimeofday() to change.
+     */
+    tsr_usleep(1);
+#endif /* __MSDOS__ */
+  }
 }

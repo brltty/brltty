@@ -58,9 +58,6 @@ extern void adjustTimeValue (TimeValue *time, int milliseconds);
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
 extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
 
-extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
-extern void accurateDelay (int milliseconds);
-
 extern void getMonotonicTime (TimeValue *now);
 extern long int getMonotonicElapsed (const TimeValue *start);
 
@@ -72,6 +69,9 @@ typedef struct {
 extern void startTimePeriod (TimePeriod *period, long int length);
 extern void restartTimePeriod (TimePeriod *period);
 extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
+
+extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
+extern void accurateDelay (int milliseconds);
 
 #ifdef __cplusplus
 }
