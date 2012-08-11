@@ -65,6 +65,14 @@ extern long int millisecondsSince (const TimeValue *from);
 
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
+typedef struct {
+  TimeValue start;
+  long int length;
+} TimePeriod;
+
+extern void startTimePeriod (TimePeriod *period, long int length);
+extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -831,8 +831,8 @@ asyncRelativeAlarm (
 void
 asyncWait (int duration) {
   long int elapsed = 0;
-  TimeValue start;
-  getCurrentTime(&start);
+  TimePeriod period;
+  startTimePeriod(&period, duration);
 
   do {
     long int timeout = duration;
@@ -845,7 +845,11 @@ asyncWait (int duration) {
 
         if (element) {
           AlarmEntry *alarm = getElementItem(element);
-          long int milliseconds = millisecondsBetween(&start, &alarm->time);
+          TimeValue now;
+          long int milliseconds;
+
+          getCurrentTime(&now);
+          milliseconds = millisecondsBetween(&now, &alarm->time);
 
           if (milliseconds <= elapsed) {
             AsyncAlarmCallback callback = alarm->callback;
@@ -925,5 +929,5 @@ asyncWait (int duration) {
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout-elapsed);
 #endif /* ASYNC_CAN_MONITOR_IO */
-  } while ((elapsed = millisecondsSince(&start)) < duration);
+  } while (!afterTimePeriod(&period, &elapsed));
 }

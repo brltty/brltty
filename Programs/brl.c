@@ -350,7 +350,7 @@ typedef struct {
 } KeyEvent;
 
 static const int keyReleaseTimeout = 0;
-static TimeValue keyReleaseStart;
+static TimePeriod keyReleasePeriod;
 static KeyEvent *keyReleaseEvent = NULL;
 
 static Queue *
@@ -379,7 +379,7 @@ int
 enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
   if (keyReleaseEvent) {
     if (press && (set == keyReleaseEvent->set) && (key == keyReleaseEvent->key)) {
-      if (millisecondsSince(&keyReleaseStart) < keyReleaseTimeout) {
+      if (!afterTimePeriod(&keyReleasePeriod, NULL)) {
         free(keyReleaseEvent);
         keyReleaseEvent = NULL;
         return 1;
@@ -407,7 +407,7 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
 
       if (keyReleaseTimeout && !press) {
         keyReleaseEvent = event;
-        getCurrentTime(&keyReleaseStart);
+        startTimePeriod(&keyReleasePeriod, keyReleaseTimeout);
         return 1;
       }
 
@@ -426,7 +426,7 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   Queue *queue = getKeyEventQueue(0);
 
   if (keyReleaseEvent) {
-    if (millisecondsSince(&keyReleaseStart) >= keyReleaseTimeout) {
+    if (afterTimePeriod(&keyReleasePeriod, NULL)) {
       if (!addKeyEvent(keyReleaseEvent)) return 0;
       keyReleaseEvent = NULL;
     }
@@ -643,12 +643,12 @@ probeBrailleDisplay (
 int
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
   const char *mode = "lrn";
-  TimeValue start;
+  TimePeriod period;
 
   if (!setStatusText(brl, mode)) return 0;
   if (!message(mode, gettext("Command Learn Mode"), MSG_NODELAY)) return 0;
 
-  getCurrentTime(&start);
+  startTimePeriod(&period, timeout);
   do {
     int command = readBrailleCommand(brl, KTB_CTX_DEFAULT);
 
@@ -670,11 +670,11 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         if (!message(mode, buffer, MSG_NODELAY)) return 0;
       }
 
-      getCurrentTime(&start);
+      startTimePeriod(&period, timeout);
     }
 
     drainBrailleOutput(brl, poll);
-  } while (millisecondsSince(&start) < timeout);
+  } while (!afterTimePeriod(&period, NULL));
 
   return message(mode, gettext("done"), 0);
 }

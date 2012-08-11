@@ -297,3 +297,40 @@ hasTimedOut (int milliseconds) {
   getCurrentTime(&start);
   return 1;
 }
+
+static void
+getMonotonicTime (TimeValue *now) {
+#if defined(CLOCK_MONOTONIC_HR)
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC_HR, &ts);
+  now->seconds = ts.tv_sec;
+  now->nanoseconds = ts.tv_nsec;
+
+#elif defined(CLOCK_MONOTONIC)
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  now->seconds = ts.tv_sec;
+  now->nanoseconds = ts.tv_nsec;
+
+#else /* fallback to clock time */
+  getCurrentTime(now);
+#endif /* get monotonic time */
+}
+
+void
+startTimePeriod (TimePeriod *period, long int length) {
+  getMonotonicTime(&period->start);
+  period->length = length;
+}
+
+int
+afterTimePeriod (const TimePeriod *period, long int *elapsed) {
+  TimeValue now;
+  long int milliseconds;
+
+  getMonotonicTime(&now);
+  milliseconds = millisecondsBetween(&period->start, &now);
+
+  if (elapsed) *elapsed = milliseconds;
+  return milliseconds >= period->length;
+}
