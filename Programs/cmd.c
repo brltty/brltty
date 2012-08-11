@@ -434,7 +434,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
     if (*command == EOF) {
       if (state->timeout) {
         TimeValue now;
-        getCurrentTime(&now);
+        getMonotonicTime(&now);
         if (millisecondsBetween(&state->time, &now) >= state->timeout) {
           *command = state->command;
           state->time = now;
@@ -503,7 +503,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
       state->command = *command;
 
       if (flags & BRL_FLG_REPEAT_DELAY) {
-        getCurrentTime(&state->time);
+        getMonotonicTime(&state->time);
         state->timeout = delay;
         if (flags & BRL_FLG_REPEAT_INITIAL) {
           state->started = 1;
@@ -511,7 +511,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
           *command = BRL_CMD_NOOP;
         }
       } else if (flags & BRL_FLG_REPEAT_INITIAL) {
-        getCurrentTime(&state->time);
+        getMonotonicTime(&state->time);
         state->timeout = interval;
         state->started = 1;
       } else {
