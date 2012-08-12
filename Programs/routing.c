@@ -257,6 +257,8 @@ awaitCursorMotion (RoutingData *routing, int direction) {
         routing->timeSum += time * 8;
         routing->timeCount += 1;
       }
+
+      if (!ROUTING_INTERVAL) approximateDelay(1);
     } else if (time > timeout) {
       if (!moved) logRouting("timed out");
       break;
@@ -457,10 +459,13 @@ startRouting (int column, int row, int screen) {
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTING_ERROR;
-      int niceness = nice(ROUTING_NICENESS);
 
-      if (niceness == -1) {
-        logSystemError("nice");
+      if (!ROUTING_INTERVAL) {
+        int niceness = nice(ROUTING_NICENESS);
+
+        if (niceness == -1) {
+          logSystemError("nice");
+        }
       }
 
       if (constructRoutingScreen()) {
