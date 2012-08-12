@@ -3898,6 +3898,7 @@ message (const char *mode, const char *text, short flags) {
 
     convertTextToWchars(characters, text, ARRAY_COUNT(characters));
     while (length) {
+      const int delay = MIN(updateInterval, 100);
       int count;
 
       /* strip leading spaces */
@@ -3925,11 +3926,11 @@ message (const char *mode, const char *text, short flags) {
       }
 
       if (flags & MSG_WAITKEY) {
-        while (1) {
+        while (!terminationCount) {
           int command = readCommand(KTB_CTX_WAITING);
-          if (terminationCount) break;
+
           if (command == EOF) {
-            drainBrailleOutput(&brl, updateInterval);
+            drainBrailleOutput(&brl, delay);
             closeTuneDevice(0);
           } else if (command != BRL_CMD_NOOP) {
             break;
@@ -3939,15 +3940,16 @@ message (const char *mode, const char *text, short flags) {
         TimePeriod period;
         startTimePeriod(&period, messageDelay);
 
-        do {
-          int command;
+        while (!terminationCount) {
+          drainBrailleOutput(&brl, delay);
+          if (afterTimePeriod(&period, NULL)) break;
 
-          if (terminationCount) break;
-          drainBrailleOutput(&brl, updateInterval);
+          {
+            int command = readCommand(KTB_CTX_WAITING);
 
-          command = readCommand(KTB_CTX_WAITING);
-          if (command != EOF) break;
-        } while (!afterTimePeriod(&period, NULL));
+            if (command != EOF) break;
+          }
+        }
       }
     }
 
