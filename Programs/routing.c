@@ -245,7 +245,6 @@ awaitCursorMotion (RoutingData *routing, int direction) {
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
-      start = now;
       logRouting("moved: [%d,%d] -> [%d,%d]",
                  oldx, oldy,
                  routing->curx, routing->cury);
@@ -258,7 +257,12 @@ awaitCursorMotion (RoutingData *routing, int direction) {
         routing->timeCount += 1;
       }
 
-      if (!ROUTING_INTERVAL) approximateDelay(1);
+      if (ROUTING_INTERVAL) {
+        start = now;
+      } else {
+        approximateDelay(1);
+        getMonotonicTime(&start);
+      }
     } else if (time > timeout) {
       if (!moved) logRouting("timed out");
       break;
