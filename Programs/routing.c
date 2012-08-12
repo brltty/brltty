@@ -97,20 +97,33 @@ typedef enum {
   CURSOR_AXIS_VERTICAL
 } CursorAxis;
 
+static void
+adjustHorizontalCoordinate (int *y, int *x, int amount) {
+  *x += amount;
+}
+
+static void
+adjustVerticalCoordinate (int *y, int *x, int amount) {
+  *y += amount;
+}
+
 typedef struct {
   const CursorDirectionEntry *forward;
   const CursorDirectionEntry *backward;
+  void (*adjustCoordinate) (int *y, int *x, int amount);
 } CursorAxisEntry;
 
 static const CursorAxisEntry cursorAxisTable[] = {
   [CURSOR_AXIS_HORIZONTAL] = {
     .forward  = &cursorDirectionTable[CURSOR_DIR_RIGHT],
-    .backward = &cursorDirectionTable[CURSOR_DIR_LEFT]
+    .backward = &cursorDirectionTable[CURSOR_DIR_LEFT],
+    .adjustCoordinate = adjustHorizontalCoordinate
   }
   ,
   [CURSOR_AXIS_VERTICAL] = {
     .forward  = &cursorDirectionTable[CURSOR_DIR_DOWN],
-    .backward = &cursorDirectionTable[CURSOR_DIR_UP]
+    .backward = &cursorDirectionTable[CURSOR_DIR_UP],
+    .adjustCoordinate = adjustVerticalCoordinate
   }
 };
 
@@ -187,16 +200,18 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 }
 
 static int
-awaitCursorMotion (RoutingData *routing, int direction) {
-  int oldx = (routing->oldx = routing->curx);
-  int oldy = (routing->oldy = routing->cury);
+awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
   long int timeout = routing->timeSum / routing->timeCount;
   int moved = 0;
   TimeValue start;
 
+  routing->oldy = routing->cury;
+  routing->oldx = routing->curx;
   getMonotonicTime(&start);
 
   while (1) {
+    int oldy;
+    int oldx;
     TimeValue now;
     long int time;
 
@@ -257,6 +272,14 @@ awaitCursorMotion (RoutingData *routing, int direction) {
         routing->timeCount += 1;
       }
 
+      {
+        int y = oldy;
+        int x = oldx;
+
+        axis->adjustCoordinate(&y, &x, direction);
+        if ((routing->cury == y) && (routing->curx == x)) break;
+      }
+
       if (ROUTING_INTERVAL) {
         start = now;
       } else {
@@ -292,7 +315,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
 
     /* tell the cursor to move in the needed direction */
     moveCursor(routing, ((dir > 0)? axis->forward: axis->backward));
-    if (!awaitCursorMotion(routing, dir)) return CRR_FAIL;
+    if (!awaitCursorMotion(routing, dir, axis)) return CRR_FAIL;
 
     if (routing->cury != routing->oldy) {
       if (routing->oldy != trgy) {
@@ -330,7 +353,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
      * the nearest ever reached.
      */
     moveCursor(routing, ((dir > 0)? axis->backward: axis->forward));
-    return awaitCursorMotion(routing, -dir)? CRR_NEAR: CRR_FAIL;
+    return awaitCursorMotion(routing, -dir, axis)? CRR_NEAR: CRR_FAIL;
   }
 }
 
