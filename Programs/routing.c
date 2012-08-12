@@ -201,10 +201,13 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
-  long int timeout = routing->timeSum / routing->timeCount;
+  int trgy = routing->cury;
+  int trgx = routing->curx;
   int moved = 0;
+  long int timeout = routing->timeSum / routing->timeCount;
   TimeValue start;
 
+  axis->adjustCoordinate(&trgy, &trgx, direction);
   routing->oldy = routing->cury;
   routing->oldx = routing->curx;
   getMonotonicTime(&start);
@@ -272,13 +275,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
         routing->timeCount += 1;
       }
 
-      {
-        int y = oldy;
-        int x = oldx;
-
-        axis->adjustCoordinate(&y, &x, direction);
-        if ((routing->cury == y) && (routing->curx == x)) break;
-      }
+      if ((routing->cury == trgy) && (routing->curx == trgx)) break;
 
       if (ROUTING_INTERVAL) {
         start = now;
