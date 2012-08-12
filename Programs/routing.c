@@ -190,17 +190,19 @@ static int
 awaitCursorMotion (RoutingData *routing, int direction) {
   int oldx = (routing->oldx = routing->curx);
   int oldy = (routing->oldy = routing->cury);
-  long timeout = routing->timeSum / routing->timeCount;
+  long int timeout = routing->timeSum / routing->timeCount;
   int moved = 0;
   TimeValue start;
 
   getMonotonicTime(&start);
 
   while (1) {
-    long time;
+    TimeValue now;
+    long int time;
 
     approximateDelay(ROUTING_INTERVAL);
-    time = getMonotonicElapsed(&start) + 1;
+    getMonotonicTime(&now);
+    time = millisecondsBetween(&start, &now) + 1;
 
     {
       int row = routing->cury + routing->verticalDelta;
@@ -243,22 +245,20 @@ awaitCursorMotion (RoutingData *routing, int direction) {
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
+      start = now;
       logRouting("moved: [%d,%d] -> [%d,%d]",
                  oldx, oldy,
                  routing->curx, routing->cury);
 
       if (!moved) {
         moved = 1;
-        timeout = time * 2;
+        timeout = (time * 2) + 1;
 
         routing->timeSum += time * 8;
         routing->timeCount += 1;
       }
     } else if (time > timeout) {
-      if (!moved) {
-        logRouting("timed out");
-      }
-
+      if (!moved) logRouting("timed out");
       break;
     }
   }
