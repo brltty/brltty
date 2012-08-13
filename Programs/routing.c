@@ -201,22 +201,25 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
-  int trgy = routing->cury;
-  int trgx = routing->curx;
   int moved = 0;
   long int timeout = routing->timeSum / routing->timeCount;
   TimeValue start;
 
-  axis->adjustCoordinate(&trgy, &trgx, direction);
+  int trgy = routing->cury;
+  int trgx = routing->curx;
+
   routing->oldy = routing->cury;
   routing->oldx = routing->curx;
+
+  axis->adjustCoordinate(&trgy, &trgx, direction);
   getMonotonicTime(&start);
 
   while (1) {
+    long int time;
+    TimeValue now;
+
     int oldy;
     int oldx;
-    TimeValue now;
-    long int time;
 
     approximateDelay(ROUTING_INTERVAL);
     getMonotonicTime(&now);
@@ -263,9 +266,8 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
-      logRouting("moved: [%d,%d] -> [%d,%d]",
-                 oldx, oldy,
-                 routing->curx, routing->cury);
+      logRouting("moved: [%d,%d] -> [%d,%d] (%dms)",
+                 oldx, oldy, routing->curx, routing->cury, time);
 
       if (!moved) {
         moved = 1;
@@ -284,7 +286,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
         getMonotonicTime(&start);
       }
     } else if (time > timeout) {
-      if (!moved) logRouting("timed out");
+      if (!moved) logRouting("timed out: %ldms", timeout);
       break;
     }
   }
