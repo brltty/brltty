@@ -1037,9 +1037,9 @@ speakCurrentLine (void) {
 
 static int
 autospeak (void) {
-  if (speech == &noSpeech) return 0;
+  if (speech->definition.code == noSpeech.definition.code) return 0;
   if (prefs.autospeak) return 1;
-  return braille == &noBraille;
+  return braille->definition.code == noBraille.definition.code;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
