@@ -1034,6 +1034,13 @@ static void
 speakCurrentLine (void) {
   speakDone(NULL, 0, scr.cols, 0);
 }
+
+static int
+autospeak (void) {
+  if (speech == &noSpeech) return 0;
+  if (prefs.autospeak) return 1;
+  return braille == &noBraille;
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static inline int
@@ -2529,7 +2536,7 @@ doCommand:
         getTimeFormattingData(&fmt);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-        if (prefs.autospeak) doSpeechTime(&fmt);
+        if (autospeak()) doSpeechTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
         doBrailleTime(&fmt);
@@ -3408,7 +3415,7 @@ brlttyUpdate (void) {
     }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (prefs.autospeak) {
+    if (autospeak()) {
       static int oldScreen = -1;
       static int oldX = -1;
       static int oldY = -1;
@@ -3879,7 +3886,9 @@ message (const char *mode, const char *text, short flags) {
   if (!mode) mode = "";
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.autospeak && !(flags & MSG_SILENT)) sayString(&spk, text, 1);
+  if (!(flags & MSG_SILENT))
+    if (autospeak())
+      sayString(&spk, text, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {
