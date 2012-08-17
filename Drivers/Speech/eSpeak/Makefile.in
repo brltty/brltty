@@ -19,7 +19,7 @@
 DRIVER_CODE = es
 DRIVER_NAME = eSpeak
 DRIVER_COMMENT = text to speech engine 
-DRIVER_VERSION = 0.2 
+DRIVER_VERSION = 0.3 
 DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>
 SPK_OBJS = @speech_libraries_es@
 include $(SRC_TOP)speech.mk
