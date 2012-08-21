@@ -405,6 +405,9 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
+/* Define this if the function atspi_get_a11y_bus exists in atspi2. */
+#undef HAVE_ATSPI_GET_A11Y_BUS
+
 #define TEXT_TABLE_EXTENSION ".ttb"
 #define TEXT_SUBTABLE_EXTENSION ".tti"
 

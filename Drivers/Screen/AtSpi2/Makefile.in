@@ -25,5 +25,5 @@ SCR_OBJS = @screen_libraries_a2@
 include $(SRC_TOP)screen.mk
 
 screen.$O:
-	$(CC) $(SCR_CFLAGS) $(DBUS_INCLUDES) -c $(SRC_DIR)/screen.c
+	$(CC) $(SCR_CFLAGS) $(DBUS_INCLUDES) $(ATSPI2_INCLUDES) $(GLIB2_INCLUDES) -c $(SRC_DIR)/screen.c
 

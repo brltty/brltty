@@ -26,6 +26,10 @@
 #include <limits.h>
 #include <locale.h>
 
+#ifdef HAVE_ATSPI_GET_A11Y_BUS
+#include <atspi/atspi.h>
+#endif
+
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif /* HAVE_LANGINFO_H */
@@ -39,8 +43,10 @@
 #include <dbus/dbus.h>
 #define SPI2_DBUS_INTERFACE		"org.a11y.atspi"
 #define SPI2_DBUS_INTERFACE_REG		SPI2_DBUS_INTERFACE".Registry"
-#define SPI2_DBUS_PATH_DEC		"/org/a11y/atspi/registry/deviceeventcontroller"
+#define SPI2_DBUS_PATH_REG		"/org/a11y/atspi/registry"
+#define SPI2_DBUS_PATH_DEC		SPI2_DBUS_PATH_REG "/deviceeventcontroller"
 #define SPI2_DBUS_INTERFACE_DEC		SPI2_DBUS_INTERFACE".DeviceEventController"
+#define SPI2_DBUS_INTERFACE_DEL		SPI2_DBUS_INTERFACE".DeviceEventListener"
 #define SPI2_DBUS_INTERFACE_EVENT	SPI2_DBUS_INTERFACE".Event"
 #define SPI2_DBUS_INTERFACE_TREE	SPI2_DBUS_INTERFACE".Tree"
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
@@ -730,18 +736,71 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
 
 static int finished;
 
+static int watch(const char *message, const char *event) {
+  DBusError error;
+  DBusMessage *msg, *reply;
+
+  dbus_error_init(&error);
+  dbus_bus_add_match(bus, message, &error);
+  if (dbus_error_is_set(&error)) {
+    logMessage(LOG_ERR, "error while adding watch %s: %s %s", message, error.name, error.message);
+    dbus_error_free(&error);
+    return 0;
+  }
+ 
+  if (!event)
+    return 1;
+
+  /* Register as event listener. */
+  dbus_error_init(&error);
+  msg = dbus_message_new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_REG, SPI2_DBUS_INTERFACE_REG, "RegisterEvent");
+  if (dbus_error_is_set(&error)) {
+    logMessage(LOG_DEBUG, "error while registering listener: %s %s", error.name, error.message);
+    dbus_error_free(&error);
+    return 0;
+  }
+  if (!msg) {
+    logMessage(LOG_DEBUG, "no memory while registering listener");
+    return 0;
+  }
+ 
+  dbus_message_append_args(msg, DBUS_TYPE_STRING, &event, DBUS_TYPE_INVALID);
+ 
+  dbus_error_init(&error);
+  /* 1s max delay */
+  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
+  dbus_message_unref(msg);
+  if (dbus_error_is_set(&error)) {
+    logMessage(LOG_DEBUG, "error while registering listener: %s %s", error.name, error.message);
+    dbus_error_free(&error);
+    return 0;
+  }
+  if (!reply) {
+    logMessage(LOG_DEBUG, "timeout while registering listener");
+    return 0;
+  }
+  dbus_message_unref(reply);
+
+  return 1;
+}
+
 static void *doAtSpi2ScreenOpen(void *arg) {
   DBusError error;
 
   sem_t *SPI2_init_sem = (sem_t *)arg;
 
   dbus_error_init(&error);
-  /* TODO: try to use the accessibility bus */
-  bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
-    dbus_error_free(&error);
-    goto out;
+#ifdef HAVE_ATSPI_GET_A11Y_BUS
+  bus = atspi_get_a11y_bus();
+  if (!bus)
+#endif
+  {
+    bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
+    if (dbus_error_is_set(&error)) {
+      logMessage(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
+      dbus_error_free(&error);
+      goto out;
+    }
   }
   if (!bus) {
     logMessage(LOG_ERR, "Can't get dbus session bus.");
@@ -750,20 +809,18 @@ static void *doAtSpi2ScreenOpen(void *arg) {
   if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) {
     goto outConn;
   }
-#define WATCH(str) \
-  dbus_error_init(&error); \
-  dbus_bus_add_match(bus, str, &error); \
-  if (dbus_error_is_set(&error)) { \
-    logMessage(LOG_ERR, "error while adding watch %s: %s %s", str, error.name, error.message); \
-    dbus_error_free(&error); \
-    goto out; \
-  }
-  WATCH("type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Focus'");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object'");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'");
+
+#define WATCH(str, event) \
+  if (!watch((str), (event))) \
+    goto outConn;
+
+  WATCH("type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'", NULL);
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Focus'", "focus");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object'", "object");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='ChildrenChanged'", "object:childrenchanged");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'", "object:textchanged");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'", "object:textcaretmoved");
+  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'", "object:statechanged");
 
   /* TODO: use dbus_watch_get_unix_fd() or dbus_watch_get_socket() instead */
   sem_post(SPI2_init_sem);

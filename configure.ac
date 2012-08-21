@@ -1557,7 +1557,22 @@ fi
 
 BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
    AC_CHECK_HEADER([X11/keysym.h], [dnl
-      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS)])
+      BRLTTY_HAVE_PACKAGE([atspi2], [atspi-2], [dnl
+         brltty_cppflags_save="${CPPFLAGS}"
+         CPPFLAGS="${CPPFLAGS} ${atspi2_cflags}"
+
+         brltty_libs_save="${LIBS}"
+         LIBS="${atspi2_libs} ${LIBS}"
+
+         AC_CHECK_FUNCS([atspi_get_a11y_bus])
+
+         CPPFLAGS="${brltty_cppflags_save}"
+         LIBS="${brltty_libs_save}"
+
+         BRLTTY_HAVE_PACKAGE([glib2], [glib-2.0])
+      ])
+
+      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS) $(ATSPI2_LIBS) $(GLIB2_LIBS)])
    ])
 ])
 

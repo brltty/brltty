@@ -186,6 +186,12 @@ INSTALL_DRIVERS = @install_drivers@
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
 
+ATSPI2_INCLUDES = @atspi2_includes@
+ATSPI2_LIBS = @atspi2_libs@
+
+GLIB2_INCLUDES = @glib2_includes@
+GLIB2_LIBS = @glib2_libs@
+
 DBUS_INCLUDES = @dbus_includes@
 DBUS_LIBS = @dbus_libs@
 
