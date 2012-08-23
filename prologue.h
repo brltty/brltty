@@ -385,6 +385,12 @@ mbsinit (const mbstate_t *ps) {
 #define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
 
+#ifdef WORDS_BIGENDIAN
+#define WCHAR_CHARSET "UCS-"SIZEOF_WCHAR_T_STR"BE"
+#else /* WORDS_BIGENDIAN */
+#define WCHAR_CHARSET "UCS-"SIZEOF_WCHAR_T_STR"LE"
+#endif /* WORDS_BIGENDIAN */
+
 #ifndef HAVE_MEMPCPY
 #define mempcpy(dest,src,size) (void *)((char *)memcpy((dest), (src), (size)) + (size))
 #endif /* HAVE_MEMPCPY */

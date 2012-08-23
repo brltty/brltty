@@ -74,6 +74,8 @@ typedef signed int ssize_t;
 #include <inttypes.h> /* For PRIx64 */
 #endif /* _MSC_VER */
 
+#include <wchar.h>
+
 /** \defgroup brlapi_handles BrlAPI handles
  *
  * Each function provided by BrlAPI comes in two versions.
@@ -451,6 +453,24 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
 int BRLAPI_STDCALL brlapi_writeText(int cursor, const char *text);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int BRLAPI_STDCALL brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *text);
+
+/* brlapi_writeWText */
+/** Write the given \\0-terminated unicode string to the braille display
+ *
+ * If the string is too long, it is truncated. If it's too short,
+ * it is padded with spaces.
+ *
+ * \param cursor gives the cursor position; if equal to ::BRLAPI_CURSOR_OFF, no cursor is shown at
+ * all; if cursor==::BRLAPI_CURSOR_LEAVE, the cursor is left where it is
+ *
+ * \param text points to the string to be displayed.
+ *
+ * \return 0 on success, -1 on error.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int BRLAPI_STDCALL brlapi_writeWText(int cursor, const wchar_t *text);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int BRLAPI_STDCALL brlapi__writeWText(brlapi_handle_t *handle, int cursor, const wchar_t *text);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display

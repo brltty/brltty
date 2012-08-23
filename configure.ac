@@ -715,6 +715,12 @@ AC_CHECK_SIZEOF([key_t], [], [
 #include <sys/ipc.h>
 ])
 
+AC_CHECK_SIZEOF([wchar_t], [], [
+#include <wchar.h>
+])
+AC_DEFINE_UNQUOTED([SIZEOF_WCHAR_T_STR], ["${ac_cv_sizeof_wchar_t}"],
+                   [Define this to be a string containing the size of the wchar_t type.])
+
 BRLTTY_IF_PTHREADS([dnl
    AC_DEFINE([HAVE_POSIX_THREADS], [1],
              [Define this if posix threads are supported.])

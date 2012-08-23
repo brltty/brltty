@@ -189,6 +189,9 @@ extern "C" {
 #undef HAVE_SHMGET
 #undef SIZEOF_KEY_T
 
+/* Define this to be a string containing the size of the wchar_t type. */
+#undef SIZEOF_WCHAR_T_STR
+
 /* Define this if the function shm_open exists. */
 #undef HAVE_SHM_OPEN
 

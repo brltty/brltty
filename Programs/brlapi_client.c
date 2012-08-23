@@ -1095,37 +1095,20 @@ int BRLAPI_STDCALL brlapi_setFocus(int tty)
   return brlapi__setFocus(&defaultHandle, tty);
 }
 
-static size_t getCharset(
-  void *buffer
-#ifdef WINDOWS
-, int wide
-#endif /* WINDOWS */
-) {
+static size_t getCharset(void *buffer, int wide) {
   char *p = buffer;
   const char *start = p;
   const char *locale = setlocale(LC_CTYPE, NULL);
 
-#ifdef WINDOWS
-  static const char WIN_WCHAR_T[] =
-#ifdef WORDS_BIGENDIAN
-    "UCS-2BE"
-#else /* WORDS_BIGENDIAN */
-    "UCS-2LE"
-#endif /* WORDS_BIGENDIAN */
-    ;
-
   if (wide
-#ifndef __CYGWIN32__
+#ifdef __MINGW32__
       && CHECKPROC("ntdll.dll", wcslen)
 #endif /* __CYGWIN32__ */
   ) {
-    size_t length = strlen(WIN_WCHAR_T);
+    size_t length = strlen(WCHAR_CHARSET);
     *p++ = length;
-    p = mempcpy(p, WIN_WCHAR_T, length);
-  } else
-#endif /* WINDOWS */
-
-  if (locale && strcmp(locale, "C")) {
+    p = mempcpy(p, WCHAR_CHARSET, length);
+  } else if (locale && strcmp(locale, "C")) {
     /* not default locale, tell charset to server */
 #ifdef WINDOWS
     UINT CP = GetACP();
@@ -1150,11 +1133,7 @@ static size_t getCharset(
 
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
-#ifdef WINDOWS
-int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
-#else /* WINDOWS */
-int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
-#endif /* WINDOWS */
+static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 {
   int dispSize = handle->brlx * handle->brly;
   unsigned int min;
@@ -1173,21 +1152,16 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     wa->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
-#if defined(__CYGWIN32__)
-    if (wide)
-      len = sizeof(wchar_t) * wcslen(str);
-    else
-#elif defined(__MINGW32__)
+#if defined(__MINGW32__)
     if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
       len = sizeof(wchar_t) * wcslenProc(str);
+#else /* __MINGW32__ */
+    if (wide)
+      len = sizeof(wchar_t) * wcslen(str);
+#endif /* __MINGW32__ */
     else
-#endif /* __CYGWIN32__ */
       len = strlen(str);
-    if (
-#ifdef WINDOWS
-	!wide &&
-#endif /* WINDOWS */
-	locale && strcmp(locale,"C")) {
+    if (!wide && locale && strcmp(locale,"C")) {
       mbstate_t ps;
       size_t eaten;
       unsigned i;
@@ -1214,9 +1188,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
       }
 endcount:
       for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
-    } else
-#ifdef WINDOWS
-    if (wide) {
+    } else if (wide) {
       int extra;
       min = MIN(len, sizeof(wchar_t) * dispSize);
       extra = dispSize - min / sizeof(wchar_t);
@@ -1224,9 +1196,7 @@ endcount:
       p += min;
       wmemset((wchar_t *) p, L' ', extra);
       p += sizeof(wchar_t) * extra;
-    } else
-#endif /* WINDOWS */
-    {
+    } else {
       min = MIN(len, dispSize);
       memcpy(p, str, min);
       p += min;
@@ -1241,11 +1211,7 @@ endcount:
     p += sizeof(uint32_t);
   }
 
-  if ((len = getCharset(p
-#ifdef WINDOWS
-  	, wide
-#endif /* WINDOWS */
-	))) {
+  if ((len = getCharset(p , wide))) {
     wa->flags |= BRLAPI_WF_CHARSET;
     p += len;
   }
@@ -1257,15 +1223,35 @@ endcount:
   return res;
 }
 
+int BRLAPI_STDCALL brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
+{
+  return brlapi___writeText(handle, cursor, str, 0);
+}
+
+int BRLAPI_STDCALL brlapi__writeWText(brlapi_handle_t *handle, int cursor, const wchar_t *str)
+{
+  return brlapi___writeText(handle, cursor, str, 1);
+}
+
 #ifdef WINDOWS
+int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
+{
+  return brlapi___writetext(handle, cursor, str, wide);
+}
+
 int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide)
 {
-  return brlapi__writeTextWin(&defaultHandle, cursor, str, wide);
+  return brlapi___writeText(&defaultHandle, cursor, str, wide);
 }
 #else /* WINDOWS */
-int brlapi_writeText(int cursor, const char *str)
+int BRLAPI_STDCALL brlapi_writeText(int cursor, const char *str)
 {
   return brlapi__writeText(&defaultHandle, cursor, str);
+}
+
+int BRLAPI_STDCALL brlapi_writeWText(int cursor, const wchar_t *str)
+{
+  return brlapi__writeWText(&defaultHandle, cursor, str);
 }
 #endif /* WINDOWS */
 
@@ -1318,6 +1304,9 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
   unsigned char *p = &wa->data;
   unsigned char *end = (unsigned char*) &packet.data[sizeof(packet)];
   int res;
+#ifndef WINDOWS
+  int wide = 0;
+#endif /* WINDOWS */
   wa->flags = 0;
   if (s==NULL) goto send;
   rbeg = s->regionBegin;
@@ -1386,11 +1375,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
   }
   if (s->charset) {
     if (!*s->charset) {
-      if ((strLen = getCharset(p
-    #ifdef WINDOWS
-	    , wide
-    #endif /* WINDOWS */
-	    ))) {
+      if ((strLen = getCharset(p, wide))) {
 	wa->flags |= BRLAPI_WF_CHARSET;
 	p += strLen;
       }
