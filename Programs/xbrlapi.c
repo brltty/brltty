@@ -675,16 +675,16 @@ void toX_f(const char *display) {
 	  case BRLAPI_KEY_TYPE_CMD:
 	    switch (code & BRLAPI_KEY_CODE_MASK) {
 	      case BRLAPI_KEY_CMD_SHIFT:
-		next_modifiers |= ShiftMask;
+		next_modifiers ^= ShiftMask;
 		break;
 	      case BRLAPI_KEY_CMD_UPPER:
-		next_modifiers |= ShiftMask;
+		next_modifiers ^= ShiftMask;
 		break;
 	      case BRLAPI_KEY_CMD_CONTROL:
-		next_modifiers |= ControlMask;
+		next_modifiers ^= ControlMask;
 		break;
 	      case BRLAPI_KEY_CMD_META:
-		next_modifiers |= Mod1Mask;
+		next_modifiers ^= Mod1Mask;
 		break;
 	      default:
 		fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
