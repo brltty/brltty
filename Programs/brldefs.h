@@ -168,10 +168,10 @@ typedef enum {
 
   BRL_CMD_OFFLINE /* braille display temporarily unavailable */,
 
-  BRL_CMD_SHIFT /* add shift modifier to next typed character or emulated key */,
-  BRL_CMD_UPPER /* add upper modifier to next typed character or emulated key */,
-  BRL_CMD_CONTROL /* add control modifier to next typed character or emulated key */,
-  BRL_CMD_META /* add meta modifier to next typed character or emulated key */,
+  BRL_CMD_SHIFT /* set shift modifier of next typed character or emulated key on/off */,
+  BRL_CMD_UPPER /* set upper modifier of next typed character or emulated key on/off */,
+  BRL_CMD_CONTROL /* set control modifier of next typed character or emulated key on/off */,
+  BRL_CMD_META /* set meta modifier of next typed character or emulated key on/off */,
 
   BRL_CMD_TIME /* show the current date and time */,
   BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,

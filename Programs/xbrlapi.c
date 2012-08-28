@@ -674,18 +674,47 @@ void toX_f(const char *display) {
 	switch (code & BRLAPI_KEY_TYPE_MASK) {
 	  case BRLAPI_KEY_TYPE_CMD:
 	    switch (code & BRLAPI_KEY_CODE_MASK) {
-	      case BRLAPI_KEY_CMD_SHIFT:
-		next_modifiers ^= ShiftMask;
-		break;
-	      case BRLAPI_KEY_CMD_UPPER:
-		next_modifiers ^= ShiftMask;
-		break;
-	      case BRLAPI_KEY_CMD_CONTROL:
-		next_modifiers ^= ControlMask;
-		break;
-	      case BRLAPI_KEY_CMD_META:
-		next_modifiers ^= Mod1Mask;
-		break;
+              {
+                unsigned int modifier;
+
+              case BRLAPI_KEY_CMD_SHIFT:
+                modifier = ShiftMask;
+                goto doModifier;
+
+              case BRLAPI_KEY_CMD_UPPER:
+                modifier = ShiftMask;
+                goto doModifier;
+
+              case BRLAPI_KEY_CMD_CONTROL:
+                modifier = ControlMask;
+                goto doModifier;
+
+              case BRLAPI_KEY_CMD_META:
+                modifier = Mod1Mask;
+                goto doModifier;
+
+              doModifier:
+                switch (code & BRLAPI_KEY_FLG_TOGGLE_MASK) {
+                  case 0:
+                    next_modifiers ^= modifier;
+                    break;
+
+                  case BRLAPI_KEY_FLG_TOGGLE_ON:
+                    next_modifiers |= modifier;
+                    break;
+
+                  case BRLAPI_KEY_FLG_TOGGLE_OFF:
+                    next_modifiers &= ~modifier;
+                    break;
+
+                  default:
+                  case BRLAPI_KEY_FLG_TOGGLE_ON | BRLAPI_KEY_FLG_TOGGLE_OFF:
+                    break;
+                }
+
+                break;
+              }
+
 	      default:
 		fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
 			gettext("unexpected cmd"), code);

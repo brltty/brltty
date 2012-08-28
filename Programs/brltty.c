@@ -1592,17 +1592,75 @@ getCursorPosition (int x, int y) {
   return position;
 }
 
-static int
-toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const TuneDefinition *on) {
-  const TuneDefinition *tune;
-  if ((command & BRL_FLG_TOGGLE_MASK) != BRL_FLG_TOGGLE_MASK)
-    *flag = (command & BRL_FLG_TOGGLE_ON)? 1: ((command & BRL_FLG_TOGGLE_OFF)? 0: !*flag);
-  if ((tune = *flag? on: off)) playTune(tune);
-  return *flag;
+static inline int
+toggleResult (int isOn, const TuneDefinition *offTune, const TuneDefinition *onTune) {
+  const TuneDefinition *tune = isOn? onTune: offTune;
+
+  if (tune) playTune(tune);
+  return isOn;
 }
-#define TOGGLE(flag, off, on) toggleFlag(&flag, command, off, on)
-#define TOGGLE_NOPLAY(flag) TOGGLE(flag, NULL, NULL)
-#define TOGGLE_PLAY(flag) TOGGLE(flag, &tune_toggle_off, &tune_toggle_on)
+
+static int
+toggleFlag (
+  int *bits, int bit, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+) {
+  switch (command & BRL_FLG_TOGGLE_MASK) {
+    case 0:
+      *bits ^= bit;
+      break;
+
+    case BRL_FLG_TOGGLE_ON:
+      *bits |= bit;
+      break;
+
+    case BRL_FLG_TOGGLE_OFF:
+      *bits &= ~bit;
+      break;
+
+    default:
+    case BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF:
+      break;
+  }
+
+  return toggleResult(!!(*bits & bit), offTune, onTune);
+}
+
+static int
+toggleSetting (
+  unsigned char *setting, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+) {
+  switch (command & BRL_FLG_TOGGLE_MASK) {
+    case 0:
+      *setting = !*setting;
+      break;
+
+    case BRL_FLG_TOGGLE_ON:
+      *setting = 1;
+      break;
+
+    case BRL_FLG_TOGGLE_OFF:
+      *setting = 0;
+      break;
+
+    default:
+    case BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF:
+      break;
+  }
+
+  return toggleResult(!!*setting, offTune, onTune);
+}
+
+static inline int
+toggleModeSetting (unsigned char *setting, int command) {
+  return toggleSetting(setting, command, NULL, NULL);
+}
+
+static inline int
+toggleFeatureSetting (unsigned char *setting, int command) {
+  return toggleSetting(setting, command, &tune_toggle_off, &tune_toggle_on);
+}
 
 static inline int
 showAttributesUnderline (void) {
@@ -2315,18 +2373,18 @@ doCommand:
       case BRL_CMD_CSRVIS:
         /* toggles the preferences option that decides whether cursor
            is shown at all */
-        TOGGLE_PLAY(prefs.showCursor);
+        toggleFeatureSetting(&prefs.showCursor, command);
         break;
       case BRL_CMD_CSRHIDE:
         /* This is for briefly hiding the cursor */
-        TOGGLE_NOPLAY(ses->hideCursor);
+        toggleModeSetting(&ses->hideCursor, command);
         /* no tune */
         break;
       case BRL_CMD_CSRSIZE:
-        TOGGLE_PLAY(prefs.cursorStyle);
+        toggleFeatureSetting(&prefs.cursorStyle, command);
         break;
       case BRL_CMD_CSRTRK:
-        if (TOGGLE(ses->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
+        if (toggleSetting(&ses->trackCursor, command, &tune_cursor_unlinked, &tune_cursor_linked)) {
 #ifdef ENABLE_SPEECH_SUPPORT
           if (speechTracking && (scr.number == speechScreen)) {
             speechIndex = -1;
@@ -2336,48 +2394,48 @@ doCommand:
         }
         break;
       case BRL_CMD_CSRBLINK:
-        if (TOGGLE_PLAY(prefs.blinkingCursor)) {
+        if (toggleFeatureSetting(&prefs.blinkingCursor, command)) {
           setBlinkingState(&cursorBlinkingState, 1);
         }
         break;
 
       case BRL_CMD_ATTRVIS:
-        TOGGLE_PLAY(prefs.showAttributes);
+        toggleFeatureSetting(&prefs.showAttributes, command);
         break;
       case BRL_CMD_ATTRBLINK:
-        if (TOGGLE_PLAY(prefs.blinkingAttributes)) {
+        if (toggleFeatureSetting(&prefs.blinkingAttributes, command)) {
           setBlinkingState(&attributesBlinkingState, 1);
         }
         break;
 
       case BRL_CMD_CAPBLINK:
-        if (TOGGLE_PLAY(prefs.blinkingCapitals)) {
+        if (toggleFeatureSetting(&prefs.blinkingCapitals, command)) {
           setBlinkingState(&capitalsBlinkingState, 1);
         }
         break;
 
       case BRL_CMD_SKPIDLNS:
-        TOGGLE_PLAY(prefs.skipIdenticalLines);
+        toggleFeatureSetting(&prefs.skipIdenticalLines, command);
         break;
       case BRL_CMD_SKPBLNKWINS:
-        TOGGLE_PLAY(prefs.skipBlankWindows);
+        toggleFeatureSetting(&prefs.skipBlankWindows, command);
         break;
       case BRL_CMD_SLIDEWIN:
-        TOGGLE_PLAY(prefs.slidingWindow);
+        toggleFeatureSetting(&prefs.slidingWindow, command);
         break;
 
       case BRL_CMD_DISPMD:
-        TOGGLE_NOPLAY(ses->displayMode);
+        toggleModeSetting(&ses->displayMode, command);
         break;
       case BRL_CMD_SIXDOTS:
-        TOGGLE_PLAY(prefs.textStyle);
+        toggleFeatureSetting(&prefs.textStyle, command);
         break;
 
       case BRL_CMD_AUTOREPEAT:
-        if (TOGGLE_PLAY(prefs.autorepeat)) resetAutorepeat();
+        if (toggleFeatureSetting(&prefs.autorepeat, command)) resetAutorepeat();
         break;
       case BRL_CMD_TUNES:
-        TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
+        toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
         break;
       case BRL_CMD_FREEZE:
         if (isLiveScreen()) {
@@ -2410,13 +2468,7 @@ doCommand:
         goto doModifier;
 
       doModifier:
-        if (inputModifiers & modifier) {
-          inputModifiers &= ~modifier;
-          playTune(&tune_toggle_off);
-        } else {
-          inputModifiers |= modifier;
-          playTune(&tune_toggle_on);
-        }
+        toggleFlag(&inputModifiers, modifier, command, &tune_toggle_off, &tune_toggle_on);
         break;
       }
 
@@ -2511,9 +2563,9 @@ doCommand:
 
       case BRL_CMD_INFO:
         if ((prefs.statusPosition == spNone) || haveStatusCells()) {
-          TOGGLE_NOPLAY(infoMode);
+          toggleModeSetting(&infoMode, command);
         } else {
-          TOGGLE_NOPLAY(textMaximized);
+          toggleModeSetting(&textMaximized, command);
           reconfigureWindow();
         }
         break;
@@ -2555,31 +2607,31 @@ doCommand:
         }
         break;
       case BRL_CMD_AUTOSPEAK:
-        TOGGLE_PLAY(prefs.autospeak);
+        toggleFeatureSetting(&prefs.autospeak, command);
         break;
 
       case BRL_CMD_ASPK_SEL_LINE:
-        TOGGLE_PLAY(prefs.autospeakSelectedLine);
+        toggleFeatureSetting(&prefs.autospeakSelectedLine, command);
         break;
 
       case BRL_CMD_ASPK_SEL_CHAR:
-        TOGGLE_PLAY(prefs.autospeakSelectedCharacter);
+        toggleFeatureSetting(&prefs.autospeakSelectedCharacter, command);
         break;
 
       case BRL_CMD_ASPK_INS_CHARS:
-        TOGGLE_PLAY(prefs.autospeakInsertedCharacters);
+        toggleFeatureSetting(&prefs.autospeakInsertedCharacters, command);
         break;
 
       case BRL_CMD_ASPK_DEL_CHARS:
-        TOGGLE_PLAY(prefs.autospeakDeletedCharacters);
+        toggleFeatureSetting(&prefs.autospeakDeletedCharacters, command);
         break;
 
       case BRL_CMD_ASPK_REP_CHARS:
-        TOGGLE_PLAY(prefs.autospeakReplacedCharacters);
+        toggleFeatureSetting(&prefs.autospeakReplacedCharacters, command);
         break;
 
       case BRL_CMD_ASPK_CMP_WORDS:
-        TOGGLE_PLAY(prefs.autospeakCompletedWords);
+        toggleFeatureSetting(&prefs.autospeakCompletedWords, command);
         break;
 
       case BRL_CMD_MUTE:
@@ -2938,7 +2990,7 @@ doCommand:
       }
 
       case BRL_CMD_SHOW_CURR_LOCN:
-        TOGGLE_PLAY(prefs.showSpeechCursor);
+        toggleFeatureSetting(&prefs.showSpeechCursor, command);
         break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
