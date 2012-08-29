@@ -1535,40 +1535,6 @@ static const brlapi_keyEntry_t brlapi_keyTable[] = {
   {.name=NULL}
 };
 
-static int
-brlapi_getArgumentWidth (brlapi_keyCode_t keyCode) {
-  brlapi_keyCode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
-
-  switch (keyCode & BRLAPI_KEY_TYPE_MASK) {
-    default: break;
-
-    case BRLAPI_KEY_TYPE_SYM:
-      switch (code & 0XFF000000U) {
-        default: break;
-
-        case 0X00000000U:
-          switch (code & 0XFF0000U) {
-            default: break;
-            case 0X000000U: return 8;
-          }
-          break;
-
-        case 0X01000000U: return 24;
-      }
-      break;
-
-    case BRLAPI_KEY_TYPE_CMD:
-      switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
-        default: return 16;
-        case 0: return 0;
-      }
-      break;
-  }
-
-  brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-  return -1;
-}
-
 int BRLAPI_STDCALL
 brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
   int argumentWidth = brlapi_getArgumentWidth(keyCode);
@@ -1697,34 +1663,6 @@ static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, brlapi_ra
   return 0;
 }
 
-/* Function : keyrangeMask */
-/* returns the keyCode mask for a given range type */
-static int keyrangeMask(brlapi_rangeType_t r, brlapi_keyCode_t code, brlapi_keyCode_t *mask)
-{
-  switch(r) {
-    case brlapi_rangeType_all:
-      *mask = BRLAPI_KEY_MAX;
-      return 0;
-    case brlapi_rangeType_type:
-      *mask = BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLAGS_MASK;
-      return 0;
-    case brlapi_rangeType_command: {
-      int width = brlapi_getArgumentWidth(code);
-      if (width == -1) return -1;
-      *mask = ((1 << width) - 1) | BRLAPI_KEY_FLAGS_MASK;
-      return 0;
-    }
-    case brlapi_rangeType_key:
-      *mask = BRLAPI_KEY_FLAGS_MASK;
-      return 0;
-    case brlapi_rangeType_code:
-      *mask = 0;
-      return 0;
-  }
-  brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-  return -1;
-}
-
 /* Function : ignore_accept_keys */
 /* Common tasks for ignoring and unignoring keys */
 /* what = 0 for ignoring !0 for unignoring */
@@ -1743,7 +1681,7 @@ static int ignore_accept_keys(brlapi_handle_t *handle, int what, brlapi_rangeTyp
     brlapi_keyCode_t mask;
 
     for (i=0; i<n; i++) {
-      if (keyrangeMask(r, code[i], &mask))
+      if (brlapi_getKeyrangeMask(r, code[i], &mask))
 	return -1;
       if (code[i] & mask) {
 	brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;

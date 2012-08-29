@@ -2189,17 +2189,109 @@ static void *server(void *arg)
 /* to let the user read the screen in case theree is an error */
 static int initializeAcceptedKeys(Connection *c, int how)
 {
-  if (c==NULL) return 0;
-  if (how==BRL_KEYCODES) return 0;
-  if (addKeyrange(0,BRLAPI_KEY_MAX,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (how != BRL_KEYCODES) {
+    if (c != NULL) {
+      typedef enum {
+        END,
+        ADD,
+        REMOVE
+      } KeyrangeAction;
+
+      typedef struct {
+        KeyrangeAction action;
+        brlapi_rangeType_t type;
+        brlapi_keyCode_t code;
+      } KeyrangeEntry;
+
+      static const KeyrangeEntry keyrangeTable[] = {
+        { .action = ADD,
+          .type = brlapi_rangeType_all,
+          .code = 0
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_OFFLINE
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_NOOP
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_RESTARTBRL
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_RESTARTSPEECH
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT_PREV
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT_NEXT
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSXT
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSAT
+        },
+
+        { .action = REMOVE,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSPS2
+        },
+
+        { .action = END }
+      };
+
+      const KeyrangeEntry *keyrange = keyrangeTable;
+      KeyrangeList **list = &c->acceptedKeys;
+
+      while (keyrange->action != END) {
+        brlapi_keyCode_t first;
+        brlapi_keyCode_t mask;
+        brlapi_keyCode_t last;
+
+        first = keyrange->code;
+        if (brlapiserver_getKeyrangeMask(keyrange->type, first, &mask) == -1) return -1;
+        last = first | mask;
+
+        switch (keyrange->action) {
+          case ADD:
+            if (addKeyrange(first, last, list) == -1) return -1;
+            break;
+
+          case REMOVE:
+            if (removeKeyrange(first, last, list) == -1) return -1;
+            break;
+
+          default:
+            break;
+        }
+
+        keyrange += 1;
+      }
+    }
+  }
+
   return 0;
 }
 
