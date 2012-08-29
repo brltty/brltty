@@ -1226,7 +1226,7 @@ endcount:
 #ifdef WINDOWS
 int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 {
-  return brlapi___writetext(handle, cursor, str, wide);
+  return brlapi___writeText(handle, cursor, str, wide);
 }
 
 int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide)
