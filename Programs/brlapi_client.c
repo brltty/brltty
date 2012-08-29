@@ -1223,16 +1223,6 @@ endcount:
   return res;
 }
 
-int BRLAPI_STDCALL brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
-{
-  return brlapi___writeText(handle, cursor, str, 0);
-}
-
-int BRLAPI_STDCALL brlapi__writeWText(brlapi_handle_t *handle, int cursor, const wchar_t *str)
-{
-  return brlapi___writeText(handle, cursor, str, 1);
-}
-
 #ifdef WINDOWS
 int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 {
@@ -1244,6 +1234,16 @@ int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide)
   return brlapi___writeText(&defaultHandle, cursor, str, wide);
 }
 #else /* WINDOWS */
+int BRLAPI_STDCALL brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
+{
+  return brlapi___writeText(handle, cursor, str, 0);
+}
+
+int BRLAPI_STDCALL brlapi__writeWText(brlapi_handle_t *handle, int cursor, const wchar_t *str)
+{
+  return brlapi___writeText(handle, cursor, str, 1);
+}
+
 int BRLAPI_STDCALL brlapi_writeText(int cursor, const char *str)
 {
   return brlapi__writeText(&defaultHandle, cursor, str);
