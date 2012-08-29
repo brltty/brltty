@@ -682,7 +682,7 @@ void toX_f(const char *display) {
                 goto doModifier;
 
               case BRLAPI_KEY_CMD_UPPER:
-                modifier = ShiftMask;
+                modifier = LockMask;
                 goto doModifier;
 
               case BRLAPI_KEY_CMD_CONTROL:
