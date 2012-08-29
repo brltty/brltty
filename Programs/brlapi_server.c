@@ -2190,82 +2190,75 @@ static void *server(void *arg)
 static int initializeAcceptedKeys(Connection *c, int how)
 {
   if (how != BRL_KEYCODES) {
-    if (c != NULL) {
-      typedef enum {
-        END,
-        ADD,
-        REMOVE
-      } KeyrangeAction;
-
+    if (c) {
       typedef struct {
-        KeyrangeAction action;
+        int (*action) (brlapi_keyCode_t first, brlapi_keyCode_t last, KeyrangeList **list);
         brlapi_rangeType_t type;
         brlapi_keyCode_t code;
       } KeyrangeEntry;
 
       static const KeyrangeEntry keyrangeTable[] = {
-        { .action = ADD,
+        { .action = addKeyrange,
           .type = brlapi_rangeType_all,
           .code = 0
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_OFFLINE
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_NOOP
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_RESTARTBRL
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_RESTARTSPEECH
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT_PREV
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SWITCHVT_NEXT
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSXT
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSAT
         },
 
-        { .action = REMOVE,
+        { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSPS2
         },
 
-        { .action = END }
+        { .action = NULL }
       };
 
       const KeyrangeEntry *keyrange = keyrangeTable;
-      KeyrangeList **list = &c->acceptedKeys;
 
-      while (keyrange->action != END) {
+      while (keyrange->action) {
         brlapi_keyCode_t first;
         brlapi_keyCode_t mask;
         brlapi_keyCode_t last;
@@ -2274,19 +2267,7 @@ static int initializeAcceptedKeys(Connection *c, int how)
         if (brlapiserver_getKeyrangeMask(keyrange->type, first, &mask) == -1) return -1;
         last = first | mask;
 
-        switch (keyrange->action) {
-          case ADD:
-            if (addKeyrange(first, last, list) == -1) return -1;
-            break;
-
-          case REMOVE:
-            if (removeKeyrange(first, last, list) == -1) return -1;
-            break;
-
-          default:
-            break;
-        }
-
+        if (keyrange->action(first, last, &c->acceptedKeys) == -1) return -1;
         keyrange += 1;
       }
     }
