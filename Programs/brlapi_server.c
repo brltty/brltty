@@ -745,17 +745,16 @@ static inline void freeTty(Tty *tty)
 /** COMMUNICATION PROTOCOL HANDLING                                        **/
 /****************************************************************************/
 
-/* Function logMessageRequest */
+/* Function logRequest */
 /* Logs the given request */
-static inline void logMessageRequest(int type, FileDescriptor fd)
+static inline void logRequest(brlapi_packetType_t type, FileDescriptor fd)
 {
-  logMessage(LOG_DEBUG, "Received %s request on fd %"PRIfd, brlapiserver_getPacketTypeName(type), fd);  
+  logMessage(LOG_DEBUG, "Received %s request on fd %"PRIfd, brlapiserver_getPacketTypeName(type), fd);
 }
 
 static int handleGetDriver(Connection *c, brlapi_packetType_t type, size_t size, const char *str)
 {
   int len = strlen(str);
-  logMessageRequest(type, c->fd);
   CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd, type, str, len+1);
@@ -769,7 +768,6 @@ static int handleGetDriverName(Connection *c, brlapi_packetType_t type, brlapi_p
 
 static int handleGetDisplaySize(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd,BRLAPI_PACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
@@ -787,7 +785,6 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   Tty *tty,*tty2,*tty3;
   uint32_t *ptty;
   size_t remaining = size;
-  logMessageRequest(type, c->fd);
   CHECKERR((!c->raw),BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small");
   p += sizeof(uint32_t); remaining -= sizeof(uint32_t);
@@ -912,7 +909,6 @@ static void doLeaveTty(Connection *c)
 
 static int handleLeaveTtyMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   doLeaveTty(c);
@@ -926,7 +922,6 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   brlapi_keyCode_t x,y;
   uint32_t (*ints)[4] = (uint32_t (*)[4]) packet;
   unsigned int i;
-  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
@@ -961,7 +956,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 #ifdef HAVE_ICONV_H
   char *coreCharset = NULL;
 #endif /* HAVE_ICONV_H */
-  logMessageRequest(type, c->fd);
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
@@ -1087,7 +1081,6 @@ static int checkDriverSpecificModePacket(Connection *c, brlapi_packet_t *packet,
 
 static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKERR(!c->raw, BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(isRawCapable(trueBraille), BRLAPI_ERROR_OPNOTSUPP, "driver doesn't support Raw mode");
@@ -1114,7 +1107,6 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   logMessage(LOG_DEBUG,"Going out of raw mode");
   pthread_mutex_lock(&rawMutex);
@@ -1127,7 +1119,6 @@ static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 static int handlePacket(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKEXC(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   pthread_mutex_lock(&driverMutex);
   trueBraille->writePacket(disp,&packet->data,size);
@@ -1137,7 +1128,6 @@ static int handlePacket(Connection *c, brlapi_packetType_t type, brlapi_packet_t
 
 static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(!c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed in suspend mode");
   pthread_mutex_lock(&rawMutex);
@@ -1158,7 +1148,6 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
 
 static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  logMessageRequest(type, c->fd);
   CHECKERR(c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
   pthread_mutex_lock(&rawMutex);
   c->suspend = 0;
@@ -1357,8 +1346,10 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLAPI_PACKET_SUSPENDDRIVER: p = handlers->suspendDriver; break;
     case BRLAPI_PACKET_RESUMEDRIVER: p = handlers->resumeDriver; break;
   }
-  if (p!=NULL) p(c, type, packet, size);
-  else WEXC(c->fd,BRLAPI_ERROR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
+  if (p!=NULL) {
+    logRequest(type, c->fd);
+    p(c, type, packet, size);
+  } else WEXC(c->fd,BRLAPI_ERROR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
   return 0;
 }
 
