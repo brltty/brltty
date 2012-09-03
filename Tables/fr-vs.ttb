@@ -230,6 +230,8 @@ char \xFD	(        )  # FD ⠀ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \xFE	(        )  # FE ⠀ þ [LATIN SMALL LETTER THORN]
 char \xFF	(        )  # FF ⠀ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
 
+char \u0153	( 2 4 6 8)  # ⢪ œ [LATIN SMALL LIGATURE OE]
+
 glyph \u2019	(  3     )  # ⠄ ’ [RIGHT SINGLE QUOTATION MARK]
 char \u20AC	(1   5  8)  # ⢑ € [EURO SIGN]
 
