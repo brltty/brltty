@@ -328,7 +328,7 @@ static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { BRLAPI_PACKET_AUTH, "Auth" },
   { BRLAPI_PACKET_GETDRIVERNAME, "GetDriverName" },
   { BRLAPI_PACKET_GETDISPLAYSIZE, "GetDisplaySize" },
-  { BRLAPI_PACKET_ENTERTTYMODE, "enterTtyMode" },
+  { BRLAPI_PACKET_ENTERTTYMODE, "EnterTtyMode" },
   { BRLAPI_PACKET_LEAVETTYMODE, "LeaveTtyMode" },
   { BRLAPI_PACKET_KEY, "Key" },
   { BRLAPI_PACKET_IGNOREKEYRANGES, "IgnoreKeyRanges" },
