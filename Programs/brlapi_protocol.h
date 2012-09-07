@@ -92,7 +92,7 @@ typedef struct {
   uint32_t protocolVersion;
 } brlapi_versionPacket_t;
 
-/** Packeture of authorization packets */
+/** Structure of authorization packets */
 typedef struct {
   uint32_t type;
   unsigned char key;
