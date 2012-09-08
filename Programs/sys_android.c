@@ -18,7 +18,10 @@
 
 #include "prologue.h"
 
+#include <pthread.h>
+
 #include "system.h"
+#include "sys_android.h"
 
 #include "sys_prog_none.h"
 
@@ -43,3 +46,64 @@
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_none.h"
+
+static JavaVM *javaVirtualMachine = NULL;
+
+JNIEXPORT jint
+JNI_OnLoad (JavaVM *vm, void *reserved) {
+  javaVirtualMachine = vm;
+  return ANDROID_JNI_VERSION;
+}
+
+JNIEXPORT void
+JNI_OnUnload (JavaVM *vm, void *reserved) {
+  javaVirtualMachine = NULL;
+}
+
+static pthread_once_t threadDetachHandlerOnce = PTHREAD_ONCE_INIT;
+static pthread_key_t threadDetachHandlerKey;
+
+static void
+threadDetachHandler (void *arg) {
+  JavaVM *vm = arg;
+  (*vm)->DetachCurrentThread(vm);
+}
+
+static void
+createThreadDetachHandlerKey (void) {
+  pthread_key_create(&threadDetachHandlerKey, threadDetachHandler);
+}
+
+JavaVM *
+getJavaInvocationInterface (void) {
+  return javaVirtualMachine;
+}
+
+JNIEnv *
+getJavaNativeInterface (void) {
+  JNIEnv *env = NULL;
+  JavaVM *vm = getJavaInvocationInterface();
+
+  if (vm) {
+    jint result = (*vm)->GetEnv(vm, (void **)&env, ANDROID_JNI_VERSION);
+
+    if (result != JNI_OK) {
+      if (result == JNI_EDETACHED) {
+        JavaVMAttachArgs args = {
+          .version = ANDROID_JNI_VERSION,
+          .name = NULL,
+          .group = NULL
+        };
+
+        if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) < 0) {
+        } else {
+          pthread_once(&threadDetachHandlerOnce, createThreadDetachHandlerKey);
+          pthread_setspecific(threadDetachHandlerKey, vm);
+        }
+      } else {
+      }
+    }
+  }
+
+  return env;
+}
