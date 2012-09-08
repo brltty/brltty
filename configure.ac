@@ -962,6 +962,9 @@ brltty_pcm_interfaces=""
 brltty_midi_interfaces=""
 case "${host_os}"
 in
+   *android*)
+      system_object="android"
+      ;;
    linux*)
       system_object="linux"
       brltty_pcm_interfaces=""
@@ -1153,6 +1156,9 @@ BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
+   *android*)
+      usb_package="android"
+      ;;
    linux*)
       usb_package="linux"
       ;;
@@ -1190,6 +1196,9 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
+   *android*)
+      bluetooth_package="android"
+      ;;
    linux*)
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"

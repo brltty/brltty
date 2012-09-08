@@ -68,6 +68,9 @@ PROGRAM_OBJECTS_FOR_HOST = $(PROGRAM_OBJECTS) $(SYSTEM_OBJECT)
 sys_skeleton.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_skeleton.c
 
+sys_android.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_android.c
+
 sys_darwin.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_darwin.c
 
@@ -193,6 +196,9 @@ usb_serial.$O:
 usb_none.$O:
 	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_none.c
 
+usb_android.$O:
+	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_android.c
+
 usb_darwin.$O:
 	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_darwin.c
 
@@ -230,6 +236,9 @@ bluetooth.$O:
 
 bluetooth_none.$O:
 	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
+
+bluetooth_android.$O:
+	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_android.c
 
 bluetooth_linux.$O:
 	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
