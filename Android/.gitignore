@@ -1,2 +1,5 @@
+Makefile
+reldeps.mk
 local.properties
+assets
 gen

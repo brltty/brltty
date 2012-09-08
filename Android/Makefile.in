@@ -1,0 +1,30 @@
+ANDROID_PACKAGE_NAME = BRLTTY
+ANDROID_PACKAGE_FILE = bin/$(ANDROID_PACKAGE_NAME)-debug.apk
+ANDROID_PACKAGE_PATH = org.a11y.BRLTTY.Android
+
+ANDROID_LOCAL_FILES = local.properties
+ANDROID_ASSETS_DIRECTORY = assets
+ANDROID_TABLES_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/tables
+
+all: $(ANDROID_LOCAL_FILES) tables
+	ant debug
+
+$(ANDROID_LOCAL_FILES):
+	android update project --path .
+
+tables:
+	$(INSTALL_DIRECTORY) $(ANDROID_TABLES_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.[tack]t[bi] $(ANDROID_TABLES_DIRECTORY)
+
+clean::
+	-rm -f $(ANDROID_LOCAL_FILES)
+	-rm -f -r $(ANDROID_ASSETS_DIRECTORY)
+	-rm -f -r gen
+	-rm -f -r bin/*
+
+install: all
+	adb install $(ANDROID_PACKAGE_FILE)
+
+uninstall:
+	adb uninstall $(ANDROID_PACKAGE_PATH)
+
