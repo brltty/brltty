@@ -256,8 +256,9 @@ test "${GXX}" = "yes" && {
    CXXFLAGS="${CXXFLAGS} ${brltty_gcc_cflags}"
 }
 
-AC_CHECK_TOOL([LD], [ld])
-AC_PROG_RANLIB
+AC_PATH_TOOL([LD], [ld])
+AC_PATH_TOOL([STRIP], [strip])
+AC_PATH_TOOL([RANLIB], [ranlib])
 
 AC_PROG_AWK
 AC_PROG_LN_S

@@ -60,8 +60,13 @@ toolchainRoot="${buildRoot}/android-toolchain"
 }
 
 export toolchainBinaries="${toolchainRoot}/bin"
-export CC=`set -- "${toolchainBinaries}/"*"-gcc" && echo "${1}"`
-export LD=`set -- "${toolchainBinaries}/"*"-ld" && echo "${1}"`
+export PATH="${PATH}:${toolchainBinaries}"
+
+checkTool() {
+   eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
+}
+checkTool CC gcc
+
 export CFLAGS="-mthumb"
 export LDFLAGS="-Wl,--fix-cortex-a8"
 
