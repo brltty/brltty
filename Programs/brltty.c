@@ -259,7 +259,7 @@ fillStatusSeparator (wchar_t *text, unsigned char *dots) {
     }
 
     {
-      int row;
+      unsigned int row;
       for (row=0; row<brl.textRows; row+=1) {
         *text = textSeparator;
         text += brl.textColumns;
@@ -731,7 +731,7 @@ static void
 slideWindowVertically (int y) {
   if (y < ses->winy)
     ses->winy = y;
-  else if  (y >= (ses->winy + brl.textRows))
+  else if (y >= (int)(ses->winy + brl.textRows))
     ses->winy = y - (brl.textRows - 1);
 }
 
@@ -774,8 +774,8 @@ trackCursor (int place) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (place) {
-    if ((scr.posx < ses->winx) || (scr.posx >= (ses->winx + textCount)) ||
-        (scr.posy < ses->winy) || (scr.posy >= (ses->winy + brl.textRows))) {
+    if ((scr.posx < ses->winx) || (scr.posx >= (int)(ses->winx + textCount)) ||
+        (scr.posy < ses->winy) || (scr.posy >= (int)(ses->winy + brl.textRows))) {
       placeWindowHorizontally(scr.posx);
     }
   }
@@ -786,7 +786,7 @@ trackCursor (int place) {
 
     if (scr.posx < (ses->winx + trigger)) {
       ses->winx = MAX(scr.posx-reset, 0);
-    } else if (scr.posx >= (ses->winx + textCount - trigger)) {
+    } else if (scr.posx >= (int)(ses->winx + textCount - trigger)) {
       ses->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)textCount, 0);
     }
   } else if (scr.posx < ses->winx) {
@@ -1093,7 +1093,7 @@ canMoveUp (void) {
 
 static int
 canMoveDown (void) {
-  return ses->winy < (scr.rows - brl.textRows);
+  return ses->winy < (int)(scr.rows - brl.textRows);
 }
 
 static int
@@ -1165,7 +1165,7 @@ upOneLine (void) {
 
 static void
 downOneLine (void) {
-  if (ses->winy < (scr.rows - brl.textRows)) {
+  if (ses->winy < (int)(scr.rows - brl.textRows)) {
     ses->winy++;
   } else {
     playTune(&tune_bounce);
@@ -1205,7 +1205,7 @@ findRow (int column, int increment, RowTester test, void *data) {
 }
 
 static int
-testIndent (int column, int row, void *data) {
+testIndent (int column, int row, void *data UNUSED) {
   int count = column+1;
   ScreenCharacter characters[count];
   readScreen(0, row, count, 1, characters);
@@ -1583,8 +1583,8 @@ getCursorPosition (int x, int y) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {
-    if ((x >= ses->winx) && (x < (ses->winx + textCount)) &&
-        (y >= ses->winy) && (y < (ses->winy + brl.textRows)) &&
+    if ((x >= ses->winx) && (x < (int)(ses->winx + textCount)) &&
+        (y >= ses->winy) && (y < (int)(ses->winy + brl.textRows)) &&
         (x < scr.cols) && (y < scr.rows))
       position = ((y - ses->winy) * brl.textColumns) + textStart + x - ses->winx;
   }
@@ -1738,13 +1738,13 @@ checkPointer (void) {
     if (moved) {
       if (column < ses->winx) {
         ses->winx = column;
-      } else if (column >= (ses->winx + textCount)) {
+      } else if (column >= (int)(ses->winx + textCount)) {
         ses->winx = column + 1 - textCount;
       }
 
       if (row < ses->winy) {
         ses->winy = row;
-      } else if (row >= (ses->winy + brl.textRows)) {
+      } else if (row >= (int)(ses->winy + brl.textRows)) {
         ses->winy = row + 1 - brl.textRows;
       }
     }
@@ -1993,7 +1993,7 @@ doCommand:
         }
         break;
       case BRL_CMD_WINDN:
-        if (ses->winy < (scr.rows - brl.textRows)) {
+        if (ses->winy < (int)(scr.rows - brl.textRows)) {
           ses->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - ses->winy));
         } else {
           playTune(&tune_bounce);
@@ -2035,7 +2035,7 @@ doCommand:
           int findBlank = 1;
           int line = ses->winy;
           int i;
-          while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
+          while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
             readScreen(0, line, scr.cols, 1, characters);
             for (i=0; i<scr.cols; i++) {
               wchar_t text = characters[i].text;
@@ -2111,13 +2111,13 @@ doCommand:
               for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
             }
 
-            while ((line >= 0) && (line <= (scr.rows - brl.textRows))) {
+            while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
               const wchar_t *address = buffer;
               size_t length = scr.cols;
               readScreenText(0, line, length, 1, buffer);
 
               {
-                int i;
+                size_t i;
                 for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
               }
 

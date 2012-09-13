@@ -43,9 +43,9 @@ extern "C" {
   char *strStart = strNext; \
   char *strEnd = strStart + (size);
 #define STR_END }
-#define STR_LENGTH (strNext - strStart)
+#define STR_LENGTH (size_t)(strNext - strStart)
 #define STR_NEXT strNext
-#define STR_LEFT (strEnd - strNext)
+#define STR_LEFT (size_t)(strEnd - strNext)
 #define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
 #define STR_PRINTF(format, ...) { \
   size_t strLength = snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__); \
