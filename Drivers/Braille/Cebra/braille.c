@@ -62,52 +62,86 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_SET_ENTRY(CE_SET_RoutingKey, "RoutingKey"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(novem)
+  KEY_NAME_ENTRY(0X03, "Dot7"),
+  KEY_NAME_ENTRY(0X07, "Dot3"),
+  KEY_NAME_ENTRY(0X0B, "Dot2"),
+  KEY_NAME_ENTRY(0X0F, "Dot1"),
+  KEY_NAME_ENTRY(0X13, "Dot4"),
+  KEY_NAME_ENTRY(0X17, "Dot5"),
+  KEY_NAME_ENTRY(0X1B, "Dot6"),
+  KEY_NAME_ENTRY(0X1F, "Dot8"),
+
+  KEY_NAME_ENTRY(0X10, "LeftSpace"),
+  KEY_NAME_ENTRY(0X18, "RightSpace"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(navigation),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(novem)
+  KEY_NAME_TABLE(novem),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(novem)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(novem),
 END_KEY_TABLE_LIST
 
 typedef struct {
   unsigned char identifier;
   unsigned char cellCount;
+  const KeyTableDefinition *ktd;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
+  { .identifier = 0X68,
+    .cellCount = 0,
+    .ktd = &KEY_TABLE_DEFINITION(novem)
+  },
+
   { .identifier = 0X70,
-    .cellCount = 0
+    .cellCount = 0,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X72,
-    .cellCount = 20
+    .cellCount = 20,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X74,
-    .cellCount = 40
+    .cellCount = 40,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X76,
-    .cellCount = 60
+    .cellCount = 60,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X78,
-    .cellCount = 80
+    .cellCount = 80,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X7A,
-    .cellCount = 100
+    .cellCount = 100,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X7C,
-    .cellCount = 120
+    .cellCount = 120,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0X7E,
-    .cellCount = 140
+    .cellCount = 140,
+    .ktd = &KEY_TABLE_DEFINITION(all)
   },
 
   { .identifier = 0 }
@@ -130,7 +164,8 @@ getModelEntry (unsigned char identifier) {
     model += 1;
   }
 
-  logMessage(LOG_WARNING, "unknown NinePoint model: 0X%02X", identifier);
+  logMessage(LOG_WARNING, "unknown %s model: 0X%02X",
+             STRINGIFY(DRIVER_NAME), identifier);
   return NULL;
 }
 
@@ -139,8 +174,8 @@ setModel (BrailleDisplay *brl, unsigned char identifier) {
   const ModelEntry *model = getModelEntry(identifier);
 
   if (model) {
-    logMessage(LOG_NOTICE, "NinePoint Model: 0X%02X, %u cells",
-               model->identifier, model->cellCount);
+    logMessage(LOG_NOTICE, "%s Model: 0X%02X, %u cells",
+               STRINGIFY(DRIVER_NAME), model->identifier, model->cellCount);
 
     brl->data->model = model;
     brl->textColumns = model->cellCount;
@@ -311,12 +346,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         if (setModel(brl, response[1])) {
-          {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNameTables = ktd->names;
-          }
+          brl->keyBindings = brl->data->model->ktd->bindings;
+          brl->keyNameTables = brl->data->model->ktd->names;
 
           makeOutputTable(dotsTable_ISO11548_1);
           brl->data->forceRewrite = 1;
@@ -347,7 +378,8 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (!brl->data->acknowledgementPending) {
-    if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+    if (brl->data->textCells &&
+        cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
       unsigned char cells[brl->textColumns];
 
       translateOutputCells(cells, brl->data->textCells, brl->textColumns);
@@ -404,6 +436,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               }
             }
             break;
+
+          case 0X09:
+            while (count--) enqueueCommand(BRL_BLK_PASSAT + bytes++[0]);
+            continue;
 
           default:
             break;
