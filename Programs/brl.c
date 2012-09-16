@@ -107,7 +107,7 @@ identifyBrailleDrivers (int full) {
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {
-  brl->textColumns = 80;
+  brl->textColumns = 0;
   brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
@@ -235,17 +235,21 @@ clearStatusCells (BrailleDisplay *brl) {
 
 static void
 brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
-  memset(brl->buffer, 0, brl->textColumns*brl->textRows);
   logMessage(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
              brl->textRows, (brl->textRows == 1)? "row": "rows",
              brl->textColumns, (brl->textColumns == 1)? "column": "columns");
+
+  memset(brl->buffer, 0, brl->textColumns*brl->textRows);
   if (brl->bufferResized) brl->bufferResized(brl->textRows, brl->textColumns);
 }
 
 static int
-resizeBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
+resizeBrailleBuffer (BrailleDisplay *brl, int resized, int infoLevel) {
+  if (!brl->textColumns) brl->textColumns = 1;
+
   if (brl->resizeRequired) {
     brl->resizeRequired = 0;
+    resized = 1;
 
     if (brl->isCoreBuffer) {
       static void *currentAddress = NULL;
@@ -267,21 +271,16 @@ resizeBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
 
       brl->buffer = currentAddress;
     }
-
-    brailleBufferResized(brl, infoLevel);
   }
 
+  if (resized) brailleBufferResized(brl, infoLevel);
   return 1;
 }
 
 int
 ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
-  if ((brl->isCoreBuffer = brl->resizeRequired = brl->buffer == NULL)) {
-    if (!resizeBrailleBuffer(brl, infoLevel)) return 0;
-  } else {
-    brailleBufferResized(brl, infoLevel);
-  }
-  return 1;
+  brl->resizeRequired = brl->isCoreBuffer = !brl->buffer;
+  return resizeBrailleBuffer(brl, 1, infoLevel);
 }
 
 typedef struct {
@@ -551,7 +550,7 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   {
     int command = braille->readCommand(brl, context);
-    resizeBrailleBuffer(brl, LOG_INFO);
+    resizeBrailleBuffer(brl, 0, LOG_INFO);
 
     {
       unsigned char set;

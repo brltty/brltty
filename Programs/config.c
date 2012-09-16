@@ -731,29 +731,34 @@ windowConfigurationChanged (unsigned int rows, unsigned int columns) {
 
   if (!(textMaximized || haveStatusCells())) {
     unsigned int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
-    unsigned int statusWidth = prefs.statusCount;
+    unsigned int reserved = 1 + separatorWidth;
 
-    if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
-    statusWidth = MAX(MIN(statusWidth, brl.textColumns-1-separatorWidth), 0);
+    if (brl.textColumns > reserved) {
+      unsigned int statusWidth = prefs.statusCount;
 
-    if (statusWidth > 0) {
-      switch (prefs.statusPosition) {
-        case spLeft:
-          statusStart = 0;
-          statusCount = statusWidth;
-          textStart = statusCount + separatorWidth;
-          textCount = columns - textStart;
-          break;
+      if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
+      statusWidth = MIN(statusWidth, brl.textColumns-reserved);
 
-        case spRight:
-          statusCount = statusWidth;
-          statusStart = columns - statusCount;
-          textCount = statusStart - separatorWidth;
-          textStart = 0;
-          break;
+      if (statusWidth > 0) {
+        switch (prefs.statusPosition) {
+          case spLeft:
+            statusStart = 0;
+            statusCount = statusWidth;
+            textStart = statusCount + separatorWidth;
+            textCount = columns - textStart;
+            break;
+
+          case spRight:
+            statusCount = statusWidth;
+            statusStart = columns - statusCount;
+            textCount = statusStart - separatorWidth;
+            textStart = 0;
+            break;
+        }
       }
     }
   }
+
   logMessage(LOG_DEBUG, "regions: text=%u.%u status=%u.%u",
              textStart, textCount, statusStart, statusCount);
 
