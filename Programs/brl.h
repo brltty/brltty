@@ -46,6 +46,7 @@ struct BrailleDisplayStruct {
   int cursor;
   unsigned isCoreBuffer:1;
   unsigned resizeRequired:1;
+  unsigned noDisplay:1;
   unsigned int writeDelay;
   void (*bufferResized) (unsigned int rows, unsigned int columns);
   unsigned touchEnabled:1;

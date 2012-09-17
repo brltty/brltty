@@ -3943,7 +3943,7 @@ message (const char *mode, const char *text, short flags) {
       sayString(&spk, text, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  if (braille && brl.buffer) {
+  if (braille && brl.buffer && !brl.noDisplay) {
     size_t size = textCount * brl.textRows;
     wchar_t buffer[size];
 
