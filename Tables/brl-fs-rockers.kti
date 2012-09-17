@@ -18,8 +18,8 @@
 
 # This key subtable is for FreedomScientific displays which have rockers.
 
-bind LeftRockerUp LNUP
-bind LeftRockerDown LNDN
+bind LeftRockerUp KEY_CURSOR_UP
+bind LeftRockerDown KEY_CURSOR_DOWN
 
-bind RightRockerUp KEY_CURSOR_UP
-bind RightRockerDown KEY_CURSOR_DOWN
+bind RightRockerUp LNUP
+bind RightRockerDown LNDN
