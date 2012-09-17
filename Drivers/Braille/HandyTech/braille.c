@@ -1535,10 +1535,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                     break;
 
                   case HT_EXTPKT_Scancode: {
-                    while (length) {
-                      enqueueCommand(BRL_BLK_PASSAT + bytes++[0]);
-                      length -= 1;
-                    }
+                    while (length--)
+                      enqueueCommand(BRL_BLK_PASSAT | BRL_ARG(*bytes++));
                     break;
                   }
 
