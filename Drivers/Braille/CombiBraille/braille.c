@@ -268,22 +268,6 @@ getKey (void) {
   return EOF;
 }
 
-static void
-putKeys (unsigned char bits, unsigned char keys, unsigned char count) {
-  const unsigned char set = CB_SET_NavigationKeys;
-  unsigned int key = 0;
-
-  while (key < count) {
-    if (bits & (1 << key)) enqueueKeyEvent(set, keys+key, 1);
-    key += 1;
-  }
-
-  while (key) {
-    key -= 1;
-    if (bits & (1 << key)) enqueueKeyEvent(set, keys+key, 0);
-  }
-}
-
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int key;
@@ -294,9 +278,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     } else if (key >= 0X80) {
       enqueueKey(CB_SET_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
     } else if (key >= 0X60) {
-      putKeys(key, CB_KEY_Thumb1, 5);
+      enqueueKeys(key & 0X1F, CB_SET_NavigationKeys, CB_KEY_Thumb1);
     } else if (key < 0X40) {
-      putKeys(key, CB_KEY_Dot6, 6);
+      enqueueKeys(key & 0X3F, CB_SET_NavigationKeys, CB_KEY_Dot6);
     }
   }
 
