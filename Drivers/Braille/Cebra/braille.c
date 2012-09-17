@@ -403,8 +403,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         size_t count = packet[2] - 1;
 
         switch (packet[3]) {
-          case 0X04:
-            if (count > 0) {
+          case CE_PKT_RSP_NavigationKey:
+            if (count == 1) {
               unsigned char set;
               unsigned char key = bytes[0];
               int press = !(key & CE_KEY_RELEASE);
@@ -437,8 +437,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             }
             break;
 
-          case 0X09:
-            while (count--) enqueueCommand(BRL_BLK_PASSAT + bytes++[0]);
+          case CE_PKT_RSP_KeyboardKey:
+            while (count--) enqueueCommand(BRL_BLK_PASSAT | BRL_ARG(*bytes++));
             continue;
 
           default:
