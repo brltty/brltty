@@ -1,6 +1,6 @@
 Makefile
 reldeps.mk
-local.properties
+assets
 bin
 libs
 gen
