@@ -21,7 +21,7 @@ AC_PREREQ([2.53])
 AC_INIT([brltty], [4.5dev], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
-brltty_build_directories=". Programs Documents Messages Android/Core Android/Activity"
+brltty_build_directories=". Programs Documents Messages Android/Core Android/Application"
 
 brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
