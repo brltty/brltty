@@ -110,7 +110,6 @@ typedef struct {
     } combined;
 
     struct {
-      unsigned int version;
       unsigned char cellCount;
       unsigned char keyCount;
       unsigned char routingCount;
@@ -121,6 +120,7 @@ typedef struct {
 typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
+  void (*initializeData) (void);
   int (*readPacket) (BrailleDisplay *brl, InputPacket *packet);
   BrailleRequestWriter *writeIdentifyRequest;
   int (*writeCells) (BrailleDisplay *brl);
@@ -160,6 +160,9 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 typedef enum {
   TBT_ANY = 0X80,
   TBT_DECIMAL,
+  TBT_SIZE,
+  TBT_ID1,
+  TBT_ID2,
   TBT_KEYS
 } TemplateByteType;
 
@@ -170,9 +173,9 @@ typedef struct {
 } TemplateEntry;
 
 #define TEMPLATE_ENTRY(name) { \
-  .bytes=templateString_##name, \
-  .length=sizeof(templateString_##name), \
-  .type=IPT_##name \
+  .bytes = templateString_##name, \
+  .length = sizeof(templateString_##name), \
+  .type = IPT_##name \
 }
 
 static const unsigned char templateString_keys[] = {
@@ -180,16 +183,121 @@ static const unsigned char templateString_keys[] = {
 };
 static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
 
-static const unsigned char templateString_routing[] = {
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  0X00, 0X00, 0X00, 0X00, 0X00
-};
-static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
+static int
+writeCells_ntv0 (BrailleDisplay *brl) {
+  return 1;
+}
 
 static int
-readPacket_old (
+writeCells_ntv40 (BrailleDisplay *brl) {
+  static const unsigned char header[] = {
+    0XFF, 0XFF,
+    0X73, 0X65, 0X69, 0X6B, 0X61,
+    0X00
+  };
+
+  unsigned char packet[sizeof(header) + (brl->textColumns*2)];
+  unsigned char *byte = packet;
+
+  byte = mempcpy(byte, header, sizeof(header));
+
+  {
+    unsigned int i;
+
+    for (i=0; i<brl->textColumns; i+=1) {
+      *byte++ = 0;
+      *byte++ = translateOutputCell(textCells[i]);
+    }
+  }
+
+  return writePacket(brl, packet, byte-packet);
+}
+
+static int
+writeCells_ntv80 (BrailleDisplay *brl) {
+  static const unsigned char header[] = {
+    0XFF, 0XFF,
+    0X73, 0X38, 0X30,
+    0X00, 0X00, 0X00
+  };
+
+  unsigned char packet[sizeof(header) + brl->textColumns];
+  unsigned char *byte = packet;
+
+  byte = mempcpy(byte, header, sizeof(header));
+  byte = translateOutputCells(byte, textCells, brl->textColumns);
+  return writePacket(brl, packet, byte-packet);
+}
+
+typedef struct {
+  int (*ntvWriteCells) (BrailleDisplay *brl);
+  const TemplateEntry *routingTemplate;
+} ModelEntry;
+
+static const ModelEntry *model;
+
+static int
+setModel_bdp (unsigned char cellCount) {
+  switch (cellCount) {
+    case 0: {
+      static const ModelEntry modelEntry = {
+        .ntvWriteCells = writeCells_ntv0
+      };
+
+      model = &modelEntry;
+      return 1;
+    }
+
+    case 40: {
+      static const unsigned char templateString_routing[] = {
+        0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+        TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+        0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+        0X00, 0X00, 0X00, 0X00, 0X00
+      };
+      static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
+
+      static const ModelEntry modelEntry = {
+        .ntvWriteCells = writeCells_ntv40,
+        .routingTemplate = &templateEntry_routing
+      };
+
+      model = &modelEntry;
+      return 1;
+    }
+
+    case 80: {
+      static const unsigned char templateString_routing[] = {
+        0X00, 0X08, 0X0F, 0X00, 0X00, 0X00, 0X00,
+        TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+        TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+        0X00, 0X00, 0X00, 0X00, 0X00
+      };
+      static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
+
+      static const ModelEntry modelEntry = {
+        .ntvWriteCells = writeCells_ntv80,
+        .routingTemplate = &templateEntry_routing
+      };
+
+      model = &modelEntry;
+      return 1;
+    }
+
+    default:
+      break;
+  }
+
+  return 0;
+}
+
+static void
+initializeData_bdp (void) {
+  setModel_bdp(0);
+}
+
+static int
+readPacket_bdp (
   InputPacket *packet,
   const TemplateEntry *identityTemplate,
   const TemplateEntry *alternateTemplate,
@@ -197,12 +305,12 @@ readPacket_old (
 ) {
   const TemplateEntry *const templateTable[] = {
     identityTemplate,
-    &templateEntry_routing,
+    model->routingTemplate,
     NULL
   };
 
   const TemplateEntry *template = NULL;
-  int offset = 0;
+  unsigned int offset = 0;
 
   while (1) {
     unsigned char byte;
@@ -244,6 +352,18 @@ readPacket_old (
           if ((byte < '0') || (byte > '9')) unexpected = 1;
           break;
 
+        case TBT_SIZE:
+          if ((byte != 40) && (byte != 80)) unexpected = 1;
+          break;
+
+        case TBT_ID1:
+          if (!strchr("3458", byte)) unexpected = 1;
+          break;
+
+        case TBT_ID2:
+          if (byte != ((packet->bytes[offset] == '8')? '0': ' ')) unexpected = 1;
+          break;
+
         case TBT_KEYS:
           if ((byte & 0XE0) != 0XE0) unexpected = 1;
           break;
@@ -273,6 +393,7 @@ readPacket_old (
       switch ((packet->type = template->type)) {
         case IPT_identity:
           interpretIdentity(packet);
+          setModel_bdp(packet->fields.identity.cellCount);
           break;
 
         case IPT_keys: {
@@ -299,8 +420,6 @@ readPacket_old (
 
 static void
 interpretIdentity_pbc (InputPacket *packet) {
-  packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
-                                    ((packet->bytes[7] - '0') << (4 * 1));
   packet->fields.identity.cellCount = packet->bytes[2];
   packet->fields.identity.keyCount = 8;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
@@ -309,13 +428,13 @@ interpretIdentity_pbc (InputPacket *packet) {
 static int
 readPacket_pbc (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
-    0X00, 0X05, 0X28, 0X08,
-    0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
-    0X01, 0X01, 0X01, 0X01
+    0X00, 0X05, TBT_SIZE, 0X08,
+    TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+    TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_pbc);
+  return readPacket_bdp(packet, &identityTemplate, model->routingTemplate, interpretIdentity_pbc);
 }
 
 static int
@@ -352,69 +471,53 @@ writeCells_pbc (BrailleDisplay *brl) {
 static const ProtocolOperations protocolOperations_pbc = {
   .name = "PowerBraille Compatibility",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
+  .initializeData = initializeData_bdp,
   .readPacket = readPacket_pbc,
   .writeIdentifyRequest = writeIdentifyRequest_pbc,
   .writeCells = writeCells_pbc
 };
 
 static void
-interpretIdentity_bdp (InputPacket *packet) {
-  packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
-                                    ((packet->bytes[10] - '0') << (4 * 1)) |
-                                    ((packet->bytes[11] - '0') << (4 * 0));
-  packet->fields.identity.cellCount = 40;
+interpretIdentity_ntv (InputPacket *packet) {
+  packet->fields.identity.cellCount = (packet->bytes[5] == '8')? 80: 40;
   packet->fields.identity.keyCount = 8;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
 static int
-readPacket_bdp (BrailleDisplay *brl, InputPacket *packet) {
+readPacket_ntv (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
-    0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
-    0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
+    0X73, 0X65, 0X69, 0X6B, 0X61, TBT_ID1, TBT_ID2,
+    0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_bdp);
+  return readPacket_bdp(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_ntv);
 }
 
 static int
-writeIdentifyRequest_bdp (BrailleDisplay *brl) {
+writeIdentifyRequest_ntv (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0X1C};
   return writePacket(brl, packet, sizeof(packet));
 }
 
 static int
-writeCells_bdp (BrailleDisplay *brl) {
-  static const unsigned char header[] = {
-    0XFF, 0XFF,
-    0X73, 0X65, 0X69, 0X6B, 0X61,
-    0X00
-  };
-
-  unsigned char packet[sizeof(header) + (brl->textColumns * 2)];
-  unsigned char *byte = packet;
-
-  byte = mempcpy(byte, header, sizeof(header));
-
-  {
-    int i;
-    for (i=0; i<brl->textColumns; i+=1) {
-      *byte++ = 0;
-      *byte++ = translateOutputCell(textCells[i]);
-    }
-  }
-
-  return writePacket(brl, packet, byte-packet);
+writeCells_ntv (BrailleDisplay *brl) {
+  return model->ntvWriteCells(brl);
 }
 
-static const ProtocolOperations protocolOperations_bdp = {
+static const ProtocolOperations protocolOperations_ntv = {
   .name = "Seika Braille Display",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
-  .readPacket = readPacket_bdp,
-  .writeIdentifyRequest = writeIdentifyRequest_bdp,
-  .writeCells = writeCells_bdp
+  .initializeData = initializeData_bdp,
+  .readPacket = readPacket_ntv,
+  .writeIdentifyRequest = writeIdentifyRequest_ntv,
+  .writeCells = writeCells_ntv
 };
+
+static void
+initializeData_ntk (void) {
+}
 
 static int
 readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
@@ -472,7 +575,6 @@ readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
       switch (packet->bytes[2]) {
         case 0XA2:
           packet->type = IPT_identity;
-          packet->fields.identity.version = 0;
           packet->fields.identity.cellCount = packet->bytes[5];
           packet->fields.identity.keyCount = packet->bytes[4];
           packet->fields.identity.routingCount = packet->bytes[6];
@@ -544,6 +646,7 @@ writeCells_ntk (BrailleDisplay *brl) {
 static const ProtocolOperations protocolOperations_ntk = {
   .name = "Seika Note Taker",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
+  .initializeData = initializeData_ntk,
   .readPacket = readPacket_ntk,
   .writeIdentifyRequest = writeIdentifyRequest_ntk,
   .writeCells = writeCells_ntk
@@ -551,14 +654,14 @@ static const ProtocolOperations protocolOperations_ntk = {
 
 static const ProtocolOperations *const allProtocols[] = {
   &protocolOperations_ntk,
-  &protocolOperations_bdp,
+  &protocolOperations_ntv,
   &protocolOperations_pbc,
   NULL
 };
 
 static const ProtocolOperations *const nativeProtocols[] = {
   &protocolOperations_ntk,
-  &protocolOperations_bdp,
+  &protocolOperations_ntv,
   NULL
 };
 
@@ -636,6 +739,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       InputPacket response;
 
       logMessage(LOG_DEBUG, "trying protocol %s", protocol->name);
+      protocol->initializeData();
+
       if (probeBrailleDisplay(brl, 2, gioEndpoint, 200,
                               protocol->writeIdentifyRequest,
                               readPacket, &response, sizeof(response.bytes),
