@@ -184,12 +184,12 @@ static const unsigned char templateString_keys[] = {
 static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
 
 static int
-writeCells_ntv0 (BrailleDisplay *brl) {
+ntvWriteCells0 (BrailleDisplay *brl) {
   return 1;
 }
 
 static int
-writeCells_ntv40 (BrailleDisplay *brl) {
+ntvWriteCells40 (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF,
     0X73, 0X65, 0X69, 0X6B, 0X61,
@@ -214,7 +214,7 @@ writeCells_ntv40 (BrailleDisplay *brl) {
 }
 
 static int
-writeCells_ntv80 (BrailleDisplay *brl) {
+ntvWriteCells80 (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF,
     0X73, 0X38, 0X30,
@@ -234,17 +234,17 @@ typedef struct {
   const TemplateEntry *routingTemplate;
 } ModelEntry;
 
-static const ModelEntry *model;
+static const ModelEntry *bdpModel;
 
 static int
-setModel_bdp (unsigned char cellCount) {
+bdpSetModel (unsigned char cellCount) {
   switch (cellCount) {
     case 0: {
       static const ModelEntry modelEntry = {
-        .ntvWriteCells = writeCells_ntv0
+        .ntvWriteCells = ntvWriteCells0
       };
 
-      model = &modelEntry;
+      bdpModel = &modelEntry;
       return 1;
     }
 
@@ -258,11 +258,11 @@ setModel_bdp (unsigned char cellCount) {
       static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
 
       static const ModelEntry modelEntry = {
-        .ntvWriteCells = writeCells_ntv40,
+        .ntvWriteCells = ntvWriteCells40,
         .routingTemplate = &templateEntry_routing
       };
 
-      model = &modelEntry;
+      bdpModel = &modelEntry;
       return 1;
     }
 
@@ -276,11 +276,11 @@ setModel_bdp (unsigned char cellCount) {
       static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
 
       static const ModelEntry modelEntry = {
-        .ntvWriteCells = writeCells_ntv80,
+        .ntvWriteCells = ntvWriteCells80,
         .routingTemplate = &templateEntry_routing
       };
 
-      model = &modelEntry;
+      bdpModel = &modelEntry;
       return 1;
     }
 
@@ -292,12 +292,12 @@ setModel_bdp (unsigned char cellCount) {
 }
 
 static void
-initializeData_bdp (void) {
-  setModel_bdp(0);
+bdpInitializeData (void) {
+  bdpSetModel(0);
 }
 
 static int
-readPacket_bdp (
+bdpReadPacket (
   InputPacket *packet,
   const TemplateEntry *identityTemplate,
   const TemplateEntry *alternateTemplate,
@@ -305,7 +305,7 @@ readPacket_bdp (
 ) {
   const TemplateEntry *const templateTable[] = {
     identityTemplate,
-    model->routingTemplate,
+    bdpModel->routingTemplate,
     NULL
   };
 
@@ -393,7 +393,7 @@ readPacket_bdp (
       switch ((packet->type = template->type)) {
         case IPT_identity:
           interpretIdentity(packet);
-          setModel_bdp(packet->fields.identity.cellCount);
+          bdpSetModel(packet->fields.identity.cellCount);
           break;
 
         case IPT_keys: {
@@ -419,14 +419,14 @@ readPacket_bdp (
 }
 
 static void
-interpretIdentity_pbc (InputPacket *packet) {
+pbcInterpretIdentity (InputPacket *packet) {
   packet->fields.identity.cellCount = packet->bytes[2];
   packet->fields.identity.keyCount = 8;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
 static int
-readPacket_pbc (BrailleDisplay *brl, InputPacket *packet) {
+pbcReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X00, 0X05, TBT_SIZE, 0X08,
     TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
@@ -434,17 +434,17 @@ readPacket_pbc (BrailleDisplay *brl, InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_bdp(packet, &identityTemplate, model->routingTemplate, interpretIdentity_pbc);
+  return bdpReadPacket(packet, &identityTemplate, bdpModel->routingTemplate, pbcInterpretIdentity);
 }
 
 static int
-writeIdentifyRequest_pbc (BrailleDisplay *brl) {
+pbcWriteIdentifyRequest (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0X0A};
   return writePacket(brl, packet, sizeof(packet));
 }
 
 static int
-writeCells_pbc (BrailleDisplay *brl) {
+pbcWriteCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04,
     0X00, 0X63, 0X00
@@ -468,59 +468,59 @@ writeCells_pbc (BrailleDisplay *brl) {
   return writePacket(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_pbc = {
+static const ProtocolOperations pbcProtocolOperations = {
   .name = "PowerBraille Compatibility",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
-  .initializeData = initializeData_bdp,
-  .readPacket = readPacket_pbc,
-  .writeIdentifyRequest = writeIdentifyRequest_pbc,
-  .writeCells = writeCells_pbc
+  .initializeData = bdpInitializeData,
+  .readPacket = pbcReadPacket,
+  .writeIdentifyRequest = pbcWriteIdentifyRequest,
+  .writeCells = pbcWriteCells
 };
 
 static void
-interpretIdentity_ntv (InputPacket *packet) {
+ntvInterpretIdentity (InputPacket *packet) {
   packet->fields.identity.cellCount = (packet->bytes[5] == '8')? 80: 40;
   packet->fields.identity.keyCount = 8;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
 static int
-readPacket_ntv (BrailleDisplay *brl, InputPacket *packet) {
+ntvReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X73, 0X65, 0X69, 0X6B, 0X61, TBT_ID1, TBT_ID2,
     0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_bdp(packet, &identityTemplate, &templateEntry_keys, interpretIdentity_ntv);
+  return bdpReadPacket(packet, &identityTemplate, &templateEntry_keys, ntvInterpretIdentity);
 }
 
 static int
-writeIdentifyRequest_ntv (BrailleDisplay *brl) {
+ntvWriteIdentifyRequest (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0X1C};
   return writePacket(brl, packet, sizeof(packet));
 }
 
 static int
-writeCells_ntv (BrailleDisplay *brl) {
-  return model->ntvWriteCells(brl);
+ntvWriteCells (BrailleDisplay *brl) {
+  return bdpModel->ntvWriteCells(brl);
 }
 
-static const ProtocolOperations protocolOperations_ntv = {
+static const ProtocolOperations ntvProtocolOperations = {
   .name = "Seika Braille Display",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bdp),
-  .initializeData = initializeData_bdp,
-  .readPacket = readPacket_ntv,
-  .writeIdentifyRequest = writeIdentifyRequest_ntv,
-  .writeCells = writeCells_ntv
+  .initializeData = bdpInitializeData,
+  .readPacket = ntvReadPacket,
+  .writeIdentifyRequest = ntvWriteIdentifyRequest,
+  .writeCells = ntvWriteCells
 };
 
 static void
-initializeData_ntk (void) {
+ntkInitializeData (void) {
 }
 
 static int
-readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
+ntkReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   int offset = 0;
   unsigned int length = 0;
 
@@ -625,13 +625,13 @@ readPacket_ntk (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-writeIdentifyRequest_ntk (BrailleDisplay *brl) {
+ntkWriteIdentifyRequest (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0XFF, 0XFF, 0XA1};
   return writePacket(brl, packet, sizeof(packet));
 }
 
 static int
-writeCells_ntk (BrailleDisplay *brl) {
+ntkWriteCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {0XFF, 0XFF, 0XA3};
   unsigned char packet[sizeof(header) + 1 + brl->textColumns];
   unsigned char *byte = packet;
@@ -643,25 +643,25 @@ writeCells_ntk (BrailleDisplay *brl) {
   return writePacket(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_ntk = {
+static const ProtocolOperations ntkProtocolOperations = {
   .name = "Seika Note Taker",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(ntk),
-  .initializeData = initializeData_ntk,
-  .readPacket = readPacket_ntk,
-  .writeIdentifyRequest = writeIdentifyRequest_ntk,
-  .writeCells = writeCells_ntk
+  .initializeData = ntkInitializeData,
+  .readPacket = ntkReadPacket,
+  .writeIdentifyRequest = ntkWriteIdentifyRequest,
+  .writeCells = ntkWriteCells
 };
 
 static const ProtocolOperations *const allProtocols[] = {
-  &protocolOperations_ntk,
-  &protocolOperations_ntv,
-  &protocolOperations_pbc,
+  &ntkProtocolOperations,
+  &ntvProtocolOperations,
+  &pbcProtocolOperations,
   NULL
 };
 
 static const ProtocolOperations *const nativeProtocols[] = {
-  &protocolOperations_ntk,
-  &protocolOperations_ntv,
+  &ntkProtocolOperations,
+  &ntvProtocolOperations,
   NULL
 };
 
