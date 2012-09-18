@@ -117,7 +117,7 @@ typedef BrailleResponseResult BrailleResponseHandler (
   const void *packet, size_t size
 );
 
-extern size_t probeBrailleDisplay (
+extern int probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,
   BrailleRequestWriter writeRequest,

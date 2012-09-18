@@ -589,7 +589,7 @@ writeBraillePacket (
   return 1;
 }
 
-size_t
+int
 probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,
