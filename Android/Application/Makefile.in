@@ -4,7 +4,10 @@ include $(SRC_TOP)Android/common.mk
 
 ANDROID_TABLES_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/tables
 
-all:: tables
+all:: core tables
+
+core:
+	cd ../Core && $(MAKE)
 
 tables:
 	$(INSTALL_DIRECTORY) $(ANDROID_TABLES_DIRECTORY)
