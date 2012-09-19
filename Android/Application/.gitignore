@@ -1,5 +1,6 @@
 Makefile
 reldeps.mk
+assets
 local.properties
 bin
 libs

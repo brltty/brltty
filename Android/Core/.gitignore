@@ -1,6 +1,5 @@
 Makefile
 reldeps.mk
-assets
 bin
 libs
 gen
