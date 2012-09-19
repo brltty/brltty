@@ -1129,11 +1129,6 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
 
 <sect3>Miscellaneous Options<label id="build-miscellaneous"><p>
 <descrip>
-  <tag><tt/--with-compiler-prefix=/<em/prefix/<label id="build-compiler-prefix"></tag>
-    Specify the prefix (path and beginning of program name)
-    for the suite of compile and link tools which are to be used.
-    You may need to use this option if, for example,
-    you're cross-compiling for a different architecture.
   <tag><tt/--with-init-path=/<em/path/<label id="build-init-path"></tag>
     Specify the path to the real <tt/init/ program for the system.
     The absolute path should be supplied.
@@ -1982,7 +1977,7 @@ for the <ref id="command-HELP" name="HELP"> command.
 Use the regular motion keys (as described below) to navigate the help page,
 and press the <tt/help/ key again to quit.
 
-<sect2>Vertical Motion<label id="vertical"><p>
+<sect2>Vertical Motion<label id="vertical-motion"><p>
 See also
 the <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT">,
 and the <ref id="command-PRDIFCHAR-NXDIFCHAR" name="PRDIFCHAR/NXDIFCHAR">
@@ -2026,7 +2021,7 @@ routing key commands.
     The search isn't case sensitive.
 </descrip>
 
-<sect2>Horizontal Motion<label id="horizontal"><p>
+<sect2>Horizontal Motion<label id="horizontal-motion"><p>
 See also the <ref id="command-SETLEFT" name="SETLEFT"> routing key command.
 <descrip>
   <tag>CHRLT/CHRRT<label id="command-CHRLT-CHRRT"></tag>
@@ -2046,7 +2041,7 @@ See also the <ref id="command-SETLEFT" name="SETLEFT"> routing key command.
     Go to the beginning/end of the line.
 </descrip>
 
-<sect2>Implicit Motion<p>
+<sect2>Implicit Motion<label id="implicit-motion"><p>
 See also the <ref id="command-GOTOMARK" name="GOTOMARK"> routing key command.
 <descrip>
   <tag>HOME<label id="command-HOME"></tag>
@@ -2070,7 +2065,7 @@ See also the <ref id="command-GOTOMARK" name="GOTOMARK"> routing key command.
     </itemize>
 </descrip>
 
-<sect2>Feature Activation<label id="commands-features"><p>
+<sect2>Feature Activation<label id="feature-activation"><p>
 Each of these commands has three forms:
 <bf/activate/ (turn the feature on),
 <bf/deactivate/ (turn the feature off),
@@ -2231,15 +2226,15 @@ via the <ref id="preferences-menu" name="preferences menu">.
     <ref id="preference-autospeak" name="Autospeak"> preference.
 </descrip>
 
-<sect2>Mode Selection<p>
+<sect2>Mode Selection<label id="mode-selection"><p>
 <descrip>
   <tag>HELP<label id="command-HELP"></tag>
     Switch to the braille display driver's help page.
     This is where you can find an on-line summary of things like
     what your braille display's keys do,
     and how to interpret its status cells.
-    Use the regular <ref id="vertical" name="vertical">
-    and <ref id="horizontal" name="horizontal"> motion commands
+    Use the regular <ref id="vertical-motion" name="vertical">
+    and <ref id="horizontal-motion" name="horizontal"> motion commands
     to navigate the help page.
     Invoke the <tt/help/ command again to return to the screen.
   <tag>INFO<label id="command-INFO"></tag>
@@ -2259,7 +2254,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     <ref id="build-learn-mode" name="--disable-learn-mode"> build option was specified.
 </descrip>
 
-<sect2>Preference Maintenance<p>
+<sect2>Preference Maintenance<label id="preference-maintenance"><p>
 <descrip>
   <tag>PREFMENU<label id="command-PREFMENU"></tag>
     Switch to the preferences menu
@@ -2273,7 +2268,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     (see <ref id="preferences" name="Preferences"> for full details).
 </descrip>
 
-<sect2>Menu Navigation<label id="menu"><p>
+<sect2>Menu Navigation<label id="menu-navigation"><p>
 <descrip>
   <tag>MENU_FIRST_ITEM/MENU_LAST_ITEM<label id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM"></tag>
     Go to the first/last item in the menu.
@@ -2283,7 +2278,7 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Decrement/increment the current menu item's setting.
 </descrip>
 
-<sect2>Speech Controls<label id="speech"><p>
+<sect2>Speech Controls<label id="speech-controls"><p>
 <descrip>
   <tag>SAY_LINE<label id="command-SAY_LINE"></tag>
     Speak the current line.
@@ -2305,6 +2300,11 @@ via the <ref id="preferences-menu" name="preferences menu">.
     Decrease/increase the speech volume
     (see also the <ref id="preference-speech-volume" name="Speech Volume"> preference).
     This command is only available if a driver which supports it is being used.
+</descrip>
+
+<sect2>Speech Navigation<label id="speech-navigation"><p>
+<descrip>
+  <tag/SPEAK_CURR_CHAR/a
 </descrip>
 
 <sect2>Virtual Terminal Switching<p>
@@ -3229,7 +3229,7 @@ shows the menu title,
 and then presents the current item and its current setting.
 
 <Sect3>Navigating the Menu<p>
-See <ref id="menu" name="Menu Navigation Commands"> for the full list of
+See <ref id="menu-navigation" name="Menu Navigation Commands"> for the full list of
 commands which enable you to select items and change settings within the menu.
 For backward compatibility with old drivers, the window motion commands,
 which have modified meanings in this context, can also be used.
@@ -5479,7 +5479,8 @@ BRLTTY supports the following braille displays:
     Pegasus
       |20/27/40/80@
     Seika
-      |40@
+      |3/4/5 (40)@
+      |80@
       |Mini (16)@
     TSI
       |Navigator 20/40/80@
