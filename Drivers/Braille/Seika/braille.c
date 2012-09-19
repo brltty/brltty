@@ -361,7 +361,8 @@ bdpReadPacket (
           break;
 
         case TBT_ID2:
-          if (byte != ((packet->bytes[offset] == '8')? '0': ' ')) unexpected = 1;
+//          if (byte != ((packet->bytes[offset] == '8')? '0': ' ')) unexpected = 1;
+          if (!strchr("0 ", byte)) unexpected = 1;
           break;
 
         case TBT_KEYS:
