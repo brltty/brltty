@@ -36,6 +36,13 @@ public class ArgumentsBuilder {
     return result;
   }
 
+  private boolean foregroundFlag = false;
+  public boolean setForegroundFlag (boolean flag) {
+    boolean result = foregroundFlag;
+    foregroundFlag = flag;
+    return result;
+  }
+
   protected void addOption (List<String> arguments, String option, String value) {
     if (value != null) {
       if (value.length() > 0) {
@@ -51,10 +58,17 @@ public class ArgumentsBuilder {
     }
   }
 
+  protected void addOption (List<String> arguments, String option, boolean value) {
+    if (value) {
+      arguments.add(option);
+    }
+  }
+
   public String[] getArguments () {
     List<String> arguments = new ArrayList<String>();
     addOption(arguments, "-l", logLevel);
     addOption(arguments, "-L", logFilePath);
+    addOption(arguments, "-n", foregroundFlag);
     return arguments.toArray(new String[arguments.size()]);
   }
 }

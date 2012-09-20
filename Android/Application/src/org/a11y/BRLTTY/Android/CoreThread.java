@@ -26,6 +26,7 @@ public class CoreThread extends Thread {
 
   public void run () {
     ArgumentsBuilder arguments = new ArgumentsBuilder();
+    arguments.setForegroundFlag(true);
     arguments.setLogLevel(LogLevel.DEBUG);
     arguments.setLogFilePath("/data/local/tmp/brltty.log");
 

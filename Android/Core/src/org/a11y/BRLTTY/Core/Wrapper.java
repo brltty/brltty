@@ -38,6 +38,7 @@ public class Wrapper {
   }
 
   static {
+    System.loadLibrary("brltty_core");
     System.loadLibrary("brltty_jni");
   }
 }
