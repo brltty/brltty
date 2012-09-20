@@ -30,9 +30,9 @@
 #include <pthread.h>
 #endif /* __MINGW32__ */
 
-#ifdef ANDROID
+#ifdef __ANDROID__
 #include <android/log.h>
-#endif /* ANDROID */
+#endif /* __ANDROID__ */
 
 #include "log.h"
 #include "timing.h"
@@ -103,7 +103,7 @@ toWindowsEventType (int level) {
 
 #elif defined(__MSDOS__)
 
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
 static int
 toAndroidLogPriority (int level) {
   switch (level) {
@@ -198,7 +198,7 @@ openSystemLog (void) {
 #elif defined(__MSDOS__)
   openLogFile(PACKAGE_NAME ".log");
 
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
 
 #elif defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
@@ -219,7 +219,7 @@ closeSystemLog (void) {
 #elif defined(__MSDOS__)
   closeLogFile();
 
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
 
 #elif defined(HAVE_SYSLOG_H)
   if (syslogOpened) {
@@ -274,7 +274,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
 #elif defined(__MSDOS__)
 
-#elif defined(ANDROID)
+#elif defined(__ANDROID__)
         __android_log_write(toAndroidLogPriority(level), PACKAGE_NAME, record);
 
 #elif defined(HAVE_SYSLOG_H)
