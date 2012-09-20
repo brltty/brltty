@@ -16,22 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Android;
-import org.a11y.BRLTTY.Core.*;
+package org.a11y.BRLTTY.Core;
 
-import android.app.Activity;
-import android.os.Bundle;
+public enum ProgramExitStatus {
+  SUCCESS  (0),
+  FORCE    (1),
+  SYNTAX   (2),
+  SEMANTIC (3),
+  FATAL    (4);
 
-public class BRLTTY extends Activity {
-  private Thread coreThread = null;
+  public final int value;
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    setContentView(R.layout.main);
-
-    coreThread = new CoreThread();
-    coreThread.start();
+  ProgramExitStatus (int value) {
+    this.value = value;
   }
 }

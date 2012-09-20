@@ -16,22 +16,28 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Android;
-import org.a11y.BRLTTY.Core.*;
+package org.a11y.BRLTTY.Core;
 
-import android.app.Activity;
-import android.os.Bundle;
+public class Wrapper {
+  public static native int construct (String[] arguments);
+  public static native boolean update ();
+  public static native void destruct ();
 
-public class BRLTTY extends Activity {
-  private Thread coreThread = null;
+  public static void main (String[] arguments) {
+    int exitStatus = construct(arguments);
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    if (exitStatus == ProgramExitStatus.SUCCESS.value) {
+      while (update()) {
+      }
+    } else if (exitStatus == ProgramExitStatus.FORCE.value) {
+      exitStatus = ProgramExitStatus.SUCCESS.value;
+    }
 
-    setContentView(R.layout.main);
+    destruct();
+    System.exit(exitStatus);
+  }
 
-    coreThread = new CoreThread();
-    coreThread.start();
+  static {
+    System.loadLibrary("brltty_jni");
   }
 }

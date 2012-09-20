@@ -19,19 +19,16 @@
 package org.a11y.BRLTTY.Android;
 import org.a11y.BRLTTY.Core.*;
 
-import android.app.Activity;
-import android.os.Bundle;
+public class CoreThread extends Thread {
+  CoreThread () {
+    super("Core");
+  }
 
-public class BRLTTY extends Activity {
-  private Thread coreThread = null;
+  public void run () {
+    ArgumentsBuilder arguments = new ArgumentsBuilder();
+    arguments.setLogLevel(LogLevel.DEBUG);
+    arguments.setLogFilePath("/data/local/tmp/brltty.log");
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    setContentView(R.layout.main);
-
-    coreThread = new CoreThread();
-    coreThread.start();
+    Wrapper.main(arguments.getArguments());
   }
 }

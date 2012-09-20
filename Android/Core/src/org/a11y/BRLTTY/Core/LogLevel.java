@@ -16,22 +16,31 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Android;
-import org.a11y.BRLTTY.Core.*;
+package org.a11y.BRLTTY.Core;
 
-import android.app.Activity;
-import android.os.Bundle;
+public enum LogLevel implements NamedValue {
+  EMERGENCY   (0, ""),
+  ALERT       (1, ""),
+  CRITICAL    (2, ""),
+  ERROR       (3, ""),
+  WARNING     (4, ""),
+  NOTICE      (5, ""),
+  INFORMATION (6, ""),
+  DEBUG       (7, "");
 
-public class BRLTTY extends Activity {
-  private Thread coreThread = null;
+  public final int value;
+  public final String name;
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  LogLevel (int value, String name) {
+    this.value = value;
+    this.name = name;
+  }
 
-    setContentView(R.layout.main);
+  public int getValue () {
+    return value;
+  }
 
-    coreThread = new CoreThread();
-    coreThread.start();
+  public String getName () {
+    return name;
   }
 }

@@ -16,22 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Android;
-import org.a11y.BRLTTY.Core.*;
+package org.a11y.BRLTTY.Core;
 
-import android.app.Activity;
-import android.os.Bundle;
-
-public class BRLTTY extends Activity {
-  private Thread coreThread = null;
-
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    setContentView(R.layout.main);
-
-    coreThread = new CoreThread();
-    coreThread.start();
-  }
+public interface NamedValue {
+  public int getValue ();
+  public String getName ();
 }
