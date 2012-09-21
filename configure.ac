@@ -965,6 +965,7 @@ case "${host_os}"
 in
    *android*)
       system_object="android"
+      LIBS="-llog ${LIBS}"
       ;;
    linux*)
       system_object="linux"
@@ -1036,20 +1037,6 @@ in
       ;;
 esac
 AC_SUBST([system_object])
-
-keyboard_object=""
-case "${host_os}"
-in
-   linux*) keyboard_object="linux";;
-   *) keyboard_object="none";;
-esac
-if test -n "${keyboard_object}"
-then
-   keyboard_objects="kbd."'$O'" kbd_${keyboard_object}."'$O'
-else
-   keyboard_objects=""
-fi
-AC_SUBST([keyboard_objects])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
@@ -1244,6 +1231,10 @@ BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
          ])
       ])
       ;;
+])
+
+BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
+   linux*) keyboard_package="linux";;
 ])
 
 BRLTTY_ARG_PACKAGE([mount], [mount], [mntent mnttab], [dnl

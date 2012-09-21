@@ -19,17 +19,27 @@
 package org.a11y.BRLTTY.Android;
 import org.a11y.BRLTTY.Core.*;
 
+import android.util.Log;
+
 public class CoreThread extends Thread {
+  protected final String TAG = this.getClass().getName();
+
   CoreThread () {
     super("Core");
   }
 
   public void run () {
-    ArgumentsBuilder arguments = new ArgumentsBuilder();
-    arguments.setForegroundFlag(true);
-    arguments.setLogLevel(LogLevel.DEBUG);
-    arguments.setLogFilePath("/data/local/tmp/brltty.log");
+    ArgumentsBuilder builder = new ArgumentsBuilder();
 
-    Wrapper.main(arguments.getArguments());
+    // required arguments
+    builder.setForegroundExecution(true);
+
+    // optional arguments
+    builder.setLogLevel(LogLevel.DEBUG);
+    builder.setLogFilePath("/data/local/tmp/brltty.log");
+
+    String[] arguments = builder.getArguments();
+    Log.d(TAG, "core arguments: " + arguments.toString());
+    Wrapper.main(arguments);
   }
 }

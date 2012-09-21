@@ -203,7 +203,6 @@ TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
 SYSTEM_OBJECT = sys_@system_object@.$O
-KEYBOARD_OBJECTS = @keyboard_objects@
 
 SERIAL_OBJECTS = serial.$O serial_@serial_package@.$O
 SERIAL_CFLAGS = @serial_cflags@
@@ -224,6 +223,10 @@ CHARSET_LIBS = @charset_libs@
 HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
 HOSTCMD_CFLAGS = @hostcmd_cflags@
 HOSTCMD_LIBS = @hostcmd_libs@
+
+KEYBOARD_OBJECTS = keyboard.$O keyboard_@keyboard_package@.$O
+KEYBOARD_CFLAGS = @keyboard_cflags@
+KEYBOARD_LIBS = @keyboard_libs@
 
 MOUNT_OBJECTS = mount.$O mount_@mount_package@.$O
 MOUNT_CFLAGS = @mount_cflags@

@@ -19,17 +19,37 @@
 package org.a11y.BRLTTY.Android;
 import org.a11y.BRLTTY.Core.*;
 
+import android.util.Log;
+
 import android.app.Activity;
 import android.os.Bundle;
 
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
 public class BRLTTY extends Activity {
+  protected final String TAG = this.getClass().getName();
+
   private Thread coreThread = null;
+  private Button stopButton;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.main);
+
+    if ((stopButton = (Button)findViewById(R.id.stop)) != null) {
+      stopButton.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick (View view) {
+          Log.d(TAG, "stop button pressed");
+          Wrapper.stop = true;
+        }
+      });
+    } else {
+      Log.wtf(TAG, "stop button not found");
+    }
 
     coreThread = new CoreThread();
     coreThread.start();

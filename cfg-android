@@ -76,6 +76,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 # xw (by --disable-x)
 
 "${sourceRoot}/configure" \
+   --without-keyboard-package \
    --enable-standalone-programs \
    --disable-api \
    --with-braille-driver=-tt,-vr,all \

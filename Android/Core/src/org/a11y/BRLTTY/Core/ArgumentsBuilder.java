@@ -23,24 +23,24 @@ import java.util.ArrayList;
 
 public class ArgumentsBuilder {
   private LogLevel logLevel = null;
-  public LogLevel setLogLevel (LogLevel level) {
-    LogLevel result = logLevel;
-    logLevel = level;
-    return result;
+  public LogLevel setLogLevel (LogLevel newValue) {
+    LogLevel oldValue = logLevel;
+    logLevel = newValue;
+    return oldValue;
   }
 
   private String logFilePath = null;
-  public String setLogFilePath (String path) {
-    String result = logFilePath;
-    logFilePath = path;
-    return result;
+  public String setLogFilePath (String newValue) {
+    String oldValue = logFilePath;
+    logFilePath = newValue;
+    return oldValue;
   }
 
-  private boolean foregroundFlag = false;
-  public boolean setForegroundFlag (boolean flag) {
-    boolean result = foregroundFlag;
-    foregroundFlag = flag;
-    return result;
+  private boolean foregroundExecution = false;
+  public boolean setForegroundExecution (boolean newValue) {
+    boolean oldValue = foregroundExecution;
+    foregroundExecution = newValue;
+    return oldValue;
   }
 
   protected void addOption (List<String> arguments, String option, String value) {
@@ -52,9 +52,9 @@ public class ArgumentsBuilder {
     }
   }
 
-  protected void addOption (List<String> arguments, String option, NamedValue value) {
+  protected void addOption (List<String> arguments, String option, Enum value) {
     if (value != null) {
-      addOption(arguments, option, value.getName());
+      addOption(arguments, option, value.name());
     }
   }
 
@@ -68,7 +68,7 @@ public class ArgumentsBuilder {
     List<String> arguments = new ArrayList<String>();
     addOption(arguments, "-l", logLevel);
     addOption(arguments, "-L", logFilePath);
-    addOption(arguments, "-n", foregroundFlag);
+    addOption(arguments, "-n", foregroundExecution);
     return arguments.toArray(new String[arguments.size()]);
   }
 }

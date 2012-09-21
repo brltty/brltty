@@ -18,16 +18,26 @@
 
 package org.a11y.BRLTTY.Core;
 
+import android.util.Log;
+
 public class Wrapper {
+  protected static final String TAG = "BRLTTY_Core";
+
   public static native int construct (String[] arguments);
   public static native boolean update ();
   public static native void destruct ();
+
+  public static volatile boolean stop = false;
 
   public static void main (String[] arguments) {
     int exitStatus = construct(arguments);
 
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
       while (update()) {
+        if (stop) {
+          Log.d(TAG, "core stopping");
+          break;
+        }
       }
     } else if (exitStatus == ProgramExitStatus.FORCE.value) {
       exitStatus = ProgramExitStatus.SUCCESS.value;

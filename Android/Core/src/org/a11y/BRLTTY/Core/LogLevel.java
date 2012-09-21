@@ -18,29 +18,19 @@
 
 package org.a11y.BRLTTY.Core;
 
-public enum LogLevel implements NamedValue {
-  EMERGENCY   (0, ""),
-  ALERT       (1, ""),
-  CRITICAL    (2, ""),
-  ERROR       (3, ""),
-  WARNING     (4, ""),
-  NOTICE      (5, ""),
-  INFORMATION (6, ""),
-  DEBUG       (7, "");
+public enum LogLevel {
+  EMERGENCY   (0),
+  ALERT       (1),
+  CRITICAL    (2),
+  ERROR       (3),
+  WARNING     (4),
+  NOTICE      (5),
+  INFORMATION (6),
+  DEBUG       (7);
 
   public final int value;
-  public final String name;
 
-  LogLevel (int value, String name) {
+  LogLevel (int value) {
     this.value = value;
-    this.name = name;
-  }
-
-  public int getValue () {
-    return value;
-  }
-
-  public String getName () {
-    return name;
   }
 }
