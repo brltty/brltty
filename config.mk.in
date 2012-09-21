@@ -224,7 +224,7 @@ HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
 HOSTCMD_CFLAGS = @hostcmd_cflags@
 HOSTCMD_LIBS = @hostcmd_libs@
 
-KEYBOARD_OBJECTS = keyboard.$O keyboard_@keyboard_package@.$O
+KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
 KEYBOARD_CFLAGS = @keyboard_cflags@
 KEYBOARD_LIBS = @keyboard_libs@
 
