@@ -35,7 +35,18 @@ buildRoot=`pwd`
 sourceRoot=`dirname "${0}"`
 
 ndkRoot="${buildRoot}/Android/NDK"
-[ -d "${ndkRoot}" ] || semanticError "directory not defined: ${ndkRoot}"
+[ -d "${ndkRoot}" ] || {
+   [ -n "${ANDROID_NDK}" ] || {
+      semanticError "Android NDK directory not defined: ${ndkRoot}"
+   }
+
+   [  -f "${ANDROID_NDK}/ndk-build" ] || {
+      semanticError "not an Android NDK: ${ANDROID_NDK}"
+   }
+
+   programMessage "creating symbolic link: ${ndkRoot} -> ${ANDROID_NDK}"
+   ln -s "${ANDROID_NDK}" "${ndkRoot}" || exit "${?}"
+}
 
 toolchainRoot="${buildRoot}/Android/ToolChain"
 [ -d "${toolchainRoot}" ] || {
