@@ -34,10 +34,10 @@ semanticError() {
 buildRoot=`pwd`
 sourceRoot=`dirname "${0}"`
 
-ndkRoot="${buildRoot}/android-ndk"
+ndkRoot="${buildRoot}/Android/NDK"
 [ -d "${ndkRoot}" ] || semanticError "directory not defined: ${ndkRoot}"
 
-toolchainRoot="${buildRoot}/android-toolchain"
+toolchainRoot="${buildRoot}/Android/ToolChain"
 [ -d "${toolchainRoot}" ] || {
    "${ndkRoot}/build/tools/make-standalone-toolchain.sh" \
       --platform="${androidPlatform}" \
