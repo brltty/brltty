@@ -107,3 +107,53 @@ getJavaNativeInterface (void) {
 
   return env;
 }
+
+int
+findJavaClass (JNIEnv *env, jclass *class, const char *path) {
+  if (*class) return 1;
+
+  {
+    jclass localReference = (*env)->FindClass(env, path);
+
+    if (localReference) {
+      jclass globalReference = (*env)->NewGlobalRef(env, localReference);
+
+      (*env)->DeleteLocalRef(env, localReference);
+      localReference = NULL;
+
+      if (globalReference) {
+        *class = globalReference;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+int
+findJavaMethod (JNIEnv *env, jmethodID *method, jclass class, const char *name, const char *signature) {
+  if (!*method) {
+    if (!(*method = (*env)->GetMethodID(env, class, name, signature))) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int
+findJavaConstructor (JNIEnv *env, jmethodID *constructor, jclass class, const char *signature) {
+  return findJavaMethod(env, constructor, class, "<init>", signature);
+}
+
+int
+findJavaField (JNIEnv *env, jfieldID *field, jclass class, const char *name, const char *signature) {
+  if (!*field) {
+    if (!(*field = (*env)->GetFieldID(env, class, name, signature))) {
+      return 0;
+    }
+  }
+
+  return 1;
+}

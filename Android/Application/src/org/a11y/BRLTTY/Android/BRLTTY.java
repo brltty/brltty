@@ -17,6 +17,7 @@
  */
 
 package org.a11y.BRLTTY.Android;
+
 import org.a11y.BRLTTY.Core.*;
 
 import android.util.Log;
@@ -29,7 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class BRLTTY extends Activity {
-  protected final String TAG = this.getClass().getName();
+  private final String LOG_TAG = this.getClass().getName();
 
   private Thread coreThread = null;
   private Button stopButton;
@@ -39,17 +40,14 @@ public class BRLTTY extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    if ((stopButton = (Button)findViewById(R.id.stop)) != null) {
-      stopButton.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick (View view) {
-          Log.d(TAG, "stop button pressed");
-          Wrapper.stop = true;
-        }
-      });
-    } else {
-      Log.wtf(TAG, "stop button not found");
-    }
+    stopButton = (Button)findViewById(R.id.stop);
+    stopButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick (View view) {
+        Log.d(LOG_TAG, "stop button pressed");
+        Wrapper.stop = true;
+      }
+    });
 
     coreThread = new CoreThread();
     coreThread.start();

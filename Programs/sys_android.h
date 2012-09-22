@@ -30,6 +30,11 @@ extern "C" {
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
 
+extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);
+extern int findJavaConstructor (JNIEnv *env, jmethodID *constructor, jclass class, const char *signature);
+extern int findJavaMethod (JNIEnv *env, jmethodID *method, jclass class, const char *name, const char *signature);
+extern int findJavaField (JNIEnv *env, jfieldID *field, jclass class, const char *name, const char *signature);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

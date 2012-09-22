@@ -17,29 +17,34 @@
  */
 
 package org.a11y.BRLTTY.Android;
+
 import org.a11y.BRLTTY.Core.*;
 
 import android.util.Log;
 
 public class CoreThread extends Thread {
-  protected final String TAG = this.getClass().getName();
+  private final String LOG_TAG = this.getClass().getName();
 
   CoreThread () {
     super("Core");
   }
 
+  @Override
   public void run () {
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
-    // required arguments
+    // required settings
     builder.setForegroundExecution(true);
 
-    // optional arguments
+    // optional settings
     builder.setLogLevel(LogLevel.DEBUG);
-    builder.setLogFilePath("/data/local/tmp/brltty.log");
+    builder.setLogFile("/data/local/tmp/brltty.log");
+
+    // settings for testing - should be removed
+    builder.setBrailleDriver("al");
+    builder.setBrailleDevice("bluetooth:00:A0:96:18:54:7E");
 
     String[] arguments = builder.getArguments();
-    Log.d(TAG, "core arguments: " + arguments.toString());
     Wrapper.main(arguments);
   }
 }

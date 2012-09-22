@@ -18,8 +18,6 @@
 
 package org.a11y.BRLTTY.Core;
 
-import android.util.Log;
-
 public class Wrapper {
   protected static final String TAG = "BRLTTY_Core";
 
@@ -35,7 +33,6 @@ public class Wrapper {
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
       while (update()) {
         if (stop) {
-          Log.d(TAG, "core stopping");
           break;
         }
       }
