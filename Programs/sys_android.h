@@ -29,6 +29,7 @@ extern "C" {
 
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
+extern void clearJavaException (JNIEnv *env);
 
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);
 extern int findJavaConstructor (JNIEnv *env, jmethodID *constructor, jclass class, const char *signature);

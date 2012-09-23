@@ -71,6 +71,8 @@ bthConnect (uint64_t bda, uint8_t channel) {
           }
         }
       }
+
+      clearJavaException(bcx->env);
     }
 
     free(bcx);
@@ -89,6 +91,7 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
     }
 
     (*bcx->env)->DeleteGlobalRef(bcx->env, bcx->connection);
+    clearJavaException(bcx->env);
   }
 
   close(bcx->inputPipe[0]);
@@ -141,5 +144,6 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   }
 
   logSystemError("Bluetooth write");
+  clearJavaException(bcx->env);
   return -1;
 }

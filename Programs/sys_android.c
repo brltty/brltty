@@ -108,6 +108,11 @@ getJavaNativeInterface (void) {
   return env;
 }
 
+void
+clearJavaException (JNIEnv *env) {
+  if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+}
+
 int
 findJavaClass (JNIEnv *env, jclass *class, const char *path) {
   if (*class) return 1;
