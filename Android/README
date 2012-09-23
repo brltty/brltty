@@ -1,8 +1,10 @@
 svn checkout svn://mielke.cc/main/brltty
 cd brltty
 ./autogen
-ln -s /path/to/Android/NDK Android/NDK
+
+export ANDROID_NDK=/path/to/Android/NDK
 ./cfg-android -q
+
 cd Android/Core
 make -s
 cd ../Application
