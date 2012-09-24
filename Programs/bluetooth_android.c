@@ -46,7 +46,8 @@ bthConnect (uint64_t bda, uint8_t channel) {
 
     if ((bcx->env = getJavaNativeInterface())) {
       if (findJavaClass(bcx->env, &connectionClass, "org/a11y/BRLTTY/Android/BluetoothConnection")) {
-        if (findJavaConstructor(bcx->env, &connectionConstructor, connectionClass, "(JBI)V")) {
+        if (findJavaConstructor(bcx->env, &connectionConstructor, connectionClass,
+                                JAVA_SIG_CONSTRUCTOR(JAVA_SIG_LONG JAVA_SIG_BYTE JAVA_SIG_INT))) {
           if (pipe(bcx->inputPipe) != -1) {
             if (setBlockingIo(bcx->inputPipe[0], 0)) {
               jobject localReference;
@@ -86,7 +87,8 @@ bthConnect (uint64_t bda, uint8_t channel) {
 void
 bthDisconnect (BluetoothConnectionExtension *bcx) {
   if (bcx->connection) {
-    if (findJavaMethod(bcx->env, &closeMethod, connectionClass, "close", "()V")) {
+    if (findJavaMethod(bcx->env, &closeMethod, connectionClass, "close",
+                       JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
       (*bcx->env)->CallVoidMethod(bcx->env, bcx->connection, closeMethod);
     }
 
@@ -121,7 +123,8 @@ ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  if (findJavaMethod(bcx->env, &writeMethod, connectionClass, "write", "([B)Z")) {
+  if (findJavaMethod(bcx->env, &writeMethod, connectionClass, "write",
+                     JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN, JAVA_SIG_ARRAY JAVA_SIG_BYTE))) {
     jbyteArray bytes = (*bcx->env)->NewByteArray(bcx->env, size);
 
     if (bytes) {
