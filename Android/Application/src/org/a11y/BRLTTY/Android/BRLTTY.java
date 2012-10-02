@@ -49,7 +49,7 @@ public class BRLTTY extends Activity {
       }
     });
 
-    coreThread = new CoreThread();
+    coreThread = new CoreThread(this);
     coreThread.start();
   }
 }

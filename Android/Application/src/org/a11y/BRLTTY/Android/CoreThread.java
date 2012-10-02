@@ -21,12 +21,18 @@ package org.a11y.BRLTTY.Android;
 import org.a11y.BRLTTY.Core.*;
 
 import android.util.Log;
+import android.content.Context;
 
 public class CoreThread extends Thread {
   private final String LOG_TAG = this.getClass().getName();
 
-  CoreThread () {
+  private final Context coreContext;
+
+  CoreThread (Context context) {
     super("Core");
+    coreContext = context;
+
+    UsbConnection.setContext(coreContext);
   }
 
   @Override
@@ -42,7 +48,7 @@ public class CoreThread extends Thread {
 
     // settings for testing - should be removed
     builder.setBrailleDriver("al");
-    builder.setBrailleDevice("bluetooth:00:A0:96:18:54:7E");
+    builder.setBrailleDevice("usb:,bluetooth:00:A0:96:18:54:7E");
 
     String[] arguments = builder.getArguments();
     Wrapper.main(arguments);

@@ -137,7 +137,10 @@ findJavaClass (JNIEnv *env, jclass *class, const char *path) {
 }
 
 int
-findJavaMethod (JNIEnv *env, jmethodID *method, jclass class, const char *name, const char *signature) {
+findJavaInstanceMethod (
+  JNIEnv *env, jmethodID *method,
+  jclass class, const char *name, const char *signature
+) {
   if (!*method) {
     if (!(*method = (*env)->GetMethodID(env, class, name, signature))) {
       return 0;
@@ -148,14 +151,48 @@ findJavaMethod (JNIEnv *env, jmethodID *method, jclass class, const char *name, 
 }
 
 int
-findJavaConstructor (JNIEnv *env, jmethodID *constructor, jclass class, const char *signature) {
-  return findJavaMethod(env, constructor, class, "<init>", signature);
+findJavaStaticMethod (
+  JNIEnv *env, jmethodID *method,
+  jclass class, const char *name, const char *signature
+) {
+  if (!*method) {
+    if (!(*method = (*env)->GetStaticMethodID(env, class, name, signature))) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 int
-findJavaField (JNIEnv *env, jfieldID *field, jclass class, const char *name, const char *signature) {
+findJavaConstructor (
+  JNIEnv *env, jmethodID *constructor,
+  jclass class, const char *signature
+) {
+  return findJavaInstanceMethod(env, constructor, class, "<init>", signature);
+}
+
+int
+findJavaInstanceField (
+  JNIEnv *env, jfieldID *field,
+  jclass class, const char *name, const char *signature
+) {
   if (!*field) {
     if (!(*field = (*env)->GetFieldID(env, class, name, signature))) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int
+findJavaStaticField (
+  JNIEnv *env, jfieldID *field,
+  jclass class, const char *name, const char *signature
+) {
+  if (!*field) {
+    if (!(*field = (*env)->GetStaticFieldID(env, class, name, signature))) {
       return 0;
     }
   }

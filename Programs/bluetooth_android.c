@@ -87,8 +87,8 @@ bthConnect (uint64_t bda, uint8_t channel) {
 void
 bthDisconnect (BluetoothConnectionExtension *bcx) {
   if (bcx->connection) {
-    if (findJavaMethod(bcx->env, &closeMethod, connectionClass, "close",
-                       JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
+    if (findJavaInstanceMethod(bcx->env, &closeMethod, connectionClass, "close",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
       (*bcx->env)->CallVoidMethod(bcx->env, bcx->connection, closeMethod);
     }
 
@@ -123,8 +123,8 @@ ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  if (findJavaMethod(bcx->env, &writeMethod, connectionClass, "write",
-                     JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN, JAVA_SIG_ARRAY JAVA_SIG_BYTE))) {
+  if (findJavaInstanceMethod(bcx->env, &writeMethod, connectionClass, "write",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN, JAVA_SIG_ARRAY(JAVA_SIG_BYTE)))) {
     jbyteArray bytes = (*bcx->env)->NewByteArray(bcx->env, size);
 
     if (bytes) {

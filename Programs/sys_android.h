@@ -31,25 +31,45 @@ extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
 extern void clearJavaException (JNIEnv *env);
 
-#define JAVA_SIG_VOID         "V"
-#define JAVA_SIG_ARRAY        "["
-#define JAVA_SIG_BOOLEAN      "Z"
-#define JAVA_SIG_BYTE         "B"
-#define JAVA_SIG_CHAR         "C"
-#define JAVA_SIG_SHORT        "S"
-#define JAVA_SIG_INT          "I"
-#define JAVA_SIG_LONG         "J"
-#define JAVA_SIG_FLOAT        "F"
-#define JAVA_SIG_DOUBLE       "D"
-#define JAVA_SIG_OBJECT(path) "L" #path ";"
-
+#define JAVA_SIG_VOID                      "V"
+#define JAVA_SIG_BOOLEAN                   "Z"
+#define JAVA_SIG_BYTE                      "B"
+#define JAVA_SIG_CHAR                      "C"
+#define JAVA_SIG_SHORT                     "S"
+#define JAVA_SIG_INT                       "I"
+#define JAVA_SIG_LONG                      "J"
+#define JAVA_SIG_FLOAT                     "F"
+#define JAVA_SIG_DOUBLE                    "D"
+#define JAVA_SIG_OBJECT(path)              "L" #path ";"
+#define JAVA_SIG_ARRAY(element)            "[" element
 #define JAVA_SIG_METHOD(returns,arguments) "(" arguments ")" returns
-#define JAVA_SIG_CONSTRUCTOR(arguments) JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
+#define JAVA_SIG_CONSTRUCTOR(arguments)    JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
 
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);
-extern int findJavaConstructor (JNIEnv *env, jmethodID *constructor, jclass class, const char *signature);
-extern int findJavaMethod (JNIEnv *env, jmethodID *method, jclass class, const char *name, const char *signature);
-extern int findJavaField (JNIEnv *env, jfieldID *field, jclass class, const char *name, const char *signature);
+extern int findJavaConstructor (
+  JNIEnv *env, jmethodID *constructor,
+  jclass class, const char *signature
+);
+
+extern int findJavaInstanceMethod (
+  JNIEnv *env, jmethodID *method,
+  jclass class, const char *name, const char *signature
+);
+
+extern int findJavaStaticMethod (
+  JNIEnv *env, jmethodID *method,
+  jclass class, const char *name, const char *signature
+);
+
+extern int findJavaInstanceField (
+  JNIEnv *env, jfieldID *field,
+  jclass class, const char *name, const char *signature
+);
+
+extern int findJavaStaticField (
+  JNIEnv *env, jfieldID *field,
+  jclass class, const char *name, const char *signature
+);
 
 #ifdef __cplusplus
 }
