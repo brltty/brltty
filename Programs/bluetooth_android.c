@@ -45,7 +45,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
     memset(bcx, 0, sizeof(*bcx));
 
     if ((bcx->env = getJavaNativeInterface())) {
-      if (findJavaClass(bcx->env, &connectionClass, "org/a11y/BRLTTY/Android/BluetoothConnection")) {
+      if (findJavaClass(bcx->env, &connectionClass, "org/a11y/brltty/android/BluetoothConnection")) {
         if (findJavaConstructor(bcx->env, &connectionConstructor, connectionClass,
                                 JAVA_SIG_CONSTRUCTOR(JAVA_SIG_LONG JAVA_SIG_BYTE JAVA_SIG_INT))) {
           if (pipe(bcx->inputPipe) != -1) {

@@ -16,7 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Android;
+package org.a11y.brltty.android;
 
 import java.io.IOException;
 import java.io.InputStream;

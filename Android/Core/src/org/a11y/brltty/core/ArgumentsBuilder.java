@@ -16,7 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BRLTTY.Core;
+package org.a11y.brltty.core;
 
 import java.util.List;
 import java.util.ArrayList;

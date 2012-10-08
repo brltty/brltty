@@ -1,5 +1,5 @@
 ANDROID_PACKAGE_NAME = BRLTTY_Core
-ANDROID_PACKAGE_PATH = org.a11y.BRLTTY.Core
+ANDROID_PACKAGE_PATH = org.a11y.brltty.core
 include $(SRC_TOP)Android/common.mk
 
 ANDROID_PLATFORM_NAME = armeabi
