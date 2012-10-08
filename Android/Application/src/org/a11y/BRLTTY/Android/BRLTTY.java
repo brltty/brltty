@@ -45,7 +45,7 @@ public class BRLTTY extends Activity {
       @Override
       public void onClick (View view) {
         Log.d(LOG_TAG, "stop button pressed");
-        Wrapper.stop = true;
+        CoreWrapper.stop = true;
       }
     });
 

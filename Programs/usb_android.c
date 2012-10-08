@@ -41,12 +41,44 @@ struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
 };
 
-static jclass usbConnectionClass = NULL;
+static jclass usbHelperClass = NULL;
 static jclass usbDeviceClass = NULL;
 
 static int
-usbFindConnectionClass (JNIEnv *env) {
-  return findJavaClass(env, &usbConnectionClass, "org/a11y/BRLTTY/Android/UsbConnection");
+usbFindHelperClass (JNIEnv *env) {
+  return findJavaClass(env, &usbHelperClass, "org/a11y/BRLTTY/Android/UsbHelper");
+}
+
+static jobject
+usbGetDeviceIterator (JNIEnv *env) {
+  if (usbFindHelperClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, usbHelperClass, "getDeviceIterator",
+                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/util/Iterator), ))) {
+      jobject iterator = (*env)->CallStaticObjectMethod(env, usbHelperClass, method);
+
+      if (iterator) return iterator;
+    }
+  }
+
+  return NULL;
+}
+
+static jobject
+usbGetNextDevice (JNIEnv *env, jobject iterator) {
+  if (usbFindHelperClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, usbHelperClass, "getNextDevice",
+                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice), JAVA_SIG_OBJECT(java/util/Iterator)))) {
+      jobject device = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, iterator);
+
+      if (device) return device;
+    }
+  }
+
+  return NULL;
 }
 
 static int
@@ -352,38 +384,6 @@ usbTestHostDevice (void *item, void *data) {
   }
 
   return 0;
-}
-
-static jobject
-usbGetDeviceIterator (JNIEnv *env) {
-  if (usbFindConnectionClass(env)) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, usbConnectionClass, "getDeviceIterator",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/util/Iterator), ))) {
-      jobject iterator = (*env)->CallStaticObjectMethod(env, usbConnectionClass, method);
-
-      if (iterator) return iterator;
-    }
-  }
-
-  return NULL;
-}
-
-static jobject
-usbGetNextDevice (JNIEnv *env, jobject iterator) {
-  if (usbFindConnectionClass(env)) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, usbConnectionClass, "getNextDevice",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice), JAVA_SIG_OBJECT(java/util/Iterator)))) {
-      jobject device = (*env)->CallStaticObjectMethod(env, usbConnectionClass, method, iterator);
-
-      if (device) return device;
-    }
-  }
-
-  return NULL;
 }
 
 UsbDevice *

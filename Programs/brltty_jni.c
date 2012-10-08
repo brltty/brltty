@@ -161,7 +161,7 @@ error:
 }
 
 JNIEXPORT jint JNICALL
-Java_org_a11y_BRLTTY_Core_Wrapper_construct (JNIEnv *env, jobject this, jobjectArray arguments) {
+Java_org_a11y_BRLTTY_Core_CoreWrapper_construct (JNIEnv *env, jobject this, jobjectArray arguments) {
   if (prepareProgramArguments(env, arguments)) {
     if (loadCoreLibrary(env)) {
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
@@ -172,12 +172,12 @@ Java_org_a11y_BRLTTY_Core_Wrapper_construct (JNIEnv *env, jobject this, jobjectA
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_BRLTTY_Core_Wrapper_update (JNIEnv *env, jobject this) {
+Java_org_a11y_BRLTTY_Core_CoreWrapper_update (JNIEnv *env, jobject this) {
   return brlttyUpdate_p()? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT void JNICALL
-Java_org_a11y_BRLTTY_Core_Wrapper_destruct (JNIEnv *env, jobject this) {
+Java_org_a11y_BRLTTY_Core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
   brlttyDestruct_p();
 
 /*

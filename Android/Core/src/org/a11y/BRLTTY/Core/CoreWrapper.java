@@ -18,16 +18,14 @@
 
 package org.a11y.BRLTTY.Core;
 
-public class Wrapper {
-  protected static final String TAG = "BRLTTY_Core";
-
+public class CoreWrapper {
   public static native int construct (String[] arguments);
   public static native boolean update ();
   public static native void destruct ();
 
   public static volatile boolean stop = false;
 
-  public static void main (String[] arguments) {
+  public static int run (String[] arguments) {
     int exitStatus = construct(arguments);
 
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
@@ -41,7 +39,11 @@ public class Wrapper {
     }
 
     destruct();
-    System.exit(exitStatus);
+    return exitStatus;
+  }
+
+  public static void main (String[] arguments) {
+    System.exit(run(arguments));
   }
 
   static {

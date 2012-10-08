@@ -32,7 +32,7 @@ public class CoreThread extends Thread {
     super("Core");
     coreContext = context;
 
-    UsbConnection.setContext(coreContext);
+    UsbHelper.construct(coreContext);
   }
 
   @Override
@@ -51,6 +51,6 @@ public class CoreThread extends Thread {
     builder.setBrailleDevice("usb:,bluetooth:00:A0:96:18:54:7E");
 
     String[] arguments = builder.getArguments();
-    Wrapper.main(arguments);
+    CoreWrapper.run(arguments);
   }
 }
