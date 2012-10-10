@@ -29,7 +29,7 @@ extern "C" {
 
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
-extern void clearJavaException (JNIEnv *env);
+extern void clearJavaException (JNIEnv *env, int describe);
 
 #define JAVA_SIG_VOID                      "V"
 #define JAVA_SIG_BOOLEAN                   "Z"

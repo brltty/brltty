@@ -109,8 +109,11 @@ getJavaNativeInterface (void) {
 }
 
 void
-clearJavaException (JNIEnv *env) {
-  if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+clearJavaException (JNIEnv *env, int describe) {
+  if ((*env)->ExceptionCheck(env)) {
+    if (describe) (*env)->ExceptionDescribe(env);
+    (*env)->ExceptionClear(env);
+  }
 }
 
 int

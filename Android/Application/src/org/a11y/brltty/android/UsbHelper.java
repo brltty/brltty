@@ -97,7 +97,7 @@ public class UsbHelper {
     return usbManager.hasPermission(device);
   }
 
-  public static UsbDeviceConnection openDevice (UsbDevice device) {
+  public static UsbDeviceConnection openDeviceConnection (UsbDevice device) {
     if (obtainPermission(device)) {
       return usbManager.openDevice(device);
     }

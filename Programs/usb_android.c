@@ -39,10 +39,12 @@ static Queue *usbHostDevices = NULL;
 
 struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
+  jobject connection;
 };
 
 static jclass usbHelperClass = NULL;
 static jclass usbDeviceClass = NULL;
+static jclass usbConnectionClass = NULL;
 
 static int
 usbFindHelperClass (JNIEnv *env) {
@@ -81,9 +83,163 @@ usbGetNextDevice (JNIEnv *env, jobject iterator) {
   return NULL;
 }
 
+static jobject
+usbOpenDeviceConnection (JNIEnv *env, jobject device) {
+  if (usbFindHelperClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, usbHelperClass, "openDeviceConnection",
+                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection), JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice)))) {
+      jobject connection = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device);
+
+      if (connection) return connection;
+    }
+  }
+
+  return NULL;
+}
+
 static int
 usbFindDeviceClass (JNIEnv *env) {
   return findJavaClass(env, &usbDeviceClass, "android/hardware/usb/UsbDevice");
+}
+
+static int
+usbGetIntDeviceProperty (
+  JNIEnv *env, jint *value,
+  jobject device, const char *methodName, jmethodID *methodIdentifier
+) {
+  if (usbFindDeviceClass(env)) {
+    if (findJavaInstanceMethod(env, methodIdentifier, usbDeviceClass, methodName,
+                               JAVA_SIG_METHOD(JAVA_SIG_INT, JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice)))) {
+      *value = (*env)->CallIntMethod(env, device, *methodIdentifier);
+      if (!(*env)->ExceptionCheck(env)) return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+usbGetDeviceVendor (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
+  static jmethodID method = 0;
+
+  jint vendor;
+  int ok = usbGetIntDeviceProperty(env, &vendor, device, "getVendorId", &method);
+
+  if (ok) putLittleEndian16(&descriptor->idVendor, vendor);
+  return ok;
+}
+
+static int
+usbGetDeviceProduct (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
+  static jmethodID method = 0;
+
+  jint product;
+  int ok = usbGetIntDeviceProperty(env, &product, device, "getProductId", &method);
+
+  if (ok) putLittleEndian16(&descriptor->idProduct, product);
+  return ok;
+}
+
+static int
+usbGetDeviceClass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
+  static jmethodID method = 0;
+
+  jint class;
+  int ok = usbGetIntDeviceProperty(env, &class, device, "getClass", &method);
+
+  if (ok) descriptor->bDeviceClass = class;
+  return ok;
+}
+
+static int
+usbGetDeviceSubclass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
+  static jmethodID method = 0;
+
+  jint subclass;
+  int ok = usbGetIntDeviceProperty(env, &subclass, device, "getSubclass", &method);
+
+  if (ok) descriptor->bDeviceSubClass = subclass;
+  return ok;
+}
+
+static int
+usbGetDeviceProtocol (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
+  static jmethodID method = 0;
+
+  jint protocol;
+  int ok = usbGetIntDeviceProperty(env, &protocol, device, "getProtocol", &method);
+
+  if (ok) descriptor->bDeviceProtocol = protocol;
+  return ok;
+}
+
+static int
+usbFindConnectionClass (JNIEnv *env) {
+  return findJavaClass(env, &usbConnectionClass, "android/hardware/usb/UsbDeviceConnection");
+}
+
+static void
+usbCloseDeviceConnection (JNIEnv *env, jobject connection) {
+  if (usbFindConnectionClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "close",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
+      (*env)->CallVoidMethod(env, connection, method);
+    }
+  }
+}
+
+static int
+usbDoControlTransfer (
+  JNIEnv *env, jobject connection,
+  int type, int request, int value, int index,
+  jbyteArray buffer, int length, int timeout
+) {
+  if (usbFindConnectionClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "controlTransfer",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                               JAVA_SIG_INT // type
+                                               JAVA_SIG_INT // request
+                                               JAVA_SIG_INT // value
+                                               JAVA_SIG_INT // index
+                                               JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // buffer
+                                               JAVA_SIG_INT // length
+                                               JAVA_SIG_INT // timeout
+                                               JAVA_SIG_INT // type,
+                                              ))) {
+      return (*env)->CallIntMethod(env, connection, method,
+                                   type, request, value, index,
+                                   buffer, length, timeout);
+    }
+  }
+
+  return -1;
+}
+
+static int
+usbOpenConnection (UsbDeviceExtension *devx) {
+  if (devx->connection) return 1;
+
+  {
+    const UsbHostDevice *host = devx->host;
+    jobject connection = usbOpenDeviceConnection(host->env, host->device);
+
+    if (connection) {
+      devx->connection = (*host->env)->NewGlobalRef(host->env, connection);
+
+      (*host->env)->DeleteLocalRef(host->env, connection);
+      connection = NULL;
+
+      if (devx->connection) return 1;
+    }
+  }
+
+  return 0;
 }
 
 int
@@ -164,6 +320,35 @@ usbControlTransfer (
   uint16_t length,
   int timeout
 ) {
+  ssize_t result = -1;
+  UsbDeviceExtension *devx = device->extension;
+
+  if (usbOpenConnection(devx)) {
+    const UsbHostDevice *host = devx->host;
+    jbyteArray bytes = (*host->env)->NewByteArray(host->env, length);
+
+    if (bytes) {
+      if (direction == UsbControlDirection_Output) {
+        (*host->env)->SetByteArrayRegion(host->env, bytes, 0, length, buffer);
+      }
+
+      result = usbDoControlTransfer(host->env, devx,
+                                    direction | recipient | type,
+                                    request, value, index,
+                                    bytes, length, timeout);
+
+      if (result > 0) {
+        if (direction == UsbControlDirection_Input) {
+          (*host->env)->GetByteArrayRegion(host->env, bytes, 0, result, buffer);
+        }
+      }
+
+      (*host->env)->DeleteLocalRef(host->env, bytes);
+    } else {
+      logMallocError();
+    }
+  }
+
   errno = ENOSYS;
   logSystemError("USB control transfer");
   return -1;
@@ -247,6 +432,14 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
+  if (devx->connection) {
+    const UsbHostDevice *host = devx->host;
+
+    usbCloseDeviceConnection(host->env, devx->connection);
+    (*host->env)->DeleteGlobalRef(host->env, devx->connection);
+    devx->connection = NULL;
+  }
+
   free(devx);
 }
 
@@ -256,74 +449,6 @@ usbDeallocateHostDevice (void *item, void *data) {
 
   (*host->env)->DeleteGlobalRef(host->env, host->device);
   free(host);
-}
-
-static int
-usbGetIntDeviceProperty (JNIEnv *env, jint *value, jobject device, const char *methodName, jmethodID *methodIdentifier) {
-  if (usbFindDeviceClass(env)) {
-    if (findJavaInstanceMethod(env, methodIdentifier, usbDeviceClass, methodName,
-                               JAVA_SIG_METHOD(JAVA_SIG_INT, JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice)))) {
-      *value = (*env)->CallIntMethod(env, device, *methodIdentifier);
-      if (!(*env)->ExceptionCheck(env)) return 1;
-    }
-  }
-
-  return 0;
-}
-
-static int
-usbGetDeviceVendor (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
-  static jmethodID method = 0;
-
-  jint vendor;
-  int ok = usbGetIntDeviceProperty(env, &vendor, device, "getVendorId", &method);
-
-  if (ok) putLittleEndian16(&descriptor->idVendor, vendor);
-  return ok;
-}
-
-static int
-usbGetDeviceProduct (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
-  static jmethodID method = 0;
-
-  jint product;
-  int ok = usbGetIntDeviceProperty(env, &product, device, "getProductId", &method);
-
-  if (ok) putLittleEndian16(&descriptor->idProduct, product);
-  return ok;
-}
-
-static int
-usbGetDeviceClass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
-  static jmethodID method = 0;
-
-  jint class;
-  int ok = usbGetIntDeviceProperty(env, &class, device, "getClass", &method);
-
-  if (ok) descriptor->bDeviceClass = class;
-  return ok;
-}
-
-static int
-usbGetDeviceSubclass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
-  static jmethodID method = 0;
-
-  jint subclass;
-  int ok = usbGetIntDeviceProperty(env, &subclass, device, "getSubclass", &method);
-
-  if (ok) descriptor->bDeviceSubClass = subclass;
-  return ok;
-}
-
-static int
-usbGetDeviceProtocol (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor) {
-  static jmethodID method = 0;
-
-  jint protocol;
-  int ok = usbGetIntDeviceProperty(env, &protocol, device, "getProtocol", &method);
-
-  if (ok) descriptor->bDeviceProtocol = protocol;
-  return ok;
 }
 
 static int
@@ -375,6 +500,7 @@ usbTestHostDevice (void *item, void *data) {
   if ((devx = malloc(sizeof(*devx)))) {
     memset(devx, 0, sizeof(*devx));
     devx->host = host;
+    devx->connection = NULL;
 
     if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
 
@@ -414,7 +540,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
           (*env)->DeleteLocalRef(env, iterator);
         }
 
-        clearJavaException(env);
+        clearJavaException(env, 1);
       }
 
       if (!ok) {
