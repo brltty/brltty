@@ -5470,6 +5470,7 @@ BRLTTY supports the following braille displays:
       |EL 80@
       |EL 2D 40/66/80@
       |EL 40/66/70/80 S@
+      |EL 40/60/80 C@
       |EL 2D 80 S@
       |EL 40 P@
       |EL 80 II@
