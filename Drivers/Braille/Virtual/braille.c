@@ -906,6 +906,7 @@ dimensionsChanged (BrailleDisplay *brl) {
     }
   } else {
     logMessage(LOG_WARNING, "missing text column count");
+    ok = 0;
   }
 
   if (ok) {
