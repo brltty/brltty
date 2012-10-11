@@ -5448,7 +5448,6 @@ BRLTTY supports the following braille displays:
     HumanWare
       |Brailliant 32/40/80 bi@
     Iris@
-    IrisLinux@
     Libbraille@
     LogText
       |32@
@@ -5557,7 +5556,6 @@ BRLTTY supports the following speech synthesizers:
     hm|HIMS@
     ht|HandyTech@
     hw|HumanWare@
-    il|IrisLinux@
     ir|Iris@
     lb|Libbraille@
     lt|LogText@

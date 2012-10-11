@@ -1272,12 +1272,6 @@ BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
 BRLTTY_BRAILLE_DRIVER([hm], [HIMS])
 BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
 BRLTTY_BRAILLE_DRIVER([hw], [HumanWare])
-case "${host_os}"
-in
-   linux*)
-      BRLTTY_BRAILLE_DRIVER([il], [IrisLinux])
-      ;;
-esac
 BRLTTY_BRAILLE_DRIVER([ir], [Iris])
 BRLTTY_IF_PACKAGE([Libbraille], [libbraille], [include/braille.h], [dnl
    BRLTTY_BRAILLE_DRIVER([lb], [Libbraille], [-L$(LIBBRAILLE_ROOT)/lib -lbraille])
