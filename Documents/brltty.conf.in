@@ -99,7 +99,7 @@
 #    usb:[serial-number]
 #    bluetooth:address
 # If not specified, "@braille_device@" will be used.
-# If more than one driver, separated by commas, is specified,
+# If more than one device, separated by commas, is specified,
 # then each of them will be probed in turn.
 # (can be overridden with the -d [--braille-device=] option)
 #braille-device	serial:@serial_first_device@	# First serial device.
