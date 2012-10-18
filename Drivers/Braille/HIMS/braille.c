@@ -42,12 +42,14 @@ BEGIN_KEY_NAME_TABLE(dots)
   KEY_NAME_ENTRY(HM_KEY_Space, "Space"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(brailleSense)
+BEGIN_KEY_NAME_TABLE(f14)
   KEY_NAME_ENTRY(HM_KEY_BS_F1, "F1"),
   KEY_NAME_ENTRY(HM_KEY_BS_F2, "F2"),
   KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
   KEY_NAME_ENTRY(HM_KEY_BS_F4, "F4"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(sbf)
   KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
   KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
 END_KEY_NAME_TABLE
@@ -55,10 +57,11 @@ END_KEY_NAME_TABLE
 BEGIN_KEY_NAME_TABLES(sense)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
-  KEY_NAME_TABLE(brailleSense),
+  KEY_NAME_TABLE(f14),
+  KEY_NAME_TABLE(sbf),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLE(syncBraille)
+BEGIN_KEY_NAME_TABLE(sync)
   KEY_NAME_ENTRY(HM_KEY_SB_LeftUp, "LeftUp"),
   KEY_NAME_ENTRY(HM_KEY_SB_LeftDown, "LeftDown"),
   KEY_NAME_ENTRY(HM_KEY_SB_RightUp, "RightUp"),
@@ -67,15 +70,46 @@ END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(sync)
   KEY_NAME_TABLE(routing),
-  KEY_NAME_TABLE(syncBraille),
+  KEY_NAME_TABLE(sync),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLE(edge)
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollUp, "LeftScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollUp, "RightScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollDown, "LeftScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollDown, "RightScrollDown"),
+
+  KEY_NAME_ENTRY(HM_KEY_BE_F5, "F5"),
+  KEY_NAME_ENTRY(HM_KEY_BE_F6, "F6"),
+  KEY_NAME_ENTRY(HM_KEY_BE_F7, "F7"),
+  KEY_NAME_ENTRY(HM_KEY_BE_F8, "F8"),
+
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowUp, "LeftArrowUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowDown, "LeftArrowDown"),
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowLeft, "LeftArrowLeft"),
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowRight, "LeftArrowRight"),
+
+  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowUp, "RightArrowUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowDown, "RightArrowDown"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowLeft, "RightArrowLeft"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowRight, "RightArrowRight"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(edge)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(f14),
+  KEY_NAME_TABLE(edge),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(sense)
 DEFINE_KEY_TABLE(sync)
+DEFINE_KEY_TABLE(edge)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(sense),
   &KEY_TABLE_DEFINITION(sync),
+  &KEY_TABLE_DEFINITION(edge),
 END_KEY_TABLE_LIST
 
 typedef struct {
@@ -254,6 +288,7 @@ typedef struct {
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
+
 static int
 getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
   *count = 32;
@@ -264,6 +299,7 @@ static const ProtocolOperations brailleSenseOperations = {
   "Braille Sense", &KEY_TABLE_DEFINITION(sense),
   getBrailleSenseCellCount
 };
+
 
 static int
 getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -292,6 +328,19 @@ static const ProtocolOperations syncBrailleOperations = {
   "SyncBraille", &KEY_TABLE_DEFINITION(sync),
   getSyncBrailleCellCount
 };
+
+
+static int
+getBrailleEdgeCellCount (BrailleDisplay *brl, unsigned int *count) {
+  *count = 40;
+  return 1;
+}
+
+static const ProtocolOperations brailleEDGEOperations = {
+  "Braille Edge", &KEY_TABLE_DEFINITION(edge),
+  getBrailleEdgeCellCount
+};
+
 
 /* Serial IO */
 #include "io_serial.h"
@@ -356,15 +405,23 @@ openUsbPort (const char *device) {
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&brailleSenseOperations
-    }
-    ,
+    },
+
     { /* Sync Braille */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&syncBrailleOperations
-    }
-    ,
+    },
+
+    { /* Braille Edge */
+      .vendor=0X045E, .product=0X930B,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1,
+      .data=&brailleEDGEOperations
+    },
+
     { .vendor=0 }
   };
 
@@ -560,14 +617,17 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       case IPT_KEYS: {
-        uint16_t bits = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
-        uint16_t bit = 0X1;
+        uint32_t bits = (packet.data.reserved[0] << 0X00)
+                      | (packet.data.reserved[1] << 0X08)
+                      | (packet.data.reserved[2] << 0X10)
+                      | (packet.data.reserved[3] << 0X18);
+        uint32_t bit = UINT32_C(0X1);
         unsigned char key = 0;
 
-        unsigned char keys[0X10];
+        unsigned char keys[0X20];
         unsigned int keyCount = 0;
 
-        while (++key <= 0X10) {
+        while (++key <= 0X20) {
           if (bits & bit) {
             enqueueKeyEvent(HM_SET_NavigationKeys, key, 1);
             keys[keyCount++] = key;
