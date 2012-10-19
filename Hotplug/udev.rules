@@ -86,6 +86,7 @@ ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # HIMS
 ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="hm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="45e/930b/*", ENV{BRLTTY_DRIVER}="hm", GOTO="brltty_usb_run"
 
 # HumanWare
 ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_DRIVER}="hw", GOTO="brltty_usb_run"

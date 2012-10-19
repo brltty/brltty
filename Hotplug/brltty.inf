@@ -176,6 +176,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 HandyTech Braille Star 40 (HID)"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb-Win32 HIMS Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUsb-Win32 HIMS Braille Edge"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 "LibUsb-Win32 HumanWare (serial protocol)"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 
@@ -248,6 +249,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 HandyTech Braille Star 40 (HID)"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb-Win32 HIMS Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUsb-Win32 HIMS Braille Edge"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 "LibUsb-Win32 HumanWare (serial protocol)"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 
@@ -320,6 +322,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 HandyTech Braille Star 40 (HID)"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb-Win32 HIMS Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUsb-Win32 HIMS Braille Edge"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 "LibUsb-Win32 HumanWare (serial protocol)"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 

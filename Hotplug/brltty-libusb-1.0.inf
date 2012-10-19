@@ -96,6 +96,7 @@ HKR,,Icon,,-20
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb HIMS Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUsb HIMS Braille Edge" = LIBUSB_DEV, USB\VID_045E&PID_930B
 
 "LibUsb HumanWare (serial protocol)" = LIBUSB_DEV, USB\VID_1C71&PID_C005
 
@@ -167,6 +168,7 @@ HKR,,Icon,,-20
 "LibUsb HandyTech Braille Star 40 (HID)" = LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 "LibUsb HIMS Braille Sense" = LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUsb HIMS Braille Edge" = LIBUSB_DEV, USB\VID_045E&PID_930B
 
 "LibUsb HumanWare (serial protocol)" = LIBUSB_DEV, USB\VID_1C71&PID_C005
 
