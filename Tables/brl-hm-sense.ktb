@@ -23,10 +23,6 @@ title HIMS Braille Sense
 # Default Bindings #
 ####################
 
-include brl-hm-dots.kti
-map F2 META
-map F3 CONTROL
-
 bind RoutingKey ROUTE
 
 bind F4 HOME
@@ -69,6 +65,10 @@ bind F1+F2+F3+F4 PASTE
 
 bind F1+F3 CONTEXT+5 # RoutingKey -> SETLEFT
 bind F2+F4 CONTEXT+6 # RoutingKey -> DESCCHAR
+
+include brl-hm-dots.kti
+map F2 META
+map F3 CONTROL
 
 bind Dot8 KEY_ENTER
 bind Dot7 KEY_BACKSPACE

@@ -23,10 +23,6 @@ title HIMS Braille Edge
 # Default Bindings #
 ####################
 
-include brl-hm-dots.kti
-map F4 META
-map F5 CONTROL
-
 bind RoutingKey ROUTE
 
 bind LeftScrollUp LNUP
@@ -51,6 +47,10 @@ bind F1 HELP
 bind F2 LEARN
 bind F3 INFO
 bind F4 PREFMENU
+
+include brl-hm-dots.kti
+map F4 META
+map F5 CONTROL
 
 
 #################
