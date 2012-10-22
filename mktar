@@ -64,5 +64,5 @@ make -s distclean
 mv -- "${temporaryDirectory}/${specFile}" .
 
 cd ..
-tar --create --exclude=.svn --no-anchored --file "${archiveFile}" "${archiveName}"
+tar --create --exclude=.svn --exclude=.git --no-anchored --file "${archiveFile}" "${archiveName}"
 exit 0
