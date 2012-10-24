@@ -41,7 +41,7 @@ map B9 SPACE
 map B10 SPACE
 map B11 SPACE
 
-bind Press HOME
+bind Press RETURN
 bind Up LNUP
 bind Down LNDN
 bind Left FWINLT
@@ -72,15 +72,22 @@ bind Dot1+Left KEY_CURSOR_LEFT
 bind Dot1+Right KEY_CURSOR_RIGHT
 
 bind Dot2+Press KEY_ENTER
-bind Dot2+Up KEY_DELETE
-bind Dot2+Down KEY_INSERT
+bind Dot2+Up KEY_INSERT
+bind Dot2+Down KEY_DELETE
 bind Dot2+Left KEY_BACKSPACE
+bind Dot2+Right PASTE
 
 bind Dot3+Press KEY_ESCAPE
 bind Dot3+Up KEY_PAGE_UP
 bind Dot3+Down KEY_PAGE_DOWN
 bind Dot3+Left KEY_HOME
 bind Dot3+Right KEY_END
+
+bind RoutingKey+Press DESCCHAR
+bind RoutingKey+Left CLIP_NEW
+bind RoutingKey+Up CLIP_ADD
+bind RoutingKey+Right COPY_LINE
+bind RoutingKey+Down COPY_RECT
 
 context menu
 bind press PREFMENU
