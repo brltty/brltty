@@ -41,24 +41,51 @@ map B9 SPACE
 map B10 SPACE
 map B11 SPACE
 
-bind Press KEY_ENTER
-bind Up KEY_CURSOR_UP
-bind Down KEY_CURSOR_DOWN
-bind Left KEY_CURSOR_LEFT
-bind Right KEY_CURSOR_RIGHT
+bind Press HOME
+bind Up LNUP
+bind Down LNDN
+bind Left FWINLT
+bind Right FWINRT
 
-bind Dot4+Up TOP_LEFT
-bind Dot4+Down BOT_LEFT
+bind Dot4+Press HELP
+bind Dot4+Up TOP
+bind Dot4+Down BOT
 bind Dot4+Left LNBEG
 bind Dot4+Right LNEND
 
-bind Dot5+Up LNUP
-bind Dot5+Down LNDN
-bind Dot5+Left FWINLT
-bind Dot5+Right FWINRT
+bind Dot5+Press PREFMENU
+bind Dot5+Up PRDIFLN
+bind Dot5+Down NXDIFLN
+bind Dot5+Left FWINLTSKIP
+bind Dot5+Right FWINRTSKIP
 
-bind Dot6+Up WINUP
-bind Dot6+Down WINDN
+bind Dot6+Press LEARN
+bind Dot6+Up ATTRUP
+bind Dot6+Down ATTRDN
 bind Dot6+Left CHRLT
 bind Dot6+Right CHRRT
 
+bind Dot1+Press KEY_TAB
+bind Dot1+Up KEY_CURSOR_UP
+bind Dot1+Down KEY_CURSOR_DOWN
+bind Dot1+Left KEY_CURSOR_LEFT
+bind Dot1+Right KEY_CURSOR_RIGHT
+
+bind Dot2+Press KEY_ENTER
+bind Dot2+Up KEY_DELETE
+bind Dot2+Down KEY_INSERT
+bind Dot2+Left KEY_BACKSPACE
+
+bind Dot3+Press KEY_ESCAPE
+bind Dot3+Up KEY_PAGE_UP
+bind Dot3+Down KEY_PAGE_DOWN
+bind Dot3+Left KEY_HOME
+bind Dot3+Right KEY_END
+
+context menu
+bind press PREFMENU
+bind Up MENU_PREV_ITEM
+bind Down MENU_NEXT_ITEM
+bind Left MENU_PREV_SETTING
+bind Right MENU_NEXT_SETTING
+context default
