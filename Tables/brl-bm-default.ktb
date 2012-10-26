@@ -20,4 +20,5 @@ title Baum (default)
 
 include brl-bm-display6.kti
 include brl-bm-keyboard.kti
+include brl-bm-joystick.kti
 include brl-bm-routing6.kti

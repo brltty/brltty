@@ -1,0 +1,149 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for Baum displays which have a five-way joystick.
+note The joystick is in the middle of the front,
+note and its five positions are named Left, Right, Up, Down, and Press.
+note B9 and B11 are the keys immediately to the left and right of the joystick.
+
+map B9 SPACE
+map B11 SPACE
+
+bind Press RETURN
+bind Up LNUP
+bind Down LNDN
+bind Left FWINLT
+bind Right FWINRT
+
+bind Dot4+Press HELP
+bind Dot4+Up TOP
+bind Dot4+Down BOT
+bind Dot4+Left LNBEG
+bind Dot4+Right LNEND
+
+bind Dot5+Press INFO
+bind Dot5+Up PRDIFLN
+bind Dot5+Down NXDIFLN
+bind Dot5+Left FWINLTSKIP
+bind Dot5+Right FWINRTSKIP
+
+bind Dot6+Press LEARN
+bind Dot6+Up ATTRUP
+bind Dot6+Down ATTRDN
+bind Dot6+Left CHRLT
+bind Dot6+Right CHRRT
+
+Bind Dot4+Dot6+Press CSRJMP_VERT
+Bind Dot4+Dot6+Up PRPGRPH
+Bind Dot4+Dot6+Down NXPGRPH
+Bind Dot4+Dot6+Left PRPROMPT
+Bind Dot4+Dot6+Right NXPROMPT
+
+Bind Dot4+Dot5+Dot6+Press PREFMENU
+Bind Dot4+Dot5+Dot6+Up PREFLOAD
+Bind Dot4+Dot5+Dot6+Down PREFSAVE
+Bind Dot4+Dot5+Dot6+Left PRSEARCH
+Bind Dot4+Dot5+Dot6+Right NXSEARCH
+
+Bind Dot4+Dot5+Press SIXDOTS
+Bind Dot4+Dot5+Up FREEZE
+Bind Dot4+Dot5+Down DISPMD
+Bind Dot4+Dot5+Left SWITCHVT_PREV
+Bind Dot4+Dot5+Right SWITCHVT_NEXT
+
+Bind Dot5+Dot6+Press CSRTRK
+Bind Dot5+Dot6+Up TIME
+Bind Dot5+Dot6+Down SLIDEWIN
+Bind Dot5+Dot6+Left SKPIDLNS
+Bind Dot5+Dot6+Right SKPBLNKWINS
+
+bind RoutingKey+Press DESCCHAR
+bind RoutingKey+Left CLIP_NEW
+bind RoutingKey+Up CLIP_ADD
+bind RoutingKey+Right COPY_LINE
+bind RoutingKey+Down COPY_RECT
+
+bind Dot1+Press KEY_TAB
+bind Dot1+Up KEY_CURSOR_UP
+bind Dot1+Down KEY_CURSOR_DOWN
+bind Dot1+Left KEY_CURSOR_LEFT
+bind Dot1+Right KEY_CURSOR_RIGHT
+
+bind Dot2+Press KEY_ENTER
+bind Dot2+Up KEY_INSERT
+bind Dot2+Down KEY_DELETE
+bind Dot2+Left KEY_BACKSPACE
+bind Dot2+Right PASTE
+
+bind Dot3+Press KEY_ESCAPE
+bind Dot3+Up KEY_PAGE_UP
+bind Dot3+Down KEY_PAGE_DOWN
+bind Dot3+Left KEY_HOME
+bind Dot3+Right KEY_END
+
+bind B9+Press AUTOSPEAK
+bind B9+Up SAY_LOUDER
+bind B9+Down SAY_SOFTER
+bind B9+Left SAY_SLOWER
+bind B9+Right SAY_FASTER
+
+bind B11+Press SPKHOME
+bind B11+Up SAY_ABOVE
+bind B11+Down SAY_BELOW
+bind B11+Left MUTE
+bind B11+Right SAY_LINE
+
+bind B10+Press SPEAK_CURR_WORD
+bind B10+Up SPEAK_PREV_LINE
+bind B10+Down SPEAK_NEXT_LINE
+bind B10+Left SPEAK_PREV_WORD
+bind B10+Right SPEAK_NEXT_WORD
+
+bind B10+B9+Press SPEAK_CURR_CHAR
+bind B10+B9+Up SPELL_CURR_WORD
+bind B10+B9+Down DESC_CURR_CHAR
+bind B10+B9+Left SPEAK_PREV_CHAR
+bind B10+B9+Right SPEAK_NEXT_CHAR
+
+bind B10+B11+Press SPEAK_CURR_LINE
+bind B10+B11+Up SPEAK_FRST_LINE
+bind B10+B11+Down SPEAK_LAST_LINE
+bind B10+B11+Left SPEAK_FRST_CHAR
+bind B10+B11+Right SPEAK_LAST_CHAR
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind press PREFMENU
+bind Up MENU_PREV_ITEM
+bind Down MENU_NEXT_ITEM
+bind Left MENU_PREV_SETTING
+bind Right MENU_NEXT_SETTING
+
+bind B10 MENU_PREV_LEVEL
+bind B10+Press PREFSAVE
+bind B10+Up MENU_FIRST_ITEM
+bind B10+Down MENU_LAST_ITEM
+bind B10+Left FWINLT
+bind B10+Right FWINRT
+
+context default
