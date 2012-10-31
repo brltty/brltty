@@ -111,7 +111,7 @@ usbGetIntDeviceProperty (
 ) {
   if (usbFindDeviceClass(env)) {
     if (findJavaInstanceMethod(env, methodIdentifier, usbDeviceClass, methodName,
-                               JAVA_SIG_METHOD(JAVA_SIG_INT, JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice)))) {
+                               JAVA_SIG_METHOD(JAVA_SIG_INT, ))) {
       *value = (*env)->CallIntMethod(env, device, *methodIdentifier);
       if (!(*env)->ExceptionCheck(env)) return 1;
     }
@@ -147,7 +147,7 @@ usbGetDeviceClass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descriptor)
   static jmethodID method = 0;
 
   jint class;
-  int ok = usbGetIntDeviceProperty(env, &class, device, "getClass", &method);
+  int ok = usbGetIntDeviceProperty(env, &class, device, "getDeviceClass", &method);
 
   if (ok) descriptor->bDeviceClass = class;
   return ok;
@@ -158,7 +158,7 @@ usbGetDeviceSubclass (JNIEnv *env, jobject device, UsbDeviceDescriptor *descript
   static jmethodID method = 0;
 
   jint subclass;
-  int ok = usbGetIntDeviceProperty(env, &subclass, device, "getSubclass", &method);
+  int ok = usbGetIntDeviceProperty(env, &subclass, device, "getDeviceSubclass", &method);
 
   if (ok) descriptor->bDeviceSubClass = subclass;
   return ok;
@@ -169,7 +169,7 @@ usbGetDeviceProtocol (JNIEnv *env, jobject device, UsbDeviceDescriptor *descript
   static jmethodID method = 0;
 
   jint protocol;
-  int ok = usbGetIntDeviceProperty(env, &protocol, device, "getProtocol", &method);
+  int ok = usbGetIntDeviceProperty(env, &protocol, device, "getDeviceProtocol", &method);
 
   if (ok) descriptor->bDeviceProtocol = protocol;
   return ok;
@@ -458,6 +458,9 @@ usbAddHostDevice (JNIEnv *env, jobject device) {
   if ((host = malloc(sizeof(*host)))) {
     memset(host, 0, sizeof(*host));
     host->env = env;
+
+    host->descriptor.bDescriptorType = UsbDescriptorType_Device;
+    host->descriptor.bLength = UsbDescriptorSize_Device;
 
     if ((host->device = (*host->env)->NewGlobalRef(host->env, device))) {
       if (usbGetDeviceVendor(host->env, host->device, &host->descriptor)) {
