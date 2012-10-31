@@ -210,7 +210,6 @@ usbDoControlTransfer (
                                                JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // buffer
                                                JAVA_SIG_INT // length
                                                JAVA_SIG_INT // timeout
-                                               JAVA_SIG_INT // type,
                                               ))) {
       return (*env)->CallIntMethod(env, connection, method,
                                    type, request, value, index,
@@ -261,6 +260,8 @@ usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration
 ) {
+  if (configuration == 1) return 1;
+
   errno = ENOSYS;
   logSystemError("USB configuration set");
   return 0;
@@ -292,6 +293,8 @@ usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 ) {
+  if (alternative == 0) return 1;
+
   errno = ENOSYS;
   logSystemError("USB alternative set");
   return 0;
@@ -332,13 +335,13 @@ usbControlTransfer (
         (*host->env)->SetByteArrayRegion(host->env, bytes, 0, length, buffer);
       }
 
-      result = usbDoControlTransfer(host->env, devx,
+      result = usbDoControlTransfer(host->env, devx->connection,
                                     direction | recipient | type,
                                     request, value, index,
                                     bytes, length, timeout);
 
-      if (result > 0) {
-        if (direction == UsbControlDirection_Input) {
+      if (direction == UsbControlDirection_Input) {
+        if (result > 0) {
           (*host->env)->GetByteArrayRegion(host->env, bytes, 0, result, buffer);
         }
       }
@@ -349,9 +352,8 @@ usbControlTransfer (
     }
   }
 
-  errno = ENOSYS;
-  logSystemError("USB control transfer");
-  return -1;
+  if (result == -1) logSystemError("USB control transfer");
+  return result;
 }
 
 void *
@@ -459,8 +461,9 @@ usbAddHostDevice (JNIEnv *env, jobject device) {
     memset(host, 0, sizeof(*host));
     host->env = env;
 
-    host->descriptor.bDescriptorType = UsbDescriptorType_Device;
     host->descriptor.bLength = UsbDescriptorSize_Device;
+    host->descriptor.bDescriptorType = UsbDescriptorType_Device;
+    host->descriptor.bNumConfigurations = 1;
 
     if ((host->device = (*host->env)->NewGlobalRef(host->env, device))) {
       if (usbGetDeviceVendor(host->env, host->device, &host->descriptor)) {
