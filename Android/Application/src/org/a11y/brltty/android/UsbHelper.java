@@ -42,7 +42,7 @@ public class UsbHelper {
   private static PendingIntent permissionIntent;
 
   private static final String ACTION_USB_PERMISSION =
-    "org.a11y.BRLTTY.Android.USB_PERMISSION";
+    "org.a11y.brltty.android.USB_PERMISSION";
 
   private static void makePermissionReceiver () {
     permissionReceiver = new BroadcastReceiver () {
@@ -59,6 +59,8 @@ public class UsbHelper {
             } else {
               Log.w(LOG_TAG, "permission denied for USB device: " + device);
             }
+
+            notify();
           }
         }
       }
@@ -90,10 +92,20 @@ public class UsbHelper {
 
   private static boolean obtainPermission (UsbDevice device) {
     if (usbManager.hasPermission(device)) {
+      Log.d(LOG_TAG, "permission already granted for USB device: " + device);
       return true;
     }
 
-    usbManager.requestPermission(device, permissionIntent);
+    Log.d(LOG_TAG, "requesting permission for USB device: " + device);
+    synchronized (permissionReceiver) {
+      usbManager.requestPermission(device, permissionIntent);
+
+      try {
+        permissionReceiver.wait();
+      } catch (InterruptedException exception) {
+      }
+    }
+
     return usbManager.hasPermission(device);
   }
 
