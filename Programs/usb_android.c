@@ -272,8 +272,27 @@ usbClaimInterface (
   UsbDevice *device,
   unsigned char interface
 ) {
-  errno = ENOSYS;
-  logSystemError("USB interface claim");
+  UsbDeviceExtension *devx = device->extension;
+
+  if (usbOpenConnection(devx)) {
+    JNIEnv *env = devx->host->env;
+
+    if (usbFindHelperClass(env)) {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, usbHelperClass, "claimInterface",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection) // connection
+                                               JAVA_SIG_INT // identifier
+                                              ))) {
+        jboolean claimed = (*env)->CallStaticBooleanMethod(env, usbHelperClass, method, devx->host->device, devx->connection, interface);
+
+        if (claimed) return 1;
+      }
+    }
+  }
+
   return 0;
 }
 
@@ -282,8 +301,27 @@ usbReleaseInterface (
   UsbDevice *device,
   unsigned char interface
 ) {
-  errno = ENOSYS;
-  logSystemError("USB interface release");
+  UsbDeviceExtension *devx = device->extension;
+
+  if (usbOpenConnection(devx)) {
+    JNIEnv *env = devx->host->env;
+
+    if (usbFindHelperClass(env)) {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, usbHelperClass, "releaseInterface",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection) // connection
+                                               JAVA_SIG_INT // identifier
+                                              ))) {
+        jboolean released = (*env)->CallStaticBooleanMethod(env, usbHelperClass, method, devx->host->device, devx->connection, interface);
+
+        if (released) return 1;
+      }
+    }
+  }
+
   return 0;
 }
 

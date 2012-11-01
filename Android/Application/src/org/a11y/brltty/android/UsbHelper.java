@@ -116,4 +116,48 @@ public class UsbHelper {
 
     return null;
   }
+
+  private static UsbInterface getInterface (UsbDevice device, int identifier) {
+    int count = device.getInterfaceCount();
+
+    for (int index=0; index<count; index+=1) {
+      UsbInterface intf = device.getInterface(index);
+
+      if (identifier == intf.getId()) return intf;
+    }
+
+    return null;
+  }
+
+  public static boolean claimInterface (
+    UsbDevice device,
+    UsbDeviceConnection connection,
+    int identifier
+  ) {
+    UsbInterface intf = getInterface(device, identifier);
+
+    if (intf != null) {
+      if (connection.claimInterface(intf, true)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public static boolean releaseInterface (
+    UsbDevice device,
+    UsbDeviceConnection connection,
+    int identifier
+  ) {
+    UsbInterface intf = getInterface(device, identifier);
+
+    if (intf != null) {
+      if (connection.releaseInterface(intf)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }
