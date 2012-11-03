@@ -1514,27 +1514,27 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* Alva 5nn */
+    { /* Satellite(5nn) */
       .vendor=0X06b0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     }
     ,
-    { /* Alva BC624 */
+    { /* BC624 */
       .vendor=0X0798, .product=0X0624,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC624
     }
     ,
-    { /* Alva BC640 */
+    { /* BC640 */
       .vendor=0X0798, .product=0X0640,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC640
     }
     ,
-    { /* Alva BC680 */
+    { /* BC680 */
       .vendor=0X0798, .product=0X0680,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,

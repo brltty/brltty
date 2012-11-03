@@ -686,14 +686,14 @@ connectResource (const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* Seika Braille Display */
+    { /* Braille Display */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial=&serialParameters
     }
     ,
-    { /* Seika Note Taker */
+    { /* Note Taker */
       .vendor=0X10C4, .product=0XEA80,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,

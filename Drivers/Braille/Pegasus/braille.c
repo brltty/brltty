@@ -391,7 +391,7 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {
+    { /* all */
       .vendor=0X4242, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2

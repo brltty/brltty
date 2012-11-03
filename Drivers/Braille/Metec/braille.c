@@ -124,7 +124,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (isUsbDevice(&device)) {
     static const UsbChannelDefinition definitions[] = {
-      {
+      { /* all */
         .vendor=0X0452, .product=0X0100,
         .configuration=1, .interface=0, .alternative=0,
         .inputEndpoint=1, .outputEndpoint=0

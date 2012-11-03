@@ -173,7 +173,7 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* Albatross */
+    { /* all */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2

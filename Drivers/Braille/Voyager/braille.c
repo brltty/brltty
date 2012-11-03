@@ -689,7 +689,8 @@ connectResource (const char *identifier) {
   SerialParameters serialParameters;
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { .vendor=0X0798, .product=0X0001, 
+    { /* all */
+      .vendor=0X0798, .product=0X0001, 
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1
     }

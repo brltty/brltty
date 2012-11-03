@@ -803,25 +803,25 @@ openUsbPort (char **parameters, const char *device) {
     }
     ,
     { /* Easy Braille (HID) */
-      .vendor=HT_USB_VENDOR, .product=HT_MODEL_EasyBraille,
+      .vendor=0X1FE4, .product=0X0044,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
     }
     ,
     { /* Braille Star 40 (HID) */
-      .vendor=HT_USB_VENDOR, .product=HT_MODEL_BrailleStar40,
+      .vendor=0X1FE4, .product=0X0074,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
     }
     ,
     { /* USB-HID adapter */
-      .vendor=HT_USB_VENDOR, .product=HT_MODEL_UsbHidAdapter,
+      .vendor=0X1FE4, .product=0X0003,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
     }
     ,
     { /* Active Braille */
-      .vendor=HT_USB_VENDOR, .product=HT_MODEL_ActiveBraille,
+      .vendor=0X1FE4, .product=0X0054,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
