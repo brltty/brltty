@@ -132,7 +132,7 @@ connectResource (const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* Esys, version < 3.0, without SD card */
+    { /* Esys (version < 3.0, no SD card) */
       .vendor=0XC251, .product=0X1122,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0
@@ -144,7 +144,7 @@ connectResource (const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0
     }
     ,
-    { /* Esys, version < 3.0, with SD card */
+    { /* Esys (version < 3.0, with SD card) */
       .vendor=0XC251, .product=0X1124,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0
@@ -156,7 +156,7 @@ connectResource (const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0
     }
     ,
-    { /* Esys, version >= 3.0, without SD card */
+    { /* Esys (version >= 3.0, no SD card) */
       .vendor=0XC251, .product=0X1126,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0
@@ -168,7 +168,7 @@ connectResource (const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0
     }
     ,
-    { /* Esys, version >= 3.0, with SD card */
+    { /* Esys (version >= 3.0, with SD card) */
       .vendor=0XC251, .product=0X1128,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0
