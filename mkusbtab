@@ -1,0 +1,256 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] "prologue.tcl"]
+
+proc getMakeProperty {file property} {
+   set result ""
+
+   if {[catch [list open $file {RDONLY}] stream] == 0} {
+      while {[gets $stream line] >= 0} {
+         if {[regexp "^$property\\s*=\\s*(.*?)\\s*\$" $line x value]} {
+            set result $value
+            break
+         }
+      }
+
+      close $stream
+   } else {
+      writeProgramMessage $stream
+   }
+
+   return $result
+}
+
+proc getDriverProperty {driverDirectory propertyName} {
+   return [getMakeProperty [file join $driverDirectory "Makefile.in"] $propertyName]
+}
+
+proc getDriverCode {driverDirectory} {
+   return [getDriverProperty $driverDirectory DRIVER_CODE]
+}
+
+proc putDriverError {location message} {
+   writeProgramMessage "$message: [dict get $location file]\[[dict get $location line]\]"
+}
+
+proc parseDefinition {lines location} {
+   set device [dict create]
+
+   foreach line $lines {
+      if {[regexp {\{\s*/\*\s*(.*?)\s*\*/\s*$} $line x model]} {
+         dict set device model $model
+         continue
+      }
+
+      if {[regexp {\.vendor\s*=\s*(\S*?)\s*,} $line x vendor]} {
+         dict set device vendor $vendor
+      }
+
+      if {[regexp {\.product\s*=\s*(\S*?)\s*,} $line x vendor]} {
+         dict set device product $vendor
+      }
+   }
+
+   foreach property {model vendor product} {
+      if {![dict exists $device $property]} {
+         putDriverError $location "property not defined: $property"
+      }
+   }
+
+   foreach property {vendor product} {
+      if {[string is integer -strict [set value [dict get $device $property]]]} {
+         dict set device $property [expr {$value + 0}]
+      } else {
+         putDriverError $location "$property is not numeric: $value"
+         dict unset device $property
+      }
+   }
+
+   return $device
+}
+
+proc parseDefinitions {devicesVariable lines location} {
+   upvar 1 $devicesVariable devices
+   set lineNumber [dict get $location line]
+
+   foreach lineText $lines {
+      if {[info exists definition]} {
+         if {[regexp {\}} $lineText]} {
+            lappend devices [parseDefinition $definition $location]
+            unset definition
+         } else {
+            lappend definition $lineText
+         }
+      } elseif {[regexp {\{} $lineText]} {
+         set definition [list $lineText]
+         dict set location line $lineNumber
+      }
+
+      incr lineNumber
+   }
+}
+
+proc parseFile {devicesVariable file} {
+   upvar 1 $devicesVariable devices
+
+   if {[catch [list open $file {RDONLY}] stream] == 0} {
+      set location [dict create]
+      dict set location file $file
+      set lineNumber 0
+
+      while {[gets $stream lineText] >= 0} {
+         incr lineNumber
+
+         if {[info exists definitions]} {
+            if {[regexp {\}\s*;} $lineText]} {
+               parseDefinitions devices $definitions $location
+               unset definitions
+            } else {
+               lappend definitions $lineText
+            }
+         } elseif {[regexp {\sconst\s+UsbChannelDefinition\s} $lineText]} {
+            set definitions [list]
+            dict set location line [expr {$lineNumber + 1}]
+         }
+      }
+
+      close $stream
+   } else {
+      writeProgramMessage $stream
+   }
+}
+
+proc parseFiles {devicesVariable driverDirectory} {
+   upvar 1 $devicesVariable devices
+
+   foreach file [glob -directory $driverDirectory -nocomplain {*.[ch]}] {
+      parseFile devices $file
+   }
+
+   return $devices
+}
+
+proc parseDriver {directory} {
+   set driver [dict create]
+   dict set driver name [set name [file tail $directory]]
+
+   set devices [list]
+
+   if {[string length [set code [getDriverCode $directory]]] > 0} {
+      dict set driver code $code
+      parseFiles devices $directory
+   } else {
+      writeProgramMessage "driver code not defined: $name"
+   }
+
+   dict set driver devices $devices
+   return $driver
+}
+
+proc parseDrivers {} {
+  global sourceDirectory
+
+  set drivers [list]
+
+  foreach directory [lsort [glob -directory [file join $sourceDirectory Drivers Braille] -types {d r x} -nocomplain *]] {
+     if {[llength [dict get [set driver [parseDriver $directory]] devices]] > 0} {
+        lappend drivers $driver
+     }
+  }
+
+  return $drivers
+}
+
+proc describeDevice {device} {
+   return "[dict get $device name]\[[dict get $device model]\]"
+}
+
+proc getVendors {drivers} {
+   set vendors [dict create]
+
+   foreach driver $drivers {
+      dict with driver {
+         foreach device $devices {
+            dict with device {
+               set device [dict create code $code name $name model $model]
+
+               if {[dict exists $vendors $vendor $product]} {
+                  set devices [dict get $vendors $vendor $product]
+                  writeProgramMessage "device specified more than once: $vendor:$product: [describeDevice [lindex $devices 0]] & [describeDevice $device]"
+               } else {
+                  set devices [list]
+               }
+
+               lappend devices $device
+               dict set vendors $vendor $product $devices
+            }
+         }
+      }
+   }
+
+   return $vendors
+}
+
+proc writeVendors {vendors} {
+   global optionValues
+
+   foreach vendor [lsort -integer [dict keys $vendors]] {
+      set products [dict get $vendors $vendor]
+
+      foreach product [lsort -integer [dict keys $products]] {
+         set devices [dict get $products $product]
+
+         set codes [list]
+         set descriptions [list]
+
+         foreach device $devices {
+            dict with device {
+               lappend codes $code
+               lappend descriptions "$name \[$model\]"
+            }
+         }
+
+         writeDevice_android $vendor $product [lsort -unique $codes] [join [lsort $descriptions] ", "]
+      }
+   }
+}
+
+proc writeDevice_android {vendor product drivers description} {
+   puts stdout "<!-- $description -->"
+   puts stdout "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
+   puts stdout ""
+}
+
+set sourceDirectory $programDirectory
+
+set optionDefinitions {
+   {format.(android)}
+}
+
+if {![processOptions optionValues argv $optionDefinitions]} {
+   syntaxError
+}
+
+if {![info exists optionValues(format)]} {
+   syntaxError "format not specified"
+}
+
+writeVendors [getVendors [parseDrivers]]
+exit 0
