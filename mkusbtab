@@ -227,13 +227,16 @@ proc writeVendors {vendors} {
             }
          }
 
-         writeDevice_android $vendor $product [lsort -unique $codes] [join [lsort $descriptions] ", "]
+         writeDevice_android $vendor $product [lsort -unique $codes] [lsort $descriptions]
       }
    }
 }
 
-proc writeDevice_android {vendor product drivers description} {
-   puts stdout "<!-- $description -->"
+proc writeDevice_android {vendor product drivers descriptions} {
+   foreach description $descriptions {
+      puts stdout "<!-- $description -->"
+   }
+
    puts stdout "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
    puts stdout ""
 }
