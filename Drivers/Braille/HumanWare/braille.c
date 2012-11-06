@@ -131,7 +131,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* all */
+    { /* all models */
       .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
