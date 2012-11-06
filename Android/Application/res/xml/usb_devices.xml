@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+  <!-- BEGIN_USB_DEVICES -->
+
   <!-- Albatross [all models] -->
   <!-- Cebra [all models] -->
   <!-- HIMS [Sync Braille] -->
@@ -183,4 +185,6 @@
 
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4402" />
+
+  <!-- END_USB_DEVICES -->
 </resources>

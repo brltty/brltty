@@ -50,50 +50,50 @@ proc putDriverError {location message} {
    writeProgramMessage "$message: [dict get $location file]\[[dict get $location line]\]"
 }
 
-proc parseDefinition {lines location} {
-   set device [dict create]
+proc parseChannelDefinition {lines location} {
+   set channel [dict create]
 
    foreach line $lines {
       if {[regexp {\{\s*/\*\s*(.*?)\s*\*/\s*$} $line x model]} {
-         dict set device model $model
+         dict set channel model $model
          continue
       }
 
       if {[regexp {\.vendor\s*=\s*(\S*?)\s*,} $line x vendor]} {
-         dict set device vendor $vendor
+         dict set channel vendor $vendor
       }
 
       if {[regexp {\.product\s*=\s*(\S*?)\s*,} $line x vendor]} {
-         dict set device product $vendor
+         dict set channel product $vendor
       }
    }
 
    foreach property {model vendor product} {
-      if {![dict exists $device $property]} {
+      if {![dict exists $channel $property]} {
          putDriverError $location "property not defined: $property"
       }
    }
 
    foreach property {vendor product} {
-      if {[string is integer -strict [set value [dict get $device $property]]]} {
-         dict set device $property [expr {$value + 0}]
+      if {[string is integer -strict [set value [dict get $channel $property]]]} {
+         dict set channel $property [expr {$value + 0}]
       } else {
          putDriverError $location "$property is not numeric: $value"
-         dict unset device $property
+         dict unset channel $property
       }
    }
 
-   return $device
+   return $channel
 }
 
-proc parseDefinitions {devicesVariable lines location} {
-   upvar 1 $devicesVariable devices
+proc parseChannelDefinitions {channelsVariable lines location} {
+   upvar 1 $channelsVariable channels
    set lineNumber [dict get $location line]
 
    foreach lineText $lines {
       if {[info exists definition]} {
          if {[regexp {\}} $lineText]} {
-            lappend devices [parseDefinition $definition $location]
+            lappend channels [parseChannelDefinition $definition $location]
             unset definition
          } else {
             lappend definition $lineText
@@ -107,8 +107,8 @@ proc parseDefinitions {devicesVariable lines location} {
    }
 }
 
-proc parseFile {devicesVariable file} {
-   upvar 1 $devicesVariable devices
+proc parseSourceFile {channelsVariable file} {
+   upvar 1 $channelsVariable channels
 
    if {[catch [list open $file {RDONLY}] stream] == 0} {
       set location [dict create]
@@ -120,7 +120,7 @@ proc parseFile {devicesVariable file} {
 
          if {[info exists definitions]} {
             if {[regexp {\}\s*;} $lineText]} {
-               parseDefinitions devices $definitions $location
+               parseChannelDefinitions channels $definitions $location
                unset definitions
             } else {
                lappend definitions $lineText
@@ -137,30 +137,30 @@ proc parseFile {devicesVariable file} {
    }
 }
 
-proc parseFiles {devicesVariable driverDirectory} {
-   upvar 1 $devicesVariable devices
+proc parseSourceFiles {channelsVariable driverDirectory} {
+   upvar 1 $channelsVariable channels
 
    foreach file [glob -directory $driverDirectory -nocomplain {*.[ch]}] {
-      parseFile devices $file
+      parseSourceFile channels $file
    }
 
-   return $devices
+   return $channels
 }
 
 proc parseDriver {directory} {
    set driver [dict create]
    dict set driver name [set name [file tail $directory]]
 
-   set devices [list]
+   set channels [list]
 
    if {[string length [set code [getDriverCode $directory]]] > 0} {
       dict set driver code $code
-      parseFiles devices $directory
+      parseSourceFiles channels $directory
    } else {
       writeProgramMessage "driver code not defined: $name"
    }
 
-   dict set driver devices $devices
+   dict set driver channels $channels
    return $driver
 }
 
@@ -170,7 +170,7 @@ proc parseDrivers {} {
   set drivers [list]
 
   foreach directory [lsort [glob -directory [file join $sourceDirectory Drivers Braille] -types {d r x} -nocomplain *]] {
-     if {[llength [dict get [set driver [parseDriver $directory]] devices]] > 0} {
+     if {[llength [dict get [set driver [parseDriver $directory]] channels]] > 0} {
         lappend drivers $driver
      }
   }
@@ -187,8 +187,8 @@ proc getVendors {drivers} {
 
    foreach driver $drivers {
       dict with driver {
-         foreach device $devices {
-            dict with device {
+         foreach channel $channels {
+            dict with channel {
                set device [dict create code $code name $name model $model]
 
                if {[dict exists $vendors $vendor $product]} {
@@ -208,52 +208,251 @@ proc getVendors {drivers} {
    return $vendors
 }
 
-proc writeVendors {vendors} {
-   global optionValues
+proc getSchemes {} {
+   set schemes [list]
+   set length [string length [set prefix makeLines_]]
 
-   foreach vendor [lsort -integer [dict keys $vendors]] {
-      set products [dict get $vendors $vendor]
+   foreach command [info procs $prefix*] {
+      lappend schemes [string range $command $length end]
+   }
 
-      foreach product [lsort -integer [dict keys $products]] {
-         set devices [dict get $products $product]
+   return $schemes
+}
 
-         set codes [list]
-         set descriptions [list]
+proc parseFileArguments {filesArray schemes arguments} {
+   upvar 1 $filesArray files
 
-         foreach device $devices {
-            dict with device {
-               lappend codes $code
-               lappend descriptions "$name \[$model\]"
+   foreach argument $arguments {
+      if {[set index [string first : $argument]] < 0} {
+         syntaxError "scheme not specified: $argument"
+      }
+
+      if {[string length [set scheme [string range $argument 0 $index-1]]] == 0} {
+         syntaxError "scheme not specified: $argument"
+      }
+
+      if {[lsearch -exact $schemes $scheme] < 0} {
+         syntaxError "unknown scheme: $scheme"
+      }
+
+      if {[string length [set path [string range $argument $index+1 end]]] == 0} {
+         syntaxError "path not specified: $argument"
+      }
+
+      if {![file exists $path]} {
+         semanticError "file not found: $path"
+      }
+
+      if {![file isfile $path]} {
+         semanticError "not a file: $path"
+      }
+
+      if {![file readable $path]} {
+         semanticError "file not readable: $path"
+      }
+
+      if {![file writable $path]} {
+         semanticError "file not writable: $path"
+      }
+
+      lappend files($scheme) $path
+   }
+}
+
+proc makeLines_android {vendor product drivers descriptions} {
+   set lines [list]
+
+   foreach description $descriptions {
+      lappend lines "<!-- $description -->"
+   }
+
+   lappend lines "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
+   return $lines
+}
+
+proc makeLines {linesArray schemes vendors} {
+   foreach scheme $schemes {
+      upvar 1 ${linesArray}($scheme) lines
+      set lines [list ""]
+
+      foreach vendor [lsort -integer [dict keys $vendors]] {
+         set products [dict get $vendors $vendor]
+
+         foreach product [lsort -integer [dict keys $products]] {
+            set devices [dict get $products $product]
+
+            set codes [list]
+            set descriptions [list]
+
+            foreach device $devices {
+               dict with device {
+                  lappend codes $code
+                  lappend descriptions "$name \[$model\]"
+               }
             }
-         }
 
-         writeDevice_android $vendor $product [lsort -unique $codes] [lsort $descriptions]
+            eval [list lappend lines] [makeLines_$scheme $vendor $product [lsort -unique $codes] [lsort $descriptions]]
+            lappend lines ""
+         }
       }
    }
 }
 
-proc writeDevice_android {vendor product drivers descriptions} {
-   foreach description $descriptions {
-      puts stdout "<!-- $description -->"
+proc readFile {linesVariable file} {
+   upvar 1 $linesVariable lines
+   set lines [list]
+
+   if {[catch [list open $file {RDONLY}] stream] == 0} {
+      while {[gets $stream line] >= 0} {
+         lappend lines $line
+      }
+
+      close $stream
+      return 1
+   } else {
+      writeProgramMessage $stream
    }
 
-   puts stdout "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
-   puts stdout ""
+   return 0
+}
+
+proc writeFile {lines file} {
+   if {[catch [list open $file {WRONLY CREAT TRUNC}] stream] == 0} {
+      puts $stream [join $lines \n]
+      close $stream
+      return 1
+   } else {
+      writeProgramMessage $stream
+   }
+
+   return 0
+}
+
+proc updateFile {file newLines} {
+   if {[readFile lines $file]} {
+      set markerSuffix "_USB_DEVICES"
+      set beginMarker "BEGIN$markerSuffix"
+      set endMarker "END$markerSuffix"
+
+      set ranges [list]
+      set range [list]
+      set index 0
+
+      foreach line $lines {
+         set location "$file\[[expr {$index + 1}]\]"
+
+         if {[string first $beginMarker $line] >= 0} {
+            if {[llength $range] > 0} {
+               writeProgramMessage "nested begin marker: $location"
+               return 0
+            }
+
+            lappend range $index [lindex [regexp -inline -- {^\s*} $line] 0]
+         } elseif {[string first $endMarker $line] >= 0} {
+            if {[llength $range] == 0} {
+               writeProgramMessage "missing begin marker: $location"
+               return 0
+            }
+
+            lappend range $index
+            lappend ranges $range
+            set range [list]
+         }
+
+         incr index
+      }
+
+      if {[llength $range] > 0} {
+         writeProgramMessage "missing end marker: $file\[[lindex $range 0]\]"
+         return 0
+      }
+
+      if {[llength $ranges] == 0} {
+         writeProgramMessage "no region(s) found: $file"
+         return 0
+      }
+
+      set hasChanged 0
+      set adjustment 0
+
+      foreach range $ranges {
+         set first [expr {[lindex $range 0] + 1 + $adjustment}]
+         set prefix [lindex $range 1]
+         set last [expr {[lindex $range 2] - 1 + $adjustment}]
+
+         if {!$hasChanged} {
+            set count [expr {$last - $first + 1}]
+            set delta [expr {[llength $newLines] - $count}]
+
+            if {$delta != 0} {
+               set hasChanged 1
+               incr adjustment $delta
+            } else {
+               set replacement [list]
+               foreach line $newLines {
+                  if {[string length $line] > 0} {
+                     set line "$prefix$line"
+                  }
+
+                  lappend replacement "$line"
+               }
+
+               set index 0
+               while {$index < $count} {
+                  if {[string compare [lindex $lines $first+$index] [lindex $replacement $index]] != 0} {
+                     set hasChanged 1
+                     break
+                  }
+
+                  incr index
+               }
+            }
+         }
+
+         if {$hasChanged} {
+            set lines [eval [list lreplace $lines $first $last] $replacement]
+         }
+      }
+
+      if {!$hasChanged} {
+         return 1
+      }
+
+      if {[writeFile $lines $file]} {
+         writeProgramMessage "file updated: $file"
+         return 1
+      }
+   }
+
+   return 0
+}
+
+proc updateFiles {filesArray linesArray} {
+   upvar 1 $filesArray files
+   upvar 1 $linesArray lines
+
+   foreach scheme [array names files] {
+      foreach file $files($scheme) {
+         updateFile $file $lines($scheme)
+      }
+   }
 }
 
 set sourceDirectory $programDirectory
 
 set optionDefinitions {
-   {format.(android)}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
    syntaxError
 }
 
-if {![info exists optionValues(format)]} {
-   syntaxError "format not specified"
+if {[llength $argv] == 0} {
+   syntaxError "no file(s) specified"
 }
 
-writeVendors [getVendors [parseDrivers]]
+set schemes [getSchemes]
+parseFileArguments files $schemes $argv
+makeLines lines [array names files] [getVendors [parseDrivers]]
+updateFiles files lines
 exit 0
