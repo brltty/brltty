@@ -272,7 +272,7 @@ proc makeLines_android {vendor product drivers descriptions} {
 
 proc makeLines_windows {vendor product drivers descriptions} {
    set lines [list]
-   lappend lines [format "\"LibUSB %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   lappend lines [format "\"LibUSB: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
    return $lines
 }
 
