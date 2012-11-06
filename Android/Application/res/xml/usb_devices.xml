@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <!-- Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip] -->
+  <usb-device vendor-id="1027" product-id="24577" />
+
+  <!-- Papenmeier [all models] -->
+  <usb-device vendor-id="1027" product-id="61960" />
+
+  <!-- Baum [Vario40 (40 cells)] -->
+  <usb-device vendor-id="1027" product-id="65136" />
+
+  <!-- Baum [PocketVario (24 cells)] -->
+  <usb-device vendor-id="1027" product-id="65137" />
+
+  <!-- Baum [SuperVario 40 (40 cells)] -->
+  <usb-device vendor-id="1027" product-id="65138" />
+
+  <!-- Baum [SuperVario 32 (32 cells)] -->
+  <usb-device vendor-id="1027" product-id="65139" />
+
+  <!-- Baum [SuperVario 64 (64 cells)] -->
+  <usb-device vendor-id="1027" product-id="65140" />
+
+  <!-- Baum [SuperVario 80 (80 cells)] -->
+  <usb-device vendor-id="1027" product-id="65141" />
+
+  <!-- Baum [VarioPro 80 (80 cells)] -->
+  <usb-device vendor-id="1027" product-id="65142" />
+
+  <!-- Baum [VarioPro 64 (64 cells)] -->
+  <usb-device vendor-id="1027" product-id="65143" />
+
+  <!-- Metec [all models] -->
+  <usb-device vendor-id="1106" product-id="256" />
+
+  <!-- HIMS [Braille Sense] -->
+  <usb-device vendor-id="1118" product-id="37642" />
+
+  <!-- HIMS [Braille Edge] -->
+  <usb-device vendor-id="1118" product-id="37643" />
+
+  <!-- Alva [Satellite (5nn)] -->
+  <usb-device vendor-id="1712" product-id="1" />
+
+  <!-- Voyager [all models] -->
+  <usb-device vendor-id="1944" product-id="1" />
+
+  <!-- Alva [BC624] -->
+  <usb-device vendor-id="1944" product-id="1572" />
+
+  <!-- Alva [BC640] -->
+  <usb-device vendor-id="1944" product-id="1600" />
+
+  <!-- Alva [BC680] -->
+  <usb-device vendor-id="1944" product-id="1664" />
+
+  <!-- Baum [VarioPro 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="8192" />
+
+  <!-- Baum [EcoVario 24 (24 cells)] -->
+  <usb-device vendor-id="2308" product-id="8193" />
+
+  <!-- Baum [EcoVario 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="8194" />
+
+  <!-- Baum [VarioConnect 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="8199" />
+
+  <!-- Baum [VarioConnect 32 (32 cells)] -->
+  <usb-device vendor-id="2308" product-id="8200" />
+
+  <!-- Baum [VarioConnect 24 (24 cells)] -->
+  <usb-device vendor-id="2308" product-id="8201" />
+
+  <!-- Baum [VarioConnect 64 (64 cells)] -->
+  <usb-device vendor-id="2308" product-id="8208" />
+
+  <!-- Baum [VarioConnect 80 (80 cells)] -->
+  <usb-device vendor-id="2308" product-id="8209" />
+
+  <!-- Baum [EcoVario 32 (32 cells)] -->
+  <usb-device vendor-id="2308" product-id="8212" />
+
+  <!-- Baum [EcoVario 64 (64 cells)] -->
+  <usb-device vendor-id="2308" product-id="8213" />
+
+  <!-- Baum [EcoVario 80 (80 cells)] -->
+  <usb-device vendor-id="2308" product-id="8214" />
+
+  <!-- Baum [Refreshabraille 18 (18 cells)] -->
+  <usb-device vendor-id="2308" product-id="12288" />
+
+  <!-- HandyTech [GoHubs chip] -->
+  <usb-device vendor-id="2337" product-id="4608" />
+
+  <!-- FreedomScientific [Focus 1] -->
+  <usb-device vendor-id="3918" product-id="256" />
+
+  <!-- FreedomScientific [PAC Mate] -->
+  <usb-device vendor-id="3918" product-id="273" />
+
+  <!-- FreedomScientific [Focus 2] -->
+  <usb-device vendor-id="3918" product-id="274" />
+
+  <!-- FreedomScientific [Focus Blue] -->
+  <usb-device vendor-id="3918" product-id="276" />
+
+  <!-- Seika [Braille Display] -->
+  <usb-device vendor-id="4292" product-id="60000" />
+
+  <!-- Seika [Note Taker] -->
+  <usb-device vendor-id="4292" product-id="60032" />
+
+  <!-- HumanWare [all models] -->
+  <usb-device vendor-id="7281" product-id="49157" />
+
+  <!-- HandyTech [USB-HID adapter] -->
+  <usb-device vendor-id="8164" product-id="3" />
+
+  <!-- HandyTech [Easy Braille (HID)] -->
+  <usb-device vendor-id="8164" product-id="68" />
+
+  <!-- HandyTech [Active Braille] -->
+  <usb-device vendor-id="8164" product-id="84" />
+
+  <!-- HandyTech [Braille Star 40 (HID)] -->
+  <usb-device vendor-id="8164" product-id="116" />
+
+  <!-- Pegasus [all models] -->
+  <usb-device vendor-id="16962" product-id="1" />
+
+  <!-- EuroBraille [Esys (version < 3.0, no SD card)] -->
+  <usb-device vendor-id="49745" product-id="4386" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4387" />
+
+  <!-- EuroBraille [Esys (version < 3.0, with SD card)] -->
+  <usb-device vendor-id="49745" product-id="4388" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4389" />
+
+  <!-- EuroBraille [Esys (version >= 3.0, no SD card)] -->
+  <usb-device vendor-id="49745" product-id="4390" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4391" />
+
+  <!-- EuroBraille [Esys (version >= 3.0, with SD card)] -->
+  <usb-device vendor-id="49745" product-id="4392" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4393" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4394" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4395" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4396" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4397" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4398" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4399" />
+
+  <!-- EuroBraille [Esytime] -->
+  <usb-device vendor-id="49745" product-id="4400" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4401" />
+
+  <!-- EuroBraille [reserved] -->
+  <usb-device vendor-id="49745" product-id="4402" />
+</resources>
