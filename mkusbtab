@@ -270,6 +270,12 @@ proc makeLines_android {vendor product drivers descriptions} {
    return $lines
 }
 
+proc makeLines_windows {vendor product drivers descriptions} {
+   set lines [list]
+   lappend lines [format "\"LibUSB %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   return $lines
+}
+
 proc makeLines {linesArray schemes vendors} {
    foreach scheme $schemes {
       upvar 1 ${linesArray}($scheme) lines
@@ -380,24 +386,25 @@ proc updateFile {file newLines} {
          set prefix [lindex $range 1]
          set last [expr {[lindex $range 2] - 1 + $adjustment}]
 
-         if {!$hasChanged} {
-            set count [expr {$last - $first + 1}]
-            set delta [expr {[llength $newLines] - $count}]
+         set count [expr {$last - $first + 1}]
+         set delta [expr {[llength $newLines] - $count}]
+         incr adjustment $delta
 
+         set replacement [list]
+         foreach line $newLines {
+            if {[string length $line] > 0} {
+               set line "$prefix$line"
+            }
+
+            lappend replacement "$line"
+         }
+
+         if {!$hasChanged} {
             if {$delta != 0} {
                set hasChanged 1
-               incr adjustment $delta
             } else {
-               set replacement [list]
-               foreach line $newLines {
-                  if {[string length $line] > 0} {
-                     set line "$prefix$line"
-                  }
-
-                  lappend replacement "$line"
-               }
-
                set index 0
+
                while {$index < $count} {
                   if {[string compare [lindex $lines $first+$index] [lindex $replacement $index]] != 0} {
                      set hasChanged 1
