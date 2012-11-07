@@ -132,48 +132,108 @@ proc nextOperand {operandsVariable {operandVariable ""}} {
 }
 
 proc processOptions {valuesArray argumentsVariable definitions} {
-   package require cmdline
-
    upvar 1 $valuesArray values
    upvar 1 $argumentsVariable arguments
 
-   set options [list]
-   array set values [list]
+   set prefix -
+   set options [dict create]
    set index 0
 
    foreach definition $definitions {
-      if {[set count [llength $definition]] < 1} {
-         return -code error "name not specified for option\[$index\]"
+      set description "option\[$index\]"
+
+      if {![nextOperand definition name]} {
+         return -code error "name not specified for $description"
       }
 
-      if {[set delimiter [string first . [set option [lindex $definition 0]]]] < 0} {
-         set name $option
-         set isFlag($name) 1
+      if {[dict exists $options $name]} {
+         return -code error "duplicate name for $description: $name"
+      }
+
+      if {![nextOperand definition type]} {
+         return -code error "type not specified for $description"
+      }
+
+      if {[lsearch -exact {counter flag toggle} $type] >= 0} {
          set values($name) 0
-      } else {
-         set name [string range $option 0 $delimiter-1]
-         set isFlag($name) 0
+      } elseif {[lsearch -exact {untyped} $type] < 0} {
+         if {[catch [list string is $type ""]] != 0} {
+            return -code error "invalid type for $description: $type"
+         }
       }
 
-      if {![string is alpha -strict $name]} {
-         return -code error "invalid name for option\[$index\]: $name"
-      }
-
-      lappend options $option
+      dict set options $name type $type
       incr index
    }
 
-   while {[set result [::cmdline::typedGetopt arguments $options name value]] > 0} {
-      if {$isFlag($name)} {
-         set values($name) 1
-      } else {
-         set values($name) $value
+   while {[llength $arguments] > 0} {
+      if {[string length [set argument [lindex $arguments 0]]] == 0} {
+         break
       }
-   }
 
-   if {$result < 0} {
-      writeProgramMessage $value
-      return 0
+      if {![string equal [string index $argument 0] $prefix]} {
+         break
+      }
+
+      if {[string length [set name [string range $argument 1 end]]] == 0} {
+         break
+      }
+
+      set arguments [lreplace $arguments 0 0]
+
+      if {[string equal $name $prefix]} {
+         break
+      }
+
+      if {[set count [dict size [set subset [dict filter $options key $name*]]]] == 0} {
+         writeProgramMessage "unknown option: $prefix$name"
+         return 0
+      }
+
+      if {$count > 1} {
+         writeProgramMessage "ambiguous option: $prefix$name"
+         return 0
+      }
+
+      set name [lindex [dict keys $subset] 0]
+      set option [dict get $subset $name]
+
+      switch -exact [set type [dict get $option type]] {
+         counter {
+            set value [expr {$values($name) + 1}]
+         }
+
+         flag {
+            set value 1
+         }
+
+         toggle {
+            set value [expr {!$values($name)}]
+         }
+
+         default {
+            if {[llength $arguments] == 0} {
+               writeProgramMessage "missing operand: $prefix$name"
+               return 0
+            }
+
+            set value [lindex $arguments 0]
+            set arguments [lreplace $arguments 0 0]
+
+            if {![string equal $type untyped]} {
+               if {[catch [list string is $type -strict $value] result] != 0} {
+                  return -code error "unimplemented option type: $type"
+               }
+
+               if {!$result} {
+                  writeProgramMessage "operand not $type: $prefix$name $value"
+                  return 0
+               }
+            }
+         }
+      }
+
+      set values($name) $value
    }
 
    return 1
