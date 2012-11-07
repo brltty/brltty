@@ -18,6 +18,7 @@
 
 #BEGIN_USB_DEVICES
 
+# generic device
 # Albatross [all models]
 # Cebra [all models]
 # HIMS [Sync Braille]
@@ -126,9 +127,11 @@ brltty-fs 0x0003 0x0f4e 0x0112
 # FreedomScientific [Focus Blue]
 brltty-fs 0x0003 0x0f4e 0x0114
 
+# generic device
 # Seika [Braille Display]
 brltty-sk 0x0003 0x10c4 0xea60
 
+# generic device
 # Seika [Note Taker]
 brltty-sk 0x0003 0x10c4 0xea80
 

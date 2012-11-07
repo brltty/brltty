@@ -226,36 +226,37 @@ proc getGenericIdentifiers {} {
    return $identifiers
 }
 
-proc getVendors {drivers} {
+proc makeDeviceTable {drivers} {
    set genericIdentifiers [getGenericIdentifiers]
-   set vendors [dict create]
+   set deviceTable [dict create]
 
    foreach driver $drivers {
       dict with driver {
          foreach channel $channels {
             dict with channel {
-               set device [dict create code $code name $name model $model]
                set identifier [makeGenericIdentifier $vendor $product]
+               set device [dict create code $code name $name model $model]
 
-               if {[lsearch -exact $genericIdentifiers $identifier] >= 0} {
-                  writeWarning "generic device: $identifier: [formatDevice $device]" 1
-               }
-
-               if {[dict exists $vendors $vendor $product]} {
-                  set devices [dict get $vendors $vendor $product]
+               if {[dict exists $deviceTable vendors $vendor products $product]} {
+                  set devices [dict get $deviceTable vendors $vendor products $product devices]
                   writeWarning "device specified more than once: $identifier: [formatDevice [lindex $devices 0]] & [formatDevice $device]" 1
                } else {
                   set devices [list]
+                  dict set deviceTable vendors $vendor products $product generic [expr {[lsearch -exact $genericIdentifiers $identifier] >= 0}]
                }
 
                lappend devices $device
-               dict set vendors $vendor $product $devices
+               dict set deviceTable vendors $vendor products $product devices $devices
+
+               if {[dict get $deviceTable vendors $vendor products $product generic]} {
+                  writeWarning "generic device: $identifier: [formatDevice $device]" 1
+               }
             }
          }
       }
    }
 
-   return $vendors
+   return $deviceTable
 }
 
 proc getSchemes {} {
@@ -309,37 +310,53 @@ proc parseFileArguments {filesArray schemes arguments} {
    }
 }
 
+proc makeComment_android {comment} {
+   return "<!-- $comment -->"
+}
+
 proc makeLines_android {vendor product drivers descriptions} {
    set lines [list]
 
    foreach description $descriptions {
-      lappend lines "<!-- $description -->"
+      lappend lines [makeComment_android $description]
    }
 
    lappend lines "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
    return $lines
 }
 
+proc makeComment_hotplug {comment} {
+   return "# $comment"
+}
+
 proc makeLines_hotplug {vendor product drivers descriptions} {
    set lines [list]
 
    foreach description $descriptions {
-      lappend lines "# $description"
+      lappend lines [makeComment_hotplug $description]
    }
 
    lappend lines [format "brltty-%s 0x%04x 0x%04x 0x%04x" [join $drivers ","] 3 $vendor $product]
    return $lines
 }
 
+proc makeComment_udev {comment} {
+   return "# $comment"
+}
+
 proc makeLines_udev {vendor product drivers descriptions} {
    set lines [list]
 
    foreach description $descriptions {
-      lappend lines "# $description"
+      lappend lines [makeComment_udev $description]
    }
 
    lappend lines [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ","]]
    return $lines
+}
+
+proc makeComment_windows {comment} {
+   return "; $comment"
 }
 
 proc makeLines_windows {vendor product drivers descriptions} {
@@ -348,16 +365,19 @@ proc makeLines_windows {vendor product drivers descriptions} {
    return $lines
 }
 
-proc makeLines {linesArray schemes vendors} {
+proc makeLines {linesArray schemes deviceTable} {
    foreach scheme $schemes {
       upvar 1 ${linesArray}($scheme) lines
       set lines [list ""]
+      set vendors [dict get $deviceTable vendors]
 
       foreach vendor [lsort -integer [dict keys $vendors]] {
-         set products [dict get $vendors $vendor]
+         set vendorEntry [dict get $vendors $vendor]
+         set products [dict get $vendorEntry products]
 
          foreach product [lsort -integer [dict keys $products]] {
-            set devices [dict get $products $product]
+            set productEntry [dict get $products $product]
+            set devices [dict get $productEntry devices]
 
             set codes [list]
             set descriptions [list]
@@ -367,6 +387,10 @@ proc makeLines {linesArray schemes vendors} {
                   lappend codes $code
                   lappend descriptions "$name \[$model\]"
                }
+            }
+
+            if {[dict get $productEntry generic]} {
+               lappend lines [makeComment_$scheme "generic device"]
             }
 
             eval [list lappend lines] [makeLines_$scheme $vendor $product [lsort -unique $codes] [lsort $descriptions]]
@@ -559,6 +583,6 @@ if {[llength $argv] == 0} {
 
 set schemes [getSchemes]
 parseFileArguments files $schemes $argv
-makeLines lines [array names files] [getVendors [parseDrivers]]
+makeLines lines [array names files] [makeDeviceTable [parseDrivers]]
 updateFiles files lines
 exit 0

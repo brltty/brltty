@@ -26,6 +26,7 @@ LABEL="brltty_usb_begin"
 
 #BEGIN_USB_DEVICES
 
+# generic device
 # Albatross [all models]
 # Cebra [all models]
 # HIMS [Sync Braille]
@@ -134,9 +135,11 @@ ENV{PRODUCT}=="f4e/112/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
 # FreedomScientific [Focus Blue]
 ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
 
+# generic device
 # Seika [Braille Display]
 ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_DRIVER}="sk", GOTO="brltty_usb_run"
 
+# generic device
 # Seika [Note Taker]
 ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_DRIVER}="sk", GOTO="brltty_usb_run"
 

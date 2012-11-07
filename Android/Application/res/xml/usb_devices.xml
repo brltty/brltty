@@ -3,6 +3,7 @@
 <resources>
   <!-- BEGIN_USB_DEVICES -->
 
+  <!-- generic device -->
   <!-- Albatross [all models] -->
   <!-- Cebra [all models] -->
   <!-- HIMS [Sync Braille] -->
@@ -111,9 +112,11 @@
   <!-- FreedomScientific [Focus Blue] -->
   <usb-device vendor-id="3918" product-id="276" />
 
+  <!-- generic device -->
   <!-- Seika [Braille Display] -->
   <usb-device vendor-id="4292" product-id="60000" />
 
+  <!-- generic device -->
   <!-- Seika [Note Taker] -->
   <usb-device vendor-id="4292" product-id="60032" />
 

@@ -121,6 +121,7 @@ ServiceBinary  = %12%\libusb0.sys
 [Devices]
 ;BEGIN_USB_DEVICES
 
+; generic device
 "LibUSB: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 "LibUSB: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
@@ -191,8 +192,10 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUSB: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
+; generic device
 "LibUSB: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
+; generic device
 "LibUSB: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
 
 "LibUSB: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
@@ -246,6 +249,7 @@ ServiceBinary  = %12%\libusb0.sys
 [Devices.NT]
 ;BEGIN_USB_DEVICES
 
+; generic device
 "LibUSB: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 "LibUSB: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
@@ -316,8 +320,10 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUSB: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
+; generic device
 "LibUSB: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
+; generic device
 "LibUSB: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
 
 "LibUSB: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
@@ -371,6 +377,7 @@ ServiceBinary  = %12%\libusb0.sys
 [Devices.NTAMD64]
 ;BEGIN_USB_DEVICES
 
+; generic device
 "LibUSB: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 "LibUSB: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
@@ -441,8 +448,10 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUSB: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
+; generic device
 "LibUSB: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
+; generic device
 "LibUSB: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
 
 "LibUSB: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
