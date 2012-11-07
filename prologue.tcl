@@ -90,6 +90,16 @@ if {[catch [list package require Tclx] response] != 0} {
    }
 }
 
+proc makeEnumeration {arrayVariable elements} {
+   upvar 1 $arrayVariable array
+   set value 0
+
+   foreach element $elements {
+      set array($element) $value
+      incr value
+   }
+}
+
 proc getProgramName {} {
    return [file tail [info script]]
 }
@@ -98,6 +108,26 @@ proc writeProgramMessage {message} {
    set stream stderr
    puts $stream "[getProgramName]: $message"
    flush $stream
+}
+
+makeEnumeration logLevels {
+   debug
+   information
+   notice
+   warning
+   error
+   alert
+   critical
+   emergency
+}
+set logLevel $logLevels(notice)
+
+proc logMessage {level message} {
+   global logLevels logLevel
+
+   if {$logLevels($level) >= $logLevel} {
+      writeProgramMessage $message
+   }
 }
 
 proc syntaxError {{message ""}} {
