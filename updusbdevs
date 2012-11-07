@@ -19,6 +19,22 @@
 
 source [file join [file dirname [info script]] "prologue.tcl"]
 
+proc writeWarning {message {level 0}} {
+   upvar #0 optionValues(quiet) quiet
+
+   if {$level > $quiet} {
+      writeProgramMessage $message
+   }
+}
+
+proc writeDriverWarning {message} {
+   writeWarning $message 2
+}
+
+proc writeSourceWarning {location message} {
+   writeDriverWarning "$message: [dict get $location file]\[[dict get $location line]\]"
+}
+
 proc getMakeProperty {file property} {
    set result ""
 
@@ -46,12 +62,9 @@ proc getDriverCode {driverDirectory} {
    return [getDriverProperty $driverDirectory DRIVER_CODE]
 }
 
-proc putDriverError {location message} {
-   writeProgramMessage "$message: [dict get $location file]\[[dict get $location line]\]"
-}
-
-proc parseChannelDefinition {lines location} {
+proc parseChannelDefinition {channelVariable lines location} {
    set channel [dict create]
+   set ok 1
 
    foreach line $lines {
       if {[regexp {\{\s*/\*\s*(.*?)\s*\*/\s*$} $line x model]} {
@@ -70,20 +83,29 @@ proc parseChannelDefinition {lines location} {
 
    foreach property {model vendor product} {
       if {![dict exists $channel $property]} {
-         putDriverError $location "property not defined: $property"
+         writeSourceWarning $location "property not defined: $property"
+         set ok 0
       }
    }
 
-   foreach property {vendor product} {
-      if {[string is integer -strict [set value [dict get $channel $property]]]} {
-         dict set channel $property [expr {$value + 0}]
-      } else {
-         putDriverError $location "$property is not numeric: $value"
-         dict unset channel $property
+   if {$ok} {
+      foreach property {vendor product} {
+         if {[string is integer -strict [set value [dict get $channel $property]]]} {
+            dict set channel $property [expr {$value + 0}]
+         } else {
+            writeSourceWarning $location "$property is not numeric: $value"
+            dict unset channel $property
+            set ok 0
+         }
+      }
+
+      if {$ok} {
+         uplevel 1 [list set $channelVariable $channel]
+         return 1
       }
    }
 
-   return $channel
+   return 0
 }
 
 proc parseChannelDefinitions {channelsVariable lines location} {
@@ -93,7 +115,10 @@ proc parseChannelDefinitions {channelsVariable lines location} {
    foreach lineText $lines {
       if {[info exists definition]} {
          if {[regexp {\}} $lineText]} {
-            lappend channels [parseChannelDefinition $definition $location]
+            if {[parseChannelDefinition channel $definition $location]} {
+               lappend channels $channel
+            }
+
             unset definition
          } else {
             lappend definition $lineText
@@ -157,7 +182,7 @@ proc parseDriver {directory} {
       dict set driver code $code
       parseSourceFiles channels $directory
    } else {
-      writeProgramMessage "driver code not defined: $name"
+      writeDriverWarning "driver code not defined: $name"
    }
 
    dict set driver channels $channels
@@ -193,7 +218,7 @@ proc getVendors {drivers} {
 
                if {[dict exists $vendors $vendor $product]} {
                   set devices [dict get $vendors $vendor $product]
-                  writeProgramMessage "device specified more than once: $vendor:$product: [describeDevice [lindex $devices 0]] & [describeDevice $device]"
+                  writeWarning "device specified more than once: $vendor:$product: [describeDevice [lindex $devices 0]] & [describeDevice $device]" 1
                } else {
                   set devices [list]
                }
@@ -417,7 +442,11 @@ proc updateFile {file newLines} {
          }
 
          if {$hasChanged} {
-            set lines [eval [list lreplace $lines $first $last] $replacement]
+            if {$count == 0} {
+               set lines [eval [list linsert $lines $first] $replacement]
+            } else {
+               set lines [eval [list lreplace $lines $first $last] $replacement]
+            }
          }
       }
 
@@ -448,10 +477,17 @@ proc updateFiles {filesArray linesArray} {
 set sourceDirectory $programDirectory
 
 set optionDefinitions {
+   {quiet counter}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
    syntaxError
+}
+
+if {[llength $argv] == 0} {
+   lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
+   lappend argv "windows:[file join $sourceDirectory Hotplug brltty.inf]"
+   lappend argv "windows:[file join $sourceDirectory Hotplug brltty-libusb-1.0.inf]"
 }
 
 if {[llength $argv] == 0} {
