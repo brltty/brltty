@@ -19,28 +19,20 @@
 
 source [file join [file dirname [info script]] "prologue.tcl"]
 
-proc writeWarning {message {level 0}} {
-   upvar #0 optionValues(quiet) quiet
-
-   if {$level > $quiet} {
-      writeProgramMessage $message
-   }
+proc logDriverWarning {message} {
+   logMessage warning $message
 }
 
-proc writeDriverWarning {message} {
-   writeWarning $message 2
-}
-
-proc writeSourceWarning {location message} {
-   writeDriverWarning "$message: [dict get $location file]\[[dict get $location line]\]"
+proc logSourceWarning {location message} {
+   logDriverWarning "$message: [dict get $location file]\[[dict get $location line]\]"
 }
 
 proc makeDecimalNumber {value} {
    return [expr {$value + 0}]
 }
 
-proc makeGenericIdentifier {vendor product} {
-   return [join [list [makeDecimalNumber $vendor] [makeDecimalNumber $product]] :]
+proc formatDeviceIdentifier {vendor product} {
+   return [format "%04X:%04X" [makeDecimalNumber $vendor] [makeDecimalNumber $product]]
 }
 
 proc getMakeProperty {file property} {
@@ -91,7 +83,7 @@ proc parseChannelDefinition {channelVariable lines location} {
 
    foreach property {model vendor product} {
       if {![dict exists $channel $property]} {
-         writeSourceWarning $location "property not defined: $property"
+         logSourceWarning $location "property not defined: $property"
          set ok 0
       }
    }
@@ -101,7 +93,7 @@ proc parseChannelDefinition {channelVariable lines location} {
          if {[string is integer -strict [set value [dict get $channel $property]]]} {
             dict set channel $property [makeDecimalNumber $value]
          } else {
-            writeSourceWarning $location "$property is not numeric: $value"
+            logSourceWarning $location "$property is not numeric: $value"
             dict unset channel $property
             set ok 0
          }
@@ -190,7 +182,7 @@ proc parseDriver {directory} {
       dict set driver code $code
       parseSourceFiles channels $directory
    } else {
-      writeDriverWarning "driver code not defined: $name"
+      logDriverWarning "driver code not defined: $name"
    }
 
    dict set driver channels $channels
@@ -211,7 +203,7 @@ proc parseDrivers {} {
   return $drivers
 }
 
-proc formatDevice {device} {
+proc formatDeviceDescription {device} {
    return "[dict get $device name]\[[dict get $device model]\]"
 }
 
@@ -220,7 +212,7 @@ proc getGenericIdentifiers {} {
    set identifiers [list]
 
    foreach device $genericDevices {
-      lappend identifiers [makeGenericIdentifier [lindex $device 0] [lindex $device 1]]
+      lappend identifiers [formatDeviceIdentifier [lindex $device 0] [lindex $device 1]]
    }
 
    return $identifiers
@@ -229,17 +221,18 @@ proc getGenericIdentifiers {} {
 proc makeDeviceTable {drivers} {
    set genericIdentifiers [getGenericIdentifiers]
    set deviceTable [dict create]
+   dict set deviceTable vendors [dict create]
 
    foreach driver $drivers {
       dict with driver {
          foreach channel $channels {
             dict with channel {
-               set identifier [makeGenericIdentifier $vendor $product]
+               set identifier [formatDeviceIdentifier $vendor $product]
                set device [dict create code $code name $name model $model]
 
                if {[dict exists $deviceTable vendors $vendor products $product]} {
                   set devices [dict get $deviceTable vendors $vendor products $product devices]
-                  writeWarning "device specified more than once: $identifier: [formatDevice [lindex $devices 0]] & [formatDevice $device]" 1
+                  logMessage notice "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
                } else {
                   set devices [list]
                   dict set deviceTable vendors $vendor products $product generic [expr {[lsearch -exact $genericIdentifiers $identifier] >= 0}]
@@ -249,7 +242,7 @@ proc makeDeviceTable {drivers} {
                dict set deviceTable vendors $vendor products $product devices $devices
 
                if {[dict get $deviceTable vendors $vendor products $product generic]} {
-                  writeWarning "generic device: $identifier: [formatDevice $device]" 1
+                  logMessage notice "generic device: $identifier: [formatDeviceDescription $device]"
                }
             }
          }
@@ -555,19 +548,23 @@ proc updateFiles {filesArray linesArray} {
 set sourceDirectory $programDirectory
 
 set genericDevices {
-   {0X0403 0X6001}
-   {0X10C4 0XEA60}
-   {0X10C4 0XEA80}
+   {0X0403 0X6001 "Future Technology Devices International, Ltd" "FT232 USB-Serial (UART) IC"}
+   {0X10C4 0XEA60 "Cygnal Integrated Products, Inc." "CP210x UART Bridge / myAVR mySmartUSB light"}
+   {0X10C4 0XEA80 "Cygnal Integrated Products, Inc." "CP210x UART Bridge"}
 }
 
 set optionDefinitions {
-   {quiet counter}
-   {test  flag}
+   {quiet   counter}
+   {verbose counter}
+   {test    flag}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
    syntaxError
 }
+
+incr logLevel $optionValues(quiet)
+incr logLevel -$optionValues(verbose)
 
 if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
