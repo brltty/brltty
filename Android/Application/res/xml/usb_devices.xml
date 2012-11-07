@@ -3,8 +3,8 @@
 <resources>
   <!-- BEGIN_USB_DEVICES -->
 
-  <!-- Device 0403:6001 -->
-  <!-- Generic -->
+  <!-- Device: 0403:6001 -->
+  <!-- Generic Identifier -->
   <!-- Vendor: Future Technology Devices International, Ltd -->
   <!-- Product: FT232 USB-Serial (UART) IC -->
   <!-- Albatross [all models] -->
@@ -13,245 +13,245 @@
   <!-- HandyTech [FTDI chip] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
-  <!-- Device 0403:F208 -->
+  <!-- Device: 0403:F208 -->
   <!-- Papenmeier [all models] -->
   <usb-device vendor-id="1027" product-id="61960" />
 
-  <!-- Device 0403:FE70 -->
+  <!-- Device: 0403:FE70 -->
   <!-- Baum [Vario40 (40 cells)] -->
   <usb-device vendor-id="1027" product-id="65136" />
 
-  <!-- Device 0403:FE71 -->
+  <!-- Device: 0403:FE71 -->
   <!-- Baum [PocketVario (24 cells)] -->
   <usb-device vendor-id="1027" product-id="65137" />
 
-  <!-- Device 0403:FE72 -->
+  <!-- Device: 0403:FE72 -->
   <!-- Baum [SuperVario 40 (40 cells)] -->
   <usb-device vendor-id="1027" product-id="65138" />
 
-  <!-- Device 0403:FE73 -->
+  <!-- Device: 0403:FE73 -->
   <!-- Baum [SuperVario 32 (32 cells)] -->
   <usb-device vendor-id="1027" product-id="65139" />
 
-  <!-- Device 0403:FE74 -->
+  <!-- Device: 0403:FE74 -->
   <!-- Baum [SuperVario 64 (64 cells)] -->
   <usb-device vendor-id="1027" product-id="65140" />
 
-  <!-- Device 0403:FE75 -->
+  <!-- Device: 0403:FE75 -->
   <!-- Baum [SuperVario 80 (80 cells)] -->
   <usb-device vendor-id="1027" product-id="65141" />
 
-  <!-- Device 0403:FE76 -->
+  <!-- Device: 0403:FE76 -->
   <!-- Baum [VarioPro 80 (80 cells)] -->
   <usb-device vendor-id="1027" product-id="65142" />
 
-  <!-- Device 0403:FE77 -->
+  <!-- Device: 0403:FE77 -->
   <!-- Baum [VarioPro 64 (64 cells)] -->
   <usb-device vendor-id="1027" product-id="65143" />
 
-  <!-- Device 0452:0100 -->
+  <!-- Device: 0452:0100 -->
   <!-- Metec [all models] -->
   <usb-device vendor-id="1106" product-id="256" />
 
-  <!-- Device 045E:930A -->
+  <!-- Device: 045E:930A -->
   <!-- HIMS [Braille Sense] -->
   <usb-device vendor-id="1118" product-id="37642" />
 
-  <!-- Device 045E:930B -->
+  <!-- Device: 045E:930B -->
   <!-- HIMS [Braille Edge] -->
   <usb-device vendor-id="1118" product-id="37643" />
 
-  <!-- Device 06B0:0001 -->
+  <!-- Device: 06B0:0001 -->
   <!-- Alva [Satellite (5nn)] -->
   <usb-device vendor-id="1712" product-id="1" />
 
-  <!-- Device 0798:0001 -->
+  <!-- Device: 0798:0001 -->
   <!-- Voyager [all models] -->
   <usb-device vendor-id="1944" product-id="1" />
 
-  <!-- Device 0798:0624 -->
+  <!-- Device: 0798:0624 -->
   <!-- Alva [BC624] -->
   <usb-device vendor-id="1944" product-id="1572" />
 
-  <!-- Device 0798:0640 -->
+  <!-- Device: 0798:0640 -->
   <!-- Alva [BC640] -->
   <usb-device vendor-id="1944" product-id="1600" />
 
-  <!-- Device 0798:0680 -->
+  <!-- Device: 0798:0680 -->
   <!-- Alva [BC680] -->
   <usb-device vendor-id="1944" product-id="1664" />
 
-  <!-- Device 0904:2000 -->
+  <!-- Device: 0904:2000 -->
   <!-- Baum [VarioPro 40 (40 cells)] -->
   <usb-device vendor-id="2308" product-id="8192" />
 
-  <!-- Device 0904:2001 -->
+  <!-- Device: 0904:2001 -->
   <!-- Baum [EcoVario 24 (24 cells)] -->
   <usb-device vendor-id="2308" product-id="8193" />
 
-  <!-- Device 0904:2002 -->
+  <!-- Device: 0904:2002 -->
   <!-- Baum [EcoVario 40 (40 cells)] -->
   <usb-device vendor-id="2308" product-id="8194" />
 
-  <!-- Device 0904:2007 -->
+  <!-- Device: 0904:2007 -->
   <!-- Baum [VarioConnect 40 (40 cells)] -->
   <usb-device vendor-id="2308" product-id="8199" />
 
-  <!-- Device 0904:2008 -->
+  <!-- Device: 0904:2008 -->
   <!-- Baum [VarioConnect 32 (32 cells)] -->
   <usb-device vendor-id="2308" product-id="8200" />
 
-  <!-- Device 0904:2009 -->
+  <!-- Device: 0904:2009 -->
   <!-- Baum [VarioConnect 24 (24 cells)] -->
   <usb-device vendor-id="2308" product-id="8201" />
 
-  <!-- Device 0904:2010 -->
+  <!-- Device: 0904:2010 -->
   <!-- Baum [VarioConnect 64 (64 cells)] -->
   <usb-device vendor-id="2308" product-id="8208" />
 
-  <!-- Device 0904:2011 -->
+  <!-- Device: 0904:2011 -->
   <!-- Baum [VarioConnect 80 (80 cells)] -->
   <usb-device vendor-id="2308" product-id="8209" />
 
-  <!-- Device 0904:2014 -->
+  <!-- Device: 0904:2014 -->
   <!-- Baum [EcoVario 32 (32 cells)] -->
   <usb-device vendor-id="2308" product-id="8212" />
 
-  <!-- Device 0904:2015 -->
+  <!-- Device: 0904:2015 -->
   <!-- Baum [EcoVario 64 (64 cells)] -->
   <usb-device vendor-id="2308" product-id="8213" />
 
-  <!-- Device 0904:2016 -->
+  <!-- Device: 0904:2016 -->
   <!-- Baum [EcoVario 80 (80 cells)] -->
   <usb-device vendor-id="2308" product-id="8214" />
 
-  <!-- Device 0904:3000 -->
+  <!-- Device: 0904:3000 -->
   <!-- Baum [Refreshabraille 18 (18 cells)] -->
   <usb-device vendor-id="2308" product-id="12288" />
 
-  <!-- Device 0921:1200 -->
+  <!-- Device: 0921:1200 -->
   <!-- HandyTech [GoHubs chip] -->
   <usb-device vendor-id="2337" product-id="4608" />
 
-  <!-- Device 0F4E:0100 -->
+  <!-- Device: 0F4E:0100 -->
   <!-- FreedomScientific [Focus 1] -->
   <usb-device vendor-id="3918" product-id="256" />
 
-  <!-- Device 0F4E:0111 -->
+  <!-- Device: 0F4E:0111 -->
   <!-- FreedomScientific [PAC Mate] -->
   <usb-device vendor-id="3918" product-id="273" />
 
-  <!-- Device 0F4E:0112 -->
+  <!-- Device: 0F4E:0112 -->
   <!-- FreedomScientific [Focus 2] -->
   <usb-device vendor-id="3918" product-id="274" />
 
-  <!-- Device 0F4E:0114 -->
+  <!-- Device: 0F4E:0114 -->
   <!-- FreedomScientific [Focus Blue] -->
   <usb-device vendor-id="3918" product-id="276" />
 
-  <!-- Device 10C4:EA60 -->
-  <!-- Generic -->
+  <!-- Device: 10C4:EA60 -->
+  <!-- Generic Identifier -->
   <!-- Vendor: Cygnal Integrated Products, Inc. -->
   <!-- Product: CP210x UART Bridge / myAVR mySmartUSB light -->
   <!-- Seika [Braille Display] -->
   <usb-device vendor-id="4292" product-id="60000" />
 
-  <!-- Device 10C4:EA80 -->
-  <!-- Generic -->
+  <!-- Device: 10C4:EA80 -->
+  <!-- Generic Identifier -->
   <!-- Vendor: Cygnal Integrated Products, Inc. -->
   <!-- Product: CP210x UART Bridge -->
   <!-- Seika [Note Taker] -->
   <usb-device vendor-id="4292" product-id="60032" />
 
-  <!-- Device 1C71:C005 -->
+  <!-- Device: 1C71:C005 -->
   <!-- HumanWare [all models] -->
   <usb-device vendor-id="7281" product-id="49157" />
 
-  <!-- Device 1FE4:0003 -->
+  <!-- Device: 1FE4:0003 -->
   <!-- HandyTech [USB-HID adapter] -->
   <usb-device vendor-id="8164" product-id="3" />
 
-  <!-- Device 1FE4:0044 -->
+  <!-- Device: 1FE4:0044 -->
   <!-- HandyTech [Easy Braille (HID)] -->
   <usb-device vendor-id="8164" product-id="68" />
 
-  <!-- Device 1FE4:0054 -->
+  <!-- Device: 1FE4:0054 -->
   <!-- HandyTech [Active Braille] -->
   <usb-device vendor-id="8164" product-id="84" />
 
-  <!-- Device 1FE4:0074 -->
+  <!-- Device: 1FE4:0074 -->
   <!-- HandyTech [Braille Star 40 (HID)] -->
   <usb-device vendor-id="8164" product-id="116" />
 
-  <!-- Device 4242:0001 -->
+  <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->
   <usb-device vendor-id="16962" product-id="1" />
 
-  <!-- Device C251:1122 -->
+  <!-- Device: C251:1122 -->
   <!-- EuroBraille [Esys (version < 3.0, no SD card)] -->
   <usb-device vendor-id="49745" product-id="4386" />
 
-  <!-- Device C251:1123 -->
+  <!-- Device: C251:1123 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4387" />
 
-  <!-- Device C251:1124 -->
+  <!-- Device: C251:1124 -->
   <!-- EuroBraille [Esys (version < 3.0, with SD card)] -->
   <usb-device vendor-id="49745" product-id="4388" />
 
-  <!-- Device C251:1125 -->
+  <!-- Device: C251:1125 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4389" />
 
-  <!-- Device C251:1126 -->
+  <!-- Device: C251:1126 -->
   <!-- EuroBraille [Esys (version >= 3.0, no SD card)] -->
   <usb-device vendor-id="49745" product-id="4390" />
 
-  <!-- Device C251:1127 -->
+  <!-- Device: C251:1127 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4391" />
 
-  <!-- Device C251:1128 -->
+  <!-- Device: C251:1128 -->
   <!-- EuroBraille [Esys (version >= 3.0, with SD card)] -->
   <usb-device vendor-id="49745" product-id="4392" />
 
-  <!-- Device C251:1129 -->
+  <!-- Device: C251:1129 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4393" />
 
-  <!-- Device C251:112A -->
+  <!-- Device: C251:112A -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4394" />
 
-  <!-- Device C251:112B -->
+  <!-- Device: C251:112B -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4395" />
 
-  <!-- Device C251:112C -->
+  <!-- Device: C251:112C -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4396" />
 
-  <!-- Device C251:112D -->
+  <!-- Device: C251:112D -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4397" />
 
-  <!-- Device C251:112E -->
+  <!-- Device: C251:112E -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4398" />
 
-  <!-- Device C251:112F -->
+  <!-- Device: C251:112F -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4399" />
 
-  <!-- Device C251:1130 -->
+  <!-- Device: C251:1130 -->
   <!-- EuroBraille [Esytime] -->
   <usb-device vendor-id="49745" product-id="4400" />
 
-  <!-- Device C251:1131 -->
+  <!-- Device: C251:1131 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4401" />
 
-  <!-- Device C251:1132 -->
+  <!-- Device: C251:1132 -->
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4402" />
 

@@ -254,7 +254,7 @@ proc makeDeviceTable {drivers} {
                dict set deviceTable vendors $vendor products $product devices $devices
 
                if {[dict get $deviceTable vendors $vendor products $product generic]} {
-                  logMessage notice "generic device: $identifier: [formatDeviceDescription $device]"
+                  logMessage notice "generic device identifier: $identifier: [formatDeviceDescription $device]"
                }
             }
          }
@@ -374,8 +374,12 @@ proc makeLines {linesArray schemes deviceTable} {
    global genericDevices
 
    foreach scheme $schemes {
+      set makeLines makeLines_$scheme
+      set makeComment makeComment_$scheme
+
       upvar 1 ${linesArray}($scheme) lines
       set lines [list ""]
+
       set vendors [dict get $deviceTable vendors]
 
       foreach vendor [lsort -integer [dict keys $vendors]] {
@@ -386,7 +390,7 @@ proc makeLines {linesArray schemes deviceTable} {
             set productEntry [dict get $products $product]
 
             set identifier [formatDeviceIdentifier $vendor $product]
-            lappend lines [makeComment_$scheme "Device $identifier"]
+            lappend lines [$makeComment "Device: $identifier"]
 
             set codes [list]
             set descriptions [list]
@@ -397,7 +401,7 @@ proc makeLines {linesArray schemes deviceTable} {
             }
 
             if {[dict get $productEntry generic]} {
-               lappend lines [makeComment_$scheme "Generic"]
+               lappend lines [$makeComment "Generic Identifier"]
                set generic [dict get $genericDevices $identifier]
 
                foreach {property header} {
@@ -405,12 +409,12 @@ proc makeLines {linesArray schemes deviceTable} {
                   product Product
                } {
                   if {[dict exists $generic $property]} {
-                     lappend lines [makeComment_$scheme "$header: [dict get $generic $property]"]
+                     lappend lines [$makeComment "$header: [dict get $generic $property]"]
                   }
                }
             }
 
-            eval [list lappend lines] [makeLines_$scheme $vendor $product [lsort -unique $codes] [lsort $descriptions]]
+            eval [list lappend lines] [$makeLines $vendor $product [lsort -unique $codes] [lsort $descriptions]]
             lappend lines ""
          }
       }

@@ -18,8 +18,8 @@
 
 #BEGIN_USB_DEVICES
 
-# Device 0403:6001
-# Generic
+# Device: 0403:6001
+# Generic Identifier
 # Vendor: Future Technology Devices International, Ltd
 # Product: FT232 USB-Serial (UART) IC
 # Albatross [all models]
@@ -28,245 +28,245 @@
 # HandyTech [FTDI chip]
 brltty-at,ce,hm,ht 0x0003 0x0403 0x6001
 
-# Device 0403:F208
+# Device: 0403:F208
 # Papenmeier [all models]
 brltty-pm 0x0003 0x0403 0xf208
 
-# Device 0403:FE70
+# Device: 0403:FE70
 # Baum [Vario40 (40 cells)]
 brltty-bm 0x0003 0x0403 0xfe70
 
-# Device 0403:FE71
+# Device: 0403:FE71
 # Baum [PocketVario (24 cells)]
 brltty-bm 0x0003 0x0403 0xfe71
 
-# Device 0403:FE72
+# Device: 0403:FE72
 # Baum [SuperVario 40 (40 cells)]
 brltty-bm 0x0003 0x0403 0xfe72
 
-# Device 0403:FE73
+# Device: 0403:FE73
 # Baum [SuperVario 32 (32 cells)]
 brltty-bm 0x0003 0x0403 0xfe73
 
-# Device 0403:FE74
+# Device: 0403:FE74
 # Baum [SuperVario 64 (64 cells)]
 brltty-bm 0x0003 0x0403 0xfe74
 
-# Device 0403:FE75
+# Device: 0403:FE75
 # Baum [SuperVario 80 (80 cells)]
 brltty-bm 0x0003 0x0403 0xfe75
 
-# Device 0403:FE76
+# Device: 0403:FE76
 # Baum [VarioPro 80 (80 cells)]
 brltty-bm 0x0003 0x0403 0xfe76
 
-# Device 0403:FE77
+# Device: 0403:FE77
 # Baum [VarioPro 64 (64 cells)]
 brltty-bm 0x0003 0x0403 0xfe77
 
-# Device 0452:0100
+# Device: 0452:0100
 # Metec [all models]
 brltty-mt 0x0003 0x0452 0x0100
 
-# Device 045E:930A
+# Device: 045E:930A
 # HIMS [Braille Sense]
 brltty-hm 0x0003 0x045e 0x930a
 
-# Device 045E:930B
+# Device: 045E:930B
 # HIMS [Braille Edge]
 brltty-hm 0x0003 0x045e 0x930b
 
-# Device 06B0:0001
+# Device: 06B0:0001
 # Alva [Satellite (5nn)]
 brltty-al 0x0003 0x06b0 0x0001
 
-# Device 0798:0001
+# Device: 0798:0001
 # Voyager [all models]
 brltty-vo 0x0003 0x0798 0x0001
 
-# Device 0798:0624
+# Device: 0798:0624
 # Alva [BC624]
 brltty-al 0x0003 0x0798 0x0624
 
-# Device 0798:0640
+# Device: 0798:0640
 # Alva [BC640]
 brltty-al 0x0003 0x0798 0x0640
 
-# Device 0798:0680
+# Device: 0798:0680
 # Alva [BC680]
 brltty-al 0x0003 0x0798 0x0680
 
-# Device 0904:2000
+# Device: 0904:2000
 # Baum [VarioPro 40 (40 cells)]
 brltty-bm 0x0003 0x0904 0x2000
 
-# Device 0904:2001
+# Device: 0904:2001
 # Baum [EcoVario 24 (24 cells)]
 brltty-bm 0x0003 0x0904 0x2001
 
-# Device 0904:2002
+# Device: 0904:2002
 # Baum [EcoVario 40 (40 cells)]
 brltty-bm 0x0003 0x0904 0x2002
 
-# Device 0904:2007
+# Device: 0904:2007
 # Baum [VarioConnect 40 (40 cells)]
 brltty-bm 0x0003 0x0904 0x2007
 
-# Device 0904:2008
+# Device: 0904:2008
 # Baum [VarioConnect 32 (32 cells)]
 brltty-bm 0x0003 0x0904 0x2008
 
-# Device 0904:2009
+# Device: 0904:2009
 # Baum [VarioConnect 24 (24 cells)]
 brltty-bm 0x0003 0x0904 0x2009
 
-# Device 0904:2010
+# Device: 0904:2010
 # Baum [VarioConnect 64 (64 cells)]
 brltty-bm 0x0003 0x0904 0x2010
 
-# Device 0904:2011
+# Device: 0904:2011
 # Baum [VarioConnect 80 (80 cells)]
 brltty-bm 0x0003 0x0904 0x2011
 
-# Device 0904:2014
+# Device: 0904:2014
 # Baum [EcoVario 32 (32 cells)]
 brltty-bm 0x0003 0x0904 0x2014
 
-# Device 0904:2015
+# Device: 0904:2015
 # Baum [EcoVario 64 (64 cells)]
 brltty-bm 0x0003 0x0904 0x2015
 
-# Device 0904:2016
+# Device: 0904:2016
 # Baum [EcoVario 80 (80 cells)]
 brltty-bm 0x0003 0x0904 0x2016
 
-# Device 0904:3000
+# Device: 0904:3000
 # Baum [Refreshabraille 18 (18 cells)]
 brltty-bm 0x0003 0x0904 0x3000
 
-# Device 0921:1200
+# Device: 0921:1200
 # HandyTech [GoHubs chip]
 brltty-ht 0x0003 0x0921 0x1200
 
-# Device 0F4E:0100
+# Device: 0F4E:0100
 # FreedomScientific [Focus 1]
 brltty-fs 0x0003 0x0f4e 0x0100
 
-# Device 0F4E:0111
+# Device: 0F4E:0111
 # FreedomScientific [PAC Mate]
 brltty-fs 0x0003 0x0f4e 0x0111
 
-# Device 0F4E:0112
+# Device: 0F4E:0112
 # FreedomScientific [Focus 2]
 brltty-fs 0x0003 0x0f4e 0x0112
 
-# Device 0F4E:0114
+# Device: 0F4E:0114
 # FreedomScientific [Focus Blue]
 brltty-fs 0x0003 0x0f4e 0x0114
 
-# Device 10C4:EA60
-# Generic
+# Device: 10C4:EA60
+# Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
 # Seika [Braille Display]
 brltty-sk 0x0003 0x10c4 0xea60
 
-# Device 10C4:EA80
-# Generic
+# Device: 10C4:EA80
+# Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge
 # Seika [Note Taker]
 brltty-sk 0x0003 0x10c4 0xea80
 
-# Device 1C71:C005
+# Device: 1C71:C005
 # HumanWare [all models]
 brltty-hw 0x0003 0x1c71 0xc005
 
-# Device 1FE4:0003
+# Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
 brltty-ht 0x0003 0x1fe4 0x0003
 
-# Device 1FE4:0044
+# Device: 1FE4:0044
 # HandyTech [Easy Braille (HID)]
 brltty-ht 0x0003 0x1fe4 0x0044
 
-# Device 1FE4:0054
+# Device: 1FE4:0054
 # HandyTech [Active Braille]
 brltty-ht 0x0003 0x1fe4 0x0054
 
-# Device 1FE4:0074
+# Device: 1FE4:0074
 # HandyTech [Braille Star 40 (HID)]
 brltty-ht 0x0003 0x1fe4 0x0074
 
-# Device 4242:0001
+# Device: 4242:0001
 # Pegasus [all models]
 brltty-pg 0x0003 0x4242 0x0001
 
-# Device C251:1122
+# Device: C251:1122
 # EuroBraille [Esys (version < 3.0, no SD card)]
 brltty-eu 0x0003 0xc251 0x1122
 
-# Device C251:1123
+# Device: C251:1123
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1123
 
-# Device C251:1124
+# Device: C251:1124
 # EuroBraille [Esys (version < 3.0, with SD card)]
 brltty-eu 0x0003 0xc251 0x1124
 
-# Device C251:1125
+# Device: C251:1125
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1125
 
-# Device C251:1126
+# Device: C251:1126
 # EuroBraille [Esys (version >= 3.0, no SD card)]
 brltty-eu 0x0003 0xc251 0x1126
 
-# Device C251:1127
+# Device: C251:1127
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1127
 
-# Device C251:1128
+# Device: C251:1128
 # EuroBraille [Esys (version >= 3.0, with SD card)]
 brltty-eu 0x0003 0xc251 0x1128
 
-# Device C251:1129
+# Device: C251:1129
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1129
 
-# Device C251:112A
+# Device: C251:112A
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112a
 
-# Device C251:112B
+# Device: C251:112B
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112b
 
-# Device C251:112C
+# Device: C251:112C
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112c
 
-# Device C251:112D
+# Device: C251:112D
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112d
 
-# Device C251:112E
+# Device: C251:112E
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112e
 
-# Device C251:112F
+# Device: C251:112F
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x112f
 
-# Device C251:1130
+# Device: C251:1130
 # EuroBraille [Esytime]
 brltty-eu 0x0003 0xc251 0x1130
 
-# Device C251:1131
+# Device: C251:1131
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1131
 
-# Device C251:1132
+# Device: C251:1132
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1132
 
