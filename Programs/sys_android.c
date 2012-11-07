@@ -20,6 +20,7 @@
 
 #include <pthread.h>
 
+#include "log.h"
 #include "system.h"
 #include "sys_android.h"
 
@@ -108,12 +109,16 @@ getJavaNativeInterface (void) {
   return env;
 }
 
-void
+int
 clearJavaException (JNIEnv *env, int describe) {
-  if ((*env)->ExceptionCheck(env)) {
+  int exceptionOccurred = (*env)->ExceptionCheck(env);
+
+  if (exceptionOccurred) {
     if (describe) (*env)->ExceptionDescribe(env);
     (*env)->ExceptionClear(env);
   }
+
+  return exceptionOccurred;
 }
 
 int
@@ -132,7 +137,13 @@ findJavaClass (JNIEnv *env, jclass *class, const char *path) {
       if (globalReference) {
         *class = globalReference;
         return 1;
+      } else {
+        logMallocError();
+        clearJavaException(env, 0);
       }
+    } else {
+      logMessage(LOG_ERR, "java class not found: %s", path);
+      clearJavaException(env, 0);
     }
   }
 
@@ -146,6 +157,8 @@ findJavaInstanceMethod (
 ) {
   if (!*method) {
     if (!(*method = (*env)->GetMethodID(env, class, name, signature))) {
+      logMessage(LOG_ERR, "java instance method not found: %s: %s", name, signature);
+      clearJavaException(env, 0);
       return 0;
     }
   }
@@ -160,6 +173,8 @@ findJavaStaticMethod (
 ) {
   if (!*method) {
     if (!(*method = (*env)->GetStaticMethodID(env, class, name, signature))) {
+      logMessage(LOG_ERR, "java static method not found: %s: %s", name, signature);
+      clearJavaException(env, 0);
       return 0;
     }
   }
@@ -182,6 +197,8 @@ findJavaInstanceField (
 ) {
   if (!*field) {
     if (!(*field = (*env)->GetFieldID(env, class, name, signature))) {
+      logMessage(LOG_ERR, "java instance field not found: %s: %s", name, signature);
+      clearJavaException(env, 0);
       return 0;
     }
   }
@@ -196,6 +213,8 @@ findJavaStaticField (
 ) {
   if (!*field) {
     if (!(*field = (*env)->GetStaticFieldID(env, class, name, signature))) {
+      logMessage(LOG_ERR, "java static field not found: %s: %s", name, signature);
+      clearJavaException(env, 0);
       return 0;
     }
   }
