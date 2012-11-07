@@ -572,9 +572,20 @@ proc updateFiles {filesArray linesArray} {
 set sourceDirectory $programDirectory
 
 set genericDevices [makeGenericDeviceTable {
-   {0X0403 0X6001 "Future Technology Devices International, Ltd" "FT232 USB-Serial (UART) IC"}
-   {0X10C4 0XEA60 "Cygnal Integrated Products, Inc." "CP210x UART Bridge / myAVR mySmartUSB light"}
-   {0X10C4 0XEA80 "Cygnal Integrated Products, Inc." "CP210x UART Bridge"}
+   {  0X0403 0X6001 
+      "Future Technology Devices International, Ltd" 
+      "FT232 USB-Serial (UART) IC"
+   }
+
+   {  0X10C4 0XEA60 
+      "Cygnal Integrated Products, Inc." 
+      "CP210x UART Bridge / myAVR mySmartUSB light"
+   }
+
+   {  0X10C4 0XEA80 
+      "Cygnal Integrated Products, Inc." 
+      "CP210x UART Bridge"
+   }
 }]
 
 set optionDefinitions {
