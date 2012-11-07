@@ -306,6 +306,17 @@ proc makeLines_hotplug {vendor product drivers descriptions} {
    return $lines
 }
 
+proc makeLines_udev {vendor product drivers descriptions} {
+   set lines [list]
+
+   foreach description $descriptions {
+      lappend lines "# $description"
+   }
+
+   lappend lines [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ","]]
+   return $lines
+}
+
 proc makeLines_windows {vendor product drivers descriptions} {
    set lines [list]
    lappend lines [format "\"LibUSB: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
@@ -506,6 +517,7 @@ if {![processOptions optionValues argv $optionDefinitions]} {
 if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
    lappend argv "hotplug:[file join $sourceDirectory Hotplug brltty.usermap]"
+   lappend argv "udev:[file join $sourceDirectory Hotplug udev.rules]"
    lappend argv "windows:[file join $sourceDirectory Hotplug brltty.inf]"
    lappend argv "windows:[file join $sourceDirectory Hotplug brltty-libusb-1.0.inf]"
 }
