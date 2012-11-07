@@ -40,10 +40,17 @@ static Queue *usbHostDevices = NULL;
 struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
   jobject connection;
+  jobject interface;
+};
+
+struct UsbEndpointExtensionStruct {
+  UsbEndpoint *endpoint;
+  jobject object;
 };
 
 static jclass usbHelperClass = NULL;
 static jclass usbDeviceClass = NULL;
+static jclass usbInterfaceClass = NULL;
 static jclass usbConnectionClass = NULL;
 
 static int
@@ -61,6 +68,8 @@ usbGetDeviceIterator (JNIEnv *env) {
       jobject iterator = (*env)->CallStaticObjectMethod(env, usbHelperClass, method);
 
       if (iterator) return iterator;
+      clearJavaException(env, 1);
+      errno = EIO;
     }
   }
 
@@ -77,6 +86,49 @@ usbGetNextDevice (JNIEnv *env, jobject iterator) {
       jobject device = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, iterator);
 
       if (device) return device;
+      clearJavaException(env, 1);
+    }
+  }
+
+  return NULL;
+}
+
+static jobject
+usbGetDeviceInterface (JNIEnv *env, jobject device, jint identifier) {
+  if (usbFindHelperClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, usbHelperClass, "getDeviceInterface",
+                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface),
+                                             JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
+                                             JAVA_SIG_INT // identifier
+                                            ))) {
+      jobject interface = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device, identifier);
+
+      if (interface) return interface;
+      clearJavaException(env, 1);
+      errno = EIO;
+    }
+  }
+
+  return NULL;
+}
+
+static jobject
+usbGetInterfaceEndpoint (JNIEnv *env, jobject interface, jint address) {
+  if (usbFindHelperClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, usbHelperClass, "getInterfaceEndpoint",
+                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbEndpoint),
+                                             JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                                             JAVA_SIG_INT // address
+                                            ))) {
+      jobject endpoint = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, interface, address);
+
+      if (endpoint) return endpoint;
+      clearJavaException(env, 1);
+      errno = EIO;
     }
   }
 
@@ -93,6 +145,8 @@ usbOpenDeviceConnection (JNIEnv *env, jobject device) {
       jobject connection = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device);
 
       if (connection) return connection;
+      clearJavaException(env, 1);
+      errno = EIO;
     }
   }
 
@@ -112,8 +166,12 @@ usbGetIntDeviceProperty (
   if (usbFindDeviceClass(env)) {
     if (findJavaInstanceMethod(env, methodIdentifier, usbDeviceClass, methodName,
                                JAVA_SIG_METHOD(JAVA_SIG_INT, ))) {
-      *value = (*env)->CallIntMethod(env, device, *methodIdentifier);
-      if (!(*env)->ExceptionCheck(env)) return 1;
+      if (!clearJavaException(env, 1)) {
+        *value = (*env)->CallIntMethod(env, device, *methodIdentifier);
+        return 1;
+      }
+
+      errno = EIO;
     }
   }
 
@@ -176,20 +234,74 @@ usbGetDeviceProtocol (JNIEnv *env, jobject device, UsbDeviceDescriptor *descript
 }
 
 static int
+usbFindInterfaceClass (JNIEnv *env) {
+  return findJavaClass(env, &usbInterfaceClass, "android/hardware/usb/UsbInterface");
+}
+
+static int
+usbGetInterfaceIdentifier (JNIEnv *env, uint8_t *identifier, jobject interface) {
+  if (usbFindInterfaceClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbInterfaceClass, "getId",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                              ))) {
+      jint result = (*env)->CallIntMethod(env, interface, method);
+
+      if (!clearJavaException(env, 1)) {
+        *identifier = result;
+        return 1;
+      }
+
+      errno = EIO;
+    }
+  }
+
+  return 0;
+}
+
+static int
 usbFindConnectionClass (JNIEnv *env) {
   return findJavaClass(env, &usbConnectionClass, "android/hardware/usb/UsbDeviceConnection");
 }
 
-static void
-usbCloseDeviceConnection (JNIEnv *env, jobject connection) {
+static int
+usbDoClaimInterface (JNIEnv *env, jobject connection, jobject interface) {
   if (usbFindConnectionClass(env)) {
     static jmethodID method = 0;
 
-    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "close",
-                               JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
-      (*env)->CallVoidMethod(env, connection, method);
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "claimInterface",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                                               JAVA_SIG_BOOLEAN // force
+                                              ))) {
+      jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface, JNI_TRUE);
+
+      if (!clearJavaException(env, 1)) return result;
+      errno = EIO;
     }
   }
+
+  return 0;
+}
+
+static int
+usbDoReleaseInterface (JNIEnv *env, jobject connection, jobject interface) {
+  if (usbFindConnectionClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "releaseInterface",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                                              ))) {
+      jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface);
+
+      if (!clearJavaException(env, 1)) return result;
+      errno = EIO;
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -211,13 +323,55 @@ usbDoControlTransfer (
                                                JAVA_SIG_INT // length
                                                JAVA_SIG_INT // timeout
                                               ))) {
-      return (*env)->CallIntMethod(env, connection, method,
-                                   type, request, value, index,
-                                   buffer, length, timeout);
+      jint result = (*env)->CallIntMethod(env, connection, method,
+                                          type, request, value, index,
+                                          buffer, length, timeout);
+
+      if (!clearJavaException(env, 1)) return result;
+      errno = EIO;
     }
   }
 
   return -1;
+}
+
+static int
+usbDoBulkTransfer (
+  JNIEnv *env, jobject connection, jobject endpoint,
+  jbyteArray buffer, int length, int timeout
+) {
+  if (usbFindConnectionClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "bulkTransfer",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbEndpoint) // endpoint
+                                               JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // buffer
+                                               JAVA_SIG_INT // length
+                                               JAVA_SIG_INT // timeout
+                                              ))) {
+      jint result = (*env)->CallIntMethod(env, connection, method,
+                                          endpoint, buffer, length, timeout);
+
+      if (!clearJavaException(env, 1)) return result;
+      errno = EIO;
+    }
+  }
+
+  return -1;
+}
+
+static void
+usbCloseDeviceConnection (JNIEnv *env, jobject connection) {
+  if (usbFindConnectionClass(env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(env, &method, usbConnectionClass, "close",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
+      (*env)->CallVoidMethod(env, connection, method);
+      clearJavaException(env, 1);
+    }
+  }
 }
 
 static int
@@ -235,6 +389,47 @@ usbOpenConnection (UsbDeviceExtension *devx) {
       connection = NULL;
 
       if (devx->connection) return 1;
+      logMallocError();
+      clearJavaException(host->env, 0);
+    }
+  }
+
+  return 0;
+}
+
+static void
+usbUnsetInterface (UsbDeviceExtension *devx) {
+  if (devx->interface) {
+    JNIEnv *env = devx->host->env;
+
+    (*env)->DeleteGlobalRef(env, devx->interface);
+    devx->interface = NULL;
+  }
+}
+
+static int
+usbSetInterface (UsbDeviceExtension *devx, uint8_t identifier) {
+  JNIEnv *env = devx->host->env;
+
+  if (devx->interface) {
+    uint8_t id;
+
+    if (!usbGetInterfaceIdentifier(env, &id, devx->interface)) return 0;
+    if (id == identifier) return 1;
+  }
+
+  {
+    jobject interface = usbGetDeviceInterface(env, devx->host->device, identifier);
+
+    if (interface) {
+      usbUnsetInterface(devx);
+      devx->interface = (*env)->NewGlobalRef(env, interface);
+
+      (*env)->DeleteLocalRef(env, interface);
+      interface = NULL;
+
+      if (devx->interface) return 1;
+      logMallocError();
     }
   }
 
@@ -274,24 +469,10 @@ usbClaimInterface (
 ) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (usbOpenConnection(devx)) {
-    JNIEnv *env = devx->host->env;
-
-    if (usbFindHelperClass(env)) {
-      static jmethodID method = 0;
-
-      if (findJavaStaticMethod(env, &method, usbHelperClass, "claimInterface",
-                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection) // connection
-                                               JAVA_SIG_INT // identifier
-                                              ))) {
-        jboolean claimed = (*env)->CallStaticBooleanMethod(env, usbHelperClass, method, devx->host->device, devx->connection, interface);
-
-        if (claimed) return 1;
-      }
-    }
-  }
+  if (usbSetInterface(devx, interface))
+    if (usbOpenConnection(devx))
+      if (usbDoClaimInterface(devx->host->env, devx->connection, devx->interface))
+        return 1;
 
   return 0;
 }
@@ -303,24 +484,10 @@ usbReleaseInterface (
 ) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (usbOpenConnection(devx)) {
-    JNIEnv *env = devx->host->env;
-
-    if (usbFindHelperClass(env)) {
-      static jmethodID method = 0;
-
-      if (findJavaStaticMethod(env, &method, usbHelperClass, "releaseInterface",
-                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection) // connection
-                                               JAVA_SIG_INT // identifier
-                                              ))) {
-        jboolean released = (*env)->CallStaticBooleanMethod(env, usbHelperClass, method, devx->host->device, devx->connection, interface);
-
-        if (released) return 1;
-      }
-    }
-  }
+  if (usbSetInterface(devx, interface))
+    if (usbOpenConnection(devx))
+      if (usbDoReleaseInterface(devx->host->env, devx->connection, devx->interface))
+        return 1;
 
   return 0;
 }
@@ -437,9 +604,32 @@ usbReadEndpoint (
   size_t length,
   int timeout
 ) {
-  errno = ENOSYS;
-  logSystemError("USB endpoint read");
-  return -1;
+  int result = -1;
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+
+  if (endpoint) {
+    UsbDeviceExtension *devx = device->extension;
+
+    if (usbOpenConnection(devx)) {
+      const UsbHostDevice *host = devx->host;
+      JNIEnv *env = host->env;
+      jbyteArray bytes = (*env)->NewByteArray(env, length);
+
+      if (bytes) {
+        UsbEndpointExtension *eptx = endpoint->extension;
+
+        result = usbDoBulkTransfer(env, devx->connection, eptx->object, bytes, length, timeout);
+        if (result > 0) (*env)->GetByteArrayRegion(env, bytes, 0, result, buffer);
+
+        (*env)->DeleteLocalRef(env, bytes);
+      } else {
+        logMallocError();
+        clearJavaException(env, 0);
+      }
+    }
+  }
+
+  return result;
 }
 
 ssize_t
@@ -450,9 +640,32 @@ usbWriteEndpoint (
   size_t length,
   int timeout
 ) {
-  errno = ENOSYS;
-  logSystemError("USB endpoint write");
-  return -1;
+  int result = -1;
+  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+
+  if (endpoint) {
+    UsbDeviceExtension *devx = device->extension;
+
+    if (usbOpenConnection(devx)) {
+      const UsbHostDevice *host = devx->host;
+      JNIEnv *env = host->env;
+      jbyteArray bytes = (*env)->NewByteArray(env, length);
+
+      if (bytes) {
+        UsbEndpointExtension *eptx = endpoint->extension;
+
+        (*env)->SetByteArrayRegion(env, bytes, 0, length, buffer);
+        result = usbDoBulkTransfer(env, devx->connection, eptx->object, bytes, length, timeout);
+
+        (*env)->DeleteLocalRef(env, bytes);
+      } else {
+        logMallocError();
+        clearJavaException(env, 0);
+      }
+    }
+  }
+
+  return result;
 }
 
 int
@@ -463,15 +676,68 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
-  return 1;
+  UsbDevice *device = endpoint->device;
+  UsbDeviceExtension *devx = device->extension;
+  const UsbHostDevice *host = devx->host;
+  JNIEnv *env = host->env;
+
+  if (devx->interface) {
+    jobject localReference = usbGetInterfaceEndpoint(env, devx->interface, endpoint->descriptor->bEndpointAddress);
+
+    if (localReference) {
+      jobject globalReference = (*env)->NewGlobalRef(env, localReference);
+
+      (*env)->DeleteLocalRef(env, localReference);
+      localReference = NULL;
+
+      if (globalReference) {
+        UsbEndpointExtension *eptx = malloc(sizeof(*eptx));
+
+        if (eptx) {
+          memset(eptx, 0, sizeof(*eptx));
+          eptx->endpoint = endpoint;
+          eptx->object = globalReference;
+
+          endpoint->extension = eptx;
+          return 1;
+        } else {
+          logMallocError();
+        }
+
+        (*env)->DeleteGlobalRef(env, globalReference);
+        globalReference = NULL;
+      } else {
+        logMallocError();
+        clearJavaException(env, 0);
+      }
+    }
+  } else {
+    errno = ENOSYS;
+  }
+
+  return 0;
 }
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
+  UsbEndpoint *endpoint = eptx->endpoint;
+  UsbDevice *device = endpoint->device;
+  UsbDeviceExtension *devx = device->extension;
+  const UsbHostDevice *host = devx->host;
+  JNIEnv *env = host->env;
+
+  if (eptx->object) {
+    (*env)->DeleteGlobalRef(env, eptx->object);
+    eptx->object = NULL;
+  }
+
+  free(eptx);
 }
 
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
+  usbUnsetInterface(devx);
+
   if (devx->connection) {
     const UsbHostDevice *host = devx->host;
 
@@ -545,6 +811,7 @@ usbTestHostDevice (void *item, void *data) {
     memset(devx, 0, sizeof(*devx));
     devx->host = host;
     devx->connection = NULL;
+    devx->interface = NULL;
 
     if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
 
