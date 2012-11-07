@@ -35,6 +35,29 @@ proc formatDeviceIdentifier {vendor product} {
    return [format "%04X:%04X" [makeDecimalNumber $vendor] [makeDecimalNumber $product]]
 }
 
+proc makeGenericDeviceTable {definitions} {
+   set table [dict create]
+
+   foreach definition $definitions {
+      set entry [dict create]
+
+      foreach {index property} {
+         2 vendor
+         3 product
+      } {
+         if {$index < [llength $definition]} {
+            if {[string length [set value [lindex $definition $index]]] > 0} {
+               dict set entry $property $value
+            }
+         }
+      }
+
+      dict set table [formatDeviceIdentifier [lindex $definition 0] [lindex $definition 1]] $entry
+   }
+
+   return $table
+}
+
 proc getMakeProperty {file property} {
    set result ""
 
@@ -207,19 +230,8 @@ proc formatDeviceDescription {device} {
    return "[dict get $device name]\[[dict get $device model]\]"
 }
 
-proc getGenericIdentifiers {} {
-   global genericDevices
-   set identifiers [list]
-
-   foreach device $genericDevices {
-      lappend identifiers [formatDeviceIdentifier [lindex $device 0] [lindex $device 1]]
-   }
-
-   return $identifiers
-}
-
 proc makeDeviceTable {drivers} {
-   set genericIdentifiers [getGenericIdentifiers]
+   global genericDevices
    set deviceTable [dict create]
    dict set deviceTable vendors [dict create]
 
@@ -235,7 +247,7 @@ proc makeDeviceTable {drivers} {
                   logMessage notice "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
                } else {
                   set devices [list]
-                  dict set deviceTable vendors $vendor products $product generic [expr {[lsearch -exact $genericIdentifiers $identifier] >= 0}]
+                  dict set deviceTable vendors $vendor products $product generic [dict exists $genericDevices $identifier]
                }
 
                lappend devices $device
@@ -359,6 +371,8 @@ proc makeLines_windows {vendor product drivers descriptions} {
 }
 
 proc makeLines {linesArray schemes deviceTable} {
+   global genericDevices
+
    foreach scheme $schemes {
       upvar 1 ${linesArray}($scheme) lines
       set lines [list ""]
@@ -370,20 +384,30 @@ proc makeLines {linesArray schemes deviceTable} {
 
          foreach product [lsort -integer [dict keys $products]] {
             set productEntry [dict get $products $product]
-            set devices [dict get $productEntry devices]
+
+            set identifier [formatDeviceIdentifier $vendor $product]
+            lappend lines [makeComment_$scheme "Device $identifier"]
 
             set codes [list]
             set descriptions [list]
 
-            foreach device $devices {
-               dict with device {
-                  lappend codes $code
-                  lappend descriptions "$name \[$model\]"
-               }
+            foreach deviceEntry [dict get $productEntry devices] {
+               lappend codes [dict get $deviceEntry code]
+               lappend descriptions "[dict get $deviceEntry name] \[[dict get $deviceEntry model]\]"
             }
 
             if {[dict get $productEntry generic]} {
-               lappend lines [makeComment_$scheme "generic device"]
+               lappend lines [makeComment_$scheme "Generic"]
+               set generic [dict get $genericDevices $identifier]
+
+               foreach {property header} {
+                  vendor Vendor
+                  product Product
+               } {
+                  if {[dict exists $generic $property]} {
+                     lappend lines [makeComment_$scheme "$header: [dict get $generic $property]"]
+                  }
+               }
             }
 
             eval [list lappend lines] [makeLines_$scheme $vendor $product [lsort -unique $codes] [lsort $descriptions]]
@@ -547,11 +571,11 @@ proc updateFiles {filesArray linesArray} {
 
 set sourceDirectory $programDirectory
 
-set genericDevices {
+set genericDevices [makeGenericDeviceTable {
    {0X0403 0X6001 "Future Technology Devices International, Ltd" "FT232 USB-Serial (UART) IC"}
    {0X10C4 0XEA60 "Cygnal Integrated Products, Inc." "CP210x UART Bridge / myAVR mySmartUSB light"}
    {0X10C4 0XEA80 "Cygnal Integrated Products, Inc." "CP210x UART Bridge"}
-}
+}]
 
 set optionDefinitions {
    {quiet   counter}
