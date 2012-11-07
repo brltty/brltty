@@ -35,6 +35,14 @@ proc writeSourceWarning {location message} {
    writeDriverWarning "$message: [dict get $location file]\[[dict get $location line]\]"
 }
 
+proc makeDecimalNumber {value} {
+   return [expr {$value + 0}]
+}
+
+proc makeGenericIdentifier {vendor product} {
+   return [join [list [makeDecimalNumber $vendor] [makeDecimalNumber $product]] :]
+}
+
 proc getMakeProperty {file property} {
    set result ""
 
@@ -91,7 +99,7 @@ proc parseChannelDefinition {channelVariable lines location} {
    if {$ok} {
       foreach property {vendor product} {
          if {[string is integer -strict [set value [dict get $channel $property]]]} {
-            dict set channel $property [expr {$value + 0}]
+            dict set channel $property [makeDecimalNumber $value]
          } else {
             writeSourceWarning $location "$property is not numeric: $value"
             dict unset channel $property
@@ -203,11 +211,23 @@ proc parseDrivers {} {
   return $drivers
 }
 
-proc describeDevice {device} {
+proc formatDevice {device} {
    return "[dict get $device name]\[[dict get $device model]\]"
 }
 
+proc getGenericIdentifiers {} {
+   global genericDevices
+   set identifiers [list]
+
+   foreach device $genericDevices {
+      lappend identifiers [makeGenericIdentifier [lindex $device 0] [lindex $device 1]]
+   }
+
+   return $identifiers
+}
+
 proc getVendors {drivers} {
+   set genericIdentifiers [getGenericIdentifiers]
    set vendors [dict create]
 
    foreach driver $drivers {
@@ -215,10 +235,15 @@ proc getVendors {drivers} {
          foreach channel $channels {
             dict with channel {
                set device [dict create code $code name $name model $model]
+               set identifier [makeGenericIdentifier $vendor $product]
+
+               if {[lsearch -exact $genericIdentifiers $identifier] >= 0} {
+                  writeWarning "generic device: $identifier: [formatDevice $device]" 1
+               }
 
                if {[dict exists $vendors $vendor $product]} {
                   set devices [dict get $vendors $vendor $product]
-                  writeWarning "device specified more than once: $vendor:$product: [describeDevice [lindex $devices 0]] & [describeDevice $device]" 1
+                  writeWarning "device specified more than once: $identifier: [formatDevice [lindex $devices 0]] & [formatDevice $device]" 1
                } else {
                   set devices [list]
                }
@@ -504,6 +529,12 @@ proc updateFiles {filesArray linesArray} {
 }
 
 set sourceDirectory $programDirectory
+
+set genericDevices {
+   {0X0403 0X6001}
+   {0X10C4 0XEA60}
+   {0X10C4 0XEA80}
+}
 
 set optionDefinitions {
    {quiet counter}
