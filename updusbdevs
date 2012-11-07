@@ -360,6 +360,8 @@ proc writeFile {lines file} {
 }
 
 proc updateFile {file newLines} {
+   upvar #0 optionValues(test) testMode
+
    if {[readFile lines $file]} {
       set markerSuffix "_USB_DEVICES"
       set beginMarker "BEGIN$markerSuffix"
@@ -454,6 +456,11 @@ proc updateFile {file newLines} {
          return 1
       }
 
+      if {$testMode} {
+         writeProgramMessage "test mode - file not updated: $file"
+         return 1
+      }
+
       if {[writeFile $lines $file]} {
          writeProgramMessage "file updated: $file"
          return 1
@@ -478,6 +485,7 @@ set sourceDirectory $programDirectory
 
 set optionDefinitions {
    {quiet counter}
+   {test  flag}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
