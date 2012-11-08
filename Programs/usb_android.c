@@ -604,7 +604,7 @@ usbReadEndpoint (
   size_t length,
   int timeout
 ) {
-  int result = -1;
+  ssize_t result = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
 
   if (endpoint) {
@@ -629,6 +629,18 @@ usbReadEndpoint (
     }
   }
 
+  if (result >= 0) {
+    if (!usbApplyInputFilters(device, buffer, length, &result)) {
+      errno = EIO;
+      result = -1;
+    }
+  }
+
+  if (result == -1) {
+    if (errno == ETIMEDOUT) errno = EAGAIN;
+    if (errno != EAGAIN) logSystemError("USB bulk read");
+  }
+
   return result;
 }
 
@@ -640,8 +652,8 @@ usbWriteEndpoint (
   size_t length,
   int timeout
 ) {
-  int result = -1;
-  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  ssize_t result = -1;
+  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
 
   if (endpoint) {
     UsbDeviceExtension *devx = device->extension;
@@ -665,6 +677,7 @@ usbWriteEndpoint (
     }
   }
 
+  if (result == -1) logSystemError("USB bulk write");
   return result;
 }
 
