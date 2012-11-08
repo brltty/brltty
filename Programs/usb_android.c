@@ -277,8 +277,13 @@ usbDoClaimInterface (JNIEnv *env, jobject connection, jobject interface) {
                                               ))) {
       jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface, JNI_TRUE);
 
-      if (!clearJavaException(env, 1)) return result;
-      errno = EIO;
+      if (clearJavaException(env, 1)) {
+        errno = EIO;
+      } else if (result) {
+        return 1;
+      } else {
+        logSystemError("USB claim interface");
+      }
     }
   }
 
@@ -296,8 +301,13 @@ usbDoReleaseInterface (JNIEnv *env, jobject connection, jobject interface) {
                                               ))) {
       jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface);
 
-      if (!clearJavaException(env, 1)) return result;
-      errno = EIO;
+      if (clearJavaException(env, 1)) {
+        errno = EIO;
+      } else if (result) {
+        return 1;
+      } else {
+        logSystemError("USB release interface");
+      }
     }
   }
 
@@ -863,8 +873,6 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
           (*env)->DeleteLocalRef(env, iterator);
         }
-
-        clearJavaException(env, 1);
       }
 
       if (!ok) {
