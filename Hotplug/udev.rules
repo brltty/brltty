@@ -24,7 +24,7 @@ GOTO="brltty_end"
 
 LABEL="brltty_usb_begin"
 
-#BEGIN_USB_DEVICES
+# BEGIN_USB_DEVICES
 
 # Device: 0403:6001
 # Generic Identifier
@@ -278,7 +278,7 @@ ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 # EuroBraille [reserved]
 ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 
-#END_USB_DEVICES
+# END_USB_DEVICES
 
 GOTO="brltty_end"
 

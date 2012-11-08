@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-#BEGIN_USB_DEVICES
+# BEGIN_USB_DEVICES
 
 # Device: 0403:6001
 # Generic Identifier
@@ -270,4 +270,4 @@ brltty-eu 0x0003 0xc251 0x1131
 # EuroBraille [reserved]
 brltty-eu 0x0003 0xc251 0x1132
 
-#END_USB_DEVICES
+# END_USB_DEVICES

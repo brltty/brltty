@@ -366,7 +366,7 @@ proc makeComment_windows {comment} {
 
 proc makeLines_windows {vendor product drivers descriptions} {
    set lines [list]
-   lappend lines [format "\"LibUSB: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   lappend lines [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
    return $lines
 }
 
@@ -466,14 +466,14 @@ proc updateFile {file newLines} {
       foreach line $lines {
          set location "$file\[[expr {$index + 1}]\]"
 
-         if {[string first $beginMarker $line] >= 0} {
+         if {[regexp "\\s${beginMarker}(?:\\s+(.*?)\\s*)?\$" $line x arguments]} {
             if {[llength $range] > 0} {
                writeProgramMessage "nested begin marker: $location"
                return 0
             }
 
-            lappend range $index [lindex [regexp -inline -- {^\s*} $line] 0]
-         } elseif {[string first $endMarker $line] >= 0} {
+            lappend range $index [lindex [regexp -inline -- {^\s*} $line] 0] [regexp -inline -all {\S+} $arguments]
+         } elseif {[regexp "\\s${endMarker}(?:\\s+.*)?\$" $line]} {
             if {[llength $range] == 0} {
                writeProgramMessage "missing begin marker: $location"
                return 0
@@ -503,7 +503,8 @@ proc updateFile {file newLines} {
       foreach range $ranges {
          set first [expr {[lindex $range 0] + 1 + $adjustment}]
          set prefix [lindex $range 1]
-         set last [expr {[lindex $range 2] - 1 + $adjustment}]
+         set argumentCount [llength [set argumentList [lindex $range 2]]]
+         set last [expr {[lindex $range 3] - 1 + $adjustment}]
 
          set count [expr {$last - $first + 1}]
          set delta [expr {[llength $newLines] - $count}]
@@ -511,6 +512,16 @@ proc updateFile {file newLines} {
 
          set replacement [list]
          foreach line $newLines {
+            foreach match [lreverse [regexp -inline -all -indices {\$[1-9][0-9]*} $line]] {
+               set from [lindex $match 0]
+               set to [lindex $match 1]
+               set argumentIndex [string range $line $from+1 $to]
+
+               if {[incr argumentIndex -1] < $argumentCount} {
+                  set line [string replace $line $from $to [lindex $argumentList $argumentIndex]]
+               }
+            }
+
             if {[string length $line] > 0} {
                set line "$prefix$line"
             }
