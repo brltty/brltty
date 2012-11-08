@@ -498,17 +498,13 @@ proc updateFile {file newLines} {
       }
 
       set hasChanged 0
-      set adjustment 0
 
-      foreach range $ranges {
-         set first [expr {[lindex $range 0] + 1 + $adjustment}]
+      foreach range [lreverse $ranges] {
+         set first [expr {[lindex $range 0] + 1}]
          set prefix [lindex $range 1]
          set argumentCount [llength [set argumentList [lindex $range 2]]]
-         set last [expr {[lindex $range 3] - 1 + $adjustment}]
-
+         set last [expr {[lindex $range 3] - 1}]
          set count [expr {$last - $first + 1}]
-         set delta [expr {[llength $newLines] - $count}]
-         incr adjustment $delta
 
          set replacement [list]
          foreach line $newLines {
@@ -530,7 +526,7 @@ proc updateFile {file newLines} {
          }
 
          if {!$hasChanged} {
-            if {$delta != 0} {
+            if {[llength $newLines] != $count} {
                set hasChanged 1
             } else {
                set index 0
