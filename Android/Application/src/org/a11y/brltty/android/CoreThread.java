@@ -20,13 +20,96 @@ package org.a11y.brltty.android;
 
 import org.a11y.brltty.core.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
 import android.util.Log;
+
 import android.content.Context;
+import android.content.res.AssetManager;
 
 public class CoreThread extends Thread {
   private final String LOG_TAG = this.getClass().getName();
 
   private final Context coreContext;
+
+  public static final int DATA_MODE = Context.MODE_PRIVATE;
+  public static final String DRIVERS_SUBDIRECTORY = "drivers";
+  public static final String TABLES_SUBDIRECTORY = "tables";
+
+  private final File getDataDirectory (String subdirectory) {
+    return coreContext.getDir(subdirectory, DATA_MODE);
+  }
+
+  private final void extractAsset (AssetManager assets, String type, File path) {
+    String asset = new File(type, path.getName()).getPath();
+    Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
+
+    try {
+      InputStream input = null;
+      OutputStream output = null;
+
+      try {
+        input = assets.open(asset);
+        output = new FileOutputStream(path);
+
+        byte[] buffer = new byte[0X4000];
+        int count;
+
+        while ((count = input.read(buffer)) > 0) {
+          output.write(buffer, 0, count);
+        }
+      } finally {
+        if (input != null) {
+          input.close();
+        }
+
+        if (output != null) {
+          output.close();
+        }
+      }
+    } catch (IOException exception) {
+      Log.e(LOG_TAG, "cannot extract asset: " + asset + " -> " + path, exception);
+    }
+  }
+
+  private final void extractAssets (AssetManager assets, String type) {
+    File directory = getDataDirectory(type);
+
+    if (directory.canWrite()) {
+      try {
+        String[] files = assets.list(type);
+
+        for (String file : files) {
+          File path = new File(directory, file);
+
+          if (path.exists()) {
+            if (!path.canWrite()) {
+              continue;
+            }
+
+            path.delete();
+          }
+
+          extractAsset(assets, type, path);
+          path.setReadOnly();
+        }
+
+        directory.setReadOnly();
+      } catch (IOException exception) {
+        Log.e(LOG_TAG, "cannot list assets directory: " + type, exception);
+      }
+    }
+  }
+
+  private final void extractAssets () {
+    AssetManager assets = coreContext.getAssets();
+    extractAssets(assets, TABLES_SUBDIRECTORY);
+  }
 
   CoreThread (Context context) {
     super("Core");
@@ -37,10 +120,15 @@ public class CoreThread extends Thread {
 
   @Override
   public void run () {
+    extractAssets();
+
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
     // required settings
     builder.setForegroundExecution(true);
+    builder.setTablesDirectory(getDataDirectory(TABLES_SUBDIRECTORY).getPath());
+    builder.setDriversDirectory(getDataDirectory(DRIVERS_SUBDIRECTORY).getPath());
+    builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
     builder.setLogLevel(LogLevel.DEBUG);
