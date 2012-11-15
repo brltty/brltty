@@ -5,6 +5,7 @@ cd brltty
 export ANDROID_NDK=/path/to/Android/NDK
 ./cfg-android -q
 
+export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
 cd Android/Core
 make -s
 cd ../Application
