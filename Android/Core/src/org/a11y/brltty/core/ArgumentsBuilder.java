@@ -166,6 +166,8 @@ public class ArgumentsBuilder {
     addOption(arguments, "-n", foregroundExecution);
     addOption(arguments, "-l", logLevel);
     addOption(arguments, "-L", logFile);
+    addOption(arguments, "-f", configurationFile);
+    addOption(arguments, "-F", preferencesFile);
     addOption(arguments, "-D", driversDirectory);
     addOption(arguments, "-W", writableDirectory);
     addOption(arguments, "-T", tablesDirectory);
