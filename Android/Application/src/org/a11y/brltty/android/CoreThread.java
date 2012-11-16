@@ -38,11 +38,11 @@ public class CoreThread extends Thread {
   private final Context coreContext;
 
   public static final int DATA_MODE = Context.MODE_PRIVATE;
-  public static final String DRIVERS_SUBDIRECTORY = "drivers";
-  public static final String TABLES_SUBDIRECTORY = "tables";
+  public static final String DATA_TYPE_TABLES = "tables";
+  public static final String DATA_TYPE_DRIVERS = "drivers";
 
-  private final File getDataDirectory (String subdirectory) {
-    return coreContext.getDir(subdirectory, DATA_MODE);
+  private final File getDataDirectory (String type) {
+    return coreContext.getDir(type, DATA_MODE);
   }
 
   private final void extractAsset (AssetManager assets, String type, File path) {
@@ -108,7 +108,8 @@ public class CoreThread extends Thread {
 
   private final void extractAssets () {
     AssetManager assets = coreContext.getAssets();
-    extractAssets(assets, TABLES_SUBDIRECTORY);
+    extractAssets(assets, DATA_TYPE_TABLES);
+    extractAssets(assets, DATA_TYPE_DRIVERS);
   }
 
   CoreThread (Context context) {
@@ -126,8 +127,8 @@ public class CoreThread extends Thread {
 
     // required settings
     builder.setForegroundExecution(true);
-    builder.setTablesDirectory(getDataDirectory(TABLES_SUBDIRECTORY).getPath());
-    builder.setDriversDirectory(getDataDirectory(DRIVERS_SUBDIRECTORY).getPath());
+    builder.setTablesDirectory(getDataDirectory(DATA_TYPE_TABLES).getPath());
+    builder.setDriversDirectory(getDataDirectory(DATA_TYPE_DRIVERS).getPath());
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
