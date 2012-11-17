@@ -109,7 +109,11 @@ public class BluetoothConnection {
       inputThread = new InputThread(bluetoothSocket.getInputStream(), inputPipe);
       inputThread.start();
     } catch (Throwable cause) {
-      Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress, cause);
+      if (cause instanceof IOException) {
+        Log.w(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + cause.getMessage());
+      } else {
+        Log.e(LOG_TAG, "Bluetooth connect error: " + bluetoothAddress, cause);
+      }
 
       if (inputThread != null) {
         inputThread.stop = true;
