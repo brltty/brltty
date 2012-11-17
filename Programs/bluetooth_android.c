@@ -50,9 +50,9 @@ bthConnect (uint64_t bda, uint8_t channel) {
                                 JAVA_SIG_CONSTRUCTOR(JAVA_SIG_LONG JAVA_SIG_BYTE JAVA_SIG_INT))) {
           if (pipe(bcx->inputPipe) != -1) {
             if (setBlockingIo(bcx->inputPipe[0], 0)) {
-              jobject localReference;
+              jobject localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda, channel, bcx->inputPipe[1]);
 
-              if ((localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda, channel, bcx->inputPipe[1]))) {
+              if (!clearJavaException(bcx->env, 0)) {
                 jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
 
                 (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
@@ -61,6 +61,8 @@ bthConnect (uint64_t bda, uint8_t channel) {
                 if ((globalReference)) {
                   bcx->connection = globalReference;
                   return bcx;
+                } else {
+                  logMallocError();
                 }
               }
             }
@@ -72,8 +74,6 @@ bthConnect (uint64_t bda, uint8_t channel) {
           }
         }
       }
-
-      clearJavaException(bcx->env, 1);
     }
 
     free(bcx);
