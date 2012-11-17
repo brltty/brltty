@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="org.a11y.brltty.android"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="16" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-        <activity android:name="BRLTTY"
-                  android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.a11y.brltty.android"
+    android:versionCode="1"
+    android:versionName="1.0"
+    >
 
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                       android:resource="@xml/usb_devices"
-            />
-        </activity>
-    </application>
+  <uses-sdk android:minSdkVersion="16" />
+  <uses-permission android:name="android.permission.BLUETOOTH" />
+
+  <application
+      android:label="@string/app_name"
+      android:icon="@drawable/ic_launcher"
+      >
+
+    <activity
+        android:name="BRLTTY"
+        android:label="@string/app_name"
+        >
+
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+
+      <intent-filter>
+        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+         android:resource="@xml/usb_devices"
+      />
+    </activity>
+
+    <activity
+        android:name="Settings"
+        android:label="Settings"
+        >
+    </activity>
+  </application>
 </manifest>

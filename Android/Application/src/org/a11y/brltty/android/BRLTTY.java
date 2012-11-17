@@ -29,25 +29,47 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import android.content.Intent;
+
 public class BRLTTY extends Activity {
   private final String LOG_TAG = this.getClass().getName();
 
   private Thread coreThread = null;
-  private Button stopButton;
+
+  private final void handleStopButton () {
+    Button button = (Button)findViewById(R.id.stopButton);
+
+    button.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick (View view) {
+        Log.d(LOG_TAG, "stop button pressed");
+        CoreWrapper.stop = true;
+        finish();
+      }
+    });
+  }
+
+  private final void handleSettingsButton () {
+    Button button = (Button)findViewById(R.id.settingsButton);
+
+    button.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick (View view) {
+        Log.d(LOG_TAG, "settings button pressed");
+        Intent intent = new Intent(BRLTTY.this, Settings.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+      }
+    });
+  }
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    stopButton = (Button)findViewById(R.id.stop);
-    stopButton.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick (View view) {
-        Log.d(LOG_TAG, "stop button pressed");
-        CoreWrapper.stop = true;
-      }
-    });
+    handleStopButton();
+    handleSettingsButton();
 
     coreThread = new CoreThread(this);
     coreThread.start();
