@@ -5,16 +5,26 @@ include $(SRC_TOP)Android/common.mk
 ANDROID_TABLES_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/tables
 ANDROID_DRIVERS_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/drivers
 
-all:: core tables drivers
+all:: core tables $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 
 core:
 	cd ../Core && $(MAKE)
 
-tables:
+tables-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_TABLES_DIRECTORY)
+
+tables: tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.[tack]t[bi] $(ANDROID_TABLES_DIRECTORY)
 
-drivers:
+drivers-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_DRIVERS_DIRECTORY)
-	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)[bsx]?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
+
+braille-drivers: drivers-directory
+	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)b?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
+
+speech-drivers: drivers-directory
+	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)s?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
+
+screen-drivers: drivers-directory
+	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
 
