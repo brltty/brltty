@@ -1,0 +1,128 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2012 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] .. .. "prologue.tcl"]
+
+proc getProperties {file names} {
+   set properties [dict create]
+
+   set comment #
+   set pattern {^}
+   append pattern "${comment}([join $names |])"
+   append pattern "\\s+(\[^\\s${comment}\]+)"
+   append pattern "\\s*(?:${comment}\\s*(.*?))?"
+   append pattern {\s*$}
+
+   if {[catch [list open $file {RDONLY}] stream] == 0} {
+      while {[gets $stream record] >= 0} {
+         if {[regexp $pattern $record x name code label]} {
+            if {[string length $label] == 0} {
+               set label $code
+            }
+
+            dict set properties $name $code $label
+         }
+      }
+
+      close $stream
+   } else {
+      semanticError $stream
+   }
+
+   return $properties
+}
+
+proc makeResources {properties} {
+   set lines [list]
+   lappend lines {<?xml version="1.0" encoding="utf-8"?>}
+   lappend lines ""
+   lappend lines "<resources>"
+   set first 1
+
+   foreach name [dict keys $properties] {
+      set property [dict get $properties $name]
+      set codes [list]
+      set labels [list]
+
+      foreach code [dict keys $property] {
+         lappend codes $code
+         lappend labels [dict get $property $code]
+      }
+
+      if {$first} {
+         set first 0
+      } else {
+         lappend lines ""
+      }
+
+      set prefix "[string toupper [string map {- _} $name]]_"
+      eval [list lappend lines] [makeArray "${prefix}CODES" $codes]
+      lappend lines ""
+      eval [list lappend lines] [makeArray "${prefix}LABELS" $labels]
+   }
+
+   lappend lines "</resources>"
+   return $lines
+}
+
+proc makeArray {name items} {
+   set lines [list]
+   lappend lines "  <string-array name=\"$name\">"
+
+   foreach item $items {
+      lappend lines "    <item>$item</item>"
+   }
+
+   lappend lines "  </string-array>"
+   return $lines
+}
+
+proc writeProperties {file lines} {
+   if {[catch [list open $file {WRONLY CREAT TRUNC}] stream] == 0} {
+      puts $stream [join $lines \n]
+      close $stream
+   } else {
+      semanticError $stream
+   }
+}
+
+set sourceDirectory $programDirectory
+set inputFile [file join $sourceDirectory "Documents" "brltty.conf.in"]
+set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
+
+set optionDefinitions {
+}
+
+if {![processOptions optionValues argv $optionDefinitions]} {
+   syntaxError
+}
+
+if {[llength $argv] == 0} {
+   lappend argv "braille-driver"
+   lappend argv "text-table"
+   lappend argv "attributes-table"
+   lappend argv "contraction-table"
+}
+
+if {[llength $argv] == 0} {
+   syntaxError "properties not specified"
+}
+
+writeProperties $outputFile [makeResources [getProperties [file join $sourceDirectory $inputFile] $argv]]
+exit 0
