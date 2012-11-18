@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-set programDirectory [file normalize [file dirname [info script]]]
+set sourceDirectory [file normalize [file dirname [info script]]]
 
 if {[catch [list package require Tclx] response] != 0} {
    proc lvarcat {list elements} {

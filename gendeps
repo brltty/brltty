@@ -146,6 +146,20 @@ proc getDependencies {file} {
    return $dependencies
 }
 
+set optionDefinitions {
+}
+
+if {![processOptions optionValues argv $optionDefinitions]} {
+   syntaxError
+}
+
+if {[llength $argv] == 0} {
+}
+
+if {[llength $argv] > 0} {
+   syntaxError "too many parameters"
+}
+
 set sourceExtensions {c cc y}
 set sourceExtensionsGlob "{[join $sourceExtensions ,]}"
 

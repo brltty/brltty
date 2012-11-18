@@ -102,7 +102,6 @@ proc writeProperties {file lines} {
    }
 }
 
-set sourceDirectory $programDirectory
 set inputFile [file join $sourceDirectory "Documents" "brltty.conf.in"]
 set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
 

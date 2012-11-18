@@ -580,8 +580,6 @@ proc updateFiles {filesArray linesArray} {
    }
 }
 
-set sourceDirectory $programDirectory
-
 set genericDevices [makeGenericDeviceTable {
    {  0X0403 0X6001 
       "Future Technology Devices International, Ltd" 
@@ -621,7 +619,7 @@ if {[llength $argv] == 0} {
 }
 
 if {[llength $argv] == 0} {
-   syntaxError "no file(s) specified"
+   syntaxError "files not specified"
 }
 
 set schemes [getSchemes]
