@@ -30,6 +30,6 @@ public class Settings extends PreferenceActivity {
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    addPreferencesFromResource(R.xml.settings);
+    addPreferencesFromResource(R.xml.settings_screens);
   }
 }

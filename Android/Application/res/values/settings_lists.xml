@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string-array name="BRAILLE_DRIVER_CODES">
+    <item>auto</item>
+    <item>al</item>
+    <item>at</item>
+    <item>ba</item>
+    <item>bc</item>
+    <item>bd</item>
+    <item>bl</item>
+    <item>bm</item>
+    <item>bn</item>
+    <item>cb</item>
+    <item>ce</item>
+    <item>ec</item>
+    <item>eu</item>
+    <item>fs</item>
+    <item>hm</item>
+    <item>ht</item>
+    <item>hw</item>
+    <item>ir</item>
+    <item>lb</item>
+    <item>lt</item>
+    <item>mb</item>
+    <item>md</item>
+    <item>mn</item>
+    <item>mt</item>
+    <item>np</item>
+    <item>pg</item>
+    <item>pm</item>
+    <item>sk</item>
+    <item>tn</item>
+    <item>ts</item>
+    <item>tt</item>
+    <item>vd</item>
+    <item>vo</item>
+    <item>vr</item>
+    <item>vs</item>
+    <item>xw</item>
+  </string-array>
+
+  <string-array name="BRAILLE_DRIVER_LABELS">
+    <item>autodetect</item>
+    <item>Alva</item>
+    <item>Albatross</item>
+    <item>BrlAPI</item>
+    <item>BrailComm</item>
+    <item>Braudi</item>
+    <item>BrailleLite</item>
+    <item>Baum</item>
+    <item>BrailleNote</item>
+    <item>CombiBraille</item>
+    <item>Cebra</item>
+    <item>EcoBraille</item>
+    <item>EuroBraille</item>
+    <item>FreedomScientific</item>
+    <item>HIMS</item>
+    <item>HandyTech</item>
+    <item>HumanWare</item>
+    <item>Iris</item>
+    <item>Libbraille</item>
+    <item>LogText</item>
+    <item>MultiBraille</item>
+    <item>MDV (protocol 5)</item>
+    <item>MiniBraille</item>
+    <item>Metec</item>
+    <item>NinePoint</item>
+    <item>Pegasus</item>
+    <item>Papenmeier</item>
+    <item>Seika</item>
+    <item>TechniBraille</item>
+    <item>TSI</item>
+    <item>TTY</item>
+    <item>VideoBraille</item>
+    <item>Voyager, Part232 (serial adapter), BraillePen/EasyLink</item>
+    <item>Virtual</item>
+    <item>VisioBraille</item>
+    <item>XWindow</item>
+  </string-array>
+
+  <string-array name="TEXT_TABLE_CODES">
+    <item>auto</item>
+    <item>ar</item>
+    <item>as</item>
+    <item>awa</item>
+    <item>bg</item>
+    <item>bh</item>
+    <item>bn</item>
+    <item>bo</item>
+    <item>bra</item>
+    <item>cs</item>
+    <item>cy</item>
+    <item>da</item>
+    <item>de</item>
+    <item>dra</item>
+    <item>el</item>
+    <item>en</item>
+    <item>en_CA</item>
+    <item>en_GB</item>
+    <item>en_US</item>
+    <item>en-nabcc</item>
+    <item>eo</item>
+    <item>es</item>
+    <item>et</item>
+    <item>fi</item>
+    <item>fr</item>
+    <item>fr_CA</item>
+    <item>fr_FR</item>
+    <item>fr-2007</item>
+    <item>fr-cbifs</item>
+    <item>ga</item>
+    <item>gd</item>
+    <item>gon</item>
+    <item>gu</item>
+    <item>he</item>
+    <item>hi</item>
+    <item>hr</item>
+    <item>hu</item>
+    <item>hy</item>
+    <item>is</item>
+    <item>it</item>
+    <item>kha</item>
+    <item>kn</item>
+    <item>kok</item>
+    <item>kru</item>
+    <item>lt</item>
+    <item>lv</item>
+    <item>mg</item>
+    <item>mi</item>
+    <item>ml</item>
+    <item>mni</item>
+    <item>mr</item>
+    <item>mt</item>
+    <item>mun</item>
+    <item>mwr</item>
+    <item>ne</item>
+    <item>new</item>
+    <item>nl</item>
+    <item>nl_BE</item>
+    <item>nl_NL</item>
+    <item>no</item>
+    <item>no-generic</item>
+    <item>no-oub</item>
+    <item>nwc</item>
+    <item>or</item>
+    <item>pa</item>
+    <item>pi</item>
+    <item>pl</item>
+    <item>pt</item>
+    <item>ro</item>
+    <item>ru</item>
+    <item>sa</item>
+    <item>sat</item>
+    <item>sd</item>
+    <item>sk</item>
+    <item>sv</item>
+    <item>sw</item>
+    <item>ta</item>
+    <item>te</item>
+    <item>tr</item>
+    <item>vi</item>
+  </string-array>
+
+  <string-array name="TEXT_TABLE_LABELS">
+    <item>locale-based autoselection (fallback to "@text_table@")</item>
+    <item>Arabic (generic)</item>
+    <item>Assamese</item>
+    <item>Awadhi</item>
+    <item>Bulgarian</item>
+    <item>Bihari</item>
+    <item>Bengali</item>
+    <item>Tibetan</item>
+    <item>Braj</item>
+    <item>Czech</item>
+    <item>Welsh</item>
+    <item>Danish</item>
+    <item>German</item>
+    <item>Dravidian</item>
+    <item>Greek</item>
+    <item>English</item>
+    <item>English (Canada)</item>
+    <item>English (United Kingdom)</item>
+    <item>English (United States)</item>
+    <item>English (North American Braille Computer Code)</item>
+    <item>Esperanto</item>
+    <item>Spanish</item>
+    <item>Estonian</item>
+    <item>Finnish</item>
+    <item>French</item>
+    <item>French (Canada)</item>
+    <item>French (France)</item>
+    <item>French (unified)</item>
+    <item>French (Code Braille Informatique Français Standard)</item>
+    <item>Irish</item>
+    <item>Gaelic</item>
+    <item>Gondi</item>
+    <item>Gujarati</item>
+    <item>Hebrew</item>
+    <item>Hindi</item>
+    <item>Croatian</item>
+    <item>Hungarian</item>
+    <item>Armenian</item>
+    <item>Icelandic</item>
+    <item>Italian</item>
+    <item>Khasi</item>
+    <item>Kannada</item>
+    <item>Konkani</item>
+    <item>Kurukh</item>
+    <item>Lituanian</item>
+    <item>Latvian</item>
+    <item>Malagasy</item>
+    <item>Maori</item>
+    <item>Malayalam</item>
+    <item>Manipuri</item>
+    <item>Marathi</item>
+    <item>Maltese</item>
+    <item>Mundari</item>
+    <item>Marwari</item>
+    <item>Nepali</item>
+    <item>Newari</item>
+    <item>Dutch</item>
+    <item>Dutch (Belgium)</item>
+    <item>Dutch (Netherlands)</item>
+    <item>Norwegian</item>
+    <item>Norwegian (with support for other languages)</item>
+    <item>Norwegian (Offentlig Utvalg for Blindeskrift)</item>
+    <item>Old Newari</item>
+    <item>Oriya</item>
+    <item>Panjabi</item>
+    <item>Pali</item>
+    <item>Polish</item>
+    <item>Portuguese</item>
+    <item>Romanian</item>
+    <item>Russian</item>
+    <item>Sanskrit</item>
+    <item>Santali</item>
+    <item>Sindhi</item>
+    <item>Slovak</item>
+    <item>Swedish</item>
+    <item>Swahili</item>
+    <item>Tamil</item>
+    <item>Telugu</item>
+    <item>Turkish</item>
+    <item>Vietnamese</item>
+  </string-array>
+
+  <string-array name="ATTRIBUTES_TABLE_CODES">
+    <item>attributes</item>
+    <item>attrib</item>
+  </string-array>
+
+  <string-array name="ATTRIBUTES_TABLE_LABELS">
+    <item>attributes</item>
+    <item>attrib</item>
+  </string-array>
+
+  <string-array name="CONTRACTION_TABLE_CODES">
+    <item>af</item>
+    <item>am</item>
+    <item>de-basis</item>
+    <item>de-kurzschrift</item>
+    <item>de-vollschrift</item>
+    <item>en-ueb-g2</item>
+    <item>en-us-g2</item>
+    <item>es</item>
+    <item>fr-abrege</item>
+    <item>fr-integral</item>
+    <item>ha</item>
+    <item>id</item>
+    <item>ja</item>
+    <item>ko-g1</item>
+    <item>ko-g2</item>
+    <item>ko</item>
+    <item>mg</item>
+    <item>mun</item>
+    <item>nl</item>
+    <item>ny</item>
+    <item>ipa</item>
+    <item>pt</item>
+    <item>si</item>
+    <item>sw</item>
+    <item>th</item>
+    <item>zh-tw</item>
+    <item>zh-tw-ucb</item>
+    <item>zu</item>
+  </string-array>
+
+  <string-array name="CONTRACTION_TABLE_LABELS">
+    <item>Afrikaans (contracted)</item>
+    <item>Amharic (uncontracted)</item>
+    <item>German (uncontracted)</item>
+    <item>German (contracted - 1998 standard)</item>
+    <item>German (basic contractions)</item>
+    <item>Unified English Braille (grade 2)</item>
+    <item>American English (grade 2)</item>
+    <item>Spanish (grade 2)</item>
+    <item>French (contracted)</item>
+    <item>French (uncontracted)</item>
+    <item>Hausa (contracted)</item>
+    <item>Indonesian (contracted)</item>
+    <item>Japanese (uncontracted)</item>
+    <item>Korean (grade 1)</item>
+    <item>Korean (grade 2)</item>
+    <item>Korean (uncontracted)</item>
+    <item>Malagasy (contracted)</item>
+    <item>Munda (contracted)</item>
+    <item>Dutch (contracted)</item>
+    <item>Chichewa (contracted)</item>
+    <item>International Phonetic Alphabet</item>
+    <item>Portuguese (grade 2)</item>
+    <item>Sinhalese (uncontracted)</item>
+    <item>Swahili (contracted)</item>
+    <item>Thai (contracted)</item>
+    <item>Taiwanese Chinese (uncontracted)</item>
+    <item>Taiwanese Chinese (Unique Chinese Braille)</item>
+    <item>Zulu (contracted)</item>
+  </string-array>
+</resources>

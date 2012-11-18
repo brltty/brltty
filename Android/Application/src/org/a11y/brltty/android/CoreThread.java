@@ -32,6 +32,9 @@ import android.util.Log;
 import android.content.Context;
 import android.content.res.AssetManager;
 
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
+
 public class CoreThread extends Thread {
   private final String LOG_TAG = this.getClass().getName();
 
@@ -132,11 +135,15 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
-    builder.setLogLevel(LogLevel.DEBUG);
-    builder.setLogFile("/data/local/tmp/brltty.log");
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(coreContext);
+    builder.setBrailleDriver(prefs.getString("braille-driver", "auto"));
+    builder.setTextTable(prefs.getString("text-table", "auto"));
+    builder.setAttributesTable(prefs.getString("attributes-table", "attributes"));
+    builder.setContractionTable(prefs.getString("contraction-table", "en-us-g2"));
 
     // settings for testing - should be removed
-    builder.setBrailleDriver("al");
+    builder.setLogLevel(LogLevel.DEBUG);
+    builder.setLogFile("/data/local/tmp/brltty.log");
     builder.setBrailleDevice("usb:,bluetooth:00:A0:96:18:54:7E");
 
     String[] arguments = builder.getArguments();

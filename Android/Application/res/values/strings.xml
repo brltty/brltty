@@ -2,18 +2,4 @@
 
 <resources>
   <string name="app_name">BRLTTY</string>
-
-  <string-array
-    name="BRAILLE_DRIVER_CODES">
-
-    <item>auto</item>
-    <item>al</item>
-  </string-array>
-
-  <string-array
-    name="BRAILLE_DRIVER_NAMES">
-
-    <item>Automatic Detection</item>
-    <item>Alva</item>
-  </string-array>
 </resources>
