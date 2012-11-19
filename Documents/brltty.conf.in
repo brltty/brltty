@@ -75,7 +75,7 @@
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille
-#braille-driver	md	# MDV (protocol 5)
+#braille-driver	md	# MDV
 #braille-driver	mn	# MiniBraille
 #braille-driver	mt	# Metec
 #braille-driver	np	# NinePoint
@@ -86,7 +86,7 @@
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
 #braille-driver	vd	# VideoBraille
-#braille-driver	vo	# Voyager, Part232 (serial adapter), BraillePen/EasyLink
+#braille-driver	vo	# Voyager, BraillePen/EasyLink
 #braille-driver	vr	# Virtual
 #braille-driver	vs	# VisioBraille
 #braille-driver	xw	# XWindow
