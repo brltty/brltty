@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Old Newari
+# BRLTTY Text Table - Newari (old)
 
 include devanagari.tti
 include bengali.tti

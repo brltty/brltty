@@ -191,7 +191,7 @@
 #text-table	no	# Norwegian
 #text-table	no-generic	# Norwegian (with support for other languages)
 #text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
-#text-table	nwc	# Old Newari
+#text-table	nwc	# Newari (old)
 #text-table	or	# Oriya
 #text-table	pa	# Panjabi
 #text-table	pi	# Pali
