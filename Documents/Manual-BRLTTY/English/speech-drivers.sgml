@@ -1,0 +1,24 @@
+Alva
+  |Delphi (4nn)@
+BrailleLite
+  |@
+CombiBraille
+  |@
+eSpeak
+  |text to speech engine@
+ExternalSpeech
+  |runs /usr/local/bin/externalspeech@
+Festival
+  |text to speech engine@
+FestivalLite
+  |text to speech engine@
+GenericSay
+  |pipes to /usr/local/bin/say@
+Mikropuhe
+  |text to speech engine@
+Swift
+  |text to speech engine@
+Theta
+  |text to speech engine@
+ViaVoice
+  |text to speech engine@
