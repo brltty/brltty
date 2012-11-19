@@ -134,9 +134,12 @@
 #text-table	bn	# Bengali
 #text-table	bo	# Tibetan
 #text-table	bra	# Braj
+#text-table	brf	# Braille Ready Format (for viewing .brf files within an editor or pager)
 #text-table	cs	# Czech
 #text-table	cy	# Welsh
 #text-table	da	# Danish
+#text-table	da-1252	# Danish (Svend Thougaard, 2002-11-18)
+#text-table	da-lt	# Danish (LogText)
 #text-table	de	# German
 #text-table	dra	# Dravidian
 #text-table	el	# Greek
@@ -152,8 +155,9 @@
 #text-table	fr	# French
 #text-table	fr_CA	# French (Canada)
 #text-table	fr_FR	# French (France)
-#text-table	fr-2007	# French (unified)
+#text-table	fr-2007	# French (unified 2007)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
+#text-table	fr-vs	# French (VisioBraille)
 #text-table	ga	# Irish
 #text-table	gd	# Gaelic
 #text-table	gon	# Gondi
@@ -177,7 +181,7 @@
 #text-table	mni	# Manipuri
 #text-table	mr	# Marathi
 #text-table	mt	# Maltese
-#text-table	mun	# Mundari
+#text-table	mun	# Munda
 #text-table	mwr	# Marwari
 #text-table	ne	# Nepali
 #text-table	new	# Newari
@@ -200,6 +204,8 @@
 #text-table	sd	# Sindhi
 #text-table	sk	# Slovak
 #text-table	sv	# Swedish
+#text-table	sv-1989	# Swedish (1989 standard)
+#text-table	sv-1996	# Swedish (1996 standard)
 #text-table	sw	# Swahili
 #text-table	ta	# Tamil
 #text-table	te	# Telugu
@@ -222,8 +228,8 @@
 #contraction-table	de-basis	# German (uncontracted)
 #contraction-table	de-kurzschrift	# German (contracted - 1998 standard)
 #contraction-table	de-vollschrift	# German (basic contractions)
-#contraction-table	en-ueb-g2	# Unified English Braille (grade 2)
-#contraction-table	en-us-g2	# American English (grade 2)
+#contraction-table	en-ueb-g2	# English (Unified English Braille, grade 2)
+#contraction-table	en-us-g2	# English (US, grade 2)
 #contraction-table	es	# Spanish (grade 2)
 #contraction-table	fr-abrege	# French (contracted)
 #contraction-table	fr-integral	# French (uncontracted)
@@ -242,8 +248,8 @@
 #contraction-table	si	# Sinhalese (uncontracted)
 #contraction-table	sw	# Swahili (contracted)
 #contraction-table	th	# Thai (contracted)
-#contraction-table	zh-tw	# Taiwanese Chinese (uncontracted)
-#contraction-table	zh-tw-ucb	# Taiwanese Chinese (Unique Chinese Braille)
+#contraction-table	zh-tw	# Chinese (Taiwan, uncontracted)
+#contraction-table	zh-tw-ucb	# Chinese (Taiwan, Unique Chinese Braille)
 #contraction-table	zu	# Zulu (contracted)
 
 

@@ -7,10 +7,12 @@ bh|Bihari@
 bn|Bengali@
 bo|Tibetan@
 bra|Braj@
-brf|for viewing <tt/.brf/ files within an editor or pager@
+brf|Braille Ready Format (for viewing .brf files within an editor or pager)@
 cs|Czech@
 cy|Welsh@
 da|Danish@
+da-1252|Danish (Svend Thougaard, 2002-11-18)@
+da-lt|Danish (LogText)@
 de|German@
 dra|Dravidian@
 el|Greek@
@@ -26,8 +28,9 @@ fi|Finnish@
 fr|French@
 fr&lowbar;CA|French (Canada)@
 fr&lowbar;FR|French (France)@
-fr-2007|French (unified)@
-fr-cbifs|French (Code Braille Informatique Français Standard)@
+fr-2007|French (unified 2007)@
+fr-cbifs|French (Code Braille Informatique FranÃ§ais Standard)@
+fr-vs|French (VisioBraille)@
 ga|Irish@
 gd|Gaelic@
 gon|Gondi@
@@ -51,7 +54,7 @@ ml|Malayalam@
 mni|Manipuri@
 mr|Marathi@
 mt|Maltese@
-mun|Mundari@
+mun|Munda@
 mwr|Marwari@
 ne|Nepali@
 new|Newari@
@@ -74,6 +77,8 @@ sat|Santali@
 sd|Sindhi@
 sk|Slovak@
 sv|Swedish@
+sv-1989|Swedish (1989 standard)@
+sv-1996|Swedish (1996 standard)@
 sw|Swahili@
 ta|Tamil@
 te|Telugu@

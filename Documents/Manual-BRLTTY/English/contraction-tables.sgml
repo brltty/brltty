@@ -3,8 +3,8 @@ am|Amharic (uncontracted)@
 de-basis|German (uncontracted)@
 de-kurzschrift|German (contracted - 1998 standard)@
 de-vollschrift|German (basic contractions)@
-en-ueb-g2|Unified English Braille (grade 2)@
-en-us-g2|American English (grade 2)@
+en-ueb-g2|English (Unified English Braille, grade 2)@
+en-us-g2|English (US, grade 2)@
 es|Spanish (grade 2)@
 fr-abrege|French (contracted)@
 fr-integral|French (uncontracted)@
@@ -23,6 +23,6 @@ pt|Portuguese (grade 2)@
 si|Sinhalese (uncontracted)@
 sw|Swahili (contracted)@
 th|Thai (contracted)@
-zh-tw|Taiwanese Chinese (uncontracted)@
-zh-tw-ucb|Taiwanese Chinese (Unique Chinese Braille)@
+zh-tw|Chinese (Taiwan, uncontracted)@
+zh-tw-ucb|Chinese (Taiwan, Unique Chinese Braille)@
 zu|Zulu (contracted)@

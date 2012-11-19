@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - for viewing .brf files within an editor or pager
+# BRLTTY Text Table - Braille Ready Format (for viewing .brf files within an editor or pager)
 
 char	\s	(      )
 
