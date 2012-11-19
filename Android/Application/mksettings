@@ -60,7 +60,7 @@ proc makeResources {properties} {
       set codes [list]
       set labels [list]
 
-      foreach code [dict keys $property] {
+      foreach code [lsort -command [list compareKeysByValue $property] [dict keys $property]] {
          lappend codes $code
          lappend labels [dict get $property $code]
       }
@@ -79,6 +79,24 @@ proc makeResources {properties} {
 
    lappend lines "</resources>"
    return $lines
+}
+
+proc compareKeysByValue {dictionary key1 key2} {
+   set value1 [dict get $dictionary $key1]
+   set value2 [dict get $dictionary $key2]
+
+   set upper1 [string is upper -strict [string index $value1 0]]
+   set upper2 [string is upper -strict [string index $value2 0]]
+
+   if {!$upper1 && $upper2} {
+      return -1
+   }
+
+   if {$upper1 && !$upper2} {
+      return 1
+   }
+
+   return [string compare $value1 $value2]
 }
 
 proc makeArray {name items} {
@@ -102,7 +120,7 @@ proc writeProperties {file lines} {
    }
 }
 
-set inputFile [file join $sourceDirectory "Documents" "brltty.conf.in"]
+set inputFile [file join $sourceDirectory "Documents" "brltty.conf"]
 set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
 
 set optionDefinitions {

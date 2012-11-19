@@ -3,16 +3,16 @@
 <resources>
   <string-array name="BRAILLE_DRIVER_CODES">
     <item>auto</item>
-    <item>al</item>
     <item>at</item>
-    <item>ba</item>
-    <item>bc</item>
-    <item>bd</item>
-    <item>bl</item>
+    <item>al</item>
     <item>bm</item>
+    <item>bc</item>
+    <item>bl</item>
     <item>bn</item>
-    <item>cb</item>
+    <item>bd</item>
+    <item>ba</item>
     <item>ce</item>
+    <item>cb</item>
     <item>ec</item>
     <item>eu</item>
     <item>fs</item>
@@ -22,36 +22,36 @@
     <item>ir</item>
     <item>lb</item>
     <item>lt</item>
-    <item>mb</item>
     <item>md</item>
-    <item>mn</item>
     <item>mt</item>
+    <item>mn</item>
+    <item>mb</item>
     <item>np</item>
-    <item>pg</item>
     <item>pm</item>
+    <item>pg</item>
     <item>sk</item>
-    <item>tn</item>
     <item>ts</item>
     <item>tt</item>
+    <item>tn</item>
     <item>vd</item>
-    <item>vo</item>
     <item>vr</item>
     <item>vs</item>
+    <item>vo</item>
     <item>xw</item>
   </string-array>
 
   <string-array name="BRAILLE_DRIVER_LABELS">
     <item>autodetect</item>
-    <item>Alva</item>
     <item>Albatross</item>
-    <item>BrlAPI</item>
-    <item>BrailComm</item>
-    <item>Braudi</item>
-    <item>BrailleLite</item>
+    <item>Alva</item>
     <item>Baum</item>
+    <item>BrailComm</item>
+    <item>BrailleLite</item>
     <item>BrailleNote</item>
-    <item>CombiBraille</item>
+    <item>Braudi</item>
+    <item>BrlAPI</item>
     <item>Cebra</item>
+    <item>CombiBraille</item>
     <item>EcoBraille</item>
     <item>EuroBraille</item>
     <item>FreedomScientific</item>
@@ -61,91 +61,88 @@
     <item>Iris</item>
     <item>Libbraille</item>
     <item>LogText</item>
-    <item>MultiBraille</item>
     <item>MDV (protocol 5)</item>
-    <item>MiniBraille</item>
     <item>Metec</item>
+    <item>MiniBraille</item>
+    <item>MultiBraille</item>
     <item>NinePoint</item>
-    <item>Pegasus</item>
     <item>Papenmeier</item>
+    <item>Pegasus</item>
     <item>Seika</item>
-    <item>TechniBraille</item>
     <item>TSI</item>
     <item>TTY</item>
+    <item>TechniBraille</item>
     <item>VideoBraille</item>
-    <item>Voyager, Part232 (serial adapter), BraillePen/EasyLink</item>
     <item>Virtual</item>
     <item>VisioBraille</item>
+    <item>Voyager, Part232 (serial adapter), BraillePen/EasyLink</item>
     <item>XWindow</item>
   </string-array>
 
   <string-array name="TEXT_TABLE_CODES">
     <item>auto</item>
     <item>ar</item>
+    <item>hy</item>
     <item>as</item>
     <item>awa</item>
-    <item>bg</item>
-    <item>bh</item>
     <item>bn</item>
-    <item>bo</item>
+    <item>bh</item>
     <item>bra</item>
+    <item>bg</item>
+    <item>hr</item>
     <item>cs</item>
-    <item>cy</item>
     <item>da</item>
-    <item>de</item>
     <item>dra</item>
-    <item>el</item>
+    <item>nl</item>
+    <item>nl_BE</item>
+    <item>nl_NL</item>
     <item>en</item>
     <item>en_CA</item>
+    <item>en-nabcc</item>
     <item>en_GB</item>
     <item>en_US</item>
-    <item>en-nabcc</item>
     <item>eo</item>
-    <item>es</item>
     <item>et</item>
     <item>fi</item>
     <item>fr</item>
     <item>fr_CA</item>
+    <item>fr-cbifs</item>
     <item>fr_FR</item>
     <item>fr-2007</item>
-    <item>fr-cbifs</item>
-    <item>ga</item>
     <item>gd</item>
+    <item>de</item>
     <item>gon</item>
+    <item>el</item>
     <item>gu</item>
     <item>he</item>
     <item>hi</item>
-    <item>hr</item>
     <item>hu</item>
-    <item>hy</item>
     <item>is</item>
+    <item>ga</item>
     <item>it</item>
-    <item>kha</item>
     <item>kn</item>
+    <item>kha</item>
     <item>kok</item>
     <item>kru</item>
-    <item>lt</item>
     <item>lv</item>
+    <item>lt</item>
     <item>mg</item>
-    <item>mi</item>
     <item>ml</item>
-    <item>mni</item>
-    <item>mr</item>
     <item>mt</item>
-    <item>mun</item>
+    <item>mni</item>
+    <item>mi</item>
+    <item>mr</item>
     <item>mwr</item>
+    <item>mun</item>
     <item>ne</item>
     <item>new</item>
-    <item>nl</item>
-    <item>nl_BE</item>
-    <item>nl_NL</item>
-    <item>no</item>
-    <item>no-generic</item>
-    <item>no-oub</item>
     <item>nwc</item>
+    <item>no</item>
+    <item>no-oub</item>
+    <item>no-generic</item>
     <item>or</item>
-    <item>pa</item>
     <item>pi</item>
+    <item>pa</item>
     <item>pl</item>
     <item>pt</item>
     <item>ro</item>
@@ -154,81 +151,81 @@
     <item>sat</item>
     <item>sd</item>
     <item>sk</item>
-    <item>sv</item>
+    <item>es</item>
     <item>sw</item>
+    <item>sv</item>
     <item>ta</item>
     <item>te</item>
+    <item>bo</item>
     <item>tr</item>
     <item>vi</item>
+    <item>cy</item>
   </string-array>
 
   <string-array name="TEXT_TABLE_LABELS">
-    <item>locale-based autoselection (fallback to "@text_table@")</item>
+    <item>locale-based autoselection (fallback to "en-nabcc")</item>
     <item>Arabic (generic)</item>
+    <item>Armenian</item>
     <item>Assamese</item>
     <item>Awadhi</item>
-    <item>Bulgarian</item>
-    <item>Bihari</item>
     <item>Bengali</item>
-    <item>Tibetan</item>
+    <item>Bihari</item>
     <item>Braj</item>
+    <item>Bulgarian</item>
+    <item>Croatian</item>
     <item>Czech</item>
-    <item>Welsh</item>
     <item>Danish</item>
-    <item>German</item>
     <item>Dravidian</item>
-    <item>Greek</item>
+    <item>Dutch</item>
+    <item>Dutch (Belgium)</item>
+    <item>Dutch (Netherlands)</item>
     <item>English</item>
     <item>English (Canada)</item>
+    <item>English (North American Braille Computer Code)</item>
     <item>English (United Kingdom)</item>
     <item>English (United States)</item>
-    <item>English (North American Braille Computer Code)</item>
     <item>Esperanto</item>
-    <item>Spanish</item>
     <item>Estonian</item>
     <item>Finnish</item>
     <item>French</item>
     <item>French (Canada)</item>
+    <item>French (Code Braille Informatique Français Standard)</item>
     <item>French (France)</item>
     <item>French (unified)</item>
-    <item>French (Code Braille Informatique Français Standard)</item>
-    <item>Irish</item>
     <item>Gaelic</item>
+    <item>German</item>
     <item>Gondi</item>
+    <item>Greek</item>
     <item>Gujarati</item>
     <item>Hebrew</item>
     <item>Hindi</item>
-    <item>Croatian</item>
     <item>Hungarian</item>
-    <item>Armenian</item>
     <item>Icelandic</item>
+    <item>Irish</item>
     <item>Italian</item>
-    <item>Khasi</item>
     <item>Kannada</item>
+    <item>Khasi</item>
     <item>Konkani</item>
     <item>Kurukh</item>
-    <item>Lituanian</item>
     <item>Latvian</item>
+    <item>Lituanian</item>
     <item>Malagasy</item>
-    <item>Maori</item>
     <item>Malayalam</item>
-    <item>Manipuri</item>
-    <item>Marathi</item>
     <item>Maltese</item>
-    <item>Mundari</item>
+    <item>Manipuri</item>
+    <item>Maori</item>
+    <item>Marathi</item>
     <item>Marwari</item>
+    <item>Mundari</item>
     <item>Nepali</item>
     <item>Newari</item>
-    <item>Dutch</item>
-    <item>Dutch (Belgium)</item>
-    <item>Dutch (Netherlands)</item>
+    <item>Newari (old)</item>
     <item>Norwegian</item>
-    <item>Norwegian (with support for other languages)</item>
     <item>Norwegian (Offentlig Utvalg for Blindeskrift)</item>
-    <item>Old Newari</item>
+    <item>Norwegian (with support for other languages)</item>
     <item>Oriya</item>
-    <item>Panjabi</item>
     <item>Pali</item>
+    <item>Panjabi</item>
     <item>Polish</item>
     <item>Portuguese</item>
     <item>Romanian</item>
@@ -237,83 +234,86 @@
     <item>Santali</item>
     <item>Sindhi</item>
     <item>Slovak</item>
-    <item>Swedish</item>
+    <item>Spanish</item>
     <item>Swahili</item>
+    <item>Swedish</item>
     <item>Tamil</item>
     <item>Telugu</item>
+    <item>Tibetan</item>
     <item>Turkish</item>
     <item>Vietnamese</item>
+    <item>Welsh</item>
   </string-array>
 
   <string-array name="ATTRIBUTES_TABLE_CODES">
-    <item>attributes</item>
     <item>attrib</item>
+    <item>attributes</item>
   </string-array>
 
   <string-array name="ATTRIBUTES_TABLE_LABELS">
-    <item>attributes</item>
     <item>attrib</item>
+    <item>attributes</item>
   </string-array>
 
   <string-array name="CONTRACTION_TABLE_CODES">
     <item>af</item>
     <item>am</item>
-    <item>de-basis</item>
-    <item>de-kurzschrift</item>
-    <item>de-vollschrift</item>
-    <item>en-ueb-g2</item>
+    <item>ny</item>
+    <item>zh-tw</item>
+    <item>zh-tw-ucb</item>
+    <item>nl</item>
     <item>en-us-g2</item>
-    <item>es</item>
+    <item>en-ueb-g2</item>
     <item>fr-abrege</item>
     <item>fr-integral</item>
+    <item>de-vollschrift</item>
+    <item>de-kurzschrift</item>
+    <item>de-basis</item>
     <item>ha</item>
     <item>id</item>
+    <item>ipa</item>
     <item>ja</item>
     <item>ko-g1</item>
     <item>ko-g2</item>
     <item>ko</item>
     <item>mg</item>
     <item>mun</item>
-    <item>nl</item>
-    <item>ny</item>
-    <item>ipa</item>
     <item>pt</item>
     <item>si</item>
+    <item>es</item>
     <item>sw</item>
     <item>th</item>
-    <item>zh-tw</item>
-    <item>zh-tw-ucb</item>
     <item>zu</item>
   </string-array>
 
   <string-array name="CONTRACTION_TABLE_LABELS">
     <item>Afrikaans (contracted)</item>
     <item>Amharic (uncontracted)</item>
-    <item>German (uncontracted)</item>
-    <item>German (contracted - 1998 standard)</item>
-    <item>German (basic contractions)</item>
-    <item>Unified English Braille (grade 2)</item>
-    <item>American English (grade 2)</item>
-    <item>Spanish (grade 2)</item>
+    <item>Chichewa (contracted)</item>
+    <item>Chinese (Taiwan uncontracted)</item>
+    <item>Chinese (Taiwan unique)</item>
+    <item>Dutch (contracted)</item>
+    <item>English (US grade 2)</item>
+    <item>English (unified)</item>
     <item>French (contracted)</item>
     <item>French (uncontracted)</item>
+    <item>German (basic contractions)</item>
+    <item>German (contracted - 1998 standard)</item>
+    <item>German (uncontracted)</item>
     <item>Hausa (contracted)</item>
     <item>Indonesian (contracted)</item>
+    <item>International (phonetic alphabet)</item>
     <item>Japanese (uncontracted)</item>
     <item>Korean (grade 1)</item>
     <item>Korean (grade 2)</item>
     <item>Korean (uncontracted)</item>
     <item>Malagasy (contracted)</item>
     <item>Munda (contracted)</item>
-    <item>Dutch (contracted)</item>
-    <item>Chichewa (contracted)</item>
-    <item>International Phonetic Alphabet</item>
     <item>Portuguese (grade 2)</item>
     <item>Sinhalese (uncontracted)</item>
+    <item>Spanish (grade 2)</item>
     <item>Swahili (contracted)</item>
     <item>Thai (contracted)</item>
-    <item>Taiwanese Chinese (uncontracted)</item>
-    <item>Taiwanese Chinese (Unique Chinese Braille)</item>
     <item>Zulu (contracted)</item>
   </string-array>
 </resources>
