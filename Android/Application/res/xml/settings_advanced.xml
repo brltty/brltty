@@ -1,0 +1,12 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+  <ListPreference
+    android:key="attributes-table"
+    android:title="Attributes Table"
+    android:entries="@array/ATTRIBUTES_TABLE_LABELS"
+    android:entryValues="@array/ATTRIBUTES_TABLE_CODES"
+    android:defaultValue="attributes"
+  />
+</PreferenceScreen>

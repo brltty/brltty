@@ -47,4 +47,22 @@ public class SettingsActivity extends PreferenceActivity {
       addPreferencesFromResource(R.xml.settings_general);
     }
   }
+
+  public static class DeviceSettings extends PreferenceFragment {
+    @Override
+    public void onCreate (Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+
+      addPreferencesFromResource(R.xml.settings_device);
+    }
+  }
+
+  public static class AdvancedSettings extends PreferenceFragment {
+    @Override
+    public void onCreate (Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+
+      addPreferencesFromResource(R.xml.settings_advanced);
+    }
+  }
 }

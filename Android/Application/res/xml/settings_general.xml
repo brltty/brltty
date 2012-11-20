@@ -3,27 +3,11 @@
     >
 
   <ListPreference
-    android:key="braille-driver"
-    android:title="Braille Driver"
-    android:entries="@array/BRAILLE_DRIVER_LABELS"
-    android:entryValues="@array/BRAILLE_DRIVER_CODES"
-    android:defaultValue="auto"
-  />
-
-  <ListPreference
     android:key="text-table"
     android:title="Text Table"
     android:entries="@array/TEXT_TABLE_LABELS"
     android:entryValues="@array/TEXT_TABLE_CODES"
     android:defaultValue="auto"
-  />
-
-  <ListPreference
-    android:key="attributes-table"
-    android:title="Attributes Table"
-    android:entries="@array/ATTRIBUTES_TABLE_LABELS"
-    android:entryValues="@array/ATTRIBUTES_TABLE_CODES"
-    android:defaultValue="attributes"
   />
 
   <ListPreference

@@ -1,0 +1,12 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+  <ListPreference
+    android:key="braille-driver"
+    android:title="Braille Driver"
+    android:entries="@array/BRAILLE_DRIVER_LABELS"
+    android:entryValues="@array/BRAILLE_DRIVER_CODES"
+    android:defaultValue="auto"
+  />
+</PreferenceScreen>

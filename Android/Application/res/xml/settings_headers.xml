@@ -6,4 +6,14 @@
     android:fragment="org.a11y.brltty.android.SettingsActivity$GeneralSettings"
     android:title="General Settings"
   />
+
+  <header
+    android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceSettings"
+    android:title="Select Device"
+  />
+
+  <header
+    android:fragment="org.a11y.brltty.android.SettingsActivity$AdvancedSettings"
+    android:title="Advanced Settings"
+  />
 </preference-headers>
