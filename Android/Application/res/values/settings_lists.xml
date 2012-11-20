@@ -61,7 +61,7 @@
     <item>Iris</item>
     <item>Libbraille</item>
     <item>LogText</item>
-    <item>MDV (protocol 5)</item>
+    <item>MDV</item>
     <item>Metec</item>
     <item>MiniBraille</item>
     <item>MultiBraille</item>
@@ -75,7 +75,7 @@
     <item>VideoBraille</item>
     <item>Virtual</item>
     <item>VisioBraille</item>
-    <item>Voyager, Part232 (serial adapter), BraillePen/EasyLink</item>
+    <item>Voyager, BraillePen/EasyLink</item>
     <item>XWindow</item>
   </string-array>
 
@@ -87,11 +87,14 @@
     <item>awa</item>
     <item>bn</item>
     <item>bh</item>
+    <item>brf</item>
     <item>bra</item>
     <item>bg</item>
     <item>hr</item>
     <item>cs</item>
     <item>da</item>
+    <item>da-lt</item>
+    <item>da-1252</item>
     <item>dra</item>
     <item>nl</item>
     <item>nl_BE</item>
@@ -108,6 +111,7 @@
     <item>fr_CA</item>
     <item>fr-cbifs</item>
     <item>fr_FR</item>
+    <item>fr-vs</item>
     <item>fr-2007</item>
     <item>gd</item>
     <item>de</item>
@@ -154,6 +158,8 @@
     <item>es</item>
     <item>sw</item>
     <item>sv</item>
+    <item>sv-1989</item>
+    <item>sv-1996</item>
     <item>ta</item>
     <item>te</item>
     <item>bo</item>
@@ -170,11 +176,14 @@
     <item>Awadhi</item>
     <item>Bengali</item>
     <item>Bihari</item>
+    <item>Braille Ready Format (for viewing .brf files within an editor or pager)</item>
     <item>Braj</item>
     <item>Bulgarian</item>
     <item>Croatian</item>
     <item>Czech</item>
     <item>Danish</item>
+    <item>Danish (LogText)</item>
+    <item>Danish (Svend Thougaard, 2002-11-18)</item>
     <item>Dravidian</item>
     <item>Dutch</item>
     <item>Dutch (Belgium)</item>
@@ -191,7 +200,8 @@
     <item>French (Canada)</item>
     <item>French (Code Braille Informatique Français Standard)</item>
     <item>French (France)</item>
-    <item>French (unified)</item>
+    <item>French (VisioBraille)</item>
+    <item>French (unified 2007)</item>
     <item>Gaelic</item>
     <item>German</item>
     <item>Gondi</item>
@@ -216,7 +226,7 @@
     <item>Maori</item>
     <item>Marathi</item>
     <item>Marwari</item>
-    <item>Mundari</item>
+    <item>Munda</item>
     <item>Nepali</item>
     <item>Newari</item>
     <item>Newari (old)</item>
@@ -237,6 +247,8 @@
     <item>Spanish</item>
     <item>Swahili</item>
     <item>Swedish</item>
+    <item>Swedish (1989 standard)</item>
+    <item>Swedish (1996 standard)</item>
     <item>Tamil</item>
     <item>Telugu</item>
     <item>Tibetan</item>
@@ -259,8 +271,8 @@
     <item>af</item>
     <item>am</item>
     <item>ny</item>
-    <item>zh-tw</item>
     <item>zh-tw-ucb</item>
+    <item>zh-tw</item>
     <item>nl</item>
     <item>en-us-g2</item>
     <item>en-ueb-g2</item>
@@ -290,11 +302,11 @@
     <item>Afrikaans (contracted)</item>
     <item>Amharic (uncontracted)</item>
     <item>Chichewa (contracted)</item>
-    <item>Chinese (Taiwan uncontracted)</item>
-    <item>Chinese (Taiwan unique)</item>
+    <item>Chinese (Taiwan, Unique Chinese Braille)</item>
+    <item>Chinese (Taiwan, uncontracted)</item>
     <item>Dutch (contracted)</item>
-    <item>English (US grade 2)</item>
-    <item>English (unified)</item>
+    <item>English (US, grade 2)</item>
+    <item>English (Unified English Braille, grade 2)</item>
     <item>French (contracted)</item>
     <item>French (uncontracted)</item>
     <item>German (basic contractions)</item>
@@ -302,7 +314,7 @@
     <item>German (uncontracted)</item>
     <item>Hausa (contracted)</item>
     <item>Indonesian (contracted)</item>
-    <item>International (phonetic alphabet)</item>
+    <item>International Phonetic Alphabet</item>
     <item>Japanese (uncontracted)</item>
     <item>Korean (grade 1)</item>
     <item>Korean (grade 2)</item>
