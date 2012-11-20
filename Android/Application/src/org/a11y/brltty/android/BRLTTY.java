@@ -56,7 +56,7 @@ public class BRLTTY extends Activity {
       @Override
       public void onClick (View view) {
         Log.d(LOG_TAG, "settings button pressed");
-        Intent intent = new Intent(BRLTTY.this, Settings.class);
+        Intent intent = new Intent(BRLTTY.this, SettingsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
       }

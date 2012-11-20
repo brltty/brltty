@@ -1,0 +1,9 @@
+<preference-headers
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+  <header
+    android:fragment="org.a11y.brltty.android.SettingsActivity$GeneralSettings"
+    android:title="General Settings"
+  />
+</preference-headers>

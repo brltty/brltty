@@ -18,18 +18,33 @@
 
 package org.a11y.brltty.android;
 
+import java.util.List;
+
 import android.util.Log;
 
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.os.Bundle;
 
-public class Settings extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity {
   private final String LOG_TAG = this.getClass().getName();
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
+  protected void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+  }
 
-    addPreferencesFromResource(R.xml.settings_screens);
+  @Override
+  public void onBuildHeaders (List<Header> target) {
+    loadHeadersFromResource(R.xml.settings_headers, target);
+  }
+
+  public static class GeneralSettings extends PreferenceFragment {
+    @Override
+    public void onCreate (Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+
+      addPreferencesFromResource(R.xml.settings_general);
+    }
   }
 }
