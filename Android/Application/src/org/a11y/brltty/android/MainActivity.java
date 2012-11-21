@@ -31,7 +31,7 @@ import android.widget.Button;
 
 import android.content.Intent;
 
-public class BRLTTY extends Activity {
+public class MainActivity extends Activity {
   private final String LOG_TAG = this.getClass().getName();
 
   private Thread coreThread = null;
@@ -56,7 +56,7 @@ public class BRLTTY extends Activity {
       @Override
       public void onClick (View view) {
         Log.d(LOG_TAG, "settings button pressed");
-        Intent intent = new Intent(BRLTTY.this, SettingsActivity.class);
+        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
       }
