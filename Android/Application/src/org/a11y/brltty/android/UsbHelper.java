@@ -18,8 +18,11 @@
 
 package org.a11y.brltty.android;
 
+import java.nio.ByteBuffer;
+
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import android.util.Log;
 
@@ -139,5 +142,24 @@ public class UsbHelper {
     }
 
     return null;
+  }
+
+  public static UsbRequest enqueueRequest (UsbDeviceConnection connection, UsbEndpoint endpoint, byte[] bytes) {
+    UsbRequest request = new UsbRequest();
+
+    if (request.initialize(connection, endpoint)) {
+      ByteBuffer buffer = ByteBuffer.wrap(bytes);
+      request.setClientData(bytes);
+      if (request.queue(buffer, bytes.length)) return request;
+
+      request.close();
+    }
+
+    return null;
+  }
+
+  public static void cancelRequest (UsbRequest request) {
+    request.cancel();
+    request.close();
   }
 }
