@@ -25,6 +25,8 @@ import android.util.Log;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.view.MenuItem;
@@ -48,9 +50,16 @@ public class SettingsActivity extends PreferenceActivity {
   public boolean onOptionsItemSelected (MenuItem item) {
     switch (item.getItemId()) {
       case android.R.id.home: {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        FragmentManager fm = getFragmentManager();
+
+        if (fm.getBackStackEntryCount() > 0) {
+          fm.popBackStack();
+        } else {
+          Intent intent = new Intent(this, MainActivity.class);
+          intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+          startActivity(intent);
+        }
+
         return true;
       }
 
@@ -60,7 +69,14 @@ public class SettingsActivity extends PreferenceActivity {
     }
   }
 
-  public static class GeneralSettings extends PreferenceFragment {
+  public static abstract class SettingsFragment extends PreferenceFragment {
+    @Override
+    public void onCreate (Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+    }
+  }
+
+  public static final class GeneralSettings extends SettingsFragment {
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -69,7 +85,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
   }
 
-  public static class DeviceSettings extends PreferenceFragment {
+  public static final class DeviceSettings extends SettingsFragment {
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -78,7 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
   }
 
-  public static class AdvancedSettings extends PreferenceFragment {
+  public static final class AdvancedSettings extends SettingsFragment {
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
