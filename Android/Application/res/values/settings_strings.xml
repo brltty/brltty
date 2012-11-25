@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string-array name="DEVICE_TYPE_CODES">
+    <item>Bluetooth</item>
+    <item>Usb</item>
+    <item>Serial</item>
+  </string-array>
+
+  <string-array name="DEVICE_TYPE_LABELS">
+    <item>Bluetooth</item>
+    <item>USB</item>
+    <item>Serial</item>
+  </string-array>
+</resources>

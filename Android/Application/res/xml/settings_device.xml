@@ -2,11 +2,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
+  <PreferenceScreen
+      android:id="@+id/settings_device_add"
+      android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceFinder"
+      android:key="new-device"
+      android:title="Add Device"
+      >
+
+    <ListPreference
+      android:key="device-type"
+      android:title="Device Type"
+      android:entries="@array/DEVICE_TYPE_LABELS"
+      android:entryValues="@array/DEVICE_TYPE_CODES"
+      android:defaultValue="Bluetooth"
+      />
+
+    <ListPreference
+      android:key="device-list"
+      />
+
+    <ListPreference
+      android:key="braille-driver"
+      android:title="Braille Driver"
+      android:entries="@array/BRAILLE_DRIVER_LABELS"
+      android:entryValues="@array/BRAILLE_DRIVER_CODES"
+      android:defaultValue="auto"
+      />
+  </PreferenceScreen>
+
   <ListPreference
-    android:key="braille-driver"
-    android:title="Braille Driver"
-    android:entries="@array/BRAILLE_DRIVER_LABELS"
-    android:entryValues="@array/BRAILLE_DRIVER_CODES"
-    android:defaultValue="auto"
+    android:key="device-list"
+    android:title="Select Device"
   />
 </PreferenceScreen>

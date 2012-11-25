@@ -8,8 +8,8 @@
   />
 
   <header
-    android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceSettings"
-    android:title="Select Device"
+    android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceManager"
+    android:title="Manage Devices"
   />
 
   <header

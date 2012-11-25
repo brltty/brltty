@@ -4,6 +4,7 @@
 
   <ListPreference
     android:key="attributes-table"
+    android:persistent="true"
     android:title="Attributes Table"
     android:entries="@array/ATTRIBUTES_TABLE_LABELS"
     android:entryValues="@array/ATTRIBUTES_TABLE_CODES"

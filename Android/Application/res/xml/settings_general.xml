@@ -4,6 +4,7 @@
 
   <ListPreference
     android:key="text-table"
+    android:persistent="true"
     android:title="Text Table"
     android:entries="@array/TEXT_TABLE_LABELS"
     android:entryValues="@array/TEXT_TABLE_CODES"
@@ -12,6 +13,7 @@
 
   <ListPreference
     android:key="contraction-table"
+    android:persistent="true"
     android:title="Contraction Table"
     android:entries="@array/CONTRACTION_TABLE_LABELS"
     android:entryValues="@array/CONTRACTION_TABLE_CODES"
