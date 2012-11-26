@@ -31,6 +31,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.os.Bundle;
 
+import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.ListPreference;
 
@@ -54,6 +55,8 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static abstract class SettingsFragment extends PreferenceFragment {
+    protected final String LOG_TAG = this.getClass().getName();
+
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -74,20 +77,28 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class DeviceManager extends SettingsFragment {
+    private Preference addDevicePreference;
+
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
       addPreferencesFromResource(R.xml.settings_device);
+      addDevicePreference = findPreference("add-device");
     }
-  }
 
-  public static final class DeviceFinder extends SettingsFragment {
-    private final String LOG_TAG = this.getClass().getName();
+    interface GetString<T> {
+      String getString (T object);
+    }
 
-    @Override
-    public void onCreate (Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
+    private static <T> String[] makeStringArray (Collection<T> collection, GetString<T> getString) {
+      List<String> strings = new ArrayList<String>(collection.size());
+
+      for (T element : collection) {
+        strings.add(getString.getString(element));
+      }
+
+      return strings.toArray(new String[strings.size()]);
     }
 
     public interface DeviceCollection {
@@ -100,24 +111,26 @@ public class SettingsActivity extends PreferenceActivity {
 
       @Override
       public String[] getValues () {
-        List<String> values = new ArrayList<String>(collection.size());
+        GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
+          @Override
+          public String getString (BluetoothDevice device) {
+            return device.getAddress();
+          }
+        };
 
-        for (BluetoothDevice device : collection) {
-          values.add(device.getAddress());
-        }
-
-        return (String[])values.toArray();
+        return makeStringArray(collection, getString);
       }
 
       @Override
       public String[] getLabels () {
-        List<String> labels = new ArrayList<String>(collection.size());
+        GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
+          @Override
+          public String getString (BluetoothDevice device) {
+            return device.getName();
+          }
+        };
 
-        for (BluetoothDevice device : collection) {
-          labels.add(device.getName());
-        }
-
-        return (String[])labels.toArray();
+        return makeStringArray(collection, getString);
       }
 
       public BluetoothDeviceCollection (Context context) {
@@ -130,12 +143,26 @@ public class SettingsActivity extends PreferenceActivity {
 
       @Override
       public String[] getValues () {
-        return new String[0];
+        GetString<UsbDevice> getString = new GetString<UsbDevice>() {
+          @Override
+          public String getString (UsbDevice device) {
+            return device.getDeviceName();
+          }
+        };
+
+        return makeStringArray(collection, getString);
       }
 
       @Override
       public String[] getLabels () {
-        return new String[0];
+        GetString<UsbDevice> getString = new GetString<UsbDevice>() {
+          @Override
+          public String getString (UsbDevice device) {
+            return device.getDeviceName();
+          }
+        };
+
+        return makeStringArray(collection, getString);
       }
 
       public UsbDeviceCollection (Context context) {
@@ -156,40 +183,63 @@ public class SettingsActivity extends PreferenceActivity {
       }
     }
 
-    private DeviceCollection getDevices () {
-      ListPreference preference = findListPreference("device-type");
-      String type = preference.getValue();
-      String name = getClass().getName() + "$" + type + "DeviceCollection";
+    private DeviceCollection getDeviceCollection (String deviceType) {
+      String className = getClass().getName() + "$" + deviceType + "DeviceCollection";
 
+      Constructor constructor;
       try {
-        Constructor constructor = Class.forName(name).getConstructor(
+        constructor = Class.forName(className).getConstructor(
           Class.forName("android.content.Context")
         );
-
-        DeviceCollection devices = (DeviceCollection)constructor.newInstance(new Object[] {
-          getActivity()
-        });
-
-        return devices;
-      } catch (Exception exception) {
-        Log.w(LOG_TAG, exception.getMessage());
+      } catch (ClassNotFoundException exception) {
+        Log.w(LOG_TAG, "class not found: " + className);
+        return null;
+      } catch (NoSuchMethodException exception) {
+        Log.w(LOG_TAG, "constructor not found: " + className);
+        return null;
       }
 
-      return null;
+      DeviceCollection collection;
+      try {
+        collection = (DeviceCollection)constructor.newInstance(new Object[] {
+          getActivity()
+        });
+      } catch (java.lang.InstantiationException exception) {
+        Log.w(LOG_TAG, "uninstantiatable class: " + className);
+        return null;
+      } catch (IllegalAccessException exception) {
+        Log.w(LOG_TAG, "inaccessible constructor: " + className);
+        return null;
+      } catch (InvocationTargetException exception) {
+        Log.w(LOG_TAG, "construction failed: " + className);
+        return null;
+      }
+
+      return collection;
+    }
+
+    private ListPreference getDeviceList () {
+      return findListPreference("device-list");
+    }
+
+    private String getDeviceType () {
+      return findListPreference("device-type").getValue();
     }
 
     private void refreshDeviceList () {
-      DeviceCollection devices = getDevices();
-      ListPreference preference = findListPreference("device-list");
-      preference.setEntryValues(devices.getValues());
-      preference.setEntries(devices.getLabels());
+      DeviceCollection devices = getDeviceCollection(getDeviceType());
+      ListPreference list = getDeviceList();
+      list.setEntryValues(devices.getValues());
+      list.setEntries(devices.getLabels());
     }
 
     @Override
-    public void onResume () {
-      super.onResume();
+    public boolean onPreferenceTreeClick (PreferenceScreen screen, Preference preference) {
+      if (preference == addDevicePreference) {
+        refreshDeviceList();
+      }
 
-      refreshDeviceList();
+      return super.onPreferenceTreeClick(screen, preference);
     }
   }
 

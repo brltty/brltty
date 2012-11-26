@@ -3,9 +3,7 @@
     >
 
   <PreferenceScreen
-      android:id="@+id/settings_device_add"
-      android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceFinder"
-      android:key="new-device"
+      android:key="add-device"
       android:title="Add Device"
       >
 
