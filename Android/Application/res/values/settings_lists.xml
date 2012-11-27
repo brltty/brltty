@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string-array name="BRAILLE_DRIVER_CODES">
+  <string-array name="BRAILLE_DRIVER_VALUES">
     <item>auto</item>
     <item>at</item>
     <item>al</item>
@@ -79,7 +79,7 @@
     <item>XWindow</item>
   </string-array>
 
-  <string-array name="TEXT_TABLE_CODES">
+  <string-array name="TEXT_TABLE_VALUES">
     <item>auto</item>
     <item>ar</item>
     <item>hy</item>
@@ -257,7 +257,7 @@
     <item>Welsh</item>
   </string-array>
 
-  <string-array name="ATTRIBUTES_TABLE_CODES">
+  <string-array name="ATTRIBUTES_TABLE_VALUES">
     <item>attrib</item>
     <item>attributes</item>
   </string-array>
@@ -267,7 +267,7 @@
     <item>attributes</item>
   </string-array>
 
-  <string-array name="CONTRACTION_TABLE_CODES">
+  <string-array name="CONTRACTION_TABLE_VALUES">
     <item>af</item>
     <item>am</item>
     <item>ny</item>

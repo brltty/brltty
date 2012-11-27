@@ -77,15 +77,8 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class DeviceManager extends SettingsFragment {
-    private Preference addDevicePreference;
-
-    @Override
-    public void onCreate (Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-
-      addPreferencesFromResource(R.xml.settings_device);
-      addDevicePreference = findPreference("add-device");
-    }
+    ListPreference deviceCommunicationPreference;
+    ListPreference deviceNamePreference;
 
     interface GetString<T> {
       String getString (T object);
@@ -102,15 +95,15 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public interface DeviceCollection {
-      public String[] getValues ();
-      public String[] getLabels ();
+      public String[] getNameValues ();
+      public String[] getNameLabels ();
     }
 
     public static final class BluetoothDeviceCollection implements DeviceCollection {
       private final Collection<BluetoothDevice> collection;
 
       @Override
-      public String[] getValues () {
+      public String[] getNameValues () {
         GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
           @Override
           public String getString (BluetoothDevice device) {
@@ -122,7 +115,7 @@ public class SettingsActivity extends PreferenceActivity {
       }
 
       @Override
-      public String[] getLabels () {
+      public String[] getNameLabels () {
         GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
           @Override
           public String getString (BluetoothDevice device) {
@@ -142,7 +135,7 @@ public class SettingsActivity extends PreferenceActivity {
       private final Collection<UsbDevice> collection;
 
       @Override
-      public String[] getValues () {
+      public String[] getNameValues () {
         GetString<UsbDevice> getString = new GetString<UsbDevice>() {
           @Override
           public String getString (UsbDevice device) {
@@ -154,7 +147,7 @@ public class SettingsActivity extends PreferenceActivity {
       }
 
       @Override
-      public String[] getLabels () {
+      public String[] getNameLabels () {
         GetString<UsbDevice> getString = new GetString<UsbDevice>() {
           @Override
           public String getString (UsbDevice device) {
@@ -173,18 +166,18 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static final class SerialDeviceCollection implements DeviceCollection {
       @Override
-      public String[] getValues () {
+      public String[] getNameValues () {
         return new String[0];
       }
 
       @Override
-      public String[] getLabels () {
+      public String[] getNameLabels () {
         return new String[0];
       }
     }
 
-    private DeviceCollection getDeviceCollection (String deviceType) {
-      String className = getClass().getName() + "$" + deviceType + "DeviceCollection";
+    private DeviceCollection getDeviceCollection (String communicationMethod) {
+      String className = getClass().getName() + "$" + communicationMethod + "DeviceCollection";
 
       Constructor constructor;
       try {
@@ -219,27 +212,48 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private ListPreference getDeviceList () {
-      return findListPreference("device-list");
+      return findListPreference("device-name");
     }
 
-    private String getDeviceType () {
-      return findListPreference("device-type").getValue();
+    private String getCommunicationMethod () {
+      return deviceCommunicationPreference.getValue();
     }
 
-    private void refreshDeviceList () {
-      DeviceCollection devices = getDeviceCollection(getDeviceType());
-      ListPreference list = getDeviceList();
-      list.setEntryValues(devices.getValues());
-      list.setEntries(devices.getLabels());
+    private void refreshDeviceNames () {
+      DeviceCollection devices = getDeviceCollection(getCommunicationMethod());
+      ListPreference list = deviceNamePreference;
+
+      list.setEntryValues(devices.getNameValues());
+      list.setEntries(devices.getNameLabels());
+    }
+
+    private void setCommunicatinMethodChangeListener () {
+      Preference.OnPreferenceChangeListener listener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          refreshDeviceNames();
+          return true;
+        }
+      };
+
+      deviceCommunicationPreference.setOnPreferenceChangeListener(listener);
     }
 
     @Override
-    public boolean onPreferenceTreeClick (PreferenceScreen screen, Preference preference) {
-      if (preference == addDevicePreference) {
-        refreshDeviceList();
-      }
+    public void onCreate (Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
 
-      return super.onPreferenceTreeClick(screen, preference);
+      addPreferencesFromResource(R.xml.settings_device);
+      deviceCommunicationPreference = findListPreference("device-communication");
+      deviceNamePreference = findListPreference("device-name");
+
+      setCommunicatinMethodChangeListener();
+    }
+
+    @Override
+    public void onResume () {
+      super.onResume();
+      refreshDeviceNames();
     }
   }
 

@@ -1,35 +1,44 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Manage Devices"
     >
 
+  <ListPreference
+    android:key="device-list"
+    android:title="Change Device"
+  />
+
   <PreferenceScreen
-      android:key="add-device"
+      android:key="new-device"
       android:title="Add Device"
       >
 
     <ListPreference
-      android:key="device-type"
-      android:title="Device Type"
-      android:entries="@array/DEVICE_TYPE_LABELS"
-      android:entryValues="@array/DEVICE_TYPE_CODES"
+      android:key="device-communication"
+      android:title="Communication Method"
+      android:entries="@array/DEVICE_COMMUNICATION_LABELS"
+      android:entryValues="@array/DEVICE_COMMUNICATION_VALUES"
       android:defaultValue="Bluetooth"
       />
 
     <ListPreference
-      android:key="device-list"
+      android:key="device-name"
+      android:title="Device Name"
+      android:entries="@array/EMPTY_STRING_ARRAY"
+      android:entryValues="@array/EMPTY_STRING_ARRAY"
       />
 
     <ListPreference
-      android:key="braille-driver"
+      android:key="device-driver"
       android:title="Braille Driver"
       android:entries="@array/BRAILLE_DRIVER_LABELS"
-      android:entryValues="@array/BRAILLE_DRIVER_CODES"
+      android:entryValues="@array/BRAILLE_DRIVER_VALUES"
       android:defaultValue="auto"
       />
   </PreferenceScreen>
 
   <ListPreference
     android:key="device-list"
-    android:title="Select Device"
+    android:title="Remove Device"
   />
 </PreferenceScreen>

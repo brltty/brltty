@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string-array name="DEVICE_TYPE_CODES">
+  <string-array name="EMPTY_STRING_ARRAY">
+  </string-array>
+
+  <string-array name="DEVICE_COMMUNICATION_VALUES">
     <item>Bluetooth</item>
     <item>Usb</item>
     <item>Serial</item>
   </string-array>
 
-  <string-array name="DEVICE_TYPE_LABELS">
+  <string-array name="DEVICE_COMMUNICATION_LABELS">
     <item>Bluetooth</item>
     <item>USB</item>
     <item>Serial</item>
