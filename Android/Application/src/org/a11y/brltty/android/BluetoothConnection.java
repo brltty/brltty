@@ -32,7 +32,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 public class BluetoothConnection {
-  private final String LOG_TAG = this.getClass().getName();
+  private static final String LOG_TAG = BluetoothConnection.class.getName();
 
   protected static final UUID SERIAL_PROFILE_UUID = UUID.fromString(
     "00001101-0000-1000-8000-00805F9B34FB"
@@ -47,7 +47,7 @@ public class BluetoothConnection {
   protected InputThread inputThread = null;
 
   private class InputThread extends Thread {
-    private final String LOG_TAG = this.getClass().getName();
+    private final String LOG_TAG = InputThread.class.getName();
 
     boolean stop = false;
     InputStream inputStream;

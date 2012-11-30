@@ -22,8 +22,8 @@
       />
 
     <ListPreference
-      android:key="device-name"
-      android:title="Device Name"
+      android:key="device-identifier"
+      android:title="Device Identifier"
       android:entries="@array/EMPTY_STRING_ARRAY"
       android:entryValues="@array/EMPTY_STRING_ARRAY"
       />
@@ -34,6 +34,11 @@
       android:entries="@array/BRAILLE_DRIVER_LABELS"
       android:entryValues="@array/BRAILLE_DRIVER_VALUES"
       android:defaultValue="auto"
+      />
+
+    <Preference
+      android:key="device-add"
+      android:title="Add"
       />
   </PreferenceScreen>
 

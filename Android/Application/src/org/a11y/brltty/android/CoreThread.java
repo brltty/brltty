@@ -36,7 +36,7 @@ import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 
 public class CoreThread extends Thread {
-  private final String LOG_TAG = this.getClass().getName();
+  private static final String LOG_TAG = CoreThread.class.getName();
 
   private final Context coreContext;
 

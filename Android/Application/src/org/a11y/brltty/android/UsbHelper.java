@@ -36,7 +36,7 @@ import android.app.PendingIntent;
 import android.hardware.usb.*;
 
 public class UsbHelper {
-  private static final String LOG_TAG = "BRLTTY_USB";
+  private static final String LOG_TAG = UsbHelper.class.getName();
 
   private static Context usbContext;
   private static UsbManager usbManager;

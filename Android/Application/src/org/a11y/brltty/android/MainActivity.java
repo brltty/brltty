@@ -32,7 +32,7 @@ import android.widget.Button;
 import android.content.Intent;
 
 public class MainActivity extends Activity {
-  private final String LOG_TAG = this.getClass().getName();
+  private static final String LOG_TAG = MainActivity.class.getName();
 
   private Thread coreThread = null;
 

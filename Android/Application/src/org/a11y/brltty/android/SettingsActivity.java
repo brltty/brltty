@@ -18,18 +18,16 @@
 
 package org.a11y.brltty.android;
 
-import java.lang.reflect.*;
-
 import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 
 import android.util.Log;
+import android.os.Bundle;
 
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.os.Bundle;
 
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
@@ -42,7 +40,7 @@ import android.bluetooth.*;
 import android.hardware.usb.*;
 
 public class SettingsActivity extends PreferenceActivity {
-  private final String LOG_TAG = this.getClass().getName();
+  private static final String LOG_TAG = SettingsActivity.class.getName();
 
   @Override
   protected void onCreate (Bundle savedInstanceState) {
@@ -50,8 +48,8 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   @Override
-  public void onBuildHeaders (List<Header> target) {
-    loadHeadersFromResource(R.xml.settings_headers, target);
+  public void onBuildHeaders (List<Header> headers) {
+    loadHeadersFromResource(R.xml.settings_headers, headers);
   }
 
   public static abstract class SettingsFragment extends PreferenceFragment {
@@ -62,7 +60,11 @@ public class SettingsActivity extends PreferenceActivity {
       super.onCreate(savedInstanceState);
     }
 
-    protected ListPreference findListPreference (String key) {
+    protected PreferenceScreen findScreen (String key) {
+      return (PreferenceScreen)findPreference(key);
+    }
+
+    protected ListPreference findList (String key) {
       return (ListPreference)findPreference(key);
     }
   }
@@ -77,53 +79,56 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class DeviceManager extends SettingsFragment {
-    ListPreference deviceCommunicationPreference;
-    ListPreference deviceNamePreference;
+    PreferenceScreen newDeviceScreen;
+    ListPreference communicationMethodList;
+    ListPreference deviceIdentifierList;
+    ListPreference brailleDriverList;
+    Preference addDeviceButton;
 
-    interface GetString<T> {
-      String getString (T object);
+    interface StringArrayElementMaker<T> {
+      String makeStringArrayElement (T object);
     }
 
-    private static <T> String[] makeStringArray (Collection<T> collection, GetString<T> getString) {
+    private static <T> String[] makeStringArray (Collection<T> collection, StringArrayElementMaker<T> stringArrayElementMaker) {
       List<String> strings = new ArrayList<String>(collection.size());
 
       for (T element : collection) {
-        strings.add(getString.getString(element));
+        strings.add(stringArrayElementMaker.makeStringArrayElement(element));
       }
 
       return strings.toArray(new String[strings.size()]);
     }
 
     public interface DeviceCollection {
-      public String[] getNameValues ();
-      public String[] getNameLabels ();
+      public String[] getIdentifierValues ();
+      public String[] getIdentifierLabels ();
     }
 
     public static final class BluetoothDeviceCollection implements DeviceCollection {
       private final Collection<BluetoothDevice> collection;
 
       @Override
-      public String[] getNameValues () {
-        GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
+      public String[] getIdentifierValues () {
+        StringArrayElementMaker<BluetoothDevice> stringArrayElementMaker = new StringArrayElementMaker<BluetoothDevice>() {
           @Override
-          public String getString (BluetoothDevice device) {
+          public String makeStringArrayElement (BluetoothDevice device) {
             return device.getAddress();
           }
         };
 
-        return makeStringArray(collection, getString);
+        return makeStringArray(collection, stringArrayElementMaker);
       }
 
       @Override
-      public String[] getNameLabels () {
-        GetString<BluetoothDevice> getString = new GetString<BluetoothDevice>() {
+      public String[] getIdentifierLabels () {
+        StringArrayElementMaker<BluetoothDevice> stringArrayElementMaker = new StringArrayElementMaker<BluetoothDevice>() {
           @Override
-          public String getString (BluetoothDevice device) {
+          public String makeStringArrayElement (BluetoothDevice device) {
             return device.getName();
           }
         };
 
-        return makeStringArray(collection, getString);
+        return makeStringArray(collection, stringArrayElementMaker);
       }
 
       public BluetoothDeviceCollection (Context context) {
@@ -134,44 +139,47 @@ public class SettingsActivity extends PreferenceActivity {
     public static final class UsbDeviceCollection implements DeviceCollection {
       private final Collection<UsbDevice> collection;
 
-      @Override
-      public String[] getNameValues () {
-        GetString<UsbDevice> getString = new GetString<UsbDevice>() {
-          @Override
-          public String getString (UsbDevice device) {
-            return device.getDeviceName();
-          }
-        };
-
-        return makeStringArray(collection, getString);
+      protected UsbManager getManager (Context context) {
+        return (UsbManager)context.getSystemService(Context.USB_SERVICE);
       }
 
       @Override
-      public String[] getNameLabels () {
-        GetString<UsbDevice> getString = new GetString<UsbDevice>() {
+      public String[] getIdentifierValues () {
+        StringArrayElementMaker<UsbDevice> stringArrayElementMaker = new StringArrayElementMaker<UsbDevice>() {
           @Override
-          public String getString (UsbDevice device) {
+          public String makeStringArrayElement (UsbDevice device) {
             return device.getDeviceName();
           }
         };
 
-        return makeStringArray(collection, getString);
+        return makeStringArray(collection, stringArrayElementMaker);
+      }
+
+      @Override
+      public String[] getIdentifierLabels () {
+        StringArrayElementMaker<UsbDevice> stringArrayElementMaker = new StringArrayElementMaker<UsbDevice>() {
+          @Override
+          public String makeStringArrayElement (UsbDevice device) {
+            return device.getDeviceName();
+          }
+        };
+
+        return makeStringArray(collection, stringArrayElementMaker);
       }
 
       public UsbDeviceCollection (Context context) {
-        UsbManager manager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
-        collection = manager.getDeviceList().values();
+        collection = getManager(context).getDeviceList().values();
       }
     }
 
     public static final class SerialDeviceCollection implements DeviceCollection {
       @Override
-      public String[] getNameValues () {
+      public String[] getIdentifierValues () {
         return new String[0];
       }
 
       @Override
-      public String[] getNameLabels () {
+      public String[] getIdentifierLabels () {
         return new String[0];
       }
     }
@@ -179,64 +187,27 @@ public class SettingsActivity extends PreferenceActivity {
     private DeviceCollection getDeviceCollection (String communicationMethod) {
       String className = getClass().getName() + "$" + communicationMethod + "DeviceCollection";
 
-      Constructor constructor;
-      try {
-        constructor = Class.forName(className).getConstructor(
-          Class.forName("android.content.Context")
-        );
-      } catch (ClassNotFoundException exception) {
-        Log.w(LOG_TAG, "class not found: " + className);
-        return null;
-      } catch (NoSuchMethodException exception) {
-        Log.w(LOG_TAG, "constructor not found: " + className);
-        return null;
-      }
+      String[] argumentTypes = new String[] {
+        "android.content.Context"
+      };
 
-      DeviceCollection collection;
-      try {
-        collection = (DeviceCollection)constructor.newInstance(new Object[] {
-          getActivity()
-        });
-      } catch (java.lang.InstantiationException exception) {
-        Log.w(LOG_TAG, "uninstantiatable class: " + className);
-        return null;
-      } catch (IllegalAccessException exception) {
-        Log.w(LOG_TAG, "inaccessible constructor: " + className);
-        return null;
-      } catch (InvocationTargetException exception) {
-        Log.w(LOG_TAG, "construction failed: " + className);
-        return null;
-      }
+      Object[] arguments = new Object[] {
+        getActivity()
+      };
 
-      return collection;
-    }
-
-    private ListPreference getDeviceList () {
-      return findListPreference("device-name");
+      return (DeviceCollection)ReflectionHelper.newInstance(className, argumentTypes, arguments);
     }
 
     private String getCommunicationMethod () {
-      return deviceCommunicationPreference.getValue();
+      return communicationMethodList.getValue();
     }
 
-    private void refreshDeviceNames () {
-      DeviceCollection devices = getDeviceCollection(getCommunicationMethod());
-      ListPreference list = deviceNamePreference;
+    private void refreshDeviceIdentifiers (String communicationMethod) {
+      DeviceCollection devices = getDeviceCollection(communicationMethod);
+      ListPreference list = deviceIdentifierList;
 
-      list.setEntryValues(devices.getNameValues());
-      list.setEntries(devices.getNameLabels());
-    }
-
-    private void setCommunicatinMethodChangeListener () {
-      Preference.OnPreferenceChangeListener listener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          refreshDeviceNames();
-          return true;
-        }
-      };
-
-      deviceCommunicationPreference.setOnPreferenceChangeListener(listener);
+      list.setEntryValues(devices.getIdentifierValues());
+      list.setEntries(devices.getIdentifierLabels());
     }
 
     @Override
@@ -244,16 +215,39 @@ public class SettingsActivity extends PreferenceActivity {
       super.onCreate(savedInstanceState);
 
       addPreferencesFromResource(R.xml.settings_device);
-      deviceCommunicationPreference = findListPreference("device-communication");
-      deviceNamePreference = findListPreference("device-name");
 
-      setCommunicatinMethodChangeListener();
+      newDeviceScreen = findScreen("new-device");
+      communicationMethodList = findList("device-communication");
+      deviceIdentifierList = findList("device-identifier");
+      brailleDriverList = findList("device-driver");
+      addDeviceButton = findPreference("device-add");
+
+      communicationMethodList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            refreshDeviceIdentifiers((String)newValue);
+            return true;
+          }
+        }
+      );
+
+      addDeviceButton.setOnPreferenceClickListener(
+        new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick (Preference preference) {
+            newDeviceScreen.getDialog().dismiss();
+            return true;
+          }
+        }
+      );
     }
 
     @Override
     public void onResume () {
       super.onResume();
-      refreshDeviceNames();
+
+      refreshDeviceIdentifiers(getCommunicationMethod());
     }
   }
 
