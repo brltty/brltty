@@ -13,6 +13,12 @@
       android:title="Add Device"
       >
 
+    <EditTextPreference
+      android:key="device-name"
+      android:title="Device Name"
+      android:defaultValue=""
+      />
+
     <ListPreference
       android:key="device-communication"
       android:title="Communication Method"
@@ -23,7 +29,7 @@
 
     <ListPreference
       android:key="device-identifier"
-      android:title="Device Identifier"
+      android:title="Select Device"
       android:entries="@array/EMPTY_STRING_ARRAY"
       android:entryValues="@array/EMPTY_STRING_ARRAY"
       />

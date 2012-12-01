@@ -18,6 +18,7 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +32,7 @@ import android.preference.PreferenceFragment;
 
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 
 import android.content.Context;
@@ -64,8 +66,24 @@ public class SettingsActivity extends PreferenceActivity {
       return (PreferenceScreen)findPreference(key);
     }
 
+    protected EditTextPreference findEditor (String key) {
+      return (EditTextPreference)findPreference(key);
+    }
+
     protected ListPreference findList (String key) {
       return (ListPreference)findPreference(key);
+    }
+
+    protected void showListSelection (ListPreference list) {
+      list.setSummary(list.getEntry());
+    }
+
+    protected void showListSelection (ListPreference list, int index) {
+      list.setSummary(list.getEntries()[index]);
+    }
+
+    protected void showListSelection (ListPreference list, String value) {
+      showListSelection(list, Arrays.asList(list.getEntryValues()).indexOf(value));
     }
   }
 
@@ -80,6 +98,7 @@ public class SettingsActivity extends PreferenceActivity {
 
   public static final class DeviceManager extends SettingsFragment {
     PreferenceScreen newDeviceScreen;
+    EditTextPreference deviceNameEditor;
     ListPreference communicationMethodList;
     ListPreference deviceIdentifierList;
     ListPreference brailleDriverList;
@@ -160,7 +179,7 @@ public class SettingsActivity extends PreferenceActivity {
         StringArrayElementMaker<UsbDevice> stringArrayElementMaker = new StringArrayElementMaker<UsbDevice>() {
           @Override
           public String makeStringArrayElement (UsbDevice device) {
-            return device.getDeviceName();
+            return String.format("%04X:%04X", device.getVendorId(), device.getProductId());
           }
         };
 
@@ -198,16 +217,46 @@ public class SettingsActivity extends PreferenceActivity {
       return (DeviceCollection)ReflectionHelper.newInstance(className, argumentTypes, arguments);
     }
 
+    private void showDeviceName (String name) {
+      if (name.length() == 0) {
+        name = brailleDriverList.getSummary()
+             + " " + communicationMethodList.getSummary()
+             + " " + deviceIdentifierList.getSummary()
+             ;
+      }
+
+      deviceNameEditor.setSummary(name);
+    }
+
+    private void showDeviceName () {
+      showDeviceName(deviceNameEditor.getEditText().getText().toString());
+    }
+
     private String getCommunicationMethod () {
       return communicationMethodList.getValue();
     }
 
     private void refreshDeviceIdentifiers (String communicationMethod) {
       DeviceCollection devices = getDeviceCollection(communicationMethod);
-      ListPreference list = deviceIdentifierList;
+      ListPreference identifiers = deviceIdentifierList;
 
-      list.setEntryValues(devices.getIdentifierValues());
-      list.setEntries(devices.getIdentifierLabels());
+      identifiers.setEntryValues(devices.getIdentifierValues());
+      identifiers.setEntries(devices.getIdentifierLabels());
+
+      {
+        int count = identifiers.getEntries().length;
+        deviceIdentifierList.setEnabled(count > 1);
+
+        if (count == 0) {
+          identifiers.setSummary("no devices");
+        } else {
+          identifiers.setValueIndex(0);
+          showListSelection(deviceIdentifierList);
+        }
+      }
+
+      brailleDriverList.setValueIndex(0);
+      showListSelection(brailleDriverList);
     }
 
     @Override
@@ -217,16 +266,52 @@ public class SettingsActivity extends PreferenceActivity {
       addPreferencesFromResource(R.xml.settings_device);
 
       newDeviceScreen = findScreen("new-device");
+      deviceNameEditor = findEditor("device-name");
       communicationMethodList = findList("device-communication");
       deviceIdentifierList = findList("device-identifier");
       brailleDriverList = findList("device-driver");
       addDeviceButton = findPreference("device-add");
 
+      deviceNameEditor.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showDeviceName((String)newValue);
+            return true;
+          }
+        }
+      );
+
       communicationMethodList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            refreshDeviceIdentifiers((String)newValue);
+            String newMethod = (String)newValue;
+            showListSelection(communicationMethodList, newMethod);
+            refreshDeviceIdentifiers(newMethod);
+            showDeviceName();
+            return true;
+          }
+        }
+      );
+
+      deviceIdentifierList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(deviceIdentifierList, (String)newValue);
+            showDeviceName();
+            return true;
+          }
+        }
+      );
+
+      brailleDriverList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(brailleDriverList, (String)newValue);
+            showDeviceName();
             return true;
           }
         }
@@ -247,7 +332,9 @@ public class SettingsActivity extends PreferenceActivity {
     public void onResume () {
       super.onResume();
 
+      showListSelection(communicationMethodList);
       refreshDeviceIdentifiers(getCommunicationMethod());
+      showDeviceName();
     }
   }
 
