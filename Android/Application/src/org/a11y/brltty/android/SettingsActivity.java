@@ -75,16 +75,20 @@ public class SettingsActivity extends PreferenceActivity {
       super.onCreate(savedInstanceState);
     }
 
-    protected PreferenceScreen findScreen (String key) {
-      return (PreferenceScreen)findPreference(key);
+    protected Preference getPreference (int key) {
+      return findPreference(getResources().getString(key));
     }
 
-    protected EditTextPreference findEditor (String key) {
-      return (EditTextPreference)findPreference(key);
+    protected PreferenceScreen getScreenPreference (int key) {
+      return (PreferenceScreen)getPreference(key);
     }
 
-    protected ListPreference findList (String key) {
-      return (ListPreference)findPreference(key);
+    protected EditTextPreference getEditorPreference (int key) {
+      return (EditTextPreference)getPreference(key);
+    }
+
+    protected ListPreference getListPreference (int key) {
+      return (ListPreference)getPreference(key);
     }
 
     protected void showListSelection (ListPreference list) {
@@ -128,14 +132,14 @@ public class SettingsActivity extends PreferenceActivity {
   public static final class DeviceManager extends SettingsFragment {
     protected Set<String> deviceNames;
 
-    protected ListPreference deviceNameList;
-    protected PreferenceScreen newDeviceScreen;
+    protected ListPreference changeDeviceList;
+    protected PreferenceScreen addDeviceScreen;
     protected Preference removeDeviceButton;
 
     protected EditTextPreference deviceNameEditor;
-    protected ListPreference communicationMethodList;
+    protected ListPreference deviceMethodList;
     protected ListPreference deviceIdentifierList;
-    protected ListPreference brailleDriverList;
+    protected ListPreference deviceDriverList;
     protected Preference addDeviceButton;
 
     protected void setListElements (ListPreference list, String[] values, String[] labels) {
@@ -150,8 +154,8 @@ public class SettingsActivity extends PreferenceActivity {
     protected void updateRemoveDeviceButton () {
       boolean on = false;
 
-      if (deviceNameList.isEnabled()) {
-        CharSequence value = deviceNameList.getSummary();
+      if (changeDeviceList.isEnabled()) {
+        CharSequence value = changeDeviceList.getSummary();
 
         if (value != null) {
           if (value.length() > 0) {
@@ -163,27 +167,27 @@ public class SettingsActivity extends PreferenceActivity {
       removeDeviceButton.setSelectable(on);
     }
 
-    private void updateDeviceNameList () {
+    private void updateChangeDeviceList () {
       boolean haveDevices = !deviceNames.isEmpty();
-      deviceNameList.setEnabled(haveDevices);
+      changeDeviceList.setEnabled(haveDevices);
 
       if (haveDevices) {
         {
           String[] names = new String[deviceNames.size()];
           deviceNames.toArray(names);
-          setListElements(deviceNameList, names);
+          setListElements(changeDeviceList, names);
         }
 
-        deviceNameList.setSummary(deviceNameList.getEntry());
+        changeDeviceList.setSummary(changeDeviceList.getEntry());
       } else {
-        deviceNameList.setSummary("no devices");
+        changeDeviceList.setSummary("no devices");
       }
 
       updateRemoveDeviceButton();
     }
 
-    private String getCommunicationMethod () {
-      return communicationMethodList.getValue();
+    private String getDeviceMethod () {
+      return deviceMethodList.getValue();
     }
 
     public interface DeviceCollection {
@@ -271,8 +275,8 @@ public class SettingsActivity extends PreferenceActivity {
       }
     }
 
-    private DeviceCollection makeDeviceCollection (String communicationMethod) {
-      String className = getClass().getName() + "$" + communicationMethod + "DeviceCollection";
+    private DeviceCollection makeDeviceCollection (String deviceMethod) {
+      String className = getClass().getName() + "$" + deviceMethod + "DeviceCollection";
 
       String[] argumentTypes = new String[] {
         "android.content.Context"
@@ -285,13 +289,13 @@ public class SettingsActivity extends PreferenceActivity {
       return (DeviceCollection)ReflectionHelper.newInstance(className, argumentTypes, arguments);
     }
 
-    protected void resetBrailleDriverList () {
-      brailleDriverList.setValueIndex(0);
-      showListSelection(brailleDriverList);
+    protected void resetDeviceDriverList () {
+      deviceDriverList.setValueIndex(0);
+      showListSelection(deviceDriverList);
     }
 
-    private void updateDeviceIdentifiers (String communicationMethod) {
-      DeviceCollection devices = makeDeviceCollection(communicationMethod);
+    private void updateDeviceIdentifiers (String deviceMethod) {
+      DeviceCollection devices = makeDeviceCollection(deviceMethod);
 
       setListElements(
         deviceIdentifierList,
@@ -311,22 +315,22 @@ public class SettingsActivity extends PreferenceActivity {
         }
       }
 
-      resetBrailleDriverList();
+      resetDeviceDriverList();
     }
 
     private void updateDeviceName (String name) {
       String problem;
 
-      if (!communicationMethodList.isEnabled()) {
+      if (!deviceMethodList.isEnabled()) {
         problem = "communication method not selected";
       } else if (!deviceIdentifierList.isEnabled()) {
         problem = "device not selected";
-      } else if (!brailleDriverList.isEnabled()) {
+      } else if (!deviceDriverList.isEnabled()) {
         problem = "braille driver not selected";
       } else {
         if (name.length() == 0) {
-          name = brailleDriverList.getSummary()
-               + " " + communicationMethodList.getSummary()
+          name = deviceDriverList.getSummary()
+               + " " + deviceMethodList.getSummary()
                + " " + deviceIdentifierList.getSummary()
                ;
         }
@@ -353,31 +357,31 @@ public class SettingsActivity extends PreferenceActivity {
 
       addPreferencesFromResource(R.xml.settings_device);
 
-      deviceNameList = findList("current-device");
-      newDeviceScreen = findScreen("new-device");
-      removeDeviceButton = findPreference("device-remove");
+      changeDeviceList = getListPreference(R.string.PREF_KEY_CHANGE_DEVICE);
+      addDeviceScreen = getScreenPreference(R.string.PREF_KEY_ADD_DEVICE);
+      removeDeviceButton = getPreference(R.string.PREF_KEY_REMOVE_DEVICE);
 
-      deviceNameEditor = findEditor("device-name");
-      communicationMethodList = findList("device-method");
-      deviceIdentifierList = findList("device-identifier");
-      brailleDriverList = findList("device-driver");
-      addDeviceButton = findPreference("device-add");
+      deviceNameEditor = getEditorPreference(R.string.PREF_KEY_DEVICE_NAME);
+      deviceMethodList = getListPreference(R.string.PREF_KEY_DEVICE_METHOD);
+      deviceIdentifierList = getListPreference(R.string.PREF_KEY_DEVICE_IDENTIFIER);
+      deviceDriverList = getListPreference(R.string.PREF_KEY_DEVICE_DRIVER);
+      addDeviceButton = getPreference(R.string.PREF_KEY_DEVICE_ADD);
 
       {
         SharedPreferences prefs = getSharedPreferences();
         deviceNames = new TreeSet<String>(prefs.getStringSet("device-names", Collections.EMPTY_SET));
       }
 
-      updateDeviceNameList();
-      showListSelection(communicationMethodList);
-      updateDeviceIdentifiers(getCommunicationMethod());
+      updateChangeDeviceList();
+      showListSelection(deviceMethodList);
+      updateDeviceIdentifiers(getDeviceMethod());
       updateDeviceName();
 
-      deviceNameList.setOnPreferenceChangeListener(
+      changeDeviceList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            deviceNameList.setSummary((String)newValue);
+            changeDeviceList.setSummary((String)newValue);
             updateRemoveDeviceButton();
             return true;
           }
@@ -394,12 +398,12 @@ public class SettingsActivity extends PreferenceActivity {
         }
       );
 
-      communicationMethodList.setOnPreferenceChangeListener(
+      deviceMethodList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
             String newMethod = (String)newValue;
-            showListSelection(communicationMethodList, newMethod);
+            showListSelection(deviceMethodList, newMethod);
             updateDeviceIdentifiers(newMethod);
             updateDeviceName();
             return true;
@@ -418,11 +422,11 @@ public class SettingsActivity extends PreferenceActivity {
         }
       );
 
-      brailleDriverList.setOnPreferenceChangeListener(
+      deviceDriverList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(brailleDriverList, (String)newValue);
+            showListSelection(deviceDriverList, (String)newValue);
             updateDeviceName();
             return true;
           }
@@ -435,19 +439,19 @@ public class SettingsActivity extends PreferenceActivity {
           public boolean onPreferenceClick (Preference preference) {
             String name = deviceNameEditor.getSummary().toString();
             deviceNames.add(name);
-            updateDeviceNameList();
+            updateChangeDeviceList();
             updateDeviceName();
 
             {
               SharedPreferences.Editor editor = preference.getEditor();
-              putListSelection(editor, communicationMethodList, name);
+              putListSelection(editor, deviceMethodList, name);
               putListSelection(editor, deviceIdentifierList, name);
-              putListSelection(editor, brailleDriverList, name);
+              putListSelection(editor, deviceDriverList, name);
               editor.putStringSet("device-names", deviceNames);
               editor.commit();
             }
 
-            newDeviceScreen.getDialog().dismiss();
+            addDeviceScreen.getDialog().dismiss();
             return true;
           }
         }
@@ -457,9 +461,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
-            deviceNames.remove(deviceNameList.getValue());
-            deviceNameList.setValue("");
-            updateDeviceNameList();
+            deviceNames.remove(changeDeviceList.getValue());
+            changeDeviceList.setValue("");
+            updateChangeDeviceList();
             return true;
           }
         }

@@ -4,38 +4,38 @@
     >
 
   <ListPreference
-    android:key="current-device"
+    android:key="@string/PREF_KEY_CHANGE_DEVICE"
     android:title="Change Device"
   />
 
   <PreferenceScreen
-      android:key="new-device"
+      android:key="@string/PREF_KEY_ADD_DEVICE"
       android:title="Add Device"
       >
 
     <EditTextPreference
-      android:key="device-name"
+      android:key="@string/PREF_KEY_DEVICE_NAME"
       android:title="Device Name"
       android:defaultValue=""
       />
 
     <ListPreference
-      android:key="device-method"
+      android:key="@string/PREF_KEY_DEVICE_METHOD"
       android:title="Communication Method"
-      android:entries="@array/DEVICE_COMMUNICATION_LABELS"
-      android:entryValues="@array/DEVICE_COMMUNICATION_VALUES"
+      android:entries="@array/DEVICE_METHOD_LABELS"
+      android:entryValues="@array/DEVICE_METHOD_VALUES"
       android:defaultValue="Bluetooth"
       />
 
     <ListPreference
-      android:key="device-identifier"
+      android:key="@string/PREF_KEY_DEVICE_IDENTIFIER"
       android:title="Select Device"
       android:entries="@array/EMPTY_STRING_ARRAY"
       android:entryValues="@array/EMPTY_STRING_ARRAY"
       />
 
     <ListPreference
-      android:key="device-driver"
+      android:key="@string/PREF_KEY_DEVICE_DRIVER"
       android:title="Braille Driver"
       android:entries="@array/BRAILLE_DRIVER_LABELS"
       android:entryValues="@array/BRAILLE_DRIVER_VALUES"
@@ -43,13 +43,13 @@
       />
 
     <Preference
-      android:key="device-add"
+      android:key="@string/PREF_KEY_DEVICE_ADD"
       android:title="Add"
       />
   </PreferenceScreen>
 
   <Preference
-    android:key="device-remove"
+    android:key="@string/PREF_KEY_REMOVE_DEVICE"
     android:title="Remove Device"
   />
 </PreferenceScreen>

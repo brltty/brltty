@@ -122,6 +122,14 @@ public class CoreThread extends Thread {
     UsbHelper.construct(coreContext);
   }
 
+  private SharedPreferences getSharedPreferences () {
+    return PreferenceManager.getDefaultSharedPreferences(coreContext);
+  }
+
+  private String getStringSetting (int key, String defaultValue) {
+    return getSharedPreferences().getString(coreContext.getResources().getString(key), defaultValue);
+  }
+
   @Override
   public void run () {
     extractAssets();
@@ -135,11 +143,9 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
-    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(coreContext);
-    builder.setBrailleDriver(prefs.getString("braille-driver", "auto"));
-    builder.setTextTable(prefs.getString("text-table", "auto"));
-    builder.setAttributesTable(prefs.getString("attributes-table", "attributes"));
-    builder.setContractionTable(prefs.getString("contraction-table", "en-us-g2"));
+    builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
+    builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
+    builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
 
     // settings for testing - should be removed
     builder.setLogLevel(LogLevel.DEBUG);

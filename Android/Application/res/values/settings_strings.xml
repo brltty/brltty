@@ -4,13 +4,27 @@
   <string-array name="EMPTY_STRING_ARRAY">
   </string-array>
 
-  <string-array name="DEVICE_COMMUNICATION_VALUES">
+  <string name="PREF_KEY_TEXT_TABLE">text-table</string>
+  <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>
+  <string name="PREF_KEY_CONTRACTION_TABLE">contraction-table</string>
+
+  <string name="PREF_KEY_CHANGE_DEVICE">change-device</string>
+  <string name="PREF_KEY_ADD_DEVICE">add-device</string>
+  <string name="PREF_KEY_REMOVE_DEVICE">remove-device</string>
+
+  <string name="PREF_KEY_DEVICE_NAME">device-name</string>
+  <string name="PREF_KEY_DEVICE_METHOD">device-method</string>
+  <string name="PREF_KEY_DEVICE_IDENTIFIER">device-identifier</string>
+  <string name="PREF_KEY_DEVICE_DRIVER">device-driver</string>
+  <string name="PREF_KEY_DEVICE_ADD">device-add</string>
+
+  <string-array name="DEVICE_METHOD_VALUES">
     <item>Bluetooth</item>
     <item>Usb</item>
     <item>Serial</item>
   </string-array>
 
-  <string-array name="DEVICE_COMMUNICATION_LABELS">
+  <string-array name="DEVICE_METHOD_LABELS">
     <item>Bluetooth</item>
     <item>USB</item>
     <item>Serial</item>
