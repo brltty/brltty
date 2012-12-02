@@ -147,25 +147,36 @@ public class SettingsActivity extends PreferenceActivity {
       setListElements(list, values, values);
     }
 
-    private void updateRemoveDeviceButton () {
-      removeDeviceButton.setSelectable(deviceNameList.isEnabled());
+    protected void updateRemoveDeviceButton () {
+      boolean on = false;
+
+      if (deviceNameList.isEnabled()) {
+        CharSequence value = deviceNameList.getSummary();
+
+        if (value != null) {
+          if (value.length() > 0) {
+            on = true;
+          }
+        }
+      }
+
+      removeDeviceButton.setSelectable(on);
     }
 
     private void updateDeviceNameList () {
-      int count = deviceNames.size();
+      boolean haveDevices = !deviceNames.isEmpty();
+      deviceNameList.setEnabled(haveDevices);
 
-      if (count == 0) {
-        deviceNameList.setEnabled(false);
-        deviceNameList.setSummary("no devices");
-      } else {
+      if (haveDevices) {
         {
-          String[] names = new String[count];
+          String[] names = new String[deviceNames.size()];
           deviceNames.toArray(names);
           setListElements(deviceNameList, names);
         }
 
-        deviceNameList.setEnabled(true);
         deviceNameList.setSummary(deviceNameList.getEntry());
+      } else {
+        deviceNameList.setSummary("no devices");
       }
 
       updateRemoveDeviceButton();
@@ -449,7 +460,6 @@ public class SettingsActivity extends PreferenceActivity {
             deviceNames.remove(deviceNameList.getValue());
             deviceNameList.setValue("");
             updateDeviceNameList();
-            updateRemoveDeviceButton();
             return true;
           }
         }
