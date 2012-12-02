@@ -4,7 +4,7 @@
     >
 
   <ListPreference
-    android:key="device-list"
+    android:key="current-device"
     android:title="Change Device"
   />
 
@@ -20,7 +20,7 @@
       />
 
     <ListPreference
-      android:key="device-communication"
+      android:key="device-method"
       android:title="Communication Method"
       android:entries="@array/DEVICE_COMMUNICATION_LABELS"
       android:entryValues="@array/DEVICE_COMMUNICATION_VALUES"
@@ -48,8 +48,8 @@
       />
   </PreferenceScreen>
 
-  <ListPreference
-    android:key="device-list"
+  <Preference
+    android:key="device-remove"
     android:title="Remove Device"
   />
 </PreferenceScreen>
