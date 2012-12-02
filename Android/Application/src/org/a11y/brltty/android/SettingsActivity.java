@@ -83,7 +83,7 @@ public class SettingsActivity extends PreferenceActivity {
       return (PreferenceScreen)getPreference(key);
     }
 
-    protected EditTextPreference getEditorPreference (int key) {
+    protected EditTextPreference getEditTextPreference (int key) {
       return (EditTextPreference)getPreference(key);
     }
 
@@ -111,12 +111,8 @@ public class SettingsActivity extends PreferenceActivity {
       return getPreferenceManager().getDefaultSharedPreferences(getActivity());
     }
 
-    protected String makeListSelectionKey (ListPreference list, String owner) {
-      return list.getKey() + "-" + owner;
-    }
-
-    protected void putListSelection (SharedPreferences.Editor editor, ListPreference list, String owner) {
-      editor.putString(makeListSelectionKey(list, owner), list.getValue());
+    protected String makePropertyName (int key, String owner) {
+      return getResources().getString(key) + "-" + owner;
     }
   }
 
@@ -141,6 +137,12 @@ public class SettingsActivity extends PreferenceActivity {
     protected ListPreference deviceIdentifierList;
     protected ListPreference deviceDriverList;
     protected Preference addDeviceButton;
+
+    protected final int[] devicePropertyKeys = {
+      R.string.PREF_KEY_DEVICE_METHOD,
+      R.string.PREF_KEY_DEVICE_IDENTIFIER,
+      R.string.PREF_KEY_DEVICE_DRIVER
+    };
 
     protected void setListElements (ListPreference list, String[] values, String[] labels) {
       list.setEntryValues(values);
@@ -361,7 +363,7 @@ public class SettingsActivity extends PreferenceActivity {
       addDeviceScreen = getScreenPreference(R.string.PREF_KEY_ADD_DEVICE);
       removeDeviceButton = getPreference(R.string.PREF_KEY_REMOVE_DEVICE);
 
-      deviceNameEditor = getEditorPreference(R.string.PREF_KEY_DEVICE_NAME);
+      deviceNameEditor = getEditTextPreference(R.string.PREF_KEY_DEVICE_NAME);
       deviceMethodList = getListPreference(R.string.PREF_KEY_DEVICE_METHOD);
       deviceIdentifierList = getListPreference(R.string.PREF_KEY_DEVICE_IDENTIFIER);
       deviceDriverList = getListPreference(R.string.PREF_KEY_DEVICE_DRIVER);
@@ -444,9 +446,11 @@ public class SettingsActivity extends PreferenceActivity {
 
             {
               SharedPreferences.Editor editor = preference.getEditor();
-              putListSelection(editor, deviceMethodList, name);
-              putListSelection(editor, deviceIdentifierList, name);
-              putListSelection(editor, deviceDriverList, name);
+
+              for (int key : devicePropertyKeys) {
+                editor.putString(makePropertyName(key, name), getListPreference(key).getValue());
+              }
+
               editor.putStringSet("device-names", deviceNames);
               editor.commit();
             }
@@ -461,9 +465,22 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
-            deviceNames.remove(changeDeviceList.getValue());
-            changeDeviceList.setValue("");
+            String name = changeDeviceList.getValue();
+            deviceNames.remove(name);
             updateChangeDeviceList();
+            updateDeviceName();
+
+            {
+              SharedPreferences.Editor editor = preference.getEditor();
+              editor.putStringSet("device-names", deviceNames);
+
+              for (int key : devicePropertyKeys) {
+                editor.remove(makePropertyName(key, name));
+              }
+
+              editor.commit();
+            }
+
             return true;
           }
         }
