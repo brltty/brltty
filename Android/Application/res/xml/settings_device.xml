@@ -5,6 +5,7 @@
 
   <ListPreference
     android:key="@string/PREF_KEY_SELECTED_DEVICE"
+    android:persistent="true"
     android:title="Selected Device"
    />
 
@@ -48,8 +49,24 @@
      />
   </PreferenceScreen>
 
-  <Preference
+  <PreferenceScreen
     android:key="@string/PREF_KEY_REMOVE_DEVICE"
     android:title="Remove Device"
-   />
+    >
+
+    <Preference
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_ASK"
+      android:title="Do you really want to remove this device?"
+     />
+
+    <Preference
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_YES"
+      android:title="Yes"
+     />
+
+    <Preference
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_NO"
+      android:title="No"
+     />
+  </PreferenceScreen>
 </PreferenceScreen>

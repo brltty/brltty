@@ -12,6 +12,10 @@
   <string name="PREF_KEY_ADD_DEVICE">add-device</string>
   <string name="PREF_KEY_REMOVE_DEVICE">remove-device</string>
 
+  <string name="PREF_KEY_REMOVE_DEVICE_ASK">remove-device-ask</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_YES">remove-device-yes</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_NO">remove-device-no</string>
+
   <string name="PREF_KEY_DEVICE_NAME">device-name</string>
   <string name="PREF_KEY_DEVICE_METHOD">device-method</string>
   <string name="PREF_KEY_DEVICE_IDENTIFIER">device-identifier</string>

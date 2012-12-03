@@ -34,6 +34,7 @@ import android.preference.PreferenceFragment;
 
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 
@@ -76,11 +77,17 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     protected Preference getPreference (int key) {
-      return findPreference(getResources().getString(key));
+      String name = getResources().getString(key);
+      Log.i("TEST-OUTPUT", "getting pref: " + name + "=" + key);
+      return findPreference(name);
     }
 
     protected PreferenceScreen getPreferenceScreen (int key) {
       return (PreferenceScreen)getPreference(key);
+    }
+
+    protected CheckBoxPreference getCheckBoxPreference (int key) {
+      return (CheckBoxPreference)getPreference(key);
     }
 
     protected EditTextPreference getEditTextPreference (int key) {
@@ -130,13 +137,17 @@ public class SettingsActivity extends PreferenceActivity {
 
     protected ListPreference selectedDeviceList;
     protected PreferenceScreen addDeviceScreen;
-    protected Preference removeDeviceButton;
+    protected PreferenceScreen removeDeviceScreen;
 
     protected EditTextPreference deviceNameEditor;
     protected ListPreference deviceMethodList;
     protected ListPreference deviceIdentifierList;
     protected ListPreference deviceDriverList;
     protected Preference addDeviceButton;
+
+    protected Preference removeDeviceButton_ASK;
+    protected Preference removeDeviceButton_YES;
+    protected Preference removeDeviceButton_NO;
 
     protected static final String PREF_NAME_DEVICE_NAMES = "device-names";
 
@@ -155,20 +166,21 @@ public class SettingsActivity extends PreferenceActivity {
       setListElements(list, values, values);
     }
 
-    protected void updateRemoveDeviceButton () {
+    protected void updateRemoveDeviceScreen () {
       boolean on = false;
 
       if (selectedDeviceList.isEnabled()) {
-        CharSequence value = selectedDeviceList.getSummary();
+        CharSequence name = selectedDeviceList.getSummary();
 
-        if (value != null) {
-          if (value.length() > 0) {
+        if (name != null) {
+          if (name.length() > 0) {
             on = true;
+            removeDeviceButton_ASK.setSummary(name);
           }
         }
       }
 
-      removeDeviceButton.setSelectable(on);
+      removeDeviceScreen.setSelectable(on);
     }
 
     private void updateSelectedDeviceList () {
@@ -182,16 +194,12 @@ public class SettingsActivity extends PreferenceActivity {
           setListElements(selectedDeviceList, names);
         }
 
-        String name = selectedDeviceList.getEntry().toString();
-        if (name.length() == 0) {
-          name = "device not selected";
-        }
-        selectedDeviceList.setSummary(name);
+        selectedDeviceList.setSummary(selectedDeviceList.getEntry());
       } else {
         selectedDeviceList.setSummary("no devices");
       }
 
-      updateRemoveDeviceButton();
+      updateRemoveDeviceScreen();
     }
 
     private String getDeviceMethod () {
@@ -367,13 +375,17 @@ public class SettingsActivity extends PreferenceActivity {
 
       selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
       addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
-      removeDeviceButton = getPreference(R.string.PREF_KEY_REMOVE_DEVICE);
+      removeDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_REMOVE_DEVICE);
 
       deviceNameEditor = getEditTextPreference(R.string.PREF_KEY_DEVICE_NAME);
       deviceMethodList = getListPreference(R.string.PREF_KEY_DEVICE_METHOD);
       deviceIdentifierList = getListPreference(R.string.PREF_KEY_DEVICE_IDENTIFIER);
       deviceDriverList = getListPreference(R.string.PREF_KEY_DEVICE_DRIVER);
       addDeviceButton = getPreference(R.string.PREF_KEY_DEVICE_ADD);
+
+      removeDeviceButton_ASK = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_ASK);
+      removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
+      removeDeviceButton_NO = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_NO);
 
       {
         SharedPreferences prefs = getSharedPreferences();
@@ -390,7 +402,7 @@ public class SettingsActivity extends PreferenceActivity {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
             selectedDeviceList.setSummary((String)newValue);
-            updateRemoveDeviceButton();
+            updateRemoveDeviceScreen();
             return true;
           }
         }
@@ -467,26 +479,40 @@ public class SettingsActivity extends PreferenceActivity {
         }
       );
 
-      removeDeviceButton.setOnPreferenceClickListener(
+      removeDeviceButton_YES.setOnPreferenceClickListener(
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
             String name = selectedDeviceList.getValue();
-            deviceNames.remove(name);
-            updateSelectedDeviceList();
-            updateDeviceName();
 
-            {
-              SharedPreferences.Editor editor = preference.getEditor();
-              editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
+            if (name != null) {
+              deviceNames.remove(name);
+              updateSelectedDeviceList();
+              updateDeviceName();
 
-              for (int key : devicePropertyKeys) {
-                editor.remove(makePropertyName(key, name));
+              {
+                SharedPreferences.Editor editor = preference.getEditor();
+                editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
+
+                for (int key : devicePropertyKeys) {
+                  editor.remove(makePropertyName(key, name));
+                }
+
+                editor.commit();
               }
-
-              editor.commit();
             }
 
+            removeDeviceScreen.getDialog().dismiss();
+            return true;
+          }
+        }
+      );
+
+      removeDeviceButton_NO.setOnPreferenceClickListener(
+        new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick (Preference preference) {
+            removeDeviceScreen.getDialog().dismiss();
             return true;
           }
         }
