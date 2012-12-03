@@ -391,6 +391,12 @@ typedef struct {
 static const DotsTable dotsTable_Focus1 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
+  { .identifier = "Focus 14",
+    .dotsTable = &dotsTable_ISO11548_1,
+    .cellCount = 14,
+    .type = MOD_TYPE_Focus
+  }
+  ,
   { .identifier = "Focus 40",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
