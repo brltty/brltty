@@ -1,7 +1,7 @@
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="Advanced Settings"
-    >
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:title="Advanced Settings"
+  >
 
   <ListPreference
     android:key="PREF_KEY_ATTRIBUTES_TABLE"
@@ -10,5 +10,5 @@
     android:entries="@array/ATTRIBUTES_TABLE_LABELS"
     android:entryValues="@array/ATTRIBUTES_TABLE_VALUES"
     android:defaultValue="attributes"
-  />
+   />
 </PreferenceScreen>

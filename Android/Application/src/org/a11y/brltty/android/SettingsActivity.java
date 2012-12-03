@@ -79,7 +79,7 @@ public class SettingsActivity extends PreferenceActivity {
       return findPreference(getResources().getString(key));
     }
 
-    protected PreferenceScreen getScreenPreference (int key) {
+    protected PreferenceScreen getPreferenceScreen (int key) {
       return (PreferenceScreen)getPreference(key);
     }
 
@@ -128,7 +128,7 @@ public class SettingsActivity extends PreferenceActivity {
   public static final class DeviceManager extends SettingsFragment {
     protected Set<String> deviceNames;
 
-    protected ListPreference changeDeviceList;
+    protected ListPreference selectedDeviceList;
     protected PreferenceScreen addDeviceScreen;
     protected Preference removeDeviceButton;
 
@@ -138,7 +138,9 @@ public class SettingsActivity extends PreferenceActivity {
     protected ListPreference deviceDriverList;
     protected Preference addDeviceButton;
 
-    protected final int[] devicePropertyKeys = {
+    protected static final String PREF_NAME_DEVICE_NAMES = "device-names";
+
+    protected static final int[] devicePropertyKeys = {
       R.string.PREF_KEY_DEVICE_METHOD,
       R.string.PREF_KEY_DEVICE_IDENTIFIER,
       R.string.PREF_KEY_DEVICE_DRIVER
@@ -156,8 +158,8 @@ public class SettingsActivity extends PreferenceActivity {
     protected void updateRemoveDeviceButton () {
       boolean on = false;
 
-      if (changeDeviceList.isEnabled()) {
-        CharSequence value = changeDeviceList.getSummary();
+      if (selectedDeviceList.isEnabled()) {
+        CharSequence value = selectedDeviceList.getSummary();
 
         if (value != null) {
           if (value.length() > 0) {
@@ -169,20 +171,24 @@ public class SettingsActivity extends PreferenceActivity {
       removeDeviceButton.setSelectable(on);
     }
 
-    private void updateChangeDeviceList () {
+    private void updateSelectedDeviceList () {
       boolean haveDevices = !deviceNames.isEmpty();
-      changeDeviceList.setEnabled(haveDevices);
+      selectedDeviceList.setEnabled(haveDevices);
 
       if (haveDevices) {
         {
           String[] names = new String[deviceNames.size()];
           deviceNames.toArray(names);
-          setListElements(changeDeviceList, names);
+          setListElements(selectedDeviceList, names);
         }
 
-        changeDeviceList.setSummary(changeDeviceList.getEntry());
+        String name = selectedDeviceList.getEntry().toString();
+        if (name.length() == 0) {
+          name = "device not selected";
+        }
+        selectedDeviceList.setSummary(name);
       } else {
-        changeDeviceList.setSummary("no devices");
+        selectedDeviceList.setSummary("no devices");
       }
 
       updateRemoveDeviceButton();
@@ -359,8 +365,8 @@ public class SettingsActivity extends PreferenceActivity {
 
       addPreferencesFromResource(R.xml.settings_device);
 
-      changeDeviceList = getListPreference(R.string.PREF_KEY_CHANGE_DEVICE);
-      addDeviceScreen = getScreenPreference(R.string.PREF_KEY_ADD_DEVICE);
+      selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
+      addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
       removeDeviceButton = getPreference(R.string.PREF_KEY_REMOVE_DEVICE);
 
       deviceNameEditor = getEditTextPreference(R.string.PREF_KEY_DEVICE_NAME);
@@ -371,19 +377,19 @@ public class SettingsActivity extends PreferenceActivity {
 
       {
         SharedPreferences prefs = getSharedPreferences();
-        deviceNames = new TreeSet<String>(prefs.getStringSet("device-names", Collections.EMPTY_SET));
+        deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_NAME_DEVICE_NAMES, Collections.EMPTY_SET));
       }
 
-      updateChangeDeviceList();
+      updateSelectedDeviceList();
       showListSelection(deviceMethodList);
       updateDeviceIdentifiers(getDeviceMethod());
       updateDeviceName();
 
-      changeDeviceList.setOnPreferenceChangeListener(
+      selectedDeviceList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            changeDeviceList.setSummary((String)newValue);
+            selectedDeviceList.setSummary((String)newValue);
             updateRemoveDeviceButton();
             return true;
           }
@@ -441,7 +447,7 @@ public class SettingsActivity extends PreferenceActivity {
           public boolean onPreferenceClick (Preference preference) {
             String name = deviceNameEditor.getSummary().toString();
             deviceNames.add(name);
-            updateChangeDeviceList();
+            updateSelectedDeviceList();
             updateDeviceName();
 
             {
@@ -451,7 +457,7 @@ public class SettingsActivity extends PreferenceActivity {
                 editor.putString(makePropertyName(key, name), getListPreference(key).getValue());
               }
 
-              editor.putStringSet("device-names", deviceNames);
+              editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
               editor.commit();
             }
 
@@ -465,14 +471,14 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
-            String name = changeDeviceList.getValue();
+            String name = selectedDeviceList.getValue();
             deviceNames.remove(name);
-            updateChangeDeviceList();
+            updateSelectedDeviceList();
             updateDeviceName();
 
             {
               SharedPreferences.Editor editor = preference.getEditor();
-              editor.putStringSet("device-names", deviceNames);
+              editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
 
               for (int key : devicePropertyKeys) {
                 editor.remove(makePropertyName(key, name));
