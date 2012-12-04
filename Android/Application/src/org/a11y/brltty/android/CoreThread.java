@@ -122,18 +122,27 @@ public class CoreThread extends Thread {
     UsbHelper.construct(coreContext);
   }
 
+  private String getStringResource (int resource) {
+    return coreContext.getResources().getString(resource);
+  }
+
   private SharedPreferences getSharedPreferences () {
     return PreferenceManager.getDefaultSharedPreferences(coreContext);
   }
 
-  private String getStringSetting (int key, String defaultValue) {
-    return getSharedPreferences().getString(coreContext.getResources().getString(key), defaultValue);
+  private String getSetting (String key, String defaultValue) {
+    return getSharedPreferences().getString(key, defaultValue);
   }
 
-  @Override
-  public void run () {
-    extractAssets();
+  private String getSetting (int key, String defaultValue) {
+    return getSetting(getStringResource(key), defaultValue);
+  }
 
+  private String getSetting (int property, String owner, String defaultValue) {
+    return getSetting(getStringResource(property) + "-" + owner, defaultValue);
+  }
+
+  private String[] makeArguments () {
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
     // required settings
@@ -143,16 +152,40 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
-    builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
-    builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
-    builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
+    builder.setTextTable(getSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
+    builder.setAttributesTable(getSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
+    builder.setContractionTable(getSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
+
+    {
+      String name = getSetting(R.string.PREF_KEY_SELECTED_DEVICE, "");
+
+      if (name.length() > 0) {
+        String method = getSetting(R.string.PREF_KEY_DEVICE_METHOD, name, "");
+
+        if (method.length() > 0) {
+          String identifier = getSetting(R.string.PREF_KEY_DEVICE_IDENTIFIER, name, "");
+          if (identifier.length() > 0) {
+            String driver = getSetting(R.string.PREF_KEY_DEVICE_DRIVER, name, "");
+
+            if (driver.length() > 0) {
+              builder.setBrailleDevice(method + ":" + identifier);
+              builder.setBrailleDriver(driver);
+            }
+          }
+        }
+      }
+    }
 
     // settings for testing - should be removed
     builder.setLogLevel(LogLevel.DEBUG);
     builder.setLogFile("/data/local/tmp/brltty.log");
-    builder.setBrailleDevice("usb:,bluetooth:00:A0:96:18:54:7E");
 
-    String[] arguments = builder.getArguments();
-    CoreWrapper.run(arguments);
+    return builder.getArguments();
+  }
+
+  @Override
+  public void run () {
+    extractAssets();
+    CoreWrapper.run(makeArguments());
   }
 }
