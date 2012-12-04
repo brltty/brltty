@@ -29,18 +29,17 @@ import java.util.TreeSet;
 import android.util.Log;
 import android.os.Bundle;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 
 import android.bluetooth.*;
 import android.hardware.usb.*;
@@ -77,9 +76,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     protected Preference getPreference (int key) {
-      String name = getResources().getString(key);
-      Log.i("TEST-OUTPUT", "getting pref: " + name + "=" + key);
-      return findPreference(name);
+      return findPreference(getResources().getString(key));
     }
 
     protected PreferenceScreen getPreferenceScreen (int key) {
@@ -112,6 +109,20 @@ public class SettingsActivity extends PreferenceActivity {
 
     protected void showListSelection (ListPreference list, String value) {
       showListSelection(list, getListIndex(list, value));
+    }
+
+    protected void resetList (ListPreference list) {
+      list.setValueIndex(0);
+      showListSelection(list);
+    }
+
+    protected void setListElements (ListPreference list, String[] values, String[] labels) {
+      list.setEntryValues(values);
+      list.setEntries(labels);
+    }
+
+    protected void setListElements (ListPreference list, String[] values) {
+      setListElements(list, values, values);
     }
 
     protected SharedPreferences getSharedPreferences () {
@@ -157,25 +168,14 @@ public class SettingsActivity extends PreferenceActivity {
       R.string.PREF_KEY_DEVICE_DRIVER
     };
 
-    protected void setListElements (ListPreference list, String[] values, String[] labels) {
-      list.setEntryValues(values);
-      list.setEntries(labels);
-    }
-
-    protected void setListElements (ListPreference list, String[] values) {
-      setListElements(list, values, values);
-    }
-
-    protected void updateRemoveDeviceScreen () {
+    private void updateRemoveDeviceScreen (String selectedDevice) {
       boolean on = false;
 
       if (selectedDeviceList.isEnabled()) {
-        CharSequence name = selectedDeviceList.getSummary();
-
-        if (name != null) {
-          if (name.length() > 0) {
+        if (selectedDevice != null) {
+          if (selectedDevice.length() > 0) {
             on = true;
-            removeDeviceButton_ASK.setSummary(name);
+            removeDeviceButton_ASK.setSummary(selectedDevice);
           }
         }
       }
@@ -183,9 +183,14 @@ public class SettingsActivity extends PreferenceActivity {
       removeDeviceScreen.setSelectable(on);
     }
 
+    private void updateRemoveDeviceScreen () {
+      updateRemoveDeviceScreen(selectedDeviceList.getValue());
+    }
+
     private void updateSelectedDeviceList () {
       boolean haveDevices = !deviceNames.isEmpty();
       selectedDeviceList.setEnabled(haveDevices);
+      CharSequence summary;
 
       if (haveDevices) {
         {
@@ -194,11 +199,15 @@ public class SettingsActivity extends PreferenceActivity {
           setListElements(selectedDeviceList, names);
         }
 
-        selectedDeviceList.setSummary(selectedDeviceList.getEntry());
+        summary = selectedDeviceList.getEntry();
+        if ((summary == null) || (summary.length() == 0)) {
+          summary = "not selected";
+        }
       } else {
-        selectedDeviceList.setSummary("no devices");
+        summary = "no devices";
       }
 
+      selectedDeviceList.setSummary(summary);
       updateRemoveDeviceScreen();
     }
 
@@ -213,6 +222,10 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static final class BluetoothDeviceCollection implements DeviceCollection {
       private final Collection<BluetoothDevice> devices;
+
+      public BluetoothDeviceCollection (Context context) {
+        devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+      }
 
       @Override
       public String[] getIdentifierValues () {
@@ -237,10 +250,6 @@ public class SettingsActivity extends PreferenceActivity {
 
         return makeStringArray(devices, stringMaker);
       }
-
-      public BluetoothDeviceCollection (Context context) {
-        devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
-      }
     }
 
     public static final class UsbDeviceCollection implements DeviceCollection {
@@ -248,6 +257,10 @@ public class SettingsActivity extends PreferenceActivity {
 
       protected UsbManager getManager (Context context) {
         return (UsbManager)context.getSystemService(Context.USB_SERVICE);
+      }
+
+      public UsbDeviceCollection (Context context) {
+        devices = getManager(context).getDeviceList().values();
       }
 
       @Override
@@ -272,10 +285,6 @@ public class SettingsActivity extends PreferenceActivity {
         };
 
         return makeStringArray(devices, stringMaker);
-      }
-
-      public UsbDeviceCollection (Context context) {
-        devices = getManager(context).getDeviceList().values();
       }
     }
 
@@ -305,12 +314,7 @@ public class SettingsActivity extends PreferenceActivity {
       return (DeviceCollection)ReflectionHelper.newInstance(className, argumentTypes, arguments);
     }
 
-    protected void resetDeviceDriverList () {
-      deviceDriverList.setValueIndex(0);
-      showListSelection(deviceDriverList);
-    }
-
-    private void updateDeviceIdentifiers (String deviceMethod) {
+    private void updateDeviceIdentifierList (String deviceMethod) {
       DeviceCollection devices = makeDeviceCollection(deviceMethod);
 
       setListElements(
@@ -320,18 +324,17 @@ public class SettingsActivity extends PreferenceActivity {
       );
 
       {
-        int count = deviceIdentifierList.getEntryValues().length;
-        deviceIdentifierList.setEnabled(count > 0);
+        boolean haveIdentifiers = deviceIdentifierList.getEntryValues().length > 0;
+        deviceIdentifierList.setEnabled(haveIdentifiers);
 
-        if (count == 0) {
-          deviceIdentifierList.setSummary("no devices");
+        if (haveIdentifiers) {
+          resetList(deviceIdentifierList);
         } else {
-          deviceIdentifierList.setValueIndex(0);
-          showListSelection(deviceIdentifierList);
+          deviceIdentifierList.setSummary("no devices");
         }
       }
 
-      resetDeviceDriverList();
+      resetList(deviceDriverList);
     }
 
     private void updateDeviceName (String name) {
@@ -345,9 +348,9 @@ public class SettingsActivity extends PreferenceActivity {
         problem = "braille driver not selected";
       } else {
         if (name.length() == 0) {
-          name = deviceDriverList.getSummary()
-               + " " + deviceMethodList.getSummary()
-               + " " + deviceIdentifierList.getSummary()
+          name = deviceDriverList.getEntry()
+               + " " + deviceMethodList.getEntry()
+               + " " + deviceIdentifierList.getEntry()
                ;
         }
 
@@ -394,15 +397,16 @@ public class SettingsActivity extends PreferenceActivity {
 
       updateSelectedDeviceList();
       showListSelection(deviceMethodList);
-      updateDeviceIdentifiers(getDeviceMethod());
+      updateDeviceIdentifierList(getDeviceMethod());
       updateDeviceName();
 
       selectedDeviceList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            selectedDeviceList.setSummary((String)newValue);
-            updateRemoveDeviceScreen();
+            String newName = (String)newValue;
+            selectedDeviceList.setSummary(newName);
+            updateRemoveDeviceScreen(newName);
             return true;
           }
         }
@@ -424,7 +428,7 @@ public class SettingsActivity extends PreferenceActivity {
           public boolean onPreferenceChange (Preference preference, Object newValue) {
             String newMethod = (String)newValue;
             showListSelection(deviceMethodList, newMethod);
-            updateDeviceIdentifiers(newMethod);
+            updateDeviceIdentifierList(newMethod);
             updateDeviceName();
             return true;
           }
@@ -487,6 +491,7 @@ public class SettingsActivity extends PreferenceActivity {
 
             if (name != null) {
               deviceNames.remove(name);
+              selectedDeviceList.setValue("");
               updateSelectedDeviceList();
               updateDeviceName();
 
