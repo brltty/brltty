@@ -22,6 +22,9 @@ clean::
 install: all
 	adb install $(ANDROID_PACKAGE_FILE)
 
+reinstall: all
+	adb install -r $(ANDROID_PACKAGE_FILE)
+
 uninstall:
 	adb uninstall $(ANDROID_PACKAGE_PATH)
 
