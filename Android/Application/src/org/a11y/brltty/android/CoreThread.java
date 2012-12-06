@@ -20,6 +20,10 @@ package org.a11y.brltty.android;
 
 import org.a11y.brltty.core.*;
 
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Set;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -130,16 +134,20 @@ public class CoreThread extends Thread {
     return PreferenceManager.getDefaultSharedPreferences(coreContext);
   }
 
-  private String getSetting (String key, String defaultValue) {
-    return getSharedPreferences().getString(key, defaultValue);
+  private String getStringSetting (int key, String defaultValue) {
+    return getSharedPreferences().getString(getStringResource(key), defaultValue);
   }
 
-  private String getSetting (int key, String defaultValue) {
-    return getSetting(getStringResource(key), defaultValue);
+  private String getStringSetting (int key) {
+    return getSharedPreferences().getString(getStringResource(key), "");
   }
 
-  private String getSetting (int property, String owner, String defaultValue) {
-    return getSetting(getStringResource(property) + "-" + owner, defaultValue);
+  private Set<String> getStringSetSetting (int key) {
+    return getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
+  }
+
+  private String getStringSetting (String owner, int property) {
+    return getSharedPreferences().getString(getStringResource(property) + "-" + owner, "");
   }
 
   private String[] makeArguments () {
@@ -152,20 +160,20 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
-    builder.setTextTable(getSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
-    builder.setAttributesTable(getSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
-    builder.setContractionTable(getSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
+    builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
+    builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
+    builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
 
     {
-      String name = getSetting(R.string.PREF_KEY_SELECTED_DEVICE, "");
+      String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
-        String method = getSetting(R.string.PREF_KEY_DEVICE_METHOD, name, "");
+        String method = getStringSetting(name, R.string.PREF_KEY_DEVICE_METHOD);
 
         if (method.length() > 0) {
-          String identifier = getSetting(R.string.PREF_KEY_DEVICE_IDENTIFIER, name, "");
+          String identifier = getStringSetting(name, R.string.PREF_KEY_DEVICE_IDENTIFIER);
           if (identifier.length() > 0) {
-            String driver = getSetting(R.string.PREF_KEY_DEVICE_DRIVER, name, "");
+            String driver = getStringSetting(name, R.string.PREF_KEY_DEVICE_DRIVER);
 
             if (driver.length() > 0) {
               builder.setBrailleDevice(method + ":" + identifier);
@@ -176,9 +184,24 @@ public class CoreThread extends Thread {
       }
     }
 
-    // settings for testing - should be removed
-    builder.setLogLevel(LogLevel.DEBUG);
-    builder.setLogFile("/data/local/tmp/brltty.log");
+    {
+      ArrayList<String> keywords = new ArrayList<String>();
+      keywords.add(getStringSetting(R.string.PREF_KEY_LOG_LEVEL, "notice"));
+      keywords.addAll(getStringSetSetting(R.string.PREF_KEY_LOG_CATEGORIES));
+      StringBuilder operand = new StringBuilder();
+
+      for (String keyword : keywords) {
+        if (keyword.length() > 0) {
+          if (operand.length() > 0) {
+            operand.append(',');
+          }
+
+          operand.append(keyword);
+        }
+      }
+
+      builder.setLogLevel(operand.toString());
+    }
 
     return builder.getArguments();
   }

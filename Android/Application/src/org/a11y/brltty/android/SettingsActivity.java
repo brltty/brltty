@@ -40,6 +40,7 @@ import android.preference.Preference;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 
 import android.bluetooth.*;
 import android.hardware.usb.*;
@@ -95,8 +96,18 @@ public class SettingsActivity extends PreferenceActivity {
       return (ListPreference)getPreference(key);
     }
 
+    protected MultiSelectListPreference getMultiSelectListPreference (int key) {
+      return (MultiSelectListPreference)getPreference(key);
+    }
+
     protected void showListSelection (ListPreference list) {
-      list.setSummary(list.getEntry());
+      CharSequence label = list.getEntry();
+
+      if (label == null) {
+        label = "";
+      }
+
+      list.setSummary(label);
     }
 
     protected void showListSelection (ListPreference list, int index) {
@@ -109,6 +120,32 @@ public class SettingsActivity extends PreferenceActivity {
 
     protected void showListSelection (ListPreference list, String value) {
       showListSelection(list, getListIndex(list, value));
+    }
+
+    protected void showSetSelections (MultiSelectListPreference set, Set<String> values) {
+      StringBuilder label = new StringBuilder();
+
+      if (values.size() > 0) {
+        CharSequence[] labels = set.getEntries();
+
+        for (String value : values) {
+          if (value.length() > 0) {
+            if (label.length() > 0) {
+              label.append('\n');
+            }
+
+            label.append(labels[set.findIndexOfValue(value)]);
+          }
+        }
+      } else {
+        label.append("none selected");
+      }
+
+      set.setSummary(label.toString());
+    }
+
+    protected void showSetSelections (MultiSelectListPreference set) {
+      showSetSelections(set, set.getValues());
     }
 
     protected void resetList (ListPreference list) {
@@ -129,17 +166,46 @@ public class SettingsActivity extends PreferenceActivity {
       return getPreferenceManager().getDefaultSharedPreferences(getActivity());
     }
 
-    protected String makePropertyName (int key, String owner) {
+    protected String makePropertyName (String owner, int key) {
       return getResources().getString(key) + "-" + owner;
     }
   }
 
   public static final class GeneralSettings extends SettingsFragment {
+    protected ListPreference textTableList;
+    protected ListPreference contractionTableList;
+
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
       addPreferencesFromResource(R.xml.settings_general);
+
+      textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
+      contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
+
+      showListSelection(textTableList);
+      showListSelection(contractionTableList);
+
+      textTableList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(textTableList, (String)newValue);
+            return true;
+          }
+        }
+      );
+
+      contractionTableList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(contractionTableList, (String)newValue);
+            return true;
+          }
+        }
+      );
     }
   }
 
@@ -470,7 +536,7 @@ public class SettingsActivity extends PreferenceActivity {
               SharedPreferences.Editor editor = preference.getEditor();
 
               for (int key : devicePropertyKeys) {
-                editor.putString(makePropertyName(key, name), getListPreference(key).getValue());
+                editor.putString(makePropertyName(name, key), getListPreference(key).getValue());
               }
 
               editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
@@ -500,7 +566,7 @@ public class SettingsActivity extends PreferenceActivity {
                 editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
 
                 for (int key : devicePropertyKeys) {
-                  editor.remove(makePropertyName(key, name));
+                  editor.remove(makePropertyName(name, key));
                 }
 
                 editor.commit();
@@ -526,11 +592,54 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class AdvancedSettings extends SettingsFragment {
+    protected ListPreference attributesTableList;
+    protected ListPreference logLevelList;
+    protected MultiSelectListPreference logCategorySet;
+
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
       addPreferencesFromResource(R.xml.settings_advanced);
+
+      attributesTableList = getListPreference(R.string.PREF_KEY_ATTRIBUTES_TABLE);
+      logLevelList = getListPreference(R.string.PREF_KEY_LOG_LEVEL);
+      logCategorySet = getMultiSelectListPreference(R.string.PREF_KEY_LOG_CATEGORIES);
+
+      showListSelection(attributesTableList);
+      showListSelection(logLevelList);
+      showSetSelections(logCategorySet);
+
+      attributesTableList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(attributesTableList, (String)newValue);
+            return true;
+          }
+        }
+      );
+
+      logLevelList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            showListSelection(logLevelList, (String)newValue);
+            return true;
+          }
+        }
+      );
+
+      logCategorySet.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            Set<String> newValues = (Set<String>)newValue;
+            showSetSelections(logCategorySet, newValues);
+            return true;
+          }
+        }
+      );
     }
   }
 }

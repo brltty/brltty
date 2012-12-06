@@ -4,7 +4,7 @@
   >
 
   <ListPreference
-    android:key="PREF_KEY_TEXT_TABLE"
+    android:key="@string/PREF_KEY_TEXT_TABLE"
     android:persistent="true"
     android:title="Text Table"
     android:entries="@array/TEXT_TABLE_LABELS"
@@ -13,7 +13,7 @@
    />
 
   <ListPreference
-    android:key="PREF_KEY_CONTRACTION_TABLE"
+    android:key="@string/PREF_KEY_CONTRACTION_TABLE"
     android:persistent="true"
     android:title="Contraction Table"
     android:entries="@array/CONTRACTION_TABLE_LABELS"

@@ -4,11 +4,29 @@
   >
 
   <ListPreference
-    android:key="PREF_KEY_ATTRIBUTES_TABLE"
+    android:key="@string/PREF_KEY_ATTRIBUTES_TABLE"
     android:persistent="true"
     android:title="Attributes Table"
     android:entries="@array/ATTRIBUTES_TABLE_LABELS"
     android:entryValues="@array/ATTRIBUTES_TABLE_VALUES"
     android:defaultValue="attributes"
+   />
+
+  <ListPreference
+    android:key="@string/PREF_KEY_LOG_LEVEL"
+    android:persistent="true"
+    android:title="Log Level"
+    android:entries="@array/LOG_LEVEL_LABELS"
+    android:entryValues="@array/LOG_LEVEL_VALUES"
+    android:defaultValue="notice"
+   />
+
+  <MultiSelectListPreference
+    android:key="@string/PREF_KEY_LOG_CATEGORIES"
+    android:persistent="true"
+    android:title="Log Categories"
+    android:entries="@array/LOG_CATEGORY_LABELS"
+    android:entryValues="@array/LOG_CATEGORY_VALUES"
+    android:defaultValue="@array/EMPTY_STRING_ARRAY"
    />
 </PreferenceScreen>
