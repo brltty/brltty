@@ -49,9 +49,9 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
-  private LogLevel logLevel = null;
-  public LogLevel setLogLevel (LogLevel newValue) {
-    LogLevel oldValue = logLevel;
+  private String logLevel = null;
+  public String setLogLevel (String newValue) {
+    String oldValue = logLevel;
     logLevel = newValue;
     return oldValue;
   }
