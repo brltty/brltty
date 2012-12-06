@@ -460,6 +460,10 @@ gioConnectResource (
           endpoint->methods = &usbMethods;
           endpoint->options = descriptor->usb.options;
 
+          if (!endpoint->options.applicationData) {
+            endpoint->options.applicationData = endpoint->handle.usb.channel->definition.data;
+          }
+
           {
             UsbChannel *channel = endpoint->handle.usb.channel;
             const SerialParameters *parameters = channel->definition.serial;
