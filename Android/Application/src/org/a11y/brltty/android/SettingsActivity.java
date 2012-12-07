@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -56,6 +58,38 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     return strings.toArray(new String[strings.size()]);
+  }
+
+  public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier-%1$s";
+  public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference-%1$s";
+  public static final String PREF_KEY_DEVICE_DRIVER = "device-driver-%1$s";
+
+  public static final String[] devicePropertyKeys = {
+    PREF_KEY_DEVICE_QUALIFIER,
+    PREF_KEY_DEVICE_REFERENCE,
+    PREF_KEY_DEVICE_DRIVER
+  };
+
+  public static Map<String, String> getProperties (String owner, String[] keys, SharedPreferences prefs) {
+    Map<String, String> properties = new LinkedHashMap();
+
+    for (String key : keys) {
+      properties.put(key, prefs.getString(String.format(key, owner), ""));
+    }
+
+    return properties;
+  }
+
+  public static void putProperties (String owner, Map<String, String> properties, SharedPreferences.Editor editor) {
+    for (Map.Entry<String, String> property : properties.entrySet()) {
+      editor.putString(String.format(property.getKey(), owner), property.getValue());
+    }
+  }
+
+  public static void removeProperties (String owner, String[] keys, SharedPreferences.Editor editor) {
+    for (String key : keys) {
+      editor.remove(String.format(key, owner));
+    }
   }
 
   @Override
@@ -165,10 +199,6 @@ public class SettingsActivity extends PreferenceActivity {
     protected SharedPreferences getSharedPreferences () {
       return getPreferenceManager().getDefaultSharedPreferences(getActivity());
     }
-
-    protected String makePropertyName (String owner, int key) {
-      return getResources().getString(key) + "-" + owner;
-    }
   }
 
   public static final class GeneralSettings extends SettingsFragment {
@@ -211,6 +241,7 @@ public class SettingsActivity extends PreferenceActivity {
 
   public static final class DeviceManager extends SettingsFragment {
     protected Set<String> deviceNames;
+    protected DeviceCollection deviceCollection;
 
     protected ListPreference selectedDeviceList;
     protected PreferenceScreen addDeviceScreen;
@@ -226,13 +257,7 @@ public class SettingsActivity extends PreferenceActivity {
     protected Preference removeDeviceButton_YES;
     protected Preference removeDeviceButton_NO;
 
-    protected static final String PREF_NAME_DEVICE_NAMES = "device-names";
-
-    protected static final int[] devicePropertyKeys = {
-      R.string.PREF_KEY_DEVICE_METHOD,
-      R.string.PREF_KEY_DEVICE_IDENTIFIER,
-      R.string.PREF_KEY_DEVICE_DRIVER
-    };
+    protected static final String PREF_KEY_DEVICE_NAMES = "device-names";
 
     private void updateRemoveDeviceScreen (String selectedDevice) {
       boolean on = false;
@@ -284,6 +309,8 @@ public class SettingsActivity extends PreferenceActivity {
     public interface DeviceCollection {
       public String[] getIdentifierValues ();
       public String[] getIdentifierLabels ();
+      public String getMethodQualifier ();
+      public String getDeviceReference (String identifier);
     }
 
     public static final class BluetoothDeviceCollection implements DeviceCollection {
@@ -316,17 +343,25 @@ public class SettingsActivity extends PreferenceActivity {
 
         return makeStringArray(devices, stringMaker);
       }
+
+      public String getMethodQualifier () {
+        return "bluetooth";
+      }
+
+      public String getDeviceReference (String identifier) {
+        return identifier;
+      }
     }
 
     public static final class UsbDeviceCollection implements DeviceCollection {
+      private final UsbManager manager;
+      private final Map<String, UsbDevice> map;
       private final Collection<UsbDevice> devices;
 
-      protected UsbManager getManager (Context context) {
-        return (UsbManager)context.getSystemService(Context.USB_SERVICE);
-      }
-
       public UsbDeviceCollection (Context context) {
-        devices = getManager(context).getDeviceList().values();
+        manager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
+        map = manager.getDeviceList();
+        devices = map.values();
       }
 
       @Override
@@ -352,6 +387,23 @@ public class SettingsActivity extends PreferenceActivity {
 
         return makeStringArray(devices, stringMaker);
       }
+
+      public String getMethodQualifier () {
+        return "usb";
+      }
+
+      public String getDeviceReference (String identifier) {
+        UsbDevice device = map.get(identifier);
+        UsbDeviceConnection connection = manager.openDevice(device);
+
+        if (connection != null) {
+          String serialNumber = connection.getSerial();
+          connection.close();
+          return serialNumber;
+        }
+
+        return null;
+      }
     }
 
     public static final class SerialDeviceCollection implements DeviceCollection {
@@ -363,6 +415,14 @@ public class SettingsActivity extends PreferenceActivity {
       @Override
       public String[] getIdentifierLabels () {
         return new String[0];
+      }
+
+      public String getMethodQualifier () {
+        return "serial";
+      }
+
+      public String getDeviceReference (String identifier) {
+        return identifier;
       }
     }
 
@@ -381,12 +441,12 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void updateDeviceIdentifierList (String deviceMethod) {
-      DeviceCollection devices = makeDeviceCollection(deviceMethod);
+      deviceCollection = makeDeviceCollection(deviceMethod);
 
       setListElements(
         deviceIdentifierList,
-        devices.getIdentifierValues(), 
-        devices.getIdentifierLabels()
+        deviceCollection.getIdentifierValues(), 
+        deviceCollection.getIdentifierLabels()
       );
 
       {
@@ -458,7 +518,7 @@ public class SettingsActivity extends PreferenceActivity {
 
       {
         SharedPreferences prefs = getSharedPreferences();
-        deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_NAME_DEVICE_NAMES, Collections.EMPTY_SET));
+        deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
       }
 
       updateSelectedDeviceList();
@@ -535,11 +595,13 @@ public class SettingsActivity extends PreferenceActivity {
             {
               SharedPreferences.Editor editor = preference.getEditor();
 
-              for (int key : devicePropertyKeys) {
-                editor.putString(makePropertyName(name, key), getListPreference(key).getValue());
-              }
+              Map<String, String> properties = new LinkedHashMap();
+              properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getMethodQualifier());
+              properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.getDeviceReference(deviceIdentifierList.getValue()));
+              properties.put(PREF_KEY_DEVICE_DRIVER, deviceDriverList.getValue());
+              putProperties(name, properties, editor);
 
-              editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
+              editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
               editor.commit();
             }
 
@@ -563,12 +625,8 @@ public class SettingsActivity extends PreferenceActivity {
 
               {
                 SharedPreferences.Editor editor = preference.getEditor();
-                editor.putStringSet(PREF_NAME_DEVICE_NAMES, deviceNames);
-
-                for (int key : devicePropertyKeys) {
-                  editor.remove(makePropertyName(name, key));
-                }
-
+                editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
+                removeProperties(name, devicePropertyKeys, editor);
                 editor.commit();
               }
             }

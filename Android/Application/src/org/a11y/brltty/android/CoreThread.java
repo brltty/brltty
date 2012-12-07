@@ -22,6 +22,7 @@ import org.a11y.brltty.core.*;
 
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 import java.io.IOException;
@@ -146,10 +147,6 @@ public class CoreThread extends Thread {
     return getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
   }
 
-  private String getStringSetting (String owner, int property) {
-    return getSharedPreferences().getString(getStringResource(property) + "-" + owner, "");
-  }
-
   private String[] makeArguments () {
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
@@ -168,15 +165,19 @@ public class CoreThread extends Thread {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
-        String method = getStringSetting(name, R.string.PREF_KEY_DEVICE_METHOD);
+        Map<String, String> properties = SettingsActivity.getProperties(
+          name,
+          SettingsActivity.devicePropertyKeys,
+          getSharedPreferences()
+        );
 
-        if (method.length() > 0) {
-          String identifier = getStringSetting(name, R.string.PREF_KEY_DEVICE_IDENTIFIER);
-          if (identifier.length() > 0) {
-            String driver = getStringSetting(name, R.string.PREF_KEY_DEVICE_DRIVER);
-
+        String qualifier = properties.get(SettingsActivity.PREF_KEY_DEVICE_QUALIFIER);
+        if (qualifier.length() > 0) {
+          String reference = properties.get(SettingsActivity.PREF_KEY_DEVICE_REFERENCE);
+          if (reference.length() > 0) {
+            String driver = properties.get(SettingsActivity.PREF_KEY_DEVICE_DRIVER);
             if (driver.length() > 0) {
-              builder.setBrailleDevice(method + ":" + identifier);
+              builder.setBrailleDevice(qualifier + ":" + reference);
               builder.setBrailleDriver(driver);
             }
           }
