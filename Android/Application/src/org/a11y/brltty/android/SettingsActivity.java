@@ -474,9 +474,9 @@ public class SettingsActivity extends PreferenceActivity {
         problem = "braille driver not selected";
       } else {
         if (name.length() == 0) {
-          name = deviceDriverList.getEntry()
-               + " " + deviceMethodList.getEntry()
-               + " " + deviceIdentifierList.getEntry()
+          name = deviceDriverList.getSummary()
+               + " " + deviceMethodList.getSummary()
+               + " " + deviceIdentifierList.getSummary()
                ;
         }
 
