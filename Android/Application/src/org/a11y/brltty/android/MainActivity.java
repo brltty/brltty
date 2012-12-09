@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
       @Override
       public void onClick (View view) {
         Log.d(LOG_TAG, "stop button pressed");
-        CoreWrapper.stop = true;
+        CoreWrapper.stop();
 
         try {
           coreThread.join();
