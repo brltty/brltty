@@ -44,6 +44,12 @@ public class MainActivity extends Activity {
       public void onClick (View view) {
         Log.d(LOG_TAG, "stop button pressed");
         CoreWrapper.stop = true;
+
+        try {
+          coreThread.join();
+        } catch (InterruptedException exception) {
+        }
+
         finish();
       }
     });

@@ -123,8 +123,6 @@ public class CoreThread extends Thread {
   CoreThread (Context context) {
     super("Core");
     coreContext = context;
-
-    UsbHelper.construct(coreContext);
   }
 
   private String getStringResource (int resource) {
@@ -210,6 +208,8 @@ public class CoreThread extends Thread {
   @Override
   public void run () {
     extractAssets();
+    UsbHelper.begin(coreContext);
     CoreWrapper.run(makeArguments());
+    UsbHelper.end();
   }
 }

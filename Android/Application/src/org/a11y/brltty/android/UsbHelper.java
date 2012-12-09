@@ -77,11 +77,15 @@ public class UsbHelper {
     permissionIntent = PendingIntent.getBroadcast(usbContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
   }
 
-  public static void construct (Context context) {
+  public static void begin (Context context) {
     usbContext = context;
 
     usbManager = (UsbManager)usbContext.getSystemService(Context.USB_SERVICE);
     makePermissionReceiver();
+  }
+
+  public static void end () {
+    usbContext.unregisterReceiver(permissionReceiver);
   }
 
   public static Iterator<UsbDevice> getDeviceIterator () {

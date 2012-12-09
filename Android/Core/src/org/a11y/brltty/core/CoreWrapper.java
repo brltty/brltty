@@ -23,7 +23,11 @@ public class CoreWrapper {
   public static native boolean update ();
   public static native void destruct ();
 
-  public static volatile boolean stop = false;
+  private static volatile boolean stop = false;
+
+  public static void stop () {
+    stop = true;
+  }
 
   public static int run (String[] arguments) {
     int exitStatus = construct(arguments);
