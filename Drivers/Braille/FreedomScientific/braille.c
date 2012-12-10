@@ -36,6 +36,8 @@
 #include "brl_driver.h"
 #include "brldefs-fs.h"
 
+#include "io_generic.h"
+
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
   KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),
@@ -128,171 +130,6 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pacmate),
 END_KEY_TABLE_LIST
 
-typedef struct {
-  int (*openPort) (char **parameters, const char *device);
-  void (*closePort) (void);
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (void *buffer, int length);
-  int (*writePacket) (const void *buffer, int length);
-} InputOutputOperations;
-
-static const InputOutputOperations *io;
-static int outputPayloadLimit;
-
-static const int serialBaud = 57600;
-static int serialCharactersPerSecond;
-
-#include "io_serial.h"
-static SerialDevice *serialDevice = NULL;
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, serialBaud)) return 1;
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialBytes (void *buffer, int length) {
-  return serialReadData(serialDevice, buffer, length, 0, 0);
-}
-
-static int
-writeSerialPacket (const void *buffer, int length) {
-  return serialWriteData(serialDevice, buffer, length);
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialPacket
-};
-
-#include "io_usb.h"
-
-static UsbChannel *usbChannel = NULL;
-
-static int
-openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    { /* Focus 1 */
-      .vendor=0X0F4E, .product=0X0100,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
-    { /* PAC Mate */
-      .vendor=0X0F4E, .product=0X0111,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
-    { /* Focus 2 */
-      .vendor=0X0F4E, .product=0X0112,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
-    { /* Focus Blue */
-      .vendor=0X0F4E, .product=0X0114,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
-    { .vendor=0 }
-  };
-
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-    return 1;
-  }
-  return 0;
-}
-
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
-}
-
-static int
-readUsbBytes (void *buffer, int length) {
-  int count = usbReapInput(usbChannel->device, usbChannel->definition.inputEndpoint, buffer, length, 0, 0);
-  if (count == -1)
-    if (errno == EAGAIN)
-      count = 0;
-  return count;
-}
-
-static int
-writeUsbPacket (const void *buffer, int length) {
-  return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbPacket
-};
-
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (void *buffer, int length) {
-  return bthReadData(bluetoothConnection, buffer, length, 0, 0);
-}
-
-static int
-writeBluetoothPacket (const void *buffer, int length) {
-  return bthWriteData(bluetoothConnection, buffer, length);
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothPacket
-};
-
 typedef enum {
   PKT_QUERY  = 0X00, /* host->unit: request device information */
   PKT_ACK    = 0X01, /* unit->host: acknowledge packet receipt */
@@ -344,13 +181,15 @@ typedef struct {
   unsigned char arg3;
 } PacketHeader;
 
+#define PACKET_PAYLOAD_INFO_MODEL_SIZE 16
+
 typedef struct {
   PacketHeader header;
   union {
     unsigned char bytes[0X100];
     struct {
       char manufacturer[24];
-      char model[16];
+      char model[PACKET_PAYLOAD_INFO_MODEL_SIZE];
       char firmware[8];
     } info;
     struct {
@@ -442,30 +281,36 @@ static const ModelEntry modelTable[] = {
   { .identifier = NULL }
 };
 
-static const ModelEntry *model;
-static const KeyTableDefinition *keyTableDefinition;
+typedef void (*AcknowledgementHandler) (BrailleDisplay *brl, int ok);
 
-static unsigned char outputBuffer[84];
+struct BrailleDataStruct {
+  GioEndpoint *gioEndpoint;
+  int outputPayloadLimit;
 
-static int writeFirst;
-static int writeLast;
-static int writingFirst;
-static int writingLast;
+  const ModelEntry *model;
+  const KeyTableDefinition *keyTableDefinition;
 
-typedef void (*AcknowledgementHandler) (int ok);
-static AcknowledgementHandler acknowledgementHandler;
-static TimePeriod acknowledgementPeriod;
-static int acknowledgementsMissing;
-static unsigned char configFlags;
-static int firmnessSetting;
+  unsigned char outputBuffer[84];
+  int writeFirst;
+  int writeLast;
+  int writingFirst;
+  int writingLast;
 
-static union {
-  Packet packet;
-  unsigned char bytes[sizeof(Packet)];
-} inputBuffer;
-static int inputCount;
+  AcknowledgementHandler acknowledgementHandler;
+  TimePeriod acknowledgementPeriod;
+  int acknowledgementsMissing;
 
-static uint64_t oldKeys;
+  unsigned char configFlags;
+  int firmnessSetting;
+
+  union {
+    Packet packet;
+    unsigned char bytes[sizeof(Packet)];
+  } inputBuffer;
+  int inputCount;
+
+  uint64_t oldKeys;
+};
 
 static int
 writePacket (
@@ -496,12 +341,7 @@ writePacket (
     size += length + 1;
   }
 
-  logOutputPacket(&packet, size);
-  {
-    int result = io->writePacket(&packet, size);
-    if (result != -1) brl->writeDelay += (size * 1000 / serialCharactersPerSecond) + 1;
-    return result;
-  }
+  return writeBraillePacket(brl, brl->data->gioEndpoint, &packet, size);
 }
 
 static void
@@ -584,63 +424,73 @@ logNegativeAcknowledgement (const Packet *packet) {
 }
 
 static void
-handleConfigAcknowledgement (int ok) {
-  configFlags = 0;
+handleConfigAcknowledgement (BrailleDisplay *brl, int ok) {
+  brl->data->configFlags = 0;
 }
 
 static void
-handleFirmnessAcknowledgement (int ok) {
-  firmnessSetting = -1;
+handleFirmnessAcknowledgement (BrailleDisplay *brl, int ok) {
+  brl->data->firmnessSetting = -1;
 }
 
 static void
-handleWriteAcknowledgement (int ok) {
+handleWriteAcknowledgement (BrailleDisplay *brl, int ok) {
   if (!ok) {
-    if ((writeFirst == -1) || (writingFirst < writeFirst)) writeFirst = writingFirst;
-    if ((writeLast == -1) || (writingLast > writeLast)) writeLast = writingLast;
+    if ((brl->data->writeFirst == -1) ||
+        (brl->data->writingFirst < brl->data->writeFirst))
+      brl->data->writeFirst = brl->data->writingFirst;
+
+    if ((brl->data->writeLast == -1) ||
+        (brl->data->writingLast > brl->data->writeLast))
+      brl->data->writeLast = brl->data->writingLast;
   }
 }
 
 static void
-setAcknowledgementHandler (AcknowledgementHandler handler) {
-  acknowledgementHandler = handler;
-  startTimePeriod(&acknowledgementPeriod, 500);
+setAcknowledgementHandler (BrailleDisplay *brl, AcknowledgementHandler handler) {
+  brl->data->acknowledgementHandler = handler;
+  startTimePeriod(&brl->data->acknowledgementPeriod, 500);
 }
 
 static int
 writeRequest (BrailleDisplay *brl) {
-  if (acknowledgementHandler) return 1;
+  if (brl->data->acknowledgementHandler) return 1;
 
-  if (configFlags) {
-    if (writePacket(brl, PKT_CONFIG, configFlags, 0, 0, NULL) == -1) return 0;
-    setAcknowledgementHandler(handleConfigAcknowledgement);
+  if (brl->data->configFlags) {
+    if (writePacket(brl, PKT_CONFIG, brl->data->configFlags, 0, 0, NULL) == -1)
+      return 0;
+
+    setAcknowledgementHandler(brl, handleConfigAcknowledgement);
     return 1;
   }
 
-  if (firmnessSetting >= 0) {
-    if (writePacket(brl, PKT_HVADJ, firmnessSetting, 0, 0, NULL) == -1) return 0;
-    setAcknowledgementHandler(handleFirmnessAcknowledgement);
+  if (brl->data->firmnessSetting >= 0) {
+    if (writePacket(brl, PKT_HVADJ, brl->data->firmnessSetting, 0, 0, NULL) == -1)
+      return 0;
+
+    setAcknowledgementHandler(brl, handleFirmnessAcknowledgement);
     return 1;
   }
 
-  if (writeLast != -1) {
-    unsigned int count = writeLast + 1 - writeFirst;
+  if (brl->data->writeLast != -1) {
+    unsigned int count = brl->data->writeLast + 1 - brl->data->writeFirst;
     unsigned char buffer[count];
-    int truncate = count > outputPayloadLimit;
+    int truncate = count > brl->data->outputPayloadLimit;
 
-    if (truncate) count = outputPayloadLimit;
-    translateOutputCells(buffer, &outputBuffer[writeFirst], count);
-    if (writePacket(brl, PKT_WRITE, count, writeFirst, 0, buffer) == -1) return 0;
+    if (truncate) count = brl->data->outputPayloadLimit;
+    translateOutputCells(buffer, &brl->data->outputBuffer[brl->data->writeFirst], count);
+    if (writePacket(brl, PKT_WRITE, count, brl->data->writeFirst, 0, buffer) == -1)
+      return 0;
 
-    setAcknowledgementHandler(handleWriteAcknowledgement);
-    writingFirst = writeFirst;
+    setAcknowledgementHandler(brl, handleWriteAcknowledgement);
+    brl->data->writingFirst = brl->data->writeFirst;
 
     if (truncate) {
-      writingLast = (writeFirst += count) - 1;
+      brl->data->writingLast = (brl->data->writeFirst += count) - 1;
     } else {
-      writingLast = writeLast;
-      writeFirst = -1;
-      writeLast = -1;
+      brl->data->writingLast = brl->data->writeLast;
+      brl->data->writeFirst = -1;
+      brl->data->writeLast = -1;
     }
 
     return 1;
@@ -659,12 +509,14 @@ updateCells (
   unsigned int from;
   unsigned int to;
 
-  if (cellsHaveChanged(&outputBuffer[offset], cells, count, &from, &to, NULL)) {
+  if (cellsHaveChanged(&brl->data->outputBuffer[offset], cells, count, &from, &to, NULL)) {
     int first = from + offset;
     int last = to + offset - 1;
 
-    if ((writeFirst == -1) || (first < writeFirst)) writeFirst = first;
-    if (last > writeLast) writeLast = last;
+    if ((brl->data->writeFirst == -1) || (first < brl->data->writeFirst))
+      brl->data->writeFirst = first;
+
+    if (last > brl->data->writeLast) brl->data->writeLast = last;
   }
 }
 
@@ -674,49 +526,54 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
     int size = sizeof(PacketHeader);
     int hasPayload = 0;
 
-    if (inputCount >= sizeof(PacketHeader)) {
-      if (inputBuffer.packet.header.type & 0X80) {
+    if (brl->data->inputCount >= sizeof(PacketHeader)) {
+      if (brl->data->inputBuffer.packet.header.type & 0X80) {
         hasPayload = 1;
-        size += inputBuffer.packet.header.arg1 + 1;
+        size += brl->data->inputBuffer.packet.header.arg1 + 1;
       }
     }
 
-    if (size <= inputCount) {
-      logInputPacket(inputBuffer.bytes, size);
+    if (size <= brl->data->inputCount) {
+      logInputPacket(brl->data->inputBuffer.bytes, size);
 
       if (hasPayload) {
         unsigned char checksum = 0;
         int index;
 
-        for (index=0; index<size; index+=1) checksum -= inputBuffer.bytes[index];
+        for (index=0; index<size; index+=1)
+          checksum -= brl->data->inputBuffer.bytes[index];
+
         if (checksum) logMessage(LOG_WARNING, "Input packet checksum error.");
       }
 
-      memcpy(packet, &inputBuffer, size);
-      memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[size],
-              inputCount -= size);
+      memcpy(packet, &brl->data->inputBuffer, size);
+      memmove(&brl->data->inputBuffer.bytes[0], &brl->data->inputBuffer.bytes[size],
+              brl->data->inputCount -= size);
       return size;
     }
 
   retry:
     {
-      int count = io->readBytes(&inputBuffer.bytes[inputCount], size-inputCount);
+      int count = gioReadData(brl->data->gioEndpoint,
+                              &brl->data->inputBuffer.bytes[brl->data->inputCount],
+                              size - brl->data->inputCount,
+                              0);
 
       if (count < 1) {
         if (count == -1) {
           logSystemError("read");
-        } else if ((count == 0) && (inputCount > 0)) {
-          if (io->awaitInput(1000)) goto retry;
+        } else if ((count == 0) && (brl->data->inputCount > 0)) {
+          if (gioAwaitInput(brl->data->gioEndpoint, 1000)) goto retry;
           if (errno != EAGAIN) count = -1;
-          logPartialPacket(inputBuffer.bytes, inputCount);
-          inputCount = 0;
+          logPartialPacket(brl->data->inputBuffer.bytes, brl->data->inputCount);
+          brl->data->inputCount = 0;
         }
 
         return count;
       }
-      acknowledgementsMissing = 0;
+      brl->data->acknowledgementsMissing = 0;
 
-      if (!inputCount) {
+      if (!brl->data->inputCount) {
         static const unsigned char packets[] = {
           PKT_ACK, PKT_NAK,
           PKT_KEY, PKT_EXTKEY, PKT_BUTTON, PKT_WHEEL,
@@ -725,16 +582,16 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         int first;
 
         for (first=0; first<count; first+=1)
-          if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
+          if (memchr(packets, brl->data->inputBuffer.bytes[first], sizeof(packets)))
             break;
 
         if (first) {
-          logDiscardedBytes(inputBuffer.bytes, first);
-          memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
+          logDiscardedBytes(brl->data->inputBuffer.bytes, first);
+          memmove(&brl->data->inputBuffer.bytes[0], &brl->data->inputBuffer.bytes[first], count-=first);
         }
       }
 
-      inputCount += count;
+      brl->data->inputCount += count;
     }
   }
 }
@@ -752,24 +609,24 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
         case PKT_NAK:
           logNegativeAcknowledgement(packet);
 
-          if (!acknowledgementHandler) {
+          if (!brl->data->acknowledgementHandler) {
             logMessage(LOG_WARNING, "Unexpected NAK.");
             continue;
           }
 
           switch (packet->header.arg1) {
             case PKT_ERR_TIMEOUT: {
-              int originalLimit = outputPayloadLimit;
+              int originalLimit = brl->data->outputPayloadLimit;
 
-              if (outputPayloadLimit > model->cellCount)
-                outputPayloadLimit = model->cellCount;
+              if (brl->data->outputPayloadLimit > brl->data->model->cellCount)
+                brl->data->outputPayloadLimit = brl->data->model->cellCount;
 
-              if (outputPayloadLimit > 1)
-                outputPayloadLimit--;
+              if (brl->data->outputPayloadLimit > 1)
+                brl->data->outputPayloadLimit--;
 
-              if (outputPayloadLimit != originalLimit)
+              if (brl->data->outputPayloadLimit != originalLimit)
                 logMessage(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
-                           originalLimit, outputPayloadLimit);
+                           originalLimit, brl->data->outputPayloadLimit);
               break;
             }
           }
@@ -779,24 +636,24 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           goto handleAcknowledgement;
 
         case PKT_ACK:
-          if (!acknowledgementHandler) {
+          if (!brl->data->acknowledgementHandler) {
             logMessage(LOG_WARNING, "Unexpected ACK.");
             continue;
           }
 
           ok = 1;
         handleAcknowledgement:
-          acknowledgementHandler(ok);
-          acknowledgementHandler = NULL;
+          brl->data->acknowledgementHandler(brl, ok);
+          brl->data->acknowledgementHandler = NULL;
           if (writeRequest(brl)) continue;
 
           count = -1;
           break;
         }
       }
-    } else if ((count == 0) && acknowledgementHandler &&
-               afterTimePeriod(&acknowledgementPeriod, NULL)) {
-      if (++acknowledgementsMissing < 5) {
+    } else if ((count == 0) && brl->data->acknowledgementHandler &&
+               afterTimePeriod(&brl->data->acknowledgementPeriod, NULL)) {
+      if (++brl->data->acknowledgementsMissing < 5) {
         logMessage(LOG_WARNING, "Missing ACK; assuming NAK.");
         goto handleNegativeAcknowledgement;
       }
@@ -811,187 +668,257 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 
 static int
 setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  firmnessSetting = setting * 0XFF / BRL_FIRMNESS_MAXIMUM;
+  brl->data->firmnessSetting = setting * 0XFF / BRL_FIRMNESS_MAXIMUM;
   return writeRequest(brl);
 }
 
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 57600
+  };
+
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
+    { /* Focus 1 */
+      .vendor=0X0F4E, .product=0X0100,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { /* PAC Mate */
+      .vendor=0X0F4E, .product=0X0111,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { /* Focus 2 */
+      .vendor=0X0F4E, .product=0X0112,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { /* Focus Blue */
+      .vendor=0X0F4E, .product=0X0114,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+
+  descriptor.bluetooth.channelNumber = 1;
+
+  if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    return 1;
   }
 
-  inputCount = 0;
-  outputPayloadLimit = 0XFF;
-  serialCharactersPerSecond = serialBaud / 10;
+  return 0;
+}
 
-  if (io->openPort(parameters, device)) {
-    int tries = 0;
+static int
+writeIdentityRequest (BrailleDisplay *brl) {
+  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0;
+}
 
-    while (io->awaitInput(10)) {
-      Packet packet;
-      int count = readPacket(brl, &packet);
-      if (count == -1) goto failure;
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readPacket(brl, packet);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const Packet *response = packet;
+
+  switch (response->header.type) {
+    case PKT_INFO: return BRL_RSP_DONE;
+    case PKT_ACK:  return BRL_RSP_CONTINUE;
+
+    case PKT_NAK:
+      logNegativeAcknowledgement(response);
+      break;
+  }
+
+  return BRL_RSP_UNEXPECTED;
+}
+
+static int
+setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
+  brl->data->model = modelTable;
+  while (brl->data->model->identifier) {
+    if (strcmp(brl->data->model->identifier, modelName) == 0) break;
+    brl->data->model += 1;
+  }
+
+  if (!brl->data->model->identifier) {
+    static ModelEntry generic;
+    brl->data->model = &generic;
+    logMessage(LOG_WARNING, "Detected unknown model: %s", modelName);
+
+    memset(&generic, 0, sizeof(generic));
+    generic.identifier = "Generic";
+    generic.cellCount = 20;
+    generic.dotsTable = &dotsTable_ISO11548_1;
+    generic.type = MOD_TYPE_Pacmate;
+
+    {
+      typedef struct {
+	const char *identifier;
+	const DotsTable *dotsTable;
+      } ExceptionEntry;
+
+      static const ExceptionEntry exceptionTable[] = {
+	{"Focus", &dotsTable_Focus1},
+	{NULL   , NULL         }
+      };
+      const ExceptionEntry *exception = exceptionTable;
+
+      while (exception->identifier) {
+	if (strncmp(exception->identifier, modelName, strlen(exception->identifier)) == 0) {
+	  generic.dotsTable = exception->dotsTable;
+	  break;
+	}
+
+	exception += 1;
+      }
     }
-    if (errno != EAGAIN) goto failure;
 
-    while (writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0) {
-      int acknowledged = 0;
-      model = NULL;
+    {
+      const char *word = strrchr(modelName, ' ');
 
-      while (io->awaitInput(100)) {
-        Packet response;
-        int count = readPacket(brl, &response);
-        if (count == -1) goto failure;
+      if (word) {
+	int size;
 
-        switch (response.header.type) {
+	if (isInteger(&size, ++word)) {
+	  static char identifier[PACKET_PAYLOAD_INFO_MODEL_SIZE];
+
+	  generic.cellCount = size;
+	  snprintf(identifier, sizeof(identifier), "%s %d",
+		   generic.identifier, generic.cellCount);
+
+	  generic.identifier = identifier;
+	}
+      }
+    }
+  }
+
+  if (brl->data->model) {
+    brl->data->keyTableDefinition = modelTypeTable[brl->data->model->type].keyTableDefinition;
+    makeOutputTable(brl->data->model->dotsTable[0]);
+
+    memset(brl->data->outputBuffer, 0, brl->data->model->cellCount);
+    brl->data->writeFirst = 0;
+    brl->data->writeLast = brl->data->model->cellCount - 1;
+
+    brl->data->acknowledgementHandler = NULL;
+    brl->data->acknowledgementsMissing = 0;
+    brl->data->configFlags = 0;
+    brl->data->firmnessSetting = -1;
+
+    if (brl->data->model->type == MOD_TYPE_Focus) {
+      unsigned char firmwareVersion = firmware[0] - '0';
+
+      if (firmwareVersion >= 3) {
+	brl->data->configFlags |= 0X02;
+
+	if (brl->data->model->cellCount < 80) {
+	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus_small);
+	} else {
+	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus_large);
+	}
+      }
+    }
+
+    brl->data->oldKeys = 0;
+
+    logMessage(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
+	       brl->data->model->identifier,
+	       brl->data->model->cellCount,
+	       firmware);
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->gioEndpoint = NULL;
+    brl->data->inputCount = 0;
+    brl->data->outputPayloadLimit = 0XFF;
+
+    if (connectResource(brl, device)) {
+      Packet response;
+
+      if (probeBrailleDisplay(brl, 0, brl->data->gioEndpoint, 1000,
+                              writeIdentityRequest,
+                              readResponse, &response, sizeof(response),
+                              isIdentityResponse)) {
+	switch (response.header.type) {
           case PKT_INFO:
             logMessage(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
             logMessage(LOG_DEBUG, "Model: %s", response.payload.info.model);
             logMessage(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
 
-            model = modelTable;
-            while (model->identifier) {
-              if (strcmp(response.payload.info.model, model->identifier) == 0) break;
-              model += 1;
-            }
+            if (setModel(brl, response.payload.info.model, response.payload.info.firmware)) {
+              brl->textColumns = brl->data->model->cellCount;
+              brl->textRows = 1;
 
-            if (!model->identifier) {
-              static ModelEntry generic;
-              model = &generic;
-              logMessage(LOG_WARNING, "Detected unknown model: %s", response.payload.info.model);
+              brl->keyBindings = brl->data->keyTableDefinition->bindings;
+              brl->keyNameTables = brl->data->keyTableDefinition->names;
 
-              memset(&generic, 0, sizeof(generic));
-              generic.identifier = "Generic";
-              generic.cellCount = 20;
-              generic.dotsTable = &dotsTable_ISO11548_1;
-              generic.type = MOD_TYPE_Pacmate;
+              brl->setFirmness = setFirmness;
 
-              {
-                typedef struct {
-                  const char *identifier;
-                  const DotsTable *dotsTable;
-                } ExceptionEntry;
-                static const ExceptionEntry exceptionTable[] = {
-                  {"Focus", &dotsTable_Focus1},
-                  {NULL   , NULL         }
-                };
-                const ExceptionEntry *exception = exceptionTable;
-                while (exception->identifier) {
-                  if (strncmp(response.payload.info.model, exception->identifier, strlen(exception->identifier)) == 0) {
-                    generic.dotsTable = exception->dotsTable;
-                    break;
-                  }
-                  exception++;
-                }
-              }
-
-              {
-                const char *word = strrchr(response.payload.info.model, ' ');
-                if (word) {
-                  int size;
-                  if (isInteger(&size, ++word)) {
-                    static char identifier[sizeof(response.payload.info.model)];
-                    generic.cellCount = size;
-                    snprintf(identifier, sizeof(identifier), "%s %d",
-                             generic.identifier, generic.cellCount);
-                    generic.identifier = identifier;
-                  }
-                }
-              }
-            }
-
-            if (model) {
-              keyTableDefinition = modelTypeTable[model->type].keyTableDefinition;
-              makeOutputTable(model->dotsTable[0]);
-              memset(outputBuffer, 0, model->cellCount);
-              writeFirst = 0;
-              writeLast = model->cellCount - 1;
-
-              acknowledgementHandler = NULL;
-              acknowledgementsMissing = 0;
-              configFlags = 0;
-              firmnessSetting = -1;
-
-              if (model->type == MOD_TYPE_Focus) {
-                unsigned char firmwareVersion = response.payload.info.firmware[0] - '0';
-
-                if (firmwareVersion >= 3) {
-                  configFlags |= 0X02;
-
-                  if (model->cellCount < 80) {
-                    keyTableDefinition = &KEY_TABLE_DEFINITION(focus_small);
-                  } else {
-                    keyTableDefinition = &KEY_TABLE_DEFINITION(focus_large);
-                  }
-                }
-              }
-
-              oldKeys = 0;
-
-              logMessage(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
-                         model->identifier,
-                         model->cellCount,
-                         response.payload.info.firmware);
+              return writeRequest(brl);
             }
             break;
-
-          case PKT_ACK:
-            acknowledged = 1;
-            break;
-
-          case PKT_NAK:
-            logNegativeAcknowledgement(&response);
-          default:
-            acknowledged = 0;
-            model = NULL;
-            break;
-        }
-
-        if (acknowledged && model) {
-          brl->textColumns = model->cellCount;
-          brl->textRows = 1;
-
-          brl->keyBindings = keyTableDefinition->bindings;
-          brl->keyNameTables = keyTableDefinition->names;
-
-          brl->setFirmness = setFirmness;
-
-          if (!writeRequest(brl)) break;
-          return 1;
-        }
+	}
       }
-      if (errno != EAGAIN) break;
 
-      if (++tries == 3) break;
+      gioDisconnectResource(brl->data->gioEndpoint);
+      brl->data->gioEndpoint = NULL;
     }
 
-  failure:
-    io->closePort();
+    free(brl->data);
+    brl->data = NULL;
+  } else {
+    logMallocError();
   }
+
   return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  io->closePort();
+  if (brl->data) {
+    if (brl->data->gioEndpoint) {
+      gioDisconnectResource(brl->data->gioEndpoint);
+      brl->data->gioEndpoint = NULL;
+    }
+
+    free(brl->data);
+    brl->data = NULL;
+  }
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  updateCells(brl, brl->buffer, model->cellCount, 0);
+  updateCells(brl, brl->buffer, brl->data->model->cellCount, 0);
   return writeRequest(brl);
 }
 
 static void
-updateKeys (uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
+updateKeys (BrailleDisplay *brl, uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
   const FS_KeySet set = FS_SET_NavigationKeys;
   FS_NavigationKey key = keyBase;
 
@@ -1000,18 +927,18 @@ updateKeys (uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
 
   uint64_t keyBit = 0X1 << keyBase;
   newKeys <<= keyBase;
-  newKeys |= oldKeys & ~(((0X1 << keyCount) - 1) << keyBase);
+  newKeys |= brl->data->oldKeys & ~(((0X1 << keyCount) - 1) << keyBase);
 
-  while (oldKeys != newKeys) {
-    uint64_t oldKey = oldKeys & keyBit;
+  while (brl->data->oldKeys != newKeys) {
+    uint64_t oldKey = brl->data->oldKeys & keyBit;
     uint64_t newKey = newKeys & keyBit;
 
     if (oldKey && !newKey) {
       enqueueKeyEvent(set, key, 0);
-      oldKeys &= ~keyBit;
+      brl->data->oldKeys &= ~keyBit;
     } else if (newKey && !oldKey) {
       pressKeys[pressCount++] = key;
-      oldKeys |= keyBit;
+      brl->data->oldKeys |= keyBit;
     }
 
     keyBit <<= 1;
@@ -1038,14 +965,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                            (packet.header.arg2 << 8) |
                            (packet.header.arg3 << 16);
 
-        updateKeys(newKeys, 0, 24);
+        updateKeys(brl, newKeys, 0, 24);
         continue;
       }
 
       case PKT_EXTKEY: {
         uint64_t newKeys = packet.payload.extkey.bytes[0];
 
-        updateKeys(newKeys, 24, 8);
+        updateKeys(brl, newKeys, 24, 8);
         continue;
       }
 
@@ -1054,7 +981,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         unsigned char press = (packet.header.arg2 & 0X01) != 0;
         unsigned char set = packet.header.arg3;
 
-        if (set == modelTypeTable[model->type].hotkeysRow) {
+        if (set == modelTypeTable[brl->data->model->type].hotkeysRow) {
           static const unsigned char keys[] = {
             FS_KEY_LeftGdf,
             FS_KEY_HOT+0, FS_KEY_HOT+1, FS_KEY_HOT+2, FS_KEY_HOT+3,
@@ -1062,7 +989,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             FS_KEY_RightGdf
           };
           static const unsigned char keyCount = ARRAY_COUNT(keys);
-          const unsigned char base = (model->cellCount - keyCount) / 2;
+          const unsigned char base = (brl->data->model->cellCount - keyCount) / 2;
 
           if (key < base) {
             key = FS_KEY_LeftAdvance;
