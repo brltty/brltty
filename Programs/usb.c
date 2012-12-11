@@ -886,6 +886,15 @@ usbChooseChannel (UsbDevice *device, void *data) {
 
   while (definition->vendor) {
     if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
+      if (!(device->descriptor.iManufacturer ||
+            device->descriptor.iProduct ||
+            device->descriptor.iSerialNumber)) {
+        UsbDeviceDescriptor descriptor;
+        ssize_t result = usbGetDeviceDescriptor(device, &descriptor);
+
+        if (result == UsbDescriptorSize_Device) device->descriptor = descriptor;
+      }
+
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
       if (definition->disableAutosuspend) usbDisableAutosuspend(device);
