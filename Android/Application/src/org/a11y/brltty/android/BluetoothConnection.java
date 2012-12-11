@@ -49,7 +49,7 @@ public class BluetoothConnection {
   private class InputThread extends Thread {
     private final String LOG_TAG = InputThread.class.getName();
 
-    boolean stop = false;
+    volatile boolean stop = false;
     InputStream inputStream;
     int pipeDescriptor;
 
@@ -116,13 +116,17 @@ public class BluetoothConnection {
       }
 
       if (inputThread != null) {
-        inputThread.stop = true;
+        if (inputThread.isAlive()) {
+          inputThread.stop = true;
+          inputThread.join();
+        }
+
+        inputThread = null;
       }
 
       if (bluetoothSocket != null) {
-        if (bluetoothSocket.isConnected()) {
-          bluetoothSocket.close();
-        }
+        bluetoothSocket.close();
+        bluetoothSocket = null;
       }
 
       throw cause;
