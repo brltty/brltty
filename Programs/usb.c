@@ -892,7 +892,10 @@ usbChooseChannel (UsbDevice *device, void *data) {
         UsbDeviceDescriptor descriptor;
         ssize_t result = usbGetDeviceDescriptor(device, &descriptor);
 
-        if (result == UsbDescriptorSize_Device) device->descriptor = descriptor;
+        if (result == UsbDescriptorSize_Device) {
+          logMessage(LOG_DEBUG, "USB: using actual device descriptor");
+          device->descriptor = descriptor;
+        }
       }
 
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
