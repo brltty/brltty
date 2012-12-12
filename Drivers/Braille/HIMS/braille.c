@@ -399,9 +399,19 @@ static UsbChannel *usbChannel = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* Braille Sense */
+    { /* Braille Sense (USB 1.1) */
+      .version = UsbSpecificationVersion_1_1,
       .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1,
+      .data=&brailleSenseOperations
+    },
+
+    { /* Braille Sense (USB 2.0) */
+      .version = UsbSpecificationVersion_2_0,
+      .vendor=0X045E, .product=0X930A,
+      .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&brailleSenseOperations
