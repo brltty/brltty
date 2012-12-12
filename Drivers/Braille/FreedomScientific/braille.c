@@ -285,8 +285,8 @@ typedef void (*AcknowledgementHandler) (BrailleDisplay *brl, int ok);
 
 struct BrailleDataStruct {
   GioEndpoint *gioEndpoint;
-  int outputPayloadLimit;
 
+  int queryAcknowledged;
   const ModelEntry *model;
   const KeyTableDefinition *keyTableDefinition;
 
@@ -310,7 +310,9 @@ struct BrailleDataStruct {
     Packet packet;
     unsigned char bytes[sizeof(Packet)];
   } inputBuffer;
+
   int inputCount;
+  int outputPayloadLimit;
 
   uint64_t oldKeys;
 };
@@ -727,36 +729,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
-  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0;
-}
-
-static size_t
-readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readPacket(brl, packet);
-}
-
-static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const Packet *response = packet;
-
-  switch (response->header.type) {
-    case PKT_INFO:
-      return BRL_RSP_DONE;
-
-    case PKT_ACK:
-      return BRL_RSP_CONTINUE;
-
-    case PKT_NAK:
-      logNegativeAcknowledgement(response);
-    default:
-      break;
-  }
-
-  return BRL_RSP_UNEXPECTED;
-}
-
-static int
 setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
   brl->data->model = modelTable;
   while (brl->data->model->identifier) {
@@ -858,6 +830,40 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
 }
 
 static int
+writeIdentityRequest (BrailleDisplay *brl) {
+  brl->data->queryAcknowledged = 0;
+  brl->data->model = NULL;
+  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0;
+}
+
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readPacket(brl, packet);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const Packet *response = packet;
+
+  switch (response->header.type) {
+    case PKT_INFO:
+      if (!setModel(brl, response->payload.info.model, response->payload.info.firmware)) return BRL_RSP_FAIL;
+      break;
+
+    case PKT_ACK:
+      brl->data->queryAcknowledged = 1;
+      break;
+
+    case PKT_NAK:
+      logNegativeAcknowledgement(response);
+    default:
+      return BRL_RSP_UNEXPECTED;
+  }
+
+  return (brl->data->queryAcknowledged && brl->data->model)? BRL_RSP_DONE: BRL_RSP_CONTINUE;
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
@@ -872,25 +878,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
-	switch (response.header.type) {
-          case PKT_INFO:
-            logMessage(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
-            logMessage(LOG_DEBUG, "Model: %s", response.payload.info.model);
-            logMessage(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
+        logMessage(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);
+        logMessage(LOG_DEBUG, "Model: %s", response.payload.info.model);
+        logMessage(LOG_DEBUG, "Firmware: %s", response.payload.info.firmware);
 
-            if (setModel(brl, response.payload.info.model, response.payload.info.firmware)) {
-              brl->textColumns = brl->data->model->cellCount;
-              brl->textRows = 1;
+        brl->textColumns = brl->data->model->cellCount;
+        brl->textRows = 1;
 
-              brl->keyBindings = brl->data->keyTableDefinition->bindings;
-              brl->keyNameTables = brl->data->keyTableDefinition->names;
+        brl->keyBindings = brl->data->keyTableDefinition->bindings;
+        brl->keyNameTables = brl->data->keyTableDefinition->names;
 
-              brl->setFirmness = setFirmness;
+        brl->setFirmness = setFirmness;
 
-              return writeRequest(brl);
-            }
-            break;
-	}
+        return writeRequest(brl);
       }
 
       gioDisconnectResource(brl->data->gioEndpoint);
