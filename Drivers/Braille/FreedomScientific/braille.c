@@ -856,6 +856,10 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 
     case PKT_NAK:
       logNegativeAcknowledgement(response);
+      brl->data->queryAcknowledged = 0;
+      brl->data->model = NULL;
+      return BRL_RSP_CONTINUE;
+
     default:
       return BRL_RSP_UNEXPECTED;
   }
@@ -874,7 +878,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       Packet response;
 
-      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
+      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 100,
                               writeIdentityRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
