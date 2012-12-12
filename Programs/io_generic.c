@@ -549,6 +549,7 @@ int
 gioAwaitInput (GioEndpoint *endpoint, int timeout) {
   AwaitInputMethod *method = endpoint->methods->awaitInput;
   if (!method) return logUnsupportedOperation("awaitInput");
+  if (endpoint->input.to - endpoint->input.from) return 1;
   return method(&endpoint->handle, timeout);
 }
 
