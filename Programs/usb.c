@@ -767,7 +767,7 @@ usbAwaitInput (
       if (timeout) startTimePeriod(&period, timeout);
 
       while (1) {
-        if ((count = usbReadEndpoint(device; endpointNumber, buffer, size,
+        if ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
                                      MAX(interval, timeout))) != -1) {
           if (count) {
             endpoint->direction.input.buffer = buffer;
