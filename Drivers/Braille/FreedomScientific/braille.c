@@ -205,7 +205,7 @@ typedef struct {
 
 typedef enum {
   MOD_TYPE_Focus,
-  MOD_TYPE_Pacmate
+  MOD_TYPE_PacMate
 } ModelType;
 
 static const ModelTypeEntry modelTypeTable[] = {
@@ -214,7 +214,7 @@ static const ModelTypeEntry modelTypeTable[] = {
     .hotkeysRow = -1
   }
   ,
-  [MOD_TYPE_Pacmate] = {
+  [MOD_TYPE_PacMate] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pacmate),
     .hotkeysRow = 1
   }
@@ -269,13 +269,13 @@ static const ModelEntry modelTable[] = {
   { .identifier = "pm display 20",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 20,
-    .type = MOD_TYPE_Pacmate
+    .type = MOD_TYPE_PacMate
   }
   ,
   { .identifier = "pm display 40",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
-    .type = MOD_TYPE_Pacmate
+    .type = MOD_TYPE_PacMate
   }
   ,
   { .identifier = NULL }
@@ -289,6 +289,9 @@ struct BrailleDataStruct {
 
   const ModelEntry *model;
   const KeyTableDefinition *keyTableDefinition;
+
+  ModelEntry genericModelEntry;
+  char genericModelIdentifier[PACKET_PAYLOAD_INFO_MODEL_SIZE];
 
   unsigned char outputBuffer[84];
   int writeFirst;
@@ -738,11 +741,15 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const Packet *response = packet;
 
   switch (response->header.type) {
-    case PKT_INFO: return BRL_RSP_DONE;
-    case PKT_ACK:  return BRL_RSP_CONTINUE;
+    case PKT_INFO:
+      return BRL_RSP_DONE;
+
+    case PKT_ACK:
+      return BRL_RSP_CONTINUE;
 
     case PKT_NAK:
       logNegativeAcknowledgement(response);
+    default:
       break;
   }
 
@@ -758,15 +765,15 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
   }
 
   if (!brl->data->model->identifier) {
-    static ModelEntry generic;
-    brl->data->model = &generic;
     logMessage(LOG_WARNING, "Detected unknown model: %s", modelName);
 
-    memset(&generic, 0, sizeof(generic));
-    generic.identifier = "Generic";
-    generic.cellCount = 20;
-    generic.dotsTable = &dotsTable_ISO11548_1;
-    generic.type = MOD_TYPE_Pacmate;
+    brl->data->model = &brl->data->genericModelEntry;
+    memset(&brl->data->genericModelEntry, 0, sizeof(brl->data->genericModelEntry));
+
+    brl->data->genericModelEntry.identifier = "Generic";
+    brl->data->genericModelEntry.cellCount = 20;
+    brl->data->genericModelEntry.dotsTable = &dotsTable_ISO11548_1;
+    brl->data->genericModelEntry.type = MOD_TYPE_PacMate;
 
     {
       typedef struct {
@@ -782,7 +789,7 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
 
       while (exception->identifier) {
 	if (strncmp(exception->identifier, modelName, strlen(exception->identifier)) == 0) {
-	  generic.dotsTable = exception->dotsTable;
+	  brl->data->genericModelEntry.dotsTable = exception->dotsTable;
 	  break;
 	}
 
@@ -797,13 +804,14 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
 	int size;
 
 	if (isInteger(&size, ++word)) {
-	  static char identifier[PACKET_PAYLOAD_INFO_MODEL_SIZE];
+	  brl->data->genericModelEntry.cellCount = size;
 
-	  generic.cellCount = size;
-	  snprintf(identifier, sizeof(identifier), "%s %d",
-		   generic.identifier, generic.cellCount);
+	  snprintf(brl->data->genericModelIdentifier, sizeof(brl->data->genericModelIdentifier),
+                   "%s %d",
+		   brl->data->genericModelEntry.identifier,
+                   brl->data->genericModelEntry.cellCount);
 
-	  generic.identifier = identifier;
+	  brl->data->genericModelEntry.identifier = brl->data->genericModelIdentifier;
 	}
       }
     }
@@ -860,7 +868,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       Packet response;
 
-      if (probeBrailleDisplay(brl, 0, brl->data->gioEndpoint, 1000,
+      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
                               writeIdentityRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
