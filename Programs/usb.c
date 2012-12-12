@@ -767,17 +767,16 @@ usbAwaitInput (
       if (timeout) startTimePeriod(&period, timeout);
 
       while (1) {
-        while ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
-                                        MAX(interval, timeout))) != -1) {
-          if (!count) {
-            errno = EAGAIN;
-            break;
+        if ((count = usbReadEndpoint(device; endpointNumber, buffer, size,
+                                     MAX(interval, timeout))) != -1) {
+          if (count) {
+            endpoint->direction.input.buffer = buffer;
+            endpoint->direction.input.length = count;
+            endpoint->direction.input.completed = buffer;
+            return 1;
           }
 
-          endpoint->direction.input.buffer = buffer;
-          endpoint->direction.input.length = count;
-          endpoint->direction.input.completed = buffer;
-          return 1;
+          errno = EAGAIN;
         }
 
 #ifdef ETIMEDOUT
