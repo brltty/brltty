@@ -884,74 +884,76 @@ usbChooseChannel (UsbDevice *device, void *data) {
   const UsbChannelDefinition *definition = choose->definition;
 
   while (definition->vendor) {
-    if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
-      if (!(device->descriptor.iManufacturer ||
-            device->descriptor.iProduct ||
-            device->descriptor.iSerialNumber)) {
-        UsbDeviceDescriptor descriptor;
-        ssize_t result = usbGetDeviceDescriptor(device, &descriptor);
+    if (!definition->version || (definition->version == getLittleEndian16(descriptor->bcdUSB))) {
+      if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
+        if (!(descriptor->iManufacturer ||
+              descriptor->iProduct ||
+              descriptor->iSerialNumber)) {
+          UsbDeviceDescriptor actualDescriptor;
+          ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
 
-        if (result == UsbDescriptorSize_Device) {
-          logMessage(LOG_DEBUG, "USB: using actual device descriptor");
-          device->descriptor = descriptor;
+          if (result == UsbDescriptorSize_Device) {
+            logMessage(LOG_DEBUG, "USB: using actual device descriptor");
+            device->descriptor = actualDescriptor;
+          }
         }
-      }
 
-      if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
+        if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
-      if (definition->disableAutosuspend) usbDisableAutosuspend(device);
+        if (definition->disableAutosuspend) usbDisableAutosuspend(device);
 
-      if (usbConfigureDevice(device, definition->configuration)) {
-        if (usbOpenInterface(device, definition->interface, definition->alternative)) {
-          int ok = 1;
+        if (usbConfigureDevice(device, definition->configuration)) {
+          if (usbOpenInterface(device, definition->interface, definition->alternative)) {
+            int ok = 1;
 
-          if (ok)
-            if (!usbSetSerialOperations(device))
-              ok = 0;
+            if (ok)
+              if (!usbSetSerialOperations(device))
+                ok = 0;
 
-          if (ok)
-            if (device->serialOperations)
-              if (device->serialOperations->enableAdapter)
-                if (!device->serialOperations->enableAdapter(device))
+            if (ok)
+              if (device->serialOperations)
+                if (device->serialOperations->enableAdapter)
+                  if (!device->serialOperations->enableAdapter(device))
+                    ok = 0;
+
+            if (ok)
+              if (definition->serial)
+                if (!usbSetSerialParameters(device, definition->serial))
                   ok = 0;
 
-          if (ok)
-            if (definition->serial)
-              if (!usbSetSerialParameters(device, definition->serial))
-                ok = 0;
+            if (ok) {
+              if (definition->inputEndpoint) {
+                UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
 
-          if (ok) {
-            if (definition->inputEndpoint) {
-              UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
-
-              if (!endpoint) {
-                ok = 0;
-              } else if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
-                usbBeginInput(device, definition->inputEndpoint, 8);
+                if (!endpoint) {
+                  ok = 0;
+                } else if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
+                  usbBeginInput(device, definition->inputEndpoint, 8);
+                }
               }
             }
-          }
 
-          if (ok) {
-            if (definition->outputEndpoint) {
-              UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
+            if (ok) {
+              if (definition->outputEndpoint) {
+                UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
 
-              if (!endpoint) {
-                ok = 0;
+                if (!endpoint) {
+                  ok = 0;
+                }
               }
             }
-          }
 
-          if (ok) {
-            choose->definition = definition;
-            return 1;
+            if (ok) {
+              choose->definition = definition;
+              return 1;
+            }
+            usbCloseInterface(device);
           }
-          usbCloseInterface(device);
         }
       }
     }
 
-    ++definition;
+    definition += 1;
   }
   return 0;
 }

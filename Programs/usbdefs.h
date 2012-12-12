@@ -47,6 +47,13 @@ typedef enum {
   UsbDescriptorSize_Class         =  3
 } UsbDescriptorSize;
 
+typedef enum {
+  UsbSpecificationVersion_1_0 = 0X0100,
+  UsbSpecificationVersion_1_1 = 0X0110,
+  UsbSpecificationVersion_2_0 = 0X0200,
+  UsbSpecificationVersion_3_0 = 0X0300
+} UsbSpecificationVersion;
+
 /* Configuration attributes (bmAttributes). */
 typedef enum {
   UsbConfigurationAttribute_BusPowered   = 0X80,
@@ -296,11 +303,14 @@ typedef enum {
 typedef struct {
   uint16_t vendor;
   uint16_t product;
+  uint16_t version;
+
   unsigned char configuration;
   unsigned char interface;
   unsigned char alternative;
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
+
   unsigned disableAutosuspend:1;
   const SerialParameters *serial;
   const void *data;
