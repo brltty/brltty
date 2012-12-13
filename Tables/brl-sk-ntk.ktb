@@ -82,40 +82,8 @@ bind LeftJoystickUp+RoutingKey CLIP_ADD
 bind LeftJoystickRight+RoutingKey COPY_LINE
 bind LeftJoystickDown+RoutingKey COPY_RECT
 
-bind Space+Dot1 DISPMD
-bind Space+Dot1+Dot7 DISPMD+off
-bind Space+Dot1+Dot8 DISPMD+on
-bind Space+Dot1+Dot2 SKPBLNKWINS
-bind Space+Dot1+Dot2+Dot7 SKPBLNKWINS+off
-bind Space+Dot1+Dot2+Dot8 SKPBLNKWINS+on
-bind Space+Dot1+Dot4 CSRVIS
-bind Space+Dot1+Dot4+Dot7 CSRVIS+off
-bind Space+Dot1+Dot4+Dot8 CSRVIS+on
-bind Space+Dot1+Dot2+Dot4 FREEZE
-bind Space+Dot1+Dot2+Dot5 HELP
-bind Space+Dot2+Dot4 SKPIDLNS
-bind Space+Dot2+Dot4+Dot7 SKPIDLNS+off
-bind Space+Dot2+Dot4+Dot8 SKPIDLNS+on
-bind Space+Dot1+Dot2+Dot3 LEARN
-bind Space+Dot1+Dot2+Dot3+Dot4 PREFMENU
-bind Space+Dot1+Dot2+Dot3+Dot4+Dot7 PREFLOAD
-bind Space+Dot1+Dot2+Dot3+Dot4+Dot8 PREFSAVE
-bind Space+Dot1+Dot2+Dot3+Dot5 AUTOREPEAT
-bind Space+Dot1+Dot2+Dot3+Dot5+Dot7 AUTOREPEAT+off
-bind Space+Dot1+Dot2+Dot3+Dot5+Dot8 AUTOREPEAT+on
-bind Space+Dot2+Dot3+Dot4 INFO
-bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
-bind Space+Dot2+Dot3+Dot4+Dot5+Dot7 CSRTRK+off
-bind Space+Dot2+Dot3+Dot4+Dot5+Dot8 CSRTRK+on
-bind Space+Dot1+Dot3+Dot6 ATTRVIS
-bind Space+Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
-bind Space+Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
-bind Space+Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
-bind Space+Dot1+Dot2+Dot3+Dot6+Dot7 SWITCHVT_PREV
-bind Space+Dot1+Dot2+Dot3+Dot6+Dot8 SWITCHVT_NEXT
-bind Space+Dot2+Dot4+Dot5+Dot6 SLIDEWIN
-bind Space+Dot2+Dot4+Dot5+Dot6+Dot7 SLIDEWIN+off
-bind Space+Dot2+Dot4+Dot5+Dot6+Dot8 SLIDEWIN+on
+assign chord Space+
+include brl-chords.kti
 bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
 bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
 
