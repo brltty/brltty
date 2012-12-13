@@ -23,8 +23,9 @@ title Voyager
 # Default Bindings #
 ####################
 
+bind Thumb1+Thumb4 TIME
+
 bind RoutingKey ROUTE
-bind Thumb1+Thumb4 CSRJMP_VERT
 
 bind Thumb1 FWINLT
 bind Thumb4 FWINRT
@@ -48,25 +49,8 @@ bind Left+Down SIXDOTS
 bind Right+Up AUTOREPEAT
 bind Right+Down AUTOSPEAK
 
-bind Thumb2+Dot1+Dot2 SKPBLNKWINS
-bind Thumb2+Dot1+Dot2+Dot7 SKPBLNKWINS+off
-bind Thumb2+Dot1+Dot2+Dot8 SKPBLNKWINS+on
-bind Thumb2+Dot1+Dot4 CSRVIS
-bind Thumb2+Dot1+Dot4+Dot7 CSRVIS+off
-bind Thumb2+Dot1+Dot4+Dot8 CSRVIS+on
-bind Thumb2+Dot1+Dot2+Dot4 FREEZE
-bind Thumb2+Dot1+Dot2+Dot5 HELP
-bind Thumb2+Dot2+Dot4 SKPIDLNS
-bind Thumb2+Dot2+Dot4+Dot7 SKPIDLNS+off
-bind Thumb2+Dot2+Dot4+Dot8 SKPIDLNS+on
-bind Thumb2+Dot1+Dot2+Dot3 LEARN
-bind Thumb2+Dot1+Dot3+Dot4 PREFMENU
-bind Thumb2+Dot1+Dot3+Dot4+Dot7 PREFLOAD
-bind Thumb2+Dot1+Dot3+Dot4+Dot8 PREFSAVE
-bind Thumb2+Dot2+Dot3+Dot4 INFO
-bind Thumb2+Dot1+dot3+Dot6 ATTRVIS
-bind Thumb2+Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
-bind Thumb2+Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
+assign chord Thumb2+
+include brl-chords.kti
 
 bind Thumb1+RoutingKey CLIP_NEW
 bind Thumb2+RoutingKey CLIP_ADD
@@ -75,31 +59,33 @@ bind Thumb4+RoutingKey COPY_RECT
 bind RoutingKey+!RoutingKey CLIP_COPY
 bind Thumb2+Dot1+Dot2+Dot3+Dot4 PASTE
 
-bind Left+Thumb1 LNBEG
-bind Left+Thumb4 LNEND
-bind Right+Thumb1 CHRLT
-bind Right+Thumb4 CHRRT
-bind Up+Thumb1 FWINLTSKIP
-bind Up+Thumb4 FWINRTSKIP
-bind Down+Thumb1 PRSEARCH
-bind Down+Thumb4 NXSEARCH
+bind Thumb1+Up ATTRUP
+bind Thumb1+Down ATTRDN
+bind Thumb2+Up PRDIFLN
+bind Thumb2+Down NXDIFLN
+bind Thumb3+Up PRPROMPT
+bind Thumb3+Down NXPROMPT
+bind Thumb4+Up PRPGRPH
+bind Thumb4+Down NXPGRPH
 
-bind Left+Thumb2 ATTRUP
-bind Left+Thumb3 ATTRDN
-bind Right+Thumb2 PRDIFLN
-bind Right+Thumb3 NXDIFLN
-bind Up+Thumb2 PRPGRPH
-bind Up+Thumb3 NXPGRPH
-bind Down+Thumb2 PRPROMPT
-bind Down+Thumb3 NXPROMPT
+bind Thumb1+Left PRSEARCH
+bind Thumb1+Right NXSEARCH
+bind Thumb2+Left FWINLTSKIP
+bind Thumb2+Right FWINRTSKIP
+bind Thumb3+Left CHRLT
+bind Thumb3+Right CHRRT
+bind Thumb4+Left LNBEG
+bind Thumb4+Right LNEND
 
-Bind Left+RoutingKey SETMARK
-Bind Right+RoutingKey GOTOMARK
-bind Up+RoutingKey DESCCHAR
-bind Down+RoutingKey SETLEFT
+Bind Left+RoutingKey SETLEFT
+Bind Right+RoutingKey DESCCHAR
+bind Up+RoutingKey SWITCHVT
+bind Down+RoutingKey KEY_FUNCTION
 
 bind Thumb1+Thumb2+RoutingKey PRINDENT
-bind Thumb3+Thumb4+RoutingKey NXINDENT
+bind Thumb1+Thumb3+RoutingKey NXINDENT
+bind Thumb4+Thumb2+RoutingKey PRDIFCHAR
+bind Thumb4+Thumb3+RoutingKey NXDIFCHAR
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -134,14 +120,14 @@ bind Thumb3+Dot8 KEY_CURSOR_RIGHT
 
 context menu
 
-bind Left MENU_PREV_ITEM
-bind Right MENU_NEXT_ITEM
+bind Thumb2 MENU_PREV_ITEM
+bind Thumb3 MENU_NEXT_ITEM
 
-bind Up MENU_PREV_SETTING
-bind Down MENU_NEXT_SETTING
+bind Up MENU_FIRST_ITEM
+bind Down MENU_LAST_ITEM
 
-bind Right+Up MENU_FIRST_ITEM
-bind Right+Down MENU_LAST_ITEM
+bind Left MENU_PREV_SETTING
+bind Right MENU_NEXT_SETTING
 
 bind Left+Right PREFMENU
 bind Left+Up PREFLOAD
