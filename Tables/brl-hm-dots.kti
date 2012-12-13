@@ -26,6 +26,7 @@ map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
 
+assign chord Space+
 include brl-chords.kti
 bind Dot2+Dot3+Dot5 SIXDOTS+on
 bind Dot2+Dot3+Dot6 SIXDOTS+off
