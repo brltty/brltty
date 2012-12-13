@@ -453,7 +453,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(presentationSubmenu, rootMenu, strtext("Text Presentation"));
+    SUBMENU(presentationSubmenu, rootMenu, strtext("Braille Presentation"));
 
     {
       static const MenuString strings[] = {
@@ -576,7 +576,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(navigationSubmenu, rootMenu, strtext("Navigation"));
+    SUBMENU(navigationSubmenu, rootMenu, strtext("Navigation Options"));
 
     {
       NAME(strtext("Skip Identical Lines"));
@@ -631,7 +631,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(controlsSubmenu, rootMenu, strtext("Controls"));
+    SUBMENU(controlsSubmenu, rootMenu, strtext("Input Options"));
 
     {
       NAME(strtext("Autorepeat"));
