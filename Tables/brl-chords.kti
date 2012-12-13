@@ -22,6 +22,9 @@ bind \{chord}Dot1+Dot2+Dot8 SKPBLNKWINS+on
 bind \{chord}Dot1+Dot4 CSRVIS
 bind \{chord}Dot1+Dot4+Dot7 CSRVIS+off
 bind \{chord}Dot1+Dot4+Dot8 CSRVIS+on
+bind \{chord}Dot1+Dot4+Dot5 DISPMD
+bind \{chord}Dot1+Dot4+Dot5+Dot7 DISPMD+off
+bind \{chord}Dot1+Dot4+Dot5+Dot8 DISPMD+on
 bind \{chord}Dot1+Dot2+Dot4 FREEZE
 bind \{chord}Dot1+Dot2+Dot5 HELP
 bind \{chord}Dot2+Dot4 SKPIDLNS
@@ -44,3 +47,6 @@ bind \{chord}Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
 bind \{chord}Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
 bind \{chord}Dot1+Dot2+Dot3+Dot6+Dot7 SWITCHVT_PREV
 bind \{chord}Dot1+Dot2+Dot3+Dot6+Dot8 SWITCHVT_NEXT
+bind \{chord}Dot2+Dot4+Dot5+Dot6 SLIDEWIN
+bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot7 SLIDEWIN+off
+bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot8 SLIDEWIN+on
