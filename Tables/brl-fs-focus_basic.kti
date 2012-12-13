@@ -20,33 +20,10 @@
 
 include brl-fs-common.kti
 
-bind Space+Dot2+Dot4 SKPIDLNS
-bind Space+Dot1+Dot2 SKPBLNKWINS
-
-bind Space+Dot1 DISPMD
-bind Space+Dot1+Dot3+Dot6 ATTRVIS
-
-bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
-bind Space+Dot1+Dot4 CSRVIS
-
+assign chord Space+
+include brl-chords.kti
 bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
 bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
-bind Space+Dot1+Dot2+Dot3+Dot5 AUTOREPEAT
-
-bind Space+Dot1+Dot2+Dot5 HELP
-bind Space+Dot1+Dot2+Dot4 FREEZE
-
-bind Space+Dot1+Dot2+Dot3 LEARN
-bind Space+LeftShift+Dot1+Dot2+Dot3+Dot4 PREFLOAD
-
-bind Space+Dot1+Dot2+Dot3+Dot4 PREFMENU
-bind Space+RightShift+Dot1+Dot2+Dot3+Dot4 PREFSAVE
-
-bind Space+Dot2+Dot3+Dot4 INFO
-bind Space+Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
-
-bind Space+LeftShift+Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
-bind Space+RightShift+Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
 
 map Dot1 DOT1
 map Dot2 DOT2
