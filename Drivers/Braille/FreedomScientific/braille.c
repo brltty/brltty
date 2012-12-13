@@ -181,16 +181,18 @@ typedef struct {
   unsigned char arg3;
 } PacketHeader;
 
+#define PACKET_PAYLOAD_INFO_MANUFACTURER_SIZE 24
 #define PACKET_PAYLOAD_INFO_MODEL_SIZE 16
+#define PACKET_PAYLOAD_INFO_FIRMWARE_SIZE 8
 
 typedef struct {
   PacketHeader header;
   union {
     unsigned char bytes[0X100];
     struct {
-      char manufacturer[24];
+      char manufacturer[PACKET_PAYLOAD_INFO_MANUFACTURER_SIZE];
       char model[PACKET_PAYLOAD_INFO_MODEL_SIZE];
-      char firmware[8];
+      char firmware[PACKET_PAYLOAD_INFO_FIRMWARE_SIZE];
     } info;
     struct {
       unsigned char bytes[4];
