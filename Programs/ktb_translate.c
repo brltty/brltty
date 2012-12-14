@@ -45,7 +45,7 @@ static const KeyBinding *
 findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediate, int *isIncomplete) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->sortedKeyBindings &&
+  if (ctx && ctx->keyBindings.sorted &&
       (table->pressedCount <= MAX_MODIFIERS_PER_COMBINATION)) {
     KeyBinding target;
     memset(&target, 0, sizeof(target));
@@ -75,7 +75,7 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
         qsort(target.combination.modifierKeys, table->pressedCount, sizeof(*target.combination.modifierKeys), sortModifierKeys);
 
         {
-          const KeyBinding *const *binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
+          const KeyBinding *const *binding = bsearch(&target, ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), searchKeyBinding);
 
           if (binding) {
             if ((*binding)->command != EOF) return *binding;
@@ -104,13 +104,13 @@ static const HotkeyEntry *
 findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValue) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->sortedHotkeyEntries) {
+  if (ctx && ctx->hotkeys.sorted) {
     HotkeyEntry target = {
       .keyValue = *keyValue
     };
 
     {
-      const HotkeyEntry *const *hotkey = bsearch(&target, ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), searchHotkeyEntry);
+      const HotkeyEntry *const *hotkey = bsearch(&target, ctx->hotkeys.sorted, ctx->hotkeys.count, sizeof(*ctx->hotkeys.sorted), searchHotkeyEntry);
       if (hotkey) return *hotkey;
     }
   }
@@ -127,13 +127,13 @@ searchMappedKeyEntry (const void *target, const void *element) {
 
 static const MappedKeyEntry *
 findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
-  if (ctx->sortedMappedKeyEntries) {
+  if (ctx->mappedKeys.sorted) {
     MappedKeyEntry target = {
       .keyValue = *keyValue
     };
 
     {
-      const MappedKeyEntry *const *map = bsearch(&target, ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), searchMappedKeyEntry);
+      const MappedKeyEntry *const *map = bsearch(&target, ctx->mappedKeys.sorted, ctx->mappedKeys.count, sizeof(*ctx->mappedKeys.sorted), searchMappedKeyEntry);
       if (map) return *map;
     }
   }
@@ -167,7 +167,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
       int dotPressed = !!(keyboardCommand & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8));
       int spacePressed = !!(keyboardCommand & BRL_DOTC);
 
-      if (dotPressed) keyboardCommand |= ctx->superimposedBits;
+      if (dotPressed) keyboardCommand |= ctx->mappedKeys.superimpose;
 
       if (!chordsRequested) {
         if (dotPressed == spacePressed) return EOF;

@@ -175,19 +175,19 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
 
       ctx->title = NULL;
 
-      ctx->keyBindingTable = NULL;
-      ctx->keyBindingsSize = 0;
-      ctx->keyBindingCount = 0;
-      ctx->sortedKeyBindings = NULL;
+      ctx->keyBindings.table = NULL;
+      ctx->keyBindings.size = 0;
+      ctx->keyBindings.count = 0;
+      ctx->keyBindings.sorted = NULL;
 
-      ctx->hotkeyTable = NULL;
-      ctx->hotkeyCount = 0;
-      ctx->sortedHotkeyEntries = NULL;
+      ctx->hotkeys.table = NULL;
+      ctx->hotkeys.count = 0;
+      ctx->hotkeys.sorted = NULL;
 
-      ctx->mappedKeyTable = NULL;
-      ctx->mappedKeyCount = 0;
-      ctx->sortedMappedKeyEntries = NULL;
-      ctx->superimposedBits = 0;
+      ctx->mappedKeys.table = NULL;
+      ctx->mappedKeys.count = 0;
+      ctx->mappedKeys.sorted = NULL;
+      ctx->mappedKeys.superimpose = 0;
     }
   }
 
@@ -756,20 +756,20 @@ getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
 
 static int
 addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
-  if (ctx->keyBindingCount == ctx->keyBindingsSize) {
-    unsigned int newSize = ctx->keyBindingsSize? ctx->keyBindingsSize<<1: 0X10;
-    KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, newSize));
+  if (ctx->keyBindings.count == ctx->keyBindings.size) {
+    unsigned int newSize = ctx->keyBindings.size? ctx->keyBindings.size<<1: 0X10;
+    KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
       logSystemError("realloc");
       return 0;
     }
 
-    ctx->keyBindingTable = newTable;
-    ctx->keyBindingsSize = newSize;
+    ctx->keyBindings.table = newTable;
+    ctx->keyBindings.size = newSize;
   }
 
-  ctx->keyBindingTable[ctx->keyBindingCount++] = *binding;
+  ctx->keyBindings.table[ctx->keyBindings.count++] = *binding;
   return 1;
 }
 
@@ -885,16 +885,16 @@ processHotkeyOperands (DataFile *file, void *data) {
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
     if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
       if (getCommandOperand(file, &hotkey.releaseCommand, ktd)) {
-        unsigned int newCount = ctx->hotkeyCount + 1;
-        HotkeyEntry *newTable = realloc(ctx->hotkeyTable, ARRAY_SIZE(newTable, newCount));
+        unsigned int newCount = ctx->hotkeys.count + 1;
+        HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
           logSystemError("realloc");
           return 0;
         }
 
-        ctx->hotkeyTable = newTable;
-        ctx->hotkeyTable[ctx->hotkeyCount++] = hotkey;
+        ctx->hotkeys.table = newTable;
+        ctx->hotkeys.table[ctx->hotkeys.count++] = hotkey;
         return 1;
       }
     }
@@ -945,16 +945,16 @@ processMapOperands (DataFile *file, void *data) {
   if (getKeyOperand(file, &map.keyValue, ktd)) {
     if (map.keyValue.key != KTB_KEY_ANY) {
       if (getKeyboardFunctionOperand(file, &map.keyboardFunction, ktd)) {
-        unsigned int newCount = ctx->mappedKeyCount + 1;
-        MappedKeyEntry *newTable = realloc(ctx->mappedKeyTable, ARRAY_SIZE(newTable, newCount));
+        unsigned int newCount = ctx->mappedKeys.count + 1;
+        MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
           logSystemError("realloc");
           return 0;
         }
 
-        ctx->mappedKeyTable = newTable;
-        ctx->mappedKeyTable[ctx->mappedKeyCount++] = map;
+        ctx->mappedKeys.table = newTable;
+        ctx->mappedKeys.table[ctx->mappedKeys.count++] = map;
         return 1;
       }
     } else {
@@ -1015,7 +1015,7 @@ processSuperimposeOperands (DataFile *file, void *data) {
     const KeyboardFunction *kbf;
 
     if (getKeyboardFunctionOperand(file, &kbf, ktd)) {
-      ctx->superimposedBits |= kbf->bit;
+      ctx->mappedKeys.superimpose |= kbf->bit;
       return 1;
     }
   }
@@ -1114,7 +1114,7 @@ addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, uns
 
   while (first <= last) {
     int current = (first + last) / 2;
-    const KeyCombination *combination = &ctx->keyBindingTable[ibd->indexTable[current]].combination;
+    const KeyCombination *combination = &ctx->keyBindings.table[ibd->indexTable[current]].combination;
     int relation = compareKeyArrays(count, keys, combination->modifierCount, combination->modifierKeys);
     if (!relation) return 1;
 
@@ -1138,7 +1138,7 @@ addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, uns
     ibd->indexSize = newSize;
   }
 
-  if (index == ctx->keyBindingCount) {
+  if (index == ctx->keyBindings.count) {
     KeyBinding binding = {
       .flags = KBF_HIDDEN,
       .command = EOF,
@@ -1168,7 +1168,7 @@ addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count
     copyKeyValues(values, &keys[1], count);
 
     while (1) {
-      if (!addBindingIndex(ctx, values, count, ctx->keyBindingCount, ibd)) return 0;
+      if (!addBindingIndex(ctx, values, count, ctx->keyBindings.count, ibd)) return 0;
       if (!addSubbindingIndexes(ctx, values, count, ibd)) return 0;
       if (index == count) break;
       values[index] = keys[index];
@@ -1191,8 +1191,8 @@ addIncompleteBindings (KeyContext *ctx) {
   {
     int index;
 
-    for (index=0; index<ctx->keyBindingCount; index+=1) {
-      const KeyCombination *combination = &ctx->keyBindingTable[index].combination;
+    for (index=0; index<ctx->keyBindings.count; index+=1) {
+      const KeyCombination *combination = &ctx->keyBindings.table[index].combination;
 
       if (!(combination->flags & KCF_IMMEDIATE_KEY)) {
         if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, index, &ibd)) {
@@ -1204,14 +1204,14 @@ addIncompleteBindings (KeyContext *ctx) {
   }
 
   {
-    int count = ctx->keyBindingCount;
+    int count = ctx->keyBindings.count;
     int index;
 
     for (index=0; index<count; index+=1) {
-      const KeyCombination *combination = &ctx->keyBindingTable[index].combination;
+      const KeyCombination *combination = &ctx->keyBindings.table[index].combination;
 
       if ((combination->flags & KCF_IMMEDIATE_KEY)) {
-        if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, ctx->keyBindingCount, &ibd)) {
+        if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, ctx->keyBindings.count, &ibd)) {
           ok = 0;
           goto done;
         }
@@ -1233,34 +1233,34 @@ static int
 prepareKeyBindings (KeyContext *ctx) {
   if (!addIncompleteBindings(ctx)) return 0;
 
-  if (ctx->keyBindingCount < ctx->keyBindingsSize) {
-    if (ctx->keyBindingCount) {
-      KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
+  if (ctx->keyBindings.count < ctx->keyBindings.size) {
+    if (ctx->keyBindings.count) {
+      KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, ctx->keyBindings.count));
 
       if (!newTable) {
         logSystemError("realloc");
         return 0;
       }
 
-      ctx->keyBindingTable = newTable;
+      ctx->keyBindings.table = newTable;
     } else {
-      free(ctx->keyBindingTable);
-      ctx->keyBindingTable = NULL;
+      free(ctx->keyBindings.table);
+      ctx->keyBindings.table = NULL;
     }
 
-    ctx->keyBindingsSize = ctx->keyBindingCount;
+    ctx->keyBindings.size = ctx->keyBindings.count;
   }
 
-  if (ctx->keyBindingCount) {
-    if (!(ctx->sortedKeyBindings = malloc(ARRAY_SIZE(ctx->sortedKeyBindings, ctx->keyBindingCount)))) {
+  if (ctx->keyBindings.count) {
+    if (!(ctx->keyBindings.sorted = malloc(ARRAY_SIZE(ctx->keyBindings.sorted, ctx->keyBindings.count)))) {
       logMallocError();
       return 0;
     }
 
     {
-      KeyBinding *source = ctx->keyBindingTable;
-      const KeyBinding **target = ctx->sortedKeyBindings;
-      unsigned int count = ctx->keyBindingCount;
+      KeyBinding *source = ctx->keyBindings.table;
+      const KeyBinding **target = ctx->keyBindings.sorted;
+      unsigned int count = ctx->keyBindings.count;
 
       while (count) {
         *target++ = source++;
@@ -1268,7 +1268,7 @@ prepareKeyBindings (KeyContext *ctx) {
       }
     }
 
-    qsort(ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), sortKeyBindings);
+    qsort(ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), sortKeyBindings);
   }
 
   return 1;
@@ -1284,16 +1284,16 @@ sortHotkeyEntries (const void *element1, const void *element2) {
 
 static int
 prepareHotkeyEntries (KeyContext *ctx) {
-  if (ctx->hotkeyCount) {
-    if (!(ctx->sortedHotkeyEntries = malloc(ARRAY_SIZE(ctx->sortedHotkeyEntries, ctx->hotkeyCount)))) {
+  if (ctx->hotkeys.count) {
+    if (!(ctx->hotkeys.sorted = malloc(ARRAY_SIZE(ctx->hotkeys.sorted, ctx->hotkeys.count)))) {
       logMallocError();
       return 0;
     }
 
     {
-      const HotkeyEntry *source = ctx->hotkeyTable;
-      const HotkeyEntry **target = ctx->sortedHotkeyEntries;
-      unsigned int count = ctx->hotkeyCount;
+      const HotkeyEntry *source = ctx->hotkeys.table;
+      const HotkeyEntry **target = ctx->hotkeys.sorted;
+      unsigned int count = ctx->hotkeys.count;
 
       while (count) {
         *target++ = source++;
@@ -1301,7 +1301,7 @@ prepareHotkeyEntries (KeyContext *ctx) {
       }
     }
 
-    qsort(ctx->sortedHotkeyEntries, ctx->hotkeyCount, sizeof(*ctx->sortedHotkeyEntries), sortHotkeyEntries);
+    qsort(ctx->hotkeys.sorted, ctx->hotkeys.count, sizeof(*ctx->hotkeys.sorted), sortHotkeyEntries);
   }
 
   return 1;
@@ -1317,16 +1317,16 @@ sortMappedKeyEntries (const void *element1, const void *element2) {
 
 static int
 prepareMappedKeyEntries (KeyContext *ctx) {
-  if (ctx->mappedKeyCount) {
-    if (!(ctx->sortedMappedKeyEntries = malloc(ARRAY_SIZE(ctx->sortedMappedKeyEntries, ctx->mappedKeyCount)))) {
+  if (ctx->mappedKeys.count) {
+    if (!(ctx->mappedKeys.sorted = malloc(ARRAY_SIZE(ctx->mappedKeys.sorted, ctx->mappedKeys.count)))) {
       logMallocError();
       return 0;
     }
 
     {
-      const MappedKeyEntry *source = ctx->mappedKeyTable;
-      const MappedKeyEntry **target = ctx->sortedMappedKeyEntries;
-      unsigned int count = ctx->mappedKeyCount;
+      const MappedKeyEntry *source = ctx->mappedKeys.table;
+      const MappedKeyEntry **target = ctx->mappedKeys.sorted;
+      unsigned int count = ctx->mappedKeys.count;
 
       while (count) {
         *target++ = source++;
@@ -1334,7 +1334,7 @@ prepareMappedKeyEntries (KeyContext *ctx) {
       }
     }
 
-    qsort(ctx->sortedMappedKeyEntries, ctx->mappedKeyCount, sizeof(*ctx->sortedMappedKeyEntries), sortMappedKeyEntries);
+    qsort(ctx->mappedKeys.sorted, ctx->mappedKeys.count, sizeof(*ctx->mappedKeys.sorted), sortMappedKeyEntries);
   }
 
   return 1;
@@ -1417,14 +1417,14 @@ destroyKeyTable (KeyTable *table) {
 
     if (ctx->title) free(ctx->title);
 
-    if (ctx->keyBindingTable) free(ctx->keyBindingTable);
-    if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
+    if (ctx->keyBindings.table) free(ctx->keyBindings.table);
+    if (ctx->keyBindings.sorted) free(ctx->keyBindings.sorted);
 
-    if (ctx->hotkeyTable) free(ctx->hotkeyTable);
-    if (ctx->sortedHotkeyEntries) free(ctx->sortedHotkeyEntries);
+    if (ctx->hotkeys.table) free(ctx->hotkeys.table);
+    if (ctx->hotkeys.sorted) free(ctx->hotkeys.sorted);
 
-    if (ctx->mappedKeyTable) free(ctx->mappedKeyTable);
-    if (ctx->sortedMappedKeyEntries) free(ctx->sortedMappedKeyEntries);
+    if (ctx->mappedKeys.table) free(ctx->mappedKeys.table);
+    if (ctx->mappedKeys.sorted) free(ctx->mappedKeys.sorted);
   }
 
   if (table->keyContextTable) free(table->keyContextTable);

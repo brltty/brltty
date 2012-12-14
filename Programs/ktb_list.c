@@ -201,8 +201,8 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   {
     unsigned int index;
 
-    for (index=0; index<ctx->mappedKeyCount; index+=1) {
-      const MappedKeyEntry *map = &ctx->mappedKeyTable[index];
+    for (index=0; index<ctx->mappedKeys.count; index+=1) {
+      const MappedKeyEntry *map = &ctx->mappedKeys.table[index];
       const KeyboardFunction *kbf = map->keyboardFunction;
 
       if (!putUtf8String(lgd, prefix)) return 0;
@@ -218,7 +218,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
     const KeyboardFunction *end = kbf + keyboardFunctionCount;
 
     while (kbf < end) {
-      if (ctx->superimposedBits & kbf->bit) {
+      if (ctx->mappedKeys.superimpose & kbf->bit) {
         if (!putUtf8String(lgd, prefix)) return 0;
         if (!putUtf8String(lgd, kbf->name)) return 0;
         if (!putCharacterString(lgd, WS_C(": superimposed"))) return 0;
@@ -257,8 +257,8 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
   {
-    const HotkeyEntry *hotkey = ctx->hotkeyTable;
-    unsigned int count = ctx->hotkeyCount;
+    const HotkeyEntry *hotkey = ctx->hotkeys.table;
+    unsigned int count = ctx->hotkeys.count;
 
     while (count) {
       if (!(hotkey->flags & HKF_HIDDEN)) {
@@ -271,8 +271,8 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
   }
 
   {
-    const KeyBinding *binding = ctx->keyBindingTable;
-    unsigned int count = ctx->keyBindingCount;
+    const KeyBinding *binding = ctx->keyBindings.table;
+    unsigned int count = ctx->keyBindings.count;
 
     while (count) {
       if (!(binding->flags & KBF_HIDDEN)) {

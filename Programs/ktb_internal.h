@@ -81,19 +81,25 @@ typedef struct {
 typedef struct {
   wchar_t *title;
 
-  KeyBinding *keyBindingTable;
-  unsigned int keyBindingsSize;
-  unsigned int keyBindingCount;
-  const KeyBinding **sortedKeyBindings;
+  struct {
+    KeyBinding *table;
+    unsigned int size;
+    unsigned int count;
+    const KeyBinding **sorted;
+  } keyBindings;
 
-  HotkeyEntry *hotkeyTable;
-  unsigned int hotkeyCount;
-  const HotkeyEntry **sortedHotkeyEntries;
+  struct {
+    HotkeyEntry *table;
+    unsigned int count;
+    const HotkeyEntry **sorted;
+  } hotkeys;
 
-  MappedKeyEntry *mappedKeyTable;
-  unsigned int mappedKeyCount;
-  const MappedKeyEntry **sortedMappedKeyEntries;
-  int superimposedBits;
+  struct {
+    MappedKeyEntry *table;
+    unsigned int count;
+    const MappedKeyEntry **sorted;
+    int superimpose;
+  } mappedKeys;
 } KeyContext;
 
 struct KeyTableStruct {
