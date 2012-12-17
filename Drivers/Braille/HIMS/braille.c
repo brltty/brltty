@@ -26,6 +26,8 @@
 #include "brl_driver.h"
 #include "brldefs-hm.h"
 
+#define MAXIMUM_CELL_COUNT 40
+
 BEGIN_KEY_NAME_TABLE(routing)
   KEY_SET_ENTRY(HM_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
@@ -112,18 +114,6 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(edge),
 END_KEY_TABLE_LIST
 
-typedef struct {
-  int (*openPort) (const char *device);
-  int (*configurePort) (void);
-  void (*closePort) ();
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length);
-} InputOutputOperations;
-static const InputOutputOperations *io;
-
-static unsigned int charactersPerSecond;
-
 typedef enum {
   IPT_CURSOR  = 0X00,
   IPT_KEYS    = 0X01,
@@ -144,14 +134,17 @@ typedef union {
   } PACKED data;
 } PACKED InputPacket;
 
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = io->readBytes(byte, 1, wait);
-  if (count > 0) return 1;
+typedef struct {
+  const char *modelName;
+  const KeyTableDefinition *keyTableDefinition;
+  int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
+} ProtocolOperations;
 
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
+struct BrailleDataStruct {
+  GioEndpoint *gioEndpoint;
+  const ProtocolOperations *protocol;
+  unsigned char previousCells[MAXIMUM_CELL_COUNT];
+};
 
 static int
 readPacket (BrailleDisplay *brl, InputPacket *packet) {
@@ -163,7 +156,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
     {
       int started = offset > 0;
-      if (!readByte(&byte, started)) {
+      if (!gioReadData(brl->data->gioEndpoint, &byte, 1, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -271,22 +264,8 @@ writePacket (
     *checksum = sum;
   }
 
-  {
-    int size = byte - packet;
-    logOutputPacket(packet, size);
-    if (io->writeBytes(packet, size) == -1) return 0;
-    brl->writeDelay += (size * 1000 / charactersPerSecond) + 1;
-  }
-
-  return 1;
+  return writeBraillePacket(brl, brl->data->gioEndpoint, packet, byte - packet);
 }
-
-typedef struct {
-  const char *modelName;
-  const KeyTableDefinition *keyTableDefinition;
-  int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
-} ProtocolOperations;
-static const ProtocolOperations *protocol;
 
 
 static int
@@ -311,7 +290,7 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
   if (writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0)) {
     InputPacket packet;
 
-    while (io->awaitInput(1000)) {
+    while (gioAwaitInput(brl->data->gioEndpoint, 1000)) {
       if (readPacket(brl, &packet)) {
         if (packet.data.type == IPT_CELLS) {
           *count = packet.data.data;
@@ -342,63 +321,30 @@ static const ProtocolOperations brailleEDGEOperations = {
 };
 
 
-/* Serial IO */
-#include "io_serial.h"
-
-static SerialDevice *serialDevice = NULL;
-#define SERIAL_BAUD 115200
-
 static int
-openSerialPort (const char *device) {
-  if (!(serialDevice = serialOpenDevice(device))) return 0;
-  protocol = &brailleSenseOperations;
-  return 1;
+writeCells (BrailleDisplay *brl) {
+  const size_t count = MIN(brl->textColumns*brl->textRows, MAXIMUM_CELL_COUNT);
+  unsigned char cells[count];
+
+  translateOutputCells(cells, brl->data->previousCells, count);
+
+  return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
 }
 
 static int
-configureSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, SERIAL_BAUD)) return 0;
-  return 1;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
+clearCells (BrailleDisplay *brl) {
+  memset(brl->data->previousCells, 0, MIN(brl->textColumns*brl->textRows, MAXIMUM_CELL_COUNT));
+  return writeCells(brl);
 }
 
 static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 115200
+  };
 
-static int
-readSerialBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length) {
-  return serialWriteData(serialDevice, buffer, length);
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, configureSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes
-};
-
-/* USB IO */
-#include "io_usb.h"
-
-static UsbChannel *usbChannel = NULL;
-
-static int
-openUsbPort (const char *device) {
-  static const UsbChannelDefinition definitions[] = {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* Braille Sense (USB 1.1) */
       .version = UsbSpecificationVersion_1_1,
       .vendor=0X045E, .product=0X930A,
@@ -435,161 +381,53 @@ openUsbPort (const char *device) {
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-    protocol = usbChannel->definition.data;
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &brailleSenseOperations;
+  descriptor.serial.options.inputTimeout = 100;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &brailleSenseOperations;
+  descriptor.bluetooth.options.inputTimeout = 100;
+
+  if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
+
   return 0;
 }
 
 static int
-configureUsbPort (void) {
-  return 1;
-}
-
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device,
-                       usbChannel->definition.inputEndpoint,
-                       milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  int count = usbReapInput(usbChannel->device,
-                           usbChannel->definition.inputEndpoint,
-                           buffer, length,
-                           (wait? timeout: 0), timeout);
-  if (count != -1) return count;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usbChannel->device,
-                          usbChannel->definition.outputEndpoint,
-                          buffer, length, 1000);
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, configureUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes
-};
-
-/* Bluetooth IO */
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (const char *device) {
-  if (!(bluetoothConnection = bthOpenConnection(device, 4, 0))) return 0;
-  protocol = &brailleSenseOperations;
-  return 1;
-}
-
-static int
-configureBluetoothPort (void) {
-  return 1;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  return bthReadData(bluetoothConnection, buffer, length,
-                     (wait? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = bthWriteData(bluetoothConnection, buffer, length);
-  if (count != length) {
-    if (count == -1) {
-      logSystemError("Bluetooth write");
-    } else {
-      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-  return count;
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, configureBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
-};
-
-static unsigned char previousCells[40];
-
-static int
-writeCells (BrailleDisplay *brl) {
-  const size_t count = brl->textColumns * brl->textRows;
-  unsigned char cells[count];
-
-  translateOutputCells(cells, previousCells, count);
-
-  return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
-}
-
-static int
-clearCells (BrailleDisplay *brl) {
-  memset(previousCells, 0, brl->textColumns*brl->textRows);
-  return writeCells(brl);
-}
-
-static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
-  }
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->gioEndpoint = NULL;
 
-  if (io->openPort(device)) {
-    if (io->configurePort()) {
-      charactersPerSecond = SERIAL_BAUD / 10;
-      logMessage(LOG_INFO, "detected: %s", protocol->modelName);
+    if (connectResource(brl, device)) {
+      brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint);
+      logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
-      if (protocol->getCellCount(brl, &brl->textColumns) ||
-          protocol->getCellCount(brl, &brl->textColumns)) {
+      if (brl->data->protocol->getCellCount(brl, &brl->textColumns) ||
+          brl->data->protocol->getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
-        brl->keyBindings = protocol->keyTableDefinition->bindings;
-        brl->keyNameTables = protocol->keyTableDefinition->names;
+        brl->keyBindings = brl->data->protocol->keyTableDefinition->bindings;
+        brl->keyNameTables = brl->data->protocol->keyTableDefinition->names;
 
         makeOutputTable(dotsTable_ISO11548_1);
   
         if (clearCells(brl)) return 1;
       }
+
+      gioDisconnectResource(brl->data->gioEndpoint);
     }
 
-    io->closePort();
+    free(brl->data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -597,14 +435,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  io->closePort();
+  if (brl->data) {
+    if (brl->data->gioEndpoint) gioDisconnectResource(brl->data->gioEndpoint);
+    free(brl->data);
+  }
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   size_t count = brl->textColumns * brl->textRows;
 
-  if (cellsHaveChanged(previousCells, brl->buffer, count, NULL, NULL, NULL)) {
+  if (cellsHaveChanged(brl->data->previousCells, brl->buffer, count, NULL, NULL, NULL)) {
     if (!writeCells(brl)) return 0;
   }
 
@@ -621,8 +462,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case IPT_CURSOR: {
         unsigned char key = packet.data.data;
 
-        enqueueKeyEvent(HM_SET_RoutingKeys, key, 1);
-        enqueueKeyEvent(HM_SET_RoutingKeys, key, 0);
+        enqueueKey(HM_SET_RoutingKeys, key);
         continue;
       }
 
