@@ -156,7 +156,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
     {
       int started = offset > 0;
-      if (!gioReadData(brl->data->gioEndpoint, &byte, 1, started)) {
+      if (!gioReadByte(brl->data->gioEndpoint, &byte, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -327,7 +327,6 @@ writeCells (BrailleDisplay *brl) {
   unsigned char cells[count];
 
   translateOutputCells(cells, brl->data->previousCells, count);
-
   return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
 }
 
@@ -386,13 +385,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.applicationData = &brailleSenseOperations;
-  descriptor.serial.options.inputTimeout = 100;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
-  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.channelNumber = 4;
   descriptor.bluetooth.options.applicationData = &brailleSenseOperations;
-  descriptor.bluetooth.options.inputTimeout = 100;
 
   if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
