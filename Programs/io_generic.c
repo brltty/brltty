@@ -479,7 +479,7 @@ gioConnectResource (
 
     if (descriptor->bluetooth.channelNumber) {
       if (isBluetoothDevice(&identifier)) {
-        if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 1))) {
+        if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
           endpoint->methods = &bluetoothMethods;
           endpoint->options = descriptor->bluetooth.options;
           goto connectSucceeded;
