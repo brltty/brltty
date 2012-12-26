@@ -1,0 +1,13 @@
+An Upstart job for brltty can be found within the "Hotplug/" subdirectory of 
+BRLTTY's source tree. It's called "upstart.job". All you need to do is to copy 
+this file into Upstart's jobs directory.
+
+Upstart's jobs directory has changed over time. Older Upstart releases use 
+"/etc/event.d/" whereas newer ones use "/etc/init/". You'll need to check your 
+system to see which of these directories it's using. Don't get confused by the 
+directory "/etc/init.d/", which your system probably also has, and which has a 
+similar name. It's used for something entirely different - SysV init scripts.
+
+The file also needs to have the correct name. Older Upstart releases just use 
+the job name itself, e.g. "brltty", whereas newer ones append the ".conf" 
+extension, e.g. "brltty.conf".
