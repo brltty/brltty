@@ -761,14 +761,13 @@ usbAwaitInput (
     unsigned char *buffer = malloc(size);
 
     if (buffer) {
-      ssize_t count;
       TimePeriod period;
-
       if (timeout) startTimePeriod(&period, timeout);
 
       while (1) {
-        if ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
-                                     MAX(interval, timeout))) != -1) {
+        ssize_t count = usbReadEndpoint(device, endpointNumber, buffer, size, 20);
+
+        if (count != -1) {
           if (count) {
             endpoint->direction.input.buffer = buffer;
             endpoint->direction.input.length = count;
@@ -840,9 +839,11 @@ usbReapInput (
   int subsequentTimeout
 ) {
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+
   if (endpoint) {
     unsigned char *bytes = buffer;
     unsigned char *target = bytes;
+
     while (length > 0) {
       if (!usbAwaitInput(device, endpointNumber,
                          (target == bytes)? initialTimeout: subsequentTimeout)) {
@@ -867,8 +868,10 @@ usbReapInput (
         length -= count;
       }
     }
+
     return target - bytes;
   }
+
   return -1;
 }
 
