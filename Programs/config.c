@@ -517,17 +517,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-int
-readCommand (KeyTableCommandContext context) {
-  int command = readBrailleCommand(&brl, context);
-  if (command != EOF) {
-    logCommand(command);
-    if (BRL_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
-    command &= BRL_MSK_CMD;
-  }
-  return command;
-}
-
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
 exitContractionTable (void) {

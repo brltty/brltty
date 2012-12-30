@@ -3931,6 +3931,17 @@ brlttyUpdate (void) {
   return 1;
 }
 
+static int
+readCommand (KeyTableCommandContext context) {
+  int command = readBrailleCommand(&brl, context);
+  if (command != EOF) {
+    logCommand(command);
+    if (BRL_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
+    command &= BRL_MSK_CMD;
+  }
+  return command;
+}
+
 int 
 message (const char *mode, const char *text, short flags) {
   int ok = 1;

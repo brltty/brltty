@@ -103,7 +103,6 @@ extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-extern int readCommand (KeyTableCommandContext context);
 extern void resetAutorepeat (void);
 extern void handleAutorepeat (int *command, RepeatState *state);
 
