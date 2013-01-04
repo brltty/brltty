@@ -1,0 +1,25 @@
+[Unit]
+
+Description=
+Documentation=man:brltty(1)
+Documentation=http://mielke.cc/brltty/
+
+DefaultDependencies=yes
+
+
+[Service]
+
+Type=forking
+PIDFile=/var/run/brltty.pid
+ExecStart=/bin/brltty -E -P /var/run/brltty.pid
+
+TimeoutStartSec=5
+TimeoutStopSec=10
+
+Restart=always
+RestartSec=30
+
+Nice=-10
+OOMScoreAdjust=-900
+
+
