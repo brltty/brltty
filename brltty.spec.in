@@ -49,7 +49,7 @@ BuildRequires: gcc-java
 BuildRequires: ocaml
 BuildRequires: ocaml-findlib
 
-BuildRequires: Pyrex
+BuildRequires: Cython
 
 BuildRequires: tcl
 BuildRequires: tcl-devel
