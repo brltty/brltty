@@ -14,3 +14,16 @@ ensure to use whatever it really is on your system), define the Systemd unit
 for brltty as follows:
 
    cp systemd.service /usr/lib/systemd/user/brltty.service
+
+Once the unit file is in the right place, you'll be able to use standard 
+Systemd commands to manage the brltty service. The most common ones are:
+
+   systemctl status brltty.service
+   systemctl start brltty.service
+   systemctl stop brltty.service
+   systemctl enable brltty.service
+   systemctl disable brltty.service
+
+Nothing is automatic. If you'd like to start the brltty service right away then 
+use the "start" function. If you'd like the brltty service to be automatically 
+started when the system is booted then use the "enable" function.
