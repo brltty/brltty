@@ -11,3 +11,22 @@ similar name. It's used for something entirely different - SysV init scripts.
 The file also needs to have the correct name. Older Upstart releases just use 
 the job name itself, e.g. "brltty", whereas newer ones append the ".conf" 
 extension, e.g. "brltty.conf".
+
+so, for an older Upstart release, you'd do something like this:
+
+   cp upstart.job /etc/event.d/brltty
+
+and, for a newer Upstart release, you'd do something like this:
+
+   cp upstart.job /etc/init/brltty.conf
+
+Once the job file is in the right place, brltty will automatically start when 
+the system is rebooted. You'll also be able to use standard Upstart commands to 
+manage the brltty job. The most common ones are:
+
+   status brltty
+   start brltty
+   stop brltty
+
+For example: You don't need to reboot the system in order to start brltty. 
+Just use Upstart's start command to start it right away.
