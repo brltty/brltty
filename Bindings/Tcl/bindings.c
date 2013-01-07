@@ -19,12 +19,12 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <tcl.h>
-#include "brldots.h"
-
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
 #include "brlapi.h"
+
+#include <tcl.h>
+#include "brldots.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
