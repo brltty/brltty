@@ -112,7 +112,7 @@ else
    fi
 fi
 
-AC_PATH_PROG([CYTHON], [cython])
+AC_PATH_PROGS([CYTHON], [cython pyrexc])
 if test -z "${CYTHON}"
 then
    AC_MSG_WARN([Cython compiler not found])
