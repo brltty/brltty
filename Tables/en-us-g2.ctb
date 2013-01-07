@@ -866,8 +866,14 @@ begword reachiev 1235-15-1-16-24-15-1236 reachieving
 begword reacq 1235-15-1-14-12345 reacquire reacquaint
 always react =
 always reaction 1235-15-1-14-56-1345
+sufword readapt =
+word readd =
+begword readd 1235-15-1-256 readdressing
 begword readj = readjust
 begword readm = readmit
+begword reado = readoption readorn
+sufword readout 1235-2-145-1256-2345
+begword readv = readvance readvocate
 begword reaff 1235-15-1-235
 always reagent 1235-15-1-1245-26-2345
 begword reagg 1235-15-1-2356 reaggregated
