@@ -30,6 +30,7 @@ extern "C" {
 
 /* ntdll.dll */
 #include <ntdef.h>
+#include <ntstatus.h>
 
 typedef enum _PROCESSINFOCLASS {
   ProcessUserModeIOPL = 16,
