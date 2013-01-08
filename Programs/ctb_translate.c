@@ -520,6 +520,13 @@ putSequence (ContractionTableOffset offset) {
   return putCells(sequence+1, *sequence);
 }
 
+#ifdef HAVE_ICU
+static inline ULineBreak
+getLineBreakType (wchar_t character) {
+  return u_getIntPropertyValue(character, UCHAR_LINE_BREAK);
+}
+#endif /* HAVE_ICU */
+
 static void
 findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *characters, size_t length) {
 #ifdef HAVE_ICU
@@ -537,20 +544,16 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
    */
 
   if (length > 0) {
-    ULineBreak lineBreakTypes[length];
+    ULineBreak after = getLineBreakType(characters[0]);
+    ULineBreak before = U_LB_SPACE;
+    ULineBreak previous = before;
 
     /* LB1: Assign a line breaking class to each code point of the input.
      */
-    {
-      int i;
-      for (i=0; i<length; i+=1) {
-        lineBreakTypes[i] = u_getIntPropertyValue(characters[i], UCHAR_LINE_BREAK);
-      }
-    }
 
     /* LB10: Treat any remaining combining mark as AL.
      */
-    if (lineBreakTypes[0] == U_LB_COMBINING_MARK) lineBreakTypes[0] = U_LB_ALPHABETIC;
+    if (after == U_LB_COMBINING_MARK) after = U_LB_ALPHABETIC;
 
     /* LB2: Never break at the start of text.
      * sot ×
@@ -563,9 +566,32 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
       int index = 0;
 
       while (index < limit) {
-        ULineBreak before = lineBreakTypes[index];
-        ULineBreak after = lineBreakTypes[++index];
-        unsigned char *opportunity = &opportunities[index];
+        unsigned char *opportunity = &opportunities[++index];
+
+        previous = before;
+        before = after;
+        after = getLineBreakType(characters[index]);
+
+        /* LB9  Do not break a combining character sequence.
+         */
+        if (after == U_LB_COMBINING_MARK) {
+          /* LB10: Treat any remaining combining mark as AL.
+           */
+          if ((before == U_LB_MANDATORY_BREAK) ||
+              (before == U_LB_CARRIAGE_RETURN) ||
+              (before == U_LB_LINE_FEED) ||
+              (before == U_LB_NEXT_LINE) ||
+              (before == U_LB_SPACE) ||
+              (before == U_LB_ZWSPACE)) {
+            before = U_LB_ALPHABETIC;
+          }
+
+          /* treat it as if it has the line breaking class of the base character
+           */
+          after = before;
+          *opportunity = 0;
+          continue;
+        }
 
         if (before != U_LB_SPACE) indirect = before;
 
@@ -619,27 +645,6 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
          */
         if (before == U_LB_ZWSPACE) {
           *opportunity = 1;
-          continue;
-        }
-
-        /* LB9  Do not break a combining character sequence.
-         */
-        if (after == U_LB_COMBINING_MARK) {
-          /* LB10: Treat any remaining combining mark as AL.
-           */
-          if ((before == U_LB_MANDATORY_BREAK) ||
-              (before == U_LB_CARRIAGE_RETURN) ||
-              (before == U_LB_LINE_FEED) ||
-              (before == U_LB_NEXT_LINE) ||
-              (before == U_LB_SPACE) ||
-              (before == U_LB_ZWSPACE)) {
-            before = U_LB_ALPHABETIC;
-          }
-
-          /* treat it as if it has the line breaking class of the base character
-           */
-          lineBreakTypes[index] = before;
-          *opportunity = 0;
           continue;
         }
 
@@ -904,11 +909,11 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
         }
 
         /* Unix options begin with a minus sign. */
-        if ((before == U_LB_HYPHEN) && (after != U_LB_SPACE)) {
-          if ((index >= 2) && (lineBreakTypes[index-2] == U_LB_SPACE)) {
-            *opportunity = 0;
-            continue;
-          }
+        if ((before == U_LB_HYPHEN) &&
+            (after != U_LB_SPACE) &&
+            (previous == U_LB_SPACE)) {
+          *opportunity = 0;
+          continue;
         }
 
         /* LB31: Break everywhere else.
