@@ -521,11 +521,6 @@ putSequence (ContractionTableOffset offset) {
 }
 
 #ifdef HAVE_ICU
-static inline ULineBreak
-getLineBreakType (wchar_t character) {
-  return u_getIntPropertyValue(character, UCHAR_LINE_BREAK);
-}
-
 typedef struct {
   unsigned int index;
   ULineBreak after;
@@ -567,7 +562,8 @@ findLineBreakOpportunities (
 
     lbo->previous = lbo->before;
     lbo->before = lbo->after;
-    lbo->after = getLineBreakType(characters[lbo->index++]);
+    lbo->after = u_getIntPropertyValue(characters[lbo->index], UCHAR_LINE_BREAK);
+    lbo->index += 1;
 
     /* LB9  Do not break a combining character sequence.
      */
