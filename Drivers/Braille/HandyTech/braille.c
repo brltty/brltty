@@ -1527,6 +1527,18 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
                 switch (packet.fields.data.extended.type) {
+                  case HT_EXTPKT_Confirmation:
+                    switch (bytes[0]) {
+                      case HT_PKT_NAK:
+                        updateRequired = 1;
+                      case HT_PKT_ACK:
+                        return EOF;
+
+                      default:
+                        break;
+                    }
+                    break;
+
                   case HT_EXTPKT_Key:
                     if (model->interpretByte(bytes[0])) {
                       updateCells(brl);
