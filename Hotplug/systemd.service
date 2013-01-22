@@ -24,6 +24,6 @@ OOMScoreAdjust=-900
 
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=basic.target
 
 
