@@ -109,10 +109,16 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parse.h"
 #include "timing.h"
 #include "ascii.h"
 #include "hidkeys.h"
 #include "brltty.h"
+
+typedef enum {
+  PARM_SECONDARY_ROUTING_KEY_EMULATION
+} DriverParameter;
+#define BRLPARMS "secondaryroutingkeyemulation"
 
 #define BRL_STATUS_FIELDS sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter
 #define BRL_HAVE_STATUS_CELLS
@@ -955,6 +961,7 @@ static const ProtocolOperations protocol1Operations = {
 static uint32_t firmwareVersion2;
 static unsigned char splitOffset2;
 static HidKeyboardPacket hidKeyboardPacket2;
+static unsigned int secondaryRoutingKeyEmulation2;
 
 static void
 initializeVariables2 (void) {
@@ -1032,6 +1039,16 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
     case 0X74: { /* routing key */
       unsigned char secondary = key & 0X80;
       key &= ~secondary;
+
+      /* 
+       * The 6xx series don't have a second row of routing keys but
+       * emulate them (in order to aid compatibility with the 5xx series)
+       * using an annoying press delay.  It is adviseable to turn this
+       * functionality off in the device's menu, but, in case it's left
+       * on, we just interpret these keys as primary routing keys by
+       * default, unless overriden by a driver parameter.
+       */
+      if (!secondaryRoutingKeyEmulation2) secondary = 0;
 
       if (firmwareVersion2 < 0X011102)
         if (key >= splitOffset2)
@@ -1697,6 +1714,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   /* Open the Braille display device */
   if (io->openPort(device)) {
     protocol->initializeVariables();
+
+    secondaryRoutingKeyEmulation2 = 0;
+    if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
+      if (!validateYesNo(&secondaryRoutingKeyEmulation2, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+        logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
+                   parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
 
     if (protocol->detectModel(brl)) {
       makeOutputTable(dotsTable_ISO11548_1);
