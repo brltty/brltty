@@ -39,9 +39,9 @@ bind ETouchLeftRear+ETouchRightFront LEARN
 bind ETouchLeftFront+ETouchRightRear INFO
 bind ETouchLeftFront+ETouchRightFront PREFMENU
 
-bind ThumbUp+ThumbDown CSRTRK
-bind ThumbHome HOME
-bind ETouchLeftRear+ETouchLeftFront BACK
+bind ThumbUp+!ThumbDown CSRTRK+on
+bind ThumbDown+!ThumbUp CSRTRK+off
+bind ThumbHome RETURN
 
 bind ThumbUp LNUP
 bind ThumbDown LNDN
