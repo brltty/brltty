@@ -79,12 +79,12 @@ bind ETouchRightFront+RoutingKey1 COPY_RECT
 bind ETouchRightRear+ETouchRightFront PASTE
 
 bind !RoutingKey2 DESCCHAR
-bind ThumbUp+!RoutingKey2 PRINDENT
-bind ThumbDown+!RoutingKey2 NXINDENT
-bind ThumbLeft+!RoutingKey2 PRDIFCHAR
-bind ThumbRight+!RoutingKey2 NXDIFCHAR
 
-bind ThumbHome+!RoutingKey1 SETLEFT
+bind ThumbLeft+RoutingKey1 PRINDENT
+bind ThumbRight+RoutingKey1 NXINDENT
+bind ThumbUp+RoutingKey1 PRDIFCHAR
+bind ThumbDown+RoutingKey1 NXDIFCHAR
+bind ThumbHome+RoutingKey1 SETLEFT
 
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
