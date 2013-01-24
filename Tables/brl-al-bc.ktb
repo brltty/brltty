@@ -42,6 +42,7 @@ bind ETouchLeftFront+ETouchRightFront PREFMENU
 bind ThumbUp+!ThumbDown CSRTRK+on
 bind ThumbDown+!ThumbUp CSRTRK+off
 bind ThumbHome RETURN
+bind ThumbLeft+ThumbRight CSRJMP_VERT
 
 bind ThumbUp LNUP
 bind ThumbDown LNDN
@@ -69,14 +70,13 @@ bind ETouchLeftFront CHRLT
 bind ETouchRightFront CHRRT
 
 bind RoutingKey1 ROUTE
-bind ETouchRightRear+ETouchRightFront CSRJMP_VERT
 
 bind RoutingKey1+!RoutingKey1 CLIP_COPY
-bind ThumbLeft+!RoutingKey1 CLIP_NEW
-bind ThumbUp+!RoutingKey1 CLIP_ADD
-bind ThumbDown+!RoutingKey1 COPY_RECT
-bind ThumbRight+!RoutingKey1 COPY_LINE
-bind ThumbLeft+ThumbRight PASTE
+bind ETouchLeftRear+RoutingKey1 CLIP_NEW
+bind ETouchLeftFront+RoutingKey1 CLIP_ADD
+bind ETouchRightRear+RoutingKey1 COPY_LINE
+bind ETouchRightFront+RoutingKey1 COPY_RECT
+bind ETouchRightRear+ETouchRightFront PASTE
 
 bind !RoutingKey2 DESCCHAR
 bind ThumbUp+!RoutingKey2 PRINDENT
