@@ -71,14 +71,13 @@ bind ETouchRightFront CHRRT
 
 bind RoutingKey1 ROUTE
 
+bind ETouchLeftRear+ETouchLeftFront+RoutingKey1 DESCCHAR
 bind RoutingKey1+!RoutingKey1 CLIP_COPY
 bind ETouchLeftRear+RoutingKey1 CLIP_NEW
 bind ETouchLeftFront+RoutingKey1 CLIP_ADD
 bind ETouchRightRear+RoutingKey1 COPY_LINE
 bind ETouchRightFront+RoutingKey1 COPY_RECT
 bind ETouchRightRear+ETouchRightFront PASTE
-
-bind !RoutingKey2 DESCCHAR
 
 bind ThumbLeft+RoutingKey1 PRINDENT
 bind ThumbRight+RoutingKey1 NXINDENT
