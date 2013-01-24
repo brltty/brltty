@@ -59,10 +59,10 @@ bind ThumbLeft+ThumbDown BOT_LEFT
 bind ThumbRight+ThumbUp ATTRUP
 bind ThumbRight+ThumbDown ATTRDN
 
-bind ThumbHome+ETouchLeftRear PRPROMPT
-bind ThumbHome+ETouchLeftFront NXPROMPT
-bind ThumbHome+ETouchRightRear PRPGRPH
-bind ThumbHome+ETouchRightFront NXPGRPH
+bind ETouchLeftRear+ThumbUp PRPROMPT
+bind ETouchLeftRear+ThumbDown NXPROMPT
+bind ETouchLeftFront+ThumbUp PRPGRPH
+bind ETouchLeftFront+ThumbDown NXPGRPH
 
 bind ETouchLeftRear LNBEG
 bind ETouchRightRear LNEND
@@ -88,8 +88,8 @@ bind ThumbHome+RoutingKey1 SETLEFT
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
 bind ThumbLeft+ETouchRightFront SIXDOTS
-bind ThumbUp+ETouchLeftRear FREEZE
-bind ThumbUp+ETouchLeftFront DISPMD
+bind ThumbRight+ETouchLeftRear FREEZE
+bind ThumbRight+ETouchLeftFront DISPMD
 
 bind SmartpadLeft KEY_CURSOR_LEFT
 bind SmartpadRight KEY_CURSOR_RIGHT
