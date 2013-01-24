@@ -146,7 +146,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
   int chordsRequested = context == KTB_CTX_CHORDS;
   const KeyContext *ctx;
 
-  if (chordsRequested) context = table->persistentContext;
+  if (chordsRequested) context = table->context.persistent;
 
   if ((ctx = getKeyContext(table, context))) {
     int keyboardCommand = BRL_BLK_PASSDOTS;
@@ -214,12 +214,12 @@ processCommand (KeyTable *table, int command) {
 
         if (ctx) {
           command = BRL_CMD_NOOP;
-          table->currentContext = context;
+          table->context.next = context;
 
           if (isTemporaryKeyContext(table, ctx)) {
             command |= BRL_FLG_TOGGLE_ON;
           } else {
-            table->persistentContext = context;
+            table->context.persistent = context;
             command |= BRL_FLG_TOGGLE_OFF;
           }
         }
@@ -254,8 +254,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   int command = EOF;
   const HotkeyEntry *hotkey;
 
-  if (context == KTB_CTX_DEFAULT) context = table->currentContext;
-  if (press) table->currentContext = table->persistentContext;
+  if (press && !table->pressedCount) {
+    table->context.current = table->context.next;
+    table->context.next = table->context.persistent;
+  }
+  if (context == KTB_CTX_DEFAULT) context = table->context.current;
 
   if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
     const KeyValue anyKey = {

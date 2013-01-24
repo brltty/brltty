@@ -114,8 +114,11 @@ struct KeyTableStruct {
   KeyContext *keyContextTable;
   unsigned int keyContextCount;
 
-  unsigned char persistentContext;
-  unsigned char currentContext;
+  struct {
+    unsigned char persistent;
+    unsigned char next;
+    unsigned char current;
+  } context;
 
   KeyValue *pressedKeys;
   unsigned int pressedSize;

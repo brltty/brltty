@@ -1066,7 +1066,7 @@ processKeyTableLine (DataFile *file, void *data) {
 
 void
 resetKeyTable (KeyTable *table) {
-  table->currentContext = table->persistentContext = KTB_CTX_DEFAULT;
+  table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
   table->pressedCount = 0;
   table->command = EOF;
   table->immediate = 0;
