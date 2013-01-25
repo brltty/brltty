@@ -32,8 +32,38 @@
 
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
-#include "braille.h"
+#include "brldefs-bn.h"
 #include "ttb.h"
+
+BEGIN_KEY_NAME_TABLE(all)
+  KEY_NAME_ENTRY(BN_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(BN_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(BN_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(BN_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(BN_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(BN_KEY_Dot6, "Dot6"),
+
+  KEY_NAME_ENTRY(BN_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(BN_KEY_Backspace, "Backspace"),
+  KEY_NAME_ENTRY(BN_KEY_Enter, "Enter"),
+
+  KEY_NAME_ENTRY(BN_KEY_Previous, "Previous"),
+  KEY_NAME_ENTRY(BN_KEY_Back, "Back"),
+  KEY_NAME_ENTRY(BN_KEY_Advance, "Advance"),
+  KEY_NAME_ENTRY(BN_KEY_Next, "Next"),
+
+  KEY_SET_ENTRY(BN_SET_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(all)
+  KEY_NAME_TABLE(all),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(all)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(all),
+END_KEY_TABLE_LIST
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
@@ -71,21 +101,6 @@ static int statusCells;
 static unsigned char *dataArea;
 static int dataCells;
 
-typedef enum {
-  KBM_INPUT,
-  KBM_INPUT_7,
-  KBM_INPUT_78,
-  KBM_INPUT_8,
-  KBM_NAVIGATE
-} KeyboardMode;
-static KeyboardMode persistentKeyboardMode;
-static KeyboardMode temporaryKeyboardMode;
-static KeyboardMode currentKeyboardMode;
-
-static unsigned int persistentRoutingOperation;
-static unsigned int temporaryRoutingOperation;
-static unsigned int currentRoutingOperation;
-
 static int
 readBytes (unsigned char *buffer, int count, int wait) {
   const int timeout = 100;
@@ -118,20 +133,20 @@ readPacket (unsigned char *packet, int size) {
     if (offset < size) {
       if (offset == 0) {
         switch (byte) {
-          case BNI_DISPLAY:
+          case BN_RSP_DISPLAY:
             length = 1;
             break;
 
-          case BNI_CHARACTER:
-          case BNI_SPACE:
-          case BNI_BACKSPACE:
-          case BNI_ENTER:
-          case BNI_THUMB:
-          case BNI_ROUTE:
+          case BN_RSP_CHARACTER:
+          case BN_RSP_SPACE:
+          case BN_RSP_BACKSPACE:
+          case BN_RSP_ENTER:
+          case BN_RSP_THUMB:
+          case BN_RSP_ROUTE:
             length = 2;
             break;
 
-          case BNI_DESCRIBE:
+          case BN_RSP_DESCRIBE:
             length = 3;
             break;
 
@@ -172,10 +187,10 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
   unsigned char buffer[1 + (size * 2)];
   unsigned char *byte = buffer;
 
-  *byte++ = BNO_BEGIN;
+  *byte++ = BN_REQ_BEGIN;
 
   while (size > 0) {
-    if ((*byte++ = *packet++) == BNO_BEGIN) *byte++ = BNO_BEGIN;
+    if ((*byte++ = *packet++) == BN_REQ_BEGIN) *byte++ = BN_REQ_BEGIN;
     --size;
   }
 
@@ -196,23 +211,10 @@ refreshCells (BrailleDisplay *brl) {
   unsigned char buffer[1 + cellCount];
   unsigned char *byte = buffer;
 
-  *byte++ = BNO_WRITE;
+  *byte++ = BN_REQ_WRITE;
   byte = translateOutputCells(byte, cellBuffer, cellCount);
 
   return writePacket(brl, buffer, byte-buffer);
-}
-
-static void
-writePrompt (BrailleDisplay *brl, const char *prompt) {
-  int length = strlen(prompt);
-  int index = 0;
-  if (length > dataCells) length = dataCells;
-  while (index < length) {
-    dataArea[index] = convertCharacterToDots(textTable, (unsigned char)prompt[index]);
-     ++index;
-  }
-  while (index < dataCells) dataArea[index++] = 0;
-  refreshCells(brl);
 }
 
 static unsigned char
@@ -221,43 +223,6 @@ getByte (void) {
   while (!serialAwaitInput(serialDevice, 1000000000));
   serialReadData(serialDevice, &byte, 1, 0, 0);
   return byte;
-}
-
-static wchar_t
-getCharacter (BrailleDisplay *brl) {
-  for (;;) {
-    switch (getByte()) {
-      default:
-        break;
-      case BNI_CHARACTER:
-        return convertDotsToCharacter(textTable, translateInputCell(getByte()));
-      case BNI_SPACE:
-        switch (getByte()) {
-          default:
-            break;
-          case BNC_SPACE:
-            return WC_C(' ');
-        }
-        break;
-      case BNI_BACKSPACE:
-        switch (getByte() & 0X3F) {
-          default:
-            break;
-          case BNC_SPACE:
-            return WC_C('\b');
-        }
-        break;
-      case BNI_ENTER:
-        switch (getByte()) {
-          default:
-            break;
-          case BNC_SPACE:
-            return WC_C('\r');
-        }
-        break;
-    }
-    refreshCells(brl);
-  }
 }
 
 static int
@@ -343,12 +308,12 @@ writeVisualDisplay (unsigned char c) {
 }
 
 static int
-visualDisplay (BrailleDisplay *brl, unsigned char byte, KeyTableCommandContext context) {
+doVisualDisplay (void) {
   int vt = getVirtualTerminal();
   const unsigned char end[] = {ESC, 0};
   unsigned int state = 0;
   openVisualDisplay();
-  writeVisualDisplay(BNI_DISPLAY);
+  writeVisualDisplay(BN_RSP_DISPLAY);
   for (;;) {
     unsigned char character = getByte();
     if (character == end[state]) {
@@ -381,25 +346,31 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(serialDevice, serialBaud)) {
-      static const unsigned char request[] = {BNO_DESCRIBE};
+      static const unsigned char request[] = {BN_REQ_DESCRIBE};
       charactersPerSecond = serialBaud / 10;
       if (writePacket(brl, request, sizeof(request)) != -1) {
         while (serialAwaitInput(serialDevice, 100)) {
           ResponsePacket response;
           int size = getPacket(&response);
           if (size) {
-            if (response.data.code == BNI_DESCRIBE) {
+            if (response.data.code == BN_RSP_DESCRIBE) {
               statusCells = response.data.values.description.statusCells;
               brl->textColumns = response.data.values.description.textCells;
               brl->textRows = 1;
-              brl->keyBindings = "keys";
 
               if ((statusCells == 5) && (brl->textColumns == 30)) {
                 statusCells -= 2;
                 brl->textColumns += 2;
               }
+
               dataCells = brl->textColumns * brl->textRows;
               cellCount = statusCells + dataCells;
+
+              {
+                const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+                brl->keyBindings = ktd->bindings;
+                brl->keyNameTables = ktd->names;
+              }
 
               makeOutputTable(dotsTable_ISO11548_1);
               makeInputTable();
@@ -409,10 +380,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 statusArea = cellBuffer;
                 dataArea = statusArea + statusCells;
                 refreshCells(brl);
-                persistentKeyboardMode = KBM_NAVIGATE;
-                temporaryKeyboardMode = persistentKeyboardMode;
-                persistentRoutingOperation = BRL_BLK_ROUTE;
-                temporaryRoutingOperation = persistentRoutingOperation;
                 return 1;
               } else {
                 logSystemError("cell buffer allocation");
@@ -465,490 +432,58 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-getDecimalInteger (BrailleDisplay *brl, unsigned int *integer, unsigned int width, const char *description) {
-  char buffer[width + 1];
-  memset(buffer, '0', width);
-  buffer[width] = 0;
-  for (;;) {
-    wchar_t character;
-    char prompt[0X40];
-    snprintf(prompt, sizeof(prompt), "%s: %s", description, buffer);
-    writePrompt(brl, prompt);
-    switch ((character = getCharacter(brl))) {
-      default:
-        continue;
-      case WC_C('\r'):
-        *integer = atoi(buffer);
-        return 1;
-      case '\b':
-        return 0;
-      case WC_C('0'):
-      case WC_C('1'):
-      case WC_C('2'):
-      case WC_C('3'):
-      case WC_C('4'):
-      case WC_C('5'):
-      case WC_C('6'):
-      case WC_C('7'):
-      case WC_C('8'):
-      case WC_C('9'):
-        memmove(buffer, buffer+1, width-1);
-        buffer[width-1] = character;
-        break;
-    }
-  }
-}
-
-static int
-getHexadecimalCharacter (BrailleDisplay *brl, unsigned char *character) {
-  *character = 0X00;
-  for (;;) {
-    unsigned char digit;
-    char prompt[0X40];
-    snprintf(prompt, sizeof(prompt), "hex char: %2.2x %c", *character, *character);
-    writePrompt(brl, prompt);
-    switch (getCharacter(brl)) {
-      default:
-        continue;
-      case WC_C('\r'):
-        return 1;
-      case WC_C('\b'):
-        return 0;
-      case WC_C('0'):
-        digit = 0X0;
-        break;
-      case WC_C('1'):
-        digit = 0X1;
-        break;
-      case WC_C('2'):
-        digit = 0X2;
-        break;
-      case WC_C('3'):
-        digit = 0X3;
-        break;
-      case WC_C('4'):
-        digit = 0X4;
-        break;
-      case WC_C('5'):
-        digit = 0X5;
-        break;
-      case WC_C('6'):
-        digit = 0X6;
-        break;
-      case WC_C('7'):
-        digit = 0X7;
-        break;
-      case WC_C('8'):
-        digit = 0X8;
-        break;
-      case WC_C('9'):
-        digit = 0X9;
-        break;
-      case WC_C('a'):
-        digit = 0XA;
-        break;
-      case WC_C('b'):
-        digit = 0XB;
-        break;
-      case WC_C('c'):
-        digit = 0XC;
-        break;
-      case WC_C('d'):
-        digit = 0XD;
-        break;
-      case WC_C('e'):
-        digit = 0XE;
-        break;
-      case WC_C('f'):
-        digit = 0XF;
-        break;
-    }
-    *character = (*character << 4) | digit;
-  }
-}
-
-static int
-getFunctionKey (BrailleDisplay *brl) {
-  unsigned int keyNumber;
-  if (getDecimalInteger(brl, &keyNumber, 2, "function key")) {
-    if (!keyNumber) keyNumber = 0X100 - BRL_KEY_FUNCTION;
-    return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + (keyNumber - 1);
-  }
-  return EOF;
-}
-
-static int
-interpretNavigation (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
-  switch (dots) {
-    default:
-      break;
-    case BND_0:
-      return BRL_CMD_HOME;
-    case (BND_1):
-      return BRL_CMD_CHRLT;
-    case (BND_1 | BND_2):
-      return BRL_CMD_HWINLT;
-    case (BND_2):
-      return BRL_CMD_FWINLT;
-    case (BND_2 | BND_3):
-      return BRL_CMD_FWINLTSKIP;
-    case (BND_3):
-      return BRL_CMD_LNBEG;
-    case (BND_1 | BND_3):
-      return BRL_CMD_LNUP;
-    case (BND_1 | BND_2 | BND_3):
-      return BRL_CMD_TOP_LEFT;
-    case (BND_4):
-      return BRL_CMD_CHRRT;
-    case (BND_4 | BND_5):
-      return BRL_CMD_HWINRT;
-    case (BND_5):
-      return BRL_CMD_FWINRT;
-    case (BND_5 | BND_6):
-      return BRL_CMD_FWINRTSKIP;
-    case (BND_6):
-      return BRL_CMD_LNEND;
-    case (BND_4 | BND_6):
-      return BRL_CMD_LNDN;
-    case (BND_4 | BND_5 | BND_6):
-      return BRL_CMD_BOT_LEFT;
-    case (BND_1 | BND_4):
-      return BRL_CMD_TOP;
-    case (BND_2 | BND_5):
-      return BRL_CMD_HOME;
-    case (BND_3 | BND_6):
-      return BRL_CMD_BOT;
-    case (BND_1 | BND_4 | BND_5):
-      return BRL_CMD_PRDIFLN;
-    case (BND_2 | BND_5 | BND_6):
-      return BRL_CMD_NXDIFLN;
-    case (BND_1 | BND_2 | BND_4):
-      return BRL_CMD_PRSEARCH;
-    case (BND_2 | BND_3 | BND_5):
-      return BRL_CMD_NXSEARCH;
-    case (BND_1 | BND_2 | BND_5):
-      return BRL_CMD_ATTRUP;
-    case (BND_2 | BND_3 | BND_6):
-      return BRL_CMD_ATTRDN;
-    case (BND_2 | BND_4):
-      temporaryRoutingOperation = BRL_BLK_PRINDENT;
-      return BRL_CMD_NOOP;
-    case (BND_3 | BND_5):
-      temporaryRoutingOperation = BRL_BLK_NXINDENT;
-      return BRL_CMD_NOOP;
-    case (BND_2 | BND_4 | BND_5):
-      return BRL_CMD_WINUP;
-    case (BND_3 | BND_5 | BND_6):
-      return BRL_CMD_WINDN;
-  }
-  return EOF;
-}
-
-static int
-interpretCharacter (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
-  int mask = 0X00;
-  switch (currentKeyboardMode) {
-    case KBM_NAVIGATE:
-      return interpretNavigation(brl, dots, context);
-    case KBM_INPUT:
-      break;
-    case KBM_INPUT_7:
-      mask |= 0X40;
-      break;
-    case KBM_INPUT_78:
-      mask |= 0XC0;
-      break;
-    case KBM_INPUT_8:
-      mask |= 0X80;
-      break;
-  }
-  return BRL_BLK_PASSDOTS + (translateInputCell(dots) | mask);
-}
-
-static int
-interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
-  if (context == KTB_CTX_CHORDS)
-    return BRL_BLK_PASSDOTS | translateInputCell(dots) | BRL_DOTC;
-  switch (dots) {
-    default:
-    /* These are overridden by the Braille Note itself. */
-    case BNC_E: /* exit current operation */
-    case BNC_H: /* help for current operation */
-    case BNC_O: /* go to options menu */
-    case BNC_R: /* repeat current prompt */
-    case BNC_U: /* uppercase for computer braille */
-    case BNC_Z: /* exit current operation */
-    case BNC_PERCENT: /* acknowledge alarm */
-    case BNC_6: /* go to task menu */
-    case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6): /* go to main menu */
-      break;
-    case BNC_SPACE:
-      return interpretCharacter(brl, dots, context);
-    case BNC_C:
-      return BRL_CMD_PREFMENU;
-    case BNC_D:
-      return BRL_CMD_PREFLOAD;
-    case BNC_F:
-      return getFunctionKey(brl);
-    case BNC_L:
-      temporaryRoutingOperation = BRL_BLK_SETLEFT;
-      return BRL_CMD_NOOP;
-    case BNC_M:
-      return BRL_CMD_MUTE;
-    case BNC_N:
-      persistentKeyboardMode = KBM_NAVIGATE;
-      temporaryKeyboardMode = persistentKeyboardMode;
-      return BRL_CMD_NOOP;
-    case BNC_P:
-      return BRL_CMD_PASTE;
-    case BNC_S:
-      return BRL_CMD_SAY_LINE;
-    case BNC_V: {
-      unsigned int vt;
-      if (getDecimalInteger(brl, &vt, 2, "virt term num")) {
-        if (!vt) vt = 0X100;
-        return BRL_BLK_SWITCHVT + (vt - 1);
-      }
-      return EOF;
-    }
-    case BNC_W:
-      return BRL_CMD_PREFSAVE;
-    case BNC_X: {
-      unsigned char character;
-      if (!getHexadecimalCharacter(brl, &character)) return EOF;
-      return BRL_BLK_PASSCHAR + character;
-    }
-    case BNC_LPAREN:
-      temporaryRoutingOperation = BRL_BLK_CLIP_NEW;
-      return BRL_CMD_NOOP;
-    case BNC_LBRACE:
-      temporaryRoutingOperation = BRL_BLK_CLIP_ADD;
-      return BRL_CMD_NOOP;
-    case BNC_RPAREN:
-      temporaryRoutingOperation = BRL_BLK_COPY_RECT;
-      return BRL_CMD_NOOP;
-    case BNC_RBRACE:
-      temporaryRoutingOperation = BRL_BLK_COPY_LINE;
-      return BRL_CMD_NOOP;
-    case BNC_BAR:
-      return BRL_CMD_CSRJMP_VERT;
-    case BNC_QUESTION:
-      return BRL_CMD_LEARN;
-    case (BND_2 | BND_3 | BND_5 | BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_TAB;
-    case (BND_2 | BND_3):
-      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-    case (BND_5 | BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-    case (BND_2 | BND_5):
-      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-    case (BND_3 | BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-    case (BND_2):
-      return BRL_BLK_PASSKEY + BRL_KEY_HOME;
-    case (BND_3):
-      return BRL_BLK_PASSKEY + BRL_KEY_END;
-    case (BND_5):
-      return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-    case (BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
-    case (BND_3 | BND_5):
-      return BRL_BLK_PASSKEY + BRL_KEY_INSERT;
-    case (BND_2 | BND_5 | BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_DELETE;
-    case (BND_2 | BND_6):
-      return BRL_BLK_PASSKEY + BRL_KEY_ESCAPE;
-    case (BND_4):
-    case (BND_4 | BND_5):
-      temporaryKeyboardMode = KBM_INPUT;
-      goto kbmFinish;
-    case (BND_4 | BND_3):
-    case (BND_4 | BND_5 | BND_3):
-      temporaryKeyboardMode = KBM_INPUT_7;
-      goto kbmFinish;
-    case (BND_4 | BND_3 | BND_6):
-    case (BND_4 | BND_5 | BND_3 | BND_6):
-      temporaryKeyboardMode = KBM_INPUT_78;
-      goto kbmFinish;
-    case (BND_4 | BND_6):
-    case (BND_4 | BND_5 | BND_6):
-      temporaryKeyboardMode = KBM_INPUT_8;
-    kbmFinish:
-      if (dots & BND_5) persistentKeyboardMode = temporaryKeyboardMode;
-      return BRL_CMD_NOOP;
-  }
-  return EOF;
-}
-
-static int
-interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
-  switch (dots & 0X3F) {
-    default:
-      break;
-    case BNC_SPACE:
-      return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
-    case BNC_A:
-      return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_ON;
-    case BNC_B:
-      return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_OFF;
-    case BNC_D:
-      temporaryRoutingOperation = BRL_BLK_DESCCHAR;
-      return BRL_CMD_NOOP;
-    case BNC_F:
-      return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_OFF;
-    case BNC_H:
-      return BRL_CMD_HELP;
-    case BNC_I:
-      return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_OFF;
-    case BNC_M:
-      temporaryRoutingOperation = BRL_BLK_SETMARK;
-      return BRL_CMD_NOOP;
-    case BNC_S:
-      return BRL_CMD_INFO;
-    case BNC_T:
-      return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_OFF;
-    case BNC_V:
-      return BRL_CMD_SWITCHVT_PREV;
-    case BNC_W:
-      return BRL_CMD_SLIDEWIN | BRL_FLG_TOGGLE_OFF;
-    case BNC_6:
-      return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
-    case BNC_8:
-      return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
-    case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
-      return BRL_CMD_RESTARTSPEECH;
-  }
-  return EOF;
-}
-
-static int
-interpretEnterChord (BrailleDisplay *brl, unsigned char dots, KeyTableCommandContext context) {
-  switch (dots) {
-    default:
-    /* These are overridden by the Braille Note itself. */
-    case (BND_1): /* decrease speech volume */
-    case (BND_4): /* increase speech volume */
-    case (BND_2): /* decrease speech pitch */
-    case (BND_5): /* increase speech pitch */
-    case (BND_3): /* decrease speech speed */
-    case (BND_6): /* increase speech speed */
-    case BNC_D: /* display the date */
-    case BNC_H: /* hear punctuation in current prompt */
-    case BNC_S: /* spell name in current prompt */
-    case BNC_T: /* display the time */
-      break;
-    case BNC_SPACE:
-      return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-    case BNC_B:
-      return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_ON;
-    case BNC_F:
-      return BRL_CMD_FREEZE | BRL_FLG_TOGGLE_ON;
-    case BNC_I:
-      return BRL_CMD_SKPIDLNS | BRL_FLG_TOGGLE_ON;
-    case BNC_M:
-      temporaryRoutingOperation = BRL_BLK_GOTOMARK;
-      return BRL_CMD_NOOP;
-    case BNC_V:
-      return BRL_CMD_SWITCHVT_NEXT;
-    case BNC_W:
-      return BRL_CMD_SLIDEWIN | BRL_FLG_TOGGLE_ON;
-    case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6):
-      return BRL_CMD_RESTARTBRL;
-  }
-  return EOF;
-}
-
-static int
-interpretThumbKeys (BrailleDisplay *brl, unsigned char keys, KeyTableCommandContext context) {
-  switch (keys) {
-    default:
-      break;
-    case (BNT_PREVIOUS):
-      return BRL_CMD_FWINLT;
-    case (BNT_NEXT):
-      return BRL_CMD_FWINRT;
-    case (BNT_BACK):
-      return BRL_CMD_LNUP;
-    case (BNT_ADVANCE):
-      return BRL_CMD_LNDN;
-    case (BNT_PREVIOUS | BNT_BACK):
-      return BRL_CMD_LNBEG;
-    case (BNT_NEXT | BNT_ADVANCE):
-      return BRL_CMD_LNEND;
-    case (BNT_PREVIOUS | BNT_ADVANCE):
-      return BRL_CMD_TOP_LEFT;
-    case (BNT_PREVIOUS | BNT_NEXT):
-      return BRL_CMD_BOT_LEFT;
-    case (BNT_BACK | BNT_ADVANCE):
-      return BRL_CMD_BACK;
-    case (BNT_BACK | BNT_NEXT):
-      return BRL_CMD_CSRTRK;
-  }
-  return EOF;
-}
-
-static int
-interpretRoutingKey (BrailleDisplay *brl, unsigned char key, KeyTableCommandContext context) {
-  return currentRoutingOperation + key;
-}
-
-static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   ResponsePacket packet;
   int size;
 
   while ((size = getPacket(&packet))) {
-    int (*handler)(BrailleDisplay *, unsigned char, KeyTableCommandContext);
-    unsigned char data;
-
     switch (packet.data.code) {
-      case BNI_CHARACTER:
-        handler = interpretCharacter;
-        data = packet.data.values.dotKeys;
+      case BN_RSP_ROUTE:
+        enqueueKey(BN_SET_RoutingKeys, packet.data.values.routingKey);
         break;
 
-      case BNI_SPACE:
-        handler = interpretSpaceChord;
-        data = packet.data.values.dotKeys;
+      case BN_RSP_DISPLAY:
+        doVisualDisplay();
         break;
 
-      case BNI_BACKSPACE:
-        handler = interpretBackspaceChord;
-        data = packet.data.values.dotKeys;
-        break;
+      default: {
+        unsigned char set = BN_SET_NavigationKeys;
+        unsigned char keys = packet.data.values.dotKeys & 0X3F;
+        unsigned char base = BN_KEY_Dot1;
+        unsigned char modifier = 0;
 
-      case BNI_ENTER:
-        handler = interpretEnterChord;
-        data = packet.data.values.dotKeys;
-        break;
+        switch (packet.data.code) {
+          case BN_RSP_CHARACTER:
+            if (keys) break;
 
-      case BNI_THUMB:
-        handler = interpretThumbKeys;
-        data = packet.data.values.thumbKeys;
-        break;
+          case BN_RSP_SPACE:
+            modifier = BN_KEY_Space;
+            break;
 
-      case BNI_ROUTE:
-        handler = interpretRoutingKey;
-        data = packet.data.values.routingKey;
-        break;
+          case BN_RSP_BACKSPACE:
+            modifier = BN_KEY_Backspace;
+            break;
 
-      case BNI_DISPLAY:
-        handler = visualDisplay;
-        data = 0;
-        break;
+          case BN_RSP_ENTER:
+            modifier = BN_KEY_Enter;
+            break;
 
-      default:
-        logUnexpectedPacket(packet.bytes, size);
-        continue;
+          case BN_RSP_THUMB:
+            keys = packet.data.values.thumbKeys & 0X0F;
+            base = BN_KEY_Previous;
+            break;
+
+          default:
+            logUnexpectedPacket(packet.bytes, size);
+            continue;
+        }
+
+        if (modifier) enqueueKeyEvent(set, modifier, 1);
+        enqueueKeys(keys, set, base);
+        if (modifier) enqueueKeyEvent(set, modifier, 0);
+        break;
+      }
     }
-
-    currentKeyboardMode = temporaryKeyboardMode;
-    temporaryKeyboardMode = persistentKeyboardMode;
-
-    currentRoutingOperation = temporaryRoutingOperation;
-    temporaryRoutingOperation = persistentRoutingOperation;
-
-    return handler(brl, data, context);
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;

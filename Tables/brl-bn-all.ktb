@@ -1,0 +1,210 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2013 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Braille Note
+
+bind Previous FWINLT
+bind Next FWINRT
+bind Back LNUP
+bind Advance LNDN
+bind Previous+Back LNBEG
+bind Next+Advance LNEND
+bind Previous+Advance TOP_LEFT
+bind Previous+Next BOT_LEFT
+bind Back+Advance BACK
+bind Back+Next CSRTRK
+
+bind Dot1 CHRLT
+bind Dot1+Dot2 HWINLT
+bind Dot2 FWINLT
+bind Dot2+Dot3 FWINLTSKIP
+bind Dot3 LNBEG
+bind Dot1+Dot3 LNUP
+bind Dot1+Dot2+Dot3 TOP_LEFT
+bind Dot4 CHRRT
+bind Dot4+Dot5 HWINRT
+bind Dot5 FWINRT
+bind Dot5+Dot6 FWINRTSKIP
+bind Dot6 LNEND
+bind Dot4+Dot6 LNDN
+bind Dot4+Dot5+Dot6 BOT_LEFT
+bind Dot1+Dot4 TOP
+bind Dot2+Dot5 HOME
+bind Dot3+Dot6 BOT
+bind Dot1+Dot4+Dot5 PRDIFLN
+bind Dot2+Dot5+Dot6 NXDIFLN
+bind Dot1+Dot2+Dot4 PRSEARCH
+bind Dot2+Dot3+Dot5 NXSEARCH
+bind Dot1+Dot2+Dot5 ATTRUP
+bind Dot2+Dot3+Dot6 ATTRDN
+bind Dot2+Dot4 CONTEXT+17 # PRINDENT
+bind Dot3+Dot5 CONTEXT+18 # NXINDENT
+bind Dot2+Dot4+Dot5 WINUP
+bind Dot3+Dot5+Dot6 WINDN
+
+bind Space HOME
+bind Space+Dot1+Dot4+Dot6 NOOP # acknowledge alarm
+bind Space+Dot2+Dot3+Dot5 NOOP # go to task menu
+bind Space+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 NOOP # go to main menu
+bind Space+Dot1+Dot4 PREFMENU
+bind Space+Dot1+Dot4+Dot5 PREFLOAD
+bind Space+Dot1+Dot5 NOOP # exit current operation
+bind Space+Dot1+Dot2+Dot5 NOOP # help for current operation
+bind Space+Dot1+Dot2+Dot3 CONTEXT+10 # SETLEFT
+bind Space+Dot1+Dot3+Dot4 MUTE
+bind Space+Dot1+Dot3+Dot4+Dot5 CONTEXT+0 # navigation mode
+bind Space+Dot1+Dot3+Dot5 NOOP # go to options menu
+bind Space+Dot1+Dot2+Dot3+Dot4 PASTE
+bind Space+Dot1+Dot2+Dot3+Dot5 NOOP # repeat current prompt
+bind Space+Dot2+Dot3+Dot4 SAY_LINE
+bind Space+Dot1+Dot3+Dot6 NOOP # uppercase for computer braille
+bind Space+Dot2+Dot4+Dot5+Dot6 PREFSAVE
+bind Space+Dot1+Dot3+Dot5+Dot6 NOOP # exit current operation
+bind Space+Dot1+Dot2+Dot3+Dot5+Dot6 CONTEXT+11 # CLIP_NEW
+bind Space+Dot2+Dot4+Dot6 CONTEXT+12 # CLIP_ADD
+bind Space+Dot2+Dot3+Dot4+Dot5+Dot6 CONTEXT+13 # COPY_RECT
+bind Space+Dot1+Dot2+Dot4+Dot5+Dot6 CONTEXT+14 # COPY_LINE
+bind Space+Dot1+Dot2+Dot5+Dot6 CSRJMP_VERT
+bind Space+Dot1+Dot4+Dot5+Dot6 LEARN
+bind Space+Dot2+Dot3+Dot5+Dot6 KEY_TAB
+bind Space+Dot2+Dot3 KEY_CURSOR_LEFT
+bind Space+Dot5+Dot6 KEY_CURSOR_RIGHT
+bind Space+Dot2+Dot5 KEY_CURSOR_UP
+bind Space+Dot3+Dot6 KEY_CURSOR_DOWN
+bind Space+Dot2 KEY_HOME
+bind Space+Dot3 KEY_END
+bind Space+Dot5 KEY_PAGE_UP
+bind Space+Dot6 KEY_PAGE_DOWN
+bind Space+Dot3+Dot5 KEY_INSERT
+bind Space+Dot2+Dot5+Dot6 KEY_DELETE
+bind Space+Dot2+Dot6 KEY_ESCAPE
+
+bind Backspace KEY_BACKSPACE
+bind Backspace+Dot1 DISPMD+on
+bind Backspace+Dot1+Dot2 SKPBLNKWINS+off
+bind Backspace+Dot1+Dot4+Dot5 CONTEXT+9 # DESCCHAR
+bind Backspace+Dot1+Dot2+Dot5 HELP
+bind Backspace+Dot2+Dot4 SKPIDLNS+off
+bind Backspace+Dot1+Dot3+Dot4 CONTEXT+15 # SETMARK
+bind Backspace+Dot2+Dot3+Dot4 INFO
+bind Backspace+Dot2+Dot3+Dot4+Dot5 DISPMD+off
+bind Backspace+Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
+bind Backspace+Dot2+Dot4+Dot5+Dot6 SLIDEWIN+off
+bind Backspace+Dot2+Dot3+Dot5 SIXDOTS+on
+bind Backspace+Dot2+Dot3+Dot6 SIXDOTS+off
+bind Backspace+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 RESTARTSPEECH
+
+bind Enter KEY_ENTER
+bind Enter+Dot1 NOOP # decrease speech volume
+bind Enter+Dot4 NOOP # increase speech volume
+bind Enter+Dot2 NOOP # decrease speech pitch
+bind Enter+Dot5 NOOP # increase speech pitch
+bind Enter+Dot3 NOOP # decrease speech speed
+bind Enter+Dot6 NOOP # increase speech speed
+bind Enter+Dot1+Dot2 SKPBLNKWINS+on
+bind Enter+Dot1+Dot4+Dot5 NOOP # display the date
+bind Enter+Dot1+Dot2+Dot4 FREEZE
+bind Enter+Dot1+Dot2+Dot5 NOOP # hear punctuation in current prompt
+bind Enter+Dot2+Dot4 SKPIDLNS+on
+bind Enter+Dot1+Dot3+Dot4 CONTEXT+16 # GOTOMARK
+bind Enter+Dot2+Dot3+Dot4 NOOP # spell name in current prompt
+bind Enter+Dot2+Dot3+Dot4+Dot5 NOOP # display the time
+bind Enter+Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
+bind Enter+Dot2+Dot4+Dot5+Dot6 SLIDEWIN+on
+bind Enter+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 RESTARTBRL
+
+note To temporarily (for the next character) switch to an input mode,
+note use [4] together with combinations of [3] and ]6].
+note To permanently switch to an input mode,
+note use [45] together with combinations of [3] and ]6].
+note To turn on dot 7, add [3].  To turn on dot 8, add [6].
+note To switch back to (n)avigation mode, use space+[1345].
+
+hide on
+bind Space+Dot4 CONTEXT+1
+bind Space+Dot4+Dot5 CONTEXT+2
+bind Space+Dot4+Dot3 CONTEXT+3
+bind Space+Dot4+Dot5+Dot3 CONTEXT+4
+bind Space+Dot4+Dot6 CONTEXT+5
+bind Space+Dot4+Dot5+Dot6 CONTEXT+6
+bind Space+Dot4+Dot3+Dot6 CONTEXT+7
+bind Space+Dot4+Dot5+Dot3+Dot6 CONTEXT+8
+
+context 1
+include brl-bn-input.kti
+
+context 2 Input Mode
+include brl-bn-input.kti
+
+context 3
+include brl-bn-input.kti
+superimpose DOT7
+
+context 4 Input Mode (dot 7)
+include brl-bn-input.kti
+superimpose DOT7
+
+context 5
+include brl-bn-input.kti
+superimpose DOT8
+
+context 6 Input Mode (dot 8)
+include brl-bn-input.kti
+superimpose DOT8
+
+context 7
+include brl-bn-input.kti
+superimpose DOT7
+superimpose DOT8
+
+context 8 Input Mode (dots 7 and 8)
+include brl-bn-input.kti
+superimpose DOT7
+superimpose DOT8
+hide off
+
+context 9
+bind RoutingKey DESCCHAR
+
+context 10
+bind RoutingKey SETLEFT
+
+context 11
+bind RoutingKey CLIP_NEW
+
+context 12
+bind RoutingKey CLIP_ADD
+
+context 13
+bind RoutingKey COPY_RECT
+
+context 14
+bind RoutingKey COPY_LINE
+
+context 15
+bind RoutingKey SETMARK
+
+context 16
+bind RoutingKey GOTOMARK
+
+context 17
+bind RoutingKey PRINDENT
+
+context 18
+bind RoutingKey NXINDENT
+
