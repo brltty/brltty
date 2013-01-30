@@ -36,8 +36,6 @@
 #include "brl_driver.h"
 #include "brldefs-fs.h"
 
-#include "io_generic.h"
-
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
   KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),

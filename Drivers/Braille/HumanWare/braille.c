@@ -23,7 +23,6 @@
 
 #include "log.h"
 #include "ascii.h"
-#include "io_generic.h"
 
 #include "brl_driver.h"
 #include "brldefs-hw.h"

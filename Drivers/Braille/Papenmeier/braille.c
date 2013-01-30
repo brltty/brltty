@@ -44,7 +44,6 @@
 #include "bitfield.h"
 #include "timing.h"
 #include "ascii.h"
-#include "io_generic.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS

@@ -22,7 +22,6 @@
 #include <errno.h>
 
 #include "log.h"
-#include "io_generic.h"
 
 #include "brl_driver.h"
 #include "brldefs-xx.h"

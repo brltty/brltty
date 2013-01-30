@@ -40,7 +40,6 @@ typedef enum {
 #include "brl_driver.h"
 #include "parse.h"
 #include "timing.h"
-#include "io_generic.h"
 
 #include	"eu_protocol.h"
 

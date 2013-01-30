@@ -29,7 +29,6 @@
 
 #include "log.h"
 #include "device.h"
-#include "io_generic.h"
 
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"

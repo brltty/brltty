@@ -29,6 +29,9 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "system.h"
+#include "message.h"
+
 
 #define INTERNALSPEED 9600
 #define EXTERNALSPEED_EUROBRAILLE 9600
@@ -75,10 +78,6 @@ const iris_protocol iris_protocols[] = {
 
 #include "brl_driver.h"
 #include "brldefs-ir.h"
-
-#include "io_generic.h"
-#include "system.h"
-#include "message.h"
 
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(IR_KEY_L1, "L1"),
