@@ -29,6 +29,7 @@
 
 #include "log.h"
 #include "device.h"
+#include "io_generic.h"
 
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
@@ -65,10 +66,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
-#include "io_serial.h"
-static SerialDevice *serialDevice = NULL;
-static const unsigned int serialBaud = 38400;
-static unsigned int charactersPerSecond;
+static GioEndpoint *gioEndpoint = NULL;
 
 typedef union {
   unsigned char bytes[3];
@@ -102,22 +100,6 @@ static unsigned char *dataArea;
 static int dataCells;
 
 static int
-readBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = readBytes(byte, 1, wait);
-  if (count > 0) return 1;
-
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
-
-static int
 readPacket (unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
@@ -125,7 +107,7 @@ readPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    if (!readByte(&byte, (offset > 0))) {
+    if (!gioReadByte(gioEndpoint, &byte, (offset > 0))) {
       if (offset > 0) logPartialPacket(packet, offset);
       return 0;
     }
@@ -194,16 +176,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
     --size;
   }
 
-  {
-    int count = byte - buffer;
-    logOutputPacket(buffer, count);
-
-    {
-      int ok = serialWriteData(serialDevice, buffer, count) != -1;
-      if (ok) brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
-      return ok;
-    }
-  }
+  return writeBraillePacket(brl, gioEndpoint, buffer, byte-buffer);
 }
 
 static int
@@ -220,8 +193,8 @@ refreshCells (BrailleDisplay *brl) {
 static unsigned char
 getByte (void) {
   unsigned char byte;
-  while (!serialAwaitInput(serialDevice, 1000000000));
-  serialReadData(serialDevice, &byte, 1, 0, 0);
+  while (!gioAwaitInput(gioEndpoint, 1000000000));
+  gioReadByte(gioEndpoint, &byte, 0);
   return byte;
 }
 
@@ -338,69 +311,88 @@ doVisualDisplay (void) {
 }
 
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (!isSerialDevice(&device)) {
-     unsupportedDevice(device);
-     return 0;
+connectResource (const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 38400
+  };
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+
+  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    return 1;
   }
 
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, serialBaud)) {
-      static const unsigned char request[] = {BN_REQ_DESCRIBE};
-      charactersPerSecond = serialBaud / 10;
-      if (writePacket(brl, request, sizeof(request)) != -1) {
-        while (serialAwaitInput(serialDevice, 100)) {
-          ResponsePacket response;
-          int size = getPacket(&response);
-          if (size) {
-            if (response.data.code == BN_RSP_DESCRIBE) {
-              statusCells = response.data.values.description.statusCells;
-              brl->textColumns = response.data.values.description.textCells;
-              brl->textRows = 1;
+  return 0;
+}
 
-              if ((statusCells == 5) && (brl->textColumns == 30)) {
-                statusCells -= 2;
-                brl->textColumns += 2;
-              }
+static void
+disconnectResource (void) {
+  gioDisconnectResource(gioEndpoint);
+  gioEndpoint = NULL;
+}
 
-              dataCells = brl->textColumns * brl->textRows;
-              cellCount = statusCells + dataCells;
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if (connectResource(device)) {
+    static const unsigned char request[] = {BN_REQ_DESCRIBE};
 
-              {
-                const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-                brl->keyBindings = ktd->bindings;
-                brl->keyNameTables = ktd->names;
-              }
+    if (writePacket(brl, request, sizeof(request))) {
+      while (gioAwaitInput(gioEndpoint, 100)) {
+        ResponsePacket response;
+        int size = getPacket(&response);
 
-              makeOutputTable(dotsTable_ISO11548_1);
-              makeInputTable();
+        if (size) {
+          if (response.data.code == BN_RSP_DESCRIBE) {
+            statusCells = response.data.values.description.statusCells;
+            brl->textColumns = response.data.values.description.textCells;
+            brl->textRows = 1;
 
-              if ((cellBuffer = malloc(cellCount))) {
-                memset(cellBuffer, 0, cellCount);
-                statusArea = cellBuffer;
-                dataArea = statusArea + statusCells;
-                refreshCells(brl);
-                return 1;
-              } else {
-                logSystemError("cell buffer allocation");
-              }
-            } else {
-              logUnexpectedPacket(response.bytes, size);
+            if ((statusCells == 5) && (brl->textColumns == 30)) {
+              statusCells -= 2;
+              brl->textColumns += 2;
             }
+
+            dataCells = brl->textColumns * brl->textRows;
+            cellCount = statusCells + dataCells;
+
+            {
+              const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+              brl->keyBindings = ktd->bindings;
+              brl->keyNameTables = ktd->names;
+            }
+
+            makeOutputTable(dotsTable_ISO11548_1);
+            makeInputTable();
+
+            if ((cellBuffer = malloc(cellCount))) {
+              memset(cellBuffer, 0, cellCount);
+              statusArea = cellBuffer;
+              dataArea = statusArea + statusCells;
+              refreshCells(brl);
+              return 1;
+            } else {
+              logSystemError("cell buffer allocation");
+            }
+          } else {
+            logUnexpectedPacket(response.bytes, size);
           }
         }
       }
     }
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
+
+    disconnectResource();
   }
+
   return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  serialCloseDevice(serialDevice);
-  serialDevice = NULL;
+  disconnectResource();
 
   free(cellBuffer);
   cellBuffer = NULL;
