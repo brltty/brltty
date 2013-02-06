@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "timing.h"
 #include "device.h"
 #include "queue.h"
 #include "io_bluetooth.h"
@@ -167,7 +168,16 @@ bthOpenConnection (const char *address, uint8_t channel, int force) {
       }
 
       if (!alreadyTried) {
-        if ((connection->extension = bthConnect(connection->address, connection->channel))) return connection;
+        TimePeriod period;
+        startTimePeriod(&period, 2000);
+
+	while (1) {
+          if ((connection->extension = bthConnect(connection->address, connection->channel))) return connection;
+	  if (afterTimePeriod(&period, NULL)) break;
+	  if (errno != EBUSY) break;
+	  approximateDelay(100);
+	}
+
         bthRememberConnectError(connection->address, errno);
       }
     } else {
