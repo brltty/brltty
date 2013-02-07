@@ -708,7 +708,7 @@ PROGRAM_OBJECTS_FOR_BUILD = $(PROGRAM_OBJECTS:.$O=.$B) $(SYSTEM_OBJECT_FOR_BUILD
 TBL2HEX_OBJECTS = tbl2hex.$B $(PROGRAM_OBJECTS_FOR_BUILD) charset.$B charset_none.$B dataarea.$B datafile.$B hostcmd.$B hostcmd_none.$B lock.$B queue.$B ttb_compile.$B ttb_native.$B atb_compile.$B ctb_compile.$B
 
 tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
-	$(CC_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES_FOR_BUILD) $(LDLIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES_FOR_BUILD) $(LDLIBS_FOR_BUILD)
 
 ###############################################################################
 
