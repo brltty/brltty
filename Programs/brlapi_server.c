@@ -2523,7 +2523,7 @@ int api_flush(BrailleDisplay *brl) {
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
     }
-    if ((c->brlbufstate==TODISPLAY)) {
+    if (c->brlbufstate==TODISPLAY) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
