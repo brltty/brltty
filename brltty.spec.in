@@ -43,16 +43,9 @@ BuildRequires: binutils
 BuildRequires: ldconfig
 BuildRequires: /usr/bin/awk
 BuildRequires: glibc-devel
-
-BuildRequires: gcc-java
-
-BuildRequires: ocaml
-BuildRequires: ocaml-findlib
-
-BuildRequires: Cython
-
 BuildRequires: tcl
-BuildRequires: tcl-devel
+BuildRequires: libicu-devel
+BuildRequires: ncurses-devel
 
 AutoProv: no
 Provides: brlapi-server
@@ -114,6 +107,10 @@ Release: 1
 Group: System Environment/Daemons
 License: GPL
 
+Requires: espeak
+
+BuildRequires: espeak-devel
+
 AutoProv: no
 AutoReq: yes
 Requires: espeak
@@ -131,6 +128,8 @@ Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: GPL
+
+Requires: festival
 
 AutoProv: no
 AutoReq: yes
@@ -150,6 +149,10 @@ Release: 1
 Group: System Environment/Daemons
 License: GPL
 
+Requires: flite
+
+BuildRequires: flite-devel
+
 AutoProv: no
 AutoReq: yes
 Requires: flite
@@ -167,6 +170,10 @@ Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: GPL
+
+Requires: speech-dispatcher
+
+BuildRequires: speech-dispatcher-devel
 
 AutoProv: no
 AutoReq: yes
@@ -298,6 +305,8 @@ Release: 1
 Group: System Environment/Libraries
 License: LGPL
 
+BuildRequires: gcc-java
+
 AutoProv: no
 AutoReq: yes
 
@@ -315,6 +324,9 @@ Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
 License: LGPL
+
+BuildRequires: ocaml
+BuildRequires: ocaml-findlib
 
 AutoProv: no
 AutoReq: yes
@@ -334,6 +346,10 @@ Release: 1
 Group: System Environment/Libraries
 License: LGPL
 
+BuildRequires: python
+BuildRequires: python-devel
+BuildRequires: Cython
+
 AutoProv: no
 AutoReq: yes
 
@@ -351,6 +367,9 @@ Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
 License: LGPL
+
+BuildRequires: tcl
+BuildRequires: tcl-devel
 
 AutoProv: no
 AutoReq: yes
@@ -451,6 +470,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_bindir}/brltty-*
 %{_bindir}/vstp
 %doc %{_mandir}/man1/vstp.1.gz
+
+BuildRequires: ncurses-devel
 
 %files -n brlapi
 %defattr(-,root,root)
