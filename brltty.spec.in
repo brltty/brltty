@@ -90,6 +90,11 @@ Release: 1
 Group: System Environment/Daemons
 License: GPL
 
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: libX11-devel
+BuildRequires: libXt-devel
+BuildRequires: Xaw3d-devel
+
 AutoProv: no
 AutoReq: yes
 
@@ -400,6 +405,10 @@ Version: @api_release@
 Release: 1
 Group: Applications/System
 License: LGPL
+
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: libX11-devel
+BuildRequires: libXtst-devel
 
 AutoProv: no
 AutoReq: yes
