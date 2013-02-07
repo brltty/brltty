@@ -310,6 +310,25 @@ doVisualDisplay (void) {
 }
 
 static int
+writeIdentifyRequest (BrailleDisplay *brl) {
+  static const unsigned char request[] = {BN_REQ_DESCRIBE};
+
+  return writePacket(brl, request, sizeof(request));
+}
+
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readPacket(packet, size);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const ResponsePacket *response = packet;
+
+  return (response->data.code == BN_RSP_DESCRIBE)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
+static int
 connectResource (const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
@@ -337,49 +356,41 @@ disconnectResource (void) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(device)) {
-    static const unsigned char request[] = {BN_REQ_DESCRIBE};
+    ResponsePacket response;
 
-    if (writePacket(brl, request, sizeof(request))) {
-      while (gioAwaitInput(gioEndpoint, 100)) {
-        ResponsePacket response;
-        int size = getPacket(&response);
+    if (probeBrailleDisplay(brl, 0, gioEndpoint, 100,
+                              writeIdentifyRequest,
+                              readResponse, &response, sizeof(response),
+                              isIdentityResponse)) {
+      statusCells = response.data.values.description.statusCells;
+      brl->textColumns = response.data.values.description.textCells;
+      brl->textRows = 1;
 
-        if (size) {
-          if (response.data.code == BN_RSP_DESCRIBE) {
-            statusCells = response.data.values.description.statusCells;
-            brl->textColumns = response.data.values.description.textCells;
-            brl->textRows = 1;
+      if ((statusCells == 5) && (brl->textColumns == 30)) {
+        statusCells -= 2;
+        brl->textColumns += 2;
+      }
 
-            if ((statusCells == 5) && (brl->textColumns == 30)) {
-              statusCells -= 2;
-              brl->textColumns += 2;
-            }
+      dataCells = brl->textColumns * brl->textRows;
+      cellCount = statusCells + dataCells;
 
-            dataCells = brl->textColumns * brl->textRows;
-            cellCount = statusCells + dataCells;
+      {
+        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+        brl->keyBindings = ktd->bindings;
+        brl->keyNameTables = ktd->names;
+      }
 
-            {
-              const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-              brl->keyBindings = ktd->bindings;
-              brl->keyNameTables = ktd->names;
-            }
+      makeOutputTable(dotsTable_ISO11548_1);
+      makeInputTable();
 
-            makeOutputTable(dotsTable_ISO11548_1);
-            makeInputTable();
-
-            if ((cellBuffer = malloc(cellCount))) {
-              memset(cellBuffer, 0, cellCount);
-              statusArea = cellBuffer;
-              dataArea = statusArea + statusCells;
-              refreshCells(brl);
-              return 1;
-            } else {
-              logSystemError("cell buffer allocation");
-            }
-          } else {
-            logUnexpectedPacket(response.bytes, size);
-          }
-        }
+      if ((cellBuffer = malloc(cellCount))) {
+        memset(cellBuffer, 0, cellCount);
+        statusArea = cellBuffer;
+        dataArea = statusArea + statusCells;
+        refreshCells(brl);
+        return 1;
+      } else {
+        logSystemError("cell buffer allocation");
       }
     }
 
