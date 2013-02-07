@@ -34,6 +34,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _sysconfdir /etc
 
+Requires: libicu
+
 BuildRequires: autoconf >= 2.53
 BuildRequires: make
 BuildRequires: gcc
@@ -46,6 +48,8 @@ BuildRequires: glibc-devel
 BuildRequires: tcl
 BuildRequires: libicu-devel
 BuildRequires: ncurses-devel
+BuildRequires: linuxdoc-tools
+BuildRequires: doxygen
 
 AutoProv: no
 Provides: brlapi-server
@@ -193,6 +197,10 @@ Release: 1
 Group: System Environment/Daemons
 License: GPL
 
+Requires: at-spi
+
+BuildRequires: at-spi-devel
+
 AutoProv: no
 AutoReq: yes
 Requires: at-spi
@@ -211,6 +219,10 @@ Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: GPL
+
+Requires: dbus
+
+BuildRequires: at-spi2-core-devel
 
 AutoProv: no
 AutoReq: yes
