@@ -50,6 +50,7 @@ BuildRequires: libicu-devel
 BuildRequires: ncurses-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
+BuildRequires: bluez-libs-devel
 
 AutoProv: no
 Provides: brlapi-server
