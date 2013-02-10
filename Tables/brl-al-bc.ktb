@@ -63,6 +63,8 @@ bind ETouchLeftRear+ThumbUp PRPROMPT
 bind ETouchLeftRear+ThumbDown NXPROMPT
 bind ETouchLeftFront+ThumbUp PRPGRPH
 bind ETouchLeftFront+ThumbDown NXPGRPH
+bind ETouchRightRear+ThumbUp PRSEARCH
+bind ETouchRightRear+ThumbDown NXSEARCH
 
 bind ETouchLeftRear LNBEG
 bind ETouchRightRear LNEND
@@ -120,6 +122,9 @@ bind SmartpadF4+SmartpadRight SAY_FASTER
 bind SmartpadF4+SmartpadDown SAY_SOFTER
 bind SmartpadF4+SmartpadUp SAY_LOUDER
 bind SmartpadF4+SmartpadEnter AUTOSPEAK
+
+bind SmartpadF1+SmartpadF2+SmartpadEnter RESTARTBRL
+bind SmartpadF3+SmartpadF4+SmartpadEnter RESTARTSPEECH
 
 map Dot1 DOT1
 map Dot2 DOT2
