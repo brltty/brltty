@@ -99,6 +99,8 @@ bind SmartpadUp KEY_CURSOR_UP
 bind SmartpadDown KEY_CURSOR_DOWN
 bind SmartpadEnter PASTE
 
+bind SmartpadF2 TIME
+
 bind SmartpadF1+SmartpadLeft SWITCHVT_PREV
 bind SmartpadF1+SmartpadRight SWITCHVT_NEXT
 bind SmartpadF1+SmartpadEnter KEY_INSERT
