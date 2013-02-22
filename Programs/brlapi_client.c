@@ -441,7 +441,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
-      while ((handle->fileDescriptor = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+      while ((sockfd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,SECURITY_IMPERSONATION,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
@@ -460,7 +460,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 	brlapi_errno = BRLAPI_ERROR_LIBCERR;
 	goto out;
       }
-      if ((handle->fileDescriptor = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+      if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
         brlapi_errfun="socket";
         setSocketErrno();
         goto outlibc;
@@ -468,13 +468,14 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
       memcpy(sa.sun_path+lpath+1,port,lport+1);
-      if (connect(handle->fileDescriptor, (struct sockaddr *) &sa, sizeof(sa))<0) {
+      if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();
         goto outlibc;
       }
     }
 #endif /* __MINGW32__ */
+    handle->fileDescriptor = (FileDescriptor) sockfd;
   } else {
 #else /* PF_LOCAL */
   if (0) {} else {
