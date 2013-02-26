@@ -120,7 +120,7 @@ bthForgetConnectError (uint64_t bda) {
 static int
 bthParseAddress (uint64_t *bda, const char *address) {
   const unsigned int width = 8;
-  const unsigned long mask = (1L << width) - 1L;
+  const unsigned long mask = (1UL << width) - 1UL;
   int counter = BDA_SIZE;
   *bda = 0;
 
