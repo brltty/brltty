@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
+import android.os.Build;
 import android.util.Log;
 
 import android.bluetooth.BluetoothAdapter;
@@ -98,7 +99,18 @@ public class BluetoothConnection {
       }
     }
 
-    bluetoothDevice = bluetoothAdapter.getRemoteDevice(hardwareAddress);
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+      StringBuilder string = new StringBuilder();
+
+      for (byte octet : hardwareAddress) {
+        if (string.length() > 0) string.append(':');
+        string.append(String.format("%02X", octet));
+      }
+
+      bluetoothDevice = bluetoothAdapter.getRemoteDevice(string.toString());
+    } else {
+      bluetoothDevice = bluetoothAdapter.getRemoteDevice(hardwareAddress);
+    }
     bluetoothAddress = bluetoothDevice.getAddress();
 
     try {
