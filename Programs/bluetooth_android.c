@@ -52,7 +52,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
             if (setBlockingIo(bcx->inputPipe[0], 0)) {
               jobject localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda, channel, bcx->inputPipe[1]);
 
-              if (!clearJavaException(bcx->env, 0)) {
+              if (!clearJavaException(bcx->env, 1)) {
                 jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
 
                 (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
@@ -63,6 +63,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
                   return bcx;
                 } else {
                   logMallocError();
+                  clearJavaException(bcx->env, 0);
                 }
               }
             }
