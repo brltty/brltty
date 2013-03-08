@@ -1526,6 +1526,9 @@ BRLTTY_ARG_DRIVER([speech], [Speech])
 
 case "${host_os}"
 in
+   *android*)
+      BRLTTY_SCREEN_DRIVER([ad], [Android])
+      ;;
    linux*)
       BRLTTY_SCREEN_DRIVER([lx], [Linux])
       ;;
