@@ -36,6 +36,8 @@ public class ScreenDriver {
   public static void handleAccessibilityEvent (AccessibilityEvent event) {
     switch (event.getEventType()) {
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
         synchronized (eventLock) {
           latestEvent = event;
         }
@@ -98,5 +100,9 @@ public class ScreenDriver {
     while (textIndex < columnCount) {
       textBuffer[textIndex++] = (columnNumber < rowLength)? rowText.charAt(columnNumber++): ' ';
     }
+  }
+
+  static {
+    setCurrentText(null);
   }
 }

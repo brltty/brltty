@@ -53,13 +53,8 @@ public class BrailleService extends AccessibilityService {
 
   @Override
   public void onAccessibilityEvent (AccessibilityEvent event) {
-    Log.d(LOG_TAG, "braille accessibility event: " + event.getEventType());
+    Log.d(LOG_TAG, "accessibility event: " + event.getEventType() + "(" + event.toString() + ")");
     ScreenDriver.handleAccessibilityEvent(event);
-  }
-
-  @Override
-  protected boolean onGesture (int gesture) {
-    return false;
   }
 
   @Override

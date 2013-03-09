@@ -2,4 +2,5 @@
 
 <resources>
   <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY supports braille devices.</string>
 </resources>
