@@ -28,8 +28,8 @@
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
 
-static int screenRows;
-static int screenColumns;
+static jint screenRows;
+static jint screenColumns;
 
 static int
 findScreenDriverClass (void) {
@@ -54,7 +54,7 @@ describe_AndroidScreen (ScreenDescription *description) {
                              JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
       (*env)->CallStaticObjectMethod(env, screenDriverClass, method);
 
-      if (clearJavaException(env, 1)) {
+      if (!clearJavaException(env, 1)) {
         description->cols = screenColumns;
         description->rows = screenRows;
         description->posx = 0;
@@ -83,7 +83,7 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
       if (textBuffer) {
         (*env)->CallStaticObjectMethod(env, screenDriverClass, method, textBuffer, rowNumber, columnNumber);
 
-        if (clearJavaException(env, 1)) {
+        if (!clearJavaException(env, 1)) {
           jchar buffer[columnCount];
 
           (*env)->GetCharArrayRegion(env, textBuffer, 0, columnCount, buffer);
@@ -120,7 +120,7 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     int rowIndex;
 
     for (rowIndex=0; rowIndex<box->height; rowIndex+=1) {
-      if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;;
+      if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
     }
 
     return 1;
