@@ -815,28 +815,16 @@ trackSpeech (int index) {
 
 static void
 sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, size_t count, int immediate) {
-  unsigned char text[(count * UTF8_LEN_MAX) + 1];
-  unsigned char *t = text;
+  size_t length;
+  char *text = makeUtf8FromWchars(characters, count, &length);
 
-  {
-    unsigned int i;
-
-    for (i=0; i<count; i+=1) {
-      Utf8Buffer utf8;
-      size_t length = convertWcharToUtf8(characters[i], utf8);
-
-      if (length) {
-        t = mempcpy(t, utf8, length);
-      } else {
-        *t++ = ' ';
-      }
-    }
-
-    *t = 0;
+  if (text) {
+    if (immediate) speech->mute(&spk);
+    speech->say(&spk, text, length, count, attributes);
+    free(text);
+  } else {
+    logMallocError();
   }
-
-  if (immediate) speech->mute(&spk);
-  speech->say(&spk, text, t-text, count, attributes);
 }
 
 static void
