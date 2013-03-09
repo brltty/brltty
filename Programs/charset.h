@@ -43,6 +43,7 @@ extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
 extern size_t getUtf8Length (const char *utf8);
 extern void convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count);
+extern char *makeUtf8FromWchars (const wchar_t *characters, unsigned int count, size_t *length);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);

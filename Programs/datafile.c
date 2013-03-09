@@ -653,28 +653,40 @@ processAssignOperands (DataFile *file, void *data UNUSED) {
 
 int
 includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
+  int ok = 0;
+
   const char *prefixAddress = file->name;
-  unsigned int prefixLength = 0;
+  size_t prefixLength = 0;
 
-  if (*name != WC_C('/')) {
-    const char *prefixEnd = strrchr(prefixAddress, '/');
-    if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
-  }
+  size_t suffixLength;
+  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
 
-  {
-    char path[prefixLength + length + 1];
-    FILE *stream;
-    int ok = 0;
-
-    snprintf(path, sizeof(path), "%.*s%.*" PRIws,
-             prefixLength, prefixAddress, length, name);
-    if ((stream = openDataFile(path, "r", 0))) {
-      if (processDataStream(file->variables, stream, path, file->processor, file->data)) ok = 1;
-      fclose(stream);
+  if (suffixAddress) {
+    if (!isAbsolutePath(suffixAddress)) {
+      const char *prefixEnd = strrchr(prefixAddress, '/');
+      if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
     }
 
-    return ok;
+    {
+      char path[prefixLength + suffixLength + 1];
+      FILE *stream;
+
+      snprintf(path, sizeof(path), "%.*s%.*s",
+               (int)prefixLength, prefixAddress,
+               (int)suffixLength, suffixAddress);
+
+      if ((stream = openDataFile(path, "r", 0))) {
+        if (processDataStream(file->variables, stream, path, file->processor, file->data)) ok = 1;
+        fclose(stream);
+      }
+    }
+
+    free(suffixAddress);
+  } else {
+    logMallocError();
   }
+
+  return ok;
 }
 
 int

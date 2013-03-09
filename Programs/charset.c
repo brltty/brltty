@@ -156,6 +156,35 @@ convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count) {
   if (count) **characters = 0;
 }
 
+char *
+makeUtf8FromWchars (const wchar_t *characters, unsigned int count, size_t *length) {
+  char *text = malloc((count * UTF8_LEN_MAX) + 1);
+
+  if (text) {
+    char *t = text;
+    unsigned int i;
+
+    for (i=0; i<count; i+=1) {
+      Utf8Buffer utf8;
+      size_t utfs = convertWcharToUtf8(characters[i], utf8);
+
+      if (utfs) {
+        t = mempcpy(t, utf8, utfs);
+      } else {
+        *t++ = ' ';
+      }
+    }
+
+    *t = 0;
+    if (length) *length = t - text;
+    return text;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 size_t
 convertCharToUtf8 (char c, Utf8Buffer utf8) {
   wint_t wc = convertCharToWchar(c);
