@@ -21,15 +21,16 @@ package org.a11y.brltty.android;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import android.view.accessibility.AccessibilityEvent;
 
 public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
   private final static Object eventLock = new Object();
-  private volatile static AccessibilityEvent latestEvent = null;
+  private volatile static List<CharSequence> latestText = null;
 
-  private static AccessibilityEvent currentEvent = null;
   private static List<CharSequence> currentText;
   private static int currentWidth;
 
@@ -38,8 +39,18 @@ public class ScreenDriver {
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
       case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+        List<CharSequence> text = new ArrayList(event.getText());
+
+        if (text.isEmpty()) {
+          CharSequence description = event.getContentDescription();
+
+          if (description != null) {
+            text.add(description);
+          }
+        }
+
         synchronized (eventLock) {
-          latestEvent = event;
+          latestText = text;
         }
         break;
     }
@@ -72,37 +83,34 @@ public class ScreenDriver {
   }
 
   public static void updateCurrentView () {
-    boolean hasChanged;
+    List<CharSequence> text = null;
 
     synchronized (eventLock) {
-      if ((hasChanged = (latestEvent != currentEvent))) {
-        currentEvent = latestEvent;
+      if (latestText != currentText) {
+        text = latestText;
       }
     }
 
-    if (hasChanged) {
-      List<CharSequence> text = null;
-
-      if (currentEvent != null) {
-        text = currentEvent.getText();
-      }
-
+    if (text != null) {
       setCurrentText(text);
     }
   }
 
   public static void getRowText (char[] textBuffer, int rowNumber, int columnNumber) {
-    int columnCount = textBuffer.length;
-    CharSequence rowText = currentText.get(rowNumber);
-    int rowLength = rowText.length();
+    CharSequence rowText = (rowNumber < currentText.size())? currentText.get(rowNumber): null;
+    int rowLength = (rowText != null)? rowText.length(): 0;
+
+    int textLength = textBuffer.length;
     int textIndex = 0;
 
-    while (textIndex < columnCount) {
+    while (textIndex < textLength) {
       textBuffer[textIndex++] = (columnNumber < rowLength)? rowText.charAt(columnNumber++): ' ';
     }
   }
 
   static {
-    setCurrentText(null);
+    List<CharSequence> text = new ArrayList<CharSequence>();
+    text.add("BRLTTY on Android");
+    setCurrentText(text);
   }
 }
