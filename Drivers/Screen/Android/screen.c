@@ -194,11 +194,32 @@ executeCommand_AndroidScreen (int *command) {
   return 0;
 }
 
+static int
+routeCursor_AndroidScreen (int column, int row, int screen) {
+  if (findScreenDriverClass()) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, screenDriverClass, "routeCursor",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_INT // column
+                                             JAVA_SIG_INT // row
+                                            ))) {
+      int result = (*env)->CallStaticObjectMethod(env, screenDriverClass, method, column, row) != JNI_FALSE;
+
+      if (!clearJavaException(env, 1)) return result;
+      errno = EIO;
+    }
+  }
+
+  return 0;
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
   main->base.executeCommand = executeCommand_AndroidScreen;
+  main->base.routeCursor = routeCursor_AndroidScreen;
   env = getJavaNativeInterface();
 }

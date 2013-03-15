@@ -81,6 +81,10 @@ public class ScreenDriver {
       return screenLocation;
     }
 
+    public Rect getBrailleLocation () {
+      return brailleLocation;
+    }
+
     public void setBrailleLocation (Rect location) {
       brailleLocation = location;
     }
@@ -126,6 +130,7 @@ public class ScreenDriver {
 
   private static List<CharSequence> screenRows;
   private static int screenWidth;
+  private static List<RenderedNode> renderedNodes;
 
   private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
     if (node == null) {
@@ -369,11 +374,16 @@ public class ScreenDriver {
       List<CharSequence> rows = new ArrayList<CharSequence>();
 
       for (RenderedNode node : nodes) {
-        rows.add(node.getRenderedText());
+        String renderedText = node.getRenderedText();
+        int rowIndex = rows.size();
+        node.setBrailleLocation(new Rect(0, rowIndex, renderedText.length()-1, rowIndex));
+        rows.add(renderedText);
       }
 
       setScreenRows(rows);
     }
+
+    renderedNodes = nodes;
   }
 
   private static void setCurrentNode (AccessibilityNodeInfo node) {
@@ -405,6 +415,36 @@ public class ScreenDriver {
     while (textIndex < textLength) {
       textBuffer[textIndex++] = (columnNumber < rowLength)? rowText.charAt(columnNumber++): ' ';
     }
+  }
+
+  private static RenderedNode findRenderedNode (int column, int row) {
+    for (RenderedNode node : renderedNodes) {
+      Rect location = node.getBrailleLocation();
+      if ((column >= location.left) &&
+          (column <= location.right) &&
+          (row >= location.top) &&
+          (row <= location.bottom)) {
+        return node;
+      }
+    }
+
+    return null;
+  }
+
+  public static boolean routeCursor (int column, int row) {
+    if (row != -1) {
+      RenderedNode node = findRenderedNode(column, row);
+
+      if (node != null) {
+        if (node.isClickable()) {
+          if (node.performClick()) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   public static boolean moveUp () {
