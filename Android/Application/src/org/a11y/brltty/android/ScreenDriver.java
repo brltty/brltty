@@ -28,22 +28,91 @@ import android.graphics.Rect;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import android.accessibilityservice.AccessibilityService;
+
 public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
   private static class RenderedNode {
     private final AccessibilityNodeInfo node;
-    private final CharSequence text;
-    private final Rect rectangle = new Rect();
+    private final String nodeText;
 
-    public CharSequence getText () {
+    private Rect screenLocation = null;
+    private Rect brailleLocation = null;
+
+    public boolean isClickable () {
+      return node.isClickable();
+    }
+
+    public boolean isCheckable () {
+      return node.isCheckable();
+    }
+
+    public boolean isChecked () {
+      return node.isChecked();
+    }
+
+    public boolean performClick () {
+      return node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+    }
+
+    public String getRenderedText () {
+      String text = nodeText;
+
+      if (isCheckable()) {
+        text = text + "[" + (isChecked()? "x": " ") + "]";
+      }
+
+      if (isClickable()) {
+        text = "{" + text + "}";
+      }
+
       return text;
     }
 
-    RenderedNode (AccessibilityNodeInfo node, CharSequence text) {
+    public Rect getScreenLocation () {
+      synchronized (this) {
+        if (screenLocation == null) {
+          screenLocation = new Rect();
+          node.getBoundsInScreen(screenLocation);
+        }
+      }
+
+      return screenLocation;
+    }
+
+    public void setBrailleLocation (Rect location) {
+      brailleLocation = location;
+    }
+
+    RenderedNode (AccessibilityNodeInfo node, String text) {
       this.node = node;
-      this.text = text;
-      node.getBoundsInScreen(this.rectangle);
+      nodeText = text;
+    }
+  }
+
+  private static class GlobalRenderedNode extends RenderedNode {
+    private final int clickAction;
+
+    public boolean isClickable () {
+      return true;
+    }
+
+    public boolean isCheckable () {
+      return false;
+    }
+
+    public boolean isChecked () {
+      return false;
+    }
+
+    public boolean performClick () {
+      return BrailleService.getAccessibilityService().performGlobalAction(clickAction);
+    }
+
+    GlobalRenderedNode (int action, String text) {
+      super(null, text);
+      clickAction = action;
     }
   }
 
@@ -58,42 +127,60 @@ public class ScreenDriver {
   private static List<CharSequence> screenRows;
   private static int screenWidth;
 
-  public static void handleAccessibilityEvent (AccessibilityEvent event) {
-    switch (event.getEventType()) {
-      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-        synchronized (eventLock) {
-          latestNode = event.getSource();
-        }
-        break;
+  private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
+    if (node == null) {
+      return null;
+    }
+
+    while (true) {
+      AccessibilityNodeInfo parent = node.getParent();
+
+      if (parent == null) {
+        return node;
+      }
+
+      node = parent;
     }
   }
 
-  public static native void setScreenProperties (int rows, int columns);
+  private static String normalizeTextProperty (CharSequence text) {
+    if (text != null) {
+      String string = text.toString().trim();
 
-  public static void setScreenRows (List<CharSequence> rows) {
-    int width = 1;
-
-    if (rows == null) {
-      rows = new ArrayList<CharSequence>();
-    }
-
-    if (rows.isEmpty()) {
-      rows.add("empty screen");
-    }
-
-    for (CharSequence row : rows) {
-      int length = row.length();
-
-      if (length > width) {
-        width = length;
+      if (string.length() > 0) {
+        return string;
       }
     }
 
-    screenRows = rows;
-    screenWidth = width;
-    setScreenProperties(screenRows.size(), screenWidth);
+    return null;
+  }
+
+  private static String getNodeText (AccessibilityNodeInfo node) {
+    String text;
+
+    if ((text = normalizeTextProperty(node.getContentDescription())) != null) {
+      return text;
+    }
+
+    if ((text = normalizeTextProperty(node.getText())) != null) {
+      return text;
+    }
+
+    if (node.isFocusable())  {
+      text = normalizeTextProperty(node.getClassName());
+
+      {
+        int index = text.lastIndexOf('.');
+
+        if (index >= 0) {
+          text = text.substring(index+1);
+        }
+      }
+
+      return text;
+    }
+
+    return null;
   }
 
   private static void addNodeProperty (
@@ -158,114 +245,139 @@ public class ScreenDriver {
       addPropertyValue(values, node.isLongClickable(), "lng");
       addPropertyValue(values, node.isCheckable(), "ckb");
       addPropertyValue(values, node.isChecked(), "ckd");
-      addNodeProperty(rows, "flg", values.toArray(new CharSequence[values.size()]));
+      addNodeProperty(rows, "flgs", values.toArray(new CharSequence[values.size()]));
     }
 
-    addNodeProperty(rows, "dsc", node.getContentDescription());
-    addNodeProperty(rows, "txt", node.getText());
-    addNodeProperty(rows, "cls", node.getClassName());
-    addNodeProperty(rows, "pkg", node.getPackageName());
+    addNodeProperty(rows, "desc", node.getContentDescription());
+    addNodeProperty(rows, "text", node.getText());
+    addNodeProperty(rows, "obj", node.getClassName());
+    addNodeProperty(rows, "app", node.getPackageName());
 
     {
       Rect rect = new Rect();
       node.getBoundsInScreen(rect);
-      addNodeProperty(rows, "rct", rect.toShortString());
+      addNodeProperty(rows, "locn", rect.toShortString());
     }
   }
 
   private static void addSubtreeContent (
     List<CharSequence> rows,
-    AccessibilityNodeInfo node,
+    AccessibilityNodeInfo root,
     CharSequence name
   ) {
     addNodeProperty(rows, "name", name);
-    addNodeProperties(rows, node);
 
-    {
-      int childCount = node.getChildCount();
+    if (root != null) {
+      addNodeProperties(rows, root);
 
-      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        addSubtreeContent(rows, node.getChild(childIndex), name + "." + childIndex);
+      {
+        int childCount = root.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          addSubtreeContent(rows, root.getChild(childIndex), name + "." + childIndex);
+        }
       }
     }
   }
 
-  private static void logScreenContent (AccessibilityNodeInfo node) {
+  private static void logSubtreeContent (AccessibilityNodeInfo root) {
     List<CharSequence> rows = new ArrayList<CharSequence>();
-    addSubtreeContent(rows, getRootNode(node), ROOT_NODE_NAME);
+    addSubtreeContent(rows, root, ROOT_NODE_NAME);
 
     for (CharSequence row : rows) {
       Log.d(LOG_TAG, row.toString());
     }
   }
 
-  private static CharSequence getNodeText (AccessibilityNodeInfo node) {
-    CharSequence text;
+  public static void handleAccessibilityEvent (AccessibilityEvent event) {
+    logSubtreeContent(getRootNode(event.getSource()));
+    switch (event.getEventType()) {
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+      case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+        synchronized (eventLock) {
+          latestNode = event.getSource();
+        }
+        break;
+    }
+  }
 
-    if ((text = node.getContentDescription()) != null) {
-      return text;
+  public static native void exportScreenProperties (int rows, int columns);
+
+  public static void setScreenRows (List<CharSequence> rows) {
+    int width = 1;
+
+    if (rows == null) {
+      rows = new ArrayList<CharSequence>();
     }
 
-    if ((text = node.getText()) != null) {
-      return text;
+    if (rows.isEmpty()) {
+      rows.add("empty screen");
     }
 
-    if (node.isFocusable())  {
-      return node.getClassName();
+    for (CharSequence row : rows) {
+      int length = row.length();
+
+      if (length > width) {
+        width = length;
+      }
     }
 
-    return null;
+    screenRows = rows;
+    screenWidth = width;
+    exportScreenProperties(screenRows.size(), screenWidth);
   }
 
   private static void renderSubtree (
     List<RenderedNode> nodes,
     AccessibilityNodeInfo root
   ) {
-    CharSequence text = getNodeText(root);
+    if (root != null) {
+      if (root.isVisibleToUser()) {
+        String text = getNodeText(root);
 
-    if (text != null) {
-      nodes.add(new RenderedNode(root, text));
-    }
+        if (text != null) {
+          nodes.add(new RenderedNode(root, text));
+        }
+      }
 
-    {
-      int childCount = root.getChildCount();
+      {
+        int childCount = root.getChildCount();
 
-      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        renderSubtree(nodes, root.getChild(childIndex));
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          renderSubtree(nodes, root.getChild(childIndex));
+        }
       }
     }
   }
 
   private static void renderSubtree (AccessibilityNodeInfo root) {
     List<RenderedNode> nodes = new ArrayList<RenderedNode>();
+
+    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS, "Notifications"));
+    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS, "Quick Settings"));
+
     renderSubtree(nodes, root);
+
+    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_BACK, "Back"));
+    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_HOME, "Home"));
+    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_RECENTS, "Recent Apps"));
 
     {
       List<CharSequence> rows = new ArrayList<CharSequence>();
 
       for (RenderedNode node : nodes) {
-        rows.add(node.getText());
+        rows.add(node.getRenderedText());
       }
 
       setScreenRows(rows);
     }
   }
 
-  private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
-    while (true) {
-      AccessibilityNodeInfo parent = node.getParent();
-
-      if (parent == null) {
-        return node;
-      }
-
-      node = parent;
-    }
-  }
-
   private static void setCurrentNode (AccessibilityNodeInfo node) {
     currentNode = node;
-    logScreenContent(getRootNode(node));
     renderSubtree(getRootNode(node));
   }
 

@@ -38,7 +38,7 @@ findScreenDriverClass (void) {
 }
 
 JNIEXPORT void JNICALL
-Java_org_a11y_brltty_android_ScreenDriver_setScreenProperties (
+Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   JNIEnv *env, jobject this,
   jint rows, jint columns
 ) {

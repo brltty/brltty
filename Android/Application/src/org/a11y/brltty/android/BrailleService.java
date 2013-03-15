@@ -34,13 +34,18 @@ import android.content.Intent;
 public class BrailleService extends AccessibilityService {
   private static final String LOG_TAG = BrailleService.class.getName();
 
+  private static volatile AccessibilityService accessibilityService = null;
   private Thread coreThread = null;
+
+  public static AccessibilityService getAccessibilityService () {
+    return accessibilityService;
+  }
 
   @Override
   public void onCreate () {
     super.onCreate();
-
     Log.d(LOG_TAG, "braille accessibility service created");
+    accessibilityService = this;
   }
 
   @Override
