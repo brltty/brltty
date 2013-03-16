@@ -29,8 +29,11 @@
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
 
-static jint screenRows;
+static jint screenNumber;
 static jint screenColumns;
+static jint screenRows;
+static jint currentColumn;
+static jint currentRow;
 
 static int
 findScreenDriverClass (void) {
@@ -40,10 +43,15 @@ findScreenDriverClass (void) {
 JNIEXPORT void JNICALL
 Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   JNIEnv *env, jobject this,
-  jint rows, jint columns
+  jint number,
+  jint columns, jint rows,
+  jint column, jint row
 ) {
-  screenRows = rows;
+  screenNumber = number;
   screenColumns = columns;
+  screenRows = rows;
+  currentColumn = column;
+  currentRow = row;
 }
 
 static void
@@ -58,9 +66,9 @@ describe_AndroidScreen (ScreenDescription *description) {
       if (!clearJavaException(env, 1)) {
         description->cols = screenColumns;
         description->rows = screenRows;
-        description->posx = 0;
-        description->posy = 0;
-        description->number = 0;
+        description->posx = currentColumn;
+        description->posy = currentRow;
+        description->number = screenNumber;
       } else {
         errno = EIO;
       }

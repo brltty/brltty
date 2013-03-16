@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -33,48 +35,39 @@ import android.accessibilityservice.AccessibilityService;
 public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
+  private static final String ROOT_NODE_NAME = "root";
+
+  private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
+    return (left >= outer.left) &&
+           (right <= outer.right) &&
+           (top >= outer.top) &&
+           (bottom <= outer.bottom);
+  }
+
+  private static boolean isContainer (Rect outer, int x, int y) {
+    return isContainer(outer, x, y, x, y);
+  }
+
+  private static boolean isContainer (Rect outer, Rect inner) {
+    return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
+  }
+
   private static class RenderedNode {
-    private final AccessibilityNodeInfo node;
-    private final String nodeText;
+    private final AccessibilityNodeInfo screenNode;
+    private final String renderedText;
 
     private Rect screenLocation = null;
     private Rect brailleLocation = null;
 
-    public boolean isClickable () {
-      return node.isClickable();
-    }
-
-    public boolean isCheckable () {
-      return node.isCheckable();
-    }
-
-    public boolean isChecked () {
-      return node.isChecked();
-    }
-
-    public boolean performClick () {
-      return node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-    }
-
     public String getRenderedText () {
-      String text = nodeText;
-
-      if (isCheckable()) {
-        text = text + "[" + (isChecked()? "x": " ") + "]";
-      }
-
-      if (isClickable()) {
-        text = "{" + text + "}";
-      }
-
-      return text;
+      return renderedText;
     }
 
     public Rect getScreenLocation () {
       synchronized (this) {
         if (screenLocation == null) {
           screenLocation = new Rect();
-          node.getBoundsInScreen(screenLocation);
+          screenNode.getBoundsInScreen(screenLocation);
         }
       }
 
@@ -89,29 +82,82 @@ public class ScreenDriver {
       brailleLocation = location;
     }
 
+    public boolean performAction (int offset) {
+      final int[] actions = {
+        AccessibilityNodeInfo.ACTION_CLICK,
+        AccessibilityNodeInfo.ACTION_LONG_CLICK,
+        AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
+        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+      };
+
+      if (offset >= actions.length) {
+        return false;
+      }
+      int action = actions[offset];
+
+      AccessibilityNodeInfo node = screenNode;
+      Rect inner = getScreenLocation();
+
+      while (((node.getActions() & action) == 0) || !node.isEnabled()) {
+        AccessibilityNodeInfo parent = node.getParent();
+        if (parent == null) {
+          return false;
+        }
+
+        Rect outer = new Rect();
+        parent.getBoundsInScreen(outer);
+        if (!isContainer(outer, inner)) {
+          return false;
+        }
+
+        inner = outer;
+        node = parent;
+      }
+
+      return node.performAction(action);
+    }
+
+    public boolean isCheckable () {
+      return screenNode.isCheckable();
+    }
+
+    public boolean isChecked () {
+      return screenNode.isChecked();
+    }
+
+    private String makeRenderedText (String text) {
+      if (isCheckable()) {
+        text = text + "[" + (isChecked()? "x": " ") + "]";
+      }
+
+      return text;
+    }
+
     RenderedNode (AccessibilityNodeInfo node, String text) {
-      this.node = node;
-      nodeText = text;
+      screenNode = node;
+      renderedText = makeRenderedText(text);
     }
   }
 
   private static class GlobalRenderedNode extends RenderedNode {
     private final int clickAction;
 
-    public boolean isClickable () {
-      return true;
-    }
-
+    @Override
     public boolean isCheckable () {
       return false;
     }
 
+    @Override
     public boolean isChecked () {
       return false;
     }
 
-    public boolean performClick () {
-      return BrailleService.getAccessibilityService().performGlobalAction(clickAction);
+    public boolean performAction (int offset) {
+      if (offset > 0) {
+        return false;
+      }
+
+      return BrailleService.getBrailleService().performGlobalAction(clickAction);
     }
 
     GlobalRenderedNode (int action, String text) {
@@ -120,32 +166,32 @@ public class ScreenDriver {
     }
   }
 
-  private static final String ROOT_NODE_NAME = "root";
-
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo latestNode = null;
 
   private static AccessibilityNodeInfo homeNode;
-  private static AccessibilityNodeInfo currentNode;
-
+  private static List<RenderedNode> renderedNodes;
   private static List<CharSequence> screenRows;
   private static int screenWidth;
-  private static List<RenderedNode> renderedNodes;
+
+  private static AccessibilityNodeInfo currentNode;
+  private static int currentColumn;
+  private static int currentRow;
 
   private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
-    if (node == null) {
-      return null;
-    }
+    if (node != null) {
+      while (true) {
+        AccessibilityNodeInfo parent = node.getParent();
 
-    while (true) {
-      AccessibilityNodeInfo parent = node.getParent();
+        if (parent == null) {
+          break;
+        }
 
-      if (parent == null) {
-        return node;
+        node = parent;
       }
-
-      node = parent;
     }
+
+    return node;
   }
 
   private static String normalizeTextProperty (CharSequence text) {
@@ -188,6 +234,16 @@ public class ScreenDriver {
     return null;
   }
 
+  private static void addPropertyValue (
+    List<CharSequence> values,
+    boolean condition,
+    CharSequence value
+  ) {
+    if (condition) {
+      values.add(value);
+    }
+  }
+
   private static void addNodeProperty (
     List<CharSequence> rows,
     CharSequence name,
@@ -215,16 +271,6 @@ public class ScreenDriver {
     }
   }
 
-  private static void addPropertyValue (
-    List<CharSequence> values,
-    boolean condition,
-    CharSequence value
-  ) {
-    if (condition) {
-      values.add(value);
-    }
-  }
-
   private static void addNodeProperties (
     List<CharSequence> rows,
     AccessibilityNodeInfo node
@@ -235,14 +281,13 @@ public class ScreenDriver {
       addPropertyValue(values, node.getParent()==null, ROOT_NODE_NAME);
 
       {
-        int childCount = node.getChildCount();
-        addPropertyValue(values, childCount>0, "cld=" + childCount);
+        int count = node.getChildCount();
+        addPropertyValue(values, count>0, "cld=" + count);
       }
 
       addPropertyValue(values, node.isEnabled(), "enb");
       addPropertyValue(values, node.isSelected(), "sel");
-      addPropertyValue(values, node.isScrollable(), "scr");
-      addPropertyValue(values, node.isPassword(), "pwd");
+      addPropertyValue(values, node.isScrollable(), "scl");
       addPropertyValue(values, node.isFocusable(), "fcb");
       addPropertyValue(values, node.isFocused(), "fcd");
       addPropertyValue(values, node.isAccessibilityFocused(), "fca");
@@ -250,6 +295,7 @@ public class ScreenDriver {
       addPropertyValue(values, node.isLongClickable(), "lng");
       addPropertyValue(values, node.isCheckable(), "ckb");
       addPropertyValue(values, node.isChecked(), "ckd");
+      addPropertyValue(values, node.isPassword(), "pwd");
       addNodeProperty(rows, "flgs", values.toArray(new CharSequence[values.size()]));
     }
 
@@ -265,7 +311,7 @@ public class ScreenDriver {
     }
   }
 
-  private static void addSubtreeContent (
+  private static void addSubtreeProperties (
     List<CharSequence> rows,
     AccessibilityNodeInfo root,
     CharSequence name
@@ -279,15 +325,15 @@ public class ScreenDriver {
         int childCount = root.getChildCount();
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          addSubtreeContent(rows, root.getChild(childIndex), name + "." + childIndex);
+          addSubtreeProperties(rows, root.getChild(childIndex), name + "." + childIndex);
         }
       }
     }
   }
 
-  private static void logSubtreeContent (AccessibilityNodeInfo root) {
+  private static void logSubtreeProperties (AccessibilityNodeInfo root) {
     List<CharSequence> rows = new ArrayList<CharSequence>();
-    addSubtreeContent(rows, root, ROOT_NODE_NAME);
+    addSubtreeProperties(rows, root, ROOT_NODE_NAME);
 
     for (CharSequence row : rows) {
       Log.d(LOG_TAG, row.toString());
@@ -295,9 +341,8 @@ public class ScreenDriver {
   }
 
   public static void handleAccessibilityEvent (AccessibilityEvent event) {
-    logSubtreeContent(getRootNode(event.getSource()));
+    logSubtreeProperties(getRootNode(event.getSource()));
     switch (event.getEventType()) {
-      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
       case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
@@ -306,14 +351,19 @@ public class ScreenDriver {
           latestNode = event.getSource();
         }
         break;
+
+      default:
+        break;
     }
   }
 
-  public static native void exportScreenProperties (int rows, int columns);
+  public static native void exportScreenProperties (
+    int number,
+    int columns, int rows,
+    int column, int row
+  );
 
-  public static void setScreenRows (List<CharSequence> rows) {
-    int width = 1;
-
+  private static void setScreenRows (List<CharSequence> rows) {
     if (rows == null) {
       rows = new ArrayList<CharSequence>();
     }
@@ -322,6 +372,7 @@ public class ScreenDriver {
       rows.add("empty screen");
     }
 
+    int width = 1;
     for (CharSequence row : rows) {
       int length = row.length();
 
@@ -332,7 +383,27 @@ public class ScreenDriver {
 
     screenRows = rows;
     screenWidth = width;
-    exportScreenProperties(screenRows.size(), screenWidth);
+  }
+
+  private static void sortRenderedNodes (List<RenderedNode> nodes) {
+    Comparator<RenderedNode> comparator = new Comparator<RenderedNode>() {
+      @Override
+      public int compare (RenderedNode node1, RenderedNode node2) {
+        Rect location1 = node1.getScreenLocation();
+        Rect location2 = node2.getScreenLocation();
+        return (location1.top < location2.top)? -1:
+               (location1.top > location2.top)? 1:
+               (location1.left < location2.left)? -1:
+               (location1.left > location2.left)? 1:
+               (location1.right < location2.right)? -1:
+               (location1.right > location2.right)? 1:
+               (location1.bottom < location2.bottom)? -1:
+               (location1.bottom > location2.bottom)? 1:
+               0;
+      }
+    };
+
+    Collections.sort(nodes, comparator);
   }
 
   private static void renderSubtree (
@@ -360,11 +431,11 @@ public class ScreenDriver {
 
   private static void renderSubtree (AccessibilityNodeInfo root) {
     List<RenderedNode> nodes = new ArrayList<RenderedNode>();
-
-    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS, "Notifications"));
-    nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS, "Quick Settings"));
-
     renderSubtree(nodes, root);
+    sortRenderedNodes(nodes);
+
+    nodes.add(0, new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS, "Notifications"));
+    nodes.add(1, new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS, "Quick Settings"));
 
     nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_BACK, "Back"));
     nodes.add(new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_HOME, "Home"));
@@ -386,9 +457,47 @@ public class ScreenDriver {
     renderedNodes = nodes;
   }
 
+  private static RenderedNode findRenderedNode (int column, int row) {
+    RenderedNode bestNode = null;
+    Rect bestLocation = null;
+
+    for (RenderedNode node : renderedNodes) {
+      Rect location = node.getBrailleLocation();
+
+      if (isContainer(location, column, row)) {
+        if ((bestLocation == null) || isContainer(bestLocation, location)) {
+          bestLocation = location;
+          bestNode = node;
+        }
+      }
+    }
+
+    return bestNode;
+  }
+
+  private static void setCurrentLocation () {
+    Rect screenLocation = new Rect();
+    currentNode.getBoundsInScreen(screenLocation);
+    RenderedNode node = findRenderedNode(screenLocation.left, screenLocation.top);
+
+    if (node != null) {
+      Rect brailleLocation = node.getBrailleLocation();
+      currentColumn = brailleLocation.left;
+      currentRow = brailleLocation.top;
+    } else {
+      currentColumn = 0;
+      currentRow = 0;
+    }
+  }
+
   private static void setCurrentNode (AccessibilityNodeInfo node) {
     currentNode = node;
-    renderSubtree(getRootNode(node));
+    setCurrentLocation();
+    exportScreenProperties(
+      node.getWindowId(),
+      screenWidth, screenRows.size(),
+      currentColumn, currentRow
+    );
   }
 
   public static void updateCurrentView () {
@@ -401,6 +510,7 @@ public class ScreenDriver {
     }
 
     if (hasChanged) {
+      renderSubtree(getRootNode(homeNode));
       setCurrentNode(homeNode);
     }
   }
@@ -417,29 +527,13 @@ public class ScreenDriver {
     }
   }
 
-  private static RenderedNode findRenderedNode (int column, int row) {
-    for (RenderedNode node : renderedNodes) {
-      Rect location = node.getBrailleLocation();
-      if ((column >= location.left) &&
-          (column <= location.right) &&
-          (row >= location.top) &&
-          (row <= location.bottom)) {
-        return node;
-      }
-    }
-
-    return null;
-  }
-
   public static boolean routeCursor (int column, int row) {
     if (row != -1) {
       RenderedNode node = findRenderedNode(column, row);
 
       if (node != null) {
-        if (node.isClickable()) {
-          if (node.performClick()) {
-            return true;
-          }
+        if (node.performAction(column - node.getBrailleLocation().left)) {
+          return true;
         }
       }
     }
@@ -471,8 +565,6 @@ public class ScreenDriver {
     AccessibilityNodeInfo parent = currentNode.getParent();
 
     if (parent != null) {
-      int childCount = parent.getChildCount();
-
       for (int childIndex=parent.getChildCount()-1; childIndex>=0; childIndex-=1) {
         AccessibilityNodeInfo child = parent.getChild(childIndex);
 
