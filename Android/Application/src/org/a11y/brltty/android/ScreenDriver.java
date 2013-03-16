@@ -67,8 +67,10 @@ public class ScreenDriver {
     public Rect getScreenLocation () {
       synchronized (this) {
         if (screenLocation == null) {
-          screenLocation = new Rect();
-          screenNode.getBoundsInScreen(screenLocation);
+          if (screenNode != null) {
+            screenLocation = new Rect();
+            screenNode.getBoundsInScreen(screenLocation);
+          }
         }
       }
 
@@ -85,6 +87,7 @@ public class ScreenDriver {
 
     public boolean performAction (int offset) {
       final int[] actions = {
+        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS,
         AccessibilityNodeInfo.ACTION_CLICK,
         AccessibilityNodeInfo.ACTION_LONG_CLICK,
         AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
@@ -138,6 +141,33 @@ public class ScreenDriver {
       screenNode = node;
       renderedText = makeRenderedText(text);
     }
+
+    public interface LocationGetter {
+      public Rect getLocation (RenderedNode node);
+    }
+
+    public static RenderedNode findByLocation (
+      LocationGetter locationGetter,
+      int column, int row
+    ) {
+      RenderedNode bestNode = null;
+      Rect bestLocation = null;
+
+      for (RenderedNode node : renderedNodes) {
+        Rect location = locationGetter.getLocation(node);
+
+        if (location != null) {
+          if (isContainer(location, column, row)) {
+            if ((bestLocation == null) || isContainer(bestLocation, location)) {
+              bestLocation = location;
+              bestNode = node;
+            }
+          }
+        }
+      }
+
+      return bestNode;
+    }
   }
 
   private static class GlobalRenderedNode extends RenderedNode {
@@ -176,8 +206,8 @@ public class ScreenDriver {
   private static int screenWidth;
 
   private static AccessibilityNodeInfo currentNode;
-  private static int currentColumn;
-  private static int currentRow;
+  private static int cursorColumn;
+  private static int cursorRow;
 
   private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
     if (node != null) {
@@ -218,7 +248,7 @@ public class ScreenDriver {
       return text;
     }
 
-    if (node.isFocusable())  {
+    if (node.getActions() != 0)  {
       text = normalizeTextProperty(node.getClassName());
 
       {
@@ -357,23 +387,36 @@ public class ScreenDriver {
     }
   }
 
+  private static void logAccessibilityNode (AccessibilityNodeInfo node, String description) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(description);
+    sb.append(": ");
+
+    if (node == null) {
+      sb.append("null");
+    } else {
+      String text = getNodeText(node);
+
+      if (text != null) {
+        sb.append(text);
+      } else {
+        sb.append(node.getClassName());
+      }
+
+      Rect location = new Rect();
+      node.getBoundsInScreen(location);
+      sb.append(" ");
+      sb.append(location.toShortString());
+    }
+
+    Log.d(LOG_TAG, sb.toString());
+  }
+
   public static void handleAccessibilityEvent (AccessibilityEvent event) {
     if (LOG_ACCESSIBILITY_EVENTS) {
       AccessibilityNodeInfo node = event.getSource();
-
-      if (node != null) {
-        String text = getNodeText(node);
-
-        if (text == null) {
-          text = node.getClassName().toString();
-        }
-
-        Rect location = new Rect();
-        node.getBoundsInScreen(location);
-
-        Log.d(LOG_TAG, "node: " + text + " " + location.toShortString());
-      }
-
+      logAccessibilityNode(node, "event node");
       logSubtreeProperties(getRootNode(node));
     }
 
@@ -391,12 +434,6 @@ public class ScreenDriver {
         break;
     }
   }
-
-  public static native void exportScreenProperties (
-    int number,
-    int columns, int rows,
-    int column, int row
-  );
 
   private static void setScreenRows (List<CharSequence> rows) {
     if (rows == null) {
@@ -419,6 +456,85 @@ public class ScreenDriver {
     screenRows = rows;
     screenWidth = width;
   }
+
+  private static RenderedNode findScreenLocation (int column, int row) {
+    RenderedNode.LocationGetter locationGetter = new RenderedNode.LocationGetter() {
+      @Override
+      public Rect getLocation (RenderedNode node) {
+        return node.getScreenLocation();
+      }
+    };
+
+    return RenderedNode.findByLocation(locationGetter, column, row);
+  }
+
+  private static RenderedNode findBrailleLocation (int column, int row) {
+    RenderedNode.LocationGetter locationGetter = new RenderedNode.LocationGetter() {
+      @Override
+      public Rect getLocation (RenderedNode node) {
+        return node.getBrailleLocation();
+      }
+    };
+
+    return RenderedNode.findByLocation(locationGetter, column, row);
+  }
+
+  private static RenderedNode findRenderedNode (int column, int row) {
+    RenderedNode bestNode = null;
+    Rect bestLocation = null;
+
+    for (RenderedNode node : renderedNodes) {
+      Rect location = node.getBrailleLocation();
+
+      if (isContainer(location, column, row)) {
+        if ((bestLocation == null) || isContainer(bestLocation, location)) {
+          bestLocation = location;
+          bestNode = node;
+        }
+      }
+    }
+
+    return bestNode;
+  }
+
+  private static void setCursorLocation (int column, int row) {
+    cursorColumn = column;
+    cursorRow = row;
+  }
+
+  private static void setCursorLocation () {
+    AccessibilityNodeInfo focusedNode;
+
+    {
+      AccessibilityNodeInfo root = getRootNode(homeNode);
+
+      if ((focusedNode = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY)) != null) {
+        logAccessibilityNode(focusedNode, "accessibility focus");
+      } else if ((focusedNode = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)) != null) {
+        logAccessibilityNode(focusedNode, "input focus");
+      } else {
+        focusedNode = homeNode;
+        logAccessibilityNode(focusedNode, "home node");
+      }
+    }
+
+    Rect screenLocation = new Rect();
+    focusedNode.getBoundsInScreen(screenLocation);
+    RenderedNode node = findScreenLocation(screenLocation.left, screenLocation.top);
+
+    if (node != null) {
+      Rect brailleLocation = node.getBrailleLocation();
+      setCursorLocation(brailleLocation.left, brailleLocation.top);
+    } else {
+      setCursorLocation(0, 0);
+    }
+  }
+
+  public static native void exportScreenProperties (
+    int number,
+    int columns, int rows,
+    int column, int row
+  );
 
   private static void sortRenderedNodesByLocation (List<RenderedNode> nodes) {
     Comparator<RenderedNode> comparator = new Comparator<RenderedNode>() {
@@ -528,49 +644,17 @@ public class ScreenDriver {
     }
 
     renderedNodes = nodes;
-  }
+    setCursorLocation();
 
-  private static RenderedNode findRenderedNode (int column, int row) {
-    RenderedNode bestNode = null;
-    Rect bestLocation = null;
-
-    for (RenderedNode node : renderedNodes) {
-      Rect location = node.getBrailleLocation();
-
-      if (isContainer(location, column, row)) {
-        if ((bestLocation == null) || isContainer(bestLocation, location)) {
-          bestLocation = location;
-          bestNode = node;
-        }
-      }
-    }
-
-    return bestNode;
-  }
-
-  private static void setCurrentLocation () {
-    Rect screenLocation = new Rect();
-    currentNode.getBoundsInScreen(screenLocation);
-    RenderedNode node = findRenderedNode(screenLocation.left, screenLocation.top);
-
-    if (node != null) {
-      Rect brailleLocation = node.getBrailleLocation();
-      currentColumn = brailleLocation.left;
-      currentRow = brailleLocation.top;
-    } else {
-      currentColumn = 0;
-      currentRow = 0;
-    }
+    exportScreenProperties(
+      root.getWindowId(),
+      screenWidth, screenRows.size(),
+      cursorColumn, cursorRow
+    );
   }
 
   private static void setCurrentNode (AccessibilityNodeInfo node) {
     currentNode = node;
-    setCurrentLocation();
-    exportScreenProperties(
-      node.getWindowId(),
-      screenWidth, screenRows.size(),
-      currentColumn, currentRow
-    );
   }
 
   public static void updateCurrentView () {

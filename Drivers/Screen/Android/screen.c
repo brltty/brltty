@@ -32,8 +32,8 @@ static jclass screenDriverClass = NULL;
 static jint screenNumber;
 static jint screenColumns;
 static jint screenRows;
-static jint currentColumn;
-static jint currentRow;
+static jint cursorColumn;
+static jint cursorRow;
 
 static int
 findScreenDriverClass (void) {
@@ -50,8 +50,8 @@ Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   screenNumber = number;
   screenColumns = columns;
   screenRows = rows;
-  currentColumn = column;
-  currentRow = row;
+  cursorColumn = column;
+  cursorRow = row;
 }
 
 static void
@@ -66,8 +66,8 @@ describe_AndroidScreen (ScreenDescription *description) {
       if (!clearJavaException(env, 1)) {
         description->cols = screenColumns;
         description->rows = screenRows;
-        description->posx = currentColumn;
-        description->posy = currentRow;
+        description->posx = cursorColumn;
+        description->posy = cursorRow;
         description->number = screenNumber;
       } else {
         errno = EIO;
