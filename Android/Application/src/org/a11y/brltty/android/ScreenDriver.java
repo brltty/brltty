@@ -36,6 +36,7 @@ public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
   private static final String ROOT_NODE_NAME = "root";
+  private static final boolean LOG_ACCESSIBILITY_EVENTS = true;
 
   private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
     return (left >= outer.left) &&
@@ -305,6 +306,22 @@ public class ScreenDriver {
     addNodeProperty(rows, "app", node.getPackageName());
 
     {
+      AccessibilityNodeInfo subnode = node.getLabelFor();
+
+      if (subnode != null) {
+        addNodeProperty(rows, "lbl", getNodeText(subnode));
+      }
+    }
+
+    {
+      AccessibilityNodeInfo subnode = node.getLabeledBy();
+
+      if (subnode != null) {
+        addNodeProperty(rows, "lbd", getNodeText(subnode));
+      }
+    }
+
+    {
       Rect rect = new Rect();
       node.getBoundsInScreen(rect);
       addNodeProperty(rows, "locn", rect.toShortString());
@@ -341,7 +358,25 @@ public class ScreenDriver {
   }
 
   public static void handleAccessibilityEvent (AccessibilityEvent event) {
-    logSubtreeProperties(getRootNode(event.getSource()));
+    if (LOG_ACCESSIBILITY_EVENTS) {
+      AccessibilityNodeInfo node = event.getSource();
+
+      if (node != null) {
+        String text = getNodeText(node);
+
+        if (text == null) {
+          text = node.getClassName().toString();
+        }
+
+        Rect location = new Rect();
+        node.getBoundsInScreen(location);
+
+        Log.d(LOG_TAG, "node: " + text + " " + location.toShortString());
+      }
+
+      logSubtreeProperties(getRootNode(node));
+    }
+
     switch (event.getEventType()) {
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
@@ -385,7 +420,7 @@ public class ScreenDriver {
     screenWidth = width;
   }
 
-  private static void sortRenderedNodes (List<RenderedNode> nodes) {
+  private static void sortRenderedNodesByLocation (List<RenderedNode> nodes) {
     Comparator<RenderedNode> comparator = new Comparator<RenderedNode>() {
       @Override
       public int compare (RenderedNode node1, RenderedNode node2) {
@@ -404,6 +439,43 @@ public class ScreenDriver {
     };
 
     Collections.sort(nodes, comparator);
+  }
+
+  private static void groupRenderedNodesByContainer (List<RenderedNode> nodes) {
+    while (true) {
+      int count = nodes.size();
+
+      if (count < 3) {
+        break;
+      }
+
+      Rect outer = nodes.get(0).getScreenLocation();
+      List<RenderedNode> subnodes = new ArrayList<RenderedNode>();
+
+      int index = 1;
+      int to = 0;
+
+      while (index < nodes.size()) {
+        boolean contained = isContainer(outer, nodes.get(index).getScreenLocation());
+
+        if (to == 0) {
+          if (!contained) {
+            to = index;
+          }
+        } else if (contained) {
+          subnodes.add(nodes.remove(index));
+          continue;
+        }
+
+        index += 1;
+      }
+
+      if (to > 0) {
+        nodes.addAll(to, subnodes);
+      }
+
+      nodes = nodes.subList(1, count);
+    }
   }
 
   private static void renderSubtree (
@@ -432,7 +504,8 @@ public class ScreenDriver {
   private static void renderSubtree (AccessibilityNodeInfo root) {
     List<RenderedNode> nodes = new ArrayList<RenderedNode>();
     renderSubtree(nodes, root);
-    sortRenderedNodes(nodes);
+    sortRenderedNodesByLocation(nodes);
+    groupRenderedNodesByContainer(nodes);
 
     nodes.add(0, new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS, "Notifications"));
     nodes.add(1, new GlobalRenderedNode(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS, "Quick Settings"));
