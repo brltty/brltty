@@ -85,19 +85,23 @@ public class ScreenDriver {
       brailleLocation = location;
     }
 
-    public boolean performAction (int offset) {
-      final int[] actions = {
-        AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS,
-        AccessibilityNodeInfo.ACTION_CLICK,
-        AccessibilityNodeInfo.ACTION_LONG_CLICK,
-        AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
-        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-      };
+    private static final int[] PerformableActions = {
+      AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS,
+      AccessibilityNodeInfo.ACTION_CLICK,
+      AccessibilityNodeInfo.ACTION_LONG_CLICK,
+      AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
+      AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+    };
 
-      if (offset >= actions.length) {
+    protected static final int getPerformableAction (int offset) {
+      return (offset < PerformableActions.length)? PerformableActions[offset]: 0;
+    }
+
+    public boolean performAction (int offset) {
+      int action = getPerformableAction(offset);
+      if (action == 0) {
         return false;
       }
-      int action = actions[offset];
 
       AccessibilityNodeInfo node = screenNode;
       Rect inner = getScreenLocation();
@@ -146,7 +150,17 @@ public class ScreenDriver {
       public Rect getLocation (RenderedNode node);
     }
 
-    public static RenderedNode findByLocation (
+    public static RenderedNode find (AccessibilityNodeInfo n) {
+      for (RenderedNode node : renderedNodes) {
+        if (node.screenNode == n) {
+          return node;
+        }
+      }
+
+      return null;
+    }
+
+    public static RenderedNode find (
       LocationGetter locationGetter,
       int column, int row
     ) {
@@ -158,7 +172,9 @@ public class ScreenDriver {
 
         if (location != null) {
           if (isContainer(location, column, row)) {
-            if ((bestLocation == null) || isContainer(bestLocation, location)) {
+            if ((bestLocation == null) ||
+                isContainer(bestLocation, location) ||
+                !isContainer(location, bestLocation)) {
               bestLocation = location;
               bestNode = node;
             }
@@ -184,7 +200,8 @@ public class ScreenDriver {
     }
 
     public boolean performAction (int offset) {
-      if (offset > 0) {
+      int action = getPerformableAction(offset);
+      if (action != AccessibilityNodeInfo.ACTION_CLICK) {
         return false;
       }
 
@@ -465,7 +482,7 @@ public class ScreenDriver {
       }
     };
 
-    return RenderedNode.findByLocation(locationGetter, column, row);
+    return RenderedNode.find(locationGetter, column, row);
   }
 
   private static RenderedNode findBrailleLocation (int column, int row) {
@@ -476,25 +493,7 @@ public class ScreenDriver {
       }
     };
 
-    return RenderedNode.findByLocation(locationGetter, column, row);
-  }
-
-  private static RenderedNode findRenderedNode (int column, int row) {
-    RenderedNode bestNode = null;
-    Rect bestLocation = null;
-
-    for (RenderedNode node : renderedNodes) {
-      Rect location = node.getBrailleLocation();
-
-      if (isContainer(location, column, row)) {
-        if ((bestLocation == null) || isContainer(bestLocation, location)) {
-          bestLocation = location;
-          bestNode = node;
-        }
-      }
-    }
-
-    return bestNode;
+    return RenderedNode.find(locationGetter, column, row);
   }
 
   private static void setCursorLocation (int column, int row) {
@@ -686,7 +685,7 @@ public class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row != -1) {
-      RenderedNode node = findRenderedNode(column, row);
+      RenderedNode node = findBrailleLocation(column, row);
 
       if (node != null) {
         if (node.performAction(column - node.getBrailleLocation().left)) {
