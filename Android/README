@@ -10,3 +10,17 @@ cd Android/Core
 make -s
 cd ../Application
 make -s
+
+make -s install
+make -s reinstall
+make -s uninstall
+
+need to stop/start for settings to take effect
+document to do reinstall to preserve settings (uninstall loses them)
+document use of routing keys:
+   0: set accessibility focus (used for cursor tracking)
+   1: click
+   2: long click
+   3: scroll backward
+   4: scroll forward
+document how to start/stop
