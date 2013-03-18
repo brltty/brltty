@@ -133,63 +133,6 @@ public class ScreenDriver {
     public interface LocationGetter {
       public Rect getLocation (ScreenElement element);
     }
-
-    public static ScreenElement find (AccessibilityNodeInfo node) {
-      for (ScreenElement element : screenElements) {
-        if (element.getAccessibilityNode() == node) {
-          return element;
-        }
-      }
-
-      return null;
-    }
-
-    public static ScreenElement find (
-      LocationGetter locationGetter,
-      int column, int row
-    ) {
-      ScreenElement bestElement = null;
-      Rect bestLocation = null;
-
-      for (ScreenElement element : screenElements) {
-        Rect location = locationGetter.getLocation(element);
-
-        if (location != null) {
-          if (isContainer(location, column, row)) {
-            if ((bestLocation == null) ||
-                isContainer(bestLocation, location) ||
-                !isContainer(location, bestLocation)) {
-              bestLocation = location;
-              bestElement = element;
-            }
-          }
-        }
-      }
-
-      return bestElement;
-    }
-
-    private static ScreenElement findByScreenLocation (int column, int row) {
-      ScreenElement.LocationGetter locationGetter = new ScreenElement.LocationGetter() {
-        @Override
-        public Rect getLocation (ScreenElement element) {
-          return element.getScreenLocation();
-        }
-      };
-
-      return find(locationGetter, column, row);
-    }
-
-    private static ScreenElement findByBrailleLocation (int column, int row) {
-      ScreenElement.LocationGetter locationGetter = new ScreenElement.LocationGetter() {
-        @Override
-        public Rect getLocation (ScreenElement element) {
-          return element.getBrailleLocation();
-        }
-      };
-
-      return find(locationGetter, column, row);
-    }
   }
 
   private static class RealScreenElement extends ScreenElement {
@@ -291,7 +234,7 @@ public class ScreenDriver {
     }
   }
 
-  private static class ScreenElements extends ArrayList<ScreenElement> {
+  private static class ScreenElementList extends ArrayList<ScreenElement> {
     private int atTopCount = 0;
 
     public final void sortByScreenLocation () {
@@ -326,7 +269,7 @@ public class ScreenDriver {
         }
 
         Rect outer = elements.get(0).getScreenLocation();
-        List<ScreenElement> containedElements = new ScreenElements();
+        List<ScreenElement> containedElements = new ScreenElementList();
 
         int index = 1;
         int to = 0;
@@ -354,6 +297,63 @@ public class ScreenDriver {
       }
     }
 
+    public final ScreenElement find (AccessibilityNodeInfo node) {
+      for (ScreenElement element : this) {
+        if (element.getAccessibilityNode() == node) {
+          return element;
+        }
+      }
+
+      return null;
+    }
+
+    public final ScreenElement find (
+      ScreenElement.LocationGetter locationGetter,
+      int column, int row
+    ) {
+      ScreenElement bestElement = null;
+      Rect bestLocation = null;
+
+      for (ScreenElement element : this) {
+        Rect location = locationGetter.getLocation(element);
+
+        if (location != null) {
+          if (isContainer(location, column, row)) {
+            if ((bestLocation == null) ||
+                isContainer(bestLocation, location) ||
+                !isContainer(location, bestLocation)) {
+              bestLocation = location;
+              bestElement = element;
+            }
+          }
+        }
+      }
+
+      return bestElement;
+    }
+
+    public final ScreenElement findByScreenLocation (int column, int row) {
+      ScreenElement.LocationGetter locationGetter = new ScreenElement.LocationGetter() {
+        @Override
+        public Rect getLocation (ScreenElement element) {
+          return element.getScreenLocation();
+        }
+      };
+
+      return find(locationGetter, column, row);
+    }
+
+    public final ScreenElement findByBrailleLocation (int column, int row) {
+      ScreenElement.LocationGetter locationGetter = new ScreenElement.LocationGetter() {
+        @Override
+        public Rect getLocation (ScreenElement element) {
+          return element.getBrailleLocation();
+        }
+      };
+
+      return find(locationGetter, column, row);
+    }
+
     public final void add (String text, AccessibilityNodeInfo node) {
       add(new RealScreenElement(text, node));
     }
@@ -366,7 +366,7 @@ public class ScreenDriver {
       add(new VirtualScreenElement(text, action));
     }
 
-    public ScreenElements () {
+    public ScreenElementList () {
       super();
     }
   }
@@ -377,7 +377,7 @@ public class ScreenDriver {
   private static AccessibilityNodeInfo eventNode;
   private static AccessibilityNodeInfo currentNode;
 
-  private static ScreenElements screenElements;
+  private static ScreenElementList screenElements;
   private static List<CharSequence> screenRows;
   private static int screenWidth;
   private static int cursorColumn;
@@ -660,7 +660,7 @@ public class ScreenDriver {
 
     Rect screenLocation = new Rect();
     node.getBoundsInScreen(screenLocation);
-    ScreenElement element = ScreenElement.findByScreenLocation(screenLocation.left, screenLocation.top);
+    ScreenElement element = screenElements.findByScreenLocation(screenLocation.left, screenLocation.top);
 
     if (element != null) {
       Rect brailleLocation = element.getBrailleLocation();
@@ -677,7 +677,7 @@ public class ScreenDriver {
   );
 
   private static void renderSubtree (
-    ScreenElements elements,
+    ScreenElementList elements,
     AccessibilityNodeInfo root
   ) {
     if (root != null) {
@@ -700,7 +700,7 @@ public class ScreenDriver {
   }
 
   private static void renderSubtree (AccessibilityNodeInfo root) {
-    ScreenElements elements = new ScreenElements();
+    ScreenElementList elements = new ScreenElementList();
     renderSubtree(elements, root);
     elements.sortByScreenLocation();
     elements.groupByContainer();
@@ -768,7 +768,7 @@ public class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row != -1) {
-      ScreenElement element = ScreenElement.findByBrailleLocation(column, row);
+      ScreenElement element = screenElements.findByBrailleLocation(column, row);
 
       if (element != null) {
         if (element.performAction(column - element.getBrailleLocation().left)) {
