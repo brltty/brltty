@@ -30,18 +30,18 @@ import android.graphics.Rect;
 public class ScreenElementList extends ArrayList<ScreenElement> {
   private int atTopCount = 0;
 
-  public static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
+  private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
     return (left >= outer.left) &&
            (right <= outer.right) &&
            (top >= outer.top) &&
            (bottom <= outer.bottom);
   }
 
-  public static boolean isContainer (Rect outer, int x, int y) {
+  private static boolean isContainer (Rect outer, int x, int y) {
     return isContainer(outer, x, y, x, y);
   }
 
-  public static boolean isContainer (Rect outer, Rect inner) {
+  private static boolean isContainer (Rect outer, Rect inner) {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
 

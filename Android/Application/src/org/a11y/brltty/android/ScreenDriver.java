@@ -254,15 +254,15 @@ public class ScreenDriver {
 
   private static void logAccessibilityEvent (AccessibilityEvent event) {
     Log.d(LOG_TAG, "accessibility event: " + event.getEventType() + "(" + event.toString() + ")");
+
+    AccessibilityNodeInfo node = event.getSource();
+    logAccessibilityNode(node, "event node");
+    logSubtreeProperties(getRootNode(node));
   }
 
   public static void handleAccessibilityEvent (AccessibilityEvent event) {
     if (LOG_ACCESSIBILITY_EVENTS) {
       logAccessibilityEvent(event);
-
-      AccessibilityNodeInfo node = event.getSource();
-      logAccessibilityNode(node, "event node");
-      logSubtreeProperties(getRootNode(node));
     }
 
     switch (event.getEventType()) {

@@ -65,7 +65,7 @@ public class RealScreenElement extends ScreenElement {
       Rect outer = new Rect();
       parent.getBoundsInScreen(outer);
 
-      if (!ScreenElementList.isContainer(outer, inner)) {
+      if (!outer.contains(inner)) {
         return false;
       }
 
