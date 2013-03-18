@@ -45,12 +45,12 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
 
-  public final void sortByScreenLocation () {
+  public final void sortByVisualLocation () {
     Comparator<ScreenElement> comparator = new Comparator<ScreenElement>() {
       @Override
       public int compare (ScreenElement element1, ScreenElement element2) {
-        Rect location1 = element1.getScreenLocation();
-        Rect location2 = element2.getScreenLocation();
+        Rect location1 = element1.getVisualLocation();
+        Rect location2 = element2.getVisualLocation();
         return (location1.top < location2.top)? -1:
                (location1.top > location2.top)? 1:
                (location1.left < location2.left)? -1:
@@ -76,14 +76,14 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
         break;
       }
 
-      Rect outer = elements.get(0).getScreenLocation();
+      Rect outer = elements.get(0).getVisualLocation();
       List<ScreenElement> containedElements = new ScreenElementList();
 
       int index = 1;
       int to = 0;
 
       while (index < elements.size()) {
-        boolean contained = isContainer(outer, elements.get(index).getScreenLocation());
+        boolean contained = isContainer(outer, elements.get(index).getVisualLocation());
 
         if (to == 0) {
           if (!contained) {
@@ -140,8 +140,8 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return bestElement;
   }
 
-  public final ScreenElement findByScreenLocation (int column, int row) {
-    return find(ScreenElement.screenLocationGetter, column, row);
+  public final ScreenElement findByVisualLocation (int column, int row) {
+    return find(ScreenElement.visualLocationGetter, column, row);
   }
 
   public final ScreenElement findByBrailleLocation (int column, int row) {

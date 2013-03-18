@@ -26,7 +26,7 @@ public class ScreenElement {
   private final String unrenderedText;
 
   private String renderedText = null;
-  protected Rect screenLocation = null;
+  protected Rect visualLocation = null;
   private Rect brailleLocation = null;
 
   public final String getRenderedText () {
@@ -39,7 +39,7 @@ public class ScreenElement {
     return renderedText;
   }
 
-  public Rect getScreenLocation () {
+  public Rect getVisualLocation () {
     return null;
   }
 
@@ -110,10 +110,10 @@ public class ScreenElement {
     public Rect getLocation (ScreenElement element);
   }
 
-  public static final LocationGetter screenLocationGetter = new LocationGetter() {
+  public static final LocationGetter visualLocationGetter = new LocationGetter() {
     @Override
     public Rect getLocation (ScreenElement element) {
-      return element.getScreenLocation();
+      return element.getVisualLocation();
     }
   };
 

@@ -26,15 +26,15 @@ public class RealScreenElement extends ScreenElement {
   private final AccessibilityNodeInfo accessibilityNode;
 
   @Override
-  public Rect getScreenLocation () {
+  public Rect getVisualLocation () {
     synchronized (this) {
-      if (screenLocation == null) {
-        screenLocation = new Rect();
-        accessibilityNode.getBoundsInScreen(screenLocation);
+      if (visualLocation == null) {
+        visualLocation = new Rect();
+        accessibilityNode.getBoundsInScreen(visualLocation);
       }
     }
 
-    return screenLocation;
+    return visualLocation;
   }
 
   @Override
@@ -54,7 +54,7 @@ public class RealScreenElement extends ScreenElement {
 
   private boolean doAction (int action) {
     AccessibilityNodeInfo node = accessibilityNode;
-    Rect inner = getScreenLocation();
+    Rect inner = getVisualLocation();
 
     while (((node.getActions() & action) == 0) || !node.isEnabled()) {
       AccessibilityNodeInfo parent = node.getParent();

@@ -36,10 +36,12 @@ public class ScreenDriver {
   private static final String ROOT_NODE_NAME = "root";
   private static final boolean LOG_ACCESSIBILITY_EVENTS = true;
 
+  private static BrailleRenderer brailleRenderer = new SimpleBrailleRenderer();
+
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo latestNode = null;
 
-  private static AccessibilityNodeInfo eventNode;
+  private static AccessibilityNodeInfo eventNode = null;
   private static AccessibilityNodeInfo currentNode;
 
   private static ScreenElementList screenElements;
@@ -88,17 +90,7 @@ public class ScreenDriver {
     }
 
     if (node.getActions() != 0)  {
-      text = normalizeTextProperty(node.getClassName());
-
-      {
-        int index = text.lastIndexOf('.');
-
-        if (index >= 0) {
-          text = text.substring(index+1);
-        }
-      }
-
-      return text;
+      return "";
     }
 
     return null;
@@ -323,9 +315,9 @@ public class ScreenDriver {
       }
     }
 
-    Rect screenLocation = new Rect();
-    node.getBoundsInScreen(screenLocation);
-    ScreenElement element = screenElements.findByScreenLocation(screenLocation.left, screenLocation.top);
+    Rect visualLocation = new Rect();
+    node.getBoundsInScreen(visualLocation);
+    ScreenElement element = screenElements.findByVisualLocation(visualLocation.left, visualLocation.top);
 
     if (element != null) {
       Rect brailleLocation = element.getBrailleLocation();
@@ -365,31 +357,11 @@ public class ScreenDriver {
   }
 
   private static void renderSubtree (AccessibilityNodeInfo root) {
+    List<CharSequence> rows = new ArrayList<CharSequence>();
     ScreenElementList elements = new ScreenElementList();
     renderSubtree(elements, root);
-    elements.sortByScreenLocation();
-    elements.groupByContainer();
-
-    elements.addAtTop("Notifications", AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
-    elements.addAtTop("Quick Settings", AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
-
-    elements.addAtBottom("Back", AccessibilityService.GLOBAL_ACTION_BACK);
-    elements.addAtBottom("Home", AccessibilityService.GLOBAL_ACTION_HOME);
-    elements.addAtBottom("Recent Apps", AccessibilityService.GLOBAL_ACTION_RECENTS);
-
-    {
-      List<CharSequence> rows = new ArrayList<CharSequence>();
-
-      for (ScreenElement element : elements) {
-        String renderedText = element.getRenderedText();
-        int rowIndex = rows.size();
-        element.setBrailleLocation(new Rect(0, rowIndex, renderedText.length()-1, rowIndex));
-        rows.add(renderedText);
-      }
-
-      setScreenRows(rows);
-    }
-
+    brailleRenderer.renderElements(rows, elements);
+    setScreenRows(rows);
     screenElements = elements;
     setCursorLocation();
 
