@@ -89,7 +89,7 @@ as follows:
    make -s
 
 The -s option of the make command, which is short for its --silent 
-option, means to not display any progress information (thre's usually 
+option, means to not display any progress information (there's usually 
 quite a lot of it). Only warnings and errors are displayed.
 
 ----------------------------------------------------------------------
@@ -133,24 +133,26 @@ service. As such, it can't be started and stopped in the usual way -
 from the launcher. In fact, it can't even be found within the 
 applications list.
 
-BRLTTY can be started and stopped from within the Accessibility 
-settings. To get there, launch the Settings application, and then click 
-on Accessibility (way down near the bottom). This screen contains a 
-Services section, which lists all of the accessibility services that are 
-currently installed on the device. For each installed accessibility 
-service, there's an associated indicator which says "On" if that service 
-is currently running, and "Off" if it isn't.
+BRLTTY can be started and stopped from within the accessibility 
+settings. To get there, launch the "Settings" application, and then 
+click on "Accessibility" (way down near the bottom). This window 
+contains a "Services" section, which lists all of the accessibility 
+services that are currently installed on the device. For each installed 
+accessibility service, there's an associated indicator which says "On" 
+if that service is currently running, and "Off" if it isn't.
 
-Find "BRLTTY" and click on it. This brings up a window with two items on 
+Find "BRLTTY" and click on it. This brings up a window with two items in 
 it. One is a "switch" (which accessibility services present as a 
 "checkbox") for turning BRLTTY on and off. The other is a button which 
-takes you to BRLTTY's settings window.
+takes you to BRLTTY's "Settings" window. You should go through BRLTTY's 
+settings, making changes as desired, as well as define your braille 
+device(s), before starting BRLTTY.
 
 ----------------------------------------------------------------------
 
 
-Connecting Your Braille Device
-==================================
+Connecting and Defining Your Braille Device
+===========================================
 
 In order to use a Bluetooth braille device, it must first be paired with 
 your Android device. To do this, launch Android's "Settings" app, click 
@@ -169,6 +171,16 @@ aware, though, that your braille device will begin to draw power from
 your Android device's battery (unless you can disable USB charging). 
 This special cable, by the way, also allows you to connect any other USB 
 device (keyboard, mouse, printer, hub, etc) to your Android device.
+
+After you've connected your braille deivce to your Android device, 
+you'll need to tell BRLTTY about it. Go to BRLTTY's "Settings" window, 
+and click on "Manage Devices". From there, find your braille device, and 
+then click "Add". To find your device, select its communication method, 
+then select the device from the list that's presented, and then select 
+the correct braille driver.
+
+After you've added your braille device to BRLTTY, click on "Selected 
+Device" and select it from the list of devices that BRLTTY knows about.
 
 ----------------------------------------------------------------------
 
