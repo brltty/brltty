@@ -1,22 +1,153 @@
-svn checkout svn://mielke.cc/main/brltty
-cd brltty
-./autogen
+Preparation for Building Android Applications
+=============================================
 
-export ANDROID_NDK=/path/to/Android/NDK
-./cfg-android -q
+Install the Android SDK (Software Development Kit).
 
-export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
-cd Android/Core
-make -s
-cd ../Application
-make -s
+Install the Android NDK (Native Development Kit).
 
-make -s install
-make -s reinstall
-make -s uninstall
+The SDK initially only includes support for the current Android API 
+level. Brltty, however, needs to support earlier API levels so that it 
+can run on older releases of Android. Support for any missing API levels 
+is added whenever the SDK is updated. To do this, use the following 
+command:
 
+  android update sdk -u
+
+The -u option, which is the short form of the --no-ui option, means to 
+bypass the graphical interface. There may still be command-line password 
+prompts for installing packages which are provided by various vendours. 
+Any of these can be easily skipped.
+
+The 64-bit versions of the SDK and NDK depend on 32-bit system 
+libraries. If you're using a 64-bit version then you need to first 
+ensure that these are installed on your system. This at least includes:
+
+   libc6
+   libz
+   libstdc++6
+   libncurses
+
+----------------------------------------------------------------------
+
+
+Installing and Preparing the BRLTTY Source Tree
+===============================================
+
+Select the directory which should contain BRLTTY's source tree (which 
+needn't yet exist). Then extract the latest BRLTTY source into it with 
+the following command:
+
+   svn checkout svn://mielke.cc/main/brltty /path/to/brltty
+
+The directory operand (of svn checkout) is optional. If you don't 
+specify it then it'll assume the directory named "brltty" within the 
+current working directory.
+
+Next, you need to prepare the source tree. This is done as follows:
+
+   cd /path/to/brltty
+   ./autogen
+
+At this point, the source tree is essentially just like what you'd get 
+were you to unpack an officially released BRLTTY archive. It doesn't yet 
+know anything about the specifics of your system. It also doesn't yet 
+know anything about the platform you intend to build BRLTTY for.
+
+Adding information to BRLTTY's source tree regarding the spefiics of 
+your system, as well as of your intent to build BRLTTY for Android, is 
+done as follows:
+
+   export ANDROID_NDK=/path/to/Android/NDK
+   ./cfg-android -q
+
+The -q option, which is the short form of the configure command's 
+--quiet option, means to not diseplay any progress information (there's 
+usually quite a lot of it). Only warnings and errors are displayed.
+
+----------------------------------------------------------------------
+
+
+Building BRLTTY for Android
+===========================
+
+In order to be able to build an Android application, a number of Android 
+build tools need to be added to the command search path. This is done 
+with the following command:
+
+   export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
+
+The next step is to build the BRLTTY core for Android. This is done as 
+follows:
+
+   cd /path/to/brltty/Android/Core
+   make -s
+
+The final step is to build the BRLTTY service for Android. This is done 
+as follows:
+
+   cd /path/to/brltty/AndroidApplication
+   make -s
+
+The -s option of the make command, which is short for its --silent 
+option, means to not display any progress information (thre's usually 
+quite a lot of it). Only warnings and errors are displayed.
+
+----------------------------------------------------------------------
+
+
+Installing BRLTTY on Your Android Device
+========================================
+
+In order to install BRLTTY onto your Android device, or to uninstall it 
+from your device, you need to be in BRLTTY's Android Application 
+subdirectory.
+
+   cd /path/to/brltty/Android/Application
+
+You also need to connect your device to your host via USB.
+
+To install BRLTTY, use this command:
+
+   make -s install
+
+To uninstall BRLTTY, use this command:
+
+   make -s uninstall
+
+The "make install" command will fail if BRLTTY is already installed. If 
+you're wanting to upgrade BRLTTY, however, then uninstalling it first is 
+probably what you don't want to be doing. This is because uninstalling 
+BRLTTY also causes its settings to be lost. What you should do instead 
+is to reinstall it. You can do this with the following command:
+
+   make -s reinstall
+
+----------------------------------------------------------------------
+
+
+Starting and Stopping BRLTTY
+============================
+
+BRLTTY isn't a regular Android application - it's an accessibility 
+service. As such, it can't be started and stopped in the usual way - 
+from the launcher. In fact, it can't even be found within the 
+applications list.
+
+BRLTTY can be started and stopped from within the Accessibility 
+settings. To get there, launch the Settings application, and then click 
+on Accessibility (way down near the bottom). This screen contains a 
+Services section, which lists all of the accessibility services that are 
+currently installed on the device. For each installed accessibility 
+service, there's an associated indicator which says "On" if that service 
+is currently running, and "Off" if it isn't.
+
+Find "BRLTTY" and click on it. This brings up a window with two items on 
+it. One is a "switch" (which accessibility services present as a 
+"checkbox") for turning BRLTTY on and off. The other is a button which 
+takes you to BRLTTY's settings window.
+
+----------------------------------------------------------------------
 need to stop/start for settings to take effect
-document to do reinstall to preserve settings (uninstall loses them)
 document use of routing keys:
    0: set accessibility focus (used for cursor tracking)
    1: click
@@ -24,3 +155,4 @@ document use of routing keys:
    3: scroll backward
    4: scroll forward
 document how to start/stop
+----------------------------------------------------------------------
