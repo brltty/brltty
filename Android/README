@@ -147,12 +147,60 @@ it. One is a "switch" (which accessibility services present as a
 takes you to BRLTTY's settings window.
 
 ----------------------------------------------------------------------
-need to stop/start for settings to take effect
-document use of routing keys:
-   0: set accessibility focus (used for cursor tracking)
-   1: click
-   2: long click
-   3: scroll backward
-   4: scroll forward
-document how to start/stop
+
+
+Connecting Your Braille Device
+==================================
+
+In order to use a Bluetooth braille device, it must first be paired with 
+your Android device. To do this, launch Android's "Settings" app, click 
+on "Bluetooth", and then click on "Search for Devices". For Android to 
+be able to find your braille device, you may need to do something on it 
+in order to make it discoverable (visible). The instructions for your 
+braille deivce should tell you how to do this.
+
+In order to use a USB braille device, you'll need a special cable known 
+as a "Micro USB Host Adapter". The USB port on an Android device usually 
+acts as a device (rather than as a host) port. This is so that, for 
+example, you can control your Android device from your computer. The 
+Micro USB Host Adapter has a special plug which, when inserted into the 
+Android device's USB port, instructs Android to act as a USB host. Be 
+aware, though, that your braille device will begin to draw power from 
+your Android device's battery (unless you can disable USB charging). 
+This special cable, by the way, also allows you to connect any other USB 
+device (keyboard, mouse, printer, hub, etc) to your Android device.
+
 ----------------------------------------------------------------------
+
+
+The Routing Keys
+================
+
+The routing keys of the braille device are used to perform actions on 
+screen elements. Starting with the leftmost routing key over a screen 
+element, which we'll call key #0, these actions are as follows:
+
+   0  Set Accessibility Focus (used for cursor tracking)
+   1  Click
+   2  Long Click
+   3  Scroll Backward
+   4  Scroll Forward
+
+----------------------------------------------------------------------
+
+
+Known Issues
+============
+
+BRLTTY needs to be manually stopped and then restarted for settings 
+changes to take effect. This is unacceptable from a user perspective. 
+Any settings change should be automatically reloaded.
+
+Serial devices aren't supported. Even though Android devices don't have 
+serial ports, serial devices still can be connected via a USB to Serial 
+adapter. Users who have older, serial-only braille devices should still 
+be able to use them with their Android devices.
+
+----------------------------------------------------------------------
+
+
