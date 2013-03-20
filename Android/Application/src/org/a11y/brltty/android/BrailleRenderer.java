@@ -32,7 +32,7 @@ public abstract class BrailleRenderer {
     elements.addAtBottom("Recent Apps", AccessibilityService.GLOBAL_ACTION_RECENTS);
   }
 
-  public abstract void renderElements (
+  public abstract void renderScreenElements (
     List<CharSequence> rows,
     ScreenElementList elements
   );

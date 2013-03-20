@@ -81,6 +81,12 @@ public class ScreenDriver {
     return node;
   }
 
+  private static ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
+    Rect location = new Rect();
+    node.getBoundsInScreen(location);
+    return screenElements.findByVisualLocation(location.left, location.top, location.right, location.bottom);
+  }
+
   private static String normalizeTextProperty (CharSequence text) {
     if (text != null) {
       String string = text.toString().trim();
@@ -294,13 +300,13 @@ public class ScreenDriver {
     textEntries.clear();
   }
 
-  private static TextEntry getTextEntry (AccessibilityNodeInfo node, boolean create) {
+  private static TextEntry getTextEntry (AccessibilityNodeInfo node, boolean canCreate) {
     Rect key = new Rect();
     node.getBoundsInScreen(key);
     TextEntry textEntry = textEntries.get(key);
 
     if (textEntry == null) {
-      if (create) {
+      if (canCreate) {
         textEntry = new TextEntry();
         textEntries.put(key, textEntry);
       }
@@ -385,9 +391,7 @@ public class ScreenDriver {
       }
     }
 
-    Rect visualLocation = new Rect();
-    node.getBoundsInScreen(visualLocation);
-    ScreenElement element = screenElements.findByVisualLocation(visualLocation.left, visualLocation.top);
+    ScreenElement element = findRenderedScreenElement(node);
 
     if (element != null) {
       Rect brailleLocation = element.getBrailleLocation();
@@ -414,7 +418,7 @@ public class ScreenDriver {
     int column, int row
   );
 
-  private static void renderSubtree (
+  private static void addScreenElements (
     ScreenElementList elements,
     AccessibilityNodeInfo root
   ) {
@@ -431,18 +435,18 @@ public class ScreenDriver {
         int childCount = root.getChildCount();
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          renderSubtree(elements, root.getChild(childIndex));
+          addScreenElements(elements, root.getChild(childIndex));
         }
       }
     }
   }
 
-  private static void renderSubtree (AccessibilityNodeInfo root) {
+  private static void renderScreen (AccessibilityNodeInfo root) {
     List<CharSequence> rows = new ArrayList<CharSequence>();
     ScreenElementList elements = new ScreenElementList();
 
-    renderSubtree(elements, root);
-    brailleRenderer.renderElements(rows, elements);
+    addScreenElements(elements, root);
+    brailleRenderer.renderScreenElements(rows, elements);
 
     setScreenRows(rows);
     screenElements = elements;
@@ -473,7 +477,7 @@ public class ScreenDriver {
         currentWindow = window;
       }
 
-      renderSubtree(getRootNode(currentNode));
+      renderScreen(getRootNode(currentNode));
     }
   }
 
@@ -491,7 +495,7 @@ public class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row != -1) {
-      ScreenElement element = screenElements.findByBrailleLocation(column, row);
+      ScreenElement element = screenElements.findByBrailleLocation(column, row, column, row);
 
       if (element != null) {
         if (element.performAction(column - element.getBrailleLocation().left)) {

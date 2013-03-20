@@ -23,20 +23,20 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
 
 public class ScreenElement {
-  private final String unrenderedText;
+  private final String nodeText;
 
-  private String renderedText = null;
+  private String brailleText = null;
   protected Rect visualLocation = null;
   private Rect brailleLocation = null;
 
-  public final String getRenderedText () {
+  public final String getBrailleText () {
     synchronized (this) {
-      if (renderedText == null) {
-        renderedText = makeRenderedText(unrenderedText);
+      if (brailleText == null) {
+        brailleText = makeBrailleText(nodeText);
       }
     }
 
-    return renderedText;
+    return brailleText;
   }
 
   public Rect getVisualLocation () {
@@ -94,7 +94,7 @@ public class ScreenElement {
     }
   }
 
-  protected String makeRenderedText (String text) {
+  protected String makeBrailleText (String text) {
     if (isCheckable()) {
       text = text + "[" + (isChecked()? "x": " ") + "]";
     }
@@ -103,7 +103,7 @@ public class ScreenElement {
   }
 
   public ScreenElement (String text) {
-    unrenderedText = text;
+    nodeText = text;
   }
 
   public interface LocationGetter {

@@ -24,7 +24,7 @@ import android.graphics.Rect;
 
 public class SimpleBrailleRenderer extends BrailleRenderer {
   @Override
-  public void renderElements (
+  public void renderScreenElements (
     List<CharSequence> rows,
     ScreenElementList elements
   ) {
@@ -33,7 +33,7 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
     addVirtualElements(elements);
 
     for (ScreenElement element : elements) {
-      String text = element.getRenderedText();
+      String text = element.getBrailleText();
 
       if (text.length() > 0) {
         int rowIndex = rows.size();

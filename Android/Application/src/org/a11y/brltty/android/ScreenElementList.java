@@ -37,10 +37,6 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
            (bottom <= outer.bottom);
   }
 
-  private static boolean isContainer (Rect outer, int x, int y) {
-    return isContainer(outer, x, y, x, y);
-  }
-
   private static boolean isContainer (Rect outer, Rect inner) {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
@@ -117,7 +113,8 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
 
   public final ScreenElement find (
     ScreenElement.LocationGetter locationGetter,
-    int column, int row
+    int left, int top,
+    int right, int bottom
   ) {
     ScreenElement bestElement = null;
     Rect bestLocation = null;
@@ -126,10 +123,9 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
       Rect location = locationGetter.getLocation(element);
 
       if (location != null) {
-        if (isContainer(location, column, row)) {
+        if (isContainer(location, left, top, right, bottom)) {
           if ((bestLocation == null) ||
-              isContainer(bestLocation, location) ||
-              !isContainer(location, bestLocation)) {
+              isContainer(bestLocation, location)) {
             bestLocation = location;
             bestElement = element;
           }
@@ -140,12 +136,12 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return bestElement;
   }
 
-  public final ScreenElement findByVisualLocation (int column, int row) {
-    return find(ScreenElement.visualLocationGetter, column, row);
+  public final ScreenElement findByVisualLocation (int left, int top, int right, int bottom) {
+    return find(ScreenElement.visualLocationGetter, left, top, right, bottom);
   }
 
-  public final ScreenElement findByBrailleLocation (int column, int row) {
-    return find(ScreenElement.brailleLocationGetter, column, row);
+  public final ScreenElement findByBrailleLocation (int left, int top, int right, int bottom) {
+    return find(ScreenElement.brailleLocationGetter, left, top, right, bottom);
   }
 
   public final void add (String text, AccessibilityNodeInfo node) {
