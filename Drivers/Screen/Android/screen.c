@@ -138,70 +138,6 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   return 0;
 }
 
-static void
-doScreenDriverCommand (jmethodID *methodIdentifier, const char *methodName) {
-  if (findScreenDriverClass()) {
-    if (findJavaStaticMethod(env, methodIdentifier, screenDriverClass, methodName,
-                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                            ))) {
-      int result = (*env)->CallStaticObjectMethod(env, screenDriverClass, *methodIdentifier) != JNI_FALSE;
-
-      if (clearJavaException(env, 1)) {
-        errno = EIO;
-      } else if (!result) {
-      }
-    }
-  }
-}
-
-static int
-executeCommand_AndroidScreen (int *command) {
-  int blk = *command & BRL_MSK_BLK;
-  int arg UNUSED = *command & BRL_MSK_ARG;
-
-  switch (blk) {
-    case -1:
-      switch (arg) {
-        case BRL_CMD_TOP: {
-          static jmethodID method = 0;
-
-          doScreenDriverCommand(&method, "moveUp");
-          return 1;
-        }
-
-        case BRL_CMD_BOT: {
-          static jmethodID method = 0;
-
-          doScreenDriverCommand(&method, "moveDown");
-          return 1;
-        }
-
-        case BRL_CMD_LNBEG: {
-          static jmethodID method = 0;
-
-          doScreenDriverCommand(&method, "moveLeft");
-          return 1;
-        }
-
-        case BRL_CMD_LNEND: {
-          static jmethodID method = 0;
-
-          doScreenDriverCommand(&method, "moveRight");
-          return 1;
-        }
-
-        default:
-          break;
-      }
-      break;
-
-    default:
-      break;
-  }
-
-  return 0;
-}
-
 static int
 routeCursor_AndroidScreen (int column, int row, int screen) {
   if (findScreenDriverClass()) {
@@ -227,7 +163,6 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
-  main->base.executeCommand = executeCommand_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   env = getJavaNativeInterface();
 }

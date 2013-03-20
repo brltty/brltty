@@ -28,8 +28,6 @@ import android.graphics.Rect;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.accessibilityservice.AccessibilityService;
-
 public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
@@ -39,11 +37,9 @@ public class ScreenDriver {
   private static BrailleRenderer brailleRenderer = new SimpleBrailleRenderer();
 
   private final static Object eventLock = new Object();
-  private volatile static AccessibilityNodeInfo latestNode = null;
+  private volatile static AccessibilityNodeInfo eventNode = null;
 
-  private static AccessibilityNodeInfo eventNode = null;
-  private static AccessibilityNodeInfo currentNode;
-
+  private static AccessibilityNodeInfo currentNode = null;
   private static ScreenElementList screenElements;
   private static List<CharSequence> screenRows;
   private static int screenWidth;
@@ -229,7 +225,7 @@ public class ScreenDriver {
     } else {
       String text = getNodeText(node);
 
-      if (text != null) {
+      if ((text != null) && (text.length() > 0)) {
         sb.append(text);
       } else {
         sb.append(node.getClassName());
@@ -263,7 +259,7 @@ public class ScreenDriver {
       case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
         synchronized (eventLock) {
-          latestNode = event.getSource();
+          eventNode = event.getSource();
         }
         break;
 
@@ -303,14 +299,14 @@ public class ScreenDriver {
     AccessibilityNodeInfo node;
 
     {
-      AccessibilityNodeInfo root = getRootNode(eventNode);
+      AccessibilityNodeInfo root = getRootNode(currentNode);
 
       if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY)) != null) {
         logAccessibilityNode(node, "accessibility focus");
       } else if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)) != null) {
         logAccessibilityNode(node, "input focus");
       } else {
-        node = eventNode;
+        node = currentNode;
         logAccessibilityNode(node, "event node");
       }
     }
@@ -359,8 +355,10 @@ public class ScreenDriver {
   private static void renderSubtree (AccessibilityNodeInfo root) {
     List<CharSequence> rows = new ArrayList<CharSequence>();
     ScreenElementList elements = new ScreenElementList();
+
     renderSubtree(elements, root);
     brailleRenderer.renderElements(rows, elements);
+
     setScreenRows(rows);
     screenElements = elements;
     setCursorLocation();
@@ -372,22 +370,18 @@ public class ScreenDriver {
     );
   }
 
-  private static void setCurrentNode (AccessibilityNodeInfo node) {
-    currentNode = node;
-  }
-
   public static void updateCurrentView () {
     boolean hasChanged;
 
     synchronized (eventLock) {
-      if ((hasChanged = (latestNode != eventNode))) {
-        eventNode = latestNode;
+      if ((hasChanged = (eventNode != null))) {
+        currentNode = eventNode;
+        eventNode = null;
       }
     }
 
     if (hasChanged) {
-      renderSubtree(getRootNode(eventNode));
-      setCurrentNode(eventNode);
+      renderSubtree(getRootNode(currentNode));
     }
   }
 
@@ -410,70 +404,6 @@ public class ScreenDriver {
       if (element != null) {
         if (element.performAction(column - element.getBrailleLocation().left)) {
           return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  public static boolean moveUp () {
-    AccessibilityNodeInfo parent = currentNode.getParent();
-
-    if (parent != null) {
-      setCurrentNode(parent);
-      return true;
-    }
-
-    return false;
-  }
-
-  public static boolean moveDown () {
-    if (currentNode.getChildCount() > 0) {
-      setCurrentNode(currentNode.getChild(0));
-      return true;
-    }
-
-    return false;
-  }
-
-  public static boolean moveLeft () {
-    AccessibilityNodeInfo parent = currentNode.getParent();
-
-    if (parent != null) {
-      for (int childIndex=parent.getChildCount()-1; childIndex>=0; childIndex-=1) {
-        AccessibilityNodeInfo child = parent.getChild(childIndex);
-
-        if (child == currentNode) {
-          if (--childIndex >= 0) {
-            setCurrentNode(parent.getChild(childIndex));
-            return true;
-          }
-
-          break;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  public static boolean moveRight () {
-    AccessibilityNodeInfo parent = currentNode.getParent();
-
-    if (parent != null) {
-      int childCount = parent.getChildCount();
-
-      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        AccessibilityNodeInfo child = parent.getChild(childIndex);
-
-        if (child == currentNode) {
-          if (++childIndex < childCount) {
-            setCurrentNode(parent.getChild(childIndex));
-            return true;
-          }
-
-          break;
         }
       }
     }
