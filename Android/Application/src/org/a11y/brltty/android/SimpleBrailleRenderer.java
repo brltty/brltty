@@ -22,8 +22,6 @@ import java.util.List;
 
 import android.graphics.Rect;
 
-import android.accessibilityservice.AccessibilityService;
-
 public class SimpleBrailleRenderer extends BrailleRenderer {
   @Override
   public void renderElements (
@@ -32,13 +30,7 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
   ) {
     elements.sortByVisualLocation();
     elements.groupByContainer();
-
-    elements.addAtTop("Notifications", AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
-    elements.addAtTop("Quick Settings", AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
-
-    elements.addAtBottom("Back", AccessibilityService.GLOBAL_ACTION_BACK);
-    elements.addAtBottom("Home", AccessibilityService.GLOBAL_ACTION_HOME);
-    elements.addAtBottom("Recent Apps", AccessibilityService.GLOBAL_ACTION_RECENTS);
+    addVirtualElements(elements);
 
     for (ScreenElement element : elements) {
       String text = element.getRenderedText();

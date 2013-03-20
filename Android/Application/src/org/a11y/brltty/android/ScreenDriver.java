@@ -20,6 +20,8 @@ package org.a11y.brltty.android;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 import android.util.Log;
 
@@ -32,9 +34,23 @@ public class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
   private static final String ROOT_NODE_NAME = "root";
-  private static final boolean LOG_ACCESSIBILITY_EVENTS = true;
-
+  private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
   private static BrailleRenderer brailleRenderer = new SimpleBrailleRenderer();
+
+  private static class TextEntry {
+    private int cursorOffset = 0;
+
+    public int getCursorOffset () {
+      return cursorOffset;
+    }
+
+    public void setCursorOffset (int offset) {
+      cursorOffset = offset;
+    }
+
+    public TextEntry () {
+    }
+  }
 
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
@@ -45,6 +61,9 @@ public class ScreenDriver {
   private static int screenWidth;
   private static int cursorColumn;
   private static int cursorRow;
+
+  private static int currentWindow = -1;
+  private static final Map<Rect, TextEntry> textEntries = new HashMap<Rect, TextEntry>();
 
   private static AccessibilityNodeInfo getRootNode (AccessibilityNodeInfo node) {
     if (node != null) {
@@ -95,11 +114,29 @@ public class ScreenDriver {
   private static void addPropertyValue (
     List<CharSequence> values,
     boolean condition,
-    CharSequence value
+    CharSequence onValue,
+    CharSequence offValue
   ) {
-    if (condition) {
+    CharSequence value = condition? onValue: offValue;
+
+    if (value != null) {
       values.add(value);
     }
+  }
+
+  private static void addPropertyValue (
+    List<CharSequence> values,
+    boolean condition,
+    CharSequence onValue
+  ) {
+    addPropertyValue(values, condition, onValue, null);
+  }
+
+  private static void addPropertyValue (
+    List<CharSequence> values,
+    CharSequence value
+  ) {
+    addPropertyValue(values, true, value);
   }
 
   private static void addNodeProperty (
@@ -135,7 +172,6 @@ public class ScreenDriver {
   ) {
     {
       List<CharSequence> values = new ArrayList<CharSequence>();
-      addPropertyValue(values, node.isVisibleToUser(), "vis");
       addPropertyValue(values, node.getParent()==null, ROOT_NODE_NAME);
 
       {
@@ -143,7 +179,8 @@ public class ScreenDriver {
         addPropertyValue(values, count>0, "cld=" + count);
       }
 
-      addPropertyValue(values, node.isEnabled(), "enb");
+      addPropertyValue(values, node.isVisibleToUser(), "vis", "inv");
+      addPropertyValue(values, node.isEnabled(), "enb", "dsb");
       addPropertyValue(values, node.isSelected(), "sel");
       addPropertyValue(values, node.isScrollable(), "scl");
       addPropertyValue(values, node.isFocusable(), "fcb");
@@ -244,27 +281,67 @@ public class ScreenDriver {
     Log.d(LOG_TAG, "accessibility event: " + event.getEventType() + "(" + event.toString() + ")");
 
     AccessibilityNodeInfo node = event.getSource();
+
+    if (node != null) {
+      Log.d(LOG_TAG, "current window: " + node.getWindowId());
+    }
+
     logAccessibilityNode(node, "event node");
     logSubtreeProperties(getRootNode(node));
   }
 
-  public static void handleAccessibilityEvent (AccessibilityEvent event) {
+  private static void clearWindowData () {
+    textEntries.clear();
+  }
+
+  private static TextEntry getTextEntry (AccessibilityNodeInfo node, boolean create) {
+    Rect key = new Rect();
+    node.getBoundsInScreen(key);
+    TextEntry textEntry = textEntries.get(key);
+
+    if (textEntry == null) {
+      if (create) {
+        textEntry = new TextEntry();
+        textEntries.put(key, textEntry);
+      }
+    }
+
+    return textEntry;
+  }
+
+  private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
+    getTextEntry(node, true).setCursorOffset(offset);
+  }
+
+  public static void onAccessibilityEvent (AccessibilityEvent event) {
     if (LOG_ACCESSIBILITY_EVENTS) {
       logAccessibilityEvent(event);
     }
 
     switch (event.getEventType()) {
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-        synchronized (eventLock) {
-          eventNode = event.getSource();
-        }
+        setTextCursor(event.getSource(), event.getFromIndex() + event.getAddedCount());
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
+        setTextCursor(event.getSource(), event.getFromIndex());
         break;
 
       default:
-        break;
+        return;
+    }
+
+    synchronized (eventLock) {
+      eventNode = event.getSource();
     }
   }
 
@@ -302,12 +379,9 @@ public class ScreenDriver {
       AccessibilityNodeInfo root = getRootNode(currentNode);
 
       if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY)) != null) {
-        logAccessibilityNode(node, "accessibility focus");
       } else if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)) != null) {
-        logAccessibilityNode(node, "input focus");
       } else {
         node = currentNode;
-        logAccessibilityNode(node, "event node");
       }
     }
 
@@ -317,7 +391,18 @@ public class ScreenDriver {
 
     if (element != null) {
       Rect brailleLocation = element.getBrailleLocation();
-      setCursorLocation(brailleLocation.left, brailleLocation.top);
+      int column = brailleLocation.left;
+      int row = brailleLocation.top;
+
+      {
+        TextEntry textEntry = getTextEntry(node, false);
+
+        if (textEntry != null) {
+          column += textEntry.getCursorOffset();
+        }
+      }
+
+      setCursorLocation(column, row);
     } else {
       setCursorLocation(0, 0);
     }
@@ -381,6 +466,13 @@ public class ScreenDriver {
     }
 
     if (hasChanged) {
+      int window = currentNode.getWindowId();
+
+      if (window != currentWindow) {
+        clearWindowData();
+        currentWindow = window;
+      }
+
       renderSubtree(getRootNode(currentNode));
     }
   }

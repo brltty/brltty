@@ -20,7 +20,18 @@ package org.a11y.brltty.android;
 
 import java.util.List;
 
+import android.accessibilityservice.AccessibilityService;
+
 public abstract class BrailleRenderer {
+  protected void addVirtualElements (ScreenElementList elements) {
+    elements.addAtTop("Notifications", AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+    elements.addAtTop("Quick Settings", AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+
+    elements.addAtBottom("Back", AccessibilityService.GLOBAL_ACTION_BACK);
+    elements.addAtBottom("Home", AccessibilityService.GLOBAL_ACTION_HOME);
+    elements.addAtBottom("Recent Apps", AccessibilityService.GLOBAL_ACTION_RECENTS);
+  }
+
   public abstract void renderElements (
     List<CharSequence> rows,
     ScreenElementList elements
