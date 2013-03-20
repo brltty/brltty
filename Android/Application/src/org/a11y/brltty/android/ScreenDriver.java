@@ -81,10 +81,32 @@ public class ScreenDriver {
     return node;
   }
 
-  private static ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
+  private static ScreenElement findScreenElement (AccessibilityNodeInfo node) {
     Rect location = new Rect();
     node.getBoundsInScreen(location);
     return screenElements.findByVisualLocation(location.left, location.top, location.right, location.bottom);
+  }
+
+  private static ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
+    ScreenElement element = findScreenElement(node);
+
+    if (element != null) {
+      if (element.getBrailleLocation() != null) {
+        return element;
+      }
+    }
+
+    {
+      int childCount = node.getChildCount();
+
+      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+        if ((element = findRenderedScreenElement(node.getChild(childIndex))) != null) {
+          return element;
+        }
+      }
+    }
+
+    return null;
   }
 
   private static String normalizeTextProperty (CharSequence text) {
@@ -339,7 +361,7 @@ public class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
-        setTextCursor(event.getSource(), event.getFromIndex());
+        setTextCursor(event.getSource(), event.getToIndex());
         break;
 
       default:
