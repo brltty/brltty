@@ -148,10 +148,13 @@ routeCursor_AndroidScreen (int column, int row, int screen) {
                                              JAVA_SIG_INT // column
                                              JAVA_SIG_INT // row
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, column, row) != JNI_FALSE;
+      jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, column, row);
 
-      if (!clearJavaException(env, 1)) return result;
-      errno = EIO;
+      if (!clearJavaException(env, 1)) {
+        if (result != JNI_FALSE) {
+          return 1;
+        }
+      }
     }
   }
 
