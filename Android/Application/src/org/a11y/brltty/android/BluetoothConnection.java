@@ -48,8 +48,6 @@ public class BluetoothConnection {
   protected InputThread inputThread = null;
 
   private class InputThread extends Thread {
-    private final String LOG_TAG = InputThread.class.getName();
-
     volatile boolean stop = false;
     InputStream inputStream;
     int pipeDescriptor;

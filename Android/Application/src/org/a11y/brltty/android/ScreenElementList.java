@@ -144,6 +144,10 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return find(ScreenElement.brailleLocationGetter, left, top, right, bottom);
   }
 
+  public final ScreenElement findByBrailleLocation (int column, int row) {
+    return findByBrailleLocation(column, row, column, row);
+  }
+
   public final void add (String text, AccessibilityNodeInfo node) {
     add(new RealScreenElement(text, node));
   }

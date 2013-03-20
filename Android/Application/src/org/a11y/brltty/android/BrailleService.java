@@ -25,10 +25,6 @@ import android.util.Log;
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-
 import android.content.Intent;
 
 public class BrailleService extends AccessibilityService {
@@ -44,16 +40,32 @@ public class BrailleService extends AccessibilityService {
   @Override
   public void onCreate () {
     super.onCreate();
-    Log.d(LOG_TAG, "braille accessibility service created");
+    Log.d(LOG_TAG, "braille service created");
     brailleService = this;
   }
 
   @Override
   protected void onServiceConnected () {
-    Log.d(LOG_TAG, "braille accessibility service connected");
+    Log.d(LOG_TAG, "braille service connected");
+
+    InputService.startInputService(this);
 
     coreThread = new CoreThread(this);
     coreThread.start();
+  }
+
+  @Override
+  public boolean onUnbind (Intent intent) {
+    Log.d(LOG_TAG, "braille service disconnected");
+    CoreWrapper.stop();
+
+    try {
+      coreThread.join();
+    } catch (InterruptedException exception) {
+    }
+
+    InputService.stopInputService();
+    return false;
   }
 
   @Override
@@ -63,18 +75,5 @@ public class BrailleService extends AccessibilityService {
 
   @Override
   public void onInterrupt () {
-  }
-
-  @Override
-  public boolean onUnbind (Intent intent) {
-    Log.d(LOG_TAG, "braille accessibility service disconnected");
-    CoreWrapper.stop();
-
-    try {
-      coreThread.join();
-    } catch (InterruptedException exception) {
-    }
-
-    return false;
   }
 }

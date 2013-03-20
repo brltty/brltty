@@ -350,6 +350,9 @@ public class ScreenDriver {
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
         break;
 
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
         break;
 
@@ -517,7 +520,7 @@ public class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row != -1) {
-      ScreenElement element = screenElements.findByBrailleLocation(column, row, column, row);
+      ScreenElement element = screenElements.findByBrailleLocation(column, row);
 
       if (element != null) {
         if (element.performAction(column - element.getBrailleLocation().left)) {
