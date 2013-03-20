@@ -59,9 +59,9 @@ describe_AndroidScreen (ScreenDescription *description) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
-    if (findJavaStaticMethod(env, &method, screenDriverClass, "updateCurrentView",
+    if (findJavaStaticMethod(env, &method, screenDriverClass, "updateScreen",
                              JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
-      (*env)->CallStaticObjectMethod(env, screenDriverClass, method);
+      (*env)->CallStaticVoidMethod(env, screenDriverClass, method);
 
       if (!clearJavaException(env, 1)) {
         description->cols = screenColumns;
@@ -90,7 +90,7 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
       jcharArray textBuffer = (*env)->NewCharArray(env, columnCount);
 
       if (textBuffer) {
-        (*env)->CallStaticObjectMethod(env, screenDriverClass, method, textBuffer, rowNumber, columnNumber);
+        (*env)->CallStaticVoidMethod(env, screenDriverClass, method, textBuffer, rowNumber, columnNumber);
 
         if (!clearJavaException(env, 1)) {
           jchar buffer[columnCount];
@@ -148,7 +148,7 @@ routeCursor_AndroidScreen (int column, int row, int screen) {
                                              JAVA_SIG_INT // column
                                              JAVA_SIG_INT // row
                                             ))) {
-      int result = (*env)->CallStaticObjectMethod(env, screenDriverClass, method, column, row) != JNI_FALSE;
+      jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, column, row) != JNI_FALSE;
 
       if (!clearJavaException(env, 1)) return result;
       errno = EIO;
@@ -158,11 +158,92 @@ routeCursor_AndroidScreen (int column, int row, int screen) {
   return 0;
 }
 
+static int
+insertKey_AndroidScreen (ScreenKey key) {
+  if (findScreenDriverClass()) {
+    wchar_t character = key & SCR_KEY_CHAR_MASK;
+
+    logMessage(LOG_DEBUG, "insert key: %04X", key);
+    setKeyModifiers(&key, 0);
+
+    if (!isSpecialKey(key)) {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, screenDriverClass, "inputCharacter",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_CHAR // character
+                                              ))) {
+        jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, character);
+
+        if (!clearJavaException(env, 1)) {
+          if (result != JNI_FALSE) {
+            return 1;
+          }
+        }
+      }
+    } else if (character < SCR_KEY_FUNCTION) {
+#define KEY(key,method) [key] = method
+      static const char *const methodNames[SCR_KEY_FUNCTION] = {
+        KEY(SCR_KEY_ENTER, "inputKeyEnter"),
+        KEY(SCR_KEY_TAB, "inputKeyTab"),
+        KEY(SCR_KEY_BACKSPACE, "inputKeyBackspace"),
+        KEY(SCR_KEY_ESCAPE, "inputKeyEscape"),
+        KEY(SCR_KEY_CURSOR_LEFT, "inputKeyCursorLeft"),
+        KEY(SCR_KEY_CURSOR_RIGHT, "inputKeyCursorRight"),
+        KEY(SCR_KEY_CURSOR_UP, "inputKeyCursorUp"),
+        KEY(SCR_KEY_CURSOR_DOWN, "inputKeyCursorDown"),
+        KEY(SCR_KEY_PAGE_UP, "inputKeyPageUp"),
+        KEY(SCR_KEY_PAGE_DOWN, "inputKeyPageDown"),
+        KEY(SCR_KEY_HOME, "inputKeyHome"),
+        KEY(SCR_KEY_END, "inputKeyEnd"),
+        KEY(SCR_KEY_INSERT, "inputKeyInsert"),
+        KEY(SCR_KEY_DELETE, "inputKeyDelete"),
+      };
+      const char *methodName = methodNames[character];
+#undef KEY
+
+      static jmethodID methodIdentifiers[SCR_KEY_FUNCTION];
+      jmethodID *methodIdentifier = &methodIdentifiers[character];
+
+      if (findJavaStaticMethod(env, methodIdentifier, screenDriverClass, methodName,
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                              ))) {
+        jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, *methodIdentifier);
+
+        if (!clearJavaException(env, 1)) {
+          if (result != JNI_FALSE) {
+            return 1;
+          }
+        }
+      }
+    } else {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, screenDriverClass, "inputKeyFunction",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_INT // key
+                                              ))) {
+        jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, character);
+
+        if (!clearJavaException(env, 1)) {
+          if (result != JNI_FALSE) {
+            return 1;
+          }
+        }
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "unsuported key: %04X", key);
+  return 0;
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
+  main->base.insertKey = insertKey_AndroidScreen;
   env = getJavaNativeInterface();
 }

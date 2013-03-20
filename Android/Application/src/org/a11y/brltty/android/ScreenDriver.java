@@ -484,7 +484,7 @@ public class ScreenDriver {
     );
   }
 
-  public static void updateCurrentView () {
+  public static void updateScreen () {
     boolean hasChanged;
 
     synchronized (eventLock) {
@@ -529,6 +529,70 @@ public class ScreenDriver {
       }
     }
 
+    return false;
+  }
+
+  public static boolean inputCharacter (char character) {
+    return false;
+  }
+
+  public static boolean inputKeyEnter () {
+    return false;
+  }
+
+  public static boolean inputKeyTab () {
+    return false;
+  }
+
+  public static boolean inputKeyBackspace () {
+    return false;
+  }
+
+  public static boolean inputKeyEscape () {
+    return false;
+  }
+
+  public static boolean inputKeyCursorLeft () {
+    return false;
+  }
+
+  public static boolean inputKeyCursorRight () {
+    return false;
+  }
+
+  public static boolean inputKeyCursorUp () {
+    return false;
+  }
+
+  public static boolean inputKeyCursorDown () {
+    return false;
+  }
+
+  public static boolean inputKeyPageUp () {
+    return false;
+  }
+
+  public static boolean inputKeyPageDown () {
+    return false;
+  }
+
+  public static boolean inputKeyHome () {
+    return false;
+  }
+
+  public static boolean inputKeyEnd () {
+    return false;
+  }
+
+  public static boolean inputKeyInsert () {
+    return false;
+  }
+
+  public static boolean inputKeyDelete () {
+    return false;
+  }
+
+  public static boolean inputKeyFunction (int key) {
     return false;
   }
 

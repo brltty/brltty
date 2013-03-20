@@ -185,8 +185,8 @@ Device" and select it from the list of devices that BRLTTY knows about.
 ----------------------------------------------------------------------
 
 
-The Routing Keys
-================
+Navigation
+==========
 
 The routing keys of the braille device are used to perform actions on 
 screen elements. Starting with the leftmost routing key over a screen 
