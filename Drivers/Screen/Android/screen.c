@@ -59,7 +59,7 @@ describe_AndroidScreen (ScreenDescription *description) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
-    if (findJavaStaticMethod(env, &method, screenDriverClass, "updateScreen",
+    if (findJavaStaticMethod(env, &method, screenDriverClass, "refreshScreen",
                              JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
       (*env)->CallStaticVoidMethod(env, screenDriverClass, method);
 

@@ -35,7 +35,6 @@ public class ScreenDriver {
 
   private static final String ROOT_NODE_NAME = "root";
   private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
-  private static BrailleRenderer brailleRenderer = new SimpleBrailleRenderer();
 
   private static class TextEntry {
     private int cursorOffset = 0;
@@ -471,7 +470,7 @@ public class ScreenDriver {
     ScreenElementList elements = new ScreenElementList();
 
     addScreenElements(elements, root);
-    brailleRenderer.renderScreenElements(rows, elements);
+    BrailleRenderer.getBrailleRenderer().renderScreenElements(rows, elements);
 
     setScreenRows(rows);
     screenElements = elements;
@@ -484,7 +483,7 @@ public class ScreenDriver {
     );
   }
 
-  public static void updateScreen () {
+  public static void refreshScreen () {
     boolean hasChanged;
 
     synchronized (eventLock) {

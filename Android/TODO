@@ -15,4 +15,6 @@ a better way (than location) to map a ScreenElement to a View
 two-dimensional braille rendering
 memory wastage on restart
 manual restart needed when settings are changed
+recycle events and nodes
+initial screen needs an event
 set the actual locations of the bottom three buttons

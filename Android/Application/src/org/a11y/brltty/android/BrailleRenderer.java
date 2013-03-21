@@ -23,6 +23,13 @@ import java.util.List;
 import android.accessibilityservice.AccessibilityService;
 
 public abstract class BrailleRenderer {
+  private static final BrailleRenderer simpleBrailleRenderer = new SimpleBrailleRenderer();
+  private static BrailleRenderer currentBrailleRenderer = simpleBrailleRenderer;
+
+  public static BrailleRenderer getBrailleRenderer () {
+    return currentBrailleRenderer;
+  }
+
   protected void addVirtualElements (ScreenElementList elements) {
     elements.addAtTop("Notifications", AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
     elements.addAtTop("Quick Settings", AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
