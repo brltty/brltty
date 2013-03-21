@@ -33,7 +33,7 @@ try:
   b.write(
       regionBegin = 1,
       regionSize = 40,
-      text = u"Press any key to exit ¤                 ",
+      text = "Press any key to exit ¤                 ",
       orMask = "".center(21,underline) + "".center(19,chr(0)))
 
   b.acceptKeys(brlapi.rangeType_all,[0])
@@ -175,7 +175,7 @@ cdef class WriteStruct:
 			cdef char *c_val
 			if (type(val) == unicode):
 				val = val.encode('UTF-8')
-				self.charset = 'UTF-8'
+				self.charset = 'UTF-8'.encode("ASCII")
 			if (self.props.text):
 				c_brlapi.free(self.props.text)
 			if (val):
@@ -208,6 +208,8 @@ cdef class WriteStruct:
 			if (self.props.charset):
 				c_brlapi.free(self.props.charset)
 			if (val):
+				if (type(val) == unicode):
+					val = val.encode('ASCII')
 				size = len(val)
 				c_val = val
 				self.props.charset = <char*>c_brlapi.malloc(size+1)
@@ -229,6 +231,8 @@ cdef class WriteStruct:
 			if (self.props.andMask):
 				c_brlapi.free(self.props.andMask)
 			if (val):
+				if (type(val) == unicode):
+					val = val.encode('latin1')
 				size = len(val)
 				c_val = val
 				self.props.andMask = <unsigned char*>c_brlapi.malloc(size+1)
@@ -250,6 +254,8 @@ cdef class WriteStruct:
 			if (self.props.orMask):
 				c_brlapi.free(self.props.orMask)
 			if (val):
+				if (type(val) == unicode):
+					val = val.encode('latin1')
 				size = len(val)
 				c_val = val
 				self.props.orMask = <unsigned char*>c_brlapi.malloc(size+1)
@@ -360,6 +366,8 @@ cdef class Connection:
 		if not driver:
 			c_driver = NULL
 		else:
+			if (type(driver) == unicode):
+				driver = driver.encode('ASCII')
 			c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driver)
@@ -393,6 +401,8 @@ cdef class Connection:
 		if not driver:
 			c_driver = NULL
 		else:
+			if (type(driver) == unicode):
+				driver = driver.encode('ASCII')
 			c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driver)
@@ -484,8 +494,10 @@ cdef class Connection:
 		cdef unsigned char *c_udots
 		(x, y) = self.displaySize
 		dispSize = x * y
+		if (type(dots) == unicode):
+			dots = dots.encode('latin1')
 		if (len(dots) < dispSize):
-			dots = dots + "".center(dispSize - len(dots), '\0')
+			dots = dots + b"".center(dispSize - len(dots), '\0')
 		c_dots = dots
 		c_udots = <unsigned char *>c_dots
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
@@ -688,6 +700,8 @@ cdef class Connection:
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
 		cdef int retval
 		cdef char *c_driver
+		if (type(driver) == unicode):
+			driver = driver.encode('ASCII')
 		c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driver)
