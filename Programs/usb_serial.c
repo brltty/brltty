@@ -452,20 +452,12 @@ usbSetRtsState_FTDI (UsbDevice *device, int state) {
   return usbSetModemState_FTDI(device, state, 1, "RTS");
 }
 
-static int
-usbEnableAdapter_FTDI (UsbDevice *device) {
-  if (!usbSetDtrState_FTDI(device, 1)) return 0;
-  if (!usbSetRtsState_FTDI(device, 1)) return 0;
-  return 1;
-}
-
 static const UsbSerialOperations usbSerialOperations_FTDI_SIO = {
   .setBaud = usbSetBaud_FTDI_SIO,
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
-  .setRtsState = usbSetRtsState_FTDI,
-  .enableAdapter = usbEnableAdapter_FTDI
+  .setRtsState = usbSetRtsState_FTDI
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM = {
@@ -473,8 +465,7 @@ static const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM = {
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
-  .setRtsState = usbSetRtsState_FTDI,
-  .enableAdapter = usbEnableAdapter_FTDI
+  .setRtsState = usbSetRtsState_FTDI
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
@@ -482,8 +473,7 @@ static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
   .setDtrState = usbSetDtrState_FTDI,
-  .setRtsState = usbSetRtsState_FTDI,
-  .enableAdapter = usbEnableAdapter_FTDI
+  .setRtsState = usbSetRtsState_FTDI
 };
 
 
