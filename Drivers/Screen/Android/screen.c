@@ -226,7 +226,7 @@ insertKey_AndroidScreen (ScreenKey key) {
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                JAVA_SIG_INT // key
                                               ))) {
-        jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, character);
+        jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method, character-SCR_KEY_FUNCTION);
 
         if (!clearJavaException(env, 1)) {
           if (result != JNI_FALSE) {
