@@ -61,7 +61,7 @@ done as follows:
    ./cfg-android -q
 
 The -q option, which is the short form of the configure command's 
---quiet option, means to not diseplay any progress information (there's 
+--quiet option, means to not display any progress information (there's 
 usually quite a lot of it). Only warnings and errors are displayed.
 
 ----------------------------------------------------------------------
@@ -92,6 +92,11 @@ The -s option of the make command, which is short for its --silent
 option, means to not display any progress information (there's usually 
 quite a lot of it). Only warnings and errors are displayed.
 
+The result of the build is the file "BRLTTY_App-debug.apk".  It will
+be in the "bin" subdirectory of the Android Application subdirectory.
+
+   /path/to/brltty/Android/Application/bin/BRLTTY_App-debug.apk
+
 ----------------------------------------------------------------------
 
 
@@ -105,6 +110,10 @@ subdirectory.
    cd /path/to/brltty/Android/Application
 
 You also need to connect your device to your host via USB.
+
+You only need the Android SDK for installing or uninstalling an
+application from your device. You only need the Android NDK if you want
+to do your own builds.
 
 To install BRLTTY, use this command:
 
