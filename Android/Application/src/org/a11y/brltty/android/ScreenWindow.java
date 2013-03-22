@@ -23,8 +23,6 @@ import java.util.HashMap;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.graphics.Rect;
-
 public class ScreenWindow {
   public class TextEntry {
     private int cursorOffset = 0;
@@ -43,25 +41,24 @@ public class ScreenWindow {
 
   private final int windowIdentifier;
 
-  private final Map<Rect, TextEntry> textEntries = new HashMap<Rect, TextEntry>();
+  private final Map<Integer, TextEntry> textEntries = new HashMap<Integer, TextEntry>();
 
   public final int getWindowIdentifier () {
     return windowIdentifier;
   }
 
   public TextEntry getTextEntry (AccessibilityNodeInfo node, boolean canCreate) {
-    Rect key = new Rect();
-    node.getBoundsInScreen(key);
-    TextEntry textEntry = textEntries.get(key);
+    Integer key = new Integer(node.hashCode());
+    TextEntry value = textEntries.get(key);
 
-    if (textEntry == null) {
+    if (value == null) {
       if (canCreate) {
-        textEntry = new TextEntry();
-        textEntries.put(key, textEntry);
+        value = new TextEntry();
+        textEntries.put(key, value);
       }
     }
 
-    return textEntry;
+    return value;
   }
 
   public ScreenWindow (int identifier) {
