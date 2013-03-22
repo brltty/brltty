@@ -225,6 +225,20 @@ public class ScreenDriver {
     currentWindow.getTextEntry(node, true).setCursorOffset(offset);
   }
 
+  private static boolean setAccessibilityFocus (AccessibilityNodeInfo node) {
+    if (node != null) {
+      if (node.isVisibleToUser()) {
+        if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
+          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     if (LOG_ACCESSIBILITY_EVENTS) {
       logAccessibilityEvent(event);
@@ -235,6 +249,7 @@ public class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        setAccessibilityFocus(event.getSource());
         break;
 
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
@@ -417,5 +432,9 @@ public class ScreenDriver {
 
   public static boolean inputKeyFunction (int key) {
     return false;
+  }
+
+  static {
+    exportScreenProperties();
   }
 }
