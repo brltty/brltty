@@ -140,6 +140,10 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return find(ScreenElement.visualLocationGetter, left, top, right, bottom);
   }
 
+  public final ScreenElement findByVisualLocation (Rect location) {
+    return findByVisualLocation(location.left, location.top, location.right, location.bottom);
+  }
+
   public final ScreenElement findByBrailleLocation (int left, int top, int right, int bottom) {
     return find(ScreenElement.brailleLocationGetter, left, top, right, bottom);
   }

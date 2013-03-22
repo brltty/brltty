@@ -53,7 +53,7 @@ public class RenderedScreen {
   public final ScreenElement findScreenElement (AccessibilityNodeInfo node) {
     Rect location = new Rect();
     node.getBoundsInScreen(location);
-    return screenElements.findByVisualLocation(location.left, location.top, location.right, location.bottom);
+    return screenElements.findByVisualLocation(location);
   }
 
   public final ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
@@ -78,52 +78,6 @@ public class RenderedScreen {
     return null;
   }
 
-  public static AccessibilityNodeInfo findRootNode (AccessibilityNodeInfo node) {
-    if (node != null) {
-      while (true) {
-        AccessibilityNodeInfo parent = node.getParent();
-
-        if (parent == null) {
-          break;
-        }
-
-        node = parent;
-      }
-    }
-
-    return node;
-  }
-
-  private static String normalizeText (CharSequence text) {
-    if (text != null) {
-      String string = text.toString().trim();
-
-      if (string.length() > 0) {
-        return string;
-      }
-    }
-
-    return null;
-  }
-
-  public static String getNodeText (AccessibilityNodeInfo node) {
-    String text;
-
-    if ((text = normalizeText(node.getContentDescription())) != null) {
-      return text;
-    }
-
-    if ((text = normalizeText(node.getText())) != null) {
-      return text;
-    }
-
-    if (node.getActions() != 0)  {
-      return "";
-    }
-
-    return null;
-  }
-
   public final boolean performAction (int column, int row) {
     ScreenElement element = screenElements.findByBrailleLocation(column, row);
 
@@ -139,7 +93,7 @@ public class RenderedScreen {
   private final void addScreenElements (AccessibilityNodeInfo root) {
     if (root != null) {
       if (root.isVisibleToUser()) {
-        String text = getNodeText(root);
+        String text = ScreenUtilities.getNodeText(root);
 
         if (text != null) {
           screenElements.add(text, root);
@@ -172,7 +126,7 @@ public class RenderedScreen {
 
   public RenderedScreen (AccessibilityNodeInfo node) {
     eventNode = node;
-    rootNode = findRootNode(node);
+    rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
     BrailleRenderer.getBrailleRenderer().renderScreenElements(screenRows, screenElements);

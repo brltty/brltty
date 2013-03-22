@@ -18,208 +18,22 @@
 
 package org.a11y.brltty.android;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import android.util.Log;
-
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
 
 public class ScreenDriver {
-  private static final String LOG_TAG = ScreenDriver.class.getName();
-
-  private static final String ROOT_NODE_NAME = "root";
   private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
 
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
 
+  private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = new RenderedScreen(null);
   private static int cursorColumn = 0;
   private static int cursorRow = 0;
-
-  private static void addPropertyValue (
-    List<CharSequence> values,
-    boolean condition,
-    CharSequence onValue,
-    CharSequence offValue
-  ) {
-    CharSequence value = condition? onValue: offValue;
-
-    if (value != null) {
-      values.add(value);
-    }
-  }
-
-  private static void addPropertyValue (
-    List<CharSequence> values,
-    boolean condition,
-    CharSequence onValue
-  ) {
-    addPropertyValue(values, condition, onValue, null);
-  }
-
-  private static void addPropertyValue (
-    List<CharSequence> values,
-    CharSequence value
-  ) {
-    addPropertyValue(values, true, value);
-  }
-
-  private static void addNodeProperty (
-    List<CharSequence> rows,
-    CharSequence name,
-    CharSequence ... values
-  ) {
-    if (values.length > 0) {
-      StringBuilder sb = new StringBuilder();
-
-      sb.append(name);
-      sb.append(':');
-
-      for (CharSequence value : values) {
-        sb.append(' ');
-
-        if (value == null) {
-          sb.append("null");
-        } else if (value.length() == 0) {
-          sb.append("nil");
-        } else {
-          sb.append(value);
-        }
-      }
-
-      rows.add(sb.toString());
-    }
-  }
-
-  private static void addNodeProperties (
-    List<CharSequence> rows,
-    AccessibilityNodeInfo node
-  ) {
-    {
-      List<CharSequence> values = new ArrayList<CharSequence>();
-      addPropertyValue(values, node.getParent()==null, ROOT_NODE_NAME);
-
-      {
-        int count = node.getChildCount();
-        addPropertyValue(values, count>0, "cld=" + count);
-      }
-
-      addPropertyValue(values, node.isVisibleToUser(), "vis", "inv");
-      addPropertyValue(values, node.isEnabled(), "enb", "dsb");
-      addPropertyValue(values, node.isSelected(), "sel");
-      addPropertyValue(values, node.isScrollable(), "scl");
-      addPropertyValue(values, node.isFocusable(), "fcb");
-      addPropertyValue(values, node.isFocused(), "fcd");
-      addPropertyValue(values, node.isAccessibilityFocused(), "fca");
-      addPropertyValue(values, node.isClickable(), "clk");
-      addPropertyValue(values, node.isLongClickable(), "lng");
-      addPropertyValue(values, node.isCheckable(), "ckb");
-      addPropertyValue(values, node.isChecked(), "ckd");
-      addPropertyValue(values, node.isPassword(), "pwd");
-      addNodeProperty(rows, "flgs", values.toArray(new CharSequence[values.size()]));
-    }
-
-    addNodeProperty(rows, "desc", node.getContentDescription());
-    addNodeProperty(rows, "text", node.getText());
-    addNodeProperty(rows, "obj", node.getClassName());
-    addNodeProperty(rows, "app", node.getPackageName());
-
-    {
-      AccessibilityNodeInfo subnode = node.getLabelFor();
-
-      if (subnode != null) {
-        addNodeProperty(rows, "lbl", currentScreen.getNodeText(subnode));
-      }
-    }
-
-    {
-      AccessibilityNodeInfo subnode = node.getLabeledBy();
-
-      if (subnode != null) {
-        addNodeProperty(rows, "lbd", currentScreen.getNodeText(subnode));
-      }
-    }
-
-    {
-      Rect location = new Rect();
-      node.getBoundsInScreen(location);
-      addNodeProperty(rows, "locn", location.toShortString());
-    }
-  }
-
-  private static void addSubtreeProperties (
-    List<CharSequence> rows,
-    AccessibilityNodeInfo root,
-    CharSequence name
-  ) {
-    addNodeProperty(rows, "name", name);
-
-    if (root != null) {
-      addNodeProperties(rows, root);
-
-      {
-        int childCount = root.getChildCount();
-
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          addSubtreeProperties(rows, root.getChild(childIndex), name + "." + childIndex);
-        }
-      }
-    }
-  }
-
-  private static void logSubtreeProperties (AccessibilityNodeInfo root) {
-    List<CharSequence> rows = new ArrayList<CharSequence>();
-    addSubtreeProperties(rows, root, ROOT_NODE_NAME);
-
-    for (CharSequence row : rows) {
-      Log.d(LOG_TAG, row.toString());
-    }
-  }
-
-  private static void logAccessibilityNode (AccessibilityNodeInfo node, String description) {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(description);
-    sb.append(": ");
-
-    if (node == null) {
-      sb.append("null");
-    } else {
-      String text = currentScreen.getNodeText(node);
-
-      if ((text != null) && (text.length() > 0)) {
-        sb.append(text);
-      } else {
-        sb.append(node.getClassName());
-      }
-
-      Rect location = new Rect();
-      node.getBoundsInScreen(location);
-      sb.append(' ');
-      sb.append(location.toShortString());
-    }
-
-    Log.d(LOG_TAG, sb.toString());
-  }
-
-  private static void logAccessibilityEvent (AccessibilityEvent event) {
-    Log.d(LOG_TAG, "accessibility event: " + event.getEventType() + "(" + event.toString() + ")");
-
-    AccessibilityNodeInfo node = event.getSource();
-
-    if (node != null) {
-      Log.d(LOG_TAG, "current window: " + node.getWindowId());
-    }
-
-    logAccessibilityNode(node, "event node");
-    logSubtreeProperties(currentScreen.findRootNode(node));
-  }
 
   private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
     currentWindow.getTextEntry(node, true).setCursorOffset(offset);
@@ -241,7 +55,7 @@ public class ScreenDriver {
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     if (LOG_ACCESSIBILITY_EVENTS) {
-      logAccessibilityEvent(event);
+      currentLogger.logEvent(event);
     }
 
     switch (event.getEventType()) {
