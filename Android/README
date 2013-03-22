@@ -131,6 +131,43 @@ is to reinstall it. You can do this with the following command:
 
    make -s reinstall
 
+If you've obtained your Android package file (apk) from some other 
+source (than building it for yourself), then it may have a different 
+name than the make file is expecting. It's useful, therefore, to know 
+what the actual host commands are for installing and uninstalling BRLTTY 
+from your device.
+
+The host command for installing an Android application is:
+
+   adb install /path/to/file
+
+The host command for reinstalling an Android application is:
+
+   adb install -r /path/to/file
+
+The host command for uninstalling an Android appliation is:
+
+   adb uninstall appliation.package.name
+
+So, to uninstall BRLTTY, the host command is:
+
+   adb uninstall org.a11y.brltty.android
+
+If any of these "make" or "adb" commands fail with an error like "device 
+not found", it's probably because your host's USB device permissions are 
+requiring root access. The solution to this problem is to restart the 
+adb (Android Debug Bridge) server such that it is running as root. With 
+this done, you yourself will then be able to use adb as a regular user.
+
+The commands to restart the adb server such that it's running as root 
+are as follows:
+
+   su
+   cd /path/to/android/sdk/platform-tools
+   ./adb kill-server
+   ./adb start-server
+   exit
+
 ----------------------------------------------------------------------
 
 
