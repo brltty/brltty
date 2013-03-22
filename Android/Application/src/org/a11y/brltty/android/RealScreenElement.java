@@ -19,8 +19,8 @@
 package org.a11y.brltty.android;
 
 import android.view.accessibility.AccessibilityNodeInfo;
-
 import android.graphics.Rect;
+import android.os.Bundle;
 
 public class RealScreenElement extends ScreenElement {
   private final AccessibilityNodeInfo accessibilityNode;
@@ -50,6 +50,44 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean isChecked () {
     return accessibilityNode.isChecked();
+  }
+
+  @Override
+  public boolean performAction (int offset) {
+    {
+      ScreenTextEditor editor = ScreenTextEditor.get(accessibilityNode);
+
+      if (editor != null) {
+        if ((offset -= editor.getCursorOffset()) != 0) {
+          Bundle bundle = new Bundle();
+          int action;
+
+          bundle.putInt(
+            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
+            AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
+          );
+
+          if (offset > 0) {
+            action = AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY;
+          } else {
+            action = AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
+            offset = -offset;
+          }
+
+          while (offset > 0) {
+            if (!accessibilityNode.performAction(action, bundle)) {
+              return false;
+            }
+
+            offset -= 1;
+          }
+        }
+
+        return true;
+      }
+    }
+
+    return super.performAction(offset);
   }
 
   private boolean doAction (int action) {

@@ -18,47 +18,11 @@
 
 package org.a11y.brltty.android;
 
-import java.util.Map;
-import java.util.HashMap;
-
-import android.view.accessibility.AccessibilityNodeInfo;
-
 public class ScreenWindow {
-  public class TextEntry {
-    private int cursorOffset = 0;
-
-    public final int getCursorOffset () {
-      return cursorOffset;
-    }
-
-    public final void setCursorOffset (int offset) {
-      cursorOffset = offset;
-    }
-
-    public TextEntry () {
-    }
-  }
-
   private final int windowIdentifier;
-
-  private final Map<Integer, TextEntry> textEntries = new HashMap<Integer, TextEntry>();
 
   public final int getWindowIdentifier () {
     return windowIdentifier;
-  }
-
-  public TextEntry getTextEntry (AccessibilityNodeInfo node, boolean canCreate) {
-    Integer key = new Integer(node.hashCode());
-    TextEntry value = textEntries.get(key);
-
-    if (value == null) {
-      if (canCreate) {
-        value = new TextEntry();
-        textEntries.put(key, value);
-      }
-    }
-
-    return value;
   }
 
   public ScreenWindow (int identifier) {

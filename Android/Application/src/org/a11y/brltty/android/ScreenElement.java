@@ -83,7 +83,7 @@ public class ScreenElement {
     return false;
   }
 
-  public final boolean performAction (int offset) {
+  public boolean performAction (int offset) {
     switch (offset) {
       case  0: return onBringCursor();
       case  1: return onClick();

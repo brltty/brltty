@@ -36,7 +36,7 @@ public class ScreenDriver {
   private static int cursorRow = 0;
 
   private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
-    currentWindow.getTextEntry(node, true).setCursorOffset(offset);
+    ScreenTextEditor.get(node, true).setCursorOffset(offset);
   }
 
   private static boolean setAccessibilityFocus (AccessibilityNodeInfo node) {
@@ -127,10 +127,10 @@ public class ScreenDriver {
       int row = location.top;
 
       {
-        ScreenWindow.TextEntry textEntry = currentWindow.getTextEntry(node, false);
+        ScreenTextEditor editor = ScreenTextEditor.get(node);
 
-        if (textEntry != null) {
-          column += textEntry.getCursorOffset();
+        if (editor != null) {
+          column += editor.getCursorOffset();
         }
       }
 
