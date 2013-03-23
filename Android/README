@@ -1,5 +1,5 @@
-Preparation for Building Android Applications
-=============================================
+Preparing Your Host for Building Android Applications
+=====================================================
 
 Install the Android SDK (Software Development Kit).
 
@@ -96,6 +96,33 @@ The result of the build is the file "BRLTTY_App-debug.apk".  It will
 be in the "bin" subdirectory of the Android Application subdirectory.
 
    /path/to/brltty/Android/Application/bin/BRLTTY_App-debug.apk
+
+"apk" is the file extension used for an installable Android package.
+
+----------------------------------------------------------------------
+
+
+Preparing Your Android Device for Installing an Android Package File
+====================================================================
+
+What you need is for "USB Debugging" to be enabled. This is done from 
+the "Developer Options" screen, which you can get to from the "Settings" 
+screen.
+
+Launch the "Settings" aplication, and look, way down near the bottom, 
+for "Developer Options". If you can't find it, the most likely cause is 
+a new feature which was introduced in Android 4.2 (Jelly Bean). If you 
+need to enable it, click on "About Phone", which, again, can be found at 
+the bottom of the "Settings" screen. Then, on the "About Phone" screen, 
+look for the "Build Number" line. Tap on "Build Nubmer" seven times and 
+your device will officially declare you to be a developer. You should 
+then be able to find "Developer Options" on the "Settings" screen.
+
+There's a checkbox at the top-right of the "Developer Options" screen. 
+It needs to be checked so that all of the other controls on that screen 
+will be enabled. After doing that, check the "USB Debugging" checkebox 
+(which can be found within the "Debugging" section). This enables the 
+"adb" (Android Debug Bridge) tool to be used with your Android device.
 
 ----------------------------------------------------------------------
 
@@ -234,15 +261,61 @@ Device" and select it from the list of devices that BRLTTY knows about.
 Navigation
 ==========
 
-The routing keys of the braille device are used to perform actions on 
-screen elements. Starting with the leftmost routing key over a screen 
-element, which we'll call key #0, these actions are as follows:
+The cursor is usually placed on the first character of the screen 
+element which currently has accessibility focus. The one exception to 
+this is that, within an editable input area, the cursor is placed at the 
+location within that area where input will be inserted.
+
+The cursor routing keys of the braille device perform their usual 
+function when within an editable input area - the key above a given 
+character brings the cursor to that character. In any other context, 
+however, a cursor routing key performs an action on the screen element 
+under it. Starting with the leftmost routing key over a screen element, 
+which we'll call key #0, the actions are as follows:
 
    0  Set Accessibility Focus (used for cursor tracking)
    1  Click
    2  Long Click
    3  Scroll Backward
    4  Scroll Forward
+
+----------------------------------------------------------------------
+
+
+When BRLTTY Crashes
+===================
+
+We hope, of course, that BRLTTY won't crash. If it does, though, we want 
+to know about it.
+
+If BRLTTY does crash, you'll get a dialog with a message like this:
+
+   Unfortunately, BRLTTY has stopped.
+
+This dialog will stay on the screen until you dismiss it by clicking its 
+"OK" button. Android will then try to automatically restart BRLTTY, so 
+don't be overly concerned if this dialog comeds up again. Android will 
+eventually give up if, after a few automatic restart attempts, it 
+detects that BRLTTY simply won't stay running.
+
+If this ever happens, then, if you can, connect your device to your host 
+via SUB as soon as possible in order to capture a debug log. To capture 
+the debug log, use this command:
+
+   adb logcat -d >/path/to/logfile
+
+The -d option means to dump the current Android system log. The "adb 
+logcat" command writes the log to its standard output, so you need to 
+redirect its standard output to whichever file you'd like the log to be 
+dumped into.
+
+The reason that we're asking you to try to capture the log as soon as 
+possible after the crash is that Android imposes limits on its log 
+storage so that the log can't consume too much of your device's 
+resources. If the log becomes too large, Android automatically removes 
+older entries from it. If you wait too long, therefore, the part of it 
+that shows how BRLTTY crashed may already have been automatically 
+removed.
 
 ----------------------------------------------------------------------
 
