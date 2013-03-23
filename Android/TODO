@@ -1,3 +1,5 @@
+document about turning on developer options
+document how to capture a log (for has stopped dialog)
 pass input from ScreenDriver to InputMethodService
 pass input from InputMethodService to the active View
 show when text is selected
@@ -18,3 +20,4 @@ manual restart needed when settings are changed
 recycle events and nodes
 initial screen needs an event
 set the actual locations of the bottom three buttons
+internationalization
