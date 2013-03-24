@@ -13,10 +13,10 @@ command:
 
   android update sdk -u
 
-The -u option, which is the short form of the --no-ui option, means to 
-bypass the graphical interface. There may still be command-line password 
-prompts for installing packages which are provided by various vendours. 
-Any of these can be easily skipped.
+The "-u" option, which is the short form of the "--no-ui" option, means
+to bypass the graphical interface. There may still be command-line
+password prompts for installing packages which are provided by various
+vendours. Any of these can be easily skipped.
 
 The 64-bit versions of the SDK and NDK depend on 32-bit system 
 libraries. If you're using a 64-bit version then you need to first 
@@ -60,9 +60,14 @@ done as follows:
    export ANDROID_NDK=/path/to/Android/NDK
    ./cfg-android -q
 
-The -q option, which is the short form of the configure command's 
---quiet option, means to not display any progress information (there's 
+The "-q" option, which is the short form of the "configure" command's 
+"--quiet" option, means to not display any progress information (there's 
 usually quite a lot of it). Only warnings and errors are displayed.
+
+In fact, all of the options you give to the "cfg-android" command are 
+passed directly through to the "configure" command. So, while 
+"cfg-android" supplies a default set of options to "configure", it's 
+easy for you to do your own customization.
 
 ----------------------------------------------------------------------
 
@@ -88,7 +93,7 @@ as follows:
    cd /path/to/brltty/AndroidApplication
    make -s
 
-The -s option of the make command, which is short for its --silent 
+The "-s" option of the make command, which is short for its "--silent" 
 option, means to not display any progress information (there's usually 
 quite a lot of it). Only warnings and errors are displayed.
 
