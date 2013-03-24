@@ -302,20 +302,20 @@ If this ever happens, then, if you can, connect your device to your host
 via SUB as soon as possible in order to capture a debug log. To capture 
 the debug log, use this command:
 
-   adb logcat -d >/path/to/logfile
+   adb logcat -v time -d >/path/to/logfile
 
-The -d option means to dump the current Android system log. The "adb 
+The "-v time" option means to add a timestamp to each log record. The 
+"-d" option means to dump the current Android system log. The "adb 
 logcat" command writes the log to its standard output, so you need to 
 redirect its standard output to whichever file you'd like the log to be 
 dumped into.
 
-The reason that we're asking you to try to capture the log as soon as 
-possible after the crash is that Android imposes limits on its log 
-storage so that the log can't consume too much of your device's 
-resources. If the log becomes too large, Android automatically removes 
-older entries from it. If you wait too long, therefore, the part of it 
-that shows how BRLTTY crashed may already have been automatically 
-removed.
+The reason for capturing the log as soon as possible after a problem is 
+that Android imposes limits on its log storage so that the log can't 
+consume too much of your device's resources. If the log becomes too 
+large, Android automatically removes older entries from it. If you wait 
+too long, therefore, the part of it that shows how BRLTTY crashed may 
+already have been automatically removed.
 
 ----------------------------------------------------------------------
 
