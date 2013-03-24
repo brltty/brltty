@@ -610,21 +610,17 @@ probeBrailleDisplay (
         BrailleResponseResult result = handleResponse(brl, responsePacket, size);
 
         switch (result) {
-          case BRL_RSP_CONTINUE:
-            break;
-
           case BRL_RSP_DONE:
             return 1;
 
-          case BRL_RSP_FAIL:
-            return 0;
-
           case BRL_RSP_UNEXPECTED:
             logUnexpectedPacket(responsePacket, size);
+          case BRL_RSP_CONTINUE:
             break;
 
           default:
             logMessage(LOG_WARNING, "unimplemented braille response result: %u", result);
+          case BRL_RSP_FAIL:
             return 0;
         }
       }
