@@ -59,6 +59,10 @@ public class RealScreenElement extends ScreenElement {
       ScreenTextEditor editor = ScreenTextEditor.get(accessibilityNode);
 
       if (editor != null) {
+        if (!onBringCursor()) {
+          return false;
+        }
+
         if ((offset -= editor.getCursorOffset()) != 0) {
           Bundle bundle = new Bundle();
           int action;
@@ -118,6 +122,16 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean onBringCursor () {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      {
+        AccessibilityNodeInfo focusedNode = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+        if (focusedNode != null) {
+          if (focusedNode.equals(accessibilityNode)) {
+            return true;
+          }
+        }
+      }
+
       return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
 
