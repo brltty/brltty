@@ -31,7 +31,7 @@ public class ScreenDriver {
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
 
-  private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
+  public static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = new RenderedScreen(null);
   private static int cursorColumn = 0;
@@ -96,6 +96,9 @@ public class ScreenDriver {
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
         goToFirstClickableSubnode(event.getSource());
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
         break;
 
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
@@ -186,6 +189,20 @@ public class ScreenDriver {
     }
   }
 
+  public static void refreshScreen (AccessibilityNodeInfo node) {
+    {
+      int identifier = node.getWindowId();
+
+      if (identifier != currentWindow.getWindowIdentifier()) {
+        currentWindow = new ScreenWindow(identifier);
+      }
+    }
+
+    currentScreen = new RenderedScreen(node);
+    setCursorLocation();
+    exportScreenProperties();
+  }
+
   public static void refreshScreen () {
     AccessibilityNodeInfo node;
 
@@ -196,17 +213,7 @@ public class ScreenDriver {
     }
 
     if (node != null) {
-      {
-        int identifier = node.getWindowId();
-
-        if (identifier != currentWindow.getWindowIdentifier()) {
-          currentWindow = new ScreenWindow(identifier);
-        }
-      }
-
-      currentScreen = new RenderedScreen(node);
-      setCursorLocation();
-      exportScreenProperties();
+      refreshScreen(node);
     }
   }
 
@@ -295,6 +302,6 @@ public class ScreenDriver {
   }
 
   static {
-    exportScreenProperties();
+    refreshScreen(BrailleService.getBrailleService().getRootInActiveWindow());
   }
 }
