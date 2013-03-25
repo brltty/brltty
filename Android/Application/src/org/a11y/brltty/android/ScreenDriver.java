@@ -39,13 +39,39 @@ public class ScreenDriver {
     ScreenTextEditor.get(node, true).setCursorOffset(offset);
   }
 
-  private static boolean setAccessibilityFocus (AccessibilityNodeInfo node) {
+  private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
+    final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS | AccessibilityNodeInfo.ACTION_CLICK;
+
     if (node != null) {
       if (node.isVisibleToUser()) {
-        if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
-          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
-            return true;
+        if (node.isEnabled()) {
+          if ((node.getActions() & actions) == actions) {
+            return node;
           }
+        }
+      }
+
+      {
+        int childCount = node.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo subnode = findFirstClickableSubnode(node.getChild(childIndex));
+
+          if (subnode != null) {
+            return subnode;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo node) {
+    if ((node = findFirstClickableSubnode(node)) != null) {
+      if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
+        if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
+          return true;
         }
       }
     }
@@ -63,7 +89,7 @@ public class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-        setAccessibilityFocus(event.getSource());
+        goToFirstClickableSubnode(event.getSource());
         break;
 
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
