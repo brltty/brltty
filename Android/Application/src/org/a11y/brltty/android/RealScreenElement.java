@@ -18,6 +18,7 @@
 
 package org.a11y.brltty.android;
 
+import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -54,7 +55,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean performAction (int offset) {
-    {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       ScreenTextEditor editor = ScreenTextEditor.get(accessibilityNode);
 
       if (editor != null) {
@@ -116,27 +117,47 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onBringCursor () {
-    return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+    }
+
+    return super.onBringCursor();
   }
 
   @Override
   public boolean onClick () {
-    return doAction(AccessibilityNodeInfo.ACTION_CLICK);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return doAction(AccessibilityNodeInfo.ACTION_CLICK);
+    }
+
+    return super.onClick();
   }
 
   @Override
   public boolean onLongClick () {
-    return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+    }
+
+    return super.onLongClick();
   }
 
   @Override
   public boolean onScrollBackward () {
-    return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+    }
+
+    return super.onScrollBackward();
   }
 
   @Override
   public boolean onScrollForward () {
-    return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+    }
+
+    return super.onScrollForward();
   }
 
   public RealScreenElement (String text, AccessibilityNodeInfo node) {

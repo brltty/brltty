@@ -111,13 +111,20 @@ public class ScreenLogger {
         addValue(values, count>0, "cld=" + count);
       }
 
-      addValue(values, node.isVisibleToUser(), "vis", "inv");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, node.isVisibleToUser(), "vis", "inv");
+      }
+
       addValue(values, node.isEnabled(), "enb", "dsb");
       addValue(values, node.isSelected(), "sel");
       addValue(values, node.isScrollable(), "scl");
       addValue(values, node.isFocusable(), "fcb");
       addValue(values, node.isFocused(), "fcd");
-      addValue(values, node.isAccessibilityFocused(), "fca");
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, node.isAccessibilityFocused(), "fca");
+      }
+
       addValue(values, node.isClickable(), "clk");
       addValue(values, node.isLongClickable(), "lng");
       addValue(values, node.isCheckable(), "ckb");
@@ -130,26 +137,36 @@ public class ScreenLogger {
       List<CharSequence> values = new ArrayList<CharSequence>();
       int actions = node.getActions();
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lng");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lng");
+      }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
+      }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "nmg");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "pmg");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mgn");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mgp");
+      }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "nhe");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "phe");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "hen");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "hep");
+      }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sel");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "csl");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "foc");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "cfc");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afc");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "caf");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
+      }
 
       logProperty("actn", values);
     }

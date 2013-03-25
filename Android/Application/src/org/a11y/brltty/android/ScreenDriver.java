@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import android.os.Build;
+
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -40,25 +42,27 @@ public class ScreenDriver {
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
-    final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS | AccessibilityNodeInfo.ACTION_CLICK;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS | AccessibilityNodeInfo.ACTION_CLICK;
 
-    if (node != null) {
-      if (node.isVisibleToUser()) {
-        if (node.isEnabled()) {
-          if ((node.getActions() & actions) == actions) {
-            return node;
+      if (node != null) {
+        if (node.isVisibleToUser()) {
+          if (node.isEnabled()) {
+            if ((node.getActions() & actions) == actions) {
+              return node;
+            }
           }
         }
-      }
 
-      {
-        int childCount = node.getChildCount();
+        {
+          int childCount = node.getChildCount();
 
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo subnode = findFirstClickableSubnode(node.getChild(childIndex));
+          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+            AccessibilityNodeInfo subnode = findFirstClickableSubnode(node.getChild(childIndex));
 
-          if (subnode != null) {
-            return subnode;
+            if (subnode != null) {
+              return subnode;
+            }
           }
         }
       }
@@ -68,10 +72,12 @@ public class ScreenDriver {
   }
 
   private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo node) {
-    if ((node = findFirstClickableSubnode(node)) != null) {
-      if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
-        if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
-          return true;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if ((node = findFirstClickableSubnode(node)) != null) {
+        if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
+          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
+            return true;
+          }
         }
       }
     }
@@ -130,21 +136,35 @@ public class ScreenDriver {
     );
   }
 
+  private static AccessibilityNodeInfo getCursorNode () {
+    AccessibilityNodeInfo root = currentScreen.getRootNode();
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+      if (node != null) {
+        return node;
+      }
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+
+      if (node != null) {
+        return node;
+      }
+    }
+
+    return root;
+  }
+
   private static void setCursorLocation (int column, int row) {
     cursorColumn = column;
     cursorRow = row;
   }
 
   private static void setCursorLocation () {
-    AccessibilityNodeInfo root = currentScreen.getRootNode();
-    AccessibilityNodeInfo node;
-
-    if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY)) != null) {
-    } else if ((node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)) != null) {
-    } else {
-      node = root;
-    }
-
+    AccessibilityNodeInfo node = getCursorNode();
     ScreenElement element = currentScreen.findRenderedScreenElement(node);
 
     if (element != null) {

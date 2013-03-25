@@ -21,6 +21,8 @@ package org.a11y.brltty.android;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.os.Build;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
@@ -92,7 +94,15 @@ public class RenderedScreen {
 
   private final void addScreenElements (AccessibilityNodeInfo root) {
     if (root != null) {
-      if (root.isVisibleToUser()) {
+      boolean isVisible;
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        isVisible = root.isVisibleToUser();
+      } else {
+        isVisible = true;
+      }
+
+      if (isVisible) {
         String text = ScreenUtilities.getNodeText(root);
 
         if (text != null) {

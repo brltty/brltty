@@ -97,17 +97,17 @@ public class BluetoothConnection {
       }
     }
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-      StringBuilder string = new StringBuilder();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      bluetoothDevice = bluetoothAdapter.getRemoteDevice(hardwareAddress);
+    } else {
+      StringBuilder sb = new StringBuilder();
 
       for (byte octet : hardwareAddress) {
-        if (string.length() > 0) string.append(':');
-        string.append(String.format("%02X", octet));
+        if (sb.length() > 0) sb.append(':');
+        sb.append(String.format("%02X", octet));
       }
 
-      bluetoothDevice = bluetoothAdapter.getRemoteDevice(string.toString());
-    } else {
-      bluetoothDevice = bluetoothAdapter.getRemoteDevice(hardwareAddress);
+      bluetoothDevice = bluetoothAdapter.getRemoteDevice(sb.toString());
     }
     bluetoothAddress = bluetoothDevice.getAddress();
 

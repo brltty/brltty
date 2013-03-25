@@ -18,12 +18,18 @@
 
 package org.a11y.brltty.android;
 
+import android.os.Build;
+
 public class VirtualScreenElement extends ScreenElement {
   private final int globalAction;
 
   @Override
   public boolean onClick () {
-    return BrailleService.getBrailleService().performGlobalAction(globalAction);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      return BrailleService.getBrailleService().performGlobalAction(globalAction);
+    }
+
+    return super.onClick();
   }
 
   public VirtualScreenElement (String text, int action) {
