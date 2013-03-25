@@ -21,6 +21,7 @@ package org.a11y.brltty.android;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.os.Build;
 import android.util.Log;
 
 import android.view.accessibility.AccessibilityEvent;
@@ -92,6 +93,10 @@ public class ScreenLogger {
     }
   }
 
+  public final void logProperty (CharSequence name, List<CharSequence> values) {
+    logProperty(name, values.toArray(new CharSequence[values.size()]));
+  }
+
   public final void logProperty (CharSequence name, int value) {
     logProperty(name, Integer.toString(value));
   }
@@ -118,7 +123,35 @@ public class ScreenLogger {
       addValue(values, node.isCheckable(), "ckb");
       addValue(values, node.isChecked(), "ckd");
       addValue(values, node.isPassword(), "pwd");
-      logProperty("flgs", values.toArray(new CharSequence[values.size()]));
+      logProperty("flgs", values);
+    }
+
+    {
+      List<CharSequence> values = new ArrayList<CharSequence>();
+      int actions = node.getActions();
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lng");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "nmg");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "pmg");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "nhe");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "phe");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sel");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "csl");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "foc");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "cfc");
+
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afc");
+      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "caf");
+
+      logProperty("actn", values);
     }
 
     logProperty("desc", node.getContentDescription());
@@ -126,19 +159,21 @@ public class ScreenLogger {
     logProperty("obj", node.getClassName());
     logProperty("app", node.getPackageName());
 
-    {
-      AccessibilityNodeInfo subnode = node.getLabelFor();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      {
+        AccessibilityNodeInfo subnode = node.getLabelFor();
 
-      if (subnode != null) {
-        logProperty("lbl", ScreenUtilities.getNodeText(subnode));
+        if (subnode != null) {
+          logProperty("lbl", ScreenUtilities.getNodeText(subnode));
+        }
       }
-    }
 
-    {
-      AccessibilityNodeInfo subnode = node.getLabeledBy();
+      {
+        AccessibilityNodeInfo subnode = node.getLabeledBy();
 
-      if (subnode != null) {
-        logProperty("lbd", ScreenUtilities.getNodeText(subnode));
+        if (subnode != null) {
+          logProperty("lbd", ScreenUtilities.getNodeText(subnode));
+        }
       }
     }
 
