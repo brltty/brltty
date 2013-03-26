@@ -177,20 +177,18 @@ public class ScreenLogger {
     logProperty("app", node.getPackageName());
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      {
-        AccessibilityNodeInfo subnode = node.getLabelFor();
+      AccessibilityNodeInfo subnode = node.getLabelFor();
 
-        if (subnode != null) {
-          logProperty("lbl", ScreenUtilities.getNodeText(subnode));
-        }
+      if (subnode != null) {
+        logProperty("lbl", ScreenUtilities.getNodeText(subnode));
       }
+    }
 
-      {
-        AccessibilityNodeInfo subnode = node.getLabeledBy();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      AccessibilityNodeInfo subnode = node.getLabeledBy();
 
-        if (subnode != null) {
-          logProperty("lbd", ScreenUtilities.getNodeText(subnode));
-        }
+      if (subnode != null) {
+        logProperty("lbd", ScreenUtilities.getNodeText(subnode));
       }
     }
 
