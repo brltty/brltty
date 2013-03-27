@@ -102,7 +102,7 @@ else
 
       if test -z "${PYTHON_SITE_PKG}"
       then
-         [PYTHON_SITE_PKG="`${PYTHON} -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_python_lib(0,0));"`"]
+         [PYTHON_SITE_PKG="`${PYTHON} -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_python_lib(1,0));"`"]
          if test -z "${PYTHON_SITE_PKG}"
          then
             AC_MSG_WARN([Python package directory not found])
