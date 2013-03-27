@@ -17,9 +17,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-#xc-xfp#########################################################
-#xc-xfp# <X11/Constraint.h> doesn't include <X11/Xfuncproto.h> #
-#xc-xfp#########################################################
+# xc-xfp: when configure tests for: Xaw3d, neXtaw
+# /usr/include/X11/Constraint.h:53:1: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'typedef'
+# because <X11/Constraint.h> doesn't include <X11/Xfuncproto.h>
 
 Name: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
