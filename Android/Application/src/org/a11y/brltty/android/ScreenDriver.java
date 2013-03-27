@@ -31,11 +31,23 @@ public class ScreenDriver {
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
 
-  public static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
+  private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = new RenderedScreen(null);
   private static int cursorColumn = 0;
   private static int cursorRow = 0;
+
+  public static ScreenLogger getLogger () {
+    return currentLogger;
+  }
+
+  public static ScreenWindow getWindow () {
+    return currentWindow;
+  }
+
+  public static RenderedScreen getScreen () {
+    return currentScreen;
+  }
 
   private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
     ScreenTextEditor.get(node, true).setCursorOffset(offset);
@@ -96,7 +108,7 @@ public class ScreenDriver {
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
         goToFirstClickableSubnode(event.getSource());
-        break;
+        return;
 
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
         break;
@@ -106,11 +118,11 @@ public class ScreenDriver {
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
         setTextCursor(event.getSource(), event.getFromIndex() + event.getAddedCount());
-        break;
+        return;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
         setTextCursor(event.getSource(), event.getToIndex());
-        break;
+        return;
 
       default:
         return;
