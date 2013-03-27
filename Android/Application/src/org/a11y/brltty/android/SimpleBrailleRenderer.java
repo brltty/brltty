@@ -24,42 +24,48 @@ import android.graphics.Rect;
 
 public class SimpleBrailleRenderer extends BrailleRenderer {
   @Override
-  public void renderScreenElements (
-    List<CharSequence> rows,
-    ScreenElementList elements
-  ) {
+  public void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
     elements.sortByVisualLocation();
     elements.groupByContainer();
     addVirtualElements(elements);
 
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
+    boolean wasVirtual = false;
+
     for (ScreenElement element : elements) {
       String text = element.getBrailleText();
 
+      boolean isVirtual = element.getVisualLocation() == null;
+      boolean append = wasVirtual && isVirtual;
+      wasVirtual = isVirtual;
+
       if (text.length() > 0) {
-        int top = rows.size();
-        int width = 1;
+        List<CharSequence> lines = makeTextLines(text);
+        int width = getTextWidth(lines);
 
-        while (true) {
-          String before;
-          String after;
-          int index = text.indexOf('\n');
+        if (append) {
+          left = right + 3;
+          int row = top;
 
-          if (index == -1) {
-            before = text;
-            after = null;
-          } else {
-            before = text.substring(0, index);
-            after = text.substring(index+1);
+          for (CharSequence line : lines) {
+            StringBuilder sb = new StringBuilder();
+            if (row < rows.size()) sb.append(rows.get(row));
+            while (sb.length() < left) sb.append(' ');
+            sb.append(line);
+            rows.set(row++, sb.toString());
           }
-
-          rows.add(before);
-          width = Math.max(width, before.length());
-
-          if (after == null) break;
-          text = after;
+        } else {
+          left = 0;
+          top = rows.size();
+          rows.addAll(lines);
         }
 
-        element.setBrailleLocation(new Rect(0, top, width-1, rows.size()-1));
+        right = left + width - 1;
+        bottom = top + lines.size() - 1;
+        element.setBrailleLocation(new Rect(left, top, right, bottom));
       }
     }
   }
