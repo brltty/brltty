@@ -33,6 +33,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _sbindir /sbin
 %define _libdir /lib
 %define _sysconfdir /etc
+%define _systemddir /usr/lib/systemd/system
 
 Requires: libicu
 
@@ -430,6 +431,8 @@ make
 %install
 make install install-documents install-messages
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
+install -d "${RPM_BUILD_ROOT}%{_systemddir}"
+install -m 644 Hotplug/systemd.service "${RPM_BUILD_ROOT}%{_systemddir}/brltty.service"
 %find_lang %{name}
 
 %clean
@@ -460,6 +463,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/KeyTables
 %doc %{_docdir}/*/Manual-BRLTTY
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
+%{_systemddir}/brltty.service
 
 %files -n brltty-braille-brlapi
 %{_libdir}/brltty/libbrlttybba.so
