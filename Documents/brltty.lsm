@@ -15,21 +15,19 @@ Author: dave@mielke.cc (Dave Mielke)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-              3200KB brltty-4.4.tar.gz
-              3100KB brltty-4.4-1.src.rpm
-              2000KB brltty-4.4-1.i686.rpm
-               110KB brltty-utils-4.4-1.i686.rpm
-                12KB brltty-braille-brlapi-4.4-1.i686.rpm
-                18KB brltty-braille-xwindow-4.4-1.i686.rpm
-                12KB brltty-speech-espeak-4.4-1.i686.rpm
-                13KB brltty-speech-festival-4.4-1.i686.rpm
-                12KB brltty-speech-flite-4.4-1.i686.rpm
-                13KB brltty-speech-speechd-4.4-1.i686.rpm
-                18KB brltty-screen-atspi-4.4-1.i686.rpm
-                19KB brltty-screen-atspi2-4.4-1.i686.rpm
-                13KB brltty-screen-screen-4.4-1.i686.rpm
-                14KB brltty-4.4.README
-                 5KB brltty-4.4.lsm
+              3300KB brltty-4.5.tar.gz
+              3200KB brltty-4.5-1.src.rpm
+              2000KB brltty-4.5-1.i686.rpm
+               110KB brltty-utils-4.5-1.i686.rpm
+                13KB brltty-braille-brlapi-4.5-1.i686.rpm
+                13KB brltty-speech-espeak-4.5-1.i686.rpm
+                13KB brltty-speech-festival-4.5-1.i686.rpm
+                13KB brltty-speech-flite-4.5-1.i686.rpm
+                13KB brltty-speech-speechd-4.5-1.i686.rpm
+                19KB brltty-screen-atspi2-4.5-1.i686.rpm
+                14KB brltty-screen-screen-4.5-1.i686.rpm
+                14KB brltty-4.5.README
+                 5KB brltty-4.5.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
 Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
