@@ -52,7 +52,8 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
 
           for (CharSequence line : lines) {
             StringBuilder sb = new StringBuilder();
-            if (row < rows.size()) sb.append(rows.get(row));
+            while (row >= rows.size()) rows.add("");
+            sb.append(rows.get(row));
             while (sb.length() < left) sb.append(' ');
             sb.append(line);
             rows.set(row++, sb.toString());
