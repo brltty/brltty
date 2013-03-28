@@ -27,6 +27,13 @@ ensure that these are installed on your system. This at least includes:
    libstdc++6
    libncurses
 
+If you are using a modern Debian GNU/Linux system (wheezy or later), you 
+can install these packages from a foreign architecture (in this case, 
+i386) with the following commands (as root):
+
+   dpkg --add-architecture i386
+   apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386 libc6:i386
+
 ----------------------------------------------------------------------
 
 
