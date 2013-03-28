@@ -42,10 +42,19 @@
     </service>
 
     <service
-        android:name="InputService"
+        android:name=".InputService"
         android:label="@string/input_service_name"
         android:permission="android.permission.BIND_INPUT_METHOD"
         >
+
+      <intent-filter>
+        <action android:name="android.view.InputMethod" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.view.im"
+        android:resource="@xml/input_service"
+       />
     </service>
 
     <activity

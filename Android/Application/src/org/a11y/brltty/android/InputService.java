@@ -21,66 +21,41 @@ package org.a11y.brltty.android;
 import android.util.Log;
 
 import android.inputmethodservice.InputMethodService;
-import android.content.ComponentName;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 
 import android.view.inputmethod.EditorInfo;
 
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
 
-  private static class InputConnection implements ServiceConnection {
-    private IBinder inputBinder = null;
+  private static InputService inputService = null;
 
-    @Override
-    public void onServiceConnected (ComponentName component, IBinder binder) {
-      Log.d(LOG_TAG, "input service connected");
-
-      synchronized (this) {
-        inputBinder = binder;
-      }
-    }
-
-    @Override
-    public void onServiceDisconnected (ComponentName component) {
-      Log.d(LOG_TAG, "input service disconnected");
-
-      synchronized (this) {
-        inputBinder = null;
-      }
-    }
+  public static InputService getInputService () {
+    return inputService;
   }
 
-  private static Context inputContext = null;
-  private static Intent inputServiceIntent = null;
-  private static ServiceConnection inputConnection = null;
-
-  public static void startInputService (Context context) {
-    inputContext = context;
-
-    inputServiceIntent = new Intent(inputContext, InputService.class);
-    inputContext.startService(inputServiceIntent);
-
-    inputConnection = new InputConnection();
-    inputContext.bindService(inputServiceIntent, inputConnection,
-                             Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT);
+  @Override
+  public void onCreate () {
+    super.onCreate();
+    Log.d(LOG_TAG, "input service started");
+    inputService = this;
   }
 
-  public static void stopInputService () {
-    inputContext.unbindService(inputConnection);
-    inputConnection = null;
-
-    inputContext.stopService(inputServiceIntent);
-    inputServiceIntent = null;
-
-    inputContext = null;
+  @Override
+  public void onDestroy () {
+    super.onDestroy();
+    Log.d(LOG_TAG, "input service stopped");
+    inputService = null;
   }
 
   @Override
   public void onStartInput (EditorInfo info, boolean restarting) {
+    Log.d(LOG_TAG, "input started:" + " r=" + restarting);
+    if (info.actionLabel != null) Log.d(LOG_TAG, "action label: " + info.actionLabel);
+    Log.d(LOG_TAG, "action id: " + info.actionId);
+  }
+
+  @Override
+  public void onFinishInput () {
+    Log.d(LOG_TAG, "input finished");
   }
 }

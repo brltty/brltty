@@ -48,8 +48,6 @@ public class BrailleService extends AccessibilityService {
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
 
-    InputService.startInputService(this);
-
     coreThread = new CoreThread(this);
     coreThread.start();
   }
@@ -64,7 +62,6 @@ public class BrailleService extends AccessibilityService {
     } catch (InterruptedException exception) {
     }
 
-    InputService.stopInputService();
     return false;
   }
 
