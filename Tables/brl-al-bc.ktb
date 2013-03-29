@@ -87,11 +87,12 @@ bind ThumbUp+RoutingKey1 PRDIFCHAR
 bind ThumbDown+RoutingKey1 NXDIFCHAR
 bind ThumbHome+RoutingKey1 SETLEFT
 
+bind ETouchLeftRear+ETouchLeftFront+ETouchRightRear FREEZE
+bind ETouchLeftRear+ETouchRightRear+ETouchRightFront DISPMD
+
 bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
 bind ThumbLeft+ETouchRightFront SIXDOTS
-bind ThumbRight+ETouchLeftRear FREEZE
-bind ThumbRight+ETouchLeftFront DISPMD
 
 bind SmartpadLeft KEY_CURSOR_LEFT
 bind SmartpadRight KEY_CURSOR_RIGHT
@@ -113,7 +114,8 @@ bind SmartpadF2+SmartpadRight KEY_END
 bind SmartpadF2+SmartpadEnter KEY_DELETE
 bind SmartpadF2+!RoutingKey1 KEY_FUNCTION
 
-bind SmartpadF3+SmartpadLeft MUTE
+bind SmartpadF3+SmartpadF4 MUTE
+
 bind SmartpadF3+SmartpadRight SAY_LINE
 bind SmartpadF3+SmartpadUp SAY_ABOVE
 bind SmartpadF3+SmartpadDown SAY_BELOW
