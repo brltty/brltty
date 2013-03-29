@@ -20,8 +20,14 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 
+import android.os.SystemClock;
+
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 
 import android.graphics.Rect;
 
@@ -118,11 +124,11 @@ public class ScreenDriver {
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
         setTextCursor(event.getSource(), event.getFromIndex() + event.getAddedCount());
-        return;
+        break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
         setTextCursor(event.getSource(), event.getToIndex());
-        return;
+        break;
 
       default:
         return;
@@ -246,68 +252,151 @@ public class ScreenDriver {
     return currentScreen.performAction(column, row);
   }
 
+  public static InputConnection getInputConnection () {
+    InputService service = InputService.getInputService();
+    if (service != null) return service.getCurrentInputConnection();
+    return null;
+  }
+
   public static boolean inputCharacter (char character) {
+    InputConnection connection =  getInputConnection();
+
+    if (connection != null) {
+      if (connection.commitText(Character.toString(character), 1)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public static KeyEvent newKeyEvent (int action, int code) {
+    long time = SystemClock.uptimeMillis();
+    return new KeyEvent(time, time, action, code, 0);
+  }
+
+  public static boolean inputKey (int code) {
+    InputConnection connection =  getInputConnection();
+
+    if (connection != null) {
+      if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_DOWN, code))) {
+        if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_UP, code))) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
   public static boolean inputKeyEnter () {
-    return false;
+    {
+      InputService service = InputService.getInputService();
+
+      if (service != null) {
+        EditorInfo info = service.getCurrentInputEditorInfo();
+
+        if (info != null) {
+          if (info.actionLabel != null) {
+            InputConnection connection = service.getCurrentInputConnection();
+
+            if (connection != null) {
+              if (connection.performEditorAction(info.actionId)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return inputKey(KeyEvent.KEYCODE_ENTER);
   }
 
   public static boolean inputKeyTab () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_TAB);
   }
 
   public static boolean inputKeyBackspace () {
+    InputConnection connection =  getInputConnection();
+
+    if (connection != null) {
+      if (connection.deleteSurroundingText(1, 0)) {
+        return true;
+      }
+    }
+
     return false;
   }
 
   public static boolean inputKeyEscape () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_ESCAPE);
   }
 
   public static boolean inputKeyCursorLeft () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_DPAD_LEFT);
   }
 
   public static boolean inputKeyCursorRight () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_DPAD_RIGHT);
   }
 
   public static boolean inputKeyCursorUp () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_DPAD_UP);
   }
 
   public static boolean inputKeyCursorDown () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_DPAD_DOWN);
   }
 
   public static boolean inputKeyPageUp () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_PAGE_UP);
   }
 
   public static boolean inputKeyPageDown () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_PAGE_DOWN);
   }
 
   public static boolean inputKeyHome () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_MOVE_HOME);
   }
 
   public static boolean inputKeyEnd () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_MOVE_END);
   }
 
   public static boolean inputKeyInsert () {
-    return false;
+    return inputKey(KeyEvent.KEYCODE_INSERT);
   }
 
   public static boolean inputKeyDelete () {
+    InputConnection connection =  getInputConnection();
+
+    if (connection != null) {
+      if (connection.deleteSurroundingText(0, 1)) {
+        return true;
+      }
+    }
+
     return false;
   }
 
   public static boolean inputKeyFunction (int key) {
-    return false;
+    switch (key) {
+      case  1: return inputKey(KeyEvent.KEYCODE_F1);
+      case  2: return inputKey(KeyEvent.KEYCODE_F2);
+      case  3: return inputKey(KeyEvent.KEYCODE_F3);
+      case  4: return inputKey(KeyEvent.KEYCODE_F4);
+      case  5: return inputKey(KeyEvent.KEYCODE_F5);
+      case  6: return inputKey(KeyEvent.KEYCODE_F6);
+      case  7: return inputKey(KeyEvent.KEYCODE_F7);
+      case  8: return inputKey(KeyEvent.KEYCODE_F8);
+      case  9: return inputKey(KeyEvent.KEYCODE_F9);
+      case 10: return inputKey(KeyEvent.KEYCODE_F10);
+      case 11: return inputKey(KeyEvent.KEYCODE_F11);
+      case 12: return inputKey(KeyEvent.KEYCODE_F12);
+      default: return false;
+    }
   }
 
   static {
