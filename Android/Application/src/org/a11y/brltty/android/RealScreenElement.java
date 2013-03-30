@@ -54,6 +54,11 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
+  public boolean isEditable () {
+    return ReflectionHelper.canAssign(android.widget.EditText.class, accessibilityNode.getClassName().toString());
+  }
+
+  @Override
   public boolean performAction (int offset) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
@@ -151,6 +156,10 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
+    if (isEditable()) {
+      return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+    }
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       return doAction(AccessibilityNodeInfo.ACTION_CLICK);
     }

@@ -63,6 +63,10 @@ public class ScreenElement {
     return false;
   }
 
+  public boolean isEditable () {
+    return false;
+  }
+
   public boolean onBringCursor () {
     return false;
   }

@@ -74,4 +74,17 @@ public final class ReflectionHelper {
 
     return instance;
   }
+
+  public static boolean canAssign (Class target, Class source) {
+    return target.isAssignableFrom(source);
+  }
+
+  public static boolean canAssign (Class target, String source) {
+    try {
+      return canAssign(target, Class.forName(source));
+    } catch (ClassNotFoundException exception) {
+    }
+
+    return false;
+  }
 }
