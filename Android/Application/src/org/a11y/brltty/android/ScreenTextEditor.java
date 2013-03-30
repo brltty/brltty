@@ -42,8 +42,8 @@ public class ScreenTextEditor {
     return value;
   }
 
-  public static ScreenTextEditor get (AccessibilityNodeInfo node) {
-    return get(node, false);
+  public static ScreenTextEditor getIfFocused (AccessibilityNodeInfo node) {
+    return node.isFocused()? get(node, false): null;
   }
 
   public final int getCursorOffset () {

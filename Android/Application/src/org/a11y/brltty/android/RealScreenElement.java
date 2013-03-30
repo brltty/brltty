@@ -56,7 +56,7 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean performAction (int offset) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      ScreenTextEditor editor = ScreenTextEditor.get(accessibilityNode);
+      ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
 
       if (editor != null) {
         if (!onBringCursor()) {
@@ -99,7 +99,7 @@ public class RealScreenElement extends ScreenElement {
   protected String makeBrailleText (String text) {
     text = super.makeBrailleText(text);
 
-    if (ScreenTextEditor.get(accessibilityNode) != null) {
+    if (ScreenTextEditor.getIfFocused(accessibilityNode) != null) {
       text += ' ';
     }
 
