@@ -53,6 +53,7 @@ public class RenderedScreen {
   }
 
   public final ScreenElement findScreenElement (AccessibilityNodeInfo node) {
+    if (node == null) return null;
     Rect location = new Rect();
     node.getBoundsInScreen(location);
     return screenElements.findByVisualLocation(location);
