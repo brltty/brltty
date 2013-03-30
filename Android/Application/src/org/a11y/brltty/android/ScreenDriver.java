@@ -297,7 +297,7 @@ public class ScreenDriver {
         EditorInfo info = service.getCurrentInputEditorInfo();
 
         if (info != null) {
-          if (info.actionLabel != null) {
+          if (info.actionId != 0) {
             InputConnection connection = service.getCurrentInputConnection();
 
             if (connection != null) {
@@ -305,12 +305,14 @@ public class ScreenDriver {
                 return true;
               }
             }
+          } else if (service.sendDefaultEditorAction(false)) {
+            return true;
           }
         }
       }
     }
 
-    return inputKey(KeyEvent.KEYCODE_ENTER);
+    return false;
   }
 
   public static boolean inputKeyTab () {
