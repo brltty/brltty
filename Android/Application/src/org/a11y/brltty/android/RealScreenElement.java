@@ -95,6 +95,17 @@ public class RealScreenElement extends ScreenElement {
     return super.performAction(offset);
   }
 
+  @Override
+  protected String makeBrailleText (String text) {
+    text = super.makeBrailleText(text);
+
+    if (ScreenTextEditor.get(accessibilityNode) != null) {
+      text += ' ';
+    }
+
+    return text;
+  }
+
   private boolean doAction (int action) {
     AccessibilityNodeInfo node = accessibilityNode;
     Rect inner = getVisualLocation();
