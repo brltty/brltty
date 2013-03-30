@@ -190,7 +190,7 @@ public class ScreenDriver {
       int column = location.left;
       int row = location.top;
 
-      {
+      if (node.isFocused()) {
         ScreenTextEditor editor = ScreenTextEditor.get(node);
 
         if (editor != null) {
