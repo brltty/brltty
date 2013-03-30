@@ -19,15 +19,19 @@
 package org.a11y.brltty.android;
 
 import android.os.Build;
-
 import android.os.SystemClock;
+
+import android.content.Context;
+import android.content.ComponentName;
 
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.KeyEvent;
 
 import android.graphics.Rect;
 
@@ -254,9 +258,46 @@ public class ScreenDriver {
     return currentScreen.performAction(column, row);
   }
 
+  public static InputMethodManager getInputMethodManager () {
+    return (InputMethodManager)BrailleService.getBrailleService().getSystemService(Context.INPUT_METHOD_SERVICE);
+  }
+
+  public static String getInputServiceClassName () {
+    return InputService.class.getName();
+  }
+
+  public static void showInputMethodEnabler () {
+    String inputServiceClass = getInputServiceClassName();
+
+    for (InputMethodInfo info : getInputMethodManager().getInputMethodList()) {
+      if (info.getComponent().getClassName().equals(inputServiceClass)) {
+        break;
+      }
+    }
+  }
+
+  public static boolean inputServiceEnabled () {
+    String inputServiceClass = getInputServiceClassName();
+
+    for (InputMethodInfo info : getInputMethodManager().getEnabledInputMethodList()) {
+      if (info.getComponent().getClassName().equals(inputServiceClass)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public static InputConnection getInputConnection () {
     InputService service = InputService.getInputService();
     if (service != null) return service.getCurrentInputConnection();
+
+    if (inputServiceEnabled()) {
+      getInputMethodManager().showInputMethodPicker();
+    } else {
+      showInputMethodEnabler();
+    }
+
     return null;
   }
 
