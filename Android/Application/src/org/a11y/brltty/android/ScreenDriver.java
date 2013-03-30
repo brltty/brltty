@@ -56,7 +56,9 @@ public class ScreenDriver {
   }
 
   private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
-    ScreenTextEditor.get(node, true).setCursorOffset(offset);
+    if (node != null) {
+      ScreenTextEditor.get(node, true).setCursorOffset(offset);
+    }
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
