@@ -281,7 +281,7 @@ L'afficheur braille affiche brièvement (voir l'option
 menu, puis présente l'item du paramètre actuel.
 
 <Sect3>Navigation dans le menu<p>
-Voir <ref id="menu" name="Commandes de navigation dans le menu "> pour la
+Voir <ref id="menu-navigation" name="Commandes de navigation dans le menu"> pour la
 liste des commandes qui vous permettent de sélectionner l'élément, et de changer
 la valeur dans le menu.
 Par souci de compatibilité avec les vieux pilotes, les commandes

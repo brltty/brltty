@@ -865,12 +865,6 @@ les fonctions inutiles.
 
 <sect3>Options diverses<label id="build-miscellaneous"><p>
 <descrip>
-  <tag><tt>--with-compiler-prefix=</tt><em>prefix</em><label id="build-compiler-prefix"></tag>
-    Spécifie le préfixe (chemin et début du nom du programme) pour la
-    suite de la compilation et les outils de lien qui seront
-    installés. Par exemple, vous pourriez avoir besoin de cette option
-    si vous faites une compilation croisée (cross-compiling) pour une
-    architecture différente.
   <tag><tt>--with-init-path=</tt><em>path</em><label id="build-init-path"></tag>
     Spécifie le chemin du programme réel de démarrage pour le
     système. Vous devriez fournir le chemin absolu. Si vous ne

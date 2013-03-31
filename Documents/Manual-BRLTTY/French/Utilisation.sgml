@@ -59,7 +59,7 @@ mémoriser immédiatement est celle de la commande
 décrit ci-dessous) pour naviguer dans la page d'aide, puis pressez de
 nouveau la touche d'aide pour quitter.
 
-<sect2>Déplacement vertical<label id="vertical"><p>
+<sect2>Déplacement vertical<label id="vertical-motion"><p>
 Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT"> et <ref id="command-PRDIFCHAR-NXDIFCHAR" name="PRDIFCHAR/NXDIFCHAR">.
 <descrip>
   <tag>LNUP/LNDN<label id="command-LNUP-LNDN"></tag>
@@ -98,7 +98,7 @@ Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="P
     l'écran. La recherche ne tient pas compte de la casse.
 </descrip>
 
-<sect2>Déplacement horizontal<label id="horizontal"><p>
+<sect2>Déplacement horizontal<label id="horizontal-motion"><p>
 Voir aussi la commande de la routine <ref id="command-SETLEFT" name="SETLEFT">.
 <descrip>
   <tag>CHRLT/CHRRT<label id="command-CHRLT-CHRRT"></tag>
@@ -118,7 +118,7 @@ Voir aussi la commande de la routine <ref id="command-SETLEFT" name="SETLEFT">.
     Va au début/fin de la ligne.
 </descrip>
 
-<sect2>Déplacement implicite<p>
+<sect2>Déplacement implicite<label id="implicit-motion"><p>
 Voir aussi la commande de routine <ref id="command-GOTOMARK" name="GOTOMARK">.
 <descrip>
   <tag>HOME<label id="command-HOME"></tag>
@@ -141,7 +141,7 @@ Voir aussi la commande de routine <ref id="command-GOTOMARK" name="GOTOMARK">.
     </itemize>
 </descrip>
 
-<sect2>Activation de fonctionnalités<label id="commands-features"><p>
+<sect2>Activation de fonctionnalités<label id="feature-activation"><p>
 Chacune de ces commandes a trois modes: <bf>activée</bf>
 (déclenche la fonction), <bf>désactivée</bf> (annule la fonction),
 et <bf>à bascule</bf> (si la fonction est inhibée, la déclenche, et
@@ -300,15 +300,15 @@ par le <ref id="preferences-menu" name="menu des préférences">.
     <ref id="preference-autospeak" name="Parole automatique">.
 </descrip>
 
-<sect2>Mode Sélection<p>
+<sect2>Sélection de mode<label id="mode-selection"><p>
 <descrip>
   <tag>HELP<label id="command-HELP"></tag>
     Se déplace à la page d'aide du pilote d'un afficheur braille. C'est
     là que vous pouvez trouver un résumé en ligne de choses telles que
     ce que font les touches de votre afficheur braille, et comment
     interpréter ses cellules d'état.
-    Utilisez les commandes <ref id="vertical" name="vertical">
-    et <ref id="horizontal" name="horizontal"> pour naviguer
+    Utilisez les commandes <ref id="vertical-motion" name="vertical">
+    et <ref id="horizontal-motion" name="horizontal"> pour naviguer
     dans la page d'aide. Appelez la commande <tt>help</tt> de nouveau pour
     revenir à l'écran.
   <tag>INFO<label id="command-INFO"></tag>
@@ -329,7 +329,7 @@ par le <ref id="preferences-menu" name="menu des préférences">.
     name="--disable-learn-mode"> a été spécifiée.
 </descrip>
 
-<sect2>Maintenance des préférences<p>
+<sect2>Maintenance des préférences<label id="preference-maintenance"><p>
 <descrip>
   <tag>PREFMENU<label id="command-PREFMENU"></tag>
     Accès au menu des préférences (voir <ref id="preferences-menu" name="Le
@@ -344,7 +344,7 @@ par le <ref id="preferences-menu" name="menu des préférences">.
     détails complets).
 </descrip>
 
-<sect2>Navigation dans le menu<label id="menu"><p>
+<sect2>Navigation dans le menu<label id="menu-navigation"><p>
 <descrip>
   <tag>MENU_FIRST_ITEM/MENU_LAST_ITEM<label id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM"></tag>
     Va au premier/dernier élément du menu.
@@ -354,7 +354,7 @@ par le <ref id="preferences-menu" name="menu des préférences">.
     Remonte/descend le paramètre des éléments du menu courant.
 </descrip>
 
-<sect2>Contrôles de la verbosité<label id="speech"><p>
+<sect2>Contrôles de la verbosité<label id="speech-controls"><p>
 <descrip>
   <tag>SAY_LINE<label id="command-SAY_LINE"></tag>
     Dit la ligne courante. La préférence <ref
@@ -378,6 +378,10 @@ par le <ref id="preferences-menu" name="menu des préférences">.
     Cette commande n'est disponible que si un pilote qui la supporte est utilisé.
 </descrip>
 
+<sect2>Verbosigé dans la navigation<label id="speech-navigation"><p>
+<descrip>
+ <tag/SPEAK_CURR_CHAR/a
+</descrip>
 <sect2>Aller à un terminal virtuel<p>
 Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWITCHVT">.
 <descrip>
