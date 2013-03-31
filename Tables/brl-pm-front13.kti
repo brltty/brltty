@@ -100,11 +100,6 @@ bind Dot8+!RoutingKey1 COPY_RECT
 bind Dot1+Dot2+Dot3+Dot7 TIME
 bind Dot1+Dot2+Dot3+Dot7+!RoutingKey1 PWGEN
 
-assign chord
-include brl-chords.kti
-bind Dot2+Dot3+Dot5 SIXDOTS+on
-bind Dot2+Dot3+Dot6 SIXDOTS+off
-
 include brl-pm-routing.kti
 
 assign toggleOff Dot7
@@ -112,11 +107,27 @@ assign toggleOn Dot8
 include brl-pm-status\{statusKeys}.kti
 
 
+assign chordContext 1
+assign brailleContext 2
+bind Dot2+Dot3+!Shift context+0
+bind Dot2+Dot3+!Home context+\{chordContext}
+bind Dot2+Dot3+!End context+\{brailleContext}
+
+
+####################
+# Chord Input Mode #
+####################
+
+context \{chordContext} Chorded Commands Mode
+
+assign chord
+include brl-chords.kti
+
+
 ######################
 # Braille Input Mode #
 ######################
 
-assign brailleContext 1
 context \{brailleContext} Braille Input Mode
 
 map Dot1 DOT1
@@ -133,10 +144,6 @@ bind Dot3+!Home KEY_ESCAPE
 bind Dot3+!End KEY_TAB
 bind Dot3+!Up KEY_BACKSPACE
 bind Dot3+!Down KEY_ENTER
-
-context default
-bind Dot2+Dot3+!Shift context+0
-bind Dot5+Dot6+!Shift context+\{brailleContext}
 
 
 #################
