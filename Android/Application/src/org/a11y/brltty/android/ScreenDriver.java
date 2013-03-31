@@ -59,7 +59,7 @@ public class ScreenDriver {
     return currentScreen;
   }
 
-  private static void setTextCursor (AccessibilityNodeInfo node, int offset) {
+  private static void setEditCursor (AccessibilityNodeInfo node, int offset) {
     if (node != null) {
       ScreenTextEditor.get(node, true).setCursorOffset(offset);
     }
@@ -129,11 +129,11 @@ public class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-        setTextCursor(event.getSource(), event.getFromIndex() + event.getAddedCount());
+        setEditCursor(event.getSource(), event.getFromIndex() + event.getAddedCount());
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
-        setTextCursor(event.getSource(), event.getToIndex());
+        setEditCursor(event.getSource(), event.getToIndex());
         break;
 
       default:
@@ -266,16 +266,6 @@ public class ScreenDriver {
     return InputService.class.getName();
   }
 
-  public static void showInputMethodEnabler () {
-    String inputServiceClass = getInputServiceClassName();
-
-    for (InputMethodInfo info : getInputMethodManager().getInputMethodList()) {
-      if (info.getComponent().getClassName().equals(inputServiceClass)) {
-        break;
-      }
-    }
-  }
-
   public static boolean inputServiceEnabled () {
     String inputServiceClass = getInputServiceClassName();
 
@@ -292,12 +282,7 @@ public class ScreenDriver {
     InputService service = InputService.getInputService();
     if (service != null) return service.getCurrentInputConnection();
 
-    if (inputServiceEnabled()) {
-      getInputMethodManager().showInputMethodPicker();
-    } else {
-      showInputMethodEnabler();
-    }
-
+    getInputMethodManager().showInputMethodPicker();
     return null;
   }
 
