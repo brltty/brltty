@@ -1,21 +1,26 @@
-pass input from ScreenDriver to InputMethodService
-pass input from InputMethodService to the active View
 show when text is selected
 show that text is editable
 a way to click on the background
 a way to drag and drop
-pressing a routing key within editable text should route the cursor
-route to the first element of a folder when it is opened
+support cursor routing within multi-line text
 keep the device awake if the braille display is being used
+document Android release restrictions
+set a reasonable path for brltty.conf
+document permissions with reasons
+learn mode
+preferences menu
 update tha tables and drivers on a reinstall
 support the dynamic loading of non-built-in drivers
 become interrupt-driven rather than polling
 support serial braille devices
-a better way (than location) to map a ScreenElement to a View
 two-dimensional braille rendering
 memory wastage on restart
 manual restart needed when settings are changed
-recycle events and nodes
-initial screen needs an event
+recycle nodes: getSource getChild getParent getLabelFor getLabelledBy getRootInActiveWindow
 set the actual locations of the bottom three buttons
 internationalization
+actions on elements with short text
+enabling of input service
+document folder opening
+document input
+fix make file dependency logic
