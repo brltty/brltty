@@ -40,6 +40,9 @@ bind Thumb3+RoutingKey COPY_RECT
 bind Thumb4+RoutingKey COPY_LINE
 bind Thumb1+Thumb4 PASTE
 
+assign chord Space+
+include brl-chords.kti
+
 map Dot1 DOT1
 map Dot2 DOT2
 map Dot3 DOT3
@@ -52,17 +55,6 @@ map Space SPACE
 map Thumb2 META
 map Thumb3 CONTROL
 
-bind Space+Dot1 KEY_CURSOR_LEFT
-bind Space+Dot4 KEY_CURSOR_RIGHT
-bind Space+Dot2 KEY_CURSOR_UP
-bind Space+Dot5 KEY_CURSOR_DOWN
-bind Space+Dot3 KEY_PAGE_UP
-bind Space+Dot6 KEY_PAGE_DOWN
-bind Space+Dot7 KEY_BACKSPACE
-bind Space+Dot8 KEY_ENTER
-bind Space+Dot1+Dot4+Dot5 KEY_DELETE
-bind Space+Dot2+Dot4 KEY_INSERT
-bind Space+Dot2+Dot3+Dot4+Dot5 KEY_TAB
 bind Space+RoutingKey KEY_FUNCTION
 
 include brl-bm-display6.kti
