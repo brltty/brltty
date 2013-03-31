@@ -100,19 +100,6 @@ map Thumb3 SPACE
 map Left UPPERCASE
 map Right CONTROL
 
-bind Thumb3+Dot1+Dot2 KEY_BACKSPACE
-bind Thumb3+Dot1+Dot4+Dot5 KEY_DELETE
-bind Thumb3+Dot1+Dot5 KEY_ESCAPE
-bind Thumb3+Dot2+Dot4 KEY_INSERT
-bind Thumb3+Dot2+Dot3+Dot4+Dot5 KEY_TAB
-bind Thumb3+Dot4+Dot6 KEY_ENTER
-bind Thumb3+Dot2 KEY_PAGE_UP
-bind Thumb3+Dot5 KEY_PAGE_DOWN
-bind Thumb3+Dot3 KEY_HOME
-bind Thumb3+Dot6 KEY_END
-bind Thumb3+Dot7 KEY_CURSOR_LEFT
-bind Thumb3+Dot8 KEY_CURSOR_RIGHT
-
 
 #################
 # Menu Bindings #

@@ -70,34 +70,6 @@ include brl-hm-dots.kti
 map F2 META
 map F3 CONTROL
 
-bind Dot8 KEY_ENTER
-bind Dot7 KEY_BACKSPACE
-bind Space+Dot4+Dot5 KEY_TAB
-bind Space+Dot1+Dot5 KEY_ESCAPE
-bind Space+Dot2+Dot4 KEY_INSERT
-bind Space+Dot1+Dot4+Dot5 KEY_DELETE
-
-bind Space+Dot3 KEY_CURSOR_LEFT
-bind Space+Dot6 KEY_CURSOR_RIGHT
-bind Space+Dot1 KEY_CURSOR_UP
-bind Space+Dot4 KEY_CURSOR_DOWN
-bind Space+Dot1+Dot2+Dot6 KEY_PAGE_UP
-bind Space+Dot3+Dot4+Dot5 KEY_PAGE_DOWN
-bind Space+Dot1+Dot3 KEY_HOME
-bind Space+Dot4+Dot6 KEY_END
-
-bind Space+Dot1+Dot2+Dot5 KEY_FUNCTION+0
-bind Space+Dot1+Dot2+Dot8 KEY_FUNCTION+1
-bind Space+Dot1+Dot2+Dot4+Dot8 KEY_FUNCTION+2
-bind F3+Dot7 KEY_FUNCTION+3
-bind F2+Dot7 KEY_FUNCTION+4
-bind F4+Dot7 KEY_FUNCTION+5
-bind Space+F4 KEY_FUNCTION+6
-bind F4+Dot8 KEY_FUNCTION+7
-bind Space+Dot3+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+8
-bind Space+Dot1+Dot3+Dot5 KEY_FUNCTION+9
-bind Space+Dot1+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+10
-
 
 #################
 # Menu Bindings #

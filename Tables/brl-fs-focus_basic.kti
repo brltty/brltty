@@ -22,8 +22,6 @@ include brl-fs-common.kti
 
 assign chord Space+
 include brl-chords.kti
-bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
-bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -40,18 +38,6 @@ map RightShift CONTROL
 
 bind Space+LeftShift KEY_BACKSPACE
 bind Space+RightShift KEY_ENTER
-bind Space+Dot2+Dot3+Dot5+Dot6 KEY_TAB
-bind Space+Dot2+Dot3 KEY_CURSOR_LEFT
-bind Space+Dot5+Dot6 KEY_CURSOR_RIGHT
-bind Space+Dot2+Dot5 KEY_CURSOR_UP
-bind Space+Dot3+Dot6 KEY_CURSOR_DOWN
-bind Space+Dot5 KEY_PAGE_UP
-bind Space+Dot6 KEY_PAGE_DOWN
-bind Space+Dot2 KEY_HOME
-bind Space+Dot3 KEY_END
-bind Space+Dot3+Dot5 KEY_INSERT
-bind Space+Dot2+Dot5+Dot6 KEY_DELETE
-bind Space+Dot2+Dot6 KEY_ESCAPE
 
 bind Space+!RoutingKey KEY_FUNCTION
 bind RightShift+!RoutingKey SWITCHVT

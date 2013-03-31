@@ -84,8 +84,6 @@ bind LeftJoystickDown+RoutingKey COPY_RECT
 
 assign chord Space+
 include brl-chords.kti
-bind Space+Dot2+Dot3+Dot5 SIXDOTS+on
-bind Space+Dot2+Dot3+Dot6 SIXDOTS+off
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -100,9 +98,6 @@ map Space SPACE
 
 bind Backspace KEY_BACKSPACE
 bind Backspace+Space KEY_ENTER
-
-bind Space+Dot7 KEY_ESCAPE
-bind Space+Dot8 KEY_TAB
 
 bind Space+LeftJoystickUp KEY_PAGE_UP
 bind Space+LeftJoystickDown KEY_PAGE_DOWN
