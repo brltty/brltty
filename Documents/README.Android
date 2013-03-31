@@ -294,6 +294,51 @@ which we'll call key #0, the actions are as follows:
 ----------------------------------------------------------------------
 
 
+Using a Braille Keyboard
+========================
+
+Braille keyboard input is supported, but, like all Android input 
+methods, it must be explicitly enabled, and then selected. BRLTTY cannot 
+do either of these automatically on your behalf. Although this may be 
+inconvenient, Android imposes this manual process so that you're very 
+consciously aware of which input methods can process, and which input 
+method is currently processing, whatever you're typing. Such 
+applications, after all, handle extremely sensitive personal data (such 
+as passwords, credit card numbers, etc), so it's crucial that you make 
+your own decisions regarding which of them you trust.
+
+You can enable BRLTTY's braille keyboard support ahead of time by 
+launching the "Settings" application, and then clicking on "Language and 
+Input". The "Keyboard and Input Methods" section of this screen contains 
+a selector labeled "Default" which is used to select the current input 
+Method, as well as a checkbox for each installed input method. An input 
+method is enabled if its checkbox is checked, and can only be selected 
+if it has been enabled.
+
+BRLTTY's input method is called "BRLTTY Input Service. While you may 
+wish to enable it ahead of time, you probably don't want to select it 
+ahead of time. The reason for this is that Android only allows exactly 
+one input method to be in use at a time. When you explicitly select 
+BRLTTY's input method, therefore, you're also implicitly deselecting the 
+system keyboard.
+
+If you use a braille keyboard when BRLTTY's input method is either 
+disabled or enabled but not selected, the Android "input method picker" 
+will be automatically displayed. This dialog asks you to select an input 
+method, and presents a set of radio buttons - one for each currently 
+enabled input method. If there's no radio button for BRLTTY's input 
+method then it hasn't been enabled yet.
+
+To enable it, click the button within the dialog labeled "Set up input 
+methods". This screen contains a checkbox for each installed input 
+method. Check the checkbox for BRLTTY's input method to enable it. Then, 
+click the "Back" button to get to the "Language and Input" screen, find 
+the "Keyboard and Input Methods" section of that screen, and set the 
+"Default" input method to BRLTTY's input method.
+
+----------------------------------------------------------------------
+
+
 When BRLTTY Crashes
 ===================
 
