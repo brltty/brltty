@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string-array name="EMPTY_STRING_ARRAY">
+  </string-array>
+
+  <string name="PREF_KEY_LOG_LEVEL">log-level</string>
+  <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
+
+  <string name="PREF_KEY_TEXT_TABLE">text-table</string>
+  <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>
+  <string name="PREF_KEY_CONTRACTION_TABLE">contraction-table</string>
+
+  <string name="PREF_KEY_SELECTED_DEVICE">selected-device</string>
+  <string name="PREF_KEY_ADD_DEVICE">add-device</string>
+  <string name="PREF_KEY_REMOVE_DEVICE">remove-device</string>
+
+  <string name="PREF_KEY_REMOVE_DEVICE_ASK">remove-device-ask</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_YES">remove-device-yes</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_NO">remove-device-no</string>
+
+  <string name="PREF_KEY_DEVICE_NAME">device-name</string>
+  <string name="PREF_KEY_DEVICE_METHOD">device-method</string>
+  <string name="PREF_KEY_DEVICE_IDENTIFIER">device-identifier</string>
+  <string name="PREF_KEY_DEVICE_DRIVER">device-driver</string>
+  <string name="PREF_KEY_DEVICE_ADD">device-add</string>
+
+  <string-array name="DEVICE_METHOD_VALUES">
+    <item>Bluetooth</item>
+    <item>Usb</item>
+    <item>Serial</item>
+  </string-array>
+
+  <string-array name="DEVICE_METHOD_LABELS">
+    <item>Bluetooth</item>
+    <item>USB</item>
+    <item>Seriell</item>
+  </string-array>
+
+  <string-array name="LOG_LEVEL_VALUES">
+    <item>debug</item>
+    <item>information</item>
+    <item>notice</item>
+    <item>warning</item>
+    <item>error</item>
+    <item>critical</item>
+    <item>alert</item>
+    <item>emergency</item>
+  </string-array>
+
+  <string-array name="LOG_LEVEL_LABELS">
+    <item>Debug</item>
+    <item>Information</item>
+    <item>Notice</item>
+    <item>Warning</item>
+    <item>Error</item>
+    <item>Critical</item>
+    <item>Alert</item>
+    <item>Emergency</item>
+  </string-array>
+
+  <string-array name="LOG_CATEGORY_VALUES">
+    <item>ingio</item>
+    <item>inpkts</item>
+    <item>outpkts</item>
+    <item>brlkeys</item>
+    <item>kbdkeys</item>
+    <item>csrtrk</item>
+    <item>csrrtg</item>
+  </string-array>
+
+  <string-array name="LOG_CATEGORY_LABELS">
+    <item>Generic Input</item>
+    <item>Input Packets</item>
+    <item>Output Packets</item>
+    <item>Braille Device Key Events</item>
+    <item>Keyboard Key Events</item>
+    <item>Cursor Tracking</item>
+    <item>Cursor Routing</item>
+  </string-array>
+</resources>
