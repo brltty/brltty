@@ -41,7 +41,7 @@ try:
 
   b.leaveTtyMode()
 
-except brlapi.ConnectionError, e:
+except brlapi.ConnectionError as e:
   if e.brlerrno == brlapi.ERROR_CONNREFUSED:
     print "Connection to %s refused. BRLTTY is too busy..." % e.host
   elif e.brlerrno == brlapi.ERROR_AUTHENTICATION:
@@ -50,9 +50,9 @@ except brlapi.ConnectionError, e:
     print "Connection to %s failed. Is BRLTTY really running?" % (e.host)
   else:
     print "Connection to BRLTTY at %s failed: " % (e.host)
-  print e
-  print e.brlerrno
-  print e.libcerrno
+  print(e)
+  print(e.brlerrno)
+  print(e.libcerrno)
 """
 
 ###############################################################################
