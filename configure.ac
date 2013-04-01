@@ -18,7 +18,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [4.5dev], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [4.5], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents Messages Android/Core Android/Application"
@@ -35,8 +35,8 @@ AC_SUBST([brltty_manual_directories])
 brltty_build_directories="${brltty_build_directories} ${brltty_manual_directories}"
 
 AC_SUBST([api_major], [0])
-AC_SUBST([api_minor], [5])
-AC_SUBST([api_revision], [7])
+AC_SUBST([api_minor], [6])
+AC_SUBST([api_revision], [0])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"],

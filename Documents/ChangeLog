@@ -1,6 +1,75 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+April 1, 2013:
+ - BRLTTY 4.5 released:
+   General Fixes:
+      The cursor routing algorithm is now usually almost as fast as it used to be.
+      Speech navigation now works when braille is not being used.
+      Autospeak is now forced on if speech is being used without braille.
+      Autospeak no longer considers a single character to be a completed word.
+      The input modifier commands now function as regular toggles.
+      Hangs can no longer occur when the system clock is adjusted backward.
+      Occasional delayed input with some braille devices has been resolved.
+      Poor response when using USB with some braille devices has been resolved.
+      Bogus Bluetooth connect errors (resource busy) have been resolved.
+   Alva Braille Driver:
+      The key bindings for the BC models have been reworked.
+      Secondary routing keys are now interpreted as though they were primary keys.
+      The SecondaryRoutingKeyEmulation= parameter has been added.
+   Baum Braille Driver:
+      The RefreshaBraille key bindings have been improved.
+   BrailleNote Braille Driver:
+      Key bindings are now defined within key tables rather than being hard-coded.
+   Cebra Braille Driver:
+      Bluetooth support has been added.
+      Support for the Novem braille keyboard has been added.
+   FreedomScientific Braille Driver:
+      Support for the Focus 14 has been added.
+      A key binding for CLIP_COPY has been added.
+      The definitions for the two Focus 40 rocker keys have been swapped.
+   HandyTech Braille Driver:
+      Poor performance when using an Active Braille has been resolved.
+   HIMS Braille Driver:
+      USB support for the Braille Edge has been added.
+      Newer Braille Sense models, when connected via USB, are now recognized.
+      Many key bindings for the Braille Sense and Braille Edge have been added.
+   HumanWare Braille Driver:
+      USB autodetection is now supported.
+   IrisLinux Braille Driver:
+      Removed - superceded by the Iris braille driver.
+   NinePoint Braille Driver:
+      Cebra devices are now supported by the new Cebra braille driver.
+      This driver now supports the NinePoint device.
+   Papenmeier Braille Driver:
+      Bluetooth is now supported.
+      Models EL40c, EL60c, and EL80c are now supported.
+   Seika Braille Driver:
+      Support for the Seika 80 has been added.
+   Voyager Braille Driver:
+      The key bindings have been reworked.
+   eSpeak Speech Driver:
+      Now runs in a separate thread in order to improve core performance.
+   BrlAPI Server:
+      The RetainDots= parameter has been added.
+   BrlAPI Client:
+      Version updated to 0.6.0.
+      The brlapi_writeWText() function has been added.
+      The Python bindings are now compiled by Cython (rather than with Pyrex).
+      Python 3 is now supported.
+      A file descriptor leak has been resolved.
+   Text Tables:
+      The fr-vs table has been updated.
+   Contraction Tables:
+      The en-us-g2 table has been updated.
+   Keyboard Key Tables:
+      Many bindings have been added to the laptop table.
+   Android:
+      An initial implementation is now available.
+      Runs poorly on 4.0 (ICS) but quite well on 4.1 (JB).
+      Screen navigation is supported.
+      See Documents/README.Android for details.
+
 June 7, 2012:
  - BRLTTY 4.4 released:
    Changes:
