@@ -16,6 +16,12 @@
 <!ENTITY fr2007          SYSTEM "fr-2007.sgml">
 <!ENTITY midi 		SYSTEM "Midi.sgml">
 
+<!ENTITY DriverCodes SYSTEM "driver-codes.sgml">
+<!ENTITY BrailleDrivers SYSTEM "braille-drivers.sgml">
+<!ENTITY SpeechDrivers SYSTEM "speech-drivers.sgml">
+<!ENTITY TextTables SYSTEM "text-tables.sgml">
+<!ENTITY ContractionTables SYSTEM "contraction-tables.sgml">
+
 ]>
 <article>
 

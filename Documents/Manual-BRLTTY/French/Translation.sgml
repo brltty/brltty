@@ -10,87 +10,14 @@ Au départ, BRLTTY est configuré pour utiliser la table de texte
 <ref id="nabcc" name="North American Braille Computer Code">
 (NABCC) (code informatique braille nord-américain).
 En plus de celle-ci par défaut, les alternatives suivantes sont fournies:
-<descrip>
-  <tag/auto/sélection automatique à partir de la locale
-  <tag/ar/Arabe (générique)
-  <tag/as/Assamese
-  <tag/awa/Awaïen
-  <tag/bg/Bulgare
-  <tag/bh/Bihari
-  <tag/bn/Bengali
-  <tag/bo/Tibétin
-  <tag/bra/Braj
-  <tag/brf/pour voir des fichiers <tt/.brf/ dans un éditeur ou un visualiseur
-  <tag/cs/Tchèque
-  <tag/cy/Gallois
-  <tag/da/Danois
-  <tag/de/Allemand
-  <tag/dra/Dravidian
-  <tag/el/Grec
-  <tag/en/Anglais
-  <tag/en_CA/Anglais (Canada)
-  <tag/en_GB/Anglais (Royaume-Uni)
-  <tag/en_US/Anglais (États-Unis)
-  <tag/en-nabcc/Anglais (Code informatique braille nord-américain)
-  <tag/eo/Esperanto
-  <tag/es/Espagnol
-  <tag/et/Estonien
-  <tag/fi/Finnois
-  <tag/fr/Français
-  <tag/fr_CA/Français (Canada)
-  <tag/fr_FR/Français (France)
-  <tag/fr-2007/Français (unifié)
-  <tag/fr-cbifs/Français (Code Braille Informatique Français Standard)
-  <tag/ga/Irlandais
-  <tag/gd/Gaélique
-  <tag/gon/Gondi
-  <tag/gu/Gujarati
-  <tag/he/Hébreux
-  <tag/hi/Hindou
-  <tag/hr/Croate
-  <tag/hu/Hongrois
-  <tag/hy/Arménien
-  <tag/is/Islandais
-  <tag/it/Italien
-  <tag/kha/Khasi
-  <tag/kn/Kannada
-  <tag/kok/Konkani
-  <tag/kru/Kurukh
-  <tag/lt/Lituanien
-  <tag/lv/Letton
-  <tag/mg/Malgache
-  <tag/mi/Maori
-  <tag/ml/Malayalam
-  <tag/mni/Manipuri
-  <tag/mr/Marathi
-  <tag/mt/Maltais
-  <tag/mun/Mundari
-  <tag/mwr/Marwari
-  <tag/ne/Népalais
-  <tag/new/Newari
-  <tag/nl/Néerlandais
-  <tag/nl_BE/Néerlandais (Belge)
-  <tag/nl_NL/Néerlandais (Pays-Bas)
-  <tag/no/Norvégien
-  <tag/nwc/Newari ancien
-  <tag/or/Oriya
-  <tag/pa/Panjabi
-  <tag/pi/Pali
-  <tag/pl/Polonais
-  <tag/pt/Portugais
-  <tag/ro/Roumain
-  <tag/ru/Russe
-  <tag/sa/Sanskrit
-  <tag/sat/Santali
-  <tag/sd/Sindhi
-  <tag/sk/Slovaque
-  <tag/sv/Suédois
-  <tag/sw/Swahili
-  <tag/ta/Tamil
-  <tag/te/Telugu
-  <tag/tr/Turc
-  <tag/vi/Vietnamien
-</descrip>
+
+<table loc="h">
+  <tabular ca="ll">
+    Nom|Langue@
+    &TextTables
+  </tabular>
+</table>
+
 Voir l'option <ref id="options-text-table" name="-t"> en ligne de commande,
 la ligne <ref id="configure-text-table" name="text-table"> du fichier de
 configuration, et l'option de compilation
@@ -352,36 +279,13 @@ compilation
 <ref id="build-contracted-braille" name="--disable-contracted-braille">.
 
 Les tables d'abrégé suivantes sont fournies:
-<descrip>
-  <tag/af/Africain (abrégé)
-  <tag/am/Amharic (intégral)
-  <tag/de-basis/Allemand (intégral)
-  <tag/de-kurzschrift/Allemand (abrégé - standard 1998)
-  <tag/de-vollschrift/Allemand (abréviations de base)
-  <tag/en-ueb-g2/Braille anglais unifié (degré 2)
-  <tag/en-us-g2/Anglais américain (degré 2)
-  <tag/es/Espagnol (degré 2)
-  <tag/fr-abrege/Français (abrégé)
-  <tag/fr-integral/Français (intégral)
-  <tag/ha/Hausa (abrégé)
-  <tag/id/Indonésien (abrégé)
-  <tag/ja/Japonais (intégral)
-  <tag/ko-g1/Coréen (degré 1)
-  <tag/ko-g2/Coréen (degré 2)
-  <tag/ko/Coréen (intégral)
-  <tag/mg/Malgache (abrégé)
-  <tag/mun/Munda (abrégé)
-  <tag/nl/Néerlandais (abrégé)
-  <tag/ny/Chichewa (abrégé)
-  <tag/ipa/Alphabet phonétique international
-  <tag/pt/Portugais (degré 2)
-  <tag/si/Sinhalese (intégral)
-  <tag/sw/Swahili (abrégé)
-  <tag/th/Thai (abrégé)
-  <tag/zh-tw/Chinois thaiwanais (intégral)
-  <tag/zh-tw-ucb/Chinois thaiwanais (braille chinois unique)
-  <tag/zu/Zulu (abrégé)
-</descrip>
+
+<table loc="h">
+  <tabular ca="ll">
+    Nom|Langue@
+    &ContractionTables
+ </tabular>
+</table>
 Voir l'option <ref id="options-contraction-table" name="-c"> en ligne de commande
 et la ligne <ref id="configure-contraction-table" name="contraction-table"> du fichier de 
 configuration pour des détails sur la façon d'utiliser une table d'abrégé.

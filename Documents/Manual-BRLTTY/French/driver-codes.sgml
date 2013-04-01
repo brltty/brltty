@@ -1,0 +1,43 @@
+al|Alva@
+at|Albatross@
+ba|BrlAPI@
+bc|BrailComm@
+bl|BrailleLite@
+bm|Baum (Native, HT, PB1, PB2)@
+bn|BrailleNote@
+cb|CombiBraille@
+ec|EcoBraille@
+es|eSpeak@
+eu|EuroBraille@
+fl|FestivalLite@
+fs|FreedomScientific@
+fv|Festival@
+gs|GenericSay@
+hm|HIMS@
+ht|HandyTech@
+hw|HumanWare@
+ir|Iris@
+lb|Libbraille@
+lt|LogText@
+mb|MultiBraille@
+md|MDV@
+mn|MiniBraille@
+mp|Mikropuhe@
+mt|Metec@
+no|no driver@
+np|NinePoint@
+pg|Pegasus@
+pm|Papenmeier@
+sd|SpeechDispatcher@
+sk|Seika@
+sw|Swift@
+th|Theta@
+ts|Telesensory Systems Inc.@
+tt|TTY@
+vd|VideoBraille@
+vo|Voyager@
+vr|Virtual@
+vs|VisioBraille@
+vv|ViaVoice@
+xs|ExternalSpeech@
+xw|XWindow@
