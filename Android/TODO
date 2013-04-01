@@ -24,3 +24,6 @@ enabling of input service
 document folder opening
 document input
 fix make file dependency logic
+disconnect on lock, reconnect on unlock
+selecting multiple devices
+restoring the input method to the system default
