@@ -69,15 +69,15 @@ bind \{chord}Dot2+Dot3+Dot6 SIXDOTS+off
 
 bind \{chord}Dot7 KEY_BACKSPACE
 bind \{chord}Dot8 KEY_ENTER
-bind \{chord}Dot3 KEY_PAGE_UP
-bind \{chord}Dot6 KEY_PAGE_DOWN
-bind \{chord}Dot2 KEY_CURSOR_UP
-bind \{chord}Dot5 KEY_CURSOR_DOWN
-bind \{chord}Dot1 KEY_CURSOR_LEFT
-bind \{chord}Dot4 KEY_CURSOR_RIGHT
+bind \{chord}Dot3 KEY_CURSOR_LEFT
+bind \{chord}Dot6 KEY_CURSOR_RIGHT
+bind \{chord}Dot2 KEY_HOME
+bind \{chord}Dot5 KEY_END
+bind \{chord}Dot1 KEY_CURSOR_UP
+bind \{chord}Dot4 KEY_CURSOR_DOWN
 
-bind \{chord}Dot2+Dot3 KEY_HOME
-bind \{chord}Dot5+Dot6 KEY_END
+bind \{chord}Dot2+Dot3 KEY_PAGE_UP
+bind \{chord}Dot5+Dot6 KEY_PAGE_DOWN
 bind \{chord}Dot2+Dot3+Dot5+Dot6 KEY_TAB
 
 bind \{chord}Dot3+Dot5 KEY_INSERT
