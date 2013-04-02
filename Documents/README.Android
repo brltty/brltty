@@ -1,3 +1,33 @@
+Android Platform Considerations
+===============================
+
+BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean). 
+While it does run on Android 4.0 (Ice Cream Sandwich), many of its 
+highly desirable features won't work.
+
+BRLTTY requires access to a number of privileged Android operating 
+system capabilities. The required permissions are as follows:
+
+BIND_ACCESSIBILITY_SERVICE
+   This permission is required so that BRLTTY can inspect the layout
+   and content of the screen.
+
+BIND_INPUT_METHOD
+   This permission is required so that Android will accept input from
+   your braille device's keyboard.
+
+DEVICE_POWER
+   This permission is required so that BRLTTY can reset the Android
+   device's lock timer each time you interact with a control on your
+   braille device.
+
+BLUETOOTH
+   This permission is required so that BRLTTY can use Bluetooth to
+   communicate with your braille device.
+
+----------------------------------------------------------------------
+
+
 Preparing Your Host for Building Android Applications
 =====================================================
 
@@ -37,8 +67,8 @@ i386) with the following commands (as root):
 ----------------------------------------------------------------------
 
 
-Installing and Preparing the BRLTTY Source Tree
-===============================================
+Installing and Preparing the BRLTTY Source Tree on Your Host
+============================================================
 
 Select the directory which should contain BRLTTY's source tree (which 
 needn't yet exist). Then extract the latest BRLTTY source into it with 
