@@ -139,6 +139,29 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 }
 
 static int
+resetLockTimer (void) {
+  if (findScreenDriverClass()) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, screenDriverClass, "resetLockTimer",
+                             JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                            ))) {
+      (*env)->CallStaticVoidMethod(env, screenDriverClass, method);
+      if (!clearJavaException(env, 1)) return 1;
+      errno = EIO;
+    }
+  }
+
+  return 0;
+}
+
+static int
+executeCommand_AndroidScreen (int *command) {
+  resetLockTimer();
+  return 0;
+}
+
+static int
 routeCursor_AndroidScreen (int column, int row, int screen) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
@@ -246,6 +269,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
+  main->base.executeCommand = executeCommand_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   main->base.insertKey = insertKey_AndroidScreen;
   env = getJavaNativeInterface();

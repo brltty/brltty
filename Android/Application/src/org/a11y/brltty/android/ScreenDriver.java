@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 import android.os.SystemClock;
+import android.os.PowerManager;
 
 import android.content.Context;
 import android.content.ComponentName;
@@ -427,6 +428,14 @@ public class ScreenDriver {
       case 12: return inputKey(KeyEvent.KEYCODE_F12);
       default: return false;
     }
+  }
+
+  public static PowerManager getPowerManager () {
+    return (PowerManager)BrailleService.getBrailleService().getSystemService(Context.POWER_SERVICE);
+  }
+
+  public static void resetLockTimer () {
+    getPowerManager().userActivity(SystemClock.uptimeMillis(), true);
   }
 
   static {
