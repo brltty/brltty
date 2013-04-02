@@ -88,12 +88,6 @@ with the following command:
 
    export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
 
-The next step is to build the BRLTTY core for Android. This is done as 
-follows:
-
-   cd /path/to/brltty/Android/Core
-   make -s
-
 The final step is to build the BRLTTY service for Android. This is done 
 as follows:
 
