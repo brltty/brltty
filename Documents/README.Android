@@ -335,6 +335,15 @@ When a home screen folder is opened, BRLTTY automatically sets
 accessibility focus to that folder's first entry. This eliminates the 
 need to search for it.
 
+A checkbox is rendered in braille by appending a pair of square 
+[brackets] to its name. A space between them means that the box isn't 
+checked, and an X between them means that it is checked.
+
+A two-position switch is rendered as though it were a checkbox. The box 
+isn't checked if the switch is in its "off" position, and is checked if 
+the switch is in its "on" position. The label associated with the 
+switch's position appears just before the square [brackets].
+
 ----------------------------------------------------------------------
 
 
