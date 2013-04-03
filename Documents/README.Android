@@ -297,6 +297,12 @@ Device" and select it from the list of devices that BRLTTY knows about.
 Navigating the Screen
 =====================
 
+Pressing keys on your braille device resets your Android device's lock 
+timer in the same way that pressing its keys, touching its screen, etc 
+does. This means that your Android device will stay awake and unlocked 
+even though you're only controlling it from your braille device, and 
+that it'll also still automatically lock once you're no longer using it.
+
 The "accessibility focus" feature of Android is used for cursor tracking 
 and routing. It's a soft cursor, not visible on the screen, which can be 
 programmatically associated with any screen element. All screen readers 
