@@ -294,26 +294,40 @@ Device" and select it from the list of devices that BRLTTY knows about.
 ----------------------------------------------------------------------
 
 
-Navigation
-==========
+Navigating the Screen
+=====================
+
+The "accessibility focus" feature of Android is used for cursor tracking 
+and routing. It's a soft cursor, not visible on the screen, which can be 
+programmatically associated with any screen element. All screen readers 
+which use it to define the current element for actions (like clicking) 
+will implicitly cooperate reasonably seamlessly with one another.
 
 The cursor is usually placed on the first character of the screen 
 element which currently has accessibility focus. The one exception to 
-this is that, within an editable input area, the cursor is placed at the 
-location within that area where input will be inserted.
+this is within an editable input area. If that area has input focus then 
+the cursor is placed at the location within it where input will be 
+inserted.
 
 The cursor routing keys of the braille device perform their usual 
-function when within an editable input area - the key above a given 
-character brings the cursor to that character. In any other context, 
-however, a cursor routing key performs an action on the screen element 
-under it. Starting with the leftmost routing key over a screen element, 
-which we'll call key #0, the actions are as follows:
+function when within an editable input area if it has input focus - the 
+key above a given character brings the cursor to that character. In any 
+other context, however, a cursor routing key performs an action on the 
+screen element under it. Starting with the leftmost routing key over a 
+screen element, which we'll call key #0, the actions are as follows:
 
-   0  Set Accessibility Focus (used for cursor tracking)
+   0  Set Accessibility Focus (used for cursor tracking and routing)
    1  Click
    2  Long Click
    3  Scroll Backward
    4  Scroll Forward
+
+When an editable input area has input focus, BRLTTY's attribute 
+underlining feature is used to highlight the selected text region.
+
+When a home screen folder is opened, BRLTTY automatically sets 
+accessibility focus to that folder's first entry. This eliminates the 
+need to search for it.
 
 ----------------------------------------------------------------------
 
