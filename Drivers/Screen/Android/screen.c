@@ -34,6 +34,8 @@ static jint screenColumns;
 static jint screenRows;
 static jint cursorColumn;
 static jint cursorRow;
+static jint selectedFrom;
+static jint selectedTo;
 
 static int
 findScreenDriverClass (void) {
@@ -45,13 +47,16 @@ Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   JNIEnv *env, jobject this,
   jint number,
   jint columns, jint rows,
-  jint column, jint row
+  jint column, jint row,
+  jint from, jint to
 ) {
   screenNumber = number;
   screenColumns = columns;
   screenRows = rows;
   cursorColumn = column;
   cursorRow = row;
+  selectedFrom = from;
+  selectedTo = to;
 }
 
 static void
@@ -108,6 +113,21 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
               target->text = *source++;
               target->attributes = SCR_COLOUR_DEFAULT;
               target += 1;
+            }
+          }
+
+          if (rowNumber == cursorRow) {
+            int from = MAX(selectedFrom, columnNumber);
+            int to = MIN(selectedTo, columnNumber+columnCount);
+
+            if (from < to) {
+              ScreenCharacter *target = characters + (from - columnNumber);
+              const ScreenCharacter *end = target + (to - from);
+
+              while (target < end) {
+                target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
+                target += 1;
+              }
             }
           }
 
