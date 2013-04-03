@@ -1,4 +1,3 @@
-show when text is selected
 show that text is editable
 a way to click on the background
 a way to drag and drop
@@ -19,7 +18,6 @@ internationalization
 actions on elements with short text
 enabling of input service
 document folder opening
-document input
 disconnect on lock, reconnect on unlock
 selecting multiple devices
 restoring the input method to the system default

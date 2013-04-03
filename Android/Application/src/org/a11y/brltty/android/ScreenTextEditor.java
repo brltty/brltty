@@ -27,6 +27,8 @@ public class ScreenTextEditor {
   private static final Map<Integer, ScreenTextEditor> textEditors = new HashMap<Integer, ScreenTextEditor>();
 
   private int cursorOffset = 0;
+  private int selectedFrom = 0;
+  private int selectedTo = 0;
 
   public static ScreenTextEditor get (AccessibilityNodeInfo node, boolean canCreate) {
     Integer key = new Integer(node.hashCode());
@@ -50,8 +52,21 @@ public class ScreenTextEditor {
     return cursorOffset;
   }
 
-  public final void setCursorOffset (int offset) {
+  public final void setCursorLocation (int offset) {
     cursorOffset = offset;
+  }
+
+  public final int getSelectedFrom () {
+    return selectedFrom;
+  }
+
+  public final int getSelectedTo () {
+    return selectedTo;
+  }
+
+  public final void setSelectedRegion (int from, int to) {
+    selectedFrom = from;
+    selectedTo = to;
   }
 
   public ScreenTextEditor () {

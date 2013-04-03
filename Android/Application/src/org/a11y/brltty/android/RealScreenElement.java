@@ -156,8 +156,10 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (isEditable()) {
-      return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+      if (isEditable()) {
+        return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+      }
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
