@@ -199,5 +199,9 @@ public class RealScreenElement extends ScreenElement {
   public RealScreenElement (String text, AccessibilityNodeInfo node) {
     super(text);
     accessibilityNode = node;
+
+    if (isEditable()) {
+      ScreenTextEditor.get(accessibilityNode, true);
+    }
   }
 }
