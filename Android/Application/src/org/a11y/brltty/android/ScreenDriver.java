@@ -115,6 +115,9 @@ public class ScreenDriver {
         goToFirstClickableSubnode(event.getSource());
         return;
 
+      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
         break;
 
