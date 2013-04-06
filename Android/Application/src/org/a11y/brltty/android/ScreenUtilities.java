@@ -37,7 +37,7 @@ public final class ScreenUtilities {
     return node;
   }
 
-  private static String normalizeText (CharSequence text) {
+  public static String normalizeText (CharSequence text) {
     if (text != null) {
       String string = text.toString().trim();
 

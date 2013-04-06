@@ -93,10 +93,21 @@ public class RenderedScreen {
     return false;
   }
 
-  private final void addScreenElements (AccessibilityNodeInfo root) {
-    if (root != null) {
-      boolean isVisible;
+  private final boolean addScreenElements (AccessibilityNodeInfo root) {
+    boolean hasLabel = false;
 
+    if (root != null) {
+      {
+        int childCount = root.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          if (addScreenElements(root.getChild(childIndex))) {
+            hasLabel = true;
+          }
+        }
+      }
+
+      boolean isVisible;
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
         isVisible = root.isVisibleToUser();
       } else {
@@ -104,21 +115,36 @@ public class RenderedScreen {
       }
 
       if (isVisible) {
-        String text = ScreenUtilities.getNodeText(root);
+        String text = ScreenUtilities.normalizeText(root.getText());
+        String description = ScreenUtilities.normalizeText(root.getContentDescription());
+
+        int actions = root.getActions() & (
+          AccessibilityNodeInfo.ACTION_CLICK |
+          AccessibilityNodeInfo.ACTION_LONG_CLICK |
+          AccessibilityNodeInfo.ACTION_SCROLL_FORWARD |
+          AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+        );
 
         if (text != null) {
-          screenElements.add(text, root);
+          if (description != null) text = description;
+          if (actions == 0) hasLabel = true;
+        } else if (actions != 0) {
+          if (hasLabel) {
+            hasLabel = false;
+          } else if ((text = description) == null) {
+            text = root.getClassName().toString();
+            int index = text.lastIndexOf('.');
+            if (index >= 0) text = text.substring(index+1);
+            text = "(" + text + ")";
+          }
         }
-      }
 
-      {
-        int childCount = root.getChildCount();
-
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          addScreenElements(root.getChild(childIndex));
-        }
+        if (text == null) text = "";
+        screenElements.add(text, root);
       }
     }
+
+    return hasLabel;
   }
 
   private final void finishScreenRows () {
