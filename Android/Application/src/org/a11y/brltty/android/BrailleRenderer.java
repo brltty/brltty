@@ -21,6 +21,8 @@ package org.a11y.brltty.android;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.content.Context;
+
 import android.os.Build;
 
 import android.accessibilityservice.AccessibilityService;
@@ -35,12 +37,32 @@ public abstract class BrailleRenderer {
 
   protected void addVirtualElements (ScreenElementList elements) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      elements.addAtTop("Notifications", AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
-      elements.addAtTop("Quick Settings", AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+      Context context = BrailleService.getBrailleService();
 
-      elements.addAtBottom("Back", AccessibilityService.GLOBAL_ACTION_BACK);
-      elements.addAtBottom("Home", AccessibilityService.GLOBAL_ACTION_HOME);
-      elements.addAtBottom("Recent Apps", AccessibilityService.GLOBAL_ACTION_RECENTS);
+      elements.addAtTop(
+        context.getString(R.string.NOTIFICATIONS_BUTTON),
+        AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
+      );
+
+      elements.addAtTop(
+        context.getString(R.string.QUICK_SETTINGS_BUTTON),
+        AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
+      );
+
+      elements.addAtBottom(
+        "Back",
+        AccessibilityService.GLOBAL_ACTION_BACK
+      );
+
+      elements.addAtBottom(
+        "Home",
+        AccessibilityService.GLOBAL_ACTION_HOME
+      );
+
+      elements.addAtBottom(
+        "Recent Apps",
+        AccessibilityService.GLOBAL_ACTION_RECENTS
+      );
     }
   }
 

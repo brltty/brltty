@@ -4,4 +4,7 @@
   <string name="app_name">BRLTTY</string>
   <string name="input_service_name">BRLTTY Input Service</string>
   <string name="app_description">BRLTTY supports braille devices.</string>
+
+  <string name="NOTIFICATIONS_BUTTON">Notifications</string>
+  <string name="QUICK_SETTINGS_BUTTON">Quick Settings</string>
 </resources>
