@@ -66,7 +66,13 @@ public class BluetoothConnection {
         byte[] buffer = new byte[0X80];
 
         while (!stop) {
-          int byteCount = inputStream.read(buffer);
+          int byteCount;
+          try {
+            byteCount = inputStream.read(buffer);
+          } catch (IOException exception) {
+            Log.d(LOG_TAG, "Bluetooth input exception: " + bluetoothAddress + ": " + exception.getMessage());
+            break;
+          }
 
           if (byteCount > 0) {
             pipeStream.write(buffer, 0, byteCount);
