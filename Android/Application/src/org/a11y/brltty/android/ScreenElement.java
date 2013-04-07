@@ -100,7 +100,7 @@ public class ScreenElement {
 
   protected String makeBrailleText (String text) {
     if (isCheckable()) {
-      text = "[" + (isChecked()? "X": " ") + "]" + text;
+      text = "[" + (isChecked()? "X": " ") + "]" + " " + text;
     }
 
     return text;
