@@ -29,20 +29,28 @@ public abstract class ApplicationUtilities {
     return BrailleService.getBrailleService();
   }
 
+  private static final SingletonReference<PowerManager> powerManagerReference
+    = new SystemServiceReference<PowerManager>(Context.POWER_SERVICE);
   public static PowerManager getPowerManager () {
-    return (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
+    return powerManagerReference.get();
   }
 
+  private static final SingletonReference<KeyguardManager> keyguardManagerReference
+    = new SystemServiceReference<KeyguardManager>(Context.KEYGUARD_SERVICE);
   public static KeyguardManager getKeyguardManager () {
-    return (KeyguardManager)getContext().getSystemService(Context.KEYGUARD_SERVICE);
+    return keyguardManagerReference.get();
   }
 
+  private static final SingletonReference<InputMethodManager> inputMethodManagerReference
+    = new SystemServiceReference<InputMethodManager>(Context.INPUT_METHOD_SERVICE);
   public static InputMethodManager getInputMethodManager () {
-    return (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    return inputMethodManagerReference.get();
   }
 
+  private static final SingletonReference<UsbManager> usbManagerReference
+    = new SystemServiceReference<UsbManager>(Context.USB_SERVICE);
   public static UsbManager getUsbManager () {
-    return (UsbManager)getContext().getSystemService(Context.USB_SERVICE);
+    return usbManagerReference.get();
   }
 
   private ApplicationUtilities () {
