@@ -21,16 +21,9 @@ package org.a11y.brltty.android;
 import android.os.Build;
 import android.os.SystemClock;
 
-import android.os.PowerManager;
-import android.app.KeyguardManager;
-
-import android.content.Context;
-import android.content.ComponentName;
-
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
