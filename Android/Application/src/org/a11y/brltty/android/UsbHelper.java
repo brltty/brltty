@@ -80,7 +80,7 @@ public class UsbHelper {
   public static void begin (Context context) {
     usbContext = context;
 
-    usbManager = (UsbManager)usbContext.getSystemService(Context.USB_SERVICE);
+    usbManager = ApplicationUtilities.getUsbManager();
     makePermissionReceiver();
   }
 

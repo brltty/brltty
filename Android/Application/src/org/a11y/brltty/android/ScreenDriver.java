@@ -61,8 +61,8 @@ public class ScreenDriver {
   }
 
   private static boolean isDeviceLocked () {
-    if (!getPowerManager().isScreenOn()) {
-      if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+    if (!ApplicationUtilities.getPowerManager().isScreenOn()) {
+      if (ApplicationUtilities.getKeyguardManager().inKeyguardRestrictedInputMode()) {
         return true;
       }
     }
@@ -282,18 +282,6 @@ public class ScreenDriver {
     return currentScreen.performAction(column, row);
   }
 
-  public static PowerManager getPowerManager () {
-    return (PowerManager)BrailleService.getBrailleService().getSystemService(Context.POWER_SERVICE);
-  }
-
-  public static KeyguardManager getKeyguardManager () {
-    return (KeyguardManager)BrailleService.getBrailleService().getSystemService(Context.KEYGUARD_SERVICE);
-  }
-
-  public static InputMethodManager getInputMethodManager () {
-    return (InputMethodManager)BrailleService.getBrailleService().getSystemService(Context.INPUT_METHOD_SERVICE);
-  }
-
   public static String getInputServiceClassName () {
     return InputService.class.getName();
   }
@@ -301,7 +289,7 @@ public class ScreenDriver {
   public static boolean inputServiceEnabled () {
     String inputServiceClass = getInputServiceClassName();
 
-    for (InputMethodInfo info : getInputMethodManager().getEnabledInputMethodList()) {
+    for (InputMethodInfo info : ApplicationUtilities.getInputMethodManager().getEnabledInputMethodList()) {
       if (info.getComponent().getClassName().equals(inputServiceClass)) {
         return true;
       }
@@ -314,7 +302,7 @@ public class ScreenDriver {
     InputService service = InputService.getInputService();
     if (service != null) return service.getCurrentInputConnection();
 
-    getInputMethodManager().showInputMethodPicker();
+    ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
     return null;
   }
 
@@ -462,7 +450,7 @@ public class ScreenDriver {
   }
 
   public static void resetLockTimer () {
-    getPowerManager().userActivity(SystemClock.uptimeMillis(), true);
+    ApplicationUtilities.getPowerManager().userActivity(SystemClock.uptimeMillis(), true);
   }
 
   static {

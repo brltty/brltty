@@ -45,6 +45,11 @@ public class BrailleService extends AccessibilityService {
   }
 
   @Override
+  public void onDestroy () {
+    brailleService = null;
+  }
+
+  @Override
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
 
