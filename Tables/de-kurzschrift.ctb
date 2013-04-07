@@ -62,6 +62,7 @@ always en 14
 always er 12456
 always es 123456
 always ge 12346
+before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
 midendword ich 3456
 midendword ig 45
 always in 35
@@ -130,6 +131,7 @@ always est 15-23456
 endword tel 2345-13456
 endword tels 2345-13456-234
 endword ten 2345-14
+always daten 145-1-2345-14 
 endword tenem 2345-14-12356
 endword tenen 2345-14-14
 endword tener 2345-14-12456
@@ -208,6 +210,7 @@ always trigraph = shouldn't use the ig-contraction
 # Vorsilbenkürzungen
 begword aus 34
 begword ent 2346
+word enter 14-2345-12456 shouldn't use the ent-contraction
 begmidword entwickl 2346-2456-24-46-123
 begword ex 1346
 begword pro 12345
@@ -367,6 +370,7 @@ word von 1236
 always von 2-1236
 word vor 26
 always vor 2-26
+always favorit 124-1-1236-26-24-2345 shouldn't use the vor-contraction
 word wie 126
 always wie 2-126
 word zu 1356
@@ -809,6 +813,7 @@ always spraech 5-234-1234
 always sprech 2-2346
 always staat 23456-2345
 always stand 2-23456
+always standard 23456-235-145-356-145 shouldn't use the stand-contraction
 always ständ 5-23456
 always staend 5-23456
 always stell 2-13456
@@ -1078,6 +1083,11 @@ always viertel 1236-346-1235-2345-13456 shouldn't use the te-contraction
 before g always zeitsta 1356-2345-234-2345-1
 
 # names
+word angela 235-1245-13456-1 shouldn't use the ge-contraction
+word angeles 235-1245-13456-123456 shouldn't use the ge-contraction
+word angelika 235-1245-13456-24-13-1 shouldn't use the ge-contraction
+word angelina 235-1245-13456-35-1 shouldn't use the ge-contraction
+word angelo 235-1245-13456-135 shouldn't use the ge-contraction
 always daniel 145-235-24-13456 shouldn't use the ie-contraction
 always gerlind 1245-12456-123-35-145 should use the er-contraction
 
