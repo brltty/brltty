@@ -150,6 +150,7 @@ public class CoreThread extends Thread {
 
     // required settings
     builder.setForegroundExecution(true);
+    builder.setReleaseDevice(true);
     builder.setTablesDirectory(getDataDirectory(DATA_TYPE_TABLES).getPath());
     builder.setDriversDirectory(getDataDirectory(DATA_TYPE_DRIVERS).getPath());
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());

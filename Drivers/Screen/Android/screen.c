@@ -37,6 +37,8 @@ static jint cursorRow;
 static jint selectedFrom;
 static jint selectedTo;
 
+static const char *problemText = NULL;
+
 static int
 findScreenDriverClass (void) {
   return findJavaClass(env, &screenDriverClass, "org/a11y/brltty/android/ScreenDriver");
@@ -65,19 +67,35 @@ describe_AndroidScreen (ScreenDescription *description) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, screenDriverClass, "refreshScreen",
-                             JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
-      (*env)->CallStaticVoidMethod(env, screenDriverClass, method);
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method);
 
-      if (!clearJavaException(env, 1)) {
+      if (clearJavaException(env, 1)) {
+        description->unreadable = "java exception";
+      } else if (result == JNI_FALSE) {
+        description->unreadable = "device locked";
+      } else {
         description->cols = screenColumns;
         description->rows = screenRows;
         description->posx = cursorColumn;
         description->posy = cursorRow;
         description->number = screenNumber;
-      } else {
-        errno = EIO;
+        description->unreadable = NULL;
       }
+    } else {
+      description->unreadable = "method not found";
     }
+  } else {
+    description->unreadable = "class not found";
+  }
+
+  if ((problemText = description->unreadable)) {
+    description->cols = strlen(problemText);
+    description->rows = 1;
+    description->posx = 0;
+    description->posy = 0;
+    description->number = 0;
   }
 }
 
@@ -146,10 +164,14 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
 static int
 readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (validateScreenBox(box, screenColumns, screenRows)) {
-    int rowIndex;
+    if (problemText) {
+      setScreenMessage(box, buffer, problemText);
+    } else {
+      int rowIndex;
 
-    for (rowIndex=0; rowIndex<box->height; rowIndex+=1) {
-      if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
+      for (rowIndex=0; rowIndex<box->height; rowIndex+=1) {
+        if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
+      }
     }
 
     return 1;

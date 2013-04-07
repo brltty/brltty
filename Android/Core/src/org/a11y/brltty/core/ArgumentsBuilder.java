@@ -49,6 +49,13 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
+  private boolean releaseDevice = false;
+  public boolean setReleaseDevice (boolean newValue) {
+    boolean oldValue = releaseDevice;
+    releaseDevice = newValue;
+    return oldValue;
+  }
+
   private String logLevel = null;
   public String setLogLevel (String newValue) {
     String oldValue = logLevel;
@@ -164,6 +171,7 @@ public class ArgumentsBuilder {
   public String[] getArguments () {
     List<String> arguments = new ArrayList<String>();
     addOption(arguments, "-n", foregroundExecution);
+    addOption(arguments, "-r", releaseDevice);
     addOption(arguments, "-l", logLevel);
     addOption(arguments, "-L", logFile);
     addOption(arguments, "-f", configurationFile);

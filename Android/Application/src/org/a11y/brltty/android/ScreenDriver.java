@@ -20,7 +20,9 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 import android.os.SystemClock;
+
 import android.os.PowerManager;
+import android.app.KeyguardManager;
 
 import android.content.Context;
 import android.content.ComponentName;
@@ -56,6 +58,16 @@ public class ScreenDriver {
 
   public static RenderedScreen getScreen () {
     return currentScreen;
+  }
+
+  private static boolean isDeviceLocked () {
+    if (!getPowerManager().isScreenOn()) {
+      if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
@@ -233,9 +245,10 @@ public class ScreenDriver {
     exportScreenProperties();
   }
 
-  public static void refreshScreen () {
-    AccessibilityNodeInfo node;
+  public static boolean refreshScreen () {
+    if (isDeviceLocked()) return false;
 
+    AccessibilityNodeInfo node;
     synchronized (eventLock) {
       if ((node = eventNode) != null) {
         eventNode = null;
@@ -245,6 +258,8 @@ public class ScreenDriver {
     if (node != null) {
       refreshScreen(node);
     }
+
+    return true;
   }
 
   public static void getRowText (char[] textBuffer, int rowIndex, int columnIndex) {
@@ -265,6 +280,14 @@ public class ScreenDriver {
     }
 
     return currentScreen.performAction(column, row);
+  }
+
+  public static PowerManager getPowerManager () {
+    return (PowerManager)BrailleService.getBrailleService().getSystemService(Context.POWER_SERVICE);
+  }
+
+  public static KeyguardManager getKeyguardManager () {
+    return (KeyguardManager)BrailleService.getBrailleService().getSystemService(Context.KEYGUARD_SERVICE);
   }
 
   public static InputMethodManager getInputMethodManager () {
@@ -436,10 +459,6 @@ public class ScreenDriver {
       case 12: return inputKey(KeyEvent.KEYCODE_F12);
       default: return false;
     }
-  }
-
-  public static PowerManager getPowerManager () {
-    return (PowerManager)BrailleService.getBrailleService().getSystemService(Context.POWER_SERVICE);
   }
 
   public static void resetLockTimer () {
