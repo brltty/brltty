@@ -808,8 +808,8 @@ uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-manp
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
-	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-install
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
+	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/xbrlapi.desktop
 
 uninstall-tables:
 	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[tack]t[bi]
