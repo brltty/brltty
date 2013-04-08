@@ -21,7 +21,8 @@ package org.a11y.brltty.android;
 public final class SystemServiceReference<T> extends SingletonReference<T> {
   private final String serviceName;
 
-  protected T onNeedReference () {
+  @Override
+  protected final T onNeedReference () {
     return (T)ApplicationUtilities.getContext().getSystemService(serviceName);
   }
 
