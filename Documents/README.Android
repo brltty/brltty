@@ -271,15 +271,23 @@ in order to make it discoverable (visible). The instructions for your
 braille deivce should tell you how to do this.
 
 In order to use a USB braille device, you'll need a special cable known 
-as a "Micro USB Host Adapter". The USB port on an Android device usually 
-acts as a device (rather than as a host) port. This is so that, for 
-example, you can control your Android device from your computer. The 
-Micro USB Host Adapter has a special plug which, when inserted into the 
-Android device's USB port, instructs Android to act as a USB host. Be 
-aware, though, that your braille device will begin to draw power from 
-your Android device's battery (unless you can disable USB charging). 
-This special cable, by the way, also allows you to connect any other USB 
-device (keyboard, mouse, printer, hub, etc) to your Android device.
+as a "Micro USB Host Adapter". The reason for this is that the USB port 
+on an Android device usually acts as a device (rather than as a host) 
+port. This is so that, for example, you can control your Android device 
+from your computer. The Micro USB Host Adapter has a special plug, known 
+as an OTG (on-the-go) connector, which, when inserted into the Android 
+device's USB port, instructs Android to act as a USB host.
+
+The Micro USB Host Adapter also allows you to connect any other USB 
+device (keyboard, mouse, printer, hub, etc) to your Android device. Be 
+aware, though, that if any such device, including your braille device, 
+draws power via its USB port then your Android device's battery will 
+become the source of that power. If portability isn't an issue, you may 
+wish to consider using your Micro USB Host Adapter to connect your 
+Android device to a powered hub so that your devices will draw power 
+from the hub rather than from your Android device's battery. You may 
+also wish to consider disabling USB charging on any devices which offer 
+this capability.
 
 After you've connected your braille deivce to your Android device, 
 you'll need to tell BRLTTY about it. Go to BRLTTY's "Settings" window, 
@@ -297,11 +305,25 @@ Device" and select it from the list of devices that BRLTTY knows about.
 Navigating the Screen
 =====================
 
-Pressing keys on your braille device resets your Android device's lock 
-timer in the same way that pressing its keys, touching its screen, etc 
-does. This means that your Android device will stay awake and unlocked 
-even though you're only controlling it from your braille device, and 
-that it'll also still automatically lock once you're no longer using it.
+BRLTTY only remains connected to your braille device while your Android 
+device is unlocked or while its screen is on. If your Android device is 
+locked and its screen is off then BRLTTY automatically disconnects from 
+your braille device. This is so that you can easily share your braille 
+device amongst multiple host systems.
+
+Pressing your Android device's power button (or similar action) to wake 
+it up, even though it may still be locked, is sufficient to cause BRLTTY 
+to automatically reconnect to your braille device. This allows you to 
+enter your password or PIN via your braille keyboard.
+
+You can continue using your braille device even though your Android 
+device's screen may have turned off, as long as its lock timer hasn't 
+yet expired. Pressing keys on your braille device resets your Android 
+device's lock timer in the same way that pressing its keys, touching its 
+screen, etc does. This means that your Android device will stay awake 
+and unlocked even though you're only controlling it from your braille 
+device, and that it'll also still automatically lock once you're no 
+longer using it.
 
 The "accessibility focus" feature of Android is used for cursor tracking 
 and routing. It's a soft cursor, not visible on the screen, which can be 
