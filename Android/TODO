@@ -5,6 +5,9 @@ support cursor routing within multi-line text
 set a reasonable path for brltty.conf
 learn mode
 preferences menu
+device locked message
+contracted braille and routing key associations
+android-specific commands
 update tha tables and drivers on a reinstall
 support the dynamic loading of non-built-in drivers
 become interrupt-driven rather than polling
@@ -17,7 +20,5 @@ set the actual locations of the bottom three buttons
 internationalization
 actions on elements with short text
 enabling of input service
-document folder opening
-disconnect on lock, reconnect on unlock
 selecting multiple devices
 restoring the input method to the system default
