@@ -161,6 +161,12 @@ BRLTTY_ARG_REQUIRED(
    [include_directory], ["${includedir}/${PACKAGE_NAME}"]
 )
 
+BRLTTY_ARG_REQUIRED(
+   [gdm-autostart-directory], [DIRECTORY],
+   [path to gdm autostart directory],
+   [gdm_autostart_directory], ["${datadir}/gdm/greeter/autostart"]
+)
+
 brltty_default_init_path=/sbin/init_real
 BRLTTY_ARG_WITH(
    [init-path], [FILE],

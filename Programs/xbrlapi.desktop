@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=xbrlapi
+Exec=xbrlapi
+NoDisplay=true
+X-GNOME-AutoRestart=true

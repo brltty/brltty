@@ -133,6 +133,7 @@ WRITABLE_DIRECTORY = @writable_directory@
 TABLES_DIRECTORY = @tables_directory@
 MANPAGE_DIRECTORY = @manpage_directory@
 INCLUDE_DIRECTORY = @include_directory@
+GDM_AUTOSTART_DIRECTORY = @gdm_autostart_directory@
 
 MANUAL_DIRECTORIES = @brltty_manual_directories@
 

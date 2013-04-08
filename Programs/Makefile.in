@@ -736,8 +736,9 @@ install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-prog
 	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-xbrlapi: xbrlapi$X install-program-directory
+install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) $(SRC_TOP)$(PGM_DIR)/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
 
