@@ -69,6 +69,9 @@ typedef struct {
   unsigned char length;
   unsigned char bytes[0XFF];
 } ByteOperand;
+
+#define CELLS_OPERAND_DELIMITER WC_C('-')
+#define CELLS_OPERAND_SPACE WC_C('0')
 extern int parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length);
 extern int getCellsOperand (DataFile *file, ByteOperand *cells, const char *description);
 

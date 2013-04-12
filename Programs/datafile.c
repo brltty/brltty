@@ -687,11 +687,11 @@ parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters
         break;
       }
 
-      case WC_C('0'):			/*blank */
+      case CELLS_OPERAND_SPACE:
         if (started) goto invalid;
         break;
 
-      case WC_C('-'):			/*got all dots for this cell */
+      case CELLS_OPERAND_DELIMITER:
         if (!started) {
           reportDataError(file, "missing cell specification: %.*" PRIws,
                           length-index, &characters[index]);
