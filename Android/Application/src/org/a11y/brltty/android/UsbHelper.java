@@ -77,9 +77,8 @@ public class UsbHelper {
     permissionIntent = PendingIntent.getBroadcast(usbContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
   }
 
-  public static void begin (Context context) {
-    usbContext = context;
-
+  public static void begin () {
+    usbContext = ApplicationUtilities.getContext();
     usbManager = ApplicationUtilities.getUsbManager();
     makePermissionReceiver();
   }

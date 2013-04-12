@@ -209,7 +209,7 @@ public class CoreThread extends Thread {
   @Override
   public void run () {
     extractAssets();
-    UsbHelper.begin(coreContext);
+    UsbHelper.begin();
     CoreWrapper.run(makeArguments());
     UsbHelper.end();
   }
