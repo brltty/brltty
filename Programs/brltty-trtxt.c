@@ -166,7 +166,11 @@ processStream (FILE *inputStream, const char *inputName) {
   if (ferror(outputStream)) goto outputError;
 
   if (!mbsinit(&inputState)) {
+#ifdef EILSEQ
     errno = EILSEQ;
+#else /* EILSEQ */
+    errno = EINVAL;
+#endif /* EILSEQ */
     goto inputError;
   }
 
