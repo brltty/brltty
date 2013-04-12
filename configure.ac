@@ -1309,7 +1309,7 @@ in
    mingw*)
       brltty_cv_device_directory="//."
       ;;
-   elf*)
+   elf*|msdos*)
       brltty_cv_device_directory=""
       ;;
    *)
