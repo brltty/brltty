@@ -628,6 +628,115 @@ getDotOperand (DataFile *file, int *index) {
 }
 
 int
+parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length) {
+  unsigned char cell = 0;
+  int start = 0;
+  int index;
+
+  cells->length = 0;
+
+  for (index=0; index<length; index+=1) {
+    int started = index != start;
+    wchar_t character = characters[index];
+
+    switch (character) {
+      {
+        int dot;
+
+      case WC_C('1'):
+        dot = BRL_DOT1;
+        goto doDot;
+
+      case WC_C('2'):
+        dot = BRL_DOT2;
+        goto doDot;
+
+      case WC_C('3'):
+        dot = BRL_DOT3;
+        goto doDot;
+
+      case WC_C('4'):
+        dot = BRL_DOT4;
+        goto doDot;
+
+      case WC_C('5'):
+        dot = BRL_DOT5;
+        goto doDot;
+
+      case WC_C('6'):
+        dot = BRL_DOT6;
+        goto doDot;
+
+      case WC_C('7'):
+        dot = BRL_DOT7;
+        goto doDot;
+
+      case WC_C('8'):
+        dot = BRL_DOT8;
+        goto doDot;
+
+      doDot:
+        if (started && !cell) goto invalid;
+
+        if (cell & dot) {
+          reportDataError(file, "dot specified more than once: %.1" PRIws, &character);
+          return 0;
+        }
+
+        cell |= dot;
+        break;
+      }
+
+      case WC_C('0'):			/*blank */
+        if (started) goto invalid;
+        break;
+
+      case WC_C('-'):			/*got all dots for this cell */
+        if (!started) {
+          reportDataError(file, "missing cell specification: %.*" PRIws,
+                          length-index, &characters[index]);
+          return 0;
+        }
+
+        cells->bytes[cells->length++] = cell;
+
+        if (cells->length == ARRAY_COUNT(cells->bytes)) {
+          reportDataError(file, "cells operand too long");
+          return 0;
+        }
+
+        cell = 0;
+        start = index + 1;
+        break;
+
+      default:
+      invalid:
+        reportDataError(file, "invalid dot number: %.1" PRIws, &character);
+        return 0;
+    }
+  }
+
+  if (index == start) {
+    reportDataError(file, "missing cell specification");
+    return 0;
+  }
+
+  cells->bytes[cells->length++] = cell;		/*last cell */
+  return 1;
+}
+
+int
+getCellsOperand (DataFile *file, ByteOperand *cells, const char *description) {
+  DataOperand operand;
+
+  if (getDataOperand(file, &operand, description))
+    if (parseCellsOperand(file, cells, operand.characters, operand.length))
+      return 1;
+
+  return 0;
+}
+
+int
 processAssignOperands (DataFile *file, void *data UNUSED) {
   DataOperand name;
 

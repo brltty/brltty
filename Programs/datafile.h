@@ -62,8 +62,15 @@ typedef struct {
   unsigned char length;
   wchar_t characters[0XFF];
 } DataString;
-extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
 extern int parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode);
+extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
+
+typedef struct {
+  unsigned char length;
+  unsigned char bytes[0XFF];
+} ByteOperand;
+extern int parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length);
+extern int getCellsOperand (DataFile *file, ByteOperand *cells, const char *description);
 
 typedef struct {
   const wchar_t *name;
