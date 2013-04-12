@@ -280,6 +280,15 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
       if ((truePath = _truename(device, NULL))) {
         char *com;
 
+        {
+          char *c = truePath;
+
+          while (*c) {
+            *c = toupper(*c);
+            c += 1;
+          }
+        }
+
         if ((com = strstr(truePath, "COM"))) {
           serial->package.deviceIndex = atoi(com+3) - 1;
         }
