@@ -20,3 +20,5 @@ title FreedomScientific Focus 2 80
 
 include brl-fs-focus_basic.kti
 include brl-fs-bumpers.kti
+include brl-fs-rockers.kti
+

@@ -103,6 +103,7 @@ BEGIN_KEY_NAME_TABLES(focus_large)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(focus),
   KEY_NAME_TABLE(bumpers),
+  KEY_NAME_TABLE(rockers),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(focus_small)
