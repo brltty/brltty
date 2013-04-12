@@ -36,8 +36,6 @@ import android.util.Log;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-
-import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 
 public class CoreThread extends Thread {
@@ -129,20 +127,16 @@ public class CoreThread extends Thread {
     return coreContext.getResources().getString(resource);
   }
 
-  private SharedPreferences getSharedPreferences () {
-    return PreferenceManager.getDefaultSharedPreferences(coreContext);
-  }
-
   private String getStringSetting (int key, String defaultValue) {
-    return getSharedPreferences().getString(getStringResource(key), defaultValue);
+    return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), defaultValue);
   }
 
   private String getStringSetting (int key) {
-    return getSharedPreferences().getString(getStringResource(key), "");
+    return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), "");
   }
 
   private Set<String> getStringSetSetting (int key) {
-    return getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
+    return ApplicationUtilities.getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
   }
 
   private String[] makeArguments () {
@@ -167,7 +161,7 @@ public class CoreThread extends Thread {
         Map<String, String> properties = SettingsActivity.getProperties(
           name,
           SettingsActivity.devicePropertyKeys,
-          getSharedPreferences()
+          ApplicationUtilities.getSharedPreferences()
         );
 
         String qualifier = properties.get(SettingsActivity.PREF_KEY_DEVICE_QUALIFIER);

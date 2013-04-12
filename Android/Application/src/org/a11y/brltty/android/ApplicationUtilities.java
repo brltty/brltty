@@ -19,12 +19,20 @@
 package org.a11y.brltty.android;
 
 import android.content.Context;
+
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
+
 import android.os.PowerManager;
 import android.app.KeyguardManager;
 import android.view.inputmethod.InputMethodManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
+  public static SharedPreferences getSharedPreferences () {
+    return PreferenceManager.getDefaultSharedPreferences(ApplicationHooks.getContext());
+  }
+
   private static final SingletonReference<PowerManager> powerManagerReference
     = new SystemServiceReference<PowerManager>(Context.POWER_SERVICE);
   public static PowerManager getPowerManager () {
