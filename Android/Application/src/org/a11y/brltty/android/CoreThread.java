@@ -122,7 +122,7 @@ public class CoreThread extends Thread {
 
   CoreThread () {
     super("Core");
-    coreContext = ApplicationUtilities.getContext();
+    coreContext = ApplicationHooks.getContext();
   }
 
   private String getStringResource (int resource) {

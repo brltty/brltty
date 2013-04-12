@@ -25,10 +25,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
-  public static Context getContext () {
-    return BrailleService.getBrailleService();
-  }
-
   private static final SingletonReference<PowerManager> powerManagerReference
     = new SystemServiceReference<PowerManager>(Context.POWER_SERVICE);
   public static PowerManager getPowerManager () {

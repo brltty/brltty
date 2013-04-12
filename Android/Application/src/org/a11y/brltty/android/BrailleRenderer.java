@@ -37,7 +37,7 @@ public abstract class BrailleRenderer {
 
   protected void addVirtualElements (ScreenElementList elements) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      Context context = ApplicationUtilities.getContext();
+      Context context = ApplicationHooks.getContext();
 
       elements.addAtTop(
         context.getString(R.string.NOTIFICATIONS_BUTTON),
