@@ -53,7 +53,7 @@ public class BrailleService extends AccessibilityService {
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
 
-    coreThread = new CoreThread(this);
+    coreThread = new CoreThread();
     coreThread.start();
   }
 

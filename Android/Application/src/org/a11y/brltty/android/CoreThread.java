@@ -120,9 +120,9 @@ public class CoreThread extends Thread {
     extractAssets(assets, DATA_TYPE_DRIVERS);
   }
 
-  CoreThread (Context context) {
+  CoreThread () {
     super("Core");
-    coreContext = context;
+    coreContext = ApplicationUtilities.getContext();
   }
 
   private String getStringResource (int resource) {
