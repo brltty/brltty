@@ -52,6 +52,7 @@ begmidword al 25
 begmidword an 235
 begmidword ar 356
 begmidword be 23
+always bell 23-12345 tabelle should use the ll-contraction
 midendword ck 46
 midword eh 2356
 always ein 1246
@@ -62,6 +63,8 @@ always en 14
 always er 12456
 always es 123456
 always ge 12346
+before konsonant begmidword bel 12-13456 Übelkeit shouldn't use the be-contraction
+before konsonant begmidword ber 12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
 midendword ich 3456
 midendword ig 45
@@ -313,6 +316,8 @@ word bei 12
 always bei 2-12
 word dem 12356
 always dem 2-12356
+endword dem 145-12356 shouldn't use the dem-contraction
+always demask 145-15-134-1-234-13 demaskiert shouldn't use the dem-contraction
 word durch 1456
 always durch 2-1456
 word für 124
@@ -373,6 +378,7 @@ always vor 2-26
 always favorit 124-1-1236-26-24-2345 shouldn't use the vor-contraction
 word wie 126
 always wie 2-126
+always zwiebel 1356-2456-346-12-13456 shouldn't use the wie-contraction
 word zu 1356
 always zu 2-1356
 
