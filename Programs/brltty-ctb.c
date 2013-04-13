@@ -349,7 +349,7 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
     char *utf8 = makeUtf8FromWchars(characters, length, NULL);
 
     if (utf8) {
-      fprintf(verificationTableStream, "contracts %s ", utf8);
+      if (fprintf(verificationTableStream, "contracts %s ", utf8) == EOF) goto outputError;
       free(utf8);
     }
   }
@@ -360,15 +360,17 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
     for (index=0; index<outputCount; index+=1) {
       unsigned char dots = outputBuffer[index];
 
-      if (index > 0) fprintf(verificationTableStream, "-");
+      if (index > 0)
+        if (fprintf(verificationTableStream, "-") == EOF)
+          goto outputError;
 
       if (dots) {
         while (dots) {
-          fprintf(verificationTableStream, "%c", brlDotToNumber(dots));
+          if (fprintf(verificationTableStream, "%c", brlDotToNumber(dots)) == EOF) goto outputError;
           dots &= dots - 1;
         }
       } else {
-        fprintf(verificationTableStream, "0");
+        if (fprintf(verificationTableStream, "0") == EOF) goto outputError;
       }
     }
   }
@@ -377,13 +379,17 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
     char *utf8 = makeUtf8FromCells(outputBuffer, outputCount);
 
     if (utf8) {
-      fprintf(verificationTableStream, " %s", utf8);
+      if (fprintf(verificationTableStream, " %s", utf8) == EOF) goto outputError;
       free(utf8);
     }
   }
 
-  fprintf(verificationTableStream, "\n");
+  if (fprintf(verificationTableStream, "\n") == EOF) goto outputError;
   return 1;
+
+outputError:
+  logMessage(LOG_ERR, "output error: %s", strerror(errno));
+  return 0;
 }
 
 static int
