@@ -347,11 +347,9 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
 
   {
     char *utf8 = makeUtf8FromWchars(characters, length, NULL);
-
-    if (utf8) {
-      if (fprintf(verificationTableStream, "contracts %s ", utf8) == EOF) goto outputError;
-      free(utf8);
-    }
+    if (!utf8) return 0;
+    if (fprintf(verificationTableStream, "contracts %s ", utf8) == EOF) goto outputError;
+    free(utf8);
   }
 
   {
@@ -377,11 +375,9 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
 
   {
     char *utf8 = makeUtf8FromCells(outputBuffer, outputCount);
-
-    if (utf8) {
-      if (fprintf(verificationTableStream, " %s", utf8) == EOF) goto outputError;
-      free(utf8);
-    }
+    if (!utf8) return 0;
+    if (fprintf(verificationTableStream, " %s", utf8) == EOF) goto outputError;
+    free(utf8);
   }
 
   if (fprintf(verificationTableStream, "\n") == EOF) goto outputError;
