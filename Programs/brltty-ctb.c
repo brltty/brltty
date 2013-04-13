@@ -31,16 +31,19 @@
 #include "prefs.h"
 #include "log.h"
 #include "file.h"
+#include "datafile.h"
 #include "parse.h"
 #include "charset.h"
 #include "unicode.h"
 #include "ascii.h"
+#include "brldots.h"
 #include "ttb.h"
 #include "ctb.h"
 
 static char *opt_tablesDirectory;
 static char *opt_contractionTable;
 static char *opt_textTable;
+static char *opt_verificationTable;
 static int opt_reformatText;
 static char *opt_outputWidth;
 static int opt_forceOutput;
@@ -68,6 +71,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "file",
     .setting.string = &opt_textTable,
     .description = "Text table."
+  },
+
+  { .letter = 'v',
+    .word = "verification-table",
+    .argument = "file",
+    .setting.string = &opt_verificationTable,
+    .description = "Contraction verification table."
   },
 
   { .letter = 'r',
@@ -100,7 +110,14 @@ static unsigned char *outputBuffer;
 static int outputWidth;
 static int outputExtend;
 
+#define VERIFICATION_TABLE_EXTENSION ".cvb"
+#define VERIFICATION_SUBTABLE_EXTENSION ".cvi"
+
 static ContractionTable *contractionTable;
+static char *verificationTablePath;
+static FILE *verificationTableStream;
+
+static int (*processInputCharacters) (const wchar_t *characters, size_t length, void *data);
 static int (*putCell) (unsigned char cell, void *data);
 
 typedef struct {
@@ -264,23 +281,14 @@ processCharacters (const wchar_t *characters, size_t count, wchar_t end, void *d
 }
 
 static int
-processLine (char *line, void *data) {
-  const char *string = line;
-  size_t length = strlen(string);
-  const char *byte = string;
-
-  size_t count = length + 1;
-  wchar_t characters[count];
-  wchar_t *character = characters;
-
-  convertUtf8ToWchars(&byte, &character, count);
-  length = character - characters;
-  character = characters;
+writeContractedBraille (const wchar_t *characters, size_t length, void *data) {
+  const wchar_t *character = characters;
 
   while (1) {
     const wchar_t *end = wmemchr(character, FF, length);
-    if (!end) break;
+    size_t count;
 
+    if (!end) break;
     count = end - character;
     if (!processCharacters(character, count, *end, data)) return 0;
 
@@ -297,12 +305,176 @@ processLine (char *line, void *data) {
   return 1;
 }
 
+static char *
+makeUtf8FromCells (unsigned char *cells, size_t count) {
+  char *text = malloc((count * UTF8_LEN_MAX) + 1);
+
+  if (text) {
+    char *ch = text;
+    size_t i;
+
+    for (i=0; i<count; i+=1) {
+      Utf8Buffer utf8;
+      size_t utfs = convertWcharToUtf8(cells[i]|UNICODE_BRAILLE_ROW, utf8);
+
+      if (utfs) {
+        ch = mempcpy(ch, utf8, utfs);
+      } else {
+        *ch++ = ' ';
+      }
+    }
+
+    *ch = 0;
+
+    return text;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static int
+writeVerificationTableLine (const wchar_t *characters, size_t length, void *data) {
+  int inputCount = length;
+  int outputCount = length << 2;
+  unsigned char outputBuffer[outputCount];
+
+  contractText(contractionTable,
+               characters, &inputCount,
+               outputBuffer, &outputCount,
+               NULL, CTB_NO_CURSOR);
+
+  {
+    char *utf8 = makeUtf8FromWchars(characters, length, NULL);
+
+    if (utf8) {
+      fprintf(verificationTableStream, "contracts %s ", utf8);
+      free(utf8);
+    }
+  }
+
+  {
+    int index;
+
+    for (index=0; index<outputCount; index+=1) {
+      unsigned char dots = outputBuffer[index];
+
+      if (index > 0) fprintf(verificationTableStream, "-");
+
+      if (dots) {
+        while (dots) {
+          fprintf(verificationTableStream, "%c", brlDotToNumber(dots));
+          dots &= dots - 1;
+        }
+      } else {
+        fprintf(verificationTableStream, "0");
+      }
+    }
+  }
+
+  {
+    char *utf8 = makeUtf8FromCells(outputBuffer, outputCount);
+
+    if (utf8) {
+      fprintf(verificationTableStream, " %s", utf8);
+      free(utf8);
+    }
+  }
+
+  fprintf(verificationTableStream, "\n");
+  return 1;
+}
+
+static int
+processContractsOperands (DataFile *file, void *data) {
+  DataString text;
+
+  if (getDataString(file, &text, 1, "text")) {
+    ByteOperand cells;
+
+    if (getCellsOperand(file, &cells, "cells")) {
+      int inputCount = text.length;
+      int outputCount = inputCount << 3;
+      unsigned char outputBuffer[outputCount];
+
+      contractText(contractionTable,
+		   text.characters, &inputCount,
+		   outputBuffer, &outputCount,
+		   NULL, CTB_NO_CURSOR);
+
+      if ((outputCount != cells.length) ||
+	  (memcmp(cells.bytes, outputBuffer, outputCount) != 0)) {
+	char *expected;
+
+	if ((expected = makeUtf8FromCells(cells.bytes, cells.length))) {
+           char *actual;
+
+           if ((actual = makeUtf8FromCells(outputBuffer, outputCount))) {
+              reportDataError(file,
+                              "%.*" PRIws ": expected %s, got %s",
+                              text.length, text.characters,
+                              expected, actual);
+
+              free(actual);
+           }
+
+           free(expected);
+        }
+      }
+
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+processVerificationLine (DataFile *file, void *data) {
+  static const DataProperty properties[] = {
+    {.name=WS_C("assign"), .processor=processAssignOperands},
+    {.name=WS_C("contracts"), .processor=processContractsOperands},
+    {.name=WS_C("include"), .processor=processIncludeOperands},
+    {.name=NULL, .processor=NULL}
+  };
+
+  return processPropertyOperand(file, properties, "contraction verification table directive", data);
+}
+
 static ProgramExitStatus
-processStream (FILE *stream) {
+processVerificationTable (void) {
+  if (setGlobalTableVariables(VERIFICATION_TABLE_EXTENSION, VERIFICATION_SUBTABLE_EXTENSION)) {
+    if (processDataStream(NULL, verificationTableStream, verificationTablePath, processVerificationLine, NULL)) {
+      return PROG_EXIT_SUCCESS;
+    }
+  }
+
+  return PROG_EXIT_FATAL;
+}
+
+static int
+processInputLine (char *line, void *data) {
+  const char *string = line;
+  size_t length = strlen(string);
+  const char *byte = string;
+
+  size_t count = length + 1;
+  wchar_t characters[count];
+  wchar_t *character = characters;
+
+  convertUtf8ToWchars(&byte, &character, count);
+  length = character - characters;
+
+  return processInputCharacters(characters, length, data);
+}
+
+static ProgramExitStatus
+processInputStream (FILE *stream) {
   LineProcessingData lpd = {
     .exitStatus = PROG_EXIT_SUCCESS
   };
-  ProgramExitStatus exitStatus = processLines(stream, processLine, &lpd)? lpd.exitStatus: PROG_EXIT_FATAL;
+  ProgramExitStatus exitStatus = processLines(stream, processInputLine, &lpd)? lpd.exitStatus: PROG_EXIT_FATAL;
 
   if (exitStatus == PROG_EXIT_SUCCESS)
     if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd)))
@@ -314,6 +486,10 @@ processStream (FILE *stream) {
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
+
+  verificationTablePath = NULL;
+  verificationTableStream = NULL;
+  processInputCharacters = writeContractedBraille;
 
   resetPreferences();
   prefs.expandCurrentWord = 0;
@@ -375,15 +551,31 @@ main (int argc, char *argv[]) {
         }
 
         if (exitStatus == PROG_EXIT_SUCCESS) {
+          if (opt_verificationTable && *opt_verificationTable) {
+            if ((verificationTablePath = makeFilePath(opt_tablesDirectory, opt_verificationTable, VERIFICATION_TABLE_EXTENSION))) {
+              const char *verificationTableMode = (argc > 0)? "w": "r";
+
+              if ((verificationTableStream = openDataFile(verificationTablePath, verificationTableMode, 0))) {
+                processInputCharacters = writeVerificationTableLine;
+              } else {
+                exitStatus = PROG_EXIT_FATAL;
+              }
+            } else {
+              exitStatus = PROG_EXIT_FATAL;
+            }
+          }
+        }
+
+        if (exitStatus == PROG_EXIT_SUCCESS) {
           if (argc) {
             do {
               char *path = *argv;
               if (strcmp(path, standardStreamArgument) == 0) {
-                exitStatus = processStream(stdin);
+                exitStatus = processInputStream(stdin);
               } else {
                 FILE *stream = fopen(path, "r");
                 if (stream) {
-                  exitStatus = processStream(stream);
+                  exitStatus = processInputStream(stream);
                   fclose(stream);
                 } else {
                   logMessage(LOG_ERR, "cannot open input file: %s: %s",
@@ -392,8 +584,10 @@ main (int argc, char *argv[]) {
                 }
               }
             } while ((exitStatus == PROG_EXIT_SUCCESS) && (++argv, --argc));
+          } else if (verificationTableStream) {
+            exitStatus = processVerificationTable();
           } else {
-            exitStatus = processStream(stdin);
+            exitStatus = processInputStream(stdin);
           }
 
           if (textTable) destroyTextTable(textTable);
@@ -406,6 +600,19 @@ main (int argc, char *argv[]) {
 
       free(contractionTablePath);
     }
+  }
+
+  if (verificationTableStream) {
+    if (fclose(verificationTableStream) == EOF) {
+      exitStatus = PROG_EXIT_FATAL;
+    }
+
+    verificationTableStream = NULL;
+  }
+
+  if (verificationTablePath) {
+    free(verificationTablePath);
+    verificationTablePath = NULL;
   }
 
   if (outputBuffer) free(outputBuffer);
