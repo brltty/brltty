@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_DATAFILE
 #define BRLTTY_INCLUDED_DATAFILE
 
+#include <stdio.h>
+
 #include "queue.h"
 
 #ifdef __cplusplus
@@ -62,8 +64,14 @@ typedef struct {
   unsigned char length;
   wchar_t characters[0XFF];
 } DataString;
+
 extern int parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode);
 extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
+
+extern int writeHexadecimalCharacter (FILE *stream, const wchar_t character);
+extern int writeUtf8Character (FILE *stream, const wchar_t character);
+extern int writeEscapedCharacter (FILE *stream, const wchar_t character);
+extern int writeEscapedCharacters (FILE *stream, const wchar_t *characters, size_t count);
 
 typedef struct {
   unsigned char length;
@@ -79,6 +87,7 @@ typedef struct {
   const wchar_t *name;
   DataProcessor *processor;
 } DataProperty;
+
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
 
 extern int processAssignOperands (DataFile *file, void *data);

@@ -335,54 +335,6 @@ makeUtf8FromCells (unsigned char *cells, size_t count) {
 }
 
 static int
-writeEscapedCharacter (FILE *stream, const wchar_t character) {
-  {
-    static const char escapes[] = {
-      [' ']  = 's',
-      ['\\'] = '\\'
-    };
-
-    if (character < ARRAY_COUNT(escapes)) {
-      char escape = escapes[character];
-
-      if (escape) {
-        return fprintf(stream, "\\%c", escape) != EOF;
-      }
-    }
-  }
-
-  if (iswspace(character) || iswcntrl(character)) {
-    uint32_t value = character;
-
-    if (value < 0X100) {
-      return fprintf(stream, "\\x%02" PRIX32, value) != EOF;
-    } else if (value < 0X10000) {
-      return fprintf(stream, "\\u%04" PRIX32, value) != EOF;
-    } else {
-      return fprintf(stream, "\\U%08" PRIX32, value) != EOF;
-    }
-  }
-
-  {
-    Utf8Buffer utf8;
-    size_t utfs = convertWcharToUtf8(character, utf8);
-
-    return fprintf(stream, "%.*s", (int)utfs, utf8) != EOF;
-  }
-}
-
-static int
-writeEscapedCharacters (FILE *stream, const wchar_t *characters, size_t count) {
-  const wchar_t *end = characters + count;
-
-  while (characters < end)
-    if (!writeEscapedCharacter(stream, *characters++))
-      return 0;
-
-  return 1;
-}
-
-static int
 writeVerificationTableLine (const wchar_t *characters, size_t length, void *data) {
   int inputCount = length;
   int outputCount = length << 2;
