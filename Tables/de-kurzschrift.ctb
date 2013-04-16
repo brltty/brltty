@@ -31,6 +31,9 @@ always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-cont
 
 class e e
 class g g
+class h h
+class m m
+class n n
 class r r
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
@@ -53,9 +56,12 @@ begmidword al 25
 begmidword an 235
 begmidword ar 356
 begmidword be 23
+before g always beu 12-126
 always bell 23-12345 tabelle should use the ll-contraction
 midendword ck 46
 midword eh 2356
+before h always kohle =
+before m always kohle =
 always ein 1246
 always lateinisch 123-1-2345-1246-1345-24-156
 always el 13456
@@ -67,6 +73,15 @@ always dereferenzier 145-15-1235-15-124-12456-14-1356-346-1235 shouldn't use the
 always deregulier 145-15-1235-15-1245-136-123-346-1235 shouldn't use the er-contraction
 always es 123456
 always ge 12346
+prfword gehe 1245-2356-15
+prfword gehen 1245-2356-14
+prfword gehend 1245-2356-14-145
+prfword gehende 1245-2356-14-145-15
+prfword gehendem 1245-2356-14-145-12356
+prfword gehenden 1245-2356-14-145-14
+prfword gehender 1245-2356-14-145-12456
+prfword gehendes 1245-2356-14-145-123456
+before konsonant always geh 1245-2356
 before konsonant always bel 12-13456 Übelkeit shouldn't use the be-contraction
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
@@ -158,6 +173,7 @@ before e always sstund 234-23456-256-145 shouldn't use the und-contraction
 midendword ss 2346
 
 midendword te 236
+sufword atem 1-2345-12356 shouldn't use the te-contraction
 always un 256
 
 midendword tei 2345-146
@@ -257,6 +273,8 @@ sufword ungerecht 256-12346-1235-2345
 sufword zuge 2-1356-12346
 endword ges 1245-123456 shouldn't use the ge-contraction
 midendword ien 24-14 shouldn't use the ie-contraction
+prfword industrien 35-145-136-23456-1235-15-14
+before n always industrie 35-145-136-23456-1235-346 industrienation shouldn't use the en-contraction
 begmidword anomal 235-135-134-25 shouldn't use the mal-contraction
 endword anomal 235-135-134-1-123 shouldn't use the mal-contraction
 midendword iene 346-1345-15 should use the ie-contraction
@@ -278,6 +296,7 @@ begword ver 36
 begword auspiz 16-234-1234-24-1356 shouldn't use the aus-contraction
 word ente 14-236 shouldn't use the ent-contraction
 sufword enten 14-2345-14 shouldn't use the ent-contraction
+word entchen 14-2345-1456-14
 begword veranda 1236-12456-236-145-1 shouldn't use the ver-contraction
 begword vertikal 1236-12456-2345-24-13-25 shouldn't use the ver-contraction
 word vertikal 1236-12456-2345-24-13-1-123 shouldn't use the ver-contraction
@@ -296,6 +315,7 @@ sufword bisam =
 always bischofsamt 12-24-156-135-124-234-1-134-2345 shouldn't use the sam-contraction
 midendword schaft 156
 midendword ung 136
+always dschungel 6-145-156-256-1245-13456 shouldn't use the ung-contraction
 midendword terung 2345-12456-136
 before cst midword ungs 136-234 Bindungscharakter, Regierungschef
 midendword wärts 2456
@@ -384,9 +404,36 @@ sufword aufstand 16-2-23456
 sufword aufständ 16-5-23456
 sufword aufstell 16-2-13456
 sufword aufweis 16-2-146
-always aufwiegel 2-16-2456-346-1245-13456 shouldn't use the wie-contraction
+before g always aufwie 2-16-2456-346 aufwiegeln/aufwiegler/aufwiegst shouldn't use the wie-contraction
+before s always aufwie 2-16-2456-346
 sufword aufzu 16-2-1356
 begword aufzuck 2-16-1356-136-46
+before konsonant always aufzug 2-16-1356-136-1245
+always aufzugsturm 2-16-1356-136-1245-234-2345-136-1235-134 shouldn't use zu-contraction and st-contraction
+before m always aufzugstür 2-16-1356-136-1245-234-2345-1256-1235 shouldn't use zu-contraction and st-contraction
+always aufzugstür 2-16-1356-136-1245-234-2345-1256-1235 shouldn't use zu-contraction and st-contraction
+prfword lauf 123-16-124
+prfword laufe 123-16-124-15
+prfword laufen 123-16-124-14
+prfword laufend 123-16-124-14-145
+prfword laufende 123-16-124-14-145-15
+prfword laufendem 123-16-124-14-145-12356
+prfword laufenden 123-16-124-14-145-14
+prfword laufender 123-16-124-14-145-12456
+prfword laufendes 123-16-124-14-145-123456
+prfword laufens 123-16-124-14-234
+prfword laufes 123-16-124-123456
+prfword laufs 123-16-124-234
+prfword laufst 123-16-124-23456
+prfword lauft 123-16-124-2345
+always schlauf 156-123-16-124 shouldn't use the auf-contraction
+always abgelauf 1-12-12346-123-16-124
+always akkulauf 1-13-13-136-123-16-124
+always auflauf 2-16-123-16-124
+always durchlauf 2-1456-123-16-124
+begword verlauf 36-123-16-124 shouldn't use the auf-contraction
+midendword verlauf 1236-12456-123-16-124 shouldn't use the auf-contraction
+
 word bei 12
 always bei 2-12
 sufword beieinander 12-2-1246
@@ -397,12 +444,19 @@ sufword beispiel 12-2-346
 sufword beistand 12-2-23456
 sufword beiständ 12-5-23456
 sufword beistell 12-2-13456
+sufword beizu 12-2-1356
+always beizung 12-146-1356-136 shouldn't use the bei-contraction
 always beiß 12-146-6-2346 shouldn't use the bei-contraction
+endword bein 12-146-1345 shouldn't use the bei-contraction
+endword beine 12-146-1345-15 shouldn't use the bei-contraction
+endword beinen 12-146-1345-14 shouldn't use the bei-contraction
+endword beins 12-146-1345-234 shouldn't use the bei-contraction
 
 word dem 12356
 always dem 2-12356
 sufword demzu 12356-2-1356
 endword dem 145-12356 shouldn't use the dem-contraction
+always außerdem 16-6-2346-12456-2-12356
 always demask = demaskiert shouldn't use the dem-contraction
 always demilit = shouldn't use the dem-contraction
 always demonstr 145-12356-135-1345-23456-1235 shouldn't use the dem-contraction
@@ -413,9 +467,13 @@ word durch 1456
 always durch 2-1456
 sufword durcheinander 1456-2-1246
 sufword durchfahr 1456-2-1235
+sufword durchlass 1456-2-123
 sufword durchläss 1456-5-123
+sufword durchsprech 1456-2-2346
 sufword durchsetz 1456-2-15
 sufword durchspiel 1456-2-346
+sufword durchstand 1456-2-23456
+sufword durchstell 1456-2-13456
 sufword durchzu 1456-2-1356
 sufword durchzuck 2-1456-1356-136-46 shouldn't use the zu-contraction
 word durchzug 2-1456-1356-136-1245 shouldn't use the zu-contraction
@@ -429,10 +487,18 @@ sufword füreinander 124-2-1246
 always fürst 124-1256-1235-23456 shouldn't use the für-contraction
 word gegen 1245
 always gegen 2-1245
+sufword gegenauf 1245-2-16
+sufword gegeneinander 1245-2-1246
 sufword gegenfahr 1245-2-1235
 sufword gegensetz 1245-2-15
 sufword gegenstand 1245-2-23456
 sufword gegenständ 1245-5-23456
+sufword gegenzu 1245-2-1356
+prfword gegenzug 2-1245-1356-136-1245
+prfword gegenzuge 2-1245-1356-136-12346
+prfword gegenzuges 2-1245-1356-136-1245-123456
+prfword gegenzugs 2-1245-1356-136-1245-234
+before g sufword gegenzun 2-1245-1356-256
 word gewesen 12346
 always gewesen 2-12346
 always fürsorgewesen 2-124-234-26-12346-2456-123456-14 shouldn't use the gewesen-contraction
@@ -442,15 +508,26 @@ word immerzu 1346-2-1356
 always immer 2-1346
 always immersion 24-1346-12456-234-245 shouldn't use the immer-contraction
 always immersiv 24-1346-12456-234-24-1236
+always flimmer 124-123-24-1346-12456
 always wimmer 2456-24-1346-12456 shouldn't use the immer-contraction
 always zimmer 1356-24-1346-12456 shouldn't use the immer-contraction
 word jetzt 245
 always jetzt 2-245
 word mehr 2356
 always mehr 2-2356
+sufword mehrstell 2356-2-13456
 word mit 2345
 always mit 2-2345
+sufword mitauf 2345-2-16
+sufword mitdürf 2345-2-145
 sufword miteinander 2345-2-1246
+sufword mitfahr 2345-2-1235
+sufword mithab 2345-2-125
+sufword mitkönn 2345-2-13
+sufword mitmüss 2345-2-134
+sufword mitnicht 2345-2-1345
+sufword mitschrieb 2345-2-156
+sufword mitspiel 2345-2-346
 sufword mitunter 2345-2-256
 sufword mitzu 2345-2-1356
 word nicht 1345
@@ -463,6 +540,7 @@ always nichtzusammen 2-1345-1356-234
 word so 1234
 always so 2-1234
 sufword soundso 1234-2-136-2-1234
+sufword sowie 1234-2-126
 endword son =
 begword sozu 1234-2-1356
 always cursor = shouldn't use the so-contraction
@@ -479,6 +557,7 @@ begmidword	sensor		234-14-234-26
 endword		sensor		234-14-234-135-1235
 endword		sensor		234-14-234-135-1235
 word		soda		=
+always		soffizier	234-135-124-124-24-1356-346-1235
 always		soft		=
 always		soldat		=
 always		sommer		234-135-1346-12456
@@ -497,8 +576,16 @@ word ueber 1256
 always über 2-1256
 sufword überdurch 1256-2-1456
 sufword übereinander 1256-2-1246
+sufword überzu 1256-2-1356
+always überzucht 2-1256-1356-136-1456-2345
+always überzuck 2-1256-1356-136-46
+prfword überzug 2-1256-1356-136-1245
+prfword überzuges 2-1256-1356-136-1245-123456
+before konsonant always überzug 2-1256-1356-136-1245
+always überlauf 2-1256-123-16-124
 word und 136
 always und 2-136
+sufword gesund 12346-234-256-145
 prfword hund 125-256-145 shouldn't use the und-contraction
 always hunde 125-256-145-15 shouldn't use the und-contraction
 always hundert 125-256-145-12456-2345 shouldn't use the und-contraction
@@ -507,25 +594,41 @@ prfword hunden 125-256-145-14 shouldn't use the und-contraction
 prfword hundes 125-256-145-123456 shouldn't use the und-contraction
 always kund 13-256-145 shouldn't use the und-contraction
 always mund 134-256-145 shouldn't use the und-contraction
+sufword schrund 156-1235-256-145
 always wund 2456-256-145 shouldn't use the und-contraction
+
 word unter 256
 always unter 2-256
+sufword untereinander 256-2-1246
 word voll 12345
 always voll 2-12345
 sufword vollständ 12345-5-23456
+sufword vollzu 12345-2-1356
+prfword vollzug 2-12345-1356-136-1245
+prfword vollzuge 2-12345-1356-136-12346
+prfword vollzuges 2-12345-1356-136-1245-123456
+always vollzugs 2-12345-1356-136-1245-234
 word von 1236
 always von 2-1236
 sufword voneinander 1236-2-1246
 word vor 26
 always vor 2-26
+sufword vorbei 26-2-12
 sufword vorspiel 26-2-346
 sufword vorstell 26-2-13456
+sufword vorüber 26-2-1256
+sufword vorzu 26-2-1356
+always vorzugs 2-26-1356-136-1245-234
+always vorzugstimmen 2-26-1356-136-1245-23456-24-1346-14
 always favorit 124-1-1236-26-24-2345 shouldn't use the vor-contraction
 word wie 126
 always wie 2-126
 always zwiebel 1356-2456-346-12-13456 shouldn't use the wie-contraction
 word zu 1356
 always zu 2-1356
+word indem 35-2-12356
+word trotzdem 2345-1356-2-12356
+word zudem 1356-2-12356
 sufword zueinander 1356-2-1246
 sufword zufahr 1356-2-1235
 sufword zulass 1356-2-123
@@ -534,6 +637,7 @@ sufword zuspiel 1356-2-346
 sufword zustand 1356-2-23456
 sufword zuständ 1356-5-23456
 sufword zustell 1356-2-13456
+sufword zuzu 1356-2-1356
 always zucht 1356-136-1456-2345 shouldn't use the zu-contraction
 always zuck 1356-136-46 shouldn't use the zu-contraction
 before g always zug =
@@ -568,6 +672,7 @@ always alphabet 25-1234-125-1-12-15-2345 shouldn't use the hab-contraction
 word also 1-135
 always ander 2-12456
 always wander 2456-235-145-12456 wandern shouldn't use the ander-contraction
+sufword zander 1356-235-145-12456
 always änder 5-12456
 always aender 5-12456
 always arbeit 356-12
@@ -665,9 +770,7 @@ word dir 145-1235
 word doch 145-1456
 always druck 145-46
 always drück 5-145-46
-always dürfen 2-145-14
-always dürfnis 2-145-1346
-always dürft 2-145-2345
+always dürf 2-145
 
 always eben 15-12-14
 word ebenso 15-135
@@ -891,6 +994,9 @@ always nichtschwimm 2-1345-156-2456-24-1346 shouldn't use the nichts-contraction
 always noch 1345-1456
 always nommen 1345-1346
 contraction nx
+always genommen 12346-1345-1346
+midendword augenommen 16-12346-1345-1346
+always eigenommen 146-12346-1345-1346
 always notwendig 1345-2456
 contraction nw
 begmidword normal 1345-26-134-25 shouldn't use the mal-contraction
@@ -904,7 +1010,6 @@ always nütz 5-1345-1356
 
 sufword ohne 135-15
 contraction oe
-endword ommen 1346
 
 always öffentlich 246-456
 
@@ -972,6 +1077,7 @@ sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 always sind 234-145
 contraction sd
 always sitz 2-24
+always sitzbein 2-24-12-146-1345 shouldn't use the bei-contraction
 always solch 234-1456
 always soll 2-234
 always sondern 234-1345
@@ -1129,7 +1235,9 @@ always albert 25-12-12456-2345 shouldn't use the be-contraction
 always alexander 25-15-6-1346-235-145-12456 shouldn't use the ander-contraction
 always algerier 25-1245-12456-24-12456 shouldn't use the ie-contraction
 sufword allee 1-12345-15-15 shouldn't use the alle-contraction
-word alleen 1-12345-15-14 shouldn't use the alle-contraction
+prfword alleen 1-12345-15-14 shouldn't use the alle-contraction
+always baumallee 12-16-134-1-12345-15-15 shouldn't use the mal-contraction and alle-contraction
+always baumalleen 12-16-134-1-12345-15-14 shouldn't use the mal-contraction and alle-contraction
 before st always alltags 1-12345-2345-1-1245-234
 begword alm 25-134
 begword alter 25-2345-12456
@@ -1146,8 +1254,8 @@ always anklang 235-13-123-235-1245 shouldn't use the lang-contraction
 always ankläng 235-13-123-345-1345-1245 shouldn't use the läng-contraction
 begword anlagen 235-123-1-1245-14
 always anlauf 235-123-16-124 shouldn't use the auf-contraction
-class m m
 before m always anleihe 235-123-146-125-15 Anleihemarkt shouldn't use the em-contraction
+before m always film =
 class egn egn
 before egn begword anti 235-2345-24
 always antichrist 235-2345-24-1456-1235-24-23456 shouldn't use the ich-contraction
@@ -1227,6 +1335,7 @@ always komponist 13-135-134-1234-135-1345-24-23456 shouldn't use the nis-contrac
 always leselamp 123-123456-15-123-1-134-1234 shouldn't use the el-contraction
 always liechtenstein 123-346-1456-2345-14-23456-1246 shouldn't use the te-contraction
 prfword linie 123-35-24-15 shouldn't use the ie-contraction
+always richtlini 2-3456-123-35-24
 prfword materie 134-1-2345-12456-24-15 shouldn't use the ie-contraction
 always metallen 134-15-2345-1-12345-14 shouldn't use the allen-contraction
 always regel 1235-15-1245-13456
@@ -1290,6 +1399,20 @@ always zugantenn 1356-136-1245-235-2345-14-1345
 always zweiseit 1356-2456-146-234-146-2345
 always zweistaat 1356-2456-146-23456-2345 shouldn't use the weis-contraction
 
+midendword heitstätig 125-234-2345-345-2345-45 gelegenheitstätigkeit shouldn't use the st-contraction
+begmidword admiral 1-145-134-24-1235-25
+begmidword astral 1-23456-1235-25
+before m sufword atom =
+begmidword bifokal 12-24-124-135-13-25
+#begmidword brachial 12-1235-56-24-25
+begmidword bronchial 12-1235-135-1345-1456-24-25 bronchiallymphknoten shouldn't use the ll-contraction
+begword general 1245-14-12456-25
+begmidword kolonial 13-135-123-135-1345-24-25
+begmidword zentral 1356-14-2345-1235-25 zentrallager
+always schall 156-1-12345 schallen shouldn't use the allen-contraction
+always herzultra 125-12456-1356-136-123-2345-1235-1 shouldn't use the zu-contraction
+always mittagessen 134-24-2345-2345-1-1245-15-2346-14
+
 # names
 word angela 235-1245-13456-1 shouldn't use the ge-contraction
 word angeles 235-1245-13456-123456 shouldn't use the ge-contraction
@@ -1298,6 +1421,7 @@ word angelina 235-1245-13456-35-1 shouldn't use the ge-contraction
 word angelo 235-1245-13456-135 shouldn't use the ge-contraction
 always daniel 145-235-24-13456 shouldn't use the ie-contraction
 always gerlind 1245-12456-123-35-145 should use the er-contraction
+always solveig 234-135-123-1235-146-1245 shouldn't use the so-contraction
 
 # TODO:
 # 8-Punkte-Plan
