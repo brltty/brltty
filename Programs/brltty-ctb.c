@@ -363,10 +363,10 @@ static int
 processContractsOperands (DataFile *file, void *data) {
   DataString text;
 
-  if (getDataString(file, &text, 1, "text")) {
+  if (getDataString(file, &text, 1, "uncontracted text")) {
     ByteOperand cells;
 
-    if (getCellsOperand(file, &cells, "cells")) {
+    if (getCellsOperand(file, &cells, "contracted braille")) {
       int inputCount = text.length;
       int outputCount = inputCount << 3;
       unsigned char outputBuffer[outputCount];
@@ -385,10 +385,8 @@ processContractsOperands (DataFile *file, void *data) {
 
            if ((actual = makeUtf8FromCells(outputBuffer, outputCount))) {
               reportDataError(file,
-                              "%.*" PRIws ": expected %s, got %s",
-                              text.length, text.characters,
-                              expected, actual);
-
+                              "%" PRIws ": expected %s, got %s",
+                              text.characters, expected, actual); 
               free(actual);
            }
 
