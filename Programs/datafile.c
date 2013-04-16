@@ -607,7 +607,7 @@ getDataString (DataFile *file, DataString *string, int noUnicode, const char *de
 }
 
 int
-writeHexadecimalCharacter (FILE *stream, const wchar_t character) {
+writeHexadecimalCharacter (FILE *stream, wchar_t character) {
   uint32_t value = character;
 
   if (value < 0X100) {
@@ -620,7 +620,7 @@ writeHexadecimalCharacter (FILE *stream, const wchar_t character) {
 }
 
 int
-writeUtf8Character (FILE *stream, const wchar_t character) {
+writeUtf8Character (FILE *stream, wchar_t character) {
   Utf8Buffer utf8;
   size_t utfs = convertWcharToUtf8(character, utf8);
 
@@ -628,7 +628,7 @@ writeUtf8Character (FILE *stream, const wchar_t character) {
 }
 
 int
-writeEscapedCharacter (FILE *stream, const wchar_t character) {
+writeEscapedCharacter (FILE *stream, wchar_t character) {
   {
     static const char escapes[] = {
       [' ']  = 's',
@@ -787,6 +787,57 @@ getCellsOperand (DataFile *file, ByteOperand *cells, const char *description) {
       return 1;
 
   return 0;
+}
+
+int
+writeDots (FILE *stream, unsigned char cell) {
+  unsigned int dot;
+
+  for (dot=1; dot<=BRL_DOT_COUNT; dot+=1) {
+    if (cell & (1 << (dot - 1))) {
+      if (fprintf(stream, "%u", dot) == EOF) return 0;
+    }
+  }
+
+  return 1;
+}
+
+int
+writeDotsCell (FILE *stream, unsigned char cell) {
+  if (!cell) return fputc('0', stream) != EOF;
+  return writeDots(stream, cell);
+}
+
+int
+writeDotsCells (FILE *stream, const unsigned char *cells, size_t count) {
+  const unsigned char *cell = cells;
+  const unsigned char *end = cells + count;
+
+  while (cell < end) {
+    if (cell != cells)
+      if (fputc('-', stream) == EOF)
+        return 0;
+
+    if (!writeDotsCell(stream, *cell++)) return 0;
+  }
+
+  return 1;
+}
+
+int
+writeUtf8Cell (FILE *stream, unsigned char cell) {
+  return writeUtf8Character(stream, (UNICODE_BRAILLE_ROW | cell));
+}
+
+int
+writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count) {
+  const unsigned char *end = cells + count;
+
+  while (cells < end)
+    if (!writeUtf8Cell(stream, *cells++))
+      return 0;
+
+  return 1;
 }
 
 int

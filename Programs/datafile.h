@@ -68,9 +68,9 @@ typedef struct {
 extern int parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode);
 extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
 
-extern int writeHexadecimalCharacter (FILE *stream, const wchar_t character);
-extern int writeUtf8Character (FILE *stream, const wchar_t character);
-extern int writeEscapedCharacter (FILE *stream, const wchar_t character);
+extern int writeHexadecimalCharacter (FILE *stream, wchar_t character);
+extern int writeUtf8Character (FILE *stream, wchar_t character);
+extern int writeEscapedCharacter (FILE *stream, wchar_t character);
 extern int writeEscapedCharacters (FILE *stream, const wchar_t *characters, size_t count);
 
 typedef struct {
@@ -80,8 +80,16 @@ typedef struct {
 
 #define CELLS_OPERAND_DELIMITER WC_C('-')
 #define CELLS_OPERAND_SPACE WC_C('0')
+
 extern int parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length);
 extern int getCellsOperand (DataFile *file, ByteOperand *cells, const char *description);
+
+extern int writeDots (FILE *stream, unsigned char cell);
+extern int writeDotsCell (FILE *stream, unsigned char cell);
+extern int writeDotsCells (FILE *stream, const unsigned char *cells, size_t count);
+
+extern int writeUtf8Cell (FILE *stream, unsigned char cell);
+extern int writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count);
 
 typedef struct {
   const wchar_t *name;

@@ -204,26 +204,6 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
   return 1;
 }
 
-static int
-writeUtf8 (FILE *file, wchar_t character) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(character, utf8);
-  return fprintf(file, "%.*s", (int)utfs, utf8) != EOF;
-}
-
-static int
-writeDots (FILE *file, unsigned char dots) {
-  unsigned int dot;
-
-  for (dot=1; dot<=BRL_DOT_COUNT; dot+=1) {
-    if (dots & (1 << (dot - 1))) {
-      if (fprintf(file, "%u", dot) == EOF) return 0;
-    }
-  }
-
-  return 1;
-}
-
 static TextTableData *
 readTable_native (const char *path, FILE *file, void *data) {
   return processTextTableStream(file, path);
@@ -265,10 +245,10 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, const 
   }
 
   if (fprintf(file, " ") == EOF) goto error;
-  if (!writeUtf8(file, UNICODE_BRAILLE_ROW | dots)) goto error;
+  if (!writeUtf8Cell(file, dots)) goto error;
 
   if (fprintf(file, " ") == EOF) goto error;
-  if (!writeUtf8(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) goto error;
+  if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) goto error;
 
 #ifdef HAVE_ICU
   {

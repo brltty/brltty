@@ -348,35 +348,9 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
   if (fprintf(verificationTableStream, "contracts ") == EOF) goto outputError;
   if (!writeEscapedCharacters(verificationTableStream, characters, length)) goto outputError;
   if (fprintf(verificationTableStream, " ") == EOF) goto outputError;
-
-  {
-    int index;
-
-    for (index=0; index<outputCount; index+=1) {
-      unsigned char dots = outputBuffer[index];
-
-      if (index > 0)
-        if (fprintf(verificationTableStream, "-") == EOF)
-          goto outputError;
-
-      if (dots) {
-        while (dots) {
-          if (fprintf(verificationTableStream, "%c", brlDotToNumber(dots)) == EOF) goto outputError;
-          dots &= dots - 1;
-        }
-      } else {
-        if (fprintf(verificationTableStream, "0") == EOF) goto outputError;
-      }
-    }
-  }
-
-  {
-    char *utf8 = makeUtf8FromCells(outputBuffer, outputCount);
-    if (!utf8) return 0;
-    if (fprintf(verificationTableStream, " %s", utf8) == EOF) goto outputError;
-    free(utf8);
-  }
-
+  if (!writeDotsCells(verificationTableStream, outputBuffer, outputCount)) goto outputError;
+  if (fprintf(verificationTableStream, " ") == EOF) goto outputError;
+  if (!writeUtf8Cells(verificationTableStream, outputBuffer, outputCount)) goto outputError;
   if (fprintf(verificationTableStream, "\n") == EOF) goto outputError;
   return 1;
 
