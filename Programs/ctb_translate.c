@@ -431,8 +431,7 @@ selectRule (int length) {
 static int
 putCells (const BYTE *cells, int count) {
   if (dest + count > destmax) return 0;
-  memcpy(dest, cells, count);
-  dest += count;
+  dest = mempcpy(dest, cells, count);
   return 1;
 }
 
