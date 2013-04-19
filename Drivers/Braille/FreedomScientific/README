@@ -37,8 +37,4 @@ as the right advance key. The following drawing depicts this layout visually:
   ...+---++---++---++---++---++---++---++---++---++---++---++---++---++---+...
 
 
-This driver recognizes the following parameters:
-
-   Parameter     Settings
-   debugpackets  no, yes
 
