@@ -33,8 +33,8 @@ map Dot7 DOT7
 map Dot8 DOT8
 
 map Space SPACE
-map LeftShift UPPERCASE
-map RightShift CONTROL
+map LeftShift CONTROL
+map RightShift META
 
 bind Space+LeftShift KEY_BACKSPACE
 bind Space+RightShift KEY_ENTER
