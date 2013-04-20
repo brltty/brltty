@@ -447,6 +447,6 @@ public class ScreenDriver {
   }
 
   static {
-    refreshScreen(BrailleService.getBrailleService().getRootInActiveWindow());
+    eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
   }
 }
