@@ -500,7 +500,7 @@ public class SettingsActivity extends PreferenceActivity {
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      addPreferencesFromResource(R.xml.settings_device);
+      addPreferencesFromResource(R.xml.settings_devices);
 
       selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
       addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
