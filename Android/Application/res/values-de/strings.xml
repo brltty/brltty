@@ -5,6 +5,10 @@
   <string name="input_service_name">BRLTTY Input Service</string>
   <string name="app_description">BRLTTY unterstützt Braillegeräte.</string>
 
-  <string name="NOTIFICATIONS_BUTTON">Benachrichtigungen</string>
-  <string name="QUICK_SETTINGS_BUTTON">Schnelleinstellungen</string>
+  <string name="QUICK_SETTINGS_BUTTON"></string>
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Benachrichtigungen</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Schnelleinstellungen</string>
+  <string name="VIRTUAL_BUTTON_BACK">Zurück</string>
+  <string name="VIRTUAL_BUTTON_HOME">Home</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Letzte Apps</string>
 </resources>

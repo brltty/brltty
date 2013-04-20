@@ -40,27 +40,27 @@ public abstract class BrailleRenderer {
       Context context = ApplicationHooks.getContext();
 
       elements.addAtTop(
-        context.getString(R.string.NOTIFICATIONS_BUTTON),
+        context.getString(R.string.VIRTUAL_BUTTON_NOTIFICATIONS),
         AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
       );
 
       elements.addAtTop(
-        context.getString(R.string.QUICK_SETTINGS_BUTTON),
+        context.getString(R.string.VIRTUAL_BUTTON_QUICK_SETTINGS),
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
       );
 
       elements.addAtBottom(
-        "Back",
+        context.getString(R.string.VIRTUAL_BUTTON_BACK),
         AccessibilityService.GLOBAL_ACTION_BACK
       );
 
       elements.addAtBottom(
-        "Home",
+        context.getString(R.string.VIRTUAL_BUTTON_HOME),
         AccessibilityService.GLOBAL_ACTION_HOME
       );
 
       elements.addAtBottom(
-        "Recent Apps",
+        context.getString(R.string.VIRTUAL_BUTTON_RECENT_APPS),
         AccessibilityService.GLOBAL_ACTION_RECENTS
       );
     }
