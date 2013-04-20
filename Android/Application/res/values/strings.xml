@@ -18,4 +18,14 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Selected Device</string>
+  <string name="DEVICES_BUTTON_ADD">Add Device</string>
+  <string name="DEVICES_BUTTON_REMOVE">Remove Device</string>
+
+  <string name="ADD_DEVICE_NAME">Device Name</string>
+  <string name="ADD_DEVICE_METHOD">Communication Method</string>
+  <string name="ADD_DEVICE_SELECT">Select Device</string>
+  <string name="ADD_DEVICE_DRIVER">Braille Driver</string>
+  <string name="ADD_DEVICE_DONE">Done</string>
 </resources>
