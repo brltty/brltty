@@ -131,6 +131,10 @@ public class CoreThread extends Thread {
     return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), defaultValue);
   }
 
+  private String getStringSetting (int key, int defaultValue) {
+    return getStringSetting(key, getStringResource(defaultValue));
+  }
+
   private String getStringSetting (int key) {
     return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), "");
   }
@@ -150,9 +154,9 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     // optional settings
-    builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, "auto"));
-    builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, "attributes"));
-    builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, "en-us-g2"));
+    builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));
+    builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, R.string.DEFAULT_ATTRIBUTES_TABLE));
+    builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, R.string.DEFAULT_CONTRACTION_TABLE));
 
     {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
@@ -180,7 +184,7 @@ public class CoreThread extends Thread {
 
     {
       ArrayList<String> keywords = new ArrayList<String>();
-      keywords.add(getStringSetting(R.string.PREF_KEY_LOG_LEVEL, "notice"));
+      keywords.add(getStringSetting(R.string.PREF_KEY_LOG_LEVEL, R.string.DEFAULT_LOG_LEVEL));
       keywords.addAll(getStringSetSetting(R.string.PREF_KEY_LOG_CATEGORIES));
       StringBuilder operand = new StringBuilder();
 
