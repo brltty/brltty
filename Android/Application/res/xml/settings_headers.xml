@@ -4,16 +4,16 @@
 
   <header
     android:fragment="org.a11y.brltty.android.SettingsActivity$GeneralSettings"
-    android:title="@string/SETTINGS_BUTTON_GENERAL"
+    android:title="@string/SETTINGS_SCREEN_GENERAL"
    />
 
   <header
     android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceManager"
-    android:title="@string/SETTINGS_BUTTON_DEVICES"
+    android:title="@string/SETTINGS_SCREEN_DEVICES"
    />
 
   <header
     android:fragment="org.a11y.brltty.android.SettingsActivity$AdvancedSettings"
-    android:title="@string/SETTINGS_BUTTON_ADVANCED"
+    android:title="@string/SETTINGS_SCREEN_ADVANCED"
    />
 </preference-headers>

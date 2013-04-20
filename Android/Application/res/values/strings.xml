@@ -8,7 +8,14 @@
   <string name="NOTIFICATIONS_BUTTON">Notifications</string>
   <string name="QUICK_SETTINGS_BUTTON">Quick Settings</string>
 
-  <string name="SETTINGS_BUTTON_GENERAL">General Settings</string>
-  <string name="SETTINGS_BUTTON_DEVICES">Manage Devices</string>
-  <string name="SETTINGS_BUTTON_ADVANCED">Advanced Settings</string>
+  <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contraction Table</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>
 </resources>

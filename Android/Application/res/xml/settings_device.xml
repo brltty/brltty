@@ -1,6 +1,6 @@
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:title="Manage Devices"
+  android:title="@string/SETTINGS_SCREEN_DEVICES"
   >
 
   <ListPreference

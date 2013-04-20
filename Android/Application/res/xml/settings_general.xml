@@ -1,12 +1,12 @@
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:title="General Settings"
+  android:title="@string/SETTINGS_SCREEN_GENERAL"
   >
 
   <ListPreference
     android:key="@string/PREF_KEY_TEXT_TABLE"
     android:persistent="true"
-    android:title="Text Table"
+    android:title="@string/SETTINGS_BUTTON_TEXT_TABLE"
     android:entries="@array/TEXT_TABLE_LABELS"
     android:entryValues="@array/TEXT_TABLE_VALUES"
     android:defaultValue="@string/TEXT_TABLE_LABEL_auto"
@@ -15,7 +15,7 @@
   <ListPreference
     android:key="@string/PREF_KEY_CONTRACTION_TABLE"
     android:persistent="true"
-    android:title="Contraction Table"
+    android:title="@string/SETTINGS_BUTTON_CONTRACTION_TABLE"
     android:entries="@array/CONTRACTION_TABLE_LABELS"
     android:entryValues="@array/CONTRACTION_TABLE_VALUES"
     android:defaultValue="@string/CONTRACTION_TABLE_LABEL_en_us_g2"

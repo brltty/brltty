@@ -1,12 +1,12 @@
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:title="Advanced Settings"
+  android:title="@string/SETTINGS_SCREEN_ADVANCED"
   >
 
   <ListPreference
     android:key="@string/PREF_KEY_ATTRIBUTES_TABLE"
     android:persistent="true"
-    android:title="Attributes Table"
+    android:title="@string/SETTINGS_BUTTON_ATTRIBUTES_TABLE"
     android:entries="@array/ATTRIBUTES_TABLE_LABELS"
     android:entryValues="@array/ATTRIBUTES_TABLE_VALUES"
     android:defaultValue="@string/ATTRIBUTES_TABLE_LABEL_attributes"
@@ -15,7 +15,7 @@
   <ListPreference
     android:key="@string/PREF_KEY_LOG_LEVEL"
     android:persistent="true"
-    android:title="Log Level"
+    android:title="@string/SETTINGS_BUTTON_LOG_LEVEL"
     android:entries="@array/LOG_LEVEL_LABELS"
     android:entryValues="@array/LOG_LEVEL_VALUES"
     android:defaultValue="@string/LOG_LEVEL_LABEL_notice"
@@ -24,7 +24,7 @@
   <MultiSelectListPreference
     android:key="@string/PREF_KEY_LOG_CATEGORIES"
     android:persistent="true"
-    android:title="Log Categories"
+    android:title="@string/SETTINGS_BUTTON_LOG_CATEGORIES"
     android:entries="@array/LOG_CATEGORY_LABELS"
     android:entryValues="@array/LOG_CATEGORY_VALUES"
     android:defaultValue="@array/EMPTY_STRING_ARRAY"
