@@ -25,7 +25,7 @@
       android:title="Communication Method"
       android:entries="@array/DEVICE_METHOD_LABELS"
       android:entryValues="@array/DEVICE_METHOD_VALUES"
-      android:defaultValue="Bluetooth"
+      android:defaultValue="@string/COMMUNICATION_METHOD_LABEL_Bluetooth"
      />
 
     <ListPreference
@@ -40,7 +40,7 @@
       android:title="Braille Driver"
       android:entries="@array/BRAILLE_DRIVER_LABELS"
       android:entryValues="@array/BRAILLE_DRIVER_VALUES"
-      android:defaultValue="auto"
+      android:defaultValue="@string/BRAILLE_DRIVER_LABEL_auto"
      />
 
     <Preference
