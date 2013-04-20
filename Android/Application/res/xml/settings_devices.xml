@@ -56,17 +56,17 @@
 
     <Preference
       android:key="@string/PREF_KEY_REMOVE_DEVICE_ASK"
-      android:title="Do you really want to remove this device?"
+      android:title="@string/REMOVE_DEVICE_ASK"
      />
 
     <Preference
       android:key="@string/PREF_KEY_REMOVE_DEVICE_YES"
-      android:title="Yes"
+      android:title="@string/android:yes"
      />
 
     <Preference
       android:key="@string/PREF_KEY_REMOVE_DEVICE_NO"
-      android:title="No"
+      android:title="@string/android:no"
      />
   </PreferenceScreen>
 </PreferenceScreen>
