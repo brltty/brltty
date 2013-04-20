@@ -9,7 +9,7 @@
     android:title="@string/SETTINGS_BUTTON_ATTRIBUTES_TABLE"
     android:entries="@array/ATTRIBUTES_TABLE_LABELS"
     android:entryValues="@array/ATTRIBUTES_TABLE_VALUES"
-    android:defaultValue="@string/ATTRIBUTES_TABLE_LABEL_attributes"
+    android:defaultValue="@string/DEFAULT_ATTRIBUTES_TABLE"
    />
 
   <ListPreference
@@ -18,7 +18,7 @@
     android:title="@string/SETTINGS_BUTTON_LOG_LEVEL"
     android:entries="@array/LOG_LEVEL_LABELS"
     android:entryValues="@array/LOG_LEVEL_VALUES"
-    android:defaultValue="@string/LOG_LEVEL_LABEL_notice"
+    android:defaultValue="@string/DEFAULT_LOG_LEVEL"
    />
 
   <MultiSelectListPreference

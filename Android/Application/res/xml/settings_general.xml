@@ -9,7 +9,7 @@
     android:title="@string/SETTINGS_BUTTON_TEXT_TABLE"
     android:entries="@array/TEXT_TABLE_LABELS"
     android:entryValues="@array/TEXT_TABLE_VALUES"
-    android:defaultValue="@string/TEXT_TABLE_LABEL_auto"
+    android:defaultValue="@string/DEFAULT_TEXT_TABLE"
    />
 
   <ListPreference
@@ -18,6 +18,6 @@
     android:title="@string/SETTINGS_BUTTON_CONTRACTION_TABLE"
     android:entries="@array/CONTRACTION_TABLE_LABELS"
     android:entryValues="@array/CONTRACTION_TABLE_VALUES"
-    android:defaultValue="@string/CONTRACTION_TABLE_LABEL_en_us_g2"
+    android:defaultValue="@string/DEFAULT_CONTRACTION_TABLE"
    />
 </PreferenceScreen>
