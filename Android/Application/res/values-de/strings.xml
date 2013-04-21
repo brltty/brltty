@@ -10,4 +10,8 @@
   <string name="VIRTUAL_BUTTON_BACK">Zurück</string>
   <string name="VIRTUAL_BUTTON_HOME">Home</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Letzte Apps</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Seriell</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">automatische erkennen</string>
 </resources>
