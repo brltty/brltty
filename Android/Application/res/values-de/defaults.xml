@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="DEFAULT_TEXT_TABLE">de</string>
+  <string name="DEFAULT_CONTRACTION_TABLE">de-kurzschrift</string>
+</resources>
