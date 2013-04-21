@@ -125,7 +125,7 @@
 # are anchored at "@TABLES_DIRECTORY@". If not specified, locale-based
 # autoselection with fallback to "@text_table@" will be performed.
 # (can be overridden with the -t [--text-table=] option)
-#text-table	auto	# locale-based autoselection (fallback to "@text_table@")
+#text-table	auto	# locale-based autoselection
 #text-table	ar	# Arabic (generic)
 #text-table	as	# Assamese
 #text-table	awa	# Awadhi

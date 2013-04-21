@@ -116,7 +116,7 @@
     <item>xw</item>
   </string-array>
 
-  <string name="TEXT_TABLE_LABEL_auto">locale-based autoselection (fallback to "en-nabcc")</string>
+  <string name="TEXT_TABLE_LABEL_auto">locale-based autoselection</string>
   <string name="TEXT_TABLE_LABEL_ar">Arabic (generic)</string>
   <string name="TEXT_TABLE_LABEL_hy">Armenian</string>
   <string name="TEXT_TABLE_LABEL_as">Assamese</string>
