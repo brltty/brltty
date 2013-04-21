@@ -6,6 +6,6 @@
     >
 
     <subtype
-        android:label="@string/input_service_name"
+        android:label="@string/input_service_type"
      />
 </input-method>

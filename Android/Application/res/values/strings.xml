@@ -2,8 +2,10 @@
 
 <resources>
   <string name="app_name">BRLTTY</string>
-  <string name="input_service_name">BRLTTY Input Service</string>
   <string name="app_description">BRLTTY supports braille devices.</string>
+
+  <string name="input_service_name">BRLTTY Input Service</string>
+  <string name="input_service_type">Keyboards on Braille Devices</string>
 
   <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifications</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Quick Settings</string>
