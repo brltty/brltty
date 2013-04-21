@@ -5,6 +5,7 @@
   <string name="app_description">BRLTTY støtter punktskriftenheter.</string>
 
   <string name="input_service_name">Inntastingstjeneste for BRLTTY</string>
+  <string name="input_service_type">Tastatur på punktskriftenheter</string>
 
   <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Systemvarsler</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Hurtiginnstillinger</string>
