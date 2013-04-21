@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string-array name="DEVICE_METHOD_VALUES">
-    <item>Bluetooth</item>
-    <item>Usb</item>
-    <item>Serial</item>
-  </string-array>
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>
 
   <string-array name="DEVICE_METHOD_LABELS">
     <item>@string/COMMUNICATION_METHOD_LABEL_Bluetooth</item>
@@ -13,20 +11,20 @@
     <item>@string/COMMUNICATION_METHOD_LABEL_Serial</item>
   </string-array>
 
-  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
-  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
-  <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>
-
-  <string-array name="LOG_LEVEL_VALUES">
-    <item>debug</item>
-    <item>information</item>
-    <item>notice</item>
-    <item>warning</item>
-    <item>error</item>
-    <item>critical</item>
-    <item>alert</item>
-    <item>emergency</item>
+  <string-array name="DEVICE_METHOD_VALUES">
+    <item>Bluetooth</item>
+    <item>Usb</item>
+    <item>Serial</item>
   </string-array>
+
+  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
+  <string name="LOG_LEVEL_LABEL_information">Information</string>
+  <string name="LOG_LEVEL_LABEL_notice">Notice</string>
+  <string name="LOG_LEVEL_LABEL_warning">Warning</string>
+  <string name="LOG_LEVEL_LABEL_error">Error</string>
+  <string name="LOG_LEVEL_LABEL_critical">Critical</string>
+  <string name="LOG_LEVEL_LABEL_alert">Alert</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Emergency</string>
 
   <string-array name="LOG_LEVEL_LABELS">
     <item>@string/LOG_LEVEL_LABEL_debug</item>
@@ -39,24 +37,24 @@
     <item>@string/LOG_LEVEL_LABEL_emergency</item>
   </string-array>
 
-  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
-  <string name="LOG_LEVEL_LABEL_information">Information</string>
-  <string name="LOG_LEVEL_LABEL_notice">Notice</string>
-  <string name="LOG_LEVEL_LABEL_warning">Warning</string>
-  <string name="LOG_LEVEL_LABEL_error">Error</string>
-  <string name="LOG_LEVEL_LABEL_critical">Critical</string>
-  <string name="LOG_LEVEL_LABEL_alert">Alert</string>
-  <string name="LOG_LEVEL_LABEL_emergency">Emergency</string>
-
-  <string-array name="LOG_CATEGORY_VALUES">
-    <item>ingio</item>
-    <item>inpkts</item>
-    <item>outpkts</item>
-    <item>brlkeys</item>
-    <item>kbdkeys</item>
-    <item>csrtrk</item>
-    <item>csrrtg</item>
+  <string-array name="LOG_LEVEL_VALUES">
+    <item>debug</item>
+    <item>information</item>
+    <item>notice</item>
+    <item>warning</item>
+    <item>error</item>
+    <item>critical</item>
+    <item>alert</item>
+    <item>emergency</item>
   </string-array>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Generic Input</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Keyboard Key Events</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor Tracking</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor Routing</string>
 
   <string-array name="LOG_CATEGORY_LABELS">
     <item>@string/LOG_CATEGORY_LABEL_ingio</item>
@@ -68,11 +66,13 @@
     <item>@string/LOG_CATEGORY_LABEL_csrrtg</item>
   </string-array>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Generic Input</string>
-  <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
-  <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
-  <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>
-  <string name="LOG_CATEGORY_LABEL_kbdkeys">Keyboard Key Events</string>
-  <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor Tracking</string>
-  <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor Routing</string>
+  <string-array name="LOG_CATEGORY_VALUES">
+    <item>ingio</item>
+    <item>inpkts</item>
+    <item>outpkts</item>
+    <item>brlkeys</item>
+    <item>kbdkeys</item>
+    <item>csrtrk</item>
+    <item>csrrtg</item>
+  </string-array>
 </resources>

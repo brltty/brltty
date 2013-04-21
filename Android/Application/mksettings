@@ -61,14 +61,6 @@ proc makeResources {properties} {
 
       set values [list]
       set labels [list]
-      set strings [list]
-
-      foreach code [lsort -command [list compareKeysByValue $property] [dict keys $property]] {
-         set label "${prefix}LABEL_[string map {- _} $code]"
-         lappend values $code
-         lappend labels "@string/$label"
-         lappend strings [list $label [dict get $property $code]]
-      }
 
       if {$first} {
          set first 0
@@ -76,15 +68,19 @@ proc makeResources {properties} {
          lappend lines ""
       }
 
-      eval [list lappend lines] [makeArray "${prefix}VALUES" $values]
-      lappend lines ""
+      foreach code [lsort -command [list compareKeysByValue $property] [dict keys $property]] {
+         set label "${prefix}LABEL_[string map {- _} $code]"
+         lappend lines "  <string name=\"$label\">[dict get $property $code]</string>"
 
-      eval [list lappend lines] [makeArray "${prefix}LABELS" $labels]
-      lappend lines ""
-
-      foreach string $strings {
-         lappend lines "  <string name=\"[lindex $string 0]\">[lindex $string 1]</string>"
+         lappend values $code
+         lappend labels "@string/$label"
       }
+
+      lappend lines ""
+      eval [list lappend lines] [makeArray "${prefix}LABELS" $labels]
+
+      lappend lines ""
+      eval [list lappend lines] [makeArray "${prefix}VALUES" $values]
    }
 
    lappend lines "</resources>"
