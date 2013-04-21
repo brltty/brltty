@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY 支援點字顯示器</string>
+
+  <string name="input_service_name">BRLTTY 點字鍵盤輸入</string>
+
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">通知</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">快速設定</string>
+  <string name="VIRTUAL_BUTTON_BACK">返回</string>
+  <string name="VIRTUAL_BUTTON_HOME">主頁</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">最近開啟的應用城市</string>
+
+  <string name="SETTINGS_SCREEN_GENERAL">一般設定</string>
+  <string name="SETTINGS_SCREEN_DEVICES">點顯器設定</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">進階設定</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">普通點字</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">屬性點字</string>
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">紀錄分類</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">選用的點顯器</string>
+  <string name="DEVICES_BUTTON_ADD">新增點顯器</string>
+  <string name="DEVICES_BUTTON_REMOVE">移除點顯器</string>
+
+  <string name="ADD_DEVICE_NAME">點顯器名稱</string>
+  <string name="ADD_DEVICE_METHOD">連接方式</string>
+  <string name="ADD_DEVICE_SELECT">選擇點顯器</string>
+  <string name="ADD_DEVICE_DRIVER">點顯器</string>
+  <string name="ADD_DEVICE_DONE">完成</string>
+
+  <string name="REMOVE_DEVICE_ASK">您確定要移除這個點顯器嗎？</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">藍牙</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">序列埠</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">除錯</string>
+  <string name="LOG_LEVEL_LABEL_information">資訊</string>
+  <string name="LOG_LEVEL_LABEL_notice">提示</string>
+  <string name="LOG_LEVEL_LABEL_warning">警示</string>
+  <string name="LOG_LEVEL_LABEL_error">錯誤</string>
+  <string name="LOG_LEVEL_LABEL_critical">關鍵</string>
+  <string name="LOG_LEVEL_LABEL_alert">警告</string>
+  <string name="LOG_LEVEL_LABEL_emergency">緊急</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">一般輸入</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">輸入封包</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">輸出封包</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">點字鍵盤事件</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">普通鍵盤事件</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">游標追蹤</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">游標定位</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">自動偵測</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">依照語言設定自動選擇</string>
+  <string name="TEXT_TABLE_LABEL_ar">阿拉伯（一般）</string>
+  <string name="TEXT_TABLE_LABEL_hy">亞美尼亞</string>
+  <string name="TEXT_TABLE_LABEL_as">阿薩姆</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bn">孟加拉</string>
+  <string name="TEXT_TABLE_LABEL_bh">比哈爾</string>
+  <string name="TEXT_TABLE_LABEL_brf">點字格式檔（閱讀 .brf 檔）</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_bg">保加利亞</string>
+  <string name="TEXT_TABLE_LABEL_hr">克羅埃西亞</string>
+  <string name="TEXT_TABLE_LABEL_cs">捷克</string>
+  <string name="TEXT_TABLE_LABEL_da">丹麥</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">丹麥 (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">丹麥 (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_dra">德拉維</string>
+  <string name="TEXT_TABLE_LABEL_nl">荷蘭</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">荷蘭（比利時）</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">荷蘭（尼德蘭）</string>
+  <string name="TEXT_TABLE_LABEL_en">英文</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">英文（加拿大）</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">英文（北美電腦點字）</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">英文（英國）</string>
+  <string name="TEXT_TABLE_LABEL_en_US">英文（美國）</string>
+  <string name="TEXT_TABLE_LABEL_eo">世界語</string>
+  <string name="TEXT_TABLE_LABEL_et">愛沙尼亞</string>
+  <string name="TEXT_TABLE_LABEL_fi">芬蘭</string>
+  <string name="TEXT_TABLE_LABEL_fr">法文</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">法文（加拿大）</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">法文（法國標準點字資訊碼）</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">法文（法蘭西）</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">法文 (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">法文 (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_gd">蓋爾</string>
+  <string name="TEXT_TABLE_LABEL_de">德文</string>
+  <string name="TEXT_TABLE_LABEL_gon">岡德</string>
+  <string name="TEXT_TABLE_LABEL_el">希臘</string>
+  <string name="TEXT_TABLE_LABEL_gu">印度古吉拉特</string>
+  <string name="TEXT_TABLE_LABEL_he">希伯來</string>
+  <string name="TEXT_TABLE_LABEL_hi">北印度語</string>
+  <string name="TEXT_TABLE_LABEL_hu">匈牙利</string>
+  <string name="TEXT_TABLE_LABEL_is">冰島</string>
+  <string name="TEXT_TABLE_LABEL_ga">愛爾蘭英語</string>
+  <string name="TEXT_TABLE_LABEL_it">義大利</string>
+  <string name="TEXT_TABLE_LABEL_kn">坎那達語</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lv">拉脫維亞</string>
+  <string name="TEXT_TABLE_LABEL_lt">立陶宛</string>
+  <string name="TEXT_TABLE_LABEL_mg">馬達加斯加</string>
+  <string name="TEXT_TABLE_LABEL_ml">印度西南部的Dravidian語的一方言</string>
+  <string name="TEXT_TABLE_LABEL_mt">馬爾他</string>
+  <string name="TEXT_TABLE_LABEL_mni">(印度)曼尼普爾</string>
+  <string name="TEXT_TABLE_LABEL_mi">毛利語</string>
+  <string name="TEXT_TABLE_LABEL_mr">馬拉地語</string>
+  <string name="TEXT_TABLE_LABEL_mwr">馬爾瓦爾</string>
+  <string name="TEXT_TABLE_LABEL_mun">蒙達語</string>
+  <string name="TEXT_TABLE_LABEL_ne">尼泊爾</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
+  <string name="TEXT_TABLE_LABEL_no">挪威</string>
+  <string name="TEXT_TABLE_LABEL_no_oub">挪威 (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">挪威（支援其他語言）</string>
+  <string name="TEXT_TABLE_LABEL_or">歐利亞語</string>
+  <string name="TEXT_TABLE_LABEL_pi">巴歷語</string>
+  <string name="TEXT_TABLE_LABEL_pa">旁遮普語</string>
+  <string name="TEXT_TABLE_LABEL_pl">波蘭</string>
+  <string name="TEXT_TABLE_LABEL_pt">葡萄牙</string>
+  <string name="TEXT_TABLE_LABEL_ro">羅馬尼亞</string>
+  <string name="TEXT_TABLE_LABEL_ru">俄語</string>
+  <string name="TEXT_TABLE_LABEL_sa">梵語</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">信德語</string>
+  <string name="TEXT_TABLE_LABEL_sk">斯洛法克</string>
+  <string name="TEXT_TABLE_LABEL_es">西班牙</string>
+  <string name="TEXT_TABLE_LABEL_sw">斯華希裡</string>
+  <string name="TEXT_TABLE_LABEL_sv">瑞典</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">瑞典 (1989 標準)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">瑞典 (1996 標準)</string>
+  <string name="TEXT_TABLE_LABEL_ta">坦米爾</string>
+  <string name="TEXT_TABLE_LABEL_te">泰盧固語</string>
+  <string name="TEXT_TABLE_LABEL_bo">西藏語</string>
+  <string name="TEXT_TABLE_LABEL_tr">土耳其</string>
+  <string name="TEXT_TABLE_LABEL_vi">越南</string>
+  <string name="TEXT_TABLE_LABEL_cy">威爾斯</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">南非的荷蘭語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">阿比西尼亞官話無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">中文（高點，一對一中文點字，餵完成）</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">中文</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">荷蘭語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">英文二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">英文統一二級點字</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">法文縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">法文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">德文基本縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">德文縮寫 1998 標準</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">德文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">豪撒語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">印尼語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">國際拼音字母</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">日文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">韓文一級</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">韓文二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">韓文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">馬達加斯加語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">蒙達語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">葡萄牙語二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">錫蘭語無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">西班牙語二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">斯瓦希裡語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">泰國語縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">祖魯語縮寫</string>
+</resources>
