@@ -17,7 +17,6 @@ memory wastage on restart
 manual restart needed when settings are changed
 recycle nodes: getSource getChild getParent getLabelFor getLabelledBy getRootInActiveWindow
 set the actual locations of the bottom three buttons
-internationalization
 actions on elements with short text
 enabling of input service
 selecting multiple devices
