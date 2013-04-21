@@ -5,6 +5,7 @@
   <string name="app_description">BRLTTY 支援點字顯示器</string>
 
   <string name="input_service_name">BRLTTY 點字鍵盤輸入</string>
+  <string name="input_service_type">點顯器上的鍵盤</string>
 
   <string name="VIRTUAL_BUTTON_NOTIFICATIONS">通知</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">快速設定</string>
