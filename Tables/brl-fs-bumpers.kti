@@ -22,3 +22,9 @@ bind LeftBumperUp KEY_CURSOR_UP
 bind LeftBumperDown KEY_CURSOR_DOWN
 bind RightBumperUp LNUP
 bind RightBumperDown LNDN
+
+bind LeftGdf+LeftBumperUp TOP
+bind LeftGdf+LeftBumperDown BOT
+bind RightGdf+RightBumperUp TOP
+bind RightGdf+RightBumperDown BOT
+
