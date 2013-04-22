@@ -177,6 +177,19 @@ BEGIN_KEY_NAME_TABLES(easy)
   KEY_NAME_TABLE(easyBraille),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLE(basicBraille)
+  KEY_NAME_ENTRY(HT_KEY_B1, "Display1"),
+  KEY_NAME_ENTRY(HT_KEY_B2, "Display2"),
+  KEY_NAME_ENTRY(HT_KEY_B3, "Display3"),
+  KEY_NAME_ENTRY(HT_KEY_B4, "Display4"),
+  KEY_NAME_ENTRY(HT_KEY_B5, "Display5"),
+  KEY_NAME_ENTRY(HT_KEY_B6, "Display6"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(bb)
+  KEY_NAME_TABLE(basicBraille),
+END_KEY_NAME_TABLES
+
 typedef enum {
   HT_BWK_Backward = 0X01,
   HT_BWK_Forward = 0X08,
@@ -205,6 +218,7 @@ DEFINE_KEY_TABLE(bs80)
 DEFINE_KEY_TABLE(ab40)
 DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
+DEFINE_KEY_TABLE(bb)
 DEFINE_KEY_TABLE(bkwm)
 
 BEGIN_KEY_TABLE_LIST
@@ -216,6 +230,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(ab40),
   &KEY_TABLE_DEFINITION(wave),
   &KEY_TABLE_DEFINITION(easy),
+  &KEY_TABLE_DEFINITION(bb),
   &KEY_TABLE_DEFINITION(bkwm),
 END_KEY_TABLE_LIST
 
@@ -374,6 +389,27 @@ static const ModelEntry modelTable[] = {
     .setSensitivity = setSensitivity_ActiveBraille,
     .hasATC = 1
   }
+  ,
+#define HT_BASIC_BRAILLE(cells) \
+  { .identifier = HT_MODEL_BasicBraille##cells,     \
+    .name = "Basic Braille " STRINGIFY(cells),     \
+    .textCells = cells,                            \
+    .statusCells = 0,                              \
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),\
+    .interpretByte = interpretByte_key,             \
+    .writeCells = writeCells_Evolution,             \
+    .setFirmness = setFirmness,               \
+    .setSensitivity = setSensitivity_ActiveBraille \
+  }
+  HT_BASIC_BRAILLE(16),
+  HT_BASIC_BRAILLE(20),
+  HT_BASIC_BRAILLE(32),
+  HT_BASIC_BRAILLE(40),
+  HT_BASIC_BRAILLE(48),
+  HT_BASIC_BRAILLE(64),
+  HT_BASIC_BRAILLE(80),
+  HT_BASIC_BRAILLE(160)
+#undef HT_BASIC_BRAILLE
   ,
   { /* end of table */
     .name = NULL
@@ -824,6 +860,62 @@ openUsbPort (char **parameters, const char *device) {
     ,
     { /* Active Braille */
       .vendor=0X1FE4, .product=0X0054,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 16 */
+      .vendor=0X1FE4, .product=0X0081,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 20 */
+      .vendor=0X1FE4, .product=0X0082,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 32 */
+      .vendor=0X1FE4, .product=0X0083,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 40 */
+      .vendor=0X1FE4, .product=0X0084,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 48 */
+      .vendor=0X1FE4, .product=0X008A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 64 */
+      .vendor=0X1FE4, .product=0X0086,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 80 */
+      .vendor=0X1FE4, .product=0X0087,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    }
+    ,
+    { /* Basic Braille 160 */
+      .vendor=0X1FE4, .product=0X008B,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
