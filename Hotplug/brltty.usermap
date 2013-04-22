@@ -69,7 +69,8 @@ brltty-bm 0x0003 0x0403 0xfe77
 brltty-mt 0x0003 0x0452 0x0100
 
 # Device: 045E:930A
-# HIMS [Braille Sense]
+# HIMS [Braille Sense (USB 1.1)]
+# HIMS [Braille Sense (USB 2.0)]
 brltty-hm 0x0003 0x045e 0x930a
 
 # Device: 045E:930B
@@ -197,6 +198,38 @@ brltty-ht 0x0003 0x1fe4 0x0054
 # Device: 1FE4:0074
 # HandyTech [Braille Star 40 (HID)]
 brltty-ht 0x0003 0x1fe4 0x0074
+
+# Device: 1FE4:0081
+# HandyTech [Basic Braille 16]
+brltty-ht 0x0003 0x1fe4 0x0081
+
+# Device: 1FE4:0082
+# HandyTech [Basic Braille 20]
+brltty-ht 0x0003 0x1fe4 0x0082
+
+# Device: 1FE4:0083
+# HandyTech [Basic Braille 32]
+brltty-ht 0x0003 0x1fe4 0x0083
+
+# Device: 1FE4:0084
+# HandyTech [Basic Braille 40]
+brltty-ht 0x0003 0x1fe4 0x0084
+
+# Device: 1FE4:0086
+# HandyTech [Basic Braille 64]
+brltty-ht 0x0003 0x1fe4 0x0086
+
+# Device: 1FE4:0087
+# HandyTech [Basic Braille 80]
+brltty-ht 0x0003 0x1fe4 0x0087
+
+# Device: 1FE4:008A
+# HandyTech [Basic Braille 48]
+brltty-ht 0x0003 0x1fe4 0x008a
+
+# Device: 1FE4:008B
+# HandyTech [Basic Braille 160]
+brltty-ht 0x0003 0x1fe4 0x008b
 
 # Device: 4242:0001
 # Pegasus [all models]

@@ -77,7 +77,8 @@ ENV{PRODUCT}=="403/fe77/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="452/100/*", ENV{BRLTTY_DRIVER}="mt", GOTO="brltty_usb_run"
 
 # Device: 045E:930A
-# HIMS [Braille Sense]
+# HIMS [Braille Sense (USB 1.1)]
+# HIMS [Braille Sense (USB 2.0)]
 ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="hm", GOTO="brltty_usb_run"
 
 # Device: 045E:930B
@@ -205,6 +206,38 @@ ENV{PRODUCT}=="1fe4/54/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 # Device: 1FE4:0074
 # HandyTech [Braille Star 40 (HID)]
 ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0081
+# HandyTech [Basic Braille 16]
+ENV{PRODUCT}=="1fe4/81/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0082
+# HandyTech [Basic Braille 20]
+ENV{PRODUCT}=="1fe4/82/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0083
+# HandyTech [Basic Braille 32]
+ENV{PRODUCT}=="1fe4/83/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0084
+# HandyTech [Basic Braille 40]
+ENV{PRODUCT}=="1fe4/84/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0086
+# HandyTech [Basic Braille 64]
+ENV{PRODUCT}=="1fe4/86/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:0087
+# HandyTech [Basic Braille 80]
+ENV{PRODUCT}=="1fe4/87/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:008A
+# HandyTech [Basic Braille 48]
+ENV{PRODUCT}=="1fe4/8a/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+
+# Device: 1FE4:008B
+# HandyTech [Basic Braille 160]
+ENV{PRODUCT}=="1fe4/8b/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 4242:0001
 # Pegasus [all models]

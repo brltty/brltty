@@ -54,7 +54,8 @@
   <usb-device vendor-id="1106" product-id="256" />
 
   <!-- Device: 045E:930A -->
-  <!-- HIMS [Braille Sense] -->
+  <!-- HIMS [Braille Sense (USB 1.1)] -->
+  <!-- HIMS [Braille Sense (USB 2.0)] -->
   <usb-device vendor-id="1118" product-id="37642" />
 
   <!-- Device: 045E:930B -->
@@ -182,6 +183,38 @@
   <!-- Device: 1FE4:0074 -->
   <!-- HandyTech [Braille Star 40 (HID)] -->
   <usb-device vendor-id="8164" product-id="116" />
+
+  <!-- Device: 1FE4:0081 -->
+  <!-- HandyTech [Basic Braille 16] -->
+  <usb-device vendor-id="8164" product-id="129" />
+
+  <!-- Device: 1FE4:0082 -->
+  <!-- HandyTech [Basic Braille 20] -->
+  <usb-device vendor-id="8164" product-id="130" />
+
+  <!-- Device: 1FE4:0083 -->
+  <!-- HandyTech [Basic Braille 32] -->
+  <usb-device vendor-id="8164" product-id="131" />
+
+  <!-- Device: 1FE4:0084 -->
+  <!-- HandyTech [Basic Braille 40] -->
+  <usb-device vendor-id="8164" product-id="132" />
+
+  <!-- Device: 1FE4:0086 -->
+  <!-- HandyTech [Basic Braille 64] -->
+  <usb-device vendor-id="8164" product-id="134" />
+
+  <!-- Device: 1FE4:0087 -->
+  <!-- HandyTech [Basic Braille 80] -->
+  <usb-device vendor-id="8164" product-id="135" />
+
+  <!-- Device: 1FE4:008A -->
+  <!-- HandyTech [Basic Braille 48] -->
+  <usb-device vendor-id="8164" product-id="138" />
+
+  <!-- Device: 1FE4:008B -->
+  <!-- HandyTech [Basic Braille 160] -->
+  <usb-device vendor-id="8164" product-id="139" />
 
   <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->

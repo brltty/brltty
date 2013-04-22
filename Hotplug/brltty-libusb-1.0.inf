@@ -79,7 +79,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -176,6 +176,30 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:0074
 "LibUSB-1.0: HandyTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+; Device: 1FE4:0081
+"LibUSB-1.0: HandyTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
+
+; Device: 1FE4:0082
+"LibUSB-1.0: HandyTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
+
+; Device: 1FE4:0083
+"LibUSB-1.0: HandyTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
+
+; Device: 1FE4:0084
+"LibUSB-1.0: HandyTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
+
+; Device: 1FE4:0086
+"LibUSB-1.0: HandyTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
+
+; Device: 1FE4:0087
+"LibUSB-1.0: HandyTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
+
+; Device: 1FE4:008A
+"LibUSB-1.0: HandyTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
+
+; Device: 1FE4:008B
+"LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -273,7 +297,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -370,6 +394,30 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:0074
 "LibUSB-1.0: HandyTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
+
+; Device: 1FE4:0081
+"LibUSB-1.0: HandyTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
+
+; Device: 1FE4:0082
+"LibUSB-1.0: HandyTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
+
+; Device: 1FE4:0083
+"LibUSB-1.0: HandyTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
+
+; Device: 1FE4:0084
+"LibUSB-1.0: HandyTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
+
+; Device: 1FE4:0086
+"LibUSB-1.0: HandyTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
+
+; Device: 1FE4:0087
+"LibUSB-1.0: HandyTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
+
+; Device: 1FE4:008A
+"LibUSB-1.0: HandyTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
+
+; Device: 1FE4:008B
+"LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
