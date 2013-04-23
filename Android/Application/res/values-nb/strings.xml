@@ -18,13 +18,13 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Avanserte innstillinger</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tekst-tabell</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">kortskrifttabell</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabell</string>
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
-  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Logg-kagegorier</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Logg-kategorier</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valgt enhet</string>
-  <string name="DEVICES_BUTTON_ADD">Add Enhet</string>
+  <string name="DEVICES_BUTTON_ADD">Legg til enhet</string>
   <string name="DEVICES_BUTTON_REMOVE">Fjern enhet</string>
 
   <string name="ADD_DEVICE_NAME">Enhetsnavn</string>
@@ -56,7 +56,7 @@
   <string name="LOG_CATEGORY_LABEL_csrtrk">Markørfølging</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Markørhenting</string>
 
-  <string name="BRAILLE_DRIVER_LABEL_auto">automatisk registrering</string>
+  <string name="BRAILLE_DRIVER_LABEL_auto">automatisk gjenkjenning</string>
 
   <string name="TEXT_TABLE_LABEL_auto">lokalitetsbasert, automatisk valg</string>
   <string name="TEXT_TABLE_LABEL_ar">arabisk (generelt)</string>
@@ -152,12 +152,12 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">kinesisk (Taiwan, fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">nederlandsk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">engelsk (US, grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">engelk (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">engelsk (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_abrege">fransk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_integral">fransk (fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">tyesk (enkel kortskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">tysk (enkel kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">tysk (kortskrift - 1998-standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">tyesk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">tysk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">hausa (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">indonesisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">internasjonalt fonetisk alfabet</string>
@@ -165,7 +165,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">koreansk (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">koreansk (fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_mg">madagassisk (koftskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">madagassisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">munda (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">portugisisk (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">singalesisk (fullskrift)</string>
