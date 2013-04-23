@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY supporte des afficheurs braille.</string>
+
+  <string name="input_service_name">Service d\'entrée BRLTTY</string>
+  <string name="input_service_type">Claviers des périphériques brailles</string>
+
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifications</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Paramétrages rapides</string>
+  <string name="VIRTUAL_BUTTON_BACK">Retour</string>
+  <string name="VIRTUAL_BUTTON_HOME">Accueil</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Applis récentes</string>
+
+  <string name="SETTINGS_SCREEN_GENERAL">Paramètres généraux</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Gestion des périphériques</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Paramètres avancés</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Tables de texte</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Table d\'abrégé</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Table d\'attributs</string>
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Niveau de journalisation</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Catégorie de journal</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Périphérique sélectionné</string>
+  <string name="DEVICES_BUTTON_ADD">Ajouter un périphérique</string>
+  <string name="DEVICES_BUTTON_REMOVE">Supprimer un périphérique</string>
+
+  <string name="ADD_DEVICE_NAME">Nom du périphérique</string>
+  <string name="ADD_DEVICE_METHOD">Méthode de communication</string>
+  <string name="ADD_DEVICE_SELECT">Périphérique sélectionné</string>
+  <string name="ADD_DEVICE_DRIVER">Pilote braille</string>
+  <string name="ADD_DEVICE_DONE">Fait</string>
+
+  <string name="REMOVE_DEVICE_ASK">Voulez-vous vraiment supprimer ce périphérique ?</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Série</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Débogage</string>
+  <string name="LOG_LEVEL_LABEL_information">Informations</string>
+  <string name="LOG_LEVEL_LABEL_notice">Remarque</string>
+  <string name="LOG_LEVEL_LABEL_warning">Avertissement</string>
+  <string name="LOG_LEVEL_LABEL_error">Erreur</string>
+  <string name="LOG_LEVEL_LABEL_critical">Critique</string>
+  <string name="LOG_LEVEL_LABEL_alert">Alerte</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Urgence</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Entrée générique</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Paquets en entrée</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Paquets en sortie</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Evénements clavier du périphérique braille</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Evénement touche du clavier</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Poursuite du curseur</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Routine curseur</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">Détection automatique</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">Sélection automatique basée sur la locale</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arabe (générique)</string>
+  <string name="TEXT_TABLE_LABEL_hy">Arménien</string>
+  <string name="TEXT_TABLE_LABEL_as">Assamese</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_brf">Format transcription braille (pour visualiser les fichiers .brf dans un éditeur ou un afficheur)</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulgare</string>
+  <string name="TEXT_TABLE_LABEL_hr">Croate</string>
+  <string name="TEXT_TABLE_LABEL_cs">Tchèque</string>
+  <string name="TEXT_TABLE_LABEL_da">Dannois</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Dannois (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Dannois (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravidian</string>
+  <string name="TEXT_TABLE_LABEL_nl">Autrichien</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Flamand (Belgique)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Flamand (Pays-Bas)</string>
+  <string name="TEXT_TABLE_LABEL_en">Anglais</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">Anglais (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">Anglais (Code informatique braille nord-américain)</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">Anglais (Royaume-Uni)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">Anglais (États-Unis)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Espéranto</string>
+  <string name="TEXT_TABLE_LABEL_et">Estonien</string>
+  <string name="TEXT_TABLE_LABEL_fi">Finnois</string>
+  <string name="TEXT_TABLE_LABEL_fr">Français</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Français (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Français (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Français (France)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Français (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Français (unifié 2007)</string>
+  <string name="TEXT_TABLE_LABEL_gd">Gaélique</string>
+  <string name="TEXT_TABLE_LABEL_de">Allemand</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_el">Grec</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gujrati</string>
+  <string name="TEXT_TABLE_LABEL_he">Hébreux</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hu">Hongrois</string>
+  <string name="TEXT_TABLE_LABEL_is">Islandais</string>
+  <string name="TEXT_TABLE_LABEL_ga">Irlandais</string>
+  <string name="TEXT_TABLE_LABEL_it">Italien</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lv">Léton</string>
+  <string name="TEXT_TABLE_LABEL_lt">Lituanien</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malgache</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltais</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_ne">Népalais</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (ancien)</string>
+  <string name="TEXT_TABLE_LABEL_no">Norvégien</string>
+  <string name="TEXT_TABLE_LABEL_no_oub">Norvégien (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norvégien (with support for other languages)</string>
+  <string name="TEXT_TABLE_LABEL_or">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pa">Punjabi</string>
+  <string name="TEXT_TABLE_LABEL_pl">Polonais</string>
+  <string name="TEXT_TABLE_LABEL_pt">Portugais</string>
+  <string name="TEXT_TABLE_LABEL_ro">Roumain</string>
+  <string name="TEXT_TABLE_LABEL_ru">Russe</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanscrit</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovaque</string>
+  <string name="TEXT_TABLE_LABEL_es">Espagnol</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_sv">Suédois</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">Suédois (1989 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">Suédois (1996 standard)</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamoul</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibétin</string>
+  <string name="TEXT_TABLE_LABEL_tr">Turc</string>
+  <string name="TEXT_TABLE_LABEL_vi">Vietnamien</string>
+  <string name="TEXT_TABLE_LABEL_cy">Gallois</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharic (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinois (Taiwan, Braille chinois Unique)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinois (Taiwan, désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Autrichien (Abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Anglais (EU, 2ème degré)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Anglais (Braille anglais unifié, 2ème degré)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Français (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Français (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Allemand (abréviations de base)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Allemand (abrégé - standard 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">Allemand (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Indonésien (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">Alphabet Phonétique international</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japonais (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coréen (1er degré)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coréen (2ème degré)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Coréen (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malgache (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Munda (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portugais (2ème degré)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Cinhalais (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Espagnol (2ème deghé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Thaïlandais (abrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zoulou (abrégé)</string>
+</resources>
