@@ -1,6 +1,6 @@
-An Upstart job for brltty can be found within the "Hotplug/" subdirectory of 
-BRLTTY's source tree. It's called "upstart.job". All you need to do is to copy 
-this file into Upstart's jobs directory.
+An Upstart job for brltty can be found within the "AutoStart/Upstart/" 
+subdirectory of BRLTTY's source tree. It's called "brltty.conf". All you need 
+to do is to copy this file into Upstart's jobs directory.
 
 Upstart's jobs directory has changed over time. Older Upstart releases use 
 "/etc/event.d/" whereas newer ones use "/etc/init/". You'll need to check your 
@@ -14,11 +14,11 @@ extension, e.g. "brltty.conf".
 
 so, for an older Upstart release, you'd do something like this:
 
-   cp upstart.job /etc/event.d/brltty
+   cp brltty.conf /etc/event.d/brltty
 
 and, for a newer Upstart release, you'd do something like this:
 
-   cp upstart.job /etc/init/brltty.conf
+   cp brltty.conf /etc/init/brltty.conf
 
 Once the job file is in the right place, brltty will automatically start when 
 the system is rebooted. You'll also be able to use standard Upstart commands to 

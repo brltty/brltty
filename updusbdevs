@@ -612,10 +612,10 @@ incr logLevel -$optionValues(verbose)
 
 if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
-   lappend argv "hotplug:[file join $sourceDirectory Hotplug brltty.usermap]"
-   lappend argv "udev:[file join $sourceDirectory Hotplug udev.rules]"
-   lappend argv "windows:[file join $sourceDirectory Hotplug brltty.inf]"
-   lappend argv "windows:[file join $sourceDirectory Hotplug brltty-libusb-1.0.inf]"
+   lappend argv "hotplug:[file join $sourceDirectory AutoStart Hotplug brltty.usermap]"
+   lappend argv "udev:[file join $sourceDirectory AutoStart Udev udev.rules]"
+   lappend argv "windows:[file join $sourceDirectory AutoStart Windows brltty.inf]"
+   lappend argv "windows:[file join $sourceDirectory AutoStart Windows brltty-libusb-1.0.inf]"
 }
 
 if {[llength $argv] == 0} {
