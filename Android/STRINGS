@@ -1,0 +1,172 @@
+app_name BRLTTY
+app_description BRLTTY supports braille devices.
+
+input_service_name BRLTTY Input Service
+input_service_type Keyboards on Braille Devices
+
+VIRTUAL_BUTTON_NOTIFICATIONS Notifications
+VIRTUAL_BUTTON_QUICK_SETTINGS Quick Settings
+VIRTUAL_BUTTON_BACK Back
+VIRTUAL_BUTTON_HOME Home
+VIRTUAL_BUTTON_RECENT_APPS Recent Apps
+
+SETTINGS_SCREEN_GENERAL General Settings
+SETTINGS_SCREEN_DEVICES Manage Devices
+SETTINGS_SCREEN_ADVANCED Advanced Settings
+
+SETTINGS_BUTTON_TEXT_TABLE Text Table
+SETTINGS_BUTTON_CONTRACTION_TABLE Contraction Table
+SETTINGS_BUTTON_ATTRIBUTES_TABLE Attributes Table
+SETTINGS_BUTTON_LOG_LEVEL Log Level
+SETTINGS_BUTTON_LOG_CATEGORIES Log Categories
+
+DEVICES_BUTTON_SELECTED Selected Device
+DEVICES_BUTTON_ADD Add Device
+DEVICES_BUTTON_REMOVE Remove Device
+
+ADD_DEVICE_NAME Device Name
+ADD_DEVICE_METHOD Communication Method
+ADD_DEVICE_SELECT Select Device
+ADD_DEVICE_DRIVER Braille Driver
+ADD_DEVICE_DONE Done
+
+REMOVE_DEVICE_ASK Would you really like to remove this device?
+
+COMMUNICATION_METHOD_LABEL_Bluetooth Bluetooth
+COMMUNICATION_METHOD_LABEL_Usb USB
+COMMUNICATION_METHOD_LABEL_Serial Serial
+
+LOG_LEVEL_LABEL_debug Debug
+LOG_LEVEL_LABEL_information Information
+LOG_LEVEL_LABEL_notice Notice
+LOG_LEVEL_LABEL_warning Warning
+LOG_LEVEL_LABEL_error Error
+LOG_LEVEL_LABEL_critical Critical
+LOG_LEVEL_LABEL_alert Alert
+LOG_LEVEL_LABEL_emergency Emergency
+
+LOG_CATEGORY_LABEL_ingio Generic Input
+LOG_CATEGORY_LABEL_inpkts Input Packets
+LOG_CATEGORY_LABEL_outpkts Output Packets
+LOG_CATEGORY_LABEL_brlkeys Braille Device Key Events
+LOG_CATEGORY_LABEL_kbdkeys Keyboard Key Events
+LOG_CATEGORY_LABEL_csrtrk Cursor Tracking
+LOG_CATEGORY_LABEL_csrrtg Cursor Routing
+
+BRAILLE_DRIVER_LABEL_auto autodetect
+
+TEXT_TABLE_LABEL_auto locale-based autoselection
+TEXT_TABLE_LABEL_ar Arabic (generic)
+TEXT_TABLE_LABEL_hy Armenian
+TEXT_TABLE_LABEL_as Assamese
+TEXT_TABLE_LABEL_awa Awadhi
+TEXT_TABLE_LABEL_bn Bengali
+TEXT_TABLE_LABEL_bh Bihari
+TEXT_TABLE_LABEL_brf Braille Ready Format (for viewing .brf files within an editor or pager)
+TEXT_TABLE_LABEL_bra Braj
+TEXT_TABLE_LABEL_bg Bulgarian
+TEXT_TABLE_LABEL_hr Croatian
+TEXT_TABLE_LABEL_cs Czech
+TEXT_TABLE_LABEL_da Danish
+TEXT_TABLE_LABEL_da_lt Danish (LogText)
+TEXT_TABLE_LABEL_da_1252 Danish (Svend Thougaard, 2002-11-18)
+TEXT_TABLE_LABEL_dra Dravidian
+TEXT_TABLE_LABEL_nl Dutch
+TEXT_TABLE_LABEL_nl_BE Dutch (Belgium)
+TEXT_TABLE_LABEL_nl_NL Dutch (Netherlands)
+TEXT_TABLE_LABEL_en English
+TEXT_TABLE_LABEL_en_CA English (Canada)
+TEXT_TABLE_LABEL_en_nabcc English (North American Braille Computer Code)
+TEXT_TABLE_LABEL_en_GB English (United Kingdom)
+TEXT_TABLE_LABEL_en_US English (United States)
+TEXT_TABLE_LABEL_eo Esperanto
+TEXT_TABLE_LABEL_et Estonian
+TEXT_TABLE_LABEL_fi Finnish
+TEXT_TABLE_LABEL_fr French
+TEXT_TABLE_LABEL_fr_CA French (Canada)
+TEXT_TABLE_LABEL_fr_cbifs French (Code Braille Informatique Français Standard)
+TEXT_TABLE_LABEL_fr_FR French (France)
+TEXT_TABLE_LABEL_fr_vs French (VisioBraille)
+TEXT_TABLE_LABEL_fr_2007 French (unified 2007)
+TEXT_TABLE_LABEL_gd Gaelic
+TEXT_TABLE_LABEL_de German
+TEXT_TABLE_LABEL_gon Gondi
+TEXT_TABLE_LABEL_el Greek
+TEXT_TABLE_LABEL_gu Gujarati
+TEXT_TABLE_LABEL_he Hebrew
+TEXT_TABLE_LABEL_hi Hindi
+TEXT_TABLE_LABEL_hu Hungarian
+TEXT_TABLE_LABEL_is Icelandic
+TEXT_TABLE_LABEL_ga Irish
+TEXT_TABLE_LABEL_it Italian
+TEXT_TABLE_LABEL_kn Kannada
+TEXT_TABLE_LABEL_kha Khasi
+TEXT_TABLE_LABEL_kok Konkani
+TEXT_TABLE_LABEL_kru Kurukh
+TEXT_TABLE_LABEL_lv Latvian
+TEXT_TABLE_LABEL_lt Lituanian
+TEXT_TABLE_LABEL_mg Malagasy
+TEXT_TABLE_LABEL_ml Malayalam
+TEXT_TABLE_LABEL_mt Maltese
+TEXT_TABLE_LABEL_mni Manipuri
+TEXT_TABLE_LABEL_mi Maori
+TEXT_TABLE_LABEL_mr Marathi
+TEXT_TABLE_LABEL_mwr Marwari
+TEXT_TABLE_LABEL_mun Munda
+TEXT_TABLE_LABEL_ne Nepali
+TEXT_TABLE_LABEL_new Newari
+TEXT_TABLE_LABEL_nwc Newari (old)
+TEXT_TABLE_LABEL_no Norwegian
+TEXT_TABLE_LABEL_no_oub Norwegian (Offentlig Utvalg for Blindeskrift)
+TEXT_TABLE_LABEL_no_generic Norwegian (with support for other languages)
+TEXT_TABLE_LABEL_or Oriya
+TEXT_TABLE_LABEL_pi Pali
+TEXT_TABLE_LABEL_pa Panjabi
+TEXT_TABLE_LABEL_pl Polish
+TEXT_TABLE_LABEL_pt Portuguese
+TEXT_TABLE_LABEL_ro Romanian
+TEXT_TABLE_LABEL_ru Russian
+TEXT_TABLE_LABEL_sa Sanskrit
+TEXT_TABLE_LABEL_sat Santali
+TEXT_TABLE_LABEL_sd Sindhi
+TEXT_TABLE_LABEL_sk Slovak
+TEXT_TABLE_LABEL_es Spanish
+TEXT_TABLE_LABEL_sw Swahili
+TEXT_TABLE_LABEL_sv Swedish
+TEXT_TABLE_LABEL_sv_1989 Swedish (1989 standard)
+TEXT_TABLE_LABEL_sv_1996 Swedish (1996 standard)
+TEXT_TABLE_LABEL_ta Tamil
+TEXT_TABLE_LABEL_te Telugu
+TEXT_TABLE_LABEL_bo Tibetan
+TEXT_TABLE_LABEL_tr Turkish
+TEXT_TABLE_LABEL_vi Vietnamese
+TEXT_TABLE_LABEL_cy Welsh
+
+CONTRACTION_TABLE_LABEL_af Afrikaans (contracted)
+CONTRACTION_TABLE_LABEL_am Amharic (uncontracted)
+CONTRACTION_TABLE_LABEL_ny Chichewa (contracted)
+CONTRACTION_TABLE_LABEL_zh_tw_ucb Chinese (Taiwan, Unique Chinese Braille)
+CONTRACTION_TABLE_LABEL_zh_tw Chinese (Taiwan, uncontracted)
+CONTRACTION_TABLE_LABEL_nl Dutch (contracted)
+CONTRACTION_TABLE_LABEL_en_us_g2 English (US, grade 2)
+CONTRACTION_TABLE_LABEL_en_ueb_g2 English (Unified English Braille, grade 2)
+CONTRACTION_TABLE_LABEL_fr_abrege French (contracted)
+CONTRACTION_TABLE_LABEL_fr_integral French (uncontracted)
+CONTRACTION_TABLE_LABEL_de_vollschrift German (basic contractions)
+CONTRACTION_TABLE_LABEL_de_kurzschrift German (contracted - 1998 standard)
+CONTRACTION_TABLE_LABEL_de_basis German (uncontracted)
+CONTRACTION_TABLE_LABEL_ha Hausa (contracted)
+CONTRACTION_TABLE_LABEL_id Indonesian (contracted)
+CONTRACTION_TABLE_LABEL_ipa International Phonetic Alphabet
+CONTRACTION_TABLE_LABEL_ja Japanese (uncontracted)
+CONTRACTION_TABLE_LABEL_ko_g1 Korean (grade 1)
+CONTRACTION_TABLE_LABEL_ko_g2 Korean (grade 2)
+CONTRACTION_TABLE_LABEL_ko Korean (uncontracted)
+CONTRACTION_TABLE_LABEL_mg Malagasy (contracted)
+CONTRACTION_TABLE_LABEL_mun Munda (contracted)
+CONTRACTION_TABLE_LABEL_pt Portuguese (grade 2)
+CONTRACTION_TABLE_LABEL_si Sinhalese (uncontracted)
+CONTRACTION_TABLE_LABEL_es Spanish (grade 2)
+CONTRACTION_TABLE_LABEL_sw Swahili (contracted)
+CONTRACTION_TABLE_LABEL_th Thai (contracted)
+CONTRACTION_TABLE_LABEL_zu Zulu (contracted)
