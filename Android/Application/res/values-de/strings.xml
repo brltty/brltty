@@ -19,7 +19,7 @@
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Texttabelle</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
-  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributttabelle</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabelle</string>
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>
 
@@ -30,7 +30,7 @@
   <string name="ADD_DEVICE_NAME">Name des Gerätes</string>
   <string name="ADD_DEVICE_METHOD">Kommunikationsmethode</string>
   <string name="ADD_DEVICE_SELECT">Gerät auswählen</string>
-  <string name="ADD_DEVICE_DRIVER">Treiber auswählen</string>
+  <string name="ADD_DEVICE_DRIVER">Brailletreiber auswählen</string>
   <string name="ADD_DEVICE_DONE">Fertig</string>
 
   <string name="REMOVE_DEVICE_ASK">Möchten Sie dieses Gerät wirklich entfernen?</string>
