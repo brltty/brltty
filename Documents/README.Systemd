@@ -1,4 +1,4 @@
-A Systemd unit for brltty can be found within the "AutoStart/Systemd/" 
+A Systemd unit for brltty can be found within the "Autostart/Systemd/" 
 subdirectory of BRLTTY's source tree. It's called "brltty.service". You need to 
 copy this file into Systemd's unit directory. You can locate Systemd's unit 
 directory with this command:
