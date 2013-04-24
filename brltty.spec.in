@@ -438,7 +438,7 @@ make
 make install install-documents install-messages
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 install -d "${RPM_BUILD_ROOT}%{_systemddir}"
-install -m 644 Hotplug/systemd.service "${RPM_BUILD_ROOT}%{_systemddir}/brltty.service"
+install -m 644 Autostart/Systemd/brltty.service "${RPM_BUILD_ROOT}%{_systemddir}/brltty.service"
 %find_lang %{name}
 
 %clean
