@@ -2,43 +2,43 @@
 
 <resources>
   <string name="app_name">BRLTTY</string>
-  <string name="app_description">BRLTTY unterstützt Braillezeilen.</string>
+  <string name="app_description">BRLTTY unterstützt Braillegeräte.</string>
 
   <string name="input_service_name">BRLTTY Brailleeingabe Service</string>
-  <string name="input_service_type">Keyboards on Braille Devices</string>
+  <string name="input_service_type">Tastaturen auf Braillezeilen</string>
 
   <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Benachrichtigungen</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Schnelleinstellungen</string>
   <string name="VIRTUAL_BUTTON_BACK">Zurück</string>
   <string name="VIRTUAL_BUTTON_HOME">Startseite</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">verwendete Apps</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Verwendete Apps</string>
 
   <string name="SETTINGS_SCREEN_GENERAL">Basiseinstellungen</string>
-  <string name="SETTINGS_SCREEN_DEVICES">Braillezeilen verwalten</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Geräte verwalten</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Erweiterte Einstellungen</string>
 
-  <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Tabelle</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Übersetzungstabelle</string>
-  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attribut Tabelle</string>
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Texttabelle</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributttabelle</string>
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>
 
-  <string name="DEVICES_BUTTON_SELECTED">Braillezeile auswählen</string>
-  <string name="DEVICES_BUTTON_ADD">Braillezeile hinzufügen</string>
-  <string name="DEVICES_BUTTON_REMOVE">Braillezeile löschen</string>
+  <string name="DEVICES_BUTTON_SELECTED">Gerät auswählen</string>
+  <string name="DEVICES_BUTTON_ADD">Gerät hinzufügen</string>
+  <string name="DEVICES_BUTTON_REMOVE">Gerät entfernen</string>
 
-  <string name="ADD_DEVICE_NAME">Name der Braillezeile</string>
-  <string name="ADD_DEVICE_METHOD">Kommunikationsart</string>
-  <string name="ADD_DEVICE_SELECT">Braillezeile auswählen</string>
-  <string name="ADD_DEVICE_DRIVER">Braillezeilentreiber auswählen</string>
+  <string name="ADD_DEVICE_NAME">Name des Gerätes</string>
+  <string name="ADD_DEVICE_METHOD">Kommunikationsmethode</string>
+  <string name="ADD_DEVICE_SELECT">Gerät auswählen</string>
+  <string name="ADD_DEVICE_DRIVER">Treiber auswählen</string>
   <string name="ADD_DEVICE_DONE">Fertig</string>
 
-  <string name="REMOVE_DEVICE_ASK">Möchten Sie diese Braillezeile wirklich löschen?</string>
+  <string name="REMOVE_DEVICE_ASK">Möchten Sie dieses Gerät wirklich entfernen?</string>
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
   <string name="COMMUNICATION_METHOD_LABEL_Serial">Seriell</string>
 
-  <string name="LOG_LEVEL_LABEL_debug">Fehler</string>
+  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
   <string name="LOG_LEVEL_LABEL_information">Informationen</string>
   <string name="LOG_LEVEL_LABEL_notice">Notizen</string>
   <string name="LOG_LEVEL_LABEL_warning">Warnungen</string>
@@ -57,7 +57,7 @@
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Automatische Erkennung</string>
 
-  <string name="TEXT_TABLE_LABEL_auto">landesspezifisch AUTO</string>
+  <string name="TEXT_TABLE_LABEL_auto">Automatisch anhand der Landeseinstellung</string>
   <string name="TEXT_TABLE_LABEL_ar">Arabisch (allgemein)</string>
   <string name="TEXT_TABLE_LABEL_hy">Armenisch</string>
   <string name="TEXT_TABLE_LABEL_as">Assamesisch</string>
@@ -101,7 +101,7 @@
   <string name="TEXT_TABLE_LABEL_is">Isländisch</string>
   <string name="TEXT_TABLE_LABEL_ga">Irisch</string>
   <string name="TEXT_TABLE_LABEL_it">Italienisch</string>
-  <string name="TEXT_TABLE_LABEL_kn">Kanadisch</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kanaresisch</string>
   <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
   <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
   <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
