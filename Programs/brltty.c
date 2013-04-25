@@ -3355,6 +3355,7 @@ brlttyUpdate (void) {
   if (opt_releaseDevice) {
     if (scr.unreadable) {
       if (!isSuspended) {
+        logMessage(LOG_DEBUG, "suspending braille driver");
         writeStatusCells();
         writeBrailleText("wrn", scr.unreadable);
 
@@ -3369,14 +3370,17 @@ brlttyUpdate (void) {
         }
 
         isSuspended = 1;
+        logMessage(LOG_DEBUG, "braille driver suspended");
       }
     } else {
       if (isSuspended) {
+        logMessage(LOG_DEBUG, "resuming braille driver");
         isSuspended = !(
 #ifdef ENABLE_API
           apiStarted? api_resume(&brl):
 #endif /* ENABLE_API */
           constructBrailleDriver());
+        logMessage(LOG_DEBUG, "braille driver resumed");
       }
     }
   }
