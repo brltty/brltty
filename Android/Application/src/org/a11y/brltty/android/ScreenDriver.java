@@ -447,6 +447,8 @@ public class ScreenDriver {
   }
 
   static {
-    eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
+    }
   }
 }
