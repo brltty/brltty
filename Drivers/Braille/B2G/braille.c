@@ -20,18 +20,25 @@
 
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/ioctl.h>
+#include <linux/input.h>
 
 #include "log.h"
+#include "parse.h"
+#include "io_misc.h"
 
 #include "brl_driver.h"
 #include "metec_flat20_ioctl.h"
 
-#define DEVICE_PATH "/dev/braille0"
-#define CELL_COUNT MAX_BRAILLE_LINE_SIZE
+#define BRAILLE_DEVICE_PATH "/dev/braille0"
+#define BRAILLE_CELL_COUNT MAX_BRAILLE_LINE_SIZE
+
+#define KEYBOARD_DIRECTORY_PATH "/sys/devices/platform/cp430_keypad/input"
+#define KEYBOARD_FILE_PREFIX "input"
 
 BEGIN_KEY_NAME_TABLE(navigation)
 END_KEY_NAME_TABLE
@@ -47,31 +54,34 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int fileDescriptor;
+  int brailleDevice;
   int forceRewrite;
-  unsigned char textCells[CELL_COUNT];
+  unsigned char textCells[BRAILLE_CELL_COUNT];
+
+  int keyboardDevice;
 };
 
 static int
-openDevice (BrailleDisplay *brl, const char *device) {
-  if ((brl->data->fileDescriptor = open(DEVICE_PATH, O_RDWR)) != -1) return 1;
-  logMessage(LOG_DEBUG, "open error: %s: %s", DEVICE_PATH, strerror(errno));
+openBrailleDevice (BrailleDisplay *brl, const char *device) {
+  if ((brl->data->brailleDevice = open(BRAILLE_DEVICE_PATH, O_RDWR)) != -1) return 1;
+  logMessage(LOG_DEBUG, "open error: %s: %s", BRAILLE_DEVICE_PATH, strerror(errno));
   return 0;
 }
 
 static void
-closeDevice (BrailleDisplay *brl) {
-  if (brl->data->fileDescriptor != -1) {
-    close(brl->data->fileDescriptor);
-    brl->data->fileDescriptor = -1;
+closeBrailleDevice (BrailleDisplay *brl) {
+  if (brl->data->brailleDevice != -1) {
+    close(brl->data->brailleDevice);
+    brl->data->brailleDevice = -1;
   }
 }
 
 static int
-logVersion (BrailleDisplay *brl) {
+logBrailleVersion (BrailleDisplay *brl) {
   char buffer[10];
+  memset(buffer, 0, sizeof(buffer));
 
-  if (ioctl(brl->data->fileDescriptor, METEC_FLAT20_GET_DRIVER_VERSION, buffer) != -1) {
+  if (ioctl(brl->data->brailleDevice, METEC_FLAT20_GET_DRIVER_VERSION, buffer) != -1) {
     logMessage(LOG_INFO, "B2G Driver Version: %s", buffer);
     return 1;
   } else {
@@ -82,43 +92,100 @@ logVersion (BrailleDisplay *brl) {
 }
 
 static int
-clearCells (BrailleDisplay *brl) {
-  if (ioctl(brl->data->fileDescriptor, METEC_FLAT20_CLEAR_DISPLAY, 0) != -1) return 1;
+clearBrailleCells (BrailleDisplay *brl) {
+  if (ioctl(brl->data->brailleDevice, METEC_FLAT20_CLEAR_DISPLAY, 0) != -1) return 1;
   logSystemError("ioctl[METEC_FLAT20_CLEAR_DISPLAY]");
   return 0;
 }
 
 static int
-writeCells (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
-  if (write(brl->data->fileDescriptor, cells, count) != -1) return 1;
+writeBrailleCells (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
+  if (write(brl->data->brailleDevice, cells, count) != -1) return 1;
   logSystemError("write");
   return 0;
+}
+
+static int
+openKeyboardDevice (BrailleDisplay *brl) {
+  int opened = 0;
+
+  const char *directoryPath = KEYBOARD_DIRECTORY_PATH;
+  DIR *directory;
+
+  if ((directory = opendir(directoryPath))) {
+    const char *filePrefix = KEYBOARD_FILE_PREFIX;
+    size_t length = strlen(filePrefix);
+    struct dirent *entry;
+
+    while ((entry = readdir(directory))) {
+      if (strncmp(entry->d_name, filePrefix, length) == 0) {
+        int eventNumber;
+
+        if (isInteger(&eventNumber, &entry->d_name[length])) {
+          char path[0X80];
+          snprintf(path, sizeof(path), "/dev/input/event%d", eventNumber);
+
+          if ((brl->data->keyboardDevice = open(path, O_RDONLY)) != -1) {
+            if (setBlockingIo(brl->data->keyboardDevice, 0)) {
+              opened = 1;
+            } else {
+              close(brl->data->keyboardDevice);
+              brl->data->keyboardDevice = -1;
+            }
+          } else {
+            logMessage(LOG_DEBUG, "keyboard device open error: %s: %s", path, strerror(errno));
+          }
+
+          break;
+        }
+      }
+    }
+
+    closedir(directory);
+  } else {
+    logMessage(LOG_DEBUG, "keyboard directory open error: %s: %s", directoryPath, strerror(errno));
+  }
+
+  return opened;
+}
+
+static void
+closeKeyboardDevice (BrailleDisplay *brl) {
+  if (brl->data->keyboardDevice != -1) {
+    close(brl->data->keyboardDevice);
+    brl->data->keyboardDevice = -1;
+  }
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->fileDescriptor = -1;
+    brl->data->brailleDevice = -1;
+    brl->data->keyboardDevice = -1;
 
-    if (openDevice(brl, device)) {
-      logVersion(brl);
+    if (openBrailleDevice(brl, device)) {
+      logBrailleVersion(brl);
 
-      if (clearCells(brl)) {
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+      if (openKeyboardDevice(brl)) {
+        if (clearBrailleCells(brl)) {
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
-          brl->keyBindings = ktd->bindings;
-          brl->keyNameTables = ktd->names;
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
+          brl->textColumns = BRAILLE_CELL_COUNT;
+          makeOutputTable(dotsTable_ISO11548_1);
+          brl->data->forceRewrite = 1;
+          return 1;
         }
 
-        brl->textColumns = CELL_COUNT;
-        makeOutputTable(dotsTable_ISO11548_1);
-        brl->data->forceRewrite = 1;
-        return 1;
+        closeKeyboardDevice(brl);
       }
 
-      closeDevice(brl);
+      closeBrailleDevice(brl);
     }
 
     free(brl->data);
@@ -132,7 +199,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data) {
-    closeDevice(brl);
+    closeKeyboardDevice(brl);
+    closeBrailleDevice(brl);
     free(brl->data);
   }
 }
@@ -143,7 +211,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     unsigned char cells[brl->textColumns];
 
     translateOutputCells(cells, brl->data->textCells, brl->textColumns);
-    if (!writeCells(brl, cells, brl->textColumns)) return 0;
+    if (!writeBrailleCells(brl, cells, brl->textColumns)) return 0;
   }
 
   return 1;
@@ -151,5 +219,37 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return EOF;
+  struct input_event event;
+  ssize_t length;
+
+  while ((length = read(brl->data->keyboardDevice, &event, sizeof(event))) != -1) {
+    if (length < sizeof(event)) continue;
+    if (event.type != EV_KEY) continue;
+
+    {
+      unsigned char set = (event.code >> 8) & 0XFF;
+      unsigned char key = (event.code >> 0) & 0XFF;
+      int press;
+
+      switch (event.value) {
+        case 0:
+          press = 0;
+          break;
+
+        case 1:
+          press = 1;
+          break;
+
+        default:
+          continue;
+      }
+
+      logMessage(LOG_NOTICE, "b2g key: set=%d key=%d prs=%d", set, key, press);
+      enqueueKeyEvent(set, key, press);
+    }
+  }
+
+  if (errno == EAGAIN) return EOF;
+  logSystemError("keyboard input error");
+  return BRL_CMD_RESTARTBRL;
 }
