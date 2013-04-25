@@ -32,6 +32,7 @@
 #include "io_misc.h"
 
 #include "brl_driver.h"
+#include "brldefs-bg.h"
 #include "metec_flat20_ioctl.h"
 
 #define BRAILLE_DEVICE_PATH "/dev/braille0"
@@ -40,7 +41,29 @@
 #define KEYBOARD_DIRECTORY_PATH "/sys/devices/platform/cp430_keypad/input"
 #define KEYBOARD_FILE_PREFIX "input"
 
+#define BG_SET_VALUE(value) (((value) >> 8) & 0XFF)
+#define BG_KEY_VALUE(value) (((value) >> 0) & 0XFF)
+#define BG_KEY_ENTRY(n) {.name=#n, .value={.set=BG_SET_VALUE(BG_KEY_##n), .key=BG_KEY_VALUE(BG_KEY_##n)}}
+
 BEGIN_KEY_NAME_TABLE(navigation)
+  BG_KEY_ENTRY(Left),
+  BG_KEY_ENTRY(Right),
+  BG_KEY_ENTRY(Up),
+  BG_KEY_ENTRY(Down),
+  BG_KEY_ENTRY(Enter),
+
+  BG_KEY_ENTRY(Backward),
+  BG_KEY_ENTRY(Forward),
+
+  BG_KEY_ENTRY(Dot1),
+  BG_KEY_ENTRY(Dot2),
+  BG_KEY_ENTRY(Dot3),
+  BG_KEY_ENTRY(Dot4),
+  BG_KEY_ENTRY(Dot5),
+  BG_KEY_ENTRY(Dot6),
+  BG_KEY_ENTRY(Dot7),
+  BG_KEY_ENTRY(Dot8),
+  BG_KEY_ENTRY(Space),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -127,8 +150,14 @@ openKeyboardDevice (BrailleDisplay *brl) {
 
           if ((brl->data->keyboardDevice = open(path, O_RDONLY)) != -1) {
             if (setBlockingIo(brl->data->keyboardDevice, 0)) {
-              opened = 1;
-            } else {
+              if (ioctl(brl->data->keyboardDevice, EVIOCGRAB, 1) != -1) {
+                opened = 1;
+              } else {
+                logSystemError("ioctl[EVIOCGRAB]");
+              }
+            }
+
+            if (!opened) {
               close(brl->data->keyboardDevice);
               brl->data->keyboardDevice = -1;
             }
