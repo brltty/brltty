@@ -17,22 +17,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+. "`dirname "${0}"`/prologue.sh"
+
 androidPlatform=android-14
 androidArchitecture=arm
 hostSystem=arm-linux-androideabi
-
-programName="${0##*/}"
-programMessage() {
-   echo >&2 "${programName}: ${1}"
-}
-
-semanticError() {
-   programMessage "${1}"
-   exit 3
-}
-
-buildRoot=`pwd`
-sourceRoot=`dirname "${0}"`
+buildRoot="${initialDirectory}"
+sourceRoot="${programDirectory}"
 
 ndkRoot="${buildRoot}/Android/NDK"
 [ -d "${ndkRoot}" ] || {
@@ -89,7 +80,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 "${sourceRoot}/configure" \
    --without-keyboard-package \
    --disable-api \
-   --with-braille-driver=-tt,-vr,al,at,bg,bm,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
+   --with-braille-driver=-bg,-tt,-vr,al,at,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
    --with-screen-driver=ad \
    --without-libbraille \
    --disable-speech-support \
