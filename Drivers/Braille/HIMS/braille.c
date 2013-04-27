@@ -362,6 +362,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&brailleSenseOperations
     },
 
+    { /* Braille Sense U2 (USB 2.0) */
+      .version = UsbSpecificationVersion_2_0,
+      .vendor=0X045E, .product=0X930A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1,
+      .data=&brailleSenseOperations
+    },
+
     { /* Sync Braille */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
