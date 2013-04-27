@@ -53,6 +53,7 @@ always Y 6-13456
 # Lautgruppenkürzungen
 midendword ach 56
 begmidword al 25
+begmidword : 6-25
 begmidword an 235
 begmidword ar 356
 begmidword be 23
@@ -83,6 +84,7 @@ prfword gehender 1245-2356-14-145-12456
 prfword gehendes 1245-2356-14-145-123456
 before konsonant always geh 1245-2356
 before konsonant always bel 12-13456 Übelkeit shouldn't use the be-contraction
+word bel 12-13456
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
@@ -95,6 +97,7 @@ midendword ig 45
 always in 35
 midendword lich 456
 begword see =
+begword neusee 1345-126-234-15-15
 before konsonant always seen 234-15-14
 word seele 234-15-13456-15
 sufword seelen 234-15-13456-14
@@ -273,6 +276,7 @@ sufword ungerecht 256-12346-1235-2345
 sufword zuge 2-1356-12346
 endword ges 1245-123456 shouldn't use the ge-contraction
 midendword ien 24-14 shouldn't use the ie-contraction
+always erschien 12456-156-346-1345
 prfword industrien 35-145-136-23456-1235-15-14
 before n always industrie 35-145-136-23456-1235-346 industrienation shouldn't use the en-contraction
 begmidword anomal 235-135-134-25 shouldn't use the mal-contraction
@@ -292,6 +296,8 @@ word enter 14-2345-12456 shouldn't use the ent-contraction
 begword ex 1346
 begword pro 12345
 begword ver 36
+word verb 1236-12456-12
+word vers 1236-12456-234
 
 begword auspiz 16-234-1234-24-1356 shouldn't use the aus-contraction
 word ente 14-236 shouldn't use the ent-contraction
@@ -321,9 +327,11 @@ before cst midword ungs 136-234 Bindungscharakter, Regierungschef
 midendword wärts 2456
 
 midendword ation 5-1345
+always industrienation 35-145-136-23456-1235-346-1345-5-1345
 before s midword ations 5-1345-234
 midendword ativ 5-1236
 after st always ion 245
+always religion 1235-13456-45-245
 after st before s always ions 245-234
 endword ismus 5-24
 midendword istisch 5-156
@@ -531,6 +539,7 @@ sufword mitspiel 2345-2-346
 sufword mitunter 2345-2-256
 sufword mitzu 2345-2-1356
 word nicht 1345
+word n 6-1345
 always nicht 2-1345
 sufword nichtauf 1345-2-16
 sufword nichtzu 1345-2-1356
@@ -560,6 +569,7 @@ word		soda		=
 always		soffizier	234-135-124-124-24-1356-346-1235
 always		soft		=
 always		soldat		=
+endword		solo		=
 always		sommer		234-135-1346-12456
 before konsonant always	son =
 always		sonogra		=
@@ -599,6 +609,9 @@ always wund 2456-256-145 shouldn't use the und-contraction
 
 word unter 256
 always unter 2-256
+sufword kunter 13-256-2345-12456 shouldn't use the unter-contraction
+sufword kunterbunter 13-256-2345-12456-12-256-2345-12456
+sufword munter 134-256-2345-12456 shouldn't use the unter-contraction
 sufword untereinander 256-2-1246
 word voll 12345
 always voll 2-12345
@@ -647,8 +660,19 @@ endword zuges 1356-136-1245-123456
 # Einformige Kürzungen, alleinstehend oder am Wortanfang
 sufword ihr 24
 sufword sein 246
-sufword war 356
-sufword wär 5-356
+word war 356
+word waren 356-14
+word warst 356-23456
+word wart 356-2345
+word war's 356-6-234
+word wär 5-356
+word wäre 5-356-15
+word wären 5-356-14
+word wärest 5-356-15-23456
+word wäret 5-356-15-2345
+word wärst 5-356-23456
+word wärt 5-356-2345
+word wär's 5-356-6-234
 
 # Einformige Kürzungen, alleinstehend, mit Endungen oder in Wortverbindungen
 always hatt 125
@@ -827,6 +851,7 @@ always gelegen 1245-1245
 contraction gg
 begword gelt 1245-13456-2345 gelten shouldn't use the ge-contraction
 prfword gene 1245-14-15
+prfword genem 1245-14-12356
 prfword genen 1245-14-14
 prfword gener 1245-14-12456
 prfword genes 1245-14-123456
@@ -849,7 +874,7 @@ always größ 5-1245-2346
 always grund 1245-145
 contraction gd
 always gründ 5-1245-145
-
+always gründonners 1245-1235-1256-1345-145-135-1345-1345-12456-234 gründonnerstag shouldn't use the gründ-contraction
 always hab 2-125
 always haft 125-124
 contraction hf
@@ -921,6 +946,9 @@ always kürz 5-13-1356
 
 always lang 123-1245
 contraction lg
+before g sufword schlan 156-123-235 shouldn't use the lang-contraction
+sufword schlangen 156-123-235-1245-14
+before g always warteschlan 2456-356-236-156-123-235
 always läng 5-123-1245
 always laeng 5-123-1245
 always jahrelang 245-1235-15-123-1245 shouldn't use the el-contraction
@@ -1169,6 +1197,7 @@ word wirst 2456-23456
 always wirtschaft 2456-156
 always wiss 2456-2346
 contraction wß
+word swiss 234-2456-24-2346 shouldn't use the wiss-contraction
 always wohl 2456-123
 contraction wl
 always woll 2-135
@@ -1278,6 +1307,10 @@ always bssy 12-234-234-6-13456 shouldn't use the ss-contraction
 always bundes 12-256-145-123456 shouldn't use the und-contraction
 prfword chemikalie 1456-12356-24-13-25-24-15
 always donnerstag 145-135-1345-1345-12456-234-2345-1-1245 shouldn't use the st-contraction
+before g always samstag =
+endword stag = shouldn't use the st-contraction
+endword stage 234-2345-1-12346
+endword stages 234-2345-1-1245-123456
 sufword eheinstitut 15-125-15-35-23456-24-2345-136-2345
 begword eheleu 15-125-15-123-126
 before g begword eherin 15-125-15-1235-35 Ehering(e) shouldn't use the er-contraction
@@ -1412,6 +1445,7 @@ begmidword zentral 1356-14-2345-1235-25 zentrallager
 always schall 156-1-12345 schallen shouldn't use the allen-contraction
 always herzultra 125-12456-1356-136-123-2345-1235-1 shouldn't use the zu-contraction
 always mittagessen 134-24-2345-2345-1-1245-15-2346-14
+always snakeskin 234-1345-1-13-15-234-13-35
 
 # names
 word angela 235-1245-13456-1 shouldn't use the ge-contraction
