@@ -12,7 +12,7 @@ Before=sysinit.target
 
 Type=forking
 PIDFile=/run/brltty.pid
-ExecStart=/bin/brltty -E -P /run/brltty.pid
+ExecStart=/bin/brltty -P /run/brltty.pid
 
 TimeoutStartSec=5
 TimeoutStopSec=10
