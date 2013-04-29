@@ -1,17 +1,18 @@
 [Unit]
 
-Description=Screen Reader for Braille Users
+Description=Braille Device Support
 Documentation=man:brltty(1)
 Documentation=http://mielke.cc/brltty/
 
-DefaultDependencies=yes
+DefaultDependencies=no
+Before=sysinit.target
 
 
 [Service]
 
 Type=forking
-PIDFile=/var/run/brltty.pid
-ExecStart=/bin/brltty -E -P /var/run/brltty.pid
+PIDFile=/run/brltty.pid
+ExecStart=/bin/brltty -E -P /run/brltty.pid
 
 TimeoutStartSec=5
 TimeoutStopSec=10
@@ -24,6 +25,6 @@ OOMScoreAdjust=-900
 
 
 [Install]
-WantedBy=basic.target
+WantedBy=sysinit.target
 
 
