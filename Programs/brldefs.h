@@ -328,6 +328,11 @@ typedef enum {
   BRL_SENSITIVITY_MAXIMUM
 } BrailleSensitivity;
 
+typedef enum {
+  BRL_ORIENTATION_NORMAL,
+  BRL_ORIENTATION_ROTATED
+} BrailleOrientation;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

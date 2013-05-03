@@ -55,6 +55,7 @@ struct BrailleDisplayStruct {
 
   int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
   int (*setSensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
+  int (*setOrientation) (BrailleDisplay *brl, BrailleOrientation setting);
 };
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
@@ -127,6 +128,7 @@ extern int probeBrailleDisplay (
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
+extern int setBrailleOrientation (BrailleDisplay *brl, BrailleOrientation setting);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure

@@ -134,6 +134,16 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
+testBrailleOrientation (void) {
+  return brl.setOrientation != NULL;
+}
+
+static int
+changedBrailleOrientation (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBrailleOrientation(&brl, setting);
+}
+
+static int
 testTunes (void) {
   return prefs.alertTunes;
 }
@@ -631,29 +641,29 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(controlsSubmenu, rootMenu, strtext("Input Options"));
+    SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
       NAME(strtext("Autorepeat"));
-      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeat, &itemName));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeat, &itemName));
       CHANGED(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Panning"));
-      ITEM(newBooleanMenuItem(controlsSubmenu, &prefs.autorepeatPanning, &itemName));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
       TEST(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Delay"));
-      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatDelay, &itemName));
+      ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatDelay, &itemName));
       TEST(Autorepeat);
     }
 
     {
       NAME(strtext("Autorepeat Interval"));
-      ITEM(newTimeMenuItem(controlsSubmenu, &prefs.autorepeatInterval, &itemName));
+      ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatInterval, &itemName));
       TEST(Autorepeat);
     }
 
@@ -667,9 +677,21 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Braille Sensitivity"));
-      ITEM(newEnumeratedMenuItem(controlsSubmenu, &prefs.brailleSensitivity, &itemName, strings));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleSensitivity, &itemName, strings));
       TEST(BrailleSensitivity);
       CHANGED(BrailleSensitivity);
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Normal")},
+        {.label=strtext("Rotated")}
+      };
+
+      NAME(strtext("Braille Orientation"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleOrientation, &itemName, strings));
+      TEST(BrailleOrientation);
+      CHANGED(BrailleOrientation);
     }
   }
 

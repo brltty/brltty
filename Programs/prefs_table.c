@@ -58,6 +58,10 @@ PREFERENCE_STRING_TABLE(brailleSensitivity,
   "minimum", "low", "medium", "high", "maximum"
 )
 
+PREFERENCE_STRING_TABLE(brailleOrientation,
+  "normal", "rotated"
+)
+
 PREFERENCE_STRING_TABLE(tuneDevice,
   "beeper", "pcm", "midi", "fm"
 )
@@ -306,6 +310,12 @@ const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
     .settingNames = &preferenceStringTable_brailleSensitivity,
     .setting = &prefs.brailleSensitivity
+  },
+
+  { .name = "braille-orientation",
+    .defaultValue = DEFAULT_BRAILLE_ORIENTATION,
+    .settingNames = &preferenceStringTable_brailleOrientation,
+    .setting = &prefs.brailleOrientation
   },
 
   { .name = "alert-tunes",
