@@ -41,6 +41,25 @@ the Active Braille, execute the following command as root:
 Note that you will need to replace the sample Bluetooth device address in the 
 example above with that of your Active Braille.
 
+Basic Braille:
+--------------
+
+Starting with the Active Braille, Handy Tech has introduced a resistor 
+which limits the amount of power drawn via USB. This eliminates 
+excessive draining of the host's battery. This artificial reduction in 
+power consumtion has the side effect that the dots do not lower as 
+quickly. This leads to a kind of blurring when you scroll rapidly 
+through a screen. If you are a user who does a lot of rapid scrolling, 
+you will likely notice this effect. The Basic Braille allows this 
+behaviour to be configured. If you can afford to draw a little more 
+power via USB and would like to get rid of the blurring, here is how 
+to configure it:
+
+  Press all six display keys at once and hold for at least one second.
+  You will see "Config mode" on the display.
+  Now press cursor routing key 7 to toggle "HIGH USB POWER".
+  Pressing display key 6 will leave Config mode.
+
 Braille Star:
 -------------
 
