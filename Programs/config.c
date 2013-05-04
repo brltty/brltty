@@ -768,6 +768,7 @@ applyBraillePreferences (void) {
   reconfigureWindow();
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setBrailleSensitivity(&brl, prefs.brailleSensitivity);
+  setBrailleOrientation(&brl, prefs.brailleOrientation);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
