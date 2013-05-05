@@ -253,6 +253,10 @@ typedef int (SensitivitySetter) (BrailleDisplay *brl, BrailleSensitivity setting
 static SensitivitySetter setSensitivity_Evolution;
 static SensitivitySetter setSensitivity_ActiveBraille;
 
+typedef int (OrientationSetter) (BrailleDisplay *brl, BrailleOrientation setting);
+static BrailleOrientation orientation = BRL_ORIENTATION_NORMAL;
+static OrientationSetter setOrientation;
+
 typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
@@ -261,6 +265,7 @@ typedef struct {
   CellWriter *writeCells;
   FirmnessSetter *setFirmness;
   SensitivitySetter *setSensitivity;
+  OrientationSetter *setOrientation;
 
   const unsigned char *sessionEndAddress;
 
@@ -391,16 +396,15 @@ static const ModelEntry modelTable[] = {
     .hasATC = 1
   }
   ,
-#define HT_BASIC_BRAILLE(cells) \
+#define HT_BASIC_BRAILLE(cells)                     \
   { .identifier = HT_MODEL_BasicBraille##cells,     \
-    .name = "Basic Braille " STRINGIFY(cells),     \
-    .textCells = cells,                            \
-    .statusCells = 0,                              \
+    .name = "Basic Braille " STRINGIFY(cells),      \
+    .textCells = cells,                             \
+    .statusCells = 0,                               \
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),\
     .interpretByte = interpretByte_key,             \
     .writeCells = writeCells_Evolution,             \
-    .setFirmness = setFirmness,               \
-    .setSensitivity = setSensitivity_ActiveBraille \
+    .setOrientation = setOrientation                \
   }
   HT_BASIC_BRAILLE(16),
   HT_BASIC_BRAILLE(20),
@@ -1195,6 +1199,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   brl->setFirmness = model->setFirmness;
   brl->setSensitivity = model->setSensitivity;
+  brl->setOrientation = model->setOrientation;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
@@ -1249,6 +1254,11 @@ setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
   const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }
+
+static const DotsTable dotsTable_ISO11548_1_rotated = {
+  BRL_DOT8, BRL_DOT6, BRL_DOT5, BRL_DOT7,
+  BRL_DOT3, BRL_DOT2, BRL_DOT4, BRL_DOT1
+};
 
 typedef int (DateTimeProcessor) (BrailleDisplay *brl, const HT_DateTime *dateTime);
 static DateTimeProcessor *dateTimeProcessor = NULL;
@@ -1455,10 +1465,32 @@ updateCells (BrailleDisplay *brl) {
 }
 
 static int
+setOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
+  if (setting != orientation) {
+    switch ((orientation = setting)) {
+      case BRL_ORIENTATION_NORMAL:
+        makeOutputTable(dotsTable_ISO11548_1);
+        break;
+      case BRL_ORIENTATION_ROTATED:
+        makeOutputTable(dotsTable_ISO11548_1_rotated);
+        break;
+    }
+    updateRequired = 1;
+  }
+  return updateCells(brl);
+}
+
+static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   const size_t cellCount = model->textCells;
   if (cellsHaveChanged(prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
-    translateOutputCells(rawData, prevData, cellCount);
+    if (orientation == BRL_ORIENTATION_ROTATED) {
+      int i;
+      for (i = 0; i < cellCount; ++i)
+        rawData[i] = translateOutputCell(prevData[cellCount - i - 1]);
+    } else {
+      translateOutputCells(rawData, prevData, cellCount);
+    }
     updateRequired = 1;
   }
   updateCells(brl);
@@ -1478,11 +1510,13 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 static int
 interpretByte_key (unsigned char byte) {
   int release = (byte & HT_KEY_RELEASE) != 0;
-  if (release) byte &= ~HT_KEY_RELEASE;
+  if (release) byte ^= HT_KEY_RELEASE;
 
   if ((byte >= HT_KEY_ROUTING) &&
       (byte < (HT_KEY_ROUTING + model->textCells))) {
-    return enqueueKeyEvent(HT_SET_RoutingKeys, byte-HT_KEY_ROUTING, !release);
+    unsigned char key = byte - HT_KEY_ROUTING;
+    if (orientation == BRL_ORIENTATION_ROTATED) key = model->textCells - key - 1;
+    return enqueueKeyEvent(HT_SET_RoutingKeys, key, !release);
   }
 
   if ((byte >= HT_KEY_STATUS) &&
