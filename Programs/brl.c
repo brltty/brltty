@@ -37,6 +37,7 @@
 #include "brl.auto.h"
 #include "cmd.h"
 #include "queue.h"
+#include "prefs.h"
 #include "brltty.h"
 
 #define BRLSYMBOL noBraille
@@ -854,6 +855,38 @@ translateInputCells (unsigned char *target, const unsigned char *source, size_t 
 unsigned char
 translateInputCell (unsigned char cell) {
   return translateCell(inputTable, cell);
+}
+
+void
+applyBrailleOrientation (unsigned char *cells, size_t count) {
+  switch (prefs.brailleOrientation) {
+    case BRL_ORIENTATION_ROTATED: {
+      static TranslationTable rotateTable = {[1] = 0};
+
+      const unsigned char *source = cells;
+      const unsigned char *end = source + count;
+
+      unsigned char buffer[count];
+      unsigned char *target = &buffer[count];
+
+      if (!rotateTable[1]) {
+        static const DotsTable dotsTable = {
+          BRL_DOT8, BRL_DOT6, BRL_DOT5, BRL_DOT7,
+          BRL_DOT3, BRL_DOT2, BRL_DOT4, BRL_DOT1
+        };
+
+        makeTranslationTable(dotsTable, rotateTable);
+      }
+
+      while (source < end) *--target = rotateTable[*source++];
+      memcpy(cells, buffer, count);
+      break;
+    }
+
+    default:
+    case BRL_ORIENTATION_NORMAL:
+      break;
+  }
 }
 
 /* Functions which support vertical and horizontal status cells. */

@@ -194,6 +194,8 @@ extern void makeInputTable (void);
 extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
 extern unsigned char translateInputCell (unsigned char cell);
 
+extern void applyBrailleOrientation (unsigned char *cells, size_t count);
+
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);
 extern const unsigned char landscapeDigits[11];
