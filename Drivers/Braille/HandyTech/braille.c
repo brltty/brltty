@@ -254,7 +254,6 @@ static SensitivitySetter setSensitivity_Evolution;
 static SensitivitySetter setSensitivity_ActiveBraille;
 
 typedef int (OrientationSetter) (BrailleDisplay *brl, BrailleOrientation setting);
-static BrailleOrientation orientation = BRL_ORIENTATION_NORMAL;
 static OrientationSetter setOrientation;
 static KeyRotator rotateBasicBrailleKey;
 
@@ -1470,18 +1469,7 @@ updateCells (BrailleDisplay *brl) {
 
 static int
 setOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
-  if (setting != orientation) {
-    switch ((orientation = setting)) {
-      case BRL_ORIENTATION_NORMAL:
-        makeOutputTable(dotsTable_ISO11548_1);
-        break;
-      case BRL_ORIENTATION_ROTATED:
-        makeOutputTable(dotsTable_ISO11548_1_rotated);
-        break;
-    }
-    updateRequired = 1;
-  }
-  return updateCells(brl);
+  return 1;
 }
 
 static void
@@ -1508,14 +1496,9 @@ rotateBasicBrailleKey (BrailleDisplay *brl, unsigned char *set, unsigned char *k
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   const size_t cellCount = model->textCells;
+  applyBrailleOrientation(brl->buffer, cellCount);
   if (cellsHaveChanged(prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
-    if (orientation == BRL_ORIENTATION_ROTATED) {
-      int i;
-      for (i = 0; i < cellCount; ++i)
-        rawData[i] = translateOutputCell(prevData[cellCount - i - 1]);
-    } else {
-      translateOutputCells(rawData, prevData, cellCount);
-    }
+    translateOutputCells(rawData, prevData, cellCount);
     updateRequired = 1;
   }
   updateCells(brl);
