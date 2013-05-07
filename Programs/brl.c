@@ -126,6 +126,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
   brl->setOrientation = NULL;
+  brl->rotateKey = NULL;
 }
 
 unsigned int
@@ -561,6 +562,16 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       while (dequeueKeyEvent(&set, &key, &press)) {
         if (brl->keyTable) {
+          switch (prefs.brailleOrientation) {
+            case BRL_ORIENTATION_ROTATED:
+              if (brl->rotateKey) brl->rotateKey(brl, &set, &key);
+              break;
+
+            default:
+            case BRL_ORIENTATION_NORMAL:
+              break;
+          }
+
           processKeyEvent(brl->keyTable, context, set, key, press);
         }
       }
