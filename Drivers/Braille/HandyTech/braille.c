@@ -256,6 +256,7 @@ static SensitivitySetter setSensitivity_ActiveBraille;
 typedef int (OrientationSetter) (BrailleDisplay *brl, BrailleOrientation setting);
 static BrailleOrientation orientation = BRL_ORIENTATION_NORMAL;
 static OrientationSetter setOrientation;
+static KeyRotator rotateBasicBrailleKey;
 
 typedef struct {
   const char *name;
@@ -266,6 +267,7 @@ typedef struct {
   FirmnessSetter *setFirmness;
   SensitivitySetter *setSensitivity;
   OrientationSetter *setOrientation;
+  KeyRotator *rotateKey;
 
   const unsigned char *sessionEndAddress;
 
@@ -404,7 +406,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),\
     .interpretByte = interpretByte_key,             \
     .writeCells = writeCells_Evolution,             \
-    .setOrientation = setOrientation                \
+    .setOrientation = setOrientation,               \
+    .rotateKey = rotateBasicBrailleKey              \
   }
   HT_BASIC_BRAILLE(16),
   HT_BASIC_BRAILLE(20),
@@ -1200,6 +1203,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->setFirmness = model->setFirmness;
   brl->setSensitivity = model->setSensitivity;
   brl->setOrientation = model->setOrientation;
+  brl->rotateKey = model->rotateKey;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
@@ -1480,6 +1484,27 @@ setOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
   return updateCells(brl);
 }
 
+static void
+rotateBasicBrailleKey (BrailleDisplay *brl, unsigned char *set, unsigned char *key) {
+  switch (*set) {
+    case HT_SET_NavigationKeys:
+      switch (*key) {
+        case HT_KEY_B2: *key = HT_KEY_B5; break;
+        case HT_KEY_B3: *key = HT_KEY_B6; break;
+        case HT_KEY_B4: *key = HT_KEY_B7; break;
+        case HT_KEY_B5: *key = HT_KEY_B2; break;
+        case HT_KEY_B6: *key = HT_KEY_B3; break;
+        case HT_KEY_B7: *key = HT_KEY_B4; break;
+        default: logMessage(LOG_ERR, "unable to rotate key: %d", *key);
+      }
+      break;
+
+    case HT_SET_RoutingKeys:
+      *key = brl->textColumns - *key - 1;
+      break;
+  }
+}
+
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   const size_t cellCount = model->textCells;
@@ -1514,9 +1539,7 @@ interpretByte_key (unsigned char byte) {
 
   if ((byte >= HT_KEY_ROUTING) &&
       (byte < (HT_KEY_ROUTING + model->textCells))) {
-    unsigned char key = byte - HT_KEY_ROUTING;
-    if (orientation == BRL_ORIENTATION_ROTATED) key = model->textCells - key - 1;
-    return enqueueKeyEvent(HT_SET_RoutingKeys, key, !release);
+    return enqueueKeyEvent(HT_SET_RoutingKeys, byte - HT_KEY_ROUTING, !release);
   }
 
   if ((byte >= HT_KEY_STATUS) &&
