@@ -125,7 +125,6 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
-  brl->setOrientation = NULL;
   brl->rotateKey = NULL;
 }
 
@@ -996,11 +995,4 @@ setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
   if (!brl->setSensitivity) return 0;
   logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   return brl->setSensitivity(brl, setting);
-}
-
-int
-setBrailleOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
-  if (!brl->setOrientation) return 0;
-  logMessage(LOG_DEBUG, "setting braille orientation: %d", setting);
-  return brl->setOrientation(brl, setting);
 }

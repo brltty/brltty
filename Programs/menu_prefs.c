@@ -135,12 +135,7 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 testBrailleOrientation (void) {
-  return brl.setOrientation != NULL;
-}
-
-static int
-changedBrailleOrientation (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBrailleOrientation(&brl, setting);
+  return brl.rotateKey != NULL;
 }
 
 static int
@@ -691,7 +686,6 @@ makePreferencesMenu (void) {
       NAME(strtext("Braille Orientation"));
       ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleOrientation, &itemName, strings));
       TEST(BrailleOrientation);
-      CHANGED(BrailleOrientation);
     }
   }
 

@@ -251,8 +251,6 @@ static BrailleFirmnessSetter setFirmness;
 static BrailleSensitivitySetter setSensitivity_Evolution;
 static BrailleSensitivitySetter setSensitivity_ActiveBraille;
 
-static BrailleOrientationSetter setOrientation;
-
 static BrailleKeyRotator rotateKey_BasicBraille;
 
 typedef struct {
@@ -263,7 +261,6 @@ typedef struct {
   CellWriter *writeCells;
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
-  BrailleOrientationSetter *setOrientation;
   BrailleKeyRotator *rotateKey;
 
   const unsigned char *sessionEndAddress;
@@ -403,8 +400,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),\
     .interpretByte = interpretByte_key,             \
     .writeCells = writeCells_Evolution,             \
-    .setOrientation = setOrientation,               \
-    .rotateKey = rotateKey_BasicBraille              \
+    .rotateKey = rotateKey_BasicBraille             \
   }
   HT_BASIC_BRAILLE(16),
   HT_BASIC_BRAILLE(20),
@@ -1199,7 +1195,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   brl->setFirmness = model->setFirmness;
   brl->setSensitivity = model->setSensitivity;
-  brl->setOrientation = model->setOrientation;
   brl->rotateKey = model->rotateKey;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
@@ -1462,11 +1457,6 @@ updateCells (BrailleDisplay *brl) {
   }
 
   updateRequired = 0;
-  return 1;
-}
-
-static int
-setOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
   return 1;
 }
 

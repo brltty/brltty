@@ -35,7 +35,6 @@ typedef struct BrailleDataStruct BrailleData;
 typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
-typedef int BrailleOrientationSetter (BrailleDisplay *brl, BrailleOrientation setting);
 typedef void BrailleKeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);
 
 struct BrailleDisplayStruct {
@@ -59,7 +58,6 @@ struct BrailleDisplayStruct {
 
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
-  BrailleOrientationSetter *setOrientation;
   BrailleKeyRotator *rotateKey;
 };
 
@@ -133,7 +131,6 @@ extern int probeBrailleDisplay (
 
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
-extern int setBrailleOrientation (BrailleDisplay *brl, BrailleOrientation setting);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
