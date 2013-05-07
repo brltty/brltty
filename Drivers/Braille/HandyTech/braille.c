@@ -246,16 +246,14 @@ static CellWriter writeCells_statusAndText;
 static CellWriter writeCells_Bookworm;
 static CellWriter writeCells_Evolution;
 
-typedef int (FirmnessSetter) (BrailleDisplay *brl, BrailleFirmness setting);
-static FirmnessSetter setFirmness;
+static BrailleFirmnessSetter setFirmness;
 
-typedef int (SensitivitySetter) (BrailleDisplay *brl, BrailleSensitivity setting);
-static SensitivitySetter setSensitivity_Evolution;
-static SensitivitySetter setSensitivity_ActiveBraille;
+static BrailleSensitivitySetter setSensitivity_Evolution;
+static BrailleSensitivitySetter setSensitivity_ActiveBraille;
 
-typedef int (OrientationSetter) (BrailleDisplay *brl, BrailleOrientation setting);
-static OrientationSetter setOrientation;
-static KeyRotator rotateBasicBrailleKey;
+static BrailleOrientationSetter setOrientation;
+
+static BrailleKeyRotator rotateKey_BasicBraille;
 
 typedef struct {
   const char *name;
@@ -263,10 +261,10 @@ typedef struct {
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
-  FirmnessSetter *setFirmness;
-  SensitivitySetter *setSensitivity;
-  OrientationSetter *setOrientation;
-  KeyRotator *rotateKey;
+  BrailleFirmnessSetter *setFirmness;
+  BrailleSensitivitySetter *setSensitivity;
+  BrailleOrientationSetter *setOrientation;
+  BrailleKeyRotator *rotateKey;
 
   const unsigned char *sessionEndAddress;
 
@@ -406,7 +404,7 @@ static const ModelEntry modelTable[] = {
     .interpretByte = interpretByte_key,             \
     .writeCells = writeCells_Evolution,             \
     .setOrientation = setOrientation,               \
-    .rotateKey = rotateBasicBrailleKey              \
+    .rotateKey = rotateKey_BasicBraille              \
   }
   HT_BASIC_BRAILLE(16),
   HT_BASIC_BRAILLE(20),
@@ -1473,7 +1471,7 @@ setOrientation (BrailleDisplay *brl, BrailleOrientation setting) {
 }
 
 static void
-rotateBasicBrailleKey (BrailleDisplay *brl, unsigned char *set, unsigned char *key) {
+rotateKey_BasicBraille (BrailleDisplay *brl, unsigned char *set, unsigned char *key) {
   switch (*set) {
     case HT_SET_NavigationKeys:
       switch (*key) {
