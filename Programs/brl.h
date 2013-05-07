@@ -33,7 +33,10 @@ extern "C" {
 typedef struct BrailleDataStruct BrailleData;
 
 typedef struct BrailleDisplayStruct BrailleDisplay;
-typedef void KeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);
+typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
+typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
+typedef int BrailleOrientationSetter (BrailleDisplay *brl, BrailleOrientation setting);
+typedef void BrailleKeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);
 
 struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
@@ -54,10 +57,10 @@ struct BrailleDisplayStruct {
   unsigned highlightWindow:1;
   BrailleData *data;
 
-  int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
-  int (*setSensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
-  int (*setOrientation) (BrailleDisplay *brl, BrailleOrientation setting);
-  KeyRotator *rotateKey;
+  BrailleFirmnessSetter *setFirmness;
+  BrailleSensitivitySetter *setSensitivity;
+  BrailleOrientationSetter *setOrientation;
+  BrailleKeyRotator *rotateKey;
 };
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
