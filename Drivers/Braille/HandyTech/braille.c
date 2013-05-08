@@ -1251,11 +1251,6 @@ setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }
 
-static const DotsTable dotsTable_ISO11548_1_rotated = {
-  BRL_DOT8, BRL_DOT6, BRL_DOT5, BRL_DOT7,
-  BRL_DOT3, BRL_DOT2, BRL_DOT4, BRL_DOT1
-};
-
 typedef int (DateTimeProcessor) (BrailleDisplay *brl, const HT_DateTime *dateTime);
 static DateTimeProcessor *dateTimeProcessor = NULL;
 
