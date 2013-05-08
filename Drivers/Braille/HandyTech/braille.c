@@ -251,8 +251,6 @@ static BrailleFirmnessSetter setFirmness;
 static BrailleSensitivitySetter setSensitivity_Evolution;
 static BrailleSensitivitySetter setSensitivity_ActiveBraille;
 
-static BrailleKeyRotator rotateKey_BasicBraille;
-
 typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
@@ -261,7 +259,6 @@ typedef struct {
   CellWriter *writeCells;
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
-  BrailleKeyRotator *rotateKey;
 
   const unsigned char *sessionEndAddress;
 
@@ -399,8 +396,7 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,                               \
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),\
     .interpretByte = interpretByte_key,             \
-    .writeCells = writeCells_Evolution,             \
-    .rotateKey = rotateKey_BasicBraille             \
+    .writeCells = writeCells_Evolution              \
   }
   HT_BASIC_BRAILLE(16),
   HT_BASIC_BRAILLE(20),
@@ -1195,7 +1191,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   brl->setFirmness = model->setFirmness;
   brl->setSensitivity = model->setSensitivity;
-  brl->rotateKey = model->rotateKey;
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
@@ -1455,31 +1450,9 @@ updateCells (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
-rotateKey_BasicBraille (BrailleDisplay *brl, unsigned char *set, unsigned char *key) {
-  switch (*set) {
-    case HT_SET_NavigationKeys:
-      switch (*key) {
-        case HT_KEY_B2: *key = HT_KEY_B5; break;
-        case HT_KEY_B3: *key = HT_KEY_B6; break;
-        case HT_KEY_B4: *key = HT_KEY_B7; break;
-        case HT_KEY_B5: *key = HT_KEY_B2; break;
-        case HT_KEY_B6: *key = HT_KEY_B3; break;
-        case HT_KEY_B7: *key = HT_KEY_B4; break;
-        default: logMessage(LOG_ERR, "unable to rotate key: %d", *key);
-      }
-      break;
-
-    case HT_SET_RoutingKeys:
-      *key = brl->textColumns - *key - 1;
-      break;
-  }
-}
-
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   const size_t cellCount = model->textCells;
-  applyBrailleOrientation(brl->buffer, cellCount);
   if (cellsHaveChanged(prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
     translateOutputCells(rawData, prevData, cellCount);
     updateRequired = 1;
