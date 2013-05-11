@@ -63,6 +63,8 @@ BEGIN_KEY_NAME_TABLE(navigation)
   BG_KEY_ENTRY(Dot7),
   BG_KEY_ENTRY(Dot8),
   BG_KEY_ENTRY(Space),
+
+  KEY_SET_ENTRY(BG_SET_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -183,7 +185,7 @@ openKeyboardDevice (BrailleDisplay *brl) {
     if (deviceDescriptor != -1) {
       if (setBlockingIo(deviceDescriptor, 0)) {
         if (ioctl(deviceDescriptor, EVIOCGRAB, 1) != -1) {
-          logMessage(LOG_NOTICE, "Keyboard Device Opened: %s: %s: fd=%d",
+          logMessage(LOG_DEBUG, "Keyboard Device Opened: %s: %s: fd=%d",
                      deviceName, devicePath, deviceDescriptor);
           free(devicePath);
 
@@ -284,9 +286,17 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     if (event.type != EV_KEY) continue;
 
     {
-      unsigned char set = (event.code >> 8) & 0XFF;
-      unsigned char key = (event.code >> 0) & 0XFF;
+      unsigned char set;
+      unsigned char key;
       int press;
+
+      if ((event.code >= BG_KEY_ROUTE) && (event.code < (BG_KEY_ROUTE + brl->textColumns))) {
+        set = BG_SET_RoutingKeys;
+        key = event.code - BG_KEY_ROUTE;
+      } else {
+        set = BG_SET_VALUE(event.code);
+        key = BG_KEY_VALUE(event.code);
+      }
 
       switch (event.value) {
         case 0:
@@ -301,7 +311,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           continue;
       }
 
-      logMessage(LOG_NOTICE, "b2g key: set=%d key=%d prs=%d", set, key, press);
       enqueueKeyEvent(set, key, press);
     }
   }

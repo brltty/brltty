@@ -39,6 +39,10 @@ typedef enum {
   BG_KEY_Dot6     = 0X1F7,
   BG_KEY_Dot8     = 0X1F8,
   BG_KEY_Space    = 0X1F9,
-} BG_KeyCodes;
+} BG_KeyCode;
+
+typedef enum {
+  BG_SET_RoutingKeys = 3
+} BG_KeySet;
 
 #endif /* BRLTTY_INCLUDED_BG_BRLDEFS */ 
