@@ -38,8 +38,7 @@
 #define BRAILLE_DEVICE_PATH "/dev/braille0"
 #define BRAILLE_CELL_COUNT MAX_BRAILLE_LINE_SIZE
 
-#define KEYBOARD_DIRECTORY_PATH "/sys/devices/platform/cp430_keypad/input"
-#define KEYBOARD_FILE_PREFIX "input"
+#define KEYBOARD_DEVICE_NAME "cp430_keypad"
 
 #define BG_SET_VALUE(value) (((value) >> 8) & 0XFF)
 #define BG_KEY_VALUE(value) (((value) >> 0) & 0XFF)
@@ -128,54 +127,83 @@ writeBrailleCells (BrailleDisplay *brl, const unsigned char *cells, size_t count
   return 0;
 }
 
-static int
-openKeyboardDevice (BrailleDisplay *brl) {
-  int opened = 0;
+static char *
+findKeyboardDevice (const char *deviceName) {
+  char *devicePath = NULL;
 
-  const char *directoryPath = KEYBOARD_DIRECTORY_PATH;
-  DIR *directory;
+  const char *directoryComponents[] = {
+    "/sys/devices/platform/",
+    deviceName,
+    "/input"
+  };
+  char *directoryPath = joinStrings(directoryComponents, ARRAY_COUNT(directoryComponents));
 
-  if ((directory = opendir(directoryPath))) {
-    const char *filePrefix = KEYBOARD_FILE_PREFIX;
-    size_t length = strlen(filePrefix);
-    struct dirent *entry;
+  if (directoryPath) {
+    DIR *directory = opendir(directoryPath);
 
-    while ((entry = readdir(directory))) {
-      if (strncmp(entry->d_name, filePrefix, length) == 0) {
-        int eventNumber;
+    if (directory) {
+      const char *filePrefix = "input";
+      size_t filePrefixLength = strlen(filePrefix);
+      struct dirent *entry;
 
-        if (isInteger(&eventNumber, &entry->d_name[length])) {
-          char path[0X80];
-          snprintf(path, sizeof(path), "/dev/input/event%d", eventNumber);
+      while ((entry = readdir(directory))) {
+        if (strncmp(entry->d_name, filePrefix, filePrefixLength) == 0) {
+          int eventNumber;
 
-          if ((brl->data->keyboardDevice = open(path, O_RDONLY)) != -1) {
-            if (setBlockingIo(brl->data->keyboardDevice, 0)) {
-              if (ioctl(brl->data->keyboardDevice, EVIOCGRAB, 1) != -1) {
-                opened = 1;
-              } else {
-                logSystemError("ioctl[EVIOCGRAB]");
-              }
-            }
+          if (isInteger(&eventNumber, &entry->d_name[filePrefixLength])) {
+            char path[0X80];
 
-            if (!opened) {
-              close(brl->data->keyboardDevice);
-              brl->data->keyboardDevice = -1;
-            }
-          } else {
-            logMessage(LOG_DEBUG, "keyboard device open error: %s: %s", path, strerror(errno));
+            snprintf(path, sizeof(path), "/dev/input/event%d", eventNumber);
+            if (!(devicePath = strdup(path))) logMallocError();
+            break;
           }
-
-          break;
         }
       }
+
+      closedir(directory);
+    } else {
+      logMessage(LOG_DEBUG, "keyboard directory open error: %s: %s",
+                 directoryPath, strerror(errno));
     }
 
-    closedir(directory);
-  } else {
-    logMessage(LOG_DEBUG, "keyboard directory open error: %s: %s", directoryPath, strerror(errno));
+    free(directoryPath);
   }
 
-  return opened;
+  return devicePath;
+}
+
+static int
+openKeyboardDevice (BrailleDisplay *brl) {
+  static const char deviceName[] = KEYBOARD_DEVICE_NAME;
+  char *devicePath = findKeyboardDevice(deviceName);
+
+  if (devicePath) {
+    int deviceDescriptor = open(devicePath, O_RDONLY);
+
+    if (deviceDescriptor != -1) {
+      if (setBlockingIo(deviceDescriptor, 0)) {
+        if (ioctl(deviceDescriptor, EVIOCGRAB, 1) != -1) {
+          logMessage(LOG_NOTICE, "Keyboard Device Opened: %s: %s: fd=%d",
+                     deviceName, devicePath, deviceDescriptor);
+          free(devicePath);
+
+          brl->data->keyboardDevice = deviceDescriptor;
+          return 1;
+        } else {
+          logSystemError("ioctl[EVIOCGRAB]");
+        }
+      }
+
+      close(deviceDescriptor);
+    } else {
+      logMessage(LOG_DEBUG, "keyboard device open error: %s: %s",
+                 devicePath, strerror(errno));
+    }
+
+    free(devicePath);
+  }
+
+  return 0;
 }
 
 static void
