@@ -18,14 +18,37 @@
 
 title B2G
 
-bind Left LNBEG
-bind Right LNEND
+bind Backward FWINLTSKIP
+bind Forward FWINRTSKIP
+
+bind Left FWINLT
+bind Right FWINRT
 bind Up LNUP
 bind Down LNDN
 bind Enter HOME
 
-bind Backward FWINLT
-bind Forward FWINRT
+bind Backward+Left LNBEG
+bind Backward+Right LNEND
+bind Backward+Up TOP
+bind Backward+Down BOT
+bind Backward+Enter BACK
+
+bind Forward+Left CHRLT
+bind Forward+Right CHRRT
+bind Forward+Up PRDIFLN
+bind Forward+Down NXDIFLN
+bind Forward+Enter CSRJMP_VERT
+
+bind RoutingKey ROUTE
+bind Backward+RoutingKey SETLEFT
+bind Forward+RoutingKey DESCCHAR
+
+bind Backward+Forward PASTE
+bind RoutingKey+!RoutingKey CLIP_COPY
+bind Left+RoutingKey CLIP_NEW
+bind Up+RoutingKey CLIP_ADD
+bind Right+RoutingKey COPY_LINE
+bind Down+RoutingKey COPY_RECT
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -39,3 +62,4 @@ map Space SPACE
 
 assign chord Space+
 include brl-chords.kti
+bind Space+RoutingKey KEY_FUNCTION
