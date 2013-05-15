@@ -38,4 +38,5 @@ bind Space+Dot1+Dot2+Dot6 KEY_PAGE_UP
 bind Space+Dot3+Dot4+Dot5 KEY_PAGE_DOWN
 bind Space+Dot1+Dot3 KEY_HOME
 bind Space+Dot4+Dot6 KEY_END
+bind Space+Dot4+Dot5 KEY_TAB
 
