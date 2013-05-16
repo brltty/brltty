@@ -60,6 +60,12 @@ to configure it:
   Now press cursor routing key 7 to toggle "HIGH USB POWER".
   Pressing display key 6 will leave Config mode.
 
+The symmetry of the Basic Braille makes it easy to use when rotated 
+180 degrees such that the routing keys are below (rather than above) 
+the braille cells. If you would prefer to use your Basic Braille this 
+way, simply press both the first and last routing keys simultaneously 
+while in Config mode.
+
 Braille Star:
 -------------
 
