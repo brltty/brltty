@@ -86,29 +86,26 @@ public class CoreThread extends Thread {
   private final void extractAssets (AssetManager assets, String type) {
     File directory = getDataDirectory(type);
 
-    if (directory.canWrite()) {
-      try {
-        String[] files = assets.list(type);
+    if (!directory.canWrite()) {
+      directory.setWritable(true, true);
+    }
 
-        for (String file : files) {
-          File path = new File(directory, file);
+    for (File file : directory.listFiles()) {
+      file.delete();
+    }
 
-          if (path.exists()) {
-            if (!path.canWrite()) {
-              continue;
-            }
+    try {
+      String[] files = assets.list(type);
 
-            path.delete();
-          }
-
-          extractAsset(assets, type, path);
-          path.setReadOnly();
-        }
-
-        directory.setReadOnly();
-      } catch (IOException exception) {
-        Log.e(LOG_TAG, "cannot list assets directory: " + type, exception);
+      for (String file : files) {
+        File path = new File(directory, file);
+        extractAsset(assets, type, path);
+        path.setReadOnly();
       }
+
+      directory.setReadOnly();
+    } catch (IOException exception) {
+      Log.e(LOG_TAG, "cannot list assets directory: " + type, exception);
     }
   }
 
@@ -206,7 +203,24 @@ public class CoreThread extends Thread {
 
   @Override
   public void run () {
-    extractAssets();
+    File packageFile = new File(coreContext.getPackageCodePath());
+    long packageSize = packageFile.length();
+    long packageTime = packageFile.lastModified();
+
+    SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
+    String sizeKey = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
+    String timeKey = getStringResource(R.string.PREF_KEY_PACKAGE_TIME);
+
+    if ((packageSize != prefs.getLong(sizeKey, -1)) ||
+        (packageTime != prefs.getLong(timeKey, -1))) {
+      extractAssets();
+
+      SharedPreferences.Editor editor = prefs.edit();
+      editor.putLong(sizeKey, packageSize);
+      editor.putLong(timeKey, packageTime);
+      editor.commit();
+    }
+
     UsbHelper.begin();
     CoreWrapper.run(makeArguments());
     UsbHelper.end();

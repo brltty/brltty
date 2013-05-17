@@ -4,6 +4,9 @@
   <string-array name="EMPTY_STRING_ARRAY">
   </string-array>
 
+  <string name="PREF_KEY_PACKAGE_SIZE">package-size</string>
+  <string name="PREF_KEY_PACKAGE_TIME">package-time</string>
+
   <string name="PREF_KEY_LOG_LEVEL">log-level</string>
   <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
 
