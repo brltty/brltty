@@ -83,7 +83,7 @@ public class CoreThread extends Thread {
     }
   }
 
-  private final void extractAssets (AssetManager assets, String type) {
+  private final void extractAssets (AssetManager assets, String type, boolean executable) {
     File directory = getDataDirectory(type);
 
     if (!directory.canWrite()) {
@@ -101,6 +101,10 @@ public class CoreThread extends Thread {
         File path = new File(directory, file);
         extractAsset(assets, type, path);
         path.setReadOnly();
+
+        if (executable) {
+          path.setExecutable(true, false);
+        }
       }
 
       directory.setReadOnly();
@@ -111,8 +115,8 @@ public class CoreThread extends Thread {
 
   private final void extractAssets () {
     AssetManager assets = coreContext.getAssets();
-    extractAssets(assets, DATA_TYPE_TABLES);
-    extractAssets(assets, DATA_TYPE_DRIVERS);
+    extractAssets(assets, DATA_TYPE_TABLES, false);
+    extractAssets(assets, DATA_TYPE_DRIVERS, true);
   }
 
   CoreThread () {
