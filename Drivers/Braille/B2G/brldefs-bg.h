@@ -28,8 +28,6 @@ typedef enum {
   BG_KEY_Forward  = 0X197,
   BG_KEY_Backward = 0X19C,
 
-  BG_KEY_ROUTE    = 0X1D0,
-
   BG_KEY_Dot7     = 0X1F1,
   BG_KEY_Dot3     = 0X1F2,
   BG_KEY_Dot2     = 0X1F3,
@@ -39,6 +37,8 @@ typedef enum {
   BG_KEY_Dot6     = 0X1F7,
   BG_KEY_Dot8     = 0X1F8,
   BG_KEY_Space    = 0X1F9,
+
+  BG_KEY_ROUTE    = 0X2D0,
 } BG_KeyCode;
 
 typedef enum {

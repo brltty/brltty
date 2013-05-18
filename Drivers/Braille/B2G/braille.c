@@ -311,6 +311,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           continue;
       }
 
+      if ((event.code >= BG_KEY_ROUTE) && (event.code < (BG_KEY_ROUTE + brl->textColumns))) {
+        set = 2;
+        key = event.code - BG_KEY_ROUTE;
+      } else {
+        set = BG_SET_VALUE(event.code);
+        key = BG_KEY_VALUE(event.code);
+      }
+
       enqueueKeyEvent(set, key, press);
     }
   }
