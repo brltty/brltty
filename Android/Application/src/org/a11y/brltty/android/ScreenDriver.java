@@ -21,6 +21,7 @@ package org.a11y.brltty.android;
 import android.os.Build;
 import android.os.SystemClock;
 
+import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -275,11 +276,15 @@ public class ScreenDriver {
     return currentScreen.performAction(column, row);
   }
 
+  private static boolean performGlobalAction (int action) {
+    return BrailleService.getBrailleService().performGlobalAction(action);
+  }
+
   public static String getInputServiceClassName () {
     return InputService.class.getName();
   }
 
-  public static boolean inputServiceEnabled () {
+  public static boolean isInputServiceEnabled () {
     String inputServiceClass = getInputServiceClassName();
 
     for (InputMethodInfo info : ApplicationUtilities.getInputMethodManager().getEnabledInputMethodList()) {
@@ -424,22 +429,76 @@ public class ScreenDriver {
     return false;
   }
 
+  private static final int[] functionKeyMap = new int[] {
+    KeyEvent.KEYCODE_HOME,
+    KeyEvent.KEYCODE_BACK,
+    KeyEvent.KEYCODE_APP_SWITCH,
+    KeyEvent.KEYCODE_SETTINGS,
+    KeyEvent.KEYCODE_NOTIFICATION,
+
+    KeyEvent.KEYCODE_UNKNOWN,
+    KeyEvent.KEYCODE_UNKNOWN,
+    KeyEvent.KEYCODE_UNKNOWN,
+    KeyEvent.KEYCODE_UNKNOWN,
+    KeyEvent.KEYCODE_UNKNOWN,
+
+    KeyEvent.KEYCODE_F1,
+    KeyEvent.KEYCODE_F2,
+    KeyEvent.KEYCODE_F3,
+    KeyEvent.KEYCODE_F4,
+    KeyEvent.KEYCODE_F5,
+    KeyEvent.KEYCODE_F6,
+    KeyEvent.KEYCODE_F7,
+    KeyEvent.KEYCODE_F8,
+    KeyEvent.KEYCODE_F9,
+    KeyEvent.KEYCODE_F10,
+    KeyEvent.KEYCODE_F11,
+    KeyEvent.KEYCODE_F12
+  };
+
   public static boolean inputKeyFunction (int key) {
-    switch (key) {
-      case  1: return inputKey(KeyEvent.KEYCODE_F1);
-      case  2: return inputKey(KeyEvent.KEYCODE_F2);
-      case  3: return inputKey(KeyEvent.KEYCODE_F3);
-      case  4: return inputKey(KeyEvent.KEYCODE_F4);
-      case  5: return inputKey(KeyEvent.KEYCODE_F5);
-      case  6: return inputKey(KeyEvent.KEYCODE_F6);
-      case  7: return inputKey(KeyEvent.KEYCODE_F7);
-      case  8: return inputKey(KeyEvent.KEYCODE_F8);
-      case  9: return inputKey(KeyEvent.KEYCODE_F9);
-      case 10: return inputKey(KeyEvent.KEYCODE_F10);
-      case 11: return inputKey(KeyEvent.KEYCODE_F11);
-      case 12: return inputKey(KeyEvent.KEYCODE_F12);
-      default: return false;
+    if (key < 0) return false;
+    if (key >= functionKeyMap.length) return false;
+
+    int code = functionKeyMap[key];
+    if (code == KeyEvent.KEYCODE_UNKNOWN) return false;
+
+    switch (code) {
+      case KeyEvent.KEYCODE_HOME:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
+        }
+        break;
+
+      case KeyEvent.KEYCODE_BACK:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+        }
+        break;
+
+      case KeyEvent.KEYCODE_APP_SWITCH:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+        }
+        break;
+
+      case KeyEvent.KEYCODE_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+        }
+        break;
+
+      case KeyEvent.KEYCODE_SETTINGS:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+        }
+        break;
+
+      default:
+        break;
     }
+
+    return inputKey(code);
   }
 
   public static void resetLockTimer () {
