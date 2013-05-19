@@ -191,10 +191,7 @@ public class CoreThread extends Thread {
 
       for (String keyword : keywords) {
         if (keyword.length() > 0) {
-          if (operand.length() > 0) {
-            operand.append(',');
-          }
-
+          if (operand.length() > 0) operand.append(',');
           operand.append(keyword);
         }
       }
@@ -207,22 +204,30 @@ public class CoreThread extends Thread {
 
   @Override
   public void run () {
-    File packageFile = new File(coreContext.getPackageCodePath());
-    long packageSize = packageFile.length();
-    long packageTime = packageFile.lastModified();
+    {
+      SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
+      File file = new File(coreContext.getPackageCodePath());
 
-    SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
-    String sizeKey = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
-    String timeKey = getStringResource(R.string.PREF_KEY_PACKAGE_TIME);
+      String prefKey_size = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
+      long oldSize = prefs.getLong(prefKey_size, -1);
+      long newSize = file.length();
 
-    if ((packageSize != prefs.getLong(sizeKey, -1)) ||
-        (packageTime != prefs.getLong(timeKey, -1))) {
-      extractAssets();
+      String prefKey_time = getStringResource(R.string.PREF_KEY_PACKAGE_TIME);
+      long oldTime = prefs.getLong(prefKey_time, -1);
+      long newTime = file.lastModified();
 
-      SharedPreferences.Editor editor = prefs.edit();
-      editor.putLong(sizeKey, packageSize);
-      editor.putLong(timeKey, packageTime);
-      editor.commit();
+      if ((newSize != oldSize) || (newTime != oldTime)) {
+        Log.d(LOG_TAG, "package size: " + oldSize + " -> " + newSize);
+        Log.d(LOG_TAG, "package time: " + oldTime + " -> " + newTime);
+        extractAssets();
+
+        {
+          SharedPreferences.Editor editor = prefs.edit();
+          editor.putLong(prefKey_size, newSize);
+          editor.putLong(prefKey_time, newTime);
+          editor.commit();
+        }
+      }
     }
 
     UsbHelper.begin();
