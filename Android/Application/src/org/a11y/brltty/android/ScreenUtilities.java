@@ -23,15 +23,17 @@ import android.view.accessibility.AccessibilityNodeInfo;
 public final class ScreenUtilities {
   public static AccessibilityNodeInfo findRootNode (AccessibilityNodeInfo node) {
     if (node != null) {
+      AccessibilityNodeInfo child = AccessibilityNodeInfo.obtain(node);
+
       while (true) {
-        AccessibilityNodeInfo parent = node.getParent();
+        AccessibilityNodeInfo parent = child.getParent();
+        if (parent == null) break;
 
-        if (parent == null) {
-          break;
-        }
-
-        node = parent;
+        child.recycle();
+        child = parent;
       }
+
+      node = child;
     }
 
     return node;

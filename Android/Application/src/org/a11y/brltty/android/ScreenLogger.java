@@ -181,6 +181,7 @@ public class ScreenLogger {
 
       if (subnode != null) {
         logProperty("lbl", ScreenUtilities.getNodeText(subnode));
+        subnode.recycle();
       }
     }
 
@@ -189,6 +190,7 @@ public class ScreenLogger {
 
       if (subnode != null) {
         logProperty("lbd", ScreenUtilities.getNodeText(subnode));
+        subnode.recycle();
       }
     }
 
@@ -252,13 +254,20 @@ public class ScreenLogger {
     logProperty("accessibility event", event.toString());
 
     AccessibilityNodeInfo node = event.getSource();
-
     if (node != null) {
       logProperty("current window", node.getWindowId());
-    }
+      logNodeIdentity(node, "event node");
 
-    logNodeIdentity(node, "event node");
-    logTreeProperties(ScreenUtilities.findRootNode(node));
+      AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
+      if (root != null) {
+        logTreeProperties(root);
+        root.recycle();
+        root = null;
+      }
+
+      node.recycle();
+      node = null;
+    }
   }
 
   public ScreenLogger (String tag) {

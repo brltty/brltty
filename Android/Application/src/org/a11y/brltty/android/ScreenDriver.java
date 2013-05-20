@@ -117,9 +117,17 @@ public class ScreenDriver {
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
         break;
 
-      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-        goToFirstClickableSubnode(event.getSource());
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
+        AccessibilityNodeInfo node = event.getSource();
+
+        if (node != null) {
+          goToFirstClickableSubnode(node);
+          node.recycle();
+          node = null;
+        }
+
         return;
+      }
 
       case AccessibilityEvent.TYPE_VIEW_SCROLLED:
         break;
@@ -136,6 +144,7 @@ public class ScreenDriver {
         if (node != null) {
           ScreenTextEditor.get(node, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
           node.recycle();
+          node = null;
         }
 
         break;
@@ -151,6 +160,7 @@ public class ScreenDriver {
           editor.setCursorLocation(event.getToIndex());
 
           node.recycle();
+          node = null;
         }
 
         break;
@@ -160,8 +170,18 @@ public class ScreenDriver {
         return;
     }
 
-    synchronized (eventLock) {
-      eventNode = event.getSource();
+    {
+      AccessibilityNodeInfo oldNode;
+
+      synchronized (eventLock) {
+        oldNode = eventNode;
+        eventNode = event.getSource();
+      }
+
+      if (oldNode != null) {
+        oldNode.recycle();
+        oldNode = null;
+      }
     }
   }
 
