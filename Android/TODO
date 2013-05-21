@@ -8,14 +8,12 @@ preferences menu
 device locked message
 contracted braille and routing key associations
 android-specific commands
-update tha tables and drivers on a reinstall
 support the dynamic loading of non-built-in drivers
 become interrupt-driven rather than polling
 support serial braille devices
 two-dimensional braille rendering
 memory wastage on restart
 manual restart needed when settings are changed
-recycle nodes: getSource getChild getParent getLabelFor getLabelledBy getRootInActiveWindow
 set the actual locations of the bottom three buttons
 actions on elements with short text
 enabling of input service
