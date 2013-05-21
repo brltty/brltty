@@ -225,10 +225,13 @@ public class ScreenLogger {
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
           AccessibilityNodeInfo child = root.getChild(childIndex);
-          logTreeProperties(child, name + "." + childIndex);
 
-          child.recycle();
-          child = null;
+          if (child != null) {
+            logTreeProperties(child, name + "." + childIndex);
+
+            child.recycle();
+            child = null;
+          }
         }
       }
     }

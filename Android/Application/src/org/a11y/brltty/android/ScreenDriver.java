@@ -33,7 +33,7 @@ import android.view.KeyEvent;
 import android.graphics.Rect;
 
 public class ScreenDriver {
-  private static final boolean LOG_ACCESSIBILITY_EVENTS = true;
+  private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
 
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
@@ -83,12 +83,15 @@ public class ScreenDriver {
 
           for (int childIndex=0; childIndex<childCount; childIndex+=1) {
             AccessibilityNodeInfo child = node.getChild(childIndex);
-            AccessibilityNodeInfo subnode = findFirstClickableSubnode(child);
 
-            child.recycle();
-            child = null;
+            if (child != null) {
+              AccessibilityNodeInfo subnode = findFirstClickableSubnode(child);
 
-            if (subnode != null) return subnode;
+              child.recycle();
+              child = null;
+
+              if (subnode != null) return subnode;
+            }
           }
         }
       }

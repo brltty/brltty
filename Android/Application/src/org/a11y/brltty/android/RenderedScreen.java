@@ -73,12 +73,15 @@ public class RenderedScreen {
 
       for (int childIndex=0; childIndex<childCount; childIndex+=1) {
         AccessibilityNodeInfo child = node.getChild(childIndex);
-        element = findRenderedScreenElement(child);
 
-        child.recycle();
-        child = null;
+        if (child != null) {
+          element = findRenderedScreenElement(child);
 
-        if (element != null) return element;
+          child.recycle();
+          child = null;
+
+          if (element != null) return element;
+        }
       }
     }
 
