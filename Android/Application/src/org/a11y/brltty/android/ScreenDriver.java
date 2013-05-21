@@ -33,7 +33,7 @@ import android.view.KeyEvent;
 import android.graphics.Rect;
 
 public class ScreenDriver {
-  private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
+  private static final boolean LOG_ACCESSIBILITY_EVENTS = true;
 
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
@@ -110,8 +110,10 @@ public class ScreenDriver {
           AccessibilityNodeInfo subnode = node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
           hasFocus = subnode != null;
 
-          subnode.recycle();
-          subnode = null;
+          if (subnode != null) {
+            subnode.recycle();
+            subnode = null;
+          }
         }
 
         if (!hasFocus) {

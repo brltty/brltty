@@ -172,7 +172,9 @@ public class RenderedScreen {
   }
 
   public RenderedScreen (AccessibilityNodeInfo node) {
-    eventNode = AccessibilityNodeInfo.obtain(node);
+    if (node != null) node = AccessibilityNodeInfo.obtain(node);
+
+    eventNode = node;
     rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
