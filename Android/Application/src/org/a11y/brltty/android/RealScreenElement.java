@@ -40,7 +40,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public AccessibilityNodeInfo getAccessibilityNode () {
-    return accessibilityNode;
+    return AccessibilityNodeInfo.obtain(accessibilityNode);
   }
 
   @Override
@@ -112,27 +112,31 @@ public class RealScreenElement extends ScreenElement {
   }
 
   private boolean doAction (int action) {
-    AccessibilityNodeInfo node = accessibilityNode;
+    boolean done = false;
+    AccessibilityNodeInfo node = getAccessibilityNode();
     Rect inner = getVisualLocation();
 
     while (((node.getActions() & action) == 0) || !node.isEnabled()) {
       AccessibilityNodeInfo parent = node.getParent();
-      if (parent == null) {
-        return false;
-      }
+      if (parent == null) break;
 
       Rect outer = new Rect();
       parent.getBoundsInScreen(outer);
 
       if (!outer.contains(inner)) {
-        return false;
+        parent.recycle();
+        parent = null;
+        break;
       }
 
       inner = outer;
+      node.recycle();
       node = parent;
     }
 
-    return node.performAction(action);
+    if (node.performAction(action)) done = true;
+    node.recycle();
+    return done;
   }
 
   @Override
@@ -142,9 +146,10 @@ public class RealScreenElement extends ScreenElement {
         AccessibilityNodeInfo focusedNode = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
         if (focusedNode != null) {
-          if (focusedNode.equals(accessibilityNode)) {
-            return true;
-          }
+          boolean done = focusedNode.equals(accessibilityNode);
+          focusedNode.recycle();
+          focusedNode = null;
+          if (done) return true;
         }
       }
 
@@ -198,7 +203,7 @@ public class RealScreenElement extends ScreenElement {
 
   public RealScreenElement (String text, AccessibilityNodeInfo node) {
     super(text);
-    accessibilityNode = node;
+    accessibilityNode = AccessibilityNodeInfo.obtain(node);
 
     if (isEditable()) {
       ScreenTextEditor.get(accessibilityNode, true);

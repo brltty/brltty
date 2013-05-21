@@ -37,7 +37,7 @@ public class RenderedScreen {
   private int screenWidth = 1;
 
   public final AccessibilityNodeInfo getRootNode () {
-    return rootNode;
+    return AccessibilityNodeInfo.obtain(rootNode);
   }
 
   public final int getScreenWidth () {

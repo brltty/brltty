@@ -104,7 +104,17 @@ public class ScreenLogger {
   public final void logNodeProperties (AccessibilityNodeInfo node) {
     {
       List<CharSequence> values = new ArrayList<CharSequence>();
-      addValue(values, node.getParent()==null, ROOT_NODE_NAME);
+
+      {
+        AccessibilityNodeInfo parent = node.getParent();
+
+        if (parent != null) {
+          parent.recycle();
+          parent = null;
+        } else {
+          addValue(values, ROOT_NODE_NAME);
+        }
+      }
 
       {
         int count = node.getChildCount();
@@ -214,7 +224,11 @@ public class ScreenLogger {
         int childCount = root.getChildCount();
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          logTreeProperties(root.getChild(childIndex), name + "." + childIndex);
+          AccessibilityNodeInfo child = root.getChild(childIndex);
+          logTreeProperties(child, name + "." + childIndex);
+
+          child.recycle();
+          child = null;
         }
       }
     }

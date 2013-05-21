@@ -103,8 +103,13 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
 
   public final ScreenElement find (AccessibilityNodeInfo node) {
     for (ScreenElement element : this) {
-      if (element.getAccessibilityNode() == node) {
-        return element;
+      AccessibilityNodeInfo candidate = element.getAccessibilityNode();
+
+      if (candidate != null) {
+        boolean found = node.equals(candidate);
+        candidate.recycle();
+        candidate = null;
+        if (found) return element;
       }
     }
 

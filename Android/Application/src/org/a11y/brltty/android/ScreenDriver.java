@@ -66,13 +66,14 @@ public class ScreenDriver {
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS | AccessibilityNodeInfo.ACTION_CLICK;
+      final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
+                        | AccessibilityNodeInfo.ACTION_CLICK;
 
       if (node != null) {
         if (node.isVisibleToUser()) {
           if (node.isEnabled()) {
             if ((node.getActions() & actions) == actions) {
-              return node;
+              return AccessibilityNodeInfo.obtain(node);
             }
           }
         }
@@ -81,11 +82,13 @@ public class ScreenDriver {
           int childCount = node.getChildCount();
 
           for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-            AccessibilityNodeInfo subnode = findFirstClickableSubnode(node.getChild(childIndex));
+            AccessibilityNodeInfo child = node.getChild(childIndex);
+            AccessibilityNodeInfo subnode = findFirstClickableSubnode(child);
 
-            if (subnode != null) {
-              return subnode;
-            }
+            child.recycle();
+            child = null;
+
+            if (subnode != null) return subnode;
           }
         }
       }
@@ -94,18 +97,33 @@ public class ScreenDriver {
     return null;
   }
 
-  private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo node) {
+  private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo root) {
+    boolean done = false;
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      if ((node = findFirstClickableSubnode(node)) != null) {
-        if (node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY) == null) {
-          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
-            return true;
-          }
+      AccessibilityNodeInfo node = findFirstClickableSubnode(root);
+
+      if (node != null) {
+        boolean hasFocus;
+
+        {
+          AccessibilityNodeInfo subnode = node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+          hasFocus = subnode != null;
+
+          subnode.recycle();
+          subnode = null;
         }
+
+        if (!hasFocus) {
+          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) done = true;
+        }
+
+        node.recycle();
+        node = null;
       }
     }
 
-    return false;
+    return done;
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
@@ -190,12 +208,22 @@ public class ScreenDriver {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-      if (node != null) return node;
+
+      if (node != null) {
+        root.recycle();
+        root = null;
+        return node;
+      }
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
-      if (node != null) return node;
+
+      if (node != null) {
+        root.recycle();
+        root = null;
+        return node;
+      }
     }
 
     return root;
@@ -215,27 +243,28 @@ public class ScreenDriver {
     int selectedFrom = 0;
     int selectedTo = 0;
 
-    {
-      AccessibilityNodeInfo node = getCursorNode();
-      ScreenElement element = currentScreen.findRenderedScreenElement(node);
+    AccessibilityNodeInfo node = getCursorNode();
+    ScreenElement element = currentScreen.findRenderedScreenElement(node);
 
-      if (element != null) {
-        Rect location = element.getBrailleLocation();
+    if (element != null) {
+      Rect location = element.getBrailleLocation();
 
-        cursorColumn = location.left;
-        cursorRow = location.top;
+      cursorColumn = location.left;
+      cursorRow = location.top;
 
-        {
-          ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
+      {
+        ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
 
-          if (editor != null) {
-            selectedFrom = cursorColumn + editor.getSelectedFrom();
-            selectedTo = cursorColumn + editor.getSelectedTo();
-            cursorColumn += editor.getCursorOffset();
-          }
+        if (editor != null) {
+          selectedFrom = cursorColumn + editor.getSelectedFrom();
+          selectedTo = cursorColumn + editor.getSelectedTo();
+          cursorColumn += editor.getCursorOffset();
         }
       }
     }
+
+    node.recycle();
+    node = null;
 
     exportScreenProperties(
       currentWindow.getWindowIdentifier(),
