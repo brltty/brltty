@@ -106,14 +106,15 @@ public class RenderedScreen {
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
           AccessibilityNodeInfo child = root.getChild(childIndex);
-          boolean added = addScreenElements(child);
+
+          if (child != null) {
+            if (addScreenElements(child)) {
+              hasLabel = true;
+            }
+          }
 
           child.recycle();
           child = null;
-
-          if (added) {
-            hasLabel = true;
-          }
         }
       }
 
