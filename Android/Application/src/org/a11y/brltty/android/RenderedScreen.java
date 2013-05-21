@@ -72,9 +72,13 @@ public class RenderedScreen {
       int childCount = node.getChildCount();
 
       for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        if ((element = findRenderedScreenElement(node.getChild(childIndex))) != null) {
-          return element;
-        }
+        AccessibilityNodeInfo child = node.getChild(childIndex);
+        element = findRenderedScreenElement(child);
+
+        child.recycle();
+        child = null;
+
+        if (element != null) return element;
       }
     }
 
@@ -101,7 +105,13 @@ public class RenderedScreen {
         int childCount = root.getChildCount();
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          if (addScreenElements(root.getChild(childIndex))) {
+          AccessibilityNodeInfo child = root.getChild(childIndex);
+          boolean added = addScreenElements(child);
+
+          child.recycle();
+          child = null;
+
+          if (added) {
             hasLabel = true;
           }
         }
