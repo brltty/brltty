@@ -484,18 +484,6 @@ public class ScreenDriver {
   }
 
   private static final int[] functionKeyMap = new int[] {
-    KeyEvent.KEYCODE_HOME,
-    KeyEvent.KEYCODE_BACK,
-    KeyEvent.KEYCODE_APP_SWITCH,
-    KeyEvent.KEYCODE_SETTINGS,
-    KeyEvent.KEYCODE_NOTIFICATION,
-
-    KeyEvent.KEYCODE_UNKNOWN,
-    KeyEvent.KEYCODE_UNKNOWN,
-    KeyEvent.KEYCODE_UNKNOWN,
-    KeyEvent.KEYCODE_UNKNOWN,
-    KeyEvent.KEYCODE_UNKNOWN,
-
     KeyEvent.KEYCODE_F1,
     KeyEvent.KEYCODE_F2,
     KeyEvent.KEYCODE_F3,
@@ -507,7 +495,13 @@ public class ScreenDriver {
     KeyEvent.KEYCODE_F9,
     KeyEvent.KEYCODE_F10,
     KeyEvent.KEYCODE_F11,
-    KeyEvent.KEYCODE_F12
+    KeyEvent.KEYCODE_F12,
+
+    KeyEvent.KEYCODE_NOTIFICATION,
+    KeyEvent.KEYCODE_BACK,
+    KeyEvent.KEYCODE_HOME,
+    KeyEvent.KEYCODE_APP_SWITCH,
+    KeyEvent.KEYCODE_SETTINGS
   };
 
   public static boolean inputKeyFunction (int key) {
