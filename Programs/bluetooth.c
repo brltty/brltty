@@ -206,3 +206,59 @@ isBluetoothDevice (const char **identifier) {
   if (isQualifiedDevice(identifier, "bluez")) return 1;
   return 0;
 }
+
+typedef struct {
+  const char *namePrefix;
+  const char *const *driverCodes;
+} BluetoothNameEntry;
+
+#define BLUETOOTH_NAME_DRIVERS(name, ...) static const char *const bluetoothNameDrivers_##name[] = {__VA_ARGS__, NULL}
+BLUETOOTH_NAME_DRIVERS(ActiveBraille, "ht");
+BLUETOOTH_NAME_DRIVERS(AlvaBC, "al");
+BLUETOOTH_NAME_DRIVERS(BasicBraille, "ht");
+BLUETOOTH_NAME_DRIVERS(BrailleEdge, "hm");
+BLUETOOTH_NAME_DRIVERS(BrailleSense, "hm");
+BLUETOOTH_NAME_DRIVERS(BrailleStar, "ht");
+BLUETOOTH_NAME_DRIVERS(BrailliantBI, "hw");
+BLUETOOTH_NAME_DRIVERS(Focus, "fs");
+BLUETOOTH_NAME_DRIVERS(TSM, "sk");
+
+static const BluetoothNameEntry bluetoothNameTable[] = {
+  { .namePrefix = "Active Braille",
+    .driverCodes = bluetoothNameDrivers_ActiveBraille
+  },
+
+  { .namePrefix = "ALVA BC",
+    .driverCodes = bluetoothNameDrivers_AlvaBC
+  },
+
+  { .namePrefix = "Basic Braille",
+    .driverCodes = bluetoothNameDrivers_BasicBraille
+  },
+
+  { .namePrefix = "BrailleEDGE",
+    .driverCodes = bluetoothNameDrivers_BrailleEdge
+  },
+
+  { .namePrefix = "BrailleSense",
+    .driverCodes = bluetoothNameDrivers_BrailleSense
+  },
+
+  { .namePrefix = "Braille Star",
+    .driverCodes = bluetoothNameDrivers_BrailleStar
+  },
+
+  { .namePrefix = "Brailliant BI",
+    .driverCodes = bluetoothNameDrivers_BrailliantBI
+  },
+
+  { .namePrefix = "Focus",
+    .driverCodes = bluetoothNameDrivers_Focus
+  },
+
+  { .namePrefix = "TSM",
+    .driverCodes = bluetoothNameDrivers_TSM
+  },
+
+  { .namePrefix = NULL }
+};
