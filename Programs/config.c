@@ -1150,11 +1150,13 @@ activateBrailleDriver (int verify) {
         };
         autodetectableDrivers = usbDrivers;
       } else if (isBluetoothDevice(&dev)) {
-        static const char *bluetoothDrivers[] = {
-          "np", "ht", "al", "bm",
-          NULL
-        };
-        autodetectableDrivers = bluetoothDrivers;
+        if (!(autodetectableDrivers = bthGetDriverCodes(dev))) {
+          static const char *bluetoothDrivers[] = {
+            "np", "ht", "al", "bm",
+            NULL
+          };
+          autodetectableDrivers = bluetoothDrivers;
+        }
       } else {
         static const char *noDrivers[] = {NULL};
         autodetectableDrivers = noDrivers;

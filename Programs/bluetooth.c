@@ -208,7 +208,10 @@ bthGetDeviceName (const char *address) {
 
     if (entry) {
       if (!entry->deviceName) {
-        entry->deviceName = bthQueryDeviceName(bda);
+        if ((entry->deviceName = bthObtainDeviceName(bda))) {
+          logMessage(LOG_DEBUG, "Bluetooth Device Name: %s -> %s",
+                     address, entry->deviceName);
+        }
       }
 
       return entry->deviceName;
@@ -281,3 +284,22 @@ static const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = NULL }
 };
+
+const char *const *
+bthGetDriverCodes (const char *address) {
+  const char *name = bthGetDeviceName(address);
+
+  if (name) {
+    const BluetoothNameEntry *entry = bluetoothNameTable;
+
+    while (entry->namePrefix) {
+      if (strncmp(name, entry->namePrefix, strlen(entry->namePrefix)) == 0) {
+        return entry->driverCodes;
+      }
+
+      entry += 1;
+    }
+  }
+
+  return NULL;
+}

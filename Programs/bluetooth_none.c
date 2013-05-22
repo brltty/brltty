@@ -60,7 +60,7 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 }
 
 char *
-bthQueryDeviceName (uint64_t bda) {
+bthObtainDeviceName (uint64_t bda) {
   errno = ENOSYS;
   return NULL;
 }
