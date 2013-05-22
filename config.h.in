@@ -378,6 +378,9 @@ extern "C" {
 /* Define this if the header file legacy/dev/usb/usb.h exists. */
 #undef HAVE_LEGACY_DEV_USB_USB_H
 
+/* Define this if the bluetooth library is available. */
+#undef HAVE_LIBBLUETOOTH
+
 /* Define this if HP-UX audio support is available. */
 #undef HAVE_HPUX_AUDIO
 

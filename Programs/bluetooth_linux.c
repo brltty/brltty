@@ -21,6 +21,8 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
 
 #include "log.h"
@@ -33,6 +35,16 @@ struct BluetoothConnectionExtensionStruct {
   struct sockaddr_rc local;
   struct sockaddr_rc remote;
 };
+
+static void
+bthMakeAddress (bdaddr_t *address, uint64_t bda) {
+  unsigned int index;
+
+  for (index=0; index<BDA_SIZE; index+=1) {
+    address->b[index] = bda & 0XFF;
+    bda >>= 8;
+  }
+}
 
 BluetoothConnectionExtension *
 bthConnect (uint64_t bda, uint8_t channel) {
@@ -51,14 +63,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
       if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
         bcx->remote.rc_family = AF_BLUETOOTH;
         bcx->remote.rc_channel = channel;
-
-        {
-          int index;
-          for (index=0; index<BDA_SIZE; index+=1) {
-            bcx->remote.rc_bdaddr.b[index] = bda & 0XFF;
-            bda >>= 8;
-          }
-        }
+        bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
         if (connect(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
           if (setBlockingIo(bcx->socket, 0)) {
@@ -114,4 +119,41 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   BluetoothConnectionExtension *bcx = connection->extension;
 
   return writeData(bcx->socket, buffer, size);
+}
+
+char *
+bthQueryDeviceName (uint64_t bda) {
+  char *name = NULL;
+
+#ifdef HAVE_LIBBLUETOOTH
+  int device = hci_get_route(NULL);
+
+  if (device >= 0) {
+    int socket = hci_open_dev(device);
+
+    if (socket >= 0) {
+      bdaddr_t address;
+      char buffer[248];
+      int result;
+
+      bthMakeAddress(&address, bda);
+      memset(buffer, 0, sizeof(buffer));
+      result = hci_read_remote_name(socket, &address, sizeof(buffer), buffer, 0);
+
+      if (result >= 0) {
+        if (!(name = strdup(buffer))) logMallocError();
+      } else {
+        logSystemError("hci_read_remote_name");
+      }
+
+      close(socket);
+    } else {
+      logSystemError("hci_open_dev");
+    }
+  } else {
+    logSystemError("hci_get_route");
+  }
+#endif /* HAVE_LIBBLUETOOTH */
+
+  return name;
 }

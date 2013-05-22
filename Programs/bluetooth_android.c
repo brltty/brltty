@@ -151,3 +151,8 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   clearJavaException(bcx->env, 1);
   return -1;
 }
+
+char *
+bthQueryDeviceName (uint64_t bda) {
+  return NULL;
+}

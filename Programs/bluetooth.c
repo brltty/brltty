@@ -119,6 +119,7 @@ bthForgetConnectError (uint64_t bda) {
 
 static int
 bthParseAddress (uint64_t *bda, const char *address) {
+  const char *character = address;
   const unsigned int width = 8;
   const unsigned long mask = (1UL << width) - 1UL;
   int counter = BDA_SIZE;
@@ -127,22 +128,27 @@ bthParseAddress (uint64_t *bda, const char *address) {
   do {
     *bda <<= width;
 
-    if (*address) {
+    if (*character) {
       char *end;
-      long int value = strtol(address, &end, 0X10);
+      long int value = strtol(character, &end, 0X10);
 
-      if (end == address) return 0;
-      if (value < 0) return 0;
-      if (value > mask) return 0;
+      if (end == character) goto error;
+      if (value < 0) goto error;
+      if (value > mask) goto error;
       *bda |= value;
 
-      if (!*(address = end)) continue;
-      if (*address != ':') return 0;
-      if (!*++address) return 0;
+      if (!*(character = end)) continue;
+      if (*character != ':') goto error;
+      if (!*++character) goto error;
     }
   } while (--counter);
 
-  return !*address;
+  if (!*character) return 1;
+
+error:
+  logMessage(LOG_ERR, "invalid Bluetooth device address: %s", address);
+  errno = EINVAL;
+  return 0;
 }
 
 BluetoothConnection *
@@ -180,9 +186,6 @@ bthOpenConnection (const char *address, uint8_t channel, int force) {
 
         bthRememberConnectError(connection->address, errno);
       }
-    } else {
-      logMessage(LOG_ERR, "invalid Bluetooth device address: %s", address);
-      errno = EINVAL;
     }
 
     free(connection);
@@ -197,6 +200,19 @@ void
 bthCloseConnection (BluetoothConnection *connection) {
   bthDisconnect(connection->extension);
   free(connection);
+}
+
+char *
+bthGetDeviceName (const char *address) {
+  uint64_t bda;
+
+  if (bthParseAddress(&bda, address)) {
+    char *name = bthQueryDeviceName(bda);
+
+    if (name) return name;
+  }
+
+  return NULL;
 }
 
 int

@@ -27,13 +27,17 @@ typedef struct BluetoothConnectionStruct BluetoothConnection;
 
 extern void bthForgetConnectErrors (void);
 
+extern char *bthGetDeviceName (const char *address);
+
 extern BluetoothConnection *bthOpenConnection (const char *address, uint8_t channel, int force);
 extern void bthCloseConnection (BluetoothConnection *connection);
+
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
 extern ssize_t bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
+
 extern ssize_t bthWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
 
 extern int isBluetoothDevice (const char **identifier);

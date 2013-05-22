@@ -1196,6 +1196,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
    linux*)
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"
+         AC_HAVE_LIBRARY([bluetooth])
       ])
       ;;
    cygwin*|mingw*)

@@ -35,6 +35,7 @@ struct BluetoothConnectionStruct {
 
 extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel);
 extern void bthDisconnect (BluetoothConnectionExtension *bcx);
+extern char *bthQueryDeviceName (uint64_t bda);
 
 #ifdef __cplusplus
 }

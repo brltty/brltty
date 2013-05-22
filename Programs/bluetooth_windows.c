@@ -214,3 +214,8 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 
   return size;
 }
+
+char *
+bthQueryDeviceName (uint64_t bda) {
+  return NULL;
+}
