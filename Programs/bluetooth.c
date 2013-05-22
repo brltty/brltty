@@ -199,14 +199,20 @@ bthCloseConnection (BluetoothConnection *connection) {
   free(connection);
 }
 
-char *
+const char *
 bthGetDeviceName (const char *address) {
   uint64_t bda;
 
   if (bthParseAddress(&bda, address)) {
-    char *name = bthQueryDeviceName(bda);
+    BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
 
-    if (name) return name;
+    if (entry) {
+      if (!entry->deviceName) {
+        entry->deviceName = bthQueryDeviceName(bda);
+      }
+
+      return entry->deviceName;
+    }
   }
 
   return NULL;
