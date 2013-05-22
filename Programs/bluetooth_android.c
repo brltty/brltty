@@ -154,6 +154,40 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 
 char *
 bthObtainDeviceName (uint64_t bda) {
-  errno = ENOSYS;
-  return NULL;
+  char *name = NULL;
+  JNIEnv *env = getJavaNativeInterface();
+
+  if (env) {
+    static jclass class = NULL;
+
+    if (findJavaClass(env, &class, "org/a11y/brltty/android/BluetoothConnection")) {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, class, "getName",
+                               JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String),
+                                               JAVA_SIG_LONG // deviceAddress
+                                              ))) {
+        jstring jName = (*env)->CallStaticObjectMethod(env, class, method, bda);
+
+        if (jName) {
+          const char *cName = (*env)->GetStringUTFChars(env, jName, NULL);
+
+          if (cName) {
+            if (!(name = strdup(cName))) logMallocError();
+            (*env)->ReleaseStringUTFChars(env, jName, cName);
+          } else {
+            logMallocError();
+            clearJavaException(env, 0);
+          }
+
+          (*env)->DeleteLocalRef(env, jName);
+        } else {
+          logMallocError();
+          clearJavaException(env, 0);
+        }
+      }
+    }
+  }
+
+  return name;
 }
