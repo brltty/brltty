@@ -40,8 +40,8 @@ public class BluetoothConnection {
   );
 
   protected static final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-  protected BluetoothDevice bluetoothDevice;
-  protected String bluetoothAddress;
+  protected final BluetoothDevice bluetoothDevice;
+  protected final String bluetoothAddress;
 
   protected BluetoothSocket bluetoothSocket = null;
   protected OutputStream outputStream = null;
@@ -91,9 +91,9 @@ public class BluetoothConnection {
     }
   }
 
-  public BluetoothConnection (long deviceAddress, byte channelNumber, int inputPipe
-  ) throws Throwable {
+  public static BluetoothDevice getDevice (long deviceAddress) {
     byte[] hardwareAddress = new byte[6];
+
     {
       int i = hardwareAddress.length;
 
@@ -103,9 +103,7 @@ public class BluetoothConnection {
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      bluetoothDevice = bluetoothAdapter.getRemoteDevice(hardwareAddress);
-    } else {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
       StringBuilder sb = new StringBuilder();
 
       for (byte octet : hardwareAddress) {
@@ -113,8 +111,19 @@ public class BluetoothConnection {
         sb.append(String.format("%02X", octet));
       }
 
-      bluetoothDevice = bluetoothAdapter.getRemoteDevice(sb.toString());
+      return bluetoothAdapter.getRemoteDevice(sb.toString());
     }
+
+    return bluetoothAdapter.getRemoteDevice(hardwareAddress);
+  }
+
+  public static String getName (long deviceAddress) {
+    return getDevice(deviceAddress).getName();
+  }
+
+  public BluetoothConnection (long deviceAddress, byte channelNumber, int inputPipe
+  ) throws Throwable {
+    bluetoothDevice = getDevice(deviceAddress);
     bluetoothAddress = bluetoothDevice.getAddress();
 
     try {
