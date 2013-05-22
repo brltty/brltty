@@ -28,22 +28,25 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
-static Queue *bluetoothConnectErrors = NULL;
+static Queue *bluetoothDeviceQueue = NULL;
 typedef struct {
   uint64_t bda;
-  int value;
-} BluetoothConnectError;
+  int connectError;
+  char *deviceName;
+} BluetoothDeviceEntry;
 
 static void
-bthDeallocateConnectError (void *item, void *data) {
-  BluetoothConnectError *error = item;
-  free(error);
+bthDeallocateDeviceEntry (void *item, void *data) {
+  BluetoothDeviceEntry *entry = item;
+
+  if (entry->deviceName) free(entry->deviceName);
+  free(entry);
 }
 
 static int
-bthInitializeConnectErrors (void) {
-  if (!bluetoothConnectErrors) {
-    if (!(bluetoothConnectErrors = newQueue(bthDeallocateConnectError, NULL))) {
+bthInitializeDeviceQueue (void) {
+  if (!bluetoothDeviceQueue) {
+    if (!(bluetoothDeviceQueue = newQueue(bthDeallocateDeviceEntry, NULL))) {
       return 0;
     }
   }
@@ -52,24 +55,30 @@ bthInitializeConnectErrors (void) {
 }
 
 static int
-bthTestConnectError (const void *item, const void *data) {
-  const BluetoothConnectError *error = item;
+bthTestDeviceEntry (const void *item, const void *data) {
+  const BluetoothDeviceEntry *entry = item;
   const uint64_t *bda = data;
-  return error->bda == *bda;
+
+  return entry->bda == *bda;
 }
 
-static BluetoothConnectError *
-bthGetConnectError (uint64_t bda, int add) {
-  BluetoothConnectError *error = findItem(bluetoothConnectErrors, bthTestConnectError, &bda);
-  if (error) return error;
+static BluetoothDeviceEntry *
+bthGetDeviceEntry (uint64_t bda, int add) {
+  if (bthInitializeDeviceQueue()) {
+    BluetoothDeviceEntry *entry = findItem(bluetoothDeviceQueue, bthTestDeviceEntry, &bda);
+    if (entry) return entry;
 
-  if (add) {
-    if ((error = malloc(sizeof(*error)))) {
-      error->bda = bda;
-      error->value = 0;
-      if (enqueueItem(bluetoothConnectErrors, error)) return error;
+    if (add) {
+      if ((entry = malloc(sizeof(*entry)))) {
+        entry->bda = bda;
+        entry->connectError = 0;
+        entry->deviceName = NULL;
 
-      free(error);
+        if (enqueueItem(bluetoothDeviceQueue, entry)) return entry;
+        free(entry);
+      } else {
+        logMallocError();
+      }
     }
   }
 
@@ -77,44 +86,32 @@ bthGetConnectError (uint64_t bda, int add) {
 }
 
 void
-bthForgetConnectErrors (void) {
-  if (bthInitializeConnectErrors()) deleteElements(bluetoothConnectErrors);
+bthClearCache (void) {
+  if (bthInitializeDeviceQueue()) deleteElements(bluetoothDeviceQueue);
 }
 
 static int
 bthRememberConnectError (uint64_t bda, int value) {
-  if (bthInitializeConnectErrors()) {
-    BluetoothConnectError *error = bthGetConnectError(bda, 1);
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
+  if (!entry) return 0;
 
-    if (error) {
-      error->value = value;
-      return 1;
-    }
-  }
-
-  return 0;
+  entry->connectError = value;
+  return 1;
 }
 
 static int
 bthRecallConnectError (uint64_t bda, int *value) {
-  if (bthInitializeConnectErrors()) {
-    BluetoothConnectError *error = bthGetConnectError(bda, 0);
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 0);
+  if (!entry) return 0;
 
-    if (error) {
-      *value = error->value;
-      return 1;
-    }
-  }
-
-  return 0;
+  *value = entry->connectError;
+  return 1;
 }
 
 static void
 bthForgetConnectError (uint64_t bda) {
-  if (bthInitializeConnectErrors()) {
-    Element *element = findElement(bluetoothConnectErrors, bthTestConnectError, &bda);
-    if (element) deleteElement(element);
-  }
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 0);
+  if (entry) entry->connectError = 0;
 }
 
 static int

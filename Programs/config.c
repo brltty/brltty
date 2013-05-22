@@ -1209,7 +1209,7 @@ deactivateBrailleDriver (void) {
 static int
 startBrailleDriver (void) {
   usbForgetDevices();
-  bthForgetConnectErrors();
+  bthClearCache();
 
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {
