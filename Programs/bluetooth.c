@@ -103,6 +103,7 @@ static int
 bthRecallConnectError (uint64_t bda, int *value) {
   BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 0);
   if (!entry) return 0;
+  if (!entry->connectError) return 0;
 
   *value = entry->connectError;
   return 1;
