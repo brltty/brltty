@@ -565,7 +565,7 @@ public class SettingsActivity extends PreferenceActivity {
                 String reference = properties.get(SettingsActivity.PREF_KEY_DEVICE_REFERENCE);
                 String driver = properties.get(SettingsActivity.PREF_KEY_DEVICE_DRIVER);
 
-                CoreWrapper.changeBrailleDevice(qualifier + ":" + reference);
+                CoreWrapper.changeBrailleDevice(qualifier, reference);
                 CoreWrapper.changeBrailleDriver(driver);
                 CoreWrapper.restartBrailleDriver();
               }

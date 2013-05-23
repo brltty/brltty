@@ -95,11 +95,11 @@ extern unsigned int halfWindowShift;			/* Half window horizontal distance */
 extern unsigned int verticalWindowShift;			/* Window vertical distance */
 
 FUNCTION_DECLARE(restartBrailleDriver, void, (void));
-extern int constructBrailleDriver (void);
-extern void destructBrailleDriver (void);
-
 FUNCTION_DECLARE(changeBrailleDriver, int, (const char *driver));
 FUNCTION_DECLARE(changeBrailleDevice, int, (const char *device));
+
+extern int constructBrailleDriver (void);
+extern void destructBrailleDriver (void);
 
 extern void reconfigureWindow (void);
 extern int haveStatusCells (void);

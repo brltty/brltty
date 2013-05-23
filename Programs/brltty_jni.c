@@ -254,28 +254,28 @@ changeStringValue (JNIEnv *env, int (*change) (const char *cValue), jstring jVal
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring logLevel) {
-  return changeStringValue(env, changeLogLevel_p, logLevel);
+Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring level) {
+  return changeStringValue(env, changeLogLevel_p, level);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeLogCategories (JNIEnv *env, jobject this, jstring logCategories) {
-  return changeStringValue(env, changeLogCategories_p, logCategories);
+Java_org_a11y_brltty_core_CoreWrapper_changeLogCategories (JNIEnv *env, jobject this, jstring categories) {
+  return changeStringValue(env, changeLogCategories_p, categories);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeTextTable (JNIEnv *env, jobject this, jstring textTable) {
-  return changeStringValue(env, changeTextTable_p, textTable);
+Java_org_a11y_brltty_core_CoreWrapper_changeTextTable (JNIEnv *env, jobject this, jstring name) {
+  return changeStringValue(env, changeTextTable_p, name);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring attributesTable) {
-  return changeStringValue(env, changeAttributesTable_p, attributesTable);
+Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring name) {
+  return changeStringValue(env, changeAttributesTable_p, name);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring contractionTable) {
-  return changeStringValue(env, changeContractionTable_p, contractionTable);
+Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring name) {
+  return changeStringValue(env, changeContractionTable_p, name);
 }
 
 JNIEXPORT jboolean JNICALL
@@ -285,11 +285,11 @@ Java_org_a11y_brltty_core_CoreWrapper_restartBrailleDriver (JNIEnv *env, jobject
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDriver (JNIEnv *env, jobject this, jstring brailleDriver) {
-  return changeStringValue(env, changeBrailleDriver_p, brailleDriver);
+Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDriver (JNIEnv *env, jobject this, jstring driver) {
+  return changeStringValue(env, changeBrailleDriver_p, driver);
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDevice (JNIEnv *env, jobject this, jstring brailleDevice) {
-  return changeStringValue(env, changeBrailleDevice_p, brailleDevice);
+Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDevice (JNIEnv *env, jobject this, jstring device) {
+  return changeStringValue(env, changeBrailleDevice_p, device);
 }

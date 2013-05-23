@@ -28,26 +28,30 @@ public class CoreWrapper {
   public static native boolean update ();
   public static native void destruct ();
 
-  public static native boolean changeLogLevel (String logLevel);
-  public static native boolean changeLogCategories (String logCategories);
+  public static native boolean changeLogLevel (String level);
+  public static native boolean changeLogCategories (String categories);
 
-  public static native boolean changeTextTable (String textTable);
-  public static native boolean changeAttributesTable (String attributesTable);
-  public static native boolean changeContractionTable (String contractionTable);
+  public static native boolean changeTextTable (String name);
+  public static native boolean changeAttributesTable (String name);
+  public static native boolean changeContractionTable (String name);
 
   public static native boolean restartBrailleDriver ();
-  public static native boolean changeBrailleDriver (String brailleDriver);
-  public static native boolean changeBrailleDevice (String brailleDevice);
+  public static native boolean changeBrailleDriver (String driver);
+  public static native boolean changeBrailleDevice (String device);
 
-  public static boolean changeLogCategories (Set<String> logCategories) {
+  public static boolean changeLogCategories (Set<String> categories) {
     StringBuffer sb = new StringBuffer();
 
-    for (String category : logCategories) {
+    for (String category : categories) {
       if (sb.length() > 0) sb.append(',');
       sb.append(category);
     }
 
     return changeLogCategories(sb.toString());
+  }
+
+  public static boolean changeBrailleDevice (String qualifier, String reference) {
+    return changeBrailleDevice(qualifier + ":" + reference);
   }
 
   private static final AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
