@@ -721,6 +721,13 @@ public class SettingsActivity extends PreferenceActivity {
           public boolean onPreferenceChange (Preference preference, Object newValue) {
             final String newLogLevel = (String)newValue;
 
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeLogLevel(newLogLevel);
+              }
+            });
+
             showListSelection(logLevelList, newLogLevel);
             return true;
           }
