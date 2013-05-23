@@ -1771,6 +1771,12 @@ changeLogLevel (const char *operand) {
   return ok;
 }
 
+int
+changeLogCategories (const char *operand) {
+  disableAllLogCategories();
+  return changeLogLevel(operand);
+}
+
 ProgramExitStatus
 brlttyStart (int argc, char *argv[]) {
   {

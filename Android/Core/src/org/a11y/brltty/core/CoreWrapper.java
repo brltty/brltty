@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.core;
 
+import java.util.Set;
+
 import java.util.AbstractQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -27,9 +29,21 @@ public class CoreWrapper {
   public static native void destruct ();
 
   public static native boolean changeLogLevel (String logLevel);
+  public static native boolean changeLogCategories (String logCategories);
   public static native boolean changeTextTable (String textTable);
   public static native boolean changeAttributesTable (String attributesTable);
   public static native boolean changeContractionTable (String contractionTable);
+
+  public static boolean changeLogCategories (Set<String> logCategories) {
+    StringBuffer sb = new StringBuffer();
+
+    for (String category : logCategories) {
+      if (sb.length() > 0) sb.append(',');
+      sb.append(category);
+    }
+
+    return changeLogCategories(sb.toString());
+  }
 
   private static final AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
 

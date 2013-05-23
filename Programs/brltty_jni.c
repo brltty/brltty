@@ -25,11 +25,11 @@
 
 #include "embed.h"
 
-#define SYMBOL_POINTER(name) static const SYMBOL_TYPE(name) *name##_p = NULL;
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyUpdate);
 SYMBOL_POINTER(brlttyDestruct);
 SYMBOL_POINTER(changeLogLevel);
+SYMBOL_POINTER(changeLogCategories);
 SYMBOL_POINTER(changeTextTable);
 SYMBOL_POINTER(changeAttributesTable);
 SYMBOL_POINTER(changeContractionTable);
@@ -48,6 +48,7 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyUpdate),
   SYMBOL_ENTRY(brlttyDestruct),
   SYMBOL_ENTRY(changeLogLevel),
+  SYMBOL_ENTRY(changeLogCategories),
   SYMBOL_ENTRY(changeTextTable),
   SYMBOL_ENTRY(changeAttributesTable),
   SYMBOL_ENTRY(changeContractionTable),
@@ -226,7 +227,7 @@ Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
 }
 
 static jboolean
-changeValue (JNIEnv *env, int (*change) (const char *cValue), jstring jValue) {
+changeStringValue (JNIEnv *env, int (*change) (const char *cValue), jstring jValue) {
   jboolean result = JNI_FALSE;
   const char *cValue = (*env)->GetStringUTFChars(env, jValue, NULL);
 
@@ -242,19 +243,24 @@ changeValue (JNIEnv *env, int (*change) (const char *cValue), jstring jValue) {
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring logLevel) {
-  return changeValue(env, changeLogLevel_p, logLevel);
+  return changeStringValue(env, changeLogLevel_p, logLevel);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeLogCategories (JNIEnv *env, jobject this, jstring logCategories) {
+  return changeStringValue(env, changeLogCategories_p, logCategories);
 }
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeTextTable (JNIEnv *env, jobject this, jstring textTable) {
-  return changeValue(env, changeTextTable_p, textTable);
+  return changeStringValue(env, changeTextTable_p, textTable);
 }
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring attributesTable) {
-  return changeValue(env, changeAttributesTable_p, attributesTable);
+  return changeStringValue(env, changeAttributesTable_p, attributesTable);
 }
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring contractionTable) {
-  return changeValue(env, changeContractionTable_p, contractionTable);
+  return changeStringValue(env, changeContractionTable_p, contractionTable);
 }

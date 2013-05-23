@@ -39,6 +39,8 @@ extern "C" {
 #define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
 
 #define SYMBOL_TYPE(name) name ## _t
+#define SYMBOL_POINTER(name) static const SYMBOL_TYPE(name) *name##_p = NULL;
+
 #define FUNCTION_DECLARATION(functionName, returnType, argumentList) \
   returnType functionName argumentList
 #define FUNCTION_TYPEDEF(functionName, returnType, argumentList) \

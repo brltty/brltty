@@ -740,6 +740,13 @@ public class SettingsActivity extends PreferenceActivity {
           public boolean onPreferenceChange (Preference preference, Object newValue) {
             final Set<String> newLogCategories = (Set<String>)newValue;
 
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeLogCategories(newLogCategories);
+              }
+            });
+
             showSetSelections(logCategorySet, newLogCategories);
             return true;
           }
