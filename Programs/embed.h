@@ -19,23 +19,11 @@
 #ifndef BRLTTY_INCLUDED_EMBED
 #define BRLTTY_INCLUDED_EMBED
 
-#include "program.h"
+#include "brltty.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#define SYMBOL_TYPE(name) name ## _t
-
-#define FUNCTION_DECLARATION(functionName, returnType, argumentList) \
-  returnType functionName argumentList
-
-#define FUNCTION_TYPEDEF(functionName, returnType, argumentList) \
-  typedef FUNCTION_DECLARATION(SYMBOL_TYPE(functionName), returnType, argumentList)
-
-#define FUNCTION_DECLARE(functionName, returnType, argumentList) \
-  FUNCTION_TYPEDEF(functionName, returnType, argumentList); \
-  extern SYMBOL_TYPE(functionName) functionName
 
 FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
 FUNCTION_DECLARE(brlttyUpdate, int, (void));

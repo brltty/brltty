@@ -65,8 +65,11 @@ extern char *opt_midiDevice;
 extern int updateInterval;
 extern int messageDelay;
 
+FUNCTION_DECLARE(changeTextTable, int, (const char *name));
+FUNCTION_DECLARE(changeAttributesTable, int, (const char *name));
+
 extern ContractionTable *contractionTable;
-extern int loadContractionTable (const char *name);
+FUNCTION_DECLARE(changeContractionTable, int, (const char *name));
 
 extern KeyTable *keyboardKeyTable;
 

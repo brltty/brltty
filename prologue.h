@@ -38,6 +38,15 @@ extern "C" {
 #define ARRAY_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
 #define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
 
+#define SYMBOL_TYPE(name) name ## _t
+#define FUNCTION_DECLARATION(functionName, returnType, argumentList) \
+  returnType functionName argumentList
+#define FUNCTION_TYPEDEF(functionName, returnType, argumentList) \
+  typedef FUNCTION_DECLARATION(SYMBOL_TYPE(functionName), returnType, argumentList)
+#define FUNCTION_DECLARE(functionName, returnType, argumentList) \
+  FUNCTION_TYPEDEF(functionName, returnType, argumentList); \
+  extern SYMBOL_TYPE(functionName) functionName
+
 #define STR_BEGIN(buffer, size) { \
   char *strNext = (buffer); \
   char *strStart = strNext; \

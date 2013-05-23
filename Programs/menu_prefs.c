@@ -308,12 +308,12 @@ STATUS_FIELD_HANDLERS(9)
 
 static int
 changedTextTable (const MenuItem *item, unsigned char setting UNUSED) {
-  return replaceTextTable(opt_tablesDirectory, getMenuItemValue(item));
+  return changeTextTable(getMenuItemValue(item));
 }
 
 static int
 changedAttributesTable (const MenuItem *item, unsigned char setting UNUSED) {
-  return replaceAttributesTable(opt_tablesDirectory, getMenuItemValue(item));
+  return changeAttributesTable(getMenuItemValue(item));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -324,7 +324,7 @@ testContractedBraille (void) {
 
 static int
 changedContractionTable (const MenuItem *item, unsigned char setting UNUSED) {
-  return loadContractionTable(getMenuItemValue(item));
+  return changeContractionTable(getMenuItemValue(item));
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 

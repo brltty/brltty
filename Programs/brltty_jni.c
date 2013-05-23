@@ -29,6 +29,9 @@
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyUpdate);
 SYMBOL_POINTER(brlttyDestruct);
+SYMBOL_POINTER(changeTextTable);
+SYMBOL_POINTER(changeAttributesTable);
+SYMBOL_POINTER(changeContractionTable);
 
 typedef struct {
   const char *name;
@@ -43,6 +46,9 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
   SYMBOL_ENTRY(brlttyUpdate),
   SYMBOL_ENTRY(brlttyDestruct),
+  SYMBOL_ENTRY(changeTextTable),
+  SYMBOL_ENTRY(changeAttributesTable),
+  SYMBOL_ENTRY(changeContractionTable),
 END_SYMBOL_TABLE
 
 static void *coreHandle = NULL;
@@ -215,4 +221,38 @@ Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
     (*env)->DeleteGlobalRef(env, jArgumentArray);
     jArgumentArray = NULL;
   }
+}
+
+static jboolean
+changeValue (JNIEnv *env, int (*change) (const char *cValue), jstring jValue) {
+  jboolean result = JNI_FALSE;
+  const char *cValue = (*env)->GetStringUTFChars(env, jValue, NULL);
+
+  if (cValue) {
+    if (change(cValue)) result = JNI_TRUE;
+    (*env)->ReleaseStringUTFChars(env, jValue, cValue);
+  } else {
+    reportOutOfMemory(env, "C new value string");
+  }
+
+  return result;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring logLevel) {
+  return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeTextTable (JNIEnv *env, jobject this, jstring textTable) {
+  return changeValue(env, changeTextTable_p, textTable);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring attributesTable) {
+  return changeValue(env, changeAttributesTable_p, attributesTable);
+}
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring contractionTable) {
+  return changeValue(env, changeContractionTable_p, contractionTable);
 }

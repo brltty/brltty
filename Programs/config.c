@@ -517,6 +517,16 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+int
+changeTextTable (const char *name) {
+  return replaceTextTable(opt_tablesDirectory, name);
+}
+
+int
+changeAttributesTable (const char *name) {
+  return replaceAttributesTable(opt_tablesDirectory, name);
+}
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
 exitContractionTable (void) {
@@ -527,7 +537,7 @@ exitContractionTable (void) {
 }
 
 int
-loadContractionTable (const char *name) {
+changeContractionTable (const char *name) {
   ContractionTable *table = NULL;
 
   if (*name) {
@@ -2000,7 +2010,7 @@ brlttyStart (int argc, char *argv[]) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
   onProgramExit(exitContractionTable);
-  if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
+  if (*opt_contractionTable) changeContractionTable(opt_contractionTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
