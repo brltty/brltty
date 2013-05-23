@@ -29,6 +29,7 @@
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyUpdate);
 SYMBOL_POINTER(brlttyDestruct);
+SYMBOL_POINTER(changeLogLevel);
 SYMBOL_POINTER(changeTextTable);
 SYMBOL_POINTER(changeAttributesTable);
 SYMBOL_POINTER(changeContractionTable);
@@ -46,6 +47,7 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
   SYMBOL_ENTRY(brlttyUpdate),
   SYMBOL_ENTRY(brlttyDestruct),
+  SYMBOL_ENTRY(changeLogLevel),
   SYMBOL_ENTRY(changeTextTable),
   SYMBOL_ENTRY(changeAttributesTable),
   SYMBOL_ENTRY(changeContractionTable),
@@ -240,7 +242,7 @@ changeValue (JNIEnv *env, int (*change) (const char *cValue), jstring jValue) {
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring logLevel) {
-  return JNI_FALSE;
+  return changeValue(env, changeLogLevel_p, logLevel);
 }
 
 JNIEXPORT jboolean JNICALL

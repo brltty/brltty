@@ -126,6 +126,19 @@ static int syslogOpened = 0;
 static const char *logPrefix = NULL;
 static FILE *logFile = NULL;
 
+static void
+setLogCategory (const LogCategoryEntry *ctg, int state) {
+  logCategoryFlags[ctg - logCategoryTable] = state;
+}
+
+void
+disableAllLogCategories (void) {
+  const LogCategoryEntry *ctg = logCategoryTable;
+  const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
+
+  while (ctg < end) setLogCategory(ctg++, 0);
+}
+
 int
 enableLogCategory (const char *name) {
   const LogCategoryEntry *ctg = logCategoryTable;
@@ -134,7 +147,7 @@ enableLogCategory (const char *name) {
   while (ctg < end) {
     if (ctg->name) {
       if (strcasecmp(name, ctg->name) == 0) {
-        logCategoryFlags[ctg - logCategoryTable] = 1;
+        setLogCategory(ctg, 1);
         return 1;
       }
     }

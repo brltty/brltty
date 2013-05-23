@@ -141,8 +141,6 @@ isUnsignedInteger (unsigned int *value, const char *string) {
 
 int
 isLogLevel (int *level, const char *string) {
-  if (!*string) return 1;
-
   {
     int length = strlen(string);
     int index;

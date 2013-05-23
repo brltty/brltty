@@ -65,6 +65,7 @@ extern char *opt_midiDevice;
 extern int updateInterval;
 extern int messageDelay;
 
+FUNCTION_DECLARE(changeLogLevel, int, (const char *operand));
 FUNCTION_DECLARE(changeTextTable, int, (const char *name));
 FUNCTION_DECLARE(changeAttributesTable, int, (const char *name));
 

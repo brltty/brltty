@@ -1744,20 +1744,22 @@ validateInterval (int *value, const char *string) {
   }
 }
 
-static void
-processLogOperand (const char *operand) {
+int
+changeLogLevel (const char *operand) {
+  int ok = 1;
   char **strings = splitString(operand, ',', NULL);
 
   if (strings) {
     char **string = strings;
 
     while (*string) {
-      int level = LOG_NOTICE;
+      int level;
 
       if (isLogLevel(&level, *string)) {
         systemLogLevel = level;
       } else if (!enableLogCategory(*string)) {
         logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
+        ok = 0;
       }
 
       string += 1;
@@ -1765,6 +1767,8 @@ processLogOperand (const char *operand) {
 
     deallocateStrings(strings);
   }
+
+  return ok;
 }
 
 ProgramExitStatus
@@ -1820,7 +1824,9 @@ brlttyStart (int argc, char *argv[]) {
   }
 
   /* Set logging levels. */
-  processLogOperand(opt_logLevel);
+  systemLogLevel = LOG_NOTICE;
+  disableAllLogCategories();
+  changeLogLevel(opt_logLevel);
 
   {
     unsigned char level;
