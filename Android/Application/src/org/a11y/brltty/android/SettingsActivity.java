@@ -550,10 +550,29 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            final String newDeviceSelection = (String)newValue;
+            final String newSelectedDevice = (String)newValue;
 
-            selectedDeviceList.setSummary(newDeviceSelection);
-            updateRemoveDeviceScreen(newDeviceSelection);
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                Map<String, String> properties = SettingsActivity.getProperties(
+                  newSelectedDevice,
+                  devicePropertyKeys,
+                  ApplicationUtilities.getSharedPreferences()
+                );
+
+                String qualifier = properties.get(SettingsActivity.PREF_KEY_DEVICE_QUALIFIER);
+                String reference = properties.get(SettingsActivity.PREF_KEY_DEVICE_REFERENCE);
+                String driver = properties.get(SettingsActivity.PREF_KEY_DEVICE_DRIVER);
+
+                CoreWrapper.changeBrailleDevice(qualifier + ":" + reference);
+                CoreWrapper.changeBrailleDriver(driver);
+                CoreWrapper.restartBrailleDriver();
+              }
+            });
+
+            selectedDeviceList.setSummary(newSelectedDevice);
+            updateRemoveDeviceScreen(newSelectedDevice);
             return true;
           }
         }

@@ -28,11 +28,17 @@
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyUpdate);
 SYMBOL_POINTER(brlttyDestruct);
+
 SYMBOL_POINTER(changeLogLevel);
 SYMBOL_POINTER(changeLogCategories);
+
 SYMBOL_POINTER(changeTextTable);
 SYMBOL_POINTER(changeAttributesTable);
 SYMBOL_POINTER(changeContractionTable);
+
+SYMBOL_POINTER(restartBrailleDriver);
+SYMBOL_POINTER(changeBrailleDriver);
+SYMBOL_POINTER(changeBrailleDevice);
 
 typedef struct {
   const char *name;
@@ -47,11 +53,17 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
   SYMBOL_ENTRY(brlttyUpdate),
   SYMBOL_ENTRY(brlttyDestruct),
+
   SYMBOL_ENTRY(changeLogLevel),
   SYMBOL_ENTRY(changeLogCategories),
+
   SYMBOL_ENTRY(changeTextTable),
   SYMBOL_ENTRY(changeAttributesTable),
   SYMBOL_ENTRY(changeContractionTable),
+
+  SYMBOL_ENTRY(restartBrailleDriver),
+  SYMBOL_ENTRY(changeBrailleDriver),
+  SYMBOL_ENTRY(changeBrailleDevice),
 END_SYMBOL_TABLE
 
 static void *coreHandle = NULL;
@@ -260,7 +272,24 @@ JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring attributesTable) {
   return changeStringValue(env, changeAttributesTable_p, attributesTable);
 }
+
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring contractionTable) {
   return changeStringValue(env, changeContractionTable_p, contractionTable);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_restartBrailleDriver (JNIEnv *env, jobject this) {
+  restartBrailleDriver_p();
+  return JNI_TRUE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDriver (JNIEnv *env, jobject this, jstring brailleDriver) {
+  return changeStringValue(env, changeBrailleDriver_p, brailleDriver);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDevice (JNIEnv *env, jobject this, jstring brailleDevice) {
+  return changeStringValue(env, changeBrailleDevice_p, brailleDevice);
 }

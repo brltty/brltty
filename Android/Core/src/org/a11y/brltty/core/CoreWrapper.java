@@ -30,9 +30,14 @@ public class CoreWrapper {
 
   public static native boolean changeLogLevel (String logLevel);
   public static native boolean changeLogCategories (String logCategories);
+
   public static native boolean changeTextTable (String textTable);
   public static native boolean changeAttributesTable (String attributesTable);
   public static native boolean changeContractionTable (String contractionTable);
+
+  public static native boolean restartBrailleDriver ();
+  public static native boolean changeBrailleDriver (String brailleDriver);
+  public static native boolean changeBrailleDevice (String brailleDevice);
 
   public static boolean changeLogCategories (Set<String> logCategories) {
     StringBuffer sb = new StringBuffer();

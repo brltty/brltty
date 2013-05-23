@@ -1291,6 +1291,36 @@ exitBrailleDriver (void) {
   stopBrailleDriver();
 }
 
+int
+changeBrailleDriver (const char *driver) {
+  char **newDrivers = splitString(driver, ',', NULL);
+
+  if (newDrivers) {
+    char **oldDrivers = brailleDrivers;
+
+    brailleDrivers = newDrivers;
+    if (oldDrivers) deallocateStrings(oldDrivers);
+    return 1;
+  }
+
+  return 0;
+}
+
+int
+changeBrailleDevice (const char *device) {
+  char **newDevices = splitString(device, ',', NULL);
+
+  if (newDevices) {
+    char **oldDevices = brailleDevices;
+
+    brailleDevices = newDevices;
+    if (oldDevices) deallocateStrings(oldDevices);
+    return 1;
+  }
+
+  return 0;
+}
+
 #ifdef ENABLE_API
 static void
 exitApi (void) {
@@ -2068,10 +2098,10 @@ brlttyStart (int argc, char *argv[]) {
     logMessage(LOG_ERR, gettext("braille device not specified"));
     return PROG_EXIT_SYNTAX;
   }
-  brailleDevices = splitString(opt_brailleDevice, ',', NULL);
+  changeBrailleDevice(opt_brailleDevice);
 
   /* Activate the braille display. */
-  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
+  changeBrailleDriver(opt_brailleDriver? opt_brailleDriver: "");
   brailleConstructed = 0;
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
