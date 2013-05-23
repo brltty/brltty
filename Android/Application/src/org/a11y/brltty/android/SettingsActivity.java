@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import org.a11y.brltty.core.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Collection;
@@ -221,7 +223,16 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(textTableList, (String)newValue);
+            final String newTextTable = (String)newValue;
+
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeTextTable(newTextTable);
+              }
+            });
+
+            showListSelection(textTableList, newTextTable);
             return true;
           }
         }
@@ -231,7 +242,16 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(contractionTableList, (String)newValue);
+            final String newContractionTable = (String)newValue;
+
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeContractionTable(newContractionTable);
+              }
+            });
+
+            showListSelection(contractionTableList, newContractionTable);
             return true;
           }
         }
@@ -530,9 +550,10 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            String newName = (String)newValue;
-            selectedDeviceList.setSummary(newName);
-            updateRemoveDeviceScreen(newName);
+            final String newDeviceSelection = (String)newValue;
+
+            selectedDeviceList.setSummary(newDeviceSelection);
+            updateRemoveDeviceScreen(newDeviceSelection);
             return true;
           }
         }
@@ -542,7 +563,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            updateDeviceName((String)newValue);
+            final String newDeviceName = (String)newValue;
+
+            updateDeviceName(newDeviceName);
             return true;
           }
         }
@@ -552,9 +575,10 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            String newMethod = (String)newValue;
-            showListSelection(deviceMethodList, newMethod);
-            updateDeviceIdentifierList(newMethod);
+            final String newDeviceMethod = (String)newValue;
+
+            showListSelection(deviceMethodList, newDeviceMethod);
+            updateDeviceIdentifierList(newDeviceMethod);
             updateDeviceName();
             return true;
           }
@@ -565,7 +589,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(deviceIdentifierList, (String)newValue);
+            final String newDeviceIdentifier = (String)newValue;
+
+            showListSelection(deviceIdentifierList, newDeviceIdentifier);
             updateDeviceName();
             return true;
           }
@@ -576,7 +602,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(deviceDriverList, (String)newValue);
+            final String newDeviceDriver = (String)newValue;
+
+            showListSelection(deviceDriverList, newDeviceDriver);
             updateDeviceName();
             return true;
           }
@@ -672,7 +700,16 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(attributesTableList, (String)newValue);
+            final String newAttributesTable = (String)newValue;
+
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeAttributesTable(newAttributesTable);
+              }
+            });
+
+            showListSelection(attributesTableList, newAttributesTable);
             return true;
           }
         }
@@ -682,7 +719,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            showListSelection(logLevelList, (String)newValue);
+            final String newLogLevel = (String)newValue;
+
+            showListSelection(logLevelList, newLogLevel);
             return true;
           }
         }
@@ -692,8 +731,9 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceChangeListener() {
           @Override
           public boolean onPreferenceChange (Preference preference, Object newValue) {
-            Set<String> newValues = (Set<String>)newValue;
-            showSetSelections(logCategorySet, newValues);
+            final Set<String> newLogCategories = (Set<String>)newValue;
+
+            showSetSelections(logCategorySet, newLogCategories);
             return true;
           }
         }
