@@ -52,13 +52,17 @@ public class CoreWrapper {
 
   private static final AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
 
-  public static boolean runOnCoreThread (Runnable runnable) {
-    return runQueue.offer(runnable);
+  public static void clearRunQueue () {
+    runQueue.clear();
   }
 
   public static void processRunQueue () {
     Runnable runnable;
     while ((runnable = runQueue.poll()) != null) runnable.run();
+  }
+
+  public static boolean runOnCoreThread (Runnable runnable) {
+    return runQueue.offer(runnable);
   }
 
   private static volatile boolean stop = false;
@@ -68,6 +72,7 @@ public class CoreWrapper {
   }
 
   public static int run (String[] arguments) {
+    clearRunQueue();
     int exitStatus = construct(arguments);
 
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
