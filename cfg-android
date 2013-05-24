@@ -81,9 +81,9 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-keyboard-package \
    --disable-api \
    --with-braille-driver=-bg,-tt,-vr,al,at,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
+   --with-speech-driver=ad,-all \
    --with-screen-driver=ad \
    --without-libbraille \
-   --disable-speech-support \
    --disable-x \
    --disable-pcm-support \
    --disable-midi-support \

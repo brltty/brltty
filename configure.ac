@@ -1535,6 +1535,14 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])])
    BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+   case "${host_os}"
+   in
+      *android*)
+         BRLTTY_SPEECH_DRIVER([ad], [Android])
+         ;;
+      *)
+         ;;
+   esac
 ])
 AC_SUBST([speech_support_object])
 BRLTTY_ARG_DRIVER([speech], [Speech])
