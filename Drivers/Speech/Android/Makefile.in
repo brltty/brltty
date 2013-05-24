@@ -16,12 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = xx
-DRIVER_NAME = DirectoryName
-DRIVER_COMMENT = 
+DRIVER_CODE = ad
+DRIVER_NAME = Android
+DRIVER_COMMENT = text to speech engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = @speech_libraries_xx@
+SPK_OBJS = @speech_libraries_ad@
 include $(SRC_TOP)speech.mk
 
 speech.$O:

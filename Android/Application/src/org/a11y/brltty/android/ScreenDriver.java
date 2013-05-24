@@ -32,7 +32,7 @@ import android.view.KeyEvent;
 
 import android.graphics.Rect;
 
-public class ScreenDriver {
+public final class ScreenDriver {
   private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
 
   private final static Object eventLock = new Object();
@@ -551,6 +551,9 @@ public class ScreenDriver {
 
   public static void resetLockTimer () {
     ApplicationUtilities.getPowerManager().userActivity(SystemClock.uptimeMillis(), true);
+  }
+
+  private ScreenDriver () {
   }
 
   static {
