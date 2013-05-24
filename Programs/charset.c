@@ -32,23 +32,46 @@ static char *currentCharset = NULL;
 
 size_t
 convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
-#ifdef HAVE_WCHAR_H 
-  return mbstowcs(characters, text, size);
-#else /* HAVE_WCHAR_H */
   size_t length = strlen(text);
+  size_t count = 0;
+  mbstate_t state;
+  memset(&state, 0, sizeof(state));
 
-  if (characters) {
-    if (length > size) {
-      length = size;
-    } else if (length < size) {
-      length += 1;
+  while (length > 0) {
+    wchar_t character;
+    int consumed;
+
+#if defined(__ANDROID__)
+    const char *utf8 = text;
+    size_t utfs = length;
+    wint_t wc = convertUtf8ToWchar(&utf8, &utfs);
+
+    if (!wc) break;
+    character = wc;
+    consumed = utf8 - text;
+#elif defined(HAVE_WCHAR_H)
+    consumed = mbrtowc(&character, text, length, &state);
+    if (consumed < 0) consumed = 0;
+#else /* no conversion */
+    character = *text & 0XFF;
+    consumed = 1;
+#endif /* HAVE_WCHAR_H */
+
+    if (!consumed) break;
+    if (!character) break;
+
+    if (characters) {
+      if (count == size) break;
+      characters[count++] = character;
     }
 
-    memcpy(characters, text, length);
+    text += consumed;
+    length -= consumed;
+    count += 1;
   }
 
-  return length;
-#endif /* HAVE_WCHAR_H */
+  if (characters && (count < size)) characters[count] = 0;
+  return count;
 }
 
 size_t
