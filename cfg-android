@@ -85,7 +85,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --with-screen-driver=ad \
    --without-libbraille \
    --disable-x \
-   --disable-pcm-support \
+   --enable-pcm-support \
    --disable-midi-support \
    --disable-fm-support \
    --disable-icu \
