@@ -39,7 +39,7 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 
   while (length > 0) {
     wchar_t character;
-    int consumed;
+    ssize_t consumed;
 
 #if defined(__ANDROID__)
     const char *utf8 = text;
@@ -62,7 +62,7 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 
     if (characters) {
       if (count == size) break;
-      characters[count++] = character;
+      characters[count] = character;
     }
 
     text += consumed;
