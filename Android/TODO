@@ -3,9 +3,6 @@ a way to click on the background
 a way to drag and drop
 support cursor routing within multi-line text
 set a reasonable path for brltty.conf
-learn mode
-preferences menu
-device locked message
 contracted braille and routing key associations
 android-specific commands
 support the dynamic loading of non-built-in drivers
