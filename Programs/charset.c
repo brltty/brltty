@@ -31,6 +31,27 @@ const char defaultCharset[] = "ISO-8859-1";
 static char *currentCharset = NULL;
 
 size_t
+convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
+#ifdef HAVE_WCHAR_H 
+  return mbstowcs(characters, text, size);
+#else /* HAVE_WCHAR_H */
+  size_t length = strlen(text);
+
+  if (characters) {
+    if (length > size) {
+      length = size;
+    } else if (length < size) {
+      length += 1;
+    }
+
+    memcpy(characters, text, length);
+  }
+
+  return length;
+#endif /* HAVE_WCHAR_H */
+}
+
+size_t
 getTextLength (const char *text) {
   return convertTextToWchars(NULL, text, 0);
 }

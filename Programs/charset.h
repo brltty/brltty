@@ -48,6 +48,7 @@ extern char *makeUtf8FromWchars (const wchar_t *characters, unsigned int count, 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
 
+extern size_t convertTextToWchars (wchar_t *characters, const char *text, size_t size);
 extern size_t getTextLength (const char *text);
 
 extern int lockCharset (LockOptions options);

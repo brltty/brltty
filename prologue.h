@@ -283,8 +283,6 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #include <wchar.h>
 #include <wctype.h>
 
-#define convertTextToWchars mbstowcs
-
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
 #define PRIwc "lc"
@@ -349,23 +347,6 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 
 #define swprintf(target,count,source,...) snprintf((char *)(target), (count), (const char *)(source), ## __VA_ARGS__)
 #define vswprintf(target,count,source,args) vsnprintf((char *)(target), (count), (const char *)(source), (args))
-
-static inline size_t
-convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
-  size_t length = strlen(text);
-
-  if (characters) {
-    if (length > size) {
-      length = size;
-    } else if (length < size) {
-      length += 1;
-    }
-
-    memcpy(characters, text, length);
-  }
-
-  return length;
-}
 
 typedef unsigned char mbstate_t;
 
