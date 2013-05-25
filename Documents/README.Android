@@ -366,6 +366,30 @@ isn't checked if the switch is in its "off" position, and is checked if
 the switch is in its "on" position. The label associated with the 
 switch's position appears just after the square [brackets].
 
+Android supports a number of global actions which can be performed by 
+pressing special hardware buttons and/or by touching reserved areas on 
+the screen. BRLTTY also offers a way to perform these actions from your 
+braille device. While a better way may be developed in the future, this 
+is how it can be done right now.
+
+Since Android keyboard support only recognizes 12 function keys 
+(commonly named F1 through F12), BRLTTY uses function keys beyond F12 to 
+perform global Android actions according to the following table.
+
+  F13  Notifications
+  F14  Back
+  F15  Home
+  F16  Recent Apps
+  F17  Quick Settings
+
+The way a braille device emulates keyboard function keys differs from 
+model to model, so you should check the BRLTTY documentation for your 
+braille device. The most common way is to press the corresponding cursor 
+routing key along with some other key or key combination. For braille 
+devices which have a braille keyboard, the most common key to be used in 
+conjunction with a cursor routing key in order to emulate a keyboard 
+function key is the space bar.
+
 ----------------------------------------------------------------------
 
 
@@ -454,10 +478,6 @@ already have been automatically removed.
 
 Known Issues
 ============
-
-BRLTTY needs to be manually stopped and then restarted for settings 
-changes to take effect. This is unacceptable from a user perspective. 
-Any settings change should be automatically reloaded.
 
 Serial devices aren't supported. Even though Android devices don't have 
 serial ports, serial devices still can be connected via a USB to Serial 
