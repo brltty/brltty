@@ -35,12 +35,16 @@ public final class PcmDevice {
   private int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
   private AudioTrack audioTrack = null;
 
+  public boolean isStarted () {
+    return audioTrack != null;
+  }
+
   public int getSampleRate () {
     return sampleRate;
   }
 
   public void setSampleRate (int rate) {
-    sampleRate = rate;
+    if (!isStarted()) sampleRate = rate;
   }
 
   public int getChannelConfiguration () {
@@ -59,15 +63,17 @@ public final class PcmDevice {
   }
 
   public void setChannelCount (int count) {
-    switch (count) {
-      default:
-      case 1:
-        channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
-        break;
+    if (!isStarted()) {
+      switch (count) {
+        default:
+        case 1:
+          channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+          break;
 
-      case 2:
-        channelConfiguration = AudioFormat.CHANNEL_OUT_STEREO;
-        break;
+        case 2:
+          channelConfiguration = AudioFormat.CHANNEL_OUT_STEREO;
+          break;
+      }
     }
   }
 
@@ -80,8 +86,12 @@ public final class PcmDevice {
                           audioFormat, getBufferSize(), trackMode);
   }
 
+  protected void start () {
+    if (!isStarted()) audioTrack = newAudioTrack();
+  }
+
   public boolean write (short[] samples) {
-    if (audioTrack == null) audioTrack = newAudioTrack();
+    start();
 
     int offset = 0;
     int length = samples.length;
