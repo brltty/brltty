@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import java.util.HashMap;
+
 import android.speech.tts.TextToSpeech;
 
 public final class SpeechDriver {
@@ -29,6 +31,7 @@ public final class SpeechDriver {
 
   private static volatile State state = State.STOPPED;
   private static TextToSpeech tts = null;
+  private static final HashMap<String, String> parameters = new HashMap<String, String>();
 
   public static boolean start () {
     TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
@@ -40,6 +43,7 @@ public final class SpeechDriver {
 
     state = State.STOPPED;
     tts = new TextToSpeech(BrailleService.getBrailleService(), listener);
+    parameters.clear();
     return true;
   }
 
@@ -52,7 +56,7 @@ public final class SpeechDriver {
   }
 
   public static boolean say (String text) {
-    return tts.speak(text, TextToSpeech.QUEUE_ADD, null) == TextToSpeech.SUCCESS;
+    return tts.speak(text, TextToSpeech.QUEUE_ADD, parameters) == TextToSpeech.SUCCESS;
   }
 
   public static boolean mute () {
@@ -60,7 +64,8 @@ public final class SpeechDriver {
   }
 
   public static boolean setVolume (float volume) {
-    return false;
+    parameters.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, Float.toString(volume));
+    return true;
   }
 
   public static boolean setRate (float rate) {
