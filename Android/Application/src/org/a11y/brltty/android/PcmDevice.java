@@ -29,21 +29,16 @@ public final class PcmDevice {
 
   private static final int streamType = AudioManager.STREAM_NOTIFICATION;
   private static final int trackMode = AudioTrack.MODE_STREAM;
-
-  private int bufferSize = 0X1000;
-  private int sampleRate = AudioTrack.getNativeOutputSampleRate(streamType);
-  private int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
-  private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+  private static final int sampleRate = 8000;
+  private static final int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+  private static final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+  private static final int bufferSize = 0X2000;
 
   private AudioTrack audioTrack = null;
 
   private AudioTrack newAudioTrack () {
     return new AudioTrack(streamType, sampleRate, channelConfiguration,
                           audioFormat, bufferSize, trackMode);
-  }
-
-  public int getBufferSize () {
-    return bufferSize;
   }
 
   public int getSampleRate () {
@@ -61,24 +56,27 @@ public final class PcmDevice {
     }
   }
 
-  public boolean write (short[] samples) {
-    if (audioTrack == null) {
-      audioTrack = newAudioTrack();
-      audioTrack.play();
-    }
+  public int getBufferSize () {
+    return bufferSize;
+  }
 
-    Log.d(LOG_TAG, "track sample count: " + samples.length);
-    Log.d(LOG_TAG, "track play state: " + audioTrack.getPlayState());
-    return audioTrack.write(samples, 0, samples.length) == AudioTrack.SUCCESS;
+  public boolean write (short[] samples) {
+    if (audioTrack == null) audioTrack = newAudioTrack();
+
+    int result = audioTrack.write(samples, 0, samples.length);
+    audioTrack.play();
+    return result >= 0;
+  }
+
+  public void cancel () {
+    audioTrack.pause();
+    audioTrack.flush();
   }
 
   public void close () {
-    if (audioTrack != null) {
-      audioTrack.pause();
-      audioTrack.flush();
-      audioTrack.release();
-      audioTrack = null;
-    }
+    cancel();
+    audioTrack.release();
+    audioTrack = null;
   }
 
   public PcmDevice () {
