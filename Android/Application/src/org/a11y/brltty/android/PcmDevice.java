@@ -63,9 +63,19 @@ public final class PcmDevice {
   public boolean write (short[] samples) {
     if (audioTrack == null) audioTrack = newAudioTrack();
 
-    int result = audioTrack.write(samples, 0, samples.length);
-    audioTrack.play();
-    return result >= 0;
+    int offset = 0;
+    int length = samples.length;
+
+    while (length > 0) {
+      int result = audioTrack.write(samples, offset, length);
+      if (result < 1) return false;
+
+      audioTrack.play();
+      offset += result;
+      length -= result;
+    }
+
+    return true;
   }
 
   public void cancel () {
