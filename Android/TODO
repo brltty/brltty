@@ -2,7 +2,6 @@ show that text is editable
 a way to click on the background
 a way to drag and drop
 support cursor routing within multi-line text
-set a reasonable path for brltty.conf
 contracted braille and routing key associations
 android-specific commands
 support the dynamic loading of non-built-in drivers
@@ -13,4 +12,3 @@ actions on elements with short text
 enabling of input service
 selecting multiple devices
 restoring the input method to the system default
-tunes

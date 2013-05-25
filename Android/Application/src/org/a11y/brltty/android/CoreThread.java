@@ -46,6 +46,7 @@ public class CoreThread extends Thread {
   public static final int DATA_MODE = Context.MODE_PRIVATE;
   public static final String DATA_TYPE_TABLES = "tables";
   public static final String DATA_TYPE_DRIVERS = "drivers";
+  public static final String DATA_TYPE_STATE = "state";
 
   private final File getDataDirectory (String type) {
     return coreContext.getDir(type, DATA_MODE);
@@ -147,14 +148,17 @@ public class CoreThread extends Thread {
   private String[] makeArguments () {
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
-    // required settings
     builder.setForegroundExecution(true);
     builder.setReleaseDevice(true);
+
     builder.setTablesDirectory(getDataDirectory(DATA_TYPE_TABLES).getPath());
     builder.setDriversDirectory(getDataDirectory(DATA_TYPE_DRIVERS).getPath());
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
-    // optional settings
+    File stateDirectory = getDataDirectory(DATA_TYPE_STATE);
+    builder.setConfigurationFile(new File(stateDirectory, "default.conf").getPath());
+    builder.setPreferencesFile(new File(stateDirectory, "default.prefs").getPath());
+
     builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));
     builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, R.string.DEFAULT_ATTRIBUTES_TABLE));
     builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, R.string.DEFAULT_CONTRACTION_TABLE));
