@@ -106,21 +106,18 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
       jint size = count / 2;
       jshortArray jSamples = (*pcm->env)->NewShortArray(pcm->env, size);
       if (jSamples) {
-        jshort cSamples[size];
+        typedef union {
+          const unsigned char *bytes;
+          const int16_t *actual;
+        } Samples;
+
+        Samples samples = {
+          .bytes = buffer
+        };
+
         jboolean result;
 
-        {
-          const unsigned char *source = buffer;
-          jshort *target = cSamples;
-          jshort *end = target + size;
-
-          while (target < end) {
-            *target++ = (source[0] << 8) | source[1];
-            source += 2;
-          }
-        }
-
-        (*pcm->env)->SetShortArrayRegion(pcm->env, jSamples, 0, size, cSamples);
+        (*pcm->env)->SetShortArrayRegion(pcm->env, jSamples, 0, size, samples.actual);
         result = (*pcm->env)->CallBooleanMethod(pcm->env, pcm->device, method, jSamples);
         (*pcm->env)->DeleteLocalRef(pcm->env, jSamples);
 
@@ -202,7 +199,16 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (PcmDevice *pcm) {
-  return PCM_FMT_S16B;
+  typedef union {
+    uint8_t formats[2];
+    uint16_t value;
+  } FormatChooser;
+
+  static const FormatChooser formatChooser = {
+    .formats = {PCM_FMT_S16L, PCM_FMT_S16B}
+  };
+
+  return formatChooser.value & 0XFF;;
 }
 
 PcmAmplitudeFormat
@@ -220,4 +226,14 @@ awaitPcmOutput (PcmDevice *pcm) {
 
 void
 cancelPcmOutput (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "cancel",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                              ))) {
+      (*pcm->env)->CallVoidMethod(pcm->env, pcm->device, method);
+      clearJavaException(pcm->env, 1);
+    }
+  }
 }
