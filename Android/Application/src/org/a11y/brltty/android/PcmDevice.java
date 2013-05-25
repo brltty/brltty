@@ -29,24 +29,26 @@ public final class PcmDevice {
 
   private static final int streamType = AudioManager.STREAM_NOTIFICATION;
   private static final int trackMode = AudioTrack.MODE_STREAM;
-  private static final int sampleRate = 8000;
-  private static final int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
   private static final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-  private static final int bufferSize = 0X2000;
 
+  private int sampleRate = 8000;
+  private int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
   private AudioTrack audioTrack = null;
-
-  private AudioTrack newAudioTrack () {
-    return new AudioTrack(streamType, sampleRate, channelConfiguration,
-                          audioFormat, bufferSize, trackMode);
-  }
 
   public int getSampleRate () {
     return sampleRate;
   }
 
+  public void setSampleRate (int rate) {
+    sampleRate = rate;
+  }
+
+  public int getChannelConfiguration () {
+    return channelConfiguration;
+  }
+
   public int getChannelCount () {
-    switch (channelConfiguration) {
+    switch (getChannelConfiguration()) {
       default:
       case AudioFormat.CHANNEL_OUT_MONO:
         return 1;
@@ -56,8 +58,26 @@ public final class PcmDevice {
     }
   }
 
+  public void setChannelCount (int count) {
+    switch (count) {
+      default:
+      case 1:
+        channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+        break;
+
+      case 2:
+        channelConfiguration = AudioFormat.CHANNEL_OUT_STEREO;
+        break;
+    }
+  }
+
   public int getBufferSize () {
-    return bufferSize;
+    return AudioTrack.getMinBufferSize(getSampleRate(), getChannelConfiguration(), audioFormat);
+  }
+
+  private AudioTrack newAudioTrack () {
+    return new AudioTrack(streamType, getSampleRate(), getChannelConfiguration(),
+                          audioFormat, getBufferSize(), trackMode);
   }
 
   public boolean write (short[] samples) {

@@ -172,6 +172,18 @@ getPcmSampleRate (PcmDevice *pcm) {
 
 int
 setPcmSampleRate (PcmDevice *pcm, int rate) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "setSampleRate",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                               JAVA_SIG_INT // rate
+                                              ))) {
+      (*pcm->env)->CallVoidMethod(pcm->env, pcm->device, method, rate);
+      clearJavaException(pcm->env, 1);
+    }
+  }
+
   return getPcmSampleRate(pcm);
 }
 
@@ -194,6 +206,18 @@ getPcmChannelCount (PcmDevice *pcm) {
 
 int
 setPcmChannelCount (PcmDevice *pcm, int channels) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "setChannelCount",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                               JAVA_SIG_INT // count
+                                              ))) {
+      (*pcm->env)->CallVoidMethod(pcm->env, pcm->device, method, channels);
+      clearJavaException(pcm->env, 1);
+    }
+  }
+
   return getPcmChannelCount(pcm);
 }
 
