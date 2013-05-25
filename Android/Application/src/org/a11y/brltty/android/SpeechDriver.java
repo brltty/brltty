@@ -51,12 +51,24 @@ public final class SpeechDriver {
     }
   }
 
-  public static void say (String text) {
-    tts.speak(text, TextToSpeech.QUEUE_ADD, null);
+  public static boolean say (String text) {
+    return tts.speak(text, TextToSpeech.QUEUE_ADD, null) == TextToSpeech.SUCCESS;
   }
 
-  public static void mute () {
-    tts.stop();
+  public static boolean mute () {
+    return tts.stop() == TextToSpeech.SUCCESS;
+  }
+
+  public static boolean setVolume (float volume) {
+    return false;
+  }
+
+  public static boolean setRate (float rate) {
+    return tts.setSpeechRate(rate) == TextToSpeech.SUCCESS;
+  }
+
+  public static boolean setPitch (float pitch) {
+    return tts.setPitch(pitch) == TextToSpeech.SUCCESS;
   }
 
   private SpeechDriver () {

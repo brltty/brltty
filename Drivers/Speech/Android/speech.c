@@ -22,6 +22,9 @@
 
 #include "log.h"
 
+#define SPK_HAVE_VOLUME
+#define SPK_HAVE_RATE
+#define SPK_HAVE_PITCH
 #include "spk_driver.h"
 #include "sys_android.h"
 
@@ -76,14 +79,20 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, speechDriverClass, "say",
-                             JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_OBJECT(java/lang/String) // text
                                             ))) {
       jstring string = (*env)->NewStringUTF(env, (const char *)buffer);
       if (string) {
-        (*env)->CallStaticVoidMethod(env, speechDriverClass, method, string);
-        clearJavaException(env, 1);
+        jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, string);
+
         (*env)->DeleteLocalRef(env, string);
+        string = NULL;
+
+        if (!clearJavaException(env, 1)) {
+          if (result == JNI_TRUE) {
+          }
+        }
       } else {
         logMallocError();
         clearJavaException(env, 0);
@@ -98,50 +107,71 @@ spk_mute (SpeechSynthesizer *spk) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, speechDriverClass, "mute",
-                             JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                             ))) {
-      (*env)->CallStaticVoidMethod(env, speechDriverClass, method);
-      clearJavaException(env, 1);
+      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method);
+
+      if (!clearJavaException(env, 1)) {
+        if (result == JNI_TRUE) {
+        }
+      }
     }
   }
 }
 
-#ifdef SPK_HAVE_TRACK
-static void
-spk_doTrack (SpeechSynthesizer *spk) {
-}
-
-static int
-spk_getTrack (SpeechSynthesizer *spk) {
-  return 0;
-}
-
-static int
-spk_isSpeaking (SpeechSynthesizer *spk) {
-  return 0;
-}
-#endif /* SPK_HAVE_TRACK */
-
-#ifdef SPK_HAVE_VOLUME
 static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-}
-#endif /* SPK_HAVE_VOLUME */
+  if (findSpeechDriverClass()) {
+    static jmethodID method = 0;
 
-#ifdef SPK_HAVE_RATE
+    if (findJavaStaticMethod(env, &method, speechDriverClass, "setVolume",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_FLOAT // volume
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechVolume(setting));
+
+      if (!clearJavaException(env, 1)) {
+        if (result == JNI_TRUE) {
+        }
+      }
+    }
+  }
+}
+
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-}
-#endif /* SPK_HAVE_RATE */
+  if (findSpeechDriverClass()) {
+    static jmethodID method = 0;
 
-#ifdef SPK_HAVE_PITCH
+    if (findJavaStaticMethod(env, &method, speechDriverClass, "setRate",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_FLOAT // rate
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechRate(setting));
+
+      if (!clearJavaException(env, 1)) {
+        if (result == JNI_TRUE) {
+        }
+      }
+    }
+  }
+}
+
 static void
 spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
-}
-#endif /* SPK_HAVE_PITCH */
+  if (findSpeechDriverClass()) {
+    static jmethodID method = 0;
 
-#ifdef SPK_HAVE_PUNCTUATION
-static void
-spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+    if (findJavaStaticMethod(env, &method, speechDriverClass, "setPitch",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_FLOAT // pitch
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechPitch(setting));
+
+      if (!clearJavaException(env, 1)) {
+        if (result == JNI_TRUE) {
+        }
+      }
+    }
+  }
 }
-#endif /* SPK_HAVE_PUNCTUATION */
