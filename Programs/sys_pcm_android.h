@@ -96,16 +96,80 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "write",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                               JAVA_SIG_ARRAY(JAVA_SIG_SHORT) // samples
+                                              ))) {
+      jint size = count / 2;
+      jshortArray jSamples = (*pcm->env)->NewShortArray(pcm->env, size);
+      if (jSamples) {
+        jshort cSamples[size];
+        jboolean result;
+
+        {
+          const unsigned char *source = buffer;
+          jshort *target = cSamples;
+          jshort *end = target + size;
+
+          while (target < end) {
+            *target++ = (source[0] << 8) | source[1];
+            source += 2;
+          }
+        }
+
+        (*pcm->env)->SetShortArrayRegion(pcm->env, jSamples, 0, size, cSamples);
+        result = (*pcm->env)->CallBooleanMethod(pcm->env, pcm->device, method, jSamples);
+        (*pcm->env)->DeleteLocalRef(pcm->env, jSamples);
+
+        if (!clearJavaException(pcm->env, 1)) {
+          if (result == JNI_TRUE) {
+            return 1;
+          }
+        }
+      } else {
+        logMallocError();
+        clearJavaException(pcm->env, 0);
+      }
+    }
+  }
+
   return 0;
 }
 
 int
 getPcmBlockSize (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "getBufferSize",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                              ))) {
+      jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
+
+      if (!clearJavaException(pcm->env, 1)) return result;
+    }
+  }
+
   return 0X100;
 }
 
 int
 getPcmSampleRate (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "getSampleRate",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                              ))) {
+      jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
+
+      if (!clearJavaException(pcm->env, 1)) return result;
+    }
+  }
+
   return 8000;
 }
 
@@ -116,6 +180,18 @@ setPcmSampleRate (PcmDevice *pcm, int rate) {
 
 int
 getPcmChannelCount (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "getChannelCount",
+                               JAVA_SIG_METHOD(JAVA_SIG_INT,
+                                              ))) {
+      jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
+
+      if (!clearJavaException(pcm->env, 1)) return result;
+    }
+  }
+
   return 1;
 }
 
@@ -126,7 +202,7 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (PcmDevice *pcm) {
-  return PCM_FMT_UNKNOWN;
+  return PCM_FMT_S16B;
 }
 
 PcmAmplitudeFormat
