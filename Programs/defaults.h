@@ -86,14 +86,25 @@ extern "C" {
 #define DEFAULT_BRAILLE_ORIENTATION BRL_ORIENTATION_NORMAL
 
 #define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
+#define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
+#define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
+
+#if defined(ENABLE_BEEPER_SUPPORT)
 #define DEFAULT_TUNE_DEVICE tdBeeper
+#elif defined(ENABLE_PCM_SUPPORT)
+#define DEFAULT_TUNE_DEVICE tdPcm
+#elif defined(ENABLE_MIDI_SUPPORT)
+#define DEFAULT_TUNE_DEVICE tdMidi
+#elif defined(ENABLE_FM_SUPPORT)
+#define DEFAULT_TUNE_DEVICE tdFm
+#else /* no tune devices are supported */
+#define DEFAULT_TUNE_DEVICE 0
+#endif /* default tune device */
+
 #define DEFAULT_PCM_VOLUME 70		/* 0 to 100 (percent) */
 #define DEFAULT_MIDI_VOLUME 70		/* 0 to 100 (percent) */
 #define DEFAULT_MIDI_INSTRUMENT 0	/* 0 to 127 */
 #define DEFAULT_FM_VOLUME 70		/* 0 to 100 (percent) */
-
-#define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
-#define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_SPEECH_VOLUME SPK_VOLUME_DEFAULT
 #define DEFAULT_SPEECH_RATE SPK_RATE_DEFAULT
