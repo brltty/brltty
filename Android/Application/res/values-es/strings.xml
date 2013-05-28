@@ -1,0 +1,172 @@
+app_name BRLTTY
+app_description BRLTTY apoya dispositivos de braille. 
+
+input_service_name BRLTTY Servicio de Entrada
+input_service_type Teclados En Dispositivos de Braille
+
+VIRTUAL_BUTTON_NOTIFICATIONS Notificaciones
+VIRTUAL_BUTTON_QUICK_SETTINGS Ajustos Lijeros
+VIRTUAL_BUTTON_BACK De Vuelta
+VIRTUAL_BUTTON_HOME Hogar
+VIRTUAL_BUTTON_RECENT_APPS Aplicaciones Recientes
+
+SETTINGS_SCREEN_GENERAL Configuración General
+SETTINGS_SCREEN_DEVICES Administre Dispositivos
+SETTINGS_SCREEN_ADVANCED Configuración Avanzada
+
+SETTINGS_BUTTON_TEXT_TABLE Tabla de Texto
+SETTINGS_BUTTON_CONTRACTION_TABLE Tabla de Contracciones
+SETTINGS_BUTTON_ATTRIBUTES_TABLE Tabla de Atributos
+SETTINGS_BUTTON_LOG_LEVEL Nivel de Registro
+SETTINGS_BUTTON_LOG_CATEGORIES Categorías de Registro
+
+DEVICES_BUTTON_SELECTED Dispositivo Seleccionado
+DEVICES_BUTTON_ADD Añada un Dispositivo
+DEVICES_BUTTON_REMOVE Retire el Dispositivo
+
+ADD_DEVICE_NAME Nombre de Dispositivo
+ADD_DEVICE_METHOD Método de Comunicación
+ADD_DEVICE_SELECT Seleccione Dispositivo
+ADD_DEVICE_DRIVER Controlador de Braille
+ADD_DEVICE_DONE Terminado
+
+REMOVE_DEVICE_ASK ¿Realmente desea retirar este dispositivo?
+
+COMMUNICATION_METHOD_LABEL_Bluetooth Bluetooth
+COMMUNICATION_METHOD_LABEL_Usb USB
+COMMUNICATION_METHOD_LABEL_Serial Serial
+
+LOG_LEVEL_LABEL_debug Depure
+LOG_LEVEL_LABEL_information Informacción
+LOG_LEVEL_LABEL_notice Notificación
+LOG_LEVEL_LABEL_warning Amonestación
+LOG_LEVEL_LABEL_error Error
+LOG_LEVEL_LABEL_critical Critico
+LOG_LEVEL_LABEL_alert Alerta
+LOG_LEVEL_LABEL_emergency Emergencia
+
+LOG_CATEGORY_LABEL_ingio Entrada Genérica
+LOG_CATEGORY_LABEL_inpkts Paquetes de Entrada
+LOG_CATEGORY_LABEL_outpkts Paquetes de Salida
+LOG_CATEGORY_LABEL_brlkeys Eventos de Teclas de Dispositivos de Braille
+LOG_CATEGORY_LABEL_kbdkeys Eventos de Teclas de Teclados
+LOG_CATEGORY_LABEL_csrtrk Seguimiento de Cursor
+LOG_CATEGORY_LABEL_csrrtg Enrutamiento de Cursor
+
+BRAILLE_DRIVER_LABEL_auto Autodetecte
+
+TEXT_TABLE_LABEL_auto Selección Automática Basada en la Configuración Regional
+TEXT_TABLE_LABEL_ar Árabe (genérico
+TEXT_TABLE_LABEL_hy Armenio
+TEXT_TABLE_LABEL_as Asamés
+TEXT_TABLE_LABEL_awa Awadí
+TEXT_TABLE_LABEL_bn Bengalí
+TEXT_TABLE_LABEL_bh Biharí
+TEXT_TABLE_LABEL_brf Formado de Lista en Braille (para visualización de archivos BRF dentro de un editor o paginador)
+TEXT_TABLE_LABEL_bra Braj
+TEXT_TABLE_LABEL_bg Búlgaro
+TEXT_TABLE_LABEL_hr Croata
+TEXT_TABLE_LABEL_cs Checo
+TEXT_TABLE_LABEL_da Danés
+TEXT_TABLE_LABEL_da_lt Danés (TextoRegistro)
+TEXT_TABLE_LABEL_da_1252 Danés (Svend Thougaard, 2002-11-18)
+TEXT_TABLE_LABEL_dra Dravidiano
+TEXT_TABLE_LABEL_nl Holandés
+TEXT_TABLE_LABEL_nl_BE Holandés (Bélgica)
+TEXT_TABLE_LABEL_nl_NL Holandés (Países Bajos)
+TEXT_TABLE_LABEL_en Inglés
+TEXT_TABLE_LABEL_en_CA Inglés (Canadá)
+TEXT_TABLE_LABEL_en_nabcc Inglés (Código braille de computadoras norteamericano)
+TEXT_TABLE_LABEL_en_GB Inglés (Reino Unido)
+TEXT_TABLE_LABEL_en_US Inglés (Estados Unidos)
+TEXT_TABLE_LABEL_eo Esperanto
+TEXT_TABLE_LABEL_et Estonio
+TEXT_TABLE_LABEL_fi Finlandés
+TEXT_TABLE_LABEL_fr Francés
+TEXT_TABLE_LABEL_fr_CA Francés (Canadá)
+TEXT_TABLE_LABEL_fr_cbifs Francés (Code Braille Informatique FranÃ§ais estándar)
+TEXT_TABLE_LABEL_fr_FR Francés (Francia)
+TEXT_TABLE_LABEL_fr_vs Francés (VisioBraille)
+TEXT_TABLE_LABEL_fr_2007 Francés (unificado 2007)
+TEXT_TABLE_LABEL_gd Gaélico
+TEXT_TABLE_LABEL_de Alemán
+TEXT_TABLE_LABEL_gon Gondí
+TEXT_TABLE_LABEL_el Griego
+TEXT_TABLE_LABEL_gu Gujaratí
+TEXT_TABLE_LABEL_he Hebreo
+TEXT_TABLE_LABEL_hi Hindí
+TEXT_TABLE_LABEL_hu Húngaro
+TEXT_TABLE_LABEL_is Islandés
+TEXT_TABLE_LABEL_ga Irlandés
+TEXT_TABLE_LABEL_it Italiano
+TEXT_TABLE_LABEL_kn Kannada
+TEXT_TABLE_LABEL_kha Khasí
+TEXT_TABLE_LABEL_kok Konkaní
+TEXT_TABLE_LABEL_kru Kurukh
+TEXT_TABLE_LABEL_lv Letón
+TEXT_TABLE_LABEL_lt Lituano
+TEXT_TABLE_LABEL_mg Malagasy
+TEXT_TABLE_LABEL_ml Malayalam
+TEXT_TABLE_LABEL_mt Maltés
+TEXT_TABLE_LABEL_mni Manipurí
+TEXT_TABLE_LABEL_mi Maorí
+TEXT_TABLE_LABEL_mr Maratí
+TEXT_TABLE_LABEL_mwr Marwarí
+TEXT_TABLE_LABEL_mun Munda
+TEXT_TABLE_LABEL_ne Nepalí
+TEXT_TABLE_LABEL_new Newarí
+TEXT_TABLE_LABEL_nwc Newarí (viejo)
+TEXT_TABLE_LABEL_no Noruego
+TEXT_TABLE_LABEL_no_oub Noruego (Offentlig Utvalg for Blindeskrift)
+TEXT_TABLE_LABEL_no_generic Noruego (con apoyo de otros idiomas)
+TEXT_TABLE_LABEL_or Oriya
+TEXT_TABLE_LABEL_pi Palí
+TEXT_TABLE_LABEL_pa Panjabí
+TEXT_TABLE_LABEL_pl Polaco
+TEXT_TABLE_LABEL_pt Portugués
+TEXT_TABLE_LABEL_ro Rumano
+TEXT_TABLE_LABEL_ru Ruso
+TEXT_TABLE_LABEL_sa Sánscrito
+TEXT_TABLE_LABEL_sat Santalí
+TEXT_TABLE_LABEL_sd Sindí
+TEXT_TABLE_LABEL_sk Eslovaco
+TEXT_TABLE_LABEL_es Español
+TEXT_TABLE_LABEL_sw Swahilí
+TEXT_TABLE_LABEL_sv Sueco
+TEXT_TABLE_LABEL_sv_1989 Sueco (1989 estándar)
+TEXT_TABLE_LABEL_sv_1996 Sueco (1996 estándar)
+TEXT_TABLE_LABEL_ta Tamil
+TEXT_TABLE_LABEL_te Telugu
+TEXT_TABLE_LABEL_bo Tibetano
+TEXT_TABLE_LABEL_tr Turco
+TEXT_TABLE_LABEL_vi Vietnamita
+TEXT_TABLE_LABEL_cy Galés
+
+CONTRACTION_TABLE_LABEL_af Africaans (contraccionado)
+CONTRACTION_TABLE_LABEL_am Amharico (sin contracciones)
+CONTRACTION_TABLE_LABEL_ny Chichewa (contraccionado)
+CONTRACTION_TABLE_LABEL_zh_tw_ucb Chino (Taiwan, Braille Chino Único)
+CONTRACTION_TABLE_LABEL_zh_tw Chino (Taiwan, sin contracciones)
+CONTRACTION_TABLE_LABEL_nl Islandés (contraccionado)
+CONTRACTION_TABLE_LABEL_en_us_g2 Inglés (Estados Unidos,  grado 2)
+CONTRACTION_TABLE_LABEL_en_ueb_g2 Inglés (Braille Inglés unificado, grado 2)
+CONTRACTION_TABLE_LABEL_fr_abrege Francés (contraccionado)
+CONTRACTION_TABLE_LABEL_fr_integral Francés (sin contracciones)
+CONTRACTION_TABLE_LABEL_de_vollschrift Alemán (contracciones básicas)
+CONTRACTION_TABLE_LABEL_de_kurzschrift Alemán (contraccionado - estándar de 1998)
+CONTRACTION_TABLE_LABEL_de_basis Alemán (sin contracciones)
+CONTRACTION_TABLE_LABEL_ha Hausa (contraccionado)
+CONTRACTION_TABLE_LABEL_id Indonesio (contraccionado)
+CONTRACTION_TABLE_LABEL_ipa Alfabeto Fonético Internacional
+CONTRACTION_TABLE_LABEL_ja Japonés (sin contracciones)
+CONTRACTION_TABLE_LABEL_ko_g1 Coreano (grado 1)
+CONTRACTION_TABLE_LABEL_ko_g2 Coreano (grado 2)
+CONTRACTION_TABLE_LABEL_ko Coreano (sin contracciones)
+CONTRACTION_TABLE_LABEL_mg Malagasy (contraccionado)
+CONTRACTION_TABLE_LABEL_mun Munda (contraccionado)
+CONTRACTION_TABLE_LABEL_pt Portugés (grado 2)
+CONTRACTION_TABLE_LABEL_si Sinhalés (sin contracciones)
+CONTRACTION_TABLE_LABEL_es Español (grado 2)
+CONTRACTION_TABLE_LABEL_sw Swahilí (contraccionado)
+CONTRACTION_TABLE_LABEL_th Tilandés (contraccionado)
+CONTRACTION_TABLE_LABEL_zu Zulú (contraccionado)
