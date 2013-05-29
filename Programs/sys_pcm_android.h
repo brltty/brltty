@@ -223,16 +223,7 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (PcmDevice *pcm) {
-  typedef union {
-    uint8_t formats[2];
-    uint16_t value;
-  } FormatChooser;
-
-  static const FormatChooser formatChooser = {
-    .formats = {PCM_FMT_S16L, PCM_FMT_S16B}
-  };
-
-  return formatChooser.value & 0XFF;;
+  return PCM_FMT_S16H;
 }
 
 PcmAmplitudeFormat

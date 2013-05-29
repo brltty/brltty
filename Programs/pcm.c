@@ -126,6 +126,13 @@ writeSample (NoteDevice *device, int amplitude) {
       length = 2;
       break;
 
+    case PCM_FMT_U16H:
+      amplitude += 0X8000;
+    case PCM_FMT_S16H:
+      *((int16_t *)sample) = amplitude;
+      length = 2;
+      break;
+
     case PCM_FMT_ULAW: {
       int negative = amplitude < 0;
       int exponent = 0X7;
