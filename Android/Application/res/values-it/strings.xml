@@ -42,7 +42,7 @@
   <string name="LOG_LEVEL_LABEL_debug">Debug</string>
   <string name="LOG_LEVEL_LABEL_information">Informazioni</string>
   <string name="LOG_LEVEL_LABEL_notice">Notifica</string>
-  <string name="LOG_LLEVEL_LABEL_warning">Avviso</string>
+  <string name="LOG_LEVEL_LABEL_warning">Avviso</string>
   <string name="LOG_LEVEL_LABEL_error">Errore</string>
   <string name="LOG_LEVEL_LABEL_critical">Critico</string>
   <string name="LOG_LEVEL_LABEL_alert">Allarme</string>
