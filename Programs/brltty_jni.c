@@ -197,9 +197,9 @@ Java_org_a11y_brltty_core_CoreWrapper_update (JNIEnv *env, jobject this) {
   return brlttyUpdate_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
-  brlttyDestruct_p();
+  int result = brlttyDestruct_p();
 
 /*
   {
@@ -236,6 +236,8 @@ Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
     (*env)->DeleteGlobalRef(env, jArgumentArray);
     jArgumentArray = NULL;
   }
+
+  return result? JNI_TRUE: JNI_FALSE;
 }
 
 static jboolean

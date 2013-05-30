@@ -1880,9 +1880,10 @@ brlttyConstruct (int argc, char *argv[]) {
   return PROG_EXIT_SUCCESS;
 }
 
-void
+int
 brlttyDestruct (void) {
   endProgram();
+  return 1;
 }
 
 static int
