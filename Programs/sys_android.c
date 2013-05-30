@@ -136,6 +136,7 @@ findJavaClass (JNIEnv *env, jclass *class, const char *path) {
       localReference = NULL;
 
       if (globalReference) {
+        logMessage(LOG_DEBUG, "java class found: %s", path);
         *class = globalReference;
         return 1;
       } else {
@@ -162,6 +163,8 @@ findJavaInstanceMethod (
       clearJavaException(env, 0);
       return 0;
     }
+
+    logMessage(LOG_DEBUG, "java instance method found: %s: %s", name, signature);
   }
 
   return 1;
@@ -178,6 +181,8 @@ findJavaStaticMethod (
       clearJavaException(env, 0);
       return 0;
     }
+
+    logMessage(LOG_DEBUG, "java static method found: %s: %s", name, signature);
   }
 
   return 1;
@@ -202,6 +207,8 @@ findJavaInstanceField (
       clearJavaException(env, 0);
       return 0;
     }
+
+    logMessage(LOG_DEBUG, "java instance field found: %s: %s", name, signature);
   }
 
   return 1;
@@ -218,6 +225,8 @@ findJavaStaticField (
       clearJavaException(env, 0);
       return 0;
     }
+
+    logMessage(LOG_DEBUG, "java static field found: %s: %s", name, signature);
   }
 
   return 1;
