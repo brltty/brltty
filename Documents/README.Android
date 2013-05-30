@@ -16,7 +16,7 @@ BIND_INPUT_METHOD
    This permission is required so that Android will accept input from
    your braille device's keyboard.
 
-DEVICE_POWER
+WAKE_LOCK
    This permission is required so that BRLTTY can reset the Android
    device's lock timer each time you interact with a control on your
    braille device.

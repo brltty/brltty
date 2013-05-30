@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 import android.os.SystemClock;
+import android.os.PowerManager;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
@@ -41,6 +42,12 @@ public final class ScreenDriver {
   private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = new RenderedScreen(null);
+
+  private static final PowerManager.WakeLock wakeLock =
+    ApplicationUtilities.getPowerManager().newWakeLock(
+      PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
+      ApplicationHooks.getContext().getString(R.string.app_name)
+    );
 
   public static ScreenLogger getLogger () {
     return currentLogger;
@@ -572,7 +579,8 @@ public final class ScreenDriver {
   }
 
   public static void resetLockTimer () {
-    ApplicationUtilities.getPowerManager().userActivity(SystemClock.uptimeMillis(), true);
+    wakeLock.acquire();
+    wakeLock.release();
   }
 
   private ScreenDriver () {
