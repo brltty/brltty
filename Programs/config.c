@@ -1619,7 +1619,7 @@ retryPidFile (void *data UNUSED) {
 static int
 tryPidFile (void) {
   if (makePidFile(0)) {
-    onProgramExit(exitPidFile);
+    onProgramExit(exitPidFile, "pid-file");
   } else if (errno == EEXIST) {
     return 0;
   } else {
@@ -1991,11 +1991,11 @@ brlttyStart (int argc, char *argv[]) {
    * be used instead.
    */
 
-  onProgramExit(exitScreens);
+  onProgramExit(exitScreens, "screens");
   constructSpecialScreens();
   enableBrailleHelpPage(); /* ensure that it's first */
 
-  onProgramExit(exitTunes);
+  onProgramExit(exitTunes, "tunes");
   suppressTuneDeviceOpenErrors();
 
   {
@@ -2051,14 +2051,14 @@ brlttyStart (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
-  onProgramExit(exitContractionTable);
+  onProgramExit(exitContractionTable, "contraction-table");
   if (*opt_contractionTable) changeContractionTable(opt_contractionTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
-  onProgramExit(exitKeyTable);
+  onProgramExit(exitKeyTable, "key-table");
   replaceKeyboardKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
@@ -2086,7 +2086,7 @@ brlttyStart (int argc, char *argv[]) {
                   gettext("API Parameter"));
     if (!opt_verify) {
       if (api_start(&brl, apiParameters)) {
-        onProgramExit(exitApi);
+        onProgramExit(exitApi, "api");
         apiStarted = 1;
       }
     }
@@ -2106,7 +2106,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
-    onProgramExit(exitBrailleDriver);
+    onProgramExit(exitBrailleDriver, "braille-driver");
     tryBrailleDriver();
   }
 
@@ -2116,7 +2116,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
-    onProgramExit(exitSpeechDriver);
+    onProgramExit(exitSpeechDriver, "speech-driver");
     trySpeechDriver();
   }
 

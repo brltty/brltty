@@ -512,7 +512,7 @@ startRouting (int column, int row, int screen) {
         static int first = 1;
         if (first) {
           first = 0;
-          onProgramExit(exitRouting);
+          onProgramExit(exitRouting, "routing");
         }
       }
 

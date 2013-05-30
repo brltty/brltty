@@ -45,7 +45,7 @@ extern void beginProgram (int argumentCount, char **argumentVector);
 extern void endProgram (void);
 
 typedef void ProgramExitHandler (void);
-extern void onProgramExit (ProgramExitHandler *handler);
+extern void onProgramExit (ProgramExitHandler *handler, const char *name);
 
 extern void makeProgramBanner (char *buffer, size_t size);
 

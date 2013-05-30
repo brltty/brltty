@@ -286,7 +286,7 @@ exitSpeechInput (void) {
 int
 enableSpeechInput (const char *name) {
   const char *directory;
-  onProgramExit(exitSpeechInput);
+  onProgramExit(exitSpeechInput, "speech-input");
 
 #if defined(__MINGW32__)
   directory = "//./pipe";
