@@ -20,9 +20,13 @@ package org.a11y.brltty.android;
 
 import java.util.HashMap;
 
+import android.util.Log;
+
 import android.speech.tts.TextToSpeech;
 
-public final class SpeechDriver {
+public class SpeechDriver {
+  private static final String LOG_TAG = SpeechDriver.class.getName();
+
   enum State {
     STOPPED,
     STARTED,
@@ -37,12 +41,39 @@ public final class SpeechDriver {
     TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
       @Override
       public void onInit (int status) {
-        state = (status == TextToSpeech.SUCCESS)? State.STARTED: State.FAILED;
+        switch (status) {
+          case TextToSpeech.SUCCESS:
+            state = State.STARTED;
+            Log.d(LOG_TAG, "text to speech engine started");
+            break;
+
+          default:
+            Log.d(LOG_TAG, "unknown text to speech engine startup status: " + status);
+          case TextToSpeech.ERROR:
+            state = State.FAILED;
+            Log.w(LOG_TAG, "text to speech engine failed");
+            break;
+        }
+
+        synchronized (this) {
+          notify();
+        }
       }
     };
 
+    Log.d(LOG_TAG, "starting text to speech engine");
     state = State.STOPPED;
     tts = new TextToSpeech(BrailleService.getBrailleService(), listener);
+
+    synchronized (listener) {
+      while (state == State.STOPPED) {
+        try {
+          listener.wait();
+        } catch (InterruptedException exception) {
+        }
+      }
+    }
+
     parameters.clear();
     return true;
   }
@@ -74,8 +105,5 @@ public final class SpeechDriver {
 
   public static boolean setPitch (float pitch) {
     return tts.setPitch(pitch) == TextToSpeech.SUCCESS;
-  }
-
-  private SpeechDriver () {
   }
 }
