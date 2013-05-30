@@ -503,7 +503,7 @@ brltty.class: $(SRC_DIR)/brltty.java
 	javac $(SRC_DIR)/brltty.java
 
 $(BRLTTY_JNI_LIB): brltty_jni.$O $(BRLTTY_CORE_LIB)
-	$(MKLIB:<name>=$@) $@ brltty_jni.$O
+	$(MKLIB:<name>=$@) $@ brltty_jni.$O $(LDLIBS)
 
 brltty_jni.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brltty_jni.c
