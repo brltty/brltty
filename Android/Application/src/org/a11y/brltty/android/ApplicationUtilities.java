@@ -19,6 +19,8 @@
 package org.a11y.brltty.android;
 
 import android.content.Context;
+import android.content.ContentResolver;
+import android.provider.Settings;
 
 import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
@@ -29,6 +31,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
+  public static ContentResolver getContentResolver () {
+    return ApplicationHooks.getContext().getContentResolver();
+  }
+
+  public static String getSecureSetting (String setting) {
+    return Settings.Secure.getString(getContentResolver(), setting);
+  }
+
+  public static String getSelectedInputMethodIdentifier () {
+    return getSecureSetting(Settings.Secure.DEFAULT_INPUT_METHOD);
+  }
+
   public static SharedPreferences getSharedPreferences () {
     return PreferenceManager.getDefaultSharedPreferences(ApplicationHooks.getContext());
   }

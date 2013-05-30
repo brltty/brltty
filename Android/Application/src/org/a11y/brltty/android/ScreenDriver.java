@@ -334,15 +334,31 @@ public final class ScreenDriver {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
 
-  public static String getInputServiceClassName () {
-    return InputService.class.getName();
+  public static InputMethodInfo getInputMethodInfo (Class classObject) {
+    String className = classObject.getName();
+
+    for (InputMethodInfo info : ApplicationUtilities.getInputMethodManager().getEnabledInputMethodList()) {
+      if (info.getComponent().getClassName().equals(className)) {
+        return info;
+      }
+    }
+
+    return null;
+  }
+
+  public static InputMethodInfo getInputMethodInfo () {
+    return getInputMethodInfo(InputService.class);
   }
 
   public static boolean isInputServiceEnabled () {
-    String inputServiceClass = getInputServiceClassName();
+    return getInputMethodInfo() != null;
+  }
 
-    for (InputMethodInfo info : ApplicationUtilities.getInputMethodManager().getEnabledInputMethodList()) {
-      if (info.getComponent().getClassName().equals(inputServiceClass)) {
+  public static boolean isInputServiceSelected () {
+    InputMethodInfo info = getInputMethodInfo();
+
+    if (info != null) {
+      if (info.getId().equals(ApplicationUtilities.getSelectedInputMethodIdentifier())) {
         return true;
       }
     }
@@ -352,9 +368,15 @@ public final class ScreenDriver {
 
   public static InputConnection getInputConnection () {
     InputService service = InputService.getInputService();
-    if (service != null) return service.getCurrentInputConnection();
+    if (service != null) {
+      InputConnection connection = service.getCurrentInputConnection();
+      if (connection != null) return connection;
+    }
 
-    ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
+    if (!isInputServiceSelected()) {
+      ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
+    }
+
     return null;
   }
 
