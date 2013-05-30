@@ -26,7 +26,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class CoreWrapper {
   public static native int construct (String[] arguments);
   public static native boolean update ();
-  public static native void destruct ();
+  public static native boolean destruct ();
 
   public static native boolean changeLogLevel (String level);
   public static native boolean changeLogCategories (String categories);
