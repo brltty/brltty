@@ -76,9 +76,10 @@ public class CoreWrapper {
   }
 
   public static int run (String[] arguments) {
+    stop = false;
     clearRunQueue();
-    int exitStatus = construct(arguments);
 
+    int exitStatus = construct(arguments);
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
       while (update()) {
         if (stop) break;
