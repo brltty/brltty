@@ -43,15 +43,15 @@ public class SpeechDriver {
       public void onInit (int status) {
         switch (status) {
           case TextToSpeech.SUCCESS:
-            state = State.STARTED;
             Log.d(LOG_TAG, "text to speech engine started");
+            state = State.STARTED;
             break;
 
           default:
             Log.d(LOG_TAG, "unknown text to speech engine startup status: " + status);
           case TextToSpeech.ERROR:
-            state = State.FAILED;
             Log.w(LOG_TAG, "text to speech engine failed");
+            state = State.FAILED;
             break;
         }
 
@@ -74,8 +74,13 @@ public class SpeechDriver {
       }
     }
 
-    parameters.clear();
-    return true;
+    if (state == State.STARTED) {
+      parameters.clear();
+      return true;
+    }
+
+    tts = null;
+    return false;
   }
 
   public static void stop () {
