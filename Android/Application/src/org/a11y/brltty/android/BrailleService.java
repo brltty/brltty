@@ -40,13 +40,15 @@ public class BrailleService extends AccessibilityService {
   @Override
   public void onCreate () {
     super.onCreate();
-    Log.d(LOG_TAG, "braille service created");
+    Log.d(LOG_TAG, "braille service started");
     brailleService = this;
   }
 
   @Override
   public void onDestroy () {
     brailleService = null;
+    super.onDestroy();
+    Log.d(LOG_TAG, "braille service stopped");
   }
 
   @Override
@@ -63,8 +65,11 @@ public class BrailleService extends AccessibilityService {
     CoreWrapper.stop();
 
     try {
+      Log.d(LOG_TAG, "waiting for core to finish");
       coreThread.join();
+      Log.d(LOG_TAG, "core finished");
     } catch (InterruptedException exception) {
+      Log.d(LOG_TAG, "core join failed", exception);
     }
 
     return false;

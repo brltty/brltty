@@ -20,14 +20,16 @@ package org.a11y.brltty.android;
 
 import android.util.Log;
 
-import android.inputmethodservice.InputMethodService;
+import android.content.Intent;
 
+import android.inputmethodservice.InputMethodService;
 import android.view.inputmethod.EditorInfo;
 
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
 
   private static InputService inputService = null;
+  private static int startIdentifier = 0;
 
   public static InputService getInputService () {
     return inputService;
@@ -45,17 +47,24 @@ public class InputService extends InputMethodService {
     super.onDestroy();
     Log.d(LOG_TAG, "input service stopped");
     inputService = null;
+    startIdentifier = 0;
+  }
+
+  @Override
+  public int onStartCommand (Intent intent, int flags, int identifier) {
+    startIdentifier = identifier;
+    return START_STICKY;
   }
 
   @Override
   public void onStartInput (EditorInfo info, boolean restarting) {
-    Log.d(LOG_TAG, "input started:" + " r=" + restarting);
+    Log.d(LOG_TAG, "input service " + (restarting? "reconnected": "connected"));
     if (info.actionLabel != null) Log.d(LOG_TAG, "action label: " + info.actionLabel);
     Log.d(LOG_TAG, "action id: " + info.actionId);
   }
 
   @Override
   public void onFinishInput () {
-    Log.d(LOG_TAG, "input finished");
+    Log.d(LOG_TAG, "input service disconnected");
   }
 }
