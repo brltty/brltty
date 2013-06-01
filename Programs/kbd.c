@@ -22,6 +22,8 @@
 
 #include "log.h"
 #include "parse.h"
+#include "bitmask.h"
+
 #include "kbd.h"
 #include "kbd_internal.h"
 
@@ -128,4 +130,131 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
   }
 
   return 0;
+}
+
+KeyboardInstanceData *
+newKeyboardInstanceData (KeyboardCommonData *kcd) {
+  KeyboardInstanceData *kid;
+  unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeLimit, BITMASK_ELEMENT_SIZE(unsigned char));
+  size_t size = sizeof(*kid) + count;
+
+  if ((kid = malloc(size))) {
+    memset(kid, 0, size);
+
+    kid->kcd = kcd;
+    kid->actualProperties = anyKeyboard;
+
+    kid->keyEventBuffer = NULL;
+    kid->keyEventLimit = 0;
+    kid->keyEventCount = 0;
+
+    kid->justModifiers = 0;
+    kid->handledKeysSize = count;
+
+    return kid;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
+  if (kid->keyEventBuffer) free(kid->keyEventBuffer);
+  free(kid);
+}
+
+void
+handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
+  int mapped = 0;
+  KeyTableState state = KTS_UNBOUND;
+
+  if ((code >= 0) && (code < keyCodeLimit)) {
+    unsigned char key = keyCodeMap[code];
+
+    if (key) {
+      mapped = 1;
+      state = kid->kcd->handleKeyEvent(0, key, press);
+    }
+  }
+
+  if (!mapped) {
+    logMessage(LOG_INFO, "unmapped key code: %d", code);
+  } else if (state != KTS_HOTKEY) {
+    typedef enum {
+      WKA_NONE,
+      WKA_CURRENT,
+      WKA_ALL
+    } WriteKeysAction;
+    WriteKeysAction action = WKA_NONE;
+
+    if (press) {
+      kid->justModifiers = state == KTS_MODIFIERS;
+
+      if (state == KTS_UNBOUND) {
+        action = WKA_ALL;
+      } else {
+        if (kid->keyEventCount == kid->keyEventLimit) {
+          unsigned int newLimit = kid->keyEventLimit? kid->keyEventLimit<<1: 0X1;
+          KeyEventEntry *newBuffer = realloc(kid->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
+
+          if (newBuffer) {
+            kid->keyEventBuffer = newBuffer;
+            kid->keyEventLimit = newLimit;
+          } else {
+            logMallocError();
+          }
+        }
+
+        if (kid->keyEventCount < kid->keyEventLimit) {
+          KeyEventEntry *event = &kid->keyEventBuffer[kid->keyEventCount++];
+
+          event->code = code;
+          event->press = press;
+
+          BITMASK_SET(kid->handledKeysMask, code);
+        }
+      }
+    } else if (kid->justModifiers) {
+      kid->justModifiers = 0;
+      action = WKA_ALL;
+    } else if (BITMASK_TEST(kid->handledKeysMask, code)) {
+      KeyEventEntry *to = kid->keyEventBuffer;
+      const KeyEventEntry *from = to;
+      unsigned int count = kid->keyEventCount;
+
+      while (count) {
+        if (from->code != code)
+          if (to != from)
+            *to++ = *from;
+
+        from += 1, count -= 1;
+      }
+
+      kid->keyEventCount = to - kid->keyEventBuffer;
+      BITMASK_CLEAR(kid->handledKeysMask, code);
+    } else {
+      action = WKA_CURRENT;
+    }
+
+    switch (action) {
+      case WKA_ALL: {
+        const KeyEventEntry *event = kid->keyEventBuffer;
+
+        while (kid->keyEventCount) {
+          writeKeyboardEvent(event->code, event->press);
+          event += 1, kid->keyEventCount -= 1;
+        }
+
+        memset(kid->handledKeysMask, 0, kid->handledKeysSize);
+      }
+
+      case WKA_CURRENT:
+        writeKeyboardEvent(code, press);
+
+      case WKA_NONE:
+        break;
+    }
+  }
 }

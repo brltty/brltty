@@ -23,9 +23,10 @@
 #include <errno.h>
 
 #include "log.h"
+#include "sys_linux.h"
+
 #include "kbd.h"
 #include "kbd_internal.h"
-#include "sys_linux.h"
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <limits.h>
@@ -38,21 +39,12 @@
 #include <linux/netlink.h>
 #include <linux/input.h>
 
-#include "bitmask.h"
 #include "async.h"
 
 typedef struct {
-  KeyboardCommonData *kcd;
+  KeyboardInstanceData *kid;
   int fileDescriptor;
-  KeyboardProperties actualProperties;
-
-  BITMASK(handledKeys, KEY_MAX+1, char);
-  unsigned justModifiers:1;
-
-  struct input_event *keyEventBuffer;
-  unsigned int keyEventLimit;
-  unsigned int keyEventCount;
-} KeyboardPrivateData;
+} KeyboardPlatformData;
 
 const unsigned char keyCodeMap[KEY_MAX + 1] = {
   [KEY_ESC] = KBD_KEY_FUNCTION_Escape,
@@ -487,16 +479,22 @@ const unsigned char keyCodeMap[KEY_MAX + 1] = {
 //[KEY_BRL_DOT10] = KBD_KEY_...,
 //[KEY_MIN_INTERESTING] = KBD_KEY_...,
 };
+const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
 
 static void
-closeKeyboard (KeyboardPrivateData *kpd) {
+closeKeyboard (KeyboardPlatformData *kpd) {
   close(kpd->fileDescriptor);
   free(kpd);
 }
 
+int
+writeKeyboardEvent (int code, int press) {
+  return writeKeyEvent(code, (press? 1: 0));
+}
+
 static size_t
 handleKeyboardEvent (const AsyncInputResult *result) {
-  KeyboardPrivateData *kpd = result->data;
+  KeyboardPlatformData *kpd = result->data;
 
   if (result->error) {
     logMessage(LOG_DEBUG, "keyboard read error: fd=%d: %s",
@@ -513,91 +511,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
         int release = event->value == 0;
         int press   = event->value == 1;
 
-        if (release || press) {
-          KeyTableState state;
-
-          {
-            unsigned char key = keyCodeMap[event->code];
-
-            if (key) {
-              state = kpd->kcd->handleKeyEvent(0, key, press);
-            } else {
-              logMessage(LOG_INFO, "unmapped Linux keycode: %d", event->code);
-              state = KTS_UNBOUND;
-            }
-          }
-
-          if (state != KTS_HOTKEY) {
-            typedef enum {
-              WKA_NONE,
-              WKA_CURRENT,
-              WKA_ALL
-            } WriteKeysAction;
-            WriteKeysAction action = WKA_NONE;
-
-            if (press) {
-              kpd->justModifiers = state == KTS_MODIFIERS;
-
-              if (state == KTS_UNBOUND) {
-                action = WKA_ALL;
-              } else {
-                if (kpd->keyEventCount == kpd->keyEventLimit) {
-                  unsigned int newLimit = kpd->keyEventLimit? kpd->keyEventLimit<<1: 0X1;
-                  struct input_event *newBuffer = realloc(kpd->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
-
-                  if (newBuffer) {
-                    kpd->keyEventBuffer = newBuffer;
-                    kpd->keyEventLimit = newLimit;
-                  }
-                }
-
-                if (kpd->keyEventCount < kpd->keyEventLimit) {
-                  kpd->keyEventBuffer[kpd->keyEventCount++] = *event;
-                  BITMASK_SET(kpd->handledKeys, event->code);
-                }
-              }
-            } else if (kpd->justModifiers) {
-              kpd->justModifiers = 0;
-              action = WKA_ALL;
-            } else if (BITMASK_TEST(kpd->handledKeys, event->code)) {
-              struct input_event *to = kpd->keyEventBuffer;
-              const struct input_event *from = to;
-              unsigned int count = kpd->keyEventCount;
-
-              while (count) {
-                if (from->code != event->code)
-                  if (to != from)
-                    *to++ = *from;
-
-                from += 1, count -= 1;
-              }
-
-              kpd->keyEventCount = to - kpd->keyEventBuffer;
-              BITMASK_CLEAR(kpd->handledKeys, event->code);
-            } else {
-              action = WKA_CURRENT;
-            }
-
-            switch (action) {
-              case WKA_ALL: {
-                const struct input_event *keyEvent = kpd->keyEventBuffer;
-
-                while (kpd->keyEventCount) {
-                  writeKeyEvent(keyEvent->code, keyEvent->value);
-                  keyEvent += 1, kpd->keyEventCount -= 1;
-                }
-
-                memset(kpd->handledKeys, 0, sizeof(kpd->handledKeys));
-              }
-
-              case WKA_CURRENT:
-                writeKeyEvent(event->code, event->value);
-
-              case WKA_NONE:
-                break;
-            }
-          }
-        }
+        if (release || press) handleKeyEvent(kpd->kid, event->code, press);
       } else {
         writeInputEvent(event->type, event->code, event->value);
       }
@@ -615,64 +529,62 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
 
   if (fstat(device, &status) != -1) {
     if (S_ISCHR(status.st_mode)) {
-      KeyboardPrivateData *kpd;
+      KeyboardPlatformData *kpd;
 
       if ((kpd = malloc(sizeof(*kpd)))) {
         memset(kpd, 0, sizeof(*kpd));
-        kpd->kcd = kcd;
         kpd->fileDescriptor = device;
 
-        kpd->keyEventBuffer = NULL;
-        kpd->keyEventLimit = 0;
-        kpd->keyEventCount = 0;
+        if ((kpd->kid = newKeyboardInstanceData(kcd))) {
+          {
+            struct input_id identity;
+            if (ioctl(device, EVIOCGID, &identity) != -1) {
+              logMessage(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
+                         device, identity.bustype, identity.vendor, identity.product, identity.version);
 
-        kpd->actualProperties = anyKeyboard;
-        {
-          struct input_id identity;
-          if (ioctl(device, EVIOCGID, &identity) != -1) {
-            logMessage(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
-                       device, identity.bustype, identity.vendor, identity.product, identity.version);
+              {
+                static const KeyboardType typeTable[] = {
+  #ifdef BUS_I8042
+                  [BUS_I8042] = KBD_TYPE_PS2,
+  #endif /* BUS_I8042 */
 
-            {
-              static const KeyboardType typeTable[] = {
-#ifdef BUS_I8042
-                [BUS_I8042] = KBD_TYPE_PS2,
-#endif /* BUS_I8042 */
+  #ifdef BUS_USB
+                  [BUS_USB] = KBD_TYPE_USB,
+  #endif /* BUS_USB */
 
-#ifdef BUS_USB
-                [BUS_USB] = KBD_TYPE_USB,
-#endif /* BUS_USB */
+  #ifdef BUS_BLUETOOTH
+                  [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+  #endif /* BUS_BLUETOOTH */
+                };
 
-#ifdef BUS_BLUETOOTH
-                [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-#endif /* BUS_BLUETOOTH */
-              };
+                if (identity.bustype < ARRAY_COUNT(typeTable))
+                  kpd->kid->actualProperties.type = typeTable[identity.bustype];
+              }
 
-              if (identity.bustype < ARRAY_COUNT(typeTable))
-                kpd->actualProperties.type = typeTable[identity.bustype];
+              kpd->kid->actualProperties.vendor = identity.vendor;
+              kpd->kid->actualProperties.product = identity.product;
+            } else {
+              logMessage(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
+                         device, strerror(errno));
             }
-
-            kpd->actualProperties.vendor = identity.vendor;
-            kpd->actualProperties.product = identity.product;
-          } else {
-            logMessage(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
-                       device, strerror(errno));
           }
-        }
-      
-        if (kpd->actualProperties.type) {
-          if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
-            if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-              if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
-#ifdef EVIOCGRAB
-                ioctl(device, EVIOCGRAB, 1);
-#endif /* EVIOCGRAB */
+        
+          if (kpd->kid->actualProperties.type) {
+            if (checkKeyboardProperties(&kpd->kid->actualProperties, &kcd->requiredProperties)) {
+              if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+                if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
+  #ifdef EVIOCGRAB
+                  ioctl(device, EVIOCGRAB, 1);
+  #endif /* EVIOCGRAB */
 
-                logMessage(LOG_DEBUG, "keyboard found: fd=%d", device);
-                return 1;
+                  logMessage(LOG_DEBUG, "keyboard found: fd=%d", device);
+                  return 1;
+                }
               }
             }
           }
+
+          deallocateKeyboardInstanceData(kpd->kid);
         }
 
         free(kpd);

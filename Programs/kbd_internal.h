@@ -25,14 +25,39 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const unsigned char keyCodeMap[];
-
 typedef struct {
   KeyEventHandler *handleKeyEvent;
   KeyboardProperties requiredProperties;
 } KeyboardCommonData;
 
+typedef struct {
+  int code;
+  int press;
+} KeyEventEntry;
+
+typedef struct {
+  KeyboardCommonData *kcd;
+  KeyboardProperties actualProperties;
+
+  KeyEventEntry *keyEventBuffer;
+  unsigned int keyEventLimit;
+  unsigned int keyEventCount;
+
+  unsigned justModifiers:1;
+
+  unsigned int handledKeysSize;
+  unsigned char handledKeysMask[1];
+} KeyboardInstanceData;
+
+extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
+extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardCommonData *kcd);
+extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
+
 extern int monitorKeyboards (KeyboardCommonData *kcd);
+extern int writeKeyboardEvent (int code, int press);
+
+extern const unsigned char keyCodeMap[];
+extern const int keyCodeLimit;
 
 #ifdef __cplusplus
 }
