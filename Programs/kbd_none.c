@@ -23,6 +23,11 @@
 #include "kbd.h"
 #include "kbd_internal.h"
 
+const unsigned char keyCodeMap[] = {
+  [0] = 0
+};
+const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
+
 int
 writeKeyboardEvent (int code, int press) {
   return 0;
