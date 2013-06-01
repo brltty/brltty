@@ -121,6 +121,9 @@ kbd.$O:
 kbd_none.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_none.c
 
+kbd_android.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_android.c
+
 kbd_linux.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_linux.c
 

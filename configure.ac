@@ -1241,6 +1241,7 @@ BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
+   *android*) keyboard_package="android";;
    linux*) keyboard_package="linux";;
 ])
 
