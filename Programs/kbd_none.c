@@ -24,6 +24,11 @@
 #include "kbd_internal.h"
 
 int
+writeKeyboardEvent (int code, int press) {
+  return 0;
+}
+
+int
 monitorKeyboards (KeyboardCommonData *kcd) {
   return 0;
 }
