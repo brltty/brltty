@@ -23,6 +23,7 @@
 #include "log.h"
 #include "parse.h"
 #include "kbd.h"
+#include "kbd_internal.h"
 
 const KeyboardProperties anyKeyboard = {
   .type = KBD_TYPE_Any,
@@ -106,4 +107,25 @@ checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardPropert
   }
 
   return 1;
+}
+
+int
+startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+  KeyboardCommonData *kcd;
+
+  if ((kcd = malloc(sizeof(*kcd)))) {
+    memset(kcd, 0, sizeof(*kcd));
+    kcd->handleKeyEvent = handleKeyEvent;
+    kcd->requiredProperties = *properties;
+
+    if (monitorKeyboards(kcd)) {
+      return 1;
+    }
+
+    free(kcd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }

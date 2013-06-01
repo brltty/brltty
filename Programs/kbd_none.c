@@ -21,8 +21,9 @@
 #include "prologue.h"
 
 #include "kbd.h"
+#include "kbd_internal.h"
 
 int
-startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+monitorKeyboards (KeyboardCommonData *kcd) {
   return 0;
 }
