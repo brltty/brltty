@@ -243,7 +243,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
         const KeyEventEntry *event = kid->keyEventBuffer;
 
         while (kid->keyEventCount) {
-          writeKeyboardEvent(event->code, event->press);
+          forwardKeyEvent(event->code, event->press);
           event += 1, kid->keyEventCount -= 1;
         }
 
@@ -251,7 +251,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
       }
 
       case WKA_CURRENT:
-        writeKeyboardEvent(code, press);
+        forwardKeyEvent(code, press);
 
       case WKA_NONE:
         break;

@@ -488,7 +488,7 @@ closeKeyboard (KeyboardPlatformData *kpd) {
 }
 
 int
-writeKeyboardEvent (int code, int press) {
+forwardKeyEvent (int code, int press) {
   return writeKeyEvent(code, (press? 1: 0));
 }
 

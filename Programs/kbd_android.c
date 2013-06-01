@@ -277,7 +277,7 @@ const unsigned char keyCodeMap[] = {
 const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
 
 int
-writeKeyboardEvent (int code, int press) {
+forwardKeyEvent (int code, int press) {
   return 0;
 }
 

@@ -54,7 +54,7 @@ extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardCommonData *kcd);
 extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
 
 extern int monitorKeyboards (KeyboardCommonData *kcd);
-extern int writeKeyboardEvent (int code, int press);
+extern int forwardKeyEvent (int code, int press);
 
 extern const unsigned char keyCodeMap[];
 extern const int keyCodeLimit;
