@@ -26,8 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  KBD_KEY_SPECIAL_None = 0,
+  KBD_KEY_SPECIAL_Unknown,
+} KBD_SpecialKey;
 
+typedef enum {
   KBD_KEY_LETTER_A,
   KBD_KEY_LETTER_B,
   KBD_KEY_LETTER_C,
@@ -54,7 +56,9 @@ typedef enum {
   KBD_KEY_LETTER_X,
   KBD_KEY_LETTER_Y,
   KBD_KEY_LETTER_Z,
+} KBD_LetterKey;
 
+typedef enum {
   KBD_KEY_SYMBOL_One_Exclamation,
   KBD_KEY_SYMBOL_Two_At,
   KBD_KEY_SYMBOL_Three_Number,
@@ -77,7 +81,9 @@ typedef enum {
   KBD_KEY_SYMBOL_Comma_Less,
   KBD_KEY_SYMBOL_Period_Greater,
   KBD_KEY_SYMBOL_Slash_Question,
+} KBD_SymbolKey;
 
+typedef enum {
   KBD_KEY_FUNCTION_Escape,
   KBD_KEY_FUNCTION_Enter,
   KBD_KEY_FUNCTION_Space,
@@ -135,13 +141,52 @@ typedef enum {
   KBD_KEY_FUNCTION_GuiRight,
   KBD_KEY_FUNCTION_Application,
 
+  KBD_KEY_FUNCTION_Power,
+  KBD_KEY_FUNCTION_Sleep,
+  KBD_KEY_FUNCTION_Wakeup,
+  KBD_KEY_FUNCTION_Stop,
+
+  KBD_KEY_FUNCTION_Help,
+  KBD_KEY_FUNCTION_Find,
+
+  KBD_KEY_FUNCTION_Menu,
+  KBD_KEY_FUNCTION_Select,
+  KBD_KEY_FUNCTION_Again,
+  KBD_KEY_FUNCTION_Execute,
+
+  KBD_KEY_FUNCTION_Copy,
+  KBD_KEY_FUNCTION_Cut,
+  KBD_KEY_FUNCTION_Paste,
+  KBD_KEY_FUNCTION_Undo,
+
+  KBD_KEY_FUNCTION_Mute,
+  KBD_KEY_FUNCTION_VolumeUp,
+  KBD_KEY_FUNCTION_VolumeDown,
+
+  KBD_KEY_FUNCTION_Cancel,
+  KBD_KEY_FUNCTION_Clear,
+  KBD_KEY_FUNCTION_Prior,
+  KBD_KEY_FUNCTION_Return,
+  KBD_KEY_FUNCTION_Separator,
+  KBD_KEY_FUNCTION_Out,
+  KBD_KEY_FUNCTION_Oper,
+  KBD_KEY_FUNCTION_Clear_Again,
+  KBD_KEY_FUNCTION_CrSel_Props,
+  KBD_KEY_FUNCTION_ExSel
+} KBD_FunctionKey;
+
+typedef enum {
   KBD_KEY_LOCK_Capitals,
   KBD_KEY_LOCK_Scroll,
+} KBD_LockKey;
 
+typedef enum {
   KBD_KEY_LOCKING_Capitals,
   KBD_KEY_LOCKING_Scroll,
   KBD_KEY_LOCKING_Numbers,
+} KBD_LockingKey;
 
+typedef enum {
   KBD_KEY_KEYPAD_NumLock_Clear,
   KBD_KEY_KEYPAD_Slash,
   KBD_KEY_KEYPAD_Asterisk,
@@ -198,28 +243,6 @@ typedef enum {
   KBD_KEY_KEYPAD_CurrencyUnit,
   KBD_KEY_KEYPAD_CurrencySubunit,
 
-  KBD_KEY_FUNCTION_Power,
-  KBD_KEY_FUNCTION_Sleep,
-  KBD_KEY_FUNCTION_Wakeup,
-  KBD_KEY_FUNCTION_Stop,
-
-  KBD_KEY_FUNCTION_Help,
-  KBD_KEY_FUNCTION_Find,
-
-  KBD_KEY_FUNCTION_Menu,
-  KBD_KEY_FUNCTION_Select,
-  KBD_KEY_FUNCTION_Again,
-  KBD_KEY_FUNCTION_Execute,
-
-  KBD_KEY_FUNCTION_Copy,
-  KBD_KEY_FUNCTION_Cut,
-  KBD_KEY_FUNCTION_Paste,
-  KBD_KEY_FUNCTION_Undo,
-
-  KBD_KEY_FUNCTION_Mute,
-  KBD_KEY_FUNCTION_VolumeUp,
-  KBD_KEY_FUNCTION_VolumeDown,
-
   KBD_KEY_KEYPAD_Clear,
   KBD_KEY_KEYPAD_ClearEntry,
   KBD_KEY_KEYPAD_PlusMinus,
@@ -236,18 +259,29 @@ typedef enum {
   KBD_KEY_KEYPAD_Octal,
   KBD_KEY_KEYPAD_Decimal,
   KBD_KEY_KEYPAD_Hexadecimal,
+} KBD_KeypadKey;
 
-  KBD_KEY_FUNCTION_Cancel,
-  KBD_KEY_FUNCTION_Clear,
-  KBD_KEY_FUNCTION_Prior,
-  KBD_KEY_FUNCTION_Return,
-  KBD_KEY_FUNCTION_Separator,
-  KBD_KEY_FUNCTION_Out,
-  KBD_KEY_FUNCTION_Oper,
-  KBD_KEY_FUNCTION_Clear_Again,
-  KBD_KEY_FUNCTION_CrSel_Props,
-  KBD_KEY_FUNCTION_ExSel
-} KeyboardKey;
+typedef enum {
+  KBD_SET_SPECIAL,
+  KBD_SET_LETTER,
+  KBD_SET_SYMBOL,
+  KBD_SET_FUNCTION,
+  KBD_SET_LOCK,
+  KBD_SET_LOCKING,
+  KBD_SET_KEYPAD
+} KBD_KeySet;
+
+#define KBD_KEY_VALUE(s,k) {.set=KBD_SET_##s, .key=KBD_KEY_##s##_##k}
+#define KBD_NAME_ENTRY(s,k,n) {.value=KBD_KEY_VALUE(s, k), .name=n}
+
+#define KBD_KEY_SPECIAL(name) KBD_KEY_VALUE(SPECIAL, name)
+#define KBD_KEY_LETTER(name) KBD_KEY_VALUE(LETTER, name)
+#define KBD_KEY_SYMBOL(name) KBD_KEY_VALUE(SYMBOL, name)
+#define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
+#define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
+#define KBD_KEY_LOCKING(name) KBD_KEY_VALUE(LOCKING, name)
+#define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
+#define KBD_KEY_UNKNOWN KBD_KEY_SPECIAL(Unknown)
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 

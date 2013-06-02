@@ -56,8 +56,11 @@ extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
 extern int monitorKeyboards (KeyboardCommonData *kcd);
 extern int forwardKeyEvent (int code, int press);
 
-extern const unsigned char keyCodeMap[];
+extern const KeyValue keyCodeMap[];
 extern const int keyCodeLimit;
+
+#define BEGIN_KEY_CODE_MAP const KeyValue keyCodeMap[] = {
+#define END_KEY_CODE_MAP }; const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
 
 #ifdef __cplusplus
 }

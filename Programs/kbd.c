@@ -171,11 +171,11 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   KeyTableState state = KTS_UNBOUND;
 
   if ((code >= 0) && (code < keyCodeLimit)) {
-    unsigned char key = keyCodeMap[code];
+    const KeyValue *kv = &keyCodeMap[code];
 
-    if (key) {
+    if ((kv->set != KBD_SET_SPECIAL) || (kv->key != KBD_KEY_SPECIAL_Unknown)) {
       mapped = 1;
-      state = kid->kcd->handleKeyEvent(0, key, press);
+      state = kid->kcd->handleKeyEvent(kv->set, kv->key, press);
     }
   }
 

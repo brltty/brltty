@@ -23,10 +23,9 @@
 #include "kbd.h"
 #include "kbd_internal.h"
 
-const unsigned char keyCodeMap[] = {
-  [0] = 0
-};
-const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
+BEGIN_KEY_CODE_MAP
+  [0] = KBD_KEY_UNKNOWN
+END_KEY_CODE_MAP
 
 int
 forwardKeyEvent (int code, int press) {
