@@ -26,7 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  KBD_KEY_SPECIAL_Unknown,
+  KBD_KEY_SPECIAL_Unmapped = 0,
 } KBD_SpecialKey;
 
 typedef enum {
@@ -262,7 +262,7 @@ typedef enum {
 } KBD_KeypadKey;
 
 typedef enum {
-  KBD_SET_SPECIAL,
+  KBD_SET_SPECIAL = 0,
   KBD_SET_LETTER,
   KBD_SET_SYMBOL,
   KBD_SET_FUNCTION,
@@ -281,7 +281,7 @@ typedef enum {
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_LOCKING(name) KBD_KEY_VALUE(LOCKING, name)
 #define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
-#define KBD_KEY_UNKNOWN KBD_KEY_SPECIAL(Unknown)
+#define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 

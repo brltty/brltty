@@ -173,7 +173,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   if ((code >= 0) && (code < keyCodeLimit)) {
     const KeyValue *kv = &keyCodeMap[code];
 
-    if ((kv->set != KBD_SET_SPECIAL) || (kv->key != KBD_KEY_SPECIAL_Unknown)) {
+    if ((kv->set != KBD_SET_SPECIAL) || (kv->key != KBD_KEY_SPECIAL_Unmapped)) {
       mapped = 1;
       state = kid->kcd->handleKeyEvent(kv->set, kv->key, press);
     }

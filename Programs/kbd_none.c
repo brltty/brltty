@@ -24,7 +24,7 @@
 #include "kbd_internal.h"
 
 BEGIN_KEY_CODE_MAP
-  [0] = KBD_KEY_UNKNOWN
+  [0] = KBD_KEY_UNMAPPED
 END_KEY_CODE_MAP
 
 int
