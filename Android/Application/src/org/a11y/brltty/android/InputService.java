@@ -23,7 +23,9 @@ import android.util.Log;
 import android.content.Intent;
 
 import android.inputmethodservice.InputMethodService;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
+import android.view.KeyEvent;
 
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
@@ -51,8 +53,19 @@ public class InputService extends InputMethodService {
   }
 
   @Override
+  public void onBindInput () {
+    Log.d(LOG_TAG, "input service bound");
+  }
+
+  @Override
+  public void onUnbindInput () {
+    Log.d(LOG_TAG, "input service unbound");
+  }
+
+  @Override
   public int onStartCommand (Intent intent, int flags, int identifier) {
     startIdentifier = identifier;
+    Log.d(LOG_TAG, "input service starting");
     return START_STICKY;
   }
 
@@ -66,5 +79,28 @@ public class InputService extends InputMethodService {
   @Override
   public void onFinishInput () {
     Log.d(LOG_TAG, "input service disconnected");
+  }
+
+  public void forwardKeyEvent (int code, boolean press) {
+    InputConnection connection = getCurrentInputConnection();
+
+    if (connection != null) {
+      int action = press? KeyEvent.ACTION_DOWN: KeyEvent.ACTION_UP;
+      connection.sendKeyEvent(new KeyEvent(action, code));
+    }
+  }
+
+  public native boolean handleKeyEvent (int code, boolean press);
+
+  @Override
+  public boolean onKeyDown (int code, KeyEvent event) {
+    if (handleKeyEvent(code, true)) return true;
+    return super.onKeyDown(code, event);
+  }
+
+  @Override
+  public boolean onKeyUp (int code, KeyEvent event) {
+    if (handleKeyEvent(code, false)) return true;
+    return super.onKeyUp(code, event);
   }
 }

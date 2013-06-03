@@ -20,6 +20,7 @@
 
 #include <android/keycodes.h>
 
+#include "log.h"
 #include "sys_android.h"
 
 #include "kbd.h"
@@ -275,12 +276,85 @@ BEGIN_KEY_CODE_MAP
   [ANDROID_KEY_ZOOM_OUT] = KBD_KEY_UNMAPPED,
 END_KEY_CODE_MAP
 
+typedef struct {
+  KeyboardInstanceData *kid;
+
+  JNIEnv *env;
+  jclass this;
+
+  jclass inputService;
+  jmethodID forwardKeyEvent;
+} KeyboardPlatformData;
+
+static KeyboardPlatformData *keyboardPlatformData = NULL;
+
 int
 forwardKeyEvent (int code, int press) {
+  KeyboardPlatformData *kpd = keyboardPlatformData;
+
+  if (kpd) {
+    if (findJavaClass(kpd->env, &kpd->inputService, "org/a11y/brltty/android/InputService")) {
+      if (findJavaInstanceMethod(kpd->env, &kpd->forwardKeyEvent, kpd->inputService, "forwardKeyEvent",
+                                 JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                                 JAVA_SIG_INT // code
+                                                 JAVA_SIG_BOOLEAN // press
+                                                ))) {
+        (*kpd->env)->CallVoidMethod(
+          kpd->env, kpd->this, kpd->forwardKeyEvent,
+          code, (press? JNI_TRUE: JNI_FALSE)
+        );
+
+        if (!clearJavaException(kpd->env, 1)) {
+          return 1;
+        }
+      }
+    }
+  }
+
   return 0;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_android_InputService_handleKeyEvent (
+  JNIEnv *env, jclass *this,
+  jint code, jboolean press
+) {
+  KeyboardPlatformData *kpd = keyboardPlatformData;
+
+  if (kpd) {
+    kpd->env = env;
+    kpd->this = this;
+
+    handleKeyEvent(kpd->kid, code, (press != JNI_FALSE));
+    return JNI_TRUE;
+  }
+
+  return JNI_FALSE;
 }
 
 int
 monitorKeyboards (KeyboardCommonData *kcd) {
-  return 1;
+  KeyboardPlatformData *kpd = malloc(sizeof(*kpd));
+
+  if (kpd) {
+    memset(kpd, 0, sizeof(*kpd));
+
+    kpd->env = NULL;
+    kpd->this = NULL;
+
+    kpd->inputService = NULL;
+    kpd->forwardKeyEvent = 0;
+
+    if ((kpd->kid = newKeyboardInstanceData(kcd))) {
+      keyboardPlatformData = kpd;
+      return 1;
+    }
+
+    free(kpd);
+  } else {
+    logMallocError();
+  }
+
+  keyboardPlatformData = NULL;
+  return 0;
 }
