@@ -181,6 +181,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
   if (!mapped) {
     logMessage(LOG_INFO, "unmapped key code: %d", code);
+    forwardKeyEvent(code, press);
   } else if (state != KTS_HOTKEY) {
     typedef enum {
       WKA_NONE,
