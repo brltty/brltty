@@ -26,7 +26,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  KBD_KEY_SPECIAL_Unmapped = 0,
+  KBD_KEY_SPECIAL_Unmapped = 0 /* for KBD_KEY_UNMAPPED */,
+  KBD_KEY_SPECIAL_Ignore,
 } KBD_SpecialKey;
 
 typedef enum {
@@ -262,13 +263,31 @@ typedef enum {
 } KBD_KeypadKey;
 
 typedef enum {
-  KBD_SET_SPECIAL = 0,
+  KBD_KEY_BRAILLE_Space,
+  KBD_KEY_BRAILLE_Dot1,
+  KBD_KEY_BRAILLE_Dot2,
+  KBD_KEY_BRAILLE_Dot3,
+  KBD_KEY_BRAILLE_Dot4,
+  KBD_KEY_BRAILLE_Dot5,
+  KBD_KEY_BRAILLE_Dot6,
+  KBD_KEY_BRAILLE_Dot7,
+  KBD_KEY_BRAILLE_Dot8,
+
+  KBD_KEY_BRAILLE_Backward,
+  KBD_KEY_BRAILLE_Forward,
+} KBD_BrailleKey;
+
+typedef enum {
+  KBD_SET_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
   KBD_SET_LETTER,
   KBD_SET_SYMBOL,
   KBD_SET_FUNCTION,
   KBD_SET_LOCK,
   KBD_SET_LOCKING,
-  KBD_SET_KEYPAD
+  KBD_SET_KEYPAD,
+  KBD_SET_BRAILLE,
+
+  KBD_SET_ROUTE,
 } KBD_KeySet;
 
 #define KBD_KEY_VALUE(s,k) {.set=KBD_SET_##s, .key=KBD_KEY_##s##_##k}
@@ -281,7 +300,11 @@ typedef enum {
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_LOCKING(name) KBD_KEY_VALUE(LOCKING, name)
 #define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
+#define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
+#define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
+
 #define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)
+#define KBD_KEY_IGNORE KBD_KEY_SPECIAL(Ignore)
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 

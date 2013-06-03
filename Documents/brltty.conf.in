@@ -426,6 +426,7 @@
 #key-table	desktop	# bindings for full keyboards
 #key-table	keypad	# bindings for keypad-based navigation
 #key-table	laptop	# bindings for keyboards without a keypad
+#key-table	braille	# bindings for braille keyboards
 
 # The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
