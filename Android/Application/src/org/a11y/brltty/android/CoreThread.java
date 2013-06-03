@@ -162,6 +162,7 @@ public class CoreThread extends Thread {
     builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));
     builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, R.string.DEFAULT_ATTRIBUTES_TABLE));
     builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, R.string.DEFAULT_CONTRACTION_TABLE));
+    builder.setKeyTable(getStringSetting(R.string.PREF_KEY_KEY_TABLE, R.string.DEFAULT_KEY_TABLE));
 
     {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);

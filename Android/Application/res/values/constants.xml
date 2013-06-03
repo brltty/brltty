@@ -13,6 +13,7 @@
   <string name="PREF_KEY_TEXT_TABLE">text-table</string>
   <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>
   <string name="PREF_KEY_CONTRACTION_TABLE">contraction-table</string>
+  <string name="PREF_KEY_KEY_TABLE">key-table</string>
 
   <string name="PREF_KEY_SELECTED_DEVICE">selected-device</string>
   <string name="PREF_KEY_ADD_DEVICE">add-device</string>

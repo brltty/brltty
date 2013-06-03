@@ -697,6 +697,7 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class AdvancedSettings extends SettingsFragment {
+    protected ListPreference keyTableList;
     protected ListPreference attributesTableList;
     protected ListPreference logLevelList;
     protected MultiSelectListPreference logCategorySet;
@@ -707,13 +708,34 @@ public class SettingsActivity extends PreferenceActivity {
 
       addPreferencesFromResource(R.xml.settings_advanced);
 
+      keyTableList = getListPreference(R.string.PREF_KEY_KEY_TABLE);
       attributesTableList = getListPreference(R.string.PREF_KEY_ATTRIBUTES_TABLE);
       logLevelList = getListPreference(R.string.PREF_KEY_LOG_LEVEL);
       logCategorySet = getMultiSelectListPreference(R.string.PREF_KEY_LOG_CATEGORIES);
 
+      showListSelection(keyTableList);
       showListSelection(attributesTableList);
       showListSelection(logLevelList);
       showSetSelections(logCategorySet);
+
+      keyTableList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            final String newKeyTable = (String)newValue;
+
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeKeyTable(newKeyTable);
+              }
+            });
+
+            showListSelection(keyTableList, newKeyTable);
+            return true;
+          }
+        }
+      );
 
       attributesTableList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {

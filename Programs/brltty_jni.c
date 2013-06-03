@@ -281,6 +281,11 @@ Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobje
 }
 
 JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeKeyTable (JNIEnv *env, jobject this, jstring name) {
+  return JNI_TRUE;
+}
+
+JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_restartBrailleDriver (JNIEnv *env, jobject this) {
   restartBrailleDriver_p();
   return JNI_TRUE;

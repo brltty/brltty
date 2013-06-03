@@ -484,4 +484,20 @@
     <item>th</item>
     <item>zu</item>
   </string-array>
+
+  <string name="KEY_TABLE_LABEL_desktop">bindings for full keyboards</string>
+  <string name="KEY_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
+  <string name="KEY_TABLE_LABEL_keypad">bindings for keypad-based navigation</string>
+
+  <string-array name="KEY_TABLE_LABELS">
+    <item>@string/KEY_TABLE_LABEL_desktop</item>
+    <item>@string/KEY_TABLE_LABEL_laptop</item>
+    <item>@string/KEY_TABLE_LABEL_keypad</item>
+  </string-array>
+
+  <string-array name="KEY_TABLE_VALUES">
+    <item>desktop</item>
+    <item>laptop</item>
+    <item>keypad</item>
+  </string-array>
 </resources>

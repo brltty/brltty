@@ -141,6 +141,7 @@ if {[llength $argv] == 0} {
    lappend argv "text-table"
    lappend argv "attributes-table"
    lappend argv "contraction-table"
+   lappend argv "key-table"
 }
 
 if {[llength $argv] == 0} {

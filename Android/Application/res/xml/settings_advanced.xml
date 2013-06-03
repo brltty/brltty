@@ -6,6 +6,15 @@
   >
 
   <ListPreference
+    android:key="@string/PREF_KEY_KEY_TABLE"
+    android:persistent="true"
+    android:title="@string/SETTINGS_BUTTON_KEY_TABLE"
+    android:entries="@array/KEY_TABLE_LABELS"
+    android:entryValues="@array/KEY_TABLE_VALUES"
+    android:defaultValue="@string/DEFAULT_KEY_TABLE"
+   />
+
+  <ListPreference
     android:key="@string/PREF_KEY_ATTRIBUTES_TABLE"
     android:persistent="true"
     android:title="@string/SETTINGS_BUTTON_ATTRIBUTES_TABLE"
