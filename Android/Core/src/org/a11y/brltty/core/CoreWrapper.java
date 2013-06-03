@@ -34,7 +34,7 @@ public class CoreWrapper {
   public static native boolean changeTextTable (String name);
   public static native boolean changeAttributesTable (String name);
   public static native boolean changeContractionTable (String name);
-  public static native boolean changeKeyTable (String name);
+  public static native boolean changeKeyboardKeyTable (String name);
 
   public static native boolean restartBrailleDriver ();
   public static native boolean changeBrailleDriver (String driver);

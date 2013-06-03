@@ -727,7 +727,7 @@ public class SettingsActivity extends PreferenceActivity {
             CoreWrapper.runOnCoreThread(new Runnable() {
               @Override
               public void run () {
-                CoreWrapper.changeKeyTable(newKeyTable);
+                CoreWrapper.changeKeyboardKeyTable(newKeyTable);
               }
             });
 

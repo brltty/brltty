@@ -625,7 +625,7 @@ loadHelpFile (const char *file) {
 }
 
 static void
-exitKeyTable (void) {
+exitKeyboardKeyTable (void) {
   if (keyboardKeyTable) {
     destroyKeyTable(keyboardKeyTable);
     keyboardKeyTable = NULL;
@@ -634,8 +634,8 @@ exitKeyTable (void) {
   disableHelpPage(keyboardHelpPageNumber);
 }
 
-static int
-replaceKeyboardKeyTable (const char *name) {
+int
+changeKeyboardKeyTable (const char *name) {
   KeyTable *table = NULL;
 
   if (*name) {
@@ -2058,9 +2058,9 @@ brlttyStart (int argc, char *argv[]) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
-  onProgramExit(exitKeyTable, "key-table");
-  replaceKeyboardKeyTable(opt_keyTable);
-  logMessage(LOG_INFO, "%s: %s", gettext("Key Table"),
+  onProgramExit(exitKeyboardKeyTable, "keyboard-key-table");
+  changeKeyboardKeyTable(opt_keyTable);
+  logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))

@@ -75,6 +75,7 @@ extern ContractionTable *contractionTable;
 FUNCTION_DECLARE(changeContractionTable, int, (const char *name));
 
 extern KeyTable *keyboardKeyTable;
+FUNCTION_DECLARE(changeKeyboardKeyTable, int, (const char *name));
 
 extern ProgramExitStatus brlttyStart (int argc, char *argv[]);
 
