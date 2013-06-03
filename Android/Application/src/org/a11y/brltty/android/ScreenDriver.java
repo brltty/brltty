@@ -388,7 +388,7 @@ public final class ScreenDriver {
   }
 
   public static boolean inputCharacter (char character) {
-    InputConnection connection =  getInputConnection();
+    InputConnection connection = getInputConnection();
 
     if (connection != null) {
       if (connection.commitText(Character.toString(character), 1)) {
@@ -405,7 +405,7 @@ public final class ScreenDriver {
   }
 
   public static boolean inputKey (int code) {
-    InputConnection connection =  getInputConnection();
+    InputConnection connection = getInputConnection();
 
     if (connection != null) {
       if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_DOWN, code))) {
@@ -449,7 +449,7 @@ public final class ScreenDriver {
   }
 
   public static boolean inputKeyBackspace () {
-    InputConnection connection =  getInputConnection();
+    InputConnection connection = getInputConnection();
 
     if (connection != null) {
       if (connection.deleteSurroundingText(1, 0)) {
@@ -501,7 +501,7 @@ public final class ScreenDriver {
   }
 
   public static boolean inputKeyDelete () {
-    InputConnection connection =  getInputConnection();
+    InputConnection connection = getInputConnection();
 
     if (connection != null) {
       if (connection.deleteSurroundingText(0, 1)) {
