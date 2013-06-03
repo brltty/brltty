@@ -38,8 +38,9 @@
 #define BRAILLE_DEVICE_PATH "/dev/braille0"
 #define BRAILLE_CELL_COUNT MAX_BRAILLE_LINE_SIZE
 
-#define KEYBOARD_DEVICE_NAME "cp430_keypad"
+//#define KEYBOARD_DEVICE_NAME "cp430_keypad"
 
+#ifdef KEYBOARD_DEVICE_NAME
 #define BG_SET_VALUE(value) (((value) >> 8) & 0XFF)
 #define BG_KEY_VALUE(value) (((value) >> 0) & 0XFF)
 #define BG_KEY_ENTRY(n) {.name=#n, .value={.set=BG_SET_VALUE(BG_KEY_##n), .key=BG_KEY_VALUE(BG_KEY_##n)}}
@@ -76,13 +77,16 @@ DEFINE_KEY_TABLE(all)
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
+#endif /* KEYBOARD_DEVICE_NAME */
 
 struct BrailleDataStruct {
   int brailleDevice;
   int forceRewrite;
   unsigned char textCells[BRAILLE_CELL_COUNT];
 
+#ifdef KEYBOARD_DEVICE_NAME
   int keyboardDevice;
+#endif /* KEYBOARD_DEVICE_NAME */
 };
 
 static int
@@ -129,6 +133,7 @@ writeBrailleCells (BrailleDisplay *brl, const unsigned char *cells, size_t count
   return 0;
 }
 
+#ifdef KEYBOARD_DEVICE_NAME
 static char *
 findKeyboardDevice (const char *deviceName) {
   char *devicePath = NULL;
@@ -215,25 +220,33 @@ closeKeyboardDevice (BrailleDisplay *brl) {
     brl->data->keyboardDevice = -1;
   }
 }
+#endif /* KEYBOARD_DEVICE_NAME */
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->brailleDevice = -1;
+
+#ifdef KEYBOARD_DEVICE_NAME
     brl->data->keyboardDevice = -1;
+#endif /* KEYBOARD_DEVICE_NAME */
 
     if (openBrailleDevice(brl, device)) {
       logBrailleVersion(brl);
 
+#ifdef KEYBOARD_DEVICE_NAME
       if (openKeyboardDevice(brl)) {
+#endif /* KEYBOARD_DEVICE_NAME */
         if (clearBrailleCells(brl)) {
+#ifdef KEYBOARD_DEVICE_NAME
           {
             const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
             brl->keyBindings = ktd->bindings;
             brl->keyNameTables = ktd->names;
           }
+#endif /* KEYBOARD_DEVICE_NAME */
 
           brl->textColumns = BRAILLE_CELL_COUNT;
           makeOutputTable(dotsTable_ISO11548_1);
@@ -241,8 +254,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           return 1;
         }
 
+#ifdef KEYBOARD_DEVICE_NAME
         closeKeyboardDevice(brl);
       }
+#endif /* KEYBOARD_DEVICE_NAME */
 
       closeBrailleDevice(brl);
     }
@@ -258,8 +273,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data) {
-    closeKeyboardDevice(brl);
     closeBrailleDevice(brl);
+
+#ifdef KEYBOARD_DEVICE_NAME
+    closeKeyboardDevice(brl);
+#endif /* KEYBOARD_DEVICE_NAME */
+
     free(brl->data);
   }
 }
@@ -278,6 +297,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+#ifdef KEYBOARD_DEVICE_NAME
   struct input_event event;
   ssize_t length;
 
@@ -323,7 +343,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     }
   }
 
-  if (errno == EAGAIN) return EOF;
-  logSystemError("keyboard input error");
-  return BRL_CMD_RESTARTBRL;
+  if (errno != EAGAIN) {
+    logSystemError("keyboard input error");
+    return BRL_CMD_RESTARTBRL;
+  }
+#endif /* KEYBOARD_DEVICE_NAME */
+
+  return EOF;
 }
