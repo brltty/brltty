@@ -95,6 +95,17 @@ public class InputService extends InputMethodService {
   public native boolean handleKeyEvent (int code, boolean press);
 
   public boolean acceptKeyEvent (final int code, final boolean press) {
+    switch (code) {
+      case KeyEvent.KEYCODE_POWER:
+      case KeyEvent.KEYCODE_HOME:
+      case KeyEvent.KEYCODE_BACK:
+      case KeyEvent.KEYCODE_MENU:
+        return false;
+
+      default:
+        break;
+    }
+
     CoreWrapper.runOnCoreThread(new Runnable() {
       @Override
       public void run () {
