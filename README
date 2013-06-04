@@ -187,6 +187,7 @@ The following braille displays are supported:
 -  BrailleLite [18/40/M20/M40]
 -  BrailleNote [18/32]
 -  BrlAPI
+-  B2G
 -  Cebra [20/40/60/80/100/120/140]
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]

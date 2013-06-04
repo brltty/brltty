@@ -46,6 +46,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - BrailleLite [18/40/M20/M40]
            - BrailleNote [18/32]
            - BrlAPI
+           - B2G
            - CombiBraille [25/45/85]
            - EcoBraille [20/40/80]
            - EuroBraille [AzerBraille, Clio, Esys, Iris, NoteBraille,
