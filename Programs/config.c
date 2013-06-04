@@ -692,12 +692,15 @@ changeKeyboardKeyTable (const char *name) {
 
 static KeyTableState
 handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
-  if (scr.unreadable) {
+  if (keyboardKeyTable) {
+    if (!scr.unreadable) {
+      return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), set, key, press);
+    }
+
     resetKeyTable(keyboardKeyTable);
-    return KTS_UNBOUND;
   }
 
-  return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), set, key, press);
+  return KTS_UNBOUND;
 }
 
 static void scheduleKeyboardMonitor (int interval);
