@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import org.a11y.brltty.core.*;
+
 import android.util.Log;
 
 import android.content.Intent;
@@ -92,15 +94,26 @@ public class InputService extends InputMethodService {
 
   public native boolean handleKeyEvent (int code, boolean press);
 
+  public boolean acceptKeyEvent (final int code, final boolean press) {
+    CoreWrapper.runOnCoreThread(new Runnable() {
+      @Override
+      public void run () {
+        if (!handleKeyEvent(code, press)) forwardKeyEvent(code, press);
+      }
+    });
+
+    return true;
+  }
+
   @Override
   public boolean onKeyDown (int code, KeyEvent event) {
-    if (handleKeyEvent(code, true)) return true;
+    if (acceptKeyEvent(code, true)) return true;
     return super.onKeyDown(code, event);
   }
 
   @Override
   public boolean onKeyUp (int code, KeyEvent event) {
-    if (handleKeyEvent(code, false)) return true;
+    if (acceptKeyEvent(code, false)) return true;
     return super.onKeyUp(code, event);
   }
 }
