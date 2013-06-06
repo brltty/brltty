@@ -33,9 +33,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
-  public static boolean haveSdkVersion (int minimumVersion) {
-    int actualVersion = Build.VERSION.SDK_INT;
-    return actualVersion >= minimumVersion;
+  public static boolean haveSdkVersion (int version) {
+    return ApplicationParameters.SDK_VERSION >= version;
   }
 
   public static ContentResolver getContentResolver () {

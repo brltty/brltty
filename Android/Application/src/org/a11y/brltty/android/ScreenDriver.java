@@ -34,8 +34,6 @@ import android.view.KeyEvent;
 import android.graphics.Rect;
 
 public final class ScreenDriver {
-  private static final boolean LOG_ACCESSIBILITY_EVENTS = false;
-
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
 
@@ -139,7 +137,7 @@ public final class ScreenDriver {
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    if (LOG_ACCESSIBILITY_EVENTS) {
+    if (ApplicationParameters.LOG_ACCESSIBILITY_EVENTS) {
       currentLogger.logEvent(event);
     }
 
