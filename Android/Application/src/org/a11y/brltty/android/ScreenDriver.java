@@ -216,23 +216,25 @@ public final class ScreenDriver {
   private static AccessibilityNodeInfo getCursorNode () {
     AccessibilityNodeInfo root = currentScreen.getRootNode();
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+    if (root != null) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
-      if (node != null) {
-        root.recycle();
-        root = null;
-        return node;
+        if (node != null) {
+          root.recycle();
+          root = null;
+          return node;
+        }
       }
-    }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
 
-      if (node != null) {
-        root.recycle();
-        root = null;
-        return node;
+        if (node != null) {
+          root.recycle();
+          root = null;
+          return node;
+        }
       }
     }
 
@@ -254,27 +256,30 @@ public final class ScreenDriver {
     int selectedTo = 0;
 
     AccessibilityNodeInfo node = getCursorNode();
-    ScreenElement element = currentScreen.findRenderedScreenElement(node);
 
-    if (element != null) {
-      Rect location = element.getBrailleLocation();
+    if (node != null) {
+      ScreenElement element = currentScreen.findRenderedScreenElement(node);
 
-      cursorColumn = location.left;
-      cursorRow = location.top;
+      if (element != null) {
+        Rect location = element.getBrailleLocation();
 
-      {
-        ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
+        cursorColumn = location.left;
+        cursorRow = location.top;
 
-        if (editor != null) {
-          selectedFrom = cursorColumn + editor.getSelectedFrom();
-          selectedTo = cursorColumn + editor.getSelectedTo();
-          cursorColumn += editor.getCursorOffset();
+        {
+          ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
+
+          if (editor != null) {
+            selectedFrom = cursorColumn + editor.getSelectedFrom();
+            selectedTo = cursorColumn + editor.getSelectedTo();
+            cursorColumn += editor.getCursorOffset();
+          }
         }
       }
-    }
 
-    node.recycle();
-    node = null;
+      node.recycle();
+      node = null;
+    }
 
     exportScreenProperties(
       currentWindow.getWindowIdentifier(),
@@ -588,5 +593,9 @@ public final class ScreenDriver {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
     }
+  }
+
+  static {
+    exportScreenProperties();
   }
 }

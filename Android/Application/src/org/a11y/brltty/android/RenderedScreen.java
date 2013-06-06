@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -28,6 +30,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
 
 public class RenderedScreen {
+  private static final String LOG_TAG = RenderedScreen.class.getName();
+
   private final AccessibilityNodeInfo eventNode;
   private final AccessibilityNodeInfo rootNode;
 
@@ -37,6 +41,7 @@ public class RenderedScreen {
   private int screenWidth = 1;
 
   public final AccessibilityNodeInfo getRootNode () {
+    if (rootNode == null) return null;
     return AccessibilityNodeInfo.obtain(rootNode);
   }
 

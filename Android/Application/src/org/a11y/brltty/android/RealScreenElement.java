@@ -19,9 +19,11 @@
 package org.a11y.brltty.android;
 
 import android.os.Build;
+import android.os.Bundle;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
-import android.os.Bundle;
+import android.view.KeyEvent;
 
 public class RealScreenElement extends ScreenElement {
   private final AccessibilityNodeInfo accessibilityNode;
@@ -139,6 +141,16 @@ public class RealScreenElement extends ScreenElement {
     return done;
   }
 
+  public boolean doKey (int keyCode, boolean longPress) {
+    if (doAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+      if (ScreenDriver.inputKey(keyCode)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @Override
   public boolean onBringCursor () {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
@@ -169,6 +181,10 @@ public class RealScreenElement extends ScreenElement {
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_CLICK);
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      return doKey(KeyEvent.KEYCODE_ENTER, false);
     }
 
     return super.onClick();
