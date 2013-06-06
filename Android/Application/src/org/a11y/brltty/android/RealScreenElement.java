@@ -60,7 +60,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean performAction (int offset) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
 
       if (editor != null) {
@@ -141,7 +141,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onBringCursor () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       {
         AccessibilityNodeInfo focusedNode = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
@@ -161,13 +161,13 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
       if (isEditable()) {
         return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_CLICK);
     }
 
@@ -176,7 +176,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onLongClick () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
     }
 
@@ -185,7 +185,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollBackward () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
@@ -194,7 +194,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollForward () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
     }
 

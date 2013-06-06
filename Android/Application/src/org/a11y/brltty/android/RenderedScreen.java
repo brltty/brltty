@@ -122,7 +122,7 @@ public class RenderedScreen {
       }
 
       boolean isVisible;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         isVisible = root.isVisibleToUser();
       } else {
         isVisible = true;

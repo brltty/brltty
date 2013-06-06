@@ -25,7 +25,7 @@ public class VirtualScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return BrailleService.getBrailleService().performGlobalAction(globalAction);
     }
 

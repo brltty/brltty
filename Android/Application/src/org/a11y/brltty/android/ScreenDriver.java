@@ -72,7 +72,7 @@ public final class ScreenDriver {
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
                         | AccessibilityNodeInfo.ACTION_CLICK;
 
@@ -110,7 +110,7 @@ public final class ScreenDriver {
   private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo root) {
     boolean done = false;
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       AccessibilityNodeInfo node = findFirstClickableSubnode(root);
 
       if (node != null) {
@@ -218,7 +218,7 @@ public final class ScreenDriver {
   private static AccessibilityNodeInfo getCursorNode () {
     AccessibilityNodeInfo root = currentScreen.getRootNode();
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
       if (node != null) {
@@ -228,7 +228,7 @@ public final class ScreenDriver {
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
 
       if (node != null) {
@@ -542,31 +542,31 @@ public final class ScreenDriver {
 
     switch (code) {
       case KeyEvent.KEYCODE_HOME:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
         }
         break;
 
       case KeyEvent.KEYCODE_BACK:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
         }
         break;
 
       case KeyEvent.KEYCODE_APP_SWITCH:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
         }
         break;
 
       case KeyEvent.KEYCODE_NOTIFICATION:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
         }
         break;
 
       case KeyEvent.KEYCODE_SETTINGS:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
         }
         break;
@@ -587,7 +587,7 @@ public final class ScreenDriver {
   }
 
   static {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
     }
   }

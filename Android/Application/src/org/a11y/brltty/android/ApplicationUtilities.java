@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import android.os.Build;
+
 import android.content.Context;
 import android.content.ContentResolver;
 import android.provider.Settings;
@@ -31,6 +33,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
+  public static boolean haveSdkVersion (int minimumVersion) {
+    int actualVersion = Build.VERSION.SDK_INT;
+    return actualVersion >= minimumVersion;
+  }
+
   public static ContentResolver getContentResolver () {
     return ApplicationHooks.getContext().getContentResolver();
   }

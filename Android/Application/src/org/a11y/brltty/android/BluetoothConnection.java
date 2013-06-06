@@ -103,7 +103,7 @@ public class BluetoothConnection {
       }
     }
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+    if (!ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       StringBuilder sb = new StringBuilder();
 
       for (byte octet : hardwareAddress) {

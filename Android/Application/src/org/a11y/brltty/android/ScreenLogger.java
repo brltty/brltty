@@ -121,7 +121,7 @@ public class ScreenLogger {
         addValue(values, count>0, "cld=" + count);
       }
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, node.isVisibleToUser(), "vis", "inv");
       }
 
@@ -131,7 +131,7 @@ public class ScreenLogger {
       addValue(values, node.isFocusable(), "fcb");
       addValue(values, node.isFocused(), "fcd");
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, node.isAccessibilityFocused(), "fca");
       }
 
@@ -147,22 +147,22 @@ public class ScreenLogger {
       List<CharSequence> values = new ArrayList<CharSequence>();
       int actions = node.getActions();
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lng");
       }
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
       }
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mgn");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mgp");
       }
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "hen");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "hep");
       }
@@ -173,7 +173,7 @@ public class ScreenLogger {
       addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
       addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
       }
@@ -186,7 +186,7 @@ public class ScreenLogger {
     logProperty("obj", node.getClassName());
     logProperty("app", node.getPackageName());
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
@@ -195,7 +195,7 @@ public class ScreenLogger {
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
