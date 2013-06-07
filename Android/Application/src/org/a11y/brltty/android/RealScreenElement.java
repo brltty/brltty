@@ -66,14 +66,12 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean performAction (int offset) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
+    ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
 
-      if (editor != null) {
-        if (!onBringCursor()) {
-          return false;
-        }
+    if (editor != null) {
+      if (!onBringCursor()) return false;
 
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         if ((offset -= editor.getCursorOffset()) != 0) {
           Bundle bundle = new Bundle();
           int action;
@@ -101,6 +99,8 @@ public class RealScreenElement extends ScreenElement {
 
         return true;
       }
+
+      return ScreenDriver.inputCursor(offset);
     }
 
     return super.performAction(offset);

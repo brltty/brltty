@@ -437,16 +437,23 @@ public final class ScreenDriver {
     return false;
   }
 
-  public static KeyEvent newKeyEvent (int action, int code) {
-    long time = SystemClock.uptimeMillis();
-    return new KeyEvent(time, time, action, code, 0);
+  public static boolean inputCursor (int position) {
+    InputConnection connection = getInputConnection();
+
+    if (connection != null) {
+      if (connection.setSelection(position, position)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public static boolean inputKey (int keyCode, boolean longPress) {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
-      if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
+      if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
         if (longPress) {
           try {
             Thread.sleep(ViewConfiguration.getLongPressTimeout() + 100);
@@ -454,7 +461,7 @@ public final class ScreenDriver {
           }
         }
 
-        if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_UP, keyCode))) {
+        if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode))) {
           return true;
         }
       }
