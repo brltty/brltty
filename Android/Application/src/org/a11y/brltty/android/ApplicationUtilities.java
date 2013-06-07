@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.os.PowerManager;
 import android.app.KeyguardManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.WindowManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
@@ -73,6 +74,12 @@ public abstract class ApplicationUtilities {
     = new SystemServiceReference<InputMethodManager>(Context.INPUT_METHOD_SERVICE);
   public static InputMethodManager getInputMethodManager () {
     return inputMethodManagerReference.get();
+  }
+
+  private static final SingletonReference<WindowManager> windowManagerReference
+    = new SystemServiceReference<WindowManager>(Context.WINDOW_SERVICE);
+  public static WindowManager getWindowManager () {
+    return windowManagerReference.get();
   }
 
   private static final SingletonReference<UsbManager> usbManagerReference

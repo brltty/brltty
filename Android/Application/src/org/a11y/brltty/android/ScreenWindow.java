@@ -18,14 +18,35 @@
 
 package org.a11y.brltty.android;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+
 public class ScreenWindow {
   private final int windowIdentifier;
+
+  private final Point windowSize = new Point();
+  private final Rect windowRectangle = new Rect();
 
   public final int getWindowIdentifier () {
     return windowIdentifier;
   }
 
+  public int getWindowWidth () {
+    return windowSize.x;
+  }
+
+  public int getWindowHeight () {
+    return windowSize.y;
+  }
+
+  public boolean contains (Rect location) {
+    return windowRectangle.contains(location);
+  }
+
   public ScreenWindow (int identifier) {
     windowIdentifier = identifier;
+
+    ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(windowSize);
+    windowRectangle.set(0, 0, getWindowWidth(), getWindowHeight());
   }
 }

@@ -130,7 +130,9 @@ public class RenderedScreen {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         isVisible = root.isVisibleToUser();
       } else {
-        isVisible = true;
+        Rect location = new Rect();
+        root.getBoundsInScreen(location);
+        isVisible = ScreenDriver.getWindow().contains(location);
       }
 
       if (isVisible) {
