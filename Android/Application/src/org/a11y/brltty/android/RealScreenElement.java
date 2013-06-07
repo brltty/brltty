@@ -70,36 +70,6 @@ public class RealScreenElement extends ScreenElement {
 
     if (editor != null) {
       if (!onBringCursor()) return false;
-
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        if ((offset -= editor.getCursorOffset()) != 0) {
-          Bundle bundle = new Bundle();
-          int action;
-
-          bundle.putInt(
-            AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT,
-            AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER
-          );
-
-          if (offset > 0) {
-            action = AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY;
-          } else {
-            action = AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
-            offset = -offset;
-          }
-
-          while (offset > 0) {
-            if (!accessibilityNode.performAction(action, bundle)) {
-              return false;
-            }
-
-            offset -= 1;
-          }
-        }
-
-        return true;
-      }
-
       return ScreenDriver.inputCursor(offset);
     }
 
