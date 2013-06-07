@@ -21,9 +21,9 @@ package org.a11y.brltty.android;
 import java.util.List;
 import java.util.ArrayList;
 
-import android.content.Context;
-
 import android.os.Build;
+import android.content.Context;
+import android.view.KeyEvent;
 
 import android.accessibilityservice.AccessibilityService;
 
@@ -37,30 +37,36 @@ public abstract class BrailleRenderer {
 
   protected void addVirtualElements (ScreenElementList elements) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      Context context = ApplicationHooks.getContext();
-
       elements.addAtTop(
-        context.getString(R.string.VIRTUAL_BUTTON_NOTIFICATIONS),
+        R.string.VIRTUAL_BUTTON_NOTIFICATIONS,
         AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
       );
+    }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtTop(
-        context.getString(R.string.VIRTUAL_BUTTON_QUICK_SETTINGS),
+        R.string.VIRTUAL_BUTTON_QUICK_SETTINGS,
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
       );
+    }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtBottom(
-        context.getString(R.string.VIRTUAL_BUTTON_BACK),
+        R.string.VIRTUAL_BUTTON_BACK,
         AccessibilityService.GLOBAL_ACTION_BACK
       );
+    }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtBottom(
-        context.getString(R.string.VIRTUAL_BUTTON_HOME),
+        R.string.VIRTUAL_BUTTON_HOME,
         AccessibilityService.GLOBAL_ACTION_HOME
       );
+    }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtBottom(
-        context.getString(R.string.VIRTUAL_BUTTON_RECENT_APPS),
+        R.string.VIRTUAL_BUTTON_RECENT_APPS,
         AccessibilityService.GLOBAL_ACTION_RECENTS
       );
     }

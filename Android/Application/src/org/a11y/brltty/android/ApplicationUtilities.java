@@ -37,6 +37,10 @@ public abstract class ApplicationUtilities {
     return ApplicationParameters.SDK_VERSION >= version;
   }
 
+  public static String getString (int identifier) {
+    return ApplicationHooks.getContext().getString(identifier);
+  }
+
   public static ContentResolver getContentResolver () {
     return ApplicationHooks.getContext().getContentResolver();
   }

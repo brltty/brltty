@@ -20,8 +20,11 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 
+import android.view.KeyEvent;
+
 public class VirtualScreenElement extends ScreenElement {
   private final int globalAction;
+  private final int keyCode;
 
   @Override
   public boolean onClick () {
@@ -29,11 +32,20 @@ public class VirtualScreenElement extends ScreenElement {
       return BrailleService.getBrailleService().performGlobalAction(globalAction);
     }
 
+    if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+      return ScreenDriver.inputKey(keyCode);
+    }
+
     return super.onClick();
   }
 
-  public VirtualScreenElement (String text, int action) {
-    super(text);
+  public VirtualScreenElement (int text, int action, int key) {
+    super(ApplicationUtilities.getString(text));
     globalAction = action;
+    keyCode = key;
+  }
+
+  public VirtualScreenElement (int text, int action) {
+    this(text, action, KeyEvent.KEYCODE_UNKNOWN);
   }
 }

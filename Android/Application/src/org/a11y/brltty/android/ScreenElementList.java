@@ -161,11 +161,19 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     add(new RealScreenElement(text, node));
   }
 
-  public final void addAtTop (String text, int action) {
+  public final void addAtTop (int text, int action, int key) {
+    add(atTopCount++, new VirtualScreenElement(text, action, key));
+  }
+
+  public final void addAtTop (int text, int action) {
     add(atTopCount++, new VirtualScreenElement(text, action));
   }
 
-  public final void addAtBottom (String text, int action) {
+  public final void addAtBottom (int text, int action, int key) {
+    add(new VirtualScreenElement(text, action, key));
+  }
+
+  public final void addAtBottom (int text, int action) {
     add(new VirtualScreenElement(text, action));
   }
 
