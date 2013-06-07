@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
+
 import android.os.Build;
 import android.os.Bundle;
 
@@ -26,6 +28,8 @@ import android.graphics.Rect;
 import android.view.KeyEvent;
 
 public class RealScreenElement extends ScreenElement {
+  private static final String LOG_TAG = RealScreenElement.class.getName();
+
   private final AccessibilityNodeInfo accessibilityNode;
 
   @Override
@@ -113,12 +117,17 @@ public class RealScreenElement extends ScreenElement {
     return text;
   }
 
-  private boolean doAction (int action) {
-    boolean done = false;
+  private AccessibilityNodeInfo getActionableNode (int action) {
     AccessibilityNodeInfo node = getAccessibilityNode();
     Rect inner = getVisualLocation();
 
-    while (((node.getActions() & action) == 0) || !node.isEnabled()) {
+    while (true) {
+      if (node.isEnabled()) {
+        if ((node.getActions() & action) != 0) {
+          return node;
+        }
+      }
+
       AccessibilityNodeInfo parent = node.getParent();
       if (parent == null) break;
 
@@ -136,19 +145,55 @@ public class RealScreenElement extends ScreenElement {
       node = parent;
     }
 
-    if (node.performAction(action)) done = true;
     node.recycle();
-    return done;
+    node = null;
+    return null;
+  }
+
+  private boolean doAction (int action) {
+    AccessibilityNodeInfo node = getActionableNode(action);
+    if (node == null) return false;
+
+    boolean performed = node.performAction(action);
+    node.recycle();
+    node = null;
+    return performed;
   }
 
   public boolean doKey (int keyCode, boolean longPress) {
-    if (doAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-      if (ScreenDriver.inputKey(keyCode)) {
-        return true;
+    boolean done = false;
+    final int action = AccessibilityNodeInfo.ACTION_FOCUS;
+    final int unaction = AccessibilityNodeInfo.ACTION_CLEAR_FOCUS;
+    AccessibilityNodeInfo node = getActionableNode(action | unaction);
+
+    if (node != null) {
+      if (node.isFocused()) {
+        if (ScreenDriver.inputKey(keyCode)) done = true;
+      } else if (node.performAction(action)) {
+        final long start = System.currentTimeMillis();
+
+        while (true) {
+          if (ScreenDriver.inputKey(keyCode)) {
+            done = true;
+            break;
+          }
+
+          if ((System.currentTimeMillis() - start) >= ApplicationParameters.keyRetryTimeout) {
+            break;
+          }
+
+          try {
+            Thread.sleep(ApplicationParameters.keyRetryInterval);
+          } catch (InterruptedException exception) {
+          }
+        }
       }
+
+      node.recycle();
+      node = null;
     }
 
-    return false;
+    return done;
   }
 
   @Override
@@ -184,7 +229,7 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-      return doKey(KeyEvent.KEYCODE_ENTER, false);
+      return doKey(KeyEvent.KEYCODE_DPAD_CENTER, false);
     }
 
     return super.onClick();

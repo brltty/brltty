@@ -168,7 +168,7 @@ public class RenderedScreen {
 
   private final void finishScreenRows () {
     if (screenRows.isEmpty()) {
-      screenRows.add("empty screen");
+      screenRows.add("waiting for screen update");
     }
 
     for (CharSequence row : screenRows) {

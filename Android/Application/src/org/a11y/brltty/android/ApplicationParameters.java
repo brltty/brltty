@@ -22,7 +22,12 @@ import android.os.Build;
 
 public abstract class ApplicationParameters {
   public static final int SDK_VERSION = Build.VERSION.SDK_INT;
+//public static final int SDK_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+
   public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
+
+  public static final int keyRetryTimeout = 1000;
+  public static final int keyRetryInterval = 100;
 
   private ApplicationParameters () {
   }

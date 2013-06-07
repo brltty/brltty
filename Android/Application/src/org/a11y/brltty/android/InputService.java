@@ -32,7 +32,7 @@ import android.view.KeyEvent;
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
 
-  private static InputService inputService = null;
+  private static volatile InputService inputService = null;
   private static int startIdentifier = 0;
 
   public static InputService getInputService () {
