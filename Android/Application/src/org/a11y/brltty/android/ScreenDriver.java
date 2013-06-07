@@ -645,10 +645,8 @@ public final class ScreenDriver {
   static {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
+    } else {
+      exportScreenProperties();
     }
-  }
-
-  static {
-    exportScreenProperties();
   }
 }
