@@ -29,7 +29,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
+
 import android.view.KeyEvent;
+import android.view.ViewConfiguration;
 
 import android.graphics.Rect;
 
@@ -407,18 +409,29 @@ public final class ScreenDriver {
     return new KeyEvent(time, time, action, code, 0);
   }
 
-  public static boolean inputKey (int code) {
+  public static boolean inputKey (int keyCode, boolean longPress) {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
-      if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_DOWN, code))) {
-        if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_UP, code))) {
+      if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
+        if (longPress) {
+          try {
+            Thread.sleep(ViewConfiguration.getLongPressTimeout() + 100);
+          } catch (InterruptedException exception) {
+          }
+        }
+
+        if (connection.sendKeyEvent(newKeyEvent(KeyEvent.ACTION_UP, keyCode))) {
           return true;
         }
       }
     }
 
     return false;
+  }
+
+  public static boolean inputKey (int keyCode) {
+    return inputKey(keyCode, false);
   }
 
   public static boolean inputKeyEnter () {

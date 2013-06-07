@@ -162,18 +162,18 @@ public class RealScreenElement extends ScreenElement {
 
   public boolean doKey (int keyCode, boolean longPress) {
     boolean done = false;
-    final int action = AccessibilityNodeInfo.ACTION_FOCUS;
-    final int unaction = AccessibilityNodeInfo.ACTION_CLEAR_FOCUS;
-    AccessibilityNodeInfo node = getActionableNode(action | unaction);
+    final int ACTION_CLAIM = AccessibilityNodeInfo.ACTION_FOCUS;
+    final int ACTION_RELEASE = AccessibilityNodeInfo.ACTION_CLEAR_FOCUS;
+    AccessibilityNodeInfo node = getActionableNode(ACTION_CLAIM | ACTION_RELEASE);
 
     if (node != null) {
       if (node.isFocused()) {
-        if (ScreenDriver.inputKey(keyCode)) done = true;
-      } else if (node.performAction(action)) {
+        if (ScreenDriver.inputKey(keyCode, longPress)) done = true;
+      } else if (node.performAction(ACTION_CLAIM)) {
         final long start = System.currentTimeMillis();
 
         while (true) {
-          if (ScreenDriver.inputKey(keyCode)) {
+          if (ScreenDriver.inputKey(keyCode, longPress)) {
             done = true;
             break;
           }
@@ -213,6 +213,11 @@ public class RealScreenElement extends ScreenElement {
       return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      if (accessibilityNode.isFocused()) return true;
+      return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+    }
+
     return super.onBringCursor();
   }
 
@@ -241,6 +246,10 @@ public class RealScreenElement extends ScreenElement {
       return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
     }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      return doKey(KeyEvent.KEYCODE_DPAD_CENTER, true);
+    }
+
     return super.onLongClick();
   }
 
@@ -250,6 +259,10 @@ public class RealScreenElement extends ScreenElement {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      return doKey(KeyEvent.KEYCODE_PAGE_UP, false);
+    }
+
     return super.onScrollBackward();
   }
 
@@ -257,6 +270,10 @@ public class RealScreenElement extends ScreenElement {
   public boolean onScrollForward () {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      return doKey(KeyEvent.KEYCODE_PAGE_DOWN, false);
     }
 
     return super.onScrollForward();
