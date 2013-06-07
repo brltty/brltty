@@ -215,6 +215,29 @@ public final class ScreenDriver {
     }
   }
 
+  private static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
+    if (root != null) {
+      if (root.isFocused()) return AccessibilityNodeInfo.obtain(root);
+
+      {
+        int childCount = root.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = root.getChild(childIndex);
+
+          if (child != null) {
+            AccessibilityNodeInfo node = findFocusedNode(child);
+            child.recycle();
+            child = null;
+            if (node != null) return node;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
   private static AccessibilityNodeInfo getCursorNode () {
     AccessibilityNodeInfo root = currentScreen.getRootNode();
 
@@ -231,6 +254,16 @@ public final class ScreenDriver {
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+
+        if (node != null) {
+          root.recycle();
+          root = null;
+          return node;
+        }
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        AccessibilityNodeInfo node = findFocusedNode(root);
 
         if (node != null) {
           root.recycle();
