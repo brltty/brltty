@@ -41,6 +41,36 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
 
+  public static boolean isAncestor (AccessibilityNodeInfo ancestor, AccessibilityNodeInfo descendant) {
+    boolean found = false;
+
+    if ((ancestor != null) && (descendant != null)) {
+      AccessibilityNodeInfo child = AccessibilityNodeInfo.obtain(descendant);
+
+      while (true) {
+        if (child.equals(ancestor)) {
+          found = true;
+          break;
+        }
+
+        AccessibilityNodeInfo parent = child.getParent();
+        if (parent == null) break;
+
+        child.recycle();
+        child = parent;
+      }
+
+      child.recycle();
+      child = null;
+    }
+
+    return found;
+  }
+
+  public static boolean isAncestor (ScreenElement ancestor, ScreenElement descendant) {
+    return isAncestor(ancestor.getAccessibilityNode(), descendant.getAccessibilityNode());
+  }
+
   public final void sortByVisualLocation () {
     Comparator<ScreenElement> comparator = new Comparator<ScreenElement>() {
       @Override
@@ -67,19 +97,24 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
 
     while (true) {
       int count = elements.size();
+      if (count < 3) break;
 
-      if (count < 3) {
-        break;
-      }
-
-      Rect outer = elements.get(0).getVisualLocation();
+      ScreenElement container = elements.get(0);
+      Rect outer = container.getVisualLocation();
       List<ScreenElement> containedElements = new ScreenElementList();
 
       int index = 1;
       int to = 0;
 
       while (index < elements.size()) {
-        boolean contained = isContainer(outer, elements.get(index).getVisualLocation());
+        ScreenElement containee = elements.get(index);
+        boolean contained = isContainer(outer, containee.getVisualLocation());
+
+        if (contained) {
+          if (!isAncestor(container, containee)) {
+            contained = false;
+          }
+        }
 
         if (to == 0) {
           if (!contained) {
