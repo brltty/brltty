@@ -105,24 +105,33 @@ public class RenderedScreen {
     return false;
   }
 
-  private final boolean addScreenElements (AccessibilityNodeInfo root) {
-    boolean hasLabel = false;
+  private final int addScreenElements (AccessibilityNodeInfo root) {
+    final int significantActions = AccessibilityNodeInfo.ACTION_CLICK
+                                 | AccessibilityNodeInfo.ACTION_LONG_CLICK
+                                 | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                                 | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                                 ;
+    int propagatedActions = significantActions;
 
     if (root != null) {
+      int actions = root.getActions() & significantActions;
+
       {
         int childCount = root.getChildCount();
 
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
+        if (childCount > 0) {
+          propagatedActions = 0;
 
-          if (child != null) {
-            if (addScreenElements(child)) {
-              hasLabel = true;
+          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+            AccessibilityNodeInfo child = root.getChild(childIndex);
+
+            if (child != null) {
+              propagatedActions |= addScreenElements(child);
+
+              child.recycle();
+              child = null;
             }
           }
-
-          child.recycle();
-          child = null;
         }
       }
 
@@ -139,33 +148,27 @@ public class RenderedScreen {
         String text = ScreenUtilities.normalizeText(root.getText());
         String description = ScreenUtilities.normalizeText(root.getContentDescription());
 
-        int actions = root.getActions() & (
-          AccessibilityNodeInfo.ACTION_CLICK |
-          AccessibilityNodeInfo.ACTION_LONG_CLICK |
-          AccessibilityNodeInfo.ACTION_SCROLL_FORWARD |
-          AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-        );
-
         if (text != null) {
           if (description != null) text = description;
-          if (actions == 0) hasLabel = true;
         } else if (actions != 0) {
-          if (hasLabel) {
-            hasLabel = false;
-          } else if ((text = description) == null) {
-            text = root.getClassName().toString();
-            int index = text.lastIndexOf('.');
-            if (index >= 0) text = text.substring(index+1);
-            text = "(" + text + ")";
+          if (((actions & propagatedActions) != actions) || (root.getChildCount() == 0)) {
+            if ((text = description) == null) {
+              text = root.getClassName().toString();
+              int index = text.lastIndexOf('.');
+              if (index >= 0) text = text.substring(index+1);
+              text = "(" + text + ")";
+            }
           }
         }
 
         if (text == null) text = "";
         screenElements.add(text, root);
       }
+
+      propagatedActions &= ~actions;
     }
 
-    return hasLabel;
+    return propagatedActions;
   }
 
   private final void finishScreenRows () {
