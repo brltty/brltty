@@ -51,10 +51,10 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
                (location1.top > location2.top)? 1:
                (location1.left < location2.left)? -1:
                (location1.left > location2.left)? 1:
-               (location1.right < location2.right)? -1:
-               (location1.right > location2.right)? 1:
-               (location1.bottom < location2.bottom)? -1:
-               (location1.bottom > location2.bottom)? 1:
+               (location1.right > location2.right)? -1:
+               (location1.right < location2.right)? 1:
+               (location1.bottom > location2.bottom)? -1:
+               (location1.bottom < location2.bottom)? 1:
                0;
       }
     };
