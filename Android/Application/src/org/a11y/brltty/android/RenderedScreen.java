@@ -115,22 +115,19 @@ public class RenderedScreen {
 
     if (root != null) {
       int actions = root.getActions() & significantActions;
+      int childCount = root.getChildCount();
 
-      {
-        int childCount = root.getChildCount();
+      if (childCount > 0) {
+        propagatedActions = 0;
 
-        if (childCount > 0) {
-          propagatedActions = 0;
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = root.getChild(childIndex);
 
-          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-            AccessibilityNodeInfo child = root.getChild(childIndex);
+          if (child != null) {
+            propagatedActions |= addScreenElements(child);
 
-            if (child != null) {
-              propagatedActions |= addScreenElements(child);
-
-              child.recycle();
-              child = null;
-            }
+            child.recycle();
+            child = null;
           }
         }
       }
@@ -151,7 +148,7 @@ public class RenderedScreen {
         if (text != null) {
           if (description != null) text = description;
         } else if (actions != 0) {
-          if (((actions & propagatedActions) != actions) || (root.getChildCount() == 0)) {
+          if (((actions & propagatedActions) != actions) || (childCount == 0)) {
             if ((text = description) == null) {
               text = root.getClassName().toString();
               int index = text.lastIndexOf('.');
