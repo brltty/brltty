@@ -41,34 +41,24 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
 
-  public static boolean isAncestor (AccessibilityNodeInfo ancestor, AccessibilityNodeInfo descendant) {
+  public static boolean isContainer (AccessibilityNodeInfo outer, AccessibilityNodeInfo inner) {
     boolean found = false;
 
-    if ((ancestor != null) && (descendant != null)) {
-      AccessibilityNodeInfo child = AccessibilityNodeInfo.obtain(descendant);
+    if ((outer != null) && (inner != null)) {
+      AccessibilityNodeInfo parent = inner.getParent();
 
-      while (true) {
-        if (child.equals(ancestor)) {
-          found = true;
-          break;
-        }
-
-        AccessibilityNodeInfo parent = child.getParent();
-        if (parent == null) break;
-
-        child.recycle();
-        child = parent;
+      if (parent != null) {
+        if (parent.equals(outer)) found = true;
+        parent.recycle();
+        parent = null;
       }
-
-      child.recycle();
-      child = null;
     }
 
     return found;
   }
 
-  public static boolean isAncestor (ScreenElement ancestor, ScreenElement descendant) {
-    return isAncestor(ancestor.getAccessibilityNode(), descendant.getAccessibilityNode());
+  public static boolean isContainer (ScreenElement outer, ScreenElement inner) {
+    return isContainer(outer.getAccessibilityNode(), inner.getAccessibilityNode());
   }
 
   public final void sortByVisualLocation () {
@@ -111,7 +101,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
         boolean contained = isContainer(outer, containee.getVisualLocation());
 
         if (contained) {
-          if (!isAncestor(container, containee)) {
+          if (!isContainer(container, containee)) {
             contained = false;
           }
         }
