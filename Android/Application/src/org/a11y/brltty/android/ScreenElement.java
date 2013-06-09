@@ -121,12 +121,22 @@ public class ScreenElement {
   }
 
   protected String[] makeBrailleText (String text) {
-    if (text == null) return null;
-
     if (isCheckable()) {
-      text = "[" + (isChecked()? "X": " ") + "]" + " " + text;
+      StringBuilder sb = new StringBuilder();
+
+      sb.append('[');
+      sb.append((isChecked()? "X": " "));
+      sb.append(']');
+
+      if (text != null) {
+        sb.append(' ');
+        sb.append(text);
+      }
+
+      text = sb.toString();
     }
 
+    if (text == null) return null;
     List<String> lines = new ArrayList<String>();
 
     while (text != null) {
