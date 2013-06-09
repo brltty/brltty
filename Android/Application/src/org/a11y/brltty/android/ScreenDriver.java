@@ -281,6 +281,7 @@ public final class ScreenDriver {
     int number,
     int columns, int rows,
     int column, int row,
+    int from, int to,
     int left, int top,
     int right, int bottom
   );
@@ -289,6 +290,8 @@ public final class ScreenDriver {
     int cursorColumn = 0;
     int cursorRow = 0;
 
+    int selectedFrom = 0;
+    int selectedTo = 0;
     int selectedLeft = 0;
     int selectedTop = 0;
     int selectedRight = 0;
@@ -320,9 +323,11 @@ public final class ScreenDriver {
                   Point bottomRight = element.getBrailleCoordinate(to-1);
 
                   if (bottomRight != null) {
-                    selectedLeft = cursorColumn + topLeft.x;
+                    selectedFrom = cursorColumn + topLeft.x;
+                    selectedTo = cursorColumn + bottomRight.x;
+                    selectedLeft = location.left;
                     selectedTop = cursorRow + topLeft.y;
-                    selectedRight = cursorColumn + bottomRight.x + 1;
+                    selectedRight = location.right + 1;
                     selectedBottom = cursorRow + bottomRight.y + 1;
                   }
                 }
@@ -350,6 +355,7 @@ public final class ScreenDriver {
       currentScreen.getScreenWidth(),
       currentScreen.getScreenHeight(),
       cursorColumn, cursorRow,
+      selectedFrom, selectedTo,
       selectedLeft, selectedTop,
       selectedRight, selectedBottom
     );
