@@ -281,15 +281,18 @@ public final class ScreenDriver {
     int number,
     int columns, int rows,
     int column, int row,
-    int from, int to
+    int left, int top,
+    int right, int bottom
   );
 
   private static void exportScreenProperties () {
     int cursorColumn = 0;
     int cursorRow = 0;
 
-    int selectedFrom = 0;
-    int selectedTo = 0;
+    int selectedLeft = 0;
+    int selectedTop = 0;
+    int selectedRight = 0;
+    int selectedBottom = 0;
 
     AccessibilityNodeInfo node = getCursorNode();
 
@@ -306,15 +309,32 @@ public final class ScreenDriver {
           ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
 
           if (editor != null) {
-            selectedFrom = cursorColumn + editor.getSelectedFrom();
-            selectedTo = cursorColumn + editor.getSelectedTo();
+            {
+              int from = editor.getSelectedFrom();
+              int to = editor.getSelectedTo();
+
+              if (to > from) {
+                Point topLeft = element.getBrailleCoordinate(from);
+
+                if (topLeft != null) {
+                  Point bottomRight = element.getBrailleCoordinate(to-1);
+
+                  if (bottomRight != null) {
+                    selectedLeft = cursorColumn + topLeft.x;
+                    selectedTop = cursorRow + topLeft.y;
+                    selectedRight = cursorColumn + bottomRight.x + 1;
+                    selectedBottom = cursorRow + bottomRight.y + 1;
+                  }
+                }
+              }
+            }
 
             {
-              Point point = element.getBrailleCoordinate(editor.getCursorOffset());
+              Point cursor = element.getBrailleCoordinate(editor.getCursorOffset());
 
-              if (point != null) {
-                cursorColumn += point.x;
-                cursorRow += point.y;
+              if (cursor != null) {
+                cursorColumn += cursor.x;
+                cursorRow += cursor.y;
               }
             }
           }
@@ -330,7 +350,8 @@ public final class ScreenDriver {
       currentScreen.getScreenWidth(),
       currentScreen.getScreenHeight(),
       cursorColumn, cursorRow,
-      selectedFrom, selectedTo
+      selectedLeft, selectedTop,
+      selectedRight, selectedBottom
     );
   }
 
