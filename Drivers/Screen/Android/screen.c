@@ -34,6 +34,8 @@ static jint screenColumns;
 static jint screenRows;
 static jint cursorColumn;
 static jint cursorRow;
+static jint selectedFrom;
+static jint selectedTo;
 static jint selectedLeft;
 static jint selectedTop;
 static jint selectedRight;
@@ -52,6 +54,7 @@ Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   jint number,
   jint columns, jint rows,
   jint column, jint row,
+  jint from, jint to,
   jint left, jint top,
   int right, int bottom
 ) {
@@ -60,6 +63,8 @@ Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   screenRows = rows;
   cursorColumn = column;
   cursorRow = row;
+  selectedFrom = from;
+  selectedTo = to;
   selectedLeft = left;
   selectedTop = top;
   selectedRight = right;
@@ -142,6 +147,9 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
           if ((rowNumber >= selectedTop) && (rowNumber < selectedBottom)) {
             int from = MAX(selectedLeft, columnNumber);
             int to = MIN(selectedRight, columnNumber+columnCount);
+
+            if (rowNumber == selectedTop) from += selectedFrom - selectedLeft;
+            if (rowNumber == (selectedBottom - 1)) to -= selectedRight - selectedTo - 1;
 
             if (from < to) {
               ScreenCharacter *target = characters + (from - columnNumber);
