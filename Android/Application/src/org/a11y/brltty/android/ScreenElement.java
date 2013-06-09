@@ -110,6 +110,10 @@ public class ScreenElement {
     nodeText = text;
   }
 
+  public ScreenElement (int text) {
+    this(ApplicationUtilities.getString(text));
+  }
+
   public interface LocationGetter {
     public Rect getLocation (ScreenElement element);
   }

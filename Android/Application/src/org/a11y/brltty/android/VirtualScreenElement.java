@@ -40,7 +40,7 @@ public class VirtualScreenElement extends ScreenElement {
   }
 
   public VirtualScreenElement (int text, int action, int key) {
-    super(ApplicationUtilities.getString(text));
+    super(text);
     globalAction = action;
     keyCode = key;
   }
