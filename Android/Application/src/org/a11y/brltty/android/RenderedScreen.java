@@ -97,7 +97,9 @@ public class RenderedScreen {
     ScreenElement element = screenElements.findByBrailleLocation(column, row);
 
     if (element != null) {
-      if (element.performAction(column - element.getBrailleLocation().left)) {
+      Rect location = element.getBrailleLocation();
+
+      if (element.performAction((column - location.left), (row - location.top))) {
         return true;
       }
     }
@@ -158,7 +160,6 @@ public class RenderedScreen {
           }
         }
 
-        if (text == null) text = "";
         screenElements.add(text, root);
       }
 

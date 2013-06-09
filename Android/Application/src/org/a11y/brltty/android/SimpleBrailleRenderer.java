@@ -36,21 +36,20 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
     boolean wasVirtual = false;
 
     for (ScreenElement element : elements) {
-      String text = element.getBrailleText();
+      String[] text = element.getBrailleText();
 
       boolean isVirtual = element.getVisualLocation() == null;
       boolean append = wasVirtual && isVirtual;
       wasVirtual = isVirtual;
 
-      if (text.length() > 0) {
-        List<CharSequence> lines = makeTextLines(text);
-        int width = getTextWidth(lines);
+      if (text != null) {
+        int width = getTextWidth(text);
 
         if (append) {
           left = right + 3;
           int row = top;
 
-          for (CharSequence line : lines) {
+          for (String line : text) {
             StringBuilder sb = new StringBuilder();
             while (row >= rows.size()) rows.add("");
             sb.append(rows.get(row));
@@ -61,11 +60,14 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
         } else {
           left = 0;
           top = rows.size();
-          rows.addAll(lines);
+
+          for (String line : text) {
+            rows.add(line);
+          }
         }
 
         right = left + width - 1;
-        bottom = top + lines.size() - 1;
+        bottom = top + text.length - 1;
         element.setBrailleLocation(new Rect(left, top, right, bottom));
       }
     }

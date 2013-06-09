@@ -34,6 +34,7 @@ import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
 import android.graphics.Rect;
+import android.graphics.Point;
 
 public final class ScreenDriver {
   private final static Object eventLock = new Object();
@@ -307,7 +308,15 @@ public final class ScreenDriver {
           if (editor != null) {
             selectedFrom = cursorColumn + editor.getSelectedFrom();
             selectedTo = cursorColumn + editor.getSelectedTo();
-            cursorColumn += editor.getCursorOffset();
+
+            {
+              Point point = element.getBrailleCoordinate(editor.getCursorOffset());
+
+              if (point != null) {
+                cursorColumn += point.x;
+                cursorRow += point.y;
+              }
+            }
           }
         }
       }

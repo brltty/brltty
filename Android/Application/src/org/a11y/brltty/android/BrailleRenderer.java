@@ -19,7 +19,6 @@
 package org.a11y.brltty.android;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import android.os.Build;
 import android.content.Context;
@@ -72,31 +71,10 @@ public abstract class BrailleRenderer {
     }
   }
 
-  protected static List<CharSequence> makeTextLines (String text) {
-    List<CharSequence> lines = new ArrayList<CharSequence>();
-
-    while (text != null) {
-      String line;
-      int index = text.indexOf('\n');
-
-      if (index == -1) {
-        line = text;
-        text = null;
-      } else {
-        line = text.substring(0, index);
-        text = text.substring(index+1);
-      }
-
-      lines.add(line);
-    }
-
-    return lines;
-  }
-
-  protected static int getTextWidth (List<CharSequence> lines) {
+  protected static int getTextWidth (String[] lines) {
     int width = 1;
 
-    for (CharSequence line : lines) {
+    for (String line : lines) {
       width = Math.max(width, line.length());
     }
 

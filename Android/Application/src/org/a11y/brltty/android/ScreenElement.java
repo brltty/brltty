@@ -18,18 +18,22 @@
 
 package org.a11y.brltty.android;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
+import android.graphics.Point;
 
 public class ScreenElement {
   private final String nodeText;
 
-  private String brailleText = null;
+  private String[] brailleText = null;
   protected Rect visualLocation = null;
   private Rect brailleLocation = null;
 
-  public final String getBrailleText () {
+  public final String[] getBrailleText () {
     synchronized (this) {
       if (brailleText == null) {
         brailleText = makeBrailleText(nodeText);
@@ -49,6 +53,24 @@ public class ScreenElement {
 
   public final void setBrailleLocation (Rect location) {
     brailleLocation = location;
+  }
+
+  public final Point getBrailleCoordinate (int offset) {
+    String[] lines = getBrailleText();
+
+    if (lines != null) {
+      int y = 0;
+
+      for (String line : lines) {
+        int length = line.length();
+        if (offset < length) return new Point(offset, y);
+
+        y += 1;
+        offset -= length;
+      }
+    }
+
+    return null;
   }
 
   public AccessibilityNodeInfo getAccessibilityNode () {
@@ -87,8 +109,8 @@ public class ScreenElement {
     return false;
   }
 
-  public boolean performAction (int offset) {
-    switch (offset) {
+  public boolean performAction (int x, int y) {
+    switch (x) {
       case  0: return onBringCursor();
       case  1: return onClick();
       case  2: return onLongClick();
@@ -98,12 +120,31 @@ public class ScreenElement {
     }
   }
 
-  protected String makeBrailleText (String text) {
+  protected String[] makeBrailleText (String text) {
+    if (text == null) return null;
+
     if (isCheckable()) {
       text = "[" + (isChecked()? "X": " ") + "]" + " " + text;
     }
 
-    return text;
+    List<String> lines = new ArrayList<String>();
+
+    while (text != null) {
+      String line;
+      int index = text.indexOf('\n');
+
+      if (index == -1) {
+        line = text;
+        text = null;
+      } else {
+        line = text.substring(0, index);
+        text = text.substring(index+1);
+      }
+
+      lines.add(line);
+    }
+
+    return lines.toArray(new String[lines.size()]);
   }
 
   public ScreenElement (String text) {

@@ -65,26 +65,43 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
-  public boolean performAction (int offset) {
+  public boolean performAction (int x, int y) {
     ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
 
     if (editor != null) {
       if (!onBringCursor()) return false;
-      return ScreenDriver.inputCursor(offset);
+
+      String[] lines = getBrailleText();
+      String line;
+      int index = 0;
+      int offset = 0;
+
+      while (true) {
+        line = lines[index];
+        if (index == y) break;
+
+        offset += line.length();
+        index += 1;
+      }
+
+      return ScreenDriver.inputCursor(offset + Math.min(x, (line.length() - 1)));
     }
 
-    return super.performAction(offset);
+    return super.performAction(x, y);
   }
 
   @Override
-  protected String makeBrailleText (String text) {
-    text = super.makeBrailleText(text);
+  protected String[] makeBrailleText (String text) {
+    String[] lines = super.makeBrailleText(text);
+    if (lines == null) return null;
 
     if (ScreenTextEditor.getIfFocused(accessibilityNode) != null) {
-      text += ' ';
+      for (int i=0; i<lines.length; i+=1) {
+        lines[i] += ' ';
+      }
     }
 
-    return text;
+    return lines;
   }
 
   private AccessibilityNodeInfo getActionableNode (int action) {
