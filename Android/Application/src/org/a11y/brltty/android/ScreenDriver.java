@@ -216,29 +216,6 @@ public final class ScreenDriver {
     }
   }
 
-  private static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
-    if (root != null) {
-      if (root.isFocused()) return AccessibilityNodeInfo.obtain(root);
-
-      {
-        int childCount = root.getChildCount();
-
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
-
-          if (child != null) {
-            AccessibilityNodeInfo node = findFocusedNode(child);
-            child.recycle();
-            child = null;
-            if (node != null) return node;
-          }
-        }
-      }
-    }
-
-    return null;
-  }
-
   private static AccessibilityNodeInfo getCursorNode () {
     AccessibilityNodeInfo root = currentScreen.getRootNode();
 
@@ -262,7 +239,7 @@ public final class ScreenDriver {
           return node;
         }
       } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-        AccessibilityNodeInfo node = findFocusedNode(root);
+        AccessibilityNodeInfo node = ScreenUtilities.findFocusedNode(root);
 
         if (node != null) {
           root.recycle();
