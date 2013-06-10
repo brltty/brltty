@@ -158,6 +158,8 @@ public class RenderedScreen {
               text = "(" + text + ")";
             }
           }
+        } else if (childCount == 0) {
+          if ((text = description) == null) propagatedActions = 0;
         }
 
         screenElements.add(text, root);
