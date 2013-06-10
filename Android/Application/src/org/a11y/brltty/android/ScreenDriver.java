@@ -261,9 +261,7 @@ public final class ScreenDriver {
           root = null;
           return node;
         }
-      }
-
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
         AccessibilityNodeInfo node = findFocusedNode(root);
 
         if (node != null) {
