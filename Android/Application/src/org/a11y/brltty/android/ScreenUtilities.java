@@ -21,6 +21,55 @@ package org.a11y.brltty.android;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 public final class ScreenUtilities {
+  public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
+    if (node != null) {
+      {
+        int childCount = node.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = node.getChild(childIndex);
+
+          if (child != null) {
+            AccessibilityNodeInfo parent = child.getParent();
+
+            child.recycle();
+            child = null;
+
+            if (node.equals(parent)) return parent;
+          }
+        }
+      }
+
+      {
+        AccessibilityNodeInfo parent = node.getParent();
+
+        if (parent != null) {
+          int childCount = parent.getChildCount();
+
+          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+            AccessibilityNodeInfo child = parent.getChild(childIndex);
+
+            if (node.equals(child)) {
+              parent.recycle();
+              parent = null;
+              return child;
+            }
+
+            if (child != null) {
+              child.recycle();
+              child = null;
+            }
+          }
+
+          parent.recycle();
+          parent = null;
+        }
+      }
+    }
+
+    return null;
+  }
+
   public static AccessibilityNodeInfo findRootNode (AccessibilityNodeInfo node) {
     if (node != null) {
       AccessibilityNodeInfo child = AccessibilityNodeInfo.obtain(node);

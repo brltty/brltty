@@ -121,7 +121,7 @@ public class RealScreenElement extends ScreenElement {
       Rect outer = new Rect();
       parent.getBoundsInScreen(outer);
 
-      if (!outer.contains(inner)) {
+      if (!Rect.intersects(outer, inner)) {
         parent.recycle();
         parent = null;
         break;
@@ -160,6 +160,23 @@ public class RealScreenElement extends ScreenElement {
         final long start = System.currentTimeMillis();
 
         while (true) {
+          {
+            AccessibilityNodeInfo refreshed = ScreenUtilities.getRefreshedNode(node);
+
+            if (refreshed != null) {
+              boolean stop = false;
+
+              if (refreshed.isFocused()) {
+                stop = true;
+                if (ScreenDriver.inputKey(keyCode, longPress)) done = true;
+              }
+
+              refreshed.recycle();
+              refreshed = null;
+
+              if (stop) break;
+            }
+          }
           if (ScreenDriver.inputKey(keyCode, longPress)) {
             done = true;
             break;
