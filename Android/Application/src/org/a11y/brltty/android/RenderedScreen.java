@@ -149,17 +149,13 @@ public class RenderedScreen {
 
         if (text != null) {
           if (description != null) text = description;
-        } else if (actions != 0) {
-          if (((actions & propagatedActions) != actions) || (childCount == 0)) {
-            if ((text = description) == null) {
-              text = root.getClassName().toString();
-              int index = text.lastIndexOf('.');
-              if (index >= 0) text = text.substring(index+1);
-              text = "(" + text + ")";
-            }
+        } else if ((childCount == 0) || ((actions & propagatedActions) != actions)) {
+          if ((text = description) == null) {
+            text = root.getClassName().toString();
+            int index = text.lastIndexOf('.');
+            if (index >= 0) text = text.substring(index+1);
+            text = "(" + text + ")";
           }
-        } else if (childCount == 0) {
-          if ((text = description) == null) propagatedActions = 0;
         }
 
         screenElements.add(text, root);
