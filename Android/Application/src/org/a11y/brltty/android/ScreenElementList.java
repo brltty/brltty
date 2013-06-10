@@ -23,12 +23,26 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
 
 public class ScreenElementList extends ArrayList<ScreenElement> {
+  private static final String LOG_TAG = ScreenElementList.class.getName();
+
   private int atTopCount = 0;
+
+  public void logElements () {
+    Log.d(LOG_TAG, "begin screen element list");
+
+    for (ScreenElement element : this) {
+      Log.d(LOG_TAG, "screen element: " + element.getElementText());
+    }
+
+    Log.d(LOG_TAG, "end screen element list");
+  }
 
   private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
     return (left >= outer.left) &&
@@ -98,7 +112,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
 
       while (index < elements.size()) {
         ScreenElement containee = elements.get(index);
-        boolean contained = isContainer(outer, containee.getVisualLocation());
+        boolean contained = Rect.intersects(outer, containee.getVisualLocation());
 
         if (contained) {
           if (!isContainer(container, containee)) {

@@ -27,16 +27,20 @@ import android.graphics.Rect;
 import android.graphics.Point;
 
 public class ScreenElement {
-  private final String nodeText;
+  private final String elementText;
 
   private String[] brailleText = null;
   protected Rect visualLocation = null;
   private Rect brailleLocation = null;
 
+  public String getElementText () {
+    return elementText;
+  }
+
   public final String[] getBrailleText () {
     synchronized (this) {
       if (brailleText == null) {
-        brailleText = makeBrailleText(nodeText);
+        brailleText = makeBrailleText(elementText);
       }
     }
 
@@ -158,7 +162,7 @@ public class ScreenElement {
   }
 
   public ScreenElement (String text) {
-    nodeText = text;
+    elementText = text;
   }
 
   public ScreenElement (int text) {
