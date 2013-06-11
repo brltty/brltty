@@ -18,8 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import java.util.List;
-
 import android.graphics.Rect;
 
 public class ListBrailleRenderer extends BrailleRenderer {
