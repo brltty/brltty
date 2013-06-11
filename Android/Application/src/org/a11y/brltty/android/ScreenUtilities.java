@@ -35,7 +35,14 @@ public final class ScreenUtilities {
             child.recycle();
             child = null;
 
-            if (node.equals(parent)) return parent;
+            if (node.equals(parent)) {
+              return parent;
+            }
+
+            if (parent != null) {
+              parent.recycle();
+              parent = null;
+            }
           }
         }
       }
