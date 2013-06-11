@@ -28,7 +28,7 @@ import android.graphics.Rect;
 
 public class GridBrailleRenderer extends BrailleRenderer {
   public class Grid {
-    public class Coordinate {
+    public abstract class Coordinate implements Comparator<Cell> {
       private final int coordinateValue;
 
       private final List<Cell> cells = new ArrayList<Cell>();
@@ -41,8 +41,10 @@ public class GridBrailleRenderer extends BrailleRenderer {
         cells.add(cell);
       }
 
-      public void sortCells (Comparator<Cell> comparator) {
-        Collections.sort(cells, comparator);
+      public abstract int compare (Cell cell1, Cell cell2);
+
+      public void sortCells () {
+        Collections.sort(cells, this);
       }
 
       public Coordinate (int value) {
@@ -50,12 +52,42 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
     }
 
-    public abstract class Coordinates implements Comparator<Cell> {
+    public class Column extends Coordinate {
+      @Override
+      public final int compare (Cell cell1, Cell cell2) {
+        return LanguageUtilities.compare(
+          cell1.getRow().getValue(),
+          cell2.getRow().getValue()
+        );
+      }
+
+      public Column (int value) {
+        super(value);
+      }
+    }
+
+    public class Row extends Coordinate {
+      @Override
+      public final int compare (Cell cell1, Cell cell2) {
+        return LanguageUtilities.compare(
+          cell1.getColumn().getValue(),
+          cell2.getColumn().getValue()
+        );
+      }
+
+      public Row (int value) {
+        super(value);
+      }
+    }
+
+    public abstract class Coordinates {
       private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
       public final List<Coordinate> getCoordinates () {
         return coordinates;
       }
+
+      protected abstract Coordinate newCoordinate (int value);
 
       public final Coordinate getCoordinate (int value) {
         ListIterator<Coordinate> iterator = coordinates.listIterator();
@@ -72,17 +104,15 @@ public class GridBrailleRenderer extends BrailleRenderer {
         }
 
         {
-          Coordinate coordinate = new Coordinate(value);
+          Coordinate coordinate = newCoordinate(value);
           iterator.add(coordinate);
           return coordinate;
         }
       }
 
-      public abstract int compare (Cell cell1, Cell cell2);
-
       public void sortByCell () {
         for (Coordinate coordinate : coordinates) {
-          coordinate.sortCells(this);
+          coordinate.sortCells();
         }
       }
 
@@ -96,11 +126,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
     public class Columns extends Coordinates {
       @Override
-      public final int compare (Cell cell1, Cell cell2) {
-        return LanguageUtilities.compare(
-          cell1.getRow().getValue(),
-          cell2.getRow().getValue()
-        );
+      protected final Coordinate newCoordinate (int value) {
+        return new Column(value);
       }
 
       public Columns () {
@@ -110,11 +137,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
     public class Rows extends Coordinates {
       @Override
-      public final int compare (Cell cell1, Cell cell2) {
-        return LanguageUtilities.compare(
-          cell1.getColumn().getValue(),
-          cell2.getColumn().getValue()
-        );
+      protected final Coordinate newCoordinate (int value) {
+        return new Row(value);
       }
 
       public Rows () {
