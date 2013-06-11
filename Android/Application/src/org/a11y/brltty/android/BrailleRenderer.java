@@ -21,12 +21,10 @@ package org.a11y.brltty.android;
 import java.util.List;
 
 import android.os.Build;
-import android.graphics.Rect;
-
-import android.content.Context;
+import android.accessibilityservice.AccessibilityService;
 import android.view.KeyEvent;
 
-import android.accessibilityservice.AccessibilityService;
+import android.graphics.Rect;
 
 public abstract class BrailleRenderer {
   protected abstract void setBrailleLocations (ScreenElementList elements);
