@@ -21,17 +21,18 @@ package org.a11y.brltty.android;
 import android.os.Build;
 
 public abstract class ApplicationParameters {
-  public static final int SDK_VERSION = Build.VERSION.SDK_INT;
-//public static final int SDK_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-
-  public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
-
   public static final BrailleRenderer BRAILLE_RENDERER = new SimpleBrailleRenderer();
 //public static final BrailleRenderer BRAILLE_RENDERER = new GridBrailleRenderer();
   public static final int COLUMN_SPACING = 2;
 
-  public static final int keyRetryTimeout = 1000;
-  public static final int keyRetryInterval = 100;
+  public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
+
+  public static final int KEY_RETRY_TIMEOUT = 1000;
+  public static final int KEY_RETRY_INTERVAL = 100;
+  public static final int LONG_PRESS_DELAY = 100;
+
+  public static final int SDK_VERSION = Build.VERSION.SDK_INT;
+//public static final int SDK_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
   private ApplicationParameters () {
   }

@@ -182,12 +182,12 @@ public class RealScreenElement extends ScreenElement {
             break;
           }
 
-          if ((System.currentTimeMillis() - start) >= ApplicationParameters.keyRetryTimeout) {
+          if ((System.currentTimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
             break;
           }
 
           try {
-            Thread.sleep(ApplicationParameters.keyRetryInterval);
+            Thread.sleep(ApplicationParameters.KEY_RETRY_INTERVAL);
           } catch (InterruptedException exception) {
           }
         }

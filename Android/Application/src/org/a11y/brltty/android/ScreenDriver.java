@@ -467,7 +467,7 @@ public final class ScreenDriver {
       if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
         if (longPress) {
           try {
-            Thread.sleep(ViewConfiguration.getLongPressTimeout() + 100);
+            Thread.sleep(ViewConfiguration.getLongPressTimeout() + ApplicationParameters.LONG_PRESS_DELAY);
           } catch (InterruptedException exception) {
           }
         }
