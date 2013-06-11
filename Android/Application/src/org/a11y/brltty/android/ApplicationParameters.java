@@ -26,6 +26,8 @@ public abstract class ApplicationParameters {
 
   public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
 
+  public static final BrailleRenderer BRAILLE_RENDERER = new SimpleBrailleRenderer();
+//public static final BrailleRenderer BRAILLE_RENDERER = new GridBrailleRenderer();
   public static final int COLUMN_SPACING = 2;
 
   public static final int keyRetryTimeout = 1000;

@@ -27,13 +27,6 @@ import android.view.KeyEvent;
 import android.accessibilityservice.AccessibilityService;
 
 public abstract class BrailleRenderer {
-  private static final BrailleRenderer simpleBrailleRenderer = new SimpleBrailleRenderer();
-  private static BrailleRenderer currentBrailleRenderer = simpleBrailleRenderer;
-
-  public static BrailleRenderer getBrailleRenderer () {
-    return currentBrailleRenderer;
-  }
-
   protected void addVirtualElements (ScreenElementList elements) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtTop(
