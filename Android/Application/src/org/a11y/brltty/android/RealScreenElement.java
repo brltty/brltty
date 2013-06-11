@@ -61,7 +61,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean isEditable () {
-    return ReflectionHelper.canAssign(android.widget.EditText.class, accessibilityNode.getClassName().toString());
+    return LanguageUtilities.canAssign(android.widget.EditText.class, accessibilityNode.getClassName().toString());
   }
 
   @Override

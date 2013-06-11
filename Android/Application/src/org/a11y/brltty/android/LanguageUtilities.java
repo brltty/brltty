@@ -22,8 +22,8 @@ import java.lang.reflect.*;
 
 import android.util.Log;
 
-public final class ReflectionHelper {
-  private static final String LOG_TAG = ReflectionHelper.class.getName();
+public final class LanguageUtilities {
+  private static final String LOG_TAG = LanguageUtilities.class.getName();
 
   public static Object newInstance (String instanceType, String[] argumentTypes, Object[] arguments) {
     Class instanceClass;
@@ -86,5 +86,14 @@ public final class ReflectionHelper {
     }
 
     return false;
+  }
+
+  public static int compare (int value1, int value2) {
+    if (value1 < value2) return -1;
+    if (value1 > value2) return 1;
+    return 0;
+  }
+
+  private LanguageUtilities () {
   }
 }

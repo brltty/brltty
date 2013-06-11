@@ -457,7 +457,7 @@ public class SettingsActivity extends PreferenceActivity {
         getActivity()
       };
 
-      return (DeviceCollection)ReflectionHelper.newInstance(className, argumentTypes, arguments);
+      return (DeviceCollection)LanguageUtilities.newInstance(className, argumentTypes, arguments);
     }
 
     private void updateDeviceIdentifierList (String deviceMethod) {
