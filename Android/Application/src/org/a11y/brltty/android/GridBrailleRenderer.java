@@ -254,7 +254,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       if (location == null) return null;
 
       Coordinate column = getColumn(location.left);
-      Coordinate row = getRow(location.top);
+      Coordinate row = getRow((location.top + location.bottom) / 2);
       Cell cell = new Cell(column, row, element);
 
       column.addCell(cell);
