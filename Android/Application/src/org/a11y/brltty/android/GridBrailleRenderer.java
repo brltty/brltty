@@ -273,7 +273,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
   }
 
   @Override
-  public void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
+  protected final void setBrailleLocations (ScreenElementList elements) {
     Grid grid = new Grid();
 
     for (ScreenElement element : elements) {
@@ -293,18 +293,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
         ScreenElement element = cell.getScreenElement();
         String[] text = element.getBrailleText();
 
-        int y = top;
-
         for (String line : text) {
-          while (rows.size() <= y) rows.add("");
-
-          StringBuilder sb = new StringBuilder(rows.get(y));
-          while (sb.length() < left) sb.append(' ');
-          sb.append(line);
-          rows.set(y, sb.toString());
-
           element.setBrailleLocation(new Rect(left, top, right, bottom));
-          y += 1;
         }
       }
     }

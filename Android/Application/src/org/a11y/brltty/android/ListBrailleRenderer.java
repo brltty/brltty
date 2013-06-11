@@ -24,15 +24,15 @@ import android.graphics.Rect;
 
 public class ListBrailleRenderer extends BrailleRenderer {
   @Override
-  public void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
+  protected final void setBrailleLocations (ScreenElementList elements) {
     elements.sortByVisualLocation();
     elements.groupByContainer();
     addVirtualElements(elements);
 
     int left = 0;
     int top = 0;
-    int right = 0;
-    int bottom = 0;
+    int right = -1;
+    int bottom = -1;
     boolean wasVirtual = false;
 
     for (ScreenElement element : elements) {
@@ -47,23 +47,9 @@ public class ListBrailleRenderer extends BrailleRenderer {
 
         if (append) {
           left = right + ApplicationParameters.COLUMN_SPACING + 1;
-          int row = top;
-
-          for (String line : text) {
-            StringBuilder sb = new StringBuilder();
-            while (row >= rows.size()) rows.add("");
-            sb.append(rows.get(row));
-            while (sb.length() < left) sb.append(' ');
-            sb.append(line);
-            rows.set(row++, sb.toString());
-          }
         } else {
           left = 0;
-          top = rows.size();
-
-          for (String line : text) {
-            rows.add(line);
-          }
+          top = bottom + 1;
         }
 
         right = left + width - 1;
