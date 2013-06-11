@@ -50,6 +50,78 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
     }
 
+    public abstract class Coordinates implements Comparator<Cell> {
+      private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
+
+      public final List<Coordinate> getCoordinates () {
+        return coordinates;
+      }
+
+      public final Coordinate getCoordinate (int value) {
+        ListIterator<Coordinate> iterator = coordinates.listIterator();
+
+        while (iterator.hasNext()) {
+          Coordinate coordinate = iterator.next();
+          int current = coordinate.getValue();
+          if (current == value) return coordinate;
+
+          if (current > value) {
+            iterator.previous();
+            break;
+          }
+        }
+
+        {
+          Coordinate coordinate = new Coordinate(value);
+          iterator.add(coordinate);
+          return coordinate;
+        }
+      }
+
+      public abstract int compare (Cell cell1, Cell cell2);
+
+      public void sortByCell () {
+        for (Coordinate coordinate : coordinates) {
+          coordinate.sortCells(this);
+        }
+      }
+
+      public void finish () {
+        sortByCell();
+      }
+
+      public Coordinates () {
+      }
+    }
+
+    public class Columns extends Coordinates {
+      @Override
+      public final int compare (Cell cell1, Cell cell2) {
+        return LanguageUtilities.compare(
+          cell1.getRow().getValue(),
+          cell2.getRow().getValue()
+        );
+      }
+
+      public Columns () {
+        super();
+      }
+    }
+
+    public class Rows extends Coordinates {
+      @Override
+      public final int compare (Cell cell1, Cell cell2) {
+        return LanguageUtilities.compare(
+          cell1.getColumn().getValue(),
+          cell2.getColumn().getValue()
+        );
+      }
+
+      public Rows () {
+        super();
+      }
+    }
+
     public class Cell {
       private final Coordinate cellColumn;
       private final Coordinate cellRow;
@@ -88,36 +160,15 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
     }
 
-    private final List<Coordinate> columns = new ArrayList<Coordinate>();
-    private final List<Coordinate> rows = new ArrayList<Coordinate>();
-
-    private final Coordinate getCoordinate (List<Coordinate> coordinates, int value) {
-      ListIterator<Coordinate> iterator = coordinates.listIterator();
-
-      while (iterator.hasNext()) {
-        Coordinate coordinate = iterator.next();
-        int current = coordinate.getValue();
-        if (current == value) return coordinate;
-
-        if (current > value) {
-          iterator.previous();
-          break;
-        }
-      }
-
-      {
-        Coordinate coordinate = new Coordinate(value);
-        iterator.add(coordinate);
-        return coordinate;
-      }
-    }
+    private final Coordinates columns = new Columns();
+    private final Coordinates rows = new Rows();
 
     private final Coordinate getColumn (int value) {
-      return getCoordinate(columns, value);
+      return columns.getCoordinate(value);
     }
 
     private final Coordinate getRow (int value) {
-      return getCoordinate(rows, value);
+      return rows.getCoordinate(value);
     }
 
     public final Cell addCell (ScreenElement element) {
@@ -137,43 +188,9 @@ public class GridBrailleRenderer extends BrailleRenderer {
       return cell;
     }
 
-    private void sortCoordinatesByCell (List<Coordinate> coordinates, Comparator<Cell> comparator) {
-      for (Coordinate coordinate : coordinates) {
-        coordinate.sortCells(comparator);
-      }
-    }
-
-    private void sortColumnsByRow () {
-      Comparator<Cell> comparator = new Comparator<Cell>() {
-        @Override
-        public int compare (Cell cell1, Cell cell2) {
-          return LanguageUtilities.compare(
-            cell1.getRow().getValue(),
-            cell2.getRow().getValue()
-          );
-        }
-      };
-
-      sortCoordinatesByCell(columns, comparator);
-    }
-
-    private void sortRowsByColumn () {
-      Comparator<Cell> comparator = new Comparator<Cell>() {
-        @Override
-        public int compare (Cell cell1, Cell cell2) {
-          return LanguageUtilities.compare(
-            cell1.getColumn().getValue(),
-            cell2.getColumn().getValue()
-          );
-        }
-      };
-
-      sortCoordinatesByCell(rows, comparator);
-    }
-
     public final void finish () {
-      sortColumnsByRow();
-      sortRowsByColumn();
+      columns.finish();
+      rows.finish();
     }
 
     public Grid () {
