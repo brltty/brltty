@@ -26,6 +26,8 @@ public abstract class ApplicationParameters {
 
   public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
 
+  public static final int COLUMN_SPACING = 2;
+
   public static final int keyRetryTimeout = 1000;
   public static final int keyRetryInterval = 100;
 

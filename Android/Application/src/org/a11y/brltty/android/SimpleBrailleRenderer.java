@@ -46,7 +46,7 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
         int width = getTextWidth(text);
 
         if (append) {
-          left = right + 3;
+          left = right + ApplicationParameters.COLUMN_SPACING + 1;
           int row = top;
 
           for (String line : text) {
