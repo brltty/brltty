@@ -33,11 +33,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       private final List<Cell> cells = new ArrayList<Cell>();
 
-      private int cellOffset = 0;
-      private int cellSize = 1;
+      private int brailleOffset = 0;
+      private int brailleSize = 0;
 
       public abstract int compare (Cell cell1, Cell cell2);
-      protected abstract int getSize (Cell cell);
+      protected abstract int getBrailleSize (Cell cell);
 
       public final int getValue () {
         return coordinateValue;
@@ -47,12 +47,12 @@ public class GridBrailleRenderer extends BrailleRenderer {
         return cells;
       }
 
-      public int getOffset () {
-        return cellOffset;
+      public int getBrailleOffset () {
+        return brailleOffset;
       }
 
-      public int getSize () {
-        return cellSize;
+      public int getBrailleSize () {
+        return brailleSize;
       }
 
       public void addCell (Cell cell) {
@@ -61,11 +61,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       public void finish (int offset) {
         Collections.sort(cells, this);
-        cellOffset = offset;
+        brailleOffset = offset;
 
         for (Cell cell : cells) {
-          int size = getSize(cell);
-          if (size > cellSize) cellSize = size;
+          int size = getBrailleSize(cell);
+          if (size > brailleSize) brailleSize = size;
         }
       }
 
@@ -84,7 +84,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getSize (Cell cell) {
+      protected final int getBrailleSize (Cell cell) {
         return cell.getWidth();
       }
 
@@ -103,7 +103,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getSize (Cell cell) {
+      protected final int getBrailleSize (Cell cell) {
         return cell.getHeight();
       }
 
@@ -116,7 +116,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
       protected abstract Coordinate newCoordinate (int value);
-      protected abstract int getSpacing ();
+      protected abstract int getCellSpacing ();
 
       public final List<Coordinate> getCoordinates () {
         return coordinates;
@@ -148,7 +148,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
         for (Coordinate coordinate : coordinates) {
           coordinate.finish(offset);
-          offset += coordinate.getSize() + getSpacing();
+          offset += coordinate.getBrailleSize() + getCellSpacing();
         }
       }
 
@@ -163,7 +163,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getSpacing () {
+      protected final int getCellSpacing () {
         return ApplicationParameters.COLUMN_SPACING;
       }
 
@@ -179,7 +179,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getSpacing () {
+      protected final int getCellSpacing () {
         return 0;
       }
 
@@ -191,8 +191,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
     public class Cell {
       private final Coordinate gridColumn;
       private final Coordinate gridRow;
-
       private final ScreenElement screenElement;
+
       private final int cellWidth;
       private final int cellHeight;
 
@@ -282,20 +282,16 @@ public class GridBrailleRenderer extends BrailleRenderer {
     grid.finish();
 
     for (Grid.Coordinate row : grid.getRows()) {
-      int top = row.getOffset();
-      int bottom = top + row.getSize() - 1;
+      int top = row.getBrailleOffset();
+      int bottom = top + row.getBrailleSize() - 1;
 
       for (Grid.Cell cell : row.getCells()) {
         Grid.Coordinate column = cell.getGridColumn();
-        int left = column.getOffset();
-        int right = left + column.getSize() - 1;
+        int left = column.getBrailleOffset();
+        int right = left + column.getBrailleSize() - 1;
 
         ScreenElement element = cell.getScreenElement();
-        String[] text = element.getBrailleText();
-
-        for (String line : text) {
-          element.setBrailleLocation(new Rect(left, top, right, bottom));
-        }
+        element.setBrailleLocation(new Rect(left, top, right, bottom));
       }
     }
   }
