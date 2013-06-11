@@ -22,7 +22,7 @@ import java.util.List;
 
 import android.graphics.Rect;
 
-public class SimpleBrailleRenderer extends BrailleRenderer {
+public class ListBrailleRenderer extends BrailleRenderer {
   @Override
   public void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
     elements.sortByVisualLocation();
@@ -73,7 +73,7 @@ public class SimpleBrailleRenderer extends BrailleRenderer {
     }
   }
 
-  public SimpleBrailleRenderer () {
+  public ListBrailleRenderer () {
     super();
   }
 }

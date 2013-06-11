@@ -21,7 +21,7 @@ package org.a11y.brltty.android;
 import android.os.Build;
 
 public abstract class ApplicationParameters {
-  public static final BrailleRenderer BRAILLE_RENDERER = new SimpleBrailleRenderer();
+  public static final BrailleRenderer BRAILLE_RENDERER = new ListBrailleRenderer();
 //public static final BrailleRenderer BRAILLE_RENDERER = new GridBrailleRenderer();
   public static final int COLUMN_SPACING = 2;
 
