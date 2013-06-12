@@ -33,7 +33,7 @@ public class VirtualScreenElement extends ScreenElement {
     }
 
     if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
-      return ScreenDriver.inputKey(keyCode);
+      return InputService.inputKey(keyCode);
     }
 
     return super.onClick();

@@ -84,7 +84,7 @@ public class RealScreenElement extends ScreenElement {
         index += 1;
       }
 
-      return ScreenDriver.inputCursor(offset + Math.min(x, (line.length() - 1)));
+      return InputService.inputCursor(offset + Math.min(x, (line.length() - 1)));
     }
 
     return super.performAction(x, y);
@@ -155,7 +155,7 @@ public class RealScreenElement extends ScreenElement {
 
     if (node != null) {
       if (node.isFocused()) {
-        if (ScreenDriver.inputKey(keyCode, longPress)) done = true;
+        if (InputService.inputKey(keyCode, longPress)) done = true;
       } else if (node.performAction(ACTION_CLAIM)) {
         final long start = System.currentTimeMillis();
 
@@ -168,7 +168,7 @@ public class RealScreenElement extends ScreenElement {
 
               if (refreshed.isFocused()) {
                 stop = true;
-                if (ScreenDriver.inputKey(keyCode, longPress)) done = true;
+                if (InputService.inputKey(keyCode, longPress)) done = true;
               }
 
               refreshed.recycle();
@@ -176,10 +176,6 @@ public class RealScreenElement extends ScreenElement {
 
               if (stop) break;
             }
-          }
-          if (ScreenDriver.inputKey(keyCode, longPress)) {
-            done = true;
-            break;
           }
 
           if ((System.currentTimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
