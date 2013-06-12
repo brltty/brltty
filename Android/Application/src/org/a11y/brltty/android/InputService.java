@@ -91,6 +91,10 @@ public class InputService extends InputMethodService {
     logKeyEvent(code, press, "unhandled");
   }
 
+  public static void logKeyEventSent (int code, boolean press) {
+    logKeyEvent(code, press, "sent");
+  }
+
   public native boolean handleKeyEvent (int code, boolean press);
 
   public void forwardKeyEvent (int code, boolean press) {
@@ -104,6 +108,8 @@ public class InputService extends InputMethodService {
   }
 
   public boolean acceptKeyEvent (final int code, final boolean press) {
+    if (BrailleService.getBrailleService() == null) return false;
+
     switch (code) {
       case KeyEvent.KEYCODE_POWER:
       case KeyEvent.KEYCODE_HOME:
@@ -182,10 +188,18 @@ public class InputService extends InputMethodService {
     InputService service = InputService.getInputService();
     if (service != null) {
       InputConnection connection = service.getCurrentInputConnection();
-      if (connection != null) return connection;
+
+      if (connection != null) {
+        return connection;
+      } else {
+        Log.w(LOG_TAG, "input service not connected");
+      }
+    } else {
+      Log.w(LOG_TAG, "input service not started");
     }
 
     if (!isInputServiceSelected()) {
+      Log.w(LOG_TAG, "input service not selected");
       ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
     }
 
@@ -221,6 +235,8 @@ public class InputService extends InputMethodService {
 
     if (connection != null) {
       if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
+        logKeyEventSent(keyCode, true);
+
         if (longPress) {
           try {
             Thread.sleep(ViewConfiguration.getLongPressTimeout() + ApplicationParameters.LONG_PRESS_DELAY);
@@ -229,6 +245,7 @@ public class InputService extends InputMethodService {
         }
 
         if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode))) {
+          logKeyEventSent(keyCode, false);
           return true;
         }
       }
