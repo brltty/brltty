@@ -26,6 +26,7 @@ public abstract class ApplicationParameters {
   public static final int COLUMN_SPACING = 2;
 
   public static final boolean LOG_ACCESSIBILITY_EVENTS = false;
+  public static final boolean LOG_KEYBOARD_EVENTS = false;
 
   public static final int KEY_RETRY_TIMEOUT = 1000;
   public static final int KEY_RETRY_INTERVAL = 100;

@@ -33,7 +33,6 @@ public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
 
   private static volatile InputService inputService = null;
-  private static int startIdentifier = 0;
 
   public static InputService getInputService () {
     return inputService;
@@ -51,7 +50,6 @@ public class InputService extends InputMethodService {
     super.onDestroy();
     Log.d(LOG_TAG, "input service stopped");
     inputService = null;
-    startIdentifier = 0;
   }
 
   @Override
@@ -62,13 +60,6 @@ public class InputService extends InputMethodService {
   @Override
   public void onUnbindInput () {
     Log.d(LOG_TAG, "input service unbound");
-  }
-
-  @Override
-  public int onStartCommand (Intent intent, int flags, int identifier) {
-    startIdentifier = identifier;
-    Log.d(LOG_TAG, "input service starting");
-    return START_STICKY;
   }
 
   @Override
@@ -83,16 +74,31 @@ public class InputService extends InputMethodService {
     Log.d(LOG_TAG, "input service disconnected");
   }
 
+  public static void logKeyEvent (int code, boolean press, String description) {
+    if (ApplicationParameters.LOG_KEYBOARD_EVENTS) {
+      Log.d(LOG_TAG, "key " + (press? "press": "release") + " " + description + ": " + code);
+    }
+  }
+
+  public static void logKeyEventReceived (int code, boolean press) {
+    logKeyEvent(code, press, "received");
+  }
+
+  public static void logKeyEventUnhandled (int code, boolean press) {
+    logKeyEvent(code, press, "unhandled");
+  }
+
+  public native boolean handleKeyEvent (int code, boolean press);
+
   public void forwardKeyEvent (int code, boolean press) {
     InputConnection connection = getCurrentInputConnection();
 
     if (connection != null) {
       int action = press? KeyEvent.ACTION_DOWN: KeyEvent.ACTION_UP;
       connection.sendKeyEvent(new KeyEvent(action, code));
+      logKeyEvent(code, press, "forwarded");
     }
   }
-
-  public native boolean handleKeyEvent (int code, boolean press);
 
   public boolean acceptKeyEvent (final int code, final boolean press) {
     switch (code) {
@@ -106,6 +112,7 @@ public class InputService extends InputMethodService {
         break;
     }
 
+    logKeyEvent(code, press, "accepted");
     CoreWrapper.runOnCoreThread(new Runnable() {
       @Override
       public void run () {
@@ -118,13 +125,17 @@ public class InputService extends InputMethodService {
 
   @Override
   public boolean onKeyDown (int code, KeyEvent event) {
+    logKeyEventReceived(code, true);
     if (acceptKeyEvent(code, true)) return true;
+    logKeyEventUnhandled(code, true);
     return super.onKeyDown(code, event);
   }
 
   @Override
   public boolean onKeyUp (int code, KeyEvent event) {
+    logKeyEventReceived(code, false);
     if (acceptKeyEvent(code, false)) return true;
+    logKeyEventUnhandled(code, false);
     return super.onKeyUp(code, event);
   }
 }
