@@ -28,6 +28,7 @@
 
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
+static jclass lockUtilitiesClass = NULL;
 
 static jint screenNumber;
 static jint screenColumns;
@@ -46,6 +47,11 @@ static const char *problemText = NULL;
 static int
 findScreenDriverClass (void) {
   return findJavaClass(env, &screenDriverClass, "org/a11y/brltty/android/ScreenDriver");
+}
+
+static int
+findLockUtilitiesClass (void) {
+  return findJavaClass(env, &lockUtilitiesClass, "org/a11y/brltty/android/LockUtilities");
 }
 
 JNIEXPORT void JNICALL
@@ -195,10 +201,10 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
 static int
 resetLockTimer (void) {
-  if (findScreenDriverClass()) {
+  if (findLockUtilitiesClass()) {
     static jmethodID method = 0;
 
-    if (findJavaStaticMethod(env, &method, screenDriverClass, "resetLockTimer",
+    if (findJavaStaticMethod(env, &method, lockUtilitiesClass, "resetTimer",
                              JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                             ))) {
       (*env)->CallStaticVoidMethod(env, screenDriverClass, method);

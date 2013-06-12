@@ -20,7 +20,6 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 import android.os.SystemClock;
-import android.os.PowerManager;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
@@ -44,12 +43,6 @@ public final class ScreenDriver {
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = null;
 
-  private static final PowerManager.WakeLock wakeLock =
-    ApplicationUtilities.getPowerManager().newWakeLock(
-      PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
-      ApplicationHooks.getContext().getString(R.string.app_name)
-    );
-
   public static ScreenLogger getLogger () {
     return currentLogger;
   }
@@ -60,16 +53,6 @@ public final class ScreenDriver {
 
   public static RenderedScreen getScreen () {
     return currentScreen;
-  }
-
-  private static boolean isDeviceLocked () {
-    if (!ApplicationUtilities.getPowerManager().isScreenOn()) {
-      if (ApplicationUtilities.getKeyguardManager().inKeyguardRestrictedInputMode()) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
@@ -350,7 +333,7 @@ public final class ScreenDriver {
   }
 
   public static boolean refreshScreen () {
-    if (isDeviceLocked()) return false;
+    if (LockUtilities.isLocked()) return false;
 
     AccessibilityNodeInfo node;
     synchronized (eventLock) {
@@ -646,11 +629,6 @@ public final class ScreenDriver {
     }
 
     return inputKey(code);
-  }
-
-  public static void resetLockTimer () {
-    wakeLock.acquire();
-    wakeLock.release();
   }
 
   private ScreenDriver () {
