@@ -87,10 +87,6 @@ public class InputService extends InputMethodService {
     logKeyEvent(code, press, "received");
   }
 
-  public static void logKeyEventUnhandled (int code, boolean press) {
-    logKeyEvent(code, press, "unhandled");
-  }
-
   public static void logKeyEventSent (int code, boolean press) {
     logKeyEvent(code, press, "sent");
   }
@@ -108,24 +104,34 @@ public class InputService extends InputMethodService {
   }
 
   public boolean acceptKeyEvent (final int code, final boolean press) {
-    if (BrailleService.getBrailleService() == null) return false;
-
     switch (code) {
       case KeyEvent.KEYCODE_POWER:
       case KeyEvent.KEYCODE_HOME:
       case KeyEvent.KEYCODE_BACK:
       case KeyEvent.KEYCODE_MENU:
+        logKeyEvent(code, press, "rejected");
         return false;
 
       default:
+        logKeyEvent(code, press, "accepted");
         break;
     }
 
-    logKeyEvent(code, press, "accepted");
+    if (BrailleService.getBrailleService() == null) {
+      Log.w(LOG_TAG, "braille service not started");
+      return false;
+    }
+
     CoreWrapper.runOnCoreThread(new Runnable() {
       @Override
       public void run () {
-        if (!handleKeyEvent(code, press)) forwardKeyEvent(code, press);
+        logKeyEvent(code, press, "delivered");
+
+        if (handleKeyEvent(code, press)) {
+          logKeyEvent(code, press, "handled");
+        } else {
+          forwardKeyEvent(code, press);
+        }
       }
     });
 
@@ -136,7 +142,6 @@ public class InputService extends InputMethodService {
   public boolean onKeyDown (int code, KeyEvent event) {
     logKeyEventReceived(code, true);
     if (acceptKeyEvent(code, true)) return true;
-    logKeyEventUnhandled(code, true);
     return super.onKeyDown(code, event);
   }
 
@@ -144,7 +149,6 @@ public class InputService extends InputMethodService {
   public boolean onKeyUp (int code, KeyEvent event) {
     logKeyEventReceived(code, false);
     if (acceptKeyEvent(code, false)) return true;
-    logKeyEventUnhandled(code, false);
     return super.onKeyUp(code, event);
   }
 
@@ -194,12 +198,16 @@ public class InputService extends InputMethodService {
       } else {
         Log.w(LOG_TAG, "input service not connected");
       }
+    } else if (!isInputServiceEnabled()) {
+      Log.w(LOG_TAG, "input service not enabled");
+    } else if (!isInputServiceSelected()) {
+      Log.w(LOG_TAG, "input service not selected");
     } else {
       Log.w(LOG_TAG, "input service not started");
     }
 
     if (!isInputServiceSelected()) {
-      Log.w(LOG_TAG, "input service not selected");
+      Log.w(LOG_TAG, "showing input method picker");
       ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
     }
 
