@@ -25,34 +25,19 @@ public class ListBrailleRenderer extends BrailleRenderer {
   protected final void setBrailleLocations (ScreenElementList elements) {
     elements.sortByVisualLocation();
     elements.groupByContainer();
-    addVirtualElements(elements);
 
     int left = 0;
     int top = 0;
-    int right = -1;
-    int bottom = -1;
-    boolean wasVirtual = false;
 
     for (ScreenElement element : elements) {
       String[] text = element.getBrailleText();
 
-      boolean isVirtual = element.getVisualLocation() == null;
-      boolean append = wasVirtual && isVirtual;
-      wasVirtual = isVirtual;
-
       if (text != null) {
-        int width = getTextWidth(text);
+        int right = left + getTextWidth(text) - 1;
+        int bottom = top + text.length - 1;
 
-        if (append) {
-          left = right + ApplicationParameters.COLUMN_SPACING + 1;
-        } else {
-          left = 0;
-          top = bottom + 1;
-        }
-
-        right = left + width - 1;
-        bottom = top + text.length - 1;
-        element.setBrailleLocation(new Rect(left, top, right, bottom));
+        element.setBrailleLocation(left, top, right, bottom);
+        top = bottom + 1;
       }
     }
   }

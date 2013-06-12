@@ -59,6 +59,10 @@ public class ScreenElement {
     brailleLocation = location;
   }
 
+  public final void setBrailleLocation (int left, int top, int right, int bottom) {
+    setBrailleLocation(new Rect(left, top, right, bottom));
+  }
+
   public final Point getBrailleCoordinate (int offset) {
     String[] lines = getBrailleText();
 

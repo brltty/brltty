@@ -20,6 +20,8 @@ package org.a11y.brltty.android;
 
 import java.util.List;
 
+import android.util.Log;
+
 import android.os.Build;
 import android.accessibilityservice.AccessibilityService;
 import android.view.KeyEvent;
@@ -27,9 +29,21 @@ import android.view.KeyEvent;
 import android.graphics.Rect;
 
 public abstract class BrailleRenderer {
+  private static final String LOG_TAG = BrailleRenderer.class.getName();
+
   protected abstract void setBrailleLocations (ScreenElementList elements);
 
-  protected void addVirtualElements (ScreenElementList elements) {
+  protected static int getTextWidth (String[] lines) {
+    int width = 1;
+
+    for (String line : lines) {
+      width = Math.max(width, line.length());
+    }
+
+    return width;
+  }
+
+  private void addVirtualElements (ScreenElementList elements) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtTop(
         R.string.VIRTUAL_BUTTON_NOTIFICATIONS,
@@ -66,17 +80,7 @@ public abstract class BrailleRenderer {
     }
   }
 
-  protected static int getTextWidth (String[] lines) {
-    int width = 1;
-
-    for (String line : lines) {
-      width = Math.max(width, line.length());
-    }
-
-    return width;
-  }
-
-  private void setRegion (List<CharSequence> rows, Rect location, String[] lines) {
+  private void setScreenRegion (List<CharSequence> rows, Rect location, String[] lines) {
     int width = location.right - location.left + 1;
 
     while (rows.size() <= location.bottom) {
@@ -99,14 +103,38 @@ public abstract class BrailleRenderer {
     }
   }
 
-  public void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
+  public final void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
     setBrailleLocations(elements);
+    addVirtualElements(elements);
+
+    boolean wasVirtual = false;
+    int horizontalOffset = 0;
+    int verticalOffset = 0;
 
     for (ScreenElement element : elements) {
-      Rect location = element.getBrailleLocation();
+      boolean isVirtual = element.getVisualLocation() == null;
 
+      if (isVirtual != wasVirtual) {
+        horizontalOffset = 0;
+        verticalOffset = rows.size();
+        wasVirtual = isVirtual;
+      }
+
+      if (isVirtual) {
+        String[] text = element.getBrailleText();
+        int left = horizontalOffset;
+        int top = 0;
+        int right = left + getTextWidth(text) - 1;
+        int bottom = top + text.length - 1;
+        element.setBrailleLocation(left, top, right, bottom);
+        horizontalOffset = right + 1 + ApplicationParameters.COLUMN_SPACING;
+      }
+
+      Rect location = element.getBrailleLocation();
       if (location != null) {
-        setRegion(rows, location, element.getBrailleText());
+        location.top += verticalOffset;
+        location.bottom += verticalOffset;
+        setScreenRegion(rows, location, element.getBrailleText());
       }
     }
   }

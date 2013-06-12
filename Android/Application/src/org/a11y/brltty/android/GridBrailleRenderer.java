@@ -28,7 +28,7 @@ import android.graphics.Rect;
 
 public class GridBrailleRenderer extends BrailleRenderer {
   public class Grid {
-    public abstract class Coordinate implements Comparator<Cell> {
+    protected abstract class Coordinate implements Comparator<Cell> {
       private final int coordinateValue;
 
       private final List<Cell> cells = new ArrayList<Cell>();
@@ -151,7 +151,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
     }
 
-    public abstract class Coordinates {
+    protected abstract class Coordinates {
       private final int offsetIncrement;
 
       private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
@@ -168,7 +168,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         while (iterator.hasNext()) {
           Coordinate coordinate = iterator.next();
           int current = coordinate.getValue();
-          if (current == value) return coordinate;
+          if (Math.abs(current - value) <= 5) return coordinate;
 
           if (current > value) {
             iterator.previous();
@@ -329,7 +329,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       if (location == null) return null;
 
       Coordinate column = getColumn(location.left);
-      Coordinate row = getRow((location.top + location.bottom) / 2);
+      Coordinate row = getRow(location.top);
       Cell cell = new Cell(column, row, element);
 
       column.addCell(cell);
@@ -370,7 +370,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         int bottom = top + cell.getHeight() - 1;
 
         ScreenElement element = cell.getScreenElement();
-        element.setBrailleLocation(new Rect(left, top, right, bottom));
+        element.setBrailleLocation(left, top, right, bottom);
       }
     }
   }
