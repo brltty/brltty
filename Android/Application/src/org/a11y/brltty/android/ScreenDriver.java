@@ -42,7 +42,7 @@ public final class ScreenDriver {
 
   private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
   private static ScreenWindow currentWindow = new ScreenWindow(0);
-  private static RenderedScreen currentScreen = new RenderedScreen(null);
+  private static RenderedScreen currentScreen = null;
 
   private static final PowerManager.WakeLock wakeLock =
     ApplicationUtilities.getPowerManager().newWakeLock(
@@ -361,6 +361,9 @@ public final class ScreenDriver {
 
     if (node != null) {
       refreshScreen(node);
+    } else if (currentScreen == null) {
+      currentScreen = new RenderedScreen(null);
+      exportScreenProperties();
     }
 
     return true;
@@ -656,8 +659,6 @@ public final class ScreenDriver {
   static {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
-    } else {
-      exportScreenProperties();
     }
   }
 }
