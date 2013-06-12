@@ -34,10 +34,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
       private final List<Cell> cells = new ArrayList<Cell>();
 
       private int brailleOffset = 0;
-      private int brailleSize = 0;
 
       public abstract int compare (Cell cell1, Cell cell2);
-      protected abstract int getBrailleSize (Cell cell);
+      protected abstract void setPreviousCell (Cell cell, Cell previous);
+      protected abstract void setNextCell (Cell cell, Cell Next);
+      protected abstract void setOffset (Cell cell);
 
       public final int getValue () {
         return coordinateValue;
@@ -51,21 +52,31 @@ public class GridBrailleRenderer extends BrailleRenderer {
         return brailleOffset;
       }
 
-      public int getBrailleSize () {
-        return brailleSize;
+      public void setBrailleOffset (int offset) {
+        if (offset > brailleOffset) brailleOffset = offset;
       }
 
       public void addCell (Cell cell) {
         cells.add(cell);
       }
 
-      public void finish (int offset) {
+      public void linkCells () {
         Collections.sort(cells, this);
-        brailleOffset = offset;
+        Cell previous = null;
 
+        for (Cell next : cells) {
+          if (previous != null) {
+            setPreviousCell(next, previous);
+            setNextCell(previous, next);
+          }
+
+          previous = next;
+        }
+      }
+
+      public void setOffsets () {
         for (Cell cell : cells) {
-          int size = getBrailleSize(cell);
-          if (size > brailleSize) brailleSize = size;
+          setOffset(cell);
         }
       }
 
@@ -84,8 +95,22 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getBrailleSize (Cell cell) {
-        return cell.getWidth();
+      protected final void setPreviousCell (Cell cell, Cell previous) {
+        cell.setNorthCell(previous);
+      }
+
+      @Override
+      protected final void setNextCell (Cell cell, Cell next) {
+        cell.setSouthCell(next);
+      }
+
+      @Override
+      protected final void setOffset (Cell cell) {
+        Cell next = cell.getEastCell();
+
+        if (next != null) {
+          next.getGridColumn().setBrailleOffset(getBrailleOffset() + cell.getWidth() + ApplicationParameters.COLUMN_SPACING);
+        }
       }
 
       public Column (int value) {
@@ -103,8 +128,22 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final int getBrailleSize (Cell cell) {
-        return cell.getHeight();
+      protected final void setPreviousCell (Cell cell, Cell previous) {
+        cell.setWestCell(previous);
+      }
+
+      @Override
+      protected final void setNextCell (Cell cell, Cell next) {
+        cell.setEastCell(next);
+      }
+
+      @Override
+      protected final void setOffset (Cell cell) {
+        Cell next = cell.getSouthCell();
+
+        if (next != null) {
+          next.getGridRow().setBrailleOffset(getBrailleOffset() + cell.getHeight());
+        }
       }
 
       public Row (int value) {
@@ -113,10 +152,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
     }
 
     public abstract class Coordinates {
+      private final int offsetIncrement;
+
       private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
       protected abstract Coordinate newCoordinate (int value);
-      protected abstract int getCellSpacing ();
 
       public final List<Coordinate> getCoordinates () {
         return coordinates;
@@ -143,16 +183,24 @@ public class GridBrailleRenderer extends BrailleRenderer {
         }
       }
 
-      public void finish () {
-        int offset = 0;
-
+      public void linkCells () {
         for (Coordinate coordinate : coordinates) {
-          coordinate.finish(offset);
-          offset += coordinate.getBrailleSize() + getCellSpacing();
+          coordinate.linkCells();
         }
       }
 
-      public Coordinates () {
+      public void setOffsets () {
+        int offset = 0;
+
+        for (Coordinate coordinate : coordinates) {
+          coordinate.setBrailleOffset(offset);
+          offset += offsetIncrement;
+          coordinate.setOffsets();
+        }
+      }
+
+      public Coordinates (int increment) {
+        offsetIncrement = increment;
       }
     }
 
@@ -162,13 +210,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
         return new Column(value);
       }
 
-      @Override
-      protected final int getCellSpacing () {
-        return ApplicationParameters.COLUMN_SPACING;
-      }
-
       public Columns () {
-        super();
+        super(ApplicationParameters.COLUMN_SPACING);
       }
     }
 
@@ -178,13 +221,8 @@ public class GridBrailleRenderer extends BrailleRenderer {
         return new Row(value);
       }
 
-      @Override
-      protected final int getCellSpacing () {
-        return 0;
-      }
-
       public Rows () {
-        super();
+        super(1);
       }
     }
 
@@ -195,6 +233,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       private final int cellWidth;
       private final int cellHeight;
+
+      private Cell northCell = null;
+      private Cell eastCell = null;
+      private Cell southCell = null;
+      private Cell westCell = null;
 
       public final Coordinate getGridColumn () {
         return gridColumn;
@@ -214,6 +257,38 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       public final int getHeight () {
         return cellHeight;
+      }
+
+      public Cell getNorthCell () {
+        return northCell;
+      }
+
+      public Cell getEastCell () {
+        return eastCell;
+      }
+
+      public Cell getSouthCell () {
+        return southCell;
+      }
+
+      public Cell getWestCell () {
+        return westCell;
+      }
+
+      public void setNorthCell (Cell cell) {
+        northCell = cell;
+      }
+
+      public void setEastCell (Cell cell) {
+        eastCell = cell;
+      }
+
+      public void setSouthCell (Cell cell) {
+        southCell = cell;
+      }
+
+      public void setWestCell (Cell cell) {
+        westCell = cell;
       }
 
       public Cell (Coordinate column, Coordinate row, ScreenElement element) {
@@ -264,8 +339,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
     }
 
     public final void finish () {
-      columns.finish();
-      rows.finish();
+      columns.linkCells();
+      rows.linkCells();
+
+      columns.setOffsets();
+      rows.setOffsets();
     }
 
     public Grid () {
@@ -283,12 +361,13 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
     for (Grid.Coordinate row : grid.getRows()) {
       int top = row.getBrailleOffset();
-      int bottom = top + row.getBrailleSize() - 1;
 
       for (Grid.Cell cell : row.getCells()) {
         Grid.Coordinate column = cell.getGridColumn();
         int left = column.getBrailleOffset();
-        int right = left + column.getBrailleSize() - 1;
+
+        int right = left + cell.getWidth() - 1;
+        int bottom = top + cell.getHeight() - 1;
 
         ScreenElement element = cell.getScreenElement();
         element.setBrailleLocation(new Rect(left, top, right, bottom));
