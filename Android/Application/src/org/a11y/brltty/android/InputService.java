@@ -79,7 +79,23 @@ public class InputService extends InputMethodService {
 
   public static void logKeyEvent (int code, boolean press, String description) {
     if (ApplicationParameters.LOG_KEYBOARD_EVENTS) {
-      Log.d(LOG_TAG, "key " + (press? "press": "release") + " " + description + ": " + code);
+      StringBuilder sb = new StringBuilder();
+
+      sb.append("key ");
+      sb.append((press? "press": "release"));
+      sb.append(' ');
+      sb.append(description);
+
+      sb.append(": ");
+      sb.append(code);
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.HONEYCOMB_MR1)) {
+        sb.append(" (");
+        sb.append(KeyEvent.keyCodeToString(code));
+        sb.append(")");
+      }
+
+      Log.d(LOG_TAG, sb.toString());
     }
   }
 
