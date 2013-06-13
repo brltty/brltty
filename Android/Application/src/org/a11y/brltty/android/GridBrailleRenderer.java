@@ -25,6 +25,9 @@ import java.util.ListIterator;
 import java.util.ArrayList;
 
 import android.graphics.Rect;
+import android.graphics.Point;
+
+import android.view.accessibility.AccessibilityNodeInfo;
 
 public class GridBrailleRenderer extends BrailleRenderer {
   public static final int LOCATION_FUZZINESS = 5;
@@ -323,15 +326,42 @@ public class GridBrailleRenderer extends BrailleRenderer {
       return rows.getCoordinate(value);
     }
 
+    public Point getPoint (ScreenElement element) {
+      AccessibilityNodeInfo node = element.getAccessibilityNode();
+      if (node == null) return null;
+
+      Rect location = new Rect();
+      int x;
+      int y;
+      boolean leaf = node.getChildCount() == 0;
+
+      do {
+        node.getBoundsInScreen(location);
+        x = location.left;
+        y = leaf? ((location.top + location.bottom) / 2): location.top;
+
+        AccessibilityNodeInfo parent = node.getParent();
+        if (parent == null) break;
+
+        node.recycle();
+        node = parent;
+        leaf = false;
+      } while (node.getChildCount() == 1);
+
+      node.recycle();
+      node = null;
+      return new Point(x, y);
+    }
+
     public final Cell addCell (ScreenElement element) {
       String[] text = element.getBrailleText();
       if (text == null) return null;
 
-      Rect location = element.getOuterLocation();
-      if (location == null) return null;
+      Point point = getPoint(element);
+      if (point == null) return null;
 
-      Coordinate column = getColumn(location.left);
-      Coordinate row = getRow(location.top);
+      Coordinate column = getColumn(point.x);
+      Coordinate row = getRow(point.y);
       Cell cell = new Cell(column, row, element);
 
       column.addCell(cell);
