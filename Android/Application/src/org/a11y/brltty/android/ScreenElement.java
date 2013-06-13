@@ -51,6 +51,28 @@ public class ScreenElement {
     return null;
   }
 
+  public Rect getOuterLocation () {
+    AccessibilityNodeInfo node = getAccessibilityNode();
+    if (node == null) return null;
+    Rect location = new Rect();
+
+    do {
+      node.getBoundsInScreen(location);
+
+      {
+        AccessibilityNodeInfo parent = node.getParent();
+        if (parent == null) break;
+
+        node.recycle();
+        node = parent;
+      }
+    } while (node.getChildCount() == 1);
+
+    node.recycle();
+    node = null;
+    return location;
+  }
+
   public final Rect getBrailleLocation () {
     return brailleLocation;
   }
