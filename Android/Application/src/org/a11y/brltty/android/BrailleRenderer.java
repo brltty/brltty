@@ -127,7 +127,7 @@ public abstract class BrailleRenderer {
         int right = left + getTextWidth(text) - 1;
         int bottom = top + text.length - 1;
         element.setBrailleLocation(left, top, right, bottom);
-        horizontalOffset = right + 1 + ApplicationParameters.COLUMN_SPACING;
+        horizontalOffset = right + 1 + ApplicationParameters.BRAILLE_COLUMN_SPACING;
       }
 
       Rect location = element.getBrailleLocation();

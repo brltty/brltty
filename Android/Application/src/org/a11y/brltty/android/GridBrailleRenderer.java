@@ -30,8 +30,6 @@ import android.graphics.Point;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 public class GridBrailleRenderer extends BrailleRenderer {
-  public static final int LOCATION_FUZZINESS = 5;
-
   public class Grid {
     protected abstract class Coordinate implements Comparator<Cell> {
       private final int coordinateValue;
@@ -114,7 +112,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         Cell next = cell.getEastCell();
 
         if (next != null) {
-          next.getGridColumn().setBrailleOffset(getBrailleOffset() + cell.getWidth() + ApplicationParameters.COLUMN_SPACING);
+          next.getGridColumn().setBrailleOffset(getBrailleOffset() + cell.getWidth() + ApplicationParameters.BRAILLE_COLUMN_SPACING);
         }
       }
 
@@ -173,7 +171,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         while (iterator.hasNext()) {
           Coordinate coordinate = iterator.next();
           int current = coordinate.getValue();
-          if (Math.abs(current - value) <= LOCATION_FUZZINESS) return coordinate;
+          if (Math.abs(current - value) <= ApplicationParameters.VISUAL_LOCATION_FUZZINESS) return coordinate;
 
           if (current > value) {
             iterator.previous();
@@ -216,7 +214,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       public Columns () {
-        super(ApplicationParameters.COLUMN_SPACING);
+        super(ApplicationParameters.BRAILLE_COLUMN_SPACING);
       }
     }
 
@@ -331,25 +329,23 @@ public class GridBrailleRenderer extends BrailleRenderer {
       if (node == null) return null;
 
       Rect location = new Rect();
-      int x;
-      int y;
       boolean leaf = node.getChildCount() == 0;
 
       do {
         node.getBoundsInScreen(location);
-        x = location.left;
-        y = leaf? ((location.top + location.bottom) / 2): location.top;
 
         AccessibilityNodeInfo parent = node.getParent();
         if (parent == null) break;
 
         node.recycle();
         node = parent;
-        leaf = false;
       } while (node.getChildCount() == 1);
 
       node.recycle();
       node = null;
+
+      int x = location.left;
+      int y = leaf? ((location.top + location.bottom) / 2): location.top;
       return new Point(x, y);
     }
 
