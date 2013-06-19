@@ -31,7 +31,7 @@ import android.graphics.Rect;
 public abstract class BrailleRenderer {
   private static final String LOG_TAG = BrailleRenderer.class.getName();
 
-  private static BrailleRenderer brailleRenderer = new ListBrailleRenderer();
+  private static volatile BrailleRenderer brailleRenderer = new ListBrailleRenderer();
 
   public static BrailleRenderer getBrailleRenderer () {
     return brailleRenderer;
