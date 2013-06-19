@@ -41,6 +41,9 @@ SYMBOL_POINTER(restartBrailleDriver);
 SYMBOL_POINTER(changeBrailleDriver);
 SYMBOL_POINTER(changeBrailleDevice);
 
+SYMBOL_POINTER(restartSpeechDriver);
+SYMBOL_POINTER(changeSpeechDriver);
+
 typedef struct {
   const char *name;
   void *pointer;
@@ -66,6 +69,9 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(restartBrailleDriver),
   SYMBOL_ENTRY(changeBrailleDriver),
   SYMBOL_ENTRY(changeBrailleDevice),
+
+  SYMBOL_ENTRY(restartSpeechDriver),
+  SYMBOL_ENTRY(changeSpeechDriver),
 END_SYMBOL_TABLE
 
 static void *coreHandle = NULL;
@@ -301,4 +307,15 @@ Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDriver (JNIEnv *env, jobject 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDevice (JNIEnv *env, jobject this, jstring device) {
   return changeStringValue(env, changeBrailleDevice_p, device);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_restartSpeechDriver (JNIEnv *env, jobject this) {
+  restartSpeechDriver_p();
+  return JNI_TRUE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_changeSpeechDriver (JNIEnv *env, jobject this, jstring driver) {
+  return changeStringValue(env, changeSpeechDriver_p, driver);
 }

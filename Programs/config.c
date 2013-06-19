@@ -1479,6 +1479,21 @@ static void
 exitSpeechDriver (void) {
   stopSpeechDriver();
 }
+
+int
+changeSpeechDriver (const char *driver) {
+  char **newDrivers = splitString(driver, ',', NULL);
+
+  if (newDrivers) {
+    char **oldDrivers = speechDrivers;
+
+    speechDrivers = newDrivers;
+    if (oldDrivers) deallocateStrings(oldDrivers);
+    return 1;
+  }
+
+  return 0;
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
@@ -2115,7 +2130,7 @@ brlttyStart (int argc, char *argv[]) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
-  speechDrivers = splitString(opt_speechDriver? opt_speechDriver: "", ',', NULL);
+  changeSpeechDriver(opt_speechDriver? opt_speechDriver: "");
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {

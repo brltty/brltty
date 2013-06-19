@@ -11,6 +11,7 @@
   <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
 
   <string name="PREF_KEY_NAVIGATION_MODE">navigation-mode</string>
+  <string name="PREF_KEY_SPEECH_SUPPORT">speech-support</string>
 
   <string name="PREF_KEY_TEXT_TABLE">text-table</string>
   <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>

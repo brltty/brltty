@@ -207,6 +207,7 @@ public class SettingsActivity extends PreferenceActivity {
     protected ListPreference navigationModeList;
     protected ListPreference textTableList;
     protected ListPreference contractionTableList;
+    protected ListPreference speechSupportList;
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -217,10 +218,12 @@ public class SettingsActivity extends PreferenceActivity {
       navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);
       textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
       contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
+      speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
 
       showListSelection(navigationModeList);
       showListSelection(textTableList);
       showListSelection(contractionTableList);
+      showListSelection(speechSupportList);
 
       navigationModeList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
@@ -268,6 +271,26 @@ public class SettingsActivity extends PreferenceActivity {
             });
 
             showListSelection(contractionTableList, newContractionTable);
+            return true;
+          }
+        }
+      );
+
+      speechSupportList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            final String newSpeechSupport = (String)newValue;
+
+            CoreWrapper.runOnCoreThread(new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeSpeechDriver(newSpeechSupport);
+                CoreWrapper.restartSpeechDriver();
+              }
+            });
+
+            showListSelection(speechSupportList, newSpeechSupport);
             return true;
           }
         }

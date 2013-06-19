@@ -108,7 +108,9 @@ extern int haveStatusCells (void);
 #ifdef ENABLE_SPEECH_SUPPORT
 extern SpeechSynthesizer spk;
 
-extern void restartSpeechDriver (void);
+FUNCTION_DECLARE(restartSpeechDriver, void, (void));
+FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
+
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */

@@ -14,6 +14,19 @@
     <item>Grid</item>
   </string-array>
 
+  <string name="SPEECH_SUPPORT_LABEL_None">None</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Native</string>
+
+  <string-array name="SPEECH_SUPPORT_LABELS">
+    <item>@string/SPEECH_SUPPORT_LABEL_None</item>
+    <item>@string/SPEECH_SUPPORT_LABEL_Native</item>
+  </string-array>
+
+  <string-array name="SPEECH_SUPPORT_VALUES">
+    <item>no</item>
+    <item>ad</item>
+  </string-array>
+
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
   <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>

@@ -188,6 +188,8 @@ public class CoreThread extends Thread {
       }
     }
 
+    builder.setSpeechDriver(getStringSetting(R.string.PREF_KEY_SPEECH_SUPPORT, R.string.DEFAULT_SPEECH_SUPPORT));
+
     {
       ArrayList<String> keywords = new ArrayList<String>();
       keywords.add(getStringSetting(R.string.PREF_KEY_LOG_LEVEL, R.string.DEFAULT_LOG_LEVEL));

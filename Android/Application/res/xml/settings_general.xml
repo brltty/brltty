@@ -31,4 +31,13 @@
     android:entryValues="@array/CONTRACTION_TABLE_VALUES"
     android:defaultValue="@string/DEFAULT_CONTRACTION_TABLE"
    />
+
+  <ListPreference
+    android:key="@string/PREF_KEY_SPEECH_SUPPORT"
+    android:persistent="true"
+    android:title="@string/SETTINGS_BUTTON_SPEECH_SUPPORT"
+    android:entries="@array/SPEECH_SUPPORT_LABELS"
+    android:entryValues="@array/SPEECH_SUPPORT_VALUES"
+    android:defaultValue="@string/DEFAULT_SPEECH_SUPPORT"
+   />
 </PreferenceScreen>

@@ -40,6 +40,9 @@ public class CoreWrapper {
   public static native boolean changeBrailleDriver (String driver);
   public static native boolean changeBrailleDevice (String device);
 
+  public static native boolean restartSpeechDriver ();
+  public static native boolean changeSpeechDriver (String driver);
+
   public static boolean changeLogCategories (Set<String> categories) {
     StringBuffer sb = new StringBuffer();
 
