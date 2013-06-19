@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+  <string name="NAVIGATION_MODE_LABEL_List">Vertical List</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Two Dimensional Grid</string>
+
+  <string-array name="NAVIGATION_MODE_LABELS">
+    <item>@string/NAVIGATION_MODE_LABEL_List</item>
+    <item>@string/NAVIGATION_MODE_LABEL_Grid</item>
+  </string-array>
+
+  <string-array name="NAVIGATION_MODE_VALUES">
+    <item>List</item>
+    <item>Grid</item>
+  </string-array>
+
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
   <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>

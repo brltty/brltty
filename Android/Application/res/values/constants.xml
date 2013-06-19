@@ -10,6 +10,8 @@
   <string name="PREF_KEY_LOG_LEVEL">log-level</string>
   <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
 
+  <string name="PREF_KEY_NAVIGATION_MODE">navigation-mode</string>
+
   <string name="PREF_KEY_TEXT_TABLE">text-table</string>
   <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>
   <string name="PREF_KEY_CONTRACTION_TABLE">contraction-table</string>

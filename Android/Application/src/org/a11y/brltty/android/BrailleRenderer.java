@@ -31,6 +31,23 @@ import android.graphics.Rect;
 public abstract class BrailleRenderer {
   private static final String LOG_TAG = BrailleRenderer.class.getName();
 
+  private static BrailleRenderer brailleRenderer = new ListBrailleRenderer();
+
+  public static BrailleRenderer getBrailleRenderer () {
+    return brailleRenderer;
+  }
+
+  public static void setBrailleRenderer (BrailleRenderer renderer) {
+    brailleRenderer = renderer;
+  }
+
+  public static void setBrailleRenderer (String type) {
+    StringBuilder name = new StringBuilder(BrailleRenderer.class.getName());
+    int index = name.lastIndexOf(".");
+    name.insert(index+1, type);
+    setBrailleRenderer((BrailleRenderer)LanguageUtilities.newInstance(name.toString()));
+  }
+
   protected abstract void setBrailleLocations (ScreenElementList elements);
 
   protected static int getTextWidth (String[] lines) {

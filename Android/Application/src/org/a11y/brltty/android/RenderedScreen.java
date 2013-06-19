@@ -188,7 +188,7 @@ public class RenderedScreen {
     rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
-    ApplicationParameters.BRAILLE_RENDERER.renderScreenElements(screenRows, screenElements);
+    BrailleRenderer.getBrailleRenderer().renderScreenElements(screenRows, screenElements);
     finishScreenRows();
   }
 }

@@ -17,9 +17,11 @@
   <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contraction Table</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">Key Table</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">Keyboard Key Table</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>

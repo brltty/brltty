@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
+  <string name="DEFAULT_NAVIGATION_MODE">List</string>
   <string name="DEFAULT_TEXT_TABLE">auto</string>
   <string name="DEFAULT_CONTRACTION_TABLE">en-us-g2</string>
   <string name="DEFAULT_KEY_TABLE">braille</string>

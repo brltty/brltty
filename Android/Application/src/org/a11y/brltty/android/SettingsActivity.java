@@ -204,6 +204,7 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static final class GeneralSettings extends SettingsFragment {
+    protected ListPreference navigationModeList;
     protected ListPreference textTableList;
     protected ListPreference contractionTableList;
 
@@ -213,11 +214,26 @@ public class SettingsActivity extends PreferenceActivity {
 
       addPreferencesFromResource(R.xml.settings_general);
 
+      navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);
       textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
       contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
 
+      showListSelection(navigationModeList);
       showListSelection(textTableList);
       showListSelection(contractionTableList);
+
+      navigationModeList.setOnPreferenceChangeListener(
+        new Preference.OnPreferenceChangeListener() {
+          @Override
+          public boolean onPreferenceChange (Preference preference, Object newValue) {
+            final String newNavigationMode = (String)newValue;
+
+            showListSelection(navigationModeList, newNavigationMode);
+            BrailleRenderer.setBrailleRenderer(newNavigationMode);
+            return true;
+          }
+        }
+      );
 
       textTableList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {

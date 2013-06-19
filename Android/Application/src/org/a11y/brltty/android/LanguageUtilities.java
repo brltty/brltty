@@ -75,6 +75,10 @@ public final class LanguageUtilities {
     return instance;
   }
 
+  public static Object newInstance (String instanceType) {
+    return newInstance(instanceType, new String[0], new Object[0]);
+  }
+
   public static boolean canAssign (Class target, Class source) {
     return target.isAssignableFrom(source);
   }

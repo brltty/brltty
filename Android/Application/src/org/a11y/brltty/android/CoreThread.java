@@ -235,6 +235,8 @@ public class CoreThread extends Thread {
       }
     }
 
+    BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
+
     UsbHelper.begin();
     CoreWrapper.run(makeArguments());
     UsbHelper.end();

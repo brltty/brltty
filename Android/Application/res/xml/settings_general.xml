@@ -6,6 +6,15 @@
   >
 
   <ListPreference
+    android:key="@string/PREF_KEY_NAVIGATION_MODE"
+    android:persistent="true"
+    android:title="@string/SETTINGS_BUTTON_NAVIGATION_MODE"
+    android:entries="@array/NAVIGATION_MODE_LABELS"
+    android:entryValues="@array/NAVIGATION_MODE_VALUES"
+    android:defaultValue="@string/DEFAULT_NAVIGATION_MODE"
+   />
+
+  <ListPreference
     android:key="@string/PREF_KEY_TEXT_TABLE"
     android:persistent="true"
     android:title="@string/SETTINGS_BUTTON_TEXT_TABLE"
