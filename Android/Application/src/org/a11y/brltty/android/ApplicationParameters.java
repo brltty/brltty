@@ -34,6 +34,9 @@ public abstract class ApplicationParameters {
   public static final int SDK_VERSION = Build.VERSION.SDK_INT;
 //public static final int SDK_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
+  public static final String B2G_DEVICE_PATH = "/dev/braille0";
+  public static final String B2G_DRIVER_CODE = "bg";
+
   private ApplicationParameters () {
   }
 }

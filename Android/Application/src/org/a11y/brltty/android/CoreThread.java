@@ -164,7 +164,10 @@ public class CoreThread extends Thread {
     builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, R.string.DEFAULT_CONTRACTION_TABLE));
     builder.setKeyTable(getStringSetting(R.string.PREF_KEY_KEY_TABLE, R.string.DEFAULT_KEY_TABLE));
 
-    {
+    if ((new File(ApplicationParameters.B2G_DEVICE_PATH)).exists()) {
+      builder.setBrailleDevice(ApplicationParameters.B2G_DEVICE_PATH);
+      builder.setBrailleDriver(ApplicationParameters.B2G_DRIVER_CODE);
+    } else {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
