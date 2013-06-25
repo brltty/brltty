@@ -35,7 +35,6 @@
 #include "brldefs-bg.h"
 #include "metec_flat20_ioctl.h"
 
-#define BRAILLE_DEVICE_PATH "/dev/braille0"
 #define BRAILLE_CELL_COUNT MAX_BRAILLE_LINE_SIZE
 
 //#define KEYBOARD_DEVICE_NAME "cp430_keypad"
@@ -91,8 +90,8 @@ struct BrailleDataStruct {
 
 static int
 openBrailleDevice (BrailleDisplay *brl, const char *device) {
-  if ((brl->data->brailleDevice = open(BRAILLE_DEVICE_PATH, O_RDWR)) != -1) return 1;
-  logMessage(LOG_DEBUG, "open error: %s: %s", BRAILLE_DEVICE_PATH, strerror(errno));
+  if ((brl->data->brailleDevice = open(device, O_RDWR)) != -1) return 1;
+  logMessage(LOG_DEBUG, "open error: %s: %s", device, strerror(errno));
   return 0;
 }
 
