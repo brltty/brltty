@@ -1532,7 +1532,7 @@ static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
     { /* Satellite (5nn) */
-      .vendor=0X06b0, .product=0X0001,
+      .vendor=0X06B0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     }
