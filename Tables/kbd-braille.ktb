@@ -21,11 +21,11 @@ title Bindings for Braille Keyboards
 bind Backward FWINLTSKIP
 bind Forward FWINRTSKIP
 
-bind ArrowLeft FWINLT
-bind ArrowRight FWINRT
-bind ArrowUp LNUP
-bind ArrowDown LNDN
-bind Select HOME
+#bind ArrowLeft KEY_CURSOR_LEFT
+#bind ArrowRight KEY_CURSOR_RIGHT
+#bind ArrowUp KEY_CURSOR_UP
+#bind ArrowDown KEY_CURSOR_DOWN
+#bind Select KEY_ENTER
 
 bind Backward+ArrowLeft LNBEG
 bind Backward+ArrowRight LNEND
@@ -33,11 +33,11 @@ bind Backward+ArrowUp TOP
 bind Backward+ArrowDown BOT
 bind Backward+Select BACK
 
-bind Forward+ArrowLeft CHRLT
-bind Forward+ArrowRight CHRRT
-bind Forward+ArrowUp PRDIFLN
-bind Forward+ArrowDown NXDIFLN
-bind Forward+Select CSRJMP_VERT
+bind Forward+ArrowLeft FWINLT
+bind Forward+ArrowRight FWINRT
+bind Forward+ArrowUp LNUP
+bind Forward+ArrowDown LNDN
+bind Forward+Select HOME
 
 bind RoutingKey ROUTE
 bind Backward+RoutingKey SETLEFT
