@@ -164,6 +164,10 @@ typedef enum {
   KBD_KEY_FUNCTION_VolumeUp,
   KBD_KEY_FUNCTION_VolumeDown,
 
+  KBD_KEY_FUNCTION_PlayPause,
+  KBD_KEY_FUNCTION_SongPrevious,
+  KBD_KEY_FUNCTION_SongNext,
+
   KBD_KEY_FUNCTION_Cancel,
   KBD_KEY_FUNCTION_Clear,
   KBD_KEY_FUNCTION_Prior,
