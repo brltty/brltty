@@ -111,25 +111,39 @@ checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardPropert
   return 1;
 }
 
+void
+claimKeyboardCommonData (KeyboardCommonData *kcd) {
+  kcd->referenceCount += 1;
+}
+
+void
+releaseKeyboardCommonData (KeyboardCommonData *kcd) {
+  if (!(kcd->referenceCount -= 1)) {
+    free(kcd);
+  }
+}
+
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+  int started = 0;
   KeyboardCommonData *kcd;
 
   if ((kcd = malloc(sizeof(*kcd)))) {
     memset(kcd, 0, sizeof(*kcd));
+
+    kcd->referenceCount = 0;
+    claimKeyboardCommonData(kcd);
+
     kcd->handleKeyEvent = handleKeyEvent;
     kcd->requiredProperties = *properties;
 
-    if (monitorKeyboards(kcd)) {
-      return 1;
-    }
-
-    free(kcd);
+    if (monitorKeyboards(kcd))  started = 1;
+    releaseKeyboardCommonData(kcd);
   } else {
     logMallocError();
   }
 
-  return 0;
+  return started;
 }
 
 KeyboardInstanceData *
@@ -142,6 +156,8 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
     memset(kid, 0, size);
 
     kid->kcd = kcd;
+    claimKeyboardCommonData(kcd);
+
     kid->actualProperties = anyKeyboard;
 
     kid->keyEventBuffer = NULL;
@@ -162,6 +178,7 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
 void
 deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
   if (kid->keyEventBuffer) free(kid->keyEventBuffer);
+  releaseKeyboardCommonData(kid->kcd);
   free(kid);
 }
 

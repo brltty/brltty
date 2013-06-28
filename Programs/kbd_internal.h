@@ -26,6 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
+  unsigned int referenceCount;
   KeyEventHandler *handleKeyEvent;
   KeyboardProperties requiredProperties;
 } KeyboardCommonData;
@@ -50,6 +51,8 @@ typedef struct {
 } KeyboardInstanceData;
 
 extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
+extern void claimKeyboardCommonData (KeyboardCommonData *kcd);
+extern void releaseKeyboardCommonData (KeyboardCommonData *kcd);
 extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardCommonData *kcd);
 extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
 

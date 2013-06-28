@@ -483,6 +483,7 @@ END_KEY_CODE_MAP
 static void
 closeKeyboard (KeyboardPlatformData *kpd) {
   close(kpd->fileDescriptor);
+  deallocateKeyboardInstanceData(kpd->kid);
   free(kpd);
 }
 
@@ -654,6 +655,7 @@ doOpenInputDevice (void *data) {
   }
 
   free(idd->name);
+  releaseKeyboardCommonData(idd->kcd);
   free(idd);
 }
 
@@ -663,6 +665,7 @@ handleKobjectUeventString (const AsyncInputResult *result) {
     logMessage(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
   } else if (result->end) {
     logMessage(LOG_DEBUG, "netlink end-of-file");
+    releaseKeyboardCommonData(result->data);
   } else {
     const char *buffer = result->buffer;
     const char *end = memchr(buffer, 0, result->length);
@@ -704,15 +707,20 @@ handleKobjectUeventString (const AsyncInputResult *result) {
                         idd->kcd = result->data;
 
                         if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) {
+                          claimKeyboardCommonData(idd->kcd);
                           close(descriptor);
                           break;
                         }
 
                         free(idd->name);
+                      } else {
+                        logMallocError();
                       }
                     }
 
                     free(idd);
+                  } else {
+                    logMallocError();
                   }
                 }
 
@@ -759,15 +767,17 @@ getKobjectUeventSocket (void) {
 static int
 monitorKeyboardAdditions (KeyboardCommonData *kcd) {
 #ifdef NETLINK_KOBJECT_UEVENT
-  int kobjectEventSocket = getKobjectUeventSocket();
+  int kobjectUeventSocket = getKobjectUeventSocket();
 
-  if (kobjectEventSocket != -1) {
-    if (asyncRead(kobjectEventSocket,
+  if (kobjectUeventSocket != -1) {
+    if (asyncRead(kobjectUeventSocket,
                   6+1+PATH_MAX+1,
-                  handleKobjectUeventString, kcd))
+                  handleKobjectUeventString, kcd)) {
+      claimKeyboardCommonData(kcd);
       return 1;
+    }
 
-    close(kobjectEventSocket);
+    close(kobjectUeventSocket);
   }
 #endif /* NETLINK_KOBJECT_UEVENT */
 
