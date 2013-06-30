@@ -1685,6 +1685,12 @@ insertKey_LinuxScreen (ScreenKey key) {
           if (insertTranslated(key, insertUnicode)) ok = 1;
           break;
 
+#ifdef K_OFF
+        case K_OFF:
+          ok = 1;
+          break;
+#endif /* K_OFF */
+
         default:
           logMessage(LOG_WARNING, "unsupported keyboard mode: %d", mode);
           break;
