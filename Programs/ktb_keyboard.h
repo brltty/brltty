@@ -82,6 +82,8 @@ typedef enum {
   KBD_KEY_SYMBOL_Comma_Less,
   KBD_KEY_SYMBOL_Period_Greater,
   KBD_KEY_SYMBOL_Slash_Question,
+
+  KBD_KEY_SYMBOL_Europe2,
 } KBD_SymbolKey;
 
 typedef enum {

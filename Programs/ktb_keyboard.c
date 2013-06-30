@@ -162,6 +162,8 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(SYMBOL, Slash_Question, "Slash"),
   KBD_NAME_ENTRY(SYMBOL, Slash_Question, "SYMBOL_Slash_Question"),
 
+  KBD_NAME_ENTRY(SYMBOL, Europe2, "Europe2"),
+
   KBD_NAME_ENTRY(FUNCTION, Escape, "Escape"),
   KBD_NAME_ENTRY(FUNCTION, Escape, "FUNCTION_Escape"),
 
