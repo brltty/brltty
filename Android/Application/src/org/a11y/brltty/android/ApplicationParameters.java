@@ -22,6 +22,8 @@ import android.os.Build;
 
 public abstract class ApplicationParameters {
   public static final int BRAILLE_COLUMN_SPACING = 2;
+  public static final int BRAILLE_ROW_SPACING = 1;
+
   public static final int VISUAL_LOCATION_FUZZINESS = 0;
 
   public static final boolean LOG_ACCESSIBILITY_EVENTS = false;

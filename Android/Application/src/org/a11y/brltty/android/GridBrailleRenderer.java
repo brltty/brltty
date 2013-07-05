@@ -225,7 +225,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       public Rows () {
-        super(1);
+        super(ApplicationParameters.BRAILLE_ROW_SPACING);
       }
     }
 
