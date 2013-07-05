@@ -328,6 +328,7 @@
 # (can be overridden with the -s [--speech-driver=] option)
 #speech-driver	auto	# autodetect
 #speech-driver	al	# Alva
+#speech-driver	an	# Android (text to speech engine)
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille
 #speech-driver	es	# eSpeak (text to speech engine)
@@ -529,10 +530,12 @@
 # The screen-driver directive specifies the two-letter driver
 # identification code of the driver for the console screen.
 # (can be overridden with the -x [--screen-driver=] option)
+#screen-driver	an	# Android
 #screen-driver	as	# AtSpi
-#screen-driver	pb	# PCBIOS
+#screen-driver	a2	# AtSpi2
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
+#screen-driver	pb	# PCBIOS
 #screen-driver	sc	# Screen
 #screen-driver	wn	# Windows
 

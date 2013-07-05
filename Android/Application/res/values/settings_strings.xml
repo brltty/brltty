@@ -24,7 +24,7 @@
 
   <string-array name="SPEECH_SUPPORT_VALUES">
     <item>no</item>
-    <item>ad</item>
+    <item>an</item>
   </string-array>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>

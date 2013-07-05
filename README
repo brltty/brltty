@@ -174,7 +174,7 @@ BRLTTY has been tested on:
 *  FreeBSD/Intel (release 5.1 and beyond)
 *  NetBSD/Intel (release 1.6 and beyond)
 *  Windows 95/98/XP
-*  Android/ARM (4.1 and beyond)
+*  Android/ARM (4.0 and beyond)
 
 The following braille displays are supported:
 
@@ -187,7 +187,7 @@ The following braille displays are supported:
 -  BrailleLite [18/40/M20/M40]
 -  BrailleNote [18/32]
 -  BrlAPI
--  B2G
+-  B2G [20]
 -  Cebra [20/40/60/80/100/120/140]
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
@@ -224,6 +224,7 @@ The following braille displays are supported:
 The following speech synthesizers are supported:
 
 -  Alva [Delphi(4nn)]
+-  Android [text to speech engine]
 -  BrailleLite
 -  CombiBraille
 -  eSpeak [text to speech engine]

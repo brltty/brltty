@@ -80,8 +80,8 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 "${sourceRoot}/configure" \
    --disable-api \
    --with-braille-driver=-tt,-vr,al,at,bg,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
-   --with-speech-driver=ad,-all \
-   --with-screen-driver=ad \
+   --with-speech-driver=an,-all \
+   --with-screen-driver=an,-all \
    --without-libbraille \
    --disable-x \
    --disable-beeper-support \

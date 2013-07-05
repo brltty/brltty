@@ -1539,7 +1539,7 @@ BRLTTY_ARG_DISABLE(
    case "${host_os}"
    in
       *android*)
-         BRLTTY_SPEECH_DRIVER([ad], [Android])
+         BRLTTY_SPEECH_DRIVER([an], [Android])
          ;;
       *)
          ;;
@@ -1551,7 +1551,7 @@ BRLTTY_ARG_DRIVER([speech], [Speech])
 case "${host_os}"
 in
    *android*)
-      BRLTTY_SCREEN_DRIVER([ad], [Android])
+      BRLTTY_SCREEN_DRIVER([an], [Android])
       ;;
    linux*)
       BRLTTY_SCREEN_DRIVER([lx], [Linux])

@@ -11,7 +11,7 @@
   <string name="DEFAULT_BRAILLE_DRIVER">auto</string>
   <string name="DEFAULT_COMMUNICATION_METHOD">Bluetooth</string>
 
-  <string name="DEFAULT_SPEECH_SUPPORT">ad</string>
+  <string name="DEFAULT_SPEECH_SUPPORT">an</string>
 
   <string name="DEFAULT_LOG_LEVEL">notice</string>
 </resources>

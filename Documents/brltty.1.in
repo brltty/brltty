@@ -648,6 +648,9 @@ must be specified via its identification code:
 .B al
 Alva
 .TP 4
+.B an
+Android
+.TP 4
 .B at
 Albatross
 .TP 4

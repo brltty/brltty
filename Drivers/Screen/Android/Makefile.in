@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = ad
+DRIVER_CODE = an
 DRIVER_NAME = Android
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
