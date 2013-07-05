@@ -2427,13 +2427,34 @@ doCommand:
         toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
         break;
       case BRL_CMD_FREEZE:
-        if (isLiveScreen()) {
-          playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
-        } else if (isFrozenScreen()) {
-          deactivateFrozenScreen();
-          playTune(&tune_screen_unfrozen);
-        } else {
-          playTune(&tune_command_rejected);
+        switch (command & BRL_FLG_TOGGLE_MASK) {
+          case 0:
+            if (isLiveScreen()) {
+              playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
+            } else if (isFrozenScreen()) {
+              deactivateFrozenScreen();
+              playTune(&tune_screen_unfrozen);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+
+          case BRL_FLG_TOGGLE_ON:
+            if (isLiveScreen()) {
+              playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
+
+          case BRL_FLG_TOGGLE_OFF:
+            if (isFrozenScreen()) {
+              deactivateFrozenScreen();
+              playTune(&tune_screen_unfrozen);
+            } else {
+              playTune(&tune_command_rejected);
+            }
+            break;
         }
         break;
 

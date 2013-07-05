@@ -109,7 +109,7 @@ typedef enum {
   BRL_CMD_RETURN /* go to cursor or go back after cursor tracking */,
   
   /* feature activation and deactivation */
-  BRL_CMD_FREEZE /* freeze/unfreeze screen image */,
+  BRL_CMD_FREEZE /* set screen image frozen/unfrozen */,
   BRL_CMD_DISPMD /* set display mode attributes/text */,
   BRL_CMD_SIXDOTS /* set text style 6-dot/8-dot */,
   BRL_CMD_SLIDEWIN /* set sliding window on/off */,

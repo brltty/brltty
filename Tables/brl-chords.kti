@@ -29,6 +29,8 @@ bind \{chord}Dot1+Dot4+Dot5+Dot7 DISPMD+off
 bind \{chord}Dot1+Dot4+Dot5+Dot8 DISPMD+on
 
 bind \{chord}Dot1+Dot2+Dot4 FREEZE
+bind \{chord}Dot1+Dot2+Dot4+dot7 FREEZE+off
+bind \{chord}Dot1+Dot2+Dot4+dot8 FREEZE+on
 
 bind \{chord}Dot1+Dot2+Dot5 HELP
 
