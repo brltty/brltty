@@ -2426,37 +2426,35 @@ doCommand:
       case BRL_CMD_TUNES:
         toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
         break;
-      case BRL_CMD_FREEZE:
-        switch (command & BRL_FLG_TOGGLE_MASK) {
-          case 0:
-            if (isLiveScreen()) {
-              playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
-            } else if (isFrozenScreen()) {
-              deactivateFrozenScreen();
-              playTune(&tune_screen_unfrozen);
-            } else {
-              playTune(&tune_command_rejected);
-            }
-            break;
 
-          case BRL_FLG_TOGGLE_ON:
-            if (isLiveScreen()) {
-              playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
-            } else {
-              playTune(&tune_command_rejected);
-            }
-            break;
+      case BRL_CMD_FREEZE: {
+        unsigned char oldState;
+        unsigned char newState;
 
-          case BRL_FLG_TOGGLE_OFF:
-            if (isFrozenScreen()) {
-              deactivateFrozenScreen();
-              playTune(&tune_screen_unfrozen);
-            } else {
-              playTune(&tune_command_rejected);
-            }
-            break;
+        if (isLiveScreen()) {
+          oldState = 0;
+        } else if (isFrozenScreen()) {
+          oldState = 1;
+        } else {
+          playTune(&tune_command_rejected);
+          break;
         }
+
+        newState = oldState;
+        toggleModeSetting(&newState, command);
+
+        if (newState != oldState) {
+          if (oldState) {
+            deactivateFrozenScreen();
+          } else if (!activateFrozenScreen()) {
+            playTune(&tune_command_rejected);
+            break;
+          }
+        }
+
+        playTune(newState? &tune_screen_frozen: &tune_screen_unfrozen);
         break;
+      }
 
       {
         int modifier;
