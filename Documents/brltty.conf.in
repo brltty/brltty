@@ -429,6 +429,7 @@
 #key-table	desktop	# bindings for full keyboards
 #key-table	keypad	# bindings for keypad-based navigation
 #key-table	laptop	# bindings for keyboards without a keypad
+#key-table	sun_type6	# bindings for Sun Type 6 keyboards
 
 # The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
