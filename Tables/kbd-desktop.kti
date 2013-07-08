@@ -49,7 +49,7 @@ bind ControlLeft+ShiftLeft+KP0+!KP8 INFO
 bind ControlLeft+ShiftLeft+KP0+!KP9 LEARN
 bind ControlLeft+ShiftLeft+KP0+!KP1 RESTARTBRL
 bind ControlLeft+ShiftLeft+KP0+!KP3 RESTARTSPEECH
-bind KP0+!T TIME
+bind KP0+T TIME
 bind KP0+!S SETMARK
 bind KP0+!G GOtOMARK
 bind ControlRight+KP0+!One SETMARK+1
