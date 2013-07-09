@@ -20,10 +20,10 @@ title Bindings for Sun Microsystems, Inc. Type 6 Keyboards
 
 include kbd-desktop.kti
 
-bind FUNCTION_Mute MUTE
-bind ControlLeft+!FUNCTION_Mute TUNES
-bind FUNCTION_VolumeDown SAY_SOFTER
-bind FUNCTION_VolumeUp SAY_LOUDER
+bind MEDIA_Mute MUTE
+bind ControlLeft+!MEDIA_Mute TUNES
+bind MEDIA_VolumeDown SAY_SOFTER
+bind MEDIA_VolumeUp SAY_LOUDER
 bind FUNCTION_Power RESTARTBRL
 bind ControlLeft+!FUNCTION_Power RESTARTSPEECH
 
