@@ -346,17 +346,6 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(FUNCTION, Undo, "FUNCTION_Undo"),
 
-  KBD_NAME_ENTRY(FUNCTION, Mute, "FUNCTION_Mute"),
-
-  KBD_NAME_ENTRY(FUNCTION, VolumeUp, "FUNCTION_VolumeUp"),
-  KBD_NAME_ENTRY(FUNCTION, VolumeDown, "FUNCTION_VolumeDown"),
-
-  KBD_NAME_ENTRY(FUNCTION, PlayPause, "FUNCTION_PlayPause"),
-
-  KBD_NAME_ENTRY(FUNCTION, SongPrevious, "FUNCTION_SongPrevious"),
-
-  KBD_NAME_ENTRY(FUNCTION, SongNext, "FUNCTION_SongNext"),
-
   KBD_NAME_ENTRY(FUNCTION, Cancel, "FUNCTION_Cancel"),
 
   KBD_NAME_ENTRY(FUNCTION, Clear, "FUNCTION_Clear"),
@@ -376,6 +365,34 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(FUNCTION, CrSel_Props, "FUNCTION_CrSel_Props"),
 
   KBD_NAME_ENTRY(FUNCTION, ExSel, "FUNCTION_ExSel"),
+
+  KBD_NAME_ENTRY(MEDIA, Mute, "MEDIA_Mute"),
+
+  KBD_NAME_ENTRY(MEDIA, VolumeDown, "MEDIA_VolumeDown"),
+
+  KBD_NAME_ENTRY(MEDIA, VolumeUp, "MEDIA_VolumeUp"),
+
+  KBD_NAME_ENTRY(MEDIA, Stop, "MEDIA_Stop"),
+
+  KBD_NAME_ENTRY(MEDIA, Play, "MEDIA_Play"),
+
+  KBD_NAME_ENTRY(MEDIA, Record, "MEDIA_Record"),
+
+  KBD_NAME_ENTRY(MEDIA, Pause, "MEDIA_Pause"),
+
+  KBD_NAME_ENTRY(MEDIA, PlayPause, "MEDIA_PlayPause"),
+
+  KBD_NAME_ENTRY(MEDIA, Previous, "MEDIA_Previous"),
+
+  KBD_NAME_ENTRY(MEDIA, Next, "MEDIA_Next"),
+
+  KBD_NAME_ENTRY(MEDIA, Backward, "MEDIA_Backward"),
+
+  KBD_NAME_ENTRY(MEDIA, Forward, "MEDIA_Forward"),
+
+  KBD_NAME_ENTRY(MEDIA, Close, "MEDIA_Close"),
+
+  KBD_NAME_ENTRY(MEDIA, Eject, "MEDIA_Eject"),
 
   KBD_NAME_ENTRY(LOCK, Capitals, "CapsLock"),
   KBD_NAME_ENTRY(LOCK, Capitals, "LOCK_Capitals"),
