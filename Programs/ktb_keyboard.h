@@ -154,8 +154,8 @@ typedef enum {
 
   KBD_KEY_FUNCTION_Menu,
   KBD_KEY_FUNCTION_Select,
+  KBD_KEY_FUNCTION_Open,
   KBD_KEY_FUNCTION_Again,
-  KBD_KEY_FUNCTION_Execute,
 
   KBD_KEY_FUNCTION_Copy,
   KBD_KEY_FUNCTION_Cut,
