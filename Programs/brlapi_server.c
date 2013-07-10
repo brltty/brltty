@@ -2564,6 +2564,7 @@ int api_flush(BrailleDisplay *brl) {
   }
   if (drain)
     drainBrailleOutput(brl, 0);
+  pthread_mutex_unlock(&rawMutex);
 out:
   pthread_mutex_unlock(&connectionsMutex);
   return ok;
