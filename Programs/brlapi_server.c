@@ -2318,7 +2318,10 @@ static inline void setCurrentRootTty(void) {
 static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   int ok = 1;
-  memcpy(coreWindowText, text, displaySize * sizeof(*coreWindowText));
+  if (text)
+    memcpy(coreWindowText, text, displaySize * sizeof(*coreWindowText));
+  else
+    memset(coreWindowText, 0, displaySize * sizeof(*coreWindowText));
   memcpy(coreWindowDots, brl->buffer, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = brl->cursor;
   setCurrentRootTty();
