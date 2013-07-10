@@ -269,6 +269,13 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
+AC_PATH_TOOL([MSGFMT], [msgfmt])
+AC_PATH_TOOL([MSGMERGE], [msgmerge])
+
+install_messages=
+test -n "${MSGMERGE}" && install_messages=install-messages
+AC_SUBST([install_messages])
+
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in

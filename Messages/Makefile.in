@@ -29,7 +29,7 @@ LANGUAGE_CODES = de fr
 OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
 
 %.$(OBJECT_EXTENSION): $(SRC_DIR)/%.$(SOURCE_EXTENSION)
-	msgfmt --output-file $@ $<
+	$(MSGFMT) --output-file $@ $<
 
 objects: $(OBJECT_FILES)
 
@@ -39,7 +39,7 @@ $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
 template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
 
 %.$(SOURCE_EXTENSION): $(TEMPLATE_FILE)
-	msgmerge --quiet --force-po --no-wrap --sort-output --update -- $@ $(TEMPLATE_FILE)
+	$(MSGMERGE) --quiet --force-po --no-wrap --sort-output --update -- $@ $(TEMPLATE_FILE)
 
 LANGUAGES_FILE = LINGUAS
 $(LANGUAGES_FILE):

@@ -82,6 +82,9 @@ AWK = @AWK@
 SYMLINK = @LN_S@
 DOXYGEN = @DOXYGEN@
 
+MSGFMT = @MSGFMT@
+MSGMERGE = @MSGMERGE@
+
 X_CFLAGS = @brltty_cflags_x@
 X_LIBS = @brltty_libs_x@
 XKB_LIBS = @brltty_libs_xkb@
@@ -184,6 +187,7 @@ INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
 INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
+INSTALL_MESSAGES = @install_messages@
 
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
