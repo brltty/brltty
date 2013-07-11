@@ -50,6 +50,7 @@ extern const TuneDefinition tune_command_rejected;
 extern const TuneDefinition tune_mark_set;
 extern const TuneDefinition tune_clipboard_begin;
 extern const TuneDefinition tune_clipboard_end;
+extern const TuneDefinition tune_no_change;
 extern const TuneDefinition tune_toggle_on;
 extern const TuneDefinition tune_toggle_off;
 extern const TuneDefinition tune_cursor_linked;

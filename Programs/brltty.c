@@ -1580,19 +1580,13 @@ getCursorPosition (int x, int y) {
   return position;
 }
 
-static inline int
-toggleResult (int isOn, const TuneDefinition *offTune, const TuneDefinition *onTune) {
-  const TuneDefinition *tune = isOn? onTune: offTune;
-
-  if (tune) playTune(tune);
-  return isOn;
-}
-
 static int
 toggleFlag (
   int *bits, int bit, int command,
   const TuneDefinition *offTune, const TuneDefinition *onTune
 ) {
+  int oldBits = *bits;
+
   switch (command & BRL_FLG_TOGGLE_MASK) {
     case 0:
       *bits ^= bit;
@@ -1607,11 +1601,17 @@ toggleFlag (
       break;
 
     default:
-    case BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF:
-      break;
+      playTune(&tune_command_rejected);
+      return 0;
   }
 
-  return toggleResult(!!(*bits & bit), offTune, onTune);
+  if (*bits == oldBits) {
+    playTune(&tune_no_change);
+    return 0;
+  }
+
+  playTune((*bits & bit)? onTune: offTune);
+  return 1;
 }
 
 static int
@@ -1619,6 +1619,8 @@ toggleSetting (
   unsigned char *setting, int command,
   const TuneDefinition *offTune, const TuneDefinition *onTune
 ) {
+  unsigned char oldSetting = *setting;
+
   switch (command & BRL_FLG_TOGGLE_MASK) {
     case 0:
       *setting = !*setting;
@@ -1633,11 +1635,17 @@ toggleSetting (
       break;
 
     default:
-    case BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF:
-      break;
+      playTune(&tune_command_rejected);
+      return 0;
   }
 
-  return toggleResult(!!*setting, offTune, onTune);
+  if (*setting == oldSetting) {
+    playTune(&tune_no_change);
+    return 0;
+  }
+
+  playTune(*setting? onTune: offTune);
+  return 1;
 }
 
 static inline int
@@ -2367,24 +2375,30 @@ doCommand:
       case BRL_CMD_CSRHIDE:
         /* This is for briefly hiding the cursor */
         toggleModeSetting(&ses->hideCursor, command);
-        /* no tune */
         break;
       case BRL_CMD_CSRSIZE:
         toggleFeatureSetting(&prefs.cursorStyle, command);
         break;
       case BRL_CMD_CSRTRK:
         if (toggleSetting(&ses->trackCursor, command, &tune_cursor_unlinked, &tune_cursor_linked)) {
+          if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-          if (speechTracking && (scr.number == speechScreen)) {
-            speechIndex = -1;
-          } else
+            if (speechTracking && (scr.number == speechScreen)) {
+              speechIndex = -1;
+            } else
 #endif /* ENABLE_SPEECH_SUPPORT */
-            trackCursor(1);
+
+            {
+              trackCursor(1);
+            }
+          }
         }
         break;
       case BRL_CMD_CSRBLINK:
         if (toggleFeatureSetting(&prefs.blinkingCursor, command)) {
-          setBlinkingState(&cursorBlinkingState, 1);
+          if (prefs.blinkingCursor) {
+            setBlinkingState(&cursorBlinkingState, 1);
+          }
         }
         break;
 
@@ -2393,13 +2407,17 @@ doCommand:
         break;
       case BRL_CMD_ATTRBLINK:
         if (toggleFeatureSetting(&prefs.blinkingAttributes, command)) {
-          setBlinkingState(&attributesBlinkingState, 1);
+          if (prefs.blinkingAttributes) {
+            setBlinkingState(&attributesBlinkingState, 1);
+          }
         }
         break;
 
       case BRL_CMD_CAPBLINK:
         if (toggleFeatureSetting(&prefs.blinkingCapitals, command)) {
-          setBlinkingState(&capitalsBlinkingState, 1);
+          if (prefs.blinkingCapitals) {
+            setBlinkingState(&capitalsBlinkingState, 1);
+          }
         }
         break;
 
@@ -2421,7 +2439,11 @@ doCommand:
         break;
 
       case BRL_CMD_AUTOREPEAT:
-        if (toggleFeatureSetting(&prefs.autorepeat, command)) resetAutorepeat();
+        if (toggleFeatureSetting(&prefs.autorepeat, command)) {
+          if (prefs.autorepeat) {
+            resetAutorepeat();
+          }
+        }
         break;
       case BRL_CMD_TUNES:
         toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
@@ -2439,20 +2461,19 @@ doCommand:
           playTune(&tune_command_rejected);
           break;
         }
-
         newState = oldState;
-        toggleModeSetting(&newState, command);
 
-        if (newState != oldState) {
+        if (toggleModeSetting(&newState, command)) {
           if (oldState) {
             deactivateFrozenScreen();
-          } else if (!activateFrozenScreen()) {
+            playTune(&tune_screen_unfrozen);
+          } else if (activateFrozenScreen()) {
+            playTune(&tune_screen_frozen);
+          } else {
             playTune(&tune_command_rejected);
-            break;
           }
         }
 
-        playTune(newState? &tune_screen_frozen: &tune_screen_unfrozen);
         break;
       }
 
@@ -2572,8 +2593,7 @@ doCommand:
       case BRL_CMD_INFO:
         if ((prefs.statusPosition == spNone) || haveStatusCells()) {
           toggleModeSetting(&infoMode, command);
-        } else {
-          toggleModeSetting(&textMaximized, command);
+        } else if (toggleModeSetting(&textMaximized, command)) {
           reconfigureWindow();
         }
         break;

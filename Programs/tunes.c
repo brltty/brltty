@@ -98,12 +98,24 @@ const TuneDefinition tune_clipboard_end = {
   NULL, 0, elements_clipboard_end
 };
 
+static const TuneElement elements_no_change[] = {
+  TUNE_NOTE( 30,  79),
+  TUNE_REST( 30),
+  TUNE_NOTE( 30,  79),
+  TUNE_REST( 30),
+  TUNE_NOTE( 30,  79),
+  TUNE_STOP()
+};
+const TuneDefinition tune_no_change = {
+  NULL, TUNE_TACTILE(30,BRL_DOT2|BRL_DOT3|BRL_DOT5|BRL_DOT6), elements_no_change
+};
+
 static const TuneElement elements_toggle_on[] = {
   TUNE_NOTE( 30,  74),
   TUNE_REST( 30),
   TUNE_NOTE( 30,  79),
   TUNE_REST( 30),
-  TUNE_NOTE( 40,  86),
+  TUNE_NOTE( 30,  86),
   TUNE_STOP()
 };
 const TuneDefinition tune_toggle_on = {
@@ -380,35 +392,37 @@ setTuneDevice (TuneDevice device) {
 
 void
 playTune (const TuneDefinition *tune) {
-  int tunePlayed = 0;
+  if (tune) {
+    int tunePlayed = 0;
 
-  if (prefs.alertTunes && tune->elements) {
-    if (openTuneDevice()) {
-      const TuneElement *element = tune->elements;
+    if (prefs.alertTunes && tune->elements) {
+      if (openTuneDevice()) {
+        const TuneElement *element = tune->elements;
 
-      tunePlayed = 1;
-      closeTimer = 2000 / updateInterval;
+        tunePlayed = 1;
+        closeTimer = 2000 / updateInterval;
 
-      while (element->duration) {
-        if (!noteMethods->play(noteDevice, element->note, element->duration)) {
-          tunePlayed = 0;
-          break;
+        while (element->duration) {
+          if (!noteMethods->play(noteDevice, element->note, element->duration)) {
+            tunePlayed = 0;
+            break;
+          }
+
+          element += 1;
         }
 
-        ++element;
+        noteMethods->flush(noteDevice);
       }
-
-      noteMethods->flush(noteDevice);
     }
-  }
 
-  if (!tunePlayed) {
-    if (prefs.alertDots && tune->tactile) {
-      unsigned char dots = tune->tactile & 0XFF;
-      unsigned char duration = tune->tactile >> 8;
-      showDotPattern(dots, duration);
-    } else if (prefs.alertMessages && tune->message) {
-      message(NULL, gettext(tune->message), 0);
+    if (!tunePlayed) {
+      if (prefs.alertDots && tune->tactile) {
+        unsigned char dots = tune->tactile & 0XFF;
+        unsigned char duration = tune->tactile >> 8;
+        showDotPattern(dots, duration);
+      } else if (prefs.alertMessages && tune->message) {
+        message(NULL, gettext(tune->message), 0);
+      }
     }
   }
 }
