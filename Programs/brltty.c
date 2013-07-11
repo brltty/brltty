@@ -2450,21 +2450,19 @@ doCommand:
         break;
 
       case BRL_CMD_FREEZE: {
-        unsigned char oldState;
-        unsigned char newState;
+        unsigned char state;
 
         if (isLiveScreen()) {
-          oldState = 0;
+          state = 0;
         } else if (isFrozenScreen()) {
-          oldState = 1;
+          state = 1;
         } else {
           playTune(&tune_command_rejected);
           break;
         }
-        newState = oldState;
 
-        if (toggleModeSetting(&newState, command)) {
-          if (oldState) {
+        if (toggleModeSetting(&state, command)) {
+          if (!state) {
             deactivateFrozenScreen();
             playTune(&tune_screen_unfrozen);
           } else if (activateFrozenScreen()) {
