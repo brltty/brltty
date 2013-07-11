@@ -390,9 +390,11 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(MEDIA, Forward, "MEDIA_Forward"),
 
+  KBD_NAME_ENTRY(MEDIA, Eject, "MEDIA_Eject"),
+
   KBD_NAME_ENTRY(MEDIA, Close, "MEDIA_Close"),
 
-  KBD_NAME_ENTRY(MEDIA, Eject, "MEDIA_Eject"),
+  KBD_NAME_ENTRY(MEDIA, EjectClose, "MEDIA_EjectClose"),
 
   KBD_NAME_ENTRY(LOCK, Capitals, "CapsLock"),
   KBD_NAME_ENTRY(LOCK, Capitals, "LOCK_Capitals"),

@@ -190,8 +190,9 @@ typedef enum {
   KBD_KEY_MEDIA_Backward,
   KBD_KEY_MEDIA_Forward,
 
-  KBD_KEY_MEDIA_Close,
   KBD_KEY_MEDIA_Eject,
+  KBD_KEY_MEDIA_Close,
+  KBD_KEY_MEDIA_EjectClose,
 } KBD_MediaKey;
 
 typedef enum {
