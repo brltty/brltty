@@ -4,6 +4,7 @@
   <string name="BRAILLE_DRIVER_LABEL_auto">autodetect</string>
   <string name="BRAILLE_DRIVER_LABEL_at">Albatross</string>
   <string name="BRAILLE_DRIVER_LABEL_al">Alva</string>
+  <string name="BRAILLE_DRIVER_LABEL_bg">B2G</string>
   <string name="BRAILLE_DRIVER_LABEL_bm">Baum</string>
   <string name="BRAILLE_DRIVER_LABEL_bc">BrailComm</string>
   <string name="BRAILLE_DRIVER_LABEL_bl">BrailleLite</string>
@@ -42,6 +43,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_auto</item>
     <item>@string/BRAILLE_DRIVER_LABEL_at</item>
     <item>@string/BRAILLE_DRIVER_LABEL_al</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bg</item>
     <item>@string/BRAILLE_DRIVER_LABEL_bm</item>
     <item>@string/BRAILLE_DRIVER_LABEL_bc</item>
     <item>@string/BRAILLE_DRIVER_LABEL_bl</item>
@@ -81,6 +83,7 @@
     <item>auto</item>
     <item>at</item>
     <item>al</item>
+    <item>bg</item>
     <item>bm</item>
     <item>bc</item>
     <item>bl</item>
@@ -191,6 +194,7 @@
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovak</string>
+  <string name="TEXT_TABLE_LABEL_sl">Slovenian</string>
   <string name="TEXT_TABLE_LABEL_es">Spanish</string>
   <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
   <string name="TEXT_TABLE_LABEL_sv">Swedish</string>
@@ -279,6 +283,7 @@
     <item>@string/TEXT_TABLE_LABEL_sat</item>
     <item>@string/TEXT_TABLE_LABEL_sd</item>
     <item>@string/TEXT_TABLE_LABEL_sk</item>
+    <item>@string/TEXT_TABLE_LABEL_sl</item>
     <item>@string/TEXT_TABLE_LABEL_es</item>
     <item>@string/TEXT_TABLE_LABEL_sw</item>
     <item>@string/TEXT_TABLE_LABEL_sv</item>
@@ -368,6 +373,7 @@
     <item>sat</item>
     <item>sd</item>
     <item>sk</item>
+    <item>sl</item>
     <item>es</item>
     <item>sw</item>
     <item>sv</item>
@@ -485,12 +491,14 @@
     <item>zu</item>
   </string-array>
 
+  <string name="KEY_TABLE_LABEL_sun_type6">bindings for Sun Type 6 keyboards</string>
   <string name="KEY_TABLE_LABEL_braille">bindings for braille keyboards</string>
   <string name="KEY_TABLE_LABEL_desktop">bindings for full keyboards</string>
   <string name="KEY_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
   <string name="KEY_TABLE_LABEL_keypad">bindings for keypad-based navigation</string>
 
   <string-array name="KEY_TABLE_LABELS">
+    <item>@string/KEY_TABLE_LABEL_sun_type6</item>
     <item>@string/KEY_TABLE_LABEL_braille</item>
     <item>@string/KEY_TABLE_LABEL_desktop</item>
     <item>@string/KEY_TABLE_LABEL_laptop</item>
@@ -498,6 +506,7 @@
   </string-array>
 
   <string-array name="KEY_TABLE_VALUES">
+    <item>sun_type6</item>
     <item>braille</item>
     <item>desktop</item>
     <item>laptop</item>
