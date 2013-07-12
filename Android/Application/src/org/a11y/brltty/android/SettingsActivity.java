@@ -174,7 +174,7 @@ public class SettingsActivity extends PreferenceActivity {
           }
         }
       } else {
-        label.append("none selected");
+        label.append(getString(R.string.SET_SELECTION_NONE));
       }
 
       set.setSummary(label.toString());
@@ -515,7 +515,7 @@ public class SettingsActivity extends PreferenceActivity {
         if (haveIdentifiers) {
           resetList(deviceIdentifierList);
         } else {
-          deviceIdentifierList.setSummary("no devices");
+          deviceIdentifierList.setSummary(getString(R.string.ADD_DEVICE_NO_DEVICES));
         }
       }
 
@@ -526,11 +526,11 @@ public class SettingsActivity extends PreferenceActivity {
       String problem;
 
       if (!deviceMethodList.isEnabled()) {
-        problem = getString(R.string.ADD_DEVICE_NO_METHOD);
+        problem = getString(R.string.ADD_DEVICE_UNSELECTED_METHOD);
       } else if (!deviceIdentifierList.isEnabled()) {
-        problem = getString(R.string.ADD_DEVICE_NO_DEVICE);
+        problem = getString(R.string.ADD_DEVICE_UNSELECTED_DEVICE);
       } else if (!deviceDriverList.isEnabled()) {
-        problem = getString(R.string.ADD_DEVICE_NO_DRIVER);
+        problem = getString(R.string.ADD_DEVICE_UNSELECTED_DRIVER);
       } else {
         if (name.length() == 0) {
           name = deviceDriverList.getSummary()
