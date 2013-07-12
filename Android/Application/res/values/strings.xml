@@ -32,11 +32,18 @@
   <string name="DEVICES_BUTTON_ADD">Add Device</string>
   <string name="DEVICES_BUTTON_REMOVE">Remove Device</string>
 
+  <string name="SELECTED_DEVICE_NONE">no devices</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">device not selected</string>
+
   <string name="ADD_DEVICE_NAME">Device Name</string>
   <string name="ADD_DEVICE_METHOD">Communication Method</string>
   <string name="ADD_DEVICE_SELECT">Select Device</string>
   <string name="ADD_DEVICE_DRIVER">Braille Driver</string>
   <string name="ADD_DEVICE_DONE">Done</string>
+  <string name="ADD_DEVICE_NO_METHOD">communication method not selected</string>
+  <string name="ADD_DEVICE_NO_DEVICE">device not selected</string>
+  <string name="ADD_DEVICE_NO_DRIVER">braille driver not selected</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">device name already in use</string>
 
   <string name="REMOVE_DEVICE_ASK">Would you really like to remove this device?</string>
 </resources>

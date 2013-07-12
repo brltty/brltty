@@ -351,10 +351,10 @@ public class SettingsActivity extends PreferenceActivity {
 
         summary = selectedDeviceList.getEntry();
         if ((summary == null) || (summary.length() == 0)) {
-          summary = "not selected";
+          summary = getString(R.string.SELECTED_DEVICE_UNSELECTED);
         }
       } else {
-        summary = "no devices";
+        summary = getString(R.string.SELECTED_DEVICE_NONE);
       }
 
       selectedDeviceList.setSummary(summary);
@@ -526,11 +526,11 @@ public class SettingsActivity extends PreferenceActivity {
       String problem;
 
       if (!deviceMethodList.isEnabled()) {
-        problem = "communication method not selected";
+        problem = getString(R.string.ADD_DEVICE_NO_METHOD);
       } else if (!deviceIdentifierList.isEnabled()) {
-        problem = "device not selected";
+        problem = getString(R.string.ADD_DEVICE_NO_DEVICE);
       } else if (!deviceDriverList.isEnabled()) {
-        problem = "braille driver not selected";
+        problem = getString(R.string.ADD_DEVICE_NO_DRIVER);
       } else {
         if (name.length() == 0) {
           name = deviceDriverList.getSummary()
@@ -540,7 +540,7 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         if (deviceNames.contains(name)) {
-          problem = "device name already in use";
+          problem = getString(R.string.ADD_DEVICE_DUPLICATE_NAME);
         } else {
           problem = "";
         }
