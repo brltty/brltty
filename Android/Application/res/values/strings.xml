@@ -13,6 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Home</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Recent Apps</string>
 
+  <string name="SETTINGS_SCREEN_TITLE">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>
   <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
