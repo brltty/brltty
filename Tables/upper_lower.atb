@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Attributes Table - foreground in the upper square and background in the lower square
+# BRLTTY Attributes Table - foreground colour in the upper square and background colour in the lower square
 
 dot 1 =fg-red
 dot 4 =fg-green
