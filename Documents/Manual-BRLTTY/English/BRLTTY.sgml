@@ -570,8 +570,8 @@ for any additional display-specific instructions.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.atb/ extension is optional.
     If this option isn't specified,
-    then <tt/attributes/ is assumed.
-    Change it to <tt/attrib/ if you'd like it done the old way.
+    then <tt/left_right/ is assumed.
+    Change it to <tt/invleft_right/ if you'd like it done the old way.
     See the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive
     and the <ref id="options-attributes-table" name="-a"> command line option
     for run-time selection.
@@ -4265,19 +4265,19 @@ one of the eight <tt/VGA/ attribute bits.
 
 The following attributes tables are provided:
 <descrip>
-  <tag/attributes/
+  <tag/left_right/
     The lefthand column represents the foreground colours:
     <descrip>
-      <tag/Dot 1/Red
+      <tag/Dot 1/Blue
       <tag/Dot 2/Green
-      <tag/Dot 3/Blue
+      <tag/Dot 3/Red
       <tag/Dot 7/Bright
     </descrip>
     The righthand column represents the background colours:
     <descrip>
-      <tag/Dot 4/Red
+      <tag/Dot 4/Blue
       <tag/Dot 5/Green
-      <tag/Dot 6/Blue
+      <tag/Dot 6/Red
       <tag/Dot 8/Blink
     </descrip>
     A dot is raised when its corresponding attribute bit is on.
@@ -4286,19 +4286,19 @@ The following attributes tables are provided:
     One of its problems, though, is that it's difficult to discern
     the difference between normal (white on black)
     and reverse (black on white) video.
-  <tag/attrib/
+  <tag/invleft_right/
     The lefthand column represents the foreground colours:
     <descrip>
-      <tag/Dot 1/Red
+      <tag/Dot 1/Blue
       <tag/Dot 2/Green
-      <tag/Dot 3/Blue
+      <tag/Dot 3/Red
       <tag/Dot 7/Bright
     </descrip>
     The righthand column represents the background colours:
     <descrip>
-      <tag/Dot 4/Red
+      <tag/Dot 4/Blue
       <tag/Dot 5/Green
-      <tag/Dot 6/Blue
+      <tag/Dot 6/Red
       <tag/Dot 8/Blink
     </descrip>
     A background bit being on triggers its corresponding dot,

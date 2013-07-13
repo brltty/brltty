@@ -1498,9 +1498,9 @@ BRLTTY_TEXT_TABLE([tr], [Turkish])
 BRLTTY_TEXT_TABLE([vi], [Vietnamese])
 BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb])
 
-BRLTTY_ATTRIBUTES_TABLE([attributes], [])
-BRLTTY_ATTRIBUTES_TABLE([attrib], [])
-BRLTTY_ARG_TABLE([attributes], [attributes], [atb])
+BRLTTY_ATTRIBUTES_TABLE([left_right], [foreground in the left column, background in the right column])
+BRLTTY_ATTRIBUTES_TABLE([invleft_right], [inverse foreground in the left column, background in the right column])
+BRLTTY_ARG_TABLE([attributes], [left_right], [atb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],

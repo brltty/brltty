@@ -16,12 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Attributes Table - 
+# BRLTTY Attributes Table - foreground in the left column, background in the right column
 
-dot 1 ~fg-blue
-dot 2 ~fg-green
-dot 3 ~fg-red
-dot 7 ~fg-bright
+dot 1 =fg-blue
+dot 2 =fg-green
+dot 3 =fg-red
+dot 7 =fg-bright
 dot 4 =bg-blue
 dot 5 =bg-green
 dot 6 =bg-red

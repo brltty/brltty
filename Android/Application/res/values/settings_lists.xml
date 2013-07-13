@@ -387,17 +387,17 @@
     <item>cy</item>
   </string-array>
 
-  <string name="ATTRIBUTES_TABLE_LABEL_attrib">attrib</string>
-  <string name="ATTRIBUTES_TABLE_LABEL_attributes">attributes</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">foreground in the left column, background in the right column</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverse foreground in the left column, background in the right column</string>
 
   <string-array name="ATTRIBUTES_TABLE_LABELS">
-    <item>@string/ATTRIBUTES_TABLE_LABEL_attrib</item>
-    <item>@string/ATTRIBUTES_TABLE_LABEL_attributes</item>
+    <item>@string/ATTRIBUTES_TABLE_LABEL_left_right</item>
+    <item>@string/ATTRIBUTES_TABLE_LABEL_invleft_right</item>
   </string-array>
 
   <string-array name="ATTRIBUTES_TABLE_VALUES">
-    <item>attrib</item>
-    <item>attributes</item>
+    <item>left_right</item>
+    <item>invleft_right</item>
   </string-array>
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contracted)</string>
