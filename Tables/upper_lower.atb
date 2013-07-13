@@ -16,13 +16,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Attributes Table - inverse foreground in the left column and background in the right column
+# BRLTTY Attributes Table - foreground in the upper square and background in the lower square
 
-dot 1 ~fg-blue
-dot 2 ~fg-green
-dot 3 ~fg-red
-dot 7 ~fg-bright
-dot 4 =bg-blue
-dot 5 =bg-green
-dot 6 =bg-red
+dot 1 =fg-red
+dot 4 =fg-green
+dot 2 =fg-blue
+dot 5 =fg-bright
+dot 3 =bg-red
+dot 6 =bg-green
+dot 7 =bg-blue
 dot 8 =blink

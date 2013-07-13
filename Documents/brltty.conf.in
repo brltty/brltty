@@ -218,8 +218,9 @@
 # Relative paths are anchored at "@TABLES_DIRECTORY@". If not specified,
 # "@attributes_table@" will be used.
 # (can be overridden with the -a [--attributes-table=] option)
-#attributes-table	left_right	# foreground in the left column, background in the right column
-#attributes-table	invleft_right	# inverse foreground in the left column, background in the right column
+#attributes-table	left_right	# foreground in the left column and background in the right column
+#attributes-table	invleft_right	# inverse foreground in the left column and background in the right column
+#attributes-table	upper_lower	# foreground in the upper square and background in the lower square
 
 # The contraction-table directive specifies which contraction table to use.
 # Relative paths are anchored at "@TABLES_DIRECTORY@". If not specified, no

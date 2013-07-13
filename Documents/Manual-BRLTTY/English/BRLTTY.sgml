@@ -4305,6 +4305,22 @@ The following attributes tables are provided:
     whereas a foreground bit being off triggers its corresponding dot.
     This unintuitive logic actually makes it easier
     to read the most commonly used attribute combinations.
+  <tag/upper_lower/
+    The upper square represents the foreground colours:
+    <descrip>
+      <tag/Dot 1/Red
+      <tag/Dot 4/Green
+      <tag/Dot 2/Blue
+      <tag/Dot 5/Bright
+    </descrip>
+    The lower square represents the background colours:
+    <descrip>
+      <tag/Dot 3/Red
+      <tag/Dot 6/Green
+      <tag/Dot 7/Blue
+      <tag/Dot 8/Blink
+    </descrip>
+    A dot is raised when its corresponding attribute bit is on.
 </descrip>
 See the <ref id="options-attributes-table" name="-a"> command line option,
 the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,

@@ -387,16 +387,19 @@
     <item>cy</item>
   </string-array>
 
-  <string name="ATTRIBUTES_TABLE_LABEL_left_right">foreground in the left column, background in the right column</string>
-  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverse foreground in the left column, background in the right column</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">foreground in the left column and background in the right column</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">foreground in the upper square and background in the lower square</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverse foreground in the left column and background in the right column</string>
 
   <string-array name="ATTRIBUTES_TABLE_LABELS">
     <item>@string/ATTRIBUTES_TABLE_LABEL_left_right</item>
+    <item>@string/ATTRIBUTES_TABLE_LABEL_upper_lower</item>
     <item>@string/ATTRIBUTES_TABLE_LABEL_invleft_right</item>
   </string-array>
 
   <string-array name="ATTRIBUTES_TABLE_VALUES">
     <item>left_right</item>
+    <item>upper_lower</item>
     <item>invleft_right</item>
   </string-array>
 
