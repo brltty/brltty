@@ -13,13 +13,19 @@
   <string name="VIRTUAL_BUTTON_HOME">Home</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Applicazioni Recenti</string>
 
+  <string name="SETTINGS_SCREEN_TITLE">Impostazioni BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Impostazioni Generali</string>
   <string name="SETTINGS_SCREEN_DEVICES">Gestione Dispositivi</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Impostazioni Avanzate</string>
 
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Modalità Navigazione</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Supporto Voce</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabella di Traduzione</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabella Braille Contratto</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabella Attributi</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">Tabella Tasti</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Livello di Log</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorie Log</string>
 
@@ -27,13 +33,29 @@
   <string name="DEVICES_BUTTON_ADD">Aggiungi Dispositivo</string>
   <string name="DEVICES_BUTTON_REMOVE">Rimuovi Dispositivo</string>
 
+  <string name="SELECTED_DEVICE_NONE">nessun dispositivo</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">dispositivo non selezionato</string>
+
   <string name="ADD_DEVICE_NAME">Nome Dispositivo</string>
   <string name="ADD_DEVICE_METHOD">Modalità di Collegamento</string>
   <string name="ADD_DEVICE_SELECT">Seleziona Dispositivo</string>
   <string name="ADD_DEVICE_DRIVER">Driver Braille</string>
   <string name="ADD_DEVICE_DONE">Completato</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">modalità di comunicazione non selezionata</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">dispositivo non selezionato</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">driver braille non selezionato</string>
+  <string name="ADD_DEVICE_NO_DEVICES">nessun dispositivo</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">nome dispositivo già in uso</string>
 
   <string name="REMOVE_DEVICE_ASK">Sei sicuro di voler rimuovere questo dispositivo?</string>
+
+  <string name="SET_SELECTION_NONE">nessuna selezione</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Elenco Verticale</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Griglia Bidimensionale</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Nessuno</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Nativo</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
@@ -133,6 +155,7 @@
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovacco</string>
+  <string name="TEXT_TABLE_LABEL_sl">Sloveno</string>
   <string name="TEXT_TABLE_LABEL_es">Spanish</string>
   <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
   <string name="TEXT_TABLE_LABEL_sv">Svedese</string>
@@ -144,6 +167,10 @@
   <string name="TEXT_TABLE_LABEL_tr">Turco</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamita</string>
   <string name="TEXT_TABLE_LABEL_cy">Gallese</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">colore primo piano nella colonna sinistra e colore sfondo nella colonna destra</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inversione colore primo piano nella colonna sinistra e colore sfondo nella colonna destra</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">colore primo piano nel riquadro superiore e colore sfondo nel riquadro inferiore</string>
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amarico (non contratto)</string>
@@ -173,4 +200,10 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contratto)</string>
+
+  <string name="KEY_TABLE_LABEL_braille">combinazioni tasti per tastiere braille</string>
+  <string name="KEY_TABLE_LABEL_desktop">combinazioni tasti per tastiere estese</string>
+  <string name="KEY_TABLE_LABEL_keypad">combinazioni di tasti per navigazione da tastierino numerico</string>
+  <string name="KEY_TABLE_LABEL_laptop">combinazioni di tasti per tastiere senza tastierino numerico</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">combinazioni di tasti per tastiere di sottotipo 6</string>
 </resources>
