@@ -13,13 +13,19 @@
   <string name="VIRTUAL_BUTTON_HOME">Главная страница</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Недавние приложения</string>
 
+  <string name="SETTINGS_SCREEN_TITLE">Настройки BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Общие настройки</string>
   <string name="SETTINGS_SCREEN_DEVICES">Управление устройствами</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Расширенные настройки</string>
 
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Режим навигации</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Поддержка речи</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Текстовая таблица</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Таблица атрибутов</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">Таблица клавиатурных клавиш</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категории журнала</string>
 
@@ -27,13 +33,29 @@
   <string name="DEVICES_BUTTON_ADD">Добавить устройство</string>
   <string name="DEVICES_BUTTON_REMOVE">Удалить устройство</string>
 
+  <string name="SELECTED_DEVICE_NONE">ни одного устройства</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">устройство не выбрано</string>
+
   <string name="ADD_DEVICE_NAME">Имя устройства</string>
   <string name="ADD_DEVICE_METHOD">Способ связи</string>
   <string name="ADD_DEVICE_SELECT">Выбор устройства</string>
   <string name="ADD_DEVICE_DRIVER">Брайлевский драйвер</string>
   <string name="ADD_DEVICE_DONE">Выполнено</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">способ связи не выбран</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">устройство не выбрано</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">брайлевский драйвер не выбран</string>
+  <string name="ADD_DEVICE_NO_DEVICES">ни одного устройства</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">имя устройства уже используется</string>
 
   <string name="REMOVE_DEVICE_ASK">Вы, действительно, хотите удалить это устройство?</string>
+
+  <string name="SET_SELECTION_NONE">не выбрано</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Вертикальный список</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Двумерная сетка</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Ничего</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Нативная</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
@@ -133,6 +155,7 @@
   <string name="TEXT_TABLE_LABEL_sat">Сантали</string>
   <string name="TEXT_TABLE_LABEL_sd">Синдхов</string>
   <string name="TEXT_TABLE_LABEL_sk">Словацкий</string>
+  <string name="TEXT_TABLE_LABEL_sl">Словенский</string>
   <string name="TEXT_TABLE_LABEL_es">Испанский</string>
   <string name="TEXT_TABLE_LABEL_sw">Суахили</string>
   <string name="TEXT_TABLE_LABEL_sv">Шведский</string>
@@ -144,6 +167,10 @@
   <string name="TEXT_TABLE_LABEL_tr">Турецкий</string>
   <string name="TEXT_TABLE_LABEL_vi">Вьетнамский</string>
   <string name="TEXT_TABLE_LABEL_cy">Валлийский</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">цвет переднего плана в левой колонке и цвет фона в правой колонке</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">инверсный цвет переднего плана в левой колонке и цвет фона в правой колонке</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">цвет переднего плана в верхнем квадрате и цвет фона в нижнем квадрате</string>
 
   <string name="CONTRACTION_TABLE_LABEL_af">Африкаанс (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарский (несокращённый)</string>
@@ -173,4 +200,10 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Суахили (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Тайский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Зулу (сокращённый)</string>
+
+  <string name="KEY_TABLE_LABEL_braille">привязки для брайлевских клавиатур</string>
+  <string name="KEY_TABLE_LABEL_desktop">привязки для полных клавиатур</string>
+  <string name="KEY_TABLE_LABEL_keypad">привязки для кнопочной панели навигации</string>
+  <string name="KEY_TABLE_LABEL_laptop">привязки для клавиатур с отсутствующим дополнительным блоком</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">привязки для клавиатур Sun Type 6</string>
 </resources>
