@@ -13,13 +13,19 @@
   <string name="VIRTUAL_BUTTON_HOME">主頁</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">最近開啟的應用城市</string>
 
+  <string name="SETTINGS_SCREEN_TITLE">BRLTTY 設定</string>
   <string name="SETTINGS_SCREEN_GENERAL">一般設定</string>
   <string name="SETTINGS_SCREEN_DEVICES">點顯器設定</string>
   <string name="SETTINGS_SCREEN_ADVANCED">進階設定</string>
 
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">尋懶模式</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">語音支援</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">普通點字</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">屬性點字</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">鍵盤對應表</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">紀錄分類</string>
 
@@ -27,13 +33,29 @@
   <string name="DEVICES_BUTTON_ADD">新增點顯器</string>
   <string name="DEVICES_BUTTON_REMOVE">移除點顯器</string>
 
+  <string name="SELECTED_DEVICE_NONE">沒有設備</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">設備餵選取</string>
+
   <string name="ADD_DEVICE_NAME">點顯器名稱</string>
   <string name="ADD_DEVICE_METHOD">連接方式</string>
   <string name="ADD_DEVICE_SELECT">選擇點顯器</string>
   <string name="ADD_DEVICE_DRIVER">點顯器</string>
   <string name="ADD_DEVICE_DONE">完成</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">溝通方式餵選取</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">設備餵選取</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">點字驅動餵選取</string>
+  <string name="ADD_DEVICE_NO_DEVICES">沒有設備</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">設備名稱以使用</string>
 
   <string name="REMOVE_DEVICE_ASK">您確定要移除這個點顯器嗎？</string>
+
+  <string name="SET_SELECTION_NONE">沒有選取</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">縱向清單</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">二維方格</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">無</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">內建</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">藍牙</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
@@ -133,6 +155,7 @@
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">信德語</string>
   <string name="TEXT_TABLE_LABEL_sk">斯洛法克</string>
+  <string name="TEXT_TABLE_LABEL_sl">斯洛凡尼亞語</string>
   <string name="TEXT_TABLE_LABEL_es">西班牙</string>
   <string name="TEXT_TABLE_LABEL_sw">斯華希裡</string>
   <string name="TEXT_TABLE_LABEL_sv">瑞典</string>
@@ -144,6 +167,10 @@
   <string name="TEXT_TABLE_LABEL_tr">土耳其</string>
   <string name="TEXT_TABLE_LABEL_vi">越南</string>
   <string name="TEXT_TABLE_LABEL_cy">威爾斯</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">左邊欄位為前景顏色 右邊欄位為背景顏色</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">對調左邊欄位的前景顏色與右邊欄位的背景顏色</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">上框為前景顏色 下框為背景顏色</string>
 
   <string name="CONTRACTION_TABLE_LABEL_af">南非的荷蘭語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_am">阿比西尼亞官話無縮寫</string>
@@ -173,4 +200,10 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">斯瓦希裡語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_th">泰國語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">祖魯語縮寫</string>
+
+  <string name="KEY_TABLE_LABEL_braille">點字鍵盤對應</string>
+  <string name="KEY_TABLE_LABEL_desktop">全鍵盤對應</string>
+  <string name="KEY_TABLE_LABEL_keypad">九宮鍵尋懶對應</string>
+  <string name="KEY_TABLE_LABEL_laptop">沒有九宮鍵的鍵盤對應</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">Sun 第六形鍵盤對應</string>
 </resources>
