@@ -10,13 +10,19 @@ VIRTUAL_BUTTON_BACK Back
 VIRTUAL_BUTTON_HOME Home
 VIRTUAL_BUTTON_RECENT_APPS Recent Apps
 
+SETTINGS_SCREEN_TITLE BRLTTY Settings
 SETTINGS_SCREEN_GENERAL General Settings
 SETTINGS_SCREEN_DEVICES Manage Devices
 SETTINGS_SCREEN_ADVANCED Advanced Settings
 
+SETTINGS_BUTTON_NAVIGATION_MODE Navigation Mode
+SETTINGS_BUTTON_SPEECH_SUPPORT Speech Support
+
 SETTINGS_BUTTON_TEXT_TABLE Text Table
 SETTINGS_BUTTON_CONTRACTION_TABLE Contraction Table
 SETTINGS_BUTTON_ATTRIBUTES_TABLE Attributes Table
+SETTINGS_BUTTON_KEY_TABLE Keyboard Key Table
+
 SETTINGS_BUTTON_LOG_LEVEL Log Level
 SETTINGS_BUTTON_LOG_CATEGORIES Log Categories
 
@@ -24,13 +30,29 @@ DEVICES_BUTTON_SELECTED Selected Device
 DEVICES_BUTTON_ADD Add Device
 DEVICES_BUTTON_REMOVE Remove Device
 
+SELECTED_DEVICE_NONE no devices
+SELECTED_DEVICE_UNSELECTED device not selected
+
 ADD_DEVICE_NAME Device Name
 ADD_DEVICE_METHOD Communication Method
 ADD_DEVICE_SELECT Select Device
 ADD_DEVICE_DRIVER Braille Driver
 ADD_DEVICE_DONE Done
+ADD_DEVICE_UNSELECTED_METHOD communication method not selected
+ADD_DEVICE_UNSELECTED_DEVICE device not selected
+ADD_DEVICE_UNSELECTED_DRIVER braille driver not selected
+ADD_DEVICE_NO_DEVICES no devices
+ADD_DEVICE_DUPLICATE_NAME device name already in use
 
 REMOVE_DEVICE_ASK Would you really like to remove this device?
+
+SET_SELECTION_NONE none selected
+
+NAVIGATION_MODE_LABEL_List Vertical List
+NAVIGATION_MODE_LABEL_Grid Two Dimensional Grid
+
+SPEECH_SUPPORT_LABEL_None None
+SPEECH_SUPPORT_LABEL_Native Native
 
 COMMUNICATION_METHOD_LABEL_Bluetooth Bluetooth
 COMMUNICATION_METHOD_LABEL_Usb USB
@@ -130,6 +152,7 @@ TEXT_TABLE_LABEL_sa Sanskrit
 TEXT_TABLE_LABEL_sat Santali
 TEXT_TABLE_LABEL_sd Sindhi
 TEXT_TABLE_LABEL_sk Slovak
+TEXT_TABLE_LABEL_sl Slovenian
 TEXT_TABLE_LABEL_es Spanish
 TEXT_TABLE_LABEL_sw Swahili
 TEXT_TABLE_LABEL_sv Swedish
@@ -141,6 +164,10 @@ TEXT_TABLE_LABEL_bo Tibetan
 TEXT_TABLE_LABEL_tr Turkish
 TEXT_TABLE_LABEL_vi Vietnamese
 TEXT_TABLE_LABEL_cy Welsh
+
+ATTRIBUTES_TABLE_LABEL_left_right foreground colour in the left column and background colour in the right column
+ATTRIBUTES_TABLE_LABEL_invleft_right inverse foreground colour in the left column and background colour in the right column
+ATTRIBUTES_TABLE_LABEL_upper_lower foreground colour in the upper square and background colour in the lower square
 
 CONTRACTION_TABLE_LABEL_af Afrikaans (contracted)
 CONTRACTION_TABLE_LABEL_am Amharic (uncontracted)
@@ -170,3 +197,9 @@ CONTRACTION_TABLE_LABEL_es Spanish (grade 2)
 CONTRACTION_TABLE_LABEL_sw Swahili (contracted)
 CONTRACTION_TABLE_LABEL_th Thai (contracted)
 CONTRACTION_TABLE_LABEL_zu Zulu (contracted)
+
+KEY_TABLE_LABEL_braille bindings for braille keyboards
+KEY_TABLE_LABEL_desktop bindings for full keyboards
+KEY_TABLE_LABEL_keypad bindings for keypad-based navigation
+KEY_TABLE_LABEL_laptop bindings for keyboards without a keypad
+KEY_TABLE_LABEL_sun_type6 bindings for Sun Type 6 keyboards
