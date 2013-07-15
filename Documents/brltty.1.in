@@ -141,11 +141,12 @@ Write logs to standard error rather than to the system log (useful for debugging
 \fB\-f \fIfile\fR (\fB\-\-configuration\-file=\fR)
 The path to the configuration file.
 Relative paths are anchored at the current working directory.
-The built\-in default is
+The built-in default is
 .BR "@CONFIGURATION_DIRECTORY@/@CONFIGURATION_FILE@" "."
 .TP
 \fB\-h\fR (\fB\-\-help\fR)
-Print a command line usage summary and then exit.
+Print a command line usage summary (commonly used options only),
+and then exit.
 .TP
 \fB\-i \fIname\fR (\fB\-\-speech\-input=\fR)
 The file system object
@@ -158,8 +159,15 @@ Relative paths are anchored at the current working directory.
 The built-in default is
 that the file system object is not created.
 .TP
-\fB\-k \fIfile\fR (\fB\-\-key\-table=\fR)
-Path to key table file.
+\fB\-k \fItable\fR (\fB\-\-key\-table=\fR)
+The path to the keyboard key table.
+Relative paths are anchored at
+.BR "@TABLES_DIRECTORY@" "."
+The
+.B ".ktb"
+extension and the
+.B "kbd\-"
+prefix are optional.
 .TP
 \fB\-l \fIlevel\fR (\fB\-\-log\-level=\fR)
 The minimum severity level for messages written to the log.
@@ -307,8 +315,11 @@ Parameter names may be abbreviated.
 If a parameter assignment is qualified with a driver identification code
 then it's only processed if that braille display driver is being used.
 .TP
-\fB\-D\fR (\fB\-\-drivers\-directory=\fR)
-Path to directory for loading drivers.
+\fB\-D \fIdirectory\fR (\fB\-\-drivers\-directory=\fR)
+The path to the directory which contains
+the dynamically loadable driver objects.
+The built-in default is
+.RB "@DRIVERS_DIRECTORY@" "."
 .TP
 \fB\-E\fR (\fB\-\-environment\-variables\fR)
 Recognize environment variables.
@@ -321,7 +332,8 @@ The built-in default is
 .BR "@PREFERENCES_FILE@" "."
 .TP
 \fB\-H\fR (\fB\-\-full\-help\fR)
-Print a usage summary (all options), and then exit.
+Print a command line usage summary (all options),
+and then exit.
 .TP
 \fB\-I\fR (\fB\-\-install\-service\fR)
 (Windows only)
@@ -329,7 +341,7 @@ Install
 .B brltty
 as the
 .B BrlAPI
-service so that it will be automatically started when the system is booted
+service so that it will be automatically started when the system is booted,
 and so that applications can know that a
 .B BrlAPI
 server is running.
@@ -366,7 +378,7 @@ Remove the
 .B BrlAPI
 service so that
 .B brltty
-will not be automatically started when the system is booted
+will not be automatically started when the system is booted,
 and so that applications can know that no
 .B BrlAPI
 server is running.
@@ -380,7 +392,10 @@ If a parameter assignment is qualified with a driver identification code
 then it's only processed if that speech synthesizer driver is being used.
 .TP
 \fB\-T \fIdirectory\fR (\fB\-\-tables\-directory=\fR)
-Path to directory for text and attributes tables.
+The path to the directory which contains
+the text, attributes, contraction, and key tables.
+The built-in default is
+.RB "@TABLES_DIRECTORY@" "."
 .TP
 \fB\-U \fIcsecs\fR (\fB\-\-update\-interval=\fR)
 The braille window update interval in hundredths of a second.
@@ -402,7 +417,9 @@ option isn't also specified
 then also print copyright information.
 .TP
 \fB\-W \fIdirectory\fR (\fB\-\-writable\-directory=\fR)
-Path to directory which can be written to.
+The path to a directory which can be written to.
+The built-in default is
+.RB "@WRITABLE_DIRECTORY@" "."
 .TP
 \fB\-X \fIname\fB=\fIvalue\fB,\fR... (\fB\-\-screen\-parameters=\fR)
 Parameters for the screen driver.
@@ -601,6 +618,7 @@ See the
 .RB "(" "\-\-pcm\-device=" ")"
 option for details.
 .TP
+\fBpreferences\-file \fIfile\fR
 The preferences file.
 See the
 .B \-F
