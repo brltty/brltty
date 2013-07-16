@@ -114,8 +114,16 @@ public class InputService extends InputMethodService {
 
     if (connection != null) {
       int action = press? KeyEvent.ACTION_DOWN: KeyEvent.ACTION_UP;
-      connection.sendKeyEvent(new KeyEvent(action, code));
-      logKeyEvent(code, press, "forwarded");
+      KeyEvent event = new KeyEvent(action, code);
+      event = KeyEvent.changeFlags(event, KeyEvent.FLAG_SOFT_KEYBOARD);
+
+      if (connection.sendKeyEvent(event)) {
+        logKeyEvent(code, press, "forwarded");
+      } else {
+        logKeyEvent(code, press, "not forwarded");
+      }
+    } else {
+      logKeyEvent(code, press, "unforwardable");
     }
   }
 
