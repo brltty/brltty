@@ -139,6 +139,9 @@ public final class ScreenDriver {
       case AccessibilityEvent.TYPE_VIEW_SCROLLED:
         break;
 
+      case AccessibilityEvent.TYPE_VIEW_SELECTED:
+        break;
+
       case AccessibilityEvent.TYPE_VIEW_FOCUSED:
         break;
 
@@ -207,27 +210,50 @@ public final class ScreenDriver {
       }
 
       {
-        AccessibilityNodeInfo focusedNode;
+        AccessibilityNodeInfo node;
 
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          focusedNode = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+          node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+        } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+          node = ScreenUtilities.findFocusedNode(root);
         } else {
-          focusedNode = ScreenUtilities.findFocusedNode(root);
+          node = null;
         }
 
-        if (focusedNode != null) {
+        if (node != null) {
           root.recycle();
-          root = null;
+          root = node;
+          node = ScreenUtilities.findSelectedNode(root);
 
-          AccessibilityNodeInfo selectedNode = ScreenUtilities.findSelectedNode(focusedNode);
-
-          if (selectedNode != null) {
-            focusedNode.recycle();
-            focusedNode = null;
-            return selectedNode;
+          if (node != null) {
+            root.recycle();
+            root = node;
+            node = null;
           }
 
-          return focusedNode;
+          if ((node = ScreenUtilities.findTextNode(root)) == null) {
+            node =  ScreenUtilities.findDescribedNode(root);
+          }
+
+          if (node != null) {
+            root.recycle();
+            root = node;
+            node = null;
+          }
+
+          return root;
+        }
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        AccessibilityNodeInfo node = ScreenUtilities.findFocusableNode(root);
+
+        if (node != null) {
+          if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+            root.recycle();
+            root = null;
+            return node;
+          }
         }
       }
     }

@@ -95,9 +95,13 @@ public final class ScreenUtilities {
     return node;
   }
 
-  public static AccessibilityNodeInfo findSelectedNode (AccessibilityNodeInfo root) {
+  public interface NodeTester {
+    public boolean testNode (AccessibilityNodeInfo node);
+  }
+
+  public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, NodeTester tester) {
     if (root != null) {
-      if (root.isSelected()) return AccessibilityNodeInfo.obtain(root);
+      if (tester.testNode(root)) return AccessibilityNodeInfo.obtain(root);
 
       {
         int childCount = root.getChildCount();
@@ -106,7 +110,7 @@ public final class ScreenUtilities {
           AccessibilityNodeInfo child = root.getChild(childIndex);
 
           if (child != null) {
-            AccessibilityNodeInfo node = findSelectedNode(child);
+            AccessibilityNodeInfo node = findNode(child, tester);
             child.recycle();
             child = null;
             if (node != null) return node;
@@ -118,27 +122,59 @@ public final class ScreenUtilities {
     return null;
   }
 
-  public static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
-    if (root != null) {
-      if (root.isFocused()) return AccessibilityNodeInfo.obtain(root);
-
-      {
-        int childCount = root.getChildCount();
-
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
-
-          if (child != null) {
-            AccessibilityNodeInfo node = findFocusedNode(child);
-            child.recycle();
-            child = null;
-            if (node != null) return node;
-          }
-        }
+  public static AccessibilityNodeInfo findSelectedNode (AccessibilityNodeInfo root) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.isSelected();
       }
-    }
+    };
 
-    return null;
+    return findNode(root, tester);
+  }
+
+  public static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.isFocused();
+      }
+    };
+
+    return findNode(root, tester);
+  }
+
+  public static AccessibilityNodeInfo findFocusableNode (AccessibilityNodeInfo root) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.isFocusable();
+      }
+    };
+
+    return findNode(root, tester);
+  }
+
+  public static AccessibilityNodeInfo findTextNode (AccessibilityNodeInfo root) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.getText() != null;
+      }
+    };
+
+    return findNode(root, tester);
+  }
+
+  public static AccessibilityNodeInfo findDescribedNode (AccessibilityNodeInfo root) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.getContentDescription() != null;
+      }
+    };
+
+    return findNode(root, tester);
   }
 
   public static String normalizeText (CharSequence text) {
