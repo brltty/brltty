@@ -213,7 +213,7 @@ resetLockTimer (void) {
     if (findJavaStaticMethod(env, &method, lockUtilitiesClass, "resetTimer",
                              JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                             ))) {
-      (*env)->CallStaticVoidMethod(env, screenDriverClass, method);
+      (*env)->CallStaticVoidMethod(env, lockUtilitiesClass, method);
       if (!clearJavaException(env, 1)) return 1;
       errno = EIO;
     }
