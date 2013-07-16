@@ -206,21 +206,28 @@ public final class ScreenDriver {
         }
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+      {
+        AccessibilityNodeInfo focusedNode;
 
-        if (node != null) {
-          root.recycle();
-          root = null;
-          return node;
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          focusedNode = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+        } else {
+          focusedNode = ScreenUtilities.findFocusedNode(root);
         }
-      } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-        AccessibilityNodeInfo node = ScreenUtilities.findFocusedNode(root);
 
-        if (node != null) {
+        if (focusedNode != null) {
           root.recycle();
           root = null;
-          return node;
+
+          AccessibilityNodeInfo selectedNode = ScreenUtilities.findSelectedNode(focusedNode);
+
+          if (selectedNode != null) {
+            focusedNode.recycle();
+            focusedNode = null;
+            return selectedNode;
+          }
+
+          return focusedNode;
         }
       }
     }

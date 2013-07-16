@@ -95,6 +95,29 @@ public final class ScreenUtilities {
     return node;
   }
 
+  public static AccessibilityNodeInfo findSelectedNode (AccessibilityNodeInfo root) {
+    if (root != null) {
+      if (root.isSelected()) return AccessibilityNodeInfo.obtain(root);
+
+      {
+        int childCount = root.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = root.getChild(childIndex);
+
+          if (child != null) {
+            AccessibilityNodeInfo node = findSelectedNode(child);
+            child.recycle();
+            child = null;
+            if (node != null) return node;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
   public static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
     if (root != null) {
       if (root.isFocused()) return AccessibilityNodeInfo.obtain(root);
