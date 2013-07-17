@@ -4,42 +4,64 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY støtter punktskriftenheter.</string>
 
-  <string name="input_service_name">Inntastingstjeneste for BRLTTY</string>
+  <string name="input_service_name">Inndatatjeneste for BRLTTY</string>
   <string name="input_service_type">Tastatur på punktskriftenheter</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Systemvarsler</string>
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Varslinger</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Hurtiginnstillinger</string>
   <string name="VIRTUAL_BUTTON_BACK">Tilbake</string>
   <string name="VIRTUAL_BUTTON_HOME">Hjem</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Nylig brukte apper</string>
 
+  <string name="SETTINGS_SCREEN_TITLE">Innstillinger for BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generelle innstillinger</string>
   <string name="SETTINGS_SCREEN_DEVICES">Administrere enheter</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Avanserte innstillinger</string>
 
-  <string name="SETTINGS_BUTTON_TEXT_TABLE">Tekst-tabell</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigasjonsmmodus</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Støtte for tale</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabell</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabell</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">Tastetabell for tastatur</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
-  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Logg-kategorier</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valgt enhet</string>
   <string name="DEVICES_BUTTON_ADD">Legg til enhet</string>
   <string name="DEVICES_BUTTON_REMOVE">Fjern enhet</string>
+
+  <string name="SELECTED_DEVICE_NONE">ingen enheter</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">enhet er ikke valgt</string>
 
   <string name="ADD_DEVICE_NAME">Enhetsnavn</string>
   <string name="ADD_DEVICE_METHOD">Kommunikasjonsmetode</string>
   <string name="ADD_DEVICE_SELECT">Velg enhet</string>
   <string name="ADD_DEVICE_DRIVER">Punktskriftdriver</string>
   <string name="ADD_DEVICE_DONE">Ferdig</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">kommunikasjonsmetoden er ikke valgt</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">enheten er ikke valgt</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">punktskriftdriveren er ikke valgt</string>
+  <string name="ADD_DEVICE_NO_DEVICES">ingen enheter</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">enhetsnavnet er allerede i bruk</string>
 
   <string name="REMOVE_DEVICE_ASK">Vil du virkelig fjerne denne enheten?</string>
+
+  <string name="SET_SELECTION_NONE">ingenting er valgt</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Todimensjonelt rutenett</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Ingen</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Original</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
   <string name="COMMUNICATION_METHOD_LABEL_Serial">Seriell</string>
 
-  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
+  <string name="LOG_LEVEL_LABEL_debug">Feilretting</string>
   <string name="LOG_LEVEL_LABEL_information">Informasjon</string>
   <string name="LOG_LEVEL_LABEL_notice">Note</string>
   <string name="LOG_LEVEL_LABEL_warning">Advarsel</string>
@@ -75,19 +97,19 @@
   <string name="TEXT_TABLE_LABEL_da_1252">dansk (Svend Thougaard, 2002-11-18)</string>
   <string name="TEXT_TABLE_LABEL_dra">dravidisk</string>
   <string name="TEXT_TABLE_LABEL_nl">nederlandsk</string>
-  <string name="TEXT_TABLE_LABEL_nl_BE">flamsk</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">nederlandsk (Belgia)</string>
   <string name="TEXT_TABLE_LABEL_nl_NL">nederlandsk</string>
   <string name="TEXT_TABLE_LABEL_en">engelsk</string>
-  <string name="TEXT_TABLE_LABEL_en_CA">canadisk engelsk</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">engelsk (Canada)</string>
   <string name="TEXT_TABLE_LABEL_en_nabcc">engelsk (North American Braille Computer Code)</string>
-  <string name="TEXT_TABLE_LABEL_en_GB">britisk engelsk</string>
-  <string name="TEXT_TABLE_LABEL_en_US">amerikansk engelsk</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">engelsk (Storbritania)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">engelsk (USA)</string>
   <string name="TEXT_TABLE_LABEL_eo">esperanto</string>
   <string name="TEXT_TABLE_LABEL_et">estisk</string>
   <string name="TEXT_TABLE_LABEL_fi">finsk</string>
   <string name="TEXT_TABLE_LABEL_fr">fransk</string>
-  <string name="TEXT_TABLE_LABEL_fr_CA">canadisk fransk</string>
-  <string name="TEXT_TABLE_LABEL_fr_cbifs">fransk (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">fransk (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">fransk (Code Braille Informatique FranÃ§ais Standard)</string>
   <string name="TEXT_TABLE_LABEL_fr_FR">fransk (Frankrike)</string>
   <string name="TEXT_TABLE_LABEL_fr_vs">fransk (VisioBraille)</string>
   <string name="TEXT_TABLE_LABEL_fr_2007">fransk (unified 2007)</string>
@@ -133,6 +155,7 @@
   <string name="TEXT_TABLE_LABEL_sat">santali</string>
   <string name="TEXT_TABLE_LABEL_sd">sindhi</string>
   <string name="TEXT_TABLE_LABEL_sk">slovakisk</string>
+  <string name="TEXT_TABLE_LABEL_sl">slovensk</string>
   <string name="TEXT_TABLE_LABEL_es">spansk</string>
   <string name="TEXT_TABLE_LABEL_sw">swahili</string>
   <string name="TEXT_TABLE_LABEL_sv">svensk</string>
@@ -144,6 +167,10 @@
   <string name="TEXT_TABLE_LABEL_tr">tyrkisk</string>
   <string name="TEXT_TABLE_LABEL_vi">vietnamesisk</string>
   <string name="TEXT_TABLE_LABEL_cy">walisisk</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">forgrunnsfarge i venstre kolonne og bakgrunnsfarge i høyre kolonne</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">omvendt forgrunnsfarge i venstre kolonne og bakgrunnsfarge i høyre kolonne</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">forgrunnsfarge i øverste del og bakgrunnsfarge i nederste del</string>
 
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amharisk (fullskrift)</string>
@@ -173,4 +200,10 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">swahili (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">thai (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">zulu (kortskrift)</string>
+
+  <string name="KEY_TABLE_LABEL_braille">alternativ for punktskrifttastatur</string>
+  <string name="KEY_TABLE_LABEL_desktop">alternativ for fullt tastatur</string>
+  <string name="KEY_TABLE_LABEL_keypad">alternativ for talltastaturbasert navigasjon</string>
+  <string name="KEY_TABLE_LABEL_laptop">alternativ for tastatur uten talltastatur</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">alternativ for Sun type 6 tastatur</string>
 </resources>
