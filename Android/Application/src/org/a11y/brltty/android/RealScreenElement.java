@@ -137,6 +137,10 @@ public class RealScreenElement extends ScreenElement {
     return null;
   }
 
+  private AccessibilityNodeInfo getFocusableNode () {
+    return getActionableNode(AccessibilityNodeInfo.ACTION_FOCUS | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+  }
+
   private boolean doAction (int action) {
     AccessibilityNodeInfo node = getActionableNode(action);
     if (node == null) return false;
@@ -147,16 +151,52 @@ public class RealScreenElement extends ScreenElement {
     return performed;
   }
 
+  private boolean selectNode (AccessibilityNodeInfo root, boolean isDescendant) {
+    boolean select = false;
+
+    if (root != null) {
+      {
+        int childCount = root.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = root.getChild(childIndex);
+
+          if (child != null) {
+            if (selectNode(child, true)) {
+              select = true;
+            } else if (child.equals(accessibilityNode)) {
+              select = true;
+            }
+
+            child.recycle();
+            child = null;
+          }
+        }
+      }
+
+      if (isDescendant) {
+        if (select != root.isSelected()) {
+          int action = select? AccessibilityNodeInfo.ACTION_SELECT: AccessibilityNodeInfo.ACTION_CLEAR_SELECTION;
+          root.performAction(action);
+        }
+      }
+    }
+
+    return select;
+  }
+
+  private boolean selectNode (AccessibilityNodeInfo root) {
+    return selectNode(root, false);
+  }
+
   public boolean doKey (int keyCode, boolean longPress) {
     boolean done = false;
-    final int ACTION_CLAIM = AccessibilityNodeInfo.ACTION_FOCUS;
-    final int ACTION_RELEASE = AccessibilityNodeInfo.ACTION_CLEAR_FOCUS;
-    AccessibilityNodeInfo node = getActionableNode(ACTION_CLAIM | ACTION_RELEASE);
+    AccessibilityNodeInfo node = getFocusableNode();
 
     if (node != null) {
       if (node.isFocused()) {
         if (InputService.inputKey(keyCode, longPress)) done = true;
-      } else if (node.performAction(ACTION_CLAIM)) {
+      } else if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
         final long start = System.currentTimeMillis();
 
         while (true) {
@@ -214,8 +254,22 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-      if (accessibilityNode.isFocused()) return true;
-      return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+      AccessibilityNodeInfo node = getFocusableNode();
+
+      if (node != null) {
+        boolean isFocused = node.isFocused();
+
+        if (!isFocused) {
+          if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+            isFocused = true;
+          }
+        }
+
+        if (isFocused) selectNode(node);
+        node.recycle();
+        node = null;
+        return isFocused;
+      }
     }
 
     return super.onBringCursor();
