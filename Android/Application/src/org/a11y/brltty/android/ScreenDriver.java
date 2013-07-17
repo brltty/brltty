@@ -220,6 +220,17 @@ public final class ScreenDriver {
           node = null;
         }
 
+        if (node == null) {
+          if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+            if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
+              if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+                node.recycle();
+                node = null;
+              }
+            }
+          }
+        }
+
         if (node != null) {
           root.recycle();
           root = node;
@@ -242,18 +253,6 @@ public final class ScreenDriver {
           }
 
           return root;
-        }
-      }
-
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-        AccessibilityNodeInfo node = ScreenUtilities.findFocusableNode(root);
-
-        if (node != null) {
-          if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-            root.recycle();
-            root = null;
-            return node;
-          }
         }
       }
     }
