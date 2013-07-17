@@ -155,6 +155,8 @@ public class RealScreenElement extends ScreenElement {
     boolean select = false;
 
     if (root != null) {
+      if (root.equals(accessibilityNode)) select = true;
+
       {
         int childCount = root.getChildCount();
 
@@ -162,12 +164,7 @@ public class RealScreenElement extends ScreenElement {
           AccessibilityNodeInfo child = root.getChild(childIndex);
 
           if (child != null) {
-            if (selectNode(child, true)) {
-              select = true;
-            } else if (child.equals(accessibilityNode)) {
-              select = true;
-            }
-
+            if (selectNode(child, true)) select = true;
             child.recycle();
             child = null;
           }
