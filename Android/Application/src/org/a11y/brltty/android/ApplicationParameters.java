@@ -22,11 +22,9 @@ import android.os.Build;
 
 public abstract class ApplicationParameters {
   public static volatile int BRAILLE_COLUMN_SPACING = 2;
-  public static volatile int BRAILLE_ROW_SPACING = 1;
+  public static volatile int BRAILLE_ROW_SPACING = 0;
 
-  public static volatile int VISUAL_LOCATION_FUZZINESS = 0;
-
-  public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
+  public static volatile boolean LOG_ACCESSIBILITY_EVENTS = true;
   public static volatile boolean LOG_KEYBOARD_EVENTS = false;
 
   public static volatile int KEY_RETRY_TIMEOUT = 1000;

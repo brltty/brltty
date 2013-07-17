@@ -41,7 +41,10 @@ public class GridBrailleRenderer extends BrailleRenderer {
       public abstract int compare (Cell cell1, Cell cell2);
       protected abstract void setPreviousCell (Cell cell, Cell previous);
       protected abstract void setNextCell (Cell cell, Cell Next);
-      protected abstract void setOffset (Cell cell);
+      protected abstract Cell getAdjacentCell (Cell cell);
+      protected abstract Coordinate getCoordinate (Cell cell);
+      protected abstract int getSize (Cell cell);
+      protected abstract int getSpacing ();
 
       public final int getValue () {
         return coordinateValue;
@@ -79,7 +82,11 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       public void setOffsets () {
         for (Cell cell : cells) {
-          setOffset(cell);
+          Cell next = getAdjacentCell(cell);
+
+          if (next != null) {
+            getCoordinate(next).setBrailleOffset(getBrailleOffset() + getSize(cell) + getSpacing());
+          }
         }
       }
 
@@ -108,12 +115,23 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final void setOffset (Cell cell) {
-        Cell next = cell.getEastCell();
+      protected final Cell getAdjacentCell (Cell cell) {
+        return cell.getEastCell();
+      }
 
-        if (next != null) {
-          next.getGridColumn().setBrailleOffset(getBrailleOffset() + cell.getWidth() + ApplicationParameters.BRAILLE_COLUMN_SPACING);
-        }
+      @Override
+      protected final Coordinate getCoordinate (Cell cell) {
+        return cell.getGridColumn();
+      }
+
+      @Override
+      protected final int getSize (Cell cell) {
+        return cell.getWidth();
+      }
+
+      @Override
+      protected final int getSpacing () {
+        return ApplicationParameters.BRAILLE_COLUMN_SPACING;
       }
 
       public Column (int value) {
@@ -141,12 +159,23 @@ public class GridBrailleRenderer extends BrailleRenderer {
       }
 
       @Override
-      protected final void setOffset (Cell cell) {
-        Cell next = cell.getSouthCell();
+      protected final Cell getAdjacentCell (Cell cell) {
+        return cell.getSouthCell();
+      }
 
-        if (next != null) {
-          next.getGridRow().setBrailleOffset(getBrailleOffset() + cell.getHeight());
-        }
+      @Override
+      protected final Coordinate getCoordinate (Cell cell) {
+        return cell.getGridRow();
+      }
+
+      @Override
+      protected final int getSize (Cell cell) {
+        return cell.getHeight();
+      }
+
+      @Override
+      protected final int getSpacing () {
+        return ApplicationParameters.BRAILLE_ROW_SPACING;
       }
 
       public Row (int value) {
@@ -155,7 +184,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
     }
 
     protected abstract class Coordinates {
-      private final int offsetIncrement;
+      private final int coordinateSpacing;
 
       private final List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
@@ -171,7 +200,7 @@ public class GridBrailleRenderer extends BrailleRenderer {
         while (iterator.hasNext()) {
           Coordinate coordinate = iterator.next();
           int current = coordinate.getValue();
-          if (Math.abs(current - value) <= ApplicationParameters.VISUAL_LOCATION_FUZZINESS) return coordinate;
+          if (current == value) return coordinate;
 
           if (current > value) {
             iterator.previous();
@@ -194,16 +223,18 @@ public class GridBrailleRenderer extends BrailleRenderer {
 
       public void setOffsets () {
         int offset = 0;
+        int increment = coordinateSpacing;
+        if (increment == 0) increment = 1;
 
         for (Coordinate coordinate : coordinates) {
           coordinate.setBrailleOffset(offset);
-          offset += offsetIncrement;
+          offset += increment;
           coordinate.setOffsets();
         }
       }
 
-      public Coordinates (int increment) {
-        offsetIncrement = increment;
+      public Coordinates (int spacing) {
+        coordinateSpacing = spacing;
       }
     }
 
