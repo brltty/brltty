@@ -95,11 +95,7 @@ public final class ScreenUtilities {
     return node;
   }
 
-  public interface NodeTester {
-    public boolean testNode (AccessibilityNodeInfo node);
-  }
-
-  public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, NodeTester tester) {
+  public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, ScreenNodeTester tester) {
     if (root != null) {
       if (tester.testNode(root)) return AccessibilityNodeInfo.obtain(root);
 
@@ -123,7 +119,7 @@ public final class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findSelectedNode (AccessibilityNodeInfo root) {
-    NodeTester tester = new NodeTester() {
+    ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.isSelected();
@@ -134,7 +130,7 @@ public final class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
-    NodeTester tester = new NodeTester() {
+    ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.isFocused();
@@ -145,7 +141,7 @@ public final class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findFocusableNode (AccessibilityNodeInfo root) {
-    NodeTester tester = new NodeTester() {
+    ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.isFocusable();
@@ -156,7 +152,7 @@ public final class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findTextNode (AccessibilityNodeInfo root) {
-    NodeTester tester = new NodeTester() {
+    ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.getText() != null;
@@ -167,7 +163,7 @@ public final class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findDescribedNode (AccessibilityNodeInfo root) {
-    NodeTester tester = new NodeTester() {
+    ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.getContentDescription() != null;
