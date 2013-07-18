@@ -161,6 +161,13 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
+  private boolean quietIfNoBraille = false;
+  public boolean setQuietIfNoBraille (boolean newValue) {
+    boolean oldValue = quietIfNoBraille;
+    quietIfNoBraille = newValue;
+    return oldValue;
+  }
+
   protected void addOption (List<String> arguments, String option, String value) {
     if (value != null) {
       if (value.length() > 0) {
@@ -201,6 +208,7 @@ public class ArgumentsBuilder {
     addOption(arguments, "-b", brailleDriver);
     addOption(arguments, "-d", brailleDevice);
     addOption(arguments, "-s", speechDriver);
+    addOption(arguments, "-Q", quietIfNoBraille);
     return arguments.toArray(new String[arguments.size()]);
   }
 }
