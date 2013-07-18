@@ -33,6 +33,13 @@ struct BluetoothConnectionStruct {
   BluetoothConnectionExtension *extension;
 };
 
+typedef struct {
+  const char *namePrefix;
+  const char *const *driverCodes;
+} BluetoothNameEntry;
+
+extern const BluetoothNameEntry bluetoothNameTable[];
+
 extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel);
 extern void bthDisconnect (BluetoothConnectionExtension *bcx);
 extern char *bthObtainDeviceName (uint64_t bda);

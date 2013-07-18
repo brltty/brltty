@@ -217,7 +217,7 @@ USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O usb_@usb_package@.$O
 USB_CFLAGS = @usb_cflags@
 USB_LIBS = @usb_libs@
 
-BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_@bluetooth_package@.$O
+BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O bluetooth_@bluetooth_package@.$O
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
 

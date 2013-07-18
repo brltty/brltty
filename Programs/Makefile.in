@@ -237,6 +237,9 @@ usb_solaris.$O:
 bluetooth.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bluetooth.c
 
+bluetooth_names.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bluetooth_names.c
+
 bluetooth_none.$O:
 	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
 
