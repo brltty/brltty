@@ -77,6 +77,7 @@ extern int asyncRelativeAlarm (
 
 
 extern void asyncWait (int duration);
+extern int asyncAwaitOperation (int timeout);
 
 
 #ifdef __cplusplus

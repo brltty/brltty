@@ -828,6 +828,107 @@ asyncRelativeAlarm (
   return asyncAbsoluteAlarm(&time, callback, data);
 }
 
+static void
+processPendingAlarms (void) {
+  Queue *alarms = getAlarmQueue(0);
+
+  if (alarms) {
+    while (1) {
+      Element *element = getQueueHead(alarms);
+      if (!element) break;
+
+      {
+        AlarmEntry *alarm = getElementItem(element);
+        TimeValue now;
+
+        getCurrentTime(&now);
+        if (millisecondsBetween(&now, &alarm->time) > 0) break;
+
+        {
+          AsyncAlarmCallback callback = alarm->callback;
+          void *data = alarm->data;
+
+          deleteElement(element);
+          callback(data);
+        }
+      }
+    }
+  }
+}
+
+int
+asyncAwaitOperation (int timeout) {
+  processPendingAlarms();
+
+#ifdef ASYNC_CAN_MONITOR_IO
+  {
+    Queue *functions = getFunctionQueue(0);
+    Element *functionElement = NULL;
+
+    int monitorCount = functions? getQueueSize(functions): 0;
+    MonitorEntry *monitorArray = NULL;
+
+    prepareMonitors();
+
+    if (monitorCount) {
+      if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
+        AddMonitorData add = {
+          .monitor = monitorArray
+        };
+
+        functionElement = processQueue(functions, addMonitor, &add);
+
+        if (!(monitorCount = add.monitor - monitorArray)) {
+          free(monitorArray);
+          monitorArray = NULL;
+        }
+      } else {
+        logMallocError();
+        monitorCount = 0;
+      }
+    }
+
+    if (!functionElement) {
+      if (awaitOperation(monitorArray, monitorCount, timeout)) {
+        FindMonitorData find = {
+          .monitor = monitorArray
+        };
+
+        functionElement = processQueue(functions, findMonitor, &find);
+      }
+    }
+
+    if (functionElement) {
+      FunctionEntry *function = getElementItem(functionElement);
+      Element *operationElement = getQueueHead(function->operations);
+      OperationEntry *operation = getElementItem(operationElement);
+
+      if (!operation->finished) finishOperation(operation);
+      if (function->methods->invokeCallback(operation)) {
+        operation->error = 0;
+      } else {
+        deleteElement(operationElement);
+      }
+
+      if ((operationElement = getQueueHead(function->operations))) {
+        operation = getElementItem(operationElement);
+        if (!operation->finished) startOperation(operation);
+        requeueElement(functionElement);
+      } else {
+        deleteElement(functionElement);
+      }
+    }
+
+    if (monitorArray) free(monitorArray);
+    if (functionElement) return 1;
+  }
+#else /* ASYNC_CAN_MONITOR_IO */
+  approximateDelay(timeout);
+#endif /* ASYNC_CAN_MONITOR_IO */
+
+  return 0;
+}
+
 void
 asyncWait (int duration) {
   long int elapsed = 0;
@@ -835,99 +936,6 @@ asyncWait (int duration) {
   startTimePeriod(&period, duration);
 
   do {
-    long int timeout = duration;
-
-    {
-      Queue *alarms = getAlarmQueue(0);
-
-      if (alarms) {
-        Element *element = getQueueHead(alarms);
-
-        if (element) {
-          AlarmEntry *alarm = getElementItem(element);
-          TimeValue now;
-          long int milliseconds;
-
-          getCurrentTime(&now);
-          milliseconds = millisecondsBetween(&now, &alarm->time);
-
-          if (milliseconds <= elapsed) {
-            AsyncAlarmCallback callback = alarm->callback;
-            void *data = alarm->data;
-
-            deleteElement(element);
-            callback(data);
-            continue;
-          }
-
-          if (milliseconds < timeout) timeout = milliseconds;
-        }
-      }
-    }
-
-#ifdef ASYNC_CAN_MONITOR_IO
-    {
-      Queue *functions = getFunctionQueue(0);
-      Element *functionElement = NULL;
-
-      int monitorCount = functions? getQueueSize(functions): 0;
-      MonitorEntry *monitorArray = NULL;
-
-      prepareMonitors();
-
-      if (monitorCount) {
-        if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
-          AddMonitorData add = {
-            .monitor = monitorArray
-          };
-
-          functionElement = processQueue(functions, addMonitor, &add);
-
-          if (!(monitorCount = add.monitor - monitorArray)) {
-            free(monitorArray);
-            monitorArray = NULL;
-          }
-        } else {
-          logMallocError();
-          monitorCount = 0;
-        }
-      }
-
-      if (!functionElement) {
-        if (awaitOperation(monitorArray, monitorCount, timeout-elapsed)) {
-          FindMonitorData find = {
-            .monitor = monitorArray
-          };
-
-          functionElement = processQueue(functions, findMonitor, &find);
-        }
-      }
-
-      if (functionElement) {
-        FunctionEntry *function = getElementItem(functionElement);
-        Element *operationElement = getQueueHead(function->operations);
-        OperationEntry *operation = getElementItem(operationElement);
-
-        if (!operation->finished) finishOperation(operation);
-        if (function->methods->invokeCallback(operation)) {
-          operation->error = 0;
-        } else {
-          deleteElement(operationElement);
-        }
-
-        if ((operationElement = getQueueHead(function->operations))) {
-          operation = getElementItem(operationElement);
-          if (!operation->finished) startOperation(operation);
-          requeueElement(functionElement);
-        } else {
-          deleteElement(functionElement);
-        }
-      }
-
-      if (monitorArray) free(monitorArray);
-    }
-#else /* ASYNC_CAN_MONITOR_IO */
-    approximateDelay(timeout-elapsed);
-#endif /* ASYNC_CAN_MONITOR_IO */
+    asyncAwaitOperation(duration - elapsed);
   } while (!afterTimePeriod(&period, &elapsed));
 }
