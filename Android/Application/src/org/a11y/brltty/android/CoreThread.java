@@ -192,6 +192,7 @@ public class CoreThread extends Thread {
     }
 
     builder.setSpeechDriver(getStringSetting(R.string.PREF_KEY_SPEECH_SUPPORT, R.string.DEFAULT_SPEECH_SUPPORT));
+    builder.setQuietIfNoBraille(true);
 
     {
       ArrayList<String> keywords = new ArrayList<String>();
