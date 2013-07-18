@@ -152,6 +152,7 @@ static void *speechObject;
 static char *opt_speechParameters;
 static char **speechParameters = NULL;
 static char *opt_speechInput;
+int opt_quietIfNoBraille;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
@@ -409,6 +410,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_speechInput,
     .description = strtext("Path to speech input file system object.")
+  },
+
+  { .letter = 'Q',
+    .word = "quiet-if-no-braille",
+    .setting.flag = &opt_quietIfNoBraille,
+    .description = strtext("Do not autospeak when braille is not being used.")
   },
 #endif /* ENABLE_SPEECH_SUPPORT */
 

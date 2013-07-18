@@ -107,6 +107,7 @@ extern int haveStatusCells (void);
 
 #ifdef ENABLE_SPEECH_SUPPORT
 extern SpeechSynthesizer spk;
+extern int opt_quietIfNoBraille;
 
 FUNCTION_DECLARE(restartSpeechDriver, void, (void));
 FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
