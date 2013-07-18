@@ -222,14 +222,6 @@ bthGetDeviceName (const char *address) {
   return NULL;
 }
 
-int
-isBluetoothDevice (const char **identifier) {
-  if (isQualifiedDevice(identifier, "bluetooth")) return 1;
-  if (isQualifiedDevice(identifier, "bt")) return 1;
-  if (isQualifiedDevice(identifier, "bluez")) return 1;
-  return 0;
-}
-
 const char *const *
 bthGetDriverCodes (const char *address) {
   const char *name = bthGetDeviceName(address);
@@ -247,4 +239,12 @@ bthGetDriverCodes (const char *address) {
   }
 
   return NULL;
+}
+
+int
+isBluetoothDevice (const char **identifier) {
+  if (isQualifiedDevice(identifier, "bluetooth")) return 1;
+  if (isQualifiedDevice(identifier, "bt")) return 1;
+  if (isQualifiedDevice(identifier, "bluez")) return 1;
+  return 0;
 }
