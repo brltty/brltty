@@ -151,41 +151,6 @@ public class RealScreenElement extends ScreenElement {
     return performed;
   }
 
-  private boolean selectNode (AccessibilityNodeInfo root, boolean isDescendant) {
-    boolean select = false;
-
-    if (root != null) {
-      if (root.equals(accessibilityNode)) select = true;
-
-      {
-        int childCount = root.getChildCount();
-
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
-
-          if (child != null) {
-            if (selectNode(child, true)) select = true;
-            child.recycle();
-            child = null;
-          }
-        }
-      }
-
-      if (isDescendant) {
-        if (select != root.isSelected()) {
-          int action = select? AccessibilityNodeInfo.ACTION_SELECT: AccessibilityNodeInfo.ACTION_CLEAR_SELECTION;
-          root.performAction(action);
-        }
-      }
-    }
-
-    return select;
-  }
-
-  private boolean selectNode (AccessibilityNodeInfo root) {
-    return selectNode(root, false);
-  }
-
   public boolean doKey (int keyCode, boolean longPress) {
     boolean done = false;
     AccessibilityNodeInfo node = getFocusableNode();
@@ -262,7 +227,6 @@ public class RealScreenElement extends ScreenElement {
           }
         }
 
-        if (isFocused) selectNode(node);
         node.recycle();
         node = null;
         return isFocused;
