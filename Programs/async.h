@@ -26,6 +26,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+typedef struct AsyncHandleStruct *AsyncHandle;
+
+extern int asyncCancel (AsyncHandle handle);
+
+extern void asyncWait (int duration);
+
+
 typedef struct {
   void *data;
   const void *buffer;
@@ -37,6 +44,13 @@ typedef struct {
 
 typedef size_t (*AsyncInputCallback) (const AsyncInputResult *result);
 
+extern int asyncRead (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  size_t size,
+  AsyncInputCallback callback, void *data
+);
+
 
 typedef struct {
   void *data;
@@ -47,14 +61,8 @@ typedef struct {
 
 typedef void (*AsyncOutputCallback) (const AsyncOutputResult *result);
 
-
-extern int asyncRead (
-  FileDescriptor fileDescriptor,
-  size_t size,
-  AsyncInputCallback callback, void *data
-);
-
 extern int asyncWrite (
+  AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
@@ -64,19 +72,18 @@ extern int asyncWrite (
 typedef void (*AsyncAlarmCallback) (void *data);
 
 extern int asyncAbsoluteAlarm (
+  AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback callback,
   void *data
 );
 
 extern int asyncRelativeAlarm (
+  AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback callback,
   void *data
 );
-
-
-extern void asyncWait (int duration);
 
 
 #ifdef __cplusplus

@@ -66,6 +66,10 @@ typedef struct {
 #include "queue.h"
 #include "async.h"
 
+struct AsyncHandleStruct {
+  Element *element;
+};
+
 typedef struct FunctionEntryStruct FunctionEntry;
 
 typedef union {
@@ -608,8 +612,8 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
   return NULL;
 }
 
-static int
-createOperation (
+static Element *
+newOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
   void *extension,
@@ -622,20 +626,21 @@ createOperation (
 
     if ((functionElement = getFunctionElement(fileDescriptor, methods, 1))) {
       FunctionEntry *function = getElementItem(functionElement);
-      int new = !getQueueSize(function->operations);
+      int isFirstOperation = !getQueueSize(function->operations);
+      Element *operationElement = enqueueItem(function->operations, operation);
 
-      if (enqueueItem(function->operations, operation)) {
+      if (operationElement) {
         operation->function = function;
         operation->extension = extension;
         operation->data = data;
         operation->finished = 0;
         operation->error = 0;
 
-        if (new) startOperation(operation);
-        return 1;
+        if (isFirstOperation) startOperation(operation);
+        return operationElement;
       }
 
-      if (new) deleteElement(functionElement);
+      if (isFirstOperation) deleteElement(functionElement);
     }
 
     free(operation);
@@ -643,11 +648,11 @@ createOperation (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
-static int
-createTransferOperation (
+static Element *
+newTransferOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
   const TransferDirectionUnion *direction,
@@ -662,18 +667,22 @@ createTransferOperation (
     extension->length = 0;
     if (buffer) memcpy(extension->buffer, buffer, size);
 
-    if (createOperation(fileDescriptor, methods, extension, data)) return 1;
+    {
+      Element *element = newOperation(fileDescriptor, methods, extension, data);
+
+      if (element) return element;
+    }
 
     free(extension);
   } else {
     logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
-static int
-createInputOperation (
+static Element *
+newInputOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
   AsyncInputCallback callback,
@@ -683,11 +692,11 @@ createInputOperation (
   TransferDirectionUnion direction;
   direction.input.callback = callback;
   direction.input.end = 0;
-  return createTransferOperation(fileDescriptor, methods, &direction, size, NULL, data);
+  return newTransferOperation(fileDescriptor, methods, &direction, size, NULL, data);
 }
 
-static int
-createOutputOperation (
+static Element *
+newOutputOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
   AsyncOutputCallback callback,
@@ -696,12 +705,50 @@ createOutputOperation (
 ) {
   TransferDirectionUnion direction;
   direction.output.callback = callback;
-  return createTransferOperation(fileDescriptor, methods, &direction, size, buffer, data);
+  return newTransferOperation(fileDescriptor, methods, &direction, size, buffer, data);
 }
 #endif /* ASYNC_CAN_MONITOR_IO */
 
+static int
+makeHandle (AsyncHandle *handle, Element *element) {
+  if (handle) {
+    if (!(*handle = malloc(sizeof(**handle)))) {
+      logMallocError();
+      return 0;
+    }
+
+    memset(*handle, 0, sizeof(**handle));
+    (*handle)->element = element;
+  }
+
+  return 1;
+}
+
+static int
+testHandle (AsyncHandle handle) {
+  if (handle) {
+    if (handle->element) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
+asyncCancel (AsyncHandle handle) {
+  if (testHandle(handle)) {
+    deleteElement(handle->element);
+    free(handle);
+    return 1;
+  }
+
+  return 0;
+}
+
 int
 asyncRead (
+  AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   size_t size,
   AsyncInputCallback callback, void *data
@@ -717,19 +764,30 @@ asyncRead (
     .beginFunction = beginUnixInputFunction,
     .finishOperation = finishUnixRead,
 #endif /* __MINGW32__ */
+
     .invokeCallback = invokeInputCallback
   };
 
-  return createInputOperation(fileDescriptor, &methods, callback, size, data);
+  Element *element = newInputOperation(fileDescriptor, &methods, callback, size, data);
+
+  if (element) {
+    if (makeHandle(handle, element)) {
+      return 1;
+    } else {
+      deleteElement(element);
+    }
+  }
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncRead");
-  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
+
+  return 0;
 }
 
 int
 asyncWrite (
+  AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
@@ -745,15 +803,25 @@ asyncWrite (
     .beginFunction = beginUnixOutputFunction,
     .finishOperation = finishUnixWrite,
 #endif /* __MINGW32__ */
+
     .invokeCallback = invokeOutputCallback
   };
 
-  return createOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
+  Element *element = newOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
+
+  if (element) {
+    if (makeHandle(handle, element)) {
+      return 1;
+    } else {
+      deleteElement(element);
+    }
+  }
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncWrite");
-  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
+
+  return 0;
 }
 
 typedef struct {
@@ -791,6 +859,7 @@ getAlarmQueue (int create) {
 
 int
 asyncAbsoluteAlarm (
+  AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback callback,
   void *data
@@ -805,7 +874,17 @@ asyncAbsoluteAlarm (
       alarm->callback = callback;
       alarm->data = data;
 
-      if (enqueueItem(alarms, alarm)) return 1;
+      {
+        Element *element = enqueueItem(alarms, alarm);
+
+        if (element) {
+          if (makeHandle(handle, element)) {
+            return 1;
+          } else {
+            deleteElement(element);
+          }
+        }
+      }
 
       free(alarm);
     } else {
@@ -818,6 +897,7 @@ asyncAbsoluteAlarm (
 
 int
 asyncRelativeAlarm (
+  AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback callback,
   void *data
@@ -825,7 +905,7 @@ asyncRelativeAlarm (
   TimeValue time;
   getCurrentTime(&time);
   adjustTimeValue(&time, interval);
-  return asyncAbsoluteAlarm(&time, callback, data);
+  return asyncAbsoluteAlarm(handle, &time, callback, data);
 }
 
 void

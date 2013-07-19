@@ -723,7 +723,7 @@ tryKeyboardMonitor (void *data UNUSED) {
 
 static void
 scheduleKeyboardMonitor (int interval) {
-  asyncRelativeAlarm(interval, tryKeyboardMonitor, NULL);
+  asyncRelativeAlarm(NULL, interval, tryKeyboardMonitor, NULL);
 }
 
 int
@@ -1272,7 +1272,7 @@ retryBrailleDriver (void *data UNUSED) {
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
-  asyncRelativeAlarm(5000, retryBrailleDriver, NULL);
+  asyncRelativeAlarm(NULL, 5000, retryBrailleDriver, NULL);
   initializeBraille();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
@@ -1465,7 +1465,7 @@ retrySpeechDriver (void *data UNUSED) {
 static int
 trySpeechDriver (void) {
   if (startSpeechDriver()) return 1;
-  asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
+  asyncRelativeAlarm(NULL, 5000, retrySpeechDriver, NULL);
   return 0;
 }
 
@@ -1599,7 +1599,7 @@ retryScreenDriver (void *data UNUSED) {
 static int
 tryScreenDriver (void) {
   if (startScreenDriver()) return 1;
-  asyncRelativeAlarm(5000, retryScreenDriver, NULL);
+  asyncRelativeAlarm(NULL, 5000, retryScreenDriver, NULL);
   initializeScreen();
   return 0;
 }
@@ -1648,7 +1648,7 @@ tryPidFile (void) {
   } else if (errno == EEXIST) {
     return 0;
   } else {
-    asyncRelativeAlarm(5000, retryPidFile, NULL);
+    asyncRelativeAlarm(NULL, 5000, retryPidFile, NULL);
   }
 
   return 1;

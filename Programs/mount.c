@@ -91,7 +91,7 @@ updateMountsTable (MountEntry *entry) {
   }
 
   if (retry) {
-    asyncRelativeAlarm(5000, retryMountsTableUpdate, entry);
+    asyncRelativeAlarm(NULL, 5000, retryMountsTableUpdate, entry);
   } else {
     if (entry->mountPath) free(entry->mountPath);
     if (entry->mountReference) free(entry->mountReference);
