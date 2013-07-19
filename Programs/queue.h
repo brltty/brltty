@@ -41,6 +41,7 @@ extern void *dequeueItem (Queue *queue);
 extern int deleteItem (Queue *queue, const void *item);
 
 extern Queue *getElementQueue (const Element *element);
+extern int getElementIdentifier (const Element *element);
 extern void *getElementItem (const Element *element);
 
 extern void deleteElements (Queue *queue);

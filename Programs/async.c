@@ -68,6 +68,7 @@ typedef struct {
 
 struct AsyncHandleStruct {
   Element *element;
+  int identifier;
 };
 
 typedef struct FunctionEntryStruct FunctionEntry;
@@ -719,13 +720,14 @@ makeHandle (AsyncHandle *handle, Element *element) {
 
     memset(*handle, 0, sizeof(**handle));
     (*handle)->element = element;
+    (*handle)->identifier = getElementIdentifier(element);
   }
 
   return 1;
 }
 
 static int
-testHandle (AsyncHandle handle) {
+checkHandleValidity (AsyncHandle handle) {
   if (handle) {
     if (handle->element) {
       return 1;
@@ -735,15 +737,28 @@ testHandle (AsyncHandle handle) {
   return 0;
 }
 
-int
-asyncCancel (AsyncHandle handle) {
-  if (testHandle(handle)) {
-    deleteElement(handle->element);
-    free(handle);
-    return 1;
+static int
+checkHandleIdentifier (AsyncHandle handle) {
+  return handle->identifier == getElementIdentifier(handle->element);
+}
+
+static int
+checkHandle (AsyncHandle handle) {
+  if (checkHandleValidity(handle)) {
+    if (checkHandleIdentifier(handle)) {
+      return 1;
+    }
   }
 
   return 0;
+}
+
+void
+asyncCancel (AsyncHandle handle) {
+  if (checkHandleValidity(handle)) {
+    if (checkHandleIdentifier(handle)) deleteElement(handle->element);
+    free(handle);
+  }
 }
 
 int

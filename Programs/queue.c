@@ -33,6 +33,7 @@ struct ElementStruct {
   Element *next;
   Element *previous;
   Queue *queue;
+  int identifier;
   void *item;
 };
 
@@ -50,6 +51,7 @@ discardElement (Element *element) {
   element->queue = NULL;
   queue->size--;
 
+  element->identifier = 0;
   element->next = discardedElements;
   discardedElements = element;
 }
@@ -77,6 +79,11 @@ newElement (Queue *queue, void *item) {
     }
 
     element->previous = element->next = NULL;
+  }
+
+  {
+    static int identifier = 0;
+    element->identifier = ++identifier;
   }
 
   element->queue = queue;
@@ -187,6 +194,11 @@ dequeueItem (Queue *queue) {
 Queue *
 getElementQueue (const Element *element) {
   return element->queue;
+}
+
+int
+getElementIdentifier (const Element *element) {
+  return element->identifier;
 }
 
 void *
