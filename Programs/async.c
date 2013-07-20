@@ -1068,10 +1068,12 @@ asyncWait (int duration) {
 
           if (milliseconds <= 0) {
             AsyncAlarmCallback callback = alarm->callback;
-            void *data = alarm->data;
+            const AsyncAlarmResult result = {
+              .data = alarm->data
+            };
 
             deleteElement(element);
-            callback(data);
+            if (callback) callback(&result);
             continue;
           }
 

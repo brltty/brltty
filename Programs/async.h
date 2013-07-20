@@ -88,7 +88,11 @@ extern int asyncWrite (
 );
 
 
-typedef void (*AsyncAlarmCallback) (void *data);
+typedef struct {
+  void *data;
+} AsyncAlarmResult;
+
+typedef void (*AsyncAlarmCallback) (const AsyncAlarmResult *result);
 
 extern int asyncAbsoluteAlarm (
   AsyncHandle *handle,

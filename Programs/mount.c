@@ -70,8 +70,8 @@ findMountPoint (MountPointTester test) {
 static void updateMountsTable (MountEntry *entry);
 
 static void
-retryMountsTableUpdate (void *data) {
-  MountEntry *entry = data;
+retryMountsTableUpdate (const AsyncAlarmResult *result) {
+  MountEntry *entry = result->data;
   updateMountsTable(entry);
 }
 

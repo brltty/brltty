@@ -640,8 +640,8 @@ typedef struct {
 } InputDeviceData;
 
 static void
-doOpenInputDevice (void *data) {
-  InputDeviceData *idd = data;
+doOpenInputDevice (const AsyncAlarmResult *result) {
+  InputDeviceData *idd = result->data;
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
   if (device != -1) {
