@@ -1092,7 +1092,7 @@ asyncWait (int duration, AsyncWaitCallback callback, void *data) {
 
             deleteElement(element);
             if (callback) callback(&result);
-            continue;
+            goto done;
           }
 
           if (milliseconds < timeout) timeout = milliseconds;
@@ -1160,17 +1160,16 @@ asyncWait (int duration, AsyncWaitCallback callback, void *data) {
       }
 
       if (monitorArray) free(monitorArray);
-
-      if (callback) {
-        if (functionElement) {
-          if (callback(data)) {
-            break;
-          }
-        }
-      }
     }
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout);
 #endif /* ASYNC_CAN_MONITOR_IO */
+
+  done:
+    if (callback) {
+      if (callback(data)) {
+        break;
+      }
+    }
   } while (!afterTimePeriod(&period, &elapsed));
 }
