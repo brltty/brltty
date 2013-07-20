@@ -35,6 +35,25 @@ extern void asyncWait (int duration);
 
 typedef struct {
   void *data;
+} AsyncMonitorResult;
+
+typedef int (*AsyncMonitorCallback) (const AsyncMonitorResult *data);
+
+extern int asyncMonitorInput (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback callback, void *data
+);
+
+extern int asyncMonitorOutput (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback callback, void *data
+);
+
+
+typedef struct {
+  void *data;
   const void *buffer;
   size_t size;
   size_t length;

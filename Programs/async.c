@@ -73,6 +73,10 @@ struct AsyncHandleStruct {
 
 typedef struct FunctionEntryStruct FunctionEntry;
 
+typedef struct {
+  AsyncMonitorCallback callback;
+} MonitorExtension;
+
 typedef union {
   struct {
     AsyncInputCallback callback;
@@ -504,6 +508,22 @@ findMonitor (void *item, void *data) {
 }
 
 static int
+invokeMonitorCallback (OperationEntry *operation) {
+  MonitorExtension *extension = operation->extension;
+  AsyncMonitorCallback callback = extension->callback;
+
+  if (callback) {
+    const AsyncMonitorResult result = {
+      .data = operation->data
+    };
+
+    if (callback(&result)) return 1;
+  }
+
+  return 0;
+}
+
+static int
 invokeInputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
   size_t count;
@@ -511,13 +531,15 @@ invokeInputCallback (OperationEntry *operation) {
   if (!extension->direction.input.callback) return 0;
 
   {
-    AsyncInputResult result;
-    result.data = operation->data;
-    result.buffer = extension->buffer;
-    result.size = extension->size;
-    result.length = extension->length;
-    result.error = operation->error;
-    result.end = extension->direction.input.end;
+    const AsyncInputResult result = {
+      .data = operation->data,
+      .buffer = extension->buffer,
+      .size = extension->size,
+      .length = extension->length,
+      .error = operation->error,
+      .end = extension->direction.input.end
+    };
+
     count = extension->direction.input.callback(&result);
   }
 
@@ -544,11 +566,13 @@ invokeOutputCallback (OperationEntry *operation) {
   }
 
   if (extension->direction.output.callback) {
-    AsyncOutputResult result;
-    result.data = operation->data;
-    result.buffer = extension->buffer;
-    result.size = extension->size;
-    result.error = operation->error;
+    const AsyncOutputResult result = {
+      .data = operation->data,
+      .buffer = extension->buffer,
+      .size = extension->size,
+      .error = operation->error
+    };
+
     extension->direction.output.callback(&result);
   }
 
@@ -645,6 +669,32 @@ newOperation (
     }
 
     free(operation);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static Element *
+newMonitorOperation (
+  FileDescriptor fileDescriptor,
+  const FunctionMethods *methods,
+  AsyncMonitorCallback callback,
+  void *data
+) {
+  MonitorExtension *extension;
+
+  if ((extension = malloc(sizeof(*extension)))) {
+    extension->callback = callback;
+
+    {
+      Element *element = newOperation(fileDescriptor, methods, extension, data);
+
+      if (element) return element;
+    }
+
+    free(extension);
   } else {
     logMallocError();
   }
@@ -759,6 +809,76 @@ asyncCancel (AsyncHandle handle) {
     if (checkHandleIdentifier(handle)) deleteElement(handle->element);
     free(handle);
   }
+}
+
+int
+asyncMonitorInput (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+#ifdef ASYNC_CAN_MONITOR_IO
+  static const FunctionMethods methods = {
+#ifdef __MINGW32__
+    .beginFunction = beginWindowsFunction,
+    .endFunction = endWindowsFunction,
+#else /* __MINGW32__ */
+    .beginFunction = beginUnixInputFunction,
+#endif /* __MINGW32__ */
+
+    .invokeCallback = invokeMonitorCallback
+  };
+
+  Element *element = newMonitorOperation(fileDescriptor, &methods, callback, data);
+
+  if (element) {
+    if (makeHandle(handle, element)) {
+      return 1;
+    } else {
+      deleteElement(element);
+    }
+  }
+#else /* ASYNC_CAN_MONITOR_IO */
+  errno = ENOSYS;
+  logSystemError("asyncRead");
+#endif /* ASYNC_CAN_MONITOR_IO */
+
+  return 0;
+}
+
+int
+asyncMonitorOutput (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+#ifdef ASYNC_CAN_MONITOR_IO
+  static const FunctionMethods methods = {
+#ifdef __MINGW32__
+    .beginFunction = beginWindowsFunction,
+    .endFunction = endWindowsFunction,
+#else /* __MINGW32__ */
+    .beginFunction = beginUnixOutputFunction,
+#endif /* __MINGW32__ */
+
+    .invokeCallback = invokeMonitorCallback
+  };
+
+  Element *element = newMonitorOperation(fileDescriptor, &methods, callback, data);
+
+  if (element) {
+    if (makeHandle(handle, element)) {
+      return 1;
+    } else {
+      deleteElement(element);
+    }
+  }
+#else /* ASYNC_CAN_MONITOR_IO */
+  errno = ENOSYS;
+  logSystemError("asyncWrite");
+#endif /* ASYNC_CAN_MONITOR_IO */
+
+  return 0;
 }
 
 int
