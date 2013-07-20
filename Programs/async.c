@@ -686,20 +686,23 @@ newOperation (
   return NULL;
 }
 
+typedef struct {
+  FileDescriptor fileDescriptor;
+  const FunctionMethods *methods;
+  AsyncMonitorCallback callback;
+  void *data;
+} MonitorOperationParameters;
+
 static Element *
-newMonitorOperation (
-  FileDescriptor fileDescriptor,
-  const FunctionMethods *methods,
-  AsyncMonitorCallback callback,
-  void *data
-) {
+newMonitorOperation (const void *parameters) {
+  const MonitorOperationParameters *mop = parameters;
   MonitorExtension *extension;
 
   if ((extension = malloc(sizeof(*extension)))) {
-    extension->callback = callback;
+    extension->callback = mop->callback;
 
     {
-      Element *element = newOperation(fileDescriptor, methods, extension, data);
+      Element *element = newOperation(mop->fileDescriptor, mop->methods, extension, mop->data);
 
       if (element) return element;
     }
@@ -742,48 +745,110 @@ newTransferOperation (
   return NULL;
 }
 
-static Element *
-newInputOperation (
-  FileDescriptor fileDescriptor,
-  const FunctionMethods *methods,
-  AsyncInputCallback callback,
-  size_t size,
-  void *data
-) {
-  TransferDirectionUnion direction;
-  direction.input.callback = callback;
-  direction.input.end = 0;
-  return newTransferOperation(fileDescriptor, methods, &direction, size, NULL, data);
-}
+typedef struct {
+  FileDescriptor fileDescriptor;
+  size_t size;
+  AsyncInputCallback callback;
+  void *data;
+} InputOperationParameters;
 
 static Element *
-newOutputOperation (
-  FileDescriptor fileDescriptor,
-  const FunctionMethods *methods,
-  AsyncOutputCallback callback,
-  size_t size, const void *buffer,
-  void *data
-) {
-  TransferDirectionUnion direction;
-  direction.output.callback = callback;
-  return newTransferOperation(fileDescriptor, methods, &direction, size, buffer, data);
+newInputOperation (const void *parameters) {
+  const InputOperationParameters *iop = parameters;
+
+  TransferDirectionUnion direction = {
+    .input = {
+      .callback = iop->callback,
+      .end = 0
+    }
+  };
+
+  static const FunctionMethods methods = {
+    .functionName = "transferInput",
+
+#ifdef __MINGW32__
+    .beginFunction = beginWindowsFunction,
+    .endFunction = endWindowsFunction,
+    .startOperation = startWindowsRead,
+    .finishOperation = finishWindowsTransferOperation,
+#else /* __MINGW32__ */
+    .beginFunction = beginUnixInputFunction,
+    .finishOperation = finishUnixRead,
+#endif /* __MINGW32__ */
+
+    .invokeCallback = invokeInputCallback
+  };
+
+  return newTransferOperation(iop->fileDescriptor, &methods, &direction, iop->size, NULL, iop->data);
+}
+
+typedef struct {
+  FileDescriptor fileDescriptor;
+  size_t size;
+  const void *buffer;
+  AsyncOutputCallback callback;
+  void *data;
+} OutputOperationParameters;
+
+static Element *
+newOutputOperation (const void *parameters) {
+  const OutputOperationParameters *oop = parameters;
+
+  TransferDirectionUnion direction = {
+    .output = {
+      .callback = oop->callback
+    }
+  };
+
+  static const FunctionMethods methods = {
+    .functionName = "transferOutput",
+
+#ifdef __MINGW32__
+    .beginFunction = beginWindowsFunction,
+    .endFunction = endWindowsFunction,
+    .startOperation = startWindowsWrite,
+    .finishOperation = finishWindowsTransferOperation,
+#else /* __MINGW32__ */
+    .beginFunction = beginUnixOutputFunction,
+    .finishOperation = finishUnixWrite,
+#endif /* __MINGW32__ */
+
+    .invokeCallback = invokeOutputCallback
+  };
+
+  return newTransferOperation(oop->fileDescriptor, &methods, &direction, oop->size, oop->buffer, oop->data);
 }
 #endif /* ASYNC_CAN_MONITOR_IO */
 
 static int
-makeHandle (AsyncHandle *handle, Element *element) {
+makeHandle (
+  AsyncHandle *handle,
+  Element *(*newElement) (const void *parameters),
+  const void *parameters
+) {
   if (handle) {
     if (!(*handle = malloc(sizeof(**handle)))) {
       logMallocError();
       return 0;
     }
-
-    memset(*handle, 0, sizeof(**handle));
-    (*handle)->element = element;
-    (*handle)->identifier = getElementIdentifier(element);
   }
 
-  return 1;
+  {
+    Element *element = newElement(parameters);
+
+    if (element) {
+      if (handle) {
+        memset(*handle, 0, sizeof(**handle));
+        (*handle)->element = element;
+        (*handle)->identifier = getElementIdentifier(element);
+      }
+
+      return 1;
+    }
+
+    if (handle) free(*handle);
+    return 0;
+  }
 }
 
 static int
@@ -841,21 +906,19 @@ asyncMonitorInput (
     .invokeCallback = invokeMonitorCallback
   };
 
-  Element *element = newMonitorOperation(fileDescriptor, &methods, callback, data);
+  const MonitorOperationParameters mop = {
+    .fileDescriptor = fileDescriptor,
+    .methods = &methods,
+    .callback = callback,
+    .data = data
+  };
 
-  if (element) {
-    if (makeHandle(handle, element)) {
-      return 1;
-    } else {
-      deleteElement(element);
-    }
-  }
+  return makeHandle(handle, newMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncRead");
-#endif /* ASYNC_CAN_MONITOR_IO */
-
   return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
@@ -878,21 +941,19 @@ asyncMonitorOutput (
     .invokeCallback = invokeMonitorCallback
   };
 
-  Element *element = newMonitorOperation(fileDescriptor, &methods, callback, data);
+  const MonitorOperationParameters mop = {
+    .fileDescriptor = fileDescriptor,
+    .methods = &methods,
+    .callback = callback,
+    .data = data
+  };
 
-  if (element) {
-    if (makeHandle(handle, element)) {
-      return 1;
-    } else {
-      deleteElement(element);
-    }
-  }
+  return makeHandle(handle, newMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncWrite");
-#endif /* ASYNC_CAN_MONITOR_IO */
-
   return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
@@ -903,37 +964,19 @@ asyncRead (
   AsyncInputCallback callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
-  static const FunctionMethods methods = {
-    .functionName = "transferInput",
-
-#ifdef __MINGW32__
-    .beginFunction = beginWindowsFunction,
-    .endFunction = endWindowsFunction,
-    .startOperation = startWindowsRead,
-    .finishOperation = finishWindowsTransferOperation,
-#else /* __MINGW32__ */
-    .beginFunction = beginUnixInputFunction,
-    .finishOperation = finishUnixRead,
-#endif /* __MINGW32__ */
-
-    .invokeCallback = invokeInputCallback
+  const InputOperationParameters iop = {
+    .fileDescriptor = fileDescriptor,
+    .size = size,
+    .callback = callback,
+    .data = data
   };
 
-  Element *element = newInputOperation(fileDescriptor, &methods, callback, size, data);
-
-  if (element) {
-    if (makeHandle(handle, element)) {
-      return 1;
-    } else {
-      deleteElement(element);
-    }
-  }
+  return makeHandle(handle, newInputOperation, &iop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncRead");
-#endif /* ASYNC_CAN_MONITOR_IO */
-
   return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
@@ -944,37 +987,20 @@ asyncWrite (
   AsyncOutputCallback callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
-  static const FunctionMethods methods = {
-    .functionName = "transferOutput",
-
-#ifdef __MINGW32__
-    .beginFunction = beginWindowsFunction,
-    .endFunction = endWindowsFunction,
-    .startOperation = startWindowsWrite,
-    .finishOperation = finishWindowsTransferOperation,
-#else /* __MINGW32__ */
-    .beginFunction = beginUnixOutputFunction,
-    .finishOperation = finishUnixWrite,
-#endif /* __MINGW32__ */
-
-    .invokeCallback = invokeOutputCallback
+  const OutputOperationParameters oop = {
+    .fileDescriptor = fileDescriptor,
+    .size = size,
+    .buffer = buffer,
+    .callback = callback,
+    .data = data
   };
 
-  Element *element = newOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
-
-  if (element) {
-    if (makeHandle(handle, element)) {
-      return 1;
-    } else {
-      deleteElement(element);
-    }
-  }
+  return makeHandle(handle, newOutputOperation, &oop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
   logSystemError("asyncWrite");
-#endif /* ASYNC_CAN_MONITOR_IO */
-
   return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 typedef struct {
@@ -1010,33 +1036,29 @@ getAlarmQueue (int create) {
   return alarms;
 }
 
-int
-asyncAbsoluteAlarm (
-  AsyncHandle *handle,
-  const TimeValue *time,
-  AsyncAlarmCallback callback,
-  void *data
-) {
-  Queue *alarms;
+typedef struct {
+  const TimeValue *time;
+  AsyncAlarmCallback callback;
+  void *data;
+} AlarmElementParameters;
 
-  if ((alarms = getAlarmQueue(1))) {
+static Element *
+newAlarmElement (const void *parameters) {
+  const AlarmElementParameters *aep = parameters;
+  Queue *alarms = getAlarmQueue(1);
+
+  if (alarms) {
     AlarmEntry *alarm;
 
     if ((alarm = malloc(sizeof(*alarm)))) {
-      alarm->time = *time;
-      alarm->callback = callback;
-      alarm->data = data;
+      alarm->time = *aep->time;
+      alarm->callback = aep->callback;
+      alarm->data = aep->data;
 
       {
         Element *element = enqueueItem(alarms, alarm);
 
-        if (element) {
-          if (makeHandle(handle, element)) {
-            return 1;
-          } else {
-            deleteElement(element);
-          }
-        }
+        if (element) return element;
       }
 
       free(alarm);
@@ -1045,7 +1067,23 @@ asyncAbsoluteAlarm (
     }
   }
 
-  return 0;
+  return NULL;
+}
+
+int
+asyncAbsoluteAlarm (
+  AsyncHandle *handle,
+  const TimeValue *time,
+  AsyncAlarmCallback callback,
+  void *data
+) {
+  const AlarmElementParameters aep = {
+    .time = time,
+    .callback = callback,
+    .data = data
+  };
+
+  return makeHandle(handle, newAlarmElement, &aep);
 }
 
 int
