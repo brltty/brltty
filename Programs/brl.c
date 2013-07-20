@@ -133,7 +133,7 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   int duration = brl->writeDelay + 1;
   if (duration < minimumDelay) duration = minimumDelay;
   brl->writeDelay = 0;
-  asyncWait(duration);
+  asyncWait(duration, NULL, NULL);
   return duration;
 }
 

@@ -30,7 +30,10 @@ typedef struct AsyncHandleStruct *AsyncHandle;
 
 extern void asyncCancel (AsyncHandle handle);
 
-extern void asyncWait (int duration);
+
+typedef int (*AsyncWaitCallback) (void *data);
+
+extern void asyncWait (int duration, AsyncWaitCallback callback, void *data);
 
 
 typedef struct {

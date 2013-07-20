@@ -1044,7 +1044,7 @@ asyncRelativeAlarm (
 }
 
 void
-asyncWait (int duration) {
+asyncWait (int duration, AsyncWaitCallback callback, void *data) {
   long int elapsed = 0;
   TimePeriod period;
   startTimePeriod(&period, duration);
@@ -1142,6 +1142,14 @@ asyncWait (int duration) {
       }
 
       if (monitorArray) free(monitorArray);
+
+      if (callback) {
+        if (functionElement) {
+          if (callback(data)) {
+            break;
+          }
+        }
+      }
     }
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout);
