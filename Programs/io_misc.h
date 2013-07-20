@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_IO_MISC
 #define BRLTTY_INCLUDED_IO_MISC
 
+#include <sys/socket.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -43,6 +45,11 @@ extern int setOpenFlags (int fileDescriptor, int state, int flags);
 extern int setBlockingIo (int fileDescriptor, int state);
 extern int setCloseOnExec (int fileDescriptor, int state);
 #endif /* __MINGW32__ */
+
+extern int connectSocket (
+  int socketDescriptor,
+  const struct sockaddr *address, size_t addressLength
+);
 
 #ifdef __cplusplus
 }

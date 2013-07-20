@@ -22,6 +22,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/socket.h>
 
 #if defined(HAVE_SYS_POLL_H)
 #include <sys/poll.h>
@@ -34,6 +35,7 @@
 #include "io_misc.h"
 #include "log.h"
 #include "timing.h"
+#include "async.h"
 
 #ifdef __MSDOS__
 #include "sys_msdos.h"
@@ -294,4 +296,61 @@ setCloseOnExec (int fileDescriptor, int state) {
 #endif /* defined(F_SETFD) && defined(FD_CLOEXEC) */
 
   return 0;
+}
+
+typedef struct {
+  unsigned completed:1;
+} ConnectionCompletionData;
+
+static int
+monitorConnectionCompletion (const AsyncMonitorResult *result) {
+  ConnectionCompletionData *ccd = result->data;
+  ccd->completed = 1;
+  return 0;
+}
+
+static int
+testConnectionCompletion (void *data) {
+  ConnectionCompletionData *ccd = data;
+
+  return ccd->completed;
+}
+
+int
+connectSocket (
+  int socketDescriptor,
+  const struct sockaddr *address, size_t addressLength
+) {
+  int result = connect(socketDescriptor, address, addressLength);
+
+  if (result == -1) {
+    if (errno == EINPROGRESS) {
+      AsyncHandle handle;
+
+      ConnectionCompletionData ccd = {
+        .completed = 0
+      };
+
+      if (asyncMonitorOutput(&handle, socketDescriptor, monitorConnectionCompletion, &ccd)) {
+        asyncWait(15000, testConnectionCompletion, &ccd);
+        asyncCancel(handle);
+
+        if (ccd.completed) {
+          int error;
+          socklen_t length = sizeof(error);
+
+          if (getsockopt(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
+            if (!error) return 0;
+            errno = error;
+          }
+        } else {
+          errno = ETIMEDOUT;
+        }
+      }
+
+      close(socketDescriptor);
+    }
+  }
+
+  return result;
 }

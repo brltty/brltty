@@ -65,14 +65,14 @@ bthConnect (uint64_t bda, uint8_t channel) {
         bcx->remote.rc_channel = channel;
         bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
-        if (connect(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
-          if (setBlockingIo(bcx->socket, 0)) {
+        if (setBlockingIo(bcx->socket, 0)) {
+          if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
             return bcx;
+          } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
+            logSystemError("RFCOMM connect");
+          } else {
+            logMessage(LOG_DEBUG, "Bluetooth connect error: %s", strerror(errno));
           }
-        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-          logSystemError("RFCOMM connect");
-        } else {
-          logMessage(LOG_DEBUG, "Bluetooth connect error: %s", strerror(errno));
         }
       } else {
         logSystemError("RFCOMM bind");
