@@ -524,7 +524,8 @@ invokeMonitorCallback (OperationEntry *operation) {
 
   if (callback) {
     const AsyncMonitorResult result = {
-      .data = operation->data
+      .data = operation->data,
+      .fileDescriptor = operation->function->fileDescriptor
     };
 
     if (callback(&result)) return 1;

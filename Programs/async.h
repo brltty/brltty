@@ -33,6 +33,7 @@ extern void asyncCancel (AsyncHandle handle);
 
 typedef struct {
   void *data;
+  FileDescriptor fileDescriptor;
 } AsyncMonitorResult;
 
 typedef int (*AsyncMonitorCallback) (const AsyncMonitorResult *data);
