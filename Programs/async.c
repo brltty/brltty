@@ -104,10 +104,14 @@ typedef struct {
 } OperationEntry;
 
 typedef struct {
+  const char *functionName;
+
   void (*beginFunction) (FunctionEntry *function);
   void (*endFunction) (FunctionEntry *function);
+
   void (*startOperation) (OperationEntry *operation);
   void (*finishOperation) (OperationEntry *operation);
+
   int (*invokeCallback) (OperationEntry *operation);
 } FunctionMethods;
 
@@ -465,7 +469,10 @@ getFunctionQueue (int create) {
 
 static OperationEntry *
 getFirstOperation (const FunctionEntry *function) {
-  return getElementItem(getQueueHead(function->operations));
+  Element *element = getQueueHead(function->operations);
+
+  if (element) return getElementItem(element);
+  return NULL;
 }
 
 static void
@@ -487,9 +494,12 @@ addMonitor (void *item, void *data) {
   const FunctionEntry *function = item;
   AddMonitorData *add = data;
   OperationEntry *operation = getFirstOperation(function);
-  if (operation->finished) return 1;
 
-  initializeMonitor(add->monitor++, function, operation);
+  if (operation) {
+    if (operation->finished) return 1;
+    initializeMonitor(add->monitor++, function, operation);
+  }
+
   return 0;
 }
 
@@ -499,10 +509,10 @@ typedef struct {
 
 static int
 findMonitor (void *item, void *data) {
-/*FunctionEntry *function = item;*/
+//FunctionEntry *function = item;
   FindMonitorData *find = data;
-  if (testMonitor(find->monitor)) return 1;
 
+  if (testMonitor(find->monitor)) return 1;
   find->monitor += 1;
   return 0;
 }
@@ -819,6 +829,8 @@ asyncMonitorInput (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
+    .functionName = "monitorInput",
+
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
@@ -854,6 +866,8 @@ asyncMonitorOutput (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
+    .functionName = "monitorOutput",
+
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
@@ -890,6 +904,8 @@ asyncRead (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
+    .functionName = "transferInput",
+
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
@@ -929,6 +945,8 @@ asyncWrite (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
+    .functionName = "transferOutput",
+
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,

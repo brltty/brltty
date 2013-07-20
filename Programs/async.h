@@ -31,11 +31,6 @@ typedef struct AsyncHandleStruct *AsyncHandle;
 extern void asyncCancel (AsyncHandle handle);
 
 
-typedef int (*AsyncWaitCallback) (void *data);
-
-extern void asyncWait (int duration, AsyncWaitCallback callback, void *data);
-
-
 typedef struct {
   void *data;
 } AsyncMonitorResult;
@@ -110,6 +105,11 @@ extern int asyncRelativeAlarm (
   AsyncAlarmCallback callback,
   void *data
 );
+
+
+typedef int (*AsyncWaitCallback) (void *data);
+
+extern void asyncWait (int duration, AsyncWaitCallback callback, void *data);
 
 
 #ifdef __cplusplus
