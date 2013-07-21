@@ -22,7 +22,10 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#ifndef __MSDOS__
 #include <sys/socket.h>
+#endif /* __MSDOS__ */
 
 #include "io_misc.h"
 #include "log.h"
@@ -67,7 +70,11 @@ awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
     asyncCancel(monitor);
 
     if (fdm.ready) return 1;
+#ifdef ETIMEDOUT
     errno = ETIMEDOUT;
+#else /* ETIMEDOUT */
+    errno = EAGAIN;
+#endif /* ETIMEDOUT */
   }
 
   return 0;
@@ -191,6 +198,7 @@ canWrite:
   }
 }
 
+#ifndef __MSDOS__
 int
 connectSocket (
   int socketDescriptor,
@@ -218,6 +226,7 @@ connectSocket (
 
   return result;
 }
+#endif /* __MSDOS__ */
 
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
