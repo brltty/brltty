@@ -57,7 +57,7 @@ bthSocketError (const char *action, const DWORD *exceptions) {
 }
 
 BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel) {
+bthConnect (uint64_t bda, uint8_t channel, int timeout) {
   int result;
   WSADATA wsa;
 

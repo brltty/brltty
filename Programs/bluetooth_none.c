@@ -25,7 +25,7 @@
 #include "log.h"
 
 BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel) {
+bthConnect (uint64_t bda, uint8_t channel, int timeout) {
   errno = ENOSYS;
   logSystemError("Bluetooth connect");
   return NULL;

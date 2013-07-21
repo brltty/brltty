@@ -176,7 +176,7 @@ bthOpenConnection (const char *address, uint8_t channel, int force) {
         startTimePeriod(&period, 2000);
 
 	while (1) {
-          if ((connection->extension = bthConnect(connection->address, connection->channel))) return connection;
+          if ((connection->extension = bthConnect(connection->address, connection->channel, 15000))) return connection;
 	  if (afterTimePeriod(&period, NULL)) break;
 	  if (errno != EBUSY) break;
 	  approximateDelay(100);

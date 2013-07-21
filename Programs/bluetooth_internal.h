@@ -40,7 +40,7 @@ typedef struct {
 
 extern const BluetoothNameEntry bluetoothNameTable[];
 
-extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel);
+extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel, int timeout);
 extern void bthDisconnect (BluetoothConnectionExtension *bcx);
 extern char *bthObtainDeviceName (uint64_t bda);
 

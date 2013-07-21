@@ -38,7 +38,7 @@ static jmethodID closeMethod = 0;
 static jmethodID writeMethod = 0;
 
 BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel) {
+bthConnect (uint64_t bda, uint8_t channel, int timeout) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
