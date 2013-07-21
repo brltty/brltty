@@ -119,6 +119,7 @@ struct FunctionEntryStruct {
   FileDescriptor fileDescriptor;
   const FunctionMethods *methods;
   Queue *operations;
+  unsigned active:1;
 
 #if defined(__MINGW32__)
   OVERLAPPED ol;
@@ -493,11 +494,14 @@ static int
 addMonitor (void *item, void *data) {
   const FunctionEntry *function = item;
   AddMonitorData *add = data;
-  OperationEntry *operation = getFirstOperation(function);
 
-  if (operation) {
-    if (operation->finished) return 1;
-    initializeMonitor(add->monitor++, function, operation);
+  if (!function->active) {
+    OperationEntry *operation = getFirstOperation(function);
+
+    if (operation) {
+      if (operation->finished) return 1;
+      initializeMonitor(add->monitor++, function, operation);
+    }
   }
 
   return 0;
@@ -626,6 +630,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
       if ((function = malloc(sizeof(*function)))) {
         function->fileDescriptor = fileDescriptor;
         function->methods = methods;
+        function->active = 0;
 
         if ((function->operations = newQueue(deallocateOperationEntry, NULL))) {
           if (methods->beginFunction) methods->beginFunction(function);
@@ -1183,11 +1188,14 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
         OperationEntry *operation = getElementItem(operationElement);
 
         if (!operation->finished) finishOperation(operation);
+
+        function->active = 1;
         if (function->methods->invokeCallback(operation)) {
           operation->error = 0;
         } else {
           deleteElement(operationElement);
         }
+        function->active = 0;
 
         if ((operationElement = getQueueHead(function->operations))) {
           operation = getElementItem(operationElement);
