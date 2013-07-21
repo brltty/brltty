@@ -624,7 +624,7 @@ usbInterruptTransfer (
         break;
       }
 
-      approximateDelay(interval);
+      asyncWait(interval);
     } while (1);
   }
 

@@ -24,14 +24,6 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
-#if defined(HAVE_SYS_POLL_H)
-#include <sys/poll.h>
-#elif defined(HAVE_SYS_SELECT_H)
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
-
 #include "io_misc.h"
 #include "log.h"
 #include "timing.h"

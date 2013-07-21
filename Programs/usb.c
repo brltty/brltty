@@ -785,7 +785,7 @@ usbAwaitInput (
         if (errno != EAGAIN) break;
         if (!timeout) break;
         if (afterTimePeriod(&period, NULL)) break;
-        approximateDelay(interval);
+        asyncWait(interval);
       }
 
       free(buffer);
@@ -811,7 +811,7 @@ usbAwaitInput (
         if (errno != EAGAIN) return 0;
         if (!timeout) return 0;
         if (afterTimePeriod(&period, NULL)) return 0;
-        approximateDelay(interval);
+        asyncWait(interval);
       }
 
       usbAddPendingInputRequest(endpoint);
