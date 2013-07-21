@@ -319,7 +319,9 @@ testConnectionCompletion (void *data) {
 int
 connectSocket (
   int socketDescriptor,
-  const struct sockaddr *address, size_t addressLength
+  const struct sockaddr *address,
+  size_t addressLength,
+  int timeout
 ) {
   int result = connect(socketDescriptor, address, addressLength);
 
@@ -332,7 +334,7 @@ connectSocket (
       };
 
       if (asyncMonitorOutput(&handle, socketDescriptor, monitorConnectionCompletion, &ccd)) {
-        asyncWait(15000, testConnectionCompletion, &ccd);
+        asyncWait(timeout, testConnectionCompletion, &ccd);
         asyncCancel(handle);
 
         if (ccd.completed) {

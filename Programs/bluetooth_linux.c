@@ -66,7 +66,7 @@ bthConnect (uint64_t bda, uint8_t channel) {
         bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
         if (setBlockingIo(bcx->socket, 0)) {
-          if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != -1) {
+          if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), 15000) != -1) {
             return bcx;
           } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
             logSystemError("RFCOMM connect");

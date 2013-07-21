@@ -48,7 +48,9 @@ extern int setCloseOnExec (int fileDescriptor, int state);
 
 extern int connectSocket (
   int socketDescriptor,
-  const struct sockaddr *address, size_t addressLength
+  const struct sockaddr *address,
+  size_t addressLength,
+  int timeout
 );
 
 #ifdef __cplusplus
