@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int awaitInput (int fileDescriptor, int milliseconds);
+extern int awaitInput (int fileDescriptor, int timeout);
 extern int readChunk (
   int fileDescriptor,
   void *buffer, size_t *offset, size_t count,
@@ -36,7 +36,7 @@ extern ssize_t readData (
   int initialTimeout, int subsequentTimeout
 );
 
-extern int awaitOutput (int fileDescriptor, int milliseconds);
+extern int awaitOutput (int fileDescriptor, int timeout);
 extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
 
 #ifndef __MINGW32__

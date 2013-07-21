@@ -37,98 +37,58 @@
 #include "timing.h"
 #include "async.h"
 
-#ifdef __MSDOS__
-#include "sys_msdos.h"
-#endif /* __MSDOS__ */
+typedef struct {
+  unsigned ready:1;
+} FileDescriptorMonitorData;
 
 static int
-awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
-#if defined(GRUB_RUNTIME)
-  approximateDelay(milliseconds);
-  errno = EAGAIN;
+monitorFileDescriptor (const AsyncMonitorResult *result) {
+  FileDescriptorMonitorData *fdm = result->data;
+  fdm->ready = 1;
   return 0;
-#else
+}
 
-#ifdef __MSDOS__
-  int left = milliseconds * 1000;
-#endif /* __MSDOS__ */
+static int
+testFileDescriptor (void *data) {
+  FileDescriptorMonitorData *fdm = data;
 
-  while (1) {
-    {
-#if defined(HAVE_SYS_POLL_H)
-      struct pollfd pfd = {
-        .fd = fileDescriptor,
-        .events = output? POLLOUT: POLLIN
-      };
-      int timeout;
+  return fdm->ready;
+}
 
-#ifdef __MSDOS__
-      timeout = 0;
-#else /* __MSDOS__ */
-      timeout = milliseconds;
-#endif /* __MSDOS__ */
+static int
+awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
+  FileDescriptorMonitorData fdm = {
+    .ready = 0
+  };
 
-      {
-        int result = poll(&pfd, 1, timeout);
+  AsyncHandle monitor;
+  int monitoring;
 
-        if (result == -1) {
-          if (errno == EINTR) continue;
-          logSystemError("poll");
-          return 0;
-        }
-
-        if (result) return 1;
-      }
-#else /* select */
-      fd_set mask;
-      struct timeval timeout;
-
-      FD_ZERO(&mask);
-      FD_SET(fileDescriptor, &mask);
-
-      memset(&timeout, 0, sizeof(timeout));
-#ifndef __MSDOS__
-      timeout.tv_sec = milliseconds / 1000;
-      timeout.tv_usec = (milliseconds % 1000) * 1000;
-#endif /* __MSDOS__ */
-
-      {
-        int result = select(fileDescriptor+1,
-                            (output? NULL: &mask),
-                            (output? &mask: NULL),
-                            NULL, &timeout);
-
-        if (result == -1) {
-          if (errno == EINTR) continue;
-          logSystemError("select");
-          return 0;
-        }
-
-        if (result) return 1;
-      }
-#endif /* await file descriptor */
-    }
-
-#ifdef __MSDOS__
-    if (left > 0) {
-      left -= tsr_usleep(1000);
-      continue;
-    }
-#endif /* __MSDOS__ */
-
-    if (milliseconds > 0)
-      logMessage(LOG_DEBUG, "timeout after %d %s",
-                 milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-
-    errno = EAGAIN;
-    return 0;
+  if (output) {
+    monitoring = asyncMonitorOutput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
+  } else {
+    monitoring = asyncMonitorInput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
   }
-#endif
+
+  if (monitoring) {
+    asyncWait(timeout, testFileDescriptor, &fdm);
+    asyncCancel(monitor);
+
+    if (fdm.ready) return 1;
+    errno = ETIMEDOUT;
+  }
+
+  return 0;
 }
 
 int
-awaitInput (int fileDescriptor, int milliseconds) {
-  return awaitFileDescriptor(fileDescriptor, milliseconds, 0);
+awaitInput (int fileDescriptor, int timeout) {
+  return awaitFileDescriptor(fileDescriptor, timeout, 0);
+}
+
+int
+awaitOutput (int fileDescriptor, int timeout) {
+  return awaitFileDescriptor(fileDescriptor, timeout, 1);
 }
 
 int
@@ -200,11 +160,6 @@ readData (
   return -1;
 }
 
-int
-awaitOutput (int fileDescriptor, int milliseconds) {
-  return awaitFileDescriptor(fileDescriptor, milliseconds, 1);
-}
-
 ssize_t
 writeData (int fileDescriptor, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
@@ -242,6 +197,34 @@ canWrite:
     const unsigned char *start = buffer;
     return address - start;
   }
+}
+
+int
+connectSocket (
+  int socketDescriptor,
+  const struct sockaddr *address,
+  size_t addressLength,
+  int timeout
+) {
+  int result = connect(socketDescriptor, address, addressLength);
+
+  if (result == -1) {
+    if (errno == EINPROGRESS) {
+      if (awaitOutput(socketDescriptor, timeout)) {
+        int error;
+        socklen_t length = sizeof(error);
+
+        if (getsockopt(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
+          if (!error) return 0;
+          errno = error;
+        }
+      }
+
+      close(socketDescriptor);
+    }
+  }
+
+  return result;
 }
 
 int
@@ -296,63 +279,4 @@ setCloseOnExec (int fileDescriptor, int state) {
 #endif /* defined(F_SETFD) && defined(FD_CLOEXEC) */
 
   return 0;
-}
-
-typedef struct {
-  unsigned completed:1;
-} ConnectionCompletionData;
-
-static int
-monitorConnectionCompletion (const AsyncMonitorResult *result) {
-  ConnectionCompletionData *ccd = result->data;
-  ccd->completed = 1;
-  return 0;
-}
-
-static int
-testConnectionCompletion (void *data) {
-  ConnectionCompletionData *ccd = data;
-
-  return ccd->completed;
-}
-
-int
-connectSocket (
-  int socketDescriptor,
-  const struct sockaddr *address,
-  size_t addressLength,
-  int timeout
-) {
-  int result = connect(socketDescriptor, address, addressLength);
-
-  if (result == -1) {
-    if (errno == EINPROGRESS) {
-      AsyncHandle handle;
-
-      ConnectionCompletionData ccd = {
-        .completed = 0
-      };
-
-      if (asyncMonitorOutput(&handle, socketDescriptor, monitorConnectionCompletion, &ccd)) {
-        asyncWait(timeout, testConnectionCompletion, &ccd);
-        asyncCancel(handle);
-
-        if (ccd.completed) {
-          int error;
-          socklen_t length = sizeof(error);
-
-          if (getsockopt(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
-            if (!error) return 0;
-            errno = error;
-          }
-        } else {
-          errno = ETIMEDOUT;
-        }
-      }
-
-      close(socketDescriptor);
-    }
-  }
-
-  return result;
 }
