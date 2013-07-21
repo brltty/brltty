@@ -108,9 +108,10 @@ extern int asyncRelativeAlarm (
 );
 
 
-typedef int (*AsyncWaitCallback) (void *data);
+typedef int (*AsyncAwaitCallback) (void *data);
 
-extern void asyncWait (int duration, AsyncWaitCallback callback, void *data);
+extern int asyncAwait (int duration, AsyncAwaitCallback callback, void *data);
+extern void asyncWait (int duration);
 
 
 #ifdef __cplusplus

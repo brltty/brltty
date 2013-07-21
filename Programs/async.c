@@ -1100,8 +1100,8 @@ asyncRelativeAlarm (
   return asyncAbsoluteAlarm(handle, &time, callback, data);
 }
 
-void
-asyncWait (int duration, AsyncWaitCallback callback, void *data) {
+int
+asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
   long int elapsed = 0;
   TimePeriod period;
   startTimePeriod(&period, duration);
@@ -1207,8 +1207,15 @@ asyncWait (int duration, AsyncWaitCallback callback, void *data) {
   done:
     if (callback) {
       if (callback(data)) {
-        break;
+        return 1;
       }
     }
   } while (!afterTimePeriod(&period, &elapsed));
+
+  return 0;
+}
+
+void
+asyncWait (int duration) {
+  asyncAwait(duration, NULL, NULL);
 }

@@ -71,7 +71,7 @@ awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
   }
 
   if (monitoring) {
-    asyncWait(timeout, testFileDescriptor, &fdm);
+    asyncAwait(timeout, testFileDescriptor, &fdm);
     asyncCancel(monitor);
 
     if (fdm.ready) return 1;
