@@ -90,31 +90,26 @@ awaitOutput (int fileDescriptor, int timeout) {
   return awaitFileDescriptor(fileDescriptor, timeout, 1);
 }
 
-int
-readChunk (
-  int fileDescriptor,
-  void *buffer, size_t *offset, size_t count,
+ssize_t
+readData (
+  int fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
+  unsigned char *address = buffer;
+
 #ifdef __MSDOS__
   int tried = 0;
   goto noInput;
 #endif /* __MSDOS__ */
 
-  while (count > 0) {
-    ssize_t amount;
-
-    {
-      unsigned char *address = buffer;
-      address += *offset;
-      amount = read(fileDescriptor, address, count);
-    }
+  while (size > 0) {
+    ssize_t count = read(fileDescriptor, address, size);
 
 #ifdef __MSDOS__
     tried = 1;
 #endif /* __MSDOS__ */
 
-    if (amount == -1) {
+    if (count == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noInput;
 
@@ -123,40 +118,46 @@ readChunk (
 #endif /* EWOULDBLOCK */
 
       logSystemError("read");
-      return 0;
+      return count;
     }
 
-    if (amount == 0) {
+    if (!count) {
+      unsigned char *start;
+      unsigned int offset;
       int timeout;
+
     noInput:
-      if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
+      start = buffer;
+      offset = address - start;
+      timeout = offset? subsequentTimeout: initialTimeout;
+
+      if (timeout) {
         if (awaitInput(fileDescriptor, timeout)) continue;
-        logMessage(LOG_WARNING, "input byte missing at offset %d", (int)*offset);
+        logMessage(LOG_WARNING, "input byte missing at offset %u", offset);
+      } else
+
 #ifdef __MSDOS__
-      } else if (!tried) {
+      if (!tried) {
         if (awaitInput(fileDescriptor, 0)) continue;
+      } else
 #endif /* __MSDOS__ */
-      } else {
+
+      {
         errno = EAGAIN;
       }
-      return 0;
+
+      break;
     }
 
-    *offset += amount;
-    count -= amount;
+    address += count;
+    size -= count;
   }
-  return 1;
-}
 
-ssize_t
-readData (
-  int fileDescriptor, void *buffer, size_t size,
-  int initialTimeout, int subsequentTimeout
-) {
-  size_t length = 0;
-  if (readChunk(fileDescriptor, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
-  if (errno == EAGAIN) return length;
-  return -1;
+  {
+    unsigned char *start = buffer;
+
+    return address - start;
+  }
 }
 
 ssize_t
@@ -170,9 +171,11 @@ canWrite:
     if (count == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noOutput;
+
 #ifdef EWOULDBLOCK
       if (errno == EWOULDBLOCK) goto noOutput;
 #endif /* EWOULDBLOCK */
+
       logSystemError("Write");
       return count;
     }

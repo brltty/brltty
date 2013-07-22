@@ -30,12 +30,6 @@ extern "C" {
 extern int awaitInput (int fileDescriptor, int timeout);
 extern int awaitOutput (int fileDescriptor, int timeout);
 
-extern int readChunk (
-  int fileDescriptor,
-  void *buffer, size_t *offset, size_t count,
-  int initialTimeout, int subsequentTimeout
-);
-
 extern ssize_t readData (
   int fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
