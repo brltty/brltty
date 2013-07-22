@@ -23,9 +23,9 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifndef __MSDOS__
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif /* __MSDOS__ */
+#endif /* HAVE_SYS_SOCKET_H */
 
 #include "io_misc.h"
 #include "log.h"
@@ -198,7 +198,7 @@ canWrite:
   }
 }
 
-#ifndef __MSDOS__
+#ifdef HAVE_SYS_SOCKET_H
 int
 connectSocket (
   int socketDescriptor,
@@ -226,7 +226,7 @@ connectSocket (
 
   return result;
 }
-#endif /* __MSDOS__ */
+#endif /* HAVE_SYS_SOCKET_H */
 
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {

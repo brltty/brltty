@@ -19,9 +19,9 @@
 #ifndef BRLTTY_INCLUDED_IO_MISC
 #define BRLTTY_INCLUDED_IO_MISC
 
-#ifndef __MSDOS__
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif /* __MSDOS__ */
+#endif /* HAVE_SYS_SOCKET_H */
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,14 +43,14 @@ extern ssize_t readData (
 
 extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
 
-#ifndef __MSDOS__
+#ifdef HAVE_SYS_SOCKET_H
 extern int connectSocket (
   int socketDescriptor,
   const struct sockaddr *address,
   size_t addressLength,
   int timeout
 );
-#endif /* __MSDOS__ */
+#endif /* HAVE_SYS_SOCKET_H */
 
 #ifndef __MINGW32__
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);

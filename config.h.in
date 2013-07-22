@@ -86,6 +86,9 @@ extern "C" {
 /* Define this if the header file sys/file.h exists. */
 #undef HAVE_SYS_FILE_H
 
+/* Define this if the header file sys/socket.h exists. */
+#undef HAVE_SYS_SOCKET_H
+
 /* Define this if the function time exists. */
 #undef HAVE_TIME
 
