@@ -229,12 +229,6 @@ AC_PROG_CXX
 
 brltty_gcc_cflags="-std=gnu99 -Wall"
 brltty_gcc_cppflags=""
-case "${build_os} ${host_os}"
-in
-   cygwin*\ mingw*)
-      brltty_gcc_cflags="${brltty_gcc_cflags} -mno-cygwin"
-      ;;
-esac
 
 case "${host_os}"
 in
