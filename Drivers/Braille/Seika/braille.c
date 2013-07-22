@@ -480,7 +480,7 @@ static const ProtocolOperations pbcProtocolOperations = {
 static void
 ntvInterpretIdentity (InputPacket *packet) {
   packet->fields.identity.cellCount = (packet->bytes[5] == '8')? 80: 40;
-  packet->fields.identity.keyCount = 8;
+  packet->fields.identity.keyCount = 16;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
