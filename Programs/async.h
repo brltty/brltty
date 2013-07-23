@@ -93,19 +93,21 @@ typedef struct {
 
 typedef void (*AsyncAlarmCallback) (const AsyncAlarmResult *result);
 
-extern int asyncAbsoluteAlarm (
+extern int asyncSetAlarmTo (
   AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback callback,
   void *data
 );
 
-extern int asyncRelativeAlarm (
+extern int asyncSetAlarmIn (
   AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback callback,
   void *data
 );
+
+extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
 
 
 typedef int (*AsyncAwaitCallback) (void *data);

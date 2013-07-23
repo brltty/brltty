@@ -723,7 +723,7 @@ retryKeyboardMonitor (const AsyncAlarmResult *result UNUSED) {
 
 static void
 scheduleKeyboardMonitor (int interval) {
-  asyncRelativeAlarm(NULL, interval, retryKeyboardMonitor, NULL);
+  asyncSetAlarmIn(NULL, interval, retryKeyboardMonitor, NULL);
 }
 
 int
@@ -1272,7 +1272,7 @@ retryBrailleDriver (const AsyncAlarmResult *result UNUSED) {
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
-  asyncRelativeAlarm(NULL, 5000, retryBrailleDriver, NULL);
+  asyncSetAlarmIn(NULL, 5000, retryBrailleDriver, NULL);
   initializeBraille();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
@@ -1465,7 +1465,7 @@ retrySpeechDriver (const AsyncAlarmResult *result UNUSED) {
 static int
 trySpeechDriver (void) {
   if (startSpeechDriver()) return 1;
-  asyncRelativeAlarm(NULL, 5000, retrySpeechDriver, NULL);
+  asyncSetAlarmIn(NULL, 5000, retrySpeechDriver, NULL);
   return 0;
 }
 
@@ -1599,7 +1599,7 @@ retryScreenDriver (const AsyncAlarmResult *result UNUSED) {
 static int
 tryScreenDriver (void) {
   if (startScreenDriver()) return 1;
-  asyncRelativeAlarm(NULL, 5000, retryScreenDriver, NULL);
+  asyncSetAlarmIn(NULL, 5000, retryScreenDriver, NULL);
   initializeScreen();
   return 0;
 }
@@ -1648,7 +1648,7 @@ tryPidFile (void) {
   } else if (errno == EEXIST) {
     return 0;
   } else {
-    asyncRelativeAlarm(NULL, 5000, retryPidFile, NULL);
+    asyncSetAlarmIn(NULL, 5000, retryPidFile, NULL);
   }
 
   return 1;

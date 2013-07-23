@@ -514,10 +514,6 @@ addMonitor (void *item, void *data) {
   return 0;
 }
 
-typedef struct {
-  const MonitorEntry *monitor;
-} FindMonitorData;
-
 static int
 findMonitor (void *item, void *data) {
   FunctionEntry *function = item;
@@ -889,10 +885,12 @@ checkHandleIdentifier (AsyncHandle handle) {
 }
 
 static int
-checkHandle (AsyncHandle handle) {
+checkHandle (AsyncHandle handle, Queue *queue) {
   if (checkHandleValidity(handle)) {
     if (checkHandleIdentifier(handle)) {
-      return 1;
+      if (getElementQueue(handle->element) == queue) {
+        return 1;
+      }
     }
   }
 
@@ -1092,7 +1090,7 @@ newAlarmElement (const void *parameters) {
 }
 
 int
-asyncAbsoluteAlarm (
+asyncSetAlarmTo (
   AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback callback,
@@ -1108,7 +1106,7 @@ asyncAbsoluteAlarm (
 }
 
 int
-asyncRelativeAlarm (
+asyncSetAlarmIn (
   AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback callback,
@@ -1117,7 +1115,26 @@ asyncRelativeAlarm (
   TimeValue time;
   getCurrentTime(&time);
   adjustTimeValue(&time, interval);
-  return asyncAbsoluteAlarm(handle, &time, callback, data);
+  return asyncSetAlarmTo(handle, &time, callback, data);
+}
+
+static int
+checkAlarmHandle (AsyncHandle handle) {
+  return checkHandle(handle, getAlarmQueue(0));
+}
+
+int
+asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time) {
+  if (checkAlarmHandle(handle)) {
+    Element *element = handle->element;
+    AlarmEntry *alarm = getElementItem(element);
+
+    alarm->time = *time;
+    requeueElement(element);
+    return 1;
+  }
+
+  return 0;
 }
 
 int

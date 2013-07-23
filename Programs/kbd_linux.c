@@ -706,7 +706,7 @@ handleKobjectUeventString (const AsyncInputResult *result) {
                       if ((idd->name = strdup(eventDevice))) {
                         idd->kcd = result->data;
 
-                        if (asyncRelativeAlarm(NULL, 1000, doOpenInputDevice, idd)) {
+                        if (asyncSetAlarmIn(NULL, 1000, doOpenInputDevice, idd)) {
                           claimKeyboardCommonData(idd->kcd);
                           close(descriptor);
                           break;
