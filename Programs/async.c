@@ -99,6 +99,8 @@ typedef struct {
   FunctionEntry *function;
   void *extension;
   void *data;
+
+  MonitorEntry *monitor;
   unsigned finished:1;
   int error;
 } OperationEntry;
@@ -162,7 +164,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor) {
+testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
   DWORD result = WaitForSingleObject(*monitor, 0);
   if (result == WAIT_OBJECT_0) return 1;
 
@@ -301,8 +303,8 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor) {
-  return monitor->revents != 0;
+testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
+  return (monitor->revents & function->pollEvents) != 0;
 }
 
 static void
@@ -391,7 +393,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor) {
+testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
   return FD_ISSET(monitor->fileDescriptor, monitor->selectSet);
 }
 
@@ -494,13 +496,18 @@ static int
 addMonitor (void *item, void *data) {
   const FunctionEntry *function = item;
   AddMonitorData *add = data;
+  OperationEntry *operation = getFirstOperation(function);
 
-  if (!function->active) {
-    OperationEntry *operation = getFirstOperation(function);
+  if (operation) {
+    operation->monitor = NULL;
 
-    if (operation) {
-      if (operation->finished) return 1;
-      initializeMonitor(add->monitor++, function, operation);
+    if (!function->active) {
+      if (operation->finished) {
+        return 1;
+      }
+
+      operation->monitor = add->monitor++;
+      initializeMonitor(operation->monitor, function, operation);
     }
   }
 
@@ -513,11 +520,17 @@ typedef struct {
 
 static int
 findMonitor (void *item, void *data) {
-//FunctionEntry *function = item;
-  FindMonitorData *find = data;
+  FunctionEntry *function = item;
+  OperationEntry *operation = getFirstOperation(function);
 
-  if (testMonitor(find->monitor)) return 1;
-  find->monitor += 1;
+  if (operation) {
+    if (operation->monitor) {
+      if (testMonitor(operation->monitor, function)) {
+        return 1;
+      }
+    }
+  }
+
   return 0;
 }
 
@@ -674,6 +687,8 @@ newOperation (
         operation->function = function;
         operation->extension = extension;
         operation->data = data;
+
+        operation->monitor = NULL;
         operation->finished = 0;
         operation->error = 0;
 
@@ -1174,11 +1189,7 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
 
       if (!functionElement) {
         if (awaitOperation(monitorArray, monitorCount, timeout)) {
-          FindMonitorData find = {
-            .monitor = monitorArray
-          };
-
-          functionElement = processQueue(functions, findMonitor, &find);
+          functionElement = processQueue(functions, findMonitor, NULL);
         }
       }
 
