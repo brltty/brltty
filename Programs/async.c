@@ -105,8 +105,11 @@ typedef struct {
   void *data;
 
   MonitorEntry *monitor;
-  unsigned finished:1;
   int error;
+
+  unsigned active:1;
+  unsigned cancel:1;
+  unsigned finished:1;
 } OperationEntry;
 
 typedef struct {
@@ -125,7 +128,6 @@ struct FunctionEntryStruct {
   FileDescriptor fileDescriptor;
   const FunctionMethods *methods;
   Queue *operations;
-  unsigned active:1;
 
 #if defined(__MINGW32__)
   OVERLAPPED ol;
@@ -505,7 +507,7 @@ addMonitor (void *item, void *data) {
   if (operation) {
     operation->monitor = NULL;
 
-    if (!function->active) {
+    if (!operation->active) {
       if (operation->finished) {
         return 1;
       }
@@ -607,14 +609,6 @@ invokeOutputCallback (OperationEntry *operation) {
   return 0;
 }
 
-static int
-testFunctionEntry (const void *item, const void *data) {
-  const FunctionEntry *function = item;
-  const FunctionKey *key = data;
-  return (function->fileDescriptor == key->fileDescriptor) &&
-         (function->methods == key->methods);
-}
-
 static void
 deallocateOperationEntry (void *item, void *data) {
   OperationEntry *operation = item;
@@ -623,20 +617,31 @@ deallocateOperationEntry (void *item, void *data) {
 }
 
 static void
-cancelOperation (Element *element) {
-  OperationEntry *operation = getElementItem(element);
-  FunctionEntry *function = operation->function;
+cancelOperation (Element *operationElement) {
+  OperationEntry *operation = getElementItem(operationElement);
 
-  if (!function->active) {
+  if (operation->active) {
+    operation->cancel = 1;
+  } else {
+    FunctionEntry *function = operation->function;
+
     if (getQueueSize(function->operations) == 1) {
       Queue *functionQueue = getFunctionQueue(0);
       Element *functionElement = findElementWithItem(functionQueue, function);
 
       deleteElement(functionElement);
     } else {
-      deleteElement(element);
+      deleteElement(operationElement);
     }
   }
+}
+
+static int
+testFunctionEntry (const void *item, const void *data) {
+  const FunctionEntry *function = item;
+  const FunctionKey *key = data;
+  return (function->fileDescriptor == key->fileDescriptor) &&
+         (function->methods == key->methods);
 }
 
 static Element *
@@ -660,7 +665,6 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
       if ((function = malloc(sizeof(*function)))) {
         function->fileDescriptor = fileDescriptor;
         function->methods = methods;
-        function->active = 0;
 
         if ((function->operations = newQueue(deallocateOperationEntry, NULL))) {
           {
@@ -714,8 +718,11 @@ newOperation (
         operation->data = data;
 
         operation->monitor = NULL;
-        operation->finished = 0;
         operation->error = 0;
+
+        operation->active = 0;
+        operation->cancel = 0;
+        operation->finished = 0;
 
         if (isFirstOperation) startOperation(operation);
         return operationElement;
@@ -1272,13 +1279,15 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
 
         if (!operation->finished) finishOperation(operation);
 
-        function->active = 1;
-        if (function->methods->invokeCallback(operation)) {
-          operation->error = 0;
-        } else {
+        operation->active = 1;
+        if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
+        operation->active = 0;
+
+        if (operation->cancel) {
           deleteElement(operationElement);
+        } else {
+          operation->error = 0;
         }
-        function->active = 0;
 
         if ((operationElement = getQueueHead(function->operations))) {
           operation = getElementItem(operationElement);
