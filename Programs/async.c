@@ -71,6 +71,10 @@ struct AsyncHandleStruct {
   int identifier;
 };
 
+typedef struct {
+  void (*cancel) (Element *element);
+} QueueMethods;
+
 typedef struct FunctionEntryStruct FunctionEntry;
 
 typedef struct {
@@ -618,6 +622,23 @@ deallocateOperationEntry (void *item, void *data) {
   free(operation);
 }
 
+static void
+cancelOperation (Element *element) {
+  OperationEntry *operation = getElementItem(element);
+  FunctionEntry *function = operation->function;
+
+  if (!function->active) {
+    if (getQueueSize(function->operations) == 1) {
+      Queue *functionQueue = getFunctionQueue(0);
+      Element *functionElement = findElementWithItem(functionQueue, function);
+
+      deleteElement(functionElement);
+    } else {
+      deleteElement(element);
+    }
+  }
+}
+
 static Element *
 getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *methods, int create) {
   Queue *functions = getFunctionQueue(create);
@@ -642,6 +663,14 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
         function->active = 0;
 
         if ((function->operations = newQueue(deallocateOperationEntry, NULL))) {
+          {
+            static QueueMethods methods = {
+              .cancel = cancelOperation
+            };
+
+            setQueueData(function->operations, &methods);
+          }
+
           if (methods->beginFunction) methods->beginFunction(function);
 
           {
@@ -900,7 +929,27 @@ checkHandle (AsyncHandle handle, Queue *queue) {
 void
 asyncCancel (AsyncHandle handle) {
   if (checkHandleValidity(handle)) {
-    if (checkHandleIdentifier(handle)) deleteElement(handle->element);
+    if (checkHandleIdentifier(handle)) {
+      Element *element = handle->element;
+      int cancelled = 0;
+
+      {
+        Queue *queue = getElementQueue(element);
+        const QueueMethods *methods = getQueueData(queue);
+
+        if (methods) {
+          if (methods->cancel) {
+            methods->cancel(element);
+            cancelled = 1;
+          }
+        }
+      }
+
+      if (!cancelled) {
+        deleteElement(element);
+      }
+    }
+
     free(handle);
   }
 }

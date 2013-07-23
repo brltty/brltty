@@ -275,6 +275,16 @@ findItem (const Queue *queue, ItemTester testItem, const void *data) {
   return NULL;
 }
 
+static int
+testElementHasItem (const void *item, const void *data) {
+  return item == data;
+}
+
+Element *
+findElementWithItem (Queue *queue, void *item) {
+  return findElement(queue, testElementHasItem, item);
+}
+
 Element *
 processQueue (Queue *queue, ItemProcessor processItem, void *data) {
   Element *element = queue->head;

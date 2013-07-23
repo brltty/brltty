@@ -51,6 +51,7 @@ extern void requeueElement (Element *element);
 typedef int (*ItemTester) (const void *item, const void *data);
 extern Element *findElement (const Queue *queue, ItemTester testItem, const void *data);
 extern void *findItem (const Queue *queue, ItemTester testItem, const void *data);
+extern Element *findElementWithItem (Queue *queue, void *item);
 
 typedef int (*ItemProcessor) (void *item, void *data);
 extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
