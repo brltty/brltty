@@ -1113,8 +1113,7 @@ asyncSetAlarmIn (
   void *data
 ) {
   TimeValue time;
-  getCurrentTime(&time);
-  adjustTimeValue(&time, interval);
+  getRelativeTime(&time, interval);
   return asyncSetAlarmTo(handle, &time, callback, data);
 }
 
@@ -1135,6 +1134,13 @@ asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time) {
   }
 
   return 0;
+}
+
+int
+asyncResetAlarmIn (AsyncHandle handle, int interval) {
+  TimeValue time;
+  getRelativeTime(&time, interval);
+  return asyncResetAlarmTo(handle, &time);
 }
 
 int

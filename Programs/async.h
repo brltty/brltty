@@ -108,6 +108,7 @@ extern int asyncSetAlarmIn (
 );
 
 extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
+extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
 
 
 typedef int (*AsyncAwaitCallback) (void *data);
