@@ -126,13 +126,6 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
-  private String keyTable = null;
-  public String setKeyTable (String newValue) {
-    String oldValue = keyTable;
-    keyTable = newValue;
-    return oldValue;
-  }
-
   private String keyboardKeyTable = null;
   public String setKeyboardKeyTable (String newValue) {
     String oldValue = keyboardKeyTable;
@@ -168,6 +161,20 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
+  private boolean apiEnabled = false;
+  public boolean setApiEnabled (boolean newValue) {
+    boolean oldValue = apiEnabled;
+    apiEnabled = newValue;
+    return oldValue;
+  }
+
+  private String apiParameters = null;
+  public String setApiParameters (String newValue) {
+    String oldValue = apiParameters;
+    apiParameters = newValue;
+    return oldValue;
+  }
+
   protected void addOption (List<String> arguments, String option, String value) {
     if (value != null) {
       if (value.length() > 0) {
@@ -192,23 +199,32 @@ public class ArgumentsBuilder {
   public String[] getArguments () {
     List<String> arguments = new ArrayList<String>();
     addOption(arguments, "-n", foregroundExecution);
-    addOption(arguments, "-r", releaseDevice);
+
     addOption(arguments, "-l", logLevel);
     addOption(arguments, "-L", logFile);
+
     addOption(arguments, "-f", configurationFile);
     addOption(arguments, "-F", preferencesFile);
+
     addOption(arguments, "-D", driversDirectory);
     addOption(arguments, "-W", writableDirectory);
+
     addOption(arguments, "-T", tablesDirectory);
     addOption(arguments, "-t", textTable);
     addOption(arguments, "-a", attributesTable);
     addOption(arguments, "-c", contractionTable);
-    addOption(arguments, "-k", keyTable);
     addOption(arguments, "-k", keyboardKeyTable);
+
     addOption(arguments, "-b", brailleDriver);
     addOption(arguments, "-d", brailleDevice);
+    addOption(arguments, "-r", releaseDevice);
+
     addOption(arguments, "-s", speechDriver);
     addOption(arguments, "-Q", quietIfNoBraille);
+
+    addOption(arguments, "-N", !apiEnabled);
+    addOption(arguments, "-A", apiParameters);
+
     return arguments.toArray(new String[arguments.size()]);
   }
 }

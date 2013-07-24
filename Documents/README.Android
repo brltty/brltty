@@ -25,6 +25,10 @@ BLUETOOTH
    This permission is required so that BRLTTY can use Bluetooth to
    communicate with your braille device.
 
+INTERNET
+   This permission is required so that BRLTTY can listen on
+   a TCP/IP port for BrlAPI client connection requests.
+
 ----------------------------------------------------------------------
 
 

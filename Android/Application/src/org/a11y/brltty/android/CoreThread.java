@@ -162,7 +162,7 @@ public class CoreThread extends Thread {
     builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));
     builder.setAttributesTable(getStringSetting(R.string.PREF_KEY_ATTRIBUTES_TABLE, R.string.DEFAULT_ATTRIBUTES_TABLE));
     builder.setContractionTable(getStringSetting(R.string.PREF_KEY_CONTRACTION_TABLE, R.string.DEFAULT_CONTRACTION_TABLE));
-    builder.setKeyTable(getStringSetting(R.string.PREF_KEY_KEY_TABLE, R.string.DEFAULT_KEY_TABLE));
+    builder.setKeyboardKeyTable(getStringSetting(R.string.PREF_KEY_KEY_TABLE, R.string.DEFAULT_KEY_TABLE));
 
     if ((new File(ApplicationParameters.B2G_DEVICE_PATH)).exists()) {
       builder.setBrailleDevice(ApplicationParameters.B2G_DEVICE_PATH);
@@ -193,6 +193,9 @@ public class CoreThread extends Thread {
 
     builder.setSpeechDriver(getStringSetting(R.string.PREF_KEY_SPEECH_SUPPORT, R.string.DEFAULT_SPEECH_SUPPORT));
     builder.setQuietIfNoBraille(true);
+
+    builder.setApiEnabled(true);
+    builder.setApiParameters("host=127.0.0.1:0,auth=none");
 
     {
       ArrayList<String> keywords = new ArrayList<String>();
