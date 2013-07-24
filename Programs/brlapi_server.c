@@ -1818,7 +1818,7 @@ out:
 
 static void *establishSocket(void *arg)
 {
-  intptr_t num = (intptr_t) arg;
+  long int num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 #ifndef __MINGW32__
   int res;
@@ -1842,10 +1842,12 @@ static void *establishSocket(void *arg)
 #else /* PF_LOCAL */
   if ((
 #endif /* PF_LOCAL */
-	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR))
+	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR)) {
     logMessage(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
-  else
+  } else {
     logMessage(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
+  }
+
   return NULL;
 }
 
