@@ -222,7 +222,9 @@ setWindowsTransferResult (OperationEntry *operation, DWORD success, DWORD count)
     extension->length += count;
   } else {
     DWORD error = GetLastError();
+
     if (error == ERROR_IO_PENDING) return;
+    if (error == ERROR_IO_INCOMPLETE) return;
 
     if ((error == ERROR_HANDLE_EOF) || (error == ERROR_BROKEN_PIPE)) {
       extension->direction.input.end = 1;
@@ -280,7 +282,18 @@ finishWindowsTransferOperation (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   DWORD count;
   DWORD success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
+
   setWindowsTransferResult(operation, success, count);
+}
+
+static void
+cancelWindowsTransferOperation (OperationEntry *operation) {
+  FunctionEntry *function = operation->function;
+  DWORD count;
+
+  if (CancelIoEx(function->fileDescriptor, &function->ol)) {
+    GetOverlappedResult(function->fileDescriptor, &function->ol, &count, TRUE);
+  }
 }
 
 #else /* __MINGW32__ */
@@ -439,6 +452,7 @@ finishUnixRead (OperationEntry *operation) {
   int result = read(function->fileDescriptor,
                     &extension->buffer[extension->length],
                     extension->size - extension->length);
+
   setUnixTransferResult(operation, result);
 }
 
@@ -449,6 +463,7 @@ finishUnixWrite (OperationEntry *operation) {
   int result = write(function->fileDescriptor,
                      &extension->buffer[extension->length],
                      extension->size - extension->length);
+
   setUnixTransferResult(operation, result);
 }
 #endif /* ASYNC_CAN_MONITOR_IO */
@@ -845,6 +860,7 @@ newInputOperation (const void *parameters) {
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsRead,
     .finishOperation = finishWindowsTransferOperation,
+    .cancelOperation = cancelWindowsTransferOperation,
 #else /* __MINGW32__ */
     .beginFunction = beginUnixInputFunction,
     .finishOperation = finishUnixRead,
@@ -882,6 +898,7 @@ newOutputOperation (const void *parameters) {
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsWrite,
     .finishOperation = finishWindowsTransferOperation,
+    .cancelOperation = cancelWindowsTransferOperation,
 #else /* __MINGW32__ */
     .beginFunction = beginUnixOutputFunction,
     .finishOperation = finishUnixWrite,
