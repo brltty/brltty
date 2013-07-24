@@ -150,6 +150,12 @@ static brlapi_error_t brlapiserver_error;
 /** ask for raw driver keycodes */
 #define BRL_KEYCODES 1
 
+#ifndef __MINGW32__
+static void empty_handler(int sig)
+{
+}
+#endif /* __MINGW32__ */
+
 /****************************************************************************/
 /** GLOBAL TYPES AND VARIABLES                                              */
 /****************************************************************************/
@@ -218,6 +224,7 @@ typedef struct Tty {
 /* Pointer to the connection accepter thread */
 static pthread_t serverThread; /* server */
 static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
+static int running; /* should threads be running? */
 static char **socketHosts; /* socket local hosts */
 static struct socketInfo {
   int addrfamily;
@@ -1848,7 +1855,11 @@ static void closeSockets(void *arg)
   struct socketInfo *info;
   
   for (i=0;i<numSockets;i++) {
+#ifdef __MINGW32__
     pthread_cancel(socketThreads[i]);
+#else /* __MINGW32__ */
+    pthread_kill(socketThreads[i], SIGUSR2);
+#endif /* __MINGW32__ */
     info=&socketInfo[i];
     if (info->fd>=0) {
       if (closeFileDescriptor(info->fd))
@@ -2030,7 +2041,9 @@ static void *server(void *arg)
   }
 #endif /* __MINGW32__ */
 
+#ifdef __MINGW32__
   pthread_cleanup_push(closeSockets,NULL);
+#endif /* __MINGW32__ */
 
   for (i=0;i<numSockets;i++) {
     socketInfo[i].addrfamily=brlapiserver_expandHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
@@ -2040,7 +2053,11 @@ static void *server(void *arg)
       if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 	for (i--;i>=0;i--)
+#ifdef __MINGW32__
 	  pthread_cancel(socketThreads[i]);
+#else /* __MINGW32__ */
+	  pthread_kill(socketThreads[i], SIGUSR2);
+#endif /* __MINGW32__ */
 	pthread_exit(NULL);
       }
 #ifdef __MINGW32__
@@ -2054,7 +2071,7 @@ static void *server(void *arg)
   }
 
   unauthConnections = 0; unauthConnLog = 0;
-  while (1) {
+  while (running) {
 #ifdef __MINGW32__
     lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
     nbHandles = 0;
@@ -2163,7 +2180,12 @@ static void *server(void *arg)
     handleTtyFds(&sockset,currentTime,&ttys);
   }
 
+  running = 0;
+#ifdef __MINGW32__
   pthread_cleanup_pop(1);
+#else /* __MINGW32__ */
+  closeSockets(NULL);
+#endif /* __MINGW32__ */
   return NULL;
 }
 
@@ -2280,7 +2302,13 @@ static void ttyTerminationHandler(Tty *tty)
 static void terminationHandler(void)
 {
   int res;
-  if ((res = pthread_cancel(serverThread)) != 0 )
+  running = 0;
+#ifdef __MINGW32__
+  res = pthread_cancel(serverThread);
+#else /* __MINGW32__ */
+  res = pthread_kill(serverThread, SIGUSR2);
+#endif /* __MINGW32__ */
+  if (res != 0)
     logMessage(LOG_WARNING,"pthread_cancel: %s",strerror(res));
   ttyTerminationHandler(&notty);
   ttyTerminationHandler(&ttys);
@@ -2761,11 +2789,21 @@ int api_start(BrailleDisplay *brl, char **parameters)
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
+#ifndef __MINGW32__
+  signal(SIGUSR2, empty_handler);
+#endif /* __MINGW32__ */
+  running = 1;
+
   trueBraille=&noBraille;
   if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
+    running = 0;
     for (i=0;i<numSockets;i++)
+#ifdef __MINGW32__
       pthread_cancel(socketThreads[i]);
+#else /* __MINGW32__ */
+      pthread_kill(socketThreads[i], SIGUSR2);
+#endif /* __MINGW32__ */
     goto outallocs;
   }
 
