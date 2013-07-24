@@ -120,6 +120,7 @@ typedef struct {
 
   void (*startOperation) (OperationEntry *operation);
   void (*finishOperation) (OperationEntry *operation);
+  void (*cancelOperation) (OperationEntry *operation);
 
   int (*invokeCallback) (OperationEntry *operation);
 } FunctionMethods;
@@ -486,12 +487,16 @@ getFirstOperation (const FunctionEntry *function) {
 
 static void
 startOperation (OperationEntry *operation) {
-  if (operation->function->methods->startOperation) operation->function->methods->startOperation(operation);
+  if (operation->function->methods->startOperation) {
+    operation->function->methods->startOperation(operation);
+  }
 }
 
 static void
 finishOperation (OperationEntry *operation) {
-  if (operation->function->methods->finishOperation) operation->function->methods->finishOperation(operation);
+  if (operation->function->methods->finishOperation) {
+    operation->function->methods->finishOperation(operation);
+  }
 }
 
 typedef struct {
@@ -624,6 +629,15 @@ cancelOperation (Element *operationElement) {
     operation->cancel = 1;
   } else {
     FunctionEntry *function = operation->function;
+    int isFirstOperation = operationElement == getQueueHead(function->operations);
+
+    if (isFirstOperation) {
+      if (!operation->finished) {
+        if (operation->function->methods->cancelOperation) {
+          operation->function->methods->cancelOperation(operation);
+        }
+      }
+    }
 
     if (getQueueSize(function->operations) == 1) {
       Queue *functionQueue = getFunctionQueue(0);
@@ -632,6 +646,13 @@ cancelOperation (Element *operationElement) {
       deleteElement(functionElement);
     } else {
       deleteElement(operationElement);
+
+      if (isFirstOperation) {
+        operationElement = getQueueHead(function->operations);
+        operation = getElementItem(operationElement);
+
+        if (!operation->finished) startOperation(operation);
+      }
     }
   }
 }
@@ -952,9 +973,7 @@ asyncCancel (AsyncHandle handle) {
         }
       }
 
-      if (!cancelled) {
-        deleteElement(element);
-      }
+      if (!cancelled) deleteElement(element);
     }
 
     free(handle);
