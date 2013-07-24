@@ -95,41 +95,43 @@ writeBytes (NoteDevice *device, const unsigned char *address, size_t length) {
 
 static int
 writeSample (NoteDevice *device, int amplitude) {
-  unsigned char sample[4];
+  typedef union {
+    unsigned char bytes[4];
+    int16_t s16h;
+  } Sample;
+
+  Sample sample;
   size_t length;
+  const int U2S = 0X8000;
 
   switch (device->amplitudeFormat) {
-    default:
-      length = 0;
-      break;
-
     case PCM_FMT_U8:
-      amplitude += 0X8000;
+      amplitude += U2S;
     case PCM_FMT_S8:
-      sample[0] = amplitude >> 8;
+      sample.bytes[0] = amplitude >> 8;
       length = 1;
       break;
 
     case PCM_FMT_U16B:
-      amplitude += 0X8000;
+      amplitude += U2S;
     case PCM_FMT_S16B:
-      sample[0] = amplitude >> 8;
-      sample[1] = amplitude;
+      sample.bytes[0] = amplitude >> 8;
+      sample.bytes[1] = amplitude;
       length = 2;
       break;
 
     case PCM_FMT_U16L:
-      amplitude += 0X8000;
+      amplitude += U2S;
     case PCM_FMT_S16L:
-      sample[0] = amplitude;
-      sample[1] = amplitude >> 8;
+      sample.bytes[0] = amplitude;
+      sample.bytes[1] = amplitude >> 8;
       length = 2;
       break;
 
     case PCM_FMT_U16H:
-      amplitude += 0X8000;
+      amplitude += U2S;
     case PCM_FMT_S16H:
-      *((int16_t *)sample) = amplitude;
+      sample.s16h = amplitude;
       length = 2;
       break;
 
@@ -151,7 +153,7 @@ writeSample (NoteDevice *device, int amplitude) {
 
       value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
       if (negative) value |= 0X80;
-      sample[0] = ~value;
+      sample.bytes[0] = ~value;
       length = 1;
       break;
     }
@@ -171,16 +173,21 @@ writeSample (NoteDevice *device, int amplitude) {
       if (!exponent) amplitude >>= 1;
       value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
       if (negative) value |= 0X80;
-      sample[0] = value ^ 0X55;
+      sample.bytes[0] = value ^ 0X55;
       length = 1;
       break;
     }
+
+    default:
+      length = 0;
+      break;
   }
 
   {
     int channel;
-    for (channel=0; channel<device->channelCount; ++channel) {
-      if (!writeBytes(device, sample, length)) return 0;
+
+    for (channel=0; channel<device->channelCount; channel+=1) {
+      if (!writeBytes(device, sample.bytes, length)) return 0;
     }
   }
 
