@@ -78,7 +78,6 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 # xw (by --disable-x)
 
 "${sourceRoot}/configure" \
-   --disable-api \
    --with-braille-driver=-tt,-vr,al,at,bg,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
    --with-speech-driver=an,-all \
    --with-screen-driver=an,-all \
