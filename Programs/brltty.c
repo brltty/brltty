@@ -816,7 +816,7 @@ trackSpeech (int index) {
 static void
 sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, size_t count, int immediate) {
   size_t length;
-  char *text = makeUtf8FromWchars(characters, count, &length);
+  void *text = makeUtf8FromWchars(characters, count, &length);
 
   if (text) {
     if (immediate) speech->mute(&spk);
