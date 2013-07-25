@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_MOUNT_MNTTAB
-#define BRLTTY_INCLUDED_MOUNT_MNTTAB
+#ifndef BRLTTY_INCLUDED_MNTPT_MNTTAB
+#define BRLTTY_INCLUDED_MNTPT_MNTTAB
 
 #include <sys/mnttab.h>
 
@@ -35,4 +35,4 @@ typedef struct mnttab MountEntry;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_MOUNT_MNTTAB */
+#endif /* BRLTTY_INCLUDED_MNTPT_MNTTAB */

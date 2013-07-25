@@ -16,9 +16,29 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <sys/mount.h>
+#ifndef BRLTTY_INCLUDED_MNTPT_MNTENT
+#define BRLTTY_INCLUDED_MNTPT_MNTENT
 
-int
-mountFileSystem (const char *path, const char *reference, const char *type) {
-  return mount(reference, path, type, 0, NULL) != -1;
+#include <mntent.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+#if defined(MOUNTED)
+#define MOUNTS_TABLE_PATH MOUNTED
+#elif defined(MNT_MNTTAB)
+#define MOUNTS_TABLE_PATH MNT_MNTTAB
+#endif /* MOUNTS_TABLE_PATH */
+
+typedef struct mntent MountEntry;
+#define mountPath mnt_dir
+#define mountReference mnt_fsname
+#define mountType mnt_type
+#define mountOptions mnt_opts
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_MNTPT_MNTENT */

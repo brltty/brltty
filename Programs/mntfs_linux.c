@@ -18,30 +18,11 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
-#include <errno.h>
+#include <sys/mount.h>
 
-#include "log.h"
-#include "mount_none.h"
-#include "mount_internal.h"
-
-FILE *
-openMountsTable (int update) {
-  errno = ENOSYS;
-  logSystemError("openMountsTable");
-  return NULL;
-}
-
-void
-closeMountsTable (FILE *table) {
-}
-
-MountEntry *
-readMountsTable (FILE *table) {
-  return NULL;
-}
+#include "mntfs.h"
 
 int
-addMountEntry (FILE *table, MountEntry *entry) {
-  return 0;
+mountFileSystem (const char *path, const char *reference, const char *type) {
+  return mount(reference, path, type, 0, NULL) != -1;
 }

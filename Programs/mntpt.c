@@ -23,22 +23,22 @@
 #include <errno.h>
 
 #include "log.h"
-#include "system.h"
+#include "mntfs.h"
 #include "async.h"
-#include "mount.h"
+#include "mntpt.h"
 
-#if defined(USE_MOUNT_PACKAGE_NONE)
-#include "mount_none.h"
-#elif defined(USE_MOUNT_PACKAGE_MNTENT)
-#include "mount_mntent.h"
-#elif defined(USE_MOUNT_PACKAGE_MNTTAB)
-#include "mount_mnttab.h"
-#else /* serial package */
-#error mount package not selected
-#include "mount_none.h"
-#endif /* mount package */
+#if defined(USE_MNTPT_PACKAGE_NONE)
+#include "mntpt_none.h"
+#elif defined(USE_MNTPT_PACKAGE_MNTENT)
+#include "mntpt_mntent.h"
+#elif defined(USE_MNTPT_PACKAGE_MNTTAB)
+#include "mntpt_mnttab.h"
+#else /* mount point package */
+#error mount point package not selected
+#include "mntpt_none.h"
+#endif /* mount point package */
 
-#include "mount_internal.h"
+#include "mntpt_internal.h"
 
 #if defined(MNTOPT_RW)
 #define MOUNT_OPTION_RW MNTOPT_RW

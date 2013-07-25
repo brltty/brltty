@@ -25,7 +25,7 @@
 #include "hostcmd_none.h"
 #elif defined(USE_HOSTCMD_PACKAGE_UNIX)
 #include "hostcmd_unix.h"
-#else /* serial package */
+#else /* host command package */
 #error host command package not selected
 #include "hostcmd_none.h"
 #endif /* host command package */

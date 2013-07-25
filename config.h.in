@@ -290,10 +290,14 @@ extern "C" {
 #undef USE_HOSTCMD_PACKAGE_NONE
 #undef USE_HOSTCMD_PACKAGE_UNIX
 
-/* Define only one of the following mount packages. */
-#undef USE_MOUNT_PACKAGE_NONE
-#undef USE_MOUNT_PACKAGE_MNTENT
-#undef USE_MOUNT_PACKAGE_MNTTAB
+/* Define only one of the following mount point packages. */
+#undef USE_MNTPT_PACKAGE_NONE
+#undef USE_MNTPT_PACKAGE_MNTENT
+#undef USE_MNTPT_PACKAGE_MNTTAB
+
+/* Define only one of the following mount file system packages. */
+#undef USE_MNTFS_PACKAGE_NONE
+#undef USE_MNTFS_PACKAGE_LINUX
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT

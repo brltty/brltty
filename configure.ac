@@ -1208,7 +1208,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([charset], [charset], [iconv], [dnl
+BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
    mingw*)
       charset_package=windows
       ;;
@@ -1246,20 +1246,26 @@ BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
    linux*) keyboard_package="linux";;
 ])
 
-BRLTTY_ARG_PACKAGE([mount], [mount], [mntent mnttab], [dnl
+BRLTTY_ARG_PACKAGE([mntpt], [mount point], [mntent mnttab], [dnl
 ], [dnl
    mntent)
       AC_CHECK_HEADER([mntent.h], [dnl
          AC_CHECK_FUNC([setmntent], [dnl
-            mount_package=mntent
+            mntpt_package=mntent
             AC_CHECK_FUNCS([addmntent])
          ])
       ])
       ;;
    mnttab)
       AC_CHECK_HEADER([sys/mnttab.h], [dnl
-         mount_package=mnttab
+         mntpt_package=mnttab
       ])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
+   linux*)
+      mntfs_package="linux"
       ;;
 ])
 

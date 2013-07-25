@@ -285,17 +285,28 @@ hostcmd_unix.$O:
 
 ###############################################################################
 
-mount.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mount.c
+mntpt.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt.c
 
-mount_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mount_none.c
+mntpt_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_none.c
 
-mount_mntent.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mount_mntent.c
+mntpt_mntent.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mntent.c
 
-mount_mnttab.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mount_mnttab.c
+mntpt_mnttab.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mnttab.c
+
+###############################################################################
+
+mntfs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs.c
+
+mntfs_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_none.c
+
+mntfs_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_linux.c
 
 ###############################################################################
 

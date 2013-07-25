@@ -40,8 +40,6 @@
 
 #include "sys_exec_unix.h"
 
-#include "sys_mount_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 void *
 loadSharedObject (const char *path) {

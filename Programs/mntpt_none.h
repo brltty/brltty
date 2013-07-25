@@ -16,21 +16,22 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_MOUNT
-#define BRLTTY_INCLUDED_MOUNT
+#ifndef BRLTTY_INCLUDED_MNTPT_NONE
+#define BRLTTY_INCLUDED_MNTPT_NONE
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef int (*MountPointTester) (const char *path, const char *type);
-
-extern char *findMountPoint (MountPointTester test);
-
-extern int makeMountPoint (const char *path, const char *reference, const char *type);
+typedef struct {
+  char *mountPath;
+  char *mountReference;
+  char *mountType;
+  char *mountOptions;
+} MountEntry;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_MOUNT */
+#endif /* BRLTTY_INCLUDED_MNTPT_NONE */

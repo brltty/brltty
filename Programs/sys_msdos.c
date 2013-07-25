@@ -27,8 +27,6 @@
 
 #include "sys_exec_none.h"
 
-#include "sys_mount_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #include "sys_shlib_none.h"
 #endif /* ENABLE_SHARED_OBJECTS */

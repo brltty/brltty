@@ -24,8 +24,8 @@
 
 #include "log.h"
 
-#include "mount_mnttab.h"
-#include "mount_internal.h"
+#include "mntpt_mnttab.h"
+#include "mntpt_internal.h"
 
 FILE *
 openMountsTable (int update) {

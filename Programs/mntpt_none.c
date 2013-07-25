@@ -19,42 +19,29 @@
 #include "prologue.h"
 
 #include <stdio.h>
-#include <string.h>
 #include <errno.h>
 
 #include "log.h"
-
-#include "mount_mntent.h"
-#include "mount_internal.h"
+#include "mntpt_none.h"
+#include "mntpt_internal.h"
 
 FILE *
 openMountsTable (int update) {
-  FILE *table = setmntent(MOUNTS_TABLE_PATH, (update? "a": "r"));
-  if (!table)
-    logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-               "mounted file systems table open erorr: %s: %s",
-               MOUNTS_TABLE_PATH, strerror(errno));
-  return table;
+  errno = ENOSYS;
+  logSystemError("openMountsTable");
+  return NULL;
 }
 
 void
 closeMountsTable (FILE *table) {
-  endmntent(table);
 }
 
 MountEntry *
 readMountsTable (FILE *table) {
-  return getmntent(table);
+  return NULL;
 }
 
 int
 addMountEntry (FILE *table, MountEntry *entry) {
-#ifdef HAVE_ADDMNTENT
-  if (addmntent(table, entry)) {
-    logMessage(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-               entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
-    return 0;
-  }
-#endif /* HAVE_ADDMNTENT */
-  return 1;
+  return 0;
 }

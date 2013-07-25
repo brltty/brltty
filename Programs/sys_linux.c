@@ -153,8 +153,6 @@ getBootParameters (const char *name) {
 
 #include "sys_exec_unix.h"
 
-#include "sys_mount_linux.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"

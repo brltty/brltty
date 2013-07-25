@@ -16,22 +16,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_MOUNT_INTERNAL
-#define BRLTTY_INCLUDED_MOUNT_INTERNAL
-
-#include <stdio.h>
+#ifndef BRLTTY_INCLUDED_MNTFS
+#define BRLTTY_INCLUDED_MNTFS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern FILE *openMountsTable (int update);
-extern void closeMountsTable (FILE *table);
-extern MountEntry *readMountsTable (FILE *table);
-extern int addMountEntry (FILE *table, MountEntry *entry);
+extern int mountFileSystem (const char *path, const char *reference, const char *type);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_MOUNT_INTERNAL */
+#endif /* BRLTTY_INCLUDED_MNTFS */

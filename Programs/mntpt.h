@@ -16,12 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning file system mount support not available on this platform
+#ifndef BRLTTY_INCLUDED_MNTPT
+#define BRLTTY_INCLUDED_MNTPT
 
-#include <errno.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-int
-mountFileSystem (const char *path, const char *reference, const char *type) {
-  errno = ENOSYS;
-  return 0;
+typedef int (*MountPointTester) (const char *path, const char *type);
+
+extern char *findMountPoint (MountPointTester test);
+
+extern int makeMountPoint (const char *path, const char *reference, const char *type);
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_MNTPT */
