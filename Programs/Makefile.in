@@ -280,6 +280,9 @@ hostcmd_none.$O:
 hostcmd_unix.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_unix.c
 
+hostcmd_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_windows.c
+
 ###############################################################################
 
 mntpt.$O:
