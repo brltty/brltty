@@ -28,8 +28,6 @@
 
 #include "sys_prog_windows.h"
 
-#include "sys_boot_none.h"
-
 #include "sys_beep_windows.h"
 
 #include "sys_ports_windows.h"

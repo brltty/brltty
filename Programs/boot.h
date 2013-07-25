@@ -16,9 +16,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning boot parameter retrieval not available on this platform
+#ifndef BRLTTY_INCLUDED_BOOT
+#define BRLTTY_INCLUDED_BOOT
 
-char *
-getBootParameters (const char *name) {
-  return NULL;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+extern char * getBootParameters (const char *name);
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_BOOT */

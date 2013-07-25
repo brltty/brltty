@@ -23,8 +23,6 @@
 
 #include "sys_prog_none.h"
 
-#include "sys_boot_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #include "sys_shlib_none.h"
 #endif /* ENABLE_SHARED_OBJECTS */

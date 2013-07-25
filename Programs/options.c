@@ -29,7 +29,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "system.h"
+#include "boot.h"
 
 #undef ALLOW_DOS_OPTION_SYNTAX
 #if defined(__MINGW32__) || defined(__MSDOS__)

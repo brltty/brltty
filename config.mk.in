@@ -234,8 +234,12 @@ KEYBOARD_CFLAGS = @keyboard_cflags@
 KEYBOARD_LIBS = @keyboard_libs@
 
 MOUNT_OBJECTS = mntpt.$O mntpt_@mntpt_package@.$O mntfs_@mntfs_package@.$O
-MOUNT_CFLAGS = @mount_cflags@
-MOUNT_LIBS = @mount_libs@
+MOUNT_CFLAGS = @mntpt_cflags@ @mntfs_cflags@
+MOUNT_LIBS = @mntpt_libs@ @mntfs_libs@
+
+BOOT_OBJECTS = boot_@boot_package@.$O
+BOOT_CFLAGS = @boot_cflags@
+BOOT_LIBS = @boot_libs@
 
 CTB_OBJECTS = @contracted_braille_objects@
 

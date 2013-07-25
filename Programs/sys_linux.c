@@ -110,48 +110,6 @@ getProgramPath (void) {
   return path;
 }
 
-char *
-getBootParameters (const char *name) {
-  size_t nameLength = strlen(name);
-  char *parameters;
-
-  if ((parameters = strdup(""))) {
-    const char *path = "/proc/cmdline";
-    FILE *file;
-
-    if ((file = fopen(path, "r"))) {
-      char buffer[0X1000];
-      char *line = fgets(buffer, sizeof(buffer), file);
-
-      if (line) {
-        char *token;
-
-        while ((token = strtok(line, " \n"))) {
-          line = NULL;
-
-          if ((strncmp(token, name, nameLength) == 0) &&
-              (token[nameLength] == '=')) {
-            char *newParameters = strdup(token + nameLength + 1);
-
-            if (newParameters) {
-              free(parameters);
-              parameters = newParameters;
-            } else {
-              logMallocError();
-            }
-          }
-        }
-      }
-
-      fclose(file);
-    }
-  } else {
-    logMallocError();
-  }
-
-  return parameters;
-}
-
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"

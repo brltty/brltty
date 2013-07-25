@@ -18,22 +18,9 @@
 
 #include "prologue.h"
 
-#include "system.h"
+#include "boot.h"
 
-#include "sys_prog_none.h"
-
-#ifdef ENABLE_SHARED_OBJECTS
-#include "sys_shlib_none.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+char *
+getBootParameters (const char *name) {
+  return NULL;
+}

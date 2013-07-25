@@ -26,8 +26,6 @@
 
 #include "sys_prog_none.h"
 
-#include "sys_boot_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"

@@ -1272,6 +1272,12 @@ BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([boot], [boot parameters], [], [dnl
+   linux*)
+      boot_package="linux"
+      ;;
+])
+
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 test -n "${api_objects}" && {

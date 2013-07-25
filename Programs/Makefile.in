@@ -50,7 +50,7 @@ io_misc.$O:
 
 ###############################################################################
 
-PROGRAM_OBJECTS = program.$O pid.$O options.$O $(BASE_OBJECTS)
+PROGRAM_OBJECTS = program.$O pid.$O options.$O $(BOOT_OBJECTS) $(BASE_OBJECTS)
 
 program.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
@@ -307,6 +307,14 @@ mntfs_none.$O:
 
 mntfs_linux.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_linux.c
+
+###############################################################################
+
+boot_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/boot_none.c
+
+boot_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/boot_linux.c
 
 ###############################################################################
 
