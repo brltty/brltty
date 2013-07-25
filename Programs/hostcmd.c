@@ -35,10 +35,16 @@
 #include "hostcmd_internal.h"
 
 int
-processHostCommandStreams (HostCommandStreamProcessor *processor, HostCommandStream *hcs) {
-  while (hcs->file) {
-    if (*hcs->file) {
-      if (!processor(hcs)) return 0;
+processHostCommandStreams (
+  HostCommandStream *hcs,
+  HostCommandStreamProcessor *processStream,
+  void *data
+) {
+  while (hcs->streamVariable) {
+    if (*hcs->streamVariable) {
+      if (!processStream(hcs, data)) {
+        return 0;
+      }
     }
 
     hcs += 1;
@@ -57,19 +63,19 @@ initializeHostCommandOptions (HostCommandOptions *options) {
 }
 
 static int
-constructHostCommandStream (HostCommandStream *hcs) {
-  **hcs->file = NULL;
+constructHostCommandStream (HostCommandStream *hcs, void *data) {
+  **hcs->streamVariable = NULL;
   subconstructHostCommandStream(hcs);
   return 1;
 }
 
 static int
-destructHostCommandStream (HostCommandStream *hcs) {
+destructHostCommandStream (HostCommandStream *hcs, void *data) {
   subdestructHostCommandStream(hcs);
 
-  if (**hcs->file) {
-    fclose(**hcs->file);
-    **hcs->file = NULL;
+  if (**hcs->streamVariable) {
+    fclose(**hcs->streamVariable);
+    **hcs->streamVariable = NULL;
   }
 
   return 1;
@@ -92,32 +98,34 @@ runHostCommand (
 
   {
     HostCommandStream streams[] = {
-      { .file = &options->standardInput,
-        .descriptor = 0,
-        .input = 1
+      { .streamVariable = &options->standardInput,
+        .fileDescriptor = 0,
+        .isInput = 1
       },
 
-      { .file = &options->standardOutput,
-        .descriptor = 1,
-        .input = 0
+      { .streamVariable = &options->standardOutput,
+        .fileDescriptor = 1,
+        .isInput = 0
       },
 
-      { .file = &options->standardError,
-        .descriptor = 2,
-        .input = 0
+      { .streamVariable = &options->standardError,
+        .fileDescriptor = 2,
+        .isInput = 0
       },
 
-      { .file = NULL }
+      { .streamVariable = NULL }
     };
 
-    if (processHostCommandStreams(constructHostCommandStream, streams)) {
+    if (processHostCommandStreams(streams, constructHostCommandStream, NULL)) {
       int ok = 0;
 
-      if (processHostCommandStreams(prepareHostCommandStream, streams)) {
-        if (runCommand(&result, command, streams, options->asynchronous)) ok = 1;
+      if (processHostCommandStreams(streams, prepareHostCommandStream, NULL)) {
+        if (runCommand(&result, command, streams, options->asynchronous)) {
+          ok = 1;
+        }
       }
 
-      if (!ok) processHostCommandStreams(destructHostCommandStream, streams);
+      if (!ok) processHostCommandStreams(streams, destructHostCommandStream, NULL);
     }
   }
 

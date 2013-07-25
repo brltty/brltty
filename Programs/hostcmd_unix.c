@@ -38,22 +38,22 @@ subconstructHostCommandStream (HostCommandStream *hcs) {
 void
 subdestructHostCommandStream (HostCommandStream *hcs) {
   {
-    int *descriptor = hcs->package.pipe;
-    const int *end = descriptor + 2;
+    int *fileDescriptor = hcs->package.pipe;
+    const int *end = fileDescriptor + 2;
 
-    while (descriptor < end) {
-      if (*descriptor != -1) {
-        close(*descriptor);
-        *descriptor = -1;
+    while (fileDescriptor < end) {
+      if (*fileDescriptor != -1) {
+        close(*fileDescriptor);
+        *fileDescriptor = -1;
       }
 
-      descriptor += 1;
+      fileDescriptor += 1;
     }
   }
 }
 
 int
-prepareHostCommandStream (HostCommandStream *hcs) {
+prepareHostCommandStream (HostCommandStream *hcs, void *data) {
   if (pipe(hcs->package.pipe) == -1) {
     logSystemError("pipe");
     return 0;
@@ -63,12 +63,12 @@ prepareHostCommandStream (HostCommandStream *hcs) {
 }
 
 static int
-parentHostCommandStream (HostCommandStream *hcs) {
+parentHostCommandStream (HostCommandStream *hcs, void *data) {
   int *local;
   int *remote;
   const char *mode;
 
-  if (hcs->input) {
+  if (hcs->isInput) {
     local = &hcs->package.pipe[1];
     remote = &hcs->package.pipe[0];
     mode = "w";
@@ -81,7 +81,7 @@ parentHostCommandStream (HostCommandStream *hcs) {
   close(*remote);
   *remote = -1;
 
-  if (!(**hcs->file = fdopen(*local, mode))) {
+  if (!(**hcs->streamVariable = fdopen(*local, mode))) {
     logSystemError("fdopen");
     return 0;
   }
@@ -91,11 +91,11 @@ parentHostCommandStream (HostCommandStream *hcs) {
 }
 
 static int
-childHostCommandStream (HostCommandStream *hcs) {
+childHostCommandStream (HostCommandStream *hcs, void *data) {
   int *local;
   int *remote;
 
-  if (hcs->input) {
+  if (hcs->isInput) {
     local = &hcs->package.pipe[0];
     remote = &hcs->package.pipe[1];
   } else {
@@ -106,12 +106,12 @@ childHostCommandStream (HostCommandStream *hcs) {
   close(*remote);
   *remote = -1;
 
-  if (close(hcs->descriptor) == -1) {
+  if (close(hcs->fileDescriptor) == -1) {
     logSystemError("close");
     return 0;
   }
 
-  if (fcntl(*local, F_DUPFD, hcs->descriptor) == -1) {
+  if (fcntl(*local, F_DUPFD, hcs->fileDescriptor) == -1) {
     logSystemError("fcntl[F_DUPFD]");
     return 0;
   }
@@ -145,7 +145,7 @@ runCommand (
     case 0: /* child */
       sigprocmask(SIG_SETMASK, &oldMask, NULL);
 
-      if (processHostCommandStreams(childHostCommandStream, streams)) {
+      if (processHostCommandStreams(streams, childHostCommandStream, NULL)) {
         execvp(command[0], (char *const*)command);
         logSystemError("execvp");
       }
@@ -153,7 +153,7 @@ runCommand (
       _exit(1);
 
     default: /* parent */
-      if (processHostCommandStreams(parentHostCommandStream, streams)) {
+      if (processHostCommandStreams(streams, parentHostCommandStream, NULL)) {
         ok = 1;
 
         if (asynchronous) {

@@ -26,19 +26,24 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  FILE **const *const file;
-  const int descriptor;
-  const unsigned input:1;
+  FILE **const *const streamVariable;
+  const int fileDescriptor;
+  const unsigned isInput:1;
 
   HostCommandPackageFields package;
 } HostCommandStream;
 
-typedef int HostCommandStreamProcessor (HostCommandStream *hcs);
-extern int processHostCommandStreams (HostCommandStreamProcessor *processor, HostCommandStream *hcs);
+typedef int HostCommandStreamProcessor (HostCommandStream *hcs, void *data);
+
+extern int processHostCommandStreams (
+  HostCommandStream *hcs,
+  HostCommandStreamProcessor *processStream,
+  void *data
+);
 
 extern void subconstructHostCommandStream (HostCommandStream *hcs);
 extern void subdestructHostCommandStream (HostCommandStream *hcs);
-extern int prepareHostCommandStream (HostCommandStream *hcs);
+extern int prepareHostCommandStream (HostCommandStream *hcs, void *data);
 
 extern int runCommand (
   int *result,

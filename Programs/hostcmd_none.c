@@ -35,7 +35,7 @@ subdestructHostCommandStream (HostCommandStream *hcs) {
 }
 
 int
-prepareHostCommandStream (HostCommandStream *hcs) {
+prepareHostCommandStream (HostCommandStream *hcs, void *data) {
   return 1;
 }
 
