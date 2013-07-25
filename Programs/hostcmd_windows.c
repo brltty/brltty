@@ -51,8 +51,6 @@ runCommand (
   int ok = 0;
   char *line = makeWindowsCommandLine(command);
 
-  *result = 0XFF;
-
   if (line) {
     STARTUPINFO startup;
     PROCESS_INFORMATION process;
@@ -67,16 +65,27 @@ runCommand (
                       CREATE_NEW_PROCESS_GROUP,
                       NULL, NULL, &startup, &process)) {
       DWORD status;
-      while ((status = WaitForSingleObject(process.hProcess, INFINITE)) == WAIT_TIMEOUT);
-      if (status == WAIT_OBJECT_0) {
-        DWORD code;
-        if (GetExitCodeProcess(process.hProcess, &code)) {
-          *result = code;
-        } else {
-          logWindowsSystemError("GetExitCodeProcess");
-        }
+
+      ok = 1;
+
+      if (asynchronous) {
+        *result = 0;
       } else {
-        logWindowsSystemError("WaitForSingleObject");
+        *result = 0XFF;
+
+        while ((status = WaitForSingleObject(process.hProcess, INFINITE)) == WAIT_TIMEOUT);
+
+        if (status == WAIT_OBJECT_0) {
+          DWORD code;
+
+          if (GetExitCodeProcess(process.hProcess, &code)) {
+            *result = code;
+          } else {
+            logWindowsSystemError("GetExitCodeProcess");
+          }
+        } else {
+          logWindowsSystemError("WaitForSingleObject");
+        }
       }
 
       CloseHandle(process.hProcess);
@@ -86,6 +95,8 @@ runCommand (
     }
 
     free(line);
+  } else {
+    logMallocError();
   }
 
   return ok;
