@@ -29,7 +29,7 @@ extern "C" {
 
 typedef struct {
   int pipe[2];
-} HostCommandPackageFields;
+} HostCommandPackageData;
 
 #ifdef __cplusplus
 }

@@ -30,15 +30,16 @@ isHostCommand (const char *path) {
   return access(path, X_OK) != -1;
 }
 
-void
-subconstructHostCommandStream (HostCommandStream *hcs) {
-  hcs->package.pipe[0] = hcs->package.pipe[1] = -1;
+int
+constructHostCommandPackageData (HostCommandPackageData *pkg) {
+  pkg->pipe[0] = pkg->pipe[1] = -1;
+  return 1;
 }
 
 void
-subdestructHostCommandStream (HostCommandStream *hcs) {
+destructHostCommandPackageData (HostCommandPackageData *pkg) {
   {
-    int *fileDescriptor = hcs->package.pipe;
+    int *fileDescriptor = pkg->pipe;
     const int *end = fileDescriptor + 2;
 
     while (fileDescriptor < end) {

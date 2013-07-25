@@ -26,12 +26,13 @@ isHostCommand (const char *path) {
   return 0;
 }
 
-void
-subconstructHostCommandStream (HostCommandStream *hcs) {
+int
+constructHostCommandPackageData (HostCommandPackageData *pkg) {
+  return 1;
 }
 
 void
-subdestructHostCommandStream (HostCommandStream *hcs) {
+destructHostCommandPackageData (HostCommandPackageData *pkg) {
 }
 
 int

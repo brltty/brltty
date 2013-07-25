@@ -65,13 +65,12 @@ initializeHostCommandOptions (HostCommandOptions *options) {
 static int
 constructHostCommandStream (HostCommandStream *hcs, void *data) {
   **hcs->streamVariable = NULL;
-  subconstructHostCommandStream(hcs);
-  return 1;
+  return constructHostCommandPackageData(&hcs->package);
 }
 
 static int
 destructHostCommandStream (HostCommandStream *hcs, void *data) {
-  subdestructHostCommandStream(hcs);
+  destructHostCommandPackageData(&hcs->package);
 
   if (**hcs->streamVariable) {
     fclose(**hcs->streamVariable);

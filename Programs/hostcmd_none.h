@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct {
   unsigned char dummy;
-} HostCommandPackageFields;
+} HostCommandPackageData;
 
 #ifdef __cplusplus
 }

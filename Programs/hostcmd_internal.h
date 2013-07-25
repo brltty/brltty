@@ -30,7 +30,7 @@ typedef struct {
   const int fileDescriptor;
   const unsigned isInput:1;
 
-  HostCommandPackageFields package;
+  HostCommandPackageData package;
 } HostCommandStream;
 
 typedef int HostCommandStreamProcessor (HostCommandStream *hcs, void *data);
@@ -41,8 +41,8 @@ extern int processHostCommandStreams (
   void *data
 );
 
-extern void subconstructHostCommandStream (HostCommandStream *hcs);
-extern void subdestructHostCommandStream (HostCommandStream *hcs);
+extern int constructHostCommandPackageData (HostCommandPackageData *pkg);
+extern void destructHostCommandPackageData (HostCommandPackageData *pkg);
 extern int prepareHostCommandStream (HostCommandStream *hcs, void *data);
 
 extern int runCommand (
