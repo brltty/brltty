@@ -1227,6 +1227,9 @@ BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
+   mingw*)
+      hostcmd_package=windows
+      ;;
 ], [dnl
    unix)
       AC_CHECK_DECL([fork], [dnl

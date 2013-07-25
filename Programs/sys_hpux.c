@@ -38,8 +38,6 @@
 
 #include "sys_boot_none.h"
 
-#include "sys_exec_unix.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 void *
 loadSharedObject (const char *path) {

@@ -16,9 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning host command execution not available on this platform
+#ifndef BRLTTY_INCLUDED_HOSTCMD_WINDOWS
+#define BRLTTY_INCLUDED_HOSTCMD_WINDOWS
 
-int
-executeHostCommand (const char *const *arguments) {
-  return 1;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+typedef struct {
+  unsigned char dummy;
+} HostCommandPackageFields;
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_HOSTCMD_WINDOWS */

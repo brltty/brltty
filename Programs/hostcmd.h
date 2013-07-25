@@ -42,6 +42,8 @@ extern int runHostCommand (
   const HostCommandOptions *options
 );
 
+extern int executeHostCommand (const char *const *command);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -36,8 +36,6 @@
 
 #ifdef __CYGWIN32__
 
-#include "sys_exec_unix.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
@@ -54,8 +52,6 @@
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #else /* __CYGWIN32__ */
-
-#include "sys_exec_windows.h"
 
 #ifdef ENABLE_SHARED_OBJECTS
 #include "sys_shlib_windows.h"

@@ -34,9 +34,10 @@
 #include "file.h"
 #include "device.h"
 #include "timing.h"
+#include "hostcmd.h"
+#include "bitmask.h"
 #include "system.h"
 #include "sys_linux.h"
-#include "bitmask.h"
 
 #ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>
@@ -150,8 +151,6 @@ getBootParameters (const char *name) {
 
   return parameters;
 }
-
-#include "sys_exec_unix.h"
 
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)

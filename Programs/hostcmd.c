@@ -25,6 +25,8 @@
 #include "hostcmd_none.h"
 #elif defined(USE_HOSTCMD_PACKAGE_UNIX)
 #include "hostcmd_unix.h"
+#elif defined(USE_HOSTCMD_PACKAGE_WINDOWS)
+#include "hostcmd_windows.h"
 #else /* host command package */
 #error host command package not selected
 #include "hostcmd_none.h"
@@ -120,4 +122,12 @@ runHostCommand (
   }
 
   return result;
+}
+
+int
+executeHostCommand (const char *const *command) {
+  HostCommandOptions options;
+
+  initializeHostCommandOptions(&options);
+  return runHostCommand(command, &options);
 }

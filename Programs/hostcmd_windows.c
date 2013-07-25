@@ -18,33 +18,33 @@
 
 #include "prologue.h"
 
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/audioio.h>
-#include <sys/time.h>
+#include "hostcmd_windows.h"
+#include "hostcmd_internal.h"
 
-#include "system.h"
+int
+isHostCommand (const char *path) {
+  return 0;
+}
 
-#include "sys_prog_none.h"
+void
+subconstructHostCommandStream (HostCommandStream *hcs) {
+}
 
-#include "sys_boot_none.h"
+void
+subdestructHostCommandStream (HostCommandStream *hcs) {
+}
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (DL_LAZY)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
+int
+prepareHostCommandStream (HostCommandStream *hcs) {
+  return 1;
+}
 
-#include "sys_beep_wskbd.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#define PCM_AUDIO_DEVICE_PATH "/dev/audio"
-#include "sys_pcm_audio.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+int
+runCommand (
+  int *result,
+  const char *const *command,
+  HostCommandStream *streams,
+  int asynchronous
+) {
+  return 0;
+}

@@ -39,7 +39,7 @@ static int shmFileDescriptor = -1;
 #endif /* HAVE_SHM_OPEN */
 
 #include "log.h"
-#include "system.h"
+#include "hostcmd.h"
 #include "charset.h"
 
 #include "scr_driver.h"
@@ -152,6 +152,7 @@ doScreenCommand (const char *command, ...) {
 
     {
       int result = executeHostCommand(argv);
+
       if (result == 0) return 1;
       logMessage(LOG_ERR, "screen error: %d", result);
     }
