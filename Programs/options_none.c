@@ -16,17 +16,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BOOT
-#define BRLTTY_INCLUDED_BOOT
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "options.h"
 
-extern char * getBootParameters (const char *name);
-
-#ifdef __cplusplus
+char *
+getBootParameters (const char *name) {
+  return NULL;
 }
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_BOOT */

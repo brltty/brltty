@@ -75,13 +75,18 @@ typedef struct {
 
 #define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
 
-extern ProgramExitStatus processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
+extern ProgramExitStatus processOptions (
+  const OptionsDescriptor *descriptor,
+  int *argumentCount, char ***argumentVector
+);
 
 #define PROCESS_OPTIONS(descriptorVariable, argcVariable, argvVariable) { \
   ProgramExitStatus exitStatus = processOptions(&descriptorVariable, &argcVariable, &argvVariable); \
   if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_SUCCESS; \
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
+
+extern char * getBootParameters (const char *name);
 
 #ifdef __cplusplus
 }

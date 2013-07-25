@@ -1272,9 +1272,9 @@ BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([boot], [boot parameters], [], [dnl
+BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
    linux*)
-      boot_package="linux"
+      options_package="linux"
       ;;
 ])
 

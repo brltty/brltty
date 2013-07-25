@@ -300,9 +300,9 @@ extern "C" {
 #undef USE_MNTFS_PACKAGE_NONE
 #undef USE_MNTFS_PACKAGE_LINUX
 
-/* Define only one of the following boot parameters packages. */
-#undef USE_BOOT_PACKAGE_NONE
-#undef USE_BOOT_PACKAGE_LINUX
+/* Define only one of the following options packages. */
+#undef USE_OPTIONS_PACKAGE_NONE
+#undef USE_OPTIONS_PACKAGE_LINUX
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT

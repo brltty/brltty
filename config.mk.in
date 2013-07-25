@@ -237,9 +237,9 @@ MOUNT_OBJECTS = mntpt.$O mntpt_@mntpt_package@.$O mntfs_@mntfs_package@.$O
 MOUNT_CFLAGS = @mntpt_cflags@ @mntfs_cflags@
 MOUNT_LIBS = @mntpt_libs@ @mntfs_libs@
 
-BOOT_OBJECTS = boot_@boot_package@.$O
-BOOT_CFLAGS = @boot_cflags@
-BOOT_LIBS = @boot_libs@
+OPTIONS_OBJECTS = options.$O options_@options_package@.$O
+OPTIONS_CFLAGS = @options_cflags@
+OPTIONS_LIBS = @options_libs@
 
 CTB_OBJECTS = @contracted_braille_objects@
 
