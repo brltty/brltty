@@ -28,17 +28,52 @@ isHostCommand (const char *path) {
   return 0;
 }
 
-void
-subconstructHostCommandStream (HostCommandStream *hcs) {
+int
+constructHostCommandPackageData (HostCommandPackageData *pkg) {
+  pkg->inputHandle = INVALID_HANDLE_VALUE;
+  pkg->outputHandle = INVALID_HANDLE_VALUE;
+  return 1;
+}
+
+static void
+closeHandle (HANDLE *handle) {
+  if (*handle != INVALID_HANDLE_VALUE) {
+    if (*handle) {
+      CloseHandle(*handle);
+    }
+
+    *handle = INVALID_HANDLE_VALUE;
+  }
 }
 
 void
-subdestructHostCommandStream (HostCommandStream *hcs) {
+destructHostCommandPackageData (HostCommandPackageData *pkg) {
+  closeHandle(&pkg->inputHandle);
+  closeHandle(&pkg->outputHandle);
 }
 
 int
-prepareHostCommandStream (HostCommandStream *hcs) {
-  return 1;
+prepareHostCommandStream (HostCommandStream *hcs, void *data) {
+  SECURITY_ATTRIBUTES attributes;
+
+  ZeroMemory(&attributes, sizeof(attributes));
+  attributes.nLength = sizeof(attributes);
+  attributes.bInheritHandle = TRUE;
+  attributes.lpSecurityDescriptor = NULL;
+
+  if (CreatePipe(&hcs->package.inputHandle, &hcs->package.outputHandle, &attributes, 0)) {
+    HANDLE parentHandle = hcs->isInput? hcs->package.outputHandle: hcs->package.inputHandle;
+
+    if (SetHandleInformation(parentHandle, HANDLE_FLAG_INHERIT, 0)) {
+      return 1;
+    } else {
+      logWindowsSystemError("SetHandleInformation");
+    }
+  } else {
+    logWindowsSystemError("CreatePipe");
+  }
+
+  return 0;
 }
 
 int
@@ -55,10 +90,11 @@ runCommand (
     STARTUPINFO startup;
     PROCESS_INFORMATION process;
 
-    memset(&startup, 0, sizeof(startup));
+    ZeroMemory(&startup, sizeof(startup));
     startup.cb = sizeof(startup);
+    startup.dwFlags = STARTF_USESTDHANDLES;
 
-    memset(&process, 0, sizeof(process));
+    ZeroMemory(&process, sizeof(process));
 
     logMessage(LOG_DEBUG, "host command: %s", line);
     if (CreateProcess(NULL, line, NULL, NULL, TRUE,

@@ -24,7 +24,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  unsigned char dummy;
+  HANDLE inputHandle;
+  HANDLE outputHandle;
 } HostCommandPackageData;
 
 #ifdef __cplusplus
