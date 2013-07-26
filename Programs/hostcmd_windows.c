@@ -23,16 +23,14 @@
 #include "hostcmd_windows.h"
 #include "hostcmd_internal.h"
 
+typedef struct {
+  DWORD identifier;
+  HANDLE *field;
+} HandleEntry;
+
 int
 isHostCommand (const char *path) {
   return 0;
-}
-
-int
-constructHostCommandPackageData (HostCommandPackageData *pkg) {
-  pkg->inputHandle = INVALID_HANDLE_VALUE;
-  pkg->outputHandle = INVALID_HANDLE_VALUE;
-  return 1;
 }
 
 static void
@@ -44,6 +42,23 @@ closeHandle (HANDLE *handle) {
 
     *handle = INVALID_HANDLE_VALUE;
   }
+}
+
+static HANDLE *
+getParentHandle (HostCommandStream *hcs) {
+  return hcs->isInput? &hcs->package.outputHandle: &hcs->package.inputHandle;
+}
+
+static HANDLE *
+getChildHandle (HostCommandStream *hcs) {
+  return hcs->isInput? &hcs->package.inputHandle: &hcs->package.outputHandle;
+}
+
+int
+constructHostCommandPackageData (HostCommandPackageData *pkg) {
+  pkg->inputHandle = INVALID_HANDLE_VALUE;
+  pkg->outputHandle = INVALID_HANDLE_VALUE;
+  return 1;
 }
 
 void
@@ -62,9 +77,7 @@ prepareHostCommandStream (HostCommandStream *hcs, void *data) {
   attributes.lpSecurityDescriptor = NULL;
 
   if (CreatePipe(&hcs->package.inputHandle, &hcs->package.outputHandle, &attributes, 0)) {
-    HANDLE parentHandle = hcs->isInput? hcs->package.outputHandle: hcs->package.inputHandle;
-
-    if (SetHandleInformation(parentHandle, HANDLE_FLAG_INHERIT, 0)) {
+    if (SetHandleInformation(*getParentHandle(hcs), HANDLE_FLAG_INHERIT, 0)) {
       return 1;
     } else {
       logWindowsSystemError("SetHandleInformation");
@@ -74,6 +87,24 @@ prepareHostCommandStream (HostCommandStream *hcs, void *data) {
   }
 
   return 0;
+}
+
+typedef struct {
+  const HandleEntry *const handleTable;
+} SetChildHandleData;
+
+static int
+setChildHandle (HostCommandStream *hcs, void *data) {
+  SetChildHandleData *sch = data;
+
+  *sch->handleTable[hcs->fileDescriptor].field = *getChildHandle(hcs);
+  return 1;
+}
+
+static int
+closeChildHandle (HostCommandStream *hcs, void *data) {
+  closeHandle(getChildHandle(hcs));
+  return 1;
 }
 
 int
@@ -88,46 +119,77 @@ runCommand (
 
   if (line) {
     STARTUPINFO startup;
-    PROCESS_INFORMATION process;
+
+    const HandleEntry handleTable[] = {
+      [0] = {.identifier=STD_INPUT_HANDLE , .field=&startup.hStdInput },
+      [1] = {.identifier=STD_OUTPUT_HANDLE, .field=&startup.hStdOutput},
+      [2] = {.identifier=STD_ERROR_HANDLE , .field=&startup.hStdError },
+    };
+
+    const unsigned int handleCount = ARRAY_COUNT(handleTable);
+    const HandleEntry *const handleEnd = handleTable + handleCount;
+
+    SetChildHandleData sch = {
+      .handleTable = handleTable
+    };
+
+    logMessage(LOG_DEBUG, "host command: %s", line);
 
     ZeroMemory(&startup, sizeof(startup));
     startup.cb = sizeof(startup);
     startup.dwFlags = STARTF_USESTDHANDLES;
 
-    ZeroMemory(&process, sizeof(process));
+    {
+      const HandleEntry *hdl = handleTable;
 
-    logMessage(LOG_DEBUG, "host command: %s", line);
-    if (CreateProcess(NULL, line, NULL, NULL, TRUE,
-                      CREATE_NEW_PROCESS_GROUP,
-                      NULL, NULL, &startup, &process)) {
-      DWORD status;
-
-      ok = 1;
-
-      if (asynchronous) {
-        *result = 0;
-      } else {
-        *result = 0XFF;
-
-        while ((status = WaitForSingleObject(process.hProcess, INFINITE)) == WAIT_TIMEOUT);
-
-        if (status == WAIT_OBJECT_0) {
-          DWORD code;
-
-          if (GetExitCodeProcess(process.hProcess, &code)) {
-            *result = code;
-          } else {
-            logWindowsSystemError("GetExitCodeProcess");
-          }
-        } else {
-          logWindowsSystemError("WaitForSingleObject");
+      while (hdl < handleEnd) {
+        if ((*hdl->field = GetStdHandle(hdl->identifier)) == INVALID_HANDLE_VALUE) {
+          logWindowsSystemError("GetStdHandle");
+          return 0;
         }
-      }
 
-      CloseHandle(process.hProcess);
-      CloseHandle(process.hThread);
-    } else {
-      logWindowsSystemError("CreateProcess");
+        hdl += 1;
+      }
+    }
+
+    if (processHostCommandStreams(streams, setChildHandle, &sch)) {
+      PROCESS_INFORMATION info;
+
+      ZeroMemory(&info, sizeof(info));
+
+      if (CreateProcess(NULL, line, NULL, NULL, TRUE,
+                        CREATE_NEW_PROCESS_GROUP,
+                        NULL, NULL, &startup, &info)) {
+        DWORD status;
+
+        processHostCommandStreams(streams, closeChildHandle, NULL);
+        ok = 1;
+
+        if (asynchronous) {
+          *result = 0;
+        } else {
+          *result = 0XFF;
+
+          while ((status = WaitForSingleObject(info.hProcess, INFINITE)) == WAIT_TIMEOUT);
+
+          if (status == WAIT_OBJECT_0) {
+            DWORD code;
+
+            if (GetExitCodeProcess(info.hProcess, &code)) {
+              *result = code;
+            } else {
+              logWindowsSystemError("GetExitCodeProcess");
+            }
+          } else {
+            logWindowsSystemError("WaitForSingleObject");
+          }
+        }
+
+        CloseHandle(info.hProcess);
+        CloseHandle(info.hThread);
+      } else {
+        logWindowsSystemError("CreateProcess");
+      }
     }
 
     free(line);
