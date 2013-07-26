@@ -21,9 +21,33 @@
 #include <stdio.h>
 
 #include "log.h"
-
 #include "hostcmd_unix.h"
 #include "hostcmd_internal.h"
+
+static int *
+getPipeDescriptor (HostCommandPackageData *pkg, unsigned int index) {
+  return &pkg->pipe[index];
+}
+
+static int *
+getInputDescriptor (HostCommandPackageData *pkg) {
+  return getPipeDescriptor(pkg, 0);
+}
+
+static int *
+getOutputDescriptor (HostCommandPackageData *pkg) {
+  return getPipeDescriptor(pkg, 1);
+}
+
+static int *
+getParentDescriptor (HostCommandStream *hcs) {
+  return hcs->isInput? getOutputDescriptor(&hcs->package): getInputDescriptor(&hcs->package);
+}
+
+static int *
+getChildDescriptor (HostCommandStream *hcs) {
+  return hcs->isInput? getInputDescriptor(&hcs->package): getOutputDescriptor(&hcs->package);
+}
 
 int
 constructHostCommandPackageData (HostCommandPackageData *pkg) {
@@ -59,20 +83,10 @@ prepareHostCommandStream (HostCommandStream *hcs, void *data) {
 }
 
 static int
-parentHostCommandStream (HostCommandStream *hcs, void *data) {
-  int *local;
-  int *remote;
-  const char *mode;
-
-  if (hcs->isInput) {
-    local = &hcs->package.pipe[1];
-    remote = &hcs->package.pipe[0];
-    mode = "w";
-  } else {
-    local = &hcs->package.pipe[0];
-    remote = &hcs->package.pipe[1];
-    mode = "r";
-  }
+finishParentHostCommandStream (HostCommandStream *hcs, void *data) {
+  int *local = getParentDescriptor(hcs);
+  int *remote = getChildDescriptor(hcs);
+  const char *mode = hcs->isInput? "w": "r";
 
   close(*remote);
   *remote = -1;
@@ -87,17 +101,9 @@ parentHostCommandStream (HostCommandStream *hcs, void *data) {
 }
 
 static int
-childHostCommandStream (HostCommandStream *hcs, void *data) {
-  int *local;
-  int *remote;
-
-  if (hcs->isInput) {
-    local = &hcs->package.pipe[0];
-    remote = &hcs->package.pipe[1];
-  } else {
-    local = &hcs->package.pipe[1];
-    remote = &hcs->package.pipe[0];
-  }
+finishChildHostCommandStream (HostCommandStream *hcs, void *data) {
+  int *local = getChildDescriptor(hcs);
+  int *remote = getParentDescriptor(hcs);
 
   close(*remote);
   *remote = -1;
@@ -141,7 +147,7 @@ runCommand (
     case 0: /* child */
       sigprocmask(SIG_SETMASK, &oldMask, NULL);
 
-      if (processHostCommandStreams(streams, childHostCommandStream, NULL)) {
+      if (processHostCommandStreams(streams, finishChildHostCommandStream, NULL)) {
         execvp(command[0], (char *const*)command);
         logSystemError("execvp");
       }
@@ -149,7 +155,7 @@ runCommand (
       _exit(1);
 
     default: /* parent */
-      if (processHostCommandStreams(streams, parentHostCommandStream, NULL)) {
+      if (processHostCommandStreams(streams, finishParentHostCommandStream, NULL)) {
         ok = 1;
 
         if (asynchronous) {
