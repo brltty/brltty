@@ -28,11 +28,6 @@ typedef struct {
   HANDLE *field;
 } HandleEntry;
 
-int
-isHostCommand (const char *path) {
-  return 0;
-}
-
 static void
 closeHandle (HANDLE *handle) {
   if (*handle != INVALID_HANDLE_VALUE) {

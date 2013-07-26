@@ -26,11 +26,6 @@
 #include "hostcmd_internal.h"
 
 int
-isHostCommand (const char *path) {
-  return access(path, X_OK) != -1;
-}
-
-int
 constructHostCommandPackageData (HostCommandPackageData *pkg) {
   pkg->pipe[0] = pkg->pipe[1] = -1;
   return 1;

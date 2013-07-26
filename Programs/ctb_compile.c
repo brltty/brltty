@@ -581,7 +581,7 @@ ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
 
-  if (isHostCommand(fileName)) {
+  if (testProgramPath(fileName)) {
     if ((table = malloc(sizeof(*table)))) {
       memset(table, 0, sizeof(*table));
 

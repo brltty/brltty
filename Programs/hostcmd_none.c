@@ -22,11 +22,6 @@
 #include "hostcmd_internal.h"
 
 int
-isHostCommand (const char *path) {
-  return 0;
-}
-
-int
 constructHostCommandPackageData (HostCommandPackageData *pkg) {
   return 1;
 }

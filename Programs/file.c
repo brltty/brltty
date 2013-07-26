@@ -194,6 +194,8 @@ testFilePath (const char *path) {
 
 int
 testProgramPath (const char *path) {
+  if (!testFilePath(path)) return 0;
+
 #ifdef X_OK
   return access(path, X_OK) != -1;
 #else /* X_OK */
