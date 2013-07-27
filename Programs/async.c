@@ -1027,7 +1027,7 @@ asyncMonitorInput (
   return makeHandle(handle, newMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
-  logSystemError("asyncRead");
+  logSystemError("asyncMonitorInput");
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
@@ -1062,7 +1062,7 @@ asyncMonitorOutput (
   return makeHandle(handle, newMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
   errno = ENOSYS;
-  logSystemError("asyncWrite");
+  logSystemError("asyncMonitorOutput");
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
