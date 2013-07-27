@@ -146,8 +146,5 @@ runHostCommand (
 
 int
 executeHostCommand (const char *const *command) {
-  HostCommandOptions options;
-
-  initializeHostCommandOptions(&options);
-  return runHostCommand(command, &options);
+  return runHostCommand(command, NULL);
 }
