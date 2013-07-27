@@ -18,6 +18,9 @@
 
 #include "prologue.h"
 
+#include <io.h>
+#include <fcntl.h>
+
 #include "log.h"
 #include "sys_windows.h"
 #include "hostcmd_windows.h"
@@ -97,7 +100,24 @@ setChildHandle (HostCommandStream *hcs, void *data) {
 }
 
 static int
-closeChildHandle (HostCommandStream *hcs, void *data) {
+finishParentHostCommandStream (HostCommandStream *hcs, void *data) {
+  {
+    HANDLE *handle = getParentHandle(hcs);
+    int mode = hcs->isInput? O_WRONLY: O_RDONLY;
+    int fileDescriptor;
+
+    if ((fileDescriptor = _open_osfhandle((intptr_t)*handle, mode)) == -1) {
+      logSystemError("_open_osfhandle");
+      return 0;
+    }
+    *handle = INVALID_HANDLE_VALUE;
+
+    if (!finishHostCommandStream(hcs, fileDescriptor)) {
+      _close(fileDescriptor);
+      return 0;
+    }
+  }
+
   closeHandle(getChildHandle(hcs));
   return 1;
 }
@@ -155,28 +175,29 @@ runCommand (
       if (CreateProcess(NULL, line, NULL, NULL, TRUE,
                         CREATE_NEW_PROCESS_GROUP,
                         NULL, NULL, &startup, &info)) {
-        DWORD status;
+        if (processHostCommandStreams(streams, finishParentHostCommandStream, NULL)) {
+          ok = 1;
 
-        processHostCommandStreams(streams, closeChildHandle, NULL);
-        ok = 1;
-
-        if (asynchronous) {
-          *result = 0;
-        } else {
-          *result = 0XFF;
-
-          while ((status = WaitForSingleObject(info.hProcess, INFINITE)) == WAIT_TIMEOUT);
-
-          if (status == WAIT_OBJECT_0) {
-            DWORD code;
-
-            if (GetExitCodeProcess(info.hProcess, &code)) {
-              *result = code;
-            } else {
-              logWindowsSystemError("GetExitCodeProcess");
-            }
+          if (asynchronous) {
+            *result = 0;
           } else {
-            logWindowsSystemError("WaitForSingleObject");
+            DWORD waitResult;
+
+            *result = 0XFF;
+
+            while ((waitResult = WaitForSingleObject(info.hProcess, INFINITE)) == WAIT_TIMEOUT);
+
+            if (waitResult == WAIT_OBJECT_0) {
+              DWORD exitCode;
+
+              if (GetExitCodeProcess(info.hProcess, &exitCode)) {
+                *result = exitCode;
+              } else {
+                logWindowsSystemError("GetExitCodeProcess");
+              }
+            } else {
+              logWindowsSystemError("WaitForSingleObject");
+            }
           }
         }
 
