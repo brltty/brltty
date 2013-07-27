@@ -184,7 +184,6 @@ deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
 
 void
 handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
-  int mapped = 0;
   KeyTableState state = KTS_UNBOUND;
 
   if ((code >= 0) && (code < keyCodeLimit)) {
@@ -192,16 +191,11 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
     if ((kv->set != KBD_SET_SPECIAL) || (kv->key != KBD_KEY_SPECIAL_Unmapped)) {
       if ((kv->set == KBD_SET_SPECIAL) && (kv->key == KBD_KEY_SPECIAL_Ignore)) return;
-
-      mapped = 1;
       state = kid->kcd->handleKeyEvent(kv->set, kv->key, press);
     }
   }
 
-  if (!mapped) {
-    logMessage(LOG_INFO, "unmapped key code: %d", code);
-    forwardKeyEvent(code, press);
-  } else if (state != KTS_HOTKEY) {
+  if (state != KTS_HOTKEY) {
     typedef enum {
       WKA_NONE,
       WKA_CURRENT,
