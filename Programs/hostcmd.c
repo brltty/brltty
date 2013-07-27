@@ -35,6 +35,19 @@
 #include "hostcmd_internal.h"
 
 int
+finishHostCommandStream (HostCommandStream *hcs, int fileDescriptor) {
+  const char *mode = hcs->isInput? "w": "r";
+
+  if ((**hcs->streamVariable = fdopen(fileDescriptor, mode))) {
+    return 1;
+  } else {
+    logSystemError("fdopen");
+  }
+
+  return 0;
+}
+
+int
 processHostCommandStreams (
   HostCommandStream *hcs,
   HostCommandStreamProcessor *processStream,

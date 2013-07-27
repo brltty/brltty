@@ -25,28 +25,28 @@
 #include "hostcmd_internal.h"
 
 static int *
-getPipeDescriptor (HostCommandPackageData *pkg, unsigned int index) {
-  return &pkg->pipe[index];
+getPipeDescriptor (HostCommandStream *hcs, unsigned int index) {
+  return &hcs->package.pipe[index];
 }
 
 static int *
-getInputDescriptor (HostCommandPackageData *pkg) {
-  return getPipeDescriptor(pkg, 0);
+getInputDescriptor (HostCommandStream *hcs) {
+  return getPipeDescriptor(hcs, 0);
 }
 
 static int *
-getOutputDescriptor (HostCommandPackageData *pkg) {
-  return getPipeDescriptor(pkg, 1);
+getOutputDescriptor (HostCommandStream *hcs) {
+  return getPipeDescriptor(hcs, 1);
 }
 
 static int *
 getParentDescriptor (HostCommandStream *hcs) {
-  return hcs->isInput? getOutputDescriptor(&hcs->package): getInputDescriptor(&hcs->package);
+  return hcs->isInput? getOutputDescriptor(hcs): getInputDescriptor(hcs);
 }
 
 static int *
 getChildDescriptor (HostCommandStream *hcs) {
-  return hcs->isInput? getInputDescriptor(&hcs->package): getOutputDescriptor(&hcs->package);
+  return hcs->isInput? getInputDescriptor(hcs): getOutputDescriptor(hcs);
 }
 
 int
@@ -86,15 +86,11 @@ static int
 finishParentHostCommandStream (HostCommandStream *hcs, void *data) {
   int *local = getParentDescriptor(hcs);
   int *remote = getChildDescriptor(hcs);
-  const char *mode = hcs->isInput? "w": "r";
 
   close(*remote);
   *remote = -1;
 
-  if (!(**hcs->streamVariable = fdopen(*local, mode))) {
-    logSystemError("fdopen");
-    return 0;
-  }
+  if (!finishHostCommandStream(hcs, *local)) return 0;
   *local = -1;
 
   return 1;

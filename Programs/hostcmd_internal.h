@@ -41,6 +41,8 @@ extern int processHostCommandStreams (
   void *data
 );
 
+extern int finishHostCommandStream (HostCommandStream *hcs, int fileDescriptor);
+
 extern int constructHostCommandPackageData (HostCommandPackageData *pkg);
 extern void destructHostCommandPackageData (HostCommandPackageData *pkg);
 extern int prepareHostCommandStream (HostCommandStream *hcs, void *data);
