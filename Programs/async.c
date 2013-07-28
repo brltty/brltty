@@ -605,6 +605,8 @@ doOneOperation (long int timeout) {
         deleteElement(functionElement);
       }
     }
+  } else {
+    approximateDelay(timeout);
   }
 }
 
