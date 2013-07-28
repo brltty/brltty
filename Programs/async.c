@@ -573,10 +573,10 @@ doOneOperation (long int timeout) {
     Element *functionElement = processQueue(functions, addMonitor, &add);
 
     if (!functionElement) {
-      if ((monitorCount = add.monitor - monitorArray)) {
-        if (awaitOperation(monitorArray, monitorCount, timeout)) {
-          functionElement = processQueue(functions, findMonitor, NULL);
-        }
+      if (!(monitorCount = add.monitor - monitorArray)) {
+        approximateDelay(timeout);
+      } else if (awaitOperation(monitorArray, monitorCount, timeout)) {
+        functionElement = processQueue(functions, findMonitor, NULL);
       }
     }
 
