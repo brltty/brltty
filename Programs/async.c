@@ -150,7 +150,7 @@ prepareMonitors (void) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+monitorOperations (MonitorEntry *monitors, int count, int timeout) {
   if (count) {
     DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
     if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
@@ -258,6 +258,7 @@ startWindowsRead (OperationEntry *operation) {
                              &extension->buffer[extension->length],
                              extension->size - extension->length,
                              &count, &function->ol);
+
     setWindowsTransferResult(operation, success, count);
   }
 }
@@ -273,6 +274,7 @@ startWindowsWrite (OperationEntry *operation) {
                               &extension->buffer[extension->length],
                               extension->size - extension->length,
                               &count, &function->ol);
+
     setWindowsTransferResult(operation, success, count);
   }
 }
@@ -304,7 +306,7 @@ prepareMonitors (void) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+monitorOperations (MonitorEntry *monitors, int count, int timeout) {
   int result = poll(monitors, count, timeout);
   if (result > 0) return 1;
 
@@ -376,7 +378,7 @@ doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+monitorOperations (MonitorEntry *monitors, int count, int timeout) {
   int setSize = MAX(selectDescriptor_read.size, selectDescriptor_write.size);
   fd_set *readSet = getSelectSet(&selectDescriptor_read);
   fd_set *writeSet = getSelectSet(&selectDescriptor_write);
@@ -554,6 +556,56 @@ findMonitor (void *item, void *data) {
   }
 
   return 0;
+}
+
+static void
+awaitOperation (long int timeout) {
+  Queue *functions = getFunctionQueue(0);
+  int monitorCount = functions? getQueueSize(functions): 0;
+
+  prepareMonitors();
+
+  if (monitorCount) {
+    MonitorEntry monitorArray[monitorCount];
+    AddMonitorData add = {
+      .monitor = monitorArray
+    };
+    Element *functionElement = processQueue(functions, addMonitor, &add);
+
+    if (!functionElement) {
+      if ((monitorCount = add.monitor - monitorArray)) {
+        if (monitorOperations(monitorArray, monitorCount, timeout)) {
+          functionElement = processQueue(functions, findMonitor, NULL);
+        }
+      }
+    }
+
+    if (functionElement) {
+      FunctionEntry *function = getElementItem(functionElement);
+      Element *operationElement = getQueueHead(function->operations);
+      OperationEntry *operation = getElementItem(operationElement);
+
+      if (!operation->finished) finishOperation(operation);
+
+      operation->active = 1;
+      if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
+      operation->active = 0;
+
+      if (operation->cancel) {
+        deleteElement(operationElement);
+      } else {
+        operation->error = 0;
+      }
+
+      if ((operationElement = getQueueHead(function->operations))) {
+        operation = getElementItem(operationElement);
+        if (!operation->finished) startOperation(operation);
+        requeueElement(functionElement);
+      } else {
+        deleteElement(functionElement);
+      }
+    }
+  }
 }
 
 static int
@@ -1275,54 +1327,7 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
     }
 
 #ifdef ASYNC_CAN_MONITOR_IO
-    {
-      Queue *functions = getFunctionQueue(0);
-      int monitorCount = functions? getQueueSize(functions): 0;
-
-      prepareMonitors();
-
-      if (monitorCount) {
-        MonitorEntry monitorArray[monitorCount];
-        AddMonitorData add = {
-          .monitor = monitorArray
-        };
-        Element *functionElement = processQueue(functions, addMonitor, &add);
-
-        if ((monitorCount = add.monitor - monitorArray)) {
-          if (!functionElement) {
-            if (awaitOperation(monitorArray, monitorCount, timeout)) {
-              functionElement = processQueue(functions, findMonitor, NULL);
-            }
-          }
-        }
-
-        if (functionElement) {
-          FunctionEntry *function = getElementItem(functionElement);
-          Element *operationElement = getQueueHead(function->operations);
-          OperationEntry *operation = getElementItem(operationElement);
-
-          if (!operation->finished) finishOperation(operation);
-
-          operation->active = 1;
-          if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
-          operation->active = 0;
-
-          if (operation->cancel) {
-            deleteElement(operationElement);
-          } else {
-            operation->error = 0;
-          }
-
-          if ((operationElement = getQueueHead(function->operations))) {
-            operation = getElementItem(operationElement);
-            if (!operation->finished) startOperation(operation);
-            requeueElement(functionElement);
-          } else {
-            deleteElement(functionElement);
-          }
-        }
-      }
-    }
+    awaitOperation(timeout);
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout);
 #endif /* ASYNC_CAN_MONITOR_IO */
