@@ -1277,64 +1277,51 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
 #ifdef ASYNC_CAN_MONITOR_IO
     {
       Queue *functions = getFunctionQueue(0);
-      Element *functionElement = NULL;
-
       int monitorCount = functions? getQueueSize(functions): 0;
-      MonitorEntry *monitorArray = NULL;
 
       prepareMonitors();
 
       if (monitorCount) {
-        if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
-          AddMonitorData add = {
-            .monitor = monitorArray
-          };
+        MonitorEntry monitorArray[monitorCount];
+        AddMonitorData add = {
+          .monitor = monitorArray
+        };
+        Element *functionElement = processQueue(functions, addMonitor, &add);
 
-          functionElement = processQueue(functions, addMonitor, &add);
-
-          if (!(monitorCount = add.monitor - monitorArray)) {
-            free(monitorArray);
-            monitorArray = NULL;
+        if ((monitorCount = add.monitor - monitorArray)) {
+          if (!functionElement) {
+            if (awaitOperation(monitorArray, monitorCount, timeout)) {
+              functionElement = processQueue(functions, findMonitor, NULL);
+            }
           }
-        } else {
-          logMallocError();
-          monitorCount = 0;
+        }
+
+        if (functionElement) {
+          FunctionEntry *function = getElementItem(functionElement);
+          Element *operationElement = getQueueHead(function->operations);
+          OperationEntry *operation = getElementItem(operationElement);
+
+          if (!operation->finished) finishOperation(operation);
+
+          operation->active = 1;
+          if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
+          operation->active = 0;
+
+          if (operation->cancel) {
+            deleteElement(operationElement);
+          } else {
+            operation->error = 0;
+          }
+
+          if ((operationElement = getQueueHead(function->operations))) {
+            operation = getElementItem(operationElement);
+            if (!operation->finished) startOperation(operation);
+            requeueElement(functionElement);
+          } else {
+            deleteElement(functionElement);
+          }
         }
       }
-
-      if (!functionElement) {
-        if (awaitOperation(monitorArray, monitorCount, timeout)) {
-          functionElement = processQueue(functions, findMonitor, NULL);
-        }
-      }
-
-      if (functionElement) {
-        FunctionEntry *function = getElementItem(functionElement);
-        Element *operationElement = getQueueHead(function->operations);
-        OperationEntry *operation = getElementItem(operationElement);
-
-        if (!operation->finished) finishOperation(operation);
-
-        operation->active = 1;
-        if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
-        operation->active = 0;
-
-        if (operation->cancel) {
-          deleteElement(operationElement);
-        } else {
-          operation->error = 0;
-        }
-
-        if ((operationElement = getQueueHead(function->operations))) {
-          operation = getElementItem(operationElement);
-          if (!operation->finished) startOperation(operation);
-          requeueElement(functionElement);
-        } else {
-          deleteElement(functionElement);
-        }
-      }
-
-      if (monitorArray) free(monitorArray);
     }
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout);
