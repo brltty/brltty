@@ -144,16 +144,21 @@ typedef struct {
   const FunctionMethods *methods;
 } FunctionKey;
 
+typedef struct {
+  MonitorEntry *const array;
+  unsigned int count;
+} MonitorGroup;
+
 #ifdef __MINGW32__
 static void
 prepareMonitors (void) {
 }
 
 static int
-awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
-  if (count) {
-    DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
-    if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
+awaitMonitors (const MonitorGroup *monitors, int timeout) {
+  if (monitors->count) {
+    DWORD result = WaitForMultipleObjects(monitors->count, monitors->array, FALSE, timeout);
+    if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + monitors->count))) return 1;
 
     if (result == WAIT_FAILED) {
       logWindowsSystemError("WaitForMultipleObjects");
@@ -306,8 +311,8 @@ prepareMonitors (void) {
 }
 
 static int
-awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
-  int result = poll(monitors, count, timeout);
+awaitMonitors (const MonitorGroup *monitors, int timeout) {
+  int result = poll(monitors->array, monitors->count, timeout);
   if (result > 0) return 1;
 
   if (result == -1) {
@@ -378,7 +383,7 @@ doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
 }
 
 static int
-awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
+awaitMonitors (const MonitorGroup *monitors, int timeout) {
   int setSize = MAX(selectDescriptor_read.size, selectDescriptor_write.size);
   fd_set *readSet = getSelectSet(&selectDescriptor_read);
   fd_set *writeSet = getSelectSet(&selectDescriptor_write);
@@ -516,19 +521,10 @@ finishOperation (OperationEntry *operation) {
   }
 }
 
-typedef struct {
-  MonitorEntry *monitor;
-} AddFunctionMonitorData;
-
-static unsigned int
-getAddedMonitorCount (const MonitorEntry *monitorArray, const AddFunctionMonitorData *afm) {
-  return afm->monitor - monitorArray;
-}
-
 static int
 addFunctionMonitor (void *item, void *data) {
   const FunctionEntry *function = item;
-  AddFunctionMonitorData *afm = data;
+  MonitorGroup *monitors = data;
   OperationEntry *operation = getFirstOperation(function);
 
   if (operation) {
@@ -539,7 +535,7 @@ addFunctionMonitor (void *item, void *data) {
         return 1;
       }
 
-      operation->monitor = afm->monitor++;
+      operation->monitor = &monitors->array[monitors->count++];
       initializeMonitor(operation->monitor, function, operation);
     }
   }
@@ -566,21 +562,22 @@ testFunctionMonitor (void *item, void *data) {
 static void
 awaitNextOperation (long int timeout) {
   Queue *functions = getFunctionQueue(0);
-  unsigned int monitorCount = functions? getQueueSize(functions): 0;
+  unsigned int functionCount = functions? getQueueSize(functions): 0;
 
   prepareMonitors();
 
-  if (monitorCount) {
-    MonitorEntry monitorArray[monitorCount];
-    AddFunctionMonitorData afm = {
-      .monitor = monitorArray
+  if (functionCount) {
+    MonitorEntry monitorArray[functionCount];
+    MonitorGroup monitors = {
+      .array = monitorArray,
+      .count = 0
     };
-    Element *functionElement = processQueue(functions, addFunctionMonitor, &afm);
+    Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
 
     if (!functionElement) {
-      if (!(monitorCount = getAddedMonitorCount(monitorArray, &afm))) {
+      if (!monitors.count) {
         approximateDelay(timeout);
-      } else if (awaitMonitors(monitorArray, monitorCount, timeout)) {
+      } else if (awaitMonitors(&monitors, timeout)) {
         functionElement = processQueue(functions, testFunctionMonitor, NULL);
       }
     }
