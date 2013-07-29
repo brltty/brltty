@@ -66,7 +66,12 @@ before m always kohle =
 always ein 1246
 always lateinisch 123-1-2345-1246-1345-24-156
 always el 13456
+begmidword elineal 15-123-35-15-25
+endword elineal 15-123-35-15-1-123
+always eleist 15-123-146-23456
 always em 12356
+always emach 15-134-56
+before e always emachs 12356-56-234 Systemachse
 always en 14
 always denunz 145-15-1345-256-1356 shouldn't use the en-contraction
 always er 12456
@@ -130,6 +135,7 @@ midendword mm 1346
 always wurm = wurmmittel shouldn't use the mm-contraction
 begmidword or 26
 
+always schaos 234-1456-1-135-234
 after konsonant midword ss =
 after konsonant midendword ssatz 234-234-1356
 after konsonant midendword ssätz 234-5-234-1356
@@ -314,6 +320,7 @@ before s midword heits 125-234
 midendword keit 13
 before s midword keits 13-234
 midendword mal 134
+sufword gemal 12346-134-25 gemalt shouldn't use the mal-contraction
 midendword nis 1346
 always nisier 1345-24-234-346-1235 technisierung shouldn't use -nis
 midendword sam 2346
@@ -961,8 +968,12 @@ always langobard 123-235-1245-135-12-356-145 shouldn't use the lang-contraction
 always lass 2-123
 always läss 5-123
 always laess 5-123
+sufword blass 12-123-1-2346
+sufword blasst 12-123-1-234-23456
 always class = shouldn't use the lass-contraction
+before s always glas =
 sufword klass 13-123-1-2346 shouldn't use the lass-contraction
+always lassist 123-1-2346-24-23456
 always laich 123-1-24-1456 shouldn't use the ich-contraction
 always lasagne = shouldn't use the sag-contraction
 always lasso 123-1-2346-135 shouldn't use the lass-contraction
@@ -1104,6 +1115,10 @@ always setz 2-15
 sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 always sind 234-145
 contraction sd
+always sindex 234-35-145-15-6-1346
+always sindik 234-35-145-24-13
+always sindiz 234-35-145-24-1356
+always sindustr 234-35-145-136-23456-1235
 always sitz 2-24
 always sitzbein 2-24-12-146-1345 shouldn't use the bei-contraction
 always solch 234-1456
@@ -1446,6 +1461,10 @@ always schall 156-1-12345 schallen shouldn't use the allen-contraction
 always herzultra 125-12456-1356-136-123-2345-1235-1 shouldn't use the zu-contraction
 always mittagessen 134-24-2345-2345-1-1245-15-2346-14
 always snakeskin 234-1345-1-13-15-234-13-35
+
+# countries
+always dänemark 145-345-1345-15-134-356-13 shouldn't use the em-contraction
+always daenemark 145-345-1345-15-134-356-13 shouldn't use the em-contraction
 
 # names
 word angela 235-1245-13456-1 shouldn't use the ge-contraction
