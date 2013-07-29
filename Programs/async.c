@@ -150,7 +150,7 @@ prepareMonitors (void) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
   if (count) {
     DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
     if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
@@ -306,7 +306,7 @@ prepareMonitors (void) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
   int result = poll(monitors, count, timeout);
   if (result > 0) return 1;
 
@@ -378,7 +378,7 @@ doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+awaitMonitors (MonitorEntry *monitors, int count, int timeout) {
   int setSize = MAX(selectDescriptor_read.size, selectDescriptor_write.size);
   fd_set *readSet = getSelectSet(&selectDescriptor_read);
   fd_set *writeSet = getSelectSet(&selectDescriptor_write);
@@ -518,12 +518,17 @@ finishOperation (OperationEntry *operation) {
 
 typedef struct {
   MonitorEntry *monitor;
-} AddMonitorData;
+} AddFunctionMonitorData;
+
+static unsigned int
+getAddedMonitorCount (const MonitorEntry *monitorArray, const AddFunctionMonitorData *afm) {
+  return afm->monitor - monitorArray;
+}
 
 static int
-addMonitor (void *item, void *data) {
+addFunctionMonitor (void *item, void *data) {
   const FunctionEntry *function = item;
-  AddMonitorData *add = data;
+  AddFunctionMonitorData *afm = data;
   OperationEntry *operation = getFirstOperation(function);
 
   if (operation) {
@@ -534,7 +539,7 @@ addMonitor (void *item, void *data) {
         return 1;
       }
 
-      operation->monitor = add->monitor++;
+      operation->monitor = afm->monitor++;
       initializeMonitor(operation->monitor, function, operation);
     }
   }
@@ -543,7 +548,7 @@ addMonitor (void *item, void *data) {
 }
 
 static int
-findMonitor (void *item, void *data) {
+testFunctionMonitor (void *item, void *data) {
   FunctionEntry *function = item;
   OperationEntry *operation = getFirstOperation(function);
 
@@ -559,24 +564,24 @@ findMonitor (void *item, void *data) {
 }
 
 static void
-doOneOperation (long int timeout) {
+awaitNextOperation (long int timeout) {
   Queue *functions = getFunctionQueue(0);
-  int monitorCount = functions? getQueueSize(functions): 0;
+  unsigned int monitorCount = functions? getQueueSize(functions): 0;
 
   prepareMonitors();
 
   if (monitorCount) {
     MonitorEntry monitorArray[monitorCount];
-    AddMonitorData add = {
+    AddFunctionMonitorData afm = {
       .monitor = monitorArray
     };
-    Element *functionElement = processQueue(functions, addMonitor, &add);
+    Element *functionElement = processQueue(functions, addFunctionMonitor, &afm);
 
     if (!functionElement) {
-      if (!(monitorCount = add.monitor - monitorArray)) {
+      if (!(monitorCount = getAddedMonitorCount(monitorArray, &afm))) {
         approximateDelay(timeout);
-      } else if (awaitOperation(monitorArray, monitorCount, timeout)) {
-        functionElement = processQueue(functions, findMonitor, NULL);
+      } else if (awaitMonitors(monitorArray, monitorCount, timeout)) {
+        functionElement = processQueue(functions, testFunctionMonitor, NULL);
       }
     }
 
@@ -1329,7 +1334,7 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
     }
 
 #ifdef ASYNC_CAN_MONITOR_IO
-    doOneOperation(timeout);
+    awaitNextOperation(timeout);
 #else /* ASYNC_CAN_MONITOR_IO */
     approximateDelay(timeout);
 #endif /* ASYNC_CAN_MONITOR_IO */
