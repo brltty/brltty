@@ -66,11 +66,11 @@ typedef struct {
 #include "queue.h"
 #include "async.h"
 
-#define ASYNC_UNIMPLEMENTED_FUNCTION(name) { \
+#define ASYNC_UNIMPLEMENTED_FUNCTION(name) do { \
   errno = ENOSYS; \
   logSystemError(name); \
   return 0; \
-}
+} while (0)
 
 struct AsyncHandleStruct {
   Element *element;
@@ -234,13 +234,14 @@ setWindowsTransferResult (OperationEntry *operation, DWORD success, DWORD count)
   } else {
     DWORD error = GetLastError();
 
-    if (error == ERROR_IO_PENDING) return;
-    if (error == ERROR_IO_INCOMPLETE) return;
-
     if ((error == ERROR_HANDLE_EOF) || (error == ERROR_BROKEN_PIPE)) {
       extension->direction.input.end = 1;
     } else {
-      operation->error = error;
+      setErrno(error);
+      operation->error = errno;
+
+      if (error == ERROR_IO_PENDING) return;
+      if (error == ERROR_IO_INCOMPLETE) return;
     }
   }
 
@@ -265,10 +266,10 @@ startWindowsRead (OperationEntry *operation) {
 
   if (allocateWindowsResources(operation)) {
     DWORD count;
-    DWORD success = ReadFile(function->fileDescriptor,
-                             &extension->buffer[extension->length],
-                             extension->size - extension->length,
-                             &count, &function->ol);
+    BOOL success = ReadFile(function->fileDescriptor,
+                            &extension->buffer[extension->length],
+                            extension->size - extension->length,
+                            &count, &function->ol);
 
     setWindowsTransferResult(operation, success, count);
   }
@@ -281,10 +282,10 @@ startWindowsWrite (OperationEntry *operation) {
 
   if (allocateWindowsResources(operation)) {
     DWORD count;
-    DWORD success = WriteFile(function->fileDescriptor,
-                              &extension->buffer[extension->length],
-                              extension->size - extension->length,
-                              &count, &function->ol);
+    BOOL success = WriteFile(function->fileDescriptor,
+                             &extension->buffer[extension->length],
+                             extension->size - extension->length,
+                             &count, &function->ol);
 
     setWindowsTransferResult(operation, success, count);
   }
@@ -294,7 +295,7 @@ static void
 finishWindowsTransferOperation (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   DWORD count;
-  DWORD success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
+  BOOL success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
 
   setWindowsTransferResult(operation, success, count);
 }
