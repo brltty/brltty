@@ -237,6 +237,32 @@ monitorFileOutput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutpu
   return asyncMonitorFileOutput(handle, ioh->descriptor.file, setInputOutputMonitor, iom);
 }
 
+#ifdef __MINGW32__
+static ssize_t
+readFileData (const InputOutputHandle *ioh, void *buffer, size_t size) {
+  {
+    DWORD count;
+
+    if (ReadFile(ioh->descriptor.file, buffer, size, &count, NULL)) return count;
+  }
+
+  setSystemErrno();
+  return -1;
+}
+
+static ssize_t
+writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
+  {
+    DWORD count;
+
+    if (WriteFile(ioh->descriptor.file, buffer, size, &count, NULL)) return count;
+  }
+
+  setSystemErrno();
+  return -1;
+}
+
+#else /* __MINGW32__ */
 static ssize_t
 readFileData (const InputOutputHandle *ioh, void *buffer, size_t size) {
   return read(ioh->descriptor.file, buffer, size);
@@ -246,6 +272,7 @@ static ssize_t
 writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
   return write(ioh->descriptor.file, buffer, size);
 }
+#endif /* __MINGW32__ */
 
 static const InputOutputMethods fileMethods = {
   .monitorInput = monitorFileInput,
