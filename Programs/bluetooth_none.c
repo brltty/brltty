@@ -26,8 +26,7 @@
 
 BluetoothConnectionExtension *
 bthConnect (uint64_t bda, uint8_t channel, int timeout) {
-  errno = ENOSYS;
-  logSystemError("Bluetooth connect");
+  logUnsupportedOperation("Bluetooth connect");
   return NULL;
 }
 
@@ -37,8 +36,7 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
 
 int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
-  errno = ENOSYS;
-  logSystemError("Bluetooth wait");
+  logUnsupportedOperation("Bluetooth wait");
   return 0;
 }
 
@@ -47,15 +45,13 @@ bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  errno = ENOSYS;
-  logSystemError("Bluetooth read");
+  logUnsupportedOperation("Bluetooth read");
   return -1;
 }
 
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
-  errno = ENOSYS;
-  logSystemError("Bluetooth write");
+  logUnsupportedOperation("Bluetooth write");
   return -1;
 }
 

@@ -60,13 +60,13 @@ typedef ssize_t ReadDataMethod (
 
 typedef int ReconfigureResourceMethod (GioHandle *handle, const SerialParameters *parameters);
 
-typedef int TellResourceMethod (
+typedef ssize_t TellResourceMethod (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 );
 
-typedef int AskResourceMethod (
+typedef ssize_t AskResourceMethod (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
@@ -263,7 +263,7 @@ reconfigureUsbResource (GioHandle *handle, const SerialParameters *parameters) {
   return usbSetSerialParameters(channel->device, parameters);
 }
 
-static int
+static ssize_t
 tellUsbResource (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
@@ -275,7 +275,7 @@ tellUsbResource (
                          request, value, index, data, size, timeout);
 }
 
-static int
+static ssize_t
 askUsbResource (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
@@ -408,13 +408,6 @@ static const InputOutputMethods bluetoothMethods = {
   .readData = readBluetoothData
 };
 
-static int
-logUnsupportedOperation (const char *name) {
-  errno = ENOSYS;
-  logSystemError(name);
-  return -1;
-}
-
 static void
 setBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters) {
   endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
@@ -540,7 +533,12 @@ gioGetApplicationData (GioEndpoint *endpoint) {
 ssize_t
 gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
   WriteDataMethod *method = endpoint->methods->writeData;
-  if (!method) return logUnsupportedOperation("writeData");
+
+  if (!method) {
+    logUnsupportedOperation("writeData");
+    return -1;
+  }
+
   return method(&endpoint->handle, data, size,
                 endpoint->options.outputTimeout);
 }
@@ -548,15 +546,25 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 int
 gioAwaitInput (GioEndpoint *endpoint, int timeout) {
   AwaitInputMethod *method = endpoint->methods->awaitInput;
-  if (!method) return logUnsupportedOperation("awaitInput");
+
+  if (!method) {
+    logUnsupportedOperation("awaitInput");
+    return 0;
+  }
+
   if (endpoint->input.to - endpoint->input.from) return 1;
+
   return method(&endpoint->handle, timeout);
 }
 
 ssize_t
 gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
   ReadDataMethod *method = endpoint->methods->readData;
-  if (!method) return logUnsupportedOperation("readData");
+
+  if (!method) {
+    logUnsupportedOperation("readData");
+    return -1;
+  }
 
   {
     unsigned char *start = buffer;
@@ -663,7 +671,12 @@ gioTellResource (
   const void *data, uint16_t size
 ) {
   TellResourceMethod *method = endpoint->methods->tellResource;
-  if (!method) return logUnsupportedOperation("tellResource");
+
+  if (!method) {
+    logUnsupportedOperation("tellResource");
+    return -1;
+  }
+
   return method(&endpoint->handle, recipient, type,
                 request, value, index, data, size,
                 endpoint->options.outputTimeout);
@@ -677,7 +690,12 @@ gioAskResource (
   void *buffer, uint16_t size
 ) {
   AskResourceMethod *method = endpoint->methods->askResource;
-  if (!method) return logUnsupportedOperation("askResource");
+
+  if (!method) {
+    logUnsupportedOperation("askResource");
+    return -1;
+  }
+
   return method(&endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
                 endpoint->options.inputTimeout);
@@ -701,7 +719,12 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
 
   {
     GetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
-    if (!method) return logUnsupportedOperation("getHidReportSize");
+
+    if (!method) {
+      logUnsupportedOperation("getHidReportSize");
+      return 0;
+    }
+
     return method(&endpoint->hidReportItems, report);
   }
 }
@@ -712,7 +735,12 @@ gioSetHidReport (
   const void *data, uint16_t size
 ) {
   SetHidReportMethod *method = endpoint->methods->setHidReport;
-  if (!method) return logUnsupportedOperation("setHidReport");
+
+  if (!method) {
+    logUnsupportedOperation("setHidReport");
+    return -1;
+  }
+
   return method(&endpoint->handle, report,
                 data, size, endpoint->options.outputTimeout);
 }
@@ -723,7 +751,12 @@ gioGetHidReport (
   void *buffer, uint16_t size
 ) {
   GetHidReportMethod *method = endpoint->methods->getHidReport;
-  if (!method) return logUnsupportedOperation("getHidReport");
+
+  if (!method) {
+    logUnsupportedOperation("getHidReport");
+    return -1;
+  }
+
   return method(&endpoint->handle, report,
                 buffer, size, endpoint->options.inputTimeout);
 }
@@ -734,7 +767,12 @@ gioSetHidFeature (
   const void *data, uint16_t size
 ) {
   SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
-  if (!method) return logUnsupportedOperation("setHidFeature");
+
+  if (!method) {
+    logUnsupportedOperation("setHidFeature");
+    return -1;
+  }
+
   return method(&endpoint->handle, report,
                 data, size, endpoint->options.outputTimeout);
 }
@@ -745,7 +783,12 @@ gioGetHidFeature (
   void *buffer, uint16_t size
 ) {
   GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
-  if (!method) return logUnsupportedOperation("getHidFeature");
+
+  if (!method) {
+    logUnsupportedOperation("getHidFeature");
+    return -1;
+  }
+
   return method(&endpoint->handle, report,
                 buffer, size, endpoint->options.inputTimeout);
 }

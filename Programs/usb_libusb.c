@@ -44,8 +44,7 @@ usbResetDevice (UsbDevice *device) {
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device autosuspend disable");
+  logUnsupportedOperation("USB device autosuspend disable");
   return 0;
 }
 
@@ -151,7 +150,7 @@ usbSubmitRequest (
   size_t length,
   void *data
 ) {
-  errno = ENOSYS;
+  logUnsupportedOperation("USB request submit");
   return NULL;
 }
 
@@ -160,8 +159,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  errno = ENOSYS;
-  logSystemError("USB request cancel");
+  logUnsupportedOperation("USB request cancel");
   return 0;
 }
 
@@ -172,8 +170,7 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  errno = ENOSYS;
-  logSystemError("USB request reap");
+  logUnsupportedOperation("USB request reap");
   return NULL;
 }
 

@@ -94,6 +94,7 @@ extern void logBytes (int level, const char *description, const void *data, size
 
 extern void logSystemError (const char *action);
 extern void logMallocError (void);
+extern void logUnsupportedOperation (const char *name);
 
 #ifdef WINDOWS
 extern void logWindowsError (DWORD code, const char *action);

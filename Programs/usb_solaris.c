@@ -96,15 +96,13 @@ usbOpenEndpointFiles (
 
 int
 usbResetDevice (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device reset");
+  logUnsupportedOperation("USB device reset");
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device autosuspend disable");
+  logUnsupportedOperation("USB device autosuspend disable");
   return 0;
 }
 
@@ -154,8 +152,7 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
-  errno = ENOSYS;
-  logSystemError("USB endpoint clear");
+  logUnsupportedOperation("USB endpoint clear");
   return 0;
 }
 

@@ -66,12 +66,6 @@ typedef struct {
 #include "queue.h"
 #include "async.h"
 
-#define ASYNC_UNIMPLEMENTED_FUNCTION(name) do { \
-  errno = ENOSYS; \
-  logSystemError(name); \
-  return 0; \
-} while (0)
-
 struct AsyncHandleStruct {
   Element *element;
   int identifier;
@@ -1088,7 +1082,8 @@ asyncMonitorFileInput (
 
   return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorFileInput");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
@@ -1121,7 +1116,8 @@ asyncMonitorFileOutput (
 
   return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorFileOutput");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
@@ -1142,7 +1138,8 @@ asyncReadFile (
 
   return makeHandle(handle, newInputOperation, &iop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncReadFile");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
@@ -1164,7 +1161,8 @@ asyncWriteFile (
 
   return makeHandle(handle, newOutputOperation, &oop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncWriteFile");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
@@ -1175,7 +1173,8 @@ asyncMonitorSocketInput (
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorSocketInput");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 }
 
 int
@@ -1184,7 +1183,8 @@ asyncMonitorSocketOutput (
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorSocketOutput");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 }
 
 int
@@ -1194,7 +1194,8 @@ asyncReadSocket (
   size_t size,
   AsyncInputCallback callback, void *data
 ) {
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncReadSocket");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 }
 
 int
@@ -1204,7 +1205,8 @@ asyncWriteSocket (
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
 ) {
-  ASYNC_UNIMPLEMENTED_FUNCTION("asyncWriteSocket");
+  logUnsupportedOperation(__FUNC__);
+  return 0;
 }
 
 #else /* __MINGW32__ */

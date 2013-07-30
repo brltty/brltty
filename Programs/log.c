@@ -382,9 +382,16 @@ void
 logSystemError (const char *action) {
   logMessage(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
 }
+
 void
 logMallocError (void) {
   logSystemError("malloc");
+}
+
+void
+logUnsupportedOperation (const char *name) {
+  errno = ENOSYS;
+  logSystemError(name);
 }
 
 #ifdef WINDOWS

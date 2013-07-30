@@ -398,8 +398,7 @@ usbResetDevice (UsbDevice *device) {
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device autosuspend disable");
+  logUnsupportedOperation("USB device autosuspend disable");
   return 0;
 }
 
@@ -620,7 +619,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  errno = ENOSYS;
+  logUnsupportedOperation("USB request cancel");
   return 0;
 }
 

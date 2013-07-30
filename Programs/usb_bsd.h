@@ -53,15 +53,13 @@ usbSetShortTransfers (int file, int arg) {
 
 int
 usbResetDevice (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device reset");
+  logUnsupportedOperation("USB device reset");
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  errno = ENOSYS;
-  logSystemError("USB device autosuspend disable");
+  logUnsupportedOperation("USB device autosuspend disable");
   return 0;
 }
 
@@ -84,8 +82,7 @@ usbClaimInterface (
 ) {
   return 1;
 /*
-  errno = ENOSYS;
-  logSystemError("USB interface claim");
+  logUnsupportedOperation("USB interface claim");
   return 0;
 */
 }
@@ -97,8 +94,7 @@ usbReleaseInterface (
 ) {
   return 1;
 /*
-  errno = ENOSYS;
-  logSystemError("USB interface release");
+  logUnsupportedOperation("USB interface release");
   return 0;
 */
 }
@@ -124,8 +120,7 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
-  errno = ENOSYS;
-  logSystemError("USB endpoint clear");
+  logUnsupportedOperation("USB endpoint clear");
   return 0;
 }
 
@@ -167,8 +162,7 @@ usbSubmitRequest (
   size_t length,
   void *context
 ) {
-  errno = ENOSYS;
-  logSystemError("USB request submit");
+  logUnsupportedOperation("USB request submit");
   return NULL;
 }
 
@@ -177,8 +171,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  errno = ENOSYS;
-  logSystemError("USB request cancel");
+  logUnsupportedOperation("USB request cancel");
   return 0;
 }
 
@@ -189,8 +182,7 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  errno = ENOSYS;
-  logSystemError("USB request reap");
+  logUnsupportedOperation("USB request reap");
   return NULL;
 }
 
