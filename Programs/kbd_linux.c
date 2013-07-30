@@ -572,7 +572,8 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
           if (kpd->kid->actualProperties.type) {
             if (checkKeyboardProperties(&kpd->kid->actualProperties, &kcd->requiredProperties)) {
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-                if (asyncRead(NULL, device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
+                if (asyncReadFile(NULL, device, sizeof(struct input_event),
+                                  handleKeyboardEvent, kpd)) {
   #ifdef EVIOCGRAB
                   ioctl(device, EVIOCGRAB, 1);
   #endif /* EVIOCGRAB */
@@ -770,8 +771,8 @@ monitorKeyboardAdditions (KeyboardCommonData *kcd) {
   int kobjectUeventSocket = getKobjectUeventSocket();
 
   if (kobjectUeventSocket != -1) {
-    if (asyncRead(NULL, kobjectUeventSocket, 6+1+PATH_MAX+1,
-                  handleKobjectUeventString, kcd)) {
+    if (asyncReadFile(NULL, kobjectUeventSocket, 6+1+PATH_MAX+1,
+                      handleKobjectUeventString, kcd)) {
       claimKeyboardCommonData(kcd);
       return 1;
     }

@@ -60,9 +60,9 @@ awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
   int monitoring;
 
   if (output) {
-    monitoring = asyncMonitorOutput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
+    monitoring = asyncMonitorFileOutput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
   } else {
-    monitoring = asyncMonitorInput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
+    monitoring = asyncMonitorFileInput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
   }
 
   if (monitoring) {

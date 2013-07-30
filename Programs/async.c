@@ -66,6 +66,12 @@ typedef struct {
 #include "queue.h"
 #include "async.h"
 
+#define ASYNC_UNIMPLEMENTED_FUNCTION(name) { \
+  errno = ENOSYS; \
+  logSystemError(name); \
+  return 0; \
+}
+
 struct AsyncHandleStruct {
   Element *element;
   int identifier;
@@ -619,8 +625,7 @@ invokeMonitorCallback (OperationEntry *operation) {
 
   if (callback) {
     const AsyncMonitorResult result = {
-      .data = operation->data,
-      .fileDescriptor = operation->function->fileDescriptor
+      .data = operation->data
     };
 
     if (callback(&result)) return 1;
@@ -836,11 +841,11 @@ typedef struct {
   const FunctionMethods *methods;
   AsyncMonitorCallback callback;
   void *data;
-} MonitorOperationParameters;
+} MonitorFileOperationParameters;
 
 static Element *
-newMonitorOperation (const void *parameters) {
-  const MonitorOperationParameters *mop = parameters;
+newFileMonitorOperation (const void *parameters) {
+  const MonitorFileOperationParameters *mop = parameters;
   MonitorExtension *extension;
 
   if ((extension = malloc(sizeof(*extension)))) {
@@ -1054,14 +1059,14 @@ asyncCancel (AsyncHandle handle) {
 }
 
 int
-asyncMonitorInput (
+asyncMonitorFileInput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorInput",
+    .functionName = "monitorFileInput",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1073,30 +1078,28 @@ asyncMonitorInput (
     .invokeCallback = invokeMonitorCallback
   };
 
-  const MonitorOperationParameters mop = {
+  const MonitorFileOperationParameters mop = {
     .fileDescriptor = fileDescriptor,
     .methods = &methods,
     .callback = callback,
     .data = data
   };
 
-  return makeHandle(handle, newMonitorOperation, &mop);
+  return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  errno = ENOSYS;
-  logSystemError("asyncMonitorInput");
-  return 0;
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorFileInput");
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
-asyncMonitorOutput (
+asyncMonitorFileOutput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorOutput",
+    .functionName = "monitorFileOutput",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1108,23 +1111,21 @@ asyncMonitorOutput (
     .invokeCallback = invokeMonitorCallback
   };
 
-  const MonitorOperationParameters mop = {
+  const MonitorFileOperationParameters mop = {
     .fileDescriptor = fileDescriptor,
     .methods = &methods,
     .callback = callback,
     .data = data
   };
 
-  return makeHandle(handle, newMonitorOperation, &mop);
+  return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  errno = ENOSYS;
-  logSystemError("asyncMonitorOutput");
-  return 0;
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorFileOutput");
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
-asyncRead (
+asyncReadFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   size_t size,
@@ -1140,14 +1141,12 @@ asyncRead (
 
   return makeHandle(handle, newInputOperation, &iop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  errno = ENOSYS;
-  logSystemError("asyncRead");
-  return 0;
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncReadFile");
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
 
 int
-asyncWrite (
+asyncWriteFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
@@ -1164,11 +1163,88 @@ asyncWrite (
 
   return makeHandle(handle, newOutputOperation, &oop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  errno = ENOSYS;
-  logSystemError("asyncWrite");
-  return 0;
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncWriteFile");
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
+
+#ifdef __MINGW32__
+int
+asyncMonitorSocketInput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorSocketInput");
+}
+
+int
+asyncMonitorSocketOutput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncMonitorSocketOutput");
+}
+
+int
+asyncReadSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  size_t size,
+  AsyncInputCallback callback, void *data
+) {
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncReadSocket");
+}
+
+int
+asyncWriteSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  const void *buffer, size_t size,
+  AsyncOutputCallback callback, void *data
+) {
+  ASYNC_UNIMPLEMENTED_FUNCTION("asyncWriteSocket");
+}
+
+#else /* __MINGW32__ */
+int
+asyncMonitorSocketInput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+  return asyncMonitorFileInput(handle, socketDescriptor, callback, data);
+}
+
+int
+asyncMonitorSocketOutput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback callback, void *data
+) {
+  return asyncMonitorFileOutput(handle, socketDescriptor, callback, data);
+}
+
+int
+asyncReadSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  size_t size,
+  AsyncInputCallback callback, void *data
+) {
+  return asyncReadFile(handle, socketDescriptor, size, callback, data);
+}
+
+int
+asyncWriteSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  const void *buffer, size_t size,
+  AsyncOutputCallback callback, void *data
+) {
+  return asyncWriteFile(handle, socketDescriptor, buffer, size, callback, data);
+}
+#endif /* __MINGW32__ */
 
 typedef struct {
   TimeValue time;

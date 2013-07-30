@@ -33,20 +33,31 @@ extern void asyncCancel (AsyncHandle handle);
 
 typedef struct {
   void *data;
-  FileDescriptor fileDescriptor;
 } AsyncMonitorResult;
 
 typedef int (*AsyncMonitorCallback) (const AsyncMonitorResult *data);
 
-extern int asyncMonitorInput (
+extern int asyncMonitorFileInput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   AsyncMonitorCallback callback, void *data
 );
 
-extern int asyncMonitorOutput (
+extern int asyncMonitorSocketInput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback callback, void *data
+);
+
+extern int asyncMonitorFileOutput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
+  AsyncMonitorCallback callback, void *data
+);
+
+extern int asyncMonitorSocketOutput (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
   AsyncMonitorCallback callback, void *data
 );
 
@@ -62,9 +73,16 @@ typedef struct {
 
 typedef size_t (*AsyncInputCallback) (const AsyncInputResult *result);
 
-extern int asyncRead (
+extern int asyncReadFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
+  size_t size,
+  AsyncInputCallback callback, void *data
+);
+
+extern int asyncReadSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
   size_t size,
   AsyncInputCallback callback, void *data
 );
@@ -79,9 +97,16 @@ typedef struct {
 
 typedef void (*AsyncOutputCallback) (const AsyncOutputResult *result);
 
-extern int asyncWrite (
+extern int asyncWriteFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
+  const void *buffer, size_t size,
+  AsyncOutputCallback callback, void *data
+);
+
+extern int asyncWriteSocket (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
 );
