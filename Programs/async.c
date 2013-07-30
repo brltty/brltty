@@ -1082,7 +1082,7 @@ asyncMonitorFileInput (
 
   return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
@@ -1116,7 +1116,7 @@ asyncMonitorFileOutput (
 
   return makeHandle(handle, newFileMonitorOperation, &mop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
@@ -1138,7 +1138,7 @@ asyncReadFile (
 
   return makeHandle(handle, newInputOperation, &iop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
@@ -1161,7 +1161,7 @@ asyncWriteFile (
 
   return makeHandle(handle, newOutputOperation, &oop);
 #else /* ASYNC_CAN_MONITOR_IO */
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 #endif /* ASYNC_CAN_MONITOR_IO */
 }
@@ -1173,7 +1173,7 @@ asyncMonitorSocketInput (
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -1183,7 +1183,7 @@ asyncMonitorSocketOutput (
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback callback, void *data
 ) {
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -1194,7 +1194,7 @@ asyncReadSocket (
   size_t size,
   AsyncInputCallback callback, void *data
 ) {
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -1205,7 +1205,7 @@ asyncWriteSocket (
   const void *buffer, size_t size,
   AsyncOutputCallback callback, void *data
 ) {
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return 0;
 }
 

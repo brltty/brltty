@@ -634,25 +634,22 @@ releaseFileLock (int file) {
 #else /* file locking */
 #warning file lock support not available on this platform
 
-static int
-fileLockingNotSupported (void) {
-  logUnsupportedOperation("lock");
+int
+acquireFileLock (int file, int exclusive) {
+  logUnsupportedFunction();
   return 0;
 }
 
 int
-acquireFileLock (int file, int exclusive) {
-  return fileLockingNotSupported();
-}
-
-int
 attemptFileLock (int file, int exclusive) {
-  return fileLockingNotSupported();
+  logUnsupportedFunction();
+  return 0;
 }
 
 int
 releaseFileLock (int file) {
-  return fileLockingNotSupported();
+  logUnsupportedFunction();
+  return 0;
 }
 #endif /* file locking */
 

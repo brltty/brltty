@@ -27,7 +27,7 @@
 
 FILE *
 openMountsTable (int update) {
-  logUnsupportedOperation(__FUNC__);
+  logUnsupportedFunction();
   return NULL;
 }
 
