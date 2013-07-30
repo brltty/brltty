@@ -27,19 +27,29 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int awaitInput (int fileDescriptor, int timeout);
-extern int awaitOutput (int fileDescriptor, int timeout);
+extern int awaitFileInput (FileDescriptor fileDescriptor, int timeout);
+extern int awaitFileOutput (FileDescriptor fileDescriptor, int timeout);
 
-extern ssize_t readData (
-  int fileDescriptor, void *buffer, size_t size,
+extern ssize_t readFile (
+  FileDescriptor fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 
-extern ssize_t writeData (int fileDescriptor, const void *buffer, size_t size);
+extern ssize_t writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size);
 
 #ifdef HAVE_SYS_SOCKET_H
+extern int awaitSocketInput (SocketDescriptor socketDescriptor, int timeout);
+extern int awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout);
+
+extern ssize_t readSocket (
+  SocketDescriptor socketDescriptor, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
+
+extern ssize_t writeSocket (SocketDescriptor socketDescriptor, const void *buffer, size_t size);
+
 extern int connectSocket (
-  int socketDescriptor,
+  SocketDescriptor socketDescriptor,
   const struct sockaddr *address,
   size_t addressLength,
   int timeout

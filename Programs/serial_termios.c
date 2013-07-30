@@ -391,7 +391,7 @@ serialCancelOutput (SerialDevice *serial) {
 
 int
 serialPollInput (SerialDevice *serial, int timeout) {
-  return awaitInput(serial->fileDescriptor, timeout);
+  return awaitFileInput(serial->fileDescriptor, timeout);
 }
 
 int
@@ -414,7 +414,7 @@ serialGetData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+  return readFile(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
@@ -422,7 +422,7 @@ serialPutData (
   SerialDevice *serial,
   const void *data, size_t size
 ) {
-  return writeData(serial->fileDescriptor, data, size);
+  return writeFile(serial->fileDescriptor, data, size);
 }
 
 int

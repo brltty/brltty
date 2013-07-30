@@ -170,7 +170,7 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  return writeData(snd_pcm_file_descriptor(pcm->handle, pcm->parameters.channel), buffer, count);
+  return writeFile(snd_pcm_file_descriptor(pcm->handle, pcm->parameters.channel), buffer, count);
 }
 
 int

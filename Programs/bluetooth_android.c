@@ -107,7 +107,7 @@ int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return awaitInput(bcx->inputPipe[0], milliseconds);
+  return awaitFileInput(bcx->inputPipe[0], milliseconds);
 }
 
 ssize_t
@@ -117,7 +117,7 @@ bthReadData (
 ) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return readData(bcx->inputPipe[0], buffer, size, initialTimeout, subsequentTimeout);
+  return readFile(bcx->inputPipe[0], buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t

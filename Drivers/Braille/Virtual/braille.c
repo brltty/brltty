@@ -121,8 +121,8 @@ typedef struct {
 static const OperationsEntry *operations;
 
 static int
-readSocket (int descriptor, void *buffer, int size) {
-  if (awaitInput(descriptor, 0)) {
+readNetworkSocket (int descriptor, void *buffer, int size) {
+  if (awaitSocketInput(descriptor, 0)) {
     int count = recv(descriptor, buffer, size, 0);
     if (count != -1) return count;
     LogSocketError("recv");
@@ -132,7 +132,7 @@ readSocket (int descriptor, void *buffer, int size) {
 }
 
 static const OperationsEntry socketOperationsEntry = {
-  readSocket
+  readNetworkSocket
 };
 
 static char *

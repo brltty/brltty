@@ -34,25 +34,25 @@
 
 typedef struct {
   unsigned ready:1;
-} FileDescriptorMonitorData;
+} InputOutputMonitorData;
 
 static int
-monitorFileDescriptor (const AsyncMonitorResult *result) {
-  FileDescriptorMonitorData *fdm = result->data;
-  fdm->ready = 1;
+monitorInputOutput (const AsyncMonitorResult *result) {
+  InputOutputMonitorData *iom = result->data;
+  iom->ready = 1;
   return 0;
 }
 
 static int
-testFileDescriptor (void *data) {
-  FileDescriptorMonitorData *fdm = data;
+testInputOutput (void *data) {
+  InputOutputMonitorData *iom = data;
 
-  return fdm->ready;
+  return iom->ready;
 }
 
 static int
-awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
-  FileDescriptorMonitorData fdm = {
+awaitFileDescriptor (FileDescriptor fileDescriptor, int timeout, int output) {
+  InputOutputMonitorData iom = {
     .ready = 0
   };
 
@@ -60,16 +60,16 @@ awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
   int monitoring;
 
   if (output) {
-    monitoring = asyncMonitorFileOutput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
+    monitoring = asyncMonitorFileOutput(&monitor, fileDescriptor, monitorInputOutput, &iom);
   } else {
-    monitoring = asyncMonitorFileInput(&monitor, fileDescriptor, monitorFileDescriptor, &fdm);
+    monitoring = asyncMonitorFileInput(&monitor, fileDescriptor, monitorInputOutput, &iom);
   }
 
   if (monitoring) {
-    asyncAwait(timeout, testFileDescriptor, &fdm);
+    asyncAwait(timeout, testInputOutput, &iom);
     asyncCancel(monitor);
 
-    if (fdm.ready) return 1;
+    if (iom.ready) return 1;
 #ifdef ETIMEDOUT
     errno = ETIMEDOUT;
 #else /* ETIMEDOUT */
@@ -81,18 +81,18 @@ awaitFileDescriptor (int fileDescriptor, int timeout, int output) {
 }
 
 int
-awaitInput (int fileDescriptor, int timeout) {
+awaitFileInput (FileDescriptor fileDescriptor, int timeout) {
   return awaitFileDescriptor(fileDescriptor, timeout, 0);
 }
 
 int
-awaitOutput (int fileDescriptor, int timeout) {
+awaitFileOutput (FileDescriptor fileDescriptor, int timeout) {
   return awaitFileDescriptor(fileDescriptor, timeout, 1);
 }
 
 ssize_t
-readData (
-  int fileDescriptor, void *buffer, size_t size,
+readFile (
+  FileDescriptor fileDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   unsigned char *address = buffer;
@@ -132,13 +132,13 @@ readData (
       timeout = offset? subsequentTimeout: initialTimeout;
 
       if (timeout) {
-        if (awaitInput(fileDescriptor, timeout)) continue;
+        if (awaitFileInput(fileDescriptor, timeout)) continue;
         logMessage(LOG_WARNING, "input byte missing at offset %u", offset);
       } else
 
 #ifdef __MSDOS__
       if (!tried) {
-        if (awaitInput(fileDescriptor, 0)) continue;
+        if (awaitFileInput(fileDescriptor, 0)) continue;
       } else
 #endif /* __MSDOS__ */
 
@@ -161,7 +161,7 @@ readData (
 }
 
 ssize_t
-writeData (int fileDescriptor, const void *buffer, size_t size) {
+writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
 
 canWrite:
@@ -185,7 +185,7 @@ canWrite:
 
     noOutput:
       do {
-        if (awaitOutput(fileDescriptor, 15000)) goto canWrite;
+        if (awaitFileOutput(fileDescriptor, 15000)) goto canWrite;
       } while (errno == EAGAIN);
 
       return -1;
@@ -203,8 +203,31 @@ canWrite:
 
 #ifdef HAVE_SYS_SOCKET_H
 int
+awaitSocketInput (SocketDescriptor socketDescriptor, int timeout) {
+  return awaitFileInput(socketDescriptor, timeout);
+}
+
+int
+awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout) {
+  return awaitFileOutput(socketDescriptor, timeout);
+}
+
+ssize_t
+readSocket (
+  SocketDescriptor socketDescriptor, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readFile(socketDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+writeSocket (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
+  return writeFile(socketDescriptor, buffer, size);
+}
+
+int
 connectSocket (
-  int socketDescriptor,
+  SocketDescriptor socketDescriptor,
   const struct sockaddr *address,
   size_t addressLength,
   int timeout
@@ -213,7 +236,7 @@ connectSocket (
 
   if (result == -1) {
     if (errno == EINPROGRESS) {
-      if (awaitOutput(socketDescriptor, timeout)) {
+      if (awaitSocketOutput(socketDescriptor, timeout)) {
         int error;
         socklen_t length = sizeof(error);
 

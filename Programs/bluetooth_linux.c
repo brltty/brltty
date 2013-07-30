@@ -101,7 +101,7 @@ int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return awaitInput(bcx->socket, milliseconds);
+  return awaitSocketInput(bcx->socket, milliseconds);
 }
 
 ssize_t
@@ -111,14 +111,14 @@ bthReadData (
 ) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return readData(bcx->socket, buffer, size, initialTimeout, subsequentTimeout);
+  return readSocket(bcx->socket, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return writeData(bcx->socket, buffer, size);
+  return writeSocket(bcx->socket, buffer, size);
 }
 
 char *

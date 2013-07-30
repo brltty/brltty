@@ -68,7 +68,7 @@ closePcmDevice (PcmDevice *pcm) {
 
 int
 writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
-  return writeData(pcm->fileDescriptor, buffer, count) != -1;
+  return writeFile(pcm->fileDescriptor, buffer, count) != -1;
 }
 
 static int

@@ -42,7 +42,7 @@ static MidiDevice *midiDevice = NULL;
 void
 seqbuf_dump (void) {
   if (_seqbufptr)
-    if (writeData(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
+    if (writeFile(midiDevice->fileDescriptor, _seqbuf, _seqbufptr) == -1)
       logSystemError("MIDI write");
   _seqbufptr = 0;
 }
