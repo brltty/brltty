@@ -19,11 +19,11 @@
 #ifndef BRL_INCLUDED_BRLDOTS
 #define BRL_INCLUDED_BRLDOTS
 
+#include <strings.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include <strings.h>
 
 /* The bits for each braille dot as defined by the ISO 11548-1 standard.
  *
