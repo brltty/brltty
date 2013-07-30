@@ -32,41 +32,66 @@
 #include "timing.h"
 #include "async.h"
 
+typedef struct InputOutputMethodsStruct InputOutputMethods;
+
+typedef enum {
+  IOH_TYPE_FILE,
+  IOH_TYPE_SOCKET
+} InputOutputHandleType;
+
+typedef struct {
+  const InputOutputMethods *methods;
+  InputOutputHandleType type;
+
+  union {
+    FileDescriptor file;
+    SocketDescriptor socket;
+  } descriptor;
+} InputOutputHandle;
+
 typedef struct {
   unsigned ready:1;
-} InputOutputMonitorData;
+} InputOutputMonitor;
+
+struct InputOutputMethodsStruct {
+  int (*monitorInput) (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom);
+  int (*monitorOutput) (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom);
+  ssize_t (*readData) (const InputOutputHandle *ioh, void *buffer, size_t size);
+  ssize_t (*writeData) (const InputOutputHandle *ioh, const void *buffer, size_t size);
+};
 
 static int
-monitorInputOutput (const AsyncMonitorResult *result) {
-  InputOutputMonitorData *iom = result->data;
+setInputOutputMonitor (const AsyncMonitorResult *result) {
+  InputOutputMonitor *iom = result->data;
+
   iom->ready = 1;
   return 0;
 }
 
 static int
-testInputOutput (void *data) {
-  InputOutputMonitorData *iom = data;
+testInputOutputMonitor (void *data) {
+  InputOutputMonitor *iom = data;
 
   return iom->ready;
 }
 
 static int
-awaitFileDescriptor (FileDescriptor fileDescriptor, int timeout, int output) {
-  InputOutputMonitorData iom = {
+awaitHandle (const InputOutputHandle *ioh, int timeout, int isOutput) {
+  InputOutputMonitor iom = {
     .ready = 0
   };
 
   AsyncHandle monitor;
   int monitoring;
 
-  if (output) {
-    monitoring = asyncMonitorFileOutput(&monitor, fileDescriptor, monitorInputOutput, &iom);
+  if (isOutput) {
+    monitoring = ioh->methods->monitorOutput(ioh, &monitor, &iom);
   } else {
-    monitoring = asyncMonitorFileInput(&monitor, fileDescriptor, monitorInputOutput, &iom);
+    monitoring = ioh->methods->monitorInput(ioh, &monitor, &iom);
   }
 
   if (monitoring) {
-    asyncAwait(timeout, testInputOutput, &iom);
+    asyncAwait(timeout, testInputOutputMonitor, &iom);
     asyncCancel(monitor);
 
     if (iom.ready) return 1;
@@ -80,19 +105,20 @@ awaitFileDescriptor (FileDescriptor fileDescriptor, int timeout, int output) {
   return 0;
 }
 
-int
-awaitFileInput (FileDescriptor fileDescriptor, int timeout) {
-  return awaitFileDescriptor(fileDescriptor, timeout, 0);
+static int
+awaitInput (const InputOutputHandle *ioh, int timeout) {
+  return awaitHandle(ioh, timeout, 0);
 }
 
-int
-awaitFileOutput (FileDescriptor fileDescriptor, int timeout) {
-  return awaitFileDescriptor(fileDescriptor, timeout, 1);
+static int
+awaitOutput (const InputOutputHandle *ioh, int timeout) {
+  return awaitHandle(ioh, timeout, 1);
 }
 
-ssize_t
-readFile (
-  FileDescriptor fileDescriptor, void *buffer, size_t size,
+static ssize_t
+readData (
+  const InputOutputHandle *ioh,
+  void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   unsigned char *address = buffer;
@@ -103,7 +129,7 @@ readFile (
 #endif /* __MSDOS__ */
 
   while (size > 0) {
-    ssize_t count = read(fileDescriptor, address, size);
+    ssize_t count = ioh->methods->readData(ioh, address, size);
 
 #ifdef __MSDOS__
     tried = 1;
@@ -132,13 +158,13 @@ readFile (
       timeout = offset? subsequentTimeout: initialTimeout;
 
       if (timeout) {
-        if (awaitFileInput(fileDescriptor, timeout)) continue;
+        if (awaitInput(ioh, timeout)) continue;
         logMessage(LOG_WARNING, "input byte missing at offset %u", offset);
       } else
 
 #ifdef __MSDOS__
       if (!tried) {
-        if (awaitFileInput(fileDescriptor, 0)) continue;
+        if (awaitInput(ioh, 0)) continue;
       } else
 #endif /* __MSDOS__ */
 
@@ -160,13 +186,13 @@ readFile (
   }
 }
 
-ssize_t
-writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
+static ssize_t
+writeData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
 
 canWrite:
   while (size > 0) {
-    ssize_t count = write(fileDescriptor, address, size);
+    ssize_t count = ioh->methods->writeData(ioh, address, size);
 
     if (count == -1) {
       if (errno == EINTR) continue;
@@ -185,7 +211,7 @@ canWrite:
 
     noOutput:
       do {
-        if (awaitFileOutput(fileDescriptor, 15000)) goto canWrite;
+        if (awaitOutput(ioh, 15000)) goto canWrite;
       } while (errno == EAGAIN);
 
       return -1;
@@ -201,15 +227,124 @@ canWrite:
   }
 }
 
+static int
+monitorFileInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
+  return asyncMonitorFileInput(handle, ioh->descriptor.file, setInputOutputMonitor, iom);
+}
+
+static int
+monitorFileOutput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
+  return asyncMonitorFileOutput(handle, ioh->descriptor.file, setInputOutputMonitor, iom);
+}
+
+static ssize_t
+readFileData (const InputOutputHandle *ioh, void *buffer, size_t size) {
+  return read(ioh->descriptor.file, buffer, size);
+}
+
+static ssize_t
+writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
+  return write(ioh->descriptor.file, buffer, size);
+}
+
+static const InputOutputMethods fileMethods = {
+  .monitorInput = monitorFileInput,
+  .monitorOutput = monitorFileOutput,
+  .readData = readFileData,
+  .writeData = writeFileData
+};
+
+static void
+makeFileHandle (InputOutputHandle *ioh, FileDescriptor fileDescriptor) {
+  ioh->methods = &fileMethods;
+  ioh->type = IOH_TYPE_FILE;
+  ioh->descriptor.file = fileDescriptor;
+}
+
+int
+awaitFileInput (FileDescriptor fileDescriptor, int timeout) {
+  InputOutputHandle ioh;
+
+  makeFileHandle(&ioh, fileDescriptor);
+  return awaitInput(&ioh, timeout);
+}
+
+int
+awaitFileOutput (FileDescriptor fileDescriptor, int timeout) {
+  InputOutputHandle ioh;
+
+  makeFileHandle(&ioh, fileDescriptor);
+  return awaitOutput(&ioh, timeout);
+}
+
+ssize_t
+readFile (
+  FileDescriptor fileDescriptor, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  InputOutputHandle ioh;
+
+  makeFileHandle(&ioh, fileDescriptor);
+  return readData(&ioh, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+ssize_t
+writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
+  InputOutputHandle ioh;
+
+  makeFileHandle(&ioh, fileDescriptor);
+  return writeData(&ioh, buffer, size);
+}
+
 #ifdef HAVE_SYS_SOCKET_H
+static int
+monitorSocketInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
+  return asyncMonitorSocketInput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
+}
+
+static int
+monitorSocketOutput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
+  return asyncMonitorSocketOutput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
+}
+
+static ssize_t
+readSocketData (const InputOutputHandle *ioh, void *buffer, size_t size) {
+  return recv(ioh->descriptor.socket, buffer, size, 0);
+}
+
+static ssize_t
+writeSocketData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
+  return send(ioh->descriptor.socket, buffer, size, 0);
+}
+
+static const InputOutputMethods socketMethods = {
+  .monitorInput = monitorSocketInput,
+  .monitorOutput = monitorSocketOutput,
+  .readData = readSocketData,
+  .writeData = writeSocketData
+};
+
+static void
+makeSocketHandle (InputOutputHandle *ioh, FileDescriptor fileDescriptor) {
+  ioh->methods = &fileMethods;
+  ioh->type = IOH_TYPE_FILE;
+  ioh->descriptor.file = fileDescriptor;
+}
+
 int
 awaitSocketInput (SocketDescriptor socketDescriptor, int timeout) {
-  return awaitFileInput(socketDescriptor, timeout);
+  InputOutputHandle ioh;
+
+  makeSocketHandle(&ioh, socketDescriptor);
+  return awaitInput(&ioh, timeout);
 }
 
 int
 awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout) {
-  return awaitFileOutput(socketDescriptor, timeout);
+  InputOutputHandle ioh;
+
+  makeSocketHandle(&ioh, socketDescriptor);
+  return awaitOutput(&ioh, timeout);
 }
 
 ssize_t
@@ -217,12 +352,18 @@ readSocket (
   SocketDescriptor socketDescriptor, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return readFile(socketDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+  InputOutputHandle ioh;
+
+  makeSocketHandle(&ioh, socketDescriptor);
+  return readData(&ioh, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
 writeSocket (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
-  return writeFile(socketDescriptor, buffer, size);
+  InputOutputHandle ioh;
+
+  makeSocketHandle(&ioh, socketDescriptor);
+  return writeData(&ioh, buffer, size);
 }
 
 int
