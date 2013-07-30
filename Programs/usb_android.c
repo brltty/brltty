@@ -450,13 +450,13 @@ usbSetInterface (UsbDeviceExtension *devx, uint8_t identifier) {
 
 int
 usbResetDevice (UsbDevice *device) {
-  logUnsupportedOperation("USB device reset");
+  logUnsupportedFunction();
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  logUnsupportedOperation("USB device autosuspend disable");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -467,7 +467,7 @@ usbSetConfiguration (
 ) {
   if (configuration == 1) return 1;
 
-  logUnsupportedOperation("USB configuration set");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -509,7 +509,7 @@ usbSetAlternative (
 ) {
   if (alternative == 0) return 1;
 
-  logUnsupportedOperation("USB alternative set");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -518,7 +518,7 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
-  logUnsupportedOperation("USB endpoint clear");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -576,7 +576,7 @@ usbSubmitRequest (
   size_t length,
   void *context
 ) {
-  logUnsupportedOperation("USB request submit");
+  logUnsupportedFunction();
   return NULL;
 }
 
@@ -585,7 +585,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  logUnsupportedOperation("USB request cancel");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -596,7 +596,7 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  logUnsupportedOperation("USB request reap");
+  logUnsupportedFunction();
   return NULL;
 }
 

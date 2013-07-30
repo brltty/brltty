@@ -398,7 +398,7 @@ usbResetDevice (UsbDevice *device) {
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  logUnsupportedOperation("USB device autosuspend disable");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -619,7 +619,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  logUnsupportedOperation("USB request cancel");
+  logUnsupportedFunction();
   return 0;
 }
 

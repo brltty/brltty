@@ -53,13 +53,13 @@ usbSetShortTransfers (int file, int arg) {
 
 int
 usbResetDevice (UsbDevice *device) {
-  logUnsupportedOperation("USB device reset");
+  logUnsupportedFunction();
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  logUnsupportedOperation("USB device autosuspend disable");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -82,7 +82,7 @@ usbClaimInterface (
 ) {
   return 1;
 /*
-  logUnsupportedOperation("USB interface claim");
+  logUnsupportedFunction();
   return 0;
 */
 }
@@ -94,7 +94,7 @@ usbReleaseInterface (
 ) {
   return 1;
 /*
-  logUnsupportedOperation("USB interface release");
+  logUnsupportedFunction();
   return 0;
 */
 }
@@ -120,7 +120,7 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
-  logUnsupportedOperation("USB endpoint clear");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -162,7 +162,7 @@ usbSubmitRequest (
   size_t length,
   void *context
 ) {
-  logUnsupportedOperation("USB request submit");
+  logUnsupportedFunction();
   return NULL;
 }
 
@@ -171,7 +171,7 @@ usbCancelRequest (
   UsbDevice *device,
   void *request
 ) {
-  logUnsupportedOperation("USB request cancel");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -182,7 +182,7 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  logUnsupportedOperation("USB request reap");
+  logUnsupportedFunction();
   return NULL;
 }
 

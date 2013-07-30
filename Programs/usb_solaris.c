@@ -96,13 +96,13 @@ usbOpenEndpointFiles (
 
 int
 usbResetDevice (UsbDevice *device) {
-  logUnsupportedOperation("USB device reset");
+  logUnsupportedFunction();
   return 0;
 }
 
 int
 usbDisableAutosuspend (UsbDevice *device) {
-  logUnsupportedOperation("USB device autosuspend disable");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -152,7 +152,7 @@ usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
 ) {
-  logUnsupportedOperation("USB endpoint clear");
+  logUnsupportedFunction();
   return 0;
 }
 

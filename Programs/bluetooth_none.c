@@ -26,7 +26,7 @@
 
 BluetoothConnectionExtension *
 bthConnect (uint64_t bda, uint8_t channel, int timeout) {
-  logUnsupportedOperation("Bluetooth connect");
+  logUnsupportedFunction();
   return NULL;
 }
 
@@ -36,7 +36,7 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
 
 int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
-  logUnsupportedOperation("Bluetooth wait");
+  logUnsupportedFunction();
   return 0;
 }
 
@@ -45,13 +45,13 @@ bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  logUnsupportedOperation("Bluetooth read");
+  logUnsupportedFunction();
   return -1;
 }
 
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
-  logUnsupportedOperation("Bluetooth write");
+  logUnsupportedFunction();
   return -1;
 }
 
