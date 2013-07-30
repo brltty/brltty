@@ -27,8 +27,7 @@
 
 FILE *
 openMountsTable (int update) {
-  errno = ENOSYS;
-  logSystemError("openMountsTable");
+  logUnsupportedOperation(__FUNC__);
   return NULL;
 }
 

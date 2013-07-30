@@ -636,8 +636,7 @@ releaseFileLock (int file) {
 
 static int
 fileLockingNotSupported (void) {
-  errno = ENOSYS;
-  logSystemError("lock");
+  logUnsupportedOperation("lock");
   return 0;
 }
 
