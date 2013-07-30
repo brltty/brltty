@@ -19,9 +19,15 @@
 #ifndef BRLTTY_INCLUDED_IO_MISC
 #define BRLTTY_INCLUDED_IO_MISC
 
-#ifdef HAVE_SYS_SOCKET_H
+#undef IO_HAVE_SOCKETS
+#if defined(HAVE_SYS_SOCKET_H)
+#define IO_HAVE_SOCKETS
 #include <sys/socket.h>
-#endif /* HAVE_SYS_SOCKET_H */
+
+#elif defined(__MINGW32__)
+#define IO_HAVE_SOCKETS
+
+#endif /* have sockets */
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +43,7 @@ extern ssize_t readFile (
 
 extern ssize_t writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size);
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifdef IO_HAVE_SOCKETS
 extern int awaitSocketInput (SocketDescriptor socketDescriptor, int timeout);
 extern int awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout);
 
@@ -54,7 +60,7 @@ extern int connectSocket (
   size_t addressLength,
   int timeout
 );
-#endif /* HAVE_SYS_SOCKET_H */
+#endif /* IO_HAVE_SOCKETS */
 
 #ifndef __MINGW32__
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);

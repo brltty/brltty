@@ -23,10 +23,6 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif /* HAVE_SYS_SOCKET_H */
-
 #include "io_misc.h"
 #include "log.h"
 #include "timing.h"
@@ -34,14 +30,8 @@
 
 typedef struct InputOutputMethodsStruct InputOutputMethods;
 
-typedef enum {
-  IOH_TYPE_FILE,
-  IOH_TYPE_SOCKET
-} InputOutputHandleType;
-
 typedef struct {
   const InputOutputMethods *methods;
-  InputOutputHandleType type;
 
   union {
     FileDescriptor file;
@@ -284,7 +274,6 @@ static const InputOutputMethods fileMethods = {
 static void
 makeFileHandle (InputOutputHandle *ioh, FileDescriptor fileDescriptor) {
   ioh->methods = &fileMethods;
-  ioh->type = IOH_TYPE_FILE;
   ioh->descriptor.file = fileDescriptor;
 }
 
@@ -323,7 +312,7 @@ writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
   return writeData(&ioh, buffer, size);
 }
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifdef IO_HAVE_SOCKETS
 static int
 monitorSocketInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
   return asyncMonitorSocketInput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
@@ -352,10 +341,9 @@ static const InputOutputMethods socketMethods = {
 };
 
 static void
-makeSocketHandle (InputOutputHandle *ioh, FileDescriptor fileDescriptor) {
-  ioh->methods = &fileMethods;
-  ioh->type = IOH_TYPE_FILE;
-  ioh->descriptor.file = fileDescriptor;
+makeSocketHandle (InputOutputHandle *ioh, SocketDescriptor socketDescriptor) {
+  ioh->methods = &socketMethods;
+  ioh->descriptor.socket = socketDescriptor;
 }
 
 int
@@ -403,6 +391,7 @@ connectSocket (
   int result = connect(socketDescriptor, address, addressLength);
 
   if (result == -1) {
+#ifdef EINPROGRESS
     if (errno == EINPROGRESS) {
       if (awaitSocketOutput(socketDescriptor, timeout)) {
         int error;
@@ -416,11 +405,12 @@ connectSocket (
 
       close(socketDescriptor);
     }
+#endif /* EINPROGRESS */
   }
 
   return result;
 }
-#endif /* HAVE_SYS_SOCKET_H */
+#endif /* IO_HAVE_SOCKETS */
 
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
