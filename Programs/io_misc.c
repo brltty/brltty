@@ -392,12 +392,12 @@ connectSocket (
 
   if (result == -1) {
 #ifdef EINPROGRESS
-    if (errno == EINPROGRESS) {
+    if (getSocketError() == EINPROGRESS) {
       if (awaitSocketOutput(socketDescriptor, timeout)) {
         int error;
         socklen_t length = sizeof(error);
 
-        if (getsockopt(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
+        if (getSocketOption(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
           if (!error) return 0;
           errno = error;
         }

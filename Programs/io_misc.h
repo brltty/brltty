@@ -27,6 +27,14 @@
 #elif defined(__MINGW32__)
 #define IO_HAVE_SOCKETS
 
+typedef int socklen_t;
+
+#ifndef EINPROGRESS
+#ifdef WSAEINPROGRESS
+#define EINPROGRESS WSAEINPROGRESS
+#endif /* WSAEINPROGRESS */
+#endif /* EINPROGRESS */
+
 #endif /* have sockets */
 
 #ifdef __cplusplus
@@ -60,6 +68,15 @@ extern int connectSocket (
   size_t addressLength,
   int timeout
 );
+
+static inline int
+getSocketOption (
+  SocketDescriptor socketDescriptor,
+  int level, int option,
+  void *value, socklen_t *length
+) {
+  return getsockopt(socketDescriptor, level, option, value, length);
+}
 #endif /* IO_HAVE_SOCKETS */
 
 #ifndef __MINGW32__
