@@ -490,11 +490,8 @@ static Queue *
 getFunctionQueue (int create) {
   static Queue *functions = NULL;
 
-  if (!functions) {
-    if (create) {
-      if ((functions = newQueue(deallocateFunctionEntry, NULL))) {
-      }
-    }
+  if (!functions && create) {
+    functions = newQueue(deallocateFunctionEntry, NULL);
   }
 
   return functions;
@@ -1272,11 +1269,8 @@ static Queue *
 getAlarmQueue (int create) {
   static Queue *alarms = NULL;
 
-  if (!alarms) {
-    if (create) {
-      if ((alarms = newQueue(deallocateAlarmEntry, compareAlarmEntries))) {
-      }
-    }
+  if (!alarms && create) {
+    alarms = newQueue(deallocateAlarmEntry, compareAlarmEntries);
   }
 
   return alarms;
