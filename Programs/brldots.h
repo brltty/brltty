@@ -21,6 +21,10 @@
 
 #include <strings.h>
 
+#ifdef __MINGW32__
+extern int ffs (int i);
+#endif /* __MINGW32__ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
