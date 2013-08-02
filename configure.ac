@@ -286,7 +286,7 @@ in
       brltty_cv_prog_ld_flags=""
       ;;
    cygwin*|mingw*)
-      brltty_cv_prog_ld_flags="-export-dynamic --enable-auto-import"
+      brltty_cv_prog_ld_flags="--export-all-symbols --enable-auto-import"
       ;;
    msdos*)
       brltty_cv_prog_ld_flags=""
