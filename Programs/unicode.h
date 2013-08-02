@@ -72,6 +72,8 @@ extern "C" {
 #define UNICODE_GROUP_NUMBER(c) (((c) & UNICODE_GROUP_MASK) >> UNICODE_GROUP_SHIFT)
 #define UNICODE_CHARACTER(group,plane,row,cell) (((group) << UNICODE_GROUP_SHIFT) | ((plane) << UNICODE_PLANE_SHIFT) | ((row) << UNICODE_ROW_SHIFT) | ((cell) << UNICODE_CELL_SHIFT))
 
+extern int getCharacterByName (wchar_t *character, const char *name);
+
 extern int getCharacterWidth (wchar_t character);
 
 extern wchar_t getBaseCharacter (wchar_t character);

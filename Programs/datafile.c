@@ -535,29 +535,26 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
                 char name[count+1];
 
                 {
-                  int i;
+                  unsigned int i;
+
                   for (i=0; i<count; i+=1) {
                     wchar_t wc = first[i];
+
                     if (wc == WC_C('_')) wc = WC_C(' ');
-                    if (!iswLatin1(wc)) goto badName;
+                    if (!iswLatin1(wc)) break;
                     name[i] = wc;
                   }
-                }
-                name[count] = 0;
 
-#ifdef HAVE_ICU
-                {
-                  UErrorCode error = U_ZERO_ERROR;
-                  character = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
-                  if (U_SUCCESS(error)) ok = 1;
+                  if (i < count) break;
+                  name[i] = 0;
                 }
-#endif /* HAVE_ICU */
+
+                if (getCharacterByName(&character, name)) ok = 1;
               }
             } else {
               index = length - 1;
             }
 
-          badName:
             break;
           }
         }

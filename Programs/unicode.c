@@ -31,6 +31,21 @@
 #include "ascii.h"
 
 int
+getCharacterByName (wchar_t *character, const char *name) {
+#ifdef HAVE_ICU
+  UErrorCode error = U_ZERO_ERROR;
+  UChar uc = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
+
+  if (U_SUCCESS(error)) {
+    *character = uc;
+    return 1;
+  }
+#endif /* HAVE_ICU */
+
+  return 0;
+}
+
+int
 getCharacterWidth (wchar_t character) {
 #if defined(HAVE_WCWIDTH)
   return wcwidth(character);
