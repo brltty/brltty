@@ -42,7 +42,7 @@ then
       gcj)   JAVAC_OPTIONS="-C --encoding=${JAVA_ENCODING}";;
       *)     JAVAC_OPTIONS="";;
    esac
-   AC_SUBST([JAVAC], ["${JAVAC_PATH} ${JAVAC_OPTIONS}"])
+   AC_SUBST([JAVAC], ["'${JAVAC_PATH}' ${JAVAC_OPTIONS}"])
 
    JAVA_BIN=`AS_DIRNAME("${JAVAC_PATH}")`
    JAVA_ROOT=`AS_DIRNAME("${JAVA_BIN}")`
@@ -54,10 +54,10 @@ then
    else
       JAVADOC_PATH=":"
    fi
-   AC_SUBST([JAVADOC], ["${JAVADOC_PATH} -encoding ${JAVA_ENCODING}"])
+   AC_SUBST([JAVADOC], ["'${JAVADOC_PATH}' -encoding ${JAVA_ENCODING}"])
 
    AC_CHECK_PROGS([JAR_NAME], [jar gjar], [JAR_NOT_FOUND_BY_CONFIGURE], ["${JAVA_BIN}"])
-   AC_SUBST([JAR], ["${JAVA_BIN}/${JAR_NAME}"])
+   AC_SUBST([JAR], ["'${JAVA_BIN}/${JAR_NAME}'"])
    BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java])
 
    JAVA_JNI_INC="${JAVA_ROOT}/include"
@@ -65,7 +65,7 @@ then
    JAVA_JNI_FLAGS=""
    AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AC_CHECK_FILE(["${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
    AC_SUBST([JAVA_JNI_HDR])
-   AC_SUBST([JAVA_JNI_INC])
+   AC_SUBST([JAVA_JNI_INC], ["'${JAVA_JNI_INC}'"])
    AC_SUBST([JAVA_JNI_FLAGS])
    BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni])
 else
