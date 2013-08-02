@@ -23,10 +23,6 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-#endif /* HAVE_ICU */
-
 #include "log.h"
 #include "file.h"
 #include "queue.h"
