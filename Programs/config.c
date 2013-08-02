@@ -1670,10 +1670,10 @@ background (void) {
       char c = variableName[i];
 
       if (c == '_') continue;
-      if (isdigit(c) && (i > 0)) continue;
+      if (isdigit((unsigned char)c) && (i > 0)) continue;
 
-      if (isalpha(c)) {
-        if (islower(c)) variableName[i] = toupper(c);
+      if (isalpha((unsigned char)c)) {
+        if (islower((unsigned char)c)) variableName[i] = toupper((unsigned char)c);
         continue;
       }
 

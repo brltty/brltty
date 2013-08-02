@@ -221,7 +221,7 @@ main (int argc, char *argv[]) {
                 int column;
                 for (column=0; column<width; column++) {
                   wchar_t character = buffer[line * width + column].text;
-                  if (!iswprint(character)) {
+                  if (!iswLatin1(character)) {
                     putchar('?');
                   } else if (!isprint(character)) {
                     putchar('*');
