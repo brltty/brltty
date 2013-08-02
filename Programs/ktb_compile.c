@@ -257,7 +257,7 @@ compareToName (const wchar_t *location1, int length1, const char *location2) {
 
     {
       wchar_t character1 = towlower(*location1);
-      char character2 = tolower(*location2);
+      char character2 = tolower((unsigned char)*location2);
 
       if (character1 < character2) return -1;
       if (character1 > character2) return 1;

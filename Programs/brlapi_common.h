@@ -73,7 +73,7 @@ static ssize_t brlapi_writeFile(brlapi_fileDescriptor fd, const void *buffer, si
 #endif /* __MINGW32__ */
   for (n=0;n<size;n+=res) {
 #ifdef __MINGW32__
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+    OVERLAPPED overl = {0, 0, {{0, 0}}, CreateEvent(NULL, TRUE, FALSE, NULL)};
     if ((!WriteFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult(fd, &overl, &res, TRUE)) {
@@ -111,7 +111,7 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
 #endif /* __MINGW32__ */
   for (n=0;n<size && res>=0;n+=res) {
 #ifdef __MINGW32__
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+    OVERLAPPED overl = {0, 0, {{0, 0}}, CreateEvent(NULL, TRUE, FALSE, NULL)};
     if ((!ReadFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult(fd, &overl, &res, TRUE)) {

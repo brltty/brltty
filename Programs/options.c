@@ -608,8 +608,8 @@ processEnvironmentVariables (
         while (*character) {
           if (*character == '-') {
             *character = '_';
-	  } else if (islower(*character)) {
-            *character = toupper(*character);
+	  } else if (islower((unsigned char)*character)) {
+            *character = toupper((unsigned char)*character);
           }
 
           character += 1;

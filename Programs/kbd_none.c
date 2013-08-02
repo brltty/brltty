@@ -16,8 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning keyboard monitor support not available on this platform
-
 #include "prologue.h"
 
 #include "kbd.h"

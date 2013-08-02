@@ -1818,7 +1818,7 @@ out:
 
 static void *establishSocket(void *arg)
 {
-  long int num = (intptr_t) arg;
+  intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 #ifndef __MINGW32__
   int res;

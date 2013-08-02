@@ -313,7 +313,7 @@ cancelProgram (const char *pidFile) {
       char *end;
       long int pid = strtol(line, &end, 10);
 
-      if (!*end || isspace(*end)) {
+      if (!*end || isspace((unsigned char)*end)) {
         if (cancelProcess(pid)) cancelled = 1;
       }
     }

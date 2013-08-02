@@ -374,7 +374,7 @@ readNamedPipe (int descriptor, void *buffer, int size) {
 
   {
     DWORD received;
-    OVERLAPPED overl = {0, 0, 0, 0, NULL};
+    OVERLAPPED overl = {0, 0, {{0, 0}}, NULL};
     overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
     if (!ReadFile((HANDLE)descriptor, buffer, size, &received, &overl)) {
@@ -399,7 +399,7 @@ static const OperationsEntry namedPipeOperationsEntry = {
 static int
 acceptNamedPipeConnection (const char *path) {
   HANDLE h;
-  OVERLAPPED overl = {0,0,0,0,NULL};
+  OVERLAPPED overl = {0, 0, {{0, 0}}, NULL};
   DWORD res;
   int attempts = 0;
 
@@ -648,7 +648,7 @@ flushOutput (void) {
   while (length) {
 #ifdef __MINGW32__
     DWORD sent;
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+    OVERLAPPED overl = {0, 0, {{0, 0}}, CreateEvent(NULL, TRUE, FALSE, NULL)};
     if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &sent, TRUE)) {
