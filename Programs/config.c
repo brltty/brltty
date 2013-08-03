@@ -59,7 +59,7 @@
 #include "io_bluetooth.h"
 
 #ifdef __MINGW32__
-#include "sys_windows.h"
+#include "service.h"
 
 int isWindowsService = 0;
 
