@@ -24,9 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-extern char *getProgramPath (void);
-
-
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);

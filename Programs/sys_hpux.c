@@ -34,8 +34,6 @@
 #include "log.h"
 #include "system.h"
 
-#include "sys_prog_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 void *
 loadSharedObject (const char *path) {

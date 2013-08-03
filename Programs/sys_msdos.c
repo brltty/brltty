@@ -21,8 +21,6 @@
 #include "log.h"
 #include "system.h"
 
-#include "sys_prog_none.h"
-
 #ifdef ENABLE_SHARED_OBJECTS
 #include "sys_shlib_none.h"
 #endif /* ENABLE_SHARED_OBJECTS */

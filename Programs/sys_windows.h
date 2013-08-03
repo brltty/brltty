@@ -78,8 +78,6 @@ extern const char *win_getLocale (void);
 
 
 extern char *makeWindowsCommandLine (const char *const *arguments);
-extern int installService (const char *name, const char *description);
-extern int removeService (const char *name);
 
 extern void sysInit (void);
 

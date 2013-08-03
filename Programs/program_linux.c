@@ -18,28 +18,46 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
 
-#include "system.h"
+#include "log.h"
+#include "program.h"
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
+char *
+getProgramPath (void) {
+  char *path = NULL;
+  size_t size = 0X80;
+  char *buffer = NULL;
 
-#include "sys_beep_spkr.h"
+  while (1) {
+    {
+      char *newBuffer = realloc(buffer, size<<=1);
 
-#ifdef ENABLE_PCM_SUPPORT
-#define PCM_OSS_DEVICE_PATH "/dev/dsp"
-#include "sys_pcm_oss.h"
-#endif /* ENABLE_PCM_SUPPORT */
+      if (!newBuffer) {
+        logMallocError();
+        break;
+      }
 
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
+      buffer = newBuffer;
+    }
 
-#include "sys_ports_kfreebsd.h"
+    {
+      int length = readlink("/proc/self/exe", buffer, size);
+
+      if (length == -1) {
+        if (errno != ENOENT) logSystemError("readlink");
+        break;
+      }
+
+      if (length < size) {
+        buffer[length] = 0;
+        if (!(path = strdup(buffer))) logMallocError();
+        break;
+      }
+    }
+  }
+
+  if (buffer) free(buffer);
+  return path;
+}

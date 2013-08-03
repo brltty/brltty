@@ -26,8 +26,6 @@
 #include "system.h"
 #include "sys_windows.h"
 
-#include "sys_prog_windows.h"
-
 #include "sys_beep_windows.h"
 
 #include "sys_ports_windows.h"
@@ -181,82 +179,6 @@ makeWindowsCommandLine (const char *const *arguments) {
 error:
   if (buffer) free(buffer);
   return NULL;
-}
-
-int
-installService (const char *name, const char *description) {
-  int installed = 0;
-  const char *const arguments[] = {
-    getProgramPath(),
-    NULL
-  };
-  char *command = makeWindowsCommandLine(arguments);
-
-  if (command) {
-    SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
-
-    if (scm) {
-      SC_HANDLE service = CreateService(scm, name, description, SERVICE_ALL_ACCESS,
-                                        SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-                                        SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
-                                        command, NULL, NULL, NULL, NULL, NULL);
-
-      if (service) {
-        logMessage(LOG_NOTICE, "service installed: %s", name);
-        installed = 1;
-
-        CloseServiceHandle(service);
-      } else if (GetLastError() == ERROR_SERVICE_EXISTS) {
-        logMessage(LOG_WARNING, "service already installed: %s", name);
-        installed = 1;
-      } else {
-        logWindowsSystemError("CreateService");
-      }
-
-      CloseServiceHandle(scm);
-    } else {
-      logWindowsSystemError("OpenSCManager");
-    }
-
-    free(command);
-  }
-
-  return installed;
-}
-
-int
-removeService (const char *name) {
-  int removed = 0;
-  SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-
-  if (scm) {
-    SC_HANDLE service = OpenService(scm, name, DELETE);
-
-    if (service) {
-      if (DeleteService(service)) {
-        logMessage(LOG_NOTICE, "service removed: %s", name);
-        removed = 1;
-      } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        logMessage(LOG_WARNING, "service already being removed: %s", name);
-        removed = 1;
-      } else {
-        logWindowsSystemError("DeleteService");
-      }
-
-      CloseServiceHandle(service);
-    } else if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST) {
-      logMessage(LOG_WARNING, "service not installed: %s", name);
-      removed = 1;
-    } else {
-      logWindowsSystemError("OpenService");
-    }
-
-    CloseServiceHandle(scm);
-  } else {
-    logWindowsSystemError("OpenSCManager");
-  }
-
-  return removed;
 }
 
 void

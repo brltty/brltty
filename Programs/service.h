@@ -16,23 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_SERVICE
+#define BRLTTY_INCLUDED_SERVICE
 
-#include "system.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
+extern int installService (const char *name, const char *description);
+extern int removeService (const char *name);
 
-#include "sys_beep_none.h"
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_glibc.h"
+#endif /* BRLTTY_INCLUDED_SERVICE */

@@ -1278,6 +1278,24 @@ BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
+   linux*)
+      program_package="linux"
+      ;;
+   solaris*)
+      program_package="solaris"
+      ;;
+   cygwin*|mingw*)
+      program_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([service], [service], [], [dnl
+   mingw*)
+      service_package="windows"
+      ;;
+])
+
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 test -n "${api_objects}" && {

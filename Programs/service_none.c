@@ -18,21 +18,14 @@
 
 #include "prologue.h"
 
-#include "system.h"
+#include "service.h"
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
+int
+installService (const char *name, const char *description) {
+  return 0;
+}
 
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_glibc.h"
+int
+removeService (const char *name) {
+  return 0;
+}

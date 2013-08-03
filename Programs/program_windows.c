@@ -16,7 +16,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include "log.h"
+#include "program.h"
+#include "sys_windows.h"
 
 char *
 getProgramPath (void) {

@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_PROGRAM
 #define BRLTTY_INCLUDED_PROGRAM
 
+#include "pid.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "pid.h"
 
 typedef enum {
   PROG_EXIT_SUCCESS  = 0,
@@ -54,6 +54,8 @@ extern void fixInstallPath (char **path);
 
 extern int createPidFile (const char *path, ProcessIdentifier pid);
 extern int cancelProgram (const char *pidFile);
+
+extern char *getProgramPath (void);
 
 #ifdef __cplusplus
 }

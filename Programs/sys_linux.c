@@ -72,44 +72,6 @@ enableUinputAutorepeat (int device) {
 }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-char *
-getProgramPath (void) {
-  char *path = NULL;
-  size_t size = 0X80;
-  char *buffer = NULL;
-
-  while (1) {
-    {
-      char *newBuffer = realloc(buffer, size<<=1);
-
-      if (!newBuffer) {
-        logMallocError();
-        break;
-      }
-
-      buffer = newBuffer;
-    }
-
-    {
-      int length = readlink("/proc/self/exe", buffer, size);
-
-      if (length == -1) {
-        if (errno != ENOENT) logSystemError("readlink");
-        break;
-      }
-
-      if (length < size) {
-        buffer[length] = 0;
-        if (!(path = strdup(buffer))) logMallocError();
-        break;
-      }
-    }
-  }
-
-  if (buffer) free(buffer);
-  return path;
-}
-
 #ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"

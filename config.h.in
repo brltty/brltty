@@ -304,6 +304,16 @@ extern "C" {
 #undef USE_OPTIONS_PACKAGE_NONE
 #undef USE_OPTIONS_PACKAGE_LINUX
 
+/* Define only one of the following program packages. */
+#undef USE_PROGRAM_PACKAGE_NONE
+#undef USE_PROGRAM_PACKAGE_LINUX
+#undef USE_PROGRAM_PACKAGE_SOLARIS
+#undef USE_PROGRAM_PACKAGE_WINDOWS
+
+/* Define only one of the following service packages. */
+#undef USE_SERVICE_PACKAGE_NONE
+#undef USE_SERVICE_PACKAGE_WINDOWS
+
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
 

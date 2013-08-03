@@ -239,6 +239,14 @@ OPTIONS_OBJECTS = options.$O options_@options_package@.$O
 OPTIONS_CFLAGS = @options_cflags@
 OPTIONS_LIBS = @options_libs@
 
+PROGRAM_OBJECTS = program.$O program_@program_package@.$O
+PROGRAM_CFLAGS = @program_cflags@
+PROGRAM_LIBS = @program_libs@
+
+SERVICE_OBJECTS = service_@service_package@.$O
+SERVICE_CFLAGS = @service_cflags@
+SERVICE_LIBS = @service_libs@
+
 SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
 
 CTB_OBJECTS = @contracted_braille_objects@

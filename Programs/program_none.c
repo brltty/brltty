@@ -16,7 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning program path determination not available on this platform
+#include "prologue.h"
+
+#include "program.h"
 
 char *
 getProgramPath (void) {
