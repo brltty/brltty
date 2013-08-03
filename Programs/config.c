@@ -49,6 +49,7 @@
 #include "system.h"
 #include "async.h"
 #include "program.h"
+#include "service.h"
 #include "options.h"
 #include "brltty.h"
 #include "prefs.h"
@@ -59,9 +60,12 @@
 #include "io_bluetooth.h"
 
 #ifdef __MINGW32__
-#include "service.h"
-
 int isWindowsService = 0;
+#endif /* __MINGW32__ */
+
+#ifdef __MSDOS__
+#include "sys_msdos.h"
+#endif /* __MSDOS__ */
 
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
@@ -77,11 +81,6 @@ static const char *const optionStrings_RemoveService[] = {
   SERVICE_NAME,
   NULL
 };
-#endif /* __MINGW32__ */
-
-#ifdef __MSDOS__
-#include "sys_msdos.h"
-#endif /* __MSDOS__ */
 
 static int opt_version;
 static int opt_verify;
@@ -194,7 +193,6 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-#ifdef __MINGW32__
   { .letter = 'I',
     .word = "install-service",
     .flags = OPT_Hidden,
@@ -210,7 +208,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Remove the %s service, and then exit."),
     .strings = optionStrings_RemoveService
   },
-#endif /* __MINGW32__ */
 
   { .letter = 'C',
     .word = "cancel-execution",
@@ -1935,7 +1932,6 @@ brlttyStart (int argc, char *argv[]) {
     return PROG_EXIT_FORCE;
   }
 
-#ifdef __MINGW32__
   {
     int stop = 0;
 
@@ -1951,7 +1947,6 @@ brlttyStart (int argc, char *argv[]) {
 
     if (stop) return PROG_EXIT_FORCE;
   }
-#endif /* __MINGW32__ */
 
   if (opt_verify) opt_noDaemon = 1;
   if (!opt_noDaemon

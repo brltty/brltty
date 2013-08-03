@@ -18,14 +18,17 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "service.h"
 
 int
 installService (const char *name, const char *description) {
+  logMessage(LOG_WARNING, "service installation is not supported on this platform");
   return 0;
 }
 
 int
 removeService (const char *name) {
+  logMessage(LOG_WARNING, "service removal is not supported on this platform");
   return 0;
 }
