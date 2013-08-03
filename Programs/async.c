@@ -1377,7 +1377,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 static void
-awaitNextRequest (long int timeout) {
+awaitNextResponse (long int timeout) {
   {
     Queue *alarms = getAlarmQueue(0);
 
@@ -1422,7 +1422,7 @@ asyncAwaitCondition (int timeout, AsyncConditionTester testCondition, void *data
 
   startTimePeriod(&period, timeout);
   do {
-    awaitNextRequest(timeout - elapsed);
+    awaitNextResponse(timeout - elapsed);
 
     if (testCondition) {
       if (testCondition(data)) {
