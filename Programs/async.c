@@ -1349,7 +1349,10 @@ asyncSetAlarmIn (
 
 static int
 checkAlarmHandle (AsyncHandle handle) {
-  return checkHandle(handle, getAlarmQueue(0));
+  Queue *alarms = getAlarmQueue(0);
+
+  if (!alarms) return 0;
+  return checkHandle(handle, alarms);
 }
 
 int
@@ -1373,52 +1376,54 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
   return asyncResetAlarmTo(handle, &time);
 }
 
-int
-asyncAwaitCondition (int duration, AsyncConditionTester testCondition, void *data) {
-  long int elapsed = 0;
-  TimePeriod period;
-  startTimePeriod(&period, duration);
+static void
+awaitNextRequest (long int timeout) {
+  {
+    Queue *alarms = getAlarmQueue(0);
 
-  do {
-    long int timeout = duration - elapsed;
+    if (alarms) {
+      Element *element = getQueueHead(alarms);
 
-    {
-      Queue *alarms = getAlarmQueue(0);
+      if (element) {
+        AlarmEntry *alarm = getElementItem(element);
+        TimeValue now;
+        long int milliseconds;
 
-      if (alarms) {
-        Element *element = getQueueHead(alarms);
+        getCurrentTime(&now);
+        milliseconds = millisecondsBetween(&now, &alarm->time);
 
-        if (element) {
-          AlarmEntry *alarm = getElementItem(element);
-          TimeValue now;
-          long int milliseconds;
+        if (milliseconds <= 0) {
+          AsyncAlarmCallback callback = alarm->callback;
+          const AsyncAlarmResult result = {
+            .data = alarm->data
+          };
 
-          getCurrentTime(&now);
-          milliseconds = millisecondsBetween(&now, &alarm->time);
-
-          if (milliseconds <= 0) {
-            AsyncAlarmCallback callback = alarm->callback;
-            const AsyncAlarmResult result = {
-              .data = alarm->data
-            };
-
-            deleteElement(element);
-            if (callback) callback(&result);
-            goto done;
-          }
-
-          if (milliseconds < timeout) timeout = milliseconds;
+          deleteElement(element);
+          if (callback) callback(&result);
+          return;
         }
+
+        if (milliseconds < timeout) timeout = milliseconds;
       }
     }
+  }
 
 #ifdef ASYNC_CAN_MONITOR_IO
-    awaitNextOperation(timeout);
+  awaitNextOperation(timeout);
 #else /* ASYNC_CAN_MONITOR_IO */
-    approximateDelay(timeout);
+  approximateDelay(timeout);
 #endif /* ASYNC_CAN_MONITOR_IO */
+}
 
-  done:
+int
+asyncAwaitCondition (int timeout, AsyncConditionTester testCondition, void *data) {
+  long int elapsed = 0;
+  TimePeriod period;
+
+  startTimePeriod(&period, timeout);
+  do {
+    awaitNextRequest(timeout - elapsed);
+
     if (testCondition) {
       if (testCondition(data)) {
         return 1;
