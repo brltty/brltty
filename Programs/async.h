@@ -28,7 +28,8 @@ extern "C" {
 
 typedef struct AsyncHandleStruct *AsyncHandle;
 
-extern void asyncCancel (AsyncHandle handle);
+extern void asyncDiscardHandle (AsyncHandle handle);
+extern void asyncCancelRequest (AsyncHandle handle);
 
 
 typedef struct {
@@ -136,9 +137,9 @@ extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
 extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
 
 
-typedef int (*AsyncAwaitCallback) (void *data);
+typedef int (*AsyncConditionTester) (void *data);
 
-extern int asyncAwait (int duration, AsyncAwaitCallback callback, void *data);
+extern int asyncAwaitCondition (int duration, AsyncConditionTester testCondition, void *data);
 extern void asyncWait (int duration);
 
 

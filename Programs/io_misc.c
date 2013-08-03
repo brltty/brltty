@@ -81,8 +81,8 @@ awaitHandle (const InputOutputHandle *ioh, int timeout, int isOutput) {
   }
 
   if (monitoring) {
-    asyncAwait(timeout, testInputOutputMonitor, &iom);
-    asyncCancel(monitor);
+    asyncAwaitCondition(timeout, testInputOutputMonitor, &iom);
+    asyncCancelRequest(monitor);
 
     if (iom.ready) return 1;
 #ifdef ETIMEDOUT

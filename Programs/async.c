@@ -72,7 +72,7 @@ struct AsyncHandleStruct {
 };
 
 typedef struct {
-  void (*cancel) (Element *element);
+  void (*cancelRequest) (Element *element);
 } QueueMethods;
 
 typedef struct FunctionEntryStruct FunctionEntry;
@@ -758,7 +758,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
         if ((function->operations = newQueue(deallocateOperationEntry, NULL))) {
           {
             static QueueMethods methods = {
-              .cancel = cancelOperation
+              .cancelRequest = cancelOperation
             };
 
             setQueueData(function->operations, &methods);
@@ -1015,38 +1015,47 @@ static int
 checkHandle (AsyncHandle handle, Queue *queue) {
   if (checkHandleValidity(handle)) {
     if (checkHandleIdentifier(handle)) {
-      if (getElementQueue(handle->element) == queue) {
-        return 1;
-      }
+      if (!queue) return 1;
+      if (queue == getElementQueue(handle->element)) return 1;
     }
   }
 
   return 0;
 }
 
-void
-asyncCancel (AsyncHandle handle) {
+static Element *
+deallocateHandle (AsyncHandle handle) {
+  Element *element = NULL;
+
   if (checkHandleValidity(handle)) {
-    if (checkHandleIdentifier(handle)) {
-      Element *element = handle->element;
-      int cancelled = 0;
+    if (checkHandleIdentifier(handle)) element = handle->element;
+    free(handle);
+  }
 
-      {
-        Queue *queue = getElementQueue(element);
-        const QueueMethods *methods = getQueueData(queue);
+  return element;
+}
 
-        if (methods) {
-          if (methods->cancel) {
-            methods->cancel(element);
-            cancelled = 1;
-          }
-        }
+void
+asyncDiscardHandle (AsyncHandle handle) {
+  deallocateHandle(handle);
+}
+
+void
+asyncCancelRequest (AsyncHandle handle) {
+  Element *element = deallocateHandle(handle);
+
+  if (element) {
+    Queue *queue = getElementQueue(element);
+    const QueueMethods *methods = getQueueData(queue);
+
+    if (methods) {
+      if (methods->cancelRequest) {
+        methods->cancelRequest(element);
+        return;
       }
-
-      if (!cancelled) deleteElement(element);
     }
 
-    free(handle);
+    deleteElement(element);
   }
 }
 
@@ -1365,7 +1374,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
+asyncAwaitCondition (int duration, AsyncConditionTester testCondition, void *data) {
   long int elapsed = 0;
   TimePeriod period;
   startTimePeriod(&period, duration);
@@ -1410,8 +1419,8 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
 #endif /* ASYNC_CAN_MONITOR_IO */
 
   done:
-    if (callback) {
-      if (callback(data)) {
+    if (testCondition) {
+      if (testCondition(data)) {
         return 1;
       }
     }
@@ -1422,5 +1431,5 @@ asyncAwait (int duration, AsyncAwaitCallback callback, void *data) {
 
 void
 asyncWait (int duration) {
-  asyncAwait(duration, NULL, NULL);
+  asyncAwaitCondition(duration, NULL, NULL);
 }
