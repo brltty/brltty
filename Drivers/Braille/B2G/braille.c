@@ -20,16 +20,11 @@
 
 #include <string.h>
 #include <errno.h>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <linux/ioctl.h>
-#include <linux/input.h>
 
 #include "log.h"
-#include "parse.h"
-#include "io_misc.h"
 
 #include "brl_driver.h"
 #include "brldefs-bg.h"
@@ -40,6 +35,13 @@
 //#define KEYBOARD_DEVICE_NAME "cp430_keypad"
 
 #ifdef KEYBOARD_DEVICE_NAME
+#include <dirent.h>
+#include <linux/ioctl.h>
+#include <linux/input.h>
+
+#include "io_misc.h"
+#include "parse.h"
+
 #define BG_SET_VALUE(value) (((value) >> 8) & 0XFF)
 #define BG_KEY_VALUE(value) (((value) >> 0) & 0XFF)
 #define BG_KEY_ENTRY(n) {.name=#n, .value={.set=BG_SET_VALUE(BG_KEY_##n), .key=BG_KEY_VALUE(BG_KEY_##n)}}
