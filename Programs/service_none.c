@@ -23,12 +23,12 @@
 
 int
 installService (const char *name, const char *description) {
-  logMessage(LOG_WARNING, "service installation is not supported on this platform");
+  logUnsupportedFeature("service installation");
   return 0;
 }
 
 int
 removeService (const char *name) {
-  logMessage(LOG_WARNING, "service removal is not supported on this platform");
+  logUnsupportedFeature("service removal");
   return 0;
 }

@@ -389,6 +389,11 @@ logMallocError (void) {
 }
 
 void
+logUnsupportedFeature (const char *name) {
+  logMessage(LOG_WARNING, "feature not supported: %s", name);
+}
+
+void
 logUnsupportedOperation (const char *name) {
   errno = ENOSYS;
   logSystemError(name);
