@@ -120,7 +120,7 @@ findJavaClass (JNIEnv *env, jclass *class, const char *path) {
       }
     } else {
       logMessage(LOG_ERR, "java class not found: %s", path);
-      clearJavaException(env, 0);
+      clearJavaException(env, 1);
     }
   }
 
