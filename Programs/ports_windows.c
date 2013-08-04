@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "ports.h"
+#include "sys_windows.h"
 
 #define USE_PORTS_X86
 
