@@ -220,8 +220,66 @@ kbd_linux.$O:
 
 ###############################################################################
 
+beep_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_none.c
+
+beep_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_linux.c
+
+beep_msdos.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_msdos.c
+
+beep_spkr.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_spkr.c
+
+beep_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_windows.c
+
+beep_wskbd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_wskbd.c
+
+###############################################################################
+
+pcm_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_none.c
+
+pcm_alsa.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_alsa.c
+
+pcm_android.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_android.c
+
+pcm_audio.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_audio.c
+
+pcm_oss.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_oss.c
+
+pcm_qsa.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_qsa.c
+
+pcm_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_windows.c
+
+###############################################################################
+
 midi.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi.c
+
+midi_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_none.c
+
+midi_alsa.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_alsa.c
+
+midi_darwin.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_darwin.c
+
+midi_oss.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_oss.c
+
+midi_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_windows.c
 
 ###############################################################################
 
