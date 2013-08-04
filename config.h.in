@@ -273,21 +273,42 @@ extern "C" {
 /* Define this to be a string containing the path to the default braille device. */
 #undef BRAILLE_DEVICE
 
-/* Define only one of the following serial packages. */
-#undef USE_SERIAL_PACKAGE_NONE
-#undef USE_SERIAL_PACKAGE_GRUB
-#undef USE_SERIAL_PACKAGE_MSDOS
-#undef USE_SERIAL_PACKAGE_TERMIOS
-#undef USE_SERIAL_PACKAGE_WINDOWS
-
 /* Define this if the function tcdrain exists. */
 #undef HAVE_TCDRAIN
 
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 
+/* Define only one of the following program packages. */
+#undef USE_PROGRAM_PACKAGE_NONE
+#undef USE_PROGRAM_PACKAGE_LINUX
+#undef USE_PROGRAM_PACKAGE_SOLARIS
+#undef USE_PROGRAM_PACKAGE_WINDOWS
+
+/* Define only one of the following system service packages. */
+#undef USE_SERVICE_PACKAGE_NONE
+#undef USE_SERVICE_PACKAGE_WINDOWS
+
+/* Define only one of the following options packages. */
+#undef USE_OPTIONS_PACKAGE_NONE
+#undef USE_OPTIONS_PACKAGE_LINUX
+
+/* Define only one of the following dynamic loading packages. */
+#undef USE_DYNLD_PACKAGE_NONE
+#undef USE_DYNLD_PACKAGE_DLFCN
+#undef USE_DYNLD_PACKAGE_DYLD
+#undef USE_DYNLD_PACKAGE_GRUB
+#undef USE_DYNLD_PACKAGE_WINDOWS
+
+/* Define only one of the following character set packages. */
+#undef USE_CHARSET_PACKAGE_NONE
+#undef USE_CHARSET_PACKAGE_GRUB
+#undef USE_CHARSET_PACKAGE_ICONV
+#undef USE_CHARSET_PACKAGE_MSDOS
+#undef USE_CHARSET_PACKAGE_WINDOWS
+
 /* Define only one of the following host command packages. */
-#undef USE_HOSTCMD_PACKAGE_NONE
+#undef USE_HOSTCMD_PACKAGE_NONe
 #undef USE_HOSTCMD_PACKAGE_UNIX
 #undef USE_HOSTCMD_PACKAGE_WINDOWS
 
@@ -300,26 +321,37 @@ extern "C" {
 #undef USE_MNTFS_PACKAGE_NONE
 #undef USE_MNTFS_PACKAGE_LINUX
 
-/* Define only one of the following options packages. */
-#undef USE_OPTIONS_PACKAGE_NONE
-#undef USE_OPTIONS_PACKAGE_LINUX
+/* Define only one of the following keyboard packages. */
+#undef USE_KEYBOARD_PACKAGE_NONE
+#undef USE_KEYBOARD_PACKAGE_ANDROID
+#undef USE_KEYBOARD_PACKAGE_LINUX
 
-/* Define only one of the following program packages. */
-#undef USE_PROGRAM_PACKAGE_NONE
-#undef USE_PROGRAM_PACKAGE_LINUX
-#undef USE_PROGRAM_PACKAGE_SOLARIS
-#undef USE_PROGRAM_PACKAGE_WINDOWS
+/* Define only one of the following serial I/O packages. */
+#undef USE_SERIAL_PACKAGE_NONE
+#undef USE_SERIAL_PACKAGE_GRUB
+#undef USE_SERIAL_PACKAGE_MSDOS
+#undef USE_SERIAL_PACKAGE_TERMIOS
+#undef USE_SERIAL_PACKAGE_WINDOWS
 
-/* Define only one of the following system service packages. */
-#undef USE_SERVICE_PACKAGE_NONE
-#undef USE_SERVICE_PACKAGE_WINDOWS
+/* Define only one of the following USB I/O packages. */
+#undef USE_USB_PACKAGE_NONE
+#undef USE_USB_PACKAGE_ANDROID
+#undef USE_USB_PACKAGE_DARWIN
+#undef USE_USB_PACKAGE_FREEBSD
+#undef USE_USB_PACKAGE_GRUB
+#undef USE_USB_PACKAGE_KFREEBSD
+#undef USE_USB_PACKAGE_LIBUSB
+#undef USE_USB_PACKAGE_LIBUSB_1_0
+#undef USE_USB_PACKAGE_LINUX
+#undef USE_USB_PACKAGE_NETBSD
+#undef USE_USB_PACKAGE_OPENBSD
+#undef USE_USB_PACKAGE_SOLARIS
 
-/* Define only one of the following dynamic loading packages. */
-#undef USE_DYNLD_PACKAGE_NONE
-#undef USE_DYNLD_PACKAGE_DLFCN
-#undef USE_DYNLD_PACKAGE_DYLD
-#undef USE_DYNLD_PACKAGE_GRUB
-#undef USE_DYNLD_PACKAGE_WINDOWS
+/* Define only one of the following Bluetooth I/O packages. */
+#undef USE_BLUETOOTH_PACKAGE_NONE
+#undef USE_BLUETOOTH_PACKAGE_ANDROID
+#undef USE_BLUETOOTH_PACKAGE_LINUX
+#undef USE_BLUETOOTH_PACKAGE_WINDOWS
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT

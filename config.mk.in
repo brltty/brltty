@@ -207,6 +207,38 @@ ICU_LIBRARIES = @icu_libraries@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
+PROGRAM_OBJECTS = program.$O program_@program_package@.$O
+PROGRAM_CFLAGS = @program_cflags@
+PROGRAM_LIBS = @program_libs@
+
+SERVICE_OBJECTS = service_@service_package@.$O
+SERVICE_CFLAGS = @service_cflags@
+SERVICE_LIBS = @service_libs@
+
+OPTIONS_OBJECTS = options.$O options_@options_package@.$O
+OPTIONS_CFLAGS = @options_cflags@
+OPTIONS_LIBS = @options_libs@
+
+DYNLD_OBJECTS = dynld_@dynld_package@.$O
+DYNLD_CFLAGS = @dynld_cflags@
+DYNLD_LIBS = @dynld_libs@
+
+CHARSET_OBJECTS = charset.$O charset_@charset_package@.$O
+CHARSET_CFLAGS = @charset_cflags@
+CHARSET_LIBS = @charset_libs@
+
+HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
+HOSTCMD_CFLAGS = @hostcmd_cflags@
+HOSTCMD_LIBS = @hostcmd_libs@
+
+MOUNT_OBJECTS = mntpt.$O mntpt_@mntpt_package@.$O mntfs_@mntfs_package@.$O
+MOUNT_CFLAGS = @mntpt_cflags@ @mntfs_cflags@
+MOUNT_LIBS = @mntpt_libs@ @mntfs_libs@
+
+KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
+KEYBOARD_CFLAGS = @keyboard_cflags@
+KEYBOARD_LIBS = @keyboard_libs@
+
 SERIAL_OBJECTS = serial.$O serial_@serial_package@.$O
 SERIAL_CFLAGS = @serial_cflags@
 SERIAL_LIBS = @serial_libs@
@@ -218,38 +250,6 @@ USB_LIBS = @usb_libs@
 BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O bluetooth_@bluetooth_package@.$O
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
-
-CHARSET_OBJECTS = charset.$O charset_@charset_package@.$O
-CHARSET_CFLAGS = @charset_cflags@
-CHARSET_LIBS = @charset_libs@
-
-HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
-HOSTCMD_CFLAGS = @hostcmd_cflags@
-HOSTCMD_LIBS = @hostcmd_libs@
-
-KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
-KEYBOARD_CFLAGS = @keyboard_cflags@
-KEYBOARD_LIBS = @keyboard_libs@
-
-MOUNT_OBJECTS = mntpt.$O mntpt_@mntpt_package@.$O mntfs_@mntfs_package@.$O
-MOUNT_CFLAGS = @mntpt_cflags@ @mntfs_cflags@
-MOUNT_LIBS = @mntpt_libs@ @mntfs_libs@
-
-OPTIONS_OBJECTS = options.$O options_@options_package@.$O
-OPTIONS_CFLAGS = @options_cflags@
-OPTIONS_LIBS = @options_libs@
-
-PROGRAM_OBJECTS = program.$O program_@program_package@.$O
-PROGRAM_CFLAGS = @program_cflags@
-PROGRAM_LIBS = @program_libs@
-
-SERVICE_OBJECTS = service_@service_package@.$O
-SERVICE_CFLAGS = @service_cflags@
-SERVICE_LIBS = @service_libs@
-
-DYNLD_OBJECTS = dynld_@dynld_package@.$O
-DYNLD_CFLAGS = @dynld_cflags@
-DYNLD_LIBS = @dynld_libs@
 
 SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
 

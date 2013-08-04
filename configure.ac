@@ -1131,6 +1131,109 @@ in
       ;;
 esac
 
+BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
+   linux*)
+      program_package="linux"
+      ;;
+   solaris*)
+      program_package="solaris"
+      ;;
+   cygwin*|mingw*)
+      program_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([service], [system service], [], [dnl
+   mingw*)
+      service_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
+   linux*)
+      options_package="linux"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
+      dynld_package="dlfcn"
+      ;;
+   darwin*)
+      dynld_package="dyld"
+      ;;
+   elf*)
+      dynld_package="grub"
+      ;;
+   mingw*)
+      dynld_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
+   mingw*)
+      charset_package=windows
+      ;;
+   msdos*)
+      charset_package=msdos
+      ;;
+   elf*)
+      charset_package=grub
+      ;;
+], [dnl
+   iconv)
+      AC_CHECK_HEADER([iconv.h], [dnl
+         charset_package=iconv
+      ])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
+   mingw*)
+      hostcmd_package=windows
+      ;;
+], [dnl
+   unix)
+      AC_CHECK_DECL([fork], [dnl
+         AC_CHECK_HEADER([signal.h], [dnl
+            AC_CHECK_DECL([SIGCHLD], [dnl
+               hostcmd_package=unix
+            ], [], [dnl
+#include <signal.h>
+            ])
+         ])
+      ])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([mntpt], [mount point], [mntent mnttab], [dnl
+], [dnl
+   mntent)
+      AC_CHECK_HEADER([mntent.h], [dnl
+         AC_CHECK_FUNC([setmntent], [dnl
+            mntpt_package=mntent
+            AC_CHECK_FUNCS([addmntent])
+         ])
+      ])
+      ;;
+   mnttab)
+      AC_CHECK_HEADER([sys/mnttab.h], [dnl
+         mntpt_package=mnttab
+      ])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
+   linux*)
+      mntfs_package="linux"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
+   *android*) keyboard_package="android";;
+   linux*) keyboard_package="linux";;
+])
+
 BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
    mingw*)
       serial_package="windows"
@@ -1205,109 +1308,6 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
          bluetooth_package="windows"
          bluetooth_libs="-lbthprops -lws2_32"
       ], , [[#include <windows.h>]])
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
-   mingw*)
-      charset_package=windows
-      ;;
-   msdos*)
-      charset_package=msdos
-      ;;
-   elf*)
-      charset_package=grub
-      ;;
-], [dnl
-   iconv)
-      AC_CHECK_HEADER([iconv.h], [dnl
-         charset_package=iconv
-      ])
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([hostcmd], [host command], [unix], [dnl
-   mingw*)
-      hostcmd_package=windows
-      ;;
-], [dnl
-   unix)
-      AC_CHECK_DECL([fork], [dnl
-         AC_CHECK_HEADER([signal.h], [dnl
-            AC_CHECK_DECL([SIGCHLD], [dnl
-               hostcmd_package=unix
-            ], [], [dnl
-#include <signal.h>
-            ])
-         ])
-      ])
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
-   *android*) keyboard_package="android";;
-   linux*) keyboard_package="linux";;
-])
-
-BRLTTY_ARG_PACKAGE([mntpt], [mount point], [mntent mnttab], [dnl
-], [dnl
-   mntent)
-      AC_CHECK_HEADER([mntent.h], [dnl
-         AC_CHECK_FUNC([setmntent], [dnl
-            mntpt_package=mntent
-            AC_CHECK_FUNCS([addmntent])
-         ])
-      ])
-      ;;
-   mnttab)
-      AC_CHECK_HEADER([sys/mnttab.h], [dnl
-         mntpt_package=mnttab
-      ])
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
-   linux*)
-      mntfs_package="linux"
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
-   linux*)
-      options_package="linux"
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
-   linux*)
-      program_package="linux"
-      ;;
-   solaris*)
-      program_package="solaris"
-      ;;
-   cygwin*|mingw*)
-      program_package="windows"
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([service], [system service], [], [dnl
-   mingw*)
-      service_package="windows"
-      ;;
-])
-
-BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
-      dynld_package="dlfcn"
-      ;;
-   darwin*)
-      dynld_package="dyld"
-      ;;
-   elf*)
-      dynld_package="grub"
-      ;;
-   mingw*)
-      dynld_package="windows"
       ;;
 ])
 
