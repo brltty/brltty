@@ -25,7 +25,7 @@
 
 #include "log.h"
 #include "io_misc.h"
-#include "system.h"
+#include "ports.h"
 
 #include "serial_msdos.h"
 #include "serial_internal.h"

@@ -1234,7 +1234,7 @@ BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
    linux*) keyboard_package="linux";;
 ])
 
-BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
+BRLTTY_ARG_PACKAGE([serial], [serial I/O], [termios], [dnl
    mingw*)
       serial_package="windows"
       ;;
@@ -1253,7 +1253,7 @@ BRLTTY_ARG_PACKAGE([serial], [serial], [termios], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
+BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
    *android*)
       usb_package="android"
       ;;
@@ -1293,7 +1293,7 @@ BRLTTY_ARG_PACKAGE([usb], [USB], [libusb libusb-1.0], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
+BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
    *android*)
       bluetooth_package="android"
       ;;
@@ -1308,6 +1308,27 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth], [], [dnl
          bluetooth_package="windows"
          bluetooth_libs="-lbthprops -lws2_32"
       ], , [[#include <windows.h>]])
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
+   linux*)
+      ports_package="glibc"
+      ;;
+   gnu*)
+      ports_package="glibc"
+      ;;
+   kfreebsd*)
+      ports_package="kfreebsd"
+      ;;
+   cygwin*|mingw*)
+      ports_package="windows"
+      ;;
+   msdos*)
+      ports_package="msdos"
+      ;;
+   elf*)
+      ports_package="grub"
       ;;
 ])
 

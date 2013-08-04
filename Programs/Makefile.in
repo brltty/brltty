@@ -28,7 +28,7 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O io_misc.$O async.$O queue.$O $(DYNLD_OBJECTS)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O io_misc.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS)
 
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
@@ -245,6 +245,26 @@ bluetooth_linux.$O:
 
 bluetooth_windows.$O:
 	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -D__USE_W32_SOCKETS -c $(SRC_DIR)/bluetooth_windows.c
+
+###############################################################################
+
+ports_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_none.c
+
+ports_glibc.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_glibc.c
+
+ports_grub.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_grub.c
+
+ports_kfreebsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_kfreebsd.c
+
+ports_msdos.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_msdos.c
+
+ports_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ports_windows.c
 
 ###############################################################################
 

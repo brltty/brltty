@@ -16,26 +16,27 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define USE_PORTS_X86
+#include "prologue.h"
 
-static int portsEnabled = 0;
+#include "log.h"
+#include "ports.h"
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
-  if (!portsEnabled && NtSetInformationProcessProc) {
-    ULONG Iopl=3;
-    if (NtSetInformationProcessProc(GetCurrentProcess(), ProcessUserModeIOPL,
-                                &Iopl, sizeof(Iopl)) != STATUS_SUCCESS) {
-      return 0;
-    }
-    portsEnabled = 1;
-  }
-  return 1;
+  logMessage(errorLevel, "I/O ports not supported.");
+  return 0;
 }
 
 int
 disablePorts (unsigned short int base, unsigned short int count) {
-  return 1;
+  return 0;
 }
 
-#include "sys_ports_x86.h"
+unsigned char
+readPort1 (unsigned short int port) {
+  return 0;
+}
+
+void
+writePort1 (unsigned short int port, unsigned char value) {
+}

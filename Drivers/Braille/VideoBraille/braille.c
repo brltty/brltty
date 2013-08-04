@@ -27,7 +27,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "system.h"
+#include "ports.h"
 
 #include "brl_driver.h"
 #include "braille.h"

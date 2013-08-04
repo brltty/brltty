@@ -16,6 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
+#include <grub/cpu/io.h>
+
+#include "ports.h"
+
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
   return 1;
@@ -24,4 +30,14 @@ enablePorts (int errorLevel, unsigned short int base, unsigned short int count) 
 int
 disablePorts (unsigned short int base, unsigned short int count) {
   return 1;
+}
+
+unsigned char
+readPort1 (unsigned short int port) {
+  return grub_inb(port);
+}
+
+void
+writePort1 (unsigned short int port, unsigned char value) {
+  grub_outb(value, port);
 }

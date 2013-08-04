@@ -30,7 +30,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "system.h"
+#include "ports.h"
 #include "adlib.h"
 
 const unsigned char AL_channelOffsets[] = {

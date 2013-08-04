@@ -102,8 +102,6 @@ enableUinputAutorepeat (int device) {
 #endif /* USE_MIDI_SUPPORT_ */
 #endif /* ENABLE_MIDI_SUPPORT */
 
-#include "sys_ports_glibc.h"
-
 int
 installKernelModule (const char *name, int *status) {
   if (status && *status) return *status == 2;

@@ -31,9 +31,6 @@
 #include "sys_midi_none.h"
 #endif /* ENABLE_MIDI_SUPPORT */
 
-#include "sys_ports_always.h"
-#include "sys_ports_x86.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>

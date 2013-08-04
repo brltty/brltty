@@ -18,21 +18,16 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
+#include "ports.h"
 
-#include "system.h"
+int
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  return 1;
+}
 
-#include "sys_beep_spkr.h"
+int
+disablePorts (unsigned short int base, unsigned short int count) {
+  return 1;
+}
 
-#ifdef ENABLE_PCM_SUPPORT
-#define PCM_OSS_DEVICE_PATH "/dev/dsp"
-#include "sys_pcm_oss.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
+#include "sys_ports_x86.h"

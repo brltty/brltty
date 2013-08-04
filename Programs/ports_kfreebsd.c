@@ -16,6 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <string.h>
 #include <errno.h>
 
@@ -24,6 +26,7 @@
 #endif /* HAVE_SYS_IO_H */
 
 #include "log.h"
+#include "ports.h"
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {

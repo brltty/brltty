@@ -77,12 +77,6 @@ extern int stopMidiNote (MidiDevice *midi, unsigned char channel);
 extern int insertMidiWait (MidiDevice *midi, int duration);
 
 
-extern int enablePorts (int errorLevel, unsigned short int base, unsigned short int count);
-extern int disablePorts (unsigned short int base, unsigned short int count);
-extern unsigned char readPort1 (unsigned short int port);
-extern void writePort1 (unsigned short int port, unsigned char value);
-
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

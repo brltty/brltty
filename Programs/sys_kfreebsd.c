@@ -36,5 +36,3 @@
 #ifdef ENABLE_MIDI_SUPPORT
 #include "sys_midi_none.h"
 #endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_kfreebsd.h"

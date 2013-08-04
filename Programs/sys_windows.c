@@ -28,8 +28,6 @@
 
 #include "sys_beep_windows.h"
 
-#include "sys_ports_windows.h"
-
 #ifdef __CYGWIN32__
 
 #ifdef ENABLE_PCM_SUPPORT

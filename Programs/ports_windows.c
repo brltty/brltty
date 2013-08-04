@@ -16,10 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <grub/cpu/io.h>
+#include "prologue.h"
+
+#include "ports.h"
+
+#define USE_PORTS_X86
+
+static int portsEnabled = 0;
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  if (!portsEnabled && NtSetInformationProcessProc) {
+    ULONG Iopl=3;
+    if (NtSetInformationProcessProc(GetCurrentProcess(), ProcessUserModeIOPL,
+                                &Iopl, sizeof(Iopl)) != STATUS_SUCCESS) {
+      return 0;
+    }
+    portsEnabled = 1;
+  }
   return 1;
 }
 
@@ -28,12 +42,4 @@ disablePorts (unsigned short int base, unsigned short int count) {
   return 1;
 }
 
-unsigned char
-readPort1 (unsigned short int port) {
-  return grub_inb(port);
-}
-
-void
-writePort1 (unsigned short int port, unsigned char value) {
-  grub_outb(value, port);
-}
+#include "sys_ports_x86.h"

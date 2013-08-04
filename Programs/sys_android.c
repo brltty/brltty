@@ -34,8 +34,6 @@
 #include "sys_midi_none.h"
 #endif /* ENABLE_MIDI_SUPPORT */
 
-#include "sys_ports_none.h"
-
 static JavaVM *javaVirtualMachine = NULL;
 
 JNIEXPORT jint

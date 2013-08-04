@@ -29,7 +29,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "system.h"
+#include "ports.h"
 #include "message.h"
 
 
