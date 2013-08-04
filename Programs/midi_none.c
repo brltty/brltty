@@ -16,9 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning MIDI support not available on this platform
+#include "prologue.h"
 
 #include "log.h"
+#include "midi.h"
 
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {

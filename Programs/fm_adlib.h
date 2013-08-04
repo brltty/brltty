@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ADLIB
-#define BRLTTY_INCLUDED_ADLIB
+#ifndef BRLTTY_INCLUDED_FM_ADLIB
+#define BRLTTY_INCLUDED_FM_ADLIB
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,16 +32,6 @@ extern "C" {
  * Must link with -lm.
  * May compile with -DDEBUG_ADLIB.
  */
-
-extern int AL_enablePorts (int errorLevel);
-extern void AL_disablePorts (void);
-
-extern int AL_testCard (int errorLevel);
-extern void AL_resetCard (void);
-
-extern void AL_playTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume);
-extern void AL_startTone (int channel, int pitch);
-extern void AL_stopTone (int channel);
 
 extern void AL_writeRegister (int number, unsigned char data);
 extern unsigned char AL_readStatus (void);
@@ -145,4 +135,4 @@ extern const unsigned char AL_channelCount;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ADLIB */
+#endif /* BRLTTY_INCLUDED_FM_ADLIB */

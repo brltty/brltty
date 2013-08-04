@@ -26,29 +26,9 @@
 #include "system.h"
 #include "sys_windows.h"
 
-#include "sys_beep_windows.h"
-
 #ifdef __CYGWIN32__
 
-#ifdef ENABLE_PCM_SUPPORT
-#define PCM_OSS_DEVICE_PATH "/dev/dsp"
-#include "sys_pcm_oss.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#define MIDI_OSS_DEVICE_PATH "/dev/sequencer"
-#include "sys_midi_oss.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
 #else /* __CYGWIN32__ */
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_windows.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_windows.h"
-#endif /* ENABLE_MIDI_SUPPORT */
 
 #endif /* __CYGWIN32__ */
 

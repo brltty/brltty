@@ -16,8 +16,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include "log.h"
 #include "parse.h"
+#include "pcm.h"
 
 struct PcmDeviceStruct {
   HWAVEOUT handle;

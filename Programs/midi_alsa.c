@@ -16,12 +16,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <alsa/asoundlib.h>
 
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
 #include "dynld.h"
+#include "midi.h"
 
 struct MidiDeviceStruct {
   snd_seq_t *sequencer;

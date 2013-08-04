@@ -365,6 +365,7 @@ extern "C" {
 #undef USE_PKG_BEEP_NONE
 #undef USE_PKG_BEEP_LINUX
 #undef USE_PKG_BEEP_MSDOS
+#undef USE_PKG_BEEP_SOLARIS
 #undef USE_PKG_BEEP_SPKR
 #undef USE_PKG_BEEP_WINDOWS
 #undef USE_PKG_BEEP_WSKBD
@@ -374,6 +375,7 @@ extern "C" {
 #undef USE_PKG_PCM_ALSA
 #undef USE_PKG_PCM_ANDROID
 #undef USE_PKG_PCM_AUDIO
+#undef USE_PKG_PCM_HPUX
 #undef USE_PKG_PCM_OSS
 #undef USE_PKG_PCM_QSA
 #undef USE_PKG_PCM_WINDOWS
@@ -384,6 +386,9 @@ extern "C" {
 #undef USE_PKG_MIDI_DARWIN
 #undef USE_PKG_MIDI_OSS
 #undef USE_PKG_MIDI_WINDOWS
+
+/* Define only one of the following FM packages. */
+#undef USE_PKG_FM_ADLIB
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT

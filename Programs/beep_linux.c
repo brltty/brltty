@@ -16,13 +16,27 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <dev/wscons/wsconsio.h>
+#include "prologue.h"
+
+#include <sys/ioctl.h>
+#include <linux/kd.h>
 
 #include "log.h"
 #include "device.h"
+#include "beep.h"
+#include "sys_linux.h"
+
+#define BEEP_DIVIDEND 1193180
+
+static void
+enableBeeps (void) {
+  static int status = 0;
+  installKernelModule("pcspkr", &status);
+}
 
 int
 canBeep (void) {
+  enableBeeps();
   return !!getConsole();
 }
 
@@ -35,19 +49,19 @@ int
 asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
   FILE *console = getConsole();
   if (console) {
-    struct wskbd_bell_data bell;
-    if (!(bell.period = milliseconds)) return 1;
-    bell.pitch = frequency;
-    bell.volume = 100;
-    bell.which = WSKBD_BELL_DOALL;
-    if (ioctl(fileno(console), WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    logSystemError("ioctl WSKBDIO_COMPLEXBELL");
+    if (ioctl(fileno(console), KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
+    logSystemError("ioctl KDMKTONE");
   }
   return 0;
 }
 
 int
 startBeep (unsigned short frequency) {
+  FILE *console = getConsole();
+  if (console) {
+    if (ioctl(fileno(console), KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
+    logSystemError("ioctl KIOCSOUND");
+  }
   return 0;
 }
 
@@ -55,12 +69,8 @@ int
 stopBeep (void) {
   FILE *console = getConsole();
   if (console) {
-    struct wskbd_bell_data bell;
-    bell.which = WSKBD_BELL_DOVOLUME | WSKBD_BELL_DOPERIOD;
-    bell.volume = 0;
-    bell.period = 0;
-    if (ioctl(fileno(console), WSKBDIO_COMPLEXBELL, &bell) != -1) return 1;
-    logSystemError("ioctl WSKBDIO_COMPLEXBELL");
+    if (ioctl(fileno(console), KIOCSOUND, 0) != -1) return 1;
+    logSystemError("ioctl KIOCSOUND");
   }
   return 0;
 }

@@ -16,10 +16,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/soundcard.h>
 
 #include "log.h"
 #include "io_misc.h"
+#include "midi.h"
+
+#define MIDI_OSS_DEVICE_PATH "/dev/sequencer";
 
 struct MidiDeviceStruct {
   int fileDescriptor;

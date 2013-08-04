@@ -16,12 +16,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioToolbox.h>
 
 #include "log.h"
 #include "timing.h"
+#include "midi.h"
 
 struct MidiDeviceStruct {
   AUGraph graph;

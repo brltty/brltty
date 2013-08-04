@@ -16,9 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "midi.h"
 
 struct MidiDeviceStruct {
   HMIDIOUT handle;

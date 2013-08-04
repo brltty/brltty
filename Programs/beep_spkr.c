@@ -16,10 +16,13 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #ifdef HAVE_MACHINE_SPEAKER_H
 #include <machine/speaker.h>
 
 #include "log.h"
+#include "beep.h"
 
 static int speaker = -1;
 

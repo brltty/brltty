@@ -22,7 +22,7 @@
 #include "log.h"
 #include "timing.h"
 #include "notes.h"
-#include "adlib.h"
+#include "fm.h"
 
 struct NoteDeviceStruct {
   unsigned int channelNumber;
@@ -33,15 +33,15 @@ fmConstruct (int errorLevel) {
   NoteDevice *device;
 
   if ((device = malloc(sizeof(*device)))) {
-    if (AL_enablePorts(errorLevel)) {
-      if (AL_testCard(errorLevel)) {
+    if (fmEnablePorts(errorLevel)) {
+      if (fmTestCard(errorLevel)) {
         device->channelNumber = 0;
 
         logMessage(LOG_DEBUG, "FM enabled");
         return device;
       }
 
-      AL_disablePorts();
+      fmDisablePorts();
     }
 
     free(device);
@@ -59,7 +59,7 @@ fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
              duration, note);
 
   if (note) {
-    AL_playTone(device->channelNumber, getIntegerNoteFrequency(note), duration, prefs.fmVolume);
+    fmPlayTone(device->channelNumber, getIntegerNoteFrequency(note), duration, prefs.fmVolume);
   } else {
     accurateDelay(duration);
   }
@@ -75,7 +75,7 @@ fmFlush (NoteDevice *device) {
 static void
 fmDestruct (NoteDevice *device) {
   free(device);
-  AL_disablePorts();
+  fmDisablePorts();
   logMessage(LOG_DEBUG, "FM disabled");
 }
 

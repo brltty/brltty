@@ -72,36 +72,6 @@ enableUinputAutorepeat (int device) {
 }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-#ifdef ENABLE_BEEPER_SUPPORT
-#include "sys_beep_linux.h"
-#else /* ENABLE_BEEPER_SUPPORT */
-#include "sys_beep_none.h"
-#endif /* ENABLE_BEEPER_SUPPORT */
-
-#ifdef ENABLE_PCM_SUPPORT
-#if defined(USE_PCM_SUPPORT_ALSA)
-#include "sys_pcm_alsa.h"
-#elif defined(USE_PCM_SUPPORT_OSS)
-#define PCM_OSS_DEVICE_PATH "/dev/dsp"
-#include "sys_pcm_oss.h"
-#else /* USE_PCM_SUPPORT_ */
-#warning PCM interface either unspecified or unsupported
-#include "sys_pcm_none.h"
-#endif /* USE_PCM_SUPPORT_ */
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#if defined(USE_MIDI_SUPPORT_OSS)
-#define MIDI_OSS_DEVICE_PATH "/dev/sequencer";
-#include "sys_midi_oss.h"
-#elif defined(USE_MIDI_SUPPORT_ALSA)
-#include "sys_midi_alsa.h"
-#else /* USE_MIDI_SUPPORT_ */
-#warning MIDI interface either unspecified or unsupported
-#include "sys_midi_none.h"
-#endif /* USE_MIDI_SUPPORT_ */
-#endif /* ENABLE_MIDI_SUPPORT */
-
 int
 installKernelModule (const char *name, int *status) {
   if (status && *status) return *status == 2;

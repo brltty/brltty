@@ -1234,6 +1234,100 @@ BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
    linux*) keyboard_package="linux";;
 ])
 
+BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
+   *android*)
+      beep_package="none"
+      ;;
+   linux*)
+      beep_package="linux"
+      ;;
+   solaris*)
+      beep_package="solaris"
+      ;;
+   openbsd*)
+      beep_package="wskbd"
+      ;;
+   freebsd*)
+      beep_package="spkr"
+      ;;
+   kfreebsd*)
+      beep_package="spkr"
+      ;;
+   netbsd*)
+      beep_package="wskbd"
+      ;;
+   cygwin*)
+      beep_package="windows"
+      ;;
+   mingw*)
+      beep_package="windows"
+      ;;
+   msdos*)
+      beep_package="msdos"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([pcm], [PCm], [], [dnl
+   *android*)
+      pcm_package="android"
+      ;;
+   linux*)
+      pcm_package="oss"
+      ;;
+   solaris*)
+      pcm_package="audio"
+      ;;
+   hpux*)
+      pcm_package="hpux"
+      ;;
+   openbsd*)
+      pcm_package="audio"
+      ;;
+   freebsd*)
+      pcm_package="oss"
+      ;;
+   kfreebsd*)
+      pcm_package="oss"
+      ;;
+   netbsd*)
+      pcm_package="audio"
+      ;;
+   *qnx*)
+      pcm_package="qsa"
+      ;;
+   cygwin*)
+      pcm_package="oss"
+      ;;
+   mingw*)
+      pcm_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([midi], [MIDI], [], [dnl
+   *android*)
+      midi_package="none"
+      ;;
+   linux*)
+      midi_package="oss"
+      ;;
+   cygwin*)
+      midi_package="oss"
+      ;;
+   mingw*)
+      midi_package="windows"
+      ;;
+   darwin*)
+      midi_package="darwin"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([fm], [FM], [adlib], [dnl
+], [dnl
+   adlib)
+      fm_package="adlib"
+      ;;
+])
+
 BRLTTY_ARG_PACKAGE([serial], [serial I/O], [termios], [dnl
    mingw*)
       serial_package="windows"

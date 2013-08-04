@@ -16,9 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning sound card support not available on this platform
+#include "prologue.h"
 
 #include "log.h"
+#include "pcm.h"
 
 PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {

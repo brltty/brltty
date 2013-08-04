@@ -18,10 +18,37 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
+#include <pc.h>
 
-#include "system.h"
+#include "beep.h"
+
+int
+canBeep (void) {
+  return 1;
+}
+
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+startBeep (unsigned short frequency) {
+  sound(frequency);
+  return 1;
+}
+
+int
+stopBeep (void) {
+  nosound();
+  return 1;
+}
+
+void
+endBeep (void) {
+}

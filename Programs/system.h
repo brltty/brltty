@@ -19,10 +19,6 @@
 #ifndef BRLTTY_INCLUDED_SYSTEM
 #define BRLTTY_INCLUDED_SYSTEM
 
-#include "beep.h"
-#include "pcm.h"
-#include "midi.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

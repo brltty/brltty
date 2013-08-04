@@ -26,14 +26,3 @@
 #include <sys/time.h>
 
 #include "system.h"
-
-#include "sys_beep_wskbd.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#define PCM_AUDIO_DEVICE_PATH "/dev/audio"
-#include "sys_pcm_audio.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */

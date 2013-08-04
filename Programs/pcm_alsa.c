@@ -16,12 +16,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #include <alsa/asoundlib.h>
 
 #include "log.h"
 #include "timing.h"
 #include "dynld.h"
+#include "pcm.h"
 
 struct PcmDeviceStruct {
   snd_pcm_t *handle;

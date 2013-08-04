@@ -239,6 +239,22 @@ KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
 KEYBOARD_CFLAGS = @keyboard_cflags@
 KEYBOARD_LIBS = @keyboard_libs@
 
+BEEP_OBJECTS = notes_beep.$O beep_@beep_package@.$O
+BEEP_CFLAGS = @beep_cflags@
+BEEP_LIBS = @beep_libs@
+
+PCM_OBJECTS = notes_pcm.$O pcm_@pcm_package@.$O
+PCM_CFLAGS = @pcm_cflags@
+PCM_LIBS = @pcm_libs@
+
+MIDI_OBJECTS = notes_midi.$O midi.$O midi_@midi_package@.$O
+MIDI_CFLAGS = @midi_cflags@
+MIDI_LIBS = @midi_libs@
+
+FM_OBJECTS = notes_fm.$O fm_@fm_package@.$O
+FM_CFLAGS = @fm_cflags@
+FM_LIBS = @fm_libs@
+
 SERIAL_OBJECTS = serial.$O serial_@serial_package@.$O
 SERIAL_CFLAGS = @serial_cflags@
 SERIAL_LIBS = @serial_libs@
@@ -260,11 +276,6 @@ SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
 CTB_OBJECTS = @contracted_braille_objects@
 
 SPEECH_OBJECT = @speech_support_object@
-
-BEEPER_OBJECTS = @beeper_tune_objects@
-PCM_OBJECTS = @pcm_tune_objects@
-MIDI_OBJECTS = @midi_tune_objects@
-FM_OBJECTS = @fm_tune_objects@
 
 API_VERSION = @api_version@
 API_RELEASE = @api_release@

@@ -16,7 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include "log.h"
+#include "pcm.h"
 #include "sys_android.h"
 
 struct PcmDeviceStruct {

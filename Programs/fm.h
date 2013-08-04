@@ -16,35 +16,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <pc.h>
+#ifndef BRLTTY_INCLUDED_FM
+#define BRLTTY_INCLUDED_FM
 
-int
-canBeep (void) {
-  return 1;
-}
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
+extern int fmEnablePorts (int errorLevel);
+extern void fmDisablePorts (void);
 
-int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-  return 0;
-}
+extern int fmTestCard (int errorLevel);
+extern void fmResetCard (void);
 
-int
-startBeep (unsigned short frequency) {
-  sound(frequency);
-  return 1;
-}
+extern void fmPlayTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume);
+extern void fmStartTone (int channel, int pitch);
+extern void fmStopTone (int channel);
 
-int
-stopBeep (void) {
-  nosound();
-  return 1;
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
-void
-endBeep (void) {
-}
+#endif /* BRLTTY_INCLUDED_FM */

@@ -16,11 +16,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <sys/audio.h>
 #include <stropts.h>
 
 #include "log.h"
 #include "io_misc.h"
+#include "pcm.h"
+
+#define PCM_AUDIO_DEVICE_PATH "/dev/audio"
 
 struct PcmDeviceStruct {
   int fileDescriptor;

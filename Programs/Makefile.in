@@ -229,6 +229,9 @@ beep_linux.$O:
 beep_msdos.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_msdos.c
 
+beep_solaris.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_solaris.c
+
 beep_spkr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep_spkr.c
 
@@ -251,6 +254,9 @@ pcm_android.$O:
 
 pcm_audio.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_audio.c
+
+pcm_hpux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_hpux.c
 
 pcm_oss.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm_oss.c
@@ -280,6 +286,11 @@ midi_oss.$O:
 
 midi_windows.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi_windows.c
+
+###############################################################################
+
+fm_adlib.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/fm_adlib.c
 
 ###############################################################################
 
@@ -492,7 +503,7 @@ routing.$O:
 
 ###############################################################################
 
-TUNE_OBJECTS = tunes.$O notes.$O notes_beep.$O notes_pcm.$O notes_midi.$O midi.$O notes_fm.$O adlib.$O
+TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
 
 tunes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tunes.c

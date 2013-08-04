@@ -31,7 +31,8 @@
 #include "log.h"
 #include "timing.h"
 #include "ports.h"
-#include "adlib.h"
+#include "fm.h"
+#include "fm_adlib.h"
 
 const unsigned char AL_channelOffsets[] = {
   /* 1     2     3     4     5     6     7     8     9 */
@@ -42,7 +43,7 @@ const unsigned char AL_channelCount = ARRAY_COUNT(AL_channelOffsets);
 static unsigned int portsEnabledCount = 0;
 
 int
-AL_enablePorts (int errorLevel) {
+fmEnablePorts (int errorLevel) {
   if (portsEnabledCount) return 1;
 
   if (enablePorts(errorLevel, ALP_REGISTER, 1)) {
@@ -58,7 +59,7 @@ AL_enablePorts (int errorLevel) {
 }
 
 void
-AL_disablePorts (void) {
+fmDisablePorts (void) {
   if (!--portsEnabledCount) {
     disablePorts(ALP_REGISTER, 1);
     disablePorts(ALP_DATA, 1);
@@ -87,7 +88,7 @@ AL_writeRegister (int number, unsigned char data) {
 }
 
 void
-AL_resetCard (void) {
+fmResetCard (void) {
   int number;
   for (number=ALR_FIRST; number<=ALR_LAST; ++number) {
     AL_writeRegister(number, 0);
@@ -101,7 +102,7 @@ AL_resetTimers (void) {
 }
 
 int
-AL_testCard (int errorLevel) {
+fmTestCard (int errorLevel) {
   const unsigned char mask = AL_STAT_EXP | AL_STAT_EXP1 | AL_STAT_EXP2;
 
   AL_resetTimers();
@@ -140,21 +141,21 @@ AL_initiateTone (int channel, int exponent, int mantissa) {
 }
 
 void
-AL_startTone (int channel, int pitch) {
+fmStartTone (int channel, int pitch) {
   int exponent;
   int mantissa;
   AL_evaluatePitch(pitch, &exponent, &mantissa);
-  /* logMessage(LOG_DEBUG, "AL_startTone: %d", pitch); */
+  /* logMessage(LOG_DEBUG, "fmStartTone: %d", pitch); */
   AL_initiateTone(channel, exponent, mantissa);
 }
 
 void
-AL_stopTone (int channel) {
+fmStopTone (int channel) {
   AL_writeRegister(ALR_FREQUENCY_MSB(channel), 0);
 }
 
 void
-AL_playTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume) {
+fmPlayTone (int channel, unsigned int pitch, unsigned long int duration, unsigned int volume) {
   /* Play tone at fundamental frequency. */
   AL_writeRegister(ALR_MODULATOR(ALG_EFFECT, channel),
                    (AL_HARMONIC_1 << AL_HARMONIC_SHIFT));
@@ -177,7 +178,7 @@ AL_playTone (int channel, unsigned int pitch, unsigned long int duration, unsign
                    ((AL_SUSTAIN_SOFT << AL_SUSTAIN_SHIFT) |
                     (AL_RELEASE_FAST << AL_RELEASE_SHIFT)));
       
-  AL_startTone(channel, pitch);
+  fmStartTone(channel, pitch);
   accurateDelay(duration);
-  AL_stopTone(channel);
+  fmStopTone(channel);
 }

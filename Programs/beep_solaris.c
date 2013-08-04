@@ -16,11 +16,29 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning console beep support not available on this platform
+#include "prologue.h"
+
+#include <sys/kbio.h>
+#include <sys/kbd.h>
+
+#include "beep.h"
+
+static int
+getKeyboard (void) {
+  static int keyboard = -1;
+  if (keyboard == -1) {
+    if ((keyboard = open("/dev/kbd", O_WRONLY)) != -1) {
+      logMessage(LOG_DEBUG, "keyboard opened: fd=%d", keyboard);
+    } else {
+      logSystemError("keyboard open");
+    }
+  }
+  return keyboard;
+}
 
 int
 canBeep (void) {
-  return 0;
+  return getKeyboard() != -1;
 }
 
 int
@@ -35,11 +53,23 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 
 int
 startBeep (unsigned short frequency) {
+  int keyboard = getKeyboard();
+  if (keyboard != -1) {
+    int command = KBD_CMD_BELL;
+    if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
+    logSystemError("ioctl KIOCCMD KBD_CMD_BELL");
+  }
   return 0;
 }
 
 int
 stopBeep (void) {
+  int keyboard = getKeyboard();
+  if (keyboard != -1) {
+    int command = KBD_CMD_NOBELL;
+    if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
+    logSystemError("ioctl KIOCCMD KBD_CMD_NOBELL");
+  }
   return 0;
 }
 

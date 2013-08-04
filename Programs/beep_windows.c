@@ -16,9 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#if _WIN32_WINNT <= WindowsME
-#include "sys_beep_none.h"
-#else /* _WIN32_WINNT */
+#include "prologue.h"
+
+#include "beep.h"
 
 int
 canBeep (void) {
@@ -48,4 +48,3 @@ stopBeep (void) {
 void
 endBeep (void) {
 }
-#endif /* _WIN32_WINNT */

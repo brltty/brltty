@@ -16,10 +16,13 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include <sys/asoundlib.h>
 
 #include "log.h"
 #include "io_misc.h"
+#include "pcm.h"
 
 struct PcmDeviceStruct {
   int card;
