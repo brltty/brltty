@@ -59,68 +59,6 @@ pid.$O:
 
 COMMAND_OBJECTS_FOR_HOST = $(COMMAND_OBJECTS) $(SYSTEM_OBJECTS)
 
-sys_skeleton.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_skeleton.c
-
-sys_android.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_android.c
-
-sys_darwin.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_darwin.c
-
-sys_freebsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_freebsd.c
-
-sys_grub.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_grub.c
-
-sys_hpux.$O:
-	$(CC) $(LIBCFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
-
-sys_hurd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_hurd.c
-
-sys_kfreebsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
-
-sys_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_linux.c
-
-sys_msdos.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_msdos.c
-
-sys_netbsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_netbsd.c
-
-sys_openbsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_openbsd.c
-
-sys_osf.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_osf.c
-
-sys_qnx.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_qnx.c
-
-sys_solaris.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_solaris.c
-
-sys_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_windows.c
-
-###############################################################################
-
-kbd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd.c
-
-kbd_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_none.c
-
-kbd_android.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_android.c
-
-kbd_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_linux.c
-
 ###############################################################################
 
 async.$O:
@@ -156,8 +94,129 @@ prefs_table.$O:
 
 ###############################################################################
 
-io_generic.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
+program.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
+
+program_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_none.c
+
+program_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_linux.c
+
+program_solaris.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_solaris.c
+
+program_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_windows.c
+
+###############################################################################
+
+service_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/service_none.c
+
+service_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/service_windows.c
+
+###############################################################################
+
+options.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
+
+options_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options_none.c
+
+options_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options_linux.c
+
+###############################################################################
+
+dynld_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_none.c
+
+dynld_dlfcn.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_dlfcn.c
+
+dynld_dyld.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_dyld.c
+
+dynld_grub.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_grub.c
+
+dynld_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_windows.c
+
+###############################################################################
+
+charset.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset.c
+
+charset_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_none.c
+
+charset_grub.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_grub.c
+
+charset_iconv.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_iconv.c
+
+charset_msdos.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_msdos.c
+
+charset_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_windows.c
+
+###############################################################################
+
+hostcmd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd.c
+
+hostcmd_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_none.c
+
+hostcmd_unix.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_unix.c
+
+hostcmd_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_windows.c
+
+###############################################################################
+
+mntpt.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt.c
+
+mntpt_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_none.c
+
+mntpt_mntent.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mntent.c
+
+mntpt_mnttab.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mnttab.c
+
+###############################################################################
+
+mntfs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs.c
+
+mntfs_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_none.c
+
+mntfs_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_linux.c
+
+###############################################################################
+
+kbd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd.c
+
+kbd_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_none.c
+
+kbd_android.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_android.c
+
+kbd_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_linux.c
 
 ###############################################################################
 
@@ -268,119 +327,63 @@ ports_windows.$O:
 
 ###############################################################################
 
-charset.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset.c
+sys_skeleton.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_skeleton.c
 
-charset_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_none.c
+sys_android.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_android.c
 
-charset_grub.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_grub.c
+sys_darwin.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_darwin.c
 
-charset_iconv.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_iconv.c
+sys_freebsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_freebsd.c
 
-charset_msdos.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_msdos.c
+sys_grub.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_grub.c
 
-charset_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset_windows.c
+sys_hpux.$O:
+	$(CC) $(LIBCFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
 
-###############################################################################
+sys_hurd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_hurd.c
 
-hostcmd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd.c
+sys_kfreebsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
 
-hostcmd_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_none.c
+sys_linux.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_linux.c
 
-hostcmd_unix.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_unix.c
+sys_msdos.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_msdos.c
 
-hostcmd_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd_windows.c
+sys_netbsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_netbsd.c
 
-###############################################################################
+sys_openbsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_openbsd.c
 
-mntpt.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt.c
+sys_osf.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_osf.c
 
-mntpt_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_none.c
+sys_qnx.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_qnx.c
 
-mntpt_mntent.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mntent.c
+sys_solaris.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_solaris.c
 
-mntpt_mnttab.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt_mnttab.c
-
-###############################################################################
-
-mntfs.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs.c
-
-mntfs_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_none.c
-
-mntfs_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs_linux.c
-
-###############################################################################
-
-options.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
-
-options_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options_none.c
-
-options_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options_linux.c
-
-###############################################################################
-
-program.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
-
-program_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_none.c
-
-program_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_linux.c
-
-program_solaris.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_solaris.c
-
-program_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program_windows.c
-
-###############################################################################
-
-service_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/service_none.c
-
-service_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/service_windows.c
-
-###############################################################################
-
-dynld_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_none.c
-
-dynld_dlfcn.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_dlfcn.c
-
-dynld_dyld.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_dyld.c
-
-dynld_grub.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_grub.c
-
-dynld_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dynld_windows.c
+sys_windows.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_windows.c
 
 ###############################################################################
 
 IO_OBJECTS = io_generic.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+
+io_generic.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
+
+###############################################################################
+
 BRAILLE_OBJECTS = brl.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
 
 brl.$O:
