@@ -280,86 +280,110 @@ extern "C" {
 #undef SERIAL_FIRST_DEVICE
 
 /* Define only one of the following program packages. */
-#undef USE_PROGRAM_PACKAGE_NONE
-#undef USE_PROGRAM_PACKAGE_LINUX
-#undef USE_PROGRAM_PACKAGE_SOLARIS
-#undef USE_PROGRAM_PACKAGE_WINDOWS
+#undef USE_PKG_PROGRAM_NONE
+#undef USE_PKG_PROGRAM_LINUX
+#undef USE_PKG_PROGRAM_SOLARIS
+#undef USE_PKG_PROGRAM_WINDOWS
 
 /* Define only one of the following system service packages. */
-#undef USE_SERVICE_PACKAGE_NONE
-#undef USE_SERVICE_PACKAGE_WINDOWS
+#undef USE_PKG_SERVICE_NONE
+#undef USE_PKG_SERVICE_WINDOWS
 
 /* Define only one of the following options packages. */
-#undef USE_OPTIONS_PACKAGE_NONE
-#undef USE_OPTIONS_PACKAGE_LINUX
+#undef USE_PKG_OPTIONS_NONE
+#undef USE_PKG_OPTIONS_LINUX
 
 /* Define only one of the following dynamic loading packages. */
-#undef USE_DYNLD_PACKAGE_NONE
-#undef USE_DYNLD_PACKAGE_DLFCN
-#undef USE_DYNLD_PACKAGE_DYLD
-#undef USE_DYNLD_PACKAGE_GRUB
-#undef USE_DYNLD_PACKAGE_WINDOWS
+#undef USE_PKG_DYNLD_NONE
+#undef USE_PKG_DYNLD_DLFCN
+#undef USE_PKG_DYNLD_DYLD
+#undef USE_PKG_DYNLD_GRUB
+#undef USE_PKG_DYNLD_WINDOWS
 
 /* Define only one of the following character set packages. */
-#undef USE_CHARSET_PACKAGE_NONE
-#undef USE_CHARSET_PACKAGE_GRUB
-#undef USE_CHARSET_PACKAGE_ICONV
-#undef USE_CHARSET_PACKAGE_MSDOS
-#undef USE_CHARSET_PACKAGE_WINDOWS
+#undef USE_PKG_CHARSET_NONE
+#undef USE_PKG_CHARSET_GRUB
+#undef USE_PKG_CHARSET_ICONV
+#undef USE_PKG_CHARSET_MSDOS
+#undef USE_PKG_CHARSET_WINDOWS
 
 /* Define only one of the following host command packages. */
-#undef USE_HOSTCMD_PACKAGE_NONe
-#undef USE_HOSTCMD_PACKAGE_UNIX
-#undef USE_HOSTCMD_PACKAGE_WINDOWS
+#undef USE_PKG_HOSTCMD_NONe
+#undef USE_PKG_HOSTCMD_UNIX
+#undef USE_PKG_HOSTCMD_WINDOWS
 
 /* Define only one of the following mount point packages. */
-#undef USE_MNTPT_PACKAGE_NONE
-#undef USE_MNTPT_PACKAGE_MNTENT
-#undef USE_MNTPT_PACKAGE_MNTTAB
+#undef USE_PKG_MNTPT_NONE
+#undef USE_PKG_MNTPT_MNTENT
+#undef USE_PKG_MNTPT_MNTTAB
 
 /* Define only one of the following mount file system packages. */
-#undef USE_MNTFS_PACKAGE_NONE
-#undef USE_MNTFS_PACKAGE_LINUX
+#undef USE_PKG_MNTFS_NONE
+#undef USE_PKG_MNTFS_LINUX
 
 /* Define only one of the following keyboard packages. */
-#undef USE_KEYBOARD_PACKAGE_NONE
-#undef USE_KEYBOARD_PACKAGE_ANDROID
-#undef USE_KEYBOARD_PACKAGE_LINUX
+#undef USE_PKG_KEYBOARD_NONE
+#undef USE_PKG_KEYBOARD_ANDROID
+#undef USE_PKG_KEYBOARD_LINUX
 
 /* Define only one of the following serial I/O packages. */
-#undef USE_SERIAL_PACKAGE_NONE
-#undef USE_SERIAL_PACKAGE_GRUB
-#undef USE_SERIAL_PACKAGE_MSDOS
-#undef USE_SERIAL_PACKAGE_TERMIOS
-#undef USE_SERIAL_PACKAGE_WINDOWS
+#undef USE_PKG_SERIAL_NONE
+#undef USE_PKG_SERIAL_GRUB
+#undef USE_PKG_SERIAL_MSDOS
+#undef USE_PKG_SERIAL_TERMIOS
+#undef USE_PKG_SERIAL_WINDOWS
 
 /* Define only one of the following USB I/O packages. */
-#undef USE_USB_PACKAGE_NONE
-#undef USE_USB_PACKAGE_ANDROID
-#undef USE_USB_PACKAGE_DARWIN
-#undef USE_USB_PACKAGE_FREEBSD
-#undef USE_USB_PACKAGE_GRUB
-#undef USE_USB_PACKAGE_KFREEBSD
-#undef USE_USB_PACKAGE_LIBUSB
-#undef USE_USB_PACKAGE_LIBUSB_1_0
-#undef USE_USB_PACKAGE_LINUX
-#undef USE_USB_PACKAGE_NETBSD
-#undef USE_USB_PACKAGE_OPENBSD
-#undef USE_USB_PACKAGE_SOLARIS
+#undef USE_PKG_USB_NONE
+#undef USE_PKG_USB_ANDROID
+#undef USE_PKG_USB_DARWIN
+#undef USE_PKG_USB_FREEBSD
+#undef USE_PKG_USB_GRUB
+#undef USE_PKG_USB_KFREEBSD
+#undef USE_PKG_USB_LIBUSB
+#undef USE_PKG_USB_LIBUSB_1_0
+#undef USE_PKG_USB_LINUX
+#undef USE_PKG_USB_NETBSD
+#undef USE_PKG_USB_OPENBSD
+#undef USE_PKG_USB_SOLARIS
 
 /* Define only one of the following Bluetooth I/O packages. */
-#undef USE_BLUETOOTH_PACKAGE_NONE
-#undef USE_BLUETOOTH_PACKAGE_ANDROID
-#undef USE_BLUETOOTH_PACKAGE_LINUX
-#undef USE_BLUETOOTH_PACKAGE_WINDOWS
+#undef USE_PKG_BLUETOOTH_NONE
+#undef USE_PKG_BLUETOOTH_ANDROID
+#undef USE_PKG_BLUETOOTH_LINUX
+#undef USE_PKG_BLUETOOTH_WINDOWS
 
 /* Define only one of the following I/O ports packages. */
-#undef USE_PORTS_PACKAGE_NONE
-#undef USE_PORTS_PACKAGE_GLIBC
-#undef USE_PORTS_PACKAGE_GRUB
-#undef USE_PORTS_PACKAGE_KFREEBSD
-#undef USE_PORTS_PACKAGE_MSDOS
-#undef USE_PORTS_PACKAGE_WINDOWS
+#undef USE_PKG_PORTS_NONE
+#undef USE_PKG_PORTS_GLIBC
+#undef USE_PKG_PORTS_GRUB
+#undef USE_PKG_PORTS_KFREEBSD
+#undef USE_PKG_PORTS_MSDOS
+#undef USE_PKG_PORTS_WINDOWS
+
+/* Define only one of the following beeper packages. */
+#undef USE_PKG_BEEP_NONE
+#undef USE_PKG_BEEP_LINUX
+#undef USE_PKG_BEEP_MSDOS
+#undef USE_PKG_BEEP_SPKR
+#undef USE_PKG_BEEP_WINDOWS
+#undef USE_PKG_BEEP_WSKBD
+
+/* Define only one of the following PCM packages. */
+#undef USE_PKG_PCM_NONE
+#undef USE_PKG_PCM_ALSA
+#undef USE_PKG_PCM_ANDROID
+#undef USE_PKG_PCM_AUDIO
+#undef USE_PKG_PCM_OSS
+#undef USE_PKG_PCM_QSA
+#undef USE_PKG_PCM_WINDOWS
+
+/* Define only one of the following MIDI packages. */
+#undef USE_PKG_MIDI_NONE
+#undef USE_PKG_MIDI_ALSA
+#undef USE_PKG_MIDI_DARWIN
+#undef USE_PKG_MIDI_OSS
+#undef USE_PKG_MIDI_WINDOWS
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
