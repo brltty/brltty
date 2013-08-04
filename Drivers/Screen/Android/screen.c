@@ -24,7 +24,7 @@
 #include "brldefs.h"
 
 #include "scr_driver.h"
-#include "sys_android.h"
+#include "sys_java.h"
 
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;

@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SYS_ANDROID
-#define BRLTTY_INCLUDED_SYS_ANDROID
+#ifndef BRLTTY_INCLUDED_SYS_JAVA
+#define BRLTTY_INCLUDED_SYS_JAVA
 
 #include <jni.h>
 
@@ -25,7 +25,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define ANDROID_JNI_VERSION JNI_VERSION_1_6
+#ifdef __ANDROID__
+#define JAVA_JNI_VERSION JNI_VERSION_1_6
+#endif /* __ANDROID__ */
 
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
@@ -75,4 +77,4 @@ extern int findJavaStaticField (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SYS_ANDROID */
+#endif /* BRLTTY_INCLUDED_SYS_JAVA */

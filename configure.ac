@@ -972,7 +972,7 @@ brltty_midi_interfaces=""
 case "${host_os}"
 in
    *android*)
-      system_object="android"
+      system_object="java"
       LIBS="-llog ${LIBS}"
       ;;
    linux*)

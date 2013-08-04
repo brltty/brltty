@@ -404,8 +404,8 @@ ports_windows.$O:
 sys_none.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_none.c
 
-sys_android.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_android.c
+sys_java.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_java.c
 
 sys_linux.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_linux.c

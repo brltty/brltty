@@ -22,14 +22,14 @@
 
 #include "log.h"
 #include "system.h"
-#include "sys_android.h"
+#include "sys_java.h"
 
 static JavaVM *javaVirtualMachine = NULL;
 
 JNIEXPORT jint
 JNI_OnLoad (JavaVM *vm, void *reserved) {
   javaVirtualMachine = vm;
-  return ANDROID_JNI_VERSION;
+  return JAVA_JNI_VERSION;
 }
 
 JNIEXPORT void
@@ -62,12 +62,12 @@ getJavaNativeInterface (void) {
   JavaVM *vm = getJavaInvocationInterface();
 
   if (vm) {
-    jint result = (*vm)->GetEnv(vm, (void **)&env, ANDROID_JNI_VERSION);
+    jint result = (*vm)->GetEnv(vm, (void **)&env, JAVA_JNI_VERSION);
 
     if (result != JNI_OK) {
       if (result == JNI_EDETACHED) {
         JavaVMAttachArgs args = {
-          .version = ANDROID_JNI_VERSION,
+          .version = JAVA_JNI_VERSION,
           .name = NULL,
           .group = NULL
         };

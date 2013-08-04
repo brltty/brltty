@@ -27,7 +27,7 @@
 
 #include "io_usb.h"
 #include "usb_internal.h"
-#include "sys_android.h"
+#include "sys_java.h"
 
 typedef struct {
   JNIEnv *env;

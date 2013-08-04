@@ -26,7 +26,7 @@
 #define SPK_HAVE_RATE
 #define SPK_HAVE_PITCH
 #include "spk_driver.h"
-#include "sys_android.h"
+#include "sys_java.h"
 
 static JNIEnv *env = NULL;
 static jclass speechDriverClass = NULL;
