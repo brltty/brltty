@@ -82,16 +82,8 @@ AWK = @AWK@
 SYMLINK = @LN_S@
 DOXYGEN = @DOXYGEN@
 
-MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
-
-X_CFLAGS = @brltty_cflags_x@
-X_LIBS = @brltty_libs_x@
-XKB_LIBS = @brltty_libs_xkb@
-XTK_LIBS = @brltty_libs_xtk@
-
-CURSES_LIB = @brltty_package_curses@
-GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
+MSGFMT = @MSGFMT@
 
 INSTALL = @INSTALL@
 INSTALL_SCRIPT = $(INSTALL)
@@ -272,6 +264,14 @@ PORTS_CFLAGS = @ports_cflags@
 PORTS_LIBS = @ports_libs@
 
 SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
+
+X_CFLAGS = @brltty_cflags_x@
+X_LIBS = @brltty_libs_x@
+XKB_LIBS = @brltty_libs_xkb@
+XTK_LIBS = @brltty_libs_xtk@
+
+CURSES_LIB = @brltty_package_curses@
+GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
 
 CTB_OBJECTS = @contracted_braille_objects@
 

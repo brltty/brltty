@@ -390,6 +390,18 @@ extern "C" {
 /* Define only one of the following FM packages. */
 #undef USE_PKG_FM_ADLIB
 
+/* Define only one of the following curses packages. */
+#undef HAVE_PKG_CURSES
+#undef HAVE_PKG_NCURSES
+#undef HAVE_PKG_NCURSESW
+
+/* Define only one of the following Xaw packages. */
+#undef HAVE_PKG_XAW
+#undef HAVE_PKG_XAW3D
+#undef HAVE_PKG_NEXTAW
+#undef HAVE_PKG_XAWPLUS
+#undef HAVE_PKG_XM
+
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
 
@@ -496,18 +508,6 @@ extern "C" {
 
 /* Define this if the header file X11/extensions/XKB.h exists. */
 #undef HAVE_X11_EXTENSIONS_XKB_H
-
-/* Define only one of the following curses packages. */
-#undef HAVE_PKG_CURSES
-#undef HAVE_PKG_NCURSES
-#undef HAVE_PKG_NCURSESW
-
-/* Define only one of the following Xaw packages. */
-#undef HAVE_PKG_XAW
-#undef HAVE_PKG_XAW3D
-#undef HAVE_PKG_NEXTAW
-#undef HAVE_PKG_XAWPLUS
-#undef HAVE_PKG_XM
 
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
