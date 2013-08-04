@@ -30,4 +30,4 @@ disablePorts (unsigned short int base, unsigned short int count) {
   return 1;
 }
 
-#include "sys_ports_x86.h"
+#include "ports_x86.h"
