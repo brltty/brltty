@@ -32,7 +32,7 @@ typedef struct {
   void (*destruct) (NoteDevice *device);
 } NoteMethods;
 
-extern const NoteMethods beeperMethods;
+extern const NoteMethods beepMethods;
 extern const NoteMethods pcmMethods;
 extern const NoteMethods midiMethods;
 extern const NoteMethods fmMethods;

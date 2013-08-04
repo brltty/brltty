@@ -357,7 +357,7 @@ setTuneDevice (TuneDevice device) {
 
 #ifdef ENABLE_BEEPER_SUPPORT
     case tdBeeper:
-      methods = &beeperMethods;
+      methods = &beepMethods;
       break;
 #endif /* ENABLE_BEEPER_SUPPORT */
 

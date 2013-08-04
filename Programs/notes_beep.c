@@ -28,7 +28,7 @@ struct NoteDeviceStruct {
 };
 
 static NoteDevice *
-beeperConstruct (int errorLevel) {
+beepConstruct (int errorLevel) {
   NoteDevice *device;
 
   if ((device = malloc(sizeof(*device)))) {
@@ -47,7 +47,7 @@ beeperConstruct (int errorLevel) {
 }
 
 static int
-beeperPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
+beepPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
 
   if (!note) {
@@ -71,20 +71,20 @@ beeperPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
 }
 
 static int
-beeperFlush (NoteDevice *device) {
+beepFlush (NoteDevice *device) {
   return 1;
 }
 
 static void
-beeperDestruct (NoteDevice *device) {
+beepDestruct (NoteDevice *device) {
   endBeep();
   free(device);
   logMessage(LOG_DEBUG, "beeper disabled");
 }
 
-const NoteMethods beeperMethods = {
-  beeperConstruct,
-  beeperPlay,
-  beeperFlush,
-  beeperDestruct
+const NoteMethods beepMethods = {
+  beepConstruct,
+  beepPlay,
+  beepFlush,
+  beepDestruct
 };
