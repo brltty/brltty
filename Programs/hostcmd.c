@@ -21,11 +21,11 @@
 #include "log.h"
 #include "hostcmd.h"
 
-#if defined(USE_HOSTCMD_PACKAGE_NONE)
+#if defined(USE_PKG_HOSTCMD_NONE)
 #include "hostcmd_none.h"
-#elif defined(USE_HOSTCMD_PACKAGE_UNIX)
+#elif defined(USE_PKG_HOSTCMD_UNIX)
 #include "hostcmd_unix.h"
-#elif defined(USE_HOSTCMD_PACKAGE_WINDOWS)
+#elif defined(USE_PKG_HOSTCMD_WINDOWS)
 #include "hostcmd_windows.h"
 #else /* host command package */
 #error host command package not selected

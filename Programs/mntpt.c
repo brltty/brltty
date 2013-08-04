@@ -27,11 +27,11 @@
 #include "async.h"
 #include "mntpt.h"
 
-#if defined(USE_MNTPT_PACKAGE_NONE)
+#if defined(USE_PKG_MNTPT_NONE)
 #include "mntpt_none.h"
-#elif defined(USE_MNTPT_PACKAGE_MNTENT)
+#elif defined(USE_PKG_MNTPT_MNTENT)
 #include "mntpt_mntent.h"
-#elif defined(USE_MNTPT_PACKAGE_MNTTAB)
+#elif defined(USE_PKG_MNTPT_MNTTAB)
 #include "mntpt_mnttab.h"
 #else /* mount point package */
 #error mount point package not selected

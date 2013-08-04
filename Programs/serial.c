@@ -26,18 +26,18 @@
 #include "device.h"
 #include "timing.h"
 
-#if defined(USE_SERIAL_PACKAGE_NONE)
+#if defined(USE_PKG_SERIAL_NONE)
 #include "serial_none.h"
-#elif defined(USE_SERIAL_PACKAGE_GRUB)
+#elif defined(USE_PKG_SERIAL_GRUB)
 #include "serial_grub.h"
-#elif defined(USE_SERIAL_PACKAGE_MSDOS)
+#elif defined(USE_PKG_SERIAL_MSDOS)
 #include "serial_msdos.h"
-#elif defined(USE_SERIAL_PACKAGE_TERMIOS)
+#elif defined(USE_PKG_SERIAL_TERMIOS)
 #include "serial_termios.h"
-#elif defined(USE_SERIAL_PACKAGE_WINDOWS)
+#elif defined(USE_PKG_SERIAL_WINDOWS)
 #include "serial_windows.h"
 #else /* serial package */
-#error serial package not selected
+#error serial I/O package not selected
 #include "serial_none.h"
 #endif /* serial package */
 
