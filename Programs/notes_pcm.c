@@ -283,7 +283,7 @@ pcmDestruct (NoteDevice *device) {
   logMessage(LOG_DEBUG, "PCM disabled");
 }
 
-const NoteMethods pcmMethods = {
+const NoteMethods pcmNoteMethods = {
   pcmConstruct,
   pcmPlay,
   pcmFlush,

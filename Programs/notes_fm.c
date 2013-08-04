@@ -79,7 +79,7 @@ fmDestruct (NoteDevice *device) {
   logMessage(LOG_DEBUG, "FM disabled");
 }
 
-const NoteMethods fmMethods = {
+const NoteMethods fmNoteMethods = {
   fmConstruct,
   fmPlay,
   fmFlush,

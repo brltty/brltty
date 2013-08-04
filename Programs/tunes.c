@@ -357,25 +357,25 @@ setTuneDevice (TuneDevice device) {
 
 #ifdef ENABLE_BEEPER_SUPPORT
     case tdBeeper:
-      methods = &beepMethods;
+      methods = &beepNoteMethods;
       break;
 #endif /* ENABLE_BEEPER_SUPPORT */
 
 #ifdef ENABLE_PCM_SUPPORT
     case tdPcm:
-      methods = &pcmMethods;
+      methods = &pcmNoteMethods;
       break;
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
     case tdMidi:
-      methods = &midiMethods;
+      methods = &midiNoteMethods;
       break;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #ifdef ENABLE_FM_SUPPORT
     case tdFm:
-      methods = &fmMethods;
+      methods = &fmNoteMethods;
       break;
 #endif /* ENABLE_FM_SUPPORT */
   }

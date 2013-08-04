@@ -84,7 +84,7 @@ midiDestruct (NoteDevice *device) {
   logMessage(LOG_DEBUG, "MIDI disabled");
 }
 
-const NoteMethods midiMethods = {
+const NoteMethods midiNoteMethods = {
   midiConstruct,
   midiPlay,
   midiFlush,

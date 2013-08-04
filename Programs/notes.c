@@ -18,7 +18,6 @@
 
 #include "prologue.h"
 
-#include "log.h"
 #include "notes.h"
 
 #define NOTE_FREQUENCY_FACTOR 1000

@@ -23,20 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct NoteDeviceStruct NoteDevice;
-
-typedef struct {
-  NoteDevice * (*construct) (int errorLevel);
-  int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
-  int (*flush) (NoteDevice *device);
-  void (*destruct) (NoteDevice *device);
-} NoteMethods;
-
-extern const NoteMethods beepMethods;
-extern const NoteMethods pcmMethods;
-extern const NoteMethods midiMethods;
-extern const NoteMethods fmMethods;
-
 extern int32_t getIntegerNoteFrequency (unsigned char note);
 
 #ifndef NO_FLOAT
@@ -50,6 +36,20 @@ extern float getRealNoteFrequency (unsigned char note);
 #define NOTE_FREQUENCY_TYPE float
 #define GET_NOTE_FREQUENCY getRealNoteFrequency
 #endif /* NO_FLOAT */
+
+typedef struct NoteDeviceStruct NoteDevice;
+
+typedef struct {
+  NoteDevice * (*construct) (int errorLevel);
+  int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
+  int (*flush) (NoteDevice *device);
+  void (*destruct) (NoteDevice *device);
+} NoteMethods;
+
+extern const NoteMethods beepNoteMethods;
+extern const NoteMethods pcmNoteMethods;
+extern const NoteMethods midiNoteMethods;
+extern const NoteMethods fmNoteMethods;
 
 #ifdef __cplusplus
 }

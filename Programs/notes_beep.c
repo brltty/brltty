@@ -82,7 +82,7 @@ beepDestruct (NoteDevice *device) {
   logMessage(LOG_DEBUG, "beeper disabled");
 }
 
-const NoteMethods beepMethods = {
+const NoteMethods beepNoteMethods = {
   beepConstruct,
   beepPlay,
   beepFlush,
