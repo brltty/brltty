@@ -72,11 +72,6 @@ enableUinputAutorepeat (int device) {
 }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
 #ifdef ENABLE_BEEPER_SUPPORT
 #include "sys_beep_linux.h"
 #else /* ENABLE_BEEPER_SUPPORT */

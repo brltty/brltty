@@ -16,9 +16,13 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
+#include <stdio.h>
 #include <mach-o/dyld.h>
 
 #include "log.h"
+#include "dynld.h"
 
 static void
 logDyldError (const char *action) {

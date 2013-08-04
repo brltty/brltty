@@ -16,25 +16,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <grub/dl.h>
+#include "prologue.h"
+
+#include "log.h"
+#include "dynld.h"
 
 void *
-loadSharedObject (const char *name) {
-  return grub_dl_load (name);
+loadSharedObject (const char *path) {
+  HMODULE library;
+  if (!(library = LoadLibrary(path)))
+    logWindowsSystemError("loading library");
+  return library;
 }
 
 void 
 unloadSharedObject (void *object) {
-  grub_dl_unload (object);
+  if (!(FreeLibrary((HMODULE) object)))
+    logWindowsSystemError("unloading library");
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   void **address = pointerAddress;
-  grub_symbol_t sym;
-  sym = grub_get_symbol (symbol, object);
-  if (!sym)
-    return 0;
-  *address = sym->addr;
-  return 1;
+  if ((*address = GetProcAddress((HMODULE) object, symbol)))
+    return 1;
+  logWindowsSystemError("looking up symbol in library");
+  return 0;
 }

@@ -26,7 +26,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "system.h"
+#include "dynld.h"
 #include "ktb.h"
 #include "ktb_keyboard.h"
 #include "brl.h"

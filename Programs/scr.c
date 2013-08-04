@@ -31,7 +31,6 @@
 
 #include "log.h"
 #include "message.h"
-#include "system.h"
 #include "drivers.h"
 #include "menu_prefs.h"
 #include "scr.h"

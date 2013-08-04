@@ -16,18 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning shared object support not available on this platform
+#ifndef BRLTTY_INCLUDED_DYNLD
+#define BRLTTY_INCLUDED_DYNLD
 
-void *
-loadSharedObject (const char *path) {
-  return NULL;
-}
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-void 
-unloadSharedObject (void *object) {
-}
+extern void *loadSharedObject (const char *path);
+extern void unloadSharedObject (void *object);
+extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);
 
-int 
-findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-  return 0;
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_DYNLD */

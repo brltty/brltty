@@ -1290,9 +1290,24 @@ BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([service], [service], [], [dnl
+BRLTTY_ARG_PACKAGE([service], [system service], [], [dnl
    mingw*)
       service_package="windows"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
+      dynld_package="dlfcn"
+      ;;
+   darwin*)
+      dynld_package="dyld"
+      ;;
+   elf*)
+      dynld_package="grub"
+      ;;
+   mingw*)
+      dynld_package="windows"
       ;;
 ])
 

@@ -21,6 +21,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "dynld.h"
 
 struct MidiDeviceStruct {
   snd_seq_t *sequencer;

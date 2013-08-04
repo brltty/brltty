@@ -36,7 +36,6 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "system.h"
 
 #ifdef WINDOWS
 #include "sys_windows.h"

@@ -16,44 +16,28 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_DLOPEN 
-#include <dlfcn.h>
-#else /* HAVE_DLOPEN */
-#warning shared object support not available on this installation: no <dlfcn.h>
-#endif /* HAVE_DLOPEN */
+#include "prologue.h"
 
-#include "log.h"
+#include <grub/dl.h>
+
+#include "dynld.h"
 
 void *
-loadSharedObject (const char *path) {
-#ifdef HAVE_DLOPEN 
-  void *object = dlopen(path, SHARED_OBJECT_LOAD_FLAGS);
-  if (object) return object;
-  logMessage(LOG_ERR, "%s", dlerror());
-#endif /* HAVE_DLOPEN */
-  return NULL;
+loadSharedObject (const char *name) {
+  return grub_dl_load(name);
 }
 
 void 
 unloadSharedObject (void *object) {
-#ifdef HAVE_DLOPEN 
-  dlclose((void *)object);
-#endif /* HAVE_DLOPEN */
+  grub_dl_unload(object);
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-#ifdef HAVE_DLOPEN 
   void **address = pointerAddress;
+  grub_symbol_t sym = grub_get_symbol(symbol, object);
 
-  dlerror(); /* clear any previous error condition */
-  *address = dlsym(object, symbol);
-
-  {
-    const char *error = dlerror();
-    if (!error) return 1;
-    logMessage(LOG_ERR, "%s", error);
-  }
-#endif /* HAVE_DLOPEN */
-  return 0;
+  if (!sym) return 0;
+  *address = sym->addr;
+  return 1;
 }

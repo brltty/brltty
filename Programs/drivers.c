@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "file.h"
-#include "system.h"
+#include "dynld.h"
 #include "drivers.h"
 
 int

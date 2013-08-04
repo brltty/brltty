@@ -247,6 +247,10 @@ SERVICE_OBJECTS = service_@service_package@.$O
 SERVICE_CFLAGS = @service_cflags@
 SERVICE_LIBS = @service_libs@
 
+DYNLD_OBJECTS = dynld_@dynld_package@.$O
+DYNLD_CFLAGS = @dynld_cflags@
+DYNLD_LIBS = @dynld_libs@
+
 SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
 
 CTB_OBJECTS = @contracted_braille_objects@

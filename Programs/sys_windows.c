@@ -32,11 +32,6 @@
 
 #ifdef __CYGWIN32__
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
 #ifdef ENABLE_PCM_SUPPORT
 #define PCM_OSS_DEVICE_PATH "/dev/dsp"
 #include "sys_pcm_oss.h"
@@ -48,10 +43,6 @@
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #else /* __CYGWIN32__ */
-
-#ifdef ENABLE_SHARED_OBJECTS
-#include "sys_shlib_windows.h"
-#endif /* ENABLE_SHARED_OBJECTS */
 
 #ifdef ENABLE_PCM_SUPPORT
 #include "sys_pcm_windows.h"

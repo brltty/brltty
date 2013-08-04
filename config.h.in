@@ -310,9 +310,16 @@ extern "C" {
 #undef USE_PROGRAM_PACKAGE_SOLARIS
 #undef USE_PROGRAM_PACKAGE_WINDOWS
 
-/* Define only one of the following service packages. */
+/* Define only one of the following system service packages. */
 #undef USE_SERVICE_PACKAGE_NONE
 #undef USE_SERVICE_PACKAGE_WINDOWS
+
+/* Define only one of the following dynamic loading packages. */
+#undef USE_DYNLD_PACKAGE_NONE
+#undef USE_DYNLD_PACKAGE_DLFCN
+#undef USE_DYNLD_PACKAGE_DYLD
+#undef USE_DYNLD_PACKAGE_GRUB
+#undef USE_DYNLD_PACKAGE_WINDOWS
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT

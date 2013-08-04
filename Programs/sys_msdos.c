@@ -21,10 +21,6 @@
 #include "log.h"
 #include "system.h"
 
-#ifdef ENABLE_SHARED_OBJECTS
-#include "sys_shlib_none.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
 #include "sys_beep_msdos.h"
 
 #ifdef ENABLE_PCM_SUPPORT

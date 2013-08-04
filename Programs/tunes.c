@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "system.h"
 #include "message.h"
 #include "brl.h"
 #include "brltty.h"

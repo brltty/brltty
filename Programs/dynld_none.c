@@ -16,27 +16,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "log.h"
+#include "prologue.h"
+
+#include "dynld.h"
 
 void *
 loadSharedObject (const char *path) {
-  HMODULE library;
-  if (!(library = LoadLibrary(path)))
-    logWindowsSystemError("loading library");
-  return library;
+  return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
-  if (!(FreeLibrary((HMODULE) object)))
-    logWindowsSystemError("unloading library");
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-  void **address = pointerAddress;
-  if ((*address = GetProcAddress((HMODULE) object, symbol)))
-    return 1;
-  logWindowsSystemError("looking up symbol in library");
   return 0;
 }

@@ -24,11 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-extern void *loadSharedObject (const char *path);
-extern void unloadSharedObject (void *object);
-extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);
-
-
 extern int canBeep (void);
 extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
 extern int asynchronousBeep (unsigned short frequency, unsigned short milliseconds);

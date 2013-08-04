@@ -26,11 +26,6 @@
 
 #include "system.h"
 
-#ifdef ENABLE_SHARED_OBJECTS
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_SHARED_OBJECTS */
-
 #include "sys_beep_spkr.h"
 
 #ifdef ENABLE_PCM_SUPPORT

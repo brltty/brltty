@@ -46,7 +46,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "system.h"
+#include "dynld.h"
 #include "async.h"
 #include "program.h"
 #include "service.h"
