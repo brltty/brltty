@@ -79,8 +79,6 @@ extern const char *win_getLocale (void);
 
 extern char *makeWindowsCommandLine (const char *const *arguments);
 
-extern void sysInit (void);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

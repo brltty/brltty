@@ -36,10 +36,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-
-#ifdef WINDOWS
-#include "sys_windows.h"
-#endif /* WINDOWS */
+#include "system.h"
 
 const char *programPath;
 const char *programName;
@@ -105,10 +102,7 @@ beginProgram (int argumentCount, char **argumentVector) {
   atexit(endProgram);
 #endif /* at exit */
 
-#ifdef WINDOWS
-  sysInit();
-#endif /* WINDOWS */
-
+  initializeSystemObject();
   prepareLocale();
 
   if (!(programPath = getProgramPath())) programPath = argumentVector[0];

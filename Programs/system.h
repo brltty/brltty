@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern void initializeSystemObject (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

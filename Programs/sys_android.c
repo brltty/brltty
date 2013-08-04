@@ -206,3 +206,7 @@ findJavaStaticField (
 
   return 1;
 }
+
+void
+initializeSystemObject (void) {
+}

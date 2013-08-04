@@ -311,3 +311,7 @@ releaseAllKeys (void) {
   }
 #endif /* HAVE_LINUX_INPUT_H */
 }
+
+void
+initializeSystemObject (void) {
+}

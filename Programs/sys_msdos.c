@@ -333,3 +333,7 @@ snprintf (char *str, size_t size, const char *format, ...) {
   va_end(argp);
   return ret;
 }
+
+void
+initializeSystemObject (void) {
+}

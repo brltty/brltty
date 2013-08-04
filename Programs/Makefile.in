@@ -401,50 +401,17 @@ ports_windows.$O:
 
 ###############################################################################
 
-sys_skeleton.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_skeleton.c
+sys_none.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_none.c
 
 sys_android.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_android.c
-
-sys_darwin.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_darwin.c
-
-sys_freebsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_freebsd.c
-
-sys_grub.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_grub.c
-
-sys_hpux.$O:
-	$(CC) $(LIBCFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
-
-sys_hurd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_hurd.c
-
-sys_kfreebsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
 
 sys_linux.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_linux.c
 
 sys_msdos.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_msdos.c
-
-sys_netbsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_netbsd.c
-
-sys_openbsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_openbsd.c
-
-sys_osf.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_osf.c
-
-sys_qnx.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_qnx.c
-
-sys_solaris.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_solaris.c
 
 sys_windows.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_windows.c

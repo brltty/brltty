@@ -966,6 +966,7 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
+system_object="none"
 brltty_pcm_interfaces=""
 brltty_midi_interfaces=""
 case "${host_os}"
@@ -989,14 +990,7 @@ in
          brltty_midi_interfaces="${brltty_midi_interfaces} oss"
       ])
       ;;
-   gnu*)
-      system_object="hurd"
-      ;;
-   solaris*)
-      system_object="solaris"
-      ;;
    hpux*)
-      system_object="hpux"
       if test -d /opt/audio/include
       then
          CPPFLAGS="${CPPFLAGS} -I/opt/audio/include"
@@ -1005,25 +999,7 @@ in
                    [Define this if HP-UX audio support is available.])
       fi
       ;;
-   openbsd*)
-      system_object="openbsd"
-      ;;
-   freebsd*)
-      system_object="freebsd"
-      ;;
-   kfreebsd*)
-      system_object="kfreebsd"
-      brltty_pcm_interfaces="oss"
-      brltty_midi_interfaces="oss"
-      ;;
-   netbsd*)
-      system_object="netbsd"
-      ;;
-   osf*)
-      system_object="osf"
-      ;;
    *qnx*)
-      system_object="qnx"
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
    cygwin*|mingw*)
@@ -1033,14 +1009,7 @@ in
       system_object="msdos"
       ;;
    darwin*)
-      system_object="darwin"
       LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
-      ;;
-   elf*)
-      system_object="grub"
-      ;;
-   *)
-      AC_MSG_ERROR([no system object available for ${host_os}])
       ;;
 esac
 AC_SUBST([system_object])

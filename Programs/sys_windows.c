@@ -151,7 +151,7 @@ error:
 }
 
 void
-sysInit (void) {
+initializeSystemObject (void) {
   HMODULE library;
 
 #define LOAD_LIBRARY(name) (library = loadLibrary(name))

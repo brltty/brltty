@@ -19,3 +19,7 @@
 #include "prologue.h"
 
 #include "system.h"
+
+void
+initializeSystemObject (void) {
+}
