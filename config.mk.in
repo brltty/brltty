@@ -251,6 +251,10 @@ BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O bluetooth_@bluetooth_package
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
+PORTS_OBJECTS = ports_@ports_package@.$O
+PORTS_CFLAGS = @ports_cflags@
+PORTS_LIBS = @ports_libs@
+
 SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
 
 CTB_OBJECTS = @contracted_braille_objects@

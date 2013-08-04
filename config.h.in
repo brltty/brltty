@@ -353,6 +353,14 @@ extern "C" {
 #undef USE_BLUETOOTH_PACKAGE_LINUX
 #undef USE_BLUETOOTH_PACKAGE_WINDOWS
 
+/* Define only one of the following I/O ports packages. */
+#undef USE_PORTS_PACKAGE_NONE
+#undef USE_PORTS_PACKAGE_GLIBC
+#undef USE_PORTS_PACKAGE_GRUB
+#undef USE_PORTS_PACKAGE_KFREEBSD
+#undef USE_PORTS_PACKAGE_MSDOS
+#undef USE_PORTS_PACKAGE_WINDOWS
+
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
 
