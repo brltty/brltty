@@ -27,6 +27,7 @@
 
 #include "options.h"
 #include "tunes.h"
+#include "midi.h"
 #include "log.h"
 #include "parse.h"
 #include "defaults.h"

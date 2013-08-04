@@ -220,6 +220,11 @@ kbd_linux.$O:
 
 ###############################################################################
 
+midi.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi.c
+
+###############################################################################
+
 serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/serial.c
 
@@ -429,7 +434,7 @@ routing.$O:
 
 ###############################################################################
 
-TUNE_OBJECTS = tunes.$O notes.$O $(BEEPER_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
+TUNE_OBJECTS = tunes.$O notes.$O notes_beep.$O notes_pcm.$O notes_midi.$O midi.$O notes_fm.$O adlib.$O
 
 tunes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tunes.c
@@ -437,17 +442,17 @@ tunes.$O:
 notes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes.c
 
-beeper.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beeper.c
+notes_beep.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes_beep.c
 
-pcm.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm.c
+notes_pcm.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes_pcm.c
 
-midi.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi.c
+notes_midi.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes_midi.c
 
-fm.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/fm.c
+notes_fm.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes_fm.c
 
 adlib.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/adlib.c

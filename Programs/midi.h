@@ -23,6 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern const char *const midiInstrumentTable[];
+extern const unsigned int midiInstrumentCount;
+extern const char *midiGetInstrumentType (unsigned char instrument);
+
 typedef struct MidiDeviceStruct MidiDevice;
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
 

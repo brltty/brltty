@@ -30,6 +30,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "tunes.h"
+#include "midi.h"
 
 #define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
