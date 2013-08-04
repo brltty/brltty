@@ -59,8 +59,6 @@ extern char *opt_attributesTable;
 extern char *opt_contractionTable;
 
 extern int opt_releaseDevice;
-extern char *opt_pcmDevice;
-extern char *opt_midiDevice;
 
 extern int updateInterval;
 extern int messageDelay;

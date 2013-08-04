@@ -21,11 +21,12 @@
 #include <string.h>
 #include <errno.h>
 
-#include "brltty.h"
 #include "prefs.h"
 #include "log.h"
 #include "pcm.h"
 #include "notes.h"
+
+char *opt_pcmDevice;
 
 struct NoteDeviceStruct {
   PcmDevice *pcm;

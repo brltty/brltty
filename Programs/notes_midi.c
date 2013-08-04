@@ -21,11 +21,12 @@
 #include <string.h>
 #include <errno.h>
 
-#include "brltty.h"
 #include "prefs.h"
 #include "log.h"
 #include "midi.h"
 #include "notes.h"
+
+char *opt_midiDevice;
 
 struct NoteDeviceStruct {
   MidiDevice *midi;

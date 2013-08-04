@@ -42,6 +42,7 @@
 #include "ktb_keyboard.h"
 #include "kbd.h"
 #include "tunes.h"
+#include "notes.h"
 #include "message.h"
 #include "log.h"
 #include "file.h"
@@ -160,14 +161,6 @@ static const ScreenDriver *screenDriver = NULL;
 static void *screenObject;
 static char *opt_screenParameters;
 static char **screenParameters = NULL;
-
-#ifdef ENABLE_PCM_SUPPORT
-char *opt_pcmDevice;
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-char *opt_midiDevice;
-#endif /* ENABLE_MIDI_SUPPORT */
 
 static const char *const optionStrings_LogLevel[] = {
   "0-7 [5]",

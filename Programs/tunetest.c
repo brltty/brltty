@@ -27,6 +27,7 @@
 
 #include "options.h"
 #include "tunes.h"
+#include "notes.h"
 #include "midi.h"
 #include "log.h"
 #include "parse.h"
@@ -40,12 +41,7 @@ int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static char *opt_tuneDevice;
 static char *opt_outputVolume;
 
-#ifdef ENABLE_PCM_SUPPORT
-char *opt_pcmDevice;
-#endif /* ENABLE_PCM_SUPPORT */
-
 #ifdef ENABLE_MIDI_SUPPORT
-char *opt_midiDevice;
 static char *opt_midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
