@@ -24,7 +24,7 @@
 #include "brltty.h"
 #include "prefs.h"
 #include "log.h"
-#include "system.h"
+#include "midi.h"
 #include "notes.h"
 
 struct NoteDeviceStruct {

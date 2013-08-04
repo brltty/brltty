@@ -16,19 +16,22 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SYSTEM
-#define BRLTTY_INCLUDED_SYSTEM
-
-#include "beep.h"
-#include "pcm.h"
-#include "midi.h"
+#ifndef BRLTTY_INCLUDED_BEEP
+#define BRLTTY_INCLUDED_BEEP
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+extern int canBeep (void);
+extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
+extern int asynchronousBeep (unsigned short frequency, unsigned short milliseconds);
+extern int startBeep (unsigned short frequency);
+extern int stopBeep (void);
+extern void endBeep (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SYSTEM */
+#endif /* BRLTTY_INCLUDED_BEEP */

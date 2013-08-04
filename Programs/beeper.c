@@ -20,7 +20,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "system.h"
+#include "beep.h"
 #include "notes.h"
 
 struct NoteDeviceStruct {

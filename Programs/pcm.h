@@ -1,0 +1,60 @@
+/*
+ * BRLTTY - A background process providing access to the console screen (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2013 by The BRLTTY Developers.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any
+ * later version. Please see the file LICENSE-GPL for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#ifndef BRLTTY_INCLUDED_PCM
+#define BRLTTY_INCLUDED_PCM
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+typedef struct PcmDeviceStruct PcmDevice;
+
+typedef enum {
+  PCM_FMT_U8,
+  PCM_FMT_S8,
+  PCM_FMT_U16B,
+  PCM_FMT_S16B,
+  PCM_FMT_U16L,
+  PCM_FMT_S16L,
+  PCM_FMT_U16H,
+  PCM_FMT_S16H,
+  PCM_FMT_ULAW,
+  PCM_FMT_ALAW,
+  PCM_FMT_UNKNOWN
+} PcmAmplitudeFormat;
+
+extern PcmDevice *openPcmDevice (int errorLevel, const char *device);
+extern void closePcmDevice (PcmDevice *pcm);
+extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
+extern int getPcmBlockSize (PcmDevice *pcm);
+extern int getPcmSampleRate (PcmDevice *pcm);
+extern int setPcmSampleRate (PcmDevice *pcm, int rate);
+extern int getPcmChannelCount (PcmDevice *pcm);
+extern int setPcmChannelCount (PcmDevice *pcm, int channels);
+extern PcmAmplitudeFormat getPcmAmplitudeFormat (PcmDevice *pcm);
+extern PcmAmplitudeFormat setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format);
+extern void forcePcmOutput (PcmDevice *pcm);
+extern void awaitPcmOutput (PcmDevice *pcm);
+extern void cancelPcmOutput (PcmDevice *pcm);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_PCM */
