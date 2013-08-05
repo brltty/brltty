@@ -268,8 +268,6 @@ routing.$O:
 
 ###############################################################################
 
-TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
-
 tunes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tunes.c
 
