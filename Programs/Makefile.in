@@ -94,228 +94,149 @@ prefs_table.$O:
 
 ###############################################################################
 
+PROGRAM_OBJECT = program_$(PROGRAM_PACKAGE)
+PROGRAM_OBJECTS = program.$O $(PROGRAM_OBJECT).$O
+
 program.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
 
-program_none.$O:
-	$(CC) $(LIBCFLAGS) $(PROGRAM_CFLAGS) -c $(SRC_DIR)/program_none.c
-
-program_linux.$O:
-	$(CC) $(LIBCFLAGS) $(PROGRAM_CFLAGS) -c $(SRC_DIR)/program_linux.c
-
-program_solaris.$O:
-	$(CC) $(LIBCFLAGS) $(PROGRAM_CFLAGS) -c $(SRC_DIR)/program_solaris.c
-
-program_windows.$O:
-	$(CC) $(LIBCFLAGS) $(PROGRAM_CFLAGS) -c $(SRC_DIR)/program_windows.c
+$(PROGRAM_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(PROGRAM_CFLAGS) -c $(SRC_DIR)/$(PROGRAM_OBJECT).c
 
 ###############################################################################
 
-service_none.$O:
-	$(CC) $(LIBCFLAGS) $(SERVICE_CFLAGS) -c $(SRC_DIR)/service_none.c
+SERVICE_OBJECT = service_$(SERVICE_PACKAGE)
+SERVICE_OBJECTS = $(SERVICE_OBJECT).$O
 
-service_windows.$O:
-	$(CC) $(LIBCFLAGS) $(SERVICE_CFLAGS) -c $(SRC_DIR)/service_windows.c
+$(SERVICE_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(SERVICE_CFLAGS) -c $(SRC_DIR)/$(SERVICE_OBJECT).c
 
 ###############################################################################
+
+OPTIONS_OBJECT = options_$(OPTIONS_PACKAGE)
+OPTIONS_OBJECTS = options.$O $(OPTIONS_OBJECT).$O
 
 options.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
 
-options_none.$O:
-	$(CC) $(LIBCFLAGS) $(OPTIONS_CFLAGS) -c $(SRC_DIR)/options_none.c
-
-options_linux.$O:
-	$(CC) $(LIBCFLAGS) $(OPTIONS_CFLAGS) -c $(SRC_DIR)/options_linux.c
+$(OPTIONS_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(OPTIONS_CFLAGS) -c $(SRC_DIR)/$(OPTIONS_OBJECT).c
 
 ###############################################################################
 
-dynld_none.$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/dynld_none.c
+DYNLD_OBJECT = dynld_$(DYNLD_PACKAGE)
+DYNLD_OBJECTS = $(DYNLD_OBJECT).$O
 
-dynld_dlfcn.$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/dynld_dlfcn.c
-
-dynld_dyld.$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/dynld_dyld.c
-
-dynld_grub.$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/dynld_grub.c
-
-dynld_windows.$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/dynld_windows.c
+$(DYNLD_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/$(DYNLD_OBJECT).c
 
 ###############################################################################
+
+CHARSET_OBJECT = charset_$(CHARSET_PACKAGE)
+CHARSET_OBJECTS = charset.$O $(CHARSET_OBJECT).$O
 
 charset.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset.c
 
-charset_none.$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/charset_none.c
-
-charset_grub.$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/charset_grub.c
-
-charset_iconv.$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/charset_iconv.c
-
-charset_msdos.$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/charset_msdos.c
-
-charset_windows.$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/charset_windows.c
+$(CHARSET_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/$(CHARSET_OBJECT).c
 
 ###############################################################################
+
+HOSTCMD_OBJECT = hostcmd_$(HOSTCMD_PACKAGE)
+HOSTCMD_OBJECTS = hostcmd.$O $(HOSTCMD_OBJECT).$O
 
 hostcmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd.c
 
-hostcmd_none.$O:
-	$(CC) $(LIBCFLAGS) $(HOSTCMD_CFLAGS) -c $(SRC_DIR)/hostcmd_none.c
-
-hostcmd_unix.$O:
-	$(CC) $(LIBCFLAGS) $(HOSTCMD_CFLAGS) -c $(SRC_DIR)/hostcmd_unix.c
-
-hostcmd_windows.$O:
-	$(CC) $(LIBCFLAGS) $(HOSTCMD_CFLAGS) -c $(SRC_DIR)/hostcmd_windows.c
+$(HOSTCMD_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(HOSTCMD_CFLAGS) -c $(SRC_DIR)/$(HOSTCMD_OBJECT).c
 
 ###############################################################################
+
+MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
+
+
+MNTPT_OBJECT = mntpt_$(MNTPT_PACKAGE)
+MNTPT_OBJECTS = mntpt.$O $(MNTPT_OBJECT).$O
 
 mntpt.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt.c
 
-mntpt_none.$O:
-	$(CC) $(LIBCFLAGS) $(MNTPT_CFLAGS) -c $(SRC_DIR)/mntpt_none.c
+$(MNTPT_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(MNTPT_CFLAGS) -c $(SRC_DIR)/$(MNTPT_OBJECT).c
 
-mntpt_mntent.$O:
-	$(CC) $(LIBCFLAGS) $(MNTPT_CFLAGS) -c $(SRC_DIR)/mntpt_mntent.c
 
-mntpt_mnttab.$O:
-	$(CC) $(LIBCFLAGS) $(MNTPT_CFLAGS) -c $(SRC_DIR)/mntpt_mnttab.c
+MNTFS_OBJECT = mntfs_$(MNTFS_PACKAGE)
+MNTFS_OBJECTS = $(MNTFS_OBJECT).$O
 
-###############################################################################
-
-mntfs.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntfs.c
-
-mntfs_none.$O:
-	$(CC) $(LIBCFLAGS) $(MNTFS_CFLAGS) -c $(SRC_DIR)/mntfs_none.c
-
-mntfs_linux.$O:
-	$(CC) $(LIBCFLAGS) $(MNTFS_CFLAGS) -c $(SRC_DIR)/mntfs_linux.c
+$(MNTFS_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(MNTFS_CFLAGS) -c $(SRC_DIR)/$(MNTFS_OBJECT).c
 
 ###############################################################################
+
+KBD_OBJECT = kbd_$(KBD_PACKAGE)
+KBD_OBJECTS = kbd.$O $(KBD_OBJECT).$O
 
 kbd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd.c
 
-kbd_none.$O:
-	$(CC) $(LIBCFLAGS) $(KEYBOARD_CFLAGS) -c $(SRC_DIR)/kbd_none.c
-
-kbd_android.$O:
-	$(CC) $(LIBCFLAGS) $(KEYBOARD_CFLAGS) -c $(SRC_DIR)/kbd_android.c
-
-kbd_linux.$O:
-	$(CC) $(LIBCFLAGS) $(KEYBOARD_CFLAGS) -c $(SRC_DIR)/kbd_linux.c
+$(KBD_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(KBD_CFLAGS) -c $(SRC_DIR)/$(KBD_OBJECT).c
 
 ###############################################################################
+
+BEEP_OBJECT = beep_$(BEEP_PACKAGE)
+BEEP_OBJECTS = notes_beep.$O beep.$O $(BEEP_OBJECT).$O
 
 beep.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep.c
 
-beep_none.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_none.c
-
-beep_linux.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_linux.c
-
-beep_msdos.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_msdos.c
-
-beep_solaris.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_solaris.c
-
-beep_spkr.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_spkr.c
-
-beep_windows.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_windows.c
-
-beep_wskbd.$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_wskbd.c
+$(BEEP_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/$(BEEP_OBJECT).c
 
 ###############################################################################
 
-pcm_none.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_none.c
+PCM_OBJECT = pcm_$(PCM_PACKAGE)
+PCM_OBJECTS = notes_pcm.$O $(PCM_OBJECT).$O
 
-pcm_alsa.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_alsa.c
-
-pcm_android.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_android.c
-
-pcm_audio.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_audio.c
-
-pcm_hpux.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_hpux.c
-
-pcm_oss.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_oss.c
-
-pcm_qsa.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_qsa.c
-
-pcm_windows.$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/pcm_windows.c
+$(PCM_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/$(PCM_OBJECT).c
 
 ###############################################################################
+
+MIDI_OBJECT = midi_$(MIDI_PACKAGE)
+MIDI_OBJECTS = notes_midi.$O midi.$O $(MIDI_OBJECT).$O
 
 midi.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi.c
 
-midi_none.$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/midi_none.c
-
-midi_alsa.$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/midi_alsa.c
-
-midi_darwin.$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/midi_darwin.c
-
-midi_oss.$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/midi_oss.c
-
-midi_windows.$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/midi_windows.c
+$(MIDI_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/$(MIDI_OBJECT).c
 
 ###############################################################################
 
-fm_adlib.$O:
-	$(CC) $(LIBCFLAGS) $(FM_CFLAGS) -c $(SRC_DIR)/fm_adlib.c
+FM_OBJECT = fm_$(FM_PACKAGE)
+FM_OBJECTS = notes_fm.$O $(FM_OBJECT).$O
+
+$(FM_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(FM_CFLAGS) -c $(SRC_DIR)/$(FM_OBJECT).c
 
 ###############################################################################
+
+SERIAL_OBJECT = serial_$(SERIAL_PACKAGE)
+SERIAL_OBJECTS = serial.$O $(SERIAL_OBJECT).$O
 
 serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/serial.c
 
-serial_none.$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/serial_none.c
-
-serial_grub.$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/serial_grub.c
-
-serial_msdos.$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/serial_msdos.c
-
-serial_termios.$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/serial_termios.c
-
-serial_windows.$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/serial_windows.c
+$(SERIAL_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/$(SERIAL_OBJECT).c
 
 ###############################################################################
+
+USB_OBJECT = usb_$(USB_PACKAGE)
+USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O $(USB_OBJECT).$O
 
 usb.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb.c
@@ -326,43 +247,13 @@ usb_hid.$O:
 usb_serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_serial.c
 
-usb_none.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_none.c
-
-usb_android.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_android.c
-
-usb_darwin.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_darwin.c
-
-usb_freebsd.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_freebsd.c
-
-usb_grub.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_grub.c
-
-usb_kfreebsd.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_kfreebsd.c
-
-usb_libusb.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb.c
-
-usb_libusb-1.0.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_libusb-1.0.c
-
-usb_linux.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_linux.c
-
-usb_netbsd.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_netbsd.c
-
-usb_openbsd.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
-
-usb_solaris.$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/usb_solaris.c
+$(USB_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/$(USB_OBJECT).c
 
 ###############################################################################
+
+BLUETOOTH_OBJECT = bluetooth_$(BLUETOOTH_PACKAGE)
+BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O $(BLUETOOTH_OBJECT).$O
 
 bluetooth.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bluetooth.c
@@ -370,37 +261,16 @@ bluetooth.$O:
 bluetooth_names.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bluetooth_names.c
 
-bluetooth_none.$O:
-	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_none.c
-
-bluetooth_android.$O:
-	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_android.c
-
-bluetooth_linux.$O:
-	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
-
-bluetooth_windows.$O:
-	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -D__USE_W32_SOCKETS -c $(SRC_DIR)/bluetooth_windows.c
+$(BLUETOOTH_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/$(BLUETOOTH_OBJECT).c
 
 ###############################################################################
 
-ports_none.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_none.c
+PORTS_OBJECT = ports_$(PORTS_PACKAGE)
+PORTS_OBJECTS = $(PORTS_OBJECT).$O
 
-ports_glibc.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_glibc.c
-
-ports_grub.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_grub.c
-
-ports_kfreebsd.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_kfreebsd.c
-
-ports_msdos.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_msdos.c
-
-ports_windows.$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/ports_windows.c
+$(PORTS_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/$(PORTS_OBJECT).c
 
 ###############################################################################
 
@@ -562,7 +432,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(COMMAND_OBJECTS_FOR_HOST) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O $(MOUNT_OBJECTS) cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(COMMAND_OBJECTS_FOR_HOST) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O $(MOUNT_OBJECTS) cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)

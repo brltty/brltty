@@ -199,67 +199,71 @@ ICU_LIBRARIES = @icu_libraries@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
-PROGRAM_OBJECTS = program.$O program_@program_package@.$O
+PROGRAM_PACKAGE = @program_package@
 PROGRAM_CFLAGS = @program_cflags@
 PROGRAM_LIBS = @program_libs@
 
-SERVICE_OBJECTS = service_@service_package@.$O
+SERVICE_PACKAGE = @service_package@
 SERVICE_CFLAGS = @service_cflags@
 SERVICE_LIBS = @service_libs@
 
-OPTIONS_OBJECTS = options.$O options_@options_package@.$O
+OPTIONS_PACKAGE = @options_package@
 OPTIONS_CFLAGS = @options_cflags@
 OPTIONS_LIBS = @options_libs@
 
-DYNLD_OBJECTS = dynld_@dynld_package@.$O
+DYNLD_PACKAGE = @dynld_package@
 DYNLD_CFLAGS = @dynld_cflags@
 DYNLD_LIBS = @dynld_libs@
 
-CHARSET_OBJECTS = charset.$O charset_@charset_package@.$O
+CHARSET_PACKAGE = @charset_package@
 CHARSET_CFLAGS = @charset_cflags@
 CHARSET_LIBS = @charset_libs@
 
-HOSTCMD_OBJECTS = hostcmd.$O hostcmd_@hostcmd_package@.$O
+HOSTCMD_PACKAGE = @hostcmd_package@
 HOSTCMD_CFLAGS = @hostcmd_cflags@
 HOSTCMD_LIBS = @hostcmd_libs@
 
-MOUNT_OBJECTS = mntpt.$O mntpt_@mntpt_package@.$O mntfs_@mntfs_package@.$O
-MOUNT_CFLAGS = @mntpt_cflags@ @mntfs_cflags@
-MOUNT_LIBS = @mntpt_libs@ @mntfs_libs@
+MNTPT_PACKAGE = @mntpt_package@
+MNTPT_CFLAGS = @mntpt_cflags@
+MNTPT_LIBS = @mntpt_libs@
 
-KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
-KEYBOARD_CFLAGS = @keyboard_cflags@
-KEYBOARD_LIBS = @keyboard_libs@
+MNTFS_PACKAGE = @mntfs_package@
+MNTFS_CFLAGS = @mntfs_cflags@
+MNTFS_LIBS = @mntfs_libs@
 
-BEEP_OBJECTS = notes_beep.$O beep.$O beep_@beep_package@.$O
+KBD_PACKAGE = @kbd_package@
+KBD_CFLAGS = @kbd_cflags@
+KBD_LIBS = @kbd_libs@
+
+BEEP_PACKAGE = @beep_package@
 BEEP_CFLAGS = @beep_cflags@
 BEEP_LIBS = @beep_libs@
 
-PCM_OBJECTS = notes_pcm.$O pcm_@pcm_package@.$O
+PCM_PACKAGE = @pcm_package@
 PCM_CFLAGS = @pcm_cflags@
 PCM_LIBS = @pcm_libs@
 
-MIDI_OBJECTS = notes_midi.$O midi.$O midi_@midi_package@.$O
+MIDI_PACKAGE = @midi_package@
 MIDI_CFLAGS = @midi_cflags@
 MIDI_LIBS = @midi_libs@
 
-FM_OBJECTS = notes_fm.$O fm_@fm_package@.$O
+FM_PACKAGE = @fm_package@
 FM_CFLAGS = @fm_cflags@
 FM_LIBS = @fm_libs@
 
-SERIAL_OBJECTS = serial.$O serial_@serial_package@.$O
+SERIAL_PACKAGE = @serial_package@
 SERIAL_CFLAGS = @serial_cflags@
 SERIAL_LIBS = @serial_libs@
 
-USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O usb_@usb_package@.$O
+USB_PACKAGE = @usb_package@
 USB_CFLAGS = @usb_cflags@
 USB_LIBS = @usb_libs@
 
-BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O bluetooth_@bluetooth_package@.$O
+BLUETOOTH_PACKAGE = @bluetooth_package@
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
-PORTS_OBJECTS = ports_@ports_package@.$O
+PORTS_PACKAGE = @ports_package@
 PORTS_CFLAGS = @ports_cflags@
 PORTS_LIBS = @ports_libs@
 

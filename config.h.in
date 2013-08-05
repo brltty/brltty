@@ -322,9 +322,9 @@ extern "C" {
 #undef USE_PKG_MNTFS_LINUX
 
 /* Define only one of the following keyboard packages. */
-#undef USE_PKG_KEYBOARD_NONE
-#undef USE_PKG_KEYBOARD_ANDROID
-#undef USE_PKG_KEYBOARD_LINUX
+#undef USE_PKG_KBD_NONE
+#undef USE_PKG_KBD_ANDROID
+#undef USE_PKG_KBD_LINUX
 
 /* Define only one of the following serial I/O packages. */
 #undef USE_PKG_SERIAL_NONE
