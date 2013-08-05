@@ -28,7 +28,7 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O io_misc.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS)
 
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
@@ -291,7 +291,7 @@ sys_windows.$O:
 
 ###############################################################################
 
-IO_OBJECTS = io_generic.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+IO_OBJECTS = io_generic.$O io_misc.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
 
 io_generic.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
@@ -432,7 +432,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(COMMAND_OBJECTS_FOR_HOST) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O $(MOUNT_OBJECTS) cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(COMMAND_OBJECTS_FOR_HOST) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -571,7 +571,7 @@ check-contraction-tables: brltty-ctb$X
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O $(COMMAND_OBJECTS_FOR_HOST) $(MOUNT_OBJECTS) ttb_translate.$O cmd.$O $(CHARSET_OBJECTS) lock.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
+BRLTEST_OBJECTS = brltest.$O $(COMMAND_OBJECTS_FOR_HOST) ttb_translate.$O cmd.$O $(CHARSET_OBJECTS) lock.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -609,7 +609,7 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(COMMAND_OBJECTS_FOR_HOST) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O lock.$O unicode.$O $(CHARSET_OBJECTS) cmd.$O scancodes.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(MOUNT_OBJECTS) touch.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O prefs.$O prefs_table.$O
+KTBTEST_OBJECTS = ktbtest.$O $(COMMAND_OBJECTS_FOR_HOST) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O lock.$O unicode.$O $(CHARSET_OBJECTS) cmd.$O scancodes.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O prefs.$O prefs_table.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
