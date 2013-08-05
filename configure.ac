@@ -1072,21 +1072,26 @@ BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
-   darwin*)
-      dynld_package="dyld"
-      ;;
+BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dyld dlfcn], [dnl
    elf*)
       dynld_package="grub"
       ;;
    hpux*)
       dynld_package="shl"
       ;;
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
-      dynld_package="dlfcn"
-      ;;
    mingw*)
       dynld_package="windows"
+      ;;
+], [dnl
+   dlfcn)
+      AC_CHECK_HEADERS([dlfcn.h], [
+         dynld_package="dlfcn"
+      ])
+      ;;
+   dyld)
+      AC_CHECK_HEADERS([mach-o/dyld.h], [
+         dynld_package="dyld"
+      ])
       ;;
 ])
 
