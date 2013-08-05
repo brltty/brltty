@@ -21,7 +21,6 @@
 
 #include "bitfield.h"
 #include "queue.h"
-#include "async.h"
 
 #ifdef __cplusplus
 extern "C" {
