@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
-#include <alsa/asoundlib.h>
+#include <asoundlib.h>
 
 #include "log.h"
 #include "timing.h"

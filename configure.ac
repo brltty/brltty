@@ -1242,7 +1242,7 @@ BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([pcm], [PCm], [], [dnl
+BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa], [dnl
    *android*)
       pcm_package="android"
       ;;
@@ -1278,7 +1278,7 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([midi], [MIDI], [], [dnl
+BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa], [dnl
    *android*)
       midi_package="none"
       ;;
