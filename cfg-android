@@ -83,10 +83,9 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --with-screen-driver=an,-all \
    --without-libbraille \
    --disable-x \
-   --disable-beeper-support \
-   --enable-pcm-support \
-   --disable-midi-support \
-   --disable-fm-support \
+   --without-beep-package \
+   --without-midi-package \
+   --without-fm-package \
    --disable-icu \
    --disable-gpm \
    --host="${hostSystem}" \

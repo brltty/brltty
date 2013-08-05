@@ -30,9 +30,9 @@ directory=`dirname "${0}"`
    --disable-speech-support \
    --disable-api \
    --disable-x \
-   --disable-pcm-support \
-   --disable-midi-support \
-   --disable-fm-support \
+   --without-pcm-package \
+   --without-midi-package \
+   --without-fm-package \
    --disable-icu \
    --disable-gpm \
    --host=i386-elf \

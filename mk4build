@@ -73,7 +73,7 @@ then
       --without-libbraille --disable-speech-support \
       --with-braille-driver=-all --with-speech-driver=-all -with-screen-driver=-all \
       --without-serial-package --without-usb-package --without-bluetooth-package \
-      --disable-beeper-support --disable-pcm-support --disable-midi-support --disable-fm-support \
+      --without-beep-package --without-pcm-package --without-midi-package --without-fm-package \
       --quiet
 fi
 

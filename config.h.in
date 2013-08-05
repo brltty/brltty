@@ -389,6 +389,7 @@ extern "C" {
 #undef USE_PKG_MIDI_WINDOWS
 
 /* Define only one of the following FM packages. */
+#undef USE_PKG_FM_NONE
 #undef USE_PKG_FM_ADLIB
 
 /* Define only one of the following curses packages. */
