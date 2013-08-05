@@ -355,29 +355,29 @@ setTuneDevice (TuneDevice device) {
       methods = NULL;
       break;
 
-#ifdef ENABLE_BEEPER_SUPPORT
+#ifdef HAVE_BEEP_SUPPORT
     case tdBeeper:
       methods = &beepNoteMethods;
       break;
-#endif /* ENABLE_BEEPER_SUPPORT */
+#endif /* HAVE_BEEP_SUPPORT */
 
-#ifdef ENABLE_PCM_SUPPORT
+#ifdef HAVE_PCM_SUPPORT
     case tdPcm:
       methods = &pcmNoteMethods;
       break;
-#endif /* ENABLE_PCM_SUPPORT */
+#endif /* HAVE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
     case tdMidi:
       methods = &midiNoteMethods;
       break;
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
-#ifdef ENABLE_FM_SUPPORT
+#ifdef HAVE_FM_SUPPORT
     case tdFm:
       methods = &fmNoteMethods;
       break;
-#endif /* ENABLE_FM_SUPPORT */
+#endif /* HAVE_FM_SUPPORT */
   }
   if (!methods) return 0;
 

@@ -41,9 +41,9 @@ int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static char *opt_tuneDevice;
 static char *opt_outputVolume;
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
 static char *opt_midiInstrument;
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'v',
@@ -60,7 +60,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of tune device."
   },
 
-#ifdef ENABLE_PCM_SUPPORT
+#ifdef HAVE_PCM_SUPPORT
   { .letter = 'p',
     .word = "pcm-device",
     .flags = OPT_Hidden,
@@ -68,9 +68,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_pcmDevice,
     .description = "Device specifier for soundcard digital audio."
   },
-#endif /* ENABLE_PCM_SUPPORT */
+#endif /* HAVE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
   { .letter = 'm',
     .word = "midi-device",
     .flags = OPT_Hidden,
@@ -85,12 +85,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_midiInstrument,
     .description = "Name of MIDI instrument."
   },
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
 static int
 validateInstrument (unsigned char *value, const char *string) {
   size_t stringLength = strlen(string);
@@ -126,7 +126,7 @@ validateInstrument (unsigned char *value, const char *string) {
   }
   return 0;
 }
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
 int
 main (int argc, char *argv[]) {
@@ -155,7 +155,7 @@ main (int argc, char *argv[]) {
     prefs.tuneDevice = device;
   }
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
   if (opt_midiInstrument && *opt_midiInstrument) {
     unsigned char instrument;
 
@@ -166,7 +166,7 @@ main (int argc, char *argv[]) {
 
     prefs.midiInstrument = instrument;
   }
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
   if (opt_outputVolume && *opt_outputVolume) {
     static const int minimum = 0;

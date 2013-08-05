@@ -437,6 +437,22 @@ mbsinit (const mbstate_t *ps) {
 #endif /* ENABLE_I18N_SUPPORT */
 #define strtext(string) string
 
+#ifndef USE_PKG_BEEP_NONE
+#define HAVE_BEEP_SUPPORT
+#endif /* USE_PKG_BEEP_NONE */
+
+#ifndef USE_PKG_PCM_NONE
+#define HAVE_PCM_SUPPORT
+#endif /* USE_PKG_PCM_NONE */
+
+#ifndef USE_PKG_MIDI_NONE
+#define HAVE_MIDI_SUPPORT
+#endif /* USE_PKG_MIDI_NONE */
+
+#ifndef USE_PKG_FM_NONE
+#define HAVE_FM_SUPPORT
+#endif /* USE_PKG_FM_NONE */
+
 #ifdef HAVE_SHMGET
 #if SIZEOF_KEY_T == 4
 #define PRIX_KEY_T PRIX32

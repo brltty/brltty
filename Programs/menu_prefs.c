@@ -149,26 +149,26 @@ changedTuneDevice (const MenuItem *item UNUSED, unsigned char setting) {
   return setTuneDevice(setting);
 }
 
-#ifdef ENABLE_PCM_SUPPORT
+#ifdef HAVE_PCM_SUPPORT
 static int
 testTunesPcm (void) {
   return testTunes() && (prefs.tuneDevice == tdPcm);
 }
-#endif /* ENABLE_PCM_SUPPORT */
+#endif /* HAVE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
 static int
 testTunesMidi (void) {
   return testTunes() && (prefs.tuneDevice == tdMidi);
 }
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
-#ifdef ENABLE_FM_SUPPORT
+#ifdef HAVE_FM_SUPPORT
 static int
 testTunesFm (void) {
   return testTunes() && (prefs.tuneDevice == tdFm);
 }
-#endif /* ENABLE_FM_SUPPORT */
+#endif /* HAVE_FM_SUPPORT */
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
@@ -396,14 +396,14 @@ newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   return newNumericMenuItem(menu, setting, name, 1, 100, updateInterval/10);
 }
 
-#if defined(ENABLE_PCM_SUPPORT) || defined(ENABLE_MIDI_SUPPORT) || defined(ENABLE_FM_SUPPORT)
+#if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
 static MenuItem *
 newVolumeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   return newNumericMenuItem(menu, setting, name, 0, 100, 5);
 }
-#endif /* defined(ENABLE_PCM_SUPPORT) || defined(ENABLE_MIDI_SUPPORT) || defined(ENABLE_FM_SUPPORT) */
+#endif /* defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT) */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
 MenuString *
 makeMidiInstrumentMenuStrings (void) {
   MenuString *strings = malloc(midiInstrumentCount * sizeof(*strings));
@@ -420,7 +420,7 @@ makeMidiInstrumentMenuStrings (void) {
 
   return strings;
 }
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
 static Menu *
 makePreferencesMenu (void) {
@@ -712,15 +712,15 @@ makePreferencesMenu (void) {
       CHANGED(TuneDevice);
     }
 
-#ifdef ENABLE_PCM_SUPPORT
+#ifdef HAVE_PCM_SUPPORT
     {
       NAME(strtext("PCM Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.pcmVolume, &itemName));
       TEST(TunesPcm);
     }
-#endif /* ENABLE_PCM_SUPPORT */
+#endif /* HAVE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
     {
       NAME(strtext("MIDI Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.midiVolume, &itemName));
@@ -737,15 +737,15 @@ makePreferencesMenu (void) {
         TEST(TunesMidi);
       }
     }
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
-#ifdef ENABLE_FM_SUPPORT
+#ifdef HAVE_FM_SUPPORT
     {
       NAME(strtext("FM Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.fmVolume, &itemName));
       TEST(TunesFm);
     }
-#endif /* ENABLE_FM_SUPPORT */
+#endif /* HAVE_FM_SUPPORT */
 
     {
       NAME(strtext("Alert Dots"));

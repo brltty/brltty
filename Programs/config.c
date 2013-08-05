@@ -428,7 +428,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Parameters for the screen driver.")
   },
 
-#ifdef ENABLE_PCM_SUPPORT
+#ifdef HAVE_PCM_SUPPORT
   { .letter = 'p',
     .word = "pcm-device",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
@@ -436,9 +436,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_pcmDevice,
     .description = strtext("Device specifier for soundcard digital audio.")
   },
-#endif /* ENABLE_PCM_SUPPORT */
+#endif /* HAVE_PCM_SUPPORT */
 
-#ifdef ENABLE_MIDI_SUPPORT
+#ifdef HAVE_MIDI_SUPPORT
   { .letter = 'm',
     .word = "midi-device",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
@@ -446,7 +446,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_midiDevice,
     .description = strtext("Device specifier for the Musical Instrument Digital Interface.")
   },
-#endif /* ENABLE_MIDI_SUPPORT */
+#endif /* HAVE_MIDI_SUPPORT */
 
   { .letter = 'U',
     .word = "update-interval",

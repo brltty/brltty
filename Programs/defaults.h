@@ -89,13 +89,13 @@ extern "C" {
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 
-#if defined(ENABLE_BEEPER_SUPPORT)
+#if defined(HAVE_BEEP_SUPPORT)
 #define DEFAULT_TUNE_DEVICE tdBeeper
-#elif defined(ENABLE_PCM_SUPPORT)
+#elif defined(HAVE_PCM_SUPPORT)
 #define DEFAULT_TUNE_DEVICE tdPcm
-#elif defined(ENABLE_MIDI_SUPPORT)
+#elif defined(HAVE_MIDI_SUPPORT)
 #define DEFAULT_TUNE_DEVICE tdMidi
-#elif defined(ENABLE_FM_SUPPORT)
+#elif defined(HAVE_FM_SUPPORT)
 #define DEFAULT_TUNE_DEVICE tdFm
 #else /* no tune devices are supported */
 #define DEFAULT_TUNE_DEVICE 0
