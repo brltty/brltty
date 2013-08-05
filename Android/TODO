@@ -6,9 +6,8 @@ android-specific commands
 support the dynamic loading of non-built-in drivers
 become interrupt-driven rather than polling
 support serial braille devices
-two-dimensional braille rendering
 actions on elements with short text
 selecting multiple devices
-pthread_cancel()
 gettext()
 scrolling backward/forward on ICS
+list element selection on ICS
