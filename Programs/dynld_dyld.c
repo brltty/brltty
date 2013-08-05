@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <mach-o/dyld.h>
 
 #include "log.h"
