@@ -1242,27 +1242,15 @@ BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa], [dnl
+BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa oss], [dnl
    *android*)
       pcm_package="android"
       ;;
    *qnx*)
       pcm_package="qsa"
       ;;
-   cygwin*)
-      pcm_package="oss"
-      ;;
-   freebsd*)
-      pcm_package="oss"
-      ;;
    hpux*)
       pcm_package="hpux"
-      ;;
-   kfreebsd*)
-      pcm_package="oss"
-      ;;
-   linux*)
-      pcm_package="oss"
       ;;
    mingw*)
       pcm_package="windows"
@@ -1276,23 +1264,26 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa], [dnl
    solaris*)
       pcm_package="audio"
       ;;
+], [dnl
+   oss)
+      AC_CHECK_HEADER([linux/soundcard.h], [dnl
+         pcm_package="oss"
+      ])
+      ;;
 ])
 
-BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa], [dnl
-   *android*)
-      midi_package="none"
-      ;;
-   cygwin*)
-      midi_package="oss"
-      ;;
+BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa oss], [dnl
    darwin*)
       midi_package="darwin"
       ;;
-   linux*)
-      midi_package="oss"
-      ;;
    mingw*)
       midi_package="windows"
+      ;;
+], [dnl
+   oss)
+      AC_CHECK_HEADER([linux/soundcard.h], [dnl
+         midi_package="oss"
+      ])
       ;;
 ])
 
