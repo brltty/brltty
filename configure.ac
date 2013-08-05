@@ -967,8 +967,6 @@ libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
 system_object="none"
-brltty_pcm_interfaces=""
-brltty_midi_interfaces=""
 case "${host_os}"
 in
    *android*)
@@ -995,18 +993,6 @@ in
       ;;
    linux*)
       system_object="linux"
-      brltty_pcm_interfaces=""
-      brltty_midi_interfaces=""
-
-      AC_CHECK_HEADER([alsa/asoundlib.h], [dnl
-         brltty_pcm_interfaces="${brltty_pcm_interfaces} alsa"
-         brltty_midi_interfaces="${brltty_midi_interfaces} alsa"
-      ])
-
-      AC_CHECK_HEADER([linux/soundcard.h], [dnl
-         brltty_pcm_interfaces="${brltty_pcm_interfaces} oss"
-         brltty_midi_interfaces="${brltty_midi_interfaces} oss"
-      ])
       ;;
    mingw*)
       system_object="windows"
