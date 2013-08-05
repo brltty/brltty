@@ -267,7 +267,7 @@ PORTS_PACKAGE = @ports_package@
 PORTS_CFLAGS = @ports_cflags@
 PORTS_LIBS = @ports_libs@
 
-SYSTEM_OBJECTS = sys_@system_object@.$O $(HOSTCMD_OBJECTS)
+SYSTEM_PACKAGE = @system_package@
 
 X_CFLAGS = @brltty_cflags_x@
 X_LIBS = @brltty_libs_x@

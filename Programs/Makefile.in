@@ -28,72 +28,6 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
-BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS)
-
-log.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
-
-file.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/file.c
-
-device.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/device.c
-
-parse.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/parse.c
-
-timing.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/timing.c
-
-io_misc.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_misc.c
-
-###############################################################################
-
-COMMAND_OBJECTS = $(PROGRAM_OBJECTS) $(SERVICE_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
-
-pid.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pid.c
-
-###############################################################################
-
-COMMAND_OBJECTS_FOR_HOST = $(COMMAND_OBJECTS) $(SYSTEM_OBJECTS)
-
-###############################################################################
-
-async.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async.c
-
-auth.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/auth.c
-
-dataarea.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dataarea.c
-
-datafile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
-
-lock.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/lock.c
-
-queue.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/queue.c
-
-unicode.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/unicode.c
-
-###############################################################################
-
-PREFS_OBJECTS = prefs.$O prefs_table.$O
-
-prefs.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs.c
-
-prefs_table.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs_table.c
-
-###############################################################################
-
 PROGRAM_OBJECT = program_$(PROGRAM_PACKAGE)
 PROGRAM_OBJECTS = program.$O $(PROGRAM_OBJECT).$O
 
@@ -274,20 +208,14 @@ $(PORTS_OBJECT).$O:
 
 ###############################################################################
 
-sys_none.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_none.c
+SYSTEM_OBJECT = sys_$(SYSTEM_PACKAGE)
+SYSTEM_OBJECTS = $(SYSTEM_OBJECT).$O $(HOSTCMD_OBJECTS)
 
-sys_java.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_java.c
+SYSTEM_OBJECT_FOR_BUILD = sys_$(SYSTEM_PACKAGE_FOR_BUILD)
+SYSTEM_OBJECTS_FOR_BUILD = $(SYSTEM_OBJECT_FOR_BUILD).$O $(HOSTCMD_OBJECTS)
 
-sys_linux.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_linux.c
-
-sys_msdos.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_msdos.c
-
-sys_windows.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/sys_windows.c
+$(SYSTEM_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(SYSTEM_CFLAGS) -c $(SRC_DIR)/$(SYSTEM_OBJECT).c
 
 ###############################################################################
 
@@ -295,6 +223,72 @@ IO_OBJECTS = io_generic.$O io_misc.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOO
 
 io_generic.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
+
+io_misc.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_misc.c
+
+###############################################################################
+
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS)
+
+log.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
+
+file.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/file.c
+
+device.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/device.c
+
+parse.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/parse.c
+
+timing.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/timing.c
+
+async.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async.c
+
+queue.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/queue.c
+
+###############################################################################
+
+COMMAND_OBJECTS = $(PROGRAM_OBJECTS) $(SERVICE_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
+
+pid.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pid.c
+
+###############################################################################
+
+COMMAND_OBJECTS_FOR_HOST = $(COMMAND_OBJECTS) $(SYSTEM_OBJECTS)
+
+###############################################################################
+
+auth.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/auth.c
+
+dataarea.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dataarea.c
+
+datafile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
+
+lock.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/lock.c
+
+unicode.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/unicode.c
+
+###############################################################################
+
+PREFS_OBJECTS = prefs.$O prefs_table.$O
+
+prefs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs.c
+
+prefs_table.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs_table.c
 
 ###############################################################################
 
@@ -362,9 +356,6 @@ notes_midi.$O:
 
 notes_fm.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes_fm.c
-
-adlib.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/adlib.c
 
 ###############################################################################
 

@@ -966,18 +966,18 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
-system_object="none"
+system_package="none"
 case "${host_os}"
 in
    *android*)
-      system_object="java"
+      system_package="java"
       LIBS="-llog ${LIBS}"
       ;;
    *qnx*)
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
    cygwin*)
-      system_object="windows"
+      system_package="windows"
       ;;
    darwin*)
       LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
@@ -992,16 +992,16 @@ in
       fi
       ;;
    linux*)
-      system_object="linux"
+      system_package="linux"
       ;;
    mingw*)
-      system_object="windows"
+      system_package="windows"
       ;;
    msdos*)
-      system_object="msdos"
+      system_package="msdos"
       ;;
 esac
-AC_SUBST([system_object])
+AC_SUBST([system_package])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
