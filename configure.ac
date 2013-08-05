@@ -975,6 +975,24 @@ in
       system_object="java"
       LIBS="-llog ${LIBS}"
       ;;
+   *qnx*)
+      AC_CHECK_LIB([asound], [snd_pcm_open])
+      ;;
+   cygwin*)
+      system_object="windows"
+      ;;
+   darwin*)
+      LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
+      ;;
+   hpux*)
+      if test -d /opt/audio/include
+      then
+         CPPFLAGS="${CPPFLAGS} -I/opt/audio/include"
+         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
+         AC_DEFINE([HAVE_HPUX_AUDIO], [1],
+                   [Define this if HP-UX audio support is available.])
+      fi
+      ;;
    linux*)
       system_object="linux"
       brltty_pcm_interfaces=""
@@ -990,26 +1008,11 @@ in
          brltty_midi_interfaces="${brltty_midi_interfaces} oss"
       ])
       ;;
-   hpux*)
-      if test -d /opt/audio/include
-      then
-         CPPFLAGS="${CPPFLAGS} -I/opt/audio/include"
-         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
-         AC_DEFINE([HAVE_HPUX_AUDIO], [1],
-                   [Define this if HP-UX audio support is available.])
-      fi
-      ;;
-   *qnx*)
-      AC_CHECK_LIB([asound], [snd_pcm_open])
-      ;;
-   cygwin*|mingw*)
+   mingw*)
       system_object="windows"
       ;;
    msdos*)
       system_object="msdos"
-      ;;
-   darwin*)
-      LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
       ;;
 esac
 AC_SUBST([system_object])
@@ -1101,14 +1104,17 @@ in
 esac
 
 BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
+   cygwin*)
+      program_package="windows"
+      ;;
    linux*)
       program_package="linux"
       ;;
+   mingw*)
+      program_package="windows"
+      ;;
    solaris*)
       program_package="solaris"
-      ;;
-   cygwin*|mingw*)
-      program_package="windows"
       ;;
 ])
 
@@ -1125,14 +1131,14 @@ BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
-      dynld_package="dlfcn"
-      ;;
    darwin*)
       dynld_package="dyld"
       ;;
    elf*)
       dynld_package="grub"
+      ;;
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
+      dynld_package="dlfcn"
       ;;
    mingw*)
       dynld_package="windows"
@@ -1140,14 +1146,14 @@ BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
+   elf*)
+      charset_package=grub
+      ;;
    mingw*)
       charset_package=windows
       ;;
    msdos*)
       charset_package=msdos
-      ;;
-   elf*)
-      charset_package=grub
       ;;
 ], [dnl
    iconv)
@@ -1207,14 +1213,8 @@ BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
    *android*)
       beep_package="none"
       ;;
-   linux*)
-      beep_package="linux"
-      ;;
-   solaris*)
-      beep_package="solaris"
-      ;;
-   openbsd*)
-      beep_package="wskbd"
+   cygwin*)
+      beep_package="windows"
       ;;
    freebsd*)
       beep_package="spkr"
@@ -1222,11 +1222,8 @@ BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
    kfreebsd*)
       beep_package="spkr"
       ;;
-   netbsd*)
-      beep_package="wskbd"
-      ;;
-   cygwin*)
-      beep_package="windows"
+   linux*)
+      beep_package="linux"
       ;;
    mingw*)
       beep_package="windows"
@@ -1234,32 +1231,20 @@ BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
    msdos*)
       beep_package="msdos"
       ;;
+   netbsd*)
+      beep_package="wskbd"
+      ;;
+   openbsd*)
+      beep_package="wskbd"
+      ;;
+   solaris*)
+      beep_package="solaris"
+      ;;
 ])
 
 BRLTTY_ARG_PACKAGE([pcm], [PCm], [], [dnl
    *android*)
       pcm_package="android"
-      ;;
-   linux*)
-      pcm_package="oss"
-      ;;
-   solaris*)
-      pcm_package="audio"
-      ;;
-   hpux*)
-      pcm_package="hpux"
-      ;;
-   openbsd*)
-      pcm_package="audio"
-      ;;
-   freebsd*)
-      pcm_package="oss"
-      ;;
-   kfreebsd*)
-      pcm_package="oss"
-      ;;
-   netbsd*)
-      pcm_package="audio"
       ;;
    *qnx*)
       pcm_package="qsa"
@@ -1267,8 +1252,29 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [], [dnl
    cygwin*)
       pcm_package="oss"
       ;;
+   freebsd*)
+      pcm_package="oss"
+      ;;
+   hpux*)
+      pcm_package="hpux"
+      ;;
+   kfreebsd*)
+      pcm_package="oss"
+      ;;
+   linux*)
+      pcm_package="oss"
+      ;;
    mingw*)
       pcm_package="windows"
+      ;;
+   netbsd*)
+      pcm_package="audio"
+      ;;
+   openbsd*)
+      pcm_package="audio"
+      ;;
+   solaris*)
+      pcm_package="audio"
       ;;
 ])
 
@@ -1276,17 +1282,17 @@ BRLTTY_ARG_PACKAGE([midi], [MIDI], [], [dnl
    *android*)
       midi_package="none"
       ;;
-   linux*)
+   cygwin*)
       midi_package="oss"
       ;;
-   cygwin*)
+   darwin*)
+      midi_package="darwin"
+      ;;
+   linux*)
       midi_package="oss"
       ;;
    mingw*)
       midi_package="windows"
-      ;;
-   darwin*)
-      midi_package="darwin"
       ;;
 ])
 
@@ -1298,14 +1304,14 @@ BRLTTY_ARG_PACKAGE([fm], [FM], [adlib], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([serial], [serial I/O], [termios], [dnl
+   elf*)
+      serial_package="grub"
+      ;;
    mingw*)
       serial_package="windows"
       ;;
    msdos*)
       serial_package="msdos"
-      ;;
-   elf*)
-      serial_package="grub"
       ;;
 ], [dnl
    termios)
@@ -1320,16 +1326,11 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
    *android*)
       usb_package="android"
       ;;
-   linux*)
-      usb_package="linux"
+   darwin*)
+      usb_package="darwin"
       ;;
-   solaris*)
-      usb_package="solaris"
-      AC_HAVE_LIBRARY([aio])
-      AC_HAVE_LIBRARY([rt])
-      ;;
-   openbsd*)
-      usb_package="openbsd"
+   elf*)
+      usb_package="grub"
       ;;
    freebsd*)
       usb_package="freebsd"
@@ -1338,14 +1339,19 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
       usb_package="kfreebsd"
       AC_CHECK_HEADERS([legacy/dev/usb/usb.h])
       ;;
+   linux*)
+      usb_package="linux"
+      ;;
    netbsd*)
       usb_package="netbsd"
       ;;
-   darwin*)
-      usb_package="darwin"
+   openbsd*)
+      usb_package="openbsd"
       ;;
-   elf*)
-      usb_package="grub"
+   solaris*)
+      usb_package="solaris"
+      AC_HAVE_LIBRARY([aio])
+      AC_HAVE_LIBRARY([rt])
       ;;
 ], [dnl
    libusb)
@@ -1360,23 +1366,26 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
    *android*)
       bluetooth_package="android"
       ;;
-   linux*)
-      AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
-         bluetooth_package="linux"
-         AC_HAVE_LIBRARY([bluetooth])
-      ])
-      ;;
    cygwin*|mingw*)
       AC_CHECK_HEADER([ws2bth.h], [dnl
          bluetooth_package="windows"
          bluetooth_libs="-lbthprops -lws2_32"
       ], , [[#include <windows.h>]])
       ;;
+   linux*)
+      AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
+         bluetooth_package="linux"
+         AC_HAVE_LIBRARY([bluetooth])
+      ])
+      ;;
 ])
 
 BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
-   linux*)
-      ports_package="glibc"
+   cygwin*)
+      ports_package="windows"
+      ;;
+   elf*)
+      ports_package="grub"
       ;;
    gnu*)
       ports_package="glibc"
@@ -1384,14 +1393,14 @@ BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
    kfreebsd*)
       ports_package="kfreebsd"
       ;;
-   cygwin*|mingw*)
+   linux*)
+      ports_package="glibc"
+      ;;
+   mingw*)
       ports_package="windows"
       ;;
    msdos*)
       ports_package="msdos"
-      ;;
-   elf*)
-      ports_package="grub"
       ;;
 ])
 
