@@ -378,7 +378,7 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   UsbEndpointExtension *eptx = endpoint->extension;
 
   request->result = result;
-  request->count = (UInt32)arg;
+  request->count = (intptr_t)arg;
 
   if (!enqueueItem(eptx->completedRequests, request)) {
     logSystemError("USB completed request enqueue");
@@ -702,8 +702,12 @@ usbReadEndpoint (
 
     switch (result) {
       case kIOReturnSuccess:
-        length = count;
-        if (usbApplyInputFilters(device, buffer, length, &length)) return length;
+        {
+          ssize_t actual = count;
+
+          if (usbApplyInputFilters(device, buffer, length, &actual)) return actual;
+        }
+
         errno = EIO;
         break;
 
