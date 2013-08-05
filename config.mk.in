@@ -200,74 +200,116 @@ TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
 PROGRAM_PACKAGE = @program_package@
+PROGRAM_OBJECT = program_$(PROGRAM_PACKAGE)
+PROGRAM_OBJECTS = program.$O $(PROGRAM_OBJECT).$O
 PROGRAM_CFLAGS = @program_cflags@
 PROGRAM_LIBS = @program_libs@
 
 SERVICE_PACKAGE = @service_package@
+SERVICE_OBJECT = service_$(SERVICE_PACKAGE)
+SERVICE_OBJECTS = $(SERVICE_OBJECT).$O
 SERVICE_CFLAGS = @service_cflags@
 SERVICE_LIBS = @service_libs@
 
 OPTIONS_PACKAGE = @options_package@
+OPTIONS_OBJECT = options_$(OPTIONS_PACKAGE)
+OPTIONS_OBJECTS = options.$O $(OPTIONS_OBJECT).$O
 OPTIONS_CFLAGS = @options_cflags@
 OPTIONS_LIBS = @options_libs@
 
 DYNLD_PACKAGE = @dynld_package@
+DYNLD_OBJECT = dynld_$(DYNLD_PACKAGE)
+DYNLD_OBJECTS = $(DYNLD_OBJECT).$O
 DYNLD_CFLAGS = @dynld_cflags@
 DYNLD_LIBS = @dynld_libs@
 
 CHARSET_PACKAGE = @charset_package@
+CHARSET_OBJECT = charset_$(CHARSET_PACKAGE)
+CHARSET_OBJECTS = charset.$O $(CHARSET_OBJECT).$O
 CHARSET_CFLAGS = @charset_cflags@
 CHARSET_LIBS = @charset_libs@
 
 HOSTCMD_PACKAGE = @hostcmd_package@
+HOSTCMD_OBJECT = hostcmd_$(HOSTCMD_PACKAGE)
+HOSTCMD_OBJECTS = hostcmd.$O $(HOSTCMD_OBJECT).$O
 HOSTCMD_CFLAGS = @hostcmd_cflags@
 HOSTCMD_LIBS = @hostcmd_libs@
 
 MNTPT_PACKAGE = @mntpt_package@
+MNTPT_OBJECT = mntpt_$(MNTPT_PACKAGE)
+MNTPT_OBJECTS = mntpt.$O $(MNTPT_OBJECT).$O
 MNTPT_CFLAGS = @mntpt_cflags@
 MNTPT_LIBS = @mntpt_libs@
 
 MNTFS_PACKAGE = @mntfs_package@
+MNTFS_OBJECT = mntfs_$(MNTFS_PACKAGE)
+MNTFS_OBJECTS = $(MNTFS_OBJECT).$O
 MNTFS_CFLAGS = @mntfs_cflags@
 MNTFS_LIBS = @mntfs_libs@
 
 KBD_PACKAGE = @kbd_package@
+KBD_OBJECT = kbd_$(KBD_PACKAGE)
+KBD_OBJECTS = kbd.$O $(KBD_OBJECT).$O
 KBD_CFLAGS = @kbd_cflags@
 KBD_LIBS = @kbd_libs@
 
 BEEP_PACKAGE = @beep_package@
+BEEP_OBJECT = beep_$(BEEP_PACKAGE)
+BEEP_OBJECTS = notes_beep.$O beep.$O $(BEEP_OBJECT).$O
 BEEP_CFLAGS = @beep_cflags@
 BEEP_LIBS = @beep_libs@
 
 PCM_PACKAGE = @pcm_package@
+PCM_OBJECT = pcm_$(PCM_PACKAGE)
+PCM_OBJECTS = notes_pcm.$O $(PCM_OBJECT).$O
 PCM_CFLAGS = @pcm_cflags@
 PCM_LIBS = @pcm_libs@
 
 MIDI_PACKAGE = @midi_package@
+MIDI_OBJECT = midi_$(MIDI_PACKAGE)
+MIDI_OBJECTS = notes_midi.$O midi.$O $(MIDI_OBJECT).$O
 MIDI_CFLAGS = @midi_cflags@
 MIDI_LIBS = @midi_libs@
 
 FM_PACKAGE = @fm_package@
+FM_OBJECT = fm_$(FM_PACKAGE)
+FM_OBJECTS = notes_fm.$O $(FM_OBJECT).$O
 FM_CFLAGS = @fm_cflags@
 FM_LIBS = @fm_libs@
 
 SERIAL_PACKAGE = @serial_package@
+SERIAL_OBJECT = serial_$(SERIAL_PACKAGE)
+SERIAL_OBJECTS = serial.$O $(SERIAL_OBJECT).$O
 SERIAL_CFLAGS = @serial_cflags@
 SERIAL_LIBS = @serial_libs@
 
 USB_PACKAGE = @usb_package@
+USB_OBJECT = usb_$(USB_PACKAGE)
+USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O $(USB_OBJECT).$O
 USB_CFLAGS = @usb_cflags@
 USB_LIBS = @usb_libs@
 
 BLUETOOTH_PACKAGE = @bluetooth_package@
+BLUETOOTH_OBJECT = bluetooth_$(BLUETOOTH_PACKAGE)
+BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O $(BLUETOOTH_OBJECT).$O
 BLUETOOTH_CFLAGS = @bluetooth_cflags@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
 PORTS_PACKAGE = @ports_package@
+PORTS_OBJECT = ports_$(PORTS_PACKAGE)
+PORTS_OBJECTS = $(PORTS_OBJECT).$O
 PORTS_CFLAGS = @ports_cflags@
 PORTS_LIBS = @ports_libs@
 
 SYSTEM_PACKAGE = @system_package@
+SYSTEM_OBJECT = sys_$(SYSTEM_PACKAGE)
+SYSTEM_OBJECTS = $(SYSTEM_OBJECT).$O $(HOSTCMD_OBJECTS)
+
+MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
+IO_OBJECTS = io_generic.$O io_misc.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
+TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
+BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
+COMMAND_OBJECTS = $(PROGRAM_OBJECTS) $(SERVICE_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
 
 X_CFLAGS = @brltty_cflags_x@
 X_LIBS = @brltty_libs_x@

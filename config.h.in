@@ -309,7 +309,7 @@ extern "C" {
 #undef USE_PKG_CHARSET_WINDOWS
 
 /* Define only one of the following host command packages. */
-#undef USE_PKG_HOSTCMD_NONe
+#undef USE_PKG_HOSTCMD_NONE
 #undef USE_PKG_HOSTCMD_UNIX
 #undef USE_PKG_HOSTCMD_WINDOWS
 
@@ -326,6 +326,36 @@ extern "C" {
 #undef USE_PKG_KBD_NONE
 #undef USE_PKG_KBD_ANDROID
 #undef USE_PKG_KBD_LINUX
+
+/* Define only one of the following beeper packages. */
+#undef USE_PKG_BEEP_NONE
+#undef USE_PKG_BEEP_LINUX
+#undef USE_PKG_BEEP_MSDOS
+#undef USE_PKG_BEEP_SOLARIS
+#undef USE_PKG_BEEP_SPKR
+#undef USE_PKG_BEEP_WINDOWS
+#undef USE_PKG_BEEP_WSKBD
+
+/* Define only one of the following PCM packages. */
+#undef USE_PKG_PCM_NONE
+#undef USE_PKG_PCM_ALSA
+#undef USE_PKG_PCM_ANDROID
+#undef USE_PKG_PCM_AUDIO
+#undef USE_PKG_PCM_HPUX
+#undef USE_PKG_PCM_OSS
+#undef USE_PKG_PCM_QSA
+#undef USE_PKG_PCM_WINDOWS
+
+/* Define only one of the following MIDI packages. */
+#undef USE_PKG_MIDI_NONE
+#undef USE_PKG_MIDI_ALSA
+#undef USE_PKG_MIDI_DARWIN
+#undef USE_PKG_MIDI_OSS
+#undef USE_PKG_MIDI_WINDOWS
+
+/* Define only one of the following FM packages. */
+#undef USE_PKG_FM_NONE
+#undef USE_PKG_FM_ADLIB
 
 /* Define only one of the following serial I/O packages. */
 #undef USE_PKG_SERIAL_NONE
@@ -361,36 +391,6 @@ extern "C" {
 #undef USE_PKG_PORTS_KFREEBSD
 #undef USE_PKG_PORTS_MSDOS
 #undef USE_PKG_PORTS_WINDOWS
-
-/* Define only one of the following beeper packages. */
-#undef USE_PKG_BEEP_NONE
-#undef USE_PKG_BEEP_LINUX
-#undef USE_PKG_BEEP_MSDOS
-#undef USE_PKG_BEEP_SOLARIS
-#undef USE_PKG_BEEP_SPKR
-#undef USE_PKG_BEEP_WINDOWS
-#undef USE_PKG_BEEP_WSKBD
-
-/* Define only one of the following PCM packages. */
-#undef USE_PKG_PCM_NONE
-#undef USE_PKG_PCM_ALSA
-#undef USE_PKG_PCM_ANDROID
-#undef USE_PKG_PCM_AUDIO
-#undef USE_PKG_PCM_HPUX
-#undef USE_PKG_PCM_OSS
-#undef USE_PKG_PCM_QSA
-#undef USE_PKG_PCM_WINDOWS
-
-/* Define only one of the following MIDI packages. */
-#undef USE_PKG_MIDI_NONE
-#undef USE_PKG_MIDI_ALSA
-#undef USE_PKG_MIDI_DARWIN
-#undef USE_PKG_MIDI_OSS
-#undef USE_PKG_MIDI_WINDOWS
-
-/* Define only one of the following FM packages. */
-#undef USE_PKG_FM_NONE
-#undef USE_PKG_FM_ADLIB
 
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES

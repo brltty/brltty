@@ -72,8 +72,23 @@ then
       --disable-api --disable-x \
       --without-libbraille --disable-speech-support \
       --with-braille-driver=-all --with-speech-driver=-all -with-screen-driver=-all \
-      --without-serial-package --without-usb-package --without-bluetooth-package \
-      --without-beep-package --without-pcm-package --without-midi-package --without-fm-package \
+      --without-program-package \
+      --without-service-package \
+      --without-options-package \
+      --without-dynld-package \
+      --without-charset-package \
+      --without-hostcmd-package \
+      --without-mntpt-package \
+      --without-mntfs-package \
+      --without-kbd-package \
+      --without-beep-package \
+      --without-pcm-package \
+      --without-midi-package \
+      --without-fm-package \
+      --without-serial-package \
+      --without-usb-package \
+      --without-bluetooth-package \
+      --without-ports-package \
       --quiet
 fi
 

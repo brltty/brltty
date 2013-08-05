@@ -28,7 +28,7 @@
 #elif defined(USE_PKG_HOSTCMD_WINDOWS)
 #include "hostcmd_windows.h"
 #else /* host command package */
-#error host command package not selected
+#warning host command package not selected
 #include "hostcmd_none.h"
 #endif /* host command package */
 
