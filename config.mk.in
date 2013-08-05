@@ -231,7 +231,7 @@ KEYBOARD_OBJECTS = kbd.$O kbd_@keyboard_package@.$O
 KEYBOARD_CFLAGS = @keyboard_cflags@
 KEYBOARD_LIBS = @keyboard_libs@
 
-BEEP_OBJECTS = notes_beep.$O beep_@beep_package@.$O
+BEEP_OBJECTS = notes_beep.$O beep.$O beep_@beep_package@.$O
 BEEP_CFLAGS = @beep_cflags@
 BEEP_LIBS = @beep_libs@
 

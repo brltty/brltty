@@ -220,6 +220,9 @@ kbd_linux.$O:
 
 ###############################################################################
 
+beep.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep.c
+
 beep_none.$O:
 	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/beep_none.c
 

@@ -16,24 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BEEP
-#define BRLTTY_INCLUDED_BEEP
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "timing.h"
+#include "beep.h"
 
-extern int playBeep (unsigned short frequency, unsigned int duration);
+int
+playBeep (unsigned short frequency, unsigned int duration) {
+  if (asynchronousBeep(frequency, duration*4)) {
+    accurateDelay(duration);
+    stopBeep();
+    return 1;
+  }
 
-extern int canBeep (void);
-extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
-extern int asynchronousBeep (unsigned short frequency, unsigned short milliseconds);
-extern int startBeep (unsigned short frequency);
-extern int stopBeep (void);
-extern void endBeep (void);
+  if (startBeep(frequency)) {
+    accurateDelay(duration);
+    stopBeep();
+    return 1;
+  }
 
-#ifdef __cplusplus
+  return synchronousBeep(frequency, duration);
 }
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_BEEP */

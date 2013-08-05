@@ -55,19 +55,7 @@ beepPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     return 1;
   }
 
-  if (asynchronousBeep(getIntegerNoteFrequency(note), duration*4)) {
-    accurateDelay(duration);
-    stopBeep();
-    return 1;
-  }
-
-  if (startBeep(getIntegerNoteFrequency(note))) {
-    accurateDelay(duration);
-    stopBeep();
-    return 1;
-  }
-
-  return synchronousBeep(getIntegerNoteFrequency(note), duration);
+  return playBeep(getIntegerNoteFrequency(note), duration);
 }
 
 static int
