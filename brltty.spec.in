@@ -56,6 +56,7 @@ BuildRequires: ncurses-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
 BuildRequires: bluez-libs-devel
+BuildRequires: alsa-lib-devel
 
 AutoProv: no
 Provides: brlapi-server
