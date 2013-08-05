@@ -19,16 +19,14 @@
 #include "prologue.h"
 
 #include <string.h>
-#include <errno.h>
 
 #ifdef HAVE_SHL_LOAD
-#  include <dl.h>
+#include <dl.h>
 #endif /* HAVE_SHL_LOAD */
 
 #include "log.h"
-#include "system.h"
+#include "dynld.h"
 
-#ifdef ENABLE_SHARED_OBJECTS
 void *
 loadSharedObject (const char *path) {
 #ifdef HAVE_SHL_LOAD
@@ -59,4 +57,3 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 #endif /* HAVE_SHL_LOAD */
   return 0;
 }
-#endif /* ENABLE_SHARED_OBJECTS */

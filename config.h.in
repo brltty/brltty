@@ -298,6 +298,7 @@ extern "C" {
 #undef USE_PKG_DYNLD_DLFCN
 #undef USE_PKG_DYNLD_DYLD
 #undef USE_PKG_DYNLD_GRUB
+#undef USE_PKG_DYNLD_SHL
 #undef USE_PKG_DYNLD_WINDOWS
 
 /* Define only one of the following character set packages. */

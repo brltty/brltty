@@ -1137,6 +1137,9 @@ BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [], [dnl
    elf*)
       dynld_package="grub"
       ;;
+   hpux*)
+      dynld_package="shl"
+      ;;
    linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*)
       dynld_package="dlfcn"
       ;;
