@@ -100,6 +100,14 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-midi-package \
    --without-fm-package \
    \
+   --without-program-package \
+   --without-service-package \
+   --without-options-package \
+   --without-hostcmd-package \
+   --without-mntpt-package \
+   --without-mntfs-package \
+   --without-ports-package \
+   \
    --host="${hostSystem}" \
    "${@}"
 exit "${?}"
