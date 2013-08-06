@@ -69,9 +69,18 @@ then
    done
 
    "${sourceRoot}/configure" \
-      --disable-api --disable-x \
-      --without-libbraille --disable-speech-support \
-      --with-braille-driver=-all --with-speech-driver=-all -with-screen-driver=-all \
+      --disable-api \
+      --disable-gpm \
+      --disable-x \
+      \
+      --without-libbraille \
+      --with-braille-driver=-all \
+      \
+      --disable-speech-support \
+      --with-speech-driver=-all \
+      \
+      -with-screen-driver=-all \
+      \
       --without-program-package \
       --without-service-package \
       --without-options-package \
@@ -89,6 +98,7 @@ then
       --without-usb-package \
       --without-bluetooth-package \
       --without-ports-package \
+      \
       --quiet
 fi
 
