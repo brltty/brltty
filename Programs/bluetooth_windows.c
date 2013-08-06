@@ -16,12 +16,27 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#define __USE_W32_SOCKETS
 #include "prologue.h"
 
 #include <errno.h>
-
-#include <winsock2.h>
 #include <ws2bth.h>
+
+#if defined(AF_BTH)
+#ifndef PF_BTH
+#define PF_BTH AF_BTH
+#endif /* PF_BTH */
+
+#elif defined(PF_BTH)
+#ifndef AF_BTH
+#define AF_BTH PF_BTH
+#endif /* AF_BTH */
+
+#else /* bluetooth address/protocol family definitions */
+#define AF_BTH 32
+#define PF_BTH AF_BTH
+#warning using hard-coded value for Bluetooth socket address and protocol family constants
+#endif /* bluetooth address/protocol family definitions */
 
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
