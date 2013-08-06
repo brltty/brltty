@@ -103,6 +103,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-program-package \
    --without-service-package \
    --without-options-package \
+   --without-charset-package \
    --without-hostcmd-package \
    --without-mntpt-package \
    --without-mntfs-package \
