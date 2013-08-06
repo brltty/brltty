@@ -78,16 +78,28 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 # xw (by --disable-x)
 
 "${sourceRoot}/configure" \
-   --with-braille-driver=-tt,-vr,al,at,bg,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
-   --with-speech-driver=an,-all \
-   --with-screen-driver=an,-all \
-   --without-libbraille \
+   --disable-gpm \
+   --disable-icu \
    --disable-x \
+   \
+   --without-libbraille \
+   --with-braille-driver=-tt,-vr,al,at,bg,ce,eu,fs,hm,ht,hw,ir,mt,np,pg,pm,sk,vo \
+   \
+   --without-espeak \
+   --without-flite \
+   --without-mikropuhe \
+   --without-speechd \
+   --without-swift \
+   --without-theta \
+   --without-viavoice \
+   --with-speech-driver=an,-all \
+   \
+   --with-screen-driver=an,-all \
+   \
    --without-beep-package \
    --without-midi-package \
    --without-fm-package \
-   --disable-icu \
-   --disable-gpm \
+   \
    --host="${hostSystem}" \
    "${@}"
 exit "${?}"
