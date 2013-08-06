@@ -21,6 +21,12 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef __MINGW32__
+#if WINVER < WindowsVista
+#define CancelIoEx(handle, ol) CancelIo((handle))
+#endif /* WINVER < WindowsVista */
+#endif /* __MINGW32__ */
+
 #ifdef __MSDOS__
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
