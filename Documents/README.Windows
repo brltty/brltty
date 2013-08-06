@@ -89,14 +89,14 @@ As of the time of this writing, the libusb-1.0 binary snapshots can be found on
 http://www.libusb.org/wiki/windows_backend . The file will be called something
 like "libusb_<date>.7z". Unpack it in some place.
 
-The Cygwin or mingw toolchain then needs to get aware of the presence of
+The Cygwin or MinGW toolchain then needs to get aware of the presence of
 libusb-win32 or libusb1.0-devel.
 
 For Cygwin:
 
 * Just install the libusb-win32 or libusb1.0-devel package.
 
-For mingw:
+For MinGW:
 
   For libusb-win32:
 
@@ -159,6 +159,26 @@ components via absolute paths. On the Windows platform, however, the convention
 is for a package to use relative paths so that it can be installed into an
 arbitrary directory and so that it can be moved around thereafter as well. This
 option builds BRLTTY such that relative paths are used.
+
+------------------------------------------------------------------------------
+
+Missing Java Class Definitions on Cygwin
+========================================
+
+You may get a Java failure which looks like this:
+
+   Exception in thread "main" java.lang.NoClassDefFoundError:
+   org.eclipse.jdt.internal.compiler.batch.GCCMain
+      at gnu.java.lang.MainThread.run(Unknown Source)
+   Caused by: java.lang.ClassNotFoundException:
+   org.eclipse.jdt.internal.compiler.batch.GCCMain
+   not found in gnu.gcj.runtime.SystemClassLoader
+   {urls=[], parent=gnu.gcj.runtime.ExtensionClassLoader{urls=[], parent=null}}
+
+This problem occurs when the java-ecj package isn't installed. It can
+be obtained from Cygwin Ports. You can also resolve the probem by
+downloading the file "ftp://sourceware.org/pub/java/ecj-4.5.jar", and
+installing it into "/usr/share/java/ecj.jar".
 
 ------------------------------------------------------------------------------
 
