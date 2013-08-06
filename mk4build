@@ -24,8 +24,10 @@ inputName="config"
 outputName="forbuild"
 
 headerExtension="h"
+logExtension="log"
 makeExtension="mk"
 sedExtension="sed"
+statusExtension="status"
 
 makeInput="${inputName}.${makeExtension}"
 makeOutput="${initialDirectory}/${outputName}.${makeExtension}"
@@ -119,9 +121,13 @@ s/^\(.\)$/s%\\$\\(\1\\)%$(\\1_FOR_BUILD)%g/p
 sed <"${makeInput}" >"${makeOutput}" -f "${sedScript}"
 rm "${sedScript}"
 
-for extension in "${headerExtension}"
+for extension in "${headerExtension}" "${logExtension}" "${statusExtension}"
 do
-   cp "${inputName}.${extension}" "${initialDirectory}/${outputName}.${extension}"
+   inputFile="${inputName}.${extension}"
+
+   [ ! -f "${inputFile}" ] || {
+      cp "${inputFile}" "${initialDirectory}/${outputName}.${extension}"
+   }
 done
 
 exit 0

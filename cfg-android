@@ -110,5 +110,6 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-ports-package \
    \
    --host="${hostSystem}" \
+   --quiet \
    "${@}"
 exit "${?}"
