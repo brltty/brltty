@@ -2,11 +2,13 @@ Makefile
 absdeps.mk
 reldeps.mk
 configure
-config.status
-config.log
 autom4te*.cache
+config.log
+config.status
 config.mk
 config.h
+forbuild.log
+forbuild.status
 forbuild.mk
 forbuild.h
 brltty.spec
