@@ -713,6 +713,10 @@ static long inputConsoleMode;
 #else /* termios */
 #include <termios.h>
 static struct termios inputTerminalAttributes;
+
+#ifndef _POSIX_VDISABLE
+#define _POSIX_VDISABLE 0
+#endif /* _POSIX_VDISABLE */
 #endif /* input terminal definitions */
 #endif /* curses package */
 
