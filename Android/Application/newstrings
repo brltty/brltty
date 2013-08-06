@@ -1,0 +1,80 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2013 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] .. .. "prologue.tcl"]
+
+proc getStrings {directory args} {
+   set strings [dict create]
+
+   foreach file $args {
+      if {[catch [list open [set path [file join $directory $file]] {RDONLY}] channel] == 0} {
+         while {[gets $channel line] >= 0} {
+            if {[regexp {^\s*<\s*string\s+name\s*=\s*"([^"]*)"\s*>(.*)<\s*/string\s*>\s*$} $line x name value]} {
+               dict set strings $name $value
+            }
+         }
+
+         close $channel; unset channel
+      } else {
+         writeProgramMessage $channel
+      }
+   }
+
+   return $strings
+}
+
+set stringsDirectory [file join $sourceDirectory Android Application res values]
+set defaultStrings [getStrings $stringsDirectory strings.xml settings_strings.xml settings_lists.xml]
+
+foreach keyPattern {BRAILLE_DRIVER_LABEL_??} {
+   foreach key [dict keys $defaultStrings $keyPattern] {
+      dict unset defaultStrings $key
+   }
+}
+
+set languageDelimiter -
+foreach languageDirectory [glob -nocomplain -path "$stringsDirectory$languageDelimiter" ?*] {
+   set languageCode [lindex [split [file tail $languageDirectory] $languageDelimiter] 1]
+   set languageStrings($languageCode) [getStrings $languageDirectory strings.xml]
+}
+
+foreach languageCode [lsort [array names languageStrings]] {
+   lassign [intersect3 [dict keys $languageStrings($languageCode)] [dict keys $defaultStrings]] oldStrings sameStrings newStrings
+
+   foreach oldString $oldStrings {
+      writeProgramMessage "old string: $languageCode: $oldString"
+   }
+
+   set languageFile "[getProgramName]-$languageCode.txt"
+   file delete $languageFile
+
+   if {[llength $newStrings] > 0} {
+      if {[catch [list open $languageFile {WRONLY TRUNC CREAT}] languageChannel] == 0} {
+         foreach newString $newStrings {
+            puts $languageChannel "$newString [dict get $defaultStrings $newString]"
+         }
+
+         close $languageChannel; unset languageChannel
+      } else {
+         writeProgramMessage $languageChannel
+      }
+   }
+}
+
+exit 0

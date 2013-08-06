@@ -264,7 +264,7 @@ AC_PROG_AWK
 AC_PROG_LN_S
 
 AC_PATH_PROG([MSGMERGE], [msgmerge])
-AC_PATH_TOOL([MSGFMT], [msgfmt])
+AC_PATH_PROG([MSGFMT], [msgfmt])
 
 install_messages=
 test -n "${MSGMERGE}" && install_messages=install-messages
