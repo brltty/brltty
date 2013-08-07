@@ -43,6 +43,7 @@
 #include "embed.h"
 #include "log.h"
 #include "parse.h"
+#include "timing.h"
 #include "message.h"
 #include "tunes.h"
 #include "ttb.h"

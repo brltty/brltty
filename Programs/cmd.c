@@ -22,12 +22,10 @@
 #include <string.h>
 
 #include "log.h"
-#include "timing.h"
 #include "brldefs.h"
+#include "prefs.h"
 #include "cmd.h"
 #include "ttb.h"
-#include "charset.h"
-#include "queue.h"
 
 const CommandEntry commandTable[] = {
   #include "cmds.auto.h"

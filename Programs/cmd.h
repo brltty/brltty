@@ -19,7 +19,6 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
-#include "timing.h"
 #ifdef ENABLE_API
 #include "brlapi_keycodes.h"
 #endif /* ENABLE_API */
@@ -48,16 +47,6 @@ typedef struct {
 extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
-typedef enum {
-  CDO_IncludeName    = 0X1,
-  CDO_IncludeOperand = 0X2,
-  CDO_DefaultOperand = 0X4
-} CommandDescriptionOption;
-
-extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
-extern void logCommand (int command);
-extern void logTransformedCommand (int oldCommand, int newCommand);
-
 typedef struct {
   const char *name;
   int bit;
@@ -70,6 +59,16 @@ extern const CommandModifierEntry commandModifierTable_keyboard[];
 extern const CommandModifierEntry commandModifierTable_line[];
 extern const CommandModifierEntry commandModifierTable_motion[];
 extern const CommandModifierEntry commandModifierTable_toggle[];
+
+typedef enum {
+  CDO_IncludeName    = 0X1,
+  CDO_IncludeOperand = 0X2,
+  CDO_DefaultOperand = 0X4
+} CommandDescriptionOption;
+
+extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
+extern void logCommand (int command);
+extern void logTransformedCommand (int oldCommand, int newCommand);
 
 #ifdef ENABLE_API
 extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
