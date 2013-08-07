@@ -23,7 +23,6 @@
 
 #include "log.h"
 #include "brldefs.h"
-#include "prefs.h"
 #include "cmd.h"
 #include "ttb.h"
 
