@@ -343,7 +343,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (hotkey) {
     state = KTS_HOTKEY;
-    resetKeyTableAutorepeatData(&table->autorepeat);
+    resetAutorepeatData(table);
 
     {
       int cmd = press? hotkey->pressCommand: hotkey->releaseCommand;
@@ -396,7 +396,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (!wasPressed) {
-        resetKeyTableAutorepeatData(&table->autorepeat);
+        resetAutorepeatData(table);
 
         if (binding) {
           if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
@@ -446,7 +446,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         table->autorepeat.pending = 0;
       }
 
-      resetKeyTableAutorepeatData(&table->autorepeat);
+      resetAutorepeatData(table);
     }
   }
 

@@ -104,12 +104,6 @@ typedef struct {
   } mappedKeys;
 } KeyContext;
 
-typedef struct {
-  AsyncHandle alarm;
-  int command;
-  unsigned pending:1;
-} KeyTableAutorepeatData;
-
 struct KeyTableStruct {
   wchar_t *title;
 
@@ -140,7 +134,11 @@ struct KeyTableStruct {
     unsigned int count;
   } pressedKeys;
 
-  KeyTableAutorepeatData autorepeat;
+  struct {
+    AsyncHandle alarm;
+    int command;
+    unsigned pending:1;
+  } autorepeat;
 
   const unsigned char *logKeyEvents;
 };
@@ -163,7 +161,7 @@ extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
-extern void resetKeyTableAutorepeatData (KeyTableAutorepeatData *autorepeat);
+extern void resetAutorepeatData (KeyTable *table);
 
 #ifdef __cplusplus
 }
