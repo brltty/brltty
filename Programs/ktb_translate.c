@@ -248,12 +248,12 @@ static void setAutorepeatAlarm (KeyTable *table, unsigned char when);
 static void
 handleAutorepeatAlarm (const AsyncAlarmResult *result) {
   KeyTable *table = result->data;
-  table->autorepeat.alarm = NULL;
 
-  if (table->autorepeat.command != EOF) {
-    setAutorepeatAlarm(table, prefs.autorepeatInterval);
-    processCommand(table, table->autorepeat.command);
-  }
+  table->autorepeat.alarm = NULL;
+  table->autorepeat.pending = 0;
+
+  setAutorepeatAlarm(table, prefs.autorepeatInterval);
+  processCommand(table, table->autorepeat.command);
 }
 
 static void
@@ -330,8 +330,13 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     table->context.current = table->context.next;
     table->context.next = table->context.persistent;
   }
-
   if (context == KTB_CTX_DEFAULT) context = table->context.current;
+
+  if (table->autorepeat.pending) {
+    if (!press) {
+      processCommand(table, table->autorepeat.command);
+    }
+  }
   resetKeyTableAutorepeatData(&table->autorepeat);
 
   if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
@@ -385,9 +390,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (command == EOF) {
-        if (isIncomplete) state = KTS_MODIFIERS;
         command = BRL_CMD_NOOP;
+        if (isIncomplete) state = KTS_MODIFIERS;
       } else {
+        state = KTS_COMMAND;
+
         if (binding) {
           if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
             unsigned int keyCount = table->pressedCount;
@@ -422,12 +429,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         if (context != KTB_CTX_WAITING) {
           if (isAutorepeatableCommand(command)) {
             table->autorepeat.command = command;
+            table->autorepeat.pending = !immediate;
             setAutorepeatAlarm(table, prefs.autorepeatDelay);
             if (!immediate) command = BRL_CMD_NOOP;
           }
         }
-
-        state = KTS_COMMAND;
       }
 
       processCommand(table, command);

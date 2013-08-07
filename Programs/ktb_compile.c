@@ -1072,6 +1072,7 @@ resetKeyTableAutorepeatData (KeyTableAutorepeatData *autorepeat) {
   }
 
   autorepeat->command = EOF;
+  autorepeat->pending = 0;
 }
 
 void

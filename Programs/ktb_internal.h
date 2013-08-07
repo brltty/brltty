@@ -107,6 +107,7 @@ typedef struct {
 typedef struct {
   AsyncHandle alarm;
   int command;
+  unsigned pending:1;
 } KeyTableAutorepeatData;
 
 struct KeyTableStruct {
