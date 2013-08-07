@@ -1697,25 +1697,6 @@ insertKey (ScreenKey key, int flags) {
   return insertScreenKey(key);
 }
 
-static RepeatState repeatState;
-
-void
-resetAutorepeat (void) {
-  resetRepeatState(&repeatState);
-}
-
-void
-handleAutorepeat (int *command, RepeatState *state) {
-  if (!prefs.autorepeat) {
-    state = NULL;
-  } else if (!state) {
-    state = &repeatState;
-  }
-  handleRepeatFlags(command, state, prefs.autorepeatPanning,
-                    PREFERENCES_TIME(prefs.autorepeatDelay),
-                    PREFERENCES_TIME(prefs.autorepeatInterval));
-}
-
 static int
 checkPointer (void) {
   int moved = 0;
@@ -1824,7 +1805,6 @@ static void
 resetBrailleState (void) {
   resetScanCodes();
   resetBlinkingStates();
-  if (prefs.autorepeat) resetAutorepeat();
   inputModifiers = 0;
 }
 
@@ -1958,7 +1938,6 @@ brlttyCommand (void) {
     isOffline = 0;
   }
 
-  handleAutorepeat(&command, NULL);
   if (command == EOF) return 0;
 
 doCommand:
@@ -2440,11 +2419,7 @@ doCommand:
         break;
 
       case BRL_CMD_AUTOREPEAT:
-        if (toggleFeatureSetting(&prefs.autorepeat, command)) {
-          if (prefs.autorepeat) {
-            resetAutorepeat();
-          }
-        }
+        toggleFeatureSetting(&prefs.autorepeat, command);
         break;
       case BRL_CMD_TUNES:
         toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
@@ -3965,11 +3940,12 @@ brlttyUpdate (void) {
 static int
 readCommand (KeyTableCommandContext context) {
   int command = readBrailleCommand(&brl, context);
+
   if (command != EOF) {
     logCommand(command);
-    if (BRL_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
     command &= BRL_MSK_CMD;
   }
+
   return command;
 }
 

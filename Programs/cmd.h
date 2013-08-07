@@ -71,15 +71,6 @@ extern const CommandModifierEntry commandModifierTable_line[];
 extern const CommandModifierEntry commandModifierTable_motion[];
 extern const CommandModifierEntry commandModifierTable_toggle[];
 
-typedef struct {
-  int command;
-  int timeout;
-  int started;
-  TimeValue time;
-} RepeatState;
-extern void resetRepeatState (RepeatState *state);
-extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);
-
 #ifdef ENABLE_API
 extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
 extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);

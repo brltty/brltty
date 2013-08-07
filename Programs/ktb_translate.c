@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "prefs.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
@@ -202,29 +203,38 @@ deleteExplicitKeyValue (KeyValue *values, unsigned int *count, const KeyValue *v
 }
 
 static int
+sortKeyOffsets (const void *element1, const void *element2) {
+  const KeyValue *value1 = element1;
+  const KeyValue *value2 = element2;
+
+  if (value1->key < value2->key) return -1;
+  if (value1->key > value2->key) return 1;
+  return 0;
+}
+
+static int
 processCommand (KeyTable *table, int command) {
   int blk = command & BRL_MSK_BLK;
   int arg = command & BRL_MSK_ARG;
 
   switch (blk) {
-    case BRL_BLK_CONTEXT:
-      if (!BRL_DELAYED_COMMAND(command)) {
-        unsigned char context = KTB_CTX_DEFAULT + arg;
-        const KeyContext *ctx = getKeyContext(table, context);
+    case BRL_BLK_CONTEXT: {
+      unsigned char context = KTB_CTX_DEFAULT + arg;
+      const KeyContext *ctx = getKeyContext(table, context);
 
-        if (ctx) {
-          command = BRL_CMD_NOOP;
-          table->context.next = context;
+      if (ctx) {
+        command = BRL_CMD_NOOP;
+        table->context.next = context;
 
-          if (isTemporaryKeyContext(table, ctx)) {
-            command |= BRL_FLG_TOGGLE_ON;
-          } else {
-            table->context.persistent = context;
-            command |= BRL_FLG_TOGGLE_OFF;
-          }
+        if (isTemporaryKeyContext(table, ctx)) {
+          command |= BRL_FLG_TOGGLE_ON;
+        } else {
+          table->context.persistent = context;
+          command |= BRL_FLG_TOGGLE_OFF;
         }
       }
       break;
+    }
 
     default:
       break;
@@ -233,13 +243,73 @@ processCommand (KeyTable *table, int command) {
   return enqueueCommand(command);
 }
 
-static int
-sortKeyOffsets (const void *element1, const void *element2) {
-  const KeyValue *value1 = element1;
-  const KeyValue *value2 = element2;
+static void setAutorepeatAlarm (KeyTable *table, unsigned char when);
 
-  if (value1->key < value2->key) return -1;
-  if (value1->key > value2->key) return 1;
+static void
+handleAutorepeatAlarm (const AsyncAlarmResult *result) {
+  KeyTable *table = result->data;
+
+  table->autorepeat.alarm = NULL;
+  setAutorepeatAlarm(table, prefs.autorepeatInterval);
+  processCommand(table, table->autorepeat.command);
+}
+
+static void
+setAutorepeatAlarm (KeyTable *table, unsigned char when) {
+  asyncSetAlarmIn(&table->autorepeat.alarm, PREFERENCES_TIME(when),
+                  handleAutorepeatAlarm, table);
+}
+
+static int
+isAutorepeatableCommand (int command) {
+  if (prefs.autorepeat) {
+    switch (command & BRL_MSK_BLK) {
+      case BRL_BLK_PASSCHAR:
+      case BRL_BLK_PASSDOTS:
+        return 1;
+
+      default:
+        switch (command & BRL_MSK_CMD) {
+          case BRL_CMD_LNUP:
+          case BRL_CMD_LNDN:
+          case BRL_CMD_PRDIFLN:
+          case BRL_CMD_NXDIFLN:
+          case BRL_CMD_CHRLT:
+          case BRL_CMD_CHRRT:
+
+          case BRL_CMD_MENU_PREV_ITEM:
+          case BRL_CMD_MENU_NEXT_ITEM:
+          case BRL_CMD_MENU_PREV_SETTING:
+          case BRL_CMD_MENU_NEXT_SETTING:
+
+          case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
+          case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
+          case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
+          case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
+          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
+          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
+          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
+          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
+
+          case BRL_CMD_SPEAK_PREV_CHAR:
+          case BRL_CMD_SPEAK_NEXT_CHAR:
+          case BRL_CMD_SPEAK_PREV_WORD:
+          case BRL_CMD_SPEAK_NEXT_WORD:
+          case BRL_CMD_SPEAK_PREV_LINE:
+          case BRL_CMD_SPEAK_NEXT_LINE:
+            return 1;
+
+          case BRL_CMD_FWINLT:
+          case BRL_CMD_FWINRT:
+            if (prefs.autorepeatPanning) return 1;
+
+          default:
+            break;
+        }
+        break;
+    }
+  }
+
   return 0;
 }
 
@@ -258,7 +328,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     table->context.current = table->context.next;
     table->context.next = table->context.persistent;
   }
+
   if (context == KTB_CTX_DEFAULT) context = table->context.current;
+  resetKeyTableAutorepeatData(&table->autorepeat);
 
   if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
     const KeyValue anyKey = {
@@ -312,77 +384,51 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
       if (command == EOF) {
         if (isIncomplete) state = KTS_MODIFIERS;
-
-        if (table->command != EOF) {
-          table->command = EOF;
-          processCommand(table, (command = BRL_CMD_NOOP));
-        }
+        command = BRL_CMD_NOOP;
       } else {
-        if (command != table->command) {
-          if (binding) {
-            if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
-              unsigned int keyCount = table->pressedCount;
-              KeyValue keyValues[keyCount];
-              copyKeyValues(keyValues, table->pressedKeys, keyCount);
+        if (binding) {
+          if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
+            unsigned int keyCount = table->pressedCount;
+            KeyValue keyValues[keyCount];
+            copyKeyValues(keyValues, table->pressedKeys, keyCount);
 
-              {
-                int index;
+            {
+              int index;
 
-                for (index=0; index<binding->combination.modifierCount; index+=1) {
-                  deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
-                }
-              }
-
-              if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
-                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
-              }
-
-              if (keyCount > 0) {
-                if (keyCount > 1) {
-                  qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-                  if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
-                }
-
-                command += keyValues[0].key;
-              } else if (binding->flags & KBF_COLUMN) {
-                if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
+              for (index=0; index<binding->combination.modifierCount; index+=1) {
+                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
               }
             }
-          }
 
-          if (context == KTB_CTX_WAITING) {
-            table->command = EOF;
-            table->immediate = 0;
-          } else {
-            table->command = command;
+            if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
+              deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
+            }
 
-            if ((table->immediate = immediate)) {
-              command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
-            } else {
-              command |= BRL_FLG_REPEAT_DELAY;
+            if (keyCount > 0) {
+              if (keyCount > 1) {
+                qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
+                if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
+              }
+
+              command += keyValues[0].key;
+            } else if (binding->flags & KBF_COLUMN) {
+              if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
             }
           }
+        }
 
-          processCommand(table, command);
-        } else {
-          command = EOF;
+        if (context != KTB_CTX_WAITING) {
+          if (isAutorepeatableCommand(command)) {
+            table->autorepeat.command = command;
+            setAutorepeatAlarm(table, prefs.autorepeatDelay);
+            if (!immediate) command = BRL_CMD_NOOP;
+          }
         }
 
         state = KTS_COMMAND;
       }
-    } else {
-      if (context == KTB_CTX_WAITING) table->command = EOF;
 
-      if (table->command != EOF) {
-        if (table->immediate) {
-          command = BRL_CMD_NOOP;
-        } else {
-          command = table->command;
-        }
-
-        table->command = EOF;
-        processCommand(table, command);
-      }
+      processCommand(table, command);
     }
   }
 

@@ -421,112 +421,6 @@ logTransformedCommand (int oldCommand, int newCommand) {
   logData(LOG_DEBUG, formatLogTransformedCommandData, &cmd);
 }
 
-void
-resetRepeatState (RepeatState *state) {
-  state->command = EOF;
-  state->timeout = 0;
-  state->started = 0;
-}
-
-void
-handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval) {
-  if (state) {
-    if (*command == EOF) {
-      if (state->timeout) {
-        TimeValue now;
-        getMonotonicTime(&now);
-        if (millisecondsBetween(&state->time, &now) >= state->timeout) {
-          *command = state->command;
-          state->time = now;
-          state->timeout = interval;
-          state->started = 1;
-        }
-      }
-    } else {
-      int flags = *command & BRL_FLG_REPEAT_MASK;
-      *command &= ~BRL_FLG_REPEAT_MASK;
-
-      switch (*command & BRL_MSK_BLK) {
-        default:
-          switch (*command & BRL_MSK_CMD) {
-            case BRL_CMD_FWINLT:
-            case BRL_CMD_FWINRT:
-              if (panning) break;
-
-            default:
-              if (BRL_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
-              flags = 0;
-
-            case BRL_CMD_LNUP:
-            case BRL_CMD_LNDN:
-            case BRL_CMD_PRDIFLN:
-            case BRL_CMD_NXDIFLN:
-            case BRL_CMD_CHRLT:
-            case BRL_CMD_CHRRT:
-
-            case BRL_CMD_MENU_PREV_ITEM:
-            case BRL_CMD_MENU_NEXT_ITEM:
-            case BRL_CMD_MENU_PREV_SETTING:
-            case BRL_CMD_MENU_NEXT_SETTING:
-
-            case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
-            case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
-            case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
-            case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
-            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
-            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
-            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
-            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
-
-            case BRL_CMD_SPEAK_PREV_CHAR:
-            case BRL_CMD_SPEAK_NEXT_CHAR:
-            case BRL_CMD_SPEAK_PREV_WORD:
-            case BRL_CMD_SPEAK_NEXT_WORD:
-            case BRL_CMD_SPEAK_PREV_LINE:
-            case BRL_CMD_SPEAK_NEXT_LINE:
-              break;
-          }
-
-        case BRL_BLK_PASSCHAR:
-        case BRL_BLK_PASSDOTS:
-          break;
-      }
-
-      if (state->started) {
-        state->started = 0;
-
-        if (*command == state->command) {
-          *command = BRL_CMD_NOOP;
-          flags = 0;
-        }
-      }
-      state->command = *command;
-
-      if (flags & BRL_FLG_REPEAT_DELAY) {
-        getMonotonicTime(&state->time);
-        state->timeout = delay;
-        if (flags & BRL_FLG_REPEAT_INITIAL) {
-          state->started = 1;
-        } else {
-          *command = BRL_CMD_NOOP;
-        }
-      } else if (flags & BRL_FLG_REPEAT_INITIAL) {
-        getMonotonicTime(&state->time);
-        state->timeout = interval;
-        state->started = 1;
-      } else {
-        state->timeout = 0;
-      }     
-    }
-  } else if (*command != EOF) {
-    if (BRL_DELAYED_COMMAND(*command)) {
-      *command = BRL_CMD_NOOP;
-    } else {
-      *command &= ~BRL_FLG_REPEAT_MASK;
-    }
-  }
-}
-
 #ifdef ENABLE_API
 static brlapi_keyCode_t
 cmdWCharToBrlapi (wchar_t wc) {
@@ -603,8 +497,6 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
     | (command & BRL_FLG_MOTION_ROUTE	? BRLAPI_KEY_FLG_MOTION_ROUTE	: 0)
       ;
   return code
-  | (command & BRL_FLG_REPEAT_INITIAL	? BRLAPI_KEY_FLG_REPEAT_INITIAL	: 0)
-  | (command & BRL_FLG_REPEAT_DELAY	? BRLAPI_KEY_FLG_REPEAT_DELAY	: 0)
     ;
 }
 
@@ -652,8 +544,6 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   | (code & BRLAPI_KEY_FLG_TOGGLE_ON		? BRL_FLG_TOGGLE_ON	: 0)
   | (code & BRLAPI_KEY_FLG_TOGGLE_OFF		? BRL_FLG_TOGGLE_OFF	: 0)
   | (code & BRLAPI_KEY_FLG_MOTION_ROUTE		? BRL_FLG_MOTION_ROUTE	: 0)
-  | (code & BRLAPI_KEY_FLG_REPEAT_INITIAL	? BRL_FLG_REPEAT_INITIAL: 0)
-  | (code & BRLAPI_KEY_FLG_REPEAT_DELAY		? BRL_FLG_REPEAT_DELAY	: 0)
   | (code & BRLAPI_KEY_FLG_LINE_SCALED		? BRL_FLG_LINE_SCALED	: 0)
   | (code & BRLAPI_KEY_FLG_LINE_TOLEFT		? BRL_FLG_LINE_TOLEFT	: 0)
   | (code & BRLAPI_KEY_FLG_CONTROL		? BRL_FLG_CHAR_CONTROL	: 0)

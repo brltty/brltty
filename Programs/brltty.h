@@ -114,9 +114,6 @@ extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-extern void resetAutorepeat (void);
-extern void handleAutorepeat (int *command, RepeatState *state);
-
 extern void highlightWindow (void);
 
 extern void api_identify (int full);

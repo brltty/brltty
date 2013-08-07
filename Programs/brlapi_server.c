@@ -202,7 +202,6 @@ typedef struct Connection {
   unsigned int how; /* how keys must be delivered to clients */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
-  RepeatState repeatState;
   pthread_mutex_t brlMutex;
   KeyrangeList *acceptedKeys;
   pthread_mutex_t acceptedKeysMutex;
@@ -628,7 +627,6 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
-  resetRepeatState(&c->repeatState);
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&c->brlMutex,&mattr);
@@ -2457,20 +2455,8 @@ static int api__handleCommand(int command) {
     logMessage(LOG_DEBUG, "API got command %08x, thus client code %016"BRLAPI_PRIxKEYCODE, command, clientCode);
     /* nobody needs the raw code */
     if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-      int passKey;
-      /* Handle repetition */
-      handleAutorepeat(&command, &c->repeatState);
-      /* Update brlapi equivalent */
-      clientCode = cmdBrlttyToBrlapi(command, retainDots);
-      logMessage(LOG_DEBUG, "API got command %08x from repeat engine, thus client code %016"BRLAPI_PRIxKEYCODE, command, clientCode);
-      /* Check whether the client really wants the result of repetition */
-      pthread_mutex_lock(&c->acceptedKeysMutex);
-      passKey = inKeyrangeList(c->acceptedKeys,clientCode) != NULL;
-      pthread_mutex_unlock(&c->acceptedKeysMutex);
-      if (passKey) {
-        logMessage(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
-        writeKey(c->fd,clientCode);
-      }
+      logMessage(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
+      writeKey(c->fd,clientCode);
       return EOF;
     }
   }

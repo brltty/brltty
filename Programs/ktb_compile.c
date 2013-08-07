@@ -1065,11 +1065,20 @@ processKeyTableLine (DataFile *file, void *data) {
 }
 
 void
+resetKeyTableAutorepeatData (KeyTableAutorepeatData *autorepeat) {
+  if (autorepeat->alarm) {
+    asyncCancelRequest(autorepeat->alarm);
+    autorepeat->alarm = NULL;
+  }
+
+  autorepeat->command = EOF;
+}
+
+void
 resetKeyTable (KeyTable *table) {
+  resetKeyTableAutorepeatData(&table->autorepeat);
   table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
   table->pressedCount = 0;
-  table->command = EOF;
-  table->immediate = 0;
 }
 
 static int
@@ -1386,6 +1395,8 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
       ktd.table->pressedSize = 0;
       ktd.table->pressedCount = 0;
 
+      ktd.table->autorepeat.alarm = NULL;
+
       if (allocateKeyNameTable(&ktd, keys)) {
         if (allocateCommandTable(&ktd)) {
           if (processDataFile(name, processKeyTableLine, &ktd)) {
@@ -1410,6 +1421,8 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
+  resetKeyTableAutorepeatData(&table->autorepeat);
+
   while (table->noteCount) free(table->noteTable[--table->noteCount]);
 
   while (table->keyContextCount) {

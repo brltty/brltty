@@ -84,12 +84,6 @@ testAutorepeat (void) {
 }
 
 static int
-changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
-  if (setting) resetAutorepeat();
-  return 1;
-}
-
-static int
 testShowCursor (void) {
   return prefs.showCursor;
 }
@@ -642,7 +636,6 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Autorepeat"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeat, &itemName));
-      CHANGED(Autorepeat);
     }
 
     {

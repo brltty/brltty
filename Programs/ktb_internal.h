@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_KTB_INTERNAL
 #define BRLTTY_INCLUDED_KTB_INTERNAL
 
+#include "async.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -102,6 +104,11 @@ typedef struct {
   } mappedKeys;
 } KeyContext;
 
+typedef struct {
+  AsyncHandle alarm;
+  int command;
+} KeyTableAutorepeatData;
+
 struct KeyTableStruct {
   wchar_t *title;
 
@@ -124,8 +131,7 @@ struct KeyTableStruct {
   unsigned int pressedSize;
   unsigned int pressedCount;
 
-  int command;
-  unsigned immediate:1;
+  KeyTableAutorepeatData autorepeat;
 
   const unsigned char *logKeyEvents;
 };
@@ -137,14 +143,18 @@ extern int findKeyValue (
   const KeyValue *values, unsigned int count,
   const KeyValue *target, unsigned int *position
 );
+
 extern int insertKeyValue (
   KeyValue **values, unsigned int *count, unsigned int *size,
   const KeyValue *value, unsigned int position
 );
+
 extern void removeKeyValue (KeyValue *values, unsigned int *count, unsigned int position);
 extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value);
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
+
+extern void resetKeyTableAutorepeatData (KeyTableAutorepeatData *autorepeat);
 
 #ifdef __cplusplus
 }

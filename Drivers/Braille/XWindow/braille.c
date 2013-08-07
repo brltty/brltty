@@ -385,18 +385,13 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
     default: logMessage(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
   }
-  if (modifiers & ControlMask)
-    keypressed |= BRL_FLG_CHAR_CONTROL;
-  if (modifiers & Mod1Mask)
-    keypressed |= BRL_FLG_CHAR_META;
-  if (modifiers & ShiftMask)
-    keypressed |= BRL_FLG_CHAR_SHIFT;
-  if (modifiers & LockMask)
-    keypressed |= BRL_FLG_CHAR_UPPER;
-  if (event->type == KeyPress)
-    keypressed |= BRL_FLG_REPEAT_DELAY | BRL_FLG_REPEAT_INITIAL;
-  else
-    keypressed = BRL_CMD_NOOP;
+
+  if (modifiers & ControlMask) keypressed |= BRL_FLG_CHAR_CONTROL;
+  if (modifiers & Mod1Mask) keypressed |= BRL_FLG_CHAR_META;
+  if (modifiers & ShiftMask) keypressed |= BRL_FLG_CHAR_SHIFT;
+  if (modifiers & LockMask) keypressed |= BRL_FLG_CHAR_UPPER;
+  if (event->type != KeyPress) keypressed = BRL_CMD_NOOP;
+
   logMessage(LOG_DEBUG,"keypressed %#lx", keypressed);
   enqueueCommand(keypressed);
   return;
