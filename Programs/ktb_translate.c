@@ -248,10 +248,12 @@ static void setAutorepeatAlarm (KeyTable *table, unsigned char when);
 static void
 handleAutorepeatAlarm (const AsyncAlarmResult *result) {
   KeyTable *table = result->data;
-
   table->autorepeat.alarm = NULL;
-  setAutorepeatAlarm(table, prefs.autorepeatInterval);
-  processCommand(table, table->autorepeat.command);
+
+  if (table->autorepeat.command != EOF) {
+    setAutorepeatAlarm(table, prefs.autorepeatInterval);
+    processCommand(table, table->autorepeat.command);
+  }
 }
 
 static void
