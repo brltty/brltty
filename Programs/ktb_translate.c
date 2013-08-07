@@ -353,90 +353,93 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
     state = KTS_HOTKEY;
   } else {
-    int immediate = 1;
+    int isImmediate = 1;
     unsigned int keyPosition;
-
-    if (findPressedKey(table, &keyValue, &keyPosition)) removePressedKey(table, keyPosition);
+    int wasPressed = findPressedKey(table, &keyValue, &keyPosition);
 
     if (press) {
-      int isIncomplete = 0;
-      const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
-      int inserted = insertPressedKey(table, &keyValue, keyPosition);
-
-      if (binding) {
-        command = binding->command;
-      } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
-        command = binding->command;
-        immediate = 0;
-      } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
-        immediate = 0;
-      } else if (context == KTB_CTX_DEFAULT) {
-        command = EOF;
-      } else if (!inserted) {
-        command = EOF;
-      } else {
-        removePressedKey(table, keyPosition);
-        binding = findKeyBinding(table, KTB_CTX_DEFAULT, &keyValue, &isIncomplete);
-        inserted = insertPressedKey(table, &keyValue, keyPosition);
+      if (!wasPressed) {
+        int isIncomplete = 0;
+        const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
+        int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
         if (binding) {
           command = binding->command;
-        } else if ((binding = findKeyBinding(table, KTB_CTX_DEFAULT, NULL, &isIncomplete))) {
+        } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
           command = binding->command;
-          immediate = 0;
-        } else {
+          isImmediate = 0;
+        } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
+          isImmediate = 0;
+        } else if (context == KTB_CTX_DEFAULT) {
           command = EOF;
+        } else if (!inserted) {
+          command = EOF;
+        } else {
+          removePressedKey(table, keyPosition);
+          binding = findKeyBinding(table, KTB_CTX_DEFAULT, &keyValue, &isIncomplete);
+          inserted = insertPressedKey(table, &keyValue, keyPosition);
+
+          if (binding) {
+            command = binding->command;
+          } else if ((binding = findKeyBinding(table, KTB_CTX_DEFAULT, NULL, &isIncomplete))) {
+            command = binding->command;
+            isImmediate = 0;
+          } else {
+            command = EOF;
+          }
         }
-      }
 
-      if (command == EOF) {
-        command = BRL_CMD_NOOP;
-        if (isIncomplete) state = KTS_MODIFIERS;
-      } else {
-        state = KTS_COMMAND;
+        if (command == EOF) {
+          command = BRL_CMD_NOOP;
+          if (isIncomplete) state = KTS_MODIFIERS;
+        } else {
+          state = KTS_COMMAND;
 
-        if (binding) {
-          if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
-            unsigned int keyCount = table->pressedCount;
-            KeyValue keyValues[keyCount];
-            copyKeyValues(keyValues, table->pressedKeys, keyCount);
+          if (binding) {
+            if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
+              unsigned int keyCount = table->pressedCount;
+              KeyValue keyValues[keyCount];
+              copyKeyValues(keyValues, table->pressedKeys, keyCount);
 
-            {
-              int index;
+              {
+                int index;
 
-              for (index=0; index<binding->combination.modifierCount; index+=1) {
-                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
-              }
-            }
-
-            if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
-              deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
-            }
-
-            if (keyCount > 0) {
-              if (keyCount > 1) {
-                qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-                if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
+                for (index=0; index<binding->combination.modifierCount; index+=1) {
+                  deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
+                }
               }
 
-              command += keyValues[0].key;
-            } else if (binding->flags & KBF_COLUMN) {
-              if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
+              if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
+                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
+              }
+
+              if (keyCount > 0) {
+                if (keyCount > 1) {
+                  qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
+                  if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
+                }
+
+                command += keyValues[0].key;
+              } else if (binding->flags & KBF_COLUMN) {
+                if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
+              }
+            }
+          }
+
+          if (context != KTB_CTX_WAITING) {
+            if (isAutorepeatableCommand(command)) {
+              table->autorepeat.command = command;
+              table->autorepeat.pending = !isImmediate;
+              setAutorepeatAlarm(table, prefs.autorepeatDelay);
+              if (!isImmediate) command = BRL_CMD_NOOP;
             }
           }
         }
 
-        if (context != KTB_CTX_WAITING) {
-          if (isAutorepeatableCommand(command)) {
-            table->autorepeat.command = command;
-            table->autorepeat.pending = !immediate;
-            setAutorepeatAlarm(table, prefs.autorepeatDelay);
-            if (!immediate) command = BRL_CMD_NOOP;
-          }
-        }
+        processCommand(table, command);
       }
-
-      processCommand(table, command);
+    } else if (wasPressed) {
+      removePressedKey(table, keyPosition);
     }
   }
 
