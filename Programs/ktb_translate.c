@@ -47,7 +47,7 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
   const KeyContext *ctx = getKeyContext(table, context);
 
   if (ctx && ctx->keyBindings.sorted &&
-      (table->pressedCount <= MAX_MODIFIERS_PER_COMBINATION)) {
+      (table->pressedKeys.count <= MAX_MODIFIERS_PER_COMBINATION)) {
     KeyBinding target;
     memset(&target, 0, sizeof(target));
 
@@ -55,10 +55,10 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
       target.combination.immediateKey = *immediate;
       target.combination.flags |= KCF_IMMEDIATE_KEY;
     }
-    target.combination.modifierCount = table->pressedCount;
+    target.combination.modifierCount = table->pressedKeys.count;
 
     while (1) {
-      unsigned int all = (1 << table->pressedCount) - 1;
+      unsigned int all = (1 << table->pressedKeys.count) - 1;
       unsigned int bits;
 
       for (bits=0; bits<=all; bits+=1) {
@@ -66,14 +66,14 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
           unsigned int index;
           unsigned int bit;
 
-          for (index=0, bit=1; index<table->pressedCount; index+=1, bit<<=1) {
+          for (index=0, bit=1; index<table->pressedKeys.count; index+=1, bit<<=1) {
             KeyValue *modifier = &target.combination.modifierKeys[index];
 
-            *modifier = table->pressedKeys[index];
+            *modifier = table->pressedKeys.table[index];
             if (bits & bit) modifier->key = KTB_KEY_ANY;
           }
         }
-        qsort(target.combination.modifierKeys, table->pressedCount, sizeof(*target.combination.modifierKeys), sortModifierKeys);
+        qsort(target.combination.modifierKeys, table->pressedKeys.count, sizeof(*target.combination.modifierKeys), sortModifierKeys);
 
         {
           const KeyBinding *const *binding = bsearch(&target, ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), searchKeyBinding);
@@ -155,8 +155,8 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
     {
       unsigned int pressedIndex;
 
-      for (pressedIndex=0; pressedIndex<table->pressedCount; pressedIndex+=1) {
-        const KeyValue *keyValue = &table->pressedKeys[pressedIndex];
+      for (pressedIndex=0; pressedIndex<table->pressedKeys.count; pressedIndex+=1) {
+        const KeyValue *keyValue = &table->pressedKeys.table[pressedIndex];
         const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
 
         if (!map) return EOF;
@@ -184,17 +184,17 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
 
 static int
 findPressedKey (KeyTable *table, const KeyValue *value, unsigned int *position) {
-  return findKeyValue(table->pressedKeys, table->pressedCount, value, position);
+  return findKeyValue(table->pressedKeys.table, table->pressedKeys.count, value, position);
 }
 
 static int
 insertPressedKey (KeyTable *table, const KeyValue *value, unsigned int position) {
-  return insertKeyValue(&table->pressedKeys, &table->pressedCount, &table->pressedSize, value, position);
+  return insertKeyValue(&table->pressedKeys.table, &table->pressedKeys.count, &table->pressedKeys.size, value, position);
 }
 
 static void
 removePressedKey (KeyTable *table, unsigned int position) {
-  removeKeyValue(table->pressedKeys, &table->pressedCount, position);
+  removeKeyValue(table->pressedKeys.table, &table->pressedKeys.count, position);
 }
 
 static inline void
@@ -326,7 +326,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   int command = EOF;
   const HotkeyEntry *hotkey;
 
-  if (press && !table->pressedCount) {
+  if (press && !table->pressedKeys.count) {
     table->context.current = table->context.next;
     table->context.next = table->context.persistent;
   }
@@ -400,9 +400,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
         if (binding) {
           if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
-            unsigned int keyCount = table->pressedCount;
+            unsigned int keyCount = table->pressedKeys.count;
             KeyValue keyValues[keyCount];
-            copyKeyValues(keyValues, table->pressedKeys, keyCount);
+            copyKeyValues(keyValues, table->pressedKeys.table, keyCount);
 
             {
               int index;

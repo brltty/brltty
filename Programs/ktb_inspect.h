@@ -27,13 +27,13 @@ extern "C" {
 
 static inline const KeyContext *
 getKeyContext (KeyTable *table, unsigned char context) {
-  if (context < table->keyContextCount) return &table->keyContextTable[context];
+  if (context < table->keyContexts.count) return &table->keyContexts.table[context];
   return NULL;
 }
 
 static inline int
 isTemporaryKeyContext (const KeyTable *table, const KeyContext *ctx) {
-  return ((ctx - table->keyContextTable) > KTB_CTX_DEFAULT) && !ctx->title;
+  return ((ctx - table->keyContexts.table) > KTB_CTX_DEFAULT) && !ctx->title;
 }
 
 #ifdef __cplusplus

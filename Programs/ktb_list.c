@@ -110,8 +110,8 @@ searchKeyNameEntry (const void *target, const void *element) {
 
 static const KeyNameEntry *
 findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
-  const KeyNameEntry *const *array = lgd->keyTable->keyNameTable;
-  unsigned int count = lgd->keyTable->keyNameCount;
+  const KeyNameEntry *const *array = lgd->keyTable->keyNames.table;
+  unsigned int count = lgd->keyTable->keyNames.count;
 
   const KeyNameEntry *const *kne = bsearch(value, array, count, sizeof(*array), searchKeyNameEntry);
   if (!kne) return NULL;
@@ -333,13 +333,13 @@ doListKeyTable (ListGenerationData *lgd) {
     if (!endLine(lgd)) return 0;
   }
 
-  if (lgd->keyTable->noteCount) {
+  if (lgd->keyTable->notes.count) {
     unsigned int noteIndex;
 
     if (!endLine(lgd)) return 0;
 
-    for (noteIndex=0; noteIndex<lgd->keyTable->noteCount; noteIndex+=1) {
-      if (!putCharacterString(lgd, lgd->keyTable->noteTable[noteIndex])) return 0;
+    for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
+      if (!putCharacterString(lgd, lgd->keyTable->notes.table[noteIndex])) return 0;
       if (!endLine(lgd)) return 0;
     }
   }
@@ -368,7 +368,7 @@ doListKeyTable (ListGenerationData *lgd) {
   {
     unsigned int context;
 
-    for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContextCount; context+=1) {
+    for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContexts.count; context+=1) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
 
       if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {

@@ -159,18 +159,18 @@ hideBindings (const KeyTableData *ktd) {
 
 static KeyContext *
 getKeyContext (KeyTableData *ktd, unsigned char context) {
-  if (context >= ktd->table->keyContextCount) {
+  if (context >= ktd->table->keyContexts.count) {
     unsigned int newCount = context + 1;
-    KeyContext *newTable = realloc(ktd->table->keyContextTable, ARRAY_SIZE(newTable, newCount));
+    KeyContext *newTable = realloc(ktd->table->keyContexts.table, ARRAY_SIZE(newTable, newCount));
 
     if (!newTable) {
       logSystemError("realloc");
       return NULL;
     }
-    ktd->table->keyContextTable = newTable;
+    ktd->table->keyContexts.table = newTable;
 
-    while (ktd->table->keyContextCount < newCount) {
-      KeyContext *ctx = &ktd->table->keyContextTable[ktd->table->keyContextCount++];
+    while (ktd->table->keyContexts.count < newCount) {
+      KeyContext *ctx = &ktd->table->keyContexts.table[ktd->table->keyContexts.count++];
       memset(ctx, 0, sizeof(*ctx));
 
       ctx->title = NULL;
@@ -191,7 +191,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
     }
   }
 
-  return &ktd->table->keyContextTable[context];
+  return &ktd->table->keyContexts.table[context];
 }
 
 static inline KeyContext *
@@ -298,18 +298,18 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   {
     const KeyNameEntry *const *knt = keys;
 
-    ktd->table->keyNameCount = 0;
+    ktd->table->keyNames.count = 0;
     while (*knt) {
       const KeyNameEntry *kne = *knt;
       while (kne->name) kne += 1;
-      ktd->table->keyNameCount += kne - *knt;
+      ktd->table->keyNames.count += kne - *knt;
       knt += 1;
     }
   }
 
-  if ((ktd->table->keyNameTable = malloc(ARRAY_SIZE(ktd->table->keyNameTable, ktd->table->keyNameCount)))) {
+  if ((ktd->table->keyNames.table = malloc(ARRAY_SIZE(ktd->table->keyNames.table, ktd->table->keyNames.count)))) {
     {
-      const KeyNameEntry **address = ktd->table->keyNameTable;
+      const KeyNameEntry **address = ktd->table->keyNames.table;
       const KeyNameEntry *const *knt = keys;
 
       while (*knt) {
@@ -318,7 +318,7 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
       }
     }
 
-    qsort(ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), sortKeyNames);
+    qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyNames);
     return 1;
   }
 
@@ -332,7 +332,7 @@ findKeyName (const wchar_t *characters, int length, KeyTableData *ktd) {
     .length = length
   };
 
-  return bsearch(&name, ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), searchKeyName);
+  return bsearch(&name, ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), searchKeyName);
 }
 
 static int
@@ -975,18 +975,18 @@ processNoteOperands (DataFile *file, void *data) {
       DataString string;
 
       if (parseDataString(file, &string, operand.characters, operand.length, 0)) {
-        unsigned int newCount = ktd->table->noteCount + 1;
-        wchar_t **newTable = realloc(ktd->table->noteTable, ARRAY_SIZE(newTable, newCount));
+        unsigned int newCount = ktd->table->notes.count + 1;
+        wchar_t **newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
           logSystemError("realloc");
           return 0;
         }
 
-        ktd->table->noteTable = newTable;
+        ktd->table->notes.table = newTable;
 
         {
-          wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->noteTable, string.length+1));
+          wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->notes.table, string.length+1));
 
           if (!noteString) {
             logMallocError();
@@ -995,7 +995,7 @@ processNoteOperands (DataFile *file, void *data) {
 
           wmemcpy(noteString, string.characters, string.length);
           noteString[string.length] = 0;
-          ktd->table->noteTable[ktd->table->noteCount++] = noteString;
+          ktd->table->notes.table[ktd->table->notes.count++] = noteString;
           return 1;
         }
       }
@@ -1079,7 +1079,7 @@ void
 resetKeyTable (KeyTable *table) {
   resetKeyTableAutorepeatData(&table->autorepeat);
   table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
-  table->pressedCount = 0;
+  table->pressedKeys.count = 0;
 }
 
 static int
@@ -1355,8 +1355,8 @@ finishKeyTable (KeyTableData *ktd) {
   {
     unsigned int context;
 
-    for (context=0; context<ktd->table->keyContextCount; context+=1) {
-      KeyContext *ctx = &ktd->table->keyContextTable[context];
+    for (context=0; context<ktd->table->keyContexts.count; context+=1) {
+      KeyContext *ctx = &ktd->table->keyContexts.table[context];
 
       if (!prepareKeyBindings(ctx)) return 0;
       if (!prepareHotkeyEntries(ctx)) return 0;
@@ -1365,7 +1365,7 @@ finishKeyTable (KeyTableData *ktd) {
   }
 
   if (!setDefaultKeyContextProperties(ktd)) return 0;
-  qsort(ktd->table->keyNameTable, ktd->table->keyNameCount, sizeof(*ktd->table->keyNameTable), sortKeyValues);
+  qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyValues);
   resetKeyTable(ktd->table);
   return 1;
 }
@@ -1383,18 +1383,18 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
     if ((ktd.table = malloc(sizeof(*ktd.table)))) {
       ktd.table->title = NULL;
 
-      ktd.table->noteTable = NULL;
-      ktd.table->noteCount = 0;
+      ktd.table->notes.table = NULL;
+      ktd.table->notes.count = 0;
 
-      ktd.table->keyNameTable = NULL;
-      ktd.table->keyNameCount = 0;
+      ktd.table->keyNames.table = NULL;
+      ktd.table->keyNames.count = 0;
 
-      ktd.table->keyContextTable = NULL;
-      ktd.table->keyContextCount = 0;
+      ktd.table->keyContexts.table = NULL;
+      ktd.table->keyContexts.count = 0;
 
-      ktd.table->pressedKeys = NULL;
-      ktd.table->pressedSize = 0;
-      ktd.table->pressedCount = 0;
+      ktd.table->pressedKeys.table = NULL;
+      ktd.table->pressedKeys.size = 0;
+      ktd.table->pressedKeys.count = 0;
 
       ktd.table->autorepeat.alarm = NULL;
 
@@ -1424,10 +1424,10 @@ void
 destroyKeyTable (KeyTable *table) {
   resetKeyTableAutorepeatData(&table->autorepeat);
 
-  while (table->noteCount) free(table->noteTable[--table->noteCount]);
+  while (table->notes.count) free(table->notes.table[--table->notes.count]);
 
-  while (table->keyContextCount) {
-    KeyContext *ctx = &table->keyContextTable[--table->keyContextCount];
+  while (table->keyContexts.count) {
+    KeyContext *ctx = &table->keyContexts.table[--table->keyContexts.count];
 
     if (ctx->title) free(ctx->title);
 
@@ -1441,10 +1441,10 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->mappedKeys.sorted) free(ctx->mappedKeys.sorted);
   }
 
-  if (table->keyContextTable) free(table->keyContextTable);
-  if (table->keyNameTable) free(table->keyNameTable);
+  if (table->keyContexts.table) free(table->keyContexts.table);
+  if (table->keyNames.table) free(table->keyNames.table);
   if (table->title) free(table->title);
-  if (table->pressedKeys) free(table->pressedKeys);
+  if (table->pressedKeys.table) free(table->pressedKeys.table);
   free(table);
 }
 

@@ -113,14 +113,20 @@ typedef struct {
 struct KeyTableStruct {
   wchar_t *title;
 
-  wchar_t **noteTable;
-  unsigned int noteCount;
+  struct {
+    wchar_t **table;
+    unsigned int count;
+  } notes;
 
-  const KeyNameEntry **keyNameTable;
-  unsigned int keyNameCount;
+  struct {
+    const KeyNameEntry **table;
+    unsigned int count;
+  } keyNames;
 
-  KeyContext *keyContextTable;
-  unsigned int keyContextCount;
+  struct {
+    KeyContext *table;
+    unsigned int count;
+  } keyContexts;
 
   struct {
     unsigned char persistent;
@@ -128,9 +134,11 @@ struct KeyTableStruct {
     unsigned char current;
   } context;
 
-  KeyValue *pressedKeys;
-  unsigned int pressedSize;
-  unsigned int pressedCount;
+  struct {
+    KeyValue *table;
+    unsigned int size;
+    unsigned int count;
+  } pressedKeys;
 
   KeyTableAutorepeatData autorepeat;
 
