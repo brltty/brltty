@@ -760,7 +760,6 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
   jbyte *buf;
   int size;
   char errmsg[256];
-  brlapi_error_t error;
 
   env = jenv;
 
@@ -775,7 +774,6 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
   GET_ID(jenv, bufID,    jcerr, "buf",    "I", NULL);
 
   handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jerr, handleID);
-  error.brlerrno = (*jenv)->GetIntField(jenv, jerr, errnoID);
   type  = (*jenv)->GetIntField(jenv, jerr, typeID);
   if (!(jbuf  = (*jenv)->GetObjectField(jenv, jerr, typeID))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
