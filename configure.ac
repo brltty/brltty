@@ -1045,18 +1045,18 @@ in
       ;;
 esac
 
-BRLTTY_ARG_PACKAGE([program], [program], [], [dnl
+BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
    cygwin*)
-      program_package="windows"
+      pgmpath_package="windows"
       ;;
    linux*)
-      program_package="linux"
+      pgmpath_package="linux"
       ;;
    mingw*)
-      program_package="windows"
+      pgmpath_package="windows"
       ;;
    solaris*)
-      program_package="solaris"
+      pgmpath_package="solaris"
       ;;
 ])
 

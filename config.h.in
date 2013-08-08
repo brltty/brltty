@@ -279,11 +279,11 @@ extern "C" {
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 
-/* Define only one of the following program packages. */
-#undef USE_PKG_PROGRAM_NONE
-#undef USE_PKG_PROGRAM_LINUX
-#undef USE_PKG_PROGRAM_SOLARIS
-#undef USE_PKG_PROGRAM_WINDOWS
+/* Define only one of the following program path packages. */
+#undef USE_PKG_PGMPATH_NONE
+#undef USE_PKG_PGMPATH_LINUX
+#undef USE_PKG_PGMPATH_SOLARIS
+#undef USE_PKG_PGMPATH_WINDOWS
 
 /* Define only one of the following system service packages. */
 #undef USE_PKG_SERVICE_NONE

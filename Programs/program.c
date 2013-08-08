@@ -32,6 +32,7 @@
 #endif /* ENABLE_I18N_SUPPORT */
 
 #include "program.h"
+#include "pgmpath.h"
 #include "pid.h"
 #include "log.h"
 #include "file.h"
