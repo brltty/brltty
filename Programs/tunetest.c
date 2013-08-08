@@ -262,7 +262,7 @@ main (int argc, char *argv[]) {
     {
       TuneDefinition tune = {NULL, 0, elements};
       playTune(&tune);
-      closeTuneDevice(1);
+      closeTunes();
     }
 
     free(elements);

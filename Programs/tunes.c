@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "async.h"
 #include "message.h"
 #include "brl.h"
 #include "brltty.h"
@@ -315,7 +316,7 @@ const TuneDefinition tune_routing_failed = {
 
 static const NoteMethods *noteMethods = NULL;
 static NoteDevice *noteDevice = NULL;
-static unsigned int closeTimer = 0;
+static AsyncHandle tunesCloseTimer = NULL;
 static int openErrorLevel = LOG_ERR;
 
 void
@@ -323,29 +324,40 @@ suppressTuneDeviceOpenErrors (void) {
   openErrorLevel = LOG_DEBUG;
 }
 
-static int
-openTuneDevice (void) {
-  if (noteDevice) return 1;
-  if (!noteMethods) return 0;
-  return (noteDevice = noteMethods->construct(openErrorLevel)) != NULL;
+void
+closeTunes (void) {
+  if (tunesCloseTimer) {
+    asyncCancelRequest(tunesCloseTimer);
+    tunesCloseTimer = NULL;
+  }
+
+  if (noteDevice) {
+    noteMethods->destruct(noteDevice);
+    noteDevice = NULL;
+  }
 }
 
-void
-closeTuneDevice (int force) {
-  if (force) {
-    closeTimer = 0;
-  } else if (closeTimer) {
-    closeTimer--;
-  }
-
-  if (!closeTimer) {
-    if (noteDevice) {
-      noteMethods->destruct(noteDevice);
-      noteDevice = NULL;
-    }
-  }
+static void
+handleTunesTimeout (const AsyncAlarmResult *result) {
+  tunesCloseTimer = NULL;
+  closeTunes();
 }
  
+static int
+openTunes (void) {
+  const int timeout = 2000;
+
+  if (noteDevice) {
+    asyncResetAlarmIn(tunesCloseTimer, timeout);
+  } else if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
+    asyncSetAlarmIn(&tunesCloseTimer, timeout, handleTunesTimeout, NULL);
+  } else {
+    return 0;
+  }
+
+  return 1;
+}
+
 int
 setTuneDevice (TuneDevice device) {
   const NoteMethods *methods;
@@ -382,7 +394,7 @@ setTuneDevice (TuneDevice device) {
   if (!methods) return 0;
 
   if (methods != noteMethods) {
-    closeTuneDevice(1);
+    closeTunes();
     noteMethods = methods;
   }
 
@@ -395,11 +407,10 @@ playTune (const TuneDefinition *tune) {
     int tunePlayed = 0;
 
     if (prefs.alertTunes && tune->elements) {
-      if (openTuneDevice()) {
+      if (openTunes()) {
         const TuneElement *element = tune->elements;
 
         tunePlayed = 1;
-        closeTimer = 2000 / updateInterval;
 
         while (element->duration) {
           if (!noteMethods->play(noteDevice, element->note, element->duration)) {

@@ -1607,7 +1607,7 @@ exitScreens (void) {
 
 static void
 exitTunes (void) {
-  closeTuneDevice(1);
+  closeTunes();
 }
 
 static void

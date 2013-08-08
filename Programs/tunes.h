@@ -69,7 +69,7 @@ extern const TuneDefinition tune_routing_failed;
 
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);
-extern void closeTuneDevice (int force);
+extern void closeTunes (void);
 extern void playTune (const TuneDefinition *tune);
 
 extern int showDotPattern (unsigned char dots, unsigned char duration);

@@ -3363,8 +3363,6 @@ int
 brlttyUpdate (void) {
   if (!brlttyPrepare()) return 0;
   if (terminationCount) return 0;
-
-  closeTuneDevice(0);
   checkRoutingStatus(ROUTING_DONE, 0);
 
   if (opt_releaseDevice) {
@@ -4011,7 +4009,6 @@ message (const char *mode, const char *text, short flags) {
 
           if (command == EOF) {
             drainBrailleOutput(&brl, delay);
-            closeTuneDevice(0);
           } else if (command != BRL_CMD_NOOP) {
             break;
           }
