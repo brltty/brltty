@@ -25,16 +25,20 @@
 
 directory=`dirname "${0}"`
 "${directory}/configure" \
-   --with-braille-driver=-lt,-tt,-vd,-vr \
-   --without-libbraille \
-   --disable-speech-support \
    --disable-api \
+   --disable-icu \
+   --disable-gpm \
    --disable-x \
+   \
+   --without-libbraille \
+   --with-braille-driver=-lt,-tt,-vd,-vr \
+   \
+   --disable-speech-support \
+   \
    --without-pcm-package \
    --without-midi-package \
    --without-fm-package \
-   --disable-icu \
-   --disable-gpm \
+   \
    --host=i386-elf \
    "${@}"
 exit "${?}"

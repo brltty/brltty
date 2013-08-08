@@ -83,9 +83,9 @@ then
       \
       -with-screen-driver=-all \
       \
-      --without-program-package \
+      --without-pgmpath-package \
       --without-service-package \
-      --without-options-package \
+      --without-params-package \
       --without-dynld-package \
       --without-charset-package \
       --without-hostcmd-package \

@@ -100,9 +100,9 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-midi-package \
    --without-fm-package \
    \
-   --without-program-package \
+   --without-pgmpath-package \
    --without-service-package \
-   --without-options-package \
+   --without-params-package \
    --without-charset-package \
    --without-hostcmd-package \
    --without-mntpt-package \
