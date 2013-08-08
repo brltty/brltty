@@ -138,7 +138,8 @@ struct KeyTableStruct {
     AsyncHandle alarm;
     int command;
     unsigned pending:1;
-  } autorepeat;
+    unsigned repeat:1;
+  } longPress;
 
   const unsigned char *logKeyEvents;
 };
@@ -161,7 +162,7 @@ extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
-extern void resetAutorepeatData (KeyTable *table);
+extern void resetLongPressData (KeyTable *table);
 
 #ifdef __cplusplus
 }

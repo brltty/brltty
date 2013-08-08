@@ -243,27 +243,27 @@ processCommand (KeyTable *table, int command) {
   return enqueueCommand(command);
 }
 
-static void setAutorepeatAlarm (KeyTable *table, unsigned char when);
+static void setLongPressAlarm (KeyTable *table, unsigned char when);
 
 static void
-handleAutorepeatAlarm (const AsyncAlarmResult *result) {
+handleLongPressAlarm (const AsyncAlarmResult *result) {
   KeyTable *table = result->data;
 
-  table->autorepeat.alarm = NULL;
-  table->autorepeat.pending = 0;
+  table->longPress.alarm = NULL;
+  table->longPress.pending = 0;
 
-  setAutorepeatAlarm(table, prefs.autorepeatInterval);
-  processCommand(table, table->autorepeat.command);
+  if (table->longPress.repeat) setLongPressAlarm(table, prefs.autorepeatInterval);
+  processCommand(table, table->longPress.command);
 }
 
 static void
-setAutorepeatAlarm (KeyTable *table, unsigned char when) {
-  asyncSetAlarmIn(&table->autorepeat.alarm, PREFERENCES_TIME(when),
-                  handleAutorepeatAlarm, table);
+setLongPressAlarm (KeyTable *table, unsigned char when) {
+  asyncSetAlarmIn(&table->longPress.alarm, PREFERENCES_TIME(when),
+                  handleLongPressAlarm, table);
 }
 
 static int
-isAutorepeatableCommand (int command) {
+isRepeatableCommand (int command) {
   if (prefs.autorepeat) {
     switch (command & BRL_MSK_BLK) {
       case BRL_BLK_PASSCHAR:
@@ -343,7 +343,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (hotkey) {
     state = KTS_HOTKEY;
-    resetAutorepeatData(table);
+    resetLongPressData(table);
 
     {
       int cmd = press? hotkey->pressCommand: hotkey->releaseCommand;
@@ -396,7 +396,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (!wasPressed) {
-        resetAutorepeatData(table);
+        resetLongPressData(table);
 
         if (binding) {
           if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
@@ -430,23 +430,22 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         }
 
         if (context != KTB_CTX_WAITING) {
-          if (isAutorepeatableCommand(command)) {
-            table->autorepeat.command = command;
-            table->autorepeat.pending = !isImmediate;
-            setAutorepeatAlarm(table, prefs.autorepeatDelay);
-            if (!isImmediate) command = BRL_CMD_NOOP;
+          int pending = !isImmediate;
+          int repeat = isRepeatableCommand(command);
+
+          if (pending || repeat) {
+            table->longPress.command = command;
+            if ((table->longPress.pending = pending)) command = BRL_CMD_NOOP;
+            table->longPress.repeat = repeat;
+            setLongPressAlarm(table, prefs.autorepeatDelay);
           }
         }
 
         processCommand(table, command);
       }
     } else {
-      if (table->autorepeat.pending) {
-        processCommand(table, table->autorepeat.command);
-        table->autorepeat.pending = 0;
-      }
-
-      resetAutorepeatData(table);
+      if (table->longPress.pending) processCommand(table, table->longPress.command);
+      resetLongPressData(table);
     }
   }
 

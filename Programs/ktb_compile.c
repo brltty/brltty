@@ -1065,19 +1065,20 @@ processKeyTableLine (DataFile *file, void *data) {
 }
 
 void
-resetAutorepeatData (KeyTable *table) {
-  if (table->autorepeat.alarm) {
-    asyncCancelRequest(table->autorepeat.alarm);
-    table->autorepeat.alarm = NULL;
+resetLongPressData (KeyTable *table) {
+  if (table->longPress.alarm) {
+    asyncCancelRequest(table->longPress.alarm);
+    table->longPress.alarm = NULL;
   }
 
-  table->autorepeat.command = EOF;
-  table->autorepeat.pending = 0;
+  table->longPress.command = EOF;
+  table->longPress.pending = 0;
+  table->longPress.repeat = 0;
 }
 
 void
 resetKeyTable (KeyTable *table) {
-  resetAutorepeatData(table);
+  resetLongPressData(table);
   table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
   table->pressedKeys.count = 0;
 }
@@ -1396,7 +1397,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
       ktd.table->pressedKeys.size = 0;
       ktd.table->pressedKeys.count = 0;
 
-      ktd.table->autorepeat.alarm = NULL;
+      ktd.table->longPress.alarm = NULL;
 
       if (allocateKeyNameTable(&ktd, keys)) {
         if (allocateCommandTable(&ktd)) {
@@ -1422,7 +1423,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
-  resetAutorepeatData(table);
+  resetLongPressData(table);
 
   while (table->notes.count) free(table->notes.table[--table->notes.count]);
 
