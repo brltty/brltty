@@ -22,12 +22,11 @@
 
 #include "log.h"
 #include "async.h"
-#include "message.h"
-#include "brl.h"
-#include "brltty.h"
 #include "prefs.h"
 #include "tunes.h"
 #include "notes.h"
+#include "message.h"
+#include "brl.h"
 
 static const TuneElement elements_braille_on[] = {
   TUNE_NOTE( 60,  64),
