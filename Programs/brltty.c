@@ -96,7 +96,6 @@ static int contractedTrack = 0;
 
 ScreenDescription scr;
 SessionEntry *ses = NULL;
-unsigned int updateIntervals = 0;
 unsigned char infoMode = 0;
 
 static void
@@ -1797,7 +1796,6 @@ static int inputModifiers;
 static int
 brlttyPrepare_next (void) {
   drainBrailleOutput(&brl, updateInterval);
-  updateIntervals += 1;
   updateSessionAttributes();
   return 1;
 }

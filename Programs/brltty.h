@@ -46,7 +46,6 @@ extern ScreenDescription scr;
 #define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
 extern SessionEntry *ses;
-extern unsigned int updateIntervals;
 extern unsigned char infoMode;
 
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);

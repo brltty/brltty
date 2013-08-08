@@ -18,9 +18,8 @@
 
 #include "prologue.h"
 
-#include <time.h>
-
 #include "status.h"
+#include "timing.h"
 #include "brldefs.h"
 #include "scr.h"
 #include "brltty.h"
@@ -64,10 +63,25 @@ renderCoordinatesVertical (unsigned char *cells, int column, int row) {
 static void
 renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
   /* the coordinates are presented as an underlined letter as the Alva DOS TSR */
-  *cell = !SCR_COORDINATES_OK(column, row)? convertCharacterToDots(textTable, WC_C('z')):
-          ((updateIntervals / 16) % (row / 25 + 1))? 0:
-          convertCharacterToDots(textTable, (row % 25 + WC_C('a'))) |
-          ((column / textCount) << 6);
+  if (!SCR_COORDINATES_OK(column, row)) {
+    *cell = convertCharacterToDots(textTable, WC_C('z'));
+  } else {
+    const int32_t height = 25;
+    const int32_t frequency = row / height;
+
+    if (frequency) {
+      TimeValue time;
+      getMonotonicTime(&time);
+
+      if (((time.nanoseconds / (NSECS_PER_SEC / (frequency * 2))) % 2) == 0) {
+        *cell = 0;
+        return;
+      }
+    }
+
+    *cell = convertCharacterToDots(textTable, ((row % height) + WC_C('a')))
+          | ((column / textCount) << 6);
+  }
 }
 
 typedef void (*RenderStatusField) (unsigned char *cells);
@@ -144,10 +158,14 @@ renderStatusField_stateLetter (unsigned char *cells) {
 
 static void
 renderStatusField_time (unsigned char *cells) {
-  time_t now = time(NULL);
-  struct tm *local = localtime(&now);
-  renderNumberUpper(cells, local->tm_hour);
-  renderNumberLower(cells, local->tm_min);
+  TimeValue value;
+  TimeComponents components;
+
+  getCurrentTime(&value);
+  expandTimeValue(&value, &components);
+
+  renderNumberUpper(cells, components.hour);
+  renderNumberLower(cells, components.minute);
 }
 
 static void
