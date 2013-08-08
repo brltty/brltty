@@ -44,8 +44,8 @@ $(SERVICE_OBJECT).$O:
 options.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
 
-$(OPTIONS_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(OPTIONS_CFLAGS) -c $(SRC_DIR)/$(OPTIONS_OBJECT).c
+$(PARAMS_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(PARAMS_CFLAGS) -c $(SRC_DIR)/$(PARAMS_OBJECT).c
 
 ###############################################################################
 

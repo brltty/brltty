@@ -86,8 +86,6 @@ extern ProgramExitStatus processOptions (
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
 
-extern char * getBootParameters (const char *name);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

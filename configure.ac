@@ -1066,9 +1066,9 @@ BRLTTY_ARG_PACKAGE([service], [system service], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([options], [options], [], [dnl
+BRLTTY_ARG_PACKAGE([params], [boot parameters], [], [dnl
    linux*)
-      options_package="linux"
+      params_package="linux"
       ;;
 ])
 

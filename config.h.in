@@ -289,9 +289,9 @@ extern "C" {
 #undef USE_PKG_SERVICE_NONE
 #undef USE_PKG_SERVICE_WINDOWS
 
-/* Define only one of the following options packages. */
-#undef USE_PKG_OPTIONS_NONE
-#undef USE_PKG_OPTIONS_LINUX
+/* Define only one of the following boot parameters packages. */
+#undef USE_PKG_PARAMS_NONE
+#undef USE_PKG_PARAMS_LINUX
 
 /* Define only one of the following dynamic loading packages. */
 #undef USE_PKG_DYNLD_NONE

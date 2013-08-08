@@ -26,6 +26,7 @@
 
 #include "program.h"
 #include "options.h"
+#include "params.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"
