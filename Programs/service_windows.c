@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "program.h"
+#include "pgmpath.h"
 #include "service.h"
 #include "sys_windows.h"
 

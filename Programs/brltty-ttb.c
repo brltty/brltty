@@ -705,7 +705,7 @@ static int inputAttributesChanged;
 
 #if defined(__MINGW32__)
 #define STDIN_HANDLE ((HANDLE)_get_osfhandle(STDIN_FILENO))
-static long inputConsoleMode;
+static DWORD inputConsoleMode;
 
 #undef beep
 #define beep() MessageBeep(MB_ICONWARNING)
@@ -1624,6 +1624,7 @@ doKeyboardCommand (EditTableData *etd) {
   return 1;
 }
 
+#ifndef __MINGW32__
 static int
 doBrailleCommand (EditTableData *etd) {
   if (haveBrailleDisplay(etd)) {
@@ -1750,6 +1751,7 @@ doBrailleCommand (EditTableData *etd) {
 
   return 1;
 }
+#endif /* __MINGW32__ */
 
 static ProgramExitStatus
 editTable (void) {
@@ -1791,7 +1793,7 @@ editTable (void) {
 
 #if defined(__MINGW32__)
     if (GetConsoleMode(STDIN_HANDLE, &inputConsoleMode)) {
-      long newConsoleMode = inputConsoleMode;
+      DWORD newConsoleMode = inputConsoleMode;
       newConsoleMode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
 
       if (SetConsoleMode(STDIN_HANDLE, newConsoleMode)) {
