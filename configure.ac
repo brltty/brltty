@@ -837,6 +837,9 @@ in
    osf*)
       brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE -D_OSF_SOURCE"
       ;;
+   cygwin*)
+      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED"
+      ;;
    *)
       brltty_cv_prog_cc_sysflags=""
       ;;
