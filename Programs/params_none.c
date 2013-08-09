@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "options.h"
+#include "params.h"
 
 char *
 getBootParameters (const char *name) {

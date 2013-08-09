@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "options.h"
+#include "params.h"
 
 char *
 getBootParameters (const char *name) {

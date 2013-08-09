@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include "program.h"
+#include "pgmpath.h"
 
 char *
 getProgramPath (void) {

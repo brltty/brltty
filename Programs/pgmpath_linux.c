@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "program.h"
+#include "pgmpath.h"
 
 char *
 getProgramPath (void) {
