@@ -28,6 +28,7 @@
 
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
+#define START_INPUT_TIMEOUT 1000
 #define MAXIMUM_CELL_COUNT 80
 
 #define MM_KEY_SET_ENTRY(s,n) BRL_KEY_SET_ENTRY(MM, s, n)
@@ -143,23 +144,6 @@ writePacket (
   return writeBytes(brl, bytes, byte-bytes);
 }
 
-static int
-startDisplayMode (BrailleDisplay *brl) {
-  static const unsigned char data[] = {MM_BLINK_NO, 0};
-
-  return writePacket(brl, MM_CMD_StartDisplayMode, 0, data, sizeof(data));
-}
-
-static int
-endDisplayMode (BrailleDisplay *brl) {
-  return writePacket(brl, MM_CMD_EndDisplayMode, 0, NULL, 0);
-}
-
-static int
-sendBrailleData (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
-  return writePacket(brl, MM_CMD_SendBrailleData, 0, cells, count);
-}
-
 static size_t
 readBytes (BrailleDisplay *brl, void *packet, size_t size) {
   unsigned char *bytes = packet;
@@ -240,6 +224,35 @@ readPacket (BrailleDisplay *brl, MM_CommandPacket *packet) {
 }
 
 static int
+startDisplayMode (BrailleDisplay *brl) {
+  static const unsigned char data[] = {MM_BLINK_NO, 0};
+
+  if (writePacket(brl, MM_CMD_StartDisplayMode, 0, data, sizeof(data))) {
+    if (gioAwaitInput(brl->data->gioEndpoint, START_INPUT_TIMEOUT)) {
+      MM_CommandPacket response;
+      size_t size = readPacket(brl, &response);
+
+      if (size) {
+        if (response.fields.header.id1 == MM_HEADER_ACK) return 1;
+        logUnexpectedPacket(response.bytes, size);
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+endDisplayMode (BrailleDisplay *brl) {
+  return writePacket(brl, MM_CMD_EndDisplayMode, 0, NULL, 0);
+}
+
+static int
+sendBrailleData (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
+  return writePacket(brl, MM_CMD_SendBrailleData, 0, cells, count);
+}
+
+static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS
@@ -287,24 +300,26 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readBytes, &response, sizeof(response),
                               isIdentityResponse)) {
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+        if (startDisplayMode(brl)) {
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
-          brl->keyBindings = ktd->bindings;
-          brl->keyNameTables = ktd->names;
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
+          {
+            static const DotsTable dots = {
+              MM_DOT_1, MM_DOT_2, MM_DOT_3, MM_DOT_4,
+              MM_DOT_5, MM_DOT_6, MM_DOT_7, MM_DOT_8
+            };
+
+            makeOutputTable(dots);
+          }
+
+          brl->data->forceRewrite = 1;
+          return 1;
         }
-
-        {
-          static const DotsTable dots = {
-            MM_DOT_1, MM_DOT_2, MM_DOT_3, MM_DOT_4,
-            MM_DOT_5, MM_DOT_6, MM_DOT_7, MM_DOT_8
-          };
-
-          makeOutputTable(dots);
-        }
-
-        brl->data->forceRewrite = 1;
-        return 1;
       }
 
       gioDisconnectResource(brl->data->gioEndpoint);
