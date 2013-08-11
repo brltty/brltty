@@ -129,8 +129,8 @@ writePacket (
   unsigned char bytes[sizeof(MM_CommandHeader) + length];
   unsigned char *byte = bytes;
 
-  *byte++ = 0XFF;
-  *byte++ = 0XFF;
+  *byte++ = MM_HEADER_ID1;
+  *byte++ = MM_HEADER_ID2;
 
   *byte++ = code;
   *byte++ = subcode;
@@ -181,7 +181,12 @@ readBytes (BrailleDisplay *brl, void *packet, size_t size) {
   gotByte:
     if (offset == 0) {
       switch (byte) {
-        case 0XFF:
+        case MM_HEADER_NAK:
+        case MM_HEADER_ACK:
+          length = 1;
+          break;
+
+        case MM_HEADER_ID1:
           length = 6;
           break;
 
@@ -194,7 +199,7 @@ readBytes (BrailleDisplay *brl, void *packet, size_t size) {
 
       switch (offset) {
         case 1:
-          if (byte != 0XFF) unexpected = 1;
+          if (byte != MM_HEADER_ID2) unexpected = 1;
           break;
 
         case 5:
@@ -343,47 +348,50 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, &packet))) {
-    switch (packet.fields.header.code) {
-      case MM_CMD_KeyCombination:
-        switch (packet.fields.data.keys.group) {
-          case MM_SET_SHIFT:
-            if (!packet.fields.data.keys.value) {
-              enqueueKeys(packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
-              continue;
-            }
-            break;
+    if ((packet.fields.header.id1 == MM_HEADER_ID1) &&
+        (packet.fields.header.id2 == MM_HEADER_ID2)) {
+      switch (packet.fields.header.code) {
+        case MM_CMD_KeyCombination:
+          switch (packet.fields.data.keys.group) {
+            case MM_SET_SHIFT:
+              if (!packet.fields.data.keys.value) {
+                enqueueKeys(packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
+                continue;
+              }
+              break;
 
-          case MM_SET_DOT:
-          case MM_SET_EDIT:
-          case MM_SET_ARROW:
-          case MM_SET_DISPLAY:
-          {
-            uint32_t shift = 0;
+            case MM_SET_DOT:
+            case MM_SET_EDIT:
+            case MM_SET_ARROW:
+            case MM_SET_DISPLAY:
+            {
+              uint32_t shift = 0;
 
-            enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
-            enqueueKeys(packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
-            enqueueUpdatedKeys(0, &shift, MM_SET_SHIFT, 0);
-            continue;
-          }
-
-          case MM_SET_ROUTE: {
-            unsigned char key = packet.fields.data.keys.value;
-
-            if ((key > 0) && (key <= brl->textColumns)) {
-              enqueueKey(packet.fields.data.keys.group, key-1);
+              enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
+              enqueueKeys(packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
+              enqueueUpdatedKeys(0, &shift, MM_SET_SHIFT, 0);
               continue;
             }
 
-            break;
+            case MM_SET_ROUTE: {
+              unsigned char key = packet.fields.data.keys.value;
+
+              if ((key > 0) && (key <= brl->textColumns)) {
+                enqueueKey(packet.fields.data.keys.group, key-1);
+                continue;
+              }
+
+              break;
+            }
+
+            default:
+              break;
           }
+          break;
 
-          default:
-            break;
-        }
-        break;
-
-      default:
-        break;
+        default:
+          break;
+      }
     }
 
     logUnexpectedPacket(packet.bytes, size);

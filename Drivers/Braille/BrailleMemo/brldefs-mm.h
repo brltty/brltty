@@ -18,6 +18,12 @@
 #ifndef BRLTTY_INCLUDED_MM_BRLDEFS
 #define BRLTTY_INCLUDED_MM_BRLDEFS
 
+#define MM_HEADER_ID1 0XFF
+#define MM_HEADER_ID2 0XFF
+
+#define MM_HEADER_NAK 0X00
+#define MM_HEADER_ACK 0X01
+
 typedef enum {
   MM_CMD_QueryLineSize    = 0X13,
   MM_CMD_StartDisplayMode = 0X20,
@@ -36,8 +42,8 @@ typedef enum {
 } MM_BlinkMode;
 
 typedef struct {
-  unsigned char ID1;
-  unsigned char ID2;
+  unsigned char id1;
+  unsigned char id2;
   unsigned char code;
   unsigned char subcode;
   unsigned char lengthLow;
