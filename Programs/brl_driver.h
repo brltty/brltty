@@ -107,6 +107,12 @@ DRIVER_VERSION_DECLARATION(brl);
   KEY_TABLE_LIST_DECLARATION = {
 #define END_KEY_TABLE_LIST LAST_KEY_TABLE_DEFINITION};
 
+#define BRL_SET_NAME(d,s) d ## _SET_ ## s
+#define BRL_KEY_NAME(d,s,k) d ## _ ## s ## _ ## k
+
+#define BRL_KEY_SET_ENTRY(d,s,n) KEY_SET_ENTRY(BRL_SET_NAME(d, s), n)
+#define BRL_KEY_NAME_ENTRY(d,s,k,n) {.value={.set=BRL_SET_NAME(d, s), .key=BRL_KEY_NAME(d, s, k)}, .name=n}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
