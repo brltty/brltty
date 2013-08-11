@@ -49,19 +49,21 @@ typedef union {
 
   struct {
     MM_CommandHeader header;
-    unsigned char data[3];
+
+    union {
+      struct {
+        unsigned char blink;
+        unsigned char reserved;
+      } start;
+
+      struct {
+        unsigned char kind;
+        unsigned char group;
+        unsigned char shift;
+      } keys;
+    } data;
   } fields;
 } MM_CommandPacket;
-
-typedef enum {
-  MM_GROUP_NONE    = 0,
-  MM_GROUP_BRAILLE = 1,
-  MM_GROUP_EDIT    = 2,
-  MM_GROUP_ARROW   = 3,
-  MM_GROUP_CURSOR  = 4,
-  MM_GROUP_ERROR   = 5,
-  MM_GROUP_DISPLAY = 6
-} MM_KeyGroup;
 
 typedef enum {
   MM_SHIFT_F1      = 0,
@@ -116,6 +118,7 @@ typedef enum {
   MM_SET_EDIT    = 2,
   MM_SET_ARROW   = 3,
   MM_SET_ROUTE   = 4,
+  MM_SET_ERROR   = 5,
   MM_SET_DISPLAY = 6
 } MM_KeySet;
 
