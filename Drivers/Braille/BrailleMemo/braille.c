@@ -182,12 +182,29 @@ readBytes (BrailleDisplay *brl, void *packet, size_t size) {
   gotByte:
     if (offset == 0) {
       switch (byte) {
+        case 0XFF:
+          length = 6;
+          break;
+
         default:
           logIgnoredByte(byte);
           continue;
       }
     } else {
       int unexpected = 0;
+
+      switch (offset) {
+        case 1:
+          if (byte != 0XFF) unexpected = 1;
+          break;
+
+        case 5:
+          length += (byte << 8) || bytes[offset-1];
+          break;
+
+        default:
+          break;
+      }
 
       if (unexpected) {
         logShortPacket(bytes, offset);
