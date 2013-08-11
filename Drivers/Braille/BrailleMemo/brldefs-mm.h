@@ -86,14 +86,14 @@ typedef enum {
 } MM_DotKey;
 
 typedef enum {
-  MM_EDIT_ESCAPE    = 0,
-  MM_EDIT_INFO      = 1,
-  MM_EDIT_BACKSPACE = 2,
-  MM_EDIT_DELETE    = 3,
-  MM_EDIT_INSERT    = 4,
-  MM_EDIT_CHANGE    = 5,
-  MM_EDIT_OK        = 6,
-  MM_EDIT_SET       = 7
+  MM_EDIT_ESC    = 0,
+  MM_EDIT_INF    = 1,
+  MM_EDIT_BS     = 2,
+  MM_EDIT_DEL    = 3,
+  MM_EDIT_INS    = 4,
+  MM_EDIT_CHANGE = 5,
+  MM_EDIT_OK     = 6,
+  MM_EDIT_SET    = 7
 } MM_EditKey;
 
 typedef enum {
