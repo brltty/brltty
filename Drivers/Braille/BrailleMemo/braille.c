@@ -162,7 +162,7 @@ sendBrailleData (BrailleDisplay *brl, const unsigned char *cells, size_t count) 
 }
 
 static size_t
-readPacket (BrailleDisplay *brl, void *packet, size_t size) {
+readBytes (BrailleDisplay *brl, void *packet, size_t size) {
   unsigned char *bytes = packet;
   size_t offset = 0;
   size_t length = 0;
@@ -213,6 +213,11 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   }
 }
 
+static size_t
+readPacket (BrailleDisplay *brl, MM_CommandPacket *packet) {
+  return readBytes(brl, packet, sizeof(*packet));
+}
+
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
@@ -254,12 +259,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_RESPONSE_SIZE];
+      MM_CommandPacket response;
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT,
                               brl->data->gioEndpoint, PROBE_INPUT_TIMEOUT,
                               writeIdentityRequest,
-                              readPacket, &response, sizeof(response),
+                              readBytes, &response, sizeof(response),
                               isIdentityResponse)) {
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
@@ -305,11 +310,47 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[MAXIMUM_RESPONSE_SIZE];
+  MM_CommandPacket packet;
   size_t size;
 
-  while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    logUnexpectedPacket(packet, size);
+  while ((size = readPacket(brl, &packet))) {
+    switch (packet.fields.header.code) {
+      case MM_CMD_KeyCombination:
+        switch (packet.fields.data.keys.group) {
+          case MM_SET_SHIFT:
+            if (!packet.fields.data.keys.value) {
+              enqueueKeys(packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
+              continue;
+            }
+            break;
+
+          case MM_SET_DOT:
+          case MM_SET_EDIT:
+          case MM_SET_ARROW:
+          case MM_SET_DISPLAY:
+          {
+            uint32_t shift = 0;
+
+            enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
+            enqueueKeys(packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
+            enqueueUpdatedKeys(0, &shift, MM_SET_SHIFT, 0);
+            continue;
+          }
+
+          case MM_SET_ROUTE:
+            enqueueKey(packet.fields.data.keys.group, packet.fields.data.keys.value-1);
+            continue;
+
+          default:
+            break;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    logUnexpectedPacket(packet.bytes, size);
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;

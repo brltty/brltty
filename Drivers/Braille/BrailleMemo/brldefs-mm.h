@@ -57,8 +57,8 @@ typedef union {
       } start;
 
       struct {
-        unsigned char kind;
         unsigned char group;
+        unsigned char value;
         unsigned char shift;
       } keys;
     } data;
