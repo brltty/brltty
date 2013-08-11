@@ -1373,6 +1373,7 @@ BRLTTY_IF_PACKAGE([Libbraille], [libbraille], [include/braille.h], [dnl
 BRLTTY_BRAILLE_DRIVER([lt], [LogText])
 BRLTTY_BRAILLE_DRIVER([mb], [MultiBraille])
 BRLTTY_BRAILLE_DRIVER([md], [MDV])
+BRLTTY_BRAILLE_DRIVER([mm], [BrailleMemo])
 BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([mt], [Metec])
 BRLTTY_BRAILLE_DRIVER([np], [NinePoint])
