@@ -24,7 +24,7 @@
 #include "log.h"
 #include "timing.h"
 #include "system.h"
-#include "sys_windows.h"
+#include "system_windows.h"
 
 #ifdef __CYGWIN32__
 

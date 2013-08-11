@@ -24,7 +24,7 @@
 #include "bluetooth_internal.h"
 #include "log.h"
 #include "io_misc.h"
-#include "sys_java.h"
+#include "system_java.h"
 
 struct BluetoothConnectionExtensionStruct {
   JNIEnv *env;

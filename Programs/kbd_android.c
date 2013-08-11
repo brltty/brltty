@@ -21,7 +21,7 @@
 #include <android/keycodes.h>
 
 #include "log.h"
-#include "sys_java.h"
+#include "system_java.h"
 
 #include "kbd.h"
 #include "kbd_internal.h"

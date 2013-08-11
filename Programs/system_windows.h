@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SYS_WINDOWS
-#define BRLTTY_INCLUDED_SYS_WINDOWS
+#ifndef BRLTTY_INCLUDED_SYSTEM_WINDOWS
+#define BRLTTY_INCLUDED_SYSTEM_WINDOWS
 
 #include "prologue.h"
 
@@ -83,4 +83,4 @@ extern char *makeWindowsCommandLine (const char *const *arguments);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SYS_WINDOWS */
+#endif /* BRLTTY_INCLUDED_SYSTEM_WINDOWS */

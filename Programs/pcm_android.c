@@ -20,7 +20,7 @@
 
 #include "log.h"
 #include "pcm.h"
-#include "sys_java.h"
+#include "system_java.h"
 
 struct PcmDeviceStruct {
   JNIEnv *env;

@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SYS_JAVA
-#define BRLTTY_INCLUDED_SYS_JAVA
+#ifndef BRLTTY_INCLUDED_SYSTEM_JAVA
+#define BRLTTY_INCLUDED_SYSTEM_JAVA
 
 #include <jni.h>
 
@@ -77,4 +77,4 @@ extern int findJavaStaticField (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SYS_JAVA */
+#endif /* BRLTTY_INCLUDED_SYSTEM_JAVA */

@@ -21,7 +21,7 @@
 #include "log.h"
 #include "parse.h"
 #include "brldefs.h"
-#include "sys_windows.h"
+#include "system_windows.h"
 #include "scancodes.h"
 #include "unicode.h"
 

@@ -37,7 +37,7 @@
 #include "hostcmd.h"
 #include "bitmask.h"
 #include "system.h"
-#include "sys_linux.h"
+#include "system_linux.h"
 
 #ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>

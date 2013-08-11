@@ -24,7 +24,7 @@
 #include "log.h"
 #include "device.h"
 #include "beep.h"
-#include "sys_linux.h"
+#include "system_linux.h"
 
 #define BEEP_DIVIDEND 1193180
 

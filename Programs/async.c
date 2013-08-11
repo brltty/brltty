@@ -28,7 +28,7 @@
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
-#include "sys_msdos.h"
+#include "system_msdos.h"
 #endif /* __MSDOS__ */
 
 #undef ASYNC_CAN_MONITOR_IO

@@ -18,12 +18,9 @@
 
 #include "prologue.h"
 
-#include "log.h"
-#include "system.h"
-
-#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include <setjmp.h>
 #include <dpmi.h>
 #include <pc.h>
@@ -31,6 +28,10 @@
 #include <go32.h>
 #include <crt0.h>
 #include <sys/farptr.h>
+
+#include "log.h"
+#include "system.h"
+#include "system_msdos.h"
 
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 

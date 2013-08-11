@@ -22,7 +22,7 @@
 #include <fcntl.h>
 
 #include "log.h"
-#include "sys_windows.h"
+#include "system_windows.h"
 #include "hostcmd_windows.h"
 #include "hostcmd_internal.h"
 

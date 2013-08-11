@@ -65,7 +65,7 @@ int isWindowsService = 0;
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
-#include "sys_msdos.h"
+#include "system_msdos.h"
 #endif /* __MSDOS__ */
 
 #define SERVICE_NAME "BrlAPI"

@@ -16,26 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SYS_LINUX
-#define BRLTTY_INCLUDED_SYS_LINUX
+#ifndef BRLTTY_INCLUDED_SYSTEM_MSDOS
+#define BRLTTY_INCLUDED_SYSTEM_MSDOS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int installKernelModule (const char *name, int *status);
+extern void msdosBackground (void);
 
-extern int openCharacterDevice (const char *name, int flags, int major, int minor);
+extern unsigned long tsr_usleep (unsigned long usec);
 
-extern int getUinputDevice (void);
-extern int hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max);
-extern int writeInputEvent (uint16_t type, uint16_t code, int32_t value);
-
-extern int writeKeyEvent (int key, int press);
-extern void releaseAllKeys (void);
+extern unsigned short getCodePage (void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SYS_LINUX */
+#endif /* BRLTTY_INCLUDED_SYSTEM_MSDOS */

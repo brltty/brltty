@@ -41,7 +41,7 @@
 #include "timing.h"
 
 #ifdef __MSDOS__
-#include "sys_msdos.h"
+#include "system_msdos.h"
 #endif /* __MSDOS__ */
 
 #if !HAVE_DECL_LOCALTIME_R

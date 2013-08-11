@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "sys_linux.h"
+#include "system_linux.h"
 
 #include "kbd.h"
 #include "kbd_internal.h"

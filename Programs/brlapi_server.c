@@ -34,7 +34,7 @@
 #endif /* HAVE_ICONV_H */
 
 #ifdef __MINGW32__
-#include "sys_windows.h"
+#include "system_windows.h"
 #include "win_pthread.h"
 
 #else /* __MINGW32__ */

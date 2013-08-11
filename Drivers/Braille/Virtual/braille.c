@@ -27,7 +27,7 @@
 
 #ifdef __MINGW32__
 #include <ws2tcpip.h>
-#include "sys_windows.h"
+#include "system_windows.h"
 #else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>

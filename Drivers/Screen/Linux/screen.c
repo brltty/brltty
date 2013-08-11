@@ -33,7 +33,7 @@
 #include "log.h"
 #include "device.h"
 #include "parse.h"
-#include "sys_linux.h"
+#include "system_linux.h"
 #include "charset.h"
 #include "brldefs.h"
 

@@ -31,7 +31,7 @@
 #include "ttb_compile.h"
 
 #ifdef __MINGW32__
-#include "sys_windows.h"
+#include "system_windows.h"
 #endif /* __MINGW32__ */
 
 struct TextTableDataStruct {

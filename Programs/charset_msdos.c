@@ -23,7 +23,7 @@
 
 #include "charset_internal.h"
 #include "unicode.h"
-#include "sys_msdos.h"
+#include "system_msdos.h"
 
 #define CHARACTER_SET_SIZE 0X100
 

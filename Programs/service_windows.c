@@ -21,7 +21,7 @@
 #include "log.h"
 #include "pgmpath.h"
 #include "service.h"
-#include "sys_windows.h"
+#include "system_windows.h"
 
 int
 installService (const char *name, const char *description) {

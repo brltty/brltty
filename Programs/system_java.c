@@ -22,7 +22,7 @@
 
 #include "log.h"
 #include "system.h"
-#include "sys_java.h"
+#include "system_java.h"
 
 static JavaVM *javaVirtualMachine = NULL;
 
