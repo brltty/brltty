@@ -316,7 +316,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data) {
-    if (brl->data->gioEndpoint) gioDisconnectResource(brl->data->gioEndpoint);
+    if (brl->data->gioEndpoint) {
+      endDisplayMode(brl);
+      gioDisconnectResource(brl->data->gioEndpoint);
+    }
+
     free(brl->data);
   }
 }
@@ -327,6 +331,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     unsigned char cells[brl->textColumns];
 
     translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+    if (!sendBrailleData(brl, cells, sizeof(cells))) return 0;
   }
 
   return 1;
