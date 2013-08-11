@@ -28,8 +28,7 @@
 
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
-#define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
-#define MAXIMUM_CELL_COUNT 140
+#define MAXIMUM_CELL_COUNT 80
 
 #define MM_KEY_SET_ENTRY(s,n) BRL_KEY_SET_ENTRY(MM, s, n)
 #define MM_KEY_NAME_ENTRY(s,k,n) BRL_KEY_NAME_ENTRY(MM, s, k, n)
@@ -290,7 +289,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->keyNameTables = ktd->names;
         }
 
-        makeOutputTable(dotsTable_ISO11548_1);
+        {
+          static const DotsTable dots = {
+            MM_DOT_1, MM_DOT_2, MM_DOT_3, MM_DOT_4,
+            MM_DOT_5, MM_DOT_6, MM_DOT_7, MM_DOT_8
+          };
+
+          makeOutputTable(dots);
+        }
+
         brl->data->forceRewrite = 1;
         return 1;
       }
