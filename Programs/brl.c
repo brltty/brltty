@@ -595,7 +595,7 @@ readBraillePacket (
   BrailleDisplay *brl,
   GioEndpoint *endpoint,
   void *packet, size_t size,
-  BraillePacketVerifier verifyPacket
+  BraillePacketVerifier verifyPacket, void *data
 ) {
   unsigned char *bytes = packet;
   size_t count = 0;
@@ -613,24 +613,20 @@ readBraillePacket (
       }
     }
 
+  gotByte:
     if (count < size) {
-    gotByte:
       bytes[count++] = byte;
 
-      {
-        int ok = verifyPacket(brl, bytes, count, &length);
-
-        if (!ok) {
-          if (--count) {
-            logShortPacket(bytes, count);
-            count = 0;
-            length = 1;
-            goto gotByte;
-          }
-
-          logIgnoredByte(byte);
-          continue;
+      if (!verifyPacket(brl, bytes, count, &length, data)) {
+        if (--count) {
+          logShortPacket(bytes, count);
+          count = 0;
+          length = 1;
+          goto gotByte;
         }
+
+        logIgnoredByte(byte);
+        continue;
       }
 
       if (count == length) {

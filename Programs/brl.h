@@ -101,14 +101,15 @@ typedef int BraillePacketVerifier (
   BrailleDisplay *brl,
   const unsigned char *bytes,
   size_t size,
-  size_t *length
+  size_t *length,
+  void *data
 );
 
 extern size_t readBraillePacket (
   BrailleDisplay *brl,
   GioEndpoint *endpoint,
   void *packet, size_t size,
-  BraillePacketVerifier verifyPacket
+  BraillePacketVerifier verifyPacket, void *data
 );
 
 extern int writeBraillePacket (

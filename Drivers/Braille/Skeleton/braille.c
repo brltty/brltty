@@ -70,14 +70,15 @@ verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes,
   size_t size,
-  size_t *length
+  size_t *length,
+  void *data
 ) {
   return 1;
 }
 
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket);
+  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket, NULL);
 }
 
 static int

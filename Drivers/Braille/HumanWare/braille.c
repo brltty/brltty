@@ -76,7 +76,8 @@ verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes,
   size_t size,
-  size_t *length
+  size_t *length,
+  void *data
 ) {
   if (size > 0) {
     unsigned char byte = bytes[size-1];
@@ -157,7 +158,7 @@ writeIdentifyRequest (BrailleDisplay *brl) {
 
 static size_t
 readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket);
+  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket, NULL);
 }
 
 static BrailleResponseResult
@@ -259,7 +260,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   HW_Packet packet;
   size_t length;
 
-  while ((length = readBraillePacket(brl, brl->data->gioEndpoint, &packet, sizeof(packet), verifyPacket))) {
+  while ((length = readBraillePacket(brl, brl->data->gioEndpoint, &packet, sizeof(packet), verifyPacket, NULL))) {
     switch (packet.fields.type) {
       case HW_MSG_KEY_DOWN:
         handleKeyEvent(packet.fields.data.key.id, 1);
