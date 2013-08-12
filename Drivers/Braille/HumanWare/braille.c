@@ -71,40 +71,32 @@ struct BrailleDataStruct {
   unsigned char textCells[0XFF];
 };
 
-static size_t
-readPacket (BrailleDisplay *brl, HW_Packet *packet) {
-  size_t offset = 0;
-  size_t length = 0;
+static int
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes,
+  size_t size,
+  size_t *length
+) {
+  if (size > 0) {
+    unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
+    switch (size) {
+      case 1:
+        if (byte != ESC) return 0;
+        *length = 3;
+        break;
 
-    {
-      int started = offset > 0;
+      case 3:
+        *length += byte;
+        break;
 
-      if (!gioReadByte(brl->data->gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet, offset);
-        return 0;
-      }
-    }
-
-    if (offset == 0) {
-      if (byte != ESC) {
-        logIgnoredByte(byte);
-        continue;
-      }
-
-      length = 3;
-    } else if (offset == 2) {
-      length += byte;
-    }
-    packet->bytes[offset++] = byte;
-
-    if (offset == length) {
-      logInputPacket(packet, offset);
-      return length;
+      default:
+        break;
     }
   }
+
+  return 1;
 }
 
 static int
@@ -165,7 +157,7 @@ writeIdentifyRequest (BrailleDisplay *brl) {
 
 static size_t
 readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readPacket(brl, packet);
+  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket);
 }
 
 static BrailleResponseResult
@@ -267,7 +259,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   HW_Packet packet;
   size_t length;
 
-  while ((length = readPacket(brl, &packet))) {
+  while ((length = readBraillePacket(brl, brl->data->gioEndpoint, &packet, sizeof(packet), verifyPacket))) {
     switch (packet.fields.type) {
       case HW_MSG_KEY_DOWN:
         handleKeyEvent(packet.fields.data.key.id, 1);
