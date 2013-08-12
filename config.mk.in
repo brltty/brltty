@@ -261,7 +261,7 @@ BEEP_LIBS = @beep_libs@
 
 PCM_PACKAGE = @pcm_package@
 PCM_OBJECT = pcm_$(PCM_PACKAGE)
-PCM_OBJECTS = notes_pcm.$O $(PCM_OBJECT).$O
+PCM_OBJECTS = notes_pcm.$O pcm.$O $(PCM_OBJECT).$O
 PCM_CFLAGS = @pcm_cflags@
 PCM_LIBS = @pcm_libs@
 

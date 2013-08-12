@@ -99,6 +99,9 @@ $(BEEP_OBJECT).$O:
 
 ###############################################################################
 
+pcm.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm.c
+
 $(PCM_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/$(PCM_OBJECT).c
 

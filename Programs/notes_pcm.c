@@ -96,99 +96,19 @@ writeBytes (NoteDevice *device, const unsigned char *address, size_t length) {
 
 static int
 writeSample (NoteDevice *device, int amplitude) {
-  typedef union {
-    unsigned char bytes[4];
-    int16_t s16h;
-  } Sample;
+  PcmAmplitudeFormat format = device->amplitudeFormat;
+  size_t length = getPcmSampleLength(format);;
 
-  Sample sample;
-  size_t length;
-  const int U2S = 0X8000;
+  if (length) {
+    unsigned char buffer[length];
+    length = makePcmSample(format, amplitude, buffer, sizeof(buffer));
 
-  switch (device->amplitudeFormat) {
-    case PCM_FMT_U8:
-      amplitude += U2S;
-    case PCM_FMT_S8:
-      sample.bytes[0] = amplitude >> 8;
-      length = 1;
-      break;
+    {
+      int channel;
 
-    case PCM_FMT_U16B:
-      amplitude += U2S;
-    case PCM_FMT_S16B:
-      sample.bytes[0] = amplitude >> 8;
-      sample.bytes[1] = amplitude;
-      length = 2;
-      break;
-
-    case PCM_FMT_U16L:
-      amplitude += U2S;
-    case PCM_FMT_S16L:
-      sample.bytes[0] = amplitude;
-      sample.bytes[1] = amplitude >> 8;
-      length = 2;
-      break;
-
-    case PCM_FMT_U16H:
-      amplitude += U2S;
-    case PCM_FMT_S16H:
-      sample.s16h = amplitude;
-      length = 2;
-      break;
-
-    case PCM_FMT_ULAW: {
-      int negative = amplitude < 0;
-      int exponent = 0X7;
-      unsigned char value;
-      const unsigned int bias = 0X84;
-      const unsigned int clip = 0X7FFF - bias;
-
-      if (negative) amplitude = -amplitude;
-      if (amplitude > clip) amplitude = clip;
-      amplitude += bias;
-
-      while ((exponent > 0) && !(amplitude & 0X4000)) {
-        amplitude <<= 1;
-        --exponent;
+      for (channel=0; channel<device->channelCount; channel+=1) {
+        if (!writeBytes(device, buffer, length)) return 0;
       }
-
-      value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
-      if (negative) value |= 0X80;
-      sample.bytes[0] = ~value;
-      length = 1;
-      break;
-    }
-
-    case PCM_FMT_ALAW: {
-      int negative = amplitude < 0;
-      int exponent = 0X7;
-      unsigned char value;
-
-      if (negative) amplitude = -amplitude;
-
-      while ((exponent > 0) && !(amplitude & 0X4000)) {
-        amplitude <<= 1;
-        --exponent;
-      }
-
-      if (!exponent) amplitude >>= 1;
-      value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
-      if (negative) value |= 0X80;
-      sample.bytes[0] = value ^ 0X55;
-      length = 1;
-      break;
-    }
-
-    default:
-      length = 0;
-      break;
-  }
-
-  {
-    int channel;
-
-    for (channel=0; channel<device->channelCount; channel+=1) {
-      if (!writeBytes(device, sample.bytes, length)) return 0;
     }
   }
 

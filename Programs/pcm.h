@@ -23,8 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct PcmDeviceStruct PcmDevice;
-
 typedef enum {
   PCM_FMT_U8,
   PCM_FMT_S8,
@@ -39,16 +37,30 @@ typedef enum {
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
 
+extern size_t getPcmSampleLength (PcmAmplitudeFormat format);
+
+extern size_t makePcmSample (
+  PcmAmplitudeFormat format, int16_t amplitude,
+  void *buffer, size_t size
+);
+
+typedef struct PcmDeviceStruct PcmDevice;
+
 extern PcmDevice *openPcmDevice (int errorLevel, const char *device);
 extern void closePcmDevice (PcmDevice *pcm);
-extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
+
 extern int getPcmBlockSize (PcmDevice *pcm);
+
 extern int getPcmSampleRate (PcmDevice *pcm);
 extern int setPcmSampleRate (PcmDevice *pcm, int rate);
+
 extern int getPcmChannelCount (PcmDevice *pcm);
 extern int setPcmChannelCount (PcmDevice *pcm, int channels);
+
 extern PcmAmplitudeFormat getPcmAmplitudeFormat (PcmDevice *pcm);
 extern PcmAmplitudeFormat setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format);
+
+extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
 extern void forcePcmOutput (PcmDevice *pcm);
 extern void awaitPcmOutput (PcmDevice *pcm);
 extern void cancelPcmOutput (PcmDevice *pcm);
