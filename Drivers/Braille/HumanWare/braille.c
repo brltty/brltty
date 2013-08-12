@@ -79,22 +79,20 @@ verifyPacket (
   size_t *length,
   void *data
 ) {
-  if (size > 0) {
-    unsigned char byte = bytes[size-1];
+  unsigned char byte = bytes[size-1];
 
-    switch (size) {
-      case 1:
-        if (byte != ESC) return 0;
-        *length = 3;
-        break;
+  switch (size) {
+    case 1:
+      if (byte != ESC) return 0;
+      *length = 3;
+      break;
 
-      case 3:
-        *length += byte;
-        break;
+    case 3:
+      *length += byte;
+      break;
 
-      default:
-        break;
-    }
+    default:
+      break;
   }
 
   return 1;
