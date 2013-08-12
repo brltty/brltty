@@ -144,78 +144,50 @@ writePacket (
   return writeBytes(brl, bytes, byte-bytes);
 }
 
-static size_t
-readBytes (BrailleDisplay *brl, void *packet, size_t size) {
-  unsigned char *bytes = packet;
-  size_t offset = 0;
-  size_t length = 0;
+static int
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes,
+  size_t size,
+  size_t *length
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(brl->data->gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    if (offset == 0) {
+  switch (size) {
+    case 1:
       switch (byte) {
-        case MM_HEADER_NAK:
         case MM_HEADER_ACK:
-          length = 1;
+        case MM_HEADER_NAK:
+          *length = 1;
           break;
 
         case MM_HEADER_ID1:
-          length = 6;
+          *length = sizeof(MM_CommandHeader);
           break;
 
         default:
-          logIgnoredByte(byte);
-          continue;
+          return 0;
       }
-    } else {
-      int unexpected = 0;
+      break;
 
-      switch (offset) {
-        case 1:
-          if (byte != MM_HEADER_ID2) unexpected = 1;
-          break;
+    case 2:
+      if (byte != MM_HEADER_ID2) return 0;
+      break;
 
-        case 5:
-          length += (byte << 8) || bytes[offset-1];
-          break;
+    case 6:
+      *length += (byte << 8) || bytes[size-2];
+      break;
 
-        default:
-          break;
-      }
-
-      if (unexpected) {
-        logShortPacket(bytes, offset);
-        offset = 0;
-        length = 0;
-        goto gotByte;
-      }
-    }
-
-    if (offset < size) {
-      bytes[offset] = byte;
-
-      if (offset == (length - 1)) {
-        logInputPacket(bytes, length);
-        return length;
-      }
-    } else {
-      if (offset == size) logTruncatedPacket(bytes, offset);
-      logDiscardedByte(byte);
-    }
-
-    offset += 1;
+    default:
+      break;
   }
+
+  return 1;
+}
+
+static size_t
+readBytes (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket);
 }
 
 static size_t
