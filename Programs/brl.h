@@ -97,6 +97,20 @@ extern int enqueueXtScanCode (
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern KeyTableCommandContext getCurrentCommandContext (void);
 
+typedef int BraillePacketVerifier (
+  BrailleDisplay *brl,
+  const unsigned char *bytes,
+  size_t size,
+  size_t *length
+);
+
+extern size_t readBraillePacket (
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
+  void *packet, size_t size,
+  BraillePacketVerifier verifyPacket
+);
+
 extern int writeBraillePacket (
   BrailleDisplay *brl, GioEndpoint *endpoint,
   const void *packet, size_t size

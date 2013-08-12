@@ -590,6 +590,60 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
 }
 
+size_t
+readBraillePacket (
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
+  void *packet, size_t size,
+  BraillePacketVerifier verifyPacket
+) {
+  unsigned char *bytes = packet;
+  size_t count = 0;
+  size_t length = 1;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = count > 0;
+
+      if (!gioReadByte(endpoint, &byte, started)) {
+        if (started) logPartialPacket(bytes, count);
+        return 0;
+      }
+    }
+
+    if (count < size) {
+    gotByte:
+      bytes[count++] = byte;
+
+      {
+        int ok = verifyPacket(brl, bytes, count, &length);
+
+        if (!ok) {
+          if (--count) {
+            logShortPacket(bytes, count);
+            count = 0;
+            length = 1;
+            goto gotByte;
+          }
+
+          logIgnoredByte(byte);
+          continue;
+        }
+      }
+
+      if (count == length) {
+        logInputPacket(bytes, length);
+        return length;
+      }
+    } else {
+      if (count++ == size) logTruncatedPacket(bytes, size);
+      logDiscardedByte(byte);
+    }
+  }
+}
+
 int
 writeBraillePacket (
   BrailleDisplay *brl, GioEndpoint *endpoint,
