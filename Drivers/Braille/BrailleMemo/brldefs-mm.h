@@ -18,6 +18,8 @@
 #ifndef BRLTTY_INCLUDED_MM_BRLDEFS
 #define BRLTTY_INCLUDED_MM_BRLDEFS
 
+#define MM_MAXIMUM_CELL_COUNT 0XFF
+
 #define MM_HEADER_ID1 0XFF
 #define MM_HEADER_ID2 0XFF
 
@@ -61,6 +63,10 @@ typedef union {
         unsigned char blink;
         unsigned char reserved;
       } start;
+
+      struct {
+        unsigned char cells[MM_MAXIMUM_CELL_COUNT * 2];
+      } send;
 
       struct {
         unsigned char group;

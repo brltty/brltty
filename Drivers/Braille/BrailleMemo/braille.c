@@ -29,7 +29,6 @@
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 #define START_INPUT_TIMEOUT 1000
-#define MAXIMUM_CELL_COUNT 80
 
 #define MM_KEY_SET_ENTRY(s,n) BRL_KEY_SET_ENTRY(MM, s, n)
 #define MM_KEY_NAME_ENTRY(s,k,n) BRL_KEY_NAME_ENTRY(MM, s, k, n)
@@ -113,7 +112,7 @@ END_KEY_TABLE_LIST
 struct BrailleDataStruct {
   GioEndpoint *gioEndpoint;
   int forceRewrite;
-  unsigned char textCells[MAXIMUM_CELL_COUNT];
+  unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
 };
 
 static int
@@ -175,8 +174,12 @@ verifyPacket (
       if (byte != MM_HEADER_ID2) return 0;
       break;
 
+    case 5:
+      *length += byte;
+      break;
+
     case 6:
-      *length += (byte << 8) || bytes[size-2];
+      *length += byte << 8;
       break;
 
     default:
