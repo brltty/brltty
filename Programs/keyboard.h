@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KBD
-#define BRLTTY_INCLUDED_KBD
+#ifndef BRLTTY_INCLUDED_KEYBOARD
+#define BRLTTY_INCLUDED_KEYBOARD
 
 #include "ktbdefs.h"
 
@@ -50,4 +50,4 @@ extern int startKeyboardMonitor (const KeyboardProperties *properties, KeyEventH
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KBD */
+#endif /* BRLTTY_INCLUDED_KEYBOARD */

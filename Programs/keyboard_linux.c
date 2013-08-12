@@ -25,8 +25,8 @@
 #include "log.h"
 #include "system_linux.h"
 
-#include "kbd.h"
-#include "kbd_internal.h"
+#include "keyboard.h"
+#include "keyboard_internal.h"
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <limits.h>

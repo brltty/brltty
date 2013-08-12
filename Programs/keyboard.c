@@ -24,8 +24,8 @@
 #include "parse.h"
 #include "bitmask.h"
 
-#include "kbd.h"
-#include "kbd_internal.h"
+#include "keyboard.h"
+#include "keyboard_internal.h"
 
 const KeyboardProperties anyKeyboard = {
   .type = KBD_TYPE_Any,

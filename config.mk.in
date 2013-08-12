@@ -247,11 +247,11 @@ MNTFS_OBJECTS = $(MNTFS_OBJECT).$O
 MNTFS_CFLAGS = @mntfs_cflags@
 MNTFS_LIBS = @mntfs_libs@
 
-KBD_PACKAGE = @kbd_package@
-KBD_OBJECT = kbd_$(KBD_PACKAGE)
-KBD_OBJECTS = kbd.$O $(KBD_OBJECT).$O
-KBD_CFLAGS = @kbd_cflags@
-KBD_LIBS = @kbd_libs@
+KEYBOARD_PACKAGE = @keyboard_package@
+KEYBOARD_OBJECT = keyboard_$(KEYBOARD_PACKAGE)
+KEYBOARD_OBJECTS = keyboard.$O $(KEYBOARD_OBJECT).$O
+KEYBOARD_CFLAGS = @keyboard_cflags@
+KEYBOARD_LIBS = @keyboard_libs@
 
 BEEP_PACKAGE = @beep_package@
 BEEP_OBJECT = beep_$(BEEP_PACKAGE)

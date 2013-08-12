@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KBD_INTERNAL
-#define BRLTTY_INCLUDED_KBD_INTERNAL
+#ifndef BRLTTY_INCLUDED_KEYBOARD_INTERNAL
+#define BRLTTY_INCLUDED_KEYBOARD_INTERNAL
 
 #include "ktb_keyboard.h"
 
@@ -69,4 +69,4 @@ extern const int keyCodeLimit;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KBD_INTERNAL */
+#endif /* BRLTTY_INCLUDED_KEYBOARD_INTERNAL */

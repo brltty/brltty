@@ -23,9 +23,9 @@
 #include "log.h"
 #include "system_java.h"
 
-#include "kbd.h"
-#include "kbd_internal.h"
-#include "kbd_android.h"
+#include "keyboard.h"
+#include "keyboard_internal.h"
+#include "keyboard_android.h"
 
 BEGIN_KEY_CODE_MAP
   [ANDROID_KEY_0] = KBD_KEY_SYMBOL(Zero_RightParenthesis),

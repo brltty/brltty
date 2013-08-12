@@ -40,7 +40,7 @@
 #include "ctb.h"
 #include "ktb.h"
 #include "ktb_keyboard.h"
-#include "kbd.h"
+#include "keyboard.h"
 #include "tunes.h"
 #include "notes.h"
 #include "message.h"
