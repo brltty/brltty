@@ -74,6 +74,13 @@ verifyPacket (
   unsigned char byte = bytes[size-1];
 
   switch (size) {
+    case 1:
+      switch (byte) {
+        default:
+          return 0;
+      }
+      break;
+
     default:
       break;
   }
