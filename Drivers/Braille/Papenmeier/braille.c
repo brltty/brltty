@@ -200,120 +200,71 @@ static unsigned char xmtTextOffset;
 
 static unsigned char switchState1;
 
-static size_t
-readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
-  unsigned char *bytes = packet;
-  size_t offset = 0;
-  size_t length = 0;
+static int
+verifyPacket1 (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
+  switch (size) {
+    case 1:
+      *length = 2;
+      if (byte != STX) return 0;
+      break;
 
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    {
-      int unexpected = 0;
-
-      switch (offset) {
-        case 0:
-          length = 2;
-          if (byte != STX) unexpected = 1;
-          break;
-
-        case 1:
-          switch (byte) {
-            case PM1_PKT_IDENTITY:
-              length = 10;
-              break;
-
-            case PM1_PKT_RECEIVE:
-              length = 6;
-              break;
-
-            case 0X03:
-            case 0X04:
-            case 0X05:
-            case 0X06:
-            case 0X07:
-              length = 3;
-              break;
-
-            default:
-              unexpected = 1;
-              break;
-          }
-          break;
-
-        case 5:
-          switch (bytes[1]) {
-            case PM1_PKT_RECEIVE:
-              length = (bytes[4] << 8) | byte;
-              if (length != 10) unexpected = 1;
-              break;
-
-            default:
-              break;
-          }
-          break;
-
-        default:
-          break;
-      }
-
-      if (unexpected) {
-        if (offset) {
-          logShortPacket(bytes, offset);
-          offset = 0;
-          length = 0;
-          goto gotByte;
-        }
-
-        logIgnoredByte(byte);
-        continue;
-      }
-    }
-
-    if (offset < length) bytes[offset] = byte;
-    if (++offset < length) continue;
-
-    {
-      int isLength = offset == length;
-
+    case 2:
       switch (byte) {
-        case STX:
-          if (isLength) logPartialPacket(bytes, offset-1);
-          offset = 0;
-          length = 0;
-          goto gotByte;
+        case PM1_PKT_IDENTITY:
+          *length = 10;
+          break;
 
-        case ETX:
-          if (isLength) {
-            logInputPacket(bytes, offset);
-            return offset;
-          }
+        case PM1_PKT_RECEIVE:
+          *length = 6;
+          break;
 
-          offset = 0;
-          length = 0;
-          continue;
+        case 0X03:
+        case 0X04:
+        case 0X05:
+        case 0X06:
+        case 0X07:
+          *length = 3;
+          break;
 
         default:
-          if (isLength) {
-            logCorruptPacket(bytes, offset);
-          } else {
-            logDiscardedByte(byte);
-          }
+          return 0;
+      }
+      break;
+
+    case 6:
+      switch (bytes[1]) {
+        case PM1_PKT_RECEIVE:
+          *length = (bytes[4] << 8) | byte;
+          if (*length != 10) return 0;
+          break;
+
+        default:
           break;
       }
+      break;
+
+    default:
+      break;
+  }
+
+  if (size == *length) {
+    if (byte != ETX) {
+      return 0;
     }
   }
+
+  return 1;
+}
+
+static size_t
+readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, gioEndpoint, packet, size, verifyPacket1, NULL);
 }
 
 static int

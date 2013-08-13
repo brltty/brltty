@@ -146,10 +146,8 @@ writePacket (
 static int
 verifyPacket (
   BrailleDisplay *brl,
-  const unsigned char *bytes,
-  size_t size,
-  size_t *length,
-  void *data
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];
 

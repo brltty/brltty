@@ -99,10 +99,8 @@ extern KeyTableCommandContext getCurrentCommandContext (void);
 
 typedef int BraillePacketVerifier (
   BrailleDisplay *brl,
-  const unsigned char *bytes,
-  size_t size,
-  size_t *length,
-  void *data
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
 );
 
 extern size_t readBraillePacket (
