@@ -186,13 +186,16 @@ typedef struct {
 
 typedef struct {
   PacketHeader header;
+
   union {
     unsigned char bytes[0X100];
+
     struct {
       char manufacturer[PACKET_PAYLOAD_INFO_MANUFACTURER_SIZE];
       char model[PACKET_PAYLOAD_INFO_MODEL_SIZE];
       char firmware[PACKET_PAYLOAD_INFO_FIRMWARE_SIZE];
     } info;
+
     struct {
       unsigned char bytes[4];
     } extkey;
@@ -307,12 +310,6 @@ struct BrailleDataStruct {
   unsigned char configFlags;
   int firmnessSetting;
 
-  union {
-    Packet packet;
-    unsigned char bytes[sizeof(Packet)];
-  } inputBuffer;
-
-  int inputCount;
   int outputPayloadLimit;
 
   uint64_t oldKeys;
@@ -526,80 +523,65 @@ updateCells (
   }
 }
 
+typedef struct {
+  unsigned char checksum;
+} ReadPacketData;
+
+static int
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  ReadPacketData *rpd = data;
+  unsigned char byte = bytes[size-1];
+
+  switch (size) {
+    case 1:
+      switch (byte) {
+        case PKT_ACK:
+        case PKT_NAK:
+        case PKT_KEY:
+        case PKT_EXTKEY:
+        case PKT_BUTTON:
+        case PKT_WHEEL:
+        case PKT_INFO:
+          *length = sizeof(PacketHeader);
+          break;
+
+        default:
+          return 0;
+      }
+
+      rpd->checksum = 0;
+      break;
+
+    case 2:
+      if (bytes[0] & 0X80) *length += byte + 1;
+      break;
+
+    default:
+      break;
+  }
+
+  rpd->checksum -= byte;
+  return 1;
+}
+
 static int
 readPacket (BrailleDisplay *brl, Packet *packet) {
-  while (1) {
-    int size = sizeof(PacketHeader);
-    int hasPayload = 0;
+  ReadPacketData rpd;
+  size_t length = readBraillePacket(brl, brl->data->gioEndpoint,
+                                    packet, sizeof(*packet),
+                                    verifyPacket, &rpd);
 
-    if (brl->data->inputCount >= sizeof(PacketHeader)) {
-      if (brl->data->inputBuffer.packet.header.type & 0X80) {
-        hasPayload = 1;
-        size += brl->data->inputBuffer.packet.header.arg1 + 1;
-      }
-    }
-
-    if (size <= brl->data->inputCount) {
-      logInputPacket(brl->data->inputBuffer.bytes, size);
-
-      if (hasPayload) {
-        unsigned char checksum = 0;
-        int index;
-
-        for (index=0; index<size; index+=1)
-          checksum -= brl->data->inputBuffer.bytes[index];
-
-        if (checksum) logMessage(LOG_WARNING, "Input packet checksum error.");
-      }
-
-      memcpy(packet, &brl->data->inputBuffer, size);
-      memmove(&brl->data->inputBuffer.bytes[0], &brl->data->inputBuffer.bytes[size],
-              brl->data->inputCount -= size);
-      return size;
-    }
-
-  retry:
-    {
-      int count = gioReadData(brl->data->gioEndpoint,
-                              &brl->data->inputBuffer.bytes[brl->data->inputCount],
-                              size - brl->data->inputCount,
-                              0);
-
-      if (count < 1) {
-        if (count == -1) {
-          logSystemError("read");
-        } else if ((count == 0) && (brl->data->inputCount > 0)) {
-          if (gioAwaitInput(brl->data->gioEndpoint, 1000)) goto retry;
-          if (errno != EAGAIN) count = -1;
-          logPartialPacket(brl->data->inputBuffer.bytes, brl->data->inputCount);
-          brl->data->inputCount = 0;
-        }
-
-        return count;
-      }
-      brl->data->acknowledgementsMissing = 0;
-
-      if (!brl->data->inputCount) {
-        static const unsigned char packets[] = {
-          PKT_ACK, PKT_NAK,
-          PKT_KEY, PKT_EXTKEY, PKT_BUTTON, PKT_WHEEL,
-          PKT_INFO
-        };
-        int first;
-
-        for (first=0; first<count; first+=1)
-          if (memchr(packets, brl->data->inputBuffer.bytes[first], sizeof(packets)))
-            break;
-
-        if (first) {
-          logDiscardedBytes(brl->data->inputBuffer.bytes, first);
-          memmove(&brl->data->inputBuffer.bytes[0], &brl->data->inputBuffer.bytes[first], count-=first);
-        }
-      }
-
-      brl->data->inputCount += count;
+  if (length > sizeof(PacketHeader)) {
+    if (rpd.checksum) {
+      logMessage(LOG_WARNING, "input packet checksum error");
     }
   }
+
+  return length;
 }
 
 static int
@@ -873,7 +855,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->gioEndpoint = NULL;
-    brl->data->inputCount = 0;
     brl->data->outputPayloadLimit = 0XFF;
 
     if (connectResource(brl, device)) {
