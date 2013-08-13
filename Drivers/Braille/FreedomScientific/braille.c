@@ -565,6 +565,7 @@ verifyPacket (
   }
 
   rpd->checksum -= byte;
+  brl->data->acknowledgementsMissing = 0;
   return 1;
 }
 
