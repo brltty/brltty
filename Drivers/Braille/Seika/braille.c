@@ -520,108 +520,89 @@ ntkInitializeData (void) {
 }
 
 static int
-ntkReadPacket (BrailleDisplay *brl, InputPacket *packet) {
-  int offset = 0;
-  unsigned int length = 0;
+ntkVerifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
+  switch (size) {
+    case 1:
+      *length = 4;
+    case 2:
+      if (byte != 0XFF) return 0;
+      break;
 
-    {
-      int started = offset > 0;
+    case 4:
+      *length += byte;
+      break;
 
-      if (!gioReadByte(gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet->bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    {
-      int unexpected = 0;
-
-      switch (offset) {
-        case 0:
-          length = 4;
-        case 1:
-          if (byte != 0XFF) unexpected = 1;
-          break;
-
-        case 3:
-          length += byte;
-          break;
-
-        default:
-          break;
-      }
-
-      if (unexpected) {
-        if (offset) {
-          logShortPacket(packet->bytes, offset);
-          offset = 0;
-          length = 0;
-          goto gotByte;
-        }
-
-        logIgnoredByte(byte);
-        continue;
-      }
-    }
-
-    packet->bytes[offset++] = byte;
-    if (offset == length) {
-      logInputPacket(packet->bytes, offset);
-
-      switch (packet->bytes[2]) {
-        case 0XA2:
-          packet->type = IPT_identity;
-          packet->fields.identity.cellCount = packet->bytes[5];
-          packet->fields.identity.keyCount = packet->bytes[4];
-          packet->fields.identity.routingCount = packet->bytes[6];
-          break;
-
-        case 0XA4:
-          packet->type = IPT_routing;
-          packet->fields.routing = &packet->bytes[4];
-          break;
-
-        {
-          uint32_t *keys;
-          const unsigned char *byte;
-
-        case 0XA6:
-          packet->type = IPT_keys;
-          keys = &packet->fields.keys;
-          byte = packet->bytes + offset;
-          goto doKeys;
-
-        case 0XA8:
-          packet->type = IPT_combined;
-          keys = &packet->fields.combined.keys;
-          byte = packet->fields.combined.routing = packet->bytes +  4 + ((keyCount + 7) / 8);
-          goto doKeys;
-
-        doKeys:
-          *keys = 0;
-
-          while (--byte != &packet->bytes[3]) {
-            *keys <<= 8;
-            *keys |= *byte;
-          }
-
-          break;
-        }
-
-        default:
-          logUnknownPacket(packet->bytes[2]);
-          offset = 0;
-          length = 0;
-          continue;
-      }
-
-      return offset;
-    }
+    default:
+      break;
   }
+
+  return 1;
+}
+
+static int
+ntkReadPacket (BrailleDisplay *brl, InputPacket *packet) {
+  size_t length;
+
+  while ((length = readBraillePacket(brl, gioEndpoint,
+                                     packet->bytes, sizeof(packet->bytes),
+                                     ntkVerifyPacket, NULL))) {
+    unsigned char type = packet->bytes[2];
+
+    switch (type) {
+      case 0XA2:
+        packet->type = IPT_identity;
+        packet->fields.identity.cellCount = packet->bytes[5];
+        packet->fields.identity.keyCount = packet->bytes[4];
+        packet->fields.identity.routingCount = packet->bytes[6];
+        break;
+
+      case 0XA4:
+        packet->type = IPT_routing;
+        packet->fields.routing = &packet->bytes[4];
+        break;
+
+      {
+        uint32_t *keys;
+        const unsigned char *byte;
+
+      case 0XA6:
+        packet->type = IPT_keys;
+        keys = &packet->fields.keys;
+        byte = packet->bytes + length;
+        goto doKeys;
+
+      case 0XA8:
+        packet->type = IPT_combined;
+        keys = &packet->fields.combined.keys;
+        byte = packet->fields.combined.routing = packet->bytes +  4 + ((keyCount + 7) / 8);
+        goto doKeys;
+
+      doKeys:
+        *keys = 0;
+
+        while (--byte != &packet->bytes[3]) {
+          *keys <<= 8;
+          *keys |= *byte;
+        }
+
+        break;
+      }
+
+      default:
+        logUnknownPacket(type);
+        continue;
+    }
+
+    break;
+  }
+
+  return length;
 }
 
 static int
