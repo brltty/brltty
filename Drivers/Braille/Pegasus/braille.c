@@ -531,11 +531,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 static int
 enqueueNavigationKey (PG_NavigationKey modifier, PG_NavigationKey key) {
   const PG_KeySet set = PG_SET_NavigationKeys;
-  int modifierSpecified = modifier != PG_KEY_None;
+  const int modifierSpecified = modifier != PG_KEY_None;
 
   if (modifierSpecified && !enqueueKeyEvent(set, modifier, 1)) return 0;
-  if (!enqueueKeyEvent(set, key, 1)) return 0;
-  if (!enqueueKeyEvent(set, key, 0)) return 0;
+  if (!enqueueKey(set, key)) return 0;
   if (modifierSpecified && !enqueueKeyEvent(set, modifier, 0)) return 0;
   return 1;
 }
@@ -629,8 +628,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           break;
         }
 
-        enqueueKeyEvent(set, key, 1);
-        enqueueKeyEvent(set, key, 0);
+        enqueueKey(set, key);
         continue;
       }
 
