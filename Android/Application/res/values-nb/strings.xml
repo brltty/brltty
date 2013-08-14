@@ -13,7 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Hjem</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Nylig brukte apper</string>
 
-  <string name="SETTINGS_SCREEN_TITLE">Innstillinger for BRLTTY</string>
+  <string name="SETTINGS_SCREEN_MAIN">Innstillinger for BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generelle innstillinger</string>
   <string name="SETTINGS_SCREEN_DEVICES">Administrere enheter</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Avanserte innstillinger</string>
@@ -22,8 +22,8 @@
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Støtte for tale</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabell</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabell</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_KEY_TABLE">Tastetabell for tastatur</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>

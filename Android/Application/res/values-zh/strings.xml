@@ -13,7 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">主頁</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">最近開啟的應用城市</string>
 
-  <string name="SETTINGS_SCREEN_TITLE">BRLTTY 設定</string>
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY 設定</string>
   <string name="SETTINGS_SCREEN_GENERAL">一般設定</string>
   <string name="SETTINGS_SCREEN_DEVICES">點顯器設定</string>
   <string name="SETTINGS_SCREEN_ADVANCED">進階設定</string>
@@ -22,8 +22,8 @@
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">語音支援</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">普通點字</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">屬性點字</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
   <string name="SETTINGS_BUTTON_KEY_TABLE">鍵盤對應表</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>

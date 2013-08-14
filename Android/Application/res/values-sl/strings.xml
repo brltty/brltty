@@ -18,8 +18,9 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Napredne Nastavitve</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabela Besedila</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table Tabela Prilastkov</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>
 

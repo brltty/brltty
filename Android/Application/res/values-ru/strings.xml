@@ -13,7 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Главная страница</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Недавние приложения</string>
 
-  <string name="SETTINGS_SCREEN_TITLE">Настройки BRLTTY</string>
+  <string name="SETTINGS_SCREEN_MAIN">Настройки BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Общие настройки</string>
   <string name="SETTINGS_SCREEN_DEVICES">Управление устройствами</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Расширенные настройки</string>
@@ -22,8 +22,8 @@
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Поддержка речи</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Текстовая таблица</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Таблица атрибутов</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
   <string name="SETTINGS_BUTTON_KEY_TABLE">Таблица клавиатурных клавиш</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>

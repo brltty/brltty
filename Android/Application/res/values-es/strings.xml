@@ -18,8 +18,9 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Configuración Avanzada</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabla de Texto</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabla de Contracciones</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabla de Atributos</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabla de Contracciones</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivel de Registro</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorías de Registro</string>
 

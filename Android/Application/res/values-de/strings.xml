@@ -13,7 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Startseite</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Verwendete Apps</string>
 
-  <string name="SETTINGS_SCREEN_TITLE">BRLTTY Einstellungen</string>
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY Einstellungen</string>
   <string name="SETTINGS_SCREEN_GENERAL">Basiseinstellungen</string>
   <string name="SETTINGS_SCREEN_DEVICES">Geräte verwalten</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Erweiterte Einstellungen</string>
@@ -22,8 +22,8 @@
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Sprachausgabenunterstützung</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Texttabelle</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabelle</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
   <string name="SETTINGS_BUTTON_KEY_TABLE">Tastatur Tastentabelle</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>

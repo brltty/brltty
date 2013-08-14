@@ -13,7 +13,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Home</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Applicazioni Recenti</string>
 
-  <string name="SETTINGS_SCREEN_TITLE">Impostazioni BRLTTY</string>
+  <string name="SETTINGS_SCREEN_MAIN">Impostazioni BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Impostazioni Generali</string>
   <string name="SETTINGS_SCREEN_DEVICES">Gestione Dispositivi</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Impostazioni Avanzate</string>
@@ -22,8 +22,8 @@
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Supporto Voce</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabella di Traduzione</string>
-  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabella Braille Contratto</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabella Attributi</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabella Braille Contratto</string>
   <string name="SETTINGS_BUTTON_KEY_TABLE">Tabella Tasti</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Livello di Log</string>
