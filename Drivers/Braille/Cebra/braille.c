@@ -230,11 +230,8 @@ verifyPacket (
       case CE_PKT_BEGIN:
         if (size == 2) {
           if (byte != brl->data->model->identifier) {
-            if (setModel(brl, byte)) {
-              brl->resizeRequired = 1;
-            } else {
-              return 0;
-            }
+            if (!setModel(brl, byte)) return 0;
+            brl->resizeRequired = 1;
           }
         } else if (size == 3) {
           *length += byte + 1;
