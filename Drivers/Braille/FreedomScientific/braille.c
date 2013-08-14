@@ -565,6 +565,8 @@ verifyPacket (
   }
 
   rpd->checksum -= byte;
+  if ((size == *length) && (size > sizeof(PacketHeader)) && rpd->checksum) return 0;
+
   brl->data->acknowledgementsMissing = 0;
   return 1;
 }
@@ -572,17 +574,10 @@ verifyPacket (
 static int
 readPacket (BrailleDisplay *brl, Packet *packet) {
   ReadPacketData rpd;
-  size_t length = readBraillePacket(brl, brl->data->gioEndpoint,
-                                    packet, sizeof(*packet),
-                                    verifyPacket, &rpd);
 
-  if (length > sizeof(PacketHeader)) {
-    if (rpd.checksum) {
-      logMessage(LOG_WARNING, "input packet checksum error");
-    }
-  }
-
-  return length;
+  return readBraillePacket(brl, brl->data->gioEndpoint,
+                           packet, sizeof(*packet),
+                           verifyPacket, &rpd);
 }
 
 static int
