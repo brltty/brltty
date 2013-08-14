@@ -204,85 +204,57 @@ writePacket (BrailleDisplay *brl, unsigned char type, size_t size, const unsigne
   return writeBytes(brl, bytes, byte-bytes);
 }
 
+static int
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  const unsigned char byte = bytes[size-1];
+
+  if (size == 1) {
+    switch (byte) {
+      case CE_RSP_Identity:
+        *length = 2;
+        break;
+
+      case CE_PKT_BEGIN:
+        *length = 3;
+        break;
+
+      default:
+        return 0;
+    }
+  } else {
+    switch (bytes[0]) {
+      case CE_PKT_BEGIN:
+        if (size == 2) {
+          if (byte != brl->data->model->identifier) {
+            if (setModel(brl, byte)) {
+              brl->resizeRequired = 1;
+            } else {
+              return 0;
+            }
+          }
+        } else if (size == 3) {
+          *length += byte + 1;
+        } else if (size == *length) {
+          if (byte != CE_PKT_END) return 0;
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return 1;
+}
+
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  unsigned char *bytes = packet;
-  size_t offset = 0;
-  size_t length = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(brl->data->gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    if (offset == 0) {
-      switch (byte) {
-        case CE_RSP_Identity:
-          length = 2;
-          break;
-
-        case CE_PKT_BEGIN:
-          length = 3;
-          break;
-
-        default:
-          logIgnoredByte(byte);
-          continue;
-      }
-    } else {
-      int unexpected = 0;
-
-      switch (bytes[0]) {
-        case CE_PKT_BEGIN:
-          if (offset == 1) {
-            if (byte != brl->data->model->identifier) {
-              if (setModel(brl, byte)) {
-                brl->resizeRequired = 1;
-              } else {
-                unexpected = 1;
-              }
-            }
-          } else if (offset == 2) {
-            length += byte + 1;
-          } else if (offset == (length-1)) {
-            if (byte != CE_PKT_END) unexpected = 1;
-          }
-          break;
-
-        default:
-          break;
-      }
-
-      if (unexpected) {
-        logShortPacket(bytes, offset);
-        offset = 0;
-        length = 0;
-        goto gotByte;
-      }
-    }
-
-    if (offset < size) {
-      bytes[offset] = byte;
-
-      if (offset == (length - 1)) {
-        logInputPacket(bytes, length);
-        return length;
-      }
-    } else {
-      if (offset == size) logTruncatedPacket(bytes, offset);
-      logDiscardedByte(byte);
-    }
-
-    offset += 1;
-  }
+  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size,
+                           verifyPacket, NULL);
 }
 
 static int
