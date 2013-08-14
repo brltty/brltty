@@ -134,16 +134,7 @@ public class RenderedScreen {
         }
       }
 
-      boolean isVisible;
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        isVisible = root.isVisibleToUser();
-      } else {
-        Rect location = new Rect();
-        root.getBoundsInScreen(location);
-        isVisible = ScreenDriver.getWindow().contains(location);
-      }
-
-      if (isVisible) {
+      if (ScreenUtilities.isVisible(root)) {
         String text = ScreenUtilities.normalizeText(root.getText());
         String description = ScreenUtilities.normalizeText(root.getContentDescription());
 

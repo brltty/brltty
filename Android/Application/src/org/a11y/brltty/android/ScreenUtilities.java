@@ -18,9 +18,23 @@
 
 package org.a11y.brltty.android;
 
+import android.os.Build;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import android.graphics.Rect;
+
 public final class ScreenUtilities {
+  public static boolean isVisible (AccessibilityNodeInfo node) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      return node.isVisibleToUser();
+    }
+
+    Rect location = new Rect();
+    node.getBoundsInScreen(location);
+    return ScreenDriver.getWindow().contains(location);
+  }
+
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
       {
@@ -144,7 +158,13 @@ public final class ScreenUtilities {
     ScreenNodeTester tester = new ScreenNodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
-        return node.isFocusable();
+        if (node.isFocusable()) {
+          if (isVisible(node)) {
+            return true;
+          }
+        }
+
+        return false;
       }
     };
 
