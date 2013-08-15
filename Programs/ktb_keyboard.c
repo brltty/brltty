@@ -99,35 +99,35 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(LETTER, Z, "Z"),
   KBD_NAME_ENTRY(LETTER, Z, "LETTER_Z"),
 
-  KBD_NAME_ENTRY(SYMBOL, One_Exclamation, "One"),
-  KBD_NAME_ENTRY(SYMBOL, One_Exclamation, "SYMBOL_One_Exclamation"),
+  KBD_NAME_ENTRY(DIGIT, Zero, "Zero"),
+  KBD_NAME_ENTRY(DIGIT, Zero, "DIGIT_Zero"),
 
-  KBD_NAME_ENTRY(SYMBOL, Two_At, "Two"),
-  KBD_NAME_ENTRY(SYMBOL, Two_At, "SYMBOL_Two_At"),
+  KBD_NAME_ENTRY(DIGIT, One, "One"),
+  KBD_NAME_ENTRY(DIGIT, One, "DIGIT_One"),
 
-  KBD_NAME_ENTRY(SYMBOL, Three_Number, "Three"),
-  KBD_NAME_ENTRY(SYMBOL, Three_Number, "SYMBOL_Three_Number"),
+  KBD_NAME_ENTRY(DIGIT, Two, "Two"),
+  KBD_NAME_ENTRY(DIGIT, Two, "DIGIT_Two"),
 
-  KBD_NAME_ENTRY(SYMBOL, Four_Dollar, "Four"),
-  KBD_NAME_ENTRY(SYMBOL, Four_Dollar, "SYMBOL_Four_Dollar"),
+  KBD_NAME_ENTRY(DIGIT, Three, "Three"),
+  KBD_NAME_ENTRY(DIGIT, Three, "DIGIT_Three"),
 
-  KBD_NAME_ENTRY(SYMBOL, Five_Percent, "Five"),
-  KBD_NAME_ENTRY(SYMBOL, Five_Percent, "SYMBOL_Five_Percent"),
+  KBD_NAME_ENTRY(DIGIT, Four, "Four"),
+  KBD_NAME_ENTRY(DIGIT, Four, "DIGIT_Four"),
 
-  KBD_NAME_ENTRY(SYMBOL, Six_Circumflex, "Six"),
-  KBD_NAME_ENTRY(SYMBOL, Six_Circumflex, "SYMBOL_Six_Circumflex"),
+  KBD_NAME_ENTRY(DIGIT, Five, "Five"),
+  KBD_NAME_ENTRY(DIGIT, Five, "DIGIT_Five"),
 
-  KBD_NAME_ENTRY(SYMBOL, Seven_Ampersand, "Seven"),
-  KBD_NAME_ENTRY(SYMBOL, Seven_Ampersand, "SYMBOL_Seven_Ampersand"),
+  KBD_NAME_ENTRY(DIGIT, Six, "Six"),
+  KBD_NAME_ENTRY(DIGIT, Six, "DIGIT_Six"),
 
-  KBD_NAME_ENTRY(SYMBOL, Eight_Asterisk, "Eight"),
-  KBD_NAME_ENTRY(SYMBOL, Eight_Asterisk, "SYMBOL_Eight_Asterisk"),
+  KBD_NAME_ENTRY(DIGIT, Seven, "Seven"),
+  KBD_NAME_ENTRY(DIGIT, Seven, "DIGIT_Seven"),
 
-  KBD_NAME_ENTRY(SYMBOL, Nine_LeftParenthesis, "Nine"),
-  KBD_NAME_ENTRY(SYMBOL, Nine_LeftParenthesis, "SYMBOL_Nine_LeftParenthesis"),
+  KBD_NAME_ENTRY(DIGIT, Eight, "Eight"),
+  KBD_NAME_ENTRY(DIGIT, Eight, "DIGIT_Eight"),
 
-  KBD_NAME_ENTRY(SYMBOL, Zero_RightParenthesis, "Zero"),
-  KBD_NAME_ENTRY(SYMBOL, Zero_RightParenthesis, "SYMBOL_Zero_RightParenthesis"),
+  KBD_NAME_ENTRY(DIGIT, Nine, "Nine"),
+  KBD_NAME_ENTRY(DIGIT, Nine, "DIGIT_Nine"),
 
   KBD_NAME_ENTRY(SYMBOL, Grave_Tilde, "Grave"),
   KBD_NAME_ENTRY(SYMBOL, Grave_Tilde, "SYMBOL_Grave_Tilde"),
