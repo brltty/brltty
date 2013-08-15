@@ -140,6 +140,11 @@ public class ScreenLogger {
       addValue(values, node.isCheckable(), "ckb");
       addValue(values, node.isChecked(), "ckd");
       addValue(values, node.isPassword(), "pwd");
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+        addValue(values, node.isEditable(), "edb");
+      }
+
       logProperty("flgs", values);
     }
 
@@ -167,15 +172,26 @@ public class ScreenLogger {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "hep");
       }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
+      }
 
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
-      addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
+      }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
         addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "tss");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "tsc");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "tsd");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "cbp");
       }
 
       logProperty("actn", values);
