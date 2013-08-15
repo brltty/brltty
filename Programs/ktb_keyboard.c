@@ -164,20 +164,139 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(SYMBOL, Europe2, "Europe2"),
 
-  KBD_NAME_ENTRY(FUNCTION, Escape, "Escape"),
-  KBD_NAME_ENTRY(FUNCTION, Escape, "FUNCTION_Escape"),
+  KBD_NAME_ENTRY(ACTION, Escape, "Escape"),
+  KBD_NAME_ENTRY(ACTION, Escape, "ACTION_Escape"),
 
-  KBD_NAME_ENTRY(FUNCTION, Enter, "Enter"),
-  KBD_NAME_ENTRY(FUNCTION, Enter, "FUNCTION_Enter"),
+  KBD_NAME_ENTRY(ACTION, Enter, "Enter"),
+  KBD_NAME_ENTRY(ACTION, Enter, "ACTION_Enter"),
 
-  KBD_NAME_ENTRY(FUNCTION, Space, "Space"),
-  KBD_NAME_ENTRY(FUNCTION, Space, "FUNCTION_Space"),
+  KBD_NAME_ENTRY(ACTION, Space, "Space"),
+  KBD_NAME_ENTRY(ACTION, Space, "ACTION_Space"),
 
-  KBD_NAME_ENTRY(FUNCTION, Tab, "Tab"),
-  KBD_NAME_ENTRY(FUNCTION, Tab, "FUNCTION_Tab"),
+  KBD_NAME_ENTRY(ACTION, Tab, "Tab"),
+  KBD_NAME_ENTRY(ACTION, Tab, "ACTION_Tab"),
 
-  KBD_NAME_ENTRY(FUNCTION, DeleteBackward, "DeleteBackward"),
-  KBD_NAME_ENTRY(FUNCTION, DeleteBackward, "FUNCTION_DeleteBackward"),
+  KBD_NAME_ENTRY(ACTION, DeleteBackward, "DeleteBackward"),
+  KBD_NAME_ENTRY(ACTION, DeleteBackward, "ACTION_DeleteBackward"),
+
+  KBD_NAME_ENTRY(ACTION, Insert, "Insert"),
+  KBD_NAME_ENTRY(ACTION, Insert, "ACTION_Insert"),
+
+  KBD_NAME_ENTRY(ACTION, DeleteForward, "DeleteForward"),
+  KBD_NAME_ENTRY(ACTION, DeleteForward, "ACTION_DeleteForward"),
+
+  KBD_NAME_ENTRY(ACTION, Home, "Home"),
+  KBD_NAME_ENTRY(ACTION, Home, "ACTION_Home"),
+
+  KBD_NAME_ENTRY(ACTION, End, "End"),
+  KBD_NAME_ENTRY(ACTION, End, "ACTION_End"),
+
+  KBD_NAME_ENTRY(ACTION, PageUp, "PageUp"),
+  KBD_NAME_ENTRY(ACTION, PageUp, "ACTION_PageUp"),
+
+  KBD_NAME_ENTRY(ACTION, PageDown, "PageDown"),
+  KBD_NAME_ENTRY(ACTION, PageDown, "ACTION_PageDown"),
+
+  KBD_NAME_ENTRY(ACTION, ArrowUp, "ArrowUp"),
+  KBD_NAME_ENTRY(ACTION, ArrowUp, "ACTION_ArrowUp"),
+
+  KBD_NAME_ENTRY(ACTION, ArrowDown, "ArrowDown"),
+  KBD_NAME_ENTRY(ACTION, ArrowDown, "ACTION_ArrowDown"),
+
+  KBD_NAME_ENTRY(ACTION, ArrowLeft, "ArrowLeft"),
+  KBD_NAME_ENTRY(ACTION, ArrowLeft, "ACTION_ArrowLeft"),
+
+  KBD_NAME_ENTRY(ACTION, ArrowRight, "ArrowRight"),
+  KBD_NAME_ENTRY(ACTION, ArrowRight, "ACTION_ArrowRight"),
+
+  KBD_NAME_ENTRY(ACTION, PrintScreen, "PrintScreen"),
+  KBD_NAME_ENTRY(ACTION, PrintScreen, "ACTION_PrintScreen"),
+
+  KBD_NAME_ENTRY(ACTION, SystemRequest, "SystemRequest"),
+  KBD_NAME_ENTRY(ACTION, SystemRequest, "ACTION_SystemRequest"),
+
+  KBD_NAME_ENTRY(ACTION, Pause, "Pause"),
+  KBD_NAME_ENTRY(ACTION, Pause, "ACTION_Pause"),
+
+  KBD_NAME_ENTRY(ACTION, ShiftLeft, "ShiftLeft"),
+  KBD_NAME_ENTRY(ACTION, ShiftLeft, "ACTION_ShiftLeft"),
+
+  KBD_NAME_ENTRY(ACTION, ShiftRight, "ShiftRight"),
+  KBD_NAME_ENTRY(ACTION, ShiftRight, "ACTION_ShiftRight"),
+
+  KBD_NAME_ENTRY(ACTION, ControlLeft, "ControlLeft"),
+  KBD_NAME_ENTRY(ACTION, ControlLeft, "ACTION_ControlLeft"),
+
+  KBD_NAME_ENTRY(ACTION, ControlRight, "ControlRight"),
+  KBD_NAME_ENTRY(ACTION, ControlRight, "ACTION_ControlRight"),
+
+  KBD_NAME_ENTRY(ACTION, AltLeft, "AltLeft"),
+  KBD_NAME_ENTRY(ACTION, AltLeft, "ACTION_AltLeft"),
+
+  KBD_NAME_ENTRY(ACTION, AltRight, "AltRight"),
+  KBD_NAME_ENTRY(ACTION, AltRight, "ACTION_AltRight"),
+
+  KBD_NAME_ENTRY(ACTION, GuiLeft, "GuiLeft"),
+  KBD_NAME_ENTRY(ACTION, GuiLeft, "ACTION_GuiLeft"),
+
+  KBD_NAME_ENTRY(ACTION, GuiRight, "GuiRight"),
+  KBD_NAME_ENTRY(ACTION, GuiRight, "ACTION_GuiRight"),
+
+  KBD_NAME_ENTRY(ACTION, Application, "Application"),
+  KBD_NAME_ENTRY(ACTION, Application, "ACTION_Application"),
+
+  KBD_NAME_ENTRY(ACTION, Help, "ACTION_Help"),
+
+  KBD_NAME_ENTRY(ACTION, Stop, "ACTION_Stop"),
+
+  KBD_NAME_ENTRY(ACTION, Props, "ACTION_Props"),
+
+  KBD_NAME_ENTRY(ACTION, Front, "ACTION_Front"),
+
+  KBD_NAME_ENTRY(ACTION, Open, "ACTION_Open"),
+
+  KBD_NAME_ENTRY(ACTION, Find, "ACTION_Find"),
+
+  KBD_NAME_ENTRY(ACTION, Again, "ACTION_Again"),
+
+  KBD_NAME_ENTRY(ACTION, Undo, "ACTION_Undo"),
+
+  KBD_NAME_ENTRY(ACTION, Copy, "ACTION_Copy"),
+
+  KBD_NAME_ENTRY(ACTION, Paste, "ACTION_Paste"),
+
+  KBD_NAME_ENTRY(ACTION, Cut, "ACTION_Cut"),
+
+  KBD_NAME_ENTRY(ACTION, Power, "ACTION_Power"),
+
+  KBD_NAME_ENTRY(ACTION, Sleep, "ACTION_Sleep"),
+
+  KBD_NAME_ENTRY(ACTION, Wakeup, "ACTION_Wakeup"),
+
+  KBD_NAME_ENTRY(ACTION, Menu, "ACTION_Menu"),
+
+  KBD_NAME_ENTRY(ACTION, Select, "Select"),
+  KBD_NAME_ENTRY(ACTION, Select, "ACTION_Select"),
+
+  KBD_NAME_ENTRY(ACTION, Cancel, "ACTION_Cancel"),
+
+  KBD_NAME_ENTRY(ACTION, Clear, "ACTION_Clear"),
+
+  KBD_NAME_ENTRY(ACTION, Prior, "ACTION_Prior"),
+
+  KBD_NAME_ENTRY(ACTION, Return, "ACTION_Return"),
+
+  KBD_NAME_ENTRY(ACTION, Separator, "ACTION_Separator"),
+
+  KBD_NAME_ENTRY(ACTION, Out, "ACTION_Out"),
+
+  KBD_NAME_ENTRY(ACTION, Oper, "ACTION_Oper"),
+
+  KBD_NAME_ENTRY(ACTION, Clear_Again, "ACTION_Clear_Again"),
+
+  KBD_NAME_ENTRY(ACTION, CrSel_Props, "ACTION_CrSel_Props"),
+
+  KBD_NAME_ENTRY(ACTION, ExSel, "ACTION_ExSel"),
 
   KBD_NAME_ENTRY(FUNCTION, F1, "F1"),
   KBD_NAME_ENTRY(FUNCTION, F1, "FUNCTION_F1"),
@@ -250,125 +369,6 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(FUNCTION, F24, "F24"),
   KBD_NAME_ENTRY(FUNCTION, F24, "FUNCTION_F24"),
-
-  KBD_NAME_ENTRY(FUNCTION, Insert, "Insert"),
-  KBD_NAME_ENTRY(FUNCTION, Insert, "FUNCTION_Insert"),
-
-  KBD_NAME_ENTRY(FUNCTION, DeleteForward, "DeleteForward"),
-  KBD_NAME_ENTRY(FUNCTION, DeleteForward, "FUNCTION_DeleteForward"),
-
-  KBD_NAME_ENTRY(FUNCTION, Home, "Home"),
-  KBD_NAME_ENTRY(FUNCTION, Home, "FUNCTION_Home"),
-
-  KBD_NAME_ENTRY(FUNCTION, End, "End"),
-  KBD_NAME_ENTRY(FUNCTION, End, "FUNCTION_End"),
-
-  KBD_NAME_ENTRY(FUNCTION, PageUp, "PageUp"),
-  KBD_NAME_ENTRY(FUNCTION, PageUp, "FUNCTION_PageUp"),
-
-  KBD_NAME_ENTRY(FUNCTION, PageDown, "PageDown"),
-  KBD_NAME_ENTRY(FUNCTION, PageDown, "FUNCTION_PageDown"),
-
-  KBD_NAME_ENTRY(FUNCTION, ArrowUp, "ArrowUp"),
-  KBD_NAME_ENTRY(FUNCTION, ArrowUp, "FUNCTION_ArrowUp"),
-
-  KBD_NAME_ENTRY(FUNCTION, ArrowDown, "ArrowDown"),
-  KBD_NAME_ENTRY(FUNCTION, ArrowDown, "FUNCTION_ArrowDown"),
-
-  KBD_NAME_ENTRY(FUNCTION, ArrowLeft, "ArrowLeft"),
-  KBD_NAME_ENTRY(FUNCTION, ArrowLeft, "FUNCTION_ArrowLeft"),
-
-  KBD_NAME_ENTRY(FUNCTION, ArrowRight, "ArrowRight"),
-  KBD_NAME_ENTRY(FUNCTION, ArrowRight, "FUNCTION_ArrowRight"),
-
-  KBD_NAME_ENTRY(FUNCTION, PrintScreen, "PrintScreen"),
-  KBD_NAME_ENTRY(FUNCTION, PrintScreen, "FUNCTION_PrintScreen"),
-
-  KBD_NAME_ENTRY(FUNCTION, SystemRequest, "SystemRequest"),
-  KBD_NAME_ENTRY(FUNCTION, SystemRequest, "FUNCTION_SystemRequest"),
-
-  KBD_NAME_ENTRY(FUNCTION, Pause, "Pause"),
-  KBD_NAME_ENTRY(FUNCTION, Pause, "FUNCTION_Pause"),
-
-  KBD_NAME_ENTRY(FUNCTION, ShiftLeft, "ShiftLeft"),
-  KBD_NAME_ENTRY(FUNCTION, ShiftLeft, "FUNCTION_ShiftLeft"),
-
-  KBD_NAME_ENTRY(FUNCTION, ShiftRight, "ShiftRight"),
-  KBD_NAME_ENTRY(FUNCTION, ShiftRight, "FUNCTION_ShiftRight"),
-
-  KBD_NAME_ENTRY(FUNCTION, ControlLeft, "ControlLeft"),
-  KBD_NAME_ENTRY(FUNCTION, ControlLeft, "FUNCTION_ControlLeft"),
-
-  KBD_NAME_ENTRY(FUNCTION, ControlRight, "ControlRight"),
-  KBD_NAME_ENTRY(FUNCTION, ControlRight, "FUNCTION_ControlRight"),
-
-  KBD_NAME_ENTRY(FUNCTION, AltLeft, "AltLeft"),
-  KBD_NAME_ENTRY(FUNCTION, AltLeft, "FUNCTION_AltLeft"),
-
-  KBD_NAME_ENTRY(FUNCTION, AltRight, "AltRight"),
-  KBD_NAME_ENTRY(FUNCTION, AltRight, "FUNCTION_AltRight"),
-
-  KBD_NAME_ENTRY(FUNCTION, GuiLeft, "GuiLeft"),
-  KBD_NAME_ENTRY(FUNCTION, GuiLeft, "FUNCTION_GuiLeft"),
-
-  KBD_NAME_ENTRY(FUNCTION, GuiRight, "GuiRight"),
-  KBD_NAME_ENTRY(FUNCTION, GuiRight, "FUNCTION_GuiRight"),
-
-  KBD_NAME_ENTRY(FUNCTION, Application, "Application"),
-  KBD_NAME_ENTRY(FUNCTION, Application, "FUNCTION_Application"),
-
-  KBD_NAME_ENTRY(FUNCTION, Help, "FUNCTION_Help"),
-
-  KBD_NAME_ENTRY(FUNCTION, Stop, "FUNCTION_Stop"),
-
-  KBD_NAME_ENTRY(FUNCTION, Props, "FUNCTION_Props"),
-
-  KBD_NAME_ENTRY(FUNCTION, Front, "FUNCTION_Front"),
-
-  KBD_NAME_ENTRY(FUNCTION, Open, "FUNCTION_Open"),
-
-  KBD_NAME_ENTRY(FUNCTION, Find, "FUNCTION_Find"),
-
-  KBD_NAME_ENTRY(FUNCTION, Again, "FUNCTION_Again"),
-
-  KBD_NAME_ENTRY(FUNCTION, Undo, "FUNCTION_Undo"),
-
-  KBD_NAME_ENTRY(FUNCTION, Copy, "FUNCTION_Copy"),
-
-  KBD_NAME_ENTRY(FUNCTION, Paste, "FUNCTION_Paste"),
-
-  KBD_NAME_ENTRY(FUNCTION, Cut, "FUNCTION_Cut"),
-
-  KBD_NAME_ENTRY(FUNCTION, Power, "FUNCTION_Power"),
-
-  KBD_NAME_ENTRY(FUNCTION, Sleep, "FUNCTION_Sleep"),
-
-  KBD_NAME_ENTRY(FUNCTION, Wakeup, "FUNCTION_Wakeup"),
-
-  KBD_NAME_ENTRY(FUNCTION, Menu, "FUNCTION_Menu"),
-
-  KBD_NAME_ENTRY(FUNCTION, Select, "Select"),
-  KBD_NAME_ENTRY(FUNCTION, Select, "FUNCTION_Select"),
-
-  KBD_NAME_ENTRY(FUNCTION, Cancel, "FUNCTION_Cancel"),
-
-  KBD_NAME_ENTRY(FUNCTION, Clear, "FUNCTION_Clear"),
-
-  KBD_NAME_ENTRY(FUNCTION, Prior, "FUNCTION_Prior"),
-
-  KBD_NAME_ENTRY(FUNCTION, Return, "FUNCTION_Return"),
-
-  KBD_NAME_ENTRY(FUNCTION, Separator, "FUNCTION_Separator"),
-
-  KBD_NAME_ENTRY(FUNCTION, Out, "FUNCTION_Out"),
-
-  KBD_NAME_ENTRY(FUNCTION, Oper, "FUNCTION_Oper"),
-
-  KBD_NAME_ENTRY(FUNCTION, Clear_Again, "FUNCTION_Clear_Again"),
-
-  KBD_NAME_ENTRY(FUNCTION, CrSel_Props, "FUNCTION_CrSel_Props"),
-
-  KBD_NAME_ENTRY(FUNCTION, ExSel, "FUNCTION_ExSel"),
 
   KBD_NAME_ENTRY(MEDIA, Mute, "MEDIA_Mute"),
 

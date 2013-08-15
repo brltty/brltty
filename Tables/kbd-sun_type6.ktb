@@ -24,22 +24,22 @@ bind MEDIA_Mute MUTE
 bind ControlLeft+!MEDIA_Mute TUNES
 bind MEDIA_VolumeDown SAY_SOFTER
 bind MEDIA_VolumeUp SAY_LOUDER
-bind FUNCTION_Power RESTARTBRL
-bind ControlLeft+!FUNCTION_Power RESTARTSPEECH
+bind ACTION_Power RESTARTBRL
+bind ControlLeft+!ACTION_Power RESTARTSPEECH
 
-bind FUNCTION_Stop FREEZE+on
-bind FUNCTION_Again FREEZE+off
-bind FUNCTION_Stop+!FUNCTION_Again FREEZE
+bind ACTION_Stop FREEZE+on
+bind ACTION_Again FREEZE+off
+bind ACTION_Stop+!ACTION_Again FREEZE
 hide on
-bind FUNCTION_Again+!FUNCTION_Stop FREEZE
+bind ACTION_Again+!ACTION_Stop FREEZE
 hide off
-bind !FUNCTION_Undo RETURN
-bind ControlLeft+!FUNCTION_Undo BACK
-bind !FUNCTION_Paste PASTE
-bind ControlLeft+!FUNCTION_Paste PWGEN+7
-bind ShiftLeft+!FUNCTION_Paste PWGEN+11
-bind !FUNCTION_Find NXSEARCH
-bind ControlLeft+!FUNCTION_Find PRSEARCH
+bind !ACTION_Undo RETURN
+bind ControlLeft+!ACTION_Undo BACK
+bind !ACTION_Paste PASTE
+bind ControlLeft+!ACTION_Paste PWGEN+7
+bind ShiftLeft+!ACTION_Paste PWGEN+11
+bind !ACTION_Find NXSEARCH
+bind ControlLeft+!ACTION_Find PRSEARCH
 
-bind !FUNCTION_Help HELP
-bind ControlLeft+FUNCTION_Help LEARN
+bind !ACTION_Help HELP
+bind ControlLeft+ACTION_Help LEARN
