@@ -37,6 +37,17 @@ public final class ScreenUtilities {
 
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+        node = AccessibilityNodeInfo.obtain(node);
+
+        if (!node.refresh()) {
+          node.recycle();
+          node = null;
+        }
+
+        return node;
+      }
+
       {
         int childCount = node.getChildCount();
 
