@@ -60,17 +60,17 @@ typedef enum {
 } KBD_LetterKey;
 
 typedef enum {
-  KBD_KEY_DIGIT_Zero,
-  KBD_KEY_DIGIT_One,
-  KBD_KEY_DIGIT_Two,
-  KBD_KEY_DIGIT_Three,
-  KBD_KEY_DIGIT_Four,
-  KBD_KEY_DIGIT_Five,
-  KBD_KEY_DIGIT_Six,
-  KBD_KEY_DIGIT_Seven,
-  KBD_KEY_DIGIT_Eight,
-  KBD_KEY_DIGIT_Nine,
-} KBD_DigitKey;
+  KBD_KEY_NUMBER_Zero,
+  KBD_KEY_NUMBER_One,
+  KBD_KEY_NUMBER_Two,
+  KBD_KEY_NUMBER_Three,
+  KBD_KEY_NUMBER_Four,
+  KBD_KEY_NUMBER_Five,
+  KBD_KEY_NUMBER_Six,
+  KBD_KEY_NUMBER_Seven,
+  KBD_KEY_NUMBER_Eight,
+  KBD_KEY_NUMBER_Nine,
+} KBD_NumberKey;
 
 typedef enum {
   KBD_KEY_SYMBOL_Grave,
@@ -304,7 +304,7 @@ typedef enum {
 typedef enum {
   KBD_SET_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
   KBD_SET_LETTER,
-  KBD_SET_DIGIT,
+  KBD_SET_NUMBER,
   KBD_SET_SYMBOL,
   KBD_SET_ACTION,
   KBD_SET_FUNCTION,
@@ -322,7 +322,7 @@ typedef enum {
 
 #define KBD_KEY_SPECIAL(name) KBD_KEY_VALUE(SPECIAL, name)
 #define KBD_KEY_LETTER(name) KBD_KEY_VALUE(LETTER, name)
-#define KBD_KEY_DIGIT(name) KBD_KEY_VALUE(DIGIT, name)
+#define KBD_KEY_NUMBER(name) KBD_KEY_VALUE(NUMBER, name)
 #define KBD_KEY_SYMBOL(name) KBD_KEY_VALUE(SYMBOL, name)
 #define KBD_KEY_ACTION(name) KBD_KEY_VALUE(ACTION, name)
 #define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
