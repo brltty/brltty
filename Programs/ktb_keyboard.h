@@ -337,6 +337,7 @@ typedef enum {
   KBD_SET_ROUTING,
 } KBD_KeySet;
 
+#define KBD_SET_VALUE(s,k) {.set=KBD_SET_##s, .key=(k)}
 #define KBD_KEY_VALUE(s,k) {.set=KBD_SET_##s, .key=KBD_KEY_##s##_##k}
 #define KBD_NAME_ENTRY(s,k,n) {.value=KBD_KEY_VALUE(s, k), .name=n}
 
@@ -360,7 +361,7 @@ typedef enum {
 #define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
 
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
-#define KBD_KEY_ROUTING(offset) {.set=KBD_SET_ROUTING, .key=(offset)}
+#define KBD_KEY_ROUTING(offset) KBD_SET_VALUE(ROUTING, (offset))
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
