@@ -93,15 +93,17 @@ typedef enum {
 } KBD_SymbolKey;
 
 typedef enum {
-  KBD_KEY_ACTION_Escape,
   KBD_KEY_ACTION_Enter,
   KBD_KEY_ACTION_Tab,
-  KBD_KEY_ACTION_DeleteBackward,
+  KBD_KEY_ACTION_Escape,
 
   KBD_KEY_ACTION_Insert,
+  KBD_KEY_ACTION_DeleteBackward,
   KBD_KEY_ACTION_DeleteForward,
+
   KBD_KEY_ACTION_Home,
   KBD_KEY_ACTION_End,
+
   KBD_KEY_ACTION_PageUp,
   KBD_KEY_ACTION_PageDown,
 
@@ -299,6 +301,7 @@ typedef enum {
 
 typedef enum {
   KBD_KEY_BRAILLE_Space,
+
   KBD_KEY_BRAILLE_Dot1,
   KBD_KEY_BRAILLE_Dot2,
   KBD_KEY_BRAILLE_Dot3,

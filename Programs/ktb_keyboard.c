@@ -168,20 +168,20 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(SYMBOL, Space, "Space"),
   KBD_NAME_ENTRY(SYMBOL, Space, "SYMBOL_Space"),
 
-  KBD_NAME_ENTRY(ACTION, Escape, "Escape"),
-  KBD_NAME_ENTRY(ACTION, Escape, "ACTION_Escape"),
-
   KBD_NAME_ENTRY(ACTION, Enter, "Enter"),
   KBD_NAME_ENTRY(ACTION, Enter, "ACTION_Enter"),
 
   KBD_NAME_ENTRY(ACTION, Tab, "Tab"),
   KBD_NAME_ENTRY(ACTION, Tab, "ACTION_Tab"),
 
-  KBD_NAME_ENTRY(ACTION, DeleteBackward, "DeleteBackward"),
-  KBD_NAME_ENTRY(ACTION, DeleteBackward, "ACTION_DeleteBackward"),
+  KBD_NAME_ENTRY(ACTION, Escape, "Escape"),
+  KBD_NAME_ENTRY(ACTION, Escape, "ACTION_Escape"),
 
   KBD_NAME_ENTRY(ACTION, Insert, "Insert"),
   KBD_NAME_ENTRY(ACTION, Insert, "ACTION_Insert"),
+
+  KBD_NAME_ENTRY(ACTION, DeleteBackward, "DeleteBackward"),
+  KBD_NAME_ENTRY(ACTION, DeleteBackward, "ACTION_DeleteBackward"),
 
   KBD_NAME_ENTRY(ACTION, DeleteForward, "DeleteForward"),
   KBD_NAME_ENTRY(ACTION, DeleteForward, "ACTION_DeleteForward"),
