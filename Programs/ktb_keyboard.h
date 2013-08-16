@@ -73,6 +73,8 @@ typedef enum {
 } KBD_NumberKey;
 
 typedef enum {
+  KBD_KEY_SYMBOL_Space,
+
   KBD_KEY_SYMBOL_Grave,
   KBD_KEY_SYMBOL_Backslash,
   KBD_KEY_SYMBOL_Minus,
@@ -91,7 +93,6 @@ typedef enum {
 typedef enum {
   KBD_KEY_ACTION_Escape,
   KBD_KEY_ACTION_Enter,
-  KBD_KEY_ACTION_Space,
   KBD_KEY_ACTION_Tab,
   KBD_KEY_ACTION_DeleteBackward,
 
@@ -197,8 +198,10 @@ typedef enum {
 typedef enum {
   KBD_KEY_MODIFIER_ShiftLeft,
   KBD_KEY_MODIFIER_ShiftRight,
+
   KBD_KEY_MODIFIER_ControlLeft,
   KBD_KEY_MODIFIER_ControlRight,
+
   KBD_KEY_MODIFIER_AltLeft,
   KBD_KEY_MODIFIER_AltRight,
 } KBD_ModifierKey;
@@ -326,13 +329,15 @@ typedef enum {
   KBD_SET_KPACTION,
 
   KBD_SET_BRAILLE,
-  KBD_SET_ROUTE,
+  KBD_SET_ROUTING,
 } KBD_KeySet;
 
 #define KBD_KEY_VALUE(s,k) {.set=KBD_SET_##s, .key=KBD_KEY_##s##_##k}
 #define KBD_NAME_ENTRY(s,k,n) {.value=KBD_KEY_VALUE(s, k), .name=n}
 
 #define KBD_KEY_SPECIAL(name) KBD_KEY_VALUE(SPECIAL, name)
+#define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)
+#define KBD_KEY_IGNORE KBD_KEY_SPECIAL(Ignore)
 
 #define KBD_KEY_LETTER(name) KBD_KEY_VALUE(LETTER, name)
 #define KBD_KEY_NUMBER(name) KBD_KEY_VALUE(NUMBER, name)
@@ -350,10 +355,6 @@ typedef enum {
 #define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
 
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
-#define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
-
-#define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)
-#define KBD_KEY_IGNORE KBD_KEY_SPECIAL(Ignore)
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
