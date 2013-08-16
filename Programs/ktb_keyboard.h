@@ -309,19 +309,23 @@ typedef enum {
 
 typedef enum {
   KBD_SET_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
+
   KBD_SET_LETTER,
   KBD_SET_NUMBER,
   KBD_SET_SYMBOL,
+
   KBD_SET_ACTION,
   KBD_SET_MEDIA,
   KBD_SET_FUNCTION,
+
   KBD_SET_MODIFIER,
   KBD_SET_LOCK,
+
   KBD_SET_KPNUMBER,
   KBD_SET_KPSYMBOL,
   KBD_SET_KPACTION,
-  KBD_SET_BRAILLE,
 
+  KBD_SET_BRAILLE,
   KBD_SET_ROUTE,
 } KBD_KeySet;
 
@@ -329,17 +333,22 @@ typedef enum {
 #define KBD_NAME_ENTRY(s,k,n) {.value=KBD_KEY_VALUE(s, k), .name=n}
 
 #define KBD_KEY_SPECIAL(name) KBD_KEY_VALUE(SPECIAL, name)
+
 #define KBD_KEY_LETTER(name) KBD_KEY_VALUE(LETTER, name)
 #define KBD_KEY_NUMBER(name) KBD_KEY_VALUE(NUMBER, name)
 #define KBD_KEY_SYMBOL(name) KBD_KEY_VALUE(SYMBOL, name)
+
 #define KBD_KEY_ACTION(name) KBD_KEY_VALUE(ACTION, name)
 #define KBD_KEY_MEDIA(name) KBD_KEY_VALUE(MEDIA, name)
 #define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
+
 #define KBD_KEY_MODIFIER(name) KBD_KEY_VALUE(MODIFIER, name)
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
+
 #define KBD_KEY_KPNUMBER(name) KBD_KEY_VALUE(KPNUMBER, name)
 #define KBD_KEY_KPSYMBOL(name) KBD_KEY_VALUE(KPSYMBOL, name)
 #define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
+
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
 #define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
 
