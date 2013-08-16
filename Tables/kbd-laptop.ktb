@@ -106,8 +106,8 @@ assign kpSix L
 assign kpSeven U
 assign kpEight I
 assign kpNine O
-assign kpSlash Eight
-assign kpAsterisk Nine
+assign kpDivide Eight
+assign kpMultiply Nine
 
 assign kpSay CapsLock+ShiftLeft
 include kbd-kp_say.kti

@@ -218,24 +218,6 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(ACTION, Pause, "Pause"),
   KBD_NAME_ENTRY(ACTION, Pause, "ACTION_Pause"),
 
-  KBD_NAME_ENTRY(ACTION, ShiftLeft, "ShiftLeft"),
-  KBD_NAME_ENTRY(ACTION, ShiftLeft, "ACTION_ShiftLeft"),
-
-  KBD_NAME_ENTRY(ACTION, ShiftRight, "ShiftRight"),
-  KBD_NAME_ENTRY(ACTION, ShiftRight, "ACTION_ShiftRight"),
-
-  KBD_NAME_ENTRY(ACTION, ControlLeft, "ControlLeft"),
-  KBD_NAME_ENTRY(ACTION, ControlLeft, "ACTION_ControlLeft"),
-
-  KBD_NAME_ENTRY(ACTION, ControlRight, "ControlRight"),
-  KBD_NAME_ENTRY(ACTION, ControlRight, "ACTION_ControlRight"),
-
-  KBD_NAME_ENTRY(ACTION, AltLeft, "AltLeft"),
-  KBD_NAME_ENTRY(ACTION, AltLeft, "ACTION_AltLeft"),
-
-  KBD_NAME_ENTRY(ACTION, AltRight, "AltRight"),
-  KBD_NAME_ENTRY(ACTION, AltRight, "ACTION_AltRight"),
-
   KBD_NAME_ENTRY(ACTION, GuiLeft, "GuiLeft"),
   KBD_NAME_ENTRY(ACTION, GuiLeft, "ACTION_GuiLeft"),
 
@@ -399,6 +381,24 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(FUNCTION, F24, "F24"),
   KBD_NAME_ENTRY(FUNCTION, F24, "FUNCTION_F24"),
+
+  KBD_NAME_ENTRY(MODIFIER, ShiftLeft, "ShiftLeft"),
+  KBD_NAME_ENTRY(MODIFIER, ShiftLeft, "MODIFIER_ShiftLeft"),
+
+  KBD_NAME_ENTRY(MODIFIER, ShiftRight, "ShiftRight"),
+  KBD_NAME_ENTRY(MODIFIER, ShiftRight, "MODIFIER_ShiftRight"),
+
+  KBD_NAME_ENTRY(MODIFIER, ControlLeft, "ControlLeft"),
+  KBD_NAME_ENTRY(MODIFIER, ControlLeft, "MODIFIER_ControlLeft"),
+
+  KBD_NAME_ENTRY(MODIFIER, ControlRight, "ControlRight"),
+  KBD_NAME_ENTRY(MODIFIER, ControlRight, "MODIFIER_ControlRight"),
+
+  KBD_NAME_ENTRY(MODIFIER, AltLeft, "AltLeft"),
+  KBD_NAME_ENTRY(MODIFIER, AltLeft, "MODIFIER_AltLeft"),
+
+  KBD_NAME_ENTRY(MODIFIER, AltRight, "AltRight"),
+  KBD_NAME_ENTRY(MODIFIER, AltRight, "MODIFIER_AltRight"),
 
   KBD_NAME_ENTRY(LOCK, Capitals, "CapsLock"),
   KBD_NAME_ENTRY(LOCK, Capitals, "LOCK_Capitals"),

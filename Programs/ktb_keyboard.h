@@ -111,12 +111,6 @@ typedef enum {
   KBD_KEY_ACTION_SystemRequest,
   KBD_KEY_ACTION_Pause,
 
-  KBD_KEY_ACTION_ShiftLeft,
-  KBD_KEY_ACTION_ShiftRight,
-  KBD_KEY_ACTION_ControlLeft,
-  KBD_KEY_ACTION_ControlRight,
-  KBD_KEY_ACTION_AltLeft,
-  KBD_KEY_ACTION_AltRight,
   KBD_KEY_ACTION_GuiLeft,
   KBD_KEY_ACTION_GuiRight,
   KBD_KEY_ACTION_Application,
@@ -199,6 +193,15 @@ typedef enum {
   KBD_KEY_FUNCTION_F23,
   KBD_KEY_FUNCTION_F24,
 } KBD_FunctionKey;
+
+typedef enum {
+  KBD_KEY_MODIFIER_ShiftLeft,
+  KBD_KEY_MODIFIER_ShiftRight,
+  KBD_KEY_MODIFIER_ControlLeft,
+  KBD_KEY_MODIFIER_ControlRight,
+  KBD_KEY_MODIFIER_AltLeft,
+  KBD_KEY_MODIFIER_AltRight,
+} KBD_ModifierKey;
 
 typedef enum {
   KBD_KEY_LOCK_Capitals,
@@ -312,6 +315,7 @@ typedef enum {
   KBD_SET_ACTION,
   KBD_SET_MEDIA,
   KBD_SET_FUNCTION,
+  KBD_SET_MODIFIER,
   KBD_SET_LOCK,
   KBD_SET_KPNUMBER,
   KBD_SET_KPSYMBOL,
@@ -331,6 +335,7 @@ typedef enum {
 #define KBD_KEY_ACTION(name) KBD_KEY_VALUE(ACTION, name)
 #define KBD_KEY_MEDIA(name) KBD_KEY_VALUE(MEDIA, name)
 #define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
+#define KBD_KEY_MODIFIER(name) KBD_KEY_VALUE(MODIFIER, name)
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_KPNUMBER(name) KBD_KEY_VALUE(KPNUMBER, name)
 #define KBD_KEY_KPSYMBOL(name) KBD_KEY_VALUE(KPSYMBOL, name)
