@@ -129,20 +129,17 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(NUMBER, Nine, "Nine"),
   KBD_NAME_ENTRY(NUMBER, Nine, "NUMBER_Nine"),
 
-  KBD_NAME_ENTRY(SYMBOL, Space, "Space"),
-  KBD_NAME_ENTRY(SYMBOL, Space, "SYMBOL_Space"),
-
   KBD_NAME_ENTRY(SYMBOL, Grave, "Grave"),
   KBD_NAME_ENTRY(SYMBOL, Grave, "SYMBOL_Grave"),
-
-  KBD_NAME_ENTRY(SYMBOL, Backslash, "Backslash"),
-  KBD_NAME_ENTRY(SYMBOL, Backslash, "SYMBOL_Backslash"),
 
   KBD_NAME_ENTRY(SYMBOL, Minus, "Minus"),
   KBD_NAME_ENTRY(SYMBOL, Minus, "SYMBOL_Minus"),
 
   KBD_NAME_ENTRY(SYMBOL, Equals, "Equals"),
   KBD_NAME_ENTRY(SYMBOL, Equals, "SYMBOL_Equals"),
+
+  KBD_NAME_ENTRY(SYMBOL, Backslash, "Backslash"),
+  KBD_NAME_ENTRY(SYMBOL, Backslash, "SYMBOL_Backslash"),
 
   KBD_NAME_ENTRY(SYMBOL, LeftBracket, "LeftBracket"),
   KBD_NAME_ENTRY(SYMBOL, LeftBracket, "SYMBOL_LeftBracket"),
@@ -156,6 +153,9 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(SYMBOL, Apostrophe, "Apostrophe"),
   KBD_NAME_ENTRY(SYMBOL, Apostrophe, "SYMBOL_Apostrophe"),
 
+  KBD_NAME_ENTRY(SYMBOL, Europe2, "Europe2"),
+  KBD_NAME_ENTRY(SYMBOL, Europe2, "SYMBOL_Europe2"),
+
   KBD_NAME_ENTRY(SYMBOL, Comma, "Comma"),
   KBD_NAME_ENTRY(SYMBOL, Comma, "SYMBOL_Comma"),
 
@@ -165,7 +165,8 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(SYMBOL, Slash, "Slash"),
   KBD_NAME_ENTRY(SYMBOL, Slash, "SYMBOL_Slash"),
 
-  KBD_NAME_ENTRY(SYMBOL, Europe2, "Europe2"),
+  KBD_NAME_ENTRY(SYMBOL, Space, "Space"),
+  KBD_NAME_ENTRY(SYMBOL, Space, "SYMBOL_Space"),
 
   KBD_NAME_ENTRY(ACTION, Escape, "Escape"),
   KBD_NAME_ENTRY(ACTION, Escape, "ACTION_Escape"),
