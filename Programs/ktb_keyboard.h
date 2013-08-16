@@ -227,42 +227,44 @@ typedef enum {
 } KBD_KPNumberKey;
 
 typedef enum {
-  KBD_KEY_KPSYMBOL_Slash,
-  KBD_KEY_KPSYMBOL_Asterisk,
-  KBD_KEY_KPSYMBOL_Minus,
+  KBD_KEY_KPSYMBOL_DecimalSeparator,
+  KBD_KEY_KPSYMBOL_ThousandsSeparator,
+  KBD_KEY_KPSYMBOL_00,
+  KBD_KEY_KPSYMBOL_000,
+
   KBD_KEY_KPSYMBOL_Plus,
-  KBD_KEY_KPSYMBOL_Period,
+  KBD_KEY_KPSYMBOL_Minus,
+  KBD_KEY_KPSYMBOL_Asterisk,
+  KBD_KEY_KPSYMBOL_Slash,
+  KBD_KEY_KPSYMBOL_Modulo,
 
   KBD_KEY_KPSYMBOL_Equals,
+  KBD_KEY_KPSYMBOL_Less,
+  KBD_KEY_KPSYMBOL_Greater,
+  KBD_KEY_KPSYMBOL_PlusMinus,
+
   KBD_KEY_KPSYMBOL_LeftParenthesis,
   KBD_KEY_KPSYMBOL_RightParenthesis,
   KBD_KEY_KPSYMBOL_LeftBrace,
   KBD_KEY_KPSYMBOL_RightBrace,
-  KBD_KEY_KPSYMBOL_Modulo,
+
   KBD_KEY_KPSYMBOL_BitwiseAnd,
   KBD_KEY_KPSYMBOL_BitwiseOr,
   KBD_KEY_KPSYMBOL_BitwiseXor,
-  KBD_KEY_KPSYMBOL_Less,
-  KBD_KEY_KPSYMBOL_Greater,
+
+  KBD_KEY_KPSYMBOL_BooleanNot,
   KBD_KEY_KPSYMBOL_BooleanAnd,
   KBD_KEY_KPSYMBOL_BooleanOr,
   KBD_KEY_KPSYMBOL_BooleanXor,
-  KBD_KEY_KPSYMBOL_BooleanNot,
 
   KBD_KEY_KPSYMBOL_Space,
+  KBD_KEY_KPSYMBOL_Period,
   KBD_KEY_KPSYMBOL_Comma,
   KBD_KEY_KPSYMBOL_Colon,
-  KBD_KEY_KPSYMBOL_Number,
   KBD_KEY_KPSYMBOL_At,
-
-  KBD_KEY_KPSYMBOL_00,
-  KBD_KEY_KPSYMBOL_000,
-  KBD_KEY_KPSYMBOL_ThousandsSeparator,
-  KBD_KEY_KPSYMBOL_DecimalSeparator,
+  KBD_KEY_KPSYMBOL_Number,
   KBD_KEY_KPSYMBOL_CurrencyUnit,
   KBD_KEY_KPSYMBOL_CurrencySubunit,
-
-  KBD_KEY_KPSYMBOL_PlusMinus,
 } KBD_KPSymbolKey;
 
 typedef enum {
