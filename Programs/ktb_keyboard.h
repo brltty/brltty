@@ -153,6 +153,27 @@ typedef enum {
 } KBD_ActionKey;
 
 typedef enum {
+  KBD_KEY_MEDIA_Mute,
+  KBD_KEY_MEDIA_VolumeDown,
+  KBD_KEY_MEDIA_VolumeUp,
+
+  KBD_KEY_MEDIA_Stop,
+  KBD_KEY_MEDIA_Play,
+  KBD_KEY_MEDIA_Record,
+  KBD_KEY_MEDIA_Pause,
+  KBD_KEY_MEDIA_PlayPause,
+
+  KBD_KEY_MEDIA_Previous,
+  KBD_KEY_MEDIA_Next,
+  KBD_KEY_MEDIA_Backward,
+  KBD_KEY_MEDIA_Forward,
+
+  KBD_KEY_MEDIA_Eject,
+  KBD_KEY_MEDIA_Close,
+  KBD_KEY_MEDIA_EjectClose,
+} KBD_MediaKey;
+
+typedef enum {
   KBD_KEY_FUNCTION_F1,
   KBD_KEY_FUNCTION_F2,
   KBD_KEY_FUNCTION_F3,
@@ -178,27 +199,6 @@ typedef enum {
   KBD_KEY_FUNCTION_F23,
   KBD_KEY_FUNCTION_F24,
 } KBD_FunctionKey;
-
-typedef enum {
-  KBD_KEY_MEDIA_Mute,
-  KBD_KEY_MEDIA_VolumeDown,
-  KBD_KEY_MEDIA_VolumeUp,
-
-  KBD_KEY_MEDIA_Stop,
-  KBD_KEY_MEDIA_Play,
-  KBD_KEY_MEDIA_Record,
-  KBD_KEY_MEDIA_Pause,
-  KBD_KEY_MEDIA_PlayPause,
-
-  KBD_KEY_MEDIA_Previous,
-  KBD_KEY_MEDIA_Next,
-  KBD_KEY_MEDIA_Backward,
-  KBD_KEY_MEDIA_Forward,
-
-  KBD_KEY_MEDIA_Eject,
-  KBD_KEY_MEDIA_Close,
-  KBD_KEY_MEDIA_EjectClose,
-} KBD_MediaKey;
 
 typedef enum {
   KBD_KEY_LOCK_Capitals,
@@ -307,8 +307,8 @@ typedef enum {
   KBD_SET_NUMBER,
   KBD_SET_SYMBOL,
   KBD_SET_ACTION,
-  KBD_SET_FUNCTION,
   KBD_SET_MEDIA,
+  KBD_SET_FUNCTION,
   KBD_SET_LOCK,
   KBD_SET_LOCKING,
   KBD_SET_KEYPAD,
@@ -325,8 +325,8 @@ typedef enum {
 #define KBD_KEY_NUMBER(name) KBD_KEY_VALUE(NUMBER, name)
 #define KBD_KEY_SYMBOL(name) KBD_KEY_VALUE(SYMBOL, name)
 #define KBD_KEY_ACTION(name) KBD_KEY_VALUE(ACTION, name)
-#define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
 #define KBD_KEY_MEDIA(name) KBD_KEY_VALUE(MEDIA, name)
+#define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_LOCKING(name) KBD_KEY_VALUE(LOCKING, name)
 #define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
