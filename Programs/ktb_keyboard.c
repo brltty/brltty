@@ -451,9 +451,6 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(KEYPAD, Plus, "KPPlus"),
   KBD_NAME_ENTRY(KEYPAD, Plus, "KEYPAD_Plus"),
 
-  KBD_NAME_ENTRY(KEYPAD, Enter, "KPEnter"),
-  KBD_NAME_ENTRY(KEYPAD, Enter, "KEYPAD_Enter"),
-
   KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPPeriod"),
   KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPDelete"),
   KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KEYPAD_Period_Delete"),
@@ -489,11 +486,7 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(KEYPAD, BooleanNot, "KEYPAD_BooleanNot"),
 
-  KBD_NAME_ENTRY(KEYPAD, Backspace, "KEYPAD_Backspace"),
-
   KBD_NAME_ENTRY(KEYPAD, Space, "KEYPAD_Space"),
-
-  KBD_NAME_ENTRY(KEYPAD, Tab, "KEYPAD_Tab"),
 
   KBD_NAME_ENTRY(KEYPAD, Comma, "KEYPAD_Comma"),
 
@@ -527,33 +520,40 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(KEYPAD, CurrencySubunit, "KEYPAD_CurrencySubunit"),
 
-  KBD_NAME_ENTRY(KEYPAD, Clear, "KEYPAD_Clear"),
-
-  KBD_NAME_ENTRY(KEYPAD, ClearEntry, "KEYPAD_ClearEntry"),
-
   KBD_NAME_ENTRY(KEYPAD, PlusMinus, "KEYPAD_PlusMinus"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryClear, "KEYPAD_MemoryClear"),
+  KBD_NAME_ENTRY(KPACTION, Enter, "KPEnter"),
+  KBD_NAME_ENTRY(KPACTION, Enter, "KPACTION_Enter"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryStore, "KEYPAD_MemoryStore"),
+  KBD_NAME_ENTRY(KPACTION, Backspace, "KPACTION_Backspace"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryRecall, "KEYPAD_MemoryRecall"),
+  KBD_NAME_ENTRY(KPACTION, Tab, "KPACTION_Tab"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryAdd, "KEYPAD_MemoryAdd"),
+  KBD_NAME_ENTRY(KPACTION, Clear, "KPACTION_Clear"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemorySubtract, "KEYPAD_MemorySubtract"),
+  KBD_NAME_ENTRY(KPACTION, ClearEntry, "KPACTION_ClearEntry"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryMultiply, "KEYPAD_MemoryMultiply"),
+  KBD_NAME_ENTRY(KPACTION, MemoryClear, "KPACTION_MemoryClear"),
 
-  KBD_NAME_ENTRY(KEYPAD, MemoryDivide, "KEYPAD_MemoryDivide"),
+  KBD_NAME_ENTRY(KPACTION, MemoryStore, "KPACTION_MemoryStore"),
 
-  KBD_NAME_ENTRY(KEYPAD, Binary, "KEYPAD_Binary"),
+  KBD_NAME_ENTRY(KPACTION, MemoryRecall, "KPACTION_MemoryRecall"),
 
-  KBD_NAME_ENTRY(KEYPAD, Octal, "KEYPAD_Octal"),
+  KBD_NAME_ENTRY(KPACTION, MemoryAdd, "KPACTION_MemoryAdd"),
 
-  KBD_NAME_ENTRY(KEYPAD, Decimal, "KEYPAD_Decimal"),
+  KBD_NAME_ENTRY(KPACTION, MemorySubtract, "KPACTION_MemorySubtract"),
 
-  KBD_NAME_ENTRY(KEYPAD, Hexadecimal, "KEYPAD_Hexadecimal"),
+  KBD_NAME_ENTRY(KPACTION, MemoryMultiply, "KPACTION_MemoryMultiply"),
+
+  KBD_NAME_ENTRY(KPACTION, MemoryDivide, "KPACTION_MemoryDivide"),
+
+  KBD_NAME_ENTRY(KPACTION, Binary, "KPACTION_Binary"),
+
+  KBD_NAME_ENTRY(KPACTION, Octal, "KPACTION_Octal"),
+
+  KBD_NAME_ENTRY(KPACTION, Decimal, "KPACTION_Decimal"),
+
+  KBD_NAME_ENTRY(KPACTION, Hexadecimal, "KPACTION_Hexadecimal"),
 
   KBD_NAME_ENTRY(BRAILLE, Space, "Space"),
   KBD_NAME_ENTRY(BRAILLE, Space, "BRAILLE_Space"),

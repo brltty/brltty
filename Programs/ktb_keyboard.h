@@ -224,7 +224,6 @@ typedef enum {
   KBD_KEY_KEYPAD_Asterisk,
   KBD_KEY_KEYPAD_Minus,
   KBD_KEY_KEYPAD_Plus,
-  KBD_KEY_KEYPAD_Enter,
   KBD_KEY_KEYPAD_Period_Delete,
 
   KBD_KEY_KEYPAD_Equals,
@@ -243,9 +242,7 @@ typedef enum {
   KBD_KEY_KEYPAD_BooleanXor,
   KBD_KEY_KEYPAD_BooleanNot,
 
-  KBD_KEY_KEYPAD_Backspace,
   KBD_KEY_KEYPAD_Space,
-  KBD_KEY_KEYPAD_Tab,
   KBD_KEY_KEYPAD_Comma,
   KBD_KEY_KEYPAD_Colon,
   KBD_KEY_KEYPAD_Number,
@@ -265,23 +262,30 @@ typedef enum {
   KBD_KEY_KEYPAD_CurrencyUnit,
   KBD_KEY_KEYPAD_CurrencySubunit,
 
-  KBD_KEY_KEYPAD_Clear,
-  KBD_KEY_KEYPAD_ClearEntry,
   KBD_KEY_KEYPAD_PlusMinus,
-
-  KBD_KEY_KEYPAD_MemoryClear,
-  KBD_KEY_KEYPAD_MemoryStore,
-  KBD_KEY_KEYPAD_MemoryRecall,
-  KBD_KEY_KEYPAD_MemoryAdd,
-  KBD_KEY_KEYPAD_MemorySubtract,
-  KBD_KEY_KEYPAD_MemoryMultiply,
-  KBD_KEY_KEYPAD_MemoryDivide,
-
-  KBD_KEY_KEYPAD_Binary,
-  KBD_KEY_KEYPAD_Octal,
-  KBD_KEY_KEYPAD_Decimal,
-  KBD_KEY_KEYPAD_Hexadecimal,
 } KBD_KeypadKey;
+
+typedef enum {
+  KBD_KEY_KPACTION_Enter,
+  KBD_KEY_KPACTION_Backspace,
+  KBD_KEY_KPACTION_Tab,
+
+  KBD_KEY_KPACTION_Clear,
+  KBD_KEY_KPACTION_ClearEntry,
+
+  KBD_KEY_KPACTION_MemoryClear,
+  KBD_KEY_KPACTION_MemoryStore,
+  KBD_KEY_KPACTION_MemoryRecall,
+  KBD_KEY_KPACTION_MemoryAdd,
+  KBD_KEY_KPACTION_MemorySubtract,
+  KBD_KEY_KPACTION_MemoryMultiply,
+  KBD_KEY_KPACTION_MemoryDivide,
+
+  KBD_KEY_KPACTION_Binary,
+  KBD_KEY_KPACTION_Octal,
+  KBD_KEY_KPACTION_Decimal,
+  KBD_KEY_KPACTION_Hexadecimal,
+} KBD_KPActionKey;
 
 typedef enum {
   KBD_KEY_BRAILLE_Space,
@@ -309,6 +313,7 @@ typedef enum {
   KBD_SET_LOCK,
   KBD_SET_KPNUMBER,
   KBD_SET_KEYPAD,
+  KBD_SET_KPACTION,
   KBD_SET_BRAILLE,
 
   KBD_SET_ROUTE,
@@ -327,6 +332,7 @@ typedef enum {
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_KPNUMBER(name) KBD_KEY_VALUE(KPNUMBER, name)
 #define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
+#define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
 #define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
 
