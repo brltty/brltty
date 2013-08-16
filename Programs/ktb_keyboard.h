@@ -360,6 +360,7 @@ typedef enum {
 #define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
 
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
+#define KBD_KEY_ROUTING(offset) {.set=KBD_SET_ROUTING, .key=(offset)}
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
