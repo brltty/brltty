@@ -406,13 +406,8 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(LOCK, Scroll, "ScrollLock"),
   KBD_NAME_ENTRY(LOCK, Scroll, "LOCK_Scroll"),
 
-  KBD_NAME_ENTRY(LOCKING, Capitals, "LOCKING_Capitals"),
-
-  KBD_NAME_ENTRY(LOCKING, Scroll, "LOCKING_Scroll"),
-
-  KBD_NAME_ENTRY(LOCKING, Numbers, "LOCKING_Numbers"),
-
-  KBD_NAME_ENTRY(KEYPAD, NumLock_Clear, "KEYPAD_NumLock_Clear"),
+  KBD_NAME_ENTRY(LOCK, Numbers, "NumLock"),
+  KBD_NAME_ENTRY(LOCK, Numbers, "LOCK_Numbers"),
 
   KBD_NAME_ENTRY(KEYPAD, Slash, "KPSlash"),
   KBD_NAME_ENTRY(KEYPAD, Slash, "KEYPAD_Slash"),

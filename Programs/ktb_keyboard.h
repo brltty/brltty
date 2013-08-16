@@ -203,16 +203,10 @@ typedef enum {
 typedef enum {
   KBD_KEY_LOCK_Capitals,
   KBD_KEY_LOCK_Scroll,
+  KBD_KEY_LOCK_Numbers,
 } KBD_LockKey;
 
 typedef enum {
-  KBD_KEY_LOCKING_Capitals,
-  KBD_KEY_LOCKING_Scroll,
-  KBD_KEY_LOCKING_Numbers,
-} KBD_LockingKey;
-
-typedef enum {
-  KBD_KEY_KEYPAD_NumLock_Clear,
   KBD_KEY_KEYPAD_Slash,
   KBD_KEY_KEYPAD_Asterisk,
   KBD_KEY_KEYPAD_Minus,
@@ -310,7 +304,6 @@ typedef enum {
   KBD_SET_MEDIA,
   KBD_SET_FUNCTION,
   KBD_SET_LOCK,
-  KBD_SET_LOCKING,
   KBD_SET_KEYPAD,
   KBD_SET_BRAILLE,
 
@@ -328,7 +321,6 @@ typedef enum {
 #define KBD_KEY_MEDIA(name) KBD_KEY_VALUE(MEDIA, name)
 #define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
-#define KBD_KEY_LOCKING(name) KBD_KEY_VALUE(LOCKING, name)
 #define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
 #define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
