@@ -409,6 +409,36 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(LOCK, Numbers, "NumLock"),
   KBD_NAME_ENTRY(LOCK, Numbers, "LOCK_Numbers"),
 
+  KBD_NAME_ENTRY(KPNUMBER, Zero, "KP0"),
+  KBD_NAME_ENTRY(KPNUMBER, Zero, "KPNUMBER_Zero"),
+
+  KBD_NAME_ENTRY(KPNUMBER, One, "KP1"),
+  KBD_NAME_ENTRY(KPNUMBER, One, "KPNUMBER_One"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Two, "KP2"),
+  KBD_NAME_ENTRY(KPNUMBER, Two, "KPNUMBER_Two"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Three, "KP3"),
+  KBD_NAME_ENTRY(KPNUMBER, Three, "KPNUMBER_Three"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Four, "KP4"),
+  KBD_NAME_ENTRY(KPNUMBER, Four, "KPNUMBER_Four"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Five, "KP5"),
+  KBD_NAME_ENTRY(KPNUMBER, Five, "KPNUMBER_Five"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Six, "KP6"),
+  KBD_NAME_ENTRY(KPNUMBER, Six, "KPNUMBER_Six"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Seven, "KP7"),
+  KBD_NAME_ENTRY(KPNUMBER, Seven, "KPNUMBER_Seven"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Eight, "KP8"),
+  KBD_NAME_ENTRY(KPNUMBER, Eight, "KPNUMBER_Eight"),
+
+  KBD_NAME_ENTRY(KPNUMBER, Nine, "KP9"),
+  KBD_NAME_ENTRY(KPNUMBER, Nine, "KPNUMBER_Nine"),
+
   KBD_NAME_ENTRY(KEYPAD, Slash, "KPSlash"),
   KBD_NAME_ENTRY(KEYPAD, Slash, "KEYPAD_Slash"),
 
@@ -423,45 +453,6 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_NAME_ENTRY(KEYPAD, Enter, "KPEnter"),
   KBD_NAME_ENTRY(KEYPAD, Enter, "KEYPAD_Enter"),
-
-  KBD_NAME_ENTRY(KEYPAD, One_End, "KP1"),
-  KBD_NAME_ENTRY(KEYPAD, One_End, "KPEnd"),
-  KBD_NAME_ENTRY(KEYPAD, One_End, "KEYPAD_One_End"),
-
-  KBD_NAME_ENTRY(KEYPAD, Two_ArrowDown, "KP2"),
-  KBD_NAME_ENTRY(KEYPAD, Two_ArrowDown, "KPArrowDown"),
-  KBD_NAME_ENTRY(KEYPAD, Two_ArrowDown, "KEYPAD_Two_ArrowDown"),
-
-  KBD_NAME_ENTRY(KEYPAD, Three_PageDown, "KP3"),
-  KBD_NAME_ENTRY(KEYPAD, Three_PageDown, "KPPageDown"),
-  KBD_NAME_ENTRY(KEYPAD, Three_PageDown, "KEYPAD_Three_PageDown"),
-
-  KBD_NAME_ENTRY(KEYPAD, Four_ArrowLeft, "KP4"),
-  KBD_NAME_ENTRY(KEYPAD, Four_ArrowLeft, "KPArrowLeft"),
-  KBD_NAME_ENTRY(KEYPAD, Four_ArrowLeft, "KEYPAD_Four_ArrowLeft"),
-
-  KBD_NAME_ENTRY(KEYPAD, Five, "KP5"),
-  KBD_NAME_ENTRY(KEYPAD, Five, "KEYPAD_Five"),
-
-  KBD_NAME_ENTRY(KEYPAD, Six_ArrowRight, "KP6"),
-  KBD_NAME_ENTRY(KEYPAD, Six_ArrowRight, "KPArrowRight"),
-  KBD_NAME_ENTRY(KEYPAD, Six_ArrowRight, "KEYPAD_Six_ArrowRight"),
-
-  KBD_NAME_ENTRY(KEYPAD, Seven_Home, "KP7"),
-  KBD_NAME_ENTRY(KEYPAD, Seven_Home, "KPHome"),
-  KBD_NAME_ENTRY(KEYPAD, Seven_Home, "KEYPAD_Seven_Home"),
-
-  KBD_NAME_ENTRY(KEYPAD, Eight_ArrowUp, "KP8"),
-  KBD_NAME_ENTRY(KEYPAD, Eight_ArrowUp, "KPArrowUp"),
-  KBD_NAME_ENTRY(KEYPAD, Eight_ArrowUp, "KEYPAD_Eight_ArrowUp"),
-
-  KBD_NAME_ENTRY(KEYPAD, Nine_PageUp, "KP9"),
-  KBD_NAME_ENTRY(KEYPAD, Nine_PageUp, "KPPageUp"),
-  KBD_NAME_ENTRY(KEYPAD, Nine_PageUp, "KEYPAD_Nine_PageUp"),
-
-  KBD_NAME_ENTRY(KEYPAD, Zero_Insert, "KP0"),
-  KBD_NAME_ENTRY(KEYPAD, Zero_Insert, "KPInsert"),
-  KBD_NAME_ENTRY(KEYPAD, Zero_Insert, "KEYPAD_Zero_Insert"),
 
   KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPPeriod"),
   KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPDelete"),
