@@ -457,76 +457,75 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(KPNUMBER, F, "KPF"),
   KBD_NAME_ENTRY(KPNUMBER, F, "KPNUMBER_F"),
 
-  KBD_NAME_ENTRY(KEYPAD, Slash, "KPSlash"),
-  KBD_NAME_ENTRY(KEYPAD, Slash, "KEYPAD_Slash"),
+  KBD_NAME_ENTRY(KPSYMBOL, Slash, "KPSlash"),
+  KBD_NAME_ENTRY(KPSYMBOL, Slash, "KPSYMBOL_Slash"),
 
-  KBD_NAME_ENTRY(KEYPAD, Asterisk, "KPAsterisk"),
-  KBD_NAME_ENTRY(KEYPAD, Asterisk, "KEYPAD_Asterisk"),
+  KBD_NAME_ENTRY(KPSYMBOL, Asterisk, "KPAsterisk"),
+  KBD_NAME_ENTRY(KPSYMBOL, Asterisk, "KPSYMBOL_Asterisk"),
 
-  KBD_NAME_ENTRY(KEYPAD, Minus, "KPMinus"),
-  KBD_NAME_ENTRY(KEYPAD, Minus, "KEYPAD_Minus"),
+  KBD_NAME_ENTRY(KPSYMBOL, Minus, "KPMinus"),
+  KBD_NAME_ENTRY(KPSYMBOL, Minus, "KPSYMBOL_Minus"),
 
-  KBD_NAME_ENTRY(KEYPAD, Plus, "KPPlus"),
-  KBD_NAME_ENTRY(KEYPAD, Plus, "KEYPAD_Plus"),
+  KBD_NAME_ENTRY(KPSYMBOL, Plus, "KPPlus"),
+  KBD_NAME_ENTRY(KPSYMBOL, Plus, "KPSYMBOL_Plus"),
 
-  KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPPeriod"),
-  KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KPDelete"),
-  KBD_NAME_ENTRY(KEYPAD, Period_Delete, "KEYPAD_Period_Delete"),
+  KBD_NAME_ENTRY(KPSYMBOL, Period, "KPPeriod"),
+  KBD_NAME_ENTRY(KPSYMBOL, Period, "KPSYMBOL_Period"),
 
-  KBD_NAME_ENTRY(KEYPAD, Equals, "KPEquals"),
-  KBD_NAME_ENTRY(KEYPAD, Equals, "KEYPAD_Equals"),
+  KBD_NAME_ENTRY(KPSYMBOL, Equals, "KPEquals"),
+  KBD_NAME_ENTRY(KPSYMBOL, Equals, "KPSYMBOL_Equals"),
 
-  KBD_NAME_ENTRY(KEYPAD, LeftParenthesis, "KEYPAD_LeftParenthesis"),
+  KBD_NAME_ENTRY(KPSYMBOL, LeftParenthesis, "KPSYMBOL_LeftParenthesis"),
 
-  KBD_NAME_ENTRY(KEYPAD, RightParenthesis, "KEYPAD_RightParenthesis"),
+  KBD_NAME_ENTRY(KPSYMBOL, RightParenthesis, "KPSYMBOL_RightParenthesis"),
 
-  KBD_NAME_ENTRY(KEYPAD, LeftBrace, "KEYPAD_LeftBrace"),
+  KBD_NAME_ENTRY(KPSYMBOL, LeftBrace, "KPSYMBOL_LeftBrace"),
 
-  KBD_NAME_ENTRY(KEYPAD, RightBrace, "KEYPAD_RightBrace"),
+  KBD_NAME_ENTRY(KPSYMBOL, RightBrace, "KPSYMBOL_RightBrace"),
 
-  KBD_NAME_ENTRY(KEYPAD, Modulo, "KEYPAD_Modulo"),
+  KBD_NAME_ENTRY(KPSYMBOL, Modulo, "KPSYMBOL_Modulo"),
 
-  KBD_NAME_ENTRY(KEYPAD, BitwiseAnd, "KEYPAD_BitwiseAnd"),
+  KBD_NAME_ENTRY(KPSYMBOL, BitwiseAnd, "KPSYMBOL_BitwiseAnd"),
 
-  KBD_NAME_ENTRY(KEYPAD, BitwiseOr, "KEYPAD_BitwiseOr"),
+  KBD_NAME_ENTRY(KPSYMBOL, BitwiseOr, "KPSYMBOL_BitwiseOr"),
 
-  KBD_NAME_ENTRY(KEYPAD, BitwiseXor, "KEYPAD_BitwiseXor"),
+  KBD_NAME_ENTRY(KPSYMBOL, BitwiseXor, "KPSYMBOL_BitwiseXor"),
 
-  KBD_NAME_ENTRY(KEYPAD, Less, "KEYPAD_Less"),
+  KBD_NAME_ENTRY(KPSYMBOL, Less, "KPSYMBOL_Less"),
 
-  KBD_NAME_ENTRY(KEYPAD, Greater, "KEYPAD_Greater"),
+  KBD_NAME_ENTRY(KPSYMBOL, Greater, "KPSYMBOL_Greater"),
 
-  KBD_NAME_ENTRY(KEYPAD, BooleanAnd, "KEYPAD_BooleanAnd"),
+  KBD_NAME_ENTRY(KPSYMBOL, BooleanAnd, "KPSYMBOL_BooleanAnd"),
 
-  KBD_NAME_ENTRY(KEYPAD, BooleanOr, "KEYPAD_BooleanOr"),
+  KBD_NAME_ENTRY(KPSYMBOL, BooleanOr, "KPSYMBOL_BooleanOr"),
 
-  KBD_NAME_ENTRY(KEYPAD, BooleanXor, "KEYPAD_BooleanXor"),
+  KBD_NAME_ENTRY(KPSYMBOL, BooleanXor, "KPSYMBOL_BooleanXor"),
 
-  KBD_NAME_ENTRY(KEYPAD, BooleanNot, "KEYPAD_BooleanNot"),
+  KBD_NAME_ENTRY(KPSYMBOL, BooleanNot, "KPSYMBOL_BooleanNot"),
 
-  KBD_NAME_ENTRY(KEYPAD, Space, "KEYPAD_Space"),
+  KBD_NAME_ENTRY(KPSYMBOL, Space, "KPSYMBOL_Space"),
 
-  KBD_NAME_ENTRY(KEYPAD, Comma, "KEYPAD_Comma"),
+  KBD_NAME_ENTRY(KPSYMBOL, Comma, "KPSYMBOL_Comma"),
 
-  KBD_NAME_ENTRY(KEYPAD, Colon, "KEYPAD_Colon"),
+  KBD_NAME_ENTRY(KPSYMBOL, Colon, "KPSYMBOL_Colon"),
 
-  KBD_NAME_ENTRY(KEYPAD, Number, "KEYPAD_Number"),
+  KBD_NAME_ENTRY(KPSYMBOL, Number, "KPSYMBOL_Number"),
 
-  KBD_NAME_ENTRY(KEYPAD, At, "KEYPAD_At"),
+  KBD_NAME_ENTRY(KPSYMBOL, At, "KPSYMBOL_At"),
 
-  KBD_NAME_ENTRY(KEYPAD, 00, "KEYPAD_00"),
+  KBD_NAME_ENTRY(KPSYMBOL, 00, "KPSYMBOL_00"),
 
-  KBD_NAME_ENTRY(KEYPAD, 000, "KEYPAD_000"),
+  KBD_NAME_ENTRY(KPSYMBOL, 000, "KPSYMBOL_000"),
 
-  KBD_NAME_ENTRY(KEYPAD, ThousandsSeparator, "KEYPAD_ThousandsSeparator"),
+  KBD_NAME_ENTRY(KPSYMBOL, ThousandsSeparator, "KPSYMBOL_ThousandsSeparator"),
 
-  KBD_NAME_ENTRY(KEYPAD, DecimalSeparator, "KEYPAD_DecimalSeparator"),
+  KBD_NAME_ENTRY(KPSYMBOL, DecimalSeparator, "KPSYMBOL_DecimalSeparator"),
 
-  KBD_NAME_ENTRY(KEYPAD, CurrencyUnit, "KEYPAD_CurrencyUnit"),
+  KBD_NAME_ENTRY(KPSYMBOL, CurrencyUnit, "KPSYMBOL_CurrencyUnit"),
 
-  KBD_NAME_ENTRY(KEYPAD, CurrencySubunit, "KEYPAD_CurrencySubunit"),
+  KBD_NAME_ENTRY(KPSYMBOL, CurrencySubunit, "KPSYMBOL_CurrencySubunit"),
 
-  KBD_NAME_ENTRY(KEYPAD, PlusMinus, "KEYPAD_PlusMinus"),
+  KBD_NAME_ENTRY(KPSYMBOL, PlusMinus, "KPSYMBOL_PlusMinus"),
 
   KBD_NAME_ENTRY(KPACTION, Enter, "KPEnter"),
   KBD_NAME_ENTRY(KPACTION, Enter, "KPACTION_Enter"),

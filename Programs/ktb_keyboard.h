@@ -227,43 +227,43 @@ typedef enum {
 } KBD_KPNumberKey;
 
 typedef enum {
-  KBD_KEY_KEYPAD_Slash,
-  KBD_KEY_KEYPAD_Asterisk,
-  KBD_KEY_KEYPAD_Minus,
-  KBD_KEY_KEYPAD_Plus,
-  KBD_KEY_KEYPAD_Period_Delete,
+  KBD_KEY_KPSYMBOL_Slash,
+  KBD_KEY_KPSYMBOL_Asterisk,
+  KBD_KEY_KPSYMBOL_Minus,
+  KBD_KEY_KPSYMBOL_Plus,
+  KBD_KEY_KPSYMBOL_Period,
 
-  KBD_KEY_KEYPAD_Equals,
-  KBD_KEY_KEYPAD_LeftParenthesis,
-  KBD_KEY_KEYPAD_RightParenthesis,
-  KBD_KEY_KEYPAD_LeftBrace,
-  KBD_KEY_KEYPAD_RightBrace,
-  KBD_KEY_KEYPAD_Modulo,
-  KBD_KEY_KEYPAD_BitwiseAnd,
-  KBD_KEY_KEYPAD_BitwiseOr,
-  KBD_KEY_KEYPAD_BitwiseXor,
-  KBD_KEY_KEYPAD_Less,
-  KBD_KEY_KEYPAD_Greater,
-  KBD_KEY_KEYPAD_BooleanAnd,
-  KBD_KEY_KEYPAD_BooleanOr,
-  KBD_KEY_KEYPAD_BooleanXor,
-  KBD_KEY_KEYPAD_BooleanNot,
+  KBD_KEY_KPSYMBOL_Equals,
+  KBD_KEY_KPSYMBOL_LeftParenthesis,
+  KBD_KEY_KPSYMBOL_RightParenthesis,
+  KBD_KEY_KPSYMBOL_LeftBrace,
+  KBD_KEY_KPSYMBOL_RightBrace,
+  KBD_KEY_KPSYMBOL_Modulo,
+  KBD_KEY_KPSYMBOL_BitwiseAnd,
+  KBD_KEY_KPSYMBOL_BitwiseOr,
+  KBD_KEY_KPSYMBOL_BitwiseXor,
+  KBD_KEY_KPSYMBOL_Less,
+  KBD_KEY_KPSYMBOL_Greater,
+  KBD_KEY_KPSYMBOL_BooleanAnd,
+  KBD_KEY_KPSYMBOL_BooleanOr,
+  KBD_KEY_KPSYMBOL_BooleanXor,
+  KBD_KEY_KPSYMBOL_BooleanNot,
 
-  KBD_KEY_KEYPAD_Space,
-  KBD_KEY_KEYPAD_Comma,
-  KBD_KEY_KEYPAD_Colon,
-  KBD_KEY_KEYPAD_Number,
-  KBD_KEY_KEYPAD_At,
+  KBD_KEY_KPSYMBOL_Space,
+  KBD_KEY_KPSYMBOL_Comma,
+  KBD_KEY_KPSYMBOL_Colon,
+  KBD_KEY_KPSYMBOL_Number,
+  KBD_KEY_KPSYMBOL_At,
 
-  KBD_KEY_KEYPAD_00,
-  KBD_KEY_KEYPAD_000,
-  KBD_KEY_KEYPAD_ThousandsSeparator,
-  KBD_KEY_KEYPAD_DecimalSeparator,
-  KBD_KEY_KEYPAD_CurrencyUnit,
-  KBD_KEY_KEYPAD_CurrencySubunit,
+  KBD_KEY_KPSYMBOL_00,
+  KBD_KEY_KPSYMBOL_000,
+  KBD_KEY_KPSYMBOL_ThousandsSeparator,
+  KBD_KEY_KPSYMBOL_DecimalSeparator,
+  KBD_KEY_KPSYMBOL_CurrencyUnit,
+  KBD_KEY_KPSYMBOL_CurrencySubunit,
 
-  KBD_KEY_KEYPAD_PlusMinus,
-} KBD_KeypadKey;
+  KBD_KEY_KPSYMBOL_PlusMinus,
+} KBD_KPSymbolKey;
 
 typedef enum {
   KBD_KEY_KPACTION_Enter,
@@ -312,7 +312,7 @@ typedef enum {
   KBD_SET_FUNCTION,
   KBD_SET_LOCK,
   KBD_SET_KPNUMBER,
-  KBD_SET_KEYPAD,
+  KBD_SET_KPSYMBOL,
   KBD_SET_KPACTION,
   KBD_SET_BRAILLE,
 
@@ -331,7 +331,7 @@ typedef enum {
 #define KBD_KEY_FUNCTION(name) KBD_KEY_VALUE(FUNCTION, name)
 #define KBD_KEY_LOCK(name) KBD_KEY_VALUE(LOCK, name)
 #define KBD_KEY_KPNUMBER(name) KBD_KEY_VALUE(KPNUMBER, name)
-#define KBD_KEY_KEYPAD(name) KBD_KEY_VALUE(KEYPAD, name)
+#define KBD_KEY_KPSYMBOL(name) KBD_KEY_VALUE(KPSYMBOL, name)
 #define KBD_KEY_KPACTION(name) KBD_KEY_VALUE(KPACTION, name)
 #define KBD_KEY_BRAILLE(name) KBD_KEY_VALUE(BRAILLE, name)
 #define KBD_KEY_ROUTE(offset) {.set=KBD_SET_ROUTE, .key=(offset)}
