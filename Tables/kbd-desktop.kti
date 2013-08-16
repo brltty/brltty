@@ -36,8 +36,8 @@ bind ControlRight MUTE
 bind KP0+!KP6 AUTOsPEAK
 bind KP0+!KPPeriod CSRTRK
 bind KP0+!KPEnter HOME
-bind KP0+!KPSlash CLIP_NEW
-bind KP0+!KPAsterisk COPY_LINE
+bind KP0+!KPDivide CLIP_NEW
+bind KP0+!KPMultiply COPY_LINE
 bind KP0+!KPMinus COPY_RECT
 bind KP0+!KPPlus PASTE
 bind ControlLeft+KP0+!KPPlus CLIP_ADD

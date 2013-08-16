@@ -34,7 +34,7 @@ bind \{kpSpeak}+\{kpAlt}+!\{kpSeven} SPEAK_FRST_LINE
 bind \{kpSpeak}+!\{kpNine} SPEAK_NEXT_LINE
 bind \{kpSpeak}+\{kpAlt}+!\{kpNine} SPEAK_LAST_LINE
 
-bind \{kpSpeak}+!\{kpSlash} SPEAK_CURR_LOCN
-bind \{kpSpeak}+\{kpAlt}+!\{kpSlash} SHOW_CURR_LOCN
-bind \{kpSpeak}+!\{kpAsterisk} ROUTE_CURR_LOCN
+bind \{kpSpeak}+!\{kpDivide} SPEAK_CURR_LOCN
+bind \{kpSpeak}+\{kpAlt}+!\{kpDivide} SHOW_CURR_LOCN
+bind \{kpSpeak}+!\{kpMultiply} ROUTE_CURR_LOCN
 

@@ -32,8 +32,8 @@ bind KP0+!KP7 TOP_LEFT
 bind KP0+!KP1 BOT_LEFT
 bind KP0+!KP9 PRDIFLN
 bind KP0+!KP3 NXDIFLN
-bind KP0+!KPSlash CSRTRK
-bind KP0+!KPAsterisk DISPMD
+bind KP0+!KPDivide CSRTRK
+bind KP0+!KPMultiply DISPMD
 bind KP0+!KPMinus SIXDOTS
 
 bind KPPeriod+!KP5 BACK
@@ -45,8 +45,8 @@ bind KPPeriod+!KP7 PRPROMPT
 bind KPPeriod+!KP1 NXPROMPT
 bind KPPeriod+!KP9 ATTRUP
 bind KPPeriod+!KP3 ATTRDN
-bind KPPeriod+!KPSlash CSRVIS
-bind KPPeriod+!KPAsterisk ATTRVIS
+bind KPPeriod+!KPDivide CSRVIS
+bind KPPeriod+!KPMultiply ATTRVIS
 bind KPPeriod+!KPMinus FREEZE
 
 bind KP0+KPPeriod+!KP1 CHRLT
@@ -64,20 +64,20 @@ bind KPMinus+!KP7 HELP
 bind KPMinus+!KP9 LEARN
 bind KPMinus+!KP2 CSRJMP_VERT
 bind KPMinus+!KP1 TIME
-bind KPMinus+!KPSlash RESTARTBRL
-bind KPMinus+!KPAsterisk RESTARTSPEECH
+bind KPMinus+!KPDivide RESTARTBRL
+bind KPMinus+!KPMultiply RESTARTSPEECH
 
-bind KPAsterisk+!KP5 PASTE
-bind KPAsterisk+!KP7 CLIP_NEW
-bind KPAsterisk+!KP1 CLIP_ADD
-bind KPAsterisk+!KP9 COPY_LINE
-bind KPAsterisk+!KP3 COPY_RECT
-bind KPAsterisk+!KP8 PRINDENT
-bind KPAsterisk+!KP2 NXINDENT
-bind KPAsterisk+!KP4 PRDIFCHAR
-bind KPAsterisk+!KP6 NXDIFCHAR
-bind KPAsterisk+!KPMinus PRSEARCH
-bind KPAsterisk+!KPPlus NXSEARCH
+bind KPMultiply+!KP5 PASTE
+bind KPMultiply+!KP7 CLIP_NEW
+bind KPMultiply+!KP1 CLIP_ADD
+bind KPMultiply+!KP9 COPY_LINE
+bind KPMultiply+!KP3 COPY_RECT
+bind KPMultiply+!KP8 PRINDENT
+bind KPMultiply+!KP2 NXINDENT
+bind KPMultiply+!KP4 PRDIFCHAR
+bind KPMultiply+!KP6 NXDIFCHAR
+bind KPMultiply+!KPMinus PRSEARCH
+bind KPMultiply+!KPPlus NXSEARCH
 
 assign kpAlt KP0
 assign kpOne KP1
@@ -89,8 +89,8 @@ assign kpSix KP6
 assign kpSeven KP7
 assign kpEight KP8
 assign kpNine KP9
-assign kpSlash KPSlash
-assign kpAsterisk KPAsterisk
+assign kpDivide KPDivide
+assign kpMultiply KPMultiply
 
 assign kpSay KPEnter
 include kbd-kp_say.kti

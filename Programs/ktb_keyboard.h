@@ -234,8 +234,8 @@ typedef enum {
 
   KBD_KEY_KPSYMBOL_Plus,
   KBD_KEY_KPSYMBOL_Minus,
-  KBD_KEY_KPSYMBOL_Asterisk,
-  KBD_KEY_KPSYMBOL_Slash,
+  KBD_KEY_KPSYMBOL_Multiply,
+  KBD_KEY_KPSYMBOL_Divide,
   KBD_KEY_KPSYMBOL_Modulo,
 
   KBD_KEY_KPSYMBOL_Equals,
