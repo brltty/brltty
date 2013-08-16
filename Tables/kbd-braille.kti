@@ -18,10 +18,10 @@
 
 context \{brailleContext} Braille Input Mode
 
-hotkey SYMBOL_Grave_Tilde NOOP NOOP
-hotkey SYMBOL_Minus_Underscore NOOP NOOP
-hotkey SYMBOL_Equals_Plus NOOP NOOP
-hotkey SYMBOL_Backslash_Bar NOOP NOOP
+hotkey Grave NOOP NOOP
+hotkey Minus NOOP NOOP
+hotkey Equals NOOP NOOP
+hotkey Backslash NOOP NOOP
 
 hotkey q NOOP NOOP
 hotkey w NOOP NOOP
@@ -33,8 +33,8 @@ hotkey u NOOP NOOP
 hotkey i NOOP NOOP
 hotkey o NOOP NOOP
 hotkey p NOOP NOOP
-hotkey SYMBOL_LeftBracket_LeftBrace NOOP NOOP
-hotkey SYMBOL_RightBracket_RightBrace NOOP NOOP
+hotkey LeftBracket NOOP NOOP
+hotkey RightBracket NOOP NOOP
 
 map a DOT7
 map s DOT3
@@ -45,8 +45,8 @@ map h SPACE
 map j DOT4
 map k DOT5
 map l DOT6
-map SYMBOL_Semicolon_Colon DOT8
-hotkey SYMBOL_Apostrophe_Quote NOOP NOOP
+map Semicolon DOT8
+hotkey Apostrophe NOOP NOOP
 
 hotkey z NOOP NOOP
 hotkey x NOOP NOOP
@@ -55,9 +55,9 @@ hotkey v NOOP NOOP
 hotkey b NOOP NOOP
 hotkey n NOOP NOOP
 hotkey m NOOP NOOP
-hotkey SYMBOL_Comma_Less NOOP NOOP
-hotkey SYMBOL_Period_Greater NOOP NOOP
-hotkey SYMBOL_Slash_Question NOOP NOOP
+hotkey Comma NOOP NOOP
+hotkey Period NOOP NOOP
+hotkey Slash NOOP NOOP
 
 map Space SPACE
 map ShiftLeft UPPERCASE

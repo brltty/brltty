@@ -73,17 +73,17 @@ typedef enum {
 } KBD_DigitKey;
 
 typedef enum {
-  KBD_KEY_SYMBOL_Grave_Tilde,
-  KBD_KEY_SYMBOL_Backslash_Bar,
-  KBD_KEY_SYMBOL_Minus_Underscore,
-  KBD_KEY_SYMBOL_Equals_Plus,
-  KBD_KEY_SYMBOL_LeftBracket_LeftBrace,
-  KBD_KEY_SYMBOL_RightBracket_RightBrace,
-  KBD_KEY_SYMBOL_Semicolon_Colon,
-  KBD_KEY_SYMBOL_Apostrophe_Quote,
-  KBD_KEY_SYMBOL_Comma_Less,
-  KBD_KEY_SYMBOL_Period_Greater,
-  KBD_KEY_SYMBOL_Slash_Question,
+  KBD_KEY_SYMBOL_Grave,
+  KBD_KEY_SYMBOL_Backslash,
+  KBD_KEY_SYMBOL_Minus,
+  KBD_KEY_SYMBOL_Equals,
+  KBD_KEY_SYMBOL_LeftBracket,
+  KBD_KEY_SYMBOL_RightBracket,
+  KBD_KEY_SYMBOL_Semicolon,
+  KBD_KEY_SYMBOL_Apostrophe,
+  KBD_KEY_SYMBOL_Comma,
+  KBD_KEY_SYMBOL_Period,
+  KBD_KEY_SYMBOL_Slash,
 
   KBD_KEY_SYMBOL_Europe2,
 } KBD_SymbolKey;

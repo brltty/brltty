@@ -129,38 +129,38 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_NAME_ENTRY(DIGIT, Nine, "Nine"),
   KBD_NAME_ENTRY(DIGIT, Nine, "DIGIT_Nine"),
 
-  KBD_NAME_ENTRY(SYMBOL, Grave_Tilde, "Grave"),
-  KBD_NAME_ENTRY(SYMBOL, Grave_Tilde, "SYMBOL_Grave_Tilde"),
+  KBD_NAME_ENTRY(SYMBOL, Grave, "Grave"),
+  KBD_NAME_ENTRY(SYMBOL, Grave, "SYMBOL_Grave"),
 
-  KBD_NAME_ENTRY(SYMBOL, Backslash_Bar, "Backslash"),
-  KBD_NAME_ENTRY(SYMBOL, Backslash_Bar, "SYMBOL_Backslash_Bar"),
+  KBD_NAME_ENTRY(SYMBOL, Backslash, "Backslash"),
+  KBD_NAME_ENTRY(SYMBOL, Backslash, "SYMBOL_Backslash"),
 
-  KBD_NAME_ENTRY(SYMBOL, Minus_Underscore, "Minus"),
-  KBD_NAME_ENTRY(SYMBOL, Minus_Underscore, "SYMBOL_Minus_Underscore"),
+  KBD_NAME_ENTRY(SYMBOL, Minus, "Minus"),
+  KBD_NAME_ENTRY(SYMBOL, Minus, "SYMBOL_Minus"),
 
-  KBD_NAME_ENTRY(SYMBOL, Equals_Plus, "Equals"),
-  KBD_NAME_ENTRY(SYMBOL, Equals_Plus, "SYMBOL_Equals_Plus"),
+  KBD_NAME_ENTRY(SYMBOL, Equals, "Equals"),
+  KBD_NAME_ENTRY(SYMBOL, Equals, "SYMBOL_Equals"),
 
-  KBD_NAME_ENTRY(SYMBOL, LeftBracket_LeftBrace, "LeftBracket"),
-  KBD_NAME_ENTRY(SYMBOL, LeftBracket_LeftBrace, "SYMBOL_LeftBracket_LeftBrace"),
+  KBD_NAME_ENTRY(SYMBOL, LeftBracket, "LeftBracket"),
+  KBD_NAME_ENTRY(SYMBOL, LeftBracket, "SYMBOL_LeftBracket"),
 
-  KBD_NAME_ENTRY(SYMBOL, RightBracket_RightBrace, "RightBracket"),
-  KBD_NAME_ENTRY(SYMBOL, RightBracket_RightBrace, "SYMBOL_RightBracket_RightBrace"),
+  KBD_NAME_ENTRY(SYMBOL, RightBracket, "RightBracket"),
+  KBD_NAME_ENTRY(SYMBOL, RightBracket, "SYMBOL_RightBracket"),
 
-  KBD_NAME_ENTRY(SYMBOL, Semicolon_Colon, "Semicolon"),
-  KBD_NAME_ENTRY(SYMBOL, Semicolon_Colon, "SYMBOL_Semicolon_Colon"),
+  KBD_NAME_ENTRY(SYMBOL, Semicolon, "Semicolon"),
+  KBD_NAME_ENTRY(SYMBOL, Semicolon, "SYMBOL_Semicolon"),
 
-  KBD_NAME_ENTRY(SYMBOL, Apostrophe_Quote, "Apostrophe"),
-  KBD_NAME_ENTRY(SYMBOL, Apostrophe_Quote, "SYMBOL_Apostrophe_Quote"),
+  KBD_NAME_ENTRY(SYMBOL, Apostrophe, "Apostrophe"),
+  KBD_NAME_ENTRY(SYMBOL, Apostrophe, "SYMBOL_Apostrophe"),
 
-  KBD_NAME_ENTRY(SYMBOL, Comma_Less, "Comma"),
-  KBD_NAME_ENTRY(SYMBOL, Comma_Less, "SYMBOL_Comma_Less"),
+  KBD_NAME_ENTRY(SYMBOL, Comma, "Comma"),
+  KBD_NAME_ENTRY(SYMBOL, Comma, "SYMBOL_Comma"),
 
-  KBD_NAME_ENTRY(SYMBOL, Period_Greater, "Period"),
-  KBD_NAME_ENTRY(SYMBOL, Period_Greater, "SYMBOL_Period_Greater"),
+  KBD_NAME_ENTRY(SYMBOL, Period, "Period"),
+  KBD_NAME_ENTRY(SYMBOL, Period, "SYMBOL_Period"),
 
-  KBD_NAME_ENTRY(SYMBOL, Slash_Question, "Slash"),
-  KBD_NAME_ENTRY(SYMBOL, Slash_Question, "SYMBOL_Slash_Question"),
+  KBD_NAME_ENTRY(SYMBOL, Slash, "Slash"),
+  KBD_NAME_ENTRY(SYMBOL, Slash, "SYMBOL_Slash"),
 
   KBD_NAME_ENTRY(SYMBOL, Europe2, "Europe2"),
 
