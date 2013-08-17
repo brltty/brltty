@@ -1038,9 +1038,6 @@ BRLTTY_ARG_DISABLE(
 
 case "${host_os}"
 in
-   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
-      BRLTTY_SEARCH_LIBS([dlopen], [dl])
-      ;;
    hpux*)
       BRLTTY_SEARCH_LIBS([shl_load], [dld])
       ;;
@@ -1075,7 +1072,7 @@ BRLTTY_ARG_PACKAGE([params], [boot parameters], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dyld dlfcn], [dnl
+BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dlfcn dyld], [dnl
    elf*)
       dynld_package="grub"
       ;;
@@ -1088,7 +1085,9 @@ BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dyld dlfcn], [dnl
 ], [dnl
    dlfcn)
       AC_CHECK_HEADERS([dlfcn.h], [
-         dynld_package="dlfcn"
+         AC_SEARCH_LIBS([dlopen], [dl], [dnl
+            dynld_package="dlfcn"
+         ])
       ])
       ;;
    dyld)

@@ -204,9 +204,6 @@ extern "C" {
 /* Define this if the function vsyslog exists. */
 #undef HAVE_VSYSLOG
 
-/* Define this if the function dlopen is available. */
-#undef HAVE_DLOPEN
-
 /* Define this if the function shl_load is available. */
 #undef HAVE_SHL_LOAD
 

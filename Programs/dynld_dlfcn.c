@@ -18,11 +18,7 @@
 
 #include "prologue.h"
 
-#ifdef HAVE_DLOPEN 
 #include <dlfcn.h>
-#else /* HAVE_DLOPEN */
-#warning shared object support not available on this installation: no <dlfcn.h>
-#endif /* HAVE_DLOPEN */
 
 #include "log.h"
 #include "dynld.h"
@@ -42,24 +38,19 @@ getSharedObjectLoadFlags (void) {
 
 void *
 loadSharedObject (const char *path) {
-#ifdef HAVE_DLOPEN 
   void *object = dlopen(path, getSharedObjectLoadFlags());
   if (object) return object;
   logMessage(LOG_ERR, "%s", dlerror());
-#endif /* HAVE_DLOPEN */
   return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
-#ifdef HAVE_DLOPEN 
   dlclose((void *)object);
-#endif /* HAVE_DLOPEN */
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-#ifdef HAVE_DLOPEN 
   void **address = pointerAddress;
 
   dlerror(); /* clear any previous error condition */
@@ -70,6 +61,6 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
     if (!error) return 1;
     logMessage(LOG_ERR, "%s", error);
   }
-#endif /* HAVE_DLOPEN */
+
   return 0;
 }
