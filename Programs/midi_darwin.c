@@ -23,7 +23,6 @@
 #include <AudioToolbox/AudioToolbox.h>
 
 #include "log.h"
-#include "timing.h"
 #include "midi.h"
 
 struct MidiDeviceStruct {
@@ -191,6 +190,6 @@ stopMidiNote (MidiDevice *midi, unsigned char channel) {
 
 int
 insertMidiWait (MidiDevice *midi, int duration) {
-  accurateDelay(duration);
+  usleep(duration * 1000);
   return 1;
 }
