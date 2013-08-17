@@ -18,7 +18,9 @@
 ###############################################################################
 
 ./configure \
+   --disable-api \
    --disable-gpm \
+   --disable-icu \
    \
    --without-libbraille \
    \
