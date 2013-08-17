@@ -209,13 +209,14 @@ public class RenderedScreen {
           node = null;
         }
 
-        if (node == null) {
-          if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-            if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
-Log.d(LOG_TAG, "setting input focus");
-              if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-                node.recycle();
-                node = null;
+        if (!ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          if (node == null) {
+            if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+              if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
+                if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+                  node.recycle();
+                  node = null;
+                }
               }
             }
           }
