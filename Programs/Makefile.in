@@ -212,7 +212,7 @@ lock.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/lock.c
 
 unicode.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/unicode.c
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/unicode.c
 
 ###############################################################################
 
