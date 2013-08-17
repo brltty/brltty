@@ -38,11 +38,15 @@ public class RenderedScreen {
   private final ScreenElementList screenElements = new ScreenElementList();
   private final List<CharSequence> screenRows = new ArrayList<CharSequence>();
 
-  private int screenWidth = 1;
+  private final int screenWidth;
+  private final AccessibilityNodeInfo cursorNode;
 
+  private final AccessibilityNodeInfo getNode (AccessibilityNodeInfo node) {
+    if (node == null) return null;
+    return AccessibilityNodeInfo.obtain(node);
+  }
   public final AccessibilityNodeInfo getRootNode () {
-    if (rootNode == null) return null;
-    return AccessibilityNodeInfo.obtain(rootNode);
+    return getNode(rootNode);
   }
 
   public final int getScreenWidth () {
@@ -55,6 +59,10 @@ public class RenderedScreen {
 
   public final CharSequence getScreenRow (int index) {
     return screenRows.get(index);
+  }
+
+  public final AccessibilityNodeInfo getCursorNode () {
+    return getNode(cursorNode);
   }
 
   public final ScreenElement findScreenElement (AccessibilityNodeInfo node) {
@@ -158,7 +166,9 @@ public class RenderedScreen {
     return propagatedActions;
   }
 
-  private final void finishScreenRows () {
+  private final int findScreenWidth () {
+    int width = 1;
+
     if (screenRows.isEmpty()) {
       screenRows.add("waiting for screen update");
     }
@@ -166,10 +176,78 @@ public class RenderedScreen {
     for (CharSequence row : screenRows) {
       int length = row.length();
 
-      if (length > screenWidth) {
-        screenWidth = length;
+      if (length > width) {
+        width = length;
       }
     }
+
+    return width;
+  }
+
+  private final AccessibilityNodeInfo findCursorNode () {
+    AccessibilityNodeInfo root = getRootNode();
+
+    if (root != null) {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+        if (node != null) {
+          root.recycle();
+          root = null;
+          return node;
+        }
+      }
+
+      {
+        AccessibilityNodeInfo node;
+
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
+        } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+          node = ScreenUtilities.findFocusedNode(root);
+        } else {
+          node = null;
+        }
+
+        if (node == null) {
+          if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+            if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
+Log.d(LOG_TAG, "setting input focus");
+              if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+                node.recycle();
+                node = null;
+              }
+            }
+          }
+        }
+
+        if (node != null) {
+          root.recycle();
+          root = node;
+          node = ScreenUtilities.findSelectedNode(root);
+
+          if (node != null) {
+            root.recycle();
+            root = node;
+            node = null;
+          }
+
+          if ((node = ScreenUtilities.findTextNode(root)) == null) {
+            node =  ScreenUtilities.findDescribedNode(root);
+          }
+
+          if (node != null) {
+            root.recycle();
+            root = node;
+            node = null;
+          }
+
+          return root;
+        }
+      }
+    }
+
+    return root;
   }
 
   public RenderedScreen (AccessibilityNodeInfo node) {
@@ -180,6 +258,7 @@ public class RenderedScreen {
 
     addScreenElements(rootNode);
     BrailleRenderer.getBrailleRenderer().renderScreenElements(screenRows, screenElements);
-    finishScreenRows();
+    screenWidth = findScreenWidth();
+    cursorNode = findCursorNode();
   }
 }

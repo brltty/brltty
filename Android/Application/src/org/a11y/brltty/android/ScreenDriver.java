@@ -195,71 +195,6 @@ public final class ScreenDriver {
     }
   }
 
-  private static AccessibilityNodeInfo getCursorNode () {
-    AccessibilityNodeInfo root = currentScreen.getRootNode();
-
-    if (root != null) {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-
-        if (node != null) {
-          root.recycle();
-          root = null;
-          return node;
-        }
-      }
-
-      {
-        AccessibilityNodeInfo node;
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
-        } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-          node = ScreenUtilities.findFocusedNode(root);
-        } else {
-          node = null;
-        }
-
-        if (node == null) {
-          if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-            if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
-              if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-                node.recycle();
-                node = null;
-              }
-            }
-          }
-        }
-
-        if (node != null) {
-          root.recycle();
-          root = node;
-          node = ScreenUtilities.findSelectedNode(root);
-
-          if (node != null) {
-            root.recycle();
-            root = node;
-            node = null;
-          }
-
-          if ((node = ScreenUtilities.findTextNode(root)) == null) {
-            node =  ScreenUtilities.findDescribedNode(root);
-          }
-
-          if (node != null) {
-            root.recycle();
-            root = node;
-            node = null;
-          }
-
-          return root;
-        }
-      }
-    }
-
-    return root;
-  }
-
   public static native void exportScreenProperties (
     int number,
     int columns, int rows,
@@ -280,7 +215,7 @@ public final class ScreenDriver {
     int selectedRight = 0;
     int selectedBottom = 0;
 
-    AccessibilityNodeInfo node = getCursorNode();
+    AccessibilityNodeInfo node = currentScreen.getCursorNode();
 
     if (node != null) {
       ScreenElement element = currentScreen.findRenderedScreenElement(node);
