@@ -22,10 +22,9 @@ FORCE:
 
 include $(BLD_TOP)config.mk
 include $(BLD_TOP)forbuild.mk
+
 include $(SRC_TOP)absdeps.mk
 include $(SRC_DIR)/reldeps.mk
-
-B = build.$(O_FOR_BUILD)
 
 %.$B: $(SRC_DIR)/%.c
 	$(CC_FOR_BUILD) -DFOR_BUILD $(CFLAGS_FOR_BUILD) -o $@ -c $<

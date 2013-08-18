@@ -59,8 +59,12 @@ getMakeProperty() {
 buildSystem=`getMakeProperty BUILD_SYSTEM`
 hostSystem=`getMakeProperty HOST_SYSTEM`
 
+objectExtension='$(O_FOR_BUILD)'
+
 if [ "${hostSystem}" != "${buildSystem}" ]
 then
+   objectExtension="build.${objectExtension}"
+
    needTemporaryDirectory
 
    for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS
@@ -73,6 +77,7 @@ then
    "${sourceRoot}/configure" \
       --disable-api \
       --disable-gpm \
+      --disable-icu \
       --disable-x \
       \
       --without-libbraille \
@@ -117,6 +122,8 @@ s/^\(.*\)$/s%\\(\\$(\\)\\(\1\\)\\([):]\\)%\\1\\2_FOR_BUILD\\3%g/p
 g
 s/^\(.\)$/s%\\$\\(\1\\)%$(\\1_FOR_BUILD)%g/p
 ' <"${makeInput}" >"${sedScript}"
+
+echo >>"${sedScript}" "\$aB = ${objectExtension}"
 
 sed <"${makeInput}" >"${makeOutput}" -f "${sedScript}"
 rm "${sedScript}"
