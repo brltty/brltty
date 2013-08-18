@@ -73,7 +73,6 @@ then
    "${sourceRoot}/configure" \
       --disable-api \
       --disable-gpm \
-      --disable-icu \
       --disable-x \
       \
       --without-libbraille \

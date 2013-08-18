@@ -214,6 +214,9 @@ lock.$O:
 unicode.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/unicode.c
 
+unicode.$B:
+	$(CC_FOR_BUILD) -DFOR_BUILD $(CFLAGS_FOR_BUILD) $(ICU_INCLUDES_FOR_BUILD) -o $@ -c $(SRC_DIR)/unicode.c
+
 ###############################################################################
 
 PREFS_OBJECTS = prefs.$O prefs_table.$O
