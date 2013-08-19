@@ -184,10 +184,10 @@ INSTALL_MESSAGES = @install_messages@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
-XSV_INCLUDES = @xsvr_includes@
-XSV_LIBS = @brltty_libs_x@
-XKB_LIBS = @brltty_libs_xkb@
-XTK_LIBS = @brltty_libs_xtk@
+XSV_INCLUDES = @xsv_includes@
+XSV_LIBS = @xsv_libs@
+XKB_LIBS = @xkb_libs@
+XTK_LIBS = @xtk_libs@
 
 CURSES_LIB = @brltty_package_curses@
 GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@

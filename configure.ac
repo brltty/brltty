@@ -602,10 +602,10 @@ brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([brltty_libs_curses])
 
-xsvr_includes=""
-brltty_libs_x=""
-brltty_libs_xkb=""
-brltty_libs_xtk=""
+xsv_includes=""
+xsv_libs=""
+xkb_libs=""
+xtk_libs=""
 all_xbrlapi=""
 install_xbrlapi=""
 BRLTTY_ARG_DISABLE(
@@ -614,8 +614,8 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    pkg-config --exists x11 && {
-      xsvr_includes="`pkg-config --cflags-only-I x11`"
-      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} x11`"
+      xsv_includes="`pkg-config --cflags-only-I x11`"
+      xsv_libs="`pkg-config ${pkgconfig_flags_libs} x11`"
 
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
@@ -623,10 +623,10 @@ BRLTTY_ARG_DISABLE(
       AC_CHECK_HEADERS([X11/keysym.h])
 
       pkg-config --exists xext && {
-         brltty_libs_xkb="`pkg-config ${pkgconfig_flags_libs} xext` ${brltty_libs_xkb}"
+         xkb_libs="`pkg-config ${pkgconfig_flags_libs} xext` ${xkb_libs}"
 
          pkg-config --exists xtst && {
-            brltty_libs_xkb="`pkg-config ${pkgconfig_flags_libs} xtst` ${brltty_libs_xkb}"
+            xkb_libs="`pkg-config ${pkgconfig_flags_libs} xtst` ${xkb_libs}"
 
             AC_CHECK_HEADERS([X11/extensions/XTest.h])
             AC_CHECK_HEADERS([X11/extensions/XKB.h])
@@ -634,13 +634,13 @@ BRLTTY_ARG_DISABLE(
       }
 
       pkg-config --exists xt && {
-         brltty_libs_xtk="`pkg-config ${pkgconfig_flags_libs} xt` ${brltty_libs_xtk}"
+         xtk_libs="`pkg-config ${pkgconfig_flags_libs} xt` ${xtk_libs}"
 
          brltty_cppflags_save="${CPPFLAGS}"
-         CPPFLAGS="${CPPFLAGS} ${xsvr_includes}"
+         CPPFLAGS="${CPPFLAGS} ${xsv_includes}"
 
          brltty_libs_save="${LIBS}"
-         LIBS="${brltty_libs_xtk} ${brltty_libs_x} ${LIBS}"
+         LIBS="${xtk_libs} ${xsv_libs} ${LIBS}"
 
          BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
             [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
@@ -649,17 +649,17 @@ BRLTTY_ARG_DISABLE(
             [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
             [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
 
-         brltty_libs_xtk="${LIBS%${brltty_libs_x} ${brltty_libs_save}}"
+         xtk_libs="${LIBS%${xsv_libs} ${brltty_libs_save}}"
 
          CPPFLAGS="${brltty_cppflags_save}"
          LIBS="${brltty_libs_save}"
       }
    }
 ])
-AC_SUBST([xsvr_includes])
-AC_SUBST([brltty_libs_x])
-AC_SUBST([brltty_libs_xkb])
-AC_SUBST([brltty_libs_xtk])
+AC_SUBST([xsv_includes])
+AC_SUBST([xsv_libs])
+AC_SUBST([xkb_libs])
+AC_SUBST([xtk_libs])
 AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
 
