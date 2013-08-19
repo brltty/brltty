@@ -450,7 +450,7 @@ brltty-trtxt.$O:
 BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) lock.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O unicode.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
 
 brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(ICU_LIBS) $(LDLIBS)
 
 brltty-ttb.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c

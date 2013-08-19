@@ -69,7 +69,6 @@ LIBCXXFLAGS = $(CXXFLAGS) @LIBCXXFLAGS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LDLIBS = @LIBS@
-CLIBS = @brltty_libs_curses@
 
 MKOBJ = @MKOBJ@
 MKMOD = @MKMOD@
@@ -189,8 +188,10 @@ XSV_LIBS = @xsv_libs@
 XKB_LIBS = @xkb_libs@
 XTK_LIBS = @xtk_libs@
 
-CURSES_LIB = @brltty_package_curses@
-GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
+CURSES_PACKAGE = @curses_package@
+CURSES_LIBS = @curses_libs@
+
+GUI_TOOLKIT_PACKAGE = @gui_toolkit_package@
 
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@

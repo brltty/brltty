@@ -596,12 +596,12 @@ AC_DEFUN([BRLTTY_PACKAGE_CHOOSE], [dnl
 BRLTTY_ARG_WITH(
    [translit([$1], [_], [-])], [PACKAGE],
    [which translit([$1], [_], [ ]) package to use (BRLTTY_PACKAGE_LIST(m4_shift($@)))],
-   [brltty_package_$1], ["yes"]
+   [$1_package], ["yes"]
 )
-if test "${brltty_package_$1}" = "no"
+if test "${$1_package}" = "no"
 then
-   brltty_package_$1=""
-elif test "${brltty_package_$1}" = "yes"
+   $1_package=""
+elif test "${$1_package}" = "yes"
 then
 AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_package_$1], [dnl
    brltty_cv_package_$1=""
@@ -626,15 +626,15 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
       break
    done
 ])
-   brltty_package_$1="${brltty_cv_package_$1}"
+   $1_package="${brltty_cv_package_$1}"
 else
-   AC_HAVE_LIBRARY([${brltty_package_$1}], [], [brltty_package_$1=""])
+   AC_HAVE_LIBRARY([${$1_package}], [], [$1_package=""])
 fi
-AC_SUBST([brltty_package_$1])
-test -n "${brltty_package_$1}" && {
-   BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [${brltty_package_$1}])
+AC_SUBST([$1_package])
+test -n "${$1_package}" && {
+   BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [${$1_package}])
    AC_DEFINE_UNQUOTED([HAVE_PKG_${brltty_uc}])
-   BRLTTY_SUMMARY_ITEM([translit([$1], [_], [-])-package], [brltty_package_$1])
+   BRLTTY_SUMMARY_ITEM([translit([$1], [_], [-])-package], [$1_package])
 }])
 AC_DEFUN([BRLTTY_PACKAGE_DEFINE], [dnl
 ifelse($#, 0, [], [dnl

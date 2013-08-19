@@ -598,9 +598,9 @@ BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncursesw/ncurses.h],
    [ncurses ncurses.h],
    [curses curses.h])
-brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
+curses_libs="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
-AC_SUBST([brltty_libs_curses])
+AC_SUBST([curses_libs])
 
 xsv_includes=""
 xsv_libs=""
@@ -1381,7 +1381,7 @@ BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([sk], [Seika])
 BRLTTY_BRAILLE_DRIVER([tn], [TechniBraille])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-BRLTTY_BRAILLE_DRIVER([tt], [TTY], [$(CLIBS)])
+BRLTTY_BRAILLE_DRIVER([tt], [TTY], [$(CURSES_LIBS)])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
