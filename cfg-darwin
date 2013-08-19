@@ -19,7 +19,7 @@
 
 ./configure \
    --disable-gpm \
-   --disable-icu \
+   --disable-iconv \
    \
    --without-libbraille \
    \

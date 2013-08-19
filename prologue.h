@@ -453,10 +453,6 @@ mbsinit (const mbstate_t *ps) {
 #define HAVE_FM_SUPPORT
 #endif /* USE_PKG_FM_NONE */
 
-#ifdef HAVE_ICONV_H
-#define LIBICONV_PLUG
-#endif /* HAVE_ICONV_H */
-
 #ifdef HAVE_SHMGET
 #if SIZEOF_KEY_T == 4
 #define PRIX_KEY_T PRIX32

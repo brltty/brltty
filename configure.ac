@@ -1109,9 +1109,12 @@ BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
       ;;
 ], [dnl
    iconv)
-      AC_CHECK_HEADER([iconv.h], [dnl
-         charset_package=iconv
-      ])
+      if test "${brltty_enabled_iconv}" = "yes"
+      then
+         AC_CHECK_HEADER([iconv.h], [dnl
+            charset_package=iconv
+         ])
+      fi
       ;;
 ])
 
