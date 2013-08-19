@@ -602,7 +602,7 @@ brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([brltty_libs_curses])
 
-brltty_cflags_x=""
+xsvr_includes=""
 brltty_libs_x=""
 brltty_libs_xkb=""
 brltty_libs_xtk=""
@@ -614,7 +614,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    pkg-config --exists x11 && {
-      brltty_cflags_x="`pkg-config --cflags-only-I x11`"
+      xsvr_includes="`pkg-config --cflags-only-I x11`"
       brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} x11`"
 
       all_xbrlapi="all-xbrlapi"
@@ -637,7 +637,7 @@ BRLTTY_ARG_DISABLE(
          brltty_libs_xtk="`pkg-config ${pkgconfig_flags_libs} xt` ${brltty_libs_xtk}"
 
          brltty_cppflags_save="${CPPFLAGS}"
-         CPPFLAGS="${CPPFLAGS} ${brltty_cflags_x}"
+         CPPFLAGS="${CPPFLAGS} ${xsvr_includes}"
 
          brltty_libs_save="${LIBS}"
          LIBS="${brltty_libs_xtk} ${brltty_libs_x} ${LIBS}"
@@ -656,7 +656,7 @@ BRLTTY_ARG_DISABLE(
       }
    }
 ])
-AC_SUBST([brltty_cflags_x])
+AC_SUBST([xsvr_includes])
 AC_SUBST([brltty_libs_x])
 AC_SUBST([brltty_libs_xkb])
 AC_SUBST([brltty_libs_xtk])
@@ -1387,7 +1387,7 @@ BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X_LIBS)])
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(XSV_LIBS)])
 }
 case "${host_os}"
 in
@@ -1671,7 +1671,7 @@ then
    BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
       AC_CHECK_HEADER([X11/keysym.h], [dnl
          AC_CHECK_HEADER([X11/Xlib.h], [dnl
-            BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X_LIBS) $(CSPI_LIBS)])
+            BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(XSV_LIBS) $(CSPI_LIBS)])
          ])
       ])
    ])

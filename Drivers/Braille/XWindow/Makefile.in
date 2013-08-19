@@ -25,5 +25,5 @@ BRL_OBJS = @braille_libraries_xw@
 include $(SRC_TOP)braille.mk
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/braille.c
+	$(CC) $(BRL_CFLAGS) $(XSV_INCLUDES) -c $(SRC_DIR)/braille.c
 

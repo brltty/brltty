@@ -184,6 +184,14 @@ INSTALL_MESSAGES = @install_messages@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
+XSV_INCLUDES = @xsvr_includes@
+XSV_LIBS = @brltty_libs_x@
+XKB_LIBS = @brltty_libs_xkb@
+XTK_LIBS = @brltty_libs_xtk@
+
+CURSES_LIB = @brltty_package_curses@
+GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
+
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
 
@@ -311,14 +319,6 @@ TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) 
 BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
 OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)
 PROGRAM_OBJECTS = program.$O $(PGMPATH_OBJECTS) $(SERVICE_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
-
-X_CFLAGS = @brltty_cflags_x@
-X_LIBS = @brltty_libs_x@
-XKB_LIBS = @brltty_libs_xkb@
-XTK_LIBS = @brltty_libs_xtk@
-
-CURSES_LIB = @brltty_package_curses@
-GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
 
 CTB_OBJECTS = @contracted_braille_objects@
 
