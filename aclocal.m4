@@ -104,7 +104,7 @@ BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
 AC_DEFUN([BRLTTY_ARG_PACKAGE], [dnl
 $1_package=""
-$1_cflags=""
+$1_includes=""
 $1_libs=""
 
 BRLTTY_ARG_WITH(
@@ -136,7 +136,7 @@ test -z "${$1_package}" && {
       do
          pkg-config --exists "${package}" && {
             $1_package="${package}"
-            $1_cflags=`pkg-config --cflags-only-I "${package}"`
+            $1_includes=`pkg-config --cflags-only-I "${package}"`
             $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package}"`
             break
          }
@@ -162,7 +162,7 @@ test -z "${$1_package}" && {
 }
 
 AC_SUBST([$1_package])
-AC_SUBST([$1_cflags])
+AC_SUBST([$1_includes])
 AC_SUBST([$1_libs])
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_package]), [${$1_package}], [Define this to the name of the selected $2 package.])
 BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [use_pkg_$1_${$1_package}])

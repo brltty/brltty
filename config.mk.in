@@ -181,6 +181,9 @@ INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
 INSTALL_MESSAGES = @install_messages@
 
+TEXT_TABLE = @text_table@
+ATTRIBUTES_TABLE = @attributes_table@
+
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
 
@@ -194,111 +197,108 @@ DBUS_INCLUDES = @dbus_includes@
 DBUS_LIBS = @dbus_libs@
 
 ICU_INCLUDES = @icu_includes@
-ICU_LIBRARIES = @icu_libraries@
-
-TEXT_TABLE = @text_table@
-ATTRIBUTES_TABLE = @attributes_table@
+ICU_LIBS = @icu_libs@
 
 PGMPATH_PACKAGE = @pgmpath_package@
 PGMPATH_OBJECT = pgmpath_$(PGMPATH_PACKAGE)
 PGMPATH_OBJECTS = $(PGMPATH_OBJECT).$O
-PGMPATH_CFLAGS = @pgmpath_cflags@
+PGMPATH_INCLUDES = @pgmpath_includes@
 PGMPATH_LIBS = @pgmpath_libs@
 
 SERVICE_PACKAGE = @service_package@
 SERVICE_OBJECT = service_$(SERVICE_PACKAGE)
 SERVICE_OBJECTS = $(SERVICE_OBJECT).$O
-SERVICE_CFLAGS = @service_cflags@
+SERVICE_INCLUDES = @service_includes@
 SERVICE_LIBS = @service_libs@
 
 PARAMS_PACKAGE = @params_package@
 PARAMS_OBJECT = params_$(PARAMS_PACKAGE)
 PARAMS_OBJECTS = $(PARAMS_OBJECT).$O
-PARAMS_CFLAGS = @params_cflags@
+PARAMS_INCLUDES = @params_includes@
 PARAMS_LIBS = @params_libs@
 
 DYNLD_PACKAGE = @dynld_package@
 DYNLD_OBJECT = dynld_$(DYNLD_PACKAGE)
 DYNLD_OBJECTS = $(DYNLD_OBJECT).$O
-DYNLD_CFLAGS = @dynld_cflags@
+DYNLD_INCLUDES = @dynld_includes@
 DYNLD_LIBS = @dynld_libs@
 
 CHARSET_PACKAGE = @charset_package@
 CHARSET_OBJECT = charset_$(CHARSET_PACKAGE)
 CHARSET_OBJECTS = charset.$O $(CHARSET_OBJECT).$O
-CHARSET_CFLAGS = @charset_cflags@
+CHARSET_INCLUDES = @charset_includes@
 CHARSET_LIBS = @charset_libs@
 
 HOSTCMD_PACKAGE = @hostcmd_package@
 HOSTCMD_OBJECT = hostcmd_$(HOSTCMD_PACKAGE)
 HOSTCMD_OBJECTS = hostcmd.$O $(HOSTCMD_OBJECT).$O
-HOSTCMD_CFLAGS = @hostcmd_cflags@
+HOSTCMD_INCLUDES = @hostcmd_includes@
 HOSTCMD_LIBS = @hostcmd_libs@
 
 MNTPT_PACKAGE = @mntpt_package@
 MNTPT_OBJECT = mntpt_$(MNTPT_PACKAGE)
 MNTPT_OBJECTS = mntpt.$O $(MNTPT_OBJECT).$O
-MNTPT_CFLAGS = @mntpt_cflags@
+MNTPT_INCLUDES = @mntpt_includes@
 MNTPT_LIBS = @mntpt_libs@
 
 MNTFS_PACKAGE = @mntfs_package@
 MNTFS_OBJECT = mntfs_$(MNTFS_PACKAGE)
 MNTFS_OBJECTS = $(MNTFS_OBJECT).$O
-MNTFS_CFLAGS = @mntfs_cflags@
+MNTFS_INCLUDES = @mntfs_includes@
 MNTFS_LIBS = @mntfs_libs@
 
 KEYBOARD_PACKAGE = @keyboard_package@
 KEYBOARD_OBJECT = keyboard_$(KEYBOARD_PACKAGE)
 KEYBOARD_OBJECTS = keyboard.$O $(KEYBOARD_OBJECT).$O
-KEYBOARD_CFLAGS = @keyboard_cflags@
+KEYBOARD_INCLUDES = @keyboard_includes@
 KEYBOARD_LIBS = @keyboard_libs@
 
 BEEP_PACKAGE = @beep_package@
 BEEP_OBJECT = beep_$(BEEP_PACKAGE)
 BEEP_OBJECTS = notes_beep.$O beep.$O $(BEEP_OBJECT).$O
-BEEP_CFLAGS = @beep_cflags@
+BEEP_INCLUDES = @beep_includes@
 BEEP_LIBS = @beep_libs@
 
 PCM_PACKAGE = @pcm_package@
 PCM_OBJECT = pcm_$(PCM_PACKAGE)
 PCM_OBJECTS = notes_pcm.$O pcm.$O $(PCM_OBJECT).$O
-PCM_CFLAGS = @pcm_cflags@
+PCM_INCLUDES = @pcm_includes@
 PCM_LIBS = @pcm_libs@
 
 MIDI_PACKAGE = @midi_package@
 MIDI_OBJECT = midi_$(MIDI_PACKAGE)
 MIDI_OBJECTS = notes_midi.$O midi.$O $(MIDI_OBJECT).$O
-MIDI_CFLAGS = @midi_cflags@
+MIDI_INCLUDES = @midi_includes@
 MIDI_LIBS = @midi_libs@
 
 FM_PACKAGE = @fm_package@
 FM_OBJECT = fm_$(FM_PACKAGE)
 FM_OBJECTS = notes_fm.$O $(FM_OBJECT).$O
-FM_CFLAGS = @fm_cflags@
+FM_INCLUDES = @fm_includes@
 FM_LIBS = @fm_libs@
 
 SERIAL_PACKAGE = @serial_package@
 SERIAL_OBJECT = serial_$(SERIAL_PACKAGE)
 SERIAL_OBJECTS = serial.$O $(SERIAL_OBJECT).$O
-SERIAL_CFLAGS = @serial_cflags@
+SERIAL_INCLUDES = @serial_includes@
 SERIAL_LIBS = @serial_libs@
 
 USB_PACKAGE = @usb_package@
 USB_OBJECT = usb_$(USB_PACKAGE)
 USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O $(USB_OBJECT).$O
-USB_CFLAGS = @usb_cflags@
+USB_INCLUDES = @usb_includes@
 USB_LIBS = @usb_libs@
 
 BLUETOOTH_PACKAGE = @bluetooth_package@
 BLUETOOTH_OBJECT = bluetooth_$(BLUETOOTH_PACKAGE)
 BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O $(BLUETOOTH_OBJECT).$O
-BLUETOOTH_CFLAGS = @bluetooth_cflags@
+BLUETOOTH_INCLUDES = @bluetooth_includes@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
 PORTS_PACKAGE = @ports_package@
 PORTS_OBJECT = ports_$(PORTS_PACKAGE)
 PORTS_OBJECTS = $(PORTS_OBJECT).$O
-PORTS_CFLAGS = @ports_cflags@
+PORTS_INCLUDES = @ports_includes@
 PORTS_LIBS = @ports_libs@
 
 SYSTEM_PACKAGE = @system_package@

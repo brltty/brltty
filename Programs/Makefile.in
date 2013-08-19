@@ -32,12 +32,12 @@ program.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
 
 $(PGMPATH_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(PGMPATH_CFLAGS) -c $(SRC_DIR)/$(PGMPATH_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(PGMPATH_INCLUDES) -c $(SRC_DIR)/$(PGMPATH_OBJECT).c
 
 ###############################################################################
 
 $(SERVICE_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(SERVICE_CFLAGS) -c $(SRC_DIR)/$(SERVICE_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(SERVICE_INCLUDES) -c $(SRC_DIR)/$(SERVICE_OBJECT).c
 
 ###############################################################################
 
@@ -45,12 +45,12 @@ options.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
 
 $(PARAMS_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(PARAMS_CFLAGS) -c $(SRC_DIR)/$(PARAMS_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(PARAMS_INCLUDES) -c $(SRC_DIR)/$(PARAMS_OBJECT).c
 
 ###############################################################################
 
 $(DYNLD_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(DYNLD_CFLAGS) -c $(SRC_DIR)/$(DYNLD_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(DYNLD_INCLUDES) -c $(SRC_DIR)/$(DYNLD_OBJECT).c
 
 ###############################################################################
 
@@ -58,7 +58,7 @@ charset.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/charset.c
 
 $(CHARSET_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(CHARSET_CFLAGS) -c $(SRC_DIR)/$(CHARSET_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(CHARSET_INCLUDES) -c $(SRC_DIR)/$(CHARSET_OBJECT).c
 
 ###############################################################################
 
@@ -66,7 +66,7 @@ hostcmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hostcmd.c
 
 $(HOSTCMD_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(HOSTCMD_CFLAGS) -c $(SRC_DIR)/$(HOSTCMD_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(HOSTCMD_INCLUDES) -c $(SRC_DIR)/$(HOSTCMD_OBJECT).c
 
 ###############################################################################
 
@@ -74,12 +74,12 @@ mntpt.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/mntpt.c
 
 $(MNTPT_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(MNTPT_CFLAGS) -c $(SRC_DIR)/$(MNTPT_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(MNTPT_INCLUDES) -c $(SRC_DIR)/$(MNTPT_OBJECT).c
 
 ###############################################################################
 
 $(MNTFS_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(MNTFS_CFLAGS) -c $(SRC_DIR)/$(MNTFS_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(MNTFS_INCLUDES) -c $(SRC_DIR)/$(MNTFS_OBJECT).c
 
 ###############################################################################
 
@@ -87,7 +87,7 @@ keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/keyboard.c
 
 $(KEYBOARD_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(KEYBOARD_CFLAGS) -c $(SRC_DIR)/$(KEYBOARD_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(KEYBOARD_INCLUDES) -c $(SRC_DIR)/$(KEYBOARD_OBJECT).c
 
 ###############################################################################
 
@@ -95,7 +95,7 @@ beep.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep.c
 
 $(BEEP_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(BEEP_CFLAGS) -c $(SRC_DIR)/$(BEEP_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(BEEP_INCLUDES) -c $(SRC_DIR)/$(BEEP_OBJECT).c
 
 ###############################################################################
 
@@ -103,7 +103,7 @@ pcm.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pcm.c
 
 $(PCM_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(PCM_CFLAGS) -c $(SRC_DIR)/$(PCM_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(PCM_INCLUDES) -c $(SRC_DIR)/$(PCM_OBJECT).c
 
 ###############################################################################
 
@@ -111,12 +111,12 @@ midi.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/midi.c
 
 $(MIDI_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(MIDI_CFLAGS) -c $(SRC_DIR)/$(MIDI_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(MIDI_INCLUDES) -c $(SRC_DIR)/$(MIDI_OBJECT).c
 
 ###############################################################################
 
 $(FM_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(FM_CFLAGS) -c $(SRC_DIR)/$(FM_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(FM_INCLUDES) -c $(SRC_DIR)/$(FM_OBJECT).c
 
 ###############################################################################
 
@@ -124,7 +124,7 @@ serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/serial.c
 
 $(SERIAL_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(SERIAL_CFLAGS) -c $(SRC_DIR)/$(SERIAL_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(SERIAL_INCLUDES) -c $(SRC_DIR)/$(SERIAL_OBJECT).c
 
 ###############################################################################
 
@@ -138,7 +138,7 @@ usb_serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_serial.c
 
 $(USB_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(USB_CFLAGS) -c $(SRC_DIR)/$(USB_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(USB_INCLUDES) -c $(SRC_DIR)/$(USB_OBJECT).c
 
 ###############################################################################
 
@@ -149,17 +149,17 @@ bluetooth_names.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bluetooth_names.c
 
 $(BLUETOOTH_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(BLUETOOTH_CFLAGS) -c $(SRC_DIR)/$(BLUETOOTH_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(BLUETOOTH_INCLUDES) -c $(SRC_DIR)/$(BLUETOOTH_OBJECT).c
 
 ###############################################################################
 
 $(PORTS_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(PORTS_CFLAGS) -c $(SRC_DIR)/$(PORTS_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(PORTS_INCLUDES) -c $(SRC_DIR)/$(PORTS_OBJECT).c
 
 ###############################################################################
 
 $(SYSTEM_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(SYSTEM_CFLAGS) -c $(SRC_DIR)/$(SYSTEM_OBJECT).c
+	$(CC) $(LIBCFLAGS) $(SYSTEM_INCLUDES) -c $(SRC_DIR)/$(SYSTEM_OBJECT).c
 
 ###############################################################################
 
@@ -399,7 +399,7 @@ driver.$O:
 ###############################################################################
 
 BRLTTY_OBJECTS = main.$O $(CORE_OBJECTS)
-BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
@@ -440,7 +440,7 @@ brltty_jni.$O:
 BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) ttb_translate.$O ttb_compile.$O ttb_native.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O
 
 brltty-trtxt$X: $(BRLTTY_TRTXT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(ICU_LIBS) $(LDLIBS)
 
 brltty-trtxt.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-trtxt.c
@@ -450,7 +450,7 @@ brltty-trtxt.$O:
 BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) lock.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O unicode.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
 
 brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBS) $(LDLIBS)
 
 brltty-ttb.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c
@@ -478,7 +478,7 @@ check-text-tables: brltty-ttb$X
 BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS)
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(ICU_LIBS) $(LDLIBS)
 
 brltty-ctb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
@@ -517,7 +517,7 @@ spktest.$O:
 SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(CHARSET_OBJECTS) lock.$O unicode.$O scancodes.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBS) $(LDLIBS)
 
 scrtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c
@@ -535,7 +535,7 @@ atb_translate.$O:
 KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O datafile.$O lock.$O unicode.$O $(CHARSET_OBJECTS) cmd.$O scancodes.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O prefs.$O prefs_table.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBS) $(LDLIBS)
 
 ktbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
@@ -570,7 +570,7 @@ tunetest.$O:
 APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O ttb_translate.$O ttb_compile.$O ttb_native.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O
 
 apitest$X: $(APITEST_OBJECTS) api
-	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(ICU_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(ICU_LIBS) $(LDLIBS)
 
 apitest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
@@ -634,7 +634,7 @@ TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) 
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
 tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
-	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES_FOR_BUILD) $(LDLIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBS_FOR_BUILD) $(LDLIBS_FOR_BUILD)
 
 ###############################################################################
 
