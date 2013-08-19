@@ -123,7 +123,9 @@ g
 s/^\(.\)$/s%\\$\\(\1\\)%$(\\1_FOR_BUILD)%g/p
 ' <"${makeInput}" >"${sedScript}"
 
-echo >>"${sedScript}" "\$aB = ${objectExtension}"
+echo "\$a\\
+B = ${objectExtension}
+" >>"${sedScript}"
 
 sed <"${makeInput}" >"${makeOutput}" -f "${sedScript}"
 rm "${sedScript}"
