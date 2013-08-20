@@ -112,7 +112,7 @@ fi
 
 sedScript="${outputName}.${sedExtension}"
 sed -n -e '
-s/^ *\([A-Z][A-Z_]*\) *=.*$/\1/
+s/^ *\([A-Za-z][A-Za-z_]*\) *=.*$/\1/
 t found
 d
 :found
