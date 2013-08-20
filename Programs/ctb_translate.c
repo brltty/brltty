@@ -1168,7 +1168,7 @@ putExternalRequests (void) {
 
   typedef struct {
     const char *name;
-    unsigned char type;
+    ExternalRequestType type;
 
     union {
       struct {
