@@ -663,11 +663,11 @@ AC_SUBST([xtk_libs])
 AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
 
-test -z "$brltty_package_gui_toolkit" && {
+test -z "$gui_toolkit_package" && {
    case "${host_os}"
    in
       cygwin*|mingw*)
-         brltty_package_gui_toolkit="windows"
+         gui_toolkit_package="windows"
          ;;
    esac
 }
@@ -1389,7 +1389,7 @@ BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
-test -n "${brltty_package_gui_toolkit}" && {
+test -n "${gui_toolkit_package}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(XSV_LIBS)])
 }
 case "${host_os}"
