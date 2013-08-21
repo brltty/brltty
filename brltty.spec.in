@@ -17,10 +17,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# xc-xfp: when configure tests for: Xaw3d, neXtaw
-# /usr/include/X11/Constraint.h:53:1: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'typedef'
-# because <X11/Constraint.h> doesn't include <X11/Xfuncproto.h>
-
 Name: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Release: 1
@@ -41,13 +37,13 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 
 Requires: libicu
 
+BuildRequires: /bin/sh
+BuildRequires: /usr/bin/env
 BuildRequires: autoconf >= 2.53
 BuildRequires: make
 BuildRequires: gcc
-BuildRequires: /bin/sh
 BuildRequires: coreutils
 BuildRequires: binutils
-BuildRequires: ldconfig
 BuildRequires: /usr/bin/awk
 BuildRequires: glibc-devel
 BuildRequires: tcl
@@ -91,30 +87,30 @@ another instance of BRLTTY which is actually in control
 of the braille device.
 
 
-#xc-xfp#%package -n brltty-braille-xwindow
-#xc-xfp#Version: @PACKAGE_VERSION@
-#xc-xfp#Release: 1
-#xc-xfp#Group: System Environment/Daemons
-#xc-xfp#License: GPL
-#xc-xfp#
-#xc-xfp#BuildRequires: xorg-x11-proto-devel
-#xc-xfp#BuildRequires: libX11-devel
-#xc-xfp#BuildRequires: libXt-devel
-#xc-xfp#BuildRequires: Xaw3d-devel
-#xc-xfp#
-#xc-xfp#AutoProv: no
-#xc-xfp#AutoReq: yes
-#xc-xfp#
-#xc-xfp#Summary: XWindow braille driver for BRLTTY.
-#xc-xfp#%description -n brltty-braille-xwindow
-#xc-xfp#This package provides the XWindow braille driver for BRLTTY.
-#xc-xfp#This driver presents a virtual braille device within a graphical
-#xc-xfp#user interface. It is primarily intended for sighted developers
-#xc-xfp#who don't have access to a real braille device but still wish to
-#xc-xfp#assess the accessibility of their applications.
-#xc-xfp#
-#xc-xfp#Install this package if you would like to see how usable an
-#xc-xfp#application would be by a blind person using a braille device.
+%package -n brltty-braille-xwindow
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: GPL
+
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: libX11-devel
+BuildRequires: libXt-devel
+BuildRequires: neXtaw-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: XWindow braille driver for BRLTTY.
+%description -n brltty-braille-xwindow
+This package provides the XWindow braille driver for BRLTTY.
+This driver presents a virtual braille device within a graphical
+user interface. It is primarily intended for sighted developers
+who don't have access to a real braille device but still wish to
+assess the accessibility of their applications.
+
+Install this package if you would like to see how usable an
+application would be by a blind person using a braille device.
 
 
 %package -n brltty-speech-espeak
@@ -203,27 +199,27 @@ Install this package if you would like to be able to use the
 Speech Dispatcher text-to-speech server.
 
 
-#xc-xfp#%package -n brltty-screen-atspi
-#xc-xfp#Version: @PACKAGE_VERSION@
-#xc-xfp#Release: 1
-#xc-xfp#Group: System Environment/Daemons
-#xc-xfp#License: GPL
-#xc-xfp#
-#xc-xfp#Requires: at-spi
-#xc-xfp#
-#xc-xfp#BuildRequires: at-spi-devel
-#xc-xfp#
-#xc-xfp#AutoProv: no
-#xc-xfp#AutoReq: yes
-#xc-xfp#Requires: at-spi
-#xc-xfp#
-#xc-xfp#Summary: AT-SPI screen driver for BRLTTY.
-#xc-xfp#%description -n brltty-screen-atspi
-#xc-xfp#This package provides the AT-SPI screen driver for BRLTTY.
-#xc-xfp#
-#xc-xfp#Install this package if you would like to be able to
-#xc-xfp#access GTK-based applications via the Assistive
-#xc-xfp#Technology Service Provider Interface.
+%package -n brltty-screen-atspi
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: GPL
+
+Requires: at-spi
+
+BuildRequires: at-spi-devel
+
+AutoProv: no
+AutoReq: yes
+Requires: at-spi
+
+Summary: AT-SPI screen driver for BRLTTY.
+%description -n brltty-screen-atspi
+This package provides the AT-SPI screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+access GTK-based applications via the Assistive
+Technology Service Provider Interface.
 
 
 %package -n brltty-screen-atspi2
@@ -451,12 +447,12 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_bindir}/brltty
 %{_libdir}/brltty
 %exclude %{_libdir}/brltty/libbrlttybba.so
-#xc-xfp#%exclude %{_libdir}/brltty/libbrlttybxw.so
+%exclude %{_libdir}/brltty/libbrlttybxw.so
 %exclude %{_libdir}/brltty/libbrlttyses.so
 %exclude %{_libdir}/brltty/libbrlttysfl.so
 %exclude %{_libdir}/brltty/libbrlttysfv.so
 %exclude %{_libdir}/brltty/libbrlttyssd.so
-#xc-xfp#%exclude %{_libdir}/brltty/libbrlttyxas.so
+%exclude %{_libdir}/brltty/libbrlttyxas.so
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
 %exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
@@ -475,8 +471,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-braille-brlapi
 %{_libdir}/brltty/libbrlttybba.so
 
-#xc-xfp#%files -n brltty-braille-xwindow
-#xc-xfp#%{_libdir}/brltty/libbrlttybxw.so
+%files -n brltty-braille-xwindow
+%{_libdir}/brltty/libbrlttybxw.so
 
 %files -n brltty-speech-espeak
 %{_libdir}/brltty/libbrlttyses.so
@@ -490,8 +486,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-speech-speechd
 %{_libdir}/brltty/libbrlttyssd.so
 
-#xc-xfp#%files -n brltty-screen-atspi
-#xc-xfp#%{_libdir}/brltty/libbrlttyxas.so
+%files -n brltty-screen-atspi
+%{_libdir}/brltty/libbrlttyxas.so
 
 %files -n brltty-screen-atspi2
 %{_libdir}/brltty/libbrlttyxa2.so
