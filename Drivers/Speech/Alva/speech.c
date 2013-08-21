@@ -33,7 +33,7 @@
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
  */
-static unsigned char latin2cp437[128] =
+static unsigned char latin2cp437[0X80] =
   {199, 252, 233, 226, 228, 224, 229, 231,
    234, 235, 232, 239, 238, 236, 196, 197,
    201, 181, 198, 244, 247, 242, 251, 249,
@@ -75,7 +75,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t
   for (i = 0; i < len; i++)
     {
       c = buffer[i];
-      if (c >= 128) c = latin2cp437[c];
+      if (c >= 0X80) c = latin2cp437[c-0X80];
       if (c < 33)	/* space or control character */
 	{
 	  buf[0] = ' ';
