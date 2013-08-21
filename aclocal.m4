@@ -615,7 +615,7 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
          brltty_found=true
          for brltty_header in ${brltty_headers}
          do
-            AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false])
+            AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false], [-])
             "${brltty_found}" || break
          done
          "${brltty_found}" || continue
