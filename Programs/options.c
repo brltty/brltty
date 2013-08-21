@@ -219,10 +219,10 @@ printHelp (
 
         while (option->strings[index]) {
           strings[index] = option->strings[index];
-          ++index;
+          index += 1;
         }
 
-        while (index < count) strings[index++] = NULL;
+        while (index < count) strings[index++] = "";
         snprintf(buffer, sizeof(buffer),
                  description, strings[0], strings[1], strings[2], strings[3]);
         description = buffer;
@@ -233,19 +233,36 @@ printHelp (
 
         while (1) {
           unsigned int charCount = charsLeft;
+
           if (charCount > descriptionWidth) {
             charCount = descriptionWidth;
-            while (description[charCount] != ' ') --charCount;
-            while (description[charCount] == ' ') --charCount;
-            ++charCount;
+
+            while (charCount > 0) {
+              if (description[charCount] == ' ') break;
+              charCount -= 1;
+            }
+
+            while (charCount > 0) {
+              if (description[--charCount] != ' ') {
+                charCount += 1;
+                break;
+              }
+            }
           }
-          memcpy(line+lineLength, description, charCount);
-          lineLength += charCount;
 
-          line[lineLength] = 0;
-          fprintf(outputStream, "%s\n", line);
+          if (charCount > 0) {
+            memcpy(line+lineLength, description, charCount);
+            lineLength += charCount;
 
-          while (description[charCount] == ' ') ++charCount;
+            line[lineLength] = 0;
+            fprintf(outputStream, "%s\n", line);
+          }
+
+          while (charCount < charsLeft) {
+            if (description[charCount] != ' ') break;
+            charCount += 1;
+          }
+
           if (!(charsLeft -= charCount)) break;
           description += charCount;
 
