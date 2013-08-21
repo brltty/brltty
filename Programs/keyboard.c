@@ -35,11 +35,11 @@ const KeyboardProperties anyKeyboard = {
 
 int
 parseKeyboardProperties (KeyboardProperties *properties, const char *string) {
-  typedef enum {
+  enum {
     KBD_PARM_TYPE,
     KBD_PARM_VENDOR,
     KBD_PARM_PRODUCT
-  } KeyboardParameter;
+  };
 
   static const char *const names[] = {"type", "vendor", "product", NULL};
   char **parameters = getParameters(names, NULL, string);

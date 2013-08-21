@@ -380,7 +380,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     NULL
   };
 
-  typedef enum {
+  enum {
     FCN_acceptKeyRanges,
     FCN_acceptKeys,
     FCN_closeConnection,
@@ -404,7 +404,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_suspendDriver,
     FCN_write,
     FCN_writeDots
-  } Function;
+  };
 
   BrlapiSession *session = data;
   int function;
@@ -1124,13 +1124,13 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     NULL
   };
 
-  typedef enum {
+  enum {
     FCN_describeKeyCode,
     FCN_expandKeyCode,
     FCN_getHandleSize,
     FCN_makeDots,
     FCN_openConnection
-  } Function;
+  };
 
   int function;
 
