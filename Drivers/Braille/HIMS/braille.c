@@ -146,10 +146,10 @@ struct BrailleDataStruct {
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
 };
 
-static int
+static size_t
 readPacket (BrailleDisplay *brl, InputPacket *packet) {
-  const int length = 10;
-  int offset = 0;
+  const size_t length = 10;
+  size_t offset = 0;
 
   while (1) {
     unsigned char byte;
@@ -176,7 +176,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
           int checksum = -packet->data.checksum;
 
           {
-            int i;
+            size_t i;
             for (i=0; i<offset; i+=1) checksum += packet->bytes[i];
           }
 
@@ -198,6 +198,16 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
       }
     }
   }
+}
+
+static size_t
+readBytes (BrailleDisplay *brl, void *packet, size_t size) {
+  return readPacket(brl, packet);
+}
+
+static int
+writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
+  return writeBraillePacket(brl, brl->data->gioEndpoint, bytes, count);
 }
 
 static int
@@ -264,7 +274,7 @@ writePacket (
     *checksum = sum;
   }
 
-  return writeBraillePacket(brl, brl->data->gioEndpoint, packet, byte - packet);
+  return writeBytes(brl, packet, byte - packet);
 }
 
 
@@ -282,24 +292,6 @@ static const ProtocolOperations brailleSenseOperations = {
 
 static int
 getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
-  static const unsigned char data[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-  };
-
-  if (writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0)) {
-    InputPacket packet;
-
-    while (gioAwaitInput(brl->data->gioEndpoint, 1000)) {
-      if (readPacket(brl, &packet)) {
-        if (packet.data.type == IPT_CELLS) {
-          *count = packet.data.data;
-          return 1;
-        }
-      }
-    }
-  }
-
   return 0;
 }
 
@@ -334,6 +326,38 @@ static int
 clearCells (BrailleDisplay *brl) {
   memset(brl->data->previousCells, 0, MIN(brl->textColumns*brl->textRows, MAXIMUM_CELL_COUNT));
   return writeCells(brl);
+}
+
+static int
+writeCellCountRequest (BrailleDisplay *brl) {
+  static const unsigned char data[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
+
+  return writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0);
+}
+
+static BrailleResponseResult
+isCellCountResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const InputPacket *response = packet;
+
+  return (response->data.type == IPT_CELLS)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
+static int
+getCellCount (BrailleDisplay *brl, unsigned int *count) {
+  InputPacket response;
+
+  if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
+                          writeCellCountRequest,
+                          readBytes, &response, sizeof(response.bytes),
+                          isCellCountResponse)) {
+    *count = response.data.data;
+    return 1;
+  }
+
+  return brl->data->protocol->getCellCount(brl, count);
 }
 
 static int
@@ -417,8 +441,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint);
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
-      if (brl->data->protocol->getCellCount(brl, &brl->textColumns) ||
-          brl->data->protocol->getCellCount(brl, &brl->textColumns)) {
+      if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
         brl->keyBindings = brl->data->protocol->keyTableDefinition->bindings;
         brl->keyNameTables = brl->data->protocol->keyTableDefinition->names;
