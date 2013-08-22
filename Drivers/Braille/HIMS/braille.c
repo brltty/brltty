@@ -45,29 +45,29 @@ BEGIN_KEY_NAME_TABLE(dots)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(f14)
-  KEY_NAME_ENTRY(HM_KEY_BS_F1, "F1"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F2, "F2"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
-  KEY_NAME_ENTRY(HM_KEY_BS_F4, "F4"),
+  KEY_NAME_ENTRY(HM_KEY_F1, "F1"),
+  KEY_NAME_ENTRY(HM_KEY_F2, "F2"),
+  KEY_NAME_ENTRY(HM_KEY_F3, "F3"),
+  KEY_NAME_ENTRY(HM_KEY_F4, "F4"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(sbf)
-  KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
-  KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
+BEGIN_KEY_NAME_TABLE(bf)
+  KEY_NAME_ENTRY(HM_KEY_Backward, "Backward"),
+  KEY_NAME_ENTRY(HM_KEY_Forward, "Forward"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(sense)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(f14),
-  KEY_NAME_TABLE(sbf),
+  KEY_NAME_TABLE(bf),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(sync)
-  KEY_NAME_ENTRY(HM_KEY_SB_LeftUp, "LeftUp"),
-  KEY_NAME_ENTRY(HM_KEY_SB_LeftDown, "LeftDown"),
-  KEY_NAME_ENTRY(HM_KEY_SB_RightUp, "RightUp"),
-  KEY_NAME_ENTRY(HM_KEY_SB_RightDown, "RightDown"),
+  KEY_NAME_ENTRY(HM_KEY_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(HM_KEY_LeftDown, "LeftDown"),
+  KEY_NAME_ENTRY(HM_KEY_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(HM_KEY_RightDown, "RightDown"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(sync)
@@ -76,25 +76,25 @@ BEGIN_KEY_NAME_TABLES(sync)
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLE(edge)
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollUp, "LeftScrollUp"),
-  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollUp, "RightScrollUp"),
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollDown, "LeftScrollDown"),
-  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollDown, "RightScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_LeftScrollUp, "LeftScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_RightScrollUp, "RightScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_LeftScrollDown, "LeftScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_RightScrollDown, "RightScrollDown"),
 
-  KEY_NAME_ENTRY(HM_KEY_BE_F5, "F5"),
-  KEY_NAME_ENTRY(HM_KEY_BE_F6, "F6"),
-  KEY_NAME_ENTRY(HM_KEY_BE_F7, "F7"),
-  KEY_NAME_ENTRY(HM_KEY_BE_F8, "F8"),
+  KEY_NAME_ENTRY(HM_KEY_F5, "F5"),
+  KEY_NAME_ENTRY(HM_KEY_F6, "F6"),
+  KEY_NAME_ENTRY(HM_KEY_F7, "F7"),
+  KEY_NAME_ENTRY(HM_KEY_F8, "F8"),
 
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowUp, "LeftArrowUp"),
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowDown, "LeftArrowDown"),
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowLeft, "LeftArrowLeft"),
-  KEY_NAME_ENTRY(HM_KEY_BE_LeftArrowRight, "LeftArrowRight"),
+  KEY_NAME_ENTRY(HM_KEY_LeftArrowUp, "LeftArrowUp"),
+  KEY_NAME_ENTRY(HM_KEY_LeftArrowDown, "LeftArrowDown"),
+  KEY_NAME_ENTRY(HM_KEY_LeftArrowLeft, "LeftArrowLeft"),
+  KEY_NAME_ENTRY(HM_KEY_LeftArrowRight, "LeftArrowRight"),
 
-  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowUp, "RightArrowUp"),
-  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowDown, "RightArrowDown"),
-  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowLeft, "RightArrowLeft"),
-  KEY_NAME_ENTRY(HM_KEY_BE_RightArrowRight, "RightArrowRight"),
+  KEY_NAME_ENTRY(HM_KEY_RightArrowUp, "RightArrowUp"),
+  KEY_NAME_ENTRY(HM_KEY_RightArrowDown, "RightArrowDown"),
+  KEY_NAME_ENTRY(HM_KEY_RightArrowLeft, "RightArrowLeft"),
+  KEY_NAME_ENTRY(HM_KEY_RightArrowRight, "RightArrowRight"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(edge)
@@ -500,30 +500,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       | (packet.data.reserved[1] << 0X08)
                       | (packet.data.reserved[2] << 0X10)
                       | (packet.data.reserved[3] << 0X18);
-        uint32_t bit = UINT32_C(0X1);
-        unsigned char key = 0;
 
-        unsigned char keys[0X20];
-        unsigned int keyCount = 0;
-
-        while (++key <= 0X20) {
-          if (bits & bit) {
-            enqueueKeyEvent(HM_SET_NavigationKeys, key, 1);
-            keys[keyCount++] = key;
-          }
-
-          bit <<= 1;
-        }
-
-        if (keyCount) {
-          do {
-            enqueueKeyEvent(HM_SET_NavigationKeys, keys[--keyCount], 0);
-          } while (keyCount);
-
-          continue;
-        }
-
-        break;
+        enqueueKeys(bits, HM_SET_NavigationKeys, 0);
+        continue;
       }
 
       default:
