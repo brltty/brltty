@@ -57,15 +57,15 @@ typedef enum {
   HM_KEY_F7 = 22,
   HM_KEY_F8 = 23,
 
-  HM_KEY_LeftArrowUp     = 24,
-  HM_KEY_LeftArrowDown   = 25,
-  HM_KEY_LeftArrowLeft   = 26,
-  HM_KEY_LeftArrowRight  = 27,
+  HM_KEY_LeftPadUp     = 24,
+  HM_KEY_LeftPadDown   = 25,
+  HM_KEY_LeftPadLeft   = 26,
+  HM_KEY_LeftPadRight  = 27,
 
-  HM_KEY_RightArrowUp    = 28,
-  HM_KEY_RightArrowDown  = 29,
-  HM_KEY_RightArrowLeft  = 30,
-  HM_KEY_RightArrowRight = 31
+  HM_KEY_RightPadUp    = 28,
+  HM_KEY_RightPadDown  = 29,
+  HM_KEY_RightPadLeft  = 30,
+  HM_KEY_RightPadRight = 31
 } HM_NavigationKey;
 
 typedef enum {

@@ -86,15 +86,15 @@ BEGIN_KEY_NAME_TABLE(edge)
   KEY_NAME_ENTRY(HM_KEY_F7, "F7"),
   KEY_NAME_ENTRY(HM_KEY_F8, "F8"),
 
-  KEY_NAME_ENTRY(HM_KEY_LeftArrowUp, "LeftArrowUp"),
-  KEY_NAME_ENTRY(HM_KEY_LeftArrowDown, "LeftArrowDown"),
-  KEY_NAME_ENTRY(HM_KEY_LeftArrowLeft, "LeftArrowLeft"),
-  KEY_NAME_ENTRY(HM_KEY_LeftArrowRight, "LeftArrowRight"),
+  KEY_NAME_ENTRY(HM_KEY_LeftPadUp, "LeftPadUp"),
+  KEY_NAME_ENTRY(HM_KEY_LeftPadDown, "LeftPadDown"),
+  KEY_NAME_ENTRY(HM_KEY_LeftPadLeft, "LeftPadLeft"),
+  KEY_NAME_ENTRY(HM_KEY_LeftPadRight, "LeftPadRight"),
 
-  KEY_NAME_ENTRY(HM_KEY_RightArrowUp, "RightArrowUp"),
-  KEY_NAME_ENTRY(HM_KEY_RightArrowDown, "RightArrowDown"),
-  KEY_NAME_ENTRY(HM_KEY_RightArrowLeft, "RightArrowLeft"),
-  KEY_NAME_ENTRY(HM_KEY_RightArrowRight, "RightArrowRight"),
+  KEY_NAME_ENTRY(HM_KEY_RightPadUp, "RightPadUp"),
+  KEY_NAME_ENTRY(HM_KEY_RightPadDown, "RightPadDown"),
+  KEY_NAME_ENTRY(HM_KEY_RightPadLeft, "RightPadLeft"),
+  KEY_NAME_ENTRY(HM_KEY_RightPadRight, "RightPadRight"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(edge)
