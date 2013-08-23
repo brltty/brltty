@@ -625,8 +625,8 @@ static int
 readUsbBytes1 (unsigned char *buffer, int length, int wait) {
   int timeout = 100;
 
-  return usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
-                      (wait? timeout: 0), timeout);
+  return usbReadData(usb->device, usb->definition.inputEndpoint, buffer, length,
+                     (wait? timeout: 0), timeout);
 }
 
 static int
@@ -759,9 +759,9 @@ awaitUsbInput3 (int milliseconds) {
     startTimePeriod(&period, milliseconds);
 
     while (1) {
-      int result = usbReapInput(usb->device, usb->definition.inputEndpoint,
-                                hidInputReport, hidReportSize_OutData,
-                                0, 100);
+      int result = usbReadData(usb->device, usb->definition.inputEndpoint,
+                               hidInputReport, hidReportSize_OutData,
+                               0, 100);
 
       if (result == -1) return 0;
       if (result > 0 && hidInputLength > 0) {

@@ -215,10 +215,11 @@ awaitUsbInput (int milliseconds) {
 static int
 readUsbBytes (unsigned char *buffer, size_t size, int wait) {
   const int timeout = 100;
-  int count = usbReapInput(usbChannel->device,
-                           usbChannel->definition.inputEndpoint,
-                           buffer, size,
-                           (wait? timeout: 0), timeout);
+  int count = usbReadData(usbChannel->device,
+                          usbChannel->definition.inputEndpoint,
+                          buffer, size,
+                          (wait? timeout: 0), timeout);
+
   if (count != -1) return count;
   if (errno == EAGAIN) return 0;
   return -1;

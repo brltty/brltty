@@ -836,7 +836,7 @@ usbAwaitInput (
 }
 
 ssize_t
-usbReapInput (
+usbReadData (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,

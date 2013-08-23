@@ -252,8 +252,8 @@ readUsbData (
 ) {
   UsbChannel *channel = handle->usb.channel;
 
-  return usbReapInput(channel->device, channel->definition.inputEndpoint,
-                      buffer, size, initialTimeout, subsequentTimeout);
+  return usbReadData(channel->device, channel->definition.inputEndpoint,
+                     buffer, size, initialTimeout, subsequentTimeout);
 }
 
 static int

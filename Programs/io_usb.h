@@ -202,7 +202,7 @@ extern int usbAwaitInput (
   unsigned char endpointNumber,
   int timeout
 );
-extern ssize_t usbReapInput (
+extern ssize_t usbReadData (
   UsbDevice *device,
   unsigned char endpointNumber,
   void *buffer,
