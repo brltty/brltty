@@ -754,6 +754,11 @@ usbAwaitInput (
   if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) return 0;
   if (endpoint->direction.input.completed) return 1;
 
+  if (!timeout) {
+    errno = EAGAIN;
+    return 0;
+  }
+
   interval = endpoint->descriptor->bInterval;
   interval = MAX(20, interval);
 
@@ -846,8 +851,10 @@ usbReapInput (
     unsigned char *target = bytes;
 
     while (length > 0) {
-      if (!usbAwaitInput(device, endpointNumber,
-                         (target == bytes)? initialTimeout: subsequentTimeout)) {
+      int timeout = (target != bytes)? subsequentTimeout:
+                    initialTimeout? initialTimeout: 20;
+
+      if (!usbAwaitInput(device, endpointNumber, timeout)) {
         if (errno == EAGAIN) break;
         return -1;
       }
