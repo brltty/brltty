@@ -43,6 +43,8 @@ typedef struct {
       void *completed;
       unsigned char *buffer;
       size_t length;
+
+      unsigned asynchronous:1;
     } input;
 
     struct {

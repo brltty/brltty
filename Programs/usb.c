@@ -504,6 +504,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           endpoint->direction.input.completed = NULL;
           endpoint->direction.input.buffer = NULL;
           endpoint->direction.input.length = 0;
+          endpoint->direction.input.asynchronous = 0;
           break;
       }
 
@@ -938,8 +939,14 @@ usbChooseChannel (UsbDevice *device, void *data) {
 
                 if (!endpoint) {
                   ok = 0;
-                } else if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
-                  usbBeginInput(device, definition->inputEndpoint, 8);
+                } else {
+                  if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
+                    endpoint->direction.input.asynchronous = 1;
+                  }
+
+                  if (endpoint->direction.input.asynchronous) {
+                    usbBeginInput(device, definition->inputEndpoint, 8);
+                  }
                 }
               }
             }
