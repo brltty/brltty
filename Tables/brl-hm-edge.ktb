@@ -24,29 +24,64 @@ title HIMS Braille Edge
 ####################
 
 bind RoutingKey ROUTE
+bind LeftPadLeft+LeftPadRight CSRJMP_VERT
 
 bind LeftScrollUp LNUP
 bind LeftScrollDown LNDN
 bind RightScrollUp FWINLT
 bind RightScrollDown FWINRT
 
+bind LeftScrollUp+RightScrollUp TOP
+bind LeftScrollDown+RightScrollDown BOT
 bind LeftScrollUp+LeftScrollDown LNBEG
-bind LeftScrollUp+LeftScrollDown+RightScrollUp TOP_LEFT
-bind LeftScrollUp+LeftScrollDown+RightScrollDown BOT_LEFT
+bind RightScrollUp+RightScrollDown TIME
 
-bind RightScrollUp+RightScrollDown RETURN
-bind RightScrollUp+RightScrollDown+LeftScrollUp TOP
-bind RightScrollUp+RightScrollDown+LeftScrollDown BOT
+bind LeftScrollUp+LeftScrollDown+RightScrollUp PRPGRPH
+bind LeftScrollUp+LeftScrollDown+RightScrollDown NXPGRPH
 
-bind LeftScrollUp+RightScrollUp CSRTRK
-bind LeftScrollUp+RightScrollDown SIXDOTS
-bind LeftScrollDown+RightScrollUp FREEZE
-bind LeftScrollDown+RightScrollDown DISPMD
+bind RightScrollUp+RightScrollDown+LeftScrollUp PRPROMPT
+bind RightScrollUp+RightScrollDown+LeftScrollDown NXPROMPT
+
+bind LeftScrollUp+RightScrollDown SIXDOTS+off
+bind LeftScrollDown+RightScrollUp SIXDOTS+on
+
+bind LeftScrollUp+LeftScrollDown+RightScrollUp+RightScrollDown FREEZE
 
 bind F1 HELP
 bind F2 LEARN
 bind F3 INFO
 bind F4 PREFMENU
+
+bind F5 DISPMD
+bind F6 BACK
+bind F7 HOME
+bind F8 CSRTRK
+
+bind LeftPadUp ATTRUP
+bind LeftPadDown ATTRDN
+bind LeftPadLeft PRSEARCH
+bind LeftPadRight NXSEARCH
+
+bind RightPadUp PRDIFLN
+bind RightPadDown NXDIFLN
+bind RightPadLeft FWINLTSKIP
+bind RightPadRight FWINRTSKIP
+
+bind LeftPadLeft+LeftPadUp CONTEXT+5 # PRDIFCHAR
+bind LeftPadLeft+LeftPadDown CONTEXT+6 # NXDIFCHAR
+
+bind LeftPadRight+LeftPadUp CONTEXT+7 # PRINDENT
+bind LeftPadRight+LeftPadDown CONTEXT+8 # NXINDENT
+
+bind RightPadLeft+RightPadUp CONTEXT+1 # CLIP_NEW
+bind RightPadLeft+RightPadDown CONTEXT+2 # CLIP_APPEND
+
+bind RightPadRight+RightPadUp CONTEXT+3 # COPY_LINE
+bind RightPadRight+RightPadDown CONTEXT+4 # COPY_RECT
+bind RightPadLeft+RightPadRight PASTE
+
+bind LeftPadUp+LeftPadDown CONTEXT+9 # SETLEFT
+bind RightPadUp+RightPadDown CONTEXT+10 # DESCCHAR
 
 include brl-hm-dots.kti
 map F4 META
@@ -69,4 +104,35 @@ bind RightScrollUp+RightScrollDown FWINRT
 
 bind LeftScrollUp+RightScrollUp MENU_FIRST_ITEM
 bind LeftScrollDown+RightScrollDown MENU_LAST_ITEM
+
+
+context 1
+bind RoutingKey CLIP_NEW
+
+context 2
+bind RoutingKey CLIP_APPEND
+
+context 3
+bind RoutingKey COPY_LINE
+
+context 4
+bind RoutingKey COPY_RECT
+
+context 5
+bind RoutingKey PRDIFCHAR
+
+context 6
+bind RoutingKey NXDIFCHAR
+
+context 7
+bind RoutingKey PRINDENT
+
+context 8
+bind RoutingKey NXINDENT
+
+context 9
+bind RoutingKey SETLEFT
+
+context 10
+bind RoutingKey DESCCHAR
 
