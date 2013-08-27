@@ -1312,6 +1312,11 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
    *android*)
       bluetooth_package="android"
       ;;
+   darwin*)
+      bluetooth_package="darwin"
+      bluetooth_includes="-x objective-c"
+      bluetooth_libs="-framework IOBluetooth -lobjc"
+      ;;
    cygwin*|mingw*)
       AC_CHECK_HEADER([ws2bth.h], [dnl
          bluetooth_package="windows"

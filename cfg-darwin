@@ -40,7 +40,6 @@
    --without-beep-package \
    --without-pcm-package \
    --without-fm-package \
-   --without-bluetooth-package \
    --without-ports-package \
    \
    --disable-java-bindings \

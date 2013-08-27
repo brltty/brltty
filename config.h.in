@@ -378,6 +378,7 @@ extern "C" {
 /* Define only one of the following Bluetooth I/O packages. */
 #undef USE_PKG_BLUETOOTH_NONE
 #undef USE_PKG_BLUETOOTH_ANDROID
+#undef USE_PKG_BLUETOOTH_DARWIN
 #undef USE_PKG_BLUETOOTH_LINUX
 #undef USE_PKG_BLUETOOTH_WINDOWS
 
