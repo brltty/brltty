@@ -984,7 +984,7 @@ in
       ;;
    darwin*)
       system_package="darwin"
-      LIBS="-lIOKit -framework CoreFoundation ${LIBS}"
+      LIBS="-lIOKit -framework CoreFoundation -lobjc ${LIBS}"
       ;;
    hpux*)
       if test -d /opt/audio/include
@@ -1317,7 +1317,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
    darwin*)
       bluetooth_package="darwin"
       bluetooth_includes="-x objective-c"
-      bluetooth_libs="-framework IOBluetooth -lobjc"
+      bluetooth_libs="-framework IOBluetooth"
       ;;
    cygwin*|mingw*)
       AC_CHECK_HEADER([ws2bth.h], [dnl
