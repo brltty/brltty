@@ -28,12 +28,21 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
-static Queue *bluetoothDeviceQueue = NULL;
+const uint8_t uuidBytes_serialPortProfile[] = {
+  0X00, 0X00, 0X11, 0X01,
+  0X00, 0X00,
+  0X10, 0X00,
+  0X80, 0X00,
+  0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
+};
+const uint8_t uuidLength_serialPortProfile = ARRAY_COUNT(uuidBytes_serialPortProfile);
+
 typedef struct {
   uint64_t bda;
   int connectError;
   char *deviceName;
 } BluetoothDeviceEntry;
+static Queue *bluetoothDeviceQueue = NULL;
 
 static void
 bthDeallocateDeviceEntry (void *item, void *data) {

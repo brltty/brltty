@@ -25,6 +25,9 @@ extern "C" {
 
 #define BDA_SIZE 6
 
+extern const uint8_t uuidBytes_serialPortProfile[];
+extern const uint8_t uuidLength_serialPortProfile;
+
 typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
 
 struct BluetoothConnectionStruct {
