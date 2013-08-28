@@ -984,7 +984,7 @@ in
       ;;
    darwin*)
       system_package="darwin"
-      LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
+      LIBS="-lIOKit -framework CoreFoundation ${LIBS}"
       ;;
    hpux*)
       if test -d /opt/audio/include
@@ -1231,6 +1231,7 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa oss], [dnl
 BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa oss], [dnl
    darwin*)
       midi_package="darwin"
+      midi_libs="-framework AudioUnit -framework AudioToolbox"
       ;;
    mingw*)
       midi_package="windows"
