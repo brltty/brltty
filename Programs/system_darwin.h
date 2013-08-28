@@ -23,6 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MAP_DARWIN_ERROR(from,to) case (from): errno = (to); break;
+extern void setDarwinSystemError (IOReturn result);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -28,6 +28,7 @@
 #include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
+#include "system_darwin.h"
 
 typedef struct {
   UsbEndpoint *endpoint;
@@ -65,146 +66,37 @@ struct UsbEndpointExtensionStruct {
 };
 
 static void
-setUnixError (long int result, const char *action) {
-#define SET(to) errno = (to); break;
-#define MAP(from,to) case (from): SET(to)
+setUsbError (long int result, const char *action) {
   switch (result) {
-    default: SET(EIO)
+    default: setDarwinSystemError(result); break;
 
-  //MAP(KERN_SUCCESS, )
-    MAP(KERN_INVALID_ADDRESS, EINVAL)
-    MAP(KERN_PROTECTION_FAILURE, EFAULT)
-    MAP(KERN_NO_SPACE, ENOSPC)
-    MAP(KERN_INVALID_ARGUMENT, EINVAL)
-  //MAP(KERN_FAILURE, )
-    MAP(KERN_RESOURCE_SHORTAGE, EAGAIN)
-  //MAP(KERN_NOT_RECEIVER, )
-    MAP(KERN_NO_ACCESS, EACCES)
-    MAP(KERN_MEMORY_FAILURE, EFAULT)
-    MAP(KERN_MEMORY_ERROR, EFAULT)
-  //MAP(KERN_ALREADY_IN_SET, )
-  //MAP(KERN_NOT_IN_SET, )
-    MAP(KERN_NAME_EXISTS, EEXIST)
-    MAP(KERN_ABORTED, ECANCELED)
-    MAP(KERN_INVALID_NAME, EINVAL)
-    MAP(KERN_INVALID_TASK, EINVAL)
-    MAP(KERN_INVALID_RIGHT, EINVAL)
-    MAP(KERN_INVALID_VALUE, EINVAL)
-  //MAP(KERN_UREFS_OVERFLOW, )
-    MAP(KERN_INVALID_CAPABILITY, EINVAL)
-  //MAP(KERN_RIGHT_EXISTS, )
-    MAP(KERN_INVALID_HOST, EINVAL)
-  //MAP(KERN_MEMORY_PRESENT, )
-  //MAP(KERN_MEMORY_DATA_MOVED, )
-  //MAP(KERN_MEMORY_RESTART_COPY, )
-    MAP(KERN_INVALID_PROCESSOR_SET, EINVAL)
-  //MAP(KERN_POLICY_LIMIT, )
-    MAP(KERN_INVALID_POLICY, EINVAL)
-    MAP(KERN_INVALID_OBJECT, EINVAL)
-  //MAP(KERN_ALREADY_WAITING, )
-  //MAP(KERN_DEFAULT_SET, )
-  //MAP(KERN_EXCEPTION_PROTECTED, )
-    MAP(KERN_INVALID_LEDGER, EINVAL)
-    MAP(KERN_INVALID_MEMORY_CONTROL, EINVAL)
-    MAP(KERN_INVALID_SECURITY, EINVAL)
-  //MAP(KERN_NOT_DEPRESSED, )
-  //MAP(KERN_TERMINATED, )
-  //MAP(KERN_LOCK_SET_DESTROYED, )
-  //MAP(KERN_LOCK_UNSTABLE, )
-  //MAP(KERN_LOCK_OWNED, )
-  //MAP(KERN_LOCK_OWNED_SELF, )
-  //MAP(KERN_SEMAPHORE_DESTROYED, )
-  //MAP(KERN_RPC_SERVER_TERMINATED, )
-  //MAP(KERN_RPC_TERMINATE_ORPHAN, )
-  //MAP(KERN_RPC_CONTINUE_ORPHAN, )
-    MAP(KERN_NOT_SUPPORTED, ENOTSUP)
-    MAP(KERN_NODE_DOWN, EHOSTDOWN)
-  //MAP(KERN_NOT_WAITING, )
-    MAP(KERN_OPERATION_TIMED_OUT, ETIMEDOUT)
-
-  //MAP(kIOReturnSuccess, )
-  //MAP(kIOReturnError, )
-    MAP(kIOReturnNoMemory, ENOMEM)
-    MAP(kIOReturnNoResources, EAGAIN)
-  //MAP(kIOReturnIPCError, )
-    MAP(kIOReturnNoDevice, ENODEV)
-    MAP(kIOReturnNotPrivileged, EACCES)
-    MAP(kIOReturnBadArgument, EINVAL)
-    MAP(kIOReturnLockedRead, ENOLCK)
-    MAP(kIOReturnLockedWrite, ENOLCK)
-    MAP(kIOReturnExclusiveAccess, EBUSY)
-  //MAP(kIOReturnBadMessageID, )
-    MAP(kIOReturnUnsupported, ENOTSUP)
-  //MAP(kIOReturnVMError, )
-  //MAP(kIOReturnInternalError, )
-    MAP(kIOReturnIOError, EIO)
-    MAP(kIOReturnCannotLock, ENOLCK)
-    MAP(kIOReturnNotOpen, EBADF)
-    MAP(kIOReturnNotReadable, EACCES)
-    MAP(kIOReturnNotWritable, EROFS)
-  //MAP(kIOReturnNotAligned, )
-    MAP(kIOReturnBadMedia, ENXIO)
-  //MAP(kIOReturnStillOpen, )
-  //MAP(kIOReturnRLDError, )
-    MAP(kIOReturnDMAError, EDEVERR)
-    MAP(kIOReturnBusy, EBUSY)
-    MAP(kIOReturnTimeout, ETIMEDOUT)
-    MAP(kIOReturnOffline, ENXIO)
-    MAP(kIOReturnNotReady, ENXIO)
-    MAP(kIOReturnNotAttached, ENXIO)
-    MAP(kIOReturnNoChannels, EDEVERR)
-    MAP(kIOReturnNoSpace, ENOSPC)
-    MAP(kIOReturnPortExists, EADDRINUSE)
-    MAP(kIOReturnCannotWire, ENOMEM)
-  //MAP(kIOReturnNoInterrupt, )
-    MAP(kIOReturnNoFrames, EDEVERR)
-    MAP(kIOReturnMessageTooLarge, EMSGSIZE)
-    MAP(kIOReturnNotPermitted, EPERM)
-    MAP(kIOReturnNoPower, EPWROFF)
-    MAP(kIOReturnNoMedia, ENXIO)
-    MAP(kIOReturnUnformattedMedia, ENXIO)
-    MAP(kIOReturnUnsupportedMode, ENOSYS)
-    MAP(kIOReturnUnderrun, EDEVERR)
-    MAP(kIOReturnOverrun, EDEVERR)
-    MAP(kIOReturnDeviceError, EDEVERR)
-  //MAP(kIOReturnNoCompletion, )
-    MAP(kIOReturnAborted, ECANCELED)
-    MAP(kIOReturnNoBandwidth, EDEVERR)
-    MAP(kIOReturnNotResponding, EDEVERR)
-    MAP(kIOReturnIsoTooOld, EDEVERR)
-    MAP(kIOReturnIsoTooNew, EDEVERR)
-    MAP(kIOReturnNotFound, ENOENT)
-  //MAP(kIOReturnInvalid, )
-
-  //MAP(kIOUSBUnknownPipeErr, )
-  //MAP(kIOUSBTooManyPipesErr, )
-  //MAP(kIOUSBNoAsyncPortErr, )
-  //MAP(kIOUSBNotEnoughPipesErr, )
-  //MAP(kIOUSBNotEnoughPowerErr, )
-  //MAP(kIOUSBEndpointNotFound, )
-  //MAP(kIOUSBConfigNotFound, )
-    MAP(kIOUSBTransactionTimeout, ETIMEDOUT)
-  //MAP(kIOUSBTransactionReturned, )
-  //MAP(kIOUSBPipeStalled, )
-  //MAP(kIOUSBInterfaceNotFound, )
-  //MAP(kIOUSBLowLatencyBufferNotPreviouslyAllocated, )
-  //MAP(kIOUSBLowLatencyFrameListNotPreviouslyAllocated, )
-  //MAP(kIOUSBHighSpeedSplitError, )
-  //MAP(kIOUSBLinkErr, )
-  //MAP(kIOUSBNotSent2Err, )
-  //MAP(kIOUSBNotSent1Err, )
-  //MAP(kIOUSBBufferUnderrunErr, )
-  //MAP(kIOUSBBufferOverrunErr, )
-  //MAP(kIOUSBReserved2Err, )
-  //MAP(kIOUSBReserved1Err, )
-  //MAP(kIOUSBWrongPIDErr, )
-  //MAP(kIOUSBPIDCheckErr, )
-  //MAP(kIOUSBDataToggleErr, )
-  //MAP(kIOUSBBitstufErr, )
-  //MAP(kIOUSBCRCErr, )
+  //MAP_DARWIN_ERROR(kIOUSBUnknownPipeErr, )
+  //MAP_DARWIN_ERROR(kIOUSBTooManyPipesErr, )
+  //MAP_DARWIN_ERROR(kIOUSBNoAsyncPortErr, )
+  //MAP_DARWIN_ERROR(kIOUSBNotEnoughPipesErr, )
+  //MAP_DARWIN_ERROR(kIOUSBNotEnoughPowerErr, )
+  //MAP_DARWIN_ERROR(kIOUSBEndpointNotFound, )
+  //MAP_DARWIN_ERROR(kIOUSBConfigNotFound, )
+    MAP_DARWIN_ERROR(kIOUSBTransactionTimeout, ETIMEDOUT)
+  //MAP_DARWIN_ERROR(kIOUSBTransactionReturned, )
+  //MAP_DARWIN_ERROR(kIOUSBPipeStalled, )
+  //MAP_DARWIN_ERROR(kIOUSBInterfaceNotFound, )
+  //MAP_DARWIN_ERROR(kIOUSBLowLatencyBufferNotPreviouslyAllocated, )
+  //MAP_DARWIN_ERROR(kIOUSBLowLatencyFrameListNotPreviouslyAllocated, )
+  //MAP_DARWIN_ERROR(kIOUSBHighSpeedSplitError, )
+  //MAP_DARWIN_ERROR(kIOUSBLinkErr, )
+  //MAP_DARWIN_ERROR(kIOUSBNotSent2Err, )
+  //MAP_DARWIN_ERROR(kIOUSBNotSent1Err, )
+  //MAP_DARWIN_ERROR(kIOUSBBufferUnderrunErr, )
+  //MAP_DARWIN_ERROR(kIOUSBBufferOverrunErr, )
+  //MAP_DARWIN_ERROR(kIOUSBReserved2Err, )
+  //MAP_DARWIN_ERROR(kIOUSBReserved1Err, )
+  //MAP_DARWIN_ERROR(kIOUSBWrongPIDErr, )
+  //MAP_DARWIN_ERROR(kIOUSBPIDCheckErr, )
+  //MAP_DARWIN_ERROR(kIOUSBDataToggleErr, )
+  //MAP_DARWIN_ERROR(kIOUSBBitstufErr, )
+  //MAP_DARWIN_ERROR(kIOUSBCRCErr, )
   }
-#undef MAP
-#undef SET
 
   if (action) {
     logMessage(LOG_WARNING, "Darwin error 0X%lX.", result);
@@ -223,12 +115,12 @@ openDevice (UsbDevice *device, int seize) {
 
     result = (*devx->device)->USBDeviceOpen(devx->device);
     if (result != kIOReturnSuccess) {
-      setUnixError(result, "USB device open");
+      setUsbError(result, "USB device open");
       if ((result != kIOReturnExclusiveAccess) || !seize) return 0;
 
       result = (*devx->device)->USBDeviceOpenSeize(devx->device);
       if (result != kIOReturnSuccess) {
-        setUnixError(result, "USB device seize");
+        setUsbError(result, "USB device seize");
         return 0;
       }
 
@@ -258,7 +150,7 @@ unsetInterface (UsbDeviceExtension *devx) {
           for (pipe=1; pipe<=devx->pipeCount; ++pipe) {
             result = (*devx->interface)->AbortPipe(devx->interface, pipe);
             if (result != kIOReturnSuccess) {
-              setUnixError(result, "USB pipe abort");
+              setUsbError(result, "USB pipe abort");
             }
           }
         }
@@ -271,7 +163,7 @@ unsetInterface (UsbDeviceExtension *devx) {
 
       result = (*devx->interface)->USBInterfaceClose(devx->interface);
       if (result != kIOReturnSuccess) {
-        setUnixError(result, "USB interface close");
+        setUsbError(result, "USB interface close");
         ok = 0;
       }
       devx->interfaceOpened = 0;
@@ -291,7 +183,7 @@ isInterface (IOUSBInterfaceInterface190 **interface, UInt8 number) {
 
   result = (*interface)->GetInterfaceNumber(interface, &num);
   if (result != kIOReturnSuccess) {
-    setUnixError(result, "USB interface number query");
+    setUsbError(result, "USB interface number query");
   } else if (num == number) {
     return 1;
   }
@@ -354,10 +246,10 @@ setInterface (UsbDeviceExtension *devx, UInt8 number) {
           (*interface)->Release(interface);
           interface = NULL;
         } else {
-          setUnixError(result, "USB interface interface create");
+          setUsbError(result, "USB interface interface create");
         }
       } else {
-        setUnixError(result, "USB interface service plugin create");
+        setUsbError(result, "USB interface service plugin create");
       }
     }
     if (!found) logMessage(LOG_ERR, "USB interface not found: %d", number);
@@ -365,7 +257,7 @@ setInterface (UsbDeviceExtension *devx, UInt8 number) {
     IOObjectRelease(iterator);
     iterator = 0;
   } else {
-    setUnixError(result, "USB interface iterator create");
+    setUsbError(result, "USB interface iterator create");
   }
 
   return found;
@@ -392,7 +284,7 @@ usbResetDevice (UsbDevice *device) {
   IOReturn result = (*devx->device)->ResetDevice(devx->device);
   if (result == kIOReturnSuccess) return 1;
 
-  setUnixError(result, "USB device reset");
+  setUsbError(result, "USB device reset");
   return 0;
 }
 
@@ -413,7 +305,7 @@ usbSetConfiguration (
     UInt8 arg = configuration;
     IOReturn result = (*devx->device)->SetConfiguration(devx->device, arg);
     if (result == kIOReturnSuccess) return 1;
-    setUnixError(result, "USB configuration set");
+    setUsbError(result, "USB configuration set");
   }
 
   return 0;
@@ -437,12 +329,12 @@ usbClaimInterface (
         devx->interfaceOpened = 1;
         return 1;
       } else {
-        setUnixError(result, "USB pipe count query");
+        setUsbError(result, "USB pipe count query");
       }
 
       (*devx->interface)->USBInterfaceClose(devx->interface);
     } else {
-      setUnixError(result, "USB interface open");
+      setUsbError(result, "USB interface open");
     }
   }
 
@@ -477,9 +369,9 @@ usbSetAlternative (
       arg = alternative;
       result = (*devx->interface)->SetAlternateInterface(devx->interface, arg);
       if (result == kIOReturnSuccess) return 1;
-      setUnixError(result, "USB alternative set");
+      setUsbError(result, "USB alternative set");
     } else {
-      setUnixError(result, "USB alternative get");
+      setUsbError(result, "USB alternative get");
     }
   }
 
@@ -500,7 +392,7 @@ usbClearEndpoint (
 
     result = (*devx->interface)->ClearPipeStallBothEnds(devx->interface, eptx->pipeNumber);
     if (result == kIOReturnSuccess) return 1;
-    setUnixError(result, "USB endpoint clear");
+    setUsbError(result, "USB endpoint clear");
   }
 
   return 0;
@@ -535,7 +427,7 @@ usbControlTransfer (
 
   result = (*devx->device)->DeviceRequestTO(devx->device, &arg);
   if (result == kIOReturnSuccess) return arg.wLenDone;
-  setUnixError(result, "USB control transfer");
+  setUsbError(result, "USB control transfer");
   return -1;
 }
 
@@ -567,7 +459,7 @@ usbSubmitRequest (
       result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
                                                                    &devx->runloopSource);
       if (result != kIOReturnSuccess) {
-        setUnixError(result, "USB interface event source create");
+        setUsbError(result, "USB interface event source create");
         return NULL;
       }
       CFRunLoopAddSource(devx->runloopReference,
@@ -586,7 +478,7 @@ usbSubmitRequest (
                                                      request->buffer, request->length,
                                                      usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
-          setUnixError(result, "USB endpoint asynchronous read");
+          setUsbError(result, "USB endpoint asynchronous read");
           break;
 
         case kUSBOut:
@@ -595,7 +487,7 @@ usbSubmitRequest (
                                                       request->buffer, request->length,
                                                       usbAsynchronousRequestCallback, request);
           if (result == kIOReturnSuccess) return request;
-          setUnixError(result, "USB endpoint asynchronous write");
+          setUsbError(result, "USB endpoint asynchronous write");
           break;
 
         default:
@@ -665,7 +557,7 @@ usbReapResponse (
         response->count = -1;
       }
     } else {
-      setUnixError(request->result, "USB asynchronous response");
+      setUsbError(request->result, "USB asynchronous response");
       response->error = errno;
       response->count = -1;
     }
@@ -723,12 +615,12 @@ usbReadEndpoint (
             goto read;
           }
 
-          setUnixError(result, "USB stall clear");
+          setUsbError(result, "USB stall clear");
           break;
         }
 
       default:
-        setUnixError(result, "USB endpoint read");
+        setUsbError(result, "USB endpoint read");
         break;
     }
   }
@@ -755,7 +647,7 @@ usbWriteEndpoint (
                                              (void *)buffer, length,
                                              timeout, timeout);
     if (result == kIOReturnSuccess) return length;
-    setUnixError(result, "USB endpoint write");
+    setUsbError(result, "USB endpoint write");
   }
 
   return -1;
@@ -797,7 +689,7 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 
 error:
-  setUnixError(result, "USB device descriptor read");
+  setUsbError(result, "USB device descriptor read");
   return 0;
 }
 
@@ -831,7 +723,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
             return 1;
           }
         } else {
-          setUnixError(result, "USB pipe properties query");
+          setUsbError(result, "USB pipe properties query");
         }
       }
 
@@ -870,7 +762,7 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 
   if (devx->deviceOpened) {
     result = (*devx->device)->USBDeviceClose(devx->device);
-    if (result != kIOReturnSuccess) setUnixError(result, "USB device close");
+    if (result != kIOReturnSuccess) setUsbError(result, "USB device close");
     devx->deviceOpened = 0;
   }
 
@@ -944,17 +836,17 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
               (*interface)->Release(interface);
               interface = NULL;
             } else {
-              setUnixError(ioResult, "USB device interface create");
+              setUsbError(ioResult, "USB device interface create");
             }
           } else {
-            setUnixError(ioResult, "USB device service plugin create");
+            setUsbError(ioResult, "USB device service plugin create");
           }
         }
 
         IOObjectRelease(iterator);
         iterator = 0;
       } else {
-        setUnixError(kernelResult, "USB device iterator create");
+        setUsbError(kernelResult, "USB device iterator create");
       }
     } else {
       logMessage(LOG_ERR, "USB device matching dictionary create error.");
@@ -962,7 +854,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
 
     mach_port_deallocate(mach_task_self(), port);
   } else {
-    setUnixError(kernelResult, "Darwin master port create");
+    setUsbError(kernelResult, "Darwin master port create");
   }
 
   return device;
