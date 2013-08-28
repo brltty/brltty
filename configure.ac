@@ -983,6 +983,7 @@ in
       system_package="windows"
       ;;
    darwin*)
+      system_package="darwin"
       LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
       ;;
    hpux*)
