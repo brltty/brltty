@@ -20,9 +20,37 @@
 
 #include <errno.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/IOCFPlugIn.h>
 
 #include "system.h"
 #include "system_darwin.h"
+
+static CFRunLoopRef runLoopReference = NULL;
+static CFStringRef runLoopMode = NULL;
+
+static void
+makeRunLoop (void) {
+  if (!runLoopReference) runLoopReference = CFRunLoopGetCurrent();
+  if (!runLoopMode) runLoopMode = kCFRunLoopDefaultMode;
+}
+
+IOReturn
+executeRunLoop (int seconds) {
+  makeRunLoop();
+  return CFRunLoopRunInMode(runLoopMode, seconds, 1);
+}
+
+void
+addRunLoopSource (CFRunLoopSourceRef source) {
+  makeRunLoop();
+  CFRunLoopAddSource(runLoopReference, source, runLoopMode);
+}
+
+void
+removeRunLoopSource (CFRunLoopSourceRef source) {
+  makeRunLoop();
+  CFRunLoopRemoveSource(runLoopReference, source, runLoopMode);
+}
 
 void
 setDarwinSystemError (IOReturn result) {

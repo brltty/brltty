@@ -23,6 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern IOReturn executeRunLoop (int seconds);
+extern void addRunLoopSource (CFRunLoopSourceRef source);
+extern void removeRunLoopSource (CFRunLoopSourceRef source);
+
 #define MAP_DARWIN_ERROR(from,to) case (from): errno = (to); break;
 extern void setDarwinSystemError (IOReturn result);
 

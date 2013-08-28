@@ -24,17 +24,40 @@
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 
-#include "io_bluetooth.h"
-#include "bluetooth_internal.h"
 #include "log.h"
 #include "io_misc.h"
+#include "io_bluetooth.h"
+#include "bluetooth_internal.h"
+#include "system_darwin.h"
 
-@interface RfcommChannelDelegate: NSObject<IOBluetoothRFCOMMChannelDelegate> {
+@interface AsynchronousOperation: NSObject {
+  int isFinished;
+  IOReturn finalStatus;
+}
+
+- (int)wait;
+- (void)setStatus:(IOReturn)status;
+- (IOReturn)getStatus;
+@end
+
+@interface BluetoothConnectionDelegate: AsynchronousOperation {
   BluetoothConnectionExtension *bluetoothConnectionExtension;
 }
 
 - (void)setBluetoothConnectionExtension:(BluetoothConnectionExtension*)bcx;
 - (BluetoothConnectionExtension*)getBluetoothConnectionExtension;
+@end
+
+@interface SdpQueryDelegate: BluetoothConnectionDelegate {
+}
+
+- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status;
+@end
+
+@interface RfcommChannelDelegate: BluetoothConnectionDelegate {
+}
+
+- (void)rfcommChannelData:(IOBluetoothRFCOMMChannel*)rfcommChannel data:(void *)dataPointer length:(size_t)dataLength;
 @end
 
 struct BluetoothConnectionExtensionStruct {
@@ -45,7 +68,26 @@ struct BluetoothConnectionExtensionStruct {
   int inputPipe[2];
 };
 
-@implementation RfcommChannelDelegate
+@implementation AsynchronousOperation
+- (int)wait {
+    isFinished = 0;
+
+    while (1) {
+      executeRunLoop(60);
+      if (isFinished) return 1;
+    }
+  }
+
+- (void)setStatus:(IOReturn)status {
+    [self setStatus:status];
+  }
+
+- (IOReturn)getStatus {
+    return finalStatus;
+  }
+@end
+
+@implementation BluetoothConnectionDelegate
 - (void)setBluetoothConnectionExtension:(BluetoothConnectionExtension*)bcx {
     bluetoothConnectionExtension = bcx;
   }
@@ -53,7 +95,16 @@ struct BluetoothConnectionExtensionStruct {
 - (BluetoothConnectionExtension*)getBluetoothConnectionExtension {
     return bluetoothConnectionExtension;
   }
+@end
 
+@implementation SdpQueryDelegate
+- (void)sdpQueryComplete:(IOBluetoothDevice *)device status:(IOReturn)status {
+    isFinished = 1;
+    finalStatus = status;
+  }
+@end
+
+@implementation RfcommChannelDelegate
 - (void)rfcommChannelData:(IOBluetoothRFCOMMChannel*)rfcommChannel data:(void *)dataPointer length:(size_t)dataLength {
     writeFile(bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
   }
@@ -67,6 +118,31 @@ bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
     address->data[--index] = bda & 0XFF;
     bda >>= 8;
   }
+}
+
+static int
+bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+  int found = 0;
+  IOReturn result;
+  SdpQueryDelegate *delegate = [SdpQueryDelegate new];
+
+  if (delegate) {
+    [delegate setBluetoothConnectionExtension:bcx];
+
+    if ((result = [bcx->device performSDPQuery:delegate]) == kIOReturnSuccess) {
+      if ([delegate wait]) {
+        if ([delegate getStatus] == kIOReturnSuccess) {
+          logMessage(LOG_NOTICE, "sdp done");
+        }
+      }
+    } else {
+      setDarwinSystemError(result);
+    }
+
+    [delegate release];
+  }
+
+  return found;
 }
 
 BluetoothConnectionExtension *
@@ -86,6 +162,8 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
           if ((bcx->delegate = [RfcommChannelDelegate new])) {
             [bcx->delegate setBluetoothConnectionExtension:bcx];
+            bthGetSerialPortChannel(&channel, bcx);
+exit(0);
 
             if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:bcx->delegate]) == kIOReturnSuccess) {
               [bcx->channel closeChannel];

@@ -48,8 +48,6 @@ struct UsbDeviceExtensionStruct {
   unsigned interfaceOpened:1;
   UInt8 pipeCount;
 
-  CFRunLoopRef runloopReference;
-  CFStringRef runloopMode;
   CFRunLoopSourceRef runloopSource;
 };
 
@@ -155,10 +153,7 @@ unsetInterface (UsbDeviceExtension *devx) {
           }
         }
 
-        CFRunLoopRemoveSource(devx->runloopReference,
-                              devx->runloopSource,
-                              devx->runloopMode);
-        devx->runloopReference = NULL;
+        removeRunLoopSource(devx->runloopSource);
       }
 
       result = (*devx->interface)->USBInterfaceClose(devx->interface);
@@ -448,23 +443,14 @@ usbSubmitRequest (
     UsbAsynchronousRequest *request;
 
     if (!devx->runloopSource) {
-      if (!devx->runloopReference) {
-        devx->runloopReference = CFRunLoopGetCurrent();
-      }
-
-      if (!devx->runloopMode) {
-        devx->runloopMode = kCFRunLoopDefaultMode;
-      }
-
       result = (*devx->interface)->CreateInterfaceAsyncEventSource(devx->interface,
                                                                    &devx->runloopSource);
       if (result != kIOReturnSuccess) {
         setUsbError(result, "USB interface event source create");
         return NULL;
       }
-      CFRunLoopAddSource(devx->runloopReference,
-                         devx->runloopSource,
-                         devx->runloopMode);
+
+      addRunLoopSource(devx->runloopSource);
     }
 
     if ((request = malloc(sizeof(*request) + length))) {
@@ -522,7 +508,6 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  UsbDeviceExtension *devx = device->extension;
   UsbEndpoint *endpoint;
 
   if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
@@ -530,7 +515,7 @@ usbReapResponse (
     UsbAsynchronousRequest *request;
 
     while (!(request = dequeueItem(eptx->completedRequests))) {
-      switch (CFRunLoopRunInMode(devx->runloopMode, (wait? 60: 0), 1)) {
+      switch (executeRunLoop((wait? 60: 0))) {
         case kCFRunLoopRunTimedOut:
           if (wait) continue;
         case kCFRunLoopRunFinished:
@@ -822,8 +807,6 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                 devx->interface = NULL;
                 devx->interfaceOpened = 0;
 
-                devx->runloopReference = NULL;
-                devx->runloopMode = NULL;
                 devx->runloopSource = NULL;
 
                 if ((device = usbTestDevice(devx, chooser, data))) break;
