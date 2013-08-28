@@ -113,6 +113,12 @@ struct BluetoothConnectionExtensionStruct {
 @end
 
 static void
+bthSetError (IOReturn result, const char *action) {
+  setDarwinSystemError(result);
+  logSystemError(action);
+}
+
+static void
 bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
   unsigned int index = sizeof(address->data);
 
@@ -133,12 +139,14 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
 
     if ((result = [bcx->device performSDPQuery:delegate]) == kIOReturnSuccess) {
       if ([delegate wait]) {
-        if ([delegate getStatus] == kIOReturnSuccess) {
+        if ((result = [delegate getStatus]) == kIOReturnSuccess) {
           ok = 1;
+        } else {
+          bthSetError(result, "service discovery response");
         }
       }
     } else {
-      setDarwinSystemError(result);
+      bthSetError(result, "service discovery request");
     }
 
     [delegate release];
@@ -163,6 +171,8 @@ bthGetServiceChannel (
       if (record) {
         if ((result = [record getRFCOMMChannelID:channel]) == kIOReturnSuccess) {
           return 1;
+        } else {
+          bthSetError(result, "RFCOMM channel lookup");
         }
       }
     }
@@ -204,8 +214,9 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
             bthGetSerialPortChannel(&channel, bcx);
 
             if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:bcx->delegate]) == kIOReturnSuccess) {
-              [bcx->channel closeChannel];
-              [bcx->channel release];
+              return bcx;
+            } else {
+              bthSetError(result, "RFCOMM channel open");
             }
 
             [bcx->delegate release];
@@ -269,6 +280,7 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   IOReturn result = [bcx->channel writeSync:(void*)buffer length:size];
 
   if (result == kIOReturnSuccess) return size;
+  bthSetError(result, "RFCOMM channel write");
   return -1;
 }
 
@@ -297,6 +309,8 @@ bthObtainDeviceName (uint64_t bda) {
             }
           }
         }
+      } else {
+        bthSetError(result, "device name query");
       }
 
       [device closeConnection];
