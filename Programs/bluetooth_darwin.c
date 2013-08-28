@@ -22,6 +22,8 @@
 #include <errno.h>
 
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
+#import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
+#import <IOBluetooth/objc/IOBluetoothSDPServiceRecord.h>
 #import <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 
 #include "log.h"
@@ -121,8 +123,8 @@ bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
 }
 
 static int
-bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
-  int found = 0;
+bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
+  int ok = 0;
   IOReturn result;
   SdpQueryDelegate *delegate = [SdpQueryDelegate new];
 
@@ -132,7 +134,7 @@ bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
     if ((result = [bcx->device performSDPQuery:delegate]) == kIOReturnSuccess) {
       if ([delegate wait]) {
         if ([delegate getStatus] == kIOReturnSuccess) {
-          logMessage(LOG_NOTICE, "sdp done");
+          ok = 1;
         }
       }
     } else {
@@ -142,7 +144,44 @@ bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
     [delegate release];
   }
 
-  return found;
+  return ok;
+}
+
+static int
+bthGetServiceChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidData, size_t uuidSize
+) {
+  IOReturn result;
+
+  if (bthPerformServiceQuery(bcx)) {
+    IOBluetoothSDPUUID *uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidData length:uuidSize];
+
+    if (uuid) {
+      IOBluetoothSDPServiceRecord *record = [bcx->device getServiceRecordForUUID:uuid];
+
+      if (record) {
+        if ((result = [record getRFCOMMChannelID:channel]) == kIOReturnSuccess) {
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+  static const char uuid[] = {
+    0X00, 0X00, 0X11, 0X01,
+    0X00, 0X00,
+    0X10, 0X00,
+    0X80, 0X00,
+    0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
+  };
+
+  return bthGetServiceChannel(channel, bcx, uuid, sizeof(uuid));
 }
 
 BluetoothConnectionExtension *
@@ -163,7 +202,6 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
           if ((bcx->delegate = [RfcommChannelDelegate new])) {
             [bcx->delegate setBluetoothConnectionExtension:bcx];
             bthGetSerialPortChannel(&channel, bcx);
-exit(0);
 
             if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:bcx->delegate]) == kIOReturnSuccess) {
               [bcx->channel closeChannel];
