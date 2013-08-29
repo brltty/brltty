@@ -969,12 +969,10 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
-system_package="none"
-case "${host_os}"
-in
+BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    *android*)
       system_package="java"
-      LIBS="-llog ${LIBS}"
+      system_libs="-llog"
       ;;
    *qnx*)
       AC_CHECK_LIB([asound], [snd_pcm_open])
@@ -984,13 +982,14 @@ in
       ;;
    darwin*)
       system_package="darwin"
-      LIBS="-lIOKit -framework CoreFoundation -lobjc ${LIBS}"
+      system_includes="-x objective-c"
+      system_libs="-lIOKit -framework CoreFoundation -lobjc"
       ;;
    hpux*)
       if test -d /opt/audio/include
       then
          CPPFLAGS="${CPPFLAGS} -I/opt/audio/include"
-         LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
+         system_libs="-L/opt/audio/lib -lAlib"
          AC_DEFINE([HAVE_HPUX_AUDIO], [1],
                    [Define this if HP-UX audio support is available.])
       fi
@@ -1004,8 +1003,7 @@ in
    msdos*)
       system_package="msdos"
       ;;
-esac
-AC_SUBST([system_package])
+])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
