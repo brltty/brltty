@@ -153,7 +153,7 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 }
 
 char *
-bthObtainDeviceName (uint64_t bda) {
+bthObtainDeviceName (uint64_t bda, int timeout) {
   char *name = NULL;
   JNIEnv *env = getJavaNativeInterface();
 

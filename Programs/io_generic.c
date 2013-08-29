@@ -397,7 +397,7 @@ disconnectBluetoothResource (GioHandle *handle) {
 
 static char *
 getBluetoothResourceName (GioHandle *handle, int timeout) {
-  return bthGetNameOfDevice(handle->bluetooth.connection);
+  return bthGetNameOfDevice(handle->bluetooth.connection, timeout);
 }
 
 static ssize_t

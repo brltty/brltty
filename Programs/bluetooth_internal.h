@@ -45,7 +45,7 @@ extern const BluetoothNameEntry bluetoothNameTable[];
 
 extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel, int timeout);
 extern void bthDisconnect (BluetoothConnectionExtension *bcx);
-extern char *bthObtainDeviceName (uint64_t bda);
+extern char *bthObtainDeviceName (uint64_t bda, int timeout);
 
 #ifdef __cplusplus
 }
