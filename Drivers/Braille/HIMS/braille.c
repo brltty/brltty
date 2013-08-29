@@ -137,7 +137,7 @@ typedef union {
 typedef struct {
   const char *modelName;
   const KeyTableDefinition *keyTableDefinition;
-  int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
+  int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
 } ProtocolOperations;
 
 struct BrailleDataStruct {
@@ -279,37 +279,37 @@ writePacket (
 
 
 static int
-getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
+getBrailleSenseDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   *count = 32;
   return 1;
 }
 
 static const ProtocolOperations brailleSenseOperations = {
   "Braille Sense", &KEY_TABLE_DEFINITION(sense),
-  getBrailleSenseCellCount
+  getBrailleSenseDefaultCellCount
 };
 
 
 static int
-getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
+getSyncBrailleDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   return 0;
 }
 
 static const ProtocolOperations syncBrailleOperations = {
   "SyncBraille", &KEY_TABLE_DEFINITION(sync),
-  getSyncBrailleCellCount
+  getSyncBrailleDefaultCellCount
 };
 
 
 static int
-getBrailleEdgeCellCount (BrailleDisplay *brl, unsigned int *count) {
+getBrailleEdgeDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   *count = 40;
   return 1;
 }
 
-static const ProtocolOperations brailleEDGEOperations = {
+static const ProtocolOperations brailleEdgeOperations = {
   "Braille Edge", &KEY_TABLE_DEFINITION(edge),
-  getBrailleEdgeCellCount
+  getBrailleEdgeDefaultCellCount
 };
 
 
@@ -357,7 +357,7 @@ getCellCount (BrailleDisplay *brl, unsigned int *count) {
     return 1;
   }
 
-  return brl->data->protocol->getCellCount(brl, count);
+  return brl->data->protocol->getDefaultCellCount(brl, count);
 }
 
 static int
@@ -407,7 +407,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleEDGEOperations
+      .data=&brailleEdgeOperations
     },
 
     { .vendor=0 }
@@ -422,7 +422,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   descriptor.bluetooth.channelNumber = 4;
-  descriptor.bluetooth.options.applicationData = &brailleSenseOperations;
 
   if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
@@ -438,7 +437,21 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint);
+      if (!(brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint))) {
+        char *name = gioGetResourceName(brl->data->gioEndpoint);
+        brl->data->protocol = &brailleSenseOperations;
+
+        if (name) {
+          const char *prefix = "BrailleEDGE";
+
+          if (strncasecmp(name, prefix, strlen(prefix)) == 0) {
+            brl->data->protocol = &brailleEdgeOperations;
+          }
+
+          free(name);
+        }
+      }
+
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
       if (getCellCount(brl, &brl->textColumns)) {
