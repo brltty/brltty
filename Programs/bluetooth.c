@@ -209,23 +209,32 @@ bthCloseConnection (BluetoothConnection *connection) {
   free(connection);
 }
 
-const char *
-bthGetDeviceName (const char *address) {
+static char *
+bthGetDeviceName (uint64_t bda) {
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
+
+  if (entry) {
+    if (!entry->deviceName) {
+      entry->deviceName = bthObtainDeviceName(bda);
+    }
+
+    return entry->deviceName;
+  }
+
+  return NULL;
+}
+
+char *
+bthGetNameOfDevice (BluetoothConnection *connection) {
+  return bthGetDeviceName(connection->address);
+}
+
+char *
+bthGetNameAtAddress (const char *address) {
   uint64_t bda;
 
   if (bthParseAddress(&bda, address)) {
-    BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
-
-    if (entry) {
-      if (!entry->deviceName) {
-        if ((entry->deviceName = bthObtainDeviceName(bda))) {
-          logMessage(LOG_DEBUG, "Bluetooth Device Name: %s -> %s",
-                     address, entry->deviceName);
-        }
-      }
-
-      return entry->deviceName;
-    }
+    return bthGetDeviceName(bda);
   }
 
   return NULL;
@@ -233,7 +242,7 @@ bthGetDeviceName (const char *address) {
 
 const char *const *
 bthGetDriverCodes (const char *address) {
-  const char *name = bthGetDeviceName(address);
+  const char *name = bthGetNameAtAddress(address);
 
   if (name) {
     const BluetoothNameEntry *entry = bluetoothNameTable;

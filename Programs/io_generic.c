@@ -49,6 +49,8 @@ typedef struct {
 
 typedef int DisconnectResourceMethod (GioHandle *handle);
 
+typedef char *GetResourceNameMethod (GioHandle *handle, int timeout);
+
 typedef ssize_t WriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
 
 typedef int AwaitInputMethod (GioHandle *handle, int timeout);
@@ -98,6 +100,7 @@ typedef ssize_t GetHidFeatureMethod (
 
 typedef struct {
   DisconnectResourceMethod *disconnectResource;
+  GetResourceNameMethod *getResourceName;
 
   WriteDataMethod *writeData;
   AwaitInputMethod *awaitInput;
@@ -139,6 +142,7 @@ initializeOptions (GioOptions *options) {
   options->readyDelay = 0;
   options->inputTimeout = 0;
   options->outputTimeout = 0;
+  options->requestTimeout = 0;
 }
 
 void
@@ -151,10 +155,12 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
   initializeOptions(&descriptor->usb.options);
   descriptor->usb.options.inputTimeout = 1000;
   descriptor->usb.options.outputTimeout = 1000;
+  descriptor->usb.options.requestTimeout = 1000;
 
   descriptor->bluetooth.channelNumber = 0;
   initializeOptions(&descriptor->bluetooth.options);
   descriptor->bluetooth.options.inputTimeout = 100;
+  descriptor->bluetooth.options.requestTimeout = 5000;
 }
 
 void
@@ -210,6 +216,13 @@ static int
 disconnectUsbResource (GioHandle *handle) {
   usbCloseChannel(handle->usb.channel);
   return 1;
+}
+
+static char *
+getUsbResourceName (GioHandle *handle, int timeout) {
+  UsbChannel *channel = handle->usb.channel;
+
+  return usbGetProduct(channel->device, timeout);
 }
 
 static ssize_t
@@ -355,6 +368,7 @@ getUsbHidFeature (
 
 static const InputOutputMethods usbMethods = {
   .disconnectResource = disconnectUsbResource,
+  .getResourceName = getUsbResourceName,
 
   .writeData = writeUsbData,
   .awaitInput = awaitUsbInput,
@@ -381,6 +395,11 @@ disconnectBluetoothResource (GioHandle *handle) {
   return 1;
 }
 
+static char *
+getBluetoothResourceName (GioHandle *handle, int timeout) {
+  return bthGetNameOfDevice(handle->bluetooth.connection);
+}
+
 static ssize_t
 writeBluetoothData (GioHandle *handle, const void *data, size_t size, int timeout) {
   return bthWriteData(handle->bluetooth.connection, data, size);
@@ -402,6 +421,7 @@ readBluetoothData (
 
 static const InputOutputMethods bluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
+  .getResourceName = getBluetoothResourceName,
 
   .writeData = writeBluetoothData,
   .awaitInput = awaitBluetoothInput,
@@ -523,6 +543,20 @@ gioDisconnectResource (GioEndpoint *endpoint) {
   if (endpoint->hidReportItems.address) free(endpoint->hidReportItems.address);
   free(endpoint);
   return ok;
+}
+
+char *
+gioGetResourceName (GioEndpoint *endpoint) {
+  char *name = NULL;
+  GetResourceNameMethod *method = endpoint->methods->getResourceName;
+
+  if (!method) {
+    logUnsupportedOperation("getResourceName");
+  } else {
+    name = method(&endpoint->handle, endpoint->options.requestTimeout);
+  }
+
+  return name;
 }
 
 const void *

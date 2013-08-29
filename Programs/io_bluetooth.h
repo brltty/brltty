@@ -27,7 +27,8 @@ typedef struct BluetoothConnectionStruct BluetoothConnection;
 
 extern void bthClearCache (void);
 
-extern const char *bthGetDeviceName (const char *address);
+extern char *bthGetNameOfDevice (BluetoothConnection *connection);
+extern char *bthGetNameAtAddress (const char *address);
 extern const char *const *bthGetDriverCodes (const char *address);
 
 extern BluetoothConnection *bthOpenConnection (const char *address, uint8_t channel, int force);

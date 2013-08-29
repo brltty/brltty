@@ -31,6 +31,7 @@ typedef struct {
   int readyDelay;
   int inputTimeout;
   int outputTimeout;
+  int requestTimeout;
 } GioOptions;
 
 typedef struct {
@@ -59,7 +60,9 @@ extern GioEndpoint *gioConnectResource (
   const char *identifier,
   const GioDescriptor *descriptor
 );
+
 extern int gioDisconnectResource (GioEndpoint *endpoint);
+extern char *gioGetResourceName (GioEndpoint *endpoint);
 extern const void *gioGetApplicationData (GioEndpoint *endpoint);
 
 extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t size);
