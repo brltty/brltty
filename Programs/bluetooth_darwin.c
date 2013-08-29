@@ -21,8 +21,6 @@
 #include <string.h>
 #include <errno.h>
 
-#import <Foundation/NSThread.h>
-
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
 #import <IOBluetooth/objc/IOBluetoothSDPServiceRecord.h>
@@ -87,11 +85,11 @@
 @end
 
 struct BluetoothConnectionExtensionStruct {
-  BluetoothDeviceAddress address;
-  IOBluetoothDevice *device;
+  BluetoothDeviceAddress bluetoothAddress;
+  IOBluetoothDevice *bluetoothDevice;
 
-  IOBluetoothRFCOMMChannel *channel;
-  RfcommChannelDelegate *delegate;
+  IOBluetoothRFCOMMChannel *rfcommChannel;
+  RfcommChannelDelegate *rfcommDelegate;
 
   RfcommInputThread *inputThread;
   int inputPipe[2];
@@ -122,7 +120,7 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
   if (delegate) {
     [delegate setBluetoothConnectionExtension:bcx];
 
-    if ((result = [bcx->device performSDPQuery:delegate]) == kIOReturnSuccess) {
+    if ((result = [bcx->bluetoothDevice performSDPQuery:delegate]) == kIOReturnSuccess) {
       if ([delegate wait]) {
         if ((result = [delegate getStatus]) == kIOReturnSuccess) {
           ok = 1;
@@ -151,7 +149,7 @@ bthGetServiceChannel (
     IOBluetoothSDPUUID *uuid = [IOBluetoothSDPUUID uuidWithBytes:uuidBytes length:uuidLength];
 
     if (uuid) {
-      IOBluetoothSDPServiceRecord *record = [bcx->device getServiceRecordForUUID:uuid];
+      IOBluetoothSDPServiceRecord *record = [bcx->bluetoothDevice getServiceRecordForUUID:uuid];
 
       if (record) {
         if ((result = [record getRFCOMMChannelID:channel]) == kIOReturnSuccess) {
@@ -179,34 +177,34 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
     bcx->inputPipe[0] = bcx->inputPipe[1] = -1;
-    bthMakeAddress(&bcx->address, bda);
+    bthMakeAddress(&bcx->bluetoothAddress, bda);
 
     if (pipe(bcx->inputPipe) != -1) {
       if (setBlockingIo(bcx->inputPipe[0], 0)) {
-        if ((bcx->device = [IOBluetoothDevice deviceWithAddress:&bcx->address])) {
-          [bcx->device retain];
+        if ((bcx->bluetoothDevice = [IOBluetoothDevice deviceWithAddress:&bcx->bluetoothAddress])) {
+          [bcx->bluetoothDevice retain];
 
-          if ((bcx->delegate = [RfcommChannelDelegate new])) {
-            [bcx->delegate setBluetoothConnectionExtension:bcx];
+          if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
+            [bcx->rfcommDelegate setBluetoothConnectionExtension:bcx];
             bthGetSerialPortChannel(&channel, bcx);
 
-            if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
+            if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
               if ((bcx->inputThread = [RfcommInputThread new])) {
-                [bcx->inputThread start:bcx->delegate];
+                [bcx->inputThread start:bcx->rfcommDelegate];
                 return bcx;
               }
 
-              [bcx->channel closeChannel];
-              [bcx->channel release];
+              [bcx->rfcommChannel closeChannel];
+              [bcx->rfcommChannel release];
             } else {
               bthSetError(result, "RFCOMM channel open");
             }
 
-            [bcx->delegate release];
+            [bcx->rfcommDelegate release];
           }
 
-          [bcx->device closeConnection];
-          [bcx->device release];
+          [bcx->bluetoothDevice closeConnection];
+          [bcx->bluetoothDevice release];
         }
       }
 
@@ -226,13 +224,13 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
 void
 bthDisconnect (BluetoothConnectionExtension *bcx) {
-  [bcx->channel closeChannel];
-  [bcx->channel release];
+  [bcx->rfcommChannel closeChannel];
+  [bcx->rfcommChannel release];
 
-  [bcx->delegate release];
+  [bcx->rfcommDelegate release];
 
-  [bcx->device closeConnection];
-  [bcx->device release];
+  [bcx->bluetoothDevice closeConnection];
+  [bcx->bluetoothDevice release];
 
   close(bcx->inputPipe[0]);
   close(bcx->inputPipe[1]);
@@ -260,7 +258,7 @@ bthReadData (
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
-  IOReturn result = [bcx->channel writeSync:(void *)buffer length:size];
+  IOReturn result = [bcx->rfcommChannel writeSync:(void *)buffer length:size];
 
   if (result == kIOReturnSuccess) return size;
   bthSetError(result, "RFCOMM channel write");
@@ -366,20 +364,20 @@ bthObtainDeviceName (uint64_t bda) {
 - (void) run
   : (id) argument
   {
-    logMessage(LOG_DEBUG, "input thread started");
+    logMessage(LOG_DEBUG, "Bluetooth input thread started");
 
     {
       RfcommChannelDelegate *delegate = argument;
       BluetoothConnectionExtension *bcx = [delegate getBluetoothConnectionExtension];
       IOReturn result;
 
-      if ((result = [bcx->channel setDelegate:delegate]) == kIOReturnSuccess) {
+      if ((result = [bcx->rfcommChannel setDelegate:delegate]) == kIOReturnSuccess) {
         CFRunLoopRun();
       } else {
         bthSetError(result, "RFCOMM delegate set");
       }
     }
 
-    logMessage(LOG_DEBUG, "input thread finished");
+    logMessage(LOG_DEBUG, "Bluetooth input thread finished");
   }
 @end
