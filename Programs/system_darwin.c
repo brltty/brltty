@@ -25,31 +25,29 @@
 #include "system.h"
 #include "system_darwin.h"
 
-static CFRunLoopRef runLoopReference = NULL;
-static CFStringRef runLoopMode = NULL;
+static inline CFRunLoopRef
+getRunLoop (void) {
+  return CFRunLoopGetCurrent();
+}
 
-static void
-makeRunLoop (void) {
-  if (!runLoopReference) runLoopReference = CFRunLoopGetCurrent();
-  if (!runLoopMode) runLoopMode = kCFRunLoopDefaultMode;
+static inline CFStringRef
+getRunMode (void) {
+  return kCFRunLoopDefaultMode;
 }
 
 IOReturn
 executeRunLoop (int seconds) {
-  makeRunLoop();
-  return CFRunLoopRunInMode(runLoopMode, seconds, 1);
+  return CFRunLoopRunInMode(getRunMode(), seconds, 1);
 }
 
 void
 addRunLoopSource (CFRunLoopSourceRef source) {
-  makeRunLoop();
-  CFRunLoopAddSource(runLoopReference, source, runLoopMode);
+  CFRunLoopAddSource(getRunLoop(), source, getRunMode());
 }
 
 void
 removeRunLoopSource (CFRunLoopSourceRef source) {
-  makeRunLoop();
-  CFRunLoopRemoveSource(runLoopReference, source, runLoopMode);
+  CFRunLoopRemoveSource(getRunLoop(), source, getRunMode());
 }
 
 void
