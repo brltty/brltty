@@ -21,6 +21,8 @@
 #include <string.h>
 #include <errno.h>
 
+#import <Foundation/NSThread.h>
+
 #import <IOBluetooth/objc/IOBluetoothDevice.h>
 #import <IOBluetooth/objc/IOBluetoothSDPUUID.h>
 #import <IOBluetooth/objc/IOBluetoothSDPServiceRecord.h>
@@ -76,11 +78,22 @@
   length: (size_t) dataLength;
 @end
 
+@interface RfcommInputThread: SystemThread
+  {
+  }
+
+- (void) run
+  : (id) argument;
+@end
+
 struct BluetoothConnectionExtensionStruct {
   BluetoothDeviceAddress address;
   IOBluetoothDevice *device;
+
   IOBluetoothRFCOMMChannel *channel;
   RfcommChannelDelegate *delegate;
+
+  RfcommInputThread *inputThread;
   int inputPipe[2];
 };
 
@@ -177,8 +190,14 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
             [bcx->delegate setBluetoothConnectionExtension:bcx];
             bthGetSerialPortChannel(&channel, bcx);
 
-            if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:bcx->delegate]) == kIOReturnSuccess) {
-              return bcx;
+            if ((result = [bcx->device openRFCOMMChannelSync:&bcx->channel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
+              if ((bcx->inputThread = [RfcommInputThread new])) {
+                [bcx->inputThread start:bcx->delegate];
+                return bcx;
+              }
+
+              [bcx->channel closeChannel];
+              [bcx->channel release];
             } else {
               bthSetError(result, "RFCOMM channel open");
             }
@@ -290,8 +309,11 @@ bthObtainDeviceName (uint64_t bda) {
     isFinished = 0;
 
     while (1) {
-      executeRunLoop(60);
+      IOReturn result = executeRunLoop(10);
+
       if (isFinished) return 1;
+      if (result == kCFRunLoopRunHandledSource) continue;
+      if (result == kCFRunLoopRunTimedOut) return 0;
     }
   }
 
@@ -337,5 +359,27 @@ bthObtainDeviceName (uint64_t bda) {
   length: (size_t) dataLength
   {
     writeFile(bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
+  }
+@end
+
+@implementation RfcommInputThread
+- (void) run
+  : (id) argument
+  {
+    logMessage(LOG_DEBUG, "input thread started");
+
+    {
+      RfcommChannelDelegate *delegate = argument;
+      BluetoothConnectionExtension *bcx = [delegate getBluetoothConnectionExtension];
+      IOReturn result;
+
+      if ((result = [bcx->channel setDelegate:delegate]) == kIOReturnSuccess) {
+        CFRunLoopRun();
+      } else {
+        bthSetError(result, "RFCOMM delegate set");
+      }
+    }
+
+    logMessage(LOG_DEBUG, "input thread finished");
   }
 @end

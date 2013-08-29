@@ -20,8 +20,11 @@
 
 #include <errno.h>
 #include <IOKit/IOKitLib.h>
-#include <IOKit/IOCFPlugIn.h>
 
+#import <Foundation/NSThread.h>
+#import <Foundation/NSAutoreleasePool.h>
+
+#include "log.h"
 #include "system.h"
 #include "system_darwin.h"
 
@@ -165,3 +168,26 @@ setDarwinSystemError (IOReturn result) {
 void
 initializeSystemObject (void) {
 }
+
+@implementation SystemThread
+- (void) run
+  : (id) argument
+  {
+    logMessage(LOG_WARNING, "run method not overridden");
+  }
+
+- (void) main
+  {
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+
+    [self run:threadArgument];
+    [pool release];
+  }
+
+- (void) start
+  : (id) argument
+  {
+    threadArgument = argument;
+    [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:argument];
+  }
+@end

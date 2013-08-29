@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SYSTEM_DARWIN
 #define BRLTTY_INCLUDED_SYSTEM_DARWIN
 
+#include <IOKit/IOCFPlugIn.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -29,6 +31,18 @@ extern void removeRunLoopSource (CFRunLoopSourceRef source);
 
 #define MAP_DARWIN_ERROR(from,to) case (from): errno = (to); break;
 extern void setDarwinSystemError (IOReturn result);
+
+@interface SystemThread: NSObject
+  {
+    id threadArgument;
+  }
+
+- (void) run
+  : (id) argument;
+
+- (void) start
+  : (id) argument;
+@end
 
 #ifdef __cplusplus
 }
