@@ -148,7 +148,7 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
   if (target) {
     if ((result = [bcx->bluetoothDevice performSDPQuery:target]) == kIOReturnSuccess) {
       if ([target wait:10]) {
-        if ((result = [target getStatus]) == kIOReturnSuccess) {
+        if ((result = target.finalStatus) == kIOReturnSuccess) {
           ok = 1;
         } else {
           bthSetError(result, "service discovery response");

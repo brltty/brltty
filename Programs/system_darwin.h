@@ -35,35 +35,25 @@ extern void removeRunLoopSource (CFRunLoopSourceRef source);
 extern void setDarwinSystemError (IOReturn result);
 
 @interface AsynchronousResult: NSObject
-  {
-    int isFinished;
-    IOReturn finalStatus;
-  }
+@property (assign, readonly) int isFinished;
+@property (assign, readonly) IOReturn finalStatus;
 
 - (int) wait
   : (int) timeout;
 
 - (void) setStatus
   : (IOReturn) status;
-
-- (IOReturn) getStatus;
 @end
 
 @interface AsynchronousTask: AsynchronousResult
-  {
-    NSThread *thread;
-    CFRunLoopRef runLoop;
-  }
+@property (assign, readonly) NSThread *thread;
+@property (assign, readonly) CFRunLoopRef runLoop;
 
 - (IOReturn) run;
 
 - (int) start;
 
 - (void) stop;
-
-- (NSThread *) getThread;
-
-- (CFRunLoopRef) getRunLoop;
 @end
 
 #ifdef __cplusplus

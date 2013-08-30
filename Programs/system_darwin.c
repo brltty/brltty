@@ -170,16 +170,24 @@ void
 initializeSystemObject (void) {
 }
 
+@interface AsynchronousResult ()
+@property (assign, readwrite) int isFinished;
+@property (assign, readwrite) IOReturn finalStatus;
+@end
+
 @implementation AsynchronousResult
+@synthesize isFinished;
+@synthesize finalStatus;
+
 - (int) wait
   : (int) timeout
   {
-    if (isFinished) return 1;
+    if (self.isFinished) return 1;
 
     while (1) {
       IOReturn result = executeRunLoop(timeout);
 
-      if (isFinished) return 1;
+      if (self.isFinished) return 1;
       if (result == kCFRunLoopRunHandledSource) continue;
       if (result == kCFRunLoopRunTimedOut) return 0;
     }
@@ -188,23 +196,25 @@ initializeSystemObject (void) {
 - (void) setStatus
   : (IOReturn) status
   {
-    finalStatus = status;
-    isFinished = 1;
-  }
-
-- (IOReturn) getStatus
-  {
-    return finalStatus;
+    self.finalStatus = status;
+    self.isFinished = 1;
   }
 @end
 
 @interface AsynchronousTask ()
-@property (retain, readwrite) NSCondition *condition;
+@property (assign, readwrite) NSThread *thread;
+@property (assign, readwrite) CFRunLoopRef runLoop;
+
+@property (retain) NSCondition *condition;
 
 - (void) main;
+
+- (void) done;
 @end
 
 @implementation AsynchronousTask
+@synthesize thread;
+@synthesize runLoop;
 @synthesize condition;
 
 - (IOReturn) run
@@ -218,8 +228,8 @@ initializeSystemObject (void) {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
     [self.condition lock];
-    thread = [NSThread currentThread];
-    runLoop = CFRunLoopGetCurrent();
+    self.thread = [NSThread currentThread];
+    self.runLoop = CFRunLoopGetCurrent();
     [self.condition signal];
     [self.condition unlock];
 
@@ -244,21 +254,11 @@ initializeSystemObject (void) {
 
 - (void) done
   {
-    CFRunLoopStop([self getRunLoop]);
+    CFRunLoopStop(self.runLoop);
   }
 
 - (void) stop
   {
-    [self performSelector:@selector(done) onThread:[self getThread] withObject:nil waitUntilDone:0];
-  }
-
-- (NSThread *) getThread
-  {
-    return thread;
-  }
-
-- (CFRunLoopRef) getRunLoop
-  {
-    return runLoop;
+    [self performSelector:@selector(done) onThread:self.thread withObject:nil waitUntilDone:0];
   }
 @end
