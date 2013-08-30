@@ -33,29 +33,16 @@
 #include "system_darwin.h"
 
 @interface ServiceQueryResult: AsynchronousResult
-  {
-  }
-
 - (void) sdpQueryComplete
   : (IOBluetoothDevice *) device
   status: (IOReturn) status;
 @end
 
 @interface BluetoothConnectionDelegate: AsynchronousTask
-  {
-    BluetoothConnectionExtension *bluetoothConnectionExtension;
-  }
-
-- (void) setBluetoothConnectionExtension
-  : (BluetoothConnectionExtension*) bcx;
-
-- (BluetoothConnectionExtension*) getBluetoothConnectionExtension;
+@property (assign) BluetoothConnectionExtension *bluetoothConnectionExtension;
 @end
 
 @interface RfcommChannelDelegate: BluetoothConnectionDelegate
-  {
-  }
-
 - (void) rfcommChannelData
   : (IOBluetoothRFCOMMChannel *) rfcommChannel
   data: (void *) dataPointer
@@ -211,7 +198,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
           [bcx->bluetoothDevice retain];
 
           if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
-            [bcx->rfcommDelegate setBluetoothConnectionExtension:bcx];
+            bcx->rfcommDelegate.bluetoothConnectionExtension = bcx;
 
             bthGetSerialPortChannel(&channel, bcx);
             logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
@@ -328,16 +315,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 @end
 
 @implementation BluetoothConnectionDelegate
-- (void) setBluetoothConnectionExtension
-  : (BluetoothConnectionExtension*) bcx
-  {
-    bluetoothConnectionExtension = bcx;
-  }
-
-- (BluetoothConnectionExtension *) getBluetoothConnectionExtension
-  {
-    return bluetoothConnectionExtension;
-  }
+@synthesize bluetoothConnectionExtension;
 @end
 
 @implementation RfcommChannelDelegate
@@ -346,7 +324,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   data: (void *) dataPointer
   length: (size_t) dataLength
   {
-    writeFile(bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
+    writeFile(self.bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
   }
 
 - (IOReturn) run
@@ -355,7 +333,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
     logMessage(LOG_DEBUG, "RFCOMM channel delegate started");
 
     {
-      BluetoothConnectionExtension *bcx = bluetoothConnectionExtension;
+      BluetoothConnectionExtension *bcx = self.bluetoothConnectionExtension;
 
       if ((result = [bcx->rfcommChannel setDelegate:self]) == kIOReturnSuccess) {
         CFRunLoopRun();
