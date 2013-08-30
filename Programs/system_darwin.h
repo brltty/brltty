@@ -21,6 +21,8 @@
 
 #include <CoreFoundation/CFRunLoop.h>
 
+#import <Foundation/NSThread.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -49,11 +51,19 @@ extern void setDarwinSystemError (IOReturn result);
 
 @interface AsynchronousTask: AsynchronousResult
   {
+    NSThread *thread;
+    CFRunLoopRef runLoop;
   }
 
 - (IOReturn) run;
 
 - (int) start;
+
+- (void) stop;
+
+- (NSThread *) getThread;
+
+- (CFRunLoopRef) getRunLoop;
 @end
 
 #ifdef __cplusplus

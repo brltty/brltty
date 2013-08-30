@@ -54,7 +54,6 @@
 
 @interface RfcommChannelDelegate: BluetoothConnectionDelegate
   {
-    CFRunLoopRef runLoop;
   }
 
 - (void) rfcommChannelData
@@ -63,10 +62,6 @@
   length: (size_t) dataLength;
 
 - (IOReturn) run;
-
-- (void) stop;
-
-- (id) init;
 @end
 
 struct BluetoothConnectionExtensionStruct {
@@ -372,19 +367,5 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
     logMessage(LOG_DEBUG, "RFCOMM channel delegate finished");
     return result;
-  }
-
-- (void) stop
-  {
-    CFRunLoopStop(runLoop);
-  }
-
-- (id) init
-  {
-    if ((self = [super init])) {
-      runLoop = CFRunLoopGetCurrent();
-    }
-
-    return self;
   }
 @end

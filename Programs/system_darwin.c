@@ -208,7 +208,10 @@ initializeSystemObject (void) {
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
+    thread = [NSThread currentThread];
+    runLoop = CFRunLoopGetCurrent();
     [self setStatus:[self run]];
+
     [pool drain];
   }
 
@@ -216,5 +219,25 @@ initializeSystemObject (void) {
   {
     [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
     return 1;
+  }
+
+- (void) done
+  {
+    CFRunLoopStop([self getRunLoop]);
+  }
+
+- (void) stop
+  {
+    [self performSelector:@selector(done) onThread:[self getThread] withObject:nil waitUntilDone:0];
+  }
+
+- (NSThread *) getThread
+  {
+    return thread;
+  }
+
+- (CFRunLoopRef) getRunLoop
+  {
+    return runLoop;
   }
 @end
