@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <IOKit/IOKitLib.h>
 
+#import <Foundation/NSLock.h>
 #import <Foundation/NSThread.h>
 #import <Foundation/NSAutoreleasePool.h>
 
@@ -197,7 +198,15 @@ initializeSystemObject (void) {
   }
 @end
 
+@interface AsynchronousTask ()
+@property (retain, readwrite) NSCondition *condition;
+
+- (void) main;
+@end
+
 @implementation AsynchronousTask
+@synthesize condition;
+
 - (IOReturn) run
   {
     logMessage(LOG_WARNING, "run method not overridden");
@@ -208,17 +217,29 @@ initializeSystemObject (void) {
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
+    [self.condition lock];
     thread = [NSThread currentThread];
     runLoop = CFRunLoopGetCurrent();
-    [self setStatus:[self run]];
+    [self.condition signal];
+    [self.condition unlock];
 
+    [self setStatus:[self run]];
     [pool drain];
   }
 
 - (int) start
   {
-    [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
-    return 1;
+    if ((self.condition = [NSCondition new])) {
+      [self.condition lock];
+      [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
+      [self.condition wait];
+      [self.condition unlock];
+
+      self.condition = nil;
+      return 1;
+    }
+
+    return 0;
   }
 
 - (void) done
