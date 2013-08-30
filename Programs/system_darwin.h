@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SYSTEM_DARWIN
 #define BRLTTY_INCLUDED_SYSTEM_DARWIN
 
-#include <IOKit/IOCFPlugIn.h>
+#include <CoreFoundation/CFRunLoop.h>
 
 #ifdef __cplusplus
 extern "C" {

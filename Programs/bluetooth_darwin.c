@@ -54,6 +54,7 @@
 
 @interface RfcommChannelDelegate: BluetoothConnectionDelegate
   {
+    CFRunLoopRef runLoop;
   }
 
 - (void) rfcommChannelData
@@ -62,6 +63,10 @@
   length: (size_t) dataLength;
 
 - (void) run;
+
+- (void) stop;
+
+- (id) init;
 @end
 
 struct BluetoothConnectionExtensionStruct {
@@ -178,6 +183,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
               bthSetError(result, "RFCOMM channel open");
             }
 
+            [bcx->rfcommDelegate stop];
             [bcx->rfcommDelegate release];
           }
 
@@ -205,6 +211,7 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
   [bcx->rfcommChannel closeChannel];
   [bcx->rfcommChannel release];
 
+  [bcx->rfcommDelegate stop];
   [bcx->rfcommDelegate release];
 
   [bcx->bluetoothDevice closeConnection];
@@ -326,5 +333,19 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
     }
 
     logMessage(LOG_DEBUG, "RFCOMM channel delegate finished");
+  }
+
+- (void) stop
+  {
+    CFRunLoopStop(runLoop);
+  }
+
+- (id) init
+  {
+    if ((self = [super init])) {
+      runLoop = CFRunLoopGetCurrent();
+    }
+
+    return self;
   }
 @end
