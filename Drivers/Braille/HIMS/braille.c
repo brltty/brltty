@@ -136,13 +136,14 @@ typedef union {
 
 typedef struct {
   const char *modelName;
+  const char *resourceNamePrefix;
   const KeyTableDefinition *keyTableDefinition;
   int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
-} ProtocolOperations;
+} ProtocolEntry;
 
 struct BrailleDataStruct {
   GioEndpoint *gioEndpoint;
-  const ProtocolOperations *protocol;
+  const ProtocolEntry *protocol;
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
 };
 
@@ -284,9 +285,10 @@ getBrailleSenseDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolOperations brailleSenseOperations = {
-  "Braille Sense", &KEY_TABLE_DEFINITION(sense),
-  getBrailleSenseDefaultCellCount
+static const ProtocolEntry brailleSenseProtocol = {
+  .modelName = "Braille Sense",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(sense),
+  .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
 
@@ -295,9 +297,10 @@ getSyncBrailleDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   return 0;
 }
 
-static const ProtocolOperations syncBrailleOperations = {
-  "SyncBraille", &KEY_TABLE_DEFINITION(sync),
-  getSyncBrailleDefaultCellCount
+static const ProtocolEntry syncBrailleProtocol = {
+  .modelName = "SyncBraille",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(sync),
+  .getDefaultCellCount = getSyncBrailleDefaultCellCount
 };
 
 
@@ -307,9 +310,19 @@ getBrailleEdgeDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolOperations brailleEdgeOperations = {
-  "Braille Edge", &KEY_TABLE_DEFINITION(edge),
-  getBrailleEdgeDefaultCellCount
+static const ProtocolEntry brailleEdgeProtocol = {
+  .modelName = "Braille Edge",
+  .resourceNamePrefix = "BrailleEDGE",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(edge),
+  .getDefaultCellCount = getBrailleEdgeDefaultCellCount
+};
+
+
+static const ProtocolEntry *protocolTable[] = {
+  &brailleSenseProtocol,
+  &syncBrailleProtocol,
+  &brailleEdgeProtocol,
+  NULL
 };
 
 
@@ -374,7 +387,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleSenseOperations
+      .data=&brailleSenseProtocol
     },
 
     { /* Braille Sense (USB 2.0) */
@@ -383,7 +396,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleSenseOperations
+      .data=&brailleSenseProtocol
     },
 
     { /* Braille Sense U2 (USB 2.0) */
@@ -392,14 +405,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleSenseOperations
+      .data=&brailleSenseProtocol
     },
 
     { /* Sync Braille */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&syncBrailleOperations
+      .data=&syncBrailleProtocol
     },
 
     { /* Braille Edge */
@@ -407,7 +420,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleEdgeOperations
+      .data=&brailleEdgeProtocol
     },
 
     { .vendor=0 }
@@ -417,7 +430,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &brailleSenseOperations;
+  descriptor.serial.options.applicationData = &brailleSenseProtocol;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
@@ -439,13 +452,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       if (!(brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint))) {
         char *name = gioGetResourceName(brl->data->gioEndpoint);
-        brl->data->protocol = &brailleSenseOperations;
+        brl->data->protocol = &brailleSenseProtocol;
 
         if (name) {
-          const char *prefix = "BrailleEDGE";
+          const ProtocolEntry *const *protocolAddress = protocolTable;
 
-          if (strncasecmp(name, prefix, strlen(prefix)) == 0) {
-            brl->data->protocol = &brailleEdgeOperations;
+          while (*protocolAddress) {
+            const ProtocolEntry *protocol = *protocolAddress;
+            const char *prefix = protocol->resourceNamePrefix;
+
+            if (prefix) {
+              if (strncasecmp(name, prefix, strlen(prefix)) == 0) {
+                brl->data->protocol = protocol;
+                break;
+              }
+            }
+
+            protocolAddress += 1;
           }
 
           free(name);
