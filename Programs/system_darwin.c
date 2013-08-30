@@ -209,7 +209,7 @@ initializeSystemObject (void) {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
     [self setStatus:[self run]];
-    [pool release];
+    [pool drain];
   }
 
 - (int) start
