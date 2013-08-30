@@ -74,9 +74,11 @@ bthInitializeRfcommChannel (BluetoothConnectionExtension *bcx) {
 
 static void
 bthDestroyRfcommChannel (BluetoothConnectionExtension *bcx) {
-  [bcx->rfcommChannel closeChannel];
-  [bcx->rfcommChannel release];
-  bthInitializeRfcommChannel(bcx);
+  if (bcx->rfcommChannel) {
+    [bcx->rfcommChannel closeChannel];
+    [bcx->rfcommChannel release];
+    bthInitializeRfcommChannel(bcx);
+  }
 }
 
 static void
@@ -86,10 +88,12 @@ bthInitializeRfcommDelegate (BluetoothConnectionExtension *bcx) {
 
 static void
 bthDestroyRfcommDelegate (BluetoothConnectionExtension *bcx) {
-  [bcx->rfcommDelegate stop];
-//[bcx->rfcommDelegate wait:5];
-  [bcx->rfcommDelegate release];
-  bthInitializeRfcommDelegate(bcx);
+  if (bcx->rfcommDelegate) {
+    [bcx->rfcommDelegate stop];
+  //[bcx->rfcommDelegate wait:5];
+    [bcx->rfcommDelegate release];
+    bthInitializeRfcommDelegate(bcx);
+  }
 }
 
 static void
@@ -99,9 +103,11 @@ bthInitializeBluetoothDevice (BluetoothConnectionExtension *bcx) {
 
 static void
 bthDestroyBluetoothDevice (BluetoothConnectionExtension *bcx) {
-  [bcx->bluetoothDevice closeConnection];
-  [bcx->bluetoothDevice release];
-  bthInitializeBluetoothDevice(bcx);
+  if (bcx->bluetoothDevice) {
+    [bcx->bluetoothDevice closeConnection];
+    [bcx->bluetoothDevice release];
+    bthInitializeBluetoothDevice(bcx);
+  }
 }
 
 static void
@@ -111,8 +117,17 @@ bthInitializeInputPipe (BluetoothConnectionExtension *bcx) {
 
 static void
 bthDestroyInputPipe (BluetoothConnectionExtension *bcx) {
-  close(bcx->inputPipe[0]);
-  close(bcx->inputPipe[1]);
+  int *fileDescriptor = bcx->inputPipe;
+  const int *end = fileDescriptor + ARRAY_COUNT(bcx->inputPipe);
+
+  while (fileDescriptor < end) {
+    if (*fileDescriptor != -1) {
+      close(*fileDescriptor);
+    }
+
+    fileDescriptor += 1;
+  }
+
   bthInitializeInputPipe(bcx);
 }
 
