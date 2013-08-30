@@ -48,13 +48,13 @@ extern void setDarwinSystemError (IOReturn result);
 
 @interface AsynchronousTask: NSObject
   {
-    id threadArgument;
+    id runArgument;
   }
 
 - (void) run
   : (id) argument;
 
-- (void) start
+- (int) start
   : (id) argument;
 @end
 

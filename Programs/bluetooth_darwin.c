@@ -41,7 +41,7 @@
   status: (IOReturn) status;
 @end
 
-@interface BluetoothConnectionDelegate: AsynchronousResult
+@interface BluetoothConnectionDelegate: AsynchronousTask
   {
     BluetoothConnectionExtension *bluetoothConnectionExtension;
   }
@@ -60,11 +60,6 @@
   : (IOBluetoothRFCOMMChannel *) rfcommChannel
   data: (void *) dataPointer
   length: (size_t) dataLength;
-@end
-
-@interface RfcommInputThread: AsynchronousTask
-  {
-  }
 
 - (void) run
   : (id) argument;
@@ -77,7 +72,6 @@ struct BluetoothConnectionExtensionStruct {
   IOBluetoothRFCOMMChannel *rfcommChannel;
   RfcommChannelDelegate *rfcommDelegate;
 
-  RfcommInputThread *inputThread;
   int inputPipe[2];
 };
 
@@ -173,8 +167,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
             bthGetSerialPortChannel(&channel, bcx);
 
             if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
-              if ((bcx->inputThread = [RfcommInputThread new])) {
-                [bcx->inputThread start:bcx->rfcommDelegate];
+              if ([bcx->rfcommDelegate start:nil]) {
                 return bcx;
               }
 
@@ -315,26 +308,23 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   {
     writeFile(bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
   }
-@end
 
-@implementation RfcommInputThread
 - (void) run
   : (id) argument
   {
-    logMessage(LOG_DEBUG, "Bluetooth input thread started");
+    logMessage(LOG_DEBUG, "RFCOMM channel delegate started");
 
     {
-      RfcommChannelDelegate *delegate = argument;
-      BluetoothConnectionExtension *bcx = [delegate getBluetoothConnectionExtension];
+      BluetoothConnectionExtension *bcx = bluetoothConnectionExtension;
       IOReturn result;
 
-      if ((result = [bcx->rfcommChannel setDelegate:delegate]) == kIOReturnSuccess) {
+      if ((result = [bcx->rfcommChannel setDelegate:self]) == kIOReturnSuccess) {
         CFRunLoopRun();
       } else {
-        bthSetError(result, "RFCOMM delegate set");
+        bthSetError(result, "RFCOMM channel delegate set");
       }
     }
 
-    logMessage(LOG_DEBUG, "Bluetooth input thread finished");
+    logMessage(LOG_DEBUG, "RFCOMM channel delegate finished");
   }
 @end

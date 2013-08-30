@@ -207,14 +207,15 @@ initializeSystemObject (void) {
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
-    [self run:threadArgument];
+    [self run:runArgument];
     [pool release];
   }
 
-- (void) start
+- (int) start
   : (id) argument
   {
-    threadArgument = argument;
+    runArgument = argument;
     [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:argument];
+    return 1;
   }
 @end
