@@ -32,21 +32,16 @@
 #include "bluetooth_internal.h"
 #include "system_darwin.h"
 
-@interface AsynchronousOperation: NSObject
+@interface ServiceQueryResult: AsynchronousResult
   {
-    int isFinished;
-    IOReturn finalStatus;
   }
 
-- (int) wait;
-
-- (void) setStatus
-  : (IOReturn) status;
-
-- (IOReturn) getStatus;
+- (void) sdpQueryComplete
+  : (IOBluetoothDevice *) device
+  status: (IOReturn) status;
 @end
 
-@interface BluetoothConnectionDelegate: AsynchronousOperation
+@interface BluetoothConnectionDelegate: AsynchronousResult
   {
     BluetoothConnectionExtension *bluetoothConnectionExtension;
   }
@@ -55,15 +50,6 @@
   : (BluetoothConnectionExtension*) bcx;
 
 - (BluetoothConnectionExtension*) getBluetoothConnectionExtension;
-@end
-
-@interface SdpQueryDelegate: BluetoothConnectionDelegate
-  {
-  }
-
-- (void) sdpQueryComplete
-  : (IOBluetoothDevice *) device
-  status: (IOReturn) status;
 @end
 
 @interface RfcommChannelDelegate: BluetoothConnectionDelegate
@@ -76,7 +62,7 @@
   length: (size_t) dataLength;
 @end
 
-@interface RfcommInputThread: SystemThread
+@interface RfcommInputThread: AsynchronousTask
   {
   }
 
@@ -115,14 +101,12 @@ static int
 bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
   int ok = 0;
   IOReturn result;
-  SdpQueryDelegate *delegate = [SdpQueryDelegate new];
+  ServiceQueryResult *target = [ServiceQueryResult new];
 
-  if (delegate) {
-    [delegate setBluetoothConnectionExtension:bcx];
-
-    if ((result = [bcx->bluetoothDevice performSDPQuery:delegate]) == kIOReturnSuccess) {
-      if ([delegate wait]) {
-        if ((result = [delegate getStatus]) == kIOReturnSuccess) {
+  if (target) {
+    if ((result = [bcx->bluetoothDevice performSDPQuery:target]) == kIOReturnSuccess) {
+      if ([target wait]) {
+        if ((result = [target getStatus]) == kIOReturnSuccess) {
           ok = 1;
         } else {
           bthSetError(result, "service discovery response");
@@ -132,7 +116,7 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
       bthSetError(result, "service discovery request");
     }
 
-    [delegate release];
+    [target release];
   }
 
   return ok;
@@ -301,29 +285,12 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   return NULL;
 }
 
-@implementation AsynchronousOperation
-- (int) wait
-  {
-    isFinished = 0;
-
-    while (1) {
-      IOReturn result = executeRunLoop(10);
-
-      if (isFinished) return 1;
-      if (result == kCFRunLoopRunHandledSource) continue;
-      if (result == kCFRunLoopRunTimedOut) return 0;
-    }
-  }
-
-- (void) setStatus
-  : (IOReturn) status
+@implementation ServiceQueryResult
+- (void) sdpQueryComplete
+  : (IOBluetoothDevice *) device
+  status: (IOReturn) status
   {
     [self setStatus:status];
-  }
-
-- (IOReturn) getStatus
-  {
-    return finalStatus;
   }
 @end
 
@@ -337,16 +304,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 - (BluetoothConnectionExtension *) getBluetoothConnectionExtension
   {
     return bluetoothConnectionExtension;
-  }
-@end
-
-@implementation SdpQueryDelegate
-- (void) sdpQueryComplete
-  : (IOBluetoothDevice *) device
-  status: (IOReturn) status
-  {
-    isFinished = 1;
-    finalStatus = status;
   }
 @end
 

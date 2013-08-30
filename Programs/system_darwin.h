@@ -32,7 +32,21 @@ extern void removeRunLoopSource (CFRunLoopSourceRef source);
 #define MAP_DARWIN_ERROR(from,to) case (from): errno = (to); break;
 extern void setDarwinSystemError (IOReturn result);
 
-@interface SystemThread: NSObject
+@interface AsynchronousResult: NSObject
+  {
+    int isFinished;
+    IOReturn finalStatus;
+  }
+
+- (int) wait;
+
+- (void) setStatus
+  : (IOReturn) status;
+
+- (IOReturn) getStatus;
+@end
+
+@interface AsynchronousTask: NSObject
   {
     id threadArgument;
   }

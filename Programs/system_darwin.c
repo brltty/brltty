@@ -169,7 +169,34 @@ void
 initializeSystemObject (void) {
 }
 
-@implementation SystemThread
+@implementation AsynchronousResult
+- (int) wait
+  {
+    isFinished = 0;
+
+    while (1) {
+      IOReturn result = executeRunLoop(10);
+
+      if (isFinished) return 1;
+      if (result == kCFRunLoopRunHandledSource) continue;
+      if (result == kCFRunLoopRunTimedOut) return 0;
+    }
+  }
+
+- (void) setStatus
+  : (IOReturn) status
+  {
+    finalStatus = status;
+    isFinished = 1;
+  }
+
+- (IOReturn) getStatus
+  {
+    return finalStatus;
+  }
+@end
+
+@implementation AsynchronousTask
 - (void) run
   : (id) argument
   {
