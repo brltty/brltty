@@ -62,7 +62,7 @@
   data: (void *) dataPointer
   length: (size_t) dataLength;
 
-- (void) run;
+- (IOReturn) run;
 
 - (void) stop;
 
@@ -83,6 +83,55 @@ static void
 bthSetError (IOReturn result, const char *action) {
   setDarwinSystemError(result);
   logSystemError(action);
+}
+
+static void
+bthInitializeRfcommChannel (BluetoothConnectionExtension *bcx) {
+  bcx->rfcommChannel = nil;
+}
+
+static void
+bthDestroyRfcommChannel (BluetoothConnectionExtension *bcx) {
+  [bcx->rfcommChannel closeChannel];
+  [bcx->rfcommChannel release];
+  bthInitializeRfcommChannel(bcx);
+}
+
+static void
+bthInitializeRfcommDelegate (BluetoothConnectionExtension *bcx) {
+  bcx->rfcommDelegate = nil;
+}
+
+static void
+bthDestroyRfcommDelegate (BluetoothConnectionExtension *bcx) {
+  [bcx->rfcommDelegate stop];
+//[bcx->rfcommDelegate wait:5];
+  [bcx->rfcommDelegate release];
+  bthInitializeRfcommDelegate(bcx);
+}
+
+static void
+bthInitializeBluetoothDevice (BluetoothConnectionExtension *bcx) {
+  bcx->bluetoothDevice = nil;
+}
+
+static void
+bthDestroyBluetoothDevice (BluetoothConnectionExtension *bcx) {
+  [bcx->bluetoothDevice closeConnection];
+  [bcx->bluetoothDevice release];
+  bthInitializeBluetoothDevice(bcx);
+}
+
+static void
+bthInitializeInputPipe (BluetoothConnectionExtension *bcx) {
+  bcx->inputPipe[0] = bcx->inputPipe[1] = -1;
+}
+
+static void
+bthDestroyInputPipe (BluetoothConnectionExtension *bcx) {
+  close(bcx->inputPipe[0]);
+  close(bcx->inputPipe[1]);
+  bthInitializeInputPipe(bcx);
 }
 
 static void
@@ -158,7 +207,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
-    bcx->inputPipe[0] = bcx->inputPipe[1] = -1;
+    bthInitializeInputPipe(bcx);
     bthMakeAddress(&bcx->bluetoothAddress, bda);
 
     if (pipe(bcx->inputPipe) != -1) {
@@ -177,23 +226,19 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
                 return bcx;
               }
 
-              [bcx->rfcommChannel closeChannel];
-              [bcx->rfcommChannel release];
+              bthDestroyRfcommChannel(bcx);
             } else {
               bthSetError(result, "RFCOMM channel open");
             }
 
-            [bcx->rfcommDelegate stop];
-            [bcx->rfcommDelegate release];
+            bthDestroyRfcommDelegate(bcx);
           }
 
-          [bcx->bluetoothDevice closeConnection];
-          [bcx->bluetoothDevice release];
+          bthDestroyBluetoothDevice(bcx);
         }
       }
 
-      close(bcx->inputPipe[0]);
-      close(bcx->inputPipe[1]);
+      bthDestroyInputPipe(bcx);
     } else {
       logSystemError("pipe");
     }
@@ -208,18 +253,10 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
 void
 bthDisconnect (BluetoothConnectionExtension *bcx) {
-  [bcx->rfcommChannel closeChannel];
-  [bcx->rfcommChannel release];
-
-  [bcx->rfcommDelegate stop];
-  [bcx->rfcommDelegate release];
-
-  [bcx->bluetoothDevice closeConnection];
-  [bcx->bluetoothDevice release];
-
-  close(bcx->inputPipe[0]);
-  close(bcx->inputPipe[1]);
-
+  bthDestroyRfcommChannel(bcx);
+  bthDestroyRfcommDelegate(bcx);
+  bthDestroyBluetoothDevice(bcx);
+  bthDestroyInputPipe(bcx);
   free(bcx);
 }
 
@@ -317,22 +354,24 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
     writeFile(bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
   }
 
-- (void) run
+- (IOReturn) run
   {
+    IOReturn result;
     logMessage(LOG_DEBUG, "RFCOMM channel delegate started");
 
     {
       BluetoothConnectionExtension *bcx = bluetoothConnectionExtension;
-      IOReturn result;
 
       if ((result = [bcx->rfcommChannel setDelegate:self]) == kIOReturnSuccess) {
         CFRunLoopRun();
+        result = kIOReturnSuccess;
       } else {
         bthSetError(result, "RFCOMM channel delegate set");
       }
     }
 
     logMessage(LOG_DEBUG, "RFCOMM channel delegate finished");
+    return result;
   }
 
 - (void) stop

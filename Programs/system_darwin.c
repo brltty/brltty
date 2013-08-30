@@ -198,16 +198,17 @@ initializeSystemObject (void) {
 @end
 
 @implementation AsynchronousTask
-- (void) run
+- (IOReturn) run
   {
     logMessage(LOG_WARNING, "run method not overridden");
+    return kIOReturnSuccess;
   }
 
 - (void) main
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
-    [self run];
+    [self setStatus:[self run]];
     [pool release];
   }
 

@@ -47,11 +47,11 @@ extern void setDarwinSystemError (IOReturn result);
 - (IOReturn) getStatus;
 @end
 
-@interface AsynchronousTask: NSObject
+@interface AsynchronousTask: AsynchronousResult
   {
   }
 
-- (void) run;
+- (IOReturn) run;
 
 - (int) start;
 @end
