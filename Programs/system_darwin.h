@@ -38,7 +38,8 @@ extern void setDarwinSystemError (IOReturn result);
     IOReturn finalStatus;
   }
 
-- (int) wait;
+- (int) wait
+  : (int) timeout;
 
 - (void) setStatus
   : (IOReturn) status;
@@ -48,14 +49,11 @@ extern void setDarwinSystemError (IOReturn result);
 
 @interface AsynchronousTask: NSObject
   {
-    id runArgument;
   }
 
-- (void) run
-  : (id) argument;
+- (void) run;
 
-- (int) start
-  : (id) argument;
+- (int) start;
 @end
 
 #ifdef __cplusplus

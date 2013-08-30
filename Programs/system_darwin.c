@@ -171,11 +171,12 @@ initializeSystemObject (void) {
 
 @implementation AsynchronousResult
 - (int) wait
+  : (int) timeout
   {
-    isFinished = 0;
+    if (isFinished) return 1;
 
     while (1) {
-      IOReturn result = executeRunLoop(10);
+      IOReturn result = executeRunLoop(timeout);
 
       if (isFinished) return 1;
       if (result == kCFRunLoopRunHandledSource) continue;
@@ -198,7 +199,6 @@ initializeSystemObject (void) {
 
 @implementation AsynchronousTask
 - (void) run
-  : (id) argument
   {
     logMessage(LOG_WARNING, "run method not overridden");
   }
@@ -207,15 +207,13 @@ initializeSystemObject (void) {
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
-    [self run:runArgument];
+    [self run];
     [pool release];
   }
 
 - (int) start
-  : (id) argument
   {
-    runArgument = argument;
-    [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:argument];
+    [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
     return 1;
   }
 @end

@@ -61,8 +61,7 @@
   data: (void *) dataPointer
   length: (size_t) dataLength;
 
-- (void) run
-  : (id) argument;
+- (void) run;
 @end
 
 struct BluetoothConnectionExtensionStruct {
@@ -99,7 +98,7 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
 
   if (target) {
     if ((result = [bcx->bluetoothDevice performSDPQuery:target]) == kIOReturnSuccess) {
-      if ([target wait]) {
+      if ([target wait:10]) {
         if ((result = [target getStatus]) == kIOReturnSuccess) {
           ok = 1;
         } else {
@@ -164,10 +163,12 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
           if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
             [bcx->rfcommDelegate setBluetoothConnectionExtension:bcx];
+
             bthGetSerialPortChannel(&channel, bcx);
+            logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
 
             if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
-              if ([bcx->rfcommDelegate start:nil]) {
+              if ([bcx->rfcommDelegate start]) {
                 return bcx;
               }
 
@@ -310,7 +311,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   }
 
 - (void) run
-  : (id) argument
   {
     logMessage(LOG_DEBUG, "RFCOMM channel delegate started");
 
