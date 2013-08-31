@@ -177,7 +177,7 @@ getUsbHidFeature (
                           report, buffer, size, timeout);
 }
 
-const GioMethods gioUsbMethods = {
+static const GioEndpointMethods gioUsbEndpointMethods = {
   .disconnectResource = disconnectUsbResource,
   .getResourceName = getUsbResourceName,
 
@@ -198,4 +198,49 @@ const GioMethods gioUsbMethods = {
 
   .setHidFeature = setUsbHidFeature,
   .getHidFeature = getUsbHidFeature
+};
+
+static int
+isUsbSupported (const GioDescriptor *descriptor) {
+  return descriptor->usb.channelDefinitions != NULL;
+}
+
+static int
+testUsbIdentifier (const char **identifier) {
+  return isUsbDevice(identifier);
+}
+
+static int
+connectUsbResource (
+  const char *identifier,
+  const GioDescriptor *descriptor,
+  GioEndpoint *endpoint
+) {
+  if ((endpoint->handle.usb.channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
+    endpoint->methods = &gioUsbEndpointMethods;
+    endpoint->options = descriptor->usb.options;
+
+    if (!endpoint->options.applicationData) {
+      endpoint->options.applicationData = endpoint->handle.usb.channel->definition.data;
+    }
+
+    {
+      UsbChannel *channel = endpoint->handle.usb.channel;
+      const SerialParameters *parameters = channel->definition.serial;
+
+      if (parameters) {
+        gioSetBytesPerSecond(endpoint, parameters);
+      }
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+const GioResourceEntry gioUsbResourceEntry = {
+  .isSupported = isUsbSupported,
+  .testIdentifier = testUsbIdentifier,
+  .connectResource = connectUsbResource
 };

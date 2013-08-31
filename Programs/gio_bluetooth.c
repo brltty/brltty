@@ -51,11 +51,42 @@ readBluetoothData (
                      initialTimeout, subsequentTimeout);
 }
 
-const GioMethods gioBluetoothMethods = {
+static const GioEndpointMethods gioBluetoothEndpointMethods = {
   .disconnectResource = disconnectBluetoothResource,
   .getResourceName = getBluetoothResourceName,
 
   .writeData = writeBluetoothData,
   .awaitInput = awaitBluetoothInput,
   .readData = readBluetoothData
+};
+
+static int
+isBluetoothSupported (const GioDescriptor *descriptor) {
+  return descriptor->bluetooth.channelNumber != 0;
+}
+
+static int
+testBluetoothIdentifier (const char **identifier) {
+  return isBluetoothDevice(identifier);
+}
+
+static int
+connectBluetoothResource (
+  const char *identifier,
+  const GioDescriptor *descriptor,
+  GioEndpoint *endpoint
+) {
+  if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
+    endpoint->methods = &gioBluetoothEndpointMethods;
+    endpoint->options = descriptor->bluetooth.options;
+    return 1;
+  }
+
+  return 0;
+}
+
+const GioResourceEntry gioBluetoothResourceEntry = {
+  .isSupported = isBluetoothSupported,
+  .testIdentifier = testBluetoothIdentifier,
+  .connectResource = connectBluetoothResource
 };

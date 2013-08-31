@@ -51,7 +51,7 @@ reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters
   return serialSetParameters(handle->serial.device, parameters);
 }
 
-const GioMethods gioSerialMethods = {
+static const GioEndpointMethods gioSerialEndpointMethods = {
   .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
@@ -59,4 +59,40 @@ const GioMethods gioSerialMethods = {
   .readData = readSerialData,
 
   .reconfigureResource = reconfigureSerialResource
+};
+
+static int
+isSerialSupported (const GioDescriptor *descriptor) {
+  return descriptor->serial.parameters != NULL;
+}
+
+static int
+testSerialIdentifier (const char **identifier) {
+  return isSerialDevice(identifier);
+}
+
+static int
+connectSerialResource (
+  const char *identifier,
+  const GioDescriptor *descriptor,
+  GioEndpoint *endpoint
+) {
+  if ((endpoint->handle.serial.device = serialOpenDevice(identifier))) {
+    if (serialSetParameters(endpoint->handle.serial.device, descriptor->serial.parameters)) {
+      endpoint->methods = &gioSerialEndpointMethods;
+      endpoint->options = descriptor->serial.options;
+      gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
+      return 1;
+    }
+
+    serialCloseDevice(endpoint->handle.serial.device);
+  }
+
+  return 0;
+}
+
+const GioResourceEntry gioSerialResourceEntry = {
+  .isSupported = isSerialSupported,
+  .testIdentifier = testSerialIdentifier,
+  .connectResource = connectSerialResource
 };

@@ -26,6 +26,13 @@
 #include "io_generic.h"
 #include "gio_internal.h"
 
+static const GioResourceEntry *const gioResourceTable[] = {
+  &gioSerialResourceEntry,
+  &gioUsbResourceEntry,
+  &gioBluetoothResourceEntry,
+  NULL
+};
+
 static void
 initializeOptions (GioOptions *options) {
   options->applicationData = NULL;
@@ -62,8 +69,8 @@ gioInitializeSerialParameters (SerialParameters *parameters) {
   parameters->flowControl = SERIAL_DEFAULT_FLOW_CONTROL;
 }
 
-static void
-setBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters) {
+void
+gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters) {
   endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
 }
 
@@ -84,60 +91,36 @@ gioConnectResource (
     endpoint->hidReportItems.address = NULL;
     endpoint->hidReportItems.size = 0;
 
-    if (descriptor->serial.parameters) {
-      if (isSerialDevice(&identifier)) {
-        if ((endpoint->handle.serial.device = serialOpenDevice(identifier))) {
-          if (serialSetParameters(endpoint->handle.serial.device, descriptor->serial.parameters)) {
-            endpoint->methods = &gioSerialMethods;
-            endpoint->options = descriptor->serial.options;
-            setBytesPerSecond(endpoint, descriptor->serial.parameters);
-            goto connectSucceeded;
-          }
+    {
+      const GioResourceEntry *const *resource = gioResourceTable;
 
-          serialCloseDevice(endpoint->handle.serial.device);
+      while (*resource) {
+        if ((*resource)->isSupported(descriptor)) {
+          if ((*resource)->testIdentifier(&identifier)) {
+            if (!(*resource)->connectResource(identifier, descriptor, endpoint)) goto connectFailed;
+
+            {
+              int delay = endpoint->options.readyDelay;
+              if (delay) approximateDelay(delay);
+            }
+
+            if (!gioDiscardInput(endpoint)) {
+              int originalErrno = errno;
+              gioDisconnectResource(endpoint);
+              errno = originalErrno;
+              return NULL;
+            }
+
+            return endpoint;
+          }
         }
 
-        goto connectFailed;
-      }
-    }
-
-    if (descriptor->usb.channelDefinitions) {
-      if (isUsbDevice(&identifier)) {
-        if ((endpoint->handle.usb.channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
-          endpoint->methods = &gioUsbMethods;
-          endpoint->options = descriptor->usb.options;
-
-          if (!endpoint->options.applicationData) {
-            endpoint->options.applicationData = endpoint->handle.usb.channel->definition.data;
-          }
-
-          {
-            UsbChannel *channel = endpoint->handle.usb.channel;
-            const SerialParameters *parameters = channel->definition.serial;
-            if (parameters) setBytesPerSecond(endpoint, parameters);
-          }
-
-          goto connectSucceeded;
-        }
-
-        goto connectFailed;
-      }
-    }
-
-    if (descriptor->bluetooth.channelNumber) {
-      if (isBluetoothDevice(&identifier)) {
-        if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
-          endpoint->methods = &gioBluetoothMethods;
-          endpoint->options = descriptor->bluetooth.options;
-          goto connectSucceeded;
-        }
-
-        goto connectFailed;
+        resource += 1;
       }
     }
 
     errno = ENOSYS;
-    logMessage(LOG_WARNING, "unsupported input/output resource identifier: %s", identifier);
+    logMessage(LOG_WARNING, "unsupported generic resource identifier: %s", identifier);
 
   connectFailed:
     free(endpoint);
@@ -146,21 +129,6 @@ gioConnectResource (
   }
 
   return NULL;
-
-connectSucceeded:
-  {
-    int delay = endpoint->options.readyDelay;
-    if (delay) approximateDelay(delay);
-  }
-
-  if (!gioDiscardInput(endpoint)) {
-    int originalErrno = errno;
-    gioDisconnectResource(endpoint);
-    errno = originalErrno;
-    return NULL;
-  }
-
-  return endpoint;
 }
 
 int
@@ -314,7 +282,7 @@ gioReconfigureResource (
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
   } else if (method(&endpoint->handle, parameters)) {
-    setBytesPerSecond(endpoint, parameters);
+    gioSetBytesPerSecond(endpoint, parameters);
     ok = 1;
   }
 
