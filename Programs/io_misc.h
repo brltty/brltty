@@ -41,6 +41,7 @@ typedef int socklen_t;
 extern "C" {
 #endif /* __cplusplus */
 
+extern void closeFile (FileDescriptor *fileDescriptor);
 extern int awaitFileInput (FileDescriptor fileDescriptor, int timeout);
 extern int awaitFileOutput (FileDescriptor fileDescriptor, int timeout);
 
@@ -52,6 +53,7 @@ extern ssize_t readFile (
 extern ssize_t writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size);
 
 #ifdef IO_HAVE_SOCKETS
+extern void closeSocket (SocketDescriptor *socketDescriptor);
 extern int awaitSocketInput (SocketDescriptor socketDescriptor, int timeout);
 extern int awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout);
 

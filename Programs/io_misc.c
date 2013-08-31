@@ -277,6 +277,14 @@ makeFileHandle (InputOutputHandle *ioh, FileDescriptor fileDescriptor) {
   ioh->descriptor.file = fileDescriptor;
 }
 
+void
+closeFile (FileDescriptor *fileDescriptor) {
+  if (*fileDescriptor != INVALID_FILE_DESCRIPTOR) {
+    closeFileDescriptor(*fileDescriptor);
+    *fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  }
+}
+
 int
 awaitFileInput (FileDescriptor fileDescriptor, int timeout) {
   InputOutputHandle ioh;
@@ -344,6 +352,14 @@ static void
 makeSocketHandle (InputOutputHandle *ioh, SocketDescriptor socketDescriptor) {
   ioh->methods = &socketMethods;
   ioh->descriptor.socket = socketDescriptor;
+}
+
+void
+closeSocket (SocketDescriptor *socketDescriptor) {
+  if (*socketDescriptor != INVALID_SOCKET_DESCRIPTOR) {
+    closeSocketDescriptor(*socketDescriptor);
+    *socketDescriptor = INVALID_SOCKET_DESCRIPTOR;
+  }
 }
 
 int
