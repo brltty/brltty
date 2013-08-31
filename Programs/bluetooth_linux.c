@@ -138,7 +138,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
       bthMakeAddress(&address, bda);
       memset(buffer, 0, sizeof(buffer));
-      result = hci_read_remote_name(socket, &address, sizeof(buffer), buffer, 0);
+      result = hci_read_remote_name(socket, &address, sizeof(buffer), buffer, timeout);
 
       if (result >= 0) {
         if (!(name = strdup(buffer))) logMallocError();
