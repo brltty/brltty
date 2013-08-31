@@ -112,7 +112,7 @@ bthDestroyBluetoothDevice (BluetoothConnectionExtension *bcx) {
 
 static void
 bthInitializeInputPipe (BluetoothConnectionExtension *bcx) {
-  bcx->inputPipe[0] = bcx->inputPipe[1] = -1;
+  bcx->inputPipe[0] = bcx->inputPipe[1] = INVALID_FILE_DESCRIPTOR;
 }
 
 static void
@@ -121,14 +121,9 @@ bthDestroyInputPipe (BluetoothConnectionExtension *bcx) {
   const int *end = fileDescriptor + ARRAY_COUNT(bcx->inputPipe);
 
   while (fileDescriptor < end) {
-    if (*fileDescriptor != -1) {
-      close(*fileDescriptor);
-    }
-
+    closeFile(fileDescriptor);
     fileDescriptor += 1;
   }
-
-  bthInitializeInputPipe(bcx);
 }
 
 static void
