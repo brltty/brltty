@@ -23,6 +23,8 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
 
 #include "log.h"
@@ -46,6 +48,132 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
   }
 }
 
+static int
+bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidBytes) {
+  int found = 0;
+
+#ifdef HAVE_LIBBLUETOOTH
+  sdp_session_t *session = sdp_connect(BDADDR_ANY, address, SDP_RETRY_IF_BUSY);;
+
+  if (session) {
+    uuid_t uuid;
+    sdp_list_t *searchList;
+
+    sdp_uuid128_create(&uuid, uuidBytes);
+    searchList = sdp_list_append(NULL, &uuid);
+
+    if (searchList) {
+      uint32_t attributesRange = 0X0000FFFF;
+      sdp_list_t *attributesList = sdp_list_append(NULL, &attributesRange);
+
+      if (attributesList) {
+        sdp_list_t *responseList = NULL;
+        int result = sdp_service_search_attr_req(session, searchList,
+                                                 SDP_ATTR_REQ_RANGE, attributesList,
+                                                 &responseList);
+
+        if (!result) {
+          int stop = 0;
+          sdp_list_t *responseElement = responseList;
+
+          while (responseElement) {
+            sdp_record_t *record = (sdp_record_t *)responseElement->data;
+
+            if (record) {
+              sdp_list_t *protocolsList;
+
+              if (!(sdp_get_access_protos(record, &protocolsList))) {
+                sdp_list_t *protocolsElement = protocolsList;
+
+                while (protocolsElement) {
+                  sdp_list_t *protocolList = (sdp_list_t *)protocolsElement->data;
+                  sdp_list_t *protocolElement = protocolList;
+
+                  while (protocolElement) {
+                    sdp_data_t *dataList = (sdp_data_t *)protocolElement->data;
+                    sdp_data_t *dataElement = dataList;
+                    unsigned int dataIndex = 0;
+
+                    while (dataElement) {
+                      int ok = 0;
+
+                      switch (dataIndex) {
+                        case 0:
+                          if (SDP_IS_UUID(dataElement->dtd)) ok = 1;
+                          break;
+
+                        case 1:
+                          if (dataElement->dtd == SDP_UINT8) {
+                            ok = 1;
+                            stop = 1;
+
+                            *channel = dataElement->val.uint8;
+                            found = 1;
+                          }
+                          break;
+
+                        default:
+                          break;
+                      }
+
+                      if (!ok) break;
+                      if (stop) break;
+                      dataElement = dataElement->next;
+                      dataIndex += 1;
+                    }
+
+                  //sdp_data_free(dataList);
+                    if (stop) break;
+                    protocolElement = protocolElement->next;
+                  }
+
+                  sdp_list_free(protocolList, NULL);
+                  if (stop) break;
+                  protocolsElement = protocolsElement->next;
+                }
+
+                sdp_list_free(protocolsList, NULL);
+              } else {
+                logMallocError();
+                stop = 1;
+              }
+
+              sdp_record_free(record);
+            }
+
+            if (stop) break;
+            responseElement = responseElement->next;
+          }
+
+          sdp_list_free(responseList, NULL);
+        } else {
+          logSystemError("sdp_service_search_attr_req");
+        }
+
+        sdp_list_free(attributesList, NULL);
+      } else {
+        logMallocError();
+      }
+
+      sdp_list_free(searchList, NULL);
+    } else {
+      logMallocError();
+    }
+
+    sdp_close(session);
+  } else {
+    logSystemError("sdp_connect");
+  }
+#endif /* HAVE_LIBBLUETOOTH */
+
+  return found;
+}
+
+static int
+bthGetSerialPortChannel (uint8_t *channel, const bdaddr_t *address) {
+  return bthGetServiceChannel(channel, address, uuidBytes_serialPortProfile);
+}
+
 BluetoothConnectionExtension *
 bthConnect (uint64_t bda, uint8_t channel, int timeout) {
   BluetoothConnectionExtension *bcx;
@@ -66,6 +194,8 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
         bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
         if (setBlockingIo(bcx->socket, 0)) {
+          bthGetSerialPortChannel(&channel, &bcx->remote.rc_bdaddr);
+
           if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
             return bcx;
           } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
