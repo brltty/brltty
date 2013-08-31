@@ -1304,7 +1304,7 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
       AC_CHECK_HEADER([usb.h], [dnl
          usb_package="libusb"
          usb_libs="-lusb"
-      ])
+      ], [], [-])
       ;;
 ])
 
