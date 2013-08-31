@@ -75,6 +75,21 @@ gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters)
   endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
 }
 
+static int
+gioFinishEndpoint (GioEndpoint *endpoint) {
+  {
+    int delay = endpoint->options.readyDelay;
+
+    if (delay) asyncWait(delay);
+  }
+
+  if (gioDiscardInput(endpoint)) {
+    return 1;
+  }
+
+  return 0;
+}
+
 GioEndpoint *
 gioConnectResource (
   const char *identifier,
@@ -98,23 +113,26 @@ gioConnectResource (
       while (*resource) {
         if ((*resource)->isSupported(descriptor)) {
           if ((*resource)->testIdentifier(&identifier)) {
-            if (!(*resource)->connectResource(identifier, descriptor, endpoint)) {
+            endpoint->options = *(*resource)->getOptions(descriptor);
+            endpoint->methods = (*resource)->getEndpointMethods();
+
+            if (!(endpoint->handle = (*resource)->connectResource(identifier, descriptor))) {
               goto connectFailed;
             }
 
-            {
-              int delay = endpoint->options.readyDelay;
-              if (delay) asyncWait(delay);
+            if ((*resource)->finishEndpoint(endpoint, descriptor)) {
+              if (gioFinishEndpoint(endpoint)) {
+                return endpoint;
+              }
             }
 
-            if (!gioDiscardInput(endpoint)) {
+            {
               int originalErrno = errno;
               gioDisconnectResource(endpoint);
               errno = originalErrno;
-              return NULL;
             }
 
-            return endpoint;
+            return NULL;
           }
         }
 

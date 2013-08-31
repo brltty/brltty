@@ -218,11 +218,20 @@ testUsbIdentifier (const char **identifier) {
   return isUsbDevice(identifier);
 }
 
-static int
+static const GioOptions *
+getUsbOptions (const GioDescriptor *descriptor) {
+  return &descriptor->usb.options;
+}
+
+static const GioEndpointMethods *
+getUsbEndpointMethods (void) {
+  return &gioUsbEndpointMethods;
+}
+
+static GioHandle *
 connectUsbResource (
   const char *identifier,
-  const GioDescriptor *descriptor,
-  GioEndpoint *endpoint
+  const GioDescriptor *descriptor
 ) {
   GioHandle *handle = malloc(sizeof(*handle));
 
@@ -230,24 +239,7 @@ connectUsbResource (
     memset(handle, 0,sizeof(*handle));
 
     if ((handle->channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
-      endpoint->handle = handle;
-      endpoint->methods = &gioUsbEndpointMethods;
-      endpoint->options = descriptor->usb.options;
-
-      if (!endpoint->options.applicationData) {
-        endpoint->options.applicationData = endpoint->handle->channel->definition.data;
-      }
-
-      {
-        UsbChannel *channel = endpoint->handle->channel;
-        const SerialParameters *parameters = channel->definition.serial;
-
-        if (parameters) {
-          gioSetBytesPerSecond(endpoint, parameters);
-        }
-      }
-
-      return 1;
+      return handle;
     }
 
     free(handle);
@@ -255,11 +247,36 @@ connectUsbResource (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
+}
+
+static int
+finishUsbEndpoint (
+  GioEndpoint *endpoint,
+  const GioDescriptor *descriptor
+) {
+  UsbChannel *channel = endpoint->handle->channel;
+
+  if (!endpoint->options.applicationData) {
+    endpoint->options.applicationData = channel->definition.data;
+  }
+
+  {
+    const SerialParameters *parameters = channel->definition.serial;
+
+    if (parameters) {
+      gioSetBytesPerSecond(endpoint, parameters);
+    }
+  }
+
+  return 1;
 }
 
 const GioResourceEntry gioUsbResourceEntry = {
   .isSupported = isUsbSupported,
   .testIdentifier = testUsbIdentifier,
-  .connectResource = connectUsbResource
+  .getOptions = getUsbOptions,
+  .getEndpointMethods = getUsbEndpointMethods,
+  .connectResource = connectUsbResource,
+  .finishEndpoint = finishUsbEndpoint
 };

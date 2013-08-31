@@ -80,11 +80,20 @@ testSerialIdentifier (const char **identifier) {
   return isSerialDevice(identifier);
 }
 
-static int
+static const GioOptions *
+getSerialOptions (const GioDescriptor *descriptor) {
+  return &descriptor->serial.options;
+}
+
+static const GioEndpointMethods *
+getSerialEndpointMethods (void) {
+  return &gioSerialEndpointMethods;
+}
+
+static GioHandle *
 connectSerialResource (
   const char *identifier,
-  const GioDescriptor *descriptor,
-  GioEndpoint *endpoint
+  const GioDescriptor *descriptor
 ) {
   GioHandle *handle = malloc(sizeof(*handle));
 
@@ -93,12 +102,7 @@ connectSerialResource (
 
     if ((handle->device = serialOpenDevice(identifier))) {
       if (serialSetParameters(handle->device, descriptor->serial.parameters)) {
-        endpoint->handle = handle;
-        endpoint->methods = &gioSerialEndpointMethods;
-        endpoint->options = descriptor->serial.options;
-
-        gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
-        return 1;
+        return handle;
       }
 
       serialCloseDevice(handle->device);
@@ -109,11 +113,23 @@ connectSerialResource (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
+}
+
+static int
+finishSerialEndpoint (
+  GioEndpoint *endpoint,
+  const GioDescriptor *descriptor
+) {
+  gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
+  return 1;
 }
 
 const GioResourceEntry gioSerialResourceEntry = {
   .isSupported = isSerialSupported,
   .testIdentifier = testSerialIdentifier,
-  .connectResource = connectSerialResource
+  .getOptions = getSerialOptions,
+  .getEndpointMethods = getSerialEndpointMethods,
+  .connectResource = connectSerialResource,
+  .finishEndpoint = finishSerialEndpoint
 };

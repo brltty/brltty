@@ -79,11 +79,20 @@ testBluetoothIdentifier (const char **identifier) {
   return isBluetoothDevice(identifier);
 }
 
-static int
+static const GioOptions *
+getBluetoothOptions (const GioDescriptor *descriptor) {
+  return &descriptor->bluetooth.options;
+}
+
+static const GioEndpointMethods *
+getBluetoothEndpointMethods (void) {
+  return &gioBluetoothEndpointMethods;
+}
+
+static GioHandle *
 connectBluetoothResource (
   const char *identifier,
-  const GioDescriptor *descriptor,
-  GioEndpoint *endpoint
+  const GioDescriptor *descriptor
 ) {
   GioHandle *handle = malloc(sizeof(*handle));
 
@@ -91,11 +100,7 @@ connectBluetoothResource (
     memset(handle, 0,sizeof(*handle));
 
     if ((handle->connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
-      endpoint->handle = handle;
-      endpoint->methods = &gioBluetoothEndpointMethods;
-      endpoint->options = descriptor->bluetooth.options;
-
-      return 1;
+      return handle;
     }
 
     free(handle);
@@ -103,11 +108,22 @@ connectBluetoothResource (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
+}
+
+static int
+finishBluetoothEndpoint (
+  GioEndpoint *endpoint,
+  const GioDescriptor *descriptor
+) {
+  return 1;
 }
 
 const GioResourceEntry gioBluetoothResourceEntry = {
   .isSupported = isBluetoothSupported,
   .testIdentifier = testBluetoothIdentifier,
-  .connectResource = connectBluetoothResource
+  .getOptions = getBluetoothOptions,
+  .getEndpointMethods = getBluetoothEndpointMethods,
+  .connectResource = connectBluetoothResource,
+  .finishEndpoint = finishBluetoothEndpoint
 };

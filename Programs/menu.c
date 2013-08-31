@@ -287,7 +287,7 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 
 static const char *
 getValue_numeric (const MenuItem *item) {
-  return formatValue(item->menu, "%u", *item->setting);;
+  return formatValue(item->menu, "%u", *item->setting);
 }
 
 static const MenuItemMethods menuItemMethods_numeric = {

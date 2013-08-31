@@ -30,22 +30,6 @@ typedef struct {
   size_t size;
 } GioHidReportItemsData;
 
-typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
-
-typedef int GioTestIdentifierMethod (const char **identifier);
-
-typedef int GioConnectResourceMethod (
-  const char *identifier,
-  const GioDescriptor *descriptor,
-  GioEndpoint *endpoint
-);
-
-typedef struct {
-  GioIsSupportedMethod *isSupported;
-  GioTestIdentifierMethod *testIdentifier;
-  GioConnectResourceMethod *connectResource;
-} GioResourceEntry;
-
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
@@ -134,6 +118,33 @@ struct GioEndpointStruct {
     unsigned char buffer[0X40];
   } input;
 };
+
+typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
+
+typedef int GioTestIdentifierMethod (const char **identifier);
+
+typedef const GioOptions *GioGetOptionsMethod (const GioDescriptor *descriptor);
+
+typedef const GioEndpointMethods *GioGetEndpointMethodsMethod (void);
+
+typedef GioHandle *GioConnectResourceMethod (
+  const char *identifier,
+  const GioDescriptor *descriptor
+);
+
+typedef int GioFinishEndpointMethod (
+  GioEndpoint *endpoint,
+  const GioDescriptor *descriptor
+);
+
+typedef struct {
+  GioIsSupportedMethod *isSupported;
+  GioTestIdentifierMethod *testIdentifier;
+  GioGetOptionsMethod *getOptions;
+  GioGetEndpointMethodsMethod *getEndpointMethods;
+  GioConnectResourceMethod *connectResource;
+  GioFinishEndpointMethod *finishEndpoint;
+} GioResourceEntry;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
 

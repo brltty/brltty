@@ -97,7 +97,7 @@ writeBytes (NoteDevice *device, const unsigned char *address, size_t length) {
 static int
 writeSample (NoteDevice *device, int amplitude) {
   PcmAmplitudeFormat format = device->amplitudeFormat;
-  size_t length = getPcmSampleLength(format);;
+  size_t length = getPcmSampleLength(format);
 
   if (length) {
     unsigned char buffer[length];

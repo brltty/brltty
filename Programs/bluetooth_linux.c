@@ -53,7 +53,7 @@ bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uui
   int found = 0;
 
 #ifdef HAVE_LIBBLUETOOTH
-  sdp_session_t *session = sdp_connect(BDADDR_ANY, address, SDP_RETRY_IF_BUSY);;
+  sdp_session_t *session = sdp_connect(BDADDR_ANY, address, SDP_RETRY_IF_BUSY);
 
   if (session) {
     uuid_t uuid;
