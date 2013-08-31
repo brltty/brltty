@@ -713,7 +713,7 @@ gioTellResource (
 
   return method(&endpoint->handle, recipient, type,
                 request, value, index, data, size,
-                endpoint->options.outputTimeout);
+                endpoint->options.requestTimeout);
 }
 
 ssize_t
@@ -732,7 +732,7 @@ gioAskResource (
 
   return method(&endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
-                endpoint->options.inputTimeout);
+                endpoint->options.requestTimeout);
 }
 
 size_t
@@ -746,7 +746,7 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
     }
 
     if (!method(&endpoint->handle, &endpoint->hidReportItems,
-                endpoint->options.inputTimeout)) {
+                endpoint->options.requestTimeout)) {
       return 0;
     }
   }
@@ -776,7 +776,7 @@ gioSetHidReport (
   }
 
   return method(&endpoint->handle, report,
-                data, size, endpoint->options.outputTimeout);
+                data, size, endpoint->options.requestTimeout);
 }
 
 ssize_t
@@ -792,7 +792,7 @@ gioGetHidReport (
   }
 
   return method(&endpoint->handle, report,
-                buffer, size, endpoint->options.inputTimeout);
+                buffer, size, endpoint->options.requestTimeout);
 }
 
 ssize_t
@@ -808,7 +808,7 @@ gioSetHidFeature (
   }
 
   return method(&endpoint->handle, report,
-                data, size, endpoint->options.outputTimeout);
+                data, size, endpoint->options.requestTimeout);
 }
 
 ssize_t
@@ -824,5 +824,5 @@ gioGetHidFeature (
   }
 
   return method(&endpoint->handle, report,
-                buffer, size, endpoint->options.inputTimeout);
+                buffer, size, endpoint->options.requestTimeout);
 }
