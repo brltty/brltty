@@ -162,19 +162,19 @@ FM_LIBS = @fm_libs@
 
 SERIAL_PACKAGE = @serial_package@
 SERIAL_OBJECT = serial_$(SERIAL_PACKAGE)
-SERIAL_OBJECTS = serial.$O $(SERIAL_OBJECT).$O
+SERIAL_OBJECTS = gio_serial.$O serial.$O $(SERIAL_OBJECT).$O
 SERIAL_INCLUDES = @serial_includes@
 SERIAL_LIBS = @serial_libs@
 
 USB_PACKAGE = @usb_package@
 USB_OBJECT = usb_$(USB_PACKAGE)
-USB_OBJECTS = usb.$O usb_hid.$O usb_serial.$O $(USB_OBJECT).$O
+USB_OBJECTS = gio_usb.$O usb.$O usb_hid.$O usb_serial.$O $(USB_OBJECT).$O
 USB_INCLUDES = @usb_includes@
 USB_LIBS = @usb_libs@
 
 BLUETOOTH_PACKAGE = @bluetooth_package@
 BLUETOOTH_OBJECT = bluetooth_$(BLUETOOTH_PACKAGE)
-BLUETOOTH_OBJECTS = bluetooth.$O bluetooth_names.$O $(BLUETOOTH_OBJECT).$O
+BLUETOOTH_OBJECTS = gio_bluetooth.$O bluetooth.$O bluetooth_names.$O $(BLUETOOTH_OBJECT).$O
 BLUETOOTH_INCLUDES = @bluetooth_includes@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
@@ -191,7 +191,7 @@ SYSTEM_INCLUDES = @system_includes@
 SYSTEM_LIBS = @system_libs@
 
 MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
-IO_OBJECTS = io_generic.$O io_misc.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
+IO_OBJECTS = io_misc.$O gio.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
 TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
 BASE_OBJECTS = log.$O file.$O device.$O parse.$O timing.$O async.$O queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
 OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)

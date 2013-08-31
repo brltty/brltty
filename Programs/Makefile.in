@@ -163,11 +163,20 @@ $(SYSTEM_OBJECT).$O:
 
 ###############################################################################
 
-io_generic.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_generic.c
-
 io_misc.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_misc.c
+
+gio.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio.c
+
+gio_serial.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_serial.c
+
+gio_usb.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_usb.c
+
+gio_bluetooth.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_bluetooth.c
 
 ###############################################################################
 
