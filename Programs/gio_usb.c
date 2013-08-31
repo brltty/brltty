@@ -112,7 +112,7 @@ askUsbResource (
 }
 
 static int
-getUsbHidReportItems (GioHandle *handle, HidReportItemsData *items, int timeout) {
+getUsbHidReportItems (GioHandle *handle, GioHidReportItemsData *items, int timeout) {
   UsbChannel *channel = handle->usb.channel;
   unsigned char *address;
   ssize_t result = usbHidGetItems(channel->device,
@@ -126,7 +126,7 @@ getUsbHidReportItems (GioHandle *handle, HidReportItemsData *items, int timeout)
 }
 
 static size_t
-getUsbHidReportSize (const HidReportItemsData *items, unsigned char report) {
+getUsbHidReportSize (const GioHidReportItemsData *items, unsigned char report) {
   size_t size;
   if (usbHidGetReportSize(items->address, items->size, report, &size)) return size;
   errno = ENOSYS;

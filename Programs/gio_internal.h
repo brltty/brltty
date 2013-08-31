@@ -44,80 +44,80 @@ typedef union {
 typedef struct {
   void *address;
   size_t size;
-} HidReportItemsData;
+} GioHidReportItemsData;
 
-typedef int DisconnectResourceMethod (GioHandle *handle);
+typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
-typedef char *GetResourceNameMethod (GioHandle *handle, int timeout);
+typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
 
-typedef ssize_t WriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
+typedef ssize_t GioWriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
 
-typedef int AwaitInputMethod (GioHandle *handle, int timeout);
+typedef int GioAwaitInputMethod (GioHandle *handle, int timeout);
 
-typedef ssize_t ReadDataMethod (
+typedef ssize_t GioReadDataMethod (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 
-typedef int ReconfigureResourceMethod (GioHandle *handle, const SerialParameters *parameters);
+typedef int GioReconfigureResourceMethod (GioHandle *handle, const SerialParameters *parameters);
 
-typedef ssize_t TellResourceMethod (
+typedef ssize_t GioTellResourceMethod (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 );
 
-typedef ssize_t AskResourceMethod (
+typedef ssize_t GioAskResourceMethod (
   GioHandle *handle, uint8_t recipient, uint8_t type,
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
 );
 
-typedef int GetHidReportItemsMethod (GioHandle *handle, HidReportItemsData *items, int timeout);
+typedef int GioGetHidReportItemsMethod (GioHandle *handle, GioHidReportItemsData *items, int timeout);
 
-typedef size_t GetHidReportSizeMethod (const HidReportItemsData *items, unsigned char report);
+typedef size_t GioGetHidReportSizeMethod (const GioHidReportItemsData *items, unsigned char report);
 
-typedef ssize_t SetHidReportMethod (
+typedef ssize_t GioSetHidReportMethod (
   GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
-typedef ssize_t GetHidReportMethod (
+typedef ssize_t GioGetHidReportMethod (
   GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
-typedef ssize_t SetHidFeatureMethod (
+typedef ssize_t GioSetHidFeatureMethod (
   GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 );
 
-typedef ssize_t GetHidFeatureMethod (
+typedef ssize_t GioGetHidFeatureMethod (
   GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 );
 
 typedef struct {
-  DisconnectResourceMethod *disconnectResource;
-  GetResourceNameMethod *getResourceName;
+  GioDisconnectResourceMethod *disconnectResource;
+  GioGetResourceNameMethod *getResourceName;
 
-  WriteDataMethod *writeData;
-  AwaitInputMethod *awaitInput;
-  ReadDataMethod *readData;
+  GioWriteDataMethod *writeData;
+  GioAwaitInputMethod *awaitInput;
+  GioReadDataMethod *readData;
 
-  ReconfigureResourceMethod *reconfigureResource;
+  GioReconfigureResourceMethod *reconfigureResource;
 
-  TellResourceMethod *tellResource;
-  AskResourceMethod *askResource;
+  GioTellResourceMethod *tellResource;
+  GioAskResourceMethod *askResource;
 
-  GetHidReportItemsMethod *getHidReportItems;
-  GetHidReportSizeMethod *getHidReportSize;
+  GioGetHidReportItemsMethod *getHidReportItems;
+  GioGetHidReportSizeMethod *getHidReportSize;
 
-  SetHidReportMethod *setHidReport;
-  GetHidReportMethod *getHidReport;
+  GioSetHidReportMethod *setHidReport;
+  GioGetHidReportMethod *getHidReport;
 
-  SetHidFeatureMethod *setHidFeature;
-  GetHidFeatureMethod *getHidFeature;
+  GioSetHidFeatureMethod *setHidFeature;
+  GioGetHidFeatureMethod *getHidFeature;
 } GioMethods;
 
 struct GioEndpointStruct {
@@ -125,7 +125,7 @@ struct GioEndpointStruct {
   const GioMethods *methods;
   GioOptions options;
   unsigned int bytesPerSecond;
-  HidReportItemsData hidReportItems;
+  GioHidReportItemsData hidReportItems;
 
   struct {
     int error;

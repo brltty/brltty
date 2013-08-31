@@ -166,7 +166,7 @@ connectSucceeded:
 int
 gioDisconnectResource (GioEndpoint *endpoint) {
   int ok = 0;
-  DisconnectResourceMethod *method = endpoint->methods->disconnectResource;
+  GioDisconnectResourceMethod *method = endpoint->methods->disconnectResource;
 
   if (!method) {
     logUnsupportedOperation("disconnectResource");
@@ -182,7 +182,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
 char *
 gioGetResourceName (GioEndpoint *endpoint) {
   char *name = NULL;
-  GetResourceNameMethod *method = endpoint->methods->getResourceName;
+  GioGetResourceNameMethod *method = endpoint->methods->getResourceName;
 
   if (!method) {
     logUnsupportedOperation("getResourceName");
@@ -200,7 +200,7 @@ gioGetApplicationData (GioEndpoint *endpoint) {
 
 ssize_t
 gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
-  WriteDataMethod *method = endpoint->methods->writeData;
+  GioWriteDataMethod *method = endpoint->methods->writeData;
 
   if (!method) {
     logUnsupportedOperation("writeData");
@@ -213,7 +213,7 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 
 int
 gioAwaitInput (GioEndpoint *endpoint, int timeout) {
-  AwaitInputMethod *method = endpoint->methods->awaitInput;
+  GioAwaitInputMethod *method = endpoint->methods->awaitInput;
 
   if (!method) {
     logUnsupportedOperation("awaitInput");
@@ -227,7 +227,7 @@ gioAwaitInput (GioEndpoint *endpoint, int timeout) {
 
 ssize_t
 gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
-  ReadDataMethod *method = endpoint->methods->readData;
+  GioReadDataMethod *method = endpoint->methods->readData;
 
   if (!method) {
     logUnsupportedOperation("readData");
@@ -309,7 +309,7 @@ gioReconfigureResource (
   const SerialParameters *parameters
 ) {
   int ok = 0;
-  ReconfigureResourceMethod *method = endpoint->methods->reconfigureResource;
+  GioReconfigureResourceMethod *method = endpoint->methods->reconfigureResource;
 
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
@@ -338,7 +338,7 @@ gioTellResource (
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 ) {
-  TellResourceMethod *method = endpoint->methods->tellResource;
+  GioTellResourceMethod *method = endpoint->methods->tellResource;
 
   if (!method) {
     logUnsupportedOperation("tellResource");
@@ -357,7 +357,7 @@ gioAskResource (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 ) {
-  AskResourceMethod *method = endpoint->methods->askResource;
+  GioAskResourceMethod *method = endpoint->methods->askResource;
 
   if (!method) {
     logUnsupportedOperation("askResource");
@@ -372,7 +372,7 @@ gioAskResource (
 size_t
 gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
   if (!endpoint->hidReportItems.address) {
-    GetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
+    GioGetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
 
     if (!method) {
       logUnsupportedOperation("getHidReportItems");
@@ -386,7 +386,7 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
   }
 
   {
-    GetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
+    GioGetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
 
     if (!method) {
       logUnsupportedOperation("getHidReportSize");
@@ -402,7 +402,7 @@ gioSetHidReport (
   GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 ) {
-  SetHidReportMethod *method = endpoint->methods->setHidReport;
+  GioSetHidReportMethod *method = endpoint->methods->setHidReport;
 
   if (!method) {
     logUnsupportedOperation("setHidReport");
@@ -418,7 +418,7 @@ gioGetHidReport (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 ) {
-  GetHidReportMethod *method = endpoint->methods->getHidReport;
+  GioGetHidReportMethod *method = endpoint->methods->getHidReport;
 
   if (!method) {
     logUnsupportedOperation("getHidReport");
@@ -434,7 +434,7 @@ gioSetHidFeature (
   GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
 ) {
-  SetHidFeatureMethod *method = endpoint->methods->setHidFeature;
+  GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
 
   if (!method) {
     logUnsupportedOperation("setHidFeature");
@@ -450,7 +450,7 @@ gioGetHidFeature (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 ) {
-  GetHidFeatureMethod *method = endpoint->methods->getHidFeature;
+  GioGetHidFeatureMethod *method = endpoint->methods->getHidFeature;
 
   if (!method) {
     logUnsupportedOperation("getHidFeature");
