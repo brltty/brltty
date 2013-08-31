@@ -983,7 +983,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    darwin*)
       system_package="darwin"
       system_includes="-x objective-c"
-      system_libs="-lIOKit -framework CoreFoundation -lobjc"
+      system_libs="-lIOKit -framework Foundation -framework CoreFoundation -lobjc"
       ;;
    hpux*)
       if test -d /opt/audio/include
@@ -1274,6 +1274,7 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
       ;;
    darwin*)
       usb_package="darwin"
+      usb_includes="-x objective-c"
       ;;
    elf*)
       usb_package="grub"
