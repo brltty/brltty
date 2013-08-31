@@ -90,7 +90,7 @@ static void
 bthDestroyRfcommDelegate (BluetoothConnectionExtension *bcx) {
   if (bcx->rfcommDelegate) {
     [bcx->rfcommDelegate stop];
-  //[bcx->rfcommDelegate wait:5];
+    [bcx->rfcommDelegate wait:5];
     [bcx->rfcommDelegate release];
     bthInitializeRfcommDelegate(bcx);
   }

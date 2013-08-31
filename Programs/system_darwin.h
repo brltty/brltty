@@ -46,8 +46,8 @@ extern void setDarwinSystemError (IOReturn result);
 @end
 
 @interface AsynchronousTask: AsynchronousResult
-@property (assign, readonly) NSThread *thread;
-@property (assign, readonly) CFRunLoopRef runLoop;
+@property (assign, readonly) NSThread *taskThread;
+@property (assign, readonly) CFRunLoopRef taskRunLoop;
 
 - (IOReturn) run;
 

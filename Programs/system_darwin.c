@@ -202,20 +202,24 @@ initializeSystemObject (void) {
 @end
 
 @interface AsynchronousTask ()
-@property (assign, readwrite) NSThread *thread;
-@property (assign, readwrite) CFRunLoopRef runLoop;
+@property (assign, readwrite) NSThread *taskThread;
+@property (assign, readwrite) CFRunLoopRef taskRunLoop;
 
-@property (retain) NSCondition *condition;
+@property (retain) NSCondition *startSynchronizer;
+@property (retain) NSThread *resultThread;
+
+- (void) taskFinished;
 
 - (void) main;
 
-- (void) done;
+- (void) endTask;
 @end
 
 @implementation AsynchronousTask
-@synthesize thread;
-@synthesize runLoop;
-@synthesize condition;
+@synthesize taskThread;
+@synthesize taskRunLoop;
+@synthesize startSynchronizer;
+@synthesize resultThread;
 
 - (IOReturn) run
   {
@@ -223,42 +227,52 @@ initializeSystemObject (void) {
     return kIOReturnSuccess;
   }
 
+- (void) taskFinished
+  {
+    self.resultThread = nil;
+  }
+
 - (void) main
   {
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
-    [self.condition lock];
-    self.thread = [NSThread currentThread];
-    self.runLoop = CFRunLoopGetCurrent();
-    [self.condition signal];
-    [self.condition unlock];
+    [self.startSynchronizer lock];
+    self.taskThread = [NSThread currentThread];
+    self.taskRunLoop = CFRunLoopGetCurrent();
+    [self.startSynchronizer signal];
+    [self.startSynchronizer unlock];
 
     [self setStatus:[self run]];
+    [self performSelector:@selector(taskFinished) onThread:self.resultThread withObject:nil waitUntilDone:0];
+
+    self.taskThread = nil;
     [pool drain];
   }
 
 - (int) start
   {
-    if ((self.condition = [NSCondition new])) {
-      [self.condition lock];
-      [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
-      [self.condition wait];
-      [self.condition unlock];
+    if ((self.startSynchronizer = [NSCondition new])) {
+      self.resultThread = [NSThread currentThread];
 
-      self.condition = nil;
+      [self.startSynchronizer lock];
+      [NSThread detachNewThreadSelector:@selector(main) toTarget:self withObject:nil];
+      [self.startSynchronizer wait];
+      [self.startSynchronizer unlock];
+
+      self.startSynchronizer = nil;
       return 1;
     }
 
     return 0;
   }
 
-- (void) done
+- (void) endTask
   {
-    CFRunLoopStop(self.runLoop);
+    CFRunLoopStop(self.taskRunLoop);
   }
 
 - (void) stop
   {
-    [self performSelector:@selector(done) onThread:self.thread withObject:nil waitUntilDone:0];
+    [self performSelector:@selector(endTask) onThread:self.taskThread withObject:nil waitUntilDone:0];
   }
 @end
