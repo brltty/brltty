@@ -500,6 +500,7 @@ endword ngham = Langham
 always ghead 1245-125-2-145
 always gheart 1245-125-15-345-2345
 midendword ghill = dunghill
+midendword ghof 1245-125-12356 Berghoffer
 midendword ghorn = bighorn
 always ghouse 1245-125-1256-234-15
 always ghz = (gigahertz)
@@ -813,6 +814,7 @@ word phoneme =
 word phonemes =
 word phoney =
 begword phonemi = phonemic
+begword phospho = phosphofructokinase
 sufword picoult 1234-24-14-1256-123-2345 Jodi Picoult, an author
 begword pinea 1234-35-15-1 pineapple
 word pineal 1234-35-2-123
@@ -1019,6 +1021,7 @@ always st 34
 always sth 234-1456
 always sthe 234-2346
 midendword sthead 34-125-2-145 masthead
+midendword sthof 34-125-12356 Westhoff
 always sthood 34-125-135-135-145 priesthood
 word still 34
 always stime 234-5-2345
@@ -1054,6 +1057,7 @@ midendword theresque 2346-1235-15-234-12345-136-15 Wertheresque
 always thill 2345-125-24-123-123 anthill
 before apostrophe word this 1456-24-234 this'll
 word this 1456
+midendword thof 2345-125-12356 Richthofen
 word thyself 1456-13456-124
 word thyf =
 always tnam =
