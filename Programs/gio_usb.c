@@ -18,27 +18,35 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <errno.h>
 
+#include "log.h"
 #include "io_generic.h"
 #include "gio_internal.h"
+#include "io_usb.h"
+
+struct GioHandleStruct {
+  UsbChannel *channel;
+};
 
 static int
 disconnectUsbResource (GioHandle *handle) {
-  usbCloseChannel(handle->usb.channel);
+  usbCloseChannel(handle->channel);
+  free(handle);
   return 1;
 }
 
 static char *
 getUsbResourceName (GioHandle *handle, int timeout) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbGetProduct(channel->device, timeout);
 }
 
 static ssize_t
 writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   if (channel->definition.outputEndpoint) {
     return usbWriteEndpoint(channel->device,
@@ -62,7 +70,7 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
 
 static int
 awaitUsbInput (GioHandle *handle, int timeout) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbAwaitInput(channel->device,
                        channel->definition.inputEndpoint,
@@ -74,7 +82,7 @@ readUsbData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbReadData(channel->device, channel->definition.inputEndpoint,
                      buffer, size, initialTimeout, subsequentTimeout);
@@ -82,7 +90,7 @@ readUsbData (
 
 static int
 reconfigureUsbResource (GioHandle *handle, const SerialParameters *parameters) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbSetSerialParameters(channel->device, parameters);
 }
@@ -93,7 +101,7 @@ tellUsbResource (
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbControlWrite(channel->device, recipient, type,
                          request, value, index, data, size, timeout);
@@ -105,7 +113,7 @@ askUsbResource (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbControlRead(channel->device, recipient, type,
                         request, value, index, buffer, size, timeout);
@@ -113,7 +121,7 @@ askUsbResource (
 
 static int
 getUsbHidReportItems (GioHandle *handle, GioHidReportItemsData *items, int timeout) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
   unsigned char *address;
   ssize_t result = usbHidGetItems(channel->device,
                                   channel->definition.interface, 0,
@@ -138,7 +146,7 @@ setUsbHidReport (
   GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbHidSetReport(channel->device, channel->definition.interface,
                          report, data, size, timeout);
@@ -149,7 +157,7 @@ getUsbHidReport (
   GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbHidGetReport(channel->device, channel->definition.interface,
                          report, buffer, size, timeout);
@@ -160,7 +168,7 @@ setUsbHidFeature (
   GioHandle *handle, unsigned char report,
   const void *data, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbHidSetFeature(channel->device, channel->definition.interface,
                           report, data, size, timeout);
@@ -171,7 +179,7 @@ getUsbHidFeature (
   GioHandle *handle, unsigned char report,
   void *buffer, uint16_t size, int timeout
 ) {
-  UsbChannel *channel = handle->usb.channel;
+  UsbChannel *channel = handle->channel;
 
   return usbHidGetFeature(channel->device, channel->definition.interface,
                           report, buffer, size, timeout);
@@ -216,24 +224,35 @@ connectUsbResource (
   const GioDescriptor *descriptor,
   GioEndpoint *endpoint
 ) {
-  if ((endpoint->handle.usb.channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
-    endpoint->methods = &gioUsbEndpointMethods;
-    endpoint->options = descriptor->usb.options;
+  GioHandle *handle = malloc(sizeof(*handle));
 
-    if (!endpoint->options.applicationData) {
-      endpoint->options.applicationData = endpoint->handle.usb.channel->definition.data;
-    }
+  if (handle) {
+    memset(handle, 0,sizeof(*handle));
 
-    {
-      UsbChannel *channel = endpoint->handle.usb.channel;
-      const SerialParameters *parameters = channel->definition.serial;
+    if ((handle->channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
+      endpoint->handle = handle;
+      endpoint->methods = &gioUsbEndpointMethods;
+      endpoint->options = descriptor->usb.options;
 
-      if (parameters) {
-        gioSetBytesPerSecond(endpoint, parameters);
+      if (!endpoint->options.applicationData) {
+        endpoint->options.applicationData = endpoint->handle->channel->definition.data;
       }
+
+      {
+        UsbChannel *channel = endpoint->handle->channel;
+        const SerialParameters *parameters = channel->definition.serial;
+
+        if (parameters) {
+          gioSetBytesPerSecond(endpoint, parameters);
+        }
+      }
+
+      return 1;
     }
 
-    return 1;
+    free(handle);
+  } else {
+    logMallocError();
   }
 
   return 0;

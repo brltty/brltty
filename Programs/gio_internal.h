@@ -19,27 +19,11 @@
 #ifndef BRLTTY_INCLUDED_GIO_INTERNAL
 #define BRLTTY_INCLUDED_GIO_INTERNAL
 
-#include "io_serial.h"
-#include "io_usb.h"
-#include "io_bluetooth.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef union {
-  struct {
-    SerialDevice *device;
-  } serial;
-
-  struct {
-    UsbChannel *channel;
-  } usb;
-
-  struct {
-    BluetoothConnection *connection;
-  } bluetooth;
-} GioHandle;
+typedef struct GioHandleStruct GioHandle;
 
 typedef struct {
   void *address;
@@ -137,7 +121,7 @@ typedef struct {
 } GioEndpointMethods;
 
 struct GioEndpointStruct {
-  GioHandle handle;
+  GioHandle *handle;
   const GioEndpointMethods *methods;
   GioOptions options;
   unsigned int bytesPerSecond;

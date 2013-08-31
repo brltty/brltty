@@ -22,9 +22,10 @@
 #include <errno.h>
 
 #include "log.h"
-#include "timing.h"
+#include "async.h"
 #include "io_generic.h"
 #include "gio_internal.h"
+#include "io_serial.h"
 
 static const GioResourceEntry *const gioResourceTable[] = {
   &gioSerialResourceEntry,
@@ -97,11 +98,13 @@ gioConnectResource (
       while (*resource) {
         if ((*resource)->isSupported(descriptor)) {
           if ((*resource)->testIdentifier(&identifier)) {
-            if (!(*resource)->connectResource(identifier, descriptor, endpoint)) goto connectFailed;
+            if (!(*resource)->connectResource(identifier, descriptor, endpoint)) {
+              goto connectFailed;
+            }
 
             {
               int delay = endpoint->options.readyDelay;
-              if (delay) approximateDelay(delay);
+              if (delay) asyncWait(delay);
             }
 
             if (!gioDiscardInput(endpoint)) {
@@ -138,7 +141,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
 
   if (!method) {
     logUnsupportedOperation("disconnectResource");
-  } else if (method(&endpoint->handle)) {
+  } else if (method(endpoint->handle)) {
     ok = 1;
   }
 
@@ -155,7 +158,7 @@ gioGetResourceName (GioEndpoint *endpoint) {
   if (!method) {
     logUnsupportedOperation("getResourceName");
   } else {
-    name = method(&endpoint->handle, endpoint->options.requestTimeout);
+    name = method(endpoint->handle, endpoint->options.requestTimeout);
   }
 
   return name;
@@ -175,7 +178,7 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
     return -1;
   }
 
-  return method(&endpoint->handle, data, size,
+  return method(endpoint->handle, data, size,
                 endpoint->options.outputTimeout);
 }
 
@@ -190,7 +193,7 @@ gioAwaitInput (GioEndpoint *endpoint, int timeout) {
 
   if (endpoint->input.to - endpoint->input.from) return 1;
 
-  return method(&endpoint->handle, timeout);
+  return method(endpoint->handle, timeout);
 }
 
 ssize_t
@@ -231,7 +234,7 @@ gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
       }
 
       {
-        ssize_t result = method(&endpoint->handle,
+        ssize_t result = method(endpoint->handle,
                                 &endpoint->input.buffer[endpoint->input.to],
                                 sizeof(endpoint->input.buffer) - endpoint->input.to,
                                 (wait? endpoint->options.inputTimeout: 0), 0);
@@ -281,7 +284,7 @@ gioReconfigureResource (
 
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
-  } else if (method(&endpoint->handle, parameters)) {
+  } else if (method(endpoint->handle, parameters)) {
     gioSetBytesPerSecond(endpoint, parameters);
     ok = 1;
   }
@@ -313,7 +316,7 @@ gioTellResource (
     return -1;
   }
 
-  return method(&endpoint->handle, recipient, type,
+  return method(endpoint->handle, recipient, type,
                 request, value, index, data, size,
                 endpoint->options.requestTimeout);
 }
@@ -332,7 +335,7 @@ gioAskResource (
     return -1;
   }
 
-  return method(&endpoint->handle, recipient, type,
+  return method(endpoint->handle, recipient, type,
                 request, value, index, buffer, size,
                 endpoint->options.requestTimeout);
 }
@@ -347,7 +350,7 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
       return 0;
     }
 
-    if (!method(&endpoint->handle, &endpoint->hidReportItems,
+    if (!method(endpoint->handle, &endpoint->hidReportItems,
                 endpoint->options.requestTimeout)) {
       return 0;
     }
@@ -377,7 +380,7 @@ gioSetHidReport (
     return -1;
   }
 
-  return method(&endpoint->handle, report,
+  return method(endpoint->handle, report,
                 data, size, endpoint->options.requestTimeout);
 }
 
@@ -393,7 +396,7 @@ gioGetHidReport (
     return -1;
   }
 
-  return method(&endpoint->handle, report,
+  return method(endpoint->handle, report,
                 buffer, size, endpoint->options.requestTimeout);
 }
 
@@ -409,7 +412,7 @@ gioSetHidFeature (
     return -1;
   }
 
-  return method(&endpoint->handle, report,
+  return method(endpoint->handle, report,
                 data, size, endpoint->options.requestTimeout);
 }
 
@@ -425,6 +428,6 @@ gioGetHidFeature (
     return -1;
   }
 
-  return method(&endpoint->handle, report,
+  return method(endpoint->handle, report,
                 buffer, size, endpoint->options.requestTimeout);
 }

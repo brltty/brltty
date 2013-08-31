@@ -18,28 +18,37 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
 #include "io_generic.h"
 #include "gio_internal.h"
+#include "io_bluetooth.h"
+
+struct GioHandleStruct {
+  BluetoothConnection *connection;
+};
 
 static int
 disconnectBluetoothResource (GioHandle *handle) {
-  bthCloseConnection(handle->bluetooth.connection);
+  bthCloseConnection(handle->connection);
+  free(handle);
   return 1;
 }
 
 static char *
 getBluetoothResourceName (GioHandle *handle, int timeout) {
-  return bthGetNameOfDevice(handle->bluetooth.connection, timeout);
+  return bthGetNameOfDevice(handle->connection, timeout);
 }
 
 static ssize_t
 writeBluetoothData (GioHandle *handle, const void *data, size_t size, int timeout) {
-  return bthWriteData(handle->bluetooth.connection, data, size);
+  return bthWriteData(handle->connection, data, size);
 }
 
 static int
 awaitBluetoothInput (GioHandle *handle, int timeout) {
-  return bthAwaitInput(handle->bluetooth.connection, timeout);
+  return bthAwaitInput(handle->connection, timeout);
 }
 
 static ssize_t
@@ -47,7 +56,7 @@ readBluetoothData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return bthReadData(handle->bluetooth.connection, buffer, size,
+  return bthReadData(handle->connection, buffer, size,
                      initialTimeout, subsequentTimeout);
 }
 
@@ -76,10 +85,22 @@ connectBluetoothResource (
   const GioDescriptor *descriptor,
   GioEndpoint *endpoint
 ) {
-  if ((endpoint->handle.bluetooth.connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
-    endpoint->methods = &gioBluetoothEndpointMethods;
-    endpoint->options = descriptor->bluetooth.options;
-    return 1;
+  GioHandle *handle = malloc(sizeof(*handle));
+
+  if (handle) {
+    memset(handle, 0,sizeof(*handle));
+
+    if ((handle->connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
+      endpoint->handle = handle;
+      endpoint->methods = &gioBluetoothEndpointMethods;
+      endpoint->options = descriptor->bluetooth.options;
+
+      return 1;
+    }
+
+    free(handle);
+  } else {
+    logMallocError();
   }
 
   return 0;

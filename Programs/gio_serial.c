@@ -18,23 +18,32 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
 #include "io_generic.h"
 #include "gio_internal.h"
+#include "io_serial.h"
+
+struct GioHandleStruct {
+  SerialDevice *device;
+};
 
 static int
 disconnectSerialResource (GioHandle *handle) {
-  serialCloseDevice(handle->serial.device);
+  serialCloseDevice(handle->device);
+  free(handle);
   return 1;
 }
 
 static ssize_t
 writeSerialData (GioHandle *handle, const void *data, size_t size, int timeout) {
-  return serialWriteData(handle->serial.device, data, size);
+  return serialWriteData(handle->device, data, size);
 }
 
 static int
 awaitSerialInput (GioHandle *handle, int timeout) {
-  return serialAwaitInput(handle->serial.device, timeout);
+  return serialAwaitInput(handle->device, timeout);
 }
 
 static ssize_t
@@ -42,13 +51,13 @@ readSerialData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return serialReadData(handle->serial.device, buffer, size,
+  return serialReadData(handle->device, buffer, size,
                         initialTimeout, subsequentTimeout);
 }
 
 static int
 reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters) {
-  return serialSetParameters(handle->serial.device, parameters);
+  return serialSetParameters(handle->device, parameters);
 }
 
 static const GioEndpointMethods gioSerialEndpointMethods = {
@@ -77,15 +86,27 @@ connectSerialResource (
   const GioDescriptor *descriptor,
   GioEndpoint *endpoint
 ) {
-  if ((endpoint->handle.serial.device = serialOpenDevice(identifier))) {
-    if (serialSetParameters(endpoint->handle.serial.device, descriptor->serial.parameters)) {
-      endpoint->methods = &gioSerialEndpointMethods;
-      endpoint->options = descriptor->serial.options;
-      gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
-      return 1;
+  GioHandle *handle = malloc(sizeof(*handle));
+
+  if (handle) {
+    memset(handle, 0,sizeof(*handle));
+
+    if ((handle->device = serialOpenDevice(identifier))) {
+      if (serialSetParameters(handle->device, descriptor->serial.parameters)) {
+        endpoint->handle = handle;
+        endpoint->methods = &gioSerialEndpointMethods;
+        endpoint->options = descriptor->serial.options;
+
+        gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
+        return 1;
+      }
+
+      serialCloseDevice(handle->device);
     }
 
-    serialCloseDevice(endpoint->handle.serial.device);
+    free(handle);
+  } else {
+    logMallocError();
   }
 
   return 0;
