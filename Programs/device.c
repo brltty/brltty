@@ -181,24 +181,34 @@ isQualifiedDevice (const char **identifier, const char *qualifier) {
 
 char **
 getDeviceParameters (const char *const *names, const char *identifier) {
-  static const char characters[] = {
-    PARAMETER_SEPARATOR_CHARACTER,
-    PARAMETER_ASSIGNMENT_CHARACTER,
-    0
-  };
+  char parameters[strlen(names[0]) + 1 + strlen(identifier) + 1];
+  STR_BEGIN(parameters, sizeof(parameters))
 
-  const char *character = strpbrk(identifier, characters);
-  char buffer[strlen(names[0]) + 1 + strlen(identifier) + 1];
+  {
+    static const char characters[] = {
+      ':',
+      PARAMETER_ASSIGNMENT_CHARACTER,
+      0
+    };
+    const char *character = strpbrk(identifier, characters);
 
-  if (!(character && (*character == PARAMETER_ASSIGNMENT_CHARACTER))) {
-    STR_BEGIN(buffer, sizeof(buffer));
-    STR_PRINTF("%s%c%s", names[0], PARAMETER_ASSIGNMENT_CHARACTER, identifier);
-    STR_END;
-
-    identifier = buffer;
+    if (!(character && (*character == PARAMETER_ASSIGNMENT_CHARACTER))) {
+       STR_PRINTF("%s%c", names[0], PARAMETER_ASSIGNMENT_CHARACTER);
+    }
   }
 
-  return getParameters(names, NULL, identifier);
+  {
+    char *character = STR_NEXT;
+    STR_PRINTF("%s", identifier);
+
+    while (character < STR_NEXT) {
+      if (*character == ':') *character = PARAMETER_SEPARATOR_CHARACTER;
+      character += 1;
+    }
+  }
+
+  STR_END
+  return getParameters(names, NULL, parameters);
 }
 
 #ifdef ALLOW_DOS_DEVICE_NAMES
