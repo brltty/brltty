@@ -22,7 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
-#include "timing.h"
+#include "async.h"
+#include "parse.h"
 #include "device.h"
 #include "queue.h"
 #include "io_bluetooth.h"
@@ -164,45 +165,64 @@ error:
 }
 
 BluetoothConnection *
-bthOpenConnection (const char *address, uint8_t channel, int force) {
-  BluetoothConnection *connection;
+bthOpenConnection (const char *identifier, uint8_t channel, int force) {
+  static const char *const parameterNames[] = {
+    "address",
+    NULL
+  };
 
-  if ((connection = malloc(sizeof(*connection)))) {
-    memset(connection, 0, sizeof(*connection));
-    connection->channel = channel;
+  enum {
+    PARM_ADDRESS
+  };
 
-    if (bthParseAddress(&connection->address, address)) {
-      int alreadyTried = 0;
+  char **parameterValues = getDeviceParameters(parameterNames, identifier);
 
-      if (force) {
-        bthForgetConnectError(connection->address);
-      } else {
-        int value;
+  if (parameterValues) {
+    BluetoothConnection *connection;
 
-        if (bthRecallConnectError(connection->address, &value)) {
-          errno = value;
-          alreadyTried = 1;
+    if ((connection = malloc(sizeof(*connection)))) {
+      memset(connection, 0, sizeof(*connection));
+      connection->channel = channel;
+
+      if (bthParseAddress(&connection->address, parameterValues[PARM_ADDRESS])) {
+        int alreadyTried = 0;
+
+        if (force) {
+          bthForgetConnectError(connection->address);
+        } else {
+          int value;
+
+          if (bthRecallConnectError(connection->address, &value)) {
+            errno = value;
+            alreadyTried = 1;
+          }
+        }
+
+        if (!alreadyTried) {
+          TimePeriod period;
+          startTimePeriod(&period, 2000);
+
+          while (1) {
+            if ((connection->extension = bthConnect(connection->address, connection->channel, 15000))) {
+              deallocateStrings(parameterValues);
+              return connection;
+            }
+
+            if (afterTimePeriod(&period, NULL)) break;
+            if (errno != EBUSY) break;
+            asyncWait(100);
+          }
+
+          bthRememberConnectError(connection->address, errno);
         }
       }
 
-      if (!alreadyTried) {
-        TimePeriod period;
-        startTimePeriod(&period, 2000);
-
-	while (1) {
-          if ((connection->extension = bthConnect(connection->address, connection->channel, 15000))) return connection;
-	  if (afterTimePeriod(&period, NULL)) break;
-	  if (errno != EBUSY) break;
-	  approximateDelay(100);
-	}
-
-        bthRememberConnectError(connection->address, errno);
-      }
+      free(connection);
+    } else {
+      logMallocError();
     }
 
-    free(connection);
-  } else {
-    logMallocError();
+    deallocateStrings(parameterValues);
   }
 
   return NULL;

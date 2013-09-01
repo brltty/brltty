@@ -25,6 +25,7 @@
 #include <fcntl.h>
 
 #include "device.h"
+#include "parse.h"
 #include "log.h"
 #include "file.h"
 
@@ -176,6 +177,28 @@ isQualifiedDevice (const char **identifier, const char *qualifier) {
     if (ok) *identifier += count + 1;
     return ok;
   }
+}
+
+char **
+getDeviceParameters (const char *const *names, const char *identifier) {
+  static const char characters[] = {
+    PARAMETER_SEPARATOR_CHARACTER,
+    PARAMETER_ASSIGNMENT_CHARACTER,
+    0
+  };
+
+  const char *character = strpbrk(identifier, characters);
+  char buffer[strlen(names[0]) + 1 + strlen(identifier) + 1];
+
+  if (!(character && (*character == PARAMETER_ASSIGNMENT_CHARACTER))) {
+    STR_BEGIN(buffer, sizeof(buffer));
+    STR_PRINTF("%s%c%s", names[0], PARAMETER_ASSIGNMENT_CHARACTER, identifier);
+    STR_END;
+
+    identifier = buffer;
+  }
+
+  return getParameters(names, NULL, identifier);
 }
 
 #ifdef ALLOW_DOS_DEVICE_NAMES

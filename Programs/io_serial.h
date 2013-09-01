@@ -32,7 +32,7 @@ typedef struct SerialDeviceStruct SerialDevice;
 extern int isSerialDevice (const char **identifier);
 extern int serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices);
 
-extern SerialDevice *serialOpenDevice (const char *path);
+extern SerialDevice *serialOpenDevice (const char *identifier);
 extern void serialCloseDevice (SerialDevice *serial);
 extern int serialRestartDevice (SerialDevice *serial, unsigned int baud);
 extern FILE *serialGetStream (SerialDevice *serial);

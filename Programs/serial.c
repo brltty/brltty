@@ -521,27 +521,43 @@ serialPrepareDevice (SerialDevice *serial) {
 }
 
 SerialDevice *
-serialOpenDevice (const char *path) {
-  SerialDevice *serial;
+serialOpenDevice (const char *identifier) {
+  static const char *const parameterNames[] = {
+    "name",
+    NULL
+  };
 
-  if ((serial = malloc(sizeof(*serial)))) {
-    char *device;
+  enum {
+    PARM_NAME
+  };
 
-    if ((device = getDevicePath(path))) {
-      serial->fileDescriptor = -1;
-      serial->stream = NULL;
+  char **parameterValues = getDeviceParameters(parameterNames, identifier);
 
-      if (serialConnectDevice(serial, device)) {
+  if (parameterValues) {
+    SerialDevice *serial;
+
+    if ((serial = malloc(sizeof(*serial)))) {
+      char *device;
+
+      if ((device = getDevicePath(parameterValues[PARM_NAME]))) {
+        serial->fileDescriptor = -1;
+        serial->stream = NULL;
+
+        if (serialConnectDevice(serial, device)) {
+          free(device);
+          deallocateStrings(parameterValues);
+          return serial;
+        }
+
         free(device);
-        return serial;
       }
 
-      free(device);
+      free(serial);
+    } else {
+      logMallocError();
     }
 
-    free(serial);
-  } else {
-    logMallocError();
+    deallocateStrings(parameterValues);
   }
 
   return NULL;

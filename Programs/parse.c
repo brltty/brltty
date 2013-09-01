@@ -257,12 +257,12 @@ parseParameters (
 
       ok = 1;
       while (1) {
-        char *end = strchr(name, ',');
+        char *end = strchr(name, PARAMETER_SEPARATOR_CHARACTER);
         int done = !end;
         if (!done) *end = 0;
 
         if (*name) {
-          char *value = strchr(name, '=');
+          char *value = strchr(name, PARAMETER_ASSIGNMENT_CHARACTER);
 
           if (!value) {
             logMessage(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
@@ -274,7 +274,7 @@ parseParameters (
             int eligible = 1;
 
             if (qualifier) {
-              char *colon = memchr(name, ':', nameLength);
+              char *colon = memchr(name, PARAMETER_QUALIFIER_CHARACTER, nameLength);
 
               if (colon) {
                 size_t qualifierLength = (size_t)(colon - name);

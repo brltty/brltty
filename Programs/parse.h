@@ -44,6 +44,10 @@ extern int isFloat (float *value, const char *string);
 extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
 #endif /* NO_FLOAT */
 
+#define PARAMETER_SEPARATOR_CHARACTER  ','
+#define PARAMETER_ASSIGNMENT_CHARACTER '='
+#define PARAMETER_QUALIFIER_CHARACTER  ':'
+
 extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
 extern void logParameters (const char *const *names, char **values, const char *description);
 
