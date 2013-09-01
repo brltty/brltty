@@ -29,6 +29,7 @@
 #endif /* HAVE_REGEX_H */
 
 #include "log.h"
+#include "parse.h"
 #include "device.h"
 #include "timing.h"
 #include "async.h"
@@ -977,29 +978,46 @@ usbChooseChannel (UsbDevice *device, void *data) {
 }
 
 UsbChannel *
-usbFindChannel (const UsbChannelDefinition *definitions, const char *serialNumber) {
-  UsbChooseChannelData choose = {
-    .definition = definitions,
-    .serialNumber = serialNumber
+usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
+  static const char *const parameterNames[] = {
+    "serialnumber",
+    NULL
   };
-  UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
 
-  if (device) {
-    UsbChannel *channel = malloc(sizeof(*channel));
+  enum {
+    PARM_SERIAL_NUMBER
+  };
 
-    if (channel) {
-      memset(channel, 0, sizeof(*channel));
-      channel->device = device;
-      channel->definition = *choose.definition;
-      return channel;
+  char **parameterValues = getDeviceParameters(parameterNames, identifier);
+
+  if (parameterValues) {
+    UsbChooseChannelData choose = {
+      .definition = definitions,
+      .serialNumber = parameterValues[PARM_SERIAL_NUMBER]
+    };
+    UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
+
+    if (device) {
+      UsbChannel *channel = malloc(sizeof(*channel));
+
+      if (channel) {
+        memset(channel, 0, sizeof(*channel));
+        channel->device = device;
+        channel->definition = *choose.definition;
+
+        deallocateStrings(parameterValues);
+        return channel;
+      } else {
+        logMallocError();
+      }
+
+      usbCloseDevice(device);
     } else {
-      logMallocError();
+      logMessage(LOG_DEBUG, "USB device not found%s%s",
+                 (*identifier? ": ": ""), identifier);
     }
 
-    usbCloseDevice(device);
-  } else {
-    logMessage(LOG_DEBUG, "USB device not found%s%s",
-               (*serialNumber? ": ": ""), serialNumber);
+    deallocateStrings(parameterValues);
   }
 
   return NULL;
