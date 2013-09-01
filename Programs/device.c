@@ -167,16 +167,22 @@ resolveDeviceName (const char *const *names, const char *description) {
 
 int
 isQualifiedDevice (const char **identifier, const char *qualifier) {
-  size_t count = strcspn(*identifier, ":");
-  if (count == strlen(*identifier)) return 0;
-  if (!qualifier) return 1;
-  if (!count) return 0;
+  const char *delimiter = strchr(*identifier, DEVICE_QUALIFIER_CHARACTER);
 
-  {
-    int ok = strncasecmp(*identifier, qualifier, count) == 0;
-    if (ok) *identifier += count + 1;
-    return ok;
+  if (delimiter) {
+    size_t count = delimiter - *identifier;
+
+    if (!qualifier) return 1;
+
+    if (count) {
+      if (strncasecmp(*identifier, qualifier, count) == 0) {
+        *identifier += count + 1;
+        return 1;
+      }
+    }
   }
+
+  return 0;
 }
 
 char **
@@ -186,7 +192,7 @@ getDeviceParameters (const char *const *names, const char *identifier) {
 
   {
     static const char characters[] = {
-      ':',
+      DEVICE_QUALIFIER_CHARACTER,
       PARAMETER_ASSIGNMENT_CHARACTER,
       0
     };
@@ -202,7 +208,7 @@ getDeviceParameters (const char *const *names, const char *identifier) {
     STR_PRINTF("%s", identifier);
 
     while (character < STR_NEXT) {
-      if (*character == ':') *character = PARAMETER_SEPARATOR_CHARACTER;
+      if (*character == DEVICE_QUALIFIER_CHARACTER) *character = PARAMETER_SEPARATOR_CHARACTER;
       character += 1;
     }
   }
