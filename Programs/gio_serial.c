@@ -64,7 +64,7 @@ reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters
   return ok;
 }
 
-static const GioEndpointMethods gioSerialEndpointMethods = {
+static const GioMethods gioSerialMethods = {
   .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
@@ -89,9 +89,9 @@ getSerialOptions (const GioDescriptor *descriptor) {
   return &descriptor->serial.options;
 }
 
-static const GioEndpointMethods *
-getSerialEndpointMethods (void) {
-  return &gioSerialEndpointMethods;
+static const GioMethods *
+getSerialMethods (void) {
+  return &gioSerialMethods;
 }
 
 static GioHandle *
@@ -127,11 +127,13 @@ finishSerialEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioClassEntry gioSerialClassEntry = {
+const GioClass gioSerialClass = {
   .isSupported = isSerialSupported,
   .testIdentifier = testSerialIdentifier,
+
   .getOptions = getSerialOptions,
-  .getEndpointMethods = getSerialEndpointMethods,
+  .getMethods = getSerialMethods,
+
   .connectResource = connectSerialResource,
   .finishEndpoint = finishSerialEndpoint
 };

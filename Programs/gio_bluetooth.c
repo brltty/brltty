@@ -60,8 +60,9 @@ readBluetoothData (
                      initialTimeout, subsequentTimeout);
 }
 
-static const GioEndpointMethods gioBluetoothEndpointMethods = {
+static const GioMethods gioBluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
+
   .getResourceName = getBluetoothResourceName,
 
   .writeData = writeBluetoothData,
@@ -84,9 +85,9 @@ getBluetoothOptions (const GioDescriptor *descriptor) {
   return &descriptor->bluetooth.options;
 }
 
-static const GioEndpointMethods *
-getBluetoothEndpointMethods (void) {
-  return &gioBluetoothEndpointMethods;
+static const GioMethods *
+getBluetoothMethods (void) {
+  return &gioBluetoothMethods;
 }
 
 static GioHandle *
@@ -116,11 +117,13 @@ finishBluetoothEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioClassEntry gioBluetoothClassEntry = {
+const GioClass gioBluetoothClass = {
   .isSupported = isBluetoothSupported,
   .testIdentifier = testBluetoothIdentifier,
+
   .getOptions = getBluetoothOptions,
-  .getEndpointMethods = getBluetoothEndpointMethods,
+  .getMethods = getBluetoothMethods,
+
   .connectResource = connectBluetoothResource,
   .finishEndpoint = finishBluetoothEndpoint
 };

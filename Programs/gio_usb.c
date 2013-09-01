@@ -185,8 +185,9 @@ getUsbHidFeature (
                           report, buffer, size, timeout);
 }
 
-static const GioEndpointMethods gioUsbEndpointMethods = {
+static const GioMethods gioUsbMethods = {
   .disconnectResource = disconnectUsbResource,
+
   .getResourceName = getUsbResourceName,
 
   .writeData = writeUsbData,
@@ -223,9 +224,9 @@ getUsbOptions (const GioDescriptor *descriptor) {
   return &descriptor->usb.options;
 }
 
-static const GioEndpointMethods *
-getUsbEndpointMethods (void) {
-  return &gioUsbEndpointMethods;
+static const GioMethods *
+getUsbMethods (void) {
+  return &gioUsbMethods;
 }
 
 static GioHandle *
@@ -269,11 +270,13 @@ finishUsbEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioClassEntry gioUsbClassEntry = {
+const GioClass gioUsbClass = {
   .isSupported = isUsbSupported,
   .testIdentifier = testUsbIdentifier,
+
   .getOptions = getUsbOptions,
-  .getEndpointMethods = getUsbEndpointMethods,
+  .getMethods = getUsbMethods,
+
   .connectResource = connectUsbResource,
   .finishEndpoint = finishUsbEndpoint
 };

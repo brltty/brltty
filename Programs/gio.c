@@ -27,15 +27,15 @@
 #include "gio_internal.h"
 #include "io_serial.h"
 
-static const GioClassEntry *const gioClassTable[] = {
-  &gioSerialClassEntry,
-  &gioUsbClassEntry,
-  &gioBluetoothClassEntry,
+const GioClass *const gioClasses[] = {
+  &gioSerialClass,
+  &gioUsbClass,
+  &gioBluetoothClass,
   NULL
 };
 
 static void
-initializeOptions (GioOptions *options) {
+gioInitializeOptions (GioOptions *options) {
   options->applicationData = NULL;
   options->readyDelay = 0;
   options->inputTimeout = 0;
@@ -46,17 +46,17 @@ initializeOptions (GioOptions *options) {
 void
 gioInitializeDescriptor (GioDescriptor *descriptor) {
   descriptor->serial.parameters = NULL;
-  initializeOptions(&descriptor->serial.options);
+  gioInitializeOptions(&descriptor->serial.options);
   descriptor->serial.options.inputTimeout = 100;
 
   descriptor->usb.channelDefinitions = NULL;
-  initializeOptions(&descriptor->usb.options);
+  gioInitializeOptions(&descriptor->usb.options);
   descriptor->usb.options.inputTimeout = 1000;
   descriptor->usb.options.outputTimeout = 1000;
   descriptor->usb.options.requestTimeout = 1000;
 
   descriptor->bluetooth.channelNumber = 0;
-  initializeOptions(&descriptor->bluetooth.options);
+  gioInitializeOptions(&descriptor->bluetooth.options);
   descriptor->bluetooth.options.inputTimeout = 100;
   descriptor->bluetooth.options.requestTimeout = 5000;
 }
@@ -90,18 +90,26 @@ gioFinishEndpoint (GioEndpoint *endpoint) {
   return 0;
 }
 
-static const GioClassEntry *
+static const GioClass *
 gioGetClass (
   const char **identifier,
   const GioDescriptor *descriptor
 ) {
-  const GioClassEntry *const *class = gioClassTable;
+  const GioClass *const *class = gioClasses;
 
   while (*class) {
-    if ((*class)->isSupported(descriptor)) {
-      if ((*class)->testIdentifier(identifier)) {
-        return *class;
+    if ((*class)->isSupported) {
+      if ((*class)->isSupported(descriptor)) {
+        if ((*class)->testIdentifier) {
+          if ((*class)->testIdentifier(identifier)) {
+            return *class;
+          }
+        } else {
+          logUnsupportedOperation("testIdentifier");
+        }
       }
+    } else {
+      logUnsupportedOperation("isSupported");
     }
 
     class += 1;
@@ -117,7 +125,7 @@ gioConnectResource (
   const char *identifier,
   const GioDescriptor *descriptor
 ) {
-  const GioClassEntry *class = gioGetClass(&identifier, descriptor);
+  const GioClass *class = gioGetClass(&identifier, descriptor);
 
   if (class) {
     GioEndpoint *endpoint;
@@ -132,23 +140,36 @@ gioConnectResource (
       endpoint->hidReportItems.address = NULL;
       endpoint->hidReportItems.size = 0;
 
-      endpoint->options = *class->getOptions(descriptor);
-      endpoint->methods = class->getEndpointMethods();
+      if (class->getOptions) {
+        endpoint->options = *class->getOptions(descriptor);
+      } else {
+        gioInitializeOptions(&endpoint->options);
+      }
 
-      if ((endpoint->handle = class->connectResource(identifier, descriptor))) {
-        if (class->finishEndpoint(endpoint)) {
-          if (gioFinishEndpoint(endpoint)) {
-            return endpoint;
+      if (class->getMethods) {
+        endpoint->methods = class->getMethods();
+      } else {
+        endpoint->methods = NULL;
+      }
+
+      if (class->connectResource) {
+        if ((endpoint->handle = class->connectResource(identifier, descriptor))) {
+          if (!class->finishEndpoint || class->finishEndpoint(endpoint)) {
+            if (gioFinishEndpoint(endpoint)) {
+              return endpoint;
+            }
           }
-        }
 
-        {
-          int originalErrno = errno;
-          gioDisconnectResource(endpoint);
-          errno = originalErrno;
-        }
+          {
+            int originalErrno = errno;
+            gioDisconnectResource(endpoint);
+            errno = originalErrno;
+          }
 
-        return NULL;
+          return NULL;
+        }
+      } else {
+        logUnsupportedOperation("connectResource");
       }
 
       free(endpoint);
@@ -176,6 +197,11 @@ gioDisconnectResource (GioEndpoint *endpoint) {
   return ok;
 }
 
+const void *
+gioGetApplicationData (GioEndpoint *endpoint) {
+  return endpoint->options.applicationData;
+}
+
 char *
 gioGetResourceName (GioEndpoint *endpoint) {
   char *name = NULL;
@@ -188,11 +214,6 @@ gioGetResourceName (GioEndpoint *endpoint) {
   }
 
   return name;
-}
-
-const void *
-gioGetApplicationData (GioEndpoint *endpoint) {
-  return endpoint->options.applicationData;
 }
 
 ssize_t

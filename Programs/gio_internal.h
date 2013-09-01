@@ -83,6 +83,7 @@ typedef ssize_t GioGetHidFeatureMethod (
 
 typedef struct {
   GioDisconnectResourceMethod *disconnectResource;
+
   GioGetResourceNameMethod *getResourceName;
 
   GioWriteDataMethod *writeData;
@@ -102,11 +103,11 @@ typedef struct {
 
   GioSetHidFeatureMethod *setHidFeature;
   GioGetHidFeatureMethod *getHidFeature;
-} GioEndpointMethods;
+} GioMethods;
 
 struct GioEndpointStruct {
   GioHandle *handle;
-  const GioEndpointMethods *methods;
+  const GioMethods *methods;
   GioOptions options;
   unsigned int bytesPerSecond;
   GioHidReportItemsData hidReportItems;
@@ -125,7 +126,7 @@ typedef int GioTestIdentifierMethod (const char **identifier);
 
 typedef const GioOptions *GioGetOptionsMethod (const GioDescriptor *descriptor);
 
-typedef const GioEndpointMethods *GioGetEndpointMethodsMethod (void);
+typedef const GioMethods *GioGetMethodsMethod (void);
 
 typedef GioHandle *GioConnectResourceMethod (
   const char *identifier,
@@ -137,17 +138,20 @@ typedef int GioFinishEndpointMethod (GioEndpoint *endpoint);
 typedef struct {
   GioIsSupportedMethod *isSupported;
   GioTestIdentifierMethod *testIdentifier;
+
   GioGetOptionsMethod *getOptions;
-  GioGetEndpointMethodsMethod *getEndpointMethods;
+  GioGetMethodsMethod *getMethods;
+
   GioConnectResourceMethod *connectResource;
   GioFinishEndpointMethod *finishEndpoint;
-} GioClassEntry;
+} GioClass;
+
+extern const GioClass *const gioClasses[];
+extern const GioClass gioSerialClass;
+extern const GioClass gioUsbClass;
+extern const GioClass gioBluetoothClass;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
-
-extern const GioClassEntry gioSerialClassEntry;
-extern const GioClassEntry gioUsbClassEntry;
-extern const GioClassEntry gioBluetoothClassEntry;
 
 #ifdef __cplusplus
 }

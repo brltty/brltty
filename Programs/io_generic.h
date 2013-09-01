@@ -62,8 +62,9 @@ extern GioEndpoint *gioConnectResource (
 );
 
 extern int gioDisconnectResource (GioEndpoint *endpoint);
-extern char *gioGetResourceName (GioEndpoint *endpoint);
+
 extern const void *gioGetApplicationData (GioEndpoint *endpoint);
+extern char *gioGetResourceName (GioEndpoint *endpoint);
 
 extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t size);
 extern int gioAwaitInput (GioEndpoint *endpoint, int timeout);
