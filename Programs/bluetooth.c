@@ -37,6 +37,11 @@ const uint8_t uuidBytes_serialPortProfile[] = {
 };
 const uint8_t uuidLength_serialPortProfile = ARRAY_COUNT(uuidBytes_serialPortProfile);
 
+void
+bthLogChannel (uint8_t channel) {
+  logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
+}
+
 typedef struct {
   uint64_t bda;
   int connectError;

@@ -211,7 +211,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
             bcx->rfcommDelegate.bluetoothConnectionExtension = bcx;
 
             bthGetSerialPortChannel(&channel, bcx);
-            logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
+            bthLogChannel(channel);
 
             if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
               if ([bcx->rfcommDelegate start]) {

@@ -50,7 +50,7 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
 
 static int
 bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidBytes) {
-  int found = 0;
+  int foundChannel = 0;
 
 #ifdef HAVE_LIBBLUETOOTH
   sdp_session_t *session = sdp_connect(BDADDR_ANY, address, SDP_RETRY_IF_BUSY);
@@ -67,17 +67,17 @@ bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uui
       sdp_list_t *attributesList = sdp_list_append(NULL, &attributesRange);
 
       if (attributesList) {
-        sdp_list_t *responseList = NULL;
-        int result = sdp_service_search_attr_req(session, searchList,
-                                                 SDP_ATTR_REQ_RANGE, attributesList,
-                                                 &responseList);
+        sdp_list_t *recordList = NULL;
+        int queryStatus = sdp_service_search_attr_req(session, searchList,
+                                                      SDP_ATTR_REQ_RANGE, attributesList,
+                                                      &recordList);
 
-        if (!result) {
-          int stop = 0;
-          sdp_list_t *responseElement = responseList;
+        if (!queryStatus) {
+          int stopSearching = 0;
+          sdp_list_t *recordElement = recordList;
 
-          while (responseElement) {
-            sdp_record_t *record = (sdp_record_t *)responseElement->data;
+          while (recordElement) {
+            sdp_record_t *record = (sdp_record_t *)recordElement->data;
 
             if (record) {
               sdp_list_t *protocolsList;
@@ -105,10 +105,9 @@ bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uui
                         case 1:
                           if (dataElement->dtd == SDP_UINT8) {
                             ok = 1;
-                            stop = 1;
-
+                            foundChannel = 1;
                             *channel = dataElement->val.uint8;
-                            found = 1;
+                            stopSearching = 1;
                           }
                           break;
 
@@ -117,35 +116,37 @@ bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uui
                       }
 
                       if (!ok) break;
-                      if (stop) break;
+                      if (stopSearching) break;
                       dataElement = dataElement->next;
                       dataIndex += 1;
                     }
 
-                  //sdp_data_free(dataList);
-                    if (stop) break;
+                    if (stopSearching) break;
                     protocolElement = protocolElement->next;
                   }
 
                   sdp_list_free(protocolList, NULL);
-                  if (stop) break;
+                  if (stopSearching) break;
                   protocolsElement = protocolsElement->next;
                 }
 
                 sdp_list_free(protocolsList, NULL);
               } else {
                 logMallocError();
-                stop = 1;
+                stopSearching = 1;
               }
 
               sdp_record_free(record);
+            } else {
+              logMallocError();
+              stopSearching = 1;
             }
 
-            if (stop) break;
-            responseElement = responseElement->next;
+            if (stopSearching) break;
+            recordElement = recordElement->next;
           }
 
-          sdp_list_free(responseList, NULL);
+          sdp_list_free(recordList, NULL);
         } else {
           logSystemError("sdp_service_search_attr_req");
         }
@@ -166,7 +167,7 @@ bthGetServiceChannel (uint8_t *channel, const bdaddr_t *address, const void *uui
   }
 #endif /* HAVE_LIBBLUETOOTH */
 
-  return found;
+  return foundChannel;
 }
 
 static int
@@ -195,6 +196,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
 
         if (setBlockingIo(bcx->socket, 0)) {
           bthGetSerialPortChannel(&channel, &bcx->remote.rc_bdaddr);
+          bthLogChannel(channel);
 
           if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
             return bcx;

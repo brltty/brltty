@@ -28,6 +28,8 @@ extern "C" {
 extern const uint8_t uuidBytes_serialPortProfile[];
 extern const uint8_t uuidLength_serialPortProfile;
 
+extern void bthLogChannel (uint8_t channel);
+
 typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
 
 struct BluetoothConnectionStruct {
