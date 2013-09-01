@@ -90,63 +90,71 @@ gioFinishEndpoint (GioEndpoint *endpoint) {
   return 0;
 }
 
+static const GioClassEntry *
+gioGetClass (
+  const char **identifier,
+  const GioDescriptor *descriptor
+) {
+  const GioClassEntry *const *class = gioClassTable;
+
+  while (*class) {
+    if ((*class)->isSupported(descriptor)) {
+      if ((*class)->testIdentifier(identifier)) {
+        return *class;
+      }
+    }
+
+    class += 1;
+  }
+
+  errno = ENOSYS;
+  logMessage(LOG_WARNING, "unsupported generic resource identifier: %s", *identifier);
+  return NULL;
+}
+
 GioEndpoint *
 gioConnectResource (
   const char *identifier,
   const GioDescriptor *descriptor
 ) {
-  GioEndpoint *endpoint;
+  const GioClassEntry *class = gioGetClass(&identifier, descriptor);
 
-  if ((endpoint = malloc(sizeof(*endpoint)))) {
-    endpoint->bytesPerSecond = 0;
+  if (class) {
+    GioEndpoint *endpoint;
 
-    endpoint->input.error = 0;
-    endpoint->input.from = 0;
-    endpoint->input.to = 0;
+    if ((endpoint = malloc(sizeof(*endpoint)))) {
+      endpoint->bytesPerSecond = 0;
 
-    endpoint->hidReportItems.address = NULL;
-    endpoint->hidReportItems.size = 0;
+      endpoint->input.error = 0;
+      endpoint->input.from = 0;
+      endpoint->input.to = 0;
 
-    {
-      const GioClassEntry *const *class = gioClassTable;
+      endpoint->hidReportItems.address = NULL;
+      endpoint->hidReportItems.size = 0;
 
-      while (*class) {
-        if ((*class)->isSupported(descriptor)) {
-          if ((*class)->testIdentifier(&identifier)) {
-            endpoint->options = *(*class)->getOptions(descriptor);
-            endpoint->methods = (*class)->getEndpointMethods();
+      endpoint->options = *class->getOptions(descriptor);
+      endpoint->methods = class->getEndpointMethods();
 
-            if (!(endpoint->handle = (*class)->connectResource(identifier, descriptor))) {
-              goto connectFailed;
-            }
-
-            if ((*class)->finishEndpoint(endpoint)) {
-              if (gioFinishEndpoint(endpoint)) {
-                return endpoint;
-              }
-            }
-
-            {
-              int originalErrno = errno;
-              gioDisconnectResource(endpoint);
-              errno = originalErrno;
-            }
-
-            return NULL;
+      if ((endpoint->handle = class->connectResource(identifier, descriptor))) {
+        if (class->finishEndpoint(endpoint)) {
+          if (gioFinishEndpoint(endpoint)) {
+            return endpoint;
           }
         }
 
-        class += 1;
+        {
+          int originalErrno = errno;
+          gioDisconnectResource(endpoint);
+          errno = originalErrno;
+        }
+
+        return NULL;
       }
+
+      free(endpoint);
+    } else {
+      logMallocError();
     }
-
-    errno = ENOSYS;
-    logMessage(LOG_WARNING, "unsupported generic resource identifier: %s", identifier);
-
-  connectFailed:
-    free(endpoint);
-  } else {
-    logMallocError();
   }
 
   return NULL;
