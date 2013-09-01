@@ -683,7 +683,7 @@ isSerialDevice (const char **identifier) {
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
   if (!isQualifiedDevice(identifier, "serial"))
-    if (isQualifiedDevice(identifier, NULL))
+    if (!isUnqualifiedDevice(*identifier))
       return 0;
 
   if (!**identifier) *identifier = SERIAL_FIRST_DEVICE;

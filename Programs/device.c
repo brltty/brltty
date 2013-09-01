@@ -185,6 +185,11 @@ isQualifiedDevice (const char **identifier, const char *qualifier) {
   return 0;
 }
 
+int
+isUnqualifiedDevice (const char *identifier) {
+  return !isQualifiedDevice(&identifier, NULL);
+}
+
 char **
 getDeviceParameters (const char *const *names, const char *identifier) {
   char parameters[strlen(names[0]) + 1 + strlen(identifier) + 1];

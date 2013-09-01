@@ -37,6 +37,7 @@ extern const char *resolveDeviceName (const char *const *names, const char *desc
 
 #define DEVICE_QUALIFIER_CHARACTER ':'
 extern int isQualifiedDevice (const char **identifier, const char *qualifier);
+extern int isUnqualifiedDevice (const char *identifier);
 extern char **getDeviceParameters (const char *const *names, const char *identifier);
 
 #undef ALLOW_DOS_DEVICE_NAMES
