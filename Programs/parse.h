@@ -29,6 +29,8 @@ extern char *joinStrings (const char *const *strings, int count);
 
 extern int rescaleInteger (int value, int from, int to);
 
+extern int isAbbreviation (const char *actual, const char *supplied);
+
 extern int isInteger (int *value, const char *string);
 extern int isUnsignedInteger (unsigned int *value, const char *string);
 extern int isLogLevel (int *level, const char *string);

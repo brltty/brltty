@@ -114,6 +114,14 @@ rescaleInteger (int value, int from, int to) {
 }
 
 int
+isAbbreviation (const char *actual, const char *supplied) {
+  size_t length = strlen(supplied);
+
+  if (length > strlen(actual)) return 0;
+  return strncasecmp(actual, supplied, length) == 0;
+}
+
+int
 isInteger (int *value, const char *string) {
   if (*string) {
     char *end;

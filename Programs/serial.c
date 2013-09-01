@@ -520,15 +520,112 @@ serialPrepareDevice (SerialDevice *serial) {
   return 0;
 }
 
+static void
+serialConfigureBaud (SerialDevice *serial, const char *string) {
+  if (string && *string) {
+    unsigned int baud;
+
+    if (isUnsignedInteger(&baud, string)) {
+      if (serialSetBaud(serial, baud)) {
+        return;
+      }
+    }
+
+    logMessage(LOG_WARNING, "serial baud not configurable: %s", string);
+  }
+}
+
+static void
+serialConfigureDataBits (SerialDevice *serial, const char *string) {
+  if (string && *string) {
+    unsigned int bits;
+
+    if (isUnsignedInteger(&bits, string)) {
+      if (serialSetDataBits(serial, bits)) {
+        return;
+      }
+    }
+
+    logMessage(LOG_WARNING, "serial data bits not configurable: %s", string);
+  }
+}
+
+static void
+serialConfigureStopBits (SerialDevice *serial, const char *string) {
+  if (string && *string) {
+    unsigned int bits;
+
+    if (isUnsignedInteger(&bits, string)) {
+      if (serialSetStopBits(serial, bits)) {
+        return;
+      }
+    }
+
+    logMessage(LOG_WARNING, "serial stop bits not configurable: %s", string);
+  }
+}
+
+static void
+serialConfigureParity (SerialDevice *serial, const char *string) {
+  if (string && *string) {
+    SerialParity parity;
+
+    if (isAbbreviation(string, "none")) {
+      parity = SERIAL_PARITY_NONE;
+    } else if (isAbbreviation(string, "odd")) {
+      parity = SERIAL_PARITY_ODD;
+    } else if (isAbbreviation(string, "even")) {
+      parity = SERIAL_PARITY_EVEN;
+    } else if (isAbbreviation(string, "space")) {
+      parity = SERIAL_PARITY_SPACE;
+    } else if (isAbbreviation(string, "mark")) {
+      parity = SERIAL_PARITY_MARK;
+    } else {
+      logMessage(LOG_WARNING, "serial parity not configurable: %s", string);
+      return;
+    }
+
+    serialSetParity(serial, parity);
+  }
+}
+
+static void
+serialConfigureFlowControl (SerialDevice *serial, const char *string) {
+  if (string && *string) {
+    SerialFlowControl flow;
+
+    if (isAbbreviation(string, "none")) {
+      flow = SERIAL_FLOW_NONE;
+    } else if (isAbbreviation(string, "hardware")) {
+      flow = SERIAL_FLOW_HARDWARE;
+    } else {
+      logMessage(LOG_WARNING, "serial flow control not configurable: %s", string);
+      return;
+    }
+
+    serialSetFlowControl(serial, flow);
+  }
+}
+
 SerialDevice *
 serialOpenDevice (const char *identifier) {
   static const char *const parameterNames[] = {
     "name",
+    "baud",
+    "dataBits",
+    "stopBits",
+    "parity",
+    "flowControl",
     NULL
   };
 
   enum {
-    PARM_NAME
+    PARM_NAME,
+    PARM_BAUD,
+    PARM_DATA_BITS,
+    PARM_STOP_BITS,
+    PARM_PARITY,
+    PARM_FLOW_CONTROL
   };
 
   char **parameterValues = getDeviceParameters(parameterNames, identifier);
@@ -544,6 +641,12 @@ serialOpenDevice (const char *identifier) {
         serial->stream = NULL;
 
         if (serialConnectDevice(serial, device)) {
+          serialConfigureBaud(serial, parameterValues[PARM_BAUD]);
+          serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS]);
+          serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS]);
+          serialConfigureParity(serial, parameterValues[PARM_PARITY]);
+          serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL]);
+
           free(device);
           deallocateStrings(parameterValues);
           return serial;
