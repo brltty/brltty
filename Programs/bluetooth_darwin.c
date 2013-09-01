@@ -162,7 +162,7 @@ bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
 }
 
 static int
-bthGetServiceChannel (
+bthQueryChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
@@ -188,8 +188,8 @@ bthGetServiceChannel (
 }
 
 static int
-bthGetSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
-  return bthGetServiceChannel(channel, bcx, uuidBytes_serialPortProfile, uuidLength_serialPortProfile);
+bthQuerySerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+  return bthQueryChannel(channel, bcx, uuidBytes_serialPortProfile, uuidLength_serialPortProfile);
 }
 
 BluetoothConnectionExtension *
@@ -210,7 +210,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
           if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
             bcx->rfcommDelegate.bluetoothConnectionExtension = bcx;
 
-            bthGetSerialPortChannel(&channel, bcx);
+            bthQuerySerialPortChannel(&channel, bcx);
             bthLogChannel(channel);
 
             if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {

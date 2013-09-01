@@ -236,7 +236,7 @@ connectUsbResource (
   GioHandle *handle = malloc(sizeof(*handle));
 
   if (handle) {
-    memset(handle, 0,sizeof(*handle));
+    memset(handle, 0, sizeof(*handle));
 
     if ((handle->channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
       return handle;
@@ -251,10 +251,7 @@ connectUsbResource (
 }
 
 static int
-finishUsbEndpoint (
-  GioEndpoint *endpoint,
-  const GioDescriptor *descriptor
-) {
+finishUsbEndpoint (GioEndpoint *endpoint) {
   UsbChannel *channel = endpoint->handle->channel;
 
   if (!endpoint->options.applicationData) {
@@ -272,7 +269,7 @@ finishUsbEndpoint (
   return 1;
 }
 
-const GioResourceEntry gioUsbResourceEntry = {
+const GioClassEntry gioUsbClassEntry = {
   .isSupported = isUsbSupported,
   .testIdentifier = testUsbIdentifier,
   .getOptions = getUsbOptions,

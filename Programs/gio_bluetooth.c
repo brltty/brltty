@@ -97,7 +97,7 @@ connectBluetoothResource (
   GioHandle *handle = malloc(sizeof(*handle));
 
   if (handle) {
-    memset(handle, 0,sizeof(*handle));
+    memset(handle, 0, sizeof(*handle));
 
     if ((handle->connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
       return handle;
@@ -112,14 +112,11 @@ connectBluetoothResource (
 }
 
 static int
-finishBluetoothEndpoint (
-  GioEndpoint *endpoint,
-  const GioDescriptor *descriptor
-) {
+finishBluetoothEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioResourceEntry gioBluetoothResourceEntry = {
+const GioClassEntry gioBluetoothClassEntry = {
   .isSupported = isBluetoothSupported,
   .testIdentifier = testBluetoothIdentifier,
   .getOptions = getBluetoothOptions,

@@ -132,10 +132,7 @@ typedef GioHandle *GioConnectResourceMethod (
   const GioDescriptor *descriptor
 );
 
-typedef int GioFinishEndpointMethod (
-  GioEndpoint *endpoint,
-  const GioDescriptor *descriptor
-);
+typedef int GioFinishEndpointMethod (GioEndpoint *endpoint);
 
 typedef struct {
   GioIsSupportedMethod *isSupported;
@@ -144,13 +141,13 @@ typedef struct {
   GioGetEndpointMethodsMethod *getEndpointMethods;
   GioConnectResourceMethod *connectResource;
   GioFinishEndpointMethod *finishEndpoint;
-} GioResourceEntry;
+} GioClassEntry;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
 
-extern const GioResourceEntry gioSerialResourceEntry;
-extern const GioResourceEntry gioUsbResourceEntry;
-extern const GioResourceEntry gioBluetoothResourceEntry;
+extern const GioClassEntry gioSerialClassEntry;
+extern const GioClassEntry gioUsbClassEntry;
+extern const GioClassEntry gioBluetoothClassEntry;
 
 #ifdef __cplusplus
 }

@@ -27,10 +27,10 @@
 #include "gio_internal.h"
 #include "io_serial.h"
 
-static const GioResourceEntry *const gioResourceTable[] = {
-  &gioSerialResourceEntry,
-  &gioUsbResourceEntry,
-  &gioBluetoothResourceEntry,
+static const GioClassEntry *const gioClassTable[] = {
+  &gioSerialClassEntry,
+  &gioUsbClassEntry,
+  &gioBluetoothClassEntry,
   NULL
 };
 
@@ -108,19 +108,19 @@ gioConnectResource (
     endpoint->hidReportItems.size = 0;
 
     {
-      const GioResourceEntry *const *resource = gioResourceTable;
+      const GioClassEntry *const *class = gioClassTable;
 
-      while (*resource) {
-        if ((*resource)->isSupported(descriptor)) {
-          if ((*resource)->testIdentifier(&identifier)) {
-            endpoint->options = *(*resource)->getOptions(descriptor);
-            endpoint->methods = (*resource)->getEndpointMethods();
+      while (*class) {
+        if ((*class)->isSupported(descriptor)) {
+          if ((*class)->testIdentifier(&identifier)) {
+            endpoint->options = *(*class)->getOptions(descriptor);
+            endpoint->methods = (*class)->getEndpointMethods();
 
-            if (!(endpoint->handle = (*resource)->connectResource(identifier, descriptor))) {
+            if (!(endpoint->handle = (*class)->connectResource(identifier, descriptor))) {
               goto connectFailed;
             }
 
-            if ((*resource)->finishEndpoint(endpoint, descriptor)) {
+            if ((*class)->finishEndpoint(endpoint)) {
               if (gioFinishEndpoint(endpoint)) {
                 return endpoint;
               }
@@ -136,7 +136,7 @@ gioConnectResource (
           }
         }
 
-        resource += 1;
+        class += 1;
       }
     }
 

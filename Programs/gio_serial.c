@@ -27,6 +27,7 @@
 
 struct GioHandleStruct {
   SerialDevice *device;
+  SerialParameters parameters;
 };
 
 static int
@@ -57,7 +58,10 @@ readSerialData (
 
 static int
 reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters) {
-  return serialSetParameters(handle->device, parameters);
+  int ok = serialSetParameters(handle->device, parameters);
+
+  if (ok) handle->parameters = *parameters;
+  return ok;
 }
 
 static const GioEndpointMethods gioSerialEndpointMethods = {
@@ -98,10 +102,11 @@ connectSerialResource (
   GioHandle *handle = malloc(sizeof(*handle));
 
   if (handle) {
-    memset(handle, 0,sizeof(*handle));
+    memset(handle, 0, sizeof(*handle));
 
     if ((handle->device = serialOpenDevice(identifier))) {
       if (serialSetParameters(handle->device, descriptor->serial.parameters)) {
+        handle->parameters = *descriptor->serial.parameters;
         return handle;
       }
 
@@ -117,15 +122,12 @@ connectSerialResource (
 }
 
 static int
-finishSerialEndpoint (
-  GioEndpoint *endpoint,
-  const GioDescriptor *descriptor
-) {
-  gioSetBytesPerSecond(endpoint, descriptor->serial.parameters);
+finishSerialEndpoint (GioEndpoint *endpoint) {
+  gioSetBytesPerSecond(endpoint, &endpoint->handle->parameters);
   return 1;
 }
 
-const GioResourceEntry gioSerialResourceEntry = {
+const GioClassEntry gioSerialClassEntry = {
   .isSupported = isSerialSupported,
   .testIdentifier = testSerialIdentifier,
   .getOptions = getSerialOptions,
