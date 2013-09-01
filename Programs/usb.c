@@ -227,13 +227,13 @@ usbVerifyString (
 }
 
 int
-usbVerifyManufacturer (UsbDevice *device, const char *eRegExp) {
+usbVerifyManufacturerName (UsbDevice *device, const char *eRegExp) {
   return usbVerifyString(device, usbStringMatches,
                          device->descriptor.iManufacturer, eRegExp);
 }
 
 int
-usbVerifyProduct (UsbDevice *device, const char *eRegExp) {
+usbVerifyProductDescription (UsbDevice *device, const char *eRegExp) {
   return usbVerifyString(device, usbStringMatches,
                          device->descriptor.iProduct, eRegExp);
 }
@@ -242,6 +242,52 @@ int
 usbVerifySerialNumber (UsbDevice *device, const char *string) {
   return usbVerifyString(device, usbStringEquals,
                          device->descriptor.iSerialNumber, string);
+}
+
+uint16_t
+usbParseVendorIdentifier (const char *string) {
+  if (string && *string) {
+    unsigned int identifier;
+
+    if (isUnsignedInteger(&identifier, string)) {
+      if ((identifier > 0) && (identifier <= UINT16_MAX)) {
+        return identifier;
+      }
+    }
+
+    logMessage(LOG_WARNING, "invalid USB vendor identifier: %s", string);
+  }
+
+  return 0;
+}
+
+int
+usbVerifyVendorIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t identifier) {
+  if (!identifier) return 1;
+  return identifier == getLittleEndian16(descriptor->idVendor);
+}
+
+uint16_t
+usbParseProductIdentifier (const char *string) {
+  if (string && *string) {
+    unsigned int identifier;
+
+    if (isUnsignedInteger(&identifier, string)) {
+      if ((identifier > 0) && (identifier <= UINT16_MAX)) {
+        return identifier;
+      }
+    }
+
+    logMessage(LOG_WARNING, "invalid USB product identifier: %s", string);
+  }
+
+  return 0;
+}
+
+int
+usbVerifyProductIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t identifier) {
+  if (!identifier) return 1;
+  return identifier == getLittleEndian16(descriptor->idProduct);
 }
 
 const UsbDeviceDescriptor *
@@ -887,7 +933,10 @@ usbReadData (
 
 typedef struct {
   const UsbChannelDefinition *definition;
+
   const char *serialNumber;
+  uint16_t vendorIdentifier;
+  uint16_t productIdentifier;
 } UsbChooseChannelData;
 
 static int
@@ -911,6 +960,8 @@ usbChooseChannel (UsbDevice *device, void *data) {
           }
         }
 
+        if (!usbVerifyVendorIdentifier(descriptor, choose->vendorIdentifier)) break;
+        if (!usbVerifyProductIdentifier(descriptor, choose->productIdentifier)) break;
         if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
 
         if (definition->disableAutosuspend) usbDisableAutosuspend(device);
@@ -980,12 +1031,16 @@ usbChooseChannel (UsbDevice *device, void *data) {
 UsbChannel *
 usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
   static const char *const parameterNames[] = {
-    "serialnumber",
+    "serialNumber",
+    "vendorIdentifier",
+    "productIdentifier",
     NULL
   };
 
   enum {
-    PARM_SERIAL_NUMBER
+    PARM_SERIAL_NUMBER,
+    PARM_VENDOR_IDENTIFIER,
+    PARM_PRODUCT_IDENTIFIER
   };
 
   char **parameterValues = getDeviceParameters(parameterNames, identifier);
@@ -993,7 +1048,10 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier)
   if (parameterValues) {
     UsbChooseChannelData choose = {
       .definition = definitions,
-      .serialNumber = parameterValues[PARM_SERIAL_NUMBER]
+
+      .serialNumber = parameterValues[PARM_SERIAL_NUMBER],
+      .vendorIdentifier = usbParseVendorIdentifier(parameterValues[PARM_VENDOR_IDENTIFIER]),
+      .productIdentifier = usbParseProductIdentifier(parameterValues[PARM_PRODUCT_IDENTIFIER])
     };
     UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
 
