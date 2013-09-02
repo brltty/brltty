@@ -633,25 +633,28 @@ serialOpenDevice (const char *identifier) {
     SerialDevice *serial;
 
     if ((serial = malloc(sizeof(*serial)))) {
-      char *device;
+      char *path;
 
-      if ((device = getDevicePath(parameterValues[PARM_NAME]))) {
+      if ((path = getDevicePath(parameterValues[PARM_NAME]))) {
+        int connected;
+
         serial->fileDescriptor = -1;
         serial->stream = NULL;
 
-        if (serialConnectDevice(serial, device)) {
+        connected = serialConnectDevice(serial, path);
+        free(path);
+        path = NULL;
+
+        if (connected) {
           serialConfigureBaud(serial, parameterValues[PARM_BAUD]);
           serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS]);
           serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS]);
           serialConfigureParity(serial, parameterValues[PARM_PARITY]);
           serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL]);
 
-          free(device);
           deallocateStrings(parameterValues);
           return serial;
         }
-
-        free(device);
       }
 
       free(serial);
