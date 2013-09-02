@@ -146,11 +146,11 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	}
 	while (!afterTimePeriod (&period, NULL) && n <= init_ack[0]);
 
-	if (success && (brlcols != 25)) {
-          if ((prevdata = malloc(brl->textColumns * brl->textRows))) {
-            if ((rawdata = malloc(20 + (brl->textColumns * brl->textRows * 2)))) {
+	if (success && (brlcols > 0)) {
+          if ((prevdata = malloc(brlcols))) {
+            if ((rawdata = malloc(20 + (brlcols * 2)))) {
               brl->textColumns = brlcols;
-              brl->textRows = BRLROWS;
+              brl->textRows = 1;
 
               brl->statusColumns = 5;
               brl->statusRows = 1;
