@@ -297,7 +297,7 @@ struct BrailleDataStruct {
   ModelEntry genericModelEntry;
   char genericModelIdentifier[PACKET_PAYLOAD_INFO_MODEL_SIZE];
 
-  unsigned char outputBuffer[84];
+  unsigned char outputBuffer[UINT8_MAX + 1];
   int writeFirst;
   int writeLast;
   int writingFirst;
@@ -752,17 +752,19 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
       const char *word = strrchr(modelName, ' ');
 
       if (word) {
-	int size;
+	unsigned int size;
 
-	if (isInteger(&size, ++word)) {
-	  brl->data->genericModelEntry.cellCount = size;
+	if (isUnsignedInteger(&size, ++word)) {
+          if (size <= ARRAY_COUNT(brl->data->outputBuffer)) {
+            brl->data->genericModelEntry.cellCount = size;
 
-	  snprintf(brl->data->genericModelIdentifier, sizeof(brl->data->genericModelIdentifier),
-                   "%s %d",
-		   brl->data->genericModelEntry.identifier,
-                   brl->data->genericModelEntry.cellCount);
+            snprintf(brl->data->genericModelIdentifier, sizeof(brl->data->genericModelIdentifier),
+                     "%s %d",
+                     brl->data->genericModelEntry.identifier,
+                     brl->data->genericModelEntry.cellCount);
 
-	  brl->data->genericModelEntry.identifier = brl->data->genericModelIdentifier;
+            brl->data->genericModelEntry.identifier = brl->data->genericModelIdentifier;
+          }
 	}
       }
     }
