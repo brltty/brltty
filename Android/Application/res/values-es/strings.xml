@@ -13,13 +13,18 @@
   <string name="VIRTUAL_BUTTON_HOME">Hogar</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Aplicaciones Recientes</string>
 
+  <string name="SETTINGS_SCREEN_MAIN">Ajustos de BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Configuración General</string>
   <string name="SETTINGS_SCREEN_DEVICES">Administre Dispositivos</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Configuración Avanzada</string>
 
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Moda de Navigacción</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Supporte del Habla</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabla de Texto</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabla de Atributos</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabla de Contracciones</string>
+  <string name="SETTINGS_BUTTON_KEY_TABLE">Tabla de Teclas Teclado</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivel de Registro</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorías de Registro</string>
@@ -28,13 +33,29 @@
   <string name="DEVICES_BUTTON_ADD">Añada un Dispositivo</string>
   <string name="DEVICES_BUTTON_REMOVE">Retire el Dispositivo</string>
 
+  <string name="SELECTED_DEVICE_NONE">ningunos dispositivos</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">dispositivo no está seleccionado</string>
+
   <string name="ADD_DEVICE_NAME">Nombre de Dispositivo</string>
   <string name="ADD_DEVICE_METHOD">Método de Comunicación</string>
   <string name="ADD_DEVICE_SELECT">Seleccione Dispositivo</string>
   <string name="ADD_DEVICE_DRIVER">Controlador de Braille</string>
   <string name="ADD_DEVICE_DONE">Terminado</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">método de communicacción no está seleccionado</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">depositivo no está seleccionado</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">controlador de braille no está seleccionado</string>
+  <string name="ADD_DEVICE_NO_DEVICES">ningunos dispositivos</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">nombre de dispositivo ya está en uso</string>
 
   <string name="REMOVE_DEVICE_ASK">¿Realmente desea retirar este dispositivo?</string>
+
+  <string name="SET_SELECTION_NONE">ninguno seleccionado</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Lista Vertical</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Cuadrícula de Dos Dimensiones</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Ninguno</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Nativo</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
@@ -134,6 +155,7 @@
   <string name="TEXT_TABLE_LABEL_sat">Santalí</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindí</string>
   <string name="TEXT_TABLE_LABEL_sk">Eslovaco</string>
+  <string name="TEXT_TABLE_LABEL_sl">esloveno</string>
   <string name="TEXT_TABLE_LABEL_es">Español</string>
   <string name="TEXT_TABLE_LABEL_sw">Swahilí</string>
   <string name="TEXT_TABLE_LABEL_sv">Sueco</string>
@@ -145,6 +167,10 @@
   <string name="TEXT_TABLE_LABEL_tr">Turco</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamita</string>
   <string name="TEXT_TABLE_LABEL_cy">Galés</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">color del primer plano en la columna isquierda y color del fondo en la columna derecha</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">color inverso del primer plano en la columna isquierda y color del fondo en la columna isquierda</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">color del primer plano en el cuadro superior y color del fondo en el cuadro inferior</string>
 
   <string name="CONTRACTION_TABLE_LABEL_af">Africaans (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharico (sin contracciones)</string>
@@ -174,4 +200,10 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahilí (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Tilandés (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulú (contraccionado)</string>
+
+  <string name="KEY_TABLE_LABEL_braille">vinculantes para teclados braille</string>
+  <string name="KEY_TABLE_LABEL_desktop">vinculantes para teclados plenos</string>
+  <string name="KEY_TABLE_LABEL_keypad">vinculantes para navigacción de teclado numérico</string>
+  <string name="KEY_TABLE_LABEL_laptop">vinculantes para teclados sin teclado numérico</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">vinculantes para teclados Sun Tipo 6</string>
 </resources>
