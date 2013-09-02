@@ -76,7 +76,7 @@ gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters)
 }
 
 static int
-gioFinishEndpoint (GioEndpoint *endpoint) {
+gioStartEndpoint (GioEndpoint *endpoint) {
   {
     int delay = endpoint->options.readyDelay;
 
@@ -154,8 +154,8 @@ gioConnectResource (
 
       if (class->connectResource) {
         if ((endpoint->handle = class->connectResource(identifier, descriptor))) {
-          if (!class->finishEndpoint || class->finishEndpoint(endpoint)) {
-            if (gioFinishEndpoint(endpoint)) {
+          if (!class->prepareEndpoint || class->prepareEndpoint(endpoint)) {
+            if (gioStartEndpoint(endpoint)) {
               return endpoint;
             }
           }

@@ -112,11 +112,6 @@ connectBluetoothResource (
   return NULL;
 }
 
-static int
-finishBluetoothEndpoint (GioEndpoint *endpoint) {
-  return 1;
-}
-
 const GioClass gioBluetoothClass = {
   .isSupported = isBluetoothSupported,
   .testIdentifier = testBluetoothIdentifier,
@@ -124,6 +119,5 @@ const GioClass gioBluetoothClass = {
   .getOptions = getBluetoothOptions,
   .getMethods = getBluetoothMethods,
 
-  .connectResource = connectBluetoothResource,
-  .finishEndpoint = finishBluetoothEndpoint
+  .connectResource = connectBluetoothResource
 };

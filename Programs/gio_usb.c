@@ -252,7 +252,7 @@ connectUsbResource (
 }
 
 static int
-finishUsbEndpoint (GioEndpoint *endpoint) {
+prepareUsbEndpoint (GioEndpoint *endpoint) {
   UsbChannel *channel = endpoint->handle->channel;
 
   if (!endpoint->options.applicationData) {
@@ -278,5 +278,5 @@ const GioClass gioUsbClass = {
   .getMethods = getUsbMethods,
 
   .connectResource = connectUsbResource,
-  .finishEndpoint = finishUsbEndpoint
+  .prepareEndpoint = prepareUsbEndpoint
 };

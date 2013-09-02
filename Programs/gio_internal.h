@@ -133,7 +133,7 @@ typedef GioHandle *GioConnectResourceMethod (
   const GioDescriptor *descriptor
 );
 
-typedef int GioFinishEndpointMethod (GioEndpoint *endpoint);
+typedef int GioPrepareEndpointMethod (GioEndpoint *endpoint);
 
 typedef struct {
   GioIsSupportedMethod *isSupported;
@@ -143,7 +143,7 @@ typedef struct {
   GioGetMethodsMethod *getMethods;
 
   GioConnectResourceMethod *connectResource;
-  GioFinishEndpointMethod *finishEndpoint;
+  GioPrepareEndpointMethod *prepareEndpoint;
 } GioClass;
 
 extern const GioClass *const gioClasses[];

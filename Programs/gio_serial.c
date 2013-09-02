@@ -122,7 +122,7 @@ connectSerialResource (
 }
 
 static int
-finishSerialEndpoint (GioEndpoint *endpoint) {
+prepareSerialEndpoint (GioEndpoint *endpoint) {
   gioSetBytesPerSecond(endpoint, &endpoint->handle->parameters);
   return 1;
 }
@@ -135,5 +135,5 @@ const GioClass gioSerialClass = {
   .getMethods = getSerialMethods,
 
   .connectResource = connectSerialResource,
-  .finishEndpoint = finishSerialEndpoint
+  .prepareEndpoint = prepareSerialEndpoint
 };
