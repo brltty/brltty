@@ -33,7 +33,7 @@
 #include "file.h"
 #include "log.h"
 #include "parse.h"
-#include "timing.h"
+#include "async.h"
 
 int
 isPathDelimiter (const char character) {
@@ -599,7 +599,7 @@ modifyFileLock (int file, int mode) {
         }
 
         if (!wait) break;
-        approximateDelay(1000);
+        asyncWait(1000);
       }
 
       if (lseek(file, offset, SEEK_SET) == -1) {

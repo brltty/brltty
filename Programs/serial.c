@@ -24,7 +24,7 @@
 #include "log.h"
 #include "parse.h"
 #include "device.h"
-#include "timing.h"
+#include "async.h"
 
 #if defined(USE_PKG_SERIAL_NONE)
 #include "serial_none.h"
@@ -124,7 +124,6 @@ serialValidateBaud (unsigned int *baud, const char *description, const char *wor
       }
 
       logMessage(LOG_ERR, "unsupported %s: %u", description, *baud);
-      return 0;
     } else {
       logMessage(LOG_ERR, "undefined %s: %u", description, *baud);
     }
@@ -743,7 +742,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
         return 0;
   }
 
-  approximateDelay(500);
+  asyncWait(500);
   if (!serialDiscardInput(serial)) return 0;
 
   if (!usingB0)
