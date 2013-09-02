@@ -2580,7 +2580,7 @@ static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (const char *device) {
-  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
+  return (bluetoothConnection = bthOpenConnection(device, 1)) != NULL;
 }
 
 static int

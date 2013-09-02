@@ -100,7 +100,7 @@ connectBluetoothResource (
   if (handle) {
     memset(handle, 0, sizeof(*handle));
 
-    if ((handle->connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber, 0))) {
+    if ((handle->connection = bthOpenConnection(identifier, descriptor->bluetooth.channelNumber))) {
       return handle;
     }
 

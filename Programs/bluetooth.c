@@ -124,12 +124,6 @@ bthRecallConnectError (uint64_t bda, int *value) {
   return 1;
 }
 
-static void
-bthForgetConnectError (uint64_t bda) {
-  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 0);
-  if (entry) entry->connectError = 0;
-}
-
 static int
 bthParseAddress (uint64_t *bda, const char *address) {
   const char *character = address;
@@ -165,7 +159,7 @@ error:
 }
 
 BluetoothConnection *
-bthOpenConnection (const char *identifier, uint8_t channel, int force) {
+bthOpenConnection (const char *identifier, uint8_t channel) {
   static const char *const parameterNames[] = {
     "address",
     NULL
@@ -187,9 +181,7 @@ bthOpenConnection (const char *identifier, uint8_t channel, int force) {
       if (bthParseAddress(&connection->address, parameterValues[PARM_ADDRESS])) {
         int alreadyTried = 0;
 
-        if (force) {
-          bthForgetConnectError(connection->address);
-        } else {
+        {
           int value;
 
           if (bthRecallConnectError(connection->address, &value)) {
