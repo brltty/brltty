@@ -203,7 +203,7 @@
 
   <string name="KEY_TABLE_LABEL_braille">bližnjice za brajeve tipkovnice</string>
   <string name="KEY_TABLE_LABEL_desktop">bližnjice za polne tipkovnice</string>
-  <string name="KEY_TABLE_LABEl_keypad">bližnjice za krmarjenje ki bazira na številskih tipkovnicah</string>
+  <string name="KEY_TABLE_LABEL_keypad">bližnjice za krmarjenje ki bazira na številskih tipkovnicah</string>
   <string name="KEY_TABLE_LABEL_laptop">bližnjice za tipkovnice brez številskega dela</string>
   <string name="KEY_TABLE_LABEL_sun_type6">bližnjice za Sun Type 6 tipkovnice</string>
 </resources>
