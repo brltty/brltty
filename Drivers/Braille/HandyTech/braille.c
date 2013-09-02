@@ -1659,9 +1659,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                         unsigned char byte = bytes[dataIndex];
                         unsigned char nibble;
 
+                        if (cellIndex >= cellCount) break;
                         nibble = HIGH_NIBBLE(byte);
                         pressureValues[cellIndex++] = nibble | (nibble >> 4);
 
+                        if (cellIndex >= cellCount) break;
                         nibble = LOW_NIBBLE(byte);
                         pressureValues[cellIndex++] = nibble | (nibble << 4);
                       }
@@ -1682,17 +1684,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   case HT_EXTPKT_ReadingPosition: {
                     const size_t cellCount = model->textCells + model->statusCells;
                     unsigned char pressureValues[cellCount];
-                    const unsigned char *pressure;
+                    const unsigned char *pressure = NULL;
 
                     if (bytes[0] != 0XFF) {
                       const int cellIndex = bytes[0];
 
-                      memset(pressureValues, 0, cellCount);
-                      pressureValues[cellIndex] = 0XFF;
-
-                      pressure = &pressureValues[0];
-                    } else {
-                      pressure = NULL;
+                      if (cellIndex < cellCount) {
+                        memset(pressureValues, 0, cellCount);
+                        pressureValues[cellIndex] = 0XFF;
+                        pressure = &pressureValues[0];
+                      }
                     }
 
                     {
