@@ -151,10 +151,10 @@ extern int usbVerifyManufacturerName (UsbDevice *device, const char *eRegExp);
 extern int usbVerifyProductDescription (UsbDevice *device, const char *eRegExp);
 extern int usbVerifySerialNumber (UsbDevice *device, const char *string);
 
-extern uint16_t usbParseVendorIdentifier (const char *string);
+extern int usbParseVendorIdentifier (uint16_t *identifier, const char *string);
 extern int usbVerifyVendorIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t identifier);
 
-extern uint16_t usbParseProductIdentifier (const char *string);
+extern int usbParseProductIdentifier (uint16_t *identifier, const char *string);
 extern int usbVerifyProductIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t identifier);
 
 extern int usbBeginInput (
