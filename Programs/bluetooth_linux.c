@@ -49,7 +49,7 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
 }
 
 static int
-bthQueryChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidBytes) {
+bthDiscoverChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidBytes) {
   int foundChannel = 0;
 
 #ifdef HAVE_LIBBLUETOOTH
@@ -171,8 +171,8 @@ bthQueryChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidByte
 }
 
 static int
-bthQuerySerialPortChannel (uint8_t *channel, const bdaddr_t *address) {
-  return bthQueryChannel(channel, address, uuidBytes_serialPortProfile);
+bthDiscoverSerialPortChannel (uint8_t *channel, const bdaddr_t *address) {
+  return bthDiscoverChannel(channel, address, uuidBytes_serialPortProfile);
 }
 
 BluetoothConnectionExtension *
@@ -195,7 +195,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
         bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
         if (setBlockingIo(bcx->socket, 0)) {
-          bthQuerySerialPortChannel(&channel, &bcx->remote.rc_bdaddr);
+          bthDiscoverSerialPortChannel(&channel, &bcx->remote.rc_bdaddr);
           bthLogChannel(channel);
 
           if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
