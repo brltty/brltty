@@ -300,7 +300,7 @@ cpbPaste (void) {
 static FILE *
 cpbOpenFile (const char *mode) {
   const char *file = "clipboard";
-  const char *directory = getWritableDirectory();
+  const char *directory = STATE_DIRECTORY;
 
   if (directory) {
     char *path = makePath(directory, file);
