@@ -252,92 +252,103 @@ parseParameters (
   const char *qualifier,
   const char *parameters
 ) {
-  int ok = 0;
-
   if (parameters && *parameters) {
-    char *copiedParameters = strdup(parameters);
+    const char *parameter = parameters;
 
-    if (copiedParameters) {
-      char *name = copiedParameters;
+    while (1) {
+      const char *parameterEnd = strchr(parameter, PARAMETER_SEPARATOR_CHARACTER);
+      int done = !parameterEnd;
+      int parameterLength;
 
-      ok = 1;
-      while (1) {
-        char *end = strchr(name, PARAMETER_SEPARATOR_CHARACTER);
-        int done = !end;
-        if (!done) *end = 0;
+      if (done) parameterEnd = parameter + strlen(parameter);
+      parameterLength = parameterEnd - parameter;
 
-        if (*name) {
-          char *value = strchr(name, PARAMETER_ASSIGNMENT_CHARACTER);
+      if (*parameter) {
+        const char *value = memchr(parameter, PARAMETER_ASSIGNMENT_CHARACTER, parameterLength);
 
-          if (!value) {
-            logMessage(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
-          } else if (value == name) {
-          noName:
-            logMessage(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
-          } else {
-            size_t nameLength = value++ - name;
-            int eligible = 1;
-
-            if (qualifier) {
-              char *colon = memchr(name, PARAMETER_QUALIFIER_CHARACTER, nameLength);
-
-              if (colon) {
-                size_t qualifierLength = (size_t)(colon - name);
-                size_t nameAdjustment = qualifierLength + 1;
-
-                eligible = 0;
-                if (!qualifierLength) {
-                  logMessage(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
-                } else if (!(nameLength -= nameAdjustment)) {
-                  goto noName;
-                } else if ((qualifierLength == strlen(qualifier)) &&
-                           (memcmp(name, qualifier, qualifierLength) == 0)) {
-                  name += nameAdjustment;
-                  eligible = 1;
-                }
-              }
-            }
-
-            if (eligible) {
-              unsigned int index = 0;
-
-              while (names[index]) {
-                if (strncasecmp(name, names[index], nameLength) == 0) {
-                  char *copiedValue = strdup(value);
-
-                  if (copiedValue) {
-                    free(values[index]);
-                    values[index] = copiedValue;
-                  } else {
-                    logMallocError();
-                    ok = 0;
-                  }
-
-                  break;
-                }
-
-                index += 1;
-              }
-
-              if (!ok) break;
-              if (!names[index]) logMessage(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
-            }
-          }
+        if (!value) {
+          logMessage(LOG_ERR, "%s: %.*s",
+                     gettext("missing parameter value"),
+                     parameterLength, parameter);
+          return 0;
         }
 
-        if (done) break;
-        name = end + 1;
+        {
+          const char *name = parameter;
+          size_t nameLength = value++ - name;
+          size_t valueLength = parameterEnd - value;
+          int isEligible = 1;
+
+          if (qualifier) {
+            const char *delimiter = memchr(name, PARAMETER_QUALIFIER_CHARACTER, nameLength);
+
+            if (delimiter) {
+              size_t qualifierLength = delimiter - name;
+              size_t nameAdjustment = qualifierLength + 1;
+
+              name += nameAdjustment;
+              nameLength -= nameAdjustment;
+              isEligible = 0;
+
+              if (!qualifierLength) {
+                logMessage(LOG_ERR, "%s: %.*s",
+                           gettext("missing parameter qualifier"),
+                           parameterLength, parameter);
+                return 0;
+              }
+
+              if ((qualifierLength == strlen(qualifier)) &&
+                  (memcmp(parameter, qualifier, qualifierLength) == 0)) {
+                isEligible = 1;
+              }
+            }
+          }
+
+          if (!nameLength) {
+            logMessage(LOG_ERR, "%s: %.*s",
+                       gettext("missing parameter name"),
+                       parameterLength, parameter);
+            return 0;
+          }
+
+          if (isEligible) {
+            unsigned int index = 0;
+
+            while (names[index]) {
+              if (strncasecmp(name, names[index], nameLength) == 0) {
+                char *newValue = malloc(valueLength + 1);
+
+                if (!newValue) {
+                  logMallocError();
+                  return 0;
+                }
+
+                memcpy(newValue, value, valueLength);
+                newValue[valueLength] = 0;
+
+                free(values[index]);
+                values[index] = newValue;
+                goto parameterDone;
+              }
+
+              index += 1;
+            }
+
+            logMessage(LOG_ERR, "%s: %.*s",
+                       gettext("unsupported parameter"),
+                       parameterLength, parameter);
+            return 0;
+          }
+        }
       }
 
-      free(copiedParameters);
-    } else {
-      logMallocError();
+    parameterDone:
+      if (done) break;
+      parameter = parameterEnd + 1;
     }
-  } else {
-    ok = 1;
   }
 
-  return ok;
+  return 1;
 }
 
 char **
