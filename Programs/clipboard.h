@@ -34,6 +34,9 @@ extern int cpbRectangularCopy (int column, int row);
 extern int cpbLinearCopy (int column, int row);
 extern int cpbPaste (void);
 
+extern int cpbSave (void);
+extern int cpbRestore (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

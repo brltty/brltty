@@ -66,6 +66,10 @@ bind \{chord}Dot2+Dot4+Dot5+Dot6 SLIDEWIN
 bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot7 SLIDEWIN+off
 bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot8 SLIDEWIN+on
 
+bind \{chord}Dot1+Dot3+Dot4+Dot6 PASTE
+bind \{chord}Dot1+Dot3+Dot4+Dot6+Dot7 CLIP_RESTORE
+bind \{chord}Dot1+Dot3+Dot4+Dot6+Dot8 CLIP_SAVE
+
 bind \{chord}Dot2+Dot3+Dot5 SIXDOTS+on
 bind \{chord}Dot2+Dot3+Dot6 SIXDOTS+off
 

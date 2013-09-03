@@ -26,6 +26,8 @@
 #include "scr.h"
 #include "tunes.h"
 #include "clipboard.h"
+#include "file.h"
+#include "charset.h"
 
 static wchar_t *clipboardCharacters = NULL;
 static size_t clipboardSize = 0;
@@ -293,4 +295,128 @@ cpbPaste (void) {
   }
 
   return 1;
+}
+
+static FILE *
+cpbOpenFile (const char *mode) {
+  const char *file = "clipboard";
+  const char *directory = getWritableDirectory();
+
+  if (directory) {
+    char *path = makePath(directory, file);
+
+    if (path) {
+      FILE *stream = openDataFile(path, mode, 0);
+
+      free(path);
+      path = NULL;
+
+      if (stream) return stream;
+    }
+  }
+
+  return NULL;
+}
+
+int
+cpbSave (void) {
+  int ok = 0;
+  size_t length;
+  const wchar_t *character = cpbGetContent(&length);
+
+  if (length > 0) {
+    FILE *stream = cpbOpenFile("w");
+
+    if (stream) {
+      const wchar_t *end = character + length;
+      ok = 1;
+
+      while (character < end) {
+        Utf8Buffer utf8;
+        size_t utfs = convertWcharToUtf8(*character, utf8);
+
+        if (!utfs) {
+          logBytes(LOG_ERR, "invalid Unicode character", character, sizeof(*character));
+          ok = 0;
+          break;
+        }
+
+        if (fwrite(utf8, 1, utfs, stream) < utfs) {
+          logSystemError("fwrite");
+          ok = 0;
+          break;
+        }
+
+        character += 1;
+      }
+
+      if (fclose(stream) == EOF) {
+        logSystemError("fclose");
+        ok = 0;
+      }
+    }
+  }
+
+  return ok;
+}
+
+int
+cpbRestore (void) {
+  int ok = 0;
+  FILE *stream = cpbOpenFile("r");
+
+  if (stream) {
+    size_t size = 0X1000;
+    char buffer[size];
+    size_t length = 0;
+
+    cpbClearContent();
+    ok = 1;
+
+    do {
+      size_t count = fread(&buffer[length], 1, (size - length), stream);
+      int done = (length += count) < size;
+
+      if (ferror(stream)) {
+        logSystemError("fread");
+        ok = 0;
+      } else {
+        const char *next = buffer;
+        size_t left = length;
+
+        while (left > 0) {
+          const char *start = next;
+          wint_t wi = convertUtf8ToWchar(&next, &left);
+
+          if (wi == WEOF) {
+            length = next - start;
+
+            if (left > 0) {
+              logBytes(LOG_ERR, "invalid UTF-8 character", start, length);
+              ok = 0;
+              break;
+            }
+
+            memmove(buffer, start, length);
+          } else {
+            wchar_t wc = wi;
+
+            if (!cpbAddContent(&wc, 1)) {
+              ok = 0;
+              break;
+            }
+          }
+        }
+      }
+
+      if (done) break;
+    } while (ok);
+
+    if (fclose(stream) == EOF) {
+      logSystemError("fclose");
+      ok = 0;
+    }
+  }
+
+  return ok;
 }

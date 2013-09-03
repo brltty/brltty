@@ -2334,12 +2334,22 @@ doCommand:
         resetBrailleState();
         restartRequired = 0;
         break;
+
       case BRL_CMD_PASTE:
         if (isLiveScreen() && !isRouting()) {
           if (cpbPaste()) break;
         }
         playTune(&tune_command_rejected);
         break;
+
+      case BRL_CMD_CLIP_SAVE:
+        playTune(cpbSave()? &tune_command_done: &tune_command_rejected);
+        break;
+
+      case BRL_CMD_CLIP_RESTORE:
+        playTune(cpbRestore()? &tune_command_done: &tune_command_rejected);
+        break;
+
       case BRL_CMD_CSRJMP_VERT:
         playTune(routeCursor(-1, ses->winy, scr.number)?
                  &tune_routing_started:

@@ -202,6 +202,9 @@ typedef enum {
   BRL_CMD_SPEAK_CURR_LOCN /* speak speech location */,
   BRL_CMD_SHOW_CURR_LOCN /* set speech location visibility on/off */,
 
+  BRL_CMD_CLIP_SAVE /* save clipboard to disk */,
+  BRL_CMD_CLIP_RESTORE /* restore clipboard from disk */,
+
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
 
