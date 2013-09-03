@@ -61,6 +61,12 @@ extern ssize_t serialWriteData (
   const void *data, size_t size
 );
 
+extern int serialParseBaud (unsigned int *baud, const char *string);
+extern int serialParseDataBits (unsigned int *bits, const char *string);
+extern int serialParseStopBits (unsigned int *bits, const char *string);
+extern int serialParseParity (SerialParity *parity, const char *string);
+extern int serialParseFlowControl (SerialFlowControl *flow, const char *string);
+
 extern int serialSetParameters (SerialDevice *serial, const SerialParameters *parameters);
 extern int serialSetBaud (SerialDevice *serial, unsigned int baud);
 extern int serialSetDataBits (SerialDevice *serial, unsigned int bits);

@@ -48,8 +48,9 @@ serialGetBaudEntry (unsigned int baud) {
   const SerialBaudEntry *entry = serialBaudTable;
   while (entry->baud) {
     if (baud == entry->baud) return entry;
-    ++entry;
+    entry += 1;
   }
+
   return NULL;
 }
 
@@ -519,91 +520,122 @@ serialPrepareDevice (SerialDevice *serial) {
   return 0;
 }
 
-static void
+int
+serialParseBaud (unsigned int *baud, const char *string) {
+  if (isUnsignedInteger(baud, string)) return 1;
+
+  logMessage(LOG_WARNING, "invalid serial baud: %s", string);
+  return 0;
+}
+
+int
+serialParseDataBits (unsigned int *bits, const char *string) {
+  if (isUnsignedInteger(bits, string)) return 1;
+
+  logMessage(LOG_WARNING, "invalid serial data bit count: %s", string);
+  return 0;
+}
+
+int
+serialParseStopBits (unsigned int *bits, const char *string) {
+  if (isUnsignedInteger(bits, string)) return 1;
+
+  logMessage(LOG_WARNING, "invalid serial stop bit count: %s", string);
+  return 0;
+}
+
+int
+serialParseParity (SerialParity *parity, const char *string) {
+  if (isAbbreviation(string, "none")) {
+    *parity = SERIAL_PARITY_NONE;
+  } else if (isAbbreviation(string, "odd")) {
+    *parity = SERIAL_PARITY_ODD;
+  } else if (isAbbreviation(string, "even")) {
+    *parity = SERIAL_PARITY_EVEN;
+  } else if (isAbbreviation(string, "space")) {
+    *parity = SERIAL_PARITY_SPACE;
+  } else if (isAbbreviation(string, "mark")) {
+    *parity = SERIAL_PARITY_MARK;
+  } else {
+    logMessage(LOG_WARNING, "invalid serial parity: %s", string);
+    return 0;
+  }
+
+  return 1;
+}
+
+int
+serialParseFlowControl (SerialFlowControl *flow, const char *string) {
+  if (isAbbreviation(string, "none")) {
+    *flow = SERIAL_FLOW_NONE;
+  } else if (isAbbreviation(string, "hardware")) {
+    *flow = SERIAL_FLOW_HARDWARE;
+  } else {
+    logMessage(LOG_WARNING, "invalid serial flow control: %s", string);
+    return 0;
+  }
+
+  return 1;
+}
+
+static int
 serialConfigureBaud (SerialDevice *serial, const char *string) {
   if (string && *string) {
     unsigned int baud;
 
-    if (isUnsignedInteger(&baud, string)) {
-      if (serialSetBaud(serial, baud)) {
-        return;
-      }
-    }
-
-    logMessage(LOG_WARNING, "serial baud not configurable: %s", string);
+    if (!serialParseBaud(&baud, string)) return 0;
+    if (!serialSetBaud(serial, baud)) return 0;
   }
+
+  return 1;
 }
 
-static void
+static int
 serialConfigureDataBits (SerialDevice *serial, const char *string) {
   if (string && *string) {
     unsigned int bits;
 
-    if (isUnsignedInteger(&bits, string)) {
-      if (serialSetDataBits(serial, bits)) {
-        return;
-      }
-    }
-
-    logMessage(LOG_WARNING, "serial data bits not configurable: %s", string);
+    if (!serialParseDataBits(&bits, string)) return 0;
+    if (!serialSetDataBits(serial, bits)) return 0;
   }
+
+  return 1;
 }
 
-static void
+static int
 serialConfigureStopBits (SerialDevice *serial, const char *string) {
   if (string && *string) {
     unsigned int bits;
 
-    if (isUnsignedInteger(&bits, string)) {
-      if (serialSetStopBits(serial, bits)) {
-        return;
-      }
-    }
-
-    logMessage(LOG_WARNING, "serial stop bits not configurable: %s", string);
+    if (!serialParseStopBits(&bits, string)) return 0;
+    if (!serialSetStopBits(serial, bits)) return 0;
   }
+
+  return 1;
 }
 
-static void
+static int
 serialConfigureParity (SerialDevice *serial, const char *string) {
   if (string && *string) {
     SerialParity parity;
 
-    if (isAbbreviation(string, "none")) {
-      parity = SERIAL_PARITY_NONE;
-    } else if (isAbbreviation(string, "odd")) {
-      parity = SERIAL_PARITY_ODD;
-    } else if (isAbbreviation(string, "even")) {
-      parity = SERIAL_PARITY_EVEN;
-    } else if (isAbbreviation(string, "space")) {
-      parity = SERIAL_PARITY_SPACE;
-    } else if (isAbbreviation(string, "mark")) {
-      parity = SERIAL_PARITY_MARK;
-    } else {
-      logMessage(LOG_WARNING, "serial parity not configurable: %s", string);
-      return;
-    }
-
-    serialSetParity(serial, parity);
+    if (!serialParseParity(&parity, string)) return 0;
+    if (!serialSetParity(serial, parity)) return 0;
   }
+
+  return 1;
 }
 
-static void
+static int
 serialConfigureFlowControl (SerialDevice *serial, const char *string) {
   if (string && *string) {
     SerialFlowControl flow;
 
-    if (isAbbreviation(string, "none")) {
-      flow = SERIAL_FLOW_NONE;
-    } else if (isAbbreviation(string, "hardware")) {
-      flow = SERIAL_FLOW_HARDWARE;
-    } else {
-      logMessage(LOG_WARNING, "serial flow control not configurable: %s", string);
-      return;
-    }
-
-    serialSetFlowControl(serial, flow);
+    if (!serialParseFlowControl(&flow, string)) return 0;
+    if (!serialSetFlowControl(serial, flow)) return 0;
   }
+
+  return 1;
 }
 
 SerialDevice *
@@ -653,14 +685,21 @@ serialOpenDevice (const char *identifier) {
         path = NULL;
 
         if (connected) {
-          serialConfigureBaud(serial, parameterValues[PARM_BAUD]);
-          serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS]);
-          serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS]);
-          serialConfigureParity(serial, parameterValues[PARM_PARITY]);
-          serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL]);
+          if (serialConfigureBaud(serial, parameterValues[PARM_BAUD])) {
+            if (serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS])) {
+              if (serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS])) {
+                if (serialConfigureParity(serial, parameterValues[PARM_PARITY])) {
+                  if (serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL])) {
+                    deallocateStrings(parameterValues);
+                    return serial;
+                  }
+                }
+              }
+            }
+          }
 
-          deallocateStrings(parameterValues);
-          return serial;
+          serialCloseDevice(serial);
+          return NULL;
         }
       }
 
