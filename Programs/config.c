@@ -1075,6 +1075,7 @@ initializeBrailleDriver (const char *code, int verify) {
     brailleParameters = getParameters(braille->parameters,
                                       braille->definition.code,
                                       opt_brailleParameters);
+
     if (brailleParameters) {
       int constructed = verify;
 
@@ -1360,6 +1361,7 @@ initializeSpeechDriver (const char *code, int verify) {
     speechParameters = getParameters(speech->parameters,
                                      speech->definition.code,
                                      opt_speechParameters);
+
     if (speechParameters) {
       int constructed = verify;
 
@@ -1499,6 +1501,7 @@ initializeScreenDriver (const char *code, int verify) {
     screenParameters = getParameters(getScreenParameters(screen),
                                      getScreenDriverDefinition(screen)->code,
                                      opt_screenParameters);
+
     if (screenParameters) {
       int constructed = verify;
 
@@ -2090,17 +2093,22 @@ brlttyStart (int argc, char *argv[]) {
   
 #ifdef ENABLE_API
   apiStarted = 0;
+
   if (!opt_noApi) {
-    api_identify(0);
     apiParameters = getParameters(api_parameters,
                                   NULL,
                                   opt_apiParameters);
-    logParameters(api_parameters, apiParameters,
-                  gettext("API Parameter"));
-    if (!opt_verify) {
-      if (api_start(&brl, apiParameters)) {
-        onProgramExit(exitApi, "api");
-        apiStarted = 1;
+
+    if (apiParameters) {
+      api_identify(0);
+      logParameters(api_parameters, apiParameters,
+                    gettext("API Parameter"));
+
+      if (!opt_verify) {
+        if (api_start(&brl, apiParameters)) {
+          onProgramExit(exitApi, "api");
+          apiStarted = 1;
+        }
       }
     }
   }
