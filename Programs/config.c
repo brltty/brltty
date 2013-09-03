@@ -1327,6 +1327,9 @@ static void
 exitApi (void) {
   api_stop(&brl);
   apiStarted = 0;
+
+  deallocateStrings(apiParameters);
+  apiParameters = NULL;
 }
 #endif /* ENABLE_API */
 
