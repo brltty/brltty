@@ -685,18 +685,16 @@ serialOpenDevice (const char *identifier) {
         path = NULL;
 
         if (connected) {
-          if (serialConfigureBaud(serial, parameterValues[PARM_BAUD])) {
-            if (serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS])) {
-              if (serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS])) {
-                if (serialConfigureParity(serial, parameterValues[PARM_PARITY])) {
-                  if (serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL])) {
-                    deallocateStrings(parameterValues);
-                    return serial;
-                  }
-                }
-              }
-            }
-          }
+          int ok = 1;
+
+          if (!serialConfigureBaud(serial, parameterValues[PARM_BAUD])) ok = 0;
+          if (!serialConfigureDataBits(serial, parameterValues[PARM_DATA_BITS])) ok = 0;
+          if (!serialConfigureStopBits(serial, parameterValues[PARM_STOP_BITS])) ok = 0;
+          if (!serialConfigureParity(serial, parameterValues[PARM_PARITY])) ok = 0;
+          if (!serialConfigureFlowControl(serial, parameterValues[PARM_FLOW_CONTROL])) ok = 0;
+
+          deallocateStrings(parameterValues);
+          if (ok) return serial;
 
           serialCloseDevice(serial);
           return NULL;
