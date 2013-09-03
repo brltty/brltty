@@ -3189,26 +3189,6 @@ doCommand:
             break;
           }
 
-          case BRL_BLK_PWGEN: {
-            static const char codeset[] =
-              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-              "abcdefghijklmnopqrstuvwxyz"
-              "0123456789";
-            const size_t codesetLength = strlen(codeset);
-
-            wchar_t password[arg + 1];
-            wchar_t *character = password;
-            const wchar_t *end = character + ARRAY_COUNT(password);
-
-            while (character < end) {
-              *character++ = codeset[rand() % codesetLength];
-            }
-
-            cpbSetContent(password, character-password);
-            playTune(&tune_clipboard_end);
-            break;
-          }
-
           case BRL_BLK_DESCCHAR: {
             int column, row;
 

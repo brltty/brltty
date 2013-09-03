@@ -62,5 +62,3 @@ bind B6+RoutingKey COPY_LINE
 bind B7+RoutingKey SETMARK
 bind B8+RoutingKey GOTOMARK
 
-bind B1+B2+!RoutingKey PWGEN
-
