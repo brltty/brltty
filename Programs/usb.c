@@ -244,21 +244,24 @@ usbVerifySerialNumber (UsbDevice *device, const char *string) {
                          device->descriptor.iSerialNumber, string);
 }
 
-uint16_t
-usbParseVendorIdentifier (const char *string) {
+int
+usbParseVendorIdentifier (uint16_t *identifier, const char *string) {
   if (string && *string) {
-    unsigned int identifier;
+    unsigned int value;
 
-    if (isUnsignedInteger(&identifier, string)) {
-      if ((identifier > 0) && (identifier <= UINT16_MAX)) {
-        return identifier;
+    if (isUnsignedInteger(&value, string)) {
+      if ((value > 0) && (value <= UINT16_MAX)) {
+        *identifier = value;
+        return 1;
       }
     }
 
     logMessage(LOG_WARNING, "invalid USB vendor identifier: %s", string);
+    return 0;
   }
 
-  return 0;
+  *identifier = 0;
+  return 1;
 }
 
 int
@@ -267,21 +270,24 @@ usbVerifyVendorIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t ident
   return identifier == getLittleEndian16(descriptor->idVendor);
 }
 
-uint16_t
-usbParseProductIdentifier (const char *string) {
+int
+usbParseProductIdentifier (uint16_t *identifier, const char *string) {
   if (string && *string) {
-    unsigned int identifier;
+    unsigned int value;
 
-    if (isUnsignedInteger(&identifier, string)) {
-      if ((identifier > 0) && (identifier <= UINT16_MAX)) {
-        return identifier;
+    if (isUnsignedInteger(&value, string)) {
+      if ((value > 0) && (value <= UINT16_MAX)) {
+        *identifier = value;
+        return 1;
       }
     }
 
     logMessage(LOG_WARNING, "invalid USB product identifier: %s", string);
+    return 0;
   }
 
-  return 0;
+  *identifier = 0;
+  return 1;
 }
 
 int
@@ -1049,30 +1055,35 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier)
     UsbChooseChannelData choose = {
       .definition = definitions,
 
-      .serialNumber = parameterValues[PARM_SERIAL_NUMBER],
-      .vendorIdentifier = usbParseVendorIdentifier(parameterValues[PARM_VENDOR_IDENTIFIER]),
-      .productIdentifier = usbParseProductIdentifier(parameterValues[PARM_PRODUCT_IDENTIFIER])
+      .serialNumber = parameterValues[PARM_SERIAL_NUMBER]
     };
-    UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
 
-    if (device) {
-      UsbChannel *channel = malloc(sizeof(*channel));
+    int ok = 1;
+    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameterValues[PARM_VENDOR_IDENTIFIER])) ok = 0;
+    if (!usbParseProductIdentifier(&choose.productIdentifier, parameterValues[PARM_PRODUCT_IDENTIFIER])) ok = 0;
 
-      if (channel) {
-        memset(channel, 0, sizeof(*channel));
-        channel->device = device;
-        channel->definition = *choose.definition;
+    if (ok) {
+      UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
 
-        deallocateStrings(parameterValues);
-        return channel;
+      if (device) {
+        UsbChannel *channel = malloc(sizeof(*channel));
+
+        if (channel) {
+          memset(channel, 0, sizeof(*channel));
+          channel->device = device;
+          channel->definition = *choose.definition;
+
+          deallocateStrings(parameterValues);
+          return channel;
+        } else {
+          logMallocError();
+        }
+
+        usbCloseDevice(device);
       } else {
-        logMallocError();
+        logMessage(LOG_DEBUG, "USB device not found%s%s",
+                   (*identifier? ": ": ""), identifier);
       }
-
-      usbCloseDevice(device);
-    } else {
-      logMessage(LOG_DEBUG, "USB device not found%s%s",
-                 (*identifier? ": ": ""), identifier);
     }
 
     deallocateStrings(parameterValues);
