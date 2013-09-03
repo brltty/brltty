@@ -635,7 +635,14 @@ serialOpenDevice (const char *identifier) {
     if ((serial = malloc(sizeof(*serial)))) {
       char *path;
 
-      if ((path = getDevicePath(parameterValues[PARM_NAME]))) {
+      {
+        const char *name = parameterValues[PARM_NAME];
+
+        if (!*name) name = SERIAL_FIRST_DEVICE;
+        path = getDevicePath(name);
+      }
+
+      if (path) {
         int connected;
 
         serial->fileDescriptor = -1;
@@ -787,10 +794,7 @@ isSerialDevice (const char **identifier) {
   if (isDosDevice(*identifier, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
-  if (!isQualifiedDevice(identifier, "serial"))
-    if (!isUnqualifiedDevice(*identifier))
-      return 0;
-
-  if (!**identifier) *identifier = SERIAL_FIRST_DEVICE;
-  return 1;
+  if (isQualifiedDevice(identifier, "serial")) return 1;
+  if (isUnqualifiedDevice(*identifier)) return 1;
+  return 0;
 }
