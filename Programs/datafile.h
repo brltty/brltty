@@ -69,7 +69,6 @@ extern int parseDataString (DataFile *file, DataString *string, const wchar_t *c
 extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
 
 extern int writeHexadecimalCharacter (FILE *stream, wchar_t character);
-extern int writeUtf8Character (FILE *stream, wchar_t character);
 extern int writeEscapedCharacter (FILE *stream, wchar_t character);
 extern int writeEscapedCharacters (FILE *stream, const wchar_t *characters, size_t count);
 

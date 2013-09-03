@@ -613,14 +613,6 @@ writeHexadecimalCharacter (FILE *stream, wchar_t character) {
 }
 
 int
-writeUtf8Character (FILE *stream, wchar_t character) {
-  Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(character, utf8);
-
-  return fprintf(stream, "%.*s", (int)utfs, utf8) != EOF;
-}
-
-int
 writeEscapedCharacter (FILE *stream, wchar_t character) {
   {
     static const char escapes[] = {

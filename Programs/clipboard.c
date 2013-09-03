@@ -322,32 +322,14 @@ int
 cpbSave (void) {
   int ok = 0;
   size_t length;
-  const wchar_t *character = cpbGetContent(&length);
+  const wchar_t *characters = cpbGetContent(&length);
 
   if (length > 0) {
     FILE *stream = cpbOpenFile("w");
 
     if (stream) {
-      const wchar_t *end = character + length;
-      ok = 1;
-
-      while (character < end) {
-        Utf8Buffer utf8;
-        size_t utfs = convertWcharToUtf8(*character, utf8);
-
-        if (!utfs) {
-          logBytes(LOG_ERR, "invalid Unicode character", character, sizeof(*character));
-          ok = 0;
-          break;
-        }
-
-        if (fwrite(utf8, 1, utfs, stream) < utfs) {
-          logSystemError("fwrite");
-          ok = 0;
-          break;
-        }
-
-        character += 1;
+      if (writeUtf8Characters(stream, characters, length)) {
+        ok = 1;
       }
 
       if (fclose(stream) == EOF) {

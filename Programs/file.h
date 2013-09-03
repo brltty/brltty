@@ -58,6 +58,9 @@ extern const char *getOverrideDirectory (void);
 extern FILE *openFile (const char *path, const char *mode, int optional);
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 
+extern int writeUtf8Character (FILE *stream, wchar_t character);
+extern int writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count);
+
 extern int acquireFileLock (int file, int exclusive);
 extern int attemptFileLock (int file, int exclusive);
 extern int releaseFileLock (int file);
