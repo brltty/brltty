@@ -263,7 +263,7 @@ parseParameters (
       if (done) parameterEnd = parameter + strlen(parameter);
       parameterLength = parameterEnd - parameter;
 
-      if (*parameter) {
+      if (parameterLength > 0) {
         const char *value = memchr(parameter, PARAMETER_ASSIGNMENT_CHARACTER, parameterLength);
 
         if (!value) {
