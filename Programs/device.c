@@ -167,7 +167,7 @@ resolveDeviceName (const char *const *names, const char *description) {
 
 int
 isQualifiedDevice (const char **identifier, const char *qualifier) {
-  const char *delimiter = strchr(*identifier, DEVICE_QUALIFIER_CHARACTER);
+  const char *delimiter = strchr(*identifier, PARAMETER_QUALIFIER_CHARACTER);
 
   if (delimiter) {
     size_t count = delimiter - *identifier;
@@ -197,7 +197,7 @@ getDeviceParameters (const char *const *names, const char *identifier) {
 
   {
     static const char characters[] = {
-      DEVICE_QUALIFIER_CHARACTER,
+      DEVICE_PARAMETER_SEPARATOR,
       PARAMETER_ASSIGNMENT_CHARACTER,
       0
     };
@@ -213,7 +213,7 @@ getDeviceParameters (const char *const *names, const char *identifier) {
     STR_PRINTF("%s", identifier);
 
     while (character < STR_NEXT) {
-      if (*character == DEVICE_QUALIFIER_CHARACTER) *character = PARAMETER_SEPARATOR_CHARACTER;
+      if (*character == DEVICE_PARAMETER_SEPARATOR) *character = PARAMETER_SEPARATOR_CHARACTER;
       character += 1;
     }
   }
