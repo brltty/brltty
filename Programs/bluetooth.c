@@ -248,15 +248,15 @@ bthProcessDiscoverParameter (BluetoothConnectionRequest *request, const char *pa
 }
 
 typedef enum {
-  BTH_PARM_ADDRESS,
-  BTH_PARM_TIMEOUT,
-  BTH_PARM_CHANNEL,
-  BTH_PARM_DISCOVER
+  BTH_CONN_ADDRESS,
+  BTH_CONN_TIMEOUT,
+  BTH_CONN_CHANNEL,
+  BTH_CONN_DISCOVER
 } BluetoothConnectionParameter;
 
 static char **
-bthGetParameters (const char *identifier) {
-  static const char *const parameterNames[] = {
+bthGetConnectionParameters (const char *identifier) {
+  static const char *const names[] = {
     "address",
     "timeout",
     "channel",
@@ -265,21 +265,21 @@ bthGetParameters (const char *identifier) {
   };
 
   if (!identifier) identifier = "";
-  return getDeviceParameters(parameterNames, identifier);
+  return getDeviceParameters(names, identifier);
 }
 
 BluetoothConnection *
 bthOpenConnection (const BluetoothConnectionRequest *request) {
   BluetoothConnectionRequest req = *request;
-  char **parameters = bthGetParameters(req.identifier);
+  char **parameters = bthGetConnectionParameters(req.identifier);
 
   if (parameters) {
     int ok = 1;
 
     if (!req.channel) req.discover = 1;
-    if (!bthProcessTimeoutParameter(&req, parameters[BTH_PARM_TIMEOUT])) ok = 0;
-    if (!bthProcessChannelParameter(&req, parameters[BTH_PARM_CHANNEL])) ok = 0;
-    if (!bthProcessDiscoverParameter(&req, parameters[BTH_PARM_DISCOVER])) ok = 0;
+    if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
+    if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
+    if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
 
     if (ok) {
       BluetoothConnection *connection;
@@ -288,7 +288,7 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
         memset(connection, 0, sizeof(*connection));
         connection->channel = req.channel;
 
-        if (bthParseAddress(&connection->address, parameters[BTH_PARM_ADDRESS])) {
+        if (bthParseAddress(&connection->address, parameters[BTH_CONN_ADDRESS])) {
           int alreadyTried = 0;
 
           {
@@ -371,10 +371,10 @@ bthGetNameAtAddress (const char *address, int timeout) {
 const char *const *
 bthGetDriverCodes (const char *identifier, int timeout) {
   const char *const *codes = NULL;
-  char **parameters = bthGetParameters(identifier);
+  char **parameters = bthGetConnectionParameters(identifier);
 
   if (parameters) {
-    const char *name = bthGetNameAtAddress(parameters[BTH_PARM_ADDRESS], timeout);
+    const char *name = bthGetNameAtAddress(parameters[BTH_CONN_ADDRESS], timeout);
 
     if (name) {
       const BluetoothNameEntry *entry = bluetoothNameTable;

@@ -1034,33 +1034,39 @@ usbChooseChannel (UsbDevice *device, void *data) {
   return 0;
 }
 
-UsbChannel *
-usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
-  static const char *const parameterNames[] = {
+typedef enum {
+  USB_CHAN_SERIAL_NUMBER,
+  USB_CHAN_VENDOR_IDENTIFIER,
+  USB_CHAN_PRODUCT_IDENTIFIER
+} UsbChannelParameter;
+
+static char **
+usbGetChannelParameters (const char *identifier) {
+  static const char *const names[] = {
     "serialNumber",
     "vendorIdentifier",
     "productIdentifier",
     NULL
   };
 
-  enum {
-    PARM_SERIAL_NUMBER,
-    PARM_VENDOR_IDENTIFIER,
-    PARM_PRODUCT_IDENTIFIER
-  };
+  if (!identifier) identifier = "";
+  return getDeviceParameters(names, identifier);
+}
 
-  char **parameterValues = getDeviceParameters(parameterNames, identifier);
+UsbChannel *
+usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
+  char **parameters = usbGetChannelParameters(identifier);
 
-  if (parameterValues) {
+  if (parameters) {
     UsbChooseChannelData choose = {
       .definition = definitions,
 
-      .serialNumber = parameterValues[PARM_SERIAL_NUMBER]
+      .serialNumber = parameters[USB_CHAN_SERIAL_NUMBER]
     };
 
     int ok = 1;
-    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameterValues[PARM_VENDOR_IDENTIFIER])) ok = 0;
-    if (!usbParseProductIdentifier(&choose.productIdentifier, parameterValues[PARM_PRODUCT_IDENTIFIER])) ok = 0;
+    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_CHAN_VENDOR_IDENTIFIER])) ok = 0;
+    if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_CHAN_PRODUCT_IDENTIFIER])) ok = 0;
 
     if (ok) {
       UsbDevice *device = usbFindDevice(usbChooseChannel, &choose);
@@ -1073,7 +1079,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier)
           channel->device = device;
           channel->definition = *choose.definition;
 
-          deallocateStrings(parameterValues);
+          deallocateStrings(parameters);
           return channel;
         } else {
           logMallocError();
@@ -1086,7 +1092,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier)
       }
     }
 
-    deallocateStrings(parameterValues);
+    deallocateStrings(parameters);
   }
 
   return NULL;
