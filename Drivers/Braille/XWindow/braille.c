@@ -1093,7 +1093,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 
   if (*parameters[PARM_INPUT]) {
     unsigned int value;
-    if (validateFlag(&value, parameters[PARM_INPUT], "on", "off")) {
+    if (validateOnOff(&value, parameters[PARM_INPUT])) {
       input = value;
     } else {
       logMessage(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUT]);
