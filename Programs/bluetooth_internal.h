@@ -25,12 +25,25 @@ extern "C" {
 
 #define BDA_SIZE 6
 
+typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
+
+extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout);
+extern void bthDisconnect (BluetoothConnectionExtension *bcx);
+extern char *bthObtainDeviceName (uint64_t bda, int timeout);
+
 extern const uint8_t uuidBytes_serialPortProfile[];
 extern const uint8_t uuidLength_serialPortProfile;
 
-extern void bthLogChannel (uint8_t channel);
+extern int bthDiscoverSerialPortChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx
+);
 
-typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
+extern int bthDiscoverChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidBytes, size_t uuidLength
+);
+
+extern void bthLogChannel (uint8_t channel);
 
 struct BluetoothConnectionStruct {
   uint64_t address;
@@ -44,10 +57,6 @@ typedef struct {
 } BluetoothNameEntry;
 
 extern const BluetoothNameEntry bluetoothNameTable[];
-
-extern BluetoothConnectionExtension *bthConnect (uint64_t bda, uint8_t channel, int timeout);
-extern void bthDisconnect (BluetoothConnectionExtension *bcx);
-extern char *bthObtainDeviceName (uint64_t bda, int timeout);
 
 #ifdef __cplusplus
 }

@@ -24,8 +24,16 @@
 #include "bluetooth_internal.h"
 #include "log.h"
 
+int
+bthDiscoverChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidBytes, size_t uuidLength
+) {
+  return 0;
+}
+
 BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel, int timeout) {
+bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
   logUnsupportedFunction();
   return NULL;
 }

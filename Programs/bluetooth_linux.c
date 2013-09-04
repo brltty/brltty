@@ -48,12 +48,15 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
   }
 }
 
-static int
-bthDiscoverChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidBytes) {
+int
+bthDiscoverChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidBytes, size_t uuidLength
+) {
   int foundChannel = 0;
 
 #ifdef HAVE_LIBBLUETOOTH
-  sdp_session_t *session = sdp_connect(BDADDR_ANY, address, SDP_RETRY_IF_BUSY);
+  sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remote.rc_bdaddr, SDP_RETRY_IF_BUSY);
 
   if (session) {
     uuid_t uuid;
@@ -92,33 +95,21 @@ bthDiscoverChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidB
                   while (protocolElement) {
                     sdp_data_t *dataList = (sdp_data_t *)protocolElement->data;
                     sdp_data_t *dataElement = dataList;
-                    unsigned int dataIndex = 0;
+                    int uuidProtocol = 0;
 
                     while (dataElement) {
-                      int ok = 0;
-
-                      switch (dataIndex) {
-                        case 0:
-                          if (SDP_IS_UUID(dataElement->dtd)) ok = 1;
-                          break;
-
-                        case 1:
-                          if (dataElement->dtd == SDP_UINT8) {
-                            ok = 1;
-                            foundChannel = 1;
-                            *channel = dataElement->val.uint8;
-                            stopSearching = 1;
-                          }
-                          break;
-
-                        default:
-                          break;
+                      if (SDP_IS_UUID(dataElement->dtd)) {
+                        uuidProtocol = sdp_uuid_to_proto(&dataElement->val.uuid);
+                      } else if (dataElement->dtd == SDP_UINT8) {
+                        if (uuidProtocol == RFCOMM_UUID) {
+                          *channel = dataElement->val.uint8;
+                          foundChannel = 1;
+                          stopSearching = 1;
+                        }
                       }
 
-                      if (!ok) break;
                       if (stopSearching) break;
                       dataElement = dataElement->next;
-                      dataIndex += 1;
                     }
 
                     if (stopSearching) break;
@@ -170,13 +161,8 @@ bthDiscoverChannel (uint8_t *channel, const bdaddr_t *address, const void *uuidB
   return foundChannel;
 }
 
-static int
-bthDiscoverSerialPortChannel (uint8_t *channel, const bdaddr_t *address) {
-  return bthDiscoverChannel(channel, address, uuidBytes_serialPortProfile);
-}
-
 BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel, int timeout) {
+bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
@@ -195,7 +181,7 @@ bthConnect (uint64_t bda, uint8_t channel, int timeout) {
         bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
 
         if (setBlockingIo(bcx->socket, 0)) {
-          bthDiscoverSerialPortChannel(&channel, &bcx->remote.rc_bdaddr);
+          if (discover) bthDiscoverSerialPortChannel(&channel, bcx);
           bthLogChannel(channel);
 
           if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {

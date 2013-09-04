@@ -38,6 +38,11 @@ const uint8_t uuidBytes_serialPortProfile[] = {
 };
 const uint8_t uuidLength_serialPortProfile = ARRAY_COUNT(uuidBytes_serialPortProfile);
 
+int
+bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+  return bthDiscoverChannel(channel, bcx, uuidBytes_serialPortProfile, uuidLength_serialPortProfile);
+}
+
 void
 bthLogChannel (uint8_t channel) {
   logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
@@ -195,7 +200,7 @@ bthOpenConnection (const char *identifier, uint8_t channel) {
           startTimePeriod(&period, 2000);
 
           while (1) {
-            if ((connection->extension = bthConnect(connection->address, connection->channel, 15000))) {
+            if ((connection->extension = bthConnect(connection->address, connection->channel, 1, 15000))) {
               deallocateStrings(parameterValues);
               return connection;
             }
