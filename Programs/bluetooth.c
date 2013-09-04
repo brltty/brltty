@@ -164,7 +164,7 @@ error:
 }
 
 BluetoothConnection *
-bthOpenConnection (const char *identifier, uint8_t channel) {
+bthOpenConnection (const char *identifier, uint8_t channel, int discover) {
   static const char *const parameterNames[] = {
     "address",
     NULL
@@ -200,7 +200,7 @@ bthOpenConnection (const char *identifier, uint8_t channel) {
           startTimePeriod(&period, 2000);
 
           while (1) {
-            if ((connection->extension = bthConnect(connection->address, connection->channel, 1, 15000))) {
+            if ((connection->extension = bthConnect(connection->address, connection->channel, discover, 15000))) {
               deallocateStrings(parameterValues);
               return connection;
             }

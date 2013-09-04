@@ -1634,7 +1634,7 @@ static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (const char *device) {
-  if ((bluetoothConnection = bthOpenConnection(device, 1))) {
+  if ((bluetoothConnection = bthOpenConnection(device, 1, 0))) {
     textRewriteInterval = REWRITE_INTERVAL;
     protocol = &protocol2sOperations;
     return 1;

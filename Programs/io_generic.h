@@ -47,6 +47,7 @@ typedef struct {
 
   struct {
     uint8_t channelNumber;
+    unsigned discoverChannel:1;
     GioOptions options;
   } bluetooth;
 } GioDescriptor;

@@ -56,6 +56,7 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
   descriptor->usb.options.requestTimeout = 1000;
 
   descriptor->bluetooth.channelNumber = 0;
+  descriptor->bluetooth.discoverChannel = 0;
   gioInitializeOptions(&descriptor->bluetooth.options);
   descriptor->bluetooth.options.inputTimeout = 100;
   descriptor->bluetooth.options.requestTimeout = 5000;

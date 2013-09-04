@@ -31,7 +31,7 @@ extern char *bthGetNameOfDevice (BluetoothConnection *connection, int timeout);
 extern char *bthGetNameAtAddress (const char *address, int timeout);
 extern const char *const *bthGetDriverCodes (const char *address, int timeout);
 
-extern BluetoothConnection *bthOpenConnection (const char *identifier, uint8_t channel);
+extern BluetoothConnection *bthOpenConnection (const char *identifier, uint8_t channel, int discover);
 extern void bthCloseConnection (BluetoothConnection *connection);
 
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
