@@ -31,7 +31,15 @@ extern char *bthGetNameOfDevice (BluetoothConnection *connection, int timeout);
 extern char *bthGetNameAtAddress (const char *address, int timeout);
 extern const char *const *bthGetDriverCodes (const char *address, int timeout);
 
-extern BluetoothConnection *bthOpenConnection (const char *identifier, uint8_t channel, int discover);
+typedef struct {
+  const char *identifier;
+  int timeout;
+  uint8_t channel;
+  unsigned discover:1;
+} BluetoothConnectionRequest;
+
+extern void bthInitializeConnectionRequest (BluetoothConnectionRequest *request);
+extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
 
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);

@@ -98,11 +98,16 @@ connectBluetoothResource (
   GioHandle *handle = malloc(sizeof(*handle));
 
   if (handle) {
+    BluetoothConnectionRequest request;
+
+    bthInitializeConnectionRequest(&request);
+    request.identifier = identifier;
+    request.channel = descriptor->bluetooth.channelNumber;
+    request.discover = descriptor->bluetooth.discoverChannel;
+
     memset(handle, 0, sizeof(*handle));
 
-    if ((handle->connection = bthOpenConnection(identifier,
-                                                descriptor->bluetooth.channelNumber,
-                                                descriptor->bluetooth.discoverChannel))) {
+    if ((handle->connection = bthOpenConnection(&request))) {
       return handle;
     }
 

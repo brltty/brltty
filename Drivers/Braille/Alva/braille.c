@@ -1634,7 +1634,13 @@ static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (const char *device) {
-  if ((bluetoothConnection = bthOpenConnection(device, 1, 0))) {
+  BluetoothConnectionRequest request;
+
+  bthInitializeConnectionRequest(&request);
+  request.identifier = device;
+  request.channel = 1;
+
+  if ((bluetoothConnection = bthOpenConnection(&request))) {
     textRewriteInterval = REWRITE_INTERVAL;
     protocol = &protocol2sOperations;
     return 1;

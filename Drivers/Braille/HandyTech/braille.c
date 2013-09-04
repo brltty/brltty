@@ -976,7 +976,13 @@ static BluetoothConnection *bluetoothConnection = NULL;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = bthOpenConnection(device, 1, 0)) != NULL;
+  BluetoothConnectionRequest request;
+
+  bthInitializeConnectionRequest(&request);
+  request.identifier = device;
+  request.channel = 1;
+
+  return (bluetoothConnection = bthOpenConnection(&request)) != NULL;
 }
 
 static void

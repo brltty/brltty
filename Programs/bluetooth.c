@@ -163,8 +163,17 @@ error:
   return 0;
 }
 
+void
+bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
+  memset(request, 0, sizeof(*request));
+  request->identifier = NULL;
+  request->timeout = 15000;
+  request->channel = 0;
+  request->discover = 0;
+}
+
 BluetoothConnection *
-bthOpenConnection (const char *identifier, uint8_t channel, int discover) {
+bthOpenConnection (const BluetoothConnectionRequest *request) {
   static const char *const parameterNames[] = {
     "address",
     NULL
@@ -174,12 +183,16 @@ bthOpenConnection (const char *identifier, uint8_t channel, int discover) {
     PARM_ADDRESS
   };
 
-  char **parameterValues = getDeviceParameters(parameterNames, identifier);
+  char **parameterValues = getDeviceParameters(parameterNames, request->identifier);
 
   if (parameterValues) {
     BluetoothConnection *connection;
 
     if ((connection = malloc(sizeof(*connection)))) {
+      int timeout = request->timeout;
+      uint8_t channel = request->channel;
+      int discover = request->discover;
+
       memset(connection, 0, sizeof(*connection));
       connection->channel = channel;
 
@@ -200,7 +213,7 @@ bthOpenConnection (const char *identifier, uint8_t channel, int discover) {
           startTimePeriod(&period, 2000);
 
           while (1) {
-            if ((connection->extension = bthConnect(connection->address, connection->channel, discover, 15000))) {
+            if ((connection->extension = bthConnect(connection->address, connection->channel, discover, timeout))) {
               deallocateStrings(parameterValues);
               return connection;
             }
