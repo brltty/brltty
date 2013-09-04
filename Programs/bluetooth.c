@@ -141,32 +141,40 @@ bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
 int
 bthParseAddress (uint64_t *address, const char *string) {
   const char *character = string;
-  const unsigned int width = 8;
-  const unsigned long mask = (1UL << width) - 1UL;
-  int counter = BDA_SIZE;
+  unsigned int count = BDA_SIZE;
+  char delimiter = 0;
   *address = 0;
 
-  do {
-    *address <<= width;
+  while (*character) {
+    long unsigned int value;
 
-    if (*character) {
+    {
+      const char *start = character;
       char *end;
-      long int value = strtol(character, &end, 0X10);
 
-      if (end == character) goto error;
-      if (value < 0) goto error;
-      if (value > mask) goto error;
-      *address |= value;
-
-      if (!*(character = end)) continue;
-      if (*character != ':') goto error;
-      if (!*++character) goto error;
+      value = strtoul(character, &end, 0X10);
+      if ((end - start) != 2) break;
+      character = end;
     }
-  } while (--counter);
 
-  if (!*character) return 1;
+    if (value > UINT8_MAX) break;
+    *address <<= 8;
+    *address |= value;
 
-error:
+    if (!--count) break;
+    if (!*character) break;
+
+    if (!delimiter) {
+      delimiter = *character;
+      if ((delimiter != ':') && (delimiter != '-')) break;
+    } else if (*character != delimiter) {
+      break;
+    }
+
+    character += 1;
+  }
+
+  if (!count && !*character) return 1;
   logMessage(LOG_ERR, "invalid Bluetooth device address: %s", string);
   errno = EINVAL;
   return 0;
@@ -273,7 +281,6 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
     if (!bthProcessChannelParameter(&req, parameters[BTH_PARM_CHANNEL])) ok = 0;
     if (!bthProcessDiscoverParameter(&req, parameters[BTH_PARM_DISCOVER])) ok = 0;
 
-logMessage(LOG_NOTICE, "params: %s", ok? "yes": "no"); exit(0);
     if (ok) {
       BluetoothConnection *connection;
 
