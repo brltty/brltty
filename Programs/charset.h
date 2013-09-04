@@ -54,6 +54,9 @@ extern size_t getTextLength (const char *text);
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);
 
+extern int writeUtf8Character (FILE *stream, wchar_t character);
+extern int writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -320,3 +320,35 @@ isPosixLocale (const char *locale) {
   if (strcmp(locale, "POSIX") == 0) return 1;
   return 0;
 }
+
+int
+writeUtf8Character (FILE *stream, wchar_t character) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(character, utf8);
+
+  if (utfs) {
+    if (fwrite(utf8, 1, utfs, stream) == utfs) {
+      return 1;
+    } else {
+      logSystemError("fwrite");
+    }
+  } else {
+    logBytes(LOG_ERR, "invalid Unicode character", &character, sizeof(character));
+  }
+
+  return 0;
+}
+
+int
+writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count) {
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    if (!writeUtf8Character(stream, *character++)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
