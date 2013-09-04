@@ -129,16 +129,25 @@ bthRecallConnectError (uint64_t bda, int *value) {
   return 1;
 }
 
-static int
-bthParseAddress (uint64_t *bda, const char *address) {
-  const char *character = address;
+void
+bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
+  memset(request, 0, sizeof(*request));
+  request->identifier = NULL;
+  request->timeout = 15000;
+  request->channel = 0;
+  request->discover = 0;
+}
+
+int
+bthParseAddress (uint64_t *address, const char *string) {
+  const char *character = string;
   const unsigned int width = 8;
   const unsigned long mask = (1UL << width) - 1UL;
   int counter = BDA_SIZE;
-  *bda = 0;
+  *address = 0;
 
   do {
-    *bda <<= width;
+    *address <<= width;
 
     if (*character) {
       char *end;
@@ -147,7 +156,7 @@ bthParseAddress (uint64_t *bda, const char *address) {
       if (end == character) goto error;
       if (value < 0) goto error;
       if (value > mask) goto error;
-      *bda |= value;
+      *address |= value;
 
       if (!*(character = end)) continue;
       if (*character != ':') goto error;
@@ -158,81 +167,157 @@ bthParseAddress (uint64_t *bda, const char *address) {
   if (!*character) return 1;
 
 error:
-  logMessage(LOG_ERR, "invalid Bluetooth device address: %s", address);
+  logMessage(LOG_ERR, "invalid Bluetooth device address: %s", string);
   errno = EINVAL;
   return 0;
 }
 
-void
-bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
-  memset(request, 0, sizeof(*request));
-  request->identifier = NULL;
-  request->timeout = 15000;
-  request->channel = 0;
-  request->discover = 0;
+int
+bthParseChannelNumber (uint8_t *channel, const char *string) {
+  if (*string) {
+    unsigned int value;
+
+    if (isUnsignedInteger(&value, string)) {
+      if ((value > 0) && (value < 0X1F)) {
+        *channel = value;
+        return 1;
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "invalid RFCOMM channel number: %s", string);
+  return 0;
+}
+
+static int
+bthProcessTimeoutParameter (BluetoothConnectionRequest *request, const char *parameter) {
+  int seconds;
+
+  if (!parameter) return 1;
+  if (!*parameter) return 1;
+
+  if (isInteger(&seconds, parameter)) {
+    if ((seconds > 0) && (seconds < 60)) {
+      request->timeout = seconds * 1000;
+      return 1;
+    }
+  }
+
+  logMessage(LOG_ERR, "invalid Bluetooth connection timeout: %s", parameter);
+  return 0;
+}
+
+static int
+bthProcessChannelParameter (BluetoothConnectionRequest *request, const char *parameter) {
+  uint8_t channel;
+
+  if (!parameter) return 1;
+  if (!*parameter) return 1;
+
+  if (bthParseChannelNumber(&channel, parameter)) {
+    request->channel = channel;
+    request->discover = 0;
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+bthProcessDiscoverParameter (BluetoothConnectionRequest *request, const char *parameter) {
+  unsigned int flag;
+
+  if (!parameter) return 1;
+  if (!*parameter) return 1;
+
+  if (validateYesNo(&flag, parameter)) {
+    request->discover = flag;
+    return 1;
+  }
+
+  logMessage(LOG_ERR, "invalid discover option: %s", parameter);
+  return 0;
 }
 
 BluetoothConnection *
 bthOpenConnection (const BluetoothConnectionRequest *request) {
-  static const char *const parameterNames[] = {
-    "address",
-    NULL
-  };
+  BluetoothConnectionRequest req = *request;
 
-  enum {
-    PARM_ADDRESS
-  };
+  if (!req.identifier) req.identifier = "";
+  if (!req.channel) req.discover = 1;
 
-  char **parameterValues = getDeviceParameters(parameterNames, request->identifier);
+  {
+    static const char *const parameterNames[] = {
+      "address",
+      "timeout",
+      "channel",
+      "discover",
+      NULL
+    };
 
-  if (parameterValues) {
-    BluetoothConnection *connection;
+    enum {
+      PARM_ADDRESS,
+      PARM_TIMEOUT,
+      PARM_CHANNEL,
+      PARM_DISCOVER
+    };
 
-    if ((connection = malloc(sizeof(*connection)))) {
-      int timeout = request->timeout;
-      uint8_t channel = request->channel;
-      int discover = request->discover;
+    char **parameterValues = getDeviceParameters(parameterNames, req.identifier);
 
-      memset(connection, 0, sizeof(*connection));
-      connection->channel = channel;
+    if (parameterValues) {
+      int ok = 1;
 
-      if (bthParseAddress(&connection->address, parameterValues[PARM_ADDRESS])) {
-        int alreadyTried = 0;
+      if (!bthProcessTimeoutParameter(&req, parameterValues[PARM_TIMEOUT])) ok = 0;
+      if (!bthProcessChannelParameter(&req, parameterValues[PARM_CHANNEL])) ok = 0;
+      if (!bthProcessDiscoverParameter(&req, parameterValues[PARM_DISCOVER])) ok = 0;
 
-        {
-          int value;
+logMessage(LOG_NOTICE, "params: %s", ok? "yes": "no"); exit(0);
+      if (ok) {
+        BluetoothConnection *connection;
 
-          if (bthRecallConnectError(connection->address, &value)) {
-            errno = value;
-            alreadyTried = 1;
-          }
-        }
+        if ((connection = malloc(sizeof(*connection)))) {
+          memset(connection, 0, sizeof(*connection));
+          connection->channel = req.channel;
 
-        if (!alreadyTried) {
-          TimePeriod period;
-          startTimePeriod(&period, 2000);
+          if (bthParseAddress(&connection->address, parameterValues[PARM_ADDRESS])) {
+            int alreadyTried = 0;
 
-          while (1) {
-            if ((connection->extension = bthConnect(connection->address, connection->channel, discover, timeout))) {
-              deallocateStrings(parameterValues);
-              return connection;
+            {
+              int value;
+
+              if (bthRecallConnectError(connection->address, &value)) {
+                errno = value;
+                alreadyTried = 1;
+              }
             }
 
-            if (afterTimePeriod(&period, NULL)) break;
-            if (errno != EBUSY) break;
-            asyncWait(100);
+            if (!alreadyTried) {
+              TimePeriod period;
+              startTimePeriod(&period, 2000);
+
+              while (1) {
+                if ((connection->extension = bthConnect(connection->address, connection->channel, req.discover, req.timeout))) {
+                  deallocateStrings(parameterValues);
+                  return connection;
+                }
+
+                if (afterTimePeriod(&period, NULL)) break;
+                if (errno != EBUSY) break;
+                asyncWait(100);
+              }
+
+              bthRememberConnectError(connection->address, errno);
+            }
           }
 
-          bthRememberConnectError(connection->address, errno);
+          free(connection);
+        } else {
+          logMallocError();
         }
       }
 
-      free(connection);
-    } else {
-      logMallocError();
+      deallocateStrings(parameterValues);
     }
-
-    deallocateStrings(parameterValues);
   }
 
   return NULL;

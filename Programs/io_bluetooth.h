@@ -39,6 +39,9 @@ typedef struct {
 } BluetoothConnectionRequest;
 
 extern void bthInitializeConnectionRequest (BluetoothConnectionRequest *request);
+extern int bthParseAddress (uint64_t *address, const char *string);
+extern int bthParseChannelNumber (uint8_t *channel, const char *string);
+
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
 
