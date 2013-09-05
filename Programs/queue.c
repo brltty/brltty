@@ -240,6 +240,12 @@ getQueueHead (const Queue *queue) {
   return queue->head;
 }
 
+Element *
+getQueueTail (const Queue *queue) {
+  Element *head = queue->head;
+  return head? head->previous: NULL;
+}
+
 int
 getQueueSize (const Queue *queue) {
   return queue->size;

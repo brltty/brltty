@@ -32,6 +32,7 @@ extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
 extern void deallocateQueue (Queue *queue);
 
 extern Element *getQueueHead (const Queue *queue);
+extern Element *getQueueTail (const Queue *queue);
 extern int getQueueSize (const Queue *queue);
 extern void *getQueueData (const Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
