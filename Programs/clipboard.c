@@ -26,6 +26,7 @@
 #include "scr.h"
 #include "tunes.h"
 #include "clipboard.h"
+#include "queue.h"
 #include "file.h"
 #include "charset.h"
 
@@ -37,6 +38,11 @@ static int beginColumn = 0;
 static int beginRow = 0;
 static int beginOffset = -1;
 
+typedef struct {
+  wchar_t *characters;
+  size_t length;
+} HistoryEntry;
+
 static wchar_t *
 cpbAllocateCharacters (size_t count) {
   {
@@ -46,6 +52,66 @@ cpbAllocateCharacters (size_t count) {
 
   logMallocError();
   return NULL;
+}
+
+static void
+cpbDeallocateHistoryEntry (void *item, void *data) {
+  HistoryEntry *entry = item;
+
+  if (entry->characters) free(entry->characters);
+  free(entry);
+}
+
+static Queue *
+cpbGetHistoryQueue (int create) {
+  static Queue *queue = NULL;
+
+  if (!queue && create) queue = newQueue(cpbDeallocateHistoryEntry, NULL);
+  return queue;
+}
+
+static void
+cpbPushContent (const wchar_t *characters, size_t length) {
+  if (length > 0) {
+    Queue *queue = cpbGetHistoryQueue(1);
+
+    if (queue) {
+      Element *element = getQueueTail(queue);
+
+      if (element) {
+        const HistoryEntry *entry = getElementItem(element);
+
+        if (length == entry->length) {
+          if (wmemcmp(characters, entry->characters, length) == 0) {
+            return;
+          }
+        }
+      }
+
+      {
+        HistoryEntry *entry;
+
+        if ((entry = malloc(sizeof(*entry)))) {
+          if ((entry->characters = cpbAllocateCharacters(length))) {
+            wmemcpy(entry->characters, characters, length);
+            entry->length = length;
+
+            if (enqueueItem(queue, entry)) {
+              return;
+            }
+
+            free(entry->characters);
+          } else {
+            logMallocError();
+          }
+
+          free(entry);
+        } else {
+          logMallocError();
+        }
+      }
+    }
+  }
 }
 
 const wchar_t *
@@ -61,6 +127,10 @@ cpbTruncateContent (size_t length) {
 
 void
 cpbClearContent (void) {
+  size_t length;
+  const wchar_t *characters = cpbGetContent(&length);
+
+  cpbPushContent(characters, length);
   cpbTruncateContent(0);
 }
 
