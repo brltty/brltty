@@ -1,0 +1,168 @@
+Device Identifiers
+==================
+
+The general syntax of a device identifier is:
+
+   qualifier:param1=value1+param2=value2+...
+
+More specifically, with [brackets] meaning optional, the syntax is:
+
+   [qualifier:][param=]value[+param=value]...
+
+The qualifier specifies which class of device is being identified. It is 
+separated from the rest of the device identifier by a colon (:). It may be 
+"serial", "usb", or "bluetooth". The qualifier is case insensitive, and any 
+abbreviation may be used. For backward compatibility (to when a device 
+identifier was strictly interpreted as the full path to a serial device), the 
+qualifier (along with its colon delimiter) is optional, and, if it isn't 
+supplied, "serial" is assumed.
+
+One or more parameters may be supplied after the qualifier. Each parameter has 
+the syntax "name=value", and the parameters are separated from one another by a 
+plus sign (+). Parameter names are case insensitive, and any abbreviation may 
+be used. Supplying a zero-length value means to use the parameter's default 
+value.
+
+For backward compatibility (to when device identifier parameters weren't 
+supported), the first supplied parameter is special in that its name (along 
+with its equals sign delimiter) is optional. If the name of the first parameter 
+isn't supplied, then the class-dependent parameter which most specifically 
+identifies the device is assumed. These are as follows:
+
+   serial:     name=
+   usb:        serialNumber=
+   bluetooth:  address=
+
+Note that it's impossible to specify no parameters at all. Specifying only the 
+qualifier is equivalent to also specifying a zero-length value for the assumed 
+first parameter of that class. For example, specifying "usb:" is equivalent to 
+specifying "usb:serialNumber=".
+
+On Linux, for example, the full path to the first serial device is 
+"/dev/ttyS0". To illustrate the optionality of both the qualifier and the name 
+of the first supplied parameter, the following device identifiers all refer to 
+the same serial device:
+
+   serial:name=ttyS0
+   serial:ttyS0
+   ttyS0
+   name=ttyS0
+
+-------------------------------------------------------------------------------
+
+
+Serial Device Parameters
+========================
+
+Serial device identifiers support the following parameters:
+
+   name=         name of, relative path to, or full path to the device
+   baud=         a supported decimal integer (often: 9600, 38400, 115200)
+   dataBits=     a supported decimal integer (usually within the range 5-8)
+   stopBits=     a supported decimal integer (usually 1 or 2)
+   parity=       none, odd, even, space, mark
+   flowControl=  none, hardware
+
+All of the parameters are optional, although the name= parameter should be 
+supplied. It shouldn't normally be necessary to supply any of the others, 
+especially since, in most cases, the braille driver actually overrides them.
+
+The name= parameter specifies the host device to use. It must be the name of 
+the device, the relative path to the device, or the full path to the device. If 
+it's a name or a relative path then the host's devices directory (usually 
+"/dev" on Unix-based platforms) is used. If this parameter isn't supplied then 
+the first real serial device is used.
+
+The baud= parameter specifies the speed, in bits per second, at which to 
+communicate with the device. It's value must be a decimal integer that's 
+supported by the host. Typical values are: 9600, 19200, 38400, 57600, 115200. 
+If this parameter isn't supplied then 9600 is used.
+
+The dataBits= parameter specifies the number of bits to use to represent an 
+actual character - it doesn't include any maintenance bits (start, stop, 
+parity, etc). It's value must be a decimal integer supported by the host, and 
+is usually within the range 5-8. If this parameter isn't supplied then 8 is 
+assumed.
+
+The stopBits= parameter specifies the number of stop bits to inject after a 
+character has been transmitted. It's value must be a decimal integer supported 
+by the host, and is usually either 1 or 2. If this parameter isn't supplied 
+then 1 is used.
+
+The parity= parameter specifies the type of error checking to use. It's value 
+must be one of: "none", "odd", "even", "space", "mark". If this parameter isn't 
+supplied then parity is not used.
+
+The flowControl= parameter specifies the kind of flow control to use. It's 
+value must be one of: "none", "hardware". If this parameter isn't supplied then 
+flow control is not used.
+
+-------------------------------------------------------------------------------
+
+
+USB Device Parameters
+=====================
+
+USB device identifiers support the following parameters:
+
+   serialNumber=       one or more arbitrary characters
+   vendorIdentifier=   four hexadecimal digits (other than 0000)
+   productIdentifier=  four hexadecimal digits (other than 0000)
+
+All of the parameters are optional. It shouldn't normally be necessary to 
+supply any of them.
+
+The serialNumber= parameter acts as a filter. It specifies the USB serial 
+number that the device must have. The match is case sensitive and must be 
+exact. If this parameter isn't supplied then this filter isn't applied.
+
+The vendorIdentifier= parameter acts as a filter. It specifies the USB vendor 
+identifier that the device must have. It's value must be four hexadecimal 
+digits (the "letter" digits may be in either case) other than "0000". If this 
+parameter isn't supplied then this filter isn't applied.
+
+The productIdentifier= parameter acts as a filter. It specifies the USB product 
+identifier that the device must have. It's value must be four hexadecimal 
+digits (the "letter" digits may be in either case) other than "0000". If this 
+parameter isn't supplied then this filter isn't applied.
+
+-------------------------------------------------------------------------------
+
+
+Bluetooth Device Parameters
+===========================
+
+Bluetooth device identifiers support the following parameters:
+
+   address=   six two-digit hexadecimal numbers separated by either : or -
+   timeout=   a decimal integer within the range 1-59
+   channel=   a decimal integer within the range 1-30
+   discover=  yes, no
+
+The address= parameter is required. All of the other parameters are optional, 
+and it shouldn't normally be necessary to supply any of them.
+
+The address= parameter specifies the Bluetooth address of the device. It's 
+value must be six two-digit hexadecimal numbers (the "letter" digits may be in 
+either case) separated from one another by either a colon (:) or a minus sign 
+(-).
+
+The timeout= parameter specifies the number of seconds to wait for a connection 
+to the device to complete. It's value must be a decimal integer within the 
+range 1-59. If this parameter isn't supplied then a reasonable default is used.
+
+The channel= parameter specifies the RFCOMM channel to use. It's value must be 
+a decimal integer within the range 1-30. If this parameter isn't supplied then 
+it's value is determined automatically.
+
+The discover= parameter specifies whether or not service discovery is to be 
+performed. In other words, it specifies whether or not the device is to be 
+"asked" for the RFCOMM channel to use. It's value must be either "yes" or "no" 
+- it is case insensitive, and any abbreviation may be used. If this parameter 
+isn't supplied then service discovery is performed if the channel= parameter 
+hasn't been supplied and isn't performed if the channel= parameter has been 
+supplied.
+
+-------------------------------------------------------------------------------
+
+
