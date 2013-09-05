@@ -159,9 +159,13 @@ The discover= parameter specifies whether or not service discovery is to be
 performed. In other words, it specifies whether or not the device is to be 
 "asked" for the RFCOMM channel to use. It's value must be either "yes" or "no" 
 - it is case insensitive, and any abbreviation may be used. If this parameter 
-isn't supplied then service discovery is performed if the channel= parameter 
-hasn't been supplied and isn't performed if the channel= parameter has been 
-supplied.
+isn't supplied then whether or not service discovery is performed is decided
+according to the following sequence of tests:
+
+   If the channel= parameter has been specified, then "no".
+   If the driver has requested service discovery, then "yes".
+   If the driver has specified a channel, then "no".
+   Otherwise, "yes".
 
 -------------------------------------------------------------------------------
 
