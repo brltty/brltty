@@ -251,7 +251,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
     if (socket >= 0) {
       bdaddr_t address;
-      char buffer[248];
+      char buffer[HCI_MAX_NAME_LENGTH];
       int result;
 
       bthMakeAddress(&address, bda);
