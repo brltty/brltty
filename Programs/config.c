@@ -1804,7 +1804,7 @@ changeLogLevel (const char *operand) {
     char **string = strings;
 
     while (*string) {
-      int level;
+      unsigned int level;
 
       if (isLogLevel(&level, *string)) {
         systemLogLevel = level;

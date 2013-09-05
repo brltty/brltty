@@ -123,11 +123,13 @@ isInteger (int *value, const char *string) {
   if (*string) {
     char *end;
     long l = strtol(string, &end, 0);
+
     if (!*end) {
       *value = l;
       return 1;
     }
   }
+
   return 0;
 }
 
@@ -136,19 +138,21 @@ isUnsignedInteger (unsigned int *value, const char *string) {
   if (*string) {
     char *end;
     unsigned long l = strtoul(string, &end, 0);
+
     if (!*end) {
       *value = l;
       return 1;
     }
   }
+
   return 0;
 }
 
 int
-isLogLevel (int *level, const char *string) {
+isLogLevel (unsigned int *level, const char *string) {
   {
-    int length = strlen(string);
-    int index;
+    size_t length = strlen(string);
+    unsigned int index;
 
     for (index=0; index<logLevelCount; index+=1) {
       if (strncasecmp(string, logLevelNames[index], length) == 0) {
@@ -159,9 +163,9 @@ isLogLevel (int *level, const char *string) {
   }
 
   {
-    int value;
+    unsigned int value;
 
-    if (isInteger(&value, string) && (value >= 0) && (value < logLevelCount)) {
+    if (isUnsignedInteger(&value, string) && (value < logLevelCount)) {
       *level = value;
       return 1;
     }
@@ -174,28 +178,35 @@ int
 validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
   if (*string) {
     int i;
+
     if (!isInteger(&i, string)) return 0;
     if (minimum && (i < *minimum)) return 0;
     if (maximum && (i > *maximum)) return 0;
+
     *value = i;
   }
+
   return 1;
 }
 
 int
 validateChoice (unsigned int *value, const char *string, const char *const *choices) {
-  int length = strlen(string);
+  size_t length = strlen(string);
+
   *value = 0;
   if (!length) return 1;
 
   {
-    int index = 0;
-    while (choices[index]) {
-      if (strncasecmp(string, choices[index], length) == 0) {
+    unsigned int index = 0;
+    const char *choice;
+
+    while ((choice = choices[index])) {
+      if (strncasecmp(string, choice, length) == 0) {
         *value = index;
         return 1;
       }
-      ++index;
+
+      index += 1;
     }
   }
 
@@ -205,6 +216,7 @@ validateChoice (unsigned int *value, const char *string, const char *const *choi
 int
 validateFlag (unsigned int *value, const char *string, const char *on, const char *off) {
   const char *choices[] = {off, on, NULL};
+
   return validateChoice(value, string, choices);
 }
 
@@ -224,11 +236,13 @@ isFloat (float *value, const char *string) {
   if (*string) {
     char *end;
     double d = strtod(string, &end);
+
     if (!*end) {
       *value = d;
       return 1;
     }
   }
+
   return 0;
 }
 
@@ -236,11 +250,14 @@ int
 validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
   if (*string) {
     float f;
+
     if (!isFloat(&f, string)) return 0;
     if (minimum && (f < *minimum)) return 0;
     if (maximum && (f > *maximum)) return 0;
+
     *value = f;
   }
+
   return 1;
 }
 #endif /* NO_FLOAT */
