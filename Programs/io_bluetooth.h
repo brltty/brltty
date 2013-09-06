@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct BluetoothConnectionStruct BluetoothConnection;
 
-extern void bthClearCache (void);
+extern void bthForgetDevices (void);
 
 extern char *bthGetNameOfDevice (BluetoothConnection *connection, int timeout);
 extern char *bthGetNameAtAddress (const char *address, int timeout);

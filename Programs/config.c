@@ -1222,7 +1222,7 @@ deactivateBrailleDriver (void) {
 static int
 startBrailleDriver (void) {
   usbForgetDevices();
-  bthClearCache();
+  bthForgetDevices();
 
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {

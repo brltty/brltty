@@ -106,7 +106,7 @@ bthGetDeviceEntry (uint64_t bda, int add) {
 }
 
 void
-bthClearCache (void) {
+bthForgetDevices (void) {
   if (bthInitializeDeviceQueue()) deleteElements(bluetoothDeviceQueue);
 }
 
@@ -141,7 +141,7 @@ bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
 int
 bthParseAddress (uint64_t *address, const char *string) {
   const char *character = string;
-  unsigned int count = BDA_SIZE;
+  unsigned int counter = BDA_SIZE;
   char delimiter = 0;
   *address = 0;
 
@@ -161,7 +161,11 @@ bthParseAddress (uint64_t *address, const char *string) {
     *address <<= 8;
     *address |= value;
 
-    if (!--count) break;
+    if (!--counter) {
+      if (*character) break;
+      return 1;
+    }
+
     if (!*character) break;
 
     if (!delimiter) {
@@ -174,7 +178,6 @@ bthParseAddress (uint64_t *address, const char *string) {
     character += 1;
   }
 
-  if (!count && !*character) return 1;
   logMessage(LOG_ERR, "invalid Bluetooth device address: %s", string);
   errno = EINVAL;
   return 0;
