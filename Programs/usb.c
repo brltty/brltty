@@ -1045,6 +1045,8 @@ usbNewChannel (UsbChooseChannelData *choose) {
       channel->definition = *choose->definition;
       return channel;
     }
+
+    free(channel);
   } else {
     logMallocError();
   }
