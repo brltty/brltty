@@ -1034,6 +1034,24 @@ usbChooseChannel (UsbDevice *device, void *data) {
   return 0;
 }
 
+static UsbChannel *
+usbNewChannel (UsbChooseChannelData *choose) {
+  UsbChannel *channel;
+
+  if ((channel = malloc(sizeof(*channel)))) {
+    memset(channel, 0, sizeof(*channel));
+
+    if ((channel->device = usbFindDevice(usbChooseChannel, choose))) {
+      channel->definition = *choose->definition;
+      return channel;
+    }
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 typedef enum {
   USB_CHAN_SERIAL_NUMBER,
   USB_CHAN_VENDOR_IDENTIFIER,
@@ -1055,53 +1073,31 @@ usbGetChannelParameters (const char *identifier) {
 
 UsbChannel *
 usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
+  UsbChannel *channel = NULL;
   char **parameters = usbGetChannelParameters(identifier);
 
   if (parameters) {
-    UsbDevice *device = NULL;
-    const UsbChannelDefinition *definition = NULL;
+    int ok = 1;
 
-    {
-      int ok = 1;
+    UsbChooseChannelData choose = {
+      .definition = definitions,
+      .serialNumber = parameters[USB_CHAN_SERIAL_NUMBER]
+    };
 
-      UsbChooseChannelData choose = {
-        .definition = definitions,
-        .serialNumber = parameters[USB_CHAN_SERIAL_NUMBER]
-      };
+    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_CHAN_VENDOR_IDENTIFIER])) ok = 0;
+    if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_CHAN_PRODUCT_IDENTIFIER])) ok = 0;
 
-      if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_CHAN_VENDOR_IDENTIFIER])) ok = 0;
-      if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_CHAN_PRODUCT_IDENTIFIER])) ok = 0;
-
-      if (ok) {
-        if ((device = usbFindDevice(usbChooseChannel, &choose))) {
-          definition = choose.definition;
-        }
+    if (ok) {
+      if (!(channel = usbNewChannel(&choose))) {
+        logMessage(LOG_DEBUG, "USB device not found%s%s",
+                   (*identifier? ": ": ""), identifier);
       }
-
-      deallocateStrings(parameters);
-      parameters = NULL;
     }
 
-    if (device) {
-      UsbChannel *channel;
-
-      if ((channel = malloc(sizeof(*channel)))) {
-        memset(channel, 0, sizeof(*channel));
-        channel->device = device;
-        channel->definition = *definition;
-        return channel;
-      } else {
-        logMallocError();
-      }
-
-      usbCloseDevice(device);
-    } else {
-      logMessage(LOG_DEBUG, "USB device not found%s%s",
-                 (*identifier? ": ": ""), identifier);
-    }
+    deallocateStrings(parameters);
   }
 
-  return NULL;
+  return channel;
 }
 
 void
