@@ -128,6 +128,59 @@ bthRecallConnectError (uint64_t bda, int *value) {
   return 1;
 }
 
+static BluetoothConnection *
+bthNewConnection (const char *address, uint8_t channel, int discover, int timeout) {
+  BluetoothConnection *connection;
+
+  if ((connection = malloc(sizeof(*connection)))) {
+    memset(connection, 0, sizeof(*connection));
+    connection->channel = channel;
+
+    if (bthParseAddress(&connection->address, address)) {
+      if ((connection->extension = bthNewConnectionExtension(connection->address))) {
+        int alreadyTried = 0;
+
+        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
+        bthLogChannel(connection->channel);
+
+        {
+          int value;
+
+          if (bthRecallConnectError(connection->address, &value)) {
+            errno = value;
+            alreadyTried = 1;
+          }
+        }
+
+        if (!alreadyTried) {
+          TimePeriod period;
+          startTimePeriod(&period, 2000);
+
+          while (1) {
+            if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
+              return connection;
+            }
+
+            if (afterTimePeriod(&period, NULL)) break;
+            if (errno != EBUSY) break;
+            asyncWait(100);
+          }
+
+          bthRememberConnectError(connection->address, errno);
+        }
+
+        bthReleaseConnectionExtension(connection->extension);
+      }
+    }
+
+    free(connection);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 void
 bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   memset(request, 0, sizeof(*request));
@@ -272,6 +325,7 @@ bthGetConnectionParameters (const char *identifier) {
 
 BluetoothConnection *
 bthOpenConnection (const BluetoothConnectionRequest *request) {
+  BluetoothConnection *connection = NULL;
   BluetoothConnectionRequest req = *request;
   char **parameters = bthGetConnectionParameters(req.identifier);
 
@@ -282,62 +336,12 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
     if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
     if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
     if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
-
-    if (ok) {
-      BluetoothConnection *connection;
-
-      if ((connection = malloc(sizeof(*connection)))) {
-        memset(connection, 0, sizeof(*connection));
-        connection->channel = req.channel;
-
-        if (bthParseAddress(&connection->address, parameters[BTH_CONN_ADDRESS])) {
-          if ((connection->extension = bthNewConnectionExtension(connection->address))) {
-            int alreadyTried = 0;
-
-            if (req.discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
-            bthLogChannel(connection->channel);
-
-            {
-              int value;
-
-              if (bthRecallConnectError(connection->address, &value)) {
-                errno = value;
-                alreadyTried = 1;
-              }
-            }
-
-            if (!alreadyTried) {
-              TimePeriod period;
-              startTimePeriod(&period, 2000);
-
-              while (1) {
-                if (bthOpenChannel(connection->extension, connection->channel, req.timeout)) {
-                  deallocateStrings(parameters);
-                  return connection;
-                }
-
-                if (afterTimePeriod(&period, NULL)) break;
-                if (errno != EBUSY) break;
-                asyncWait(100);
-              }
-
-              bthRememberConnectError(connection->address, errno);
-            }
-
-            bthReleaseConnectionExtension(connection->extension);
-          }
-        }
-
-        free(connection);
-      } else {
-        logMallocError();
-      }
-    }
+    if (ok) connection = bthNewConnection(parameters[BTH_CONN_ADDRESS], req.channel, req.discover, req.timeout);
 
     deallocateStrings(parameters);
   }
 
-  return NULL;
+  return connection;
 }
 
 void
