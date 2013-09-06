@@ -1074,7 +1074,7 @@ usbGetChannelParameters (const char *identifier) {
 }
 
 UsbChannel *
-usbFindChannel (const UsbChannelDefinition *definitions, const char *identifier) {
+usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier) {
   UsbChannel *channel = NULL;
   char **parameters = usbGetChannelParameters(identifier);
 

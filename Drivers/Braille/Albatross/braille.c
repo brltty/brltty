@@ -182,7 +182,7 @@ openUsbPort (const char *device) {
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+  if ((usbChannel = usbOpenChannel(definitions, (void *)device))) {
     return 1;
   }
 

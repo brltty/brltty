@@ -239,7 +239,7 @@ connectUsbResource (
   if (handle) {
     memset(handle, 0, sizeof(*handle));
 
-    if ((handle->channel = usbFindChannel(descriptor->usb.channelDefinitions, identifier))) {
+    if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
       return handle;
     }
 

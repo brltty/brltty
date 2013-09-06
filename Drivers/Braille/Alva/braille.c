@@ -1561,7 +1561,7 @@ openUsbPort (const char *device) {
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+  if ((usbChannel = usbOpenChannel(definitions, (void *)device))) {
     if (usbChannel->definition.outputEndpoint) {
       protocol = &protocol1Operations;
     } else {

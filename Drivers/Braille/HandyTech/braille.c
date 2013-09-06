@@ -921,7 +921,7 @@ openUsbPort (char **parameters, const char *device) {
     { .vendor=0 }
   };
 
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
+  if ((usb = usbOpenChannel(definitions, (void *)device))) {
     usbOps = usb->definition.data;
     usbOps->initialize();
 

@@ -133,7 +133,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       { .vendor=0 }
     };
 
-    if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    if ((usbChannel = usbOpenChannel(definitions, (void *)device))) {
       char identity[100];
       int identityLength;
       int retries = -1;
