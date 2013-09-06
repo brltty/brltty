@@ -137,7 +137,7 @@ bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
 }
 
 BluetoothConnectionExtension *
-bthGetConnectionExtension (uint64_t bda) {
+bthNewConnectionExtension (uint64_t bda) {
   logUnsupportedFunction();
   return NULL;
 }

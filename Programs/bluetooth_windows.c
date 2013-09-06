@@ -73,7 +73,7 @@ bthSocketError (const char *action, const DWORD *exceptions) {
 }
 
 BluetoothConnectionExtension *
-bthGetConnectionExtension (uint64_t bda) {
+bthNewConnectionExtension (uint64_t bda) {
   int result;
   WSADATA wsa;
 

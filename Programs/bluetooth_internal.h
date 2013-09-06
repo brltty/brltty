@@ -29,7 +29,7 @@ extern char *bthObtainDeviceName (uint64_t bda, int timeout);
 
 typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
 
-extern BluetoothConnectionExtension *bthGetConnectionExtension (uint64_t bda);
+extern BluetoothConnectionExtension *bthNewConnectionExtension (uint64_t bda);
 extern void bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx);
 
 extern int bthDiscoverChannel (

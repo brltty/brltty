@@ -25,7 +25,7 @@
 #include "log.h"
 
 BluetoothConnectionExtension *
-bthGetConnectionExtension (uint64_t bda) {
+bthNewConnectionExtension (uint64_t bda) {
   logUnsupportedFunction();
   return NULL;
 }

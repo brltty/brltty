@@ -291,7 +291,7 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
         connection->channel = req.channel;
 
         if (bthParseAddress(&connection->address, parameters[BTH_CONN_ADDRESS])) {
-          if ((connection->extension = bthGetConnectionExtension(connection->address))) {
+          if ((connection->extension = bthNewConnectionExtension(connection->address))) {
             int alreadyTried = 0;
 
             if (req.discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);

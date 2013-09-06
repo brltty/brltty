@@ -33,7 +33,7 @@
 #include "io_misc.h"
 
 struct BluetoothConnectionExtensionStruct {
-  int socket;
+  SocketDescriptor socket;
   struct sockaddr_rc local;
   struct sockaddr_rc remote;
 };
@@ -49,7 +49,7 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
 }
 
 BluetoothConnectionExtension *
-bthGetConnectionExtension (uint64_t bda) {
+bthNewConnectionExtension (uint64_t bda) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
