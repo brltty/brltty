@@ -330,13 +330,16 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
   char **parameters = bthGetConnectionParameters(req.identifier);
 
   if (parameters) {
-    int ok = 1;
+    {
+      int ok = 1;
 
-    if (!req.channel) req.discover = 1;
-    if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
-    if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
-    if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
-    if (ok) connection = bthNewConnection(parameters[BTH_CONN_ADDRESS], req.channel, req.discover, req.timeout);
+      if (!req.channel) req.discover = 1;
+      if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
+      if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
+      if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
+
+      if (ok) connection = bthNewConnection(parameters[BTH_CONN_ADDRESS], req.channel, req.discover, req.timeout);
+    }
 
     deallocateStrings(parameters);
   }
