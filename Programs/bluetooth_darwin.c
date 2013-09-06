@@ -48,6 +48,9 @@
   data: (void *) dataPointer
   length: (size_t) dataLength;
 
+- (void) rfcommChannelClosed
+  : (IOBluetoothRFCOMMChannel*) rfcommChannel;
+
 - (IOReturn) run;
 @end
 
@@ -138,17 +141,64 @@ bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
 
 BluetoothConnectionExtension *
 bthNewConnectionExtension (uint64_t bda) {
-  logUnsupportedFunction();
+  BluetoothConnectionExtension *bcx;
+
+  if ((bcx = malloc(sizeof(*bcx)))) {
+    memset(bcx, 0, sizeof(*bcx));
+    bthInitializeInputPipe(bcx);
+    bthMakeAddress(&bcx->bluetoothAddress, bda);
+
+    if ((bcx->bluetoothDevice = [IOBluetoothDevice deviceWithAddress:&bcx->bluetoothAddress])) {
+      [bcx->bluetoothDevice retain];
+
+      return bcx;
+    }
+
+    free(bcx);
+  } else {
+    logMallocError();
+  }
+
   return NULL;
 }
 
 void
 bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+  bthDestroyRfcommChannel(bcx);
+  bthDestroyRfcommDelegate(bcx);
+  bthDestroyBluetoothDevice(bcx);
+  bthDestroyInputPipe(bcx);
+  free(bcx);
 }
 
 int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
-  logUnsupportedFunction();
+  IOReturn result;
+
+  if (pipe(bcx->inputPipe) != -1) {
+    if (setBlockingIo(bcx->inputPipe[0], 0)) {
+      if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
+        bcx->rfcommDelegate.bluetoothConnectionExtension = bcx;
+
+        if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
+          if ([bcx->rfcommDelegate start]) {
+            return 1;
+          }
+
+          bthDestroyRfcommChannel(bcx);
+        } else {
+          bthSetError(result, "RFCOMM channel open");
+        }
+
+        bthDestroyRfcommDelegate(bcx);
+      }
+    }
+
+    bthDestroyInputPipe(bcx);
+  } else {
+    logSystemError("pipe");
+  }
+
   return 0;
 }
 
@@ -201,66 +251,6 @@ bthDiscoverChannel (
   }
 
   return 0;
-}
-
-BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
-  IOReturn result;
-  BluetoothConnectionExtension *bcx;
-
-  if ((bcx = malloc(sizeof(*bcx)))) {
-    memset(bcx, 0, sizeof(*bcx));
-    bthInitializeInputPipe(bcx);
-    bthMakeAddress(&bcx->bluetoothAddress, bda);
-
-    if (pipe(bcx->inputPipe) != -1) {
-      if (setBlockingIo(bcx->inputPipe[0], 0)) {
-        if ((bcx->bluetoothDevice = [IOBluetoothDevice deviceWithAddress:&bcx->bluetoothAddress])) {
-          [bcx->bluetoothDevice retain];
-
-          if ((bcx->rfcommDelegate = [RfcommChannelDelegate new])) {
-            bcx->rfcommDelegate.bluetoothConnectionExtension = bcx;
-
-            if (discover) bthDiscoverSerialPortChannel(&channel, bcx);
-            bthLogChannel(channel);
-
-            if ((result = [bcx->bluetoothDevice openRFCOMMChannelSync:&bcx->rfcommChannel withChannelID:channel delegate:nil]) == kIOReturnSuccess) {
-              if ([bcx->rfcommDelegate start]) {
-                return bcx;
-              }
-
-              bthDestroyRfcommChannel(bcx);
-            } else {
-              bthSetError(result, "RFCOMM channel open");
-            }
-
-            bthDestroyRfcommDelegate(bcx);
-          }
-
-          bthDestroyBluetoothDevice(bcx);
-        }
-      }
-
-      bthDestroyInputPipe(bcx);
-    } else {
-      logSystemError("pipe");
-    }
-
-    free(bcx);
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
-}
-
-void
-bthDisconnect (BluetoothConnectionExtension *bcx) {
-  bthDestroyRfcommChannel(bcx);
-  bthDestroyRfcommDelegate(bcx);
-  bthDestroyBluetoothDevice(bcx);
-  bthDestroyInputPipe(bcx);
-  free(bcx);
 }
 
 int
@@ -346,6 +336,12 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   length: (size_t) dataLength
   {
     writeFile(self.bluetoothConnectionExtension->inputPipe[1], dataPointer, dataLength);
+  }
+
+- (void) rfcommChannelClosed
+  : (IOBluetoothRFCOMMChannel*) rfcommChannel
+  {
+    logMessage(LOG_NOTICE, "RFCOMM channel closed");
   }
 
 - (IOReturn) run
