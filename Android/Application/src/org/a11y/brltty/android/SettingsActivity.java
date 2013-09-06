@@ -405,12 +405,14 @@ public class SettingsActivity extends PreferenceActivity {
         return makeStringArray(devices, stringMaker);
       }
 
+      @Override
       public String getMethodQualifier () {
         return "bluetooth";
       }
 
+      @Override
       public String getDeviceReference (String identifier) {
-        return identifier;
+        return "address=" + identifier;
       }
     }
 
@@ -449,10 +451,12 @@ public class SettingsActivity extends PreferenceActivity {
         return makeStringArray(devices, stringMaker);
       }
 
+      @Override
       public String getMethodQualifier () {
         return "usb";
       }
 
+      @Override
       public String getDeviceReference (String identifier) {
         UsbDevice device = map.get(identifier);
         UsbDeviceConnection connection = manager.openDevice(device);
@@ -460,7 +464,9 @@ public class SettingsActivity extends PreferenceActivity {
         if (connection != null) {
           String serialNumber = connection.getSerial();
           connection.close();
-          return serialNumber;
+
+          return String.format("vendorIdentifier=0X%04X+productIdentifier=0X%04X+serialNumber=%s",
+                               device.getVendorId(), device.getProductId(), serialNumber);
         }
 
         return null;
@@ -478,10 +484,12 @@ public class SettingsActivity extends PreferenceActivity {
         return new String[0];
       }
 
+      @Override
       public String getMethodQualifier () {
         return "serial";
       }
 
+      @Override
       public String getDeviceReference (String identifier) {
         return identifier;
       }
