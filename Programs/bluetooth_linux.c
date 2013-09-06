@@ -48,6 +48,66 @@ bthMakeAddress (bdaddr_t *address, uint64_t bda) {
   }
 }
 
+BluetoothConnectionExtension *
+bthGetConnectionExtension (uint64_t bda) {
+  BluetoothConnectionExtension *bcx;
+
+  if ((bcx = malloc(sizeof(*bcx)))) {
+    memset(bcx, 0, sizeof(*bcx));
+
+    bcx->local.rc_family = AF_BLUETOOTH;
+    bcx->local.rc_channel = 0;
+    bacpy(&bcx->local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
+                                               * interface specification yet.
+                                                 */
+
+    bcx->remote.rc_family = AF_BLUETOOTH;
+    bcx->remote.rc_channel = 0;
+    bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
+
+    bcx->socket = INVALID_SOCKET_DESCRIPTOR;
+    return bcx;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+  closeSocket(&bcx->socket);
+  free(bcx);
+}
+
+int
+bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
+  bcx->remote.rc_channel = channel;
+
+  if ((bcx->socket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+    if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
+      if (setBlockingIo(bcx->socket, 0)) {
+        if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
+          return 1;
+        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
+          logSystemError("RFCOMM connect");
+        } else {
+          logMessage(LOG_DEBUG, "Bluetooth connect error: %s", strerror(errno));
+        }
+      }
+    } else {
+      logSystemError("RFCOMM bind");
+    }
+
+    close(bcx->socket);
+    bcx->socket = INVALID_SOCKET_DESCRIPTOR;
+  } else {
+    logSystemError("RFCOMM socket");
+  }
+
+  return 0;
+}
+
 int
 bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
@@ -159,60 +219,6 @@ bthDiscoverChannel (
 #endif /* HAVE_LIBBLUETOOTH */
 
   return foundChannel;
-}
-
-BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
-  BluetoothConnectionExtension *bcx;
-
-  if ((bcx = malloc(sizeof(*bcx)))) {
-    memset(bcx, 0, sizeof(*bcx));
-
-    if ((bcx->socket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
-      bcx->local.rc_family = AF_BLUETOOTH;
-      bcx->local.rc_channel = 0;
-      bacpy(&bcx->local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
-                                                 * interface specification yet.
-                                                 */
-
-      if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
-        bcx->remote.rc_family = AF_BLUETOOTH;
-        bcx->remote.rc_channel = channel;
-        bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
-
-        if (setBlockingIo(bcx->socket, 0)) {
-          if (discover) bthDiscoverSerialPortChannel(&channel, bcx);
-          bthLogChannel(channel);
-
-          if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
-            return bcx;
-          } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-            logSystemError("RFCOMM connect");
-          } else {
-            logMessage(LOG_DEBUG, "Bluetooth connect error: %s", strerror(errno));
-          }
-        }
-      } else {
-        logSystemError("RFCOMM bind");
-      }
-
-      close(bcx->socket);
-    } else {
-      logSystemError("RFCOMM socket");
-    }
-
-    free(bcx);
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
-}
-
-void
-bthDisconnect (BluetoothConnectionExtension *bcx) {
-  close(bcx->socket);
-  free(bcx);
 }
 
 int

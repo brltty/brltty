@@ -136,6 +136,22 @@ bthMakeAddress (BluetoothDeviceAddress *address, uint64_t bda) {
   }
 }
 
+BluetoothConnectionExtension *
+bthGetConnectionExtension (uint64_t bda) {
+  logUnsupportedFunction();
+  return NULL;
+}
+
+void
+bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+}
+
+int
+bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
+  logUnsupportedFunction();
+  return 0;
+}
+
 static int
 bthPerformServiceQuery (BluetoothConnectionExtension *bcx) {
   int ok = 0;

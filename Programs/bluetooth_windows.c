@@ -71,11 +71,28 @@ bthSocketError (const char *action, const DWORD *exceptions) {
   return error;
 }
 
+BluetoothConnectionExtension *
+bthGetConnectionExtension (uint64_t bda) {
+  logUnsupportedFunction();
+  return NULL;
+}
+
+void
+bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+}
+
+int
+bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
+  logUnsupportedFunction();
+  return 0;
+}
+
 int
 bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
+  logUnsupportedFunction();
   return 0;
 }
 

@@ -29,21 +29,20 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
-const uint8_t uuidBytes_serialPortProfile[] = {
-  0X00, 0X00, 0X11, 0X01,
-  0X00, 0X00,
-  0X10, 0X00,
-  0X80, 0X00,
-  0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
-};
-const uint8_t uuidLength_serialPortProfile = ARRAY_COUNT(uuidBytes_serialPortProfile);
-
-int
+static int
 bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
-  return bthDiscoverChannel(channel, bcx, uuidBytes_serialPortProfile, uuidLength_serialPortProfile);
+  static const uint8_t uuid[] = {
+    0X00, 0X00, 0X11, 0X01,
+    0X00, 0X00,
+    0X10, 0X00,
+    0X80, 0X00,
+    0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
+  };
+
+  return bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid));
 }
 
-void
+static void
 bthLogChannel (uint8_t channel) {
   logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
 }
@@ -292,33 +291,40 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
         connection->channel = req.channel;
 
         if (bthParseAddress(&connection->address, parameters[BTH_CONN_ADDRESS])) {
-          int alreadyTried = 0;
+          if ((connection->extension = bthGetConnectionExtension(connection->address))) {
+            int alreadyTried = 0;
 
-          {
-            int value;
+            if (req.discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
+            bthLogChannel(connection->channel);
 
-            if (bthRecallConnectError(connection->address, &value)) {
-              errno = value;
-              alreadyTried = 1;
+            {
+              int value;
+
+              if (bthRecallConnectError(connection->address, &value)) {
+                errno = value;
+                alreadyTried = 1;
+              }
             }
-          }
 
-          if (!alreadyTried) {
-            TimePeriod period;
-            startTimePeriod(&period, 2000);
+            if (!alreadyTried) {
+              TimePeriod period;
+              startTimePeriod(&period, 2000);
 
-            while (1) {
-              if ((connection->extension = bthConnect(connection->address, connection->channel, req.discover, req.timeout))) {
-                deallocateStrings(parameters);
-                return connection;
+              while (1) {
+                if (bthOpenChannel(connection->extension, connection->channel, req.timeout)) {
+                  deallocateStrings(parameters);
+                  return connection;
+                }
+
+                if (afterTimePeriod(&period, NULL)) break;
+                if (errno != EBUSY) break;
+                asyncWait(100);
               }
 
-              if (afterTimePeriod(&period, NULL)) break;
-              if (errno != EBUSY) break;
-              asyncWait(100);
+              bthRememberConnectError(connection->address, errno);
             }
 
-            bthRememberConnectError(connection->address, errno);
+            bthReleaseConnectionExtension(connection->extension);
           }
         }
 
@@ -336,7 +342,7 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
 
 void
 bthCloseConnection (BluetoothConnection *connection) {
-  bthDisconnect(connection->extension);
+  bthReleaseConnectionExtension(connection->extension);
   free(connection);
 }
 
