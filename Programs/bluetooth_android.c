@@ -35,68 +35,40 @@ struct BluetoothConnectionExtensionStruct {
 static jclass connectionClass = NULL;
 static jmethodID connectionConstructor = 0;
 static jmethodID closeMethod = 0;
+static jmethodID openMethod = 0;
 static jmethodID writeMethod = 0;
 
 BluetoothConnectionExtension *
 bthNewConnectionExtension (uint64_t bda) {
-  logUnsupportedFunction();
-  return NULL;
-}
-
-void
-bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
-}
-
-int
-bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
-  logUnsupportedFunction();
-  return 0;
-}
-
-int
-bthDiscoverChannel (
-  uint8_t *channel, BluetoothConnectionExtension *bcx,
-  const void *uuidBytes, size_t uuidLength
-) {
-  logUnsupportedFunction();
-  return 0;
-}
-
-BluetoothConnectionExtension *
-bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
   BluetoothConnectionExtension *bcx;
 
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
 
+    bcx->inputPipe[0] = INVALID_FILE_DESCRIPTOR;
+    bcx->inputPipe[1] = INVALID_FILE_DESCRIPTOR;
+
     if ((bcx->env = getJavaNativeInterface())) {
       if (findJavaClass(bcx->env, &connectionClass, "org/a11y/brltty/android/BluetoothConnection")) {
         if (findJavaConstructor(bcx->env, &connectionConstructor, connectionClass,
-                                JAVA_SIG_CONSTRUCTOR(JAVA_SIG_LONG JAVA_SIG_BYTE JAVA_SIG_INT))) {
-          if (pipe(bcx->inputPipe) != -1) {
-            if (setBlockingIo(bcx->inputPipe[0], 0)) {
-              jobject localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda, channel, bcx->inputPipe[1]);
+                                JAVA_SIG_CONSTRUCTOR(
+                                                     JAVA_SIG_LONG // deviceAddress
+                                                    ))) {
+          jobject localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda);
 
-              if (!clearJavaException(bcx->env, 0)) {
-                jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
+          if (!clearJavaException(bcx->env, 0)) {
+            jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
 
-                (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
-                localReference = NULL;
+            (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
+            localReference = NULL;
 
-                if ((globalReference)) {
-                  bcx->connection = globalReference;
-                  return bcx;
-                } else {
-                  logMallocError();
-                  clearJavaException(bcx->env, 0);
-                }
-              }
+            if ((globalReference)) {
+              bcx->connection = globalReference;
+              return bcx;
+            } else {
+              logMallocError();
+              clearJavaException(bcx->env, 0);
             }
-
-            close(bcx->inputPipe[0]);
-            close(bcx->inputPipe[1]);
-          } else {
-            logSystemError("pipe");
           }
         }
       }
@@ -111,7 +83,7 @@ bthConnect (uint64_t bda, uint8_t channel, int discover, int timeout) {
 }
 
 void
-bthDisconnect (BluetoothConnectionExtension *bcx) {
+bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
   if (bcx->connection) {
     if (findJavaInstanceMethod(bcx->env, &closeMethod, connectionClass, "close",
                                JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
@@ -122,10 +94,48 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
     clearJavaException(bcx->env, 1);
   }
 
-  close(bcx->inputPipe[0]);
-  close(bcx->inputPipe[1]);
+  closeFile(&bcx->inputPipe[0]);
+  closeFile(&bcx->inputPipe[1]);
 
   free(bcx);
+}
+
+int
+bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
+  if (pipe(bcx->inputPipe) != -1) {
+    if (setBlockingIo(bcx->inputPipe[0], 0)) {
+      if (findJavaInstanceMethod(bcx->env, &openMethod, connectionClass, "open",
+                                 JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                                 JAVA_SIG_INT // inputPipe
+                                                ))) {
+        jboolean result = (*bcx->env)->CallBooleanMethod(bcx->env, bcx->connection, openMethod, bcx->inputPipe[0]);
+
+        if (!clearJavaException(bcx->env, 1)) {
+          if (result == JNI_TRUE) {
+            return 1;
+          }
+        }
+
+        errno = EIO;
+      }
+    }
+
+    close(bcx->inputPipe[0]);
+    close(bcx->inputPipe[1]);
+  } else {
+    logSystemError("pipe");
+  }
+
+  return 0;
+}
+
+int
+bthDiscoverChannel (
+  uint8_t *channel, BluetoothConnectionExtension *bcx,
+  const void *uuidBytes, size_t uuidLength
+) {
+  logUnsupportedFunction();
+  return 0;
 }
 
 int
@@ -150,7 +160,9 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   BluetoothConnectionExtension *bcx = connection->extension;
 
   if (findJavaInstanceMethod(bcx->env, &writeMethod, connectionClass, "write",
-                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN, JAVA_SIG_ARRAY(JAVA_SIG_BYTE)))) {
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_ARRAY(JAVA_SIG_BYTE)) // bytes
+                                            )) {
     jbyteArray bytes = (*bcx->env)->NewByteArray(bcx->env, size);
 
     if (bytes) {
@@ -160,11 +172,13 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
       result = (*bcx->env)->CallBooleanMethod(bcx->env, bcx->connection, writeMethod, bytes);
       (*bcx->env)->DeleteLocalRef(bcx->env, bytes);
 
-      if (result) {
-        return size;
-      } else {
-        errno = EIO;
+      if (!clearJavaException(bcx->env, 1)) {
+        if (result == JNI_TRUE) {
+          return size;
+        }
       }
+
+      errno = EIO;
     } else {
       errno = ENOMEM;
     }
@@ -173,7 +187,6 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   }
 
   logSystemError("Bluetooth write");
-  clearJavaException(bcx->env, 1);
   return -1;
 }
 

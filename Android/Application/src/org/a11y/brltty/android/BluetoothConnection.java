@@ -121,41 +121,9 @@ public class BluetoothConnection {
     return getDevice(deviceAddress).getName();
   }
 
-  public BluetoothConnection (long deviceAddress, byte channelNumber, int inputPipe
-  ) throws Throwable {
+  public BluetoothConnection (long deviceAddress) {
     bluetoothDevice = getDevice(deviceAddress);
     bluetoothAddress = bluetoothDevice.getAddress();
-
-    try {
-      bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
-      bluetoothSocket.connect();
-
-      outputStream = bluetoothSocket.getOutputStream();
-      inputThread = new InputThread(bluetoothSocket.getInputStream(), inputPipe);
-      inputThread.start();
-    } catch (Throwable cause) {
-      if (cause instanceof IOException) {
-        Log.w(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + cause.getMessage());
-      } else {
-        Log.e(LOG_TAG, "Bluetooth connect error: " + bluetoothAddress, cause);
-      }
-
-      if (inputThread != null) {
-        if (inputThread.isAlive()) {
-          inputThread.stop = true;
-          inputThread.join();
-        }
-
-        inputThread = null;
-      }
-
-      if (bluetoothSocket != null) {
-        bluetoothSocket.close();
-        bluetoothSocket = null;
-      }
-
-      throw cause;
-    }
   }
 
   public void close () {
@@ -173,6 +141,37 @@ public class BluetoothConnection {
 
       bluetoothSocket = null;
     }
+  }
+
+  public boolean open (int inputPipe) {
+    InputStream inputStream;
+
+    try {
+      bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
+      bluetoothSocket.connect();
+
+      inputStream = bluetoothSocket.getInputStream();
+      outputStream = bluetoothSocket.getOutputStream();
+    } catch (IOException openException) {
+      Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
+
+      if (bluetoothSocket != null) {
+        try {
+          bluetoothSocket.close();
+        } catch (IOException closeException) {
+          Log.e(LOG_TAG, "Bluetooth socket close error: " + bluetoothAddress, closeException);
+        }
+
+        bluetoothSocket = null;
+        outputStream = null;
+      }
+
+      return false;
+    }
+
+    inputThread = new InputThread(inputStream, inputPipe);
+    inputThread.start();
+    return true;
   }
 
   public boolean write (byte[] bytes) {
