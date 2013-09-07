@@ -15,12 +15,17 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-
+#define WINVER WindowsVista
 #define __USE_W32_SOCKETS
+
+#pragma pack(push,2)
+#include <winsock2.h>
+#include <ws2bth.h>
+#pragma pack(pop)
+
 #include "prologue.h"
 
 #include <errno.h>
-#include <ws2bth.h>
 
 #if defined(AF_BTH)
 #ifndef PF_BTH
@@ -37,6 +42,11 @@
 #define PF_BTH AF_BTH
 #warning using hard-coded value for Bluetooth socket address and protocol family constants
 #endif /* bluetooth address/protocol family definitions */
+
+#ifndef NS_BTH
+#define NS_BTH 16
+#warning using hard-coded value for Bluetooth namespace constant
+#endif /* NS_BTH */
 
 #include "log.h"
 #include "io_bluetooth.h"
@@ -85,7 +95,7 @@ bthNewConnectionExtension (uint64_t bda) {
 
       bcx->local.addressFamily = AF_BTH;
       bcx->local.btAddr = BTH_ADDR_NULL;
-      bcx->local.port = BT_PORT_ANY;
+      bcx->local.port = 0;
 
       bcx->remote.addressFamily = AF_BTH;
       bcx->remote.btAddr = bda;
@@ -118,8 +128,8 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
   bcx->remote.port = channel;
 
   if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
-    if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
-      if (connect(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
+    if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
+      if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
         unsigned long nonblocking = 1;
 
         if (ioctlsocket(bcx->socket, FIONBIO, &nonblocking) != SOCKET_ERROR) {
@@ -154,7 +164,42 @@ bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
-  logUnsupportedFunction();
+  char addressString[0X100];
+  DWORD addressLength = sizeof(addressString);
+
+  if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
+                          NULL,
+                          addressString, &addressLength) != SOCKET_ERROR) {
+    HANDLE handle;
+
+    WSAQUERYSET restrictions = {
+      .dwNameSpace = NS_BTH,
+      .lpszContext = addressString,
+      .lpServiceClassId = (GUID *)uuidBytes,
+      .dwNumberOfCsAddrs = 0,
+      .dwSize = sizeof(restrictions)
+    };
+
+    if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
+      WSAQUERYSET result;
+      DWORD resultLength = sizeof(result);
+
+      while (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result) != SOCKET_ERROR) {
+        SOCKADDR_BTH *address = (SOCKADDR_BTH *)&result.lpcsaBuffer->RemoteAddr;
+        logMessage(LOG_NOTICE, "windows sdp: %lu", address->port);
+      }
+      bthSocketError("WSALookupServiceNext", NULL);
+
+      if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
+        bthSocketError("WSALookupServiceEnd", NULL);
+      }
+    } else {
+      bthSocketError("WSALookupServiceBegin", NULL);
+    }
+  } else {
+    bthSocketError("WSAAddressToString", NULL);
+  }
+
   return 0;
 }
 
