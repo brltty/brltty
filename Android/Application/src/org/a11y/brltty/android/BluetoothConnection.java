@@ -143,11 +143,12 @@ public class BluetoothConnection {
     }
   }
 
-  public boolean open (int inputPipe) {
+  public boolean open (int inputPipe, boolean secure) {
     InputStream inputStream;
 
     try {
-      bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
+      bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
+                                bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
       bluetoothSocket.connect();
 
       inputStream = bluetoothSocket.getInputStream();
