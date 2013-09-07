@@ -31,6 +31,8 @@
 
 static int
 bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+  int discovered;
+
   static const uint8_t uuid[] = {
     0X00, 0X00, 0X11, 0X01,
     0X00, 0X00,
@@ -39,7 +41,16 @@ bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bc
     0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
   };
 
-  return bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid));
+  logMessage(LOG_DEBUG, "discovering serial port channel");
+  discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid));
+
+  if (discovered) {
+    logMessage(LOG_DEBUG, "serial port channel discovered: %u", *channel);
+  } else {
+    logMessage(LOG_DEBUG, "serial port channel not discovered");
+  }
+
+  return discovered;
 }
 
 static void
@@ -140,16 +151,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
       if ((connection->extension = bthNewConnectionExtension(connection->address))) {
         int alreadyTried = 0;
 
-        if (discover) {
-          logMessage(LOG_DEBUG, "performing service discovery");
-
-          if (bthDiscoverSerialPortChannel(&connection->channel, connection->extension)) {
-            logMessage(LOG_DEBUG, "service discovery succeeded");
-          } else {
-            logMessage(LOG_DEBUG, "service discovery failed");
-          }
-        }
-
+        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
         bthLogChannel(connection->channel);
 
         {
@@ -373,7 +375,7 @@ bthGetDeviceName (uint64_t bda, int timeout) {
       if ((entry->deviceName = bthObtainDeviceName(bda, timeout))) {
         logMessage(LOG_DEBUG, "device name: %s", entry->deviceName);
       } else {
-        logMessage(LOG_DEBUG, "device name not obtainable");
+        logMessage(LOG_DEBUG, "device name not obtained");
       }
     }
 
