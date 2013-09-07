@@ -140,7 +140,16 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
       if ((connection->extension = bthNewConnectionExtension(connection->address))) {
         int alreadyTried = 0;
 
-        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
+        if (discover) {
+          logMessage(LOG_DEBUG, "performing service discovery");
+
+          if (bthDiscoverSerialPortChannel(&connection->channel, connection->extension)) {
+            logMessage(LOG_DEBUG, "service discovery succeeded");
+          } else {
+            logMessage(LOG_DEBUG, "service discovery failed");
+          }
+        }
+
         bthLogChannel(connection->channel);
 
         {
@@ -359,7 +368,13 @@ bthGetDeviceName (uint64_t bda, int timeout) {
 
   if (entry) {
     if (!entry->deviceName) {
-      entry->deviceName = bthObtainDeviceName(bda, timeout);
+      logMessage(LOG_DEBUG, "obtaining device name");
+
+      if ((entry->deviceName = bthObtainDeviceName(bda, timeout))) {
+        logMessage(LOG_DEBUG, "device name: %s", entry->deviceName);
+      } else {
+        logMessage(LOG_DEBUG, "device name not obtainable");
+      }
     }
 
     return entry->deviceName;
