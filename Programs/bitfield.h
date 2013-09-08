@@ -29,7 +29,7 @@ extern "C" {
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
 
 static inline uint16_t
-getSameEndian16 (uint16_t from) {
+getNativeEndian16 (uint16_t from) {
   return from;
 }
 
@@ -42,8 +42,8 @@ getOtherEndian16 (uint16_t from) {
 }
 
 static inline void
-putSameEndian16 (uint16_t *to, uint16_t from) {
-  *to = getSameEndian16(from);
+putNativeEndian16 (uint16_t *to, uint16_t from) {
+  *to = getNativeEndian16(from);
 }
 
 static inline void
@@ -52,7 +52,7 @@ putOtherEndian16 (uint16_t *to, uint16_t from) {
 }
 
 static inline uint32_t
-getSameEndian32 (uint32_t from) {
+getNativeEndian32 (uint32_t from) {
   return from;
 }
 
@@ -67,8 +67,8 @@ getOtherEndian32 (uint32_t from) {
 }
 
 static inline void
-putSameEndian32 (uint32_t *to, uint32_t from) {
-  *to = getSameEndian32(from);
+putNativeEndian32 (uint32_t *to, uint32_t from) {
+  *to = getNativeEndian32(from);
 }
 
 static inline void
@@ -80,24 +80,24 @@ putOtherEndian32 (uint32_t *to, uint32_t from) {
 #  define getLittleEndian16 getOtherEndian16
 #  define putLittleEndian16 putOtherEndian16
 
-#  define getBigEndian16 getSameEndian16
-#  define putBigEndian16 putSameEndian16
+#  define getBigEndian16 getNativeEndian16
+#  define putBigEndian16 putNativeEndian16
 
 #  define getLittleEndian32 getOtherEndian32
 #  define putLittleEndian32 putOtherEndian32
 
-#  define getBigEndian32 getSameEndian32
-#  define putBigEndian32 putSameEndian32
+#  define getBigEndian32 getNativeEndian32
+#  define putBigEndian32 putNativeEndian32
 
 #else /* WORDS_BIGENDIAN */
-#  define getLittleEndian16 getSameEndian16
-#  define putLittleEndian16 putSameEndian16
+#  define getLittleEndian16 getNativeEndian16
+#  define putLittleEndian16 putNativeEndian16
 
 #  define getBigEndian16 getOtherEndian16
 #  define putBigEndian16 putOtherEndian16
 
-#  define getLittleEndian32 getSameEndian32
-#  define putLittleEndian32 putSameEndian32
+#  define getLittleEndian32 getNativeEndian32
+#  define putLittleEndian32 putNativeEndian32
 
 #  define getBigEndian32 getOtherEndian32
 #  define putBigEndian32 putOtherEndian32
