@@ -50,6 +50,7 @@
 #endif /* NS_BTH */
 
 #include "log.h"
+#include "bitfield.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
@@ -130,7 +131,6 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
 
   if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
     if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
-logBytes(LOG_NOTICE, "connect", &bcx->remote, sizeof(bcx->remote));
       if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
         unsigned long nonblocking = 1;
 
@@ -166,61 +166,70 @@ bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
+  GUID guid;
+
+  memcpy(&guid, uuidBytes, sizeof(guid));
+  putNativeEndian32((uint32_t *)&guid.Data1, getBigEndian32(guid.Data1));
+  putNativeEndian16((uint16_t *)&guid.Data2, getBigEndian16(guid.Data2));
+  putNativeEndian16((uint16_t *)&guid.Data3, getBigEndian16(guid.Data3));
+
 #if 0
-  char addressString[0X100];
-  DWORD addressLength = sizeof(addressString);
+  {
+    char addressString[0X100];
+    DWORD addressLength = sizeof(addressString);
 
-  if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
-                          NULL,
-                          addressString, &addressLength) != SOCKET_ERROR) {
-    HANDLE handle;
+    if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
+                            NULL,
+                            addressString, &addressLength) != SOCKET_ERROR) {
+      HANDLE handle;
 
-    WSAQUERYSET restrictions = {
-      .dwNameSpace = NS_BTH,
-      .lpszContext = addressString,
-      .lpServiceClassId = (GUID *)uuidBytes,
-      .dwNumberOfCsAddrs = 0,
-      .dwSize = sizeof(restrictions)
-    };
+      WSAQUERYSET restrictions = {
+        .dwNameSpace = NS_BTH,
+        .lpszContext = addressString,
+        .lpServiceClassId = &guid,
+        .dwNumberOfCsAddrs = 0,
+        .dwSize = sizeof(restrictions)
+      };
 
-    if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
-      WSAQUERYSET result;
-      DWORD resultLength = sizeof(result);
+      if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
+        WSAQUERYSET result;
+        DWORD resultLength = sizeof(result);
 
-      while (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result) != SOCKET_ERROR) {
-        SOCKADDR_BTH *address = (SOCKADDR_BTH *)&result.lpcsaBuffer->RemoteAddr;
-        logMessage(LOG_NOTICE, "windows sdp: %lu", address->port);
-      }
+        while (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result) != SOCKET_ERROR) {
+          SOCKADDR_BTH *address = (SOCKADDR_BTH *)&result.lpcsaBuffer->RemoteAddr;
+          logMessage(LOG_NOTICE, "windows sdp: %lu", address->port);
+        }
 
-      {
-        static const DWORD exceptions[] = {
+        {
+          static const DWORD exceptions[] = {
 #ifdef WSA_E_NO_MORE
-          WSA_E_NO_MORE,
+            WSA_E_NO_MORE,
 #endif /* WSA_E_NO_MORE */
 
 #ifdef WSAENOMORE
-          WSAENOMORE,
-#endif /* WSAENOMORE */
+            WSAENOMORE,
+ #endif /* WSAENOMORE */
 
-          NO_ERROR
-        };
+            NO_ERROR
+          };
 
-        bthSocketError("WSALookupServiceNext", exceptions);
-      }
+          bthSocketError("WSALookupServiceNext", exceptions);
+        }
 
-      if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
-        bthSocketError("WSALookupServiceEnd", NULL);
+        if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
+          bthSocketError("WSALookupServiceEnd", NULL);
+        }
+      } else {
+        bthSocketError("WSALookupServiceBegin", NULL);
       }
     } else {
-      bthSocketError("WSALookupServiceBegin", NULL);
+      bthSocketError("WSAAddressToString", NULL);
     }
-  } else {
-    bthSocketError("WSAAddressToString", NULL);
   }
 
   return 0;
 #else /* discover channel */
-  memcpy(&bcx->remote.serviceClassId, uuidBytes, sizeof(bcx->remote.serviceClassId));
+  memcpy(&bcx->remote.serviceClassId, &guid, sizeof(bcx->remote.serviceClassId));
   *channel = 0;
   return 1;
 #endif /* discover channel */
