@@ -84,32 +84,35 @@ bthSocketError (const char *action, const DWORD *exceptions) {
   return error;
 }
 
+static int
+bthStartSockets (void) {
+  WSADATA wsa;
+  int result = WSAStartup(MAKEWORD(2, 2), &wsa);
+
+  if (!result) return 1;
+  bthSetErrno(result, "WSA startup", NULL);
+  return 0;
+}
+
 BluetoothConnectionExtension *
 bthNewConnectionExtension (uint64_t bda) {
-  int result;
-  WSADATA wsa;
+  BluetoothConnectionExtension *bcx;
 
-  if ((result = WSAStartup(MAKEWORD(2, 2), &wsa)) == NO_ERROR) {
-    BluetoothConnectionExtension *bcx;
+  if ((bcx = malloc(sizeof(*bcx)))) {
+    memset(bcx, 0, sizeof(*bcx));
 
-    if ((bcx = malloc(sizeof(*bcx)))) {
-      memset(bcx, 0, sizeof(*bcx));
+    bcx->local.addressFamily = AF_BTH;
+    bcx->local.btAddr = BTH_ADDR_NULL;
+    bcx->local.port = 0;
 
-      bcx->local.addressFamily = AF_BTH;
-      bcx->local.btAddr = BTH_ADDR_NULL;
-      bcx->local.port = 0;
+    bcx->remote.addressFamily = AF_BTH;
+    bcx->remote.btAddr = bda;
+    bcx->remote.port = 0;
 
-      bcx->remote.addressFamily = AF_BTH;
-      bcx->remote.btAddr = bda;
-      bcx->remote.port = 0;
-
-      bcx->socket = INVALID_SOCKET;
-      return bcx;
-    } else {
-      logMallocError();
-    }
+    bcx->socket = INVALID_SOCKET;
+    return bcx;
   } else {
-    bthSetErrno(result, "WSA startup", NULL);
+    logMallocError();
   }
 
   return NULL;
@@ -129,36 +132,117 @@ int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
   bcx->remote.port = channel;
 
-  if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
-    if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
-      if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
-        unsigned long nonblocking = 1;
+  if (bthStartSockets()) {
+    if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
+      if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
+        if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
+          unsigned long nonblocking = 1;
 
-        if (ioctlsocket(bcx->socket, FIONBIO, &nonblocking) != SOCKET_ERROR) {
-          return 1;
+          if (ioctlsocket(bcx->socket, FIONBIO, &nonblocking) != SOCKET_ERROR) {
+            return 1;
+          } else {
+            bthSocketError("RFCOMM nonblocking", NULL);
+          }
         } else {
-          bthSocketError("RFCOMM nonblocking", NULL);
+          static const DWORD exceptions[] = {
+            ERROR_HOST_DOWN,
+            ERROR_HOST_UNREACHABLE,
+            NO_ERROR
+          };
+
+          bthSocketError("RFCOMM connect", exceptions);
         }
       } else {
-        static const DWORD exceptions[] = {
-          ERROR_HOST_DOWN,
-          ERROR_HOST_UNREACHABLE,
-          NO_ERROR
-        };
-
-        bthSocketError("RFCOMM connect", exceptions);
+        bthSocketError("RFCOMM bind", NULL);
       }
-    } else {
-      bthSocketError("RFCOMM bind", NULL);
-    }
 
-    closesocket(bcx->socket);
-    bcx->socket = INVALID_SOCKET;
-  } else {
-    bthSocketError("RFCOMM socket", NULL);
+      closesocket(bcx->socket);
+      bcx->socket = INVALID_SOCKET;
+    } else {
+      bthSocketError("RFCOMM socket", NULL);
+    }
   }
 
   return 0;
+}
+
+typedef union {
+  WSAQUERYSET querySet;
+  unsigned char bytes[0X1000];
+} BluetoothServiceLookupResult;
+
+static int
+bthPerformServiceLookup (
+  BluetoothServiceLookupResult *result,
+  ULONGLONG address, DWORD flags, GUID *guid
+) {
+  int found = 0;
+
+  if (bthStartSockets()) {
+    SOCKADDR_BTH socketAddress = {
+      .addressFamily = AF_BTH,
+      .btAddr = address
+    };
+
+    char addressString[0X100];
+    DWORD addressLength = sizeof(addressString);
+
+    if (WSAAddressToString((SOCKADDR *)&socketAddress, sizeof(socketAddress),
+                            NULL,
+                            addressString, &addressLength) != SOCKET_ERROR) {
+      HANDLE handle;
+
+      CSADDR_INFO csa[] = {
+        {
+          .RemoteAddr = {
+            .lpSockaddr = (SOCKADDR *)&socketAddress,
+            .iSockaddrLength = sizeof(socketAddress)
+          }
+        }
+      };
+
+      WSAQUERYSET restrictions = {
+        .dwNameSpace = NS_BTH,
+        .lpcsaBuffer = csa,
+        .dwNumberOfCsAddrs = ARRAY_COUNT(csa),
+        .lpszContext = addressString,
+        .lpServiceClassId = guid,
+        .dwSize = sizeof(restrictions)
+      };
+
+      if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
+        DWORD resultLength = sizeof(*result);
+
+        if (WSALookupServiceNext(handle, flags, &resultLength, &result->querySet) != SOCKET_ERROR) {
+          found = 1;
+        } else {
+          static const DWORD exceptions[] = {
+  #ifdef WSA_E_NO_MORE
+            WSA_E_NO_MORE,
+  #endif /* WSA_E_NO_MORE */
+
+  #ifdef WSAENOMORE
+            WSAENOMORE,
+  #endif /* WSAENOMORE */
+
+            NO_ERROR
+          };
+
+          bthSocketError("WSALookupServiceNext", exceptions);
+        }
+
+        if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
+          bthSocketError("WSALookupServiceEnd", NULL);
+        }
+      } else {
+        bthSocketError("WSALookupServiceBegin", NULL);
+      }
+    } else {
+      bthSocketError("WSAAddressToString", NULL);
+    }
+  }
+
+  return found;
 }
 
 int
@@ -176,67 +260,13 @@ bthDiscoverChannel (
 #if 1
   {
     int found = 0;
-    char addressString[0X100];
-    DWORD addressLength = sizeof(addressString);
+    BluetoothServiceLookupResult result;
 
-    if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
-                            NULL,
-                            addressString, &addressLength) != SOCKET_ERROR) {
-      HANDLE handle;
+    if (bthPerformServiceLookup(&result, bcx->remote.btAddr, LUP_RETURN_ADDR, &guid)) {
+      SOCKADDR_BTH *bth = (SOCKADDR_BTH *)result.querySet.lpcsaBuffer[0].RemoteAddr.lpSockaddr;
 
-      CSADDR_INFO csa[] = {
-        {
-          .RemoteAddr = {
-            .lpSockaddr = (SOCKADDR *)&bcx->remote,
-            .iSockaddrLength = sizeof(bcx->remote)
-          }
-        }
-      };
-
-      WSAQUERYSET restrictions = {
-        .dwNameSpace = NS_BTH,
-        .lpcsaBuffer = csa,
-        .dwNumberOfCsAddrs = ARRAY_COUNT(csa),
-        .lpszContext = addressString,
-        .lpServiceClassId = &guid,
-        .dwSize = sizeof(restrictions)
-      };
-
-      if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
-        union {
-          WSAQUERYSET querySet;
-          unsigned char bytes[0X1000];
-        } result;
-        DWORD resultLength = sizeof(result);
-
-        if (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result.querySet) != SOCKET_ERROR) {
-          SOCKADDR_BTH *bth = (SOCKADDR_BTH *)result.querySet.lpcsaBuffer[0].RemoteAddr.lpSockaddr;
-          *channel = bth->port;
-          if (*channel) found = 1;
-        } else {
-          static const DWORD exceptions[] = {
-#ifdef WSA_E_NO_MORE
-            WSA_E_NO_MORE,
-#endif /* WSA_E_NO_MORE */
-
-#ifdef WSAENOMORE
-            WSAENOMORE,
-#endif /* WSAENOMORE */
-
-            NO_ERROR
-          };
-
-          bthSocketError("WSALookupServiceNext", exceptions);
-        }
-
-        if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
-          bthSocketError("WSALookupServiceEnd", NULL);
-        }
-      } else {
-        bthSocketError("WSALookupServiceBegin", NULL);
-      }
-    } else {
-      bthSocketError("WSAAddressToString", NULL);
+      *channel = bth->port;
+      if (*channel) found = 1;
     }
 
     return found;
@@ -340,6 +370,11 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 
 char *
 bthObtainDeviceName (uint64_t bda, int timeout) {
-  errno = ENOSYS;
+  BluetoothServiceLookupResult result;
+
+  if (bthPerformServiceLookup(&result, bda, LUP_RETURN_NAME, NULL)) {
+    logMessage(LOG_NOTICE, "found");
+  }
+
   return NULL;
 }
