@@ -15,16 +15,17 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
+
 #define WINVER WindowsVista
 #define __USE_W32_SOCKETS
+#include "prologue.h"
 
 #pragma pack(push,2)
 #include <winsock2.h>
 #include <ws2bth.h>
 #pragma pack(pop)
 
-#include "prologue.h"
-
+#include <string.h>
 #include <errno.h>
 
 #if defined(AF_BTH)
@@ -129,6 +130,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
 
   if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
     if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
+logBytes(LOG_NOTICE, "connect", &bcx->remote, sizeof(bcx->remote));
       if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
         unsigned long nonblocking = 1;
 
@@ -164,6 +166,7 @@ bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
+#if 0
   char addressString[0X100];
   DWORD addressLength = sizeof(addressString);
 
@@ -188,7 +191,22 @@ bthDiscoverChannel (
         SOCKADDR_BTH *address = (SOCKADDR_BTH *)&result.lpcsaBuffer->RemoteAddr;
         logMessage(LOG_NOTICE, "windows sdp: %lu", address->port);
       }
-      bthSocketError("WSALookupServiceNext", NULL);
+
+      {
+        static const DWORD exceptions[] = {
+#ifdef WSA_E_NO_MORE
+          WSA_E_NO_MORE,
+#endif /* WSA_E_NO_MORE */
+
+#ifdef WSAENOMORE
+          WSAENOMORE,
+#endif /* WSAENOMORE */
+
+          NO_ERROR
+        };
+
+        bthSocketError("WSALookupServiceNext", exceptions);
+      }
 
       if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
         bthSocketError("WSALookupServiceEnd", NULL);
@@ -201,6 +219,11 @@ bthDiscoverChannel (
   }
 
   return 0;
+#else /* discover channel */
+  memcpy(&bcx->remote.serviceClassId, uuidBytes, sizeof(bcx->remote.serviceClassId));
+  *channel = 0;
+  return 1;
+#endif /* discover channel */
 }
 
 int
@@ -254,8 +277,8 @@ bthReadData (
           WSAEWOULDBLOCK,
           NO_ERROR
         };
-        DWORD error = bthSocketError("RFCOMM read", exceptions);
 
+        DWORD error = bthSocketError("RFCOMM read", exceptions);
         if (error != WSAEWOULDBLOCK) return -1;
       }
 
