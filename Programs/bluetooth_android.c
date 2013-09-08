@@ -136,8 +136,8 @@ bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
-  logUnsupportedFunction();
-  return 0;
+  *channel = 0;
+  return 1;
 }
 
 int
