@@ -169,6 +169,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
 
           while (1) {
             if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
+logMessage(LOG_NOTICE, "connection opened"); exit(0);
               return connection;
             }
 
@@ -189,6 +190,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
     logMallocError();
   }
 
+logMessage(LOG_NOTICE, "connection failed"); exit(0);
   return NULL;
 }
 
