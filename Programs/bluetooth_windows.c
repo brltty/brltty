@@ -245,7 +245,7 @@ bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   timeout.tv_sec = milliseconds / 1000;
   timeout.tv_usec = (milliseconds % 1000) * 1000;
 
-  switch (select(1, &input, NULL, NULL, &timeout)) {
+  switch (select(bcx->socket+1, &input, NULL, NULL, &timeout)) {
     case SOCKET_ERROR:
       bthSocketError("RFCOMM wait", NULL);
       break;
@@ -291,16 +291,13 @@ bthReadData (
       {
         int timeout = (to == buffer)? initialTimeout: subsequentTimeout;
 
-        if (!timeout) {
-          errno = EAGAIN;
-          return -1;
-        }
-
+        if (!timeout) break;
         if (!bthAwaitInput(connection, timeout)) return -1;
       }
     }
   }
 
+  if (size == count) errno = EAGAIN;
   return size - count;
 }
 
