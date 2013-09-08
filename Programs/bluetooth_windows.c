@@ -166,67 +166,83 @@ bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
   const void *uuidBytes, size_t uuidLength
 ) {
-#if 0
-  char addressString[0X100];
-  DWORD addressLength = sizeof(addressString);
+  GUID guid;
 
-  if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
-                          NULL,
-                          addressString, &addressLength) != SOCKET_ERROR) {
-    HANDLE handle;
+  memcpy(&guid, uuidBytes, sizeof(guid));
+  putNativeEndian32((uint32_t *)&guid.Data1, getBigEndian32(guid.Data1));
+  putNativeEndian16((uint16_t *)&guid.Data2, getBigEndian16(guid.Data2));
+  putNativeEndian16((uint16_t *)&guid.Data3, getBigEndian16(guid.Data3));
 
-    WSAQUERYSET restrictions = {
-      .dwNameSpace = NS_BTH,
-      .lpszContext = addressString,
-      .lpServiceClassId = (GUID *)uuidBytes,
-      .dwNumberOfCsAddrs = 0,
-      .dwSize = sizeof(restrictions)
-    };
+#if 1
+  {
+    int found = 0;
+    char addressString[0X100];
+    DWORD addressLength = sizeof(addressString);
 
-    if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
-      WSAQUERYSET result;
-      DWORD resultLength = sizeof(result);
+    if (WSAAddressToString((SOCKADDR *)&bcx->remote, sizeof(bcx->remote),
+                            NULL,
+                            addressString, &addressLength) != SOCKET_ERROR) {
+      HANDLE handle;
 
-      while (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result) != SOCKET_ERROR) {
-        SOCKADDR_BTH *address = (SOCKADDR_BTH *)&result.lpcsaBuffer->RemoteAddr;
-        logMessage(LOG_NOTICE, "windows sdp: %lu", address->port);
-      }
+      CSADDR_INFO csa[] = {
+        {
+          .RemoteAddr = {
+            .lpSockaddr = (SOCKADDR *)&bcx->remote,
+            .iSockaddrLength = sizeof(bcx->remote)
+          }
+        }
+      };
 
-      {
-        static const DWORD exceptions[] = {
+      WSAQUERYSET restrictions = {
+        .dwNameSpace = NS_BTH,
+        .lpcsaBuffer = csa,
+        .dwNumberOfCsAddrs = ARRAY_COUNT(csa),
+        .lpszContext = addressString,
+        .lpServiceClassId = &guid,
+        .dwSize = sizeof(restrictions)
+      };
+
+      if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
+        union {
+          WSAQUERYSET querySet;
+          unsigned char bytes[0X1000];
+        } result;
+        DWORD resultLength = sizeof(result);
+
+        if (WSALookupServiceNext(handle, LUP_RETURN_ADDR, &resultLength, &result.querySet) != SOCKET_ERROR) {
+          SOCKADDR_BTH *bth = (SOCKADDR_BTH *)result.querySet.lpcsaBuffer[0].RemoteAddr.lpSockaddr;
+          *channel = bth->port;
+          if (*channel) found = 1;
+        } else {
+          static const DWORD exceptions[] = {
 #ifdef WSA_E_NO_MORE
-          WSA_E_NO_MORE,
+            WSA_E_NO_MORE,
 #endif /* WSA_E_NO_MORE */
 
 #ifdef WSAENOMORE
-          WSAENOMORE,
+            WSAENOMORE,
 #endif /* WSAENOMORE */
 
-          NO_ERROR
-        };
+            NO_ERROR
+          };
 
-        bthSocketError("WSALookupServiceNext", exceptions);
-      }
+          bthSocketError("WSALookupServiceNext", exceptions);
+        }
 
-      if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
-        bthSocketError("WSALookupServiceEnd", NULL);
+        if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
+          bthSocketError("WSALookupServiceEnd", NULL);
+        }
+      } else {
+        bthSocketError("WSALookupServiceBegin", NULL);
       }
     } else {
-      bthSocketError("WSALookupServiceBegin", NULL);
+      bthSocketError("WSAAddressToString", NULL);
     }
-  } else {
-    bthSocketError("WSAAddressToString", NULL);
+
+    return found;
   }
-
-  return 0;
 #else /* discover channel */
-  GUID *guid = &bcx->remote.serviceClassId;
-
-  memcpy(guid, uuidBytes, sizeof(*guid));
-  putNativeEndian32((uint32_t *)&guid->Data1, getBigEndian32(guid->Data1));
-  putNativeEndian16((uint16_t *)&guid->Data2, getBigEndian16(guid->Data2));
-  putNativeEndian16((uint16_t *)&guid->Data3, getBigEndian16(guid->Data3));
-
+  memcpy(&bcx->remote.serviceClassId, &guid, sizeof(bcx->remote.serviceClassId));
   *channel = 0;
   return 1;
 #endif /* discover channel */
