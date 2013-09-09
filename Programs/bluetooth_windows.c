@@ -174,7 +174,8 @@ typedef union {
 static int
 bthPerformServiceLookup (
   BluetoothServiceLookupResult *result,
-  ULONGLONG address, DWORD flags, GUID *guid
+  ULONGLONG address, GUID *guid,
+  DWORD beginFlags, DWORD nextFlags
 ) {
   int found = 0;
 
@@ -203,17 +204,17 @@ bthPerformServiceLookup (
 
       WSAQUERYSET restrictions = {
         .dwNameSpace = NS_BTH,
+        .lpszContext = addressString,
         .lpcsaBuffer = csa,
         .dwNumberOfCsAddrs = ARRAY_COUNT(csa),
-        .lpszContext = addressString,
         .lpServiceClassId = guid,
         .dwSize = sizeof(restrictions)
       };
 
-      if (WSALookupServiceBegin(&restrictions, LUP_FLUSHCACHE, &handle) != SOCKET_ERROR) {
+      if (WSALookupServiceBegin(&restrictions, (LUP_FLUSHCACHE | beginFlags), &handle) != SOCKET_ERROR) {
         DWORD resultLength = sizeof(*result);
 
-        if (WSALookupServiceNext(handle, flags, &resultLength, &result->querySet) != SOCKET_ERROR) {
+        if (WSALookupServiceNext(handle, nextFlags, &resultLength, &result->querySet) != SOCKET_ERROR) {
           found = 1;
         } else {
           static const DWORD exceptions[] = {
@@ -259,17 +260,18 @@ bthDiscoverChannel (
 
 #if 1
   {
-    int found = 0;
     BluetoothServiceLookupResult result;
 
-    if (bthPerformServiceLookup(&result, bcx->remote.btAddr, LUP_RETURN_ADDR, &guid)) {
+    if (bthPerformServiceLookup(&result, bcx->remote.btAddr, &guid, 0, LUP_RETURN_ADDR)) {
       SOCKADDR_BTH *bth = (SOCKADDR_BTH *)result.querySet.lpcsaBuffer[0].RemoteAddr.lpSockaddr;
 
-      *channel = bth->port;
-      if (*channel) found = 1;
+      if (bth->port) {
+        *channel = bth->port;
+        return 1;
+      }
     }
 
-    return found;
+    return 0;
   }
 #else /* discover channel */
   memcpy(&bcx->remote.serviceClassId, &guid, sizeof(bcx->remote.serviceClassId));
@@ -372,8 +374,14 @@ char *
 bthObtainDeviceName (uint64_t bda, int timeout) {
   BluetoothServiceLookupResult result;
 
-  if (bthPerformServiceLookup(&result, bda, LUP_RETURN_NAME, NULL)) {
-    logMessage(LOG_NOTICE, "found");
+  if (bthPerformServiceLookup(&result, bda, NULL, LUP_CONTAINERS, LUP_RETURN_NAME)) {
+    char *name = strdup(result.querySet.lpszServiceInstanceName);
+
+    if (name) {
+      return name;
+    } else {
+      logMallocError();
+    }
   }
 
   return NULL;
