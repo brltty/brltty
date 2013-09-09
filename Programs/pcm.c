@@ -49,11 +49,11 @@ static const PcmSampleEntry pcmSampleTable[] = {
     .size = 2
   },
 
-  [PCM_FMT_U16H] = {
+  [PCM_FMT_U16N] = {
     .size = 2
   },
 
-  [PCM_FMT_S16H] = {
+  [PCM_FMT_S16N] = {
     .size = 2
   },
 
@@ -81,7 +81,7 @@ makePcmSample (
   if (size >= length) {
     typedef union {
       unsigned char bytes[4];
-      int16_t s16h;
+      int16_t s16N;
     } Sample;
 
     Sample *sample = buffer;
@@ -108,10 +108,10 @@ makePcmSample (
         sample->bytes[1] = amplitude >> 8;
         break;
 
-      case PCM_FMT_U16H:
+      case PCM_FMT_U16N:
         amplitude += U2S;
-      case PCM_FMT_S16H:
-        sample->s16h = amplitude;
+      case PCM_FMT_S16N:
+        sample->s16N = amplitude;
         break;
 
       case PCM_FMT_ULAW: {

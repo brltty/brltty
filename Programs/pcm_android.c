@@ -226,7 +226,7 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
 
 PcmAmplitudeFormat
 getPcmAmplitudeFormat (PcmDevice *pcm) {
-  return PCM_FMT_S16H;
+  return PCM_FMT_S16N;
 }
 
 PcmAmplitudeFormat
