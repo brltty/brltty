@@ -33,6 +33,7 @@
 #include "bluetooth_internal.h"
 #include "io_misc.h"
 
+#define ASYNCHRONOUS_NAME_QUERY
 #define ASYNCHRONOUS_CHANNEL_DISCOVERY
 
 struct BluetoothConnectionExtensionStruct {
@@ -406,24 +407,142 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   int device = hci_get_route(NULL);
 
   if (device >= 0) {
-    int socket = hci_open_dev(device);
+    SocketDescriptor socketDescriptor = hci_open_dev(device);
 
-    if (socket >= 0) {
+    if (socketDescriptor >= 0) {
+      int obtained = 0;
       bdaddr_t address;
       char buffer[HCI_MAX_NAME_LENGTH];
-      int result;
 
       bthMakeAddress(&address, bda);
       memset(buffer, 0, sizeof(buffer));
-      result = hci_read_remote_name(socket, &address, sizeof(buffer), buffer, timeout);
 
-      if (result >= 0) {
-        if (!(name = strdup(buffer))) logMallocError();
-      } else {
-        logSystemError("hci_read_remote_name");
+#ifdef ASYNCHRONOUS_NAME_QUERY
+      if (setBlockingIo(socketDescriptor, 0)) {
+        struct hci_filter oldFilter;
+        socklen_t oldLength = sizeof(oldFilter);
+
+        if (getsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, &oldLength) != -1) {
+          struct hci_filter newFilter;
+
+          hci_filter_clear(&newFilter);
+          hci_filter_set_ptype(HCI_EVENT_PKT, &newFilter);
+          hci_filter_set_event(EVT_CMD_STATUS, &newFilter);
+          hci_filter_set_event(EVT_CMD_COMPLETE, &newFilter);
+          hci_filter_set_event(EVT_REMOTE_NAME_REQ_COMPLETE, &newFilter);
+
+          if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &newFilter, sizeof(newFilter)) != -1) {
+            remote_name_req_cp parameters;
+
+            memset(&parameters, 0, sizeof(parameters));
+            bacpy(&parameters.bdaddr, &address);
+            parameters.pscan_rep_mode = 0X02;
+            parameters.clock_offset = 0;
+
+            if (hci_send_cmd(socketDescriptor, OGF_LINK_CTL, OCF_REMOTE_NAME_REQ, sizeof(parameters), &parameters) != -1) {
+              while (awaitSocketInput(socketDescriptor, timeout)) {
+                typedef union {
+                  unsigned char event[HCI_MAX_EVENT_SIZE];
+
+                  struct {
+                    unsigned char type;
+
+                    union {
+                      struct {
+                        hci_event_hdr header;
+
+                        union {
+                          evt_remote_name_req_complete rn;
+                        } data;
+                      } PACKED event;
+                    } data;
+                  } PACKED fields;
+                } HciPacket;
+
+                HciPacket packet;
+                int result = read(socketDescriptor, &packet, sizeof(packet));
+
+                if (result == -1) {
+                  if (errno == EAGAIN) continue;
+                  if (errno == EINTR) continue;
+
+                  logSystemError("read");
+                  break;
+                }
+
+                switch (packet.fields.type) {
+                  case HCI_EVENT_PKT: {
+                    hci_event_hdr *header = &packet.fields.data.event.header;
+                    void *data = &packet.fields.data.event.data;
+
+                    switch (header->evt) {
+                      case EVT_REMOTE_NAME_REQ_COMPLETE: {
+                        evt_remote_name_req_complete *rn = data;
+
+                        if (!rn->status) {
+                          if (bacmp(&rn->bdaddr, &address) == 0) {
+                            size_t length = header->plen;
+
+                            length -= rn->name - (unsigned char *)rn;
+                            length = MIN(length, sizeof(rn->name));
+                            length = MIN(length, sizeof(buffer)-1);
+
+                            memcpy(buffer, rn->name, length);
+                            buffer[length] = 0;
+                            obtained = 1;
+                            break;
+                          }
+                        }
+
+                        break;
+                      }
+
+                      default:
+                        break;
+                    }
+
+                    break;
+                  }
+
+                  default:
+                    break;
+                }
+
+                if (obtained) break;
+              }
+            } else {
+              logSystemError("hci_send_cmd");
+            }
+
+            if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, oldLength) == -1) {
+              logSystemError("setsockopt[SOL_HCI,HCI_FILTER]");
+            }
+          } else {
+            logSystemError("setsockopt[SOL_HCI,HCI_FILTER]");
+          }
+        } else {
+          logSystemError("getsockopt[SOL_HCI,HCI_FILTER]");
+        }
+      }
+#else /* ASYNCHRONOUS_NAME_QUERY */
+      {
+        int result = hci_read_remote_name(socketDescriptor, &address, sizeof(buffer), buffer, timeout);
+
+        if (result >= 0) {
+          obtained = 1;
+        } else {
+          logSystemError("hci_read_remote_name");
+        }
+      }
+#endif /* ASYNCHRONOUS_NAME_QUERY */
+
+      if (obtained) {
+        if (!(name = strdup(buffer))) {
+          logMallocError();
+        }
       }
 
-      close(socket);
+      close(socketDescriptor);
     } else {
       logSystemError("hci_open_dev");
     }
