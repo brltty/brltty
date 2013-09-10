@@ -72,7 +72,7 @@ static const GioMethods gioBluetoothMethods = {
 
 static int
 isBluetoothSupported (const GioDescriptor *descriptor) {
-  return descriptor->bluetooth.channelNumber != 0;
+  return descriptor->bluetooth.channelNumber || descriptor->bluetooth.discoverChannel;
 }
 
 static int
