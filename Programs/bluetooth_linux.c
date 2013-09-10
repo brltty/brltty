@@ -23,6 +23,7 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <bluetooth/l2cap.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
@@ -31,6 +32,8 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 #include "io_misc.h"
+
+#define ASYNCHRONOUS_CHANNEL_DISCOVERY
 
 struct BluetoothConnectionExtensionStruct {
   SocketDescriptor socket;
@@ -108,6 +111,160 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
   return 0;
 }
 
+static int
+bthFindChannel (uint8_t *channel, sdp_record_t *record) {
+  int foundChannel = 0;
+  int stopSearching = 0;
+  sdp_list_t *protocolsList;
+
+  if (!(sdp_get_access_protos(record, &protocolsList))) {
+    sdp_list_t *protocolsElement = protocolsList;
+
+    while (protocolsElement) {
+      sdp_list_t *protocolList = (sdp_list_t *)protocolsElement->data;
+      sdp_list_t *protocolElement = protocolList;
+
+      while (protocolElement) {
+        sdp_data_t *dataList = (sdp_data_t *)protocolElement->data;
+        sdp_data_t *dataElement = dataList;
+        int uuidProtocol = 0;
+
+        while (dataElement) {
+          if (SDP_IS_UUID(dataElement->dtd)) {
+            uuidProtocol = sdp_uuid_to_proto(&dataElement->val.uuid);
+          } else if (dataElement->dtd == SDP_UINT8) {
+            if (uuidProtocol == RFCOMM_UUID) {
+              *channel = dataElement->val.uint8;
+              foundChannel = 1;
+              stopSearching = 1;
+            }
+          }
+
+          if (stopSearching) break;
+          dataElement = dataElement->next;
+        }
+
+        if (stopSearching) break;
+        protocolElement = protocolElement->next;
+      }
+
+      sdp_list_free(protocolList, NULL);
+      if (stopSearching) break;
+      protocolsElement = protocolsElement->next;
+    }
+
+    sdp_list_free(protocolsList, NULL);
+  } else {
+    logSystemError("sdp_get_access_protos");
+  }
+
+  return foundChannel;
+}
+
+#ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
+static SocketDescriptor
+bthNewL2capConnection (const bdaddr_t *address) {
+  SocketDescriptor socketDescriptor = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+
+  if (socketDescriptor != -1) {
+    if (setBlockingIo(socketDescriptor, 0)) {
+      struct sockaddr_l2 socketAddress = {
+        .l2_family = AF_BLUETOOTH,
+        .l2_bdaddr = *address,
+        .l2_psm = htobs(SDP_PSM)
+      };
+
+      if (connectSocket(socketDescriptor, (struct sockaddr *)&socketAddress, sizeof(socketAddress), 5000) != -1) {
+        return socketDescriptor;
+      } else {
+        logSystemError("L2CAP connect");
+      }
+    }
+
+    close(socketDescriptor);
+  } else {
+    logSystemError("L2CAP socket");
+  }
+
+  return INVALID_SOCKET_DESCRIPTOR;
+}
+
+typedef struct {
+  sdp_session_t *session;
+  int *found;
+  uint8_t *channel;
+} BluetoothDiscoverChannelData;
+
+static void
+bthDiscoverChannelCallback (
+  uint8_t type, uint16_t status,
+  uint8_t *response, size_t size,
+  void *data
+) {
+  BluetoothDiscoverChannelData *dcd = data;
+
+  switch (status) {
+    case 0:
+      switch (type) {
+        case SDP_SVC_SEARCH_ATTR_RSP: {
+          uint8_t *nextByte = response;
+          int bytesLeft = size;
+
+          uint8_t dtd = 0;
+          int dataLeft = 0;
+          int headerLength = sdp_extract_seqtype(nextByte, bytesLeft, &dtd, &dataLeft);
+
+          if (headerLength > 0) {
+            nextByte += headerLength;
+            bytesLeft -= headerLength;
+
+            while (dataLeft > 0) {
+              int stop = 0;
+              int recordLength = 0;
+              sdp_record_t *record = sdp_extract_pdu(nextByte, bytesLeft, &recordLength);
+
+              if (record) {
+                if (bthFindChannel(dcd->channel, record)) {
+                  *dcd->found = 1;
+                  stop = 1;
+                }
+
+                nextByte += recordLength;
+                bytesLeft -= recordLength;
+                dataLeft -= recordLength;
+
+                sdp_record_free(record);
+              } else {
+                logSystemError("sdp_extract_pdu");
+                stop = 1;
+              }
+
+              if (stop) break;
+            }
+          }
+
+          break;
+        }
+
+        default:
+          logMessage(LOG_ERR, "unhandled discover channel response type: %u", type);
+          break;
+      }
+      break;
+
+    case 0XFFFF:
+      errno = sdp_get_error(dcd->session);
+      if (errno < 0) errno = EINVAL;
+      logSystemError("discover channel response");
+      break;
+
+    default:
+      logMessage(LOG_ERR, "unhandled discover channel response status: %u", status);
+      break;
+  }
+}
+#endif /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
+
 int
 bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
@@ -115,21 +272,58 @@ bthDiscoverChannel (
 ) {
   int foundChannel = 0;
 
-#ifdef HAVE_LIBBLUETOOTH
-  sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remote.rc_bdaddr, SDP_RETRY_IF_BUSY);
+  uuid_t uuid;
+  sdp_list_t *searchList;
 
-  if (session) {
-    uuid_t uuid;
-    sdp_list_t *searchList;
+  sdp_uuid128_create(&uuid, uuidBytes);
+  searchList = sdp_list_append(NULL, &uuid);
 
-    sdp_uuid128_create(&uuid, uuidBytes);
-    searchList = sdp_list_append(NULL, &uuid);
+  if (searchList) {
+    uint32_t attributesRange = 0X0000FFFF;
+    sdp_list_t *attributesList = sdp_list_append(NULL, &attributesRange);
 
-    if (searchList) {
-      uint32_t attributesRange = 0X0000FFFF;
-      sdp_list_t *attributesList = sdp_list_append(NULL, &attributesRange);
+    if (attributesList) {
+#ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
+      SocketDescriptor l2capSocket = bthNewL2capConnection(&bcx->remote.rc_bdaddr);
 
-      if (attributesList) {
+      if (l2capSocket != INVALID_SOCKET_DESCRIPTOR) {
+        sdp_session_t *session = sdp_create(l2capSocket, 0);
+
+        if (session) {
+          BluetoothDiscoverChannelData dcd = {
+            .session = session,
+            .found = &foundChannel,
+            .channel = channel
+          };
+
+          if (sdp_set_notify(session, bthDiscoverChannelCallback, &dcd) != -1) {
+            int queryStatus = sdp_service_search_attr_async(session, searchList,
+                                                            SDP_ATTR_REQ_RANGE, attributesList);
+
+            if (!queryStatus) {
+              while (awaitSocketInput(l2capSocket, 5000)) {
+                if (sdp_process(session) == -1) {
+                  break;
+                }
+              }
+            } else {
+              logSystemError("sdp_service_search_attr_async");
+            }
+          } else {
+            logSystemError("sdp_set_notify");
+          }
+
+          sdp_close(session);
+        } else {
+          logSystemError("sdp_create");
+        }
+
+        close(l2capSocket);
+      }
+#else /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
+      sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remote.rc_bdaddr, SDP_RETRY_IF_BUSY);
+
+      if (session) {
         sdp_list_t *recordList = NULL;
         int queryStatus = sdp_service_search_attr_req(session, searchList,
                                                       SDP_ATTR_REQ_RANGE, attributesList,
@@ -143,47 +337,8 @@ bthDiscoverChannel (
             sdp_record_t *record = (sdp_record_t *)recordElement->data;
 
             if (record) {
-              sdp_list_t *protocolsList;
-
-              if (!(sdp_get_access_protos(record, &protocolsList))) {
-                sdp_list_t *protocolsElement = protocolsList;
-
-                while (protocolsElement) {
-                  sdp_list_t *protocolList = (sdp_list_t *)protocolsElement->data;
-                  sdp_list_t *protocolElement = protocolList;
-
-                  while (protocolElement) {
-                    sdp_data_t *dataList = (sdp_data_t *)protocolElement->data;
-                    sdp_data_t *dataElement = dataList;
-                    int uuidProtocol = 0;
-
-                    while (dataElement) {
-                      if (SDP_IS_UUID(dataElement->dtd)) {
-                        uuidProtocol = sdp_uuid_to_proto(&dataElement->val.uuid);
-                      } else if (dataElement->dtd == SDP_UINT8) {
-                        if (uuidProtocol == RFCOMM_UUID) {
-                          *channel = dataElement->val.uint8;
-                          foundChannel = 1;
-                          stopSearching = 1;
-                        }
-                      }
-
-                      if (stopSearching) break;
-                      dataElement = dataElement->next;
-                    }
-
-                    if (stopSearching) break;
-                    protocolElement = protocolElement->next;
-                  }
-
-                  sdp_list_free(protocolList, NULL);
-                  if (stopSearching) break;
-                  protocolsElement = protocolsElement->next;
-                }
-
-                sdp_list_free(protocolsList, NULL);
-              } else {
-                logMallocError();
+              if (bthFindChannel(channel, record)) {
+                foundChannel = 1;
                 stopSearching = 1;
               }
 
@@ -202,21 +357,21 @@ bthDiscoverChannel (
           logSystemError("sdp_service_search_attr_req");
         }
 
-        sdp_list_free(attributesList, NULL);
+        sdp_close(session);
       } else {
-        logMallocError();
+        logSystemError("sdp_connect");
       }
+#endif /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
 
-      sdp_list_free(searchList, NULL);
+      sdp_list_free(attributesList, NULL);
     } else {
       logMallocError();
     }
 
-    sdp_close(session);
+    sdp_list_free(searchList, NULL);
   } else {
-    logSystemError("sdp_connect");
+    logMallocError();
   }
-#endif /* HAVE_LIBBLUETOOTH */
 
   return foundChannel;
 }
@@ -248,8 +403,6 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 char *
 bthObtainDeviceName (uint64_t bda, int timeout) {
   char *name = NULL;
-
-#ifdef HAVE_LIBBLUETOOTH
   int device = hci_get_route(NULL);
 
   if (device >= 0) {
@@ -277,7 +430,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   } else {
     logSystemError("hci_get_route");
   }
-#endif /* HAVE_LIBBLUETOOTH */
 
   return name;
 }
