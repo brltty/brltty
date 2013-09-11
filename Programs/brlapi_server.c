@@ -977,9 +977,21 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region begin */
     rsiz = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region size */
+
     CHECKEXC(
-      (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
-      BRLAPI_ERROR_INVALID_PARAMETER, "wrong region");
+      (rbeg >= 1) && (rbeg <= displaySize),
+      BRLAPI_ERROR_INVALID_PARAMETER, "invalid region start"
+    );
+
+    CHECKEXC(
+      (rsiz > 0) && (rsiz <= displaySize),
+      BRLAPI_ERROR_INVALID_PARAMETER, "invalid region size"
+    );
+
+    CHECKEXC(
+      ((rbeg + rsiz - 1) <= displaySize),
+      BRLAPI_ERROR_INVALID_PARAMETER, "invalid region"
+    );
   } else {
     logMessage(LOG_DEBUG,"Warning: Client uses deprecated regionBegin=0 and regionSize = 0");
     rbeg = 1;
