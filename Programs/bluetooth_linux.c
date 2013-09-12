@@ -32,6 +32,7 @@
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 #include "io_misc.h"
+#include "timing.h"
 
 #define ASYNCHRONOUS_NAME_QUERY
 #define ASYNCHRONOUS_CHANNEL_DISCOVERY
@@ -41,6 +42,24 @@ struct BluetoothConnectionExtensionStruct {
   struct sockaddr_rc local;
   struct sockaddr_rc remote;
 };
+
+typedef union {
+  unsigned char event[HCI_MAX_EVENT_SIZE];
+
+  struct {
+    unsigned char type;
+
+    union {
+      struct {
+        hci_event_hdr header;
+
+        union {
+          evt_remote_name_req_complete rn;
+        } data;
+      } PACKED event;
+    } data;
+  } PACKED fields;
+} BluetoothHciPacket;
 
 static void
 bthMakeAddress (bdaddr_t *address, uint64_t bda) {
@@ -164,7 +183,7 @@ bthFindChannel (uint8_t *channel, sdp_record_t *record) {
 
 #ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
 static SocketDescriptor
-bthNewL2capConnection (const bdaddr_t *address) {
+bthNewL2capConnection (const bdaddr_t *address, int timeout) {
   SocketDescriptor socketDescriptor = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
 
   if (socketDescriptor != -1) {
@@ -175,7 +194,7 @@ bthNewL2capConnection (const bdaddr_t *address) {
         .l2_psm = htobs(SDP_PSM)
       };
 
-      if (connectSocket(socketDescriptor, (struct sockaddr *)&socketAddress, sizeof(socketAddress), 5000) != -1) {
+      if (connectSocket(socketDescriptor, (struct sockaddr *)&socketAddress, sizeof(socketAddress), timeout) != -1) {
         return socketDescriptor;
       } else {
         logSystemError("L2CAP connect");
@@ -286,9 +305,11 @@ bthDiscoverChannel (
 
     if (attributesList) {
 #ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
-      SocketDescriptor l2capSocket = bthNewL2capConnection(&bcx->remote.rc_bdaddr);
+      SocketDescriptor l2capSocket;
+      TimePeriod period;
+      startTimePeriod(&period, timeout);
 
-      if (l2capSocket != INVALID_SOCKET_DESCRIPTOR) {
+      if ((l2capSocket = bthNewL2capConnection(&bcx->remote.rc_bdaddr, timeout)) != INVALID_SOCKET_DESCRIPTOR) {
         sdp_session_t *session = sdp_create(l2capSocket, 0);
 
         if (session) {
@@ -303,10 +324,11 @@ bthDiscoverChannel (
                                                             SDP_ATTR_REQ_RANGE, attributesList);
 
             if (!queryStatus) {
-              while (awaitSocketInput(l2capSocket, 5000)) {
-                if (sdp_process(session) == -1) {
-                  break;
-                }
+              long int elapsed;
+
+              while (!afterTimePeriod(&period, &elapsed)) {
+                if (!awaitSocketInput(l2capSocket, (timeout - elapsed))) break;
+                if (sdp_process(session) == -1) break;
               }
             } else {
               logSystemError("sdp_service_search_attr_async");
@@ -441,26 +463,12 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
             parameters.clock_offset = 0;
 
             if (hci_send_cmd(socketDescriptor, OGF_LINK_CTL, OCF_REMOTE_NAME_REQ, sizeof(parameters), &parameters) != -1) {
-              while (awaitSocketInput(socketDescriptor, timeout)) {
-                typedef union {
-                  unsigned char event[HCI_MAX_EVENT_SIZE];
+              long int elapsed = 0;
+              TimePeriod period;
+              startTimePeriod(&period, timeout);
 
-                  struct {
-                    unsigned char type;
-
-                    union {
-                      struct {
-                        hci_event_hdr header;
-
-                        union {
-                          evt_remote_name_req_complete rn;
-                        } data;
-                      } PACKED event;
-                    } data;
-                  } PACKED fields;
-                } HciPacket;
-
-                HciPacket packet;
+              while (awaitSocketInput(socketDescriptor, (timeout - elapsed))) {
+                BluetoothHciPacket packet;
                 int result = read(socketDescriptor, &packet, sizeof(packet));
 
                 if (result == -1) {
@@ -510,6 +518,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                 }
 
                 if (obtained) break;
+                if (afterTimePeriod(&period, &elapsed)) break;
               }
             } else {
               logSystemError("hci_send_cmd");
