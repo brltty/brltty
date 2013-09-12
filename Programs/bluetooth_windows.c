@@ -249,7 +249,8 @@ bthPerformServiceLookup (
 int
 bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
-  const void *uuidBytes, size_t uuidLength
+  const void *uuidBytes, size_t uuidLength,
+  int timeout
 ) {
   GUID guid;
 

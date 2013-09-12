@@ -34,7 +34,8 @@ extern void bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx);
 
 extern int bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,
-  const void *uuidBytes, size_t uuidLength
+  const void *uuidBytes, size_t uuidLength,
+  int timeout
 );
 
 extern int bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout);

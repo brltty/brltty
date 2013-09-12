@@ -30,7 +30,7 @@
 #include "bluetooth_internal.h"
 
 static int
-bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx) {
+bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx, int timeout) {
   int discovered;
 
   static const uint8_t uuid[] = {
@@ -42,7 +42,7 @@ bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bc
   };
 
   logMessage(LOG_DEBUG, "discovering serial port channel");
-  discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid));
+  discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid), timeout);
 
   if (discovered) {
     logMessage(LOG_DEBUG, "serial port channel discovered: %u", *channel);
@@ -151,7 +151,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
       if ((connection->extension = bthNewConnectionExtension(connection->address))) {
         int alreadyTried = 0;
 
-        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension);
+        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, timeout);
         bthLogChannel(connection->channel);
 
         {
