@@ -469,12 +469,17 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
             parameters.clock_offset = 0;
 
             if (hci_send_cmd(socketDescriptor, ogf, ocf, sizeof(parameters), &parameters) != -1) {
-              int done = 0;
               long int elapsed = 0;
               TimePeriod period;
               startTimePeriod(&period, timeout);
 
               while (awaitSocketInput(socketDescriptor, (timeout - elapsed))) {
+                enum {
+                  UNEXPECTED,
+                  HANDLED,
+                  DONE
+                } state = UNEXPECTED;
+
                 BluetoothPacket packet;
                 int result = read(socketDescriptor, &packet, sizeof(packet));
 
@@ -486,8 +491,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                   break;
                 }
 
-                logBytes(LOG_DEBUG, "bluetooth packet", &packet, result);
-
                 switch (packet.fields.type) {
                   case HCI_EVENT_PKT: {
                     hci_event_hdr *header = &packet.fields.data.event.header;
@@ -496,8 +499,10 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                       case EVT_REMOTE_NAME_REQ_COMPLETE: {
                         evt_remote_name_req_complete *rn = &packet.fields.data.event.data.rn;
 
-                        if (!rn->status) {
-                          if (bacmp(&rn->bdaddr, &address) == 0) {
+                        if (bacmp(&rn->bdaddr, &address) == 0) {
+                          state = DONE;
+
+                          if (!rn->status) {
                             size_t length = header->plen;
 
                             length -= rn->name - (unsigned char *)rn;
@@ -507,7 +512,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                             memcpy(buffer, rn->name, length);
                             buffer[length] = 0;
                             obtained = 1;
-                            done = 1;
                           }
                         }
 
@@ -518,8 +522,9 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                         evt_cmd_status *cs = &packet.fields.data.event.data.cs;
 
                         if (cs->opcode == opcode) {
+                          state = HANDLED;
+
                           if (cs->status) {
-                            done = 1;
                           }
                         }
 
@@ -539,7 +544,8 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                     break;
                 }
 
-                if (done) break;
+                if (state == DONE) break;
+                if (state == UNEXPECTED) logBytes(LOG_DEBUG, "unexpected Bluetooth packet", &packet, result);
                 if (afterTimePeriod(&period, &elapsed)) break;
               }
             } else {
