@@ -55,11 +55,13 @@ typedef union {
 
         union {
           evt_remote_name_req_complete rn;
+          evt_cmd_complete cc;
+          evt_cmd_status cs;
         } data;
       } PACKED event;
     } data;
   } PACKED fields;
-} BluetoothHciPacket;
+} BluetoothPacket;
 
 static void
 bthMakeAddress (bdaddr_t *address, uint64_t bda) {
@@ -446,6 +448,9 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
         socklen_t oldLength = sizeof(oldFilter);
 
         if (getsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, &oldLength) != -1) {
+          uint16_t ogf = OGF_LINK_CTL;
+          uint16_t ocf = OCF_REMOTE_NAME_REQ;
+          uint16_t opcode = htobs(cmd_opcode_pack(ogf, ocf));
           struct hci_filter newFilter;
 
           hci_filter_clear(&newFilter);
@@ -453,6 +458,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
           hci_filter_set_event(EVT_CMD_STATUS, &newFilter);
           hci_filter_set_event(EVT_CMD_COMPLETE, &newFilter);
           hci_filter_set_event(EVT_REMOTE_NAME_REQ_COMPLETE, &newFilter);
+          hci_filter_set_opcode(opcode, &newFilter);
 
           if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &newFilter, sizeof(newFilter)) != -1) {
             remote_name_req_cp parameters;
@@ -462,13 +468,14 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
             parameters.pscan_rep_mode = 0X02;
             parameters.clock_offset = 0;
 
-            if (hci_send_cmd(socketDescriptor, OGF_LINK_CTL, OCF_REMOTE_NAME_REQ, sizeof(parameters), &parameters) != -1) {
+            if (hci_send_cmd(socketDescriptor, ogf, ocf, sizeof(parameters), &parameters) != -1) {
+              int done = 0;
               long int elapsed = 0;
               TimePeriod period;
               startTimePeriod(&period, timeout);
 
               while (awaitSocketInput(socketDescriptor, (timeout - elapsed))) {
-                BluetoothHciPacket packet;
+                BluetoothPacket packet;
                 int result = read(socketDescriptor, &packet, sizeof(packet));
 
                 if (result == -1) {
@@ -479,14 +486,15 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                   break;
                 }
 
+                logBytes(LOG_DEBUG, "bluetooth packet", &packet, result);
+
                 switch (packet.fields.type) {
                   case HCI_EVENT_PKT: {
                     hci_event_hdr *header = &packet.fields.data.event.header;
-                    void *data = &packet.fields.data.event.data;
 
                     switch (header->evt) {
                       case EVT_REMOTE_NAME_REQ_COMPLETE: {
-                        evt_remote_name_req_complete *rn = data;
+                        evt_remote_name_req_complete *rn = &packet.fields.data.event.data.rn;
 
                         if (!rn->status) {
                           if (bacmp(&rn->bdaddr, &address) == 0) {
@@ -499,7 +507,19 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                             memcpy(buffer, rn->name, length);
                             buffer[length] = 0;
                             obtained = 1;
-                            break;
+                            done = 1;
+                          }
+                        }
+
+                        break;
+                      }
+
+                      case EVT_CMD_STATUS: {
+                        evt_cmd_status *cs = &packet.fields.data.event.data.cs;
+
+                        if (cs->opcode == opcode) {
+                          if (cs->status) {
+                            done = 1;
                           }
                         }
 
@@ -507,6 +527,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                       }
 
                       default:
+                        logMessage(LOG_DEBUG, "unexpected bluetooth event type: %02X", header->evt);
                         break;
                     }
 
@@ -514,10 +535,11 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                   }
 
                   default:
+                    logMessage(LOG_DEBUG, "unexpected bluetooth packet type: %02X", packet.fields.type);
                     break;
                 }
 
-                if (obtained) break;
+                if (done) break;
                 if (afterTimePeriod(&period, &elapsed)) break;
               }
             } else {
