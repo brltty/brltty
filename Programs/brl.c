@@ -289,15 +289,19 @@ typedef struct {
   int command;
 } CommandQueueItem;
 
+static void
+deallocateCommandQueueItem (void *item, void *data) {
+  CommandQueueItem *cmd = item;
+
+  free(cmd);
+}
+
 static Queue *
 getCommandQueue (int create) {
-  static Queue *commandQueue = NULL;
+  static Queue *commands = NULL;
 
-  if (create && !commandQueue) {
-    commandQueue = newQueue(NULL, NULL);
-  }
-
-  return commandQueue;
+  return getProgramQueue(&commands, "command-queue", create,
+                         deallocateCommandQueueItem, NULL);
 }
 
 int
@@ -354,15 +358,24 @@ static const int keyReleaseTimeout = 0;
 static TimePeriod keyReleasePeriod;
 static KeyEvent *keyReleaseEvent = NULL;
 
+static void
+deallocateKeyEvent (KeyEvent *event) {
+  free(event);
+}
+
+static void
+deallocateKeyEventQueueItem (void *item, void *data) {
+  KeyEvent *event = item;
+
+  deallocateKeyEvent(event);
+}
+
 static Queue *
 getKeyEventQueue (int create) {
-  static Queue *keyEventQueue = NULL;
+  static Queue *events = NULL;
 
-  if (create && !keyEventQueue) {
-    keyEventQueue = newQueue(NULL, NULL);
-  }
-
-  return keyEventQueue;
+  return getProgramQueue(&events, "key-event-queue", create,
+                         deallocateKeyEventQueueItem, NULL);
 }
 
 static int
@@ -381,7 +394,7 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
   if (keyReleaseEvent) {
     if (press && (set == keyReleaseEvent->set) && (key == keyReleaseEvent->key)) {
       if (!afterTimePeriod(&keyReleasePeriod, NULL)) {
-        free(keyReleaseEvent);
+        deallocateKeyEvent(keyReleaseEvent);
         keyReleaseEvent = NULL;
         return 1;
       }
@@ -392,7 +405,7 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
       keyReleaseEvent = NULL;
 
       if (!addKeyEvent(event)) {
-        free(event);
+        deallocateKeyEvent(event);
         return 0;
       }
     }
@@ -413,7 +426,7 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
       }
 
       if (addKeyEvent(event)) return 1;
-      free(event);
+      deallocateKeyEvent(event);
     } else {
       logMallocError();
     }
@@ -440,7 +453,7 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
 #ifdef ENABLE_API
       if (apiStarted) {
         if ((api_handleKeyEvent(event->set, event->key, event->press)) == EOF) {
-          free(event);
+          deallocateKeyEvent(event);
 	  continue;
 	}
       }
@@ -449,7 +462,7 @@ dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
       *set = event->set;
       *key = event->key;
       *press = event->press;
-      free(event);
+      deallocateKeyEvent(event);
       return 1;
     }
   }
