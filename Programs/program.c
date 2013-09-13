@@ -343,6 +343,7 @@ onProgramExit (const char *name, ProgramExitHandler *handler, void *data) {
 
     pxe->next = programExitEntries;
     programExitEntries = pxe;
+    logMessage(LOG_DEBUG, "program exit event added: %s", name);
   } else {
     logMallocError();
   }
