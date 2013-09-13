@@ -38,21 +38,42 @@ struct ElementStruct {
   void *item;
 };
 
+static void
+addElement (Queue *queue, Element *element) {
+  {
+    static int identifier = 0;
+    element->identifier = ++identifier;
+  }
+
+  element->queue = queue;
+  queue->size += 1;
+}
+
+static void
+removeElement (Element *element) {
+  element->queue->size -= 1;
+  element->queue = NULL;
+  element->identifier = 0;
+}
+
+static void
+removeItem (Element *element) {
+  if (element->item) {
+    Queue *queue = element->queue;
+    ItemDeallocator deallocator = queue->deallocate;
+
+    if (deallocator) deallocator(element->item, queue->data);
+    element->item = NULL;
+  }
+}
+
 static Element *discardedElements = NULL;
 
 static void
 discardElement (Element *element) {
-  Queue *queue = element->queue;
+  removeItem(element);
+  removeElement(element);
 
-  if (element->item) {
-    if (queue->deallocate) queue->deallocate(element->item, queue->data);
-    element->item = NULL;
-  }
-
-  element->queue = NULL;
-  queue->size--;
-
-  element->identifier = 0;
   element->next = discardedElements;
   discardedElements = element;
 }
@@ -82,14 +103,7 @@ newElement (Queue *queue, void *item) {
     element->previous = element->next = NULL;
   }
 
-  {
-    static int identifier = 0;
-    element->identifier = ++identifier;
-  }
-
-  element->queue = queue;
-  queue->size++;
-
+  addElement(queue, element);
   element->item = item;
   return element;
 }
@@ -146,9 +160,10 @@ enqueueElement (Element *element) {
     int newHead = 0;
 
     if (queue->compare) {
-      FindReferenceElementData fre;
-      fre.queue = queue;
-      fre.item = element->item;
+      FindReferenceElementData fre = {
+        .queue = queue,
+        .item = element->item
+      };
 
       if (!(reference = findElement(queue, findReferenceElement, &fre))) {
         reference = queue->head;
@@ -207,9 +222,27 @@ getElementItem (const Element *element) {
   return element->item;
 }
 
+static int queueInitialized = 0;
+
+static void
+exitQueue (void *data) {
+  while (discardedElements) {
+    Element *element = discardedElements;
+    discardedElements = element->next;
+    free(element);
+  }
+
+  queueInitialized = 0;
+}
+
 Queue *
 newQueue (ItemDeallocator deallocate, ItemComparator compare) {
   Queue *queue;
+
+  if (!queueInitialized) {
+    queueInitialized = 1;
+    onProgramExit("queue", exitQueue, NULL);
+  }
 
   if ((queue = malloc(sizeof(*queue)))) {
     queue->head = NULL;
@@ -237,7 +270,7 @@ deallocateQueue (Queue *queue) {
 }
 
 static void
-exitQueue (void *data) {
+exitProgramQueue (void *data) {
   Queue **queue = data;
 
   if (*queue) {
@@ -253,7 +286,7 @@ getProgramQueue (
 ) {
   if (!*queue && create) {
     if ((*queue = newQueue(deallocate, compare))) {
-      onProgramExit(name, exitQueue, queue);
+      onProgramExit(name, exitProgramQueue, queue);
     }
   }
 
