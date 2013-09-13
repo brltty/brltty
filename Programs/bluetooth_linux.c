@@ -44,7 +44,7 @@ struct BluetoothConnectionExtensionStruct {
 };
 
 typedef union {
-  unsigned char event[HCI_MAX_EVENT_SIZE];
+  unsigned char hciEvent[HCI_MAX_EVENT_SIZE];
 
   struct {
     unsigned char type;
@@ -58,7 +58,7 @@ typedef union {
           evt_cmd_complete cc;
           evt_cmd_status cs;
         } data;
-      } PACKED event;
+      } PACKED hciEvent;
     } data;
   } PACKED fields;
 } BluetoothPacket;
@@ -215,15 +215,15 @@ typedef struct {
   sdp_session_t *session;
   int *found;
   uint8_t *channel;
-} BluetoothDiscoverChannelData;
+} BluetoothChannelDiscoveryData;
 
 static void
-bthDiscoverChannelCallback (
+bthHandleChannelDiscoveryResponse (
   uint8_t type, uint16_t status,
   uint8_t *response, size_t size,
   void *data
 ) {
-  BluetoothDiscoverChannelData *dcd = data;
+  BluetoothChannelDiscoveryData *bcd = data;
 
   switch (status) {
     case 0:
@@ -246,8 +246,8 @@ bthDiscoverChannelCallback (
               sdp_record_t *record = sdp_extract_pdu(nextByte, bytesLeft, &recordLength);
 
               if (record) {
-                if (bthFindChannel(dcd->channel, record)) {
-                  *dcd->found = 1;
+                if (bthFindChannel(bcd->channel, record)) {
+                  *bcd->found = 1;
                   stop = 1;
                 }
 
@@ -269,19 +269,19 @@ bthDiscoverChannelCallback (
         }
 
         default:
-          logMessage(LOG_ERR, "unhandled discover channel response type: %u", type);
+          logMessage(LOG_ERR, "unexpected channel discovery response type: %u", type);
           break;
       }
       break;
 
     case 0XFFFF:
-      errno = sdp_get_error(dcd->session);
+      errno = sdp_get_error(bcd->session);
       if (errno < 0) errno = EINVAL;
-      logSystemError("discover channel response");
+      logSystemError("channel discovery response");
       break;
 
     default:
-      logMessage(LOG_ERR, "unhandled discover channel response status: %u", status);
+      logMessage(LOG_ERR, "unexpected channel discovery response status: %u", status);
       break;
   }
 }
@@ -315,13 +315,13 @@ bthDiscoverChannel (
         sdp_session_t *session = sdp_create(l2capSocket, 0);
 
         if (session) {
-          BluetoothDiscoverChannelData dcd = {
+          BluetoothChannelDiscoveryData bcd = {
             .session = session,
             .found = &foundChannel,
             .channel = channel
           };
 
-          if (sdp_set_notify(session, bthDiscoverChannelCallback, &dcd) != -1) {
+          if (sdp_set_notify(session, bthHandleChannelDiscoveryResponse, &bcd) != -1) {
             int queryStatus = sdp_service_search_attr_async(session, searchList,
                                                             SDP_ATTR_REQ_RANGE, attributesList);
 
@@ -493,11 +493,11 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
                 switch (packet.fields.type) {
                   case HCI_EVENT_PKT: {
-                    hci_event_hdr *header = &packet.fields.data.event.header;
+                    hci_event_hdr *header = &packet.fields.data.hciEvent.header;
 
                     switch (header->evt) {
                       case EVT_REMOTE_NAME_REQ_COMPLETE: {
-                        evt_remote_name_req_complete *rn = &packet.fields.data.event.data.rn;
+                        evt_remote_name_req_complete *rn = &packet.fields.data.hciEvent.data.rn;
 
                         if (bacmp(&rn->bdaddr, &address) == 0) {
                           state = DONE;
@@ -519,7 +519,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                       }
 
                       case EVT_CMD_STATUS: {
-                        evt_cmd_status *cs = &packet.fields.data.event.data.cs;
+                        evt_cmd_status *cs = &packet.fields.data.hciEvent.data.cs;
 
                         if (cs->opcode == opcode) {
                           state = HANDLED;
@@ -532,7 +532,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                       }
 
                       default:
-                        logMessage(LOG_DEBUG, "unexpected bluetooth event type: %02X", header->evt);
+                        logMessage(LOG_DEBUG, "unexpected HCI event type: %u", header->evt);
                         break;
                     }
 
@@ -540,12 +540,12 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                   }
 
                   default:
-                    logMessage(LOG_DEBUG, "unexpected bluetooth packet type: %02X", packet.fields.type);
+                    logMessage(LOG_DEBUG, "unexpected Bluetooth packet type: %u", packet.fields.type);
                     break;
                 }
 
                 if (state == DONE) break;
-                if (state == UNEXPECTED) logBytes(LOG_DEBUG, "unexpected Bluetooth packet", &packet, result);
+                if (state == UNEXPECTED) logBytes(LOG_WARNING, "unexpected Bluetooth packet", &packet, result);
                 if (afterTimePeriod(&period, &elapsed)) break;
               }
             } else {
