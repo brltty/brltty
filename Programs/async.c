@@ -496,11 +496,8 @@ static Queue *
 getFunctionQueue (int create) {
   static Queue *functions = NULL;
 
-  if (!functions && create) {
-    functions = newQueue(deallocateFunctionEntry, NULL);
-  }
-
-  return functions;
+  return getProgramQueue(&functions, "async-function-queue", create,
+                         deallocateFunctionEntry, NULL);
 }
 
 static OperationEntry *
@@ -1284,11 +1281,8 @@ static Queue *
 getAlarmQueue (int create) {
   static Queue *alarms = NULL;
 
-  if (!alarms && create) {
-    alarms = newQueue(deallocateAlarmEntry, compareAlarmEntries);
-  }
-
-  return alarms;
+  return getProgramQueue(&alarms, "async-alarm-queue", create,
+                         deallocateAlarmEntry, compareAlarmEntries);
 }
 
 typedef struct {
