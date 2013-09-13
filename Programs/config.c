@@ -1612,11 +1612,6 @@ exitScreens (void *data) {
 }
 
 static void
-exitTunes (void *data) {
-  closeTunes();
-}
-
-static void
 exitPidFile (void *data) {
 #if defined(GRUB_RUNTIME)
 
@@ -2014,7 +2009,6 @@ brlttyStart (int argc, char *argv[]) {
   constructSpecialScreens();
   enableBrailleHelpPage(); /* ensure that it's first */
 
-  onProgramExit("tunes", exitTunes, NULL);
   suppressTuneDeviceOpenErrors();
 
   {

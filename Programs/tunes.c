@@ -22,8 +22,9 @@
 
 #include "log.h"
 #include "async.h"
-#include "prefs.h"
+#include "program.h"
 #include "tunes.h"
+#include "prefs.h"
 #include "notes.h"
 #include "message.h"
 #include "brl.h"
@@ -341,6 +342,14 @@ handleTunesTimeout (const AsyncAlarmResult *result) {
   tunesCloseTimer = NULL;
   closeTunes();
 }
+
+static int tunesInitialized = 0;
+
+static void
+exitTunes (void *data) {
+  closeTunes();
+  tunesInitialized = 0;
+}
  
 static int
 openTunes (void) {
@@ -349,7 +358,12 @@ openTunes (void) {
   if (noteDevice) {
     asyncResetAlarmIn(tunesCloseTimer, timeout);
   } else if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
-    asyncSetAlarmIn(&tunesCloseTimer, timeout, handleTunesTimeout, NULL);
+    if (asyncSetAlarmIn(&tunesCloseTimer, timeout, handleTunesTimeout, NULL)) {
+      if (!tunesInitialized) {
+        tunesInitialized = 1;
+        onProgramExit("tunes", exitTunes, NULL);
+      }
+    }
   } else {
     return 0;
   }
