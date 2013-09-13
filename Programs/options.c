@@ -648,11 +648,14 @@ setDefaultOptions (
   OptionProcessingInformation *info,
   int config
 ) {
-  int optionIndex;
+  unsigned int optionIndex;
+
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
+
     if (!(option->flags & OPT_Config) == !config) {
       const char *setting = option->defaultSetting;
+
       if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
       ensureSetting(info, option, setting);
     }
@@ -770,6 +773,27 @@ processConfigurationFile (
   }
 }
 
+static void
+exitOptions (void *data) {
+  const OptionsDescriptor *descriptor = data;
+  unsigned int optionIndex = 0;
+
+  for (optionIndex=0; optionIndex<descriptor->optionCount; optionIndex+=1) {
+    const OptionEntry *option = &descriptor->optionTable[optionIndex];
+
+    if (option->argument) {
+      char **string = option->setting.string;
+
+      if (string) {
+        if (*string) {
+          free(*string);
+          *string = NULL;
+        }
+      }
+    }
+  }
+}
+
 ProgramExitStatus
 processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   OptionProcessingInformation info = {
@@ -781,9 +805,12 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     .syntaxError = 0
   };
 
+  onProgramExit("options", exitOptions, (void *)descriptor);
+
   {
-    int index;
-    for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
+    unsigned int index;
+
+    for (index=0; index<0X100; index+=1) info.ensuredSettings[index] = 0;
   }
 
   beginProgram(*argumentCount, *argumentVector);
