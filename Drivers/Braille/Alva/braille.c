@@ -1145,7 +1145,7 @@ tellDevice2s (unsigned char command, unsigned char operand) {
 static int
 askDevice2s (unsigned char command, unsigned char *response, int size) {
   if (tellDevice2s(command, 0X3F)) {
-    while (io->awaitInput(200)) {
+    while (io->awaitInput(500)) {
       int length = protocol->readPacket(response, size);
       if (length <= 0) break;
       if ((response[0] == ESC) && (response[1] == command)) return 1;
