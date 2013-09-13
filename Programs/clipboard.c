@@ -66,8 +66,8 @@ static Queue *
 cpbGetHistoryQueue (int create) {
   static Queue *queue = NULL;
 
-  if (!queue && create) queue = newQueue(cpbDeallocateHistoryEntry, NULL);
-  return queue;
+  return getProgramQueue(&queue, "clipboard-history-queue", create,
+                         cpbDeallocateHistoryEntry, NULL);
 }
 
 static void
