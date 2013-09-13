@@ -526,7 +526,7 @@ changeAttributesTable (const char *name) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
-exitContractionTable (void) {
+exitContractionTable (void *data) {
   if (contractionTable) {
     destroyContractionTable(contractionTable);
     contractionTable = NULL;
@@ -622,7 +622,7 @@ loadHelpFile (const char *file) {
 }
 
 static void
-exitKeyboardKeyTable (void) {
+exitKeyboardKeyTable (void *data) {
   if (keyboardKeyTable) {
     destroyKeyTable(keyboardKeyTable);
     keyboardKeyTable = NULL;
@@ -1283,7 +1283,7 @@ restartBrailleDriver (void) {
 }
 
 static void
-exitBrailleDriver (void) {
+exitBrailleDriver (void *data) {
   if (brailleConstructed) {
     clearStatusCells(&brl);
     message(NULL, gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
@@ -1324,7 +1324,7 @@ changeBrailleDevice (const char *device) {
 
 #ifdef ENABLE_API
 static void
-exitApi (void) {
+exitApiServer (void *data) {
   api_stop(&brl);
   apiStarted = 0;
 
@@ -1478,7 +1478,7 @@ restartSpeechDriver (void) {
 }
 
 static void
-exitSpeechDriver (void) {
+exitSpeechDriver (void *data) {
   stopSpeechDriver();
 }
 
@@ -1606,18 +1606,18 @@ stopScreenDriver (void) {
 }
 
 static void
-exitScreens (void) {
+exitScreens (void *data) {
   stopScreenDriver();
   destructSpecialScreens();
 }
 
 static void
-exitTunes (void) {
+exitTunes (void *data) {
   closeTunes();
 }
 
 static void
-exitPidFile (void) {
+exitPidFile (void *data) {
 #if defined(GRUB_RUNTIME)
 
 #else /* remove pid file */
@@ -1640,7 +1640,7 @@ retryPidFile (const AsyncAlarmResult *result UNUSED) {
 static int
 tryPidFile (void) {
   if (makePidFile(0)) {
-    onProgramExit(exitPidFile, "pid-file");
+    onProgramExit("pid-file", exitPidFile, NULL);
   } else if (errno == EEXIST) {
     return 0;
   } else {
@@ -2010,11 +2010,11 @@ brlttyStart (int argc, char *argv[]) {
    * be used instead.
    */
 
-  onProgramExit(exitScreens, "screens");
+  onProgramExit("screens", exitScreens, NULL);
   constructSpecialScreens();
   enableBrailleHelpPage(); /* ensure that it's first */
 
-  onProgramExit(exitTunes, "tunes");
+  onProgramExit("tunes", exitTunes, NULL);
   suppressTuneDeviceOpenErrors();
 
   {
@@ -2070,14 +2070,14 @@ brlttyStart (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
-  onProgramExit(exitContractionTable, "contraction-table");
+  onProgramExit("contraction-table", exitContractionTable, NULL);
   if (*opt_contractionTable) changeContractionTable(opt_contractionTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
-  onProgramExit(exitKeyboardKeyTable, "keyboard-key-table");
+  onProgramExit("keyboard-key-table", exitKeyboardKeyTable, NULL);
   changeKeyboardKeyTable(opt_keyTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
@@ -2109,7 +2109,7 @@ brlttyStart (int argc, char *argv[]) {
 
       if (!opt_verify) {
         if (api_start(&brl, apiParameters)) {
-          onProgramExit(exitApi, "api");
+          onProgramExit("api-server", exitApiServer, NULL);
           apiStarted = 1;
         }
       }
@@ -2130,7 +2130,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
-    onProgramExit(exitBrailleDriver, "braille-driver");
+    onProgramExit("braille-driver", exitBrailleDriver, NULL);
     tryBrailleDriver();
   }
 
@@ -2140,7 +2140,7 @@ brlttyStart (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
-    onProgramExit(exitSpeechDriver, "speech-driver");
+    onProgramExit("speech-driver", exitSpeechDriver, NULL);
     trySpeechDriver();
   }
 

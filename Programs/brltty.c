@@ -131,13 +131,13 @@ updateSessionAttributes (void) {
 }
 
 static void
-exitSessions (void) {
+exitSessions (void *data) {
   ses = NULL;
   deallocateSessionEntries();
 }
 
 static void
-exitLog (void) {
+exitLog (void *data) {
   closeSystemLog();
   closeLogFile();
 }
@@ -1837,7 +1837,7 @@ brlttyPrepare_first (void) {
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   srand((unsigned int)time(NULL));
-  onProgramExit(exitLog, "log");
+  onProgramExit("log", exitLog, NULL);
   openSystemLog();
 
   terminationCount = 0;
@@ -1863,7 +1863,7 @@ brlttyConstruct (int argc, char *argv[]) {
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
-  onProgramExit(exitSessions, "sessions");
+  onProgramExit("sessions", exitSessions, NULL);
   brlttyPrepare = brlttyPrepare_first;
   return PROG_EXIT_SUCCESS;
 }

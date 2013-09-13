@@ -44,8 +44,8 @@ extern const char standardErrorName[];
 extern void beginProgram (int argumentCount, char **argumentVector);
 extern void endProgram (void);
 
-typedef void ProgramExitHandler (void);
-extern void onProgramExit (ProgramExitHandler *handler, const char *name);
+typedef void ProgramExitHandler (void *data);
+extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *data);
 
 extern void makeProgramBanner (char *buffer, size_t size);
 

@@ -327,17 +327,20 @@ static ProgramExitEntry *programExitEntries = NULL;
 
 struct ProgramExitEntryStruct {
   ProgramExitEntry *next;
-  ProgramExitHandler *handler;
   char *name;
+  ProgramExitHandler *handler;
+  void *data;
 };
 
 void
-onProgramExit (ProgramExitHandler *handler, const char *name) {
+onProgramExit (const char *name, ProgramExitHandler *handler, void *data) {
   ProgramExitEntry *pxe;
 
   if ((pxe = malloc(sizeof(*pxe)))) {
-    pxe->handler = handler;
     pxe->name = strdup(name);
+    pxe->handler = handler;
+    pxe->data = data;
+
     pxe->next = programExitEntries;
     programExitEntries = pxe;
   } else {
@@ -357,7 +360,7 @@ endProgram (void) {
     if (!name) name = "unknown";
 
     logMessage(LOG_DEBUG, "stopping program component: %s", name);
-    pxe->handler();
+    pxe->handler(pxe->data);
 
     if (pxe->name) free(pxe->name);
     free(pxe);

@@ -254,7 +254,7 @@ static int speechInputDescriptor = -1;
 #endif /* speech input definitions */
 
 static void
-exitSpeechInput (void) {
+exitSpeechInput (void *data) {
   if (speechInputPath) {
 #if defined(__MINGW32__)
 #elif defined(S_ISFIFO)
@@ -286,7 +286,7 @@ exitSpeechInput (void) {
 int
 enableSpeechInput (const char *name) {
   const char *directory;
-  onProgramExit(exitSpeechInput, "speech-input");
+  onProgramExit("speech-input", exitSpeechInput, NULL);
 
 #if defined(__MINGW32__)
   directory = "//./pipe";

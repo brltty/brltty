@@ -456,7 +456,7 @@ stopRouting (void) {
 }
 
 static void
-exitRouting (void) {
+exitCursorRouting (void *data) {
   stopRouting();
 }
 #else /* SIGUSR1 */
@@ -512,7 +512,7 @@ startRouting (int column, int row, int screen) {
         static int first = 1;
         if (first) {
           first = 0;
-          onProgramExit(exitRouting, "routing");
+          onProgramExit("cursor-routing", exitCursorRouting, NULL);
         }
       }
 
