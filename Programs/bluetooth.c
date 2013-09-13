@@ -63,7 +63,6 @@ typedef struct {
   int connectError;
   char *deviceName;
 } BluetoothDeviceEntry;
-static Queue *bluetoothDeviceQueue = NULL;
 
 static void
 bthDeallocateDeviceEntry (void *item, void *data) {
@@ -73,15 +72,12 @@ bthDeallocateDeviceEntry (void *item, void *data) {
   free(entry);
 }
 
-static int
-bthInitializeDeviceQueue (void) {
-  if (!bluetoothDeviceQueue) {
-    if (!(bluetoothDeviceQueue = newQueue(bthDeallocateDeviceEntry, NULL))) {
-      return 0;
-    }
-  }
+static Queue *
+bthGetDeviceQueue (int create) {
+  static Queue *devices = NULL;
 
-  return 1;
+  return getProgramQueue(&devices, "bluetooth-device-queue", create,
+                         bthDeallocateDeviceEntry, NULL);
 }
 
 static int
@@ -94,8 +90,10 @@ bthTestDeviceEntry (const void *item, const void *data) {
 
 static BluetoothDeviceEntry *
 bthGetDeviceEntry (uint64_t bda, int add) {
-  if (bthInitializeDeviceQueue()) {
-    BluetoothDeviceEntry *entry = findItem(bluetoothDeviceQueue, bthTestDeviceEntry, &bda);
+  Queue *devices = bthGetDeviceQueue(add);
+
+  if (devices) {
+    BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceEntry, &bda);
     if (entry) return entry;
 
     if (add) {
@@ -104,7 +102,7 @@ bthGetDeviceEntry (uint64_t bda, int add) {
         entry->connectError = 0;
         entry->deviceName = NULL;
 
-        if (enqueueItem(bluetoothDeviceQueue, entry)) return entry;
+        if (enqueueItem(devices, entry)) return entry;
         free(entry);
       } else {
         logMallocError();
@@ -117,7 +115,9 @@ bthGetDeviceEntry (uint64_t bda, int add) {
 
 void
 bthForgetDevices (void) {
-  if (bthInitializeDeviceQueue()) deleteElements(bluetoothDeviceQueue);
+  Queue *devices = bthGetDeviceQueue(0);
+
+  if (devices) deleteElements(devices);
 }
 
 static int
