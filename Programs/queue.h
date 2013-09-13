@@ -31,6 +31,11 @@ typedef int (*ItemComparator) (const void *item1, const void *item2, void *data)
 extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
 extern void deallocateQueue (Queue *queue);
 
+extern Queue *getProgramQueue (
+  Queue **queue, const char *name, int create,
+  ItemDeallocator deallocate, ItemComparator compare
+);
+
 extern Element *getQueueHead (const Queue *queue);
 extern Element *getQueueTail (const Queue *queue);
 extern int getQueueSize (const Queue *queue);

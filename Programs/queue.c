@@ -20,6 +20,7 @@
 
 #include "log.h"
 #include "queue.h"
+#include "program.h"
 
 struct QueueStruct {
   Element *head;
@@ -233,6 +234,30 @@ void
 deallocateQueue (Queue *queue) {
   deleteElements(queue);
   free(queue);
+}
+
+static void
+exitQueue (void *data) {
+  Queue **queue = data;
+
+  if (*queue) {
+    deallocateQueue(*queue);
+    *queue = NULL;
+  }
+}
+
+Queue *
+getProgramQueue (
+  Queue **queue, const char *name, int create,
+  ItemDeallocator deallocate, ItemComparator compare
+) {
+  if (!*queue && create) {
+    if ((*queue = newQueue(deallocate, compare))) {
+      onProgramExit(name, exitQueue, queue);
+    }
+  }
+
+  return *queue;
 }
 
 Element *
