@@ -28,6 +28,7 @@
 #include "brldefs.h"
 #include "ktb.h"
 #include "ktb_internal.h"
+#include "program.h"
 
 const KeyboardFunction keyboardFunctionTable[] = {
   {.name="dot1", .bit=BRL_DOT1},
@@ -556,6 +557,7 @@ parseKeyboardFunctionName (DataFile *file, const KeyboardFunction **keyboardFunc
     }
 
     sortedKeyboardFunctions = newTable;
+    registerProgramMemory("sorted-keyboard-functions", &sortedKeyboardFunctions);
   }
 
   {
