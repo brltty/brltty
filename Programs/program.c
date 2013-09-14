@@ -150,7 +150,7 @@ beginProgram (int argumentCount, char **argumentVector) {
   }
 
   programName = locatePathName(programPath);
-  setLogPrefix(programName);
+  pushLogPrefix(programName);
 }
 
 void
@@ -183,7 +183,9 @@ fixInstallPaths (char **const *paths) {
 
       if (newPath) {
         if (changeStringSetting(*paths, newPath)) {
-          if (!isAbsolutePath(**paths)) {
+          if (isAbsolutePath(**paths)) {
+            problem = NULL;
+          } else {
             problem = strtext("install path not absolute");
           }
         }
@@ -398,4 +400,5 @@ endProgram (void) {
   }
 
   logMessage(LOG_DEBUG, "stopped program components");
+  popLogPrefix();
 }

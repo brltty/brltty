@@ -123,8 +123,14 @@ toAndroidLogPriority (int level) {
 static int syslogOpened = 0;
 #endif /* system log internal definitions */
 
-static const char *logPrefix = NULL;
+typedef struct LogPrefixEntryStruct LogPrefixEntry;
+static LogPrefixEntry *logPrefixStack = NULL;
 static FILE *logFile = NULL;
+
+struct LogPrefixEntryStruct {
+  LogPrefixEntry *previous;
+  char *prefix;
+};
 
 static void
 setLogCategory (const LogCategoryEntry *ctg, int state) {
@@ -158,11 +164,40 @@ enableLogCategory (const char *name) {
   return 0;
 }
 
-const char *
-setLogPrefix (const char *newPrefix) {
-  const char *oldPrefix = logPrefix;
-  logPrefix = newPrefix;
-  return oldPrefix;
+int
+pushLogPrefix (const char *prefix) {
+  LogPrefixEntry *entry;
+
+  if ((entry = malloc(sizeof(*entry)))) {
+    memset(entry, 0, sizeof(*entry));
+    if (!prefix) prefix = "";
+
+    if ((entry->prefix = strdup(prefix))) {
+      entry->previous = logPrefixStack;
+      logPrefixStack = entry;
+      return 1;
+    }
+
+    free(entry);
+  }
+
+  return 0;
+}
+
+int
+popLogPrefix (void) {
+  if (logPrefixStack) {
+    LogPrefixEntry *entry = logPrefixStack;
+    logPrefixStack = entry->previous;
+    entry->previous = NULL;
+
+    free(entry->prefix);
+    free(entry);
+
+    return 1;
+  }
+
+  return 0;
 }
 
 void
@@ -298,9 +333,13 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
       if (print) {
         FILE *stream = stderr;
 
-        if (logPrefix) {
-          fputs(logPrefix, stream);
-          fputs(": ", stream);
+        if (logPrefixStack) {
+          const char *prefix = logPrefixStack->prefix;
+
+          if (*prefix) {
+            fputs(prefix, stream);
+            fputs(": ", stream);
+          }
         }
 
         fputs(record, stream);

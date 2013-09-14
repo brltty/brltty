@@ -1936,12 +1936,14 @@ brlttyStart (int argc, char *argv[]) {
   }
 
   {
-    const char *oldPrefix = setLogPrefix(NULL);
     char banner[0X100];
-
     makeProgramBanner(banner, sizeof(banner));
-    logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
-    setLogPrefix(oldPrefix);
+
+    {
+      int pushed = pushLogPrefix(NULL);
+      logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
+      if (pushed) popLogPrefix();
+    }
   }
 
   if (opt_version) {

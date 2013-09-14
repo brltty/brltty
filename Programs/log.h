@@ -82,7 +82,8 @@ extern void closeLogFile (void);
 extern void openSystemLog (void);
 extern void closeSystemLog (void);
 
-extern const char *setLogPrefix (const char *newPrefix);
+extern int pushLogPrefix (const char *prefix);
+extern int popLogPrefix (void);
 
 typedef size_t LogDataFormatter (char *buffer, size_t size, const void *data);
 extern void logData (int level, LogDataFormatter *formatLogData, const void *data);
