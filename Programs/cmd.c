@@ -25,6 +25,7 @@
 #include "brldefs.h"
 #include "cmd.h"
 #include "ttb.h"
+#include "program.h"
 
 const CommandEntry commandTable[] = {
   #include "cmds.auto.h"
@@ -98,6 +99,7 @@ getCommandEntry (int code) {
   if (!commandEntries) {
     {
       const CommandEntry *cmd = commandTable;
+
       while (cmd->name) cmd += 1;
       commandCount = cmd - commandTable;
     }
@@ -113,12 +115,15 @@ getCommandEntry (int code) {
       {
         const CommandEntry *cmd = commandTable;
         const CommandEntry **entry = entries;
+
         while (cmd->name) *entry++ = cmd++;
       }
 
       qsort(entries, commandCount, sizeof(*entries), compareCommandCodes);
       commandEntries = entries;
     }
+
+    registerProgramMemory("sorted-command-table", &commandEntries);
   }
 
   code &= BRL_MSK_CMD;
