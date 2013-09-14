@@ -26,8 +26,8 @@ struct QueueStruct {
   Element *head;
   unsigned int size;
   void *data;
-  ItemDeallocator deallocate;
-  ItemComparator compare;
+  ItemDeallocator *deallocateItem;
+  ItemComparator *compareItems;
 };
 
 struct ElementStruct {
@@ -60,9 +60,9 @@ static void
 removeItem (Element *element) {
   if (element->item) {
     Queue *queue = element->queue;
-    ItemDeallocator deallocator = queue->deallocate;
+    ItemDeallocator *deallocateItem = queue->deallocateItem;
 
-    if (deallocator) deallocator(element->item, queue->data);
+    if (deallocateItem) deallocateItem(element->item, queue->data);
     element->item = NULL;
   }
 }
@@ -148,7 +148,8 @@ typedef struct {
 static int
 findReferenceElement (const void *item, const void *data) {
   const FindReferenceElementData *fre = data;
-  return fre->queue->compare(fre->item, item, fre->queue->data);
+
+  return fre->queue->compareItems(fre->item, item, fre->queue->data);
 }
 
 static void
@@ -159,7 +160,7 @@ enqueueElement (Element *element) {
     Element *reference;
     int newHead = 0;
 
-    if (queue->compare) {
+    if (queue->compareItems) {
       FindReferenceElementData fre = {
         .queue = queue,
         .item = element->item
@@ -236,7 +237,7 @@ exitQueue (void *data) {
 }
 
 Queue *
-newQueue (ItemDeallocator deallocate, ItemComparator compare) {
+newQueue (ItemDeallocator *deallocateItem, ItemComparator *compareItems) {
   Queue *queue;
 
   if (!queueInitialized) {
@@ -248,8 +249,8 @@ newQueue (ItemDeallocator deallocate, ItemComparator compare) {
     queue->head = NULL;
     queue->size = 0;
     queue->data = NULL;
-    queue->deallocate = deallocate;
-    queue->compare = compare;
+    queue->deallocateItem = deallocateItem;
+    queue->compareItems = compareItems;
     return queue;
   } else {
     logMallocError();
@@ -282,10 +283,10 @@ exitProgramQueue (void *data) {
 Queue *
 getProgramQueue (
   Queue **queue, const char *name, int create,
-  QueueCreator creator, void *data
+  QueueCreator *createQueue, void *data
 ) {
   if (!*queue && create) {
-    if ((*queue = creator(data))) {
+    if ((*queue = createQueue(data))) {
       onProgramExit(name, exitProgramQueue, queue);
     }
   }
@@ -322,7 +323,7 @@ setQueueData (Queue *queue, void *data) {
 }
 
 Element *
-findElement (const Queue *queue, ItemTester testItem, const void *data) {
+findElement (const Queue *queue, ItemTester *testItem, const void *data) {
   if (queue->head) {
     Element *element = queue->head;
     do {
@@ -333,7 +334,7 @@ findElement (const Queue *queue, ItemTester testItem, const void *data) {
 }
 
 void *
-findItem (const Queue *queue, ItemTester testItem, const void *data) {
+findItem (const Queue *queue, ItemTester *testItem, const void *data) {
   Element *element = findElement(queue, testItem, data);
   if (element) return element->item;
   return NULL;
@@ -350,7 +351,7 @@ findElementWithItem (Queue *queue, void *item) {
 }
 
 Element *
-processQueue (Queue *queue, ItemProcessor processItem, void *data) {
+processQueue (Queue *queue, ItemProcessor *processItem, void *data) {
   Element *element = queue->head;
   while (element) {
     Element *next = element->next;

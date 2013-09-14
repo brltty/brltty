@@ -25,16 +25,16 @@ extern "C" {
 
 typedef struct QueueStruct Queue;
 typedef struct ElementStruct Element;
-typedef void (*ItemDeallocator) (void *item, void *data);
-typedef int (*ItemComparator) (const void *item1, const void *item2, void *data);
+typedef void ItemDeallocator (void *item, void *data);
+typedef int ItemComparator (const void *item1, const void *item2, void *data);
 
-extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
+extern Queue *newQueue (ItemDeallocator *deallocateItem, ItemComparator *compareItems);
 extern void deallocateQueue (Queue *queue);
 
-typedef Queue *(*QueueCreator) (void *data);
+typedef Queue *QueueCreator (void *data);
 extern Queue *getProgramQueue (
   Queue **queue, const char *name, int create,
-  QueueCreator creator, void *data
+  QueueCreator *createQueue, void *data
 );
 
 extern Element *getQueueHead (const Queue *queue);
@@ -55,13 +55,13 @@ extern void deleteElements (Queue *queue);
 extern void deleteElement (Element *element);
 extern void requeueElement (Element *element);
 
-typedef int (*ItemTester) (const void *item, const void *data);
-extern Element *findElement (const Queue *queue, ItemTester testItem, const void *data);
-extern void *findItem (const Queue *queue, ItemTester testItem, const void *data);
+typedef int ItemTester (const void *item, const void *data);
+extern Element *findElement (const Queue *queue, ItemTester *testItem, const void *data);
+extern void *findItem (const Queue *queue, ItemTester *testItem, const void *data);
 extern Element *findElementWithItem (Queue *queue, void *item);
 
-typedef int (*ItemProcessor) (void *item, void *data);
-extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
+typedef int ItemProcessor (void *item, void *data);
+extern Element *processQueue (Queue *queue, ItemProcessor *processItem, void *data);
 
 #ifdef __cplusplus
 }
