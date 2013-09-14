@@ -106,7 +106,11 @@ beginProgram (int argumentCount, char **argumentVector) {
   initializeSystemObject();
   prepareLocale();
 
-  if (!(programPath = getProgramPath())) programPath = argumentVector[0];
+  if ((programPath = getProgramPath())) {
+    registerProgramMemory("program-path", &programPath);
+  } else {
+    programPath = argumentVector[0];
+  }
 
   if (!isExplicitPath(programPath)) {
     char *path = findProgram(programPath);
@@ -162,7 +166,9 @@ fixInstallPaths (char **const *paths) {
   static const char *programDirectory = NULL;
 
   if (!programDirectory) {
-    if (!(programDirectory = getPathDirectory(programPath))) {
+    if ((programDirectory = getPathDirectory(programPath))) {
+      registerProgramMemory("program-directory", &programDirectory);
+    } else {
       logMessage(LOG_WARNING, gettext("cannot determine program directory"));
       programDirectory = ".";
     }
