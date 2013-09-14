@@ -114,7 +114,7 @@ static const char *brailleDevice = NULL;
 static int brailleConstructed;
 
 static char *opt_brailleDriver;
-static char **brailleDrivers;
+static char **brailleDrivers = NULL;
 static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject;
 static char *opt_brailleParameters;
@@ -156,7 +156,7 @@ int opt_quietIfNoBraille;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
-static char **screenDrivers;
+static char **screenDrivers = NULL;
 static const ScreenDriver *screenDriver = NULL;
 static void *screenObject;
 static char *opt_screenParameters;
@@ -1290,6 +1290,11 @@ exitBrailleDriver (void *data) {
   }
 
   stopBrailleDriver();
+
+  if (brailleDrivers) {
+    deallocateStrings(brailleDrivers);
+    brailleDrivers = NULL;
+  }
 }
 
 int
@@ -1480,6 +1485,11 @@ restartSpeechDriver (void) {
 static void
 exitSpeechDriver (void *data) {
   stopSpeechDriver();
+
+  if (speechDrivers) {
+    deallocateStrings(speechDrivers);
+    speechDrivers = NULL;
+  }
 }
 
 int
@@ -1609,6 +1619,11 @@ static void
 exitScreens (void *data) {
   stopScreenDriver();
   destructSpecialScreens();
+
+  if (screenDrivers) {
+    deallocateStrings(screenDrivers);
+    screenDrivers = NULL;
+  }
 }
 
 static void
@@ -2006,6 +2021,7 @@ brlttyStart (int argc, char *argv[]) {
    */
 
   onProgramExit("screens", exitScreens, NULL);
+  screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   constructSpecialScreens();
   enableBrailleHelpPage(); /* ensure that it's first */
 
@@ -2083,12 +2099,13 @@ brlttyStart (int argc, char *argv[]) {
   logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Key Table"),
              *opt_keyTable? opt_keyTable: gettext("none"));
 
-  if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))
-    if (keyboardKeyTable)
+  if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties)) {
+    if (keyboardKeyTable) {
       scheduleKeyboardMonitor(0);
+    }
+  }
 
   /* initialize screen driver */
-  screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
   } else {
