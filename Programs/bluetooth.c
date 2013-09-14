@@ -73,11 +73,16 @@ bthDeallocateDeviceEntry (void *item, void *data) {
 }
 
 static Queue *
+bthCreateDeviceQueue (void *data) {
+  return newQueue(bthDeallocateDeviceEntry, NULL);
+}
+
+static Queue *
 bthGetDeviceQueue (int create) {
   static Queue *devices = NULL;
 
   return getProgramQueue(&devices, "bluetooth-device-queue", create,
-                         bthDeallocateDeviceEntry, NULL);
+                         bthCreateDeviceQueue, NULL);
 }
 
 static int

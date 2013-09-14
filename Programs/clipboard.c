@@ -63,11 +63,16 @@ cpbDeallocateHistoryEntry (void *item, void *data) {
 }
 
 static Queue *
+cpbCreateHistoryQueue (void *data) {
+  return newQueue(cpbDeallocateHistoryEntry, NULL);
+}
+
+static Queue *
 cpbGetHistoryQueue (int create) {
   static Queue *queue = NULL;
 
   return getProgramQueue(&queue, "clipboard-history-queue", create,
-                         cpbDeallocateHistoryEntry, NULL);
+                         cpbCreateHistoryQueue, NULL);
 }
 
 static void

@@ -260,11 +260,16 @@ setDataVariable (DataVariable *variable, const wchar_t *characters, int length) 
 }
 
 static Queue *
-getGlobalDataVariables () {
+createGlobalDataVariableQueue (void *data) {
+  return newDataVariableQueue(NULL);
+}
+
+static Queue *
+getGlobalDataVariables (int create) {
   static Queue *variables = NULL;
 
-  if (!variables) variables = newDataVariableQueue(NULL);
-  return variables;
+  return getProgramQueue(&variables, "global-data-variables", create,
+                         createGlobalDataVariableQueue, NULL);
 }
 
 int
@@ -288,7 +293,7 @@ setGlobalDataVariable (const char *name, const char *value) {
   }
 
   {
-    Queue *variables = getGlobalDataVariables();
+    Queue *variables = getGlobalDataVariables(1);
 
     if (variables) {
       const DataOperand nameArgument = {
@@ -970,7 +975,7 @@ processDataStream (
   file.data = data;
 
   if (!variables)
-    if (!(variables = getGlobalDataVariables()))
+    if (!(variables = getGlobalDataVariables(1)))
       return 0;
 
   logMessage(LOG_DEBUG, "including data file: %s", file.name);

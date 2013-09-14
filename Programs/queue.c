@@ -282,10 +282,10 @@ exitProgramQueue (void *data) {
 Queue *
 getProgramQueue (
   Queue **queue, const char *name, int create,
-  ItemDeallocator deallocate, ItemComparator compare
+  QueueCreator creator, void *data
 ) {
   if (!*queue && create) {
-    if ((*queue = newQueue(deallocate, compare))) {
+    if ((*queue = creator(data))) {
       onProgramExit(name, exitProgramQueue, queue);
     }
   }

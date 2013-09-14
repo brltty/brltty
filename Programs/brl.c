@@ -297,11 +297,16 @@ deallocateCommandQueueItem (void *item, void *data) {
 }
 
 static Queue *
+createCommandQueue (void *data) {
+  return newQueue(deallocateCommandQueueItem, NULL);
+}
+
+static Queue *
 getCommandQueue (int create) {
   static Queue *commands = NULL;
 
   return getProgramQueue(&commands, "command-queue", create,
-                         deallocateCommandQueueItem, NULL);
+                         createCommandQueue, NULL);
 }
 
 int
@@ -371,11 +376,16 @@ deallocateKeyEventQueueItem (void *item, void *data) {
 }
 
 static Queue *
+createKeyEventQueue (void *data) {
+  return newQueue(deallocateKeyEventQueueItem, NULL);
+}
+
+static Queue *
 getKeyEventQueue (int create) {
   static Queue *events = NULL;
 
   return getProgramQueue(&events, "key-event-queue", create,
-                         deallocateKeyEventQueueItem, NULL);
+                         createKeyEventQueue, NULL);
 }
 
 static int

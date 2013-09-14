@@ -493,11 +493,16 @@ deallocateFunctionEntry (void *item, void *data) {
 }
 
 static Queue *
+createFunctionQueue (void *data) {
+  return newQueue(deallocateFunctionEntry, NULL);
+}
+
+static Queue *
 getFunctionQueue (int create) {
   static Queue *functions = NULL;
 
   return getProgramQueue(&functions, "async-function-queue", create,
-                         deallocateFunctionEntry, NULL);
+                         createFunctionQueue, NULL);
 }
 
 static OperationEntry *
@@ -1278,11 +1283,16 @@ compareAlarmEntries (const void *item1, const void *item2, void *data) {
 }
 
 static Queue *
+createAlarmQueue (void *data) {
+  return newQueue(deallocateAlarmEntry, compareAlarmEntries);
+}
+
+static Queue *
 getAlarmQueue (int create) {
   static Queue *alarms = NULL;
 
   return getProgramQueue(&alarms, "async-alarm-queue", create,
-                         deallocateAlarmEntry, compareAlarmEntries);
+                         createAlarmQueue, NULL);
 }
 
 typedef struct {
