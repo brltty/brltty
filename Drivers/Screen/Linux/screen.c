@@ -468,10 +468,9 @@ setScreenFontMap (int force) {
         return 0;
       }
     }
-
-    free(screenFontMapTable);
   }
 
+  if (screenFontMapTable) free(screenFontMapTable);
   screenFontMapTable = sfm.entries;
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
