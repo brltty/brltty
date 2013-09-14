@@ -2038,28 +2038,35 @@ brlttyStart (int argc, char *argv[]) {
   if (*opt_textTable) {
     if (strcmp(opt_textTable, "auto") == 0) {
       char *name = selectTextTable(opt_tablesDirectory);
-      opt_textTable = "";
+
+      changeStringSetting(&opt_textTable, "");
 
       if (name) {
         if (replaceTextTable(opt_tablesDirectory, name)) {
-          opt_textTable = name;
-        } else {
-          free(name);
+          changeStringSetting(&opt_textTable, name);
         }
+
+        free(name);
       }
-    } else {
-      if (!replaceTextTable(opt_tablesDirectory, opt_textTable)) opt_textTable = "";
+    } else if (!replaceTextTable(opt_tablesDirectory, opt_textTable)) {
+      changeStringSetting(&opt_textTable, "");
     }
   }
 
-  if (!*opt_textTable) opt_textTable = TEXT_TABLE;
+  if (!*opt_textTable) {
+    changeStringSetting(&opt_textTable, TEXT_TABLE);
+  }
   logMessage(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
 
   /* handle attributes table option */
-  if (*opt_attributesTable)
-    if (!replaceAttributesTable(opt_tablesDirectory, opt_attributesTable))
-      opt_attributesTable = "";
-  if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
+  if (*opt_attributesTable) {
+    if (!replaceAttributesTable(opt_tablesDirectory, opt_attributesTable)) {
+      changeStringSetting(&opt_attributesTable, "");
+    }
+  }
+  if (!*opt_attributesTable) {
+    changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
+  }
   logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE

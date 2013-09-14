@@ -145,7 +145,10 @@ main (int argc, char *argv[]) {
     driver = *argv++;
     --argc;
   }
-  if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
+
+  if (!*opt_brailleDevice) {
+    changeStringSetting(&opt_brailleDevice, BRAILLE_DEVICE);
+  }
 
   if ((braille = loadBrailleDriver(driver, &object, opt_driversDirectory))) {
     const char *const *parameterNames = braille->parameters;

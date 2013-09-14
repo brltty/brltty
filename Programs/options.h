@@ -86,6 +86,10 @@ extern ProgramExitStatus processOptions (
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
 
+extern void resetOptions (const OptionsDescriptor *descriptor);
+extern int changeStringSetting (char **setting, const char *value);
+extern int extendStringSetting (char **setting, const char *value, int prepend);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

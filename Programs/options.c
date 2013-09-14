@@ -61,31 +61,38 @@ wordMeansFalse (const char *word) {
   return strcasecmp(word, FLAG_FALSE_WORD) == 0;
 }
 
-static int
-extendSetting (char **setting, const char *value, int prepend) {
-  if (value && *value) {
-    if (!*setting) {
-      if (!(*setting = strdup(value))) {
-        logMallocError();
-        return 0;
-      }
-    } else {
-      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
-      char *newSetting = malloc(newSize);
+int
+changeStringSetting (char **setting, const char *value) {
+  char *string;
 
-      if (!newSetting) {
-        logMallocError();
-        return 0;
-      }
+  if (!value) {
+    string = NULL;
+  } else if (!(string = strdup(value))) {
+    logMallocError();
+    return 0;
+  }
+
+  if (*setting) free(*setting);
+  *setting = string;
+  return 1;
+}
+
+int
+extendStringSetting (char **setting, const char *value, int prepend) {
+  if (value && *value) {
+    if (*setting) {
+      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
+      char newSetting[newSize];
 
       if (prepend) {
-        snprintf(newSetting, newSize, "%s,%s", value, *setting);
+        snprintf(newSetting, newSize, "%s%c%s", value, PARAMETER_SEPARATOR_CHARACTER, *setting);
       } else {
-        snprintf(newSetting, newSize, "%s,%s", *setting, value);
+        snprintf(newSetting, newSize, "%s%c%s", *setting, PARAMETER_SEPARATOR_CHARACTER, value);
       }
 
-      free(*setting);
-      *setting = newSetting;
+      if (!changeStringSetting(setting, newSetting)) return 0;
+    } else if (!changeStringSetting(setting, value)) {
+      return 0;
     }
   }
 
@@ -106,12 +113,9 @@ ensureSetting (
     if (option->argument) {
       if (option->setting.string) {
         if (option->flags & OPT_Extend) {
-          if (!extendSetting(option->setting.string, value, 1)) return 0;
-        } else {
-          if (!(*option->setting.string = strdup(value))) {
-            logMallocError();
-            return 0;
-          }
+          if (!extendStringSetting(option->setting.string, value, 1)) return 0;
+        } else if (!changeStringSetting(option->setting.string, value)) {
+          return 0;
         }
       }
     } else {
@@ -282,7 +286,7 @@ processCommandLine (
   const char *argumentsSummary
 ) {
   int lastOptInd = -1;
-  int index;
+  unsigned int index;
 
   const char resetPrefix = '+';
   const char *reset = NULL;
@@ -498,9 +502,9 @@ processCommandLine (
 
           if (entry->setting.string) {
             if (entry->flags & OPT_Extend) {
-              extendSetting(entry->setting.string, optarg, 0);
+              extendStringSetting(entry->setting.string, optarg, 0);
             } else {
-              *entry->setting.string = optarg;
+              changeStringSetting(entry->setting.string, optarg);
             }
           }
         } else {
@@ -603,44 +607,62 @@ processBootParameters (
   if (allocated) free(allocated);
 }
 
-static void
+static int
+processEnvironmentVariable (
+  OptionProcessingInformation *info,
+  const OptionEntry *option,
+  const char *prefix
+) {
+  size_t prefixLength = strlen(prefix);
+
+  if ((option->flags & OPT_Environ) && option->word) {
+    size_t nameSize = prefixLength + 1 + strlen(option->word) + 1;
+    char name[nameSize];
+
+    snprintf(name, nameSize, "%s_%s", prefix, option->word);
+
+    {
+      char *character = name;
+
+      while (*character) {
+        if (*character == '-') {
+          *character = '_';
+        } else if (islower((unsigned char)*character)) {
+          *character = toupper((unsigned char)*character);
+        }
+
+        character += 1;
+      }
+    }
+
+    {
+      const char *setting = getenv(name);
+
+      if (setting && *setting) {
+        if (!ensureSetting(info, option, setting)) {
+          return 0;
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
 processEnvironmentVariables (
   OptionProcessingInformation *info,
   const char *prefix
 ) {
-  size_t prefixLength = strlen(prefix);
   unsigned int optionIndex;
 
   for (optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
 
-    if ((option->flags & OPT_Environ) && option->word) {
-      size_t nameSize = prefixLength + 1 + strlen(option->word) + 1;
-      char name[nameSize];
-
-      snprintf(name, nameSize, "%s_%s", prefix, option->word);
-
-      {
-        char *character = name;
-
-        while (*character) {
-          if (*character == '-') {
-            *character = '_';
-	  } else if (islower((unsigned char)*character)) {
-            *character = toupper((unsigned char)*character);
-          }
-
-          character += 1;
-        }
-      }
-
-      {
-        const char *setting = getenv(name);
-
-        if (setting && *setting) ensureSetting(info, option, setting);
-      }
-    }
+    if (!processEnvironmentVariable(info, option, prefix)) return 0;
   }
+
+  return 1;
 }
 
 static void
@@ -709,7 +731,7 @@ processConfigurationLine (
             }
 
             if (*setting) {
-              if (!extendSetting(setting, operand, 0)) return 0;
+              if (!extendStringSetting(setting, operand, 0)) return 0;
             } else {
               if (!(*setting = strdup(operand))) {
                 logMallocError();
@@ -773,9 +795,8 @@ processConfigurationFile (
   }
 }
 
-static void
-exitOptions (void *data) {
-  const OptionsDescriptor *descriptor = data;
+void
+resetOptions (const OptionsDescriptor *descriptor) {
   unsigned int optionIndex = 0;
 
   for (optionIndex=0; optionIndex<descriptor->optionCount; optionIndex+=1) {
@@ -784,14 +805,20 @@ exitOptions (void *data) {
     if (option->argument) {
       char **string = option->setting.string;
 
-      if (string) {
-        if (*string) {
-          free(*string);
-          *string = NULL;
-        }
-      }
+      if (string) changeStringSetting(string, NULL);
+    } else {
+      int *flag = option->setting.flag;
+
+      if (flag) *flag = 0;
     }
   }
+}
+
+static void
+exitOptions (void *data) {
+  const OptionsDescriptor *descriptor = data;
+
+  resetOptions(descriptor);
 }
 
 ProgramExitStatus
