@@ -109,7 +109,7 @@ static char *opt_driversDirectory;
 
 static char *opt_brailleDevice;
 int opt_releaseDevice;
-static char **brailleDevices;
+static char **brailleDevices = NULL;
 static const char *brailleDevice = NULL;
 static int brailleConstructed;
 
@@ -1304,6 +1304,11 @@ exitBrailleDriver (void *data) {
   if (brailleDrivers) {
     deallocateStrings(brailleDrivers);
     brailleDrivers = NULL;
+  }
+
+  if (brailleDevices) {
+    deallocateStrings(brailleDevices);
+    brailleDevices = NULL;
   }
 }
 
