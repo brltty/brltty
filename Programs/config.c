@@ -965,6 +965,12 @@ unloadDriverObject (void **object) {
 #endif /* ENABLE_SHARED_OBJECTS */
 }
 
+static void
+forgetDevices (void) {
+  usbForgetDevices();
+  bthForgetDevices();
+}
+
 void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
@@ -1236,8 +1242,7 @@ deactivateBrailleDriver (void) {
 
 static int
 startBrailleDriver (void) {
-  usbForgetDevices();
-  bthForgetDevices();
+  forgetDevices();
 
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {
@@ -1315,6 +1320,8 @@ exitBrailleDriver (void *data) {
     deallocateStrings(brailleDevices);
     brailleDevices = NULL;
   }
+
+  forgetDevices();
 }
 
 int
