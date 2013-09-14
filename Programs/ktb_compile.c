@@ -123,7 +123,7 @@ insertKeyValue (
     KeyValue *newValues = realloc(*values, ARRAY_SIZE(newValues, newSize));
 
     if (!newValues) {
-      logSystemError("realloc");
+      logMallocError();
       return 0;
     }
 
@@ -164,7 +164,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
     KeyContext *newTable = realloc(ktd->table->keyContexts.table, ARRAY_SIZE(newTable, newCount));
 
     if (!newTable) {
-      logSystemError("realloc");
+      logMallocError();
       return NULL;
     }
     ktd->table->keyContexts.table = newTable;
@@ -761,7 +761,7 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
     KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      logSystemError("realloc");
+      logMallocError();
       return 0;
     }
 
@@ -889,7 +889,7 @@ processHotkeyOperands (DataFile *file, void *data) {
         HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
-          logSystemError("realloc");
+          logMallocError();
           return 0;
         }
 
@@ -949,7 +949,7 @@ processMapOperands (DataFile *file, void *data) {
         MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
-          logSystemError("realloc");
+          logMallocError();
           return 0;
         }
 
@@ -979,7 +979,7 @@ processNoteOperands (DataFile *file, void *data) {
         wchar_t **newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newCount));
 
         if (!newTable) {
-          logSystemError("realloc");
+          logMallocError();
           return 0;
         }
 
@@ -1119,7 +1119,10 @@ typedef struct {
 } IncompleteBindingData;
 
 static int
-addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, unsigned int index, IncompleteBindingData *ibd) {
+addBindingIndex (
+  KeyContext *ctx, const KeyValue *keys, unsigned char count,
+  unsigned int index, IncompleteBindingData *ibd
+) {
   int first = 0;
   int last = ibd->indexCount - 1;
 
@@ -1141,7 +1144,7 @@ addBindingIndex (KeyContext *ctx, const KeyValue *keys, unsigned char count, uns
     unsigned int *newTable = realloc(ibd->indexTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      logSystemError("realloc");
+      logMallocError();
       return 0;
     }
 
@@ -1174,7 +1177,7 @@ static int
 addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count, IncompleteBindingData *ibd) {
   if (count > 1) {
     KeyValue values[--count];
-    int index = 0;
+    unsigned int index = 0;
 
     copyKeyValues(values, &keys[1], count);
 
@@ -1193,6 +1196,7 @@ addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count
 static int
 addIncompleteBindings (KeyContext *ctx) {
   int ok = 1;
+
   IncompleteBindingData ibd = {
     .indexTable = NULL,
     .indexSize = 0,
@@ -1200,7 +1204,7 @@ addIncompleteBindings (KeyContext *ctx) {
   };
 
   {
-    int index;
+    unsigned int index;
 
     for (index=0; index<ctx->keyBindings.count; index+=1) {
       const KeyCombination *combination = &ctx->keyBindings.table[index].combination;
@@ -1215,20 +1219,20 @@ addIncompleteBindings (KeyContext *ctx) {
   }
 
   {
-    int count = ctx->keyBindings.count;
-    int index;
+    unsigned int count = ctx->keyBindings.count;
+    unsigned int index;
 
     for (index=0; index<count; index+=1) {
-      const KeyCombination *combination = &ctx->keyBindings.table[index].combination;
+      const KeyCombination combination = ctx->keyBindings.table[index].combination;
 
-      if ((combination->flags & KCF_IMMEDIATE_KEY)) {
-        if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, ctx->keyBindings.count, &ibd)) {
+      if ((combination.flags & KCF_IMMEDIATE_KEY)) {
+        if (!addBindingIndex(ctx, combination.modifierKeys, combination.modifierCount, ctx->keyBindings.count, &ibd)) {
           ok = 0;
           goto done;
         }
       }
 
-      if (!addSubbindingIndexes(ctx, combination->modifierKeys, combination->modifierCount, &ibd)) {
+      if (!addSubbindingIndexes(ctx, combination.modifierKeys, combination.modifierCount, &ibd)) {
         ok = 0;
         goto done;
       }
@@ -1249,7 +1253,7 @@ prepareKeyBindings (KeyContext *ctx) {
       KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, ctx->keyBindings.count));
 
       if (!newTable) {
-        logSystemError("realloc");
+        logMallocError();
         return 0;
       }
 
