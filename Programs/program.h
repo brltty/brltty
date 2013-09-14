@@ -49,9 +49,6 @@ extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *
 
 extern void makeProgramBanner (char *buffer, size_t size);
 
-extern int changeStringSetting (char **setting, const char *value);
-extern int extendStringSetting (char **setting, const char *value, int prepend);
-
 extern void fixInstallPaths (char **const *paths);
 extern void fixInstallPath (char **path);
 

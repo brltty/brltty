@@ -18,10 +18,82 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "parse.h"
 #include "log.h"
+
+char *
+joinStrings (const char *const *strings, int count) {
+  char *string;
+  size_t length = 0;
+  size_t lengths[count];
+  int index;
+
+  for (index=0; index<count; index+=1) {
+    length += lengths[index] = strlen(strings[index]);
+  }
+
+  if ((string = malloc(length+1))) {
+    char *target = string;
+
+    for (index=0; index<count; index+=1) {
+      length = lengths[index];
+      memcpy(target, strings[index], length);
+      target += length;
+    }
+
+    *target = 0;
+  }
+
+  return string;
+}
+
+int
+changeStringSetting (char **setting, const char *value) {
+  char *string;
+
+  if (!value) {
+    string = NULL;
+  } else if (!(string = strdup(value))) {
+    logMallocError();
+    return 0;
+  }
+
+  if (*setting) free(*setting);
+  *setting = string;
+  return 1;
+}
+
+int
+extendStringSetting (char **setting, const char *value, int prepend) {
+  if (value && *value) {
+    if (*setting) {
+      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
+      char newSetting[newSize];
+
+      if (prepend) {
+        snprintf(newSetting, newSize, "%s%c%s", value, PARAMETER_SEPARATOR_CHARACTER, *setting);
+      } else {
+        snprintf(newSetting, newSize, "%s%c%s", *setting, PARAMETER_SEPARATOR_CHARACTER, value);
+      }
+
+      if (!changeStringSetting(setting, newSetting)) return 0;
+    } else if (!changeStringSetting(setting, value)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+void
+deallocateStrings (char **array) {
+  char **element = array;
+  while (*element) free(*element++);
+  free(array);
+}
 
 char **
 splitString (const char *string, char delimiter, int *count) {
@@ -73,39 +145,6 @@ splitString (const char *string, char delimiter, int *count) {
 done:
   if (!array && count) *count = 0;
   return array;
-}
-
-void
-deallocateStrings (char **array) {
-  char **element = array;
-  while (*element) free(*element++);
-  free(array);
-}
-
-char *
-joinStrings (const char *const *strings, int count) {
-  char *string;
-  size_t length = 0;
-  size_t lengths[count];
-  int index;
-
-  for (index=0; index<count; index+=1) {
-    length += lengths[index] = strlen(strings[index]);
-  }
-
-  if ((string = malloc(length+1))) {
-    char *target = string;
-
-    for (index=0; index<count; index+=1) {
-      length = lengths[index];
-      memcpy(target, strings[index], length);
-      target += length;
-    }
-
-    *target = 0;
-  }
-
-  return string;
 }
 
 int

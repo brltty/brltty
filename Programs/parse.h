@@ -23,9 +23,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern char **splitString (const char *string, char delimiter, int *count);
-extern void deallocateStrings (char **array);
 extern char *joinStrings (const char *const *strings, int count);
+extern int changeStringSetting (char **setting, const char *value);
+extern int extendStringSetting (char **setting, const char *value, int prepend);
+extern void deallocateStrings (char **array);
+extern char **splitString (const char *string, char delimiter, int *count);
 
 extern int rescaleInteger (int value, int from, int to);
 
