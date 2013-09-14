@@ -1077,6 +1077,11 @@ destructBrailleDriver (void) {
     destroyKeyTable(brl.keyTable);
     brl.keyTable = NULL;
   }
+
+  if (brl.buffer) {
+    if (brl.isCoreBuffer) free(brl.buffer);
+    brl.buffer = NULL;
+  }
 }
 
 static int
