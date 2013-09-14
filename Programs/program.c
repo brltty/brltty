@@ -358,6 +358,21 @@ onProgramExit (const char *name, ProgramExitHandler *handler, void *data) {
   }
 }
 
+static void
+exitProgramMemory (void *data) {
+  char **pointer = data;
+
+  if (*pointer) {
+    free(*pointer);
+    *pointer = NULL;
+  }
+}
+
+void
+registerProgramMemory (const char *name, void *pointer) {
+  onProgramExit(name, exitProgramMemory, pointer);
+}
+
 void
 endProgram (void) {
   logMessage(LOG_DEBUG, "stopping program components");

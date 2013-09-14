@@ -35,6 +35,7 @@
 #include "parse.h"
 #include "async.h"
 #include "charset.h"
+#include "program.h"
 
 int
 isPathDelimiter (const char character) {
@@ -386,6 +387,7 @@ getOverrideDirectory (void) {
 
   gotDirectory:
     logMessage(LOG_INFO, "Override Directory: %s", directory);
+    registerProgramMemory("override-directory", &directory);
   }
 
 ready:
