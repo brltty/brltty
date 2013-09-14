@@ -40,13 +40,14 @@ void *
 loadSharedObject (const char *path) {
   void *object = dlopen(path, getSharedObjectLoadFlags());
   if (object) return object;
+
   logMessage(LOG_ERR, "%s", dlerror());
   return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
-  dlclose((void *)object);
+  dlclose(object);
 }
 
 int 
