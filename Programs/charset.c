@@ -292,7 +292,12 @@ setCharset (const char *name) {
     return NULL;
   }
 
-  if (currentCharset) free(currentCharset);
+  if (currentCharset) {
+    free(currentCharset);
+  } else {
+    registerProgramMemory("current-charset", &currentCharset);
+  }
+
   return currentCharset = charset;
 }
 
