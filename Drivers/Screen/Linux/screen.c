@@ -182,6 +182,7 @@ allocateCharsetEntries (const char *names) {
         CharsetEntry *charset = &charsetEntries[charsetCount];
 
         if (!(charset->name = strdup(namesArray[charsetCount]))) {
+          logMallocError();
           ok = 0;
           deallocateCharsetEntries();
           break;
@@ -428,24 +429,31 @@ static int
 setScreenFontMap (int force) {
   struct unimapdesc sfm;
   unsigned short size = force? 0: screenFontMapCount;
+
   if (!size) size = 0X100;
+
   while (1) {
     sfm.entry_ct = size;
+
     if (!(sfm.entries = malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
-      logSystemError("screen font map allocation");
+      logMallocError();
       return 0;
     }
+
     if (controlConsole(GIO_UNIMAP, &sfm) != -1) break;
     free(sfm.entries);
+
     if (errno != ENOMEM) {
-      logSystemError("ioctl GIO_UNIMAP");
+      logSystemError("ioctl[GIO_UNIMAP]");
       return 0;
     }
+
     if (!(size <<= 1)) {
-      logMessage(LOG_ERR, "screen font map too big.");
+      logMessage(LOG_ERR, "screen font map too big");
       return 0;
     }
   }
+
   if (!force) {
     if (sfm.entry_ct == screenFontMapCount) {
       if (memcmp(sfm.entries, screenFontMapTable, sfm.entry_ct*sizeof(sfm.entries[0])) == 0) {
@@ -456,23 +464,30 @@ setScreenFontMap (int force) {
           screenFontMapTable = sfm.entries;
           screenFontMapSize = size;
         }
+
         return 0;
       }
     }
+
     free(screenFontMapTable);
   }
+
   screenFontMapTable = sfm.entries;
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
   logMessage(LOG_INFO, "Screen Font Map Size: %d", screenFontMapCount);
+
   if (debugScreenFontMap) {
-    int i;
+    unsigned int i;
+
     for (i=0; i<screenFontMapCount; ++i) {
       const struct unipair *map = &screenFontMapTable[i];
+
       logMessage(LOG_DEBUG, "sfm[%03u]: unum=%4.4X fpos=%4.4X",
                  i, map->unicode, map->fontpos);
     }
   }
+
   return 1;
 }
 
@@ -503,9 +518,11 @@ setVgaCharacterCount (int force) {
   }
 
   if (!vgaCharacterCount) {
-    int index;
+    unsigned int index;
+
     for (index=0; index<screenFontMapCount; ++index) {
       const struct unipair *map = &screenFontMapTable[index];
+
       if (vgaCharacterCount <= map->fontpos) vgaCharacterCount = map->fontpos + 1;
     }
   }
@@ -513,9 +530,11 @@ setVgaCharacterCount (int force) {
   vgaCharacterCount = ((vgaCharacterCount - 1) | 0XFF) + 1;
   vgaLargeTable = vgaCharacterCount > 0X100;
 
-  if (!force)
-    if (vgaCharacterCount == oldCount)
+  if (!force) {
+    if (vgaCharacterCount == oldCount) {
       return 0;
+    }
+  }
 
   logMessage(LOG_INFO, "VGA Character Count: %d(%s)",
              vgaCharacterCount,
@@ -553,6 +572,7 @@ determineAttributesMasks (void) {
   } else {
     {
       unsigned short mask;
+
       if (controlConsole(VT_GETHIFONTMASK, &mask) == -1) {
         if (errno != EINVAL) logSystemError("ioctl[VT_GETHIFONTMASK]");
       } else if (mask & 0XFF) {
@@ -572,9 +592,10 @@ determineAttributesMasks (void) {
 
         if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
           int counts[0X10];
-          int index;
+          unsigned int index;
 
           memset(counts, 0, sizeof(counts));
+
           for (index=0; index<count; index+=1) ++counts[(buffer[index] & 0X0F00) >> 8];
 
           setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
@@ -597,20 +618,25 @@ static int
 processParameters_LinuxScreen (char **parameters) {
   {
     const char *names = parameters[PARM_CHARSET];
+
     if (!names || !*names) names = getLocaleCharset();
     if (!allocateCharsetEntries(names)) return 0;
   }
 
-  if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM]))
+  if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM])) {
     logMessage(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
+  }
 
   highFontBit = 0;
   if (parameters[PARM_HFB] && *parameters[PARM_HFB]) {
     int bit = 0;
+
     static const int minimum = 0;
     static const int maximum = 7;
+
     static const char *choices[] = {"auto", "vga", "fb", NULL};
     unsigned int choice;
+
     if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
       highFontBit = 1 << (bit + 8);
     } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
@@ -622,6 +648,11 @@ processParameters_LinuxScreen (char **parameters) {
   }
 
   return 1;
+}
+
+static void
+releaseParameters_LinuxScreen (void) {
+  deallocateCharsetEntries();
 }
 
 static wchar_t translationTable[0X200];
@@ -636,16 +667,19 @@ setTranslationTable (int force) {
     unsigned int count = ARRAY_COUNT(translationTable);
 
     {
-      int i;
+      unsigned int i;
+
       for (i=0; i<count; ++i) {
         translationTable[i] = UNICODE_ROW_DIRECT | i;
       }
     }
 
     {
-      int screenFontMapIndex = screenFontMapCount;
+      unsigned int screenFontMapIndex = screenFontMapCount;
+
       while (screenFontMapIndex > 0) {
         const struct unipair *sfm = &screenFontMapTable[--screenFontMapIndex];
+
         if (sfm->fontpos < count) {
           translationTable[sfm->fontpos] = sfm->unicode;
         }
@@ -1866,6 +1900,7 @@ executeCommand_LinuxScreen (int *command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
+
   main->base.describe = describe_LinuxScreen;
   main->base.readCharacters = readCharacters_LinuxScreen;
   main->base.insertKey = insertKey_LinuxScreen;
@@ -1875,7 +1910,9 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
   main->base.executeCommand = executeCommand_LinuxScreen;
+
   main->processParameters = processParameters_LinuxScreen;
+  main->releaseParameters = releaseParameters_LinuxScreen;
   main->construct = construct_LinuxScreen;
   main->destruct = destruct_LinuxScreen;
   main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;

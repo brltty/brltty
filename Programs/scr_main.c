@@ -28,6 +28,10 @@ processParameters_MainScreen (char **parameters) {
   return 1;
 }
 
+static void
+releaseParameters_MainScreen (void) {
+}
+
 static int
 construct_MainScreen (void) {
   return 1;
@@ -45,8 +49,12 @@ userVirtualTerminal_MainScreen (int number) {
 void
 initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
+
   main->processParameters = processParameters_MainScreen;
+  main->releaseParameters = releaseParameters_MainScreen;
+
   main->construct = construct_MainScreen;
   main->destruct = destruct_MainScreen;
+
   main->userVirtualTerminal = userVirtualTerminal_MainScreen;
 }

@@ -97,6 +97,7 @@ initializeScreen (void) {
 int
 constructScreenDriver (char **parameters) {
   initializeScreen();
+
   if (mainScreen.processParameters(parameters)) {
     if (mainScreen.construct()) {
       return 1;
@@ -104,6 +105,8 @@ constructScreenDriver (char **parameters) {
       logMessage(LOG_DEBUG, "screen driver initialization failed: %s",
                  screen->definition.code);
     }
+
+    mainScreen.releaseParameters();
   }
 
   return 0;
@@ -112,6 +115,7 @@ constructScreenDriver (char **parameters) {
 void
 destructScreenDriver (void) {
   mainScreen.destruct();
+  mainScreen.releaseParameters();
 }
 
 void
@@ -370,6 +374,7 @@ constructRoutingScreen (void) {
 void
 destructRoutingScreen (void) {
   mainScreen.destruct();
+  mainScreen.releaseParameters();
 }
 
 
