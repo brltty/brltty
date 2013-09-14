@@ -23,8 +23,9 @@
 
 #include "log.h"
 #include "charset_internal.h"
-#include "lock.h"
 #include "unicode.h"
+#include "lock.h"
+#include "program.h"
 
 const char defaultCharset[] = "ISO-8859-1";
 
@@ -249,6 +250,7 @@ getWcharCharset (void) {
 
   if (!wcharCharset) {
     char charset[0X10];
+
     snprintf(charset, sizeof(charset), "UCS-%lu%cE",
              (unsigned long)sizeof(wchar_t),
 #ifdef WORDS_BIGENDIAN
@@ -258,7 +260,11 @@ getWcharCharset (void) {
 #endif /* WORDS_BIGENDIAN */
             );
 
-    if (!(wcharCharset = strdup(charset))) logMallocError();
+    if ((wcharCharset = strdup(charset))) {
+      registerProgramMemory("wchar-charset", &wcharCharset);
+    } else {
+      logMallocError();
+    }
   }
 
   return wcharCharset;
