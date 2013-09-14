@@ -519,9 +519,19 @@ changeTextTable (const char *name) {
   return replaceTextTable(opt_tablesDirectory, name);
 }
 
+static void
+exitTextTable (void *data) {
+  changeTextTable(NULL);
+}
+
 int
 changeAttributesTable (const char *name) {
   return replaceAttributesTable(opt_tablesDirectory, name);
+}
+
+static void
+exitAttributesTable (void *data) {
+  changeAttributesTable(NULL);
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -2072,7 +2082,9 @@ brlttyStart (int argc, char *argv[]) {
   if (!*opt_textTable) {
     changeStringSetting(&opt_textTable, TEXT_TABLE);
   }
+
   logMessage(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
+  onProgramExit("text-table", exitTextTable, NULL);
 
   /* handle attributes table option */
   if (*opt_attributesTable) {
@@ -2080,10 +2092,13 @@ brlttyStart (int argc, char *argv[]) {
       changeStringSetting(&opt_attributesTable, "");
     }
   }
+
   if (!*opt_attributesTable) {
     changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
   }
+
   logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
+  onProgramExit("attributes-table", exitAttributesTable, NULL);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */

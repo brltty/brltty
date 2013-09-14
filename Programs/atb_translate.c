@@ -41,25 +41,32 @@ convertAttributesToDots (AttributesTable *table, unsigned char attributes) {
 
 int
 replaceAttributesTable (const char *directory, const char *name) {
-  int ok = 0;
-  char *path;
+  AttributesTable *newTable = NULL;
 
-  if ((path = makeAttributesTablePath(directory, name))) {
-    AttributesTable *newTable;
+  if (name) {
+    char *path;
 
-    logMessage(LOG_DEBUG, "compiling attributes table: %s", path);
-    if ((newTable = compileAttributesTable(path))) {
-      AttributesTable *oldTable = attributesTable;
-      attributesTable = newTable;
-      destroyAttributesTable(oldTable);
-      ok = 1;
-    } else {
-      logMessage(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
+    if ((path = makeAttributesTablePath(directory, name))) {
+      logMessage(LOG_DEBUG, "compiling attributes table: %s", path);
+
+      if (!(newTable = compileAttributesTable(path))) {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile attributes table"), path);
+      }
+
+      free(path);
     }
-
-    free(path);
+  } else {
+    newTable = &internalAttributesTable;
   }
 
-  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
-  return ok;
+  if (newTable) {
+    AttributesTable *oldTable = attributesTable;
+
+    attributesTable = newTable;
+    destroyAttributesTable(oldTable);
+    return 1;
+  }
+
+  logMessage(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
+  return 0;
 }

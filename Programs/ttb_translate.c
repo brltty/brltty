@@ -150,25 +150,32 @@ convertDotsToCharacter (TextTable *table, unsigned char dots) {
 
 int
 replaceTextTable (const char *directory, const char *name) {
-  int ok = 0;
-  char *path;
+  TextTable *newTable = NULL;
 
-  if ((path = makeTextTablePath(directory, name))) {
-    TextTable *newTable;
+  if (name) {
+    char *path;
 
-    logMessage(LOG_DEBUG, "compiling text table: %s", path);
-    if ((newTable = compileTextTable(path))) {
-      TextTable *oldTable = textTable;
-      textTable = newTable;
-      destroyTextTable(oldTable);
-      ok = 1;
-    } else {
-      logMessage(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
+    if ((path = makeTextTablePath(directory, name))) {
+      logMessage(LOG_DEBUG, "compiling text table: %s", path);
+
+      if (!(newTable = compileTextTable(path))) {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile text table"), path);
+      }
+
+      free(path);
     }
-
-    free(path);
+  } else {
+    newTable = &internalTextTable;
   }
 
-  if (!ok) logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
-  return ok;
+  if (newTable) {
+    TextTable *oldTable = textTable;
+
+    textTable = newTable;
+    destroyTextTable(oldTable);
+    return 1;
+  }
+
+  logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
+  return 0;
 }
