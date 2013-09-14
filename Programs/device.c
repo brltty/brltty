@@ -24,10 +24,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "device.h"
-#include "parse.h"
 #include "log.h"
+#include "device.h"
 #include "file.h"
+#include "parse.h"
 
 FILE *
 getConsole (void) {
@@ -39,6 +39,7 @@ getConsole (void) {
   if (!console) {
     if ((console = fopen("/dev/console", "wb"))) {
       logMessage(LOG_DEBUG, "console opened: fd=%d", fileno(console));
+      registerProgramStream("console-stream", &console);
     } else {
       logSystemError("console open");
     }

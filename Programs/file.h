@@ -55,6 +55,7 @@ extern int setWorkingDirectory (const char *path);
 extern char *getHomeDirectory (void);
 extern const char *getOverrideDirectory (void);
 
+extern void registerProgramStream (const char *name, FILE **stream);
 extern FILE *openFile (const char *path, const char *mode, int optional);
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 

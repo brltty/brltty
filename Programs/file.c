@@ -394,6 +394,21 @@ ready:
   return *directory? directory: NULL;
 }
 
+static void
+exitProgramStream (void *data) {
+  FILE **stream = data;
+
+  if (*stream) {
+    fclose(*stream);
+    *stream = NULL;
+  }
+}
+
+void
+registerProgramStream (const char *name, FILE **stream) {
+  onProgramExit(name, exitProgramStream, stream);
+}
+
 FILE *
 openFile (const char *path, const char *mode, int optional) {
   FILE *file = fopen(path, mode);
