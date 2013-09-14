@@ -224,7 +224,7 @@ typedef struct Tty {
 static pthread_t serverThread; /* server */
 static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
 static int running; /* should threads be running? */
-static char **socketHosts; /* socket local hosts */
+static char **socketHosts = NULL; /* socket local hosts */
 static struct socketInfo {
   int addrfamily;
   FileDescriptor fd;
@@ -1451,6 +1451,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
     );
     return INVALID_FILE_DESCRIPTOR;
   }
+
   for (cur = res; cur; cur = cur->ai_next) {
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
     if (fd<0) {
@@ -1461,24 +1462,29 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
         logMessage(LOG_WARNING,"socket: %s",strerror(errno));
       continue;
     }
+
     /* Specifies that address can be reused */
     if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
       fun = "setsockopt";
       goto cont;
     }
+
     if (loopBind(fd, cur->ai_addr, cur->ai_addrlen)<0) {
       fun = "bind";
       goto cont;
     }
+
     if (listen(fd,1)<0) {
       fun = "listen";
       goto cont;
     }
+
     break;
 cont:
     LogSocketError(fun);
     closeSocketDescriptor(fd);
   }
+
   freeaddrinfo(res);
   if (cur) {
     free(info->host);
@@ -2315,21 +2321,33 @@ static void terminationHandler(void)
 {
   int res;
   running = 0;
+
 #ifdef __MINGW32__
   res = pthread_cancel(serverThread);
 #else /* __MINGW32__ */
   res = pthread_kill(serverThread, SIGUSR2);
 #endif /* __MINGW32__ */
-  if (res != 0)
+
+  if (res != 0) {
     logMessage(LOG_WARNING,"pthread_cancel: %s",strerror(res));
+  }
+
   ttyTerminationHandler(&notty);
   ttyTerminationHandler(&ttys);
-  if (authDescriptor)
+
+  if (authDescriptor) {
     authEnd(authDescriptor);
-  authDescriptor = NULL;
+    authDescriptor = NULL;
+  }
+
 #ifdef __MINGW32__
   WSACleanup();
 #endif /* __MINGW32__ */
+
+  if (socketHosts) {
+    deallocateStrings(socketHosts);
+    socketHosts = NULL;
+  }
 }
 
 /* Function: whoFillsTty */

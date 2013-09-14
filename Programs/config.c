@@ -139,7 +139,7 @@ static KeyboardProperties keyboardProperties;
 
 #ifdef ENABLE_API
 static int opt_noApi;
-static char *opt_apiParameters;
+static char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
 int apiStarted;
 #endif /* ENABLE_API */
@@ -1360,8 +1360,10 @@ exitApiServer (void *data) {
   api_stop(&brl);
   apiStarted = 0;
 
-  deallocateStrings(apiParameters);
-  apiParameters = NULL;
+  if (apiParameters) {
+    deallocateStrings(apiParameters);
+    apiParameters = NULL;
+  }
 }
 #endif /* ENABLE_API */
 
