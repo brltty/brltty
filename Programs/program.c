@@ -157,6 +157,44 @@ makeProgramBanner (char *buffer, size_t size) {
            (*revision? " rev ": ""), revision);
 }
 
+int
+changeStringSetting (char **setting, const char *value) {
+  char *string;
+
+  if (!value) {
+    string = NULL;
+  } else if (!(string = strdup(value))) {
+    logMallocError();
+    return 0;
+  }
+
+  if (*setting) free(*setting);
+  *setting = string;
+  return 1;
+}
+
+int
+extendStringSetting (char **setting, const char *value, int prepend) {
+  if (value && *value) {
+    if (*setting) {
+      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
+      char newSetting[newSize];
+
+      if (prepend) {
+        snprintf(newSetting, newSize, "%s%c%s", value, PARAMETER_SEPARATOR_CHARACTER, *setting);
+      } else {
+        snprintf(newSetting, newSize, "%s%c%s", *setting, PARAMETER_SEPARATOR_CHARACTER, value);
+      }
+
+      if (!changeStringSetting(setting, newSetting)) return 0;
+    } else if (!changeStringSetting(setting, value)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 void
 fixInstallPaths (char **const *paths) {
   static const char *programDirectory = NULL;
@@ -172,12 +210,21 @@ fixInstallPaths (char **const *paths) {
 
   while (*paths) {
     if (**paths && ***paths) {
+      const char *problem = strtext("cannot fix install path");
       char *newPath = makePath(programDirectory, **paths);
 
-      if (!newPath) {
-        logMessage(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
-      } else if (!isAbsolutePath(**paths=newPath)) {
-        logMessage(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
+      if (newPath) {
+        if (changeStringSetting(*paths, newPath)) {
+          if (!isAbsolutePath(**paths)) {
+            problem = strtext("install path not absolute");
+          }
+        }
+
+        free(newPath);
+      }
+
+      if (problem) {
+        logMessage(LOG_WARNING, "%s: %s", gettext(problem), **paths);
       }
     }
 

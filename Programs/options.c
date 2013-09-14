@@ -61,44 +61,6 @@ wordMeansFalse (const char *word) {
   return strcasecmp(word, FLAG_FALSE_WORD) == 0;
 }
 
-int
-changeStringSetting (char **setting, const char *value) {
-  char *string;
-
-  if (!value) {
-    string = NULL;
-  } else if (!(string = strdup(value))) {
-    logMallocError();
-    return 0;
-  }
-
-  if (*setting) free(*setting);
-  *setting = string;
-  return 1;
-}
-
-int
-extendStringSetting (char **setting, const char *value, int prepend) {
-  if (value && *value) {
-    if (*setting) {
-      size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
-      char newSetting[newSize];
-
-      if (prepend) {
-        snprintf(newSetting, newSize, "%s%c%s", value, PARAMETER_SEPARATOR_CHARACTER, *setting);
-      } else {
-        snprintf(newSetting, newSize, "%s%c%s", *setting, PARAMETER_SEPARATOR_CHARACTER, value);
-      }
-
-      if (!changeStringSetting(setting, newSetting)) return 0;
-    } else if (!changeStringSetting(setting, value)) {
-      return 0;
-    }
-  }
-
-  return 1;
-}
-
 static int
 ensureSetting (
   OptionProcessingInformation *info,
@@ -854,10 +816,8 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
 
     setDefaultOptions(&info, 0);
     if (descriptor->configurationFile && *descriptor->configurationFile) {
-      char *configurationFile = *descriptor->configurationFile;
-      fixInstallPath(&configurationFile);
-      processConfigurationFile(&info, configurationFile, !configurationFileSpecified);
-      if (configurationFile != *descriptor->configurationFile) free(configurationFile);
+      fixInstallPath(descriptor->configurationFile);
+      processConfigurationFile(&info, *descriptor->configurationFile, !configurationFileSpecified);
     }
     setDefaultOptions(&info, 1);
   }
