@@ -2392,9 +2392,19 @@ static int initializeAcceptedKeys(Connection *c, int how)
 /* Recursively removes connections */
 static void ttyTerminationHandler(Tty *tty)
 {
-  Tty *t;
-  while (tty->connections->next!=tty->connections) removeFreeConnection(tty->connections->next);
-  for (t = tty->subttys; t; t = t->next) ttyTerminationHandler(t);
+  while (tty->connections->next != tty->connections) {
+    removeFreeConnection(tty->connections->next);
+  }
+  freeConnection(tty->connections);
+
+  {
+    Tty *t = tty->subttys;
+
+    while (t) {
+      ttyTerminationHandler(t);
+      t = t->next;
+    }
+  }
 }
 /* Function : terminationHandler */
 /* Terminates driver */
