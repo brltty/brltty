@@ -1388,38 +1388,47 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 /* tries binding while temporary errors occur */
 static int loopBind(SocketDescriptor fd, struct sockaddr *addr, socklen_t len)
 {
-  while (bind(fd, addr, len)<0) {
+  int res;
+
+  while ((res = bind(fd, addr, len)) == -1) {
+    if (!running) break;
+
     if (
 #ifdef EADDRNOTAVAIL
-      errno!=EADDRNOTAVAIL &&
+      (errno != EADDRNOTAVAIL) &&
 #endif /* EADDRNOTAVAIL */
 #ifdef EADDRINUSE
-      errno!=EADDRINUSE &&
+      (errno != EADDRINUSE) &&
 #endif /* EADDRINUSE */
-      errno!=EROFS) {
-      return -1;
+      (errno != EROFS)) {
+      break;
     }
+
+    logMessage(LOG_DEBUG, "bind waiting: %s", strerror(errno));
     approximateDelay(1000);
   }
-  return 0;
+
+  return res;
 }
 
-/* Function : initializeTcpSocket */
+/* Function : createTcpSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-static FileDescriptor initializeTcpSocket(struct socketInfo *info)
+static FileDescriptor createTcpSocket(struct socketInfo *info)
 {
 #ifdef __MINGW32__
   SOCKET fd=INVALID_SOCKET;
 #else /* __MINGW32__ */
   int fd=-1;
 #endif /* __MINGW32__ */
+
   const char *fun;
   int yes=1;
 
 #ifdef __MINGW32__
   if (getaddrinfoProc) {
-#endif
+#endif /* __MINGW32__ */
+
 #if defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
   int err;
   struct addrinfo *res,*cur;
@@ -1431,6 +1440,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
   hints.ai_socktype = SOCK_STREAM;
 
   err = getaddrinfo(info->host, info->port, &hints, &res);
+
   if (err) {
     logMessage(LOG_WARNING,"getaddrinfo(%s,%s): "
 #ifdef HAVE_GAI_STRERROR
@@ -1454,8 +1464,10 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 
   for (cur = res; cur; cur = cur->ai_next) {
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+
     if (fd<0) {
       setSocketErrno();
+
 #ifdef EAFNOSUPPORT
       if (errno != EAFNOSUPPORT)
 #endif /* EAFNOSUPPORT */
@@ -1655,10 +1667,10 @@ static int readPid(char *path)
 }
 #endif /* __MINGW32__ */
 
-/* Function : initializeLocalSocket */
+/* Function : createLocalSocket */
 /* Creates the listening socket for in-connections */
 /* Returns 1, or 0 if an error occurred */
-static FileDescriptor initializeLocalSocket(struct socketInfo *info)
+static FileDescriptor createLocalSocket(struct socketInfo *info)
 {
   int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
   FileDescriptor fd;
@@ -1832,12 +1844,12 @@ out:
 }
 #endif /* PF_LOCAL */
 
-static void *apiSocketThread(void *arg)
+static void *createSocket(void *arg)
 {
   intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 
-  logMessage(LOG_DEBUG, "socket thread started: %"PRIuPTR, num);
+  logMessage(LOG_DEBUG, "socket creation started: %"PRIuPTR, num);
 
 #ifndef __MINGW32__
   {
@@ -1858,20 +1870,20 @@ static void *apiSocketThread(void *arg)
   }
 #endif /* __MINGW32__ */
 
+  cinfo->fd =
 #if defined(PF_LOCAL)
-  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==INVALID_FILE_DESCRIPTOR) ||
-      (cinfo->addrfamily!=PF_LOCAL && 
-#else /* PF_LOCAL */
-  if ((
+    (cinfo->addrfamily == PF_LOCAL)? createLocalSocket(cinfo):
 #endif /* PF_LOCAL */
-	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR)) {
-    logMessage(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
+    createTcpSocket(cinfo);
+
+  if (cinfo->fd == INVALID_FILE_DESCRIPTOR) {
+    logMessage(LOG_WARNING,"error while creating socket %"PRIdPTR,num);
   } else {
-    logMessage(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
+    logMessage(LOG_DEBUG,"socket %"PRIdPTR" created (fd %"PRIfd")",num,cinfo->fd);
   }
 
 finished:
-  logMessage(LOG_DEBUG, "socket thread finished: %"PRIuPTR, num);
+  logMessage(LOG_DEBUG, "socket creation finished: %"PRIuPTR, num);
   return NULL;
 }
 
@@ -1886,38 +1898,52 @@ static void closeSockets(void *arg)
 #else /* __MINGW32__ */
     pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
+
     info=&socketInfo[i];
+
     if (info->fd>=0) {
-      if (closeFileDescriptor(info->fd))
+      if (closeFileDescriptor(info->fd)) {
         logSystemError("closing socket");
+      }
       info->fd=INVALID_FILE_DESCRIPTOR;
+
 #ifdef __MINGW32__
       if ((info->overl.hEvent)) {
 	CloseHandle(info->overl.hEvent);
 	info->overl.hEvent = NULL;
       }
 #else /* __MINGW32__ */
+
 #if defined(PF_LOCAL)
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
 	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
+
 	if ((path=malloc(lpath+lport+3))) {
 	  memcpy(path,BRLAPI_SOCKETPATH "/",lpath+1);
 	  memcpy(path+lpath+1,info->port,lport+1);
-	  if (unlink(path))
+
+	  if (unlink(path) == -1) {
 	    logSystemError("unlinking local socket");
+          }
+
 	  path[lpath+1]='.';
 	  memcpy(path+lpath+2,info->port,lport+1);
-	  if (unlink(path))
+
+	  if (unlink(path) == -1) {
 	    logSystemError("unlinking local socket lock");
+          }
+
 	  free(path);
 	}
       }
 #endif /* PF_LOCAL */
 #endif /* __MINGW32__ */
     }
+
     free(info->port);
     info->port = NULL;
+
     free(info->host);
     info->host = NULL;
   }
@@ -2083,9 +2109,7 @@ static void *apiServerThread(void *arg)
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      logMessage(LOG_DEBUG, "creating socket thread: %d", i);
-
-      if ((res = pthread_create(&socketThreads[i],&attr,apiSocketThread,(void *)(intptr_t)i)) != 0) {
+      if ((res = pthread_create(&socketThreads[i],&attr,createSocket,(void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 
 	for (i--;i>=0;i--) {
@@ -2105,58 +2129,78 @@ static void *apiServerThread(void *arg)
        * filesystems, but it has with inter-thread overlapped operations,
        * so call from here 
        */
-      logMessage(LOG_DEBUG, "running socket thread: %d", i);
-      apiSocketThread((void *)i);
-      logMessage(LOG_DEBUG, "socket thread returned: %d", i);
+      createSocket((void *)i);
     }
 #endif /* __MINGW32__ */
   }
 
-  unauthConnections = 0; unauthConnLog = 0;
+  unauthConnections = 0;
+  unauthConnLog = 0;
+
   while (running) {
 #ifdef __MINGW32__
     lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
     nbHandles = 0;
-    for (i=0;i<numSockets;i++)
-      if (socketInfo[i].fd != INVALID_HANDLE_VALUE)
+
+    for (i=0;i<numSockets;i++) {
+      if (socketInfo[i].fd != INVALID_HANDLE_VALUE) {
 	lpHandles[nbHandles++] = socketInfo[i].overl.hEvent;
+      }
+    }
+
     pthread_mutex_lock(&connectionsMutex);
     addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &notty);
     addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &ttys);
     pthread_mutex_unlock(&connectionsMutex);
+
     if (!nbHandles) {
       free(lpHandles);
       approximateDelay(1000);
       continue;
     }
+
     switch (WaitForMultipleObjects(nbHandles, lpHandles, FALSE, 1000)) {
-      case WAIT_TIMEOUT: continue;
-      case WAIT_FAILED:  logWindowsSystemError("WaitForMultipleObjects");
+      case WAIT_TIMEOUT:
+        continue;
+
+      case WAIT_FAILED:
+        logWindowsSystemError("WaitForMultipleObjects");
+        break;
     }
+
     free(lpHandles);
 #else /* __MINGW32__ */
     /* Compute sockets set and fdmax */
     FD_ZERO(&sockset);
     fdmax=0;
-    for (i=0;i<numSockets;i++)
+
+    for (i=0;i<numSockets;i++) {
       if (socketInfo[i].fd>=0) {
 	FD_SET(socketInfo[i].fd, &sockset);
-	if (socketInfo[i].fd>fdmax)
+
+	if (socketInfo[i].fd>fdmax) {
 	  fdmax = socketInfo[i].fd;
+        }
       }
+    }
+
     pthread_mutex_lock(&connectionsMutex);
     addTtyFds(&sockset, &fdmax, &notty);
     addTtyFds(&sockset, &fdmax, &ttys);
     pthread_mutex_unlock(&connectionsMutex);
-    tv.tv_sec = 1; tv.tv_usec = 0;
-    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0)
-    {
+
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+
+    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
       if (fdmax==0) continue; /* still no server socket */
       logMessage(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
 #endif /* __MINGW32__ */
+
     time(&currentTime);
+
     for (i=0;i<numSockets;i++) {
       char source[0X100];
 
@@ -2165,37 +2209,47 @@ static void *apiServerThread(void *arg)
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
-          if (!(GetOverlappedResult(socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
+
+          if (!(GetOverlappedResult(socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE))) {
             logWindowsSystemError("GetOverlappedResult");
+          }
+
           resfd = socketInfo[i].fd;
-          if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR)
+          if ((socketInfo[i].fd = createLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR) {
             logMessage(LOG_DEBUG,"socket %d re-established (fd %"PRIfd", was %"PRIfd")",i,socketInfo[i].fd,resfd);
+          }
+
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
-          if (!ResetEvent(socketInfo[i].overl.hEvent))
+          if (!ResetEvent(socketInfo[i].overl.hEvent)) {
             logWindowsSystemError("ResetEvent in server loop");
+          }
 #else /* __MINGW32__ */
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* __MINGW32__ */
           addrlen = sizeof(addr);
           resfd = (FileDescriptor)accept((SocketDescriptor)socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
+
           if (resfd == INVALID_FILE_DESCRIPTOR) {
             setSocketErrno();
             logMessage(LOG_WARNING,"accept(%"PRIfd"): %s",socketInfo[i].fd,strerror(errno));
             continue;
           }
-          formatAddress(source, sizeof(source), &addr, addrlen);
 
+          formatAddress(source, sizeof(source), &addr, addrlen);
 #ifdef __MINGW32__
         }
 #endif /* __MINGW32__ */
-
         logMessage(LOG_NOTICE, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
           writeError(resfd, BRLAPI_ERROR_CONNREFUSED);
           closeFileDescriptor(resfd);
-          if (unauthConnLog==0) logMessage(LOG_WARNING, "Too many simultaneous unauthorized connections");
+
+          if (unauthConnLog==0) {
+            logMessage(LOG_WARNING, "Too many simultaneous unauthorized connections");
+          }
+
           unauthConnLog++;
         } else {
 #ifndef __MINGW32__
