@@ -1386,7 +1386,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 
 /* Function: loopBind */
 /* tries binding while temporary errors occur */
-static int loopBind(SocketDescriptor fd, struct sockaddr *addr, socklen_t len)
+static int loopBind(SocketDescriptor fd, const struct sockaddr *addr, socklen_t len)
 {
   int res;
 
@@ -1411,148 +1411,146 @@ static int loopBind(SocketDescriptor fd, struct sockaddr *addr, socklen_t len)
   return res;
 }
 
+static SocketDescriptor newTcpSocket(int family, int type, int protocol, const struct sockaddr *addr, socklen_t len)
+{
+  static const int yes = 1;
+  SocketDescriptor fd = socket(family, type, protocol);
+
+  if (fd != INVALID_SOCKET_DESCRIPTOR) {
+    /* Specifies that address can be reused */
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                   (const void *)&yes, sizeof(yes)) != -1) {
+#if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
+      if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+                     (const void *)&yes, sizeof(yes)) == -1) {
+      }
+#endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
+
+      if (loopBind(fd, addr, len) != -1) {
+        if (listen(fd, 1) != -1) {
+          return fd;
+        } else {
+          LogSocketError("listen");
+        }
+      } else {
+        LogSocketError("bind");
+      }
+    } else {
+      LogSocketError("setsockopt[SOL_SOCKET,SO_REUSEADDR]");
+    }
+
+    closeSocketDescriptor(fd);
+  } else {
+    setSocketErrno();
+
+#ifdef EAFNOSUPPORT
+    if (errno != EAFNOSUPPORT)
+#endif /* EAFNOSUPPORT */
+      logMessage(LOG_WARNING, "socket allocation error: %s", strerror(errno));
+  }
+
+  return INVALID_SOCKET_DESCRIPTOR;
+}
+
 /* Function : createTcpSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
 static FileDescriptor createTcpSocket(struct socketInfo *info)
 {
-#ifdef __MINGW32__
-  SOCKET fd=INVALID_SOCKET;
-#else /* __MINGW32__ */
-  int fd=-1;
-#endif /* __MINGW32__ */
-
-  const char *fun;
-  int yes=1;
+  SocketDescriptor fd = INVALID_SOCKET_DESCRIPTOR;
 
 #ifdef __MINGW32__
   if (getaddrinfoProc) {
 #endif /* __MINGW32__ */
 
 #if defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
-  int err;
-  struct addrinfo *res,*cur;
-  struct addrinfo hints;
+  static const struct addrinfo hints = {
+    .ai_flags = AI_PASSIVE,
+    .ai_family = PF_UNSPEC,
+    .ai_socktype = SOCK_STREAM
+  };
 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_flags = AI_PASSIVE;
-  hints.ai_family = PF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-
-  err = getaddrinfo(info->host, info->port, &hints, &res);
+  struct addrinfo *res, *cur;
+  int err = getaddrinfo(info->host, info->port, &hints, &res);
 
   if (err) {
-    logMessage(LOG_WARNING,"getaddrinfo(%s,%s): "
+    logMessage(LOG_WARNING,
+               "getaddrinfo(%s,%s): "
 #ifdef HAVE_GAI_STRERROR
-	"%s"
+               "%s"
 #else /* HAVE_GAI_STRERROR */
-	"%d"
+               "%d"
 #endif /* HAVE_GAI_STRERROR */
-	,info->host,info->port
+               , info->host
+               , info->port
 #ifdef HAVE_GAI_STRERROR
-	,
+               ,
 #ifdef EAI_SYSTEM
-	err == EAI_SYSTEM ? strerror(errno) :
+                 (err == EAI_SYSTEM)? strerror(errno):
 #endif /* EAI_SYSTEM */
-	gai_strerror(err)
+                 gai_strerror(err)
 #else /* HAVE_GAI_STRERROR */
-	,err
+               , err
 #endif /* HAVE_GAI_STRERROR */
     );
     return INVALID_FILE_DESCRIPTOR;
   }
 
   for (cur = res; cur; cur = cur->ai_next) {
-    fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+    fd = newTcpSocket(cur->ai_family, cur->ai_socktype, cur->ai_protocol,
+                      cur->ai_addr, cur->ai_addrlen);
 
-    if (fd<0) {
-      setSocketErrno();
-
-#ifdef EAFNOSUPPORT
-      if (errno != EAFNOSUPPORT)
-#endif /* EAFNOSUPPORT */
-        logMessage(LOG_WARNING,"socket: %s",strerror(errno));
-      continue;
-    }
-
-    /* Specifies that address can be reused */
-    if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
-      fun = "setsockopt";
-      goto cont;
-    }
-
-    if (loopBind(fd, cur->ai_addr, cur->ai_addrlen)<0) {
-      fun = "bind";
-      goto cont;
-    }
-
-    if (listen(fd,1)<0) {
-      fun = "listen";
-      goto cont;
-    }
-
-    break;
-cont:
-    LogSocketError(fun);
-    closeSocketDescriptor(fd);
+    if (fd != INVALID_SOCKET_DESCRIPTOR) break;
   }
 
+  if (!cur) fd = INVALID_SOCKET_DESCRIPTOR;
   freeaddrinfo(res);
-  if (cur) {
-    free(info->host);
-    info->host = NULL;
-    free(info->port);
-    info->port = NULL;
-
-#ifdef __MINGW32__
-    if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-      logWindowsSystemError("CreateEvent");
-      closeSocketDescriptor(fd);
-      return INVALID_FILE_DESCRIPTOR;
-    }
-    logMessage(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
-    WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
-#endif /* __MINGW32__ */
-
-    return (FileDescriptor)fd;
-  }
-  logMessage(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
 #endif /* HAVE_GETADDRINFO */
+
 #ifdef __MINGW32__
   } else {
 #endif /* __MINGW32__ */
-#if !defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
 
-  struct sockaddr_in addr;
+#if !defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
   struct hostent *he;
 
-  memset(&addr,0,sizeof(addr));
-  addr.sin_family = AF_INET;
-  if (!info->port)
+  struct sockaddr_in addr = {
+    .sin_family = AF_INET
+  };
+
+  if (!info->port) {
     addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
-  else {
-    char *c;
-    addr.sin_port = htons(strtol(info->port, &c, 0));
-    if (*c) {
+  } else {
+    unsigned int port;
+
+    if (!isUnsignedInteger(&port, info->port)) {
       struct servent *se;
 
-      if (!(se = getservbyname(info->port,"tcp"))) {
-        logMessage(LOG_ERR,"port %s: "
+      if (!(se = getservbyname(info->port, "tcp"))) {
+        logMessage(LOG_ERR,
+                   "TCP port %s: "
 #ifdef __MINGW32__
-	  "%d"
+                   "%d"
 #else /* __MINGW32__ */
-	  "%s"
+                   "%s"
 #endif /* __MINGW32__ */
-	  ,info->port,
+                   , info->port
 #ifdef __MINGW32__
-	  WSAGetLastError()
+                   , WSAGetLastError()
 #else /* __MINGW32__ */
-	  hstrerror(h_errno)
+                   , hstrerror(h_errno)
 #endif /* __MINGW32__ */
-	  );
+	);
+
 	return INVALID_FILE_DESCRIPTOR;
       }
+
       addr.sin_port = se->s_port;
+    } else if ((port > 0) && (port <= UINT16_MAX)) {
+      addr.sin_port = htons(port);
+    } else {
+      logMessage(LOG_ERR, "invalid TCP port: %s", info->port);
+      return INVALID_FILE_DESCRIPTOR;
     }
   }
 
@@ -1560,63 +1558,65 @@ cont:
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   } else if ((addr.sin_addr.s_addr = inet_addr(info->host)) == htonl(INADDR_NONE)) {
     if (!(he = gethostbyname(info->host))) {
-      logMessage(LOG_ERR,"gethostbyname(%s): "
+      logMessage(LOG_ERR,
+                 "gethostbyname(%s): "
 #ifdef __MINGW32__
-	"%d"
+                 "%d"
 #else /* __MINGW32__ */
-	"%s"
+                 "%s"
 #endif /* __MINGW32__ */
-	,info->host,
+                 , info->host
 #ifdef __MINGW32__
-	WSAGetLastError()
+                 , WSAGetLastError()
 #else /* __MINGW32__ */
-	hstrerror(h_errno)
+                 , hstrerror(h_errno)
 #endif /* __MINGW32__ */
-	);
+      );
+
       return INVALID_FILE_DESCRIPTOR;
     }
+
     if (he->h_addrtype != AF_INET) {
 #ifdef EAFNOSUPPORT
       errno = EAFNOSUPPORT;
 #else /* EAFNOSUPPORT */
       errno = EINVAL;
 #endif /* EAFNOSUPPORT */
-      logMessage(LOG_ERR,"unknown address type %d",he->h_addrtype);
+
+      logMessage(LOG_ERR, "unknown address type %d", he->h_addrtype);
       return INVALID_FILE_DESCRIPTOR;
     }
+
     if (he->h_length > sizeof(addr.sin_addr)) {
       errno = EINVAL;
-      logMessage(LOG_ERR,"too big address: %d",he->h_length);
+      logMessage(LOG_ERR, "address too big: %d", he->h_length);
       return INVALID_FILE_DESCRIPTOR;
     }
-    memcpy(&addr.sin_addr,he->h_addr,he->h_length);
+
+    memcpy(&addr.sin_addr, he->h_addr, he->h_length);
   }
 
-  fd = socket(addr.sin_family, SOCK_STREAM, 0);
-  if (fd<0) {
-    fun = "socket";
-    goto err;
+  fd = newTcpSocket(PF_INET, SOCK_STREAM, IPPROTO_TCP,
+                    (struct sockaddr *)&addr, sizeof(addr));
+#endif /* !HAVE_GETADDRINFO */
+
+#ifdef __MINGW32__
   }
-  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
-    fun = "setsockopt(REUSEADDR)";
-    goto err;
+#endif /* __MINGW32__ */
+
+  if (fd == INVALID_SOCKET_DESCRIPTOR) {
+    logMessage(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
   }
-#if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
-  if (setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes))!=0)
-    logMessage(LOG_WARNING, "setsockopt(NODELAY): %s", strerror(errno));
-#endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
-  if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
-    fun = "bind";
-    goto err;
-  }
-  if (listen(fd,1)<0) {
-    fun = "listen";
-    goto err;
-  }
+
   free(info->host);
   info->host = NULL;
+
   free(info->port);
   info->port = NULL;
+
+  if (fd == INVALID_SOCKET_DESCRIPTOR) {
+    return INVALID_FILE_DESCRIPTOR;
+  }
 
 #ifdef __MINGW32__
   if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
@@ -1624,26 +1624,12 @@ cont:
     closeSocketDescriptor(fd);
     return INVALID_FILE_DESCRIPTOR;
   }
-  logMessage(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+
+  logMessage(LOG_DEBUG, "Event -> %p", info->overl.hEvent);
   WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* __MINGW32__ */
 
   return (FileDescriptor)fd;
-
-err:
-  LogSocketError(fun);
-  if (fd >= 0) closeSocketDescriptor(fd);
-
-#endif /* !HAVE_GETADDRINFO */
-#ifdef __MINGW32__
-  }
-#endif /* __MINGW32__ */
-
-  free(info->host);
-  info->host = NULL;
-  free(info->port);
-  info->port = NULL;
-  return INVALID_FILE_DESCRIPTOR;
 }
 
 #if defined(PF_LOCAL)
