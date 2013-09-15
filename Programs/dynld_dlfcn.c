@@ -38,15 +38,17 @@ getSharedObjectLoadFlags (void) {
 
 void *
 loadSharedObject (const char *path) {
-  void *object = dlopen(path, getSharedObjectLoadFlags());
-  if (object) return object;
+  void *object;
 
-  logMessage(LOG_ERR, "%s", dlerror());
-  return NULL;
+  dlerror();
+  object = dlopen(path, getSharedObjectLoadFlags());
+  if (!object) logMessage(LOG_ERR, "%s", dlerror());
+  return object;
 }
 
 void 
 unloadSharedObject (void *object) {
+  dlerror();
   dlclose(object);
 }
 

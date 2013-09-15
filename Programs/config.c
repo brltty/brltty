@@ -1306,7 +1306,7 @@ static void
 exitBrailleDriver (void *data) {
   if (brailleConstructed) {
     clearStatusCells(&brl);
-    message(NULL, gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
+    message(NULL, gettext("BRLTTY stopped"), MSG_NODELAY|MSG_SILENT);
   }
 
   stopBrailleDriver();
