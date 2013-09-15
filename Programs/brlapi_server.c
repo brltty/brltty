@@ -1832,23 +1832,29 @@ out:
 }
 #endif /* PF_LOCAL */
 
-static void *establishSocket(void *arg)
+static void *apiSocketThread(void *arg)
 {
   intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
-#ifndef __MINGW32__
-  int res;
-  sigset_t blockedSignals;
 
-  sigemptyset(&blockedSignals);
-  sigaddset(&blockedSignals,SIGTERM);
-  sigaddset(&blockedSignals,SIGINT);
-  sigaddset(&blockedSignals,SIGPIPE);
-  sigaddset(&blockedSignals,SIGCHLD);
-  sigaddset(&blockedSignals,SIGUSR1);
-  if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-    logMessage(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
-    return NULL;
+  logMessage(LOG_DEBUG, "socket thread started: %"PRIuPTR, num);
+
+#ifndef __MINGW32__
+  {
+    int res;
+    sigset_t blockedSignals;
+
+    sigemptyset(&blockedSignals);
+    sigaddset(&blockedSignals,SIGTERM);
+    sigaddset(&blockedSignals,SIGINT);
+    sigaddset(&blockedSignals,SIGPIPE);
+    sigaddset(&blockedSignals,SIGCHLD);
+    sigaddset(&blockedSignals,SIGUSR1);
+
+    if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
+      logMessage(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
+      goto finished;
+    }
   }
 #endif /* __MINGW32__ */
 
@@ -1864,6 +1870,8 @@ static void *establishSocket(void *arg)
     logMessage(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIfd")",num,cinfo->fd);
   }
 
+finished:
+  logMessage(LOG_DEBUG, "socket thread finished: %"PRIuPTR, num);
   return NULL;
 }
 
@@ -1991,7 +1999,7 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
 /* Function : server */
 /* The server thread */
 /* Returns NULL in any case */
-static void *server(void *arg)
+static void *apiServerThread(void *arg)
 {
   char *hosts = (char *)arg;
   pthread_attr_t attr;
@@ -2003,6 +2011,7 @@ static void *server(void *arg)
   time_t currentTime;
   fd_set sockset;
   FileDescriptor resfd;
+
 #ifdef __MINGW32__
   HANDLE *lpHandles;
   int nbAlloc;
@@ -2013,29 +2022,34 @@ static void *server(void *arg)
   int n;
 #endif /* __MINGW32__ */
 
+  logMessage(LOG_DEBUG, "server thread started");
 
 #ifndef __MINGW32__
-  sigset_t blockedSignals;
-  sigemptyset(&blockedSignals);
-  sigaddset(&blockedSignals,SIGTERM);
-  sigaddset(&blockedSignals,SIGINT);
-  sigaddset(&blockedSignals,SIGPIPE);
-  sigaddset(&blockedSignals,SIGCHLD);
-  sigaddset(&blockedSignals,SIGUSR1);
-  if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-    logMessage(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
-    pthread_exit(NULL);
+  {
+    sigset_t blockedSignals;
+
+    sigemptyset(&blockedSignals);
+    sigaddset(&blockedSignals,SIGTERM);
+    sigaddset(&blockedSignals,SIGINT);
+    sigaddset(&blockedSignals,SIGPIPE);
+    sigaddset(&blockedSignals,SIGCHLD);
+    sigaddset(&blockedSignals,SIGUSR1);
+
+    if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
+      logMessage(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
+      goto finished;
+    }
   }
 #endif /* __MINGW32__ */
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
     logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
-    pthread_exit(NULL);
+    goto finished;
   }
   if (numSockets == 0) {
     logMessage(LOG_INFO,"no hosts specified");
-    pthread_exit(NULL);
+    goto finished;
   }
 #ifdef __MINGW32__
   nbAlloc = numSockets;
@@ -2055,7 +2069,7 @@ static void *server(void *arg)
   if ((getaddrinfoProc && WSAStartup(MAKEWORD(2,0), &wsadata))
 	|| (!getaddrinfoProc && WSAStartup(MAKEWORD(1,1), &wsadata))) {
     logWindowsSocketError("Starting socket library");
-    pthread_exit(NULL);
+    goto finished;
   }
 #endif /* __MINGW32__ */
 
@@ -2065,25 +2079,35 @@ static void *server(void *arg)
 
   for (i=0;i<numSockets;i++) {
     socketInfo[i].addrfamily=brlapiserver_expandHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
+
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)(intptr_t)i)) != 0) {
+      logMessage(LOG_DEBUG, "creating socket thread: %d", i);
+
+      if ((res = pthread_create(&socketThreads[i],&attr,apiSocketThread,(void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
-	for (i--;i>=0;i--)
+
+	for (i--;i>=0;i--) {
 #ifdef __MINGW32__
 	  pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
 	  pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
-	pthread_exit(NULL);
+        }
+
+	goto finished;
       }
+
 #ifdef __MINGW32__
     } else {
-      /* Windows doesn't have troubles with local sockets on read-only
+      /* Windows doesn't have trouble with local sockets on read-only
        * filesystems, but it has with inter-thread overlapped operations,
-       * so call from here */
-      establishSocket((void *)i);
+       * so call from here 
+       */
+      logMessage(LOG_DEBUG, "running socket thread: %d", i);
+      apiSocketThread((void *)i);
+      logMessage(LOG_DEBUG, "socket thread returned: %d", i);
     }
 #endif /* __MINGW32__ */
   }
@@ -2204,6 +2228,9 @@ static void *server(void *arg)
 #else /* __MINGW32__ */
   closeSockets(NULL);
 #endif /* __MINGW32__ */
+
+finished:
+  logMessage(LOG_DEBUG, "server thread finished");
   return NULL;
 }
 
@@ -2813,7 +2840,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   running = 1;
 
   trueBraille=&noBraille;
-  if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
+  if ((res = pthread_create(&serverThread,&attr,apiServerThread,hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
     for (i=0;i<numSockets;i++)
