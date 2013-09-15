@@ -1835,7 +1835,11 @@ static void *createSocket(void *arg)
   intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 
-  logMessage(LOG_DEBUG, "socket creation started: %"PRIuPTR, num);
+  logMessage(LOG_DEBUG, "socket creation started: %"PRIdPTR " (%s:%s)",
+             num,
+             (cinfo->host? cinfo->host: "LOCAL"),
+             (cinfo->port? cinfo->port: "DEFAULT")
+  );
 
 #ifndef __MINGW32__
   {
