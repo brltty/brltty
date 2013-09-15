@@ -25,6 +25,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef _POSIX_THREAD_SAFE_FUNCTIONS
+#define lockStream(stream) flockfile((stream))
+#define unlockStream(stream) funlockfile((stream))
+#else /* _POSIX_THREAD_SAFE_FUNCTIONS */
+#define lockStream(stream)
+#define unlockStream(stream)
+#endif /* _POSIX_THREAD_SAFE_FUNCTIONS */
+
 #ifdef __MINGW32__
 /* MinGW defines localtime_r() in <pthread.h> */
 #include <pthread.h>
@@ -217,6 +225,8 @@ openLogFile (const char *path) {
 static void
 writeLogRecord (const char *record) {
   if (logFile) {
+    lockStream(logFile);
+
     {
       TimeValue now;
       char buffer[0X20];
@@ -233,6 +243,7 @@ writeLogRecord (const char *record) {
     fputs(record, logFile);
     fputc('\n', logFile);
     fflush(logFile);
+    unlockStream(logFile);
   }
 }
 
@@ -332,6 +343,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
       if (print) {
         FILE *stream = stderr;
+        lockStream(stream);
 
         if (logPrefixStack) {
           const char *prefix = logPrefixStack->prefix;
@@ -345,6 +357,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         fputs(record, stream);
         fputc('\n', stream);
         fflush(stream);
+        unlockStream(stream);
       }
 
       errno = oldErrno;
