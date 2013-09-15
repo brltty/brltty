@@ -41,6 +41,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
@@ -1417,26 +1418,28 @@ static SocketDescriptor newTcpSocket(int family, int type, int protocol, const s
   SocketDescriptor fd = socket(family, type, protocol);
 
   if (fd != INVALID_SOCKET_DESCRIPTOR) {
-    /* Specifies that address can be reused */
+#ifdef SO_REUSEADDR
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-                   (const void *)&yes, sizeof(yes)) != -1) {
-#if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
-      if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
-                     (const void *)&yes, sizeof(yes)) == -1) {
-      }
-#endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
+                   (const void *)&yes, sizeof(yes)) == -1) {
+      LogSocketError("setsockopt[SOCKET,REUSEADDR]");
+    }
+#endif /* SO_REUSEADDR */
 
-      if (loopBind(fd, addr, len) != -1) {
-        if (listen(fd, 1) != -1) {
-          return fd;
-        } else {
-          LogSocketError("listen");
-        }
+#ifdef TCP_NODELAY
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+                   (const void *)&yes, sizeof(yes)) == -1) {
+      LogSocketError("setsockopt[TCP,NODELAY]");
+    }
+#endif /* TCP_NODELAY */
+
+    if (loopBind(fd, addr, len) != -1) {
+      if (listen(fd, 1) != -1) {
+        return fd;
       } else {
-        LogSocketError("bind");
+        LogSocketError("listen");
       }
     } else {
-      LogSocketError("setsockopt[SOL_SOCKET,SO_REUSEADDR]");
+      LogSocketError("bind");
     }
 
     closeSocketDescriptor(fd);
@@ -1608,11 +1611,15 @@ static FileDescriptor createTcpSocket(struct socketInfo *info)
     logMessage(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
   }
 
-  free(info->host);
-  info->host = NULL;
+  if (info->host) {
+    free(info->host);
+    info->host = NULL;
+  }
 
-  free(info->port);
-  info->port = NULL;
+  if (info->port) {
+    free(info->port);
+    info->port = NULL;
+  }
 
   if (fd == INVALID_SOCKET_DESCRIPTOR) {
     return INVALID_FILE_DESCRIPTOR;
