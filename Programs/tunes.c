@@ -339,6 +339,11 @@ closeTunes (void) {
 
 static void
 handleTunesTimeout (const AsyncAlarmResult *result) {
+  if (tunesCloseTimer) {
+    asyncDiscardHandle(tunesCloseTimer);
+    tunesCloseTimer = NULL;
+  }
+
   closeTunes();
 }
 
