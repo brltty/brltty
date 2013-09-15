@@ -1426,7 +1426,7 @@ static SocketDescriptor newTcpSocket(int family, int type, int protocol, const s
 #endif /* SO_REUSEADDR */
 
 #ifdef TCP_NODELAY
-    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+    if (setsockopt(fd, SOL_TCP, TCP_NODELAY,
                    (const void *)&yes, sizeof(yes)) == -1) {
       LogSocketError("setsockopt[TCP,NODELAY]");
     }
@@ -1837,35 +1837,15 @@ out:
 }
 #endif /* PF_LOCAL */
 
-static void *createSocket(void *arg)
+static void createSocket(int num)
 {
-  intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 
-  logMessage(LOG_DEBUG, "socket creation started: %"PRIdPTR " (%s:%s)",
+  logMessage(LOG_DEBUG, "creating socket: %d (%s:%s)",
              num,
              (cinfo->host? cinfo->host: "LOCAL"),
              (cinfo->port? cinfo->port: "DEFAULT")
   );
-
-#ifndef __MINGW32__
-  {
-    int res;
-    sigset_t blockedSignals;
-
-    sigemptyset(&blockedSignals);
-    sigaddset(&blockedSignals,SIGTERM);
-    sigaddset(&blockedSignals,SIGINT);
-    sigaddset(&blockedSignals,SIGPIPE);
-    sigaddset(&blockedSignals,SIGCHLD);
-    sigaddset(&blockedSignals,SIGUSR1);
-
-    if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-      logMessage(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
-      goto finished;
-    }
-  }
-#endif /* __MINGW32__ */
 
   cinfo->fd =
 #if defined(PF_LOCAL)
@@ -1874,14 +1854,10 @@ static void *createSocket(void *arg)
     createTcpSocket(cinfo);
 
   if (cinfo->fd == INVALID_FILE_DESCRIPTOR) {
-    logMessage(LOG_WARNING,"error while creating socket %"PRIdPTR,num);
+    logMessage(LOG_WARNING, "error while creating socket %d", num);
   } else {
-    logMessage(LOG_DEBUG,"socket %"PRIdPTR" created (fd %"PRIfd")",num,cinfo->fd);
+    logMessage(LOG_DEBUG, "socket %d created (fd %"PRIfd")", num, cinfo->fd);
   }
-
-finished:
-  logMessage(LOG_DEBUG, "socket creation finished: %"PRIuPTR, num);
-  return NULL;
 }
 
 static void closeSockets(void *arg)
@@ -2019,10 +1995,46 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   }
 }
 
+static int prepareThread(void)
+{
+#ifndef __MINGW32__
+  {
+    sigset_t blockedSignals;
+
+    sigemptyset(&blockedSignals);
+    sigaddset(&blockedSignals, SIGTERM);
+    sigaddset(&blockedSignals, SIGINT);
+    sigaddset(&blockedSignals, SIGPIPE);
+    sigaddset(&blockedSignals, SIGCHLD);
+    sigaddset(&blockedSignals, SIGUSR1);
+
+    if (pthread_sigmask(SIG_BLOCK, &blockedSignals, NULL) != 0) {
+      logSystemError("pthread_sigmask[SIG_BLOCK]");
+      return 0;
+    }
+  }
+#endif /* __MINGW32__ */
+
+  return 1;
+}
+
+static void *runCreateSocket(void *arg)
+{
+  intptr_t num = (intptr_t) arg;
+  logMessage(LOG_DEBUG, "socket creation started: %"PRIdPTR, num);
+
+  if (prepareThread()) {
+    createSocket(num);
+  }
+
+  logMessage(LOG_DEBUG, "socket creation finished: %"PRIdPTR, num);
+  return NULL;
+}
+
 /* Function : server */
 /* The server thread */
 /* Returns NULL in any case */
-static void *apiServerThread(void *arg)
+static void *runServer(void *arg)
 {
   char *hosts = (char *)arg;
   pthread_attr_t attr;
@@ -2046,24 +2058,7 @@ static void *apiServerThread(void *arg)
 #endif /* __MINGW32__ */
 
   logMessage(LOG_DEBUG, "server thread started");
-
-#ifndef __MINGW32__
-  {
-    sigset_t blockedSignals;
-
-    sigemptyset(&blockedSignals);
-    sigaddset(&blockedSignals,SIGTERM);
-    sigaddset(&blockedSignals,SIGINT);
-    sigaddset(&blockedSignals,SIGPIPE);
-    sigaddset(&blockedSignals,SIGCHLD);
-    sigaddset(&blockedSignals,SIGUSR1);
-
-    if ((res = pthread_sigmask(SIG_BLOCK,&blockedSignals,NULL))!=0) {
-      logMessage(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
-      goto finished;
-    }
-  }
-#endif /* __MINGW32__ */
+  if (!prepareThread()) goto finished;
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
@@ -2106,7 +2101,7 @@ static void *apiServerThread(void *arg)
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      if ((res = pthread_create(&socketThreads[i],&attr,createSocket,(void *)(intptr_t)i)) != 0) {
+      if ((res = pthread_create(&socketThreads[i],&attr,runCreateSocket,(void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 
 	for (i--;i>=0;i--) {
@@ -2901,7 +2896,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   running = 1;
 
   trueBraille=&noBraille;
-  if ((res = pthread_create(&serverThread,&attr,apiServerThread,hosts)) != 0) {
+  if ((res = pthread_create(&serverThread,&attr,runServer,hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
     for (i=0;i<numSockets;i++)
