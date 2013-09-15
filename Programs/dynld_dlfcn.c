@@ -23,6 +23,20 @@
 #include "log.h"
 #include "dynld.h"
 
+static void
+clearError (void) {
+  dlerror();
+}
+
+static int
+logError (void) {
+  const char *error = dlerror();
+  if (!error) return 1;
+
+  logMessage(LOG_ERR, "%s", error);
+  return 0;
+}
+
 static inline int
 getSharedObjectLoadFlags (void) {
   int flags = 0;
@@ -40,30 +54,23 @@ void *
 loadSharedObject (const char *path) {
   void *object;
 
-  dlerror();
+  clearError();
   object = dlopen(path, getSharedObjectLoadFlags());
-  if (!object) logMessage(LOG_ERR, "%s", dlerror());
+  if (!object) logError();
   return object;
 }
 
 void 
 unloadSharedObject (void *object) {
-  dlerror();
-  dlclose(object);
+  clearError();
+  if (dlclose(object)) logError();
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   void **address = pointerAddress;
 
-  dlerror(); /* clear any previous error condition */
+  clearError(); /* clear any previous error condition */
   *address = dlsym(object, symbol);
-
-  {
-    const char *error = dlerror();
-    if (!error) return 1;
-    logMessage(LOG_ERR, "%s", error);
-  }
-
-  return 0;
+  return logError();
 }
