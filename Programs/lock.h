@@ -37,6 +37,22 @@ extern void freeLockDescriptor (LockDescriptor *lock);
 extern int obtainLock (LockDescriptor *lock, LockOptions options);
 extern void releaseLock (LockDescriptor *lock);
 
+static inline void obtainExclusiveLock (LockDescriptor *lock) {
+  obtainLock(lock, LOCK_Exclusive);
+}
+
+static inline void obtainSharedLock (LockDescriptor *lock) {
+  obtainLock(lock, 0);
+}
+
+static inline int tryExclusiveLock (LockDescriptor *lock) {
+  return obtainLock(lock, LOCK_Exclusive | LOCK_NoWait);
+}
+
+static inline int trySharedLock (LockDescriptor *lock) {
+  return obtainLock(lock, LOCK_NoWait);
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

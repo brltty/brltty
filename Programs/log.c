@@ -431,8 +431,13 @@ logBytes (int level, const char *description, const void *data, size_t length) {
 }
 
 void
+logActionError (int error, const char *action) {
+  logMessage(LOG_ERR, "%s error %d: %s.", action, error, strerror(error));
+}
+
+void
 logSystemError (const char *action) {
-  logMessage(LOG_ERR, "%s error %d: %s.", action, errno, strerror(errno));
+  logActionError(errno, action);
 }
 
 void

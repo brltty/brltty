@@ -36,6 +36,7 @@
 #endif /* posix thread definitions */
 
 #include "lock.h"
+#include "log.h"
 
 #ifdef CAN_LOCK
 #ifdef PTHREAD_RWLOCK_INITIALIZER
@@ -53,6 +54,8 @@ newLockDescriptor (void) {
     }
 
     free(lock);
+  } else {
+    logMallocError();
   }
 
   return NULL;
@@ -73,6 +76,7 @@ obtainLock (LockDescriptor *lock, LockOptions options) {
     if (options & LOCK_NoWait) return !pthread_rwlock_tryrdlock(&lock->lock);
     pthread_rwlock_rdlock(&lock->lock);
   }
+
   return 1;
 }
 
@@ -101,15 +105,23 @@ newLockDescriptor (void) {
           lock->count = 0;
           lock->writers = 0;
           return lock;
+        } else {
+          logActionError(result, "pthread_mutex_init");
         }
 
         pthread_cond_destroy(&lock->write);
+      } else {
+        logActionError(result, "pthread_cond_init");
       }
 
       pthread_cond_destroy(&lock->read);
+    } else {
+      logActionError(result, "pthread_cond_init");
     }
 
     free(lock);
+  } else {
+    logMallocError();
   }
 
   return NULL;
@@ -126,25 +138,28 @@ freeLockDescriptor (LockDescriptor *lock) {
 int
 obtainLock (LockDescriptor *lock, LockOptions options) {
   int locked = 0;
+
   pthread_mutex_lock(&lock->mutex);
 
   if (options & LOCK_Exclusive) {
     while (lock->count) {
       if (options & LOCK_NoWait) goto done;
-      ++lock->writers;
+      lock->writers += 1;
       pthread_cond_wait(&lock->write, &lock->mutex);
-      --lock->writers;
+      lock->writers -= 1;
     }
+
     lock->count = -1;
   } else {
     while (lock->count < 0) {
       if (options & LOCK_NoWait) goto done;
       pthread_cond_wait(&lock->read, &lock->mutex);
     }
-    ++lock->count;
-  }
-  locked = 1;
 
+    lock->count += 1;
+  }
+
+  locked = 1;
 done:
   pthread_mutex_unlock(&lock->mutex);
   return locked;
@@ -173,12 +188,12 @@ done:
 
 LockDescriptor *
 getLockDescriptor (LockDescriptor **lock) {
-  if (!*lock) {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex);
-    if (!*lock) *lock = newLockDescriptor();
-    pthread_mutex_unlock(&mutex);
-  }
+  static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+  pthread_mutex_lock(&mutex);
+  if (!*lock) *lock = newLockDescriptor();
+  pthread_mutex_unlock(&mutex);
+
   return *lock;
 }
 #else /* CAN_LOCK */
@@ -186,6 +201,7 @@ getLockDescriptor (LockDescriptor **lock) {
 
 LockDescriptor *
 newLockDescriptor (void) {
+  errno = ENOSYS;
   return NULL;
 }
 
@@ -204,7 +220,6 @@ releaseLock (LockDescriptor *lock) {
 
 LockDescriptor *
 getLockDescriptor (LockDescriptor **lock) {
-  *lock = NULL;
-  return NULL;
+  return *lock;
 }
 #endif /* CAN_LOCK */
