@@ -1795,18 +1795,599 @@ brlttyPrepare_unconstructed (void) {
 #endif /* ENABLE_API */
 
 static int (*brlttyPrepare) (void) = brlttyPrepare_unconstructed;
-static int oldwinx;
-static int oldwiny;
+static AsyncHandle updateAlarm = NULL;
+static TimeValue updateTime;
+
 static int restartRequired;
 static int isOffline;
 static int isSuspended;
+
 static int inputModifiers;
+static int oldwinx;
+static int oldwiny;
 
 static void
 resetBrailleState (void) {
   resetScanCodes();
   resetBlinkingStates();
   inputModifiers = 0;
+}
+
+static void setUpdateAlarm (void *data);
+
+static void
+handleDrainAlarm (const AsyncAlarmResult *result) {
+  setUpdateAlarm(result->data);
+}
+
+static void
+handleUpdateAlarm (const AsyncAlarmResult *result) {
+  getRelativeTime(&updateTime, updateInterval);
+  asyncDiscardHandle(updateAlarm);
+  updateAlarm = NULL;
+
+  updateSessionAttributes();
+
+  if (opt_releaseDevice) {
+    if (scr.unreadable) {
+      if (!isSuspended) {
+        logMessage(LOG_DEBUG, "suspending braille driver");
+        writeStatusCells();
+        writeBrailleText("wrn", scr.unreadable);
+
+#ifdef ENABLE_API
+        if (apiStarted) {
+          api_suspend(&brl);
+        } else
+#endif /* ENABLE_API */
+
+        {
+          destructBrailleDriver();
+        }
+
+        isSuspended = 1;
+        logMessage(LOG_DEBUG, "braille driver suspended");
+      }
+    } else {
+      if (isSuspended) {
+        logMessage(LOG_DEBUG, "resuming braille driver");
+        isSuspended = !(
+#ifdef ENABLE_API
+          apiStarted? api_resume(&brl):
+#endif /* ENABLE_API */
+          constructBrailleDriver());
+        logMessage(LOG_DEBUG, "braille driver resumed");
+      }
+    }
+  }
+
+  if (!isSuspended) {
+    CLAIM_DRIVER;
+    int pointerMoved = 0;
+
+    /* some commands (key insertion, virtual terminal switching, etc)
+     * may have moved the cursor
+     */
+    updateSessionAttributes();
+
+    /*
+     * Update blink counters: 
+     */
+    updateBlinkingState(&cursorBlinkingState);
+    updateBlinkingState(&attributesBlinkingState);
+    updateBlinkingState(&capitalsBlinkingState);
+    updateBlinkingState(&speechCursorBlinkingState);
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    /* called continually even if we're not tracking so that the pipe doesn't fill up. */
+    speech->doTrack(&spk);
+
+    if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+    if (ses->trackCursor) {
+#ifdef ENABLE_SPEECH_SUPPORT
+      if (speechTracking && (scr.number == speechScreen)) {
+        int index = speech->getTrack(&spk);
+        if (index != speechIndex) trackSpeech(speechIndex = index);
+      } else
+#endif /* ENABLE_SPEECH_SUPPORT */
+      {
+        /* If cursor moves while blinking is on */
+        if (prefs.blinkingCursor) {
+          if (scr.posy != ses->trky) {
+            /* turn off cursor to see what's under it while changing lines */
+            setBlinkingState(&cursorBlinkingState, 0);
+          } else if (scr.posx != ses->trkx) {
+            /* turn on cursor to see it moving on the line */
+            setBlinkingState(&cursorBlinkingState, 1);
+          }
+        }
+
+        /* If the cursor moves in cursor tracking mode: */
+        if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
+          int oldx = ses->winx;
+          int oldy = ses->winy;
+
+          trackCursor(0);
+          logMessage(LOG_CATEGORY(CURSOR_TRACKING),
+                     "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                     scr.number,
+                     ses->trkx, ses->trky, scr.posx, scr.posy,
+                     oldx, oldy, ses->winx, ses->winy);
+
+          ses->spkx = ses->trkx = scr.posx;
+          ses->spky = ses->trky = scr.posy;
+        } else if (checkPointer()) {
+          pointerMoved = 1;
+        }
+      }
+    }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (autospeak()) {
+      static int oldScreen = -1;
+      static int oldX = -1;
+      static int oldY = -1;
+      static int oldWidth = 0;
+      static ScreenCharacter *oldCharacters = NULL;
+
+      int newScreen = scr.number;
+      int newX = scr.posx;
+      int newY = scr.posy;
+      int newWidth = scr.cols;
+      ScreenCharacter newCharacters[newWidth];
+
+      readScreen(0, ses->winy, newWidth, 1, newCharacters);
+
+      if (!speechTracking) {
+        int column = 0;
+        int count = newWidth;
+        const ScreenCharacter *characters = newCharacters;
+
+        if (!oldCharacters) {
+          count = 0;
+        } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
+          if (!prefs.autospeakSelectedLine) count = 0;
+        } else {
+          int onScreen = (newX >= 0) && (newX < newWidth);
+
+          if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
+            if ((newY == ses->winy) && (newY == oldY) && onScreen) {
+              if ((newX == oldX) &&
+                  isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
+                int oldLength = oldWidth;
+                int newLength = newWidth;
+                int x = newX;
+
+                while (oldLength > oldX) {
+                  if (!iswspace(oldCharacters[oldLength-1].text)) break;
+                  oldLength -= 1;
+                }
+                if (oldLength < oldWidth) oldLength += 1;
+
+                while (newLength > newX) {
+                  if (!iswspace(newCharacters[newLength-1].text)) break;
+                  newLength -= 1;
+                }
+                if (newLength < newWidth) newLength += 1;
+
+                while (1) {
+                  int done = 1;
+
+                  if (x < newLength) {
+                    if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
+                      column = newX;
+                      count = prefs.autospeakInsertedCharacters? (x - newX): 0;
+                      goto autospeak;
+                    }
+
+                    done = 0;
+                  }
+
+                  if (x < oldLength) {
+                    if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
+                      characters = oldCharacters;
+                      column = oldX;
+                      count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
+                      goto autospeak;
+                    }
+
+                    done = 0;
+                  }
+
+                  if (done) break;
+                  x += 1;
+                }
+              }
+
+              if (oldX < 0) oldX = 0;
+              if ((newX > oldX) &&
+                  isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
+                  isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
+                column = oldX;
+                count = newX - oldX;
+
+                if (prefs.autospeakCompletedWords) {
+                  int last = column + count - 1;
+
+                  if (iswspace(characters[last].text)) {
+                    int first = column;
+
+                    while (first > 0) {
+                      if (iswspace(characters[--first].text)) {
+                        first += 1;
+                        break;
+                      }
+                    }
+
+                    if (first < column) {
+                      while (last >= first) {
+                        if (!iswspace(characters[last].text)) break;
+                        last -= 1;
+                      }
+
+                      if (last > first) {
+                        column = first;
+                        count = last - first + 1;
+                        goto autospeak;
+                      }
+                    }
+                  }
+                }
+
+                if (!prefs.autospeakInsertedCharacters) count = 0;
+                goto autospeak;
+              }
+
+              if (oldX >= oldWidth) oldX = oldWidth - 1;
+              if ((newX < oldX) &&
+                  isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
+                  isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
+                characters = oldCharacters;
+                column = newX;
+                count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
+                goto autospeak;
+              }
+            }
+
+            while (newCharacters[column].text == oldCharacters[column].text) ++column;
+            while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
+            count -= column;
+            if (!prefs.autospeakReplacedCharacters) count = 0;
+          } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
+            column = newX;
+            count = prefs.autospeakSelectedCharacter? 1: 0;
+
+            if (prefs.autospeakCompletedWords) {
+              if ((newX > oldX) && (column >= 2)) {
+                int length = newWidth;
+
+                while (length > 0) {
+                  if (!iswspace(characters[--length].text)) {
+                    length += 1;
+                    break;
+                  }
+                }
+
+                if ((length + 1) == column) {
+                  int first = length - 1;
+
+                  while (first > 0) {
+                    if (iswspace(characters[--first].text)) {
+                      first += 1;
+                      break;
+                    }
+                  }
+
+                  if ((length -= first) > 1) {
+                    column = first;
+                    count = length;
+                    goto autospeak;
+                  }
+                }
+              }
+            }
+          } else {
+            count = 0;
+          }
+        }
+
+      autospeak:
+        characters += column;
+
+        if (count) speakCharacters(characters, count, 0);
+      }
+
+      {
+        size_t size = newWidth * sizeof(*oldCharacters);
+
+        if ((oldCharacters = realloc(oldCharacters, size))) {
+          memcpy(oldCharacters, newCharacters, size);
+        } else {
+          logMallocError();
+        }
+      }
+
+      oldScreen = newScreen;
+      oldX = newX;
+      oldY = newY;
+      oldWidth = newWidth;
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+    /* There are a few things to take care of if the display has moved. */
+    if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
+      if (!pointerMoved) highlightWindow();
+
+      if (prefs.showAttributes && prefs.blinkingAttributes) {
+        /* Attributes are blinking.
+           We could check to see if we changed screen, but that doesn't
+           really matter... this is mainly for when you are hunting up/down
+           for the line with attributes. */
+        setBlinkingState(&attributesBlinkingState, 1);
+        /* problem: this still doesn't help when the braille window is
+           stationnary and the attributes themselves are moving
+           (example: tin). */
+      }
+
+      if ((ses->spky < ses->winy) || (ses->spky >= (ses->winy + brl.textRows))) ses->spky = ses->winy;
+      if ((ses->spkx < ses->winx) || (ses->spkx >= (ses->winx + textCount))) ses->spkx = ses->winx;
+
+      oldwinx = ses->winx;
+      oldwiny = ses->winy;
+    }
+
+    if (!isOffline) {
+      if (infoMode) {
+        if (!showInfo()) restartRequired = 1;
+      } else {
+        const unsigned int windowLength = brl.textColumns * brl.textRows;
+        const unsigned int textLength = textCount * brl.textRows;
+        wchar_t textBuffer[windowLength];
+
+        memset(brl.buffer, 0, windowLength);
+        wmemset(textBuffer, WC_C(' '), windowLength);
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+        contracted = 0;
+        if (isContracting()) {
+          while (1) {
+            int inputLength = scr.cols - ses->winx;
+            ScreenCharacter inputCharacters[inputLength];
+            wchar_t inputText[inputLength];
+
+            int outputLength = textLength;
+            unsigned char outputBuffer[outputLength];
+
+            readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
+
+            {
+              int i;
+              for (i=0; i<inputLength; ++i) {
+                inputText[i] = inputCharacters[i].text;
+              }
+            }
+
+            contractText(contractionTable,
+                         inputText, &inputLength,
+                         outputBuffer, &outputLength,
+                         contractedOffsets, getContractedCursor());
+
+            {
+              int inputEnd = inputLength;
+
+              if (contractedTrack) {
+                if (outputLength == textLength) {
+                  int inputIndex = inputEnd;
+                  while (inputIndex) {
+                    int offset = contractedOffsets[--inputIndex];
+                    if (offset != CTB_NO_OFFSET) {
+                      if (offset != outputLength) break;
+                      inputEnd = inputIndex;
+                    }
+                  }
+                }
+
+                if (scr.posx >= (ses->winx + inputEnd)) {
+                  int offset = 0;
+                  int length = scr.cols - ses->winx;
+                  int onspace = 0;
+
+                  while (offset < length) {
+                    if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
+                      if (onspace) break;
+                      onspace = 1;
+                    }
+                    ++offset;
+                  }
+
+                  if ((offset += ses->winx) > scr.posx) {
+                    ses->winx = (ses->winx + scr.posx) / 2;
+                  } else {
+                    ses->winx = offset;
+                  }
+
+                  continue;
+                }
+              }
+            }
+
+            contractedStart = ses->winx;
+            contractedLength = inputLength;
+            contractedTrack = 0;
+            contracted = 1;
+
+            if (ses->displayMode || showAttributesUnderline()) {
+              int inputOffset;
+              int outputOffset = 0;
+              unsigned char attributes = 0;
+              unsigned char attributesBuffer[outputLength];
+
+              for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
+                int offset = contractedOffsets[inputOffset];
+                if (offset != CTB_NO_OFFSET) {
+                  while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
+                  attributes = 0;
+                }
+                attributes |= inputCharacters[inputOffset].attributes;
+              }
+              while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
+
+              if (ses->displayMode) {
+                for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
+                  outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
+                }
+              } else {
+                int i;
+                for (i=0; i<outputLength; ++i) {
+                  overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
+                }
+              }
+            }
+
+            fillDotsRegion(textBuffer, brl.buffer,
+                           textStart, textCount, brl.textColumns, brl.textRows,
+                           outputBuffer, outputLength);
+            break;
+          }
+        }
+
+        if (!contracted)
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+        {
+          int windowColumns = MIN(textCount, scr.cols-ses->winx);
+          ScreenCharacter characters[textLength];
+
+          readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
+          if (windowColumns < textCount) {
+            /* We got a rectangular piece of text with readScreen but the display
+             * is in an off-right position with some cells at the end blank
+             * so we'll insert these cells and blank them.
+             */
+            int i;
+
+            for (i=brl.textRows-1; i>0; i--) {
+              memmove(characters + (i * textCount),
+                      characters + (i * windowColumns),
+                      windowColumns * sizeof(*characters));
+            }
+
+            for (i=0; i<brl.textRows; i++) {
+              clearScreenCharacters(characters + (i * textCount) + windowColumns,
+                                    textCount-windowColumns);
+            }
+          }
+
+          /* blank out capital letters if they're blinking and should be off */
+          if (!isBlinkedOn(&capitalsBlinkingState)) {
+            unsigned int i;
+            for (i=0; i<textCount*brl.textRows; i+=1) {
+              ScreenCharacter *character = &characters[i];
+              if (iswupper(character->text)) character->text = WC_C(' ');
+            }
+          }
+
+          /* convert to dots using the current translation table */
+          if (ses->displayMode) {
+            int row;
+
+            for (row=0; row<brl.textRows; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned int start = (row * brl.textColumns) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
+              }
+            }
+          } else {
+            int underline = showAttributesUnderline();
+            int row;
+
+            for (row=0; row<brl.textRows; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned int start = (row * brl.textColumns) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                const ScreenCharacter *character = &source[column];
+                unsigned char *dots = &target[column];
+
+                *dots = convertCharacterToDots(textTable, character->text);
+                if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
+                if (underline) overlayAttributesUnderline(dots, character->attributes);
+
+                text[column] = character->text;
+              }
+            }
+          }
+        }
+
+        if ((brl.cursor = getCursorPosition(scr.posx, scr.posy)) >= 0) {
+          if (showCursor()) {
+            brl.buffer[brl.cursor] |= getCursorDots();
+          }
+        }
+
+        if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
+          int position = getCursorPosition(ses->spkx, ses->spky);
+
+          if (position >= 0)
+            if (position != brl.cursor)
+              brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
+        }
+
+        if (statusCount > 0) {
+          const unsigned char *fields = prefs.statusFields;
+          unsigned int length = getStatusFieldsLength(fields);
+
+          if (length > 0) {
+            unsigned char cells[length];
+            memset(cells, 0, length);
+            renderStatusFields(fields, cells);
+            fillDotsRegion(textBuffer, brl.buffer,
+                           statusStart, statusCount, brl.textColumns, brl.textRows,
+                           cells, length);
+          }
+
+          fillStatusSeparator(textBuffer, brl.buffer);
+        }
+
+        if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
+      }
+    }
+
+    RELEASE_DRIVER;
+  }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  processSpeechInput(&spk);
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+  asyncSetAlarmIn(NULL, brl.writeDelay+1, handleDrainAlarm, result->data);
+  brl.writeDelay = 0;
+}
+
+static void
+setUpdateAlarm (void *data) {
+  asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+}
+
+static void
+resetUpdateAlarm (int delay) {
+  TimeValue when;
+  getRelativeTime(&when, delay);
+
+  if (updateAlarm) {
+    asyncResetAlarmTo(updateAlarm, &when);
+  } else {
+    updateTime = when;
+  }
 }
 
 static void
@@ -3296,7 +3877,12 @@ handleCommandAlarm (const AsyncAlarmResult *result) {
 
   if (!isSuspended) {
     CLAIM_DRIVER;
-    if (doNextCommand()) delay = 0;
+
+    if (doNextCommand()) {
+      delay = 0;
+      resetUpdateAlarm(10);
+    }
+
     RELEASE_DRIVER;
   }
 
@@ -3327,561 +3913,6 @@ setCommandAlarm (int when, void *data) {
   asyncSetAlarmIn(NULL, when, handleCommandAlarm, data);
 }
 
-static void setUpdateAlarm (int when, void *data);
-
-static void
-handleUpdateAlarm (const AsyncAlarmResult *result) {
-  updateSessionAttributes();
-
-  if (opt_releaseDevice) {
-    if (scr.unreadable) {
-      if (!isSuspended) {
-        logMessage(LOG_DEBUG, "suspending braille driver");
-        writeStatusCells();
-        writeBrailleText("wrn", scr.unreadable);
-
-#ifdef ENABLE_API
-        if (apiStarted) {
-          api_suspend(&brl);
-        } else
-#endif /* ENABLE_API */
-
-        {
-          destructBrailleDriver();
-        }
-
-        isSuspended = 1;
-        logMessage(LOG_DEBUG, "braille driver suspended");
-      }
-    } else {
-      if (isSuspended) {
-        logMessage(LOG_DEBUG, "resuming braille driver");
-        isSuspended = !(
-#ifdef ENABLE_API
-          apiStarted? api_resume(&brl):
-#endif /* ENABLE_API */
-          constructBrailleDriver());
-        logMessage(LOG_DEBUG, "braille driver resumed");
-      }
-    }
-  }
-
-  if (!isSuspended) {
-    CLAIM_DRIVER;
-    int pointerMoved = 0;
-
-    /* some commands (key insertion, virtual terminal switching, etc)
-     * may have moved the cursor
-     */
-    updateSessionAttributes();
-
-    /*
-     * Update blink counters: 
-     */
-    updateBlinkingState(&cursorBlinkingState);
-    updateBlinkingState(&attributesBlinkingState);
-    updateBlinkingState(&capitalsBlinkingState);
-    updateBlinkingState(&speechCursorBlinkingState);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    /* called continually even if we're not tracking so that the pipe doesn't fill up. */
-    speech->doTrack(&spk);
-
-    if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-    if (ses->trackCursor) {
-#ifdef ENABLE_SPEECH_SUPPORT
-      if (speechTracking && (scr.number == speechScreen)) {
-        int index = speech->getTrack(&spk);
-        if (index != speechIndex) trackSpeech(speechIndex = index);
-      } else
-#endif /* ENABLE_SPEECH_SUPPORT */
-      {
-        /* If cursor moves while blinking is on */
-        if (prefs.blinkingCursor) {
-          if (scr.posy != ses->trky) {
-            /* turn off cursor to see what's under it while changing lines */
-            setBlinkingState(&cursorBlinkingState, 0);
-          } else if (scr.posx != ses->trkx) {
-            /* turn on cursor to see it moving on the line */
-            setBlinkingState(&cursorBlinkingState, 1);
-          }
-        }
-
-        /* If the cursor moves in cursor tracking mode: */
-        if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
-          int oldx = ses->winx;
-          int oldy = ses->winy;
-
-          trackCursor(0);
-          logMessage(LOG_CATEGORY(CURSOR_TRACKING),
-                     "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
-                     scr.number,
-                     ses->trkx, ses->trky, scr.posx, scr.posy,
-                     oldx, oldy, ses->winx, ses->winy);
-
-          ses->spkx = ses->trkx = scr.posx;
-          ses->spky = ses->trky = scr.posy;
-        } else if (checkPointer()) {
-          pointerMoved = 1;
-        }
-      }
-    }
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    if (autospeak()) {
-      static int oldScreen = -1;
-      static int oldX = -1;
-      static int oldY = -1;
-      static int oldWidth = 0;
-      static ScreenCharacter *oldCharacters = NULL;
-
-      int newScreen = scr.number;
-      int newX = scr.posx;
-      int newY = scr.posy;
-      int newWidth = scr.cols;
-      ScreenCharacter newCharacters[newWidth];
-
-      readScreen(0, ses->winy, newWidth, 1, newCharacters);
-
-      if (!speechTracking) {
-        int column = 0;
-        int count = newWidth;
-        const ScreenCharacter *characters = newCharacters;
-
-        if (!oldCharacters) {
-          count = 0;
-        } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
-          if (!prefs.autospeakSelectedLine) count = 0;
-        } else {
-          int onScreen = (newX >= 0) && (newX < newWidth);
-
-          if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
-            if ((newY == ses->winy) && (newY == oldY) && onScreen) {
-              if ((newX == oldX) &&
-                  isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
-                int oldLength = oldWidth;
-                int newLength = newWidth;
-                int x = newX;
-
-                while (oldLength > oldX) {
-                  if (!iswspace(oldCharacters[oldLength-1].text)) break;
-                  oldLength -= 1;
-                }
-                if (oldLength < oldWidth) oldLength += 1;
-
-                while (newLength > newX) {
-                  if (!iswspace(newCharacters[newLength-1].text)) break;
-                  newLength -= 1;
-                }
-                if (newLength < newWidth) newLength += 1;
-
-                while (1) {
-                  int done = 1;
-
-                  if (x < newLength) {
-                    if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
-                      column = newX;
-                      count = prefs.autospeakInsertedCharacters? (x - newX): 0;
-                      goto autospeak;
-                    }
-
-                    done = 0;
-                  }
-
-                  if (x < oldLength) {
-                    if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
-                      characters = oldCharacters;
-                      column = oldX;
-                      count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
-                      goto autospeak;
-                    }
-
-                    done = 0;
-                  }
-
-                  if (done) break;
-                  x += 1;
-                }
-              }
-
-              if (oldX < 0) oldX = 0;
-              if ((newX > oldX) &&
-                  isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
-                  isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
-                column = oldX;
-                count = newX - oldX;
-
-                if (prefs.autospeakCompletedWords) {
-                  int last = column + count - 1;
-
-                  if (iswspace(characters[last].text)) {
-                    int first = column;
-
-                    while (first > 0) {
-                      if (iswspace(characters[--first].text)) {
-                        first += 1;
-                        break;
-                      }
-                    }
-
-                    if (first < column) {
-                      while (last >= first) {
-                        if (!iswspace(characters[last].text)) break;
-                        last -= 1;
-                      }
-
-                      if (last > first) {
-                        column = first;
-                        count = last - first + 1;
-                        goto autospeak;
-                      }
-                    }
-                  }
-                }
-
-                if (!prefs.autospeakInsertedCharacters) count = 0;
-                goto autospeak;
-              }
-
-              if (oldX >= oldWidth) oldX = oldWidth - 1;
-              if ((newX < oldX) &&
-                  isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
-                  isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
-                characters = oldCharacters;
-                column = newX;
-                count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
-                goto autospeak;
-              }
-            }
-
-            while (newCharacters[column].text == oldCharacters[column].text) ++column;
-            while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
-            count -= column;
-            if (!prefs.autospeakReplacedCharacters) count = 0;
-          } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
-            column = newX;
-            count = prefs.autospeakSelectedCharacter? 1: 0;
-
-            if (prefs.autospeakCompletedWords) {
-              if ((newX > oldX) && (column >= 2)) {
-                int length = newWidth;
-
-                while (length > 0) {
-                  if (!iswspace(characters[--length].text)) {
-                    length += 1;
-                    break;
-                  }
-                }
-
-                if ((length + 1) == column) {
-                  int first = length - 1;
-
-                  while (first > 0) {
-                    if (iswspace(characters[--first].text)) {
-                      first += 1;
-                      break;
-                    }
-                  }
-
-                  if ((length -= first) > 1) {
-                    column = first;
-                    count = length;
-                    goto autospeak;
-                  }
-                }
-              }
-            }
-          } else {
-            count = 0;
-          }
-        }
-
-      autospeak:
-        characters += column;
-
-        if (count) speakCharacters(characters, count, 0);
-      }
-
-      {
-        size_t size = newWidth * sizeof(*oldCharacters);
-
-        if ((oldCharacters = realloc(oldCharacters, size))) {
-          memcpy(oldCharacters, newCharacters, size);
-        } else {
-          logMallocError();
-        }
-      }
-
-      oldScreen = newScreen;
-      oldX = newX;
-      oldY = newY;
-      oldWidth = newWidth;
-    }
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-    /* There are a few things to take care of if the display has moved. */
-    if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
-      if (!pointerMoved) highlightWindow();
-
-      if (prefs.showAttributes && prefs.blinkingAttributes) {
-        /* Attributes are blinking.
-           We could check to see if we changed screen, but that doesn't
-           really matter... this is mainly for when you are hunting up/down
-           for the line with attributes. */
-        setBlinkingState(&attributesBlinkingState, 1);
-        /* problem: this still doesn't help when the braille window is
-           stationnary and the attributes themselves are moving
-           (example: tin). */
-      }
-
-      if ((ses->spky < ses->winy) || (ses->spky >= (ses->winy + brl.textRows))) ses->spky = ses->winy;
-      if ((ses->spkx < ses->winx) || (ses->spkx >= (ses->winx + textCount))) ses->spkx = ses->winx;
-
-      oldwinx = ses->winx;
-      oldwiny = ses->winy;
-    }
-
-    if (!isOffline) {
-      if (infoMode) {
-        if (!showInfo()) restartRequired = 1;
-      } else {
-        const unsigned int windowLength = brl.textColumns * brl.textRows;
-        const unsigned int textLength = textCount * brl.textRows;
-        wchar_t textBuffer[windowLength];
-
-        memset(brl.buffer, 0, windowLength);
-        wmemset(textBuffer, WC_C(' '), windowLength);
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-        contracted = 0;
-        if (isContracting()) {
-          while (1) {
-            int inputLength = scr.cols - ses->winx;
-            ScreenCharacter inputCharacters[inputLength];
-            wchar_t inputText[inputLength];
-
-            int outputLength = textLength;
-            unsigned char outputBuffer[outputLength];
-
-            readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
-
-            {
-              int i;
-              for (i=0; i<inputLength; ++i) {
-                inputText[i] = inputCharacters[i].text;
-              }
-            }
-
-            contractText(contractionTable,
-                         inputText, &inputLength,
-                         outputBuffer, &outputLength,
-                         contractedOffsets, getContractedCursor());
-
-            {
-              int inputEnd = inputLength;
-
-              if (contractedTrack) {
-                if (outputLength == textLength) {
-                  int inputIndex = inputEnd;
-                  while (inputIndex) {
-                    int offset = contractedOffsets[--inputIndex];
-                    if (offset != CTB_NO_OFFSET) {
-                      if (offset != outputLength) break;
-                      inputEnd = inputIndex;
-                    }
-                  }
-                }
-
-                if (scr.posx >= (ses->winx + inputEnd)) {
-                  int offset = 0;
-                  int length = scr.cols - ses->winx;
-                  int onspace = 0;
-
-                  while (offset < length) {
-                    if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
-                      if (onspace) break;
-                      onspace = 1;
-                    }
-                    ++offset;
-                  }
-
-                  if ((offset += ses->winx) > scr.posx) {
-                    ses->winx = (ses->winx + scr.posx) / 2;
-                  } else {
-                    ses->winx = offset;
-                  }
-
-                  continue;
-                }
-              }
-            }
-
-            contractedStart = ses->winx;
-            contractedLength = inputLength;
-            contractedTrack = 0;
-            contracted = 1;
-
-            if (ses->displayMode || showAttributesUnderline()) {
-              int inputOffset;
-              int outputOffset = 0;
-              unsigned char attributes = 0;
-              unsigned char attributesBuffer[outputLength];
-
-              for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
-                int offset = contractedOffsets[inputOffset];
-                if (offset != CTB_NO_OFFSET) {
-                  while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
-                  attributes = 0;
-                }
-                attributes |= inputCharacters[inputOffset].attributes;
-              }
-              while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
-
-              if (ses->displayMode) {
-                for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                  outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
-                }
-              } else {
-                int i;
-                for (i=0; i<outputLength; ++i) {
-                  overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
-                }
-              }
-            }
-
-            fillDotsRegion(textBuffer, brl.buffer,
-                           textStart, textCount, brl.textColumns, brl.textRows,
-                           outputBuffer, outputLength);
-            break;
-          }
-        }
-
-        if (!contracted)
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-        {
-          int windowColumns = MIN(textCount, scr.cols-ses->winx);
-          ScreenCharacter characters[textLength];
-
-          readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
-          if (windowColumns < textCount) {
-            /* We got a rectangular piece of text with readScreen but the display
-             * is in an off-right position with some cells at the end blank
-             * so we'll insert these cells and blank them.
-             */
-            int i;
-
-            for (i=brl.textRows-1; i>0; i--) {
-              memmove(characters + (i * textCount),
-                      characters + (i * windowColumns),
-                      windowColumns * sizeof(*characters));
-            }
-
-            for (i=0; i<brl.textRows; i++) {
-              clearScreenCharacters(characters + (i * textCount) + windowColumns,
-                                    textCount-windowColumns);
-            }
-          }
-
-          /* blank out capital letters if they're blinking and should be off */
-          if (!isBlinkedOn(&capitalsBlinkingState)) {
-            unsigned int i;
-            for (i=0; i<textCount*brl.textRows; i+=1) {
-              ScreenCharacter *character = &characters[i];
-              if (iswupper(character->text)) character->text = WC_C(' ');
-            }
-          }
-
-          /* convert to dots using the current translation table */
-          if (ses->displayMode) {
-            int row;
-
-            for (row=0; row<brl.textRows; row+=1) {
-              const ScreenCharacter *source = &characters[row * textCount];
-              unsigned int start = (row * brl.textColumns) + textStart;
-              unsigned char *target = &brl.buffer[start];
-              wchar_t *text = &textBuffer[start];
-              int column;
-
-              for (column=0; column<textCount; column+=1) {
-                text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
-              }
-            }
-          } else {
-            int underline = showAttributesUnderline();
-            int row;
-
-            for (row=0; row<brl.textRows; row+=1) {
-              const ScreenCharacter *source = &characters[row * textCount];
-              unsigned int start = (row * brl.textColumns) + textStart;
-              unsigned char *target = &brl.buffer[start];
-              wchar_t *text = &textBuffer[start];
-              int column;
-
-              for (column=0; column<textCount; column+=1) {
-                const ScreenCharacter *character = &source[column];
-                unsigned char *dots = &target[column];
-
-                *dots = convertCharacterToDots(textTable, character->text);
-                if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
-                if (underline) overlayAttributesUnderline(dots, character->attributes);
-
-                text[column] = character->text;
-              }
-            }
-          }
-        }
-
-        if ((brl.cursor = getCursorPosition(scr.posx, scr.posy)) >= 0) {
-          if (showCursor()) {
-            brl.buffer[brl.cursor] |= getCursorDots();
-          }
-        }
-
-        if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
-          int position = getCursorPosition(ses->spkx, ses->spky);
-
-          if (position >= 0)
-            if (position != brl.cursor)
-              brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
-        }
-
-        if (statusCount > 0) {
-          const unsigned char *fields = prefs.statusFields;
-          unsigned int length = getStatusFieldsLength(fields);
-
-          if (length > 0) {
-            unsigned char cells[length];
-            memset(cells, 0, length);
-            renderStatusFields(fields, cells);
-            fillDotsRegion(textBuffer, brl.buffer,
-                           statusStart, statusCount, brl.textColumns, brl.textRows,
-                           cells, length);
-          }
-
-          fillStatusSeparator(textBuffer, brl.buffer);
-        }
-
-        if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
-      }
-    }
-
-    RELEASE_DRIVER;
-  }
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  processSpeechInput(&spk);
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-  setUpdateAlarm(updateInterval, result->data);
-}
-
-static void
-setUpdateAlarm (int when, void *data) {
-  asyncSetAlarmIn(NULL, when, handleUpdateAlarm, data);
-}
-
 static int
 brlttyPrepare_next (void) {
   return 1;
@@ -3906,7 +3937,8 @@ brlttyPrepare_first (void) {
 
   brlttyPrepare = brlttyPrepare_next;
   setCommandAlarm(0, NULL);
-  setUpdateAlarm(0, NULL);
+  getCurrentTime(&updateTime);
+  setUpdateAlarm(NULL);
   return 1;
 }
 
