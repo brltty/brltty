@@ -1827,17 +1827,6 @@ resetUpdateAlarm (int delay) {
 static void setUpdateAlarm (void *data);
 
 static void
-handleDrainAlarm (const AsyncAlarmResult *result) {
-  setUpdateAlarm(result->data);
-}
-
-static void
-setDrainAlarm (void *data) {
-  asyncSetAlarmIn(NULL, brl.writeDelay+1, handleDrainAlarm, data);
-  brl.writeDelay = 0;
-}
-
-static void
 handleUpdateAlarm (const AsyncAlarmResult *result) {
   setUpdateTime(updateInterval);
   asyncDiscardHandle(updateAlarm);
@@ -2386,7 +2375,8 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  setDrainAlarm(result->data);
+  drainBrailleOutput(&brl, 0);
+  setUpdateAlarm(result->data);
 }
 
 static void
