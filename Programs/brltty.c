@@ -44,6 +44,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "async.h"
 #include "message.h"
 #include "tunes.h"
 #include "ttb.h"
@@ -1785,6 +1786,14 @@ brlttyPrepare_unconstructed (void) {
   return 0;
 }
 
+#ifdef ENABLE_API
+#define CLAIM_DRIVER int driverClaimed = apiStarted && api_claimDriver(&brl);
+#define RELEASE_DRIVER if (driverClaimed) api_releaseDriver(&brl);
+#else /* ENABLE_API */
+#define CLAIM_DRIVER 
+#define RELEASE_DRIVER 
+#endif /* ENABLE_API */
+
 static int (*brlttyPrepare) (void) = brlttyPrepare_unconstructed;
 static int oldwinx;
 static int oldwiny;
@@ -1792,13 +1801,6 @@ static int restartRequired;
 static int isOffline;
 static int isSuspended;
 static int inputModifiers;
-
-static int
-brlttyPrepare_next (void) {
-  drainBrailleOutput(&brl, updateInterval);
-  updateSessionAttributes();
-  return 1;
-}
 
 static void
 resetBrailleState (void) {
@@ -1814,68 +1816,7 @@ applyInputModifiers (int *modifiers) {
 }
 
 static int
-brlttyPrepare_first (void) {
-  setSessionEntry();
-  ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0;
-  ses->motx = ses->winx; ses->moty = ses->winy;
-  ses->spkx = ses->winx; ses->spky = ses->winy;
-
-  oldwinx = ses->winx; oldwiny = ses->winy;
-  restartRequired = 0;
-  isOffline = 0;
-  isSuspended = 0;
-
-  highlightWindow();
-  checkPointer();
-  resetBrailleState();
-
-  brlttyPrepare = brlttyPrepare_next;
-  return 1;
-}
-
-ProgramExitStatus
-brlttyConstruct (int argc, char *argv[]) {
-  srand((unsigned int)time(NULL));
-  onProgramExit("log", exitLog, NULL);
-  openSystemLog();
-
-  terminationCount = 0;
-  terminationTime = time(NULL);
-
-#ifdef SIGPIPE
-  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
-   * a broken pipe won't abort program execution.
-   */
-  handleSignal(SIGPIPE, SIG_IGN);
-#endif /* SIGPIPE */
-
-#ifdef SIGTERM
-  handleSignal(SIGTERM, handleTerminationRequest);
-#endif /* SIGTERM */
-
-#ifdef SIGINT
-  handleSignal(SIGINT, handleTerminationRequest);
-#endif /* SIGINT */
-
-  {
-    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
-    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
-  }
-
-  onProgramExit("sessions", exitSessions, NULL);
-  brlttyPrepare = brlttyPrepare_first;
-  return PROG_EXIT_SUCCESS;
-}
-
-int
-brlttyDestruct (void) {
-  endProgram();
-  return 1;
-}
-
-static int
-brlttyCommand (void) {
+doNextCommand (void) {
   static const char modeString_preferences[] = "prf";
   static Preferences savedPreferences;
 
@@ -3347,11 +3288,50 @@ doCommand:
   return 1;
 }
 
-int
-brlttyUpdate (void) {
-  if (!brlttyPrepare()) return 0;
-  if (terminationCount) return 0;
-  checkRoutingStatus(ROUTING_DONE, 0);
+static void setCommandAlarm (int when, void *data);
+
+static void
+handleCommandAlarm (const AsyncAlarmResult *result) {
+  int delay = 40;
+
+  if (!isSuspended) {
+    CLAIM_DRIVER;
+    if (doNextCommand()) delay = 0;
+    RELEASE_DRIVER;
+  }
+
+#ifdef ENABLE_API
+  else if (apiStarted) {
+    switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
+      case BRL_CMD_RESTARTBRL:
+        restartBrailleDriver();
+        break;
+
+      default:
+        delay = 0;
+      case EOF:
+        break;
+    }
+  }
+
+  if (apiStarted) {
+    if (!api_flush(&brl)) restartRequired = 1;
+  }
+#endif /* ENABLE_API */
+
+  setCommandAlarm(delay, result->data);
+}
+
+static void
+setCommandAlarm (int when, void *data) {
+  asyncSetAlarmIn(NULL, when, handleCommandAlarm, data);
+}
+
+static void setUpdateAlarm (int when, void *data);
+
+static void
+handleUpdateAlarm (const AsyncAlarmResult *result) {
+  updateSessionAttributes();
 
   if (opt_releaseDevice) {
     if (scr.unreadable) {
@@ -3387,18 +3367,8 @@ brlttyUpdate (void) {
   }
 
   if (!isSuspended) {
+    CLAIM_DRIVER;
     int pointerMoved = 0;
-
-#ifdef ENABLE_API
-    int claimed = apiStarted && api_claimDriver(&brl);
-#endif /* ENABLE_API */
-
-    /*
-     * Process any Braille input 
-     */
-    do {
-      if (terminationCount) return 0;
-    } while (brlttyCommand());
 
     /* some commands (key insertion, virtual terminal switching, etc)
      * may have moved the cursor
@@ -3897,30 +3867,96 @@ brlttyUpdate (void) {
       }
     }
 
-#ifdef ENABLE_API
-    if (claimed) api_releaseDriver(&brl);
-  } else if (apiStarted) {
-    switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
-      case BRL_CMD_RESTARTBRL:
-        restartBrailleDriver();
-        break;
-
-      default:
-        break;
-    }
-#endif /* ENABLE_API */
+    RELEASE_DRIVER;
   }
-
-#ifdef ENABLE_API
-  if (apiStarted) {
-    if (!api_flush(&brl)) restartRequired = 1;
-  }
-#endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
   processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+  setUpdateAlarm(updateInterval, result->data);
+}
+
+static void
+setUpdateAlarm (int when, void *data) {
+  asyncSetAlarmIn(NULL, when, handleUpdateAlarm, data);
+}
+
+static int
+brlttyPrepare_next (void) {
+  return 1;
+}
+
+static int
+brlttyPrepare_first (void) {
+  setSessionEntry();
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  ses->motx = ses->winx; ses->moty = ses->winy;
+  ses->spkx = ses->winx; ses->spky = ses->winy;
+
+  oldwinx = ses->winx; oldwiny = ses->winy;
+  restartRequired = 0;
+  isOffline = 0;
+  isSuspended = 0;
+
+  highlightWindow();
+  checkPointer();
+  resetBrailleState();
+
+  brlttyPrepare = brlttyPrepare_next;
+  setCommandAlarm(0, NULL);
+  setUpdateAlarm(0, NULL);
+  return 1;
+}
+
+ProgramExitStatus
+brlttyConstruct (int argc, char *argv[]) {
+  srand((unsigned int)time(NULL));
+  onProgramExit("log", exitLog, NULL);
+  openSystemLog();
+
+  terminationCount = 0;
+  terminationTime = time(NULL);
+
+#ifdef SIGPIPE
+  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
+   * a broken pipe won't abort program execution.
+   */
+  handleSignal(SIGPIPE, SIG_IGN);
+#endif /* SIGPIPE */
+
+#ifdef SIGTERM
+  handleSignal(SIGTERM, handleTerminationRequest);
+#endif /* SIGTERM */
+
+#ifdef SIGINT
+  handleSignal(SIGINT, handleTerminationRequest);
+#endif /* SIGINT */
+
+  {
+    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
+    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
+  }
+
+  onProgramExit("sessions", exitSessions, NULL);
+  brlttyPrepare = brlttyPrepare_first;
+  return PROG_EXIT_SUCCESS;
+}
+
+int
+brlttyDestruct (void) {
+  endProgram();
+  return 1;
+}
+
+int
+brlttyUpdate (void) {
+  if (!brlttyPrepare()) return 0;
+  if (terminationCount) return 0;
+
+  checkRoutingStatus(ROUTING_DONE, 0);
+  asyncWait(40);
   return 1;
 }
 
