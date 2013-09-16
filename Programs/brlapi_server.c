@@ -1387,26 +1387,37 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 
 /* Function: loopBind */
 /* tries binding while temporary errors occur */
-static int loopBind(SocketDescriptor fd, const struct sockaddr *addr, socklen_t len)
+static int loopBind(SocketDescriptor fd, const struct sockaddr *address, socklen_t length)
 {
+  char buffer[0X100] = {0};
+  const int maximum = 100000;
+  int delay = 1000;
   int res;
 
-  while ((res = bind(fd, addr, len)) == -1) {
+  while ((res = bind(fd, address, length)) == -1) {
     if (!running) break;
 
     if (
 #ifdef EADDRNOTAVAIL
-      (errno != EADDRNOTAVAIL) &&
+        (errno != EADDRNOTAVAIL) &&
 #endif /* EADDRNOTAVAIL */
 #ifdef EADDRINUSE
-      (errno != EADDRINUSE) &&
+        (errno != EADDRINUSE) &&
 #endif /* EADDRINUSE */
-      (errno != EROFS)) {
+        (errno != EROFS)) {
       break;
     }
 
-    logMessage(LOG_DEBUG, "bind waiting: %s", strerror(errno));
-    approximateDelay(1000);
+    if (!buffer[0]) {
+      formatAddress(buffer, sizeof(buffer), address, length);
+    }
+
+logMessage(LOG_NOTICE, "bind delay: %d", delay);
+    logMessage(LOG_DEBUG, "bind waiting: %s: %s", buffer, strerror(errno));
+    approximateDelay(delay);
+
+    delay <<= 1;
+    delay = MIN(delay, maximum);
   }
 
   return res;
