@@ -638,13 +638,18 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
 }
 
 void
-formatAddress (char *buffer, size_t bufferSize, const void *address, int addressSize) {
+formatAddress (
+  char *buffer, size_t bufferSize,
+  const void *address, socklen_t addressSize
+) {
 #ifdef AF_INET
   const struct sockaddr *sa = address;
+
   switch (sa->sa_family) {
 #ifndef __MINGW32__
     case AF_LOCAL: {
       const struct sockaddr_un *local = address;
+
       if (addressSize <= sizeof(sa_family_t)) {
         snprintf(buffer, bufferSize, "local <unnamed>");
       } else {
@@ -656,6 +661,7 @@ formatAddress (char *buffer, size_t bufferSize, const void *address, int address
 
     case AF_INET: {
       const struct sockaddr_in *inet = address;
+
       snprintf(buffer, bufferSize, "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
       break;
     }
@@ -683,7 +689,7 @@ formatAddress (char *buffer, size_t bufferSize, const void *address, int address
 #endif /* EAI_SYSTEM */
                    gai_strerror(err));
 #else /* HAVE_GAI_STRERROR */
-          snprintf(buffer, bufferSize, "reverse lookup error %d for address family %d.",
+          snprintf(buffer, bufferSize, "reverse lookup error %d for address family %d",
                    err, sa->sa_family);
 #endif /* HAVE_GAI_STRERROR */
           break;

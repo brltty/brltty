@@ -29,7 +29,10 @@ extern AuthDescriptor *authBeginServer (const char *parameter);
 extern void authEnd (AuthDescriptor *auth);
 extern int authPerform (AuthDescriptor *auth, FileDescriptor fd);
 
-extern void formatAddress (char *buffer, size_t bufferSize, const void *address, int addressSize);
+extern void formatAddress (
+  char *buffer, size_t bufferSize,
+  const void *address, socklen_t addressSize
+);
 
 #ifdef __cplusplus
 }
