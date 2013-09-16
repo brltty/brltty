@@ -84,17 +84,17 @@ typedef struct {
 typedef struct FunctionEntryStruct FunctionEntry;
 
 typedef struct {
-  AsyncMonitorCallback callback;
+  AsyncMonitorCallback *callback;
 } MonitorExtension;
 
 typedef union {
   struct {
-    AsyncInputCallback callback;
+    AsyncInputCallback *callback;
     unsigned end:1;
   } input;
 
   struct {
-    AsyncOutputCallback callback;
+    AsyncOutputCallback *callback;
   } output;
 } TransferDirectionUnion;
 
@@ -621,7 +621,7 @@ awaitNextOperation (long int timeout) {
 static int
 invokeMonitorCallback (OperationEntry *operation) {
   MonitorExtension *extension = operation->extension;
-  AsyncMonitorCallback callback = extension->callback;
+  AsyncMonitorCallback *callback = extension->callback;
 
   if (callback) {
     const AsyncMonitorResult result = {
@@ -839,7 +839,7 @@ newOperation (
 typedef struct {
   FileDescriptor fileDescriptor;
   const FunctionMethods *methods;
-  AsyncMonitorCallback callback;
+  AsyncMonitorCallback *callback;
   void *data;
 } MonitorFileOperationParameters;
 
@@ -898,7 +898,7 @@ newTransferOperation (
 typedef struct {
   FileDescriptor fileDescriptor;
   size_t size;
-  AsyncInputCallback callback;
+  AsyncInputCallback *callback;
   void *data;
 } InputOperationParameters;
 
@@ -937,7 +937,7 @@ typedef struct {
   FileDescriptor fileDescriptor;
   size_t size;
   const void *buffer;
-  AsyncOutputCallback callback;
+  AsyncOutputCallback *callback;
   void *data;
 } OutputOperationParameters;
 
@@ -1071,7 +1071,7 @@ int
 asyncMonitorFileInput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
@@ -1105,7 +1105,7 @@ int
 asyncMonitorFileOutput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
@@ -1140,7 +1140,7 @@ asyncReadFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   size_t size,
-  AsyncInputCallback callback, void *data
+  AsyncInputCallback *callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   const InputOperationParameters iop = {
@@ -1162,7 +1162,7 @@ asyncWriteFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  AsyncOutputCallback callback, void *data
+  AsyncOutputCallback *callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   const OutputOperationParameters oop = {
@@ -1185,7 +1185,7 @@ int
 asyncMonitorSocketInput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
   logUnsupportedFunction();
   return 0;
@@ -1195,7 +1195,7 @@ int
 asyncMonitorSocketOutput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
   logUnsupportedFunction();
   return 0;
@@ -1206,7 +1206,7 @@ asyncReadSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   size_t size,
-  AsyncInputCallback callback, void *data
+  AsyncInputCallback *callback, void *data
 ) {
   logUnsupportedFunction();
   return 0;
@@ -1217,7 +1217,7 @@ asyncWriteSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   const void *buffer, size_t size,
-  AsyncOutputCallback callback, void *data
+  AsyncOutputCallback *callback, void *data
 ) {
   logUnsupportedFunction();
   return 0;
@@ -1228,7 +1228,7 @@ int
 asyncMonitorSocketInput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
   return asyncMonitorFileInput(handle, socketDescriptor, callback, data);
 }
@@ -1237,7 +1237,7 @@ int
 asyncMonitorSocketOutput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 ) {
   return asyncMonitorFileOutput(handle, socketDescriptor, callback, data);
 }
@@ -1247,7 +1247,7 @@ asyncReadSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   size_t size,
-  AsyncInputCallback callback, void *data
+  AsyncInputCallback *callback, void *data
 ) {
   return asyncReadFile(handle, socketDescriptor, size, callback, data);
 }
@@ -1257,7 +1257,7 @@ asyncWriteSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   const void *buffer, size_t size,
-  AsyncOutputCallback callback, void *data
+  AsyncOutputCallback *callback, void *data
 ) {
   return asyncWriteFile(handle, socketDescriptor, buffer, size, callback, data);
 }
@@ -1265,7 +1265,7 @@ asyncWriteSocket (
 
 typedef struct {
   TimeValue time;
-  AsyncAlarmCallback callback;
+  AsyncAlarmCallback *callback;
   void *data;
 } AlarmEntry;
 
@@ -1297,7 +1297,7 @@ getAlarmQueue (int create) {
 
 typedef struct {
   const TimeValue *time;
-  AsyncAlarmCallback callback;
+  AsyncAlarmCallback *callback;
   void *data;
 } AlarmElementParameters;
 
@@ -1333,7 +1333,7 @@ int
 asyncSetAlarmTo (
   AsyncHandle *handle,
   const TimeValue *time,
-  AsyncAlarmCallback callback,
+  AsyncAlarmCallback *callback,
   void *data
 ) {
   const AlarmElementParameters aep = {
@@ -1349,7 +1349,7 @@ int
 asyncSetAlarmIn (
   AsyncHandle *handle,
   int interval,
-  AsyncAlarmCallback callback,
+  AsyncAlarmCallback *callback,
   void *data
 ) {
   TimeValue time;
@@ -1403,7 +1403,7 @@ awaitNextResponse (long int timeout) {
         milliseconds = millisecondsBetween(&now, &alarm->time);
 
         if (milliseconds <= 0) {
-          AsyncAlarmCallback callback = alarm->callback;
+          AsyncAlarmCallback *callback = alarm->callback;
           const AsyncAlarmResult result = {
             .data = alarm->data
           };

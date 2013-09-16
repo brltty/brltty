@@ -36,30 +36,30 @@ typedef struct {
   void *data;
 } AsyncMonitorResult;
 
-typedef int (*AsyncMonitorCallback) (const AsyncMonitorResult *data);
+typedef int AsyncMonitorCallback (const AsyncMonitorResult *data);
 
 extern int asyncMonitorFileInput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 );
 
 extern int asyncMonitorSocketInput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 );
 
 extern int asyncMonitorFileOutput (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 );
 
 extern int asyncMonitorSocketOutput (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
-  AsyncMonitorCallback callback, void *data
+  AsyncMonitorCallback *callback, void *data
 );
 
 
@@ -72,20 +72,20 @@ typedef struct {
   unsigned end:1;
 } AsyncInputResult;
 
-typedef size_t (*AsyncInputCallback) (const AsyncInputResult *result);
+typedef size_t AsyncInputCallback (const AsyncInputResult *result);
 
 extern int asyncReadFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   size_t size,
-  AsyncInputCallback callback, void *data
+  AsyncInputCallback *callback, void *data
 );
 
 extern int asyncReadSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   size_t size,
-  AsyncInputCallback callback, void *data
+  AsyncInputCallback *callback, void *data
 );
 
 
@@ -96,20 +96,20 @@ typedef struct {
   int error;
 } AsyncOutputResult;
 
-typedef void (*AsyncOutputCallback) (const AsyncOutputResult *result);
+typedef void AsyncOutputCallback (const AsyncOutputResult *result);
 
 extern int asyncWriteFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  AsyncOutputCallback callback, void *data
+  AsyncOutputCallback *callback, void *data
 );
 
 extern int asyncWriteSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   const void *buffer, size_t size,
-  AsyncOutputCallback callback, void *data
+  AsyncOutputCallback *callback, void *data
 );
 
 
@@ -117,19 +117,19 @@ typedef struct {
   void *data;
 } AsyncAlarmResult;
 
-typedef void (*AsyncAlarmCallback) (const AsyncAlarmResult *result);
+typedef void AsyncAlarmCallback (const AsyncAlarmResult *result);
 
 extern int asyncSetAlarmTo (
   AsyncHandle *handle,
   const TimeValue *time,
-  AsyncAlarmCallback callback,
+  AsyncAlarmCallback *callback,
   void *data
 );
 
 extern int asyncSetAlarmIn (
   AsyncHandle *handle,
   int interval,
-  AsyncAlarmCallback callback,
+  AsyncAlarmCallback *callback,
   void *data
 );
 
