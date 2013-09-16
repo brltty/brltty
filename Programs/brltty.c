@@ -1813,6 +1813,17 @@ resetBrailleState (void) {
   inputModifiers = 0;
 }
 
+static void
+setUpdateTime (int delay) {
+  getRelativeTime(&updateTime, delay);
+}
+
+static void
+resetUpdateAlarm (int delay) {
+  setUpdateTime(delay);
+  if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
+}
+
 static void setUpdateAlarm (void *data);
 
 static void
@@ -1821,8 +1832,14 @@ handleDrainAlarm (const AsyncAlarmResult *result) {
 }
 
 static void
+setDrainAlarm (void *data) {
+  asyncSetAlarmIn(NULL, brl.writeDelay+1, handleDrainAlarm, data);
+  brl.writeDelay = 0;
+}
+
+static void
 handleUpdateAlarm (const AsyncAlarmResult *result) {
-  getRelativeTime(&updateTime, updateInterval);
+  setUpdateTime(updateInterval);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
@@ -2369,25 +2386,12 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  asyncSetAlarmIn(NULL, brl.writeDelay+1, handleDrainAlarm, result->data);
-  brl.writeDelay = 0;
+  setDrainAlarm(result->data);
 }
 
 static void
 setUpdateAlarm (void *data) {
   asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
-}
-
-static void
-resetUpdateAlarm (int delay) {
-  TimeValue when;
-  getRelativeTime(&when, delay);
-
-  if (updateAlarm) {
-    asyncResetAlarmTo(updateAlarm, &when);
-  } else {
-    updateTime = when;
-  }
 }
 
 static void
@@ -3869,7 +3873,7 @@ doCommand:
   return 1;
 }
 
-static void setCommandAlarm (int when, void *data);
+static void setCommandAlarm (int delay, void *data);
 
 static void
 handleCommandAlarm (const AsyncAlarmResult *result) {
@@ -3909,8 +3913,8 @@ handleCommandAlarm (const AsyncAlarmResult *result) {
 }
 
 static void
-setCommandAlarm (int when, void *data) {
-  asyncSetAlarmIn(NULL, when, handleCommandAlarm, data);
+setCommandAlarm (int delay, void *data) {
+  asyncSetAlarmIn(NULL, delay, handleCommandAlarm, data);
 }
 
 static int
@@ -3935,10 +3939,11 @@ brlttyPrepare_first (void) {
   checkPointer();
   resetBrailleState();
 
-  brlttyPrepare = brlttyPrepare_next;
-  setCommandAlarm(0, NULL);
-  getCurrentTime(&updateTime);
+  setUpdateTime(0);
   setUpdateAlarm(NULL);
+  setCommandAlarm(0, NULL);
+
+  brlttyPrepare = brlttyPrepare_next;
   return 1;
 }
 
