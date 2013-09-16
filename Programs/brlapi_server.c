@@ -1390,8 +1390,8 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 static int loopBind(SocketDescriptor fd, const struct sockaddr *address, socklen_t length)
 {
   char buffer[0X100] = {0};
-  const int maximum = 100000;
-  int delay = 1000;
+  const int maximum = 100;
+  int delay = 1;
   int res;
 
   while ((res = bind(fd, address, length)) == -1) {
@@ -1412,9 +1412,8 @@ static int loopBind(SocketDescriptor fd, const struct sockaddr *address, socklen
       formatAddress(buffer, sizeof(buffer), address, length);
     }
 
-logMessage(LOG_NOTICE, "bind delay: %d", delay);
     logMessage(LOG_DEBUG, "bind waiting: %s: %s", buffer, strerror(errno));
-    approximateDelay(delay);
+    approximateDelay(delay * MSECS_PER_SEC);
 
     delay <<= 1;
     delay = MIN(delay, maximum);
