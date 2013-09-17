@@ -3977,13 +3977,57 @@ brlttyDestruct (void) {
   return 1;
 }
 
+typedef void UnmonitoredConditionHandler (const void *data);
+
+static void
+handleRoutingDone (const void *data) {
+  const TuneDefinition *tune = data;
+  playTune(tune);
+
+  ses->spkx = scr.posx;
+  ses->spky = scr.posy;
+}
+
+typedef struct {
+  UnmonitoredConditionHandler *handler;
+  const void *data;
+} UnmonitoredConditionDescriptor;
+
+static int
+checkUnmonitoredConditions (void *data) {
+  UnmonitoredConditionDescriptor *ucd = data;
+
+  if (terminationCount) {
+    return 1;
+  }
+
+  {
+    RoutingStatus status = getRoutingStatus(0);
+
+    if (status != ROUTING_NONE) {
+      ucd->handler = handleRoutingDone;
+      ucd->data = (status > ROUTING_DONE)? &tune_routing_failed: &tune_routing_succeeded;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 int
 brlttyUpdate (void) {
-  if (!brlttyPrepare()) return 0;
-  if (terminationCount) return 0;
+  UnmonitoredConditionDescriptor ucd = {
+    .handler = NULL,
+    .data = NULL
+  };
 
-  checkRoutingStatus(ROUTING_DONE, 0);
-  asyncWait(40);
+  if (!brlttyPrepare()) return 0;
+
+  if (asyncAwaitCondition(40, checkUnmonitoredConditions, &ucd)) {
+    if (!ucd.handler) return 0;
+    ucd.handler(ucd.data);
+  }
+
   return 1;
 }
 
