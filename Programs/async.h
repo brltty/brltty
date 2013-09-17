@@ -62,13 +62,13 @@ extern int asyncMonitorSocketOutput (
   AsyncMonitorCallback *callback, void *data
 );
 
-extern int asyncMonitorFileException (
+extern int asyncMonitorFileAlert (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   AsyncMonitorCallback *callback, void *data
 );
 
-extern int asyncMonitorSocketException (
+extern int asyncMonitorSocketAlert (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback *callback, void *data

@@ -353,7 +353,7 @@ beginUnixOutputFunction (FunctionEntry *function) {
 }
 
 static void
-beginUnixExceptionFunction (FunctionEntry *function) {
+beginUnixAlertFunction (FunctionEntry *function) {
   function->pollEvents = POLLPRI;
 }
 
@@ -461,7 +461,7 @@ beginUnixOutputFunction (FunctionEntry *function) {
 }
 
 static void
-beginUnixExceptionFunction (FunctionEntry *function) {
+beginUnixAlertFunction (FunctionEntry *function) {
   function->selectDescriptor = &selectDescriptor_exception;
 }
 
@@ -1160,20 +1160,20 @@ asyncMonitorFileOutput (
 }
 
 int
-asyncMonitorFileException (
+asyncMonitorFileAlert (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
   AsyncMonitorCallback *callback, void *data
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorFileException",
+    .functionName = "monitorFileAlert",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
 #else /* __MINGW32__ */
-    .beginFunction = beginUnixExceptionFunction,
+    .beginFunction = beginUnixAlertFunction,
 #endif /* __MINGW32__ */
 
     .invokeCallback = invokeMonitorCallback
@@ -1260,7 +1260,7 @@ asyncMonitorSocketOutput (
 }
 
 int
-asyncMonitorSocketException (
+asyncMonitorSocketAlert (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback *callback, void *data
@@ -1311,12 +1311,12 @@ asyncMonitorSocketOutput (
 }
 
 int
-asyncMonitorSocketException (
+asyncMonitorSocketAlert (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
   AsyncMonitorCallback *callback, void *data
 ) {
-  return asyncMonitorFileException(handle, socketDescriptor, callback, data);
+  return asyncMonitorFileAlert(handle, socketDescriptor, callback, data);
 }
 
 int
