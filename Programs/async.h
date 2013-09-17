@@ -62,6 +62,18 @@ extern int asyncMonitorSocketOutput (
   AsyncMonitorCallback *callback, void *data
 );
 
+extern int asyncMonitorFileException (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback *callback, void *data
+);
+
+extern int asyncMonitorSocketException (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback *callback, void *data
+);
+
 
 typedef struct {
   void *data;

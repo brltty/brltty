@@ -59,6 +59,7 @@ typedef struct {
 
 static SelectDescriptor selectDescriptor_read;
 static SelectDescriptor selectDescriptor_write;
+static SelectDescriptor selectDescriptor_exception;
 
 typedef struct {
   fd_set *selectSet;
@@ -351,6 +352,11 @@ beginUnixOutputFunction (FunctionEntry *function) {
   function->pollEvents = POLLOUT;
 }
 
+static void
+beginUnixExceptionFunction (FunctionEntry *function) {
+  function->pollEvents = POLLPRI;
+}
+
 #elif defined(HAVE_SELECT)
 
 static void
@@ -363,6 +369,7 @@ static void
 prepareMonitors (void) {
   prepareSelectDescriptor(&selectDescriptor_read);
   prepareSelectDescriptor(&selectDescriptor_write);
+  prepareSelectDescriptor(&selectDescriptor_exception);
 }
 
 static fd_set *
@@ -371,14 +378,14 @@ getSelectSet (SelectDescriptor *descriptor) {
 }
 
 static int
-doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
-  struct timeval time;
-
-  time.tv_sec = timeout / 1000;
-  time.tv_usec = timeout % 1000 * 1000;
+doSelect (int setSize, fd_set *readSet, fd_set *writeSet, fd_set *exceptionSet, int timeout) {
+  struct timeval time = {
+    .tv_sec = timeout / MSECS_PER_SEC,
+    .tv_usec = (timeout % MSECS_PER_SEC) * USECS_PER_MSEC
+  };
 
   {
-    int result = select(setSize, readSet, writeSet, NULL, &time);
+    int result = select(setSize, readSet, writeSet, exceptionSet, &time);
     if (result > 0) return 1;
 
     if (result == -1) {
@@ -391,27 +398,37 @@ doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
 
 static int
 awaitMonitors (const MonitorGroup *monitors, int timeout) {
-  int setSize = MAX(selectDescriptor_read.size, selectDescriptor_write.size);
   fd_set *readSet = getSelectSet(&selectDescriptor_read);
   fd_set *writeSet = getSelectSet(&selectDescriptor_write);
+  fd_set *exceptionSet = getSelectSet(&selectDescriptor_exception);
+
+  int setSize = selectDescriptor_read.size;
+  setSize = MAX(setSize, selectDescriptor_write.size);
+  setSize = MAX(setSize, selectDescriptor_exception.size);
 
 #ifdef __MSDOS__
   int elapsed = 0;
 
   do {
-    fd_set readSet1, writeSet1;
+    fd_set readSet1, writeSet1, exceptionSet1;
 
     if (readSet) readSet1 = *readSet;
     if (writeSet) writeSet1 = *writeSet;
+    if (exceptionSet) exceptionSet1 = *exceptionSet;
 
-    if (doSelect(setSize, (readSet? &readSet1: NULL), (writeSet? &writeSet1: NULL), 0)) {
+    if (doSelect(setSize,
+                 (readSet? &readSet1: NULL),
+                 (writeSet? &writeSet1: NULL),
+                 (exceptionSet? &exceptionSet1: NULL),
+                 0)) {
       if (readSet) *readSet = readSet1;
       if (writeSet) *writeSet = writeSet1;
+      if (exceptionSet) *exceptionSet = exceptionSet1;
       return 1;
     }
   } while ((elapsed += tsr_usleep(1000)) < timeout);
 #else /* __MSDOS__ */
-  if (doSelect(setSize, readSet, writeSet, timeout)) return 1;
+  if (doSelect(setSize, readSet, writeSet, exceptionSet, timeout)) return 1;
 #endif /* __MSDOS__ */
 
   return 0;
@@ -421,9 +438,11 @@ static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
   monitor->selectSet = &function->selectDescriptor->set;
   monitor->fileDescriptor = function->fileDescriptor;
-
   FD_SET(function->fileDescriptor, &function->selectDescriptor->set);
-  if (function->fileDescriptor >= function->selectDescriptor->size) function->selectDescriptor->size = function->fileDescriptor + 1;
+
+  if (function->fileDescriptor >= function->selectDescriptor->size) {
+    function->selectDescriptor->size = function->fileDescriptor + 1;
+  }
 }
 
 static int
@@ -439,6 +458,11 @@ beginUnixInputFunction (FunctionEntry *function) {
 static void
 beginUnixOutputFunction (FunctionEntry *function) {
   function->selectDescriptor = &selectDescriptor_write;
+}
+
+static void
+beginUnixExceptionFunction (FunctionEntry *function) {
+  function->selectDescriptor = &selectDescriptor_exception;
 }
 
 #endif /* Unix I/O monitoring capabilities */
@@ -1136,6 +1160,40 @@ asyncMonitorFileOutput (
 }
 
 int
+asyncMonitorFileException (
+  AsyncHandle *handle,
+  FileDescriptor fileDescriptor,
+  AsyncMonitorCallback *callback, void *data
+) {
+#ifdef ASYNC_CAN_MONITOR_IO
+  static const FunctionMethods methods = {
+    .functionName = "monitorFileException",
+
+#ifdef __MINGW32__
+    .beginFunction = beginWindowsFunction,
+    .endFunction = endWindowsFunction,
+#else /* __MINGW32__ */
+    .beginFunction = beginUnixExceptionFunction,
+#endif /* __MINGW32__ */
+
+    .invokeCallback = invokeMonitorCallback
+  };
+
+  const MonitorFileOperationParameters mop = {
+    .fileDescriptor = fileDescriptor,
+    .methods = &methods,
+    .callback = callback,
+    .data = data
+  };
+
+  return makeHandle(handle, newFileMonitorOperation, &mop);
+#else /* ASYNC_CAN_MONITOR_IO */
+  logUnsupportedFunction();
+  return 0;
+#endif /* ASYNC_CAN_MONITOR_IO */
+}
+
+int
 asyncReadFile (
   AsyncHandle *handle,
   FileDescriptor fileDescriptor,
@@ -1202,6 +1260,16 @@ asyncMonitorSocketOutput (
 }
 
 int
+asyncMonitorSocketException (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback *callback, void *data
+) {
+  logUnsupportedFunction();
+  return 0;
+}
+
+int
 asyncReadSocket (
   AsyncHandle *handle,
   SocketDescriptor socketDescriptor,
@@ -1240,6 +1308,15 @@ asyncMonitorSocketOutput (
   AsyncMonitorCallback *callback, void *data
 ) {
   return asyncMonitorFileOutput(handle, socketDescriptor, callback, data);
+}
+
+int
+asyncMonitorSocketException (
+  AsyncHandle *handle,
+  SocketDescriptor socketDescriptor,
+  AsyncMonitorCallback *callback, void *data
+) {
+  return asyncMonitorFileException(handle, socketDescriptor, callback, data);
 }
 
 int
