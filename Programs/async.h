@@ -137,9 +137,9 @@ extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
 extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
 
 
-typedef int (*AsyncConditionTester) (void *data);
+typedef int AsyncConditionTester (void *data);
 
-extern int asyncAwaitCondition (int timeout, AsyncConditionTester testCondition, void *data);
+extern int asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data);
 extern void asyncWait (int duration);
 
 

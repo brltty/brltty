@@ -1426,7 +1426,7 @@ awaitNextResponse (long int timeout) {
 }
 
 int
-asyncAwaitCondition (int timeout, AsyncConditionTester testCondition, void *data) {
+asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
   long int elapsed = 0;
   TimePeriod period;
 
