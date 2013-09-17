@@ -1780,12 +1780,6 @@ switchVirtualTerminal (int vt) {
   return switched;
 }
 
-static int
-brlttyPrepare_unconstructed (void) {
-  logMessage(LOG_ERR, "not constructed yet");
-  return 0;
-}
-
 #ifdef ENABLE_API
 #define CLAIM_DRIVER int driverClaimed = apiStarted && api_claimDriver(&brl);
 #define RELEASE_DRIVER if (driverClaimed) api_releaseDriver(&brl);
@@ -1794,7 +1788,6 @@ brlttyPrepare_unconstructed (void) {
 #define RELEASE_DRIVER 
 #endif /* ENABLE_API */
 
-static int (*brlttyPrepare) (void) = brlttyPrepare_unconstructed;
 static AsyncHandle updateAlarm = NULL;
 static TimeValue updateTime;
 
@@ -3907,13 +3900,8 @@ setCommandAlarm (int delay, void *data) {
   asyncSetAlarmIn(NULL, delay, handleCommandAlarm, data);
 }
 
-static int
-brlttyPrepare_next (void) {
-  return 1;
-}
-
-static int
-brlttyPrepare_first (void) {
+static void
+handlePrepareAlarm (const AsyncAlarmResult *result) {
   setSessionEntry();
   ses->trkx = scr.posx; ses->trky = scr.posy;
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
@@ -3930,11 +3918,8 @@ brlttyPrepare_first (void) {
   resetBrailleState();
 
   setUpdateTime(0);
-  setUpdateAlarm(NULL);
-  setCommandAlarm(0, NULL);
-
-  brlttyPrepare = brlttyPrepare_next;
-  return 1;
+  setUpdateAlarm(result->data);
+  setCommandAlarm(0, result->data);
 }
 
 ProgramExitStatus
@@ -3967,7 +3952,7 @@ brlttyConstruct (int argc, char *argv[]) {
   }
 
   onProgramExit("sessions", exitSessions, NULL);
-  brlttyPrepare = brlttyPrepare_first;
+  asyncSetAlarmIn(NULL, 0, handlePrepareAlarm, NULL);
   return PROG_EXIT_SUCCESS;
 }
 
@@ -4020,8 +4005,6 @@ brlttyUpdate (void) {
     .handler = NULL,
     .data = NULL
   };
-
-  if (!brlttyPrepare()) return 0;
 
   if (asyncAwaitCondition(40, checkUnmonitoredConditions, &ucd)) {
     if (!ucd.handler) return 0;
