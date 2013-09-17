@@ -408,6 +408,53 @@ openScreen (unsigned char vt) {
 }
 
 static int
+readScreenData (off_t offset, void *buffer, size_t size) {
+  if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
+    logSystemError("screen seek");
+  } else {
+    ssize_t count = read(screenDescriptor, buffer, size);
+    if (count == size) return 1;
+
+    if (count == -1) {
+      logSystemError("screen read");
+    } else {
+      logMessage(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
+                 (unsigned int)size, (int)count);
+    }
+  }
+
+  return 0;
+}
+
+typedef struct {
+  unsigned char rows;
+  unsigned char columns;
+} ScreenSize;
+
+static int
+readScreenSize (ScreenSize *size) {
+  return readScreenData(0, size, sizeof(*size));
+}
+
+typedef struct {
+  unsigned char column;
+  unsigned char row;
+} ScreenLocation;
+
+static int
+readCursorLocation (ScreenLocation *location) {
+  return readScreenData(2, location, sizeof(*location));
+}
+
+static int
+readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
+  count *= sizeof(*buffer);
+  offset *= sizeof(*buffer);
+  offset += 4;
+  return readScreenData(offset, buffer, count);
+}
+
+static int
 rebindConsole (void) {
   return virtualTerminal? 1: openConsole(0);
 }
@@ -583,13 +630,13 @@ determineAttributesMasks (void) {
     }
 
     if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
-      unsigned char attributes[4];
+      ScreenSize size;
 
-      if (read(screenDescriptor, attributes, sizeof(attributes)) != -1) {
-        const size_t count = attributes[0] * attributes[1];
+      if (readScreenSize(&size)) {
+        const size_t count = size.columns * size.rows;
         unsigned short buffer[count];
 
-        if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
+        if (readScreenContent(0, buffer, ARRAY_COUNT(buffer))) {
           int counts[0X10];
           unsigned int index;
 
@@ -599,11 +646,7 @@ determineAttributesMasks (void) {
 
           setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
           return 1;
-        } else {
-          logSystemError("read");
         }
-      } else {
-        logSystemError("read");
       }
     } else {
       logSystemError("lseek");
@@ -913,51 +956,17 @@ userVirtualTerminal_LinuxScreen (int number) {
 }
 
 static int
-readScreenDevice (off_t offset, void *buffer, size_t size) {
-  if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
-    logSystemError("screen seek");
-  } else {
-    ssize_t count = read(screenDescriptor, buffer, size);
-    if (count == size) return 1;
-
-    if (count == -1) {
-      logSystemError("screen read");
-    } else {
-      logMessage(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
-                 (unsigned int)size, (int)count);
-    }
-  }
-  return 0;
-}
-
-static int
-readScreenDimensions (short *columns, short *rows) {
-  typedef struct {
-    unsigned char rows;
-    unsigned char columns;
-  } ScreenDimensions;
-
-  ScreenDimensions dimensions;
-  if (!readScreenDevice(0, &dimensions, sizeof(dimensions))) return 0;
-
-  *rows = dimensions.rows;
-  *columns = dimensions.columns;
-  return 1;
-}
-
-static int
 readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
-  unsigned short line[size];
-  size_t length = sizeof(line);
+  uint16_t line[size];
   int column = 0;
 
-  if (readScreenDevice((4 + (row * length)), line, length)) {
-    const unsigned short *source = line;
-    const unsigned short *end = source + size;
+  if (readScreenContent((row * size), line, size)) {
+    const uint16_t *source = line;
+    const uint16_t *end = source + size;
     ScreenCharacter *character = characters;
 
     while (source != end) {
-      unsigned short position = *source & 0XFF;
+      uint16_t position = *source & 0XFF;
       wint_t wc;
 
       if (*source & fontAttributesMask) position |= 0X100;
@@ -995,35 +1004,30 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 }
 
 static int
-readCursorCoordinates (short *column, short *row, short columns) {
-  typedef struct {
-    unsigned char column;
-    unsigned char row;
-  } ScreenCoordinates;
+getCursorCoordinates (short *column, short *row, short columns) {
+  ScreenLocation location;
 
-  ScreenCoordinates coordinates;
-
-  if (readScreenDevice(2, &coordinates, sizeof(coordinates))) {
+  if (readCursorLocation(&location)) {
     const CharsetEntry *charset = getCharsetEntry();
 
-    *row = coordinates.row;
+    *row = location.row;
 
     if (!charset->isMultiByte) {
-      *column = coordinates.column;
+      *column = location.column;
       return 1;
     }
 
     {
       int offsets[columns];
 
-      if (readScreenRow(coordinates.row, columns, NULL, offsets)) {
+      if (readScreenRow(location.row, columns, NULL, offsets)) {
         int first = 0;
         int last = columns - 1;
 
         while (first <= last) {
           int current = (first + last) / 2;
 
-          if (offsets[current] < coordinates.column) {
+          if (offsets[current] < location.column) {
             first = current + 1;
           } else {
             last = current - 1;
@@ -1043,8 +1047,13 @@ readCursorCoordinates (short *column, short *row, short columns) {
 static int
 getScreenDescription (ScreenDescription *description) {
   if (!problemText) {
-    if (readScreenDimensions(&description->cols, &description->rows)) {
-      if (readCursorCoordinates(&description->posx, &description->posy, description->cols)) {
+    ScreenSize size;
+
+    if (readScreenSize(&size)) {
+      description->cols = size.columns;
+      description->rows = size.rows;
+
+      if (getCursorCoordinates(&description->posx, &description->posy, description->cols)) {
         return 1;
       }
     }
@@ -1118,11 +1127,10 @@ describe_LinuxScreen (ScreenDescription *description) {
 
 static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  short columns;
-  short rows;
+  ScreenSize size;
 
-  if (readScreenDimensions(&columns, &rows)) {
-    if (validateScreenBox(box, columns, rows)) {
+  if (readScreenSize(&size)) {
+    if (validateScreenBox(box, size.columns, size.rows)) {
       if (problemText) {
         setScreenMessage(box, buffer, problemText);
         return 1;
@@ -1132,8 +1140,8 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
         int row;
 
         for (row=0; row<box->height; ++row) {
-          ScreenCharacter characters[columns];
-          if (!readScreenRow(box->top+row, columns, characters, NULL)) return 0;
+          ScreenCharacter characters[size.columns];
+          if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
 
           memcpy(buffer, &characters[box->left],
                  box->width * sizeof(characters[0]));
