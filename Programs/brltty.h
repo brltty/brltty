@@ -22,6 +22,7 @@
 #include "prologue.h"
 
 #include "program.h"
+#include "timing.h"
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
@@ -45,7 +46,48 @@ extern ScreenDescription scr;
 #define SCR_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)
 #define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
+extern void updateSessionAttributes (void);
 extern SessionEntry *ses;
+
+typedef int (*IsSameCharacter) (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+);
+
+extern int isSameText (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+);
+
+extern int isSameAttributes (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+);
+
+extern int isSameRow (
+  const ScreenCharacter *characters1,
+  const ScreenCharacter *characters2,
+  int count,
+  IsSameCharacter isSameCharacter
+);
+
+typedef struct {
+  const unsigned char *const blinkingEnabled;
+  const unsigned char *const visibleTime;
+  const unsigned char *const invisibleTime;
+
+  int isVisible;
+  int timer;
+} BlinkingState;
+
+extern BlinkingState cursorBlinkingState;
+extern BlinkingState attributesBlinkingState;
+extern BlinkingState capitalsBlinkingState;
+extern BlinkingState speechCursorBlinkingState;
+
+extern void resetBlinkingStates (void);
+extern void setBlinkingState (BlinkingState *state, int visible);
+
 extern unsigned char infoMode;
 
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
@@ -61,6 +103,51 @@ extern int opt_releaseDevice;
 
 extern int updateInterval;
 extern int messageDelay;
+
+extern int restartRequired;
+extern int isOffline;
+extern int isSuspended;
+extern int inputModifiers;
+
+extern void resetBrailleState (void);
+
+extern void placeRightEdge (int column);
+extern void placeWindowRight (void);
+extern void placeWindowHorizontally (int x);
+
+extern int moveWindowLeft (unsigned int amount);
+extern int moveWindowRight (unsigned int amount);
+
+extern int shiftWindowLeft (unsigned int amount);
+extern int shiftWindowRight (unsigned int amount);
+
+extern void slideWindowVertically (int y);
+
+extern int showCursor (void);
+extern int trackCursor (int place);
+
+extern int isTextOffset (int *arg, int end, int relaxed);
+
+typedef struct {
+  TimeComponents time;
+  const char *meridian;
+} TimeFormattingData;
+
+extern void getTimeFormattingData (TimeFormattingData *fmt);
+extern size_t formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt);
+
+#ifdef ENABLE_SPEECH_SUPPORT
+extern size_t formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt);
+extern size_t formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt);
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+extern int isContracted;
+extern int contractedLength;
+
+extern int isContracting (void);
+extern int getContractedLength (unsigned int outputLimit);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 FUNCTION_DECLARE(changeLogLevel, int, (const char *operand));
 FUNCTION_DECLARE(changeLogCategories, int, (const char *operand));
@@ -102,9 +189,30 @@ extern void destructBrailleDriver (void);
 extern void reconfigureWindow (void);
 extern int haveStatusCells (void);
 
+typedef enum {
+  SCT_WORD,
+  SCT_NONWORD,
+  SCT_SPACE
+} ScreenCharacterType;
+
+extern ScreenCharacterType getScreenCharacterType (const ScreenCharacter *character);
+extern int findFirstNonSpaceCharacter (const ScreenCharacter *characters, int count);
+extern int findLastNonSpaceCharacter (const ScreenCharacter *characters, int count);
+extern int isAllSpaceCharacters (const ScreenCharacter *characters, int count);
+
 #ifdef ENABLE_SPEECH_SUPPORT
 extern SpeechSynthesizer spk;
 extern int opt_quietIfNoBraille;
+
+extern int speechTracking;
+extern int speechScreen;
+extern int speechLine;
+extern int speechIndex;
+
+extern int autospeak (void);
+extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate);
+extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);
+extern void trackSpeech (int index);
 
 FUNCTION_DECLARE(restartSpeechDriver, void, (void));
 FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
@@ -112,8 +220,6 @@ FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
-
-extern void highlightWindow (void);
 
 extern void api_identify (int full);
 extern int api_start (BrailleDisplay *brl, char **parameters);
