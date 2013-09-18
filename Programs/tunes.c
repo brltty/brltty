@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "async.h"
+#include "async_alarm.h"
 #include "program.h"
 #include "tunes.h"
 #include "prefs.h"

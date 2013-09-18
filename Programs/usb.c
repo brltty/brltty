@@ -32,7 +32,7 @@
 #include "parse.h"
 #include "device.h"
 #include "timing.h"
-#include "async.h"
+#include "async_wait.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 

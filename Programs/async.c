@@ -69,9 +69,13 @@ typedef struct {
 #endif /* monitor definitions */
 
 #include "log.h"
-#include "timing.h"
 #include "queue.h"
+#include "timing.h"
+
 #include "async.h"
+#include "async_io.h"
+#include "async_alarm.h"
+#include "async_wait.h"
 
 struct AsyncHandleStruct {
   Element *element;

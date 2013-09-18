@@ -25,7 +25,8 @@
 
 #include "io_misc.h"
 #include "log.h"
-#include "async.h"
+#include "async_io.h"
+#include "async_wait.h"
 
 typedef struct InputOutputMethodsStruct InputOutputMethods;
 

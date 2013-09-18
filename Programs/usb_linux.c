@@ -41,7 +41,7 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
-#include "async.h"
+#include "async_wait.h"
 #include "mntpt.h"
 #include "io_usb.h"
 #include "usb_internal.h"

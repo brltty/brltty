@@ -48,7 +48,7 @@
 #include "file.h"
 #include "parse.h"
 #include "dynld.h"
-#include "async.h"
+#include "async_alarm.h"
 #include "program.h"
 #include "service.h"
 #include "options.h"

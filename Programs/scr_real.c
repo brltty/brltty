@@ -30,7 +30,7 @@
 
 #include "log.h"
 #include "device.h"
-#include "async.h"
+#include "async_alarm.h"
 #include "scr.h"
 #include "scr_real.h"
 #include "routing.h"

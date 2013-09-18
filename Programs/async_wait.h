@@ -16,20 +16,22 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC
-#define BRLTTY_INCLUDED_ASYNC
+#ifndef BRLTTY_INCLUDED_ASYNC_WAIT
+#define BRLTTY_INCLUDED_ASYNC_WAIT
+
+#include "async.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct AsyncHandleStruct *AsyncHandle;
+typedef int AsyncConditionTester (void *data);
 
-extern void asyncDiscardHandle (AsyncHandle handle);
-extern void asyncCancelRequest (AsyncHandle handle);
+extern int asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data);
+extern void asyncWait (int duration);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC */
+#endif /* BRLTTY_INCLUDED_ASYNC_WAIT */

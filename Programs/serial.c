@@ -24,7 +24,7 @@
 #include "log.h"
 #include "parse.h"
 #include "device.h"
-#include "async.h"
+#include "async_wait.h"
 
 #if defined(USE_PKG_SERIAL_NONE)
 #include "serial_none.h"

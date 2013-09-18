@@ -22,7 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
-#include "async.h"
+#include "timing.h"
+#include "async_wait.h"
 #include "parse.h"
 #include "device.h"
 #include "queue.h"

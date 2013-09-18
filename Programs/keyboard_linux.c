@@ -39,7 +39,8 @@
 #include <linux/netlink.h>
 #include <linux/input.h>
 
-#include "async.h"
+#include "async_io.h"
+#include "async_alarm.h"
 
 typedef struct {
   KeyboardInstanceData *kid;

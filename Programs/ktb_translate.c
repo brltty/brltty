@@ -27,6 +27,7 @@
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
 #include "brl.h"
+#include "async_alarm.h"
 
 static int
 sortModifierKeys (const void *element1, const void *element2) {

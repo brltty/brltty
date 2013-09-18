@@ -16,20 +16,41 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC
-#define BRLTTY_INCLUDED_ASYNC
+#ifndef BRLTTY_INCLUDED_ASYNC_ALARM
+#define BRLTTY_INCLUDED_ASYNC_ALARM
+
+#include "async.h"
+#include "timing.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct AsyncHandleStruct *AsyncHandle;
+typedef struct {
+  void *data;
+} AsyncAlarmResult;
 
-extern void asyncDiscardHandle (AsyncHandle handle);
-extern void asyncCancelRequest (AsyncHandle handle);
+typedef void AsyncAlarmCallback (const AsyncAlarmResult *result);
+
+extern int asyncSetAlarmTo (
+  AsyncHandle *handle,
+  const TimeValue *time,
+  AsyncAlarmCallback *callback,
+  void *data
+);
+
+extern int asyncSetAlarmIn (
+  AsyncHandle *handle,
+  int interval,
+  AsyncAlarmCallback *callback,
+  void *data
+);
+
+extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
+extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC */
+#endif /* BRLTTY_INCLUDED_ASYNC_ALARM */

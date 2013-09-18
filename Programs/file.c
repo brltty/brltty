@@ -33,7 +33,7 @@
 #include "file.h"
 #include "log.h"
 #include "parse.h"
-#include "async.h"
+#include "async_wait.h"
 #include "charset.h"
 #include "program.h"
 

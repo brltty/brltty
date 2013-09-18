@@ -24,7 +24,7 @@
 
 #include "log.h"
 #include "mntfs.h"
-#include "async.h"
+#include "async_alarm.h"
 #include "mntpt.h"
 
 #if defined(USE_PKG_MNTPT_NONE)

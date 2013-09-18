@@ -29,6 +29,7 @@
 
 #include "program.h"
 #include "options.h"
+#include "parse.h"
 #include "brl.h"
 #include "log.h"
 #include "file.h"
