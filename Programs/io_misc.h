@@ -46,6 +46,7 @@ extern "C" {
 extern void closeFile (FileDescriptor *fileDescriptor);
 extern int awaitFileInput (FileDescriptor fileDescriptor, int timeout);
 extern int awaitFileOutput (FileDescriptor fileDescriptor, int timeout);
+extern int awaitFileAlert (FileDescriptor fileDescriptor, int timeout);
 
 extern ssize_t readFile (
   FileDescriptor fileDescriptor, void *buffer, size_t size,
@@ -58,6 +59,7 @@ extern ssize_t writeFile (FileDescriptor fileDescriptor, const void *buffer, siz
 extern void closeSocket (SocketDescriptor *socketDescriptor);
 extern int awaitSocketInput (SocketDescriptor socketDescriptor, int timeout);
 extern int awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout);
+extern int awaitSocketAlert (SocketDescriptor socketDescriptor, int timeout);
 
 extern ssize_t readSocket (
   SocketDescriptor socketDescriptor, void *buffer, size_t size,

@@ -40,50 +40,49 @@ typedef struct {
 
 typedef struct {
   unsigned ready:1;
-} InputOutputMonitor;
+} EventMonitor;
+
+typedef int MonitorEventMethod (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm);
+typedef ssize_t ReadDataMethod (const InputOutputHandle *ioh, void *buffer, size_t size);
+typedef ssize_t WriteDataMethod (const InputOutputHandle *ioh, const void *buffer, size_t size);
 
 struct InputOutputMethodsStruct {
-  int (*monitorInput) (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom);
-  int (*monitorOutput) (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom);
-  ssize_t (*readData) (const InputOutputHandle *ioh, void *buffer, size_t size);
-  ssize_t (*writeData) (const InputOutputHandle *ioh, const void *buffer, size_t size);
+  MonitorEventMethod *monitorInput;
+  MonitorEventMethod *monitorOutput;
+  MonitorEventMethod *monitorAlert;
+
+  ReadDataMethod *readData;
+  WriteDataMethod *writeData;
 };
 
 static int
-setInputOutputMonitor (const AsyncMonitorResult *result) {
-  InputOutputMonitor *iom = result->data;
+setEventMonitor (const AsyncMonitorResult *result) {
+  EventMonitor *evm = result->data;
 
-  iom->ready = 1;
+  evm->ready = 1;
   return 0;
 }
 
 static int
-testInputOutputMonitor (void *data) {
-  InputOutputMonitor *iom = data;
+testEventMonitor (void *data) {
+  EventMonitor *evm = data;
 
-  return iom->ready;
+  return evm->ready;
 }
 
 static int
-awaitHandle (const InputOutputHandle *ioh, int timeout, int isOutput) {
-  InputOutputMonitor iom = {
+awaitEvent (const InputOutputHandle *ioh, int timeout, MonitorEventMethod *monitorEvent) {
+  EventMonitor evm = {
     .ready = 0
   };
 
   AsyncHandle monitor;
-  int monitoring;
 
-  if (isOutput) {
-    monitoring = ioh->methods->monitorOutput(ioh, &monitor, &iom);
-  } else {
-    monitoring = ioh->methods->monitorInput(ioh, &monitor, &iom);
-  }
-
-  if (monitoring) {
-    asyncAwaitCondition(timeout, testInputOutputMonitor, &iom);
+  if (monitorEvent(ioh, &monitor, &evm)) {
+    asyncAwaitCondition(timeout, testEventMonitor, &evm);
     asyncCancelRequest(monitor);
+    if (evm.ready) return 1;
 
-    if (iom.ready) return 1;
 #ifdef ETIMEDOUT
     errno = ETIMEDOUT;
 #else /* ETIMEDOUT */
@@ -96,12 +95,17 @@ awaitHandle (const InputOutputHandle *ioh, int timeout, int isOutput) {
 
 static int
 awaitInput (const InputOutputHandle *ioh, int timeout) {
-  return awaitHandle(ioh, timeout, 0);
+  return awaitEvent(ioh, timeout, ioh->methods->monitorInput);
 }
 
 static int
 awaitOutput (const InputOutputHandle *ioh, int timeout) {
-  return awaitHandle(ioh, timeout, 1);
+  return awaitEvent(ioh, timeout, ioh->methods->monitorOutput);
+}
+
+static int
+awaitAlert (const InputOutputHandle *ioh, int timeout) {
+  return awaitEvent(ioh, timeout, ioh->methods->monitorAlert);
 }
 
 static ssize_t
@@ -217,14 +221,20 @@ canWrite:
 }
 
 static int
-monitorFileInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
-  return asyncMonitorFileInput(handle, ioh->descriptor.file, setInputOutputMonitor, iom);
+monitorFileInput (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorFileInput(handle, ioh->descriptor.file, setEventMonitor, evm);
 }
 
 static int
-monitorFileOutput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
-  return asyncMonitorFileOutput(handle, ioh->descriptor.file, setInputOutputMonitor, iom);
+monitorFileOutput (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorFileOutput(handle, ioh->descriptor.file, setEventMonitor, evm);
 }
+
+static int
+monitorFileAlert (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorFileAlert(handle, ioh->descriptor.file, setEventMonitor, evm);
+}
+
 
 #ifdef __MINGW32__
 static ssize_t
@@ -266,6 +276,8 @@ writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
 static const InputOutputMethods fileMethods = {
   .monitorInput = monitorFileInput,
   .monitorOutput = monitorFileOutput,
+  .monitorAlert = monitorFileAlert,
+
   .readData = readFileData,
   .writeData = writeFileData
 };
@@ -300,6 +312,14 @@ awaitFileOutput (FileDescriptor fileDescriptor, int timeout) {
   return awaitOutput(&ioh, timeout);
 }
 
+int
+awaitFileAlert (FileDescriptor fileDescriptor, int timeout) {
+  InputOutputHandle ioh;
+
+  makeFileHandle(&ioh, fileDescriptor);
+  return awaitAlert(&ioh, timeout);
+}
+
 ssize_t
 readFile (
   FileDescriptor fileDescriptor, void *buffer, size_t size,
@@ -321,13 +341,18 @@ writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
 
 #ifdef IO_HAVE_SOCKETS
 static int
-monitorSocketInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
-  return asyncMonitorSocketInput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
+monitorSocketInput (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorSocketInput(handle, ioh->descriptor.socket, setEventMonitor, evm);
 }
 
 static int
-monitorSocketOutput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
-  return asyncMonitorSocketOutput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
+monitorSocketOutput (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorSocketOutput(handle, ioh->descriptor.socket, setEventMonitor, evm);
+}
+
+static int
+monitorSocketAlert (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonitor *evm) {
+  return asyncMonitorSocketAlert(handle, ioh->descriptor.socket, setEventMonitor, evm);
 }
 
 static ssize_t
@@ -343,6 +368,8 @@ writeSocketData (const InputOutputHandle *ioh, const void *buffer, size_t size) 
 static const InputOutputMethods socketMethods = {
   .monitorInput = monitorSocketInput,
   .monitorOutput = monitorSocketOutput,
+  .monitorAlert = monitorSocketAlert,
+
   .readData = readSocketData,
   .writeData = writeSocketData
 };
@@ -375,6 +402,14 @@ awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout) {
 
   makeSocketHandle(&ioh, socketDescriptor);
   return awaitOutput(&ioh, timeout);
+}
+
+int
+awaitSocketAlert (SocketDescriptor socketDescriptor, int timeout) {
+  InputOutputHandle ioh;
+
+  makeSocketHandle(&ioh, socketDescriptor);
+  return awaitAlert(&ioh, timeout);
 }
 
 ssize_t
