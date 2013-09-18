@@ -2020,6 +2020,11 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
   updateSessionAttributes();
 
+#ifdef ENABLE_SPEECH_SUPPORT
+  speech->doTrack(&spk);
+  if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
+
   if (opt_releaseDevice) {
     if (scr.unreadable) {
       if (!isSuspended) {
@@ -2359,9 +2364,6 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  speech->doTrack(&spk);
-  if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
-
   if (autospeak()) doAutospeak();
   processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
