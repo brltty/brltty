@@ -227,7 +227,7 @@ typedef HANDLE FileDescriptor;
 #define closeFileDescriptor(fd) CloseHandle(fd)
 
 typedef SOCKET SocketDescriptor;
-#define INVALID_SOCKET_DESCRIPTOR -1
+#define INVALID_SOCKET_DESCRIPTOR INVALID_SOCKET
 #define PRIsd "d"
 #define closeSocketDescriptor(sd) closesocket(sd)
 #else /* __MINGW32__ */
