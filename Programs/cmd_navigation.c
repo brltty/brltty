@@ -192,7 +192,7 @@ downDifferentCharacter (IsSameCharacter isSameCharacter, int column) {
 
 static void
 upOneLine (void) {
-  if (ses->winy > 0) {
+  if (canMoveUp()) {
     ses->winy--;
   } else {
     playTune(&tune_bounce);
@@ -201,7 +201,7 @@ upOneLine (void) {
 
 static void
 downOneLine (void) {
-  if (ses->winy < (int)(scr.rows - brl.textRows)) {
+  if (canMoveDown()) {
     ses->winy++;
   } else {
     playTune(&tune_bounce);
@@ -571,14 +571,14 @@ doCommand:
         break;
 
       case BRL_CMD_WINUP:
-        if (ses->winy > 0) {
+        if (canMoveUp()) {
           ses->winy -= MIN(verticalWindowShift, ses->winy);
         } else {
           playTune(&tune_bounce);
         }
         break;
       case BRL_CMD_WINDN:
-        if (ses->winy < (int)(scr.rows - brl.textRows)) {
+        if (canMoveDown()) {
           ses->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - ses->winy));
         } else {
           playTune(&tune_bounce);
