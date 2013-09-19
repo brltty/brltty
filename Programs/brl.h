@@ -82,18 +82,6 @@ extern void fillDotsRegion (
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
-extern int enqueueCommand (int command);
-extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
-
-extern int enqueueKey (unsigned char set, unsigned char key);
-extern int enqueueKeys (uint32_t bits, unsigned char set, unsigned char key);
-extern int enqueueUpdatedKeys (uint32_t new, uint32_t *old, unsigned char set, unsigned char key);
-
-extern int enqueueXtScanCode (
-  unsigned char code, unsigned char escape,
-  unsigned char set00, unsigned char setE0, unsigned char setE1
-);
-
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern KeyTableCommandContext getCurrentCommandContext (void);
 

@@ -98,7 +98,18 @@ static void
 setSessionEntry (void) {
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
-  if (!ses || (scr.number != ses->number)) ses = getSessionEntry(scr.number);
+
+  {
+    typedef enum {SAME, DIFFERENT, FIRST} State;
+    State state = (!ses)? FIRST:
+                  (scr.number == ses->number)? SAME:
+                  DIFFERENT;
+
+    if (state != SAME) {
+      ses = getSessionEntry(scr.number);
+      if (state == FIRST) pushCommandHandler(handleNavigationCommand, NULL);
+    }
+  }
 }
 
 void
@@ -1307,14 +1318,6 @@ isSameRow (
   return 1;
 }
 
-#ifdef ENABLE_API
-#define CLAIM_DRIVER int driverClaimed = apiStarted && api_claimDriver(&brl);
-#define RELEASE_DRIVER if (driverClaimed) api_releaseDriver(&brl);
-#else /* ENABLE_API */
-#define CLAIM_DRIVER 
-#define RELEASE_DRIVER 
-#endif /* ENABLE_API */
-
 static AsyncHandle updateAlarm = NULL;
 static TimeValue updateTime;
 
@@ -1326,6 +1329,10 @@ int inputModifiers;
 static int oldwinx;
 static int oldwiny;
 
+#ifdef ENABLE_API
+static int apiDriverClaimed;
+#endif /* ENABLE_API */
+
 void
 resetBrailleState (void) {
   resetScanCodes();
@@ -1333,12 +1340,26 @@ resetBrailleState (void) {
   inputModifiers = 0;
 }
 
+void
+apiClaimDriver (void) {
+#ifdef ENABLE_API
+  apiDriverClaimed = apiStarted && api_claimDriver(&brl);
+#endif /* ENABLE_API */
+}
+
+void
+apiReleaseDriver (void) {
+#ifdef ENABLE_API
+  if (apiDriverClaimed) api_releaseDriver(&brl);
+#endif /* ENABLE_API */
+}
+
 static void
 setUpdateTime (int delay) {
   getRelativeTime(&updateTime, delay);
 }
 
-static void
+void
 resetUpdateAlarm (int delay) {
   setUpdateTime(delay);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
@@ -1584,7 +1605,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   }
 
   if (!isSuspended) {
-    CLAIM_DRIVER;
+    apiClaimDriver();
     int pointerMoved = 0;
 
     if (brl.highlightWindow) {
@@ -1884,7 +1905,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
       }
     }
 
-    RELEASE_DRIVER;
+    apiReleaseDriver();
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1899,72 +1920,6 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 static void
 setUpdateAlarm (void *data) {
   asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
-}
-
-static void setCommandAlarm (int delay, void *data);
-
-static void
-handleCommandAlarm (const AsyncAlarmResult *result) {
-  int delay = 40;
-
-  if (!isSuspended) {
-    CLAIM_DRIVER;
-
-    if (doNextCommand()) {
-      delay = 0;
-      resetUpdateAlarm(10);
-    }
-
-    RELEASE_DRIVER;
-  }
-
-#ifdef ENABLE_API
-  else if (apiStarted) {
-    switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
-      case BRL_CMD_RESTARTBRL:
-        restartBrailleDriver();
-        break;
-
-      default:
-        delay = 0;
-      case EOF:
-        break;
-    }
-  }
-
-  if (apiStarted) {
-    if (!api_flush(&brl)) restartRequired = 1;
-  }
-#endif /* ENABLE_API */
-
-  setCommandAlarm(delay, result->data);
-}
-
-static void
-setCommandAlarm (int delay, void *data) {
-  asyncSetAlarmIn(NULL, delay, handleCommandAlarm, data);
-}
-
-static void
-handlePrepareAlarm (const AsyncAlarmResult *result) {
-  setSessionEntry();
-  ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0;
-  ses->motx = ses->winx; ses->moty = ses->winy;
-  ses->spkx = ses->winx; ses->spky = ses->winy;
-
-  oldwinx = ses->winx; oldwiny = ses->winy;
-  restartRequired = 0;
-  isOffline = 0;
-  isSuspended = 0;
-
-  highlightWindow();
-  checkPointer();
-  resetBrailleState();
-
-  setUpdateTime(0);
-  setUpdateAlarm(result->data);
-  setCommandAlarm(0, result->data);
 }
 
 ProgramExitStatus
@@ -1997,7 +1952,23 @@ brlttyConstruct (int argc, char *argv[]) {
   }
 
   onProgramExit("sessions", exitSessions, NULL);
-  asyncSetAlarmIn(NULL, 0, handlePrepareAlarm, NULL);
+  setSessionEntry();
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  ses->motx = ses->winx; ses->moty = ses->winy;
+  ses->spkx = ses->winx; ses->spky = ses->winy;
+
+  oldwinx = ses->winx; oldwiny = ses->winy;
+  restartRequired = 0;
+  isOffline = 0;
+  isSuspended = 0;
+
+  highlightWindow();
+  checkPointer();
+  resetBrailleState();
+
+  setUpdateTime(0);
+  setUpdateAlarm(NULL);
   return PROG_EXIT_SUCCESS;
 }
 

@@ -52,6 +52,7 @@
 #include "program.h"
 #include "service.h"
 #include "options.h"
+#include "cmdqueue.h"
 #include "brltty.h"
 #include "prefs.h"
 #include "charset.h"
@@ -983,9 +984,6 @@ constructBrailleDriver (void) {
 
   if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
-      brailleConstructed = 1;
-
-      /* Initialize the braille driver's help screen. */
       if (brl.keyBindings) {
         logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"), brl.keyBindings);
 
@@ -1059,6 +1057,8 @@ constructBrailleDriver (void) {
         }
       }
 
+      startBrailleCommands();
+      brailleConstructed = 1;
       return 1;
     }
 
@@ -1075,6 +1075,7 @@ constructBrailleDriver (void) {
 void
 destructBrailleDriver (void) {
   brailleConstructed = 0;
+  stopBrailleCommands();
   drainBrailleOutput(&brl, 0);
   braille->destruct(&brl);
   disableHelpPage(brailleHelpPageNumber);

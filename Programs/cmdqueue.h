@@ -23,7 +23,25 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int doNextCommand (void);
+extern void startBrailleCommands (void);
+extern void stopBrailleCommands (void);
+
+typedef int CommandHandler (int command, void *data);
+extern CommandHandler handleNavigationCommand;
+
+extern int pushCommandHandler (CommandHandler *handler, void *data);
+
+extern int enqueueCommand (int command);
+extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
+
+extern int enqueueKey (unsigned char set, unsigned char key);
+extern int enqueueKeys (uint32_t bits, unsigned char set, unsigned char key);
+extern int enqueueUpdatedKeys (uint32_t new, uint32_t *old, unsigned char set, unsigned char key);
+
+extern int enqueueXtScanCode (
+  unsigned char code, unsigned char escape,
+  unsigned char set00, unsigned char setE0, unsigned char setE1
+);
 
 #ifdef __cplusplus
 }
