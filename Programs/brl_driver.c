@@ -19,7 +19,10 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 
+#include "log.h"
+#include "io_generic.h"
 #include "prefs.h"
 #include "drivers.h"
 #include "brl.h"
@@ -297,4 +300,110 @@ applyBrailleOrientation (unsigned char *cells, size_t count) {
     case BRL_ORIENTATION_NORMAL:
       break;
   }
+}
+
+size_t
+readBraillePacket (
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
+  void *packet, size_t size,
+  BraillePacketVerifier verifyPacket, void *data
+) {
+  unsigned char *bytes = packet;
+  size_t count = 0;
+  size_t length = 1;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = count > 0;
+
+      if (!gioReadByte(endpoint, &byte, started)) {
+        if (started) logPartialPacket(bytes, count);
+        return 0;
+      }
+    }
+
+  gotByte:
+    if (count < size) {
+      bytes[count++] = byte;
+
+      if (!verifyPacket(brl, bytes, count, &length, data)) {
+        if (--count) {
+          logShortPacket(bytes, count);
+          count = 0;
+          length = 1;
+          goto gotByte;
+        }
+
+        logIgnoredByte(byte);
+        continue;
+      }
+
+      if (count == length) {
+        logInputPacket(bytes, length);
+        return length;
+      }
+    } else {
+      if (count++ == size) logTruncatedPacket(bytes, size);
+      logDiscardedByte(byte);
+    }
+  }
+}
+
+int
+writeBraillePacket (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  const void *packet, size_t size
+) {
+  logOutputPacket(packet, size);
+  if (gioWriteData(endpoint, packet, size) == -1) return 0;
+  brl->writeDelay += gioGetMillisecondsToTransfer(endpoint, size);
+  return 1;
+}
+
+int
+probeBrailleDisplay (
+  BrailleDisplay *brl, unsigned int retryLimit,
+  GioEndpoint *endpoint, int inputTimeout,
+  BrailleRequestWriter writeRequest,
+  BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
+  BrailleResponseHandler *handleResponse
+) {
+  unsigned int retryCount = 0;
+
+  while (writeRequest(brl)) {
+    drainBrailleOutput(brl, 0);
+
+    while (gioAwaitInput(endpoint, inputTimeout)) {
+      size_t size = readPacket(brl, responsePacket, responseSize);
+      if (!size) break;
+
+      {
+        BrailleResponseResult result = handleResponse(brl, responsePacket, size);
+
+        switch (result) {
+          case BRL_RSP_DONE:
+            return 1;
+
+          case BRL_RSP_UNEXPECTED:
+            logUnexpectedPacket(responsePacket, size);
+          case BRL_RSP_CONTINUE:
+            break;
+
+          default:
+            logMessage(LOG_WARNING, "unimplemented braille response result: %u", result);
+          case BRL_RSP_FAIL:
+            return 0;
+        }
+      }
+    }
+
+    if (errno != EAGAIN) break;
+    if (retryCount == retryLimit) break;
+    retryCount += 1;
+  }
+
+  return 0;
 }
