@@ -52,6 +52,11 @@ brl_writeWindow (BrailleDisplay *brl UNUSED, const wchar_t *characters UNUSED) {
 
 const BrailleDriver *braille = &noBraille;
 
+const DotsTable dotsTable_ISO11548_1 = {
+  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+};
+
 int
 haveBrailleDriver (const char *code) {
   return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);

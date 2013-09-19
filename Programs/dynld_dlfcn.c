@@ -44,7 +44,7 @@ getSharedObjectLoadFlags (void) {
 #ifdef DL_LAZY
   flags |= DL_LAZY;
 #else /* DL_LAZY */
-  flags |= RTLD_NOW | RTLD_GLOBAL;
+  flags |= RTLD_LAZY | RTLD_GLOBAL;
 #endif /* DL_LAZY */
 
   return flags;

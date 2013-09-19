@@ -464,11 +464,6 @@ cursorHasChanged (int *cursor, int new, int *force) {
   return 1;
 }
 
-const DotsTable dotsTable_ISO11548_1 = {
-  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
-};
-
 void
 makeTranslationTable (const DotsTable dots, TranslationTable table) {
   int byte;
