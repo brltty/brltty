@@ -31,35 +31,19 @@
 
 #include "log.h"
 #include "message.h"
-#include "drivers.h"
 #include "menu_prefs.h"
 #include "scr.h"
 #include "scr_help.h"
 #include "scr_menu.h"
 #include "scr_frozen.h"
 #include "scr_real.h"
-#include "scr.auto.h"
+#include "driver.h"
 
 static HelpScreen helpScreen;
 static MenuScreen menuScreen;
 static FrozenScreen frozenScreen;                
 static MainScreen mainScreen;
 static BaseScreen *currentScreen = &mainScreen.base;
-
-#define SCRSYMBOL noScreen
-#define DRIVER_NAME NoScreen
-#define DRIVER_CODE no
-#define DRIVER_COMMENT "no screen support"
-#define DRIVER_VERSION ""
-#define DRIVER_DEVELOPERS ""
-#include "scr_driver.h"
-
-static void
-scr_initialize (MainScreen *main) {
-  initializeMainScreen(main);
-}
-
-const ScreenDriver *screen = &noScreen;
 
 const char *const *
 getScreenParameters (const ScreenDriver *driver) {
@@ -69,24 +53,6 @@ getScreenParameters (const ScreenDriver *driver) {
 const DriverDefinition *
 getScreenDriverDefinition (const ScreenDriver *driver) {
   return &driver->definition;
-}
-
-int
-haveScreenDriver (const char *code) {
-  return haveDriver(code, SCREEN_DRIVER_CODES, driverTable);
-}
-
-const char *
-getDefaultScreenDriver (void) {
-  return getDefaultDriver(driverTable);
-}
-
-const ScreenDriver *
-loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory) {
-  return loadDriver(code, driverObject,
-                    driverDirectory, driverTable,
-                    "screen", 'x', "scr",
-                    &noScreen, &noScreen.definition);
 }
 
 void
@@ -116,20 +82,6 @@ void
 destructScreenDriver (void) {
   mainScreen.destruct();
   mainScreen.releaseParameters();
-}
-
-void
-identifyScreenDriver (const ScreenDriver *driver, int full) {
-  identifyDriver("Screen", &driver->definition, full);
-}
-
-void
-identifyScreenDrivers (int full) {
-  const DriverEntry *entry = driverTable;
-  while (entry->address) {
-    const ScreenDriver *driver = entry++->address;
-    identifyScreenDriver(driver, full);
-  }
 }
 
 void

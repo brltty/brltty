@@ -255,7 +255,7 @@ spk_driver.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O menu_prefs.$O scr_main.$O scr_real.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O menu_prefs.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
 
 scr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr.c
@@ -280,6 +280,9 @@ scr_main.$O:
 
 scr_real.$O: scr.auto.h
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_real.c
+
+scr.driver$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scdriverr.c
 
 routing.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/routing.c
