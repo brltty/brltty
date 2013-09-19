@@ -38,7 +38,8 @@
 
 #include "embed.h"
 #include "log.h"
-#include "cmdqueue.h"
+#include "cmd_queue.h"
+#include "cmd_navigation.h"
 #include "timing.h"
 #include "async_alarm.h"
 #include "async_wait.h"

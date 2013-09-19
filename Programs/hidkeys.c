@@ -23,7 +23,7 @@
 #include "hidkeys.h"
 #include "bitmask.h"
 #include "brldefs.h"
-#include "cmdqueue.h"
+#include "cmd_queue.h"
 
 typedef struct {
   uint16_t xtCode;

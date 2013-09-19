@@ -364,16 +364,13 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O cmdqueue.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O cmd_queue.$O cmd_navigation.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
 
 brltty.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty.c
-
-cmdqueue.$O:
-	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmdqueue.c
 
 config.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/config.c
@@ -395,6 +392,12 @@ touch.$O:
 
 cmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd.c
+
+cmd_queue.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_queue.c
+
+cmd_navigation.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c
 
 hidkeys.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidkeys.c

@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include "cmdqueue.h"
+#include "cmd_queue.h"
 #include "brl.h"
 #include "statdefs.h"
 

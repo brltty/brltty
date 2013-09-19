@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMDQUEUE
-#define BRLTTY_INCLUDED_CMDQUEUE
+#ifndef BRLTTY_INCLUDED_CMD_QUEUE
+#define BRLTTY_INCLUDED_CMD_QUEUE
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +27,6 @@ extern void startBrailleCommands (void);
 extern void stopBrailleCommands (void);
 
 typedef int CommandHandler (int command, void *data);
-extern CommandHandler handleNavigationCommand;
-
 extern int pushCommandHandler (CommandHandler *handler, void *data);
 
 extern int enqueueCommand (int command);
@@ -47,4 +45,4 @@ extern int enqueueXtScanCode (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMDQUEUE */
+#endif /* BRLTTY_INCLUDED_CMD_QUEUE */

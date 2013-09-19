@@ -52,7 +52,7 @@
 #include "program.h"
 #include "service.h"
 #include "options.h"
-#include "cmdqueue.h"
+#include "cmd_queue.h"
 #include "brltty.h"
 #include "prefs.h"
 #include "charset.h"

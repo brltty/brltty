@@ -26,7 +26,7 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
-#include "cmdqueue.h"
+#include "cmd_queue.h"
 #include "async_alarm.h"
 
 static int

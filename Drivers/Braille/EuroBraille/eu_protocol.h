@@ -28,6 +28,7 @@
 #ifndef __EU_PROTOCOL_H__
 #define __EU_PROTOCOL_H__
 
+#include "cmd_queue.h"
 #include "ktbdefs.h"
 #include "brl.h"
 
