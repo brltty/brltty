@@ -1545,8 +1545,8 @@ doAutospeak (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static AsyncHandle updateAlarm;
 static TimeValue updateTime;
+static AsyncHandle updateAlarm;
 static int updateSuspendCount;
 
 static void
@@ -1921,39 +1921,31 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
 static void
 setUpdateAlarm (void *data) {
-  if (!updateSuspendCount) asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+  if (!updateSuspendCount && !updateAlarm) {
+    asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+  }
 }
 
 static void
 startUpdates (void) {
-  updateAlarm = NULL;
-  updateSuspendCount = 0;
   setUpdateTime(0);
-  setUpdateAlarm(NULL);
-}
-
-static int
-testUpdateNotRunning (void *data) {
-  return !updateAlarm;
+  updateAlarm = NULL;
+  updateSuspendCount = 1;
 }
 
 void
 suspendUpdates (void) {
-  if (updateSuspendCount++) {
-    if (asyncAwaitCondition(2000, testUpdateNotRunning, NULL)) {
-      asyncCancelRequest(updateAlarm);
-      updateAlarm = NULL;
-    }
+  if (updateAlarm) {
+    asyncCancelRequest(updateAlarm);
+    updateAlarm = NULL;
   }
+
+  updateSuspendCount += 1;
 }
 
 void
 resumeUpdates (void) {
-  if (!--updateSuspendCount) {
-    if (!updateAlarm) {
-      setUpdateAlarm(NULL);
-    }
-  }
+  if (!--updateSuspendCount) setUpdateAlarm(NULL);
 }
 
 ProgramExitStatus
@@ -1980,6 +1972,8 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGINT, handleTerminationRequest);
 #endif /* SIGINT */
 
+  startUpdates();
+
   {
     ProgramExitStatus exitStatus = brlttyStart(argc, argv);
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
@@ -2001,7 +1995,7 @@ brlttyConstruct (int argc, char *argv[]) {
   checkPointer();
   resetBrailleState();
 
-  startUpdates();
+  resumeUpdates();
   return PROG_EXIT_SUCCESS;
 }
 
