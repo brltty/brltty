@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_CMD_QUEUE
 #define BRLTTY_INCLUDED_CMD_QUEUE
 
+#include "ktbdefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -27,7 +29,8 @@ extern void startBrailleCommands (void);
 extern void stopBrailleCommands (void);
 
 typedef int CommandHandler (int command, void *data);
-extern int pushCommandHandler (CommandHandler *handler, void *data);
+extern int pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data);
+extern int popCommandHandler (void);
 
 extern int enqueueCommand (int command);
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);

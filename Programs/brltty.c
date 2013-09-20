@@ -108,7 +108,7 @@ setSessionEntry (void) {
 
     if (state != SAME) {
       ses = getSessionEntry(scr.number);
-      if (state == FIRST) pushCommandHandler(handleNavigationCommand, NULL);
+      if (state == FIRST) pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
     }
   }
 }
@@ -2031,16 +2031,24 @@ brlttyUpdate (void) {
   return 1;
 }
 
+typedef struct {
+  unsigned endWait:1;
+} MessageCommandData;
+
 static int
-readCommand (KeyTableCommandContext context) {
-  int command = readBrailleCommand(&brl, context);
+testEndMessageWait (void *data) {
+  MessageCommandData *mcd = data;
 
-  if (command != EOF) {
-    logCommand(command);
-    command &= BRL_MSK_CMD;
-  }
+  return mcd->endWait;
+}
 
-  return command;
+static int
+handleMessageCommand (int command, void *data) {
+  MessageCommandData *mcd = data;
+
+logMessage(LOG_NOTICE, "msg cmd: %d", command);
+  mcd->endWait = 1;
+  return 1;
 }
 
 int 
@@ -2050,12 +2058,16 @@ message (const char *mode, const char *text, short flags) {
   if (!mode) mode = "";
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (!(flags & MSG_SILENT))
-    if (autospeak())
+  if (!(flags & MSG_SILENT)) {
+    if (autospeak()) {
       sayString(&spk, text, 1);
+    }
+  }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer && !brl.noDisplay) {
+    MessageCommandData mcd;
+
     size_t size = textCount * brl.textRows;
     wchar_t buffer[size];
 
@@ -2070,18 +2082,22 @@ message (const char *mode, const char *text, short flags) {
 #endif /* ENABLE_API */
 
     convertTextToWchars(characters, text, ARRAY_COUNT(characters));
+    pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &mcd);
+
     while (length) {
-      const int delay = MIN(updateInterval, 100);
-      int count;
+      size_t count;
 
       /* strip leading spaces */
-      while (iswspace(*character)) character++, length--;
+      while (iswspace(*character)) {
+        character += 1;
+        length -= 1;
+      }
 
       if (length <= size) {
         count = length; /* the whole message fits in the braille window */
       } else {
         /* split the message across multiple windows on space characters */
-        for (count=size-2; count>0 && iswspace(characters[count]); count--);
+        for (count=size-2; count>0 && iswspace(characters[count]); count-=1);
         count = count? count+1: size-1;
       }
 
@@ -2098,32 +2114,17 @@ message (const char *mode, const char *text, short flags) {
         break;
       }
 
-      if (flags & MSG_WAITKEY) {
-        while (!terminationCount) {
-          int command = readCommand(KTB_CTX_WAITING);
+      if (length || !(flags & MSG_NODELAY)) {
+        mcd.endWait = 0;
 
-          if (command == EOF) {
-            drainBrailleOutput(&brl, delay);
-          } else if (command != BRL_CMD_NOOP) {
-            break;
-          }
-        }
-      } else if (length || !(flags & MSG_NODELAY)) {
-        TimePeriod period;
-        startTimePeriod(&period, messageDelay);
-
-        while (!terminationCount) {
-          drainBrailleOutput(&brl, delay);
-          if (afterTimePeriod(&period, NULL)) break;
-
-          {
-            int command = readCommand(KTB_CTX_WAITING);
-
-            if (command != EOF) break;
-          }
-        }
+        do {
+logMessage(LOG_NOTICE, "msg wait");
+          if (asyncAwaitCondition(messageDelay, testEndMessageWait, &mcd)) break;
+        } while (flags & MSG_WAITKEY);
       }
     }
+
+    popCommandHandler();
 
 #ifdef ENABLE_API
     if (api) api_link(&brl);

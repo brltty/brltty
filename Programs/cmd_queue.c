@@ -38,17 +38,19 @@ static CommandHandlerLevel *commandHandlerStack = NULL;
 struct CommandHandlerLevelStruct {
   CommandHandlerLevel *previousLevel;
   CommandHandler *handleCommand;
-  void *data;
+  void *handlerData;
+  KeyTableCommandContext commandContext;
 };
 
 int
-pushCommandHandler (CommandHandler *handler, void *data) {
+pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data) {
   CommandHandlerLevel *chl;
 
   if ((chl = malloc(sizeof(*chl)))) {
     memset(chl, 0, sizeof(*chl));
     chl->handleCommand = handler;
-    chl->data = data;
+    chl->handlerData = data;
+    chl->commandContext = context;
 
     chl->previousLevel = commandHandlerStack;
     commandHandlerStack = chl;
@@ -58,6 +60,16 @@ pushCommandHandler (CommandHandler *handler, void *data) {
   }
 
   return 0;
+}
+
+int
+popCommandHandler (void) {
+  CommandHandlerLevel *chl = commandHandlerStack;
+  if (!chl) return 0;
+
+  commandHandlerStack = chl->previousLevel;
+  free(chl);
+  return 1;
 }
 
 typedef struct {
@@ -119,7 +131,7 @@ handleExecuteCommandAlarm (const AsyncAlarmResult *result) {
       const CommandHandlerLevel *chl = commandHandlerStack;
 
       while (chl) {
-        if (chl->handleCommand(command, chl->data)) break;
+        if (chl->handleCommand(command, chl->handlerData)) break;
         chl = chl->previousLevel;
       }
     }
@@ -365,8 +377,13 @@ enqueueXtScanCode (
 
 static int
 readNextCommand (void) {
-  KeyTableCommandContext context = getScreenCommandContext();
-  int command = readBrailleCommand(&brl, context);
+  const CommandHandlerLevel *chl = commandHandlerStack;
+  KeyTableCommandContext context;
+  int command;
+
+  context = chl? chl->commandContext: KTB_CTX_DEFAULT;
+  if (context == KTB_CTX_DEFAULT) context = getScreenCommandContext();
+  command = readBrailleCommand(&brl, context);
 
   unsigned char set;
   unsigned char key;

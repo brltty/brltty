@@ -1260,11 +1260,10 @@ startBrailleDriver (void) {
       if (opt_quiet) return 1;
 
       {
-        int flags = MSG_SILENT;
         char banner[0X100];
 
         makeProgramBanner(banner, sizeof(banner));
-        if (message(NULL, banner, flags)) return 1;
+        if (message(NULL, banner, MSG_SILENT)) return 1;
       }
     }
 
