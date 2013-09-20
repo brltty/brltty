@@ -42,10 +42,10 @@ typedef struct {
 } LearnData;
 
 static int
-testContinueLearnCommand (void *data) {
+testEndLearnWait (void *data) {
   LearnData *lrn = data;
 
-  return lrn->state == LRN_CONTINUE;
+  return lrn->state != LRN_TIMEOUT;
 }
 
 static int
@@ -96,7 +96,8 @@ learnCommand (int timeout) {
     if (message(mode, gettext("Learn Mode"), MSG_NODELAY)) {
       do {
         lrn.state = LRN_TIMEOUT;
-      } while (asyncAwaitCondition(timeout, testContinueLearnCommand, &lrn));
+        if (!asyncAwaitCondition(timeout, testEndLearnWait, &lrn)) break;
+      } while (lrn.state == LRN_CONTINUE);
 
       if (lrn.state == LRN_TIMEOUT) {
         if (!message(mode, gettext("done"), 0)) {

@@ -1932,14 +1932,19 @@ startUpdates (void) {
   setUpdateAlarm(NULL);
 }
 
+static int
+testUpdateNotRunning (void *data) {
+  return !updateAlarm;
+}
+
 void
 suspendUpdates (void) {
-  if (updateAlarm) {
-    asyncCancelRequest(updateAlarm);
-    updateAlarm = NULL;
+  if (updateSuspendCount++) {
+    if (asyncAwaitCondition(2000, testUpdateNotRunning, NULL)) {
+      asyncCancelRequest(updateAlarm);
+      updateAlarm = NULL;
+    }
   }
-
-  updateSuspendCount += 1;
 }
 
 void
