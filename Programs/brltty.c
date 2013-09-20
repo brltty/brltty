@@ -1319,9 +1319,6 @@ isSameRow (
   return 1;
 }
 
-static AsyncHandle updateAlarm = NULL;
-static TimeValue updateTime;
-
 int restartRequired;
 int isOffline;
 int isSuspended;
@@ -1354,19 +1351,6 @@ apiReleaseDriver (void) {
   if (apiDriverClaimed) api_releaseDriver(&brl);
 #endif /* ENABLE_API */
 }
-
-static void
-setUpdateTime (int delay) {
-  getRelativeTime(&updateTime, delay);
-}
-
-void
-resetUpdateAlarm (int delay) {
-  setUpdateTime(delay);
-  if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
-}
-
-static void setUpdateAlarm (void *data);
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
@@ -1560,6 +1544,23 @@ doAutospeak (void) {
   oldWidth = newWidth;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+static AsyncHandle updateAlarm;
+static TimeValue updateTime;
+static int updateSuspendCount;
+
+static void
+setUpdateTime (int delay) {
+  getRelativeTime(&updateTime, delay);
+}
+
+void
+resetUpdateAlarm (int delay) {
+  setUpdateTime(delay);
+  if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
+}
+
+static void setUpdateAlarm (void *data);
 
 static void
 handleUpdateAlarm (const AsyncAlarmResult *result) {
@@ -1920,7 +1921,30 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
 static void
 setUpdateAlarm (void *data) {
-  asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+  if (!updateSuspendCount) asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+}
+
+static void
+startUpdates (void) {
+  updateAlarm = NULL;
+  updateSuspendCount = 0;
+  setUpdateTime(0);
+  setUpdateAlarm(NULL);
+}
+
+void
+suspendUpdates (void) {
+  if (updateAlarm) {
+    asyncCancelRequest(updateAlarm);
+    updateAlarm = NULL;
+  }
+
+  updateSuspendCount += 1;
+}
+
+void
+resumeUpdates (void) {
+  if (!--updateSuspendCount) setUpdateAlarm(NULL);
 }
 
 ProgramExitStatus
@@ -1968,8 +1992,7 @@ brlttyConstruct (int argc, char *argv[]) {
   checkPointer();
   resetBrailleState();
 
-  setUpdateTime(0);
-  setUpdateAlarm(NULL);
+  startUpdates();
   return PROG_EXIT_SUCCESS;
 }
 
@@ -2082,6 +2105,7 @@ message (const char *mode, const char *text, short flags) {
 #endif /* ENABLE_API */
 
     convertTextToWchars(characters, text, ARRAY_COUNT(characters));
+    suspendUpdates();
     pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &mcd);
 
     while (length) {
@@ -2125,6 +2149,7 @@ logMessage(LOG_NOTICE, "msg wait");
     }
 
     popCommandHandler();
+    resumeUpdates();
 
 #ifdef ENABLE_API
     if (api) api_link(&brl);
