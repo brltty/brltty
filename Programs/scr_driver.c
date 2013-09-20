@@ -20,6 +20,7 @@
 
 #include "drivers.h"
 #include "scr.h"
+#include "scr_main.h"
 #include "scr.auto.h"
 
 #define SCRSYMBOL noScreen
