@@ -1944,7 +1944,11 @@ suspendUpdates (void) {
 
 void
 resumeUpdates (void) {
-  if (!--updateSuspendCount) setUpdateAlarm(NULL);
+  if (!--updateSuspendCount) {
+    if (!updateAlarm) {
+      setUpdateAlarm(NULL);
+    }
+  }
 }
 
 ProgramExitStatus
@@ -2069,7 +2073,6 @@ static int
 handleMessageCommand (int command, void *data) {
   MessageCommandData *mcd = data;
 
-logMessage(LOG_NOTICE, "msg cmd: %d", command);
   mcd->endWait = 1;
   return 1;
 }
@@ -2142,7 +2145,6 @@ message (const char *mode, const char *text, short flags) {
         mcd.endWait = 0;
 
         do {
-logMessage(LOG_NOTICE, "msg wait");
           if (asyncAwaitCondition(messageDelay, testEndMessageWait, &mcd)) break;
         } while (flags & MSG_WAITKEY);
       }

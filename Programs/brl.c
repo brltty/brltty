@@ -236,46 +236,6 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
 }
 
-#ifdef ENABLE_LEARN_MODE
-int
-learnMode (BrailleDisplay *brl, int poll, int timeout) {
-  const char *mode = "lrn";
-  TimePeriod period;
-
-  if (!setStatusText(brl, mode)) return 0;
-  if (!message(mode, gettext("Command Learn Mode"), MSG_NODELAY)) return 0;
-
-  startTimePeriod(&period, timeout);
-  do {
-    int command = readBrailleCommand(brl, KTB_CTX_DEFAULT);
-
-    if (command != EOF) {
-      logMessage(LOG_DEBUG, "Learn: command=%06X", command);
-
-      {
-        int cmd = command & BRL_MSK_CMD;
-        if (cmd == BRL_CMD_NOOP) continue;
-        if (cmd == BRL_CMD_LEARN) return 1;
-      }
-
-      {
-        char buffer[0X100];
-        describeCommand(command, buffer, sizeof(buffer),
-                        CDO_IncludeName | CDO_IncludeOperand);
-        logMessage(LOG_DEBUG, "Learn: %s", buffer);
-        if (!message(mode, buffer, MSG_NODELAY)) return 0;
-      }
-
-      restartTimePeriod(&period);
-    }
-
-    drainBrailleOutput(brl, poll);
-  } while (!afterTimePeriod(&period, NULL));
-
-  return message(mode, gettext("done"), 0);
-}
-#endif /* ENABLE_LEARN_MODE */
-
 int
 cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,

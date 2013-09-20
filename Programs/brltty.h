@@ -47,6 +47,8 @@ extern ScreenDescription scr;
 #define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
 extern void resetUpdateAlarm (int delay);
+extern void suspendUpdates (void);
+extern void resumeUpdates (void);
 
 extern void updateSessionAttributes (void);
 extern SessionEntry *ses;

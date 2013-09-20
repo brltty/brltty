@@ -211,8 +211,6 @@ extern const unsigned char portraitDigits[11];
 extern int portraitNumber (int x);
 extern int portraitFlag (int number, int on);
 
-extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

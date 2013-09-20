@@ -26,6 +26,7 @@
 
 #include "log.h"
 #include "cmd_navigation.h"
+#include "cmd_learn.h"
 #include "parse.h"
 #include "timing.h"
 #include "prefs.h"
@@ -1190,11 +1191,9 @@ doCommand:
         }
         break;
 
-#ifdef ENABLE_LEARN_MODE
       case BRL_CMD_LEARN:
-        if (!learnMode(&brl, updateInterval, 10000)) restartRequired = 1;
+        if (!learnCommand(10000)) restartRequired = 1;
         break;
-#endif /* ENABLE_LEARN_MODE */
 
       case BRL_CMD_SWITCHVT_PREV:
         switchVirtualTerminal(scr.number-1);
