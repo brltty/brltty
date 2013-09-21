@@ -501,54 +501,6 @@ handleNavigationCommand (int command, void *datga) {
   int oldmotx = ses->winx;
   int oldmoty = ses->winy;
 
-  if (command != EOF) {
-    int real = command;
-
-    if (prefs.skipIdenticalLines) {
-      switch (command & BRL_MSK_CMD) {
-        case BRL_CMD_LNUP:
-          real = BRL_CMD_PRDIFLN;
-          break;
-
-        case BRL_CMD_LNDN:
-          real = BRL_CMD_NXDIFLN;
-          break;
-
-        case BRL_CMD_PRDIFLN:
-          real = BRL_CMD_LNUP;
-          break;
-
-        case BRL_CMD_NXDIFLN:
-          real = BRL_CMD_LNDN;
-          break;
-      }
-    }
-
-    if (real == command) {
-      logCommand(command);
-    } else {
-      real |= (command & ~BRL_MSK_CMD);
-      logTransformedCommand(command, real);
-      command = real;
-    }
-
-    switch (command & BRL_MSK_CMD) {
-      case BRL_CMD_OFFLINE:
-        if (!isOffline) {
-          logMessage(LOG_DEBUG, "braille display offline");
-          isOffline = 1;
-        }
-        return 1;
-    }
-  }
-
-  if (isOffline) {
-    logMessage(LOG_DEBUG, "braille display online");
-    isOffline = 0;
-  }
-
-  if (command == EOF) return 1;
-
 doCommand:
   if (!executeScreenCommand(&command)) {
     switch (command & BRL_MSK_CMD) {
@@ -1897,8 +1849,7 @@ doCommand:
           }
 
           default:
-            playTune(&tune_command_rejected);
-            logMessage(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
+            return 0;
         }
         break;
       }

@@ -25,11 +25,12 @@
 #include "cmd_queue.h"
 #include "queue.h"
 #include "async_alarm.h"
+#include "prefs.h"
+#include "tunes.h"
 #include "ktbdefs.h"
+#include "ktb.h"
 #include "scr.h"
 #include "brl.h"
-#include "ktb.h"
-#include "prefs.h"
 #include "brltty.h"
 
 typedef struct CommandHandlerLevelStruct CommandHandlerLevel;
@@ -70,6 +71,73 @@ popCommandHandler (void) {
   commandHandlerStack = chl->previousLevel;
   free(chl);
   return 1;
+}
+
+static void
+executeCommand (int command) {
+  {
+    int real = command;
+
+    if (prefs.skipIdenticalLines) {
+      switch (command & BRL_MSK_CMD) {
+        case BRL_CMD_LNUP:
+          real = BRL_CMD_PRDIFLN;
+          break;
+
+        case BRL_CMD_LNDN:
+          real = BRL_CMD_NXDIFLN;
+          break;
+
+        case BRL_CMD_PRDIFLN:
+          real = BRL_CMD_LNUP;
+          break;
+
+        case BRL_CMD_NXDIFLN:
+          real = BRL_CMD_LNDN;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    if (real == command) {
+      logCommand(command);
+    } else {
+      real |= (command & ~BRL_MSK_CMD);
+      logTransformedCommand(command, real);
+      command = real;
+    }
+
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_OFFLINE:
+        if (!isOffline) {
+          logMessage(LOG_DEBUG, "braille display offline");
+          isOffline = 1;
+        }
+        return;
+
+      default:
+        break;
+    }
+  }
+
+  if (isOffline) {
+    logMessage(LOG_DEBUG, "braille display online");
+    isOffline = 0;
+  }
+
+  {
+    const CommandHandlerLevel *chl = commandHandlerStack;
+
+    while (chl) {
+      if (chl->handleCommand(command, chl->handlerData)) return;
+      chl = chl->previousLevel;
+    }
+  }
+
+  playTune(&tune_command_rejected);
+  logMessage(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
 }
 
 typedef struct {
@@ -127,15 +195,7 @@ handleExecuteCommandAlarm (const AsyncAlarmResult *result) {
   if (queue) {
     int command = dequeueCommand(queue);
 
-    if (command != EOF) {
-      const CommandHandlerLevel *chl = commandHandlerStack;
-
-      while (chl) {
-        if (chl->handleCommand(command, chl->handlerData)) break;
-        chl = chl->previousLevel;
-      }
-    }
-
+    if (command != EOF) executeCommand(command);
     if (getQueueSize(queue) > 0) setExecuteCommandAlarm(result->data);
   }
 }
