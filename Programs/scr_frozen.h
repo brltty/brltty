@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_SCR_FROZEN
 #define BRLTTY_INCLUDED_SCR_FROZEN
 
+#include "scr_base.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "scr_base.h"
 
 typedef struct {
   BaseScreen base;

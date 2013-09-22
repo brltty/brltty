@@ -19,12 +19,12 @@
 #ifndef BRLTTY_INCLUDED_SCR_MAIN
 #define BRLTTY_INCLUDED_SCR_MAIN
 
+#include "scr_base.h"
+#include "driver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "scr_base.h"
-#include "driver.h"
 
 typedef struct {
   BaseScreen base;

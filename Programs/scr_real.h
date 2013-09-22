@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_SCR_REAL
 #define BRLTTY_INCLUDED_SCR_REAL
 
+#include "scr_main.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "scr_main.h"
 
 extern void initializeRealScreen (MainScreen *);
 

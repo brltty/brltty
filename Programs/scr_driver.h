@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SCR_DRIVER
 #define BRLTTY_INCLUDED_SCR_DRIVER
 
+#include "scr.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -26,9 +28,6 @@ extern "C" {
 /* this header file is used to create the driver structure
  * for a dynamically loadable screen driver.
  */
-
-#include "scr.h"
-#include "scr_real.h"
 
 /* Routines provided by this screen driver. */
 static void scr_initialize (MainScreen *main);
