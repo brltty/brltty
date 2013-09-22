@@ -262,18 +262,18 @@ readCommand (void) {
     }
   }
 
-  if (command == EOF) return 0;
+  if (command != EOF) {
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_OFFLINE:
+        if (!isOffline) {
+          logMessage(LOG_DEBUG, "braille display offline");
+          isOffline = 1;
+        }
+        return 0;
 
-  switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_OFFLINE:
-      if (!isOffline) {
-        logMessage(LOG_DEBUG, "braille display offline");
-        isOffline = 1;
-      }
-      return 1;
-
-    default:
-      break;
+      default:
+        break;
+    }
   }
 
   if (isOffline) {
@@ -281,6 +281,7 @@ readCommand (void) {
     isOffline = 0;
   }
 
+  if (command == EOF) return 0;
   enqueueCommand(command);
   return 1;
 }
