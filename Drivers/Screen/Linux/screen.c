@@ -371,7 +371,29 @@ openConsole (unsigned char vt) {
 
 static const char *screenName = NULL;
 static int screenDescriptor;
+static int isMonitorable;
 static unsigned char virtualTerminal;
+
+#ifdef HAVE_SYS_POLL_H
+#include <poll.h>
+
+
+static int
+canMonitor (void) {
+  struct pollfd pollDescriptor = {
+    .fd = screenDescriptor,
+    .events = POLLPRI
+  };
+
+  return poll(&pollDescriptor, 1, 0) == 1;
+}
+
+#else /* can poll */
+static int
+canMonitor (void) {
+  return 0;
+}
+#endif /* can poll */
 
 static int
 setScreenName (void) {
@@ -406,9 +428,8 @@ openScreen (unsigned char vt) {
         closeScreen();
         screenDescriptor = screen;
         virtualTerminal = vt;
+        isMonitorable = canMonitor();
         opened = 1;
-logMessage(LOG_NOTICE, "alerts: %s",
-awaitFileAlert(screenDescriptor, 50)? "yes": "no");
       } else {
         close(screen);
         logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
