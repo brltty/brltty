@@ -195,6 +195,14 @@ requeueElement (Element *element) {
   enqueueElement(element);
 }
 
+void
+moveElement (Element *element, Queue *queue) {
+  unlinkElement(element);
+  removeElement(element);
+  addElement(queue, element);
+  enqueueElement(element);
+}
+
 void *
 dequeueItem (Queue *queue) {
   void *item;

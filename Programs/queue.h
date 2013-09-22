@@ -54,6 +54,7 @@ extern void *getElementItem (const Element *element);
 extern void deleteElements (Queue *queue);
 extern void deleteElement (Element *element);
 extern void requeueElement (Element *element);
+extern void moveElement (Element *element, Queue *queue);
 
 typedef int ItemTester (const void *item, const void *data);
 extern Element *findElement (const Queue *queue, ItemTester *testItem, const void *data);
