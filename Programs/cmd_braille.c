@@ -28,6 +28,7 @@
 #include "prefs.h"
 #include "ktb.h"
 #include "brl.h"
+#include "brldefs.h"
 #include "brltty.h"
 
 typedef struct {
@@ -262,6 +263,24 @@ readCommand (void) {
   }
 
   if (command == EOF) return 0;
+
+  switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_OFFLINE:
+      if (!isOffline) {
+        logMessage(LOG_DEBUG, "braille display offline");
+        isOffline = 1;
+      }
+      return 1;
+
+    default:
+      break;
+  }
+
+  if (isOffline) {
+    logMessage(LOG_DEBUG, "braille display online");
+    isOffline = 0;
+  }
+
   enqueueCommand(command);
   return 1;
 }

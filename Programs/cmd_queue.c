@@ -272,23 +272,6 @@ setCommandAlarm (void *data) {
 
 int
 enqueueCommand (int command) {
-  switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_OFFLINE:
-      if (!isOffline) {
-        logMessage(LOG_DEBUG, "braille display offline");
-        isOffline = 1;
-      }
-      return 1;
-
-    default:
-      break;
-  }
-
-  if (isOffline) {
-    logMessage(LOG_DEBUG, "braille display online");
-    isOffline = 0;
-  }
-
   if (command != EOF) {
     Queue *queue = getCommandQueue(1);
 
