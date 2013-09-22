@@ -83,7 +83,6 @@ extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
-extern KeyTableCommandContext getCurrentCommandContext (void);
 
 typedef int BraillePacketVerifier (
   BrailleDisplay *brl,

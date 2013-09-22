@@ -16,24 +16,28 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_QUEUE
-#define BRLTTY_INCLUDED_CMD_QUEUE
-
-#include "ktbdefs.h"
+#ifndef BRLTTY_INCLUDED_CMD_BRAILLE
+#define BRLTTY_INCLUDED_CMD_BRAILLE
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef int CommandHandler (int command, void *data);
-extern int pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data);
-extern int popCommandHandler (void);
-extern KeyTableCommandContext getCurrentCommandContext (void);
+extern void startBrailleCommands (void);
+extern void stopBrailleCommands (void);
 
-extern int enqueueCommand (int command);
+extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
+extern int enqueueKey (unsigned char set, unsigned char key);
+extern int enqueueKeys (uint32_t bits, unsigned char set, unsigned char key);
+extern int enqueueUpdatedKeys (uint32_t new, uint32_t *old, unsigned char set, unsigned char key);
+
+extern int enqueueXtScanCode (
+  unsigned char code, unsigned char escape,
+  unsigned char set00, unsigned char setE0, unsigned char setE1
+);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_QUEUE */
+#endif /* BRLTTY_INCLUDED_CMD_BRAILLE */

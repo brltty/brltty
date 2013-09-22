@@ -217,23 +217,12 @@ ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
   return resizeBrailleBuffer(brl, 1, infoLevel);
 }
 
-static KeyTableCommandContext currentCommandContext = KTB_CTX_DEFAULT;
-
-KeyTableCommandContext
-getCurrentCommandContext (void) {
-  return currentCommandContext;
-}
-
 int
 readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  currentCommandContext = context;
+  int command = braille->readCommand(brl, context);
 
-  {
-    int command = braille->readCommand(brl, context);
-
-    resizeBrailleBuffer(brl, 0, LOG_INFO);
-    return command;
-  }
+  resizeBrailleBuffer(brl, 0, LOG_INFO);
+  return command;
 }
 
 int
