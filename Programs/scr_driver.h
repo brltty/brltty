@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_SCR_DRIVER
 
 #include "scr.h"
+#include "scr_real.h"
 
 #ifdef __cplusplus
 extern "C" {
