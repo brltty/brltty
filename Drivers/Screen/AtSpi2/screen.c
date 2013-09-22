@@ -1090,14 +1090,6 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   }
 }
 
-static int
-executeCommand_AtSpi2Screen (int *command) {
-  int blk UNUSED = *command & BRL_MSK_BLK;
-  int arg UNUSED = *command & BRL_MSK_ARG;
-
-  return 0;
-}
-
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
@@ -1107,7 +1099,6 @@ scr_initialize (MainScreen *main) {
   main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpi2Screen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpi2Screen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpi2Screen;
-  main->base.executeCommand = executeCommand_AtSpi2Screen;
   main->processParameters = processParameters_AtSpi2Screen;
   main->construct = construct_AtSpi2Screen;
   main->destruct = destruct_AtSpi2Screen;

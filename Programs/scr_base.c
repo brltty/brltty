@@ -149,7 +149,7 @@ getPointer_BaseScreen (int *column, int *row) {
 }
 
 static int
-executeCommand_BaseScreen (int *command) {
+handleCommand_BaseScreen (int command) {
   return 0;
 }
 
@@ -171,7 +171,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->highlightRegion = highlightRegion_BaseScreen;
   base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
-  base->executeCommand = executeCommand_BaseScreen;
+  base->handleCommand = handleCommand_BaseScreen;
   base->getCommandContext = getCommandContext_BaseScreen;
 }
 

@@ -28,6 +28,8 @@ extern "C" {
 typedef int CommandHandler (int command, void *data);
 extern int pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data);
 extern int popCommandHandler (void);
+
+extern int handleCommand (int command);
 extern KeyTableCommandContext getCurrentCommandContext (void);
 
 extern int enqueueCommand (int command);

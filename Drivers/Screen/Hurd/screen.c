@@ -432,14 +432,6 @@ currentVirtualTerminal_HurdScreen (void) {
   return description.number;
 }
 
-static int
-executeCommand_HurdScreen (int *command) {
-  int blk UNUSED = *command & BRL_MSK_BLK;
-  int arg UNUSED = *command & BRL_MSK_ARG;
-
-  return 0;
-}
-
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
@@ -449,7 +441,6 @@ scr_initialize (MainScreen *main) {
   main->base.selectVirtualTerminal = selectVirtualTerminal_HurdScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_HurdScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_HurdScreen;
-  main->base.executeCommand = executeCommand_HurdScreen;
   main->processParameters = processParameters_HurdScreen;
   main->construct = construct_HurdScreen;
   main->destruct = destruct_HurdScreen;

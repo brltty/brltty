@@ -19,8 +19,9 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
-#include "ktbdefs.h"
 #include "driver.h"
+#include "ktbdefs.h"
+#include "cmd_queue.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -175,7 +176,7 @@ extern int selectScreenVirtualTerminal (int vt);
 extern int switchScreenVirtualTerminal (int vt);
 extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
-extern int executeScreenCommand (int *);
+extern CommandHandler handleScreenCommand;
 extern KeyTableCommandContext getScreenCommandContext (void);
 
 /* Routines which apply to the routing screen.

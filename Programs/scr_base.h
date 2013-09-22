@@ -40,7 +40,7 @@ typedef struct {
   int (*selectVirtualTerminal) (int vt);
   int (*switchVirtualTerminal) (int vt);
   int (*currentVirtualTerminal) (void);
-  int (*executeCommand) (int *command);
+  int (*handleCommand) (int command);
   KeyTableCommandContext (*getCommandContext) (void);
 } BaseScreen;
 

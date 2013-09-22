@@ -108,7 +108,11 @@ setSessionEntry (void) {
 
     if (state != SAME) {
       ses = getSessionEntry(scr.number);
-      if (state == FIRST) pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
+
+      if (state == FIRST) {
+        pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
+        pushCommandHandler(KTB_CTX_DEFAULT, handleScreenCommand, NULL);
+      }
     }
   }
 }

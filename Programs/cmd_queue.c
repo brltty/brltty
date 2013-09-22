@@ -81,7 +81,7 @@ getCurrentCommandContext (void) {
   return context;
 }
 
-static int
+int
 handleCommand (int command) {
   {
     int real = command;

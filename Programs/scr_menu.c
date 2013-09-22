@@ -193,20 +193,17 @@ settingChanged (void) {
 }
 
 static int
-executeCommand_MenuScreen (int *command) {
-  switch (*command) {
+handleCommand_MenuScreen (int command) {
+  switch (command) {
     case BRL_BLK_PASSKEY+BRL_KEY_ESCAPE:
     case BRL_BLK_PASSKEY+BRL_KEY_END:
-      *command = BRL_CMD_PREFMENU;
-      return 0;
+      return handleCommand(BRL_CMD_PREFMENU);
 
     case BRL_BLK_PASSKEY+BRL_KEY_HOME:
-      *command = BRL_CMD_PREFLOAD;
-      return 0;
+      return handleCommand(BRL_CMD_PREFLOAD);
 
     case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
-      *command = BRL_CMD_PREFSAVE;
-      return 0;
+      return handleCommand(BRL_CMD_PREFSAVE);
 
     case BRL_CMD_TOP_LEFT:
     case BRL_CMD_BOT_LEFT:
@@ -288,8 +285,8 @@ executeCommand_MenuScreen (int *command) {
       return 1;
 
     default:
-      if ((*command & BRL_MSK_BLK) == BRL_BLK_ROUTE) {
-        int key = *command & BRL_MSK_ARG;
+      if ((command & BRL_MSK_BLK) == BRL_BLK_ROUTE) {
+        int key = command & BRL_MSK_ARG;
 
         if ((key >= textStart) && (key < (textStart + textCount))) {
           if (changeMenuItemScaled(getItem(), key-textStart, textCount)) {
@@ -328,7 +325,7 @@ initializeMenuScreen (MenuScreen *menu) {
   menu->base.formatTitle = formatTitle_MenuScreen;
   menu->base.describe = describe_MenuScreen;
   menu->base.readCharacters = readCharacters_MenuScreen;
-  menu->base.executeCommand = executeCommand_MenuScreen;
+  menu->base.handleCommand = handleCommand_MenuScreen;
   menu->base.getCommandContext = getCommandContext_MenuScreen;
   menu->construct = construct_MenuScreen;
   menu->destruct = destruct_MenuScreen;

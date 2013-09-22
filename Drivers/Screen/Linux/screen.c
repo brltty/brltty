@@ -29,13 +29,14 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 
-#include "ascii.h"
 #include "log.h"
 #include "device.h"
+#include "io_misc.h"
 #include "parse.h"
-#include "system_linux.h"
-#include "charset.h"
 #include "brldefs.h"
+#include "ascii.h"
+#include "charset.h"
+#include "system_linux.h"
 
 typedef enum {
   PARM_CHARSET,
@@ -341,6 +342,7 @@ closeConsole (void) {
     if (close(consoleDescriptor) == -1) {
       logSystemError("console close");
     }
+
     logMessage(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
@@ -350,16 +352,20 @@ static int
 openConsole (unsigned char vt) {
   int opened = 0;
   char *name = vtName(consoleName, vt);
+
   if (name) {
     int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
+
     if (console != -1) {
       logMessage(LOG_DEBUG, "console opened: %s: fd=%d", name, console);
       closeConsole();
       consoleDescriptor = console;
       opened = 1;
     }
+
     free(name);
   }
+
   return opened;
 }
 
@@ -379,6 +385,7 @@ closeScreen (void) {
     if (close(screenDescriptor) == -1) {
       logSystemError("screen close");
     }
+
     logMessage(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
   }
@@ -388,22 +395,29 @@ static int
 openScreen (unsigned char vt) {
   int opened = 0;
   char *name = vtName(screenName, vt);
+
   if (name) {
     int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
+
     if (screen != -1) {
       logMessage(LOG_DEBUG, "screen opened: %s: fd=%d", name, screen);
+
       if (openConsole(vt)) {
         closeScreen();
         screenDescriptor = screen;
         virtualTerminal = vt;
         opened = 1;
+logMessage(LOG_NOTICE, "alerts: %s",
+awaitFileAlert(screenDescriptor, 50)? "yes": "no");
       } else {
         close(screen);
         logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
       }
     }
+
     free(name);
   }
+
   return opened;
 }
 
@@ -1821,9 +1835,9 @@ currentVirtualTerminal_LinuxScreen (void) {
 }
 
 static int
-executeCommand_LinuxScreen (int *command) {
-  int blk = *command & BRL_MSK_BLK;
-  int arg UNUSED = *command & BRL_MSK_ARG;
+handleCommand_LinuxScreen (int command) {
+  int blk = command & BRL_MSK_BLK;
+  int arg UNUSED = command & BRL_MSK_ARG;
   int cmd = blk | arg;
 
   switch (cmd) {
@@ -1841,14 +1855,14 @@ executeCommand_LinuxScreen (int *command) {
             int press = !(arg & 0X80);
             arg &= 0X7F;
 
-            if (*command & BRL_FLG_KBD_EMUL0) {
+            if (command & BRL_FLG_KBD_EMUL0) {
               unsigned char code = emul0XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		logMessage(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;
-	    } else if (*command & BRL_FLG_KBD_EMUL1) {
+	    } else if (command & BRL_FLG_KBD_EMUL1) {
               unsigned int code = emul1XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		logMessage(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
@@ -1864,19 +1878,19 @@ executeCommand_LinuxScreen (int *command) {
           {
             int handled = 0;
 
-            if (*command & BRL_FLG_KBD_RELEASE) {
+            if (command & BRL_FLG_KBD_RELEASE) {
               at2Pressed = 0;
             } else if (arg == 0XF0) {
               at2Pressed = 0;
               handled = 1;
             }
 
-            if (*command & BRL_FLG_KBD_EMUL0) {
+            if (command & BRL_FLG_KBD_EMUL0) {
               at2Keys = at2KeysE0;
             } else if (arg == 0XE0) {
               at2Keys = at2KeysE0;
               handled = 1;
-	    } else if (*command & BRL_FLG_KBD_EMUL1) {
+	    } else if (command & BRL_FLG_KBD_EMUL1) {
               at2Keys = at2KeysE1;
             } else if (arg == 0XE1) {
               at2Keys = at2KeysE1;
@@ -1916,7 +1930,7 @@ scr_initialize (MainScreen *main) {
   main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
-  main->base.executeCommand = executeCommand_LinuxScreen;
+  main->base.handleCommand = handleCommand_LinuxScreen;
 
   main->processParameters = processParameters_LinuxScreen;
   main->releaseParameters = releaseParameters_LinuxScreen;

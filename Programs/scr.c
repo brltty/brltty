@@ -303,8 +303,8 @@ userVirtualTerminal (int number) {
 }
 
 int
-executeScreenCommand (int *command) {
-  return currentScreen->executeCommand(command);
+handleScreenCommand (int command, void *data) {
+  return currentScreen->handleCommand(command);
 }
 
 KeyTableCommandContext

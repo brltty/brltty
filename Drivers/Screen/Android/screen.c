@@ -223,7 +223,7 @@ resetLockTimer (void) {
 }
 
 static int
-executeCommand_AndroidScreen (int *command) {
+handleCommand_AndroidScreen (int command) {
   resetLockTimer();
   return 0;
 }
@@ -336,7 +336,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
-  main->base.executeCommand = executeCommand_AndroidScreen;
+  main->base.handleCommand = handleCommand_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   main->base.insertKey = insertKey_AndroidScreen;
   env = getJavaNativeInterface();
