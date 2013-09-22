@@ -28,7 +28,6 @@
 #include "cmd_navigation.h"
 #include "cmd_learn.h"
 #include "parse.h"
-#include "timing.h"
 #include "prefs.h"
 #include "tunes.h"
 #include "routing.h"
@@ -481,25 +480,10 @@ applyInputModifiers (int *modifiers) {
   inputModifiers = 0;
 }
 
-static void
-checkRoutingStatus (RoutingStatus ok, int wait) {
-  RoutingStatus status = getRoutingStatus(wait);
-
-  if (status != ROUTING_NONE) {
-    playTune((status > ok)? &tune_routing_failed: &tune_routing_succeeded);
-
-    ses->spkx = scr.posx;
-    ses->spky = scr.posy;
-  }
-}
-
 int
 handleNavigationCommand (int command, void *datga) {
   static const char modeString_preferences[] = "prf";
   static Preferences savedPreferences;
-
-  int oldmotx = ses->winx;
-  int oldmoty = ses->winy;
 
 doCommand:
   if (!executeScreenCommand(&command)) {
@@ -1852,53 +1836,6 @@ doCommand:
             return 0;
         }
         break;
-      }
-    }
-  }
-
-  if ((ses->winx != oldmotx) || (ses->winy != oldmoty)) {
-    /* The window has been manually moved. */
-    ses->motx = ses->winx;
-    ses->moty = ses->winy;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-    isContracted = 0;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
-      ses->trackCursor = 0;
-      playTune(&tune_cursor_unlinked);
-    }
-#endif /* ENABLE_SPEECH_SUPPORT */
-  }
-
-  if (!(command & BRL_MSK_BLK)) {
-    if (command & BRL_FLG_MOTION_ROUTE) {
-      int left = ses->winx;
-      int right = MIN(left+textCount, scr.cols) - 1;
-
-      int top = ses->winy;
-      int bottom = MIN(top+brl.textRows, scr.rows) - 1;
-
-      if ((scr.posx < left) || (scr.posx > right) ||
-          (scr.posy < top) || (scr.posy > bottom)) {
-        if (routeCursor(MIN(MAX(scr.posx, left), right),
-                        MIN(MAX(scr.posy, top), bottom),
-                        scr.number)) {
-          playTune(&tune_routing_started);
-          checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
-
-          {
-            ScreenDescription description;
-            describeScreen(&description);
-
-            if (description.number == scr.number) {
-              slideWindowVertically(description.posy);
-              placeWindowHorizontally(description.posx);
-            }
-          }
-        }
       }
     }
   }
