@@ -70,15 +70,23 @@ int messageDelay = DEFAULT_MESSAGE_DELAY;
 
 static volatile unsigned int terminationCount;
 static volatile time_t terminationTime;
+
 #define TERMINATION_COUNT_EXIT_THRESHOLD 3
 #define TERMINATION_COUNT_RESET_TIME 5
 
 BrailleDisplay brl;                        /* For the Braille routines */
+ScreenDescription scr;
+SessionEntry *ses = NULL;
+
+unsigned char infoMode = 0;
+
 unsigned int textStart;
 unsigned int textCount;
 unsigned char textMaximized = 0;
+
 unsigned int statusStart;
 unsigned int statusCount;
+
 unsigned int fullWindowShift;                /* Full window horizontal distance */
 unsigned int halfWindowShift;                /* Half window horizontal distance */
 unsigned int verticalWindowShift;                /* Window vertical distance */
@@ -90,10 +98,6 @@ static int contractedStart;
 static int contractedOffsets[0X100];
 static int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-
-ScreenDescription scr;
-SessionEntry *ses = NULL;
-unsigned char infoMode = 0;
 
 static void
 setSessionEntry (void) {
@@ -1021,11 +1025,6 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-int
-showCursor (void) {
-  return scr.cursor && prefs.showCursor && !ses->hideCursor;
-}
-
 #ifdef ENABLE_CONTRACTED_BRAILLE
 int
 isContracting (void) {
@@ -1155,6 +1154,11 @@ getCursorPosition (int x, int y) {
   return position;
 }
 
+int
+showCursor (void) {
+  return scr.cursor && prefs.showCursor && !ses->hideCursor;
+}
+
 static inline int
 showAttributesUnderline (void) {
   return prefs.showAttributes && isBlinkedOn(&attributesBlinkingState);
@@ -1182,42 +1186,6 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
   }
 
   *cell |= dots;
-}
-
-static int
-checkPointer (void) {
-  int moved = 0;
-  int column, row;
-
-  if (prefs.windowFollowsPointer && getScreenPointer(&column, &row)) {
-    if (column != ses->ptrx) {
-      if (ses->ptrx >= 0) moved = 1;
-      ses->ptrx = column;
-    }
-
-    if (row != ses->ptry) {
-      if (ses->ptry >= 0) moved = 1;
-      ses->ptry = row;
-    }
-
-    if (moved) {
-      if (column < ses->winx) {
-        ses->winx = column;
-      } else if (column >= (int)(ses->winx + textCount)) {
-        ses->winx = column + 1 - textCount;
-      }
-
-      if (row < ses->winy) {
-        ses->winy = row;
-      } else if (row >= (int)(ses->winy + brl.textRows)) {
-        ses->winy = row + 1 - brl.textRows;
-      }
-    }
-  } else {
-    ses->ptrx = ses->ptry = -1;
-  }
-
-  return moved;
 }
 
 int
@@ -1259,39 +1227,6 @@ isTextOffset (int *arg, int end, int relaxed) {
   return 1;
 }
 
-static void
-highlightWindow (void) {
-  if (prefs.highlightWindow) {
-    int left = 0;
-    int right;
-    int top = 0;
-    int bottom;
-
-    if (prefs.showAttributes) {
-      right = left;
-      bottom = top;
-    } else if (!brl.touchEnabled) {
-      right = textCount - 1;
-      bottom = brl.textRows - 1;
-    } else {
-      int clear = 1;
-
-      if (touchGetRegion(&left, &right, &top, &bottom)) {
-        left = MAX(left, textStart);
-        right = MIN(right, textStart+textCount-1);
-        if (isTextOffset(&left, 0, 0) && isTextOffset(&right, 1, 1)) clear = 0;
-      }
-
-      if (clear) {
-        unhighlightScreenRegion();
-        return;
-      }
-    }
-
-    highlightScreenRegion(ses->winx+left, ses->winx+right, ses->winy+top, ses->winy+bottom);
-  }
-}
-
 int
 isSameText (
   const ScreenCharacter *character1,
@@ -1328,13 +1263,6 @@ int isOffline;
 int isSuspended;
 int inputModifiers;
 
-static int oldwinx;
-static int oldwiny;
-
-#ifdef ENABLE_API
-static int apiDriverClaimed;
-#endif /* ENABLE_API */
-
 void
 resetBrailleState (void) {
   resetScanCodes();
@@ -1342,19 +1270,100 @@ resetBrailleState (void) {
   inputModifiers = 0;
 }
 
+#ifdef ENABLE_API
+static int apiDriverClaimed;
+
 void
 apiClaimDriver (void) {
-#ifdef ENABLE_API
   apiDriverClaimed = apiStarted && api_claimDriver(&brl);
-#endif /* ENABLE_API */
 }
 
 void
 apiReleaseDriver (void) {
-#ifdef ENABLE_API
   if (apiDriverClaimed) api_releaseDriver(&brl);
-#endif /* ENABLE_API */
 }
+
+#else /* ENABLE_API */
+void
+apiClaimDriver (void) {
+}
+
+void
+apiReleaseDriver (void) {
+}
+#endif /* ENABLE_API */
+
+static int
+checkPointer (void) {
+  int moved = 0;
+  int column, row;
+
+  if (prefs.windowFollowsPointer && getScreenPointer(&column, &row)) {
+    if (column != ses->ptrx) {
+      if (ses->ptrx >= 0) moved = 1;
+      ses->ptrx = column;
+    }
+
+    if (row != ses->ptry) {
+      if (ses->ptry >= 0) moved = 1;
+      ses->ptry = row;
+    }
+
+    if (moved) {
+      if (column < ses->winx) {
+        ses->winx = column;
+      } else if (column >= (int)(ses->winx + textCount)) {
+        ses->winx = column + 1 - textCount;
+      }
+
+      if (row < ses->winy) {
+        ses->winy = row;
+      } else if (row >= (int)(ses->winy + brl.textRows)) {
+        ses->winy = row + 1 - brl.textRows;
+      }
+    }
+  } else {
+    ses->ptrx = ses->ptry = -1;
+  }
+
+  return moved;
+}
+
+static void
+highlightWindow (void) {
+  if (prefs.highlightWindow) {
+    int left = 0;
+    int right;
+    int top = 0;
+    int bottom;
+
+    if (prefs.showAttributes) {
+      right = left;
+      bottom = top;
+    } else if (!brl.touchEnabled) {
+      right = textCount - 1;
+      bottom = brl.textRows - 1;
+    } else {
+      int clear = 1;
+
+      if (touchGetRegion(&left, &right, &top, &bottom)) {
+        left = MAX(left, textStart);
+        right = MIN(right, textStart+textCount-1);
+        if (isTextOffset(&left, 0, 0) && isTextOffset(&right, 1, 1)) clear = 0;
+      }
+
+      if (clear) {
+        unhighlightScreenRegion();
+        return;
+      }
+    }
+
+    highlightScreenRegion(ses->winx+left, ses->winx+right, ses->winy+top, ses->winy+bottom);
+  }
+}
+
+static int oldwinx;
+static int oldwiny;
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
@@ -2014,8 +2023,8 @@ typedef void UnmonitoredConditionHandler (const void *data);
 static void
 handleRoutingDone (const void *data) {
   const TuneDefinition *tune = data;
-  playTune(tune);
 
+  playTune(tune);
   ses->spkx = scr.posx;
   ses->spky = scr.posy;
 }
@@ -2063,20 +2072,20 @@ brlttyUpdate (void) {
 
 typedef struct {
   unsigned endWait:1;
-} MessageCommandData;
+} MessageData;
 
 static int
 testEndMessageWait (void *data) {
-  MessageCommandData *mcd = data;
+  MessageData *msg = data;
 
-  return mcd->endWait;
+  return msg->endWait;
 }
 
 static int
 handleMessageCommand (int command, void *data) {
-  MessageCommandData *mcd = data;
+  MessageData *msg = data;
 
-  mcd->endWait = 1;
+  msg->endWait = 1;
   return 1;
 }
 
@@ -2095,7 +2104,7 @@ message (const char *mode, const char *text, short flags) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer && !brl.noDisplay) {
-    MessageCommandData mcd;
+    MessageData msg;
 
     size_t size = textCount * brl.textRows;
     wchar_t buffer[size];
@@ -2112,7 +2121,7 @@ message (const char *mode, const char *text, short flags) {
 
     convertTextToWchars(characters, text, ARRAY_COUNT(characters));
     suspendUpdates();
-    pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &mcd);
+    pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &msg);
 
     while (length) {
       size_t count;
@@ -2145,10 +2154,10 @@ message (const char *mode, const char *text, short flags) {
       }
 
       if (length || !(flags & MSG_NODELAY)) {
-        mcd.endWait = 0;
+        msg.endWait = 0;
 
         do {
-          if (asyncAwaitCondition(messageDelay, testEndMessageWait, &mcd)) break;
+          if (asyncAwaitCondition(messageDelay, testEndMessageWait, &msg)) break;
         } while (flags & MSG_WAITKEY);
       }
     }

@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int learnCommand (int timeout);
+extern int learnMode (int timeout);
 
 #ifdef __cplusplus
 }

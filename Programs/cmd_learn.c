@@ -54,12 +54,12 @@ handleLearnCommand (int command, void *data) {
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
 
   switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_NOOP:
-      lrn->state = LRN_CONTINUE;
-      return 1;
-
     case BRL_CMD_LEARN:
       lrn->state = LRN_EXIT;
+      return 1;
+
+    case BRL_CMD_NOOP:
+      lrn->state = LRN_CONTINUE;
       return 1;
 
     default:
@@ -69,6 +69,7 @@ handleLearnCommand (int command, void *data) {
 
   {
     char buffer[0X100];
+
     describeCommand(command, buffer, sizeof(buffer),
                     CDO_IncludeName | CDO_IncludeOperand);
     logMessage(LOG_DEBUG, "learn: %s", buffer);
@@ -80,7 +81,7 @@ handleLearnCommand (int command, void *data) {
 #endif /* ENABLE_LEARN_MODE */
 
 int
-learnCommand (int timeout) {
+learnMode (int timeout) {
   int ok = 0;
   const char *mode = "lrn";
 
@@ -112,7 +113,7 @@ learnCommand (int timeout) {
   popCommandHandler();
   resumeUpdates();
 #else /* ENABLE_LEARN_MODE */
-  if (message(lrn.mode, gettext("learn not available"), 0)) ok = 1;
+  if (message(lrn.mode, gettext("learn mode not available"), 0)) ok = 1;
 #endif /* ENABLE_LEARN_MODE */
 
   return ok;

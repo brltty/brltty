@@ -227,6 +227,7 @@ downLine (IsSameCharacter isSameCharacter) {
 }
 
 typedef int (*RowTester) (int column, int row, void *data);
+
 static void
 findRow (int column, int increment, RowTester test, void *data) {
   int row = ses->winy + increment;
@@ -406,17 +407,7 @@ static void
 speakCurrentLine (void) {
   speakDone(NULL, 0, scr.cols, 0);
 }
-#endif /* ENABLE_SPEECH_SUPPORT */
 
-static void
-doBrailleTime (const TimeFormattingData *fmt) {
-  char buffer[0X80];
-
-  formatBrailleTime(buffer, sizeof(buffer), fmt);
-  message(NULL, buffer, MSG_SILENT);
-}
-
-#ifdef ENABLE_SPEECH_SUPPORT
 static void
 doSpeechTime (const TimeFormattingData *fmt) {
   char announcement[0X100];
@@ -451,6 +442,14 @@ doSpeechTime (const TimeFormattingData *fmt) {
   sayString(&spk, announcement, 1);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+static void
+doBrailleTime (const TimeFormattingData *fmt) {
+  char buffer[0X80];
+
+  formatBrailleTime(buffer, sizeof(buffer), fmt);
+  message(NULL, buffer, MSG_SILENT);
+}
 
 static int
 insertKey (ScreenKey key, int flags) {
@@ -1126,7 +1125,7 @@ handleNavigationCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_LEARN:
-      if (!learnCommand(10000)) restartRequired = 1;
+      if (!learnMode(10000)) restartRequired = 1;
       break;
 
     case BRL_CMD_SWITCHVT_PREV:
