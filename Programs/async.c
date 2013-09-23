@@ -75,6 +75,7 @@ typedef struct {
 #include "async.h"
 #include "async_io.h"
 #include "async_alarm.h"
+#include "async_event.h"
 #include "async_wait.h"
 
 struct AsyncHandleStruct {
@@ -1465,6 +1466,65 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
   TimeValue time;
   getRelativeTime(&time, interval);
   return asyncResetAlarmTo(handle, &time);
+}
+
+struct AsyncEventStruct {
+  AsyncEventCallback *callback;
+  void *data;
+  int pipe[2];
+  AsyncHandle monitor;
+};
+
+static int
+monitorEvent (const AsyncMonitorResult *result) {
+  AsyncEvent *event = result->data;
+  void *data;
+
+  if (read(event->pipe[0], &data, sizeof(data)) == sizeof(data)) {
+    event->callback(event->data, data);
+    return 1;
+  }
+
+  return 0;
+}
+
+AsyncEvent *
+asyncNewEvent (AsyncEventCallback *callback, void *data) {
+  AsyncEvent *event;
+
+  if ((event = malloc(sizeof(*event)))) {
+    memset(event, 0, sizeof(*event));
+    event->callback = callback;
+    event->data = data;
+
+    if (pipe(event->pipe) != -1) {
+      if (asyncMonitorFileInput(&event->monitor, event->pipe[0], monitorEvent, event)) {
+        return event;
+      }
+
+      close(event->pipe[0]);
+      close(event->pipe[1]);
+    } else {
+      logSystemError("pipe");
+    }
+
+    free(event);
+  }
+
+  return NULL;
+}
+
+void
+asyncDiscardEvent (AsyncEvent *event) {
+  asyncCancelRequest(event->monitor);
+  close(event->pipe[0]);
+  close(event->pipe[1]);
+  free(event);
+}
+
+void
+asyncSignalEvent (AsyncEvent *event, void *data) {
+  write(event->pipe[1], &data, sizeof(data));
 }
 
 static void
