@@ -23,7 +23,6 @@
 #include "log.h"
 #include "cmd_braille.h"
 #include "cmd_queue.h"
-#include "queue.h"
 #include "async_alarm.h"
 #include "prefs.h"
 #include "ktb.h"
@@ -31,133 +30,31 @@
 #include "brldefs.h"
 #include "brltty.h"
 
-typedef struct {
-  unsigned char set;
-  unsigned char key;
-  unsigned press:1;
-} KeyEvent;
-
-static const int keyReleaseTimeout = 0;
-static TimePeriod keyReleasePeriod;
-static KeyEvent *keyReleaseEvent = NULL;
-
-static void
-deallocateKeyEvent (KeyEvent *event) {
-  free(event);
-}
-
-static void
-deallocateKeyEventQueueItem (void *item, void *data) {
-  KeyEvent *event = item;
-
-  deallocateKeyEvent(event);
-}
-
-static Queue *
-createKeyEventQueue (void *data) {
-  return newQueue(deallocateKeyEventQueueItem, NULL);
-}
-
-static Queue *
-getKeyEventQueue (int create) {
-  static Queue *events = NULL;
-
-  return getProgramQueue(&events, "key-event-queue", create,
-                         createKeyEventQueue, NULL);
-}
-
-static int
-addKeyEvent (KeyEvent *event) {
-  Queue *queue = getKeyEventQueue(1);
-
-  if (queue) {
-    if (enqueueItem(queue, event)) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-static int
-dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
-  Queue *queue = getKeyEventQueue(0);
-
-  if (keyReleaseEvent) {
-    if (afterTimePeriod(&keyReleasePeriod, NULL)) {
-      if (!addKeyEvent(keyReleaseEvent)) return 0;
-      keyReleaseEvent = NULL;
-    }
-  }
-
-  if (queue) {
-    KeyEvent *event;
-
-    while ((event = dequeueItem(queue))) {
-#ifdef ENABLE_API
-      if (apiStarted) {
-        if ((api_handleKeyEvent(event->set, event->key, event->press)) == EOF) {
-          deallocateKeyEvent(event);
-	  continue;
-	}
-      }
-#endif /* ENABLE_API */
-
-      *set = event->set;
-      *key = event->key;
-      *press = event->press;
-      deallocateKeyEvent(event);
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
 int
 enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
-  if (keyReleaseEvent) {
-    if (press && (set == keyReleaseEvent->set) && (key == keyReleaseEvent->key)) {
-      if (!afterTimePeriod(&keyReleasePeriod, NULL)) {
-        deallocateKeyEvent(keyReleaseEvent);
-        keyReleaseEvent = NULL;
-        return 1;
-      }
-    }
-
-    {
-      KeyEvent *event = keyReleaseEvent;
-      keyReleaseEvent = NULL;
-
-      if (!addKeyEvent(event)) {
-        deallocateKeyEvent(event);
-        return 0;
-      }
+#ifdef ENABLE_API
+  if (apiStarted) {
+    if (api_handleKeyEvent(set, key, press) == EOF) {
+      return 1;
     }
   }
+#endif /* ENABLE_API */
 
-  {
-    KeyEvent *event;
+  if (brl.keyTable) {
+    switch (prefs.brailleOrientation) {
+      case BRL_ORIENTATION_ROTATED:
+        if (brl.rotateKey) brl.rotateKey(&brl, &set, &key);
+        break;
 
-    if ((event = malloc(sizeof(*event)))) {
-      event->set = set;
-      event->key = key;
-      event->press = press;
-
-      if (keyReleaseTimeout && !press) {
-        keyReleaseEvent = event;
-        startTimePeriod(&keyReleasePeriod, keyReleaseTimeout);
-        return 1;
-      }
-
-      if (addKeyEvent(event)) return 1;
-      deallocateKeyEvent(event);
-    } else {
-      logMallocError();
+      default:
+      case BRL_ORIENTATION_NORMAL:
+        break;
     }
+
+    processKeyEvent(brl.keyTable, getCurrentCommandContext(), set, key, press);
   }
 
-  return 0;
+  return 1;
 }
 
 int
@@ -239,28 +136,7 @@ enqueueXtScanCode (
 
 static int
 readCommand (void) {
-  KeyTableCommandContext context = getCurrentCommandContext();
-  int command = readBrailleCommand(&brl, context);
-
-  unsigned char set;
-  unsigned char key;
-  int press;
-
-  while (dequeueKeyEvent(&set, &key, &press)) {
-    if (brl.keyTable) {
-      switch (prefs.brailleOrientation) {
-        case BRL_ORIENTATION_ROTATED:
-          if (brl.rotateKey) brl.rotateKey(&brl, &set, &key);
-          break;
-
-        default:
-        case BRL_ORIENTATION_NORMAL:
-          break;
-      }
-
-      processKeyEvent(brl.keyTable, context, set, key, press);
-    }
-  }
+  int command = readBrailleCommand(&brl, getCurrentCommandContext());
 
   if (command != EOF) {
     switch (command & BRL_MSK_CMD) {
@@ -347,11 +223,5 @@ stopBrailleCommands (void) {
   if (pollAlarm) {
     asyncCancelRequest(pollAlarm);
     pollAlarm = NULL;
-  }
-
-  {
-    Queue *queue = getKeyEventQueue(0);
-
-    if (queue) deleteElements(queue);
   }
 }
