@@ -34,7 +34,7 @@ int
 enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
 #ifdef ENABLE_API
   if (apiStarted) {
-    if (api_handleKeyEvent(set, key, press) == EOF) {
+    if (api_handleKeyEvent(set, key, press)) {
       return 1;
     }
   }
@@ -52,9 +52,10 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
     }
 
     processKeyEvent(brl.keyTable, getCurrentCommandContext(), set, key, press);
+    return 1;
   }
 
-  return 1;
+  return 0;
 }
 
 int
@@ -199,7 +200,9 @@ handlePollAlarm (const AsyncAlarmResult *result) {
   }
 
   if (apiStarted) {
-    if (!api_flush(&brl)) restartRequired = 1;
+    if (!api_flush(&brl)) {
+      restartRequired = 1;
+    }
   }
 #endif /* ENABLE_API */
 
@@ -209,7 +212,7 @@ handlePollAlarm (const AsyncAlarmResult *result) {
 static void
 setPollAlarm (int delay, void *data) {
   if (!pollAlarm) {
-   asyncSetAlarmIn(&pollAlarm, delay, handlePollAlarm, data);
+    asyncSetAlarmIn(&pollAlarm, delay, handlePollAlarm, data);
   }
 }
 

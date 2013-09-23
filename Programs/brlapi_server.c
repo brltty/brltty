@@ -2526,8 +2526,7 @@ static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
     broadcastKey(t, code, how);
 }
 
-/* The core produced a key event, try to send it to a brlapi client.
- * On success, return EOF, else return the command.  */
+/* The core produced a key event, try to send it to a brlapi client. */
 static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
   Connection *c;
 
@@ -2539,7 +2538,7 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
   if ((c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
     logMessage(LOG_DEBUG,"Transmitting accepted key %016"BRLAPI_PRIxKEYCODE, clientCode);
     writeKey(c->fd,clientCode);
-    return EOF;
+    return 1;
   }
   return 0;
 }
