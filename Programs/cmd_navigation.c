@@ -20,10 +20,6 @@
 
 #include <stdio.h>
 
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-#endif /* HAVE_ICU */
-
 #include "log.h"
 #include "cmd_navigation.h"
 #include "cmd_learn.h"
@@ -61,63 +57,6 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
     *row = ses->winy;
   }
   return 1;
-}
-
-static size_t
-formatCharacterDescription (char *buffer, size_t size, int column, int row) {
-  static char *const colours[] = {
-    strtext("black"),
-    strtext("blue"),
-    strtext("green"),
-    strtext("cyan"),
-    strtext("red"),
-    strtext("magenta"),
-    strtext("brown"),
-    strtext("light grey"),
-    strtext("dark grey"),
-    strtext("light blue"),
-    strtext("light green"),
-    strtext("light cyan"),
-    strtext("light red"),
-    strtext("light magenta"),
-    strtext("yellow"),
-    strtext("white")
-  };
-
-  size_t length;
-  ScreenCharacter character;
-
-  readScreen(column, row, 1, 1, &character);
-  STR_BEGIN(buffer, size);
-
-  {
-    uint32_t text = character.text;
-
-    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "): %s on %s",
-               text, text,
-               gettext(colours[character.attributes & 0X0F]),
-               gettext(colours[(character.attributes & 0X70) >> 4]));
-  }
-
-  if (character.attributes & SCR_ATTR_BLINK) {
-    STR_PRINTF(" %s", gettext("blink"));
-  }
-
-#ifdef HAVE_ICU
-  {
-    char name[0X40];
-    UErrorCode error = U_ZERO_ERROR;
-
-    u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-    if (U_SUCCESS(error)) {
-      STR_PRINTF(" [%s]", name);
-    }
-  }
-#endif /* HAVE_ICU */
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
 }
 
 typedef int (*CanMoveWindow) (void);
@@ -285,127 +224,113 @@ findCharacters (const wchar_t **address, size_t *length, const wchar_t *characte
   return 0;
 }
 
-static int
-toggleFlag (
-  int *bits, int bit, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
-) {
-  int oldBits = *bits;
-
-  switch (command & BRL_FLG_TOGGLE_MASK) {
-    case 0:
-      *bits ^= bit;
-      break;
-
-    case BRL_FLG_TOGGLE_ON:
-      *bits |= bit;
-      break;
-
-    case BRL_FLG_TOGGLE_OFF:
-      *bits &= ~bit;
-      break;
-
-    default:
-      playTune(&tune_command_rejected);
-      return 0;
-  }
-
-  if (*bits == oldBits) {
-    playTune(&tune_no_change);
-    return 0;
-  }
-
-  playTune((*bits & bit)? onTune: offTune);
-  return 1;
-}
-
-static int
-toggleSetting (
-  unsigned char *setting, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
-) {
-  unsigned char oldSetting = *setting;
-
-  switch (command & BRL_FLG_TOGGLE_MASK) {
-    case 0:
-      *setting = !*setting;
-      break;
-
-    case BRL_FLG_TOGGLE_ON:
-      *setting = 1;
-      break;
-
-    case BRL_FLG_TOGGLE_OFF:
-      *setting = 0;
-      break;
-
-    default:
-      playTune(&tune_command_rejected);
-      return 0;
-  }
-
-  if (*setting == oldSetting) {
-    playTune(&tune_no_change);
-    return 0;
-  }
-
-  playTune(*setting? onTune: offTune);
-  return 1;
-}
-
-static inline int
-toggleModeSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, NULL, NULL);
-}
-
-static inline int
-toggleFeatureSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, &tune_toggle_off, &tune_toggle_on);
-}
-
 #ifdef ENABLE_SPEECH_SUPPORT
-static void
-sayScreenRegion (int left, int top, int width, int height, int track, SayMode mode) {
-  size_t count = width * height;
-  ScreenCharacter characters[count];
+static size_t
+formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
+  size_t length;
 
-  readScreen(left, top, width, height, characters);
-  sayScreenCharacters(characters, count, mode==sayImmediate);
+  const char *yearFormat = "%u";
+  const char *monthFormat = "%s";
+  const char *dayFormat = "%u";
 
-  speechTracking = track;
-  speechScreen = scr.number;
-  speechLine = top;
-}
+  const char *month;
+  uint8_t day = fmt->time.day + 1;
 
-static void
-sayScreenLines (int line, int count, int track, SayMode mode) {
-  sayScreenRegion(0, line, scr.cols, count, track, mode);
-}
+#ifdef MON_1
+  {
+    static const int months[] = {
+      MON_1, MON_2, MON_3, MON_4, MON_5, MON_6,
+      MON_7, MON_8, MON_9, MON_10, MON_11, MON_12
+    };
 
-static void
-speakDone (const ScreenCharacter *line, int column, int count, int spell) {
-  ScreenCharacter internalBuffer[count];
+    month = (fmt->time.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->time.month]): "?";
+  }
+#else /* MON_1 */
+  {
+    static const char *const months[] = {
+      strtext("January"),
+      strtext("February"),
+      strtext("March"),
+      strtext("April"),
+      strtext("May"),
+      strtext("June"),
+      strtext("July"),
+      strtext("August"),
+      strtext("September"),
+      strtext("October"),
+      strtext("November"),
+      strtext("December")
+    };
 
-  if (line) {
-    line = &line[column];
-  } else {
-    readScreen(column, ses->spky, count, 1, internalBuffer);
-    line = internalBuffer;
+    month = (fmt->time.month < ARRAY_COUNT(months))? gettext(months[fmt->time.month]): "?";
+  }
+#endif /* MON_1 */
+
+  STR_BEGIN(buffer, size);
+
+  switch (prefs.dateFormat) {
+    default:
+    case dfYearMonthDay:
+      STR_PRINTF(yearFormat, fmt->time.year);
+      STR_PRINTF(" ");
+      STR_PRINTF(monthFormat, month);
+      STR_PRINTF(" ");
+      STR_PRINTF(dayFormat, day);
+      break;
+
+    case dfMonthDayYear:
+      STR_PRINTF(monthFormat, month);
+      STR_PRINTF(" ");
+      STR_PRINTF(dayFormat, day);
+      STR_PRINTF(", ");
+      STR_PRINTF(yearFormat, fmt->time.year);
+      break;
+
+    case dfDayMonthYear:
+      STR_PRINTF(dayFormat, day);
+      STR_PRINTF(" ");
+      STR_PRINTF(monthFormat, month);
+      STR_PRINTF(", ");
+      STR_PRINTF(yearFormat, fmt->time.year);
+      break;
   }
 
-  speakCharacters(line, count, spell);
-  placeWindowHorizontally(ses->spkx);
-  slideWindowVertically(ses->spky);
+  length = STR_LENGTH;
+  STR_END
+
+  return length;
 }
 
-static void
-speakCurrentCharacter (void) {
-  speakDone(NULL, ses->spkx, 1, 0);
-}
+static size_t
+formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
+  size_t length;
 
-static void
-speakCurrentLine (void) {
-  speakDone(NULL, 0, scr.cols, 0);
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%u", fmt->time.hour);
+  if (fmt->time.minute < 10) STR_PRINTF(" 0");
+  STR_PRINTF(" %u", fmt->time.minute);
+
+  if (fmt->meridian) {
+    const char *character = fmt->meridian;
+    while (*character) STR_PRINTF(" %c", *character++);
+  }
+
+  if (prefs.showSeconds) {
+    STR_PRINTF(", ");
+
+    if (fmt->time.second == 0) {
+      STR_PRINTF("%s", gettext("exactly"));
+    } else {
+      STR_PRINTF("%s %u %s",
+                 gettext("and"), fmt->time.second,
+                 ngettext("second", "seconds", fmt->time.second));
+    }
+  }
+
+  length = STR_LENGTH;
+  STR_END
+
+  return length;
 }
 
 static void
@@ -1146,405 +1071,6 @@ handleNavigationCommand (int command, void *datga) {
       doBrailleTime(&fmt);
       break;
     }
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    case BRL_CMD_RESTARTSPEECH:
-      restartSpeechDriver();
-      break;
-    case BRL_CMD_SPKHOME:
-      if (scr.number == speechScreen) {
-        trackSpeech(speech->getTrack(&spk));
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-    case BRL_CMD_AUTOSPEAK:
-      toggleFeatureSetting(&prefs.autospeak, command);
-      break;
-
-    case BRL_CMD_ASPK_SEL_LINE:
-      toggleFeatureSetting(&prefs.autospeakSelectedLine, command);
-      break;
-
-    case BRL_CMD_ASPK_SEL_CHAR:
-      toggleFeatureSetting(&prefs.autospeakSelectedCharacter, command);
-      break;
-
-    case BRL_CMD_ASPK_INS_CHARS:
-      toggleFeatureSetting(&prefs.autospeakInsertedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_DEL_CHARS:
-      toggleFeatureSetting(&prefs.autospeakDeletedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_REP_CHARS:
-      toggleFeatureSetting(&prefs.autospeakReplacedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_CMP_WORDS:
-      toggleFeatureSetting(&prefs.autospeakCompletedWords, command);
-      break;
-
-    case BRL_CMD_MUTE:
-      speech->mute(&spk);
-      break;
-
-    case BRL_CMD_SAY_LINE:
-      sayScreenLines(ses->winy, 1, 0, prefs.sayLineMode);
-      break;
-    case BRL_CMD_SAY_ABOVE:
-      sayScreenLines(0, ses->winy+1, 1, sayImmediate);
-      break;
-    case BRL_CMD_SAY_BELOW:
-      sayScreenLines(ses->winy, scr.rows-ses->winy, 1, sayImmediate);
-      break;
-
-    case BRL_CMD_SAY_SLOWER:
-      if (speech->setRate && (prefs.speechRate > 0)) {
-        setSpeechRate(&spk, --prefs.speechRate, 1);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-    case BRL_CMD_SAY_FASTER:
-      if (speech->setRate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
-        setSpeechRate(&spk, ++prefs.speechRate, 1);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-
-    case BRL_CMD_SAY_SOFTER:
-      if (speech->setVolume && (prefs.speechVolume > 0)) {
-        setSpeechVolume(&spk, --prefs.speechVolume, 1);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-    case BRL_CMD_SAY_LOUDER:
-      if (speech->setVolume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
-        setSpeechVolume(&spk, ++prefs.speechVolume, 1);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-
-    case BRL_CMD_SPEAK_CURR_CHAR:
-      speakCurrentCharacter();
-      break;
-
-    case BRL_CMD_SPEAK_PREV_CHAR:
-      if (ses->spkx > 0) {
-        ses->spkx -= 1;
-        speakCurrentCharacter();
-      } else if (ses->spky > 0) {
-        ses->spky -= 1;
-        ses->spkx = scr.cols - 1;
-        playTune(&tune_wrap_up);
-        speakCurrentCharacter();
-      } else {
-        playTune(&tune_bounce);
-      }
-      break;
-
-    case BRL_CMD_SPEAK_NEXT_CHAR:
-      if (ses->spkx < (scr.cols - 1)) {
-        ses->spkx += 1;
-        speakCurrentCharacter();
-      } else if (ses->spky < (scr.rows - 1)) {
-        ses->spky += 1;
-        ses->spkx = 0;
-        playTune(&tune_wrap_down);
-        speakCurrentCharacter();
-      } else {
-        playTune(&tune_bounce);
-      }
-      break;
-
-    case BRL_CMD_SPEAK_FRST_CHAR: {
-      ScreenCharacter characters[scr.cols];
-      int column;
-
-      readScreen(0, ses->spky, scr.cols, 1, characters);
-      if ((column = findFirstNonSpaceCharacter(characters, scr.cols)) >= 0) {
-        ses->spkx = column;
-        speakDone(characters, column, 1, 0);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-
-      break;
-    }
-
-    case BRL_CMD_SPEAK_LAST_CHAR: {
-      ScreenCharacter characters[scr.cols];
-      int column;
-
-      readScreen(0, ses->spky, scr.cols, 1, characters);
-      if ((column = findLastNonSpaceCharacter(characters, scr.cols)) >= 0) {
-        ses->spkx = column;
-        speakDone(characters, column, 1, 0);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-
-      break;
-    }
-
-    {
-      int direction;
-      int spell;
-
-    case BRL_CMD_SPEAK_PREV_WORD:
-      direction = -1;
-      spell = 0;
-      goto speakWord;
-
-    case BRL_CMD_SPEAK_NEXT_WORD:
-      direction = 1;
-      spell = 0;
-      goto speakWord;
-
-    case BRL_CMD_SPEAK_CURR_WORD:
-      direction = 0;
-      spell = 0;
-      goto speakWord;
-
-    case BRL_CMD_SPELL_CURR_WORD:
-      direction = 0;
-      spell = 1;
-      goto speakWord;
-
-    speakWord:
-      {
-        int row = ses->spky;
-        int column = ses->spkx;
-
-        ScreenCharacter characters[scr.cols];
-        ScreenCharacterType type;
-        int onCurrentWord;
-
-        int from = column;
-        int to = from + 1;
-
-      findWord:
-        readScreen(0, row, scr.cols, 1, characters);
-        type = (row == ses->spky)? getScreenCharacterType(&characters[column]): SCT_SPACE;
-        onCurrentWord = type != SCT_SPACE;
-
-        if (direction < 0) {
-          while (1) {
-            if (column == 0) {
-              if ((type != SCT_SPACE) && !onCurrentWord) {
-                ses->spkx = from = column;
-                ses->spky = row;
-                break;
-              }
-
-              if (row == 0) goto noWord;
-              if (row-- == ses->spky) playTune(&tune_wrap_up);
-              column = scr.cols;
-              goto findWord;
-            }
-
-            {
-              ScreenCharacterType newType = getScreenCharacterType(&characters[--column]);
-
-              if (newType != type) {
-                if (onCurrentWord) {
-                  onCurrentWord = 0;
-                } else if (type != SCT_SPACE) {
-                  ses->spkx = from = column + 1;
-                  ses->spky = row;
-                  break;
-                }
-
-                if (newType != SCT_SPACE) to = column + 1;
-                type = newType;
-              }
-            }
-          }
-        } else if (direction > 0) {
-          while (1) {
-            if (++column == scr.cols) {
-              if ((type != SCT_SPACE) && !onCurrentWord) {
-                to = column;
-                ses->spkx = from;
-                ses->spky = row;
-                break;
-              }
-
-              if (row == (scr.rows - 1)) goto noWord;
-              if (row++ == ses->spky) playTune(&tune_wrap_down);
-              column = -1;
-              goto findWord;
-            }
-
-            {
-              ScreenCharacterType newType = getScreenCharacterType(&characters[column]);
-
-              if (newType != type) {
-                if (onCurrentWord) {
-                  onCurrentWord = 0;
-                } else if (type != SCT_SPACE) {
-                  to = column;
-                  ses->spkx = from;
-                  ses->spky = row;
-                  break;
-                }
-
-                if (newType != SCT_SPACE) from = column;
-                type = newType;
-              }
-            }
-          }
-        } else if (type != SCT_SPACE) {
-          while (from > 0) {
-            if (getScreenCharacterType(&characters[--from]) != type) {
-              from += 1;
-              break;
-            }
-          }
-
-          while (to < scr.cols) {
-            if (getScreenCharacterType(&characters[to]) != type) break;
-            to += 1;
-          }
-        }
-
-        speakDone(characters, from, to-from, spell);
-        break;
-      }
-
-    noWord:
-      playTune(&tune_bounce);
-      break;
-    }
-
-    case BRL_CMD_SPEAK_CURR_LINE:
-      speakCurrentLine();
-      break;
-
-    {
-      int increment;
-      int limit;
-
-    case BRL_CMD_SPEAK_PREV_LINE:
-      increment = -1;
-      limit = 0;
-      goto speakLine;
-
-    case BRL_CMD_SPEAK_NEXT_LINE:
-      increment = 1;
-      limit = scr.rows - 1;
-      goto speakLine;
-
-    speakLine:
-      if (ses->spky == limit) {
-        playTune(&tune_bounce);
-      } else {
-        if (prefs.skipIdenticalLines) {
-          ScreenCharacter original[scr.cols];
-          ScreenCharacter current[scr.cols];
-          int count = 0;
-
-          readScreen(0, ses->spky, scr.cols, 1, original);
-
-          do {
-            readScreen(0, ses->spky+=increment, scr.cols, 1, current);
-            if (!isSameRow(original, current, scr.cols, isSameText)) break;
-
-            if (!count) {
-              playTune(&tune_skip_first);
-            } else if (count < 4) {
-              playTune(&tune_skip);
-            } else if (!(count % 4)) {
-              playTune(&tune_skip_more);
-            }
-
-            count += 1;
-          } while (ses->spky != limit);
-        } else {
-          ses->spky += increment;
-        }
-
-        speakCurrentLine();
-      }
-
-      break;
-    }
-
-    case BRL_CMD_SPEAK_FRST_LINE: {
-      ScreenCharacter characters[scr.cols];
-      int row = 0;
-
-      while (row < scr.rows) {
-        readScreen(0, row, scr.cols, 1, characters);
-        if (!isAllSpaceCharacters(characters, scr.cols)) break;
-        row += 1;
-      }
-
-      if (row < scr.rows) {
-        ses->spky = row;
-        ses->spkx = 0;
-        speakCurrentLine();
-      } else {
-        playTune(&tune_command_rejected);
-      }
-
-      break;
-    }
-
-    case BRL_CMD_SPEAK_LAST_LINE: {
-      ScreenCharacter characters[scr.cols];
-      int row = scr.rows - 1;
-
-      while (row >= 0) {
-        readScreen(0, row, scr.cols, 1, characters);
-        if (!isAllSpaceCharacters(characters, scr.cols)) break;
-        row -= 1;
-      }
-
-      if (row >= 0) {
-        ses->spky = row;
-        ses->spkx = 0;
-        speakCurrentLine();
-      } else {
-        playTune(&tune_command_rejected);
-      }
-
-      break;
-    }
-
-    case BRL_CMD_DESC_CURR_CHAR: {
-      char description[0X50];
-      formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
-      sayString(&spk, description, 1);
-      break;
-    }
-
-    case BRL_CMD_ROUTE_CURR_LOCN:
-      if (routeCursor(ses->spkx, ses->spky, scr.number)) {
-        playTune(&tune_routing_started);
-      } else {
-        playTune(&tune_command_rejected);
-      }
-      break;
-
-    case BRL_CMD_SPEAK_CURR_LOCN: {
-      char buffer[0X50];
-      snprintf(buffer, sizeof(buffer), "%s %d, %s %d",
-               gettext("line"), ses->spky+1,
-               gettext("column"), ses->spkx+1);
-      sayString(&spk, buffer, 1);
-      break;
-    }
-
-    case BRL_CMD_SHOW_CURR_LOCN:
-      toggleFeatureSetting(&prefs.showSpeechCursor, command);
-      break;
-#endif /* ENABLE_SPEECH_SUPPORT */
 
     default: {
       int blk = command & BRL_MSK_BLK;

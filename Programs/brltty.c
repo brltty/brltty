@@ -24,6 +24,10 @@
 #include <errno.h>
 #include <time.h>
 
+#ifdef HAVE_ICU
+#include <unicode/uchar.h>
+#endif /* HAVE_ICU */
+
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif /* HAVE_LANGINFO_H */
@@ -40,6 +44,7 @@
 #include "log.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
+#include "cmd_speech.h"
 #include "timing.h"
 #include "async_alarm.h"
 #include "async_wait.h"
@@ -114,6 +119,7 @@ setSessionEntry (void) {
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
+        pushCommandHandler(KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
         pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
         pushCommandHandler(KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
@@ -477,116 +483,6 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   return length;
 }
 
-#ifdef ENABLE_SPEECH_SUPPORT
-size_t
-formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
-  size_t length;
-
-  STR_BEGIN(buffer, size);
-  STR_PRINTF("%u", fmt->time.hour);
-  if (fmt->time.minute < 10) STR_PRINTF(" 0");
-  STR_PRINTF(" %u", fmt->time.minute);
-
-  if (fmt->meridian) {
-    const char *character = fmt->meridian;
-    while (*character) STR_PRINTF(" %c", *character++);
-  }
-
-  if (prefs.showSeconds) {
-    STR_PRINTF(", ");
-
-    if (fmt->time.second == 0) {
-      STR_PRINTF("%s", gettext("exactly"));
-    } else {
-      STR_PRINTF("%s %u %s",
-                 gettext("and"), fmt->time.second,
-                 ngettext("second", "seconds", fmt->time.second));
-    }
-  }
-
-  length = STR_LENGTH;
-  STR_END
-
-  return length;
-}
-
-size_t
-formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
-  size_t length;
-
-  const char *yearFormat = "%u";
-  const char *monthFormat = "%s";
-  const char *dayFormat = "%u";
-
-  const char *month;
-  uint8_t day = fmt->time.day + 1;
-
-#ifdef MON_1
-  {
-    static const int months[] = {
-      MON_1, MON_2, MON_3, MON_4, MON_5, MON_6,
-      MON_7, MON_8, MON_9, MON_10, MON_11, MON_12
-    };
-
-    month = (fmt->time.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->time.month]): "?";
-  }
-#else /* MON_1 */
-  {
-    static const char *const months[] = {
-      strtext("January"),
-      strtext("February"),
-      strtext("March"),
-      strtext("April"),
-      strtext("May"),
-      strtext("June"),
-      strtext("July"),
-      strtext("August"),
-      strtext("September"),
-      strtext("October"),
-      strtext("November"),
-      strtext("December")
-    };
-
-    month = (fmt->time.month < ARRAY_COUNT(months))? gettext(months[fmt->time.month]): "?";
-  }
-#endif /* MON_1 */
-
-  STR_BEGIN(buffer, size);
-
-  switch (prefs.dateFormat) {
-    default:
-    case dfYearMonthDay:
-      STR_PRINTF(yearFormat, fmt->time.year);
-      STR_PRINTF(" ");
-      STR_PRINTF(monthFormat, month);
-      STR_PRINTF(" ");
-      STR_PRINTF(dayFormat, day);
-      break;
-
-    case dfMonthDayYear:
-      STR_PRINTF(monthFormat, month);
-      STR_PRINTF(" ");
-      STR_PRINTF(dayFormat, day);
-      STR_PRINTF(", ");
-      STR_PRINTF(yearFormat, fmt->time.year);
-      break;
-
-    case dfDayMonthYear:
-      STR_PRINTF(dayFormat, day);
-      STR_PRINTF(" ");
-      STR_PRINTF(monthFormat, month);
-      STR_PRINTF(", ");
-      STR_PRINTF(yearFormat, fmt->time.year);
-      break;
-  }
-
-  length = STR_LENGTH;
-  STR_END
-
-  return length;
-}
-#endif /* ENABLE_SPEECH_SUPPORT */
-
 void
 getTimeFormattingData (TimeFormattingData *fmt) {
   TimeValue now;
@@ -594,6 +490,63 @@ getTimeFormattingData (TimeFormattingData *fmt) {
   getCurrentTime(&now);
   expandTimeValue(&now, &fmt->time);
   fmt->meridian = getMeridianString(&fmt->time.hour);
+}
+
+size_t
+formatCharacterDescription (char *buffer, size_t size, int column, int row) {
+  static char *const colours[] = {
+    strtext("black"),
+    strtext("blue"),
+    strtext("green"),
+    strtext("cyan"),
+    strtext("red"),
+    strtext("magenta"),
+    strtext("brown"),
+    strtext("light grey"),
+    strtext("dark grey"),
+    strtext("light blue"),
+    strtext("light green"),
+    strtext("light cyan"),
+    strtext("light red"),
+    strtext("light magenta"),
+    strtext("yellow"),
+    strtext("white")
+  };
+
+  size_t length;
+  ScreenCharacter character;
+
+  readScreen(column, row, 1, 1, &character);
+  STR_BEGIN(buffer, size);
+
+  {
+    uint32_t text = character.text;
+
+    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "): %s on %s",
+               text, text,
+               gettext(colours[character.attributes & 0X0F]),
+               gettext(colours[(character.attributes & 0X70) >> 4]));
+  }
+
+  if (character.attributes & SCR_ATTR_BLINK) {
+    STR_PRINTF(" %s", gettext("blink"));
+  }
+
+#ifdef HAVE_ICU
+  {
+    char name[0X40];
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+    if (U_SUCCESS(error)) {
+      STR_PRINTF(" [%s]", name);
+    }
+  }
+#endif /* HAVE_ICU */
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
 }
 
 static int
@@ -1107,6 +1060,84 @@ resetBlinkingStates (void) {
   setBlinkingState(&attributesBlinkingState, 1);
   setBlinkingState(&capitalsBlinkingState, 1);
   setBlinkingState(&speechCursorBlinkingState, 0);
+}
+
+int
+toggleFlag (
+  int *bits, int bit, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+) {
+  int oldBits = *bits;
+
+  switch (command & BRL_FLG_TOGGLE_MASK) {
+    case 0:
+      *bits ^= bit;
+      break;
+
+    case BRL_FLG_TOGGLE_ON:
+      *bits |= bit;
+      break;
+
+    case BRL_FLG_TOGGLE_OFF:
+      *bits &= ~bit;
+      break;
+
+    default:
+      playTune(&tune_command_rejected);
+      return 0;
+  }
+
+  if (*bits == oldBits) {
+    playTune(&tune_no_change);
+    return 0;
+  }
+
+  playTune((*bits & bit)? onTune: offTune);
+  return 1;
+}
+
+int
+toggleSetting (
+  unsigned char *setting, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+) {
+  unsigned char oldSetting = *setting;
+
+  switch (command & BRL_FLG_TOGGLE_MASK) {
+    case 0:
+      *setting = !*setting;
+      break;
+
+    case BRL_FLG_TOGGLE_ON:
+      *setting = 1;
+      break;
+
+    case BRL_FLG_TOGGLE_OFF:
+      *setting = 0;
+      break;
+
+    default:
+      playTune(&tune_command_rejected);
+      return 0;
+  }
+
+  if (*setting == oldSetting) {
+    playTune(&tune_no_change);
+    return 0;
+  }
+
+  playTune(*setting? onTune: offTune);
+  return 1;
+}
+
+int
+toggleModeSetting (unsigned char *setting, int command) {
+  return toggleSetting(setting, command, NULL, NULL);
+}
+
+int
+toggleFeatureSetting (unsigned char *setting, int command) {
+  return toggleSetting(setting, command, &tune_toggle_off, &tune_toggle_on);
 }
 
 static const unsigned char cursorStyles[] = {

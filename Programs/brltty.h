@@ -26,12 +26,13 @@
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
-#include "ctb.h"
-#include "ktb.h"
 #include "scr.h"
 #include "ses.h"
+#include "ctb.h"
+#include "ktb.h"
 #include "menu.h"
 #include "prefs.h"
+#include "tunes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,6 +92,18 @@ extern BlinkingState speechCursorBlinkingState;
 
 extern void resetBlinkingStates (void);
 extern void setBlinkingState (BlinkingState *state, int visible);
+extern int toggleFlag (
+  int *bits, int bit, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+);
+
+extern int toggleSetting (
+  unsigned char *setting, int command,
+  const TuneDefinition *offTune, const TuneDefinition *onTune
+);
+
+extern int toggleModeSetting (unsigned char *setting, int command);
+extern int toggleFeatureSetting (unsigned char *setting, int command);
 
 extern unsigned char infoMode;
 
@@ -140,10 +153,7 @@ typedef struct {
 extern void getTimeFormattingData (TimeFormattingData *fmt);
 extern size_t formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt);
 
-#ifdef ENABLE_SPEECH_SUPPORT
-extern size_t formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt);
-extern size_t formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt);
-#endif /* ENABLE_SPEECH_SUPPORT */
+extern size_t formatCharacterDescription (char *buffer, size_t size, int column, int row);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;
