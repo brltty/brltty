@@ -297,13 +297,15 @@ handlePollAlarm (const AsyncAlarmResult *result) {
   pollAlarm = NULL;
 
   if (!isSuspended) {
+#ifdef ENABLE_API
     apiClaimDriver();
+#endif /* ENABLE_API */
 
-    if (readCommand()) {
-      delay = 0;
-    }
+    if (readCommand()) delay = 0;
 
+#ifdef ENABLE_API
     apiReleaseDriver();
+#endif /* ENABLE_API */
   }
 
 #ifdef ENABLE_API

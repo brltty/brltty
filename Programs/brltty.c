@@ -119,7 +119,10 @@ setSessionEntry (void) {
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
+#ifdef ENABLE_SPEECH_SUPPORT
         pushCommandHandler(KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
+#endif /*  ENABLE_SPEECH_SUPPORT */
+
         pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
         pushCommandHandler(KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
@@ -1313,15 +1316,6 @@ void
 apiReleaseDriver (void) {
   if (apiDriverClaimed) api_releaseDriver(&brl);
 }
-
-#else /* ENABLE_API */
-void
-apiClaimDriver (void) {
-}
-
-void
-apiReleaseDriver (void) {
-}
 #endif /* ENABLE_API */
 
 static int
@@ -1651,8 +1645,11 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   }
 
   if (!isSuspended) {
-    apiClaimDriver();
     int pointerMoved = 0;
+
+#ifdef ENABLE_API
+    apiClaimDriver();
+#endif /*  ENABLE_API */
 
     if (brl.highlightWindow) {
       brl.highlightWindow = 0;
@@ -1951,7 +1948,9 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
       }
     }
 
+#ifdef ENABLE_API
     apiReleaseDriver();
+#endif /*  ENABLE_API */
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT

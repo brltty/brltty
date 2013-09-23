@@ -29,11 +29,12 @@
 
 #include "program.h"
 #include "options.h"
+#include "log.h"
 #include "parse.h"
 #include "brl.h"
-#include "log.h"
 #include "file.h"
-#include "timing.h"
+#include "async_wait.h"
+#include "cmd_learn.h"
 #include "charset.h"
 #include "message.h"
 #include "defaults.h"
@@ -106,7 +107,7 @@ message (const char *mode, const char *text, short flags) {
       int timer = 0;
       while (braille->readCommand(&brl, KTB_CTX_WAITING) == EOF) {
         if (timer > 4000) break;
-        approximateDelay(updateInterval);
+        asyncWait(updateInterval);
         timer += updateInterval;
       }
     }
@@ -202,7 +203,7 @@ main (int argc, char *argv[]) {
     if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
       if (ensureBrailleBuffer(&brl, LOG_INFO)) {
 #ifdef ENABLE_LEARN_MODE
-        learnMode(&brl, updateInterval, 10000);
+        learnMode(10000);
 #else /* ENABLE_LEARN_MODE */
         message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */

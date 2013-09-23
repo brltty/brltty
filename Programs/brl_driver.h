@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "cmd_queue.h"
+#include "cmd_braille.h"
 #include "brl.h"
 #include "statdefs.h"
 
