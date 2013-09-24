@@ -1435,12 +1435,14 @@ static SocketDescriptor newTcpSocket(int family, int type, int protocol, const s
     }
 #endif /* SO_REUSEADDR */
 
+#ifdef SOL_TCP
 #ifdef TCP_NODELAY
     if (setsockopt(fd, SOL_TCP, TCP_NODELAY,
                    (const void *)&yes, sizeof(yes)) == -1) {
       LogSocketError("setsockopt[TCP,NODELAY]");
     }
 #endif /* TCP_NODELAY */
+#endif /* SOL_TCP */
 
     if (loopBind(fd, addr, len) != -1) {
       if (listen(fd, 1) != -1) {
@@ -2131,7 +2133,7 @@ static void *runServer(void *arg)
        * filesystems, but it has with inter-thread overlapped operations,
        * so call from here 
        */
-      createSocket((void *)i);
+      createSocket(i);
     }
 #endif /* __MINGW32__ */
   }
