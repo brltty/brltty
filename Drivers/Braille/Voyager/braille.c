@@ -717,7 +717,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.options.readyDelay = BLUETOOTH_READY_DELAY;
   descriptor.bluetooth.options.inputTimeout = SERIAL_INPUT_TIMEOUT;
 
-  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if (connectBrailleResource(brl, identifier, &descriptor)) {
     protocol = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
@@ -989,8 +989,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    gioDisconnectResource(brl->gioEndpoint);
-    brl->gioEndpoint = NULL;
+    disconnectBrailleResource(brl, NULL);
   }
 
   return 0;
@@ -998,10 +997,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (brl->gioEndpoint) {
-    gioDisconnectResource(brl->gioEndpoint);
-    brl->gioEndpoint = NULL;
-  }
+  disconnectBrailleResource(brl, NULL);
 
   if (translatedCells) {
     free(translatedCells);

@@ -247,20 +247,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
-  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if (connectBrailleResource(brl, identifier, &descriptor)) {
     io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
   return 0;
-}
-
-static void
-disconnectResource (BrailleDisplay *brl) {
-  if (brl->gioEndpoint) {
-    gioDisconnectResource(brl->gioEndpoint);
-    brl->gioEndpoint = NULL;
-  }
 }
 
 static int
@@ -330,7 +322,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    disconnectResource(brl);
+    disconnectBrailleResource(brl, NULL);
   }
 
   return 0;
@@ -342,7 +334,7 @@ brl_destruct (BrailleDisplay *brl) {
     {
       protocol = NULL;
     }
-  disconnectResource(brl);
+  disconnectBrailleResource(brl, NULL);
 }
 
 #ifdef BRL_HAVE_PACKET_IO

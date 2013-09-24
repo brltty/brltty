@@ -434,12 +434,37 @@ applyBrailleOrientation (unsigned char *cells, size_t count) {
   }
 }
 
+int
+connectBrailleResource (
+  BrailleDisplay *brl,
+  const char *identifier,
+  const GioDescriptor *descriptor
+) {
+  GioEndpoint *endpoint = gioConnectResource(identifier, descriptor);
+  if (!endpoint) return 0;
+
+  brl->gioEndpoint = endpoint;
+  return 1;
+}
+
+void
+disconnectBrailleResource (
+  BrailleDisplay *brl,
+  BrailleSessionEnder *endSession
+) {
+  if (brl->gioEndpoint) {
+    if (endSession) endSession(brl);
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
+  }
+}
+
 size_t
 readBraillePacket (
   BrailleDisplay *brl,
   GioEndpoint *endpoint,
   void *packet, size_t size,
-  BraillePacketVerifier verifyPacket, void *data
+  BraillePacketVerifier *verifyPacket, void *data
 ) {
   unsigned char *bytes = packet;
   size_t count = 0;
@@ -507,8 +532,8 @@ int
 probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,
-  BrailleRequestWriter writeRequest,
-  BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
+  BrailleRequestWriter *writeRequest,
+  BraillePacketReader *readPacket, void *responsePacket, size_t responseSize,
   BrailleResponseHandler *handleResponse
 ) {
   unsigned int retryCount = 0;

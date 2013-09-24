@@ -86,6 +86,19 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 
+extern int connectBrailleResource (
+  BrailleDisplay *brl,
+  const char *identifier,
+  const GioDescriptor *descriptor
+);
+
+typedef int BrailleSessionEnder (BrailleDisplay *brl);
+
+extern void disconnectBrailleResource (
+  BrailleDisplay *brl,
+  BrailleSessionEnder *endSession
+);
+
 typedef int BraillePacketVerifier (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -96,7 +109,7 @@ extern size_t readBraillePacket (
   BrailleDisplay *brl,
   GioEndpoint *endpoint,
   void *packet, size_t size,
-  BraillePacketVerifier verifyPacket, void *data
+  BraillePacketVerifier *verifyPacket, void *data
 );
 
 extern int writeBraillePacket (
@@ -127,8 +140,8 @@ typedef BrailleResponseResult BrailleResponseHandler (
 extern int probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,
-  BrailleRequestWriter writeRequest,
-  BraillePacketReader readPacket, void *responsePacket, size_t responseSize,
+  BrailleRequestWriter *writeRequest,
+  BraillePacketReader *readPacket, void *responsePacket, size_t responseSize,
   BrailleResponseHandler *handleResponse
 );
 

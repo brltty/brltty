@@ -338,17 +338,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.serial.parameters = &serialParameters;
 
-  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if (connectBrailleResource(brl, identifier, &descriptor)) {
     return 1;
   }
 
   return 0;
-}
-
-static void
-disconnectResource (BrailleDisplay *brl) {
-  gioDisconnectResource(brl->gioEndpoint);
-  brl->gioEndpoint = NULL;
 }
 
 static int
@@ -392,7 +386,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    disconnectResource(brl);
+    disconnectBrailleResource(brl, NULL);
   }
 
   return 0;
@@ -400,10 +394,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  disconnectResource(brl);
+  disconnectBrailleResource(brl, NULL);
 
-  free(cellBuffer);
-  cellBuffer = NULL;
+  if (cellBuffer) {
+    free(cellBuffer);
+    cellBuffer = NULL;
+  }
 }
 
 static ssize_t
