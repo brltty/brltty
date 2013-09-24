@@ -768,3 +768,18 @@ formatInputError (char *buffer, size_t size, const char *file, const int *line, 
   STR_END
   return length;
 }
+
+int
+createPipe (FileDescriptor *input, FileDescriptor *output) {
+  int fileDescriptors[2];
+
+  if (pipe(fileDescriptors) != -1) {
+    *input = fileDescriptors[1];
+    *output = fileDescriptors[0];
+    return 1;
+  } else {
+    logSystemError("pipe");
+  }
+
+  return 0;
+}

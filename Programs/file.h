@@ -69,6 +69,8 @@ extern int readLine (FILE *file, char **buffer, size_t *size);
 
 extern size_t formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp);
 
+extern int createPipe (FileDescriptor *input, FileDescriptor *output);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

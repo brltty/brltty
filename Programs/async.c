@@ -71,6 +71,7 @@ typedef struct {
 #include "log.h"
 #include "queue.h"
 #include "timing.h"
+#include "file.h"
 
 #include "async.h"
 #include "async_io.h"
@@ -1471,16 +1472,19 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 struct AsyncEventStruct {
   AsyncEventCallback *callback;
   void *data;
-  int pipe[2];
-  AsyncHandle monitor;
+
+  FileDescriptor pipeInput;
+  FileDescriptor pipeOutput;
+  AsyncHandle monitorHandle;
 };
 
 static int
-monitorEvent (const AsyncMonitorResult *result) {
+monitorEventPipe (const AsyncMonitorResult *result) {
   AsyncEvent *event = result->data;
   void *data;
+  ssize_t count = read(event->pipeOutput, &data, sizeof(data));
 
-  if (read(event->pipe[0], &data, sizeof(data)) == sizeof(data)) {
+  if (count == sizeof(data)) {
     event->callback(event->data, data);
     return 1;
   }
@@ -1497,18 +1501,18 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
     event->callback = callback;
     event->data = data;
 
-    if (pipe(event->pipe) != -1) {
-      if (asyncMonitorFileInput(&event->monitor, event->pipe[0], monitorEvent, event)) {
+    if (createPipe(&event->pipeInput, &event->pipeOutput)) {
+      if (asyncMonitorFileInput(&event->monitorHandle, event->pipeOutput, monitorEventPipe, event)) {
         return event;
       }
 
-      close(event->pipe[0]);
-      close(event->pipe[1]);
-    } else {
-      logSystemError("pipe");
+      closeFileDescriptor(event->pipeInput);
+      closeFileDescriptor(event->pipeOutput);
     }
 
     free(event);
+  } else {
+    logMallocError();
   }
 
   return NULL;
@@ -1516,15 +1520,15 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
 
 void
 asyncDiscardEvent (AsyncEvent *event) {
-  asyncCancelRequest(event->monitor);
-  close(event->pipe[0]);
-  close(event->pipe[1]);
+  asyncCancelRequest(event->monitorHandle);
+  close(event->pipeInput);
+  close(event->pipeOutput);
   free(event);
 }
 
 void
 asyncSignalEvent (AsyncEvent *event, void *data) {
-  write(event->pipe[1], &data, sizeof(data));
+  write(event->pipeInput, &data, sizeof(data));
 }
 
 static void
