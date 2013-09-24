@@ -36,6 +36,8 @@ typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
 
 typedef ssize_t GioWriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
 
+typedef int GioMonitorInputMethod (GioHandle *handle, AsyncMonitorCallback *callback);
+
 typedef int GioAwaitInputMethod (GioHandle *handle, int timeout);
 
 typedef ssize_t GioReadDataMethod (
@@ -87,6 +89,7 @@ typedef struct {
   GioGetResourceNameMethod *getResourceName;
 
   GioWriteDataMethod *writeData;
+  GioMonitorInputMethod *monitorInput;
   GioAwaitInputMethod *awaitInput;
   GioReadDataMethod *readData;
 

@@ -231,6 +231,19 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 }
 
 int
+gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback) {
+  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
+
+  if (method) {
+    if (method(endpoint->handle, callback)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
 gioAwaitInput (GioEndpoint *endpoint, int timeout) {
   GioAwaitInputMethod *method = endpoint->methods->awaitInput;
 
