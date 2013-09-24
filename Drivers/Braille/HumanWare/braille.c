@@ -66,7 +66,6 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  GioEndpoint *gioEndpoint;
   int forceWrite;
   unsigned char textCells[0XFF];
 };
@@ -107,7 +106,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
   memcpy(packet.fields.data.bytes, data, length);
   length += packet.fields.data.bytes - packet.bytes;
 
-  return writeBraillePacket(brl, brl->data->gioEndpoint, &packet, length);
+  return writeBraillePacket(brl, NULL, &packet, length);
 }
 
 static int
@@ -140,7 +139,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.readyDelay = 100;
 
-  if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
 
@@ -154,7 +153,7 @@ writeIdentifyRequest (BrailleDisplay *brl) {
 
 static size_t
 readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, brl->data->gioEndpoint, packet, size, verifyPacket, NULL);
+  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
 }
 
 static BrailleResponseResult
@@ -168,12 +167,11 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
       HW_Packet response;
 
-      if (probeBrailleDisplay(brl, 0, brl->data->gioEndpoint, 1000,
+      if (probeBrailleDisplay(brl, 0, NULL, 1000,
                               writeIdentifyRequest,
                               readResponse, &response, sizeof(response.bytes),
                               isIdentityResponse)) {
@@ -199,8 +197,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }
       }
 
-      gioDisconnectResource(brl->data->gioEndpoint);
-      brl->data->gioEndpoint = NULL;
+      gioDisconnectResource(brl->gioEndpoint);
+      brl->gioEndpoint = NULL;
     }
 
     free(brl->data);
@@ -215,9 +213,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data) {
-    if (brl->data->gioEndpoint) {
-      gioDisconnectResource(brl->data->gioEndpoint);
-      brl->data->gioEndpoint = NULL;
+    if (brl->gioEndpoint) {
+      gioDisconnectResource(brl->gioEndpoint);
+      brl->gioEndpoint = NULL;
     }
 
     free(brl->data);
@@ -256,7 +254,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   HW_Packet packet;
   size_t length;
 
-  while ((length = readBraillePacket(brl, brl->data->gioEndpoint, &packet, sizeof(packet), verifyPacket, NULL))) {
+  while ((length = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL))) {
     switch (packet.fields.type) {
       case HW_MSG_KEY_DOWN:
         handleKeyEvent(packet.fields.data.key.id, 1);

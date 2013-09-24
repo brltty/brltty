@@ -682,7 +682,7 @@ initializeDevice (BrailleDisplay *brl) {
   do {
     if (!resetDevice(brl)) return 0;
 
-    while (io->awaitInput(500)) {
+    while (io->awaitInput(brl, 500)) {
       if (readCommand(brl, KTB_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) return 0;
 
       if (haveSystemInformation) {

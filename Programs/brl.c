@@ -49,8 +49,10 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->keyNameTables = NULL;
   brl->keyTable = NULL;
 
+  brl->gioEndpoint = NULL;
   brl->buffer = NULL;
   brl->writeDelay = 0;
+
   brl->bufferResized = NULL;
   brl->touchEnabled = 0;
   brl->highlightWindow = 0;
@@ -443,6 +445,8 @@ readBraillePacket (
   size_t count = 0;
   size_t length = 1;
 
+  if (!endpoint) endpoint = brl->gioEndpoint;
+
   while (1) {
     unsigned char byte;
 
@@ -484,12 +488,18 @@ readBraillePacket (
 
 int
 writeBraillePacket (
-  BrailleDisplay *brl, GioEndpoint *endpoint,
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
   const void *packet, size_t size
 ) {
+  if (!endpoint) endpoint = brl->gioEndpoint;
   logOutputPacket(packet, size);
   if (gioWriteData(endpoint, packet, size) == -1) return 0;
-  brl->writeDelay += gioGetMillisecondsToTransfer(endpoint, size);
+
+  if (endpoint == brl->gioEndpoint) {
+    brl->writeDelay += gioGetMillisecondsToTransfer(endpoint, size);
+  }
+
   return 1;
 }
 
@@ -502,6 +512,8 @@ probeBrailleDisplay (
   BrailleResponseHandler *handleResponse
 ) {
   unsigned int retryCount = 0;
+
+  if (!endpoint) endpoint = brl->gioEndpoint;
 
   while (writeRequest(brl)) {
     drainBrailleOutput(brl, 0);

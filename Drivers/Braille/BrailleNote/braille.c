@@ -65,8 +65,6 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
-static GioEndpoint *gioEndpoint = NULL;
-
 typedef union {
   unsigned char bytes[3];
   struct {
@@ -99,14 +97,14 @@ static unsigned char *dataArea;
 static int dataCells;
 
 static int
-readPacket (unsigned char *packet, int size) {
+readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
   while (1) {
     unsigned char byte;
 
-    if (!gioReadByte(gioEndpoint, &byte, (offset > 0))) {
+    if (!gioReadByte(brl->gioEndpoint, &byte, (offset > 0))) {
       if (offset > 0) logPartialPacket(packet, offset);
       return 0;
     }
@@ -159,8 +157,8 @@ readPacket (unsigned char *packet, int size) {
 }
 
 static int
-getPacket (ResponsePacket *packet) {
-  return readPacket(packet->bytes, sizeof(*packet));
+getPacket (BrailleDisplay *brl, ResponsePacket *packet) {
+  return readPacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -175,7 +173,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
     --size;
   }
 
-  return writeBraillePacket(brl, gioEndpoint, buffer, byte-buffer);
+  return writeBraillePacket(brl, NULL, buffer, byte-buffer);
 }
 
 static int
@@ -190,10 +188,10 @@ refreshCells (BrailleDisplay *brl) {
 }
 
 static unsigned char
-getByte (void) {
+getByte (BrailleDisplay *brl) {
   unsigned char byte;
-  while (!gioAwaitInput(gioEndpoint, 1000000000));
-  gioReadByte(gioEndpoint, &byte, 0);
+  while (!gioAwaitInput(brl->gioEndpoint, 1000000000));
+  gioReadByte(brl->gioEndpoint, &byte, 0);
   return byte;
 }
 
@@ -280,14 +278,14 @@ writeVisualDisplay (unsigned char c) {
 }
 
 static int
-doVisualDisplay (void) {
+doVisualDisplay (BrailleDisplay *brl) {
   int vt = getVirtualTerminal();
   const unsigned char end[] = {ESC, 0};
   unsigned int state = 0;
   openVisualDisplay();
   writeVisualDisplay(BN_RSP_DISPLAY);
   for (;;) {
-    unsigned char character = getByte();
+    unsigned char character = getByte(brl);
     if (character == end[state]) {
       if (++state == sizeof(end)) break;
     } else {
@@ -318,7 +316,7 @@ writeIdentifyRequest (BrailleDisplay *brl) {
 
 static size_t
 readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readPacket(packet, size);
+  return readPacket(brl, packet, size);
 }
 
 static BrailleResponseResult
@@ -329,7 +327,7 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 }
 
 static int
-connectResource (const char *identifier) {
+connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
     .baud = 38400
@@ -340,7 +338,7 @@ connectResource (const char *identifier) {
 
   descriptor.serial.parameters = &serialParameters;
 
-  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
 
@@ -348,17 +346,17 @@ connectResource (const char *identifier) {
 }
 
 static void
-disconnectResource (void) {
-  gioDisconnectResource(gioEndpoint);
-  gioEndpoint = NULL;
+disconnectResource (BrailleDisplay *brl) {
+  gioDisconnectResource(brl->gioEndpoint);
+  brl->gioEndpoint = NULL;
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (connectResource(device)) {
+  if (connectResource(brl, device)) {
     ResponsePacket response;
 
-    if (probeBrailleDisplay(brl, 0, gioEndpoint, 100,
+    if (probeBrailleDisplay(brl, 0, NULL, 100,
                               writeIdentifyRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
@@ -394,7 +392,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    disconnectResource();
+    disconnectResource(brl);
   }
 
   return 0;
@@ -402,7 +400,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  disconnectResource();
+  disconnectResource(brl);
 
   free(cellBuffer);
   cellBuffer = NULL;
@@ -410,7 +408,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  int count = readPacket(buffer, size);
+  int count = readPacket(brl, buffer, size);
   if (!count) count = -1;
   return count;
 }
@@ -438,14 +436,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   ResponsePacket packet;
   int size;
 
-  while ((size = getPacket(&packet))) {
+  while ((size = getPacket(brl, &packet))) {
     switch (packet.data.code) {
       case BN_RSP_ROUTE:
         enqueueKey(BN_SET_RoutingKeys, packet.data.values.routingKey);
         break;
 
       case BN_RSP_DISPLAY:
-        doVisualDisplay();
+        doVisualDisplay(brl);
         break;
 
       default: {

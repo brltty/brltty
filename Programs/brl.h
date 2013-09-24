@@ -45,12 +45,14 @@ struct BrailleDisplayStruct {
   KEY_NAME_TABLES_REFERENCE keyNameTables;
   KeyTable *keyTable;
 
+  GioEndpoint *gioEndpoint;
   unsigned char *buffer;
+  unsigned int writeDelay;
+
   int cursor;
   unsigned isCoreBuffer:1;
   unsigned resizeRequired:1;
   unsigned noDisplay:1;
-  unsigned int writeDelay;
   void (*bufferResized) (unsigned int rows, unsigned int columns);
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
@@ -98,7 +100,8 @@ extern size_t readBraillePacket (
 );
 
 extern int writeBraillePacket (
-  BrailleDisplay *brl, GioEndpoint *endpoint,
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
   const void *packet, size_t size
 );
 

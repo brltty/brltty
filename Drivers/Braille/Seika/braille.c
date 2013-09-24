@@ -129,7 +129,6 @@ typedef struct {
   const ProtocolOperations *const *protocols;
 } InputOutputOperations;
 
-static GioEndpoint *gioEndpoint = NULL;
 static const InputOutputOperations *io;
 static const ProtocolOperations *protocol;
 
@@ -146,7 +145,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
 static int
 writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
-  return writeBraillePacket(brl, gioEndpoint, packet, size);
+  return writeBraillePacket(brl, NULL, packet, size);
 }
 
 static BrailleResponseResult
@@ -297,6 +296,7 @@ bdpInitializeData (void) {
 
 static int
 bdpReadPacket (
+  BrailleDisplay *brl,
   InputPacket *packet,
   const TemplateEntry *identityTemplate,
   const TemplateEntry *alternateTemplate,
@@ -317,7 +317,7 @@ bdpReadPacket (
     {
       int started = offset > 0;
 
-      if (!gioReadByte(gioEndpoint, &byte, started)) {
+      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -434,7 +434,7 @@ pbcReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return bdpReadPacket(packet, &identityTemplate, bdpModel->routingTemplate, pbcInterpretIdentity);
+  return bdpReadPacket(brl, packet, &identityTemplate, bdpModel->routingTemplate, pbcInterpretIdentity);
 }
 
 static int
@@ -492,7 +492,7 @@ ntvReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return bdpReadPacket(packet, &identityTemplate, &templateEntry_keys, ntvInterpretIdentity);
+  return bdpReadPacket(brl, packet, &identityTemplate, &templateEntry_keys, ntvInterpretIdentity);
 }
 
 static int
@@ -549,7 +549,7 @@ static int
 ntkReadPacket (BrailleDisplay *brl, InputPacket *packet) {
   size_t length;
 
-  while ((length = readBraillePacket(brl, gioEndpoint,
+  while ((length = readBraillePacket(brl, NULL,
                                      packet->bytes, sizeof(packet->bytes),
                                      ntkVerifyPacket, NULL))) {
     unsigned char type = packet->bytes[2];
@@ -659,7 +659,7 @@ static const InputOutputOperations bluetoothOperations = {
 };
 
 static int
-connectResource (const char *identifier) {
+connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
     .baud = 9600
@@ -695,8 +695,8 @@ connectResource (const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
-  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
-    io = gioGetApplicationData(gioEndpoint);
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -704,16 +704,16 @@ connectResource (const char *identifier) {
 }
 
 static void
-disconnectResource (void) {
-  if (gioEndpoint) {
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+disconnectResource (BrailleDisplay *brl) {
+  if (brl->gioEndpoint) {
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (connectResource(device)) {
+  if (connectResource(brl, device)) {
     const ProtocolOperations *const *protocolAddress = io->protocols;
 
     while ((protocol = *protocolAddress++)) {
@@ -722,7 +722,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       logMessage(LOG_DEBUG, "trying protocol %s", protocol->name);
       protocol->initializeData();
 
-      if (probeBrailleDisplay(brl, 2, gioEndpoint, 200,
+      if (probeBrailleDisplay(brl, 2, NULL, 200,
                               protocol->writeIdentifyRequest,
                               readPacket, &response, sizeof(response.bytes),
                               isIdentityResponse)) {
@@ -746,7 +746,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    disconnectResource();
+    disconnectResource(brl);
   }
 
   return 0;
@@ -754,7 +754,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  disconnectResource();
+  disconnectResource(brl);
 }
 
 static int

@@ -63,7 +63,6 @@ typedef struct {
   unsigned char protocol2;
 } InputOutputOperations;
 
-static GioEndpoint *gioEndpoint = NULL;
 static const InputOutputOperations *io;
 
 /*--- Serial Operations ---*/
@@ -114,7 +113,7 @@ static unsigned char currentText[BRLCOLSMAX];
 
 static int
 writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
-  return writeBraillePacket(brl, gioEndpoint, packet, size);
+  return writeBraillePacket(brl, NULL, packet, size);
 }
 
 static int
@@ -264,7 +263,7 @@ verifyPacket1 (
 
 static size_t
 readPacket1 (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, gioEndpoint, packet, size, verifyPacket1, NULL);
+  return readBraillePacket(brl, NULL, packet, size, verifyPacket1, NULL);
 }
 
 static int
@@ -541,8 +540,7 @@ isIdentityResponse1 (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 identifyTerminal1 (BrailleDisplay *brl) {
   unsigned char response[PM1_MAX_PACKET_SIZE];			/* answer has 10 chars */
-  int detected = probeBrailleDisplay(brl, 0,
-                                     gioEndpoint, 1000,
+  int detected = probeBrailleDisplay(brl, 0, NULL, 1000,
                                      writeIdentifyRequest1,
                                      readPacket1, response, sizeof(response),
                                      isIdentityResponse1);
@@ -600,7 +598,7 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
     {
       int started = offset > 0;
 
-      if (!gioReadByte(gioEndpoint, &packet2->bytes[offset], started)) {
+      if (!gioReadByte(brl->gioEndpoint, &packet2->bytes[offset], started)) {
         if (started) logPartialPacket(packet2->bytes, offset);
         return 0;
       }
@@ -1030,8 +1028,7 @@ isIdentityResponse2 (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
   Packet2 packet;			/* answer has 10 chars */
-  int detected = probeBrailleDisplay(brl, io->protocol2-1,
-                                     gioEndpoint, 100,
+  int detected = probeBrailleDisplay(brl, io->protocol2-1, NULL, 100,
                                      writeIdentifyRequest2,
                                      readPacket2, &packet, PM2_MAX_PACKET_SIZE,
                                      isIdentityResponse2);
@@ -1084,7 +1081,7 @@ identifyTerminal (BrailleDisplay *brl) {
 
 static int
 startTerminal (BrailleDisplay *brl) {
-  if (gioDiscardInput(gioEndpoint)) {
+  if (gioDiscardInput(brl->gioEndpoint)) {
     if (identifyTerminal(brl)) {
       brl->setFirmness = protocol->setFirmness;
 
@@ -1100,7 +1097,7 @@ startTerminal (BrailleDisplay *brl) {
 }
 
 static int
-connectResource (const char *identifier) {
+connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS
   };
@@ -1128,8 +1125,8 @@ connectResource (const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
-  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
-    io = gioGetApplicationData(gioEndpoint);
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -1138,7 +1135,7 @@ connectResource (const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (connectResource(device)) {
+  if (connectResource(brl, device)) {
     const unsigned int *baud = io->baudList;
 
     if (baud) {
@@ -1150,7 +1147,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         serialParameters.flowControl = io->flowControl;
         logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
 
-        if (gioReconfigureResource(gioEndpoint, &serialParameters)) {
+        if (gioReconfigureResource(brl->gioEndpoint, &serialParameters)) {
           if (startTerminal(brl)) {
              return 1;
           }
@@ -1162,8 +1159,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       return 1;
     }
 
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 
   return 0;
@@ -1171,9 +1168,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (gioEndpoint) {
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+  if (brl->gioEndpoint) {
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 
   protocol->releaseResources();

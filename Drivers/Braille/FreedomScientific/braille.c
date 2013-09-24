@@ -288,8 +288,6 @@ static const ModelEntry modelTable[] = {
 typedef void (*AcknowledgementHandler) (BrailleDisplay *brl, int ok);
 
 struct BrailleDataStruct {
-  GioEndpoint *gioEndpoint;
-
   int queryAcknowledged;
   const ModelEntry *model;
   const KeyTableDefinition *keyTableDefinition;
@@ -344,7 +342,7 @@ writePacket (
     size += length + 1;
   }
 
-  return writeBraillePacket(brl, brl->data->gioEndpoint, &packet, size);
+  return writeBraillePacket(brl, NULL, &packet, size);
 }
 
 static void
@@ -575,9 +573,7 @@ static int
 readPacket (BrailleDisplay *brl, Packet *packet) {
   ReadPacketData rpd;
 
-  return readBraillePacket(brl, brl->data->gioEndpoint,
-                           packet, sizeof(*packet),
-                           verifyPacket, &rpd);
+  return readBraillePacket(brl, NULL, packet, sizeof(*packet), verifyPacket, &rpd);
 }
 
 static int
@@ -700,7 +696,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.bluetooth.channelNumber = 1;
 
-  if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
 
@@ -852,13 +848,12 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->gioEndpoint = NULL;
     brl->data->outputPayloadLimit = 0XFF;
 
     if (connectResource(brl, device)) {
       Packet response;
 
-      if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 100,
+      if (probeBrailleDisplay(brl, 2, NULL, 100,
                               writeIdentityRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
@@ -877,8 +872,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         return writeRequest(brl);
       }
 
-      gioDisconnectResource(brl->data->gioEndpoint);
-      brl->data->gioEndpoint = NULL;
+      gioDisconnectResource(brl->gioEndpoint);
+      brl->gioEndpoint = NULL;
     }
 
     free(brl->data);
@@ -893,9 +888,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data) {
-    if (brl->data->gioEndpoint) {
-      gioDisconnectResource(brl->data->gioEndpoint);
-      brl->data->gioEndpoint = NULL;
+    if (brl->gioEndpoint) {
+      gioDisconnectResource(brl->gioEndpoint);
+      brl->gioEndpoint = NULL;
     }
 
     free(brl->data);

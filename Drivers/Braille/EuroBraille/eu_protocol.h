@@ -51,7 +51,7 @@ typedef struct {
 
 typedef struct {
   const ProtocolOperations *protocol;
-  int (*awaitInput) (int timeout);
+  int (*awaitInput) (BrailleDisplay *brl, int timeout);
   int (*readByte) (BrailleDisplay *brl, unsigned char *byte, int wait);
   ssize_t (*writeData) (BrailleDisplay *brl, const void *data, size_t size);
 } InputOutputOperations;

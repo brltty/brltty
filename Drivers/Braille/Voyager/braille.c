@@ -225,8 +225,6 @@ typedef struct {
 static const ProtocolOperations *protocol;
 
 
-static GioEndpoint *gioEndpoint = NULL;
-
 #define SERIAL_BAUD 38400
 #define SERIAL_READY_DELAY 400
 #define SERIAL_INPUT_TIMEOUT 100
@@ -237,20 +235,22 @@ static GioEndpoint *gioEndpoint = NULL;
 
 static int
 tellResource (
+  BrailleDisplay *brl,
   uint8_t request, uint16_t value, uint16_t index,
   const unsigned char *data, uint16_t size
 ) {
-  ssize_t result = gioTellResource(gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+  ssize_t result = gioTellResource(brl->gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                                    request, value, index, data, size);
   return result != -1;
 }
 
 static int
 askResource (
+  BrailleDisplay *brl,
   uint8_t request, uint16_t value, uint16_t index,
   unsigned char *buffer, uint16_t size
 ) {
-  ssize_t result = gioAskResource(gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
+  ssize_t result = gioAskResource(brl->gioEndpoint, UsbControlRecipient_Endpoint, UsbControlType_Vendor,
                                   request, value, index, buffer, size);
   int ok = result != -1;
 
@@ -277,11 +277,11 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
     if ((buffer[size++] = data[index]) == buffer[0])
       buffer[size++] = buffer[0];
 
-  return writeBraillePacket(brl, gioEndpoint, buffer, size);
+  return writeBraillePacket(brl, NULL, buffer, size);
 }
 
 static int
-readSerialPacket (unsigned char *packet, int size) {
+readSerialPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
   int started = 0;
   int escape = 0;
   int offset = 0;
@@ -290,7 +290,7 @@ readSerialPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    if (!gioReadByte(gioEndpoint, &byte, (started || escape))) {
+    if (!gioReadByte(brl->gioEndpoint, &byte, (started || escape))) {
       if (started) logPartialPacket(packet, offset);
       return 0;
     }
@@ -367,14 +367,14 @@ readSerialPacket (unsigned char *packet, int size) {
 }
 
 static int
-nextSerialPacket (unsigned char code, unsigned char *buffer, int size, int wait) {
+nextSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *buffer, int size, int wait) {
   int length;
 
   if (wait)
-    if (!gioAwaitInput(gioEndpoint, SERIAL_WAIT_TIMEOUT))
+    if (!gioAwaitInput(brl->gioEndpoint, SERIAL_WAIT_TIMEOUT))
       return 0;
 
-  while ((length = readSerialPacket(buffer, size))) {
+  while ((length = readSerialPacket(brl, buffer, size))) {
     if (buffer[0] == code) return length;
     logUnexpectedPacket(buffer, length);
   }
@@ -387,7 +387,7 @@ getSerialCellCount (BrailleDisplay *brl, unsigned char *count) {
   const unsigned int code = 0X4C;
   if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[3];
-    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
+    if (nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) {
       *count = buffer[2];
       return 1;
     }
@@ -404,7 +404,7 @@ logSerialSerialNumber (BrailleDisplay *brl) {
     unsigned char buffer[10];
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
+    if (!nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "%s Serial Number: %02X%02X%02X%02X%02X%02X%02X%02X",
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4], buffer[5],
@@ -423,7 +423,7 @@ logSerialHardwareVersion (BrailleDisplay *brl) {
     unsigned char buffer[5];
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
+    if (!nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "%s Hardware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
@@ -441,7 +441,7 @@ logSerialFirmwareVersion (BrailleDisplay *brl) {
     unsigned char buffer[5];
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
-    if (!nextSerialPacket(code, buffer, sizeof(buffer), 1)) return 0;
+    if (!nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) return 0;
     logMessage(LOG_INFO, "%s Firmware Version: %c.%c.%c", 
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
@@ -460,7 +460,7 @@ getSerialDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
   const unsigned char code = 0X47;
   if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[2];
-    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
+    if (nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) {
       *voltage = buffer[1];
       return 1;
     }
@@ -473,7 +473,7 @@ getSerialDisplayCurrent (BrailleDisplay *brl, unsigned char *current) {
   const unsigned int code = 0X43;
   if (writeSerialPacket(brl, code, NULL, 0)) {
     unsigned char buffer[2];
-    if (nextSerialPacket(code, buffer, sizeof(buffer), 1)) {
+    if (nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) {
       *current = buffer[1];
       return 1;
     }
@@ -502,7 +502,7 @@ updateSerialKeys (BrailleDisplay *brl) {
   const unsigned char code = 0X4B;
   unsigned char packet[9];
 
-  while (nextSerialPacket(code, packet, sizeof(packet), 0)) {
+  while (nextSerialPacket(brl, code, packet, sizeof(packet), 0)) {
     updateKeys(&packet[1]);
   }
 
@@ -533,16 +533,16 @@ static int
 getUsbCellCount (BrailleDisplay *brl, unsigned char *count) {
   unsigned char buffer[2];
 
-  if (!askResource(0X06, 0, 0, buffer, sizeof(buffer))) return 0;
+  if (!askResource(brl, 0X06, 0, 0, buffer, sizeof(buffer))) return 0;
   *count = buffer[1];
   return 1;
 }
 
 static wchar_t *
-getUsbString (uint8_t request) {
+getUsbString (BrailleDisplay *brl, uint8_t request) {
   UsbDescriptor descriptor;
 
-  if (askResource(request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes))) {
+  if (askResource(brl, request, 0, 0, descriptor.bytes, sizeof(descriptor.bytes))) {
     size_t count = (descriptor.string.bLength - 2) / sizeof(descriptor.string.wData[0]);
     wchar_t *string = malloc((count + 1) * sizeof(*string));
 
@@ -564,8 +564,8 @@ getUsbString (uint8_t request) {
 }
 
 static int
-logUsbString (uint8_t request, const char *description) {
-  wchar_t *string = getUsbString(request);
+logUsbString (BrailleDisplay *brl, uint8_t request, const char *description) {
+  wchar_t *string = getUsbString(brl, request);
 
   if (string) {
     logMessage(LOG_INFO, "%s: %" PRIws, description, string);
@@ -578,14 +578,14 @@ logUsbString (uint8_t request, const char *description) {
 
 static int
 logUsbSerialNumber (BrailleDisplay *brl) {
-  return logUsbString(0X03, "Serial Number");
+  return logUsbString(brl, 0X03, "Serial Number");
 }
 
 static int
 logUsbHardwareVersion (BrailleDisplay *brl) {
   unsigned char buffer[2];
 
-  if (!askResource(0X04, 0, 0, buffer, sizeof(buffer))) return 0;
+  if (!askResource(brl, 0X04, 0, 0, buffer, sizeof(buffer))) return 0;
   logMessage(LOG_INFO, "Hardware Version: %u.%u",
              buffer[0], buffer[1]);
   return 1;
@@ -593,19 +593,19 @@ logUsbHardwareVersion (BrailleDisplay *brl) {
 
 static int
 logUsbFirmwareVersion (BrailleDisplay *brl) {
-  return logUsbString(0X05, "Firmware Version");
+  return logUsbString(brl, 0X05, "Firmware Version");
 }
 
 static int
 setUsbDisplayVoltage (BrailleDisplay *brl, unsigned char voltage) {
-  return tellResource(0X01, voltage, 0, NULL, 0);
+  return tellResource(brl, 0X01, voltage, 0, NULL, 0);
 }
 
 static int
 getUsbDisplayVoltage (BrailleDisplay *brl, unsigned char *voltage) {
   unsigned char buffer[1];
 
-  if (!askResource(0X02, 0, 0, buffer, sizeof(buffer))) return 0;
+  if (!askResource(brl, 0X02, 0, 0, buffer, sizeof(buffer))) return 0;
   *voltage = buffer[0];
   return 1;
 }
@@ -614,19 +614,19 @@ static int
 getUsbDisplayCurrent (BrailleDisplay *brl, unsigned char *current) {
   unsigned char buffer[1];
 
-  if (!askResource(0X08, 0, 0, buffer, sizeof(buffer))) return 0;
+  if (!askResource(brl, 0X08, 0, 0, buffer, sizeof(buffer))) return 0;
   *current = buffer[0];
   return 1;
 }
 
 static int
 setUsbDisplayState (BrailleDisplay *brl, unsigned char state) {
-  return tellResource(0X00, state, 0, NULL, 0);
+  return tellResource(brl, 0X00, state, 0, NULL, 0);
 }
 
 static int
 writeUsbBraille (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
-  return tellResource(0X07, 0, start, cells, count);
+  return tellResource(brl, 0X07, 0, start, cells, count);
 }
 
 static int
@@ -635,7 +635,7 @@ updateUsbKeys (BrailleDisplay *brl) {
     unsigned char packet[8];
 
     {
-      ssize_t result = gioReadData(gioEndpoint, packet, sizeof(packet), 0);
+      ssize_t result = gioReadData(brl->gioEndpoint, packet, sizeof(packet), 0);
       if (!result) return 1;
 
       if (result < 0) {
@@ -665,7 +665,7 @@ updateUsbKeys (BrailleDisplay *brl) {
 
 static int
 soundUsbBeep (BrailleDisplay *brl, unsigned char duration) {
-  return tellResource(0X09, duration, 0, NULL, 0);
+  return tellResource(brl, 0X09, duration, 0, NULL, 0);
 }
 
 static const ProtocolOperations usbProtocolOperations = {
@@ -684,7 +684,7 @@ static const ProtocolOperations usbProtocolOperations = {
 
 
 static int
-connectResource (const char *identifier) {
+connectResource (BrailleDisplay *brl, const char *identifier) {
   SerialParameters serialParameters;
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
@@ -717,8 +717,8 @@ connectResource (const char *identifier) {
   descriptor.bluetooth.options.readyDelay = BLUETOOTH_READY_DELAY;
   descriptor.bluetooth.options.inputTimeout = SERIAL_INPUT_TIMEOUT;
 
-  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
-    protocol = gioGetApplicationData(gioEndpoint);
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    protocol = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -924,7 +924,7 @@ soundBeep (BrailleDisplay *brl, unsigned char duration) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (connectResource(device)) {
+  if (connectResource(brl, device)) {
     if (protocol->getCellCount(brl, &cellCount)) {
       deviceModel = deviceModels;
 
@@ -989,8 +989,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 
   return 0;
@@ -998,9 +998,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (gioEndpoint) {
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+  if (brl->gioEndpoint) {
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 
   if (translatedCells) {

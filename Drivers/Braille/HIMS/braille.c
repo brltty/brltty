@@ -142,7 +142,6 @@ typedef struct {
 } ProtocolEntry;
 
 struct BrailleDataStruct {
-  GioEndpoint *gioEndpoint;
   const ProtocolEntry *protocol;
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
 };
@@ -157,7 +156,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
     {
       int started = offset > 0;
-      if (!gioReadByte(brl->data->gioEndpoint, &byte, started)) {
+      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
         if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
@@ -208,7 +207,7 @@ readBytes (BrailleDisplay *brl, void *packet, size_t size) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return writeBraillePacket(brl, brl->data->gioEndpoint, bytes, count);
+  return writeBraillePacket(brl, NULL, bytes, count);
 }
 
 static int
@@ -362,7 +361,7 @@ static int
 getCellCount (BrailleDisplay *brl, unsigned int *count) {
   InputPacket response;
 
-  if (probeBrailleDisplay(brl, 2, brl->data->gioEndpoint, 1000,
+  if (probeBrailleDisplay(brl, 2, NULL, 1000,
                           writeCellCountRequest,
                           readBytes, &response, sizeof(response.bytes),
                           isCellCountResponse)) {
@@ -437,7 +436,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.channelNumber = 4;
   descriptor.bluetooth.discoverChannel = 1;
 
-  if ((brl->data->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
     return 1;
   }
 
@@ -448,11 +447,10 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->gioEndpoint = NULL;
 
     if (connectResource(brl, device)) {
-      if (!(brl->data->protocol = gioGetApplicationData(brl->data->gioEndpoint))) {
-        char *name = gioGetResourceName(brl->data->gioEndpoint);
+      if (!(brl->data->protocol = gioGetApplicationData(brl->gioEndpoint))) {
+        char *name = gioGetResourceName(brl->gioEndpoint);
         brl->data->protocol = &brailleSenseProtocol;
 
         if (name) {
@@ -488,7 +486,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (clearCells(brl)) return 1;
       }
 
-      gioDisconnectResource(brl->data->gioEndpoint);
+      gioDisconnectResource(brl->gioEndpoint);
+      brl->gioEndpoint = NULL;
     }
 
     free(brl->data);
@@ -501,9 +500,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
+  if (brl->gioEndpoint) {
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
+  }
+
   if (brl->data) {
-    if (brl->data->gioEndpoint) gioDisconnectResource(brl->data->gioEndpoint);
     free(brl->data);
+    brl->data = NULL;
   }
 }
 

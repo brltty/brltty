@@ -53,29 +53,28 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(esytime),
 END_KEY_TABLE_LIST
 
-static GioEndpoint *gioEndpoint = NULL;
 const InputOutputOperations *io = NULL;
 static const ProtocolOperations *protocol = NULL;
 
 static inline void
 updateWriteDelay (BrailleDisplay *brl, size_t count) {
-  brl->writeDelay += gioGetMillisecondsToTransfer(gioEndpoint, count);
+  brl->writeDelay += gioGetMillisecondsToTransfer(brl->gioEndpoint, count);
 }
 
 static int
-awaitInput_generic (int timeout) {
-  return gioAwaitInput(gioEndpoint, timeout);
+awaitInput_generic (BrailleDisplay *brl, int timeout) {
+  return gioAwaitInput(brl->gioEndpoint, timeout);
 }
 
 static int
 readByte_generic (BrailleDisplay *brl, unsigned char *byte, int wait) {
-  return gioReadByte(gioEndpoint, byte, wait);
+  return gioReadByte(brl->gioEndpoint, byte, wait);
 }
 
 static ssize_t
 writeData_generic (BrailleDisplay *brl, const void *data, size_t length) {
   updateWriteDelay(brl, length);
-  return gioWriteData(gioEndpoint, data, length);
+  return gioWriteData(brl->gioEndpoint, data, length);
 }
 
 static ssize_t
@@ -94,7 +93,7 @@ writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
     memcpy(report, data+offset, count);
 
     updateWriteDelay(brl, sizeof(report));
-    if (gioSetHidReport(gioEndpoint, 0, report, sizeof(report)) < 0) return -1;
+    if (gioSetHidReport(brl->gioEndpoint, 0, report, sizeof(report)) < 0) return -1;
 
     offset += count;
   }
@@ -123,7 +122,7 @@ static const InputOutputOperations bluetoothOperations = {
 };
 
 static int
-connectResource (const char *identifier) {
+connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
     .baud = 9600,
@@ -248,8 +247,8 @@ connectResource (const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
-  if ((gioEndpoint = gioConnectResource(identifier, &descriptor))) {
-    io = gioGetApplicationData(gioEndpoint);
+  if ((brl->gioEndpoint = gioConnectResource(identifier, &descriptor))) {
+    io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -257,10 +256,10 @@ connectResource (const char *identifier) {
 }
 
 static void
-disconnectResource (void) {
-  if (gioEndpoint) {
-    gioDisconnectResource(gioEndpoint);
-    gioEndpoint = NULL;
+disconnectResource (BrailleDisplay *brl) {
+  if (brl->gioEndpoint) {
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 }
 
@@ -305,7 +304,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     protocol = protocols[choice];
   }
 
-  if (connectResource(device)) {
+  if (connectResource(brl, device)) {
     if (protocol) {
       if (!io->protocol || (io->protocol == protocol)) {
         if (protocol->initializeDevice(brl)) return 1;
@@ -331,7 +330,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    disconnectResource();
+    disconnectResource(brl);
   }
 
   return 0;
@@ -343,7 +342,7 @@ brl_destruct (BrailleDisplay *brl) {
     {
       protocol = NULL;
     }
-  disconnectResource();
+  disconnectResource(brl);
 }
 
 #ifdef BRL_HAVE_PACKET_IO
