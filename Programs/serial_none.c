@@ -98,6 +98,11 @@ serialCancelOutput (SerialDevice *serial) {
 }
 
 int
+serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *data) {
+  return 0;
+}
+
+int
 serialPollInput (SerialDevice *serial, int timeout) {
   errno = EAGAIN;
   return 0;

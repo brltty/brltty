@@ -26,6 +26,8 @@
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
 
+#include "async.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -42,7 +44,7 @@ typedef int SerialLines;
 #define SERIAL_LINE_CAR TIOCM_CAR
 
 typedef struct {
-  char dummy;
+  AsyncHandle inputMonitor;
 } SerialPackageFields;
 
 #ifdef __cplusplus

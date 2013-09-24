@@ -216,6 +216,11 @@ serialCancelOutput (SerialDevice *serial) {
 }
 
 int
+serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *data) {
+  return 0;
+}
+
+int
 serialPollInput (SerialDevice *serial, int timeout) {
   return awaitFileInput(serial->fileDescriptor, timeout);
 }

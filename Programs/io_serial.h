@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "serialdefs.h"
+#include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +42,7 @@ extern int serialDiscardInput (SerialDevice *serial);
 extern int serialDiscardOutput (SerialDevice *serial);
 extern int serialFlushOutput (SerialDevice *serial);
 
+extern int serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *data);
 extern int serialAwaitInput (SerialDevice *serial, int timeout);
 extern int serialAwaitOutput (SerialDevice *serial);
 

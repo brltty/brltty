@@ -390,6 +390,11 @@ serialCancelOutput (SerialDevice *serial) {
 }
 
 int
+serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *data) {
+  return asyncMonitorFileInput(&serial->package.inputMonitor, serial->fileDescriptor, callback, data);
+}
+
+int
 serialPollInput (SerialDevice *serial, int timeout) {
   return awaitFileInput(serial->fileDescriptor, timeout);
 }
@@ -481,6 +486,8 @@ serialMonitorWaitLines (SerialDevice *serial) {
 
 int
 serialConnectDevice (SerialDevice *serial, const char *device) {
+  serial->package.inputMonitor = NULL;
+
   if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
     if (isatty(serial->fileDescriptor)) {
       if (serialPrepareDevice(serial)) {
@@ -502,6 +509,10 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
 
 void
 serialDisconnectDevice (SerialDevice *serial) {
+  if (serial->package.inputMonitor) {
+    asyncCancelRequest(serial->package.inputMonitor);
+    serial->package.inputMonitor = NULL;
+  }
 }
 
 int
@@ -512,4 +523,3 @@ serialEnsureFileDescriptor (SerialDevice *serial) {
 void
 serialClearError (SerialDevice *serial) {
 }
-
