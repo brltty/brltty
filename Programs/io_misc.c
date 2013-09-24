@@ -25,6 +25,7 @@
 
 #include "io_misc.h"
 #include "log.h"
+#include "file.h"
 #include "async_io.h"
 #include "async_wait.h"
 
@@ -236,43 +237,15 @@ monitorFileAlert (const InputOutputHandle *ioh, AsyncHandle *handle, EventMonito
   return asyncMonitorFileAlert(handle, ioh->descriptor.file, setEventMonitor, evm);
 }
 
-
-#ifdef __MINGW32__
 static ssize_t
 readFileData (const InputOutputHandle *ioh, void *buffer, size_t size) {
-  {
-    DWORD count;
-
-    if (ReadFile(ioh->descriptor.file, buffer, size, &count, NULL)) return count;
-  }
-
-  setSystemErrno();
-  return -1;
+  return readFileDescriptor(ioh->descriptor.file, buffer, size);
 }
 
 static ssize_t
 writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
-  {
-    DWORD count;
-
-    if (WriteFile(ioh->descriptor.file, buffer, size, &count, NULL)) return count;
-  }
-
-  setSystemErrno();
-  return -1;
+  return writeFileDescriptor(ioh->descriptor.file, buffer, size);
 }
-
-#else /* __MINGW32__ */
-static ssize_t
-readFileData (const InputOutputHandle *ioh, void *buffer, size_t size) {
-  return read(ioh->descriptor.file, buffer, size);
-}
-
-static ssize_t
-writeFileData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
-  return write(ioh->descriptor.file, buffer, size);
-}
-#endif /* __MINGW32__ */
 
 static const InputOutputMethods fileMethods = {
   .monitorInput = monitorFileInput,
@@ -358,12 +331,12 @@ monitorSocketAlert (const InputOutputHandle *ioh, AsyncHandle *handle, EventMoni
 
 static ssize_t
 readSocketData (const InputOutputHandle *ioh, void *buffer, size_t size) {
-  return recv(ioh->descriptor.socket, buffer, size, 0);
+  return readSocketDescriptor(ioh->descriptor.socket, buffer, size);
 }
 
 static ssize_t
 writeSocketData (const InputOutputHandle *ioh, const void *buffer, size_t size) {
-  return send(ioh->descriptor.socket, buffer, size, 0);
+  return writeSocketDescriptor(ioh->descriptor.socket, buffer, size);
 }
 
 static const InputOutputMethods socketMethods = {
