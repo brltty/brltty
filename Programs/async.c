@@ -1482,7 +1482,7 @@ static int
 monitorEventPipe (const AsyncMonitorResult *result) {
   AsyncEvent *event = result->data;
   void *data;
-  ssize_t count = read(event->pipeOutput, &data, sizeof(data));
+  ssize_t count = readFileDescriptor(event->pipeOutput, &data, sizeof(data));
 
   if (count == sizeof(data)) {
     event->callback(event->data, data);
@@ -1528,7 +1528,7 @@ asyncDiscardEvent (AsyncEvent *event) {
 
 void
 asyncSignalEvent (AsyncEvent *event, void *data) {
-  write(event->pipeInput, &data, sizeof(data));
+  writeFileDescriptor(event->pipeInput, &data, sizeof(data));
 }
 
 static void
