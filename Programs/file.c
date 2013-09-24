@@ -26,9 +26,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifndef __MINGW32__
+#ifndef SOL_SOCKET
 #include <sys/socket.h>
-#endif /* __MINGW32__ */
+#endif /* SOL_SOCKET */
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
@@ -807,7 +807,7 @@ createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
   attributes.bInheritHandle = TRUE;
   attributes.lpSecurityDescriptor = NULL;
 
-  if (CreatePipe(inputDescriptor, outputDescriptor, &attributes, 0)) {
+  if (CreatePipe(outputDescriptor, inputDescriptor, &attributes, 0)) {
     return 1;
   } else {
     logWindowsSystemError("CreatePipe");

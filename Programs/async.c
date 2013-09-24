@@ -1521,8 +1521,8 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
 void
 asyncDiscardEvent (AsyncEvent *event) {
   asyncCancelRequest(event->monitorHandle);
-  close(event->pipeInput);
-  close(event->pipeOutput);
+  closeFileDescriptor(event->pipeInput);
+  closeFileDescriptor(event->pipeOutput);
   free(event);
 }
 
