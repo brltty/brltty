@@ -231,11 +231,11 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 }
 
 int
-gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback) {
+gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
   GioMonitorInputMethod *method = endpoint->methods->monitorInput;
 
   if (method) {
-    if (method(endpoint->handle, callback)) {
+    if (method(endpoint->handle, callback, data)) {
       return 1;
     }
   }
