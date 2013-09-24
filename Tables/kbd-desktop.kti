@@ -51,12 +51,12 @@ bind ControlLeft+ShiftLeft+KP0+!KP1 RESTARTBRL
 bind ControlLeft+ShiftLeft+KP0+!KP3 RESTARTSPEECH
 bind KP0+T TIME
 bind KP0+!S SETMARK
-bind KP0+!G GOtOMARK
+bind KP0+!G GOTOMARK
 bind ControlRight+KP0+!One SETMARK+1
-bind KP0+!One GOtOMARK+1
+bind KP0+!One GOTOMARK+1
 bind ControlRight+KP0+!Two SETMARK+2
-bind KP0+!Two GOtOMARK+2
+bind KP0+!Two GOTOMARK+2
 bind ControlRight+KP0+!Three SETMARK+3
-bind KP0+!Three GOtOMARK+3
+bind KP0+!Three GOTOMARK+3
 bind ControlRight+KP0+!Four SETMARK+4
-bind KP0+!Four GOtOMARK+4
+bind KP0+!Four GOTOMARK+4
