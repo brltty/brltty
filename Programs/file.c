@@ -26,6 +26,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifndef __MINGW32__
+#include <sys/socket.h>
+#endif /* __MINGW32__ */
+
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
@@ -769,17 +773,82 @@ formatInputError (char *buffer, size_t size, const char *file, const int *line, 
   return length;
 }
 
+#ifdef __MINGW32__
+ssize_t
+readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size) {
+  {
+    DWORD count;
+
+    if (ReadFile(fileDescriptor, buffer, size, &count, NULL)) return count;
+  }
+
+  setSystemErrno();
+  return -1;
+}
+
+ssize_t
+writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
+  {
+    DWORD count;
+
+    if (WriteFile(fileDescriptor, buffer, size, &count, NULL)) return count;
+  }
+
+  setSystemErrno();
+  return -1;
+}
+
 int
-createPipe (FileDescriptor *input, FileDescriptor *output) {
+createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
+  SECURITY_ATTRIBUTES attributes;
+
+  ZeroMemory(&attributes, sizeof(attributes));
+  attributes.nLength = sizeof(attributes);
+  attributes.bInheritHandle = TRUE;
+  attributes.lpSecurityDescriptor = NULL;
+
+  if (CreatePipe(inputDescriptor, outputDescriptor, &attributes, 0)) {
+    return 1;
+  } else {
+    logWindowsSystemError("CreatePipe");
+  }
+
+  return 0;
+}
+
+#else /* unix file/socket descriptor operations */
+ssize_t
+readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size) {
+  return read(fileDescriptor, buffer, size);
+}
+
+ssize_t
+writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
+  return write(fileDescriptor, buffer, size);
+}
+
+int
+createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
   int fileDescriptors[2];
 
   if (pipe(fileDescriptors) != -1) {
-    *input = fileDescriptors[1];
-    *output = fileDescriptors[0];
+    *inputDescriptor = fileDescriptors[1];
+    *outputDescriptor = fileDescriptors[0];
     return 1;
   } else {
     logSystemError("pipe");
   }
 
   return 0;
+}
+#endif /* basic file/socket descriptor operations */
+
+ssize_t
+readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size) {
+  return recv(socketDescriptor, buffer, size, 0);
+}
+
+ssize_t
+writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
+  return send(socketDescriptor, buffer, size, 0);
 }

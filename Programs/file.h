@@ -69,7 +69,13 @@ extern int readLine (FILE *file, char **buffer, size_t *size);
 
 extern size_t formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp);
 
-extern int createPipe (FileDescriptor *input, FileDescriptor *output);
+extern ssize_t readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size);
+extern ssize_t writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t size);
+
+extern ssize_t readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size);
+extern ssize_t writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size);
+
+extern int createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor);
 
 #ifdef __cplusplus
 }
