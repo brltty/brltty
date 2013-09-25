@@ -61,6 +61,11 @@ bthDisconnect (BluetoothConnectionExtension *bcx) {
 }
 
 int
+bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
+  return 0;
+}
+
+int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   logUnsupportedFunction();
   return 0;

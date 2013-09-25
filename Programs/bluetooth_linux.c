@@ -38,9 +38,10 @@
 #define ASYNCHRONOUS_CHANNEL_DISCOVERY
 
 struct BluetoothConnectionExtensionStruct {
-  SocketDescriptor socket;
-  struct sockaddr_rc local;
-  struct sockaddr_rc remote;
+  SocketDescriptor socketDescriptor;
+  struct sockaddr_rc localAddress;
+  struct sockaddr_rc remoteAddress;
+  AsyncHandle inputMonitor;
 };
 
 typedef union {
@@ -80,17 +81,17 @@ bthNewConnectionExtension (uint64_t bda) {
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
 
-    bcx->local.rc_family = AF_BLUETOOTH;
-    bcx->local.rc_channel = 0;
-    bacpy(&bcx->local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
+    bcx->localAddress.rc_family = AF_BLUETOOTH;
+    bcx->localAddress.rc_channel = 0;
+    bacpy(&bcx->localAddress.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
                                                * interface specification yet.
                                                  */
 
-    bcx->remote.rc_family = AF_BLUETOOTH;
-    bcx->remote.rc_channel = 0;
-    bthMakeAddress(&bcx->remote.rc_bdaddr, bda);
+    bcx->remoteAddress.rc_family = AF_BLUETOOTH;
+    bcx->remoteAddress.rc_channel = 0;
+    bthMakeAddress(&bcx->remoteAddress.rc_bdaddr, bda);
 
-    bcx->socket = INVALID_SOCKET_DESCRIPTOR;
+    bcx->socketDescriptor = INVALID_SOCKET_DESCRIPTOR;
     return bcx;
   } else {
     logMallocError();
@@ -101,18 +102,23 @@ bthNewConnectionExtension (uint64_t bda) {
 
 void
 bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
-  closeSocket(&bcx->socket);
+  if (bcx->inputMonitor) {
+    asyncCancelRequest(bcx->inputMonitor);
+    bcx->inputMonitor = NULL;
+  }
+
+  closeSocket(&bcx->socketDescriptor);
   free(bcx);
 }
 
 int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
-  bcx->remote.rc_channel = channel;
+  bcx->remoteAddress.rc_channel = channel;
 
-  if ((bcx->socket = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
-    if (bind(bcx->socket, (struct sockaddr *)&bcx->local, sizeof(bcx->local)) != -1) {
-      if (setBlockingIo(bcx->socket, 0)) {
-        if (connectSocket(bcx->socket, (struct sockaddr *)&bcx->remote, sizeof(bcx->remote), timeout) != -1) {
+  if ((bcx->socketDescriptor = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+    if (bind(bcx->socketDescriptor, (struct sockaddr *)&bcx->localAddress, sizeof(bcx->localAddress)) != -1) {
+      if (setBlockingIo(bcx->socketDescriptor, 0)) {
+        if (connectSocket(bcx->socketDescriptor, (struct sockaddr *)&bcx->remoteAddress, sizeof(bcx->remoteAddress), timeout) != -1) {
           return 1;
         } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
           logSystemError("RFCOMM connect");
@@ -124,8 +130,8 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
       logSystemError("RFCOMM bind");
     }
 
-    close(bcx->socket);
-    bcx->socket = INVALID_SOCKET_DESCRIPTOR;
+    close(bcx->socketDescriptor);
+    bcx->socketDescriptor = INVALID_SOCKET_DESCRIPTOR;
   } else {
     logSystemError("RFCOMM socket");
   }
@@ -311,7 +317,7 @@ bthDiscoverChannel (
       TimePeriod period;
       startTimePeriod(&period, timeout);
 
-      if ((l2capSocket = bthNewL2capConnection(&bcx->remote.rc_bdaddr, timeout)) != INVALID_SOCKET_DESCRIPTOR) {
+      if ((l2capSocket = bthNewL2capConnection(&bcx->remoteAddress.rc_bdaddr, timeout)) != INVALID_SOCKET_DESCRIPTOR) {
         sdp_session_t *session = sdp_create(l2capSocket, 0);
 
         if (session) {
@@ -347,7 +353,7 @@ bthDiscoverChannel (
         close(l2capSocket);
       }
 #else /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
-      sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remote.rc_bdaddr, SDP_RETRY_IF_BUSY);
+      sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remoteAddress.rc_bdaddr, SDP_RETRY_IF_BUSY);
 
       if (session) {
         sdp_list_t *recordList = NULL;
@@ -403,10 +409,17 @@ bthDiscoverChannel (
 }
 
 int
+bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  return asyncMonitorSocketInput(&bcx->inputMonitor, bcx->socketDescriptor, callback, data);
+}
+
+int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return awaitSocketInput(bcx->socket, milliseconds);
+  return awaitSocketInput(bcx->socketDescriptor, milliseconds);
 }
 
 ssize_t
@@ -416,14 +429,14 @@ bthReadData (
 ) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return readSocket(bcx->socket, buffer, size, initialTimeout, subsequentTimeout);
+  return readSocket(bcx->socketDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
-  return writeSocket(bcx->socket, buffer, size);
+  return writeSocket(bcx->socketDescriptor, buffer, size);
 }
 
 char *

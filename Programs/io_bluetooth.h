@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_IO_BLUETOOTH
 #define BRLTTY_INCLUDED_IO_BLUETOOTH
 
+#include "async_io.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -45,6 +47,7 @@ extern int bthParseChannelNumber (uint8_t *channel, const char *string);
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
 
+extern int bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data);
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
 extern ssize_t bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,

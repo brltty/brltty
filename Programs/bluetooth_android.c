@@ -142,6 +142,11 @@ bthDiscoverChannel (
 }
 
 int
+bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
+  return 0;
+}
+
+int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
