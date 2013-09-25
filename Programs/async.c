@@ -1486,15 +1486,16 @@ struct AsyncEventStruct {
   AsyncHandle monitorHandle;
 };
 
-static int
-monitorEventPipe (const AsyncMonitorResult *result) {
+static size_t
+readEventPipe (const AsyncInputResult *result) {
   AsyncEvent *event = result->data;
   void *data;
-  ssize_t count = readFileDescriptor(event->pipeOutput, &data, sizeof(data));
+  const size_t size = sizeof(data);
 
-  if (count == sizeof(data)) {
+  if (result->length >= size) {
+    memcpy(&data, result->buffer, size);
     event->callback(event->data, data);
-    return 1;
+    return size;
   }
 
   return 0;
@@ -1510,7 +1511,7 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
     event->data = data;
 
     if (createPipe(&event->pipeInput, &event->pipeOutput)) {
-      if (asyncMonitorFileInput(&event->monitorHandle, event->pipeOutput, monitorEventPipe, event)) {
+      if (asyncReadFile(&event->monitorHandle, event->pipeOutput, 0X100, readEventPipe, event)) {
         return event;
       }
 
