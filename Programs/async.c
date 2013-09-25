@@ -535,119 +535,6 @@ getFunctionQueue (int create) {
                          createFunctionQueue, NULL);
 }
 
-static OperationEntry *
-getFirstOperation (const FunctionEntry *function) {
-  Element *element = getQueueHead(function->operations);
-
-  if (element) return getElementItem(element);
-  return NULL;
-}
-
-static void
-startOperation (OperationEntry *operation) {
-  if (operation->function->methods->startOperation) {
-    operation->function->methods->startOperation(operation);
-  }
-}
-
-static void
-finishOperation (OperationEntry *operation) {
-  if (operation->function->methods->finishOperation) {
-    operation->function->methods->finishOperation(operation);
-  }
-}
-
-static int
-addFunctionMonitor (void *item, void *data) {
-  const FunctionEntry *function = item;
-  MonitorGroup *monitors = data;
-  OperationEntry *operation = getFirstOperation(function);
-
-  if (operation) {
-    operation->monitor = NULL;
-
-    if (!operation->active) {
-      if (operation->finished) {
-        return 1;
-      }
-
-      operation->monitor = &monitors->array[monitors->count++];
-      initializeMonitor(operation->monitor, function, operation);
-    }
-  }
-
-  return 0;
-}
-
-static int
-testFunctionMonitor (void *item, void *data) {
-  FunctionEntry *function = item;
-  OperationEntry *operation = getFirstOperation(function);
-
-  if (operation) {
-    if (operation->monitor) {
-      if (testMonitor(operation->monitor, function)) {
-        return 1;
-      }
-    }
-  }
-
-  return 0;
-}
-
-static void
-awaitNextOperation (long int timeout) {
-  Queue *functions = getFunctionQueue(0);
-  unsigned int functionCount = functions? getQueueSize(functions): 0;
-
-  prepareMonitors();
-
-  if (functionCount) {
-    MonitorEntry monitorArray[functionCount];
-    MonitorGroup monitors = {
-      .array = monitorArray,
-      .count = 0
-    };
-    Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
-
-    if (!functionElement) {
-      if (!monitors.count) {
-        approximateDelay(timeout);
-      } else if (awaitMonitors(&monitors, timeout)) {
-        functionElement = processQueue(functions, testFunctionMonitor, NULL);
-      }
-    }
-
-    if (functionElement) {
-      FunctionEntry *function = getElementItem(functionElement);
-      Element *operationElement = getQueueHead(function->operations);
-      OperationEntry *operation = getElementItem(operationElement);
-
-      if (!operation->finished) finishOperation(operation);
-
-      operation->active = 1;
-      if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
-      operation->active = 0;
-
-      if (operation->cancel) {
-        deleteElement(operationElement);
-      } else {
-        operation->error = 0;
-      }
-
-      if ((operationElement = getQueueHead(function->operations))) {
-        operation = getElementItem(operationElement);
-        if (!operation->finished) startOperation(operation);
-        requeueElement(functionElement);
-      } else {
-        deleteElement(functionElement);
-      }
-    }
-  } else {
-    approximateDelay(timeout);
-  }
-}
-
 static int
 invokeMonitorCallback (OperationEntry *operation) {
   MonitorExtension *extension = operation->extension;
@@ -720,6 +607,127 @@ invokeOutputCallback (OperationEntry *operation) {
   return 0;
 }
 
+static Element *
+getActiveOperationElement (const FunctionEntry *function) {
+  Queue *queue = function->operations;
+
+  if (function->methods->invokeCallback == invokeMonitorCallback) return getQueueTail(queue);
+  return getQueueHead(queue);
+}
+
+static OperationEntry *
+getActiveOperation (const FunctionEntry *function) {
+  Element *element = getActiveOperationElement(function);
+
+  if (element) return getElementItem(element);
+  return NULL;
+}
+
+static void
+startOperation (OperationEntry *operation) {
+  if (operation->function->methods->startOperation) {
+    operation->function->methods->startOperation(operation);
+  }
+}
+
+static void
+finishOperation (OperationEntry *operation) {
+  if (operation->function->methods->finishOperation) {
+    operation->function->methods->finishOperation(operation);
+  }
+}
+
+static int
+addFunctionMonitor (void *item, void *data) {
+  const FunctionEntry *function = item;
+  MonitorGroup *monitors = data;
+  OperationEntry *operation = getActiveOperation(function);
+
+  if (operation) {
+    operation->monitor = NULL;
+
+    if (!operation->active) {
+      if (operation->finished) {
+        return 1;
+      }
+
+      operation->monitor = &monitors->array[monitors->count++];
+      initializeMonitor(operation->monitor, function, operation);
+    }
+  }
+
+  return 0;
+}
+
+static int
+testFunctionMonitor (void *item, void *data) {
+  FunctionEntry *function = item;
+  OperationEntry *operation = getActiveOperation(function);
+
+  if (operation) {
+    if (operation->monitor) {
+      if (testMonitor(operation->monitor, function)) {
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+static void
+awaitNextOperation (long int timeout) {
+  Queue *functions = getFunctionQueue(0);
+  unsigned int functionCount = functions? getQueueSize(functions): 0;
+
+  prepareMonitors();
+
+  if (functionCount) {
+    MonitorEntry monitorArray[functionCount];
+    MonitorGroup monitors = {
+      .array = monitorArray,
+      .count = 0
+    };
+    Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
+
+    if (!functionElement) {
+      if (!monitors.count) {
+        approximateDelay(timeout);
+      } else if (awaitMonitors(&monitors, timeout)) {
+        functionElement = processQueue(functions, testFunctionMonitor, NULL);
+      }
+    }
+
+    if (functionElement) {
+      FunctionEntry *function = getElementItem(functionElement);
+      Element *operationElement = getActiveOperationElement(function);
+      OperationEntry *operation = getElementItem(operationElement);
+
+      if (!operation->finished) finishOperation(operation);
+
+      operation->active = 1;
+      if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
+      operation->active = 0;
+
+      if (operation->cancel) {
+        deleteElement(operationElement);
+      } else {
+        operation->error = 0;
+      }
+
+      if ((operationElement = getActiveOperationElement(function))) {
+        operation = getElementItem(operationElement);
+        if (!operation->finished) startOperation(operation);
+        requeueElement(functionElement);
+      } else {
+        deleteElement(functionElement);
+      }
+    }
+  } else {
+    approximateDelay(timeout);
+  }
+}
+
 static void
 deallocateOperationEntry (void *item, void *data) {
   OperationEntry *operation = item;
@@ -735,7 +743,7 @@ cancelOperation (Element *operationElement) {
     operation->cancel = 1;
   } else {
     FunctionEntry *function = operation->function;
-    int isFirstOperation = operationElement == getQueueHead(function->operations);
+    int isFirstOperation = operationElement == getActiveOperationElement(function);
 
     if (isFirstOperation) {
       if (!operation->finished) {
@@ -754,7 +762,7 @@ cancelOperation (Element *operationElement) {
       deleteElement(operationElement);
 
       if (isFirstOperation) {
-        operationElement = getQueueHead(function->operations);
+        operationElement = getActiveOperationElement(function);
         operation = getElementItem(operationElement);
 
         if (!operation->finished) startOperation(operation);
