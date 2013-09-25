@@ -136,7 +136,7 @@ enqueueXtScanCode (
 }
 
 static int
-readCommand (void) {
+processInput (void) {
   int command = readBrailleCommand(&brl, getCurrentCommandContext());
 
   if (command != EOF) {
@@ -163,22 +163,16 @@ readCommand (void) {
   return 1;
 }
 
-static void setPollAlarm (int delay, void *data);
-static AsyncHandle pollAlarm = NULL;
-
-static void
-handlePollAlarm (const AsyncAlarmResult *result) {
-  int delay = 40;
-
-  asyncDiscardHandle(pollAlarm);
-  pollAlarm = NULL;
+static int
+handleInput (void) {
+  int processed = 0;
 
   if (!isSuspended) {
 #ifdef ENABLE_API
     apiClaimDriver();
 #endif /* ENABLE_API */
 
-    if (readCommand()) delay = 0;
+    if (processInput()) processed = 1;
 
 #ifdef ENABLE_API
     apiReleaseDriver();
@@ -193,7 +187,7 @@ handlePollAlarm (const AsyncAlarmResult *result) {
         break;
 
       default:
-        delay = 0;
+        processed = 1;
       case EOF:
         break;
     }
@@ -206,7 +200,18 @@ handlePollAlarm (const AsyncAlarmResult *result) {
   }
 #endif /* ENABLE_API */
 
-  setPollAlarm(delay, result->data);
+  return processed;
+}
+
+static void setPollAlarm (int delay, void *data);
+static AsyncHandle pollAlarm = NULL;
+
+static void
+handlePollAlarm (const AsyncAlarmResult *result) {
+  asyncDiscardHandle(pollAlarm);
+  pollAlarm = NULL;
+
+  setPollAlarm((handleInput()? 0: 40), result->data);
 }
 
 static void
@@ -216,8 +221,20 @@ setPollAlarm (int delay, void *data) {
   }
 }
 
+static int
+monitorInput (const AsyncMonitorResult *result) {
+  handleInput();
+  return 1;
+}
+
 void
 startBrailleCommands (void) {
+  if (brl.gioEndpoint) {
+    if (gioMonitorInput(brl.gioEndpoint, monitorInput, NULL)) {
+      return;
+    }
+  }
+
   setPollAlarm(0, NULL);
 }
 
