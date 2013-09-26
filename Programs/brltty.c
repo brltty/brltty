@@ -1583,6 +1583,11 @@ doAutospeak (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static int
+canBraille (void) {
+  return braille && brl.buffer && !brl.noDisplay && !isSuspended;
+}
+
 static TimeValue updateTime;
 static AsyncHandle updateAlarm;
 static int updateSuspendCount;
@@ -1613,7 +1618,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
   if (opt_releaseDevice) {
     if (scr.unreadable) {
-      if (!isSuspended) {
+      if (canBraille()) {
         logMessage(LOG_DEBUG, "suspending braille driver");
         writeStatusCells();
         writeBrailleText("wrn", scr.unreadable);
@@ -1644,7 +1649,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
     }
   }
 
-  if (!isSuspended) {
+  if (canBraille()) {
     int pointerMoved = 0;
 
 #ifdef ENABLE_API
@@ -1723,7 +1728,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
       oldwiny = ses->winy;
     }
 
-    if (!isOffline) {
+    if (!isOffline && canBraille()) {
       if (infoMode) {
         if (!showInfo()) restartRequired = 1;
       } else {
@@ -2133,7 +2138,7 @@ message (const char *mode, const char *text, short flags) {
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  if (braille && brl.buffer && !brl.noDisplay) {
+  if (canBraille()) {
     MessageData msg;
 
     size_t size = textCount * brl.textRows;
