@@ -18,3 +18,15 @@
 
 title Braille Memo
 
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map F3 SPACE
+map Control CONTROL
+map Alt META
+

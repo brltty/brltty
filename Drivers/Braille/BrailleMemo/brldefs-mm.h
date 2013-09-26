@@ -27,7 +27,7 @@
 #define MM_HEADER_ACK 0X01
 
 typedef enum {
-  MM_CMD_QueryLineSize    = 0X13,
+  MM_CMD_QueryLineSize    = 0X11,
   MM_CMD_StartDisplayMode = 0X20,
   MM_CMD_EndDisplayMode   = 0X28,
   MM_CMD_SendBrailleData  = 0X31,

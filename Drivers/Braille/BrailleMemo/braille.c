@@ -114,6 +114,14 @@ struct BrailleDataStruct {
   unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
 };
 
+static const unsigned char sizeTable[] = {16};
+static const unsigned char sizeCount = ARRAY_COUNT(sizeTable);
+
+static int
+isValidSize (unsigned char size) {
+  return memchr(sizeTable, size, sizeCount) != NULL;
+}
+
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
   return writeBraillePacket(brl, NULL, bytes, count);
@@ -163,6 +171,11 @@ verifyPacket (
           break;
 
         default:
+          if (isValidSize(byte)) {
+            *length = 1;
+            break;
+          }
+
           return 0;
       }
       break;
@@ -256,7 +269,12 @@ writeIdentityRequest (BrailleDisplay *brl) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  return BRL_RSP_UNEXPECTED;
+  const MM_CommandPacket *cmd = packet;
+  unsigned char byte = cmd->bytes[0];
+
+  if (!isValidSize(byte)) return BRL_RSP_UNEXPECTED;
+  brl->textColumns = byte;
+  return BRL_RSP_DONE;
 }
 
 static int
@@ -281,8 +299,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           {
             static const DotsTable dots = {
-              MM_DOT_1, MM_DOT_2, MM_DOT_3, MM_DOT_4,
-              MM_DOT_5, MM_DOT_6, MM_DOT_7, MM_DOT_8
+              0X80, 0X40, 0X20, 0X08,
+              0X04, 0X02, 0X10, 0X01
             };
 
             makeOutputTable(dots);
@@ -372,6 +390,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               break;
           }
           break;
+
+        case MM_CMD_ShiftPress:
+        case MM_CMD_ShiftRelease:
+          continue;
 
         default:
           break;
