@@ -69,6 +69,7 @@ typedef struct {
 #endif /* monitor definitions */
 
 #include "log.h"
+#include "program.h"
 #include "queue.h"
 #include "timing.h"
 #include "file.h"
@@ -76,8 +77,9 @@ typedef struct {
 #include "async.h"
 #include "async_io.h"
 #include "async_alarm.h"
-#include "async_event.h"
 #include "async_wait.h"
+#include "async_event.h"
+#include "async_call.h"
 
 struct AsyncHandleStruct {
   Element *element;
@@ -1479,6 +1481,69 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
   return asyncResetAlarmTo(handle, &time);
 }
 
+static void
+awaitNextResponse (long int timeout) {
+  {
+    Queue *alarms = getAlarmQueue(0);
+
+    if (alarms) {
+      Element *element = getQueueHead(alarms);
+
+      if (element) {
+        AlarmEntry *alarm = getElementItem(element);
+        TimeValue now;
+        long int milliseconds;
+
+        getCurrentTime(&now);
+        milliseconds = millisecondsBetween(&now, &alarm->time);
+
+        if (milliseconds <= 0) {
+          AsyncAlarmCallback *callback = alarm->callback;
+          const AsyncAlarmResult result = {
+            .data = alarm->data
+          };
+
+          deleteElement(element);
+          if (callback) callback(&result);
+          return;
+        }
+
+        if (milliseconds < timeout) timeout = milliseconds;
+      }
+    }
+  }
+
+#ifdef ASYNC_CAN_MONITOR_IO
+  awaitNextOperation(timeout);
+#else /* ASYNC_CAN_MONITOR_IO */
+  approximateDelay(timeout);
+#endif /* ASYNC_CAN_MONITOR_IO */
+}
+
+int
+asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
+  long int elapsed = 0;
+  TimePeriod period;
+
+  startTimePeriod(&period, timeout);
+  do {
+    awaitNextResponse(timeout - elapsed);
+
+    if (testCondition) {
+      if (testCondition(data)) {
+        return 1;
+      }
+    }
+  } while (!afterTimePeriod(&period, &elapsed));
+
+  return 0;
+}
+
+void
+asyncWait (int duration) {
+  asyncAwaitCondition(duration, NULL, NULL);
+}
+
 struct AsyncEventStruct {
   AsyncEventCallback *callback;
   void *data;
@@ -1515,15 +1580,28 @@ monitorEventPipe (const AsyncMonitorResult *result) {
   return 0;
 }
 
-void
+int
 asyncSignalEvent (AsyncEvent *event, void *data) {
-  writeFileDescriptor(event->pipeInput, &data, sizeof(data));
+  const size_t size = sizeof(data);
+  ssize_t result = writeFileDescriptor(event->pipeInput, &data, size);
 
+  if (result == size) {
 #ifdef __MINGW32__
-  EnterCriticalSection(&event->criticalSection);
-  if (!event->pendingCount++) SetEvent(event->monitorDescriptor);
-  LeaveCriticalSection(&event->criticalSection);
+    EnterCriticalSection(&event->criticalSection);
+    if (!event->pendingCount++) SetEvent(event->monitorDescriptor);
+    LeaveCriticalSection(&event->criticalSection);
 #endif /* __MINGW32__ */
+
+    return 1;
+  }
+
+  if (result == -1) {
+    logSystemError("write");
+  } else {
+    logMessage(LOG_ERR, "short write"); 
+  }
+
+  return 0;
 }
 
 AsyncEvent *
@@ -1586,64 +1664,80 @@ asyncDiscardEvent (AsyncEvent *event) {
 }
 
 static void
-awaitNextResponse (long int timeout) {
-  {
-    Queue *alarms = getAlarmQueue(0);
+exitProgramEvent (void *data) {
+  AsyncEvent **event = data;
 
-    if (alarms) {
-      Element *element = getQueueHead(alarms);
+  if (*event) {
+    asyncDiscardEvent(*event);
+    *event = NULL;
+  }
+}
 
-      if (element) {
-        AlarmEntry *alarm = getElementItem(element);
-        TimeValue now;
-        long int milliseconds;
+AsyncEvent *
+asyncGetProgramEvent (
+  AsyncEvent **event, const char *name,
+  AsyncEventCreator *createEvent, void *data
+) {
+  if (!*event) {
+    if ((*event = createEvent(data))) {
+      onProgramExit(name, exitProgramEvent, event);
+    }
+  }
 
-        getCurrentTime(&now);
-        milliseconds = millisecondsBetween(&now, &alarm->time);
+  return *event;
+}
 
-        if (milliseconds <= 0) {
-          AsyncAlarmCallback *callback = alarm->callback;
-          const AsyncAlarmResult result = {
-            .data = alarm->data
-          };
+typedef struct {
+  AsyncFunction *function;
+  void *data;
+  unsigned called:1;
+} CallFunctionData;
 
-          deleteElement(element);
-          if (callback) callback(&result);
-          return;
-        }
+static void
+handleCallFunctionEvent (void *eventData, void *signalData) {
+  CallFunctionData *cfd = signalData;
 
-        if (milliseconds < timeout) timeout = milliseconds;
+  if (cfd->function) cfd->function(cfd->data);
+  cfd->called = 1;
+}
+
+static AsyncEvent *
+createCallFunctionEvent (void *data) {
+  return asyncNewEvent(handleCallFunctionEvent, NULL);
+}
+
+static AsyncEvent *
+getCallFunctionEvent (void) {
+  static AsyncEvent *event = NULL;
+
+  return asyncGetProgramEvent(&event, "call-function-event",
+                              createCallFunctionEvent, NULL);
+}
+
+static int
+testFunctionCalled (void *data) {
+  CallFunctionData *cfd = data;
+
+  return cfd->called;
+}
+
+int
+asyncCallFunction (int timeout, AsyncFunction *function, void *data) {
+  AsyncEvent *event = getCallFunctionEvent();
+
+  if (event) {
+    CallFunctionData cfd = {
+      .function = function,
+      .data = data,
+      .called = 0
+    };
+
+    if (asyncSignalEvent(event, &cfd)) {
+      if (asyncAwaitCondition(timeout, testFunctionCalled, &cfd)) {
+        return 1;
       }
     }
   }
 
-#ifdef ASYNC_CAN_MONITOR_IO
-  awaitNextOperation(timeout);
-#else /* ASYNC_CAN_MONITOR_IO */
-  approximateDelay(timeout);
-#endif /* ASYNC_CAN_MONITOR_IO */
-}
-
-int
-asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
-  long int elapsed = 0;
-  TimePeriod period;
-
-  startTimePeriod(&period, timeout);
-  do {
-    awaitNextResponse(timeout - elapsed);
-
-    if (testCondition) {
-      if (testCondition(data)) {
-        return 1;
-      }
-    }
-  } while (!afterTimePeriod(&period, &elapsed));
-
   return 0;
-}
-
-void
-asyncWait (int duration) {
-  asyncAwaitCondition(duration, NULL, NULL);
 }

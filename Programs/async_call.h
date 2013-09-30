@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_EVENT
-#define BRLTTY_INCLUDED_ASYNC_EVENT
+#ifndef BRLTTY_INCLUDED_ASYNC_CALL
+#define BRLTTY_INCLUDED_ASYNC_CALL
 
 #include "async.h"
 
@@ -25,22 +25,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct AsyncEventStruct AsyncEvent;
-typedef void AsyncEventCallback (void *eventData, void *signalData);
+typedef void AsyncFunction (void *data);
 
-extern AsyncEvent *asyncNewEvent (AsyncEventCallback *callback, void *data);
-extern void asyncDiscardEvent (AsyncEvent *event);
-extern int asyncSignalEvent (AsyncEvent *event, void *data);
-
-typedef AsyncEvent *AsyncEventCreator (void *data);
-
-extern AsyncEvent *asyncGetProgramEvent (
-  AsyncEvent **event, const char *name,
-  AsyncEventCreator *createEvent, void *data
-);
+extern int asyncCallFunction (int timeout, AsyncFunction *function, void *data);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_EVENT */
+#endif /* BRLTTY_INCLUDED_ASYNC_CALL */
