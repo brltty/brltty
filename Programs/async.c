@@ -185,7 +185,9 @@ awaitMonitors (const MonitorGroup *monitors, int timeout) {
 
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
-  *monitor = function->ol.hEvent;
+  *monitor = (function->ol.hEvent != INVALID_HANDLE_VALUE)?
+               function->ol.hEvent:
+               function->fileDescriptor;
 }
 
 static int
@@ -1483,22 +1485,45 @@ struct AsyncEventStruct {
 
   FileDescriptor pipeInput;
   FileDescriptor pipeOutput;
+
+  FileDescriptor monitorDescriptor;
   AsyncHandle monitorHandle;
+
+#ifdef __MINGW32__
+  CRITICAL_SECTION criticalSection;
+  unsigned int pendingCount;
+#endif /* __MINGW32__ */
 };
 
-static size_t
-readEventPipe (const AsyncInputResult *result) {
+static int
+monitorEventPipe (const AsyncMonitorResult *result) {
   AsyncEvent *event = result->data;
   void *data;
   const size_t size = sizeof(data);
 
-  if (result->length >= size) {
-    memcpy(&data, result->buffer, size);
+  if (readFileDescriptor(event->pipeOutput, &data, size) == size) {
+#ifdef __MINGW32__
+    EnterCriticalSection(&event->criticalSection);
+    if (!--event->pendingCount) ResetEvent(event->monitorDescriptor);
+    LeaveCriticalSection(&event->criticalSection);
+#endif /* __MINGW32__ */
+
     event->callback(event->data, data);
-    return size;
+    return 1;
   }
 
   return 0;
+}
+
+void
+asyncSignalEvent (AsyncEvent *event, void *data) {
+  writeFileDescriptor(event->pipeInput, &data, sizeof(data));
+
+#ifdef __MINGW32__
+  EnterCriticalSection(&event->criticalSection);
+  if (!event->pendingCount++) SetEvent(event->monitorDescriptor);
+  LeaveCriticalSection(&event->criticalSection);
+#endif /* __MINGW32__ */
 }
 
 AsyncEvent *
@@ -1511,8 +1536,26 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
     event->data = data;
 
     if (createPipe(&event->pipeInput, &event->pipeOutput)) {
-      if (asyncReadFile(&event->monitorHandle, event->pipeOutput, 0X100, readEventPipe, event)) {
-        return event;
+#ifdef __MINGW32__
+      if (!(event->monitorDescriptor = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+        logWindowsSystemError("CreateEvent");
+        event->monitorDescriptor = INVALID_FILE_DESCRIPTOR;
+      }
+#else /* __MINGW32__ */
+      event->monitorDescriptor = event->pipeOutput;
+#endif /* __MINGW32__ */
+
+      if (event->monitorDescriptor != INVALID_FILE_DESCRIPTOR) {
+        if (asyncMonitorFileInput(&event->monitorHandle, event->monitorDescriptor, monitorEventPipe, event)) {
+#ifdef __MINGW32__
+          InitializeCriticalSection(&event->criticalSection);
+          event->pendingCount = 0;
+#endif /* __MINGW32__ */
+
+          return event;
+        }
+
+        closeFileDescriptor(event->monitorDescriptor);
       }
 
       closeFileDescriptor(event->pipeInput);
@@ -1530,14 +1573,16 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
 void
 asyncDiscardEvent (AsyncEvent *event) {
   asyncCancelRequest(event->monitorHandle);
+
   closeFileDescriptor(event->pipeInput);
   closeFileDescriptor(event->pipeOutput);
-  free(event);
-}
 
-void
-asyncSignalEvent (AsyncEvent *event, void *data) {
-  writeFileDescriptor(event->pipeInput, &data, sizeof(data));
+#ifdef __MINGW32__
+  CloseHandle(event->monitorDescriptor);
+  DeleteCriticalSection(&event->criticalSection);
+#endif /* __MINGW32__ */
+
+  free(event);
 }
 
 static void
