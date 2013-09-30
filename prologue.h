@@ -71,7 +71,10 @@ extern "C" {
 #define WINDOWS
 
 #include <w32api.h>
+
+#ifndef WINVER
 #define WINVER WindowsXP
+#endif /* WINVER */
 
 #ifdef __MINGW32__
 #ifndef __USE_W32_SOCKETS
