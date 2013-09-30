@@ -27,7 +27,7 @@ extern "C" {
 
 typedef void AsyncFunction (void *data);
 
-extern int asyncCallFunction (int timeout, AsyncFunction *function, void *data);
+extern int asyncCallFunction (AsyncFunction *function, void *data);
 
 #ifdef __cplusplus
 }

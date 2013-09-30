@@ -1687,28 +1687,17 @@ asyncGetProgramEvent (
   return *event;
 }
 
-typedef enum {
-  CFS_WAITING,
-  CFS_CALLED,
-  CFS_TIMEOUT
-} CallFunctionState;
-
 typedef struct {
   AsyncFunction *function;
   void *data;
-  CallFunctionState state;
 } CallFunctionData;
 
 static void
 handleCallFunctionEvent (void *eventData, void *signalData) {
   CallFunctionData *cfd = signalData;
 
-  if (cfd->state == CFS_WAITING) {
-    if (cfd->function) cfd->function(cfd->data);
-    cfd->state = CFS_CALLED;
-  } else if (cfd->state == CFS_TIMEOUT) {
-    free(cfd);
-  }
+  if (cfd->function) cfd->function(cfd->data);
+  free(cfd);
 }
 
 static AsyncEvent *
@@ -1724,16 +1713,8 @@ getCallFunctionEvent (void) {
                               createCallFunctionEvent, NULL);
 }
 
-static int
-testFunctionCalled (void *data) {
-  CallFunctionData *cfd = data;
-
-  return cfd->state != CFS_WAITING;
-}
-
 int
-asyncCallFunction (int timeout, AsyncFunction *function, void *data) {
-  int called = 0;
+asyncCallFunction (AsyncFunction *function, void *data) {
   AsyncEvent *event = getCallFunctionEvent();
 
   if (event) {
@@ -1743,21 +1724,16 @@ asyncCallFunction (int timeout, AsyncFunction *function, void *data) {
       memset(cfd, 0, sizeof(*cfd));
       cfd->function = function;
       cfd->data = data;
-      cfd->state = CFS_WAITING;
 
       if (asyncSignalEvent(event, cfd)) {
-        if (asyncAwaitCondition(timeout, testFunctionCalled, cfd)) {
-          called = 1;
-        } else {
-          cfd->state = CFS_TIMEOUT;
-        }
+        return 1;
       }
 
-      if (cfd->state != CFS_TIMEOUT) free(cfd);
+      free(cfd);
     } else {
       logMallocError();
     }
   }
 
-  return called;
+  return 0;
 }
