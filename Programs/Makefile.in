@@ -281,8 +281,8 @@ scr_main.$O:
 scr_real.$O: scr.auto.h
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_real.c
 
-scr.driver$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scdriverr.c
+scr_driver.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_driver.c
 
 routing.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/routing.c
