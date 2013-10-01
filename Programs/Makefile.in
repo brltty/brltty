@@ -565,7 +565,7 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O datafile.$O unicode.$O $(CHARSET_OBJECTS) lock.$O cmd.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O brl_driver.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O datafile.$O unicode.$O $(CHARSET_OBJECTS) lock.$O cmd.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBS) $(LDLIBS)
