@@ -146,12 +146,21 @@ struct FunctionEntryStruct {
   Queue *operations;
 
 #if defined(__MINGW32__)
-  OVERLAPPED ol;
+  struct {
+    OVERLAPPED overlapped;
+  } windows;
+
 #elif defined(HAVE_SYS_POLL_H)
-  short pollEvents;
+  struct {
+    short int events;
+  } poll;
+
 #elif defined(HAVE_SELECT)
-  SelectDescriptor *selectDescriptor;
-#endif /* monitor definitions */
+  struct {
+    SelectDescriptor *descriptor;
+  } select;
+
+#endif /* monitor paradigms */
 };
 
 typedef struct {
@@ -187,9 +196,8 @@ awaitMonitors (const MonitorGroup *monitors, int timeout) {
 
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
-  *monitor = (function->ol.hEvent != INVALID_HANDLE_VALUE)?
-               function->ol.hEvent:
-               function->fileDescriptor;
+  *monitor = function->windows.overlapped.hEvent;
+  if (*monitor == INVALID_HANDLE_VALUE) *monitor = function->fileDescriptor;
 }
 
 static int
@@ -227,7 +235,7 @@ static int
 allocateWindowsResources (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
 
-  if (allocateWindowsEvent(&function->ol.hEvent)) {
+  if (allocateWindowsEvent(&function->windows.overlapped.hEvent)) {
     return 1;
   }
 
@@ -261,13 +269,13 @@ setWindowsTransferResult (OperationEntry *operation, DWORD success, DWORD count)
 
 static void
 beginWindowsFunction (FunctionEntry *function) {
-  ZeroMemory(&function->ol, sizeof(function->ol));
-  function->ol.hEvent = INVALID_HANDLE_VALUE;
+  ZeroMemory(&function->windows.overlapped, sizeof(function->windows.overlapped));
+  function->windows.overlapped.hEvent = INVALID_HANDLE_VALUE;
 }
 
 static void
 endWindowsFunction (FunctionEntry *function) {
-  deallocateWindowsEvent(&function->ol.hEvent);
+  deallocateWindowsEvent(&function->windows.overlapped.hEvent);
 }
 
 static void
@@ -280,7 +288,7 @@ startWindowsRead (OperationEntry *operation) {
     BOOL success = ReadFile(function->fileDescriptor,
                             &extension->buffer[extension->length],
                             extension->size - extension->length,
-                            &count, &function->ol);
+                            &count, &function->windows.overlapped);
 
     setWindowsTransferResult(operation, success, count);
   }
@@ -296,7 +304,7 @@ startWindowsWrite (OperationEntry *operation) {
     BOOL success = WriteFile(function->fileDescriptor,
                              &extension->buffer[extension->length],
                              extension->size - extension->length,
-                             &count, &function->ol);
+                             &count, &function->windows.overlapped);
 
     setWindowsTransferResult(operation, success, count);
   }
@@ -306,7 +314,7 @@ static void
 finishWindowsTransferOperation (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   DWORD count;
-  BOOL success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
+  BOOL success = GetOverlappedResult(function->fileDescriptor, &function->windows.overlapped, &count, FALSE);
 
   setWindowsTransferResult(operation, success, count);
 }
@@ -316,8 +324,8 @@ cancelWindowsTransferOperation (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   DWORD count;
 
-  if (CancelIoEx(function->fileDescriptor, &function->ol)) {
-    GetOverlappedResult(function->fileDescriptor, &function->ol, &count, TRUE);
+  if (CancelIoEx(function->fileDescriptor, &function->windows.overlapped)) {
+    GetOverlappedResult(function->fileDescriptor, &function->windows.overlapped, &count, TRUE);
   }
 }
 
@@ -343,28 +351,28 @@ awaitMonitors (const MonitorGroup *monitors, int timeout) {
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
   monitor->fd = function->fileDescriptor;
-  monitor->events = function->pollEvents;
+  monitor->events = function->poll.events;
   monitor->revents = 0;
 }
 
 static int
 testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
-  return (monitor->revents & function->pollEvents) != 0;
+  return (monitor->revents & function->poll.events) != 0;
 }
 
 static void
 beginUnixInputFunction (FunctionEntry *function) {
-  function->pollEvents = POLLIN;
+  function->poll.events = POLLIN;
 }
 
 static void
 beginUnixOutputFunction (FunctionEntry *function) {
-  function->pollEvents = POLLOUT;
+  function->poll.events = POLLOUT;
 }
 
 static void
 beginUnixAlertFunction (FunctionEntry *function) {
-  function->pollEvents = POLLPRI;
+  function->poll.events = POLLPRI;
 }
 
 #elif defined(HAVE_SELECT)
@@ -446,12 +454,12 @@ awaitMonitors (const MonitorGroup *monitors, int timeout) {
 
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
-  monitor->selectSet = &function->selectDescriptor->set;
+  monitor->selectSet = &function->select.descriptor->set;
   monitor->fileDescriptor = function->fileDescriptor;
-  FD_SET(function->fileDescriptor, &function->selectDescriptor->set);
+  FD_SET(function->fileDescriptor, &function->select.descriptor->set);
 
-  if (function->fileDescriptor >= function->selectDescriptor->size) {
-    function->selectDescriptor->size = function->fileDescriptor + 1;
+  if (function->fileDescriptor >= function->select.descriptor->size) {
+    function->select.descriptor->size = function->fileDescriptor + 1;
   }
 }
 
@@ -462,17 +470,17 @@ testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
 
 static void
 beginUnixInputFunction (FunctionEntry *function) {
-  function->selectDescriptor = &selectDescriptor_read;
+  function->select.descriptor = &selectDescriptor_read;
 }
 
 static void
 beginUnixOutputFunction (FunctionEntry *function) {
-  function->selectDescriptor = &selectDescriptor_write;
+  function->select.descriptor = &selectDescriptor_write;
 }
 
 static void
 beginUnixAlertFunction (FunctionEntry *function) {
-  function->selectDescriptor = &selectDescriptor_exception;
+  function->select.descriptor = &selectDescriptor_exception;
 }
 
 #endif /* Unix I/O monitoring capabilities */
