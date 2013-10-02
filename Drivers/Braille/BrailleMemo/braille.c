@@ -385,11 +385,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               continue;
             }
 
-            case MM_SET_ROUTE: {
+            case MM_SET_ROUTE:
+            {
               unsigned char key = packet.fields.data.keys.value;
 
               if ((key > 0) && (key <= brl->textColumns)) {
+                uint32_t shift = 0;
+
+                enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
                 enqueueKey(brl, packet.fields.data.keys.group, key-1);
+                enqueueUpdatedKeys(brl, 0, &shift, MM_SET_SHIFT, 0);
                 continue;
               }
 
