@@ -1075,7 +1075,6 @@ constructBrailleDriver (void) {
 
 void
 destructBrailleDriver (void) {
-  brl.noDisplay = 1;
   brailleConstructed = 0;
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);
@@ -1303,6 +1302,7 @@ exitBrailleDriver (void *data) {
   if (brailleConstructed) {
     clearStatusCells(&brl);
     message(NULL, gettext("BRLTTY stopped"), MSG_NODELAY|MSG_SILENT);
+    brl.noDisplay = 1;
   }
 
   stopBrailleDriver();

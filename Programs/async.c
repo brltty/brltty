@@ -1534,17 +1534,12 @@ asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *dat
   TimePeriod period;
 
   startTimePeriod(&period, timeout);
-  do {
+
+  while (1) {
+    if (testCondition && testCondition(data)) return 1;
+    if (afterTimePeriod(&period, &elapsed)) return 0;
     awaitNextResponse(timeout - elapsed);
-
-    if (testCondition) {
-      if (testCondition(data)) {
-        return 1;
-      }
-    }
-  } while (!afterTimePeriod(&period, &elapsed));
-
-  return 0;
+  }
 }
 
 void
