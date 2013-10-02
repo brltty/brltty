@@ -18,6 +18,26 @@
 
 title Braille Memo
 
+bind RoutingKey ROUTE
+
+bind Control LNUP
+bind Alt LNDN
+
+bind F1 FWINLT
+bind F4 FWINRT
+
+bind Control+Select PRDIFLN
+bind Control+Read NXDIFLN
+
+bind Alt+Select FWINLTSKIP
+bind Alt+Read FWINRTSKIP
+
+bind Control+Alt+Select TOP
+bind Control+Alt+Read BOT
+
+bind Control+Alt LNBEG
+bind F1+F4 HOME
+
 map Dot1 DOT1
 map Dot2 DOT2
 map Dot3 DOT3

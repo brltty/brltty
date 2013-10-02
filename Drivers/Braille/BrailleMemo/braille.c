@@ -114,7 +114,7 @@ struct BrailleDataStruct {
   unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
 };
 
-static const unsigned char sizeTable[] = {16};
+static const unsigned char sizeTable[] = {16, 32, 40};
 static const unsigned char sizeCount = ARRAY_COUNT(sizeTable);
 
 static int
@@ -241,10 +241,18 @@ sendBrailleData (BrailleDisplay *brl, const unsigned char *cells, size_t count) 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 9600
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
+    { /* Braille Memo */
+      .vendor=0X10C4, .product=0XEA60,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .serial=&serialParameters
+    },
+
     { .vendor=0 }
   };
 
@@ -254,6 +262,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.serial.parameters = &serialParameters;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+
+  descriptor.bluetooth.channelNumber = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor)) {
     return 1;
