@@ -2214,12 +2214,10 @@ message (const char *mode, const char *text, short flags) {
     size_t length = getTextLength(text);
     wchar_t characters[length + 1];
     const wchar_t *character = characters;
+    int apiWasStarted = apiStarted;
 
-#ifdef ENABLE_API
-    int api = apiStarted;
+    apiUnlink();
     apiStarted = 0;
-    if (api) api_unlink(&brl);
-#endif /* ENABLE_API */
 
     convertTextToWchars(characters, text, ARRAY_COUNT(characters));
     suspendUpdates();
@@ -2267,10 +2265,8 @@ message (const char *mode, const char *text, short flags) {
     popCommandHandler();
     resumeUpdates();
 
-#ifdef ENABLE_API
-    if (api) api_link(&brl);
-    apiStarted = api;
-#endif /* ENABLE_API */
+    apiStarted = apiWasStarted;
+    apiLink();
   }
 
   return ok;

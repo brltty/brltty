@@ -51,7 +51,7 @@ extern int apiStarted;
 extern void apiUnlink (void);
 extern void apiLink (void);
 
-extern void apiClaimDriver (void);
+extern int apiClaimDriver (void);
 extern void apiReleaseDriver (void);
 
 #ifdef __cplusplus

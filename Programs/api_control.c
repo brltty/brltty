@@ -93,13 +93,14 @@ apiLink (void) {
   if (apiStarted) api_link(&brl);
 }
 
-void
+int
 apiClaimDriver (void) {
-  if (!apiDriverClaimed) {
-    if (apiStarted && api_claimDriver(&brl)) {
-      apiDriverClaimed = 1;
-    }
+  if (!apiDriverClaimed && apiStarted) {
+    if (!api_claimDriver(&brl)) return 0;
+    apiDriverClaimed = 1;
   }
+
+  return 1;
 }
 
 void
