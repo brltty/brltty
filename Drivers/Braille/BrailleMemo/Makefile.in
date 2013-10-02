@@ -18,7 +18,7 @@
 
 DRIVER_CODE = mm
 DRIVER_NAME = BrailleMemo
-DRIVER_COMMENT = Pocket (16)
+DRIVER_COMMENT = Pocket (16), 32, 40
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 include $(SRC_TOP)braille.mk
