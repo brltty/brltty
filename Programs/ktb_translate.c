@@ -450,10 +450,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (table->logKeyEvents && *table->logKeyEvents) {
+  if (table->logKeyEventsFlag && *table->logKeyEventsFlag) {
     char buffer[0X40];
 
     STR_BEGIN(buffer, sizeof(buffer));
+    if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
     STR_PRINTF("Key %s: Ctx:%u Set:%u Key:%u",
                press? "Press": "Release",
                context, set, key);
@@ -470,6 +471,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 }
 
 void
-setKeyEventLoggingFlag (KeyTable *table, const unsigned char *flag) {
-  table->logKeyEvents = flag;
+setKeyTableLogLabel (KeyTable *table, const char *label) {
+  table->logLabel = label;
+}
+
+void
+setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
+  table->logKeyEventsFlag = flag;
 }

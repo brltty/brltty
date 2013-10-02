@@ -141,7 +141,8 @@ struct KeyTableStruct {
     unsigned repeat:1;
   } longPress;
 
-  const unsigned char *logKeyEvents;
+  const char *logLabel;
+  const unsigned char *logKeyEventsFlag;
 };
 
 extern void copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count);
