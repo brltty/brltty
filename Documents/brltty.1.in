@@ -759,6 +759,9 @@ MultiBraille
 .B md
 MDV
 .TP 4
+.B mm
+BrailleMemo
+.TP 4
 .B mn
 MiniBraille
 .TP 4
