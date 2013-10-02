@@ -332,6 +332,7 @@ resetKeyGroup (unsigned char *group, unsigned char count, unsigned char key) {
 
 static void
 updateKeyGroup (
+  BrailleDisplay *brl,
   unsigned char *group, const unsigned char *new,
   unsigned char set, unsigned char base, unsigned char count, int scaled
 ) {
@@ -349,27 +350,30 @@ updateKeyGroup (
       if (press) {
         pressTable[pressCount++] = key;
       } else {
-        enqueueKeyEvent(set, key, 0);
+        enqueueKeyEvent(brl, set, key, 0);
       }
     }
   }
 
-  while (pressCount) enqueueKeyEvent(set, pressTable[--pressCount], 1);
+  while (pressCount) enqueueKeyEvent(brl, set, pressTable[--pressCount], 1);
 }
 
 static void
-updateNavigationKeys (const unsigned char *new, unsigned char base, unsigned char count) {
-  updateKeyGroup(keysState.navigationKeys, new, BM_SET_NavigationKeys, base, count, 0);
+updateNavigationKeys (
+  BrailleDisplay *brl,
+  const unsigned char *new, unsigned char base, unsigned char count
+) {
+  updateKeyGroup(brl, keysState.navigationKeys, new, BM_SET_NavigationKeys, base, count, 0);
 }
 
 static void
-updateDisplayKeys (unsigned char new) {
-  updateNavigationKeys(&new, BM_KEY_DISPLAY, BM_KEYS_DISPLAY);
+updateDisplayKeys (BrailleDisplay *brl, unsigned char new) {
+  updateNavigationKeys(brl, &new, BM_KEY_DISPLAY, BM_KEYS_DISPLAY);
 }
 
 static void
-updateRoutingKeys (const unsigned char *new, unsigned char count) {
-  updateKeyGroup(keysState.routingKeys, new, BM_SET_RoutingKeys, 0, count, 0);
+updateRoutingKeys (BrailleDisplay *brl, const unsigned char *new, unsigned char count) {
+  updateKeyGroup(brl, keysState.routingKeys, new, BM_SET_RoutingKeys, 0, count, 0);
 }
 
 static int
@@ -1366,8 +1370,8 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
             while (count > 0) {
               unsigned char key = BM_KEY_WHEEL_UP + index;
 
-              enqueueKeyEvent(BM_SET_NavigationKeys, key, 1);
-              enqueueKeyEvent(BM_SET_NavigationKeys, key, 0);
+              enqueueKeyEvent(brl, BM_SET_NavigationKeys, key, 1);
+              enqueueKeyEvent(brl, BM_SET_NavigationKeys, key, 0);
 
               count -= 1;
             }
@@ -1375,8 +1379,8 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
             while (count < 0) {
               unsigned char key = BM_KEY_WHEEL_DOWN + index;
 
-              enqueueKeyEvent(BM_SET_NavigationKeys, key, 1);
-              enqueueKeyEvent(BM_SET_NavigationKeys, key, 0);
+              enqueueKeyEvent(brl, BM_SET_NavigationKeys, key, 1);
+              enqueueKeyEvent(brl, BM_SET_NavigationKeys, key, 0);
 
               count += 1;
             }
@@ -1384,15 +1388,15 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
         }
 
         if (flags & BAUM_DRF_ButtonsChanged) {
-          updateNavigationKeys(&buttons, BM_KEY_WHEEL_PRESS, wheels);
+          updateNavigationKeys(brl, &buttons, BM_KEY_WHEEL_PRESS, wheels);
         }
 
         if (flags & BAUM_DRF_KeysChanged) {
-          updateDisplayKeys(keys);
+          updateDisplayKeys(brl, keys);
         }
 
         if (flags & BAUM_DRF_SensorsChanged) {
-          updateRoutingKeys(sensors, brl->textColumns);
+          updateRoutingKeys(brl, sensors, brl->textColumns);
         }
 
         break;
@@ -1400,7 +1404,7 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 
       case BAUM_MODULE_Status:
         if (packet->data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged) {
-          updateNavigationKeys(&packet->data.values.modular.data.registers.status.buttons,
+          updateNavigationKeys(brl, &packet->data.values.modular.data.registers.status.buttons,
                                BM_KEY_STATUS, BM_KEYS_STATUS);
         }
 
@@ -1601,22 +1605,22 @@ updateBaumKeys (BrailleDisplay *brl) {
             break;
         }
 
-        updateDisplayKeys(keys);
+        updateDisplayKeys(brl, keys);
         continue;
       }
 
       case BAUM_RSP_CommandKeys:
-        updateNavigationKeys(packet.data.values.commandKeys,
+        updateNavigationKeys(brl, packet.data.values.commandKeys,
                              BM_KEY_COMMAND, BM_KEYS_COMMAND);
         continue;
 
       case BAUM_RSP_Front6:
-        updateNavigationKeys(packet.data.values.front6,
+        updateNavigationKeys(brl, packet.data.values.front6,
                              BM_KEY_FRONT, 6);
         continue;
 
       case BAUM_RSP_Back6:
-        updateNavigationKeys(packet.data.values.back6,
+        updateNavigationKeys(brl, packet.data.values.back6,
                              BM_KEY_BACK, 6);
         continue;
 
@@ -1624,7 +1628,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         unsigned char keys[2];
         keys[0] = packet.data.values.front10[1];
         keys[1] = packet.data.values.front10[0];
-        updateNavigationKeys(keys, BM_KEY_FRONT, 10);
+        updateNavigationKeys(brl, keys, BM_KEY_FRONT, 10);
         continue;
       }
 
@@ -1632,17 +1636,17 @@ updateBaumKeys (BrailleDisplay *brl) {
         unsigned char keys[2];
         keys[0] = packet.data.values.back10[1];
         keys[1] = packet.data.values.back10[0];
-        updateNavigationKeys(keys, BM_KEY_BACK, 10);
+        updateNavigationKeys(brl, keys, BM_KEY_BACK, 10);
         continue;
       }
 
       case BAUM_RSP_EntryKeys:
-        updateNavigationKeys(packet.data.values.entryKeys,
+        updateNavigationKeys(brl, packet.data.values.entryKeys,
                              BM_KEY_ENTRY, BM_KEYS_ENTRY);
         continue;
 
       case BAUM_RSP_Joystick:
-        updateNavigationKeys(packet.data.values.joystick,
+        updateNavigationKeys(brl, packet.data.values.joystick,
                              BM_KEY_JOYSTICK, BM_KEYS_JOYSTICK);
         continue;
 
@@ -1650,7 +1654,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         resetKeyGroup(packet.data.values.horizontalSensors, brl->textColumns, packet.data.values.horizontalSensor);
       case BAUM_RSP_HorizontalSensors:
         if (!(switchSettings & BAUM_SWT_DisableSensors)) {
-          updateKeyGroup(keysState.horizontalSensors, packet.data.values.horizontalSensors,
+          updateKeyGroup(brl, keysState.horizontalSensors, packet.data.values.horizontalSensors,
                          BM_SET_HorizontalSensors, 0, brl->textColumns, 0);
         }
         continue;
@@ -1677,10 +1681,10 @@ updateBaumKeys (BrailleDisplay *brl) {
         if (!(switchSettings & BAUM_SWT_DisableSensors)) {
           int scaled = (switchSettings & BAUM_SWT_ScaledVertical) != 0;
 
-          updateKeyGroup(keysState.leftSensors, packet.data.values.verticalSensors.left,
+          updateKeyGroup(brl, keysState.leftSensors, packet.data.values.verticalSensors.left,
                          (scaled? BM_SET_ScaledLeftSensors: BM_SET_LeftSensors),
                          0, VERTICAL_SENSOR_COUNT, scaled);
-          updateKeyGroup(keysState.rightSensors, packet.data.values.verticalSensors.right,
+          updateKeyGroup(brl, keysState.rightSensors, packet.data.values.verticalSensors.right,
                          (scaled? BM_SET_ScaledRightSensors: BM_SET_RightSensors),
                          0, VERTICAL_SENSOR_COUNT, scaled);
         }
@@ -1697,7 +1701,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         }
 
       doRoutingKeys:
-        updateKeyGroup(keysState.routingKeys, packet.data.values.routingKeys,
+        updateKeyGroup(brl, keysState.routingKeys, packet.data.values.routingKeys,
                        BM_SET_RoutingKeys, 0, cellCount, 0);
         continue;
 
@@ -1976,7 +1980,7 @@ updateHandyTechKeys (BrailleDisplay *brl) {
         }
       }
 
-      if (setGroupedKey(group, key, press)) enqueueKeyEvent(set, key, press);
+      if (setGroupedKey(group, key, press)) enqueueKeyEvent(brl, set, key, press);
     }
   }
 }
@@ -2201,7 +2205,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl) {
           continue;
 
         case PB_RSP_SENSORS:
-          updateKeyGroup(keysState.routingKeys, packet.data.values.sensors.horizontal,
+          updateKeyGroup(brl, keysState.routingKeys, packet.data.values.sensors.horizontal,
                          BM_SET_RoutingKeys, 0, brl->textColumns, 0);
           continue;
 
@@ -2252,12 +2256,12 @@ updatePowerBrailleKeys (BrailleDisplay *brl) {
           if (keys & (1 << offset)) {
             unsigned char key = BM_KEY_DISPLAY + offset;
 
-            enqueueKeyEvent(set, key, 1);
+            enqueueKeyEvent(brl, set, key, 1);
             pressedKeys[pressedCount++] = key;
           }
         }
 
-        while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
+        while (pressedCount) enqueueKeyEvent(brl, set, pressedKeys[--pressedCount], 0);
       }
       continue;
     }

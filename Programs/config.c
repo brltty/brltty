@@ -55,6 +55,7 @@
 #include "cmd_braille.h"
 #include "cmd_queue.h"
 #include "brltty.h"
+#include "api_control.h"
 #include "prefs.h"
 #include "charset.h"
 
@@ -143,7 +144,6 @@ static KeyboardProperties keyboardProperties;
 static int opt_noApi;
 static char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
-int apiStarted;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT

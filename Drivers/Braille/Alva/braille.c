@@ -797,17 +797,17 @@ readCommand1 (BrailleDisplay *brl) {
     switch (group) {
       case 0X71: /* operating keys and status keys */
         if (key <= 0X0D) {
-          enqueueKeyEvent(AL_SET_NavigationKeys, key+AL_KEY_OPERATION, press);
+          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key+AL_KEY_OPERATION, press);
           continue;
         }
 
         if ((key >= 0X20) && (key <= 0X25)) {
-          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X20+AL_KEY_STATUS1, press);
+          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X20+AL_KEY_STATUS1, press);
           continue;
         }
 
         if ((key >= 0X30) && (key <= 0X35)) {
-          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X30+AL_KEY_STATUS2, press);
+          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X30+AL_KEY_STATUS2, press);
           continue;
         }
 
@@ -815,7 +815,7 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X72: /* primary (lower) routing keys */
         if (key <= 0X5F) {			/* make */
-          enqueueKeyEvent(AL_SET_RoutingKeys1, key, press);
+          enqueueKeyEvent(brl, AL_SET_RoutingKeys1, key, press);
           continue;
         }
 
@@ -823,7 +823,7 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X75: /* secondary (upper) routing keys */
         if (key <= 0X5F) {			/* make */
-          enqueueKeyEvent(AL_SET_RoutingKeys2, key, press);
+          enqueueKeyEvent(brl, AL_SET_RoutingKeys2, key, press);
           continue;
         }
 
@@ -831,12 +831,12 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X77: /* satellite keypads */
         if (key <= 0X05) {
-          enqueueKeyEvent(AL_SET_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
+          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
           continue;
         }
 
         if ((key >= 0X20) && (key <= 0X25)) {
-          enqueueKeyEvent(AL_SET_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
+          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
           continue;
         }
 
@@ -901,7 +901,7 @@ readCommand1 (BrailleDisplay *brl) {
       while (byte) {
         if (byte & bit) {
           byte &= ~bit;
-          enqueueKeyEvent(set, *key, 1);
+          enqueueKeyEvent(brl, set, *key, 1);
           pressedKeys[pressedCount++] = *key;
         }
 
@@ -909,21 +909,21 @@ readCommand1 (BrailleDisplay *brl) {
         bit <<= 1;
       }
 
-      while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
+      while (pressedCount) enqueueKeyEvent(brl, set, pressedKeys[--pressedCount], 0);
       continue;
     }
 
     if (byte >= routingBase) {
       if ((byte -= routingBase) < brl->textColumns) {
-        enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 1);
-        enqueueKeyEvent(AL_SET_RoutingKeys1, byte, 0);
+        enqueueKeyEvent(brl, AL_SET_RoutingKeys1, byte, 1);
+        enqueueKeyEvent(brl, AL_SET_RoutingKeys1, byte, 0);
         continue;
       }
 
       if ((byte -= brl->textColumns) < brl->statusColumns) {
         byte += AL_KEY_STATUS1;
-        enqueueKeyEvent(AL_SET_NavigationKeys, byte, 1);
-        enqueueKeyEvent(AL_SET_NavigationKeys, byte, 0);
+        enqueueKeyEvent(brl, AL_SET_NavigationKeys, byte, 1);
+        enqueueKeyEvent(brl, AL_SET_NavigationKeys, byte, 0);
         continue;
       }
     }
@@ -1030,7 +1030,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       }
 
       if (key < count) {
-        enqueueKeyEvent(AL_SET_NavigationKeys, base+key, press);
+        enqueueKeyEvent(brl, AL_SET_NavigationKeys, base+key, press);
         return EOF;
       }
       break;
@@ -1057,7 +1057,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       if (key >= textOffset) {
         if ((key -= textOffset) < brl->textColumns) {
           unsigned char set = secondary? AL_SET_RoutingKeys2: AL_SET_RoutingKeys1;
-          enqueueKeyEvent(set, key, press);
+          enqueueKeyEvent(brl, set, key, press);
           return EOF;
         }
       }

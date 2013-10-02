@@ -541,8 +541,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       if ((key >= windowStart) &&
           (key < (windowStart + windowWidth))) {
         key -= windowStart;
-        enqueueKeyEvent(set, key, 1);
-        enqueueKeyEvent(set, key, 0);
+        enqueueKeyEvent(brl, set, key, 1);
+        enqueueKeyEvent(brl, set, key, 0);
         continue;
       }
     }
@@ -578,13 +578,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case AT_KEY_Cursor2:
         if (byte == controlKey) {
           controlKey = NO_CONTROL_KEY;
-          enqueueKeyEvent(AT_SET_NavigationKeys, byte, 0);
+          enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 0);
           continue;
         }
 
         if (controlKey == NO_CONTROL_KEY) {
           controlKey = byte;
-          enqueueKeyEvent(AT_SET_NavigationKeys, byte, 1);
+          enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 1);
           continue;
         }
 
@@ -612,8 +612,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case AT_KEY_RightWheelLeft:
       case AT_KEY_RightWheelUp:
       case AT_KEY_RightWheelDown:
-        enqueueKeyEvent(AT_SET_NavigationKeys, byte, 1);
-        enqueueKeyEvent(AT_SET_NavigationKeys, byte, 0);
+        enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 1);
+        enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 0);
         continue;
     }
 

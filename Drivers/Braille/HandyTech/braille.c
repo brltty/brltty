@@ -237,7 +237,7 @@ END_KEY_TABLE_LIST
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
-typedef int (ByteInterpreter) (unsigned char byte);
+typedef int ByteInterpreter (BrailleDisplay *brl, unsigned char byte);
 static ByteInterpreter interpretByte_key;
 static ByteInterpreter interpretByte_Bookworm;
 
@@ -1478,29 +1478,29 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 }
 
 static int
-interpretByte_key (unsigned char byte) {
+interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
   int release = (byte & HT_KEY_RELEASE) != 0;
   if (release) byte ^= HT_KEY_RELEASE;
 
   if ((byte >= HT_KEY_ROUTING) &&
       (byte < (HT_KEY_ROUTING + model->textCells))) {
-    return enqueueKeyEvent(HT_SET_RoutingKeys, byte - HT_KEY_ROUTING, !release);
+    return enqueueKeyEvent(brl, HT_SET_RoutingKeys, byte - HT_KEY_ROUTING, !release);
   }
 
   if ((byte >= HT_KEY_STATUS) &&
       (byte < (HT_KEY_STATUS + model->statusCells))) {
-    return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
+    return enqueueKeyEvent(brl, HT_SET_NavigationKeys, byte, !release);
   }
 
   if ((byte > 0) && (byte < 0X20)) {
-    return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
+    return enqueueKeyEvent(brl, HT_SET_NavigationKeys, byte, !release);
   }
 
   return 0;
 }
 
 static int
-interpretByte_Bookworm (unsigned char byte) {
+interpretByte_Bookworm (BrailleDisplay *brl, unsigned char byte) {
   static const unsigned char keys[] = {
     HT_BWK_Backward,
     HT_BWK_Forward,
@@ -1521,13 +1521,13 @@ interpretByte_Bookworm (unsigned char byte) {
   }
 
   while (*key) {
-    if ((byte & *key) && !enqueueKeyEvent(set, *key, 1)) return 0;
+    if ((byte & *key) && !enqueueKeyEvent(brl, set, *key, 1)) return 0;
     key += 1;
   }
 
   do {
     key -= 1;
-    if ((byte & *key) && !enqueueKeyEvent(set, *key, 0)) return 0;
+    if ((byte & *key) && !enqueueKeyEvent(brl, set, *key, 0)) return 0;
   } while (key != keys);
 
   return 1;
@@ -1625,7 +1625,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
                 switch (packet.fields.data.extended.type) {
                   case HT_EXTPKT_Key:
-                    if (model->interpretByte(bytes[0])) {
+                    if (model->interpretByte(brl, bytes[0])) {
                       updateCells(brl);
                       return EOF;
                     }
@@ -1717,7 +1717,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               }
 
               default:
-                if (model->interpretByte(packet.fields.type)) {
+                if (model->interpretByte(brl, packet.fields.type)) {
                   updateCells(brl);
                   return EOF;
                 }

@@ -610,7 +610,7 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
       unsigned int keys = ((packet[2] << 8) | packet[1]) & 0X3FF;
-      enqueueKeys(keys, EU_SET_BrailleKeys, 0);
+      enqueueKeys(brl, keys, EU_SET_BrailleKeys, 0);
       return 1;
     }
 
@@ -618,16 +618,16 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
       unsigned char key = packet[1];
 
       if ((key >= 1) && (key <= brl->textColumns)) {
-        enqueueKey(EU_SET_RoutingKeys1, key-1);
+        enqueueKey(brl, EU_SET_RoutingKeys1, key-1);
       } else {
-        enqueueKey(EU_SET_InteractiveKeys, key);
+        enqueueKey(brl, EU_SET_InteractiveKeys, key);
       }
 
       return 1;
     }
 
     case 'T': 
-      enqueueKey(EU_SET_NavigationKeys, packet[1]);
+      enqueueKey(brl, EU_SET_NavigationKeys, packet[1]);
       return 1;
 
     default :

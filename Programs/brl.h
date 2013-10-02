@@ -85,6 +85,7 @@ extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
+extern void applyBrailleOrientation (unsigned char *cells, size_t count);
 
 extern int connectBrailleResource (
   BrailleDisplay *brl,
@@ -212,7 +213,31 @@ extern void makeInputTable (void);
 extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
 extern unsigned char translateInputCell (unsigned char cell);
 
-extern void applyBrailleOrientation (unsigned char *cells, size_t count);
+extern int enqueueKeyEvent (
+  BrailleDisplay *brl,
+  unsigned char set, unsigned char key, int press
+);
+
+extern int enqueueKey (
+  BrailleDisplay *brl,
+  unsigned char set, unsigned char key
+);
+
+extern int enqueueKeys (
+  BrailleDisplay *brl,
+  uint32_t bits, unsigned char set, unsigned char key
+);
+
+extern int enqueueUpdatedKeys (
+  BrailleDisplay *brl,
+  uint32_t new, uint32_t *old, unsigned char set, unsigned char key
+);
+
+extern int enqueueXtScanCode (
+  BrailleDisplay *brl,
+  unsigned char code, unsigned char escape,
+  unsigned char set00, unsigned char setE0, unsigned char setE1
+);
 
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);

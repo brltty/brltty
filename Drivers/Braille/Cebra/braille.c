@@ -384,7 +384,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                 set = CE_SET_NavigationKey;
               }
 
-              enqueueKeyEvent(set, key, press);
+              enqueueKeyEvent(brl, set, key, press);
               continue;
             }
             break;

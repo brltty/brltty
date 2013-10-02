@@ -16,18 +16,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_BRAILLE
-#define BRLTTY_INCLUDED_CMD_BRAILLE
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "api_control.h"
+#include "brltty.h"
 
-extern void startBrailleCommands (void);
-extern void stopBrailleCommands (void);
+#ifdef ENABLE_API
+int apiStarted;
 
-#ifdef __cplusplus
+static int apiDriverClaimed;
+
+void
+apiClaimDriver (void) {
+  apiDriverClaimed = apiStarted && api_claimDriver(&brl);
 }
-#endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_BRAILLE */
+void
+apiReleaseDriver (void) {
+  if (apiDriverClaimed) api_releaseDriver(&brl);
+}
+#endif /* ENABLE_API */

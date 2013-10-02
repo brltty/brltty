@@ -357,7 +357,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           switch (packet.fields.data.keys.group) {
             case MM_SET_SHIFT:
               if (!packet.fields.data.keys.value) {
-                enqueueKeys(packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
+                enqueueKeys(brl, packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
                 continue;
               }
               break;
@@ -369,9 +369,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             {
               uint32_t shift = 0;
 
-              enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
-              enqueueKeys(packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
-              enqueueUpdatedKeys(0, &shift, MM_SET_SHIFT, 0);
+              enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
+              enqueueKeys(brl, packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
+              enqueueUpdatedKeys(brl, 0, &shift, MM_SET_SHIFT, 0);
               continue;
             }
 
@@ -379,7 +379,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               unsigned char key = packet.fields.data.keys.value;
 
               if ((key > 0) && (key <= brl->textColumns)) {
-                enqueueKey(packet.fields.data.keys.group, key-1);
+                enqueueKey(brl, packet.fields.data.keys.group, key-1);
                 continue;
               }
 

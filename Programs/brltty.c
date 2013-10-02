@@ -63,6 +63,7 @@
 #include "scancodes.h"
 #include "brl.h"
 #include "brltty.h"
+#include "api_control.h"
 #include "prefs.h"
 #include "defaults.h"
 
@@ -105,6 +106,84 @@ static int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static void
+checkRoutingStatus (RoutingStatus ok, int wait) {
+  RoutingStatus status = getRoutingStatus(wait);
+
+  if (status != ROUTING_NONE) {
+    playTune((status > ok)? &tune_routing_failed: &tune_routing_succeeded);
+
+    ses->spkx = scr.posx;
+    ses->spky = scr.posy;
+  }
+}
+
+static int
+executeCommand (int command) {
+  int oldmotx = ses->winx;
+  int oldmoty = ses->winy;
+  int handled = handleCommand(command);
+
+  if (handled) {
+    resetUpdateAlarm(10);
+  }
+
+  if ((ses->winx != oldmotx) || (ses->winy != oldmoty)) {
+    /* The window has been manually moved. */
+    ses->motx = ses->winx;
+    ses->moty = ses->winy;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+    isContracted = 0;
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
+      ses->trackCursor = 0;
+      playTune(&tune_cursor_unlinked);
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+  }
+
+  if (!(command & BRL_MSK_BLK)) {
+    if (command & BRL_FLG_MOTION_ROUTE) {
+      int left = ses->winx;
+      int right = MIN(left+textCount, scr.cols) - 1;
+
+      int top = ses->winy;
+      int bottom = MIN(top+brl.textRows, scr.rows) - 1;
+
+      if ((scr.posx < left) || (scr.posx > right) ||
+          (scr.posy < top) || (scr.posy > bottom)) {
+        if (routeCursor(MIN(MAX(scr.posx, left), right),
+                        MIN(MAX(scr.posy, top), bottom),
+                        scr.number)) {
+          playTune(&tune_routing_started);
+          checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
+
+          {
+            ScreenDescription description;
+            describeScreen(&description);
+
+            if (description.number == scr.number) {
+              slideWindowVertically(description.posy);
+              placeWindowHorizontally(description.posx);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return handled;
+}
+
+static int
+handleUnhandledCommand (int command, void *datga) {
+  playTune(&tune_command_rejected);
+  return 0;
+}
+
+static void
 setSessionEntry (void) {
   describeScreen(&scr);
   if (scr.number == -1) scr.number = userVirtualTerminal(0);
@@ -119,6 +198,9 @@ setSessionEntry (void) {
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
+        currentCommandExecuter = executeCommand;
+        pushCommandHandler(KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
+
 #ifdef ENABLE_SPEECH_SUPPORT
         pushCommandHandler(KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
 #endif /*  ENABLE_SPEECH_SUPPORT */
@@ -157,6 +239,9 @@ updateSessionAttributes (void) {
 
 static void
 exitSessions (void *data) {
+  currentCommandExecuter = NULL;
+  while (popCommandHandler());
+
   ses = NULL;
   deallocateSessionEntries();
 }
@@ -1303,20 +1388,6 @@ resetBrailleState (void) {
   resetBlinkingStates();
   inputModifiers = 0;
 }
-
-#ifdef ENABLE_API
-static int apiDriverClaimed;
-
-void
-apiClaimDriver (void) {
-  apiDriverClaimed = apiStarted && api_claimDriver(&brl);
-}
-
-void
-apiReleaseDriver (void) {
-  if (apiDriverClaimed) api_releaseDriver(&brl);
-}
-#endif /* ENABLE_API */
 
 static int
 checkPointer (void) {

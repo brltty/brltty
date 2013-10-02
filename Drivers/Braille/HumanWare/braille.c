@@ -232,7 +232,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static void
-handleKeyEvent (unsigned char key, int press) {
+handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   unsigned char set;
 
   if (key < HW_KEY_ROUTING) {
@@ -242,7 +242,7 @@ handleKeyEvent (unsigned char key, int press) {
     key -= HW_KEY_ROUTING;
   }
 
-  enqueueKeyEvent(set, key, press);
+  enqueueKeyEvent(brl, set, key, press);
 }
 
 static int
@@ -253,11 +253,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((length = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL))) {
     switch (packet.fields.type) {
       case HW_MSG_KEY_DOWN:
-        handleKeyEvent(packet.fields.data.key.id, 1);
+        handleKeyEvent(brl, packet.fields.data.key.id, 1);
         continue;
 
       case HW_MSG_KEY_UP:
-        handleKeyEvent(packet.fields.data.key.id, 0);
+        handleKeyEvent(brl, packet.fields.data.key.id, 0);
         continue;
 
       default:

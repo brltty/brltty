@@ -1217,22 +1217,22 @@ core_handleZKey(BrailleDisplay *brl, Port *port) {
 
 static int
 core_handleRoutingKey(BrailleDisplay *brl, Port *port, unsigned char key) {
-  return enqueueKey(IR_SET_RoutingKeys, key-1);
+  return enqueueKey(brl, IR_SET_RoutingKeys, key-1);
 }
 
 static int
 core_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char escape, unsigned char code) {
-  return enqueueXtScanCode(code, escape, IR_SET_Xt, IR_SET_XtE0, IR_SET_XtE1);
+  return enqueueXtScanCode(brl, code, escape, IR_SET_Xt, IR_SET_XtE0, IR_SET_XtE1);
 }
 
 static int
 core_handleFunctionKeys(BrailleDisplay *brl, Port *port, uint16_t keys) {
-  return enqueueUpdatedKeys(keys, &linearKeys, IR_SET_NavigationKeys, IR_KEY_L1);
+  return enqueueUpdatedKeys(brl, keys, &linearKeys, IR_SET_NavigationKeys, IR_KEY_L1);
 }
 
 static int
 core_handleBrailleKeys(BrailleDisplay *brl, Port *port, unsigned int keys) {
-  return enqueueKeys(keys, IR_SET_NavigationKeys, IR_KEY_Dot1);
+  return enqueueKeys(brl, keys, IR_SET_NavigationKeys, IR_KEY_Dot1);
 }
 
 static const KeyHandlers coreKeyHandlers = {

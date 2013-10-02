@@ -235,31 +235,6 @@ extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-#ifdef ENABLE_API
-extern void api_identify (int full);
-extern const char *const api_parameters[];
-
-extern int api_start (BrailleDisplay *brl, char **parameters);
-extern void api_stop (BrailleDisplay *brl);
-
-extern void api_link (BrailleDisplay *brl);
-extern void api_unlink (BrailleDisplay *brl);
-
-extern void api_suspend (BrailleDisplay *brl);
-extern int api_resume (BrailleDisplay *brl);
-
-extern int api_claimDriver (BrailleDisplay *brl);
-extern void api_releaseDriver (BrailleDisplay *brl);
-
-extern int api_flush (BrailleDisplay *brl);
-extern int api_handleCommand (int command);
-extern int api_handleKeyEvent (unsigned char set, unsigned char key, int press);
-
-extern int apiStarted;
-extern void apiClaimDriver (void);
-extern void apiReleaseDriver (void);
-#endif /* ENABLE_API */
-
 #ifdef __MINGW32__
 extern int isWindowsService;
 #endif /* __MINGW32__ */

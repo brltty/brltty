@@ -25,115 +25,11 @@
 #include "cmd_queue.h"
 #include "async_alarm.h"
 #include "prefs.h"
+#include "api_control.h"
 #include "ktb.h"
 #include "brl.h"
 #include "brldefs.h"
 #include "brltty.h"
-
-int
-enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
-#ifdef ENABLE_API
-  if (apiStarted) {
-    if (api_handleKeyEvent(set, key, press)) {
-      return 1;
-    }
-  }
-#endif /* ENABLE_API */
-
-  if (brl.keyTable) {
-    switch (prefs.brailleOrientation) {
-      case BRL_ORIENTATION_ROTATED:
-        if (brl.rotateKey) brl.rotateKey(&brl, &set, &key);
-        break;
-
-      default:
-      case BRL_ORIENTATION_NORMAL:
-        break;
-    }
-
-    processKeyEvent(brl.keyTable, getCurrentCommandContext(), set, key, press);
-    return 1;
-  }
-
-  return 0;
-}
-
-int
-enqueueKey (unsigned char set, unsigned char key) {
-  if (enqueueKeyEvent(set, key, 1))
-    if (enqueueKeyEvent(set, key, 0))
-      return 1;
-
-  return 0;
-}
-
-int
-enqueueKeys (uint32_t bits, unsigned char set, unsigned char key) {
-  unsigned char stack[0X20];
-  unsigned char count = 0;
-
-  while (bits) {
-    if (bits & 0X1) {
-      if (!enqueueKeyEvent(set, key, 1)) return 0;
-      stack[count++] = key;
-    }
-
-    bits >>= 1;
-    key += 1;
-  }
-
-  while (count)
-    if (!enqueueKeyEvent(set, stack[--count], 0))
-      return 0;
-
-  return 1;
-}
-
-int
-enqueueUpdatedKeys (uint32_t new, uint32_t *old, unsigned char set, unsigned char key) {
-  uint32_t bit = 0X1;
-  unsigned char stack[0X20];
-  unsigned char count = 0;
-
-  while (*old != new) {
-    if ((new & bit) && !(*old & bit)) {
-      stack[count++] = key;
-      *old |= bit;
-    } else if (!(new & bit) && (*old & bit)) {
-      if (!enqueueKeyEvent(set, key, 0)) return 0;
-      *old &= ~bit;
-    }
-
-    key += 1;
-    bit <<= 1;
-  }
-
-  while (count)
-    if (!enqueueKeyEvent(set, stack[--count], 1))
-      return 0;
-
-  return 1;
-}
-
-int
-enqueueXtScanCode (
-  unsigned char key, unsigned char escape,
-  unsigned char set00, unsigned char setE0, unsigned char setE1
-) {
-  unsigned char set;
-
-  switch (escape) {
-    case 0X00: set = set00; break;
-    case 0XE0: set = setE0; break;
-    case 0XE1: set = setE1; break;
-
-    default:
-      logMessage(LOG_WARNING, "unsupported XT scan code: %02X %02X", escape, key);
-      return 0;
-  }
-
-  return enqueueKey(set, key);
-}
 
 static int
 processInput (void) {

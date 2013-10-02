@@ -759,7 +759,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static void
-processKeys (uint32_t keys, const unsigned char *routing) {
+processKeys (BrailleDisplay *brl, uint32_t keys, const unsigned char *routing) {
   KeyValue pressedKeys[keyCount + routingCount];
   unsigned int pressedCount = 0;
 
@@ -770,7 +770,7 @@ processKeys (uint32_t keys, const unsigned char *routing) {
     while (key < keyCount) {
       if (keys & bit) {
         KeyValue *kv = &pressedKeys[pressedCount++];
-        enqueueKeyEvent((kv->set = SK_SET_NavigationKeys), (kv->key = key), 1);
+        enqueueKeyEvent(brl, (kv->set = SK_SET_NavigationKeys), (kv->key = key), 1);
         if (!(keys &= ~bit)) break;
       }
 
@@ -790,7 +790,7 @@ processKeys (uint32_t keys, const unsigned char *routing) {
         do {
           if (*byte & bit) {
             KeyValue *kv = &pressedKeys[pressedCount++];
-            enqueueKeyEvent((kv->set = SK_SET_RoutingKeys), (kv->key = key), 1);
+            enqueueKeyEvent(brl, (kv->set = SK_SET_RoutingKeys), (kv->key = key), 1);
           }
 
           key += 1;
@@ -805,7 +805,7 @@ processKeys (uint32_t keys, const unsigned char *routing) {
 
   while (pressedCount) {
     KeyValue *kv = &pressedKeys[--pressedCount];
-    enqueueKeyEvent(kv->set, kv->key, 0);
+    enqueueKeyEvent(brl, kv->set, kv->key, 0);
   }
 }
 
@@ -817,15 +817,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((length = protocol->readPacket(brl, &packet))) {
     switch (packet.type) {
       case IPT_keys:
-        processKeys(packet.fields.keys, NULL);
+        processKeys(brl, packet.fields.keys, NULL);
         continue;
 
       case IPT_routing:
-        processKeys(0, packet.fields.routing);
+        processKeys(brl, 0, packet.fields.routing);
         continue;
 
       case IPT_combined:
-        processKeys(packet.fields.combined.keys, packet.fields.combined.routing);
+        processKeys(brl, packet.fields.combined.keys, packet.fields.combined.routing);
         continue;
 
       default:

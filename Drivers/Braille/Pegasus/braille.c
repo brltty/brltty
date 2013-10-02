@@ -530,19 +530,19 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 }
 
 static int
-enqueueNavigationKey (PG_NavigationKey modifier, PG_NavigationKey key) {
+enqueueNavigationKey (BrailleDisplay *brl, PG_NavigationKey modifier, PG_NavigationKey key) {
   const PG_KeySet set = PG_SET_NavigationKeys;
   const int modifierSpecified = modifier != PG_KEY_None;
 
-  if (modifierSpecified && !enqueueKeyEvent(set, modifier, 1)) return 0;
-  if (!enqueueKey(set, key)) return 0;
-  if (modifierSpecified && !enqueueKeyEvent(set, modifier, 0)) return 0;
+  if (modifierSpecified && !enqueueKeyEvent(brl, set, modifier, 1)) return 0;
+  if (!enqueueKey(brl, set, key)) return 0;
+  if (modifierSpecified && !enqueueKeyEvent(brl, set, modifier, 0)) return 0;
   return 1;
 }
 
 static int
-interpretNavigationKey (unsigned char key) {
-#define KEY(code,modifier,key) case (code): return enqueueNavigationKey((modifier), (key))
+interpretNavigationKey (BrailleDisplay *brl, unsigned char key) {
+#define KEY(code,modifier,key) case (code): return enqueueNavigationKey(brl, (modifier), (key))
   switch (key) {
     KEY(0X15, PG_KEY_None, PG_KEY_Left);
     KEY(0X4D, PG_KEY_None, PG_KEY_Right);
@@ -590,13 +590,13 @@ interpretNavigationKey (unsigned char key) {
 }
 
 static int
-interpretSimulationKey (unsigned char key) {
+interpretSimulationKey (BrailleDisplay *brl, unsigned char key) {
   switch (key) {
     default:
       break;
   }
 
-  return interpretNavigationKey(key);
+  return interpretNavigationKey(brl, key);
 }
 
 static int
@@ -607,11 +607,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((length = readPacket(brl, &packet))) {
     switch (packet.data.type) {
       case IPT_KEY_NAVIGATION:
-        if (interpretNavigationKey(packet.data.fields.key.value)) continue;
+        if (interpretNavigationKey(brl, packet.data.fields.key.value)) continue;
         break;
 
       case IPT_KEY_SIMULATION:
-        if (interpretSimulationKey(packet.data.fields.key.value)) continue;
+        if (interpretSimulationKey(brl, packet.data.fields.key.value)) continue;
         break;
 
       case IPT_KEY_ROUTING: {
@@ -629,7 +629,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           break;
         }
 
-        enqueueKey(set, key);
+        enqueueKey(brl, set, key);
         continue;
       }
 

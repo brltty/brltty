@@ -435,7 +435,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((size = getPacket(brl, &packet))) {
     switch (packet.data.code) {
       case BN_RSP_ROUTE:
-        enqueueKey(BN_SET_RoutingKeys, packet.data.values.routingKey);
+        enqueueKey(brl, BN_SET_RoutingKeys, packet.data.values.routingKey);
         break;
 
       case BN_RSP_DISPLAY:
@@ -474,9 +474,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             continue;
         }
 
-        if (modifier) enqueueKeyEvent(set, modifier, 1);
-        enqueueKeys(keys, set, base);
-        if (modifier) enqueueKeyEvent(set, modifier, 0);
+        if (modifier) enqueueKeyEvent(brl, set, modifier, 1);
+        enqueueKeys(brl, keys, set, base);
+        if (modifier) enqueueKeyEvent(brl, set, modifier, 0);
         break;
       }
     }

@@ -528,7 +528,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case IPT_CURSOR: {
         unsigned char key = packet.data.data;
 
-        enqueueKey(HM_SET_RoutingKeys, key);
+        enqueueKey(brl, HM_SET_RoutingKeys, key);
         continue;
       }
 
@@ -538,7 +538,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       | (packet.data.reserved[2] << 0X10)
                       | (packet.data.reserved[3] << 0X18);
 
-        enqueueKeys(bits, HM_SET_NavigationKeys, 0);
+        enqueueKeys(brl, bits, HM_SET_NavigationKeys, 0);
         continue;
       }
 

@@ -25,6 +25,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef int CommandExecuter (int command);
+extern CommandExecuter *currentCommandExecuter;
+
 typedef int CommandHandler (int command, void *data);
 extern int pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data);
 extern int popCommandHandler (void);

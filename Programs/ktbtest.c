@@ -273,7 +273,7 @@ message (const char *mode, const char *text, short flags) {
 
 #include "scr.h"
 
-int
-currentVirtualTerminal (void) {
-  return 0;
+KeyTableCommandContext
+getScreenCommandContext (void) {
+  return KTB_CTX_DEFAULT;
 }

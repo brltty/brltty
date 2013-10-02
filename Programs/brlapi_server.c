@@ -69,6 +69,7 @@
 #include "brl.h"
 #include "ttb.h"
 #include "brltty.h"
+#include "api_control.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"

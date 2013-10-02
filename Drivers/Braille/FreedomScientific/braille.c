@@ -917,7 +917,7 @@ updateKeys (BrailleDisplay *brl, uint64_t newKeys, unsigned char keyBase, unsign
     uint64_t newKey = newKeys & keyBit;
 
     if (oldKey && !newKey) {
-      enqueueKeyEvent(set, key, 0);
+      enqueueKeyEvent(brl, set, key, 0);
       brl->data->oldKeys &= ~keyBit;
     } else if (newKey && !oldKey) {
       pressKeys[pressCount++] = key;
@@ -928,7 +928,7 @@ updateKeys (BrailleDisplay *brl, uint64_t newKeys, unsigned char keyBase, unsign
     key += 1;
   }
 
-  while (pressCount) enqueueKeyEvent(set, pressKeys[--pressCount], 1);
+  while (pressCount) enqueueKeyEvent(brl, set, pressKeys[--pressCount], 1);
 }
 
 static int
@@ -987,7 +987,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           set += 1;
         }
 
-        enqueueKeyEvent(set, key, press);
+        enqueueKeyEvent(brl, set, key, press);
         continue;
       }
 
@@ -997,8 +997,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         unsigned int count = packet.header.arg1 & 0X7;
 
         while (count) {
-          enqueueKeyEvent(set, key, 1);
-          enqueueKeyEvent(set, key, 0);
+          enqueueKeyEvent(brl, set, key, 1);
+          enqueueKeyEvent(brl, set, key, 0);
           count -= 1;
         }
 

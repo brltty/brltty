@@ -340,7 +340,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         key = BG_KEY_VALUE(event.code);
       }
 
-      enqueueKeyEvent(set, key, press);
+      enqueueKeyEvent(brl, set, key, press);
     }
   }
 

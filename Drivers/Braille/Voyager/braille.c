@@ -143,7 +143,7 @@ initializeKeys (void) {
 }
 
 static void
-updateKeys (const unsigned char *packet) {
+updateKeys (BrailleDisplay *brl, const unsigned char *packet) {
   Keys currentKeys;
 
   unsigned char navigationPresses[0X10];
@@ -162,7 +162,7 @@ updateKeys (const unsigned char *packet) {
 
     while (key < 0X10) {
       if ((pressedKeys.navigation & bit) && !(currentKeys.navigation & bit)) {
-        enqueueKeyEvent(VO_SET_NavigationKeys, key, 0);
+        enqueueKeyEvent(brl, VO_SET_NavigationKeys, key, 0);
       } else if (!(pressedKeys.navigation & bit) && (currentKeys.navigation & bit)) {
         navigationPresses[navigationPressCount++] = key;
       }
@@ -195,14 +195,14 @@ updateKeys (const unsigned char *packet) {
 
     for (key=0; key<cellCount; key+=1)
       if (pressedKeys.routing[key] && !currentKeys.routing[key])
-        enqueueKeyEvent(VO_SET_RoutingKeys, key, 0);
+        enqueueKeyEvent(brl, VO_SET_RoutingKeys, key, 0);
   }
 
   while (navigationPressCount)
-    enqueueKeyEvent(VO_SET_NavigationKeys, navigationPresses[--navigationPressCount], 1);
+    enqueueKeyEvent(brl, VO_SET_NavigationKeys, navigationPresses[--navigationPressCount], 1);
 
   while (routingPressCount)
-    enqueueKeyEvent(VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
+    enqueueKeyEvent(brl, VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
 
   pressedKeys = currentKeys;
 }
@@ -503,7 +503,7 @@ updateSerialKeys (BrailleDisplay *brl) {
   unsigned char packet[9];
 
   while (nextSerialPacket(brl, code, packet, sizeof(packet), 0)) {
-    updateKeys(&packet[1]);
+    updateKeys(brl, &packet[1]);
   }
 
   return errno == EAGAIN;
@@ -659,7 +659,7 @@ updateUsbKeys (BrailleDisplay *brl) {
       logInputPacket(packet, result);
     }
 
-    updateKeys(packet);
+    updateKeys(brl, packet);
   }
 }
 

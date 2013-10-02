@@ -239,7 +239,7 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
       return;
     }
 
-    enqueueKeyEvent(set, key, press);
+    enqueueKeyEvent(brl, set, key, press);
   }
 }
 
@@ -271,13 +271,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     while (bit) {
       if ((lastNavigationKeys & bit) && !(keys & bit)) {
-        enqueueKeyEvent(set, key, 0);
+        enqueueKeyEvent(brl, set, key, 0);
         lastNavigationKeys &= ~bit;
       } else if (!(lastNavigationKeys & bit) && (keys & bit)) {
         pressTable[pressCount++] = key;
         lastNavigationKeys |= bit;
       }
-      while (pressCount) enqueueKeyEvent(set, pressTable[--pressCount], 1);
+      while (pressCount) enqueueKeyEvent(brl, set, pressTable[--pressCount], 1);
 
       key += 1;
       bit <<= 1;

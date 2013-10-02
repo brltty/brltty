@@ -274,13 +274,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((key = getKey()) != EOF) {
     if (key >= 0X86) {
-      enqueueKey(CB_SET_RoutingKeys, (key - 0X86));
+      enqueueKey(brl, CB_SET_RoutingKeys, (key - 0X86));
     } else if (key >= 0X80) {
-      enqueueKey(CB_SET_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
+      enqueueKey(brl, CB_SET_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
     } else if (key >= 0X60) {
-      enqueueKeys(key & 0X1F, CB_SET_NavigationKeys, CB_KEY_Thumb1);
+      enqueueKeys(brl, key & 0X1F, CB_SET_NavigationKeys, CB_KEY_Thumb1);
     } else if (key < 0X40) {
-      enqueueKeys(key & 0X3F, CB_SET_NavigationKeys, CB_KEY_Dot6);
+      enqueueKeys(brl, key & 0X3F, CB_SET_NavigationKeys, CB_KEY_Dot6);
     }
   }
 

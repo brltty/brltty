@@ -336,7 +336,7 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static int
-handleSwitches1 (uint16_t time) {
+handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   unsigned char state = time & 0XFF;
   unsigned char pressStack[8];
   unsigned char pressCount = 0;
@@ -349,7 +349,7 @@ handleSwitches1 (uint16_t time) {
       pressStack[pressCount++] = key;
       switchState1 |= bit;
     } else if (!(state & bit) && (switchState1 & bit)) {
-      if (!enqueueKeyEvent(set, key, 0)) return 0;
+      if (!enqueueKeyEvent(brl, set, key, 0)) return 0;
       switchState1 &= ~bit;
     }
 
@@ -358,7 +358,7 @@ handleSwitches1 (uint16_t time) {
   }
 
   while (pressCount)
-    if (!enqueueKeyEvent(set, pressStack[--pressCount], 1))
+    if (!enqueueKeyEvent(brl, set, pressStack[--pressCount], 1))
       return 0;
 
   return 1;
@@ -371,34 +371,34 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   if (rcvFrontFirst <= code && 
       code <= rcvFrontLast) { /* front key */
     key = (code - rcvFrontFirst) / 3;
-    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_FRONT+key, press);
+    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     key = (code - rcvStatusFirst) / 3;
-    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
+    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
   }
 
   if (rcvBarFirst <= code && 
       code <= rcvBarLast) { /* easy access bar */
-    if (!handleSwitches1(time)) return 0;
+    if (!handleSwitches1(brl, time)) return 0;
 
     key = (code - rcvBarFirst) / 3;
-    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_BAR+key, press);
+    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy access bar */
-    return handleSwitches1(time);
+    return handleSwitches1(brl, time);
   //key = (code - rcvSwitchFirst) / 3;
-  //return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
+  //return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     key = (code - rcvCursorFirst) / 3;
-    return enqueueKeyEvent(PM_SET_RoutingKeys1, key, press);
+    return enqueueKeyEvent(brl, PM_SET_RoutingKeys1, key, press);
   }
 
   logMessage(LOG_WARNING, "unexpected key: %04X", code);
@@ -826,7 +826,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 
             while (bit) {
               if (!(new & bit) && (old & bit)) {
-                enqueueKeyEvent(mapping->set, mapping->key, 0);
+                enqueueKeyEvent(brl, mapping->set, mapping->key, 0);
                 if ((inputState2[byte] &= ~bit) == new) break;
               }
 
@@ -847,7 +847,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
-                enqueueKeyEvent(mapping->set, mapping->key, 1);
+                enqueueKeyEvent(brl, mapping->set, mapping->key, 1);
                 if ((inputState2[byte] |= bit) == new) break;
               }
 
@@ -876,12 +876,12 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         for (keyOffset=0; keyOffset<13; keyOffset+=1) {
           if (allKeys & (1 << keyOffset)) {
             PM_NavigationKey key = PM_KEY_KEYBOARD + keyOffset;
-            enqueueKeyEvent(set, key, 1);
+            enqueueKeyEvent(brl, set, key, 1);
             pressedKeys[pressedCount++] = key;
           }
         }
 
-        while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
+        while (pressedCount) enqueueKeyEvent(brl, set, pressedKeys[--pressedCount], 0);
         continue;
       }
     }

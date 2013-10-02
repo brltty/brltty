@@ -273,12 +273,12 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case 0XFC: {
         unsigned int key = packet[1];
         if ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX)) {
-          enqueueKey(NP_SET_RoutingKeys, (key - NP_KEY_ROUTING_MIN));
+          enqueueKey(brl, NP_SET_RoutingKeys, (key - NP_KEY_ROUTING_MIN));
           continue;
         } else {
           int press = !!(key & NP_KEY_NAVIGATION_PRESS);
           if (press) key &= ~NP_KEY_NAVIGATION_PRESS;
-          enqueueKeyEvent(NP_SET_NavigationKeys, key, press);
+          enqueueKeyEvent(brl, NP_SET_NavigationKeys, key, press);
           continue;
         }
         break;

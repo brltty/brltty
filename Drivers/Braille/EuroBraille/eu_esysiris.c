@@ -684,7 +684,7 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
       uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
-      enqueueKeys(keys, EU_SET_BrailleKeys, 0);
+      enqueueKeys(brl, keys, EU_SET_BrailleKeys, 0);
       return 1;
     }
 
@@ -696,12 +696,12 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
 
         switch (packet[1]) {
           case 1: // single click
-            enqueueKey(EU_SET_RoutingKeys1, key);
+            enqueueKey(brl, EU_SET_RoutingKeys1, key);
           case 2: // repeat
             return 1;
 
           case 3: // double click
-            enqueueKey(EU_SET_RoutingKeys2, key);
+            enqueueKey(brl, EU_SET_RoutingKeys2, key);
             return 1;
 
           default:
@@ -722,9 +722,9 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
       }
 
       if (model->isIris) {
-        enqueueKeys(keys, EU_SET_CommandKeys, 0);
+        enqueueKeys(brl, keys, EU_SET_CommandKeys, 0);
       } else {
-        enqueueUpdatedKeys(keys, &commandKeys, EU_SET_CommandKeys, 0);
+        enqueueUpdatedKeys(brl, keys, &commandKeys, EU_SET_CommandKeys, 0);
       }
 
       return 1;
