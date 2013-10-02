@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_BRAILLE
-#define BRLTTY_INCLUDED_CMD_BRAILLE
+#ifndef BRLTTY_INCLUDED_BRL_INPUT
+#define BRLTTY_INCLUDED_BRL_INPUT
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ extern void stopBrailleInput (void);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_BRAILLE */
+#endif /* BRLTTY_INCLUDED_BRL_INPUT */
