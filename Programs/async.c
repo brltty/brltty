@@ -1530,16 +1530,16 @@ awaitNextResponse (long int timeout) {
 
 int
 asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
-  long int elapsed = 0;
   TimePeriod period;
-
   startTimePeriod(&period, timeout);
 
-  while (1) {
-    if (testCondition && testCondition(data)) return 1;
+  while (!(testCondition && testCondition(data))) {
+    long int elapsed;
     if (afterTimePeriod(&period, &elapsed)) return 0;
     awaitNextResponse(timeout - elapsed);
   }
+
+  return 1;
 }
 
 void
