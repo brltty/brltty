@@ -27,15 +27,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef ENABLE_API
 extern void api_identify (int full);
 extern const char *const api_parameters[];
 
 extern int api_start (BrailleDisplay *brl, char **parameters);
 extern void api_stop (BrailleDisplay *brl);
 
-extern void api_link (BrailleDisplay *brl);
 extern void api_unlink (BrailleDisplay *brl);
+extern void api_link (BrailleDisplay *brl);
 
 extern void api_suspend (BrailleDisplay *brl);
 extern int api_resume (BrailleDisplay *brl);
@@ -48,9 +47,12 @@ extern int api_handleCommand (int command);
 extern int api_handleKeyEvent (unsigned char set, unsigned char key, int press);
 
 extern int apiStarted;
+
+extern void apiUnlink (void);
+extern void apiLink (void);
+
 extern void apiClaimDriver (void);
 extern void apiReleaseDriver (void);
-#endif /* ENABLE_API */
 
 #ifdef __cplusplus
 }

@@ -60,15 +60,9 @@ handleInput (void) {
   int processed = 0;
 
   if (!isSuspended) {
-#ifdef ENABLE_API
     apiClaimDriver();
-#endif /* ENABLE_API */
-
     if (processInput()) processed = 1;
-
-#ifdef ENABLE_API
     apiReleaseDriver();
-#endif /* ENABLE_API */
   }
 
 #ifdef ENABLE_API

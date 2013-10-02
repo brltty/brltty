@@ -1107,10 +1107,7 @@ initializeBrailleDriver (const char *code, int verify) {
                    braille->definition.code, brailleDevice);
 
         if (constructBrailleDriver()) {
-#ifdef ENABLE_API
-          if (apiStarted) api_link(&brl);
-#endif /* ENABLE_API */
-
+          apiLink();
           brailleDriver = braille;
           constructed = 1;
         }
@@ -1219,10 +1216,7 @@ activateBrailleDriver (int verify) {
 static void
 deactivateBrailleDriver (void) {
   if (brailleDriver) {
-#ifdef ENABLE_API
-    if (apiStarted) api_unlink(&brl);
-#endif /* ENABLE_API */
-
+    apiUnlink();
     if (brailleConstructed) destructBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;

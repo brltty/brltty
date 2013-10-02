@@ -21,18 +21,91 @@
 #include "api_control.h"
 #include "brltty.h"
 
-#ifdef ENABLE_API
+#ifndef ENABLE_API
+void
+api_identify (int full) {
+}
+
+const char *const api_parameters[] = {NULL};
+
+int
+api_start (BrailleDisplay *brl, char **parameters) {
+  return 0;
+}
+
+void
+api_stop (BrailleDisplay *brl) {
+}
+
+void
+api_link (BrailleDisplay *brl) {
+}
+
+void
+api_unlink (BrailleDisplay *brl) {
+}
+
+void
+api_suspend (BrailleDisplay *brl) {
+}
+
+int
+api_resume (BrailleDisplay *brl) {
+  return 0;
+}
+
+int
+api_claimDriver (BrailleDisplay *brl) {
+  return 0;
+}
+
+void
+api_releaseDriver (BrailleDisplay *brl) {
+}
+
+int
+api_flush (BrailleDisplay *brl) {
+  return 0;
+}
+
+int
+api_handleCommand (int command) {
+  return command;
+}
+
+int
+api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
+  return 0;
+}
+#endif /* ENABLE_API */
+
 int apiStarted;
 
 static int apiDriverClaimed;
 
 void
+apiUnlink (void) {
+  if (apiStarted) api_unlink(&brl);
+}
+
+void
+apiLink (void) {
+  if (apiStarted) api_link(&brl);
+}
+
+void
 apiClaimDriver (void) {
-  apiDriverClaimed = apiStarted && api_claimDriver(&brl);
+  if (!apiDriverClaimed) {
+    if (apiStarted && api_claimDriver(&brl)) {
+      apiDriverClaimed = 1;
+    }
+  }
 }
 
 void
 apiReleaseDriver (void) {
-  if (apiDriverClaimed) api_releaseDriver(&brl);
+  if (apiDriverClaimed) {
+    api_releaseDriver(&brl);
+    apiDriverClaimed = 0;
+  }
 }
-#endif /* ENABLE_API */

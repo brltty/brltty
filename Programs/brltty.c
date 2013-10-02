@@ -1723,9 +1723,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   if (canBraille()) {
     int pointerMoved = 0;
 
-#ifdef ENABLE_API
     apiClaimDriver();
-#endif /*  ENABLE_API */
 
     if (brl.highlightWindow) {
       brl.highlightWindow = 0;
@@ -2024,9 +2022,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
       }
     }
 
-#ifdef ENABLE_API
     apiReleaseDriver();
-#endif /*  ENABLE_API */
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
