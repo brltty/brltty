@@ -102,7 +102,7 @@ For MinGW:
 
     Symlink the header and library files into MinGW installation, run:
 
-       +  ln -s "/path/to/LibUSB-Win32/include/lusb0_usb.h" /mingw/include/
+       +  ln -s "/path/to/LibUSB-Win32/include/lusb0_usb.h" /mingw/include/usb.h
        +  ln -s "/path/to/LibUSB-Win32/lib/gcc/libusb.a" /mingw/lib/
        +  ln -s "/path/to/LibUSB-Win32/bin/x86/libusb0_x86.dll" /mingw/bin/libusb0.dll
 
