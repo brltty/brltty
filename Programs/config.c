@@ -1075,6 +1075,7 @@ constructBrailleDriver (void) {
 
 void
 destructBrailleDriver (void) {
+  brl.noDisplay = 1;
   brailleConstructed = 0;
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);

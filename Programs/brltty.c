@@ -2253,12 +2253,13 @@ message (const char *mode, const char *text, short flags) {
         break;
       }
 
-      if (length || !(flags & MSG_NODELAY)) {
-        msg.endWait = 0;
+      msg.endWait = 0;
+      drainBrailleOutput(&brl, 0);
 
-        do {
-          if (asyncAwaitCondition(messageDelay, testEndMessageWait, &msg)) break;
-        } while (flags & MSG_WAITKEY);
+      if (length || !(flags & MSG_NODELAY)) {
+        while (!asyncAwaitCondition(messageDelay, testEndMessageWait, &msg)) {
+          if (!(flags & MSG_WAITKEY)) break;
+        }
       }
     }
 

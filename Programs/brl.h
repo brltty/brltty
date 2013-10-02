@@ -64,7 +64,7 @@ struct BrailleDisplayStruct {
 };
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
-extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
+extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
 extern void fillTextRegion (

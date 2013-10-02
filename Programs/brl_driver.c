@@ -118,18 +118,23 @@ disconnectBrailleResource (
 ) {
   if (brl->gioEndpoint) {
     if (endSession) endSession(brl);
+    drainBrailleOutput(brl, 0);
     gioDisconnectResource(brl->gioEndpoint);
     brl->gioEndpoint = NULL;
   }
 }
 
-unsigned int
+void
 drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
-  int duration = brl->writeDelay + 1;
-  if (duration < minimumDelay) duration = minimumDelay;
-  brl->writeDelay = 0;
-  asyncWait(duration);
-  return duration;
+  do {
+    int duration = brl->writeDelay + 1;
+    brl->writeDelay = 0;
+
+    if (duration < minimumDelay) duration = minimumDelay;
+    minimumDelay = 0;
+
+    asyncWait(duration);
+  } while (brl->writeDelay > 0);
 }
 
 size_t
