@@ -117,6 +117,7 @@ void
 startBrailleInput (void) {
   if (brl.gioEndpoint) {
     if (gioMonitorInput(brl.gioEndpoint, monitorInput, NULL)) {
+      handleInput();
       return;
     }
   }
