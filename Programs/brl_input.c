@@ -21,14 +21,10 @@
 #include <stdio.h>
 
 #include "log.h"
-#include "cmd_braille.h"
+#include "brl_input.h"
 #include "cmd_queue.h"
 #include "async_alarm.h"
-#include "prefs.h"
 #include "api_control.h"
-#include "ktb.h"
-#include "brl.h"
-#include "brldefs.h"
 #include "brltty.h"
 
 static int

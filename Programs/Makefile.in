@@ -235,10 +235,13 @@ prefs_table.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
+BRAILLE_OBJECTS = brl.$O brl_input.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
+
+brl_input.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_input.c
 
 brl_driver.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_driver.c
@@ -309,8 +312,8 @@ notes_fm.$O:
 
 ###############################################################################
 
-api.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api.c
+api_control.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_control.c
 
 brlapi_server.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brlapi_server.c
@@ -378,7 +381,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O cmd_queue.$O cmd_braille.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -409,9 +412,6 @@ cmd.$O:
 
 cmd_queue.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_queue.c
-
-cmd_braille.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_braille.c
 
 cmd_navigation.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c

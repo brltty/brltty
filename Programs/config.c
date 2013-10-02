@@ -52,7 +52,7 @@
 #include "program.h"
 #include "service.h"
 #include "options.h"
-#include "cmd_braille.h"
+#include "brl_input.h"
 #include "cmd_queue.h"
 #include "brltty.h"
 #include "api_control.h"
