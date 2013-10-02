@@ -23,8 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void startBrailleCommands (void);
-extern void stopBrailleCommands (void);
+extern void startBrailleInput (void);
+extern void stopBrailleInput (void);
 
 #ifdef __cplusplus
 }

@@ -114,7 +114,7 @@ monitorInput (const AsyncMonitorResult *result) {
 }
 
 void
-startBrailleCommands (void) {
+startBrailleInput (void) {
   if (brl.gioEndpoint) {
     if (gioMonitorInput(brl.gioEndpoint, monitorInput, NULL)) {
       return;
@@ -125,7 +125,7 @@ startBrailleCommands (void) {
 }
 
 void
-stopBrailleCommands (void) {
+stopBrailleInput (void) {
   if (pollAlarm) {
     asyncCancelRequest(pollAlarm);
     pollAlarm = NULL;

@@ -1058,7 +1058,7 @@ constructBrailleDriver (void) {
         }
       }
 
-      startBrailleCommands();
+      startBrailleInput();
       brailleConstructed = 1;
       return 1;
     }
@@ -1076,7 +1076,7 @@ constructBrailleDriver (void) {
 void
 destructBrailleDriver (void) {
   brailleConstructed = 0;
-  stopBrailleCommands();
+  stopBrailleInput();
   drainBrailleOutput(&brl, 0);
   braille->destruct(&brl);
   disableHelpPage(brailleHelpPageNumber);
