@@ -217,6 +217,14 @@ extern ssize_t usbReadData (
   int subsequentTimeout
 );
 
+extern ssize_t usbWriteData (
+  UsbDevice *device,
+  unsigned char endpointNumber,
+  const void *data,
+  size_t length,
+  int timeout
+);
+
 typedef struct {
   uint64_t defined;
   uint32_t reportCount;

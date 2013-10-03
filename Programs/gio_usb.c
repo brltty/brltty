@@ -49,9 +49,9 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
   UsbChannel *channel = handle->channel;
 
   if (channel->definition.outputEndpoint) {
-    return usbWriteEndpoint(channel->device,
-                            channel->definition.outputEndpoint,
-                            data, size, timeout);
+    return usbWriteData(channel->device,
+                        channel->definition.outputEndpoint,
+                        data, size, timeout);
   }
 
   {
