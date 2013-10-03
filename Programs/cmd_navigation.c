@@ -799,8 +799,6 @@ handleNavigationCommand (int command, void *datga) {
 
     case BRL_CMD_RESTARTBRL:
       restartBrailleDriver();
-      resetBrailleState();
-      restartRequired = 0;
       break;
 
     case BRL_CMD_PASTE:

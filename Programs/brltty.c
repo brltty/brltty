@@ -2131,6 +2131,11 @@ handleRoutingDone (const void *data) {
   ses->spky = scr.posy;
 }
 
+static void
+handleRestartRequired (const void *data) {
+  restartBrailleDriver();
+}
+
 typedef struct {
   UnmonitoredConditionHandler *handler;
   const void *data;
@@ -2152,6 +2157,11 @@ checkUnmonitoredConditions (void *data) {
       ucd->data = (status > ROUTING_DONE)? &tune_routing_failed: &tune_routing_succeeded;
       return 1;
     }
+  }
+
+  if (restartRequired) {
+    ucd->handler = handleRestartRequired;
+    return 1;
   }
 
   return 0;
