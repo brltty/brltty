@@ -316,7 +316,7 @@ ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 GOTO="brltty_end"
 
 LABEL="brltty_usb_run"
-ENV{BRLTTY_DEVICE}="usb:$sysfs{serial}"
+ENV{BRLTTY_BRAILLE_DEVICE}="usb:$sysfs{serial}"
 GOTO="brltty_run"
 
 LABEL="brltty_run"
@@ -326,7 +326,7 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
-SYMLINK+="brltty/$env{BRLTTY_DRIVER}-$env{BRLTTY_DEVICE}"
+SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DRIVER}-$env{BRLTTY_BRAILLE_DEVICE}"
 RUN+="/bin/brltty -E -P$env{BRLTTY_PID_FILE}"
 GOTO="brltty_end"
 
