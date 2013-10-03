@@ -432,7 +432,7 @@ bdpReadPacket (
 static void
 pbcInterpretIdentity (InputPacket *packet) {
   packet->fields.identity.cellCount = packet->bytes[2];
-  packet->fields.identity.keyCount = 8;
+  packet->fields.identity.keyCount = 16;
   packet->fields.identity.routingCount = packet->fields.identity.cellCount;
 }
 
