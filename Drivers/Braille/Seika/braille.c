@@ -294,6 +294,89 @@ bdpInitializeData (void) {
   bdpSetModel(0);
 }
 
+typedef struct {
+  const TemplateEntry *const *const templates;
+  const TemplateEntry *template;
+  const TemplateEntry *const alternate;
+} BdpReadPacketData;
+
+static int
+bdpVerifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  BdpReadPacketData *rpd = data;
+  size_t offset = size - 1;
+  unsigned char byte = bytes[offset];
+
+checkByte:
+  switch (size) {
+    case 1: {
+      const TemplateEntry *const *templateAddress = rpd->templates;
+
+      while ((rpd->template = *templateAddress++)) {
+        if (byte == *rpd->template->bytes) break;
+      }
+
+      if (!rpd->template) {
+        if ((byte & 0XE0) != 0X60) return 0;
+        rpd->template = &templateEntry_keys;
+      }
+
+      break;
+    }
+
+    default: {
+      unsigned char type = rpd->template->bytes[offset];
+
+      switch (type) {
+        case TBT_ANY:
+          break;
+
+        case TBT_DECIMAL:
+          if (byte < '0') goto unexpectedByte;
+          if (byte > '9') goto unexpectedByte;
+          break;
+
+        case TBT_SIZE:
+          if (byte == 40) break;
+          if (byte == 80) break;
+          goto unexpectedByte;
+
+        case TBT_ID1:
+          if (!strchr("3458", byte)) goto unexpectedByte;
+          break;
+
+        case TBT_ID2:
+          if (!strchr("0 ", byte)) goto unexpectedByte;
+          break;
+
+        case TBT_KEYS:
+          if ((byte & 0XE0) != 0XE0) goto unexpectedByte;
+          break;
+
+        default:
+          if (byte != type) goto unexpectedByte;
+          break;
+      }
+
+      break;
+    }
+  }
+
+  *length = rpd->template->length;
+  return 1;
+
+unexpectedByte:
+  if ((offset == 1) && (rpd->template->type == IPT_identity)) {
+    rpd->template = rpd->alternate;
+    goto checkByte;
+  }
+
+  return 0;
+}
+
 static int
 bdpReadPacket (
   BrailleDisplay *brl,
@@ -308,114 +391,42 @@ bdpReadPacket (
     NULL
   };
 
-  const TemplateEntry *template = NULL;
-  unsigned int offset = 0;
+  BdpReadPacketData rpd = {
+    .templates = templateTable,
+    .alternate = alternateTemplate,
+    .template = NULL
+  };
 
-  while (1) {
-    unsigned char byte;
+  size_t length = readBraillePacket(brl, NULL,
+                                    packet->bytes, sizeof(packet->bytes),
+                                    bdpVerifyPacket, &rpd);
 
-    {
-      int started = offset > 0;
+  if (length) {
+    switch ((packet->type = rpd.template->type)) {
+      case IPT_identity:
+        interpretIdentity(packet);
+        bdpSetModel(packet->fields.identity.cellCount);
+        break;
 
-      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet->bytes, offset);
-        return 0;
-      }
-    }
+      case IPT_keys: {
+        const unsigned char *byte = packet->bytes + length;
+        packet->fields.keys = 0;
 
-  gotByte:
-    if (!offset) {
-      const TemplateEntry *const *templateAddress = templateTable;
+        do {
+          packet->fields.keys <<= 8;
+          packet->fields.keys |= *--byte & 0X1F;
+        } while (byte != packet->bytes);
 
-      while ((template = *templateAddress++))
-        if (byte == *template->bytes)
-          break;
-
-      if (!template) {
-        if ((byte & 0XE0) == 0X60) {
-          template = &templateEntry_keys;
-        } else {
-          logIgnoredByte(byte);
-          template = NULL;
-          continue;
-        }
-      }
-    } else {
-      int unexpected = 0;
-
-      switch (template->bytes[offset]) {
-        case TBT_ANY:
-          break;
-
-        case TBT_DECIMAL:
-          if ((byte < '0') || (byte > '9')) unexpected = 1;
-          break;
-
-        case TBT_SIZE:
-          if ((byte != 40) && (byte != 80)) unexpected = 1;
-          break;
-
-        case TBT_ID1:
-          if (!strchr("3458", byte)) unexpected = 1;
-          break;
-
-        case TBT_ID2:
-//          if (byte != ((packet->bytes[offset] == '8')? '0': ' ')) unexpected = 1;
-          if (!strchr("0 ", byte)) unexpected = 1;
-          break;
-
-        case TBT_KEYS:
-          if ((byte & 0XE0) != 0XE0) unexpected = 1;
-          break;
-
-        default:
-          if (byte != template->bytes[offset]) unexpected = 1;
-          break;
+        break;
       }
 
-      if (unexpected) {
-        if ((offset == 1) && (template->type == IPT_identity)) {
-          template = alternateTemplate;
-        } else {
-          logShortPacket(packet->bytes, offset);
-          offset = 0;
-          template = NULL;
-        }
-
-        goto gotByte;
-      }
-    }
-
-    packet->bytes[offset++] = byte;
-    if (template && (offset == template->length)) {
-      logInputPacket(packet->bytes, offset);
-
-      switch ((packet->type = template->type)) {
-        case IPT_identity:
-          interpretIdentity(packet);
-          bdpSetModel(packet->fields.identity.cellCount);
-          break;
-
-        case IPT_keys: {
-          const unsigned char *byte = packet->bytes + offset;
-          packet->fields.keys = 0;
-
-          do {
-            packet->fields.keys <<= 8;
-            packet->fields.keys |= *--byte & 0X1F;
-          } while (byte != packet->bytes);
-
-          break;
-        }
-
-        case IPT_routing:
-          packet->fields.routing = &packet->bytes[7];
-          break;
-      }
-
-      return offset;
+      case IPT_routing:
+        packet->fields.routing = &packet->bytes[7];
+        break;
     }
   }
+
+  return length;
 }
 
 static void
