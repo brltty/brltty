@@ -181,20 +181,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         if (response.fields.data.init.communicationDisabled) {
           logMessage(LOG_WARNING, "communication channel not available");
-        } else {
-          brl->textColumns = response.fields.data.init.cellCount;
-          brl->textRows = 1;
-
-          {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-            brl->keyBindings = ktd->bindings;
-            brl->keyNameTables = ktd->names;
-          }
-
-          makeOutputTable(dotsTable_ISO11548_1);
-          brl->data->forceWrite = 1;
-          return 1;
         }
+
+        brl->textColumns = response.fields.data.init.cellCount;
+        brl->textRows = 1;
+
+        {
+          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+          brl->keyBindings = ktd->bindings;
+          brl->keyNameTables = ktd->names;
+        }
+
+        makeOutputTable(dotsTable_ISO11548_1);
+        brl->data->forceWrite = 1;
+        return 1;
       }
 
       disconnectBrailleResource(brl, NULL);
