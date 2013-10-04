@@ -319,14 +319,18 @@ proc makeComment_android {comment} {
    return "<!-- $comment -->"
 }
 
-proc makeLines_android {vendor product drivers descriptions} {
+proc makeLines_android {vendor product drivers descriptions exclude} {
    set lines [list]
 
    foreach description $descriptions {
       lappend lines [makeComment_android $description]
    }
 
-   lappend lines "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
+   set line "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
+   if {$exclude} {
+      set line [makeComment_android $line]
+   }
+   lappend lines $line
    return $lines
 }
 
@@ -334,14 +338,18 @@ proc makeComment_hotplug {comment} {
    return "# $comment"
 }
 
-proc makeLines_hotplug {vendor product drivers descriptions} {
+proc makeLines_hotplug {vendor product drivers descriptions exclude} {
    set lines [list]
 
    foreach description $descriptions {
       lappend lines [makeComment_hotplug $description]
    }
 
-   lappend lines [format "brltty-%s 0x%04x 0x%04x 0x%04x" [join $drivers ","] 3 $vendor $product]
+   set line [format "brltty-%s 0x%04x 0x%04x 0x%04x" [join $drivers ","] 3 $vendor $product]
+   if {$exclude} {
+       set line [makeComment_hotplug $line]
+   }
+   lappend lines $line
    return $lines
 }
 
@@ -349,14 +357,18 @@ proc makeComment_udev {comment} {
    return "# $comment"
 }
 
-proc makeLines_udev {vendor product drivers descriptions} {
+proc makeLines_udev {vendor product drivers descriptions exclude} {
    set lines [list]
 
    foreach description $descriptions {
       lappend lines [makeComment_udev $description]
    }
 
-   lappend lines [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_BRAILLE_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ","]]
+   set line [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_BRAILLE_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ","]]
+   if {$exclude} {
+      set line [makeComment_udev $line]
+   }
+   lappend lines $line
    return $lines
 }
 
@@ -364,14 +376,19 @@ proc makeComment_windows {comment} {
    return "; $comment"
 }
 
-proc makeLines_windows {vendor product drivers descriptions} {
+proc makeLines_windows {vendor product drivers descriptions exclude} {
    set lines [list]
-   lappend lines [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   set line [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   if {$exclude} {
+      set line [makeComment_windows $line]
+   }
+   lappend lines $line
    return $lines
 }
 
 proc makeLines {linesArray schemes deviceTable} {
    global genericDevices
+   upvar #0 optionValues(excludeGeneric) excludeGeneric
 
    foreach scheme $schemes {
       set makeLines makeLines_$scheme
@@ -400,6 +417,8 @@ proc makeLines {linesArray schemes deviceTable} {
                lappend descriptions "[dict get $deviceEntry name] \[[dict get $deviceEntry model]\]"
             }
 
+            set exclude 0
+
             if {[dict get $productEntry generic]} {
                lappend lines [$makeComment "Generic Identifier"]
                set generic [dict get $genericDevices $identifier]
@@ -412,9 +431,10 @@ proc makeLines {linesArray schemes deviceTable} {
                      lappend lines [$makeComment "$header: [dict get $generic $property]"]
                   }
                }
+               set exclude $excludeGeneric
             }
 
-            eval [list lappend lines] [$makeLines $vendor $product [lsort -unique $codes] [lsort $descriptions]]
+            eval [list lappend lines] [$makeLines $vendor $product [lsort -unique $codes] [lsort $descriptions] $exclude]
             lappend lines ""
          }
       }
@@ -598,9 +618,10 @@ set genericDevices [makeGenericDeviceTable {
 }]
 
 set optionDefinitions {
-   {quiet   counter}
-   {verbose counter}
-   {test    flag}
+   {quiet          counter}
+   {verbose        counter}
+   {test           flag}
+   {excludeGeneric flag}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
