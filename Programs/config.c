@@ -1358,8 +1358,7 @@ changeBrailleDevice (const char *device) {
 #ifdef ENABLE_API
 static void
 exitApiServer (void *data) {
-  api_stop(&brl);
-  apiStarted = 0;
+  apiStop();
 
   if (apiParameters) {
     deallocateStrings(apiParameters);
@@ -2163,9 +2162,8 @@ brlttyStart (int argc, char *argv[]) {
                     gettext("API Parameter"));
 
       if (!opt_verify) {
-        if (api_start(&brl, apiParameters)) {
+        if (apiStart(apiParameters)) {
           onProgramExit("api-server", exitApiServer, NULL);
-          apiStarted = 1;
         }
       }
     }

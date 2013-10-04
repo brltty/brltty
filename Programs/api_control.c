@@ -18,7 +18,9 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "api_control.h"
+#include "async_alarm.h"
 #include "brltty.h"
 
 #ifndef ENABLE_API
@@ -64,11 +66,6 @@ api_releaseDriver (BrailleDisplay *brl) {
 }
 
 int
-api_flush (BrailleDisplay *brl) {
-  return 0;
-}
-
-int
 api_handleCommand (int command) {
   return command;
 }
@@ -77,15 +74,60 @@ int
 api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
   return 0;
 }
+
+int
+api_flush (BrailleDisplay *brl) {
+  return 0;
+}
 #endif /* ENABLE_API */
 
 int apiStarted;
+static int driverClaimed;
 
-static int apiDriverClaimed;
+static void setFlushAlarm (int delay, void *data);
+static AsyncHandle flushAlarm = NULL;
+
+static void
+handleFlushAlarm (const AsyncAlarmResult *result) {
+  asyncDiscardHandle(flushAlarm);
+  flushAlarm = NULL;
+
+logMessage(LOG_NOTICE, "flushing api");
+  api_flush(&brl);
+  setFlushAlarm(100, result->data);
+}
+
+static void
+setFlushAlarm (int delay, void *data) {
+  if (!flushAlarm) {
+    asyncSetAlarmIn(&flushAlarm, delay, handleFlushAlarm, data);
+  }
+}
+
+static void
+stopFlushAlarm () {
+  if (flushAlarm) {
+    asyncCancelRequest(flushAlarm);
+    flushAlarm = NULL;
+  }
+}
+
+int
+apiStart (char **parameters) {
+  if (api_start(&brl, parameters)) {
+    apiStarted = 1;
+    setFlushAlarm(0, NULL);
+    return 1;
+  }
+
+  return 0;
+}
 
 void
-apiUnlink (void) {
-  if (apiStarted) api_unlink(&brl);
+apiStop (void) {
+  api_stop(&brl);
+  apiStarted = 0;
+  stopFlushAlarm();
 }
 
 void
@@ -93,11 +135,16 @@ apiLink (void) {
   if (apiStarted) api_link(&brl);
 }
 
+void
+apiUnlink (void) {
+  if (apiStarted) api_unlink(&brl);
+}
+
 int
 apiClaimDriver (void) {
-  if (!apiDriverClaimed && apiStarted) {
+  if (!driverClaimed && apiStarted) {
     if (!api_claimDriver(&brl)) return 0;
-    apiDriverClaimed = 1;
+    driverClaimed = 1;
   }
 
   return 1;
@@ -105,8 +152,8 @@ apiClaimDriver (void) {
 
 void
 apiReleaseDriver (void) {
-  if (apiDriverClaimed) {
+  if (driverClaimed) {
     api_releaseDriver(&brl);
-    apiDriverClaimed = 0;
+    driverClaimed = 0;
   }
 }

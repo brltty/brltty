@@ -78,12 +78,6 @@ handleInput (void) {
         break;
     }
   }
-
-  if (apiStarted) {
-    if (!api_flush(&brl)) {
-      restartRequired = 1;
-    }
-  }
 #endif /* ENABLE_API */
 
   return processed;
