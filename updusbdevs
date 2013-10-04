@@ -331,6 +331,7 @@ proc makeLines_android {vendor product drivers descriptions exclude} {
       set line [makeComment_android $line]
    }
    lappend lines $line
+
    return $lines
 }
 
@@ -347,9 +348,10 @@ proc makeLines_hotplug {vendor product drivers descriptions exclude} {
 
    set line [format "brltty-%s 0x%04x 0x%04x 0x%04x" [join $drivers ","] 3 $vendor $product]
    if {$exclude} {
-       set line [makeComment_hotplug $line]
+      set line [makeComment_hotplug $line]
    }
    lappend lines $line
+
    return $lines
 }
 
@@ -369,6 +371,7 @@ proc makeLines_udev {vendor product drivers descriptions exclude} {
       set line [makeComment_udev $line]
    }
    lappend lines $line
+
    return $lines
 }
 
@@ -379,16 +382,18 @@ proc makeComment_windows {comment} {
 proc makeLines_windows {vendor product drivers descriptions exclude} {
    set lines [list]
    set line [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+
    if {$exclude} {
       set line [makeComment_windows $line]
    }
+
    lappend lines $line
    return $lines
 }
 
 proc makeLines {linesArray schemes deviceTable} {
    global genericDevices
-   upvar #0 optionValues(excludeGeneric) excludeGeneric
+   upvar #0 optionValues(nogeneric) excludeGenericDevices
 
    foreach scheme $schemes {
       set makeLines makeLines_$scheme
@@ -431,7 +436,8 @@ proc makeLines {linesArray schemes deviceTable} {
                      lappend lines [$makeComment "$header: [dict get $generic $property]"]
                   }
                }
-               set exclude $excludeGeneric
+
+               set exclude $excludeGenericDevices
             }
 
             eval [list lappend lines] [$makeLines $vendor $product [lsort -unique $codes] [lsort $descriptions] $exclude]
@@ -618,10 +624,10 @@ set genericDevices [makeGenericDeviceTable {
 }]
 
 set optionDefinitions {
-   {quiet          counter}
-   {verbose        counter}
-   {test           flag}
-   {excludeGeneric flag}
+   {quiet     counter}
+   {verbose   counter}
+   {test      flag}
+   {nogeneric flag}
 }
 
 if {![processOptions optionValues argv $optionDefinitions]} {
