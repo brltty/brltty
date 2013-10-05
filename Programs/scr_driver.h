@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR_DRIVER
 #define BRLTTY_INCLUDED_SCR_DRIVER
 
-#include "scr.h"
+#include "scrdefs.h"
 #include "scr_real.h"
 
 #ifdef __cplusplus
