@@ -76,22 +76,6 @@ extern int isSameRow (
   IsSameCharacter isSameCharacter
 );
 
-typedef struct {
-  const unsigned char *const blinkingEnabled;
-  const unsigned char *const visibleTime;
-  const unsigned char *const invisibleTime;
-
-  int isVisible;
-  int timer;
-} BlinkingState;
-
-extern BlinkingState cursorBlinkingState;
-extern BlinkingState attributesBlinkingState;
-extern BlinkingState capitalsBlinkingState;
-extern BlinkingState speechCursorBlinkingState;
-
-extern void resetBlinkingStates (void);
-extern void setBlinkingState (BlinkingState *state, int visible);
 extern int toggleFlag (
   int *bits, int bit, int command,
   const TuneDefinition *offTune, const TuneDefinition *onTune

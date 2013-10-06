@@ -59,6 +59,7 @@
 #include "unicode.h"
 #include "scr.h"
 #include "status.h"
+#include "blink.h"
 #include "ses.h"
 #include "scancodes.h"
 #include "brl.h"
@@ -1100,56 +1101,6 @@ getContractedLength (unsigned int outputLimit) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-BlinkingState cursorBlinkingState = {
-  .blinkingEnabled = &prefs.blinkingCursor,
-  .visibleTime = &prefs.cursorVisibleTime,
-  .invisibleTime = &prefs.cursorInvisibleTime
-};
-
-BlinkingState attributesBlinkingState = {
-  .blinkingEnabled = &prefs.blinkingAttributes,
-  .visibleTime = &prefs.attributesVisibleTime,
-  .invisibleTime = &prefs.attributesInvisibleTime
-};
-
-BlinkingState capitalsBlinkingState = {
-  .blinkingEnabled = &prefs.blinkingCapitals,
-  .visibleTime = &prefs.capitalsVisibleTime,
-  .invisibleTime = &prefs.capitalsInvisibleTime
-};
-
-BlinkingState speechCursorBlinkingState = {
-  .blinkingEnabled = &prefs.blinkingSpeechCursor,
-  .visibleTime = &prefs.speechCursorVisibleTime,
-  .invisibleTime = &prefs.speechCursorInvisibleTime
-};
-
-static int
-isBlinkedOn (const BlinkingState *state) {
-  if (!*state->blinkingEnabled) return 1;
-  return state->isVisible;
-}
-
-void
-setBlinkingState (BlinkingState *state, int visible) {
-  state->timer = PREFERENCES_TIME((state->isVisible = visible)? *state->visibleTime: *state->invisibleTime);
-}
-
-static void
-updateBlinkingState (BlinkingState *state) {
-  if (*state->blinkingEnabled)
-      if ((state->timer -= updateInterval) <= 0)
-        setBlinkingState(state, !state->isVisible);
-}
-
-void
-resetBlinkingStates (void) {
-  setBlinkingState(&cursorBlinkingState, 0);
-  setBlinkingState(&attributesBlinkingState, 1);
-  setBlinkingState(&capitalsBlinkingState, 1);
-  setBlinkingState(&speechCursorBlinkingState, 0);
-}
-
 int
 toggleFlag (
   int *bits, int bit, int command,
@@ -1237,7 +1188,7 @@ static const unsigned char cursorStyles[] = {
 
 unsigned char
 getCursorDots (void) {
-  if (!isBlinkedOn(&cursorBlinkingState)) return 0;
+  if (!isBlinkVisible(&cursorBlinkDescriptor)) return 0;
   return cursorStyles[prefs.cursorStyle];
 }
 
@@ -1280,7 +1231,7 @@ showCursor (void) {
 
 static inline int
 showAttributesUnderline (void) {
-  return prefs.showAttributes && isBlinkedOn(&attributesBlinkingState);
+  return prefs.showAttributes && isBlinkVisible(&attributesBlinkDescriptor);
 }
 
 static void
@@ -1385,7 +1336,7 @@ int inputModifiers;
 void
 resetBrailleState (void) {
   resetScanCodes();
-  resetBlinkingStates();
+  resetBlinkDescriptors();
   inputModifiers = 0;
 }
 
@@ -1731,10 +1682,6 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
     }
 
     updateSessionAttributes();
-    updateBlinkingState(&cursorBlinkingState);
-    updateBlinkingState(&attributesBlinkingState);
-    updateBlinkingState(&capitalsBlinkingState);
-    updateBlinkingState(&speechCursorBlinkingState);
 
     if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1748,10 +1695,10 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
         if (prefs.blinkingCursor) {
           if (scr.posy != ses->trky) {
             /* turn off cursor to see what's under it while changing lines */
-            setBlinkingState(&cursorBlinkingState, 0);
+            setBlinkState(&cursorBlinkDescriptor, 0);
           } else if (scr.posx != ses->trkx) {
             /* turn on cursor to see it moving on the line */
-            setBlinkingState(&cursorBlinkingState, 1);
+            setBlinkState(&cursorBlinkDescriptor, 1);
           }
         }
 
@@ -1784,7 +1731,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
            We could check to see if we changed screen, but that doesn't
            really matter... this is mainly for when you are hunting up/down
            for the line with attributes. */
-        setBlinkingState(&attributesBlinkingState, 1);
+        setBlinkState(&attributesBlinkDescriptor, 1);
         /* problem: this still doesn't help when the braille window is
            stationnary and the attributes themselves are moving
            (example: tin). */
@@ -1940,7 +1887,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
           }
 
           /* blank out capital letters if they're blinking and should be off */
-          if (!isBlinkedOn(&capitalsBlinkingState)) {
+          if (!isBlinkVisible(&capitalsBlinkDescriptor)) {
             unsigned int i;
             for (i=0; i<textCount*brl.textRows; i+=1) {
               ScreenCharacter *character = &characters[i];
@@ -1994,7 +1941,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
           }
         }
 
-        if (prefs.showSpeechCursor && isBlinkedOn(&speechCursorBlinkingState)) {
+        if (prefs.showSpeechCursor && isBlinkVisible(&speechCursorBlinkDescriptor)) {
           int position = getCursorPosition(ses->spkx, ses->spky);
 
           if (position >= 0)
