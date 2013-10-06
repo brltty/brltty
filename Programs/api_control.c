@@ -92,7 +92,6 @@ handleFlushAlarm (const AsyncAlarmResult *result) {
   asyncDiscardHandle(flushAlarm);
   flushAlarm = NULL;
 
-logMessage(LOG_NOTICE, "flushing api");
   api_flush(&brl);
   setFlushAlarm(100, result->data);
 }
