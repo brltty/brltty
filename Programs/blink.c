@@ -21,6 +21,7 @@
 #include "blink.h"
 #include "prefs.h"
 #include "async_alarm.h"
+#include "brltty.h"
 
 struct BlinkDescriptorStruct {
   const unsigned char *const isEnabled;
@@ -83,12 +84,15 @@ static void setBlinkAlarm (BlinkDescriptor *blink, int duration);
 
 void
 setBlinkState (BlinkDescriptor *blink, int visible) {
+  int changed = visible != blink->isVisible;
+
   blink->isVisible = visible;
 
   if (isBlinkEnabled(blink)) {
     unsigned char time = blink->isVisible? *blink->visibleTime: *blink->invisibleTime;
 
     setBlinkAlarm(blink, PREFERENCES_TIME(time));
+    if (changed) resetUpdateAlarm(10);
   } else if (blink->alarmHandle) {
     asyncCancelRequest(blink->alarmHandle);
     blink->alarmHandle = NULL;
