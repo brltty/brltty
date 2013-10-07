@@ -34,6 +34,7 @@
 #include "spk.h"
 #include "scr.h"
 #include "status.h"
+#include "blink.h"
 #include "datafile.h"
 #include "ttb.h"
 #include "atb.h"
@@ -1135,6 +1136,8 @@ initializeBrailleDriver (const char *code, int verify) {
 
         if (oldPreferencesFile) {
           logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
+
+          resetBlinkDescriptors();
           return 1;
         } else {
           logMallocError();
@@ -1226,6 +1229,7 @@ deactivateBrailleDriver (void) {
   }
 
   unloadDriverObject(&brailleObject);
+  stopBlinkDescriptors();
 
   if (brailleParameters) {
     deallocateStrings(brailleParameters);

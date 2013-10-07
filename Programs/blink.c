@@ -24,6 +24,7 @@
 #include "brltty.h"
 
 struct BlinkDescriptorStruct {
+  const char *const name;
   const unsigned char *const isEnabled;
   const unsigned char *const visibleTime;
   const unsigned char *const invisibleTime;
@@ -33,21 +34,24 @@ struct BlinkDescriptorStruct {
   AsyncHandle alarmHandle;
 };
 
-BlinkDescriptor cursorBlinkDescriptor = {
+BlinkDescriptor screenCursorBlinkDescriptor = {
+  .name = "screen cursor",
   .isEnabled = &prefs.blinkingCursor,
   .visibleTime = &prefs.cursorVisibleTime,
   .invisibleTime = &prefs.cursorInvisibleTime,
   .initialState = 0
 };
 
-BlinkDescriptor attributesBlinkDescriptor = {
+BlinkDescriptor attributesUnderlineBlinkDescriptor = {
+  .name = "attributes underline",
   .isEnabled = &prefs.blinkingAttributes,
   .visibleTime = &prefs.attributesVisibleTime,
   .invisibleTime = &prefs.attributesInvisibleTime,
   .initialState = 0
 };
 
-BlinkDescriptor capitalsBlinkDescriptor = {
+BlinkDescriptor uppercaseLettersBlinkDescriptor = {
+  .name = "uppercase letters",
   .isEnabled = &prefs.blinkingCapitals,
   .visibleTime = &prefs.capitalsVisibleTime,
   .invisibleTime = &prefs.capitalsInvisibleTime,
@@ -55,6 +59,7 @@ BlinkDescriptor capitalsBlinkDescriptor = {
 };
 
 BlinkDescriptor speechCursorBlinkDescriptor = {
+  .name = "speech cursor",
   .isEnabled = &prefs.blinkingSpeechCursor,
   .visibleTime = &prefs.speechCursorVisibleTime,
   .invisibleTime = &prefs.speechCursorInvisibleTime,
@@ -62,9 +67,9 @@ BlinkDescriptor speechCursorBlinkDescriptor = {
 };
 
 static BlinkDescriptor *const blinkDescriptors[] = {
-  &cursorBlinkDescriptor,
-  &attributesBlinkDescriptor,
-  &capitalsBlinkDescriptor,
+  &screenCursorBlinkDescriptor,
+  &attributesUnderlineBlinkDescriptor,
+  &uppercaseLettersBlinkDescriptor,
   &speechCursorBlinkDescriptor,
   NULL
 };
@@ -82,6 +87,14 @@ isBlinkVisible (const BlinkDescriptor *blink) {
 
 static void setBlinkAlarm (BlinkDescriptor *blink, int duration);
 
+static void
+stopBlinkDescriptor (BlinkDescriptor *blink) {
+  if (blink->alarmHandle) {
+    asyncCancelRequest(blink->alarmHandle);
+    blink->alarmHandle = NULL;
+  }
+}
+
 void
 setBlinkState (BlinkDescriptor *blink, int visible) {
   int changed = visible != blink->isVisible;
@@ -93,9 +106,8 @@ setBlinkState (BlinkDescriptor *blink, int visible) {
 
     setBlinkAlarm(blink, PREFERENCES_TIME(time));
     if (changed) resetUpdateAlarm(10);
-  } else if (blink->alarmHandle) {
-    asyncCancelRequest(blink->alarmHandle);
-    blink->alarmHandle = NULL;
+  } else {
+    stopBlinkDescriptor(blink);
   }
 }
 
@@ -129,6 +141,16 @@ resetBlinkDescriptors (void) {
 
   while (*blink) {
     resetBlinkDescriptor(*blink);
+    blink += 1;
+  }
+}
+
+void
+stopBlinkDescriptors (void) {
+  BlinkDescriptor *const *blink = blinkDescriptors;
+
+  while (*blink) {
+    stopBlinkDescriptor(*blink);
     blink += 1;
   }
 }

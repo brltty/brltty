@@ -24,9 +24,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct BlinkDescriptorStruct BlinkDescriptor;
-extern BlinkDescriptor cursorBlinkDescriptor;
-extern BlinkDescriptor attributesBlinkDescriptor;
-extern BlinkDescriptor capitalsBlinkDescriptor;
+extern BlinkDescriptor screenCursorBlinkDescriptor;
+extern BlinkDescriptor attributesUnderlineBlinkDescriptor;
+extern BlinkDescriptor uppercaseLettersBlinkDescriptor;
 extern BlinkDescriptor speechCursorBlinkDescriptor;
 
 extern int isBlinkEnabled (const BlinkDescriptor *blink);
@@ -35,6 +35,7 @@ extern void setBlinkState (BlinkDescriptor *blink, int visible);
 
 extern void resetBlinkDescriptor (BlinkDescriptor *blink);
 extern void resetBlinkDescriptors (void);
+extern void stopBlinkDescriptors (void);
 
 #ifdef __cplusplus
 }

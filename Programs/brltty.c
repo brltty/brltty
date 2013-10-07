@@ -1188,7 +1188,7 @@ static const unsigned char cursorStyles[] = {
 
 unsigned char
 getCursorDots (void) {
-  if (!isBlinkVisible(&cursorBlinkDescriptor)) return 0;
+  if (!isBlinkVisible(&screenCursorBlinkDescriptor)) return 0;
   return cursorStyles[prefs.cursorStyle];
 }
 
@@ -1231,7 +1231,7 @@ showCursor (void) {
 
 static inline int
 showAttributesUnderline (void) {
-  return prefs.showAttributes && isBlinkVisible(&attributesBlinkDescriptor);
+  return prefs.showAttributes && isBlinkVisible(&attributesUnderlineBlinkDescriptor);
 }
 
 static void
@@ -1336,7 +1336,6 @@ int inputModifiers;
 void
 resetBrailleState (void) {
   resetScanCodes();
-  resetBlinkDescriptors();
   inputModifiers = 0;
 }
 
@@ -1695,10 +1694,10 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
         if (prefs.blinkingCursor) {
           if (scr.posy != ses->trky) {
             /* turn off cursor to see what's under it while changing lines */
-            setBlinkState(&cursorBlinkDescriptor, 0);
+            setBlinkState(&screenCursorBlinkDescriptor, 0);
           } else if (scr.posx != ses->trkx) {
             /* turn on cursor to see it moving on the line */
-            setBlinkState(&cursorBlinkDescriptor, 1);
+            setBlinkState(&screenCursorBlinkDescriptor, 1);
           }
         }
 
@@ -1731,7 +1730,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
            We could check to see if we changed screen, but that doesn't
            really matter... this is mainly for when you are hunting up/down
            for the line with attributes. */
-        setBlinkState(&attributesBlinkDescriptor, 1);
+        setBlinkState(&attributesUnderlineBlinkDescriptor, 1);
         /* problem: this still doesn't help when the braille window is
            stationnary and the attributes themselves are moving
            (example: tin). */
@@ -1887,7 +1886,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
           }
 
           /* blank out capital letters if they're blinking and should be off */
-          if (!isBlinkVisible(&capitalsBlinkDescriptor)) {
+          if (!isBlinkVisible(&uppercaseLettersBlinkDescriptor)) {
             unsigned int i;
             for (i=0; i<textCount*brl.textRows; i+=1) {
               ScreenCharacter *character = &characters[i];

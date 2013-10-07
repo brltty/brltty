@@ -852,7 +852,7 @@ handleNavigationCommand (int command, void *datga) {
       break;
     case BRL_CMD_CSRBLINK:
       if (toggleFeatureSetting(&prefs.blinkingCursor, command)) {
-        resetBlinkDescriptor(&cursorBlinkDescriptor);
+        resetBlinkDescriptor(&screenCursorBlinkDescriptor);
       }
       break;
 
@@ -861,13 +861,13 @@ handleNavigationCommand (int command, void *datga) {
       break;
     case BRL_CMD_ATTRBLINK:
       if (toggleFeatureSetting(&prefs.blinkingAttributes, command)) {
-        resetBlinkDescriptor(&attributesBlinkDescriptor);
+        resetBlinkDescriptor(&attributesUnderlineBlinkDescriptor);
       }
       break;
 
     case BRL_CMD_CAPBLINK:
       if (toggleFeatureSetting(&prefs.blinkingCapitals, command)) {
-        resetBlinkDescriptor(&capitalsBlinkDescriptor);
+        resetBlinkDescriptor(&uppercaseLettersBlinkDescriptor);
       }
       break;
 
@@ -1057,6 +1057,7 @@ handleNavigationCommand (int command, void *datga) {
       TimeFormattingData fmt;
       getTimeFormattingData(&fmt);
 
+restartRequired = 1;
 #ifdef ENABLE_SPEECH_SUPPORT
       if (autospeak()) doSpeechTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */

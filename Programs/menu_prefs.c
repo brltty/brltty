@@ -96,7 +96,7 @@ testBlinkingCursor (void) {
 
 static int
 changedBlinkingCursor (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&cursorBlinkDescriptor);
+  resetBlinkDescriptor(&screenCursorBlinkDescriptor);
   return 1;
 }
 
@@ -112,7 +112,7 @@ testBlinkingAttributes (void) {
 
 static int
 changedBlinkingAttributes (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&attributesBlinkDescriptor);
+  resetBlinkDescriptor(&attributesUnderlineBlinkDescriptor);
   return 1;
 }
 
@@ -123,7 +123,7 @@ testBlinkingCapitals (void) {
 
 static int
 changedBlinkingCapitals (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&capitalsBlinkDescriptor);
+  resetBlinkDescriptor(&uppercaseLettersBlinkDescriptor);
   return 1;
 }
 
