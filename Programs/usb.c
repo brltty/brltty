@@ -948,16 +948,13 @@ usbWriteData (
   UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
 
   if (endpoint) {
-    uint16_t size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
+    const uint16_t size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
     const unsigned char *from = data;
-    const unsigned char *end = from + length;
+    const unsigned char *const end = from + length;
 
     while (from < end) {
-      size_t count = length;
-      ssize_t result;
-
-      if (count > size) count = size;
-      result = usbWriteEndpoint(device, endpointNumber, from, count, timeout);
+      size_t count = MIN((end - from), size);
+      ssize_t result = usbWriteEndpoint(device, endpointNumber, from, count, timeout);
 
       if (result == -1) return result;
       from += result;
@@ -968,6 +965,7 @@ usbWriteData (
 
   return -1;
 }
+
 typedef struct {
   const UsbChannelDefinition *definition;
 
