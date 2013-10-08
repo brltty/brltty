@@ -4,7 +4,7 @@
   <string name="DEFAULT_NAVIGATION_MODE">List</string>
 
   <string name="DEFAULT_TEXT_TABLE">auto</string>
-  <string name="DEFAULT_ATTRIBUTES_TABLE">attributes</string>
+  <string name="DEFAULT_ATTRIBUTES_TABLE">upper_lower</string>
   <string name="DEFAULT_CONTRACTION_TABLE">en-us-g2</string>
   <string name="DEFAULT_KEY_TABLE">braille</string>
 
