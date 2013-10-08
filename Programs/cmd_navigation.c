@@ -1049,7 +1049,6 @@ handleNavigationCommand (int command, void *datga) {
       TimeFormattingData fmt;
       getTimeFormattingData(&fmt);
 
-restartRequired = 1;
 #ifdef ENABLE_SPEECH_SUPPORT
       if (autospeak()) doSpeechTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */
