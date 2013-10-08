@@ -426,9 +426,6 @@ extern "C" {
 /* Define this to be a string containing the default screen driver parameters. */
 #undef SCREEN_PARAMETERS
 
-/* Define this to include command learn mode. */
-#undef ENABLE_LEARN_MODE
-
 /* Define this to include contraction table support. */
 #undef ENABLE_CONTRACTED_BRAILLE
 

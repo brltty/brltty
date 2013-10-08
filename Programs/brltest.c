@@ -202,11 +202,7 @@ main (int argc, char *argv[]) {
     identifyBrailleDriver(braille, 0);		/* start-up messages */
     if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
       if (ensureBrailleBuffer(&brl, LOG_INFO)) {
-#ifdef ENABLE_LEARN_MODE
         learnMode(10000);
-#else /* ENABLE_LEARN_MODE */
-        message("braille test", 0);
-#endif /* ENABLE_LEARN_MODE */
         braille->destruct(&brl);		/* finish with the display */
         exitStatus = PROG_EXIT_SUCCESS;
       } else {

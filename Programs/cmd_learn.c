@@ -28,7 +28,6 @@
 #include "brl.h"
 #include "brltty.h"
 
-#ifdef ENABLE_LEARN_MODE
 typedef enum {
   LRN_CONTINUE,
   LRN_TIMEOUT,
@@ -78,14 +77,12 @@ handleLearnCommand (int command, void *data) {
 
   return 1;
 }
-#endif /* ENABLE_LEARN_MODE */
 
 int
 learnMode (int timeout) {
   int ok = 0;
   const char *mode = "lrn";
 
-#ifdef ENABLE_LEARN_MODE
   LearnData lrn = {
     .mode = mode,
   };
@@ -112,9 +109,6 @@ learnMode (int timeout) {
 
   popCommandHandler();
   resumeUpdates();
-#else /* ENABLE_LEARN_MODE */
-  if (message(lrn.mode, gettext("learn mode not available"), 0)) ok = 1;
-#endif /* ENABLE_LEARN_MODE */
 
   return ok;
 }

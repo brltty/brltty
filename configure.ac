@@ -1006,15 +1006,6 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
 ])
 
 BRLTTY_ARG_DISABLE(
-   [learn-mode],
-   [interactive command learn mode],
-   [],
-[dnl
-   AC_DEFINE([ENABLE_LEARN_MODE], [1],
-             [Define this to include command learn mode.])
-])
-
-BRLTTY_ARG_DISABLE(
    [contracted-braille],
    [in-line contracted braille],
    [],
