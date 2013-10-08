@@ -58,7 +58,7 @@ then
 
    AC_CHECK_PROGS([JAR_NAME], [jar gjar], [JAR_NOT_FOUND_BY_CONFIGURE], ["${JAVA_BIN}"])
    AC_SUBST([JAR], ["'${JAVA_BIN}/${JAR_NAME}'"])
-   BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java])
+   BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java /mingw])
 
    JAVA_JNI_INC="${JAVA_ROOT}/include"
    JAVA_JNI_HDR="jni.h"
@@ -67,7 +67,7 @@ then
    AC_SUBST([JAVA_JNI_HDR])
    AC_SUBST([JAVA_JNI_INC], ["'${JAVA_JNI_INC}'"])
    AC_SUBST([JAVA_JNI_FLAGS])
-   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni])
+   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni /mingw])
 else
    AC_MSG_WARN([Java compiler not found])
 fi
