@@ -82,6 +82,7 @@ extern "C" {
 #endif /* __USE_W32_SOCKETS */
 #endif /* __MINGW32__ */
 
+#include <ws2tcpip.h>
 #include <windows.h>
 #endif /* WINDOWS */
 

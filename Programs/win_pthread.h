@@ -24,16 +24,17 @@
 #ifndef BRLTTY_INCLUDED_WIN_PTHREAD
 #define BRLTTY_INCLUDED_WIN_PTHREAD
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "prologue.h"
 
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
 
-#include "prologue.h"
 #include "timing.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return errno; } } while (0)
 #define winPthreadAssertPthread(expr) do { int ret = (expr); if (ret) return ret; } while (0)
