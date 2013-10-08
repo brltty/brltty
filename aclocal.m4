@@ -523,7 +523,7 @@ then
 elif test "${$2_root}" = "yes"
 then
    $2_root=""
-   roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2"
+   roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2 /mingw /mingw/$1 /mingw/$2"
    for root in ${roots}
    do
       if test -f "${root}/$3"
