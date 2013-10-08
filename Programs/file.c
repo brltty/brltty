@@ -798,8 +798,13 @@ writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t s
   return -1;
 }
 
+const char *
+getNamedPipeDirectory (void) {
+  return "//./pipe";
+}
+
 int
-createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
+createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
   SECURITY_ATTRIBUTES attributes;
 
   ZeroMemory(&attributes, sizeof(attributes));
@@ -827,8 +832,13 @@ writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t s
   return write(fileDescriptor, buffer, size);
 }
 
+const char *
+getNamedPipeDirectory (void) {
+  return STATE_DIRECTORY;
+}
+
 int
-createPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
+createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
   int fileDescriptors[2];
 
   if (pipe(fileDescriptors) != -1) {

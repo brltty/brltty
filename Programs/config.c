@@ -2205,7 +2205,7 @@ brlttyStart (int argc, char *argv[]) {
   logMessage(LOG_INFO, "%s: %s", gettext("Speech Input"),
              *opt_speechInput? opt_speechInput: gettext("none"));
   if (!opt_verify) {
-    if (*opt_speechInput) enableSpeechInput(opt_speechInput);
+    if (*opt_speechInput) startSpeechInput(opt_speechInput);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

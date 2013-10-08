@@ -23,8 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int enableSpeechInput (const char *name);
-extern void processSpeechInput (SpeechSynthesizer *spk);
+#ifdef ENABLE_SPEECH_SUPPORT
+extern int startSpeechInput (const char *name);
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef __cplusplus
 }

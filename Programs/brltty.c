@@ -70,7 +70,6 @@
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
-#include "spk_input.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
@@ -1985,7 +1984,6 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   if (autospeak()) doAutospeak();
-  processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   resetAllBlinkDescriptors();

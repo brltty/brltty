@@ -1616,7 +1616,7 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
     event->callback = callback;
     event->data = data;
 
-    if (createPipe(&event->pipeInput, &event->pipeOutput)) {
+    if (createAnonymousPipe(&event->pipeInput, &event->pipeOutput)) {
 #ifdef __MINGW32__
       if (!(event->monitorDescriptor = CreateEvent(NULL, TRUE, FALSE, NULL))) {
         logWindowsSystemError("CreateEvent");
