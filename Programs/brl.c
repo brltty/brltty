@@ -179,24 +179,16 @@ resizeBrailleBuffer (BrailleDisplay *brl, int resized, int infoLevel) {
     resized = 1;
 
     if (brl->isCoreBuffer) {
-      static void *currentAddress = NULL;
-      static size_t currentSize = 0;
       size_t newSize = brl->textColumns * brl->textRows;
+      unsigned char *newAddress = malloc(newSize);
 
-      if (newSize > currentSize) {
-        void *newAddress = malloc(newSize);
-
-        if (!newAddress) {
-          logMallocError();
-          return 0;
-        }
-
-        if (currentAddress) free(currentAddress);
-        currentAddress = newAddress;
-        currentSize = newSize;
+      if (!newAddress) {
+        logMallocError();
+        return 0;
       }
 
-      brl->buffer = currentAddress;
+      if (brl->buffer) free(brl->buffer);
+      brl->buffer = newAddress;
     }
   }
 
