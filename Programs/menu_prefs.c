@@ -24,7 +24,6 @@
 #include "log.h"
 #include "menu.h"
 #include "prefs.h"
-#include "blink.h"
 #include "statdefs.h"
 #include "brltty.h"
 #include "ttb.h"
@@ -95,12 +94,6 @@ testBlinkingCursor (void) {
 }
 
 static int
-changedBlinkingCursor (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&screenCursorBlinkDescriptor);
-  return 1;
-}
-
-static int
 testShowAttributes (void) {
   return prefs.showAttributes;
 }
@@ -111,20 +104,8 @@ testBlinkingAttributes (void) {
 }
 
 static int
-changedBlinkingAttributes (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&attributesUnderlineBlinkDescriptor);
-  return 1;
-}
-
-static int
 testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
-}
-
-static int
-changedBlinkingCapitals (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&uppercaseLettersBlinkDescriptor);
-  return 1;
 }
 
 static int
@@ -237,12 +218,6 @@ testShowSpeechCursor (void) {
 static int
 testBlinkingSpeechCursor (void) {
   return testShowSpeechCursor() && prefs.blinkingSpeechCursor;
-}
-
-static int
-changedBlinkingSpeechCursor (const MenuItem *item UNUSED, unsigned char setting) {
-  resetBlinkDescriptor(&speechCursorBlinkDescriptor);
-  return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -545,7 +520,6 @@ makePreferencesMenu (void) {
       NAME(strtext("Blinking Cursor"));
       ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &itemName));
       TEST(ShowCursor);
-      CHANGED(BlinkingCursor);
     }
 
     {
@@ -569,7 +543,6 @@ makePreferencesMenu (void) {
       NAME(strtext("Blinking Attributes"));
       ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingAttributes, &itemName));
       TEST(ShowAttributes);
-      CHANGED(BlinkingAttributes);
     }
 
     {
@@ -587,7 +560,6 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Blinking Capitals"));
       ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCapitals, &itemName));
-      CHANGED(BlinkingCapitals);
     }
 
     {
@@ -906,7 +878,6 @@ makePreferencesMenu (void) {
       NAME(strtext("Blinking Speech Cursor"));
       ITEM(newBooleanMenuItem(speechSubmenu, &prefs.blinkingSpeechCursor, &itemName));
       TEST(ShowSpeechCursor);
-      CHANGED(BlinkingSpeechCursor);
     }
 
     {

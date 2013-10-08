@@ -1137,7 +1137,6 @@ initializeBrailleDriver (const char *code, int verify) {
         if (oldPreferencesFile) {
           logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
 
-          resetBlinkDescriptors();
           return 1;
         } else {
           logMallocError();
@@ -1229,7 +1228,7 @@ deactivateBrailleDriver (void) {
   }
 
   unloadDriverObject(&brailleObject);
-  stopBlinkDescriptors();
+  stopAllBlinkDescriptors();
 
   if (brailleParameters) {
     deallocateStrings(brailleParameters);

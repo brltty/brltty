@@ -47,7 +47,7 @@ extern ScreenDescription scr;
 #define SCR_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)
 #define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
-extern void resetUpdateAlarm (int delay);
+extern void resetUpdateAlarm (void);
 extern void suspendUpdates (void);
 extern void resumeUpdates (void);
 

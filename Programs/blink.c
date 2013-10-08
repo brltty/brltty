@@ -28,8 +28,8 @@ struct BlinkDescriptorStruct {
   const unsigned char *const isEnabled;
   const unsigned char *const visibleTime;
   const unsigned char *const invisibleTime;
-  unsigned const initialState:1;
 
+  unsigned isRequired:1;
   unsigned isVisible:1;
   AsyncHandle alarmHandle;
 };
@@ -38,32 +38,28 @@ BlinkDescriptor screenCursorBlinkDescriptor = {
   .name = "screen cursor",
   .isEnabled = &prefs.blinkingCursor,
   .visibleTime = &prefs.cursorVisibleTime,
-  .invisibleTime = &prefs.cursorInvisibleTime,
-  .initialState = 0
+  .invisibleTime = &prefs.cursorInvisibleTime
 };
 
 BlinkDescriptor attributesUnderlineBlinkDescriptor = {
   .name = "attributes underline",
   .isEnabled = &prefs.blinkingAttributes,
   .visibleTime = &prefs.attributesVisibleTime,
-  .invisibleTime = &prefs.attributesInvisibleTime,
-  .initialState = 0
+  .invisibleTime = &prefs.attributesInvisibleTime
 };
 
 BlinkDescriptor uppercaseLettersBlinkDescriptor = {
   .name = "uppercase letters",
   .isEnabled = &prefs.blinkingCapitals,
   .visibleTime = &prefs.capitalsVisibleTime,
-  .invisibleTime = &prefs.capitalsInvisibleTime,
-  .initialState = 1
+  .invisibleTime = &prefs.capitalsInvisibleTime
 };
 
 BlinkDescriptor speechCursorBlinkDescriptor = {
   .name = "speech cursor",
   .isEnabled = &prefs.blinkingSpeechCursor,
   .visibleTime = &prefs.speechCursorVisibleTime,
-  .invisibleTime = &prefs.speechCursorInvisibleTime,
-  .initialState = 0
+  .invisibleTime = &prefs.speechCursorInvisibleTime
 };
 
 static BlinkDescriptor *const blinkDescriptors[] = {
@@ -75,17 +71,68 @@ static BlinkDescriptor *const blinkDescriptors[] = {
 };
 
 int
-isBlinkEnabled (const BlinkDescriptor *blink) {
-  return !!*blink->isEnabled;
-}
-
-int
 isBlinkVisible (const BlinkDescriptor *blink) {
-  if (!isBlinkEnabled(blink)) return 1;
+  if (!*blink->isEnabled) return 1;
   return blink->isVisible;
 }
 
-static void setBlinkAlarm (BlinkDescriptor *blink, int duration);
+static int
+getBlinkDuration (const BlinkDescriptor *blink) {
+  return PREFERENCES_TIME(blink->isVisible? *blink->visibleTime: *blink->invisibleTime);
+}
+
+void
+setBlinkState (BlinkDescriptor *blink, int visible) {
+  int changed = visible != blink->isVisible;
+
+  blink->isVisible = visible;
+
+  if (blink->alarmHandle) {
+    asyncResetAlarmIn(blink->alarmHandle, getBlinkDuration(blink));
+    if (changed) resetUpdateAlarm();
+  }
+}
+
+static void setBlinkAlarm (BlinkDescriptor *blink);
+
+static void
+handleBlinkAlarm (const AsyncAlarmResult *result) {
+  BlinkDescriptor *blink = result->data;
+
+  asyncDiscardHandle(blink->alarmHandle);
+  blink->alarmHandle = NULL;
+
+  blink->isVisible = !blink->isVisible;
+  setBlinkAlarm(blink);
+  resetUpdateAlarm();
+}
+
+static void
+setBlinkAlarm (BlinkDescriptor *blink) {
+  asyncSetAlarmIn(&blink->alarmHandle, getBlinkDuration(blink), handleBlinkAlarm, blink);
+}
+
+static void
+forEachBlinkDescriptor (void (*handleBlinkDescriptor) (BlinkDescriptor *blink)) {
+  BlinkDescriptor *const *blink = blinkDescriptors;
+
+  while (*blink) handleBlinkDescriptor(*blink++);
+}
+
+static void
+unrequireBlinkDescriptor (BlinkDescriptor *blink) {
+  blink->isRequired = 0;
+}
+
+void
+unrequireAllBlinkDescriptors (void) {
+  forEachBlinkDescriptor(unrequireBlinkDescriptor);
+}
+
+void
+requireBlinkDescriptor (BlinkDescriptor *blink) {
+  blink->isRequired = 1;
+}
 
 static void
 stopBlinkDescriptor (BlinkDescriptor *blink) {
@@ -96,61 +143,20 @@ stopBlinkDescriptor (BlinkDescriptor *blink) {
 }
 
 void
-setBlinkState (BlinkDescriptor *blink, int visible) {
-  int changed = visible != blink->isVisible;
-
-  blink->isVisible = visible;
-
-  if (isBlinkEnabled(blink)) {
-    unsigned char time = blink->isVisible? *blink->visibleTime: *blink->invisibleTime;
-
-    setBlinkAlarm(blink, PREFERENCES_TIME(time));
-    if (changed) resetUpdateAlarm(10);
-  } else {
-    stopBlinkDescriptor(blink);
-  }
+stopAllBlinkDescriptors (void) {
+  forEachBlinkDescriptor(stopBlinkDescriptor);
 }
 
 static void
-handleBlinkAlarm (const AsyncAlarmResult *result) {
-  BlinkDescriptor *blink = result->data;
-
-  asyncDiscardHandle(blink->alarmHandle);
-  blink->alarmHandle = NULL;
-
-  setBlinkState(blink, !blink->isVisible);
-}
-
-static void
-setBlinkAlarm (BlinkDescriptor *blink, int duration) {
-  if (blink->alarmHandle) {
-    asyncResetAlarmIn(blink->alarmHandle, duration);
-  } else {
-    asyncSetAlarmIn(&blink->alarmHandle, duration, handleBlinkAlarm, blink);
-  }
-}
-
-void
 resetBlinkDescriptor (BlinkDescriptor *blink) {
-  setBlinkState(blink, blink->initialState);
-}
-
-void
-resetBlinkDescriptors (void) {
-  BlinkDescriptor *const *blink = blinkDescriptors;
-
-  while (*blink) {
-    resetBlinkDescriptor(*blink);
-    blink += 1;
+  if (!(*blink->isEnabled && blink->isRequired)) {
+    stopBlinkDescriptor(blink);
+  } else if (!blink->alarmHandle) {
+    setBlinkAlarm(blink);
   }
 }
 
 void
-stopBlinkDescriptors (void) {
-  BlinkDescriptor *const *blink = blinkDescriptors;
-
-  while (*blink) {
-    stopBlinkDescriptor(*blink);
-    blink += 1;
-  }
+resetAllBlinkDescriptors (void) {
+  forEachBlinkDescriptor(resetBlinkDescriptor);
 }

@@ -25,7 +25,6 @@
 #include "cmd_learn.h"
 #include "parse.h"
 #include "prefs.h"
-#include "blink.h"
 #include "tunes.h"
 #include "routing.h"
 #include "clipboard.h"
@@ -851,24 +850,18 @@ handleNavigationCommand (int command, void *datga) {
       }
       break;
     case BRL_CMD_CSRBLINK:
-      if (toggleFeatureSetting(&prefs.blinkingCursor, command)) {
-        resetBlinkDescriptor(&screenCursorBlinkDescriptor);
-      }
+      toggleFeatureSetting(&prefs.blinkingCursor, command);
       break;
 
     case BRL_CMD_ATTRVIS:
       toggleFeatureSetting(&prefs.showAttributes, command);
       break;
     case BRL_CMD_ATTRBLINK:
-      if (toggleFeatureSetting(&prefs.blinkingAttributes, command)) {
-        resetBlinkDescriptor(&attributesUnderlineBlinkDescriptor);
-      }
+      toggleFeatureSetting(&prefs.blinkingAttributes, command);
       break;
 
     case BRL_CMD_CAPBLINK:
-      if (toggleFeatureSetting(&prefs.blinkingCapitals, command)) {
-        resetBlinkDescriptor(&uppercaseLettersBlinkDescriptor);
-      }
+      toggleFeatureSetting(&prefs.blinkingCapitals, command);
       break;
 
     case BRL_CMD_SKPIDLNS:
@@ -986,7 +979,6 @@ handleNavigationCommand (int command, void *datga) {
         setPreferences(&savedPreferences);
         message(modeString_preferences, gettext("changes discarded"), 0);
       } else if (loadPreferences()) {
-        resetBlinkDescriptors();
         playTune(&tune_command_done);
       } else {
         playTune(&tune_command_rejected);

@@ -29,13 +29,14 @@ extern BlinkDescriptor attributesUnderlineBlinkDescriptor;
 extern BlinkDescriptor uppercaseLettersBlinkDescriptor;
 extern BlinkDescriptor speechCursorBlinkDescriptor;
 
-extern int isBlinkEnabled (const BlinkDescriptor *blink);
 extern int isBlinkVisible (const BlinkDescriptor *blink);
 extern void setBlinkState (BlinkDescriptor *blink, int visible);
 
-extern void resetBlinkDescriptor (BlinkDescriptor *blink);
-extern void resetBlinkDescriptors (void);
-extern void stopBlinkDescriptors (void);
+extern void unrequireAllBlinkDescriptors (void);
+extern void requireBlinkDescriptor (BlinkDescriptor *blink);
+
+extern void resetAllBlinkDescriptors (void);
+extern void stopAllBlinkDescriptors (void);
 
 #ifdef __cplusplus
 }

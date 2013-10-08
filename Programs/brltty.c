@@ -125,7 +125,7 @@ executeCommand (int command) {
   int handled = handleCommand(command);
 
   if (handled) {
-    resetUpdateAlarm(10);
+    resetUpdateAlarm();
   }
 
   if ((ses->winx != oldmotx) || (ses->winy != oldmoty)) {
@@ -1188,7 +1188,6 @@ static const unsigned char cursorStyles[] = {
 
 unsigned char
 getCursorDots (void) {
-  if (!isBlinkVisible(&screenCursorBlinkDescriptor)) return 0;
   return cursorStyles[prefs.cursorStyle];
 }
 
@@ -1229,11 +1228,6 @@ showCursor (void) {
   return scr.cursor && prefs.showCursor && !ses->hideCursor;
 }
 
-static inline int
-showAttributesUnderline (void) {
-  return prefs.showAttributes && isBlinkVisible(&attributesUnderlineBlinkDescriptor);
-}
-
 static void
 overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
   unsigned char dots;
@@ -1255,7 +1249,12 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
       break;
   }
 
-  *cell |= dots;
+  {
+    BlinkDescriptor *blink = &attributesUnderlineBlinkDescriptor;
+
+    requireBlinkDescriptor(blink);
+    if (isBlinkVisible(blink)) *cell |= dots;
+  }
 }
 
 int
@@ -1619,8 +1618,8 @@ setUpdateTime (int delay) {
 }
 
 void
-resetUpdateAlarm (int delay) {
-  setUpdateTime(delay);
+resetUpdateAlarm (void) {
+  setUpdateTime(10);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
 }
 
@@ -1631,6 +1630,8 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   setUpdateTime(updateInterval);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
+
+  unrequireAllBlinkDescriptors();
 
 #ifdef ENABLE_SPEECH_SUPPORT
   speech->doTrack(&spk);
@@ -1725,16 +1726,16 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
     if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
       if (!pointerMoved) highlightWindow();
 
-      if (prefs.showAttributes && prefs.blinkingAttributes) {
-        /* Attributes are blinking.
-           We could check to see if we changed screen, but that doesn't
-           really matter... this is mainly for when you are hunting up/down
-           for the line with attributes. */
-        setBlinkState(&attributesUnderlineBlinkDescriptor, 1);
-        /* problem: this still doesn't help when the braille window is
-           stationnary and the attributes themselves are moving
-           (example: tin). */
-      }
+      /* Attributes are blinking.
+       * We could check to see if we changed screen, but that doesn't
+       * really matter... this is mainly for when you are hunting up/down
+       * for the line with attributes.
+       */
+      setBlinkState(&attributesUnderlineBlinkDescriptor, 1);
+      /* problem: this still doesn't help when the braille window is
+       * stationnary and the attributes themselves are moving
+       * (example: tin).
+       */
 
       if ((ses->spky < ses->winy) || (ses->spky >= (ses->winy + brl.textRows))) ses->spky = ses->winy;
       if ((ses->spkx < ses->winx) || (ses->spkx >= (ses->winx + textCount))) ses->spkx = ses->winx;
@@ -1824,7 +1825,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
             contractedTrack = 0;
             isContracted = 1;
 
-            if (ses->displayMode || showAttributesUnderline()) {
+            if (ses->displayMode || prefs.showAttributes) {
               int inputOffset;
               int outputOffset = 0;
               unsigned char attributes = 0;
@@ -1832,12 +1833,15 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
               for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
                 int offset = contractedOffsets[inputOffset];
+
                 if (offset != CTB_NO_OFFSET) {
                   while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
                   attributes = 0;
                 }
+
                 attributes |= inputCharacters[inputOffset].attributes;
               }
+
               while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
 
               if (ses->displayMode) {
@@ -1845,8 +1849,9 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
                   outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
                 }
               } else {
-                int i;
-                for (i=0; i<outputLength; ++i) {
+                unsigned int i;
+
+                for (i=0; i<outputLength; i+=1) {
                   overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
                 }
               }
@@ -1885,15 +1890,6 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
             }
           }
 
-          /* blank out capital letters if they're blinking and should be off */
-          if (!isBlinkVisible(&uppercaseLettersBlinkDescriptor)) {
-            unsigned int i;
-            for (i=0; i<textCount*brl.textRows; i+=1) {
-              ScreenCharacter *character = &characters[i];
-              if (iswupper(character->text)) character->text = WC_C(' ');
-            }
-          }
-
           /* convert to dots using the current translation table */
           if (ses->displayMode) {
             int row;
@@ -1910,23 +1906,30 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
               }
             }
           } else {
-            int underline = showAttributesUnderline();
-            int row;
+            unsigned int row;
 
             for (row=0; row<brl.textRows; row+=1) {
               const ScreenCharacter *source = &characters[row * textCount];
               unsigned int start = (row * brl.textColumns) + textStart;
               unsigned char *target = &brl.buffer[start];
               wchar_t *text = &textBuffer[start];
-              int column;
+              unsigned int column;
 
               for (column=0; column<textCount; column+=1) {
                 const ScreenCharacter *character = &source[column];
                 unsigned char *dots = &target[column];
 
                 *dots = convertCharacterToDots(textTable, character->text);
+
+                if (iswupper(character->text)) {
+                  BlinkDescriptor *blink = &uppercaseLettersBlinkDescriptor;
+
+                  requireBlinkDescriptor(blink);
+                  if (!isBlinkVisible(blink)) *dots = 0;
+                }
+
                 if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
-                if (underline) overlayAttributesUnderline(dots, character->attributes);
+                if (prefs.showAttributes) overlayAttributesUnderline(dots, character->attributes);
 
                 text[column] = character->text;
               }
@@ -1936,16 +1939,24 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
         if ((brl.cursor = getCursorPosition(scr.posx, scr.posy)) >= 0) {
           if (showCursor()) {
-            brl.buffer[brl.cursor] |= getCursorDots();
+            BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
+
+            requireBlinkDescriptor(blink);
+            if (isBlinkVisible(blink)) brl.buffer[brl.cursor] |= getCursorDots();
           }
         }
 
-        if (prefs.showSpeechCursor && isBlinkVisible(&speechCursorBlinkDescriptor)) {
+        if (prefs.showSpeechCursor) {
           int position = getCursorPosition(ses->spkx, ses->spky);
 
-          if (position >= 0)
-            if (position != brl.cursor)
-              brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
+          if (position >= 0) {
+            if (position != brl.cursor) {
+              BlinkDescriptor *blink = &speechCursorBlinkDescriptor;
+
+              requireBlinkDescriptor(blink);
+              if (isBlinkVisible(blink)) brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
+            }
+          }
         }
 
         if (statusCount > 0) {
@@ -1976,6 +1987,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
   processSpeechInput(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+  resetAllBlinkDescriptors();
   drainBrailleOutput(&brl, 0);
   setUpdateAlarm(result->data);
 }
