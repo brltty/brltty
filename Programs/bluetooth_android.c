@@ -29,6 +29,7 @@
 struct BluetoothConnectionExtensionStruct {
   JNIEnv *env;
   jobject connection;
+  AsyncHandle inputMonitor;
   int inputPipe[2];
 };
 
@@ -84,6 +85,11 @@ bthNewConnectionExtension (uint64_t bda) {
 
 void
 bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+  if (bcx->inputMonitor) {
+    asyncCancelRequest(bcx->inputMonitor);
+    bcx->inputMonitor = NULL;
+  }
+
   if (bcx->connection) {
     if (findJavaInstanceMethod(bcx->env, &closeMethod, connectionClass, "close",
                                JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
@@ -143,7 +149,9 @@ bthDiscoverChannel (
 
 int
 bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
-  return 0;
+  BluetoothConnectionExtension *bcx = connection->extension;
+
+  return asyncMonitorFileInput(&bcx->inputMonitor, bcx->inputPipe[0], callback, data);
 }
 
 int
