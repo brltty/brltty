@@ -172,8 +172,6 @@ brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
 
 static int
 resizeBrailleBuffer (BrailleDisplay *brl, int resized, int infoLevel) {
-  if ((brl->noDisplay = !brl->textColumns)) brl->textColumns = 1;
-
   if (brl->resizeRequired) {
     brl->resizeRequired = 0;
     resized = 1;
@@ -199,6 +197,7 @@ resizeBrailleBuffer (BrailleDisplay *brl, int resized, int infoLevel) {
 int
 ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
   brl->resizeRequired = brl->isCoreBuffer = !brl->buffer;
+  if ((brl->noDisplay = !brl->textColumns)) brl->textColumns = 1;
   return resizeBrailleBuffer(brl, 1, infoLevel);
 }
 
