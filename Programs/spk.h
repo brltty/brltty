@@ -86,9 +86,6 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern int enableSpeechInput (const char *name);
-extern void processSpeechInput (SpeechSynthesizer *spk);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

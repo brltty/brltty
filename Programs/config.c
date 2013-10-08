@@ -32,6 +32,7 @@
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
+#include "spk_input.h"
 #include "scr.h"
 #include "status.h"
 #include "blink.h"

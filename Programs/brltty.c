@@ -70,6 +70,7 @@
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
+#include "spk_input.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
