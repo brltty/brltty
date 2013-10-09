@@ -47,7 +47,6 @@
 #include "cmd_speech.h"
 #include "timing.h"
 #include "async_alarm.h"
-#include "async_call.h"
 #include "async_wait.h"
 #include "message.h"
 #include "tunes.h"
@@ -1604,7 +1603,7 @@ doAutospeak (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static int
+int
 canBraille (void) {
   return braille && brl.buffer && !brl.noDisplay && !isSuspended;
 }
@@ -2138,144 +2137,6 @@ brlttyUpdate (void) {
   }
 
   return 1;
-}
-
-typedef struct {
-  unsigned endWait:1;
-} MessageData;
-
-static int
-testEndMessageWait (void *data) {
-  MessageData *mgd = data;
-
-  return mgd->endWait;
-}
-
-static int
-handleMessageCommand (int command, void *data) {
-  MessageData *mgd = data;
-
-  mgd->endWait = 1;
-  return 1;
-}
-
-typedef struct {
-  const char *mode;
-  MessageOptions options;
-  unsigned presented:1;
-  char text[0];
-} MessageParameters;
-
-static void
-presentMessage (void *data) {
-  MessageParameters *mgp = data;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  if (!(mgp->options & MSG_SILENT)) {
-    if (autospeak()) {
-      sayString(&spk, mgp->text, 1);
-    }
-  }
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-  if (canBraille()) {
-    MessageData mgd;
-
-    size_t size = textCount * brl.textRows;
-    wchar_t buffer[size];
-
-    size_t length = getTextLength(mgp->text);
-    wchar_t characters[length + 1];
-    const wchar_t *character = characters;
-    int apiWasStarted = apiStarted;
-
-    apiUnlink();
-    apiStarted = 0;
-
-    convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
-    suspendUpdates();
-    pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &mgd);
-
-    while (length) {
-      size_t count;
-
-      /* strip leading spaces */
-      while (iswspace(*character)) {
-        character += 1;
-        length -= 1;
-      }
-
-      if (length <= size) {
-        count = length; /* the whole message fits in the braille window */
-      } else {
-        /* split the message across multiple windows on space characters */
-        for (count=size-2; count>0 && iswspace(characters[count]); count-=1);
-        count = count? count+1: size-1;
-      }
-
-      wmemcpy(buffer, character, count);
-      character += count;
-
-      if (length -= count) {
-        while (count < size) buffer[count++] = WC_C('-');
-        buffer[count - 1] = WC_C('>');
-      }
-
-      if (!writeBrailleCharacters(mgp->mode, buffer, count)) {
-        mgp->presented = 0;
-        break;
-      }
-
-      {
-        int delay = messageDelay - brl.writeDelay;
-
-        mgd.endWait = 0;
-        drainBrailleOutput(&brl, 0);
-
-        if (length || !(mgp->options & MSG_NODELAY)) {
-          if (delay < 0) delay = 0;
-
-          while (!asyncAwaitCondition(delay, testEndMessageWait, &mgd)) {
-            if (!(mgp->options & MSG_WAITKEY)) break;
-          }
-        }
-      }
-    }
-
-    popCommandHandler();
-    resumeUpdates();
-
-    apiStarted = apiWasStarted;
-    apiLink();
-  }
-
-  free(mgp);
-}
-
-int 
-message (const char *mode, const char *text, MessageOptions options) {
-  int presented = 0;
-  MessageParameters *mgp;
-  size_t size = sizeof(*mgp) + strlen(text);
-
-  if ((mgp = malloc(size))) {
-    memset(mgp, 0, size);
-    mgp->mode = mode? mode: "";
-    mgp->options = options;
-    mgp->presented = 1;
-    strcpy(mgp->text, text);
-
-    if (mgp->options & MSG_SYNC) {
-      presentMessage(mgp);
-      if (mgp->presented) presented = 1;
-    } else if (asyncCallFunction(NULL, presentMessage, mgp)) {
-      return 1;
-    }
-
-    free(mgp);
-  }
-
-  return presented;
 }
 
 int

@@ -91,6 +91,7 @@ extern int toggleFeatureSetting (unsigned char *setting, int command);
 
 extern unsigned char infoMode;
 
+extern int canBraille (void);
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
 extern int writeBrailleText (const char *mode, const char *text);
 extern int showBrailleText (const char *mode, const char *text, int minimumDelay);
