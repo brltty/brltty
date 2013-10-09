@@ -1707,7 +1707,7 @@ handleCallFunctionEvent (void *eventData, void *signalData) {
 }
 
 AsyncEvent *
-newCallFunctionEvent (void) {
+asyncNewCallFunctionEvent (void) {
   return asyncNewEvent(handleCallFunctionEvent, NULL);
 }
 

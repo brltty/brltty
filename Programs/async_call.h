@@ -33,7 +33,7 @@ extern int asyncCallFunction (
   AsyncFunction *function, void *data
 );
 
-extern AsyncEvent *newCallFunctionEvent (void);
+extern AsyncEvent *asyncNewCallFunctionEvent (void);
 
 #ifdef __cplusplus
 }
