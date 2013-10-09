@@ -77,9 +77,9 @@ extern "C" {
 #define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for on, 0 for off */
 #define DEFAULT_HIGHLIGHT_WINDOW 0		/* 1 for on, 0 for off */
 
+#define DEFAULT_LONG_PRESS_TIME 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT 1		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */
-#define DEFAULT_AUTOREPEAT_DELAY 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 
 #define DEFAULT_BRAILLE_SENSITIVITY BRL_SENSITIVITY_MEDIUM

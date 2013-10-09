@@ -634,6 +634,11 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
+      NAME(strtext("Long Press Time"));
+      ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
+    }
+
+    {
       NAME(strtext("Autorepeat"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeat, &itemName));
     }
@@ -641,12 +646,6 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Autorepeat Panning"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
-      TEST(Autorepeat);
-    }
-
-    {
-      NAME(strtext("Autorepeat Delay"));
-      ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatDelay, &itemName));
       TEST(Autorepeat);
     }
 

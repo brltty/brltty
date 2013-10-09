@@ -438,7 +438,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
             table->longPress.command = command;
             if ((table->longPress.pending = pending)) command = BRL_CMD_NOOP;
             table->longPress.repeat = repeat;
-            setLongPressAlarm(table, prefs.autorepeatDelay);
+            setLongPressAlarm(table, prefs.longPressTime);
           }
         }
 

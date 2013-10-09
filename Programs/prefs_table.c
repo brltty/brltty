@@ -284,6 +284,11 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.highlightWindow
   },
 
+  { .name = "long-press-time",
+    .defaultValue = DEFAULT_LONG_PRESS_TIME,
+    .setting = &prefs.longPressTime
+  },
+
   { .name = "autorepeat",
     .defaultValue = DEFAULT_AUTOREPEAT,
     .settingNames = &preferenceStringTable_boolean,
@@ -294,11 +299,6 @@ const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.autorepeatPanning
-  },
-
-  { .name = "autorepeat-delay",
-    .defaultValue = DEFAULT_AUTOREPEAT_DELAY,
-    .setting = &prefs.autorepeatDelay
   },
 
   { .name = "autorepeat-interval",

@@ -309,7 +309,7 @@ loadPreferencesFile (const char *path) {
       if (prefs.version == 2) {
         prefs.version += 1;
         prefs.autorepeat = DEFAULT_AUTOREPEAT;
-        prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+        prefs.longPressTime = DEFAULT_LONG_PRESS_TIME;
         prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
         prefs.cursorVisibleTime *= 4;
         prefs.cursorInvisibleTime *= 4;

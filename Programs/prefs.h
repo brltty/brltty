@@ -112,7 +112,7 @@ typedef struct {
   unsigned char blinkingCursor;
   unsigned char autorepeat;
   unsigned char blinkingCapitals;
-  unsigned char autorepeatDelay;
+  unsigned char longPressTime;
   unsigned char blinkingAttributes;
   unsigned char autorepeatInterval;
   unsigned char cursorStyle;
