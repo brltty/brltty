@@ -76,7 +76,7 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 int
-message (const char *mode, const char *text, short flags) {
+message (const char *mode, const char *text, MessageOptions options) {
   size_t size = brl.textColumns * brl.textRows;
   wchar_t buffer[size];
 

@@ -23,17 +23,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* message.h - send a message to Braille and speech */
+typedef enum {
+  MSG_SILENT  = 0X1, /* don't speak the message */
+  MSG_WAITKEY = 0X2, /* wait for a key press before scrolling or dismissing the message */
+  MSG_NODELAY = 0X4, /* don't wait */
+  MSG_SYNC    = 0X8  /* run synchronously */
+} MessageOptions;
 
-/* Prototype: */
-extern int message (const char *mode, const char *text, short flags);
-
-
-/* Flags for the second argument: */
-#define MSG_SILENT 1		/* Prevent output to speech */
-#define MSG_WAITKEY 2		/* Wait for a key after the message is displayed */
-#define MSG_NODELAY 4 /* message now automatically delays for DISPDEL ms,
-			 unless this flag is set. */
+extern int message (const char *mode, const char *text, MessageOptions options);
 
 #ifdef __cplusplus
 }

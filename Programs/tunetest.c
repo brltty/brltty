@@ -271,7 +271,7 @@ main (int argc, char *argv[]) {
 }
 
 int
-message (const char *mode, const char *text, short flags) {
+message (const char *mode, const char *text, MessageOptions options) {
   return 1;
 }
 int
