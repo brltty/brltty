@@ -28,24 +28,64 @@
 #include "spk_input.h"
 #include "async_io.h"
 #include "file.h"
-#include "program.h"
 #include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static char *speechInputPath;
-static FileDescriptor speechInputPipe;
-static AsyncHandle speechInputMonitor;
+static char *pipePath;
+static FileDescriptor pipeDescriptor;
+static AsyncHandle inputMonitor;
+
+static void
+initializePipePath (void) {
+  pipePath = NULL;
+}
+
+static void
+deallocatePipePath (void) {
+  if (pipePath) free(pipePath);
+  initializePipePath();
+}
+
+static void
+removePipe (void) {
+  if (pipePath) unlink(pipePath);
+}
+
+static void
+initializePipeDescriptor (void) {
+  pipeDescriptor = INVALID_FILE_DESCRIPTOR;
+}
+
+static void
+closePipeDescriptor (void) {
+  if (pipeDescriptor != INVALID_FILE_DESCRIPTOR) closeFileDescriptor(pipeDescriptor);
+  initializePipeDescriptor();
+}
+
+static void
+initializeInputMonitor (void) {
+  inputMonitor = NULL;
+}
+
+static void
+stopInputMonitor (void) {
+  if (inputMonitor) asyncCancelRequest(inputMonitor);
+  initializeInputMonitor();
+}
 
 static size_t
-monitorSpeechInput (const AsyncInputResult *result) {
-  sayCharacters(&spk, result->buffer, result->length, 0);
-  return result->length;
+monitorInput (const AsyncInputResult *result) {
+  const char *buffer = result->buffer;
+  size_t length = result->length;
+
+  sayCharacters(&spk, buffer, length, 0);
+  return length;
 }
 
 static int
-startSpeechInputMonitor (void) {
-  if (!speechInputMonitor) {
-    if (!asyncReadFile(&speechInputMonitor, speechInputPipe, 0x1000, monitorSpeechInput, NULL)) {
+startInputMonitor (void) {
+  if (!inputMonitor) {
+    if (!asyncReadFile(&inputMonitor, pipeDescriptor, 0x1000, monitorInput, NULL)) {
       return 0;
     }
   }
@@ -53,25 +93,18 @@ startSpeechInputMonitor (void) {
   return 1;
 }
 
-static void
-stopSpeechInputMonitor (void) {
-  if (speechInputMonitor) {
-    asyncCancelRequest(speechInputMonitor);
-    speechInputMonitor = NULL;
-  }
-}
-
 #if defined(__MINGW32__)
-static HANDLE speechInputHandle = INVALID_HANDLE_VALUE;
 static int speechInputConnected;
 
 static int
-makeSpeechInputPipe (void) {
-  if ((speechInputHandle = CreateNamedPipe(speechInputPath, PIPE_ACCESS_INBOUND,
-                                           PIPE_TYPE_MESSAGE|PIPE_READMODE_MESSAGE|PIPE_NOWAIT,
-                                           1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
+createPipe (void) {
+  if ((pipeDescriptor = CreateNamedPipe(pipePath,
+                                        PIPE_ACCESS_INBOUND | PIPE_FLAG_OVERLAPPED,
+                                        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                        1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
     logMessage(LOG_DEBUG, "speech input pipe created: %s: handle=%u",
-               speechInputPath, (unsigned)speechInputHandle);
+               pipePath, (unsigned)pipeDescriptor);
+
     return 1;
   } else {
     logWindowsSystemError("CreateNamedPipe");
@@ -80,90 +113,90 @@ makeSpeechInputPipe (void) {
   return 0;
 }
 
+static int
+startMonitor (void) {
+  return 0;
+}
+
 #elif defined(S_ISFIFO)
 static int
-makeSpeechInputPipe (void) {
-  int result = mkfifo(speechInputPath, 0);
+createPipe (void) {
+  int result = mkfifo(pipePath, 0);
 
   if ((result == -1) && (errno == EEXIST)) {
     struct stat fifo;
 
-    if (lstat(speechInputPath, &fifo) == -1) {
+    if (lstat(pipePath, &fifo) == -1) {
       logMessage(LOG_ERR, "cannot stat speech input FIFO: %s: %s",
-                 speechInputPath, strerror(errno));
+                 pipePath, strerror(errno));
     } else if (S_ISFIFO(fifo.st_mode)) {
       result = 0;
     }
   }
 
   if (result != -1) {
-    if (chmod(speechInputPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
-      if ((speechInputPipe = open(speechInputPath, O_RDONLY|O_NONBLOCK)) != -1) {
-        if (startSpeechInputMonitor()) {
-          logMessage(LOG_DEBUG, "speech input FIFO created: %s: fd=%d",
-                     speechInputPath, speechInputPipe);
+    if (chmod(pipePath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
+      if ((pipeDescriptor = open(pipePath, O_RDONLY|O_NONBLOCK)) != -1) {
+        logMessage(LOG_DEBUG, "speech input FIFO created: %s: fd=%d",
+                   pipePath, pipeDescriptor);
 
-          return 1;
-        }
-
-        close(speechInputPipe);
-        speechInputPipe = INVALID_FILE_DESCRIPTOR;
+        return 1;
       } else {
         logMessage(LOG_ERR, "cannot open speech input FIFO: %s: %s",
-                   speechInputPath, strerror(errno));
+                   pipePath, strerror(errno));
       }
     } else {
       logMessage(LOG_ERR, "cannot set speech input FIFO permissions: %s: %s",
-                 speechInputPath, strerror(errno));
+                 pipePath, strerror(errno));
     }
 
-    unlink(speechInputPath);
+    removePipe();
   } else {
     logMessage(LOG_ERR, "cannot create speech input FIFO: %s: %s",
-               speechInputPath, strerror(errno));
+               pipePath, strerror(errno));
   }
 
   return 0;
+}
+
+static int
+startMonitor (void) {
+  return startInputMonitor();
 }
 
 #else /* speech input functions */
 #warning speech input not supported on this platform
 #endif /* speech input functions */
 
-static void
-exitSpeechInput (void *data) {
-  stopSpeechInputMonitor();
-
-  if (speechInputPipe != INVALID_FILE_DESCRIPTOR) {
-    closeFileDescriptor(speechInputPipe);
-    speechInputPipe = INVALID_FILE_DESCRIPTOR;
-  }
-
-  if (speechInputPath) {
-    unlink(speechInputPath);
-    free(speechInputPath);
-    speechInputPath = NULL;
-  }
-}
-
 int
-startSpeechInput (const char *name) {
+enableSpeechInput (const char *name) {
   const char *directory = getNamedPipeDirectory();
 
-  speechInputPath = NULL;
-  speechInputPipe = INVALID_FILE_DESCRIPTOR;
-  speechInputMonitor = NULL;
-  onProgramExit("speech-input", exitSpeechInput, NULL);
+  initializePipePath();
+  initializePipeDescriptor();
+  initializeInputMonitor();
 
-  if ((speechInputPath = makePath(directory, name))) {
-    if (makeSpeechInputPipe()) {
-      return 1;
+  if ((pipePath = makePath(directory, name))) {
+    if (createPipe()) {
+      if (startMonitor()) {
+        return 1;
+      }
+
+      closePipeDescriptor();
+      removePipe();
     }
 
-    free(speechInputPath);
-    speechInputPath = NULL;
+    deallocatePipePath();
   }
 
   return 0;
+}
+
+void
+disableSpeechInput (void) {
+  stopInputMonitor();
+  closePipeDescriptor();
+  removePipe();
+  deallocatePipePath();
 }
 #endif /* ENABLE_SPEECH_SUPPORT */

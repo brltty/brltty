@@ -1525,6 +1525,11 @@ exitSpeechDriver (void *data) {
   }
 }
 
+static void
+exitSpeechInput (void *data) {
+  disableSpeechInput();
+}
+
 int
 changeSpeechDriver (const char *driver) {
   char **newDrivers = splitString(driver, ',', NULL);
@@ -2205,7 +2210,10 @@ brlttyStart (int argc, char *argv[]) {
   logMessage(LOG_INFO, "%s: %s", gettext("Speech Input"),
              *opt_speechInput? opt_speechInput: gettext("none"));
   if (!opt_verify) {
-    if (*opt_speechInput) startSpeechInput(opt_speechInput);
+    if (*opt_speechInput) {
+      enableSpeechInput(opt_speechInput);
+      onProgramExit("speech-input", exitSpeechInput, NULL);
+    }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
