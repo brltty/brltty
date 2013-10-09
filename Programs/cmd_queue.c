@@ -179,9 +179,11 @@ dequeueCommand (Queue *queue) {
 }
 
 static void setCommandAlarm (void *data);
+static AsyncHandle commandAlarm = NULL;
 
 static void
 handleCommandAlarm (const AsyncAlarmResult *result) {
+  int reschedule = 0;
   Queue *queue = getCommandQueue(0);
 
   if (queue) {
@@ -194,13 +196,19 @@ handleCommandAlarm (const AsyncAlarmResult *result) {
       executeCommand(command);
     }
 
-    if (getQueueSize(queue) > 0) setCommandAlarm(result->data);
+    if (getQueueSize(queue) > 0) reschedule = 1;
   }
+
+  asyncDiscardHandle(commandAlarm);
+  commandAlarm = NULL;
+  if (reschedule) setCommandAlarm(result->data);
 }
 
 static void
 setCommandAlarm (void *data) {
-  asyncSetAlarmIn(NULL, 0, handleCommandAlarm, data);
+  if (!commandAlarm) {
+    asyncSetAlarmIn(&commandAlarm, 0, handleCommandAlarm, data);
+  }
 }
 
 int
