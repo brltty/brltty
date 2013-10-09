@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "async_call.h"
 #include "message.h"
 #include "menu_prefs.h"
 #include "scr.h"
@@ -107,6 +108,14 @@ typedef enum {
 static ActiveScreen activeScreens = 0;
 
 static void
+identifyScreen (void *data) {
+  char buffer[0X80];
+  size_t length = formatScreenTitle(buffer, sizeof(buffer));
+
+  if (length) message(NULL, buffer, 0);
+}
+
+static void
 setScreen (ActiveScreen which) {
   typedef struct {
     ActiveScreen which;
@@ -125,13 +134,9 @@ setScreen (ActiveScreen which) {
     if (which & entry->which) break;
     entry += 1;
   }
-  currentScreen = entry->screen;
 
-  {
-    char buffer[0X80];
-    size_t length = formatScreenTitle(buffer, sizeof(buffer));
-    if (length) message(NULL, buffer, 0);
-  }
+  currentScreen = entry->screen;
+  asyncCallFunction(identifyScreen, NULL);
 }
 
 static void
