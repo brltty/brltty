@@ -80,9 +80,10 @@ extern "C" {
 #ifndef __USE_W32_SOCKETS
 #define __USE_W32_SOCKETS
 #endif /* __USE_W32_SOCKETS */
-#endif /* __MINGW32__ */
 
 #include <ws2tcpip.h>
+#endif /* __MINGW32__ */
+
 #include <windows.h>
 #endif /* WINDOWS */
 
