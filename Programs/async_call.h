@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_ASYNC_CALL
 
 #include "async.h"
+#include "async_event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +28,12 @@ extern "C" {
 
 typedef void AsyncFunction (void *data);
 
-extern int asyncCallFunction (AsyncFunction *function, void *data);
+extern int asyncCallFunction (
+  AsyncEvent *event,
+  AsyncFunction *function, void *data
+);
+
+extern AsyncEvent *newCallFunctionEvent (void);
 
 #ifdef __cplusplus
 }

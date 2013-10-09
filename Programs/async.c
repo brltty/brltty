@@ -1696,46 +1696,44 @@ typedef struct {
 } CallFunctionData;
 
 static void
-handleCallFunctionEvent (void *eventData, void *signalData) {
-  CallFunctionData *cfd = signalData;
-
+callFunction (CallFunctionData *cfd) {
   if (cfd->function) cfd->function(cfd->data);
   free(cfd);
 }
 
-static AsyncEvent *
-createCallFunctionEvent (void *data) {
+static void
+handleCallFunctionEvent (void *eventData, void *signalData) {
+  callFunction(signalData);
+}
+
+AsyncEvent *
+newCallFunctionEvent (void) {
   return asyncNewEvent(handleCallFunctionEvent, NULL);
 }
 
-static AsyncEvent *
-getCallFunctionEvent (void) {
-  static AsyncEvent *event = NULL;
-
-  return asyncGetProgramEvent(&event, "call-function-event",
-                              createCallFunctionEvent, NULL);
+static void
+handleCallFunctionAlarm(const AsyncAlarmResult *result) {
+  callFunction(result->data);
 }
 
 int
-asyncCallFunction (AsyncFunction *function, void *data) {
-  AsyncEvent *event = getCallFunctionEvent();
+asyncCallFunction (AsyncEvent *event, AsyncFunction *function, void *data) {
+  CallFunctionData *cfd;
 
-  if (event) {
-    CallFunctionData *cfd;
+  if ((cfd = malloc(sizeof(*cfd)))) {
+    memset(cfd, 0, sizeof(*cfd));
+    cfd->function = function;
+    cfd->data = data;
 
-    if ((cfd = malloc(sizeof(*cfd)))) {
-      memset(cfd, 0, sizeof(*cfd));
-      cfd->function = function;
-      cfd->data = data;
-
-      if (asyncSignalEvent(event, cfd)) {
-        return 1;
-      }
-
-      free(cfd);
-    } else {
-      logMallocError();
+    if (event) {
+      if (asyncSignalEvent(event, cfd)) return 1;
+    } else if (asyncSetAlarmIn(NULL, 0, handleCallFunctionAlarm, cfd)) {
+      return 1;
     }
+
+    free(cfd);
+  } else {
+    logMallocError();
   }
 
   return 0;

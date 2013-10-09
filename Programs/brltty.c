@@ -2268,7 +2268,7 @@ message (const char *mode, const char *text, MessageOptions options) {
     if (mgp->options & MSG_SYNC) {
       presentMessage(mgp);
       if (mgp->presented) presented = 1;
-    } else if (asyncCallFunction(presentMessage, mgp)) {
+    } else if (asyncCallFunction(NULL, presentMessage, mgp)) {
       return 1;
     }
 
