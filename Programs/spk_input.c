@@ -166,6 +166,17 @@ startMonitor (void) {
 
 #else /* speech input functions */
 #warning speech input not supported on this platform
+
+static int
+createPipe (void) {
+  logUnsupportedFeature("speech input");
+  return 0;
+}
+
+static int
+startMonitor (void) {
+  return startInputMonitor();
+}
 #endif /* speech input functions */
 
 int
