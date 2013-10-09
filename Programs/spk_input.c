@@ -94,6 +94,8 @@ startInputMonitor (void) {
 }
 
 #if defined(__MINGW32__)
+#define startPipeMonitor startConnectionMonitor
+
 static int speechInputConnected;
 
 static int
@@ -114,7 +116,7 @@ createPipe (void) {
 }
 
 static int
-startMonitor (void) {
+startConnectionMonitor (void) {
   return 0;
 }
 
@@ -159,11 +161,6 @@ createPipe (void) {
   return 0;
 }
 
-static int
-startMonitor (void) {
-  return startInputMonitor();
-}
-
 #else /* speech input functions */
 #warning speech input not supported on this platform
 
@@ -172,12 +169,11 @@ createPipe (void) {
   logUnsupportedFeature("speech input");
   return 0;
 }
-
-static int
-startMonitor (void) {
-  return startInputMonitor();
-}
 #endif /* speech input functions */
+
+#ifndef startPipeMonitor
+#define startPipeMonitor startInputMonitor
+#endif /* startPipeMonitor */
 
 int
 enableSpeechInput (const char *name) {
@@ -189,7 +185,7 @@ enableSpeechInput (const char *name) {
 
   if ((pipePath = makePath(directory, name))) {
     if (createPipe()) {
-      if (startMonitor()) {
+      if (startPipeMonitor()) {
         return 1;
       }
 
