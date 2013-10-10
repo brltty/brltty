@@ -32,42 +32,40 @@
 #include "brltty.h"
 
 typedef enum {
-  LRN_CONTINUE,
-  LRN_TIMEOUT,
-  LRN_EXIT,
-  LRN_ERROR
-} LearnState;
+  LMS_CONTINUE,
+  LMS_TIMEOUT,
+  LMS_EXIT,
+  LMS_ERROR
+} LearnModeState;
 
 typedef struct {
   const char *mode;
-  int timeout;
-
-  LearnState state;
-} LearnData;
+  LearnModeState state;
+} LearnModeData;
 
 static int
 testEndLearnWait (void *data) {
-  LearnData *lrn = data;
+  LearnModeData *lmd = data;
 
-  return lrn->state != LRN_TIMEOUT;
+  return lmd->state != LMS_TIMEOUT;
 }
 
 static int
 handleLearnCommand (int command, void *data) {
-  LearnData *lrn = data;
+  LearnModeData *lmd = data;
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
 
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_LEARN:
-      lrn->state = LRN_EXIT;
+      lmd->state = LMS_EXIT;
       return 1;
 
     case BRL_CMD_NOOP:
-      lrn->state = LRN_CONTINUE;
+      lmd->state = LMS_CONTINUE;
       return 1;
 
     default:
-      lrn->state = LRN_CONTINUE;
+      lmd->state = LMS_CONTINUE;
       break;
   }
 
@@ -76,30 +74,39 @@ handleLearnCommand (int command, void *data) {
 
     describeCommand(command, buffer, sizeof(buffer),
                     CDO_IncludeName | CDO_IncludeOperand);
+
     logMessage(LOG_DEBUG, "learn: %s", buffer);
-    if (!message(lrn->mode, buffer, MSG_NODELAY)) lrn->state = LRN_ERROR;
+    if (!message(lmd->mode, buffer, MSG_SYNC|MSG_NODELAY)) lmd->state = LMS_ERROR;
   }
 
   return 1;
 }
 
+typedef struct {
+  int timeout;
+} LearnModeParameters;
+
 static void
 presentLearnMode (void *data) {
-  LearnData *lrn = data;
+  LearnModeParameters *lmp = data;
+
+  LearnModeData lmd = {
+    .mode = "lrn"
+  };
 
   suspendUpdates();
-  pushCommandHandler(KTB_CTX_DEFAULT, handleLearnCommand, lrn);
+  pushCommandHandler(KTB_CTX_DEFAULT, handleLearnCommand, &lmd);
 
-  if (setStatusText(&brl, lrn->mode)) {
-    if (message(lrn->mode, gettext("Learn Mode"), MSG_NODELAY|MSG_SYNC)) {
+  if (setStatusText(&brl, lmd.mode)) {
+    if (message(lmd.mode, gettext("Learn Mode"), MSG_SYNC|MSG_NODELAY)) {
       do {
-        lrn->state = LRN_TIMEOUT;
-        if (!asyncAwaitCondition(lrn->timeout, testEndLearnWait, lrn)) break;
-      } while (lrn->state == LRN_CONTINUE);
+        lmd.state = LMS_TIMEOUT;
+        if (!asyncAwaitCondition(lmp->timeout, testEndLearnWait, &lmd)) break;
+      } while (lmd.state == LMS_CONTINUE);
 
-      if (lrn->state == LRN_TIMEOUT) {
-        if (!message(lrn->mode, gettext("done"), 0)) {
-          lrn->state = LRN_ERROR;
+      if (lmd.state == LMS_TIMEOUT) {
+        if (!message(lmd.mode, gettext("done"), MSG_SYNC)) {
+          lmd.state = LMS_ERROR;
         }
       }
     }
@@ -107,23 +114,22 @@ presentLearnMode (void *data) {
 
   popCommandHandler();
   resumeUpdates();
-  free(lrn);
+  free(lmp);
 }
 
 int
 learnMode (int timeout) {
-  LearnData *lrn;
+  LearnModeParameters *lmp;
 
-  if ((lrn = malloc(sizeof(*lrn)))) {
-    memset(lrn, 0, sizeof(*lrn));
-    lrn->mode = "lrn";
-    lrn->timeout = timeout;
+  if ((lmp = malloc(sizeof(*lmp)))) {
+    memset(lmp, 0, sizeof(*lmp));
+    lmp->timeout = timeout;
 
-    if (asyncCallFunction(NULL, presentLearnMode, lrn)) {
+    if (asyncCallFunction(NULL, presentLearnMode, lmp)) {
       return 1;
     }
 
-    free(lrn);
+    free(lmp);
   } else {
     logMallocError();
   }
