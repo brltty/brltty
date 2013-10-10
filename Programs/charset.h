@@ -19,11 +19,13 @@
 #ifndef BRLTTY_INCLUDED_CHARSET
 #define BRLTTY_INCLUDED_CHARSET
 
+#include <stdio.h>
+
+#include "lock.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "lock.h"
 
 extern const char *setCharset (const char *name);
 extern const char *getCharset (void);
