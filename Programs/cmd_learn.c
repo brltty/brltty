@@ -18,8 +18,11 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "message.h"
+#include "async_call.h"
 #include "async_wait.h"
 #include "ktbdefs.h"
 #include "cmd_queue.h"
@@ -37,6 +40,8 @@ typedef enum {
 
 typedef struct {
   const char *mode;
+  int timeout;
+
   LearnState state;
 } LearnData;
 
@@ -78,37 +83,50 @@ handleLearnCommand (int command, void *data) {
   return 1;
 }
 
-int
-learnMode (int timeout) {
-  int ok = 0;
-  const char *mode = "lrn";
-
-  LearnData lrn = {
-    .mode = mode,
-  };
+static void
+presentLearnMode (void *data) {
+  LearnData *lrn = data;
 
   suspendUpdates();
-  pushCommandHandler(KTB_CTX_DEFAULT, handleLearnCommand, &lrn);
+  pushCommandHandler(KTB_CTX_DEFAULT, handleLearnCommand, lrn);
 
-  if (setStatusText(&brl, mode)) {
-    if (message(mode, gettext("Learn Mode"), MSG_NODELAY)) {
+  if (setStatusText(&brl, lrn->mode)) {
+    if (message(lrn->mode, gettext("Learn Mode"), MSG_NODELAY|MSG_SYNC)) {
       do {
-        lrn.state = LRN_TIMEOUT;
-        if (!asyncAwaitCondition(timeout, testEndLearnWait, &lrn)) break;
-      } while (lrn.state == LRN_CONTINUE);
+        lrn->state = LRN_TIMEOUT;
+        if (!asyncAwaitCondition(lrn->timeout, testEndLearnWait, lrn)) break;
+      } while (lrn->state == LRN_CONTINUE);
 
-      if (lrn.state == LRN_TIMEOUT) {
-        if (!message(mode, gettext("done"), 0)) {
-          lrn.state = LRN_ERROR;
+      if (lrn->state == LRN_TIMEOUT) {
+        if (!message(lrn->mode, gettext("done"), 0)) {
+          lrn->state = LRN_ERROR;
         }
       }
-
-      if (lrn.state != LRN_ERROR) ok = 1;
     }
   }
 
   popCommandHandler();
   resumeUpdates();
+  free(lrn);
+}
 
-  return ok;
+int
+learnMode (int timeout) {
+  LearnData *lrn;
+
+  if ((lrn = malloc(sizeof(*lrn)))) {
+    memset(lrn, 0, sizeof(*lrn));
+    lrn->mode = "lrn";
+    lrn->timeout = timeout;
+
+    if (asyncCallFunction(NULL, presentLearnMode, lrn)) {
+      return 1;
+    }
+
+    free(lrn);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
