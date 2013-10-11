@@ -30,7 +30,9 @@ BLUETOOTH_NAME_DRIVERS(BaumSuperVario, "bm");
 BLUETOOTH_NAME_DRIVERS(BaumSVario, "bm");
 BLUETOOTH_NAME_DRIVERS(BrailleConnect, "bm");
 BLUETOOTH_NAME_DRIVERS(BrailleEdge, "hm");
-BLUETOOTH_NAME_DRIVERS(BrailleMemo, "mm");
+BLUETOOTH_NAME_DRIVERS(BrailleMemoPocket, "mm");
+BLUETOOTH_NAME_DRIVERS(BrailleMemoSmart, "mm");
+BLUETOOTH_NAME_DRIVERS(BrailleMemo32, "mm");
 BLUETOOTH_NAME_DRIVERS(BrailleSense, "hm");
 BLUETOOTH_NAME_DRIVERS(BrailleStar, "ht");
 BLUETOOTH_NAME_DRIVERS(BrailliantBI, "hw");
@@ -82,7 +84,15 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   },
 
   { .namePrefix = "BMpk",
-    .driverCodes = bluetoothNameDrivers_BrailleMemo
+    .driverCodes = bluetoothNameDrivers_BrailleMemoPocket
+  },
+
+  { .namePrefix = "BMsmart",
+    .driverCodes = bluetoothNameDrivers_BrailleMemoSmart
+  },
+
+  { .namePrefix = "BM32",
+    .driverCodes = bluetoothNameDrivers_BrailleMemo32
   },
 
   { .namePrefix = "BrailleSense",
