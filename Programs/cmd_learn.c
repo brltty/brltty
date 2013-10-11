@@ -22,7 +22,7 @@
 
 #include "log.h"
 #include "message.h"
-#include "async_call.h"
+#include "async_task.h"
 #include "async_wait.h"
 #include "ktbdefs.h"
 #include "cmd_queue.h"
@@ -125,7 +125,7 @@ learnMode (int timeout) {
     memset(lmp, 0, sizeof(*lmp));
     lmp->timeout = timeout;
 
-    if (asyncCallFunction(NULL, presentLearnMode, lmp)) {
+    if (asyncAddTask(NULL, presentLearnMode, lmp)) {
       return 1;
     }
 

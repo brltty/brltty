@@ -69,7 +69,6 @@ typedef struct {
 #endif /* monitor definitions */
 
 #include "log.h"
-#include "program.h"
 #include "queue.h"
 #include "timing.h"
 #include "file.h"
@@ -77,9 +76,9 @@ typedef struct {
 #include "async.h"
 #include "async_io.h"
 #include "async_alarm.h"
-#include "async_wait.h"
 #include "async_event.h"
-#include "async_call.h"
+#include "async_task.h"
+#include "async_wait.h"
 #include "async_tsd.h"
 
 struct AsyncHandleStruct {
@@ -530,6 +529,7 @@ finishUnixWrite (OperationEntry *operation) {
 static void
 deallocateFunctionEntry (void *item, void *data) {
   FunctionEntry *function = item;
+
   if (function->operations) deallocateQueue(function->operations);
   if (function->methods->endFunction) function->methods->endFunction(function);
   free(function);
@@ -688,7 +688,7 @@ testFunctionMonitor (void *item, void *data) {
 }
 
 static void
-awaitNextOperation (long int timeout) {
+awaitNextOperation (AsyncThreadSpecificData *tsd, long int timeout) {
   Queue *functions = getFunctionQueue(0);
   unsigned int functionCount = functions? getQueueSize(functions): 0;
 
@@ -1375,6 +1375,7 @@ typedef struct {
 static void
 deallocateAlarmEntry (void *item, void *data) {
   AlarmEntry *alarm = item;
+
   free(alarm);
 }
 
@@ -1486,64 +1487,6 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
   TimeValue time;
   getRelativeTime(&time, interval);
   return asyncResetAlarmTo(handle, &time);
-}
-
-static void
-awaitNextResponse (long int timeout) {
-  {
-    Queue *alarms = getAlarmQueue(0);
-
-    if (alarms) {
-      Element *element = getQueueHead(alarms);
-
-      if (element) {
-        AlarmEntry *alarm = getElementItem(element);
-        TimeValue now;
-        long int milliseconds;
-
-        getCurrentTime(&now);
-        milliseconds = millisecondsBetween(&now, &alarm->time);
-
-        if (milliseconds <= 0) {
-          AsyncAlarmCallback *callback = alarm->callback;
-          const AsyncAlarmResult result = {
-            .data = alarm->data
-          };
-
-          deleteElement(element);
-          if (callback) callback(&result);
-          return;
-        }
-
-        if (milliseconds < timeout) timeout = milliseconds;
-      }
-    }
-  }
-
-#ifdef ASYNC_CAN_MONITOR_IO
-  awaitNextOperation(timeout);
-#else /* ASYNC_CAN_MONITOR_IO */
-  approximateDelay(timeout);
-#endif /* ASYNC_CAN_MONITOR_IO */
-}
-
-int
-asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
-  TimePeriod period;
-  startTimePeriod(&period, timeout);
-
-  while (!(testCondition && testCondition(data))) {
-    long int elapsed;
-    if (afterTimePeriod(&period, &elapsed)) return 0;
-    awaitNextResponse(timeout - elapsed);
-  }
-
-  return 1;
-}
-
-void
-asyncWait (int duration) {
-  asyncAwaitCondition(duration, NULL, NULL);
 }
 
 struct AsyncEventStruct {
@@ -1665,75 +1608,155 @@ asyncDiscardEvent (AsyncEvent *event) {
   free(event);
 }
 
-static void
-exitProgramEvent (void *data) {
-  AsyncEvent **event = data;
+typedef struct {
+  AsyncTaskFunction *function;
+  void *data;
+} TaskDefinition;
 
-  if (*event) {
-    asyncDiscardEvent(*event);
-    *event = NULL;
-  }
+static void
+deallocateTaskDefinition (void *item, void *data) {
+  TaskDefinition *task = item;
+
+  free(task);
 }
 
-AsyncEvent *
-asyncGetProgramEvent (
-  AsyncEvent **event, const char *name,
-  AsyncEventCreator *createEvent, void *data
-) {
-  if (!*event) {
-    if ((*event = createEvent(data))) {
-      onProgramExit(name, exitProgramEvent, event);
+static Queue *
+getTaskQueue (int create) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
+
+  if (!tsd->taskQueue && create) {
+    tsd->taskQueue = newQueue(deallocateTaskDefinition, NULL);
+  }
+
+  return tsd->taskQueue;
+}
+
+static int
+addTask (TaskDefinition *task) {
+  Queue *queue = getTaskQueue(1);
+
+  if (queue) {
+    if (enqueueItem(queue, task)) {
+      return 1;
     }
   }
 
-  return *event;
-}
-
-typedef struct {
-  AsyncFunction *function;
-  void *data;
-} CallFunctionData;
-
-static void
-callFunction (CallFunctionData *cfd) {
-  if (cfd->function) cfd->function(cfd->data);
-  free(cfd);
-}
-
-static void
-handleCallFunctionEvent (void *eventData, void *signalData) {
-  callFunction(signalData);
-}
-
-AsyncEvent *
-asyncNewCallFunctionEvent (void) {
-  return asyncNewEvent(handleCallFunctionEvent, NULL);
-}
-
-static void
-handleCallFunctionAlarm(const AsyncAlarmResult *result) {
-  callFunction(result->data);
+  return 0;
 }
 
 int
-asyncCallFunction (AsyncEvent *event, AsyncFunction *function, void *data) {
-  CallFunctionData *cfd;
+asyncAddTask (AsyncEvent *event, AsyncTaskFunction *function, void *data) {
+  TaskDefinition *task;
 
-  if ((cfd = malloc(sizeof(*cfd)))) {
-    memset(cfd, 0, sizeof(*cfd));
-    cfd->function = function;
-    cfd->data = data;
+  if ((task = malloc(sizeof(*task)))) {
+    memset(task, 0, sizeof(*task));
+    task->function = function;
+    task->data = data;
 
     if (event) {
-      if (asyncSignalEvent(event, cfd)) return 1;
-    } else if (asyncSetAlarmIn(NULL, 0, handleCallFunctionAlarm, cfd)) {
+      if (asyncSignalEvent(event, task)) return 1;
+    } else if (addTask(task)) {
       return 1;
     }
 
-    free(cfd);
+    free(task);
   } else {
     logMallocError();
   }
 
   return 0;
+}
+
+static void
+handleAddTaskEvent (void *eventData, void *signalData) {
+  addTask(signalData);
+}
+
+AsyncEvent *
+asyncNewAddTaskEvent (void) {
+  return asyncNewEvent(handleAddTaskEvent, NULL);
+}
+
+static void
+awaitNextResponse (long int timeout) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+
+  if (tsd) {
+    tsd->waitDepth += 1;
+
+    {
+      Queue *alarms = tsd->alarmQueue;
+
+      if (alarms) {
+        Element *element = getQueueHead(alarms);
+
+        if (element) {
+          AlarmEntry *alarm = getElementItem(element);
+          TimeValue now;
+          long int milliseconds;
+
+          getCurrentTime(&now);
+          milliseconds = millisecondsBetween(&now, &alarm->time);
+
+          if (milliseconds <= 0) {
+            AsyncAlarmCallback *callback = alarm->callback;
+            const AsyncAlarmResult result = {
+              .data = alarm->data
+            };
+
+            deleteElement(element);
+            if (callback) callback(&result);
+            goto done;
+          }
+
+          if (milliseconds < timeout) timeout = milliseconds;
+        }
+      }
+    }
+
+    if (tsd->waitDepth == 1) {
+      Queue *queue = tsd->taskQueue;
+
+      if (queue) {
+        TaskDefinition *task = dequeueItem(queue);
+
+        if (task) {
+          if (task->function) task->function(task->data);
+          free(task);
+          goto done;
+        }
+      }
+    }
+
+#ifdef ASYNC_CAN_MONITOR_IO
+    awaitNextOperation(tsd, timeout);
+    goto done;
+#endif /* ASYNC_CAN_MONITOR_IO */
+
+  done:
+    tsd->waitDepth -= 1;
+    return;
+  }
+
+  approximateDelay(timeout);
+}
+
+int
+asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
+  TimePeriod period;
+  startTimePeriod(&period, timeout);
+
+  while (!(testCondition && testCondition(data))) {
+    long int elapsed;
+    if (afterTimePeriod(&period, &elapsed)) return 0;
+    awaitNextResponse(timeout - elapsed);
+  }
+
+  return 1;
+}
+
+void
+asyncWait (int duration) {
+  asyncAwaitCondition(duration, NULL, NULL);
 }

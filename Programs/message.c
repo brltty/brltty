@@ -21,8 +21,8 @@
 #include <string.h>
 
 #include "message.h"
+#include "async_task.h"
 #include "async_wait.h"
-#include "async_call.h"
 #include "charset.h"
 #include "spk.h"
 #include "ktbdefs.h"
@@ -158,7 +158,7 @@ message (const char *mode, const char *text, MessageOptions options) {
     if (mgp->options & MSG_SYNC) {
       presentMessage(mgp);
       if (mgp->presented) presented = 1;
-    } else if (asyncCallFunction(NULL, presentMessage, mgp)) {
+    } else if (asyncAddTask(NULL, presentMessage, mgp)) {
       return 1;
     }
 

@@ -28,6 +28,8 @@ extern "C" {
 typedef struct {
   Queue *functionQueue;
   Queue *alarmQueue;
+  Queue *taskQueue;
+  unsigned int waitDepth;
 } AsyncThreadSpecificData;
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);
