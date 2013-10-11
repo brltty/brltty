@@ -40,9 +40,11 @@ static void
 tsdDestroyData (void *data) {
   AsyncThreadSpecificData *tsd = data;
 
-  if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
-  if (tsd->alarmQueue) deallocateQueue(tsd->alarmQueue);
-  free(tsd);
+  if (tsd) {
+    if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
+    if (tsd->alarmQueue) deallocateQueue(tsd->alarmQueue);
+    free(tsd);
+  }
 }
 
 static void
