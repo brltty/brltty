@@ -80,6 +80,7 @@ typedef struct {
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_call.h"
+#include "async_tsd.h"
 
 struct AsyncHandleStruct {
   Element *element;
@@ -535,16 +536,15 @@ deallocateFunctionEntry (void *item, void *data) {
 }
 
 static Queue *
-createFunctionQueue (void *data) {
-  return newQueue(deallocateFunctionEntry, NULL);
-}
-
-static Queue *
 getFunctionQueue (int create) {
-  static Queue *functions = NULL;
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
 
-  return getProgramQueue(&functions, "async-function-queue", create,
-                         createFunctionQueue, NULL);
+  if (!tsd->functionQueue && create) {
+    tsd->functionQueue = newQueue(deallocateFunctionEntry, NULL);
+  }
+
+  return tsd->functionQueue;
 }
 
 static int
@@ -1386,16 +1386,15 @@ compareAlarmEntries (const void *item1, const void *item2, void *data) {
 }
 
 static Queue *
-createAlarmQueue (void *data) {
-  return newQueue(deallocateAlarmEntry, compareAlarmEntries);
-}
-
-static Queue *
 getAlarmQueue (int create) {
-  static Queue *alarms = NULL;
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
 
-  return getProgramQueue(&alarms, "async-alarm-queue", create,
-                         createAlarmQueue, NULL);
+  if (!tsd->alarmQueue && create) {
+    tsd->alarmQueue = newQueue(deallocateAlarmEntry, compareAlarmEntries);
+  }
+
+  return tsd->alarmQueue;
 }
 
 typedef struct {

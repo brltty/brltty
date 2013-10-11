@@ -180,6 +180,14 @@ gio_bluetooth.$O:
 
 ###############################################################################
 
+async.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async.c
+
+async_tsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_tsd.c
+
+###############################################################################
+
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
 
@@ -194,9 +202,6 @@ parse.$O:
 
 timing.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/timing.c
-
-async.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async.c
 
 queue.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/queue.c
