@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "async_tsd.h"
+#include "async_internal.h"
 
 #if defined(__MINGW32__)
 #include "win_pthread.h"

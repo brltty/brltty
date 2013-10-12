@@ -16,9 +16,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_TSD
-#define BRLTTY_INCLUDED_ASYNC_TSD
+#ifndef BRLTTY_INCLUDED_ASYNC_INTERNAL
+#define BRLTTY_INCLUDED_ASYNC_INTERNAL
 
+#include "prologue.h"
+
+#ifdef __MSDOS__
+#include "system_msdos.h"
+#endif /* __MSDOS__ */
+
+#include "async.h"
 #include "queue.h"
 
 #ifdef __cplusplus
@@ -34,8 +41,29 @@ typedef struct {
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);
 
+struct AsyncHandleStruct {
+  Element *element;
+  int identifier;
+};
+
+extern int asyncMakeHandle (
+  AsyncHandle *handle,
+  Element *(*newElement) (const void *parameters),
+  const void *parameters
+);
+
+extern int asyncCheckHandle (AsyncHandle handle, Queue *queue);
+
+typedef struct {
+  void (*cancelRequest) (Element *element);
+} AsyncQueueMethods;
+
+extern int asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
+extern int asyncPerformTask (AsyncThreadSpecificData *tsd);
+extern void asyncAwaitNextOperation (AsyncThreadSpecificData *tsd, long int timeout);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_TSD */
+#endif /* BRLTTY_INCLUDED_ASYNC_INTERNAL */
