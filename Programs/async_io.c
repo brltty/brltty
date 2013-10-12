@@ -27,6 +27,10 @@
 #endif /* WINVER < WindowsVista */
 #endif /* __MINGW32__ */
 
+#ifdef __MSDOS__
+#include "system_msdos.h"
+#endif /* __MSDOS__ */
+
 #undef ASYNC_CAN_MONITOR_IO
 #if defined(__MINGW32__)
 #define ASYNC_CAN_MONITOR_IO

@@ -19,12 +19,6 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_INTERNAL
 #define BRLTTY_INCLUDED_ASYNC_INTERNAL
 
-#include "prologue.h"
-
-#ifdef __MSDOS__
-#include "system_msdos.h"
-#endif /* __MSDOS__ */
-
 #include "async.h"
 #include "queue.h"
 
