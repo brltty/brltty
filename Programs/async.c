@@ -689,7 +689,7 @@ testFunctionMonitor (void *item, void *data) {
 
 static void
 awaitNextOperation (AsyncThreadSpecificData *tsd, long int timeout) {
-  Queue *functions = getFunctionQueue(0);
+  Queue *functions = tsd->functionQueue;
   unsigned int functionCount = functions? getQueueSize(functions): 0;
 
   prepareMonitors();
