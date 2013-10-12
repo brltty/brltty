@@ -34,10 +34,9 @@ awaitNextResponse (long int timeout) {
     asyncAwaitNextOperation(tsd, timeout);
   done:
     tsd->waitDepth -= 1;
-    return;
+  } else {
+    approximateDelay(timeout);
   }
-
-  approximateDelay(timeout);
 }
 
 int
