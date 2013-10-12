@@ -35,6 +35,7 @@
 #ifdef PTHREAD_ONCE_INIT
 static pthread_once_t tsdOnce = PTHREAD_ONCE_INIT;
 static pthread_key_t tsdKey;
+static unsigned char tsdKeyCreated = 0;
 
 static void
 tsdDestroyData (void *data) {
@@ -51,30 +52,37 @@ tsdDestroyData (void *data) {
 static void
 tsdCreateKey (void) {
   int error = pthread_key_create(&tsdKey, tsdDestroyData);
-  if (error) logActionError(error, "pthread_key_create");
+
+  if (!error) {
+    tsdKeyCreated = 1;
+  } else {
+    logActionError(error, "pthread_key_create");
+  }
 }
 
 AsyncThreadSpecificData *
 asyncGetThreadSpecificData (void) {
-  int error = pthread_once(&tsdOnce, tsdCreateKey);
+  int error;
 
-  if (!error) {
-    AsyncThreadSpecificData *tsd = pthread_getspecific(tsdKey);
-    if (tsd) return tsd;
+  if (!(error = pthread_once(&tsdOnce, tsdCreateKey))) {
+    if (tsdKeyCreated) {
+      AsyncThreadSpecificData *tsd = pthread_getspecific(tsdKey);
+      if (tsd) return tsd;
 
-    if ((tsd = malloc(sizeof(*tsd)))) {
-      tsd->functionQueue = NULL;
-      tsd->alarmQueue = NULL;
-      tsd->taskQueue = NULL;
-      tsd->waitDepth = 0;
+      if ((tsd = malloc(sizeof(*tsd)))) {
+        tsd->functionQueue = NULL;
+        tsd->alarmQueue = NULL;
+        tsd->taskQueue = NULL;
+        tsd->waitDepth = 0;
 
-      if (!(error = pthread_setspecific(tsdKey, tsd))) {
-        return tsd;
+        if (!(error = pthread_setspecific(tsdKey, tsd))) {
+          return tsd;
+        } else {
+          logActionError(error, "pthread_setspecific");
+        }
       } else {
-        logActionError(error, "pthread_setspecific");
+        logMallocError();
       }
-    } else {
-      logMallocError();
     }
   } else {
     logActionError(error, "pthread_once");
