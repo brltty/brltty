@@ -180,8 +180,8 @@ gio_bluetooth.$O:
 
 ###############################################################################
 
-async.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async.c
+async_handle.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_handle.c
 
 async_io.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_io.c

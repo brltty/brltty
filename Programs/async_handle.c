@@ -23,6 +23,11 @@
 #include "log.h"
 #include "async_internal.h"
 
+struct AsyncHandleStruct {
+  Element *element;
+  int identifier;
+};
+
 int
 asyncMakeHandle (
   AsyncHandle *handle,
@@ -54,54 +59,29 @@ asyncMakeHandle (
   }
 }
 
-static int
-checkHandleValidity (AsyncHandle handle) {
-  if (handle) {
-    if (handle->element) {
-      return 1;
+Element *
+asyncGetHandleElement (AsyncHandle handle, Queue *queue) {
+  Element *element = handle->element;
+
+  if (handle->identifier == getElementIdentifier(element)) {
+    if (!queue || (queue == getElementQueue(element))) {
+      return element;
     }
   }
 
-  return 0;
-}
-
-static int
-checkHandleIdentifier (AsyncHandle handle) {
-  return handle->identifier == getElementIdentifier(handle->element);
-}
-
-int
-asyncCheckHandle (AsyncHandle handle, Queue *queue) {
-  if (checkHandleValidity(handle)) {
-    if (checkHandleIdentifier(handle)) {
-      if (!queue) return 1;
-      if (queue == getElementQueue(handle->element)) return 1;
-    }
-  }
-
-  return 0;
-}
-
-static Element *
-deallocateHandle (AsyncHandle handle) {
-  Element *element = NULL;
-
-  if (checkHandleValidity(handle)) {
-    if (checkHandleIdentifier(handle)) element = handle->element;
-    free(handle);
-  }
-
-  return element;
+  return NULL;
 }
 
 void
 asyncDiscardHandle (AsyncHandle handle) {
-  deallocateHandle(handle);
+  free(handle);
 }
 
 void
 asyncCancelRequest (AsyncHandle handle) {
-  Element *element = deallocateHandle(handle);
+  Element *element = asyncGetHandleElement(handle, NULL);
+
+  asyncDiscardHandle(handle);
 
   if (element) {
     Queue *queue = getElementQueue(element);

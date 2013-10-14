@@ -117,18 +117,26 @@ asyncSetAlarmIn (
   return asyncSetAlarmTo(handle, &time, callback, data);
 }
 
-static int
-checkAlarmHandle (AsyncHandle handle) {
+static Element *
+getAlarmElement (AsyncHandle handle) {
   Queue *alarms = getAlarmQueue(0);
 
-  if (!alarms) return 0;
-  return asyncCheckHandle(handle, alarms);
+  if (alarms) {
+    Element *element = asyncGetHandleElement(handle, alarms);
+
+    if (element) {
+      return element;
+    }
+  }
+
+  return NULL;
 }
 
 int
 asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time) {
-  if (checkAlarmHandle(handle)) {
-    Element *element = handle->element;
+  Element *element = getAlarmElement(handle);
+
+  if (element) {
     AlarmEntry *alarm = getElementItem(element);
 
     alarm->time = *time;

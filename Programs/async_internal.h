@@ -35,18 +35,13 @@ typedef struct {
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);
 
-struct AsyncHandleStruct {
-  Element *element;
-  int identifier;
-};
-
 extern int asyncMakeHandle (
   AsyncHandle *handle,
   Element *(*newElement) (const void *parameters),
   const void *parameters
 );
 
-extern int asyncCheckHandle (AsyncHandle handle, Queue *queue);
+extern Element *asyncGetHandleElement (AsyncHandle handle, Queue *queue);
 
 typedef struct {
   void (*cancelRequest) (Element *element);
