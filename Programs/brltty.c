@@ -1613,13 +1613,16 @@ static AsyncHandle updateAlarm;
 static int updateSuspendCount;
 
 static void
-setUpdateTime (int delay) {
-  getRelativeTime(&updateTime, delay);
+setUpdateTime (int delay, int ifEarlier) {
+  TimeValue time;
+
+  getRelativeTime(&time, delay);
+  if (!ifEarlier || (millisecondsBetween(&time, &updateTime) < 0)) updateTime = time;
 }
 
 void
 resetUpdateAlarm (void) {
-  setUpdateTime(10);
+  setUpdateTime(10, 1);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
 }
 
@@ -1627,7 +1630,7 @@ static void setUpdateAlarm (void *data);
 
 static void
 handleUpdateAlarm (const AsyncAlarmResult *result) {
-  setUpdateTime(updateInterval);
+  setUpdateTime(updateInterval, 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
@@ -2000,7 +2003,7 @@ setUpdateAlarm (void *data) {
 
 static void
 startUpdates (void) {
-  setUpdateTime(0);
+  setUpdateTime(0, 0);
   updateAlarm = NULL;
   updateSuspendCount = 1;
 }
