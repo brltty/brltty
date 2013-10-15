@@ -41,8 +41,8 @@ extern int asyncMakeHandle (
   const void *parameters
 );
 
-#define ASYNC_ANY_QUEUE ((Queue *)1)
-extern Element *asyncGetHandleElement (AsyncHandle handle, Queue *queue);
+#define ASYNC_ANY_QUEUE ((const Queue *)1)
+extern Element *asyncGetHandleElement (AsyncHandle handle, const Queue *queue);
 
 typedef struct {
   void (*cancelRequest) (Element *element);

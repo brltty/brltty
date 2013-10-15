@@ -60,7 +60,7 @@ asyncMakeHandle (
 }
 
 Element *
-asyncGetHandleElement (AsyncHandle handle, Queue *queue) {
+asyncGetHandleElement (AsyncHandle handle, const Queue *queue) {
   if (queue) {
     Element *element = handle->element;
 
