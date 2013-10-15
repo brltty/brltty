@@ -119,17 +119,7 @@ asyncSetAlarmIn (
 
 static Element *
 getAlarmElement (AsyncHandle handle) {
-  Queue *alarms = getAlarmQueue(0);
-
-  if (alarms) {
-    Element *element = asyncGetHandleElement(handle, alarms);
-
-    if (element) {
-      return element;
-    }
-  }
-
-  return NULL;
+  return asyncGetHandleElement(handle, getAlarmQueue(0));
 }
 
 int
@@ -155,7 +145,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
+asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
   Queue *alarms = tsd->alarmQueue;
 
   if (alarms) {

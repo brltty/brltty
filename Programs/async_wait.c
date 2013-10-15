@@ -24,14 +24,16 @@
 #include "timing.h"
 
 static void
-awaitNextResponse (long int timeout) {
+asyncAwaitAction (long int timeout) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
 
   if (tsd) {
     tsd->waitDepth += 1;
-    if (asyncPerformAlarm(tsd, &timeout)) goto done;
+
+    if (asyncHandleAlarm(tsd, &timeout)) goto done;
     if (asyncPerformTask(tsd)) goto done;
-    asyncAwaitNextOperation(tsd, timeout);
+    if (asyncHandleOperation(tsd, timeout)) goto done;
+
   done:
     tsd->waitDepth -= 1;
   } else {
@@ -47,7 +49,7 @@ asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *dat
   while (!(testCondition && testCondition(data))) {
     long int elapsed;
     if (afterTimePeriod(&period, &elapsed)) return 0;
-    awaitNextResponse(timeout - elapsed);
+    asyncAwaitAction(timeout - elapsed);
   }
 
   return 1;

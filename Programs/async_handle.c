@@ -61,11 +61,13 @@ asyncMakeHandle (
 
 Element *
 asyncGetHandleElement (AsyncHandle handle, Queue *queue) {
-  Element *element = handle->element;
+  if (queue) {
+    Element *element = handle->element;
 
-  if (handle->identifier == getElementIdentifier(element)) {
-    if (!queue || (queue == getElementQueue(element))) {
-      return element;
+    if (handle->identifier == getElementIdentifier(element)) {
+      if ((queue == ASYNC_ANY_QUEUE) || (queue == getElementQueue(element))) {
+        return element;
+      }
     }
   }
 
@@ -79,7 +81,7 @@ asyncDiscardHandle (AsyncHandle handle) {
 
 void
 asyncCancelRequest (AsyncHandle handle) {
-  Element *element = asyncGetHandleElement(handle, NULL);
+  Element *element = asyncGetHandleElement(handle, ASYNC_ANY_QUEUE);
 
   asyncDiscardHandle(handle);
 

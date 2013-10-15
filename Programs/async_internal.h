@@ -41,15 +41,16 @@ extern int asyncMakeHandle (
   const void *parameters
 );
 
+#define ASYNC_ANY_QUEUE ((Queue *)1)
 extern Element *asyncGetHandleElement (AsyncHandle handle, Queue *queue);
 
 typedef struct {
   void (*cancelRequest) (Element *element);
 } AsyncQueueMethods;
 
-extern int asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
+extern int asyncHandleOperation (AsyncThreadSpecificData *tsd, long int timeout);
+extern int asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
 extern int asyncPerformTask (AsyncThreadSpecificData *tsd);
-extern void asyncAwaitNextOperation (AsyncThreadSpecificData *tsd, long int timeout);
 
 #ifdef __cplusplus
 }
