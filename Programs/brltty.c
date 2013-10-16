@@ -1617,7 +1617,7 @@ setUpdateTime (int delay, int ifEarlier) {
   TimeValue time;
 
   getRelativeTime(&time, delay);
-  if (!ifEarlier || (millisecondsBetween(&time, &updateTime) < 0)) updateTime = time;
+  if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) updateTime = time;
 }
 
 void
