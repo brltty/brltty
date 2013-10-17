@@ -243,6 +243,30 @@ BEGIN_KEY_NAME_TABLE(featurepack)
   KEY_NAME_ENTRY(AL_KEY_Enter, "Enter"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(el)
+  KEY_NAME_ENTRY(AL_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(AL_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(AL_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(AL_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(AL_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(AL_KEY_Dot6, "Dot6"),
+
+  KEY_NAME_ENTRY(AL_KEY_Dot7, "Shift"),
+  KEY_NAME_ENTRY(AL_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(AL_KEY_Dot8, "Control"),
+
+  KEY_NAME_ENTRY(AL_KEY_SmartpadEnter, "JoystickEnter"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadLeft, "JoystickLeft"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadRight, "JoystickRight"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadUp, "JoystickUp"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadDown, "JoystickDown"),
+
+  KEY_NAME_ENTRY(AL_KEY_THUMB+0, "ScrollLeft"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+4, "ScrollRight"),
+
+  KEY_SET_ENTRY(AL_SET_RoutingKeys1, "RoutingKey"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(abt_small)
   KEY_NAME_TABLE(abt_basic),
   KEY_NAME_TABLE(status1),
@@ -282,11 +306,16 @@ BEGIN_KEY_NAME_TABLES(bc)
   KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(el)
+  KEY_NAME_TABLE(el),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(abt_small)
 DEFINE_KEY_TABLE(abt_large)
 DEFINE_KEY_TABLE(sat_small)
 DEFINE_KEY_TABLE(sat_large)
 DEFINE_KEY_TABLE(bc)
+DEFINE_KEY_TABLE(el)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(abt_small),
@@ -294,6 +323,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(sat_small),
   &KEY_TABLE_DEFINITION(sat_large),
   &KEY_TABLE_DEFINITION(bc),
+  &KEY_TABLE_DEFINITION(el),
 END_KEY_TABLE_LIST
 
 typedef struct {
@@ -307,6 +337,7 @@ typedef struct {
 static const ModelEntry *model;		/* points to terminal model config struct */
 
 #define MOD_FLAG_CONFIGURABLE 0X01
+#define MOD_FLAG_SEMI_PARTIAL_UPDATES 0X02
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -443,6 +474,15 @@ static const ModelEntry modelBC680 = {
   .name = "BC680",
   .columns = 80,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
+};
+
+static const ModelEntry modelEL12 = {
+  .identifier = 0X40,
+  .name = "EL 12 Touch",
+  .columns = 12,
+  /* Workaround for a firmware bug, partial updates can't have start ofset > 0. */
+  .flags = MOD_FLAG_SEMI_PARTIAL_UPDATES,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
 };
 
 typedef struct {
@@ -1138,14 +1178,14 @@ static int
 tellDevice2s (unsigned char command, unsigned char operand) {
   unsigned char packet[] = {ESC, command, operand};
 
-  logOutputPacket(packet, sizeof(packet));
   return writeBytes(packet, sizeof(packet), NULL);
 }
 
 static int
 askDevice2s (unsigned char command, unsigned char *response, int size) {
+  
   if (tellDevice2s(command, 0X3F)) {
-    while (io->awaitInput(500)) {
+    while (io->awaitInput(1000)) {
       int length = protocol->readPacket(response, size);
       if (length <= 0) break;
       if ((response[0] == ESC) && (response[1] == command)) return 1;
@@ -1162,14 +1202,17 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
   if (askDevice2s(0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
-    if (askDevice2s(0X54, response, sizeof(response))) {
-      unsigned char statusColumns = response[2];
-      unsigned char statusSide = response[3];
+    /* EL 12 touch reports itself as an bc640 with 12 columns. */
+    if (model != &modelEL12 || textColumns == model->columns) {
+      if (askDevice2s(0X54, response, sizeof(response))) {
+        unsigned char statusColumns = response[2];
+        unsigned char statusSide = response[3];
 
-      if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
-                              (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
-        splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
-        return 1;
+        if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
+                                (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
+          splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
+          return 1;
+        }
       }
     }
   }
@@ -1180,7 +1223,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
 static int
 identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   static const ModelEntry *const models[] = {
-    &modelBC624, &modelBC640, &modelBC680,
+    &modelEL12, &modelBC624, &modelBC640, &modelBC680,
     NULL
   };
 
@@ -1664,14 +1707,17 @@ awaitBluetoothInput (int milliseconds) {
 
 static int
 readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
+  const int timeout = 200;
   return bthReadData(bluetoothConnection, buffer, length,
                      (wait? timeout: 0), timeout);
 }
 
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = bthWriteData(bluetoothConnection, buffer, length);
+  int count;
+
+  logOutputPacket(buffer, length);
+  count = bthWriteData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
       logSystemError("Alva Bluetooth write");
@@ -1769,6 +1815,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to, &textRewriteRequired)) {
+    if (model->flags & MOD_FLAG_SEMI_PARTIAL_UPDATES) from = 0;
     size_t count = to - from;
     unsigned char cells[count];
 
