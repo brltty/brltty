@@ -336,8 +336,9 @@ typedef struct {
 } ModelEntry;
 static const ModelEntry *model;		/* points to terminal model config struct */
 
-#define MOD_FLAG_CONFIGURABLE 0X01
-#define MOD_FLAG_SEMI_PARTIAL_UPDATES 0X02
+#define MOD_FLAG_CAN_CONFIGURE   0X01
+#define MOD_FLAG_CAN_SHOW_STATUS 0X02
+#define MOD_FLAG_ALWAYS_FROM_0   0X04
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -416,7 +417,7 @@ static const ModelEntry modelTable[] = {
     .name = "Satellite 544",
     .columns = 40,
     .statusCells = 3,
-    .flags = MOD_FLAG_CONFIGURABLE,
+    .flags = MOD_FLAG_CAN_CONFIGURE,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
@@ -424,7 +425,7 @@ static const ModelEntry modelTable[] = {
     .name = "Satellite 570 Pro",
     .columns = 66,
     .statusCells = 3,
-    .flags = MOD_FLAG_CONFIGURABLE,
+    .flags = MOD_FLAG_CAN_CONFIGURE,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_large)
   }
   ,
@@ -432,7 +433,7 @@ static const ModelEntry modelTable[] = {
     .name = "Satellite 584 Pro",
     .columns = 80,
     .statusCells = 3,
-    .flags = MOD_FLAG_CONFIGURABLE,
+    .flags = MOD_FLAG_CAN_CONFIGURE,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_large)
   }
   ,
@@ -440,7 +441,7 @@ static const ModelEntry modelTable[] = {
     .name = "Satellite 544 Traveller",
     .columns = 40,
     .statusCells = 3,
-    .flags = MOD_FLAG_CONFIGURABLE,
+    .flags = MOD_FLAG_CAN_CONFIGURE,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
@@ -448,7 +449,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille System 40",
     .columns = 40,
     .statusCells = 0,
-    .flags = MOD_FLAG_CONFIGURABLE,
+    .flags = MOD_FLAG_CAN_CONFIGURE,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(sat_small)
   }
   ,
@@ -459,6 +460,7 @@ static const ModelEntry modelBC624 = {
   .identifier = 0X24,
   .name = "BC624",
   .columns = 24,
+  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -466,6 +468,7 @@ static const ModelEntry modelBC640 = {
   .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
+  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -473,6 +476,7 @@ static const ModelEntry modelBC680 = {
   .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
+  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -480,8 +484,7 @@ static const ModelEntry modelEL12 = {
   .identifier = 0X40,
   .name = "EL 12 Touch",
   .columns = 12,
-  /* Workaround for a firmware bug, partial updates can't have start ofset > 0. */
-  .flags = MOD_FLAG_SEMI_PARTIAL_UPDATES,
+  .flags = MOD_FLAG_ALWAYS_FROM_0, /* workaround for a firmware bug */
   .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
 };
 
@@ -684,10 +687,11 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 
   if (model->name) {
     if (setDefaultConfiguration(brl)) {
-      if (model->flags & MOD_FLAG_CONFIGURABLE) {
+      if (model->flags & MOD_FLAG_CAN_CONFIGURE) {
         brl->setFirmness = setFirmness1;
 
         if (!writeFunction1(brl, 0X07)) return 0;
+
         while (io->awaitInput(200)) {
           unsigned char packet[MAXIMUM_PACKET_SIZE];
           int count = protocol->readPacket(packet, sizeof(packet));
@@ -1183,7 +1187,6 @@ tellDevice2s (unsigned char command, unsigned char operand) {
 
 static int
 askDevice2s (unsigned char command, unsigned char *response, int size) {
-  
   if (tellDevice2s(command, 0X3F)) {
     while (io->awaitInput(1000)) {
       int length = protocol->readPacket(response, size);
@@ -1203,7 +1206,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
     unsigned char textColumns = response[2];
 
     /* EL 12 touch reports itself as an bc640 with 12 columns. */
-    if (model != &modelEL12 || textColumns == model->columns) {
+    if (model->flags & MOD_FLAG_CAN_SHOW_STATUS) {
       if (askDevice2s(0X54, response, sizeof(response))) {
         unsigned char statusColumns = response[2];
         unsigned char statusSide = response[3];
@@ -1815,12 +1818,15 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to, &textRewriteRequired)) {
-    if (model->flags & MOD_FLAG_SEMI_PARTIAL_UPDATES) from = 0;
-    size_t count = to - from;
-    unsigned char cells[count];
+    if (model->flags & MOD_FLAG_ALWAYS_FROM_0) from = 0;
 
-    translateOutputCells(cells, &brl->buffer[from], count);
-    if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
+    {
+      size_t count = to - from;
+      unsigned char cells[count];
+
+      translateOutputCells(cells, &brl->buffer[from], count);
+      if (!protocol->writeBraille(brl, cells, textOffset+from, count)) return 0;
+    }
   }
 
   return 1;
