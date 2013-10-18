@@ -480,14 +480,6 @@ static const ModelEntry modelBC680 = {
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
-static const ModelEntry modelEL12 = {
-  .identifier = 0X40,
-  .name = "EL 12 Touch",
-  .columns = 12,
-  .flags = MOD_FLAG_FORCE_FROM_0, /* workaround for a firmware bug */
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
-};
-
 typedef struct {
   int (*openPort) (const char *device);
   void (*closePort) (void);
@@ -1227,7 +1219,6 @@ static int
 identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   static const ModelEntry *const models[] = {
     &modelBC624, &modelBC640, &modelBC680,
-    &modelEL12,
     NULL
   };
 
@@ -1619,6 +1610,7 @@ openUsbPort (const char *device) {
     textRewriteInterval = 0;
     return 1;
   }
+
   return 0;
 }
 
