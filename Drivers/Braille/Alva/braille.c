@@ -338,7 +338,7 @@ static const ModelEntry *model;		/* points to terminal model config struct */
 
 #define MOD_FLAG_CAN_CONFIGURE   0X01
 #define MOD_FLAG_CAN_SHOW_STATUS 0X02
-#define MOD_FLAG_ALWAYS_FROM_0   0X04
+#define MOD_FLAG_FORCE_FROM_0    0X04
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -484,7 +484,7 @@ static const ModelEntry modelEL12 = {
   .identifier = 0X40,
   .name = "EL 12 Touch",
   .columns = 12,
-  .flags = MOD_FLAG_ALWAYS_FROM_0, /* workaround for a firmware bug */
+  .flags = MOD_FLAG_FORCE_FROM_0, /* workaround for a firmware bug */
   .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
 };
 
@@ -1205,7 +1205,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
   if (askDevice2s(0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
-    /* EL 12 touch reports itself as an bc640 with 12 columns. */
+    /* The EL 12 touch reports itself as a BC640 with 12 columns. */
     if (model->flags & MOD_FLAG_CAN_SHOW_STATUS) {
       if (askDevice2s(0X54, response, sizeof(response))) {
         unsigned char statusColumns = response[2];
@@ -1226,7 +1226,8 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
 static int
 identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   static const ModelEntry *const models[] = {
-    &modelEL12, &modelBC624, &modelBC640, &modelBC680,
+    &modelBC624, &modelBC640, &modelBC680,
+    &modelEL12,
     NULL
   };
 
@@ -1587,21 +1588,21 @@ openUsbPort (const char *device) {
       .vendor=0X0798, .product=0X0624,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data=&modelBC624
+      .data= &modelBC624
     }
     ,
     { /* BC640 */
       .vendor=0X0798, .product=0X0640,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data=&modelBC640
+      .data= &modelBC640
     }
     ,
     { /* BC680 */
       .vendor=0X0798, .product=0X0680,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data=&modelBC680
+      .data= &modelBC680
     }
     ,
     { .vendor=0 }
@@ -1818,7 +1819,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to, &textRewriteRequired)) {
-    if (model->flags & MOD_FLAG_ALWAYS_FROM_0) from = 0;
+    if (model->flags & MOD_FLAG_FORCE_FROM_0) from = 0;
 
     {
       size_t count = to - from;
