@@ -480,6 +480,14 @@ static const ModelEntry modelBC680 = {
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
+static const ModelEntry modelEL12 = {
+  .identifier = 0X40,
+  .name = "EL12 Touch",
+  .columns = 12,
+  .flags = MOD_FLAG_FORCE_FROM_0,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
+};
+
 typedef struct {
   int (*openPort) (const char *device);
   void (*closePort) (void);
@@ -1197,7 +1205,6 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
   if (askDevice2s(0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
-    /* The EL 12 touch reports itself as a BC640 with 12 columns. */
     if (model->flags & MOD_FLAG_CAN_SHOW_STATUS) {
       if (askDevice2s(0X54, response, sizeof(response))) {
         unsigned char statusColumns = response[2];
@@ -1579,21 +1586,21 @@ openUsbPort (const char *device) {
       .vendor=0X0798, .product=0X0624,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data= &modelBC624
+      .data=&modelBC624
     }
     ,
     { /* BC640 */
       .vendor=0X0798, .product=0X0640,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data= &modelBC640
+      .data=&modelBC640
     }
     ,
     { /* BC680 */
       .vendor=0X0798, .product=0X0680,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
-      .data= &modelBC680
+      .data=&modelBC680
     }
     ,
     { .vendor=0 }
@@ -1714,6 +1721,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
 
   logOutputPacket(buffer, length);
   count = bthWriteData(bluetoothConnection, buffer, length);
+
   if (count != length) {
     if (count == -1) {
       logSystemError("Alva Bluetooth write");
@@ -1721,6 +1729,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
       logMessage(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
     }
   }
+
   return count;
 }
 
