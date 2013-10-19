@@ -1205,14 +1205,16 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
   if (askDevice2s(0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
-    if (firmwareVersion2 < 0X010A00) {
-      switch (textColumns) {
-        case 12:
-          if (model == &modelBC640) model = &modelEL12;
-          break;
+    if (autodetecting) {
+      if (firmwareVersion2 < 0X010A00) {
+        switch (textColumns) {
+          case 12:
+            if (model == &modelBC640) model = &modelEL12;
+            break;
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
     }
 
