@@ -110,6 +110,7 @@
 
 #include "log.h"
 #include "parse.h"
+#include "bitfield.h"
 #include "timing.h"
 #include "ascii.h"
 #include "hidkeys.h"
@@ -1023,11 +1024,30 @@ initializeVariables2 (void) {
 
 static void
 logVersion2 (uint32_t version, const char *label) {
-  logMessage(LOG_DEBUG, "%s: %u.%u.%u",
-             label,
-             (version >> 16) & 0XFF,
-             (version >>  8) & 0XFF,
-             (version >>  0) & 0XFF);
+  union {
+    uint32_t u32;
+    unsigned char bytes[4];
+  } value;
+
+  unsigned char *byte = &value.bytes[2];
+  char string[0X40];
+
+  putLittleEndian32(&value.u32, version);
+  STR_BEGIN(string, sizeof(string));
+
+  while (1) {
+    STR_PRINTF("%u", *byte);
+    if (byte == value.bytes) break;
+
+    *byte = 0;
+    if (!value.u32) break;
+
+    STR_PRINTF(".");
+    byte -= 1;
+  }
+
+  STR_END;
+  logMessage(LOG_DEBUG, "%s: %s", label, string);
 }
 
 static void
