@@ -1002,14 +1002,55 @@ static const ProtocolOperations protocol1Operations = {
   readCommand1, writeBraille1
 };
 
+static uint32_t hardwareVersion2;
 static uint32_t firmwareVersion2;
+static uint32_t btbaseVersion2;
+static uint32_t btfpVersion2;
+
 static unsigned char splitOffset2;
 static HidKeyboardPacket hidKeyboardPacket2;
 static unsigned int secondaryRoutingKeyEmulation2;
 
 static void
 initializeVariables2 (void) {
+  hardwareVersion2 = 0;
+  firmwareVersion2 = 0;
+  btbaseVersion2 = 0;
+  btfpVersion2 = 0;
+
   initializeHidKeyboardPacket(&hidKeyboardPacket2);
+}
+
+static void
+logVersion2 (uint32_t version, const char *label) {
+  logMessage(LOG_DEBUG, "%s: %u.%u.%u",
+             label,
+             (version >> 16) & 0XFF,
+             (version >>  8) & 0XFF,
+             (version >>  0) & 0XFF);
+}
+
+static void
+setVersions2 (const unsigned char *bytes, size_t count) {
+  if (count >=  1) hardwareVersion2 |= ((bytes[0] - '0') << 16);
+  if (count >=  2) hardwareVersion2 |= ((bytes[1] - '0') <<  8);
+
+  if (count >=  3) firmwareVersion2 |= (bytes[2] << 16);
+  if (count >=  4) firmwareVersion2 |= (bytes[3] <<  8);
+  if (count >=  5) firmwareVersion2 |= (bytes[4] <<  0);
+
+  if (count >=  6) btbaseVersion2 |= (bytes[5] << 16);
+  if (count >=  7) btbaseVersion2 |= (bytes[6] <<  8);
+  if (count >=  8) btbaseVersion2 |= (bytes[7] <<  0);
+
+  if (count >=  9) btfpVersion2 |= (bytes[ 8] << 16);
+  if (count >= 10) btfpVersion2 |= (bytes[ 9] <<  8);
+  if (count >= 11) btfpVersion2 |= (bytes[10] <<  0);
+
+  logVersion2(hardwareVersion2, "Hardware Version");
+  logVersion2(firmwareVersion2, "Firmware Version");
+  logVersion2(btbaseVersion2, "Base Bluetooth Module Version");
+  logVersion2(btfpVersion2, "Feature Pack Bluetooth Module Version");
 }
 
 static int
@@ -1190,6 +1231,7 @@ askDevice2s (unsigned char command, unsigned char *response, int size) {
   if (tellDevice2s(command, 0X3F)) {
     while (io->awaitInput(1000)) {
       int length = protocol->readPacket(response, size);
+
       if (length <= 0) break;
       if ((response[0] == ESC) && (response[1] == command)) return 1;
     }
@@ -1247,12 +1289,8 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
-      firmwareVersion2 = 0;
-
       if (askDevice2s(0X56, response, sizeof(response))) {
-        firmwareVersion2 |= (response[4] << 16);
-        firmwareVersion2 |= (response[5] <<  8);
-        firmwareVersion2 |= (response[6] <<  0);
+        setVersions2(&response[2], sizeof(response)-2);
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
@@ -1430,10 +1468,7 @@ detectModel2u (BrailleDisplay *brl) {
     unsigned char buffer[0X20];
     int length = io->getFeatureReport(0X09, buffer, sizeof(buffer));
 
-    firmwareVersion2 = 0;
-    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
-    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
-    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
+    if (length >= 3) setVersions2(&buffer[3], length-3);
   }
 
   {
