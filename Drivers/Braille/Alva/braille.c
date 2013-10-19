@@ -1205,6 +1205,17 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
   if (askDevice2s(0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
+    if (firmwareVersion2 < 0X010A00) {
+      switch (textColumns) {
+        case 12:
+          if (model == &modelBC640) model = &modelEL12;
+          break;
+
+        default:
+          break;
+      }
+    }
+
     if (model->flags & MOD_FLAG_CAN_SHOW_STATUS) {
       if (askDevice2s(0X54, response, sizeof(response))) {
         unsigned char statusColumns = response[2];
@@ -1235,6 +1246,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
       firmwareVersion2 = 0;
+
       if (askDevice2s(0X56, response, sizeof(response))) {
         firmwareVersion2 |= (response[4] << 16);
         firmwareVersion2 |= (response[5] <<  8);
