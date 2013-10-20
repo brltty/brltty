@@ -561,6 +561,7 @@ word horsed 125-135-1235-234-1246
 sufword horser 125-135-1235-234-12456 nine-horsers
 begword horsera = horserace
 sufword houghton 125-1256-126-2345-135-1345
+begword housedres 125-1256-234-15-145-1235-15-234 housedressed
 sufword humidistat 125-136-134-24-145-24-34-1-2345
 always hydro =
 begword hypsomet = hypsometrical
@@ -808,7 +809,6 @@ word percvg =
 always perhaps 1234-12456-125
 word perh =
 begword persever 1234-12456-234-15-1236-12456 persevere
-sufword pest 1234-15-34 pesthouse
 sufword petar 1234-15-2345-345 petard
 always pher 1234-125-12456 cyphered
 word phoneme =
@@ -1038,6 +1038,7 @@ endword such 234-16 nonesuch somesuch
 before consonant sufword such 234-16
 word sch =
 sufword schofield 234-16-135-124-24-15-123-145
+midword sthous 34-125-1256-234 guesthouse oasthouse masthouse
 sufword straw 34-1235-1-2456 strawhat
 begword supersed 234-136-1234-12456-234-1246 superseding
 always sword =
@@ -1076,6 +1077,8 @@ always thead 2345-125-2-145
 always theast 1456-15-1-34
 always theart 2345-125-15-345-2345
 always thouse 2345-125-1256-234-15
+always thoused 2345-125-1256-234-1246 hothoused, penthoused
+always thousing 2345-125-1256-234-346 hothousing
 lastlargesign the 2346
 word themselves 2346-134-1236-234
 word themvs 1456-15-134-1236-234
