@@ -338,8 +338,7 @@ typedef struct {
 static const ModelEntry *model;		/* points to terminal model config struct */
 
 #define MOD_FLAG_CAN_CONFIGURE   0X01
-#define MOD_FLAG_CAN_SHOW_STATUS 0X02
-#define MOD_FLAG_FORCE_FROM_0    0X04
+#define MOD_FLAG_FORCE_FROM_0    0X02
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -461,7 +460,6 @@ static const ModelEntry modelBC624 = {
   .identifier = 0X24,
   .name = "BC624",
   .columns = 24,
-  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -469,7 +467,6 @@ static const ModelEntry modelBC640 = {
   .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
-  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -477,7 +474,6 @@ static const ModelEntry modelBC680 = {
   .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
-  .flags = MOD_FLAG_CAN_SHOW_STATUS,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
 };
 
@@ -1271,7 +1267,12 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       if (firmwareVersion2 < 0X010A00) {
         switch (textColumns) {
           case 12:
-            if (model == &modelBC640) model = &modelEL12;
+            if (model == &modelBC640) {
+              model = &modelEL12;
+              brl->keyBindings = model->keyTableDefinition->bindings;
+              brl->keyNameTables = model->keyTableDefinition->names;
+              logMessage(LOG_INFO, "switched to model %s", model->name);
+            }
             break;
 
           default:
@@ -1280,16 +1281,14 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       }
     }
 
-    if (model->flags & MOD_FLAG_CAN_SHOW_STATUS) {
-      if (askDevice2s(0X54, response, sizeof(response))) {
-        unsigned char statusColumns = response[2];
-        unsigned char statusSide = response[3];
+    if (askDevice2s(0X54, response, sizeof(response))) {
+      unsigned char statusColumns = response[2];
+      unsigned char statusSide = response[3];
 
-        if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
-                                (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
-          splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
-          return 1;
-        }
+      if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
+                              (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
+        splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
+        return 1;
       }
     }
   }
