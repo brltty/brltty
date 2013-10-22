@@ -566,9 +566,6 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
 
-  brl->keyBindings = model->keyTableDefinition->bindings;
-  brl->keyNameTables = model->keyTableDefinition->names;
-
   actualColumns = model->columns;
   statusOffset = 0;
   textOffset = statusOffset + model->statusCells;
@@ -1269,8 +1266,6 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
           case 12:
             if (model == &modelBC640) {
               model = &modelEL12;
-              brl->keyBindings = model->keyTableDefinition->bindings;
-              brl->keyNameTables = model->keyTableDefinition->names;
               logMessage(LOG_INFO, "switched to model %s", model->name);
             }
             break;
@@ -1848,8 +1843,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                    parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
 
     if (protocol->detectModel(brl)) {
-      makeOutputTable(dotsTable_ISO11548_1);
+      {
+        const KeyTableDefinition *ktd = model->keyTableDefinition;
 
+        brl->keyBindings = ktd->bindings;
+        brl->keyNameTables = ktd->names;
+      }
+
+      makeOutputTable(dotsTable_ISO11548_1);
       memset(&textRewriteTime, 0, sizeof(textRewriteTime));
       return 1;
     }
