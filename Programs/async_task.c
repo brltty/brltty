@@ -85,8 +85,8 @@ asyncAddTask (AsyncEvent *event, AsyncTaskFunction *function, void *data) {
 }
 
 static void
-handleAddTaskEvent (void *eventData, void *signalData) {
-  addTask(signalData);
+handleAddTaskEvent (const AsyncEventHandlerParameters *parameters) {
+  addTask(parameters->signalData);
 }
 
 AsyncEvent *

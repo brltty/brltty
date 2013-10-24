@@ -26,9 +26,15 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct AsyncEventStruct AsyncEvent;
-typedef void AsyncEventCallback (void *eventData, void *signalData);
 
-extern AsyncEvent *asyncNewEvent (AsyncEventCallback *callback, void *data);
+typedef struct {
+  void *eventData;
+  void *signalData;
+} AsyncEventHandlerParameters;
+
+typedef void AsyncEventHandler (const AsyncEventHandlerParameters *parameters);
+
+extern AsyncEvent *asyncNewEvent (AsyncEventHandler *handler, void *data);
 extern void asyncDiscardEvent (AsyncEvent *event);
 extern int asyncSignalEvent (AsyncEvent *event, void *data);
 
