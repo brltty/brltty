@@ -87,11 +87,11 @@ static void setPollAlarm (int delay, void *data);
 static AsyncHandle pollAlarm = NULL;
 
 static void
-handlePollAlarm (const AsyncAlarmResult *result) {
+handlePollAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(pollAlarm);
   pollAlarm = NULL;
 
-  setPollAlarm((handleInput()? 0: 40), result->data);
+  setPollAlarm((handleInput()? 0: 40), parameters->data);
 }
 
 static void
@@ -102,7 +102,7 @@ setPollAlarm (int delay, void *data) {
 }
 
 static int
-monitorInput (const AsyncMonitorResult *result) {
+monitorInput (const AsyncMonitorCallbackParameters *parameters) {
   handleInput();
   return 1;
 }

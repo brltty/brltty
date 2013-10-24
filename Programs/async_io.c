@@ -536,11 +536,11 @@ invokeMonitorCallback (OperationEntry *operation) {
   AsyncMonitorCallback *callback = extension->callback;
 
   if (callback) {
-    const AsyncMonitorResult result = {
+    const AsyncMonitorCallbackParameters parameters = {
       .data = operation->data
     };
 
-    if (callback(&result)) return 1;
+    if (callback(&parameters)) return 1;
   }
 
   return 0;
@@ -554,7 +554,7 @@ invokeInputCallback (OperationEntry *operation) {
   if (!extension->direction.input.callback) return 0;
 
   {
-    const AsyncInputResult result = {
+    const AsyncInputCallbackParameters parameters = {
       .data = operation->data,
       .buffer = extension->buffer,
       .size = extension->size,
@@ -563,7 +563,7 @@ invokeInputCallback (OperationEntry *operation) {
       .end = extension->direction.input.end
     };
 
-    count = extension->direction.input.callback(&result);
+    count = extension->direction.input.callback(&parameters);
   }
 
   if (operation->error) return 0;
@@ -589,14 +589,14 @@ invokeOutputCallback (OperationEntry *operation) {
   }
 
   if (extension->direction.output.callback) {
-    const AsyncOutputResult result = {
+    const AsyncOutputCallbackParameters parameters = {
       .data = operation->data,
       .buffer = extension->buffer,
       .size = extension->size,
       .error = operation->error
     };
 
-    extension->direction.output.callback(&result);
+    extension->direction.output.callback(&parameters);
   }
 
   return 0;

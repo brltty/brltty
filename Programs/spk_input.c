@@ -74,9 +74,9 @@ stopInputMonitor (void) {
 }
 
 static size_t
-monitorInput (const AsyncInputResult *result) {
-  const char *buffer = result->buffer;
-  size_t length = result->length;
+monitorInput (const AsyncInputCallbackParameters *parameters) {
+  const char *buffer = parameters->buffer;
+  size_t length = parameters->length;
 
   sayCharacters(&spk, buffer, length, 0);
   return length;

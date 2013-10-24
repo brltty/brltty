@@ -28,9 +28,9 @@ extern "C" {
 
 typedef struct {
   void *data;
-} AsyncAlarmResult;
+} AsyncAlarmCallbackParameters;
 
-typedef void AsyncAlarmCallback (const AsyncAlarmResult *result);
+typedef void AsyncAlarmCallback (const AsyncAlarmCallbackParameters *parameters);
 
 extern int asyncSetAlarmTo (
   AsyncHandle *handle,

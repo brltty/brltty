@@ -58,8 +58,8 @@ struct InputOutputMethodsStruct {
 };
 
 static int
-setEventMonitor (const AsyncMonitorResult *result) {
-  EventMonitor *evm = result->data;
+setEventMonitor (const AsyncMonitorCallbackParameters *parameters) {
+  EventMonitor *evm = parameters->data;
 
   evm->ready = 1;
   return 0;

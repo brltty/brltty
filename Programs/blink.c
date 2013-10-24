@@ -96,8 +96,8 @@ setBlinkState (BlinkDescriptor *blink, int visible) {
 static void setBlinkAlarm (BlinkDescriptor *blink);
 
 static void
-handleBlinkAlarm (const AsyncAlarmResult *result) {
-  BlinkDescriptor *blink = result->data;
+handleBlinkAlarm (const AsyncAlarmCallbackParameters *parameters) {
+  BlinkDescriptor *blink = parameters->data;
 
   asyncDiscardHandle(blink->alarmHandle);
   blink->alarmHandle = NULL;

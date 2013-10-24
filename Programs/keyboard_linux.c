@@ -495,20 +495,20 @@ forwardKeyEvent (int code, int press) {
 }
 
 static size_t
-handleKeyboardEvent (const AsyncInputResult *result) {
-  KeyboardPlatformData *kpd = result->data;
+handleKeyboardEvent (const AsyncInputCallbackParameters *parameters) {
+  KeyboardPlatformData *kpd = parameters->data;
 
-  if (result->error) {
+  if (parameters->error) {
     logMessage(LOG_DEBUG, "keyboard read error: fd=%d: %s",
-               kpd->fileDescriptor, strerror(result->error));
+               kpd->fileDescriptor, strerror(parameters->error));
     closeKeyboard(kpd);
-  } else if (result->end) {
+  } else if (parameters->end) {
     logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
     closeKeyboard(kpd);
   } else {
-    const struct input_event *event = result->buffer;
+    const struct input_event *event = parameters->buffer;
 
-    if (result->length >= sizeof(*event)) {
+    if (parameters->length >= sizeof(*event)) {
       if (event->type == EV_KEY) {
         int release = event->value == 0;
         int press   = event->value == 1;
@@ -643,8 +643,8 @@ typedef struct {
 } InputDeviceData;
 
 static void
-doOpenInputDevice (const AsyncAlarmResult *result) {
-  InputDeviceData *idd = result->data;
+doOpenInputDevice (const AsyncAlarmCallbackParameters *parameters) {
+  InputDeviceData *idd = parameters->data;
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
   if (device != -1) {
@@ -663,15 +663,15 @@ doOpenInputDevice (const AsyncAlarmResult *result) {
 }
 
 static size_t
-handleKobjectUeventString (const AsyncInputResult *result) {
-  if (result->error) {
-    logMessage(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
-  } else if (result->end) {
+handleKobjectUeventString (const AsyncInputCallbackParameters *parameters) {
+  if (parameters->error) {
+    logMessage(LOG_DEBUG, "netlink read error: %s", strerror(parameters->error));
+  } else if (parameters->end) {
     logMessage(LOG_DEBUG, "netlink end-of-file");
-    releaseKeyboardCommonData(result->data);
+    releaseKeyboardCommonData(parameters->data);
   } else {
-    const char *buffer = result->buffer;
-    const char *end = memchr(buffer, 0, result->length);
+    const char *buffer = parameters->buffer;
+    const char *end = memchr(buffer, 0, parameters->length);
 
     if (end) {
       const char *path = strchr(buffer, '@');
@@ -707,7 +707,7 @@ handleKobjectUeventString (const AsyncInputResult *result) {
                       snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
 
                       if ((idd->name = strdup(eventDevice))) {
-                        idd->kcd = result->data;
+                        idd->kcd = parameters->data;
 
                         if (asyncSetAlarmIn(NULL, 1000, doOpenInputDevice, idd)) {
                           claimKeyboardCommonData(idd->kcd);

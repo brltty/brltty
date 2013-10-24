@@ -88,12 +88,12 @@ static void setFlushAlarm (int delay, void *data);
 static AsyncHandle flushAlarm = NULL;
 
 static void
-handleFlushAlarm (const AsyncAlarmResult *result) {
+handleFlushAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(flushAlarm);
   flushAlarm = NULL;
 
   api_flush(&brl);
-  setFlushAlarm(100, result->data);
+  setFlushAlarm(100, parameters->data);
 }
 
 static void

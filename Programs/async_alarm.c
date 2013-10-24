@@ -161,12 +161,12 @@ asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
 
       if (milliseconds <= 0) {
         AsyncAlarmCallback *callback = alarm->callback;
-        const AsyncAlarmResult result = {
+        const AsyncAlarmCallbackParameters parameters = {
           .data = alarm->data
         };
 
         deleteElement(element);
-        if (callback) callback(&result);
+        if (callback) callback(&parameters);
         return 1;
       }
 

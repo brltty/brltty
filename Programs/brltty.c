@@ -1629,7 +1629,7 @@ resetUpdateAlarm (void) {
 static void setUpdateAlarm (void *data);
 
 static void
-handleUpdateAlarm (const AsyncAlarmResult *result) {
+handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   setUpdateTime(updateInterval, 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
@@ -1991,7 +1991,7 @@ handleUpdateAlarm (const AsyncAlarmResult *result) {
 
   resetAllBlinkDescriptors();
   drainBrailleOutput(&brl, 0);
-  setUpdateAlarm(result->data);
+  setUpdateAlarm(parameters->data);
 }
 
 static void

@@ -247,8 +247,8 @@ processCommand (KeyTable *table, int command) {
 static void setLongPressAlarm (KeyTable *table, unsigned char when);
 
 static void
-handleLongPressAlarm (const AsyncAlarmResult *result) {
-  KeyTable *table = result->data;
+handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
+  KeyTable *table = parameters->data;
 
   table->longPress.alarm = NULL;
   table->longPress.pending = 0;

@@ -182,7 +182,7 @@ static void setCommandAlarm (void *data);
 static AsyncHandle commandAlarm = NULL;
 
 static void
-handleCommandAlarm (const AsyncAlarmResult *result) {
+handleCommandAlarm (const AsyncAlarmCallbackParameters *parameters) {
   int reschedule = 0;
   Queue *queue = getCommandQueue(0);
 
@@ -201,7 +201,7 @@ handleCommandAlarm (const AsyncAlarmResult *result) {
 
   asyncDiscardHandle(commandAlarm);
   commandAlarm = NULL;
-  if (reschedule) setCommandAlarm(result->data);
+  if (reschedule) setCommandAlarm(parameters->data);
 }
 
 static void

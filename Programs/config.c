@@ -718,7 +718,7 @@ handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
 static void scheduleKeyboardMonitor (int interval);
 
 static void
-retryKeyboardMonitor (const AsyncAlarmResult *result UNUSED) {
+retryKeyboardMonitor (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
   if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
@@ -1277,7 +1277,7 @@ startBrailleDriver (void) {
 static int tryBrailleDriver (void);
 
 static void
-retryBrailleDriver (const AsyncAlarmResult *result UNUSED) {
+retryBrailleDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!brailleDriver) tryBrailleDriver();
 }
 
@@ -1491,7 +1491,7 @@ startSpeechDriver (void) {
 static int trySpeechDriver (void);
 
 static void
-retrySpeechDriver (const AsyncAlarmResult *result UNUSED) {
+retrySpeechDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!speechDriver) trySpeechDriver();
 }
 
@@ -1636,7 +1636,7 @@ startScreenDriver (void) {
 static int tryScreenDriver (void);
 
 static void
-retryScreenDriver (const AsyncAlarmResult *result UNUSED) {
+retryScreenDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!screenDriver) tryScreenDriver();
 }
 
@@ -1681,7 +1681,7 @@ makePidFile (ProcessIdentifier pid) {
 static int tryPidFile (void);
 
 static void
-retryPidFile (const AsyncAlarmResult *result UNUSED) {
+retryPidFile (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   tryPidFile();
 }
 

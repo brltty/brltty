@@ -43,8 +43,8 @@ struct AsyncEventStruct {
 };
 
 static int
-monitorEventPipe (const AsyncMonitorResult *result) {
-  AsyncEvent *event = result->data;
+monitorEventPipe (const AsyncMonitorCallbackParameters *parameters) {
+  AsyncEvent *event = parameters->data;
   void *data;
   const size_t size = sizeof(data);
 
