@@ -835,17 +835,17 @@ handleNavigationCommand (int command, void *datga) {
       toggleFeatureSetting(&prefs.cursorStyle, command);
       break;
     case BRL_CMD_CSRTRK:
-      if (toggleSetting(&ses->trackCursor, command, &tune_cursor_unlinked, &tune_cursor_linked)) {
-        if (ses->trackCursor) {
+      toggleSetting(&ses->trackCursor, command, &tune_cursor_unlinked, &tune_cursor_linked);
+
+      if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-          if (speechTracking && (scr.number == speechScreen)) {
-            speechIndex = -1;
-          } else
+        if (speechTracking && (scr.number == speechScreen)) {
+          speechIndex = -1;
+        } else
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-          {
-            trackCursor(1);
-          }
+        {
+          trackCursor(1);
         }
       }
       break;
