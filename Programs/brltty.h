@@ -76,18 +76,27 @@ extern int isSameRow (
   IsSameCharacter isSameCharacter
 );
 
-extern int toggleFlag (
+typedef enum {
+  TOGGLE_ERROR,
+  TOGGLE_SAME,
+  TOGGLE_OFF,
+  TOGGLE_ON
+} ToggleResult;
+
+extern ToggleResult toggleBit (
   int *bits, int bit, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
+  const TuneDefinition *offTune,
+  const TuneDefinition *onTune
 );
 
-extern int toggleSetting (
+extern ToggleResult toggleSetting (
   unsigned char *setting, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
+  const TuneDefinition *offTune,
+  const TuneDefinition *onTune
 );
 
-extern int toggleModeSetting (unsigned char *setting, int command);
-extern int toggleFeatureSetting (unsigned char *setting, int command);
+extern ToggleResult toggleModeSetting (unsigned char *setting, int command);
+extern ToggleResult toggleFeatureSetting (unsigned char *setting, int command);
 
 extern unsigned char infoMode;
 

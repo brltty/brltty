@@ -889,26 +889,28 @@ handleNavigationCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_FREEZE: {
-      unsigned char state;
+      unsigned char setting;
 
       if (isLiveScreen()) {
-        state = 0;
+        setting = 0;
       } else if (isFrozenScreen()) {
-        state = 1;
+        setting = 1;
       } else {
         playTune(&tune_command_rejected);
         break;
       }
 
-      if (toggleModeSetting(&state, command)) {
-        if (!state) {
+      switch (toggleSetting(&setting, command, &tune_screen_unfrozen, &tune_screen_frozen)) {
+        case TOGGLE_OFF:
           deactivateFrozenScreen();
-          playTune(&tune_screen_unfrozen);
-        } else if (activateFrozenScreen()) {
-          playTune(&tune_screen_frozen);
-        } else {
-          playTune(&tune_command_rejected);
-        }
+          break;
+
+        case TOGGLE_ON:
+          if (!activateFrozenScreen()) playTune(&tune_command_rejected);
+          break;
+
+        default:
+          break;
       }
 
       break;
@@ -934,7 +936,7 @@ handleNavigationCommand (int command, void *datga) {
       goto doModifier;
 
     doModifier:
-      toggleFlag(&inputModifiers, modifier, command, &tune_toggle_off, &tune_toggle_on);
+      toggleBit(&inputModifiers, modifier, command, &tune_toggle_off, &tune_toggle_on);
       break;
     }
 
@@ -1029,8 +1031,10 @@ handleNavigationCommand (int command, void *datga) {
     case BRL_CMD_INFO:
       if ((prefs.statusPosition == spNone) || haveStatusCells()) {
         toggleModeSetting(&infoMode, command);
-      } else if (toggleModeSetting(&textMaximized, command)) {
-        reconfigureWindow();
+      } else {
+        ToggleResult result = toggleModeSetting(&textMaximized, command);
+
+        if (result > TOGGLE_SAME) reconfigureWindow();
       }
       break;
 

@@ -1101,10 +1101,11 @@ getContractedLength (unsigned int outputLimit) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-int
-toggleFlag (
+ToggleResult
+toggleBit (
   int *bits, int bit, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
+  const TuneDefinition *offTune,
+  const TuneDefinition *onTune
 ) {
   int oldBits = *bits;
 
@@ -1123,58 +1124,42 @@ toggleFlag (
 
     default:
       playTune(&tune_command_rejected);
-      return 0;
+      return TOGGLE_ERROR;
   }
 
-  if (*bits == oldBits) {
-    playTune(&tune_no_change);
-    return 0;
-  }
+  {
+    int isOn = (*bits & bit) != 0;
+    const TuneDefinition *tune = isOn? onTune: offTune;
 
-  playTune((*bits & bit)? onTune: offTune);
-  return 1;
+    playTune(tune);
+    if (*bits != oldBits) return isOn? TOGGLE_ON: TOGGLE_OFF;
+
+    asyncWait(100);
+    playTune(tune);
+    return TOGGLE_SAME;
+  }
 }
 
-int
+ToggleResult
 toggleSetting (
   unsigned char *setting, int command,
-  const TuneDefinition *offTune, const TuneDefinition *onTune
+  const TuneDefinition *offTune,
+  const TuneDefinition *onTune
 ) {
-  unsigned char oldSetting = *setting;
+  const int bit = 1;
+  int bits = *setting? bit: 0;
+  ToggleResult result = toggleBit(&bits, bit, command, offTune, onTune);
 
-  switch (command & BRL_FLG_TOGGLE_MASK) {
-    case 0:
-      *setting = !*setting;
-      break;
-
-    case BRL_FLG_TOGGLE_ON:
-      *setting = 1;
-      break;
-
-    case BRL_FLG_TOGGLE_OFF:
-      *setting = 0;
-      break;
-
-    default:
-      playTune(&tune_command_rejected);
-      return 0;
-  }
-
-  if (*setting == oldSetting) {
-    playTune(&tune_no_change);
-    return 0;
-  }
-
-  playTune(*setting? onTune: offTune);
-  return 1;
+  *setting = (bits & bit)? 1: 0;
+  return result;
 }
 
-int
+ToggleResult
 toggleModeSetting (unsigned char *setting, int command) {
   return toggleSetting(setting, command, NULL, NULL);
 }
 
-int
+ToggleResult
 toggleFeatureSetting (unsigned char *setting, int command) {
   return toggleSetting(setting, command, &tune_toggle_off, &tune_toggle_on);
 }
