@@ -132,14 +132,14 @@ handleSpeechCommand (int command, void *datga) {
       if (speech->setRate && (prefs.speechRate > 0)) {
         setSpeechRate(&spk, --prefs.speechRate, 1);
       } else {
-        playTune(&tune_command_rejected);
+        playTune(&tune_no_change);
       }
       break;
     case BRL_CMD_SAY_FASTER:
       if (speech->setRate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
         setSpeechRate(&spk, ++prefs.speechRate, 1);
       } else {
-        playTune(&tune_command_rejected);
+        playTune(&tune_no_change);
       }
       break;
 
@@ -147,14 +147,14 @@ handleSpeechCommand (int command, void *datga) {
       if (speech->setVolume && (prefs.speechVolume > 0)) {
         setSpeechVolume(&spk, --prefs.speechVolume, 1);
       } else {
-        playTune(&tune_command_rejected);
+        playTune(&tune_no_change);
       }
       break;
     case BRL_CMD_SAY_LOUDER:
       if (speech->setVolume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
         setSpeechVolume(&spk, ++prefs.speechVolume, 1);
       } else {
-        playTune(&tune_command_rejected);
+        playTune(&tune_no_change);
       }
       break;
 
