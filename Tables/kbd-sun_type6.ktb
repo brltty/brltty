@@ -36,6 +36,8 @@ hide off
 bind !ACTION_Undo RETURN
 bind ControlLeft+!ACTION_Undo BACK
 bind !ACTION_Paste PASTE
+bind ControlLeft+!ACTION_Paste CLIP_RESTORE
+bind ShiftLeft+!ACTION_Paste CLIP_SAVE
 bind !ACTION_Find NXSEARCH
 bind ControlLeft+!ACTION_Find PRSEARCH
 
