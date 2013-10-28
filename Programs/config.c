@@ -1079,9 +1079,10 @@ constructBrailleDriver (void) {
 
 void
 destructBrailleDriver (void) {
-  brailleConstructed = 0;
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);
+
+  brailleConstructed = 0;
   braille->destruct(&brl);
   disableHelpPage(brailleHelpPageNumber);
 
