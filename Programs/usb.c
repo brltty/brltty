@@ -822,7 +822,7 @@ usbAwaitInput (
 
     if (buffer) {
       TimePeriod period;
-      if (timeout) startTimePeriod(&period, timeout);
+      startTimePeriod(&period, timeout);
 
       while (1) {
         ssize_t count = usbReadEndpoint(device, endpointNumber, buffer, size, 20);
@@ -843,7 +843,6 @@ usbAwaitInput (
 #endif /* ETIMEDOUT */
 
         if (errno != EAGAIN) break;
-        if (!timeout) break;
         if (afterTimePeriod(&period, NULL)) break;
         asyncWait(interval);
       }
@@ -858,8 +857,7 @@ usbAwaitInput (
 
   {
     TimePeriod period;
-
-    if (timeout) startTimePeriod(&period, timeout);
+    startTimePeriod(&period, timeout);
 
     while (1) {
       UsbResponse response;
@@ -869,7 +867,6 @@ usbAwaitInput (
                                          endpointNumber | UsbEndpointDirection_Input,
                                          &response, 0))) {
         if (errno != EAGAIN) return 0;
-        if (!timeout) return 0;
         if (afterTimePeriod(&period, NULL)) return 0;
         asyncWait(interval);
       }
