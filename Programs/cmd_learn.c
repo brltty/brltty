@@ -95,7 +95,7 @@ presentLearnMode (void *data) {
   };
 
   suspendUpdates();
-  pushCommandHandler(KTB_CTX_DEFAULT, handleLearnCommand, &lmd);
+  pushCommandHandler("learn", KTB_CTX_DEFAULT, handleLearnCommand, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
     if (message(lmd.mode, gettext("Learn Mode"), MSG_SYNC|MSG_NODELAY)) {

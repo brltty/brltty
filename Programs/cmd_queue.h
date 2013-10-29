@@ -25,11 +25,28 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef int CommandExecuter (int command);
-extern CommandExecuter *currentCommandExecuter;
+extern int beginCommandHandling (void);
+extern void endCommandHandling (void);
+
+typedef void *CommandPreprocessor (void);
+typedef void CommandPostprocessor (void *state, int command, int handled);
+
+extern int pushCommandEnvironment (
+  const char *name,
+  CommandPreprocessor *preprocessCommand,
+  CommandPostprocessor *postprocessCommand
+);
+
+extern int popCommandEnvironment (void);
 
 typedef int CommandHandler (int command, void *data);
-extern int pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data);
+
+extern int pushCommandHandler (
+  const char *name,
+  KeyTableCommandContext context,
+  CommandHandler *handler, void *data
+);
+
 extern int popCommandHandler (void);
 
 extern int handleCommand (int command);

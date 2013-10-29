@@ -31,51 +31,37 @@
 #include "scr.h"
 #include "brltty.h"
 
-CommandExecuter *currentCommandExecuter = NULL;
-
+typedef struct CommandEnvironmentStruct CommandEnvironment;
 typedef struct CommandHandlerLevelStruct CommandHandlerLevel;
-static CommandHandlerLevel *commandHandlerStack = NULL;
 
 struct CommandHandlerLevelStruct {
   CommandHandlerLevel *previousLevel;
+  const char *levelName;
+
   CommandHandler *handleCommand;
   void *handlerData;
   KeyTableCommandContext commandContext;
 };
 
-int
-pushCommandHandler (KeyTableCommandContext context, CommandHandler *handler, void *data) {
-  CommandHandlerLevel *chl;
+struct CommandEnvironmentStruct {
+  CommandEnvironment *previousEnvironment;
+  const char *environmentName;
 
-  if ((chl = malloc(sizeof(*chl)))) {
-    memset(chl, 0, sizeof(*chl));
-    chl->handleCommand = handler;
-    chl->handlerData = data;
-    chl->commandContext = context;
+  CommandHandlerLevel *handlerStack;
+  CommandPreprocessor *preprocessCommand;
+  CommandPostprocessor *postprocessCommand;
+};
 
-    chl->previousLevel = commandHandlerStack;
-    commandHandlerStack = chl;
-    return 1;
-  } else {
-    logMallocError();
-  }
+static CommandEnvironment *commandEnvironmentStack = NULL;
 
-  return 0;
-}
-
-int
-popCommandHandler (void) {
-  CommandHandlerLevel *chl = commandHandlerStack;
-  if (!chl) return 0;
-
-  commandHandlerStack = chl->previousLevel;
-  free(chl);
-  return 1;
+static CommandHandlerLevel **
+getCommandHandlerTop (void) {
+  return &commandEnvironmentStack->handlerStack;
 }
 
 KeyTableCommandContext
 getCurrentCommandContext (void) {
-  const CommandHandlerLevel *chl = commandHandlerStack;
+  const CommandHandlerLevel *chl = *getCommandHandlerTop();
   KeyTableCommandContext context = chl? chl->commandContext: KTB_CTX_DEFAULT;
 
   if (context == KTB_CTX_DEFAULT) context = getScreenCommandContext();
@@ -120,7 +106,8 @@ handleCommand (int command) {
   }
 
   {
-    const CommandHandlerLevel *chl = commandHandlerStack;
+    const CommandEnvironment *env = commandEnvironmentStack;
+    const CommandHandlerLevel *chl = env->handlerStack;
 
     while (chl) {
       if (chl->handleCommand(command, chl->handlerData)) return 1;
@@ -190,10 +177,11 @@ handleCommandAlarm (const AsyncAlarmCallbackParameters *parameters) {
     int command = dequeueCommand(queue);
 
     if (command != EOF) {
-      CommandExecuter *executeCommand = currentCommandExecuter;
+      const CommandEnvironment *env = commandEnvironmentStack;
+      void *state = env->preprocessCommand? env->preprocessCommand(): NULL;
+      int handled = handleCommand(command);
 
-      if (!executeCommand) executeCommand = handleCommand;
-      executeCommand(command);
+      if (env->postprocessCommand) env->postprocessCommand(state, command, handled);
     }
 
     if (getQueueSize(queue) > 0) reschedule = 1;
@@ -233,4 +221,99 @@ enqueueCommand (int command) {
   }
 
   return 0;
+}
+
+int
+pushCommandHandler (
+  const char *name,
+  KeyTableCommandContext context,
+  CommandHandler *handler, void *data
+) {
+  CommandHandlerLevel *chl;
+
+  if ((chl = malloc(sizeof(*chl)))) {
+    memset(chl, 0, sizeof(*chl));
+    chl->levelName = name;
+    chl->handleCommand = handler;
+    chl->handlerData = data;
+    chl->commandContext = context;
+
+    {
+      CommandHandlerLevel **top = getCommandHandlerTop();
+
+      chl->previousLevel = *top;
+      *top = chl;
+    }
+
+    logMessage(LOG_DEBUG, "push command handler: %s", chl->levelName);
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+int
+popCommandHandler (void) {
+  CommandHandlerLevel **top = getCommandHandlerTop();
+  CommandHandlerLevel *chl = *top;
+
+  if (!chl) return 0;
+  *top = chl->previousLevel;
+
+  logMessage(LOG_DEBUG, "pop command handler: %s", chl->levelName);
+  free(chl);
+  return 1;
+}
+
+int
+pushCommandEnvironment (
+  const char *name,
+  CommandPreprocessor *preprocessCommand,
+  CommandPostprocessor *postprocessCommand
+) {
+  CommandEnvironment *env;
+
+  if ((env = malloc(sizeof(*env)))) {
+    memset(env, 0, sizeof(*env));
+    env->environmentName = name;
+    env->handlerStack = NULL;
+    env->preprocessCommand = preprocessCommand;
+    env->postprocessCommand = postprocessCommand;
+
+    env->previousEnvironment = commandEnvironmentStack;
+    commandEnvironmentStack = env;
+
+    logMessage(LOG_DEBUG, "push command environment: %s", env->environmentName);
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+int
+popCommandEnvironment (void) {
+  CommandEnvironment *env = commandEnvironmentStack;
+
+  if (!env) return 0;
+  while (popCommandHandler());
+  commandEnvironmentStack = env->previousEnvironment;
+
+  logMessage(LOG_DEBUG, "pop command environment: %s", env->environmentName);
+  free(env);
+  return 1;
+}
+
+int
+beginCommandHandling (void) {
+  commandEnvironmentStack = NULL;
+  return pushCommandEnvironment("initial", NULL, NULL);
+}
+
+void
+endCommandHandling (void) {
+  while (popCommandEnvironment());
 }

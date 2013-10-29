@@ -118,64 +118,84 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
   }
 }
 
-static int
-executeCommand (int command) {
-  int oldmotx = ses->winx;
-  int oldmoty = ses->winy;
-  int handled = handleCommand(command);
+typedef struct {
+  int oldmotx;
+  int oldmoty;
+} PrecommandState;
 
-  if (handled) {
-    resetUpdateAlarm();
+static void *
+preprocessCommand (void) {
+  PrecommandState *pre;
+
+  if ((pre = malloc(sizeof(*pre)))) {
+    pre->oldmotx = ses->winx;
+    pre->oldmoty = ses->winy;
+    return pre;
+  } else {
+    logMallocError();
   }
 
-  if ((ses->winx != oldmotx) || (ses->winy != oldmoty)) {
-    /* The window has been manually moved. */
-    ses->motx = ses->winx;
-    ses->moty = ses->winy;
+  return NULL;
+}
+
+static void
+postprocessCommand (void *state, int command, int handled) {
+  PrecommandState *pre = state;
+
+  if (pre) {
+    if (handled) {
+      resetUpdateAlarm();
+    }
+
+    if ((ses->winx != pre->oldmotx) || (ses->winy != pre->oldmoty)) {
+      /* The window has been manually moved. */
+      ses->motx = ses->winx;
+      ses->moty = ses->winy;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-    isContracted = 0;
+      isContracted = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
-      ses->trackCursor = 0;
-      playTune(&tune_cursor_unlinked);
-    }
+      if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
+        ses->trackCursor = 0;
+        playTune(&tune_cursor_unlinked);
+      }
 #endif /* ENABLE_SPEECH_SUPPORT */
-  }
+    }
 
-  if (!(command & BRL_MSK_BLK)) {
-    if (command & BRL_FLG_MOTION_ROUTE) {
-      int left = ses->winx;
-      int right = MIN(left+textCount, scr.cols) - 1;
+    if (!(command & BRL_MSK_BLK)) {
+      if (command & BRL_FLG_MOTION_ROUTE) {
+        int left = ses->winx;
+        int right = MIN(left+textCount, scr.cols) - 1;
 
-      int top = ses->winy;
-      int bottom = MIN(top+brl.textRows, scr.rows) - 1;
+        int top = ses->winy;
+        int bottom = MIN(top+brl.textRows, scr.rows) - 1;
 
-      if ((scr.posx < left) || (scr.posx > right) ||
-          (scr.posy < top) || (scr.posy > bottom)) {
-        if (routeCursor(MIN(MAX(scr.posx, left), right),
-                        MIN(MAX(scr.posy, top), bottom),
-                        scr.number)) {
-          playTune(&tune_routing_started);
-          checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
+        if ((scr.posx < left) || (scr.posx > right) ||
+            (scr.posy < top) || (scr.posy > bottom)) {
+          if (routeCursor(MIN(MAX(scr.posx, left), right),
+                          MIN(MAX(scr.posy, top), bottom),
+                          scr.number)) {
+            playTune(&tune_routing_started);
+            checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
 
-          {
-            ScreenDescription description;
-            describeScreen(&description);
+            {
+              ScreenDescription description;
+              describeScreen(&description);
 
-            if (description.number == scr.number) {
-              slideWindowVertically(description.posy);
-              placeWindowHorizontally(description.posx);
+              if (description.number == scr.number) {
+                slideWindowVertically(description.posy);
+                placeWindowHorizontally(description.posx);
+              }
             }
           }
         }
       }
     }
-  }
 
-  return handled;
+    free(pre);
+  }
 }
 
 static int
@@ -199,15 +219,15 @@ setSessionEntry (void) {
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
-        currentCommandExecuter = executeCommand;
-        pushCommandHandler(KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
+        pushCommandEnvironment("main", preprocessCommand, postprocessCommand);
+        pushCommandHandler("unhandled", KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-        pushCommandHandler(KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
+        pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
 #endif /*  ENABLE_SPEECH_SUPPORT */
 
-        pushCommandHandler(KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
-        pushCommandHandler(KTB_CTX_DEFAULT, handleScreenCommand, NULL);
+        pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
+        pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
     }
   }
@@ -240,10 +260,11 @@ updateSessionAttributes (void) {
 
 static void
 exitSessions (void *data) {
-  currentCommandExecuter = NULL;
-  while (popCommandHandler());
+  if (ses) {
+    popCommandEnvironment();
+    ses = NULL;
+  }
 
-  ses = NULL;
   deallocateSessionEntries();
 }
 
@@ -2011,6 +2032,7 @@ resumeUpdates (void) {
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   srand((unsigned int)time(NULL));
+
   onProgramExit("log", exitLog, NULL);
   openSystemLog();
 
@@ -2032,6 +2054,7 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGINT, handleTerminationRequest);
 #endif /* SIGINT */
 
+  beginCommandHandling();
   startUpdates();
 
   {
@@ -2062,6 +2085,7 @@ brlttyConstruct (int argc, char *argv[]) {
 int
 brlttyDestruct (void) {
   endProgram();
+  endCommandHandling();
   return 1;
 }
 

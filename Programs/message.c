@@ -53,6 +53,7 @@ typedef struct {
   const char *mode;
   MessageOptions options;
   unsigned presented:1;
+  unsigned deallocate:1;
   char text[0];
 } MessageParameters;
 
@@ -84,7 +85,7 @@ presentMessage (void *data) {
 
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
     suspendUpdates();
-    pushCommandHandler(KTB_CTX_WAITING, handleMessageCommand, &mgd);
+    pushCommandHandler("message", KTB_CTX_WAITING, handleMessageCommand, &mgd);
 
     while (length) {
       size_t count;
@@ -139,7 +140,7 @@ presentMessage (void *data) {
     apiLink();
   }
 
-  free(mgp);
+  if (mgp->deallocate) free(mgp);
 }
 
 int 
@@ -156,10 +157,12 @@ message (const char *mode, const char *text, MessageOptions options) {
     strcpy(mgp->text, text);
 
     if (mgp->options & MSG_SYNC) {
+      mgp->deallocate = 0;
       presentMessage(mgp);
       if (mgp->presented) presented = 1;
-    } else if (asyncAddTask(NULL, presentMessage, mgp)) {
-      return 1;
+    } else {
+      mgp->deallocate = 1;
+      if (asyncAddTask(NULL, presentMessage, mgp)) return 1;
     }
 
     free(mgp);
