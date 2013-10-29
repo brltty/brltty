@@ -119,8 +119,8 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
 }
 
 typedef struct {
-  int oldmotx;
-  int oldmoty;
+  int motionColumn;
+  int motionRow;
 } PrecommandState;
 
 static void *
@@ -128,8 +128,8 @@ preprocessCommand (void) {
   PrecommandState *pre;
 
   if ((pre = malloc(sizeof(*pre)))) {
-    pre->oldmotx = ses->winx;
-    pre->oldmoty = ses->winy;
+    pre->motionColumn = ses->winx;
+    pre->motionRow = ses->winy;
     return pre;
   } else {
     logMallocError();
@@ -147,7 +147,7 @@ postprocessCommand (void *state, int command, int handled) {
       resetUpdateAlarm();
     }
 
-    if ((ses->winx != pre->oldmotx) || (ses->winy != pre->oldmoty)) {
+    if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
       /* The window has been manually moved. */
       ses->motx = ses->winx;
       ses->moty = ses->winy;

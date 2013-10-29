@@ -85,6 +85,7 @@ presentMessage (void *data) {
 
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
     suspendUpdates();
+    pushCommandEnvironment("message", NULL, NULL);
     pushCommandHandler("message", KTB_CTX_WAITING, handleMessageCommand, &mgd);
 
     while (length) {
@@ -133,7 +134,7 @@ presentMessage (void *data) {
       }
     }
 
-    popCommandHandler();
+    popCommandEnvironment();
     resumeUpdates();
 
     apiStarted = apiWasStarted;

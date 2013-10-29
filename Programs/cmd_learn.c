@@ -95,6 +95,7 @@ presentLearnMode (void *data) {
   };
 
   suspendUpdates();
+  pushCommandEnvironment("learn", NULL, NULL);
   pushCommandHandler("learn", KTB_CTX_DEFAULT, handleLearnCommand, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
@@ -112,7 +113,7 @@ presentLearnMode (void *data) {
     }
   }
 
-  popCommandHandler();
+  popCommandEnvironment();
   resumeUpdates();
   free(lmp);
 }
