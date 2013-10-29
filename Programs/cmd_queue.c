@@ -31,6 +31,8 @@
 #include "scr.h"
 #include "brltty.h"
 
+#define LOG_LEVEL LOG_DEBUG
+
 typedef struct CommandEnvironmentStruct CommandEnvironment;
 typedef struct CommandHandlerLevelStruct CommandHandlerLevel;
 
@@ -50,6 +52,7 @@ struct CommandEnvironmentStruct {
   CommandHandlerLevel *handlerStack;
   CommandPreprocessor *preprocessCommand;
   CommandPostprocessor *postprocessCommand;
+  unsigned handlingCommand:1;
 };
 
 static CommandEnvironment *commandEnvironmentStack = NULL;
@@ -170,32 +173,43 @@ static AsyncHandle commandAlarm = NULL;
 
 static void
 handleCommandAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  int reschedule = 0;
   Queue *queue = getCommandQueue(0);
+
+  asyncDiscardHandle(commandAlarm);
+  commandAlarm = NULL;
 
   if (queue) {
     int command = dequeueCommand(queue);
 
     if (command != EOF) {
-      const CommandEnvironment *env = commandEnvironmentStack;
-      void *state = env->preprocessCommand? env->preprocessCommand(): NULL;
-      int handled = handleCommand(command);
+      CommandEnvironment *env = commandEnvironmentStack;
+      void *state;
+      int handled;
 
+      env->handlingCommand = 1;
+      state = env->preprocessCommand? env->preprocessCommand(): NULL;
+      handled = handleCommand(command);
       if (env->postprocessCommand) env->postprocessCommand(state, command, handled);
+      env->handlingCommand = 0;
     }
-
-    if (getQueueSize(queue) > 0) reschedule = 1;
   }
 
-  asyncDiscardHandle(commandAlarm);
-  commandAlarm = NULL;
-  if (reschedule) setCommandAlarm(parameters->data);
+  setCommandAlarm(parameters->data);
 }
 
 static void
 setCommandAlarm (void *data) {
   if (!commandAlarm) {
-    asyncSetAlarmIn(&commandAlarm, 0, handleCommandAlarm, data);
+    const CommandEnvironment *env = commandEnvironmentStack;
+
+    if (env && !env->handlingCommand) {
+      Queue *queue = getCommandQueue(0);
+
+      if (queue && (getQueueSize(queue) > 0)) {
+        asyncSetAlarmIn(&commandAlarm, 0, handleCommandAlarm, data);
+        logMessage(LOG_LEVEL, "set command alarm");
+      }
+    }
   }
 }
 
@@ -211,7 +225,7 @@ enqueueCommand (int command) {
         item->command = command;
 
         if (enqueueItem(queue, item)) {
-          if (getQueueSize(queue) == 1) setCommandAlarm(NULL);
+          setCommandAlarm(NULL);
           return 1;
         }
 
@@ -245,7 +259,7 @@ pushCommandHandler (
       *top = chl;
     }
 
-    logMessage(LOG_DEBUG, "push command handler: %s", chl->levelName);
+    logMessage(LOG_LEVEL, "pushed command handler: %s", chl->levelName);
     return 1;
   } else {
     logMallocError();
@@ -262,7 +276,7 @@ popCommandHandler (void) {
   if (!chl) return 0;
   *top = chl->previousLevel;
 
-  logMessage(LOG_DEBUG, "pop command handler: %s", chl->levelName);
+  logMessage(LOG_LEVEL, "popped command handler: %s", chl->levelName);
   free(chl);
   return 1;
 }
@@ -281,11 +295,13 @@ pushCommandEnvironment (
     env->handlerStack = NULL;
     env->preprocessCommand = preprocessCommand;
     env->postprocessCommand = postprocessCommand;
+    env->handlingCommand = 0;
 
     env->previousEnvironment = commandEnvironmentStack;
     commandEnvironmentStack = env;
+    setCommandAlarm(NULL);
 
-    logMessage(LOG_DEBUG, "push command environment: %s", env->environmentName);
+    logMessage(LOG_LEVEL, "pushed command environment: %s", env->environmentName);
     return 1;
   } else {
     logMallocError();
@@ -302,7 +318,17 @@ popCommandEnvironment (void) {
   while (popCommandHandler());
   commandEnvironmentStack = env->previousEnvironment;
 
-  logMessage(LOG_DEBUG, "pop command environment: %s", env->environmentName);
+  if (commandAlarm) {
+    const CommandEnvironment *env = commandEnvironmentStack;
+
+    if (!env || env->handlingCommand) {
+      asyncCancelRequest(commandAlarm);
+      commandAlarm = NULL;
+      logMessage(LOG_LEVEL, "cancelled command alarm");
+    }
+  }
+
+  logMessage(LOG_LEVEL, "popped command environment: %s", env->environmentName);
   free(env);
   return 1;
 }
