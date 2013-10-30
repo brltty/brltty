@@ -385,22 +385,9 @@ public class InputService extends InputMethodService {
   }
 
   private static final int[] functionKeyMap = new int[] {
-    KeyEvent.KEYCODE_F1,
-    KeyEvent.KEYCODE_F2,
-    KeyEvent.KEYCODE_F3,
-    KeyEvent.KEYCODE_F4,
-    KeyEvent.KEYCODE_F5,
-    KeyEvent.KEYCODE_F6,
-    KeyEvent.KEYCODE_F7,
-    KeyEvent.KEYCODE_F8,
-    KeyEvent.KEYCODE_F9,
-    KeyEvent.KEYCODE_F10,
-    KeyEvent.KEYCODE_F11,
-    KeyEvent.KEYCODE_F12,
-
-    KeyEvent.KEYCODE_NOTIFICATION,
-    KeyEvent.KEYCODE_BACK,
     KeyEvent.KEYCODE_HOME,
+    KeyEvent.KEYCODE_BACK,
+    KeyEvent.KEYCODE_NOTIFICATION,
     KeyEvent.KEYCODE_APP_SWITCH,
     KeyEvent.KEYCODE_SETTINGS
   };
@@ -425,23 +412,20 @@ public class InputService extends InputMethodService {
         }
         break;
 
-      case KeyEvent.KEYCODE_APP_SWITCH:
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
-        }
-        break;
-
       case KeyEvent.KEYCODE_NOTIFICATION:
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
         }
         break;
 
-      case KeyEvent.KEYCODE_SETTINGS:
+      case KeyEvent.KEYCODE_APP_SWITCH:
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
         }
         break;
+
+      case KeyEvent.KEYCODE_SETTINGS:
+        return BrailleService.getBrailleService().launchSettingsActivity();
 
       default:
         break;

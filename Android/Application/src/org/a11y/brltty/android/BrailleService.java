@@ -37,6 +37,20 @@ public class BrailleService extends AccessibilityService {
     return brailleService;
   }
 
+  public boolean launchSettingsActivity () {
+    Intent intent = new Intent(this, SettingsActivity.class);
+
+    intent.addFlags(
+      Intent.FLAG_ACTIVITY_NEW_TASK |
+      Intent.FLAG_ACTIVITY_CLEAR_TOP |
+      Intent.FLAG_ACTIVITY_SINGLE_TOP |
+      Intent.FLAG_FROM_BACKGROUND
+    );
+
+    startActivity(intent);
+    return true;
+  }
+
   @Override
   public void onCreate () {
     super.onCreate();

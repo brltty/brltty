@@ -376,15 +376,15 @@ the screen. BRLTTY also offers a way to perform these actions from your
 braille device. While a better way may be developed in the future, this 
 is how it can be done right now.
 
-Since Android keyboard support only recognizes 12 function keys 
-(commonly named F1 through F12), BRLTTY uses function keys beyond F12 to 
-perform global Android actions according to the following table.
+Since Android doesn't use the keyboard function keys (commonly named F1 
+through F12), BRLTTY uses them to perform global Android actions 
+according to the following table:
 
-  F13  Notifications
-  F14  Back
-  F15  Home
-  F16  Recent Apps
-  F17  Quick Settings
+  F1  Home
+  F2  Back
+  F3  Notifications
+  F4  Recent Apps
+  F5  BRLTTY Settings
 
 The way a braille device emulates keyboard function keys differs from 
 model to model, so you should check the BRLTTY documentation for your 
