@@ -2054,7 +2054,7 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGINT, handleTerminationRequest);
 #endif /* SIGINT */
 
-  beginCommandHandling();
+  beginCommandQueue();
   startUpdates();
 
   {
@@ -2085,7 +2085,7 @@ brlttyConstruct (int argc, char *argv[]) {
 int
 brlttyDestruct (void) {
   endProgram();
-  endCommandHandling();
+  endCommandQueue();
   return 1;
 }
 

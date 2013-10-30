@@ -56,6 +56,7 @@ struct CommandEnvironmentStruct {
 };
 
 static CommandEnvironment *commandEnvironmentStack = NULL;
+static unsigned int commandQueueSuspendCount = 0;
 
 static CommandHandlerLevel **
 getCommandHandlerTop (void) {
@@ -199,7 +200,7 @@ handleCommandAlarm (const AsyncAlarmCallbackParameters *parameters) {
 
 static void
 setCommandAlarm (void *data) {
-  if (!commandAlarm) {
+  if (!commandAlarm && !commandQueueSuspendCount) {
     const CommandEnvironment *env = commandEnvironmentStack;
 
     if (env && !env->handlingCommand) {
@@ -210,6 +211,15 @@ setCommandAlarm (void *data) {
         logMessage(LOG_LEVEL, "set command alarm");
       }
     }
+  }
+}
+
+static void
+cancelCommandAlarm (void) {
+  if (commandAlarm) {
+    asyncCancelRequest(commandAlarm);
+    commandAlarm = NULL;
+    logMessage(LOG_LEVEL, "cancelled command alarm");
   }
 }
 
@@ -318,13 +328,11 @@ popCommandEnvironment (void) {
   while (popCommandHandler());
   commandEnvironmentStack = env->previousEnvironment;
 
-  if (commandAlarm) {
+  {
     const CommandEnvironment *env = commandEnvironmentStack;
 
     if (!env || env->handlingCommand) {
-      asyncCancelRequest(commandAlarm);
-      commandAlarm = NULL;
-      logMessage(LOG_LEVEL, "cancelled command alarm");
+      cancelCommandAlarm();
     }
   }
 
@@ -334,12 +342,24 @@ popCommandEnvironment (void) {
 }
 
 int
-beginCommandHandling (void) {
+beginCommandQueue (void) {
   commandEnvironmentStack = NULL;
+  commandQueueSuspendCount = 0;
+
   return pushCommandEnvironment("initial", NULL, NULL);
 }
 
 void
-endCommandHandling (void) {
+endCommandQueue (void) {
   while (popCommandEnvironment());
+}
+
+void
+suspendCommandQueue (void) {
+  if (!commandQueueSuspendCount++) cancelCommandAlarm();
+}
+
+void
+resumeCommandQueue (void) {
+  if (!--commandQueueSuspendCount) setCommandAlarm(NULL);
 }

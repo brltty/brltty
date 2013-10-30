@@ -59,6 +59,8 @@ static int
 handleInput (void) {
   int processed = 0;
 
+  suspendCommandQueue();
+
   if (!isSuspended) {
     apiClaimDriver();
     if (processInput()) processed = 1;
@@ -80,6 +82,7 @@ handleInput (void) {
   }
 #endif /* ENABLE_API */
 
+  resumeCommandQueue();
   return processed;
 }
 

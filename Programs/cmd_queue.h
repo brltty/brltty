@@ -25,8 +25,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int beginCommandHandling (void);
-extern void endCommandHandling (void);
+extern int beginCommandQueue (void);
+extern void endCommandQueue (void);
+
+extern void suspendCommandQueue (void);
+extern void resumeCommandQueue (void);
 
 typedef void *CommandPreprocessor (void);
 typedef void CommandPostprocessor (void *state, int command, int handled);
