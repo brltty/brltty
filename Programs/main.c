@@ -30,7 +30,7 @@
 
 static ProgramExitStatus
 brlttyRun (void) {
-  while (brlttyUpdate(INT_MAX));
+  while (brlttyWait(INT_MAX));
   return PROG_EXIT_SUCCESS;
 }
 

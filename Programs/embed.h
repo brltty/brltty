@@ -26,8 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
-FUNCTION_DECLARE(brlttyUpdate, int, (int waitDuration));
 FUNCTION_DECLARE(brlttyDestruct, int, (void));
+
+FUNCTION_DECLARE(brlttyWait, int, (int duration));
+FUNCTION_DECLARE(brlttyInterrupt, int, (void));
 
 #ifdef __cplusplus
 }

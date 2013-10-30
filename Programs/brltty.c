@@ -47,6 +47,7 @@
 #include "cmd_speech.h"
 #include "timing.h"
 #include "async_alarm.h"
+#include "async_event.h"
 #include "async_wait.h"
 #include "message.h"
 #include "tunes.h"
@@ -1333,6 +1334,9 @@ isSameRow (
   return 1;
 }
 
+static int interruptRequested;
+static AsyncEvent *interruptRequestEvent;
+
 int restartRequired;
 int isOffline;
 int isSuspended;
@@ -2029,6 +2033,11 @@ resumeUpdates (void) {
   if (!--updateSuspendCount) setUpdateAlarm(NULL);
 }
 
+static void
+handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
+  interruptRequested = 1;
+}
+
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   srand((unsigned int)time(NULL));
@@ -2070,6 +2079,10 @@ brlttyConstruct (int argc, char *argv[]) {
   ses->spkx = ses->winx; ses->spky = ses->winy;
 
   oldwinx = ses->winx; oldwiny = ses->winy;
+
+  interruptRequested = 0;
+  interruptRequestEvent = asyncNewEvent(handleInterruptRequest, NULL);
+
   restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
@@ -2086,6 +2099,7 @@ int
 brlttyDestruct (void) {
   endProgram();
   endCommandQueue();
+  if (interruptRequestEvent) asyncDiscardEvent(interruptRequestEvent);
   return 1;
 }
 
@@ -2114,7 +2128,16 @@ static int
 checkUnmonitoredConditions (void *data) {
   UnmonitoredConditionDescriptor *ucd = data;
 
+  if (interruptRequested) {
+    static const unsigned char waitResult = 1;
+    ucd->data = &waitResult;
+    interruptRequested = 0;
+    return 1;
+  }
+
   if (terminationCount) {
+    static const unsigned char waitResult = 0;
+    ucd->data = &waitResult;
     return 1;
   }
 
@@ -2137,18 +2160,28 @@ checkUnmonitoredConditions (void *data) {
 }
 
 int
-brlttyUpdate (int waitDuration) {
+brlttyWait (int duration) {
   UnmonitoredConditionDescriptor ucd = {
     .handler = NULL,
     .data = NULL
   };
 
-  if (asyncAwaitCondition(waitDuration, checkUnmonitoredConditions, &ucd)) {
-    if (!ucd.handler) return 0;
+  if (asyncAwaitCondition(duration, checkUnmonitoredConditions, &ucd)) {
+    if (!ucd.handler) {
+      const unsigned char *result = ucd.data;
+      return *result;
+    }
+
     ucd.handler(ucd.data);
   }
 
   return 1;
+}
+
+int
+brlttyInterrupt (void) {
+  if (!interruptRequestEvent) return 0;
+  return asyncSignalEvent(interruptRequestEvent, NULL);
 }
 
 int

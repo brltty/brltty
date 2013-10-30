@@ -26,8 +26,10 @@
 #include "embed.h"
 
 SYMBOL_POINTER(brlttyConstruct);
-SYMBOL_POINTER(brlttyUpdate);
 SYMBOL_POINTER(brlttyDestruct);
+
+SYMBOL_POINTER(brlttyWait);
+SYMBOL_POINTER(brlttyInterrupt);
 
 SYMBOL_POINTER(changeLogLevel);
 SYMBOL_POINTER(changeLogCategories);
@@ -55,8 +57,10 @@ typedef struct {
 
 BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
-  SYMBOL_ENTRY(brlttyUpdate),
   SYMBOL_ENTRY(brlttyDestruct),
+
+  SYMBOL_ENTRY(brlttyWait),
+  SYMBOL_ENTRY(brlttyInterrupt),
 
   SYMBOL_ENTRY(changeLogLevel),
   SYMBOL_ENTRY(changeLogCategories),
@@ -190,7 +194,7 @@ error:
 }
 
 JNIEXPORT jint JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_construct (JNIEnv *env, jobject this, jobjectArray arguments) {
+Java_org_a11y_brltty_core_CoreWrapper_coreConstruct (JNIEnv *env, jobject this, jobjectArray arguments) {
   if (prepareProgramArguments(env, arguments)) {
     if (loadCoreLibrary(env)) {
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
@@ -201,12 +205,7 @@ Java_org_a11y_brltty_core_CoreWrapper_construct (JNIEnv *env, jobject this, jobj
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_update (JNIEnv *env, jobject this, jint waitDuration) {
-  return brlttyUpdate_p(waitDuration)? JNI_TRUE: JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
+Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
   int result = brlttyDestruct_p();
 
 /*
@@ -246,6 +245,16 @@ Java_org_a11y_brltty_core_CoreWrapper_destruct (JNIEnv *env, jobject this) {
   }
 
   return result? JNI_TRUE: JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_coreWait (JNIEnv *env, jobject this, jint duration) {
+  return brlttyWait_p(duration)? JNI_TRUE: JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_coreInterrupt (JNIEnv *env, jobject this) {
+  return brlttyInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
 static jboolean

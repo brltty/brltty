@@ -24,9 +24,11 @@ import java.util.AbstractQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class CoreWrapper {
-  public static native int construct (String[] arguments);
-  public static native boolean update (int waitDuration);
-  public static native boolean destruct ();
+  public static native int coreConstruct (String[] arguments);
+  public static native boolean coreDestruct ();
+
+  public static native boolean coreWait (int duration);
+  public static native boolean coreInterrupt ();
 
   public static native boolean changeLogLevel (String level);
   public static native boolean changeLogCategories (String categories);
@@ -70,7 +72,9 @@ public class CoreWrapper {
   }
 
   public static boolean runOnCoreThread (Runnable runnable) {
-    return runQueue.offer(runnable);
+    if (!runQueue.offer(runnable)) return false;
+    coreInterrupt();
+    return true;
   }
 
   private static volatile boolean stop = false;
@@ -83,9 +87,9 @@ public class CoreWrapper {
     stop = false;
     clearRunQueue();
 
-    int exitStatus = construct(arguments);
+    int exitStatus = coreConstruct(arguments);
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
-      while (update(waitDuration)) {
+      while (coreWait(waitDuration)) {
         if (stop) break;
         processRunQueue();
       }
@@ -93,7 +97,7 @@ public class CoreWrapper {
       exitStatus = ProgramExitStatus.SUCCESS.value;
     }
 
-    destruct();
+    coreDestruct();
     return exitStatus;
   }
 
