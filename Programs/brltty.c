@@ -2137,13 +2137,13 @@ checkUnmonitoredConditions (void *data) {
 }
 
 int
-brlttyUpdate (void) {
+brlttyUpdate (int waitDuration) {
   UnmonitoredConditionDescriptor ucd = {
     .handler = NULL,
     .data = NULL
   };
 
-  if (asyncAwaitCondition(40, checkUnmonitoredConditions, &ucd)) {
+  if (asyncAwaitCondition(waitDuration, checkUnmonitoredConditions, &ucd)) {
     if (!ucd.handler) return 0;
     ucd.handler(ucd.data);
   }

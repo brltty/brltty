@@ -27,6 +27,8 @@ public abstract class ApplicationParameters {
   public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
   public static volatile boolean LOG_KEYBOARD_EVENTS = false;
 
+  public static volatile int CORE_WAIT_DURATION = 40;
+
   public static volatile int KEY_RETRY_TIMEOUT = 1000;
   public static volatile int KEY_RETRY_INTERVAL = 100;
   public static volatile int LONG_PRESS_DELAY = 100;

@@ -25,7 +25,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class CoreWrapper {
   public static native int construct (String[] arguments);
-  public static native boolean update ();
+  public static native boolean update (int waitDuration);
   public static native boolean destruct ();
 
   public static native boolean changeLogLevel (String level);
@@ -79,13 +79,13 @@ public class CoreWrapper {
     stop = true;
   }
 
-  public static int run (String[] arguments) {
+  public static int run (String[] arguments, int waitDuration) {
     stop = false;
     clearRunQueue();
 
     int exitStatus = construct(arguments);
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
-      while (update()) {
+      while (update(waitDuration)) {
         if (stop) break;
         processRunQueue();
       }
@@ -98,7 +98,7 @@ public class CoreWrapper {
   }
 
   public static void main (String[] arguments) {
-    System.exit(run(arguments));
+    System.exit(run(arguments, Integer.MAX_VALUE));
   }
 
   static {

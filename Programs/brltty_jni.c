@@ -201,8 +201,8 @@ Java_org_a11y_brltty_core_CoreWrapper_construct (JNIEnv *env, jobject this, jobj
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_update (JNIEnv *env, jobject this) {
-  return brlttyUpdate_p()? JNI_TRUE: JNI_FALSE;
+Java_org_a11y_brltty_core_CoreWrapper_update (JNIEnv *env, jobject this, jint waitDuration) {
+  return brlttyUpdate_p(waitDuration)? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
