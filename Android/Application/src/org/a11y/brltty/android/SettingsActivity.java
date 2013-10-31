@@ -199,6 +199,8 @@ public class SettingsActivity extends PreferenceActivity {
     protected void sortListLabels (String[] values, String[] labels) {
       if (localeCollator == null) {
         localeCollator = Collator.getInstance();
+        localeCollator.setStrength(Collator.PRIMARY);
+        localeCollator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
       }
 
       int size = values.length;
