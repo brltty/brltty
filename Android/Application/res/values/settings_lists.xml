@@ -2,17 +2,17 @@
 
 <resources>
   <string name="BRAILLE_DRIVER_LABEL_auto">autodetect</string>
-  <string name="BRAILLE_DRIVER_LABEL_at">Albatross</string>
   <string name="BRAILLE_DRIVER_LABEL_al">Alva</string>
-  <string name="BRAILLE_DRIVER_LABEL_bg">B2G</string>
-  <string name="BRAILLE_DRIVER_LABEL_bm">Baum</string>
-  <string name="BRAILLE_DRIVER_LABEL_bc">BrailComm</string>
-  <string name="BRAILLE_DRIVER_LABEL_bl">BrailleLite</string>
-  <string name="BRAILLE_DRIVER_LABEL_bn">BrailleNote</string>
-  <string name="BRAILLE_DRIVER_LABEL_bd">Braudi</string>
+  <string name="BRAILLE_DRIVER_LABEL_at">Albatross</string>
   <string name="BRAILLE_DRIVER_LABEL_ba">BrlAPI</string>
-  <string name="BRAILLE_DRIVER_LABEL_ce">Cebra</string>
+  <string name="BRAILLE_DRIVER_LABEL_bc">BrailComm</string>
+  <string name="BRAILLE_DRIVER_LABEL_bd">Braudi</string>
+  <string name="BRAILLE_DRIVER_LABEL_bg">B2G</string>
+  <string name="BRAILLE_DRIVER_LABEL_bl">BrailleLite</string>
+  <string name="BRAILLE_DRIVER_LABEL_bm">Baum</string>
+  <string name="BRAILLE_DRIVER_LABEL_bn">BrailleNote</string>
   <string name="BRAILLE_DRIVER_LABEL_cb">CombiBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_ce">Cebra</string>
   <string name="BRAILLE_DRIVER_LABEL_ec">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu">EuroBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_fs">FreedomScientific</string>
@@ -22,36 +22,37 @@
   <string name="BRAILLE_DRIVER_LABEL_ir">Iris</string>
   <string name="BRAILLE_DRIVER_LABEL_lb">Libbraille</string>
   <string name="BRAILLE_DRIVER_LABEL_lt">LogText</string>
-  <string name="BRAILLE_DRIVER_LABEL_md">MDV</string>
-  <string name="BRAILLE_DRIVER_LABEL_mt">Metec</string>
-  <string name="BRAILLE_DRIVER_LABEL_mn">MiniBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_mb">MultiBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_md">MDV</string>
+  <string name="BRAILLE_DRIVER_LABEL_mm">BrailleMemo</string>
+  <string name="BRAILLE_DRIVER_LABEL_mn">MiniBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_mt">Metec</string>
   <string name="BRAILLE_DRIVER_LABEL_np">NinePoint</string>
-  <string name="BRAILLE_DRIVER_LABEL_pm">Papenmeier</string>
   <string name="BRAILLE_DRIVER_LABEL_pg">Pegasus</string>
+  <string name="BRAILLE_DRIVER_LABEL_pm">Papenmeier</string>
   <string name="BRAILLE_DRIVER_LABEL_sk">Seika</string>
+  <string name="BRAILLE_DRIVER_LABEL_tn">TechniBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_ts">TSI</string>
   <string name="BRAILLE_DRIVER_LABEL_tt">TTY</string>
-  <string name="BRAILLE_DRIVER_LABEL_tn">TechniBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_vd">VideoBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_vo">Voyager, BraillePen/EasyLink</string>
   <string name="BRAILLE_DRIVER_LABEL_vr">Virtual</string>
   <string name="BRAILLE_DRIVER_LABEL_vs">VisioBraille</string>
-  <string name="BRAILLE_DRIVER_LABEL_vo">Voyager, BraillePen/EasyLink</string>
   <string name="BRAILLE_DRIVER_LABEL_xw">XWindow</string>
 
   <string-array name="BRAILLE_DRIVER_LABELS">
     <item>@string/BRAILLE_DRIVER_LABEL_auto</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_at</item>
     <item>@string/BRAILLE_DRIVER_LABEL_al</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bg</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bm</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bc</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bl</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bn</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_bd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_at</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ba</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_ce</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bc</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bg</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bl</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_cb</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ce</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
     <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
     <item>@string/BRAILLE_DRIVER_LABEL_fs</item>
@@ -61,37 +62,38 @@
     <item>@string/BRAILLE_DRIVER_LABEL_ir</item>
     <item>@string/BRAILLE_DRIVER_LABEL_lb</item>
     <item>@string/BRAILLE_DRIVER_LABEL_lt</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_md</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_mt</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_mn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_mb</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_md</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mt</item>
     <item>@string/BRAILLE_DRIVER_LABEL_np</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_pm</item>
     <item>@string/BRAILLE_DRIVER_LABEL_pg</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_pm</item>
     <item>@string/BRAILLE_DRIVER_LABEL_sk</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_tn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ts</item>
     <item>@string/BRAILLE_DRIVER_LABEL_tt</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_tn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_vo</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vr</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vs</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_vo</item>
     <item>@string/BRAILLE_DRIVER_LABEL_xw</item>
   </string-array>
 
   <string-array name="BRAILLE_DRIVER_VALUES">
     <item>auto</item>
-    <item>at</item>
     <item>al</item>
-    <item>bg</item>
-    <item>bm</item>
-    <item>bc</item>
-    <item>bl</item>
-    <item>bn</item>
-    <item>bd</item>
+    <item>at</item>
     <item>ba</item>
-    <item>ce</item>
+    <item>bc</item>
+    <item>bd</item>
+    <item>bg</item>
+    <item>bl</item>
+    <item>bm</item>
+    <item>bn</item>
     <item>cb</item>
+    <item>ce</item>
     <item>ec</item>
     <item>eu</item>
     <item>fs</item>
@@ -101,91 +103,95 @@
     <item>ir</item>
     <item>lb</item>
     <item>lt</item>
-    <item>md</item>
-    <item>mt</item>
-    <item>mn</item>
     <item>mb</item>
+    <item>md</item>
+    <item>mm</item>
+    <item>mn</item>
+    <item>mt</item>
     <item>np</item>
-    <item>pm</item>
     <item>pg</item>
+    <item>pm</item>
     <item>sk</item>
+    <item>tn</item>
     <item>ts</item>
     <item>tt</item>
-    <item>tn</item>
     <item>vd</item>
+    <item>vo</item>
     <item>vr</item>
     <item>vs</item>
-    <item>vo</item>
     <item>xw</item>
   </string-array>
 
   <string name="TEXT_TABLE_LABEL_auto">locale-based autoselection</string>
   <string name="TEXT_TABLE_LABEL_ar">Arabic (generic)</string>
-  <string name="TEXT_TABLE_LABEL_hy">Armenian</string>
   <string name="TEXT_TABLE_LABEL_as">Assamese</string>
   <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
-  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
-  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
-  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (for viewing .brf files within an editor or pager)</string>
-  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
   <string name="TEXT_TABLE_LABEL_bg">Bulgarian</string>
-  <string name="TEXT_TABLE_LABEL_hr">Croatian</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetan</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (for viewing .brf files within an editor or pager)</string>
   <string name="TEXT_TABLE_LABEL_cs">Czech</string>
+  <string name="TEXT_TABLE_LABEL_cy">Welsh</string>
   <string name="TEXT_TABLE_LABEL_da">Danish</string>
-  <string name="TEXT_TABLE_LABEL_da_lt">Danish (LogText)</string>
   <string name="TEXT_TABLE_LABEL_da_1252">Danish (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Danish (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">German</string>
   <string name="TEXT_TABLE_LABEL_dra">Dravidian</string>
-  <string name="TEXT_TABLE_LABEL_nl">Dutch</string>
-  <string name="TEXT_TABLE_LABEL_nl_BE">Dutch (Belgium)</string>
-  <string name="TEXT_TABLE_LABEL_nl_NL">Dutch (Netherlands)</string>
+  <string name="TEXT_TABLE_LABEL_el">Greek</string>
   <string name="TEXT_TABLE_LABEL_en">English</string>
-  <string name="TEXT_TABLE_LABEL_en_CA">English (Canada)</string>
   <string name="TEXT_TABLE_LABEL_en_nabcc">English (North American Braille Computer Code)</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">English (Canada)</string>
   <string name="TEXT_TABLE_LABEL_en_GB">English (United Kingdom)</string>
   <string name="TEXT_TABLE_LABEL_en_US">English (United States)</string>
   <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">Spanish</string>
   <string name="TEXT_TABLE_LABEL_et">Estonian</string>
   <string name="TEXT_TABLE_LABEL_fi">Finnish</string>
   <string name="TEXT_TABLE_LABEL_fr">French</string>
-  <string name="TEXT_TABLE_LABEL_fr_CA">French (Canada)</string>
-  <string name="TEXT_TABLE_LABEL_fr_cbifs">French (Code Braille Informatique Français Standard)</string>
-  <string name="TEXT_TABLE_LABEL_fr_FR">French (France)</string>
-  <string name="TEXT_TABLE_LABEL_fr_vs">French (VisioBraille)</string>
   <string name="TEXT_TABLE_LABEL_fr_2007">French (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">French (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">French (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">French (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">French (France)</string>
+  <string name="TEXT_TABLE_LABEL_ga">Irish</string>
   <string name="TEXT_TABLE_LABEL_gd">Gaelic</string>
-  <string name="TEXT_TABLE_LABEL_de">German</string>
   <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
-  <string name="TEXT_TABLE_LABEL_el">Greek</string>
   <string name="TEXT_TABLE_LABEL_gu">Gujarati</string>
   <string name="TEXT_TABLE_LABEL_he">Hebrew</string>
   <string name="TEXT_TABLE_LABEL_hi">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hr">Croatian</string>
   <string name="TEXT_TABLE_LABEL_hu">Hungarian</string>
+  <string name="TEXT_TABLE_LABEL_hy">Armenian</string>
   <string name="TEXT_TABLE_LABEL_is">Icelandic</string>
-  <string name="TEXT_TABLE_LABEL_ga">Irish</string>
   <string name="TEXT_TABLE_LABEL_it">Italian</string>
-  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
   <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
   <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
   <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
-  <string name="TEXT_TABLE_LABEL_lv">Latvian</string>
   <string name="TEXT_TABLE_LABEL_lt">Lituanian</string>
+  <string name="TEXT_TABLE_LABEL_lv">Latvian</string>
   <string name="TEXT_TABLE_LABEL_mg">Malagasy</string>
-  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
-  <string name="TEXT_TABLE_LABEL_mt">Maltese</string>
-  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
   <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
   <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
-  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltese</string>
   <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
   <string name="TEXT_TABLE_LABEL_ne">Nepali</string>
   <string name="TEXT_TABLE_LABEL_new">Newari</string>
-  <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
+  <string name="TEXT_TABLE_LABEL_nl">Dutch</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Dutch (Belgium)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Dutch (Netherlands)</string>
   <string name="TEXT_TABLE_LABEL_no">Norwegian</string>
-  <string name="TEXT_TABLE_LABEL_no_oub">Norwegian (Offentlig Utvalg for Blindeskrift)</string>
   <string name="TEXT_TABLE_LABEL_no_generic">Norwegian (with support for other languages)</string>
+  <string name="TEXT_TABLE_LABEL_no_oub">Norwegian (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
   <string name="TEXT_TABLE_LABEL_or">Oriya</string>
-  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
   <string name="TEXT_TABLE_LABEL_pa">Panjabi</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
   <string name="TEXT_TABLE_LABEL_pl">Polish</string>
   <string name="TEXT_TABLE_LABEL_pt">Portuguese</string>
   <string name="TEXT_TABLE_LABEL_ro">Romanian</string>
@@ -195,86 +201,86 @@
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovak</string>
   <string name="TEXT_TABLE_LABEL_sl">Slovenian</string>
-  <string name="TEXT_TABLE_LABEL_es">Spanish</string>
-  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
   <string name="TEXT_TABLE_LABEL_sv">Swedish</string>
   <string name="TEXT_TABLE_LABEL_sv_1989">Swedish (1989 standard)</string>
   <string name="TEXT_TABLE_LABEL_sv_1996">Swedish (1996 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
   <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
   <string name="TEXT_TABLE_LABEL_te">Telugu</string>
-  <string name="TEXT_TABLE_LABEL_bo">Tibetan</string>
   <string name="TEXT_TABLE_LABEL_tr">Turkish</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamese</string>
-  <string name="TEXT_TABLE_LABEL_cy">Welsh</string>
 
   <string-array name="TEXT_TABLE_LABELS">
     <item>@string/TEXT_TABLE_LABEL_auto</item>
     <item>@string/TEXT_TABLE_LABEL_ar</item>
-    <item>@string/TEXT_TABLE_LABEL_hy</item>
     <item>@string/TEXT_TABLE_LABEL_as</item>
     <item>@string/TEXT_TABLE_LABEL_awa</item>
-    <item>@string/TEXT_TABLE_LABEL_bn</item>
-    <item>@string/TEXT_TABLE_LABEL_bh</item>
-    <item>@string/TEXT_TABLE_LABEL_brf</item>
-    <item>@string/TEXT_TABLE_LABEL_bra</item>
     <item>@string/TEXT_TABLE_LABEL_bg</item>
-    <item>@string/TEXT_TABLE_LABEL_hr</item>
+    <item>@string/TEXT_TABLE_LABEL_bh</item>
+    <item>@string/TEXT_TABLE_LABEL_bn</item>
+    <item>@string/TEXT_TABLE_LABEL_bo</item>
+    <item>@string/TEXT_TABLE_LABEL_bra</item>
+    <item>@string/TEXT_TABLE_LABEL_brf</item>
     <item>@string/TEXT_TABLE_LABEL_cs</item>
+    <item>@string/TEXT_TABLE_LABEL_cy</item>
     <item>@string/TEXT_TABLE_LABEL_da</item>
-    <item>@string/TEXT_TABLE_LABEL_da_lt</item>
     <item>@string/TEXT_TABLE_LABEL_da_1252</item>
+    <item>@string/TEXT_TABLE_LABEL_da_lt</item>
+    <item>@string/TEXT_TABLE_LABEL_de</item>
     <item>@string/TEXT_TABLE_LABEL_dra</item>
-    <item>@string/TEXT_TABLE_LABEL_nl</item>
-    <item>@string/TEXT_TABLE_LABEL_nl_BE</item>
-    <item>@string/TEXT_TABLE_LABEL_nl_NL</item>
+    <item>@string/TEXT_TABLE_LABEL_el</item>
     <item>@string/TEXT_TABLE_LABEL_en</item>
-    <item>@string/TEXT_TABLE_LABEL_en_CA</item>
     <item>@string/TEXT_TABLE_LABEL_en_nabcc</item>
+    <item>@string/TEXT_TABLE_LABEL_en_CA</item>
     <item>@string/TEXT_TABLE_LABEL_en_GB</item>
     <item>@string/TEXT_TABLE_LABEL_en_US</item>
     <item>@string/TEXT_TABLE_LABEL_eo</item>
+    <item>@string/TEXT_TABLE_LABEL_es</item>
     <item>@string/TEXT_TABLE_LABEL_et</item>
     <item>@string/TEXT_TABLE_LABEL_fi</item>
     <item>@string/TEXT_TABLE_LABEL_fr</item>
-    <item>@string/TEXT_TABLE_LABEL_fr_CA</item>
-    <item>@string/TEXT_TABLE_LABEL_fr_cbifs</item>
-    <item>@string/TEXT_TABLE_LABEL_fr_FR</item>
-    <item>@string/TEXT_TABLE_LABEL_fr_vs</item>
     <item>@string/TEXT_TABLE_LABEL_fr_2007</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_cbifs</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_vs</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_CA</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_FR</item>
+    <item>@string/TEXT_TABLE_LABEL_ga</item>
     <item>@string/TEXT_TABLE_LABEL_gd</item>
-    <item>@string/TEXT_TABLE_LABEL_de</item>
     <item>@string/TEXT_TABLE_LABEL_gon</item>
-    <item>@string/TEXT_TABLE_LABEL_el</item>
     <item>@string/TEXT_TABLE_LABEL_gu</item>
     <item>@string/TEXT_TABLE_LABEL_he</item>
     <item>@string/TEXT_TABLE_LABEL_hi</item>
+    <item>@string/TEXT_TABLE_LABEL_hr</item>
     <item>@string/TEXT_TABLE_LABEL_hu</item>
+    <item>@string/TEXT_TABLE_LABEL_hy</item>
     <item>@string/TEXT_TABLE_LABEL_is</item>
-    <item>@string/TEXT_TABLE_LABEL_ga</item>
     <item>@string/TEXT_TABLE_LABEL_it</item>
-    <item>@string/TEXT_TABLE_LABEL_kn</item>
     <item>@string/TEXT_TABLE_LABEL_kha</item>
+    <item>@string/TEXT_TABLE_LABEL_kn</item>
     <item>@string/TEXT_TABLE_LABEL_kok</item>
     <item>@string/TEXT_TABLE_LABEL_kru</item>
-    <item>@string/TEXT_TABLE_LABEL_lv</item>
     <item>@string/TEXT_TABLE_LABEL_lt</item>
+    <item>@string/TEXT_TABLE_LABEL_lv</item>
     <item>@string/TEXT_TABLE_LABEL_mg</item>
-    <item>@string/TEXT_TABLE_LABEL_ml</item>
-    <item>@string/TEXT_TABLE_LABEL_mt</item>
-    <item>@string/TEXT_TABLE_LABEL_mni</item>
     <item>@string/TEXT_TABLE_LABEL_mi</item>
+    <item>@string/TEXT_TABLE_LABEL_ml</item>
+    <item>@string/TEXT_TABLE_LABEL_mni</item>
     <item>@string/TEXT_TABLE_LABEL_mr</item>
-    <item>@string/TEXT_TABLE_LABEL_mwr</item>
+    <item>@string/TEXT_TABLE_LABEL_mt</item>
     <item>@string/TEXT_TABLE_LABEL_mun</item>
+    <item>@string/TEXT_TABLE_LABEL_mwr</item>
     <item>@string/TEXT_TABLE_LABEL_ne</item>
     <item>@string/TEXT_TABLE_LABEL_new</item>
-    <item>@string/TEXT_TABLE_LABEL_nwc</item>
+    <item>@string/TEXT_TABLE_LABEL_nl</item>
+    <item>@string/TEXT_TABLE_LABEL_nl_BE</item>
+    <item>@string/TEXT_TABLE_LABEL_nl_NL</item>
     <item>@string/TEXT_TABLE_LABEL_no</item>
-    <item>@string/TEXT_TABLE_LABEL_no_oub</item>
     <item>@string/TEXT_TABLE_LABEL_no_generic</item>
+    <item>@string/TEXT_TABLE_LABEL_no_oub</item>
+    <item>@string/TEXT_TABLE_LABEL_nwc</item>
     <item>@string/TEXT_TABLE_LABEL_or</item>
-    <item>@string/TEXT_TABLE_LABEL_pi</item>
     <item>@string/TEXT_TABLE_LABEL_pa</item>
+    <item>@string/TEXT_TABLE_LABEL_pi</item>
     <item>@string/TEXT_TABLE_LABEL_pl</item>
     <item>@string/TEXT_TABLE_LABEL_pt</item>
     <item>@string/TEXT_TABLE_LABEL_ro</item>
@@ -284,87 +290,87 @@
     <item>@string/TEXT_TABLE_LABEL_sd</item>
     <item>@string/TEXT_TABLE_LABEL_sk</item>
     <item>@string/TEXT_TABLE_LABEL_sl</item>
-    <item>@string/TEXT_TABLE_LABEL_es</item>
-    <item>@string/TEXT_TABLE_LABEL_sw</item>
     <item>@string/TEXT_TABLE_LABEL_sv</item>
     <item>@string/TEXT_TABLE_LABEL_sv_1989</item>
     <item>@string/TEXT_TABLE_LABEL_sv_1996</item>
+    <item>@string/TEXT_TABLE_LABEL_sw</item>
     <item>@string/TEXT_TABLE_LABEL_ta</item>
     <item>@string/TEXT_TABLE_LABEL_te</item>
-    <item>@string/TEXT_TABLE_LABEL_bo</item>
     <item>@string/TEXT_TABLE_LABEL_tr</item>
     <item>@string/TEXT_TABLE_LABEL_vi</item>
-    <item>@string/TEXT_TABLE_LABEL_cy</item>
   </string-array>
 
   <string-array name="TEXT_TABLE_VALUES">
     <item>auto</item>
     <item>ar</item>
-    <item>hy</item>
     <item>as</item>
     <item>awa</item>
-    <item>bn</item>
-    <item>bh</item>
-    <item>brf</item>
-    <item>bra</item>
     <item>bg</item>
-    <item>hr</item>
+    <item>bh</item>
+    <item>bn</item>
+    <item>bo</item>
+    <item>bra</item>
+    <item>brf</item>
     <item>cs</item>
+    <item>cy</item>
     <item>da</item>
-    <item>da-lt</item>
     <item>da-1252</item>
+    <item>da-lt</item>
+    <item>de</item>
     <item>dra</item>
-    <item>nl</item>
-    <item>nl_BE</item>
-    <item>nl_NL</item>
+    <item>el</item>
     <item>en</item>
-    <item>en_CA</item>
     <item>en-nabcc</item>
+    <item>en_CA</item>
     <item>en_GB</item>
     <item>en_US</item>
     <item>eo</item>
+    <item>es</item>
     <item>et</item>
     <item>fi</item>
     <item>fr</item>
-    <item>fr_CA</item>
-    <item>fr-cbifs</item>
-    <item>fr_FR</item>
-    <item>fr-vs</item>
     <item>fr-2007</item>
+    <item>fr-cbifs</item>
+    <item>fr-vs</item>
+    <item>fr_CA</item>
+    <item>fr_FR</item>
+    <item>ga</item>
     <item>gd</item>
-    <item>de</item>
     <item>gon</item>
-    <item>el</item>
     <item>gu</item>
     <item>he</item>
     <item>hi</item>
+    <item>hr</item>
     <item>hu</item>
+    <item>hy</item>
     <item>is</item>
-    <item>ga</item>
     <item>it</item>
-    <item>kn</item>
     <item>kha</item>
+    <item>kn</item>
     <item>kok</item>
     <item>kru</item>
-    <item>lv</item>
     <item>lt</item>
+    <item>lv</item>
     <item>mg</item>
-    <item>ml</item>
-    <item>mt</item>
-    <item>mni</item>
     <item>mi</item>
+    <item>ml</item>
+    <item>mni</item>
     <item>mr</item>
-    <item>mwr</item>
+    <item>mt</item>
     <item>mun</item>
+    <item>mwr</item>
     <item>ne</item>
     <item>new</item>
-    <item>nwc</item>
+    <item>nl</item>
+    <item>nl_BE</item>
+    <item>nl_NL</item>
     <item>no</item>
-    <item>no-oub</item>
     <item>no-generic</item>
+    <item>no-oub</item>
+    <item>nwc</item>
     <item>or</item>
-    <item>pi</item>
     <item>pa</item>
+    <item>pi</item>
     <item>pl</item>
     <item>pt</item>
     <item>ro</item>
@@ -374,145 +380,142 @@
     <item>sd</item>
     <item>sk</item>
     <item>sl</item>
-    <item>es</item>
-    <item>sw</item>
     <item>sv</item>
     <item>sv-1989</item>
     <item>sv-1996</item>
+    <item>sw</item>
     <item>ta</item>
     <item>te</item>
-    <item>bo</item>
     <item>tr</item>
     <item>vi</item>
-    <item>cy</item>
   </string-array>
 
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverse foreground colour in the left column and background colour in the right column</string>
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">foreground colour in the left column and background colour in the right column</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">foreground colour in the upper square and background colour in the lower square</string>
-  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverse foreground colour in the left column and background colour in the right column</string>
 
   <string-array name="ATTRIBUTES_TABLE_LABELS">
+    <item>@string/ATTRIBUTES_TABLE_LABEL_invleft_right</item>
     <item>@string/ATTRIBUTES_TABLE_LABEL_left_right</item>
     <item>@string/ATTRIBUTES_TABLE_LABEL_upper_lower</item>
-    <item>@string/ATTRIBUTES_TABLE_LABEL_invleft_right</item>
   </string-array>
 
   <string-array name="ATTRIBUTES_TABLE_VALUES">
+    <item>invleft_right</item>
     <item>left_right</item>
     <item>upper_lower</item>
-    <item>invleft_right</item>
   </string-array>
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">German (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_abrege">French (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_integral">French (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">German (basic contractions)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">German (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japanese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portuguese (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
   <string-array name="CONTRACTION_TABLE_LABELS">
     <item>@string/CONTRACTION_TABLE_LABEL_af</item>
     <item>@string/CONTRACTION_TABLE_LABEL_am</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_ny</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw_ucb</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_nl</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_basis</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_kurzschrift</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_vollschrift</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_es</item>
     <item>@string/CONTRACTION_TABLE_LABEL_fr_abrege</item>
     <item>@string/CONTRACTION_TABLE_LABEL_fr_integral</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_vollschrift</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_kurzschrift</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_basis</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ha</item>
     <item>@string/CONTRACTION_TABLE_LABEL_id</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ipa</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ja</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g2</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_ko</item>
     <item>@string/CONTRACTION_TABLE_LABEL_mg</item>
     <item>@string/CONTRACTION_TABLE_LABEL_mun</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_nl</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ny</item>
     <item>@string/CONTRACTION_TABLE_LABEL_pt</item>
     <item>@string/CONTRACTION_TABLE_LABEL_si</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_es</item>
     <item>@string/CONTRACTION_TABLE_LABEL_sw</item>
     <item>@string/CONTRACTION_TABLE_LABEL_th</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw_ucb</item>
     <item>@string/CONTRACTION_TABLE_LABEL_zu</item>
   </string-array>
 
   <string-array name="CONTRACTION_TABLE_VALUES">
     <item>af</item>
     <item>am</item>
-    <item>ny</item>
-    <item>zh-tw-ucb</item>
-    <item>zh-tw</item>
-    <item>nl</item>
-    <item>en-us-g2</item>
+    <item>de-basis</item>
+    <item>de-kurzschrift</item>
+    <item>de-vollschrift</item>
     <item>en-ueb-g2</item>
+    <item>en-us-g2</item>
+    <item>es</item>
     <item>fr-abrege</item>
     <item>fr-integral</item>
-    <item>de-vollschrift</item>
-    <item>de-kurzschrift</item>
-    <item>de-basis</item>
     <item>ha</item>
     <item>id</item>
     <item>ipa</item>
     <item>ja</item>
+    <item>ko</item>
     <item>ko-g1</item>
     <item>ko-g2</item>
-    <item>ko</item>
     <item>mg</item>
     <item>mun</item>
+    <item>nl</item>
+    <item>ny</item>
     <item>pt</item>
     <item>si</item>
-    <item>es</item>
     <item>sw</item>
     <item>th</item>
+    <item>zh-tw</item>
+    <item>zh-tw-ucb</item>
     <item>zu</item>
   </string-array>
 
-  <string name="KEY_TABLE_LABEL_sun_type6">bindings for Sun Type 6 keyboards</string>
   <string name="KEY_TABLE_LABEL_braille">bindings for braille keyboards</string>
   <string name="KEY_TABLE_LABEL_desktop">bindings for full keyboards</string>
-  <string name="KEY_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
   <string name="KEY_TABLE_LABEL_keypad">bindings for keypad-based navigation</string>
+  <string name="KEY_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
+  <string name="KEY_TABLE_LABEL_sun_type6">bindings for Sun Type 6 keyboards</string>
 
   <string-array name="KEY_TABLE_LABELS">
-    <item>@string/KEY_TABLE_LABEL_sun_type6</item>
     <item>@string/KEY_TABLE_LABEL_braille</item>
     <item>@string/KEY_TABLE_LABEL_desktop</item>
-    <item>@string/KEY_TABLE_LABEL_laptop</item>
     <item>@string/KEY_TABLE_LABEL_keypad</item>
+    <item>@string/KEY_TABLE_LABEL_laptop</item>
+    <item>@string/KEY_TABLE_LABEL_sun_type6</item>
   </string-array>
 
   <string-array name="KEY_TABLE_VALUES">
-    <item>sun_type6</item>
     <item>braille</item>
     <item>desktop</item>
-    <item>laptop</item>
     <item>keypad</item>
+    <item>laptop</item>
+    <item>sun_type6</item>
   </string-array>
 </resources>

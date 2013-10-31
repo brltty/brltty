@@ -68,7 +68,7 @@ proc makeResources {properties} {
          lappend lines ""
       }
 
-      foreach code [lsort -command [list compareKeysByValue $property] [dict keys $property]] {
+      foreach code [lsort -command [list compareKeys $property] [dict keys $property]] {
          set label "${prefix}LABEL_[string map {- _} $code]"
          lappend lines "  <string name=\"$label\">[dict get $property $code]</string>"
 
@@ -87,7 +87,7 @@ proc makeResources {properties} {
    return $lines
 }
 
-proc compareKeysByValue {dictionary key1 key2} {
+proc compareKeys {dictionary key1 key2} {
    set value1 [dict get $dictionary $key1]
    set value2 [dict get $dictionary $key2]
 
@@ -102,7 +102,7 @@ proc compareKeysByValue {dictionary key1 key2} {
       return 1
    }
 
-   return [string compare $value1 $value2]
+   return [string compare $key1 $key2]
 }
 
 proc makeArray {name items} {
