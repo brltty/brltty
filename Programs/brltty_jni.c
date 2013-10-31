@@ -249,7 +249,7 @@ Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_coreWait (JNIEnv *env, jobject this, jint duration) {
-  return brlttyWait_p(duration)? JNI_TRUE: JNI_FALSE;
+  return (brlttyWait_p(duration) != WAIT_STOP)? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL

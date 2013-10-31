@@ -28,7 +28,12 @@ extern "C" {
 FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
 FUNCTION_DECLARE(brlttyDestruct, int, (void));
 
-FUNCTION_DECLARE(brlttyWait, int, (int duration));
+typedef enum {
+  WAIT_STOP,
+  WAIT_CONTINUE
+} WaitResult;
+
+FUNCTION_DECLARE(brlttyWait, WaitResult, (int duration));
 FUNCTION_DECLARE(brlttyInterrupt, int, (void));
 
 #ifdef __cplusplus

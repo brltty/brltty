@@ -1334,9 +1334,6 @@ isSameRow (
   return 1;
 }
 
-static int interruptRequested;
-static AsyncEvent *interruptRequestEvent;
-
 int restartRequired;
 int isOffline;
 int isSuspended;
@@ -2033,6 +2030,9 @@ resumeUpdates (void) {
   if (!--updateSuspendCount) setUpdateAlarm(NULL);
 }
 
+static int interruptRequested;
+static AsyncEvent *interruptRequestEvent;
+
 static void
 handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
   interruptRequested = 1;
@@ -2129,15 +2129,15 @@ checkUnmonitoredConditions (void *data) {
   UnmonitoredConditionDescriptor *ucd = data;
 
   if (interruptRequested) {
-    static const unsigned char waitResult = 1;
-    ucd->data = &waitResult;
+    static const WaitResult result = WAIT_CONTINUE;
+    ucd->data = &result;
     interruptRequested = 0;
     return 1;
   }
 
   if (terminationCount) {
-    static const unsigned char waitResult = 0;
-    ucd->data = &waitResult;
+    static const WaitResult result = WAIT_STOP;
+    ucd->data = &result;
     return 1;
   }
 
@@ -2159,7 +2159,7 @@ checkUnmonitoredConditions (void *data) {
   return 0;
 }
 
-int
+WaitResult
 brlttyWait (int duration) {
   UnmonitoredConditionDescriptor ucd = {
     .handler = NULL,
@@ -2168,7 +2168,7 @@ brlttyWait (int duration) {
 
   if (asyncAwaitCondition(duration, checkUnmonitoredConditions, &ucd)) {
     if (!ucd.handler) {
-      const unsigned char *result = ucd.data;
+      const WaitResult *result = ucd.data;
       return *result;
     }
 
