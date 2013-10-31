@@ -30,6 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
+import java.text.Collator;
+import java.text.CollationKey;
+
 import android.util.Log;
 import android.os.Bundle;
 
@@ -108,6 +111,8 @@ public class SettingsActivity extends PreferenceActivity {
 
   public static abstract class SettingsFragment extends PreferenceFragment {
     protected final String LOG_TAG = this.getClass().getName();
+
+    private static Collator localeCollator = null;
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -191,13 +196,46 @@ public class SettingsActivity extends PreferenceActivity {
       showListSelection(list);
     }
 
+    protected void sortListLabels (String[] values, String[] labels) {
+      if (localeCollator == null) {
+        localeCollator = Collator.getInstance();
+      }
+
+      int size = values.length;
+      Map<String, String> map = new LinkedHashMap<String, String>();
+      CollationKey keys[] = new CollationKey[size];
+
+      for (int i=0; i<size; i+=1) {
+        String label = labels[i];
+        map.put(label, values[i]);
+        keys[i] = localeCollator.getCollationKey(label);
+      }
+
+      Arrays.sort(keys);
+
+      for (int i=0; i<size; i+=1) {
+        String label = keys[i].getSourceString();
+        labels[i] = label;
+        values[i] = map.get(label);
+      }
+    }
+
     protected void setListElements (ListPreference list, String[] values, String[] labels) {
+      sortListLabels(values, labels);
       list.setEntryValues(values);
       list.setEntries(labels);
     }
 
     protected void setListElements (ListPreference list, String[] values) {
       setListElements(list, values, values);
+    }
+
+    protected void sortList (ListPreference list) {
+      setListElements(
+        list,
+        LanguageUtilities.newStringArray(list.getEntryValues()),
+        LanguageUtilities.newStringArray(list.getEntries())
+      );
     }
 
     protected SharedPreferences getSharedPreferences () {
@@ -221,6 +259,9 @@ public class SettingsActivity extends PreferenceActivity {
       textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
       contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
       speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
+
+      sortList(textTableList);
+      sortList(contractionTableList);
 
       showListSelection(navigationModeList);
       showListSelection(textTableList);
@@ -761,6 +802,9 @@ public class SettingsActivity extends PreferenceActivity {
       attributesTableList = getListPreference(R.string.PREF_KEY_ATTRIBUTES_TABLE);
       logLevelList = getListPreference(R.string.PREF_KEY_LOG_LEVEL);
       logCategorySet = getMultiSelectListPreference(R.string.PREF_KEY_LOG_CATEGORIES);
+
+      sortList(keyTableList);
+      sortList(attributesTableList);
 
       showListSelection(keyTableList);
       showListSelection(attributesTableList);

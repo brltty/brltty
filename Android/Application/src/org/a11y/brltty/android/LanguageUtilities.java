@@ -25,6 +25,17 @@ import android.util.Log;
 public final class LanguageUtilities {
   private static final String LOG_TAG = LanguageUtilities.class.getName();
 
+  public static String[] newStringArray (CharSequence[] charSequences) {
+    int size = charSequences.length;
+    String[] strings = new String[size];
+
+    for (int i=0; i<size; i+=1) {
+      strings[i] = charSequences[i].toString();
+    }
+
+    return strings;
+  }
+
   public static Object newInstance (String instanceType, String[] argumentTypes, Object[] arguments) {
     Class instanceClass;
     try {
