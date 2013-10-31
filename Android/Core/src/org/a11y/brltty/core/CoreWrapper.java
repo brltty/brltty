@@ -29,7 +29,7 @@ public class CoreWrapper {
 
   public static native boolean coreEnableInterrupt ();
   public static native boolean coreDisableInterrupt ();
-  public static native boolean coreInterrupt ();
+  public static native boolean coreInterrupt (boolean stop);
 
   public static native boolean coreWait (int duration);
 
@@ -76,19 +76,15 @@ public class CoreWrapper {
 
   public static boolean runOnCoreThread (Runnable runnable) {
     if (!runQueue.offer(runnable)) return false;
-    coreInterrupt();
+    coreInterrupt(false);
     return true;
   }
 
-  private static volatile boolean stop = false;
-
   public static void stop () {
-    stop = true;
-    coreInterrupt();
+    coreInterrupt(true);
   }
 
   public static int run (String[] arguments, int waitDuration) {
-    stop = false;
     clearRunQueue();
 
     int exitStatus = coreConstruct(arguments);
@@ -96,7 +92,6 @@ public class CoreWrapper {
       boolean interruptEnabled = coreEnableInterrupt();
 
       while (coreWait(waitDuration)) {
-        if (stop) break;
         processRunQueue();
       }
 

@@ -30,8 +30,8 @@ SYMBOL_POINTER(brlttyDestruct);
 
 SYMBOL_POINTER(brlttyEnableInterrupt);
 SYMBOL_POINTER(brlttyDisableInterrupt);
-SYMBOL_POINTER(brlttyInterrupt);
 
+SYMBOL_POINTER(brlttyInterrupt);
 SYMBOL_POINTER(brlttyWait);
 
 SYMBOL_POINTER(changeLogLevel);
@@ -64,8 +64,8 @@ BEGIN_SYMBOL_TABLE
 
   SYMBOL_ENTRY(brlttyEnableInterrupt),
   SYMBOL_ENTRY(brlttyDisableInterrupt),
-  SYMBOL_ENTRY(brlttyInterrupt),
 
+  SYMBOL_ENTRY(brlttyInterrupt),
   SYMBOL_ENTRY(brlttyWait),
 
   SYMBOL_ENTRY(changeLogLevel),
@@ -264,8 +264,8 @@ Java_org_a11y_brltty_core_CoreWrapper_coreDisableInterrupt (JNIEnv *env, jobject
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreInterrupt (JNIEnv *env, jobject this) {
-  return brlttyInterrupt_p()? JNI_TRUE: JNI_FALSE;
+Java_org_a11y_brltty_core_CoreWrapper_coreInterrupt (JNIEnv *env, jobject this, jboolean stop) {
+  return brlttyInterrupt_p((stop != JNI_FALSE)? WAIT_STOP: WAIT_CONTINUE)? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL

@@ -2091,18 +2091,45 @@ brlttyDestruct (void) {
   return 1;
 }
 
-static int interruptRequested;
 static AsyncEvent *interruptRequestEvent;
+static int interruptRequested;
+static WaitResult waitResult;
+
+typedef struct {
+  WaitResult waitResult;
+} InterruptRequest;
 
 int
-brlttyInterrupt (void) {
-  if (!interruptRequestEvent) return 0;
-  return asyncSignalEvent(interruptRequestEvent, NULL);
+brlttyInterrupt (WaitResult waitResult) {
+  if (interruptRequestEvent) {
+    InterruptRequest *req;
+
+    if ((req = malloc(sizeof(*req)))) {
+      memset(req, 0, sizeof(*req));
+      req->waitResult = waitResult;
+
+      if (asyncSignalEvent(interruptRequestEvent, req)) {
+        return 1;
+      }
+
+      free(req);
+    } else {
+      logMallocError();
+    }
+  }
+
+  return 0;
 }
 
 static void
 handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
-  interruptRequested = 1;
+  InterruptRequest *req = parameters->signalData;
+
+  if (req) {
+    interruptRequested = 1;
+    waitResult = req->waitResult;
+    free(req);
+  }
 }
 
 int
@@ -2156,8 +2183,7 @@ checkUnmonitoredConditions (void *data) {
   UnmonitoredConditionDescriptor *ucd = data;
 
   if (interruptRequested) {
-    static const WaitResult result = WAIT_CONTINUE;
-    ucd->data = &result;
+    ucd->data = &waitResult;
     interruptRequested = 0;
     return 1;
   }
