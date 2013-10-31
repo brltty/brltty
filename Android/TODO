@@ -4,7 +4,6 @@ a way to drag and drop
 contracted braille and routing key associations
 android-specific commands
 support the dynamic loading of non-built-in drivers
-become interrupt-driven rather than polling
 support serial braille devices
 actions on elements with short text
 selecting multiple devices
