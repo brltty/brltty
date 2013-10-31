@@ -28,8 +28,11 @@
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyDestruct);
 
-SYMBOL_POINTER(brlttyWait);
+SYMBOL_POINTER(brlttyEnableInterrupt);
+SYMBOL_POINTER(brlttyDisableInterrupt);
 SYMBOL_POINTER(brlttyInterrupt);
+
+SYMBOL_POINTER(brlttyWait);
 
 SYMBOL_POINTER(changeLogLevel);
 SYMBOL_POINTER(changeLogCategories);
@@ -59,8 +62,11 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
   SYMBOL_ENTRY(brlttyDestruct),
 
-  SYMBOL_ENTRY(brlttyWait),
+  SYMBOL_ENTRY(brlttyEnableInterrupt),
+  SYMBOL_ENTRY(brlttyDisableInterrupt),
   SYMBOL_ENTRY(brlttyInterrupt),
+
+  SYMBOL_ENTRY(brlttyWait),
 
   SYMBOL_ENTRY(changeLogLevel),
   SYMBOL_ENTRY(changeLogCategories),
@@ -204,9 +210,9 @@ Java_org_a11y_brltty_core_CoreWrapper_coreConstruct (JNIEnv *env, jobject this, 
   return PROG_EXIT_FATAL;
 }
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT void JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
-  int result = brlttyDestruct_p();
+  brlttyDestruct_p();
 
 /*
   {
@@ -243,18 +249,26 @@ Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
     (*env)->DeleteGlobalRef(env, jArgumentArray);
     jArgumentArray = NULL;
   }
-
-  return result? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreWait (JNIEnv *env, jobject this, jint duration) {
-  return (brlttyWait_p(duration) != WAIT_STOP)? JNI_TRUE: JNI_FALSE;
+Java_org_a11y_brltty_core_CoreWrapper_coreEnableInterrupt (JNIEnv *env, jobject this) {
+  return brlttyEnableInterrupt_p()? JNI_TRUE: JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_coreDisableInterrupt (JNIEnv *env, jobject this) {
+  brlttyDisableInterrupt_p();
 }
 
 JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_coreInterrupt (JNIEnv *env, jobject this) {
   return brlttyInterrupt_p()? JNI_TRUE: JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_a11y_brltty_core_CoreWrapper_coreWait (JNIEnv *env, jobject this, jint duration) {
+  return (brlttyWait_p(duration) != WAIT_STOP)? JNI_TRUE: JNI_FALSE;
 }
 
 static jboolean

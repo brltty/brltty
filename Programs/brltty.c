@@ -2030,14 +2030,6 @@ resumeUpdates (void) {
   if (!--updateSuspendCount) setUpdateAlarm(NULL);
 }
 
-static int interruptRequested;
-static AsyncEvent *interruptRequestEvent;
-
-static void
-handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
-  interruptRequested = 1;
-}
-
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   srand((unsigned int)time(NULL));
@@ -2080,9 +2072,6 @@ brlttyConstruct (int argc, char *argv[]) {
 
   oldwinx = ses->winx; oldwiny = ses->winy;
 
-  interruptRequested = 0;
-  interruptRequestEvent = asyncNewEvent(handleInterruptRequest, NULL);
-
   restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
@@ -2095,12 +2084,47 @@ brlttyConstruct (int argc, char *argv[]) {
   return PROG_EXIT_SUCCESS;
 }
 
-int
+void
 brlttyDestruct (void) {
   endProgram();
   endCommandQueue();
-  if (interruptRequestEvent) asyncDiscardEvent(interruptRequestEvent);
+}
+
+static int interruptRequested;
+static AsyncEvent *interruptRequestEvent;
+
+int
+brlttyInterrupt (void) {
+  if (!interruptRequestEvent) return 0;
+  return asyncSignalEvent(interruptRequestEvent, NULL);
+}
+
+static void
+handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
+  interruptRequested = 1;
+}
+
+int
+brlttyEnableInterrupt (void) {
+  interruptRequested = 0;
+
+  if (!interruptRequestEvent) {
+    if (!(interruptRequestEvent = asyncNewEvent(handleInterruptRequest, NULL))) {
+      return 0;
+    }
+  }
+
   return 1;
+}
+
+void
+brlttyDisableInterrupt (void) {
+  interruptRequested = 0;
+
+  if (interruptRequestEvent) {
+    asyncDiscardEvent(interruptRequestEvent);
+    interruptRequestEvent = NULL;
+  }
 }
 
 typedef void UnmonitoredConditionHandler (const void *data);
@@ -2176,12 +2200,6 @@ brlttyWait (int duration) {
   }
 
   return 1;
-}
-
-int
-brlttyInterrupt (void) {
-  if (!interruptRequestEvent) return 0;
-  return asyncSignalEvent(interruptRequestEvent, NULL);
 }
 
 int

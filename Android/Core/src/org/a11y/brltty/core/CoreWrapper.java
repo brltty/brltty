@@ -25,10 +25,13 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class CoreWrapper {
   public static native int coreConstruct (String[] arguments);
-  public static native boolean coreDestruct ();
+  public static native void coreDestruct ();
+
+  public static native boolean coreEnableInterrupt ();
+  public static native void coreDisableInterrupt ();
+  public static native boolean coreInterrupt ();
 
   public static native boolean coreWait (int duration);
-  public static native boolean coreInterrupt ();
 
   public static native boolean changeLogLevel (String level);
   public static native boolean changeLogCategories (String categories);
@@ -89,9 +92,15 @@ public class CoreWrapper {
 
     int exitStatus = coreConstruct(arguments);
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
+      boolean interruptEnabled = coreEnableInterrupt();
+
       while (coreWait(waitDuration)) {
         if (stop) break;
         processRunQueue();
+      }
+
+      if (interruptEnabled) {
+        coreDisableInterrupt();
       }
     } else if (exitStatus == ProgramExitStatus.FORCE.value) {
       exitStatus = ProgramExitStatus.SUCCESS.value;
