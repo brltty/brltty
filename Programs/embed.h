@@ -26,10 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 FUNCTION_DECLARE(brlttyConstruct, ProgramExitStatus, (int argc, char *argv[]));
-FUNCTION_DECLARE(brlttyDestruct, void, (void));
+FUNCTION_DECLARE(brlttyDestruct, int, (void));
 
 FUNCTION_DECLARE(brlttyEnableInterrupt, int, (void));
-FUNCTION_DECLARE(brlttyDisableInterrupt, void, (void));
+FUNCTION_DECLARE(brlttyDisableInterrupt, int, (void));
 FUNCTION_DECLARE(brlttyInterrupt, int, (void));
 
 typedef enum {

@@ -2084,10 +2084,11 @@ brlttyConstruct (int argc, char *argv[]) {
   return PROG_EXIT_SUCCESS;
 }
 
-void
+int
 brlttyDestruct (void) {
   endProgram();
   endCommandQueue();
+  return 1;
 }
 
 static int interruptRequested;
@@ -2117,7 +2118,7 @@ brlttyEnableInterrupt (void) {
   return 1;
 }
 
-void
+int
 brlttyDisableInterrupt (void) {
   interruptRequested = 0;
 
@@ -2125,6 +2126,8 @@ brlttyDisableInterrupt (void) {
     asyncDiscardEvent(interruptRequestEvent);
     interruptRequestEvent = NULL;
   }
+
+  return 1;
 }
 
 typedef void UnmonitoredConditionHandler (const void *data);

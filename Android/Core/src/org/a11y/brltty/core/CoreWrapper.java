@@ -25,10 +25,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class CoreWrapper {
   public static native int coreConstruct (String[] arguments);
-  public static native void coreDestruct ();
+  public static native boolean coreDestruct ();
 
   public static native boolean coreEnableInterrupt ();
-  public static native void coreDisableInterrupt ();
+  public static native boolean coreDisableInterrupt ();
   public static native boolean coreInterrupt ();
 
   public static native boolean coreWait (int duration);
@@ -84,6 +84,7 @@ public class CoreWrapper {
 
   public static void stop () {
     stop = true;
+    coreInterrupt();
   }
 
   public static int run (String[] arguments, int waitDuration) {

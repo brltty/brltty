@@ -210,9 +210,9 @@ Java_org_a11y_brltty_core_CoreWrapper_coreConstruct (JNIEnv *env, jobject this, 
   return PROG_EXIT_FATAL;
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
-  brlttyDestruct_p();
+  jboolean result = brlttyDestruct_p()? JNI_TRUE: JNI_FALSE;
 
 /*
   {
@@ -249,6 +249,8 @@ Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
     (*env)->DeleteGlobalRef(env, jArgumentArray);
     jArgumentArray = NULL;
   }
+
+  return result;
 }
 
 JNIEXPORT jboolean JNICALL
@@ -256,9 +258,9 @@ Java_org_a11y_brltty_core_CoreWrapper_coreEnableInterrupt (JNIEnv *env, jobject 
   return brlttyEnableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_org_a11y_brltty_core_CoreWrapper_coreDisableInterrupt (JNIEnv *env, jobject this) {
-  brlttyDisableInterrupt_p();
+  return brlttyDisableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
