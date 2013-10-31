@@ -626,6 +626,8 @@ public class SettingsActivity extends PreferenceActivity {
       removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
       removeDeviceButton_NO = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_NO);
 
+      sortList(deviceDriverList);
+
       {
         SharedPreferences prefs = getSharedPreferences();
         deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
