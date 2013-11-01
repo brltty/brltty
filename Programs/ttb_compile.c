@@ -295,7 +295,6 @@ char *
 selectTextTable (const char *directory) {
   const char *locale = getCurrentLocale();
 
-logMessage(LOG_NOTICE, "current locale: %s", locale);
   if (locale) {
     char name[strlen(locale) + 1];
 
