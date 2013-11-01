@@ -712,6 +712,12 @@ in
          BRLTTY_HAVE_WINDOWS_FUNCTION([getnameinfo], [ws2_32])
          AC_CHECK_FUNCS([gai_strerror])
       fi
+      AC_CHECK_TYPES([PROCESS_INFORMATION_CLASS], [], [], [
+#include <windows.h>
+])
+      AC_CHECK_DECLS([ProcessUserModeIOPL], [], [], [
+#include <windows.h>
+])
       ;;
    *)
       AC_CHECK_FUNCS([gai_strerror getaddrinfo getnameinfo])

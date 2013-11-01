@@ -35,9 +35,15 @@ extern "C" {
 #include <ntstatus.h>
 #endif /* STATUS_SUCCESS */
 
+#ifndef HAVE_PROCESS_INFORMATION_CLASS
 typedef enum _PROCESSINFOCLASS {
   ProcessUserModeIOPL = 16,
 } PROCESSINFOCLASS, PROCESS_INFORMATION_CLASS;
+#else /* HAVE_PROCESS_INFORMATION_CLASS */
+#  ifndef HAVE_ProcessUserModeIOPL
+#    define ProcessUserModeIOPL 16
+#  endif /* ProcessUserModeIOPL */
+#endif /* HAVE_PROCESS_INFORMATION_CLASS */
 
 extern NTSTATUS WINAPI NtSetInformationProcess (HANDLE, PROCESS_INFORMATION_CLASS, PVOID, ULONG);
 extern WIN_PROC_STUB(NtSetInformationProcess);

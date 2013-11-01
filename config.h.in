@@ -170,6 +170,12 @@ extern "C" {
 /* Define this if the function gai_strerror exists. */
 #undef HAVE_GAI_STRERROR
 
+/* Define this if the type PROCESS_INFORMATION_CLASS exists. */
+#undef HAVE_PROCESS_INFORMATION_CLASS
+
+/* Define this if the value ProcessUserModeIOPL exists. */
+#undef HAVE_PROCESSUSERMODEIOPL
+
 /* Define this if the function getopt_long exists. */
 #undef HAVE_GETOPT_LONG
 
