@@ -226,8 +226,8 @@ initializeSystemObject (void) {
 #define SUBLANG_SYRIAC_TURKEY SUBLANG_SYRIAC
 #endif /* SUBLANG_SYRIAC_TURKEY */
 
-const char *
-win_getLocale (void) {
+char *
+getWindowsLocaleName (void) {
   if (GetLocaleInfoExProc) {
 #define WIN_LOCALE_SIZE 85
     WCHAR buffer[WIN_LOCALE_SIZE];

@@ -41,10 +41,10 @@ const char defaultCharset[] = "ISO-8859-1";
 
 static char *currentCharset = NULL;
 
-const char *
-getCurrentLocale (void) {
+char *
+getLocaleName (void) {
 #if defined(__MINGW32__)
-  return win_getLocale();
+  return getWindowsLocaleName();
 
 #elif defined(__ANDROID__)
   return getJavaLocaleName();

@@ -293,7 +293,7 @@ testTextTable (const char *directory, char *name) {
 
 char *
 selectTextTable (const char *directory) {
-  const char *locale = getCurrentLocale();
+  const char *locale = getLocaleName();
 
   if (locale) {
     char name[strlen(locale) + 1];

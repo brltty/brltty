@@ -27,7 +27,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const char *getCurrentLocale (void);
+extern char *getLocaleName (void);
 extern int isPosixLocale (const char *locale);
 
 extern const char *setCharset (const char *name);
