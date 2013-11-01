@@ -196,12 +196,24 @@ public class SettingsActivity extends PreferenceActivity {
       showListSelection(list);
     }
 
-    protected void sortListLabels (String[] values, String[] labels) {
+    protected void setListElements (ListPreference list, String[] values, String[] labels) {
+      list.setEntryValues(values);
+      list.setEntries(labels);
+    }
+
+    protected void setListElements (ListPreference list, String[] values) {
+      setListElements(list, values, values);
+    }
+
+    protected void sortList (ListPreference list, int fromIndex) {
       if (localeCollator == null) {
         localeCollator = Collator.getInstance();
         localeCollator.setStrength(Collator.PRIMARY);
         localeCollator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
       }
+
+      String[] values = LanguageUtilities.newStringArray(list.getEntryValues());
+      String[] labels = LanguageUtilities.newStringArray(list.getEntries());
 
       int size = values.length;
       Map<String, String> map = new LinkedHashMap<String, String>();
@@ -213,31 +225,19 @@ public class SettingsActivity extends PreferenceActivity {
         keys[i] = localeCollator.getCollationKey(label);
       }
 
-      Arrays.sort(keys);
+      Arrays.sort(keys, fromIndex, keys.length);
 
       for (int i=0; i<size; i+=1) {
         String label = keys[i].getSourceString();
         labels[i] = label;
         values[i] = map.get(label);
       }
-    }
 
-    protected void setListElements (ListPreference list, String[] values, String[] labels) {
-      sortListLabels(values, labels);
-      list.setEntryValues(values);
-      list.setEntries(labels);
-    }
-
-    protected void setListElements (ListPreference list, String[] values) {
-      setListElements(list, values, values);
+      setListElements(list, values, labels);
     }
 
     protected void sortList (ListPreference list) {
-      setListElements(
-        list,
-        LanguageUtilities.newStringArray(list.getEntryValues()),
-        LanguageUtilities.newStringArray(list.getEntries())
-      );
+      sortList(list, 0);
     }
 
     protected SharedPreferences getSharedPreferences () {
@@ -262,7 +262,7 @@ public class SettingsActivity extends PreferenceActivity {
       contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
       speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
 
-      sortList(textTableList);
+      sortList(textTableList, 1);
       sortList(contractionTableList);
 
       showListSelection(navigationModeList);
@@ -392,6 +392,7 @@ public class SettingsActivity extends PreferenceActivity {
           String[] names = new String[deviceNames.size()];
           deviceNames.toArray(names);
           setListElements(selectedDeviceList, names);
+          sortList(selectedDeviceList);
         }
 
         summary = selectedDeviceList.getEntry();
@@ -561,6 +562,8 @@ public class SettingsActivity extends PreferenceActivity {
         deviceCollection.getIdentifierLabels()
       );
 
+      sortList(deviceIdentifierList);
+
       {
         boolean haveIdentifiers = deviceIdentifierList.getEntryValues().length > 0;
         deviceIdentifierList.setEnabled(haveIdentifiers);
@@ -628,7 +631,7 @@ public class SettingsActivity extends PreferenceActivity {
       removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
       removeDeviceButton_NO = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_NO);
 
-      sortList(deviceDriverList);
+      sortList(deviceDriverList, 1);
 
       {
         SharedPreferences prefs = getSharedPreferences();
