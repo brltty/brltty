@@ -50,7 +50,15 @@ getLocaleName (void) {
   return getJavaLocaleName();
 
 #else /* unix */
-  return setlocale(LC_CTYPE, NULL);
+  char *name = setlocale(LC_CTYPE, NULL);
+
+  if (name) {
+    if (!(name = strdup(name))) {
+      logMallocError();
+    }
+  }
+
+  return name;
 #endif /* text table locale */
 }
 
