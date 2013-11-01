@@ -25,8 +25,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int isPosixLocale (const char *locale);
-
 extern const char defaultCharset[];
 
 extern int registerCharacterSet (const char *charset);

@@ -19,7 +19,6 @@
 #include "prologue.h"
 
 #include <string.h>
-#include <locale.h>
 
 #include "log.h"
 #include "file.h"
@@ -29,10 +28,6 @@
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"
-
-#ifdef __MINGW32__
-#include "system_windows.h"
-#endif /* __MINGW32__ */
 
 struct TextTableDataStruct {
   DataArea *area;
@@ -282,15 +277,6 @@ makeTextTablePath (const char *directory, const char *name) {
   return makeFilePath(directory, name, TEXT_TABLE_EXTENSION);
 }
 
-static const char *
-getTextTableLocale (void) {
-#if defined(__MINGW32__)
-  return win_getLocale();
-#else /* unix */
-  return setlocale(LC_CTYPE, NULL);
-#endif /* text table locale */
-}
-
 static int
 testTextTable (const char *directory, char *name) {
   int exists = 0;
@@ -307,8 +293,9 @@ testTextTable (const char *directory, char *name) {
 
 char *
 selectTextTable (const char *directory) {
-  const char *locale = getTextTableLocale();
+  const char *locale = getCurrentLocale();
 
+logMessage(LOG_NOTICE, "current locale: %s", locale);
   if (locale) {
     char name[strlen(locale) + 1];
 
@@ -318,7 +305,7 @@ selectTextTable (const char *directory) {
       name[length] = 0;
     }
 
-    if (strcmp(name, "C") == 0) {
+    if (isPosixLocale(name)) {
       name[0] = 0;
     } else if (!testTextTable(directory, name)) {
       char *delimiter = strchr(name, '_');

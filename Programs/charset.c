@@ -27,9 +27,39 @@
 #include "lock.h"
 #include "program.h"
 
+#if defined(__MINGW32__)
+#include "system_windows.h"
+
+#elif defined(__ANDROID__)
+#include "system_java.h"
+
+#else /* unix */
+#include <locale.h>
+#endif /* locale definitions */
+
 const char defaultCharset[] = "ISO-8859-1";
 
 static char *currentCharset = NULL;
+
+const char *
+getCurrentLocale (void) {
+#if defined(__MINGW32__)
+  return win_getLocale();
+
+#elif defined(__ANDROID__)
+  return getJavaLocaleName();
+
+#else /* unix */
+  return setlocale(LC_CTYPE, NULL);
+#endif /* text table locale */
+}
+
+int
+isPosixLocale (const char *locale) {
+  if (strcmp(locale, "C") == 0) return 1;
+  if (strcmp(locale, "POSIX") == 0) return 1;
+  return 0;
+}
 
 size_t
 convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
@@ -323,13 +353,6 @@ void
 unlockCharset (void) {
   LockDescriptor *lock = getCharsetLock();
   if (lock) releaseLock(lock);
-}
-
-int
-isPosixLocale (const char *locale) {
-  if (strcmp(locale, "C") == 0) return 1;
-  if (strcmp(locale, "POSIX") == 0) return 1;
-  return 0;
 }
 
 int

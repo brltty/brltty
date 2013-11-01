@@ -73,6 +73,8 @@ extern int findJavaStaticField (
   jclass class, const char *name, const char *signature
 );
 
+extern char *getJavaLocaleName (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

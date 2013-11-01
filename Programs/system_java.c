@@ -207,6 +207,52 @@ findJavaStaticField (
   return 1;
 }
 
+char *
+getJavaLocaleName (void) {
+  char *name = NULL;
+  JNIEnv *env;
+
+  if ((env = getJavaNativeInterface())) {
+    jclass Locale_class = NULL;
+
+    if (findJavaClass(env, &Locale_class, "java/util/Locale")) {
+      jmethodID Locale_getDefault = 0;
+
+      if (findJavaStaticMethod(env, &Locale_getDefault, Locale_class, "getDefault",
+                               JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/util/Locale), 
+                                              ))) {
+        jobject locale = (*env)->CallStaticObjectMethod(env, Locale_class, Locale_getDefault);
+
+        if (!clearJavaException(env, 1)) {
+          jmethodID Locale_toString = 0;
+
+          if (findJavaInstanceMethod(env, &Locale_toString, Locale_class, "toString",
+                                     JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String), 
+                                                    ))) {
+            jstring jName = (*env)->CallObjectMethod(env, locale, Locale_toString);
+
+            if (!clearJavaException(env, 1)) {
+              jboolean isCopy;
+              const char *cName = (*env)->GetStringUTFChars(env, jName, &isCopy);
+
+              if (!(name = strdup(cName))) {
+                logMallocError();
+              }
+
+              (*env)->ReleaseStringUTFChars(env, jName, cName);
+              (*env)->DeleteLocalRef(env, jName);
+            }
+          }
+
+          (*env)->DeleteLocalRef(env, locale);
+        }
+      }
+    }
+  }
+
+  return name;
+}
+
 void
 initializeSystemObject (void) {
 }
