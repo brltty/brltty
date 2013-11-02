@@ -137,8 +137,8 @@ struct KeyTableStruct {
 
   struct {
     AsyncHandle alarm;
-    int command;
-    unsigned pending:1;
+    int primaryCommand;
+    int secondaryCommand;
     unsigned repeat:1;
   } longPress;
 

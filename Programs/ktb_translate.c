@@ -282,11 +282,11 @@ static void
 handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   KeyTable *table = parameters->data;
 
+  asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
-  table->longPress.pending = 0;
 
   if (table->longPress.repeat) setLongPressAlarm(table, prefs.autorepeatInterval);
-  processCommand(table, table->longPress.command);
+  processCommand(table, table->longPress.secondaryCommand);
 }
 
 static void
@@ -429,19 +429,28 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (!wasPressed) {
+        int secondaryCommand = BRL_CMD_NOOP;
+
         resetLongPressData(table);
 
         if (binding) {
           addCommandArguments(table, &command, binding->primaryCommand.entry, binding);
+
+          secondaryCommand = binding->secondaryCommand.value;
+          addCommandArguments(table, &secondaryCommand, binding->secondaryCommand.entry, binding);
         }
 
-        if (context != KTB_CTX_WAITING) {
-          int pending = !isImmediate;
-          int repeat = isRepeatableCommand(command);
+        if (secondaryCommand == BRL_CMD_NOOP) secondaryCommand = command;
 
-          if (pending || repeat) {
-            table->longPress.command = command;
-            if ((table->longPress.pending = pending)) command = BRL_CMD_NOOP;
+        if (context != KTB_CTX_WAITING) {
+          int secondary = secondaryCommand != BRL_CMD_NOOP;
+          int pending = !isImmediate;
+          int repeat = isRepeatableCommand(secondaryCommand);
+
+          if (secondary || pending || repeat) {
+            table->longPress.primaryCommand = command;
+            table->longPress.secondaryCommand = secondaryCommand;
+            if (pending) command = BRL_CMD_NOOP;
             table->longPress.repeat = repeat;
             setLongPressAlarm(table, prefs.longPressTime);
           }
@@ -450,7 +459,12 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         processCommand(table, command);
       }
     } else {
-      if (table->longPress.pending) processCommand(table, table->longPress.command);
+      {
+        int command = table->longPress.primaryCommand;
+
+        if (command != BRL_CMD_NOOP) processCommand(table, command);
+      }
+
       resetLongPressData(table);
     }
   }
