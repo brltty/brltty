@@ -285,6 +285,7 @@ handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
 
+  table->longPress.primaryCommand = BRL_CMD_NOOP;
   if (table->longPress.repeat) setLongPressAlarm(table, prefs.autorepeatInterval);
   processCommand(table, table->longPress.secondaryCommand);
 }
@@ -448,10 +449,12 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
           int repeat = isRepeatableCommand(secondaryCommand);
 
           if (secondary || pending || repeat) {
-            table->longPress.primaryCommand = command;
-            table->longPress.secondaryCommand = secondaryCommand;
+            table->longPress.primaryCommand = pending? command: BRL_CMD_NOOP;
             if (pending) command = BRL_CMD_NOOP;
+
+            table->longPress.secondaryCommand = secondaryCommand;
             table->longPress.repeat = repeat;
+
             setLongPressAlarm(table, prefs.longPressTime);
           }
         }
