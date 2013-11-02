@@ -257,7 +257,8 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
 static int listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix);
 
 static int
-listBoundCommand (ListGenerationData *lgd, const KeyBinding *binding, const BoundCommand *cmd, int longPress, const wchar_t *keysPrefix) {
+listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPress, const wchar_t *keysPrefix) {
+  const BoundCommand *cmd = longPress? &binding->secondaryCommand: &binding->primaryCommand;
   size_t keysOffset;
 
   if (cmd->value == BRL_CMD_NOOP) return 1;
@@ -328,8 +329,8 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 
     while (count) {
       if (!(binding->flags & KBF_HIDDEN)) {
-        if (!listBoundCommand(lgd, binding, &binding->primaryCommand, 0, keysPrefix)) return 0;
-        if (!listBoundCommand(lgd, binding, &binding->secondaryCommand, 1, keysPrefix)) return 0;
+        if (!listKeyBinding(lgd, binding, 0, keysPrefix)) return 0;
+        if (!listKeyBinding(lgd, binding, 1, keysPrefix)) return 0;
       }
 
       binding += 1, count -= 1;

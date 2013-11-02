@@ -53,13 +53,13 @@ typedef struct {
   const CommandEntry **commandTable;
   unsigned int commandCount;
 
+  BoundCommand nullBoundCommand;
+
   unsigned char context;
 
   unsigned hideRequested:1;
   unsigned hideImposed:1;
 } KeyTableData;
-
-static BoundCommand nullBoundCommand;
 
 void
 copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count) {
@@ -774,7 +774,7 @@ getCommandsOperand (DataFile *file, BoundCommand **cmds, KeyTableData *ktd) {
       }
 
       if (!count) {
-        *cmd = nullBoundCommand;
+        *cmd = ktd->nullBoundCommand;
       } else if (!parseCommandOperand(file, cmd, characters, count, ktd)) {
         return 0;
       }
@@ -1427,17 +1427,16 @@ KeyTable *
 compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
   KeyTable *table = NULL;
 
-  {
-    BoundCommand *cmd = &nullBoundCommand;
-
-    cmd->entry = getCommandEntry(cmd->value = BRL_CMD_NOOP);
-  }
-
   if (setGlobalTableVariables(KEY_TABLE_EXTENSION, KEY_SUBTABLE_EXTENSION)) {
     KeyTableData ktd;
     memset(&ktd, 0, sizeof(ktd));
-
     ktd.context = KTB_CTX_DEFAULT;
+
+    {
+      BoundCommand *cmd = &ktd.nullBoundCommand;
+
+      cmd->entry = getCommandEntry(cmd->value = BRL_CMD_NOOP);
+    }
 
     if ((ktd.table = malloc(sizeof(*ktd.table)))) {
       ktd.table->title = NULL;

@@ -213,6 +213,38 @@ sortKeyOffsets (const void *element1, const void *element2) {
   return 0;
 }
 
+static void
+addCommandArguments (KeyTable *table, int *command, const CommandEntry *entry, const KeyBinding *binding) {
+  if (entry->isOffset | entry->isColumn | entry->isRow | entry->isRange | entry->isKeyboard) {
+    unsigned int keyCount = table->pressedKeys.count;
+    KeyValue keyValues[keyCount];
+    copyKeyValues(keyValues, table->pressedKeys.table, keyCount);
+
+    {
+      int index;
+
+      for (index=0; index<binding->keyCombination.modifierCount; index+=1) {
+        deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.modifierKeys[index]);
+      }
+    }
+
+    if (binding->keyCombination.flags & KCF_IMMEDIATE_KEY) {
+      deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.immediateKey);
+    }
+
+    if (keyCount > 0) {
+      if (keyCount > 1) {
+        qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
+        if (entry->isRange) *command |= BRL_EXT(keyValues[1].key);
+      }
+
+      *command += keyValues[0].key;
+    } else if (entry->isColumn) {
+      if (!entry->isRouting) *command |= BRL_MSK_ARG;
+    }
+  }
+}
+
 static int
 processCommand (KeyTable *table, int command) {
   int blk = command & BRL_MSK_BLK;
@@ -400,36 +432,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         resetLongPressData(table);
 
         if (binding) {
-          const CommandEntry *entry = binding->primaryCommand.entry;
-
-          if (entry->isOffset | entry->isColumn | entry->isRow | entry->isRange | entry->isKeyboard) {
-            unsigned int keyCount = table->pressedKeys.count;
-            KeyValue keyValues[keyCount];
-            copyKeyValues(keyValues, table->pressedKeys.table, keyCount);
-
-            {
-              int index;
-
-              for (index=0; index<binding->keyCombination.modifierCount; index+=1) {
-                deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.modifierKeys[index]);
-              }
-            }
-
-            if (binding->keyCombination.flags & KCF_IMMEDIATE_KEY) {
-              deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.immediateKey);
-            }
-
-            if (keyCount > 0) {
-              if (keyCount > 1) {
-                qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-                if (entry->isRange) command |= BRL_EXT(keyValues[1].key);
-              }
-
-              command += keyValues[0].key;
-            } else if (entry->isColumn) {
-              if (!entry->isRouting) command |= BRL_MSK_ARG;
-            }
-          }
+          addCommandArguments(table, &command, binding->primaryCommand.entry, binding);
         }
 
         if (context != KTB_CTX_WAITING) {
