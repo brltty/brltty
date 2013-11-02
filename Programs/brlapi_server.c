@@ -79,6 +79,7 @@
 #include "scr.h"
 #include "tunes.h"
 #include "charset.h"
+#include "async_event.h"
 
 #ifdef __MINGW32__
 #define LogSocketError(msg) logWindowsSocketError(msg)
@@ -108,6 +109,7 @@ typedef enum {
 const char *const api_parameters[] = { "auth", "host", "retaindots", "stacksize", NULL };
 
 static size_t stackSize;
+static AsyncEvent *flushEvent;
 
 #define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright (C) 2002-2013 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
@@ -1081,6 +1083,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   if (cursor>=0) c->brailleWindow.cursor = cursor;
   c->brlbufstate = TODISPLAY;
   pthread_mutex_unlock(&c->brlMutex);
+  asyncSignalEvent(flushEvent, NULL);
   return 0;
 }
 
@@ -2410,6 +2413,11 @@ static void ttyTerminationHandler(Tty *tty)
       t = t->next;
     }
   }
+
+  if (flushEvent) {
+    asyncDiscardEvent(flushEvent);
+    flushEvent = NULL;
+  }
 }
 /* Function : terminationHandler */
 /* Terminates driver */
@@ -2635,10 +2643,10 @@ out:
   return command;
 }
 
-/* Function : api_flush
+/* Function : flushWrites
  * Flush writes to the braille device.
  */
-int api_flush(BrailleDisplay *brl) {
+static int flushWrites(BrailleDisplay *brl) {
   Connection *c;
   int ok = 1;
   int drain = 0;
@@ -2711,6 +2719,11 @@ out:
   return ok;
 }
 
+static void handleFlushEvent (const AsyncEventHandlerParameters *parameters) {
+  BrailleDisplay *brl = parameters->eventData;
+  flushWrites(brl);
+}
+
 int api_resume(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
@@ -2740,7 +2753,7 @@ void api_releaseDriver(BrailleDisplay *brl)
 void api_suspend(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
-  /* we let core's call to api_flush() go to full suspend state */
+  asyncSignalEvent(flushEvent, NULL);
 }
 
 static void brlResize(BrailleDisplay *brl)
@@ -2878,55 +2891,64 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
   if ((notty.connections = createConnection(INVALID_FILE_DESCRIPTOR,0)) == NULL) {
     logMessage(LOG_WARNING, "Unable to create connections list");
-    goto out;
+    goto noNottyConnections;
   }
   notty.connections->prev = notty.connections->next = notty.connections;
   if ((ttys.connections = createConnection(INVALID_FILE_DESCRIPTOR, 0)) == NULL) {
     logMessage(LOG_WARNING, "Unable to create ttys' connections list");
-    goto outalloc;
+    goto noTtysConnections;
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
   ttys.focus = -1;
 
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+
   pthread_mutex_init(&connectionsMutex,&mattr);
   pthread_mutex_init(&driverMutex,&mattr);
   pthread_mutex_init(&rawMutex,&mattr);
   pthread_mutex_init(&suspendMutex,&mattr);
 
   pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr,stackSize);
+
 #ifndef __MINGW32__
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 #endif /* __MINGW32__ */
-  /* don't care if it fails */
-  pthread_attr_setstacksize(&attr,stackSize);
+
+  if (!(flushEvent = asyncNewEvent(handleFlushEvent, brl))) goto noFlushEvent;
 
 #ifndef __MINGW32__
   signal(SIGUSR2, empty_handler);
 #endif /* __MINGW32__ */
-  running = 1;
 
+  running = 1;
   trueBraille=&noBraille;
+
   if ((res = pthread_create(&serverThread,&attr,runServer,hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
-    for (i=0;i<numSockets;i++)
+
+    for (i=0;i<numSockets;i++) {
 #ifdef __MINGW32__
       pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
       pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
-    goto outallocs;
+    }
+
+    goto noServerThread;
   }
 
   return 1;
   
-outallocs:
+noServerThread:
+  asyncDiscardEvent(flushEvent);
+noFlushEvent:
   freeConnection(ttys.connections);
-outalloc:
+noTtysConnections:
   freeConnection(notty.connections);
-out:
+noNottyConnections:
   authEnd(authDescriptor);
   authDescriptor = NULL;
   return 0;

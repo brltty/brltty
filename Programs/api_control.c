@@ -20,7 +20,6 @@
 
 #include "log.h"
 #include "api_control.h"
-#include "async_alarm.h"
 #include "brltty.h"
 
 #ifndef ENABLE_API
@@ -74,48 +73,15 @@ int
 api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
   return 0;
 }
-
-int
-api_flush (BrailleDisplay *brl) {
-  return 0;
-}
 #endif /* ENABLE_API */
 
 int apiStarted;
 static int driverClaimed;
 
-static void setFlushAlarm (int delay, void *data);
-static AsyncHandle flushAlarm = NULL;
-
-static void
-handleFlushAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  asyncDiscardHandle(flushAlarm);
-  flushAlarm = NULL;
-
-  api_flush(&brl);
-  setFlushAlarm(100, parameters->data);
-}
-
-static void
-setFlushAlarm (int delay, void *data) {
-  if (!flushAlarm) {
-    asyncSetAlarmIn(&flushAlarm, delay, handleFlushAlarm, data);
-  }
-}
-
-static void
-stopFlushAlarm () {
-  if (flushAlarm) {
-    asyncCancelRequest(flushAlarm);
-    flushAlarm = NULL;
-  }
-}
-
 int
 apiStart (char **parameters) {
   if (api_start(&brl, parameters)) {
     apiStarted = 1;
-    setFlushAlarm(0, NULL);
     return 1;
   }
 
@@ -126,7 +92,6 @@ void
 apiStop (void) {
   api_stop(&brl);
   apiStarted = 0;
-  stopFlushAlarm();
 }
 
 void
