@@ -646,8 +646,8 @@ applyCommandModifier (int *command, const CommandModifierEntry *modifiers, const
   return 0;
 }
 
-static const CommandEntry *
-parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
+static int
+parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *characters, int length, KeyTableData *ktd) {
   int offsetDone = 0;
   int unicodeDone = 0;
 
@@ -662,22 +662,23 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
     if (!name.length) {
       reportDataError(file, "missing command name");
-      return NULL;
+      return 0;
     }
 
     if (!(command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName))) {
       reportDataError(file, "unknown command name: %.*" PRIws, name.length, name.characters);
-      return NULL;
+      return 0;
     }
   }
-  *value = (*command)->code;
+
+  cmd->value = (cmd->entry = *command)->code;
 
   while (end) {
     DataOperand modifier;
 
     if (!(length -= end - characters + 1)) {
       reportDataError(file, "missing command modifier");
-      return NULL;
+      return 0;
     }
 
     characters = end + 1;
@@ -686,28 +687,28 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     modifier.characters = characters;
     modifier.length = end? end-characters: length;
 
-    if ((*command)->isToggle && !(*value & BRL_FLG_TOGGLE_MASK)) {
-      if (applyCommandModifier(value, commandModifierTable_toggle, &modifier)) continue;
+    if ((*command)->isToggle && !(cmd->value & BRL_FLG_TOGGLE_MASK)) {
+      if (applyCommandModifier(&cmd->value, commandModifierTable_toggle, &modifier)) continue;
     }
 
     if ((*command)->isMotion) {
-      if (applyCommandModifier(value, commandModifierTable_motion, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_motion, &modifier)) continue;
 
       if ((*command)->isRow) {
-        if (applyCommandModifier(value, commandModifierTable_line, &modifier)) continue;
+        if (applyCommandModifier(&cmd->value, commandModifierTable_line, &modifier)) continue;
       }
     }
 
     if ((*command)->isInput) {
-      if (applyCommandModifier(value, commandModifierTable_input, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_input, &modifier)) continue;
     }
 
     if ((*command)->isCharacter) {
-      if (applyCommandModifier(value, commandModifierTable_character, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_character, &modifier)) continue;
 
       if (!unicodeDone) {
         if (modifier.length == 1) {
-          *value |= BRL_ARG_SET(modifier.characters[0]);
+          cmd->value |= BRL_ARG_SET(modifier.characters[0]);
           unicodeDone = 1;
           continue;
         }
@@ -715,12 +716,12 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     }
 
     if ((*command)->isBraille) {
-      if (applyCommandModifier(value, commandModifierTable_braille, &modifier)) continue;
-      if (applyCommandModifier(value, commandModifierTable_character, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_braille, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_character, &modifier)) continue;
     }
 
     if ((*command)->isKeyboard) {
-      if (applyCommandModifier(value, commandModifierTable_keyboard, &modifier)) continue;
+      if (applyCommandModifier(&cmd->value, commandModifierTable_keyboard, &modifier)) continue;
     }
 
     if (((*command)->isOffset || (*command)->isColumn) && !offsetDone) {
@@ -729,7 +730,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
 
       if (isNumber(&offset, modifier.characters, modifier.length)) {
         if ((offset >= 0) && (offset <= maximum)) {
-          *value += offset;
+          cmd->value += offset;
           offsetDone = 1;
           continue;
         }
@@ -737,23 +738,23 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     }
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
-    return NULL;
+    return 0;
   }
 
-  return *command;
+  return 1;
 }
 
-static const CommandEntry *
-getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
+static int
+getCommandOperand (DataFile *file, BoundCommand *cmd, KeyTableData *ktd) {
   DataString name;
 
   if (getDataString(file, &name, 1, "command name")) {
-    const CommandEntry *cmd;
-
-    if ((cmd = parseCommandOperand(file, value, name.characters, name.length, ktd))) return cmd;
+    if (parseCommandOperand(file, cmd, name.characters, name.length, ktd)) {
+      return 1;
+    }
   }
 
-  return NULL;
+  return 0;
 }
 
 static int
@@ -788,16 +789,8 @@ processBindOperands (DataFile *file, void *data) {
   memset(&binding, 0, sizeof(binding));
   if (hideBindings(ktd)) binding.flags |= KBF_HIDDEN;
 
-  if (getKeysOperand(file, &binding.combination, ktd)) {
-    const CommandEntry *cmd;
-
-    if ((cmd = getCommandOperand(file, &binding.command, ktd))) {
-      if (cmd->isOffset) binding.flags |= KBF_OFFSET;
-      if (cmd->isColumn) binding.flags |= KBF_COLUMN;
-      if (cmd->isRow) binding.flags |= KBF_ROW;
-      if (cmd->isRange) binding.flags |= KBF_RANGE;
-      if (cmd->isRouting) binding.flags |= KBF_ROUTE;
-      if (cmd->isKeyboard) binding.flags |= KBF_KEYBOARD;
+  if (getKeysOperand(file, &binding.keyCombination, ktd)) {
+    if (getCommandOperand(file, &binding.primaryCommand, ktd)) {
       if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }
@@ -1104,7 +1097,7 @@ compareKeyCombinations (const KeyCombination *combination1, const KeyCombination
 
 int
 compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
-  return compareKeyCombinations(&binding1->combination, &binding2->combination);
+  return compareKeyCombinations(&binding1->keyCombination, &binding2->keyCombination);
 }
 
 static int
@@ -1130,7 +1123,7 @@ addBindingIndex (
 
   while (first <= last) {
     int current = (first + last) / 2;
-    const KeyCombination *combination = &ctx->keyBindings.table[ibd->indexTable[current]].combination;
+    const KeyCombination *combination = &ctx->keyBindings.table[ibd->indexTable[current]].keyCombination;
     int relation = compareKeyArrays(count, keys, combination->modifierCount, combination->modifierKeys);
     if (!relation) return 1;
 
@@ -1155,16 +1148,23 @@ addBindingIndex (
   }
 
   if (index == ctx->keyBindings.count) {
+    static const BoundCommand command = {
+      .entry = NULL,
+      .value = EOF
+    };
+
     KeyBinding binding = {
       .flags = KBF_HIDDEN,
-      .command = EOF,
 
-      .combination = {
+      .primaryCommand = command,
+      .secondaryCommand = command,
+
+      .keyCombination = {
         .modifierCount = count
       }
     };
 
-    copyKeyValues(binding.combination.modifierKeys, keys, count);
+    copyKeyValues(binding.keyCombination.modifierKeys, keys, count);
 
     if (!addKeyBinding(ctx, &binding)) return 0;
   }
@@ -1209,7 +1209,7 @@ addIncompleteBindings (KeyContext *ctx) {
     unsigned int index;
 
     for (index=0; index<ctx->keyBindings.count; index+=1) {
-      const KeyCombination *combination = &ctx->keyBindings.table[index].combination;
+      const KeyCombination *combination = &ctx->keyBindings.table[index].keyCombination;
 
       if (!(combination->flags & KCF_IMMEDIATE_KEY)) {
         if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, index, &ibd)) {
@@ -1225,7 +1225,7 @@ addIncompleteBindings (KeyContext *ctx) {
     unsigned int index;
 
     for (index=0; index<count; index+=1) {
-      const KeyCombination combination = ctx->keyBindings.table[index].combination;
+      const KeyCombination combination = ctx->keyBindings.table[index].keyCombination;
 
       if ((combination.flags & KCF_IMMEDIATE_KEY)) {
         if (!addBindingIndex(ctx, combination.modifierKeys, combination.modifierCount, ctx->keyBindings.count, &ibd)) {

@@ -53,10 +53,10 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
     memset(&target, 0, sizeof(target));
 
     if (immediate) {
-      target.combination.immediateKey = *immediate;
-      target.combination.flags |= KCF_IMMEDIATE_KEY;
+      target.keyCombination.immediateKey = *immediate;
+      target.keyCombination.flags |= KCF_IMMEDIATE_KEY;
     }
-    target.combination.modifierCount = table->pressedKeys.count;
+    target.keyCombination.modifierCount = table->pressedKeys.count;
 
     while (1) {
       unsigned int all = (1 << table->pressedKeys.count) - 1;
@@ -68,27 +68,27 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
           unsigned int bit;
 
           for (index=0, bit=1; index<table->pressedKeys.count; index+=1, bit<<=1) {
-            KeyValue *modifier = &target.combination.modifierKeys[index];
+            KeyValue *modifier = &target.keyCombination.modifierKeys[index];
 
             *modifier = table->pressedKeys.table[index];
             if (bits & bit) modifier->key = KTB_KEY_ANY;
           }
         }
-        qsort(target.combination.modifierKeys, table->pressedKeys.count, sizeof(*target.combination.modifierKeys), sortModifierKeys);
+        qsort(target.keyCombination.modifierKeys, table->pressedKeys.count, sizeof(*target.keyCombination.modifierKeys), sortModifierKeys);
 
         {
           const KeyBinding *const *binding = bsearch(&target, ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), searchKeyBinding);
 
           if (binding) {
-            if ((*binding)->command != EOF) return *binding;
+            if ((*binding)->primaryCommand.value != EOF) return *binding;
             *isIncomplete = 1;
           }
         }
       }
 
-      if (!(target.combination.flags & KCF_IMMEDIATE_KEY)) break;
-      if (target.combination.immediateKey.key == KTB_KEY_ANY) break;
-      target.combination.immediateKey.key = KTB_KEY_ANY;
+      if (!(target.keyCombination.flags & KCF_IMMEDIATE_KEY)) break;
+      if (target.keyCombination.immediateKey.key == KTB_KEY_ANY) break;
+      target.keyCombination.immediateKey.key = KTB_KEY_ANY;
     }
   }
 
@@ -347,9 +347,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     resetLongPressData(table);
 
     {
-      int cmd = press? hotkey->pressCommand: hotkey->releaseCommand;
+      const BoundCommand *cmd = press? &hotkey->pressCommand: &hotkey->releaseCommand;
 
-      if (cmd != BRL_CMD_NOOP) processCommand(table, (command = cmd));
+      if (cmd->value != BRL_CMD_NOOP) processCommand(table, (command = cmd->value));
     }
   } else {
     int isImmediate = 1;
@@ -364,9 +364,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
       if (binding) {
-        command = binding->command;
+        command = binding->primaryCommand.value;
       } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
-        command = binding->command;
+        command = binding->primaryCommand.value;
         isImmediate = 0;
       } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
         isImmediate = 0;
@@ -380,9 +380,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         inserted = insertPressedKey(table, &keyValue, keyPosition);
 
         if (binding) {
-          command = binding->command;
+          command = binding->primaryCommand.value;
         } else if ((binding = findKeyBinding(table, KTB_CTX_DEFAULT, NULL, &isIncomplete))) {
-          command = binding->command;
+          command = binding->primaryCommand.value;
           isImmediate = 0;
         } else {
           command = EOF;
@@ -400,7 +400,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         resetLongPressData(table);
 
         if (binding) {
-          if (binding->flags & (KBF_OFFSET | KBF_COLUMN | KBF_ROW | KBF_RANGE | KBF_KEYBOARD)) {
+          const CommandEntry *entry = binding->primaryCommand.entry;
+
+          if (entry->isOffset | entry->isColumn | entry->isRow | entry->isRange | entry->isKeyboard) {
             unsigned int keyCount = table->pressedKeys.count;
             KeyValue keyValues[keyCount];
             copyKeyValues(keyValues, table->pressedKeys.table, keyCount);
@@ -408,24 +410,24 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
             {
               int index;
 
-              for (index=0; index<binding->combination.modifierCount; index+=1) {
-                deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.modifierKeys[index]);
+              for (index=0; index<binding->keyCombination.modifierCount; index+=1) {
+                deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.modifierKeys[index]);
               }
             }
 
-            if (binding->combination.flags & KCF_IMMEDIATE_KEY) {
-              deleteExplicitKeyValue(keyValues, &keyCount, &binding->combination.immediateKey);
+            if (binding->keyCombination.flags & KCF_IMMEDIATE_KEY) {
+              deleteExplicitKeyValue(keyValues, &keyCount, &binding->keyCombination.immediateKey);
             }
 
             if (keyCount > 0) {
               if (keyCount > 1) {
                 qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-                if (binding->flags & KBF_RANGE) command |= BRL_EXT(keyValues[1].key);
+                if (entry->isRange) command |= BRL_EXT(keyValues[1].key);
               }
 
               command += keyValues[0].key;
-            } else if (binding->flags & KBF_COLUMN) {
-              if (!(binding->flags & KBF_ROUTE)) command |= BRL_MSK_ARG;
+            } else if (entry->isColumn) {
+              if (!entry->isRouting) command |= BRL_MSK_ARG;
             }
           }
         }

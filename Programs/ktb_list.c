@@ -177,10 +177,10 @@ putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
 }
 
 static int
-putCommandDescription (ListGenerationData *lgd, int command, int details) {
+putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int details) {
   char description[0X60];
 
-  describeCommand(command, description, sizeof(description),
+  describeCommand(cmd->value, description, sizeof(description),
                   details? (CDO_IncludeOperand | CDO_DefaultOperand): 0);
   return putUtf8String(lgd, description);
 }
@@ -233,15 +233,15 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 }
 
 static int
-listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, int command) {
-  if (command != BRL_CMD_NOOP) {
-    if ((command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-      const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (command & BRL_MSK_ARG)));
+listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
+  if (cmd->value != BRL_CMD_NOOP) {
+    if ((cmd->value & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+      const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
       if (!c) return 0;
       if (!putUtf8String(lgd, "switch to ")) return 0;
       if (!putCharacterString(lgd, c->title)) return 0;
     } else {
-      if (!putCommandDescription(lgd, command, (keyValue->key != KTB_KEY_ANY))) return 0;
+      if (!putCommandDescription(lgd, cmd, (keyValue->key != KTB_KEY_ANY))) return 0;
     }
 
     if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -262,8 +262,8 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 
     while (count) {
       if (!(hotkey->flags & HKF_HIDDEN)) {
-        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", hotkey->pressCommand)) return 0;
-        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", hotkey->releaseCommand)) return 0;
+        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", &hotkey->pressCommand)) return 0;
+        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", &hotkey->releaseCommand)) return 0;
       }
 
       hotkey += 1, count -= 1;
@@ -278,7 +278,7 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
       if (!(binding->flags & KBF_HIDDEN)) {
         size_t keysOffset;
 
-        if (!putCommandDescription(lgd, binding->command, !binding->combination.anyKeyCount)) return 0;
+        if (!putCommandDescription(lgd, &binding->primaryCommand, !binding->keyCombination.anyKeyCount)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         keysOffset = lgd->lineLength;
 
@@ -287,10 +287,10 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
           if (!putCharacterString(lgd, WS_C(", "))) return 0;
         }
 
-        if (!putKeyCombination(lgd, &binding->combination)) return 0;
+        if (!putKeyCombination(lgd, &binding->keyCombination)) return 0;
 
-        if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-          const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+        if ((binding->primaryCommand.value & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+          const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (binding->primaryCommand.value & BRL_MSK_ARG)));
           if (!c) return 0;
 
           {

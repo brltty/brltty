@@ -19,30 +19,17 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
+#include "prologue.h"
+
 #ifdef ENABLE_API
 #include "brlapi_keycodes.h"
 #endif /* ENABLE_API */
 
+#include "cmddefs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct {
-  const char *name;
-  const char *description;
-  int code;
-  unsigned isToggle:1;
-  unsigned isMotion:1;
-  unsigned isRouting:1;
-  unsigned isColumn:1;
-  unsigned isRow:1;
-  unsigned isOffset:1;
-  unsigned isRange:1;
-  unsigned isInput:1;
-  unsigned isCharacter:1;
-  unsigned isBraille:1;
-  unsigned isKeyboard:1;
-} CommandEntry;
 
 extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);

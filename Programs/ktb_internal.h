@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KTB_INTERNAL
 #define BRLTTY_INCLUDED_KTB_INTERNAL
 
+#include "cmddefs.h"
 #include "async.h"
 
 #ifdef __cplusplus
@@ -48,19 +49,19 @@ typedef struct {
   KeyValue immediateKey;
 } KeyCombination;
 
+typedef struct {
+  const CommandEntry *entry;
+  int value;
+} BoundCommand;
+
 typedef enum {
   KBF_HIDDEN   = 0X01,
-  KBF_OFFSET   = 0X02,
-  KBF_COLUMN   = 0X04,
-  KBF_ROW      = 0X08,
-  KBF_RANGE    = 0X10,
-  KBF_ROUTE    = 0X20,
-  KBF_KEYBOARD = 0X40
 } KeyBindingFlag;
 
 typedef struct {
-  int command;
-  KeyCombination combination;
+  BoundCommand primaryCommand;
+  BoundCommand secondaryCommand;
+  KeyCombination keyCombination;
   unsigned char flags;
 } KeyBinding;
 
@@ -70,8 +71,8 @@ typedef enum {
 
 typedef struct {
   KeyValue keyValue;
-  int pressCommand;
-  int releaseCommand;
+  BoundCommand pressCommand;
+  BoundCommand releaseCommand;
   unsigned char flags;
 } HotkeyEntry;
 
