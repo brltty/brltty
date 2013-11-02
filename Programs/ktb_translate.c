@@ -462,10 +462,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         processCommand(table, command);
       }
     } else {
-      {
-        int command = table->longPress.primaryCommand;
+      int *command = &table->longPress.primaryCommand;
 
-        if (command != BRL_CMD_NOOP) processCommand(table, command);
+      if (*command != BRL_CMD_NOOP) {
+        processCommand(table, *command);
+        *command = BRL_CMD_NOOP;
       }
 
       resetLongPressData(table);
