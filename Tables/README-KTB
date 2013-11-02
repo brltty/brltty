@@ -61,37 +61,93 @@ Use the "bind" directive to define which BRLTTY command is executed when a
 particular combination of one or more keys is pressed. The binding is defined 
 within the current context.
 
-   bind <keys> <command>
+   bind <keys> <commands>
 
 The <keys> operand specifies the key combination which is to be bound. It's a 
-sequence of one or more key names separated by plus (+) signs. The final (or 
-only) key name may be optionally prefixed with an exclamation (!) point. The 
-keys may be pressed in any order, with the exception that if the final key name 
-is prefixed with an exclamation point then it must be pressed last. The 
-exclamation point prefix means that the command is executed as soon as that key 
-is pressed. If not used, the command is executed as soon as any of the keys is 
-released.
+sequence of one or more key and/or key set names separated by plus (+) signs. 
+The final (or only) key name may be optionally prefixed with an exclamation (!) 
+point. For example:
 
-The <command> operand specifies the name of a BRLTTY command.  One or more 
-modifiers may be optionally appended to the command name by using a plus (+) 
-sign as the separator.
+   key1
+   set1
+   key1+key2
+   key1+key2+set1
+   !set1
+   key1+!key2
+
+A key set name refers to any key within the named set. A specific key within 
+the set may be identified by appending a dot (.) and a number to the name. The 
+first key within the set is key #1 (e.g. "keySetName.1").
+
+The keys may be pressed in any order, with the exception that if the final key 
+name is prefixed with an exclamation point then it must be pressed last. The 
+exclamation point prefix means that the primary command (see below) is executed 
+as soon as that key is pressed. If not used, the primary command is executed as 
+soon as any of the keys is released.
+
+The <commands> operand specifies the primary and secondary BRLTTY commands 
+which are to be bound to the key combination. The two commands (primary first 
+and secondary last) are separated from one another by a colon (:). Both 
+commands are optional. If just a primary command is being bound then the colon 
+needn't be supplied. All of these are valid:
+
+   bind key primaryCommand
+   bind key primaryCommand:
+   bind key primaryCommand:secondaryCommand
+   bind key :secondaryCommand
+   bind key :
+
+The primary command is executed as described above. The secondary command is 
+executed if the key combination is held for a while (i.e. when a long key press 
+is detected). If the autorepeat feature is enabled then the secondary command 
+is autorepeated if it has been defined else the primary command is 
+autorepeated.
+
+One or more modifiers may be optionally appended to the command name by using a 
+plus (+) sign as the separator. For example:
+
+   bind key command
+   bind key command+modifier1
+   bind key command+modifier1+modifier2
+
 *  For commands which enable/disable a feature:
    +  If the modifier +on is specified then the feature is enabled.
    +  If the modifier +off is specified then the feature is disabled.
    +  If neither +on nor +off is specified then the state of the feature is 
       toggled on/off.
+
 *  For commands which move the braille window:
    +  If the modifier +route is specified then, if necessary, the cursor is
       automatically routed so that it's always visible on the braille display.
+
 *  For commands which move the braille window to a specific line on the screen:
    +  If the modifier +toleft is specified then the braille window is also
       moved to the beginning of that line.
    +  If the modifier +scaled is specified then the set of keys bound to the 
       command is interpreted as though it were a scroll bar. If it isn't, then 
       there's a one-to-one correspondence between keys and lines.
+
 *  For commands which require an offset:
    +  The modifier +<offset>, where <offset> is a non-negative integer, may be 
       specified. If it isn't supplied then +0 is assumed.
+
+*  For commands which input any keyboard key (print or braille): 
+   +  The +shift modifier adds the shift key.
+   +  The +control modifier adds the control key.
+   +  The +meta modifier adds the meta (or left alt) key.
+
+*  For commands which input characters (print or braille):
+   +  The modifier +upper converts a lowercase character to uppercase.
+
+*  For commands which input braille characters:
+   +  The modifiers +dot1 through +dot8 add those dots to the character.
+   +  The modifier +space adds the space bar (or chord key) to the character.
+
+*  For commands which input keyboard scancodes:
+   +  The +release modifier means that it's a key release scancode. If it
+      isn't supplied then it's a key press scancode.
+   +  The +emul0 modifier means that it's an emulation mode 0 scancode.
+   +  The +emul1 modifier means that it's an emulation mode 1 scancode.
 
 Examples:
 
