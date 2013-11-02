@@ -254,6 +254,58 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
   return 1;
 }
 
+static int listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix);
+
+static int
+listBoundCommand (ListGenerationData *lgd, const KeyBinding *binding, const BoundCommand *cmd, int longPress, const wchar_t *keysPrefix) {
+  size_t keysOffset;
+
+  if (cmd->value == BRL_CMD_NOOP) return 1;
+
+  if (!putCommandDescription(lgd, cmd, !binding->keyCombination.anyKeyCount)) return 0;
+  if (!putCharacterString(lgd, WS_C(": "))) return 0;
+  keysOffset = lgd->lineLength;
+
+  if (keysPrefix) {
+    if (!putCharacterString(lgd, keysPrefix)) return 0;
+    if (!putCharacterString(lgd, WS_C(", "))) return 0;
+  }
+
+  if (longPress) {
+    if (!putCharacterString(lgd, WS_C("long "))) return 0;
+  }
+
+  if (!putKeyCombination(lgd, &binding->keyCombination)) return 0;
+
+  if ((cmd->value & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+    const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
+    if (!c) return 0;
+
+    {
+      size_t length = lgd->lineLength - keysOffset;
+      wchar_t keys[length + 1];
+
+      wmemcpy(keys, &lgd->lineCharacters[keysOffset], length);
+      keys[length] = 0;
+      lgd->lineLength = 0;
+
+      if (isTemporaryKeyContext(lgd->keyTable, c)) {
+        if (!listKeyContext(lgd, c, keys)) return 0;
+      } else {
+        if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
+        if (!putCharacterString(lgd, c->title)) return 0;
+        if (!putCharacterString(lgd, WS_C(": "))) return 0;
+        if (!putCharacterString(lgd, keys)) return 0;
+        if (!endLine(lgd)) return 0;
+      }
+    }
+  } else {
+    if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
   {
@@ -276,44 +328,8 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 
     while (count) {
       if (!(binding->flags & KBF_HIDDEN)) {
-        size_t keysOffset;
-
-        if (!putCommandDescription(lgd, &binding->primaryCommand, !binding->keyCombination.anyKeyCount)) return 0;
-        if (!putCharacterString(lgd, WS_C(": "))) return 0;
-        keysOffset = lgd->lineLength;
-
-        if (keysPrefix) {
-          if (!putCharacterString(lgd, keysPrefix)) return 0;
-          if (!putCharacterString(lgd, WS_C(", "))) return 0;
-        }
-
-        if (!putKeyCombination(lgd, &binding->keyCombination)) return 0;
-
-        if ((binding->primaryCommand.value & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-          const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (binding->primaryCommand.value & BRL_MSK_ARG)));
-          if (!c) return 0;
-
-          {
-            size_t length = lgd->lineLength - keysOffset;
-            wchar_t keys[length + 1];
-
-            wmemcpy(keys, &lgd->lineCharacters[keysOffset], length);
-            keys[length] = 0;
-            lgd->lineLength = 0;
-
-            if (isTemporaryKeyContext(lgd->keyTable, c)) {
-              if (!listKeyContext(lgd, c, keys)) return 0;
-            } else {
-              if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
-              if (!putCharacterString(lgd, c->title)) return 0;
-              if (!putCharacterString(lgd, WS_C(": "))) return 0;
-              if (!putCharacterString(lgd, keys)) return 0;
-              if (!endLine(lgd)) return 0;
-            }
-          }
-        } else {
-          if (!endLine(lgd)) return 0;
-        }
+        if (!listBoundCommand(lgd, binding, &binding->primaryCommand, 0, keysPrefix)) return 0;
+        if (!listBoundCommand(lgd, binding, &binding->secondaryCommand, 1, keysPrefix)) return 0;
       }
 
       binding += 1, count -= 1;

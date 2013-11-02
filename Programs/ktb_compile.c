@@ -745,16 +745,54 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
 }
 
 static int
-getCommandOperand (DataFile *file, BoundCommand *cmd, KeyTableData *ktd) {
-  DataString name;
+getCommandsOperand (DataFile *file, BoundCommand **cmds, KeyTableData *ktd) {
+  DataString commands;
 
-  if (getDataString(file, &name, 1, "command name")) {
-    if (parseCommandOperand(file, cmd, name.characters, name.length, ktd)) {
-      return 1;
+  if (getDataString(file, &commands, 1, "command")) {
+    const wchar_t *characters = commands.characters;
+    unsigned int length = commands.length;
+    int first = 1;
+
+    while (1) {
+      int count;
+
+      BoundCommand *cmd = *cmds++;
+      if (!cmd) break;
+
+      if (first) {
+        first = 0;
+      } else if (length) {
+        characters += 1;
+        length -= 1;
+      }
+
+      {
+        const wchar_t *end = wmemchr(characters, WC_C(':'), length);
+        count = end? (end - characters): length;
+      }
+
+      if (!count) {
+        cmd->entry = getCommandEntry(cmd->value = BRL_CMD_NOOP);
+      } else if (!parseCommandOperand(file, cmd, characters, count, ktd)) {
+        return 0;
+      }
+
+      characters += count;
+      length -= count;
     }
+
+    if (!length) return 1;
+    reportDataError(file, "too many commands: %.*" PRIws, length, characters);
   }
 
   return 0;
+}
+
+static int
+getCommandOperand (DataFile *file, BoundCommand *cmd, KeyTableData *ktd) {
+  BoundCommand *cmds[] = {cmd, NULL};
+
+  return getCommandsOperand(file, cmds, ktd);
 }
 
 static int
@@ -790,7 +828,13 @@ processBindOperands (DataFile *file, void *data) {
   if (hideBindings(ktd)) binding.flags |= KBF_HIDDEN;
 
   if (getKeysOperand(file, &binding.keyCombination, ktd)) {
-    if (getCommandOperand(file, &binding.primaryCommand, ktd)) {
+    BoundCommand *cmds[] = {
+      &binding.primaryCommand,
+      &binding.secondaryCommand,
+      NULL
+    };
+
+    if (getCommandsOperand(file, cmds, ktd)) {
       if (!addKeyBinding(ctx, &binding)) return 0;
     }
   }
