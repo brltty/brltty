@@ -58,6 +58,9 @@ puts "DisplaySize: [expandList $displaySize width height]"
 set tty [$session enterTtyMode]
 puts "Tty: $tty"
 
+$session write -text "The TCL bindings for BrlAPI seem to be working."
+after 5000
+
 $session leaveTtyMode
 $session closeConnection; unset session
 exit 0
