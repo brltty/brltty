@@ -1679,11 +1679,6 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
     }
   }
 
-  if (brl.highlightWindow) {
-    brl.highlightWindow = 0;
-    highlightWindow();
-  }
-
 #ifdef ENABLE_SPEECH_SUPPORT
   speech->doTrack(&spk);
   if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
@@ -1726,6 +1721,11 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
         pointerMoved = 1;
       }
     }
+  }
+
+  if (brl.highlightWindow) {
+    brl.highlightWindow = 0;
+    highlightWindow();
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
