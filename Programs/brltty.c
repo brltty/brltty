@@ -1646,12 +1646,6 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   unrequireAllBlinkDescriptors();
   updateSessionAttributes();
 
-#ifdef ENABLE_SPEECH_SUPPORT
-  speech->doTrack(&spk);
-  if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
-  if (autospeak()) doAutospeak();
-#endif /* ENABLE_SPEECH_SUPPORT */
-
   if (opt_releaseDevice) {
     if (scr.unreadable) {
       if (canBraille()) {
@@ -1689,6 +1683,11 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
     brl.highlightWindow = 0;
     highlightWindow();
   }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  speech->doTrack(&spk);
+  if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1728,6 +1727,10 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
       }
     }
   }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  if (autospeak()) doAutospeak();
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   /* There are a few things to take care of if the display has moved. */
   if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
