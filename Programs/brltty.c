@@ -1731,6 +1731,10 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
     }
   }
 
+#ifdef ENABLE_SPEECH_SUPPORT
+  if (autospeak()) doAutospeak();
+#endif /* ENABLE_SPEECH_SUPPORT */
+
   /* There are a few things to take care of if the display has moved. */
   if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
     if (!pointerMoved) highlightWindow();
@@ -1989,10 +1993,6 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   }
 
   apiReleaseDriver();
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  if (autospeak()) doAutospeak();
-#endif /* ENABLE_SPEECH_SUPPORT */
 
   resetAllBlinkDescriptors();
   drainBrailleOutput(&brl, 0);
