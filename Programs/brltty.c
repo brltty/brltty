@@ -1644,10 +1644,12 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   updateAlarm = NULL;
 
   unrequireAllBlinkDescriptors();
+  updateSessionAttributes();
 
 #ifdef ENABLE_SPEECH_SUPPORT
   speech->doTrack(&spk);
   if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
+  if (autospeak()) doAutospeak();
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_releaseDevice) {
@@ -1683,14 +1685,10 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
     }
   }
 
-  apiClaimDriver();
-
   if (brl.highlightWindow) {
     brl.highlightWindow = 0;
     highlightWindow();
   }
-
-  updateSessionAttributes();
 
   if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1731,10 +1729,6 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
     }
   }
 
-#ifdef ENABLE_SPEECH_SUPPORT
-  if (autospeak()) doAutospeak();
-#endif /* ENABLE_SPEECH_SUPPORT */
-
   /* There are a few things to take care of if the display has moved. */
   if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
     if (!pointerMoved) highlightWindow();
@@ -1758,6 +1752,8 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   }
 
   if (!isOffline && canBraille()) {
+    apiClaimDriver();
+
     if (infoMode) {
       if (!showInfo()) restartRequired = 1;
     } else {
@@ -1990,9 +1986,9 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
 
       if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
     }
-  }
 
-  apiReleaseDriver();
+    apiReleaseDriver();
+  }
 
   resetAllBlinkDescriptors();
   drainBrailleOutput(&brl, 0);
