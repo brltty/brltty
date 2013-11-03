@@ -939,7 +939,6 @@ static int generateToplevel(void)
 #ifdef USE_XAW
 	XtNshowGrip,False,
 	XtNinternational, True,
-	XNFontSet, fontset,
 #else /* USE_XAW */
 	XmNpaneMaximum,20,
 	XmNpaneMinimum,20,
@@ -947,10 +946,11 @@ static int generateToplevel(void)
 #endif /* USE_XAW */
 #ifdef USE_XAW
 	XtNlabel, disp,
+	fontset ? XNFontSet : NULL, fontset, NULL
 #else /* USE_XAW */
-	XmNlabelString, display_cs,
+	XmNlabelString, display_cs, NULL
 #endif /* USE_XAW */
-	NULL);
+	);
 
 #ifdef USE_XAW
       if (fontset) {
