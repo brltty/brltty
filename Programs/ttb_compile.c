@@ -293,7 +293,7 @@ testTextTable (const char *directory, char *name) {
 
 char *
 selectTextTable (const char *directory) {
-  const char *locale = getLocaleName();
+  char *locale = getLocaleName();
 
   if (locale) {
     char name[strlen(locale) + 1];
@@ -303,6 +303,9 @@ selectTextTable (const char *directory) {
       strncpy(name, locale, length);
       name[length] = 0;
     }
+
+    free(locale);
+    locale = NULL;
 
     if (isPosixLocale(name)) {
       name[0] = 0;
