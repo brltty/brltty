@@ -234,17 +234,26 @@ getWindowsLocaleName (void) {
     int result = GetLocaleInfoExProc(LOCALE_NAME_USER_DEFAULT, LOCALE_SNAME, buffer, WIN_LOCALE_SIZE);
 
     if (result > 0) {
-      static char locale[WIN_LOCALE_SIZE];
+      char locale[WIN_LOCALE_SIZE];
       const WCHAR *source = buffer;
       char *target = locale;
 
       do {
-        char c = *source;
+        WCHAR c = *source;
+
         if (c == '-') c = '_';
         *target++ = c;
       } while (*source++);
 
-      return locale;
+      {
+        char *name = strdup(locale);
+
+        if (name) {
+          return name;
+        } else {
+          logMallocError();
+        }
+      }
     } else {
       logWindowsSystemError("GetLocaleInfoEx");
     }
@@ -257,8 +266,10 @@ getWindowsLocaleName (void) {
                                (char *)&langid, sizeof(langid)/sizeof(TCHAR));
 
     if (result > 0) {
+      char *name;
+
       switch (langid) {
-#define DIALECT(primary,secondary,locale) case MAKELANGID(LANG_##primary, SUBLANG_##primary##_##secondary): return (locale);
+#define DIALECT(primary,secondary,locale) case MAKELANGID(LANG_##primary, SUBLANG_##primary##_##secondary): name = (locale); break;
         DIALECT(AFRIKAANS, SOUTH_AFRICA, "af_ZA");
         DIALECT(ALBANIAN, ALBANIA, "sq_AL");
         DIALECT(ALSATIAN, FRANCE, "gsw_FR");
@@ -468,140 +479,154 @@ getWindowsLocaleName (void) {
         DIALECT(YI, PRC, "ii_CN");
         DIALECT(YORUBA, NIGERIA, "yo_NG");
         DIALECT(ZULU, SOUTH_AFRICA, "zu_ZA");
-#undef DIALECT
+#undef DIALECTo
+
+        default:
+          switch (PRIMARYLANGID(langid)) {
+#define LANGUAGE(primary,locale) case LANG_##primary: name = (locale); break;
+            LANGUAGE(AFRIKAANS, "af");
+            LANGUAGE(ALBANIAN, "sq");
+            LANGUAGE(ALSATIAN, "gsw");
+            LANGUAGE(AMHARIC, "am");
+            LANGUAGE(ARABIC, "ar");
+            LANGUAGE(ARMENIAN, "hy");
+            LANGUAGE(ASSAMESE, "as");
+            LANGUAGE(AZERI, "az");
+            LANGUAGE(BASHKIR, "ba");
+            LANGUAGE(BASQUE, "eu");
+            LANGUAGE(BELARUSIAN, "be");
+            LANGUAGE(BENGALI, "bn");
+            LANGUAGE(BOSNIAN, "bs");
+            LANGUAGE(BOSNIAN_NEUTRAL, "bs");
+            LANGUAGE(BRETON, "br");
+            LANGUAGE(BULGARIAN, "bg");
+            LANGUAGE(CATALAN, "ca");
+            LANGUAGE(CHINESE, "zh");
+            LANGUAGE(CORSICAN, "co");
+          //LANGUAGE(CROATIAN, "hr");
+            LANGUAGE(CZECH, "cs");
+            LANGUAGE(DANISH, "da");
+            LANGUAGE(DARI, "gbz");
+            LANGUAGE(DIVEHI, "dv");
+            LANGUAGE(DUTCH, "nl");
+            LANGUAGE(ENGLISH, "en");
+            LANGUAGE(ESTONIAN, "et");
+            LANGUAGE(FAEROESE, "fo");
+            LANGUAGE(FILIPINO, "fil");
+            LANGUAGE(FINNISH, "fi");
+            LANGUAGE(FRENCH, "fr");
+            LANGUAGE(FRISIAN, "fy");
+            LANGUAGE(GALICIAN, "gl");
+            LANGUAGE(GEORGIAN, "ka");
+            LANGUAGE(GERMAN, "de");
+            LANGUAGE(GREEK, "el");
+            LANGUAGE(GREENLANDIC, "kl");
+            LANGUAGE(GUJARATI, "gu");
+            LANGUAGE(HAUSA, "ha");
+            LANGUAGE(HEBREW, "he");
+            LANGUAGE(HINDI, "hi");
+            LANGUAGE(HUNGARIAN, "hu");
+            LANGUAGE(ICELANDIC, "is");
+            LANGUAGE(IGBO, "ig");
+            LANGUAGE(INDONESIAN, "id");
+            LANGUAGE(INUKTITUT, "iu");
+            LANGUAGE(IRISH, "ga");
+            LANGUAGE(ITALIAN, "it");
+            LANGUAGE(JAPANESE, "ja");
+            LANGUAGE(KANNADA, "kn");
+            LANGUAGE(KASHMIRI, "ks");
+            LANGUAGE(KAZAK, "kk");
+            LANGUAGE(KHMER, "km");
+            LANGUAGE(KICHE, "quc");
+            LANGUAGE(KINYARWANDA, "rw");
+            LANGUAGE(KONKANI, "kok");
+            LANGUAGE(KOREAN, "ko");
+            LANGUAGE(KYRGYZ, "ky");
+            LANGUAGE(LAO, "lo");
+            LANGUAGE(LATVIAN, "lv");
+            LANGUAGE(LITHUANIAN, "lt");
+            LANGUAGE(LOWER_SORBIAN, "dsb");
+            LANGUAGE(LUXEMBOURGISH, "lb");
+            LANGUAGE(MACEDONIAN, "mk");
+            LANGUAGE(MALAGASY, "mg");
+            LANGUAGE(MALAY, "ms");
+            LANGUAGE(MALAYALAM, "ml");
+            LANGUAGE(MALTESE, "mt");
+            LANGUAGE(MANIPURI, "mni");
+            LANGUAGE(MAORI, "mi");
+            LANGUAGE(MAPUDUNGUN, "arn");
+            LANGUAGE(MARATHI, "mr");
+            LANGUAGE(MOHAWK, "moh");
+            LANGUAGE(MONGOLIAN, "mn");
+            LANGUAGE(NEPALI, "ne");
+            LANGUAGE(NORWEGIAN, "no");
+            LANGUAGE(OCCITAN, "oc");
+            LANGUAGE(ORIYA, "or");
+            LANGUAGE(PASHTO, "ps");
+            LANGUAGE(PERSIAN, "fa");
+            LANGUAGE(POLISH, "pl");
+            LANGUAGE(PORTUGUESE, "pt");
+            LANGUAGE(PUNJABI, "pa");
+            LANGUAGE(QUECHUA, "qu");
+            LANGUAGE(ROMANIAN, "ro");
+            LANGUAGE(RUSSIAN, "ru");
+            LANGUAGE(SAMI, "se");
+            LANGUAGE(SANSKRIT, "sa");
+          //LANGUAGE(SERBIAN, "sr");
+            LANGUAGE(SERBIAN_NEUTRAL, "sr");
+            LANGUAGE(SINDHI, "sd");
+            LANGUAGE(SINHALESE, "si");
+            LANGUAGE(SLOVAK, "sk");
+            LANGUAGE(SLOVENIAN, "sl");
+            LANGUAGE(SOTHO, "st");
+            LANGUAGE(SPANISH, "es");
+            LANGUAGE(SWAHILI, "sw");
+            LANGUAGE(SWEDISH, "sv");
+            LANGUAGE(SYRIAC, "syr");
+            LANGUAGE(TAMAZIGHT, "ber");
+            LANGUAGE(TAMIL, "ta");
+            LANGUAGE(TATAR, "tt");
+            LANGUAGE(TELUGU, "te");
+            LANGUAGE(THAI, "th");
+            LANGUAGE(TIBETAN, "bo");
+            LANGUAGE(TIGRIGNA, "ti");
+            LANGUAGE(TSWANA, "tn");
+            LANGUAGE(TURKISH, "tr");
+            LANGUAGE(UIGHUR, "ug");
+            LANGUAGE(UKRAINIAN, "uk");
+          //LANGUAGE(UPPER_SORBIAN, "hsb");
+            LANGUAGE(URDU, "ur");
+            LANGUAGE(UZBEK, "uz");
+            LANGUAGE(VIETNAMESE, "vi");
+            LANGUAGE(WELSH, "cy");
+            LANGUAGE(WOLOF, "fy");
+            LANGUAGE(XHOSA, "xh");
+            LANGUAGE(YAKUT, "sah");
+            LANGUAGE(YI, "ii");
+            LANGUAGE(YORUBA, "yo");
+            LANGUAGE(ZULU, "zu");
+#undef LANGUAGE
+
+            default:
+              name = NULL;
+              break;
+          }
+          break;
       }
 
-      switch (PRIMARYLANGID(langid)) {
-#define LANGUAGE(primary,locale) case LANG_##primary: return (locale);
-        LANGUAGE(AFRIKAANS, "af");
-        LANGUAGE(ALBANIAN, "sq");
-        LANGUAGE(ALSATIAN, "gsw");
-        LANGUAGE(AMHARIC, "am");
-        LANGUAGE(ARABIC, "ar");
-        LANGUAGE(ARMENIAN, "hy");
-        LANGUAGE(ASSAMESE, "as");
-        LANGUAGE(AZERI, "az");
-        LANGUAGE(BASHKIR, "ba");
-        LANGUAGE(BASQUE, "eu");
-        LANGUAGE(BELARUSIAN, "be");
-        LANGUAGE(BENGALI, "bn");
-        LANGUAGE(BOSNIAN, "bs");
-        LANGUAGE(BOSNIAN_NEUTRAL, "bs");
-        LANGUAGE(BRETON, "br");
-        LANGUAGE(BULGARIAN, "bg");
-        LANGUAGE(CATALAN, "ca");
-        LANGUAGE(CHINESE, "zh");
-        LANGUAGE(CORSICAN, "co");
-      //LANGUAGE(CROATIAN, "hr");
-        LANGUAGE(CZECH, "cs");
-        LANGUAGE(DANISH, "da");
-        LANGUAGE(DARI, "gbz");
-        LANGUAGE(DIVEHI, "dv");
-        LANGUAGE(DUTCH, "nl");
-        LANGUAGE(ENGLISH, "en");
-        LANGUAGE(ESTONIAN, "et");
-        LANGUAGE(FAEROESE, "fo");
-        LANGUAGE(FILIPINO, "fil");
-        LANGUAGE(FINNISH, "fi");
-        LANGUAGE(FRENCH, "fr");
-        LANGUAGE(FRISIAN, "fy");
-        LANGUAGE(GALICIAN, "gl");
-        LANGUAGE(GEORGIAN, "ka");
-        LANGUAGE(GERMAN, "de");
-        LANGUAGE(GREEK, "el");
-        LANGUAGE(GREENLANDIC, "kl");
-        LANGUAGE(GUJARATI, "gu");
-        LANGUAGE(HAUSA, "ha");
-        LANGUAGE(HEBREW, "he");
-        LANGUAGE(HINDI, "hi");
-        LANGUAGE(HUNGARIAN, "hu");
-        LANGUAGE(ICELANDIC, "is");
-        LANGUAGE(IGBO, "ig");
-        LANGUAGE(INDONESIAN, "id");
-        LANGUAGE(INUKTITUT, "iu");
-        LANGUAGE(IRISH, "ga");
-        LANGUAGE(ITALIAN, "it");
-        LANGUAGE(JAPANESE, "ja");
-        LANGUAGE(KANNADA, "kn");
-        LANGUAGE(KASHMIRI, "ks");
-        LANGUAGE(KAZAK, "kk");
-        LANGUAGE(KHMER, "km");
-        LANGUAGE(KICHE, "quc");
-        LANGUAGE(KINYARWANDA, "rw");
-        LANGUAGE(KONKANI, "kok");
-        LANGUAGE(KOREAN, "ko");
-        LANGUAGE(KYRGYZ, "ky");
-        LANGUAGE(LAO, "lo");
-        LANGUAGE(LATVIAN, "lv");
-        LANGUAGE(LITHUANIAN, "lt");
-        LANGUAGE(LOWER_SORBIAN, "dsb");
-        LANGUAGE(LUXEMBOURGISH, "lb");
-        LANGUAGE(MACEDONIAN, "mk");
-        LANGUAGE(MALAGASY, "mg");
-        LANGUAGE(MALAY, "ms");
-        LANGUAGE(MALAYALAM, "ml");
-        LANGUAGE(MALTESE, "mt");
-        LANGUAGE(MANIPURI, "mni");
-        LANGUAGE(MAORI, "mi");
-        LANGUAGE(MAPUDUNGUN, "arn");
-        LANGUAGE(MARATHI, "mr");
-        LANGUAGE(MOHAWK, "moh");
-        LANGUAGE(MONGOLIAN, "mn");
-        LANGUAGE(NEPALI, "ne");
-        LANGUAGE(NORWEGIAN, "no");
-        LANGUAGE(OCCITAN, "oc");
-        LANGUAGE(ORIYA, "or");
-        LANGUAGE(PASHTO, "ps");
-        LANGUAGE(PERSIAN, "fa");
-        LANGUAGE(POLISH, "pl");
-        LANGUAGE(PORTUGUESE, "pt");
-        LANGUAGE(PUNJABI, "pa");
-        LANGUAGE(QUECHUA, "qu");
-        LANGUAGE(ROMANIAN, "ro");
-        LANGUAGE(RUSSIAN, "ru");
-        LANGUAGE(SAMI, "se");
-        LANGUAGE(SANSKRIT, "sa");
-      //LANGUAGE(SERBIAN, "sr");
-        LANGUAGE(SERBIAN_NEUTRAL, "sr");
-        LANGUAGE(SINDHI, "sd");
-        LANGUAGE(SINHALESE, "si");
-        LANGUAGE(SLOVAK, "sk");
-        LANGUAGE(SLOVENIAN, "sl");
-        LANGUAGE(SOTHO, "st");
-        LANGUAGE(SPANISH, "es");
-        LANGUAGE(SWAHILI, "sw");
-        LANGUAGE(SWEDISH, "sv");
-        LANGUAGE(SYRIAC, "syr");
-        LANGUAGE(TAMAZIGHT, "ber");
-        LANGUAGE(TAMIL, "ta");
-        LANGUAGE(TATAR, "tt");
-        LANGUAGE(TELUGU, "te");
-        LANGUAGE(THAI, "th");
-        LANGUAGE(TIBETAN, "bo");
-        LANGUAGE(TIGRIGNA, "ti");
-        LANGUAGE(TSWANA, "tn");
-        LANGUAGE(TURKISH, "tr");
-        LANGUAGE(UIGHUR, "ug");
-        LANGUAGE(UKRAINIAN, "uk");
-      //LANGUAGE(UPPER_SORBIAN, "hsb");
-        LANGUAGE(URDU, "ur");
-        LANGUAGE(UZBEK, "uz");
-        LANGUAGE(VIETNAMESE, "vi");
-        LANGUAGE(WELSH, "cy");
-        LANGUAGE(WOLOF, "fy");
-        LANGUAGE(XHOSA, "xh");
-        LANGUAGE(YAKUT, "sah");
-        LANGUAGE(YI, "ii");
-        LANGUAGE(YORUBA, "yo");
-        LANGUAGE(ZULU, "zu");
-#undef LANGUAGE
+      if (name) {
+        if ((name = strdup(name))) {
+          return name;
+        } else {
+          logMallocError();
+        }
       }
     } else {
       logWindowsSystemError("GetLocaleInfo");
     }
   }
 
-  return "xx";
+  return NULL;
 }
 
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
