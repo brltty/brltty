@@ -153,9 +153,13 @@ static char *opt_speechDriver;
 static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
+
 static char *opt_speechParameters;
 static char **speechParameters = NULL;
+
 static char *opt_speechInput;
+static SpeechInputObject *speechInputObject;
+
 int opt_quietIfNoBraille;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1528,7 +1532,10 @@ exitSpeechDriver (void *data) {
 
 static void
 exitSpeechInput (void *data) {
-  disableSpeechInput();
+  if (speechInputObject) {
+    destroySpeechInputObject(speechInputObject);
+    speechInputObject = NULL;
+  }
 }
 
 int
@@ -2212,7 +2219,7 @@ brlttyStart (int argc, char *argv[]) {
              *opt_speechInput? opt_speechInput: gettext("none"));
   if (!opt_verify) {
     if (*opt_speechInput) {
-      enableSpeechInput(opt_speechInput);
+      speechInputObject = newSpeechInputObject(opt_speechInput);
       onProgramExit("speech-input", exitSpeechInput, NULL);
     }
   }

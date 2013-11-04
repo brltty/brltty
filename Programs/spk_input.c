@@ -31,50 +31,65 @@
 #include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static char *pipePath;
-static FileDescriptor pipeDescriptor;
-static AsyncHandle inputMonitor;
+struct SpeechInputObjectStruct {
+  int (*createPipe) (SpeechInputObject *obj);
+  int (*startMonitor) (SpeechInputObject *obj);
+
+  char *pipePath;
+  FileDescriptor pipeDescriptor;
+  AsyncHandle inputMonitor;
+
+#if defined(__MINGW32__)
+  struct {
+    AsyncHandle connectMonitor;
+    HANDLE connectEvent;
+    OVERLAPPED connectOverlapped;
+  } windows;
+
+#endif /*  */
+};
 
 static void
-initializePipePath (void) {
-  pipePath = NULL;
+initializePipePath (SpeechInputObject *obj) {
+  obj->pipePath = NULL;
 }
 
 static void
-deallocatePipePath (void) {
-  if (pipePath) free(pipePath);
-  initializePipePath();
+deallocatePipePath (SpeechInputObject *obj) {
+  if (obj->pipePath) free(obj->pipePath);
+  initializePipePath(obj);
 }
 
 static void
-removePipe (void) {
-  if (pipePath) unlink(pipePath);
+removePipe (SpeechInputObject *obj) {
+  if (obj->pipePath) unlink(obj->pipePath);
 }
 
 static void
-initializePipeDescriptor (void) {
-  pipeDescriptor = INVALID_FILE_DESCRIPTOR;
+initializePipeDescriptor (SpeechInputObject *obj) {
+  obj->pipeDescriptor = INVALID_FILE_DESCRIPTOR;
 }
 
 static void
-closePipeDescriptor (void) {
-  if (pipeDescriptor != INVALID_FILE_DESCRIPTOR) closeFileDescriptor(pipeDescriptor);
-  initializePipeDescriptor();
+closePipeDescriptor (SpeechInputObject *obj) {
+  if (obj->pipeDescriptor != INVALID_FILE_DESCRIPTOR) closeFileDescriptor(obj->pipeDescriptor);
+  initializePipeDescriptor(obj);
 }
 
 static void
-initializeInputMonitor (void) {
-  inputMonitor = NULL;
+initializeInputMonitor (SpeechInputObject *obj) {
+  obj->inputMonitor = NULL;
 }
 
 static void
-stopInputMonitor (void) {
-  if (inputMonitor) asyncCancelRequest(inputMonitor);
-  initializeInputMonitor();
+stopInputMonitor (SpeechInputObject *obj) {
+  if (obj->inputMonitor) asyncCancelRequest(obj->inputMonitor);
+  initializeInputMonitor(obj);
 }
 
 static size_t
 monitorInput (const AsyncInputCallbackParameters *parameters) {
+  SpeechInputObject *obj = parameters->data;
   const char *buffer = parameters->buffer;
   size_t length = parameters->length;
 
@@ -83,9 +98,9 @@ monitorInput (const AsyncInputCallbackParameters *parameters) {
 }
 
 static int
-startInputMonitor (void) {
-  if (!inputMonitor) {
-    if (!asyncReadFile(&inputMonitor, pipeDescriptor, 0x1000, monitorInput, NULL)) {
+startInputMonitor (SpeechInputObject *obj) {
+  if (!obj->inputMonitor) {
+    if (!asyncReadFile(&obj->inputMonitor, obj->pipeDescriptor, 0x1000, monitorInput, obj)) {
       return 0;
     }
   }
@@ -94,35 +109,88 @@ startInputMonitor (void) {
 }
 
 #if defined(__MINGW32__)
-#define startPipeMonitor startConnectionMonitor
-
-static int speechInputConnected;
-
 static int
-createPipe (void) {
-  if ((pipeDescriptor = CreateNamedPipe(pipePath,
-                                        PIPE_ACCESS_INBOUND | PIPE_FLAG_OVERLAPPED,
-                                        PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-                                        1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
-    logMessage(LOG_DEBUG, "speech input pipe created: %s: handle=%u",
-               pipePath, (unsigned)pipeDescriptor);
+createWindowsPipe (SpeechInputObject *obj) {
+  obj->windows.connectMonitor = NULL;
 
-    return 1;
+  if ((obj->windows.connectEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+    if ((obj->pipeDescriptor = CreateNamedPipe(obj->pipePath,
+                                               PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
+                                               PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                               1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
+      logMessage(LOG_DEBUG, "speech input pipe created: %s: handle=%u",
+                 obj->pipePath, (unsigned int)obj->pipeDescriptor);
+
+      return 1;
+    } else {
+      logWindowsSystemError("CreateNamedPipe");
+    }
+
+    CloseHandle(obj->windows.connectEvent);
   } else {
-    logWindowsSystemError("CreateNamedPipe");
+    logWindowsSystemError("CreateEvent");
   }
 
   return 0;
 }
 
 static int
-startConnectionMonitor (void) {
+doConnected (SpeechInputObject *obj) {
+  return startInputMonitor(obj);
+}
+
+static int
+monitorConnect (const AsyncMonitorCallbackParameters *parameters) {
+  SpeechInputObject *obj = parameters->data;
+
+  asyncDiscardHandle(obj->windows.connectMonitor);
+  obj->windows.connectMonitor = NULL;
+
+  doConnected(obj);
   return 0;
+}
+
+static int
+startConnectMonitor (SpeechInputObject *obj) {
+  if (ResetEvent(obj->windows.connectEvent)) {
+    ZeroMemory(&obj->windows.connectOverlapped, sizeof(obj->windows.connectOverlapped));
+    obj->windows.connectOverlapped.hEvent = obj->windows.connectEvent;
+
+    if (ConnectNamedPipe(obj->pipeDescriptor, &obj->windows.connectOverlapped)) {
+      if (doConnected(obj)) {
+        return 1;
+      }
+    } else {
+      DWORD error = GetLastError();
+
+      if (error == ERROR_PIPE_CONNECTED) {
+        if (doConnected(obj)) {
+          return 1;
+        }
+      } else if (error == ERROR_IO_PENDING) {
+        if (asyncMonitorFileInput(&obj->windows.connectMonitor, obj->windows.connectEvent, monitorConnect, obj)) {
+          return 1;
+        }
+      } else {
+        logWindowsError(error, "ConnectNamedPipe");
+      }
+    }
+  } else {
+    logWindowsSystemError("ResetEvent");
+  }
+
+  return 0;
+}
+
+static void
+setSpeechInputMethods (SpeechInputObject *obj) {
+  obj->createPipe = createWindowsPipe;
+  obj->startMonitor = startConnectMonitor;
 }
 
 #elif defined(S_ISFIFO)
 static int
-createPipe (void) {
+createUnixPipe (void) {
   int result = mkfifo(pipePath, 0);
 
   if ((result == -1) && (errno == EEXIST)) {
@@ -161,49 +229,62 @@ createPipe (void) {
   return 0;
 }
 
+static void
+setSpeechInputMethods (SpeechInputObject *obj) {
+  obj->createPipe = createUnixPipe;
+  obj->startMonitor = startInputMonitor;
+}
+
 #else /* speech input functions */
 #warning speech input not supported on this platform
 
-static int
-createPipe (void) {
-  logUnsupportedFeature("speech input");
-  return 0;
+static void
+setSpeechInputMethods (SpeechInputObject *obj) {
 }
 #endif /* speech input functions */
 
-#ifndef startPipeMonitor
-#define startPipeMonitor startInputMonitor
-#endif /* startPipeMonitor */
+SpeechInputObject *
+newSpeechInputObject (const char *name) {
+  SpeechInputObject *obj;
 
-int
-enableSpeechInput (const char *name) {
-  const char *directory = getNamedPipeDirectory();
+  if ((obj = malloc(sizeof(*obj)))) {
+    memset(obj, 0, sizeof(*obj));
 
-  initializePipePath();
-  initializePipeDescriptor();
-  initializeInputMonitor();
+    obj->createPipe = NULL;
+    obj->startMonitor = NULL;
+    setSpeechInputMethods(obj);
 
-  if ((pipePath = makePath(directory, name))) {
-    if (createPipe()) {
-      if (startPipeMonitor()) {
-        return 1;
+    initializePipePath(obj);
+    initializePipeDescriptor(obj);
+    initializeInputMonitor(obj);
+
+    if ((obj->pipePath = makePath(getNamedPipeDirectory(), name))) {
+      if (obj->createPipe(obj)) {
+        if (obj->startMonitor(obj)) {
+          return obj;
+        }
+
+        closePipeDescriptor(obj);
+        removePipe(obj);
       }
 
-      closePipeDescriptor();
-      removePipe();
+      deallocatePipePath(obj);
     }
 
-    deallocatePipePath();
+    free(obj);
+  } else {
+    logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
 void
-disableSpeechInput (void) {
-  stopInputMonitor();
-  closePipeDescriptor();
-  removePipe();
-  deallocatePipePath();
+destroySpeechInputObject (SpeechInputObject *obj) {
+  stopInputMonitor(obj);
+  closePipeDescriptor(obj);
+  removePipe(obj);
+  deallocatePipePath(obj);
+  free(obj);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
