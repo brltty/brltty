@@ -887,7 +887,7 @@ void
 beginUpdates (void) {
   setUpdateTime(0, 0);
   updateAlarm = NULL;
-  updateSuspendCount = 1;
+  updateSuspendCount = 0;
 
   oldwinx = -1;
   oldwiny = -1;

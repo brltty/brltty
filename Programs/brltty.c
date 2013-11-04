@@ -1179,6 +1179,8 @@ brlttyConstruct (int argc, char *argv[]) {
   handleSignal(SIGINT, handleTerminationRequest);
 #endif /* SIGINT */
 
+  beginCommandQueue();
+
   {
     ProgramExitStatus exitStatus = brlttyStart(argc, argv);
 
@@ -1196,12 +1198,8 @@ brlttyConstruct (int argc, char *argv[]) {
   isOffline = 0;
   isSuspended = 0;
 
-  beginCommandQueue();
-  beginUpdates();
-
   resetBrailleState();
-
-  resumeUpdates();
+  beginUpdates();
   return PROG_EXIT_SUCCESS;
 }
 
