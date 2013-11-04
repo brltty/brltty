@@ -100,7 +100,7 @@ cd "${buildRoot}"
 installRoot="${temporaryDirectory}/${archiveName}"
 "./configure" $configure_line
 make -s
-"${autohotkey}/Compiler/Ahk2Exe.exe" /in brlttycnf.ahk /out brlttycnf.exe
+"${autohotkey}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
 make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
 make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
 cp Bindings/Python/dist/Brlapi-$apiversion.win32.exe "${installRoot}"
