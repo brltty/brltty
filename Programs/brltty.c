@@ -1110,110 +1110,7 @@ canBraille (void) {
   return braille && brl.buffer && !brl.noDisplay && !isSuspended;
 }
 
-static void
-exitLog (void *data) {
-  closeSystemLog();
-  closeLogFile();
-}
-
-static void
-exitSessions (void *data) {
-  if (ses) {
-    popCommandEnvironment();
-    ses = NULL;
-  }
-
-  deallocateSessionEntries();
-}
-
-#ifdef HAVE_SIGNAL_H
-static void
-handleSignal (int number, void (*handler) (int)) {
-#ifdef HAVE_SIGACTION
-  struct sigaction action;
-  memset(&action, 0, sizeof(action));
-  sigemptyset(&action.sa_mask);
-  action.sa_handler = handler;
-  if (sigaction(number, &action, NULL) == -1) {
-    logSystemError("sigaction");
-  }
-#else /* HAVE_SIGACTION */
-  if (signal(number, handler) == SIG_ERR) {
-    logSystemError("signal");
-  }
-#endif /* HAVE_SIGACTION */
-}
-
-static void 
-handleTerminationRequest (int signalNumber) {
-  time_t now = time(NULL);
-  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
-  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
-  terminationTime = now;
-}
-#endif /* HAVE_SIGNAL_H */
-
-ProgramExitStatus
-brlttyConstruct (int argc, char *argv[]) {
-  {
-    TimeValue now;
-
-    getMonotonicTime(&now);
-    srand(now.seconds + now.nanoseconds);
-  }
-
-  onProgramExit("log", exitLog, NULL);
-  openSystemLog();
-
-  terminationCount = 0;
-  terminationTime = time(NULL);
-
-#ifdef SIGPIPE
-  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
-   * a broken pipe won't abort program execution.
-   */
-  handleSignal(SIGPIPE, SIG_IGN);
-#endif /* SIGPIPE */
-
-#ifdef SIGTERM
-  handleSignal(SIGTERM, handleTerminationRequest);
-#endif /* SIGTERM */
-
-#ifdef SIGINT
-  handleSignal(SIGINT, handleTerminationRequest);
-#endif /* SIGINT */
-
-  beginCommandQueue();
-
-  {
-    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
-
-    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
-  }
-
-  onProgramExit("sessions", exitSessions, NULL);
-  setSessionEntry();
-  ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0;
-  ses->motx = ses->winx; ses->moty = ses->winy;
-  ses->spkx = ses->winx; ses->spky = ses->winy;
-  beginUpdates();
-
-  restartRequired = 0;
-  isOffline = 0;
-  isSuspended = 0;
-  resetBrailleState();
-
-  return PROG_EXIT_SUCCESS;
-}
-
-int
-brlttyDestruct (void) {
-  endProgram();
-  endCommandQueue();
-  return 1;
-}
-
+static unsigned int interruptEnabledCount;
 static AsyncEvent *interruptEvent;
 static int interruptPending;
 static WaitResult waitResult;
@@ -1257,22 +1154,21 @@ handleInterruptEvent (const AsyncEventHandlerParameters *parameters) {
 
 int
 brlttyEnableInterrupt (void) {
-  interruptPending = 0;
-
-  if (!interruptEvent) {
+  if (!interruptEnabledCount) {
     if (!(interruptEvent = asyncNewEvent(handleInterruptEvent, NULL))) {
       return 0;
     }
   }
 
+  interruptEnabledCount += 1;
   return 1;
 }
 
 int
 brlttyDisableInterrupt (void) {
-  interruptPending = 0;
+  if (!interruptEnabledCount) return 0;
 
-  if (interruptEvent) {
+  if (!--interruptEnabledCount) {
     asyncDiscardEvent(interruptEvent);
     interruptEvent = NULL;
   }
@@ -1367,5 +1263,113 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   if (!braille->writeWindow(&brl, NULL)) return 0;
 
   drainBrailleOutput(&brl, duration);
+  return 1;
+}
+
+static void
+exitLog (void *data) {
+  closeSystemLog();
+  closeLogFile();
+}
+
+static void
+exitSessions (void *data) {
+  if (ses) {
+    popCommandEnvironment();
+    ses = NULL;
+  }
+
+  deallocateSessionEntries();
+}
+
+#ifdef HAVE_SIGNAL_H
+static void
+handleSignal (int number, void (*handler) (int)) {
+#ifdef HAVE_SIGACTION
+  struct sigaction action;
+  memset(&action, 0, sizeof(action));
+  sigemptyset(&action.sa_mask);
+  action.sa_handler = handler;
+  if (sigaction(number, &action, NULL) == -1) {
+    logSystemError("sigaction");
+  }
+#else /* HAVE_SIGACTION */
+  if (signal(number, handler) == SIG_ERR) {
+    logSystemError("signal");
+  }
+#endif /* HAVE_SIGACTION */
+}
+
+static void 
+handleTerminationRequest (int signalNumber) {
+  time_t now = time(NULL);
+  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
+  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
+  terminationTime = now;
+}
+#endif /* HAVE_SIGNAL_H */
+
+ProgramExitStatus
+brlttyConstruct (int argc, char *argv[]) {
+  {
+    TimeValue now;
+
+    getMonotonicTime(&now);
+    srand(now.seconds ^ now.nanoseconds);
+  }
+
+  onProgramExit("log", exitLog, NULL);
+  openSystemLog();
+
+  terminationCount = 0;
+  terminationTime = time(NULL);
+
+#ifdef SIGPIPE
+  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
+   * a broken pipe won't abort program execution.
+   */
+  handleSignal(SIGPIPE, SIG_IGN);
+#endif /* SIGPIPE */
+
+#ifdef SIGTERM
+  handleSignal(SIGTERM, handleTerminationRequest);
+#endif /* SIGTERM */
+
+#ifdef SIGINT
+  handleSignal(SIGINT, handleTerminationRequest);
+#endif /* SIGINT */
+
+  interruptEnabledCount = 0;
+  interruptEvent = NULL;
+  interruptPending = 0;
+
+  beginCommandQueue();
+
+  {
+    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
+
+    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
+  }
+
+  onProgramExit("sessions", exitSessions, NULL);
+  setSessionEntry();
+  ses->trkx = scr.posx; ses->trky = scr.posy;
+  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  ses->motx = ses->winx; ses->moty = ses->winy;
+  ses->spkx = ses->winx; ses->spky = ses->winy;
+  beginUpdates();
+
+  restartRequired = 0;
+  isOffline = 0;
+  isSuspended = 0;
+  resetBrailleState();
+
+  return PROG_EXIT_SUCCESS;
+}
+
+int
+brlttyDestruct (void) {
+  endProgram();
+  endCommandQueue();
   return 1;
 }
