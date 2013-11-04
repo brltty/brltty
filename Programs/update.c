@@ -40,11 +40,6 @@
 #include "api_control.h"
 #include "brltty.h"
 
-static void setUpdateAlarm (void *data);
-static TimeValue updateTime;
-static AsyncHandle updateAlarm;
-static int updateSuspendCount;
-
 static int oldwinx;
 static int oldwiny;
 
@@ -500,26 +495,8 @@ doAutospeak (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-setUpdateTime (int delay, int ifEarlier) {
-  TimeValue time;
-
-  getRelativeTime(&time, delay);
-  if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) updateTime = time;
-}
-
-void
-resetUpdateAlarm (void) {
-  setUpdateTime(10, 1);
-  if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
-}
-
-static void
-handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
+doUpdate (void) {
   int pointerMoved = 0;
-
-  setUpdateTime(updateInterval, 0);
-  asyncDiscardHandle(updateAlarm);
-  updateAlarm = NULL;
 
   unrequireAllBlinkDescriptors();
   updateSessionAttributes();
@@ -873,6 +850,34 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
 
   resetAllBlinkDescriptors();
   drainBrailleOutput(&brl, 0);
+}
+
+static void setUpdateAlarm (void *data);
+static TimeValue updateTime;
+static AsyncHandle updateAlarm;
+static int updateSuspendCount;
+
+static void
+setUpdateTime (int delay, int ifEarlier) {
+  TimeValue time;
+
+  getRelativeTime(&time, delay);
+  if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) updateTime = time;
+}
+
+void
+scheduleUpdate (void) {
+  setUpdateTime(10, 1);
+  if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
+}
+
+static void
+handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
+  setUpdateTime(updateInterval, 0);
+  asyncDiscardHandle(updateAlarm);
+  updateAlarm = NULL;
+
+  doUpdate();
   setUpdateAlarm(parameters->data);
 }
 

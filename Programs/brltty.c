@@ -137,9 +137,7 @@ postprocessCommand (void *state, int command, int handled) {
   PrecommandState *pre = state;
 
   if (pre) {
-    if (handled) {
-      resetUpdateAlarm();
-    }
+    if (handled) scheduleUpdate();
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
       /* The window has been manually moved. */

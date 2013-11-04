@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void resetUpdateAlarm (void);
+extern void scheduleUpdate (void);
 
 extern void beginUpdates (void);
 extern void suspendUpdates (void);
