@@ -233,6 +233,7 @@ updateSessionAttributes (void) {
     int maximum = MAX(scr.rows-(int)brl.textRows, 0);
     int *table[] = {&ses->winy, &ses->moty, NULL};
     int **value = table;
+
     while (*value) {
       if (**value > maximum) **value = maximum;
       value += 1;
@@ -249,49 +250,6 @@ updateSessionAttributes (void) {
     }
   }
 }
-
-static void
-exitSessions (void *data) {
-  if (ses) {
-    popCommandEnvironment();
-    ses = NULL;
-  }
-
-  deallocateSessionEntries();
-}
-
-static void
-exitLog (void *data) {
-  closeSystemLog();
-  closeLogFile();
-}
-
-#ifdef HAVE_SIGNAL_H
-static void
-handleSignal (int number, void (*handler) (int)) {
-#ifdef HAVE_SIGACTION
-  struct sigaction action;
-  memset(&action, 0, sizeof(action));
-  sigemptyset(&action.sa_mask);
-  action.sa_handler = handler;
-  if (sigaction(number, &action, NULL) == -1) {
-    logSystemError("sigaction");
-  }
-#else /* HAVE_SIGACTION */
-  if (signal(number, handler) == SIG_ERR) {
-    logSystemError("signal");
-  }
-#endif /* HAVE_SIGACTION */
-}
-
-static void 
-handleTerminationRequest (int signalNumber) {
-  time_t now = time(NULL);
-  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
-  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
-  terminationTime = now;
-}
-#endif /* HAVE_SIGNAL_H */
 
 void
 fillStatusSeparator (wchar_t *text, unsigned char *dots) {
@@ -1152,9 +1110,57 @@ canBraille (void) {
   return braille && brl.buffer && !brl.noDisplay && !isSuspended;
 }
 
+static void
+exitLog (void *data) {
+  closeSystemLog();
+  closeLogFile();
+}
+
+static void
+exitSessions (void *data) {
+  if (ses) {
+    popCommandEnvironment();
+    ses = NULL;
+  }
+
+  deallocateSessionEntries();
+}
+
+#ifdef HAVE_SIGNAL_H
+static void
+handleSignal (int number, void (*handler) (int)) {
+#ifdef HAVE_SIGACTION
+  struct sigaction action;
+  memset(&action, 0, sizeof(action));
+  sigemptyset(&action.sa_mask);
+  action.sa_handler = handler;
+  if (sigaction(number, &action, NULL) == -1) {
+    logSystemError("sigaction");
+  }
+#else /* HAVE_SIGACTION */
+  if (signal(number, handler) == SIG_ERR) {
+    logSystemError("signal");
+  }
+#endif /* HAVE_SIGACTION */
+}
+
+static void 
+handleTerminationRequest (int signalNumber) {
+  time_t now = time(NULL);
+  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
+  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
+  terminationTime = now;
+}
+#endif /* HAVE_SIGNAL_H */
+
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
-  srand((unsigned int)time(NULL));
+  {
+    TimeValue now;
+
+    getMonotonicTime(&now);
+    srand(now.seconds + now.nanoseconds);
+  }
 
   onProgramExit("log", exitLog, NULL);
   openSystemLog();
@@ -1191,13 +1197,13 @@ brlttyConstruct (int argc, char *argv[]) {
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
+  beginUpdates();
 
   restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
-
   resetBrailleState();
-  beginUpdates();
+
   return PROG_EXIT_SUCCESS;
 }
 
@@ -1208,28 +1214,28 @@ brlttyDestruct (void) {
   return 1;
 }
 
-static AsyncEvent *interruptRequestEvent;
-static int interruptRequested;
+static AsyncEvent *interruptEvent;
+static int interruptPending;
 static WaitResult waitResult;
 
 typedef struct {
   WaitResult waitResult;
-} InterruptRequest;
+} InterruptEventParameters;
 
 int
 brlttyInterrupt (WaitResult waitResult) {
-  if (interruptRequestEvent) {
-    InterruptRequest *req;
+  if (interruptEvent) {
+    InterruptEventParameters *iep;
 
-    if ((req = malloc(sizeof(*req)))) {
-      memset(req, 0, sizeof(*req));
-      req->waitResult = waitResult;
+    if ((iep = malloc(sizeof(*iep)))) {
+      memset(iep, 0, sizeof(*iep));
+      iep->waitResult = waitResult;
 
-      if (asyncSignalEvent(interruptRequestEvent, req)) {
+      if (asyncSignalEvent(interruptEvent, iep)) {
         return 1;
       }
 
-      free(req);
+      free(iep);
     } else {
       logMallocError();
     }
@@ -1239,22 +1245,22 @@ brlttyInterrupt (WaitResult waitResult) {
 }
 
 static void
-handleInterruptRequest (const AsyncEventHandlerParameters *parameters) {
-  InterruptRequest *req = parameters->signalData;
+handleInterruptEvent (const AsyncEventHandlerParameters *parameters) {
+  InterruptEventParameters *iep = parameters->signalData;
 
-  if (req) {
-    interruptRequested = 1;
-    waitResult = req->waitResult;
-    free(req);
+  if (iep) {
+    interruptPending = 1;
+    waitResult = iep->waitResult;
+    free(iep);
   }
 }
 
 int
 brlttyEnableInterrupt (void) {
-  interruptRequested = 0;
+  interruptPending = 0;
 
-  if (!interruptRequestEvent) {
-    if (!(interruptRequestEvent = asyncNewEvent(handleInterruptRequest, NULL))) {
+  if (!interruptEvent) {
+    if (!(interruptEvent = asyncNewEvent(handleInterruptEvent, NULL))) {
       return 0;
     }
   }
@@ -1264,11 +1270,11 @@ brlttyEnableInterrupt (void) {
 
 int
 brlttyDisableInterrupt (void) {
-  interruptRequested = 0;
+  interruptPending = 0;
 
-  if (interruptRequestEvent) {
-    asyncDiscardEvent(interruptRequestEvent);
-    interruptRequestEvent = NULL;
+  if (interruptEvent) {
+    asyncDiscardEvent(interruptEvent);
+    interruptEvent = NULL;
   }
 
   return 1;
@@ -1299,9 +1305,9 @@ static int
 checkUnmonitoredConditions (void *data) {
   UnmonitoredConditionDescriptor *ucd = data;
 
-  if (interruptRequested) {
+  if (interruptPending) {
     ucd->data = &waitResult;
-    interruptRequested = 0;
+    interruptPending = 0;
     return 1;
   }
 
