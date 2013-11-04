@@ -190,40 +190,40 @@ setSpeechInputMethods (SpeechInputObject *obj) {
 
 #elif defined(S_ISFIFO)
 static int
-createUnixPipe (void) {
-  int result = mkfifo(pipePath, 0);
+createUnixPipe (SpeechInputObject *obj) {
+  int result = mkfifo(obj->pipePath, 0);
 
   if ((result == -1) && (errno == EEXIST)) {
     struct stat fifo;
 
-    if (lstat(pipePath, &fifo) == -1) {
+    if (lstat(obj->pipePath, &fifo) == -1) {
       logMessage(LOG_ERR, "cannot stat speech input FIFO: %s: %s",
-                 pipePath, strerror(errno));
+                 obj->pipePath, strerror(errno));
     } else if (S_ISFIFO(fifo.st_mode)) {
       result = 0;
     }
   }
 
   if (result != -1) {
-    if (chmod(pipePath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
-      if ((pipeDescriptor = open(pipePath, O_RDONLY|O_NONBLOCK)) != -1) {
+    if (chmod(obj->pipePath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
+      if ((obj->pipeDescriptor = open(obj->pipePath, O_RDONLY|O_NONBLOCK)) != -1) {
         logMessage(LOG_DEBUG, "speech input FIFO created: %s: fd=%d",
-                   pipePath, pipeDescriptor);
+                   obj->pipePath, obj->pipeDescriptor);
 
         return 1;
       } else {
         logMessage(LOG_ERR, "cannot open speech input FIFO: %s: %s",
-                   pipePath, strerror(errno));
+                   obj->pipePath, strerror(errno));
       }
     } else {
       logMessage(LOG_ERR, "cannot set speech input FIFO permissions: %s: %s",
-                 pipePath, strerror(errno));
+                 obj->pipePath, strerror(errno));
     }
 
-    removePipe();
+    removePipe(obj);
   } else {
     logMessage(LOG_ERR, "cannot create speech input FIFO: %s: %s",
-               pipePath, strerror(errno));
+               obj->pipePath, strerror(errno));
   }
 
   return 0;

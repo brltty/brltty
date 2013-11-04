@@ -26,8 +26,8 @@ extern "C" {
 #ifdef ENABLE_SPEECH_SUPPORT
 typedef struct SpeechInputObjectStruct SpeechInputObject;
 
-extern SpeechInputObject *newSpeechInput (const char *name);
-extern void destroySpeechInput (SpeechInputObject *obj);
+extern SpeechInputObject *newSpeechInputObject (const char *name);
+extern void destroySpeechInputObject (SpeechInputObject *obj);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef __cplusplus
