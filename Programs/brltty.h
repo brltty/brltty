@@ -47,10 +47,6 @@ extern ScreenDescription scr;
 #define SCR_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)
 #define SCR_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
-extern void resetUpdateAlarm (void);
-extern void suspendUpdates (void);
-extern void resumeUpdates (void);
-
 extern void updateSessionAttributes (void);
 extern SessionEntry *ses;
 
@@ -102,6 +98,8 @@ extern unsigned char infoMode;
 
 extern int canBraille (void);
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
+extern void fillStatusSeparator (wchar_t *text, unsigned char *dots);
+
 extern int writeBrailleText (const char *mode, const char *text);
 extern int showBrailleText (const char *mode, const char *text, int minimumDelay);
 
@@ -152,8 +150,13 @@ extern size_t formatCharacterDescription (char *buffer, size_t size, int column,
 #ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;
 extern int contractedLength;
+extern int contractedStart;
+extern int contractedOffsets[0X100];
+extern int contractedTrack;
 
 extern int isContracting (void);
+extern int getUncontractedCursorOffset (int x, int y);
+extern int getContractedCursor (void);
 extern int getContractedLength (unsigned int outputLimit);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 

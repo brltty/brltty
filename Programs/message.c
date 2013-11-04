@@ -26,6 +26,7 @@
 #include "charset.h"
 #include "spk.h"
 #include "ktbdefs.h"
+#include "update.h"
 #include "cmd_queue.h"
 #include "api_control.h"
 #include "brltty.h"

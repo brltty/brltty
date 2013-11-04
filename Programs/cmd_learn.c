@@ -25,6 +25,7 @@
 #include "async_task.h"
 #include "async_wait.h"
 #include "ktbdefs.h"
+#include "update.h"
 #include "cmd_queue.h"
 #include "cmd_learn.h"
 #include "cmd.h"

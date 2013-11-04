@@ -21,6 +21,7 @@
 #include "blink.h"
 #include "prefs.h"
 #include "async_alarm.h"
+#include "update.h"
 #include "brltty.h"
 
 struct BlinkDescriptorStruct {
