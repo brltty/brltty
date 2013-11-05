@@ -218,6 +218,11 @@ extern int enqueueKeyEvent (
   unsigned char set, unsigned char key, int press
 );
 
+extern int enqueueKeyEvents (
+  BrailleDisplay *brl,
+  uint32_t bits, unsigned char set, unsigned char key, int press
+);
+
 extern int enqueueKey (
   BrailleDisplay *brl,
   unsigned char set, unsigned char key

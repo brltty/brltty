@@ -462,6 +462,25 @@ enqueueKeyEvent (
 }
 
 int
+enqueueKeyEvents (
+  BrailleDisplay *brl,
+  uint32_t bits, unsigned char set, unsigned char key, int press
+) {
+  while (bits) {
+    if (bits & 0X1) {
+      if (!enqueueKeyEvent(brl, set, key, press)) {
+        return 0;
+      }
+    }
+
+    bits >>= 1;
+    key += 1;
+  }
+
+  return 1;
+}
+
+int
 enqueueKey (
   BrailleDisplay *brl,
   unsigned char set, unsigned char key
