@@ -1741,7 +1741,7 @@ background (void) {
     memset(&startupInfo, 0, sizeof(startupInfo));
     startupInfo.cb = sizeof(startupInfo);
 
-    if (!SetEnvironmentVariable(variableName, "")) {
+    if (!SetEnvironmentVariable(variableName, "BACKGROUND")) {
       logWindowsSystemError("SetEnvironmentVariable");
       exit(PROG_EXIT_FATAL);
     }
