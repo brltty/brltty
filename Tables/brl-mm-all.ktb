@@ -20,23 +20,33 @@ title Braille Memo
 
 bind RoutingKey ROUTE
 
-bind Control LNUP
-bind Alt LNDN
+bind Backward FWINLT
+bind Forward FWINRT
+bind Backward+Forward HOME
 
-bind F1 FWINLT
-bind F4 FWINRT
+bind UpArrow LNUP
+bind DownArrow LNDN
+bind UpArrow+DownArrow CSRJMP_VERT
 
-bind Control+Select PRDIFLN
-bind Control+Read NXDIFLN
+bind UpArrow+LeftArrow FWINLTSKIP
+bind UpArrow+RightArrow FWINRTSKIP
 
-bind Alt+Select FWINLTSKIP
-bind Alt+Read FWINRTSKIP
+bind DownArrow+LeftArrow CHRLT
+bind DownArrow+RightArrow CHRRT
 
-bind Control+Alt+Select TOP
-bind Control+Alt+Read BOT
+bind UpArrow+DownArrow+LeftArrow LNBEG
+bind UpArrow+DownArrow+RightArrow LNEND
 
-bind Control+Alt LNBEG
-bind F1+F4 HOME
+bind LeftArrow+RightArrow+UpArrow TOP
+bind LeftArrow+RightArrow+DownArrow BOT
+
+bind Control+RoutingKey CLIP_NEW
+bind Alt+RoutingKey CLIP_ADD
+bind Select+RoutingKey COPY_LINE
+bind Read+RoutingKey COPY_RECT
+
+bind Control+Alt+RoutingKey SETLEFT
+bind Select+Read+RoutingKey DESCCHAR
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -46,7 +56,16 @@ map Dot5 DOT5
 map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
-map F3 SPACE
+
 map Control CONTROL
 map Alt META
 
+bind Dot7 KEY_ENTER
+bind Dot8 PASSDOTS+space
+
+bind Backspace KEY_BACKSPACE
+bind Delete KEY_DELETE
+bind Escape KEY_ESCAPE
+
+assign chord Read+
+include brl-chords.kti

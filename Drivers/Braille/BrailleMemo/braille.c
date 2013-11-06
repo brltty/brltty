@@ -40,10 +40,10 @@
 #define MM_DISPLAY_KEY_ENTRY(k,n) MM_KEY_NAME_ENTRY(DISPLAY, k, n)
 
 BEGIN_KEY_NAME_TABLE(shift)
-  MM_SHIFT_KEY_ENTRY(F1, "F1"),
+  MM_SHIFT_KEY_ENTRY(F1, "Backward"),
   MM_SHIFT_KEY_ENTRY(F2, "F2"),
-  MM_SHIFT_KEY_ENTRY(F3, "F3"),
-  MM_SHIFT_KEY_ENTRY(F4, "F4"),
+  MM_SHIFT_KEY_ENTRY(F3, "Chord"),
+  MM_SHIFT_KEY_ENTRY(F4, "Forward"),
 
   MM_SHIFT_KEY_ENTRY(CONTROL, "Control"),
   MM_SHIFT_KEY_ENTRY(ALT, "Alt"),
@@ -246,7 +246,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* Braille Memo */
+    { /* all models */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
