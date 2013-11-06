@@ -835,10 +835,9 @@ processAssignOperands (DataFile *file, void *data UNUSED) {
   DataOperand name;
 
   if (getDataOperand(file, &name, "variable name")) {
-    DataOperand value;
+    DataString value;
 
-    if (!getDataOperand(file, &value, NULL)) {
-      value.characters = NULL;
+    if (!getDataString(file, &value, 0, NULL)) {
       value.length = 0;
     }
 
