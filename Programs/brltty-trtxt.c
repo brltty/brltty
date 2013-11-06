@@ -153,8 +153,10 @@ processStream (FILE *inputStream, const char *inputName) {
         if (!iswcntrl(character)) {
           unsigned char dots = toDots(character);
 
-          if (opt_sixDots) dots &= ~(BRL_DOT7 | BRL_DOT8);
-          if (dots || !iswblank(character)) character = toCharacter(dots);
+          if (dots || !iswspace(character)) {
+            if (opt_sixDots) dots &= ~(BRL_DOT7 | BRL_DOT8);
+            character = toCharacter(dots);
+          }
         }
 
         if (!writeCharacter(&character, &outputState)) goto outputError;
