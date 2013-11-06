@@ -164,6 +164,8 @@ extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
+extern size_t formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value);
+
 extern void resetLongPressData (KeyTable *table);
 
 #ifdef __cplusplus

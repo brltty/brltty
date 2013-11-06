@@ -351,7 +351,7 @@ isRepeatableCommand (int command) {
 
 KeyTableState
 processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
-  KeyValue keyValue = {
+  const KeyValue keyValue = {
     .set = set,
     .key = key
   };
@@ -474,19 +474,25 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   }
 
   if (table->logKeyEventsFlag && *table->logKeyEventsFlag) {
-    char buffer[0X40];
+    char buffer[0X100];
 
     STR_BEGIN(buffer, sizeof(buffer));
     if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
-    STR_PRINTF("Key %s: Ctx:%u Set:%u Key:%u",
-               press? "Press": "Release",
-               context, set, key);
+
+    STR_PRINTF("key %s [", (press? "press": "release"));
+    {
+      size_t length = formatKeyName(table, STR_NEXT, STR_LEFT, &keyValue);
+      STR_ADJUST(length);
+    }
+    STR_PRINTF("]:");
+
+    STR_PRINTF(" Ctx:%u Set:%u Key:%u", context, set, key);
 
     if (command != EOF) {
       STR_PRINTF(" Cmd:%06X", command);
     }
 
-    STR_END
+    STR_END;
     logMessage(categoryLogLevel, "%s", buffer);
   }
 

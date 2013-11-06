@@ -94,14 +94,6 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
 }
 
 static int
-putNumber (ListGenerationData *lgd, int number) {
-  char buffer[0X10];
-
-  snprintf(buffer, sizeof(buffer), "%d", number);
-  return putUtf8String(lgd, buffer);
-}
-
-static int
 searchKeyNameEntry (const void *target, const void *element) {
   const KeyValue *value = target;
   const KeyNameEntry *const *kne = element;
@@ -109,9 +101,9 @@ searchKeyNameEntry (const void *target, const void *element) {
 }
 
 static const KeyNameEntry *
-findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
-  const KeyNameEntry *const *array = lgd->keyTable->keyNames.table;
-  unsigned int count = lgd->keyTable->keyNames.count;
+findKeyNameEntry (KeyTable *table, const KeyValue *value) {
+  const KeyNameEntry *const *array = table->keyNames.table;
+  unsigned int count = table->keyNames.count;
 
   const KeyNameEntry *const *kne = bsearch(value, array, count, sizeof(*array), searchKeyNameEntry);
   if (!kne) return NULL;
@@ -126,26 +118,38 @@ findKeyNameEntry (ListGenerationData *lgd, const KeyValue *value) {
   return *kne;
 }
 
-static int
-putKeyName (ListGenerationData *lgd, const KeyValue *value) {
-  const KeyNameEntry *kne = findKeyNameEntry(lgd, value);
-  if (kne) return putUtf8String(lgd, kne->name);
+size_t
+formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value) {
+  const KeyNameEntry *kne = findKeyNameEntry(table, value);
 
-  if (value->key != KTB_KEY_ANY) {
+  size_t length;
+  STR_BEGIN(buffer, size);
+
+  if (kne) {
+    STR_PRINTF("%s", kne->name);
+  } else if (value->key != KTB_KEY_ANY) {
     const KeyValue anyKey = {
       .set = value->set,
       .key = KTB_KEY_ANY
     };
 
-    if ((kne = findKeyNameEntry(lgd, &anyKey))) {
-      if (!putUtf8String(lgd, kne->name)) return 0;
-      if (!putCharacter(lgd, WC_C('.'))) return 0;
-      if (!putNumber(lgd, value->key+1)) return 0;
-      return 1;
+    if ((kne = findKeyNameEntry(table, &anyKey))) {
+      STR_PRINTF("%s.%u", kne->name, value->key+1);
     }
   }
 
-  return putUtf8String(lgd, "?");
+  if (STR_LENGTH == 0) STR_PRINTF("?");
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
+static int
+putKeyName (ListGenerationData *lgd, const KeyValue *value) {
+  char name[0X100];
+
+  formatKeyName(lgd->keyTable, name, sizeof(name), value);
+  return putUtf8String(lgd, name);
 }
 
 static int
