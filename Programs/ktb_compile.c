@@ -1112,8 +1112,8 @@ resetLongPressData (KeyTable *table) {
     table->longPress.alarm = NULL;
   }
 
-  table->longPress.primaryCommand = EOF;
-  table->longPress.secondaryCommand = EOF;
+  table->longPress.primaryCommand = BRL_CMD_NOOP;
+  table->longPress.secondaryCommand = BRL_CMD_NOOP;
   table->longPress.repeat = 0;
 }
 

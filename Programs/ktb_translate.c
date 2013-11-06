@@ -26,6 +26,7 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
+#include "cmd.h"
 #include "cmd_queue.h"
 #include "async_alarm.h"
 
@@ -478,18 +479,20 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
     STR_BEGIN(buffer, sizeof(buffer));
     if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
+    STR_PRINTF("key %s: ", (press? "press": "release"));
 
-    STR_PRINTF("key %s [", (press? "press": "release"));
     {
       size_t length = formatKeyName(table, STR_NEXT, STR_LEFT, &keyValue);
       STR_ADJUST(length);
     }
-    STR_PRINTF("]:");
 
-    STR_PRINTF(" Ctx:%u Set:%u Key:%u", context, set, key);
+    STR_PRINTF(" (Ctx:%u Set:%u Key:%u)", context, set, key);
 
     if (command != EOF) {
-      STR_PRINTF(" Cmd:%06X", command);
+      const CommandEntry *cmd = getCommandEntry(command);
+      const char *name = cmd? cmd->name: "?";
+
+      STR_PRINTF(" -> %s (Cmd:%06X)", name, command);
     }
 
     STR_END;
