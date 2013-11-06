@@ -18,6 +18,10 @@
 
 title Braille Memo
 
+####################
+# Default Bindings #
+####################
+
 bind RoutingKey ROUTE
 
 bind Backward FWINLT
@@ -69,3 +73,22 @@ bind Escape KEY_ESCAPE
 
 assign chord Read+
 include brl-chords.kti
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind UpArrow MENU_PREV_ITEM
+bind DownArrow MENU_NEXT_ITEM
+
+bind Control MENU_PREV_SETTING
+bind Alt MENU_NEXT_SETTING
+bind Control+Alt MENU_PREV_LEVEL
+
+bind Chord PREFMENU
+bind Dot7 PREFLOAD
+bind Dot8 PREFSAVE
+
