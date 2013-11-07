@@ -277,6 +277,37 @@ processCommand (KeyTable *table, int command) {
   return enqueueCommand(command);
 }
 
+static void
+logKeyEvent (
+  KeyTable *table, const char *action,
+  unsigned char context, const KeyValue *keyValue, int command
+) {
+  if (table->logKeyEventsFlag && *table->logKeyEventsFlag) {
+    char buffer[0X100];
+
+    STR_BEGIN(buffer, sizeof(buffer));
+    if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
+    STR_PRINTF("key %s: ", action);
+
+    {
+      size_t length = formatKeyName(table, STR_NEXT, STR_LEFT, keyValue);
+      STR_ADJUST(length);
+    }
+
+    STR_PRINTF(" (Ctx:%u Set:%u Key:%u)", context, keyValue->set, keyValue->key);
+
+    if (command != EOF) {
+      const CommandEntry *cmd = getCommandEntry(command);
+      const char *name = cmd? cmd->name: "?";
+
+      STR_PRINTF(" -> %s (Cmd:%06X)", name, command);
+    }
+
+    STR_END;
+    logMessage(categoryLogLevel, "%s", buffer);
+  }
+}
+
 static void setLongPressAlarm (KeyTable *table, unsigned char when);
 
 static void
@@ -286,8 +317,16 @@ handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
 
+  logKeyEvent(table, table->longPress.keyAction,
+              table->longPress.keyContext, &table->longPress.keyValue,
+              table->longPress.secondaryCommand);
+
+  if (table->longPress.repeat) {
+    table->longPress.keyAction = "repeat";
+    setLongPressAlarm(table, prefs.autorepeatInterval);
+  }
+
   table->longPress.primaryCommand = BRL_CMD_NOOP;
-  if (table->longPress.repeat) setLongPressAlarm(table, prefs.autorepeatInterval);
   processCommand(table, table->longPress.secondaryCommand);
 }
 
@@ -456,6 +495,10 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
             table->longPress.secondaryCommand = secondaryCommand;
             table->longPress.repeat = repeat;
 
+            table->longPress.keyAction = "long";
+            table->longPress.keyContext = context;
+            table->longPress.keyValue = keyValue;
+
             setLongPressAlarm(table, prefs.longPressTime);
           }
         }
@@ -474,31 +517,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (table->logKeyEventsFlag && *table->logKeyEventsFlag) {
-    char buffer[0X100];
-
-    STR_BEGIN(buffer, sizeof(buffer));
-    if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
-    STR_PRINTF("key %s: ", (press? "press": "release"));
-
-    {
-      size_t length = formatKeyName(table, STR_NEXT, STR_LEFT, &keyValue);
-      STR_ADJUST(length);
-    }
-
-    STR_PRINTF(" (Ctx:%u Set:%u Key:%u)", context, set, key);
-
-    if (command != EOF) {
-      const CommandEntry *cmd = getCommandEntry(command);
-      const char *name = cmd? cmd->name: "?";
-
-      STR_PRINTF(" -> %s (Cmd:%06X)", name, command);
-    }
-
-    STR_END;
-    logMessage(categoryLogLevel, "%s", buffer);
-  }
-
+  logKeyEvent(table, (press? "press": "release"), context, &keyValue, command);
   return state;
 }
 

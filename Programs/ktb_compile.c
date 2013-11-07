@@ -289,10 +289,15 @@ static int
 sortKeyValues (const void *element1, const void *element2) {
   const KeyNameEntry *const *kne1 = element1;
   const KeyNameEntry *const *kne2 = element2;
-  int result = compareKeyValues(&(*kne1)->value, &(*kne2)->value);
-  if (result != 0) return result;
+
+  {
+    int result = compareKeyValues(&(*kne1)->value, &(*kne2)->value);
+    if (result != 0) return result;
+  }
+
   if (*kne1 < *kne2) return -1;
   if (*kne1 > *kne2) return 1;
+
   return 0;
 }
 
@@ -1114,6 +1119,12 @@ resetLongPressData (KeyTable *table) {
 
   table->longPress.primaryCommand = BRL_CMD_NOOP;
   table->longPress.secondaryCommand = BRL_CMD_NOOP;
+
+  table->longPress.keyAction = NULL;
+  table->longPress.keyContext = KTB_CTX_DEFAULT;
+  table->longPress.keyValue.set = 0;
+  table->longPress.keyValue.key = KTB_KEY_ANY;
+
   table->longPress.repeat = 0;
 }
 

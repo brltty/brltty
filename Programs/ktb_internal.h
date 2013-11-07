@@ -137,8 +137,14 @@ struct KeyTableStruct {
 
   struct {
     AsyncHandle alarm;
+
     int primaryCommand;
     int secondaryCommand;
+
+    const char *keyAction;
+    unsigned char keyContext;
+    KeyValue keyValue;
+
     unsigned repeat:1;
   } longPress;
 
