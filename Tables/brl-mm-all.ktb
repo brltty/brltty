@@ -56,14 +56,38 @@ note * Set: ArrowRight + Chord + Dot8
 ####################
 
 bind RoutingKey ROUTE
+bind ArrowUp+ArrowDown CSRJMP_VERT
+bind PanLeft+PanRight RETURN
 
 bind PanLeft FWINLT
 bind PanRight FWINRT
-bind PanLeft+PanRight HOME
-
 bind ArrowUp LNUP
 bind ArrowDown LNDN
-bind ArrowUp+ArrowDown CSRJMP_VERT
+
+bind Control+PanLeft ATTRVIS
+bind Control+PanRight CSRVIS
+bind Control+ArrowUp CSRTRK
+bind Control+ArrowDown SIXDOTS
+
+bind Alt+PanLeft LNBEG
+bind Alt+PanRight LNEND
+bind Alt+ArrowUp TOP
+bind Alt+ArrowDown BOT
+
+bind Select+ArrowUp PRPROMPT
+bind Select+ArrowDown NXPROMPT
+bind Select+PanLeft PRPGRPH
+bind Select+PanRight NXPGRPH
+
+bind Read+ArrowUp PRDIFLN
+bind Read+ArrowDown NXDIFLN
+bind Read+PanLeft ATTRUP
+bind Read+PanRight ATTRDN
+
+bind Select+Read+ArrowUp PRSEARCH
+bind Select+Read+ArrowDown NXSEARCH
+bind Select+Read+PanLeft DISPMD
+bind Select+Read+PanRight FREEZE
 
 bind ArrowUp+ArrowLeft FWINLTSKIP
 bind ArrowUp+ArrowRight FWINRTSKIP
@@ -71,23 +95,8 @@ bind ArrowUp+ArrowRight FWINRTSKIP
 bind ArrowDown+ArrowLeft CHRLT
 bind ArrowDown+ArrowRight CHRRT
 
-bind ArrowUp+ArrowDown+ArrowLeft LNBEG
-bind ArrowUp+ArrowDown+ArrowRight LNEND
-
-bind ArrowLeft+ArrowRight+ArrowUp TOP
-bind ArrowLeft+ArrowRight+ArrowDown BOT
-
-bind Select+ArrowUp PRPROMPT
-bind Select+ArrowDown NXPROMPT
-
-bind Select+PanLeft PRPGRPH
-bind Select+PanRight NXPGRPH
-
-bind Read+ArrowUp PRDIFLN
-bind Read+ArrowDown NXDIFLN
-
-bind Read+PanLeft ATTRUP
-bind Read+PanRight ATTRDN
+bind Control TIME
+bind Alt INFO
 
 bind Control+RoutingKey CLIP_NEW
 bind Alt+RoutingKey CLIP_ADD
@@ -112,6 +121,7 @@ map Alt META
 
 bind Dot7 KEY_ENTER
 bind Dot8 PASSDOTS+space
+bind Chord KEY_TAB
 
 bind Insert KEY_INSERT
 bind Delete KEY_DELETE
