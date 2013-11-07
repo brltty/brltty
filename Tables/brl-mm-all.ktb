@@ -40,16 +40,16 @@ note * ArrowLeft: Chord + Dot2
 note * ArrowRight: Chord + Dot5
 note * Backspace: Chord + Dot7
 note * Delete: Chord + Dot8
-note * Escape: Chord + Up
-note * Info: Chord + Down
-note * Backward: Right + Chord + Dot1
-note * Forward: Right + Chord + Dot4
-note * ScrollLeft: Right + Chord + Dot2
-note * ScrollRight: Right + Chord + Dot5
-note * Insert: Right + Chord + Dot3
-note * Change: Right + Chord + Dot6
-note * OK: Right + Chord + Dot7
-note * Set: Right + Chord + Dot8
+note * Escape: Chord + ArrowUp (or: Chord + Dot7 + Dot8)
+note * Info: Chord + ArrowDown (or: ArrowRight + Chord + Dot7 + Dot8)
+note * Backward: ArrowRight + Chord + Dot1
+note * Forward: ArrowRight + Chord + Dot4
+note * ScrollLeft: ArrowRight + Chord + Dot2
+note * ScrollRight: ArrowRight + Chord + Dot5
+note * Insert: ArrowRight + Chord + Dot3
+note * Change: ArrowRight + Chord + Dot6
+note * OK: ArrowRight + Chord + Dot7
+note * Set: ArrowRight + Chord + Dot8
 
 ####################
 # Default Bindings #
