@@ -29,8 +29,8 @@ note * From left to right, they are named: Dot7, Chord, Dot8.
 note At the bottom left is a group of four keys arranged in a cross.
 note * Starting with the leftmost key and moving clockwise, they are named:
 note * ArrowLeft, ArrowUp, ArrowRight, ArrowDown.
-note An implementation constraint within the driver requires that some of the
-note * bindings refer to the ArrowLeft and ArrowRight keys as PanLeft and PanRight.
+note A driver implementation constraint requires that some of the bindings
+note * refer to the ArrowLeft and ArrowRight keys as PanLeft and PanRight.
 note Some keys are entered by pressing a set of keys simultaneously:
 note * Return: Dot7
 note * Space: Dot8
@@ -113,9 +113,19 @@ map Alt META
 bind Dot7 KEY_ENTER
 bind Dot8 PASSDOTS+space
 
-bind Backspace KEY_BACKSPACE
-bind Delete KEY_DELETE
 bind Insert KEY_INSERT
+bind Delete KEY_DELETE
+bind Backspace KEY_BACKSPACE
+
+bind Backward KEY_HOME
+bind Forward KEY_END
+
+bind ScrollLeft KEY_PAGE_UP
+bind ScrollRight KEY_PAGE_DOWN
+
+bind ArrowLeft KEY_CURSOR_LEFT
+bind ArrowRight KEY_CURSOR_RIGHT
+
 bind Escape KEY_ESCAPE
 bind Chord+RoutingKey KEY_FUNCTION
 
