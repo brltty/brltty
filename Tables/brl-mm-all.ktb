@@ -27,13 +27,29 @@ note * From top to bottom, they are named: Select, Read.
 note Below the Dot1 and Dot4 keys are three horizontally-aligned round keys.
 note * From left to right, they are named: Dot7, Chord, Dot8.
 note At the bottom left is a group of four keys arranged in a cross.
-note * Moving clockwise, starting at the left, they are named: Left, Up, Right, Down.
+note * Starting with the leftmost key and moving clockwise, they are named:
+note * ArrowLeft, ArrowUp, ArrowRight, ArrowDown.
 note An implementation constraint within the driver requires that some of the
-note * bindings refer to the Left and Right keys as Backward and Forward.
+note * bindings refer to the ArrowLeft and ArrowRight keys as PanLeft and PanRight.
 note Some keys are entered by pressing a set of keys simultaneously:
+note * Return: Dot7
+note * Space: Dot8
+note * ArrowUp: Chord + Dot1
+note * ArrowDown: Chord + Dot4
+note * ArrowLeft: Chord + Dot2
+note * ArrowRight: Chord + Dot5
 note * Backspace: Chord + Dot7
 note * Delete: Chord + Dot8
-note * Escape: Chord + Dot7 + Dot8
+note * Escape: Chord + Up
+note * Info: Chord + Down
+note * Backward: Right + Chord + Dot1
+note * Forward: Right + Chord + Dot4
+note * ScrollLeft: Right + Chord + Dot2
+note * ScrollRight: Right + Chord + Dot5
+note * Insert: Right + Chord + Dot3
+note * Change: Right + Chord + Dot6
+note * OK: Right + Chord + Dot7
+note * Set: Right + Chord + Dot8
 
 ####################
 # Default Bindings #
@@ -41,37 +57,37 @@ note * Escape: Chord + Dot7 + Dot8
 
 bind RoutingKey ROUTE
 
-bind Backward FWINLT
-bind Forward FWINRT
-bind Backward+Forward HOME
+bind PanLeft FWINLT
+bind PanRight FWINRT
+bind PanLeft+PanRight HOME
 
-bind Up LNUP
-bind Down LNDN
-bind Up+Down CSRJMP_VERT
+bind ArrowUp LNUP
+bind ArrowDown LNDN
+bind ArrowUp+ArrowDown CSRJMP_VERT
 
-bind Up+Left FWINLTSKIP
-bind Up+Right FWINRTSKIP
+bind ArrowUp+ArrowLeft FWINLTSKIP
+bind ArrowUp+ArrowRight FWINRTSKIP
 
-bind Down+Left CHRLT
-bind Down+Right CHRRT
+bind ArrowDown+ArrowLeft CHRLT
+bind ArrowDown+ArrowRight CHRRT
 
-bind Up+Down+Left LNBEG
-bind Up+Down+Right LNEND
+bind ArrowUp+ArrowDown+ArrowLeft LNBEG
+bind ArrowUp+ArrowDown+ArrowRight LNEND
 
-bind Left+Right+Up TOP
-bind Left+Right+Down BOT
+bind ArrowLeft+ArrowRight+ArrowUp TOP
+bind ArrowLeft+ArrowRight+ArrowDown BOT
 
-bind Select+Up PRPROMPT
-bind Select+Down NXPROMPT
+bind Select+ArrowUp PRPROMPT
+bind Select+ArrowDown NXPROMPT
 
-bind Select+Backward PRPGRPH
-bind Select+Forward NXPGRPH
+bind Select+PanLeft PRPGRPH
+bind Select+PanRight NXPGRPH
 
-bind Read+Up PRDIFLN
-bind Read+Down NXDIFLN
+bind Read+ArrowUp PRDIFLN
+bind Read+ArrowDown NXDIFLN
 
-bind Read+Backward ATTRUP
-bind Read+Forward ATTRDN
+bind Read+PanLeft ATTRUP
+bind Read+PanRight ATTRDN
 
 bind Control+RoutingKey CLIP_NEW
 bind Alt+RoutingKey CLIP_ADD
@@ -99,6 +115,7 @@ bind Dot8 PASSDOTS+space
 
 bind Backspace KEY_BACKSPACE
 bind Delete KEY_DELETE
+bind Insert KEY_INSERT
 bind Escape KEY_ESCAPE
 bind Chord+RoutingKey KEY_FUNCTION
 
@@ -112,8 +129,8 @@ include brl-chords.kti
 
 context menu
 
-bind Up MENU_PREV_ITEM
-bind Down MENU_NEXT_ITEM
+bind ArrowUp MENU_PREV_ITEM
+bind ArrowDown MENU_NEXT_ITEM
 
 bind Control MENU_PREV_SETTING
 bind Alt MENU_NEXT_SETTING
