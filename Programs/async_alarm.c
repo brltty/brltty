@@ -113,7 +113,9 @@ asyncSetAlarmIn (
   void *data
 ) {
   TimeValue time;
-  getRelativeTime(&time, interval);
+
+  getMonotonicTime(&time);
+  adjustTimeValue(&time, interval);
   return asyncSetAlarmTo(handle, &time, callback, data);
 }
 
@@ -140,7 +142,9 @@ asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time) {
 int
 asyncResetAlarmIn (AsyncHandle handle, int interval) {
   TimeValue time;
-  getRelativeTime(&time, interval);
+
+  getMonotonicTime(&time);
+  adjustTimeValue(&time, interval);
   return asyncResetAlarmTo(handle, &time);
 }
 
@@ -156,7 +160,7 @@ asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
       TimeValue now;
       long int milliseconds;
 
-      getCurrentTime(&now);
+      getMonotonicTime(&now);
       milliseconds = millisecondsBetween(&now, &alarm->time);
 
       if (milliseconds <= 0) {
