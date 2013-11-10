@@ -421,13 +421,13 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
     }
 
     STR_BEGIN(time, sizeof(time));
-    STR_PRINTF(hourFormat, fmt->time.hour);
+    STR_PRINTF(hourFormat, fmt->components.hour);
     STR_PRINTF("%c", separator);
-    STR_PRINTF(minuteFormat, fmt->time.minute);
+    STR_PRINTF(minuteFormat, fmt->components.minute);
 
     if (prefs.showSeconds) {
       STR_PRINTF("%c", separator);
-      STR_PRINTF(secondFormat, fmt->time.second);
+      STR_PRINTF(secondFormat, fmt->components.second);
     }
 
     if (fmt->meridian) STR_PRINTF("%s", fmt->meridian);
@@ -444,8 +444,9 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
       const char *monthFormat = "%02" PRIu8;
       const char *dayFormat = "%02" PRIu8;
 
-      uint8_t month = fmt->time.month + 1;
-      uint8_t day = fmt->time.day + 1;
+      uint16_t year = fmt->components.year;
+      uint8_t month = fmt->components.month + 1;
+      uint8_t day = fmt->components.day + 1;
 
       char separator;
 
@@ -468,7 +469,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
       switch (prefs.dateFormat) {
         default:
         case dfYearMonthDay:
-          STR_PRINTF(yearFormat, fmt->time.year);
+          STR_PRINTF(yearFormat, year);
           STR_PRINTF("%c", separator);
           STR_PRINTF(monthFormat, month);
           STR_PRINTF("%c", separator);
@@ -480,7 +481,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
           STR_PRINTF("%c", separator);
           STR_PRINTF(dayFormat, day);
           STR_PRINTF("%c", separator);
-          STR_PRINTF(yearFormat, fmt->time.year);
+          STR_PRINTF(yearFormat, year);
           break;
 
         case dfDayMonthYear:
@@ -488,7 +489,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
           STR_PRINTF("%c", separator);
           STR_PRINTF(monthFormat, month);
           STR_PRINTF("%c", separator);
-          STR_PRINTF(yearFormat, fmt->time.year);
+          STR_PRINTF(yearFormat, year);
           break;
       }
       STR_END
@@ -516,11 +517,9 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
 
 void
 getTimeFormattingData (TimeFormattingData *fmt) {
-  TimeValue now;
-
-  getCurrentTime(&now);
-  expandTimeValue(&now, &fmt->time);
-  fmt->meridian = getMeridianString(&fmt->time.hour);
+  getCurrentTime(&fmt->value);
+  expandTimeValue(&fmt->value, &fmt->components);
+  fmt->meridian = getMeridianString(&fmt->components.hour);
 }
 
 size_t

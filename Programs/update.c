@@ -287,17 +287,14 @@ showInfo (void) {
 
   {
     TimeFormattingData fmt;
+    size_t length;
+
     getTimeFormattingData(&fmt);
-
-    {
-      char buffer[0X80];
-      size_t length = formatBrailleTime(buffer, sizeof(buffer), &fmt);
-
-      if (length < STR_LEFT) STR_PRINTF("%s", buffer);
-    }
+    length = formatBrailleTime(STR_NEXT, STR_LEFT, &fmt);
+    STR_ADJUST(length);
   }
 
-  STR_END
+  STR_END;
   return writeBrailleText(mode, text);
 }
 

@@ -138,7 +138,8 @@ extern int trackCursor (int place);
 extern int isTextOffset (int *arg, int end, int relaxed);
 
 typedef struct {
-  TimeComponents time;
+  TimeValue value;
+  TimeComponents components;
   const char *meridian;
 } TimeFormattingData;
 

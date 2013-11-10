@@ -233,8 +233,9 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
   const char *monthFormat = "%s";
   const char *dayFormat = "%u";
 
+  uint16_t year = fmt->components.year;
   const char *month;
-  uint8_t day = fmt->time.day + 1;
+  uint8_t day = fmt->components.day + 1;
 
 #ifdef MON_1
   {
@@ -243,7 +244,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       MON_7, MON_8, MON_9, MON_10, MON_11, MON_12
     };
 
-    month = (fmt->time.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->time.month]): "?";
+    month = (fmt->components.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->components.month]): "?";
   }
 #else /* MON_1 */
   {
@@ -262,7 +263,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       strtext("December")
     };
 
-    month = (fmt->time.month < ARRAY_COUNT(months))? gettext(months[fmt->time.month]): "?";
+    month = (fmt->components.month < ARRAY_COUNT(months))? gettext(months[fmt->components.month]): "?";
   }
 #endif /* MON_1 */
 
@@ -271,7 +272,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
   switch (prefs.dateFormat) {
     default:
     case dfYearMonthDay:
-      STR_PRINTF(yearFormat, fmt->time.year);
+      STR_PRINTF(yearFormat, year);
       STR_PRINTF(" ");
       STR_PRINTF(monthFormat, month);
       STR_PRINTF(" ");
@@ -283,7 +284,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       STR_PRINTF(" ");
       STR_PRINTF(dayFormat, day);
       STR_PRINTF(", ");
-      STR_PRINTF(yearFormat, fmt->time.year);
+      STR_PRINTF(yearFormat, year);
       break;
 
     case dfDayMonthYear:
@@ -291,7 +292,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       STR_PRINTF(" ");
       STR_PRINTF(monthFormat, month);
       STR_PRINTF(", ");
-      STR_PRINTF(yearFormat, fmt->time.year);
+      STR_PRINTF(yearFormat, year);
       break;
   }
 
@@ -306,9 +307,9 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   size_t length;
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%u", fmt->time.hour);
-  if (fmt->time.minute < 10) STR_PRINTF(" 0");
-  STR_PRINTF(" %u", fmt->time.minute);
+  STR_PRINTF("%u", fmt->components.hour);
+  if (fmt->components.minute < 10) STR_PRINTF(" 0");
+  STR_PRINTF(" %u", fmt->components.minute);
 
   if (fmt->meridian) {
     const char *character = fmt->meridian;
@@ -318,12 +319,12 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   if (prefs.showSeconds) {
     STR_PRINTF(", ");
 
-    if (fmt->time.second == 0) {
+    if (fmt->components.second == 0) {
       STR_PRINTF("%s", gettext("exactly"));
     } else {
       STR_PRINTF("%s %u %s",
-                 gettext("and"), fmt->time.second,
-                 ngettext("second", "seconds", fmt->time.second));
+                 gettext("and"), fmt->components.second,
+                 ngettext("second", "seconds", fmt->components.second));
     }
   }
 
