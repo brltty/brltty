@@ -176,12 +176,6 @@ adjustTimeValue (TimeValue *time, int milliseconds) {
   normalizeTimeValue(time);
 }
 
-void
-getRelativeTime (TimeValue *time, int milliseconds) {
-  getCurrentTime(time);
-  adjustTimeValue(time, milliseconds);
-}
-
 int
 compareTimeValues (const TimeValue *first, const TimeValue *second) {
   if (first->seconds < second->seconds) return -1;

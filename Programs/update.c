@@ -858,14 +858,20 @@ static void
 setUpdateTime (int delay, int ifEarlier) {
   TimeValue time;
 
-  getRelativeTime(&time, delay);
+  getMonotonicTime(&time);
+  adjustTimeValue(&time, delay);
   if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) updateTime = time;
 }
 
 void
-scheduleUpdate (void) {
-  setUpdateTime(10, 1);
+scheduleUpdateIn (int delay) {
+  setUpdateTime(delay, 1);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
+}
+
+void
+scheduleUpdate (void) {
+  scheduleUpdateIn(10);
 }
 
 static void

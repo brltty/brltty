@@ -30,6 +30,17 @@ extern "C" {
 #define NSECS_PER_MSEC (NSECS_PER_USEC * USECS_PER_MSEC)
 #define NSECS_PER_SEC  (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
 
+#define SECS_PER_MIN 60
+#define MINS_PER_HR  60
+#define HRS_PER_DAY  24
+#define DAYS_PER_WK  7
+#define SECS_PER_HR  (SECS_PER_MIN * MINS_PER_HR)
+#define SECS_PER_DAY (SECS_PER_MIN * MINS_PER_HR * HRS_PER_DAY)
+#define SECS_PER_WK  (SECS_PER_MIN * MINS_PER_HR * HRS_PER_DAY * DAYS_PER_WK)
+#define MINS_PER_DAY (MINS_PER_HR * HRS_PER_DAY)
+#define MINS_PER_WK  (MINS_PER_HR * HRS_PER_DAY * DAYS_PER_WK)
+#define HRS_PER_WK   (HRS_PER_DAY * DAYS_PER_WK)
+
 typedef struct {
   int32_t seconds;
   int32_t nanoseconds;
@@ -55,7 +66,6 @@ extern size_t formatSeconds (char *buffer, size_t size, const char *format, int3
 
 extern void normalizeTimeValue (TimeValue *time);
 extern void adjustTimeValue (TimeValue *time, int milliseconds);
-extern void getRelativeTime (TimeValue *time, int milliseconds);
 
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
 extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
