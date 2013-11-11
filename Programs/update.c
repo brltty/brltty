@@ -883,7 +883,6 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   setUpdateTime(updateInterval, 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
-playTune(&tune_command_rejected);
 
   doUpdate();
   setUpdateAlarm(parameters->data);

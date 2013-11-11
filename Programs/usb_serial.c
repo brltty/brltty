@@ -492,30 +492,45 @@ usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, s
   return result;
 }
 
-static ssize_t
-usbSetAttributes_CP2101 (UsbDevice *device, unsigned char request, const void *data, size_t length) {
-  logBytes(LOG_DEBUG, "CP2101 Attributes", data, length);
+static int
+usbSetAttributes_CP2101 (
+  UsbDevice *device,
+  uint8_t request, uint16_t value,
+  const void *data, size_t length
+) {
+  logMessage(LOG_DEBUG, "CP2101 Request: %02X %04X", request, value);
+  if (length) logBytes(LOG_DEBUG, "CP2101 Data", data, length);
+
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
-                         request, 0, 0, data, length, 1000) != -1;
+                         request, value, 0, data, length, 1000) != -1;
 }
 
 static int
-usbSetAttribute_CP2101 (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
-  logMessage(LOG_DEBUG, "CP2101 Request: %02X %04X %04X", request, value, index);
-  return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
-                         request, value, index, NULL, 0, 1000) != -1;
+usbSetAttribute_CP2101 (UsbDevice *device, uint8_t request, uint16_t value) {
+  return usbSetAttributes_CP2101(device, request, value, NULL, 0);
 }
 
 static int
 usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
   const unsigned int base = 0X384000;
   unsigned int divisor = base / baud;
+
   if ((baud * divisor) != base) {
     logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", baud);
     errno = EINVAL;
     return 0;
   }
-  return usbSetAttribute_CP2101(device, 1, divisor, 0);
+
+  if (usbSetAttribute_CP2101(device, 1, divisor)) {
+    uint32_t data;
+    putLittleEndian32(&data, baud);
+
+    if (usbSetAttributes_CP2101(device, 30, 0, &data, sizeof(data))) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -528,42 +543,50 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
   }
 
-  return usbSetAttributes_CP2101(device, 19, bytes, count) != -1;
+  return usbSetAttributes_CP2101(device, 19, 0, bytes, count);
 }
 
 static int
 usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   int ok = 1;
   unsigned int value = dataBits & 0XF;
+
   if (dataBits != value) {
     logMessage(LOG_WARNING, "unsupported CP2101 data bits: %u", dataBits);
     ok = 0;
   }
   value <<= 8;
+
   switch (parity) {
     case SERIAL_PARITY_NONE:  value |= 0X00; break;
     case SERIAL_PARITY_ODD:   value |= 0X10; break;
     case SERIAL_PARITY_EVEN:  value |= 0X20; break;
     case SERIAL_PARITY_MARK:  value |= 0X30; break;
     case SERIAL_PARITY_SPACE: value |= 0X40; break;
+
     default:
       logMessage(LOG_WARNING, "unsupported CP2101 parity: %u", parity);
       ok = 0;
       break;
   }
+
   switch (stopBits) {
-    case SERIAL_STOP_1: value |= 0X0; break;
-    case SERIAL_STOP_2: value |= 0X2; break;
+    case SERIAL_STOP_1:   value |= 0X0; break;
+    case SERIAL_STOP_1_5: value |= 0X1; break;
+    case SERIAL_STOP_2:   value |= 0X2; break;
+
     default:
       logMessage(LOG_WARNING, "unsupported CP2101 stop bits: %u", stopBits);
       ok = 0;
       break;
   }
+
   if (!ok) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetAttribute_CP2101(device, 3, value, 0);
+
+  return usbSetAttribute_CP2101(device, 3, value);
 }
 
 static int
@@ -573,7 +596,7 @@ usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *na
     errno = EINVAL;
     return 0;
   }
-  return usbSetAttribute_CP2101(device, 7, ((1 << (shift + 8)) | (state << shift)), 0);
+  return usbSetAttribute_CP2101(device, 7, ((1 << (shift + 8)) | (state << shift)));
 }
 
 static int
@@ -588,7 +611,7 @@ usbSetRtsState_CP2101 (UsbDevice *device, int state) {
 
 static int
 usbSetUartState_CP2101 (UsbDevice *device, int state) {
-  return usbSetAttribute_CP2101(device, 0, state, 0);
+  return usbSetAttribute_CP2101(device, 0, state);
 }
 
 static int
@@ -804,12 +827,7 @@ typedef struct {
 } UsbSerialAdapter;
 
 static const UsbSerialAdapter usbSerialAdapters[] = {
-  { /* HandyTech GoHubs */
-    .vendor=0X0921, .product=0X1200,
-    .operations = &usbSerialOperations_Belkin
-  },
-
-  { /* HandyTech FTDI */
+  { /* Albatross, Cebra, HIMS, HandyTech FTDI */
     .vendor=0X0403, .product=0X6001,
     .operations = &usbSerialOperations_FTDI_FT8U232AM,
     .inputFilter = usbInputFilter_FTDI
@@ -941,7 +959,12 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
     .inputFilter = usbInputFilter_FTDI
   },
 
-  { /* Seika (40 cells) */
+  { /* HandyTech GoHubs */
+    .vendor=0X0921, .product=0X1200,
+    .operations = &usbSerialOperations_Belkin
+  },
+
+  { /* Braille Memo, Seika Braille Display */
     .vendor=0X10C4, .product=0XEA60,
     .operations = &usbSerialOperations_CP2101
   },
