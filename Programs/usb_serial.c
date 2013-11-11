@@ -477,8 +477,40 @@ static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
 };
 
 
+typedef enum {
+  USB_CP2101_CTL_EnableInterface        = 0x00,
+  USB_CP2101_CTL_SetBaudDivisor         = 0x01,
+  USB_CP2101_CTL_GetBaudDivisor         = 0x02,
+  USB_CP2101_CTL_SetLineControl         = 0x03,
+  USB_CP2101_CTL_GetLineControl         = 0x04,
+  USB_CP2101_CTL_SetBreak               = 0x05,
+  USB_CP2101_CTL_SendImmediateCharacter = 0x06,
+  USB_CP2101_CTL_SetModemHandShaking    = 0x07,
+  USB_CP2101_CTL_GetModemStatus         = 0x08,
+  USB_CP2101_CTL_SetXon                 = 0x09,
+  USB_CP2101_CTL_SetXoff                = 0x0A,
+  USB_CP2101_CTL_SetEventMask           = 0x0B,
+  USB_CP2101_CTL_GetEventMask           = 0x0C,
+  USB_CP2101_CTL_SetSpecialCharacter    = 0x0D,
+  USB_CP2101_CTL_GetSpecialCharacters   = 0x0E,
+  USB_CP2101_CTL_GetProperties          = 0x0F,
+  USB_CP2101_CTL_GetSerialStatus        = 0x10,
+  USB_CP2101_CTL_Reset                  = 0x11,
+  USB_CP2101_CTL_Purge                  = 0x12,
+  USB_CP2101_CTL_SetFlowControl         = 0x13,
+  USB_CP2101_CTL_GetFlowControl         = 0x14,
+  USB_CP2101_CTL_EmbedEvents            = 0x15,
+  USB_CP2101_CTL_GetEventState          = 0x16,
+  USB_CP2101_CTL_SetSpecialCharacters   = 0x19,
+  USB_CP2101_CTL_GetBaudRate            = 0x1D,
+  USB_CP2101_CTL_SetBaudRate            = 0x1E,
+  USB_CP2101_CTL_VendorSpecific         = 0xFF
+} USB_CP2101_ControlRequest;
+
+#define USB_CP2101_BAUD_BASE 0X384000
+
 static ssize_t
-usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, size_t length) {
+usbGetAttributes_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t length) {
   ssize_t result = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                                   request, 0, 0, data, length, 1000);
   if (result == -1) return 0;
@@ -488,7 +520,8 @@ usbGetAttributes_CP2101 (UsbDevice *device, unsigned char request, void *data, s
     memset(&bytes[result], 0, length-result);
   }
 
-  logBytes(LOG_DEBUG, "CP2101 Attributes", data, result);
+  logMessage(LOG_DEBUG, "CP2101 Get: %02X", request);
+  logBytes(LOG_DEBUG, "CP2101 Data", data, result);
   return result;
 }
 
@@ -498,7 +531,7 @@ usbSetAttributes_CP2101 (
   uint8_t request, uint16_t value,
   const void *data, size_t length
 ) {
-  logMessage(LOG_DEBUG, "CP2101 Request: %02X %04X", request, value);
+  logMessage(LOG_DEBUG, "CP2101 Set: %02X %04X", request, value);
   if (length) logBytes(LOG_DEBUG, "CP2101 Data", data, length);
 
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
@@ -512,7 +545,7 @@ usbSetAttribute_CP2101 (UsbDevice *device, uint8_t request, uint16_t value) {
 
 static int
 usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
-  const unsigned int base = 0X384000;
+  const unsigned int base = USB_CP2101_BAUD_BASE;
   unsigned int divisor = base / baud;
 
   if ((baud * divisor) != base) {
@@ -521,11 +554,11 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
     return 0;
   }
 
-  if (usbSetAttribute_CP2101(device, 1, divisor)) {
+  if (usbSetAttribute_CP2101(device, USB_CP2101_CTL_SetBaudDivisor, divisor)) {
     uint32_t data;
     putLittleEndian32(&data, baud);
 
-    if (usbSetAttributes_CP2101(device, 30, 0, &data, sizeof(data))) {
+    if (usbSetAttributes_CP2101(device, USB_CP2101_CTL_SetBaudRate, 0, &data, sizeof(data))) {
       return 1;
     }
   }
@@ -536,14 +569,14 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
 static int
 usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   unsigned char bytes[16];
-  ssize_t count = usbGetAttributes_CP2101(device, 20, bytes, sizeof(bytes));
+  ssize_t count = usbGetAttributes_CP2101(device, USB_CP2101_CTL_GetFlowControl, bytes, sizeof(bytes));
   if (!count) return 0;
 
   if (flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
   }
 
-  return usbSetAttributes_CP2101(device, 19, 0, bytes, count);
+  return usbSetAttributes_CP2101(device, USB_CP2101_CTL_SetFlowControl, 0, bytes, count);
 }
 
 static int
@@ -586,7 +619,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
     return 0;
   }
 
-  return usbSetAttribute_CP2101(device, 3, value);
+  return usbSetAttribute_CP2101(device, USB_CP2101_CTL_SetLineControl, value);
 }
 
 static int
@@ -596,7 +629,8 @@ usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *na
     errno = EINVAL;
     return 0;
   }
-  return usbSetAttribute_CP2101(device, 7, ((1 << (shift + 8)) | (state << shift)));
+
+  return usbSetAttribute_CP2101(device, USB_CP2101_CTL_SetModemHandShaking, ((1 << (shift + 8)) | (state << shift)));
 }
 
 static int
@@ -611,7 +645,7 @@ usbSetRtsState_CP2101 (UsbDevice *device, int state) {
 
 static int
 usbSetUartState_CP2101 (UsbDevice *device, int state) {
-  return usbSetAttribute_CP2101(device, 0, state);
+  return usbSetAttribute_CP2101(device, USB_CP2101_CTL_EnableInterface, state);
 }
 
 static int
