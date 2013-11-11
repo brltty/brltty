@@ -287,11 +287,15 @@ showInfo (void) {
 
   {
     TimeFormattingData fmt;
-    size_t length;
 
     getTimeFormattingData(&fmt);
-    length = formatBrailleTime(STR_NEXT, STR_LEFT, &fmt);
-    STR_ADJUST(length);
+    STR_ADJUST(formatBrailleTime(STR_NEXT, STR_LEFT, &fmt));
+
+    if (prefs.showSeconds) {
+      scheduleUpdateIn(millisecondsTillNextSecond(&fmt.value));
+    } else {
+      scheduleUpdateIn(millisecondsTillNextMinute(&fmt.value));
+    }
   }
 
   STR_END;
@@ -879,6 +883,7 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   setUpdateTime(updateInterval, 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
+playTune(&tune_command_rejected);
 
   doUpdate();
   setUpdateAlarm(parameters->data);

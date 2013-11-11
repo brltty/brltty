@@ -199,6 +199,27 @@ millisecondsBetween (const TimeValue *from, const TimeValue *to) {
        + (elapsed.nanoseconds / NSECS_PER_MSEC);
 }
 
+long int
+millisecondsTillNextSecond (const TimeValue *reference) {
+  TimeValue time = *reference;
+
+  time.nanoseconds = 0;
+  time.seconds += 1;
+  return millisecondsBetween(reference, &time);
+}
+
+long int
+millisecondsTillNextMinute (const TimeValue *reference) {
+  TimeValue time = *reference;
+  int32_t *seconds = &time.seconds;
+
+  time.nanoseconds = 0;
+  *seconds /= SECS_PER_MIN;
+  *seconds += 1;
+  *seconds *= SECS_PER_MIN;
+  return millisecondsBetween(reference, &time);
+}
+
 void
 getMonotonicTime (TimeValue *now) {
 #if defined(GRUB_RUNTIME)

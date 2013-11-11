@@ -70,6 +70,9 @@ extern void adjustTimeValue (TimeValue *time, int milliseconds);
 extern int compareTimeValues (const TimeValue *first, const TimeValue *second);
 extern long int millisecondsBetween (const TimeValue *from, const TimeValue *to);
 
+extern long int millisecondsTillNextSecond (const TimeValue *reference);
+extern long int millisecondsTillNextMinute (const TimeValue *reference);
+
 extern void getMonotonicTime (TimeValue *now);
 extern long int getMonotonicElapsed (const TimeValue *start);
 
