@@ -71,10 +71,13 @@ renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
     const int32_t frequency = row / height;
 
     if (frequency) {
+      const int32_t interval = NSECS_PER_SEC / (frequency * 2);
       TimeValue time;
-      getMonotonicTime(&time);
 
-      if (((time.nanoseconds / (NSECS_PER_SEC / (frequency * 2))) % 2) == 0) {
+      getMonotonicTime(&time);
+      scheduleUpdateIn(((interval - (time.nanoseconds % interval)) / NSECS_PER_MSEC) + 1);
+
+      if (!((time.nanoseconds / interval) % 2)) {
         *cell = 0;
         return;
       }
