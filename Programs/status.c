@@ -20,6 +20,7 @@
 
 #include "status.h"
 #include "timing.h"
+#include "update.h"
 #include "brldefs.h"
 #include "scr.h"
 #include "brltty.h"
@@ -162,8 +163,9 @@ renderStatusField_time (unsigned char *cells) {
   TimeComponents components;
 
   getCurrentTime(&value);
-  expandTimeValue(&value, &components);
+  scheduleUpdateIn(millisecondsTillNextMinute(&value));
 
+  expandTimeValue(&value, &components);
   renderNumberUpper(cells, components.hour);
   renderNumberLower(cells, components.minute);
 }
