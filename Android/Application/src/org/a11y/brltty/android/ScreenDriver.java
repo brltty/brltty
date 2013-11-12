@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import org.a11y.brltty.core.*;
+
 import android.os.Build;
 import android.os.SystemClock;
 
@@ -115,6 +117,8 @@ public final class ScreenDriver {
     return done;
   }
 
+  public static native void screenUpdated ();
+
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     if (ApplicationParameters.LOG_ACCESSIBILITY_EVENTS) {
       currentLogger.logEvent(event);
@@ -193,6 +197,13 @@ public final class ScreenDriver {
         oldNode = null;
       }
     }
+
+    CoreWrapper.runOnCoreThread(new Runnable() {
+      @Override
+      public void run () {
+        screenUpdated();
+      }
+    });
   }
 
   public static native void exportScreenProperties (

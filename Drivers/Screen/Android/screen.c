@@ -43,7 +43,7 @@ static jint selectedTop;
 static jint selectedRight;
 static jint selectedBottom;
 
-static const char *problemText = NULL;
+static const char *problemText;
 
 static int
 findScreenDriverClass (void) {
@@ -58,6 +58,17 @@ findInputServiceClass (void) {
 static int
 findLockUtilitiesClass (void) {
   return findJavaClass(env, &lockUtilitiesClass, "org/a11y/brltty/android/LockUtilities");
+}
+
+static int
+poll_AndroidScreen (void) {
+  return 0;
+}
+
+JNIEXPORT void JNICALL
+Java_org_a11y_brltty_android_ScreenDriver_screenUpdated (JNIEnv *env, jobject this) {
+logMessage(LOG_DEBUG, "scrdrv linux updated");
+  mainScreenUpdated();
 }
 
 JNIEXPORT void JNICALL
@@ -83,8 +94,8 @@ Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
   selectedBottom = bottom;
 }
 
-static void
-describe_AndroidScreen (ScreenDescription *description) {
+static int
+refresh_AndroidScreen (void) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
@@ -94,30 +105,36 @@ describe_AndroidScreen (ScreenDescription *description) {
       jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method);
 
       if (clearJavaException(env, 1)) {
-        description->unreadable = "java exception";
+        problemText = "java exception";
       } else if (result == JNI_FALSE) {
-        description->unreadable = "device locked";
+        problemText = "device locked";
       } else {
-        description->cols = screenColumns;
-        description->rows = screenRows;
-        description->posx = cursorColumn;
-        description->posy = cursorRow;
-        description->number = screenNumber;
-        description->unreadable = NULL;
+        problemText = NULL;
       }
     } else {
-      description->unreadable = "method not found";
+      problemText = "method not found";
     }
   } else {
-    description->unreadable = "class not found";
+    problemText = "class not found";
   }
 
-  if ((problemText = description->unreadable)) {
+  return 1;
+}
+
+static void
+describe_AndroidScreen (ScreenDescription *description) {
+  if ((description->unreadable = problemText)) {
     description->cols = strlen(problemText);
     description->rows = 1;
     description->posx = 0;
     description->posy = 0;
     description->number = 0;
+  } else {
+    description->cols = screenColumns;
+    description->rows = screenRows;
+    description->posx = cursorColumn;
+    description->posy = cursorRow;
+    description->number = screenNumber;
   }
 }
 
@@ -334,6 +351,8 @@ insertKey_AndroidScreen (ScreenKey key) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
+  main->base.poll = poll_AndroidScreen;
+  main->base.refresh = refresh_AndroidScreen;
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
   main->base.handleCommand = handleCommand_AndroidScreen;
