@@ -66,7 +66,6 @@
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
 
 static volatile unsigned int terminationCount;

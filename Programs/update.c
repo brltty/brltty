@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "update.h"
 #include "async_alarm.h"
 #include "timing.h"
@@ -881,7 +882,7 @@ scheduleUpdate (void) {
 
 static void
 handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  setUpdateTime((pollScreen()? updateInterval: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
+  setUpdateTime((pollScreen()? UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 

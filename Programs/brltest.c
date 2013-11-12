@@ -29,6 +29,7 @@
 
 #include "program.h"
 #include "options.h"
+#include "parameters.h"
 #include "log.h"
 #include "parse.h"
 #include "brl.h"
@@ -39,7 +40,6 @@
 #include "message.h"
 #include "defaults.h"
 
-int updateInterval = DEFAULT_UPDATE_INTERVAL;
 static BrailleDisplay brl;
 
 static char *opt_brailleDevice;
@@ -107,8 +107,8 @@ message (const char *mode, const char *text, MessageOptions options) {
       int timer = 0;
       while (braille->readCommand(&brl, KTB_CTX_WAITING) == EOF) {
         if (timer > 4000) break;
-        asyncWait(updateInterval);
-        timer += updateInterval;
+        asyncWait(UPDATE_POLL_INTERVAL);
+        timer += UPDATE_POLL_INTERVAL;
       }
     }
   }

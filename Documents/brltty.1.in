@@ -397,12 +397,6 @@ the text, attributes, contraction, and key tables.
 The built-in default is
 .RB "@TABLES_DIRECTORY@" "."
 .TP
-\fB\-U \fIcsecs\fR (\fB\-\-update\-interval=\fR)
-The braille window update interval in hundredths of a second.
-The built-in default is
-.B 4
-(25 times per second).
-.TP
 \fB\-V\fR (\fB\-\-version\fR)
 Print the versions of
 .B brltty

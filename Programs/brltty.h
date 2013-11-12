@@ -110,7 +110,6 @@ extern char *opt_contractionTable;
 
 extern int opt_releaseDevice;
 
-extern int updateInterval;
 extern int messageDelay;
 
 extern int restartRequired;

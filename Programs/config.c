@@ -97,7 +97,6 @@ static char *opt_logLevel;
 static char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
-static char *opt_updateInterval;
 static char *opt_messageDelay;
 
 static int opt_cancelExecution;
@@ -455,14 +454,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Device specifier for the Musical Instrument Digital Interface.")
   },
 #endif /* HAVE_MIDI_SUPPORT */
-
-  { .letter = 'U',
-    .word = "update-interval",
-    .flags = OPT_Hidden,
-    .argument = strtext("csecs"),
-    .setting.string = &opt_updateInterval,
-    .description = strtext("Braille window update interval [4].")
-  },
 
   { .letter = 'M',
     .word = "message-delay",
@@ -1926,10 +1917,6 @@ brlttyStart (int argc, char *argv[]) {
     }
 
     return exitStatus;
-  }
-
-  if (!validateInterval(&updateInterval, opt_updateInterval)) {
-    logMessage(LOG_ERR, "%s: %s", gettext("invalid update interval"), opt_updateInterval);
   }
 
   if (!validateInterval(&messageDelay, opt_messageDelay)) {

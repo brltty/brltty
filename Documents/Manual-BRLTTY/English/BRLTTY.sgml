@@ -2935,10 +2935,6 @@ The <tt/brltty/ command accepts the following options:
     please see the documentation for that driver.
     See the <ref id="configure-speech-parameters" name="speech-parameters">
     configuration file directive for the default run-time settings.
-  <tag><tt/-U/<em/csecs/ <tt/--update-interval=/<em/csecs/<label id="options-update-interval"></tag>
-    Specify the interval (in hundredths of a second)
-    at which the braille window is updated with new screen content.
-    If not specified, then <tt/4/ (40 milliseconds) is assumed.
   <tag><tt/-V/ <tt/--version/<label id="options-version"></tag>
     Display the current versions
     of BRLTTY itself,
@@ -3906,9 +3902,7 @@ Notes:
 <itemize>
   <item><label id="time-settings">
     All time settings are in hundredths of a second.
-    They are multiples of the braille window update interval
-    (see the <ref id="options-update-interval" name="-U"> command line option)
-    within the range 1 through 100.
+    They are multiples of 4 within the range 1 through 100.
 </itemize>
 
 <sect1>The Status Display<label id="status"><p>

@@ -36,8 +36,6 @@
 #include "message.h"
 #include "brl.h"
 
-int updateInterval = DEFAULT_UPDATE_INTERVAL;
-
 static char *opt_tuneDevice;
 static char *opt_outputVolume;
 

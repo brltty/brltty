@@ -30,9 +30,6 @@ extern "C" {
 
 /* Edit as necessary for your system. */
 
-/* Delay times, measured in milliseconds. */
-#define DEFAULT_UPDATE_INTERVAL 40	/* sleep time per cycle - overall speed */
-
 #define DEFAULT_MESSAGE_DELAY 4000 /* message hold time */
 /* Under 5 seconds (init's SIGTERM-SIGKILL delay during shutdown)
  * is good as that allows "exiting" to be replaced by "terminated"

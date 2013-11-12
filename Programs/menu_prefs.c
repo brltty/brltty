@@ -387,7 +387,7 @@ newStatusFieldMenuItem (
 
 static MenuItem *
 newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 1, 100, updateInterval/10);
+  return newNumericMenuItem(menu, setting, name, 1, 100, 4);
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
