@@ -65,15 +65,15 @@ poll_AndroidScreen (void) {
   return 0;
 }
 
-JNIEXPORT void JNICALL
-Java_org_a11y_brltty_android_ScreenDriver_screenUpdated (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_android_ScreenDriver, screenUpdated, void
+) {
 logMessage(LOG_DEBUG, "scrdrv linux updated");
   mainScreenUpdated();
 }
 
-JNIEXPORT void JNICALL
-Java_org_a11y_brltty_android_ScreenDriver_exportScreenProperties (
-  JNIEnv *env, jobject this,
+JAVA_METHOD (
+  org_a11y_brltty_android_ScreenDriver, exportScreenProperties, void,
   jint number,
   jint columns, jint rows,
   jint column, jint row,

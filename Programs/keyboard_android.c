@@ -371,9 +371,8 @@ forwardKeyEvent (int code, int press) {
   return 0;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_android_InputService_handleKeyEvent (
-  JNIEnv *env, jclass *this,
+JAVA_METHOD (
+  org_a11y_brltty_android_InputService, handleKeyEvent, jboolean,
   jint code, jboolean press
 ) {
   KeyboardPlatformData *kpd = keyboardPlatformData;

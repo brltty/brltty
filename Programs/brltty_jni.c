@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 
 #include "embed.h"
+#include "system_java.h"
 
 SYMBOL_POINTER(brlttyConstruct);
 SYMBOL_POINTER(brlttyDestruct);
@@ -199,8 +200,10 @@ error:
   return 0;
 }
 
-JNIEXPORT jint JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreConstruct (JNIEnv *env, jobject this, jobjectArray arguments) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreConstruct, jint,
+  jobjectArray arguments
+) {
   if (prepareProgramArguments(env, arguments)) {
     if (loadCoreLibrary(env)) {
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
@@ -210,8 +213,9 @@ Java_org_a11y_brltty_core_CoreWrapper_coreConstruct (JNIEnv *env, jobject this, 
   return PROG_EXIT_FATAL;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreDestruct, jboolean
+) {
   jboolean result = brlttyDestruct_p()? JNI_TRUE: JNI_FALSE;
 
 /*
@@ -253,23 +257,29 @@ Java_org_a11y_brltty_core_CoreWrapper_coreDestruct (JNIEnv *env, jobject this) {
   return result;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreEnableInterrupt (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreEnableInterrupt, jboolean
+) {
   return brlttyEnableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreDisableInterrupt (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreDisableInterrupt, jboolean
+) {
   return brlttyDisableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreInterrupt (JNIEnv *env, jobject this, jboolean stop) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreInterrupt, jboolean,
+  jboolean stop
+) {
   return brlttyInterrupt_p((stop != JNI_FALSE)? WAIT_STOP: WAIT_CONTINUE)? JNI_TRUE: JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_coreWait (JNIEnv *env, jobject this, jint duration) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, coreWait, jboolean,
+  jint duration
+) {
   return (brlttyWait_p(duration) != WAIT_STOP)? JNI_TRUE: JNI_FALSE;
 }
 
@@ -288,59 +298,79 @@ changeStringValue (JNIEnv *env, int (*change) (const char *cValue), jstring jVal
   return result;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeLogLevel (JNIEnv *env, jobject this, jstring level) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeLogLevel, jboolean,
+  jstring level
+) {
   return changeStringValue(env, changeLogLevel_p, level);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeLogCategories (JNIEnv *env, jobject this, jstring categories) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeLogCategories, jboolean,
+  jstring categories
+) {
   return changeStringValue(env, changeLogCategories_p, categories);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeTextTable (JNIEnv *env, jobject this, jstring name) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeTextTable, jboolean,
+  jstring name
+) {
   return changeStringValue(env, changeTextTable_p, name);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeAttributesTable (JNIEnv *env, jobject this, jstring name) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeAttributesTable, jboolean,
+  jstring name
+) {
   return changeStringValue(env, changeAttributesTable_p, name);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeContractionTable (JNIEnv *env, jobject this, jstring name) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeContractionTable, jboolean,
+  jstring name
+) {
   return changeStringValue(env, changeContractionTable_p, name);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeKeyboardKeyTable (JNIEnv *env, jobject this, jstring name) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeKeyboardKeyTable, jboolean,
+  jstring name
+) {
   return changeStringValue(env, changeKeyboardKeyTable_p, name);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_restartBrailleDriver (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, restartBrailleDriver, jboolean
+) {
   restartBrailleDriver_p();
   return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDriver (JNIEnv *env, jobject this, jstring driver) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeBrailleDriver, jboolean,
+  jstring driver
+) {
   return changeStringValue(env, changeBrailleDriver_p, driver);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeBrailleDevice (JNIEnv *env, jobject this, jstring device) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeBrailleDevice, jboolean,
+  jstring device
+) {
   return changeStringValue(env, changeBrailleDevice_p, device);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_restartSpeechDriver (JNIEnv *env, jobject this) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, restartSpeechDriver, jboolean
+) {
   restartSpeechDriver_p();
   return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL
-Java_org_a11y_brltty_core_CoreWrapper_changeSpeechDriver (JNIEnv *env, jobject this, jstring driver) {
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeSpeechDriver, jboolean,
+  jstring driver
+) {
   return changeStringValue(env, changeSpeechDriver_p, driver);
 }
