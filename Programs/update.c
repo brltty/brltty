@@ -500,6 +500,7 @@ doUpdate (void) {
   int pointerMoved = 0;
 
   unrequireAllBlinkDescriptors();
+  refreshScreen();
   updateSessionAttributes();
 
   if (opt_releaseDevice) {
@@ -880,7 +881,7 @@ scheduleUpdate (void) {
 
 static void
 handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  setUpdateTime(updateInterval, 0);
+  setUpdateTime((pollScreen()? updateInterval: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
@@ -903,9 +904,6 @@ beginUpdates (void) {
 
   oldwinx = -1;
   oldwiny = -1;
-
-  highlightWindow();
-  checkPointer();
 }
 
 void

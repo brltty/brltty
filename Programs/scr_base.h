@@ -30,6 +30,8 @@ extern void setKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
   size_t (*formatTitle) (char *buffer, size_t size);
+  int (*poll) (void);
+  int (*refresh) (void);
   void (*describe) (ScreenDescription *);
   int (*readCharacters) (const ScreenBox *box, ScreenCharacter *buffer);
   int (*insertKey) (ScreenKey key);
@@ -46,6 +48,9 @@ typedef struct {
 
 extern void initializeBaseScreen (BaseScreen *);
 extern void describeBaseScreen (BaseScreen *, ScreenDescription *);
+
+extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
+extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message);
 
 #ifdef __cplusplus
 }

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "log.h"
 #include "scr.h"
 #include "scr_base.h"
 
@@ -105,6 +106,16 @@ formatTitle_BaseScreen (char *buffer, size_t size) {
   return 0;
 }
 
+static int
+poll_BaseScreen (void) {
+  return 0;
+}
+
+static int
+refresh_BaseScreen (void) {
+  return 1;
+}
+
 static void
 describe_BaseScreen (ScreenDescription *description) {
   description->rows = 1;
@@ -161,9 +172,8 @@ getCommandContext_BaseScreen (void) {
 void
 initializeBaseScreen (BaseScreen *base) {
   base->formatTitle = formatTitle_BaseScreen;
-  base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
-  base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
-  base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
+  base->poll = poll_BaseScreen;
+  base->refresh = refresh_BaseScreen;
   base->describe = describe_BaseScreen;
   base->readCharacters = readCharacters_BaseScreen;
   base->insertKey = insertKey_BaseScreen;
@@ -171,6 +181,9 @@ initializeBaseScreen (BaseScreen *base) {
   base->highlightRegion = highlightRegion_BaseScreen;
   base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
+  base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
+  base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
+  base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->handleCommand = handleCommand_BaseScreen;
   base->getCommandContext = getCommandContext_BaseScreen;
 }
@@ -188,5 +201,46 @@ describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
     description->cursor = 0;
   } else if (description->number == -1) {
     description->unreadable = "unreadable screen";
+  }
+}
+
+int
+validateScreenBox (const ScreenBox *box, int columns, int rows) {
+  if ((box->left >= 0))
+    if ((box->width > 0))
+      if (((box->left + box->width) <= columns))
+        if ((box->top >= 0))
+          if ((box->height > 0))
+            if (((box->top + box->height) <= rows))
+              return 1;
+
+  logMessage(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
+             columns, box->left, box->width,
+             rows, box->top, box->height);
+  return 0;
+}
+
+void
+setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message) {
+  const ScreenCharacter *end = buffer + box->width;
+  unsigned int index = 0;
+  size_t length = strlen(message);
+  mbstate_t state;
+
+  memset(&state, 0, sizeof(state));
+  clearScreenCharacters(buffer, (box->width * box->height));
+
+  while (length) {
+    wchar_t wc;
+    size_t result = mbrtowc(&wc, message, length, &state);
+    if ((ssize_t)result < 1) break;
+
+    message += result;
+    length -= result;
+
+    if (index++ >= box->left) {
+      if (buffer == end) break;
+      (buffer++)->text = wc;
+    }
   }
 }

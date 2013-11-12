@@ -1343,6 +1343,8 @@ brlttyConstruct (int argc, char *argv[]) {
   interruptPending = 0;
 
   beginCommandQueue();
+  beginUpdates();
+  suspendUpdates();
 
   {
     ProgramExitStatus exitStatus = brlttyStart(argc, argv);
@@ -1356,7 +1358,7 @@ brlttyConstruct (int argc, char *argv[]) {
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
-  beginUpdates();
+  resumeUpdates();
 
   restartRequired = 0;
   isOffline = 0;

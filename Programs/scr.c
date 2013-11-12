@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "update.h"
 #include "message.h"
 #include "menu_prefs.h"
 #include "scr.h"
@@ -43,7 +44,75 @@ static HelpScreen helpScreen;
 static MenuScreen menuScreen;
 static FrozenScreen frozenScreen;                
 static MainScreen mainScreen;
+
+typedef enum {
+  SCR_HELP   = 0X01,
+  SCR_MENU   = 0X02,
+  SCR_FROZEN = 0X04
+} ActiveScreen;
+
+static ActiveScreen activeScreens = 0;
 static BaseScreen *currentScreen = &mainScreen.base;
+
+static void
+announceScreen (void) {
+  char buffer[0X80];
+  size_t length = formatScreenTitle(buffer, sizeof(buffer));
+
+  if (length) message(NULL, buffer, 0);
+}
+
+static void
+setScreen (ActiveScreen which) {
+  typedef struct {
+    ActiveScreen which;
+    BaseScreen *screen;
+  } ScreenEntry;
+
+  static const ScreenEntry screenEntries[] = {
+    {SCR_HELP  , &helpScreen.base},
+    {SCR_MENU  , &menuScreen.base},
+    {SCR_FROZEN, &frozenScreen.base},
+    {0         , &mainScreen.base}
+  };
+  const ScreenEntry *entry = screenEntries;
+
+  while (entry->which) {
+    if (which & entry->which) break;
+    entry += 1;
+  }
+
+  currentScreen = entry->screen;
+  scheduleUpdate();
+  announceScreen();
+}
+
+static void
+selectScreen (void) {
+  setScreen(activeScreens);
+}
+
+int
+haveScreen (ActiveScreen which) {
+  return (activeScreens & which) != 0;
+}
+
+static void
+activateScreen (ActiveScreen which) {
+  activeScreens |= which;
+  setScreen(which);
+}
+
+static void
+deactivateScreen (ActiveScreen which) {
+  activeScreens &= ~which;
+  selectScreen();
+}
+
+int
+isMainScreen (void) {
+  return currentScreen == &mainScreen.base;
+}
 
 const char *const *
 getScreenParameters (const ScreenDriver *driver) {
@@ -99,89 +168,6 @@ destructSpecialScreens (void) {
 }
 
 
-typedef enum {
-  SCR_HELP   = 0X01,
-  SCR_MENU   = 0X02,
-  SCR_FROZEN = 0X04
-} ActiveScreen;
-static ActiveScreen activeScreens = 0;
-
-static void
-announceScreen (void) {
-  char buffer[0X80];
-  size_t length = formatScreenTitle(buffer, sizeof(buffer));
-
-  if (length) message(NULL, buffer, 0);
-}
-
-static void
-setScreen (ActiveScreen which) {
-  typedef struct {
-    ActiveScreen which;
-    BaseScreen *screen;
-  } ScreenEntry;
-
-  static const ScreenEntry screenEntries[] = {
-    {SCR_HELP  , &helpScreen.base},
-    {SCR_MENU  , &menuScreen.base},
-    {SCR_FROZEN, &frozenScreen.base},
-    {0         , &mainScreen.base}
-  };
-  const ScreenEntry *entry = screenEntries;
-
-  while (entry->which) {
-    if (which & entry->which) break;
-    entry += 1;
-  }
-
-  currentScreen = entry->screen;
-  announceScreen();
-}
-
-static void
-selectScreen (void) {
-  setScreen(activeScreens);
-}
-
-int
-haveScreen (ActiveScreen which) {
-  return (activeScreens & which) != 0;
-}
-
-static void
-activateScreen (ActiveScreen which) {
-  activeScreens |= which;
-  setScreen(which);
-}
-
-static void
-deactivateScreen (ActiveScreen which) {
-  activeScreens &= ~which;
-  selectScreen();
-}
-
-int
-isLiveScreen (void) {
-  return currentScreen == &mainScreen.base;
-}
-
-
-int
-validateScreenBox (const ScreenBox *box, int columns, int rows) {
-  if ((box->left >= 0))
-    if ((box->width > 0))
-      if (((box->left + box->width) <= columns))
-        if ((box->top >= 0))
-          if ((box->height > 0))
-            if (((box->top + box->height) <= rows))
-              return 1;
-
-  logMessage(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
-             columns, box->left, box->width,
-             rows, box->top, box->height);
-  return 0;
-}
-
 void
 setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count) {
   while (count > 0) {
@@ -202,34 +188,19 @@ clearScreenCharacters (ScreenCharacter *characters, size_t count) {
   setScreenCharacterAttributes(characters, SCR_COLOUR_DEFAULT, count);
 }
 
-void
-setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message) {
-  const ScreenCharacter *end = buffer + box->width;
-  unsigned int index = 0;
-  size_t length = strlen(message);
-  mbstate_t state;
-
-  memset(&state, 0, sizeof(state));
-  clearScreenCharacters(buffer, (box->width * box->height));
-
-  while (length) {
-    wchar_t wc;
-    size_t result = mbrtowc(&wc, message, length, &state);
-    if ((ssize_t)result < 1) break;
-
-    message += result;
-    length -= result;
-
-    if (index++ >= box->left) {
-      if (buffer == end) break;
-      (buffer++)->text = wc;
-    }
-  }
-}
-
 size_t
 formatScreenTitle (char *buffer, size_t size) {
   return currentScreen->formatTitle(buffer, size);
+}
+
+int
+pollScreen (void) {
+  return currentScreen->poll();
+}
+
+int
+refreshScreen (void) {
+  return currentScreen->refresh();
 }
 
 void

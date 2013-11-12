@@ -803,7 +803,7 @@ handleNavigationCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_PASTE:
-      if (isLiveScreen() && !isRouting()) {
+      if (isMainScreen() && !isRouting()) {
         if (cpbPaste()) break;
       }
       playTune(&tune_command_rejected);
@@ -892,7 +892,7 @@ handleNavigationCommand (int command, void *datga) {
     case BRL_CMD_FREEZE: {
       unsigned char setting;
 
-      if (isLiveScreen()) {
+      if (isMainScreen()) {
         setting = 0;
       } else if (isFrozenScreen()) {
         setting = 1;

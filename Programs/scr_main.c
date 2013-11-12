@@ -20,8 +20,14 @@
 
 #include <stdio.h>
 
+#include "update.h"
 #include "scr.h"
 #include "scr_main.h"
+
+static int
+poll_MainScreen (void) {
+  return 1;
+}
 
 static int
 processParameters_MainScreen (char **parameters) {
@@ -49,6 +55,7 @@ userVirtualTerminal_MainScreen (int number) {
 void
 initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
+  main->base.poll = poll_MainScreen;
 
   main->processParameters = processParameters_MainScreen;
   main->releaseParameters = releaseParameters_MainScreen;
@@ -57,4 +64,9 @@ initializeMainScreen (MainScreen *main) {
   main->destruct = destruct_MainScreen;
 
   main->userVirtualTerminal = userVirtualTerminal_MainScreen;
+}
+
+void
+mainScreenUpdated (void) {
+  if (isMainScreen()) scheduleUpdate();
 }

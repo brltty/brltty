@@ -30,6 +30,7 @@
 #include <linux/kd.h>
 
 #include "log.h"
+#include "async_io.h"
 #include "device.h"
 #include "io_misc.h"
 #include "parse.h"
@@ -371,15 +372,28 @@ openConsole (unsigned char vt) {
 
 static const char *screenName = NULL;
 static int screenDescriptor;
-static int isMonitorable;
 static unsigned char virtualTerminal;
+
+static AsyncHandle screenMonitor;
+static int screenUpdated;
+static unsigned char *cacheBuffer;
+static size_t cacheSize;
+
+typedef struct {
+  unsigned char rows;
+  unsigned char columns;
+} ScreenSize;
+
+typedef struct {
+  unsigned char column;
+  unsigned char row;
+} ScreenLocation;
 
 #ifdef HAVE_SYS_POLL_H
 #include <poll.h>
 
-
 static int
-canMonitor (void) {
+canMonitorScreen (void) {
   struct pollfd pollDescriptor = {
     .fd = screenDescriptor,
     .events = POLLPRI
@@ -390,10 +404,37 @@ canMonitor (void) {
 
 #else /* can poll */
 static int
-canMonitor (void) {
+canMonitorScreen (void) {
   return 0;
 }
 #endif /* can poll */
+
+static size_t
+readScreenDevice (off_t offset, void *buffer, size_t size) {
+  if (lseek(screenDescriptor, offset, SEEK_SET) != -1) {
+    ssize_t count = read(screenDescriptor, buffer, size);
+
+    if (count != -1) {
+      return count;
+    } else {
+      logSystemError("screen read");
+    }
+  } else {
+    logSystemError("screen seek");
+  }
+
+  return 0;
+}
+
+static int
+handleScreenAlert (const AsyncMonitorCallbackParameters *parameters) {
+  char buffer[1];
+
+  readScreenDevice(0, buffer, sizeof(buffer));
+  screenUpdated = 1;
+  mainScreenUpdated();
+  return 1;
+}
 
 static int
 setScreenName (void) {
@@ -403,6 +444,11 @@ setScreenName (void) {
 
 static void
 closeScreen (void) {
+  if (screenMonitor) {
+    asyncCancelRequest(screenMonitor);
+    screenMonitor = NULL;
+  }
+
   if (screenDescriptor != -1) {
     if (close(screenDescriptor) == -1) {
       logSystemError("screen close");
@@ -428,8 +474,15 @@ openScreen (unsigned char vt) {
         closeScreen();
         screenDescriptor = screen;
         virtualTerminal = vt;
-        isMonitorable = canMonitor();
         opened = 1;
+
+        if (!canMonitorScreen()) {
+          screenMonitor = NULL;
+        } else if (!asyncMonitorFileAlert(&screenMonitor, screenDescriptor, handleScreenAlert, NULL)) {
+          screenMonitor = NULL;
+        } else {
+          screenUpdated = 1;
+        }
       } else {
         close(screen);
         logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
@@ -442,39 +495,35 @@ openScreen (unsigned char vt) {
   return opened;
 }
 
-static int
-readScreenData (off_t offset, void *buffer, size_t size) {
-  if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
-    logSystemError("screen seek");
-  } else {
-    ssize_t count = read(screenDescriptor, buffer, size);
-    if (count == size) return 1;
+static size_t
+readScreenCache (off_t offset, void *buffer, size_t size) {
+  if (offset <= cacheSize) {
+    size_t left = cacheSize - offset;
 
-    if (count == -1) {
-      logSystemError("screen read");
-    } else {
-      logMessage(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
-                 (unsigned int)size, (int)count);
-    }
+    if (size > left) size = left;
+    memcpy(buffer, &cacheBuffer[offset], size);
+    return size;
+  } else {
+    logMessage(LOG_ERR, "invalid screen cache offset: %u", (unsigned int)offset);
   }
 
   return 0;
 }
 
-typedef struct {
-  unsigned char rows;
-  unsigned char columns;
-} ScreenSize;
+static int
+readScreenData (off_t offset, void *buffer, size_t size) {
+  size_t count = (cacheBuffer? readScreenCache: readScreenDevice)(offset, buffer, size);
+  if (count == size) return 1;
+
+  logMessage(LOG_ERR, "truncated screen data: expected %u bytes but read %d",
+             (unsigned int)size, (int)count);
+  return 0;
+}
 
 static int
 readScreenSize (ScreenSize *size) {
   return readScreenData(0, size, sizeof(*size));
 }
-
-typedef struct {
-  unsigned char column;
-  unsigned char row;
-} ScreenLocation;
 
 static int
 readCursorLocation (ScreenLocation *location) {
@@ -953,6 +1002,15 @@ static int at2Pressed;
 static int currentConsoleNumber;
 static int
 construct_LinuxScreen (void) {
+  screenUpdated = 0;
+  cacheBuffer = NULL;
+  cacheSize = 0;
+
+#ifdef HAVE_LINUX_INPUT_H
+  at2Keys = at2KeysOriginal;
+  at2Pressed = 1;
+#endif /* HAVE_LINUX_INPUT_H */
+
   if (setScreenName()) {
     screenDescriptor = -1;
 
@@ -983,6 +1041,12 @@ destruct_LinuxScreen (void) {
   }
   screenFontMapSize = 0;
   screenFontMapCount = 0;
+
+  if (cacheBuffer) {
+    free(cacheBuffer);
+    cacheBuffer = NULL;
+  }
+  cacheSize = 0;
 }
 
 static int
@@ -1036,6 +1100,70 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   }
 
   return 0;
+}
+
+static int
+poll_LinuxScreen (void) {
+  return !screenMonitor;
+}
+
+static size_t
+toScreenCacheSize (const ScreenSize *screenSize) {
+  return (screenSize->columns * screenSize->rows * 2) + 4;
+}
+
+static int
+refresh_LinuxScreen (void) {
+  if (!screenUpdated) return 1;
+
+  if (!cacheBuffer) {
+    ScreenSize screenSize;
+    if (!readScreenDevice(0, &screenSize, sizeof(screenSize))) return 0;
+
+    {
+      size_t size = toScreenCacheSize(&screenSize);
+      unsigned char *buffer = malloc(size);
+
+      if (!buffer) {
+        logMallocError();
+        return 0;
+      }
+
+      cacheBuffer = buffer;
+      cacheSize = size;
+    }
+  }
+
+  while (1) {
+    size_t count = readScreenDevice(0, cacheBuffer, cacheSize);
+
+    if (count < 4) {
+      logMessage(LOG_ERR, "truncated screen header");
+      return 0;
+    }
+
+    {
+      ScreenSize *screenSize = (void *)cacheBuffer;
+      size_t size = toScreenCacheSize(screenSize);
+
+      if (count >= size) {
+        screenUpdated = 0;
+        return 1;
+      }
+
+      {
+        unsigned char *buffer = realloc(cacheBuffer, size);
+
+        if (!buffer) {
+          logMallocError();
+          return 0;
+        }
+
+        cacheBuffer = buffer;
+        cacheSize = size;
+      }
+    }
+  }
 }
 
 static int
@@ -1943,6 +2071,8 @@ static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
 
+  main->base.poll = poll_LinuxScreen;
+  main->base.refresh = refresh_LinuxScreen;
   main->base.describe = describe_LinuxScreen;
   main->base.readCharacters = readCharacters_LinuxScreen;
   main->base.insertKey = insertKey_LinuxScreen;
@@ -1958,9 +2088,4 @@ scr_initialize (MainScreen *main) {
   main->construct = construct_LinuxScreen;
   main->destruct = destruct_LinuxScreen;
   main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;
-
-#ifdef HAVE_LINUX_INPUT_H
-  at2Keys = at2KeysOriginal;
-  at2Pressed = 1;
-#endif /* HAVE_LINUX_INPUT_H */
 }

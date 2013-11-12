@@ -47,6 +47,8 @@ struct ScreenDriverStruct {
   void (*initialize) (MainScreen *main);		/* initialize speech device */
 };
 
+extern void mainScreenUpdated (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

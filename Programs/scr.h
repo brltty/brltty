@@ -28,9 +28,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
-extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message);
-
 extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
 extern void setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count);
 extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
@@ -39,7 +36,7 @@ extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned 
 extern void constructSpecialScreens (void);
 extern void destructSpecialScreens (void);
 
-extern int isLiveScreen (void);
+extern int isMainScreen (void);
 
 extern int isHelpScreen (void);
 extern int haveHelpScreen (void);
@@ -58,6 +55,8 @@ extern void deactivateFrozenScreen (void);
 
 /* Routines which apply to the current screen. */
 extern size_t formatScreenTitle (char *buffer, size_t size);
+extern int pollScreen (void);
+extern int refreshScreen (void);
 extern void describeScreen (ScreenDescription *);		/* get screen status */
 extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
