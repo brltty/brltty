@@ -918,5 +918,8 @@ suspendUpdates (void) {
 
 void
 resumeUpdates (void) {
-  if (!--updateSuspendCount) setUpdateAlarm(NULL);
+  if (!--updateSuspendCount) {
+    setUpdateAlarm(NULL);
+    scheduleUpdate();
+  }
 }
