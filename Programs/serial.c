@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "parse.h"
 #include "device.h"
 #include "async_wait.h"
@@ -795,7 +796,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
         return 0;
   }
 
-  asyncWait(500);
+  asyncWait(SERIAL_DEVICE_RESTART_DELAY);
   if (!serialDiscardInput(serial)) return 0;
 
   if (!usingB0)

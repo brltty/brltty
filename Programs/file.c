@@ -34,6 +34,7 @@
 #include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
 
+#include "parameters.h"
 #include "file.h"
 #include "log.h"
 #include "parse.h"
@@ -621,7 +622,7 @@ modifyFileLock (int file, int mode) {
         }
 
         if (!wait) break;
-        asyncWait(1000);
+        asyncWait(WINDOWS_FILE_LOCK_RETRY_INTERVAL);
       }
 
       if (lseek(file, offset, SEEK_SET) == -1) {

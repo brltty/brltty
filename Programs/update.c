@@ -877,12 +877,12 @@ scheduleUpdateIn (int delay) {
 
 void
 scheduleUpdate (void) {
-  scheduleUpdateIn(UPDATE_SCHEDULE_DELAY);
+  scheduleUpdateIn(SCREEN_UPDATE_SCHEDULE_DELAY);
 }
 
 static void
 handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  setUpdateTime((pollScreen()? UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
+  setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 

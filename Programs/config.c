@@ -1183,7 +1183,7 @@ activateBrailleDriver (int verify) {
         };
         autodetectableDrivers = usbDrivers;
       } else if (isBluetoothDevice(&dev)) {
-        if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_NAME_TIMEOUT))) {
+        if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_TIMEOUT))) {
           static const char *bluetoothDrivers[] = {
             "np", "ht", "al", "bm",
             NULL

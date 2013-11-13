@@ -29,6 +29,7 @@
 #endif /* HAVE_REGEX_H */
 
 #include "log.h"
+#include "parameters.h"
 #include "parse.h"
 #include "device.h"
 #include "timing.h"
@@ -803,7 +804,7 @@ usbAwaitInput (
   int timeout
 ) {
   UsbEndpoint *endpoint;
-  int interval;
+  int retryInterval;
 
   if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) return 0;
   if (endpoint->direction.input.completed) return 1;
@@ -813,8 +814,8 @@ usbAwaitInput (
     return 0;
   }
 
-  interval = endpoint->descriptor->bInterval;
-  interval = MAX(20, interval);
+  retryInterval = endpoint->descriptor->bInterval;
+  retryInterval = MAX(USB_INPUT_RETRY_INTERVAL_MINIMUM, retryInterval);
 
   if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
     int size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
@@ -844,7 +845,7 @@ usbAwaitInput (
 
         if (errno != EAGAIN) break;
         if (afterTimePeriod(&period, NULL)) break;
-        asyncWait(interval);
+        asyncWait(retryInterval);
       }
 
       free(buffer);
@@ -868,7 +869,7 @@ usbAwaitInput (
                                          &response, 0))) {
         if (errno != EAGAIN) return 0;
         if (afterTimePeriod(&period, NULL)) return 0;
-        asyncWait(interval);
+        asyncWait(retryInterval);
       }
 
       usbAddPendingInputRequest(endpoint);

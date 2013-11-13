@@ -95,7 +95,7 @@ handlePollAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(pollAlarm);
   pollAlarm = NULL;
 
-  setPollAlarm((handleInput()? 0: INPUT_POLL_INTERVAL), parameters->data);
+  setPollAlarm((handleInput()? 0: BRAILLE_INPUT_POLL_INTERVAL), parameters->data);
 }
 
 static void

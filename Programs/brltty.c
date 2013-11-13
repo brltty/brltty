@@ -42,6 +42,7 @@
 
 #include "embed.h"
 #include "log.h"
+#include "parameters.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_speech.h"
@@ -984,7 +985,7 @@ toggleBit (
     playTune(tune);
     if (*bits != oldBits) return isOn? TOGGLE_ON: TOGGLE_OFF;
 
-    asyncWait(100);
+    asyncWait(TUNE_TOGGLE_REPEAT_DELAY);
     playTune(tune);
     return TOGGLE_SAME;
   }
