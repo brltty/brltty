@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "async_alarm.h"
 #include "program.h"
 #include "tunes.h"
@@ -357,7 +358,7 @@ exitTunes (void *data) {
  
 static int
 openTunes (void) {
-  const int timeout = 2000;
+  const int timeout = TUNE_DEVICE_CLOSE_DELAY;
 
   if (noteDevice) {
     asyncResetAlarmIn(tunesCloseTimer, timeout);
