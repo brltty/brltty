@@ -203,7 +203,7 @@ void
 bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   memset(request, 0, sizeof(*request));
   request->identifier = NULL;
-  request->timeout = BLUETOOTH_CONNECTION_TIMEOUT;
+  request->timeout = BLUETOOTH_CONNECT_TIMEOUT;
   request->channel = 0;
   request->discover = 0;
 }
