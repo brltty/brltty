@@ -427,7 +427,7 @@ awaitMonitors (const MonitorGroup *monitors, int timeout) {
       if (exceptionSet) *exceptionSet = exceptionSet1;
       return 1;
     }
-  } while ((elapsed += tsr_usleep(1000)) < timeout);
+  } while ((elapsed += tsr_usleep(USECS_PER_MSEC)) < timeout);
 #else /* __MSDOS__ */
   if (doSelect(setSize, readSet, writeSet, exceptionSet, timeout)) return 1;
 #endif /* __MSDOS__ */

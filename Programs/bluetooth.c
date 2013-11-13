@@ -172,7 +172,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
 
         if (!alreadyTried) {
           TimePeriod period;
-          startTimePeriod(&period, 2000);
+          startTimePeriod(&period, BLUETOOTH_BUSY_DEVICE_RETRY_TIMEOUT);
 
           while (1) {
             if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
@@ -181,7 +181,7 @@ bthNewConnection (const char *address, uint8_t channel, int discover, int timeou
 
             if (afterTimePeriod(&period, NULL)) break;
             if (errno != EBUSY) break;
-            asyncWait(100);
+            asyncWait(BLUETOOTH_BUSY_DEVICE_RETRY_INTERVAL);
           }
 
           bthRememberConnectError(connection->address, errno);

@@ -50,6 +50,7 @@
 #endif /* NS_BTH */
 
 #include "log.h"
+#include "timing.h"
 #include "bitfield.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
@@ -296,8 +297,8 @@ bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   FD_SET(bcx->socket, &input);
 
   memset(&timeout, 0, sizeof(timeout));
-  timeout.tv_sec = milliseconds / 1000;
-  timeout.tv_usec = (milliseconds % 1000) * 1000;
+  timeout.tv_sec = milliseconds / MSECS_PER_SEC;
+  timeout.tv_usec = (milliseconds % MSECS_PER_SEC) * USECS_PER_MSEC;
 
   switch (select(bcx->socket+1, &input, NULL, NULL, &timeout)) {
     case SOCKET_ERROR:
