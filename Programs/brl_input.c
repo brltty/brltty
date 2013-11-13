@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "brl_input.h"
 #include "cmd_queue.h"
 #include "async_alarm.h"
@@ -94,7 +95,7 @@ handlePollAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(pollAlarm);
   pollAlarm = NULL;
 
-  setPollAlarm((handleInput()? 0: 40), parameters->data);
+  setPollAlarm((handleInput()? 0: INPUT_POLL_INTERVAL), parameters->data);
 }
 
 static void

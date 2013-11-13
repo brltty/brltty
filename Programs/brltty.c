@@ -58,15 +58,12 @@
 #include "scancodes.h"
 #include "brl.h"
 #include "prefs.h"
-#include "defaults.h"
 #include "api_control.h"
 #include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
-
-int messageDelay = DEFAULT_MESSAGE_DELAY;
 
 static volatile unsigned int terminationCount;
 static volatile time_t terminationTime;

@@ -23,7 +23,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define INPUT_POLL_INTERVAL 40
+
+#define LEARN_MODE_TIMEOUT 10000
+
+#define MESSAGE_HOLD_TIME 4000
+
 #define UPDATE_POLL_INTERVAL 40
+#define UPDATE_SCHEDULE_DELAY 10
 
 #ifdef __cplusplus
 }

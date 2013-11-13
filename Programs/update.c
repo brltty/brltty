@@ -877,7 +877,7 @@ scheduleUpdateIn (int delay) {
 
 void
 scheduleUpdate (void) {
-  scheduleUpdateIn(10);
+  scheduleUpdateIn(UPDATE_SCHEDULE_DELAY);
 }
 
 static void

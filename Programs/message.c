@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "message.h"
+#include "defaults.h"
 #include "async_task.h"
 #include "async_wait.h"
 #include "charset.h"
@@ -30,6 +31,8 @@
 #include "cmd_queue.h"
 #include "api_control.h"
 #include "brltty.h"
+
+int messageHoldTime = DEFAULT_MESSAGE_HOLD_TIME;
 
 typedef struct {
   unsigned endWait:1;
@@ -120,7 +123,7 @@ presentMessage (void *data) {
       }
 
       {
-        int delay = messageDelay - brl.writeDelay;
+        int delay = messageHoldTime - brl.writeDelay;
 
         mgd.endWait = 0;
         drainBrailleOutput(&brl, 0);

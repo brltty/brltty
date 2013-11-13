@@ -97,7 +97,7 @@ static char *opt_logLevel;
 static char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
-static char *opt_messageDelay;
+static char *opt_messageHoldTime;
 
 static int opt_cancelExecution;
 static const char *const optionStrings_CancelExecution[] = {
@@ -459,7 +459,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "message-delay",
     .flags = OPT_Hidden,
     .argument = strtext("csecs"),
-    .setting.string = &opt_messageDelay,
+    .setting.string = &opt_messageHoldTime,
     .description = strtext("Message hold time [400].")
   },
 
@@ -1919,8 +1919,8 @@ brlttyStart (int argc, char *argv[]) {
     return exitStatus;
   }
 
-  if (!validateInterval(&messageDelay, opt_messageDelay)) {
-    logMessage(LOG_ERR, "%s: %s", gettext("invalid message delay"), opt_messageDelay);
+  if (!validateInterval(&messageHoldTime, opt_messageHoldTime)) {
+    logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold time"), opt_messageHoldTime);
   }
 
   /* Set logging levels. */

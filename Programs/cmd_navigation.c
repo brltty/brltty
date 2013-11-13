@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "cmd_navigation.h"
 #include "cmd_learn.h"
 #include "parse.h"
@@ -1040,7 +1041,7 @@ handleNavigationCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_LEARN:
-      if (!learnMode(10000)) restartRequired = 1;
+      if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
       break;
 
     case BRL_CMD_SWITCHVT_PREV:
