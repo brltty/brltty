@@ -45,6 +45,7 @@
 #elif defined(HAVE_PKG_XAW3D)
 #define USE_XAW
 #define USE_XT
+#define XAW_INTERNATIONALIZATION
 #include <X11/Intrinsic.h>
 #include <X11/Xaw3d/Form.h>
 #include <X11/Xaw3d/Paned.h>
