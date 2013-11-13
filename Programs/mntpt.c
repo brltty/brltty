@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "mntfs.h"
 #include "async_alarm.h"
 #include "mntpt.h"
@@ -91,7 +92,7 @@ updateMountsTable (MountEntry *entry) {
   }
 
   if (retry) {
-    asyncSetAlarmIn(NULL, 5000, retryMountsTableUpdate, entry);
+    asyncSetAlarmIn(NULL, MOUNT_TABLE_UPDATE_RETRY_INTERVAL, retryMountsTableUpdate, entry);
   } else {
     if (entry->mountPath) free(entry->mountPath);
     if (entry->mountReference) free(entry->mountReference);

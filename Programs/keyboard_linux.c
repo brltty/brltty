@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "system_linux.h"
 
 #include "keyboard.h"
@@ -709,7 +710,7 @@ handleKobjectUeventString (const AsyncInputCallbackParameters *parameters) {
                       if ((idd->name = strdup(eventDevice))) {
                         idd->kcd = parameters->data;
 
-                        if (asyncSetAlarmIn(NULL, 1000, doOpenInputDevice, idd)) {
+                        if (asyncSetAlarmIn(NULL, LINUX_INPUT_DEVICE_OPEN_DELAY, doOpenInputDevice, idd)) {
                           claimKeyboardCommonData(idd->kcd);
                           close(descriptor);
                           break;

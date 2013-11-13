@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "timing.h"
 #include "async_wait.h"
 #include "parse.h"
@@ -202,7 +203,7 @@ void
 bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   memset(request, 0, sizeof(*request));
   request->identifier = NULL;
-  request->timeout = 15000;
+  request->timeout = BLUETOOTH_CONNECTION_TIMEOUT;
   request->channel = 0;
   request->discover = 0;
 }
@@ -278,7 +279,7 @@ bthProcessTimeoutParameter (BluetoothConnectionRequest *request, const char *par
 
   if (isInteger(&seconds, parameter)) {
     if ((seconds > 0) && (seconds < 60)) {
-      request->timeout = seconds * 1000;
+      request->timeout = seconds * MSECS_PER_SEC;
       return 1;
     }
   }

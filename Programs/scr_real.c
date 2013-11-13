@@ -29,6 +29,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "log.h"
+#include "parameters.h"
 #include "device.h"
 #include "async_alarm.h"
 #include "scr.h"
@@ -70,7 +71,7 @@ gpmOpenConnection (void) {
 
       if (Gpm_Open(&options, -1) == -1) {
         logMessage(GPM_LOG_LEVEL, "GPM open error: %s", strerror(errno));
-        asyncSetAlarmIn(NULL, 5000, gpmResetConnection, NULL);
+        asyncSetAlarmIn(NULL, GPM_CONNECTION_RESET_INTERVAL, gpmResetConnection, NULL);
         gpmConnectionState = GCS_FAILED;
         return 0;
       }

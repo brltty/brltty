@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include "parameters.h"
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
@@ -717,7 +718,7 @@ retryKeyboardMonitor (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
   if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
-    scheduleKeyboardMonitor(5000);
+    scheduleKeyboardMonitor(KEYBOARD_MONITOR_RETRY_INTERVAL);
   }
 }
 
@@ -1182,7 +1183,7 @@ activateBrailleDriver (int verify) {
         };
         autodetectableDrivers = usbDrivers;
       } else if (isBluetoothDevice(&dev)) {
-        if (!(autodetectableDrivers = bthGetDriverCodes(dev, 5000))) {
+        if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_NAME_TIMEOUT))) {
           static const char *bluetoothDrivers[] = {
             "np", "ht", "al", "bm",
             NULL
@@ -1280,7 +1281,7 @@ retryBrailleDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
-  asyncSetAlarmIn(NULL, 5000, retryBrailleDriver, NULL);
+  asyncSetAlarmIn(NULL, BRAILLE_DRIVER_RETRY_INTERVAL, retryBrailleDriver, NULL);
   initializeBraille();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
@@ -1494,7 +1495,7 @@ retrySpeechDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 trySpeechDriver (void) {
   if (startSpeechDriver()) return 1;
-  asyncSetAlarmIn(NULL, 5000, retrySpeechDriver, NULL);
+  asyncSetAlarmIn(NULL, SPEECH_DRIVER_RETRY_INTERVAL, retrySpeechDriver, NULL);
   return 0;
 }
 
@@ -1642,7 +1643,7 @@ retryScreenDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 tryScreenDriver (void) {
   if (startScreenDriver()) return 1;
-  asyncSetAlarmIn(NULL, 5000, retryScreenDriver, NULL);
+  asyncSetAlarmIn(NULL, SCREEN_DRIVER_RETRY_INTERVAL, retryScreenDriver, NULL);
   initializeScreen();
   return 0;
 }
@@ -1691,7 +1692,7 @@ tryPidFile (void) {
   } else if (errno == EEXIST) {
     return 0;
   } else {
-    asyncSetAlarmIn(NULL, 5000, retryPidFile, NULL);
+    asyncSetAlarmIn(NULL, PID_FILE_RETRY_INTERVAL, retryPidFile, NULL);
   }
 
   return 1;
