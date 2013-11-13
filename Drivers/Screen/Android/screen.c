@@ -68,7 +68,6 @@ poll_AndroidScreen (void) {
 JAVA_METHOD (
   org_a11y_brltty_android_ScreenDriver, screenUpdated, void
 ) {
-logMessage(LOG_DEBUG, "scrdrv linux updated");
   mainScreenUpdated();
 }
 
