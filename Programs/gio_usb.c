@@ -317,11 +317,13 @@ connectUsbResource (
       if (!GIO_USB_INPUT_DISABLE_MONITORING) {
 #ifdef HAVE_POSIX_THREADS
         if (createAnonymousPipe(&handle->inputPipeInput, &handle->inputPipeOutput)) {
-          int error = pthread_create(&handle->inputThread, NULL, runInputThread, handle);
+          if (setBlockingIo(handle->inputPipeOutput, 0)) {
+            int error = pthread_create(&handle->inputThread, NULL, runInputThread, handle);
 
-          if (error) {
-            logActionError(error, "pthread_create");
-            destroyInputPipe(handle);
+            if (error) {
+              logActionError(error, "pthread_create");
+              destroyInputPipe(handle);
+            }
           }
         }
 #endif /* HAVE_POSIX_THREADS */

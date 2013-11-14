@@ -904,7 +904,8 @@ usbReadData (
 
     while (length > 0) {
       int timeout = (target != bytes)? subsequentTimeout:
-                    initialTimeout? initialTimeout: 20;
+                    initialTimeout? initialTimeout:
+                    USB_INPUT_ENDPOINT_READ_INTERVAL_DEFAULT;
 
       if (!usbAwaitInput(device, endpointNumber, timeout)) {
         if (errno == EAGAIN) break;
@@ -1030,7 +1031,7 @@ usbChooseChannel (UsbDevice *device, void *data) {
                   }
 
                   if (endpoint->direction.input.asynchronous) {
-                    usbBeginInput(device, definition->inputEndpoint, 8);
+                    usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
                   }
                 }
               }

@@ -606,7 +606,7 @@ usbInterruptTransfer (
 
   if (urb) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    int interval = endpoint->descriptor->bInterval + 1;
+    int retryInterval = endpoint->descriptor->bInterval + 1;
     TimePeriod period;
 
     if (timeout) startTimePeriod(&period, timeout);
@@ -626,7 +626,7 @@ usbInterruptTransfer (
         break;
       }
 
-      asyncWait(interval);
+      asyncWait(retryInterval);
     } while (1);
   }
 
