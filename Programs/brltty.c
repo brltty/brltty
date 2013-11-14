@@ -799,8 +799,7 @@ sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, s
   void *text = makeUtf8FromWchars(characters, count, &length);
 
   if (text) {
-    if (immediate) speech->mute(&spk);
-    speech->say(&spk, text, length, count, attributes);
+    sayText(&spk, text, attributes, length, count, immediate);
     free(text);
   } else {
     logMallocError();

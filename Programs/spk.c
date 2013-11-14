@@ -38,36 +38,21 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
 }
 
 void
-sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute) {
+sayText (
+  SpeechSynthesizer *spk,
+  const char *text, const unsigned char *attributes,
+  size_t length, size_t count,
+  int immediate
+) {
   if (count) {
-    unsigned char bytes[(count * UTF8_LEN_MAX) + 1];
-    unsigned char *b = bytes;
-
-    {
-      int i;
-      for (i=0; i<count; i+=1) {
-        Utf8Buffer utf8;
-        size_t utfs = convertCharToUtf8(characters[i], utf8);
-
-        if (utfs) {
-          memcpy(b, utf8, utfs);
-          b += utfs;
-        } else {
-          *b++ = ' ';
-        }
-      }
-
-      *b = 0;
-    }
-
-    if (mute) speech->mute(spk);
-    speech->say(spk, bytes, b-bytes, count, NULL);
+    if (immediate) speech->mute(spk);
+    speech->say(spk, (const unsigned char *)text, length, count, attributes);
   }
 }
 
 void
-sayString (SpeechSynthesizer *spk, const char *string, int mute) {
-  sayCharacters(spk, string, strlen(string), mute);
+sayString (SpeechSynthesizer *spk, const char *string, int immediate) {
+  sayText(spk, string, NULL, strlen(string), getTextLength(string), immediate);
 }
 
 static void

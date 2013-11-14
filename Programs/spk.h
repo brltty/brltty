@@ -34,8 +34,14 @@ typedef struct {
 
 extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 
-extern void sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute);
-extern void sayString (SpeechSynthesizer *spk, const char *string, int mute);
+extern void sayText (
+  SpeechSynthesizer *spk,
+  const char *text, const unsigned char *attributes,
+  size_t length, size_t count,
+  int immediate
+);
+
+extern void sayString (SpeechSynthesizer *spk, const char *string, int immediate);
 
 extern int setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);

@@ -98,8 +98,11 @@ handleInput (const AsyncInputCallbackParameters *parameters) {
   } else {
     const char *buffer = parameters->buffer;
     size_t length = parameters->length;
+    char string[length + 1];
 
-    sayCharacters(&spk, buffer, length, 0);
+    memcpy(string, buffer, length);
+    string[length] = 0;
+    sayString(&spk, string, 0);
     return length;
   }
 
