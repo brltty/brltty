@@ -30,6 +30,7 @@
 #endif /* HAVE_POSIX_THREADS */
 
 #include "log.h"
+#include "parameters.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_usb.h"
@@ -57,7 +58,7 @@ runInputThread (void *argument) {
   while (1) {
     unsigned char buffer[0X1000];
     ssize_t result = usbReadEndpoint(channel->device, channel->definition.inputEndpoint,
-                                     buffer, sizeof(buffer), 10000);
+                                     buffer, sizeof(buffer), GIO_USB_INPUT_MONITOR_TIMEOUT);
 
     if (result == -1) {
       if (errno == EAGAIN) continue;
@@ -313,17 +314,18 @@ connectUsbResource (
     handle->inputPipeOutput = INVALID_FILE_DESCRIPTOR;
 
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
-return handle;
+      if (!GIO_USB_INPUT_DISABLE_MONITORING) {
 #ifdef HAVE_POSIX_THREADS
-      if (createAnonymousPipe(&handle->inputPipeInput, &handle->inputPipeOutput)) {
-        int error = pthread_create(&handle->inputThread, NULL, runInputThread, handle);
+        if (createAnonymousPipe(&handle->inputPipeInput, &handle->inputPipeOutput)) {
+          int error = pthread_create(&handle->inputThread, NULL, runInputThread, handle);
 
-        if (error) {
-          logActionError(error, "pthread_create");
-          destroyInputPipe(handle);
+          if (error) {
+            logActionError(error, "pthread_create");
+            destroyInputPipe(handle);
+          }
         }
-      }
 #endif /* HAVE_POSIX_THREADS */
+      }
 
       return handle;
     }

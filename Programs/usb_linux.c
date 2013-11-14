@@ -38,6 +38,7 @@
 #endif /* USBDEVFS_CONNECT */
 
 #include "log.h"
+#include "parameters.h"
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
@@ -595,7 +596,7 @@ static struct usbdevfs_urb *
 usbInterruptTransfer (
   UsbEndpoint *endpoint,
   void *buffer,
-  int length,
+  size_t length,
   int timeout
 ) {
   UsbDevice *device = endpoint->device;
@@ -646,21 +647,23 @@ usbReadEndpoint (
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
     switch (transfer) {
+      case UsbEndpointTransfer_Interrupt:
+        if (!LINUX_USB_INPUT_TREAT_INTERRUPT_AS_BULK) {
+          struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, NULL, length, timeout);
+
+          if (urb) {
+            count = urb->actual_length;
+            if (count > length) count = length;
+            memcpy(buffer, urb->buffer, count);
+            free(urb);
+          }
+
+          break;
+        }
+
       case UsbEndpointTransfer_Bulk:
         count = usbBulkTransfer(endpoint, buffer, length, timeout);
         break;
-
-      case UsbEndpointTransfer_Interrupt: {
-        struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, NULL, length, timeout);
-
-        if (urb) {
-          count = urb->actual_length;
-          if (count > length) count = length;
-          memcpy(buffer, urb->buffer, count);
-          free(urb);
-        }
-        break;
-      }
 
       default:
         logMessage(LOG_ERR, "USB input transfer not supported: %d", transfer);
