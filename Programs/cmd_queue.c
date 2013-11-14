@@ -208,7 +208,6 @@ setCommandAlarm (void *data) {
 
       if (queue && (getQueueSize(queue) > 0)) {
         asyncSetAlarmIn(&commandAlarm, 0, handleCommandAlarm, data);
-        logMessage(LOG_LEVEL, "set command alarm");
       }
     }
   }
@@ -219,7 +218,6 @@ cancelCommandAlarm (void) {
   if (commandAlarm) {
     asyncCancelRequest(commandAlarm);
     commandAlarm = NULL;
-    logMessage(LOG_LEVEL, "cancelled command alarm");
   }
 }
 
