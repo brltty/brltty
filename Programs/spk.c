@@ -73,7 +73,7 @@ setSpeechTrackingAlarm (void *data) {
 }
 
 void
-sayText (
+sayUtf8Characters (
   SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
@@ -88,7 +88,7 @@ sayText (
 
 void
 sayString (SpeechSynthesizer *spk, const char *string, int immediate) {
-  sayText(spk, string, NULL, strlen(string), getTextLength(string), immediate);
+  sayUtf8Characters(spk, string, NULL, strlen(string), getTextLength(string), immediate);
 }
 
 static void

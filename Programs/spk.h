@@ -34,7 +34,7 @@ typedef struct {
 
 extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 
-extern void sayText (
+extern void sayUtf8Characters (
   SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
