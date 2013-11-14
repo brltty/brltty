@@ -805,7 +805,7 @@ getNamedPipeDirectory (void) {
 }
 
 int
-createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
+createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
   SECURITY_ATTRIBUTES attributes;
 
   ZeroMemory(&attributes, sizeof(attributes));
@@ -813,7 +813,7 @@ createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDesc
   attributes.bInheritHandle = TRUE;
   attributes.lpSecurityDescriptor = NULL;
 
-  if (CreatePipe(outputDescriptor, inputDescriptor, &attributes, 0)) {
+  if (CreatePipe(pipeOutput, pipeInput, &attributes, 0)) {
     return 1;
   } else {
     logWindowsSystemError("CreatePipe");
@@ -839,12 +839,12 @@ getNamedPipeDirectory (void) {
 }
 
 int
-createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor) {
+createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
   int fileDescriptors[2];
 
   if (pipe(fileDescriptors) != -1) {
-    *inputDescriptor = fileDescriptors[1];
-    *outputDescriptor = fileDescriptors[0];
+    *pipeInput = fileDescriptors[1];
+    *pipeOutput = fileDescriptors[0];
     return 1;
   } else {
     logSystemError("pipe");

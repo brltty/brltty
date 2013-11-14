@@ -76,7 +76,7 @@ extern ssize_t readSocketDescriptor (SocketDescriptor socketDescriptor, void *bu
 extern ssize_t writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size);
 
 extern const char *getNamedPipeDirectory (void);
-extern int createAnonymousPipe (FileDescriptor *inputDescriptor, FileDescriptor *outputDescriptor);
+extern int createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput);
 
 #ifdef __cplusplus
 }

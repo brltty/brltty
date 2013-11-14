@@ -21,14 +21,75 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef HAVE_POSIX_THREADS
+#ifdef __MINGW32__
+#include "win_pthread.h"
+#else /* __MINGW32__ */
+#include <pthread.h>
+#endif /* __MINGW32__ */
+#endif /* HAVE_POSIX_THREADS */
+
 #include "log.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_usb.h"
+#include "io_misc.h"
 
 struct GioHandleStruct {
   UsbChannel *channel;
+
+  FileDescriptor inputPipeInput;
+  FileDescriptor inputPipeOutput;
+
+#ifdef HAVE_POSIX_THREADS
+  pthread_t inputThread;
+#endif /* HAVE_POSIX_THREADS */
 };
+
+#ifdef HAVE_POSIX_THREADS
+#include "file.h"
+
+static void *
+runInputThread (void *argument) {
+  GioHandle *handle = argument;
+  UsbChannel *channel = handle->channel;
+
+  while (1) {
+    unsigned char buffer[0X1000];
+    ssize_t result = usbReadEndpoint(channel->device, channel->definition.inputEndpoint,
+                                     buffer, sizeof(buffer), 10000);
+
+    if (result == -1) {
+      if (errno == EAGAIN) continue;
+      if (errno == ETIMEDOUT) continue;
+
+      logSystemError("USB input thread read");
+      break;
+    }
+
+    if (result > 0) {
+      if (writeFile(handle->inputPipeInput, buffer, result) == -1) {
+        logSystemError("USB input thread write");
+        break;
+      }
+    }
+  }
+
+  logMessage(LOG_ERR, "USB input thread aborted");
+  return NULL;
+}
+#endif /* HAVE_POSIX_THREADS */
+
+static void
+destroyInputPipe (GioHandle *handle) {
+  closeFile(&handle->inputPipeInput);
+  closeFile(&handle->inputPipeOutput);
+}
+
+static int
+haveInputPipe (GioHandle *handle) {
+  return handle->inputPipeOutput != INVALID_FILE_DESCRIPTOR;
+}
 
 static int
 disconnectUsbResource (GioHandle *handle) {
@@ -70,11 +131,15 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
 
 static int
 awaitUsbInput (GioHandle *handle, int timeout) {
-  UsbChannel *channel = handle->channel;
+  if (haveInputPipe(handle)) {
+    return awaitFileInput(handle->inputPipeOutput, timeout);
+  } else {
+    UsbChannel *channel = handle->channel;
 
-  return usbAwaitInput(channel->device,
-                       channel->definition.inputEndpoint,
-                       timeout);
+    return usbAwaitInput(channel->device,
+                         channel->definition.inputEndpoint,
+                         timeout);
+  }
 }
 
 static ssize_t
@@ -82,10 +147,15 @@ readUsbData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  UsbChannel *channel = handle->channel;
+  if (haveInputPipe(handle)) {
+    return readFile(handle->inputPipeOutput, buffer, size,
+                    initialTimeout, subsequentTimeout);
+  } else {
+    UsbChannel *channel = handle->channel;
 
-  return usbReadData(channel->device, channel->definition.inputEndpoint,
-                     buffer, size, initialTimeout, subsequentTimeout);
+    return usbReadData(channel->device, channel->definition.inputEndpoint,
+                       buffer, size, initialTimeout, subsequentTimeout);
+  }
 }
 
 static int
@@ -239,7 +309,22 @@ connectUsbResource (
   if (handle) {
     memset(handle, 0, sizeof(*handle));
 
+    handle->inputPipeInput = INVALID_FILE_DESCRIPTOR;
+    handle->inputPipeOutput = INVALID_FILE_DESCRIPTOR;
+
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
+return handle;
+#ifdef HAVE_POSIX_THREADS
+      if (createAnonymousPipe(&handle->inputPipeInput, &handle->inputPipeOutput)) {
+        int error = pthread_create(&handle->inputThread, NULL, runInputThread, handle);
+
+        if (error) {
+          logActionError(error, "pthread_create");
+          destroyInputPipe(handle);
+        }
+      }
+#endif /* HAVE_POSIX_THREADS */
+
       return handle;
     }
 
