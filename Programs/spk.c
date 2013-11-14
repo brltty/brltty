@@ -54,12 +54,14 @@ handleSpeechTrackingAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(speechTrackingAlarm);
   speechTrackingAlarm = NULL;
 
-  speech->doTrack(spk);
+  if (speechTracking) {
+    speech->doTrack(spk);
 
-  if (speech->isSpeaking(spk)) {
-    setSpeechTrackingAlarm(parameters->data);
-  } else {
-    speechTracking = 0;
+    if (speech->isSpeaking(spk)) {
+      setSpeechTrackingAlarm(parameters->data);
+    } else {
+      speechTracking = 0;
+    }
   }
 }
 
