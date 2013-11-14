@@ -537,11 +537,6 @@ doUpdate (void) {
     }
   }
 
-#ifdef ENABLE_SPEECH_SUPPORT
-  speech->doTrack(&spk);
-  if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
   if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
     if (speechTracking && (scr.number == speechScreen)) {

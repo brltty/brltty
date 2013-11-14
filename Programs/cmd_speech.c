@@ -35,11 +35,10 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   ScreenCharacter characters[count];
 
   readScreen(left, top, width, height, characters);
-  sayScreenCharacters(characters, count, mode==sayImmediate);
-
   speechTracking = track;
   speechScreen = scr.number;
   speechLine = top;
+  sayScreenCharacters(characters, count, mode==sayImmediate);
 }
 
 static void

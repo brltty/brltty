@@ -92,6 +92,11 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
+extern int speechTracking;
+extern int speechScreen;
+extern int speechLine;
+extern int speechIndex;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

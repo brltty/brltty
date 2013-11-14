@@ -25,6 +25,8 @@
 #include <sys/stat.h>
 
 #include "log.h"
+#include "parameters.h"
+#include "async_alarm.h"
 #include "program.h"
 #include "file.h"
 #include "parse.h"
@@ -37,6 +39,37 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
   spk->data = NULL;
 }
 
+static void setSpeechTrackingAlarm (void *data);
+static AsyncHandle speechTrackingAlarm = NULL;
+
+int speechTracking = 0;
+int speechScreen = -1;
+int speechLine = 0;
+int speechIndex = -1;
+
+static void
+handleSpeechTrackingAlarm (const AsyncAlarmCallbackParameters *parameters) {
+  SpeechSynthesizer *spk = parameters->data;
+
+  asyncDiscardHandle(speechTrackingAlarm);
+  speechTrackingAlarm = NULL;
+
+  speech->doTrack(spk);
+
+  if (speech->isSpeaking(spk)) {
+    setSpeechTrackingAlarm(parameters->data);
+  } else {
+    speechTracking = 0;
+  }
+}
+
+static void
+setSpeechTrackingAlarm (void *data) {
+  if (!speechTrackingAlarm) {
+    asyncSetAlarmIn(&speechTrackingAlarm, SPEECH_TRACKING_POLL_INTERVAL, handleSpeechTrackingAlarm, data);
+  }
+}
+
 void
 sayText (
   SpeechSynthesizer *spk,
@@ -47,6 +80,7 @@ sayText (
   if (count) {
     if (immediate) speech->mute(spk);
     speech->say(spk, (const unsigned char *)text, length, count, attributes);
+    if (speechTracking) setSpeechTrackingAlarm(spk);
   }
 }
 
