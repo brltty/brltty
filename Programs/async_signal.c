@@ -42,9 +42,6 @@ typedef struct {
 
   AsyncSignalHandler *handlerFunction;
   void *handlerData;
-
-  unsigned active:1;
-  unsigned delete:1;
 } HandlerEntry;
 
 int
@@ -167,10 +164,9 @@ getSignalQueue (int create) {
 }
 
 static void
-deleteHandler (Element *handlerElement) {
+cancelHandler (Element *handlerElement) {
   HandlerEntry *hnd = getElementItem(handlerElement);
   SignalEntry *sig = hnd->signalEntry;
-
   deleteElement(handlerElement);
 
   if (getQueueSize(sig->handlers) == 0) {
@@ -182,17 +178,6 @@ deleteHandler (Element *handlerElement) {
       Element *signalElement = findElementWithItem(signals, sig);
       deleteElement(signalElement);
     }
-  }
-}
-
-static void
-cancelHandler (Element *handlerElement) {
-  HandlerEntry *hnd = getElementItem(handlerElement);
-
-  if (hnd->active) {
-    hnd->delete = 1;
-  } else {
-    deleteHandler(handlerElement);
   }
 }
 
@@ -268,10 +253,7 @@ handleSignal (int signalNumber) {
         .data = hnd->handlerData
       };
 
-      hnd->active = 1;
-      if (!hnd->handlerFunction(&parameters)) hnd->delete = 1;
-      hnd->active = 0;
-      if (hnd->delete) deleteHandler(handlerElement);
+      hnd->handlerFunction(&parameters);
     }
   }
 }
@@ -298,9 +280,6 @@ newHandlerElement (const void *parameters) {
 
       hnd->handlerFunction = hep->handler;
       hnd->handlerData = hep->data;
-
-      hnd->active = 0;
-      hnd->delete = 0;
 
       {
         Element *handlerElement = enqueueItem(sig->handlers, hnd);

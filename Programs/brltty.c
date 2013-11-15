@@ -1292,15 +1292,13 @@ handleSignal (int number, void (*handler) (int)) {
 #endif /* HAVE_SIGACTION */
 }
 
-static int 
+static void 
 handleTerminationSignal (const AsyncSignalHandlerParameters *parameters) {
   time_t now = time(NULL);
 
   if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
   if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
   terminationTime = now;
-
-  return 1;
 }
 #endif /* HAVE_SIGNAL_H */
 

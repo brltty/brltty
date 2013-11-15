@@ -39,7 +39,7 @@ typedef struct {
   void *data;
 } AsyncSignalHandlerParameters;
 
-typedef int AsyncSignalHandler (const AsyncSignalHandlerParameters *parameters);
+typedef void AsyncSignalHandler (const AsyncSignalHandlerParameters *parameters);
 
 extern int asyncHandleSignal (
   AsyncHandle *handle, int signalNumber,
