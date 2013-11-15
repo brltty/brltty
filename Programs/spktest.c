@@ -33,7 +33,7 @@
 #include "file.h"
 #include "parse.h"
 
-static SpeechSynthesizer spk;
+SpeechSynthesizer spk;
 
 char *opt_pcmDevice;
 static char *opt_speechRate;
