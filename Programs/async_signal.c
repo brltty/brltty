@@ -58,13 +58,19 @@ asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *
   newAction.sa_handler = newHandler;
 
   if (sigaction(signalNumber, &newAction, &oldAction) != -1) {
-    *oldHandler = oldAction.sa_handler;
+    if (oldHandler) *oldHandler = oldAction.sa_handler;
     return 1;
   }
 
   logSystemError("sigaction");
 #else /* HAVE_SIGACTION */
-  if ((*oldHandler = signal(signalNumber, newHandler)) != SIG_ERR) return 1;
+  sighandler_t result = signal(signalNumber, newHandler);
+
+  if (result != SIG_ERR) {
+    if (oldHandler) *oldHandler = result;
+    return 1;
+  }
+
   logSystemError("signal");
 #endif /* HAVE_SIGACTION */
 
@@ -168,9 +174,7 @@ deleteHandler (Element *handlerElement) {
   deleteElement(handlerElement);
 
   if (getQueueSize(sig->handlers) == 0) {
-    sighandler_t oldHandler;
-
-    asyncSetSignalHandler(sig->number, sig->oldHandler, &oldHandler);
+    asyncSetSignalHandler(sig->number, sig->oldHandler, NULL);
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
 
     {
