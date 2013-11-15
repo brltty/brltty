@@ -27,25 +27,20 @@
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
   int number;
-  Queue *handlers;
+  Queue *monitors;
 
   sighandler_t oldHandler;
   unsigned wasBlocked:1;
 } SignalEntry;
 
 typedef struct {
-  int signalNumber;
-} SignalKey;
-
-typedef struct {
-  SignalEntry *signalEntry;
-
-  AsyncSignalHandler *handlerFunction;
-  void *handlerData;
-} HandlerEntry;
+  SignalEntry *signal;
+  AsyncSignalCallback *callback;
+  void *data;
+} MonitorEntry;
 
 int
-asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler) {
+asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler) {
 #ifdef HAVE_SIGACTION
   struct sigaction newAction;
   struct sigaction oldAction;
@@ -74,15 +69,25 @@ asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *
   return 0;
 }
 
+int
+asyncIgnoreSignal (int signalNumber, sighandler_t *oldHandler) {
+  return asyncHandleSignal(signalNumber, SIG_IGN, oldHandler);
+}
+
+int
+asyncRevertSignal (int signalNumber, sighandler_t *oldHandler) {
+  return asyncHandleSignal(signalNumber, SIG_DFL, oldHandler);
+}
+
 static int
-setSignalMask (int how, const sigset_t *new, sigset_t *old) {
+setSignalMask (int how, const sigset_t *newMask, sigset_t *oldMask) {
 #ifdef HAVE_POSIX_THREADS
-  int error = pthread_sigmask(how, new, old);
+  int error = pthread_sigmask(how, newMask, oldMask);
 
   if (!error) return 1;
   logActionError(error, "pthread_setmask");
 #else /* HAVE_POSIX_THREADS */
-  if (sigprocmask(how, new, old) != -1) return 1;
+  if (sigprocmask(how, newMask, oldMask) != -1) return 1;
   logSystemError("sigprocmask");
 #endif /* HAVE_POSIX_THREADS */
 
@@ -137,17 +142,17 @@ asyncIsSignalBlocked (int signalNumber) {
 }
 
 static void
-deallocateHandlerEntry (void *item, void *data) {
-  HandlerEntry *hnd = item;
+deallocateMonitorEntry (void *item, void *data) {
+  MonitorEntry *mon = item;
 
-  free(hnd);
+  free(mon);
 }
 
 static void
 deallocateSignalEntry (void *item, void *data) {
   SignalEntry *sig = item;
 
-  deallocateQueue(sig->handlers);
+  deallocateQueue(sig->monitors);
   free(sig);
 }
 
@@ -164,13 +169,13 @@ getSignalQueue (int create) {
 }
 
 static void
-cancelHandler (Element *handlerElement) {
-  HandlerEntry *hnd = getElementItem(handlerElement);
-  SignalEntry *sig = hnd->signalEntry;
-  deleteElement(handlerElement);
+cancelMonitor (Element *monitorElement) {
+  MonitorEntry *mon = getElementItem(monitorElement);
+  SignalEntry *sig = mon->signal;
+  deleteElement(monitorElement);
 
-  if (getQueueSize(sig->handlers) == 0) {
-    asyncSetSignalHandler(sig->number, sig->oldHandler, NULL);
+  if (getQueueSize(sig->monitors) == 0) {
+    asyncHandleSignal(sig->number, sig->oldHandler, NULL);
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
 
     {
@@ -181,10 +186,15 @@ cancelHandler (Element *handlerElement) {
   }
 }
 
+typedef struct {
+  int signalNumber;
+} SignalKey;
+
 static int
 testSignalEntry (const void *item, const void *data) {
   const SignalEntry *sig = item;
   const SignalKey *key = data;
+
   return sig->number == key->signalNumber;
 }
 
@@ -200,6 +210,7 @@ getSignalElement (int signalNumber, int create) {
 
       {
         Element *element = findElement(signals, testSignalEntry, &key);
+
         if (element) return element;
       }
     }
@@ -208,23 +219,25 @@ getSignalElement (int signalNumber, int create) {
       SignalEntry *sig;
 
       if ((sig = malloc(sizeof(*sig)))) {
+        memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
 
-        if ((sig->handlers = newQueue(deallocateHandlerEntry, NULL))) {
+        if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
           {
             static AsyncQueueMethods methods = {
-              .cancelRequest = cancelHandler
+              .cancelRequest = cancelMonitor
             };
 
-            setQueueData(sig->handlers, &methods);
+            setQueueData(sig->monitors, &methods);
           }
 
           {
             Element *element = enqueueItem(signals, sig);
+
             if (element) return element;
           }
 
-          deallocateQueue(sig->handlers);
+          deallocateQueue(sig->monitors);
         }
 
         free(sig);
@@ -238,65 +251,64 @@ getSignalElement (int signalNumber, int create) {
 }
 
 static void
-handleSignal (int signalNumber) {
+handleMonitoredSignal (int signalNumber) {
   Element *signalElement = getSignalElement(signalNumber, 0);
 
   if (signalElement) {
     SignalEntry *sig = getElementItem(signalElement);
-    Element *handlerElement = getQueueHead(sig->handlers);
+    Element *monitorElement = getQueueHead(sig->monitors);
 
-    if (handlerElement) {
-      HandlerEntry *hnd = getElementItem(handlerElement);
+    if (monitorElement) {
+      MonitorEntry *mon = getElementItem(monitorElement);
 
-      const AsyncSignalHandlerParameters parameters = {
-        .signalNumber = signalNumber,
-        .data = hnd->handlerData
+      const AsyncSignalCallbackParameters parameters = {
+        .signal = signalNumber,
+        .data = mon->data
       };
 
-      hnd->handlerFunction(&parameters);
+      mon->callback(&parameters);
     }
   }
 }
 
 typedef struct {
-  int number;
-  AsyncSignalHandler *handler;
+  int signal;
+  AsyncSignalCallback *callback;
   void *data;
-} HandlerElementParameters;
+} MonitorElementParameters;
 
 static Element *
-newHandlerElement (const void *parameters) {
-  const HandlerElementParameters *hep = parameters;
-  Element *signalElement = getSignalElement(hep->number, 1);
+newMonitorElement (const void *parameters) {
+  const MonitorElementParameters *mep = parameters;
+  Element *signalElement = getSignalElement(mep->signal, 1);
 
   if (signalElement) {
     SignalEntry *sig = getElementItem(signalElement);
-    int newSignal = getQueueSize(sig->handlers) == 0;
-    HandlerEntry *hnd;
+    int newSignal = getQueueSize(sig->monitors) == 0;
+    MonitorEntry *mon;
 
-    if ((hnd = malloc(sizeof(*hnd)))) {
-      memset(hnd, 0, sizeof(*hnd));
-      hnd->signalEntry = sig;
-
-      hnd->handlerFunction = hep->handler;
-      hnd->handlerData = hep->data;
+    if ((mon = malloc(sizeof(*mon)))) {
+      memset(mon, 0, sizeof(*mon));
+      mon->signal = sig;
+      mon->callback = mep->callback;
+      mon->data = mep->data;
 
       {
-        Element *handlerElement = enqueueItem(sig->handlers, hnd);
+        Element *monitorElement = enqueueItem(sig->monitors, mon);
 
-        if (handlerElement) {
-          if (!newSignal) return handlerElement;
+        if (monitorElement) {
+          if (!newSignal) return monitorElement;
 
-          if (asyncSetSignalHandler(hep->number, handleSignal, &sig->oldHandler)) {
-            sig->wasBlocked = asyncIsSignalBlocked(hep->number);
-            return handlerElement;
+          if (asyncHandleSignal(mep->signal, handleMonitoredSignal, &sig->oldHandler)) {
+            sig->wasBlocked = asyncIsSignalBlocked(mep->signal);
+            return monitorElement;
           }
-        }
 
-        deleteElement(handlerElement);
+          deleteElement(monitorElement);
+        }
       }
 
-      free(hnd);
+      free(mon);
     } else {
       logMallocError();
     }
@@ -308,16 +320,16 @@ newHandlerElement (const void *parameters) {
 }
 
 int
-asyncHandleSignal (
-  AsyncHandle *handle, int signalNumber,
-  AsyncSignalHandler *handler, void *data
+asyncMonitorSignal (
+  AsyncHandle *handle, int signal,
+  AsyncSignalCallback *callback, void *data
 ) {
-  const HandlerElementParameters hep = {
-    .number = signalNumber,
-    .handler = handler,
+  const MonitorElementParameters mep = {
+    .signal = signal,
+    .callback = callback,
     .data = data
   };
 
-  return asyncMakeHandle(handle, newHandlerElement, &hep);
+  return asyncMakeHandle(handle, newMonitorElement, &mep);
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */

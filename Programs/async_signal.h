@@ -35,18 +35,21 @@ extern "C" {
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
-  int signalNumber;
+  int signal;
   void *data;
-} AsyncSignalHandlerParameters;
+} AsyncSignalCallbackParameters;
 
-typedef void AsyncSignalHandler (const AsyncSignalHandlerParameters *parameters);
+typedef void AsyncSignalCallback (const AsyncSignalCallbackParameters *parameters);
 
-extern int asyncHandleSignal (
-  AsyncHandle *handle, int signalNumber,
-  AsyncSignalHandler *handler, void *data
+extern int asyncMonitorSignal (
+  AsyncHandle *handle, int signal,
+  AsyncSignalCallback *callback, void *data
 );
 
-extern int asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler);
+extern int asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler);
+extern int asyncIgnoreSignal (int signalNumber, sighandler_t *oldHandler);
+extern int asyncRevertSignal (int signalNumber, sighandler_t *oldHandler);
+
 extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */

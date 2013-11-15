@@ -1272,7 +1272,7 @@ exitSessions (void *data) {
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 static void 
-handleTerminationSignal (const AsyncSignalHandlerParameters *parameters) {
+handleTerminationSignal (const AsyncSignalCallbackParameters *parameters) {
   time_t now = time(NULL);
 
   if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
@@ -1300,15 +1300,15 @@ brlttyConstruct (int argc, char *argv[]) {
   /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
    * a broken pipe won't abort program execution.
    */
-  asyncSetSignalHandler(SIGPIPE, SIG_IGN, NULL);
+  asyncIgnoreSignal(SIGPIPE, NULL);
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
-  asyncHandleSignal(NULL, SIGTERM, handleTerminationSignal, NULL);
+  asyncMonitorSignal(NULL, SIGTERM, handleTerminationSignal, NULL);
 #endif /* SIGTERM */
 
 #ifdef SIGINT
-  asyncHandleSignal(NULL, SIGINT, handleTerminationSignal, NULL);
+  asyncMonitorSignal(NULL, SIGINT, handleTerminationSignal, NULL);
 #endif /* SIGINT */
 
   interruptEnabledCount = 0;
