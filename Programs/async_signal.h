@@ -42,9 +42,13 @@ typedef struct {
 typedef int AsyncSignalHandler (const AsyncSignalHandlerParameters *parameters);
 
 extern int asyncHandleSignal (
-  AsyncHandle *handle, int number,
+  AsyncHandle *handle, int signalNumber,
   AsyncSignalHandler *handler, void *data
 );
+
+extern int asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler);
+extern int asyncSetSignalBlocked (int signalNumber, int state);
+extern int asyncIsSignalBlocked (int signalNumber);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 #ifdef __cplusplus

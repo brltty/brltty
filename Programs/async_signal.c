@@ -39,9 +39,37 @@ typedef struct {
 
 typedef struct {
   SignalEntry *signalEntry;
+
   AsyncSignalHandler *handlerFunction;
   void *handlerData;
+
+  unsigned active:1;
+  unsigned delete:1;
 } HandlerEntry;
+
+int
+asyncSetSignalHandler (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler) {
+#ifdef HAVE_SIGACTION
+  struct sigaction newAction;
+  struct sigaction oldAction;
+
+  memset(&newAction, 0, sizeof(newAction));
+  sigemptyset(&newAction.sa_mask);
+  newAction.sa_handler = newHandler;
+
+  if (sigaction(signalNumber, &newAction, &oldAction) != -1) {
+    *oldHandler = oldAction.sa_handler;
+    return 1;
+  }
+
+  logSystemError("sigaction");
+#else /* HAVE_SIGACTION */
+  if ((*oldHandler = signal(signalNumber, newHandler)) != SIG_ERR) return 1;
+  logSystemError("signal");
+#endif /* HAVE_SIGACTION */
+
+  return 0;
+}
 
 static int
 setSignalMask (int how, const sigset_t *new, sigset_t *old) {
@@ -54,25 +82,6 @@ setSignalMask (int how, const sigset_t *new, sigset_t *old) {
   if (sigprocmask(how, new, old) != -1) return 1;
   logSystemError("sigprocmask");
 #endif /* HAVE_POSIX_THREADS */
-
-  return 0;
-}
-
-static int
-getSignalMask (sigset_t *mask) {
-  return setSignalMask(SIG_SETMASK, NULL, mask);
-}
-
-static int
-isSignalBlocked (int signalNumber) {
-  sigset_t signalMask;
-
-  if (getSignalMask(&signalMask)) {
-    int result = sigismember(&signalMask, signalNumber);
-
-    if (result != -1) return result;
-    logSystemError("sigismember");
-  }
 
   return 0;
 }
@@ -92,8 +101,8 @@ makeSignalMask (sigset_t *signalMask, int signalNumber) {
   return 0;
 }
 
-static int
-setSignalBlocked (int signalNumber, int state) {
+int
+asyncSetSignalBlocked (int signalNumber, int state) {
   sigset_t mask;
 
   if (makeSignalMask(&mask, signalNumber)) {
@@ -106,25 +115,20 @@ setSignalBlocked (int signalNumber, int state) {
 }
 
 static int
-setSignalHandler (int number, sighandler_t newHandler, sighandler_t *oldHandler) {
-#ifdef HAVE_SIGACTION
-  struct sigaction newAction;
-  struct sigaction oldAction;
+getSignalMask (sigset_t *mask) {
+  return setSignalMask(SIG_SETMASK, NULL, mask);
+}
 
-  memset(&newAction, 0, sizeof(newAction));
-  sigemptyset(&newAction.sa_mask);
-  newAction.sa_handler = newHandler;
+int
+asyncIsSignalBlocked (int signalNumber) {
+  sigset_t signalMask;
 
-  if (sigaction(number, &newAction, &oldAction) != -1) {
-    *oldHandler = oldAction.sa_handler;
-    return 1;
+  if (getSignalMask(&signalMask)) {
+    int result = sigismember(&signalMask, signalNumber);
+
+    if (result != -1) return result;
+    logSystemError("sigismember");
   }
-
-  logSystemError("sigaction");
-#else /* HAVE_SIGACTION */
-  if ((*oldHandler = signal(number, newHandler)) != SIG_ERR) return 1;
-  logSystemError("signal");
-#endif /* HAVE_SIGACTION */
 
   return 0;
 }
@@ -154,6 +158,38 @@ getSignalQueue (int create) {
   }
 
   return tsd->signalQueue;
+}
+
+static void
+deleteHandler (Element *handlerElement) {
+  HandlerEntry *hnd = getElementItem(handlerElement);
+  SignalEntry *sig = hnd->signalEntry;
+
+  deleteElement(handlerElement);
+
+  if (getQueueSize(sig->handlers) == 0) {
+    sighandler_t oldHandler;
+
+    asyncSetSignalHandler(sig->number, sig->oldHandler, &oldHandler);
+    asyncSetSignalBlocked(sig->number, sig->wasBlocked);
+
+    {
+      Queue *signals = getSignalQueue(0);
+      Element *signalElement = findElementWithItem(signals, sig);
+      deleteElement(signalElement);
+    }
+  }
+}
+
+static void
+cancelHandler (Element *handlerElement) {
+  HandlerEntry *hnd = getElementItem(handlerElement);
+
+  if (hnd->active) {
+    hnd->delete = 1;
+  } else {
+    deleteHandler(handlerElement);
+  }
 }
 
 static int
@@ -186,6 +222,14 @@ getSignalElement (int signalNumber, int create) {
         sig->number = signalNumber;
 
         if ((sig->handlers = newQueue(deallocateHandlerEntry, NULL))) {
+          {
+            static AsyncQueueMethods methods = {
+              .cancelRequest = cancelHandler
+            };
+
+            setQueueData(sig->handlers, &methods);
+          }
+
           {
             Element *element = enqueueItem(signals, sig);
             if (element) return element;
@@ -220,17 +264,10 @@ handleSignal (int signalNumber) {
         .data = hnd->handlerData
       };
 
-      if (!hnd->handlerFunction(&parameters)) {
-        deleteElement(handlerElement);
-
-        if (getQueueSize(sig->handlers) == 0) {
-          sighandler_t oldHandler;
-
-          setSignalHandler(signalNumber, sig->oldHandler, &oldHandler);
-          setSignalBlocked(signalNumber, sig->wasBlocked);
-          deleteElement(signalElement);
-        }
-      }
+      hnd->active = 1;
+      if (!hnd->handlerFunction(&parameters)) hnd->delete = 1;
+      hnd->active = 0;
+      if (hnd->delete) deleteHandler(handlerElement);
     }
   }
 }
@@ -254,8 +291,12 @@ newHandlerElement (const void *parameters) {
     if ((hnd = malloc(sizeof(*hnd)))) {
       memset(hnd, 0, sizeof(*hnd));
       hnd->signalEntry = sig;
+
       hnd->handlerFunction = hep->handler;
       hnd->handlerData = hep->data;
+
+      hnd->active = 0;
+      hnd->delete = 0;
 
       {
         Element *handlerElement = enqueueItem(sig->handlers, hnd);
@@ -263,8 +304,8 @@ newHandlerElement (const void *parameters) {
         if (handlerElement) {
           if (!newSignal) return handlerElement;
 
-          if (setSignalHandler(hep->number, handleSignal, &sig->oldHandler)) {
-            sig->wasBlocked = isSignalBlocked(hep->number);
+          if (asyncSetSignalHandler(hep->number, handleSignal, &sig->oldHandler)) {
+            sig->wasBlocked = asyncIsSignalBlocked(hep->number);
             return handlerElement;
           }
         }
@@ -285,11 +326,11 @@ newHandlerElement (const void *parameters) {
 
 int
 asyncHandleSignal (
-  AsyncHandle *handle, int number,
+  AsyncHandle *handle, int signalNumber,
   AsyncSignalHandler *handler, void *data
 ) {
   const HandlerElementParameters hep = {
-    .number = number,
+    .number = signalNumber,
     .handler = handler,
     .data = data
   };
