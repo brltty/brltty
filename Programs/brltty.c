@@ -32,10 +32,6 @@
 #include <langinfo.h>
 #endif /* HAVE_LANGINFO_H */
 
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif /* HAVE_SIGNAL_H */
-
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
@@ -1274,24 +1270,7 @@ exitSessions (void *data) {
   deallocateSessionEntries();
 }
 
-#ifdef HAVE_SIGNAL_H
-static void
-handleSignal (int number, void (*handler) (int)) {
-#ifdef HAVE_SIGACTION
-  struct sigaction action;
-  memset(&action, 0, sizeof(action));
-  sigemptyset(&action.sa_mask);
-  action.sa_handler = handler;
-  if (sigaction(number, &action, NULL) == -1) {
-    logSystemError("sigaction");
-  }
-#else /* HAVE_SIGACTION */
-  if (signal(number, handler) == SIG_ERR) {
-    logSystemError("signal");
-  }
-#endif /* HAVE_SIGACTION */
-}
-
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
 static void 
 handleTerminationSignal (const AsyncSignalHandlerParameters *parameters) {
   time_t now = time(NULL);
@@ -1300,7 +1279,7 @@ handleTerminationSignal (const AsyncSignalHandlerParameters *parameters) {
   if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
   terminationTime = now;
 }
-#endif /* HAVE_SIGNAL_H */
+#endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
@@ -1321,7 +1300,7 @@ brlttyConstruct (int argc, char *argv[]) {
   /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
    * a broken pipe won't abort program execution.
    */
-  handleSignal(SIGPIPE, SIG_IGN);
+  asyncSetSignalHandler(SIGPIPE, SIG_IGN, NULL);
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
