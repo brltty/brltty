@@ -718,7 +718,7 @@ retryKeyboardMonitor (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
   if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
-    scheduleKeyboardMonitor(KEYBOARD_MONITOR_RETRY_INTERVAL);
+    scheduleKeyboardMonitor(KEYBOARD_MONITOR_START_RETRY_INTERVAL);
   }
 }
 
@@ -1281,7 +1281,7 @@ retryBrailleDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
-  asyncSetAlarmIn(NULL, BRAILLE_DRIVER_RETRY_INTERVAL, retryBrailleDriver, NULL);
+  asyncSetAlarmIn(NULL, BRAILLE_DRIVER_START_RETRY_INTERVAL, retryBrailleDriver, NULL);
   initializeBraille();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
@@ -1495,7 +1495,7 @@ retrySpeechDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 trySpeechDriver (void) {
   if (startSpeechDriver()) return 1;
-  asyncSetAlarmIn(NULL, SPEECH_DRIVER_RETRY_INTERVAL, retrySpeechDriver, NULL);
+  asyncSetAlarmIn(NULL, SPEECH_DRIVER_START_RETRY_INTERVAL, retrySpeechDriver, NULL);
   return 0;
 }
 
@@ -1643,7 +1643,7 @@ retryScreenDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
 static int
 tryScreenDriver (void) {
   if (startScreenDriver()) return 1;
-  asyncSetAlarmIn(NULL, SCREEN_DRIVER_RETRY_INTERVAL, retryScreenDriver, NULL);
+  asyncSetAlarmIn(NULL, SCREEN_DRIVER_START_RETRY_INTERVAL, retryScreenDriver, NULL);
   initializeScreen();
   return 0;
 }
@@ -1692,7 +1692,7 @@ tryPidFile (void) {
   } else if (errno == EEXIST) {
     return 0;
   } else {
-    asyncSetAlarmIn(NULL, PID_FILE_RETRY_INTERVAL, retryPidFile, NULL);
+    asyncSetAlarmIn(NULL, PID_FILE_CREATE_RETRY_INTERVAL, retryPidFile, NULL);
   }
 
   return 1;
