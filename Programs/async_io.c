@@ -781,11 +781,13 @@ testFunctionEntry (const void *item, const void *data) {
 static Element *
 getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *methods, int create) {
   Queue *functions = getFunctionQueue(create);
+
   if (functions) {
     {
-      FunctionKey key;
-      key.fileDescriptor = fileDescriptor;
-      key.methods = methods;
+      const FunctionKey key = {
+        .fileDescriptor = fileDescriptor,
+        .methods = methods
+      };
 
       {
         Element *element = findElement(functions, testFunctionEntry, &key);

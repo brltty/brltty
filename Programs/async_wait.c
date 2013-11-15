@@ -30,11 +30,12 @@ asyncAwaitAction (long int timeout) {
   if (tsd) {
     tsd->waitDepth += 1;
 
-    if (asyncHandleAlarm(tsd, &timeout)) goto done;
-    if (asyncPerformTask(tsd)) goto done;
-    if (asyncHandleOperation(tsd, timeout)) goto done;
+    if (asyncHandleAlarm(tsd, &timeout)) {
+    } else if (asyncPerformTask(tsd)) {
+    } else if (asyncHandleOperation(tsd, timeout)) {
+    } else {
+    }
 
-  done:
     tsd->waitDepth -= 1;
   } else {
     approximateDelay(timeout);

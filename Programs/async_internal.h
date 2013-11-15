@@ -30,6 +30,7 @@ typedef struct {
   Queue *functionQueue;
   Queue *alarmQueue;
   Queue *taskQueue;
+  Queue *signalQueue;
   unsigned int waitDepth;
 } AsyncThreadSpecificData;
 
@@ -40,6 +41,8 @@ extern int asyncMakeHandle (
   Element *(*newElement) (const void *parameters),
   const void *parameters
 );
+
+extern int asyncMakeElementHandle (AsyncHandle *handle, Element *element);
 
 #define ASYNC_ANY_QUEUE ((const Queue *)1)
 extern Element *asyncGetHandleElement (AsyncHandle handle, const Queue *queue);

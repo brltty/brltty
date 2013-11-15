@@ -48,6 +48,7 @@
 #include "cmd_speech.h"
 #include "timing.h"
 #include "async_event.h"
+#include "async_signal.h"
 #include "async_wait.h"
 #include "tunes.h"
 #include "ctb.h"
@@ -1291,12 +1292,15 @@ handleSignal (int number, void (*handler) (int)) {
 #endif /* HAVE_SIGACTION */
 }
 
-static void 
-handleTerminationRequest (int signalNumber) {
+static int 
+handleTerminationSignal (const AsyncSignalHandlerParameters *parameters) {
   time_t now = time(NULL);
+
   if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
   if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
   terminationTime = now;
+
+  return 1;
 }
 #endif /* HAVE_SIGNAL_H */
 
@@ -1323,11 +1327,11 @@ brlttyConstruct (int argc, char *argv[]) {
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
-  handleSignal(SIGTERM, handleTerminationRequest);
+  asyncHandleSignal(NULL, SIGTERM, handleTerminationSignal, NULL);
 #endif /* SIGTERM */
 
 #ifdef SIGINT
-  handleSignal(SIGINT, handleTerminationRequest);
+  asyncHandleSignal(NULL, SIGINT, handleTerminationSignal, NULL);
 #endif /* SIGINT */
 
   interruptEnabledCount = 0;

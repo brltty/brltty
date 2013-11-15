@@ -45,6 +45,7 @@ tsdDestroyData (void *data) {
     if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
     if (tsd->alarmQueue) deallocateQueue(tsd->alarmQueue);
     if (tsd->taskQueue) deallocateQueue(tsd->taskQueue);
+    if (tsd->signalQueue) deallocateQueue(tsd->signalQueue);
     free(tsd);
   }
 }
@@ -73,6 +74,7 @@ asyncGetThreadSpecificData (void) {
         tsd->functionQueue = NULL;
         tsd->alarmQueue = NULL;
         tsd->taskQueue = NULL;
+        tsd->signalQueue = NULL;
         tsd->waitDepth = 0;
 
         if (!(error = pthread_setspecific(tsdKey, tsd))) {
@@ -96,6 +98,7 @@ static AsyncThreadSpecificData tsd = {
   .functionQueue = NULL,
   .alarmQueue = NULL,
   .taskQueue = NULL,
+  .signalQueue = NULL,
   .waitDepth = 0
 };
 

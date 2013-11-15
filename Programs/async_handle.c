@@ -99,3 +99,23 @@ asyncCancelRequest (AsyncHandle handle) {
     deleteElement(element);
   }
 }
+
+typedef struct {
+  Element *element;
+} ElementHandleParameters;
+
+static Element *
+newElementHandle (const void *parameters) {
+  const ElementHandleParameters *ehp = parameters;
+
+  return ehp->element;
+}
+
+int
+asyncMakeElementHandle (AsyncHandle *handle, Element *element) {
+  const ElementHandleParameters ehp = {
+    .element = element
+  };
+
+  return asyncMakeHandle(handle, newElementHandle, &ehp);
+}

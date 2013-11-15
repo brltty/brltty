@@ -195,6 +195,9 @@ async_event.$O:
 async_task.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_task.c
 
+async_signal.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_signal.c
+
 async_wait.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_wait.c
 
