@@ -57,8 +57,10 @@ runInputThread (void *argument) {
 
   while (1) {
     unsigned char buffer[0X1000];
-    ssize_t result = usbReadEndpoint(channel->device, channel->definition.inputEndpoint,
-                                     buffer, sizeof(buffer), GIO_USB_INPUT_MONITOR_TIMEOUT);
+    ssize_t result = usbReadEndpoint(channel->device,
+                                     channel->definition.inputEndpoint,
+                                     buffer, sizeof(buffer),
+                                     GIO_USB_INPUT_MONITOR_READ_TIMEOUT);
 
     if (result == -1) {
       if (errno == EAGAIN) continue;
@@ -314,7 +316,7 @@ connectUsbResource (
     handle->inputPipeOutput = INVALID_FILE_DESCRIPTOR;
 
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
-      if (!GIO_USB_INPUT_DISABLE_MONITORING) {
+      if (!GIO_USB_INPUT_MONITOR_DISABLE) {
 #ifdef HAVE_POSIX_THREADS
         if (createAnonymousPipe(&handle->inputPipeInput, &handle->inputPipeOutput)) {
           if (setBlockingIo(handle->inputPipeOutput, 0)) {

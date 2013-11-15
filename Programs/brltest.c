@@ -107,8 +107,8 @@ message (const char *mode, const char *text, MessageOptions options) {
       int timer = 0;
       while (braille->readCommand(&brl, KTB_CTX_WAITING) == EOF) {
         if (timer > 4000) break;
-        asyncWait(UPDATE_POLL_INTERVAL);
-        timer += UPDATE_POLL_INTERVAL;
+        asyncWait(SCREEN_UPDATE_POLL_INTERVAL);
+        timer += SCREEN_UPDATE_POLL_INTERVAL;
       }
     }
   }
