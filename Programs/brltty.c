@@ -63,12 +63,6 @@
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static volatile unsigned int terminationCount;
-static volatile time_t terminationTime;
-
-#define TERMINATION_COUNT_EXIT_THRESHOLD 3
-#define TERMINATION_COUNT_RESET_TIME 5
-
 BrailleDisplay brl;                        /* For the Braille routines */
 ScreenDescription scr;
 SessionEntry *ses = NULL;
@@ -1180,6 +1174,9 @@ handleRestartRequired (const void *data) {
   restartBrailleDriver();
 }
 
+static volatile unsigned int programTerminationRequestCount;
+static volatile time_t programTerminationRequestTime;
+
 typedef struct {
   UnmonitoredConditionHandler *handler;
   const void *data;
@@ -1195,7 +1192,7 @@ checkUnmonitoredConditions (void *data) {
     return 1;
   }
 
-  if (terminationCount) {
+  if (programTerminationRequestCount) {
     static const WaitResult result = WAIT_STOP;
     ucd->data = &result;
     return 1;
@@ -1272,12 +1269,18 @@ exitSessions (void *data) {
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 static void 
-handleTerminationSignal (const AsyncSignalCallbackParameters *parameters) {
+handleProgramTerminationRequest (const AsyncSignalCallbackParameters *parameters) {
   time_t now = time(NULL);
 
-  if (difftime(now, terminationTime) > TERMINATION_COUNT_RESET_TIME) terminationCount = 0;
-  if ((terminationCount += 1) > TERMINATION_COUNT_EXIT_THRESHOLD) exit(1);
-  terminationTime = now;
+  if (difftime(now, programTerminationRequestTime) > PROGRAM_TERMINATION_REQUEST_RESET_SECONDS) {
+    programTerminationRequestCount = 0;
+  }
+
+  if ((programTerminationRequestCount += 1) > PROGRAM_TERMINATION_REQUEST_COUNT_THRESHOLD) {
+    exit(1);
+  }
+
+  programTerminationRequestTime = now;
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
@@ -1293,8 +1296,8 @@ brlttyConstruct (int argc, char *argv[]) {
   onProgramExit("log", exitLog, NULL);
   openSystemLog();
 
-  terminationCount = 0;
-  terminationTime = time(NULL);
+  programTerminationRequestCount = 0;
+  programTerminationRequestTime = time(NULL);
 
 #ifdef SIGPIPE
   /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
@@ -1304,11 +1307,11 @@ brlttyConstruct (int argc, char *argv[]) {
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
-  asyncMonitorSignal(NULL, SIGTERM, handleTerminationSignal, NULL);
+  asyncMonitorSignal(NULL, SIGTERM, handleProgramTerminationRequest, NULL);
 #endif /* SIGTERM */
 
 #ifdef SIGINT
-  asyncMonitorSignal(NULL, SIGINT, handleTerminationSignal, NULL);
+  asyncMonitorSignal(NULL, SIGINT, handleProgramTerminationRequest, NULL);
 #endif /* SIGINT */
 
   interruptEnabledCount = 0;
