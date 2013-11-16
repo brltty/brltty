@@ -318,20 +318,18 @@ handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
 
-  if (command != BRL_CMD_NOOP) {
-    logKeyEvent(table, table->longPress.keyAction,
-                table->longPress.keyContext,
-                &table->longPress.keyValue,
-                command);
+  logKeyEvent(table, table->longPress.keyAction,
+              table->longPress.keyContext,
+              &table->longPress.keyValue,
+              command);
 
-    if (table->longPress.repeat) {
-      table->longPress.keyAction = "repeat";
-      setLongPressAlarm(table, prefs.autorepeatInterval);
-    }
-
-    table->longPress.primaryCommand = BRL_CMD_NOOP;
-    processCommand(table, command);
+  if (table->longPress.repeat) {
+    table->longPress.keyAction = "repeat";
+    setLongPressAlarm(table, prefs.autorepeatInterval);
   }
+
+  table->longPress.primaryCommand = BRL_CMD_NOOP;
+  processCommand(table, command);
 }
 
 static void
@@ -486,25 +484,18 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         }
 
         if (context != KTB_CTX_WAITING) {
-          int pending = !isImmediate;
-          int secondary;
-          int repeat;
-
           if (secondaryCommand == BRL_CMD_NOOP) {
             if (isRepeatableCommand(command)) {
               secondaryCommand = command;
             }
           }
 
-          secondary = secondaryCommand != BRL_CMD_NOOP;
-          repeat = isRepeatableCommand(secondaryCommand);
+          table->longPress.primaryCommand = isImmediate? BRL_CMD_NOOP: command;
+          if (!isImmediate) command = BRL_CMD_NOOP;
 
-          if (secondary || pending || repeat) {
-            table->longPress.primaryCommand = pending? command: BRL_CMD_NOOP;
-            if (pending) command = BRL_CMD_NOOP;
-
+          if (secondaryCommand != BRL_CMD_NOOP) {
             table->longPress.secondaryCommand = secondaryCommand;
-            table->longPress.repeat = repeat;
+            table->longPress.repeat = isRepeatableCommand(secondaryCommand);
 
             table->longPress.keyAction = "long";
             table->longPress.keyContext = context;
