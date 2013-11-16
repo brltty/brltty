@@ -242,7 +242,7 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
 
     if (options & CDO_IncludeOperand) {
       if (cmd->isCharacter) {
-        STR_PRINTF(" [U+%04" PRIX16 "]", arg);
+        STR_PRINTF(" [U+%04X]", arg);
       }
 
       if (cmd->isBraille) {
@@ -279,7 +279,7 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       }
 
       if (cmd->isKeyboard) {
-        STR_PRINTF(" [\\X%02" PRIX8 "]", arg1);
+        STR_PRINTF(" [\\X%02X]", arg1);
       }
 
       if (cmd->isColumn && !cmd->isRouting && (
