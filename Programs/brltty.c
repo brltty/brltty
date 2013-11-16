@@ -770,6 +770,7 @@ void
 trackSpeech (int index) {
   placeWindowHorizontally(index % scr.cols);
   slideWindowVertically((index / scr.cols) + speechLine);
+  scheduleUpdate();
 }
 
 int

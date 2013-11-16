@@ -33,6 +33,7 @@
 #include "prefs.h"
 #include "charset.h"
 #include "spk.h"
+#include "brltty.h"
 
 void
 initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
@@ -55,10 +56,20 @@ handleSpeechTrackingAlarm (const AsyncAlarmCallbackParameters *parameters) {
   speechTrackingAlarm = NULL;
 
   if (speechTracking) {
-    speech->doTrack(spk);
+    if (scr.number == speechScreen) {
+      speech->doTrack(spk);
 
-    if (speech->isSpeaking(spk)) {
-      setSpeechTrackingAlarm(parameters->data);
+      if (ses->trackCursor) {
+        int index = speech->getTrack(spk);
+
+        if (index != speechIndex) trackSpeech(speechIndex = index);
+      }
+
+      if (speech->isSpeaking(spk)) {
+        setSpeechTrackingAlarm(parameters->data);
+      } else {
+        speechTracking = 0;
+      }
     } else {
       speechTracking = 0;
     }

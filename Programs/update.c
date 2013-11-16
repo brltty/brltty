@@ -539,10 +539,7 @@ doUpdate (void) {
 
   if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (speechTracking && (scr.number == speechScreen)) {
-      int index = speech->getTrack(&spk);
-      if (index != speechIndex) trackSpeech(speechIndex = index);
-    } else
+    if (!speechTracking)
 #endif /* ENABLE_SPEECH_SUPPORT */
     {
       /* If cursor moves while blinking is on */
