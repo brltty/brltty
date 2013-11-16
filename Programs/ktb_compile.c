@@ -1112,20 +1112,20 @@ processKeyTableLine (DataFile *file, void *data) {
 
 void
 resetLongPressData (KeyTable *table) {
+  table->release.command = BRL_CMD_NOOP;
+
   if (table->longPress.alarm) {
     asyncCancelRequest(table->longPress.alarm);
     table->longPress.alarm = NULL;
   }
 
-  table->longPress.primaryCommand = BRL_CMD_NOOP;
-  table->longPress.secondaryCommand = BRL_CMD_NOOP;
+  table->longPress.command = BRL_CMD_NOOP;
+  table->longPress.repeat = 0;
 
   table->longPress.keyAction = NULL;
   table->longPress.keyContext = KTB_CTX_DEFAULT;
   table->longPress.keyValue.set = 0;
   table->longPress.keyValue.key = KTB_KEY_ANY;
-
-  table->longPress.repeat = 0;
 }
 
 void

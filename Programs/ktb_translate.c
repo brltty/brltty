@@ -282,11 +282,11 @@ logKeyEvent (
   KeyTable *table, const char *action,
   unsigned char context, const KeyValue *keyValue, int command
 ) {
-  if (table->logKeyEventsFlag && *table->logKeyEventsFlag) {
+  if (table->log.keyEventsFlag && *table->log.keyEventsFlag) {
     char buffer[0X100];
 
     STR_BEGIN(buffer, sizeof(buffer));
-    if (table->logLabel) STR_PRINTF("%s ", table->logLabel);
+    if (table->log.label) STR_PRINTF("%s ", table->log.label);
     STR_PRINTF("key %s: ", action);
 
     {
@@ -313,7 +313,7 @@ static void setLongPressAlarm (KeyTable *table, unsigned char when);
 static void
 handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   KeyTable *table = parameters->data;
-  int command = table->longPress.secondaryCommand;
+  int command = table->longPress.command;
 
   asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
@@ -328,7 +328,7 @@ handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
     setLongPressAlarm(table, prefs.autorepeatInterval);
   }
 
-  table->longPress.primaryCommand = BRL_CMD_NOOP;
+  table->release.command = BRL_CMD_NOOP;
   processCommand(table, command);
 }
 
@@ -490,11 +490,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
             }
           }
 
-          table->longPress.primaryCommand = isImmediate? BRL_CMD_NOOP: command;
+          table->release.command = isImmediate? BRL_CMD_NOOP: command;
           if (!isImmediate) command = BRL_CMD_NOOP;
 
           if (secondaryCommand != BRL_CMD_NOOP) {
-            table->longPress.secondaryCommand = secondaryCommand;
+            table->longPress.command = secondaryCommand;
             table->longPress.repeat = isRepeatableCommand(secondaryCommand);
 
             table->longPress.keyAction = "long";
@@ -508,7 +508,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         processCommand(table, command);
       }
     } else {
-      int *cmd = &table->longPress.primaryCommand;
+      int *cmd = &table->release.command;
 
       if (*cmd != BRL_CMD_NOOP) {
         processCommand(table, (command = *cmd));
@@ -525,10 +525,10 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
 void
 setKeyTableLogLabel (KeyTable *table, const char *label) {
-  table->logLabel = label;
+  table->log.label = label;
 }
 
 void
 setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
-  table->logKeyEventsFlag = flag;
+  table->log.keyEventsFlag = flag;
 }

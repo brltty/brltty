@@ -136,20 +136,23 @@ struct KeyTableStruct {
   } pressedKeys;
 
   struct {
-    AsyncHandle alarm;
+    int command;
+  } release;
 
-    int primaryCommand;
-    int secondaryCommand;
+  struct {
+    AsyncHandle alarm;
+    int command;
+    unsigned repeat:1;
 
     const char *keyAction;
     unsigned char keyContext;
     KeyValue keyValue;
-
-    unsigned repeat:1;
   } longPress;
 
-  const char *logLabel;
-  const unsigned char *logKeyEventsFlag;
+  struct {
+    const char *label;
+    const unsigned char *keyEventsFlag;
+  } log;
 };
 
 extern void copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count);
