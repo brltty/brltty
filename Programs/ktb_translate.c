@@ -313,21 +313,25 @@ static void setLongPressAlarm (KeyTable *table, unsigned char when);
 static void
 handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
   KeyTable *table = parameters->data;
+  int command = table->longPress.secondaryCommand;
 
   asyncDiscardHandle(table->longPress.alarm);
   table->longPress.alarm = NULL;
 
-  logKeyEvent(table, table->longPress.keyAction,
-              table->longPress.keyContext, &table->longPress.keyValue,
-              table->longPress.secondaryCommand);
+  if (command != BRL_CMD_NOOP) {
+    logKeyEvent(table, table->longPress.keyAction,
+                table->longPress.keyContext,
+                &table->longPress.keyValue,
+                command);
 
-  if (table->longPress.repeat) {
-    table->longPress.keyAction = "repeat";
-    setLongPressAlarm(table, prefs.autorepeatInterval);
+    if (table->longPress.repeat) {
+      table->longPress.keyAction = "repeat";
+      setLongPressAlarm(table, prefs.autorepeatInterval);
+    }
+
+    table->longPress.primaryCommand = BRL_CMD_NOOP;
+    processCommand(table, command);
   }
-
-  table->longPress.primaryCommand = BRL_CMD_NOOP;
-  processCommand(table, table->longPress.secondaryCommand);
 }
 
 static void
@@ -481,12 +485,19 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
           addCommandArguments(table, &secondaryCommand, binding->secondaryCommand.entry, binding);
         }
 
-        if (secondaryCommand == BRL_CMD_NOOP) secondaryCommand = command;
-
         if (context != KTB_CTX_WAITING) {
-          int secondary = secondaryCommand != BRL_CMD_NOOP;
           int pending = !isImmediate;
-          int repeat = isRepeatableCommand(secondaryCommand);
+          int secondary;
+          int repeat;
+
+          if (secondaryCommand == BRL_CMD_NOOP) {
+            if (isRepeatableCommand(command)) {
+              secondaryCommand = command;
+            }
+          }
+
+          secondary = secondaryCommand != BRL_CMD_NOOP;
+          repeat = isRepeatableCommand(secondaryCommand);
 
           if (secondary || pending || repeat) {
             table->longPress.primaryCommand = pending? command: BRL_CMD_NOOP;
