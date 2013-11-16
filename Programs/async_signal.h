@@ -46,9 +46,13 @@ extern int asyncMonitorSignal (
   AsyncSignalCallback *callback, void *data
 );
 
-extern int asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler);
-extern int asyncIgnoreSignal (int signalNumber, sighandler_t *oldHandler);
-extern int asyncRevertSignal (int signalNumber, sighandler_t *oldHandler);
+
+/* Type sighandler_t isn't defined on all platforms. */
+typedef void (*SignalHandler) (int signalNumber);
+
+extern int asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *oldHandler);
+extern int asyncIgnoreSignal (int signalNumber, SignalHandler *oldHandler);
+extern int asyncRevertSignal (int signalNumber, SignalHandler *oldHandler);
 
 extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);

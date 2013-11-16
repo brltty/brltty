@@ -29,7 +29,7 @@ typedef struct {
   int number;
   Queue *monitors;
 
-  sighandler_t oldHandler;
+  SignalHandler oldHandler;
   unsigned wasBlocked:1;
 } SignalEntry;
 
@@ -40,7 +40,7 @@ typedef struct {
 } MonitorEntry;
 
 int
-asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldHandler) {
+asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *oldHandler) {
 #ifdef HAVE_SIGACTION
   struct sigaction newAction;
   struct sigaction oldAction;
@@ -56,7 +56,7 @@ asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldH
 
   logSystemError("sigaction");
 #else /* HAVE_SIGACTION */
-  sighandler_t result = signal(signalNumber, newHandler);
+  SignalHandler result = signal(signalNumber, newHandler);
 
   if (result != SIG_ERR) {
     if (oldHandler) *oldHandler = result;
@@ -70,12 +70,12 @@ asyncHandleSignal (int signalNumber, sighandler_t newHandler, sighandler_t *oldH
 }
 
 int
-asyncIgnoreSignal (int signalNumber, sighandler_t *oldHandler) {
+asyncIgnoreSignal (int signalNumber, SignalHandler *oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_IGN, oldHandler);
 }
 
 int
-asyncRevertSignal (int signalNumber, sighandler_t *oldHandler) {
+asyncRevertSignal (int signalNumber, SignalHandler *oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_DFL, oldHandler);
 }
 
