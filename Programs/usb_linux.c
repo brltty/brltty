@@ -397,6 +397,73 @@ usbReapUrb (
   return 0;
 }
 
+static struct usbdevfs_urb *
+usbMakeURB (
+  const UsbEndpointDescriptor *endpoint,
+  void *buffer,
+  size_t length,
+  void *context
+) {
+  struct usbdevfs_urb *urb;
+
+  if ((urb = malloc(sizeof(*urb) + length))) {
+    memset(urb, 0, sizeof(*urb));
+    urb->endpoint = endpoint->bEndpointAddress;
+    urb->flags = 0;
+    urb->signr = 0;
+    urb->usercontext = context;
+    urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
+
+    if (buffer) {
+      if (USB_ENDPOINT_DIRECTION(endpoint) == UsbEndpointDirection_Output) {
+        memcpy(urb->buffer, buffer, length);
+      }
+    }
+
+    switch (USB_ENDPOINT_TRANSFER(endpoint)) {
+      case UsbEndpointTransfer_Control:
+        urb->type = USBDEVFS_URB_TYPE_CONTROL;
+        break;
+
+      case UsbEndpointTransfer_Isochronous:
+        urb->type = USBDEVFS_URB_TYPE_ISO;
+        break;
+
+      case UsbEndpointTransfer_Interrupt:
+      case UsbEndpointTransfer_Bulk:
+        urb->type = USBDEVFS_URB_TYPE_BULK;
+        break;
+    }
+
+    return urb;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static int
+usbSubmitURB (
+  struct usbdevfs_urb *urb,
+  const UsbEndpointDescriptor *endpoint,
+  UsbDeviceExtension *devx
+) {
+  while (1) {
+    if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return 1;
+    if ((errno == EINVAL) &&
+        (USB_ENDPOINT_TRANSFER(endpoint) == UsbEndpointTransfer_Interrupt) &&
+        (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+      urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+      continue;
+    }
+
+    /* UHCI support returns ENXIO if a URB is already submitted. */
+    if (errno != ENXIO) logSystemError("USB URB submit");
+    return 0;
+  }
+}
+
 void *
 usbSubmitRequest (
   UsbDevice *device,
@@ -413,49 +480,10 @@ usbSubmitRequest (
     if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
       struct usbdevfs_urb *urb;
 
-      if ((urb = malloc(sizeof(*urb) + length))) {
-        memset(urb, 0, sizeof(*urb));
-        urb->endpoint = endpointAddress;
-        urb->flags = 0;
-        urb->signr = 0;
-        urb->usercontext = context;
-
-        urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
-        if (buffer)
-          if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Output)
-            memcpy(urb->buffer, buffer, length);
-
-        switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
-          case UsbEndpointTransfer_Control:
-            urb->type = USBDEVFS_URB_TYPE_CONTROL;
-            break;
-
-          case UsbEndpointTransfer_Isochronous:
-            urb->type = USBDEVFS_URB_TYPE_ISO;
-            break;
-
-          case UsbEndpointTransfer_Interrupt:
-          case UsbEndpointTransfer_Bulk:
-            urb->type = USBDEVFS_URB_TYPE_BULK;
-            break;
+      if ((urb = usbMakeURB(endpoint->descriptor, buffer, length, context))) {
+        if (usbSubmitURB(urb, endpoint->descriptor, devx)) {
+          return urb;
         }
-
-      /*
-        logMessage(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
-                   urb, urb->type, urb->endpoint, urb->flags, urb->signr,
-                   urb->buffer, urb->buffer_length, urb->usercontext);
-      */
-      submit:
-        if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return urb;
-        if ((errno == EINVAL) &&
-            (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) &&
-            (urb->type == USBDEVFS_URB_TYPE_BULK)) {
-          urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
-          goto submit;
-        }
-
-        /* UHCI support returns ENXIO if a URB is already submitted. */
-        if (errno != ENXIO) logSystemError("USB URB submit");
 
         free(urb);
       } else {
