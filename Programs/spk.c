@@ -59,20 +59,19 @@ handleSpeechTrackingAlarm (const AsyncAlarmCallbackParameters *parameters) {
     if (scr.number == speechScreen) {
       speech->doTrack(spk);
 
-      if (ses->trackCursor) {
-        int index = speech->getTrack(spk);
-
-        if (index != speechIndex) trackSpeech(speechIndex = index);
-      }
-
       if (speech->isSpeaking(spk)) {
+        if (ses->trackCursor) {
+          int index = speech->getTrack(spk);
+
+          if (index != speechIndex) trackSpeech(speechIndex = index);
+        }
+
         setSpeechTrackingAlarm(parameters->data);
-      } else {
-        speechTracking = 0;
+        return;
       }
-    } else {
-      speechTracking = 0;
     }
+
+    speechTracking = 0;
   }
 }
 
