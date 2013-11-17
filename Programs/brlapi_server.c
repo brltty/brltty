@@ -817,14 +817,19 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for accepted keys");
     return 0;
   }
+
   pthread_mutex_lock(&connectionsMutex);
   tty = tty2 = &ttys;
+
   for (ptty=ints+1; ptty<=ints+nbTtys; ptty++) {
-    for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next);
-      if (!tty2) break;
-  	tty = tty2;
-  	logMessage(LOG_DEBUG,"tty %#010lx ok",(unsigned long)ntohl(*ptty));
+    for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next) {
+    }
+
+    if (!tty2) break;
+    tty = tty2;
+    logMessage(LOG_DEBUG,"tty %#010lx ok",(unsigned long)ntohl(*ptty));
   }
+
   if (!tty2) {
     /* we were stopped at some point because the path doesn't exist yet */
     if (c->tty) {
