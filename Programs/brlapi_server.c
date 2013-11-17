@@ -811,6 +811,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     how = BRL_KEYCODES;
   }
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
+
   if ((initializeAcceptedKeys(c, how)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     logMessage(LOG_WARNING,"Failed to allocate some ressources");
     freeKeyrangeList(&c->acceptedKeys);
@@ -822,7 +823,8 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   tty = tty2 = &ttys;
 
   for (ptty=ints+1; ptty<=ints+nbTtys; ptty++) {
-    for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next) {
+    for (tty2=tty->subttys; tty2; tty2=tty2->next) {
+      if (tty2->number == ntohl(*ptty)) break;
     }
 
     if (!tty2) break;
