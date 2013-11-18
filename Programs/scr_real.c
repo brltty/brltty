@@ -51,7 +51,7 @@ typedef enum {
 static int gpmConnectionState = GCS_CLOSED;
 
 static void
-gpmResetConnection (void *data) {
+gpmResetConnection (const AsyncAlarmCallbackParameters *parameters) {
   gpmConnectionState = GCS_CLOSED;
 }
 
