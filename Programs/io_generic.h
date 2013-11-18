@@ -27,6 +27,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct GioEndpointStruct GioEndpoint;
+
 typedef struct {
   const void *applicationData;
   int readyDelay;
@@ -35,7 +37,20 @@ typedef struct {
   int requestTimeout;
 } GioOptions;
 
-typedef const void *GioHandleUsbChannelDefinitionMethod (const UsbChannelDefinition *definition);
+typedef ssize_t GioUsbWriteDataMethod (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  const void *data, size_t size, int timeout
+);
+
+typedef struct {
+  const void *applicationData;
+  GioUsbWriteDataMethod *writeData;
+} GioUsbConnectionProperties;
+
+typedef void GioUsbSetConnectionPropertiesMethod (
+  GioUsbConnectionProperties *properties,
+  const UsbChannelDefinition *definition
+);
 
 typedef struct {
   struct {
@@ -45,7 +60,7 @@ typedef struct {
 
   struct {
     const UsbChannelDefinition *channelDefinitions;
-    GioHandleUsbChannelDefinitionMethod *handleChannelDefinition;
+    GioUsbSetConnectionPropertiesMethod *setConnectionProperties;
     GioOptions options;
   } usb;
 
@@ -58,8 +73,6 @@ typedef struct {
 
 extern void gioInitializeDescriptor (GioDescriptor *descriptor);
 extern void gioInitializeSerialParameters (SerialParameters *parameters);
-
-typedef struct GioEndpointStruct GioEndpoint;
 
 extern GioEndpoint *gioConnectResource (
   const char *identifier,

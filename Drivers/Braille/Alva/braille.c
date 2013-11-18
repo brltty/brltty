@@ -114,6 +114,8 @@
 #include "timing.h"
 #include "ascii.h"
 #include "hidkeys.h"
+#include "io_generic.h"
+#include "io_usb.h"
 #include "brltty.h"
 
 typedef enum {
@@ -1527,13 +1529,24 @@ writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int 
     *byte++ = length;
     byte = mempcpy(byte, cells, length);
 
-    if (gioWriteHidReport(brl->gioEndpoint, packet, byte-packet) == -1) return 0;
+    if (!writeBraillePacket(brl, NULL, packet, byte-packet)) return 0;
     cells += length;
     start += length;
     count -= length;
   }
 
   return 1;
+}
+
+static ssize_t
+writeData2u (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  const void *data, size_t size, int timeout
+) {
+  const unsigned char *bytes = data;
+
+  return usbHidSetReport(device, definition->interface,
+                         bytes[0], bytes, size, timeout);
 }
 
 static const ProtocolOperations protocol2uOperations = {
@@ -1547,10 +1560,19 @@ AL_writeData (unsigned char *data, int len ) {
   return writeBraillePacket(&brl, NULL, data, len);
 }
 
-static const void *
-handleUsbChannelDefinition (const UsbChannelDefinition *definition) {
-  model = definition->data;
-  return definition->outputEndpoint? &protocol1Operations: &protocol2uOperations;
+static void
+setUsbConnectionProperties (
+  GioUsbConnectionProperties *properties,
+  const UsbChannelDefinition *definition
+) {
+  model = properties->applicationData;
+
+  if (definition->outputEndpoint) {
+    properties->applicationData = &protocol1Operations;
+  } else {
+    properties->applicationData = &protocol2uOperations;
+    properties->writeData = writeData2u;
+  }
 }
 
 static int
@@ -1598,7 +1620,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.serial.options.applicationData = &protocol1Operations;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.handleChannelDefinition = handleUsbChannelDefinition;
+  descriptor.usb.setConnectionProperties = setUsbConnectionProperties;
   descriptor.usb.options.inputTimeout = 100;
 
   descriptor.bluetooth.channelNumber = 1;

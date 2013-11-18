@@ -38,7 +38,7 @@
 
 struct GioHandleStruct {
   UsbChannel *channel;
-  const void *data;
+  GioUsbConnectionProperties properties;
 
   FileDescriptor inputPipeInput;
   FileDescriptor inputPipeOutput;
@@ -112,6 +112,14 @@ getUsbResourceName (GioHandle *handle, int timeout) {
 static ssize_t
 writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
   UsbChannel *channel = handle->channel;
+
+  {
+    GioUsbWriteDataMethod *method = handle->properties.writeData;
+
+    if (method) {
+      return method(channel->device, &channel->definition, data, size, timeout);
+    }
+  }
 
   if (channel->definition.outputEndpoint) {
     return usbWriteData(channel->device,
@@ -334,9 +342,15 @@ connectUsbResource (
 
       {
         const UsbChannelDefinition *definition = &handle->channel->definition;
-        GioHandleUsbChannelDefinitionMethod *method = descriptor->usb.handleChannelDefinition;
+        GioUsbConnectionProperties *properties = &handle->properties;
 
-        handle->data = method? method(definition): definition->data;
+        properties->applicationData = definition->data;
+
+        {
+          GioUsbSetConnectionPropertiesMethod *method = descriptor->usb.setConnectionProperties;
+
+          if (method) method(properties, definition);
+        }
       }
 
       return handle;
@@ -356,7 +370,7 @@ prepareUsbEndpoint (GioEndpoint *endpoint) {
   UsbChannel *channel = handle->channel;
 
   if (!endpoint->options.applicationData) {
-    endpoint->options.applicationData = handle->data;
+    endpoint->options.applicationData = handle->properties.applicationData;
   }
 
   {

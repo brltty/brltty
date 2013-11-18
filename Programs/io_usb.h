@@ -28,7 +28,6 @@ extern "C" {
 
 extern void usbForgetDevices (void);
 
-typedef struct UsbDeviceStruct UsbDevice;
 typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
 extern UsbDevice *usbFindDevice (UsbDeviceChooser chooser, void *data);
 extern void usbCloseDevice (UsbDevice *device);

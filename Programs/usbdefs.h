@@ -316,6 +316,8 @@ typedef struct {
   const void *data;
 } UsbChannelDefinition;
 
+typedef struct UsbDeviceStruct UsbDevice;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
