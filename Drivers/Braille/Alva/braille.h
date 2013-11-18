@@ -22,17 +22,8 @@
  */
 
 /* used by speech.c */
-extern int AL_writeData (BrailleDisplay *brl, unsigned char *data, int len );
+extern int AL_writeData (unsigned char *data, int len );
 
 
 /* Define next line to 1 if you have a firmware older than version 010495 */
 #define ABT3_OLD_FIRMWARE 0
-
-
-#define BAUDRATE 9600
-
-
-/* Delay in miliseconds between forced full refresh of the display.
- * This is to minimize garbage effects due to noise on the serial line.
- */
-#define REWRITE_INTERVAL 1000

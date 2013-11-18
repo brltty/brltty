@@ -1543,8 +1543,8 @@ static const ProtocolOperations protocol2uOperations = {
 };
 
 int
-AL_writeData (BrailleDisplay *brl, unsigned char *data, int len ) {
-  return writeBraillePacket(brl, NULL, data, len);
+AL_writeData (unsigned char *data, int len ) {
+  return writeBraillePacket(&brl, NULL, data, len);
 }
 
 static const void *
@@ -1557,7 +1557,7 @@ static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
-    .baud = BAUDRATE
+    .baud = 9600
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
