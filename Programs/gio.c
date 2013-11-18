@@ -447,6 +447,14 @@ gioSetHidReport (
 }
 
 ssize_t
+gioWriteHidReport (
+  GioEndpoint *endpoint,
+  const unsigned char *data, uint16_t size
+) {
+  return gioSetHidReport(endpoint, data[0], data, size);
+}
+
+ssize_t
 gioGetHidReport (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
@@ -476,6 +484,14 @@ gioSetHidFeature (
 
   return method(endpoint->handle, report,
                 data, size, endpoint->options.requestTimeout);
+}
+
+ssize_t
+gioWriteHidFeature (
+  GioEndpoint *endpoint,
+  const unsigned char *data, uint16_t size
+) {
+  return gioSetHidFeature(endpoint, data[0], data, size);
 }
 
 ssize_t

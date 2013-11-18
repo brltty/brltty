@@ -107,6 +107,11 @@ extern ssize_t gioSetHidReport (
   const void *data, uint16_t size
 );
 
+extern ssize_t gioWriteHidReport (
+  GioEndpoint *endpoint,
+  const unsigned char *data, uint16_t size
+);
+
 extern ssize_t gioGetHidReport (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
@@ -115,6 +120,11 @@ extern ssize_t gioGetHidReport (
 extern ssize_t gioSetHidFeature (
   GioEndpoint *endpoint, unsigned char report,
   const void *data, uint16_t size
+);
+
+extern ssize_t gioWriteHidFeature (
+  GioEndpoint *endpoint,
+  const unsigned char *data, uint16_t size
 );
 
 extern ssize_t gioGetHidFeature (
