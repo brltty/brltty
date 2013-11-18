@@ -486,19 +486,8 @@ static const ModelEntry modelEL12 = {
 };
 
 typedef struct {
-  int (*openPort) (const char *device);
-  void (*closePort) (void);
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
-  int (*getFeatureReport) (unsigned char report, unsigned char *buffer, int length);
-  int (*setFeatureReport) (unsigned char report, const unsigned char *data, int length);
-} InputOutputOperations;
-static const InputOutputOperations *io;
-
-typedef struct {
   void (*initializeVariables) (void);
-  int (*readPacket) (unsigned char *packet, int size);
+  int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
   int (*detectModel) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl);
@@ -520,23 +509,7 @@ static unsigned char textOffset;
 static unsigned char statusOffset;
 
 static int textRewriteRequired = 0;
-static int textRewriteInterval;
-static TimeValue textRewriteTime;
 static int statusRewriteRequired;
-
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = io->readBytes(byte, 1, wait);
-  if (count > 0) return 1;
-
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
-
-static int
-writeBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  return io->writeBytes(buffer, length, delay) != -1;
-}
 
 static int
 reallocateBuffer (unsigned char **buffer, int size) {
@@ -644,13 +617,13 @@ static const unsigned char BRL_ID[] = {ESC, 'I', 'D', '='};
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
   unsigned char bytes[] = {ESC, 'F', 'U', 'N', code, CR};
-  return writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
+  return writeBraillePacket(brl, NULL, bytes, sizeof(bytes));
 }
 
 static int
 writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
   unsigned char bytes[] = {ESC, 'P', 'A', 3, 0, parameter, setting, CR};
-  return writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
+  return writeBraillePacket(brl, NULL, bytes, sizeof(bytes));
 }
 
 static int
@@ -686,9 +659,9 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 
         if (!writeFunction1(brl, 0X07)) return 0;
 
-        while (io->awaitInput(200)) {
+        while (gioAwaitInput(brl->gioEndpoint, 200)) {
           unsigned char packet[MAXIMUM_PACKET_SIZE];
-          int count = protocol->readPacket(packet, sizeof(packet));
+          int count = protocol->readPacket(brl, packet, sizeof(packet));
 
           if (count == -1) break;
           if (count == 0) continue;
@@ -716,7 +689,7 @@ initializeVariables1 (void) {
 }
 
 static int
-readPacket1 (unsigned char *packet, int size) {
+readPacket1 (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
@@ -726,7 +699,7 @@ readPacket1 (unsigned char *packet, int size) {
     {
       int started = offset > 0;
 
-      if (!readByte(&byte, started)) {
+      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
         if (started) logPartialPacket(packet, offset);
         return result;
@@ -801,10 +774,10 @@ detectModel1 (BrailleDisplay *brl) {
   int probes = 0;
 
   while (writeFunction1(brl, 0X06)) {
-    while (io->awaitInput(200)) {
+    while (gioAwaitInput(brl->gioEndpoint, 200)) {
       unsigned char packet[MAXIMUM_PACKET_SIZE];
 
-      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
+      if (protocol->readPacket(brl, packet, sizeof(packet)) > 0) {
         if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
           if (identifyModel1(brl, packet[BRL_ID_LENGTH])) {
             return 1;
@@ -825,7 +798,7 @@ readCommand1 (BrailleDisplay *brl) {
   unsigned char packet[MAXIMUM_PACKET_SIZE];
   int length;
 
-  while ((length = protocol->readPacket(packet, sizeof(packet))) > 0) {
+  while ((length = protocol->readPacket(brl, packet, sizeof(packet))) > 0) {
 #if !ABT3_OLD_FIRMWARE
     unsigned char group = packet[0];
     unsigned char key = packet[1];
@@ -987,7 +960,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   byte = mempcpy(byte, cells, count);
   byte = mempcpy(byte, trailer, sizeof(trailer));
 
-  return writeBytes(packet, byte-packet, &brl->writeDelay);
+  return writeBraillePacket(brl, NULL, packet, byte-packet);
 }
 
 static const ProtocolOperations protocol1Operations = {
@@ -1171,7 +1144,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
 }
 
 static int
-readPacket2s (unsigned char *packet, int size) {
+readPacket2s (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
@@ -1181,7 +1154,7 @@ readPacket2s (unsigned char *packet, int size) {
     {
       int started = offset > 0;
 
-      if (!readByte(&byte, started)) {
+      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
         if (started) logPartialPacket(packet, offset);
         return result;
@@ -1233,17 +1206,17 @@ readPacket2s (unsigned char *packet, int size) {
 }
 
 static int
-tellDevice2s (unsigned char command, unsigned char operand) {
+tellDevice2s (BrailleDisplay *brl, unsigned char command, unsigned char operand) {
   unsigned char packet[] = {ESC, command, operand};
 
-  return writeBytes(packet, sizeof(packet), NULL);
+  return writeBraillePacket(brl, NULL, packet, sizeof(packet));
 }
 
 static int
-askDevice2s (unsigned char command, unsigned char *response, int size) {
-  if (tellDevice2s(command, 0X3F)) {
-    while (io->awaitInput(1000)) {
-      int length = protocol->readPacket(response, size);
+askDevice2s (BrailleDisplay *brl, unsigned char command, unsigned char *response, int size) {
+  if (tellDevice2s(brl, command, 0X3F)) {
+    while (gioAwaitInput(brl->gioEndpoint, 1000)) {
+      int length = protocol->readPacket(brl, response, size);
 
       if (length <= 0) break;
       if ((response[0] == ESC) && (response[1] == command)) return 1;
@@ -1257,7 +1230,7 @@ static int
 updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char response[0X20];
 
-  if (askDevice2s(0X45, response, sizeof(response))) {
+  if (askDevice2s(brl, 0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
     if (autodetecting) {
@@ -1276,7 +1249,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       }
     }
 
-    if (askDevice2s(0X54, response, sizeof(response))) {
+    if (askDevice2s(brl, 0X54, response, sizeof(response))) {
       unsigned char statusColumns = response[2];
       unsigned char statusSide = response[3];
 
@@ -1303,12 +1276,12 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
-      if (askDevice2s(0X56, response, sizeof(response))) {
+      if (askDevice2s(brl, 0X56, response, sizeof(response))) {
         setVersions2(&response[2], sizeof(response)-2);
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
-            tellDevice2s(0X72, 1);
+            tellDevice2s(brl, 0X72, 1);
             return 1;
           }
         }
@@ -1329,7 +1302,7 @@ detectModel2s (BrailleDisplay *brl) {
   do {
     unsigned char response[0X20];
 
-    if (askDevice2s(0X3F, response, sizeof(response))) {
+    if (askDevice2s(brl, 0X3F, response, sizeof(response))) {
       if (identifyModel2s(brl, response[2])) {
         return 1;
       }
@@ -1345,7 +1318,7 @@ static int
 readCommand2s (BrailleDisplay *brl) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
-    int length = protocol->readPacket(packet, sizeof(packet));
+    int length = protocol->readPacket(brl, packet, sizeof(packet));
 
     if (!length) return EOF;
     if (length < 0) return BRL_CMD_RESTARTBRL;
@@ -1389,7 +1362,7 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
   *byte++ = count;
   byte = mempcpy(byte, cells, count);
 
-  return writeBytes(packet, byte-packet, &brl->writeDelay);
+  return writeBraillePacket(brl, NULL, packet, byte-packet);
 }
 
 static const ProtocolOperations protocol2sOperations = {
@@ -1399,7 +1372,7 @@ static const ProtocolOperations protocol2sOperations = {
 };
 
 static int
-readPacket2u (unsigned char *packet, int size) {
+readPacket2u (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
@@ -1409,7 +1382,7 @@ readPacket2u (unsigned char *packet, int size) {
     {
       int started = offset > 0;
 
-      if (!readByte(&byte, started)) {
+      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
         if (started) logPartialPacket(packet, offset);
         return result;
@@ -1455,7 +1428,7 @@ readPacket2u (unsigned char *packet, int size) {
 static int
 updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char buffer[0X20];
-  int length = io->getFeatureReport(0X05, buffer, sizeof(buffer));
+  int length = gioGetHidFeature(brl->gioEndpoint, 0X05, buffer, sizeof(buffer));
 
   if (length != -1) {
     int textColumns = brl->textColumns;
@@ -1480,7 +1453,7 @@ static int
 detectModel2u (BrailleDisplay *brl) {
   {
     unsigned char buffer[0X20];
-    int length = io->getFeatureReport(0X09, buffer, sizeof(buffer));
+    int length = gioGetHidFeature(brl->gioEndpoint, 0X09, buffer, sizeof(buffer));
 
     if (length >= 3) setVersions2(&buffer[3], length-3);
   }
@@ -1488,7 +1461,7 @@ detectModel2u (BrailleDisplay *brl) {
   {
     int updated = 0;
     unsigned char buffer[0X20];
-    int length = io->getFeatureReport(0X06, buffer, sizeof(buffer));
+    int length = gioGetHidFeature(brl->gioEndpoint, 0X06, buffer, sizeof(buffer));
 
     if (length >= 2) {
       unsigned char *old = &buffer[1];
@@ -1501,7 +1474,7 @@ detectModel2u (BrailleDisplay *brl) {
     }
 
     if (updated) {
-      io->setFeatureReport(0X06, buffer, length);
+      gioSetHidFeature(brl->gioEndpoint, 0X06, buffer, length);
     }
   }
 
@@ -1516,7 +1489,7 @@ static int
 readCommand2u (BrailleDisplay *brl) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
-    int length = protocol->readPacket(packet, sizeof(packet));
+    int length = protocol->readPacket(brl, packet, sizeof(packet));
 
     if (!length) return EOF;
     if (length < 0) return BRL_CMD_RESTARTBRL;
@@ -1554,7 +1527,7 @@ writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int 
     *byte++ = length;
     byte = mempcpy(byte, cells, length);
 
-    if (!writeBytes(packet, byte-packet, &brl->writeDelay)) return 0;
+    if (gioWriteHidReport(brl->gioEndpoint, packet, byte-packet) == -1) return 0;
     cells += length;
     start += length;
     count -= length;
@@ -1569,271 +1542,81 @@ static const ProtocolOperations protocol2uOperations = {
   readCommand2u, writeBraille2u
 };
 
-#include "io_serial.h"
-static SerialDevice *serialDevice = NULL;
-static int serialCharactersPerSecond;
-
-static int
-openSerialPort (const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, BAUDRATE)) {
-      serialCharactersPerSecond = BAUDRATE / serialGetCharacterBits(serialDevice);
-      textRewriteInterval = REWRITE_INTERVAL;
-      protocol = &protocol1Operations;
-      return 1;
-    }
-  }
-
-  return 0;
+int
+AL_writeData (BrailleDisplay *brl, unsigned char *data, int len ) {
+  return writeBraillePacket(brl, NULL, data, len);
 }
 
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
+static const void *
+handleUsbChannelDefinition (const UsbChannelDefinition *definition) {
+  model = definition->data;
+  return definition->outputEndpoint? &protocol1Operations: &protocol2uOperations;
 }
 
 static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = BAUDRATE
+  };
 
-static int
-readSerialBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  logOutputPacket(buffer, length);
-  if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
-  return serialWriteData(serialDevice, buffer, length);
-}
-
-static int
-getSerialFeatureReport (unsigned char report, unsigned char *buffer, int length) {
-  errno = ENOSYS;
-  return -1;
-}
-
-static int
-setSerialFeatureReport (unsigned char report, const unsigned char *data, int length) {
-  errno = ENOSYS;
-  return -1;
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes,
-  getSerialFeatureReport, setSerialFeatureReport
-};
-
-#include "io_usb.h"
-
-static UsbChannel *usbChannel = NULL;
-
-static int
-openUsbPort (const char *device) {
-  static const UsbChannelDefinition definitions[] = {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* Satellite (5nn) */
       .vendor=0X06B0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
-    }
-    ,
+    },
+
     { /* BC624 */
       .vendor=0X0798, .product=0X0624,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC624
-    }
-    ,
+    },
+
     { /* BC640 */
       .vendor=0X0798, .product=0X0640,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC640
-    }
-    ,
+    },
+
     { /* BC680 */
       .vendor=0X0798, .product=0X0680,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC680
-    }
-    ,
+    },
+
     { .vendor=0 }
   };
 
-  if ((usbChannel = usbOpenChannel(definitions, (void *)device))) {
-    if (usbChannel->definition.outputEndpoint) {
-      protocol = &protocol1Operations;
-    } else {
-      protocol = &protocol2uOperations;
-    }
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
 
-    model = usbChannel->definition.data;
-    textRewriteInterval = 0;
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &protocol1Operations;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.handleChannelDefinition = handleUsbChannelDefinition;
+  descriptor.usb.options.inputTimeout = 100;
+
+  descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &protocol2sOperations;
+  descriptor.bluetooth.options.inputTimeout = 200;
+
+  if (connectBrailleResource(brl, identifier, &descriptor)) {
+    protocol = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
   return 0;
-}
-
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  int count = usbReadData(usbChannel->device,
-                          usbChannel->definition.inputEndpoint,
-                          buffer, length,
-                          (wait? timeout: 0), timeout);
-
-  if (count != -1) return count;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  logOutputPacket(buffer, length);
-
-  if (usbChannel->definition.outputEndpoint) {
-    return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);
-  } else {
-    return usbHidSetReport(usbChannel->device, usbChannel->definition.interface, buffer[0], buffer, length, 1000);
-  }
-}
-
-static int
-getUsbFeatureReport (unsigned char report, unsigned char *buffer, int length) {
-  return usbHidGetFeature(usbChannel->device, usbChannel->definition.interface, report, buffer, length, 1000);
-}
-
-static int
-setUsbFeatureReport (unsigned char report, const unsigned char *data, int length) {
-  return usbHidSetFeature(usbChannel->device, usbChannel->definition.interface, report, data, length, 1000);
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes,
-  getUsbFeatureReport, setUsbFeatureReport
-};
-
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (const char *device) {
-  BluetoothConnectionRequest request;
-
-  bthInitializeConnectionRequest(&request);
-  request.identifier = device;
-  request.channel = 1;
-
-  if ((bluetoothConnection = bthOpenConnection(&request))) {
-    textRewriteInterval = REWRITE_INTERVAL;
-    protocol = &protocol2sOperations;
-    return 1;
-  }
-
-  return 0;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 200;
-  return bthReadData(bluetoothConnection, buffer, length,
-                     (wait? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count;
-
-  logOutputPacket(buffer, length);
-  count = bthWriteData(bluetoothConnection, buffer, length);
-
-  if (count != length) {
-    if (count == -1) {
-      logSystemError("Alva Bluetooth write");
-    } else {
-      logMessage(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-
-  return count;
-}
-
-static int
-getBluetoothFeatureReport (unsigned char report, unsigned char *buffer, int length) {
-  errno = ENOSYS;
-  return -1;
-}
-
-static int
-setBluetoothFeatureReport (unsigned char report, const unsigned char *data, int length) {
-  errno = ENOSYS;
-  return -1;
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes,
-  getBluetoothFeatureReport, setBluetoothFeatureReport
-};
-
-int
-AL_writeData( unsigned char *data, int len ) {
-  return writeBytes(data, len, NULL);
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
-  }
-
   /* Open the Braille display device */
-  if (io->openPort(device)) {
+  if (connectResource(brl, device)) {
     protocol->initializeVariables();
 
     secondaryRoutingKeyEmulation2 = 0;
@@ -1851,11 +1634,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
 
       makeOutputTable(dotsTable_ISO11548_1);
-      memset(&textRewriteTime, 0, sizeof(textRewriteTime));
       return 1;
     }
 
-    io->closePort();
+    disconnectBrailleResource(brl, NULL);
   }
 
   return 0;
@@ -1863,6 +1645,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
+  disconnectBrailleResource(brl, NULL);
+
   if (previousText) {
     free(previousText);
     previousText = NULL;
@@ -1872,21 +1656,12 @@ brl_destruct (BrailleDisplay *brl) {
     free(previousStatus);
     previousStatus = NULL;
   }
-
-  io->closePort();
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int from;
   unsigned int to;
-
-  if (textRewriteInterval) {
-    TimeValue now;
-    getMonotonicTime(&now);
-    if (millisecondsBetween(&textRewriteTime, &now) > textRewriteInterval) textRewriteRequired = 1;
-    if (textRewriteRequired) textRewriteTime = now;
-  }
 
   if (cellsHaveChanged(previousText, brl->buffer, brl->textColumns, &from, &to, &textRewriteRequired)) {
     if (model->flags & MOD_FLAG_FORCE_FROM_0) from = 0;

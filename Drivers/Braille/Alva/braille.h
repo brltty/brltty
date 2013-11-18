@@ -22,7 +22,7 @@
  */
 
 /* used by speech.c */
-extern int AL_writeData( unsigned char *data, int len );
+extern int AL_writeData (BrailleDisplay *brl, unsigned char *data, int len );
 
 
 /* Define next line to 1 if you have a firmware older than version 010495 */
