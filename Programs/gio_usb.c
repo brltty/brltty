@@ -38,6 +38,7 @@
 
 struct GioHandleStruct {
   UsbChannel *channel;
+  const void *data;
 
   FileDescriptor inputPipeInput;
   FileDescriptor inputPipeOutput;
@@ -331,6 +332,13 @@ connectUsbResource (
 #endif /* HAVE_POSIX_THREADS */
       }
 
+      {
+        const UsbChannelDefinition *definition = &handle->channel->definition;
+        GioHandleUsbChannelDefinitionMethod *method = descriptor->usb.handleChannelDefinition;
+
+        handle->data = method? method(definition): definition->data;
+      }
+
       return handle;
     }
 
@@ -344,10 +352,11 @@ connectUsbResource (
 
 static int
 prepareUsbEndpoint (GioEndpoint *endpoint) {
-  UsbChannel *channel = endpoint->handle->channel;
+  GioHandle *handle = endpoint->handle;
+  UsbChannel *channel = handle->channel;
 
   if (!endpoint->options.applicationData) {
-    endpoint->options.applicationData = channel->definition.data;
+    endpoint->options.applicationData = handle->data;
   }
 
   {

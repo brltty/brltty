@@ -35,6 +35,8 @@ typedef struct {
   int requestTimeout;
 } GioOptions;
 
+typedef const void *GioHandleUsbChannelDefinitionMethod (const UsbChannelDefinition *definition);
+
 typedef struct {
   struct {
     const SerialParameters *parameters;
@@ -43,6 +45,7 @@ typedef struct {
 
   struct {
     const UsbChannelDefinition *channelDefinitions;
+    GioHandleUsbChannelDefinitionMethod *handleChannelDefinition;
     GioOptions options;
   } usb;
 

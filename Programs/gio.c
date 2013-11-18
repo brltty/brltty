@@ -50,6 +50,7 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
   descriptor->serial.options.inputTimeout = 100;
 
   descriptor->usb.channelDefinitions = NULL;
+  descriptor->usb.handleChannelDefinition = NULL;
   gioInitializeOptions(&descriptor->usb.options);
   descriptor->usb.options.inputTimeout = 1000;
   descriptor->usb.options.outputTimeout = 1000;
