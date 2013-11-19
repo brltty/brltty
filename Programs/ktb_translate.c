@@ -483,15 +483,21 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
           addCommandArguments(table, &secondaryCommand, binding->secondaryCommand.entry, binding);
         }
 
-        if (context != KTB_CTX_WAITING) {
+        if (context == KTB_CTX_WAITING) {
+          table->release.command = BRL_CMD_NOOP;
+        } else {
           if (secondaryCommand == BRL_CMD_NOOP) {
             if (isRepeatableCommand(command)) {
               secondaryCommand = command;
             }
           }
 
-          table->release.command = isImmediate? BRL_CMD_NOOP: command;
-          if (!isImmediate) command = BRL_CMD_NOOP;
+          if (isImmediate) {
+            table->release.command = BRL_CMD_NOOP;
+          } else {
+            table->release.command = command;
+            command = BRL_CMD_NOOP;
+          }
 
           if (secondaryCommand != BRL_CMD_NOOP) {
             table->longPress.command = secondaryCommand;
