@@ -374,7 +374,9 @@ static const char *screenName = NULL;
 static int screenDescriptor;
 static unsigned char virtualTerminal;
 
+static int isMonitorable;
 static AsyncHandle screenMonitor;
+
 static int screenUpdated;
 static unsigned char *cacheBuffer;
 static size_t cacheSize;
@@ -428,12 +430,13 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
 
 static int
 handleScreenAlert (const AsyncMonitorCallbackParameters *parameters) {
-  char buffer[1];
+  asyncDiscardHandle(screenMonitor);
+  screenMonitor = NULL;
 
-  readScreenDevice(0, buffer, sizeof(buffer));
   screenUpdated = 1;
   mainScreenUpdated();
-  return 1;
+
+  return 0;
 }
 
 static int
@@ -476,13 +479,9 @@ openScreen (unsigned char vt) {
         virtualTerminal = vt;
         opened = 1;
 
-        if (!canMonitorScreen()) {
-          screenMonitor = NULL;
-        } else if (!asyncMonitorFileAlert(&screenMonitor, screenDescriptor, handleScreenAlert, NULL)) {
-          screenMonitor = NULL;
-        } else {
-          screenUpdated = 1;
-        }
+        isMonitorable = canMonitorScreen();
+        screenMonitor = NULL;
+        screenUpdated = 1;
       } else {
         close(screen);
         logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
@@ -1104,7 +1103,9 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 
 static int
 poll_LinuxScreen (void) {
-  return !screenMonitor;
+  if (!isMonitorable) return 1;
+  if (screenMonitor) return 0;
+  return !asyncMonitorFileAlert(&screenMonitor, screenDescriptor, handleScreenAlert, NULL);
 }
 
 static size_t
