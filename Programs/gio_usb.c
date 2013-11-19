@@ -344,7 +344,11 @@ connectUsbResource (
         const UsbChannelDefinition *definition = &handle->channel->definition;
         GioUsbConnectionProperties *properties = &handle->properties;
 
+        memset(properties, 0, sizeof(*properties));
         properties->applicationData = definition->data;
+        properties->writeData = NULL;
+        properties->awaitInput = NULL;
+        properties->readData = NULL;
 
         {
           GioUsbSetConnectionPropertiesMethod *method = descriptor->usb.setConnectionProperties;

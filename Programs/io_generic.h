@@ -42,9 +42,21 @@ typedef ssize_t GioUsbWriteDataMethod (
   const void *data, size_t size, int timeout
 );
 
+typedef int GioUsbAwaitInputMethod (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  int timeout
+);
+
+typedef ssize_t GioUsbReadDataMethod (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  void *buffer, size_t size, int timeout
+);
+
 typedef struct {
   const void *applicationData;
   GioUsbWriteDataMethod *writeData;
+  GioUsbAwaitInputMethod *awaitInput;
+  GioUsbReadDataMethod *readData;
 } GioUsbConnectionProperties;
 
 typedef void GioUsbSetConnectionPropertiesMethod (
