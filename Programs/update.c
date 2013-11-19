@@ -893,7 +893,7 @@ scheduleUpdateIn (const char *reason, int delay) {
 
 void
 scheduleUpdate (const char *reason) {
-  scheduleUpdateIn(reason, SCREEN_UPDATE_SCHEDULE_DELAY);
+  scheduleUpdateIn(reason, 0);
 }
 
 static void
@@ -905,7 +905,7 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
                 parameters->now, 0);
   doUpdate();
 
-  setUpdateDelay(brl.writeDelay + 1);
+  setUpdateDelay(MAX((brl.writeDelay + 1), SCREEN_UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
 
   setUpdateAlarm(parameters->data);
