@@ -2001,7 +2001,12 @@ brlttyStart (int argc, char *argv[]) {
      ) {
     background();
   }
-  if (!tryPidFile()) return PROG_EXIT_SEMANTIC;
+
+  if (*opt_pidFile) {
+    if (!tryPidFile()) {
+      return PROG_EXIT_SEMANTIC;
+    }
+  }
 
   if (!opt_noDaemon) {
     fflush(stdout);
