@@ -18,19 +18,19 @@
 
 #include "prologue.h"
 
-#include "async_wait.h"
+#include "timing.h"
 #include "beep.h"
 
 int
 playBeep (unsigned short frequency, unsigned int duration) {
   if (asynchronousBeep(frequency, duration*4)) {
-    asyncWait(duration);
+    accurateDelay(duration);
     stopBeep();
     return 1;
   }
 
   if (startBeep(frequency)) {
-    asyncWait(duration);
+    accurateDelay(duration);
     stopBeep();
     return 1;
   }
