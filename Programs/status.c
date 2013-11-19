@@ -75,7 +75,8 @@ renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
       TimeValue time;
 
       getMonotonicTime(&time);
-      scheduleUpdateIn(((interval - (time.nanoseconds % interval)) / NSECS_PER_MSEC) + 1);
+      scheduleUpdateIn("alva status field",
+                       (((interval - (time.nanoseconds % interval)) / NSECS_PER_MSEC) + 1));
 
       if (!((time.nanoseconds / interval) % 2)) {
         *cell = 0;
@@ -166,7 +167,7 @@ renderStatusField_time (unsigned char *cells) {
   TimeComponents components;
 
   getCurrentTime(&value);
-  scheduleUpdateIn(millisecondsTillNextMinute(&value));
+  scheduleUpdateIn("time status field", millisecondsTillNextMinute(&value));
 
   expandTimeValue(&value, &components);
   renderNumberUpper(cells, components.hour);

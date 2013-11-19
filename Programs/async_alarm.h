@@ -27,6 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
+  const TimeValue *now;
   void *data;
 } AsyncAlarmCallbackParameters;
 

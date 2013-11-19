@@ -23,8 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void scheduleUpdate (void);
-extern void scheduleUpdateIn (int delay);
+extern void scheduleUpdate (const char *reason);
+extern void scheduleUpdateIn (const char *reason, int delay);
 
 extern void beginUpdates (void);
 extern void suspendUpdates (void);

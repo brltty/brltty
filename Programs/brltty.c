@@ -125,7 +125,7 @@ postprocessCommand (void *state, int command, int handled) {
   PrecommandState *pre = state;
 
   if (pre) {
-    if (handled) scheduleUpdate();
+    if (handled) scheduleUpdate("command executed");
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
       /* The window has been manually moved. */
@@ -770,7 +770,7 @@ void
 trackSpeech (int index) {
   placeWindowHorizontally(index % scr.cols);
   slideWindowVertically((index / scr.cols) + speechLine);
-  scheduleUpdate();
+  scheduleUpdate("speech tracked");
 }
 
 int

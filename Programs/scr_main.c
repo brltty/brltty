@@ -68,5 +68,5 @@ initializeMainScreen (MainScreen *main) {
 
 void
 mainScreenUpdated (void) {
-  if (isMainScreen()) scheduleUpdate();
+  if (isMainScreen()) scheduleUpdate("main screen updated");
 }

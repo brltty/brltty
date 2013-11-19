@@ -293,9 +293,9 @@ showInfo (void) {
     STR_ADJUST(formatBrailleTime(STR_NEXT, STR_LEFT, &fmt));
 
     if (prefs.showSeconds) {
-      scheduleUpdateIn(millisecondsTillNextSecond(&fmt.value));
+      scheduleUpdateIn("info clock second", millisecondsTillNextSecond(&fmt.value));
     } else {
-      scheduleUpdateIn(millisecondsTillNextMinute(&fmt.value));
+      scheduleUpdateIn("info clock minute", millisecondsTillNextMinute(&fmt.value));
     }
   }
 
@@ -844,41 +844,70 @@ doUpdate (void) {
   }
 
   resetAllBlinkDescriptors();
-  drainBrailleOutput(&brl, 0);
 }
 
 static void setUpdateAlarm (void *data);
-static TimeValue updateTime;
 static AsyncHandle updateAlarm;
 static int updateSuspendCount;
 
+static TimeValue updateTime;
+static TimeValue earliestTime;
+
 static void
-setUpdateTime (int delay, int ifEarlier) {
+enforceEarliestTime (void) {
+  if (compareTimeValues(&updateTime, &earliestTime) < 0) {
+    updateTime = earliestTime;
+  }
+}
+
+static void
+setUpdateDelay (int delay) {
+  getMonotonicTime(&earliestTime);
+  adjustTimeValue(&earliestTime, delay);
+  enforceEarliestTime();
+}
+
+static void
+setUpdateTime (int delay, const TimeValue *from, int ifEarlier) {
   TimeValue time;
 
-  getMonotonicTime(&time);
+  if (from) {
+    time = *from;
+  } else {
+    getMonotonicTime(&time);
+  }
+
   adjustTimeValue(&time, delay);
-  if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) updateTime = time;
+
+  if (!ifEarlier || (millisecondsBetween(&updateTime, &time) < 0)) {
+    updateTime = time;
+    enforceEarliestTime();
+  }
 }
 
 void
-scheduleUpdateIn (int delay) {
-  setUpdateTime(delay, 1);
+scheduleUpdateIn (const char *reason, int delay) {
+  setUpdateTime(delay, NULL, 1);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
 }
 
 void
-scheduleUpdate (void) {
-  scheduleUpdateIn(SCREEN_UPDATE_SCHEDULE_DELAY);
+scheduleUpdate (const char *reason) {
+  scheduleUpdateIn(reason, SCREEN_UPDATE_SCHEDULE_DELAY);
 }
 
 static void
 handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
-  setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)), 0);
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
+  setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
+                parameters->now, 0);
   doUpdate();
+
+  setUpdateDelay(brl.writeDelay + 1);
+  brl.writeDelay = 0;
+
   setUpdateAlarm(parameters->data);
 }
 
@@ -891,7 +920,7 @@ setUpdateAlarm (void *data) {
 
 void
 beginUpdates (void) {
-  setUpdateTime(0, 0);
+  setUpdateTime(0, NULL, 0);
   updateAlarm = NULL;
   updateSuspendCount = 0;
 
@@ -913,6 +942,6 @@ void
 resumeUpdates (void) {
   if (!--updateSuspendCount) {
     setUpdateAlarm(NULL);
-    scheduleUpdate();
+    scheduleUpdate("updates resumed");
   }
 }

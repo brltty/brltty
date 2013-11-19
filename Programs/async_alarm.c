@@ -166,6 +166,7 @@ asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
       if (milliseconds <= 0) {
         AsyncAlarmCallback *callback = alarm->callback;
         const AsyncAlarmCallbackParameters parameters = {
+          .now = &now,
           .data = alarm->data
         };
 

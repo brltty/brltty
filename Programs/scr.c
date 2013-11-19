@@ -83,7 +83,7 @@ setScreen (ActiveScreen which) {
   }
 
   currentScreen = entry->screen;
-  scheduleUpdate();
+  scheduleUpdate("new screen selected");
   announceScreen();
 }
 

@@ -90,7 +90,7 @@ setBlinkState (BlinkDescriptor *blink, int visible) {
 
   if (blink->alarmHandle) {
     asyncResetAlarmIn(blink->alarmHandle, getBlinkDuration(blink));
-    if (changed) scheduleUpdate();
+    if (changed) scheduleUpdate("blink state set");
   }
 }
 
@@ -105,7 +105,7 @@ handleBlinkAlarm (const AsyncAlarmCallbackParameters *parameters) {
 
   blink->isVisible = !blink->isVisible;
   setBlinkAlarm(blink);
-  scheduleUpdate();
+  scheduleUpdate("blink state changed");
 }
 
 static void
