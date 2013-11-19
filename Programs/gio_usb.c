@@ -143,11 +143,19 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
 
 static int
 awaitUsbInput (GioHandle *handle, int timeout) {
+  UsbChannel *channel = handle->channel;
+
+  {
+    GioUsbAwaitInputMethod *method = handle->properties.awaitInput;
+
+    if (method) {
+      return method(channel->device, &channel->definition, timeout);
+    }
+  }
+
   if (haveInputPipe(handle)) {
     return awaitFileInput(handle->inputPipeOutput, timeout);
   } else {
-    UsbChannel *channel = handle->channel;
-
     return usbAwaitInput(channel->device,
                          channel->definition.inputEndpoint,
                          timeout);
@@ -159,12 +167,20 @@ readUsbData (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
+  UsbChannel *channel = handle->channel;
+
+  {
+    GioUsbReadDataMethod *method = handle->properties.readData;
+
+    if (method) {
+      return method(channel->device, &channel->definition, buffer, size, initialTimeout, subsequentTimeout);
+    }
+  }
+
   if (haveInputPipe(handle)) {
     return readFile(handle->inputPipeOutput, buffer, size,
                     initialTimeout, subsequentTimeout);
   } else {
-    UsbChannel *channel = handle->channel;
-
     return usbReadData(channel->device, channel->definition.inputEndpoint,
                        buffer, size, initialTimeout, subsequentTimeout);
   }

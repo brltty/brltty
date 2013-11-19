@@ -49,7 +49,8 @@ typedef int GioUsbAwaitInputMethod (
 
 typedef ssize_t GioUsbReadDataMethod (
   UsbDevice *device, const UsbChannelDefinition *definition,
-  void *buffer, size_t size, int timeout
+  void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
 );
 
 typedef struct {
