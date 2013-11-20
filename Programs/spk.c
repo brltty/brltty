@@ -133,7 +133,7 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
 int
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setVolume) return 0;
-  logMessage(LOG_DEBUG, "setting speech volume: %d", setting);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
   speech->setVolume(spk, setting);
   if (say) sayIntegerSetting(spk, gettext("volume"), setting);
   return 1;
@@ -154,7 +154,7 @@ getFloatSpeechVolume (unsigned char setting) {
 int
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setRate) return 0;
-  logMessage(LOG_DEBUG, "setting speech rate: %d", setting);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
   speech->setRate(spk, setting);
   if (say) sayIntegerSetting(spk, gettext("rate"), setting);
   return 1;
@@ -199,7 +199,7 @@ getFloatSpeechRate (unsigned char setting) {
 int
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setPitch) return 0;
-  logMessage(LOG_DEBUG, "setting speech pitch: %d", setting);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
   speech->setPitch(spk, setting);
   if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
   return 1;
@@ -220,7 +220,7 @@ getFloatSpeechPitch (unsigned char setting) {
 int
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
   if (!speech->setPunctuation) return 0;
-  logMessage(LOG_DEBUG, "setting speech punctuation: %d", setting);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
   speech->setPunctuation(spk, setting);
   return 1;
 }

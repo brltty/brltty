@@ -858,7 +858,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
             if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
             if (pitch != prefs.speechPitch) {
-              speech->setPitch(&spk, pitch);
+              setSpeechPitch(&spk, pitch, 0);
               restorePitch = 1;
             }
           }
@@ -870,7 +870,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       unsigned char punctuation = SPK_PUNCTUATION_ALL;
 
       if (punctuation != prefs.speechPunctuation) {
-        speech->setPunctuation(&spk, punctuation);
+        setSpeechPunctuation(&spk, punctuation, 0);
         restorePunctuation = 1;
       }
     }
@@ -885,8 +885,8 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       sayWideCharacters(&character, NULL, 1, immediate);
     }
 
-    if (restorePunctuation) speech->setPunctuation(&spk, prefs.speechPunctuation);
-    if (restorePitch) speech->setPitch(&spk, prefs.speechPitch);
+    if (restorePunctuation) setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
+    if (restorePitch) setSpeechPitch(&spk, prefs.speechPitch, 0);
   } else if (spell) {
     wchar_t string[count * 2];
     size_t length = 0;
