@@ -114,7 +114,7 @@ handleSpeechCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_MUTE:
-      speech->mute(&spk);
+      muteSpeech(&spk, "command");
       break;
 
     case BRL_CMD_SAY_LINE:

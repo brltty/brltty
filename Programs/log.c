@@ -94,6 +94,16 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .name = "csrrtg",
     .prefix = "cursor routing"
   },
+
+  [LOG_CATEGORY_INDEX(UPDATE_EVENTS)] = {
+    .name = "update",
+    .prefix = "update"
+  },
+
+  [LOG_CATEGORY_INDEX(SPEECH_EVENTS)] = {
+    .name = "speech",
+    .prefix = "speech"
+  },
 };
 
 unsigned char categoryLogLevel = LOG_WARNING;

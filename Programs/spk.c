@@ -83,6 +83,12 @@ setSpeechTrackingAlarm (void *data) {
 }
 
 void
+muteSpeech (SpeechSynthesizer *spk, const char *reason) {
+  speech->mute(spk);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
+}
+
+void
 sayUtf8Characters (
   SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
@@ -90,7 +96,11 @@ sayUtf8Characters (
   int immediate
 ) {
   if (count) {
-    if (immediate) speech->mute(spk);
+    if (immediate) {
+      muteSpeech(spk, "say immediate");
+    }
+
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
     speech->say(spk, (const unsigned char *)text, length, count, attributes);
     if (speechTracking) setSpeechTrackingAlarm(spk);
   }

@@ -1501,7 +1501,7 @@ trySpeechDriver (void) {
 
 static void
 stopSpeechDriver (void) {
-  speech->mute(&spk);
+  muteSpeech(&spk, "driver stop");
   deactivateSpeechDriver();
 }
 

@@ -500,6 +500,7 @@ static void
 doUpdate (void) {
   int pointerMoved = 0;
 
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "begin");
   unrequireAllBlinkDescriptors();
   refreshScreen();
   updateSessionAttributes();
@@ -844,6 +845,7 @@ doUpdate (void) {
   }
 
   resetAllBlinkDescriptors();
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "end");
 }
 
 static void setUpdateAlarm (void *data);
@@ -888,6 +890,7 @@ setUpdateTime (int delay, const TimeValue *from, int ifEarlier) {
 void
 scheduleUpdateIn (const char *reason, int delay) {
   setUpdateTime(delay, NULL, 1);
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "schedule: %s", reason);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
 }
 

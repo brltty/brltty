@@ -823,7 +823,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     switch (prefs.whitespaceIndicator) {
       default:
       case wsNone:
-        if (immediate) speech->mute(&spk);
+        if (immediate) muteSpeech(&spk, "white space");
         break;
 
       case wsSaySpace: {
