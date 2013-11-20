@@ -1100,6 +1100,16 @@ makePreferencesMenu (void) {
       NAME(strtext("Log Cursor Routing"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(CURSOR_ROUTING), &itemName));
     }
+
+    {
+      NAME(strtext("Log Update Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(UPDATE_EVENTS), &itemName));
+    }
+
+    {
+      NAME(strtext("Log Speech Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(SPEECH_EVENTS), &itemName));
+    }
   }
 
   return rootMenu;
