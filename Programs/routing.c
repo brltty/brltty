@@ -127,14 +127,7 @@ static const CursorAxisEntry cursorAxisTable[] = {
   }
 };
 
-static void
-logRouting (const char *format, ...) {
-  va_list arguments;
-
-  va_start(arguments, format);
-  vlogMessage(LOG_CATEGORY(CURSOR_ROUTING), format, &arguments);
-  va_end(arguments);
-}
+#define logRouting(...) logMessage(LOG_CATEGORY(CURSOR_ROUTING), __VA_ARGS__)
 
 static int
 readScreenRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
@@ -266,7 +259,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
-      logRouting("moved: [%d,%d] -> [%d,%d] (%dms)",
+      logRouting("moved: [%d,%d] -> [%d,%d] (%ldms)",
                  oldx, oldy, routing->curx, routing->cury, time);
 
       if (!moved) {
