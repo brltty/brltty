@@ -500,7 +500,7 @@ static void
 doUpdate (void) {
   int pointerMoved = 0;
 
-  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "begin");
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
   unrequireAllBlinkDescriptors();
   refreshScreen();
   updateSessionAttributes();
@@ -508,7 +508,7 @@ doUpdate (void) {
   if (scr.unreadable) {
     logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen unreadable: %s", scr.unreadable);
   } else {
-    logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen: %d %dx%d [%d,%d]",
+    logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen: #%d %dx%d [%d,%d]",
                scr.number, scr.cols, scr.rows, scr.posx, scr.posy);
   }
 
@@ -852,7 +852,7 @@ doUpdate (void) {
   }
 
   resetAllBlinkDescriptors();
-  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "end");
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "finished");
 }
 
 static void setUpdateAlarm (void *data);
@@ -930,6 +930,9 @@ setUpdateAlarm (void *data) {
 
 void
 beginUpdates (void) {
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "begin");
+
+  setUpdateDelay(0);
   setUpdateTime(0, NULL, 0);
   updateAlarm = NULL;
   updateSuspendCount = 0;
@@ -946,6 +949,7 @@ suspendUpdates (void) {
   }
 
   updateSuspendCount += 1;
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "suspend: %u", updateSuspendCount);
 }
 
 void
@@ -954,4 +958,6 @@ resumeUpdates (void) {
     setUpdateAlarm(NULL);
     scheduleUpdate("updates resumed");
   }
+
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "resume: %u", updateSuspendCount);
 }
