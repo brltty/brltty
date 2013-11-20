@@ -406,6 +406,7 @@ logMessage (int level, const char *format, ...) {
 
   va_start(arguments, format);
   vlogMessage(level, format, &arguments);
+  va_end(arguments);
 }
 
 typedef struct {
