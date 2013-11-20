@@ -321,16 +321,16 @@ doAutospeak (void) {
   readScreen(0, ses->winy, newWidth, 1, newCharacters);
 
   if (!speechTracking) {
-    const char *reason = NULL;
+    const ScreenCharacter *characters = newCharacters;
     int column = 0;
     int count = newWidth;
-    const ScreenCharacter *characters = newCharacters;
+    const char *reason = NULL;
 
     if (!oldCharacters) {
       count = 0;
     } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
       if (!prefs.autospeakSelectedLine) count = 0;
-      reason = "selected line";
+      reason = "line selected";
     } else {
       int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -361,6 +361,7 @@ doAutospeak (void) {
                 if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
                   column = newX;
                   count = prefs.autospeakInsertedCharacters? (x - newX): 0;
+                  reason = "characters inserted after cursor";
                   goto autospeak;
                 }
 
@@ -372,7 +373,7 @@ doAutospeak (void) {
                   characters = oldCharacters;
                   column = oldX;
                   count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
-                  reason = "deleted characters";
+                  reason = "characters deleted after cursor";
                   goto autospeak;
                 }
 
@@ -413,7 +414,7 @@ doAutospeak (void) {
                   if (last > first) {
                     column = first;
                     count = last - first + 1;
-                    reason = "completed word";
+                    reason = "word inserted";
                     goto autospeak;
                   }
                 }
@@ -421,7 +422,7 @@ doAutospeak (void) {
             }
 
             if (!prefs.autospeakInsertedCharacters) count = 0;
-            reason = "inserted characters";
+            reason = "characters inserted before cursor";
             goto autospeak;
           }
 
@@ -432,7 +433,7 @@ doAutospeak (void) {
             characters = oldCharacters;
             column = newX;
             count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
-            reason = "deleted characters";
+            reason = "characters deleted before cursor";
             goto autospeak;
           }
         }
@@ -441,11 +442,11 @@ doAutospeak (void) {
         while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
         count -= column;
         if (!prefs.autospeakReplacedCharacters) count = 0;
-        reason = "replaced characters";
+        reason = "characters replaced";
       } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
         column = newX;
         count = prefs.autospeakSelectedCharacter? 1: 0;
-        reason = "selected character";
+        reason = "character selected";
 
         if (prefs.autospeakCompletedWords) {
           if ((newX > oldX) && (column >= 2)) {
@@ -471,7 +472,7 @@ doAutospeak (void) {
               if ((length -= first) > 1) {
                 column = first;
                 count = length;
-                reason = "completed word";
+                reason = "word appended";
                 goto autospeak;
               }
             }
