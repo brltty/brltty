@@ -321,6 +321,7 @@ doAutospeak (void) {
   readScreen(0, ses->winy, newWidth, 1, newCharacters);
 
   if (!speechTracking) {
+    const char *reason = NULL;
     int column = 0;
     int count = newWidth;
     const ScreenCharacter *characters = newCharacters;
@@ -329,6 +330,7 @@ doAutospeak (void) {
       count = 0;
     } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
       if (!prefs.autospeakSelectedLine) count = 0;
+      reason = "selected line";
     } else {
       int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -370,6 +372,7 @@ doAutospeak (void) {
                   characters = oldCharacters;
                   column = oldX;
                   count = prefs.autospeakDeletedCharacters? (x - oldX): 0;
+                  reason = "deleted characters";
                   goto autospeak;
                 }
 
@@ -410,6 +413,7 @@ doAutospeak (void) {
                   if (last > first) {
                     column = first;
                     count = last - first + 1;
+                    reason = "completed word";
                     goto autospeak;
                   }
                 }
@@ -417,6 +421,7 @@ doAutospeak (void) {
             }
 
             if (!prefs.autospeakInsertedCharacters) count = 0;
+            reason = "inserted characters";
             goto autospeak;
           }
 
@@ -427,6 +432,7 @@ doAutospeak (void) {
             characters = oldCharacters;
             column = newX;
             count = prefs.autospeakDeletedCharacters? (oldX - newX): 0;
+            reason = "deleted characters";
             goto autospeak;
           }
         }
@@ -435,9 +441,11 @@ doAutospeak (void) {
         while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
         count -= column;
         if (!prefs.autospeakReplacedCharacters) count = 0;
+        reason = "replaced characters";
       } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
         column = newX;
         count = prefs.autospeakSelectedCharacter? 1: 0;
+        reason = "selected character";
 
         if (prefs.autospeakCompletedWords) {
           if ((newX > oldX) && (column >= 2)) {
@@ -463,6 +471,7 @@ doAutospeak (void) {
               if ((length -= first) > 1) {
                 column = first;
                 count = length;
+                reason = "completed word";
                 goto autospeak;
               }
             }
@@ -476,7 +485,11 @@ doAutospeak (void) {
   autospeak:
     characters += column;
 
-    if (count) speakCharacters(characters, count, 0);
+    if (count) {
+      if (!reason) reason = "unknown reason";
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
+      speakCharacters(characters, count, 0);
+    }
   }
 
   {
@@ -897,8 +910,8 @@ setUpdateTime (int delay, const TimeValue *from, int ifEarlier) {
 void
 scheduleUpdateIn (const char *reason, int delay) {
   setUpdateTime(delay, NULL, 1);
-  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "schedule: %s", reason);
   if (updateAlarm) asyncResetAlarmTo(updateAlarm, &updateTime);
+  logMessage(LOG_CATEGORY(UPDATE_EVENTS), "scheduled: %s", reason);
 }
 
 void
