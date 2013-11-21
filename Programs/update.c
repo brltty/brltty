@@ -305,11 +305,12 @@ showInfo (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
-doAutospeak (void) {
+doAutospeak (const TimeValue *now) {
   static int oldScreen = -1;
   static int oldX = -1;
   static int oldY = -1;
   static int oldWidth = 0;
+  static TimeValue oldTime;
   static ScreenCharacter *oldCharacters = NULL;
 
   int newScreen = scr.number;
@@ -446,7 +447,6 @@ doAutospeak (void) {
       } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
         column = newX;
         count = prefs.autospeakSelectedCharacter? 1: 0;
-        reason = "character selected";
 
         if (prefs.autospeakCompletedWords) {
           if ((newX > oldX) && (column >= 2)) {
@@ -478,6 +478,9 @@ doAutospeak (void) {
             }
           }
         }
+
+        reason = "character selected";
+        if (millisecondsBetween(&oldTime, now) < UPDATE_CURSOR_MOTION_GRACE_PERIOD) count = 0;
       } else {
         count = 0;
       }
@@ -485,12 +488,9 @@ doAutospeak (void) {
 
   autospeak:
     characters += column;
-
-    if (count) {
-      if (!reason) reason = "unknown reason";
-      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
-      speakCharacters(characters, count, 0);
-    }
+    if (!reason) reason = "unknown reason";
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
+    if (count) speakCharacters(characters, count, 0);
   }
 
   {
@@ -507,11 +507,12 @@ doAutospeak (void) {
   oldX = newX;
   oldY = newY;
   oldWidth = newWidth;
+  oldTime = *now;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-doUpdate (void) {
+doUpdate (const TimeValue *now) {
   int pointerMoved = 0;
 
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
@@ -601,7 +602,7 @@ doUpdate (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (autospeak()) doAutospeak();
+  if (autospeak()) doAutospeak(now);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* There are a few things to take care of if the display has moved. */
@@ -925,11 +926,11 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
-  setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
+  setUpdateTime((pollScreen()? UPDATE_SCREEN_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
                 parameters->now, 0);
-  doUpdate();
+  doUpdate(parameters->now);
 
-  setUpdateDelay(MAX((brl.writeDelay + 1), SCREEN_UPDATE_SCHEDULE_DELAY));
+  setUpdateDelay(MAX((brl.writeDelay + 1), UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
 
   setUpdateAlarm(parameters->data);
