@@ -311,6 +311,7 @@ doAutospeak (void) {
   static int oldY = -1;
   static int oldWidth = 0;
   static ScreenCharacter *oldCharacters = NULL;
+  static size_t oldSize = 0;
   static int cursorAssumedStable = 0;
 
   int newScreen = scr.number;
@@ -328,7 +329,7 @@ doAutospeak (void) {
     const char *reason = NULL;
 
     if (!oldCharacters) {
-      count = 0;
+      reason = "current line";
     } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
       if (!prefs.autospeakSelectedLine) count = 0;
       reason = "line selected";
@@ -342,7 +343,7 @@ doAutospeak (void) {
            * before assuming that it is actually stable.
            */
 	  if ((newX == oldX) && !cursorAssumedStable) {
-	    scheduleUpdate("auto-speak cursor stability check");
+	    scheduleUpdate("autospeak cursor stability check");
 	    cursorAssumedStable = 1;
 	    return;
 	  }
@@ -495,23 +496,35 @@ doAutospeak (void) {
     }
 
   autospeak:
+    if (!reason) reason = "unknown reason";
     characters += column;
 
     if (count) {
-      if (!reason) reason = "unknown reason";
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
       speakCharacters(characters, count, 0);
     }
   }
 
   {
-    size_t size = newWidth * sizeof(*oldCharacters);
+    size_t newSize = newWidth * sizeof(*oldCharacters);
 
-    if ((oldCharacters = realloc(oldCharacters, size))) {
-      memcpy(oldCharacters, newCharacters, size);
-    } else {
-      logMallocError();
+    if (newSize > oldSize) {
+      ScreenCharacter *newBuffer = malloc(newSize);
+
+      if (!newBuffer) {
+        logMallocError();
+        return;
+      }
+
+      if (!oldCharacters) {
+        registerProgramMemory("autospeak-buffer", &oldCharacters);
+      }
+
+      oldCharacters = newBuffer;
+      oldSize = newSize;
     }
+
+    memcpy(oldCharacters, newCharacters, newSize);
   }
 
   oldScreen = newScreen;
