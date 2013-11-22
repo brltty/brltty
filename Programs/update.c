@@ -305,13 +305,13 @@ showInfo (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
-doAutospeak (const TimeValue *now) {
+doAutospeak (void) {
   static int oldScreen = -1;
   static int oldX = -1;
   static int oldY = -1;
   static int oldWidth = 0;
-  static TimeValue oldTime;
   static ScreenCharacter *oldCharacters = NULL;
+  static int cursorAssumedStable = 0;
 
   int newScreen = scr.number;
   int newX = scr.posx;
@@ -337,6 +337,16 @@ doAutospeak (const TimeValue *now) {
 
       if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
         if ((newY == ses->winy) && (newY == oldY) && onScreen) {
+          /* Sometimes the cursor moves after the screen content has been
+           * updated. Make sure we don't race ahead of such a cursor move
+           * before assuming that it is actually stable.
+           */
+	  if ((newX == oldX) && !cursorAssumedStable) {
+	    scheduleUpdate("auto-speak cursor stability check");
+	    cursorAssumedStable = 1;
+	    return;
+	  }
+
           if ((newX == oldX) &&
               isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
             int oldLength = oldWidth;
@@ -447,6 +457,7 @@ doAutospeak (const TimeValue *now) {
       } else if ((newY == ses->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
         column = newX;
         count = prefs.autospeakSelectedCharacter? 1: 0;
+        reason = "character selected";
 
         if (prefs.autospeakCompletedWords) {
           if ((newX > oldX) && (column >= 2)) {
@@ -478,9 +489,6 @@ doAutospeak (const TimeValue *now) {
             }
           }
         }
-
-        reason = "character selected";
-        if (millisecondsBetween(&oldTime, now) < UPDATE_CURSOR_MOTION_GRACE_PERIOD) count = 0;
       } else {
         count = 0;
       }
@@ -488,9 +496,12 @@ doAutospeak (const TimeValue *now) {
 
   autospeak:
     characters += column;
-    if (!reason) reason = "unknown reason";
-    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
-    if (count) speakCharacters(characters, count, 0);
+
+    if (count) {
+      if (!reason) reason = "unknown reason";
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
+      speakCharacters(characters, count, 0);
+    }
   }
 
   {
@@ -507,12 +518,12 @@ doAutospeak (const TimeValue *now) {
   oldX = newX;
   oldY = newY;
   oldWidth = newWidth;
-  oldTime = *now;
+  cursorAssumedStable = 0;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-doUpdate (const TimeValue *now) {
+doUpdate (void) {
   int pointerMoved = 0;
 
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
@@ -602,7 +613,7 @@ doUpdate (const TimeValue *now) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (autospeak()) doAutospeak(now);
+  if (autospeak()) doAutospeak();
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* There are a few things to take care of if the display has moved. */
@@ -928,7 +939,7 @@ handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
 
   setUpdateTime((pollScreen()? UPDATE_SCREEN_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
                 parameters->now, 0);
-  doUpdate(parameters->now);
+  doUpdate();
 
   setUpdateDelay(MAX((brl.writeDelay + 1), UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
