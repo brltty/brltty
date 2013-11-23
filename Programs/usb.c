@@ -807,22 +807,25 @@ usbBeginInput (
 }
 
 static void
-usbCloseInputPipe (UsbEndpoint *endpoint) {
+usbDestroyInputPipe (UsbEndpoint *endpoint) {
   closeFile(&endpoint->direction.input.pipeInput);
   closeFile(&endpoint->direction.input.pipeOutput);
 }
 
 int
 usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  if (createAnonymousPipe(&endpoint->direction.input.pipeInput, &endpoint->direction.input.pipeOutput)) {
+  if (createAnonymousPipe(&endpoint->direction.input.pipeInput,
+                          &endpoint->direction.input.pipeOutput)) {
     if (setBlockingIo(endpoint->direction.input.pipeOutput, 0)) {
-      if (asyncMonitorFileInput(&endpoint->direction.input.monitor, endpoint->direction.input.pipeOutput, callback, data)) {
+      if (asyncMonitorFileInput(&endpoint->direction.input.monitor,
+                                endpoint->direction.input.pipeOutput,
+                                callback, data)) {
         deleteElements(endpoint->direction.input.pending);
         return 1;
       }
     }
 
-    usbCloseInputPipe(endpoint);
+    usbDestroyInputPipe(endpoint);
   }
 
   return 0;
@@ -835,7 +838,7 @@ usbStopInputMonitor (UsbEndpoint *endpoint) {
     endpoint->direction.input.monitor = NULL;
   }
 
-  usbCloseInputPipe(endpoint);
+  usbDestroyInputPipe(endpoint);
 }
 
 static int
