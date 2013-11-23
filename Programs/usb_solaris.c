@@ -372,7 +372,7 @@ usbReapResponse (
 }
 
 int
-usbMonitorEndpoint (
+usbMonitorInputEndpoint (
   UsbDevice *device, unsigned char endpointNumber,
   AsyncMonitorCallback *callback, void *data
 ) {

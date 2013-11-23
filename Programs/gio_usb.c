@@ -91,7 +91,7 @@ monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) 
   if (!GIO_USB_INPUT_MONITOR_DISABLE) {
     UsbChannel *channel = handle->channel;
 
-    return usbMonitorEndpoint(channel->device, channel->definition.inputEndpoint, callback, data);
+    return usbMonitorInputEndpoint(channel->device, channel->definition.inputEndpoint, callback, data);
   }
 
   return 0;

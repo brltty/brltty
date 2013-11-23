@@ -164,7 +164,7 @@ extern int usbBeginInput (
   int count
 );
 
-extern int usbMonitorEndpoint (
+extern int usbMonitorInputEndpoint (
   UsbDevice *device, unsigned char endpointNumber,
   AsyncMonitorCallback *callback, void *data
 );
