@@ -31,9 +31,11 @@
 #include "log.h"
 #include "parameters.h"
 #include "parse.h"
+#include "file.h"
 #include "device.h"
 #include "timing.h"
 #include "async_wait.h"
+#include "io_misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 
@@ -487,6 +489,8 @@ usbDeallocateEndpoint (void *item, void *data) {
 
   switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
     case UsbEndpointDirection_Input:
+      usbStopInputMonitor(endpoint);
+
       if (endpoint->direction.input.pending) {
         deallocateQueue(endpoint->direction.input.pending);
         endpoint->direction.input.pending = NULL;
@@ -559,6 +563,11 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           endpoint->direction.input.buffer = NULL;
           endpoint->direction.input.length = 0;
           endpoint->direction.input.asynchronous = 0;
+
+          endpoint->direction.input.monitor = NULL;
+          endpoint->direction.input.pipeInput = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.pipeOutput = INVALID_FILE_DESCRIPTOR;
+
           break;
       }
 
@@ -797,6 +806,48 @@ usbBeginInput (
   return actual;
 }
 
+static void
+usbCloseInputPipe (UsbEndpoint *endpoint) {
+  closeFile(&endpoint->direction.input.pipeInput);
+  closeFile(&endpoint->direction.input.pipeOutput);
+}
+
+int
+usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
+  if (createAnonymousPipe(&endpoint->direction.input.pipeInput, &endpoint->direction.input.pipeOutput)) {
+    if (setBlockingIo(endpoint->direction.input.pipeOutput, 0)) {
+      if (asyncMonitorFileInput(&endpoint->direction.input.monitor, endpoint->direction.input.pipeOutput, callback, data)) {
+        deleteElements(endpoint->direction.input.pending);
+        return 1;
+      }
+    }
+
+    usbCloseInputPipe(endpoint);
+  }
+
+  return 0;
+}
+
+void
+usbStopInputMonitor (UsbEndpoint *endpoint) {
+  if (endpoint->direction.input.monitor) {
+    asyncCancelRequest(endpoint->direction.input.monitor);
+    endpoint->direction.input.monitor = NULL;
+  }
+
+  usbCloseInputPipe(endpoint);
+}
+
+static int
+usbHaveInputMonitor (UsbEndpoint *endpoint) {
+  return endpoint->direction.input.monitor != NULL;
+}
+
+int
+usbWriteMonitoredInput (UsbEndpoint *endpoint, const char *buffer, size_t length) {
+  return writeFile(endpoint->direction.input.pipeInput, buffer, length) != -1;
+}
+
 int
 usbAwaitInput (
   UsbDevice *device,
@@ -806,8 +857,17 @@ usbAwaitInput (
   UsbEndpoint *endpoint;
   int retryInterval;
 
-  if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) return 0;
-  if (endpoint->direction.input.completed) return 1;
+  if (!(endpoint = usbGetInputEndpoint(device, endpointNumber))) {
+    return 0;
+  }
+
+  if (usbHaveInputMonitor(endpoint)) {
+    return awaitFileInput(endpoint->direction.input.pipeOutput, timeout);
+  }
+
+  if (endpoint->direction.input.completed) {
+    return 1;
+  }
 
   if (!timeout) {
     errno = EAGAIN;
@@ -901,6 +961,10 @@ usbReadData (
   if (endpoint) {
     unsigned char *bytes = buffer;
     unsigned char *target = bytes;
+
+    if (usbHaveInputMonitor(endpoint)) {
+      return readFile(endpoint->direction.input.pipeOutput, buffer, length, initialTimeout, subsequentTimeout);
+    }
 
     while (length > 0) {
       int timeout = (target != bytes)? subsequentTimeout:

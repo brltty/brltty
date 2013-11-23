@@ -45,6 +45,10 @@ typedef struct {
       size_t length;
 
       unsigned asynchronous:1;
+
+      AsyncHandle monitor;
+      FileDescriptor pipeInput;
+      FileDescriptor pipeOutput;
     } input;
 
     struct {
@@ -99,6 +103,10 @@ extern int usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 );
+
+extern int usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
+extern void usbStopInputMonitor (UsbEndpoint *endpoint);
+extern int usbWriteMonitoredInput (UsbEndpoint *endpoint, const char *buffer, size_t length);
 
 extern ssize_t usbControlTransfer (
   UsbDevice *device,

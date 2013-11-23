@@ -42,6 +42,8 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
+#include "async_io.h"
+#include "async_signal.h"
 #include "async_wait.h"
 #include "mntpt.h"
 #include "io_usb.h"
@@ -62,6 +64,9 @@ struct UsbDeviceExtensionStruct {
 
 struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
+
+  AsyncHandle signalMonitor;
+  struct usbdevfs_urb *urb;
 };
 
 static int
@@ -444,15 +449,15 @@ usbMakeURB (
 }
 
 static int
-usbSubmitURB (
-  struct usbdevfs_urb *urb,
-  const UsbEndpointDescriptor *endpoint,
-  UsbDeviceExtension *devx
-) {
+usbSubmitURB (struct usbdevfs_urb *urb, UsbEndpoint *endpoint) {
+  const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
+  UsbDevice *device = endpoint->device;
+  UsbDeviceExtension *devx = device->extension;
+
   while (1) {
     if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return 1;
     if ((errno == EINVAL) &&
-        (USB_ENDPOINT_TRANSFER(endpoint) == UsbEndpointTransfer_Interrupt) &&
+        (USB_ENDPOINT_TRANSFER(descriptor) == UsbEndpointTransfer_Interrupt) &&
         (urb->type == USBDEVFS_URB_TYPE_BULK)) {
       urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
       continue;
@@ -481,7 +486,7 @@ usbSubmitRequest (
       struct usbdevfs_urb *urb;
 
       if ((urb = usbMakeURB(endpoint->descriptor, buffer, length, context))) {
-        if (usbSubmitURB(urb, endpoint->descriptor, devx)) {
+        if (usbSubmitURB(urb, endpoint)) {
           return urb;
         }
 
@@ -661,6 +666,65 @@ usbInterruptTransfer (
   return NULL;
 }
 
+static void
+usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
+  UsbEndpoint *endpoint = parameters->data;
+  UsbDevice *device = endpoint->device;
+  UsbDeviceExtension *devx = device->extension;
+
+  struct usbdevfs_urb *urb;
+  int reapResult = ioctl(devx->usbfsFile, USBDEVFS_REAPURBNDELAY, &urb);
+
+  if (reapResult != -1) {
+    void *buffer = urb->buffer;
+    size_t size = urb->actual_length;
+    ssize_t length = size;
+
+    if (usbApplyInputFilters(device, buffer, size, &length)) {
+      if (usbWriteMonitoredInput(endpoint, buffer, length)) {
+        if (usbSubmitURB(urb, endpoint)) {
+        }
+      }
+    }
+  }
+}
+
+int
+usbMonitorEndpoint (
+  UsbDevice *device, unsigned char endpointNumber,
+  AsyncMonitorCallback *callback, void *data
+) {
+  UsbEndpoint *endpoint;
+
+  if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
+    size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
+
+    if (usbStartInputMonitor(endpoint, callback, data)) {
+      if ((eptx->urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
+        eptx->urb->signr = SIGRTMIN;
+
+        if (asyncMonitorSignal(&eptx->signalMonitor, eptx->urb->signr, usbHandleEndpointInput, endpoint)) {
+          if (usbSubmitURB(eptx->urb, endpoint)) {
+            return 1;
+          }
+
+          asyncCancelRequest(eptx->signalMonitor);
+          eptx->signalMonitor = NULL;
+        }
+
+        free(eptx->urb);
+        eptx->urb = NULL;
+      }
+
+      usbStopInputMonitor(endpoint);
+    }
+  }
+
+  return 0;
+}
+
 ssize_t
 usbReadEndpoint (
   UsbDevice *device,
@@ -758,6 +822,11 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
+    memset(eptx, 0, sizeof(*eptx));
+
+    eptx->signalMonitor = NULL;
+    eptx->urb = NULL;
+
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       endpoint->extension = eptx;
       return 1;
@@ -775,6 +844,21 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
+  if (eptx->urb) {
+    UsbEndpoint *endpoint = eptx->urb->usercontext;
+    UsbDevice *device = endpoint->device;
+    UsbDeviceExtension *devx = device->extension;
+
+    ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, eptx->urb);
+    free(eptx->urb);
+    eptx->urb = NULL;
+  }
+
+  if (eptx->signalMonitor) {
+    asyncCancelRequest(eptx->signalMonitor);
+    eptx->signalMonitor = NULL;
+  }
+
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;

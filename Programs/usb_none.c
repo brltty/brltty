@@ -132,6 +132,14 @@ usbReapResponse (
   return NULL;
 }
 
+int
+usbMonitorEndpoint (
+  UsbDevice *device, unsigned char endpointNumber,
+  AsyncMonitorCallback *callback, void *data
+) {
+  return 0;
+}
+
 ssize_t
 usbReadEndpoint (
   UsbDevice *device,

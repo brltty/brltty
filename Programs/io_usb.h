@@ -20,7 +20,9 @@
 #define BRLTTY_INCLUDED_IO_USB
 
 #include "prologue.h"
+
 #include "usbdefs.h"
+#include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -160,6 +162,11 @@ extern int usbBeginInput (
   UsbDevice *device,
   unsigned char endpointNumber,
   int count
+);
+
+extern int usbMonitorEndpoint (
+  UsbDevice *device, unsigned char endpointNumber,
+  AsyncMonitorCallback *callback, void *data
 );
 
 extern ssize_t usbReadEndpoint (
