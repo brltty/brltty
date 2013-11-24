@@ -40,11 +40,13 @@ typedef struct {
   union {
     struct {
       Queue *pending;
-      void *completed;
-      unsigned char *buffer;
-      size_t length;
-
       unsigned asynchronous:1;
+
+      struct {
+        void *request;
+        unsigned char *buffer;
+        size_t length;
+      } completed;
 
       AsyncHandle monitor;
       FileDescriptor pipeInput;

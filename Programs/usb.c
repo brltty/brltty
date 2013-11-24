@@ -496,9 +496,9 @@ usbDeallocateEndpoint (void *item, void *data) {
         endpoint->direction.input.pending = NULL;
       }
 
-      if (endpoint->direction.input.completed) {
-        free(endpoint->direction.input.completed);
-        endpoint->direction.input.completed = NULL;
+      if (endpoint->direction.input.completed.request) {
+        free(endpoint->direction.input.completed.request);
+        endpoint->direction.input.completed.request = NULL;
       }
 
       break;
@@ -559,10 +559,11 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
           endpoint->direction.input.pending = NULL;
-          endpoint->direction.input.completed = NULL;
-          endpoint->direction.input.buffer = NULL;
-          endpoint->direction.input.length = 0;
           endpoint->direction.input.asynchronous = 0;
+
+          endpoint->direction.input.completed.request = NULL;
+          endpoint->direction.input.completed.buffer = NULL;
+          endpoint->direction.input.completed.length = 0;
 
           endpoint->direction.input.monitor = NULL;
           endpoint->direction.input.pipeInput = INVALID_FILE_DESCRIPTOR;
@@ -813,15 +814,17 @@ usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length)
 
 static int
 usbFlushBufferedInput (UsbEndpoint *endpoint) {
-  if (endpoint->direction.input.completed) {
-    if (!usbWriteReceivedInput(endpoint, endpoint->direction.input.buffer, endpoint->direction.input.length)) {
+  if (endpoint->direction.input.completed.request) {
+    if (!usbWriteReceivedInput(endpoint,
+                               endpoint->direction.input.completed.buffer,
+                               endpoint->direction.input.completed.length)) {
       return 0;
     }
 
-    free(endpoint->direction.input.completed);
-    endpoint->direction.input.completed = NULL;
-    endpoint->direction.input.buffer = NULL;
-    endpoint->direction.input.length = 0;
+    free(endpoint->direction.input.completed.request);
+    endpoint->direction.input.completed.request = NULL;
+    endpoint->direction.input.completed.buffer = NULL;
+    endpoint->direction.input.completed.length = 0;
   }
 
   while (1) {
@@ -912,7 +915,7 @@ usbAwaitInput (
     return awaitFileInput(endpoint->direction.input.pipeOutput, timeout);
   }
 
-  if (endpoint->direction.input.completed) {
+  if (endpoint->direction.input.completed.request) {
     return 1;
   }
 
@@ -937,9 +940,9 @@ usbAwaitInput (
 
         if (count != -1) {
           if (count) {
-            endpoint->direction.input.buffer = buffer;
-            endpoint->direction.input.length = count;
-            endpoint->direction.input.completed = buffer;
+            endpoint->direction.input.completed.request = buffer;
+            endpoint->direction.input.completed.buffer = buffer;
+            endpoint->direction.input.completed.length = count;
             return 1;
           }
 
@@ -983,9 +986,9 @@ usbAwaitInput (
       deleteItem(endpoint->direction.input.pending, request);
 
       if (response.count > 0) {
-        endpoint->direction.input.buffer = response.buffer;
-        endpoint->direction.input.length = response.count;
-        endpoint->direction.input.completed = request;
+        endpoint->direction.input.completed.request = request;
+        endpoint->direction.input.completed.buffer = response.buffer;
+        endpoint->direction.input.completed.length = response.count;
         return 1;
       }
 
@@ -1024,16 +1027,17 @@ usbReadData (
       }
 
       {
-        size_t count = endpoint->direction.input.length;
-        if (length < count) count = length;
-        memcpy(target, endpoint->direction.input.buffer, count);
+        size_t count = endpoint->direction.input.completed.length;
 
-        if ((endpoint->direction.input.length -= count)) {
-          endpoint->direction.input.buffer += count;
+        if (length < count) count = length;
+        memcpy(target, endpoint->direction.input.completed.buffer, count);
+
+        if ((endpoint->direction.input.completed.length -= count)) {
+          endpoint->direction.input.completed.buffer += count;
         } else {
-          endpoint->direction.input.buffer = NULL;
-          free(endpoint->direction.input.completed);
-          endpoint->direction.input.completed = NULL;
+          endpoint->direction.input.completed.buffer = NULL;
+          free(endpoint->direction.input.completed.request);
+          endpoint->direction.input.completed.request = NULL;
         }
 
         target += count;
