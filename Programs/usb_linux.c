@@ -65,8 +65,10 @@ struct UsbDeviceExtensionStruct {
 struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 
-  AsyncHandle signalMonitor;
-  struct usbdevfs_urb *urb;
+  struct {
+    AsyncHandle handle;
+    struct usbdevfs_urb *urb;
+  } monitor;
 };
 
 static int
@@ -698,20 +700,20 @@ usbMonitorInputEndpoint (
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
 
     if (usbStartInputMonitor(endpoint, callback, data)) {
-      if ((eptx->urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-        eptx->urb->signr = SIGRTMIN;
+      if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
+        eptx->monitor.urb->signr = SIGRTMIN;
 
-        if (asyncMonitorSignal(&eptx->signalMonitor, eptx->urb->signr, usbHandleEndpointInput, endpoint)) {
-          if (usbSubmitURB(eptx->urb, endpoint)) {
+        if (asyncMonitorSignal(&eptx->monitor.handle, eptx->monitor.urb->signr, usbHandleEndpointInput, endpoint)) {
+          if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
             return 1;
           }
 
-          asyncCancelRequest(eptx->signalMonitor);
-          eptx->signalMonitor = NULL;
+          asyncCancelRequest(eptx->monitor.handle);
+          eptx->monitor.handle = NULL;
         }
 
-        free(eptx->urb);
-        eptx->urb = NULL;
+        free(eptx->monitor.urb);
+        eptx->monitor.urb = NULL;
       }
 
       usbStopInputMonitor(endpoint);
@@ -820,8 +822,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     memset(eptx, 0, sizeof(*eptx));
 
-    eptx->signalMonitor = NULL;
-    eptx->urb = NULL;
+    eptx->monitor.handle = NULL;
+    eptx->monitor.urb = NULL;
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       endpoint->extension = eptx;
@@ -840,19 +842,19 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
-  if (eptx->urb) {
-    UsbEndpoint *endpoint = eptx->urb->usercontext;
+  if (eptx->monitor.urb) {
+    UsbEndpoint *endpoint = eptx->monitor.urb->usercontext;
     UsbDevice *device = endpoint->device;
     UsbDeviceExtension *devx = device->extension;
 
-    ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, eptx->urb);
-    free(eptx->urb);
-    eptx->urb = NULL;
+    ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, eptx->monitor.urb);
+    free(eptx->monitor.urb);
+    eptx->monitor.urb = NULL;
   }
 
-  if (eptx->signalMonitor) {
-    asyncCancelRequest(eptx->signalMonitor);
-    eptx->signalMonitor = NULL;
+  if (eptx->monitor.handle) {
+    asyncCancelRequest(eptx->monitor.handle);
+    eptx->monitor.handle = NULL;
   }
 
   if (eptx->completedRequests) {
