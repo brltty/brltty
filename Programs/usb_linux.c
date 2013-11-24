@@ -679,7 +679,7 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
 
   if (request) {
     if (response.count > 0) {
-      if (usbWriteReceivedInput(endpoint, response.buffer, response.count)) {
+      if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
         if (usbSubmitURB(request, endpoint)) {
         }
       }

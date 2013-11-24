@@ -49,10 +49,10 @@ typedef struct {
       } completed;
 
       struct {
-        AsyncHandle handle;
-        FileDescriptor pipeInput;
-        FileDescriptor pipeOutput;
-      } monitor;
+        FileDescriptor input;
+        FileDescriptor output;
+        AsyncHandle monitor;
+      } pipe;
     } input;
 
     struct {
@@ -110,7 +110,7 @@ extern int usbSetAlternative (
 
 extern int usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
 extern void usbStopInputMonitor (UsbEndpoint *endpoint);
-extern int usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length);
+extern int usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length);
 
 extern ssize_t usbControlTransfer (
   UsbDevice *device,

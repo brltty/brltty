@@ -565,9 +565,9 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           endpoint->direction.input.completed.buffer = NULL;
           endpoint->direction.input.completed.length = 0;
 
-          endpoint->direction.input.monitor.handle = NULL;
-          endpoint->direction.input.monitor.pipeInput = INVALID_FILE_DESCRIPTOR;
-          endpoint->direction.input.monitor.pipeOutput = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.pipe.input = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.pipe.output = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.pipe.monitor = NULL;
 
           break;
       }
@@ -807,17 +807,22 @@ usbBeginInput (
   return actual;
 }
 
+static int
+usbHaveInputPipe (UsbEndpoint *endpoint) {
+  return endpoint->direction.input.pipe.output != INVALID_FILE_DESCRIPTOR;
+}
+
 int
-usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
-  return writeFile(endpoint->direction.input.monitor.pipeInput, buffer, length) != -1;
+usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
+  return writeFile(endpoint->direction.input.pipe.input, buffer, length) != -1;
 }
 
 static int
-usbFlushBufferedInput (UsbEndpoint *endpoint) {
+usbTransferInput (UsbEndpoint *endpoint) {
   if (endpoint->direction.input.completed.request) {
-    if (!usbWriteReceivedInput(endpoint,
-                               endpoint->direction.input.completed.buffer,
-                               endpoint->direction.input.completed.length)) {
+    if (!usbEnqueueInput(endpoint,
+                         endpoint->direction.input.completed.buffer,
+                         endpoint->direction.input.completed.length)) {
       return 0;
     }
 
@@ -837,7 +842,7 @@ usbFlushBufferedInput (UsbEndpoint *endpoint) {
       deleteItem(endpoint->direction.input.pending, request);
 
       if (response.count > 0) {
-        if (!usbWriteReceivedInput(endpoint, response.buffer, response.count)) {
+        if (!usbEnqueueInput(endpoint, response.buffer, response.count)) {
           return 0;
         }
       }
@@ -856,25 +861,33 @@ usbFlushBufferedInput (UsbEndpoint *endpoint) {
 
 static void
 usbDestroyInputPipe (UsbEndpoint *endpoint) {
-  closeFile(&endpoint->direction.input.monitor.pipeInput);
-  closeFile(&endpoint->direction.input.monitor.pipeOutput);
+  closeFile(&endpoint->direction.input.pipe.input);
+  closeFile(&endpoint->direction.input.pipe.output);
+}
+
+int
+usbStartInputPipe (UsbEndpoint *endpoint) {
+  if (createAnonymousPipe(&endpoint->direction.input.pipe.input,
+                          &endpoint->direction.input.pipe.output)) {
+    if (setBlockingIo(endpoint->direction.input.pipe.output, 0)) {
+      if (usbTransferInput(endpoint)) {
+        return 1;
+      }
+    }
+
+    usbDestroyInputPipe(endpoint);
+  }
+
+  return 0;
 }
 
 int
 usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  if (createAnonymousPipe(&endpoint->direction.input.monitor.pipeInput,
-                          &endpoint->direction.input.monitor.pipeOutput)) {
-    if (setBlockingIo(endpoint->direction.input.monitor.pipeOutput, 0)) {
-      if (asyncMonitorFileInput(&endpoint->direction.input.monitor.handle,
-                                endpoint->direction.input.monitor.pipeOutput,
-                                callback, data)) {
-        if (usbFlushBufferedInput(endpoint)) {
-          return 1;
-        }
-
-        asyncCancelRequest(endpoint->direction.input.monitor.handle);
-        endpoint->direction.input.monitor.handle = NULL;
-      }
+  if (usbStartInputPipe(endpoint)) {
+    if (asyncMonitorFileInput(&endpoint->direction.input.pipe.monitor,
+                              endpoint->direction.input.pipe.output,
+                              callback, data)) {
+      return 1;
     }
 
     usbDestroyInputPipe(endpoint);
@@ -885,17 +898,12 @@ usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, voi
 
 void
 usbStopInputMonitor (UsbEndpoint *endpoint) {
-  if (endpoint->direction.input.monitor.handle) {
-    asyncCancelRequest(endpoint->direction.input.monitor.handle);
-    endpoint->direction.input.monitor.handle = NULL;
+  if (endpoint->direction.input.pipe.monitor) {
+    asyncCancelRequest(endpoint->direction.input.pipe.monitor);
+    endpoint->direction.input.pipe.monitor = NULL;
   }
 
   usbDestroyInputPipe(endpoint);
-}
-
-static int
-usbHaveInputMonitor (UsbEndpoint *endpoint) {
-  return endpoint->direction.input.monitor.handle != NULL;
 }
 
 int
@@ -911,8 +919,8 @@ usbAwaitInput (
     return 0;
   }
 
-  if (usbHaveInputMonitor(endpoint)) {
-    return awaitFileInput(endpoint->direction.input.monitor.pipeOutput, timeout);
+  if (usbHaveInputPipe(endpoint)) {
+    return awaitFileInput(endpoint->direction.input.pipe.output, timeout);
   }
 
   if (endpoint->direction.input.completed.request) {
@@ -1012,8 +1020,8 @@ usbReadData (
     unsigned char *bytes = buffer;
     unsigned char *target = bytes;
 
-    if (usbHaveInputMonitor(endpoint)) {
-      return readFile(endpoint->direction.input.monitor.pipeOutput, buffer, length, initialTimeout, subsequentTimeout);
+    if (usbHaveInputPipe(endpoint)) {
+      return readFile(endpoint->direction.input.pipe.output, buffer, length, initialTimeout, subsequentTimeout);
     }
 
     while (length > 0) {
