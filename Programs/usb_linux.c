@@ -669,20 +669,16 @@ usbInterruptTransfer (
 static void
 usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
   UsbEndpoint *endpoint = parameters->data;
-  UsbDevice *device = endpoint->device;
-  UsbDeviceExtension *devx = device->extension;
 
-  struct usbdevfs_urb *urb;
-  int reapResult = ioctl(devx->usbfsFile, USBDEVFS_REAPURBNDELAY, &urb);
+  UsbResponse response;
+  void *request = usbReapResponse(endpoint->device,
+                                  endpoint->descriptor->bEndpointAddress,
+                                  &response, 0);
 
-  if (reapResult != -1) {
-    void *buffer = urb->buffer;
-    size_t size = urb->actual_length;
-    ssize_t length = size;
-
-    if (usbApplyInputFilters(device, buffer, size, &length)) {
-      if (usbWriteReceivedInput(endpoint, buffer, length)) {
-        if (usbSubmitURB(urb, endpoint)) {
+  if (request) {
+    if (response.count > 0) {
+      if (usbWriteReceivedInput(endpoint, response.buffer, response.count)) {
+        if (usbSubmitURB(request, endpoint)) {
         }
       }
     }
