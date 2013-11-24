@@ -565,9 +565,9 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           endpoint->direction.input.completed.buffer = NULL;
           endpoint->direction.input.completed.length = 0;
 
-          endpoint->direction.input.monitor = NULL;
-          endpoint->direction.input.pipeInput = INVALID_FILE_DESCRIPTOR;
-          endpoint->direction.input.pipeOutput = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.monitor.handle = NULL;
+          endpoint->direction.input.monitor.pipeInput = INVALID_FILE_DESCRIPTOR;
+          endpoint->direction.input.monitor.pipeOutput = INVALID_FILE_DESCRIPTOR;
 
           break;
       }
@@ -809,7 +809,7 @@ usbBeginInput (
 
 int
 usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
-  return writeFile(endpoint->direction.input.pipeInput, buffer, length) != -1;
+  return writeFile(endpoint->direction.input.monitor.pipeInput, buffer, length) != -1;
 }
 
 static int
@@ -856,24 +856,24 @@ usbFlushBufferedInput (UsbEndpoint *endpoint) {
 
 static void
 usbDestroyInputPipe (UsbEndpoint *endpoint) {
-  closeFile(&endpoint->direction.input.pipeInput);
-  closeFile(&endpoint->direction.input.pipeOutput);
+  closeFile(&endpoint->direction.input.monitor.pipeInput);
+  closeFile(&endpoint->direction.input.monitor.pipeOutput);
 }
 
 int
 usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  if (createAnonymousPipe(&endpoint->direction.input.pipeInput,
-                          &endpoint->direction.input.pipeOutput)) {
-    if (setBlockingIo(endpoint->direction.input.pipeOutput, 0)) {
-      if (asyncMonitorFileInput(&endpoint->direction.input.monitor,
-                                endpoint->direction.input.pipeOutput,
+  if (createAnonymousPipe(&endpoint->direction.input.monitor.pipeInput,
+                          &endpoint->direction.input.monitor.pipeOutput)) {
+    if (setBlockingIo(endpoint->direction.input.monitor.pipeOutput, 0)) {
+      if (asyncMonitorFileInput(&endpoint->direction.input.monitor.handle,
+                                endpoint->direction.input.monitor.pipeOutput,
                                 callback, data)) {
         if (usbFlushBufferedInput(endpoint)) {
           return 1;
         }
 
-        asyncCancelRequest(endpoint->direction.input.monitor);
-        endpoint->direction.input.monitor = NULL;
+        asyncCancelRequest(endpoint->direction.input.monitor.handle);
+        endpoint->direction.input.monitor.handle = NULL;
       }
     }
 
@@ -885,9 +885,9 @@ usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, voi
 
 void
 usbStopInputMonitor (UsbEndpoint *endpoint) {
-  if (endpoint->direction.input.monitor) {
-    asyncCancelRequest(endpoint->direction.input.monitor);
-    endpoint->direction.input.monitor = NULL;
+  if (endpoint->direction.input.monitor.handle) {
+    asyncCancelRequest(endpoint->direction.input.monitor.handle);
+    endpoint->direction.input.monitor.handle = NULL;
   }
 
   usbDestroyInputPipe(endpoint);
@@ -895,7 +895,7 @@ usbStopInputMonitor (UsbEndpoint *endpoint) {
 
 static int
 usbHaveInputMonitor (UsbEndpoint *endpoint) {
-  return endpoint->direction.input.monitor != NULL;
+  return endpoint->direction.input.monitor.handle != NULL;
 }
 
 int
@@ -912,7 +912,7 @@ usbAwaitInput (
   }
 
   if (usbHaveInputMonitor(endpoint)) {
-    return awaitFileInput(endpoint->direction.input.pipeOutput, timeout);
+    return awaitFileInput(endpoint->direction.input.monitor.pipeOutput, timeout);
   }
 
   if (endpoint->direction.input.completed.request) {
@@ -1013,7 +1013,7 @@ usbReadData (
     unsigned char *target = bytes;
 
     if (usbHaveInputMonitor(endpoint)) {
-      return readFile(endpoint->direction.input.pipeOutput, buffer, length, initialTimeout, subsequentTimeout);
+      return readFile(endpoint->direction.input.monitor.pipeOutput, buffer, length, initialTimeout, subsequentTimeout);
     }
 
     while (length > 0) {

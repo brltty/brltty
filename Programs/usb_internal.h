@@ -48,9 +48,11 @@ typedef struct {
         size_t length;
       } completed;
 
-      AsyncHandle monitor;
-      FileDescriptor pipeInput;
-      FileDescriptor pipeOutput;
+      struct {
+        AsyncHandle handle;
+        FileDescriptor pipeInput;
+        FileDescriptor pipeOutput;
+      } monitor;
     } input;
 
     struct {
