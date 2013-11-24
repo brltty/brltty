@@ -806,6 +806,51 @@ usbBeginInput (
   return actual;
 }
 
+int
+usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
+  return writeFile(endpoint->direction.input.pipeInput, buffer, length) != -1;
+}
+
+static int
+usbFlushBufferedInput (UsbEndpoint *endpoint) {
+  if (endpoint->direction.input.completed) {
+    if (!usbWriteReceivedInput(endpoint, endpoint->direction.input.buffer, endpoint->direction.input.length)) {
+      return 0;
+    }
+
+    free(endpoint->direction.input.completed);
+    endpoint->direction.input.completed = NULL;
+    endpoint->direction.input.buffer = NULL;
+    endpoint->direction.input.length = 0;
+  }
+
+  while (1) {
+    UsbResponse response;
+    void *request = usbReapResponse(endpoint->device,
+                                    endpoint->descriptor->bEndpointAddress,
+                                    &response, 0);
+
+    if (request) {
+      deleteItem(endpoint->direction.input.pending, request);
+
+      if (response.count > 0) {
+        if (!usbWriteReceivedInput(endpoint, response.buffer, response.count)) {
+          return 0;
+        }
+      }
+
+      free(request);
+    } else if (errno == EAGAIN) {
+      break;
+    } else {
+      return 0;
+    }
+  }
+
+  deleteElements(endpoint->direction.input.pending);
+  return 1;
+}
+
 static void
 usbDestroyInputPipe (UsbEndpoint *endpoint) {
   closeFile(&endpoint->direction.input.pipeInput);
@@ -820,8 +865,12 @@ usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, voi
       if (asyncMonitorFileInput(&endpoint->direction.input.monitor,
                                 endpoint->direction.input.pipeOutput,
                                 callback, data)) {
-        deleteElements(endpoint->direction.input.pending);
-        return 1;
+        if (usbFlushBufferedInput(endpoint)) {
+          return 1;
+        }
+
+        asyncCancelRequest(endpoint->direction.input.monitor);
+        endpoint->direction.input.monitor = NULL;
       }
     }
 
@@ -844,11 +893,6 @@ usbStopInputMonitor (UsbEndpoint *endpoint) {
 static int
 usbHaveInputMonitor (UsbEndpoint *endpoint) {
   return endpoint->direction.input.monitor != NULL;
-}
-
-int
-usbWriteMonitoredInput (UsbEndpoint *endpoint, const char *buffer, size_t length) {
-  return writeFile(endpoint->direction.input.pipeInput, buffer, length) != -1;
 }
 
 int

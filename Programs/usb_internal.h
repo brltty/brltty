@@ -106,7 +106,7 @@ extern int usbSetAlternative (
 
 extern int usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
 extern void usbStopInputMonitor (UsbEndpoint *endpoint);
-extern int usbWriteMonitoredInput (UsbEndpoint *endpoint, const char *buffer, size_t length);
+extern int usbWriteReceivedInput (UsbEndpoint *endpoint, const void *buffer, size_t length);
 
 extern ssize_t usbControlTransfer (
   UsbDevice *device,

@@ -681,7 +681,7 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
     ssize_t length = size;
 
     if (usbApplyInputFilters(device, buffer, size, &length)) {
-      if (usbWriteMonitoredInput(endpoint, buffer, length)) {
+      if (usbWriteReceivedInput(endpoint, buffer, length)) {
         if (usbSubmitURB(urb, endpoint)) {
         }
       }
