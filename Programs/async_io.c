@@ -671,8 +671,8 @@ testFunctionMonitor (void *item, void *data) {
 }
 
 int
-asyncHandleOperation (AsyncThreadSpecificData *tsd, long int timeout) {
-  int handled = 0;
+asyncPerformOperation (AsyncThreadSpecificData *tsd, long int timeout) {
+  int performed = 0;
   Queue *functions = tsd->functionQueue;
   unsigned int functionCount = functions? getQueueSize(functions): 0;
 
@@ -704,7 +704,7 @@ asyncHandleOperation (AsyncThreadSpecificData *tsd, long int timeout) {
       operation->active = 1;
       if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
       operation->active = 0;
-      handled = 1;
+      performed = 1;
 
       if (operation->cancel) {
         deleteElement(operationElement);
@@ -724,7 +724,7 @@ asyncHandleOperation (AsyncThreadSpecificData *tsd, long int timeout) {
     approximateDelay(timeout);
   }
 
-  return handled;
+  return performed;
 }
 
 static void

@@ -27,10 +27,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  Queue *functionQueue;
+  Queue *signalQueue;
   Queue *alarmQueue;
   Queue *taskQueue;
-  Queue *signalQueue;
+  Queue *functionQueue;
   unsigned int waitDepth;
 } AsyncThreadSpecificData;
 
@@ -51,9 +51,10 @@ typedef struct {
   void (*cancelRequest) (Element *element);
 } AsyncQueueMethods;
 
-extern int asyncHandleOperation (AsyncThreadSpecificData *tsd, long int timeout);
-extern int asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
+extern int asyncPerformSignal (AsyncThreadSpecificData *tsd);
+extern int asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
 extern int asyncPerformTask (AsyncThreadSpecificData *tsd);
+extern int asyncPerformOperation (AsyncThreadSpecificData *tsd, long int timeout);
 
 #ifdef __cplusplus
 }

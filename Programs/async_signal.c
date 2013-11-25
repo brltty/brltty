@@ -27,6 +27,7 @@
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
   int number;
+  unsigned int count;
   Queue *monitors;
 
   SignalHandler oldHandler;
@@ -221,6 +222,7 @@ getSignalElement (int signalNumber, int create) {
       if ((sig = malloc(sizeof(*sig)))) {
         memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
+        sig->count = 0;
 
         if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
           {
@@ -256,18 +258,8 @@ handleMonitoredSignal (int signalNumber) {
 
   if (signalElement) {
     SignalEntry *sig = getElementItem(signalElement);
-    Element *monitorElement = getQueueHead(sig->monitors);
 
-    if (monitorElement) {
-      MonitorEntry *mon = getElementItem(monitorElement);
-
-      const AsyncSignalCallbackParameters parameters = {
-        .signal = signalNumber,
-        .data = mon->data
-      };
-
-      mon->callback(&parameters);
-    }
+    sig->count += 1;
   }
 }
 
@@ -331,5 +323,52 @@ asyncMonitorSignal (
   };
 
   return asyncMakeHandle(handle, newMonitorElement, &mep);
+}
+
+static int
+testPendingSignal (const void *item, const void *data) {
+  const SignalEntry *sig = item;
+
+  return sig->count > 0;
+}
+
+int
+asyncPerformSignal (AsyncThreadSpecificData *tsd) {
+  Queue *signals = getSignalQueue(0);
+
+  if (signals) {
+    Element *signalElement = findElement(signals, testPendingSignal, NULL);
+
+    if (signalElement) {
+      SignalEntry *sig = getElementItem(signalElement);
+
+      {
+        int wasBlocked = asyncIsSignalBlocked(sig->number);
+
+        asyncSetSignalBlocked(sig->number, 1);
+        sig->count -= 1;
+        asyncSetSignalBlocked(sig->number, wasBlocked);
+      }
+
+      {
+        Element *monitorElement = getQueueHead(sig->monitors);
+
+        if (monitorElement) {
+          MonitorEntry *mon = getElementItem(monitorElement);
+
+          const AsyncSignalCallbackParameters parameters = {
+            .signal = sig->number,
+            .data = mon->data
+          };
+
+          mon->callback(&parameters);
+          requeueElement(signalElement);
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */

@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "async_internal.h"
 
@@ -42,10 +44,10 @@ tsdDestroyData (void *data) {
   AsyncThreadSpecificData *tsd = data;
 
   if (tsd) {
-    if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
+    if (tsd->signalQueue) deallocateQueue(tsd->signalQueue);
     if (tsd->alarmQueue) deallocateQueue(tsd->alarmQueue);
     if (tsd->taskQueue) deallocateQueue(tsd->taskQueue);
-    if (tsd->signalQueue) deallocateQueue(tsd->signalQueue);
+    if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
     free(tsd);
   }
 }
@@ -71,10 +73,11 @@ asyncGetThreadSpecificData (void) {
       if (tsd) return tsd;
 
       if ((tsd = malloc(sizeof(*tsd)))) {
-        tsd->functionQueue = NULL;
+        memset(tsd, 0, sizeof(*tsd));
+        tsd->signalQueue = NULL;
         tsd->alarmQueue = NULL;
         tsd->taskQueue = NULL;
-        tsd->signalQueue = NULL;
+        tsd->functionQueue = NULL;
         tsd->waitDepth = 0;
 
         if (!(error = pthread_setspecific(tsdKey, tsd))) {
@@ -95,10 +98,10 @@ asyncGetThreadSpecificData (void) {
 
 #else /* PTHREAD_ONCE_INIT */
 static AsyncThreadSpecificData tsd = {
-  .functionQueue = NULL,
+  .signalQueue = NULL,
   .alarmQueue = NULL,
   .taskQueue = NULL,
-  .signalQueue = NULL,
+  .functionQueue = NULL,
   .waitDepth = 0
 };
 

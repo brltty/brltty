@@ -1270,7 +1270,7 @@ exitSessions (void *data) {
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 static void 
-handleProgramTerminationRequest (const AsyncSignalCallbackParameters *parameters) {
+handleProgramTerminationRequest (int signalNumber) {
   time_t now = time(NULL);
 
   if (difftime(now, programTerminationRequestTime) > PROGRAM_TERMINATION_REQUEST_RESET_SECONDS) {
@@ -1308,11 +1308,11 @@ brlttyConstruct (int argc, char *argv[]) {
 #endif /* SIGPIPE */
 
 #ifdef SIGTERM
-  asyncMonitorSignal(NULL, SIGTERM, handleProgramTerminationRequest, NULL);
+  asyncHandleSignal(SIGTERM, handleProgramTerminationRequest, NULL);
 #endif /* SIGTERM */
 
 #ifdef SIGINT
-  asyncMonitorSignal(NULL, SIGINT, handleProgramTerminationRequest, NULL);
+  asyncHandleSignal(SIGINT, handleProgramTerminationRequest, NULL);
 #endif /* SIGINT */
 
   interruptEnabledCount = 0;

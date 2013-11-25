@@ -149,7 +149,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncHandleAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
+asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
   Queue *alarms = tsd->alarmQueue;
 
   if (alarms) {

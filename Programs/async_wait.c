@@ -30,9 +30,10 @@ asyncAwaitAction (long int timeout) {
   if (tsd) {
     tsd->waitDepth += 1;
 
-    if (asyncHandleAlarm(tsd, &timeout)) {
+    if (asyncPerformSignal(tsd)) {
+    } else if (asyncPerformAlarm(tsd, &timeout)) {
     } else if (asyncPerformTask(tsd)) {
-    } else if (asyncHandleOperation(tsd, timeout)) {
+    } else if (asyncPerformOperation(tsd, timeout)) {
     } else {
     }
 
