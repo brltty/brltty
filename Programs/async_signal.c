@@ -283,12 +283,12 @@ addSignalEntry (void *data) {
 
 typedef struct {
   int signalNumber;
-} SignalKey;
+} TestMonitoredSignalKey;
 
 static int
-testSignalEntry (const void *item, const void *data) {
+testMonitoredSignal (const void *item, const void *data) {
   const SignalEntry *sig = item;
-  const SignalKey *key = data;
+  const TestMonitoredSignalKey *key = data;
 
   return sig->number == key->signalNumber;
 }
@@ -299,12 +299,12 @@ getSignalElement (int signalNumber, int create) {
 
   if (signals) {
     {
-      const SignalKey key = {
+      const TestMonitoredSignalKey key = {
         .signalNumber = signalNumber
       };
 
       {
-        Element *element = findElement(signals, testSignalEntry, &key);
+        Element *element = findElement(signals, testMonitoredSignal, &key);
 
         if (element) return element;
       }
@@ -427,6 +427,19 @@ asyncMonitorSignal (
   return asyncMakeHandle(handle, newMonitorElement, &mep);
 }
 
+typedef struct {
+  Element *const element;
+  SignalEntry *const entry;
+} SetSignalHandledParameters;
+
+static void
+setSignalHandled (void *data) {
+  SetSignalHandledParameters *parameters = data;
+
+  parameters->entry->count -= 1;
+  requeueElement(parameters->element);
+}
+
 static int
 testPendingSignal (const void *item, const void *data) {
   const SignalEntry *sig = item;
@@ -447,11 +460,12 @@ asyncPerformSignal (AsyncThreadSpecificData *tsd) {
       SignalEntry *sig = getElementItem(signalElement);
 
       {
-        int wasBlocked = asyncIsSignalBlocked(sig->number);
+        SetSignalHandledParameters parameters = {
+          .element = signalElement,
+          .entry = sig
+        };
 
-        asyncSetSignalBlocked(sig->number, 1);
-        sig->count -= 1;
-        asyncSetSignalBlocked(sig->number, wasBlocked);
+        asyncCallWithAllSignalsBlocked(setSignalHandled, &parameters);
       }
 
       {
