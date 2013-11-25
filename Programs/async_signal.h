@@ -22,6 +22,7 @@
 #include "prologue.h"
 
 #undef ASYNC_CAN_HANDLE_SIGNALS
+
 #ifdef HAVE_SIGNAL_H
 #define ASYNC_CAN_HANDLE_SIGNALS
 #include <signal.h>
@@ -56,6 +57,12 @@ extern int asyncRevertSignal (int signalNumber, SignalHandler *oldHandler);
 
 extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);
+
+
+typedef void AsyncFunction (void *data);
+extern int asyncCallWithSignalsBlocked (const sigset_t *mask, AsyncFunction *function, void *data);
+extern int asyncCallWithSignalBlocked (int number, AsyncFunction *function, void *data);
+extern int asyncCallWithAllSignalsBlocked (AsyncFunction *function, void *data);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 #ifdef __cplusplus

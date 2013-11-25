@@ -144,6 +144,49 @@ asyncIsSignalBlocked (int signalNumber) {
   return 0;
 }
 
+typedef void AsyncFunction (void *data);
+
+int
+asyncCallWithSignalsBlocked (const sigset_t *mask, AsyncFunction *function, void *data) {
+  sigset_t oldMask;
+
+  if (setSignalMask(SIG_BLOCK, mask, &oldMask)) {
+    function(data);
+    setSignalMask(SIG_SETMASK, &oldMask, NULL);
+    return 1;
+  }
+
+  return 0;
+}
+
+int
+asyncCallWithSignalBlocked (int number, AsyncFunction *function, void *data) {
+  sigset_t mask;
+
+  if (makeSignalMask(&mask, number)) {
+    if (asyncCallWithSignalsBlocked(&mask, function, data)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
+asyncCallWithAllSignalsBlocked (AsyncFunction *function, void *data) {
+  sigset_t mask;
+
+  if (sigfillset(&mask) != -1) {
+    if (asyncCallWithSignalsBlocked(&mask, function, data)) {
+      return 1;
+    }
+  } else {
+    logSystemError("sigfillset");
+  }
+
+  return 0;
+}
+
 static void
 deallocateMonitorEntry (void *item, void *data) {
   MonitorEntry *mon = item;
@@ -171,6 +214,19 @@ getSignalQueue (int create) {
   return tsd->signalQueue;
 }
 
+typedef struct {
+  SignalEntry *const signalEntry;
+} DeleteSignalEntryParameters;
+
+static void
+deleteSignalEntry (void *data) {
+  DeleteSignalEntryParameters *parameters = data;
+  Queue *signals = getSignalQueue(0);
+  Element *signalElement = findElementWithItem(signals, parameters->signalEntry);
+
+  deleteElement(signalElement);
+}
+
 static void
 deleteMonitor (Element *monitorElement) {
   MonitorEntry *mon = getElementItem(monitorElement);
@@ -182,9 +238,11 @@ deleteMonitor (Element *monitorElement) {
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
 
     {
-      Queue *signals = getSignalQueue(0);
-      Element *signalElement = findElementWithItem(signals, sig);
-      deleteElement(signalElement);
+      DeleteSignalEntryParameters parameters = {
+        .signalEntry = sig
+      };
+
+      asyncCallWithAllSignalsBlocked(deleteSignalEntry, &parameters);
     }
   }
 }
@@ -198,6 +256,20 @@ cancelMonitor (Element *monitorElement) {
   } else {
     deleteMonitor(monitorElement);
   }
+}
+
+typedef struct {
+  Queue *const signalQueue;
+  SignalEntry *const signalEntry;
+
+  Element *signalElement;
+} AddSignalEntryParameters;
+
+static void
+addSignalEntry (void *data) {
+  AddSignalEntryParameters *parameters = data;
+
+  parameters->signalElement = enqueueItem(parameters->signalQueue, parameters->signalEntry);
 }
 
 typedef struct {
@@ -247,9 +319,15 @@ getSignalElement (int signalNumber, int create) {
           }
 
           {
-            Element *element = enqueueItem(signals, sig);
+            AddSignalEntryParameters parameters = {
+              .signalQueue = signals,
+              .signalEntry = sig,
 
-            if (element) return element;
+              .signalElement = NULL
+            };
+
+            asyncCallWithAllSignalsBlocked(addSignalEntry, &parameters);
+            if (parameters.signalElement) return parameters.signalElement;
           }
 
           deallocateQueue(sig->monitors);
@@ -346,9 +424,11 @@ testPendingSignal (const void *item, const void *data) {
 
   return sig->count > 0;
 }
+#endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 int
 asyncPerformSignal (AsyncThreadSpecificData *tsd) {
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
   Queue *signals = getSignalQueue(0);
 
   if (signals) {
@@ -386,7 +466,7 @@ asyncPerformSignal (AsyncThreadSpecificData *tsd) {
       }
     }
   }
+#endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
   return 0;
 }
-#endif /* ASYNC_CAN_HANDLE_SIGNALS */
