@@ -59,10 +59,24 @@ extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);
 
 
-typedef void AsyncFunction (void *data);
-extern int asyncCallWithSignalsBlocked (const sigset_t *mask, AsyncFunction *function, void *data);
-extern int asyncCallWithSignalBlocked (int number, AsyncFunction *function, void *data);
-extern int asyncCallWithAllSignalsBlocked (AsyncFunction *function, void *data);
+typedef void AsyncWithBlockedSignalsFunction (void *data);
+
+extern int asyncCallWithSignalsBlocked (
+  const sigset_t *mask,
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+);
+
+extern int asyncCallWithSignalBlocked (
+  int number,
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+);
+
+extern int asyncCallWithAllSignalsBlocked (
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 #ifdef __cplusplus

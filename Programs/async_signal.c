@@ -144,10 +144,12 @@ asyncIsSignalBlocked (int signalNumber) {
   return 0;
 }
 
-typedef void AsyncFunction (void *data);
-
 int
-asyncCallWithSignalsBlocked (const sigset_t *mask, AsyncFunction *function, void *data) {
+asyncCallWithSignalsBlocked (
+  const sigset_t *mask,
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+) {
   sigset_t oldMask;
 
   if (setSignalMask(SIG_BLOCK, mask, &oldMask)) {
@@ -160,7 +162,11 @@ asyncCallWithSignalsBlocked (const sigset_t *mask, AsyncFunction *function, void
 }
 
 int
-asyncCallWithSignalBlocked (int number, AsyncFunction *function, void *data) {
+asyncCallWithSignalBlocked (
+  int number,
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+) {
   sigset_t mask;
 
   if (makeSignalMask(&mask, number)) {
@@ -173,7 +179,10 @@ asyncCallWithSignalBlocked (int number, AsyncFunction *function, void *data) {
 }
 
 int
-asyncCallWithAllSignalsBlocked (AsyncFunction *function, void *data) {
+asyncCallWithAllSignalsBlocked (
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+) {
   sigset_t mask;
 
   if (sigfillset(&mask) != -1) {
