@@ -19,10 +19,6 @@
 #ifndef BRLTTY_INCLUDED_HOSTCMD_UNIX
 #define BRLTTY_INCLUDED_HOSTCMD_UNIX
 
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

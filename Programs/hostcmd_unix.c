@@ -19,6 +19,9 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #include "log.h"
 #include "hostcmd_unix.h"
