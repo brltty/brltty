@@ -38,6 +38,8 @@ typedef struct {
   SignalEntry *signal;
   AsyncSignalCallback *callback;
   void *data;
+  unsigned active:1;
+  unsigned delete:1;
 } MonitorEntry;
 
 int
@@ -170,7 +172,7 @@ getSignalQueue (int create) {
 }
 
 static void
-cancelMonitor (Element *monitorElement) {
+deleteMonitor (Element *monitorElement) {
   MonitorEntry *mon = getElementItem(monitorElement);
   SignalEntry *sig = mon->signal;
   deleteElement(monitorElement);
@@ -184,6 +186,17 @@ cancelMonitor (Element *monitorElement) {
       Element *signalElement = findElementWithItem(signals, sig);
       deleteElement(signalElement);
     }
+  }
+}
+
+static void
+cancelMonitor (Element *monitorElement) {
+  MonitorEntry *mon = getElementItem(monitorElement);
+
+  if (mon->active) {
+    mon->delete = 1;
+  } else {
+    deleteMonitor(monitorElement);
   }
 }
 
@@ -284,6 +297,8 @@ newMonitorElement (const void *parameters) {
       mon->signal = sig;
       mon->callback = mep->callback;
       mon->data = mep->data;
+      mon->active = 0;
+      mon->delete = 0;
 
       {
         Element *monitorElement = enqueueItem(sig->monitors, mon);
@@ -361,8 +376,11 @@ asyncPerformSignal (AsyncThreadSpecificData *tsd) {
             .data = mon->data
           };
 
-          mon->callback(&parameters);
-          requeueElement(signalElement);
+          mon->active = 1;
+          if (!mon->callback(&parameters)) mon->delete = 1;
+          mon->active = 0;
+          if (mon->delete) deleteMonitor(monitorElement);
+
           return 1;
         }
       }

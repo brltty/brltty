@@ -668,7 +668,7 @@ usbInterruptTransfer (
   return NULL;
 }
 
-static void
+static int
 usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
   UsbEndpoint *endpoint = parameters->data;
 
@@ -685,6 +685,8 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
       }
     }
   }
+
+  return 1;
 }
 
 int
