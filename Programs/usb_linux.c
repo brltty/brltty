@@ -437,6 +437,9 @@ usbMakeURB (
         break;
 
       case UsbEndpointTransfer_Interrupt:
+        urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+        break;
+
       case UsbEndpointTransfer_Bulk:
         urb->type = USBDEVFS_URB_TYPE_BULK;
         break;
@@ -668,61 +671,12 @@ usbInterruptTransfer (
   return NULL;
 }
 
-static int
-usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
-  UsbEndpoint *endpoint = parameters->data;
-
-  UsbResponse response;
-  void *request = usbReapResponse(endpoint->device,
-                                  endpoint->descriptor->bEndpointAddress,
-                                  &response, 0);
-
-  if (request) {
-    if (response.count > 0) {
-      if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
-        if (usbSubmitURB(request, endpoint)) {
-        }
-      }
-    }
-  }
-
-  return 1;
-}
-
 int
 usbMonitorInputEndpoint (
   UsbDevice *device, unsigned char endpointNumber,
   AsyncMonitorCallback *callback, void *data
 ) {
-  UsbEndpoint *endpoint;
-
-  if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
-    UsbEndpointExtension *eptx = endpoint->extension;
-    const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
-    size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
-
-    if (usbStartInputMonitor(endpoint, callback, data)) {
-      if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-        eptx->monitor.urb->signr = SIGRTMIN;
-
-        if (asyncMonitorSignal(&eptx->monitor.handle, eptx->monitor.urb->signr, usbHandleEndpointInput, endpoint)) {
-          if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
-            return 1;
-          }
-
-          asyncCancelRequest(eptx->monitor.handle);
-          eptx->monitor.handle = NULL;
-        }
-
-        free(eptx->monitor.urb);
-        eptx->monitor.urb = NULL;
-      }
-
-      usbStopInputMonitor(endpoint);
-    }
-  }
-
-  return 0;
+  return usbMonitorInputPipe(device, endpointNumber, callback, data);
 }
 
 ssize_t
@@ -817,6 +771,70 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
+static int
+usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
+  UsbEndpoint *endpoint = parameters->data;
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  UsbResponse response;
+  void *request = usbReapResponse(endpoint->device,
+                                  endpoint->descriptor->bEndpointAddress,
+                                  &response, 0);
+
+  if (request) {
+    if (request == eptx->monitor.urb) {
+      if (response.count > 0) {
+        if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
+          if (usbSubmitURB(request, endpoint)) {
+            return 1;
+          }
+        }
+      }
+
+      eptx->monitor.urb = NULL;
+    }
+
+    free(request);
+  }
+
+  asyncDiscardHandle(eptx->monitor.handle);
+  eptx->monitor.handle = NULL;
+  return 0;
+}
+
+static int
+usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if (usbMakeInputPipe(endpoint)) {
+    const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
+    size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
+
+    if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
+      eptx->monitor.urb->signr = SIGRTMIN;
+
+      if (asyncMonitorSignal(&eptx->monitor.handle,
+                             eptx->monitor.urb->signr,
+                             usbHandleEndpointInput, endpoint)) {
+        if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
+          endpoint->direction.input.asynchronous = 0;
+          return 1;
+        }
+
+        asyncCancelRequest(eptx->monitor.handle);
+        eptx->monitor.handle = NULL;
+      }
+
+      free(eptx->monitor.urb);
+      eptx->monitor.urb = NULL;
+    }
+
+    usbDestroyInputPipe(endpoint);
+  }
+
+  return 0;
+}
+
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
@@ -828,6 +846,12 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     eptx->monitor.urb = NULL;
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
+      switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+        case UsbEndpointDirection_Input:
+          endpoint->prepare = usbPrepareInputEndpoint;
+          break;
+      }
+
       endpoint->extension = eptx;
       return 1;
     } else {

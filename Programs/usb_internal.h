@@ -32,10 +32,13 @@ typedef struct {
 
 typedef struct UsbEndpointExtensionStruct UsbEndpointExtension;
 
-typedef struct {
+typedef struct UsbEndpointStruct UsbEndpoint;
+
+struct UsbEndpointStruct {
   UsbDevice *device;
   const UsbEndpointDescriptor *descriptor;
   UsbEndpointExtension *extension;
+  int (*prepare) (UsbEndpoint *endpoint);
 
   union {
     struct {
@@ -59,7 +62,7 @@ typedef struct {
       char structMayNotBeEmpty;
     } output;
   } direction;
-} UsbEndpoint;
+};
 
 typedef struct UsbDeviceExtensionStruct UsbDeviceExtension;
 
@@ -108,9 +111,14 @@ extern int usbSetAlternative (
   unsigned char alternative
 );
 
-extern int usbStartInputMonitor (UsbEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
-extern void usbStopInputMonitor (UsbEndpoint *endpoint);
+extern int usbMakeInputPipe (UsbEndpoint *endpoint);
+extern void usbDestroyInputPipe (UsbEndpoint *endpoint);
 extern int usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length);
+
+extern int usbMonitorInputPipe (
+  UsbDevice *device, unsigned char endpointNumber,
+  AsyncMonitorCallback *callback, void *data
+);
 
 extern ssize_t usbControlTransfer (
   UsbDevice *device,
