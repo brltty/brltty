@@ -44,6 +44,7 @@ typedef struct {
 
 typedef struct {
   Queue *signalQueue;
+  sigset_t claimedSignals;
   sigset_t obtainedSignals;
 } SignalData;
 
@@ -72,6 +73,7 @@ getSignalData (void) {
 
     memset(sd, 0, sizeof(*sd));
     sd->signalQueue = NULL;
+    sigemptyset(&sd->claimedSignals);
     sigemptyset(&sd->obtainedSignals);
     tsd->signalData = sd;
   }
@@ -391,6 +393,7 @@ getSignalElement (int signalNumber, int create) {
 
 static void
 handleMonitoredSignal (int signalNumber) {
+logMessage(LOG_NOTICE, "asignal: %d", signalNumber);
   Element *signalElement = getSignalElement(signalNumber, 0);
 
   if (signalElement) {
@@ -485,6 +488,42 @@ testPendingSignal (const void *item, const void *data) {
 }
 
 int
+asyncClaimSignalNumber (int signal) {
+  if ((signal >= SIGRTMIN) && (signal <= SIGRTMAX)) {
+    SignalData *sd = getSignalData();
+
+    if (sd) {
+      if (sigismember(&sd->claimedSignals, signal)) {
+        logMessage(LOG_ERR, "signal number already claimed: %d", signal);
+      } else if (sigismember(&sd->obtainedSignals, signal)) {
+        logMessage(LOG_ERR, "signal number in use: %d", signal);
+      } else {
+        sigaddset(&sd->claimedSignals, signal);
+        return 1;
+      }
+    }
+  }
+
+  logMessage(LOG_ERR, "signal number not claimable: %d", signal);
+  return 0;
+}
+
+int
+asyncReleaseSignalNumber (int signal) {
+  SignalData *sd = getSignalData();
+
+  if (sd) {
+    if (sigismember(&sd->claimedSignals, signal)) {
+      sigdelset(&sd->claimedSignals, signal);
+      return 1;
+    }
+  }
+
+  logMessage(LOG_ERR, "signal number not claimed: %d", signal);
+  return 0;
+}
+
+int
 asyncObtainSignalNumber (void) {
   SignalData *sd = getSignalData();
 
@@ -492,9 +531,11 @@ asyncObtainSignalNumber (void) {
     int signal;
 
     for (signal=SIGRTMIN; signal<=SIGRTMAX; signal+=1) {
-      if (!sigismember(&sd->obtainedSignals, signal)) {
-        sigaddset(&sd->obtainedSignals, signal);
-        return signal;
+      if (!sigismember(&sd->claimedSignals, signal)) {
+        if (!sigismember(&sd->obtainedSignals, signal)) {
+          sigaddset(&sd->obtainedSignals, signal);
+          return signal;
+        }
       }
     }
   }

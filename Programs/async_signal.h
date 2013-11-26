@@ -79,6 +79,9 @@ extern int asyncCallWithAllSignalsBlocked (
 );
 
 
+extern int asyncClaimSignalNumber (int signal);
+extern int asyncReleaseSignalNumber (int signal);
+
 extern int asyncObtainSignalNumber (void);
 extern int asyncRelinquishSignalNumber (int signal);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
