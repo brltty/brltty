@@ -393,7 +393,6 @@ getSignalElement (int signalNumber, int create) {
 
 static void
 handleMonitoredSignal (int signalNumber) {
-logMessage(LOG_NOTICE, "asignal: %d", signalNumber);
   Element *signalElement = getSignalElement(signalNumber, 0);
 
   if (signalElement) {
@@ -489,14 +488,16 @@ testPendingSignal (const void *item, const void *data) {
 
 int
 asyncClaimSignalNumber (int signal) {
+  const char *reason = "signal number not claimable";
+
   if ((signal >= SIGRTMIN) && (signal <= SIGRTMAX)) {
     SignalData *sd = getSignalData();
 
     if (sd) {
       if (sigismember(&sd->claimedSignals, signal)) {
-        logMessage(LOG_ERR, "signal number already claimed: %d", signal);
+        reason = "signal number already claimed";
       } else if (sigismember(&sd->obtainedSignals, signal)) {
-        logMessage(LOG_ERR, "signal number in use: %d", signal);
+        reason = "signal number in use";
       } else {
         sigaddset(&sd->claimedSignals, signal);
         return 1;
@@ -504,7 +505,7 @@ asyncClaimSignalNumber (int signal) {
     }
   }
 
-  logMessage(LOG_ERR, "signal number not claimable: %d", signal);
+  logMessage(LOG_ERR, "%s: %d", reason, signal);
   return 0;
 }
 
