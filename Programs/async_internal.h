@@ -28,15 +28,19 @@ extern "C" {
 
 typedef struct SignalDataStruct SignalData;
 extern void asyncDeallocateSignalData (SignalData *sd);
+extern int asyncPerformSignal (SignalData *sd);
 
 typedef struct AlarmDataStruct AlarmData;
 extern void asyncDeallocateAlarmData (AlarmData *alarmData);
+extern int asyncPerformAlarm (AlarmData *ad, long int *timeout);
 
 typedef struct TaskDataStruct TaskData;
 extern void asyncDeallocateTaskData (TaskData *taskData);
+extern int asyncPerformTask (TaskData *td);
 
 typedef struct InputOutputDataStruct InputOutputData;
 extern void asyncDeallocateInputOutputData (InputOutputData *ioData);
+extern int asyncPerformOperation (InputOutputData *iod, long int timeout);
 
 typedef struct {
   SignalData *signalData;
@@ -62,11 +66,6 @@ extern Element *asyncGetHandleElement (AsyncHandle handle, const Queue *queue);
 typedef struct {
   void (*cancelRequest) (Element *element);
 } AsyncQueueMethods;
-
-extern int asyncPerformSignal (SignalData *sd);
-extern int asyncPerformAlarm (AlarmData *ad, long int *timeout);
-extern int asyncPerformTask (TaskData *td);
-extern int asyncPerformOperation (InputOutputData *iod, long int timeout);
 
 #ifdef __cplusplus
 }
