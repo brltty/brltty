@@ -797,6 +797,7 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
     free(request);
   }
 
+  usbSetInputError(endpoint, errno);
   asyncDiscardHandle(eptx->monitor.handle);
   eptx->monitor.handle = NULL;
   return 0;

@@ -55,6 +55,7 @@ struct UsbEndpointStruct {
         FileDescriptor input;
         FileDescriptor output;
         AsyncHandle monitor;
+        int error;
       } pipe;
     } input;
 
@@ -114,6 +115,7 @@ extern int usbSetAlternative (
 extern int usbMakeInputPipe (UsbEndpoint *endpoint);
 extern void usbDestroyInputPipe (UsbEndpoint *endpoint);
 extern int usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length);
+extern void usbSetInputError (UsbEndpoint *endpoint, int error);
 
 extern int usbMonitorInputPipe (
   UsbDevice *device, unsigned char endpointNumber,

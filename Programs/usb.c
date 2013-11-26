@@ -483,13 +483,31 @@ usbEndpointDescriptor (
   return NULL;
 }
 
-static int
+static inline int
 usbHaveInputPipe (UsbEndpoint *endpoint) {
   return endpoint->direction.input.pipe.output != INVALID_FILE_DESCRIPTOR;
 }
 
+static inline int
+usbHaveInputError (UsbEndpoint *endpoint) {
+  return endpoint->direction.input.pipe.input == INVALID_FILE_DESCRIPTOR;
+}
+
+void
+usbSetInputError (UsbEndpoint *endpoint, int error) {
+  if (!usbHaveInputError(endpoint)) {
+    endpoint->direction.input.pipe.error = error;
+    closeFile(&endpoint->direction.input.pipe.input);
+  }
+}
+
 int
 usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
+  if (usbHaveInputError(endpoint)) {
+    errno = EIO;
+    return 0;
+  }
+
   return writeFile(endpoint->direction.input.pipe.input, buffer, length) != -1;
 }
 
@@ -527,10 +545,12 @@ usbMonitorInputPipe (
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
 
   if (endpoint) {
-    if (asyncMonitorFileInput(&endpoint->direction.input.pipe.monitor,
-                              endpoint->direction.input.pipe.output,
-                              callback, data)) {
-      return 1;
+    if (usbHaveInputPipe(endpoint)) {
+      if (asyncMonitorFileInput(&endpoint->direction.input.pipe.monitor,
+                                endpoint->direction.input.pipe.output,
+                                callback, data)) {
+        return 1;
+      }
     }
   }
 
@@ -624,6 +644,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           endpoint->direction.input.pipe.input = INVALID_FILE_DESCRIPTOR;
           endpoint->direction.input.pipe.output = INVALID_FILE_DESCRIPTOR;
           endpoint->direction.input.pipe.monitor = NULL;
+          endpoint->direction.input.pipe.error = 0;
 
           break;
       }
@@ -882,6 +903,7 @@ usbAwaitInput (
   }
 
   if (usbHaveInputPipe(endpoint)) {
+    if (usbHaveInputError(endpoint)) return 1;
     return awaitFileInput(endpoint->direction.input.pipe.output, timeout);
   }
 
@@ -983,6 +1005,11 @@ usbReadData (
     unsigned char *target = bytes;
 
     if (usbHaveInputPipe(endpoint)) {
+      if (usbHaveInputError(endpoint)) {
+        errno = endpoint->direction.input.pipe.error;
+        return -1;
+      }
+
       return readFile(endpoint->direction.input.pipe.output, buffer, length, initialTimeout, subsequentTimeout);
     }
 
