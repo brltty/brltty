@@ -687,6 +687,35 @@ usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber) {
   return usbGetEndpoint(device, endpointNumber|UsbEndpointDirection_Output);
 }
 
+static int
+usbFinishEndpoint (void *item, void *data) {
+  UsbEndpoint *endpoint = item;
+
+  switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+    case UsbEndpointDirection_Input:
+      if (endpoint->direction.input.pending) deleteElements(endpoint->direction.input.pending);
+      break;
+
+    default:
+      break;
+  }
+
+  return 0;
+}
+
+static void
+usbRemoveEndpoints (UsbDevice *device, int final) {
+  if (device->endpoints) {
+    processQueue(device->endpoints, usbFinishEndpoint, NULL);
+    deleteElements(device->endpoints);
+
+    if (final) {
+      deallocateQueue(device->endpoints);
+      device->endpoints = NULL;
+    }
+  }
+}
+
 static void
 usbDeallocateInputFilter (void *item, void *data) {
   UsbInputFilterEntry *entry = item;
@@ -707,6 +736,7 @@ usbAddInputFilter (UsbDevice *device, UsbInputFilter filter) {
 static int
 usbApplyInputFilter (void *item, void *data) {
   UsbInputFilterEntry *entry = item;
+
   return !entry->filter(data);
 }
 
@@ -731,7 +761,7 @@ void
 usbCloseInterface (
   UsbDevice *device
 ) {
-  if (device->endpoints) deleteElements(device->endpoints);
+  usbRemoveEndpoints(device, 0);
 
   if (device->interface) {
     usbReleaseInterface(device, device->interface->bInterfaceNumber);
@@ -785,10 +815,7 @@ void
 usbCloseDevice (UsbDevice *device) {
   usbCloseInterface(device);
 
-  if (device->endpoints) {
-    deallocateQueue(device->endpoints);
-    device->endpoints = NULL;
-  }
+  usbRemoveEndpoints(device, 1);
 
   if (device->inputFilters) {
     deallocateQueue(device->inputFilters);
@@ -815,13 +842,18 @@ usbOpenDevice (UsbDeviceExtension *extension) {
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
       if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
-        if (usbReadDeviceDescriptor(device))
-          if (device->descriptor.bDescriptorType == UsbDescriptorType_Device)
-            if (device->descriptor.bLength == UsbDescriptorSize_Device)
+        if (usbReadDeviceDescriptor(device)) {
+          if (device->descriptor.bDescriptorType == UsbDescriptorType_Device) {
+            if (device->descriptor.bLength == UsbDescriptorSize_Device) {
               return device;
+            }
+          }
+        }
+
         deallocateQueue(device->inputFilters);
       }
-      deallocateQueue(device->endpoints);
+
+      usbRemoveEndpoints(device, 1);
     }
     free(device);
   }
