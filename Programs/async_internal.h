@@ -27,7 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  Queue *signalQueue;
+  void *signalData;
   Queue *alarmQueue;
   Queue *taskQueue;
   Queue *functionQueue;
@@ -35,6 +35,7 @@ typedef struct {
 } AsyncThreadSpecificData;
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);
+extern void asyncDeallocateSignalData (void *data);
 
 extern int asyncMakeHandle (
   AsyncHandle *handle,

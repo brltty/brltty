@@ -811,18 +811,20 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
 
     if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-      eptx->monitor.urb->signr = SIGRTMIN;
+      if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
+        if (asyncMonitorSignal(&eptx->monitor.handle,
+                               eptx->monitor.urb->signr,
+                               usbHandleEndpointInput, endpoint)) {
+          if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
+            endpoint->direction.input.asynchronous = 0;
+            return 1;
+          }
 
-      if (asyncMonitorSignal(&eptx->monitor.handle,
-                             eptx->monitor.urb->signr,
-                             usbHandleEndpointInput, endpoint)) {
-        if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
-          endpoint->direction.input.asynchronous = 0;
-          return 1;
+          asyncCancelRequest(eptx->monitor.handle);
+          eptx->monitor.handle = NULL;
         }
 
-        asyncCancelRequest(eptx->monitor.handle);
-        eptx->monitor.handle = NULL;
+        asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
       }
 
       free(eptx->monitor.urb);
@@ -874,6 +876,8 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
     UsbDeviceExtension *devx = device->extension;
 
     ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, eptx->monitor.urb);
+    asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+
     free(eptx->monitor.urb);
     eptx->monitor.urb = NULL;
   }

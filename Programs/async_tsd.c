@@ -44,7 +44,7 @@ tsdDestroyData (void *data) {
   AsyncThreadSpecificData *tsd = data;
 
   if (tsd) {
-    if (tsd->signalQueue) deallocateQueue(tsd->signalQueue);
+    asyncDeallocateSignalData(tsd->signalData);
     if (tsd->alarmQueue) deallocateQueue(tsd->alarmQueue);
     if (tsd->taskQueue) deallocateQueue(tsd->taskQueue);
     if (tsd->functionQueue) deallocateQueue(tsd->functionQueue);
@@ -74,7 +74,7 @@ asyncGetThreadSpecificData (void) {
 
       if ((tsd = malloc(sizeof(*tsd)))) {
         memset(tsd, 0, sizeof(*tsd));
-        tsd->signalQueue = NULL;
+        tsd->signalData = NULL;
         tsd->alarmQueue = NULL;
         tsd->taskQueue = NULL;
         tsd->functionQueue = NULL;
@@ -98,7 +98,7 @@ asyncGetThreadSpecificData (void) {
 
 #else /* PTHREAD_ONCE_INIT */
 static AsyncThreadSpecificData tsd = {
-  .signalQueue = NULL,
+  .signalData = NULL,
   .alarmQueue = NULL,
   .taskQueue = NULL,
   .functionQueue = NULL,

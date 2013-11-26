@@ -42,6 +42,43 @@ typedef struct {
   unsigned delete:1;
 } MonitorEntry;
 
+typedef struct {
+  Queue *signalQueue;
+  sigset_t obtainedSignals;
+} SignalData;
+
+void
+asyncDeallocateSignalData (void *data) {
+  SignalData *sd = data;
+
+  if (sd) {
+    if (sd->signalQueue) deallocateQueue(sd->signalQueue);
+    free(sd);
+  }
+}
+
+static SignalData *
+getSignalData (void) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
+
+  if (!tsd->signalData) {
+    SignalData *sd;
+
+    if (!(sd = malloc(sizeof(*sd)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    memset(sd, 0, sizeof(*sd));
+    sd->signalQueue = NULL;
+    sigemptyset(&sd->obtainedSignals);
+    tsd->signalData = sd;
+  }
+
+  return tsd->signalData;
+}
+
 int
 asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *oldHandler) {
 #ifdef HAVE_SIGACTION
@@ -213,14 +250,14 @@ deallocateSignalEntry (void *item, void *data) {
 
 static Queue *
 getSignalQueue (int create) {
-  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
-  if (!tsd) return NULL;
+  SignalData *sd = getSignalData();
+  if (!sd) return NULL;
 
-  if (!tsd->signalQueue && create) {
-    tsd->signalQueue = newQueue(deallocateSignalEntry, NULL);
+  if (!sd->signalQueue && create) {
+    sd->signalQueue = newQueue(deallocateSignalEntry, NULL);
   }
 
-  return tsd->signalQueue;
+  return sd->signalQueue;
 }
 
 typedef struct {
@@ -445,6 +482,40 @@ testPendingSignal (const void *item, const void *data) {
   const SignalEntry *sig = item;
 
   return sig->count > 0;
+}
+
+int
+asyncObtainSignalNumber (void) {
+  SignalData *sd = getSignalData();
+
+  if (sd) {
+    int signal;
+
+    for (signal=SIGRTMIN; signal<=SIGRTMAX; signal+=1) {
+      if (!sigismember(&sd->obtainedSignals, signal)) {
+        sigaddset(&sd->obtainedSignals, signal);
+        return signal;
+      }
+    }
+  }
+
+  logMessage(LOG_ERR, "no obtainable signal number");
+  return 0;
+}
+
+int
+asyncRelinquishSignalNumber (int signal) {
+  SignalData *sd = getSignalData();
+
+  if (sd) {
+    if (sigismember(&sd->obtainedSignals, signal)) {
+      sigdelset(&sd->obtainedSignals, signal);
+      return 1;
+    }
+  }
+
+  logMessage(LOG_ERR, "signal number not obtained: %d", signal);
+  return 0;
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 

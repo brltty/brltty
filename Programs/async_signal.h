@@ -77,6 +77,10 @@ extern int asyncCallWithAllSignalsBlocked (
   AsyncWithBlockedSignalsFunction *function,
   void *data
 );
+
+
+extern int asyncObtainSignalNumber (void);
+extern int asyncRelinquishSignalNumber (int signal);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 #ifdef __cplusplus
