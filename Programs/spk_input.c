@@ -107,7 +107,7 @@ handleInput (const AsyncInputCallbackParameters *parameters) {
   }
 
   asyncDiscardHandle(obj->inputMonitor);
-  initializeInputMonitor(obj);;
+  initializeInputMonitor(obj);
 
   if (obj->resetPipe) obj->resetPipe(obj);
   obj->monitorPipe(obj);
