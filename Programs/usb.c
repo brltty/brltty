@@ -563,8 +563,6 @@ usbDeallocateEndpoint (void *item, void *data) {
 
   switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
     case UsbEndpointDirection_Input:
-      usbDestroyInputPipe(endpoint);
-
       if (endpoint->direction.input.pending) {
         deallocateQueue(endpoint->direction.input.pending);
         endpoint->direction.input.pending = NULL;
@@ -576,11 +574,23 @@ usbDeallocateEndpoint (void *item, void *data) {
       }
 
       break;
+
+    default:
+      break;
   }
 
   if (endpoint->extension) {
     usbDeallocateEndpointExtension(endpoint->extension);
     endpoint->extension = NULL;
+  }
+
+  switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+    case UsbEndpointDirection_Input:
+      usbDestroyInputPipe(endpoint);
+      break;
+
+    default:
+      break;
   }
 
   free(endpoint);
