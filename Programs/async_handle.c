@@ -26,6 +26,7 @@
 struct AsyncHandleStruct {
   Element *element;
   int identifier;
+  AsyncThreadSpecificData *tsd;
 };
 
 int
@@ -49,24 +50,36 @@ asyncMakeHandle (
         memset(*handle, 0, sizeof(**handle));
         (*handle)->element = element;
         (*handle)->identifier = getElementIdentifier(element);
+        (*handle)->tsd = asyncGetThreadSpecificData();
       }
 
       return 1;
     }
-
-    if (handle) free(*handle);
-    return 0;
   }
+
+  if (handle) free(*handle);
+  return 0;
+}
+
+int
+asyncTestHandle (AsyncHandle handle) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+
+  if (handle->tsd == tsd) return 1;
+  logMessage(LOG_WARNING, "invalid async handle");
+  return 0;
 }
 
 Element *
 asyncGetHandleElement (AsyncHandle handle, const Queue *queue) {
-  if (queue) {
-    Element *element = handle->element;
+  if (asyncTestHandle(handle)) {
+    if (queue) {
+      Element *element = handle->element;
 
-    if (handle->identifier == getElementIdentifier(element)) {
-      if ((queue == ASYNC_ANY_QUEUE) || (queue == getElementQueue(element))) {
-        return element;
+      if (handle->identifier == getElementIdentifier(element)) {
+        if ((queue == ASYNC_ANY_QUEUE) || (queue == getElementQueue(element))) {
+          return element;
+        }
       }
     }
   }

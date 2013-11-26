@@ -25,6 +25,7 @@ extern "C" {
 
 typedef struct AsyncHandleStruct *AsyncHandle;
 
+extern int asyncTestHandle (AsyncHandle handle);
 extern void asyncDiscardHandle (AsyncHandle handle);
 extern void asyncCancelRequest (AsyncHandle handle);
 
