@@ -29,25 +29,25 @@ typedef struct {
   void *data;
 } TaskDefinition;
 
-struct TaskDataStruct {
+struct AsyncTaskDataStruct {
   Queue *taskQueue;
 };
 
 void
-asyncDeallocateTaskData (TaskData *td) {
+asyncDeallocateTaskData (AsyncTaskData *td) {
   if (td) {
     if (td->taskQueue) deallocateQueue(td->taskQueue);
     free(td);
   }
 }
 
-static TaskData *
+static AsyncTaskData *
 getTaskData (void) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
   if (!tsd) return NULL;
 
   if (!tsd->taskData) {
-    TaskData *td;
+    AsyncTaskData *td;
 
     if (!(td = malloc(sizeof(*td)))) {
       logMallocError();
@@ -71,7 +71,7 @@ deallocateTaskDefinition (void *item, void *data) {
 
 static Queue *
 getTaskQueue (int create) {
-  TaskData *td = getTaskData();
+  AsyncTaskData *td = getTaskData();
   if (!td) return NULL;
 
   if (!td->taskQueue && create) {
@@ -128,7 +128,7 @@ asyncNewAddTaskEvent (void) {
 }
 
 int
-asyncPerformTask (TaskData *td) {
+asyncPerformTask (AsyncTaskData *td) {
   if (td) {
     Queue *queue = td->taskQueue;
 

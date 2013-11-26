@@ -42,27 +42,27 @@ typedef struct {
   unsigned delete:1;
 } MonitorEntry;
 
-struct SignalDataStruct {
+struct AsyncSignalDataStruct {
   Queue *signalQueue;
   sigset_t claimedSignals;
   sigset_t obtainedSignals;
 };
 
 void
-asyncDeallocateSignalData (SignalData *sd) {
+asyncDeallocateSignalData (AsyncSignalData *sd) {
   if (sd) {
     if (sd->signalQueue) deallocateQueue(sd->signalQueue);
     free(sd);
   }
 }
 
-static SignalData *
+static AsyncSignalData *
 getSignalData (void) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
   if (!tsd) return NULL;
 
   if (!tsd->signalData) {
-    SignalData *sd;
+    AsyncSignalData *sd;
 
     if (!(sd = malloc(sizeof(*sd)))) {
       logMallocError();
@@ -250,7 +250,7 @@ deallocateSignalEntry (void *item, void *data) {
 
 static Queue *
 getSignalQueue (int create) {
-  SignalData *sd = getSignalData();
+  AsyncSignalData *sd = getSignalData();
   if (!sd) return NULL;
 
   if (!sd->signalQueue && create) {
@@ -489,7 +489,7 @@ asyncClaimSignalNumber (int signal) {
   const char *reason = "signal number not claimable";
 
   if ((signal >= SIGRTMIN) && (signal <= SIGRTMAX)) {
-    SignalData *sd = getSignalData();
+    AsyncSignalData *sd = getSignalData();
 
     if (sd) {
       if (sigismember(&sd->claimedSignals, signal)) {
@@ -509,7 +509,7 @@ asyncClaimSignalNumber (int signal) {
 
 int
 asyncReleaseSignalNumber (int signal) {
-  SignalData *sd = getSignalData();
+  AsyncSignalData *sd = getSignalData();
 
   if (sd) {
     if (sigismember(&sd->claimedSignals, signal)) {
@@ -524,7 +524,7 @@ asyncReleaseSignalNumber (int signal) {
 
 int
 asyncObtainSignalNumber (void) {
-  SignalData *sd = getSignalData();
+  AsyncSignalData *sd = getSignalData();
 
   if (sd) {
     int signal;
@@ -545,7 +545,7 @@ asyncObtainSignalNumber (void) {
 
 int
 asyncRelinquishSignalNumber (int signal) {
-  SignalData *sd = getSignalData();
+  AsyncSignalData *sd = getSignalData();
 
   if (sd) {
     if (sigismember(&sd->obtainedSignals, signal)) {
@@ -560,7 +560,7 @@ asyncRelinquishSignalNumber (int signal) {
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 int
-asyncPerformSignal (SignalData *sd) {
+asyncPerformSignal (AsyncSignalData *sd) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
   if (sd) {
     Queue *signals = sd->signalQueue;

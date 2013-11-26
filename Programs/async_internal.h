@@ -26,27 +26,27 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct SignalDataStruct SignalData;
-extern void asyncDeallocateSignalData (SignalData *sd);
-extern int asyncPerformSignal (SignalData *sd);
+typedef struct AsyncSignalDataStruct AsyncSignalData;
+extern void asyncDeallocateSignalData (AsyncSignalData *sd);
+extern int asyncPerformSignal (AsyncSignalData *sd);
 
-typedef struct AlarmDataStruct AlarmData;
-extern void asyncDeallocateAlarmData (AlarmData *alarmData);
-extern int asyncPerformAlarm (AlarmData *ad, long int *timeout);
+typedef struct AsyncAlarmDataStruct AsyncAlarmData;
+extern void asyncDeallocateAlarmData (AsyncAlarmData *alarmData);
+extern int asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout);
 
-typedef struct TaskDataStruct TaskData;
-extern void asyncDeallocateTaskData (TaskData *taskData);
-extern int asyncPerformTask (TaskData *td);
+typedef struct AsyncTaskDataStruct AsyncTaskData;
+extern void asyncDeallocateTaskData (AsyncTaskData *taskData);
+extern int asyncPerformTask (AsyncTaskData *td);
 
-typedef struct InputOutputDataStruct InputOutputData;
-extern void asyncDeallocateInputOutputData (InputOutputData *ioData);
-extern int asyncPerformOperation (InputOutputData *iod, long int timeout);
+typedef struct AsyncIoDataStruct AsyncIoData;
+extern void asyncDeallocateIoData (AsyncIoData *ioData);
+extern int asyncPerformOperation (AsyncIoData *iod, long int timeout);
 
 typedef struct {
-  SignalData *signalData;
-  AlarmData *alarmData;
-  TaskData *taskData;
-  InputOutputData *ioData;
+  AsyncSignalData *signalData;
+  AsyncAlarmData *alarmData;
+  AsyncTaskData *taskData;
+  AsyncIoData *ioData;
   unsigned int waitDepth;
 } AsyncThreadSpecificData;
 

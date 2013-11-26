@@ -31,25 +31,25 @@ typedef struct {
   void *data;
 } AlarmEntry;
 
-struct AlarmDataStruct {
+struct AsyncAlarmDataStruct {
   Queue *alarmQueue;
 };
 
 void
-asyncDeallocateAlarmData (AlarmData *ad) {
+asyncDeallocateAlarmData (AsyncAlarmData *ad) {
   if (ad) {
     if (ad->alarmQueue) deallocateQueue(ad->alarmQueue);
     free(ad);
   }
 }
 
-static AlarmData *
+static AsyncAlarmData *
 getAlarmData (void) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
   if (!tsd) return NULL;
 
   if (!tsd->alarmData) {
-    AlarmData *ad;
+    AsyncAlarmData *ad;
 
     if (!(ad = malloc(sizeof(*ad)))) {
       logMallocError();
@@ -80,7 +80,7 @@ compareAlarmEntries (const void *item1, const void *item2, void *data) {
 
 static Queue *
 getAlarmQueue (int create) {
-  AlarmData *ad = getAlarmData();
+  AsyncAlarmData *ad = getAlarmData();
   if (!ad) return NULL;
 
   if (!ad->alarmQueue && create) {
@@ -184,7 +184,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncPerformAlarm (AlarmData *ad, long int *timeout) {
+asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout) {
   if (ad) {
     Queue *alarms = ad->alarmQueue;
 

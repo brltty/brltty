@@ -156,25 +156,25 @@ typedef struct {
   unsigned int count;
 } MonitorGroup;
 
-struct InputOutputDataStruct {
+struct AsyncIoDataStruct {
   Queue *functionQueue;
 };
 
 void
-asyncDeallocateInputOutputData (InputOutputData *iod) {
+asyncDeallocateIoData (AsyncIoData *iod) {
   if (iod) {
     if (iod->functionQueue) deallocateQueue(iod->functionQueue);
     free(iod);
   }
 }
 
-static InputOutputData *
-getInputOutputData (void) {
+static AsyncIoData *
+getIoData (void) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
   if (!tsd) return NULL;
 
   if (!tsd->ioData) {
-    InputOutputData *iod;
+    AsyncIoData *iod;
 
     if (!(iod = malloc(sizeof(*iod)))) {
       logMallocError();
@@ -553,7 +553,7 @@ deallocateFunctionEntry (void *item, void *data) {
 
 static Queue *
 getFunctionQueue (int create) {
-  InputOutputData *iod = getInputOutputData();
+  AsyncIoData *iod = getIoData();
   if (!iod) return NULL;
 
   if (!iod->functionQueue && create) {
@@ -704,7 +704,7 @@ testFunctionMonitor (void *item, void *data) {
 }
 
 int
-asyncPerformOperation (InputOutputData *iod, long int timeout) {
+asyncPerformOperation (AsyncIoData *iod, long int timeout) {
   int performed = 0;
 
   if (iod) {

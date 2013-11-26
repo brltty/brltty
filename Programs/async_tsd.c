@@ -47,7 +47,7 @@ tsdDestroyData (void *data) {
     asyncDeallocateSignalData(tsd->signalData);
     asyncDeallocateAlarmData(tsd->alarmData);
     asyncDeallocateTaskData(tsd->taskData);
-    asyncDeallocateInputOutputData(tsd->ioData);
+    asyncDeallocateIoData(tsd->ioData);
     free(tsd);
   }
 }
