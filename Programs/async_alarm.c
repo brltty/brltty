@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "async_alarm.h"
 #include "async_internal.h"
@@ -28,6 +30,39 @@ typedef struct {
   AsyncAlarmCallback *callback;
   void *data;
 } AlarmEntry;
+
+struct AlarmDataStruct {
+  Queue *alarmQueue;
+};
+
+void
+asyncDeallocateAlarmData (AlarmData *ad) {
+  if (ad) {
+    if (ad->alarmQueue) deallocateQueue(ad->alarmQueue);
+    free(ad);
+  }
+}
+
+static AlarmData *
+getAlarmData (void) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
+
+  if (!tsd->alarmData) {
+    AlarmData *ad;
+
+    if (!(ad = malloc(sizeof(*ad)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    memset(ad, 0, sizeof(*ad));
+    ad->alarmQueue = NULL;
+    tsd->alarmData = ad;
+  }
+
+  return tsd->alarmData;
+}
 
 static void
 deallocateAlarmEntry (void *item, void *data) {
@@ -45,14 +80,14 @@ compareAlarmEntries (const void *item1, const void *item2, void *data) {
 
 static Queue *
 getAlarmQueue (int create) {
-  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
-  if (!tsd) return NULL;
+  AlarmData *ad = getAlarmData();
+  if (!ad) return NULL;
 
-  if (!tsd->alarmQueue && create) {
-    tsd->alarmQueue = newQueue(deallocateAlarmEntry, compareAlarmEntries);
+  if (!ad->alarmQueue && create) {
+    ad->alarmQueue = newQueue(deallocateAlarmEntry, compareAlarmEntries);
   }
 
-  return tsd->alarmQueue;
+  return ad->alarmQueue;
 }
 
 typedef struct {
@@ -149,33 +184,35 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout) {
-  Queue *alarms = tsd->alarmQueue;
+asyncPerformAlarm (AlarmData *ad, long int *timeout) {
+  if (ad) {
+    Queue *alarms = ad->alarmQueue;
 
-  if (alarms) {
-    Element *element = getQueueHead(alarms);
+    if (alarms) {
+      Element *element = getQueueHead(alarms);
 
-    if (element) {
-      AlarmEntry *alarm = getElementItem(element);
-      TimeValue now;
-      long int milliseconds;
+      if (element) {
+        AlarmEntry *alarm = getElementItem(element);
+        TimeValue now;
+        long int milliseconds;
 
-      getMonotonicTime(&now);
-      milliseconds = millisecondsBetween(&now, &alarm->time);
+        getMonotonicTime(&now);
+        milliseconds = millisecondsBetween(&now, &alarm->time);
 
-      if (milliseconds <= 0) {
-        AsyncAlarmCallback *callback = alarm->callback;
-        const AsyncAlarmCallbackParameters parameters = {
-          .now = &now,
-          .data = alarm->data
-        };
+        if (milliseconds <= 0) {
+          AsyncAlarmCallback *callback = alarm->callback;
+          const AsyncAlarmCallbackParameters parameters = {
+            .now = &now,
+            .data = alarm->data
+          };
 
-        deleteElement(element);
-        if (callback) callback(&parameters);
-        return 1;
+          deleteElement(element);
+          if (callback) callback(&parameters);
+          return 1;
+        }
+
+        if (milliseconds < *timeout) *timeout = milliseconds;
       }
-
-      if (milliseconds < *timeout) *timeout = milliseconds;
     }
   }
 

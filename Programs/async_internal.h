@@ -26,16 +26,27 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct SignalDataStruct SignalData;
+extern void asyncDeallocateSignalData (SignalData *sd);
+
+typedef struct AlarmDataStruct AlarmData;
+extern void asyncDeallocateAlarmData (AlarmData *alarmData);
+
+typedef struct TaskDataStruct TaskData;
+extern void asyncDeallocateTaskData (TaskData *taskData);
+
+typedef struct InputOutputDataStruct InputOutputData;
+extern void asyncDeallocateInputOutputData (InputOutputData *ioData);
+
 typedef struct {
-  void *signalData;
-  Queue *alarmQueue;
-  Queue *taskQueue;
-  Queue *functionQueue;
+  SignalData *signalData;
+  AlarmData *alarmData;
+  TaskData *taskData;
+  InputOutputData *ioData;
   unsigned int waitDepth;
 } AsyncThreadSpecificData;
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);
-extern void asyncDeallocateSignalData (void *data);
 
 extern int asyncMakeHandle (
   AsyncHandle *handle,
@@ -52,10 +63,10 @@ typedef struct {
   void (*cancelRequest) (Element *element);
 } AsyncQueueMethods;
 
-extern int asyncPerformSignal (AsyncThreadSpecificData *tsd);
-extern int asyncPerformAlarm (AsyncThreadSpecificData *tsd, long int *timeout);
-extern int asyncPerformTask (AsyncThreadSpecificData *tsd);
-extern int asyncPerformOperation (AsyncThreadSpecificData *tsd, long int timeout);
+extern int asyncPerformSignal (SignalData *sd);
+extern int asyncPerformAlarm (AlarmData *ad, long int *timeout);
+extern int asyncPerformTask (TaskData *td);
+extern int asyncPerformOperation (InputOutputData *iod, long int timeout);
 
 #ifdef __cplusplus
 }

@@ -156,6 +156,39 @@ typedef struct {
   unsigned int count;
 } MonitorGroup;
 
+struct InputOutputDataStruct {
+  Queue *functionQueue;
+};
+
+void
+asyncDeallocateInputOutputData (InputOutputData *iod) {
+  if (iod) {
+    if (iod->functionQueue) deallocateQueue(iod->functionQueue);
+    free(iod);
+  }
+}
+
+static InputOutputData *
+getInputOutputData (void) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
+
+  if (!tsd->ioData) {
+    InputOutputData *iod;
+
+    if (!(iod = malloc(sizeof(*iod)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    memset(iod, 0, sizeof(*iod));
+    iod->functionQueue = NULL;
+    tsd->ioData = iod;
+  }
+
+  return tsd->ioData;
+}
+
 #ifdef __MINGW32__
 static void
 prepareMonitors (void) {
@@ -520,14 +553,14 @@ deallocateFunctionEntry (void *item, void *data) {
 
 static Queue *
 getFunctionQueue (int create) {
-  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
-  if (!tsd) return NULL;
+  InputOutputData *iod = getInputOutputData();
+  if (!iod) return NULL;
 
-  if (!tsd->functionQueue && create) {
-    tsd->functionQueue = newQueue(deallocateFunctionEntry, NULL);
+  if (!iod->functionQueue && create) {
+    iod->functionQueue = newQueue(deallocateFunctionEntry, NULL);
   }
 
-  return tsd->functionQueue;
+  return iod->functionQueue;
 }
 
 static int
@@ -671,57 +704,60 @@ testFunctionMonitor (void *item, void *data) {
 }
 
 int
-asyncPerformOperation (AsyncThreadSpecificData *tsd, long int timeout) {
+asyncPerformOperation (InputOutputData *iod, long int timeout) {
   int performed = 0;
-  Queue *functions = tsd->functionQueue;
-  unsigned int functionCount = functions? getQueueSize(functions): 0;
 
-  prepareMonitors();
+  if (iod) {
+    Queue *functions = iod->functionQueue;
+    unsigned int functionCount = functions? getQueueSize(functions): 0;
 
-  if (functionCount) {
-    MonitorEntry monitorArray[functionCount];
-    MonitorGroup monitors = {
-      .array = monitorArray,
-      .count = 0
-    };
-    Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
+    prepareMonitors();
 
-    if (!functionElement) {
-      if (!monitors.count) {
-        approximateDelay(timeout);
-      } else if (awaitMonitors(&monitors, timeout)) {
-        functionElement = processQueue(functions, testFunctionMonitor, NULL);
+    if (functionCount) {
+      MonitorEntry monitorArray[functionCount];
+      MonitorGroup monitors = {
+        .array = monitorArray,
+        .count = 0
+      };
+      Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
+
+      if (!functionElement) {
+        if (!monitors.count) {
+          approximateDelay(timeout);
+        } else if (awaitMonitors(&monitors, timeout)) {
+          functionElement = processQueue(functions, testFunctionMonitor, NULL);
+        }
       }
+
+      if (functionElement) {
+        FunctionEntry *function = getElementItem(functionElement);
+        Element *operationElement = getActiveOperationElement(function);
+        OperationEntry *operation = getElementItem(operationElement);
+
+        if (!operation->finished) finishOperation(operation);
+
+        operation->active = 1;
+        if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
+        operation->active = 0;
+        performed = 1;
+
+        if (operation->cancel) {
+          deleteElement(operationElement);
+        } else {
+          operation->error = 0;
+        }
+
+        if ((operationElement = getActiveOperationElement(function))) {
+          operation = getElementItem(operationElement);
+          if (!operation->finished) startOperation(operation);
+          requeueElement(functionElement);
+        } else {
+          deleteElement(functionElement);
+        }
+      }
+    } else {
+      approximateDelay(timeout);
     }
-
-    if (functionElement) {
-      FunctionEntry *function = getElementItem(functionElement);
-      Element *operationElement = getActiveOperationElement(function);
-      OperationEntry *operation = getElementItem(operationElement);
-
-      if (!operation->finished) finishOperation(operation);
-
-      operation->active = 1;
-      if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
-      operation->active = 0;
-      performed = 1;
-
-      if (operation->cancel) {
-        deleteElement(operationElement);
-      } else {
-        operation->error = 0;
-      }
-
-      if ((operationElement = getActiveOperationElement(function))) {
-        operation = getElementItem(operationElement);
-        if (!operation->finished) startOperation(operation);
-        requeueElement(functionElement);
-      } else {
-        deleteElement(functionElement);
-      }
-    }
-  } else {
-    approximateDelay(timeout);
   }
 
   return performed;

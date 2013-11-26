@@ -42,16 +42,14 @@ typedef struct {
   unsigned delete:1;
 } MonitorEntry;
 
-typedef struct {
+struct SignalDataStruct {
   Queue *signalQueue;
   sigset_t claimedSignals;
   sigset_t obtainedSignals;
-} SignalData;
+};
 
 void
-asyncDeallocateSignalData (void *data) {
-  SignalData *sd = data;
-
+asyncDeallocateSignalData (SignalData *sd) {
   if (sd) {
     if (sd->signalQueue) deallocateQueue(sd->signalQueue);
     free(sd);
@@ -562,42 +560,44 @@ asyncRelinquishSignalNumber (int signal) {
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 int
-asyncPerformSignal (AsyncThreadSpecificData *tsd) {
+asyncPerformSignal (SignalData *sd) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-  Queue *signals = getSignalQueue(0);
+  if (sd) {
+    Queue *signals = sd->signalQueue;
 
-  if (signals) {
-    Element *signalElement = findElement(signals, testPendingSignal, NULL);
+    if (signals) {
+      Element *signalElement = findElement(signals, testPendingSignal, NULL);
 
-    if (signalElement) {
-      SignalEntry *sig = getElementItem(signalElement);
+      if (signalElement) {
+        SignalEntry *sig = getElementItem(signalElement);
 
-      {
-        SetSignalHandledParameters parameters = {
-          .element = signalElement,
-          .entry = sig
-        };
-
-        asyncCallWithAllSignalsBlocked(setSignalHandled, &parameters);
-      }
-
-      {
-        Element *monitorElement = getQueueHead(sig->monitors);
-
-        if (monitorElement) {
-          MonitorEntry *mon = getElementItem(monitorElement);
-
-          const AsyncSignalCallbackParameters parameters = {
-            .signal = sig->number,
-            .data = mon->data
+        {
+          SetSignalHandledParameters parameters = {
+            .element = signalElement,
+            .entry = sig
           };
 
-          mon->active = 1;
-          if (!mon->callback(&parameters)) mon->delete = 1;
-          mon->active = 0;
-          if (mon->delete) deleteMonitor(monitorElement);
+          asyncCallWithAllSignalsBlocked(setSignalHandled, &parameters);
+        }
 
-          return 1;
+        {
+          Element *monitorElement = getQueueHead(sig->monitors);
+
+          if (monitorElement) {
+            MonitorEntry *mon = getElementItem(monitorElement);
+
+            const AsyncSignalCallbackParameters parameters = {
+              .signal = sig->number,
+              .data = mon->data
+            };
+
+            mon->active = 1;
+            if (!mon->callback(&parameters)) mon->delete = 1;
+            mon->active = 0;
+            if (mon->delete) deleteMonitor(monitorElement);
+
+            return 1;
+          }
         }
       }
     }
