@@ -236,7 +236,7 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 static int
-endBookwormSession(BrailleDisplay *brl) {
+endSession_Bookworm (BrailleDisplay *brl) {
   static const unsigned char sessionEnd[] = {0X05, 0X07};
   return writeBraillePacket(brl, NULL, sessionEnd, sizeof(sessionEnd));
 }
@@ -281,8 +281,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_Modular40,
     .name = "Modular 40+4",
     .textCells = 40,
@@ -290,8 +290,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_Modular80,
     .name = "Modular 80+4",
     .textCells = 80,
@@ -299,8 +299,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(mdlr),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_ModularEvolution64,
     .name = "Modular Evolution 64",
     .textCells = 64,
@@ -310,8 +310,8 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeCells_Evolution,
     .setSensitivity = setSensitivity_Evolution,
     .hasATC = 1
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_ModularEvolution88,
     .name = "Modular Evolution 88",
     .textCells = 88,
@@ -321,8 +321,8 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeCells_Evolution,
     .setSensitivity = setSensitivity_Evolution,
     .hasATC = 1
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_BrailleWave,
     .name = "Braille Wave",
     .textCells = 40,
@@ -330,8 +330,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(wave),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_Bookworm,
     .name = "Bookworm",
     .textCells = 8,
@@ -339,9 +339,9 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bkwm),
     .interpretByte = interpretByte_Bookworm,
     .writeCells = writeCells_Bookworm,
-    .sessionEnder = endBookwormSession
-  }
-  ,
+    .sessionEnder = endSession_Bookworm
+  },
+
   { .identifier = HT_MODEL_Braillino,
     .name = "Braillino",
     .textCells = 20,
@@ -349,8 +349,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_BrailleStar40,
     .name = "Braille Star 40",
     .textCells = 40,
@@ -358,8 +358,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_BrailleStar80,
     .name = "Braille Star 80",
     .textCells = 80,
@@ -367,8 +367,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bs80),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_EasyBraille,
     .name = "Easy Braille",
     .textCells = 40,
@@ -376,8 +376,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(easy),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
-  }
-  ,
+  },
+
   { .identifier = HT_MODEL_ActiveBraille,
     .name = "Active Braille",
     .textCells = 40,
@@ -388,8 +388,8 @@ static const ModelEntry modelTable[] = {
     .setFirmness = setFirmness,
     .setSensitivity = setSensitivity_ActiveBraille,
     .hasATC = 1
-  }
-  ,
+  },
+
 #define HT_BASIC_BRAILLE(cells)                     \
   { .identifier = HT_MODEL_BasicBraille##cells,     \
     .name = "Basic Braille " STRINGIFY(cells),      \
@@ -406,15 +406,14 @@ static const ModelEntry modelTable[] = {
   HT_BASIC_BRAILLE(48),
   HT_BASIC_BRAILLE(64),
   HT_BASIC_BRAILLE(80),
-  HT_BASIC_BRAILLE(160)
+  HT_BASIC_BRAILLE(160),
 #undef HT_BASIC_BRAILLE
-  ,
+
   { /* end of table */
     .name = NULL
   }
 };
 
-#define BRLROWS              1
 #define MAXIMUM_TEXT_CELLS   160
 #define MAXIMUM_STATUS_CELLS 4
 
@@ -425,13 +424,17 @@ typedef enum {
 } BrailleDisplayState;
 
 struct BrailleDataStruct {
+  const ModelEntry *model;              /* points to terminal model config struct */
+
   unsigned char rawData[MAXIMUM_TEXT_CELLS];            /* translated data to send to Braille */
   unsigned char prevData[MAXIMUM_TEXT_CELLS];   /* previously sent raw data */
+
   unsigned char rawStatus[MAXIMUM_STATUS_CELLS];         /* to hold status info */
   unsigned char prevStatus[MAXIMUM_STATUS_CELLS];        /* to hold previous status */
-  const ModelEntry *model;              /* points to terminal model config struct */
+
   BrailleDisplayState currentState;
   TimePeriod statePeriod;
+
   unsigned int retryCount;
   unsigned char updateRequired;
 };
@@ -467,12 +470,12 @@ static unsigned char *hidInputReport = NULL;
 #define hidInputBuffer (&hidInputReport[2])
 static unsigned char hidInputOffset;
 
-static int
+static ssize_t
 getHidReport (
   UsbDevice *device, const UsbChannelDefinition *definition,
-  unsigned char number, unsigned char *buffer, int size
+  unsigned char number, unsigned char *buffer, uint16_t size
 ) {
-  int result = usbHidGetReport(device, definition->interface,
+  ssize_t result = usbHidGetReport(device, definition->interface,
                                number, buffer, size, HT_HID_REPORT_TIMEOUT);
   if (result > 0 && buffer[0] != number) {
     logMessage(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
@@ -517,8 +520,8 @@ getHidFirmwareVersion (BrailleDisplay *brl) {
 
   if (hidReportSize_OutVersion) {
     unsigned char report[hidReportSize_OutVersion];
-    int result = gioGetHidReport(brl->gioEndpoint,
-                                 HT_HID_RPT_OutVersion, report, sizeof(report));
+    ssize_t result = gioGetHidReport(brl->gioEndpoint,
+                                     HT_HID_RPT_OutVersion, report, sizeof(report));
 
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
@@ -574,8 +577,8 @@ awaitUsbInput2 (
     startTimePeriod(&period, milliseconds);
 
     while (1) {
-      int result = getHidReport(device, definition, HT_HID_RPT_OutData, hidInputReport,
-                                hidReportSize_OutData);
+      ssize_t result = getHidReport(device, definition, HT_HID_RPT_OutData,
+                                    hidInputReport, hidReportSize_OutData);
 
       if (result == -1) return 0;
       hidInputOffset = 0;
@@ -832,7 +835,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
              brl->data->model->statusCells, (brl->data->model->statusCells == 1)? "cell": "cells");
 
   brl->textColumns = brl->data->model->textCells;                       /* initialise size of display */
-  brl->textRows = BRLROWS;
+  brl->textRows = 1;
   brl->statusColumns = brl->data->model->statusCells;
   brl->statusRows = 1;
 
@@ -1000,96 +1003,96 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial = &serialParameters
-    }
-    ,
+    },
+
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .serial = &serialParameters
-    }
-    ,
+    },
+
     { /* Easy Braille (HID) */
       .vendor=0X1FE4, .product=0X0044,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
-    }
-    ,
+    },
+
     { /* Braille Star 40 (HID) */
       .vendor=0X1FE4, .product=0X0074,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
-    }
-    ,
+    },
+
     { /* USB-HID adapter */
       .vendor=0X1FE4, .product=0X0003,
       .configuration=1, .interface=0, .alternative=0,
       .data=&usbOperations2
-    }
-    ,
+    },
+
     { /* Active Braille */
       .vendor=0X1FE4, .product=0X0054,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 16 */
       .vendor=0X1FE4, .product=0X0081,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 20 */
       .vendor=0X1FE4, .product=0X0082,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 32 */
       .vendor=0X1FE4, .product=0X0083,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 40 */
       .vendor=0X1FE4, .product=0X0084,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 48 */
       .vendor=0X1FE4, .product=0X008A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 64 */
       .vendor=0X1FE4, .product=0X0086,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 80 */
       .vendor=0X1FE4, .product=0X0087,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { /* Basic Braille 160 */
       .vendor=0X1FE4, .product=0X008B,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
-    }
-    ,
+    },
+
     { .vendor=0 }
   };
 
